@@ -1,0 +1,387 @@
+//-*****************************************************************************
+//
+// Copyright (c) 2009-2010,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//-*****************************************************************************
+
+global int $AlembicIOpolyCollapse = 0;
+global int $AlembicIOgeneralCollapse = 0;
+global int $AlembicIOanimCollapse = 0;
+global int $AlembicIOattribCollapse = 0;
+
+// NOTE:  As of Maya 7.0, if these optionVars are not here, the file format
+// plugin has incomplete access to the real scene graph.  LAME!
+optionVar -intValue "ALEMBICAnimationFile" true;
+optionVar -intValue "exportIncludeShaders" true;
+optionVar -intValue "exportIncludeHistory" true;
+optionVar -intValue "exportIncludeChannels" true;
+optionVar -intValue "exportIncludeExpressions" true;
+optionVar -intValue "exportIncludeConstraints" true;
+
+//-*****************************************************************************
+global proc alembicIO_recurseCallback()
+{
+   if( `checkBox -q -v optRecurse` )
+    {
+        intFieldGrp -edit -en true optRecurseLimit;
+    }
+    else
+    {
+        intFieldGrp -edit -en false optRecurseLimit;
+    }
+}
+
+//-*****************************************************************************
+global proc alembicIO_AllAttribCallback()
+{
+   if( `checkBox -q -v optMayaAttributes` )
+    {
+        checkBox -e -v true -en false optUserAttributes;
+    }
+    else
+    {
+        checkBox -e -en true optUserAttributes;
+    }
+}
+
+//-*****************************************************************************
+global proc int AlembicAbcExportOptions( string $parent,
+                                      string $action,
+                                      string $initialSettings,
+                                      string $resultCallback )
+{
+    string $windowTitle = `window -q -t "OptionBoxWindow"`;
+    string $titleWords[];
+    tokenize $windowTitle $titleWords;
+    if( $titleWords[0] == "Import" )
+    {
+        setParent $parent;
+        confirmDialog -t "Error"
+            -m "Sorry, AlembicAbcExport does not support import."
+            -db "OK";
+        error "Can't Import with AlembicAbcExport";
+        return -1;
+    }
+    else if( $titleWords[0] == "Export" )
+    {
+        return localAlembicAbcExportOptions( $parent, $action,
+                                          $initialSettings, $resultCallback );
+    }
+    else
+    {
+        setParent $parent;
+        confirmDialog -t "Error" 
+                      -m "Sorry, AlembicAbcExport does not (yet) support exporting the whole scene.  Use Export Selection instead." 
+                      -db "OK";
+        //deleteUI BoxLayout;
+        error "Can't Export All, use Export Selection instead.";
+        return -1;
+    }
+    return -1;
+}
+
+//-*****************************************************************************
+global proc int localAlembicAbcExportOptions( string $parent,
+                                           string $action,
+                                           string $initialSettings,
+                                           string $resultCallback )
+{
+    global int $AlembicIOpolyCollapse;
+    global int $AlembicIOgeneralCollapse;
+    global int $AlembicIOanimCollapse;
+    global int $AlembicIOattribCollapse;
+
+    int       $bResult;
+    string    $currentOptions;
+    string    $optionList[];
+    string    $optionBreakDown[];
+    int       $index;
+
+    if ( $action == "post" )
+    {
+        // Build UI elements
+        setParent $parent;
+        
+        // Spacer
+        columnLayout -h 10;
+
+        setParent $parent;
+
+        frameLayout -collapsable true -label "General" -bv false
+                    -collapse $AlembicIOgeneralCollapse alembicIOGeneralFrame;
+        columnLayout -co left 40;
+            rowLayout -nc 2;
+                checkBox
+                    -l "Recursive"
+                    -al left
+                    -cc "alembicIO_recurseCallback"
+                    optRecurse;
+                intFieldGrp
+                    -l "Limit (0=infinite)"
+                    -cw 2 40
+                    optRecurseLimit;
+            setParent ..;
+
+        setParent $parent;
+
+        setParent $parent;
+        frameLayout -collapsable true -label "Animation" -bv false
+                    -collapse $AlembicIOanimCollapse alembicIOAnimFrame;
+            columnLayout;
+            // columnLayout -co left 40;
+                //checkBox 
+                //        -l "Export Frame Range"
+                //        -al left
+                //        -cc "alembicIO_animCallback"
+                //        optAnim;
+                    intFieldGrp
+                        -nf 2
+                        -co3 30 10 20
+                        -ct3 left right right
+                        -cal 1 left
+                        -l "Frame Range"
+                        optFrameRange;
+                    // setParent ..;
+
+                    //columnLayout -h 10;
+                    //setParent ..;
+                    //columnLayout -co left 40;
+                    checkBox -label "Deforming Geometry"
+                        // -cc "alembicExport_deformingCallback"
+                             optDeforming;
+                    //setParent ..;
+                        //setParent ..;
+                setParent ..;
+        
+        setParent $parent;
+
+
+        frameLayout -collapsable true -label "Attributes" -bv false
+                    -collapse $AlembicIOattribCollapse alembicIOAttribFrame;
+                    
+            columnLayout -co left 40;
+
+                checkBox
+                    -l "Export user-defined attributes"
+                    -al left
+                    -en true
+                    optUserAttributes;
+
+                checkBox
+                    -l "Export all attributes"
+                    -al left
+                    -en true
+                    -cc "alembicIO_AllAttribCallback"
+                    optMayaAttributes;
+
+            setParent ..;
+        setParent $parent;
+
+
+        frameLayout -collapsable true -label "Polys and Subds" 
+                    -bv false -collapse $AlembicIOpolyCollapse alembicIOPolyFrame;
+            columnLayout -co left 40;
+                checkBox
+                    -l "Output Polys as Subdivision Surfaces"
+                    -al left
+                    optSubd;
+                    
+        setParent $parent;
+                                
+        // Now set UI controls to current settings
+        $currentOptions = $initialSettings;
+        optionVar -sv "alembicIOExportOptions" $currentOptions;
+        if ( size($currentOptions) > 0 )
+        {
+            tokenize($currentOptions, ";", $optionList);
+            for( $index = 0; $index < size($optionList); $index++ )
+            {
+                tokenize($optionList[$index], "=", $optionBreakDown);
+
+                if ($optionBreakDown[0] == "recurse") 
+                {
+                    if ($optionBreakDown[1] == "0") 
+                    {
+                        checkBox -e -v false optRecurse;
+                        intFieldGrp -edit -en false optRecurseLimit;
+                    } 
+                    else 
+                    {
+                        checkBox -e -v true optRecurse;
+                        intFieldGrp -edit -en true optRecurseLimit;
+                    }
+                } 
+                if ($optionBreakDown[0] == "recurseLimit") 
+                {
+                    int $rl = int($optionBreakDown[1]);
+                    intFieldGrp -e -v1 $rl optRecurseLimit;
+                } 
+                else if ($optionBreakDown[0] == "subd")
+                {
+                    if ($optionBreakDown[1] == "0")
+                    {
+                        checkBox -e -v false optSubd;
+                    } 
+                    else
+                    {
+                        checkBox -e -v true optSubd;
+                    }
+                } 
+                else if ($optionBreakDown[0] == "deforming") 
+                {
+                    if ($optionBreakDown[1] == "0") 
+                    {
+                        checkBox -e -v false optDeforming;
+                    } 
+                    else 
+                    {
+                        checkBox -e -v true optDeforming;
+                    }
+                } 
+                else if ($optionBreakDown[0] == "userAttr")
+                {
+                    if ($optionBreakDown[1] == "1")
+                    {
+                        checkBox -e -v true optUserAttributes;
+                    } 
+                    else 
+                    {
+                        checkBox -e -v false optUserAttributes;
+                    }
+                }
+                else if ($optionBreakDown[0] == "mayaAttr")
+                {
+                    if ($optionBreakDown[1] == "1")
+                    {
+                        checkBox -e -v true optMayaAttributes;
+                    } 
+                    else 
+                    {
+                        checkBox -e -v false optMayaAttributes;
+                    }
+                    alembicIO_AllAttribCallback;
+                }
+                // else if ($optionBreakDown[0] == "fs")
+                //{
+                //    int $fs = int($optionBreakDown[1]);
+                //    intFieldGrp -e -v1 $fs optFrameRange;
+                //}
+                //else if ($optionBreakDown[0] == "fe")
+                //{
+                //    int $fe = int($optionBreakDown[1]);
+                //    intFieldGrp -e -v2 $fe optFrameRange;
+                //}
+
+                intFieldGrp -edit -en true 
+                    -v1 `playbackOptions -q -min`
+                    -v2 `playbackOptions -q -max`
+                    optFrameRange;
+            }
+        }
+        $result = 1;
+    
+    } 
+    // Build the options string from the values in the UI
+    else if ($action == "query") 
+    {
+        setParent $parent;
+        $AlembicIOpolyCollapse = `frameLayout -q -cl alembicIOPolyFrame`;
+        $AlembicIOgeneralCollapse = `frameLayout -q -cl alembicIOGeneralFrame`;
+        $AlembicIOanimCollapse = `frameLayout -q -cl alembicIOAnimFrame`;
+
+        if (`checkBox -q -v optRecurse` == true) 
+        {
+            $currentOptions = "recurse=1";
+        } 
+        else 
+        {
+            $currentOptions = "recurse=0";
+        }
+        $rl = `intFieldGrp -q -v1 optRecurseLimit`;
+        $currentOptions = $currentOptions + ";recurseLimit=" + $rl;
+
+        if (`checkBox -q -v optSubd` == true) 
+        {
+            $currentOptions = $currentOptions + ";subd=1";
+        } 
+        else 
+        {
+            $currentOptions = $currentOptions + ";subd=0";
+        }
+
+        if (`checkBox -q -v optDeforming` == true) 
+        {
+            $currentOptions = $currentOptions + ";deforming=1";
+        } 
+        else 
+        {
+            $currentOptions = $currentOptions + ";deforming=0";
+        }
+
+        if (`checkBox -q -v optUserAttributes` == true) 
+        {
+            $currentOptions = $currentOptions + ";userAttr=1";
+        } 
+        else 
+        {
+            $currentOptions = $currentOptions + ";userAttr=0";
+        }
+
+        if (`checkBox -q -v optMayaAttributes` == true) 
+        {
+            $currentOptions = $currentOptions + ";mayaAttr=1";
+        } 
+        else 
+        {
+            $currentOptions = $currentOptions + ";mayaAttr=0";
+        }
+        
+        $currentOptions = $currentOptions + ";fs=";
+        $currentOptions = $currentOptions + `intFieldGrp -q -v1 optFrameRange`;
+
+        $currentOptions = $currentOptions + ";fe=";
+        $currentOptions = $currentOptions + `intFieldGrp -q -v2 optFrameRange`;
+
+        // Pass the current options string to the callback
+        eval($resultCallback+" \""+$currentOptions+"\"");
+        $result = 1;
+    } 
+    else 
+    {
+        $bResult = 0;
+    }
+    
+    return $bResult;
+}
+
+

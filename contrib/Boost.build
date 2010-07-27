@@ -1,0 +1,40 @@
+setenv CXXFLAGS "-fPIC"
+setenv CFLAGS "-fPIC"
+setenv LDFLAGS "-fPIC"
+
+ - untar boost-1.42.0 sourceball
+
+cd boost_1_42_0
+
+umask 022
+
+./bootstrap.sh --with-python=/usr/lib64/python2.6/config --with-libraries=filesystem --with-libraries=iostreams --with-libraries=math --with-libraries=program_options --with-libraries=python --with-libraries=regex --with-libraries=system --with-libraries=thread
+
+sudo ./bjam install --layout=versioned link=static threading=multi cxxflags=-fPIC
+
+ - There's a bug in the way boost.python gets built (see http://old.nabble.com/-Mapnik-Users--How-To-on-RHEL-5-64-bit-p27856705.html and look for "Py_InitModule4"), so create a file in the boost source root called "user-config.jam", and put this in it:
+
+# begin user-config.jam
+import option ;
+import feature ;
+if ! gcc in [ feature.values <toolset> ]
+{
+    using gcc ;
+}
+#project: default-build <toolset>gcc ;
+using python
+    : 2.6 #version
+    : /usr/bin/python2.6          # cmd-or-prefix
+    : /usr/include/python2.6      # includes
+    : /usr/lib64/python2.6/config # find a symlink to libpython2.6.a
+    : <toolset>gcc
+    ;
+libraries = --with-python ;
+# end user-config.jam
+
+sudo ./bjam --with-python -a -j2 --user-config=user-config.jam --layout=versioned link=static threading=multi cxxflags=-fPIC toolset=gcc stage
+
+sudo cp stage/lib/libboost_python-gcc41-mt-1_42.a /usr/local/lib/
+
+cd /usr/local/include/boost-1_42
+sudo chmod -R a+r .

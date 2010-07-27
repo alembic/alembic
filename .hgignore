@@ -1,0 +1,5 @@
+# regexp syntax.
+syntax: regexp
+#^contrib/
+^build/stash/
+.*\.pyc
