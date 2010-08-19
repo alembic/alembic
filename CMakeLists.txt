@@ -44,9 +44,9 @@ IF (RUN_FROM_MK)
   MARK_AS_ADVANCED ( CMAKE_FIRST_RUN )
 ENDIF()
 
-IF ( NOT DEFINED CMAKE_FIRST_RUN )
-  MESSAGE( WARNING "This build was not first configured from the the mk_cmake build script. Possible build errors will occur. Consult the README.txt for instructions on how to build. " )
-ENDIF()
+#IF ( NOT DEFINED CMAKE_FIRST_RUN )
+#  MESSAGE( WARNING "This build was not first configured from the the mk_cmake build script. Possible build errors will occur. Consult the README.txt for instructions on how to build. " )
+#ENDIF()
 
 IF (NOT DEFINED QUIET)
   SET(CMAKE_VERBOSE_MAKEFILE TRUE)
@@ -151,7 +151,7 @@ ENDIF(UNIX AND NOT WIN32)
 
 IF(BOOTSTRAP_MODE)
 
-  ADD_SUBDIRECTORY(build/bootstrap) 
+  ADD_SUBDIRECTORY(build/bootstrap)
 
 ELSE()
 
@@ -206,12 +206,12 @@ INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )
 #-******************************************************************************
 
 INCLUDE( "./build/AlembicIlmBase.cmake" )
-INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_PATH} )
+INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
 
 #-******************************************************************************
 #-******************************************************************************
 # OPEN EXR
-#-****************************************************************************** 
+#-******************************************************************************
 #-******************************************************************************
 
 # Automatically include ILM Base Stuff.
