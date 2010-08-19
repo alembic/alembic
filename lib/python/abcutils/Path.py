@@ -51,19 +51,20 @@ class Path( object ):
         else:
             self._isabs = False
             self._path = ''
+            self._orig = ''
 
         if self._isabs:
             self._root = os.sep
         else:
-            if self._path == '':
-                self._root = ''
+            if self._orig == '':
+                self._root = None
             else:
                 self._root = os.curdir
 
         self._plist = filter( lambda x: x and x != os.curdir,
                               self._path.split( os.sep ))
         self._len = len( self._plist )
-        self._isempty = 0 == self._len
+        self._isempty = self._root == None and self._len == 0
         self._maxindex = self._len - 1
         self._maxsliceindex = self._len
 
