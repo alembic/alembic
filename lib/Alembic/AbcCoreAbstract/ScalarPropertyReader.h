@@ -38,8 +38,7 @@
 #define _Alembic_AbcCoreAbstract_ScalarPropertyReader_h_
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
-#include <Alembic/AbcCoreAbstract/SimplePropertyReader.h>
-#include <Alembic/AbcCoreAbstract/ReadOnlyData.h>
+#include <Alembic/AbcCoreAbstract/BasePropertyReader.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -50,7 +49,7 @@ namespace v1 {
 //! sample. This is distinguished from an Array Property, which has a
 //! variable number of elements per sample, and requires more sophisticated
 //! resource management.
-class ScalarPropertyReader : public SimplePropertyReader
+class ScalarPropertyReader : public BasePropertyReader
 {
 public:
     //! Virtual destructor
@@ -61,84 +60,39 @@ public:
     // NEW FUNCTIONS
     //-*************************************************************************
 
+    //! Return the number of samples contained in the property.
+    //! This can be any number, including zero.
+    //! This returns the number of samples that were written, independently
+    //! of whether or not they were constant. Implementations may (and should)
+    //! choose to condense identical samples.
+    virtual size_t getNumSamples() = 0;
+
+    //! Ask if we're constant - no change in value amongst samples,
+    //! regardless of the time sampling.
+    virtual bool isConstant() = 0;
+
+    //! Time information.
+    //! Even with identity time sampling, the Time Sampling will be
+    //! valid. 
+    virtual TimeSampling getTimeSampling() = 0;
+
     //! Returns the single sample value for the requested sample
-    //! as a shared pointer, which may have internal resource management.
-    //! It will throw an exception if you request an out of range sample.
-    //! If it cannot load the sample, and empty sample is returned.
-    virtual ReadOnlyBytesPtr getSample( index_t iSample ) = 0;
-
-    //-*************************************************************************
-    // INHERITED
-    //-*************************************************************************
-    
-    //! Returns kScalarProperty
-    //! ...
-    virtual PropertyType getPropertyType() const;
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual SimplePropertyReaderPtr asSimple();
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual ScalarPropertyReaderPtr asScalar();
-
-    //-*************************************************************************
-
-    //! Inherited from SimplePropertyReader
-    //! No implementation herein
-    //! virtual const DataType &getDataType() const = 0;
-
-    //! Inherited from SimplePropertyReader
-    //! No implementation herein
-    //! virtual const TimeSamplingType &getTimeSamplingType() const = 0;
-
-    //! Inherited from SimplePropertyReader
-    //! No implementation herein
-    //! virtual size_t getNumSamples() = 0;
-
-    //-*************************************************************************
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein
-    //! virtual const std::string &getName() const = 0;
-    
-    //! Inherited from BasePropertyReader
-    //! There's actually no enum for kSimpleProperty, since
-    //! this is just an intermediate type
-    //! virtual PropertyType getPropertyType() const = 0;
-
-    //! Inherited from BasePropertyReader
-    //! bool isScalar() const;
-
-    //! Inherited from BasePropertyReader
-    //! bool isArray() const;
-
-    //! Inherited from BasePropertyReader
-    //! bool isCompound() const;
-
-    //! Inherited from BasePropertyReader
-    //! bool isSimple() const;
-
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual const MetaData &getMetaData() const = 0;
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual ObjectReaderPtr getObject() = 0;
-
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual CompoundPropertyReaderPtr getParent() = 0;
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual ArrayPropertyReaderPtr asArray();
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual CompoundPropertyReaderPtr asCompound();
+    //! by reference. Out-of-range indices will cause an
+    //! exception to be thrown.
+    //! It will copy the scalar value directly into the memory location
+    //! specified by iIntoLocation
+    //!
+    //! In all cases EXCEPT String and Wstring, the DataType for this
+    //! property can be used to determine the size of the memory buffer
+    //! which iIntoLocation must point to.  In the case of String and Wstring,
+    //! iIntoLocation should be ( void * )&std::string and
+    //! ( void * )&std::wstring, respectively.
+    //!
+    //! This is one of the only places where we break from POD types at
+    //! the base, and we're making an explicit decision to use std::string
+    //! and std::wstring as core language-level primitives.
+    virtual void getSample( index_t iSample,
+                            void *iIntoLocation ) = 0;
 };
 
 } // End namespace v1

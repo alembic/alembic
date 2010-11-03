@@ -15,65 +15,28 @@
 
 # -------------------------------------------------------------------------------------
 
-# The three ways to search are:
-
-# ZLIB_INCLUDEDIR: if it is defined, then search for the zlib header files in
-# the specific location. 
-
-# ZLIB_LIBRARYDIR: if it is defined, then search for the zlib library files in
-# the specific location. 
-
-# ZLIB_ROOT: Set the boost root to the defined CMake variable ZLIB_ROOT, otherwise
-# it will use the defaults
-
-# For more info read:
-# /usr/share/cmake-2.8.0/share/cmake-2.8/Modules/FindZLIB.cmake
-
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(ZLIB_TRYCOMPILE)
 
 SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-IF(DEFINED ZLIB_INCLUDEDIR)
-    MESSAGE(STATUS "Using ZLIB_INCLUDEDIR: ${ZLIB_INCLUDEDIR}" )
+SET( ZLIB_FOUND TRUE )
+
+IF(DEFINED ZLIB_INCLUDE_DIR)
+    MESSAGE(STATUS "Using ZLIB_INCLUDE_DIR: ${ZLIB_INCLUDE_DIR}" )
+    SET( ZLIB_FOUND FALSE )
 ENDIF()
  
-IF(DEFINED ZLIB_LIBRARYDIR)
-    MESSAGE(STATUS "Using ZLIB_LIBRARYDIR: ${ZLIB_LIBRARYDIR}" )
-ENDIF()
-
-# If ZLIB_ROOT not set, use predefined paths
-IF(NOT DEFINED ZLIB_ROOT)
-    IF ( ${CMAKE_HOST_UNIX} )
-        IF( ${DARWIN} )
-          # TODO: set to default install path when shipping out
-	        SET( ZLIB_ROOT "/usr/local/z" )
-        ELSE()
-          # TODO: set to default install path when shipping out
-          SET( ZLIB_ROOT "/usr/local/z" )
-        ENDIF()
-    ELSE()
-        IF ( ${WINDOWS} )
-          # TODO: set to 32-bit or 64-bit path
-          SET( ZLIB_ROOT "C:/Program Files (x86)/z" )
-
-          # For 64-bit builds use:
-          # SET( ZLIB_ROOT "C:/Program Files/z" )
-        ELSE()
-          SET( ZLIB_ROOT NOTFOUND )
-        ENDIF()
-    ENDIF()
-ENDIF()
-
-IF(NOT DEFINED CMAKE_PREFIX_PATH)
-    MESSAGE(STATUS "Using ZLIB_ROOT: ${ZLIB_ROOT}" )
+IF(DEFINED ZLIB_LIBRARY)
+    MESSAGE(STATUS "Using ZLIB_LIBRARY: ${ZLIB_LIBRARY}" )
 ELSE()
-    MESSAGE(STATUS "Using CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}" )
-    UNSET(ZLIB_ROOT)
+    SET( ZLIB_FOUND FALSE )
 ENDIF()
 
-FIND_PACKAGE( ZLIB REQUIRED)
+IF( NOT ZLIB_FOUND )
+    FIND_PACKAGE(ZLIB REQUIRED)  
+ENDIF()    
 
 IF (ZLIB_FOUND)
   MESSAGE( STATUS "ZLIB FOUND: ${ZLIB_FOUND}" )
@@ -81,10 +44,32 @@ IF (ZLIB_FOUND)
   MESSAGE( STATUS "ZLIB LIBRARIES: ${ZLIB_LIBRARIES}")
 
   INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIRS})
-  ADD_EXECUTABLE(zlib_trycompile zlib_trycompile.cpp)  
-  TARGET_LINK_LIBRARIES(zlib_trycompile ${ZLIB_LIBRARIES})
+
+  # TODO: TAILOR FOR CROSS-COMPILING CASES, see: http://www.cmake.org/cmake/help/cmake-2-8-docs.html
+  MESSAGE( STATUS "COMPILING ZLIB TRY COMPILE EXECUTABLE IN ${PROJECT_BINARY_DIR}. WITH ${ZLIB_LIBRARIES}")
+
+  SET(USING_THESE_LIBS "-DLINK_LIBRARIES:STRING=${ZLIB_LIBRARIES}")
+  TRY_RUN(ZLIB_RUN_RESULT ZLIB_COMPILE_RESULT
+          ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/zlib_trycompile.cpp 
+          COMPILE_DEFINITIONS "-I${ZLIB_INCLUDE_DIRS}"
+          CMAKE_FLAGS ${USING_THESE_LIBS}
+          COMPILE_OUTPUT_VARIABLE ZLIB_COMPILE_OUTPUT
+          RUN_OUTPUT_VARIABLE ZLIB_RUN_OUTPUT
+          )
+
+  IF(NOT ZLIB_COMPILE_RESULT)
+    MESSAGE( FATAL_ERROR "FAILED TO COMPILE A WORKING ZLIB TRY COMPILE EXECUTABLE.\nCOMPILE LOG:\n${ZLIB_COMPILE_OUTPUT}")
+  ELSE()
+    MESSAGE( STATUS "COMPILED A WORKING ZLIB TRY COMPILE EXECUTABLE.\nCOMPILE LOG:\n${ZLIB_COMPILE_OUTPUT}")
+  ENDIF()
+
+  IF(ZLIB_RUN_RESULT STREQUAL "FAILED_TO_RUN")
+    MESSAGE( FATAL_ERROR "FAILED TO RUN A WORKING ZLIB TRY COMPILE EXECUTABLE.\nERROR LOG:\n${ZLIB_RUN_OUTPUT}")
+  ELSE()
+    MESSAGE( STATUS "SUCCESSFULY RAN A WORKING ZLIB TRY COMPILE EXECUTABLE.\nLOG:\n${ZLIB_RUN_OUTPUT}")
+  ENDIF()
+   
 ELSE()
   MESSAGE(SEND_ERROR "ZLIB not correctly specified")
 ENDIF()
-
 

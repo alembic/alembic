@@ -34,7 +34,7 @@
 
 # C++ files for this project
 SET( CXX_FILES Foundation.cpp GLEWInit.cpp GlslProgram.cpp )
-SET( H_FILES Foundation.h GLEWInit.h GlslProgram.h GLUtil.h )
+SET( H_FILES Foundation.h GLEWInit.h GlslProgram.h All.h )
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicGLUtil ${SOURCE_FILES} )

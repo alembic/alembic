@@ -80,21 +80,20 @@ public:
 
 //-*****************************************************************************
 //! \brief convenient macro which may be used with std::iostream syntax
-//! \example ABC_THROW( "this integer: " << myInt << " is bad" )
 //! \details Same as \ref ALEMBIC_THROW
+
 #define ABC_THROW( TEXT )                             \
 do                                                    \
 {                                                     \
     std::stringstream sstr;                           \
     sstr << TEXT;                                     \
     Alembic::Util::Exception exc( sstr.str() );       \
-    throw exc;                                        \
+    throw( exc );                                     \
 }                                                     \
 while( 0 )
 
 //-*****************************************************************************
 //! \brief convenient macro which may be used with std::iostream syntax
-//! \example ALEMBIC_THROW( "this float: " << myFloat << " is lame" )
 //! \details Same as \ref ABC_THROW
 #define ALEMBIC_THROW( TEXT ) ABC_THROW( TEXT )
 

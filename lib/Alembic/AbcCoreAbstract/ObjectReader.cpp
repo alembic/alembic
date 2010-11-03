@@ -47,9 +47,10 @@ ObjectReader::~ObjectReader()
 }
 
 //-*****************************************************************************
-ObjectReaderPtr ObjectReader::asObject()
+ObjectReaderPtr ObjectReader::getChild( size_t i )
 {
-    return shared_from_this();
+    const ObjectHeader &header = getChildHeader( i );
+    return getChild( header.getName() );
 }
 
 } // End namespace v1

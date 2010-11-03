@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreAbstract_ArrayPropertyReader_h_
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
-#include <Alembic/AbcCoreAbstract/SimplePropertyReader.h>
+#include <Alembic/AbcCoreAbstract/BasePropertyReader.h>
 #include <Alembic/AbcCoreAbstract/ArraySample.h>
 
 namespace Alembic {
@@ -51,7 +51,7 @@ namespace v1 {
 //! sample. This is distinguished from a Simple Property, which has a
 //! single element per sample, and requires less sophisticated
 //! resource management.
-class ArrayPropertyReader : public SimplePropertyReader
+class ArrayPropertyReader : public BasePropertyReader
 {
 public:
     //! Virtual destructor
@@ -62,6 +62,19 @@ public:
     // NEW FUNCTIONS
     //-*************************************************************************
 
+    //! Return the number of samples contained in the property.
+    //! This is guaranteed to be greater than zero.
+    virtual size_t getNumSamples() = 0;
+
+    //! Ask if we're constant - no change in value amongst samples,
+    //! regardless of the time sampling.
+    virtual bool isConstant() = 0;
+
+    //! Time information.
+    //! This will always be valid, even for static, constant, or
+    //! identity time sampling types.
+    virtual TimeSampling getTimeSampling() = 0;
+
     //! It returns a shared pointer to a thing which _is_ the data, in a
     //! locked and retrieved form. This represents the point of demand,
     //! not below here.
@@ -69,75 +82,16 @@ public:
     //! custom-deleter capabilities of the smart_ptr to add locking and
     //! unlocking access to cache or management code.
     //! It will throw an exception on an out-of-range access.
-    virtual ArraySamplePtr getSample( index_t iSample ) = 0;
-
-    //-*************************************************************************
-    // INHERITED
-    //-*************************************************************************
-    
-    //! Returns kArrayProperty
-    //! ...
-    virtual PropertyType getPropertyType() const;
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual SimplePropertyReaderPtr asSimple();
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual ArrayPropertyReaderPtr asArray();
-
-    //-*************************************************************************
-
-    //! Inherited from SimplePropertyReader
-    //! No implementation herein
-    //! virtual const DataType &getDataType() const = 0;
-
-    //! Inherited from SimplePropertyReader
-    //! No implementation herein
-    //! virtual const TimeSamplingType &getTimeSamplingType() const = 0;
-
-    //! Inherited from SimplePropertyReader
-    //! No implementation herein
-    //! virtual size_t getNumSamples() = 0;
-
-    //-*************************************************************************
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein
-    //! virtual const std::string &getName() const = 0;
-
-    //! Inherited from BasePropertyReader
-    //! bool isScalar() const;
-
-    //! Inherited from BasePropertyReader
-    //! bool isArray() const;
-
-    //! Inherited from BasePropertyReader
-    //! bool isCompound() const;
-
-    //! Inherited from BasePropertyReader
-    //! bool isSimple() const;
-
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual const MetaData &getMetaData() const = 0;
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual ObjectReaderPtr getObject() = 0;
-
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual CompoundPropertyReaderPtr getParent() = 0;
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual ScalarPropertyReaderPtr asScalar();
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual CompoundPropertyReaderPtr asCompound();
+    //! Though it could technically return the pointer by value efficiently
+    //! enough, we return by reference so that the calling signature
+    //! mirrors the ScalarPropertyReader.
+    //!
+    //! For each DataType, the ( void * ) data buffer returned in the
+    //! array sample points to one data element, which in the case of
+    //! DataType( kStringPOD, 1 ) and DataType( kWstringPOD, 1 ) are
+    //! arrays of std::string and std::wstring, respectively.
+    virtual void getSample( index_t iSampleIndex,
+                            ArraySamplePtr &oSample ) = 0;
 };
 
 } // End namespace v1

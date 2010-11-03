@@ -47,7 +47,7 @@ namespace v1 {
 //! The DataType class is a description of how an element of a sample in a
 //! Scalar or an Array property is stored. It does not contain an interpretation
 //! this is left to the metadata of the properties themselves.
-class DataType
+class DataType : boost::totally_ordered<DataType>
 {
 public:
     //! Default constructor
@@ -58,42 +58,63 @@ public:
     DataType()
       : m_pod( kUnknownPOD ), m_extent( 0 ) {}
 
-    //! Copy constructor.
-    //! Simple copy of pod and extent.
-    DataType( const DataType & iCopy )
-      : m_pod( iCopy.m_pod ), m_extent( iCopy.m_extent ) {}
-
     //! Explicit constructor.
     //! Takes a pod and an extent.
-    DataType( PlainOldDataType iPod, uint8_t iExtent )
+    //! By default the extent is 1.
+    //! For String and Wstring types, the extent _must_ be 1.
+    explicit DataType( PlainOldDataType iPod, uint8_t iExtent = 1 )
       : m_pod( iPod ), m_extent( iExtent ) {}
 
-    //! Assignment operator.
-    //! Simple copy of POD and extent.
-    DataType& operator=( const DataType &iCopy )
-    {
-        m_pod = iCopy.m_pod;
-        m_extent = iCopy.m_extent;
-        return *this;
-    }
+    //! Default copy constructor used.
+    //! Default assignment operator used.
 
     //! Return the PlainOldDataType enum
     //! ...
-    PlainOldDataType pod() const { return m_pod; }
+    PlainOldDataType getPod() const { return m_pod; }
+
+    //! Set the PlainOldDataType
+    //! ...
+    void setPod( PlainOldDataType iPod ) { m_pod = iPod; }
 
     //! Return the 8-bit extent
     //! ...
-    uint8_t extent() const { return m_extent; }
+    uint8_t getExtent() const { return m_extent; }
+
+    //! Set the 8-bit extent
+    //! ...
+    void setExtent( uint8_t iExtent ) { m_extent = iExtent; }
 
     //! Returns the number of bytes occupied by a single datum. (element)
     //! The assumption that each element has a fixed size in memory is a
-    //! core assumption in Alembic. In the case of null-terminated string
-    //! elements, Alembic treats them as pointers (const char *), which have
-    //! a fixed size. An Array of Strings is an array of const char pointers,
-    //! like: const char **. The library handles memory management of string
-    //! data carefully, but this assumption here can remain.
+    //! core assumption in Alembic.
+    //!
+    //! String DataTypes are a troublesome problem. A single string datum
+    //! does not have a fixed number of bytes associated with it. So we
+    //! are returning, here, the size of the std::string and std::wstring
+    //! datatypes, respectively.
     size_t getNumBytes() const
-    { return PODNumBytes( m_pod ) * ( size_t )m_extent; }
+    {
+        return PODNumBytes( m_pod ) * ( size_t )m_extent;
+    }
+
+    //! Equality operator
+    //! ...
+    bool operator==( const DataType &b ) const
+    {
+        return ( ( m_pod == b.m_pod ) &&
+                 ( m_extent == b.m_extent ) );
+    }
+
+    //-*************************************************************************
+    //! Returns whether one datatype is lexigraphically "less" than
+    //! another - this has meaning only so that DataType instances can
+    //! be meaningfully sorted.
+    bool operator<( const DataType &b ) const
+    {
+        if ( m_pod < b.m_pod ) { return true; }
+        else if ( m_pod > b.m_pod ) { return false; }
+        else { return ( m_extent < b.m_extent ); }
+    }
 
 private:
     //! An Enum indicating which PlainOldDataType is our
@@ -110,39 +131,12 @@ private:
 //! Makes use of PlainOldDataType's string conversion functions
 inline std::ostream &operator<<( std::ostream &ostr, const DataType &a )
 {
-    ostr << PODName( a.pod() );
-    if ( a.extent() > 1 )
+    ostr << PODName( a.getPod() );
+    if ( a.getExtent() > 1 )
     {
-        ostr << "[" << ( size_t )a.extent() << "]";
+        ostr << "[" << ( size_t )a.getExtent() << "]";
     }
     return ostr;
-}
-
-//-*****************************************************************************
-//! Returns whether two datatypes are exactly equal
-//! ...
-inline bool operator==( const DataType &a, const DataType &b )
-{
-    return ( ( a.pod() == b.pod() ) && ( a.extent() == b.extent() ) );
-}
-
-//-*****************************************************************************
-//! Returns whether two datatypes are not equal
-//! ...
-inline bool operator!=( const DataType &a, const DataType &b )
-{
-    return ( ( a.pod() != b.pod() ) || ( a.extent() != b.extent() ) );
-}
-
-//-*****************************************************************************
-//! Returns whether one datatype is lexigraphically "less" than
-//! another - this has meaning only so that DataType instances can
-//! be meaningfully sorted.
-inline bool operator<( const DataType &a, const DataType &b )
-{
-    if ( a.pod() < b.pod() ) { return true; }
-    else if ( a.pod() > b.pod() ) { return false; }
-    else { return ( a.extent() < b.extent() ); }
 }
 
 } // End namespace v1

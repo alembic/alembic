@@ -44,12 +44,15 @@ namespace v1 {
 ObjectWriter::~ObjectWriter()
 {
     // Nothing
+    // std::cout << "ObjectWriter::~ObjectWriter() " << std::endl;
 }
 
 //-*****************************************************************************
-ObjectWriterPtr ObjectWriter::asObject()
+ObjectWriterPtr
+ObjectWriter::getChild( size_t i )
 {
-    return shared_from_this();
+    const ObjectHeader &ohead = getChildHeader( i );
+    return getChild( ohead.getName() );
 }
 
 } // End namespace v1

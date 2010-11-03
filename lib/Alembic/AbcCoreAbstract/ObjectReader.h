@@ -39,7 +39,7 @@
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
-#include <Alembic/AbcCoreAbstract/MetaData.h>
+#include <Alembic/AbcCoreAbstract/ObjectHeader.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -52,8 +52,7 @@ namespace v1 {
 //! Objects have MetaData, which is identical to the MetaData of the root
 //! Compound Property.
 class ObjectReader
-    : private boost::noncopyable,
-      public boost::enable_shared_from_this<ObjectReader>
+    : private boost::noncopyable
 {
 public:
     //! Virtual destructor
@@ -64,22 +63,33 @@ public:
     // NEW FUNCTIONS
     //-*************************************************************************
 
+    //! All objects have a header, which contains all the MetaData that was
+    //! specified upon their creation.
+    //! This function returns a constant reference to that Header.
+    virtual const ObjectHeader &getHeader() const = 0;
+
     //! All objects have a name. This name is unique amongst their siblings
     //! Returned by reference, since it is guaranteed to exist and be
     //! unchanging.
-    virtual const std::string &getName() const = 0;
+    //! This is a convenience function which returns the header's name.
+    const std::string &getName() const
+    { return getHeader().getName(); }
     
     //! The full name of an object is the complete path name all the way
     //! to the root object of the archive. It is guaranteed to be fully
     //! unique within the entire archive.
-    virtual const std::string &getFullName() const = 0;
+    //! This is a convenience function which returns the header's full name.
+    const std::string &getFullName() const
+    { return getHeader().getFullName(); }
 
     //! All objects have metadata. This metadata is identical to the
     //! Metadata of the top level compoundProperty "properties".
     //! Because the metadata must exist and be initialized in order to
     //! bootstrap the object, it is guaranteed to exist and is returned
     //! by reference.
-    virtual const MetaData &getMetaData() const = 0;
+    //! This is a convenience function which returns the header's MetaData.
+    const MetaData &getMetaData() const
+    { return getHeader().getMetaData(); }
 
     //! All objects have a shared link to the root. This may seem
     //! wasteful, but it is essential in order to allow for the flexible,
@@ -93,7 +103,7 @@ public:
     //! cheap, basically).
     //! In order to prevent shared_ptr cycles, it is important
     //! that objects only store their children via weak ptrs.
-    virtual RootReaderPtr getRoot() = 0;
+    virtual ArchiveReaderPtr getArchive() = 0;
 
     //! All objects have a shared link to their parent. This may seem
     //! wasteful, but it is essential in order to allow for the flexible,
@@ -108,39 +118,45 @@ public:
     
     //! All objects have one and only one compound property which
     //! is the root for any properties which are associated with this object.
-    //! Guaranteed to exist, even if the compound property itself is empty.
+    //! If no properties were written to the object, this may return an
+    //! empty pointer.
     virtual CompoundPropertyReaderPtr getProperties() = 0;
+
+    //-*************************************************************************
+    // Children!
+    //-*************************************************************************
 
     //! Returns the number of objects that are contained as children.
     //! Objects do not have to have children, this may return zero.
     virtual size_t getNumChildren() = 0;
 
-    //! Return a pointer to the object reader corresponding to the child
-    //! at index i.
-    //! It is an error to ask for an out-of-range child, and it will throw
-    //! an exception in this case.
-    virtual ObjectReaderPtr getChild( size_t i ) = 0;
+    //! Return the header of an object by index.
+    //! This will throw an exception on out-of-range access.
+    virtual const ObjectHeader & getChildHeader( size_t i ) = 0;
 
-    //! This function is somewhat unnecessary. ObjectReaders by themselves,
-    //! before any children or properties have been read, are extremely
-    //! lightweight structures consisting of a name and metadata, and that's
-    //! about it. So, asking for the child and getting its name is basically
-    //! the same as this function. However, in the interest of maintaining
-    //! parity with the writer where possible, we include this function.
-    //! No such function for metadata exists, if that is required, get
-    //! the object reader.
-    //! It is an error to call this out of range, and an exception will be
-    //! thrown.
-    virtual std::string getChildName( size_t i ) = 0;
+    //! Return the header of an object by name.
+    //! This will return a NULL pointer if no header by that name is found.
+    virtual const ObjectHeader *
+    getChildHeader( const std::string &iName ) = 0;
+    
+    //! Get a child object by name.
+    //! This is a convenience function that uses getChildHeader and
+    //! the various named "get" functions here.
+    virtual ObjectReaderPtr getChild( const std::string &iName ) = 0;
 
-    //! Return a pointer to the object reader corresponding to the child
-    //! with the given name iName
-    //! Will return an empty pointer if not found.
-    virtual ObjectReaderPtr getChild( const std::string & iName ) = 0;
+    //! Get a base property by index.
+    //! It is an error to call with out-of-range indices.
+    //! This is a convenience function that uses getChildHeader and
+    //! the various named "get" functions here.
+    ObjectReaderPtr getChild( size_t i );
 
+    //-*************************************************************************
+    // YUP
+    //-*************************************************************************
+    
     //! Returns shared pointer to myself.
     //! This is non-virtual
-    ObjectReaderPtr asObject();
+    virtual ObjectReaderPtr asObjectPtr() = 0;
 };
 
 } // End namespace v1

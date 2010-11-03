@@ -39,8 +39,7 @@
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
-#include <Alembic/AbcCoreAbstract/PropertyType.h>
-#include <Alembic/AbcCoreAbstract/MetaData.h>
+#include <Alembic/AbcCoreAbstract/PropertyHeader.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -49,8 +48,7 @@ namespace v1 {
 //-*****************************************************************************
 //! Base Property Reader.
 class BasePropertyReader
-    : private boost::noncopyable,
-      protected boost::enable_shared_from_this<BasePropertyReader>
+    : private boost::noncopyable
 {
 public:
     //! Virtual destructor
@@ -61,16 +59,26 @@ public:
     // NEW FUNCTIONS
     //-*************************************************************************
 
+    //! Properties are created with a collection of metadata that is stored
+    //! in a lightweight structure called PropertyHeader.
+    //! This returns a constant reference to the PropertyHeader which
+    //! was given upon creation.
+    virtual const PropertyHeader & getHeader() const = 0;
+
     //! All properties have a name, which is unique amongst its siblings
     //! in the compund property they all live in. This is the name that
-    //! was given when the property was created.
-    virtual const std::string &getName() const = 0;
+    //! was given when the property was created, and is part of the property
+    //! header.
+    const std::string &getName() const
+    { return getHeader().getName(); }
 
     //! There are three types of abstract properties.
     //! They are Scalar, Array, and Compound properties. This function
-    //! returns an enum \ref PropertyType which indicates which property
-    //! type is returned.
-    virtual PropertyType getPropertyType() const = 0;
+    //! returns an enum PropertyType which indicates which property
+    //! type is returned. This is simply a convenience function which
+    //! returns data from the PropertyHeader.
+    PropertyType getPropertyType() const
+    { return getHeader().getPropertyType(); }
 
     //! Convenience to return whether the property is scalar.
     //! Same as getPropertyType() == kScalarProperty
@@ -88,10 +96,24 @@ public:
     //! Same as getPropertyType() != kCompoundProperty
     bool isSimple() const { return !isCompound(); }
 
-    //! All properties have metadata. This metadata is read out of the
-    //! File with the name and type as the first things read.
-    //! It is constant and unchanging.
-    virtual const MetaData &getMetaData() const = 0;
+    //! All properties have MetaData. This just returns the
+    //! MetaData portion of the header that was used in creation.
+    const MetaData &getMetaData() const
+    { return getHeader().getMetaData(); }
+
+    //! Non-compound properties have a DataType. It is an error
+    //! to call this function for CompoundProperties, and an exception will
+    //! be thrown. This is a convenience function which just returns the
+    //! DataType from the header that was used in creation.
+    const DataType &getDataType() const
+    { return getHeader().getDataType(); }
+
+    //! Non-compound properties have a TimeSamplingType. It is an error
+    //! to call this function for CompoundProperties, and an exception will
+    //! be thrown. This is a convenience function which just returns the
+    //! TimeSamplingType from the header that was used in creation.
+    TimeSamplingType getTimeSamplingType() const
+    { return getHeader().getTimeSamplingType(); }
     
     //! All properties have an object that owns them, and in order to
     //! ensure the object stays alive as long as the properties do, they
@@ -102,38 +124,27 @@ public:
     //! the top-compound property in any object)
     //! This returns a pointer to the parent compound property.
     virtual CompoundPropertyReaderPtr getParent() = 0;
-    
-    //! Return shared pointer to self, assuming we are always
-    //! created with one. This is non-virtual.
-    BasePropertyReaderPtr asBase();
-
-    //! Up-cast this base property to a SimpleProperty, if such an
-    //! upcast is valid. This can be checked with the \ref isSimple()
-    //! function. If the upcast is not valid, an empty pointer will
-    //! be returned. This default implementation returns an empty
-    //! pointer.
-    virtual SimplePropertyReaderPtr asSimple();
 
     //! Up-cast this base property to a ScalarProperty, if such an
     //! upcast is valid. This can be checked with the \ref isScalar()
     //! function. If the upcast is not valid, an empty pointer will
     //! be returned. This default implementation returns an empty
     //! pointer.
-    virtual ScalarPropertyReaderPtr asScalar();
+    virtual ScalarPropertyReaderPtr asScalarPtr();
     
     //! Up-cast this base property to an ArrayProperty, if such an
     //! upcast is valid. This can be checked with the \ref isArray()
     //! function. If the upcast is not valid, an empty pointer will
     //! be returned. This default implementation returns an empty
     //! pointer.
-    virtual ArrayPropertyReaderPtr asArray();
+    virtual ArrayPropertyReaderPtr asArrayPtr();
     
     //! Up-cast this base property to a CompoundProperty, if such an
-    //! upcast is valid. This can be checked with the \ref isCompund()
+    //! upcast is valid. This can be checked with the \ref isCompound()
     //! function. If the upcast is not valid, an empty pointer will
     //! be returned. This default implementation returns an empty
     //! pointer.
-    virtual CompoundPropertyReaderPtr asCompound();
+    virtual CompoundPropertyReaderPtr asCompoundPtr();
 };
 
 } // End namespace v1

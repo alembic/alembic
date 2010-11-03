@@ -46,38 +46,6 @@ ScalarPropertyWriter::~ScalarPropertyWriter()
     // Nothing
 }
 
-//-*****************************************************************************
-PropertyType ScalarPropertyWriter::getPropertyType() const
-{
-    return kScalarProperty;
-}
-
-
-//-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-SimplePropertyWriterPtr ScalarPropertyWriter::asSimple()
-{
-    SimplePropertyWriterPtr sptr =
-        boost::dynamic_pointer_cast<SimplePropertyWriter,
-        BasePropertyWriter>( asBase() );
-    SimplePropertyWriter *simpleThis = ( SimplePropertyWriter * )this;
-    ABCA_ASSERT( sptr.get() == simpleThis,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
-}
-
-//-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-ScalarPropertyWriterPtr ScalarPropertyWriter::asScalar()
-{
-    ScalarPropertyWriterPtr sptr =
-        boost::dynamic_pointer_cast<ScalarPropertyWriter,
-        BasePropertyWriter>( asBase() );
-    ABCA_ASSERT( sptr.get() == this,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
-}
-
 } // End namespace v1
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

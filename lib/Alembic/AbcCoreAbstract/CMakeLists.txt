@@ -37,51 +37,54 @@ SET( CXX_FILES
      TimeSampling.cpp
      TimeSamplingType.cpp
 
+     ArraySample.cpp
+     ReadArraySampleCache.cpp
+     ScalarSample.cpp
+
      BasePropertyWriter.cpp
-     SimplePropertyWriter.cpp
      ScalarPropertyWriter.cpp
      ArrayPropertyWriter.cpp
      CompoundPropertyWriter.cpp
      ObjectWriter.cpp 
-     RootWriter.cpp 
+     ArchiveWriter.cpp 
 
      BasePropertyReader.cpp
-     SimplePropertyReader.cpp
      ScalarPropertyReader.cpp
      ArrayPropertyReader.cpp
      CompoundPropertyReader.cpp
      ObjectReader.cpp 
-     RootReader.cpp 
+     ArchiveReader.cpp 
 )
 
 SET( H_FILES 
+     All.h
+     ForwardDeclarations.h
+
      ArraySample.h
+     ReadArraySampleCache.h
+     ScalarSample.h
+
      DataType.h
      Foundation.h
      MetaData.h
-     PropertyType.h
-     ReadOnlyData.h
+     ObjectHeader.h
+     PropertyHeader.h
      TimeSampling.h
      TimeSamplingType.h 
-     
-     TimeSampling.h
-     TimeSamplingType.h
 
      BasePropertyWriter.h
-     SimplePropertyWriter.h
      ScalarPropertyWriter.h
      ArrayPropertyWriter.h
      CompoundPropertyWriter.h
      ObjectWriter.h 
-     RootWriter.h 
+     ArchiveWriter.h 
 
      BasePropertyReader.h
-     SimplePropertyReader.h
      ScalarPropertyReader.h
      ArrayPropertyReader.h
      CompoundPropertyReader.h
      ObjectReader.h 
-     RootReader.h 
+     ArchiveReader.h 
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
@@ -96,4 +99,4 @@ INSTALL( FILES ${H_FILES}
          DESTINATION include/Alembic/AbcCoreAbstract
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
 
-#ADD_SUBDIRECTORY( Tests )
+ADD_SUBDIRECTORY( Tests )

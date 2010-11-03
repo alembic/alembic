@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreAbstract_ForwardDeclarations_h_
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
-#include <Alembic/AbcCoreAbstract/PropertyType.h>
+#include <Alembic/AbcCoreAbstract/PropertyHeader.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -53,10 +53,9 @@ class ArraySample;
 //-*****************************************************************************
 //! Writer types forward declared.
 //! ...
-class RootWriter;
+class ArchiveWriter;
 class ObjectWriter;
 class CompoundPropertyWriter;
-class SimplePropertyWriter;
 class ArrayPropertyWriter;
 class ScalarPropertyWriter;
 class BasePropertyWriter;
@@ -64,10 +63,9 @@ class BasePropertyWriter;
 //-*****************************************************************************
 //! Reader types forward declared.
 //! ...
-class RootReader;
+class ArchiveReader;
 class ObjectReader;
 class CompoundPropertyReader;
-class SimplePropertyReader;
 class ArrayPropertyReader;
 class ScalarPropertyReader;
 class BasePropertyReader;
@@ -78,8 +76,8 @@ class BasePropertyReader;
 //! class name precedes the Ptr suffix. We consider boost::shared_ptr to be
 //! a reliable and standard feature of C++, and worthy of inclusion in a
 //! standard.
-typedef boost::shared_ptr<TimeSampling> TimeSamplingPtr;
 typedef boost::shared_ptr<ArraySample> ArraySamplePtr;
+typedef boost::shared_ptr<TimeSampling> TimeSamplingPtr;
 
 //-*****************************************************************************
 //! Smart Ptrs to Writers.
@@ -87,10 +85,9 @@ typedef boost::shared_ptr<ArraySample> ArraySamplePtr;
 //! class name precedes the Ptr suffix. We consider boost::shared_ptr to be
 //! a reliable and standard feature of C++, and worthy of inclusion in a
 //! standard.
-typedef boost::shared_ptr<RootWriter> RootWriterPtr;
+typedef boost::shared_ptr<ArchiveWriter> ArchiveWriterPtr;
 typedef boost::shared_ptr<ObjectWriter> ObjectWriterPtr;
 typedef boost::shared_ptr<CompoundPropertyWriter> CompoundPropertyWriterPtr;
-typedef boost::shared_ptr<SimplePropertyWriter> SimplePropertyWriterPtr;
 typedef boost::shared_ptr<ArrayPropertyWriter> ArrayPropertyWriterPtr;
 typedef boost::shared_ptr<ScalarPropertyWriter> ScalarPropertyWriterPtr;
 typedef boost::shared_ptr<BasePropertyWriter> BasePropertyWriterPtr;
@@ -101,10 +98,9 @@ typedef boost::shared_ptr<BasePropertyWriter> BasePropertyWriterPtr;
 //! class name precedes the Ptr suffix. We consider boost::shared_ptr to be
 //! a reliable and standard feature of C++, and worthy of inclusion in a
 //! standard.
-typedef boost::shared_ptr<RootReader> RootReaderPtr;
+typedef boost::shared_ptr<ArchiveReader> ArchiveReaderPtr;
 typedef boost::shared_ptr<ObjectReader> ObjectReaderPtr;
 typedef boost::shared_ptr<CompoundPropertyReader> CompoundPropertyReaderPtr;
-typedef boost::shared_ptr<SimplePropertyReader> SimplePropertyReaderPtr;
 typedef boost::shared_ptr<ArrayPropertyReader> ArrayPropertyReaderPtr;
 typedef boost::shared_ptr<ScalarPropertyReader> ScalarPropertyReaderPtr;
 typedef boost::shared_ptr<BasePropertyReader> BasePropertyReaderPtr;

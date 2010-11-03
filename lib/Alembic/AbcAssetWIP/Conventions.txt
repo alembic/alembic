@@ -1,5 +1,0 @@
-
-When getting or setting the contents of a part of a class, "getThing/setThing" are used
-as a naming convention.
-
-When returning a literal part of the class internals, "thing()" is used.

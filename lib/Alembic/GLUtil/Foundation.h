@@ -37,7 +37,7 @@
 #ifndef _Alembic_GLUtil_Foundation_h_
 #define _Alembic_GLUtil_Foundation_h_
 
-#include <Alembic/Util/Util.h>
+#include <Alembic/Util/All.h>
 
 #include <boost/algorithm/string.hpp>
 

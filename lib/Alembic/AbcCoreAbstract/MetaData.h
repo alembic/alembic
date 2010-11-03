@@ -131,8 +131,13 @@ public:
     //! \internal For library implementation internal use.
     std::string serialize() const
     {
-        return m_tokenMap.get( ';', '-', true );
+        return m_tokenMap.get( ';', '=', true );
     }
+
+    //-*************************************************************************
+    // SIZE
+    //-*************************************************************************
+    size_t size() const { return m_tokenMap.size(); }
     
     //-*************************************************************************
     // ITERATION

@@ -50,5 +50,19 @@ bool operator! () const                                                 \
     return !( PASS_COND );                                              \
 }
 
+
+//-*****************************************************************************
+#define ALEMBIC_OVERRIDE_OPERATOR_BOOL( PASS_COND )                     \
+operator unspecified_bool_type() const                                  \
+{                                                                       \
+    return ( PASS_COND ) ?                                              \
+        &operator_bool_base_type::__unspecified_bool_type_fcn : 0;      \
+}                                                                       \
+bool operator! () const                                                 \
+{                                                                       \
+    return !( PASS_COND );                                              \
+}
+
+
 #endif
 

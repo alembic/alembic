@@ -46,38 +46,6 @@ ArrayPropertyWriter::~ArrayPropertyWriter()
     // Nothing
 }
 
-//-*****************************************************************************
-PropertyType ArrayPropertyWriter::getPropertyType() const
-{
-    return kArrayProperty;
-}
-
-
-//-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-SimplePropertyWriterPtr ArrayPropertyWriter::asSimple()
-{
-    SimplePropertyWriterPtr sptr =
-        boost::dynamic_pointer_cast<SimplePropertyWriter,
-        BasePropertyWriter>( asBase() );
-    SimplePropertyWriter *simpleThis = ( SimplePropertyWriter * )this;
-    ABCA_ASSERT( sptr.get() == simpleThis,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
-}
-
-//-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-ArrayPropertyWriterPtr ArrayPropertyWriter::asArray()
-{
-    ArrayPropertyWriterPtr sptr =
-        boost::dynamic_pointer_cast<ArrayPropertyWriter,
-        BasePropertyWriter>( asBase() );
-    ABCA_ASSERT( sptr.get() == this,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
-}
-
 } // End namespace v1
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

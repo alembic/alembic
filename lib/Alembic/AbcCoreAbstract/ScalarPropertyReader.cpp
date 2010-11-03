@@ -46,37 +46,6 @@ ScalarPropertyReader::~ScalarPropertyReader()
     // Nothing
 }
 
-//-*****************************************************************************
-PropertyType ScalarPropertyReader::getPropertyType() const
-{
-    return kScalarProperty;
-}
-
-//-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-SimplePropertyReaderPtr ScalarPropertyReader::asSimple()
-{
-    SimplePropertyReaderPtr sptr =
-        boost::dynamic_pointer_cast<SimplePropertyReader,
-        BasePropertyReader>( asBase() );
-    SimplePropertyReader *simpleThis = ( SimplePropertyReader * )this;
-    ABCA_ASSERT( sptr.get() == simpleThis,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
-}
-
-//-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-ScalarPropertyReaderPtr ScalarPropertyReader::asScalar()
-{
-    ScalarPropertyReaderPtr sptr =
-        boost::dynamic_pointer_cast<ScalarPropertyReader,
-        BasePropertyReader>( asBase() );
-    ABCA_ASSERT( sptr.get() == this,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
-}
-
 } // End namespace v1
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

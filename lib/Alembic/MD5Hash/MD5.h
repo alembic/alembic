@@ -48,26 +48,28 @@ class MD5
 {
 public:
     MD5() : m_process() {}
-    MD5( const MD5 &copy )
-      : m_process( copy.m_process ) {}
-    MD5 &operator=( const MD5 &copy )
-    {
-        m_process = copy.m_process;
-        return *this;
-    }
 
-    // This accumulates some number of bytes.
-    template <class POD_TYPE>
-    void update( const POD_TYPE *elements, size_t numElems );
+    // Default copy constructor.
+    // Default assignment operator.
+
+    void update( const uint8_t *iData, size_t iNum );
+    void update( const int8_t *iData, size_t iNum );
+    void update( const uint16_t *iData, size_t iNum );
+    void update( const int16_t *iData, size_t iNum );
+    void update( const uint32_t *iData, size_t iNum );
+    void update( const int32_t *iData, size_t iNum );
+    void update( const uint64_t *iData, size_t iNum );
+    void update( const int64_t *iData, size_t iNum );
+    void update( const float16_t *iData, size_t iNum );
+    void update( const float32_t *iData, size_t iNum );
+    void update( const float64_t *iData, size_t iNum );
 
     // From iterators.
     template <class ITERATOR>
     void updateIter( ITERATOR begin, ITERATOR end )
     {
-        typedef typename ITERATOR::value_type value_type;
-        size_t numElems = end - begin;
-        this->update<value_type>( ( const value_type * )&(*begin),
-                                  numElems );
+        const size_t numElems = end - begin;
+        this->update( &(*begin), numElems );
     }
     
     // This bakes the current thing down into a digest.
@@ -96,89 +98,6 @@ inline MD5 &operator<<( MD5 &md5,
     md5.updateIter<ITERATOR>( range.first, range.second );
     return md5;
 }
-
-//-*****************************************************************************
-#ifdef MD5HASH_BIG_ENDIAN
-//#if 1
-
-//-*****************************************************************************
-template <class POD_TYPE>
-void MD5::update( const POD_TYPE *data, size_t num )
-{
-    // We need to convert to little endian as we write.
-    // Do this in a buffer.
-    static UCHAR buf[1024*sizeof(POD_TYPE)];
-    for ( size_t i = 0; i < num; /* Nothing */ )
-    {
-        // Load up 1024 elements (at most) of them.
-        size_t j;
-        for ( j = 0; j < 1024 && i < num; ++j, ++i )
-        {
-            StoreLittleEndian<POD_TYPE>(
-                // Destination
-                ( void * )( buf + (j*sizeof(POD_TYPE)) ),
-                // Source
-                data[i] );
-        }
-
-        // j represents the number of elements that have been stored.
-        // j * sizeof(T) is the number of bytes.
-        m_process.append( buf, j * sizeof( POD_TYPE ) );
-    }
-}
-
-//-*****************************************************************************
-// 8-bit is never needed to be swapped
-template <>
-inline void MD5::update<unsigned char>( const unsigned char *data,
-                                        size_t num )
-{
-    m_process.append( data, num );
-}
-
-template <>
-inline void MD5::update<char>( const char *data, size_t num )
-{
-    m_process.append( ( const UCHAR * )data, num );
-}
-
-//-*****************************************************************************
-// Specializations required for float types.
-template <>
-inline void MD5::update<half>( const half *data,
-                               size_t num )
-{
-    MD5HASH_STATIC_ASSERT( sizeof( half ) == sizeof( unsigned short ) );
-    MD5::update<unsigned short>( ( const unsigned short * )data,
-                                 num );
-}
-
-template <>
-inline void MD5::update<float>( const float *data, size_t num )
-{
-    MD5HASH_STATIC_ASSERT( sizeof( float ) == sizeof( boost::uint32_t ) );
-    MD5::update<boost::uint32_t>(
-        ( const boost::uint32_t * )data, num );
-}
-
-template <>
-inline void MD5::update<double>( const double *data, size_t num )
-{
-    MD5HASH_STATIC_ASSERT( sizeof( double ) == sizeof( boost::uint64_t ) );
-    MD5::update<boost::uint64_t>(
-        ( const boost::uint64_t * )data, num );
-}
-
-#else // MD5HASH_BIG_ENDIAN
-
-template <class POD_TYPE>
-inline void MD5::update( const POD_TYPE *data, size_t num )
-{
-    m_process.append( ( const UCHAR * )data,
-                      num * sizeof( POD_TYPE ) );
-}
-
-#endif // MD5HASH_BIG_ENDIAN
 
 } // End namespace MD5Hash
 } // End namespace Alembic

@@ -39,7 +39,7 @@ SET( SOURCE_FILES main.cpp )
 
 # Create the executable
 ADD_EXECUTABLE( MD5Hash_Test ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( MD5Hash_Test AlembicMD5Hash )
+TARGET_LINK_LIBRARIES( MD5Hash_Test AlembicUtil AlembicMD5Hash )
 
 # Make a test of it
 ADD_TEST( MD5Hash_TEST MD5Hash_Test )

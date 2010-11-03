@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreAbstract_ArrayPropertyWriter_h_
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
-#include <Alembic/AbcCoreAbstract/SimplePropertyWriter.h>
+#include <Alembic/AbcCoreAbstract/BasePropertyWriter.h>
 #include <Alembic/AbcCoreAbstract/ArraySample.h>
 
 namespace Alembic {
@@ -51,7 +51,7 @@ namespace v1 {
 //! sample. This is distinguished from a Simple Property, which has a
 //! single element per sample, and requires less sophisticated
 //! resource management.
-class ArrayPropertyWriter : public SimplePropertyWriter
+class ArrayPropertyWriter : public BasePropertyWriter
 {
 public:
     //! Virtual destructor
@@ -66,99 +66,31 @@ public:
     //! a given time. Depending on the time sampling type,
     //! the sampleTime may be ignored, or it may be checked for consistency
     //! to ensure synchronization.
+    //!
     //! Samples must always be written starting at index 0, and
     //! moving incrementally forward, writing each subsequent index in order.
     //! An exception will be thrown if the samples are written out of order,
     //! or if the sample times are inconsistent.
+    //!
     //! This takes a read-only ArraySample by const reference. The class
     //! will make an internal copy (or the functional equivalent of ),
     //! and will not use that memory block outside the scope of this
     //! function call.
-    virtual void setSample( size_t iSampleIndex,
+    //!
+    //! Arrays of std::string and std::wstring are assumed to be
+    //! treated just like regular data elements.
+    virtual void setSample( index_t iSampleIndex,
                             chrono_t iSampleTime,
                             const ArraySample & iSamp ) = 0;
 
     //! Set the next sample to equal the previous sample.
     //! An important feature!
-    virtual void setPreviousSample( size_t iSampleIndex,
-                                    chrono_t iSampleTime ) = 0;
+    virtual void setFromPreviousSample( index_t iSampleIndex,
+                                        chrono_t iSampleTime ) = 0;
 
-    //-*************************************************************************
-    // INHERITED
-    //-*************************************************************************
-    
-    //! Returns kArrayProperty
-    //! ...
-    virtual PropertyType getPropertyType() const;
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual SimplePropertyWriterPtr asSimple();
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual ArrayPropertyWriterPtr asArray();
-
-    //-*************************************************************************
-
-    //! Inherited from SimplePropertyWriter
-    //! No implementation herein
-    //! virtual const DataType &getDataType() const = 0;
-
-    //! Inherited from SimplePropertyWriter
-    //! No implementation herein
-    //! virtual const TimeSamplingType &getTimeSamplingType() const = 0;
-
-    //! Inherited from SimplePropertyWriter
-    //! No implementation herein
-    //! virtual size_t getNumSamples() = 0;
-
-    //-*************************************************************************
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein
-    //! virtual const std::string &getName() const = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! There's actually no enum for kSimpleProperty, since
-    //! this is just an intermediate type
-    //! virtual PropertyType getPropertyType() const = 0;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isScalar() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isArray() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isCompound() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isSimple() const;
-
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual const MetaData &getMetaData() const = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual ObjectWriterPtr getObject() = 0;
-
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual CompoundPropertyWriterPtr getParent() = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual void appendMetaData( const MetaData &iAppend ) = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual ScalarPropertyWriterPtr asScalar();
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual CompoundPropertyWriterPtr asCompound();
+    //! Return the number of samples that have been written so far.
+    //! This changes as samples are written.
+    virtual size_t getNumSamples() = 0;
 };
 
 } // End namespace v1

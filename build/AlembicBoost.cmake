@@ -50,10 +50,10 @@
 # The three ways to search are:
 
 # BOOST_INCLUDEDIR: if it is defined, then search for the boost header files in
-# the specific location. 
+# the specific location.
 
 # BOOST_LIBRARYDIR: if it is defined, then search for the boost library files in
-# the specific location. 
+# the specific location.
 
 # BOOST_ROOT: Set the boost root to the defined CMake variable BOOST_ROOT, otherwise
 # it will use the defaults specified inline below
@@ -66,7 +66,7 @@ SET(Boost_DEBUG TRUE)
 IF(DEFINED BOOST_INCLUDEDIR)
     MESSAGE(STATUS "Using BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}" )
 ENDIF()
- 
+
 IF(DEFINED BOOST_LIBRARYDIR)
     MESSAGE(STATUS "Using BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}" )
 ENDIF()
@@ -110,17 +110,12 @@ SET( Boost_USE_STATIC_LIBS TRUE )
 SET( Boost_USE_MULTITHREADED TRUE )
 
 IF ( ${CMAKE_HOST_UNIX} )
-  IF ( ${DARWIN} )
-    SET( Boost_ADDITIONAL_VERSIONS "1.43" "1.43.0" )
-    FIND_PACKAGE( Boost 1.43.0 COMPONENTS iostreams program_options filesystem system regex python REQUIRED)
-  ELSE()
-    SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" )
-    FIND_PACKAGE( Boost 1.42.0 COMPONENTS iostreams program_options filesystem system regex python REQUIRED)
-  ENDIF()
+    SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" )
+    FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options REQUIRED)
 ELSE()
   IF ( ${CMAKE_HOST_WIN32} )
-    SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" )
-    FIND_PACKAGE( Boost 1.42.0 COMPONENTS iostreams program_options filesystem system regex python REQUIRED)
+    SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" )
+    FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options REQUIRED)
   ELSE()
     MESSAGE( ERROR "BOOST: This platform is not supported yet" )
   ENDIF()

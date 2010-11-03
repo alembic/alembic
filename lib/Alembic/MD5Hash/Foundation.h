@@ -37,10 +37,9 @@
 #ifndef _Alembic_MD5Hash_Foundation_h_
 #define _Alembic_MD5Hash_Foundation_h_
 
-#include <boost/static_assert.hpp>
-#include <boost/detail/endian.hpp>
-#include <boost/spirit/home/support/detail/integer/endian.hpp>
-#include <boost/cstdint.hpp>
+#include <Alembic/Util/All.h>
+
+#include <boost/operators.hpp>
 #include <boost/format.hpp>
 
 #include <functional>
@@ -68,35 +67,22 @@ namespace Alembic {
 namespace MD5Hash {
 
 //-*****************************************************************************
-typedef boost::uint64_t UINT8;
-typedef boost::uint32_t UINT4;
-typedef boost::uint8_t UCHAR;
+using Alembic::Util::uint8_t;
+using Alembic::Util::int8_t;
+using Alembic::Util::uint16_t;
+using Alembic::Util::int16_t;
+using Alembic::Util::uint32_t;
+using Alembic::Util::int32_t;
+using Alembic::Util::uint64_t;
+using Alembic::Util::int64_t;
+using Alembic::Util::float16_t;
+using Alembic::Util::float32_t;
+using Alembic::Util::float64_t;
 
 //-*****************************************************************************
-template <class POD_TYPE>
-inline void StoreLittleEndian( void *destination,
-                               const POD_TYPE &source )
-{
-    boost::detail::store_little_endian<POD_TYPE,sizeof(POD_TYPE)>(
-        destination, source );
-}
-
-//-*****************************************************************************
-#define MD5HASH_STATIC_ASSERT BOOST_STATIC_ASSERT
-
-//-*****************************************************************************
-#ifdef BOOST_BIG_ENDIAN
-
-#define MD5HASH_BIG_ENDIAN
-#undef MD5HASH_LITTLE_ENDIAN
-
-#else
-
-#define MD5HASH_LITTLE_ENDIAN
-#undef MD5HASH_BIG_ENDIAN
-
-#endif
-
+typedef uint64_t UINT8;
+typedef uint32_t UINT4;
+typedef uint8_t UCHAR;
 
 } // End namespace MD5Hash
 } // End namespace Alembic

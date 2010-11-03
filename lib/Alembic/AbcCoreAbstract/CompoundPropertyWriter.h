@@ -39,10 +39,6 @@
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyWriter.h>
-#include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
-#include <Alembic/AbcCoreAbstract/DataType.h>
-#include <Alembic/AbcCoreAbstract/MetaData.h>
-#include <Alembic/AbcCoreAbstract/TimeSamplingType.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -66,19 +62,29 @@ public:
     //! May change as more are created.
     virtual size_t getNumProperties() = 0;
 
+    //! Return the header of a property that has already been added.
+    //! Property is selected by index.
+    //! This will throw an exception on out-of-range access.
+    virtual const PropertyHeader & getPropertyHeader( size_t i ) = 0;
+
+    //! Return the header of a property that has already been added,
+    //! found by name. A typical use of this would be for an application
+    //! that wants to incrementally add properties, and wishes to query
+    //! whether a property of a given name has already been added, before
+    //! attempting to add a new one.
+    //! This will return NULL if no property of the given name has
+    //! been added.
+    virtual const PropertyHeader *
+    getPropertyHeader( const std::string &iName ) = 0;
+
     //! It is an error to request for a property by index out of range.
     //! This returns a property that has ALREADY BEEN ADDED.
     //! This will throw an exception on out-of-range access.
     //! There is a possibility it could return a NULL pointer, if the
     //! added property has been closed (deleted).
-    virtual BasePropertyWriterPtr getProperty( size_t i ) = 0;
-    
-    //! Return the name of a sub property that has already been written.
-    //! This is so you can check whether or not a name has already been
-    //! used amongst the siblings, even if the sub property writers have
-    //! been deleted. If you ask for an out-of-range property, it will
-    //! throw an exception, since that's a clear programming error.
-    virtual std::string getPropertyName( size_t i ) = 0;
+    //! This is just a convenience function which calls getPropertyHeader
+    //! and then getProperty.
+    BasePropertyWriterPtr getProperty( size_t i );
 
     //! Returns an ALREADY ADDED PROPERTY by name. If it can't find
     //! one by name, it returns an empty pointer. This can also happen
@@ -87,86 +93,33 @@ public:
 
     //! Create and return the requested scalar property.
     //! If a property already exists with the same name, throws
-    //! an exception.
+    //! an exception. An exception will also be thrown if the header's
+    //! configuration does not correctly specify a ScalarProperty.
     virtual ScalarPropertyWriterPtr
-    createScalarProperty( const std::string & iName,
-                          const DataType & iDataType,
-                          const MetaData & iMetaData,
-                          const TimeSamplingType & iTimeSamplingType ) = 0;
+    createScalarProperty( const PropertyHeader & iHeader ) = 0;
     
     //! Create and return the requested array property.
     //! If a property already exists with the same name, throws.
-    //! an exception.
+    //! an exception. An exception will also be thrown if the header's
+    //! configuration does not correctly specify an ArrayProperty.
     virtual ArrayPropertyWriterPtr
-    createArrayProperty( const std::string & iName,
-                         const DataType & iDataType,
-                         const MetaData & iMetaData,
-                         const TimeSamplingType &iTimeSamplingType ) = 0;
+    createArrayProperty( const PropertyHeader & iHeader ) = 0;
     
     //! Create and return the requested compound property.
     //! If a property already exists with the same name, throws
-    //! an exception.
+    //! an exception. An exception will also be thrown if the header's
+    //! configuration does not correctly specify a CompoundProperty.
     virtual CompoundPropertyWriterPtr
-    createCompoundProperty( const std::string & iName,
-                            const MetaData & iMetaData ) = 0;
+    createCompoundProperty( const PropertyHeader & iHeader ) = 0;
+
+    //! Create and return the requested "any type" property, returned
+    //! as a BasePropertyWriterPtr. If a property already exists with
+    //! the same name, throws an exception. This is a convenience function that
+    //! wraps the specific functions above.
+    BasePropertyWriterPtr
+    createProperty( const PropertyHeader & iHeader );
 
     //-*************************************************************************
-    // INHERITED
-    //-*************************************************************************
-    
-    //! Returns kCompoundProperty
-    //! ...
-    virtual PropertyType getPropertyType() const;
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual CompoundPropertyWriterPtr asCompound();
-
-    //-*************************************************************************
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein
-    //! virtual const std::string &getName() const = 0;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isScalar() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isArray() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isCompound() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isSimple() const;
-
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual const MetaData &getMetaData() const = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual ObjectWriterPtr getObject() = 0;
-
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual CompoundPropertyWriterPtr getParent() = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual void appendMetaData( const MetaData &iAppend ) = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual SimplePropertyWriterPtr asSimple();
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual ScalarPropertyWriterPtr asScalar();
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual ArrayPropertyWriterPtr asArray();
 };
 
 } // End namespace v1

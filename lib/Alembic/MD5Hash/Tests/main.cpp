@@ -34,8 +34,7 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/MD5Hash/MD5.h>
-#include <Alembic/MD5Hash/MapUtil.h>
+#include <Alembic/MD5Hash/All.h>
 #include <boost/format.hpp>
 #include <boost/timer.hpp>
 #include <iostream>

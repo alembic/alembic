@@ -35,6 +35,8 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreAbstract/CompoundPropertyReader.h>
+#include <Alembic/AbcCoreAbstract/ScalarPropertyReader.h>
+#include <Alembic/AbcCoreAbstract/ArrayPropertyReader.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -47,21 +49,97 @@ CompoundPropertyReader::~CompoundPropertyReader()
 }
 
 //-*****************************************************************************
-PropertyType CompoundPropertyReader::getPropertyType() const
+BasePropertyReaderPtr
+CompoundPropertyReader::getProperty( const std::string &iName )
 {
-    return kCompoundProperty;
+    const PropertyHeader *header = getPropertyHeader( iName );
+    if ( !header )
+    {
+        return BasePropertyReaderPtr();
+    }
+    else
+    {
+        switch ( header->getPropertyType() )
+        {
+        default:
+        case kScalarProperty:
+            return getScalarProperty( header->getName() );
+        case kArrayProperty:
+            return getArrayProperty( header->getName() );
+        case kCompoundProperty:
+            return getCompoundProperty( header->getName() );
+        }
+    }        
 }
 
 //-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-CompoundPropertyReaderPtr CompoundPropertyReader::asCompound()
+ScalarPropertyReaderPtr
+CompoundPropertyReader::getScalarProperty( size_t i )
 {
-    CompoundPropertyReaderPtr sptr =
-        boost::dynamic_pointer_cast<CompoundPropertyReader,
-        BasePropertyReader>( asBase() );
-    ABCA_ASSERT( sptr.get() == this,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
+    // This will throw if bad index.
+    const PropertyHeader &header = getPropertyHeader( i );
+
+    if ( header.getPropertyType() != kScalarProperty )
+    {
+        return ScalarPropertyReaderPtr();
+    }
+    else
+    {
+        return getScalarProperty( header.getName() );
+    }
+}
+
+//-*****************************************************************************
+ArrayPropertyReaderPtr
+CompoundPropertyReader::getArrayProperty( size_t i )
+{
+    // This will throw if bad index.
+    const PropertyHeader &header = getPropertyHeader( i );
+
+    if ( header.getPropertyType() != kArrayProperty )
+    {
+        return ArrayPropertyReaderPtr();
+    }
+    else
+    {
+        return getArrayProperty( header.getName() );
+    }
+}
+
+//-*****************************************************************************
+CompoundPropertyReaderPtr
+CompoundPropertyReader::getCompoundProperty( size_t i )
+{
+    // This will throw if bad index.
+    const PropertyHeader &header = getPropertyHeader( i );
+
+    if ( header.getPropertyType() != kCompoundProperty )
+    {
+        return CompoundPropertyReaderPtr();
+    }
+    else
+    {
+        return getCompoundProperty( header.getName() );
+    }
+}
+
+//-*****************************************************************************
+BasePropertyReaderPtr
+CompoundPropertyReader::getProperty( size_t i )
+{
+    // This will throw if bad index.
+    const PropertyHeader &header = getPropertyHeader( i );
+    
+    switch ( header.getPropertyType() )
+    {
+    default:
+    case kScalarProperty:
+        return getScalarProperty( header.getName() );
+    case kArrayProperty:
+        return getArrayProperty( header.getName() );
+    case kCompoundProperty:
+        return getCompoundProperty( header.getName() );
+    }
 }
 
 } // End namespace v1

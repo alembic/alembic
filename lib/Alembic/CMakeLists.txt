@@ -35,17 +35,14 @@
 ##-*****************************************************************************
 
 # Recurse into all the subdirectories
+
 ADD_SUBDIRECTORY( Util )
 ADD_SUBDIRECTORY( GLUtil )
-ADD_SUBDIRECTORY( HDF5 )
 ADD_SUBDIRECTORY( MD5Hash )
-ADD_SUBDIRECTORY( PdbIO )
-ADD_SUBDIRECTORY( Tako )
-ADD_SUBDIRECTORY( TakoAbstract )
-ADD_SUBDIRECTORY( TakoSPI )
 
 ADD_SUBDIRECTORY( AbcCoreAbstract )
+ADD_SUBDIRECTORY( AbcCoreHDF5 )
+ADD_SUBDIRECTORY( Abc )
+ADD_SUBDIRECTORY( AbcGeom )
 
-ADD_SUBDIRECTORY( Asset )
-ADD_SUBDIRECTORY( Traits )
-ADD_SUBDIRECTORY( TraitsGeom )
+#ADD_SUBDIRECTORY( Tako )

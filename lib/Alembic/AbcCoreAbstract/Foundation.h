@@ -37,14 +37,17 @@
 #ifndef _Alembic_AbcCoreAbstract_Foundation_h_
 #define _Alembic_AbcCoreAbstract_Foundation_h_
 
-#include <Alembic/Util/Util.h>
+#include <Alembic/Util/All.h>
+#include <Alembic/MD5Hash/All.h>
 
-#include <boost/range/iterator_range.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/operators.hpp>
+#include <boost/format.hpp>
 
 #include <limits>
 #include <utility>
+#include <vector>
 
 #include <assert.h>
 #include <string.h>
@@ -59,12 +62,25 @@ namespace v1 {
 // Just pull the whole Util namespace in. This is safe.
 using namespace ::Alembic::Util;
 
+// Same with MD5Hash.
+using namespace ::Alembic::MD5Hash;
+
 //! Index type
 //! Just being pedantic.
-typedef size_t index_t;
-typedef ::Alembic::Util::float64_t chrono_t;
+typedef int64_t index_t;
+
+//! Chrono type.
+//! This is used whenever time values are needed in the library. They are
+//! generally assumed to be seconds, but this does not need to be explicitly
+//! enforced by the API.
+typedef float64_t chrono_t;
+// Util/PlainOldDataType.h defines the enum PlainOldDataType
+#define kChrono_TPOD  kFloat64POD
+
 
 //-*****************************************************************************
+//! Exception types borrowed from Alembic::Util. We should probably eventually
+//! create specific exception types.
 #define ABCA_THROW( TEXT ) ABC_THROW( TEXT )
 
 //-*****************************************************************************

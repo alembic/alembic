@@ -38,8 +38,7 @@
 #define _Alembic_AbcCoreAbstract_ScalarPropertyWriter_h_
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
-#include <Alembic/AbcCoreAbstract/SimplePropertyWriter.h>
-#include <Alembic/AbcCoreAbstract/ReadOnlyData.h>
+#include <Alembic/AbcCoreAbstract/BasePropertyWriter.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -50,7 +49,7 @@ namespace v1 {
 //! sample. This is distinguished from an Array Property, which has a
 //! variable number of elements per sample, and requires more sophisticated
 //! resource management.
-class ScalarPropertyWriter : public SimplePropertyWriter
+class ScalarPropertyWriter : public BasePropertyWriter
 {
 public:
     //! Virtual destructor
@@ -60,7 +59,7 @@ public:
     //-*************************************************************************
     // NEW FUNCTIONS
     //-*************************************************************************
-    
+
     //! Sets a sample at a given sample index, with
     //! a given time. Depending on the time sampling type,
     //! the sampleTime may be ignored, or it may be checked for consistency
@@ -69,94 +68,29 @@ public:
     //! moving incrementally forward, writing each subsequent index in order.
     //! An exception will be thrown if the samples are written out of order,
     //! or if the sample times are inconsistent.
-    //! This takes a read-only block of bytes by const reference. The class
-    //! will make an internal copy, and will not use that memory block
-    //! outside the scope of this function call.
+    //!
+    //! For specifying the sample, this takes a void pointer which
+    //! points to the beginning of the memory corresponding to the scalar.
+    //!
+    //! For String and Wstring, the const void *iSamp is assumed to be
+    //! static_castable to const std::string * and const std::wstring *,
+    //! respectively.
+    //!
+    //! The data passed into this function will be used or copied locally
+    //! by this function, and need not live (in the calling context)
+    //! outside the return scope of this function call.
     virtual void setSample( index_t iSampleIndex,
                             chrono_t iSampleTime,
-                            const ReadOnlyBytes & iSamp ) = 0;
+                            const void *iSamp ) = 0;
 
     //! Simply copies the previously written sample's value.
     //! This is an important feature.
-    virtual void setPreviousSample( index_t iSampleIndex,
-                                    chrono_t iSampleTime ) = 0;
+    virtual void setFromPreviousSample( index_t iSampleIndex,
+                                        chrono_t iSampleTime ) = 0;
 
-    //-*************************************************************************
-    // INHERITED
-    //-*************************************************************************
-    
-    //! Returns kScalarProperty
-    //! ...
-    virtual PropertyType getPropertyType() const;
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual SimplePropertyWriterPtr asSimple();
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual ScalarPropertyWriterPtr asScalar();
-
-    //-*************************************************************************
-
-    //! Inherited from SimplePropertyWriter
-    //! No implementation herein
-    //! virtual const DataType &getDataType() const = 0;
-
-    //! Inherited from SimplePropertyWriter
-    //! No implementation herein
-    //! virtual const TimeSamplingType &getTimeSamplingType() const = 0;
-
-    //! Inherited from SimplePropertyWriter
-    //! No implementation herein
-    //! virtual size_t getNumSamples() = 0;
-
-    //-*************************************************************************
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein
-    //! virtual const std::string &getName() const = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! There's actually no enum for kSimpleProperty, since
-    //! this is just an intermediate type
-    //! virtual PropertyType getPropertyType() const = 0;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isScalar() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isArray() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isCompound() const;
-
-    //! Inherited from BasePropertyWriter
-    //! bool isSimple() const;
-
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual const MetaData &getMetaData() const = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual ObjectWriterPtr getObject() = 0;
-
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual CompoundPropertyWriterPtr getParent() = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual void appendMetaData( const MetaData &iAppend ) = 0;
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual ArrayPropertyWriterPtr asArray();
-    
-    //! Inherited from BasePropertyWriter
-    //! No implementation herein.
-    //! virtual CompoundPropertyWriterPtr asCompound();
+    //! Return the number of samples that have been written so far.
+    //! This changes as samples are written.
+    virtual size_t getNumSamples() = 0;
 };
 
 } // End namespace v1

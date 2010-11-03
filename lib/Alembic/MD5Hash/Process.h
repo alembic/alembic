@@ -49,6 +49,7 @@ class Process
 public:
     Process();
     Process( const Process &copy );
+    Process& operator=( const Process &copy );
 
     void append( const UCHAR *data, size_t nbytes );
 
@@ -67,7 +68,7 @@ protected:
     void process64bytesAligned( const UINT4 *data );
     MD5Digest unrecoverableBakeIntoDigest();
     
-    ssize_t m_count[2];
+    size_t m_count[2];
     UINT4 m_abcd[4];
     UCHAR m_buf[64];
 };

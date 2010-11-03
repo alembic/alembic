@@ -36,56 +36,89 @@
 #define _Alembic_Util_Dimensions_h_
 
 #include <Alembic/Util/Foundation.h>
+#include <Alembic/Util/PlainOldDataType.h>
 
 namespace Alembic {
 namespace Util {
 
 //-*****************************************************************************
 template <class T>
-class BaseDimensions : public std::vector<T>
+class BaseDimensions
 {
-public:
-    BaseDimensions() : std::vector<T>() {}
-    explicit BaseDimensions( size_t n ) : std::vector<T>( n ) {}
-    BaseDimensions( size_t n, const T &t ) : std::vector<T>( n, t ) {}
+private:
+    typedef std::size_t MySizeT;
+    typedef std::vector<MySizeT> SizeVec;
+    SizeVec m_vector;
+    BOOST_STATIC_ASSERT( sizeof( MySizeT ) == sizeof( T ) );
 
-    BaseDimensions( const BaseDimensions &copy ) : std::vector<T>( copy ) {}
+public:
+    // Default is for a rank-0 dimension.
+    BaseDimensions() : m_vector() {}
+
+    // When you specify a single thing, you're specifying a rank-1
+    // dimension of a certain size.
+    explicit BaseDimensions( const T& t )
+      : m_vector( 1, ( MySizeT )t ) {}
+
+    BaseDimensions( const BaseDimensions &copy )
+      : m_vector( copy.m_vector ) {}
 
     template <class Y>
-    BaseDimensions( const std::vector<Y> &copy )
-      : std::vector<T>( copy.begin(), copy.end() ) {}
+    BaseDimensions( const BaseDimensions<Y> &copy )
+    {
+        m_vector.resize( copy.rank() );
+        for ( size_t i = 0; i < copy.rank(); ++i )
+        {
+            m_vector[i] = static_cast<MySizeT>( copy[i] );
+        }
+    }
 
     BaseDimensions& operator=( const BaseDimensions &copy )
     {
-        std::vector<T>::operator=( copy );
+        m_vector = copy.m_vector;
         return *this;
     }
 
     template <class Y>
-    BaseDimensions& operator=( const std::vector<Y> &copy )
+    BaseDimensions& operator=( const BaseDimensions<Y> &copy )
     {
-        std::vector<T>::resize( 0 );
-        std::vector<T>::reserve( copy.size() );
-        std::vector<T>::insert( std::vector<T>::begin(),
-                                copy.begin(), copy.end() );
+        m_vector.resize( copy.rank() );
+        for ( size_t i = 0; i < copy.rank(); ++i )
+        {
+            m_vector[i] = static_cast<MySizeT>( copy[i] );
+        }
         return *this;
     }
 
-    size_t rank() const { return std::vector<T>::size(); }
+    size_t rank() const { return m_vector.size(); }
+    void setRank( size_t r )
+    {
+        size_t oldSize = m_vector.size();
+        m_vector.resize( r );
+        for ( size_t s = oldSize; s < r; ++s )
+        {
+            m_vector[s] = ( T )0;
+        }
+    }
 
-    T *rootPtr() { return &( std::vector<T>::front() ); }
+    T &operator[]( size_t i )
+    { return *( ( T * )( &(m_vector[i] ) ) ); }
+
+    const T & operator[]( size_t i ) const
+    { return *( ( const T *)( &( m_vector[i] ) ) ); }
+
+    T *rootPtr() { return ( T * )( &( m_vector.front() ) ); }
     const T *rootPtr() const
-    { return &( std::vector<T>::front() ); }
+    { return ( const T * )( &( m_vector.front() ) ); }
 
     size_t numPoints() const
     {
-        if ( std::vector<T>::size() == 0 ) { return 0; }
+        if ( m_vector.size() == 0 ) { return 0; }
         else
         {
             size_t npoints = 1;
-            for ( typename std::vector<T>::const_iterator diter =
-                      std::vector<T>::begin();
-                  diter != std::vector<T>::end(); ++diter )
+            for ( SizeVec::const_iterator diter = m_vector.begin();
+                  diter != m_vector.end(); ++diter )
             {
                 npoints *= ( size_t )(*diter);
             }
@@ -98,22 +131,23 @@ public:
 template <class T, class Y>
 bool operator==( const BaseDimensions<T> &a, const BaseDimensions<Y> &b )
 {
-    size_t aSize = a.size();
-    size_t bSize = b.size();
-    if ( aSize != bSize ) { return false; }
+    size_t aRank = a.rank();
+    size_t bRank = b.rank();
+    if ( aRank != bRank ) { return false; }
 
-    for ( size_t d = 0; d < aSize; ++d )
+    for ( size_t d = 0; d < aRank; ++d )
     {
         if ( static_cast<size_t>( a[d] ) !=
              static_cast<size_t>( b[d] ) ) { return false; }
     }
-    
+
     return true;
 }
 
 //-*****************************************************************************
 template <class T, class Y>
-inline bool operator!=( const BaseDimensions<T> &a, const BaseDimensions<Y> &b )
+inline bool operator!=( const BaseDimensions<T> &a,
+                        const BaseDimensions<Y> &b )
 {
     return !( a == b );
 }
@@ -122,13 +156,16 @@ inline bool operator!=( const BaseDimensions<T> &a, const BaseDimensions<Y> &b )
 template <class T>
 std::ostream &operator<<( std::ostream &ostr, const BaseDimensions<T> &a )
 {
-    typedef typename std::vector<T>::const_iterator ITER;
-    ostr << "[";
-    for ( ITER i = a.begin(); i != a.end(); ++i )
+    ostr << "{";
+    for ( size_t i = 0; i < a.rank(); ++i )
     {
-        ostr << "[" << (*i) << "]";
+        ostr << a[i];
+        if ( i != a.rank()-1 )
+        {
+            ostr << ", ";
+        }
     }
-    ostr << "]";
+    ostr << "}";
     return ostr;
 }
 

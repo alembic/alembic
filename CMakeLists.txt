@@ -44,9 +44,9 @@ IF (RUN_FROM_MK)
   MARK_AS_ADVANCED ( CMAKE_FIRST_RUN )
 ENDIF()
 
-IF ( NOT DEFINED CMAKE_FIRST_RUN )
-  MESSAGE( WARNING "This build was not first configured from the the mk_cmake build script. Possible build errors will occur. Consult the README.txt for instructions on how to build. " )
-ENDIF()
+#IF ( NOT DEFINED CMAKE_FIRST_RUN )
+#  MESSAGE( WARNING "This build was not first configured from the the mk_cmake build script. Possible build errors will occur. Consult the README.txt for instructions on how to build. " )
+#ENDIF()
 
 IF (NOT DEFINED QUIET)
   SET(CMAKE_VERBOSE_MAKEFILE TRUE)
@@ -86,7 +86,7 @@ IF( "${CMAKE_SYSTEM_NAME}" MATCHES "Linux" )
 ENDIF()
 
 #SET( CMAKE_C_FLAGS -std=gnu99 )
-#SET( CMAKE_CXX_FLAGS -std=gnu++98 )
+SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wreturn-type -Werror" )
 
 IF( ${WINDOWS} )
   ADD_DEFINITIONS( -DPLATFORM_WINDOWS -DPLATFORM=WINDOWS )
@@ -119,21 +119,12 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/build )
 #-******************************************************************************
 #-******************************************************************************
 # Globally enable testing.
-INCLUDE(CTest)
+#INCLUDE(CTest)
 ENABLE_TESTING()
 IF(BUILD_TESTING)
   SET(BUILDNAME "${BUILDNAME}" CACHE STRING "Name of build on the dashboard")
   MARK_AS_ADVANCED(BUILDNAME)
 ENDIF(BUILD_TESTING)
-
-SET(SRC_FILE CTestCustom.cmake)
-ADD_CUSTOM_COMMAND(
-    OUTPUT  CTestCustom
-    COMMAND ${CMAKE_COMMAND}
-    ARGS    -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${SRC_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/${SRC_FILE}"
-    COMMENT "Copying ${SRC_FILE} to ${CMAKE_CURRENT_BINARY_DIR}"
-)
-ADD_CUSTOM_TARGET(CopyConfigs ALL DEPENDS CTestCustom)
 
 # A macro should be added for Linux that adds -fPIC to libraries that
 # are DSO.
@@ -151,7 +142,7 @@ ENDIF(UNIX AND NOT WIN32)
 
 IF(BOOTSTRAP_MODE)
 
-  ADD_SUBDIRECTORY(build/bootstrap) 
+  ADD_SUBDIRECTORY(build/bootstrap)
 
 ELSE()
 
@@ -181,6 +172,8 @@ ELSE()
   SET( ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
 ENDIF()
 
+MESSAGE( STATUS, "OpenGL Libraries: ${ALEMBIC_GL_LIBS}" )
+
 #-******************************************************************************
 #-******************************************************************************
 # BOOST STUFF
@@ -206,12 +199,12 @@ INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )
 #-******************************************************************************
 
 INCLUDE( "./build/AlembicIlmBase.cmake" )
-INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_PATH} )
+INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
 
 #-******************************************************************************
 #-******************************************************************************
 # OPEN EXR
-#-****************************************************************************** 
+#-******************************************************************************
 #-******************************************************************************
 
 # Automatically include ILM Base Stuff.
@@ -232,37 +225,11 @@ if ( ALEMBIC_HDF5_FOUND )
 ENDIF()
 
 # Recurse into libs, then bins.
-ADD_SUBDIRECTORY( pub )
-INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/pub" )
 ADD_SUBDIRECTORY( lib )
 INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/lib" )
-ADD_SUBDIRECTORY( bin )
-ADD_SUBDIRECTORY( python )
 
-# Include PRMan stuff
-IF(DEFINED USE_PRMAN AND NOT USE_PRMAN)
-    MESSAGE(STATUS "Skipping Renderman plugins")
-ELSE()
-    INCLUDE("./build/AlembicPRMan.cmake")
-    IF ( ALEMBIC_PRMAN_FOUND )
-        MESSAGE(STATUS "Using Renderman plugins")
-        ADD_SUBDIRECTORY( prman )
-    ENDIF()
-ENDIF()
-
-# Include Maya stuff
-IF(DEFINED USE_MAYA AND NOT USE_MAYA)
-    MESSAGE(STATUS "Skipping Maya plugins")
-ELSE()
-    MESSAGE(STATUS "About to include AlembicMaya.cmake")
-    INCLUDE("./build/AlembicMaya.cmake")
-    IF( MAYA_FOUND )
-        MESSAGE(STATUS "Using Maya plugins")
-        ADD_SUBDIRECTORY( maya )
-    ELSE()
-        MESSAGE(STATUS "For some reason, MAYA_FOUND is False?")
-    ENDIF()
-ENDIF()
+# example code not supported
+ADD_SUBDIRECTORY( examples EXCLUDE_FROM_ALL )
 
 ENDIF()
 

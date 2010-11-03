@@ -63,6 +63,7 @@
 //-*****************************************************************************
 
 #include <Alembic/MD5Hash/Process.h>
+#include <Alembic/MD5Hash/FoundationPrivate.h>
 
 namespace Alembic {
 namespace MD5Hash {
@@ -98,14 +99,31 @@ Process::Process( const Process &copy )
     std::copy( copy.m_buf, copy.m_buf + 64, m_buf );
 }
 
+
+//-*****************************************************************************
+Process& Process::operator=( const Process &copy )
+{
+    m_count[0] = copy.m_count[0];
+    m_count[1] = copy.m_count[1];
+
+    m_abcd[0] = copy.m_abcd[0];
+    m_abcd[1] = copy.m_abcd[1];
+    m_abcd[2] = copy.m_abcd[2];
+    m_abcd[3] = copy.m_abcd[3];
+
+    std::copy( copy.m_buf, copy.m_buf + 64, m_buf );
+
+    return *this;
+}
+
 //-*****************************************************************************
 void Process::append( const UCHAR *data, size_t nbytesUnsigned )
 {
     const UCHAR *p = data;
-    ssize_t nbytes = ( ssize_t )nbytesUnsigned;
-    ssize_t left = nbytes;
-    ssize_t offset = ( m_count[0] >> 3 ) & ( ( ssize_t )63 );
-    ssize_t nbits = ( ssize_t )( nbytes << 3 );
+    size_t nbytes = ( size_t )nbytesUnsigned;
+    size_t left = nbytes;
+    size_t offset = ( m_count[0] >> 3 ) & ( ( size_t )63 );
+    size_t nbits = ( size_t )( nbytes << 3 );
 
     if ( nbytes <= 0 )
     {
@@ -123,9 +141,9 @@ void Process::append( const UCHAR *data, size_t nbytesUnsigned )
     // Process an initial partial block.
     if ( offset )
     {
-	ssize_t copy = ( offset + nbytes > 64 ?
-                         64 - offset :
-                         nbytes );
+	size_t copy = ( offset + nbytes > 64 ?
+                        64 - offset :
+                        nbytes );
 
 	memcpy( m_buf + offset, p, copy );
 	if ( offset + copy < 64 )

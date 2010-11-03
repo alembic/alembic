@@ -1,0 +1,45 @@
+ lib
+ |
+ `-- Alembic
+ |   |
+ |   `-- AbcGeom - High level geometric types implemented using Abc
+ |   |
+ |   `-- Abc -- The main client-facing data management layer of Alembic
+ |   |
+ |   `-- AbcCoreAbstract - Abstract base API and data types of Alembic
+ |   |
+ |   `-- AbcCoreHDF5 - Implementation of AbcCoreAbstract using HDF5
+ |   |
+ |   `-- MD5Hash - Checksum library used in conjunction with HDF5
+ |   |
+ |   `-- GLUtil - OpenGL utilities for working with Alembic
+ |   |
+ |   `-- Util - Low level utilities used by all other layers
+ |
+ `-- python - python utilities that help the bootstrap build script
+
+ build -- Cmake files and bootstrap utilities
+
+ doc -- Documentation for how to build dependencies, doxygen generated doc will
+        also end up here
+
+ examples - Unsupported examples that use Alembic
+ |
+ `-- AbcClients
+ |   |
+ |   `-- FluidSimDemo - example CUDA simulation, slightly older API, won't
+ |   |                  currently build
+ |   `-- WFObjConvert - Convert WaveFront OBJ files to Alembic Archives
+ |
+ `-- bin
+ |   |
+ |   `-- GlutSkeleton - skeletal template for OpenGL-based Alembic utility
+ |   |
+ |   `-- GtoMeshesToAbc - Convert GTO mesh files into Alembic Archives
+ |   |                    (requires Open-GTO libraries)
+ |   `-- SimpleAbcViewer - Simple OpenGL viewer for Alembic Archives
+ |
+ `-- maya
+     `-- AlembicSimpleAbcExport - A simple plugin to export polygonal geometry
+         to Alembic
+

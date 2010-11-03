@@ -1,82 +1,87 @@
 -------------------------------------------------------------------------------
 - Alembic
 -
-- Copyright 2010 Industrial Light and Magic,
--   a division of Lucasfilm Entertainment Company Ltd.
+- Copyright 2009-2010 Sony Pictures Imageworks, Inc. and
+- Industrial Light and Magic, a division of Lucasfilm Entertainment Company Ltd.
 -------------------------------------------------------------------------------
 
 Installation instructions for Alembic
 
 0) Before Alembic can be built, you will need to satisfy its external
-dependencies.  They are:
+dependencies.  They are, as of October 26 2010:
 
-CMake (2.8.2) www.cmake.org
+64-bit unix-like OS (Linux, Mac OS X)
+CMake (2.8.0) www.cmake.org
 Boost (1.42) www.boost.org
 ilmbase (1.0.1) www.openexr.com
-OpenEXR (1.6.1) www.openexr.com
-HDF5 (1.8.4-patch1) www.hdfgroup.org/HDF5
+HDF5 (1.8.5-patch1) www.hdfgroup.org/HDF5
 
 Optional:
 Autodesk Maya (2010)
 Pixar PRMan (15.x)
+OpenEXR (1.6.1) www.openexr.com
+
+Note that the versions given parenthetically above are minimum-tested
+versions.  You may have good luck with later or earlier versions, but this is
+what we've been building Alembic against.
 
 They may be installed in their default system locations (typically somewhere
-under /usr/local), or in the Alembic source root's "contrib" directory, at
-your discretion (though, CMake probably shouldn't be installed into the contrib
-directory).  Look in your Alembic source root's "contrib" directory for
+under /usr/local), or some other centralized directory at
+your discretion; it's best to not install your dependencies under the Alembic
+source root.  Look in your Alembic source root's "doc" directory for
 instructions on building Boost and HDF5; see next step for details.
+
+Additionally, Alembic currently requires a 64-bit system to build properly.
 
 1) Untar the Alembic source into your desired directory:
 
-$ cd ~/ ; tar xzf Alembic_0.1.0.tgz
+$ cd ~/ ; tar xzf Alembic_0_9_0.tgz
 
-This will create a directory, ~/Alembic_0.1.0, that contains the Alembic
-source code.
+This will create a directory, ~/Alembic_0.9.0, that contains the Alembic
+source code (if you're reading this, you've probably already done this).
 
-As alluded to in Step 0, ~/Alembic_0.1.0/contrib/ will contain instructional
+As alluded to in Step 0, ~/Alembic_0.9.0/doc/ will contain instructional
 files for building Boost and HDF5.  Mostly, those packages' libraries just
 need a little encouragement to build static archives and with -fPIC.
 
 2) Create a build root directory.  The Alembic build bootstrap script assumes
 an out-of-source build.  For purposes of illustration, this document assumes
-that your build root is located under your source root, though that is not
-required.
+that your build root is located parallel to your source root, though that is
+not required.
 
-$ mkdir ~/Alembic_0.1.0/ALEMBIC_BUILD
+$ mkdir ~/ALEMBIC_BUILD
 
 3) Change to the build directory.  This is so you can use `pwd` as part
 of the right-hand-side of a setenv command.
 
-$ cd ~/Alembic_0.1.0/ALEMBIC_BUILD
+$ cd ~/ALEMBIC_BUILD
 
-4) Set the environment varibales so that the Alembic bootstrap script can find
-the Alembic dependencies; this document assumes a csh-style syntax.
-If you're using bash or other sh-derived shell, obviously change "setenv
-FOO bar" to "export FOO=bar".
+4) Run the Alembic bootstrap script.  Again, assuming your CWD is still
+~/ALEMBIC_BUILD, the following should work:
 
-If you installed the dependent libs into the contrib directory in your source
-tree, and your CWD is Alembic_0.1.0/ALEMBIC_BUILD, then a copy-and-paste of
-the following will set you up correctly:
+$ python ../Alembic_0.9.0/build/bootstrap/alembic_bootstrap.py .
 
-setenv HDF5_ROOT "`pwd`/../contrib/hdf5-1.8.4-patch1"
-setenv ILMBASE_ROOT "`pwd`/../contrib/ilmbase-1.0.1"
-setenv BOOST_ROOT "`pwd`/../contrib/include/boost-1_42"
-setenv OPENEXR_ROOT "`pwd`/../contrib/usr"
-setenv MAYA_ROOT "`pwd`/../contrib/maya2010"
-setenv PRMAN_ROOT "`pwd`/../contrib/prman"
+You can give it several options and flags; '-h' for a list of them.  If you
+don't specify a complete set of options when you run it, it will prompt you
+interactively for the information it needs to initialize the build system.
 
-Otherwise set those variables to their respective actual locations.
+It's worth pointing out that running the bootstrap script is optional; there
+is a fairly comprehensive set of CMake files there that might just work for
+you "out of the box".  On the other hand, we do strongly recommend running
+the bootstrapper; it will make things so much easier for you.
 
-5) Run the Alembic bootstrap script.  Again, assuming your CWD is still
-~/Alembic_0.1.0/ALEMBIC_BUILD, the following should work:
+4a) Once the system is bootstrapped, there will be a file called "CMakeCache.txt"
+in your build root.  You can examine and manipulate this file with the cmake
+commands "ccmake" (curses-based console program), or "cmake-gui" (Qt-based
+gui program).  This file is the control file for CMake itself; the main thing
+the bootstrapper does is create it and populate it appropriately (the bootstrap
+script will also use it to get default values for the things it asks you for).
 
-$ ../bin/mk_cmake.py
+You can also just edit it directly, if you know what you're doing.  If you
+change it, just be sure to run "cmake ." in the same directory as it so that
+it regenerates the Makefiles.
 
-This will initialize the CMake meta-build system, then run CMake itself to
-generate regular Makefiles.  For a list of all the options, invoke it with
-'-h' or '--help'.  Go ahead, give it a shot; really: explore the space.
-
-6) Run the make command.  Kind of a no-brainer, really.  You can safely run make
+5) Run the make command.  Kind of a no-brainer, really.  You can safely run make
 with the '-j' flag, for doing multi-process builds.  In general, you can
 profitably run as many "make" processes as you have CPUs, so for a dual-proc
 machine,
@@ -96,8 +101,24 @@ each of which does what you'd expect.  Running
 
 $ make help
 
-will give you a list of possible targets.
+will give you a list of possible targets.  If you want to make a debug build,
+you can either run the bootstrap script again with the option '--debug', or
+run ccmake or cmake-gui (depending on what you installed when you installed
+cmake, as described in 4a), and change the build type to "Debug".
 
-5a) If you want to build Alembic in debug mode, you'll need to run mk_cmake.py
-again, but with the '--debug' flag.  This will cause debug-build Makefiles to
-be generated, at which point, run "make" again.
+6) If you'd like, build the example programs:
+
+$ cd ~/ALEMBIC_BUILD/examples
+$ make
+
+7) To build the API documentation via Doxygen:
+
+$ cd ../Alembic_0.9.0; doxygen Doxyfile
+
+This will generate html documentation in the doc/html folder.
+
+
+If you get stuck, contact us on the alembic-discussion mailing list. You
+can view the mailing list archives and join the mailing list via
+http://groups.google.com/group/alembic-discussion
+

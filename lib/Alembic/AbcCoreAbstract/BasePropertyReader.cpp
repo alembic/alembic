@@ -47,34 +47,21 @@ BasePropertyReader::~BasePropertyReader()
 }
 
 //-*****************************************************************************
-BasePropertyReaderPtr BasePropertyReader::asBase()
-{
-    return shared_from_this();
-}
-
-//-*****************************************************************************
-SimplePropertyReaderPtr BasePropertyReader::asSimple()
-{
-    // An empty pointer.
-    return SimplePropertyReaderPtr();
-}
-
-//-*****************************************************************************
-ScalarPropertyReaderPtr BasePropertyReader::asScalar()
+ScalarPropertyReaderPtr BasePropertyReader::asScalarPtr()
 {
     // An empty pointer.
     return ScalarPropertyReaderPtr();
 }
 
 //-*****************************************************************************
-ArrayPropertyReaderPtr BasePropertyReader::asArray()
+ArrayPropertyReaderPtr BasePropertyReader::asArrayPtr()
 {
     // An empty pointer.
     return ArrayPropertyReaderPtr();
 }
 
 //-*****************************************************************************
-CompoundPropertyReaderPtr BasePropertyReader::asCompound()
+CompoundPropertyReaderPtr BasePropertyReader::asCompoundPtr()
 {
     // An empty pointer.
     return CompoundPropertyReaderPtr();

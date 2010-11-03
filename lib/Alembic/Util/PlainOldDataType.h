@@ -44,30 +44,32 @@ namespace Alembic {
 namespace Util {
 
 //-*****************************************************************************
-// Bytes are unsigned chars, by definition.
+//! Bytes are unsigned chars, by definition.
+//! We use bytes in Alembic as the name of anonymous storage memory, since
+//! it is not possible to create arrays of voids. 
 typedef unsigned char           byte_t;
 
 //-*****************************************************************************
 //-*****************************************************************************
-// BOOLEAN BASE TYPE - since C++ doesn't explicitly demand that bool
-// be a given bit depth, but we need it to be here, we make our own
-// bool type, which is a bit silly.
+//! BOOLEAN BASE TYPE - since C++ doesn't explicitly demand that bool
+//! be a given bit depth, but we need it to be here, we make our own
+//! bool type, which is a bit silly. This is purely for storage reasons.
 //-*****************************************************************************
 class bool_t
 {
 public:
     bool_t() : m_byte( 0 ) {}
     
-    bool_t( const bool_t &copy ) : m_byte( copy.m_byte ) {}
     bool_t( bool tf ) : m_byte( static_cast<byte_t>( tf ) ) {}
     bool_t( byte_t b ) : m_byte( b ) {}
 
-    bool_t& operator=( const bool_t &copy )
-    {
-        m_byte = copy.m_byte;
-        return *this;
-    }
-
+    
+    //! Using default copy constructor
+    //! ...
+    
+    //! Using default assignment operator
+    //! ...
+    
     bool_t& operator=( bool tf )
     {
         m_byte = static_cast<byte_t>( tf );
@@ -129,69 +131,81 @@ inline bool operator!=( bool a, const bool_t &b )
 }
 
 //-*****************************************************************************
-// Name standardization and namespace promotion of explicit types.
-typedef boost::uint8_t          uint8_t;
-typedef boost::int8_t           int8_t;
-typedef boost::uint16_t         uint16_t;
-typedef boost::int16_t          int16_t;
-typedef boost::uint32_t         uint32_t;
-typedef boost::int32_t          int32_t;
-typedef boost::uint64_t         uint64_t;
-typedef boost::int64_t          int64_t;
+//! Name standardization and namespace promotion of explicit types.
+//! The reason we use the boost types instead of the cstdint types is because
+//! Microsoft has wisely chosen to omit <cstdint> from Windows Visual C++.
+//! Grumble. boost::cstdint.hpp remedies this oversight.
+using boost::uint8_t;
+using boost::int8_t;
+using boost::uint16_t;
+using boost::int16_t;
+using boost::uint32_t;
+using boost::int32_t;
+using boost::uint64_t;
+using boost::int64_t;
 typedef half                    float16_t;
 typedef float                   float32_t;
 typedef double                  float64_t;
 
-// Last, but not least, cstr_t.
-typedef const char *            cstr_t;
+//! Last, but not least, standard strings.
+//! These are CLEARLY not "Plain Old Data Types", however, "strings" are
+//! such ubiquitous components of programming, and without an enclosing
+//! structure like std::string, they're so difficult to use from an API
+//! point of view (call first time to find out length! allocate your own array!
+//! call second time to get string value!), that I'm going to put my foot down
+//! and say - from Alembic's point of view, std::string and std::wstring are
+//! "Kinda Sorta POD types". Please pardon the abuse of the idiom.
+using std::string;
+using std::wstring;
 
 //-*****************************************************************************
-// I'm using explicit names here because the terms 'int', 'short', 'long', etc,
-// have different bit-depths on different machine architectures. To avoid
-// any ambiguity whatsoever, I'm just making these explicit. End users will
-// rarely see these anyway, so it's okay to be a bit pedantic.
-//
-// These are always represented in the endian-ness of the host machine when
-// resident in working memory, but need to have an explicit endian-ness when
-// being written out. That's hidden from the user by HDF5.
-//
-//
+//! I'm using explicit names here because the terms 'int', 'short', 'long', etc,
+//! have different bit-depths on different machine architectures. To avoid
+//! any ambiguity whatsoever, I'm just making these explicit. End users will
+//! rarely see these anyway, so it's okay to be a bit pedantic.
+//!
+//! These are always represented in the endian-ness of the host machine when
+//! resident in working memory, but need to have an explicit endian-ness when
+//! being written out. That's hidden from the user by HDF5.
 enum PlainOldDataType
 {
-    // Booleans are difficult to store in arrays in a 'one bit per bool'
-    // kind of way, so we actually file them as bytes (uint8).  But again
-    // this is entirely hidden from the end user. Implemented via the
-    // "bool_t" type defined above.
+    //! Booleans are difficult to store in arrays in a 'one bit per bool'
+    //! kind of way, so we actually file them as bytes (uint8).  But again
+    //! this is entirely hidden from the end user. Implemented via the
+    //! "bool_t" type defined above.
     kBooleanPOD,
 
-    // Char/UChar
+    //! Char/UChar
     kUint8POD,
     kInt8POD,
 
-    // Short/UShort
+    //! Short/UShort
     kUint16POD,
     kInt16POD,
 
-    // Int/UInt
+    //! Int/UInt
     kUint32POD,
     kInt32POD,
 
-    // Long/ULong
+    //! Long/ULong
     kUint64POD,
     kInt64POD,
 
-    // Half/Float/Double
+    //! Half/Float/Double
     kFloat16POD,
     kFloat32POD,
     kFloat64POD,
 
-    // C-String Pointer
-    kCStringPOD,
+    //! String Pointer
+    kStringPOD,
 
-    // Number of POD
+    //! Wide String Pointer
+    kWstringPOD,
+
+    //! Number of POD
     kNumPlainOldDataTypes,
 
-    // Unknown
+    //! Unknown
     kUnknownPOD = 127
 };
 
@@ -205,38 +219,39 @@ enum PlainOldDataType
 template <PlainOldDataType PODT, class T > struct PODTraits {};
 
 //-*****************************************************************************
-// Unfortunately, C++ only allows for static const declaration of constants
-// with integral types, not floating. Therefore, we have the whole
-// inlined static function for default values.
+//! Unfortunately, C++ only allows for static const declaration of constants
+//! with integral types, not floating. Therefore, we have the whole
+//! inlined static function for default values.
 #define DECLARE_TRAITS( PENUM, PTYPE, PNAME, DFLT, PTDEF )                    \
 template <>                                                                   \
 struct PODTraits< PENUM , PTYPE >                                             \
 {                                                                             \
     static const PlainOldDataType       pod_enum = PENUM ;                    \
     typedef PTYPE                       value_type ;                          \
-    static const char *                 name() { return PNAME ; }     \
-    static PTYPE                        default_value()               \
+    static const char *                 name() { return PNAME ; }             \
+    static PTYPE                        default_value()                       \
     { return ( DFLT ) ; }                                                     \
-    static size_t                       numBytes()                    \
+    static size_t                       numBytes()                            \
     { return sizeof( PTYPE ) ; }                                              \
 };                                                                            \
 typedef PODTraits< PENUM , PTYPE > PTDEF 
 
 //-*****************************************************************************
 // Actual specialized traits
-DECLARE_TRAITS( kBooleanPOD, bool_t, "bool_t", false, BooleanPODTraits );
-DECLARE_TRAITS( kUint8POD, uint8_t, "uint8_t", 0, Uint8PODTraits );
-DECLARE_TRAITS( kInt8POD, int8_t, "int8_t", 0, Int8PODTraits );
-DECLARE_TRAITS( kUint16POD, uint16_t, "uint16_t", 0, Uint16PODTraits );
-DECLARE_TRAITS( kInt16POD, int16_t, "int16_t", 0, Int16PODTraits );
-DECLARE_TRAITS( kUint32POD, uint32_t, "uint32_t", 0, Uint32PODTraits );
-DECLARE_TRAITS( kInt32POD, int32_t, "int32_t", 0, Int32PODTraits );
-DECLARE_TRAITS( kUint64POD, uint64_t, "uint64_t", 0, Uint64PODTraits );
-DECLARE_TRAITS( kInt64POD, int64_t, "int64_t", 0, Int64PODTraits );
-DECLARE_TRAITS( kFloat16POD, float16_t, "float16_t", 0, Float16PODTraits );
-DECLARE_TRAITS( kFloat32POD, float32_t, "float32_t", 0, Float32PODTraits );
-DECLARE_TRAITS( kFloat64POD, float64_t, "float64_t", 0, Float64PODTraits );
-DECLARE_TRAITS( kCStringPOD, cstr_t, "cstr_t", NULL, CStringPODTraits );
+DECLARE_TRAITS( kBooleanPOD, bool_t,    "bool_t",    false, BooleanPODTraits );
+DECLARE_TRAITS( kUint8POD,   uint8_t,   "uint8_t",   0,     Uint8PODTraits );
+DECLARE_TRAITS( kInt8POD,    int8_t,    "int8_t",    0,     Int8PODTraits );
+DECLARE_TRAITS( kUint16POD,  uint16_t,  "uint16_t",  0,     Uint16PODTraits );
+DECLARE_TRAITS( kInt16POD,   int16_t,   "int16_t",   0,     Int16PODTraits );
+DECLARE_TRAITS( kUint32POD,  uint32_t,  "uint32_t",  0,     Uint32PODTraits );
+DECLARE_TRAITS( kInt32POD,   int32_t,   "int32_t",   0,     Int32PODTraits );
+DECLARE_TRAITS( kUint64POD,  uint64_t,  "uint64_t",  0,     Uint64PODTraits );
+DECLARE_TRAITS( kInt64POD,   int64_t,   "int64_t",   0,     Int64PODTraits );
+DECLARE_TRAITS( kFloat16POD, float16_t, "float16_t", 0,     Float16PODTraits );
+DECLARE_TRAITS( kFloat32POD, float32_t, "float32_t", 0,     Float32PODTraits );
+DECLARE_TRAITS( kFloat64POD, float64_t, "float64_t", 0,     Float64PODTraits );
+DECLARE_TRAITS( kStringPOD,  string,    "string",    "",    StringPODTraits );
+DECLARE_TRAITS( kWstringPOD, wstring,   "wstring",   L"",   WstringPODTraits );
 
 #undef DECLARE_TRAITS
 
@@ -268,7 +283,8 @@ template <> struct PODTraitsFromEnum<kInt64POD> : public Int64PODTraits {};
 template <> struct PODTraitsFromEnum<kFloat16POD> : public Float16PODTraits {};
 template <> struct PODTraitsFromEnum<kFloat32POD> : public Float32PODTraits {};
 template <> struct PODTraitsFromEnum<kFloat64POD> : public Float64PODTraits {};
-template <> struct PODTraitsFromEnum<kCStringPOD> : public CStringPODTraits {};
+template <> struct PODTraitsFromEnum<kStringPOD> : public StringPODTraits {};
+template <> struct PODTraitsFromEnum<kWstringPOD> : public WstringPODTraits {};
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -292,7 +308,8 @@ template <> struct PODTraitsFromType<int64_t> : public Int64PODTraits {};
 template <> struct PODTraitsFromType<float16_t> : public Float16PODTraits {};
 template <> struct PODTraitsFromType<float32_t> : public Float32PODTraits {};
 template <> struct PODTraitsFromType<float64_t> : public Float64PODTraits {};
-template <> struct PODTraitsFromType<cstr_t> : public CStringPODTraits {};
+template <> struct PODTraitsFromType<string> : public StringPODTraits {};
+template <> struct PODTraitsFromType<wstring> : public WstringPODTraits {};
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -315,7 +332,8 @@ inline size_t PODNumBytes( PlainOldDataType pod )
     case kFloat16POD: return Float16PODTraits::numBytes();
     case kFloat32POD: return Float32PODTraits::numBytes();
     case kFloat64POD: return Float64PODTraits::numBytes();
-    case kCStringPOD: return CStringPODTraits::numBytes();
+    case kStringPOD: return StringPODTraits::numBytes();
+    case kWstringPOD: return WstringPODTraits::numBytes();
     default:
         // Badness!
         assert( false );
@@ -340,10 +358,13 @@ inline const char *PODName( PlainOldDataType pod )
     case kFloat16POD: return Float16PODTraits::name();
     case kFloat32POD: return Float32PODTraits::name();
     case kFloat64POD: return Float64PODTraits::name();
+    case kStringPOD: return StringPODTraits::name();
+    case kWstringPOD: return WstringPODTraits::name();
     default:
         // Can't throw from here, so just return 0.
-        assert( false );
-        return 0;
+        // assert( false );
+        return "UNKNOWN";
+        // return 0;
     };
 }
 
@@ -362,16 +383,19 @@ inline PlainOldDataType PODFromName( const std::string &n )
     else if ( n == Float16PODTraits::name() ) return Float16PODTraits::pod_enum;
     else if ( n == Float32PODTraits::name() ) return Float32PODTraits::pod_enum;
     else if ( n == Float64PODTraits::name() ) return Float64PODTraits::pod_enum;
-    else if ( n == CStringPODTraits::name() ) return CStringPODTraits::pod_enum;
+    else if ( n == StringPODTraits::name() ) return StringPODTraits::pod_enum;
+    else if ( n == WstringPODTraits::name() ) return WstringPODTraits::pod_enum;
     else return kUnknownPOD;
 }
 
 //-*****************************************************************************
+//! This actually does work with strings!
 template <PlainOldDataType POD>
-inline void PODSetDefaultPOD( void *bytes )
+inline void PODSetDefaultPOD( void *addr )
 {
     typedef typename PODTraitsFromEnum<POD>::value_type value_type;
-    *(( value_type * )bytes) = PODTraitsFromEnum<POD>::default_value();
+    value_type *valPtr = reinterpret_cast<value_type*>( addr );
+    if ( valPtr ) { *valPtr = PODTraitsFromEnum<POD>::default_value(); }
 }
 
 //-*****************************************************************************
@@ -391,7 +415,10 @@ inline void PODSetDefault( PlainOldDataType pod, void *bytes )
     case kFloat16POD: PODSetDefaultPOD<kFloat16POD>( bytes ); return;
     case kFloat32POD: PODSetDefaultPOD<kFloat32POD>( bytes ); return;
     case kFloat64POD: PODSetDefaultPOD<kFloat64POD>( bytes ); return;
-    case kCStringPOD: PODSetDefaultPOD<kCStringPOD>( bytes ); return;
+
+        // This isn't tremendously valid for the string types. Eeek.
+    case kStringPOD: PODSetDefaultPOD<kStringPOD>( bytes ); return;
+    case kWstringPOD: PODSetDefaultPOD<kWstringPOD>( bytes ); return;
     default:
         // Can't throw, but in debug...
         assert( false );

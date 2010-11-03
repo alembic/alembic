@@ -41,5 +41,3 @@ INCLUDE_DIRECTORIES( ${ALEMBIC_LIBS_SOURCE_DIR} )
 # Recurse into all the subdirectories
 ADD_SUBDIRECTORY( Bootstrap )
 ADD_SUBDIRECTORY( Alembic )
-ADD_SUBDIRECTORY( FluidSimDemo )
-

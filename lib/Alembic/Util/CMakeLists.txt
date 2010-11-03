@@ -42,9 +42,10 @@ SET( H_FILES
      OperatorBool.h
      PlainOldDataType.h
      Singleton.h
-     Time.h
-     TokenMap.h 
-     Util.h )
+     SmartPtrHelp.h
+     TokenMap.h
+     All.h
+     VecN.h )
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicUtil ${SOURCE_FILES} )

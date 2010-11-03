@@ -44,7 +44,9 @@ namespace MD5Hash {
 
 //-*************************************************************************
 // Digest class. This is what the MD5 produces. it is handy!
-struct MD5Digest
+// It is totally ordered, by way of the boost::totally_ordered
+// operator template.
+struct MD5Digest : public boost::totally_ordered<MD5Digest>
 {
     union
     {
@@ -87,62 +89,32 @@ struct MD5Digest
         print( sstr );
         return sstr.str();
     }
+
+    //-*************************************************************************
+    // ORDERING AND COMPARISON OPERATORS
+    //-*************************************************************************
+    bool operator==( const MD5Digest &iRhs ) const
+    {
+        return ( ( words[0] == iRhs.words[0] ) &&
+                 ( words[1] == iRhs.words[1] ) &&
+                 ( words[2] == iRhs.words[2] ) &&
+                 ( words[3] == iRhs.words[3] ) );
+    }
+
+    bool operator<( const MD5Digest &iRhs ) const
+    {
+        return ( words[0] < iRhs.words[0] ? true :
+                 ( words[0] > iRhs.words[0] ? false :
+                   
+                   ( words[1] < iRhs.words[1] ? true :
+                     ( words[1] > iRhs.words[1] ? false :
+                       
+                       ( words[2] < iRhs.words[2] ? true :
+                         ( words[2] > iRhs.words[2] ? false :
+                           
+                           ( words[3] < iRhs.words[3] ) ) ) ) ) ) );
+    }
 };
-
-//-*****************************************************************************
-inline bool operator==( const MD5Digest &a, const MD5Digest &b )
-{
-    return ( ( a.words[0] == b.words[0] ) &&
-             ( a.words[1] == b.words[1] ) &&
-             ( a.words[2] == b.words[2] ) &&
-             ( a.words[3] == b.words[3] ) );
-}
-
-//-*****************************************************************************
-inline bool operator!=( const MD5Digest &a, const MD5Digest &b )
-{
-    return ( ( a.words[0] != b.words[0] ) ||
-             ( a.words[1] != b.words[1] ) ||
-             ( a.words[2] != b.words[2] ) ||
-             ( a.words[3] != b.words[3] ) );
-}
-
-//-*****************************************************************************
-// Now there's something to expand.
-inline bool operator<( const MD5Digest &a, const MD5Digest &b )
-{
-    return ( a.words[0] < b.words[0] ? true :
-             ( a.words[0] > b.words[0] ? false :
-               ( a.words[1] < b.words[1] ? true :
-                 ( a.words[1] > b.words[1] ? false :
-                   ( a.words[2] < b.words[2] ? true :
-                     ( a.words[2] > b.words[2] ? false :
-                       ( a.words[3] < b.words[3] ) ) ) ) ) ) );
-}
-
-//-*****************************************************************************
-inline bool operator>( const MD5Digest &a, const MD5Digest &b )
-{
-    return ( a.words[0] > b.words[0] ? true :
-             ( a.words[0] < b.words[0] ? false :
-               ( a.words[1] > b.words[1] ? true :
-                 ( a.words[1] < b.words[1] ? false :
-                   ( a.words[2] > b.words[2] ? true :
-                     ( a.words[2] < b.words[2] ? false :
-                       ( a.words[3] > b.words[3] ) ) ) ) ) ) );
-}
-
-//-*****************************************************************************
-inline bool operator<=( const MD5Digest &a, const MD5Digest &b )
-{
-    return ( a < b ) || ( a == b );
-}
-
-//-*****************************************************************************
-inline bool operator>=( const MD5Digest &a, const MD5Digest &b )
-{
-    return ( a > b ) || ( a == b );
-}
 
 //-*****************************************************************************
 inline std::ostream &operator<<( std::ostream &ostr, const MD5Digest &a )

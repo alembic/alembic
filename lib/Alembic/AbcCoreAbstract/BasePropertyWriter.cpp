@@ -47,34 +47,21 @@ BasePropertyWriter::~BasePropertyWriter()
 }
 
 //-*****************************************************************************
-BasePropertyWriterPtr BasePropertyWriter::asBase()
-{
-    return shared_from_this();
-}
-
-//-*****************************************************************************
-SimplePropertyWriterPtr BasePropertyWriter::asSimple()
-{
-    // An empty pointer.
-    return SimplePropertyWriterPtr();
-}
-
-//-*****************************************************************************
-ScalarPropertyWriterPtr BasePropertyWriter::asScalar()
+ScalarPropertyWriterPtr BasePropertyWriter::asScalarPtr()
 {
     // An empty pointer.
     return ScalarPropertyWriterPtr();
 }
 
 //-*****************************************************************************
-ArrayPropertyWriterPtr BasePropertyWriter::asArray()
+ArrayPropertyWriterPtr BasePropertyWriter::asArrayPtr()
 {
     // An empty pointer.
     return ArrayPropertyWriterPtr();
 }
 
 //-*****************************************************************************
-CompoundPropertyWriterPtr BasePropertyWriter::asCompound()
+CompoundPropertyWriterPtr BasePropertyWriter::asCompoundPtr()
 {
     // An empty pointer.
     return CompoundPropertyWriterPtr();

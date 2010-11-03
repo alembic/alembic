@@ -131,19 +131,12 @@ public:
     }
 
     //-*************************************************************************
-    //! \brief Copy constructor
-    //!  Map is copied.
-    TokenMap( const TokenMap &copy )
-      : m_map( copy.m_map ) {}
+    //! Using default copy constructor
+    //! ...
 
     //-*************************************************************************
-    //! \brief Assignment
-    //!  Map is assigned.
-    TokenMap& operator=( const TokenMap &copy )
-    {
-        m_map = copy.m_map;
-        return *this;
-    }
+    //! Using default assignment operator.
+    //! ...
 
     //-*************************************************************************
     // SET

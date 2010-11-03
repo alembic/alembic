@@ -40,6 +40,7 @@
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyReader.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
+#include <Alembic/AbcCoreAbstract/PropertyHeader.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -63,72 +64,69 @@ public:
     //! ...
     virtual size_t getNumProperties() = 0;
 
-    //! Returns a property by index.
-    //! It is an error to call it with an out-of-range index, and an
-    //! exception will be thrown
-    virtual BasePropertyReaderPtr getProperty( size_t i ) = 0;
+    //! Return the header of a property by index.
+    //! This will throw an exception on out-of-range access.
+    virtual const PropertyHeader & getPropertyHeader( size_t i ) = 0;
 
-    //! Get the name of a property by index.
-    //! ...
-    virtual std::string getPropertyName( size_t i ) = 0;
+    //! Return the header of a property name.
+    //! This will return a NULL pointer if no header by that name is found.
+    virtual const PropertyHeader *
+    getPropertyHeader( const std::string &iName ) = 0;
 
-    //! Get a property by name.
+    //! Get a Scalar Property by name..
+    //! It will return an empty pointer if the property is not scalar or
+    //! is not found.
+    virtual ScalarPropertyReaderPtr
+    getScalarProperty( const std::string &iName ) = 0;
+    
+    //! Get a Array Property by name..
+    //! It will return an empty pointer if the property is not array or
+    //! is not found.
+    virtual ArrayPropertyReaderPtr
+    getArrayProperty( const std::string &iName ) = 0;
+    
+    //! Get a Compound Property by name..
+    //! It will return an empty pointer if the property is not compound or
+    //! is not found.
+    virtual CompoundPropertyReaderPtr
+    getCompoundProperty( const std::string &iName ) = 0;
+    
+    //! Get a base property by name.
     //! That property can be safely upcast.
-    virtual BasePropertyReaderPtr getProperty( const std::string &iName ) = 0;
+    //! This is a convenience function that uses getPropertyHeader and
+    //! the various named "get" functions here.
+    BasePropertyReaderPtr getProperty( const std::string &iName );
 
-    //-*************************************************************************
-    // INHERITED
-    //-*************************************************************************
+    //! Get a Scalar Property by index.
+    //! It will return an empty pointer if the property is not scalar or
+    //! is not found.
+    //! This is convenience function that uses the above functions
+    //! to get the answer.
+    ScalarPropertyReaderPtr
+    getScalarProperty( size_t i );
     
-    //! Returns kCompoundProperty
-    //! ...
-    virtual PropertyType getPropertyType() const;
-
-    //! Returns this as a properly cast shared_ptr.
-    //! ...
-    virtual CompoundPropertyReaderPtr asCompound();
-
-    //-*************************************************************************
+    //! Get a Array Property by index.
+    //! It will return an empty pointer if the property is not array or
+    //! is not found.
+    //! This is convenience function that uses the above functions
+    //! to get the answer.
+    ArrayPropertyReaderPtr
+    getArrayProperty( size_t i );
     
-    //! Inherited from BasePropertyReader
-    //! No implementation herein
-    //! virtual const std::string &getName() const = 0;
+    //! Get a Compound Property by index.
+    //! It will return an empty pointer if the property is not compound or
+    //! is not found.
+    //! This is convenience function that uses the above functions
+    //! to get the answer.
+    CompoundPropertyReaderPtr
+    getCompoundProperty( size_t i );
 
-    //! Inherited from BasePropertyReader
-    //! bool isScalar() const;
+    //! Get a base property by index.
+    //! It is an error to call with out-of-range indices.
+    //! This is a convenience function that uses getPropertyHeader and
+    //! the various named "get" functions here.
+    BasePropertyReaderPtr getProperty( size_t i );
 
-    //! Inherited from BasePropertyReader
-    //! bool isArray() const;
-
-    //! Inherited from BasePropertyReader
-    //! bool isCompound() const;
-
-    //! Inherited from BasePropertyReader
-    //! bool isSimple() const;
-
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual const MetaData &getMetaData() const = 0;
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual ObjectReaderPtr getObject() = 0;
-
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual CompoundPropertyReaderPtr getParent() = 0;
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual SimplePropertyReaderPtr asSimple();
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual ScalarPropertyReaderPtr asScalar();
-    
-    //! Inherited from BasePropertyReader
-    //! No implementation herein.
-    //! virtual ArrayPropertyReaderPtr asArray();
 };
 
 } // End namespace v1

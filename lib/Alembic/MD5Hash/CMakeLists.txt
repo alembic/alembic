@@ -35,8 +35,18 @@
 ##-*****************************************************************************
 
 # Name our source files
-SET( CXX_FILES MD5.cpp Process.cpp )
-SET( H_FILES Digest.h Foundation.h MD5.h MapUtil.h Process.h )
+SET( CXX_FILES 
+     MD5.cpp 
+     Process.cpp )
+
+SET( H_FILES 
+     All.h 
+     Digest.h 
+     Foundation.h 
+     MD5.h 
+     MapUtil.h 
+     Process.h )
+
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 # Create the library

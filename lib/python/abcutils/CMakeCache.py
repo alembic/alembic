@@ -169,6 +169,9 @@ class CMakeCache( object ):
     def cachefile( self ):
         return self._cachefile
 
+    def refresh( self ):
+        self.__init__( self._cachefile )
+
     def write( self, newfile = None ):
         if newfile == None:
             newfile = self._cachefile

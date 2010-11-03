@@ -1,1 +1,0 @@
-"SPT_" prefix in MeshHelper.cpp

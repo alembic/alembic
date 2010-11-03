@@ -38,60 +38,165 @@
 #define _Alembic_AbcCoreAbstract_ArraySample_h_
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
-#include <Alembic/AbcCoreAbstract/ReadOnlyData.h>
+#include <Alembic/AbcCoreAbstract/DataType.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
 namespace v1 {
 
 //-*****************************************************************************
-//! The ArraySample class is a lightweight wrapper around a block of bytes
-//! that is managed elsewhere. This is basically just a named pair of
-//! Dimensions and ReadOnlyBytes. It does not own, nor purport to own,
-//! the data stored herein, it is merely a binding structure.
+//! The ArraySample class is a reference to a block of memory corresponding
+//! to an array of instances of DataTypes. The array may be multi-rank, with
+//! different sizes in each dimension, but with its data ultimately stored
+//! contiguously. The class is basically just a bundle of a memory address,
+//! stored as a void*, a DataType, and a Dimension.
+//!
+//! The ArraySample itself does not pretend to own the data referred to
+//! memory address "data". It is just a reference. For data retention mgmt,
+//! see the note on \ref ArraySamplePtr below.
 class ArraySample
 {
 public:
+    typedef ArraySample this_type;
+    typedef MD5Digest Key;
+    typedef Key key_type;
+
     //! Default constructor creates NULL bytes with degenerate dimensions.
     //! ...
     ArraySample()
-      : m_bytes(),
-        m_dimensions() {}
+      : m_data( NULL )
+      , m_dataType()
+      , m_dimensions() {}
 
     //! Explicit constructor takes bytes and dims by reference
     //! and creates its own reference to them.
-    ArraySample( const ReadOnlyBytes & iBytes,
+    ArraySample( const void * iData,
+                 const DataType &iDataType,
                  const Dimensions & iDims )
-      : m_bytes( iBytes ),
-        m_dimensions( iDims ) {}
+      : m_data( iData )
+      , m_dataType( iDataType )
+      , m_dimensions( iDims ) {}
 
-    //! Copy constructor - just a standard copy of the internal
-    //! elements
-    ArraySample( const ArraySample & iCopy )
-      : m_bytes( iCopy.m_bytes ),
-        m_dimensions( iCopy.m_dimensions ) {}
+    //! Using Default Copy Constructor
+    //! Using Default Assignment Operator
 
-    //! Assignment - standard copy,
-    //! returning *this.
-    ArraySample& operator=( const ArraySample & iCopy )
-    {
-        m_bytes = iCopy.m_bytes;
-        m_dimensions = iCopy.m_dimensions;
-        return *this;
-    }
-
-    //! Return the bytes
+    //! Return the data as a raw pointer
     //! ...
-    const ReadOnlyBytes& getBytes() const { return m_bytes; }
+    const void* getData() const { return m_data; }
+
+    //! Return the datatype.
+    //! ...
+    const DataType &getDataType() const { return m_dataType; }
 
     //! Return the dimensions
     //! ...
     const Dimensions& getDimensions() const { return m_dimensions; }
 
+    //! Return the "size", which is getDimensions().numPoints()
+    //! ...
+    size_t size() const { return m_dimensions.numPoints(); }
+
+    //! Compute the Key.
+    //! This is a calculation.
+    Key getKey() const;
+
+    //! Return if it is valid.
+    //! An empty ArraySample is valid.
+    //! however, an ArraySample that is empty and has a scalar
+    //! dimension is invalid. This is how we discriminate between
+    //! setting a sample of length zero (useful in particle systems)
+    //! vs. indicating an invalid sample (NULL).
+    bool valid() const
+    {
+        return ( m_dataType.getPod() != kUnknownPOD ) &&
+            !( m_data == NULL && m_dimensions.rank() < 1 );
+    }
+
+    //! Reset the array sample to an empty, invalid state.
+    //! Basically the same as calling *this = ArraySample();
+    void reset()
+    {
+        m_data = NULL;
+        m_dataType = DataType();
+        m_dimensions = Dimensions();
+    }
+
 private:
-    ReadOnlyBytes m_bytes;  
+    const void *m_data;
+    DataType m_dataType;
     Dimensions m_dimensions;
 };
+
+//-*****************************************************************************
+//! The ArraySamplePtr can be used not only to share this ArraySample, but
+//! also to manage the data referred to by the memory address in the pointer,
+//! by way of a custom deleter. In this manner, ArraySample and ArraySamplePtr
+//! can be used both as a reference to data and as an explicit ownership of
+//! data. This greatly reduces the redundancy of this library's code.
+typedef boost::shared_ptr<ArraySample> ArraySamplePtr;
+
+//-*****************************************************************************
+//! When creating an actual buffer for reading an array sample into,
+//! we need to allocate an array of some number of bytes, and then delete
+//! it with a special deleter. This function will return an array sample
+//! that is managed in this way.
+//! Dimensions tells us how many instances of the DataType to create
+//! DataType tells us what the instance is - and this works for
+//! pretty much every case, including std::string and std::wstring.
+ArraySamplePtr AllocateArraySample( const DataType &iDtype,
+                                    const Dimensions &iDims );
+
+//-*****************************************************************************
+//-*****************************************************************************
+//-*****************************************************************************
+// HELPER STUFF!
+//-*****************************************************************************
+//-*****************************************************************************
+//-*****************************************************************************
+
+//-*****************************************************************************
+template <class T>
+struct TArrayDeleter
+{
+    void operator()( void *memory ) const
+    {
+        ArraySample *arraySample = static_cast<ArraySample*>( memory );
+        if ( arraySample )
+        {
+            T *data = reinterpret_cast<T*>(
+                const_cast<void*>( arraySample->getData() ) );
+
+            // Delete[] NULL is okay.
+            delete[] data;
+        }
+        delete arraySample;
+    }
+};
+
+//-*****************************************************************************
+template <class T>
+ArraySamplePtr TAllocateArraySample( size_t iDataTypeExtent,
+                                     const Dimensions &iDims )
+{
+    DataType dtype( PODTraitsFromType<T>::pod_enum, iDataTypeExtent );
+    size_t numPODs = iDims.numPoints() * iDataTypeExtent;
+    if ( numPODs > 0 )
+    {
+        T *data = new T[numPODs];
+        ArraySamplePtr ret(
+            new ArraySample( reinterpret_cast<const void *>( data ),
+                             dtype, iDims ),
+            TArrayDeleter<T>() );
+        return ret;
+    }
+    else
+    {
+        ArraySamplePtr ret(
+            new ArraySample( ( const void * )NULL,
+                             dtype, iDims ) );
+        return ret;
+    }
+}
 
 } // End namespace v1
 } // End namespace AbcCoreAbstract

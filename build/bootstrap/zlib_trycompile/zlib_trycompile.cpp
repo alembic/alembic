@@ -19,6 +19,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <assert.h>
 #include "zlib.h"
@@ -178,34 +179,64 @@ void zerr(int ret)
     }
 }
 
-/* compress or decompress from stdin to stdout */
+/* Open a testfile and write Testing 1-2-3 to it, then compress is, then open the compressed file and write it to testing_out */ 
 int main(int argc, char **argv)
 {
-    int ret;
+    int ret = 1;
 
     /* avoid end-of-line conversions */
     SET_BINARY_MODE(stdin);
     SET_BINARY_MODE(stdout);
 
-    /* do compression if no arguments */
-    if (argc == 1) {
-        ret = def(stdin, stdout, Z_DEFAULT_COMPRESSION);
-        if (ret != Z_OK)
-            zerr(ret);
-        return ret;
+    FILE *fi, *fo;
+
+    fi = fopen("testfile", "w+");
+    if (fi != NULL) {
+      fputs("Testing 1-2-3\n",fi);
+      fclose(fi);
     }
 
-    /* do decompression if -d specified */
-    else if (argc == 2 && strcmp(argv[1], "-d") == 0) {
-        ret = inf(stdin, stdout);
+    fi = fopen("testfile", "r");
+    if (fi != NULL) {
+      fo = fopen("testfile.zip", "w+");
+      if (fo != NULL) {
+        ret = def(fi, fo, Z_DEFAULT_COMPRESSION);
+        fclose(fi);
+        fclose(fo);
         if (ret != Z_OK)
             zerr(ret);
-        return ret;
+        printf("Successly compressed testfile to testfile.zip!\n");
+        unlink("testfile");
+      } else {
+        fclose(fi);
+        unlink("testfile");
+        printf("Error opening testfile.zip for writing\n");
+      }
+    } else {
+      printf("Error opening testfile for reading\n");
     }
 
-    /* otherwise, report usage */
-    else {
-        fputs("zpipe usage: zpipe [-d] < source > dest\n", stderr);
-        return 1;
+    fi = fopen("testfile.zip", "r");
+    if (fi != NULL) {
+      fo = fopen("testfile_out", "w+");
+      if (fo != NULL) {
+        ret = inf(fi, fo);
+        fclose(fi);
+        fclose(fo);
+        if (ret != Z_OK)
+            zerr(ret);
+        printf("Successly decompressed testfile.zip to testfile_out!\n");
+        unlink("testfile.zip");
+        unlink("testfile_out");
+      } else {
+        fclose(fi);
+        unlink("testfile_out");
+        printf("Error opening testfile_out for writing\n");
+      }
+    } else {
+      printf("Error opening testfile.zip for reading\n");
     }
+
+    return ret;
 }
+

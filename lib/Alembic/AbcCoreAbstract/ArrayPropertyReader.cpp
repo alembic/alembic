@@ -46,38 +46,6 @@ ArrayPropertyReader::~ArrayPropertyReader()
     // Nothing
 }
 
-//-*****************************************************************************
-PropertyType ArrayPropertyReader::getPropertyType() const
-{
-    return kArrayProperty;
-}
-
-
-//-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-SimplePropertyReaderPtr ArrayPropertyReader::asSimple()
-{
-    SimplePropertyReaderPtr sptr =
-        boost::dynamic_pointer_cast<SimplePropertyReader,
-        BasePropertyReader>( asBase() );
-    SimplePropertyReader *simpleThis = ( SimplePropertyReader * )this;
-    ABCA_ASSERT( sptr.get() == simpleThis,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
-}
-
-//-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-ArrayPropertyReaderPtr ArrayPropertyReader::asArray()
-{
-    ArrayPropertyReaderPtr sptr =
-        boost::dynamic_pointer_cast<ArrayPropertyReader,
-        BasePropertyReader>( asBase() );
-    ABCA_ASSERT( sptr.get() == this,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
-}
-
 } // End namespace v1
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

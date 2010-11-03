@@ -42,10 +42,12 @@ namespace v1 {
 
 //-*****************************************************************************
 // static instancing
-const size_t TimeSamplingType::ACYCLIC_NUM_SAMPLES =
-    std::numeric_limits<Alembic::Util::uint32_t>::max();
+const uint32_t TimeSamplingType::ACYCLIC_NUM_SAMPLES =
+    std::numeric_limits<uint32_t>::max();
+
+// Not all the way to the max.
 const chrono_t TimeSamplingType::ACYCLIC_TIME_PER_CYCLE =
-    std::numeric_limits<Alembic::Util::float32_t>::max();
+    std::numeric_limits<chrono_t>::max() / 10.0;
 
 
 } // End namespace v1

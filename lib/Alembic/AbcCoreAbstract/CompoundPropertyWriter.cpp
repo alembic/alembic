@@ -35,6 +35,8 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreAbstract/CompoundPropertyWriter.h>
+#include <Alembic/AbcCoreAbstract/ScalarPropertyWriter.h>
+#include <Alembic/AbcCoreAbstract/ArrayPropertyWriter.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -47,21 +49,27 @@ CompoundPropertyWriter::~CompoundPropertyWriter()
 }
 
 //-*****************************************************************************
-PropertyType CompoundPropertyWriter::getPropertyType() const
+BasePropertyWriterPtr
+CompoundPropertyWriter::getProperty( size_t i )
 {
-    return kCompoundProperty;
+    const PropertyHeader &header = getPropertyHeader( i );
+    return getProperty( header.getName() );
 }
 
 //-*****************************************************************************
-// Must use dynamic cast for subtle reasons.
-CompoundPropertyWriterPtr CompoundPropertyWriter::asCompound()
+BasePropertyWriterPtr
+CompoundPropertyWriter::createProperty( const PropertyHeader & iHeader )
 {
-    CompoundPropertyWriterPtr sptr =
-        boost::dynamic_pointer_cast<CompoundPropertyWriter,
-        BasePropertyWriter>( asBase() );
-    ABCA_ASSERT( sptr.get() == this,
-                 "Corrupt shared pointer dynamic cast" );
-    return sptr;
+    switch ( iHeader.getPropertyType() )
+    {
+    default:
+    case kScalarProperty:
+        return createScalarProperty( iHeader );
+    case kArrayProperty:
+        return createArrayProperty( iHeader );
+    case kCompoundProperty:
+        return createCompoundProperty( iHeader );
+    }
 }
 
 } // End namespace v1
