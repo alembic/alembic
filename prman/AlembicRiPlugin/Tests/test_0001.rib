@@ -1,0 +1,25 @@
+##RenderMan RIB
+version 3.04
+
+ShadingInterpolation "smooth"
+ShadingRate 0.5
+Quantize "rgba" 0 0 0 0
+Display "AlembicRiPlugin_Test_0001.exr" "openexr" "rgba"
+PixelSamples 13 13
+
+Format 800 600 1
+Clipping 11.950501 28.854918
+Projection "perspective" "fov" [45.000000]
+Scale 1 1 -1
+Scale 1.000000 1.000000 1.000000
+Rotate -0.000000 0 0 1
+Rotate -14.000000 1 0 0
+Rotate 7.500000 0 1 0
+Translate 1.998466 -27.393841 -25.922764
+
+WorldBegin
+
+Procedural "DynamicLoad" ["AlembicRiPlugin"
+"assetName=/home/chorvath/abc/angel.abc;objectName=Polygonal_Model_1;fps=24;"] [-1e6 1e6 -1e6 1e6 -1e6 1e6]
+
+WorldEnd
