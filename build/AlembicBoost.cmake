@@ -61,7 +61,7 @@
 # For more info read:
 # /usr/share/cmake-2.8.0/share/cmake-2.8/Modules/FindBoost.cmake (or equivalent path on your O/S)
 
-SET(Boost_DEBUG TRUE)
+#SET(Boost_DEBUG TRUE)
 
 IF(DEFINED BOOST_INCLUDEDIR)
     MESSAGE(STATUS "Using BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}" )
@@ -111,11 +111,11 @@ SET( Boost_USE_MULTITHREADED TRUE )
 
 IF ( ${CMAKE_HOST_UNIX} )
     SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" )
-    FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options REQUIRED)
+    FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options thread REQUIRED)
 ELSE()
   IF ( ${CMAKE_HOST_WIN32} )
     SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" )
-    FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options REQUIRED)
+    FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options thread REQUIRED)
   ELSE()
     MESSAGE( ERROR "BOOST: This platform is not supported yet" )
   ENDIF()
@@ -126,6 +126,20 @@ ENDIF()
 # Wrap it all ups
 #-******************************************************************************
 #-******************************************************************************
+IF ( BOOST_FOUND )
+  SET( Boost_FOUND TRUE )
+ENDIF()
+
+IF ( DEFINED BOOST_VERSION )
+  SET( Boost_VERSION ${BOOST_VERSION} )
+ENDIF()
+
+IF ( DEFINED Boost_VERSION )
+  SET( BOOST_VERSION ${Boost_VERSION} )
+ENDIF()
+
+MESSAGE( STATUS "BOOST_VERSION: ${BOOST_VERSION}" )
+
 IF (Boost_FOUND)
   IF( Boost_VERSION LESS 104200 )
     MESSAGE(FATAL_ERROR "FOUND INCORRECT BOOST VERSION: ${Boost_LIB_VERSION}")
