@@ -222,7 +222,7 @@ def configureCMakeBoost( cmake_args ):
     except IndexError:
         pass
 
-    cmake_cmd='cmake --debug-trycompile -U BOOTSTRAP_* -D BOOTSTRAP_MODE:INTERNAL=TRUE -D BOOTSTRAP_BOOST:INTERNAL=TRUE -UBoost_* -UBOOST_* %s %s' %\
+    cmake_cmd='cmake --debug-trycompile -U BOOTSTRAP_* -D BOOTSTRAP_MODE:INTERNAL=TRUE -D BOOTSTRAP_BOOST:INTERNAL=TRUE -UBoost_* -UBOOST_* -UALEMBIC_BOOST_FOUND %s %s' %\
         (cmake_extra_args, srcdir )
 
     print "Executing CMake Boost configure command:\n%s" % cmake_cmd

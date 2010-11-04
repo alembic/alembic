@@ -185,6 +185,12 @@ MESSAGE( STATUS "OpenGL Libraries: ${ALEMBIC_GL_LIBS}" )
 # Include boost
 INCLUDE( "./build/AlembicBoost.cmake" )
 IF ( NOT ALEMBIC_BOOST_FOUND )
+  IF( Boost_FOUND AND (DEFINED Boost_VERSION) AND (NOT ${Boost_VERSION} LESS 104200 ) )
+    SET( ALEMBIC_BOOST_FOUND 1 )
+  ENDIF()
+ENDIF()
+
+IF ( NOT ALEMBIC_BOOST_FOUND )
   IF( Boost_FOUND )
     MESSAGE( ERROR "Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} found. Require 1.42.0 or greater.")
   ELSE()
