@@ -42,14 +42,14 @@
 #include <Alembic/GLUtil/All.h>
 #include <Alembic/Util/All.h>
 
-#include <OpenEXR/ImathMath.h>
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathMatrix.h>
-#include <OpenEXR/ImathBox.h>
-#include <OpenEXR/ImathQuat.h>
-#include <OpenEXR/ImathColor.h>
-#include <OpenEXR/ImathFun.h>
-#include <OpenEXR/ImathBoxAlgo.h>
+#include <ImathMath.h>
+#include <ImathVec.h>
+#include <ImathMatrix.h>
+#include <ImathBox.h>
+#include <ImathQuat.h>
+#include <ImathColor.h>
+#include <ImathFun.h>
+#include <ImathBoxAlgo.h>
 
 #include <boost/format.hpp>
 #include <boost/preprocessor/stringize.hpp>

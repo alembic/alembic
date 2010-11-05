@@ -54,8 +54,8 @@ ENDIF()
 
 # Declare the version
 SET( PROJECT_VERSION_MAJOR 0 )
-SET( PROJECT_VERSION_MINOR 1 )
-SET( PROJECT_VERSION_PATCH 1 )
+SET( PROJECT_VERSION_MINOR 9 )
+SET( PROJECT_VERSION_PATCH 0 )
 SET( PROJECT_VERSION
      ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
 SET( VERSION ${PROJECT_VERSION} )
@@ -126,8 +126,6 @@ IF(BUILD_TESTING)
   MARK_AS_ADVANCED(BUILDNAME)
 ENDIF(BUILD_TESTING)
 
-# A macro should be added for Linux that adds -fPIC to libraries that
-# are DSO.
 IF(UNIX AND NOT WIN32)
   FIND_PROGRAM(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin )
   IF(CMAKE_UNAME)
@@ -139,6 +137,10 @@ IF(UNIX AND NOT WIN32)
     ENDIF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
   ENDIF(CMAKE_UNAME)
 ENDIF(UNIX AND NOT WIN32)
+
+IF ( ${DARWIN} )
+  ADD_DEFINITIONS( -fPIC )
+ENDIF()
 
 IF(BOOTSTRAP_MODE)
 
@@ -172,7 +174,7 @@ ELSE()
   SET( ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
 ENDIF()
 
-MESSAGE( STATUS, "OpenGL Libraries: ${ALEMBIC_GL_LIBS}" )
+MESSAGE( STATUS "OpenGL Libraries: ${ALEMBIC_GL_LIBS}" )
 
 #-******************************************************************************
 #-******************************************************************************
@@ -182,12 +184,19 @@ MESSAGE( STATUS, "OpenGL Libraries: ${ALEMBIC_GL_LIBS}" )
 
 # Include boost
 INCLUDE( "./build/AlembicBoost.cmake" )
-IF (NOT ALEMBIC_BOOST_FOUND)
-  IF(Boost_FOUND)
-    MESSAGE(FATAL_ERROR "Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} found. Require 1.42.0. Check your BOOST_ROOT environment variable.")
-  ELSE()
-    MESSAGE(FATAL_ERROR "Boost version 1.42.0 not found. Check your BOOST_ROOT environment variable.")
+IF ( NOT ALEMBIC_BOOST_FOUND )
+  IF( Boost_FOUND AND (DEFINED Boost_VERSION) AND (NOT ${Boost_VERSION} LESS 104200 ) )
+    SET( ALEMBIC_BOOST_FOUND 1 )
   ENDIF()
+ENDIF()
+
+IF ( NOT ALEMBIC_BOOST_FOUND )
+  IF( Boost_FOUND )
+    MESSAGE( ERROR "Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} found. Require 1.42.0 or greater.")
+  ELSE()
+    MESSAGE( ERROR "Boost not found." )
+  ENDIF()
+  MESSAGE( FALTAL_ERROR "Please see comments in ${ALEMBIC_SOURCE_DIR}/build/AlembicBoost.cmake for possible solutions.")
 ENDIF()
 
 INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )

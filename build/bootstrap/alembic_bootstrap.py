@@ -160,6 +160,25 @@ def validate_path( p, wantdir=False ):
         return p.exists() and not p.isdir()
 
 ##-*****************************************************************************
+def ask_to_exit( message ):
+    print
+    print "Warning!  Something went wrong:\n%s" % message
+    print
+
+    while True:
+        answer = raw_input( "Would you like to abort the bootstrap and try fixing it manually? Y/n: " )
+        if answer == 'Y' or answer == 'y' or answer == '':
+            print "OK, exiting the bootstrapping process. Sorry for the difficulty!"
+            sys.exit( -1 )
+        elif answer == 'n' or answer == 'N':
+            print "OK, pressing on regardless. FYI, your build may not succeed."
+            break
+        else:
+            print "Please enter 'y' or 'n'."
+
+    return
+
+##-*****************************************************************************
 def find_path( magic_file, default=False ):
     input_string = "Enter the path to %s: " % magic_file
 
@@ -203,7 +222,7 @@ def configureCMakeBoost( cmake_args ):
     except IndexError:
         pass
 
-    cmake_cmd='cmake --debug-trycompile -U BOOTSTRAP_* -D BOOTSTRAP_MODE:INTERNAL=TRUE -D BOOTSTRAP_BOOST:INTERNAL=TRUE -UBoost_* -UBOOST_* %s %s' %\
+    cmake_cmd='cmake --debug-trycompile -U BOOTSTRAP_* -D BOOTSTRAP_MODE:INTERNAL=TRUE -D BOOTSTRAP_BOOST:INTERNAL=TRUE -UBoost_* -UBOOST_* -UALEMBIC_BOOST_FOUND %s %s' %\
         (cmake_extra_args, srcdir )
 
     print "Executing CMake Boost configure command:\n%s" % cmake_cmd
@@ -214,10 +233,10 @@ def configureCMakeBoost( cmake_args ):
     for line in cmake_status.stdout.readlines():
       print line.strip()
 
-    for line in cmake_status.stderr.readlines():
-      print line.strip()
+    errors = ''.join( cmake_status.stderr.readlines() )
+    print errors
 
-    return status
+    return status, errors
 
 ##-*****************************************************************************
 def configureCMakeZlib( cmake_args ):
@@ -245,10 +264,10 @@ def configureCMakeZlib( cmake_args ):
     for line in cmake_status.stdout.readlines():
       print line.strip()
 
-    for line in cmake_status.stderr.readlines():
-      print line.strip()
+    errors = ''.join( cmake_status.stderr.readlines() )
+    print errors
 
-    return status
+    return status, errors
 
 ##-*****************************************************************************
 def configureCMakeHDF5( cmake_args ):
@@ -313,10 +332,10 @@ def configureCMakeHDF5( cmake_args ):
     for line in cmake_status.stdout.readlines():
       print line.strip()
 
-    for line in cmake_status.stderr.readlines():
-      print line.strip()
+    errors = ''.join( cmake_status.stderr.readlines() )
+    print errors
 
-    return status
+    return status, errors
 
 ##-*****************************************************************************
 def configureCMakeIlmbase( cmake_args, useRoot = False ):
@@ -366,10 +385,10 @@ def configureCMakeIlmbase( cmake_args, useRoot = False ):
     for line in cmake_status.stdout.readlines():
       print line.strip()
 
-    for line in cmake_status.stderr.readlines():
-      print line.strip()
+    errors = ''.join( cmake_status.stderr.readlines() )
+    print errors
 
-    return status
+    return status, errors
 
 ##-*****************************************************************************
 def find_boost_include( cmakecache = None ):
@@ -714,12 +733,11 @@ Boost with STATIC, VERSIONED, and MULTITHREADED options turned on.
         print "Makesystem generator %s: " % (options.generator)
         cmake_args.append(options.generator)
 
-    boost_status = configureCMakeBoost( cmake_args )
+    boost_status, errors = configureCMakeBoost( cmake_args )
 
     if boost_status != 0:
         print "Could not successfully build a Boost test executable!"
-        print "Boost not found?"
-        sys.exit( boost_status )
+        ask_to_exit( errors )
 
     return boost_status, boost_include_dir, boost_program_options_library
 
@@ -746,12 +764,11 @@ def configure_zlib( options, srcdir, cmakecache ):
         print "Makesystem generator %s: " %(options.generator)
         cmake_args.append( options.generator )
 
-    zlib_status = configureCMakeZlib( cmake_args )
+    zlib_status, errors = configureCMakeZlib( cmake_args )
 
     if zlib_status != 0:
         print "Could not successfully build a zlib test executable!"
-        print "Zlib not found?"
-        sys.exit( zlib_status )
+        ask_to_exit( errors )
 
     return zlib_status, zlib_include_dir, zlib_library
 
@@ -777,12 +794,11 @@ def configure_hdf5( options, srcdir, cmakecache ):
         print "Makesystem generator %s: " %(options.generator)
         cmake_args.append(options.generator)
 
-    hdf5_status = configureCMakeHDF5( cmake_args )
+    hdf5_status, errors = configureCMakeHDF5( cmake_args )
 
     if hdf5_status != 0:
         print "Could not successfully build an HDF5 test executable!"
-        print "HDF5 not found?"
-        sys.exit( hdf5_status )
+        ask_to_exit( errors )
 
     return hdf5_status, hdf5_include_dir, hdf5_hdf5_library
 
@@ -808,12 +824,11 @@ def configure_ilmbase( options, srcdir, cmakecache ):
         print "Makesystem generator %s: " %(options.generator)
         cmake_args.append(options.generator)
 
-    ilmbase_status = configureCMakeIlmbase( cmake_args )
+    ilmbase_status, errors = configureCMakeIlmbase( cmake_args )
 
     if ilmbase_status != 0:
         print "Could not successfully build an ilmbase test executable!"
-        print "ilmbase not found?"
-        sys.exit( ilmbase_status )
+        ask_to_exit( errors )
 
     return ilmbase_status, ilmbase_include_dir, ilmbase_imath_library
 
