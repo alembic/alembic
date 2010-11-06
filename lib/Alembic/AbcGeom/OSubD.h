@@ -44,6 +44,10 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+// for default values for int scalar properties here
+const int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( -333 );
+
+//-*****************************************************************************
 class OSubDSchema : public Abc::OSchema<SubDSchemaInfo>
 {
 public:
@@ -83,9 +87,9 @@ public:
           : m_positions( iPositions )
           , m_faceIndices( iFaceIndices )
           , m_faceCounts( iFaceCounts )
-          , m_faceVaryingInterpolateBoundary( 0 )
-          , m_faceVaryingPropagateCorners( 0 )
-          , m_interpolateBoundary( 0 )
+          , m_faceVaryingInterpolateBoundary( ABC_GEOM_SUBD_NULL_INT_VALUE )
+          , m_faceVaryingPropagateCorners( ABC_GEOM_SUBD_NULL_INT_VALUE )
+          , m_interpolateBoundary( ABC_GEOM_SUBD_NULL_INT_VALUE )
           , m_creaseIndices     ( iCreaseIndices )
           , m_creaseLengths     ( iCreaseLengths )
           , m_creaseSharpnesses ( iCreaseSharpnesses )
@@ -110,17 +114,17 @@ public:
 
 
         // misc subd stuff
-        int getFaceVaryingInterpolateBoundary() const
+        int32_t getFaceVaryingInterpolateBoundary() const
         { return m_faceVaryingInterpolateBoundary; }
         void setFaceVaryingInterpolateBoundary( int i )
         { m_faceVaryingInterpolateBoundary = i; }
 
-        int getFaceVaryingPropagateCorners() const
+        int32_t getFaceVaryingPropagateCorners() const
         { return m_faceVaryingPropagateCorners; }
         void setFaceVaryingPropagateCorners( int i )
         { m_faceVaryingPropagateCorners = i; }
 
-        int getInterpolateBoundary() const
+        int32_t getInterpolateBoundary() const
         { return m_interpolateBoundary; }
         void setInterpolateBoundary( int i )
         { m_interpolateBoundary = i; }
@@ -216,9 +220,9 @@ public:
         Abc::Int32ArraySample m_faceIndices;
         Abc::Int32ArraySample m_faceCounts;
 
-        int m_faceVaryingInterpolateBoundary;
-        int m_faceVaryingPropagateCorners;
-        int m_interpolateBoundary;
+        int32_t m_faceVaryingInterpolateBoundary;
+        int32_t m_faceVaryingPropagateCorners;
+        int32_t m_interpolateBoundary;
 
         // Creases
         Abc::Int32ArraySample    m_creaseIndices;
