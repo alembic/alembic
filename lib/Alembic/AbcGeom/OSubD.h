@@ -45,7 +45,7 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 // for default values for int scalar properties here
-const int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( -333 );
+const int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( INT_MIN / 2 );
 
 //-*****************************************************************************
 class OSubDSchema : public Abc::OSchema<SubDSchemaInfo>

@@ -64,13 +64,13 @@ public:
         Abc::Int32ArraySamplePtr getFaceCounts() const { return m_faceCounts; }
 
         // misc subd stuff
-        int getFaceVaryingInterpolateBoundary() const
+        int32_t getFaceVaryingInterpolateBoundary() const
         { return m_faceVaryingInterpolateBoundary; }
 
-        int getFaceVaryingPropagateCorners() const
+        int32_t getFaceVaryingPropagateCorners() const
         { return m_faceVaryingPropagateCorners; }
 
-        int getInterpolateBoundary() const
+        int32_t getInterpolateBoundary() const
         { return m_interpolateBoundary; }
 
         // creases
@@ -134,9 +134,9 @@ public:
         Abc::Int32ArraySamplePtr m_faceIndices;
         Abc::Int32ArraySamplePtr m_faceCounts;
 
-        int m_faceVaryingInterpolateBoundary;
-        int m_faceVaryingPropagateCorners;
-        int m_interpolateBoundary;
+        int32_t m_faceVaryingInterpolateBoundary;
+        int32_t m_faceVaryingPropagateCorners;
+        int32_t m_interpolateBoundary;
 
         // Creases
         Abc::Int32ArraySamplePtr    m_creaseIndices;
