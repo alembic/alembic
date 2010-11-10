@@ -84,7 +84,6 @@ public:
 private:
     std::string m_fileName;
     hid_t m_file;
-    hid_t m_group;
 
     TopOrImpl *m_top;
 

@@ -83,7 +83,6 @@ private:
     std::string m_fileName;
     AbcA::MetaData m_metaData;
     hid_t m_file;
-    hid_t m_group;
 
     // This won't create a circular reference because the
     // TopObjectWriter we create is special and doesn't like back up

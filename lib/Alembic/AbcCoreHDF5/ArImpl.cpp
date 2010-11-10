@@ -47,39 +47,18 @@ ArImpl::ArImpl( const std::string &iFileName,
                 AbcA::ReadArraySampleCachePtr iCache )
   : m_fileName( iFileName )
   , m_file( -1 )
-  , m_group( -1 )
   , m_readArraySampleCache( iCache )
 {
     // OPEN THE FILE!
-    hid_t faid = H5Pcreate( H5P_FILE_ACCESS );
-    if ( faid < 0 )
-    {
-        ABCA_THROW( "Could not create property access for fopen" );
-    }
-    H5Pset_libver_bounds( faid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST );
-    PlistCloser plistCloser( faid );
-    
     htri_t exi = H5Fis_hdf5( m_fileName.c_str() );
     ABCA_ASSERT( exi == 1, "Nonexistent File: " << m_fileName );
     
-    m_file = H5Fopen( m_fileName.c_str(), H5F_ACC_RDONLY, faid );
+    m_file = H5Fopen( m_fileName.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
     ABCA_ASSERT( m_file >= 0,
                  "Could not open file: " << m_fileName );
 
-    // OPEN THE ROOT GROUP!
-    m_group = H5Gopen2( m_file, "/", H5P_DEFAULT );
-    if ( m_group < 0 )
-    {
-        H5Fclose( m_file );
-        m_file = -1;
-        m_group = -1;
-        ABCA_THROW(
-            "Could not create root group in file: " << m_fileName
-            << " for reading" );
-    }
-    
     // Read the top object
-    m_top = new TopOrImpl( *this, m_group );
+    m_top = new TopOrImpl( *this, m_file );
 }
 
 //-*****************************************************************************
@@ -115,35 +94,31 @@ ArImpl::~ArImpl()
 {
     delete m_top;
     m_top = NULL;
-    
-    if ( m_group >= 0 )
-    {
-        H5Gclose( m_group );
-        m_group = -1;
-    }
-    
+
     if ( m_file >= 0 )
     {
-        int dsetCount = H5Fget_obj_count( m_file, H5F_OBJ_DATASET );
-        int grpCount = H5Fget_obj_count( m_file, H5F_OBJ_GROUP );
-        int dtypCount = H5Fget_obj_count( m_file, H5F_OBJ_DATATYPE );
-        int attrCount = H5Fget_obj_count( m_file, H5F_OBJ_ATTR );
-    
+        int dsetCount = H5Fget_obj_count( m_file,
+            H5F_OBJ_LOCAL | H5F_OBJ_DATASET);
+        int grpCount = H5Fget_obj_count( m_file,
+            H5F_OBJ_LOCAL | H5F_OBJ_GROUP );
+        int dtypCount = H5Fget_obj_count( m_file,
+            H5F_OBJ_LOCAL | H5F_OBJ_DATATYPE );
+        int attrCount = H5Fget_obj_count( m_file,
+            H5F_OBJ_LOCAL | H5F_OBJ_ATTR );
+
         int objCount = dsetCount + grpCount + dtypCount + attrCount;
-        
+
         if ( objCount != 0 )
         {
             std::string excStr =
                 ( boost::format(
-                      "Aw dang, man - I was all trying to close "
-                      "this HDF5 file, but there are still open objects.\n"
-                      "That sucks, man.\n"
-                      "Dsets: %d, Grps: %d, "
-                          "Dtyps: %d, Attrs: %d" )
-                      % dsetCount
-                      % grpCount
-                      % dtypCount
-                      % attrCount ).str();
+                      "Open HDF5 handles detected during reading:\n"
+                      "DataSets: %d, Groups: %d, "
+                      "DataTypes: %d, Attributes: %d" )
+                  % dsetCount
+                  % grpCount
+                  % dtypCount
+                  % attrCount ).str();
 
             m_file = -1;
             ABCA_THROW( excStr );

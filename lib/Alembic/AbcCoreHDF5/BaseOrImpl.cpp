@@ -153,14 +153,7 @@ BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
 
 //-*****************************************************************************
 void BaseOrImpl::createProtoObject( hid_t iGroup, const std::string &iName )
-{   
-#ifdef DEBUG
-    ABCA_ASSERT( SameObject( iGroup,  m_proto->getGroup() ),
-                 "Invalid group id in OrImpl::createProtoObject. "
-                 << "Given: " << iGroup << ", but expected: "
-                 << m_proto->getGroup() );
-#endif
-
+{
     ABCA_ASSERT( m_children.count( iName ) == 0,
                  "Creating multiple children named: " << iName );
 
