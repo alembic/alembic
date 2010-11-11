@@ -99,7 +99,6 @@ hid_t CreationOrderPlist();
 hid_t DsetGzipCreatePlist( const Dimensions &dims, int level );
 
 //-*****************************************************************************
-bool SameObject( hid_t idA, hid_t idB );
 bool EquivalentDatatypes( hid_t idA, hid_t idB );
 
 //-*****************************************************************************

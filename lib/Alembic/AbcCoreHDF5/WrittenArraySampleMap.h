@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreHDF5_WrittenArraySampleMap_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
+#include <Alembic/AbcCoreHDF5/HDF5Util.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -56,29 +57,19 @@ class WrittenArraySampleID
 public:
     WrittenArraySampleID()
       : m_sampleKey(),
-        m_objectLocationID( 0 ),
-        m_objectName( "" ) {}
+        m_objectLocationID( 0 ) {}
 
     WrittenArraySampleID( const AbcA::ArraySample::Key &iKey,
-                          hid_t iObjLocID,
-                          const std::string &iObjName )
+                          hid_t iObjLocID)
       : m_sampleKey( iKey ),
-        m_objectLocationID( iObjLocID ),
-        m_objectName( iObjName ) {}
+        m_objectLocationID( iObjLocID ) {}
 
     const AbcA::ArraySample::Key &getKey() const { return m_sampleKey; }
-    hid_t getObjectLocationID() const { return m_objectLocationID; }
-    const std::string &getObjectName() const { return m_objectName; }
+    hid_t getObjectLocationID() const { return m_objectLocationID.m_id; }
 
-    bool valid() const
-    {
-        return ( m_objectLocationID > 0 && m_objectName != "" );
-    }
-    
 private:
     AbcA::ArraySample::Key m_sampleKey;
-    hid_t m_objectLocationID;
-    std::string m_objectName;
+    DsetCloser m_objectLocationID;
 };
 
 //-*****************************************************************************

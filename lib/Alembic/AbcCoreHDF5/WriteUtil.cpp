@@ -378,8 +378,7 @@ WriteArray( WrittenArraySampleMap &iMap,
     
     ABCA_ASSERT( dsetId >= 0,
                  "WriteArray() Failed in dataset constructor" );
-    DsetCloser dsetCloser( dsetId );
-    
+
     // Write the data.
     if ( hasData )
     {
@@ -394,26 +393,8 @@ WriteArray( WrittenArraySampleMap &iMap,
     // still contain useful information.
     WriteDimensions( dsetId, "dims", dims );
 
-    // Store the full information necessary to recreate
-    // this as fileId and full path.
-    {
-        char buf[4096];
-        ssize_t len = H5Iget_name( dsetId, buf, 4096 );
-        std::vector<char> bufStrBuf( ( size_t )( len + 10 ) );
-        len = H5Iget_name( dsetId, &bufStrBuf.front(), len+1 );
-        std::string bufStr = ( const char * )( &bufStrBuf.front() );
-        ABCA_ASSERT( len > 0,
-                     "WriteArray() H5Iget_name failed." );
-
-        hid_t fileId = H5Iget_file_id( dsetId );
-        ABCA_ASSERT( fileId >= 0,
-                     "WriteArray() H5Iget_file_id failed." );
-
-        writeID.reset( new WrittenArraySampleID( iKey,
-                                                 fileId,
-                                                 bufStr ) );
-        iMap.store( writeID );
-    }
+    writeID.reset( new WrittenArraySampleID( iKey, dsetId ) );
+    iMap.store( writeID );
 
     // Return the reference.
     return writeID;
@@ -430,16 +411,14 @@ CopyWrittenArray( hid_t iGroup,
 
     // We have a reference. Create a link to it.
     herr_t status = H5Lcreate_hard( iRef->getObjectLocationID(),
-                                    iRef->getObjectName().c_str(),
+                                    ".",
                                     iGroup,
                                     iName.c_str(),
                                     H5P_DEFAULT,
                                     H5P_DEFAULT );
     ABCA_ASSERT( status >= 0,
-                 "WriteSlab() H5Lcreate_hard failed!" << std::endl
-                  << "Dset obj id: " << iRef->getObjectLocationID()
-                  << std::endl
-                  << "Dset obj name: " << iRef->getObjectName() << std::endl
+                 "H5Lcreate_hard failed!" << std::endl
+                  << "Dset obj id: " << iRef->getObjectLocationID() << std::endl
                   << "Link loc id: " << iGroup << std::endl
                   << "Link name: " << iName );
 }

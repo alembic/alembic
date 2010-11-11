@@ -143,46 +143,6 @@ bool EquivalentDatatypes( hid_t iA, hid_t iB )
 }
 
 //-*****************************************************************************
-bool SameObject( hid_t idA, hid_t idB )
-{
-    if ( idA == idB ) { return true; }
-    
-    H5I_type_t typeA = H5Iget_type( idA );
-    H5I_type_t typeB = H5Iget_type( idB );
-    if ( typeA == H5I_BADID || typeB == H5I_BADID ||
-         typeA != typeB )
-    {
-        std::cerr << "Bad types: " << typeA
-                  << ", " << typeB << std::endl;
-        return false;
-    }
-
-    ssize_t lenA = H5Iget_name( idA, NULL, 0 );
-    ssize_t lenB = H5Iget_name( idB, NULL, 0 );
-    if ( lenA == 0 || lenB == 0 || lenA != lenB )
-    {
-        std::cerr << "Bad sizes: " << lenA
-                  << ", " << lenB << std::endl;
-        return false;
-    }
-
-    std::vector<char> bufA( ( size_t )lenA + 1 );
-    char *cBufA = &bufA.front();
-    H5Iget_name( idA, cBufA, ( size_t )( lenA+1 ) );
-    
-    std::vector<char> bufB( ( size_t )lenB + 1 );
-    char *cBufB = &bufB.front();
-    H5Iget_name( idB, cBufB, ( size_t )( lenB+1 ) );
-
-    if ( strcmp( cBufA, cBufB ) != 0 )
-    {
-        return false;
-    }
-
-    return true;
-}
-
-//-*****************************************************************************
 bool GroupExists( hid_t iParent, const std::string &iName )
 {
     ABCA_ASSERT( iParent >= 0, "Invalid Parent in GroupExists" );
