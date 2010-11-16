@@ -81,7 +81,7 @@ void makeDeepHierarchy( OObject parent, const int level )
 }
 
 //-*****************************************************************************
-void readDeepHierarchy( IObject parent, const int level )
+void readDeepHierarchy( IObject parent, const int level, const IObject& orig )
 {
     if ( level > DEPTH )
     {
@@ -94,14 +94,25 @@ void readDeepHierarchy( IObject parent, const int level )
 
         TESTING_ASSERT( ret.second );
 
-        std::cout << fullName << std::endl << std::endl;
+        TESTING_ASSERT( fullName == parent.getFullName() );
+
+        // walk back up the tree until you find the first child object
+        // under the top object, and check that it's the one we started
+        // with.
+        IObject _p = parent;
+        while ( _p.getParent().getParent() )
+        {
+            _p = _p.getParent();
+        }
+
+        TESTING_ASSERT( _p.getFullName() == orig.getFullName() );
 
         return;
     }
 
     readDeepHierarchy( IObject( parent,
                                 boost::lexical_cast<std::string>( level ) ),
-                       level + 1 );
+                       level + 1, orig );
 }
 
 //-*****************************************************************************
@@ -131,8 +142,9 @@ void simpleTestIn( const std::string &iArchiveName )
 
     for ( int i = 0 ; i < NUM_TOP_CHILDREN ; i++ )
     {
-        IObject obj( archiveTop, boost::lexical_cast<std::string>( i ) );
-        readDeepHierarchy( obj, 0 );
+        std::string cname = boost::lexical_cast<std::string>( i );
+        IObject obj( archiveTop, cname );
+        readDeepHierarchy( obj, 0, obj  );
     }
 
     TESTING_ASSERT( PATHS.size() == NUM_TOP_CHILDREN );
