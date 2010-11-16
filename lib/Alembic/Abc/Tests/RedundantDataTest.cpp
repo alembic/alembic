@@ -134,6 +134,8 @@ void simpleTestIn( const std::string &iArchiveName )
         IObject obj( archiveTop, boost::lexical_cast<std::string>( i ) );
         readDeepHierarchy( obj, 0 );
     }
+
+    TESTING_ASSERT( PATHS.size() == NUM_TOP_CHILDREN );
 }
 
 //-*****************************************************************************
