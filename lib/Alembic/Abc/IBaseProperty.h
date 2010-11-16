@@ -217,6 +217,7 @@ IObject IBasePropertyT<PROP_PTR>::getObject()
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IBasePropertyT::getObject()" );
 
     return IObject( m_property->getObject(),
+                    kWrapExisting,
                     getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
