@@ -106,3 +106,7 @@ ADD_TEST( Abc_OctessenceBug16_TEST Abc_OctessenceBug16 )
 ADD_EXECUTABLE( Abc_CacheControlTest CacheControlTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_CacheControlTest ${TEST_LIBS} )
 ADD_TEST( Abc_CacheControl_TEST Abc_CacheControlTest )
+
+ADD_EXECUTABLE( Abc_RedundantDataPathsTest RedundantDataTest.cpp )
+TARGET_LINK_LIBRARIES( Abc_RedundantDataPathsTest ${TEST_LIBS} )
+ADD_TEST( Abc_RedundantDataPaths_TEST Abc_RedundantDataPathsTest )
