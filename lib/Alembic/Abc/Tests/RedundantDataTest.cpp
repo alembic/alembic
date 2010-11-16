@@ -53,12 +53,14 @@ static std::set<std::string> PATHS;
 static const int32_t NUM_TOP_CHILDREN = 100;
 static const int32_t DEPTH = 499;
 
+static const int32_t HIGHVAL = 200;
+
 typedef std::pair< std::set<std::string>::iterator, bool > PATH_PAIR;
 
 //-*****************************************************************************
 void makeIntArraySamp()
 {
-    for ( int32_t i = 0 ; i < 200 ; i++ )
+    for ( int32_t i = 0 ; i < HIGHVAL ; i++ )
     {
         intArraySamp.push_back( i );
     }
@@ -91,6 +93,12 @@ void readDeepHierarchy( IObject parent, const int level, const IObject& orig )
             iap.getObject().getFullName() );
 
         PATH_PAIR ret = PATHS.insert( fullName );
+
+        Int32ArraySamplePtr valPtr = iap.getValue();
+
+        TESTING_ASSERT( valPtr->get()[5] == 5 );
+        TESTING_ASSERT( valPtr->get()[99] == 99 );
+        TESTING_ASSERT( valPtr->size() == HIGHVAL );
 
         TESTING_ASSERT( ret.second );
 
