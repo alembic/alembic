@@ -94,11 +94,11 @@ void readDeepHierarchy( IObject parent, const int level, const IObject& orig )
 
         PATH_PAIR ret = PATHS.insert( fullName );
 
-        Int32ArraySamplePtr valPtr = iap.getValue();
+        Int32ArraySamplePtr sampPtr = iap.getValue();
 
-        TESTING_ASSERT( valPtr->get()[5] == 5 );
-        TESTING_ASSERT( valPtr->get()[99] == 99 );
-        TESTING_ASSERT( valPtr->size() == HIGHVAL );
+        TESTING_ASSERT( sampPtr->get()[5] == 5 );
+        TESTING_ASSERT( sampPtr->get()[99] == 99 );
+        TESTING_ASSERT( sampPtr->size() == HIGHVAL );
 
         TESTING_ASSERT( ret.second );
 
