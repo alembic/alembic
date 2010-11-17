@@ -226,6 +226,7 @@ OObject OBasePropertyT<PROP_PTR>::getObject()
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OBaseProperty::getObject()" );
 
     return OObject( m_property->getObject(),
+                    kWrapExisting,
                     getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();

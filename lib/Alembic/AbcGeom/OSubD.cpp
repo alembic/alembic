@@ -41,6 +41,20 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+inline void SetPropUsePrevIfNull( Abc::OInt32Property iProp, int32_t iVal,
+                                  const Abc::OSampleSelector &iSS )
+{
+    if ( iVal != ABC_GEOM_SUBD_NULL_INT_VALUE )
+    {
+        iProp.set( iVal, iSS );
+    }
+    else
+    {
+        iProp.setFromPrevious( iSS );
+    }
+}
+
+//-*****************************************************************************
 void OSubDSchema::set( const Sample &iSamp,
                        const Abc::OSampleSelector &iSS  )
 {
@@ -59,11 +73,35 @@ void OSubDSchema::set( const Sample &iSamp,
         m_faceIndices.set( iSamp.getFaceIndices(), iSS );
         m_faceCounts.set( iSamp.getFaceCounts(), iSS );
 
-        m_faceVaryingInterpolateBoundary.set(
-            iSamp.getFaceVaryingInterpolateBoundary(), iSS );
-        m_faceVaryingPropagateCorners.set(
-            iSamp.getFaceVaryingPropagateCorners(), iSS );
-        m_interpolateBoundary.set( iSamp.getInterpolateBoundary(), iSS );
+        if ( iSamp.getFaceVaryingInterpolateBoundary() ==
+             ABC_GEOM_SUBD_NULL_INT_VALUE )
+        {
+            m_faceVaryingInterpolateBoundary.set( 0, iSS );
+        }
+        else
+        {
+            m_faceVaryingInterpolateBoundary.set(
+                iSamp.getFaceVaryingInterpolateBoundary(), iSS );
+        }
+        if ( iSamp.getFaceVaryingPropagateCorners() ==
+             ABC_GEOM_SUBD_NULL_INT_VALUE )
+        {
+            m_faceVaryingPropagateCorners.set( 0, iSS );
+        }
+        else
+        {
+            m_faceVaryingPropagateCorners.set(
+                iSamp.getFaceVaryingPropagateCorners(), iSS );
+        }
+        if ( iSamp.getInterpolateBoundary() ==
+             ABC_GEOM_SUBD_NULL_INT_VALUE )
+        {
+            m_interpolateBoundary.set( 0, iSS );
+        }
+        else
+        {
+            m_interpolateBoundary.set( iSamp.getInterpolateBoundary(), iSS );
+        }
 
         m_subdScheme.set( iSamp.getSubdivisionScheme(), iSS );
 
