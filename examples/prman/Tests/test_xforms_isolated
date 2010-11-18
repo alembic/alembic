@@ -1,0 +1,2 @@
+#!/bin/csh
+$BUILD_DIR/examples/prman/Tests/testbed $BUILD_DIR/examples/prman/Procedural/Procedural.so -filename testdata/xforms.abc -frame 1002 -shutterOpen -0.25 -shutterClose 0.25 -objectpath /root/c
