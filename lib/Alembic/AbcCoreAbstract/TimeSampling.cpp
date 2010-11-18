@@ -39,6 +39,8 @@
 #include <Alembic/AbcCoreAbstract/DataType.h>
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 
+#include <ImathMath.h>
+
 namespace Alembic {
 namespace AbcCoreAbstract {
 namespace v1 {
@@ -156,8 +158,7 @@ chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
 std::pair<index_t, chrono_t>
 TimeSampling::getFloorIndex( chrono_t iTime ) const
 {
-    //ABCA_ASSERT( m_numSamples > 0,
-    //             "It is invalid to call getFloorIndex() with no samples." );
+    //! Return the index of the sampled time that is <= iTime
 
     if ( m_numSamples < 1 ) { return std::pair<index_t, chrono_t>( 0, 0.0 ); }
 
@@ -182,7 +183,6 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
 
     if ( m_timeSamplingType.isAcyclic() )
     {
-        // This is the hardest one.
         // For now, just loop.
         //
         // For later, use binary search of sorted array.
@@ -239,7 +239,6 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
             assert( sampTime < iTime );
         }
 
-        // Return the pair.
         return std::pair<index_t, chrono_t>( sampIdx, sampTime );
     }
     else
@@ -249,11 +248,30 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
         const size_t N = m_timeSamplingType.getNumSamplesPerCycle();
         const chrono_t period = m_timeSamplingType.getTimePerCycle();
         const chrono_t elapsedTime = iTime - minTime;
-        const size_t numCycles = ( size_t )floor( elapsedTime / period );
-        const chrono_t cycleBlockTime = numCycles * period;
-        assert( elapsedTime >= cycleBlockTime );
+
+        double rawNumCycles = elapsedTime / period;
+        double rawNumCyclesIntregal;
+        double rawNumCyclesFractional = modf( rawNumCycles,
+                                              &rawNumCyclesIntregal );
+
+        const double tolerance = 0.0001;
+
+        if ( Imath::equalWithAbsError( 0.0, 1.0 - rawNumCyclesFractional,
+                                       tolerance ) )
+        {
+            rawNumCyclesIntregal += 1;
+        }
+
+        const size_t numCycles = ( size_t )rawNumCyclesIntregal;
+        const chrono_t cycleBlockTime = (numCycles * period);
+
+
+        assert( elapsedTime >= cycleBlockTime ||
+                Imath::equalWithAbsError( 0.0, cycleBlockTime - elapsedTime,
+                                          tolerance ) );
         const chrono_t rem = iTime - cycleBlockTime;
-        assert( rem < period );
+
+        assert( rem < period + minTime );
         const size_t cycleBlockIndex = N * numCycles;
 
         index_t sampIdx = 0;
@@ -288,8 +306,10 @@ getCeilIndexHelper( const TimeSampling *iThat, const chrono_t iTime,
                     const size_t iFloorIndex, const chrono_t iFloorTime,
                     const size_t iMaxIndex )
 {
+    const double tolerance = 0.0001;
 
-    if ( iFloorIndex == iMaxIndex || iFloorTime == iTime )
+    if ( iFloorIndex == iMaxIndex ||
+         Imath::equalWithAbsError( iFloorTime, iTime, tolerance ) )
     {
         return std::pair<index_t, chrono_t>( iFloorIndex, iFloorTime );
     }
@@ -304,8 +324,7 @@ getCeilIndexHelper( const TimeSampling *iThat, const chrono_t iTime,
 std::pair<index_t, chrono_t>
 TimeSampling::getCeilIndex( chrono_t iTime ) const
 {
-    //ABCA_ASSERT( m_numSamples > 0,
-    //             "It is invalid to call getCeilIndex() with no samples." );
+    //! Return the index of the sampled time that is >= iTime
 
     if ( m_numSamples < 1 ) { return std::pair<index_t, chrono_t>( 0, 0.0 ); }
 
@@ -342,8 +361,9 @@ TimeSampling::getCeilIndex( chrono_t iTime ) const
 std::pair<index_t, chrono_t>
 TimeSampling::getNearIndex( chrono_t iTime ) const
 {
-    //ABCA_ASSERT( m_numSamples > 0,
-    //             "It is invalid to call getNearIndex() with no samples." );
+    //! Return the index of the sampled time that is:
+    //! (iTime - floorTime < ceilTime - iTime) ? getFloorIndex( iTime )
+    //! : getCeilIndex( iTime );
 
     if ( m_numSamples < 1 ) { return std::pair<index_t, chrono_t>( 0, 0.0 ); }
 
@@ -372,8 +392,6 @@ TimeSampling::getNearIndex( chrono_t iTime ) const
     }
 
     std::pair<index_t, chrono_t> floorPair = this->getFloorIndex( iTime );
-    //std::pair<index_t, chrono_t> ceilPair = getCeilIndexHelper(
-    //    this, iTime, floorPair.first, floorPair.second, maxIndex );
     std::pair<index_t, chrono_t> ceilPair = this->getCeilIndex( iTime );
 
     assert( floorPair.second <= iTime && iTime <= ceilPair.second );
