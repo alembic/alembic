@@ -66,12 +66,22 @@ void ISimpleXformSchema::init( Abc::SchemaInterpMatching )
     m_numSamples = 0;
     m_isConstant = true;
 
-#define GET_TIME_STUFF( PROP )                                  \
-    if ( ( !m_timeSampling.isStatic() ) && PROP )               \
-    {                                                           \
-        m_numSamples = PROP.getNumSamples();                    \
-        m_isConstant = PROP.isConstant();                       \
-        m_timeSampling = PROP.getTimeSampling();        \
+    bool hasNoTime = true;
+
+#define GET_TIME_STUFF( PROP )                                                \
+    hasNoTime = PROP ?                                                        \
+        ( PROP.getTimeSampling().isStatic() ||                                \
+          PROP.getTimeSampling().getTimeSamplingType().isIdentity() ) : true; \
+    if ( PROP && ( ! ( m_timeSampling.isStatic() && hasNoTime ) ) )           \
+    {                                                                         \
+        m_timeSampling = PROP.getTimeSampling();                              \
+    }                                                                         \
+    if ( PROP )                                                               \
+    {                                                                         \
+        m_numSamples = PROP.getNumSamples() > m_numSamples ?                  \
+            PROP.getNumSamples() : m_numSamples;                              \
+                                                                              \
+        m_isConstant = m_isConstant ? PROP.isConstant() : m_isConstant;       \
     }
 
     GET_TIME_STUFF( m_scaleX );
