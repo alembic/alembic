@@ -47,6 +47,10 @@ namespace v1 {
 
 static const DataType kChrono_TDataType( kChrono_TPOD, 1 );
 
+//! Work around the imprecision of comparing floating values.
+//! We're setting it to just over 1 / 6000 (Maya's "ticks")
+static const chrono_t kCHRONO_TOLERANCE = 0.00017;
+
 //-*****************************************************************************
 // For properties that use acyclic time sampling, the array of
 // times at which samples were taken will be stored as an
@@ -68,10 +72,12 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
 {
     ABCA_ASSERT( sizeof( chrono_t ) == kChrono_TDataType.getNumBytes(),
                 "Internal error sizeof( chrono_t ) mismatch to kChrono_TPOD");
+
     ABCA_ASSERT( m_sampleTimes ||
                  ( m_numSamples == 0 && m_timeSamplingType.isIdentity() ),
                  "Non-identity time sampling with more than zero samples "
                  << "requires a valid array of sample times." );
+
     ABCA_ASSERT( m_sampleTimes->getDimensions().rank() == 1
                  && m_sampleTimes->getDataType().getPod() == kChrono_TPOD,
                  "Invalid sampleTimes ArraySample, must be rank 1 and "
@@ -254,21 +260,20 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
         double rawNumCyclesFractional = modf( rawNumCycles,
                                               &rawNumCyclesIntregal );
 
-        const double tolerance = 0.0001;
-
-        if ( Imath::equalWithAbsError( 0.0, 1.0 - rawNumCyclesFractional,
-                                       tolerance ) )
+        if ( Imath::equalWithAbsError( 1.0 - rawNumCyclesFractional, 0.0,
+                                       kCHRONO_TOLERANCE ) )
         {
             rawNumCyclesIntregal += 1;
         }
 
         const size_t numCycles = ( size_t )rawNumCyclesIntregal;
-        const chrono_t cycleBlockTime = (numCycles * period);
+        const chrono_t cycleBlockTime = ( numCycles * period );
 
 
         assert( elapsedTime >= cycleBlockTime ||
-                Imath::equalWithAbsError( 0.0, cycleBlockTime - elapsedTime,
-                                          tolerance ) );
+                Imath::equalWithAbsError( cycleBlockTime - elapsedTime, 0.0,
+                                          kCHRONO_TOLERANCE ) );
+
         const chrono_t rem = iTime - cycleBlockTime;
 
         assert( rem < period + minTime );
@@ -306,10 +311,9 @@ getCeilIndexHelper( const TimeSampling *iThat, const chrono_t iTime,
                     const size_t iFloorIndex, const chrono_t iFloorTime,
                     const size_t iMaxIndex )
 {
-    const double tolerance = 0.0001;
-
     if ( iFloorIndex == iMaxIndex ||
-         Imath::equalWithAbsError( iFloorTime, iTime, tolerance ) )
+         Imath::equalWithAbsError( iFloorTime, iTime,
+                                   kCHRONO_TOLERANCE ) )
     {
         return std::pair<index_t, chrono_t>( iFloorIndex, iFloorTime );
     }

@@ -46,7 +46,7 @@ SET( TEST_LIBS
      ${ZLIB_LIBRARIES} m )
 
 #-******************************************************************************
-ADD_EXECUTABLE( AbcGeom_PolyMeshTest 
+ADD_EXECUTABLE( AbcGeom_PolyMeshTest
 		MeshData.h
 		MeshData.cpp
 		PolyMeshTest.cpp )
@@ -55,7 +55,7 @@ TARGET_LINK_LIBRARIES( AbcGeom_PolyMeshTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_PolyMeshTEST AbcGeom_PolyMeshTest )
 
 #-******************************************************************************
-ADD_EXECUTABLE( AbcGeom_PointsTest 
+ADD_EXECUTABLE( AbcGeom_PointsTest
 		PointsTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_PointsTest ${TEST_LIBS} )
 
@@ -71,8 +71,14 @@ TARGET_LINK_LIBRARIES( AbcGeom_SubDTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_SubDTEST AbcGeom_SubDTest )
 
 #-******************************************************************************
-ADD_EXECUTABLE( AbcGeom_SimpleXformTest 
+ADD_EXECUTABLE( AbcGeom_SimpleXformTest
 		SimpleXformTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_SimpleXformTest ${TEST_LIBS} )
 
 ADD_TEST( AbcGeom_SimpleXformTEST AbcGeom_SimpleXformTest )
+
+#-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_SimpleXformTest2
+		SimpleXformTest2.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_SimpleXformTest2 ${TEST_LIBS} )
+ADD_TEST( AbcGeom_SimpleXform2_TEST AbcGeom_SimpleXformTest2 )

@@ -66,41 +66,21 @@ void ISimpleXformSchema::init( Abc::SchemaInterpMatching )
     m_numSamples = 0;
     m_isConstant = true;
 
-    bool hasNoTime = true;
+    _getTimeData( m_scaleX );
+    _getTimeData( m_scaleY );
+    _getTimeData( m_scaleZ );
 
-#define GET_TIME_STUFF( PROP )                                                \
-    hasNoTime = PROP ?                                                        \
-        ( PROP.getTimeSampling().isStatic() ||                                \
-          PROP.getTimeSampling().getTimeSamplingType().isIdentity() ) : true; \
-    if ( PROP && ( ! ( m_timeSampling.isStatic() && hasNoTime ) ) )           \
-    {                                                                         \
-        m_timeSampling = PROP.getTimeSampling();                              \
-    }                                                                         \
-    if ( PROP )                                                               \
-    {                                                                         \
-        m_numSamples = PROP.getNumSamples() > m_numSamples ?                  \
-            PROP.getNumSamples() : m_numSamples;                              \
-                                                                              \
-        m_isConstant = m_isConstant ? PROP.isConstant() : m_isConstant;       \
-    }
+    _getTimeData( m_shear0 );
+    _getTimeData( m_shear1 );
+    _getTimeData( m_shear2 );
 
-    GET_TIME_STUFF( m_scaleX );
-    GET_TIME_STUFF( m_scaleY );
-    GET_TIME_STUFF( m_scaleZ );
+    _getTimeData( m_rotateX );
+    _getTimeData( m_rotateY );
+    _getTimeData( m_rotateZ );
 
-    GET_TIME_STUFF( m_shear0 );
-    GET_TIME_STUFF( m_shear1 );
-    GET_TIME_STUFF( m_shear2 );
-
-    GET_TIME_STUFF( m_rotateX );
-    GET_TIME_STUFF( m_rotateY );
-    GET_TIME_STUFF( m_rotateZ );
-
-    GET_TIME_STUFF( m_translateX );
-    GET_TIME_STUFF( m_translateY );
-    GET_TIME_STUFF( m_translateZ );
-
-#undef GET_TIME_STUFF
+    _getTimeData( m_translateX );
+    _getTimeData( m_translateY );
+    _getTimeData( m_translateZ );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

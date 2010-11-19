@@ -36,6 +36,8 @@
 
 #include <Alembic/AbcGeom/OSimpleXform.h>
 
+#include <ImathMath.h>
+
 namespace Alembic {
 namespace AbcGeom {
 
@@ -51,7 +53,7 @@ OSimpleXformSchema::ODefaultedDoubleProperty::set( const double &iVal,
         return true;
     }
 
-    if ( fabs( iVal - m_default ) > m_epsilon )
+    if ( ! Imath::equalWithAbsError( iVal - m_default, 0.0, m_epsilon ) )
     {
         // A change!
         if ( iTimes )
