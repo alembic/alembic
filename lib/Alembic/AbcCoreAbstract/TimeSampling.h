@@ -127,6 +127,12 @@ public:
             m_numSamples < 2;
     }
 
+    //! How many stored times are there really?
+    size_t getNumStoredTimes() const
+    {
+        return m_sampleTimes->size();
+    }
+
 protected:
     //! A TimeSamplingType
     //! This is "Identity", "Uniform", "Cyclic", or "Acyclic".

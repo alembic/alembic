@@ -56,13 +56,8 @@ typedef std::vector<chrono_t> TimeVector;
 
 //-*****************************************************************************
 AbcA::ArraySamplePtr
-buildTimeSamplesPtr( TimeVector & tvec, size_t numSamps )
+buildTimeSamplesPtr( TimeVector &tvec )
 {
-    while ( tvec.size () < numSamps )
-    {
-        tvec.push_back( 0.0 );
-    }
-
     AbcA::ArraySamplePtr time_samples(
         new AbcA::ArraySample(
             reinterpret_cast<const void *>( &tvec.front() ),
@@ -89,8 +84,22 @@ void validateTimeSampling( const AbcA::TimeSampling &timeSampling,
                      "calculated cycle period does not match given time/cycle" );
     }
 
-    std::cout << "\n***********************************************************"
+    std::cout << "***********************************************************"
               << std::endl;
+
+    if ( timeSamplingType.isIdentity() )
+    { std::cout << "time sampling type is identity" << std::endl; }
+    if ( timeSamplingType.isUniform() )
+    { std::cout << "time sampling type is uniform" << std::endl; }
+    if ( timeSamplingType.isCyclic() )
+    { std::cout << "time sampling type is cyclic" << std::endl; }
+    if ( timeSamplingType.isAcyclic() )
+    { std::cout << "time sampling type is acyclic" << std::endl; }
+
+    std::cout << "Number of samples per cycle is "
+              << timeSamplingType.getNumSamplesPerCycle()
+              << std::endl << std::endl;
+
     std::cout << "Given times:" << std::endl;
     for ( size_t i = 0 ; i < timeVector.size() ; ++i )
     {
@@ -160,9 +169,12 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
     const chrono_t timePerCycle = timeSamplingType.getTimePerCycle();
     const size_t numSamplesPerCycle = timeSamplingType.getNumSamplesPerCycle();
 
+    const size_t numStoredTimes = timeSampling.getNumStoredTimes();
 
-    std::cout << "Here are the time sample times, stored in the "
-              << "TimeSampling instance" << std::endl;
+    std::cout << "Here are the time sample times, contained in the "
+              << "TimeSampling instance." << std::endl
+              << "Only the first " << numStoredTimes << " values are stored; "
+              << "the rest are computed." << std::endl << std::endl;
 
     for ( size_t i = 0; i < numSamples ; ++i )
     {
@@ -267,6 +279,8 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
                          "Calculated time per cycle is different than given." );
         }
     }
+
+    std::cout << std::endl << std::endl;
 }
 
 //-*****************************************************************************
@@ -282,13 +296,14 @@ void testCyclicTime1()
     const size_t numSamplesPerCycle = 3;
     const size_t numSamps = 97;
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
     const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isCyclic(), "Should be cyclic." );
 
+    std::cout << "Testing cyclic time, 1" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -307,13 +322,14 @@ void testCyclicTime2()
     const size_t numSamplesPerCycle = 2;
     const size_t numSamps = 43;
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
     const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isCyclic(), "Should be cyclic." );
 
+    std::cout << "Testing cyclic time, 2" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -332,13 +348,14 @@ void testCyclicTime3()
     const size_t numSamplesPerCycle = 2;
     const size_t numSamps = 70;
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
     const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isCyclic(), "Should be cyclic." );
 
+    std::cout << "Testing cyclic time, 3" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -356,13 +373,14 @@ void testUniformTime1()
     const size_t numSamplesPerCycle = 1;
     const size_t numSamps = 43;
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
     const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isUniform(), "Should be uniform." );
 
+    std::cout << "Testing uniform time, 1" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -380,13 +398,14 @@ void testUniformTime2()
     const size_t numSamplesPerCycle = 1;
     const size_t numSamps = 57;
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
     const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isUniform(), "Should be uniform." );
 
+    std::cout << "Testing uniform time, 2" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -397,20 +416,20 @@ void testUniformTime3()
 {
     // sample once at each frame, starting at +1th frame
     TimeVector tvec;
-    tvec.push_back( 1.0 / 24.0 );
     tvec.push_back( 2.0 / 24.0 );
 
     const chrono_t timePerCycle = 1.0 / 24.0;
     const size_t numSamplesPerCycle = 1;
     const size_t numSamps = 49;
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
     const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isUniform(), "Should be uniform." );
 
+    std::cout << "Testing uniform time, 3" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -418,7 +437,7 @@ void testUniformTime3()
 }
 
 //-*****************************************************************************
-void testStaticTime1()
+void testIdentityTime1()
 {
     // sample once at each frame
     TimeVector tvec;
@@ -429,13 +448,58 @@ void testStaticTime1()
     const size_t numSamplesPerCycle = 0;
     const size_t numSamps = 43;
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    Alembic::Util::Dimensions dims;
+    dims.setRank( 1 );
+
+    // Make a null ArraySamplePtr by hand
+    AbcA::ArraySamplePtr rotPtr = AbcA::ArraySamplePtr(
+        new AbcA::ArraySample( (const void *)NULL,
+                               AbcA::DataType( AbcA::kChrono_TPOD, 1 ),
+                               dims ) );
+
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
+    const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isIdentity(), "Should be identity." );
 
-    // can't actually create an instance of static TimeSampling
+    std::cout << "Testing identity time, 1" << std::endl;
+    validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
+                          timePerCycle, numSamps );
+
+    testTimeSampling( tSamp, tSampTyp );
+}
+
+//-*****************************************************************************
+void testIdentityTime2()
+{
+    const chrono_t timePerCycle = 0.0;
+    const size_t numSamplesPerCycle = 0;
+    const size_t numSamps = 5;
+
+    TimeVector tvec;
+    tvec.push_back( 0.0 );
+
+    Alembic::Util::Dimensions dims;
+    dims.setRank( 1 );
+
+    // Make a null ArraySamplePtr by hand
+    AbcA::ArraySamplePtr rotPtr = AbcA::ArraySamplePtr(
+        new AbcA::ArraySample( (const void *)NULL,
+                               AbcA::DataType( AbcA::kChrono_TPOD, 1 ),
+                               dims ) );
+
+    // default TimeSamplingType
+    const AbcA::TimeSamplingType tSampTyp;
+    const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
+
+    TESTING_MESSAGE_ASSERT( tSampTyp.isIdentity(), "Should be identity." );
+
+    std::cout << "Testing identity time, 2" << std::endl;
+    validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
+                          timePerCycle, numSamps );
+
+    testTimeSampling( tSamp, tSampTyp );
 }
 
 //-*****************************************************************************
@@ -455,13 +519,14 @@ void testAcyclicTime1()
         tvec.push_back( (chrono_t)i * ( 1.0 / 24.0 ) );
     }
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
     const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isAcyclic(), "Should be acyclic." );
 
+    std::cout << "Testing acyclic time, 1" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -489,13 +554,14 @@ void testAcyclicTime2()
         tvec.push_back( ranTime );
     }
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     const AbcA::TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
     const AbcA::TimeSampling tSamp( tSampTyp, numSamps, rotPtr );
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isAcyclic(), "Should be acyclic." );
 
+    std::cout << "Testing acyclic time, 2" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -523,7 +589,7 @@ void testAcyclicTime3()
         tvec.push_back( ranTime );
     }
 
-    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec, numSamps );
+    AbcA::ArraySamplePtr rotPtr = buildTimeSamplesPtr( tvec );
 
     AbcA::TimeSamplingType::AcyclicFlag acf;
 
@@ -532,6 +598,7 @@ void testAcyclicTime3()
 
     TESTING_MESSAGE_ASSERT( tSampTyp.isAcyclic(), "Should be acyclic." );
 
+    std::cout << "Testing acyclic time, 3" << std::endl;
     validateTimeSampling( tSamp, tSampTyp, tvec, numSamplesPerCycle,
                           timePerCycle, numSamps );
 
@@ -562,7 +629,7 @@ void testBadTypes()
 //-*****************************************************************************
 int main( int, char** )
 {
-    // cyclic is trickiest, maybe most common
+    // cyclic is trickiest
     testCyclicTime1();
     testCyclicTime2();
     testCyclicTime3();
@@ -572,8 +639,9 @@ int main( int, char** )
     testUniformTime2();
     testUniformTime3();
 
-    // static; this is pretty easy :)
-    testStaticTime1();
+    // identity; this is the default TimeSamplingType
+    testIdentityTime1();
+    testIdentityTime2();
 
     // acyclic is pretty easy, too
     testAcyclicTime1();
