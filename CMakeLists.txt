@@ -44,10 +44,6 @@ IF (RUN_FROM_MK)
   MARK_AS_ADVANCED ( CMAKE_FIRST_RUN )
 ENDIF()
 
-#IF ( NOT DEFINED CMAKE_FIRST_RUN )
-#  MESSAGE( WARNING "This build was not first configured from the the mk_cmake build script. Possible build errors will occur. Consult the README.txt for instructions on how to build. " )
-#ENDIF()
-
 IF (NOT DEFINED QUIET)
   SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 ENDIF()
@@ -85,8 +81,9 @@ IF( "${CMAKE_SYSTEM_NAME}" MATCHES "Linux" )
   SET( LINUX TRUE )
 ENDIF()
 
-#SET( CMAKE_C_FLAGS -std=gnu99 )
-SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wreturn-type -Werror" )
+IF ( NOT WINDOWS )
+  SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wreturn-type -Werror" )
+ENDIF()
 
 IF( ${WINDOWS} )
   ADD_DEFINITIONS( -DPLATFORM_WINDOWS -DPLATFORM=WINDOWS )
