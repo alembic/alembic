@@ -40,6 +40,33 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+//-*****************************************************************************
+void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
+{
+    bool hasNoTime = iProp ? iProp.getTimeSampling().isStatic() : true;
+
+    if ( ! hasNoTime )
+    {
+        uint32_t localNumSampsPerCycle = \
+            m_timeSampling.getTimeSamplingType().getNumSamplesPerCycle();
+        uint32_t propNumSampsPerCycle = \
+            iProp.getTimeSampling().getTimeSamplingType().getNumSamplesPerCycle();
+        if ( propNumSampsPerCycle > localNumSampsPerCycle )
+        {
+            m_timeSampling = iProp.getTimeSampling();
+        }
+    }
+
+    if ( iProp )
+    {
+        m_numSamples = iProp.getNumSamples() > m_numSamples ?
+            iProp.getNumSamples() : m_numSamples;
+
+        m_isConstant = m_isConstant ? iProp.isConstant() : m_isConstant;
+    }
+}
+
+//-*****************************************************************************
 void ISimpleXformSchema::init( Abc::SchemaInterpMatching )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISimpleXformSchema::init()" );

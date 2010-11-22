@@ -182,21 +182,21 @@ void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
         const chrono_t *times = &m_times.front();
         bool any = false;
 
-        any = any || m_scaleX.set( scale.x, iSS, times );
-        any = any || m_scaleY.set( scale.y, iSS, times );
-        any = any || m_scaleZ.set( scale.z, iSS, times );
+        any = m_scaleX.set( scale.x, iSS, times ) || any;
+        any = m_scaleY.set( scale.y, iSS, times ) || any;
+        any = m_scaleZ.set( scale.z, iSS, times ) || any;
 
-        any = any || m_shear0.set( shear.x, iSS, times );
-        any = any || m_shear1.set( shear.y, iSS, times );
-        any = any || m_shear2.set( shear.z, iSS, times );
+        any = m_shear0.set( shear.x, iSS, times ) || any;
+        any = m_shear1.set( shear.y, iSS, times ) || any;
+        any = m_shear2.set( shear.z, iSS, times ) || any;
 
-        any = any || m_rotateX.set( rot.x, iSS, times );
-        any = any || m_rotateY.set( rot.y, iSS, times );
-        any = any || m_rotateZ.set( rot.z, iSS, times );
+        any = m_rotateX.set( rot.x, iSS, times ) || any;
+        any = m_rotateY.set( rot.y, iSS, times ) || any;
+        any = m_rotateZ.set( rot.z, iSS, times ) || any;
 
-        any = any || m_translateX.set( trans.x, iSS, times );
-        any = any || m_translateY.set( trans.y, iSS, times );
-        any = any || m_translateZ.set( trans.z, iSS, times );
+        any = m_translateX.set( trans.x, iSS, times ) || any;
+        any = m_translateY.set( trans.y, iSS, times ) || any;
+        any = m_translateZ.set( trans.z, iSS, times ) || any;
 
         if ( any )
         {
@@ -243,21 +243,21 @@ void OSimpleXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
         const chrono_t *times = &m_times.front();
         bool any = false;
 
-        any = any || m_scaleX.setFromPrevious( iSS, times );
-        any = any || m_scaleY.setFromPrevious( iSS, times );
-        any = any || m_scaleZ.setFromPrevious( iSS, times );
+        any = m_scaleX.setFromPrevious( iSS, times ) || any;
+        any = m_scaleY.setFromPrevious( iSS, times ) || any;
+        any = m_scaleZ.setFromPrevious( iSS, times ) || any;
 
-        any = any || m_shear0.setFromPrevious( iSS, times );
-        any = any || m_shear1.setFromPrevious( iSS, times );
-        any = any || m_shear2.setFromPrevious( iSS, times );
+        any = m_shear0.setFromPrevious( iSS, times ) || any;
+        any = m_shear1.setFromPrevious( iSS, times ) || any;
+        any = m_shear2.setFromPrevious( iSS, times ) || any;
 
-        any = any || m_rotateX.setFromPrevious( iSS, times );
-        any = any || m_rotateY.setFromPrevious( iSS, times );
-        any = any || m_rotateZ.setFromPrevious( iSS, times );
+        any = m_rotateX.setFromPrevious( iSS, times ) || any;
+        any = m_rotateY.setFromPrevious( iSS, times ) || any;
+        any = m_rotateZ.setFromPrevious( iSS, times ) || any;
 
-        any = any || m_translateX.setFromPrevious( iSS, times );
-        any = any || m_translateY.setFromPrevious( iSS, times );
-        any = any || m_translateZ.setFromPrevious( iSS, times );
+        any = m_translateX.setFromPrevious( iSS, times ) || any;
+        any = m_translateY.setFromPrevious( iSS, times ) || any;
+        any = m_translateZ.setFromPrevious( iSS, times ) || any;
 
         if ( any )
         {

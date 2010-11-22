@@ -112,7 +112,7 @@ public:
         return m_timeSampling;
     }
 
-    void get( SimpleXformSample &iSamp,
+    void get( SimpleXformSample &oSamp,
               const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
 
     SimpleXformSample getValue( const Abc::ISampleSelector &iSS =
@@ -186,35 +186,6 @@ protected:
 //-*****************************************************************************
 typedef Abc::ISchemaObject<ISimpleXformSchema> ISimpleXform;
 
-//-*****************************************************************************
-inline void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
-{
-    bool hasNoTime = true;
-
-    hasNoTime = iProp ?
-        ( iProp.getTimeSampling().isStatic() ||
-          iProp.getTimeSampling().getTimeSamplingType().isIdentity() ) : true;
-
-    if ( iProp && ( ! hasNoTime ) )
-    {
-        uint32_t localNumSampsPerCycle = \
-            m_timeSampling.getTimeSamplingType().getNumSamplesPerCycle();
-        uint32_t propNumSampsPerCycle = \
-            iProp.getTimeSampling().getTimeSamplingType().getNumSamplesPerCycle();
-        if ( propNumSampsPerCycle > localNumSampsPerCycle )
-        {
-            m_timeSampling = iProp.getTimeSampling();
-        }
-    }
-
-    if ( iProp )
-    {
-        m_numSamples = iProp.getNumSamples() > m_numSamples ?
-            iProp.getNumSamples() : m_numSamples;
-
-        m_isConstant = m_isConstant ? iProp.isConstant() : m_isConstant;
-    }
-}
 
 } // End namespace AbcGeom
 } // End namespace Alembic

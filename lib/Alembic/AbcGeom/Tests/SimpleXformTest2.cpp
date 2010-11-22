@@ -37,6 +37,8 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
+#include "Assert.h"
+
 #include <iostream>
 
 using namespace Alembic::AbcGeom;
@@ -63,7 +65,9 @@ void writeArchive( const std::string& iName )
         chrono_t sampleTime = frameInterval * startFrame + ( i * frameInterval );
         std::cout << "a's " << i << "th written sample is at " << sampleTime << std::endl;
         sample.makeIdentity();
-        sample.setTranslation( V3d( i+1, i*2, sampleTime ) );
+        V3d trans( i + 1.0, i * 2.0, sampleTime );
+        std::cout << "with the translation value of " << trans << std::endl;
+        sample.setTranslation( trans );
         a.getSchema().set( sample, OSampleSelector( i, sampleTime ) );
     }
 
@@ -100,8 +104,8 @@ void writeArchive( const std::string& iName )
                 c.getSchema().set(sample, OSampleSelector( i * 3 + j,
                                                            sampleTime ) );
 
-                std::cout << "with the value:" << std::endl << sample
-                          << std::endl;
+                std::cout << "with the value:" << std::endl
+                          << sample.getTranslation() << std::endl;
 
                 sampleTime += frameInterval * 0.25;
             }
@@ -116,35 +120,55 @@ void readArchive( const std::string &iName )
 {
     IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), iName );
 
+    chrono_t startFrame = 1001.0;
+    chrono_t frameInterval = 1.0 / 24.0;
+
     IObject root( archive.getTop(), "root" );
 
     ISimpleXform c( root, "c" );
+    ISimpleXform a( root, "a" );
 
-    std::cout << "c has " << c.getSchema().getNumSamples()
+    std::cout << "a has " << a.getSchema().getNumSamples()
               << " samples." << std::endl;
 
-    TimeSamplingType tst = c.getSchema().getTimeSampling().getTimeSamplingType();
+    TimeSamplingType tst = a.getSchema().getTimeSampling().getTimeSamplingType();
 
-    if ( c.getSchema().getTimeSampling().isStatic() )
+    if ( a.getSchema().getTimeSampling().isStatic() )
     {
-        std::cout << "c is static time" << std::endl;
+        std::cout << "a is static time" << std::endl;
     }
-    if ( tst.isIdentity() ) { std::cout << "c is identity time" << std::endl; }
-    if ( tst.isUniform() ) { std::cout << "c is uniform time" << std::endl; }
-    if ( tst.isCyclic() ) { std::cout << "c is cyclic time" << std::endl; }
-    if ( tst.isAcyclic() ) { std::cout << "c is acyclic time" << std::endl; }
+    if ( tst.isIdentity() ) { std::cout << "a is identity time" << std::endl; }
+    if ( tst.isUniform() ) { std::cout << "a is uniform time" << std::endl; }
+    if ( tst.isCyclic() ) { std::cout << "a is cyclic time" << std::endl; }
+    if ( tst.isAcyclic() ) { std::cout << "a is acyclic time" << std::endl; }
 
-    if ( c.getSchema().isConstant() )
+    if ( a.getSchema().isConstant() )
     {
-        std::cout << "c is constant!" << std::endl;
+        std::cout << "a is constant!" << std::endl;
+    }
+
+    for ( size_t i = 0 ; i < a.getSchema().getNumSamples() ; i++ )
+    {
+        chrono_t sampleTime = frameInterval * startFrame + ( i * frameInterval );
+        chrono_t t = a.getSchema().getTimeSampling().getSampleTime( i );
+        TESTING_ASSERT( Imath::equalWithAbsError( t, sampleTime, 0.00001 ) );
+
+        V3d shouldBeTrans( i + 1.0, i * 2.0, sampleTime );
+        V3d trans = a.getSchema().getValue( i ).getTranslation();
+
+        TESTING_ASSERT( trans == shouldBeTrans );
+
+        std::cout << i << "th read a sample's translation at " << t
+                  << ": " << std::endl
+                  << a.getSchema().getValue( i ).getTranslation() << std::endl;
     }
 
     for ( size_t i = 0 ; i < c.getSchema().getNumSamples() ; i++ )
     {
-        std::cout << i << "th read sample's translation at "
-                  << c.getSchema().getTimeSampling().getSampleTime( i )
-                  << ": " << std::endl
-                  << c.getSchema().getValue().getTranslation() << std::endl;
+        std::cout << i << "th read c sample's translation at "
+             << c.getSchema().getTimeSampling().getSampleTime( i )
+             << ": " << std::endl
+             << c.getSchema().getValue( i ).getTranslation() << std::endl;
     }
 }
 
@@ -157,5 +181,5 @@ int main(int argc, char **argv)
     readArchive( arkive );
 
     // fail this test manually until it is correct
-    return -1;
+    return 0;
 }
