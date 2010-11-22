@@ -80,8 +80,7 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
     //! for Identity Time Sampling will be 1, and will contain '0' as the
     //! only value.
     assert( iSampleTimes->size() <= iTimeSamplingType.getNumSamplesPerCycle() ||
-            iTimeSamplingType.isIdentity() && iSampleTimes->size() <= 1 &&
-            _getTimeSamplesAsChrono_tPtr()[0] == 0 );
+            iTimeSamplingType.isIdentity() && iSampleTimes->size() <= 1 );
 
     ABCA_ASSERT( sizeof(chrono_t) == iSampleTimes->getDataType().getNumBytes(),
                 "Internal error sizeof( chrono_t ) mismatch to kChrono_TPOD");
