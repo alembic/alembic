@@ -50,18 +50,18 @@
 #include <string.h>
 
 //-*****************************************************************************
-#define TESTING_ASSERT( TEST, MSG )                                     \
+#define TESTING_ASSERT( TEST )                                          \
 do                                                                      \
 {                                                                       \
     if ( !( TEST ) )                                                    \
     {                                                                   \
         std::string failedTest = BOOST_PP_STRINGIZE( TEST );            \
         throw std::runtime_error(                                       \
-            ( boost::format( "ERROR: Failed Test: %s, File: %d, Line: %d\n%s" ) \
+            ( boost::format( "ERROR: Failed Test: %s, File: %d, Line: %d" ) \
               % failedTest                                              \
               % __FILE__                                                \
               % __LINE__                                                \
-              % MSG ).str() );                                               \
+            ).str() );                                                  \
     }                                                                   \
 }                                                                       \
 while( 0 )

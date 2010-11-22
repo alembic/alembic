@@ -48,8 +48,8 @@ namespace v1 {
 static const DataType kChrono_TDataType( kChrono_TPOD, 1 );
 
 //! Work around the imprecision of comparing floating values.
-//! We're setting it to just under 1 / 6000 (Maya's "ticks")
-static const chrono_t kCHRONO_TOLERANCE = 0.000165;
+//! We're setting it to just under 1 / 44100 (the sampling rate for audio).
+static const chrono_t kCHRONO_TOLERANCE = 0.0000226;
 
 //-*****************************************************************************
 // For properties that use acyclic time sampling, the array of
@@ -75,7 +75,13 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
     //! a TimeSampling object, though, so this assert is just an internal
     //! sanity check; if the test fails, it just means that Alembic is storing
     //! more data than it needs to.
-    assert( iSampleTimes->size() <= iTimeSamplingType.getNumSamplesPerCycle() );
+    //!
+    //! Due to an implementation detail, the "size" of the iSampleTimes
+    //! for Identity Time Sampling will be 1, and will contain '0' as the
+    //! only value.
+    assert( iSampleTimes->size() <= iTimeSamplingType.getNumSamplesPerCycle() ||
+            iTimeSamplingType.isIdentity() && iSampleTimes->size() <= 1 &&
+            _getTimeSamplesAsChrono_tPtr()[0] == 0 );
 
     ABCA_ASSERT( sizeof(chrono_t) == iSampleTimes->getDataType().getNumBytes(),
                 "Internal error sizeof( chrono_t ) mismatch to kChrono_TPOD");

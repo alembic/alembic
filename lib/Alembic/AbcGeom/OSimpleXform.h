@@ -44,6 +44,12 @@
 namespace Alembic {
 namespace AbcGeom {
 
+//! The default value for determining whether a property is actually
+//! different from the default.  If it's within this tolerance, the
+//! default value is used, which allows Alembic to more efficiently
+//! store the data, resulting in smaller Archive size.
+static const double kSIMPLE_XFORM_DELTA_TOLERANCE = 1.0e-9;
+
 //-*****************************************************************************
 //-*****************************************************************************
 // THE SCHEMA
@@ -156,12 +162,6 @@ protected:
     //! making general (yet).
     class ODefaultedDoubleProperty
     {
-    protected:
-        //! The default value for determining whether a property is actually
-        //! different from the default.  If it's within this tolerance, the
-        //! default value is used, which allows Alembic to more efficiently
-        //! store the data, resulting in smaller Archive size.
-        static const double SIMPLE_XFORM_DELTA_TOLERANCE = 1.0e-9;
     public:
         void reset()
         {
@@ -170,7 +170,7 @@ protected:
             m_errorHandlerPolicy = Abc::ErrorHandler::kThrowPolicy;
             m_timeSamplingType = AbcA::TimeSamplingType();
             m_default = 0.0;
-            m_epsilon = SIMPLE_XFORM_DELTA_TOLERANCE;
+            m_epsilon = kSIMPLE_XFORM_DELTA_TOLERANCE;
             m_property.reset();
         }
 
@@ -181,7 +181,7 @@ protected:
                                   Abc::ErrorHandler::Policy iPolicy,
                                   const AbcA::TimeSamplingType &iTst,
                                   double iDefault,
-                                  double iEpsilon=SIMPLE_XFORM_DELTA_TOLERANCE )
+                                  double iEpsilon=kSIMPLE_XFORM_DELTA_TOLERANCE )
           : m_parent( Abc::GetCompoundPropertyWriterPtr( iParent ) )
           , m_name( iName )
           , m_errorHandlerPolicy( iPolicy )
