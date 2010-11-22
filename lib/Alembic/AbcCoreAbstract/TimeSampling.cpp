@@ -410,7 +410,12 @@ TimeSampling::getNearIndex( chrono_t iTime ) const
     std::pair<index_t, chrono_t> floorPair = this->getFloorIndex( iTime );
     std::pair<index_t, chrono_t> ceilPair = this->getCeilIndex( iTime );
 
-    assert( floorPair.second <= iTime && iTime <= ceilPair.second );
+    assert( ( floorPair.second <= iTime ||
+              Imath::equalWithAbsError( iTime, floorPair.second,
+                                        kCHRONO_TOLERANCE ) ) &&
+            ( iTime <= ceilPair.second ||
+              Imath::equalWithAbsError( iTime, ceilPair.second,
+                                        kCHRONO_TOLERANCE ) ) );
 
     chrono_t deltaFloor = fabs( iTime - floorPair.second );
     chrono_t deltaCeil = fabs( ceilPair.second - iTime );
