@@ -41,6 +41,8 @@
 
 #include <ImathMath.h>
 
+#include <algorithm>
+
 namespace Alembic {
 namespace AbcCoreAbstract {
 namespace v1 {
@@ -134,10 +136,15 @@ const chrono_t *TimeSampling::_getTimeSamplesAsChrono_tPtr() const
 //-*****************************************************************************
 chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
 {
+    #if 0
     ABCA_ASSERT( iIndex >= 0 && iIndex < m_numSamples,
                  "Out-of-range sample index: " << iIndex
                  << ", range [0-" << m_numSamples
                  << "]" );
+    #endif
+
+    iIndex = std::max<index_t>( 0,
+                                std::min<index_t>( iIndex, m_numSamples - 1 ) );
 
     if ( m_timeSamplingType.isIdentity() )
     {
