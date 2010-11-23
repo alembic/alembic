@@ -49,22 +49,31 @@ private:
     typedef std::size_t MySizeT;
     typedef std::vector<MySizeT> SizeVec;
     SizeVec m_vector;
-    BOOST_STATIC_ASSERT( sizeof( MySizeT ) == sizeof( T ) );
+    const size_t m_mask;
+    //BOOST_STATIC_ASSERT( sizeof( MySizeT ) == sizeof( T ) );
 
 public:
     // Default is for a rank-0 dimension.
-    BaseDimensions() : m_vector() {}
+    BaseDimensions()
+      : m_vector()
+      , m_mask( -1 )
+    {}
 
     // When you specify a single thing, you're specifying a rank-1
     // dimension of a certain size.
     explicit BaseDimensions( const T& t )
-      : m_vector( 1, ( MySizeT )t ) {}
+      : m_vector( 1, ( MySizeT )t )
+      , m_mask( -1 )
+    {}
 
     BaseDimensions( const BaseDimensions &copy )
-      : m_vector( copy.m_vector ) {}
+      : m_vector( copy.m_vector )
+      , m_mask( -1 )
+    {}
 
     template <class Y>
     BaseDimensions( const BaseDimensions<Y> &copy )
+      : m_mask( -1 )
     {
         m_vector.resize( copy.rank() );
         for ( size_t i = 0; i < copy.rank(); ++i )
@@ -102,10 +111,10 @@ public:
     }
 
     T &operator[]( size_t i )
-    { return *( ( T * )( &(m_vector[i] ) ) ); }
+    { return *( ( T * )( m_mask & ((T) &(m_vector[i] ) ) ) ); }
 
-    const T & operator[]( size_t i ) const
-    { return *( ( const T *)( &( m_vector[i] ) ) ); }
+    const T &operator[]( size_t i ) const
+    { return *( ( const T *)( m_mask & ((T) &( m_vector[i] ) ) ) ); }
 
     T *rootPtr() { return ( T * )( &( m_vector.front() ) ); }
     const T *rootPtr() const

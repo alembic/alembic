@@ -432,8 +432,8 @@ void testReadWriteArrays()
                     ABC::PropertyHeader("uint64", ABC::kArrayProperty,
                     ABC::MetaData(), dtype, staticSampling));
             std::vector < Alembic::Util::uint64_t > vals(3);
-            vals[0] = 5000000000;
-            vals[1] = 1234567891011;
+            vals[0] = 5000000000LL;
+            vals[1] = 1234567891011LL;
             vals[2] = 12;
 
             Alembic::Util::Dimensions dims(vals.size());
@@ -449,8 +449,8 @@ void testReadWriteArrays()
                 ABC::MetaData(), dtype, staticSampling));
 
             std::vector < Alembic::Util::int64_t > vals(2);
-            vals[0] = -5000000000;
-            vals[1] = 9876543210;
+            vals[0] = -5000000000LL;
+            vals[1] = 9876543210LL;
             Alembic::Util::Dimensions dims(vals.size());
             i64WrtPtr->setSample(0, 0,
                 ABC::ArraySample(&(vals.front()), dtype, dims));
@@ -674,8 +674,8 @@ void testReadWriteArrays()
                     TESTING_ASSERT(val->getDimensions().rank() == 1);
                     Alembic::Util::uint64_t * data =
                         (Alembic::Util::uint64_t *)(val->getData());
-                    TESTING_ASSERT(data[0] == 5000000000);
-                    TESTING_ASSERT(data[1] == 1234567891011);
+                    TESTING_ASSERT(data[0] == 5000000000LL);
+                    TESTING_ASSERT(data[1] == 1234567891011LL);
                     TESTING_ASSERT(data[2] == 12);
                 }
                 break;
@@ -689,8 +689,8 @@ void testReadWriteArrays()
                     TESTING_ASSERT(val->getDimensions().rank() == 1);
                     Alembic::Util::int64_t * data =
                         (Alembic::Util::int64_t *)(val->getData());
-                    TESTING_ASSERT(data[0] == -5000000000);
-                    TESTING_ASSERT(data[1] == 9876543210);
+                    TESTING_ASSERT(data[0] == -5000000000LL);
+                    TESTING_ASSERT(data[1] == 9876543210LL);
                 }
                 break;
 
