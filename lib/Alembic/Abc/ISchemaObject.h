@@ -85,7 +85,8 @@ public:
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
         return ( getSchemaTitle() == "" ||
-                 ( iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ) );
+                 ( iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ) ||
+                 ( iMetaData.get( "schema" ) == getSchemaObjTitle() ));
     }
 
     //! This will check whether or not a given object (as represented by
