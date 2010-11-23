@@ -86,7 +86,8 @@ public:
     {
         return ( getSchemaTitle() == "" ||
                  ( iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ) ||
-                 ( iMetaData.get( "schema" ) == getSchemaObjTitle() ));
+                 ( iMetaData.get( "schema" ) == getSchemaObjTitle() ) ||
+                 ( iMetaData.get( "schema" ) == getSchemaTitle() ) );
     }
 
     //! This will check whether or not a given object (as represented by
