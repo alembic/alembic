@@ -64,10 +64,16 @@ public:
     //! data in ".geom", so, "AbcGeom_PolyMesh_v1:.geom"
     //! Sometimes schema titles from underlying schemas are "", but
     //! ours never are.
+    static const std::string &getSchemaObjTitle()
+    {
+        static std::string soSchemaTitle =
+            SCHEMA::getSchemaTitle() + ":" + SCHEMA::getDefaultSchemaName();
+        return soSchemaTitle;
+    }
+
     static const std::string &getSchemaTitle()
     {
-        static std::string sSchemaTitle =
-            SCHEMA::getSchemaTitle() + ":" + SCHEMA::getDefaultSchemaName();
+        static std::string sSchemaTitle = SCHEMA::getSchemaTitle();
         return sSchemaTitle;
     }
 
@@ -78,7 +84,7 @@ public:
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
         return ( getSchemaTitle() == "" ||
-                 ( iMetaData.get( "schema" ) == getSchemaTitle() ) );
+                 ( iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ) );
     }
 
     //! This will check whether or not a given object (as represented by
@@ -182,7 +188,8 @@ OSchemaObject<SCHEMA>::OSchemaObject
     // The object schema title is derived from the schema's title.
     // It is never empty.
     AbcA::MetaData metaData = args.getMetaData();
-    metaData.set( "schema", getSchemaTitle() );
+    metaData.set( "schema", SCHEMA::getSchemaTitle() );
+    metaData.set( "schemaObjTitle", getSchemaObjTitle() );
 
     // Make the object.
     AbcA::ObjectHeader ohdr( iName, metaData );
@@ -223,9 +230,9 @@ inline OSchemaObject<SCHEMA>::OSchemaObject(
                           GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) ),
 
                  "Incorrect match of schema: "
-                 << oheader.getMetaData().get( "schema" )
+                 << oheader.getMetaData().get( "schemaObjTitle" )
                  << " to expected: "
-                 << getSchemaTitle() );
+                 << getSchemaObjTitle() );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

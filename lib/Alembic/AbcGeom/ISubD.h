@@ -184,7 +184,7 @@ public:
                  const Abc::IArgument &iArg0 = Abc::IArgument(),
                  const Abc::IArgument &iArg1 = Abc::IArgument() )
       : Abc::ISchema<SubDSchemaInfo>( iParentObject, iName,
-                                        iArg0, iArg1 )
+                                      iArg0, iArg1 )
     {
         init(  iArg0, iArg1 );
     }
@@ -196,9 +196,21 @@ public:
                           const Abc::IArgument &iArg0 = Abc::IArgument(),
                           const Abc::IArgument &iArg1 = Abc::IArgument() )
       : Abc::ISchema<SubDSchemaInfo>( iParentObject,
-                                   iArg0, iArg1 )
+                                      iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
+    }
+
+    //! wrap an existing schema object
+    template <class CPROP_PTR>
+    ISubDSchema( CPROP_PTR iThis,
+                 Abc::WrapExistingFlag iFlag,
+
+                 const Abc::IArgument &iArg0 = Abc::IArgument(),
+                 const Abc::IArgument &iArg1 = Abc::IArgument() )
+      : Abc::ISchema<SubDSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+    {
+        // nothing
     }
 
     //! Default copy constructor used.

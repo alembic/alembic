@@ -82,3 +82,9 @@ ADD_EXECUTABLE( AbcGeom_SimpleXformTest2
 		SimpleXformTest2.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_SimpleXformTest2 ${TEST_LIBS} )
 ADD_TEST( AbcGeom_SimpleXform2_TEST AbcGeom_SimpleXformTest2 )
+
+##-*****************************************************************************
+ADD_EXECUTABLE( AbcGeom_SchemaMatchingTest
+		SchemaMatchingTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_SchemaMatchingTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_SchemaMatching_TEST AbcGeom_SchemaMatchingTest )
