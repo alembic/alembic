@@ -127,6 +127,18 @@ public:
         init( iArg0, iArg1 );
     }
 
+    //! Wrap an existing schema object
+    template <class CPROP_PTR>
+    IPolyMeshSchema( CPROP_PTR iThis,
+                     Abc::WrapExistingFlag iFlag,
+
+                     const Abc::IArgument &iArg0 = Abc::IArgument(),
+                     const Abc::IArgument &iArg1 = Abc::IArgument() )
+      : Abc::ISchema<PolyMeshSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+    {
+        // nothing
+    }
+
     //! Default copy constructor used.
     //! Default assignment operator used.
 
