@@ -176,7 +176,7 @@ ISchemaObject<SCHEMA>::ISchemaObject
     iArg1.setInto( args );
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ISchemaObject::ISchemaObject( OObject )" );
+        "ISchemaObject::ISchemaObject( IObject )" );
 
     const AbcA::ObjectHeader &oheader = this->getHeader();
 
@@ -208,10 +208,6 @@ inline ISchemaObject<SCHEMA>::ISchemaObject(
              iFlag,
              GetErrorHandlerPolicy( iObject,
                                     iArg0, iArg1 ) )
-  , m_schema( this->getProperties(),
-              iFlag,
-              this->getErrorHandlerPolicy(),
-              GetSchemaInterpMatching( iArg0, iArg1 ) )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "ISchemaObject::ISchemaObject( wrap )" );
@@ -225,6 +221,12 @@ inline ISchemaObject<SCHEMA>::ISchemaObject(
                  << oheader.getMetaData().get( "schemaObjTitle" )
                  << " to expected: "
                  << getSchemaObjTitle() );
+
+    m_schema = SCHEMA( ICompoundProperty( this->getProperties(),
+                                          SCHEMA::getDefaultSchemaName() ),
+                       iFlag,
+                       this->getErrorHandlerPolicy(),
+                       GetSchemaInterpMatching( iArg0, iArg1 ) );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
