@@ -70,7 +70,7 @@ void Example1_MeshIn( const std::string &arkiveFile )
 
     IObject smeshyObj( archive.getTop(), "subdmeshy" );
 
-    ISubD subdObjNM( smeshyObj, kWrapExisting, kNoMatching );
+    ISubD subdObjNM( smeshyObj, kWrapExisting );
 
     ISubD subdObj( archive.getTop(), "subdmeshy", kStrictMatching );
 
@@ -84,8 +84,6 @@ void Example1_MeshIn( const std::string &arkiveFile )
 
     // this subd object should have strict matching
     TESTING_ASSERT( ! IPolyMesh::matches( subdObj.getHeader() ) );
-
-
 }
 
 //-*****************************************************************************
