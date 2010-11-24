@@ -66,7 +66,8 @@ void writeArchive( const std::string& iName )
         std::cout << "a's " << i << "th written sample is at " << sampleTime << std::endl;
         sample.makeIdentity();
         V3d trans( i + 1.0, i * 2.0, sampleTime );
-        std::cout << "with the translation value of " << trans << std::endl;
+        std::cout << "with the translation value " << trans << std::endl
+                  << std::endl;
         sample.setTranslation( trans );
         a.getSchema().set( sample, OSampleSelector( i, sampleTime ) );
     }
@@ -104,8 +105,8 @@ void writeArchive( const std::string& iName )
                 c.getSchema().set(sample, OSampleSelector( i * 3 + j,
                                                            sampleTime ) );
 
-                std::cout << "with the value:" << std::endl
-                          << sample.getTranslation() << std::endl;
+                std::cout << "with the translation value "
+                          << sample.getTranslation() << std::endl << std::endl;
 
                 sampleTime += frameInterval * 0.25;
             }
@@ -125,27 +126,27 @@ void readArchive( const std::string &iName )
 
     IObject root( archive.getTop(), "root" );
 
+    IObject ao( root, "a" );
+
+    TESTING_ASSERT( ISimpleXform::matches( ao.getHeader() ) );
+
+    ISimpleXform aowrapped( ao, kWrapExisting );
+
     ISimpleXform c( root, "c" );
     ISimpleXform a( root, "a" );
 
     std::cout << "a has " << a.getSchema().getNumSamples()
               << " samples." << std::endl;
 
+    TESTING_ASSERT( aowrapped.getSchema().getNumSamples() ==
+                    a.getSchema().getNumSamples() );
+
+    std::cout << std::endl << "aowrapped has " << aowrapped.getSchema().getNumSamples()
+              << " samples." << std::endl << std::endl;
+
     TimeSamplingType tst = a.getSchema().getTimeSampling().getTimeSamplingType();
 
-    if ( a.getSchema().getTimeSampling().isStatic() )
-    {
-        std::cout << "a is static time" << std::endl;
-    }
-    if ( tst.isIdentity() ) { std::cout << "a is identity time" << std::endl; }
-    if ( tst.isUniform() ) { std::cout << "a is uniform time" << std::endl; }
-    if ( tst.isCyclic() ) { std::cout << "a is cyclic time" << std::endl; }
-    if ( tst.isAcyclic() ) { std::cout << "a is acyclic time" << std::endl; }
-
-    if ( a.getSchema().isConstant() )
-    {
-        std::cout << "a is constant!" << std::endl;
-    }
+    TESTING_ASSERT( tst.isUniform() );
 
     for ( size_t i = 0 ; i < a.getSchema().getNumSamples() ; i++ )
     {
@@ -158,17 +159,42 @@ void readArchive( const std::string &iName )
 
         TESTING_ASSERT( trans == shouldBeTrans );
 
-        std::cout << i << "th read a sample's translation at " << t
-                  << ": " << std::endl
-                  << a.getSchema().getValue( i ).getTranslation() << std::endl;
+        TESTING_ASSERT( trans ==
+                        aowrapped.getSchema().getValue( i ).getTranslation() );
+
+        std::cout << "a's " << i << "th sample has translation " << trans
+                  << " at time " << t << std::endl
+                  << std::endl;
     }
 
-    for ( size_t i = 0 ; i < c.getSchema().getNumSamples() ; i++ )
     {
-        std::cout << i << "th read c sample's translation at "
-             << c.getSchema().getTimeSampling().getSampleTime( i )
-             << ": " << std::endl
-             << c.getSchema().getValue( i ).getTranslation() << std::endl;
+        chrono_t sampleTime = frameInterval * -0.25;
+
+        sampleTime += frameInterval * startFrame;
+
+        TESTING_ASSERT( c.getSchema().getNumSamples() == 15 );
+
+        for ( size_t i = 0 ; i < 5 ; i++ )
+        {
+            for ( size_t j = 0 ; j < 3 ; j++ )
+            {
+                V3d shouldBeTrans( sampleTime * 24.0,
+                                   ( j == 1 ? 1.0 : 0.0 ),
+                                   i * 100.0 + j );
+
+                size_t idx = i * 3 + j;
+                V3d trans = c.getSchema().getValue( idx ).getTranslation();
+
+                TESTING_ASSERT( trans == shouldBeTrans );
+
+                std::cout << "c's " << idx << "th sample has translation "
+                          << trans << " at time " << sampleTime
+                          << std::endl << std::endl;
+
+                sampleTime += frameInterval * 0.25;
+            }
+            sampleTime += frameInterval * 0.25;
+        }
     }
 }
 

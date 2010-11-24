@@ -136,7 +136,7 @@ public:
                      const Abc::IArgument &iArg1 = Abc::IArgument() )
       : Abc::ISchema<PolyMeshSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
-        // nothing
+        init( iArg0, iArg1 );
     }
 
     //! Default copy constructor used.

@@ -99,6 +99,18 @@ public:
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }
 
+    //! wrap an existing ISimpleXform object
+    template <class CPROP_PTR>
+    ISimpleXformSchema( CPROP_PTR iThis,
+                        Abc::WrapExistingFlag iFlag,
+
+                        const Abc::IArgument &iArg0 = Abc::IArgument(),
+                        const Abc::IArgument &iArg1 = Abc::IArgument() )
+      : Abc::ISchema<SimpleXformSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+    {
+        init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
+    }
+
     //-*************************************************************************
     // SAMPLE STUFF
     //-*************************************************************************
