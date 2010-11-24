@@ -222,8 +222,8 @@ inline ISchemaObject<SCHEMA>::ISchemaObject(
                  << " to expected: "
                  << getSchemaObjTitle() );
 
-    m_schema = SCHEMA( ICompoundProperty( this->getProperties(),
-                                          SCHEMA::getDefaultSchemaName() ),
+    m_schema = SCHEMA( SCHEMA( this->getProperties(),
+                               SCHEMA::getDefaultSchemaName() ),
                        iFlag,
                        this->getErrorHandlerPolicy(),
                        GetSchemaInterpMatching( iArg0, iArg1 ) );
