@@ -41,6 +41,8 @@
 
 #include <ImathMath.h>
 
+#include <limits>
+
 #include <algorithm>
 
 namespace Alembic {
@@ -50,8 +52,10 @@ namespace v1 {
 static const DataType kChrono_TDataType( kChrono_TPOD, 1 );
 
 //! Work around the imprecision of comparing floating values.
-//! We're setting it to just under 1 / 44100 (the sampling rate for audio).
-static const chrono_t kCHRONO_TOLERANCE = 0.0000226;
+static const chrono_t kCHRONO_EPSILON = \
+    std::numeric_limits<chrono_t>::epsilon() * 32.0;
+
+static const chrono_t kCHRONO_TOLERANCE = kCHRONO_EPSILON * 32.0;
 
 //-*****************************************************************************
 // For properties that use acyclic time sampling, the array of
@@ -136,15 +140,15 @@ const chrono_t *TimeSampling::_getTimeSamplesAsChrono_tPtr() const
 //-*****************************************************************************
 chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
 {
-    #if 0
+    #if 1
     ABCA_ASSERT( iIndex >= 0 && iIndex < m_numSamples,
                  "Out-of-range sample index: " << iIndex
                  << ", range [0-" << m_numSamples
                  << "]" );
-    #endif
-
+    #else
     iIndex = std::max<index_t>( 0,
                                 std::min<index_t>( iIndex, m_numSamples - 1 ) );
+    #endif
 
     if ( m_timeSamplingType.isIdentity() )
     {
@@ -193,6 +197,8 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
         idx = idx < 0 ? 0 : idx >= m_numSamples ? m_numSamples - 1 : idx;
         return std::pair<index_t, chrono_t>( idx, ( chrono_t )idx );
     }
+
+    iTime += kCHRONO_EPSILON;
 
     const chrono_t minTime = this->getSampleTime( 0 );
     if ( iTime <= minTime )
@@ -358,6 +364,8 @@ TimeSampling::getCeilIndex( chrono_t iTime ) const
         idx = idx < 0 ? 0 : idx;
         return std::pair<index_t, chrono_t>( idx, ( chrono_t )idx );
     }
+
+    iTime -= kCHRONO_EPSILON;
 
     const index_t _maxind = m_numSamples - 1;
     const size_t maxIndex = _maxind > -1 ? _maxind : 0;
