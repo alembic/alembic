@@ -72,6 +72,13 @@ void Example1_MeshIn( const std::string &arkiveFile )
 
     IObject smeshyObj( archive.getTop(), "subdmeshy" );
 
+    // you can construct a Schema from a regular IObject simply by passing
+    // in that Object's CompoundProperty as the parent in the Schema's
+    // constructor.
+    ISubDSchema sds( smeshyObj.getProperties() );
+
+    TESTING_ASSERT( ISubDSchema::matches( sds.getMetaData() ) );
+
     ISubD subdObjNM( smeshyObj, kWrapExisting );
 
     ISubD subdObj( archive.getTop(), "subdmeshy", kStrictMatching );
