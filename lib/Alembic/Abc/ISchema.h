@@ -84,9 +84,15 @@ public:
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        return ( getSchemaTitle() == "" ||
-                 ( iMetaData.get( "schema" ) ==
-                   getSchemaTitle() ) );
+        if ( getSchemaTitle() == "" || iMatching == kNoMatching )
+        { return true; }
+
+        if ( iMatching == kStrictMatching || iMatching == kSchemaTitleMatching )
+        {
+            return iMetaData.get( "schema" ) == getSchemaTitle();
+        }
+
+        return false;
     }
 
     //! This will check whether or not a given object (as represented by

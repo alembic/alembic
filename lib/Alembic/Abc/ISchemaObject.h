@@ -84,10 +84,21 @@ public:
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        return ( getSchemaTitle() == "" ||
-                 ( iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ) ||
-                 ( iMetaData.get( "schema" ) == getSchemaObjTitle() ) ||
-                 ( iMetaData.get( "schema" ) == getSchemaTitle() ) );
+        if ( getSchemaTitle() == "" || iMatching == kNoMatching )
+        { return true; }
+
+        if ( iMatching == kStrictMatching )
+        {
+
+            return iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle();
+        }
+
+        if ( iMatching == kSchemaTitleMatching )
+        {
+            return iMetaData.get( "schema" ) == getSchemaTitle();
+        }
+
+        return false;
     }
 
     //! This will check whether or not a given object (as represented by
@@ -110,7 +121,7 @@ public:
 
     //! The primary constructor creates an ISchemaObject as a child of the
     //! first argument, which is any Abc or AbcCoreAbstract (or other)
-    //! object which can be intrusively cast to an ObjectWriterPtr.
+    //! object which can be intrusively cast to an ObjectReaderPtr.
     template <class OBJECT_PTR>
     ISchemaObject( OBJECT_PTR iParentObject,
                    const std::string &iName,
@@ -222,9 +233,7 @@ inline ISchemaObject<SCHEMA>::ISchemaObject(
                  << " to expected: "
                  << getSchemaObjTitle() );
 
-    m_schema = SCHEMA( SCHEMA( this->getProperties(),
-                               SCHEMA::getDefaultSchemaName() ),
-                       iFlag,
+    m_schema = SCHEMA( this->getProperties(),
                        this->getErrorHandlerPolicy(),
                        GetSchemaInterpMatching( iArg0, iArg1 ) );
 

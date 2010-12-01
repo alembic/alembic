@@ -80,8 +80,9 @@ using namespace AbcA;
 //-*****************************************************************************
 enum SchemaInterpMatching
 {
+    kStrictMatching,
     kNoMatching,
-    kStrictMatching
+    kSchemaTitleMatching
 };
 
 //-*****************************************************************************

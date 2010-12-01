@@ -58,6 +58,8 @@ void Example1_MeshOut( const std::string &arkiveFile )
 
     // Create a subd
     OSubD smeshyObj( archive.getTop(), "subdmeshy" );
+
+    TESTING_ASSERT( OSubD::matches( smeshyObj.getHeader() ) );
 }
 
 //-*****************************************************************************
@@ -74,16 +76,16 @@ void Example1_MeshIn( const std::string &arkiveFile )
 
     ISubD subdObj( archive.getTop(), "subdmeshy", kStrictMatching );
 
+    // if this function doesn't throw an exception, this test passes
+    IPolyMesh fakePolyMesh( archive.getTop(), "subdmeshy", kNoMatching );
+
     TESTING_ASSERT( ISubD::matches( smeshyObj.getMetaData() ) );
 
     TESTING_ASSERT( ISubD::matches( subdObj.getMetaData() ) );
 
-    // we constructed it with kNoMatching, so it should match for a non-matching
-    // schema
-    TESTING_ASSERT( IPolyMesh::matches( subdObjNM.getHeader(), kNoMatching ) );
-
-    // this subd object should have strict matching
     TESTING_ASSERT( ! IPolyMesh::matches( subdObj.getHeader() ) );
+
+    TESTING_ASSERT( ! IPolyMesh::matches( smeshyObj.getHeader() ) );
 }
 
 //-*****************************************************************************
