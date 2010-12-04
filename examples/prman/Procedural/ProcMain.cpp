@@ -75,7 +75,11 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     }
     else
     {
-        //unrecognized, continue walking?
+        std::cerr << "could not determine type of " << ohead.getName()
+                  << std::endl;
+
+        std::cerr << ohead.getName() << " has MetaData: "
+                  << ohead.getMetaData().serialize() << std::endl;
     }
 
     if ( nextParentObject.valid() )

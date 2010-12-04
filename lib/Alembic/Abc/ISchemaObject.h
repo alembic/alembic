@@ -90,7 +90,8 @@ public:
         if ( iMatching == kStrictMatching )
         {
 
-            return iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle();
+            return iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ||
+                iMetaData.get( "schema" ) == getSchemaObjTitle();
         }
 
         if ( iMatching == kSchemaTitleMatching )
