@@ -80,6 +80,11 @@ void SubDTagBuilder::addStringArg( const std::string &value )
 
     m_stringArgs.push_back( value );
 
+    //stow the c_str from our stored std::string to make sure it's still alive
+    //when we need it
+    m_outputStringArgs.push_back(
+        const_cast<RtToken>( m_stringArgs.back().c_str() ) );
+
     m_argCountsHierarchical[( m_tags.size() - 1 ) * 3 + 2] += 1;
 }
 
@@ -181,7 +186,7 @@ void ProcessHoles( SubDTagBuilder &tags, ISubDSchema::Sample &sample )
     {
         if ( holes->size() > 0 )
         {
-            tags.add( "holes" );
+            tags.add( "hole" );
             //TODO, unfortunate to add these one-at-a-time
             for ( size_t i = 0, e = holes->size(); i < e; ++i )
             {
