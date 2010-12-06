@@ -140,15 +140,10 @@ const chrono_t *TimeSampling::_getTimeSamplesAsChrono_tPtr() const
 //-*****************************************************************************
 chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
 {
-    #if 1
     ABCA_ASSERT( iIndex >= 0 && iIndex < m_numSamples,
                  "Out-of-range sample index: " << iIndex
                  << ", range [0-" << m_numSamples
                  << "]" );
-    #else
-    iIndex = std::max<index_t>( 0,
-                                std::min<index_t>( iIndex, m_numSamples - 1 ) );
-    #endif
 
     if ( m_timeSamplingType.isIdentity() )
     {
