@@ -43,6 +43,12 @@
 
 using namespace Alembic::AbcGeom;
 
+void castTest( const OObject& foo )
+{
+    std::cout << "foo is a const reference named " << foo.getName()
+              << std::endl;
+}
+
 //-*****************************************************************************
 void writeArchive( const std::string& iName )
 {
@@ -74,6 +80,7 @@ void writeArchive( const std::string& iName )
 
     std::cout << std::endl;
 
+    castTest( a );
 
     //b is static
     OSimpleXform b( root, "b" );
