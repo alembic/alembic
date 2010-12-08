@@ -63,15 +63,26 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
 
         nextParentObject = xform; //we do want to keep walking
     }
+    else if ( IXform::matches( ohead ) )
+    {
+        IXform xform( parent, ohead.getName() );
+        ProcessXform( xform, args );
+
+        nextParentObject = xform;
+    }
     else if ( ISubD::matches( ohead ) )
     {
         ISubD subd( parent, ohead.getName() );
         ProcessSubD( subd, args );
+
+        nextParentObject = subd;
     }
     else if ( IPolyMesh::matches( ohead ) )
     {
         IPolyMesh polymesh( parent, ohead.getName() );
         ProcessPolyMesh( polymesh, args );
+
+        nextParentObject = polymesh;
     }
     else
     {

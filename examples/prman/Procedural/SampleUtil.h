@@ -47,7 +47,7 @@ using namespace Alembic::AbcGeom;
 typedef std::set<Abc::chrono_t> SampleTimeSet;
 
 //-*****************************************************************************
-void GetRelevantSampleTimes( ProcArgs &args, TimeSampling &timeSampling,
+void GetRelevantSampleTimes( ProcArgs &args, const TimeSampling &timeSampling,
                              SampleTimeSet &output );
 
 void WriteMotionBegin( ProcArgs &args, const SampleTimeSet &sampleTimes );

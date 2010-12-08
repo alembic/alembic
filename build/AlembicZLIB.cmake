@@ -1,7 +1,7 @@
 ##-*****************************************************************************
 ##
 ## Copyright (c) 2009-2010, Industrial Light & Magic, a division of Lucas
-## Digital Ltd. LLC
+## Entertainment Company Ltd.
 ##
 ## All rights reserved.
 ##
@@ -40,7 +40,7 @@ IF(DEFINED ZLIB_INCLUDE_DIR)
     MESSAGE(STATUS "Using ZLIB_INCLUDE_DIR: ${ZLIB_INCLUDE_DIR}" )
     SET( ZLIB_FOUND FALSE )
 ENDIF()
- 
+
 IF(DEFINED ZLIB_LIBRARY)
     MESSAGE(STATUS "Using ZLIB_LIBRARY: ${ZLIB_LIBRARY}" )
 ELSE()
@@ -49,8 +49,8 @@ ENDIF()
 
 
 IF( NOT ZLIB_FOUND )
-    FIND_PACKAGE(ZLIB REQUIRED)  
-ENDIF()    
+    FIND_PACKAGE(ZLIB REQUIRED)
+ENDIF()
 
 IF( ZLIB_FOUND )
   SET( ALEMBIC_ZLIB_INCLUDE_PATH ${ZLIB_INCLUDE_DIR} )

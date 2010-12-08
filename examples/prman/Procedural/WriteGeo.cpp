@@ -40,11 +40,11 @@
 #include "SubDTags.h"
 
 //-*****************************************************************************
-void ProcessSimpleTransform( ISimpleXform xform, ProcArgs &args )
+void ProcessSimpleTransform( ISimpleXform &xform, ProcArgs &args )
 {
     ISimpleXformSchema &xs = xform.getSchema();
 
-    TimeSampling ts = xs.getTimeSampling();
+    const TimeSampling &ts = xs.getTimeSampling();
 
     SampleTimeSet sampleTimes;
     GetRelevantSampleTimes( args, ts, sampleTimes );
@@ -80,11 +80,83 @@ void ProcessSimpleTransform( ISimpleXform xform, ProcArgs &args )
 }
 
 //-*****************************************************************************
-void ProcessPolyMesh( IPolyMesh polymesh, ProcArgs &args )
+void ProcessXform( IXform &xform, ProcArgs &args )
+{
+    IXformSchema &xs = xform.getSchema();
+
+    const TimeSampling &ts = xs.getTimeSampling();
+
+    SampleTimeSet sampleTimes;
+    GetRelevantSampleTimes( args, ts, sampleTimes );
+
+    bool multiSample = sampleTimes.size() > 1;
+
+    std::vector<XformSampleVec> sampleVectors;
+    sampleVectors.resize( sampleTimes.size() );
+
+    //fetch all operators at each sample time first
+    size_t sampleTimeIndex = 0;
+    for ( SampleTimeSet::iterator I = sampleTimes.begin();
+          I != sampleTimes.end(); ++I, ++sampleTimeIndex )
+    {
+        ISampleSelector sampleSelector( *I );
+
+        XformSampleVec ops;
+
+        xs.getSample( sampleVectors[sampleTimeIndex], sampleSelector );
+    }
+
+    //loop through the operators individually since a MotionBegin block
+    //can enclose only homogenous statements
+    for ( size_t i = 0, e = sampleVectors.front().size(); i < e; ++i )
+    {
+        if ( multiSample ) { WriteMotionBegin(args, sampleTimes); }
+
+        for ( size_t j = 0; j < sampleVectors.size(); ++j )
+        {
+            XformSamplePtr & sample = sampleVectors[j][i];
+
+            switch ( sample->getType() )
+            {
+            case kScaleOperation:
+            {
+                V3d value = ScaleSample( sample ).get();
+                RiScale( value.x, value.y, value.z );
+                break;
+            }
+            case kTranslateOperation:
+            {
+                V3d value = ScaleSample( sample ).get();
+                RiTranslate( value.x, value.y, value.z );
+                break;
+            }
+            case kRotateOperation:
+            {
+                RotateSample rotateSample( sample );
+                V3d axis = rotateSample.getAxis();
+                RiRotate( rotateSample.getAngle(),
+                          axis.x, axis.y, axis.z );
+                break;
+            }
+            case kMatrixOperation:
+            {
+                M44d m = MatrixSample( sample ).get();
+                WriteConcatTransform( m );
+                break;
+            }
+            }
+        }
+
+        if ( multiSample ) { RiMotionEnd(); }
+    }
+}
+
+//-*****************************************************************************
+void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 {
     IPolyMeshSchema &ps = polymesh.getSchema();
 
-    TimeSampling ts = ps.getTimeSampling();
+    const TimeSampling &ts = ps.getTimeSampling();
 
     SampleTimeSet sampleTimes;
     GetRelevantSampleTimes( args, ts, sampleTimes );
@@ -128,14 +200,14 @@ void ProcessPolyMesh( IPolyMesh polymesh, ProcArgs &args )
 }
 
 //-*****************************************************************************
-void ProcessSubD( ISubD subd, ProcArgs &args )
+void ProcessSubD( ISubD &subd, ProcArgs &args )
 {
     ISubDSchema &ss = subd.getSchema();
 
-    TimeSampling ts = ss.getTimeSampling();
+    const TimeSampling &ts = ss.getTimeSampling();
 
     SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes(args, ts, sampleTimes);
+    GetRelevantSampleTimes( args, ts, sampleTimes );
 
     bool multiSample = sampleTimes.size() > 1;
 
@@ -224,5 +296,3 @@ void WriteIdentifier( const ObjectHeader &ohead )
     RiAttribute(const_cast<char*>( "identifier" ), const_cast<char*>( "name" ),
                 nameArray, RI_NULL );
 }
-
-

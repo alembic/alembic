@@ -80,7 +80,7 @@ void WriteConcatTransform( const M44d &m )
 }
 
 //-*****************************************************************************
-void GetRelevantSampleTimes( ProcArgs &args, TimeSampling &timeSampling,
+void GetRelevantSampleTimes( ProcArgs &args, const TimeSampling &timeSampling,
                              SampleTimeSet &output )
 {
     if ( timeSampling.isStatic() )
