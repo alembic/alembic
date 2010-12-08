@@ -71,11 +71,13 @@ void Example1_MeshOut()
     std::vector<int32_t> corners;
     std::vector<int32_t> creaseLengths;
     std::vector<float32_t> creaseSharpnesses;
+    std::vector<float32_t> cornerSharpnesses;
 
     for ( size_t i = 0 ; i < 24 ; i++ )
     {
         creases.push_back( g_indices[i] );
         corners.push_back( g_indices[i] );
+        cornerSharpnesses.push_back( 1.0e38 );
     }
 
     for ( size_t i = 0 ; i < 6 ; i++ )
@@ -84,9 +86,8 @@ void Example1_MeshOut()
         creaseSharpnesses.push_back( 1.0e38 );
     }
 
-    mesh_samp.setCreaseIndices( creases );
-    mesh_samp.setCreaseLengths( creaseLengths );
-    mesh_samp.setCornerIndices( corners );
+    mesh_samp.setCreases( creases, creaseLengths, creaseSharpnesses );
+    mesh_samp.setCorners( corners, cornerSharpnesses );
 
     // Set the sample.
     mesh.set( mesh_samp, 0 );
