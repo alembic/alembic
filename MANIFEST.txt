@@ -23,6 +23,10 @@
  doc -- Documentation for how to build dependencies, doxygen generated doc will
         also end up here
 
+ prman
+     `-- Procedural - start of a Renderman DSO suitable for use in a
+         'Procedural "DynamicLoad"' RIB statement.
+
  examples - Unsupported examples that use Alembic
  |
  `-- AbcClients
@@ -40,9 +44,5 @@
  |   `-- SimpleAbcViewer - Simple OpenGL viewer for Alembic Archives
  |
  `-- maya
- |   `-- AlembicSimpleAbcExport - A simple plugin to export polygonal geometry
- |       to Alembic
- |
- `-- prman
-     `-- Procedural - start of a Renderman DSO suitable for use in a
-         'Procedural "DynamicLoad"' RIB statement.
+     `-- AlembicSimpleAbcExport - A simple plugin to export polygonal geometry
+         to Alembic

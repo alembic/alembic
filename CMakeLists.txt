@@ -234,6 +234,20 @@ ENDIF()
 ADD_SUBDIRECTORY( lib )
 INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/lib" )
 
+# Include Prman stuff
+IF(DEFINED USE_PRMAN AND NOT USE_PRMAN)
+    MESSAGE(STATUS "Skipping Prman plugins")
+ELSE()
+    MESSAGE( STATUS "About to include AlembicPRMan.cmake" )
+    INCLUDE( "./build/AlembicPRMan.cmake" )
+    IF( ALEMBIC_PRMAN_FOUND )
+        MESSAGE(STATUS "Building PRMan plugins" )
+        ADD_SUBDIRECTORY( prman )
+    ELSE()
+        MESSAGE(STATUS "For some reason, ALEMBIC_PRMAN_FOUND is False?")
+    ENDIF()
+ENDIF()
+
 # example code not supported
 ADD_SUBDIRECTORY( examples EXCLUDE_FROM_ALL )
 
