@@ -50,6 +50,7 @@ http://code.google.com/p/alembic/issues/detail?id=102
 This is an arbitrary transform "stack" type, roughly equivalent to Renderman's
 transformation model.  It has per-operation hints that allow it to be
 recognized as a transform and mapped directly to another application's
-transformation model.
+transformation model.  It can also be read and written as a regular 4x4
+matrix.
 
 ##-*****************************************************************************
