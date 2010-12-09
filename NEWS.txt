@@ -7,7 +7,7 @@ scene, and that Alembic file can be read by the Renderman plugin to create
 images, which means that an end-to-end workflow can be achieved.  A complete
 overview of the changes to the code is here:
 
-http://codereview.appspot.com/3461042
+http://codereview.appspot.com/3427045
 
 A summary of the bugs fixed in this change:
 
@@ -41,5 +41,15 @@ A consequence of the bug that was fixed in issue 71.
 http://code.google.com/p/alembic/issues/detail?id=123
 
 Alembic was not reading all the required data from an ISimpleXform.
+
+
+In progress, we have:
+
+http://code.google.com/p/alembic/issues/detail?id=102
+
+This is an arbitrary transform "stack" type, roughly equivalent to Renderman's
+transformation model.  It has per-operation hints that allow it to be
+recognized as a transform and mapped directly to another application's
+transformation model.
 
 ##-*****************************************************************************
