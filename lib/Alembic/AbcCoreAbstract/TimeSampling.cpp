@@ -39,11 +39,23 @@
 #include <Alembic/AbcCoreAbstract/DataType.h>
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 
+#include <ImathMath.h>
+
+#include <limits>
+
+#include <algorithm>
+
 namespace Alembic {
 namespace AbcCoreAbstract {
 namespace v1 {
 
 static const DataType kChrono_TDataType( kChrono_TPOD, 1 );
+
+//! Work around the imprecision of comparing floating values.
+static const chrono_t kCHRONO_EPSILON = \
+    std::numeric_limits<chrono_t>::epsilon() * 32.0;
+
+static const chrono_t kCHRONO_TOLERANCE = kCHRONO_EPSILON * 32.0;
 
 //-*****************************************************************************
 // For properties that use acyclic time sampling, the array of
@@ -62,14 +74,28 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
                             ArraySamplePtr iSampleTimes )
   : m_timeSamplingType( iTimeSamplingType )
   , m_numSamples( iNumSamples )
-  , m_sampleTimes( iSampleTimes)
+  , m_sampleTimes( iSampleTimes )
 {
-    ABCA_ASSERT( sizeof( chrono_t ) == kChrono_TDataType.getNumBytes(),
+    //! The number of stored samples should never be greater than the number
+    //! of samples per cycle.  Users of the library never manually construct
+    //! a TimeSampling object, though, so this assert is just an internal
+    //! sanity check; if the test fails, it just means that Alembic is storing
+    //! more data than it needs to.
+    //!
+    //! Due to an implementation detail, the "size" of the iSampleTimes
+    //! for Identity Time Sampling will be 1, and will contain '0' as the
+    //! only value.
+    assert( iSampleTimes->size() <= iTimeSamplingType.getNumSamplesPerCycle() ||
+            iTimeSamplingType.isIdentity() && iSampleTimes->size() <= 1 );
+
+    ABCA_ASSERT( sizeof(chrono_t) == iSampleTimes->getDataType().getNumBytes(),
                 "Internal error sizeof( chrono_t ) mismatch to kChrono_TPOD");
+
     ABCA_ASSERT( m_sampleTimes ||
                  ( m_numSamples == 0 && m_timeSamplingType.isIdentity() ),
                  "Non-identity time sampling with more than zero samples "
                  << "requires a valid array of sample times." );
+
     ABCA_ASSERT( m_sampleTimes->getDimensions().rank() == 1
                  && m_sampleTimes->getDataType().getPod() == kChrono_TPOD,
                  "Invalid sampleTimes ArraySample, must be rank 1 and "
@@ -156,8 +182,7 @@ chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
 std::pair<index_t, chrono_t>
 TimeSampling::getFloorIndex( chrono_t iTime ) const
 {
-    //ABCA_ASSERT( m_numSamples > 0,
-    //             "It is invalid to call getFloorIndex() with no samples." );
+    //! Return the index of the sampled time that is <= iTime
 
     if ( m_numSamples < 1 ) { return std::pair<index_t, chrono_t>( 0, 0.0 ); }
 
@@ -167,6 +192,8 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
         idx = idx < 0 ? 0 : idx >= m_numSamples ? m_numSamples - 1 : idx;
         return std::pair<index_t, chrono_t>( idx, ( chrono_t )idx );
     }
+
+    iTime += kCHRONO_EPSILON;
 
     const chrono_t minTime = this->getSampleTime( 0 );
     if ( iTime <= minTime )
@@ -182,7 +209,6 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
 
     if ( m_timeSamplingType.isAcyclic() )
     {
-        // This is the hardest one.
         // For now, just loop.
         //
         // For later, use binary search of sorted array.
@@ -239,7 +265,6 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
             assert( sampTime < iTime );
         }
 
-        // Return the pair.
         return std::pair<index_t, chrono_t>( sampIdx, sampTime );
     }
     else
@@ -249,11 +274,29 @@ TimeSampling::getFloorIndex( chrono_t iTime ) const
         const size_t N = m_timeSamplingType.getNumSamplesPerCycle();
         const chrono_t period = m_timeSamplingType.getTimePerCycle();
         const chrono_t elapsedTime = iTime - minTime;
-        const size_t numCycles = ( size_t )floor( elapsedTime / period );
-        const chrono_t cycleBlockTime = numCycles * period;
-        assert( elapsedTime >= cycleBlockTime );
+
+        double rawNumCycles = elapsedTime / period;
+        double rawNumCyclesIntregal;
+        double rawNumCyclesFractional = modf( rawNumCycles,
+                                              &rawNumCyclesIntregal );
+
+        if ( Imath::equalWithAbsError( 1.0 - rawNumCyclesFractional, 0.0,
+                                       kCHRONO_TOLERANCE ) )
+        {
+            rawNumCyclesIntregal += 1;
+        }
+
+        const size_t numCycles = ( size_t )rawNumCyclesIntregal;
+        const chrono_t cycleBlockTime = ( numCycles * period );
+
+
+        assert( elapsedTime >= cycleBlockTime ||
+                Imath::equalWithAbsError( cycleBlockTime - elapsedTime, 0.0,
+                                          kCHRONO_TOLERANCE ) );
+
         const chrono_t rem = iTime - cycleBlockTime;
-        assert( rem < period );
+
+        assert( rem < period + minTime );
         const size_t cycleBlockIndex = N * numCycles;
 
         index_t sampIdx = 0;
@@ -288,8 +331,9 @@ getCeilIndexHelper( const TimeSampling *iThat, const chrono_t iTime,
                     const size_t iFloorIndex, const chrono_t iFloorTime,
                     const size_t iMaxIndex )
 {
-
-    if ( iFloorIndex == iMaxIndex || iFloorTime == iTime )
+    if ( iFloorIndex == iMaxIndex ||
+         Imath::equalWithAbsError( iFloorTime, iTime,
+                                   kCHRONO_TOLERANCE ) )
     {
         return std::pair<index_t, chrono_t>( iFloorIndex, iFloorTime );
     }
@@ -304,8 +348,7 @@ getCeilIndexHelper( const TimeSampling *iThat, const chrono_t iTime,
 std::pair<index_t, chrono_t>
 TimeSampling::getCeilIndex( chrono_t iTime ) const
 {
-    //ABCA_ASSERT( m_numSamples > 0,
-    //             "It is invalid to call getCeilIndex() with no samples." );
+    //! Return the index of the sampled time that is >= iTime
 
     if ( m_numSamples < 1 ) { return std::pair<index_t, chrono_t>( 0, 0.0 ); }
 
@@ -316,6 +359,8 @@ TimeSampling::getCeilIndex( chrono_t iTime ) const
         idx = idx < 0 ? 0 : idx;
         return std::pair<index_t, chrono_t>( idx, ( chrono_t )idx );
     }
+
+    iTime -= kCHRONO_EPSILON;
 
     const index_t _maxind = m_numSamples - 1;
     const size_t maxIndex = _maxind > -1 ? _maxind : 0;
@@ -342,8 +387,9 @@ TimeSampling::getCeilIndex( chrono_t iTime ) const
 std::pair<index_t, chrono_t>
 TimeSampling::getNearIndex( chrono_t iTime ) const
 {
-    //ABCA_ASSERT( m_numSamples > 0,
-    //             "It is invalid to call getNearIndex() with no samples." );
+    //! Return the index of the sampled time that is:
+    //! (iTime - floorTime < ceilTime - iTime) ? getFloorIndex( iTime )
+    //! : getCeilIndex( iTime );
 
     if ( m_numSamples < 1 ) { return std::pair<index_t, chrono_t>( 0, 0.0 ); }
 
@@ -372,11 +418,14 @@ TimeSampling::getNearIndex( chrono_t iTime ) const
     }
 
     std::pair<index_t, chrono_t> floorPair = this->getFloorIndex( iTime );
-    //std::pair<index_t, chrono_t> ceilPair = getCeilIndexHelper(
-    //    this, iTime, floorPair.first, floorPair.second, maxIndex );
     std::pair<index_t, chrono_t> ceilPair = this->getCeilIndex( iTime );
 
-    assert( floorPair.second <= iTime && iTime <= ceilPair.second );
+    assert( ( floorPair.second <= iTime ||
+              Imath::equalWithAbsError( iTime, floorPair.second,
+                                        kCHRONO_TOLERANCE ) ) &&
+            ( iTime <= ceilPair.second ||
+              Imath::equalWithAbsError( iTime, ceilPair.second,
+                                        kCHRONO_TOLERANCE ) ) );
 
     chrono_t deltaFloor = fabs( iTime - floorPair.second );
     chrono_t deltaCeil = fabs( ceilPair.second - iTime );

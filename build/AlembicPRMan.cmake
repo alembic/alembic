@@ -140,12 +140,13 @@ MACRO(ADD_PRMAN_CXX_PLUGIN PluginName SourceFile1 )
                          LINK_FLAGS ${PRMAN_LINK_FLAGS}
                          PREFIX "" )
 
-  TARGET_LINK_LIBRARIES( ${PluginName}
-                         AlembicTraitsGeom AlembicTraits 
-                         AlembicAsset MD5Hash AlembicHDF5
-                         ${ALEMBIC_HDF5_LIBS} AlembicUtil AlembicExc
-                         ${Boost_REGEX_LIBRARY} ${Boost_FILESYSTEM_LIBRARY}
-                         ${Boost_SYSTEM_LIBRARY}
-                         -lpthread -lz -lm )
+  TARGET_LINK_LIBRARIES ( ${PluginName} ${ALEMBIC_PRMAN_LIBPRMAN} )
+#  TARGET_LINK_LIBRARIES( ${PluginName}
+#                         AlembicTraitsGeom AlembicTraits 
+#                         AlembicAsset MD5Hash AlembicHDF5
+#                         ${ALEMBIC_HDF5_LIBS} AlembicUtil AlembicExc
+#                         ${Boost_REGEX_LIBRARY} ${Boost_FILESYSTEM_LIBRARY}
+#                        ${Boost_SYSTEM_LIBRARY}
+#                         -lpthread -lz -lm )
 
 ENDMACRO(ADD_PRMAN_CXX_PLUGIN)

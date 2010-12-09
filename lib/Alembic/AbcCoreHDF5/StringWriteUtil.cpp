@@ -391,7 +391,6 @@ WriteStringArrayT( WrittenArraySampleMap &iMap,
 
     ABCA_ASSERT( dsetId >= 0,
                  "WriteArray() Failed in dataset constructor" );
-    DsetCloser dsetCloser( dsetId );
 
     // Write the data.
     if ( hasData )
@@ -407,26 +406,9 @@ WriteStringArrayT( WrittenArraySampleMap &iMap,
     // with the compacted string.
     WriteDimensions( dsetId, "dims", dims );
 
-    // Store the full information necessary to recreate
-    // this as fileId and full path.
-    {
-        char buf[4096];
-        ssize_t len = H5Iget_name( dsetId, buf, 4096 );
-        std::vector<char> bufStrBuf( ( size_t )( len + 10 ) );
-        len = H5Iget_name( dsetId, &bufStrBuf.front(), len+1 );
-        std::string bufStr = ( const char * )( &bufStrBuf.front() );
-        ABCA_ASSERT( len > 0,
-                     "WriteArray() H5Iget_name failed." );
+    writeID.reset( new WrittenArraySampleID( iKey, dsetId ) );
 
-        hid_t fileId = H5Iget_file_id( dsetId );
-        ABCA_ASSERT( fileId >= 0,
-                     "WriteArray() H5Iget_file_id failed." );
-
-        writeID.reset( new WrittenArraySampleID( iKey,
-                                                 fileId,
-                                                 bufStr ) );
-        iMap.store( writeID );
-    }
+    iMap.store( writeID );
 
     // Return the reference.
     return writeID;

@@ -65,10 +65,16 @@ public:
     //! data in ".geom", so, "AbcGeom_PolyMesh_v1:.geom"
     //! Sometimes schema titles from underlying schemas are "", but
     //! ours never are.
+    static const std::string &getSchemaObjTitle()
+    {
+        static std::string soSchemaTitle =
+            SCHEMA::getSchemaTitle() + ":" + SCHEMA::getDefaultSchemaName();
+        return soSchemaTitle;
+    }
+
     static const std::string &getSchemaTitle()
     {
-        static std::string sSchemaTitle =
-            SCHEMA::getSchemaTitle() + ":" + SCHEMA::getDefaultSchemaName();
+        static std::string sSchemaTitle = SCHEMA::getSchemaTitle();
         return sSchemaTitle;
     }
 
@@ -78,8 +84,22 @@ public:
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        return ( getSchemaTitle() == "" ||
-                 ( iMetaData.get( "schema" ) == getSchemaTitle() ) );
+        if ( getSchemaTitle() == "" || iMatching == kNoMatching )
+        { return true; }
+
+        if ( iMatching == kStrictMatching )
+        {
+
+            return iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ||
+                iMetaData.get( "schema" ) == getSchemaObjTitle();
+        }
+
+        if ( iMatching == kSchemaTitleMatching )
+        {
+            return iMetaData.get( "schema" ) == getSchemaTitle();
+        }
+
+        return false;
     }
 
     //! This will check whether or not a given object (as represented by
@@ -102,7 +122,7 @@ public:
 
     //! The primary constructor creates an ISchemaObject as a child of the
     //! first argument, which is any Abc or AbcCoreAbstract (or other)
-    //! object which can be intrusively cast to an ObjectWriterPtr.
+    //! object which can be intrusively cast to an ObjectReaderPtr.
     template <class OBJECT_PTR>
     ISchemaObject( OBJECT_PTR iParentObject,
                    const std::string &iName,
@@ -168,7 +188,7 @@ ISchemaObject<SCHEMA>::ISchemaObject
     iArg1.setInto( args );
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ISchemaObject::ISchemaObject( OObject )" );
+        "ISchemaObject::ISchemaObject( IObject )" );
 
     const AbcA::ObjectHeader &oheader = this->getHeader();
 
@@ -200,23 +220,23 @@ inline ISchemaObject<SCHEMA>::ISchemaObject(
              iFlag,
              GetErrorHandlerPolicy( iObject,
                                     iArg0, iArg1 ) )
-  , m_schema( this->getProperties(),
-              iFlag,
-              this->getErrorHandlerPolicy(),
-              GetSchemaInterpMatching( iArg0, iArg1 ) )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "ISchemaObject::ISchemaObject( wrap )" );
 
     const AbcA::ObjectHeader &oheader = this->getHeader();
 
-    ABCA_ASSERT( matches( oheader,
+    ABCA_ASSERT( matches( oheader.getMetaData(),
                           GetSchemaInterpMatching( iArg0, iArg1 ) ),
 
                  "Incorrect match of schema: "
-                 << oheader.getMetaData().get( "schema" )
+                 << oheader.getMetaData().get( "schemaObjTitle" )
                  << " to expected: "
-                 << getSchemaTitle() );
+                 << getSchemaObjTitle() );
+
+    m_schema = SCHEMA( this->getProperties(),
+                       this->getErrorHandlerPolicy(),
+                       GetSchemaInterpMatching( iArg0, iArg1 ) );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

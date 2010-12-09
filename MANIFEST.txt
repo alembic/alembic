@@ -40,6 +40,9 @@
  |   `-- SimpleAbcViewer - Simple OpenGL viewer for Alembic Archives
  |
  `-- maya
-     `-- AlembicSimpleAbcExport - A simple plugin to export polygonal geometry
-         to Alembic
-
+ |   `-- AlembicSimpleAbcExport - A simple plugin to export polygonal geometry
+ |       to Alembic
+ |
+ `-- prman
+     `-- Procedural - start of a Renderman DSO suitable for use in a
+         'Procedural "DynamicLoad"' RIB statement.

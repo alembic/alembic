@@ -34,6 +34,7 @@
 
 ADD_SUBDIRECTORY( SimpleAbcViewer )
 ADD_SUBDIRECTORY( GlutSkeleton )
+ADD_SUBDIRECTORY( AbcEcho )
 
 # NOTE: uncomment the following line if you have the GTO libraries and wish
 # to try building the GTO->Alembic conversion utility.

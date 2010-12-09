@@ -93,16 +93,23 @@ extern "C" GLEWContext *glewGetContext();
 
 #endif // ifdef ALEMBIC_GLEW_MX
 
-
 #include <GL/gl.h>
 
+#ifdef WIN32
+#include <GL/wglew.h>
+#endif
+#ifdef WIN64
+#include <GL/wglew.h>
+
+#else
 
 #include <GL/glxew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glext.h>
 #include <GL/glut.h>
-// #include <GL/glx.h>
+
+#endif // ifdef WIN64
 
 #endif // ifdef PLATFORM_DARWIN
 

@@ -1,0 +1,2 @@
+#!/bin/csh
+$BUILD_DIR/examples/prman/Tests/testbed $BUILD_DIR/examples/prman/Procedural/Procedural.so -filename testdata/cube.abc -frame 1002

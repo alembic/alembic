@@ -218,9 +218,24 @@ void readDeepHierarchy(const std::string &archiveName)
         recursivelyReadChildren( child );
     }
 
+
+    // do it again to make sure we clean up after ourselves properly
+    IArchive archive2( Alembic::AbcCoreHDF5::ReadArchive(), archiveName );
+    IObject archiveTop2 = archive2.getTop();
+
+
     // Done - the archive closes itself
 }
 
+void readHierarchyMulti(const std::string &archiveName)
+{
+
+    Abc::IArchive a1(Alembic::AbcCoreHDF5::ReadArchive(), archiveName);
+    {
+        Abc::IArchive a2(Alembic::AbcCoreHDF5::ReadArchive(), archiveName);
+    }
+
+}
 
 int main( int argc, char *argv[] )
 {
@@ -254,6 +269,11 @@ int main( int argc, char *argv[] )
         std::cout << "Exception raised: " << str;
         std::cout << " during *ThreeDeeptHierarchy tests" << std::endl;
         return 1;
+    }
+
+    {
+        std::string archiveName("threeDeepHierarchy.abc");
+        readHierarchyMulti(archiveName);
     }
 
     return 0;

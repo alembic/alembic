@@ -54,4 +54,8 @@
 #include <Alembic/AbcGeom/OPoints.h>
 #include <Alembic/AbcGeom/IPoints.h>
 
+#include <Alembic/AbcGeom/XformOp.h>
+#include <Alembic/AbcGeom/OXform.h>
+#include <Alembic/AbcGeom/IXform.h>
+
 #endif

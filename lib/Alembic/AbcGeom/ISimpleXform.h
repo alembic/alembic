@@ -99,6 +99,18 @@ public:
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }
 
+    //! wrap an existing ISimpleXform object
+    template <class CPROP_PTR>
+    ISimpleXformSchema( CPROP_PTR iThis,
+                        Abc::WrapExistingFlag iFlag,
+
+                        const Abc::IArgument &iArg0 = Abc::IArgument(),
+                        const Abc::IArgument &iArg1 = Abc::IArgument() )
+      : Abc::ISchema<SimpleXformSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+    {
+        init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
+    }
+
     //-*************************************************************************
     // SAMPLE STUFF
     //-*************************************************************************
@@ -112,7 +124,7 @@ public:
         return m_timeSampling;
     }
 
-    void get( SimpleXformSample &iSamp,
+    void get( SimpleXformSample &oSamp,
               const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
 
     SimpleXformSample getValue( const Abc::ISampleSelector &iSS =
@@ -152,6 +164,8 @@ private:
     void init( Abc::SchemaInterpMatching iMatching );
 
 protected:
+    void _getTimeData( Abc::IDoubleProperty& iProp );
+
     // Any of these properties might not exist, in which case their
     // default values will be used.
 
@@ -183,6 +197,7 @@ protected:
 //-*****************************************************************************
 //-*****************************************************************************
 typedef Abc::ISchemaObject<ISimpleXformSchema> ISimpleXform;
+
 
 } // End namespace AbcGeom
 } // End namespace Alembic

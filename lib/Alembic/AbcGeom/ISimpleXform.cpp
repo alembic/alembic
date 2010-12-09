@@ -40,6 +40,33 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+//-*****************************************************************************
+void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
+{
+    bool hasNoTime = iProp ? iProp.getTimeSampling().isStatic() : true;
+
+    if ( ! hasNoTime )
+    {
+        uint32_t localNumSampsPerCycle = \
+            m_timeSampling.getTimeSamplingType().getNumSamplesPerCycle();
+        uint32_t propNumSampsPerCycle = \
+            iProp.getTimeSampling().getTimeSamplingType().getNumSamplesPerCycle();
+        if ( propNumSampsPerCycle > localNumSampsPerCycle )
+        {
+            m_timeSampling = iProp.getTimeSampling();
+        }
+    }
+
+    if ( iProp )
+    {
+        m_numSamples = iProp.getNumSamples() > m_numSamples ?
+            iProp.getNumSamples() : m_numSamples;
+
+        m_isConstant = m_isConstant ? iProp.isConstant() : m_isConstant;
+    }
+}
+
+//-*****************************************************************************
 void ISimpleXformSchema::init( Abc::SchemaInterpMatching )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISimpleXformSchema::init()" );
@@ -66,31 +93,21 @@ void ISimpleXformSchema::init( Abc::SchemaInterpMatching )
     m_numSamples = 0;
     m_isConstant = true;
 
-#define GET_TIME_STUFF( PROP )                                  \
-    if ( ( !m_timeSampling.isStatic() ) && PROP )               \
-    {                                                           \
-        m_numSamples = PROP.getNumSamples();                    \
-        m_isConstant = PROP.isConstant();                       \
-        m_timeSampling = PROP.getTimeSampling();        \
-    }
+    _getTimeData( m_scaleX );
+    _getTimeData( m_scaleY );
+    _getTimeData( m_scaleZ );
 
-    GET_TIME_STUFF( m_scaleX );
-    GET_TIME_STUFF( m_scaleY );
-    GET_TIME_STUFF( m_scaleZ );
+    _getTimeData( m_shear0 );
+    _getTimeData( m_shear1 );
+    _getTimeData( m_shear2 );
 
-    GET_TIME_STUFF( m_shear0 );
-    GET_TIME_STUFF( m_shear1 );
-    GET_TIME_STUFF( m_shear2 );
+    _getTimeData( m_rotateX );
+    _getTimeData( m_rotateY );
+    _getTimeData( m_rotateZ );
 
-    GET_TIME_STUFF( m_rotateX );
-    GET_TIME_STUFF( m_rotateY );
-    GET_TIME_STUFF( m_rotateZ );
-
-    GET_TIME_STUFF( m_translateX );
-    GET_TIME_STUFF( m_translateY );
-    GET_TIME_STUFF( m_translateZ );
-
-#undef GET_TIME_STUFF
+    _getTimeData( m_translateX );
+    _getTimeData( m_translateY );
+    _getTimeData( m_translateZ );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

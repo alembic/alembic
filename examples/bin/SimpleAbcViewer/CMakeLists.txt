@@ -43,6 +43,7 @@ SET( H_FILES
      IPointsDrw.h
      IPolyMeshDrw.h
      ISimpleXformDrw.h
+     ISubDDrw.h
      MeshDrwHelper.h
      Scene.h
      Transport.h
@@ -54,6 +55,7 @@ SET( CXX_FILES
      IPointsDrw.cpp
      IPolyMeshDrw.cpp
      ISimpleXformDrw.cpp
+     ISubDDrw.cpp
      MeshDrwHelper.cpp
      Scene.cpp
      Transport.cpp

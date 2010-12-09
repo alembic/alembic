@@ -38,6 +38,7 @@
 #include "IPolyMeshDrw.h"
 #include "ISimpleXformDrw.h"
 #include "IPointsDrw.h"
+#include "ISubDDrw.h"
 
 namespace SimpleAbcViewer {
 
@@ -80,6 +81,14 @@ IObjectDrw::IObjectDrw( IObject &iObj, bool iResetIfNoChildren )
             if ( xform )
             {
                 dptr.reset( new ISimpleXformDrw( xform ) );
+            }
+        }
+        else if ( ISubD::matches( ohead ) )
+        {
+            ISubD subd( m_object, ohead.getName() );
+            if ( subd )
+            {
+                dptr.reset( new ISubDDrw( subd ) );
             }
         }
         else

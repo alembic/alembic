@@ -44,9 +44,9 @@ int main( int, char** )
     {
         // Test constructors. None of these should fail.
         // but they currently do
-        #if 0
+        #if 1
         typedef  BaseDimensions<int>   IntScalarDimension;
-        
+
         IntScalarDimension rank0();
 
         IntScalarDimension rank0_val1( (int) 1);
@@ -96,7 +96,7 @@ int main( int, char** )
         rank2_copy = rank3;
         assert( rank2_copy == rank3 );
     }
-        
+
     std::cout << "Success!" << std::endl;
 
     return 0;

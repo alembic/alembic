@@ -124,7 +124,7 @@ void init( void )
 
     g_state.scene.cam.frame( g_transport->getBounds() );
 
-    glutSetWindowTitle( ( boost::format( "Asset = %s | Frame = %d" )
+    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
                           % g_transport->getFileName()
                           % g_transport->getCurrentFrame() ).str().c_str() );
 }
@@ -134,7 +134,7 @@ void init( void )
 static void TickForward()
 {
     g_transport->tickForward();
-    glutSetWindowTitle( ( boost::format( "Asset = %s | Frame = %d" )
+    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
                           % g_transport->getFileName()
                           % g_transport->getCurrentFrame() ).str().c_str() );
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
@@ -145,7 +145,7 @@ static void TickForward()
 static void TickBackward()
 {
     g_transport->tickBackward();
-    glutSetWindowTitle( ( boost::format( "Asset = %s | Frame = %d" )
+    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
                           % g_transport->getFileName()
                           % g_transport->getCurrentFrame() ).str().c_str() );
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
@@ -195,7 +195,7 @@ void display( void )
     g_transport->draw( g_state.scene );
 
     // glPopMatrix();
-    
+
     glFlush();
 }
 
@@ -248,16 +248,15 @@ void overlay()
 //-*****************************************************************************
 void RenderIt()
 {
-#if 0
     const char *templ = "/var/tmp/SimpleAbcViewer_camera.XXXXXX";
     char *buffer = new char[strlen( templ ) + 1];
     strcpy( buffer, templ );
     mkstemp( buffer );
     std::string cameraFileName = buffer;
 
-    float shutterOpenTime = -0.125f + ( float )g_transport->currentFrame();
-    float shutterCloseTime = 0.125f + ( float )g_transport->currentFrame();
-    float openTime = -0.5f + ( float )g_transport->currentFrame();
+    float shutterOpenTime = -0.125f + ( float )g_transport->getCurrentFrame();
+    float shutterCloseTime = 0.125f + ( float )g_transport->getCurrentFrame();
+    float openTime = -0.5f + ( float )g_transport->getCurrentFrame();
     float closeTime = 1.0f + openTime;
 
     std::ofstream camFile( cameraFileName.c_str() );
@@ -303,7 +302,6 @@ void RenderIt()
     system( cmd.c_str() );
 
     delete[] buffer;
-#endif
 }
 
 //-*****************************************************************************
@@ -491,9 +489,7 @@ int SimpleViewScene( int argc, char *argv[] )
     std::string RenderScript( viewerpath + "Renderit" );
     std::string abcFileName = "";
     float fps = 24.0f;
-    std::string AlembicRiPluginDsoPath =
-        "/home/chorvath/alembic-build/Debug/prman/AlembicRiPlugin/"
-        "AlembicRiPlugin.so";
+    std::string AlembicRiPluginDsoPath = "";
 
     po::options_description desc( "Simple ABC Viewer" );
     desc.add_options()

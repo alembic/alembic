@@ -37,6 +37,8 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
+#include "Assert.h"
+
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,8 +67,38 @@ void Example1_MeshOut()
         Int32ArraySample( g_indices, g_numIndices ),
         Int32ArraySample( g_counts, g_numCounts ) );
 
+    std::vector<int32_t> creases;
+    std::vector<int32_t> corners;
+    std::vector<int32_t> creaseLengths;
+    std::vector<float32_t> creaseSharpnesses;
+    std::vector<float32_t> cornerSharpnesses;
+
+    for ( size_t i = 0 ; i < 24 ; i++ )
+    {
+        creases.push_back( g_indices[i] );
+        corners.push_back( g_indices[i] );
+        cornerSharpnesses.push_back( 1.0e38 );
+    }
+
+    for ( size_t i = 0 ; i < 6 ; i++ )
+    {
+        creaseLengths.push_back( 4 );
+        creaseSharpnesses.push_back( 1.0e38 );
+    }
+
+    mesh_samp.setCreases( creases, creaseLengths, creaseSharpnesses );
+    mesh_samp.setCorners( corners, cornerSharpnesses );
+
     // Set the sample.
-    mesh.set( mesh_samp );
+    mesh.set( mesh_samp, 0 );
+
+    // change one of the schema's parameter's
+    mesh_samp.setInterpolateBoundary( 1 );
+    mesh.set( mesh_samp, 1 );
+
+    // test that the integer property doesn't latch to non-zero
+    mesh_samp.setInterpolateBoundary( 0 );
+    mesh.set( mesh_samp, 2 );
 
     std::cout << "Writing: " << archive.getName() << std::endl;
 }
@@ -80,17 +112,34 @@ void Example1_MeshIn()
     ISubD meshyObj( IObject( archive, kTop ), "subd" );
     ISubDSchema &mesh = meshyObj.getSchema();
 
-    ISubDSchema::Sample mesh_samp;
-    mesh.get( mesh_samp );
+    TESTING_ASSERT( 3 == mesh.getNumSamples() );
+
+    // get the 1th sample by value
+    ISubDSchema::Sample samp1 = mesh.getValue( 1 );
+
+    // test the second sample has '1' as the interpolate boundary value
+    TESTING_ASSERT( 1 == samp1.getInterpolateBoundary() );
+
+    std::cout << "Interpolate boundary at 1th sample: "
+              << samp1.getInterpolateBoundary() << std::endl;
+
+    // get the twoth sample by reference
+    ISubDSchema::Sample samp2;
+    mesh.get( samp2, 2 );
+
+    TESTING_ASSERT( 0 == samp2.getInterpolateBoundary() );
+
+    std::cout << "Interpolate boundary at 2th sample: "
+              << samp2.getInterpolateBoundary() << std::endl;
 
     std::cout << "Mesh num vertices: "
-              << mesh_samp.getPositions()->size() << std::endl;
+              << samp2.getPositions()->size() << std::endl;
 
     std::cout << "0th vertex from the mesh sample: "
-              << (*(mesh_samp.getPositions()))[0] << std::endl;
+              << (*(samp2.getPositions()))[0] << std::endl;
 
     std::cout << "0th vertex from the mesh sample with get method: "
-              << mesh_samp.getPositions()->get()[0] << std::endl;
+              << samp2.getPositions()->get()[0] << std::endl;
 }
 
 //-*****************************************************************************

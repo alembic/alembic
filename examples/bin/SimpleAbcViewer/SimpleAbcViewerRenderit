@@ -122,8 +122,7 @@ def mkRib( camera, procedural, asset, shutterOpen, shutterClose, samp1, samp2,
     with open( camera ) as f:
         camstr = ''.join( f.readlines() )
 
-    ribstr = """
-##RenderMan RIB
+    ribstr = """##RenderMan RIB
 
 version 3.04
 ShadingInterpolation "smooth"
@@ -134,7 +133,7 @@ Display "%s" "openexr" "rgba"
 PixelSamples 5 5
 %s
 WorldBegin
-Procedural "DynamicLoad" ["%s" "assetName=%s;samplesPerSecond=24.0;samples=%f,%f;isBounded=%s"]
+Procedural "DynamicLoad" ["%s" "-filename %s -fps 24.0 -frame %f"]
 %s
 WorldEnd
 """ % ( shutterOpen,
@@ -144,8 +143,6 @@ WorldEnd
         procedural,
         asset,
         samp1,
-        samp2,
-        bounded,
         rtboundstr )
 
     with open( ribfile, 'w' ) as rib:
@@ -166,7 +163,7 @@ def renderAndDisplay( ribfile, exrfile ):
                     close_fds=True )
     render.wait()
 
-    moviePlayer = Popen( ["loupe", exrfile],
+    moviePlayer = Popen( ["exrdisplay", exrfile],
                         stdin=SP.PIPE,
                         stdout=SP.PIPE,
                         stderr=SP.PIPE,

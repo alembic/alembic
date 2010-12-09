@@ -52,3 +52,18 @@ ELSE()
         MESSAGE(STATUS "For some reason, MAYA_FOUND is False?")
     ENDIF()
 ENDIF()
+
+# Include Prman stuff
+IF(DEFINED USE_PRMAN AND NOT USE_PRMAN)
+    MESSAGE(STATUS "Skipping Prman plugins")
+ELSE()
+    MESSAGE(STATUS "About to include AlembicPRMan.cmake")
+    INCLUDE("../build/AlembicPRMan.cmake")
+    IF( ALEMBIC_PRMAN_FOUND )
+        MESSAGE(STATUS "Using Prman plugins")
+        ADD_SUBDIRECTORY( prman )
+    ELSE()
+        MESSAGE(STATUS "For some reason, ALEMBIC_PRMAN_FOUND is False?")
+    ENDIF()
+ENDIF()
+

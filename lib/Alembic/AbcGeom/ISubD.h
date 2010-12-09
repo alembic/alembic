@@ -64,13 +64,13 @@ public:
         Abc::Int32ArraySamplePtr getFaceCounts() const { return m_faceCounts; }
 
         // misc subd stuff
-        int getFaceVaryingInterpolateBoundary() const
+        int32_t getFaceVaryingInterpolateBoundary() const
         { return m_faceVaryingInterpolateBoundary; }
 
-        int getFaceVaryingPropagateCorners() const
+        int32_t getFaceVaryingPropagateCorners() const
         { return m_faceVaryingPropagateCorners; }
 
-        int getInterpolateBoundary() const
+        int32_t getInterpolateBoundary() const
         { return m_interpolateBoundary; }
 
         // creases
@@ -134,9 +134,9 @@ public:
         Abc::Int32ArraySamplePtr m_faceIndices;
         Abc::Int32ArraySamplePtr m_faceCounts;
 
-        int m_faceVaryingInterpolateBoundary;
-        int m_faceVaryingPropagateCorners;
-        int m_interpolateBoundary;
+        int32_t m_faceVaryingInterpolateBoundary;
+        int32_t m_faceVaryingPropagateCorners;
+        int32_t m_interpolateBoundary;
 
         // Creases
         Abc::Int32ArraySamplePtr    m_creaseIndices;
@@ -184,7 +184,7 @@ public:
                  const Abc::IArgument &iArg0 = Abc::IArgument(),
                  const Abc::IArgument &iArg1 = Abc::IArgument() )
       : Abc::ISchema<SubDSchemaInfo>( iParentObject, iName,
-                                        iArg0, iArg1 )
+                                      iArg0, iArg1 )
     {
         init(  iArg0, iArg1 );
     }
@@ -196,7 +196,19 @@ public:
                           const Abc::IArgument &iArg0 = Abc::IArgument(),
                           const Abc::IArgument &iArg1 = Abc::IArgument() )
       : Abc::ISchema<SubDSchemaInfo>( iParentObject,
-                                   iArg0, iArg1 )
+                                      iArg0, iArg1 )
+    {
+        init( iArg0, iArg1 );
+    }
+
+    //! wrap an existing schema object
+    template <class CPROP_PTR>
+    ISubDSchema( CPROP_PTR iThis,
+                 Abc::WrapExistingFlag iFlag,
+
+                 const Abc::IArgument &iArg0 = Abc::IArgument(),
+                 const Abc::IArgument &iArg1 = Abc::IArgument() )
+      : Abc::ISchema<SubDSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }

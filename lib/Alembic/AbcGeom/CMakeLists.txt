@@ -76,6 +76,13 @@ SET( H_FILES
   OSimpleXform.h
   ISimpleXform.h
 
+  XformOp.h
+  XformOp.cpp
+  IXform.h
+  IXform.cpp
+  OXform.h
+  OXform.cpp
+
   OPoints.h
   IPoints.h
 )

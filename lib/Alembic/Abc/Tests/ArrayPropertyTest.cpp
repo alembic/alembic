@@ -304,6 +304,83 @@ void readV3fArrayProperty(const std::string &archiveName)
     // Done - the archive closes itself
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+void readWriteColorArrayProperty(const std::string &archiveName)
+{
+
+    {
+
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), archiveName,
+            ErrorHandler::kThrowPolicy );
+        OObject archiveTop = archive.getTop();
+
+        OObject child( archiveTop, "test" );
+        OCompoundProperty childProps = child.getProperties();
+
+        OC3fArrayProperty shades( childProps, "shades",
+            TimeSamplingType( 1.0 ) );
+
+        std::vector < C3f > grays(8);
+        grays[0].x = 0.0; grays[0].y = 0.0; grays[0].z = 0.0;
+        grays[1].x = 0.125; grays[1].y = 0.125; grays[1].z = 0.125;
+
+        grays[2].x = 0.25; grays[2].y = 0.25; grays[2].z = 0.25;
+        grays[3].x = 0.375; grays[3].y = 0.375; grays[3].z = 0.375;
+
+        grays[4].x = 0.5; grays[4].y = 0.5; grays[4].z = 0.5;
+        grays[5].x = 0.625; grays[5].y = 0.625; grays[5].z = 0.625;
+
+        grays[6].x = 0.75; grays[6].y = 0.75; grays[6].z = 0.75;
+        grays[7].x = 0.875; grays[7].y = 0.875; grays[7].z = 0.875;
+
+        // let's write 4 different color3f[2]
+        Dimensions d;
+        d.setRank(2);
+        d[0] = 2;
+        d[1] = 4;
+
+        C3fArraySample cas(&(grays.front()), d);
+        shades.set(cas);
+    }
+    {
+        // now read it
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                      archiveName, ErrorHandler::kThrowPolicy );
+        IObject archiveTop = archive.getTop();
+
+        const unsigned int numChildren =  archiveTop.getNumChildren();
+
+
+        IObject child( archiveTop, archiveTop.getChildHeader(0).getName() );
+        ICompoundProperty props = child.getProperties();
+        IC3fArrayProperty shades( props, "shades" );
+
+        C3fArraySamplePtr samplePtr;
+        shades.get( samplePtr );
+
+        ABCA_ASSERT( samplePtr->getDimensions().rank() == 2,
+            "Incorrect rank on the sample." );
+
+        ABCA_ASSERT( samplePtr->getDimensions().numPoints() == 8,
+            "Incorrect number of total points." );
+
+        ABCA_ASSERT( samplePtr->getDimensions()[0] == 2,
+            "Incorrect size on dimension 0." );
+
+        ABCA_ASSERT( samplePtr->getDimensions()[1] == 4,
+            "Incorrect size on dimension 1." );
+
+        for (size_t i = 0; i < 8; ++i)
+        {
+            ABCA_ASSERT( (*samplePtr)[i].x == i/8.0 &&
+                (*samplePtr)[i].x == (*samplePtr)[i].y &&
+                (*samplePtr)[i].x == (*samplePtr)[i].z, 
+                "Color [" << i << "] is incorrect.");
+        }
+
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -342,6 +419,7 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
+    readWriteColorArrayProperty("c3_2_array_test.abc");
     return 0;
 }
 

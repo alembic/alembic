@@ -292,7 +292,7 @@ void testReadWriteScalars()
                     AbcA::MetaData(),
                     AbcA::DataType(Alembic::Util::kUint64POD, 1),
                     staticSampling));
-            Alembic::Util::uint64_t ui = 5000000000;
+            Alembic::Util::uint64_t ui = 5000000000LL;
             ui64WrtPtr->setSample(0, 0.0, &ui);
         }
 
@@ -302,7 +302,7 @@ void testReadWriteScalars()
                 AbcA::PropertyHeader("i64", AbcA::kScalarProperty,
                 AbcA::MetaData(), AbcA::DataType(Alembic::Util::kInt64POD, 1),
                 staticSampling));
-            Alembic::Util::int64_t i = -5000000000;
+            Alembic::Util::int64_t i = -5000000000LL;
             i64WrtPtr->setSample(0, 0.0, &i);
         }
 
@@ -460,7 +460,7 @@ void testReadWriteScalars()
                     TESTING_ASSERT(sp->getName() == "uint64");
                     Alembic::Util::uint64_t val = 0;
                     sp->getSample(0, &val);
-                    TESTING_ASSERT(val == 5000000000);
+                    TESTING_ASSERT(val == 5000000000LL);
                 }
                 break;
 
@@ -469,7 +469,7 @@ void testReadWriteScalars()
                     TESTING_ASSERT(sp->getName() == "i64");
                     Alembic::Util::uint64_t val = 0;
                     sp->getSample(0, &val);
-                    TESTING_ASSERT(val == -5000000000);
+                    TESTING_ASSERT(val == -5000000000LL);
                 }
                 break;
 
