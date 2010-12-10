@@ -33,54 +33,25 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //-*****************************************************************************
+#ifndef _Alembic_Prman_SampleUtil_h_
+#define _Alembic_Prman_SampleUtil_h_
 
-#ifndef _AlembicAbcExport_Subd_h_
-#define _AlembicAbcExport_Subd_h_
+#include <Alembic/AbcGeom/All.h>
 
-#include "Foundation.h"
-#include "SimpleNull.h"
+#include "ProcArgs.h"
 
-namespace AlembicAbcExport {
+#include <set>
 
-//-*****************************************************************************
-#define ABC_MAYA_SUBD_ATTRIBUTE "alembicSubd"
-#define ABC_MAYA_INTERP_BOUNDARY_ATTRIBUTE "alembicSubdInterpBoundary"
+using namespace Alembic::AbcGeom;
 
-//-*****************************************************************************
-bool SubdInterpBoundary( MDagPath &dp );
+typedef std::set<Abc::chrono_t> SampleTimeSet;
 
 //-*****************************************************************************
-bool IsSubd( MDagPath &dp );
+void GetRelevantSampleTimes( ProcArgs &args, const TimeSampling &timeSampling,
+                             SampleTimeSet &output );
 
-//-*****************************************************************************
-class Subd : public BaseSimpleNull<Atg::OSimpleSubd>
-{
-public:
-    typedef Subd this_type;
-    
-    Subd( Exportable &parent,
-          MDagPath &dagPath,
-          MObject &nde,
-          const std::string &nme,
-          const Abc::TimeSamplingInfo &tinfo,
-          bool deforming );
+void WriteMotionBegin( ProcArgs &args, const SampleTimeSet &sampleTimes );
 
-protected:
-    virtual Abc::Box3d internalWriteSample( const Abc::Time &sampTime,
-                                            const Abc::Box3d &childBounds );
-
-    Atg::OXformLocalTrait m_xformTrait;
-    Atg::OMeshTrait m_meshTrait;
-    Atg::OSubdTrait m_subdTrait;
-    Atg::OUvsTrait m_uvsTrait;
-
-    // Deforming
-    bool m_deforming;
-
-    // Rest bounds
-    Abc::Box3d m_restBounds;
-};
-
-} // End namespace AlembicAbcExport
+void WriteConcatTransform( const M44d &m );
 
 #endif

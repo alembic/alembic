@@ -33,63 +33,23 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //-*****************************************************************************
+#include "PathUtil.h"
 
-#ifndef _AlembicAbcExport_Collider_h_
-#define _AlembicAbcExport_Collider_h_
-
-#include "Foundation.h"
-#include "SimpleNull.h"
-
-namespace AlembicAbcExport {
+#include <boost/tokenizer.hpp>
 
 //-*****************************************************************************
-class Collider : public BaseSimpleNull<Abc::OObject>
+void TokenizePath( const std::string &path, std::vector<std::string> &result )
 {
-public:
-    typedef Collider this_type;
-    
-    enum ShapeType
-    {
-        kSphere,
-        kCube,
-        kCylinder,
-        kCone,
-        kPlane,
-        kUnknown
-    };
+    typedef boost::char_separator<char> Separator;
+    typedef boost::tokenizer<Separator> Tokenizer;
 
-    Collider( Exportable &parent,
-              MDagPath &dagPath,
-              MObject &nde,
-              const std::string &nme,
-              const Abc::TimeSamplingType &iTst,
-              ShapeType shapeType );
+    Tokenizer tokenizer( path, Separator( "/" ) );
 
-    virtual void close()
+    for ( Tokenizer::iterator iter = tokenizer.begin() ; iter != tokenizer.end() ;
+          ++iter )
     {
-        std::cout << "Closing collider: "
-                  << alembicObject()-getName()
-                  << std::endl;
-        BaseSimpleNull<Abc::OObject>::close();
+        if ( (*iter).empty() ) { continue; }
+
+        result.push_back( *iter );
     }
-
-protected:
-    virtual Abc::Box3d internalWriteSample( const Abc::Box3d &childBounds,
-                                            Abc::index_t iSampleIndex,
-                                            Abc::chrono_t iSampleTime );
-
-    Abc::OCharProperty m_shapeTypeProp;
-
-    ShapeType m_shapeType;
-
-    // Rest bounds
-    Abc::Box3d m_restBounds;
-};
-
-//-*****************************************************************************
-Collider::ShapeType GetColliderShapeType( MDagPath &dp );
-
-} // End namespace AlembicAbcExport
-
-#endif
-
+}

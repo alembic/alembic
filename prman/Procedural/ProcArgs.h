@@ -34,66 +34,36 @@
 //
 //-*****************************************************************************
 
-#ifndef _AlembicAbcExport_FileTranslator_h_
-#define _AlembicAbcExport_FileTranslator_h_
+#ifndef _Alembic_Prman_ProcArgs_h_
+#define _Alembic_Prman_ProcArgs_h_
 
-#include "Foundation.h"
-#include "Factory.h"
+#include <string>
 
-namespace AlembicAbcExport {
+#include <ri.h>
 
 //-*****************************************************************************
-class FileTranslator : public MPxFileTranslator
+struct ProcArgs
 {
-public:
-    FileTranslator();
+    //constructor parses
+    ProcArgs( RtString paramStr );
 
-    static void *creator();
+    //copy constructor
+    ProcArgs( const ProcArgs &rhs )
+    : filename( rhs.filename )
+    , objectpath( rhs.objectpath )
+    , frame( rhs.frame )
+    , fps( rhs.fps )
+    , shutterOpen( rhs.shutterOpen )
+    , shutterClose( rhs.shutterClose )
+    {}
 
-    virtual MStatus writer( const MFileObject &file, 
-                            const MString &optionsString, 
-                            MPxFileTranslator::FileAccessMode mode );
-  
-    virtual bool haveReadMethod() const { return false; }
-    virtual bool haveWriteMethod() const { return true; }
-    
-    virtual MString defaultExtension() const { return "abc"; }
-    
-    // Allow 'File...import' and 'File...Open'
-    virtual bool canBeOpened() const { return false; }
-
-    virtual MFileKind identifyFile( const MFileObject &file,
-                                    const char *magic,
-                                    short magicSize ) const;
+    //member variables
+    std::string filename;
+    std::string objectpath;
+    double frame;
+    double fps;
+    double shutterOpen;
+    double shutterClose;
 };
-
-//-*****************************************************************************
-struct Parameters : public Factory::Parameters
-{
-public:
-    Parameters()
-      : Factory::Parameters(),
-        fileName( "UNSPECIFIED_FILE_NAME.abc" ),
-        startFrame( 1 ),
-        endFrame( 100 ),
-        maxRecursion( 10000 ) {}
-    
-    std::string fileName;
-    int startFrame;
-    int endFrame;
-    int maxRecursion;
-
-    // Inherited from Factory Parameters
-    // bool polysAsSubds;
-    // bool deforming;
-    // bool allUserAttributes;
-    // bool allMayaAttributes;
-};
-
-//-*****************************************************************************
-MStatus ExportSelected( const Parameters &config );
-
-} // End namespace AlembicAbcExport
 
 #endif
-

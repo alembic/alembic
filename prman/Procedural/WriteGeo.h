@@ -33,12 +33,24 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //-*****************************************************************************
+#ifndef _Alembic_Prman_WriteGeo_h_
+#define _Alembic_Prman_WriteGeo_h_
 
-#ifndef _AlembicAbcExport_NURBSSurf_h_
-#define _AlembicAbcExport_NURBSSurf_h_
+#include <Alembic/AbcGeom/All.h>
 
+#include "ProcArgs.h"
 
+using namespace Alembic::AbcGeom;
+//-*****************************************************************************
 
+void WriteIdentifier( const ObjectHeader &ohead );
 
+void ProcessSimpleTransform( ISimpleXform &xform, ProcArgs &args );
+
+void ProcessXform( IXform &xform, ProcArgs &args );
+
+void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args );
+
+void ProcessSubD( ISubD &subd, ProcArgs &args );
 
 #endif

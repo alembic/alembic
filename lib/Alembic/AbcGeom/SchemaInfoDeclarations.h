@@ -110,6 +110,14 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_SimpleXform_v1",
 
 #define ALEMBIC_ABCGEOM_SIMPLEXFORM_SCHEMA (SimpleXformSchemaInfo::title())
 
+//-*****************************************************************************
+// Xform
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v1",
+                                     ".xform",
+                                     XformSchemaInfo );
+
+#define ALEMBIC_ABCGEOM_XFORM_SCHEMA (XformSchemaInfo::title())
+
 }
 }
 

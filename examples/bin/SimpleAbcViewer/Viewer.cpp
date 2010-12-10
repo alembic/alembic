@@ -124,7 +124,7 @@ void init( void )
 
     g_state.scene.cam.frame( g_transport->getBounds() );
 
-    glutSetWindowTitle( ( boost::format( "Asset = %s | Frame = %d" )
+    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
                           % g_transport->getFileName()
                           % g_transport->getCurrentFrame() ).str().c_str() );
 }
@@ -134,7 +134,7 @@ void init( void )
 static void TickForward()
 {
     g_transport->tickForward();
-    glutSetWindowTitle( ( boost::format( "Asset = %s | Frame = %d" )
+    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
                           % g_transport->getFileName()
                           % g_transport->getCurrentFrame() ).str().c_str() );
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
@@ -145,7 +145,7 @@ static void TickForward()
 static void TickBackward()
 {
     g_transport->tickBackward();
-    glutSetWindowTitle( ( boost::format( "Asset = %s | Frame = %d" )
+    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
                           % g_transport->getFileName()
                           % g_transport->getCurrentFrame() ).str().c_str() );
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
@@ -489,9 +489,7 @@ int SimpleViewScene( int argc, char *argv[] )
     std::string RenderScript( viewerpath + "Renderit" );
     std::string abcFileName = "";
     float fps = 24.0f;
-    std::string AlembicRiPluginDsoPath =
-        "/home/jardent/alembic_build/examples/prman/Procedural/"
-        "Procedural.so";
+    std::string AlembicRiPluginDsoPath = "";
 
     po::options_description desc( "Simple ABC Viewer" );
     desc.add_options()

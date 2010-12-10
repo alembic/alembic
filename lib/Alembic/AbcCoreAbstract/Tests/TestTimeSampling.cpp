@@ -183,10 +183,10 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
 
         chrono_t timeI = timeSampling.getSampleTime( i );
         size_t floorIndex = timeSampling.getFloorIndex(
-            timeI + FLT_EPSILON ).first;
+            timeI ).first;
 
         size_t ceilIndex = timeSampling.getCeilIndex(
-            timeI - FLT_EPSILON ).first;
+            timeI ).first;
 
         size_t nearIndex = timeSampling.getNearIndex( timeI ).first;
 
@@ -360,6 +360,39 @@ void testCyclicTime3()
                           timePerCycle, numSamps );
 
     testTimeSampling( tSamp, tSampTyp );
+}
+
+//-*****************************************************************************
+void testCyclicTime4()
+{
+    const chrono_t startFrame = 1001.0;
+    const chrono_t ftime = 1.0 / 24.0;
+    const chrono_t timePerCycle = ftime;
+    const size_t numSamplesPerCycle = 3;
+    const size_t numSamps = 20;
+
+    const chrono_t first = ( startFrame * ftime ) - ( ftime / 4.0 );
+    const chrono_t second = startFrame * ftime;
+    const chrono_t third = ( startFrame * ftime ) + ( ftime / 4.0 );
+
+    TimeVector tvec;
+    tvec.push_back( first );
+    tvec.push_back( second );
+    tvec.push_back( third );
+
+    AbcA::ArraySamplePtr tptr = buildTimeSamplesPtr( tvec );
+
+    const AbcA::TimeSamplingType tst( numSamplesPerCycle, timePerCycle );
+    const AbcA::TimeSampling tsamp( tst, numSamps, tptr );
+
+    TESTING_MESSAGE_ASSERT( tst.isCyclic(), "Should be cyclic." );
+
+    std::cout << "Testing cyclic time, 4" << std::endl;
+
+    validateTimeSampling( tsamp, tst, tvec, numSamplesPerCycle,
+                          timePerCycle, numSamps );
+
+    testTimeSampling( tsamp, tst );
 }
 
 //-*****************************************************************************
@@ -633,6 +666,7 @@ int main( int, char** )
     testCyclicTime1();
     testCyclicTime2();
     testCyclicTime3();
+    testCyclicTime4();
 
     // uniform is probably most common
     testUniformTime1();

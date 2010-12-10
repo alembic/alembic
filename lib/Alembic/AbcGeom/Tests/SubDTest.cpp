@@ -67,6 +67,28 @@ void Example1_MeshOut()
         Int32ArraySample( g_indices, g_numIndices ),
         Int32ArraySample( g_counts, g_numCounts ) );
 
+    std::vector<int32_t> creases;
+    std::vector<int32_t> corners;
+    std::vector<int32_t> creaseLengths;
+    std::vector<float32_t> creaseSharpnesses;
+    std::vector<float32_t> cornerSharpnesses;
+
+    for ( size_t i = 0 ; i < 24 ; i++ )
+    {
+        creases.push_back( g_indices[i] );
+        corners.push_back( g_indices[i] );
+        cornerSharpnesses.push_back( 1.0e38 );
+    }
+
+    for ( size_t i = 0 ; i < 6 ; i++ )
+    {
+        creaseLengths.push_back( 4 );
+        creaseSharpnesses.push_back( 1.0e38 );
+    }
+
+    mesh_samp.setCreases( creases, creaseLengths, creaseSharpnesses );
+    mesh_samp.setCorners( corners, cornerSharpnesses );
+
     // Set the sample.
     mesh.set( mesh_samp, 0 );
 

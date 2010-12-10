@@ -109,17 +109,9 @@ ENDIF()
 SET( Boost_USE_STATIC_LIBS TRUE )
 SET( Boost_USE_MULTITHREADED TRUE )
 
-IF ( ${CMAKE_HOST_UNIX} )
-    SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" )
-    FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options thread REQUIRED)
-ELSE()
-  IF ( ${CMAKE_HOST_WIN32} )
-    SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" )
-    FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options thread REQUIRED)
-  ELSE()
-    MESSAGE( ERROR "BOOST: This platform is not supported yet" )
-  ENDIF()
-ENDIF()
+SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45.0" )
+FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options thread REQUIRED)
+
 
 #-******************************************************************************
 #-******************************************************************************
