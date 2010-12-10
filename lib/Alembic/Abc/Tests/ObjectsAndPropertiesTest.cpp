@@ -39,15 +39,12 @@
 #include <boost/random.hpp>
 #include "Assert.h"
 
+#include <ImathMath.h>
+
+#include <limits>
+
 namespace Abc = Alembic::Abc;
 using namespace Abc;
-
-#if 0
-using Alembic::Util::uint8_t;
-using Alembic::Util::int32_t;
-using Alembic::Util::float32_t;
-using Alembic::Util::bool_t;
-#endif
 
 //-*****************************************************************************
 static const V3f scalarV3fval( -1.0f, 32.0f, -90.0f );
@@ -60,6 +57,8 @@ static const size_t numV3fSamps = 31;
 static const size_t numIntPoints = 11;
 static const size_t numIntSamps = 7;
 
+static const chrono_t CHRONO_EPSILON = \
+    std::numeric_limits<chrono_t>::epsilon() * 32.0;
 
 //-*****************************************************************************
 void simpleTestOut( const std::string &iArchiveName )
@@ -242,9 +241,12 @@ void simpleTestIn( const std::string &iArchiveName )
         size_t numPoints = acc0V3fap0SampPtr->size();
         chrono_t time = acc0V3fap0.getTimeSampling().getSampleTime( i );
 
+        chrono_t compTime = v3fStartTime + ( i * dt );
+
         TESTING_ASSERT( numPoints == numV3fPoints );
 
-        TESTING_ASSERT( time == v3fStartTime + ( i * dt ) );
+        TESTING_ASSERT( Imath::equalWithAbsError( time, compTime,
+                                                  CHRONO_EPSILON ) );
 
         float32_t elementVal = i + time;
 
@@ -271,7 +273,10 @@ void simpleTestIn( const std::string &iArchiveName )
         size_t numPoints = ac0iap0SampPtr->size();
         chrono_t time = ac0iap0.getTimeSampling().getSampleTime( i );
 
-        TESTING_ASSERT( time == intStartTime + ( i * dt ) );
+        chrono_t compTime = intStartTime + ( i * dt );
+
+        TESTING_ASSERT( Imath::equalWithAbsError( time, compTime,
+                                                  CHRONO_EPSILON ) );
 
         TESTING_ASSERT( numPoints == numIntPoints );
 

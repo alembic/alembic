@@ -46,8 +46,8 @@ template <class T>
 class BaseDimensions
 {
 private:
-    typedef std::size_t MySizeT;
-    typedef std::vector<MySizeT> SizeVec;
+    typedef T MySizeT;
+    typedef std::vector<T> SizeVec;
     SizeVec m_vector;
     const size_t m_mask;
     //BOOST_STATIC_ASSERT( sizeof( MySizeT ) == sizeof( T ) );
@@ -62,7 +62,7 @@ public:
     // When you specify a single thing, you're specifying a rank-1
     // dimension of a certain size.
     explicit BaseDimensions( const T& t )
-      : m_vector( 1, ( MySizeT )t )
+      : m_vector( 1, ( std::size_t )t )
       , m_mask( -1 )
     {}
 
@@ -78,7 +78,7 @@ public:
         m_vector.resize( copy.rank() );
         for ( size_t i = 0; i < copy.rank(); ++i )
         {
-            m_vector[i] = static_cast<MySizeT>( copy[i] );
+            m_vector[i] = static_cast<T>( copy[i] );
         }
     }
 
@@ -94,7 +94,7 @@ public:
         m_vector.resize( copy.rank() );
         for ( size_t i = 0; i < copy.rank(); ++i )
         {
-            m_vector[i] = static_cast<MySizeT>( copy[i] );
+            m_vector[i] = static_cast<T>( copy[i] );
         }
         return *this;
     }
@@ -126,10 +126,9 @@ public:
         else
         {
             size_t npoints = 1;
-            for ( SizeVec::const_iterator diter = m_vector.begin();
-                  diter != m_vector.end(); ++diter )
+            for ( size_t i = 0 ; i < m_vector.size() ; i++ )
             {
-                npoints *= ( size_t )(*diter);
+                npoints *= (size_t)m_vector[i];
             }
             return npoints;
         }

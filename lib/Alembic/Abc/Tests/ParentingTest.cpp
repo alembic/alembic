@@ -39,19 +39,21 @@
 #include <boost/random.hpp>
 #include "Assert.h"
 
+#include <ImathMath.h>
+
+#include <limits>
+
 namespace Abc = Alembic::Abc;
 using namespace Abc;
-
-using Alembic::Util::uint8_t;
-using Alembic::Util::int32_t;
-using Alembic::Util::float32_t;
-using Alembic::Util::bool_t;
 
 static const V3f scalarV3fval( -1.0f, 32.0f, -90.0f );
 
 static const chrono_t startTime = 5.7;
 
 static const chrono_t dt = 1.0 / 24.0;
+
+static const chrono_t CHRONO_EPSILON = \
+    std::numeric_limits<chrono_t>::epsilon() * 32.0;
 
 //-*****************************************************************************
 void simpleTestOut( const std::string &iArchiveName )
@@ -160,6 +162,8 @@ void simpleTestIn( const std::string &iArchiveName )
 
         chrono_t time = acc0V3fap0.getTimeSampling().getSampleTime( i );
 
+        chrono_t compTime = startTime + ( i * dt );
+
         std::cout << "acc0fap0 at sample " << i << " is at time "
                   << time
                   << " and has " << numPoints << " points "
@@ -169,7 +173,8 @@ void simpleTestIn( const std::string &iArchiveName )
 
         TESTING_ASSERT( (*acc0V3fap0SampPtr)[0][0] == elementVal );
 
-        TESTING_ASSERT( time == startTime + ( i * dt ) );
+        TESTING_ASSERT( Imath::equalWithAbsError( time, compTime,
+                                                  CHRONO_EPSILON ) );
 
 
         for ( size_t j = 0 ; j < numPoints ; ++j )

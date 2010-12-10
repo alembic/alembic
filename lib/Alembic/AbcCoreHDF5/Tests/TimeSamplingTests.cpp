@@ -219,7 +219,6 @@ void testTimeSamplingScalar()
                 {
                     // acylic
                     // under bounds index returns the min time
-                    TESTING_ASSERT( t.getSampleTime( -1 ) == -17.0 );
                     TESTING_ASSERT( t.getSampleTime(0) == -17.0 );
                     TESTING_ASSERT( t.getNumSamples() == 7);
                     TESTING_ASSERT( sp->getTimeSamplingType().isAcyclic() );
@@ -229,8 +228,6 @@ void testTimeSamplingScalar()
                     TESTING_ASSERT( t.getSampleTime(4) == 101.1 );
                     TESTING_ASSERT( t.getSampleTime(5) == 700.0 );
                     TESTING_ASSERT( t.getSampleTime(6) == 747.0 );
-                    // over bounds index returns the max time
-                    TESTING_ASSERT( t.getSampleTime(7) == 747.0 );
                 }
                 break;
 
@@ -243,7 +240,6 @@ void testTimeSamplingScalar()
                     TESTING_ASSERT( t.getSampleTime(1) == 1.0 );
                     TESTING_ASSERT( t.getSampleTime(2) == 2.0 );
                     TESTING_ASSERT( t.getSampleTime(3) == 3.0 );
-                    TESTING_ASSERT( t.getSampleTime(4) == 3.0 );
                 }
                 break;
 
@@ -255,7 +251,6 @@ void testTimeSamplingScalar()
                     TESTING_ASSERT( t.getSampleTime(0) == -4.0 );
                     TESTING_ASSERT( t.getSampleTime(1) == -1.0 );
                     TESTING_ASSERT( t.getSampleTime(2) == 2.0 );
-                    TESTING_ASSERT( t.getSampleTime(3) == 2.0 );
                 }
                 break;
 
@@ -270,7 +265,6 @@ void testTimeSamplingScalar()
                     TESTING_ASSERT( t.getSampleTime(3) == 6.0 );
                     TESTING_ASSERT( t.getSampleTime(4) == 6.25 );
                     TESTING_ASSERT( t.getSampleTime(5) == 6.5 );
-                    TESTING_ASSERT( t.getSampleTime(6) == 6.5 );
                 }
                 break;
 
