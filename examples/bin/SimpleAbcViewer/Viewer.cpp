@@ -251,7 +251,7 @@ void RenderIt()
     const char *templ = "/var/tmp/SimpleAbcViewer_camera.XXXXXX";
     char *buffer = new char[strlen( templ ) + 1];
     strcpy( buffer, templ );
-    mkstemp( buffer );
+    int _dummy1 = mkstemp( buffer );
     std::string cameraFileName = buffer;
 
     float shutterOpenTime = -0.125f + ( float )g_transport->getCurrentFrame();
@@ -299,7 +299,7 @@ void RenderIt()
     std::string cmd = g_state.RenderScript;
     cmd += " ";
     cmd += cmdArgs;
-    system( cmd.c_str() );
+    int _dummy2= system( cmd.c_str() );
 
     delete[] buffer;
 }
