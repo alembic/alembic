@@ -36,119 +36,128 @@
 
 // NOTE: SUPER NOT WORKING RIGHT NOW!
 
-#include <Alembic/Abc/All.h>
+#include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
 #include <iostream>
-#include <stdlib.h>
-#include <vector>
+#include <sstream>
 
 //-*****************************************************************************
-using namespace ::Alembic::Abc;
+using namespace ::Alembic::AbcGeom;
 
-static std::string g_assetName;
+static const std::string g_sep( ";" );
 
-#if 0
 //-*****************************************************************************
-void VisitProperty( std::ostream &ostr,
-                    const std::string &indent,
-                    ICompoundProperty parent,
-                    const PropertyHeader &header )
+// FORWARD
+void visitProperties( ICompoundProperty, std::string & );
+
+//-*****************************************************************************
+std::string stripABC( const std::string &iPath )
 {
-    if ( header.isCompound() )
+    if ( iPath.substr( 0, 4 ) == "/ABC" )
     {
-        VisitCompoundProperty( ostr, indent,
-                               ICompoundProperty( parent,
-                                                  header.getName() ) );
+        return iPath.substr( 4, iPath.size() );
     }
-    else if ( header.isScalar() )
-    {
-        VisitScalarProperty( ostr, indent,
-                             IScalarProperty( parent,
-                                              header.getName() ) );
-    }
-    else
-    {
-        assert( header.isArray() );
-        VisitArrayProperty( ostr, indent,
-                            IArrayProperty( parent,
-                                            header.getName() ) );
-    }
+    else { return iPath; }
 }
-#endif
 
 //-*****************************************************************************
-void VisitObject( std::ostream &ostr,
-                  std::string &indent,
-                  IObject iObj )
+template <class PROP>
+void visitSimpleProperty( PROP iProp, const std::string &iIndent )
+{
+    std::string ptype = "ScalarProperty ";
+    if ( iProp.isArray() ) { ptype = "ArrayProperty "; }
+
+
+    std::string mdstring = "interpretation=";
+    mdstring += iProp.getMetaData().get( "interpretation" );
+
+    std::stringstream dtype;
+    dtype << "datatype=";
+    dtype << iProp.getDataType();
+
+    mdstring += g_sep;
+
+    mdstring += dtype.str();
+
+    std::cout << iIndent << "  " << ptype << "name=" << iProp.getName()
+              << g_sep << mdstring << std::endl;
+}
+
+//-*****************************************************************************
+void visitCompoundProperty( ICompoundProperty iProp, std::string &ioIndent )
+{
+    std::string oldIndent = ioIndent;
+    ioIndent += "  ";
+
+    std::string interp = "interpretation=";
+    interp += iProp.getMetaData().get( "interpretation" );
+
+    std::cout << ioIndent << "CompoundProperty " << "name=" << iProp.getName()
+              << g_sep << interp << std::endl;
+
+    visitProperties( iProp, ioIndent );
+
+    ioIndent = oldIndent;
+}
+
+//-*****************************************************************************
+void visitProperties( ICompoundProperty iParent,
+                      std::string &ioIndent )
+{
+    std::string oldIndent = ioIndent;
+    for ( size_t i = 0 ; i < iParent.getNumProperties() ; i++ )
+    {
+        PropertyHeader header = iParent.getPropertyHeader( i );
+
+        if ( header.isCompound() )
+        {
+            visitCompoundProperty( ICompoundProperty( iParent,
+                                                      header.getName() ),
+                                   ioIndent );
+        }
+        else if ( header.isScalar() )
+        {
+            visitSimpleProperty( IScalarProperty( iParent, header.getName() ),
+                                 ioIndent );
+        }
+        else
+        {
+            assert( header.isArray() );
+            visitSimpleProperty( IArrayProperty( iParent, header.getName() ),
+                                 ioIndent );
+        }
+    }
+
+    ioIndent = oldIndent;
+}
+
+//-*****************************************************************************
+void visitObject( IObject iObj,
+                  std::string iIndent )
 {
     // Object has a name, a full name, some meta data,
     // and then it has a compound property full of properties.
-    ostr << indent << "Object: \"" << iObj.getName() << "\"" << std::endl;
+    std::string path = iObj.getFullName();
 
-    std::string oldIndent = indent;
-    indent += "  ";
+    std::string interp = iObj.getMetaData().get( "interpretation" );
 
-    // Write the name and meta data.
-    ostr << indent << "Full Name: \"" << iObj.getFullName() << "\""
-         << std::endl
-         << indent << "Data Type: " << iObj.getMetaData().serialize()
-         << std::endl;
+    if ( path != "/ABC" )
+    {
+        std::cout << "Object " << stripABC( path )
+                  << " " << interp << std::endl;
+    }
 
-    #if 0
     // Get the properties.
-    ICompoundProperty props( iObj );
-    size_t numProps = props.getNumProperties();
-    if ( numProps > 0 )
+    ICompoundProperty props = iObj.getProperties();
+    visitProperties( props, iIndent );
+
+    // now the child objects
+    for ( size_t i = 0 ; i < iObj.getNumChildren() ; i++ )
     {
-        ostr << indent << "Properties: " << std::endl;
-        indent += "  ";
-        for ( size_t p = 0; p < numProps; ++p )
-        {
-            VisitProperty( ostr, indent,
-                           props, props.getPropertyHeader( p ) );
-        }
+        visitObject( IObject( iObj, iObj.getChildHeader( i ).getName() ),
+                     iIndent );
     }
-    #endif
-}
-
-
-//-*****************************************************************************
-// Forwards.
-std::ostream &operator<<( std::ostream &ostr, IArchive &p );
-std::ostream &operator<<( std::ostream &ostr, IObject p );
-
-//-*****************************************************************************
-// Output children
-template <class PARENT>
-void childrenOut( std::ostream &ostr, PARENT p )
-{
-    const size_t numChildren = p.getNumChildren();
-
-    if ( numChildren > 0 )
-    {
-        for ( size_t c = 0; c < numChildren; ++c )
-        {
-            ostr << g_assetName << " ";
-            IObject obj( p, p.getChildHeader( c ).getName() );
-            ostr << obj;
-        }
-    }
-}
-
-//-*****************************************************************************
-std::ostream &operator<<( std::ostream &ostr, IArchive &p )
-{
-    childrenOut( ostr, IObject( p, kTop ) );
-    return ostr;
-}
-
-//-*****************************************************************************
-std::ostream &operator<<( std::ostream &ostr, IObject p )
-{
-    // Children
-    childrenOut( ostr, p );
-    return ostr;
 }
 
 //-*****************************************************************************
@@ -169,8 +178,7 @@ int main( int argc, char *argv[] )
     {
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                           argv[1], ErrorHandler::kQuietNoopPolicy );
-        g_assetName = archive.getName();
-        std::cout << archive << std::endl;
+        visitObject( archive.getTop(), "" );
     }
 
     return 0;
