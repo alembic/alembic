@@ -90,8 +90,8 @@ void visitCompoundProperty( ICompoundProperty iProp, std::string &ioIndent )
     std::string oldIndent = ioIndent;
     ioIndent += "  ";
 
-    std::string interp = "interpretation=";
-    interp += iProp.getMetaData().get( "interpretation" );
+    std::string interp = "schema=";
+    interp += iProp.getMetaData().get( "schema" );
 
     std::cout << ioIndent << "CompoundProperty " << "name=" << iProp.getName()
               << g_sep << interp << std::endl;
@@ -140,12 +140,10 @@ void visitObject( IObject iObj,
     // and then it has a compound property full of properties.
     std::string path = iObj.getFullName();
 
-    std::string interp = iObj.getMetaData().get( "interpretation" );
-
     if ( path != "/ABC" )
     {
-        std::cout << "Object " << stripABC( path )
-                  << " " << interp << std::endl;
+        std::cout << "Object " << "name=" << stripABC( path )
+                  << std::endl;
     }
 
     // Get the properties.
