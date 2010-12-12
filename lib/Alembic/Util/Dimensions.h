@@ -46,11 +46,9 @@ template <class T>
 class BaseDimensions
 {
 private:
-    typedef T MySizeT;
     typedef std::vector<T> SizeVec;
     SizeVec m_vector;
     const size_t m_mask;
-    //BOOST_STATIC_ASSERT( sizeof( MySizeT ) == sizeof( T ) );
 
 public:
     // Default is for a rank-0 dimension.
@@ -62,7 +60,7 @@ public:
     // When you specify a single thing, you're specifying a rank-1
     // dimension of a certain size.
     explicit BaseDimensions( const T& t )
-      : m_vector( 1, ( std::size_t )t )
+      : m_vector( 1, t )
       , m_mask( -1 )
     {}
 
@@ -143,10 +141,21 @@ bool operator==( const BaseDimensions<T> &a, const BaseDimensions<Y> &b )
     size_t bRank = b.rank();
     if ( aRank != bRank ) { return false; }
 
-    for ( size_t d = 0; d < aRank; ++d )
+    if ( sizeof( Y ) > sizeof( T ) )
     {
-        if ( static_cast<size_t>( a[d] ) !=
-             static_cast<size_t>( b[d] ) ) { return false; }
+        for ( size_t d = 0; d < aRank; ++d )
+        {
+            if ( static_cast<Y>( a[d] ) !=
+                 static_cast<Y>( b[d] ) ) { return false; }
+        }
+    }
+    else
+    {
+        for ( size_t d = 0; d < aRank; ++d )
+        {
+            if ( static_cast<T>( a[d] ) !=
+                 static_cast<T>( b[d] ) ) { return false; }
+        }
     }
 
     return true;
