@@ -51,16 +51,15 @@ void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
             m_timeSampling.getTimeSamplingType().getNumSamplesPerCycle();
         uint32_t propNumSampsPerCycle = \
             iProp.getTimeSampling().getTimeSamplingType().getNumSamplesPerCycle();
-        if ( propNumSampsPerCycle > localNumSampsPerCycle )
+
+        size_t numSamps = iProp.getNumSamples();
+
+        if ( propNumSampsPerCycle >= localNumSampsPerCycle
+             && numSamps > m_numSamples )
         {
             m_timeSampling = iProp.getTimeSampling();
+            m_numSamples = numSamps;
         }
-    }
-
-    if ( iProp )
-    {
-        m_numSamples = iProp.getNumSamples() > m_numSamples ?
-            iProp.getNumSamples() : m_numSamples;
 
         m_isConstant = m_isConstant ? iProp.isConstant() : m_isConstant;
     }
