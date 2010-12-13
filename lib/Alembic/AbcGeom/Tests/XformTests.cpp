@@ -38,6 +38,19 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/Abc/Tests/Assert.h>
 
+#include <ImathMath.h>
+
+#include <limits>
+
+static const double VAL_EPSILON = std::numeric_limits<double>::epsilon() \
+    * 1024.0;
+
+bool almostEqual( const double &a, const double &b,
+                  const double &epsilon = VAL_EPSILON )
+{
+    return Imath::equalWithAbsError( a, b, epsilon );
+}
+
 using namespace Alembic::AbcGeom;
 
 //-*****************************************************************************
@@ -338,14 +351,14 @@ void someOpsXform()
             Abc::DoubleArraySamplePtr anim =
                 a.getSchema().getAnimData( Abc::ISampleSelector(i) );
             TESTING_ASSERT( anim->size() == 8 );
-            TESTING_ASSERT( (*anim)[0] == 2.0 * (i + 1) );
-            TESTING_ASSERT( (*anim)[1] == i );
-            TESTING_ASSERT( (*anim)[2] == -i );
-            TESTING_ASSERT( (*anim)[3] == 0 );
-            TESTING_ASSERT( (*anim)[4] == 0.125 * (i+1) );
-            TESTING_ASSERT( (*anim)[5] == 0.1 * (i+1) );
-            TESTING_ASSERT( (*anim)[6] == 3.0 * i );
-            TESTING_ASSERT( (*anim)[7] == 4.0 * i );
+            TESTING_ASSERT( almostEqual( (*anim)[0], 2.0 * (i + 1) ) );
+            TESTING_ASSERT( almostEqual( (*anim)[1], i ) );
+            TESTING_ASSERT( almostEqual( (*anim)[2], -i ) );
+            TESTING_ASSERT( almostEqual( (*anim)[3], 0 ) );
+            TESTING_ASSERT( almostEqual( (*anim)[4], 0.125 * (i+1) ) );
+            TESTING_ASSERT( almostEqual( (*anim)[5], 0.1 * (i+1) ) );
+            TESTING_ASSERT( almostEqual( (*anim)[6], 3.0 * i ) );
+            TESTING_ASSERT( almostEqual( (*anim)[7], 4.0 * i ) );
 
             XformSampleVec xs;
             a.getSchema().getSample(xs, Abc::ISampleSelector(i));

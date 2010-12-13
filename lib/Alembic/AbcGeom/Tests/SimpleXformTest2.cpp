@@ -39,9 +39,16 @@
 
 #include "Assert.h"
 
+#include <ImathMath.h>
+
+#include <limits>
+
 #include <iostream>
 
 using namespace Alembic::AbcGeom;
+
+static const double VAL_EPSILON = std::numeric_limits<double>::epsilon() \
+    * 1024.0;
 
 void castTest( const OObject& foo )
 {
@@ -192,7 +199,15 @@ void readArchive( const std::string &iName )
                 size_t idx = i * 3 + j;
                 V3d trans = c.getSchema().getValue( idx ).getTranslation();
 
-                TESTING_ASSERT( trans == shouldBeTrans );
+                std::cerr << "trans: " << trans << ", should be: "
+                          << shouldBeTrans << std::endl;
+
+                TESTING_ASSERT( Imath::equalWithAbsError(
+                                    trans.x, shouldBeTrans.x, VAL_EPSILON )
+                                && Imath::equalWithAbsError(
+                                    trans.y, shouldBeTrans.y, VAL_EPSILON )
+                                && Imath::equalWithAbsError(
+                                    trans.z, shouldBeTrans.z, VAL_EPSILON ) );
 
                 std::cout << "c's " << idx << "th sample has translation "
                           << trans << " at time " << sampleTime
