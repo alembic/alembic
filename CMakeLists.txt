@@ -248,6 +248,8 @@ ELSE()
     ENDIF()
 ENDIF()
 
+ADD_SUBDIRECTORY( python EXCLUDE_FROM_ALL )
+
 # example code not supported
 ADD_SUBDIRECTORY( examples EXCLUDE_FROM_ALL )
 
