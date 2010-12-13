@@ -34,8 +34,6 @@
 //
 //-*****************************************************************************
 
-// NOTE: SUPER NOT WORKING RIGHT NOW!
-
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
