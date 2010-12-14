@@ -1,3 +1,8 @@
+2010-12-13, Alembic 0.9.1:
+
+Just a minor update to enable Alembic on 32-bit systems, along with
+getting the code in examples/bin/AbcEcho reasonably working.
+
 2010-12-08, Alembic 0.9.1:
 
 The main things in this release are the addition of a Renderman procedural
