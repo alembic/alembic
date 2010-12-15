@@ -43,28 +43,31 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
 
   SET( PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY} )
 
-  SET( CPP_FILES IContext.cpp
-                 Init.cpp
-                 IParentObject.cpp
-                 IAsset.cpp
-                 IObject.cpp
-                 main.cpp )
+  SET( CORE_LIBS
+    AlembicAbcGeom
+    AlembicAbc
+    AlembicAbcCoreHDF5
+    AlembicAbcCoreAbstract
+    AlembicMD5Hash
+    AlembicUtil )
 
-  LINK_LIBRARIES( AlembicAsset
-                  MD5Hash
-                  AlembicHDF5
-                  AlembicUtil
-                  AlembicExc
+  SET( CPP_FILES
+    IObject.cpp
+    ReadArchive.cpp
+    main.cpp )
+
+  LINK_LIBRARIES( ${CORE_LIBS}
                   ${ALEMBIC_HDF5_LIBS}
                   ${PLIBS}
+                  ${ALEMBIC_ILMBASE_LIBS}
                   ${ZLIB_LIBRARIES}
                   m )
 
   INCLUDE_DIRECTORIES( "/usr/include/python2.6" "${ALEMBIC_SOURCE_DIR}/lib" )
 
-  ADD_LIBRARY( _asset SHARED ${CPP_FILES} )
+  ADD_LIBRARY( _abc SHARED ${CPP_FILES} )
 
-  INSTALL( TARGETS _asset
+  INSTALL( TARGETS _abc
            LIBRARY DESTINATION lib )
 
 ENDIF()

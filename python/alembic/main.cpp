@@ -37,17 +37,11 @@
 using namespace boost::python;
 
 // forwards
-void register_iasset();
 void register_iobject();
-void register_init();
-void register_iparentobject();
-void register_icontext();
+void register_readarchive();
 
-BOOST_PYTHON_MODULE( _asset )
+BOOST_PYTHON_MODULE( _abc )
 {
-    register_init();
-    register_icontext();
-    register_iparentobject();
-    register_iasset();
+    register_readarchive();
     register_iobject();
 }

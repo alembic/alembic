@@ -32,15 +32,20 @@
 //
 //-*****************************************************************************
 
-#include <AlembicAsset/AlembicAsset.h>
+#include <boost/python/detail/wrap_python.hpp>
+
+#include <Alembic/Abc/All.h>
 
 #include <boost/python.hpp>
 
-#include <Python.h>
+
+//#include <Python.h>
 
 using namespace boost::python;
 
-using namespace AlembicAsset;
+using namespace Alembic::Abc;
+
+#if 0
 
 //-*****************************************************************************
 void register_iobject()
@@ -91,3 +96,5 @@ void register_iobject()
         .def( "__str__", &IObject::fullPathName )
         ;
 }
+
+#endif

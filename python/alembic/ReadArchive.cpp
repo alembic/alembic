@@ -32,85 +32,20 @@
 //
 //-*****************************************************************************
 
-#include <AlembicAsset/AlembicAsset.h>
+#include <boost/python/detail/wrap_python.hpp>
+
+#include <Alembic/AbcCoreHDF5/All.h>
 
 #include <boost/python.hpp>
 
-#include <Python.h>
+//#include <Python.h>
 
 using namespace boost::python;
 
-using namespace AlembicAsset;
-
 //-*****************************************************************************
-void register_icontext()
+void register_readarchive()
 {
-    class_<IContext>( "IContext" )
-        .def( init<size_t>() )
-        .def( "valid", &IContext::valid )
-        .def( "release", &IContext::release )
-        .def( "errorString", &IContext::errorString,
-              return_value_policy<copy_const_reference>() )
+    class_< ::Alembic::AbcCoreHDF5::ReadArchive >( "ReadArchive" )
+        .def( self () )
         ;
 }
-
-#if 0
-//-*****************************************************************************
-class IContext
-{
-public:
-    typedef IContext this_type;
-
-    //-*************************************************************************
-    IContext() throw() : m_errorString( "" ), m_body() {}
-
-    IContext( const IContext &copy ) throw()
-      : m_errorString( copy.m_errorString ),
-        m_body( copy.m_body ) {}
-
-    // Non-exception-throwy.
-    // If problematic, error will be in errorString.
-    explicit IContext( size_t maxMemory ) throw();
-
-    // Exception throwy.
-    IContext( size_t maxMemory, ThrowExceptionFlag );
-
-    // It's hard to say what this will throw because destructors
-    // are involved? CJH: More later.
-    IContext &operator=( const IContext &copy ) throw()
-    {
-        m_errorString = copy.m_errorString;
-        m_body = copy.m_body;
-        return *this;
-    }
-
-    // Virtual destructor
-    virtual ~IContext() throw() {}
-
-    bool valid() const throw() { return ( bool )m_body; }
-
-    // Release lets go of this object's hold on its resources.
-    void release() throw()
-    {
-        // Not sure?
-        m_errorString = "";
-        m_body.reset();
-    }
-
-    // Add operator bool and operator!
-    ALEMBIC_OPERATOR_BOOL_NOTHROW( this->valid() );
-
-    // Access!
-    SharedIContextBody body() const throw() { return m_body; }
-
-    // Error string.
-    const std::string &errorString() const throw() { return m_errorString; }
-
-protected:
-    std::string m_errorString;
-    SharedIContextBody m_body;
-};
-
-} // End namespace AlembicAsset
-
-#endif
