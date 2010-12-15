@@ -161,7 +161,7 @@ void OSimpleXformSchema::init( const AbcA::TimeSamplingType &iTst )
 void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
                               const Abc::OSampleSelector &iSS )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::set()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSimpleXformSchema::set()" );
 
     // Get the pieces.
     Abc::V3d scale = iSamp.getScale();
@@ -228,7 +228,7 @@ void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
 //-*****************************************************************************
 void OSimpleXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::set()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSimpleXformSchema::set()" );
 
     // Get an index and a time
     index_t idx = iSS.getIndex();
