@@ -100,6 +100,11 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
                  && m_sampleTimes->getDataType().getPod() == kChrono_TPOD,
                  "Invalid sampleTimes ArraySample, must be rank 1 and "
                  << "type chrono_t" );
+
+    if ( m_numSamples == 0 && m_sampleTimes->size() > 0 )
+    {
+        m_numSamples = 1;
+    }
 }
 
 //-*****************************************************************************
