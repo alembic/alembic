@@ -37,7 +37,6 @@
 #include <Alembic/AbcCoreAbstract/TimeSampling.h>
 
 #include <Alembic/AbcCoreAbstract/DataType.h>
-#include <Alembic/AbcCoreHDF5/Foundation.h>
 
 #include <ImathMath.h>
 
