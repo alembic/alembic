@@ -40,6 +40,21 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+static bool isMoreDynamic( const AbcA::TimeSampling &a,
+                           const AbcA::TimeSampling &b )
+{
+    //! Return true if a is more dynamic than b
+    if ( b.isStatic() && ( ! a.isStatic() ) ) { return true; }
+
+    AbcA::TimeSamplingType atst = a.getTimeSamplingType();
+    AbcA::TimeSamplingType btst = b.getTimeSamplingType();
+
+    if ( atst.getNumSamplesPerCycle() > btst.getNumSamplesPerCycle() )
+    { return true; }
+
+    return false;
+}
+
 //-*****************************************************************************
 void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
 {
@@ -54,8 +69,14 @@ void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
 
         size_t numSamps = iProp.getNumSamples();
 
-        if ( propNumSampsPerCycle >= localNumSampsPerCycle
-             && numSamps > m_numSamples )
+        // if prop samples/cycle is greater than or equal to local
+        // samples/cycle, AND prop num samples is greater than local,
+        // use the prop for time
+        if ( ( isMoreDynamic( iProp.getTimeSampling(), m_timeSampling )
+               && numSamps >= m_numSamples )
+             || ( localNumSampsPerCycle == propNumSampsPerCycle
+                  && numSamps > m_numSamples )
+           )
         {
             m_timeSampling = iProp.getTimeSampling();
             m_numSamples = numSamps;
