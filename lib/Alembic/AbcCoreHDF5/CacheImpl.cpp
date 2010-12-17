@@ -73,13 +73,13 @@ CacheImpl::find( const AbcA::ArraySample::Key &iKey )
     {
         AbcA::ArraySamplePtr givenSampPtr = (*uFoundIter).second;
         assert( givenSampPtr );
-        
+
         AbcA::ArraySamplePtr deleterPtr = lock( iKey, givenSampPtr );
         assert( deleterPtr );
         assert( givenSampPtr.get() == deleterPtr.get() );
 
         // Remove it from the unlocked map.
-        m_unlockedMap.erase_return_void( uFoundIter );
+        m_unlockedMap.erase( uFoundIter );
 
         return AbcA::ReadArraySampleID( iKey, deleterPtr );
     }
@@ -119,7 +119,7 @@ CacheImpl::lock( const AbcA::ArraySample::Key &iKey,
                  AbcA::ArraySamplePtr iGivenPtr )
 {
     assert( iGivenPtr );
-    
+
     // Lock it by creating a cache-managing deleter.
     // This RecordDeleter simply tells this cache instance to nuke
     // us.
@@ -127,7 +127,7 @@ CacheImpl::lock( const AbcA::ArraySample::Key &iKey,
                            boost::dynamic_pointer_cast<CacheImpl,
                            AbcA::ReadArraySampleCache>( shared_from_this() ) );
     AbcA::ArraySamplePtr deleterPtr( iGivenPtr.get(), deleter );
-    
+
     // Add it to the locked map
     Record record( iGivenPtr, deleterPtr );
     m_lockedMap[iKey] = record;
@@ -144,7 +144,7 @@ void CacheImpl::unlock( const AbcA::ArraySample::Key &iKey )
         AbcA::ArraySamplePtr givenPtr = (*foundIter).second.given;
         assert( givenPtr );
         m_unlockedMap[iKey] = givenPtr;
-        m_lockedMap.erase_return_void( foundIter );
+        m_lockedMap.erase( foundIter );
     }
 }
 
