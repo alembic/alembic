@@ -94,3 +94,9 @@ ADD_EXECUTABLE( AbcGeom_XformTest
 		XformTests.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest  ${TEST_LIBS} )
 ADD_TEST( AbcGeom_XformTEST  AbcGeom_XformTest  )
+
+##-*****************************************************************************
+ADD_EXECUTABLE( AbcGeom_TransformingMeshTest MeshData.cpp
+                                             TransformingMeshTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_TransformingMeshTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_TransformingMeshTest_TEST AbcGeom_TransformingMeshTest )

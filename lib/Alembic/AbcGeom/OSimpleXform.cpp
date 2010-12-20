@@ -42,40 +42,40 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-bool
+void
 OSimpleXformSchema::ODefaultedDoubleProperty::set( const double &iVal,
                                                    const Abc::OSampleSelector &iSS,
-                                                   const chrono_t *iTimes )
+                                                   const ChronoSet &iTimes )
 {
+    chrono_t t = iSS.getTime();
     if ( m_property )
     {
         m_property.set( iVal, iSS );
-        return true;
+        return;
     }
 
     if ( ! Imath::equalWithAbsError( iVal - m_default, 0.0, m_epsilon ) )
     {
         // A change!
-        if ( iTimes )
-        {
-            m_property = Abc::ODoubleProperty( m_parent, m_name,
-                                               m_errorHandlerPolicy,
-                                               m_timeSamplingType );
-        }
-        else
-        {
-            m_property = Abc::ODoubleProperty( m_parent, m_name,
-                                               m_errorHandlerPolicy );
-        }
+        m_property = Abc::ODoubleProperty( m_parent, m_name,
+                                           m_errorHandlerPolicy,
+                                           m_timeSamplingType );
 
         // Run up the defaults.
         index_t idx = iSS.getIndex();
-        for ( index_t jdx = 0; jdx < idx; ++jdx )
+        std::vector<chrono_t> tvec;
+        for ( ChronoSet::const_iterator iter = iTimes.begin() ;
+              iter != iTimes.end() ; ++iter )
+        {
+            tvec.push_back( *iter );
+        }
+
+        for ( size_t jdx = 0 ; jdx < idx ; jdx++ )
         {
             Abc::OSampleSelector jSS;
-            if ( iTimes )
+            if ( ! iTimes.empty() )
             {
-                jSS = Abc::OSampleSelector( jdx, iTimes[jdx] );
+                jSS = Abc::OSampleSelector( jdx, tvec[jdx] );
             }
             else
             {
@@ -96,22 +96,22 @@ OSimpleXformSchema::ODefaultedDoubleProperty::set( const double &iVal,
         m_property.set( iVal, iSS );
 
         // And return true, because the property exists
-        return true;
+        return;
     }
 
     // Property does not (and does not need to yet) exist.
-    return false;
+    return;
 }
 
 //-*****************************************************************************
-bool
+void
 OSimpleXformSchema::ODefaultedDoubleProperty::setFromPrevious(
     const Abc::OSampleSelector &iSS,
-    const chrono_t *iTimes )
+    const ChronoSet &iTimes )
 {
     if ( m_property )
     {
-        if ( iTimes )
+        if ( ! iTimes.empty() )
         {
             m_property.setFromPrevious( iSS );
         }
@@ -119,10 +119,10 @@ OSimpleXformSchema::ODefaultedDoubleProperty::setFromPrevious(
         {
             m_property.setFromPrevious( iSS.getIndex() );
         }
-        return true;
+        return;
     }
 
-    return false;
+    return;
 }
 
 //-*****************************************************************************
@@ -174,52 +174,46 @@ void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
     chrono_t time = iSS.getTime();
 
     // Push back the times if we need to.
-    if ( m_times.size() == idx )
+    if ( m_times.size() == idx  )
     {
-        m_times.push_back( time );
+        m_times.insert( time );
 
-        // Set the components.
-        const chrono_t *times = &m_times.front();
-        bool any = false;
+        m_scaleX.set( scale.x, iSS, m_times );
+        m_scaleY.set( scale.y, iSS, m_times );
+        m_scaleZ.set( scale.z, iSS, m_times );
 
-        any = m_scaleX.set( scale.x, iSS, times ) || any;
-        any = m_scaleY.set( scale.y, iSS, times ) || any;
-        any = m_scaleZ.set( scale.z, iSS, times ) || any;
+        m_shear0.set( shear.x, iSS, m_times );
+        m_shear1.set( shear.y, iSS, m_times );
+        m_shear2.set( shear.z, iSS, m_times );
 
-        any = m_shear0.set( shear.x, iSS, times ) || any;
-        any = m_shear1.set( shear.y, iSS, times ) || any;
-        any = m_shear2.set( shear.z, iSS, times ) || any;
+        m_rotateX.set( rot.x, iSS, m_times );
+        m_rotateY.set( rot.y, iSS, m_times );
+        m_rotateZ.set( rot.z, iSS, m_times );
 
-        any = m_rotateX.set( rot.x, iSS, times ) || any;
-        any = m_rotateY.set( rot.y, iSS, times ) || any;
-        any = m_rotateZ.set( rot.z, iSS, times ) || any;
-
-        any = m_translateX.set( trans.x, iSS, times ) || any;
-        any = m_translateY.set( trans.y, iSS, times ) || any;
-        any = m_translateZ.set( trans.z, iSS, times ) || any;
-
-        if ( any )
-        {
-            m_times.clear();
-        }
+        m_translateX.set( trans.x, iSS, m_times );
+        m_translateY.set( trans.y, iSS, m_times );
+        m_translateZ.set( trans.z, iSS, m_times );
     }
     else
     {
-        m_scaleX.set( scale.x, iSS, NULL );
-        m_scaleY.set( scale.y, iSS, NULL );
-        m_scaleZ.set( scale.z, iSS, NULL );
+        ChronoSet empty;
+        empty.clear();
 
-        m_shear0.set( shear.x, iSS, NULL );
-        m_shear1.set( shear.y, iSS, NULL );
-        m_shear2.set( shear.z, iSS, NULL );
+        m_scaleX.set( scale.x, iSS, empty );
+        m_scaleY.set( scale.y, iSS, empty );
+        m_scaleZ.set( scale.z, iSS, empty );
 
-        m_rotateX.set( rot.x, iSS, NULL );
-        m_rotateY.set( rot.y, iSS, NULL );
-        m_rotateZ.set( rot.z, iSS, NULL );
+        m_shear0.set( shear.x, iSS, empty );
+        m_shear1.set( shear.y, iSS, empty );
+        m_shear2.set( shear.z, iSS, empty );
 
-        m_translateX.set( trans.x, iSS, NULL );
-        m_translateY.set( trans.y, iSS, NULL );
-        m_translateZ.set( trans.z, iSS, NULL );
+        m_rotateX.set( rot.x, iSS, empty );
+        m_rotateY.set( rot.y, iSS, empty );
+        m_rotateZ.set( rot.z, iSS, empty );
+
+        m_translateX.set( trans.x, iSS, empty );
+        m_translateY.set( trans.y, iSS, empty );
+        m_translateZ.set( trans.z, iSS, empty );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -228,7 +222,7 @@ void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
 //-*****************************************************************************
 void OSimpleXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSimpleXformSchema::set()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSimpleXformSchema::setFromPrevious()" );
 
     // Get an index and a time
     index_t idx = iSS.getIndex();
@@ -237,50 +231,44 @@ void OSimpleXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     // Push back the times if we need to.
     if ( m_times.size() == idx )
     {
-        m_times.push_back( time );
+        m_times.insert( time );
 
-        // Set the components.
-        const chrono_t *times = &m_times.front();
-        bool any = false;
+        m_scaleX.setFromPrevious( iSS, m_times );
+        m_scaleY.setFromPrevious( iSS, m_times );
+        m_scaleZ.setFromPrevious( iSS, m_times );
 
-        any = m_scaleX.setFromPrevious( iSS, times ) || any;
-        any = m_scaleY.setFromPrevious( iSS, times ) || any;
-        any = m_scaleZ.setFromPrevious( iSS, times ) || any;
+        m_shear0.setFromPrevious( iSS, m_times );
+        m_shear1.setFromPrevious( iSS, m_times );
+        m_shear2.setFromPrevious( iSS, m_times );
 
-        any = m_shear0.setFromPrevious( iSS, times ) || any;
-        any = m_shear1.setFromPrevious( iSS, times ) || any;
-        any = m_shear2.setFromPrevious( iSS, times ) || any;
+        m_rotateX.setFromPrevious( iSS, m_times );
+        m_rotateY.setFromPrevious( iSS, m_times );
+        m_rotateZ.setFromPrevious( iSS, m_times );
 
-        any = m_rotateX.setFromPrevious( iSS, times ) || any;
-        any = m_rotateY.setFromPrevious( iSS, times ) || any;
-        any = m_rotateZ.setFromPrevious( iSS, times ) || any;
-
-        any = m_translateX.setFromPrevious( iSS, times ) || any;
-        any = m_translateY.setFromPrevious( iSS, times ) || any;
-        any = m_translateZ.setFromPrevious( iSS, times ) || any;
-
-        if ( any )
-        {
-            m_times.clear();
-        }
+        m_translateX.setFromPrevious( iSS, m_times );
+        m_translateY.setFromPrevious( iSS, m_times );
+        m_translateZ.setFromPrevious( iSS, m_times );
     }
     else
     {
-        m_scaleX.setFromPrevious( iSS, NULL );
-        m_scaleY.setFromPrevious( iSS, NULL );
-        m_scaleZ.setFromPrevious( iSS, NULL );
+        ChronoSet empty;
+        empty.clear();
 
-        m_shear0.setFromPrevious( iSS, NULL );
-        m_shear1.setFromPrevious( iSS, NULL );
-        m_shear2.setFromPrevious( iSS, NULL );
+        m_scaleX.setFromPrevious( iSS, empty );
+        m_scaleY.setFromPrevious( iSS, empty );
+        m_scaleZ.setFromPrevious( iSS, empty );
 
-        m_rotateX.setFromPrevious( iSS, NULL );
-        m_rotateY.setFromPrevious( iSS, NULL );
-        m_rotateZ.setFromPrevious( iSS, NULL );
+        m_shear0.setFromPrevious( iSS, empty );
+        m_shear1.setFromPrevious( iSS, empty );
+        m_shear2.setFromPrevious( iSS, empty );
 
-        m_translateX.setFromPrevious( iSS, NULL );
-        m_translateY.setFromPrevious( iSS, NULL );
-        m_translateZ.setFromPrevious( iSS, NULL );
+        m_rotateX.setFromPrevious( iSS, empty );
+        m_rotateY.setFromPrevious( iSS, empty );
+        m_rotateZ.setFromPrevious( iSS, empty );
+
+        m_translateX.setFromPrevious( iSS, empty );
+        m_translateY.setFromPrevious( iSS, empty );
+        m_translateZ.setFromPrevious( iSS, empty );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();

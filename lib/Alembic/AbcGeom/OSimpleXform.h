@@ -41,8 +41,13 @@
 #include <Alembic/AbcGeom/SimpleXformSample.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 
+#include <set>
+
 namespace Alembic {
 namespace AbcGeom {
+
+//! a set to hold our non-default-valued sample times
+typedef std::set<chrono_t> ChronoSet;
 
 //! The default value for determining whether a property is actually
 //! different from the default.  If it's within this tolerance, the
@@ -102,7 +107,7 @@ public:
                                  const Abc::OArgument &iArg1 = Abc::OArgument(),
                                  const Abc::OArgument &iArg2 = Abc::OArgument() )
       : Abc::OSchema<SimpleXformSchemaInfo>( iParent,
-                                               iArg0, iArg1, iArg2 )
+                                             iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
@@ -194,24 +199,24 @@ protected:
 
         // Returns whether or not the property exists, or whether
         // it is still default value.
-        bool set( const double &iSamp,
+        void set( const double &iSamp,
                   const Abc::OSampleSelector &iSS,
 
                   // If we haven't made a property yet,
                   // these time samples correspond to the times
                   // not yet sampled.
                   // Otherwise, these will be NULL.
-                  const chrono_t *iTimeSamples );
+                  const ChronoSet &iTimeSamples );
 
         // Returns whether or not the property exists, or whether
         // it is still default value.
-        bool setFromPrevious( const Abc::OSampleSelector &iSS,
+        void setFromPrevious( const Abc::OSampleSelector &iSS,
 
                               // If we haven't made a property yet,
                               // these time samples correspond to the times
                               // not yet sampled.
                               // Otherwise, these will be NULL.
-                              const chrono_t *iTimeSamples );
+                              const ChronoSet &iTimeSamples );
 
         double getDefaultValue() const { return m_default; }
 
@@ -232,7 +237,7 @@ protected:
 
 protected:
     // Times for the properties set as non-default
-    std::vector<chrono_t> m_times;
+    ChronoSet m_times;
 
     // The components.
     ODefaultedDoubleProperty m_scaleX;
