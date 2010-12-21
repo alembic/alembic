@@ -207,10 +207,14 @@ inline std::ostream &operator<<( std::ostream &ostr, const TimeSamplingType &tst
 
     ostr << baseType << " time sampling";
 
-    if ( ! ( tst.isIdentity() || tst.isAcyclic() ) )
+    if ( tst.isUniform() )
     {
-        ostr << " with " << tst.getNumSamplesPerCycle() << " samples per cycle "
-             << "and " << tst.getTimePerCycle() << " chrono_ts per cycle.";
+        ostr << " with " << tst.getTimePerCycle() << " chrono_ts/cycle";
+    }
+    else if ( ! ( tst.isIdentity() || tst.isAcyclic() ) )
+    {
+        ostr << " with " << tst.getNumSamplesPerCycle() << " samps/cycle "
+             << "and " << tst.getTimePerCycle() << " chrono_ts/cycle";
     }
 
     return ostr;
