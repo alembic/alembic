@@ -39,6 +39,8 @@
 #include <boost/random.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include "Assert.h"
+
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
@@ -64,6 +66,17 @@ void writeSimpleProperties(const std::string &archiveName)
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
                       archiveName, ErrorHandler::kThrowPolicy );
     OObject archiveTop = archive.getTop();
+
+
+    OObject foochild( archiveTop, "foochild" );
+
+    ODoubleProperty foodub( foochild.getProperties(), "foodub",
+                            TimeSamplingType() );
+
+    for ( size_t i = 0 ; i < 10 ; i++ )
+    {
+        foodub.set( 2.0, i );
+    }
 
     for (int ii=0; ii<numChildren; ii++)
     {
@@ -112,9 +125,12 @@ void readSimpleProperties(const std::string &archiveName)
 
     // Determine the number of (top level) children the archive has
     const unsigned int numChildren = archiveTop.getNumChildren();
-    ABCA_ASSERT( numChildren == 3, "Wrong number of children (expected 3)");
+    TESTING_ASSERT( numChildren == 4 );
     std::cout << "The archive has " << numChildren << " children:"
               << std::endl;
+
+
+
 
     // Iterate through them, print out their names
     for (int ii=0; ii<numChildren; ii++)
@@ -227,8 +243,10 @@ void readSimpleProperties(const std::string &archiveName)
             size_t numSamples = ts.getNumSamples();
 
 
-            std::cout << "    ..with time sampling: ";
-            std::cout << "  " << numSamples << " samples";
+            std::cout << "    ..and "
+                      << ts.getTimeSamplingType() << std::endl
+                      << "    ..and " << numSamples << " samples at times: ";
+
 
             if (numSamples > 0)
             {

@@ -55,7 +55,7 @@ static const chrono_t dt = 1.0 / 24.0;
 static const size_t numV3fPoints = 20;
 static const size_t numV3fSamps = 31;
 static const size_t numIntPoints = 11;
-static const size_t numIntSamps = 7;
+static const size_t numIntSamps = 8;
 
 static const chrono_t CHRONO_EPSILON = \
     std::numeric_limits<chrono_t>::epsilon() * 32.0;
@@ -97,12 +97,13 @@ void simpleTestOut( const std::string &iArchiveName )
     OBoolProperty acc0bp0( acc0Props, "acc0bp0" );
     acc0bp0.set( false );
 
-    // now some array props
-    OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0",
-                                  TimeSamplingType( 1.0/24.0 ) );
+    TimeSamplingType tst( dt );
 
-    OInt32ArrayProperty ac0iap0( ac0Props, "ac0iap0",
-                               TimeSamplingType( 1.0/24.0 ) );
+    // now some array props
+    OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0", tst );
+
+
+    OInt32ArrayProperty ac0iap0( ac0Props, "ac0iap0", tst );
 
     // make some data for our array props
     std::vector<V3f> v3fpoints( numV3fPoints );

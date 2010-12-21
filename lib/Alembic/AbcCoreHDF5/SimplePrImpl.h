@@ -336,7 +336,7 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
     {
         // Read the sample from the parent group.
         // Sample 0 is always on the parent group, with
-        // our name + ".sample_0" as the name of it.
+        // our name + ".smp0" as the name of it.
         std::string sample0Name = getSampleName( myName, 0 );
         if ( m_header->getPropertyType() == AbcA::kScalarProperty )
         {

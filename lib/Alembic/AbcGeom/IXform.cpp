@@ -106,13 +106,11 @@ Abc::M44d IXformSchema::getMatrix( const Abc::ISampleSelector &iSS )
                 {
                     if (m_ops[i].isIndexAnimated(j*4 + k))
                     {
-                        m.x[j][k] = (*anim)[animIndex];
-                        animIndex ++;
+                        m.x[j][k] = (*anim)[animIndex++];
                     }
                     else
                     {
-                        m.x[j][k] = (*m_static)[staticIndex];
-                        staticIndex ++;
+                        m.x[j][k] = (*m_static)[staticIndex++];
                     }
                 }
             }
@@ -122,35 +120,29 @@ Abc::M44d IXformSchema::getMatrix( const Abc::ISampleSelector &iSS )
             double x, y, z;
             if (m_ops[i].isXAnimated())
             {
-                x = (*anim)[animIndex];
-                animIndex ++;
+                x = (*anim)[animIndex++];
             }
             else
             {
-                x = (*m_static)[staticIndex];
-                staticIndex ++;
+                x = (*m_static)[staticIndex++];
             }
 
             if (m_ops[i].isYAnimated())
             {
-                y = (*anim)[animIndex];
-                animIndex ++;
+                y = (*anim)[animIndex++];
             }
             else
             {
-                y = (*m_static)[staticIndex];
-                staticIndex ++;
+                y = (*m_static)[staticIndex++];
             }
 
             if (m_ops[i].isZAnimated())
             {
-                z = (*anim)[animIndex];
-                animIndex ++;
+                z = (*anim)[animIndex++];
             }
             else
             {
-                z = (*m_static)[staticIndex];
-                staticIndex ++;
+                z = (*m_static)[staticIndex++];
             }
 
             if (type == kScaleOperation)
@@ -166,13 +158,11 @@ Abc::M44d IXformSchema::getMatrix( const Abc::ISampleSelector &iSS )
                 double angle;
                 if (m_ops[i].isAngleAnimated())
                 {
-                    angle = (*anim)[animIndex];
-                    animIndex ++;
+                    angle = (*anim)[animIndex++];
                 }
                 else
                 {
-                    angle = (*m_static)[staticIndex];
-                    staticIndex ++;
+                    angle = (*m_static)[staticIndex++];
                 }
 
                 m.setAxisAngle( V3d(x,y,z), angle );
@@ -187,7 +177,22 @@ Abc::M44d IXformSchema::getMatrix( const Abc::ISampleSelector &iSS )
 }
 
 //-*****************************************************************************
-void IXformSchema::getSample( XformSampleVec & oVec,
+bool IXformSchema::isOpStatic( size_t iIndex ) const
+{
+    if ( iIndex >= m_ops.size() )
+        return true;
+
+    const XformOp & op = m_ops[iIndex];
+    for ( uint8_t i = 0; i < op.getNumIndices(); ++i )
+    {
+        if (op.isIndexAnimated(i))
+            return false;
+    }
+    return true;
+}
+
+//-*****************************************************************************
+void IXformSchema::get( XformSample & oSamp,
     const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::getSample()" );
@@ -200,6 +205,7 @@ void IXformSchema::getSample( XformSampleVec & oVec,
     size_t animIndex = 0;
 
     size_t numOps = m_ops.size();
+    oSamp.clear();
     for (size_t i = 0; i < numOps; ++i)
     {
         XformOperationType type = m_ops[i].getType();
@@ -222,8 +228,8 @@ void IXformSchema::getSample( XformSampleVec & oVec,
                     }
                 }
             }
-            XformSamplePtr p(new MatrixSample(m));
-            oVec.push_back( p );
+            XformDataPtr p(new MatrixData(m));
+            oSamp.push( p );
         }
         else
         {
@@ -263,13 +269,13 @@ void IXformSchema::getSample( XformSampleVec & oVec,
 
             if (type == kScaleOperation)
             {
-                XformSamplePtr p( new ScaleSample(V3d(x,y,z)) );
-                oVec.push_back( p );
+                XformDataPtr p( new ScaleData(V3d(x,y,z)) );
+                oSamp.push( p );
             }
             else if (type == kTranslateOperation)
             {
-                XformSamplePtr p( new TranslateSample(V3d(x,y,z)) );
-                oVec.push_back( p );
+                XformDataPtr p( new TranslateData(V3d(x,y,z)) );
+                oSamp.push( p );
             }
             else if (type == kRotateOperation)
             {
@@ -285,8 +291,8 @@ void IXformSchema::getSample( XformSampleVec & oVec,
                     staticIndex ++;
                 }
 
-                XformSamplePtr p( new RotateSample(V3d(x,y,z), angle) );
-                oVec.push_back( p );
+                XformDataPtr p( new RotateData(V3d(x,y,z), angle) );
+                oSamp.push( p );
             }
         }
 

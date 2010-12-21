@@ -34,65 +34,37 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_Foundation_h_
-#define _Alembic_AbcGeom_Foundation_h_
+#ifndef _SimpleAbcViewer_IXformDrw_h_
+#define _SimpleAbcViewer_IXformDrw_h_
 
-#include <Alembic/Abc/All.h>
+#include "Foundation.h"
+#include "IObjectDrw.h"
 
-#include <ImathMatrixAlgo.h>
-#include <ImathEuler.h>
-
-
-namespace Alembic {
-namespace AbcGeom {
-
-namespace Abc = ::Alembic::Abc;
-using namespace Abc;
+namespace SimpleAbcViewer {
 
 //-*****************************************************************************
-//! Meshes have topology, which can be either unchanging (constant)
-//! homogeneous, which indicates that the connectivity is unchanging,
-//! but the positions may change, and finally heterogeneous, which indicates
-//! that the connectivity and positions may change.
-enum MeshTopologyVariance
+//! Transform applies a matrix transformation to all of its children
+//! objects. Because we have deep, deep hierarchies, the transformation
+//! is applied via an internally managed transform stack, rather than
+//! through OpenGL's.
+class IXformDrw : public IObjectDrw
 {
-    kConstantTopology,
-    kHomogenousTopology,
-    kHeterogenousTopology
+public:
+    IXformDrw( IXform &iXform );
+
+    virtual ~IXformDrw();
+
+    virtual bool valid();
+
+    virtual void setTime( chrono_t iSeconds );
+
+    virtual void draw( const DrawContext & iCtx );
+
+protected:
+    IXform m_xform;
+    M44d m_localToParent;
 };
 
-//-*****************************************************************************
-//! \brief Enum that indicates the type of transformational operation.
-//! This enum is used when encoding and decoding the transform operation data.
-enum XformOperationType
-{
-    kScaleOperation = 0,
-    kTranslateOperation = 1,
-    kRotateOperation = 2,
-    kMatrixOperation = 3
-};
-
-//-*****************************************************************************
-//! This utility function sets an array prorperty sample using "set" if
-//! the sample is non-null, otherwise calls setFromPrevious.
-template <class PROP, class SAMP>
-inline void SetPropUsePrevIfNull( PROP iProp, SAMP iSamp,
-                                  const Abc::OSampleSelector &iSS )
-{
-    if ( iSamp ) { iProp.set( iSamp, iSS ); }
-    else { iProp.setFromPrevious( iSS ); }
-}
-
-template <>
-inline void SetPropUsePrevIfNull<Abc::OStringProperty, std::string>(
-    Abc::OStringProperty iProp, std::string iSamp,
-    const Abc::OSampleSelector &iSS )
-{
-    if ( iSamp != "" ) { iProp.set( iSamp, iSS ); }
-    else { iProp.setFromPrevious( iSS ); }
-}
-
-} // End namespace AbcGeom
-} // End namespace Alembic
+} // End namespace SimpleAbcViewer
 
 #endif
