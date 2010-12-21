@@ -91,7 +91,7 @@ void ProcessXform( IXform &xform, ProcArgs &args )
 
     bool multiSample = sampleTimes.size() > 1;
 
-    std::vector<XformSampleVec> sampleVectors;
+    std::vector<XformSample> sampleVectors;
     sampleVectors.resize( sampleTimes.size() );
 
     //fetch all operators at each sample time first
@@ -101,38 +101,36 @@ void ProcessXform( IXform &xform, ProcArgs &args )
     {
         ISampleSelector sampleSelector( *I );
 
-        XformSampleVec ops;
-
-        xs.getSample( sampleVectors[sampleTimeIndex], sampleSelector );
+        xs.get( sampleVectors[sampleTimeIndex], sampleSelector );
     }
 
     //loop through the operators individually since a MotionBegin block
     //can enclose only homogenous statements
-    for ( size_t i = 0, e = sampleVectors.front().size(); i < e; ++i )
+    for ( size_t i = 0, e = sampleVectors.front().getNum(); i < e; ++i )
     {
         if ( multiSample ) { WriteMotionBegin(args, sampleTimes); }
 
         for ( size_t j = 0; j < sampleVectors.size(); ++j )
         {
-            XformSamplePtr & sample = sampleVectors[j][i];
+            XformDataPtr sample = sampleVectors[j].get(i);
 
             switch ( sample->getType() )
             {
             case kScaleOperation:
             {
-                V3d value = ScaleSample( sample ).get();
+                V3d value = ScaleData( sample ).get();
                 RiScale( value.x, value.y, value.z );
                 break;
             }
             case kTranslateOperation:
             {
-                V3d value = ScaleSample( sample ).get();
+                V3d value = TranslateData( sample ).get();
                 RiTranslate( value.x, value.y, value.z );
                 break;
             }
             case kRotateOperation:
             {
-                RotateSample rotateSample( sample );
+                RotateData rotateSample( sample );
                 V3d axis = rotateSample.getAxis();
                 RiRotate( rotateSample.getAngle(),
                           axis.x, axis.y, axis.z );
@@ -140,7 +138,7 @@ void ProcessXform( IXform &xform, ProcArgs &args )
             }
             case kMatrixOperation:
             {
-                M44d m = MatrixSample( sample ).get();
+                M44d m = MatrixData( sample ).get();
                 WriteConcatTransform( m );
                 break;
             }

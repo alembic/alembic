@@ -40,6 +40,7 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/XformOp.h>
+#include <Alembic/AbcGeom/XformSample.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -101,27 +102,61 @@ public:
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
     size_t getNumAnimSamples()
-    { return m_anim.getNumSamples(); }
+    {
+        if ( m_anim.valid() )
+            return m_anim.getNumSamples();
+
+        return 0;
+    }
 
     //! Return the number of samples contained in the inherits property.
     //! This can be any number, including zero.
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
     size_t getNumInheritsSamples()
-    { return m_inherits.getNumSamples(); }
+    {
+        if ( m_inherits.valid() )
+            return m_inherits.getNumSamples();
+
+        return 0;
+    }
+
+    //! Time sampling type for inherits property
+    AbcA::TimeSamplingType getInheritsTimeSamplingType() const
+    {
+        if ( m_inherits.valid() )
+            return m_inherits.getTimeSamplingType();
+
+        return AbcA::TimeSamplingType();
+    }
 
     //! Time sampling type.
     AbcA::TimeSamplingType getTimeSamplingType() const
     {
-        return m_anim.getTimeSamplingType();
+        if ( m_anim.valid() )
+            return m_anim.getTimeSamplingType();
+
+        return AbcA::TimeSamplingType();
     }
 
     //! Time information.
-    //! Any of the properties could be the bearer of the time
-    //! sampling information, which otherwise defaults to Identity.
+    //! Defaults to Identity.
+    AbcA::TimeSampling getInheritsTimeSampling()
+    {
+        if ( m_inherits.valid() )
+            return m_inherits.getTimeSampling();
+
+        return AbcA::TimeSampling();
+    }
+
+    //! Time information for inherits property.
+    //! Defaults to Identity.
     AbcA::TimeSampling getTimeSampling()
     {
-        return m_anim.getTimeSampling();
+        if ( m_anim.valid() )
+            return m_anim.getTimeSampling();
+
+        return AbcA::TimeSampling();
     }
 
     //-*************************************************************************
@@ -164,8 +199,22 @@ public:
 
     const XformOpVec & getOps() { return m_ops; }
 
-    void getSample(XformSampleVec & oVec,
+    //! Returns the total number of operations.
+    size_t getNumOps() const { return m_ops.size(); }
+
+    //! Returns true if a particular op has no animated components.
+    bool isOpStatic( size_t iIndex ) const;
+
+    void get(XformSample & oVec,
         const Abc::ISampleSelector &iSS = Abc::ISampleSelector());
+
+    XformSample getValue( 
+        const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+    {
+        XformSample smp;
+        get( smp, iSS );
+        return smp;
+    }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

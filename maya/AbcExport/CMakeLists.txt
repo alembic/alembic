@@ -1,7 +1,8 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2010, Industrial Light & Magic,
-##   a division of Lucasfilm Entertainment Company Ltd.
+## Copyright (c) 2009-2010,
+##  Sony Pictures Imageworks Inc. and
+##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
 ##
@@ -14,9 +15,10 @@
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## *       Neither the name of Industrial Light & Magic nor the names of
-## its contributors may be used to endorse or promote products derived
-## from this software without specific prior written permission.
+## *       Neither the name of Sony Pictures Imageworks, nor
+## Industrial Light & Magic, nor the names of their contributors may be used
+## to endorse or promote products derived from this software without specific
+## prior written permission.
 ##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,74 +34,50 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
+PROJECT( ABC_EXPORT_MAYA_MODULE )
 
-  #ISimpleTransform.cpp
-
-  OSubD.cpp
-  ISubD.cpp
-
-  #ICamera.cpp
-  #OCamera.cpp
-
-  GeometryScope.cpp
-  OPolyMesh.cpp
-  IPolyMesh.cpp
-
-  OSimpleXform.cpp
-  ISimpleXform.cpp
-
-  XformOp.cpp
-  XformSample.cpp
-  IXform.cpp
-  OXform.cpp
-
-  OPoints.cpp
-  IPoints.cpp
+SET( H_FILES 
+  AbcExport.h
+  AbcWriteJob.h
+  AttributesWriter.h
+  Foundation.h
+  MayaMeshWriter.h
+  MayaPointPrimitiveWriter.h
+  MayaTransformWriter.h
+  MayaUtility.h
 )
 
-SET( H_FILES
-
-  All.h
-
-  Foundation.h
-
-  SchemaInfoDeclarations.h
-
-  OSubD.h
-  ISubD.h
-
-  #ICamera.h
-  #OCamera.h
-
-  GeometryScope.h
-  OPolyMesh.h
-  IPolyMesh.h
-
-  SimpleXformSample.h
-  OSimpleXform.h
-  ISimpleXform.h
-
-  XformOp.h
-  XformSample.h
-  IXform.h
-  OXform.h
-
-  OPoints.h
-  IPoints.h
+SET( CXX_FILES 
+  AbcExport.cpp
+  AbcWriteJob.cpp
+  AttributesWriter.cpp
+  MayaMeshWriter.cpp
+  MayaPointPrimitiveWriter.cpp
+  MayaTransformWriter.cpp
+  MayaUtility.cpp
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcGeom ${SOURCE_FILES} )
+SET( CORE_LIBS 
+  AlembicAbcGeom
+  AlembicAbc
+  AlembicAbcCoreHDF5
+  AlembicAbcCoreAbstract
+  AlembicMD5Hash
+  AlembicUtil )
 
-INSTALL( TARGETS AlembicAbcGeom
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )
+INCLUDE_DIRECTORIES( ".." )
 
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcGeom
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
+ADD_MAYA_CXX_PLUGIN( AbcExport ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AbcExport
+  ${MAYA_LIBRARIES}
+  ${CORE_LIBS}
+  ${ALEMBIC_HDF5_LIBS} 
+  ${ALEMBIC_ILMBASE_LIBS}
+  ${CMAKE_THREAD_LIBS_INIT}
+  ${ZLIB_LIBRARIES} m )
 
-ADD_SUBDIRECTORY( Tests )
+INSTALL( TARGETS AbcExport
+         DESTINATION maya/plug-ins )

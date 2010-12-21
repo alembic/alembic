@@ -250,6 +250,20 @@ ENDIF()
 
 ADD_SUBDIRECTORY( python EXCLUDE_FROM_ALL )
 
+# Include Maya stuff
+IF(DEFINED USE_MAYA AND NOT USE_MAYA)
+    MESSAGE(STATUS "Skipping Maya plugins")
+ELSE()
+    MESSAGE( STATUS "About to include AlembicMaya.cmake" )
+    INCLUDE( "./build/AlembicMaya.cmake" )
+    IF( MAYA_FOUND )
+        MESSAGE(STATUS "Building Maya plugins" )
+        ADD_SUBDIRECTORY( maya )
+    ELSE()
+        MESSAGE(STATUS "For some reason, MAYA_FOUND is False?")
+    ENDIF()
+ENDIF()
+
 # example code not supported
 ADD_SUBDIRECTORY( examples EXCLUDE_FROM_ALL )
 
