@@ -43,9 +43,10 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 void
-OSimpleXformSchema::ODefaultedDoubleProperty::set( const double &iVal,
-                                                   const Abc::OSampleSelector &iSS,
-                                                   const ChronoSet &iTimes )
+OSimpleXformSchema::ODefaultedDoubleProperty::set(
+    const double &iVal,
+    const Abc::OSampleSelector &iSS,
+    const std::vector<chrono_t> &iTimes )
 {
     chrono_t t = iSS.getTime();
     if ( m_property )
@@ -63,19 +64,13 @@ OSimpleXformSchema::ODefaultedDoubleProperty::set( const double &iVal,
 
         // Run up the defaults.
         index_t idx = iSS.getIndex();
-        std::vector<chrono_t> tvec;
-        for ( ChronoSet::const_iterator iter = iTimes.begin() ;
-              iter != iTimes.end() ; ++iter )
-        {
-            tvec.push_back( *iter );
-        }
 
         for ( size_t jdx = 0 ; jdx < idx ; jdx++ )
         {
             Abc::OSampleSelector jSS;
             if ( ! iTimes.empty() )
             {
-                jSS = Abc::OSampleSelector( jdx, tvec[jdx] );
+                jSS = Abc::OSampleSelector( jdx, iTimes[jdx] );
             }
             else
             {
@@ -107,7 +102,7 @@ OSimpleXformSchema::ODefaultedDoubleProperty::set( const double &iVal,
 void
 OSimpleXformSchema::ODefaultedDoubleProperty::setFromPrevious(
     const Abc::OSampleSelector &iSS,
-    const ChronoSet &iTimes )
+    const std::vector<chrono_t> &iTimes )
 {
     if ( m_property )
     {
@@ -176,7 +171,7 @@ void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
     // Push back the times if we need to.
     if ( m_times.size() == idx  )
     {
-        m_times.insert( time );
+        m_times.push_back( time );
 
         m_scaleX.set( scale.x, iSS, m_times );
         m_scaleY.set( scale.y, iSS, m_times );
@@ -196,7 +191,7 @@ void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
     }
     else
     {
-        ChronoSet empty;
+        std::vector<chrono_t> empty;
         empty.clear();
 
         m_scaleX.set( scale.x, iSS, empty );
@@ -231,7 +226,7 @@ void OSimpleXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     // Push back the times if we need to.
     if ( m_times.size() == idx )
     {
-        m_times.insert( time );
+        m_times.push_back( time );
 
         m_scaleX.setFromPrevious( iSS, m_times );
         m_scaleY.setFromPrevious( iSS, m_times );
@@ -251,7 +246,7 @@ void OSimpleXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     }
     else
     {
-        ChronoSet empty;
+        std::vector<chrono_t> empty;
         empty.clear();
 
         m_scaleX.setFromPrevious( iSS, empty );

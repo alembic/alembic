@@ -46,9 +46,6 @@
 namespace Alembic {
 namespace AbcGeom {
 
-//! a set to hold our non-default-valued sample times
-typedef std::set<chrono_t> ChronoSet;
-
 //! The default value for determining whether a property is actually
 //! different from the default.  If it's within this tolerance, the
 //! default value is used, which allows Alembic to more efficiently
@@ -206,7 +203,7 @@ protected:
                   // these time samples correspond to the times
                   // not yet sampled.
                   // Otherwise, these will be NULL.
-                  const ChronoSet &iTimeSamples );
+                  const std::vector<chrono_t> &iTimeSamples );
 
         // Returns whether or not the property exists, or whether
         // it is still default value.
@@ -216,7 +213,7 @@ protected:
                               // these time samples correspond to the times
                               // not yet sampled.
                               // Otherwise, these will be NULL.
-                              const ChronoSet &iTimeSamples );
+                              const std::vector<chrono_t> &iTimeSamples );
 
         double getDefaultValue() const { return m_default; }
 
@@ -237,7 +234,7 @@ protected:
 
 protected:
     // Times for the properties set as non-default
-    ChronoSet m_times;
+    std::vector<chrono_t> m_times;
 
     // The components.
     ODefaultedDoubleProperty m_scaleX;
