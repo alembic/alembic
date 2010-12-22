@@ -1,7 +1,8 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010, Industrial Light & Magic,
-//   a division of Lucasfilm Entertainment Company Ltd.
+// Copyright (c) 2009-2010,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
 //
@@ -14,9 +15,10 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-// *       Neither the name of Industrial Light & Magic nor the names of
-// its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,50 +34,32 @@
 //
 //-*****************************************************************************
 
-#include <AlembicAsset/AlembicAsset.h>
+#include <boost/python/detail/wrap_python.hpp>
+
+#include <Alembic/Abc/All.h>
 
 #include <boost/python.hpp>
 
-#include <Python.h>
-
 using namespace boost::python;
 
-using namespace AlembicAsset;
+namespace Abc = Alembic::Abc;
 
+//-*****************************************************************************
 void register_iasset()
 {
-    ObjectInfo ( IAsset::*childInfo1 )( size_t ) const = &IAsset::childInfo;
-    ObjectInfo ( IAsset::*childInfo2 )( const std::string&,
-                                        const std::string& ) const = \
-        &IAsset::childInfo;
-
-    void ( IAsset::*klose )() = &IAsset::close;
-
-    class_<ObjectInfoBody>( "ObjectInfoBody",
-                            init<std::string,
-                            std::string>() )
-        .def_readonly( "name", &ObjectInfoBody::name )
-        .def_readonly( "protocol", &ObjectInfoBody::protocol )
-        ;
-
-    register_ptr_to_python<ObjectInfo>();
-
-    //enum_<ThrowExceptionFlag>( "ThrowExceptionFlag" )
-    //    .value( "kThrowException", kThrowException );
-
-    class_<IAsset, bases<IParentObject> >( "IAsset", init<const std::string&,
+    class_<IArchive, bases<IParentObject> >( "IArchive", init<const std::string&,
                                            optional<const IContext&> >() )
-        .def( "fileName", &IAsset::fileName )
-        .def( "release", &IAsset::release )
-        .def( "name", &IAsset::name )
-        .def( "fullPathName", &IAsset::fullPathName )
-        .def( "protocol", &IAsset::protocol )
-        .def( "comments", &IAsset::comments )
-        .def( "numChildren", &IAsset::numChildren )
+        .def( "getName", &IArchive::getName )
+        .def( "release", &IArchive::release )
+        .def( "name", &IArchive::name )
+        .def( "fullPathName", &IArchive::fullPathName )
+        .def( "protocol", &IArchive::protocol )
+        .def( "comments", &IArchive::comments )
+        .def( "numChildren", &IArchive::numChildren )
         .def( "childInfo", childInfo1 )
         .def( "childInfo", childInfo2 )
-        .def( "valid", &IAsset::valid )
+        .def( "valid", &IArchive::valid )
         .def( "close", klose )
-        .def( "__str__", &IAsset::fileName )
+        .def( "__str__", &IArchive::getName )
         ;
 }

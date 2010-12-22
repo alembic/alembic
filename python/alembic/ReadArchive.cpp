@@ -1,7 +1,8 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010, Industrial Light & Magic,
-//   a division of Lucasfilm Entertainment Company Ltd.
+// Copyright (c) 2009-2010,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
 //
@@ -14,9 +15,10 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-// *       Neither the name of Industrial Light & Magic nor the names of
-// its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
