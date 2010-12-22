@@ -35,17 +35,30 @@
 #include <boost/python/detail/wrap_python.hpp>
 
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreAbstract/All.h>
 
 #include <boost/python.hpp>
 
 //#include <Python.h>
 
+namespace AbcA = Alembic::AbcCoreAbstract::v1;
+
 using namespace boost::python;
+
 
 //-*****************************************************************************
 void register_readarchive()
 {
+    register_ptr_to_python<AbcA::ArchiveReaderPtr>();
+
+    AbcA::ArchiveReaderPtr ( ::Alembic::AbcCoreHDF5::ReadArchive::*kall ) \
+        ( const std::string & ) const = \
+        &::Alembic::AbcCoreHDF5::ReadArchive::operator();
+
+    class_< AbcA::ArchiveReader, boost::noncopyable >( "AbcA::ArchiveReader", no_init);
+
+
     class_< ::Alembic::AbcCoreHDF5::ReadArchive >( "ReadArchive" )
-        .def( self () )
+        .def( "__call__", kall )
         ;
 }
