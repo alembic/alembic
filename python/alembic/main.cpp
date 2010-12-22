@@ -38,11 +38,10 @@ using namespace boost::python;
 
 // forwards
 void register_iobject();
-void register_readarchive();
 void register_iarchive();
 
 BOOST_PYTHON_MODULE( _abc )
 {
-    register_readarchive();
+    register_iarchive();
     //register_iobject();
 }

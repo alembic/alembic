@@ -37,6 +37,7 @@
 #include <boost/python/detail/wrap_python.hpp>
 
 #include <Alembic/Abc/All.h>
+#include <Alembic/AbcCoreHDF5/All.h>
 
 #include <boost/python.hpp>
 
@@ -45,21 +46,21 @@ using namespace boost::python;
 namespace Abc = Alembic::Abc;
 
 //-*****************************************************************************
-void register_iasset()
+static boost::shared_ptr<Abc::IArchive> mkIArchive( const std::string &iName )
 {
-    class_<IArchive, bases<IParentObject> >( "IArchive", init<const std::string&,
-                                           optional<const IContext&> >() )
-        .def( "getName", &IArchive::getName )
-        .def( "release", &IArchive::release )
-        .def( "name", &IArchive::name )
-        .def( "fullPathName", &IArchive::fullPathName )
-        .def( "protocol", &IArchive::protocol )
-        .def( "comments", &IArchive::comments )
-        .def( "numChildren", &IArchive::numChildren )
-        .def( "childInfo", childInfo1 )
-        .def( "childInfo", childInfo2 )
-        .def( "valid", &IArchive::valid )
-        .def( "close", klose )
-        .def( "__str__", &IArchive::getName )
+    return boost::shared_ptr<Abc::IArchive>(
+        new Abc::IArchive( ::Alembic::AbcCoreHDF5::ReadArchive(), iName ) );
+}
+
+//-*****************************************************************************
+void register_iarchive()
+{
+    class_< Abc::IArchive, boost::shared_ptr<Abc::IArchive> >( "IArchive" )
+        .def( "__init__", make_constructor( mkIArchive ) )
+        .def( "getName", &Abc::IArchive::getName )
+        .def( "getTop", &Abc::IArchive::getTop )
+        .def( "valid", &Abc::IArchive::valid )
+        .def( "__nonzero__", &Abc::IArchive::valid )
+        .def( "__str__", &Abc::IArchive::getName )
         ;
 }

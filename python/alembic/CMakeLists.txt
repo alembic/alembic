@@ -53,7 +53,7 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
 
   SET( CPP_FILES
     IObject.cpp
-    ReadArchive.cpp
+    IArchive.cpp
     main.cpp )
 
   LINK_LIBRARIES( ${CORE_LIBS}
