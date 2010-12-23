@@ -140,8 +140,7 @@ public:
     //! to the root object of the archive. It is guaranteed to be fully
     //! unique within the entire archive.
     //! This is a convenience function which returns the header's full name.
-    std::string getFullName() const
-    { return getHeader().getFullName(); }
+    std::string getFullName() const;
 
     //! All objects have metadata. This metadata is identical to the
     //! Metadata of the top level compoundProperty "properties".
