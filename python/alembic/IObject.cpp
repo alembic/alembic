@@ -43,13 +43,16 @@
 
 using namespace boost::python;
 
-using namespace Alembic::Abc;
+namespace Abc = ::Alembic::Abc;
 
-#if 0
+//-*****************************************************************************
+//static boost::shared_ptr<Abc::IObject> mkIObject()
+
 
 //-*****************************************************************************
 void register_iobject()
 {
+    #if 0
     PropertyInfo ( IObject::*propinfo1 )( size_t ) const = \
         &IObject::propertyInfo;
     PropertyInfo ( IObject::*propinfo2 )( const std::string&,
@@ -71,30 +74,14 @@ void register_iobject()
         ;
 
     register_ptr_to_python<PropertyInfo>();
+    #endif
 
-    class_<IObject, bases<IParentObject> >( "IObject",
-                                            init<const IParentObject&,
-                                            const std::string&,
-                                            const std::string&,
-                                            optional<const IContext&> >() )
-        .def( init<const IParentObject&, ObjectInfo,
-              optional<const IContext&> >() )
-        .def( init<const IParentObject&, size_t, optional<const IContext&> >() )
-        .def( "name", &IObject::name )
-        .def( "fullPathName", &IObject::fullPathName )
-        .def( "protocol", &IObject::protocol )
-        .def( "comments", &IObject::comments )
-        .def( "propertyInfo", propinfo1 )
-        .def( "propertyInfo", propinfo2 )
-        .def( "numProperties", &IObject::numProperties )
-        .def( "numChildren", &IObject::numChildren )
-        .def( "childInfo", childInfo1 )
-        .def( "childInfo", childInfo2 )
-        .def( "valid", &IObject::valid )
-        .def( "close", klose )
-        .def( "release", &IObject::release )
-        .def( "__str__", &IObject::fullPathName )
+    class_<Abc::IObject>( "IObject",
+                          init<Abc::IObject, const std::string&>() )
+        .def( "getName", &Abc::IObject::getName )
+        .def( "getFullName", &Abc::IObject::getFullName )
+        .def( "getNumChildren", &Abc::IObject::getNumChildren )
+        .def( "valid", &Abc::IObject::valid )
+        .def( "__str__", &Abc::IObject::getFullName )
         ;
 }
-
-#endif

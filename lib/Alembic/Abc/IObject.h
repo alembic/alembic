@@ -133,14 +133,14 @@ public:
     //! Returned by reference, since it is guaranteed to exist and be
     //! unchanging.
     //! This is a convenience function which returns the header's name.
-    const std::string &getName() const
+    std::string getName() const
     { return getHeader().getName(); }
 
     //! The full name of an object is the complete path name all the way
     //! to the root object of the archive. It is guaranteed to be fully
     //! unique within the entire archive.
     //! This is a convenience function which returns the header's full name.
-    const std::string &getFullName() const
+    std::string getFullName() const
     { return getHeader().getFullName(); }
 
     //! All objects have metadata. This metadata is identical to the

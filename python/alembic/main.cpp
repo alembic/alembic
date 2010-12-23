@@ -43,5 +43,5 @@ void register_iarchive();
 BOOST_PYTHON_MODULE( _abc )
 {
     register_iarchive();
-    //register_iobject();
+    register_iobject();
 }
