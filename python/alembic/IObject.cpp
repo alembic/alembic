@@ -44,6 +44,7 @@
 using namespace boost::python;
 
 namespace Abc = ::Alembic::Abc;
+namespace AbcA = ::Alembic::AbcCoreAbstract::v1;
 
 //-*****************************************************************************
 //static boost::shared_ptr<Abc::IObject> mkIObject()
@@ -76,12 +77,25 @@ void register_iobject()
     register_ptr_to_python<PropertyInfo>();
     #endif
 
+    Abc::IObject ( Abc::IObject::*getChildByIndex )( size_t ) = \
+        &Abc::IObject::getChild;
+    Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) = \
+        &Abc::IObject::getChild;
+
+    class_<AbcA::ObjectHeader>( "ObjectHeader", no_init );
+
     class_<Abc::IObject>( "IObject",
                           init<Abc::IObject, const std::string&>() )
+        .def( init<>() )
+        //.def( "getHeader", &Abc::IObject::getHeader,
+        //      with_custodian_and_ward<2,1>() )
         .def( "getName", &Abc::IObject::getName )
         .def( "getFullName", &Abc::IObject::getFullName )
         .def( "getNumChildren", &Abc::IObject::getNumChildren )
+        .def( "getChild", getChildByIndex )
+        .def( "getChild", getChildByName )
         .def( "valid", &Abc::IObject::valid )
         .def( "__str__", &Abc::IObject::getFullName )
+        .def( "__nonzero__", &Abc::IObject::valid )
         ;
 }
