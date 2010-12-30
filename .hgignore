@@ -5,3 +5,4 @@ syntax: regexp
 .*\.pyc
 .*/doxygen
 ^doc/html/*
+\.git.*
