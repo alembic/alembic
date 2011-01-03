@@ -82,13 +82,13 @@ void register_iobject()
     Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) = \
         &Abc::IObject::getChild;
 
-    class_<AbcA::ObjectHeader>( "ObjectHeader", no_init );
+    class_<AbcA::ObjectHeader>( "ObjectHeader" );
 
     class_<Abc::IObject>( "IObject",
                           init<Abc::IObject, const std::string&>() )
         .def( init<>() )
-        //.def( "getHeader", &Abc::IObject::getHeader,
-        //      with_custodian_and_ward<2,1>() )
+        .def( "getHeader", &Abc::IObject::getHeader,
+              with_custodian_and_ward<1,2>() )
         .def( "getName", &Abc::IObject::getName )
         .def( "getFullName", &Abc::IObject::getFullName )
         .def( "getNumChildren", &Abc::IObject::getNumChildren )
