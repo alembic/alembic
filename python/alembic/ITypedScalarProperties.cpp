@@ -49,45 +49,36 @@ namespace Abc = ::Alembic::Abc;
 namespace AbcA = ::Alembic::AbcCoreAbstract::v1;
 
 //-*****************************************************************************
-void register_iobject()
+void register_itypedscalarproperties()
 {
-    // overloads
-    Abc::IObject ( Abc::IObject::*getChildByIndex )( size_t ) = \
-        &Abc::IObject::getChild;
-    Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) = \
-        &Abc::IObject::getChild;
-
-    const AbcA::ObjectHeader&
-        ( Abc::IObject::*getChildHeaderByIndex )( size_t ) = \
-        &Abc::IObject::getChildHeader;
-
-    const AbcA::ObjectHeader*
-        ( Abc::IObject::*getChildHeaderByName )( const std::string & ) = \
-        &Abc::IObject::getChildHeader;
-
-
-    class_<Abc::IObject>( "IObject",
-                          init<Abc::IObject, const std::string&>() )
-        .def( init<>() )
-        .def( "getHeader", &Abc::IObject::getHeader,
-              return_internal_reference<1>() )
-        .def( "getName", &Abc::IObject::getName )
-        .def( "getFullName", &Abc::IObject::getFullName )
-        .def( "getNumChildren", &Abc::IObject::getNumChildren )
-        .def( "getChildHeader", getChildHeaderByIndex,
-              return_internal_reference<1>() )
-        .def( "getChildHeader", getChildHeaderByName,
-              return_value_policy<reference_existing_object>() )
-        .def( "getProperties", &Abc::IObject::getProperties )
-        .def( "getChild", getChildByIndex )
-        .def( "getChild", getChildByName )
-        .def( "valid", &Abc::IObject::valid )
-        .def( "getArchive", &Abc::IObject::getArchive )
-        .def( "getParent", &Abc::IObject::getParent )
-        .def( "getMetaData", &Abc::IObject::getMetaData,
-              return_internal_reference<1>() )
-        .def( "reset", &Abc::IObject::reset )
-        .def( "__str__", &Abc::IObject::getFullName )
-        .def( "__nonzero__", &Abc::IObject::valid )
-        ;
+    //IDoubleProperty
+    //
+class_<Abc::IDoubleProperty>( "IDoubleProperty",
+init<Abc::ICompoundProperty,
+const std::string&>() )
+.def( init<>() )
+.def( "getName", &Abc::IDoubleProperty::getName,
+return_value_policy<copy_const_reference>() )
+.def( "getHeader", &Abc::IDoubleProperty::getHeader,
+return_internal_reference<1>() )
+.def( "isScalar", &Abc::IDoubleProperty::isScalar )
+.def( "isArray", &Abc::IDoubleProperty::isArray )
+.def( "isCompound", &Abc::IDoubleProperty::isCompound )
+.def( "isSimple", &Abc::IDoubleProperty::isSimple )
+.def( "getMetaData", &Abc::IDoubleProperty::getMetaData,
+return_internal_reference<1>() )
+.def( "getDataType", &Abc::IDoubleProperty::getDataType,
+return_internal_reference<1>() )
+.def( "getTimeSamplingType", &Abc::IDoubleProperty::getTimeSamplingType )
+.def( "getInterpretation", &Abc::IDoubleProperty::getInterpretation,
+return_value_policy<copy_const_reference>() )
+.def( "getNumSamples", &Abc::IDoubleProperty::getNumSamples )
+.def( "getValue", &Abc::IDoubleProperty::getValue )
+.def( "getObject", &Abc::IDoubleProperty::getObject )
+.def( "reset", &Abc::IDoubleProperty::reset )
+.def( "valid", &Abc::IDoubleProperty::valid )
+.def( "__str__", &Abc::IDoubleProperty::getName,
+return_value_policy<copy_const_reference>() )
+.def( "__nonzero__", &Abc::IDoubleProperty::valid )
+;
 }

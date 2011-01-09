@@ -49,45 +49,11 @@ namespace Abc = ::Alembic::Abc;
 namespace AbcA = ::Alembic::AbcCoreAbstract::v1;
 
 //-*****************************************************************************
-void register_iobject()
+void register_abcenums()
 {
-    // overloads
-    Abc::IObject ( Abc::IObject::*getChildByIndex )( size_t ) = \
-        &Abc::IObject::getChild;
-    Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) = \
-        &Abc::IObject::getChild;
-
-    const AbcA::ObjectHeader&
-        ( Abc::IObject::*getChildHeaderByIndex )( size_t ) = \
-        &Abc::IObject::getChildHeader;
-
-    const AbcA::ObjectHeader*
-        ( Abc::IObject::*getChildHeaderByName )( const std::string & ) = \
-        &Abc::IObject::getChildHeader;
-
-
-    class_<Abc::IObject>( "IObject",
-                          init<Abc::IObject, const std::string&>() )
-        .def( init<>() )
-        .def( "getHeader", &Abc::IObject::getHeader,
-              return_internal_reference<1>() )
-        .def( "getName", &Abc::IObject::getName )
-        .def( "getFullName", &Abc::IObject::getFullName )
-        .def( "getNumChildren", &Abc::IObject::getNumChildren )
-        .def( "getChildHeader", getChildHeaderByIndex,
-              return_internal_reference<1>() )
-        .def( "getChildHeader", getChildHeaderByName,
-              return_value_policy<reference_existing_object>() )
-        .def( "getProperties", &Abc::IObject::getProperties )
-        .def( "getChild", getChildByIndex )
-        .def( "getChild", getChildByName )
-        .def( "valid", &Abc::IObject::valid )
-        .def( "getArchive", &Abc::IObject::getArchive )
-        .def( "getParent", &Abc::IObject::getParent )
-        .def( "getMetaData", &Abc::IObject::getMetaData,
-              return_internal_reference<1>() )
-        .def( "reset", &Abc::IObject::reset )
-        .def( "__str__", &Abc::IObject::getFullName )
-        .def( "__nonzero__", &Abc::IObject::valid )
+    enum_<Abc::SchemaInterpMatching>( "SchemaInterpMatching" )
+        .value( "kStrictMatching", Abc::kStrictMatching )
+        .value( "kNoMatching", Abc::kNoMatching )
+        .value( "kSchemaTitleMatching", Abc::kSchemaTitleMatching )
         ;
 }

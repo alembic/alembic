@@ -49,45 +49,37 @@ namespace Abc = ::Alembic::Abc;
 namespace AbcA = ::Alembic::AbcCoreAbstract::v1;
 
 //-*****************************************************************************
-void register_iobject()
+void register_icompoundproperty()
 {
     // overloads
-    Abc::IObject ( Abc::IObject::*getChildByIndex )( size_t ) = \
-        &Abc::IObject::getChild;
-    Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) = \
-        &Abc::IObject::getChild;
-
-    const AbcA::ObjectHeader&
-        ( Abc::IObject::*getChildHeaderByIndex )( size_t ) = \
-        &Abc::IObject::getChildHeader;
-
-    const AbcA::ObjectHeader*
-        ( Abc::IObject::*getChildHeaderByName )( const std::string & ) = \
-        &Abc::IObject::getChildHeader;
+    const AbcA::PropertyHeader &
+        ( Abc::ICompoundProperty::*getHeaderByIndex )( size_t ) = \
+        &Abc::ICompoundProperty::getPropertyHeader;
+    const AbcA::PropertyHeader *
+        ( Abc::ICompoundProperty::*getHeaderByName )( const std::string& ) = \
+        &Abc::ICompoundProperty::getPropertyHeader;
 
 
-    class_<Abc::IObject>( "IObject",
-                          init<Abc::IObject, const std::string&>() )
+    class_<Abc::ICompoundProperty>( "ICompoundProperty",
+                          init<Abc::ICompoundProperty, const std::string&>() )
         .def( init<>() )
-        .def( "getHeader", &Abc::IObject::getHeader,
+        .def( "getHeader", &Abc::ICompoundProperty::getHeader,
               return_internal_reference<1>() )
-        .def( "getName", &Abc::IObject::getName )
-        .def( "getFullName", &Abc::IObject::getFullName )
-        .def( "getNumChildren", &Abc::IObject::getNumChildren )
-        .def( "getChildHeader", getChildHeaderByIndex,
+        .def( "getName", &Abc::ICompoundProperty::getName,
+              return_value_policy<copy_const_reference>() )
+        .def( "getNumProperties", &Abc::ICompoundProperty::getNumProperties )
+        .def( "getPropertyHeader", getHeaderByIndex,
               return_internal_reference<1>() )
-        .def( "getChildHeader", getChildHeaderByName,
+        .def( "getPropertyHeader", getHeaderByName,
               return_value_policy<reference_existing_object>() )
-        .def( "getProperties", &Abc::IObject::getProperties )
-        .def( "getChild", getChildByIndex )
-        .def( "getChild", getChildByName )
-        .def( "valid", &Abc::IObject::valid )
-        .def( "getArchive", &Abc::IObject::getArchive )
-        .def( "getParent", &Abc::IObject::getParent )
-        .def( "getMetaData", &Abc::IObject::getMetaData,
+        .def( "valid", &Abc::ICompoundProperty::valid )
+        .def( "getParent", &Abc::ICompoundProperty::getParent )
+        .def( "getMetaData", &Abc::ICompoundProperty::getMetaData,
               return_internal_reference<1>() )
-        .def( "reset", &Abc::IObject::reset )
-        .def( "__str__", &Abc::IObject::getFullName )
-        .def( "__nonzero__", &Abc::IObject::valid )
+        .def( "getObject", &Abc::ICompoundProperty::getObject )
+        .def( "reset", &Abc::ICompoundProperty::reset )
+        .def( "__str__", &Abc::ICompoundProperty::getName,
+              return_value_policy<copy_const_reference>() )
+        .def( "__nonzero__", &Abc::ICompoundProperty::valid )
         ;
 }

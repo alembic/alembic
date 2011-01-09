@@ -37,11 +37,21 @@
 using namespace boost::python;
 
 // forwards
+void register_coreabstracttypes();
 void register_iobject();
 void register_iarchive();
+void register_icompoundproperty();
+void register_itypedscalarproperties();
+void register_abcenums();
+void register_sampleselector();
 
 BOOST_PYTHON_MODULE( _abc )
 {
+    register_coreabstracttypes();
+    register_abcenums();
     register_iarchive();
     register_iobject();
+    register_icompoundproperty();
+    register_itypedscalarproperties();
+    register_sampleselector();
 }

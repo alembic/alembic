@@ -196,7 +196,7 @@ private:
 
 //-*****************************************************************************
 //! Prints out relevant information about the TimeSamplingType instance
-inline std::ostream &operator<<( std::ostream &ostr, const TimeSamplingType &tst )
+static std::ostream &operator<<( std::ostream &ostr, const TimeSamplingType &tst )
 {
     std::string baseType( "" );
 
@@ -211,7 +211,7 @@ inline std::ostream &operator<<( std::ostream &ostr, const TimeSamplingType &tst
     {
         ostr << " with " << tst.getTimePerCycle() << " chrono_ts/cycle";
     }
-    else if ( ! ( tst.isIdentity() || tst.isAcyclic() ) )
+    else if ( tst.isCyclic() )
     {
         ostr << " with " << tst.getNumSamplesPerCycle() << " samps/cycle "
              << "and " << tst.getTimePerCycle() << " chrono_ts/cycle";

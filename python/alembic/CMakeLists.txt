@@ -52,8 +52,13 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
     AlembicUtil )
 
   SET( CPP_FILES
+    AbcEnums.cpp
+    SampleSelector.cpp
     IObject.cpp
     IArchive.cpp
+    CoreAbstractTypes.cpp
+    ICompoundProperty.cpp
+    ITypedScalarProperties.cpp
     main.cpp )
 
   LINK_LIBRARIES( ${CORE_LIBS}
