@@ -85,8 +85,10 @@ void register_iobject()
         .def( "getChild", getChildByName,
               with_custodian_and_ward_postcall<0,1>() )
         .def( "valid", &Abc::IObject::valid )
-        .def( "getArchive", &Abc::IObject::getArchive )
-        .def( "getParent", &Abc::IObject::getParent )
+        .def( "getArchive", &Abc::IObject::getArchive,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getParent", &Abc::IObject::getParent,
+              with_custodian_and_ward_postcall<0,1>() )
         .def( "getMetaData", &Abc::IObject::getMetaData,
               return_internal_reference<1>() )
         .def( "reset", &Abc::IObject::reset )

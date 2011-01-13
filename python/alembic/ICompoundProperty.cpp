@@ -73,10 +73,12 @@ void register_icompoundproperty()
         .def( "getPropertyHeader", getHeaderByName,
               return_value_policy<reference_existing_object>() )
         .def( "valid", &Abc::ICompoundProperty::valid )
-        .def( "getParent", &Abc::ICompoundProperty::getParent )
+        .def( "getParent", &Abc::ICompoundProperty::getParent,
+              with_custodian_and_ward_postcall<0,1>() )
         .def( "getMetaData", &Abc::ICompoundProperty::getMetaData,
               return_internal_reference<1>() )
-        .def( "getObject", &Abc::ICompoundProperty::getObject )
+        .def( "getObject", &Abc::ICompoundProperty::getObject,
+              with_custodian_and_ward_postcall<0,1>() )
         .def( "reset", &Abc::ICompoundProperty::reset )
         .def( "__str__", &Abc::ICompoundProperty::getName,
               return_value_policy<copy_const_reference>() )

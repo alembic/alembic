@@ -54,6 +54,11 @@ void register_coreabstracttypes()
     class_<AbcA::DataType>( "DataType" )
         .def( "getExtent", &AbcA::DataType::getExtent )
         .def( "getNumBytes", &AbcA::DataType::getNumBytes )
+        // see
+        // http://mail.python.org/pipermail/cplusplus-sig/2004-February/006496.html
+        // for explanation of "self_ns" use here
+        .def( self_ns::str( self_ns::self ) )
+
         ;
 
     // MetaData
@@ -88,7 +93,16 @@ void register_coreabstracttypes()
         ;
 
     // PropertyHeader
-    class_<AbcA::PropertyHeader>( "PropertyHeader" );
+    class_<AbcA::PropertyHeader>( "PropertyHeader" )
+        .def( "getName", &AbcA::PropertyHeader::getName,
+              return_value_policy<copy_const_reference>() )
+        .def( "isScalar", &AbcA::PropertyHeader::isScalar )
+        .def( "isArray", &AbcA::PropertyHeader::isArray )
+        .def( "isCompound", &AbcA::PropertyHeader::isCompound )
+        .def( "isSimple", &AbcA::PropertyHeader::isSimple )
+        .def( "getMetaData", &AbcA::PropertyHeader::getMetaData,
+              return_internal_reference<1>() )
+        ;
 
     // TimeSamplingType
     class_<AbcA::TimeSamplingType>( "TimeSamplingType" )
