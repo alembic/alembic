@@ -78,9 +78,12 @@ void register_iobject()
               return_internal_reference<1>() )
         .def( "getChildHeader", getChildHeaderByName,
               return_value_policy<reference_existing_object>() )
-        .def( "getProperties", &Abc::IObject::getProperties )
-        .def( "getChild", getChildByIndex )
-        .def( "getChild", getChildByName )
+        .def( "getProperties", &Abc::IObject::getProperties,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getChild", getChildByIndex,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getChild", getChildByName,
+              with_custodian_and_ward_postcall<0,1>() )
         .def( "valid", &Abc::IObject::valid )
         .def( "getArchive", &Abc::IObject::getArchive )
         .def( "getParent", &Abc::IObject::getParent )
