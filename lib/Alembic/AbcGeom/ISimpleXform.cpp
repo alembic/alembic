@@ -84,6 +84,13 @@ void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
 
         m_isConstant = m_isConstant ? iProp.isConstant() : m_isConstant;
     }
+
+    // just making sure we're not erroneously saying 0 samples when there is
+    // at least 1.
+    if ( iProp && ( iProp.getNumSamples() > m_numSamples ) )
+    {
+        m_numSamples = iProp.getNumSamples();
+    }
 }
 
 //-*****************************************************************************
