@@ -44,6 +44,7 @@ void register_icompoundproperty();
 void register_itypedscalarproperties();
 void register_abcenums();
 void register_sampleselector();
+void register_iuntypedproperties();
 
 BOOST_PYTHON_MODULE( _abc )
 {
@@ -54,4 +55,5 @@ BOOST_PYTHON_MODULE( _abc )
     register_icompoundproperty();
     register_itypedscalarproperties();
     register_sampleselector();
+    register_iuntypedproperties();
 }

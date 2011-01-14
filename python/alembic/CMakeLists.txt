@@ -59,6 +59,7 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
     CoreAbstractTypes.cpp
     ICompoundProperty.cpp
     ITypedScalarProperties.cpp
+    IUntypedProperties.cpp
     main.cpp )
 
   LINK_LIBRARIES( ${CORE_LIBS}
