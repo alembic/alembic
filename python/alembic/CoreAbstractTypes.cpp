@@ -102,6 +102,10 @@ void register_coreabstracttypes()
         .def( "isSimple", &AbcA::PropertyHeader::isSimple )
         .def( "getMetaData", &AbcA::PropertyHeader::getMetaData,
               return_internal_reference<1>() )
+        .def( "getDataType", &AbcA::PropertyHeader::getDataType,
+              return_internal_reference<1>() )
+        .def( "__str__", &AbcA::PropertyHeader::getName,
+              return_value_policy<copy_const_reference>() )
         ;
 
     // TimeSamplingType
