@@ -71,23 +71,6 @@ const AbcA::ObjectHeader &IObject::getHeader() const
 };
 
 //-*****************************************************************************
-std::string IObject::getFullName() const
-{
-    std::string fn = this->getHeader().getFullName();
-    if ( fn.substr( 0, 5 ) == "/ABC/" )
-    {
-        return fn.substr( 4, fn.size() );
-    }
-
-    if ( fn == "/ABC" )
-    {
-        return std::string( "/" );
-    }
-
-    return fn;
-}
-
-//-*****************************************************************************
 IArchive IObject::getArchive()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getArchive()" );

@@ -89,7 +89,8 @@ void readDeepHierarchy( IObject parent, const int level, const IObject& orig )
     {
         ICompoundProperty p = parent.getProperties();
         IInt32ArrayProperty iap( p, "intArrayProp" );
-        std::string fullName = iap.getObject().getFullName();
+        std::string fullName = const_cast<std::string&>(
+            iap.getObject().getFullName() );
 
         PATH_PAIR ret = PATHS.insert( fullName );
 

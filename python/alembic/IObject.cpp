@@ -71,8 +71,10 @@ void register_iobject()
         .def( init<>() )
         .def( "getHeader", &Abc::IObject::getHeader,
               return_internal_reference<1>() )
-        .def( "getName", &Abc::IObject::getName )
-        .def( "getFullName", &Abc::IObject::getFullName )
+        .def( "getName", &Abc::IObject::getName,
+              return_value_policy<copy_const_reference>() )
+        .def( "getFullName", &Abc::IObject::getFullName,
+              return_value_policy<copy_const_reference>() )
         .def( "getNumChildren", &Abc::IObject::getNumChildren )
         .def( "getChildHeader", getChildHeaderByIndex,
               return_internal_reference<1>() )
@@ -92,7 +94,8 @@ void register_iobject()
         .def( "getMetaData", &Abc::IObject::getMetaData,
               return_internal_reference<1>() )
         .def( "reset", &Abc::IObject::reset )
-        .def( "__str__", &Abc::IObject::getFullName )
+        .def( "__str__", &Abc::IObject::getFullName,
+              return_value_policy<copy_const_reference>() )
         .def( "__nonzero__", &Abc::IObject::valid )
         ;
 }
