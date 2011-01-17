@@ -68,7 +68,7 @@ void testReadWriteEmptyArchive()
         ABC::ArchiveWriterPtr a = w(archiveName, ABC::MetaData());
         ABC::ObjectWriterPtr archive = a->getTop();
 
-        TESTING_ASSERT(archive->getFullName() == "/ABC");
+        TESTING_ASSERT(archive->getFullName() == "/");
 
         // use this to get current reporting mechanism, then supress it
         // since we expect to see H5F errors because we will be trying to open
@@ -97,7 +97,7 @@ void testReadWriteEmptyArchive()
         ABC::ArchiveReaderPtr a = r( archiveName );
         ABC::ObjectReaderPtr archive = a->getTop();
         TESTING_ASSERT(archive->getName() == "ABC");
-        TESTING_ASSERT(archive->getFullName() == "/ABC");
+        TESTING_ASSERT(archive->getFullName() == "/");
         TESTING_ASSERT(archive->getParent() == NULL);
         TESTING_ASSERT(archive->getNumChildren() == 0);
 

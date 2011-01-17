@@ -51,7 +51,7 @@ BaseOwImpl::BaseOwImpl( hid_t iParentGroup,
   , m_properties( NULL )
 {
     // Check validity of all inputs.
-    ABCA_ASSERT( iParentGroup >= 0, "Invalid parent group" );    
+    ABCA_ASSERT( iParentGroup >= 0, "Invalid parent group" );
 
     // Create the HDF5 group corresponding to this object.
     hid_t copl = CreationOrderPlist();
@@ -97,7 +97,7 @@ const AbcA::ObjectHeader & BaseOwImpl::getChildHeader( size_t i )
     }
 
     ABCA_ASSERT( m_childHeaders[i], "Invalid child header: " << i );
-    
+
     return *(m_childHeaders[i]);
 }
 
@@ -144,23 +144,34 @@ BaseOwImpl::createChild( const AbcA::ObjectHeader &iHeader )
 {
     if ( m_madeChildren.count( iHeader.getName() ) )
     {
-        ABCA_THROW( "Already have a property named: "
+        ABCA_THROW( "Already have an Object named: "
                      << iHeader.getName() );
+    }
+
+    std::string fullChildName;
+    std::string fullParentName = this->getFullName();
+
+    if ( fullParentName == "/" )
+    {
+        fullChildName = "/" + iHeader.getName();
+    }
+    else
+    {
+        fullChildName = fullParentName + "/" + iHeader.getName();
     }
 
     ObjectHeaderPtr header(
         new AbcA::ObjectHeader( iHeader.getName(),
-                                this->getFullName() + "/" +
-                                iHeader.getName(),
+                                fullChildName,
                                 iHeader.getMetaData() ) );
-    
+
     AbcA::ObjectWriterPtr ret( new OwImpl( asObjectPtr(),
                                            m_group,
                                            header ) );
 
     m_childHeaders.push_back( header );
     m_madeChildren[iHeader.getName()] = WeakOwPtr( ret );
-    
+
     return ret;
 }
 
@@ -168,7 +179,7 @@ BaseOwImpl::createChild( const AbcA::ObjectHeader &iHeader )
 BaseOwImpl::~BaseOwImpl()
 {
     delete m_properties;
-    
+
     if ( m_group >= 0 )
     {
         H5Gclose( m_group );
