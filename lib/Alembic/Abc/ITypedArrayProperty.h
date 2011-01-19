@@ -256,6 +256,16 @@ typedef ITypedArrayProperty<V3iTPTraits>             IV3iArrayProperty;
 typedef ITypedArrayProperty<V3fTPTraits>             IV3fArrayProperty;
 typedef ITypedArrayProperty<V3dTPTraits>             IV3dArrayProperty;
 
+typedef ITypedArrayProperty<P2sTPTraits>             IP2sArrayProperty;
+typedef ITypedArrayProperty<P2iTPTraits>             IP2iArrayProperty;
+typedef ITypedArrayProperty<P2fTPTraits>             IP2fArrayProperty;
+typedef ITypedArrayProperty<P2dTPTraits>             IP2dArrayProperty;
+
+typedef ITypedArrayProperty<P3sTPTraits>             IP3sArrayProperty;
+typedef ITypedArrayProperty<P3iTPTraits>             IP3iArrayProperty;
+typedef ITypedArrayProperty<P3fTPTraits>             IP3fArrayProperty;
+typedef ITypedArrayProperty<P3dTPTraits>             IP3dArrayProperty;
+
 typedef ITypedArrayProperty<Box2sTPTraits>           IBox2sArrayProperty;
 typedef ITypedArrayProperty<Box2iTPTraits>           IBox2iArrayProperty;
 typedef ITypedArrayProperty<Box2fTPTraits>           IBox2fArrayProperty;
@@ -281,6 +291,9 @@ typedef ITypedArrayProperty<C3cTPTraits>             IC3cArrayProperty;
 typedef ITypedArrayProperty<C4hTPTraits>             IC4hArrayProperty;
 typedef ITypedArrayProperty<C4fTPTraits>             IC4fArrayProperty;
 typedef ITypedArrayProperty<C4cTPTraits>             IC4cArrayProperty;
+
+typedef ITypedArrayProperty<N2fTPTraits>             IN2fArrayProperty;
+typedef ITypedArrayProperty<N2dTPTraits>             IN2dArrayProperty;
 
 typedef ITypedArrayProperty<N3fTPTraits>             IN3fArrayProperty;
 typedef ITypedArrayProperty<N3dTPTraits>             IN3dArrayProperty;
