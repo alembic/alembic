@@ -33,6 +33,7 @@
 ##-*****************************************************************************
 
 SET( FULL_ABC_LIBS
+     AlembicAbcGeom
      AlembicAbc
      AlembicAbcCoreHDF5
      AlembicAbcCoreAbstract
@@ -46,4 +47,7 @@ SET( FULL_ABC_LIBS
 #-******************************************************************************
 ADD_EXECUTABLE( abcecho AbcEcho.cpp )
 TARGET_LINK_LIBRARIES( abcecho ${FULL_ABC_LIBS} )
+
+ADD_EXECUTABLE( abcechobounds AbcBoundsEcho.cpp )
+TARGET_LINK_LIBRARIES( abcechobounds ${FULL_ABC_LIBS} )
 
