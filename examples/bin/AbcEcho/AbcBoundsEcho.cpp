@@ -39,14 +39,11 @@
 
 #include <ImathBoxAlgo.h>
 
-#include <map>
-
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
 #include <iostream>
-#include <sstream>
 
 //-*****************************************************************************
 using namespace ::Alembic::AbcGeom;
