@@ -39,18 +39,12 @@
 
 #include <ImathBoxAlgo.h>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/classification.hpp>
-
 #include <iostream>
 
 //-*****************************************************************************
 using namespace ::Alembic::AbcGeom;
 
-typedef std::vector<std::string> StringVec;
-
-namespace ba = boost::algorithm;
+static Box3d g_bounds;
 
 //-*****************************************************************************
 void accumXform( M44d &xf, IObject obj )
@@ -58,37 +52,27 @@ void accumXform( M44d &xf, IObject obj )
     if ( ISimpleXform::matches( obj.getMetaData() ) )
     {
         ISimpleXform x( obj, kWrapExisting );
-        xf = x.getSchema().getValue().getMatrix() * xf;
+        xf *= x.getSchema().getValue().getMatrix();
     }
     else if ( IXform::matches( obj.getMetaData() ) )
     {
         IXform x( obj, kWrapExisting );
-        xf = x.getSchema().getMatrix() * xf;
+        xf *= x.getSchema().getMatrix();
     }
 }
 
 //-*****************************************************************************
-M44d getFinalMatrix( IObject iObj )
+M44d getFinalMatrix( IObject &iObj )
 {
     M44d xf;
     xf.makeIdentity();
 
-    StringVec pvec;
-    ba::split( pvec, iObj.getFullName(), ba::is_any_of( "/" ) );
+    IObject parent = iObj.getParent();
 
-    if ( pvec.size() > 0 && pvec.front() == "" )
+    while ( parent )
     {
-        pvec.erase( pvec.begin() );
-    }
-
-    IObject child;
-    IObject parent = iObj.getArchive().getTop();
-
-    for ( size_t i = 0 ; i < pvec.size() ; ++i )
-    {
-        child = IObject( parent, pvec[i] );
-        accumXform( xf, child );
-        parent = child;
+        accumXform( xf, parent );
+        parent = parent.getParent();
     }
 
     return xf;
@@ -129,6 +113,8 @@ Box3d getBounds( IObject iObj )
 
     bnds.extendBy( Imath::transform( bnds, xf ) );
 
+    g_bounds.extendBy( bnds );
+
     return bnds;
 }
 
@@ -167,11 +153,14 @@ int main( int argc, char *argv[] )
     }
 
     // Scoped.
+    g_bounds.makeEmpty();
     {
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                           argv[1], ErrorHandler::kQuietNoopPolicy );
         visitObject( archive.getTop() );
     }
+
+    std::cout << "/" << " " << g_bounds.min << " " << g_bounds.max << std::endl;
 
     return 0;
 }
