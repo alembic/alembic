@@ -192,6 +192,7 @@ public:
         m_positions.reset();
         m_indices.reset();
         m_counts.reset();
+        m_normals.reset();
         Abc::OSchema<PolyMeshSchemaInfo>::reset();
     }
 
@@ -215,6 +216,8 @@ protected:
     Abc::OV3fArrayProperty m_positions;
     Abc::OInt32ArrayProperty m_indices;
     Abc::OInt32ArrayProperty m_counts;
+    Abc::OV3fArrayProperty m_normals;
+    Abc::OCompoundProperty m_arbAttrs;
 };
 
 //-*****************************************************************************
