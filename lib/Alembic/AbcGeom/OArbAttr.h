@@ -34,71 +34,87 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_IArbAttrs_h_
-#define _Alembic_AbcGeom_IArbAttrs_h_
+#ifndef _Alembic_AbcGeom_OArbAttr_h_
+#define _Alembic_AbcGeom_OArbAttr_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
+#include <Alembic/AbcGeom/ArbAttrSample.h>
+
+namespace Alembic {
+namespace AbcGeom {
 
 //-*****************************************************************************
-template <class VAL_T>
-class OArbAttr : public Abc::OCompoundProperty
+template <class TRAITS>
+class OTypedArbAttr : public Abc::OCompoundProperty
 {
 public:
-    OArbAttr() {}
+    typedef OTypedArbAttr<TRAITS> this_type;
+    typedef typename TRAITS::value_type value_type;
+    typedef TypedArbAttrSample<TRAITS> sample_type;
+    typedef OTypedArrayProperty<TRAITS> prop_type;
+
+    OTypedArbAttr() {}
 
     template <class CPROP>
-    OArbAttr( CPROP iParent,
-              const std::string &iName
-              const OArgument &iArg0 = OArgument(),
-              const OArgument &iArg1 = OArgument(),
-              const OArgument &iArg2 = OArgument() )
+    OTypedArbAttr( CPROP iParent,
+                   const std::string &iName,
+                   const OArgument &iArg0 = OArgument(),
+                   const OArgument &iArg1 = OArgument(),
+                   const OArgument &iArg2 = OArgument() )
+      : Abc::OCompoundProperty( iParent, iName, iArg0, iArg1, iArg2 )
+      , m_isIndexed( false )
+      , m_timeSamplingType( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) )
     {
-        init( iParent, iName, iArg0, iArg1, iArg2 );
+        // nothing else
     }
 
-    template <class CPROP>
-    OArbAttr( CPROP iSelf,
-              WrapExistingFlag iFlag,
-              const OArgument &iArg0 = OArgument(),
-              const OArgument &iArg1 = OArgument(),
-              const OArgument &iArg2 = OArgument() );
+    void set( const sample_type &iVal,
+              const OSampleSelector &iSS = OSampleSelector() );
 
-    const std::string &getName() const;
+    void setFromPrevious( const OSampleSelector &iSS );
 
-    void setScope( GeometryScope iScope );
-    GeometryScope getScope() const;
+    size_t getNumSamples();
 
-    TimeSamplingType getTimeSamplingType() const { return m_timeSamplingType; }
+    const AbcA::DataType &getDataType();
 
-    void setIndexed( bool iIndexed ) { m_isIndexed = iIndexed; }
-    bool isIndexed() const { return m_isIndexed; }
+    void setIndexed( bool isIndexed ) { m_isIndexed = isIndexed; }
+    bool isIndexed() { return m_isIndexed; }
 
+    void setScope( GeometryScope iScope ) { m_scope = iScope; }
+    GeometryScope getScope() { return m_scope; }
 
+    TimeSamplingType getTimeSamplingType() { return m_timeSamplingType; }
 
+    bool valid() const
+    {
+        return ( Abc::OCompoundProperty::valid() && m_valProp.valid()
+                 && ( ( ! m_isIndexed ) || m_indices ) );
+    }
 
-    Abc::TypedArraySample<T> getExpandedValue(const Abc::ISampleSelector &iSS);
+    ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
 
-    IndexedArbitraryParameterSample getIndexedValue(const Abc::ISampleSelector &iSS);
+    void reset()
+    {
+        m_valProp.reset();
+        m_indices.reset();
+        m_isIndexed = false;
+        Abc::OCompoundProperty::reset();
+    }
 
 private:
-    template <class CPROP>
-    void init( CPROP iParent, const std::string &iName,
-               const OArgument &iArg0,
-               const OArgument &iArg1,
-               const OArgument &iArg2 );
+    void init( const AbcA::TimeSamplingType &iTST );
+
 
 protected:
+    prop_type m_valProp;
+    OInt32ArrayProperty m_indices;
     bool m_isIndexed;
-    GeometryScope m_scope;
     TimeSamplingType m_timeSamplingType;
 
-    Abc::OTypedArrayProperty<VAL_T> m_valArray;
-    Abc::OInt32ArrayProperty m_indices;
+    GeometryScope m_scope;
 };
 
-class IndexedArbitraryParameterSample
-{
-public:
-    Abc::TypedArraySample<T> getValue();
-    Abc::Int32ArraySamplePtr getIndices();
-};
+} // namespace AbcGeom
+} // namespace Alembic
+
+#endif
