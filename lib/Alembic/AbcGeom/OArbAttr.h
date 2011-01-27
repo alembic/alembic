@@ -64,6 +64,7 @@ public:
       : Abc::OCompoundProperty( iParent, iName, iArg0, iArg1, iArg2 )
       , m_isIndexed( false )
       , m_timeSamplingType( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) )
+      , m_scope( kUnknownScope )
     {
         // nothing else; the value and index properties get created on
         // first call to set
@@ -76,9 +77,8 @@ public:
 
     size_t getNumSamples();
 
-    const AbcA::DataType &getDataType();
+    const AbcA::DataType &getDataType() { return TRAITS::dataType(); }
 
-    void setIndexed( bool isIndexed ) { m_isIndexed = isIndexed; }
     bool isIndexed() { return m_isIndexed; }
 
     void setScope( GeometryScope iScope ) { m_scope = iScope; }
