@@ -65,7 +65,8 @@ public:
       , m_isIndexed( false )
       , m_timeSamplingType( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) )
     {
-        // nothing else
+        // nothing else; the value and index properties get created on
+        // first call to set
     }
 
     void set( const sample_type &iVal,
