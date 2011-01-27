@@ -46,7 +46,7 @@ void register_abcenums();
 void register_sampleselector();
 void register_iuntypedproperties();
 
-BOOST_PYTHON_MODULE( _abc )
+BOOST_PYTHON_MODULE( alembic )
 {
     register_coreabstracttypes();
     register_abcenums();
