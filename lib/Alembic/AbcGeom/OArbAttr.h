@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/ArbAttrSample.h>
+#include <Alembic/AbcGeom/GeometryScope.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -62,8 +63,13 @@ public:
                    GeometryScope iScope,
                    const OArgument &iArg0 = OArgument(),
                    const OArgument &iArg1 = OArgument(),
-                   const OArgument &iArg2 = OArgument() )
-      : Abc::OCompoundProperty( iParent, iName, iArg0, iArg1, iArg2 )
+                   const OArgument &iArg2 = OArgument()
+                 )
+      : Abc::OCompoundProperty(
+          iParent, iName,
+          Abc::GetMetaData( iArg0, iArg1, iArg2 ),
+          Abc::GetErrorHandlerPolicy( iParent, iArg0, iArg1, iArg2 )
+                              )
       , m_isIndexed( iIsIndexed )
       , m_timeSamplingType( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) )
       , m_scope( iScope )
@@ -72,12 +78,83 @@ public:
         // first call to set
     }
 
-    void set( const sample_type &iVal,
-              const OSampleSelector &iSS = OSampleSelector() );
+    void set( const sample_type &iSamp,
+              const OSampleSelector &iSS = OSampleSelector() )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::set()" );
 
-    void setFromPrevious( const OSampleSelector &iSS );
+        if ( iSS.getIndex() == 0 )
+        {
+            // First, create the value and index properties, using metadata
+            // from *this, with GeometryScope set
+            AbcA::MetaData md = this->getMetaData();
+            SetGeometryScope( md, m_scope );
+            m_valProp = prop_type( *this, ".vals", md, m_timeSamplingType );
 
-    size_t getNumSamples();
+            // are we setting things via indices?
+            if ( m_isIndexed )
+            {
+                m_indices = OInt32ArrayProperty( *this, ".indices",
+                                                 m_timeSamplingType );
+
+                m_indices.set( iSamp.getIndices(), iSS );
+                m_valProp.set( iSamp.getIndexedVals(), iSS );
+            }
+            else
+            {
+                m_valProp.set( iSamp.getExpandedVals(), iSS );
+            }
+        }
+        else
+        {
+            if ( m_isIndexed )
+            {
+                SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
+                SetPropUsePrevIfNull( m_valProp, iSamp.getIndexedVals(), iSS );
+            }
+            else
+            {
+                SetPropUsePrevIfNull( m_valProp, iSamp.getExpandedVals(), iSS );
+            }
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    }
+    void setFromPrevious( const OSampleSelector &iSS )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::setFromPrevious()" );
+
+        m_valProp.setFromPrevious( iSS );
+
+        if ( m_isIndexed ) { m_indices.setFromPrevious( iSS ); }
+
+        ALEMBIC_ABC_SAFE_CALL_END();
+    }
+
+    size_t getNumSamples()
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::getNumSamples()" );
+
+        if ( m_isIndexed )
+        {
+            if ( m_indices )
+            {
+                return std::max( m_indices.getNumSamples(),
+                                 m_valProp.getNumSamples() );
+            }
+            else { return 0; }
+        }
+        else
+        {
+            if ( m_valProp ) { return m_valProp.getNumSamples(); }
+            else { return 0; }
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END();
+
+        return 0;
+    }
 
     const AbcA::DataType &getDataType() { return TRAITS::dataType(); }
 

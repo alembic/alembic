@@ -71,7 +71,25 @@ public:
     {}
 
     const samp_type &getIndexedVals() const { return m_vals; }
-    const samp_type &getExpandedVals() const; // must be calculated
+    const samp_type &getExpandedVals() const
+    {
+        if ( ! m_indices ) { return m_vals; } // easy!
+        else // not as easy!
+        {
+            if ( ! m_vals ) { return m_vals; } // can't expand an empty sample
+
+            std::vector<value_type> ev;
+
+            for ( size_t i = 0 ; i < m_indices.size() ; ++i )
+            {
+                ev.push_back( m_vals[m_indices[i]] );
+            }
+
+            static const samp_type ret( ev );
+            return ret;
+        }
+    }
+
     void setVals( const samp_type &iVals ) { m_vals = iVals; }
 
     const Abc::Int32ArraySample &getIndices() const { return m_indices; }
@@ -88,26 +106,6 @@ protected:
     samp_type m_vals;
     Abc::Int32ArraySample m_indices;
 };
-
-//-*****************************************************************************
-const samp_type &TypedArbAttrSample::getExpandedVals() const
-{
-    if ( ! m_indices ) { return m_vals; } // easy!
-    else // not as easy!
-    {
-        if ( ! m_vals ) { return m_vals; } // can't expand an empty sample
-
-        std::vector<value_type> ev;
-
-        for ( size_t i = 0 ; i < m_indices.size() ; ++i )
-        {
-            ev.push_back( m_vals[m_indices[i]] );
-        }
-
-        static const samp_type ret( ev );
-        return ret;
-    }
-}
 
 //-*****************************************************************************
 // TYPEDEFS

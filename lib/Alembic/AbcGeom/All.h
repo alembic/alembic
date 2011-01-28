@@ -44,6 +44,10 @@
 
 #include <Alembic/AbcGeom/GeometryScope.h>
 
+#include <Alembic/AbcGeom/ArbAttrSample.h>
+
+#include <Alembic/AbcGeom/OArbAttr.h>
+
 #include <Alembic/AbcGeom/OPolyMesh.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
 

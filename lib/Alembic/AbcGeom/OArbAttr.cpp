@@ -40,97 +40,21 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-const AbcA::DataType &OTypedArbAttr::getDataType()
+// much like lib/Alembic/Abc/OTypedProperty.cpp, this is just a compile test,
+// due to the implementation being in the .h file, due to templates.
+static void __test( Abc::OCompoundProperty &iParent )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::getDataType()" );
+    OV2fArbAttr uvs( iParent, "uv", false, kVertexScope );
 
-    return m_valProp.getDataType();
+    std::vector<V2f> vec;
 
-    ALEMBIC_ABC_SAFE_CALL_END();
+    vec.push_back( V2f( 1.0f, 2.0f ) );
 
-    static const AbcA::DataType ret;
-    return ret;
-}
+    V2fArraySample val( vec );
 
-//-*****************************************************************************
-void OTypedArbAttr::set( const sample_type &iSamp,
-                         const OSampleSelector &iSS )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::set()" );
+    V2fArbAttrSample samp( val );
 
-    if ( iSS.getIndex() == 0 )
-    {
-        // First, create the value and index properties, using metadata from
-        // *this, with GeometryScope set
-        AbcA::MetaData md = this->getMetaData();
-        SetGeometryScope( md, m_scope );
-        m_valProp = prop_type( *this, ".vals", md, m_timeSamplingType );
-
-        // are we setting things via indices?
-        if ( m_isIndexed )
-        {
-            m_indices = OInt32ArrayProperty( *this, ".indices",
-                                             m_timeSamplingType );
-
-            m_indices.set( iSamp.getIndices(), iSS );
-            m_valProp.set( iSamp.getIndexedVals(), iSS );
-        }
-        else
-        {
-            m_valProp.set( iSamp.getExpandedVals(), iSS );
-        }
-    }
-    else
-    {
-        if ( m_isIndexed )
-        {
-            SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
-            SetPropUsePrevIfNull( m_valProp, iSamp.getIndexedVals(), iSS );
-        }
-        else
-        {
-            SetPropUsePrevIfNull( m_valProp, iSamp.getExpandedVals(), iSS );
-        }
-    }
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-void OTypedArbAttr::setFromPrevious( const OSampleSelector &iSS )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::setFromPrevious()" );
-
-    m_valProp.setFromPrevious( iSS );
-
-    if ( m_isIndexed ) { m_indices.setFromPrevious( iSS ); }
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-}
-
-//-*****************************************************************************
-size_t OTypedArbAttr::getNumSamples()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::getNumSamples()" );
-
-    if ( m_isIndexed )
-    {
-        if ( m_indices )
-        {
-            return std::max( m_indices.getNumSamples(),
-                             m_valProp.getNumSamples() );
-        }
-        else { return 0; }
-    }
-    else
-    {
-        if ( m_valProp ) { return m_valProp.getNumSamples(); }
-        else { return 0; }
-    }
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    return 0;
+    uvs.set( samp );
 }
 
 

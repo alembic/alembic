@@ -35,15 +35,13 @@
 # C++ files for this project
 SET( CXX_FILES
 
-  #ISimpleTransform.cpp
+  GeometryScope.cpp
 
   OSubD.cpp
   ISubD.cpp
 
-  #ICamera.cpp
-  #OCamera.cpp
+  OArbAttr.cpp
 
-  GeometryScope.cpp
   OPolyMesh.cpp
   IPolyMesh.cpp
 
@@ -63,17 +61,16 @@ SET( H_FILES
 
   All.h
 
+  ArbAttrSample.h
+
   Foundation.h
 
-  SchemaInfoDeclarations.h
+  GeometryScope.h
+
 
   OSubD.h
   ISubD.h
 
-  #ICamera.h
-  #OCamera.h
-
-  GeometryScope.h
   OPolyMesh.h
   IPolyMesh.h
 
@@ -88,6 +85,8 @@ SET( H_FILES
 
   OPoints.h
   IPoints.h
+
+  SchemaInfoDeclarations.h
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
