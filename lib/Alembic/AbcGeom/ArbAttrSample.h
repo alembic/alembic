@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_TypedArbAttrSample_h_
-#define _Alembic_AbcGeom_TypedArbAttrSample_h_
+#ifndef _Alembic_AbcGeom_ArbAttrSample_h_
+#define _Alembic_AbcGeom_ArbAttrSample_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
 
