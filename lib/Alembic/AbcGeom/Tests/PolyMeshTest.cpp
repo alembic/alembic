@@ -101,7 +101,7 @@ void Example1_MeshOut()
 
         // The hard link to the implementation.
         Alembic::AbcCoreHDF5::WriteArchive(),
-        
+
         // The file name.
         // Because we're an OArchive, this is creating (or clobbering)
         // the archive with this filename.
@@ -114,8 +114,8 @@ void Example1_MeshOut()
     // Add normals & UVs to it.
     MetaData normsUvsMeta;
     SetGeometryScope( normsUvsMeta, kFacevaryingScope );
-    OV3fArrayProperty Nprop( mesh, "N", normsUvsMeta );
-    OV2fArrayProperty STprop( mesh, "st", normsUvsMeta );
+    //OV3fArrayProperty Nprop( mesh, "N", normsUvsMeta );
+    //OV2fArrayProperty STprop( mesh, "st", normsUvsMeta );
 
     // Set a mesh sample.
     // We're creating the sample inline here,
@@ -124,12 +124,15 @@ void Example1_MeshOut()
     OPolyMeshSchema::Sample mesh_samp(
         V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
         Int32ArraySample( g_indices, g_numIndices ),
-        Int32ArraySample( g_counts, g_numCounts ) );
+        Int32ArraySample( g_counts, g_numCounts ),
+        V2fArbAttrSample( V2fArraySample( ( const V2f * )g_uvs, g_numUVs ) ),
+        N3fArbAttrSample( N3fArraySample( ( const N3f * )g_normals,
+                                          g_numNormals ) ) );
 
     // Set the sample.
     mesh.set( mesh_samp );
-    Nprop.set( V3fArraySample( ( const V3f * )g_normals, g_numNormals ) );
-    STprop.set( V2fArraySample( ( const V2f * )g_uvs, g_numUVs ) );
+    //Nprop.set( V3fArraySample( ( const V3f * )g_normals, g_numNormals ) );
+    //STprop.set( V2fArraySample( ( const V2f * )g_uvs, g_numUVs ) );
 
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish
@@ -145,17 +148,17 @@ void Example1_MeshIn()
 
     IPolyMesh meshyObj( IObject( archive, kTop ), "meshy" );
     IPolyMeshSchema &mesh = meshyObj.getSchema();
-    IV3fArrayProperty N( mesh, "N" );
-    IV2fArrayProperty st( mesh, "st" );
-    
+    //IV3fArrayProperty N( mesh, "N" );
+    //IV2fArrayProperty st( mesh, "st" );
+
     IPolyMeshSchema::Sample mesh_samp;
     mesh.get( mesh_samp );
 
-    V3fArraySamplePtr Nsamp;
-    N.get( Nsamp );
+    //V3fArraySamplePtr Nsamp;
+    //N.get( Nsamp );
 
-    V2fArraySamplePtr stSamp;
-    st.get( stSamp );
+    //V2fArraySamplePtr stSamp;
+    //st.get( stSamp );
 
     std::cout << "Mesh num vertices: "
               << mesh_samp.getPositions()->size() << std::endl;
@@ -227,8 +230,8 @@ void Time_Sampled_Mesh_Test0_Reader()
         //   std::cout << posSamp->get()[0] << std::endl;
     }
 
-    
-    
+
+
 
     IPolyMeshTrait::Sample mesh_samp;
     mesh.get( mesh_samp );

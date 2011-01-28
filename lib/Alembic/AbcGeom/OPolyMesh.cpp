@@ -64,13 +64,13 @@ void OPolyMeshSchema::set( const Sample &iSamp,
             if ( iSamp.getUVs().getIndices() )
             {
                 // UVs are indexed
-                m_uvs = OV2fArbAttr( *this, "uv", true, kVertexScope,
+                m_uvs = OV2fArbAttr( *this, "uv", true, kFacevaryingScope,
                                      this->getTimeSamplingType() );
             }
             else
             {
                 // UVs are not indexed
-                m_uvs = OV2fArbAttr( *this, "uv", false, kVertexScope,
+                m_uvs = OV2fArbAttr( *this, "uv", false, kFacevaryingScope,
                                      this->getTimeSamplingType() );
             }
 

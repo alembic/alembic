@@ -80,6 +80,8 @@ public:
 
             std::vector<value_type> ev;
 
+            ev.reserve( m_indices.size() );
+
             for ( size_t i = 0 ; i < m_indices.size() ; ++i )
             {
                 ev.push_back( m_vals[m_indices[i]] );
