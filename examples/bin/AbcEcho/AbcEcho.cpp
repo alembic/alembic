@@ -69,7 +69,8 @@ void visitSimpleProperty( PROP iProp, const std::string &iIndent )
     mdstring += dtype.str();
 
     std::cout << iIndent << "  " << ptype << "name=" << iProp.getName()
-              << g_sep << mdstring << std::endl;
+              << g_sep << mdstring << g_sep << "numsamps="
+              << iProp.getNumSamples() << std::endl;
 }
 
 //-*****************************************************************************
