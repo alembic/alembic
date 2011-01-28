@@ -39,33 +39,6 @@
 namespace Alembic {
 namespace AbcGeom {
 
-#if 0
-//-*****************************************************************************
-void OTypedArbAttr::init( const AbcA::TimeSamplingType &iTST )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::init()" );
-
-    m_timeSamplingType = iTST;
-
-    m_indices = Abc::OInt32ArrayProperty( *this, ".indices", iTST );
-    m_valProp = prop_type( *this, ".vals", iTST );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-#endif
-
-//-*****************************************************************************
-size_t OTypedArbAttr::getNumSamples()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::getNumSamples()" );
-
-    return m_valProp.getNumSamples();
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    return 0;
-}
-
 //-*****************************************************************************
 const AbcA::DataType &OTypedArbAttr::getDataType()
 {
@@ -94,11 +67,10 @@ void OTypedArbAttr::set( const sample_type &iSamp,
         m_valProp = prop_type( *this, ".vals", md, m_timeSamplingType );
 
         // are we setting things via indices?
-        if ( iSamp.isIndexed() )
+        if ( m_isIndexed )
         {
             m_indices = OInt32ArrayProperty( *this, ".indices",
                                              m_timeSamplingType );
-            m_isIndexed = true;
 
             m_indices.set( iSamp.getIndices(), iSS );
             m_valProp.set( iSamp.getIndexedVals(), iSS );
