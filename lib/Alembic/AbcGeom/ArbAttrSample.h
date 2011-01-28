@@ -95,7 +95,10 @@ const samp_type &TypedArbAttrSample::getExpandedVals() const
     if ( ! m_indices ) { return m_vals; } // easy!
     else // not as easy!
     {
+        if ( ! m_vals ) { return m_vals; } // can't expand an empty sample
+
         std::vector<value_type> ev;
+
         for ( size_t i = 0 ; i < m_indices.size() ; ++i )
         {
             ev.push_back( m_vals[m_indices[i]] );
