@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OArbAttr.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -62,16 +63,23 @@ public:
         Sample( const Abc::V3fArraySample &iPos )
           : m_positions( iPos ) {}
 
-        //! Creates a sample with position data, index data, and count data.
+
+        //! Creates a sample with position data, index data, count data,
+        //! and optional UV and Normals data.
         //! For specifying samples with an explicit topology. The first
         //! sample must be full like this. Subsequent samples may also
         //! be full like this, which would indicate a change of topology
         Sample( const Abc::V3fArraySample &iPos,
                 const Abc::Int32ArraySample &iInd,
-                const Abc::Int32ArraySample &iCnt )
+                const Abc::Int32ArraySample &iCnt,
+                const V2fArbAttrSample &iUVs = V2fArbAttrSample(),
+                const N3fArbAttrSample &iNormals = N3fArbAttrSample() )
           : m_positions( iPos )
           , m_indices( iInd )
-          , m_counts( iCnt ) {}
+          , m_counts( iCnt )
+          , m_uvs( iUVs )
+          , m_normals( iNormals )
+        {}
 
         const Abc::V3fArraySample &getPositions() const { return m_positions; }
         void setPositions( const Abc::V3fArraySample &iSmp )
@@ -85,17 +93,31 @@ public:
         void setCounts( const Abc::Int32ArraySample &iCnt )
         { m_counts = iCnt; }
 
+        const V2fArbAttrSample &getUVs() const { return m_uvs; }
+        void setUVs( const V2fArbAttrSample &iUVs )
+        { m_uvs = iUVs; }
+
+        const N3fArbAttrSample &getNormals() const { return m_normals; }
+        void setNormals( const N3fArbAttrSample &iNormals )
+        { m_normals = iNormals; }
+
         void reset()
         {
             m_positions.reset();
             m_indices.reset();
             m_counts.reset();
+
+            m_uvs.reset();
+            m_normals.reset();
         }
 
     protected:
         Abc::V3fArraySample m_positions;
         Abc::Int32ArraySample m_indices;
         Abc::Int32ArraySample m_counts;
+
+        V2fArbAttrSample m_uvs;
+        N3fArbAttrSample m_normals;
     };
 
     //-*************************************************************************
@@ -192,7 +214,9 @@ public:
         m_positions.reset();
         m_indices.reset();
         m_counts.reset();
+        m_uvs.reset();
         m_normals.reset();
+        m_arbAttrs.reset();
         Abc::OSchema<PolyMeshSchemaInfo>::reset();
     }
 
@@ -216,7 +240,10 @@ protected:
     Abc::OV3fArrayProperty m_positions;
     Abc::OInt32ArrayProperty m_indices;
     Abc::OInt32ArrayProperty m_counts;
-    Abc::OV3fArrayProperty m_normals;
+
+    OV2fArbAttr m_uvs;
+    ON3fArbAttr m_normals;
+
     Abc::OCompoundProperty m_arbAttrs;
 };
 

@@ -96,6 +96,13 @@ public:
     void setIndices( const Abc::Int32ArraySample &iIndices )
     { m_indices = iIndices; }
 
+    bool valid() const
+    {
+        return ( m_vals || m_indices );
+    }
+
+    ALEMBIC_OPERATOR_BOOL( this_type::valid() );
+
     void reset()
     {
         m_vals.reset();
