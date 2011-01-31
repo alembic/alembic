@@ -46,7 +46,7 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 template <class TRAITS>
-class OTypedArbAttr : public Abc::OCompoundProperty
+class OTypedArbAttr
 {
 public:
     typedef OTypedArbAttr<TRAITS> this_type;
@@ -65,17 +65,32 @@ public:
                    const OArgument &iArg1 = OArgument(),
                    const OArgument &iArg2 = OArgument()
                  )
-      : Abc::OCompoundProperty(
-          iParent, iName,
-          Abc::GetMetaData( iArg0, iArg1, iArg2 ),
-          Abc::GetErrorHandlerPolicy( iParent, iArg0, iArg1, iArg2 )
-                              )
+      : m_name( iName )
       , m_isIndexed( iIsIndexed )
       , m_timeSamplingType( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) )
       , m_scope( iScope )
     {
-        // nothing else; the value and index properties get created on
-        // first call to set
+        AbcA::MetaData md = Abc::GetMetaData( iArg0, iArg1, iArg2 );
+        SetGeometryScope( md, iScope );
+
+        Abc::ErrorHandler::Policy ehp(
+            Abc::GetErrorHandlerPolicy( iParent, iArg0, iArg1, iArg2 ) );
+
+        if ( m_isIndexed )
+        {
+            m_cprop = Abc::OCompoundProperty( iParent, iName, md, ehp );
+
+            m_valProp = prop_type( m_cprop, ".vals", md, ehp,
+                                   m_timeSamplingType );
+
+            m_indices = OInt32ArrayProperty( m_cprop, ".indices",
+                                             m_timeSamplingType );
+        }
+        else
+        {
+            m_valProp = prop_type( iParent, iName, md, ehp,
+                                   m_timeSamplingType );
+        }
     }
 
     void set( const sample_type &iSamp,
@@ -85,18 +100,8 @@ public:
 
         if ( iSS.getIndex() == 0 )
         {
-            // First, create the value and index properties, using metadata
-            // from *this, with GeometryScope set
-            AbcA::MetaData md = this->getMetaData();
-            SetGeometryScope( md, m_scope );
-            m_valProp = prop_type( *this, ".vals", md, m_timeSamplingType );
-
-            // are we setting things via indices?
             if ( m_isIndexed )
             {
-                m_indices = OInt32ArrayProperty( *this, ".indices",
-                                                 m_timeSamplingType );
-
                 m_indices.set( iSamp.getIndices(), iSS );
                 m_valProp.set( iSamp.getIndexedVals(), iSS );
             }
@@ -160,34 +165,45 @@ public:
 
     bool isIndexed() { return m_isIndexed; }
 
-    void setScope( GeometryScope iScope ) { m_scope = iScope; }
     GeometryScope getScope() { return m_scope; }
 
     TimeSamplingType getTimeSamplingType() { return m_timeSamplingType; }
 
     bool valid() const
     {
-        return ( Abc::OCompoundProperty::valid() && m_valProp.valid()
+        return ( m_valProp.valid()
                  && ( ( ! m_isIndexed ) || m_indices ) );
     }
 
-    ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
+    ALEMBIC_OPERATOR_BOOL( this_type::valid() );
 
     void reset()
     {
+        m_timeSamplingType = AbcA::TimeSamplingType();
+        m_name = "";
         m_valProp.reset();
         m_indices.reset();
+        m_cprop.reset();
+        m_scope = kUnknownScope;
         m_isIndexed = false;
-        Abc::OCompoundProperty::reset();
     }
 
+private:
+    Abc::ErrorHandler &getErrorHandler() const
+    { return m_valProp.getErrorHandler(); }
+
 protected:
+    std::string m_name;
+
     prop_type m_valProp;
     OInt32ArrayProperty m_indices;
     bool m_isIndexed;
     TimeSamplingType m_timeSamplingType;
 
     GeometryScope m_scope;
+
+    // if the GeomParam is not indexed, this will not exist.
+    Abc::OCompoundProperty m_cprop;
 };
 
 //-*****************************************************************************

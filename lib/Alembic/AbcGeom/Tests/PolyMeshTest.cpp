@@ -114,8 +114,6 @@ void Example1_MeshOut()
     // Add normals & UVs to it.
     MetaData normsUvsMeta;
     SetGeometryScope( normsUvsMeta, kFacevaryingScope );
-    //OV3fArrayProperty Nprop( mesh, "N", normsUvsMeta );
-    //OV2fArrayProperty STprop( mesh, "st", normsUvsMeta );
 
     // Set a mesh sample.
     // We're creating the sample inline here,
@@ -125,9 +123,13 @@ void Example1_MeshOut()
         V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
         Int32ArraySample( g_indices, g_numIndices ),
         Int32ArraySample( g_counts, g_numCounts ),
-        V2fArbAttrSample( V2fArraySample( ( const V2f * )g_uvs, g_numUVs ) ),
+        V2fArbAttrSample( V2fArraySample( ( const V2f * )g_uvs, g_numUVs ),
+                          kFacevaryingScope ),
+        // indexed normals; WHY NOT?
         N3fArbAttrSample( N3fArraySample( ( const N3f * )g_normals,
-                                          g_numNormals ) ) );
+                                          g_numNormals ),
+                          Int32ArraySample( g_indices, g_numIndices ),
+                          kFacevaryingScope ) );
 
     // Set the sample.
     mesh.set( mesh_samp );

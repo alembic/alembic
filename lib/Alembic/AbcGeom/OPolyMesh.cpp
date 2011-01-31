@@ -64,13 +64,15 @@ void OPolyMeshSchema::set( const Sample &iSamp,
             if ( iSamp.getUVs().getIndices() )
             {
                 // UVs are indexed
-                m_uvs = OV2fArbAttr( *this, "uv", true, kFacevaryingScope,
+                m_uvs = OV2fArbAttr( *this, "uv", true,
+                                     iSamp.getUVs().getScope(),
                                      this->getTimeSamplingType() );
             }
             else
             {
                 // UVs are not indexed
-                m_uvs = OV2fArbAttr( *this, "uv", false, kFacevaryingScope,
+                m_uvs = OV2fArbAttr( *this, "uv", false,
+                                     iSamp.getUVs().getScope(),
                                      this->getTimeSamplingType() );
             }
 
@@ -81,13 +83,15 @@ void OPolyMeshSchema::set( const Sample &iSamp,
             if ( iSamp.getNormals().getIndices() )
             {
                 // normals are indexed
-                m_normals = ON3fArbAttr( *this, "N", true, kFacevaryingScope,
+                m_normals = ON3fArbAttr( *this, "N", true,
+                                         iSamp.getNormals().getScope(),
                                          this->getTimeSamplingType() );
             }
             else
             {
                 // normals are not indexed
-                m_normals = ON3fArbAttr( *this, "N", false, kFacevaryingScope,
+                m_normals = ON3fArbAttr( *this, "N", false,
+                                         iSamp.getNormals().getScope(),
                                          this->getTimeSamplingType() );
             }
 

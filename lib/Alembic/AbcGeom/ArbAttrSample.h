@@ -38,6 +38,7 @@
 #define _Alembic_AbcGeom_ArbAttrSample_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
+#include <Alembic/AbcGeom/GeometryScope.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -58,16 +59,20 @@ public:
 
     //-*************************************************************************
     // Construct from an Abc::TypedArarySample
-    TypedArbAttrSample( const samp_type &iValues )
+    TypedArbAttrSample( const samp_type &iValues,
+                        GeometryScope iScope = kUnknownScope )
       : m_vals( iValues )
+      , m_scope( iScope )
     {}
 
     //-*************************************************************************
     // Construct from a typed array sample and an array of indices
     TypedArbAttrSample( const samp_type &iValues,
-                        const Abc::Int32ArraySample &iIndices )
+                        const Abc::Int32ArraySample &iIndices,
+                        GeometryScope iScope = kUnknownScope )
       : m_vals( iValues )
       , m_indices( iIndices )
+      , m_scope( iScope )
     {}
 
     const samp_type &getIndexedVals() const { return m_vals; }
@@ -94,6 +99,9 @@ public:
 
     void setVals( const samp_type &iVals ) { m_vals = iVals; }
 
+    GeometryScope getScope() const { return m_scope; }
+    void setScope( GeometryScope iScope ) { m_scope = iScope; }
+
     const Abc::Int32ArraySample &getIndices() const { return m_indices; }
     void setIndices( const Abc::Int32ArraySample &iIndices )
     { m_indices = iIndices; }
@@ -109,11 +117,13 @@ public:
     {
         m_vals.reset();
         m_indices.reset();
+        m_scope = kUnknownScope;
     }
 
 protected:
     samp_type m_vals;
     Abc::Int32ArraySample m_indices;
+    GeometryScope m_scope;
 };
 
 //-*****************************************************************************
