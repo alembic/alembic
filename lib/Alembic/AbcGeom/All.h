@@ -47,6 +47,7 @@
 #include <Alembic/AbcGeom/GeomParamSample.h>
 
 #include <Alembic/AbcGeom/OGeomParam.h>
+#include <Alembic/AbcGeom/IGeomParam.h>
 
 #include <Alembic/AbcGeom/OPolyMesh.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
