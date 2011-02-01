@@ -40,7 +40,7 @@ SET( CXX_FILES
   OSubD.cpp
   ISubD.cpp
 
-  OArbAttr.cpp
+  OGeomParam.cpp
 
   OPolyMesh.cpp
   IPolyMesh.cpp
@@ -61,12 +61,13 @@ SET( H_FILES
 
   All.h
 
-  ArbAttrSample.h
+  GeomParamSample.h
 
   Foundation.h
 
   GeometryScope.h
 
+  OGeomParam.h
 
   OSubD.h
   ISubD.h

@@ -48,6 +48,7 @@ extern const Abc::float32_t g_verts[];
 
 extern const size_t g_numIndices;
 extern const Abc::int32_t g_indices[];
+extern const Abc::uint32_t g_uindices[];
 
 extern const size_t g_numCounts;
 extern const Abc::int32_t g_counts[];

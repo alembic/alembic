@@ -39,7 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
-#include <Alembic/AbcGeom/OArbAttr.h>
+#include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -72,8 +72,8 @@ public:
         Sample( const Abc::V3fArraySample &iPos,
                 const Abc::Int32ArraySample &iInd,
                 const Abc::Int32ArraySample &iCnt,
-                const V2fArbAttrSample &iUVs = V2fArbAttrSample(),
-                const N3fArbAttrSample &iNormals = N3fArbAttrSample() )
+                const V2fGeomParamSample &iUVs = V2fGeomParamSample(),
+                const N3fGeomParamSample &iNormals = N3fGeomParamSample() )
           : m_positions( iPos )
           , m_indices( iInd )
           , m_counts( iCnt )
@@ -93,12 +93,12 @@ public:
         void setCounts( const Abc::Int32ArraySample &iCnt )
         { m_counts = iCnt; }
 
-        const V2fArbAttrSample &getUVs() const { return m_uvs; }
-        void setUVs( const V2fArbAttrSample &iUVs )
+        const V2fGeomParamSample &getUVs() const { return m_uvs; }
+        void setUVs( const V2fGeomParamSample &iUVs )
         { m_uvs = iUVs; }
 
-        const N3fArbAttrSample &getNormals() const { return m_normals; }
-        void setNormals( const N3fArbAttrSample &iNormals )
+        const N3fGeomParamSample &getNormals() const { return m_normals; }
+        void setNormals( const N3fGeomParamSample &iNormals )
         { m_normals = iNormals; }
 
         void reset()
@@ -116,8 +116,8 @@ public:
         Abc::Int32ArraySample m_indices;
         Abc::Int32ArraySample m_counts;
 
-        V2fArbAttrSample m_uvs;
-        N3fArbAttrSample m_normals;
+        V2fGeomParamSample m_uvs;
+        N3fGeomParamSample m_normals;
     };
 
     //-*************************************************************************
@@ -241,8 +241,8 @@ protected:
     Abc::OInt32ArrayProperty m_indices;
     Abc::OInt32ArrayProperty m_counts;
 
-    OV2fArbAttr m_uvs;
-    ON3fArbAttr m_normals;
+    OV2fGeomParam m_uvs;
+    ON3fGeomParam m_normals;
 
     Abc::OCompoundProperty m_arbAttrs;
 };

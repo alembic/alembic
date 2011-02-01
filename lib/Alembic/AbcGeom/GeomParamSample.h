@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_ArbAttrSample_h_
-#define _Alembic_AbcGeom_ArbAttrSample_h_
+#ifndef _Alembic_AbcGeom_GeomParamSample_h_
+#define _Alembic_AbcGeom_GeomParamSample_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
@@ -45,31 +45,31 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 template <class TRAITS>
-class TypedArbAttrSample
+class TypedGeomParamSample
 {
 public:
     typedef TRAITS traits_type;
-    typedef TypedArbAttrSample<TRAITS> this_type;
+    typedef TypedGeomParamSample<TRAITS> this_type;
     typedef Abc::TypedArraySample<TRAITS> samp_type;
     typedef typename TRAITS::value_type value_type;
 
     //-*************************************************************************
     // Default
-    TypedArbAttrSample() {}
+    TypedGeomParamSample() {}
 
     //-*************************************************************************
     // Construct from an Abc::TypedArarySample
-    TypedArbAttrSample( const samp_type &iValues,
-                        GeometryScope iScope = kUnknownScope )
+    TypedGeomParamSample( const samp_type &iValues,
+                          GeometryScope iScope = kUnknownScope )
       : m_vals( iValues )
       , m_scope( iScope )
     {}
 
     //-*************************************************************************
     // Construct from a typed array sample and an array of indices
-    TypedArbAttrSample( const samp_type &iValues,
-                        const Abc::Int32ArraySample &iIndices,
-                        GeometryScope iScope = kUnknownScope )
+    TypedGeomParamSample( const samp_type &iValues,
+                          const Abc::UInt32ArraySample &iIndices,
+                          GeometryScope iScope = kUnknownScope )
       : m_vals( iValues )
       , m_indices( iIndices )
       , m_scope( iScope )
@@ -102,8 +102,8 @@ public:
     GeometryScope getScope() const { return m_scope; }
     void setScope( GeometryScope iScope ) { m_scope = iScope; }
 
-    const Abc::Int32ArraySample &getIndices() const { return m_indices; }
-    void setIndices( const Abc::Int32ArraySample &iIndices )
+    const Abc::UInt32ArraySample &getIndices() const { return m_indices; }
+    void setIndices( const Abc::UInt32ArraySample &iIndices )
     { m_indices = iIndices; }
 
     bool valid() const
@@ -122,75 +122,75 @@ public:
 
 protected:
     samp_type m_vals;
-    Abc::Int32ArraySample m_indices;
+    Abc::UInt32ArraySample m_indices;
     GeometryScope m_scope;
 };
 
 //-*****************************************************************************
 // TYPEDEFS
 //-*****************************************************************************
-typedef TypedArbAttrSample<BooleanTPTraits> BoolArbAttrSample;
-typedef TypedArbAttrSample<Uint8TPTraits> UcharArbAttrSample;
-typedef TypedArbAttrSample<Int8TPTraits> CharArbAttrSample;
-typedef TypedArbAttrSample<Uint16TPTraits> UInt16ArbAttrSample;
-typedef TypedArbAttrSample<Int16TPTraits> Int16ArbAttrSample;
-typedef TypedArbAttrSample<Uint32TPTraits> UInt32ArbAttrSample;
-typedef TypedArbAttrSample<Int32TPTraits> Int32ArbAttrSample;
-typedef TypedArbAttrSample<Uint64TPTraits> UInt64ArbAttrSample;
-typedef TypedArbAttrSample<Int64TPTraits> Int64ArbAttrSample;
-typedef TypedArbAttrSample<Float16TPTraits> HalfArbAttrSample;
-typedef TypedArbAttrSample<Float32TPTraits> FloatArbAttrSample;
-typedef TypedArbAttrSample<Float64TPTraits> DoubleArbAttrSample;
-typedef TypedArbAttrSample<StringTPTraits> StringArbAttrSample;
-typedef TypedArbAttrSample<WstringTPTraits> WstringArbAttrSample;
+typedef TypedGeomParamSample<BooleanTPTraits> BoolGeomParamSample;
+typedef TypedGeomParamSample<Uint8TPTraits> UcharGeomParamSample;
+typedef TypedGeomParamSample<Int8TPTraits> CharGeomParamSample;
+typedef TypedGeomParamSample<Uint16TPTraits> UInt16GeomParamSample;
+typedef TypedGeomParamSample<Int16TPTraits> Int16GeomParamSample;
+typedef TypedGeomParamSample<Uint32TPTraits> UInt32GeomParamSample;
+typedef TypedGeomParamSample<Int32TPTraits> Int32GeomParamSample;
+typedef TypedGeomParamSample<Uint64TPTraits> UInt64GeomParamSample;
+typedef TypedGeomParamSample<Int64TPTraits> Int64GeomParamSample;
+typedef TypedGeomParamSample<Float16TPTraits> HalfGeomParamSample;
+typedef TypedGeomParamSample<Float32TPTraits> FloatGeomParamSample;
+typedef TypedGeomParamSample<Float64TPTraits> DoubleGeomParamSample;
+typedef TypedGeomParamSample<StringTPTraits> StringGeomParamSample;
+typedef TypedGeomParamSample<WstringTPTraits> WstringGeomParamSample;
 
-typedef TypedArbAttrSample<V2sTPTraits> V2sArbAttrSample;
-typedef TypedArbAttrSample<V2iTPTraits> V2iArbAttrSample;
-typedef TypedArbAttrSample<V2fTPTraits> V2fArbAttrSample;
-typedef TypedArbAttrSample<V2dTPTraits> V2dArbAttrSample;
+typedef TypedGeomParamSample<V2sTPTraits> V2sGeomParamSample;
+typedef TypedGeomParamSample<V2iTPTraits> V2iGeomParamSample;
+typedef TypedGeomParamSample<V2fTPTraits> V2fGeomParamSample;
+typedef TypedGeomParamSample<V2dTPTraits> V2dGeomParamSample;
 
-typedef TypedArbAttrSample<V3sTPTraits> V3sArbAttrSample;
-typedef TypedArbAttrSample<V3iTPTraits> V3iArbAttrSample;
-typedef TypedArbAttrSample<V3fTPTraits> V3fArbAttrSample;
-typedef TypedArbAttrSample<V3dTPTraits> V3dArbAttrSample;
+typedef TypedGeomParamSample<V3sTPTraits> V3sGeomParamSample;
+typedef TypedGeomParamSample<V3iTPTraits> V3iGeomParamSample;
+typedef TypedGeomParamSample<V3fTPTraits> V3fGeomParamSample;
+typedef TypedGeomParamSample<V3dTPTraits> V3dGeomParamSample;
 
-typedef TypedArbAttrSample<P2sTPTraits> P2sArbAttrSample;
-typedef TypedArbAttrSample<P2iTPTraits> P2iArbAttrSample;
-typedef TypedArbAttrSample<P2fTPTraits> P2fArbAttrSample;
-typedef TypedArbAttrSample<P2dTPTraits> P2dArbAttrSample;
+typedef TypedGeomParamSample<P2sTPTraits> P2sGeomParamSample;
+typedef TypedGeomParamSample<P2iTPTraits> P2iGeomParamSample;
+typedef TypedGeomParamSample<P2fTPTraits> P2fGeomParamSample;
+typedef TypedGeomParamSample<P2dTPTraits> P2dGeomParamSample;
 
-typedef TypedArbAttrSample<P3sTPTraits> P3sArbAttrSample;
-typedef TypedArbAttrSample<P3iTPTraits> P3iArbAttrSample;
-typedef TypedArbAttrSample<P3fTPTraits> P3fArbAttrSample;
-typedef TypedArbAttrSample<P3dTPTraits> P3dArbAttrSample;
+typedef TypedGeomParamSample<P3sTPTraits> P3sGeomParamSample;
+typedef TypedGeomParamSample<P3iTPTraits> P3iGeomParamSample;
+typedef TypedGeomParamSample<P3fTPTraits> P3fGeomParamSample;
+typedef TypedGeomParamSample<P3dTPTraits> P3dGeomParamSample;
 
-typedef TypedArbAttrSample<Box3sTPTraits> Box3sArbAttrSample;
-typedef TypedArbAttrSample<Box3iTPTraits> Box3iArbAttrSample;
-typedef TypedArbAttrSample<Box3fTPTraits> Box3fArbAttrSample;
-typedef TypedArbAttrSample<Box3dTPTraits> Box3dArbAttrSample;
+typedef TypedGeomParamSample<Box3sTPTraits> Box3sGeomParamSample;
+typedef TypedGeomParamSample<Box3iTPTraits> Box3iGeomParamSample;
+typedef TypedGeomParamSample<Box3fTPTraits> Box3fGeomParamSample;
+typedef TypedGeomParamSample<Box3dTPTraits> Box3dGeomParamSample;
 
-typedef TypedArbAttrSample<M33fTPTraits> M33fArbAttrSample;
-typedef TypedArbAttrSample<M33dTPTraits> M33dArbAttrSample;
+typedef TypedGeomParamSample<M33fTPTraits> M33fGeomParamSample;
+typedef TypedGeomParamSample<M33dTPTraits> M33dGeomParamSample;
 
-typedef TypedArbAttrSample<M44fTPTraits> M44fArbAttrSample;
-typedef TypedArbAttrSample<M44dTPTraits> M44dArbAttrSample;
+typedef TypedGeomParamSample<M44fTPTraits> M44fGeomParamSample;
+typedef TypedGeomParamSample<M44dTPTraits> M44dGeomParamSample;
 
-typedef TypedArbAttrSample<QuatfTPTraits> QuatfArbAttrSample;
-typedef TypedArbAttrSample<QuatdTPTraits> QuatdArbAttrSample;
+typedef TypedGeomParamSample<QuatfTPTraits> QuatfGeomParamSample;
+typedef TypedGeomParamSample<QuatdTPTraits> QuatdGeomParamSample;
 
-typedef TypedArbAttrSample<C3hTPTraits> C3hArbAttrSample;
-typedef TypedArbAttrSample<C3fTPTraits> C3fArbAttrSample;
-typedef TypedArbAttrSample<C3cTPTraits> C3cArbAttrSample;
+typedef TypedGeomParamSample<C3hTPTraits> C3hGeomParamSample;
+typedef TypedGeomParamSample<C3fTPTraits> C3fGeomParamSample;
+typedef TypedGeomParamSample<C3cTPTraits> C3cGeomParamSample;
 
-typedef TypedArbAttrSample<C4hTPTraits> C4hArbAttrSample;
-typedef TypedArbAttrSample<C4fTPTraits> C4fArbAttrSample;
-typedef TypedArbAttrSample<C4cTPTraits> C4cArbAttrSample;
+typedef TypedGeomParamSample<C4hTPTraits> C4hGeomParamSample;
+typedef TypedGeomParamSample<C4fTPTraits> C4fGeomParamSample;
+typedef TypedGeomParamSample<C4cTPTraits> C4cGeomParamSample;
 
-typedef TypedArbAttrSample<N2fTPTraits> N2fArbAttrSample;
-typedef TypedArbAttrSample<N2dTPTraits> N2dArbAttrSample;
+typedef TypedGeomParamSample<N2fTPTraits> N2fGeomParamSample;
+typedef TypedGeomParamSample<N2dTPTraits> N2dGeomParamSample;
 
-typedef TypedArbAttrSample<N3fTPTraits> N3fArbAttrSample;
-typedef TypedArbAttrSample<N3dTPTraits> N3dArbAttrSample;
+typedef TypedGeomParamSample<N3fTPTraits> N3fGeomParamSample;
+typedef TypedGeomParamSample<N3dTPTraits> N3dGeomParamSample;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

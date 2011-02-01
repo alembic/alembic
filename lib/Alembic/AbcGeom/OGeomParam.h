@@ -34,11 +34,11 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_OArbAttr_h_
-#define _Alembic_AbcGeom_OArbAttr_h_
+#ifndef _Alembic_AbcGeom_OGeomParam_h_
+#define _Alembic_AbcGeom_OGeomParam_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
-#include <Alembic/AbcGeom/ArbAttrSample.h>
+#include <Alembic/AbcGeom/GeomParamSample.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
 
 namespace Alembic {
@@ -46,24 +46,24 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 template <class TRAITS>
-class OTypedArbAttr
+class OTypedGeomParam
 {
 public:
-    typedef OTypedArbAttr<TRAITS> this_type;
+    typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename TRAITS::value_type value_type;
-    typedef TypedArbAttrSample<TRAITS> sample_type;
+    typedef TypedGeomParamSample<TRAITS> sample_type;
     typedef OTypedArrayProperty<TRAITS> prop_type;
 
-    OTypedArbAttr() {}
+    OTypedGeomParam() {}
 
     template <class CPROP>
-    OTypedArbAttr( CPROP iParent,
-                   const std::string &iName,
-                   bool iIsIndexed,
-                   GeometryScope iScope,
-                   const OArgument &iArg0 = OArgument(),
-                   const OArgument &iArg1 = OArgument(),
-                   const OArgument &iArg2 = OArgument()
+    OTypedGeomParam( CPROP iParent,
+                     const std::string &iName,
+                     bool iIsIndexed,
+                     GeometryScope iScope,
+                     const OArgument &iArg0 = OArgument(),
+                     const OArgument &iArg1 = OArgument(),
+                     const OArgument &iArg2 = OArgument()
                  )
       : m_name( iName )
       , m_isIndexed( iIsIndexed )
@@ -83,8 +83,8 @@ public:
             m_valProp = prop_type( m_cprop, ".vals", md, ehp,
                                    m_timeSamplingType );
 
-            m_indices = OInt32ArrayProperty( m_cprop, ".indices",
-                                             m_timeSamplingType );
+            m_indices = OUInt32ArrayProperty( m_cprop, ".indices",
+                                              m_timeSamplingType );
         }
         else
         {
@@ -96,7 +96,7 @@ public:
     void set( const sample_type &iSamp,
               const OSampleSelector &iSS = OSampleSelector() )
     {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::set()" );
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::set()" );
 
         if ( iSS.getIndex() == 0 )
         {
@@ -128,7 +128,7 @@ public:
     }
     void setFromPrevious( const OSampleSelector &iSS )
     {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::setFromPrevious()" );
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::setFromPrevious()" );
 
         m_valProp.setFromPrevious( iSS );
 
@@ -139,7 +139,7 @@ public:
 
     size_t getNumSamples()
     {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArbAttr::getNumSamples()" );
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::getNumSamples()" );
 
         if ( m_isIndexed )
         {
@@ -169,6 +169,8 @@ public:
 
     TimeSamplingType getTimeSamplingType() { return m_timeSamplingType; }
 
+    const std::string &getName() { return m_name; }
+
     bool valid() const
     {
         return ( m_valProp.valid()
@@ -196,7 +198,7 @@ protected:
     std::string m_name;
 
     prop_type m_valProp;
-    OInt32ArrayProperty m_indices;
+    OUInt32ArrayProperty m_indices;
     bool m_isIndexed;
     TimeSamplingType m_timeSamplingType;
 
@@ -210,72 +212,72 @@ protected:
 // TYPEDEFS
 //-*****************************************************************************
 
-typedef OTypedArbAttr<BooleanTPTraits>         OBoolArbAttr;
-typedef OTypedArbAttr<Uint8TPTraits>           OUcharArbAttr;
-typedef OTypedArbAttr<Int8TPTraits>            OCharArbAttr;
-typedef OTypedArbAttr<Uint16TPTraits>          OUInt16ArbAttr;
-typedef OTypedArbAttr<Int16TPTraits>           OInt16ArbAttr;
-typedef OTypedArbAttr<Uint32TPTraits>          OUInt32ArbAttr;
-typedef OTypedArbAttr<Int32TPTraits>           OInt32ArbAttr;
-typedef OTypedArbAttr<Uint64TPTraits>          OUInt64ArbAttr;
-typedef OTypedArbAttr<Int64TPTraits>           OInt64ArbAttr;
-typedef OTypedArbAttr<Float16TPTraits>         OHalfArbAttr;
-typedef OTypedArbAttr<Float32TPTraits>         OFloatArbAttr;
-typedef OTypedArbAttr<Float64TPTraits>         ODoubleArbAttr;
-typedef OTypedArbAttr<StringTPTraits>          OStringArbAttr;
-typedef OTypedArbAttr<WstringTPTraits>         OWstringArbAttr;
+typedef OTypedGeomParam<BooleanTPTraits>         OBoolGeomParam;
+typedef OTypedGeomParam<Uint8TPTraits>           OUcharGeomParam;
+typedef OTypedGeomParam<Int8TPTraits>            OCharGeomParam;
+typedef OTypedGeomParam<Uint16TPTraits>          OUInt16GeomParam;
+typedef OTypedGeomParam<Int16TPTraits>           OInt16GeomParam;
+typedef OTypedGeomParam<Uint32TPTraits>          OUInt32GeomParam;
+typedef OTypedGeomParam<Int32TPTraits>           OInt32GeomParam;
+typedef OTypedGeomParam<Uint64TPTraits>          OUInt64GeomParam;
+typedef OTypedGeomParam<Int64TPTraits>           OInt64GeomParam;
+typedef OTypedGeomParam<Float16TPTraits>         OHalfGeomParam;
+typedef OTypedGeomParam<Float32TPTraits>         OFloatGeomParam;
+typedef OTypedGeomParam<Float64TPTraits>         ODoubleGeomParam;
+typedef OTypedGeomParam<StringTPTraits>          OStringGeomParam;
+typedef OTypedGeomParam<WstringTPTraits>         OWstringGeomParam;
 
-typedef OTypedArbAttr<V2sTPTraits>             OV2sArbAttr;
-typedef OTypedArbAttr<V2iTPTraits>             OV2iArbAttr;
-typedef OTypedArbAttr<V2fTPTraits>             OV2fArbAttr;
-typedef OTypedArbAttr<V2dTPTraits>             OV2dArbAttr;
+typedef OTypedGeomParam<V2sTPTraits>             OV2sGeomParam;
+typedef OTypedGeomParam<V2iTPTraits>             OV2iGeomParam;
+typedef OTypedGeomParam<V2fTPTraits>             OV2fGeomParam;
+typedef OTypedGeomParam<V2dTPTraits>             OV2dGeomParam;
 
-typedef OTypedArbAttr<V3sTPTraits>             OV3sArbAttr;
-typedef OTypedArbAttr<V3iTPTraits>             OV3iArbAttr;
-typedef OTypedArbAttr<V3fTPTraits>             OV3fArbAttr;
-typedef OTypedArbAttr<V3dTPTraits>             OV3dArbAttr;
+typedef OTypedGeomParam<V3sTPTraits>             OV3sGeomParam;
+typedef OTypedGeomParam<V3iTPTraits>             OV3iGeomParam;
+typedef OTypedGeomParam<V3fTPTraits>             OV3fGeomParam;
+typedef OTypedGeomParam<V3dTPTraits>             OV3dGeomParam;
 
-typedef OTypedArbAttr<P2sTPTraits>             OP2sArbAttr;
-typedef OTypedArbAttr<P2iTPTraits>             OP2iArbAttr;
-typedef OTypedArbAttr<P2fTPTraits>             OP2fArbAttr;
-typedef OTypedArbAttr<P2dTPTraits>             OP2dArbAttr;
+typedef OTypedGeomParam<P2sTPTraits>             OP2sGeomParam;
+typedef OTypedGeomParam<P2iTPTraits>             OP2iGeomParam;
+typedef OTypedGeomParam<P2fTPTraits>             OP2fGeomParam;
+typedef OTypedGeomParam<P2dTPTraits>             OP2dGeomParam;
 
-typedef OTypedArbAttr<P3sTPTraits>             OP3sArbAttr;
-typedef OTypedArbAttr<P3iTPTraits>             OP3iArbAttr;
-typedef OTypedArbAttr<P3fTPTraits>             OP3fArbAttr;
-typedef OTypedArbAttr<P3dTPTraits>             OP3dArbAttr;
+typedef OTypedGeomParam<P3sTPTraits>             OP3sGeomParam;
+typedef OTypedGeomParam<P3iTPTraits>             OP3iGeomParam;
+typedef OTypedGeomParam<P3fTPTraits>             OP3fGeomParam;
+typedef OTypedGeomParam<P3dTPTraits>             OP3dGeomParam;
 
-typedef OTypedArbAttr<Box2sTPTraits>           OBox2sArbAttr;
-typedef OTypedArbAttr<Box2iTPTraits>           OBox2iArbAttr;
-typedef OTypedArbAttr<Box2fTPTraits>           OBox2fArbAttr;
-typedef OTypedArbAttr<Box2dTPTraits>           OBox2dArbAttr;
+typedef OTypedGeomParam<Box2sTPTraits>           OBox2sGeomParam;
+typedef OTypedGeomParam<Box2iTPTraits>           OBox2iGeomParam;
+typedef OTypedGeomParam<Box2fTPTraits>           OBox2fGeomParam;
+typedef OTypedGeomParam<Box2dTPTraits>           OBox2dGeomParam;
 
-typedef OTypedArbAttr<Box3sTPTraits>           OBox3sArbAttr;
-typedef OTypedArbAttr<Box3iTPTraits>           OBox3iArbAttr;
-typedef OTypedArbAttr<Box3fTPTraits>           OBox3fArbAttr;
-typedef OTypedArbAttr<Box3dTPTraits>           OBox3dArbAttr;
+typedef OTypedGeomParam<Box3sTPTraits>           OBox3sGeomParam;
+typedef OTypedGeomParam<Box3iTPTraits>           OBox3iGeomParam;
+typedef OTypedGeomParam<Box3fTPTraits>           OBox3fGeomParam;
+typedef OTypedGeomParam<Box3dTPTraits>           OBox3dGeomParam;
 
-typedef OTypedArbAttr<M33fTPTraits>            OM33fArbAttr;
-typedef OTypedArbAttr<M33dTPTraits>            OM33dArbAttr;
-typedef OTypedArbAttr<M44fTPTraits>            OM44fArbAttr;
-typedef OTypedArbAttr<M44dTPTraits>            OM44dArbAttr;
+typedef OTypedGeomParam<M33fTPTraits>            OM33fGeomParam;
+typedef OTypedGeomParam<M33dTPTraits>            OM33dGeomParam;
+typedef OTypedGeomParam<M44fTPTraits>            OM44fGeomParam;
+typedef OTypedGeomParam<M44dTPTraits>            OM44dGeomParam;
 
-typedef OTypedArbAttr<QuatfTPTraits>           OQuatfArbAttr;
-typedef OTypedArbAttr<QuatdTPTraits>           OQuatdArbAttr;
+typedef OTypedGeomParam<QuatfTPTraits>           OQuatfGeomParam;
+typedef OTypedGeomParam<QuatdTPTraits>           OQuatdGeomParam;
 
-typedef OTypedArbAttr<C3hTPTraits>             OC3hArbAttr;
-typedef OTypedArbAttr<C3fTPTraits>             OC3fArbAttr;
-typedef OTypedArbAttr<C3cTPTraits>             OC3cArbAttr;
+typedef OTypedGeomParam<C3hTPTraits>             OC3hGeomParam;
+typedef OTypedGeomParam<C3fTPTraits>             OC3fGeomParam;
+typedef OTypedGeomParam<C3cTPTraits>             OC3cGeomParam;
 
-typedef OTypedArbAttr<C4hTPTraits>             OC4hArbAttr;
-typedef OTypedArbAttr<C4fTPTraits>             OC4fArbAttr;
-typedef OTypedArbAttr<C4cTPTraits>             OC4cArbAttr;
+typedef OTypedGeomParam<C4hTPTraits>             OC4hGeomParam;
+typedef OTypedGeomParam<C4fTPTraits>             OC4fGeomParam;
+typedef OTypedGeomParam<C4cTPTraits>             OC4cGeomParam;
 
-typedef OTypedArbAttr<N2fTPTraits>             ON2fArbAttr;
-typedef OTypedArbAttr<N2dTPTraits>             ON2dArbAttr;
+typedef OTypedGeomParam<N2fTPTraits>             ON2fGeomParam;
+typedef OTypedGeomParam<N2dTPTraits>             ON2dGeomParam;
 
-typedef OTypedArbAttr<N3fTPTraits>             ON3fArbAttr;
-typedef OTypedArbAttr<N3dTPTraits>             ON3dArbAttr;
+typedef OTypedGeomParam<N3fTPTraits>             ON3fGeomParam;
+typedef OTypedGeomParam<N3dTPTraits>             ON3dGeomParam;
 
 } // namespace AbcGeom
 } // namespace Alembic

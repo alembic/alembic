@@ -34,7 +34,7 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcGeom/OArbAttr.h>
+#include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -42,9 +42,9 @@ namespace AbcGeom {
 //-*****************************************************************************
 // much like lib/Alembic/Abc/OTypedProperty.cpp, this is just a compile test,
 // due to the implementation being in the .h file, due to templates.
-static void __testOArbAttrCompile( Abc::OCompoundProperty &iParent )
+static void __testOGeomParamCompile( Abc::OCompoundProperty &iParent )
 {
-    OV2fArbAttr uvs( iParent, "uv", false, kVertexScope );
+    OV2fGeomParam uvs( iParent, "uv", false, kVertexScope );
 
     std::vector<V2f> vec;
 
@@ -52,7 +52,7 @@ static void __testOArbAttrCompile( Abc::OCompoundProperty &iParent )
 
     V2fArraySample val( vec );
 
-    V2fArbAttrSample samp( val );
+    V2fGeomParamSample samp( val );
 
     uvs.set( samp );
 }
