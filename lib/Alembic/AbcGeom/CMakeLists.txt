@@ -41,6 +41,7 @@ SET( CXX_FILES
   ISubD.cpp
 
   OGeomParam.cpp
+  IGeomParam.cpp
 
   OPolyMesh.cpp
   IPolyMesh.cpp
@@ -68,6 +69,7 @@ SET( H_FILES
   GeometryScope.h
 
   OGeomParam.h
+  IGeomParam.h
 
   OSubD.h
   ISubD.h
