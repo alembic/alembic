@@ -67,7 +67,7 @@ public:
 
     //! This will check whether or not a given entity (as represented by
     //! a metadata) strictly matches the interpretation of this
-    //! schema object
+    //! typed property
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
@@ -77,8 +77,8 @@ public:
     }
 
     //! This will check whether or not a given object (as represented by
-    //! an object header) strictly matches the interpretation of this
-    //! schema object, as well as the data type.
+    //! an property header) strictly matches the interpretation of this
+    //! typed property, as well as the data type.
     static bool matches( const AbcA::PropertyHeader &iHeader,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
