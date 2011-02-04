@@ -46,44 +46,13 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 template <class TRAITS>
-class OTypedGeomParam : public Abc::OTypedArrayProperty<TRAITS>
+class OTypedGeomParam
 {
 public:
     typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename TRAITS::value_type value_type;
     typedef TypedGeomParamSample<TRAITS> sample_type;
-    typedef typename Abc::OTypedArrayProperty<TRAITS> prop_type;
-    typedef typename Abc::OUInt32ArrayProperty indices_type;
-
-    //! Return the interpretation expected of this
-    //! property. An empty interpretation matches everything
-    static const std::string &getInterpretation()
-    {
-        static std::string sInterpretation = TRAITS::interpretation();
-        return sInterpretation;
-    }
-
-    //! This will check whether or not a given entity (as represented by
-    //! a metadata) strictly matches the interpretation of this
-    //! GeomParam
-    static bool matches( const AbcA::MetaData &iMetaData,
-                         SchemaInterpMatching iMatching = kStrictMatching )
-    {
-        return ( getInterpretation() == "" ||
-                 ( iMetaData.get( "interpretation" ) ==
-                   getInterpretation() &&
-                   iMetaData.get( "isGeomParam" ) != "" ) );
-    }
-
-    //! This will check whether or not a given object (as represented by
-    //! an property header) strictly matches the interpretation of this
-    //! GeomParam, as well as the data type.
-    static bool matches( const AbcA::PropertyHeader &iHeader,
-                         SchemaInterpMatching iMatching = kStrictMatching )
-    {
-        return ( iHeader.getDataType() == TRAITS::dataType() ) &&
-            matches( iHeader.getMetaData(), iMatching );
-    }
+    typedef OTypedArrayProperty<TRAITS> prop_type;
 
     OTypedGeomParam() {}
 
@@ -91,34 +60,77 @@ public:
     OTypedGeomParam( CPROP iParent,
                      const std::string &iName,
                      bool iIsIndexed,
-                     GeometryScope iScope = kUnknownScope,
+                     GeometryScope iScope,
                      const OArgument &iArg0 = OArgument(),
                      const OArgument &iArg1 = OArgument(),
-                     const OArgument &iArg2 = OArgument() );
+                     const OArgument &iArg2 = OArgument()
+                 )
+      : m_name( iName )
+      , m_isIndexed( iIsIndexed )
+      , m_timeSamplingType( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) )
+      , m_scope( iScope )
+    {
+        AbcA::MetaData md = Abc::GetMetaData( iArg0, iArg1, iArg2 );
+        SetGeometryScope( md, iScope );
+
+        Abc::ErrorHandler::Policy ehp(
+            Abc::GetErrorHandlerPolicy( iParent, iArg0, iArg1, iArg2 ) );
+
+        if ( m_isIndexed )
+        {
+            m_cprop = Abc::OCompoundProperty( iParent, iName, md, ehp );
+
+            m_valProp = prop_type( m_cprop, ".vals", md, ehp,
+                                   m_timeSamplingType );
+
+            m_indices = OUInt32ArrayProperty( m_cprop, ".indices",
+                                              m_timeSamplingType );
+        }
+        else
+        {
+            m_valProp = prop_type( iParent, iName, md, ehp,
+                                   m_timeSamplingType );
+        }
+    }
 
     void set( const sample_type &iSamp,
               const OSampleSelector &iSS = OSampleSelector() )
     {
-        if ( m_isIndexed )
-        {
-            indices_type::sample_type idxsamp( iSamp.getIndices() );
-            typename prop_type::sample_type valsamp( iSamp.getIndexedVals() );
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::set()" );
 
-            m_indices.set( idxsamp, iSS );
-            prop_type::set( valsamp, iSS );
+        if ( iSS.getIndex() == 0 )
+        {
+            if ( m_isIndexed )
+            {
+                m_indices.set( iSamp.getIndices(), iSS );
+                m_valProp.set( iSamp.getIndexedVals(), iSS );
+            }
+            else
+            {
+                m_valProp.set( iSamp.getExpandedVals(), iSS );
+            }
         }
         else
         {
-            typename prop_type::sample_type valsamp( iSamp.getExpandedVals() );
-            prop_type::set( valsamp, iSS );
+            if ( m_isIndexed )
+            {
+                SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
+                SetPropUsePrevIfNull( m_valProp, iSamp.getIndexedVals(), iSS );
+            }
+            else
+            {
+                SetPropUsePrevIfNull( m_valProp, iSamp.getExpandedVals(), iSS );
+            }
         }
-    }
 
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    }
     void setFromPrevious( const OSampleSelector &iSS )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::setFromPrevious()" );
 
-        prop_type::setFromPrevious( iSS );
+        m_valProp.setFromPrevious( iSS );
 
         if ( m_isIndexed ) { m_indices.setFromPrevious( iSS ); }
 
@@ -134,13 +146,14 @@ public:
             if ( m_indices )
             {
                 return std::max( m_indices.getNumSamples(),
-                                 prop_type::getNumSamples() );
+                                 m_valProp.getNumSamples() );
             }
             else { return 0; }
         }
         else
         {
-            return prop_type::getNumSamples();
+            if ( m_valProp ) { return m_valProp.getNumSamples(); }
+            else { return 0; }
         }
 
         ALEMBIC_ABC_SAFE_CALL_END();
@@ -148,96 +161,52 @@ public:
         return 0;
     }
 
+    const AbcA::DataType &getDataType() { return TRAITS::dataType(); }
+
     bool isIndexed() { return m_isIndexed; }
 
     GeometryScope getScope() { return m_scope; }
 
-    void reset()
-    {
-        m_scope = kUnknownScope;
-        m_isIndexed = false;
-        m_indices.reset();
-        prop_type::reset();
-    }
+    TimeSamplingType getTimeSamplingType() { return m_timeSamplingType; }
+
+    const std::string &getName() { return m_name; }
 
     bool valid() const
     {
-        return ( prop_type::valid()
+        return ( m_valProp.valid()
                  && ( ( ! m_isIndexed ) || m_indices ) );
     }
 
-    //ALEMBIC_OPERATOR_BOOL( this_type::valid() );
+    ALEMBIC_OPERATOR_BOOL( this_type::valid() );
+
+    void reset()
+    {
+        m_timeSamplingType = AbcA::TimeSamplingType();
+        m_name = "";
+        m_valProp.reset();
+        m_indices.reset();
+        m_cprop.reset();
+        m_scope = kUnknownScope;
+        m_isIndexed = false;
+    }
 
 private:
-    std::string getIndexedName()
-    {
-        std::string name( "._gp_" );
-        return name + prop_type::getName() + "_idxs";
-    }
-
     Abc::ErrorHandler &getErrorHandler() const
-    { return prop_type::getErrorHandler(); }
+    { return m_valProp.getErrorHandler(); }
 
 protected:
-    indices_type m_indices;
+    std::string m_name;
+
+    prop_type m_valProp;
+    OUInt32ArrayProperty m_indices;
     bool m_isIndexed;
+    TimeSamplingType m_timeSamplingType;
+
     GeometryScope m_scope;
-    AbcA::ArrayPropertyWriterPtr m_property;
+
+    // if the GeomParam is not indexed, this will not exist.
+    Abc::OCompoundProperty m_cprop;
 };
-
-//-*****************************************************************************
-template <class TRAITS>
-template <class CPROP>
-OTypedGeomParam<TRAITS>::OTypedGeomParam( CPROP iParent,
-                                          const std::string &iName,
-                                          bool iIsIndexed,
-                                          GeometryScope iScope,
-                                          const OArgument &iArg0,
-                                          const OArgument &iArg1,
-                                          const OArgument &iArg2 )
-  : m_isIndexed( iIsIndexed )
-  , m_scope( iScope )
-{
-    OArguments args( Abc::GetErrorHandlerPolicy( iParent ) );
-    iArg0.setInto( args );
-    iArg1.setInto( args );
-    iArg2.setInto( args );
-
-    getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
-
-    AbcA::MetaData md = Abc::GetMetaData( iArg0, iArg1, iArg2 );
-    SetGeometryScope( md, iScope );
-
-    md.set( "isGeomParam", "true" );
-
-    Abc::ErrorHandler::Policy ehp(
-        Abc::GetErrorHandlerPolicy( iParent, iArg0, iArg1, iArg2 ) );
-
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam()" );
-
-    AbcA::CompoundPropertyWriterPtr parent =
-        GetCompoundPropertyWriterPtr( iParent );
-    ABCA_ASSERT( parent, "NULL CompoundPropertyWriterPtr" );
-
-    if ( m_isIndexed )
-    {
-        const std::string idxName = getIndexedName();
-
-        md.set( "indexedBy", idxName );
-
-        m_indices = OUInt32ArrayProperty( iParent, idxName,
-                                          args.getTimeSamplingType() );
-    }
-
-    AbcA::PropertyHeader ph( iName, AbcA::kArrayProperty, md,
-                             TRAITS::dataType(),
-                             args.getTimeSamplingType() );
-
-    m_property = parent->createArrayProperty( ph );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
 
 //-*****************************************************************************
 // TYPEDEFS
