@@ -51,8 +51,8 @@ class OTypedGeomParam
 public:
     typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename TRAITS::value_type value_type;
-    typedef TypedGeomParamSample<TRAITS> sample_type;
-    typedef OTypedArrayProperty<TRAITS> prop_type;
+    typedef Abc::OTypedArrayProperty<TRAITS> prop_type;
+    typedef Abc::TypedArraySample<TRAITS> sample_type;
 
     OTypedGeomParam() {}
 
@@ -93,39 +93,26 @@ public:
         }
     }
 
-    void set( const sample_type &iSamp,
+    void set( const sample_type &iValSamp,
+              const UInt32ArraySample &iIdxSamp,
               const OSampleSelector &iSS = OSampleSelector() )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::set(indexed)" );
+
+        m_indices.set( iSamp.getIndices(), iSS );
+        m_valProp.set( iSamp.getIndexedVals(), iSS );
+
+        ALEMBIC_ABC_SAFE_CALL_END();
+
+    }
+
+    void set( const sample_type &iSamp )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::set()" );
 
-        if ( iSS.getIndex() == 0 )
-        {
-            if ( m_isIndexed )
-            {
-                m_indices.set( iSamp.getIndices(), iSS );
-                m_valProp.set( iSamp.getIndexedVals(), iSS );
-            }
-            else
-            {
-                m_valProp.set( iSamp.getExpandedVals(), iSS );
-            }
-        }
-        else
-        {
-            if ( m_isIndexed )
-            {
-                SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
-                SetPropUsePrevIfNull( m_valProp, iSamp.getIndexedVals(), iSS );
-            }
-            else
-            {
-                SetPropUsePrevIfNull( m_valProp, iSamp.getExpandedVals(), iSS );
-            }
-        }
-
-        ALEMBIC_ABC_SAFE_CALL_END_RESET();
-
+        m_valProp.set( iSamp );
     }
+
     void setFromPrevious( const OSampleSelector &iSS )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::setFromPrevious()" );
