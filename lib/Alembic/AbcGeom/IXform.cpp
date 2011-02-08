@@ -41,7 +41,7 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 void IXformSchema::init( const Abc::IArgument &iArg0,
-                            const Abc::IArgument &iArg1 )
+                         const Abc::IArgument &iArg1 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::init()" );
 
@@ -193,7 +193,7 @@ bool IXformSchema::isOpStatic( size_t iIndex ) const
 
 //-*****************************************************************************
 void IXformSchema::get( XformSample & oSamp,
-    const Abc::ISampleSelector &iSS )
+                        const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::getSample()" );
 
