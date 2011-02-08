@@ -116,17 +116,22 @@ void Example1_MeshOut()
     // We're creating the sample inline here,
     // but we could create a static sample and leave it around,
     // only modifying the parts that have changed.
+
+    OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
+                                                  g_numUVs ),
+                                                  kFacevaryingScope );
+
+    // indexed normals
+    ON3fGeomParam::Sample nsamp( N3fArraySample( (const N3f *)g_normals,
+                                                 g_numNormals ),
+                                 UInt32ArraySample( g_uindices, g_numIndices),
+                                                    kFacevaryingScope );
+
     OPolyMeshSchema::Sample mesh_samp(
         V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
         Int32ArraySample( g_indices, g_numIndices ),
         Int32ArraySample( g_counts, g_numCounts ),
-        V2fGeomParamSample( V2fArraySample( ( const V2f * )g_uvs, g_numUVs ),
-                            kFacevaryingScope ),
-        // indexed normals; WHY NOT?
-        N3fGeomParamSample( N3fArraySample( ( const N3f * )g_normals,
-                                            g_numNormals ),
-                            UInt32ArraySample( g_uindices, g_numIndices ),
-                            kFacevaryingScope ) );
+        uvsamp, nsamp );
 
     // Set the sample.
     mesh.set( mesh_samp );

@@ -41,7 +41,7 @@ SET( CXX_FILES
   ISubD.cpp
 
   OGeomParam.cpp
-  IGeomParam.cpp
+  #IGeomParam.cpp
 
   OPolyMesh.cpp
   IPolyMesh.cpp
@@ -61,8 +61,6 @@ SET( CXX_FILES
 SET( H_FILES
 
   All.h
-
-  GeomParamSample.h
 
   Foundation.h
 

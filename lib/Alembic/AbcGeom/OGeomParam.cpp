@@ -52,7 +52,7 @@ static void __testOGeomParamCompile( Abc::OCompoundProperty &iParent )
 
     V2fArraySample val( vec );
 
-    V2fGeomParamSample samp( val );
+    OV2fGeomParam::Sample samp( val, kUnknownScope );
 
     uvs.set( samp );
 }

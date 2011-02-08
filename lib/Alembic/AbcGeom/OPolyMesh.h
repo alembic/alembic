@@ -72,8 +72,8 @@ public:
         Sample( const Abc::V3fArraySample &iPos,
                 const Abc::Int32ArraySample &iInd,
                 const Abc::Int32ArraySample &iCnt,
-                const V2fGeomParamSample &iUVs = V2fGeomParamSample(),
-                const N3fGeomParamSample &iNormals = N3fGeomParamSample() )
+                const OV2fGeomParam::Sample &iUVs = OV2fGeomParam::Sample(),
+                const ON3fGeomParam::Sample &iNormals = ON3fGeomParam::Sample() )
           : m_positions( iPos )
           , m_indices( iInd )
           , m_counts( iCnt )
@@ -93,12 +93,12 @@ public:
         void setCounts( const Abc::Int32ArraySample &iCnt )
         { m_counts = iCnt; }
 
-        const V2fGeomParamSample &getUVs() const { return m_uvs; }
-        void setUVs( const V2fGeomParamSample &iUVs )
+        const OV2fGeomParam::Sample &getUVs() const { return m_uvs; }
+        void setUVs( const OV2fGeomParam::Sample &iUVs )
         { m_uvs = iUVs; }
 
-        const N3fGeomParamSample &getNormals() const { return m_normals; }
-        void setNormals( const N3fGeomParamSample &iNormals )
+        const ON3fGeomParam::Sample &getNormals() const { return m_normals; }
+        void setNormals( const ON3fGeomParam::Sample &iNormals )
         { m_normals = iNormals; }
 
         void reset()
@@ -116,8 +116,8 @@ public:
         Abc::Int32ArraySample m_indices;
         Abc::Int32ArraySample m_counts;
 
-        V2fGeomParamSample m_uvs;
-        N3fGeomParamSample m_normals;
+        OV2fGeomParam::Sample m_uvs;
+        ON3fGeomParam::Sample m_normals;
     };
 
     //-*************************************************************************

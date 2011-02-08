@@ -59,7 +59,7 @@ void OPolyMeshSchema::set( const Sample &iSamp,
         m_indices.set( iSamp.getIndices(), iSS );
         m_counts.set( iSamp.getCounts(), iSS );
 
-        if ( iSamp.getUVs() )
+        if ( iSamp.getUVs().getVals() )
         {
             if ( iSamp.getUVs().getIndices() )
             {
@@ -78,7 +78,7 @@ void OPolyMeshSchema::set( const Sample &iSamp,
 
             m_uvs.set( iSamp.getUVs(), iSS );
         }
-        if ( iSamp.getNormals() )
+        if ( iSamp.getNormals().getVals() )
         {
             if ( iSamp.getNormals().getIndices() )
             {
@@ -104,9 +104,9 @@ void OPolyMeshSchema::set( const Sample &iSamp,
         SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
         SetPropUsePrevIfNull( m_counts, iSamp.getCounts(), iSS );
 
-        if ( m_uvs ) { SetPropUsePrevIfNull( m_uvs, iSamp.getUVs(), iSS ); }
-        if ( m_normals ) { SetPropUsePrevIfNull( m_normals, iSamp.getNormals(),
-                                                 iSS ); }
+        // OGeomParam will automatically use SetPropUsePrevIfNull internally
+        if ( m_uvs ) { m_uvs.set( iSamp.getUVs(), iSS ); }
+        if ( m_normals ) { m_normals.set( iSamp.getNormals(), iSS ); }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();

@@ -38,7 +38,6 @@
 #define _Alembic_AbcGeom_OGeomParam_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
-#include <Alembic/AbcGeom/GeomParamSample.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
 
 namespace Alembic {
@@ -51,8 +50,59 @@ class OTypedGeomParam
 public:
     typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename TRAITS::value_type value_type;
-    typedef Abc::OTypedArrayProperty<TRAITS> prop_type;
-    typedef Abc::TypedArraySample<TRAITS> sample_type;
+    typedef OTypedArrayProperty<TRAITS> prop_type;
+
+    class Sample
+    {
+    public:
+        Sample()
+          : m_scope( kUnknownScope )
+        {}
+
+        Sample( const Abc::TypedArraySample<TRAITS> &iVals,
+                GeometryScope iScope )
+          : m_vals( iVals )
+          , m_scope( iScope )
+        {}
+
+        Sample( const Abc::TypedArraySample<TRAITS> &iVals,
+                const Abc::UInt32ArraySample &iIndices,
+                GeometryScope iScope )
+          : m_vals( iVals )
+          , m_indices( iIndices )
+          , m_scope ( iScope )
+        {}
+
+        void setVals( const Abc::TypedArraySample<TRAITS> &iVals )
+        { m_vals = iVals; }
+        const Abc::TypedArraySample<TRAITS> &getVals() const
+        { return m_vals; }
+
+        void setIndices( const Abc::UInt32ArraySample &iIndices )
+        { m_indices = iIndices; }
+        const Abc::UInt32ArraySample &getIndices() const
+        { return m_indices; }
+
+        void setScope( GeometryScope iScope )
+        { m_scope = iScope; }
+        GeometryScope getScope() const
+        { return m_scope; }
+
+        void reset()
+        {
+            m_vals.reset();
+            m_indices.reset();
+            m_scope = kUnknownScope;
+        }
+
+    protected:
+        Abc::TypedArraySample<TRAITS> m_vals;
+        Abc::UInt32ArraySample m_indices;
+        GeometryScope m_scope;
+    };
+
+    typedef typename this_type::Sample sample_type;
+
 
     OTypedGeomParam() {}
 
@@ -72,6 +122,8 @@ public:
     {
         AbcA::MetaData md = Abc::GetMetaData( iArg0, iArg1, iArg2 );
         SetGeometryScope( md, iScope );
+
+        md.set( "isGeomParam", "true" );
 
         Abc::ErrorHandler::Policy ehp(
             Abc::GetErrorHandlerPolicy( iParent, iArg0, iArg1, iArg2 ) );
@@ -93,24 +145,26 @@ public:
         }
     }
 
-    void set( const sample_type &iValSamp,
-              const UInt32ArraySample &iIdxSamp,
+    void set( const sample_type &iSamp,
               const OSampleSelector &iSS = OSampleSelector() )
-    {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::set(indexed)" );
-
-        m_indices.set( iSamp.getIndices(), iSS );
-        m_valProp.set( iSamp.getIndexedVals(), iSS );
-
-        ALEMBIC_ABC_SAFE_CALL_END();
-
-    }
-
-    void set( const sample_type &iSamp )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::set()" );
 
-        m_valProp.set( iSamp );
+        if ( iSS.getIndex() == 0 )
+        {
+            m_valProp.set( iSamp.getVals(), iSS );
+            if ( m_isIndexed ) { m_indices.set( iSamp.getIndices(), iSS ); }
+        }
+        else
+        {
+            SetPropUsePrevIfNull( m_valProp, iSamp.getVals(), iSS );
+            if ( m_isIndexed )
+            {
+                SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
+            }
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
 
     void setFromPrevious( const OSampleSelector &iSS )
