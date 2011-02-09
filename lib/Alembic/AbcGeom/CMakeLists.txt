@@ -41,7 +41,7 @@ SET( CXX_FILES
   ISubD.cpp
 
   OGeomParam.cpp
-  #IGeomParam.cpp
+  IGeomParam.cpp
 
   OPolyMesh.cpp
   IPolyMesh.cpp

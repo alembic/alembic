@@ -48,13 +48,14 @@ template <class TRAITS>
 class OTypedGeomParam
 {
 public:
-    typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename TRAITS::value_type value_type;
     typedef OTypedArrayProperty<TRAITS> prop_type;
 
     class Sample
     {
     public:
+        typedef Sample this_type;
+
         Sample()
           : m_scope( kUnknownScope )
         {}
@@ -95,12 +96,18 @@ public:
             m_scope = kUnknownScope;
         }
 
+        bool valid() { return m_vals; }
+
+        ALEMBIC_OPERATOR_BOOL( valid() );
+
     protected:
         Abc::TypedArraySample<TRAITS> m_vals;
         Abc::UInt32ArraySample m_indices;
         GeometryScope m_scope;
     };
 
+    //-*************************************************************************
+    typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename this_type::Sample sample_type;
 
 

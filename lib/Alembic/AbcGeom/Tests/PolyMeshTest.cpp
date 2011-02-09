@@ -69,6 +69,8 @@
 // to keep this example code clean.
 #include <Alembic/AbcGeom/Tests/MeshData.h>
 
+#include "Assert.h"
+
 //-*****************************************************************************
 //-*****************************************************************************
 // NAMESPACES
@@ -111,22 +113,21 @@ void Example1_MeshOut()
     OPolyMesh meshyObj( OObject( archive, kTop ), "meshy" );
     OPolyMeshSchema &mesh = meshyObj.getSchema();
 
-
-    // Set a mesh sample.
-    // We're creating the sample inline here,
-    // but we could create a static sample and leave it around,
-    // only modifying the parts that have changed.
-
+    // UVs and Normals use GeomParams, which can be written or read
+    // as indexed or not, as you'd like.
     OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
                                                   g_numUVs ),
                                                   kFacevaryingScope );
-
     // indexed normals
     ON3fGeomParam::Sample nsamp( N3fArraySample( (const N3f *)g_normals,
                                                  g_numNormals ),
                                  UInt32ArraySample( g_uindices, g_numIndices),
                                                     kFacevaryingScope );
 
+    // Set a mesh sample.
+    // We're creating the sample inline here,
+    // but we could create a static sample and leave it around,
+    // only modifying the parts that have changed.
     OPolyMeshSchema::Sample mesh_samp(
         V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
         Int32ArraySample( g_indices, g_numIndices ),
@@ -135,8 +136,6 @@ void Example1_MeshOut()
 
     // Set the sample.
     mesh.set( mesh_samp );
-    //Nprop.set( V3fArraySample( ( const V3f * )g_normals, g_numNormals ) );
-    //STprop.set( V2fArraySample( ( const V2f * )g_uvs, g_numUVs ) );
 
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish
@@ -152,17 +151,19 @@ void Example1_MeshIn()
 
     IPolyMesh meshyObj( IObject( archive, kTop ), "meshy" );
     IPolyMeshSchema &mesh = meshyObj.getSchema();
-    //IV3fArrayProperty N( mesh, "N" );
-    //IV2fArrayProperty st( mesh, "st" );
+    IN3fGeomParam N = mesh.getNormals();
+    IV2fGeomParam uv = mesh.getUVs();
+
+    TESTING_ASSERT( N.isIndexed() );
+
+    TESTING_ASSERT( ! uv.isIndexed() );
 
     IPolyMeshSchema::Sample mesh_samp;
     mesh.get( mesh_samp );
 
-    //V3fArraySamplePtr Nsamp;
-    //N.get( Nsamp );
+    IN3fGeomParam::Sample Nsamp = N.getExpandedValue();
 
-    //V2fArraySamplePtr stSamp;
-    //st.get( stSamp );
+    TESTING_ASSERT( (*(Nsamp.getVals()))[0] == N3f( -1.0f, 0.0f, 0.0f ) );
 
     std::cout << "Mesh num vertices: "
               << mesh_samp.getPositions()->size() << std::endl;

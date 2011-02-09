@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/IGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -201,6 +202,10 @@ public:
         return smp;
     }
 
+    IV2fGeomParam &getUVs() { return m_uvs; }
+
+    IN3fGeomParam &getNormals() { return m_normals; }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -238,6 +243,9 @@ protected:
     Abc::IV3fArrayProperty m_positions;
     Abc::IInt32ArrayProperty m_indices;
     Abc::IInt32ArrayProperty m_counts;
+
+    IV2fGeomParam m_uvs;
+    IN3fGeomParam m_normals;
 };
 
 //-*****************************************************************************
