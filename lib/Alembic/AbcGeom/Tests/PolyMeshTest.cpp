@@ -163,6 +163,8 @@ void Example1_MeshIn()
 
     IN3fGeomParam::Sample Nsamp = N.getExpandedValue();
 
+    std::cout << "0th normal: " << (*(Nsamp.getVals()))[0] << std::endl;
+
     TESTING_ASSERT( (*(Nsamp.getVals()))[0] == N3f( -1.0f, 0.0f, 0.0f ) );
 
     std::cout << "Mesh num vertices: "

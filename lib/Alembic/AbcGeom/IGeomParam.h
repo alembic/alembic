@@ -44,6 +44,8 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+
+//-*****************************************************************************
 template <class TRAITS>
 class ITypedGeomParam
 {
@@ -216,20 +218,18 @@ ITypedGeomParam<TRAITS>::getIndexed( ITypedGeomParam<TRAITS>::Sample &iSamp,
     {
         uint32_t size = iSamp.m_vals->size();
 
-        std::vector<uint32_t> v;
-        v.reserve( size );
+        const Alembic::Util::Dimensions dims( size );
+
+        std::vector<uint32_t> *v = new std::vector<uint32_t>();
+        v->reserve( size );
 
         for ( uint32_t i = 0 ; i < size ; ++i )
         {
-            v.push_back( i );
+            v->push_back( i );
         }
 
-        UInt32ArraySample idxs( v );
-
-        UInt32ArraySamplePtr ret;
-        ret.reset( &idxs );
-
-        iSamp.m_indices = ret;
+        iSamp.m_indices.reset( new Abc::UInt32ArraySample( &v->front(), dims ),
+                               AbcA::TArrayDeleter<uint32_t>() );
     }
 
     iSamp.m_scope = this->getScope();
@@ -243,6 +243,8 @@ void
 ITypedGeomParam<TRAITS>::getExpanded( ITypedGeomParam<TRAITS>::Sample &iSamp,
                                       const Abc::ISampleSelector &iSS )
 {
+    typedef typename TRAITS::value_type value_type;
+
     iSamp.m_scope = this->getScope();
     iSamp.m_isIndexed = m_isIndexed;
 
@@ -258,19 +260,19 @@ ITypedGeomParam<TRAITS>::getExpanded( ITypedGeomParam<TRAITS>::Sample &iSamp,
 
         std::size_t size = idxPtr->size();
 
-        std::vector<typename TRAITS::value_type> v;
-        v.reserve( size );
+        std::vector<value_type> *v = new std::vector<value_type>();
+        v->reserve( size );
 
         for ( size_t i = 0 ; i < size ; ++i )
         {
-            v.push_back( (*valPtr)[(*idxPtr)[i]] );
+            v->push_back( (*valPtr)[(*idxPtr)[i]] );
         }
 
-        Abc::TypedArraySample<TRAITS> retsamp( v );
-        boost::shared_ptr< Abc::TypedArraySample<TRAITS> > ret;
-        ret.reset( &retsamp );
+        const Alembic::Util::Dimensions dims( size );
 
-        iSamp.m_vals = ret;
+        iSamp.m_vals.reset( new Abc::TypedArraySample<TRAITS>(
+                                &v->front(), dims ),
+                            AbcA::TArrayDeleter<value_type>() );
     }
 
 }
