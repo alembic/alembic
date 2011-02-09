@@ -161,11 +161,21 @@ void Example1_MeshIn()
     IPolyMeshSchema::Sample mesh_samp;
     mesh.get( mesh_samp );
 
-    IN3fGeomParam::Sample Nsamp = N.getExpandedValue();
+    // getExpandedValue() takes an optional ISampleSelector;
+    // getVals() returns a TypedArraySamplePtr
+    N3fArraySamplePtr nsp = N.getExpandedValue().getVals();
 
-    std::cout << "0th normal: " << (*(Nsamp.getVals()))[0] << std::endl;
+    N3f n0 = (*nsp)[0];
 
-    TESTING_ASSERT( (*(Nsamp.getVals()))[0] == N3f( -1.0f, 0.0f, 0.0f ) );
+    TESTING_ASSERT( n0 == N3f( -1.0f, 0.0f, 0.0f ) );
+    std::cout << "0th normal: " << n0 << std::endl;
+
+    IV2fGeomParam::Sample uvsamp = uv.getIndexedValue();
+
+    TESTING_ASSERT( (*(uvsamp.getIndices()))[1] == 1 );
+    V2f uv2 = (*(uvsamp.getVals()))[2];
+    TESTING_ASSERT( uv2 == V2f( 1.0f, 1.0f ) );
+    std::cout << "2th UV: " << uv2 << std::endl;
 
     std::cout << "Mesh num vertices: "
               << mesh_samp.getPositions()->size() << std::endl;
