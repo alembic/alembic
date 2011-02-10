@@ -40,6 +40,8 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
 
+#include <boost/lexical_cast.hpp>
+
 namespace Alembic {
 namespace AbcGeom {
 
@@ -51,6 +53,9 @@ public:
     typedef typename TRAITS::value_type value_type;
     typedef OTypedArrayProperty<TRAITS> prop_type;
 
+
+    //-*************************************************************************
+    // inner class for setting
     class Sample
     {
     public:
@@ -110,6 +115,31 @@ public:
     typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename this_type::Sample sample_type;
 
+    static const std::string &getInterpretation()
+    {
+        static std::string sInterpretation = TRAITS::interpretation();
+        return sInterpretation;
+    }
+
+    static bool matches( const AbcA::MetaData &iMetaData,
+                         SchemaInterpMatching iMatching = kStrictMatching )
+    {
+        if ( iMatching == kStrictMatching )
+        {
+            return ( getInterpretation() == "" ||
+                     ( ( iMetaData.get( "interpretation" ) ==
+                         getInterpretation() ) &&
+                       iMetaData.get( "isGeomParam" ) == "true" ) );
+        }
+        return true;
+    }
+
+    static bool matches( const AbcA::PropertyHeader &iHeader,
+                         SchemaInterpMatching iMatching = kStrictMatching )
+    {
+        return ( iHeader.getDataType() == TRAITS::dataType() ) &&
+            matches( iHeader.getMetaData(), iMatching );
+    }
 
     OTypedGeomParam() {}
 
@@ -118,6 +148,7 @@ public:
                      const std::string &iName,
                      bool iIsIndexed,
                      GeometryScope iScope,
+                     size_t iArrayExtent,
                      const OArgument &iArg0 = OArgument(),
                      const OArgument &iArg1 = OArgument(),
                      const OArgument &iArg2 = OArgument()
@@ -132,6 +163,18 @@ public:
 
         md.set( "isGeomParam", "true" );
 
+        std::string podName( Alembic::Util::PODName(
+                                 TRAITS::dataType().getPod() ) );
+
+        size_t extent = TRAITS::dataType().getExtent();
+
+        md.set( "podName", podName );
+
+        md.set( "podExtent", boost::lexical_cast<std::string>( extent ) );
+
+        md.set( "arrayExtent",
+                boost::lexical_cast<std::string>( iArrayExtent ) );
+
         Abc::ErrorHandler::Policy ehp(
             Abc::GetErrorHandlerPolicy( iParent, iArg0, iArg1, iArg2 ) );
 
@@ -142,14 +185,51 @@ public:
             m_valProp = prop_type( m_cprop, ".vals", md, ehp,
                                    m_timeSamplingType );
 
-            m_indices = OUInt32ArrayProperty( m_cprop, ".indices",
-                                              m_timeSamplingType );
+            m_indices = Abc::OUInt32ArrayProperty( m_cprop, ".indices",
+                                                   m_timeSamplingType );
         }
         else
         {
             m_valProp = prop_type( iParent, iName, md, ehp,
                                    m_timeSamplingType );
         }
+    }
+
+    template <class PROP>
+    OTypedGeomParam( PROP iThis,
+                     WrapExistingFlag iWrapFlag,
+                     const Abc::OArgument &iArg0 = Abc::OArgument(),
+                     const Abc::OArgument &iArg1 = Abc::OArgument() )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam( wrap )" );
+
+        const AbcA::PropertyHeader &ph = iThis.getHeader();
+
+        ABCA_ASSERT( matches( ph,
+                              Abc::GetSchemaInterpMatching( iArg0, iArg1 ) ),
+                     "Property " << ph.getName() << " is not an "
+                     << "OTypedGeomParam" );
+
+        ABCA_ASSERT( ! ph.isScalar(), "Property " << ph.getName()
+                     << " cannot be an OTypedGeomParam" );
+
+        if ( ph.isCompound() )
+        {
+            m_cprop = Abc::OCompoundProperty( iThis, iWrapFlag, iArg0, iArg1 );
+            m_valProp = prop_type( m_cprop, ".vals" );
+            m_indices = Abc::OUInt32ArrayProperty( m_cprop, ".indices" );
+
+            m_isIndexed = true;
+            m_timeSamplingType = m_valProp.getTimeSamplingType();
+        }
+        else
+        {
+            m_valProp = prop_type( iThis, iWrapFlag, iArg0, iArg1 );
+            m_isIndexed = false;
+            m_timeSamplingType = m_valProp.getTimeSamplingType();
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
 
     void set( const sample_type &iSamp,

@@ -83,9 +83,23 @@ void IPolyMeshSchema::init( const Abc::IArgument &iArg0,
     m_counts = Abc::IInt32ArrayProperty( *this, ".faceCounts",
                                        args.getSchemaInterpMatching() );
 
-    m_uvs = IV2fGeomParam( *this, "uv", args.getSchemaInterpMatching() );
+    // none of the things below here are guaranteed to exist
+    if ( this->getPropertyHeader( "uv" ) != NULL )
+    {
+        m_uvs = IV2fGeomParam( *this, "uv", iArg0, iArg1 );
+    }
 
-    m_normals = IN3fGeomParam( *this, "N", args.getSchemaInterpMatching() );
+    if ( this->getPropertyHeader( "N" ) != NULL )
+    {
+        m_normals = IN3fGeomParam( *this, "N", iArg0, iArg1 );
+    }
+
+    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
+    {
+        m_arbGeomParams = Abc::ICompoundProperty( *this, ".arbGeomParams",
+                                                  args.getErrorHandlerPolicy()
+                                                );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

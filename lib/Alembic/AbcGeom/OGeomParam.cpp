@@ -44,7 +44,7 @@ namespace AbcGeom {
 // due to the implementation being in the .h file, due to templates.
 static void __testOGeomParamCompile( Abc::OCompoundProperty &iParent )
 {
-    OV2fGeomParam uvs( iParent, "uv", false, kVertexScope );
+    OV2fGeomParam uvs( iParent, "uv", false, kVertexScope, 1 );
 
     std::vector<V2f> vec;
 

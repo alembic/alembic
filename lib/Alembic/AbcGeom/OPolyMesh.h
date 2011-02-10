@@ -201,6 +201,8 @@ public:
     //! indices, and counts.
     void setFromPrevious( const Abc::OSampleSelector &iSS );
 
+    Abc::OCompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -216,7 +218,7 @@ public:
         m_counts.reset();
         m_uvs.reset();
         m_normals.reset();
-        m_arbAttrs.reset();
+        m_arbGeomParams.reset();
         Abc::OSchema<PolyMeshSchemaInfo>::reset();
     }
 
@@ -244,7 +246,7 @@ protected:
     OV2fGeomParam m_uvs;
     ON3fGeomParam m_normals;
 
-    Abc::OCompoundProperty m_arbAttrs;
+    Abc::OCompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

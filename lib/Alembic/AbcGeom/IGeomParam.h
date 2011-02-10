@@ -40,6 +40,8 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
 
+#include <boost/lexical_cast.hpp>
+
 namespace Alembic {
 namespace AbcGeom {
 
@@ -90,22 +92,54 @@ public:
     typedef ITypedGeomParam<TRAITS> this_type;
     typedef typename this_type::Sample sample_type;
 
+    static const std::string &getInterpretation()
+    {
+        static std::string sInterpretation = TRAITS::interpretation();
+        return sInterpretation;
+    }
+
+    static bool matches( const AbcA::MetaData &iMetaData,
+                         SchemaInterpMatching iMatching = kStrictMatching )
+    {
+        if ( iMatching == kStrictMatching )
+        {
+            return ( getInterpretation() == "" ||
+                     ( ( iMetaData.get( "interpretation" ) ==
+                         getInterpretation() ) &&
+                       iMetaData.get( "isGeomParam" ) == "true" ) );
+        }
+        return true;
+    }
+
+    static bool matches( const AbcA::PropertyHeader &iHeader,
+                         SchemaInterpMatching iMatching = kStrictMatching )
+    {
+        return ( iHeader.getDataType() == TRAITS::dataType() ) &&
+            matches( iHeader.getMetaData(), iMatching );
+    }
 
     ITypedGeomParam() {}
 
     template <class CPROP>
     ITypedGeomParam( CPROP iParent,
                      const std::string &iName,
-                     const Abc::IArgument &iArg0 = Abc::IArgument() );
+                     const Abc::IArgument &iArg0 = Abc::IArgument(),
+                     const Abc::IArgument &iArg1 = Abc::IArgument() );
 
-    void getIndexed( sample_type &iSamp,
+    template <class PROP>
+    ITypedGeomParam( PROP iThis,
+                     WrapExistingFlag iWrapFlag,
+                     const Abc::IArgument &iArg0 = Abc::IArgument(),
+                     const Abc::IArgument &iArg1 = Abc::IArgument() );
+
+    void getIndexed( sample_type &oSamp,
                      const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
 
-    void getExpanded( sample_type &iSamp,
+    void getExpanded( sample_type &oSamp,
                       const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
 
     sample_type getIndexedValue( const Abc::ISampleSelector &iSS = \
-                          Abc::ISampleSelector() )
+                                 Abc::ISampleSelector() )
     {
         sample_type ret;
         getIndexed( ret, iSS );
@@ -123,6 +157,13 @@ public:
     size_t getNumSamples();
 
     AbcA::DataType getDataType() { return TRAITS::dataType(); }
+
+    size_t getArrayExtent()
+    {
+        std::string e = m_valProp.getMetaData().get( "arrayExtent" );
+        if ( e == "" ) { return 1; }
+        else { return boost::lexical_cast<size_t>( e ); }
+    }
 
     bool isIndexed() { return m_isIndexed; }
 
@@ -162,10 +203,12 @@ template <class TRAITS>
 template <class CPROP>
 ITypedGeomParam<TRAITS>::ITypedGeomParam( CPROP iParent,
                                           const std::string &iName,
-                                          const IArgument &iArg0 )
+                                          const Abc::IArgument &iArg0,
+                                          const Abc::IArgument &iArg1 )
 {
     IArguments args( GetErrorHandlerPolicy( iParent ) );
     iArg0.setInto( args );
+    iArg1.setInto( args );
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
 
@@ -185,15 +228,18 @@ ITypedGeomParam<TRAITS>::ITypedGeomParam( CPROP iParent,
     if ( pheader->isCompound() )
     {
         // we're indexed
-        m_cprop = ICompoundProperty( iParent, iName, iArg0 );
-        m_indices = IUInt32ArrayProperty( m_cprop, ".indices", iArg0 );
-        m_valProp = ITypedArrayProperty<TRAITS>( m_cprop, ".vals", iArg0 );
+        m_cprop = ICompoundProperty( iParent, iName,
+                                     args.getErrorHandlerPolicy() );
+        m_indices = IUInt32ArrayProperty( m_cprop, ".indices", iArg0, iArg1 );
+        m_valProp = ITypedArrayProperty<TRAITS>( m_cprop, ".vals", iArg0,
+                                                 iArg1 );
         m_isIndexed = true;
     }
     else if ( pheader->isArray() )
     {
         // not indexed
-        m_valProp = ITypedArrayProperty<TRAITS>( iParent, iName, iArg0 );
+        m_valProp = ITypedArrayProperty<TRAITS>( iParent, iName, iArg0,
+                                                 iArg1 );
         m_isIndexed = false;
     }
     else
@@ -206,15 +252,61 @@ ITypedGeomParam<TRAITS>::ITypedGeomParam( CPROP iParent,
 
 //-*****************************************************************************
 template <class TRAITS>
-void
-ITypedGeomParam<TRAITS>::getIndexed( ITypedGeomParam<TRAITS>::Sample &iSamp,
-                                     const Abc::ISampleSelector &iSS )
+template <class PROP>
+ITypedGeomParam<TRAITS>::ITypedGeomParam( PROP iThis,
+                                          WrapExistingFlag iWrapFlag,
+                                          const Abc::IArgument &iArg0,
+                                          const Abc::IArgument &iArg1 )
 {
-    m_valProp.get( iSamp.m_vals, iSS );
-    if ( m_indices ) { m_indices.get( iSamp.m_indices, iSS ); }
+    IArguments args( GetErrorHandlerPolicy( iThis ) );
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+
+    getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ITypedGeomParam::ITypedGeomParam( wrap )" );
+
+    const AbcA::PropertyHeader &ph = iThis.getHeader();
+
+    ABCA_ASSERT( matches( ph,
+                          Abc::GetSchemaInterpMatching( iArg0, iArg1 ) ),
+                 "Property " << ph.getName() << " is not an "
+                 << "ITypedGeomParam" );
+
+    ABCA_ASSERT( ! ph.isScalar(), "Property " << ph.getName()
+                 << " cannot be an ITypedGeomParam" );
+
+    if ( ph.isCompound() )
+    {
+        // we're indexed
+        m_cprop = ICompoundProperty( iThis, iWrapFlag, iArg0, iArg1 );
+        m_indices = IUInt32ArrayProperty( m_cprop, ".indices", iArg0, iArg1 );
+        m_valProp = ITypedArrayProperty<TRAITS>( m_cprop, ".vals", iArg0,
+                                                 iArg1 );
+        m_isIndexed = true;
+    }
     else
     {
-        uint32_t size = iSamp.m_vals->size();
+        // not indexed
+        m_valProp = ITypedArrayProperty<TRAITS>( iThis, iWrapFlag, iArg0,
+                                                 iArg1 );
+        m_isIndexed = false;
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+template <class TRAITS>
+void
+ITypedGeomParam<TRAITS>::getIndexed( ITypedGeomParam<TRAITS>::Sample &oSamp,
+                                     const Abc::ISampleSelector &iSS )
+{
+    m_valProp.get( oSamp.m_vals, iSS );
+    if ( m_indices ) { m_indices.get( oSamp.m_indices, iSS ); }
+    else
+    {
+        uint32_t size = oSamp.m_vals->size();
 
         uint32_t *v = new uint32_t[size];
 
@@ -225,29 +317,29 @@ ITypedGeomParam<TRAITS>::getIndexed( ITypedGeomParam<TRAITS>::Sample &iSamp,
 
         const Alembic::Util::Dimensions dims( size );
 
-        iSamp.m_indices.reset( new Abc::UInt32ArraySample( v, dims ),
+        oSamp.m_indices.reset( new Abc::UInt32ArraySample( v, dims ),
                                AbcA::TArrayDeleter<uint32_t>() );
     }
 
-    iSamp.m_scope = this->getScope();
-    iSamp.m_isIndexed = m_isIndexed;
+    oSamp.m_scope = this->getScope();
+    oSamp.m_isIndexed = m_isIndexed;
 }
 
 
 //-*****************************************************************************
 template <class TRAITS>
 void
-ITypedGeomParam<TRAITS>::getExpanded( ITypedGeomParam<TRAITS>::Sample &iSamp,
+ITypedGeomParam<TRAITS>::getExpanded( ITypedGeomParam<TRAITS>::Sample &oSamp,
                                       const Abc::ISampleSelector &iSS )
 {
     typedef typename TRAITS::value_type value_type;
 
-    iSamp.m_scope = this->getScope();
-    iSamp.m_isIndexed = m_isIndexed;
+    oSamp.m_scope = this->getScope();
+    oSamp.m_isIndexed = m_isIndexed;
 
     if ( ! m_indices )
     {
-        m_valProp.get( iSamp.m_vals, iSS );
+        m_valProp.get( oSamp.m_vals, iSS );
     }
     else
     {
@@ -255,18 +347,25 @@ ITypedGeomParam<TRAITS>::getExpanded( ITypedGeomParam<TRAITS>::Sample &iSamp,
             m_valProp.getValue( iSS );
         Abc::UInt32ArraySamplePtr idxPtr = m_indices.getValue( iSS );
 
-        std::size_t size = idxPtr->size();
+        size_t size = idxPtr->size();
 
         value_type *v = new value_type[size];
 
         for ( size_t i = 0 ; i < size ; ++i )
         {
-            v[i] = ( (*valPtr)[(*idxPtr)[i]] );
+            v[i] = (*valPtr)[ (*idxPtr)[i] ];
         }
+
+        // NOTE: we could create an ArraySampleKey and insert this into the
+        // cache.  If it were in the cache, we'd return the shared pointer
+        // from there and call delete[] on v, thus preventing potentially
+        // unbounded heap growth.  We should probably do this, but for now,
+        // we'll assume that we don't have too many of these, and we're not
+        // tightly memory-constrained. Ha!
 
         const Alembic::Util::Dimensions dims( size );
 
-        iSamp.m_vals.reset( new Abc::TypedArraySample<TRAITS>( v, dims ),
+        oSamp.m_vals.reset( new Abc::TypedArraySample<TRAITS>( v, dims ),
                             AbcA::TArrayDeleter<value_type>() );
     }
 

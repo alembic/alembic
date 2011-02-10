@@ -65,15 +65,15 @@ void OPolyMeshSchema::set( const Sample &iSamp,
             {
                 // UVs are indexed
                 m_uvs = OV2fGeomParam( *this, "uv", true,
-                                     iSamp.getUVs().getScope(),
-                                     this->getTimeSamplingType() );
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
             }
             else
             {
                 // UVs are not indexed
                 m_uvs = OV2fGeomParam( *this, "uv", false,
-                                     iSamp.getUVs().getScope(),
-                                     this->getTimeSamplingType() );
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
             }
 
             m_uvs.set( iSamp.getUVs(), iSS );
@@ -84,15 +84,15 @@ void OPolyMeshSchema::set( const Sample &iSamp,
             {
                 // normals are indexed
                 m_normals = ON3fGeomParam( *this, "N", true,
-                                         iSamp.getNormals().getScope(),
-                                         this->getTimeSamplingType() );
+                                           iSamp.getNormals().getScope(),
+                                           1, this->getTimeSamplingType() );
             }
             else
             {
                 // normals are not indexed
                 m_normals = ON3fGeomParam( *this, "N", false,
-                                         iSamp.getNormals().getScope(),
-                                         this->getTimeSamplingType() );
+                                           iSamp.getNormals().getScope(), 1,
+                                           this->getTimeSamplingType() );
             }
 
             m_normals.set( iSamp.getNormals(), iSS );
@@ -139,6 +139,8 @@ void OPolyMeshSchema::init( const AbcA::TimeSamplingType &iTst )
     m_indices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTst );
 
     m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
+
+    m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
 
     // UVs and Normals are created on first call to set()
 

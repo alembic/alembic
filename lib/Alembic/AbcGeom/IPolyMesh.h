@@ -182,14 +182,14 @@ public:
     }
 
     //-*************************************************************************
-    void get( Sample &iSample,
+    void get( Sample &oSample,
               const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::get()" );
 
-        m_positions.get( iSample.m_positions, iSS );
-        m_indices.get( iSample.m_indices, iSS );
-        m_counts.get( iSample.m_counts, iSS );
+        m_positions.get( oSample.m_positions, iSS );
+        m_indices.get( oSample.m_indices, iSS );
+        m_counts.get( oSample.m_counts, iSS );
         // Could error check here.
 
         ALEMBIC_ABC_SAFE_CALL_END();
@@ -205,6 +205,10 @@ public:
     IV2fGeomParam &getUVs() { return m_uvs; }
 
     IN3fGeomParam &getNormals() { return m_normals; }
+
+    // compound property to use as parent for any arbitrary GeomParams
+    // underneath it
+    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -246,6 +250,8 @@ protected:
 
     IV2fGeomParam m_uvs;
     IN3fGeomParam m_normals;
+
+    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************
