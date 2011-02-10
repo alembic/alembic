@@ -138,8 +138,8 @@ public:
     };
 
 private:
-    typedef MD5Hash::UnorderedMapUtil<Record>::umap_type Map;
-    typedef MD5Hash::UnorderedMapUtil<AbcA::ArraySamplePtr>::umap_type
+    typedef AbcA::UnorderedMapUtil<Record>::umap_type Map;
+    typedef AbcA::UnorderedMapUtil<AbcA::ArraySamplePtr>::umap_type
     UnlockedMap;
 
     Map m_lockedMap;

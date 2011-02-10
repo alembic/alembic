@@ -268,6 +268,11 @@ public:
         return smp;
     }
 
+    Abc::IV3fArrayProperty getPositions()
+    {
+        return m_positions;
+    }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,

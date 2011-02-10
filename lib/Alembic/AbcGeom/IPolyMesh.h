@@ -209,6 +209,11 @@ public:
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+    
+    Abc::IV3fArrayProperty getPositions()
+    {
+        return m_positions;
+    }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

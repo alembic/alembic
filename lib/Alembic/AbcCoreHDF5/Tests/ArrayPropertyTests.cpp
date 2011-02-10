@@ -548,6 +548,8 @@ void testReadWriteArrays()
         ABC::CompoundPropertyReaderPtr parent = archive->getProperties();
 
         TESTING_ASSERT(parent->getNumProperties() == 14);
+
+        ABC::ArraySampleKey key;
         for ( size_t i = 0; i < parent->getNumProperties(); ++i )
         {
             ABC::BasePropertyReaderPtr bp = parent->getProperty( i );
@@ -574,6 +576,13 @@ void testReadWriteArrays()
                     TESTING_ASSERT(data[0] == false);
                     TESTING_ASSERT(data[1] == true);
                     TESTING_ASSERT(data[2] == false);
+
+                    TESTING_ASSERT(ap->getKey(0, key));
+                    TESTING_ASSERT(key.numBytes == 3);
+                    TESTING_ASSERT(key.origPOD == Alembic::Util::kBooleanPOD);
+                    TESTING_ASSERT(key.readPOD == Alembic::Util::kBooleanPOD);
+                    TESTING_ASSERT(key.digest.str() == 
+                        "418f2796e56f1a882529d8be1664eed0");
                 }
                 break;
 
@@ -590,6 +599,13 @@ void testReadWriteArrays()
                     TESTING_ASSERT(data[1] == 45);
                     TESTING_ASSERT(data[2] == 37);
                     TESTING_ASSERT(data[3] == 192);
+
+                    TESTING_ASSERT(ap->getKey(0, key));
+                    TESTING_ASSERT(key.numBytes == 4);
+                    TESTING_ASSERT(key.origPOD == Alembic::Util::kUint8POD);
+                    TESTING_ASSERT(key.readPOD == Alembic::Util::kUint8POD);
+                    TESTING_ASSERT(key.digest.str() == 
+                        "097ec357f4cddaeb5faf1e506c4b1348");
                 }
                 break;
 
@@ -936,10 +952,18 @@ void testEmptyArray()
             }
             else if (ap->getName() == "emptyInt64")
             {
+                ABC::ArraySampleKey key;
+
                 TESTING_ASSERT(ap->getNumSamples() == 1);
                 ABC::ArraySamplePtr samp;
                 ap->getSample(0, samp);
                 TESTING_ASSERT(samp->getDimensions().numPoints() == 0);
+                TESTING_ASSERT(ap->getKey(0, key));
+                TESTING_ASSERT(key.numBytes == 0);
+                TESTING_ASSERT(key.origPOD == Alembic::Util::kInt64POD);
+                TESTING_ASSERT(key.readPOD == Alembic::Util::kInt64POD);
+                TESTING_ASSERT(key.digest.str() == 
+                    "d41d8cd98f00b204e9800998ecf8427e");
             }
         }
     }
@@ -1041,6 +1065,16 @@ void testExtentArrayStrings()
         TESTING_ASSERT(data[4] == "nom nom");
         TESTING_ASSERT(data[5] == "");
 
+        ABC::ArraySampleKey key;
+        TESTING_ASSERT(ap->getKey(0, key));
+
+        // includes NULL seperator
+        TESTING_ASSERT(key.numBytes == 34);
+        TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
+        TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
+        TESTING_ASSERT(key.digest.str() == 
+            "5f49283b940d4a3030996c015f221f9a");
+
         ap->getSample(1, val);
         TESTING_ASSERT(val->getDimensions().numPoints() == 2);
         TESTING_ASSERT(val->getDimensions().rank() == 1);
@@ -1049,6 +1083,12 @@ void testExtentArrayStrings()
         TESTING_ASSERT(data[1] == "Is the cake really a lie?");
         TESTING_ASSERT(data[2] == "");
         TESTING_ASSERT(data[3] == "I certainly hope not.");
+        TESTING_ASSERT(ap->getKey(1, key));
+        TESTING_ASSERT(key.numBytes == 50);
+        TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
+        TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
+        TESTING_ASSERT(key.digest.str() == 
+            "2c3a6e05a5853e252922865e88bc0664");
 
         ap->getSample(2, val);
         TESTING_ASSERT(val->getDimensions().numPoints() == 2);
@@ -1058,6 +1098,12 @@ void testExtentArrayStrings()
         TESTING_ASSERT(data[1] == "");
         TESTING_ASSERT(data[2] == "");
         TESTING_ASSERT(data[3] == "I certainly hope not.");
+        TESTING_ASSERT(ap->getKey(2, key));
+        TESTING_ASSERT(key.numBytes == 50);
+        TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
+        TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
+        TESTING_ASSERT(key.digest.str() == 
+            "f12b670336b184fb5f181f1f0a294fc0");
     }
 }
 

@@ -75,7 +75,7 @@ void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
         if ( ( isMoreDynamic( iProp.getTimeSampling(), m_timeSampling )
                && numSamps >= m_numSamples )
              || ( localNumSampsPerCycle == propNumSampsPerCycle
-                  && numSamps > m_numSamples )
+             && numSamps > m_numSamples )
            )
         {
             m_timeSampling = iProp.getTimeSampling();

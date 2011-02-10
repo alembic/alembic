@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,12 +34,35 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_MD5Hash_All_h_
-#define _Alembic_MD5Hash_All_h_
 
-#include <Alembic/MD5Hash/Foundation.h>
-#include <Alembic/MD5Hash/Digest.h>
-#include <Alembic/MD5Hash/MD5.h>
-#include <Alembic/MD5Hash/Process.h>
+#ifndef ABCIMPORT_MESHHELPER_H_
+#define ABCIMPORT_MESHHELPER_H_
 
-#endif
+#include <maya/MFnMesh.h>
+#include <maya/MObject.h>
+
+#include <vector>
+#include <string>
+
+#include <Alembic/AbcGeom/IPolyMesh.h>
+#include <Alembic/AbcGeom/ISubD.h>
+
+void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
+    Alembic::AbcGeom::IPolyMesh & iNode, bool iInitialized);
+
+void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
+    Alembic::AbcGeom::ISubD & iNode, bool iInitialized);
+
+void connectToPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
+    std::vector<std::string> & oSampledPropNameList, MObject & iMeshObject);
+
+void connectToSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
+    std::vector<std::string> & oSampledPropNameList, MObject & iMeshObject);
+
+MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
+    MObject & iParent, std::vector<std::string> & oSampledPropNameList);
+
+MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
+    MObject & iParent, std::vector<std::string> & oSampledPropNameList);
+
+#endif  // ABCIMPORT_MESHHELPER_H_

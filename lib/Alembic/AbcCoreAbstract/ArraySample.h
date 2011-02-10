@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreAbstract_ArraySample_h_
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
+#include <Alembic/AbcCoreAbstract/ArraySampleKey.h>
 #include <Alembic/AbcCoreAbstract/DataType.h>
 
 namespace Alembic {
@@ -58,7 +59,7 @@ class ArraySample
 {
 public:
     typedef ArraySample this_type;
-    typedef MD5Digest Key;
+    typedef ArraySampleKey Key;
     typedef Key key_type;
 
     //! Default constructor creates NULL bytes with degenerate dimensions.

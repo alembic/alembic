@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,12 +34,22 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_MD5Hash_All_h_
-#define _Alembic_MD5Hash_All_h_
+#ifndef ABCIMPORT_POINTHELPER_H_
+#define ABCIMPORT_POINTHELPER_H_
 
-#include <Alembic/MD5Hash/Foundation.h>
-#include <Alembic/MD5Hash/Digest.h>
-#include <Alembic/MD5Hash/MD5.h>
-#include <Alembic/MD5Hash/Process.h>
+#include <maya/MObject.h>
 
-#endif
+#include <vector>
+#include <string>
+
+#include <Alembic/AbcGeom/IPoints.h>
+
+MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
+    MObject & iParent, MObject & iObject,
+    std::vector<std::string> & iSampledPropNameList,
+    bool iSwap = false);
+
+MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
+    MObject & iObject);
+
+#endif  // ABCIMPORT_POINTHELPER_H_

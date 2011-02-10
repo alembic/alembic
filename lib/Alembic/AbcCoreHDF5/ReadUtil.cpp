@@ -188,7 +188,7 @@ ReadKey( hid_t iParent,
                         H5T_NATIVE_UINT8,
                         16,
                         numRead,
-                        ( void * )&oKey );
+                        ( void * )&oKey.digest );
         ABCA_ASSERT( numRead == 16, "Didn't read enough key bits" );
         return true;
     }
@@ -447,14 +447,26 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
     ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
     DsetCloser dsetCloser( dsetId );
 
-    // Read the digest, if there's a cache.
+    // Read the data space.
+    hid_t dspaceId = H5Dget_space( dsetId );
+    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
+                 << iName );
+    DspaceCloser dspaceCloser( dspaceId );
+
     AbcA::ArraySample::Key key;
-    bool foundDigest = ReadKey( dsetId, "key", key );
-    
-    // If we found a digest and there's a cache, see
-    // if we're in there, and return it if so.
-    if ( foundDigest && iCache )
+    bool foundDigest = false;
+
+    // if we are caching, get the key and see if it is being used
+    if ( iCache )
     {
+        key.origPOD = iDataType.getPod();
+        key.readPOD = key.origPOD;
+
+        key.numBytes = iDataType.getNumBytes() *
+            H5Sget_simple_extent_npoints( dspaceId );
+
+        foundDigest = ReadKey( dsetId, "key", key );
+
         AbcA::ReadArraySampleID found = iCache->find( key );
         if ( found )
         {
@@ -480,16 +492,10 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
     ABCA_ASSERT( dtypeId >= 0, "Could not get datatype for dataSet: "
                  << iName );
     DtypeCloser dtypeCloser( dtypeId );
+
     ABCA_ASSERT( EquivalentDatatypes( iFileType, dtypeId ),
                  "File DataType clash for array dataset: "
                  << iName );
-
-    // Read the data space.
-    hid_t dspaceId = H5Dget_space( dsetId );
-    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
-                 << iName );
-
-    DspaceCloser dspaceCloser( dspaceId );
 
     AbcA::ArraySamplePtr ret;
 

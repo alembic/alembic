@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,12 +34,38 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_MD5Hash_All_h_
-#define _Alembic_MD5Hash_All_h_
+#include <maya/MFnPlugin.h>
+#include <maya/MObject.h>
 
-#include <Alembic/MD5Hash/Foundation.h>
-#include <Alembic/MD5Hash/Digest.h>
-#include <Alembic/MD5Hash/MD5.h>
-#include <Alembic/MD5Hash/Process.h>
+#include "AlembicNode.h"
+#include "AbcImport.h"
 
-#endif
+const MTypeId AlembicNode::mMayaNodeId(0x00082697);
+
+MStatus initializePlugin(MObject obj)
+{
+    MFnPlugin plugin(obj, "Sony Pictures Imageworks", "1.0", "Any");
+
+    MStatus status = plugin.registerCommand("AbcImport",
+                                AbcImport::creator,
+                                AbcImport::createSyntax);
+
+    status = plugin.registerNode("AlembicNode",
+                                AlembicNode::mMayaNodeId,
+                                &AlembicNode::creator,
+                                &AlembicNode::initialize);
+
+    return status;
+}
+
+MStatus uninitializePlugin(MObject obj)
+{
+    MFnPlugin plugin(obj);
+
+    MStatus status;
+
+    status = plugin.deregisterCommand("AlembicImport");
+    status = plugin.deregisterNode(AlembicNode::mMayaNodeId);
+
+    return status;
+}

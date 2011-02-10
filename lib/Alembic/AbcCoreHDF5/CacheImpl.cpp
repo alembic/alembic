@@ -99,10 +99,6 @@ CacheImpl::store( const AbcA::ArraySample::Key &iKey,
     AbcA::ReadArraySampleID foundID = find( iKey );
     if ( foundID )
     {
-#ifdef DEBUG_HARD
-        ABCA_ASSERT( foundID.getSample()->getKey() == iKey,
-                     "Stored sample doesn't match given sample" );
-#endif
         return foundID;
     }
 

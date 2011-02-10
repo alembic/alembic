@@ -118,17 +118,8 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v1",
 
 #define ALEMBIC_ABCGEOM_XFORM_SCHEMA (XformSchemaInfo::title())
 
-//-*****************************************************************************
-// arbitrary attributes
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_ArbitraryAttributes_v1",
-                                     ".arbattr",
-                                     ArbAttrSchemaInfo );
-
-#define ALEMBIC_ABCGEOM_ARBATTR_SCHEMA (ArbAttrSchemaInfo::title())
-
-} // end namespace AbcGeom
-
-} // end namespace Alembic
+}
+}
 
 
 #endif // header guard

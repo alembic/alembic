@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2010,
+## Copyright (c) 2009-2011,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,10 +34,52 @@
 ##
 ##-*****************************************************************************
 
-IF( ${MAYA_FOUND} )
+PROJECT( ABC_IMPORT_MAYA_MODULE )
 
-ADD_SUBDIRECTORY( AbcExport )
-ADD_SUBDIRECTORY( AbcImport )
+SET( H_FILES 
+  AbcImport.h
+  AlembicNode.h
+  CreateSceneHelper.h
+  MeshHelper.h
+  NodeIteratorVisitorHelper.h
+  PointHelper.h
+  util.h
+  XformHelper.h
+)
 
-ENDIF()
+SET( CXX_FILES 
+  AbcImport.cpp
+  AlembicNode.cpp
+  CreateSceneHelper.cpp
+  main.cpp
+  MeshHelper.cpp
+  NodeIteratorVisitorHelper.cpp
+  PointHelper.cpp
+  util.cpp
+  XformHelper.cpp
+)
 
+SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+
+SET( CORE_LIBS 
+  AlembicAbcGeom
+  AlembicAbc
+  AlembicAbcCoreHDF5
+  AlembicAbcCoreAbstract
+  AlembicMD5Hash
+  AlembicUtil )
+
+INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )
+INCLUDE_DIRECTORIES( ".." )
+
+ADD_MAYA_CXX_PLUGIN( AbcImport ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AbcImport
+  ${MAYA_LIBRARIES}
+  ${CORE_LIBS}
+  ${ALEMBIC_HDF5_LIBS} 
+  ${ALEMBIC_ILMBASE_LIBS}
+  ${CMAKE_THREAD_LIBS_INIT}
+  ${ZLIB_LIBRARIES} m )
+
+INSTALL( TARGETS AbcImport
+         DESTINATION maya/plug-ins )

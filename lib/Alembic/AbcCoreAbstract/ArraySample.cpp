@@ -45,12 +45,6 @@ ArraySample::Key ArraySample::getKey() const
 {
     MD5 md5;
 
-    // Accumulate the POD + Extent.
-    uint8_t fakeData[2];
-    fakeData[0] = ( uint8_t )m_dataType.getPod();
-    fakeData[1] = ( uint8_t )m_dataType.getExtent();
-    md5.update( ( const uint8_t * )fakeData, 2 );
-
     // Depending on data type, loop over everything.
     size_t numPoints = m_dimensions.numPoints();
     size_t numPods = m_dataType.getExtent() * numPoints;
@@ -89,7 +83,7 @@ ArraySample::Key ArraySample::getKey() const
         md5.update( ( const float64_t * )m_data, numPods ); break;
 
     case kStringPOD:
-        for ( size_t j = 0; j < numPoints; ++j )
+        for ( size_t j = 0; j < numPods; ++j )
         {
             const std::string &str =
                 static_cast<const std::string*>( m_data )[j];
@@ -102,28 +96,31 @@ ArraySample::Key ArraySample::getKey() const
         break;
 
     case kWstringPOD:
-        for ( size_t j = 0; j < numPoints; ++j )
+        for ( size_t j = 0; j < numPods; ++j )
         {
             const std::wstring &wstr =
                 static_cast<const std::wstring*>( m_data )[j];
-            if ( sizeof( wchar_t ) == sizeof( int8_t ) )
-            {
-                md5.update( ( const int8_t * )wstr.c_str(), wstr.length() );
-                static const int8_t zero8 = 0;
-                md5.update( &zero8, 1 );
-            }
-            else if ( sizeof( wchar_t ) == sizeof( int16_t ) )
-            {
-                md5.update( ( const int16_t * )wstr.c_str(), wstr.length() );
-                static const int16_t zero16 = 0;
-                md5.update( &zero16, 1 );
-            }
-            else if ( sizeof( wchar_t ) == sizeof( int32_t ) )
+
+            if ( sizeof( wchar_t ) == sizeof( int32_t ) )
             {
                 md5.update( ( const int32_t * )wstr.c_str(), wstr.length() );
-                static const int32_t zero32 = 0;
-                md5.update( &zero32, 1 );
+
             }
+            // if wchar_t is 1 or 2 bytes, convert it to 4 bytes for
+            // purposes of calculating the key
+            else
+            {
+                std::vector <int32_t> v(wstr.length());
+                size_t wlen = wstr.length();
+                for (size_t k = 0; k < wlen; ++k)
+                    v[k] = wstr[k];
+
+                md5.update(&(v.front()), v.size());
+            }
+
+            // append a 0 for the NULL seperator character
+            static const int32_t zero32 = 0;
+            md5.update( &zero32, 1 );
         }
         break;
 
@@ -132,7 +129,13 @@ ArraySample::Key ArraySample::getKey() const
 
     }
 
-    return md5.digest();
+    ArraySample::Key k;
+    k.digest = md5.digest();
+    k.numBytes = numBytes;
+    k.origPOD = m_dataType.getPod();
+    k.readPOD = k.origPOD;
+
+    return k;
 }
 
 //-*****************************************************************************

@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,12 +34,30 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_MD5Hash_All_h_
-#define _Alembic_MD5Hash_All_h_
 
-#include <Alembic/MD5Hash/Foundation.h>
-#include <Alembic/MD5Hash/Digest.h>
-#include <Alembic/MD5Hash/MD5.h>
-#include <Alembic/MD5Hash/Process.h>
+#ifndef ABCIMPORT_TRANSFORMHELPER_H_
+#define ABCIMPORT_TRANSFORMHELPER_H_
 
-#endif
+#include <maya/MObject.h>
+
+#include <vector>
+#include <string>
+
+#include <Alembic/AbcGeom/IXform.h>
+
+MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
+    MObject & iObject, std::vector<std::string> & oSampledPropNameList,
+    std::vector<std::string> & oSampledTransOpNameList);
+
+void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
+    std::vector<double> & oSampleList);
+
+void read(double iFrame, Alembic::AbcGeom::IXform & iNode,
+    std::vector<double> & oSampleList);
+
+// used during creation of the scene
+// This function traverses the transform operation stack, and returns true if
+// the transform stack can't be directly mapped to Maya's transform stack
+bool isComplex(Alembic::AbcGeom::IXform & iNode);
+
+#endif  // ABCIMPORT_TRANSFORMHELPER_H_

@@ -148,21 +148,10 @@ BaseOwImpl::createChild( const AbcA::ObjectHeader &iHeader )
                      << iHeader.getName() );
     }
 
-    std::string fullChildName;
-    std::string fullParentName = this->getFullName();
-
-    if ( fullParentName == "/" )
-    {
-        fullChildName = "/" + iHeader.getName();
-    }
-    else
-    {
-        fullChildName = fullParentName + "/" + iHeader.getName();
-    }
-
     ObjectHeaderPtr header(
         new AbcA::ObjectHeader( iHeader.getName(),
-                                fullChildName,
+                                this->getFullName() + "/" +
+                                iHeader.getName(),
                                 iHeader.getMetaData() ) );
 
     AbcA::ObjectWriterPtr ret( new OwImpl( asObjectPtr(),

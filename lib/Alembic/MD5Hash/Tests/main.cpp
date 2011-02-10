@@ -213,62 +213,6 @@ bool TestSuite( std::ostream &ostr )
 }
 
 //-*****************************************************************************
-// Just test this to make sure that we can use the unordered map stuff
-template <class MD5CLASS>
-static bool TestUnorderedMap( std::ostream &ostr )
-{
-    ostr << "\nTesting Unordered Map stuff." << std::endl;
-    
-    typedef UnorderedMapUtil<int>::umap_type MyMap;
-
-    MyMap mappy;
-
-    // Intern.
-    for ( int i = 0; i < 757; ++i )
-    {
-        MD5CLASS hash;
-        // hash.update( ( const UCHAR * )&i, sizeof( int ) );
-        hash.update( &i, 1 );
-        MD5Digest digest = hash.digest();
-
-        mappy[digest] = i;
-    }
-
-    ostr << "Interred 757 ints" << std::endl;
-
-    // Check.
-    for ( int i = 0; i < 757; ++i )
-    {
-        MD5CLASS hash;
-        // hash.update( ( const UCHAR * )&i, sizeof( int ) );
-        hash.update( &i, 1 );
-        MD5Digest digest = hash.digest();
-
-        if ( mappy.count( digest ) != 1 )
-        {
-            std::cerr << "ERROR: unordered map doesn't have digest: "
-                      << digest
-                      << " for int: " << i << std::endl;
-            return false;
-        }
-
-        if ( mappy.at( digest ) != i )
-        {
-            std::cerr << "ERROR: unordered map has bad int for digest: "
-                      << digest
-                      << " for int: " << i
-                      << " it had: " << mappy.at( digest )
-                      << std::endl;
-            return false;
-        }
-    }
-
-    ostr << "Verified 757 ints in map." << std::endl;
-
-    return true;
-}
-
-//-*****************************************************************************
 // A.5 Test suite
 //
 //   The MD5 test suite (driver option "-x") should print the following
@@ -293,7 +237,6 @@ int main( int argc, char *argv[] )
 
     pass = pass && TimeTrial<MD5>( std::cout );
     pass = pass && TestSuite<MD5>( std::cout );
-    pass = pass && TestUnorderedMap<MD5>( std::cout );
 
     return pass ? 0 : -1;
 }

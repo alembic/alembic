@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,12 +34,22 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_MD5Hash_All_h_
-#define _Alembic_MD5Hash_All_h_
+#ifndef ABCIMPORT_H_
+#define ABCIMPORT_H_
 
-#include <Alembic/MD5Hash/Foundation.h>
-#include <Alembic/MD5Hash/Digest.h>
-#include <Alembic/MD5Hash/MD5.h>
-#include <Alembic/MD5Hash/Process.h>
+#include <maya/MPxCommand.h>
 
-#endif
+class AbcImport: public MPxCommand
+{
+public:
+
+    AbcImport();
+    ~AbcImport();
+
+    MStatus doIt(const MArgList& args);
+
+    static MSyntax createSyntax();
+    static void*   creator();
+};
+
+#endif  // ABCIMPORT_H_

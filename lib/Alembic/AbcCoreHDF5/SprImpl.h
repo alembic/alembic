@@ -83,6 +83,12 @@ protected:
                      index_t iSampleIndex,
                      void *oSampleBytes );
     
+    //-*************************************************************************
+    // This function is called by SimplePrImpl, scalar props do not have keys.
+    bool readKey( hid_t iGroup,
+                  const std::string &iSampleName,
+                  AbcA::ArraySampleKey & oSamplePtr ) { return false; }
+
 };
 
 } // End namespace AbcCoreHDF5
