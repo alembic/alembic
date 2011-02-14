@@ -201,7 +201,7 @@ public:
     //! indices, and counts.
     void setFromPrevious( const Abc::OSampleSelector &iSS );
 
-    Abc::OCompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+    Abc::OCompoundProperty getArbGeomParams();
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

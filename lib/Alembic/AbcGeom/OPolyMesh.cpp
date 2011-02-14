@@ -140,11 +140,27 @@ void OPolyMeshSchema::init( const AbcA::TimeSamplingType &iTst )
 
     m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
 
-    m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
-
     // UVs and Normals are created on first call to set()
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
 }
 
 } // End namespace AbcGeom
