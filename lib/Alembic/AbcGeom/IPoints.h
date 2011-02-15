@@ -179,6 +179,8 @@ public:
         return smp;
     }
 
+    Abc::ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -191,6 +193,9 @@ public:
     {
         m_positions.reset();
         m_ids.reset();
+
+        m_arbGeomParams.reset();
+
         Abc::ISchema<PointsSchemaInfo>::reset();
     }
 
@@ -213,6 +218,8 @@ protected:
 
     Abc::IV3fArrayProperty m_positions;
     Abc::IUInt64ArrayProperty m_ids;
+
+    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

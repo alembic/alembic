@@ -54,6 +54,13 @@ void IPointsSchema::init( const Abc::IArgument &iArg0,
     m_ids = Abc::IUInt64ArrayProperty( *this, ".pointIds",
                                       args.getSchemaInterpMatching() );
 
+    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
+    {
+        m_arbGeomParams = Abc::ICompoundProperty( *this, ".arbGeomParams",
+                                                  args.getErrorHandlerPolicy()
+                                                );
+    }
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 

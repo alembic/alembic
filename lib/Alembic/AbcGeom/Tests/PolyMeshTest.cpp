@@ -161,6 +161,11 @@ void Example1_MeshIn()
     IPolyMeshSchema::Sample mesh_samp;
     mesh.get( mesh_samp );
 
+    ICompoundProperty arbattrs = mesh.getArbGeomParams();
+
+    // we didn't set any on write, so on read, it should be an invalid container
+    TESTING_ASSERT( ! arbattrs );
+
     // getExpandedValue() takes an optional ISampleSelector;
     // getVals() returns a TypedArraySamplePtr
     N3fArraySamplePtr nsp = N.getExpandedValue().getVals();

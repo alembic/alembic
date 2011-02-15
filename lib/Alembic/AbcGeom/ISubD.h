@@ -307,6 +307,10 @@ public:
 
         m_subdScheme.reset();
 
+        m_uvs.reset();
+
+        m_arbGeomParams.reset();
+
         Abc::ISchema<SubDSchemaInfo>::reset();
     }
 

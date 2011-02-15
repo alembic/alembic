@@ -209,7 +209,7 @@ public:
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
-    
+
     Abc::IV3fArrayProperty getPositions()
     {
         return m_positions;
@@ -228,6 +228,12 @@ public:
         m_positions.reset();
         m_indices.reset();
         m_counts.reset();
+
+        m_uvs.reset();
+        m_normals.reset();
+
+        m_arbGeomParams.reset();
+
         Abc::ISchema<PolyMeshSchemaInfo>::reset();
     }
 
