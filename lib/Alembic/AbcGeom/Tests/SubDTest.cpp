@@ -89,6 +89,14 @@ void Example1_MeshOut()
     mesh_samp.setCreases( creases, creaseLengths, creaseSharpnesses );
     mesh_samp.setCorners( corners, cornerSharpnesses );
 
+    // UVs
+    OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
+                                                  g_numUVs ),
+                                  kFacevaryingScope );
+
+    mesh_samp.setUVs( uvsamp );
+
+
     // Set the sample.
     mesh.set( mesh_samp, 0 );
 

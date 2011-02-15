@@ -73,6 +73,26 @@ void OSubDSchema::set( const Sample &iSamp,
         m_faceIndices.set( iSamp.getFaceIndices(), iSS );
         m_faceCounts.set( iSamp.getFaceCounts(), iSS );
 
+        if ( iSamp.getUVs().getVals() )
+        {
+            if ( iSamp.getUVs().getIndices() )
+            {
+                // UVs are indexed
+                m_uvs = OV2fGeomParam( *this, "uv", true,
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
+            }
+            else
+            {
+                // UVs are not indexed
+                m_uvs = OV2fGeomParam( *this, "uv", false,
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
+            }
+
+            m_uvs.set( iSamp.getUVs(), iSS );
+        }
+
         if ( iSamp.getFaceVaryingInterpolateBoundary() ==
              ABC_GEOM_SUBD_NULL_INT_VALUE )
         {
@@ -196,6 +216,8 @@ void OSubDSchema::set( const Sample &iSamp,
 
         SetPropUsePrevIfNull( m_subdScheme, iSamp.getSubdivisionScheme(),
                               iSS );
+
+        if ( m_uvs ) { m_uvs.set( iSamp.getUVs(), iSS ); }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -225,7 +247,27 @@ void OSubDSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 
     m_subdScheme.setFromPrevious( iSS );
 
+    if ( m_uvs ) { m_uvs.setFromPrevious( iSS ); }
+
     ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
 }
 
 //-*****************************************************************************
