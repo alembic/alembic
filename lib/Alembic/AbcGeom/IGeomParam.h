@@ -174,6 +174,14 @@ public:
 
     const std::string &getName();
 
+    void reset()
+    {
+        m_valProp.reset();
+        m_indices.reset();
+        m_cprop.reset();
+        m_isIndexed = false;
+    }
+
     bool valid() const
     {
         return ( m_valProp.valid()
