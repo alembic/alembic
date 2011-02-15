@@ -170,6 +170,10 @@ public:
     //! ids, and counts.
     void setFromPrevious( const Abc::OSampleSelector &iSS );
 
+    //! A container for arbitrary geom params (pseudo-properties settable and
+    //! gettable as indexed or not).
+    Abc::OCompoundProperty getArbGeomParams();
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -182,6 +186,9 @@ public:
     {
         m_positions.reset();
         m_ids.reset();
+
+        m_arbGeomParams.reset();
+
         Abc::OSchema<PointsSchemaInfo>::reset();
     }
 
@@ -203,6 +210,8 @@ protected:
 
     Abc::OV3fArrayProperty m_positions;
     Abc::OUInt64ArrayProperty m_ids;
+
+    Abc::OCompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************
