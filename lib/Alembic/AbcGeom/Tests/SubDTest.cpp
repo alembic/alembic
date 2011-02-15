@@ -122,6 +122,18 @@ void Example1_MeshIn()
 
     TESTING_ASSERT( 3 == mesh.getNumSamples() );
 
+    // UVs
+    IV2fGeomParam uv = mesh.getUVs();
+    TESTING_ASSERT( ! uv.isIndexed() );
+
+    // we can fake like the UVs are indexed
+    IV2fGeomParam::Sample uvsamp = uv.getIndexedValue();
+    TESTING_ASSERT( (*(uvsamp.getIndices()))[1] == 1 );
+    V2f uv2 = (*(uvsamp.getVals()))[2];
+    TESTING_ASSERT( uv2 == V2f( 1.0f, 1.0f ) );
+    std::cout << "2th UV: " << uv2 << std::endl;
+
+
     // get the 1th sample by value
     ISubDSchema::Sample samp1 = mesh.getValue( 1 );
 
