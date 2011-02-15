@@ -117,7 +117,7 @@ void Example1_MeshOut()
     // as indexed or not, as you'd like.
     OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
                                                   g_numUVs ),
-                                                  kFacevaryingScope );
+                                  kFacevaryingScope );
     // indexed normals
     ON3fGeomParam::Sample nsamp( N3fArraySample( (const N3f *)g_normals,
                                                  g_numNormals ),
