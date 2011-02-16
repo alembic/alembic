@@ -106,6 +106,7 @@ public:
     WriterData();
     WriterData(const WriterData & rhs);
     WriterData & operator=(const WriterData & rhs);
+    void getFrameRange(double & oMin, double & oMax);
 
     std::vector<MObject>        mPointsObjList;
     std::vector<MObject>        mPolyMeshObjList;
@@ -134,8 +135,6 @@ class ArgData
 {
 public:
     ArgData(MString iFileName = "",
-        double   iSequenceStartFrame = FLT_MAX,
-        double   iSequenceEndFrame = FLT_MAX,
         bool    iDebugOn = false,
         MObject iReparentObj = MObject::kNullObj,
         bool    iConnect = false,
@@ -146,8 +145,8 @@ public:
     ArgData & operator=(const ArgData & rhs);
 
     MString     mFileName;
-    double       mSequenceStartFrame;
-    double       mSequenceEndFrame;
+    double      mSequenceStartTime;
+    double      mSequenceEndTime;
     bool        mDebugOn;
 
     MObject     mReparentObj;

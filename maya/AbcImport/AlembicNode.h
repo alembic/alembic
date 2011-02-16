@@ -57,7 +57,7 @@ public:
 
     AlembicNode() : mFileInitialized(0), mDebugOn(false)
     {
-        mCurFrame = DBL_MAX;
+        mCurTime = DBL_MAX;
 
         // 0 mOutPropArrayAttr
         // 1 mOutTransOpArrayAttr, mOutTransOpAngleArrayAttr
@@ -82,14 +82,8 @@ public:
     static const MTypeId mMayaNodeId;
 
     // input attributes
-    static MObject mSequenceAttr;
     static MObject mTimeAttr;
     static MObject mAbcFileNameAttr;
-
-    static MObject mConnectAttr;
-    static MObject mCreateIfNotFoundAttr;
-    static MObject mRemoveIfNoUpdateAttr;
-    static MObject mConnectRootNodesAttr;
 
     // data attributes
     static MObject mSampledNurbsCurveNumCurveAttr;
@@ -104,6 +98,15 @@ public:
     static MObject mOutNurbsSurfaceArrayAttr;
     static MObject mOutTransOpArrayAttr;
     static MObject mOutTransOpAngleArrayAttr;
+
+    // output informational attrs
+    static MObject mStartFrameAttr;
+    static MObject mEndFrameAttr;
+
+    static MObject mConnectAttr;
+    static MObject mCreateIfNotFoundAttr;
+    static MObject mRemoveIfNoUpdateAttr;
+    static MObject mConnectRootNodesAttr;
 
     // override virtual methods from MPxNode
     virtual MStatus compute(const MPlug & plug, MDataBlock & dataBlock);
@@ -130,9 +133,9 @@ private:
     bool    mSubDInitialized;
     bool    mPolyInitialized;
 
-    double   mSequenceStartFrame;
-    double   mSequenceEndFrame;
-    double   mCurFrame;
+    double   mSequenceStartTime;
+    double   mSequenceEndTime;
+    double   mCurTime;
 
     bool    mDebugOn;
 

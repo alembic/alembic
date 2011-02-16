@@ -63,10 +63,11 @@
 #include "PointHelper.h"
 #include "XformHelper.h"
 
-
-MObject AlembicNode::mSequenceAttr;
 MObject AlembicNode::mTimeAttr;
 MObject AlembicNode::mAbcFileNameAttr;
+
+MObject AlembicNode::mStartFrameAttr;
+MObject AlembicNode::mEndFrameAttr;
 
 MObject AlembicNode::mConnectAttr;
 MObject AlembicNode::mCreateIfNotFoundAttr;
@@ -107,14 +108,18 @@ MStatus AlembicNode::initialize()
     status = tAttr.setStorable(true);
     status = addAttribute(mAbcFileNameAttr);
 
-    // sequence to be loaded
-    MFnStringData seqFnStringData;
-    MObject seqenceDefaultObject = seqFnStringData.create("0 - 0");
-    mSequenceAttr = tAttr.create("sequence", "sq",
-        MFnData::kString, seqenceDefaultObject);
-    status = tAttr.setWritable(false);
-    status = tAttr.setStorable(true);
-    status = addAttribute(mSequenceAttr);
+    // sequence min and max in frames
+    mStartFrameAttr = nAttr.create("startFrame", "sf",
+        MFnNumericData::kDouble, 0, &status);
+    status = nAttr.setWritable(false);
+    status = nAttr.setStorable(true);
+    status = addAttribute(mStartFrameAttr);
+
+    mEndFrameAttr = nAttr.create("endFrame", "ef",
+        MFnNumericData::kDouble, 0, &status);
+    status = nAttr.setWritable(false);
+    status = nAttr.setStorable(true);
+    status = addAttribute(mEndFrameAttr);
 
     // set mConnect
     mConnectAttr = nAttr.create("connect", "ct",
@@ -270,6 +275,11 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 {
     MStatus status;
 
+    // update the frame number to be imported
+    MDataHandle timeHandle = dataBlock.inputValue(mTimeAttr, &status);
+    MTime t = timeHandle.asTime();
+    double inputTime = t.as(MTime::kSeconds);
+
     // this should be done only once per file
     if (mFileInitialized == false)
     {
@@ -288,8 +298,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             MString theError = "Cannot read file " + fileName;
             printError(theError);
         }
-
-        getFrameRange(archive, mSequenceStartFrame, mSequenceEndFrame);
 
         // connect attributes
         dataHandle = dataBlock.inputValue(mConnectAttr, &status);
@@ -323,7 +331,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         }
         */
 
-        CreateSceneVisitor visitor(mSequenceStartFrame, MObject::kNullObj, 
+        CreateSceneVisitor visitor(inputTime, MObject::kNullObj, 
             CreateSceneVisitor::NONE, "");
 
         visitor.walk(archive);
@@ -338,6 +346,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             // information retrieved from the hierarchy traversal
             // and given to AlembicNode to provide update
             visitor.getData(mData);
+            mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
         }
 
         // getting the arrays so there's no need to repeat the tedious work
@@ -357,18 +366,13 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         }
     }
 
-    // update the frame number to be imported
-    MDataHandle timeHandle = dataBlock.inputValue(mTimeAttr, &status);
-    MTime t = timeHandle.asTime();
-    double inputTime = t.as(MTime::kSeconds);
-
-    clamp<double>(mSequenceStartFrame, mSequenceEndFrame, inputTime);
+    clamp<double>(mSequenceStartTime, mSequenceEndTime, inputTime);
 
     // update only when the time lapse is big enough
-    if (fabs(inputTime - mCurFrame) > 0.00001)
+    if (fabs(inputTime - mCurTime) > 0.00001)
     {
         mOutRead = std::vector<bool>(mOutRead.size(), false);
-        mCurFrame = inputTime;
+        mCurTime = inputTime;
     }
 
     if (plug == mOutPropArrayAttr)
@@ -389,7 +393,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             /*
             for (unsigned int i = 0, handlePos = 0; i < propSize; i++)
             {
-                updateProp(mCurFrame, mData.mPropList[i],
+                updateProp(mCurTime, mData.mPropList[i],
                     outArrayHandle, handlePos);
             }
             */
@@ -430,11 +434,11 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
                 if (mData.mIsComplexXform[i])
                 {
-                    readComplex(mCurFrame, mData.mXformList[i], sampleList);
+                    readComplex(mCurTime, mData.mXformList[i], sampleList);
                 }
                 else
                 {
-                    read(mCurFrame, mData.mXformList[i], sampleList);
+                    read(mCurTime, mData.mXformList[i], sampleList);
                 }
 
                 unsigned int sampleSize = sampleList.size();
@@ -508,7 +512,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 if (obj.hasFn(MFn::kMesh))
                 {
                     MFnMesh fnMesh(obj);
-                    readSubD(mCurFrame, fnMesh, obj, mData.mSubDList[j],
+                    readSubD(mCurTime, fnMesh, obj, mData.mSubDList[j],
                         mSubDInitialized);
                     outHandle.set(obj);
                 }
@@ -579,7 +583,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 if (obj.hasFn(MFn::kMesh))
                 {
                     MFnMesh fnMesh(obj);
-                    readPoly(mCurFrame, fnMesh, obj, mData.mPolyMeshList[j],
+                    readPoly(mCurTime, fnMesh, obj, mData.mPolyMeshList[j],
                         mPolyInitialized);
                     outHandle.set(obj);
                 }
@@ -661,7 +665,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 //    mData.mCameraList[cameraIndex];
                 std::vector<double> array;
 
-                //read(mCurFrame, camPtr, array);
+                //read(mCurTime, camPtr, array);
 
 
                 for (unsigned int dataIndex = 0; dataIndex < array.size();
@@ -756,7 +760,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                     ncObj.push_back(curveData.create());
                 }
 
-                //read(mCurFrame, mData.mCurvesList[curveGrpIndex], ncObj);
+                //read(mCurTime, mData.mCurvesList[curveGrpIndex], ncObj);
 
                 for (unsigned int i = 0; i < numChild; i++, logicalIndex++)
                 {

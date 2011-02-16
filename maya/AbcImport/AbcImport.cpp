@@ -81,8 +81,6 @@ a warning will be given and nothing will be done.                           \n\
                     Used only when -connect flag is set.                    \n\
 -sts/ setToStartFrame                                                       \n\
                     Set the current time to the start of the frame range    \n\
--t  / timeRange     double beginFrame double endFrame                       \n\
-                    Specify the frame range of the imported file.           \n\
 -m  / mode          string (\"open\"|\"import\"|\"replace\")                \n\
                     Set read mode to open/import/replace (default to import)\n\
 -h  / help          Print this message                                      \n\
@@ -121,8 +119,6 @@ MSyntax AbcImport::createSyntax()
 
     syntax.addFlag("-rpr",  "-reparent",     MSyntax::kString);
     syntax.addFlag("-sts",  "-setToStartFrame",  MSyntax::kNoArg);
-    syntax.addFlag("-t",    "-timeRange",    MSyntax::kDouble,
-                                             MSyntax::kDouble);
 
     syntax.addArg(MSyntax::kString);
 
@@ -209,23 +205,6 @@ MStatus AbcImport::doIt(const MArgList & args)
             removeIfNoUpdate = true;
     }
 
-    double sequenceStartFrame(0.0), sequenceEndFrame(0.0);
-    if (argData.isFlagSet("timeRange"))
-    {
-        status = argData.getFlagArgument("timeRange", 0, sequenceStartFrame);
-        status = argData.getFlagArgument("timeRange", 1, sequenceEndFrame);
-
-        if (sequenceStartFrame < sequenceEndFrame)
-        {
-            if (argData.isFlagSet("fitTimeRange"))
-                setPlayback(sequenceStartFrame, sequenceEndFrame,
-                    sequenceStartFrame);
-
-            if (argData.isFlagSet("setToStartFrame"))
-                MGlobal::viewFrame(sequenceStartFrame);
-        }
-    }
-
     status = argData.getCommandArgument(0, filename);
     MString abcNodeName;
     if (status == MS::kSuccess)
@@ -234,10 +213,25 @@ MStatus AbcImport::doIt(const MArgList & args)
         status = fileObj.setRawFullName(filename);
         if (status == MS::kSuccess && fileObj.exists())
         {
-            ArgData inputData(filename,
-                sequenceStartFrame, sequenceEndFrame, debugOn, reparentObj,
+            ArgData inputData(filename, debugOn, reparentObj,
                 swap, connectRootNodes, createIfNotFound, removeIfNoUpdate);
             abcNodeName = createScene(inputData);
+
+            if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&
+                inputData.mSequenceStartTime != -DBL_MAX &&
+                inputData.mSequenceEndTime != DBL_MAX)
+            {
+                if (argData.isFlagSet("fitTimeRange"))
+                {
+                    setPlayback(inputData.mSequenceStartTime * 24,
+                        inputData.mSequenceEndTime * 24);
+                }
+
+                if (argData.isFlagSet("setToStartFrame"))
+                {
+                    MGlobal::viewFrame(inputData.mSequenceStartTime * 24);
+                }
+            }
         }
         else
         {

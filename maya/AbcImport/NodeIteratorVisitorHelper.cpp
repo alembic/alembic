@@ -1102,18 +1102,61 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     return *this;
 }
 
+void WriterData::getFrameRange(double & oMin, double & oMax)
+{
+    oMin = DBL_MAX;
+    oMax = -DBL_MAX;
+
+    size_t i, iEnd;
+    Alembic::AbcCoreAbstract::v1::TimeSampling ts;
+
+    iEnd = mPointsList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        ts = mPointsList[i].getSchema().getTimeSampling();
+        oMin = std::min(ts.getSampleTime(0), oMin);
+        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+    }
+
+    iEnd = mPolyMeshList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        ts = mPolyMeshList[i].getSchema().getTimeSampling();
+        oMin = std::min(ts.getSampleTime(0), oMin);
+        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+    }
+
+    iEnd = mSubDList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        ts = mSubDList[i].getSchema().getTimeSampling();
+        oMin = std::min(ts.getSampleTime(0), oMin);
+        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+    }
+
+    iEnd = mXformList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        ts = mXformList[i].getSchema().getTimeSampling();
+        if (ts.getNumSamples() > 1)
+        {
+            oMin = std::min(ts.getSampleTime(0), oMin);
+            oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+        }
+    }
+}
+
 ArgData::ArgData(MString iFileName,
-    double iSequenceStartFrame, double iSequenceEndFrame,
     bool iDebugOn, MObject iReparentObj, bool iConnect,
     MString iConnectRootNodes, bool iCreateIfNotFound, bool iRemoveIfNoUpdate) :
         mFileName(iFileName),
-        mSequenceStartFrame(iSequenceStartFrame),
-        mSequenceEndFrame(iSequenceEndFrame),
         mDebugOn(iDebugOn), mReparentObj(iReparentObj), mConnect(iConnect),
         mConnectRootNodes(iConnectRootNodes),
         mCreateIfNotFound(iCreateIfNotFound),
         mRemoveIfNoUpdate(iRemoveIfNoUpdate)
 {
+    mSequenceStartTime = -DBL_MAX;
+    mSequenceEndTime = DBL_MAX;
 }
 
 ArgData::ArgData(const ArgData & rhs)
@@ -1124,8 +1167,8 @@ ArgData::ArgData(const ArgData & rhs)
 ArgData & ArgData::operator=(const ArgData & rhs)
 {
     mFileName = rhs.mFileName;
-    mSequenceStartFrame = rhs.mSequenceStartFrame;
-    mSequenceEndFrame = rhs.mSequenceEndFrame;
+    mSequenceStartTime = rhs.mSequenceStartTime;
+    mSequenceEndTime = rhs.mSequenceEndTime;
 
     mDebugOn = rhs.mDebugOn;
 
@@ -1161,10 +1204,7 @@ MString createScene(ArgData & iArgData)
     else if (iArgData.mConnect)
         action = CreateSceneVisitor::CONNECT;
 
-    getFrameRange(archive, iArgData.mSequenceStartFrame,
-        iArgData.mSequenceEndFrame);
-
-    CreateSceneVisitor visitor(iArgData.mSequenceStartFrame,
+    CreateSceneVisitor visitor(iArgData.mSequenceStartTime,
         iArgData.mReparentObj, action, iArgData.mConnectRootNodes);
 
     visitor.walk(archive);
@@ -1172,6 +1212,10 @@ MString createScene(ArgData & iArgData)
     if (visitor.hasSampledData())
     {
         visitor.getData(iArgData.mData);
+
+        iArgData.mData.getFrameRange(iArgData.mSequenceStartTime,
+            iArgData.mSequenceEndTime);
+
         returnName = connectAttr(iArgData);
     }
 
@@ -1212,13 +1256,12 @@ MString connectAttr(ArgData & iArgData)
     MPlug plug = alembicNodeFn.findPlug("abc_File", true, &status);
     plug.setValue(iArgData.mFileName);
 
-    // set sequence string
-    plug = alembicNodeFn.findPlug("sequence", true, &status);
-    MString seqStr;
-    seqStr += iArgData.mSequenceStartFrame;
-    seqStr += " - ";
-    seqStr += iArgData.mSequenceEndFrame;
-    plug.setValue(seqStr);
+    // set sequence start and end in frames
+    plug = alembicNodeFn.findPlug("startFrame", true, &status);
+    plug.setValue(iArgData.mSequenceStartTime * 24.0);
+
+    plug = alembicNodeFn.findPlug("endFrame", true, &status);
+    plug.setValue(iArgData.mSequenceEndTime * 24.0);
 
     // set connect input info
     plug = alembicNodeFn.findPlug("connect", true, &status);

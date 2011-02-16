@@ -49,14 +49,6 @@
 
 #include <algorithm>
 
-void getFrameRange(const Alembic::Abc::IArchive & iArchive,
-    double & oSeqStartFrame, double & oSeqEndFrame)
-{
-    // arbitrary number, until we dump out the frame range
-    oSeqStartFrame = -1000.0;
-    oSeqEndFrame = 10000.0;
-}
-
 MStatus replaceDagObject(MObject & oldObject, MObject & newObject,
             const MString & name)
 {
@@ -210,10 +202,8 @@ MStatus getPlugByName(const MString & objName, const MString & attrName,
     return status;
 }
 
-MStatus setPlayback(double min, double max, double cur)
+MStatus setPlayback(double min, double max)
 {
-    clamp<double>(min, max, cur);
-
     MStatus status = MS::kSuccess;
     MAnimControl anim;
     MTime minTime, maxTime, curTime;
@@ -228,8 +218,6 @@ MStatus setPlayback(double min, double max, double cur)
         status = anim.setMaxTime(maxTime);
         status = anim.setAnimationEndTime(maxTime);
     }
-
-    // status = MGlobal::viewFrame(cur);
 
     return status;
 }
