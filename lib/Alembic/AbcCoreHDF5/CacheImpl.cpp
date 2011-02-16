@@ -63,6 +63,7 @@ CacheImpl::find( const AbcA::ArraySample::Key &iKey )
         AbcA::ArraySamplePtr deleterPtr =
             (*foundIter).second.weakDeleter.lock();
         assert( deleterPtr );
+
         return AbcA::ReadArraySampleID( iKey, deleterPtr );
     }
 

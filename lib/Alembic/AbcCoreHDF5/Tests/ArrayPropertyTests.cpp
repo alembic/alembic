@@ -96,7 +96,7 @@ void testDuplicateArray()
         vali[0] = 8;
         vali[1] = 16;
         vali[2] = 32;
-        awp->setSample(1, 0.0, ABC::ArraySample(&(vali.front()), i16d, dims));
+        awp->setSample(1, -1.0, ABC::ArraySample(&(vali.front()), i16d, dims));
 
         vali[0] = 7;
         vali[1] = 7;
@@ -112,7 +112,7 @@ void testDuplicateArray()
         vali[0] = 7;
         vali[1] = 7;
         vali[2] = 7;
-        bwp->setSample(1, 0.0, ABC::ArraySample(&(vali.front()), i16d, dims));
+        bwp->setSample(1, -1.0, ABC::ArraySample(&(vali.front()), i16d, dims));
 
         vali[0] = 8;
         vali[1] = 16;
@@ -140,7 +140,7 @@ void testDuplicateArray()
         vals[4] = 7;
         vals[5] = 0;
         cwp->setSample(1, 0.0, ABC::ArraySample(&(vals.front()), i8d, dims));
-        cwp->setSample(2, 0.0, ABC::ArraySample(&(vals.front()), i8d, dims));
+        cwp->setSample(2, 1.0, ABC::ArraySample(&(vals.front()), i8d, dims));
     }
 
     {
@@ -581,7 +581,7 @@ void testReadWriteArrays()
                     TESTING_ASSERT(key.numBytes == 3);
                     TESTING_ASSERT(key.origPOD == Alembic::Util::kBooleanPOD);
                     TESTING_ASSERT(key.readPOD == Alembic::Util::kBooleanPOD);
-                    TESTING_ASSERT(key.digest.str() == 
+                    TESTING_ASSERT(key.digest.str() ==
                         "418f2796e56f1a882529d8be1664eed0");
                 }
                 break;
@@ -604,7 +604,7 @@ void testReadWriteArrays()
                     TESTING_ASSERT(key.numBytes == 4);
                     TESTING_ASSERT(key.origPOD == Alembic::Util::kUint8POD);
                     TESTING_ASSERT(key.readPOD == Alembic::Util::kUint8POD);
-                    TESTING_ASSERT(key.digest.str() == 
+                    TESTING_ASSERT(key.digest.str() ==
                         "097ec357f4cddaeb5faf1e506c4b1348");
                 }
                 break;
@@ -962,7 +962,7 @@ void testEmptyArray()
                 TESTING_ASSERT(key.numBytes == 0);
                 TESTING_ASSERT(key.origPOD == Alembic::Util::kInt64POD);
                 TESTING_ASSERT(key.readPOD == Alembic::Util::kInt64POD);
-                TESTING_ASSERT(key.digest.str() == 
+                TESTING_ASSERT(key.digest.str() ==
                     "d41d8cd98f00b204e9800998ecf8427e");
             }
         }
@@ -1072,7 +1072,7 @@ void testExtentArrayStrings()
         TESTING_ASSERT(key.numBytes == 34);
         TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
-        TESTING_ASSERT(key.digest.str() == 
+        TESTING_ASSERT(key.digest.str() ==
             "5f49283b940d4a3030996c015f221f9a");
 
         ap->getSample(1, val);
@@ -1087,7 +1087,7 @@ void testExtentArrayStrings()
         TESTING_ASSERT(key.numBytes == 50);
         TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
-        TESTING_ASSERT(key.digest.str() == 
+        TESTING_ASSERT(key.digest.str() ==
             "2c3a6e05a5853e252922865e88bc0664");
 
         ap->getSample(2, val);
@@ -1102,7 +1102,7 @@ void testExtentArrayStrings()
         TESTING_ASSERT(key.numBytes == 50);
         TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
-        TESTING_ASSERT(key.digest.str() == 
+        TESTING_ASSERT(key.digest.str() ==
             "f12b670336b184fb5f181f1f0a294fc0");
     }
 }
