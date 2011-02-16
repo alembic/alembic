@@ -59,12 +59,6 @@ struct ArraySampleKey : public boost::totally_ordered<ArraySampleKey>
 
     bool operator==( const ArraySampleKey &iRhs ) const
     {
-        std::cout << std::endl << "ArraySampleKey::==" << std::endl
-                  << "numBytes = " << numBytes << ", iRhs.numBytes = " << iRhs.numBytes << std::endl
-                  << "origPOD = " << origPOD << ", iRhs.origPOD = " << iRhs.origPOD << std::endl
-                  << "readPOD = " << readPOD << ", iRhs.readPOD = " << iRhs.readPOD << std::endl
-                  << "digest = " << digest << ", iRhs.digest = " << iRhs.digest << std::endl
-                  << std::endl;
         return ( ( numBytes == iRhs.numBytes ) &&
                  ( origPOD  == iRhs.origPOD  ) &&
                  ( readPOD  == iRhs.readPOD  ) &&
@@ -101,20 +95,20 @@ struct ArraySampleKeyEqualTo :
 
 //-*****************************************************************************
 // Hash function
-inline uint64_t StdHash( ArraySampleKey const &a )
+inline size_t StdHash( ArraySampleKey const &a )
 {
     // Theoretically, the bits of an MD5 Hash are uniformly
     // randomly distributed, so it doesn't matter which of the 128
     // bits we use to generate the 64 bits that we return as the hash
     // key. So, I'll just do the simple thing.
-    return *(( const uint64_t * )&a.digest);
+    return *(( const size_t * )&a.digest);
 }
 
 //-*****************************************************************************
 struct ArraySampleKeyStdHash :
-        public std::unary_function<ArraySampleKey,uint64_t>
+        public std::unary_function<ArraySampleKey,size_t>
 {
-    uint64_t operator()( ArraySampleKey const &a ) const
+    size_t operator()( ArraySampleKey const &a ) const
     {
         return StdHash( a );
     }

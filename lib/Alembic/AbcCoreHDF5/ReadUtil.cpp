@@ -60,7 +60,6 @@ std::string getFullDsetName( hid_t iDsetId )
     return fullname;
 }
 
-
 //-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
@@ -171,9 +170,6 @@ ReadDimensions( hid_t iParent,
     // Assume a maximum rank of 128. This is totally reasonable.
     static const size_t maxRank = 128;
     static uint32_t dimVals[128];
-
-    std::cout << "ReadDimensions(): iParent fullname: "
-              << getFullDsetName( iParent ) << std::endl;
 
     size_t readRank;
     ReadSmallArray( iParent, iAttrName, H5T_STD_U32LE, H5T_NATIVE_UINT32,
@@ -483,9 +479,6 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
 
         foundDigest = ReadKey( dsetId, "key", key );
 
-        std::cout << "ReadArray(): checking cache for key.digest " << key.digest.str()
-                  << " for sample " << iName << std::endl;
-
         AbcA::ReadArraySampleID found = iCache->find( key );
 
         if ( found )
@@ -501,7 +494,6 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
             }
 
             // Got it!
-            std::cout << "ReadArray(): returning cached " << iName << std::endl;
             return ret;
         }
     }
@@ -579,11 +571,6 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
         AbcA::ReadArraySampleID stored = iCache->store( key, ret );
         if ( stored )
         {
-            std::cout << "ReadArray(): storing " << iName << " with digest "
-                      << key.digest.str() << std::endl;
-
-            std::cout << "ReadArray(): stored dims: " << stored.getSample()->getDimensions() << std::endl;
-
             return stored.getSample();
         }
     }
@@ -674,9 +661,6 @@ ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
     // Check to see if the times are stored as an attr.
     if ( H5Aexists( iParent, iTimeAttrName.c_str() ) > 0 )
     {
-        //std::cout << "Reading times from group: "
-        //          << iTimeAttrName << std::endl;
-
         // Create a buffer into which we shall read.
         AbcA::ArraySamplePtr ret =
             AbcA::AllocateArraySample( AbcA::DataType( kFloat64POD, 1 ),
@@ -692,8 +676,6 @@ ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
     }
     else if ( DatasetExists( iParent, iTimeAttrName ) )
     {
-        //std::cout << "Reading time samps from dataset named: "
-        //          << iTimeAttrName << std::endl;
         return ReadArray( iCache, iParent, iTimeAttrName,
                           AbcA::DataType( kFloat64POD, 1 ),
                           H5T_IEEE_F64LE,
@@ -701,10 +683,6 @@ ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
     }
     else
     {
-        //std::cout << "Didn't find time samps thing named: "
-        //          << iTimeAttrName << ", so making an array length 1."
-        //          << std::endl;
-
         // Create a buffer of 1, fill it with zero.
         // CJH: I'm not sure this is wise anymore.
         AbcA::ArraySamplePtr ret =

@@ -162,7 +162,6 @@ void testDuplicateArray()
 
             if (ap->getName() == "a")
             {
-                #if 0
                 ABC::ArraySamplePtr samp0;
                 ABC::ArraySamplePtr samp1;
                 ABC::ArraySamplePtr samp2;
@@ -200,7 +199,6 @@ void testDuplicateArray()
                 {
                     TESTING_ASSERT(data[j] == 0);
                 }
-                #endif
             }
             else if (ap->getName() == "b")
             {
@@ -211,7 +209,6 @@ void testDuplicateArray()
                 ap->getSample(1, samp1);
                 ap->getSample(2, samp2);
 
-                #if 0
                 TESTING_ASSERT(samp0->getDimensions().numPoints() == numVals);
                 TESTING_ASSERT(samp1->getDimensions().numPoints() == numVals);
                 TESTING_ASSERT(samp2->getDimensions().numPoints() == numVals);
@@ -242,11 +239,9 @@ void testDuplicateArray()
                 {
                     TESTING_ASSERT(data[j] == 0);
                 }
-                #endif
             }
             else if (ap->getName() == "c")
             {
-                #if 0
                 ABC::ArraySamplePtr samp0;
                 ABC::ArraySamplePtr samp1;
                 ABC::ArraySamplePtr samp2;
@@ -254,9 +249,9 @@ void testDuplicateArray()
                 ap->getSample(1, samp1);
                 ap->getSample(2, samp2);
 
-                //TESTING_ASSERT(samp0->getDimensions().numPoints() == numVals*2);
-                //TESTING_ASSERT(samp1->getDimensions().numPoints() == numVals*2);
-                //TESTING_ASSERT(samp2->getDimensions().numPoints() == numVals*2);
+                TESTING_ASSERT(samp0->getDimensions().numPoints() == numVals*2);
+                TESTING_ASSERT(samp1->getDimensions().numPoints() == numVals*2);
+                TESTING_ASSERT(samp2->getDimensions().numPoints() == numVals*2);
 
                 int8_t * data = (int8_t *)(samp0->getData());
                 TESTING_ASSERT(data[0] == 8);
@@ -293,7 +288,6 @@ void testDuplicateArray()
                 {
                     TESTING_ASSERT(data[j] == 0);
                 }
-                #endif
             }
         }
     }
@@ -1117,9 +1111,9 @@ void testExtentArrayStrings()
 
 int main ( int argc, char *argv[] )
 {
-    //testEmptyArray();
+    testEmptyArray();
     testDuplicateArray();
-    //testReadWriteArrays();
-    //testExtentArrayStrings();
+    testReadWriteArrays();
+    testExtentArrayStrings();
     return 0;
 }
