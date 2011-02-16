@@ -57,12 +57,17 @@ CacheImpl::find( const AbcA::ArraySample::Key &iKey )
 {
     // Check the locked map! If we have already locked it, just return
     // it locked!
+    std::cout << "cache::find(): got key with digest " << iKey.digest.str() << std::endl;
     Map::iterator foundIter = m_lockedMap.find( iKey );
     if ( foundIter != m_lockedMap.end() )
     {
         AbcA::ArraySamplePtr deleterPtr =
             (*foundIter).second.weakDeleter.lock();
         assert( deleterPtr );
+
+        std::cout << "cache::find(): returning found sample from locked map with digest: "
+                  << iKey.digest.str() << std::endl;
+
         return AbcA::ReadArraySampleID( iKey, deleterPtr );
     }
 
@@ -81,10 +86,14 @@ CacheImpl::find( const AbcA::ArraySample::Key &iKey )
         // Remove it from the unlocked map.
         m_unlockedMap.erase( uFoundIter );
 
+        std::cout << "cache::find(): post-erase iKey.digest: " << iKey.digest.str() << std::endl;
+
         return AbcA::ReadArraySampleID( iKey, deleterPtr );
     }
 
     // Didn't find it, return null sample ID
+
+    std::cout << "cache::find(): could not find " << iKey.digest.str() << std::endl;
     return AbcA::ReadArraySampleID();
 }
 

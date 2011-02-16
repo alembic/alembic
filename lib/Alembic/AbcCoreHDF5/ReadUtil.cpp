@@ -49,6 +49,18 @@ namespace AbcCoreHDF5 {
 //-*****************************************************************************
 //-*****************************************************************************
 
+std::string getFullDsetName( hid_t iDsetId )
+{
+    std::string fullname;
+    int len = H5Iget_name( iDsetId, NULL, 0 ) + 1;
+    fullname.resize( len );
+
+    H5Iget_name( iDsetId, &(fullname[0]), len );
+
+    return fullname;
+}
+
+
 //-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
@@ -66,7 +78,7 @@ ReadScalar( hid_t iParent,
             void *oData )
 {
     ABCA_ASSERT( iParent >= 0, "Invalid parent" );
-    
+
     hid_t attrId = H5Aopen( iParent, iAttrName.c_str(), H5P_DEFAULT );
     ABCA_ASSERT( attrId >= 0,
                  "Couldn't open attribute named: " << iAttrName );
@@ -79,16 +91,16 @@ ReadScalar( hid_t iParent,
                      "Couldn't get file datatype for attribute: "
                      << iAttrName );
         DtypeCloser dtypeCloser( attrFtype );
-        
+
         ABCA_ASSERT( EquivalentDatatypes( attrFtype, iFileType ),
                      "File DataType clash for scalar attribute: "
                      << iAttrName );
-        
+
         hid_t attrSpace = H5Aget_space( attrId );
         ABCA_ASSERT( attrSpace >= 0,
                      "Couldn't get dataspace for attribute: " << iAttrName );
         DspaceCloser dspaceCloser( attrSpace );
-        
+
         H5S_class_t attrSpaceClass = H5Sget_simple_extent_type( attrSpace );
         ABCA_ASSERT( attrSpaceClass == H5S_SCALAR,
                      "Tried to read non-scalar attribute: " << iAttrName
@@ -110,7 +122,7 @@ ReadSmallArray( hid_t iParent,
                 void *oData )
 {
     ABCA_ASSERT( iParent >= 0, "Invalid parent" );
-    
+
     hid_t attrId = H5Aopen( iParent, iAttrName.c_str(), H5P_DEFAULT );
     ABCA_ASSERT( attrId >= 0,
                  "Couldn't open attribute named: " << iAttrName );
@@ -123,23 +135,23 @@ ReadSmallArray( hid_t iParent,
                      "Couldn't get file datatype for attribute: "
                      << iAttrName );
         DtypeCloser dtypeCloser( attrFtype );
-        
+
         ABCA_ASSERT( EquivalentDatatypes( attrFtype, iFileType ),
                      "File DataType clash for scalar attribute: "
                      << iAttrName );
-        
+
         hid_t attrSpace = H5Aget_space( attrId );
         ABCA_ASSERT( attrSpace >= 0,
                      "Couldn't get dataspace for attribute: " << iAttrName );
         DspaceCloser dspaceCloser( attrSpace );
-        
+
         H5S_class_t attrSpaceClass = H5Sget_simple_extent_type( attrSpace );
         ABCA_ASSERT( attrSpaceClass == H5S_SIMPLE,
                      "Tried to read non-simple attribute: " << iAttrName
                      << " as scalar" );
 
         hssize_t numPoints = H5Sget_simple_extent_npoints( attrSpace );
-        ABCA_ASSERT( numPoints <= iMaxElems,
+        ABCA_ASSERT( numPoints <= iMaxElems && numPoints > -1,
                      "Too many points in SmallArrayRead" );
 
         oNumElems = ( size_t )numPoints;
@@ -159,6 +171,9 @@ ReadDimensions( hid_t iParent,
     // Assume a maximum rank of 128. This is totally reasonable.
     static const size_t maxRank = 128;
     static uint32_t dimVals[128];
+
+    std::cout << "ReadDimensions(): iParent fullname: "
+              << getFullDsetName( iParent ) << std::endl;
 
     size_t readRank;
     ReadSmallArray( iParent, iAttrName, H5T_STD_U32LE, H5T_NATIVE_UINT32,
@@ -190,6 +205,7 @@ ReadKey( hid_t iParent,
                         numRead,
                         ( void * )&oKey.digest );
         ABCA_ASSERT( numRead == 16, "Didn't read enough key bits" );
+
         return true;
     }
     else
@@ -229,7 +245,7 @@ ReadPropertyAndDataType( hid_t iParent,
                          AbcA::DataType &oDtype )
 {
     ABCA_ASSERT( iParent >= 0, "Invalid parent in ReadPropertyAndDataType" );
-    
+
     // It is an error for this to not exist.
     ABCA_ASSERT( H5Aexists( iParent, iPADName.c_str() ) > 0,
                  "Nonexistent property type attr: " << iPADName );
@@ -274,19 +290,19 @@ ReadPropertyAndDataType( hid_t iParent,
         // Read the pod type out of bits 2-5
         char podt = ( char )( ( bitField >> 2 ) & podMask );
         if ( podt != ( char )kBooleanPOD &&
-             
+
              podt != ( char )kUint8POD &&
              podt != ( char )kInt8POD &&
-             
+
              podt != ( char )kUint16POD &&
              podt != ( char )kInt16POD &&
-             
+
              podt != ( char )kUint32POD &&
              podt != ( char )kInt32POD &&
-             
+
              podt != ( char )kUint64POD &&
              podt != ( char )kInt64POD &&
-             
+
              podt != ( char )kFloat16POD &&
              podt != ( char )kFloat32POD &&
              podt != ( char )kFloat64POD &&
@@ -347,21 +363,21 @@ ReadTimeSamplingType( hid_t iParent,
             return true;
         }
         ABCA_ASSERT( spc > 1, "Corrupt TimeSamplingType spc: " << spc );
-        
+
         chrono_t tpc = 1.0;
         ABCA_ASSERT( H5Aexists( iParent, nameTPC.c_str() ) > 0,
                      "Missing time per cycle attribute: " << nameTPC );
-        
+
         ReadScalar( iParent, nameTPC,
                     H5T_IEEE_F64LE,
                     H5T_NATIVE_DOUBLE,
                     ( void * )&tpc );
-        
+
         ABCA_ASSERT( tpc > 0.0 && tpc <
                      AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE,
                      "Invalid Time Per Cycle: " << tpc );
 
-        // Cyclic with time per cycle 
+        // Cyclic with time per cycle
         oTimeSamplingType = AbcA::TimeSamplingType( spc, tpc );
         return true;
     }
@@ -441,7 +457,7 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
     }
     assert( iDataType.getPod() != kStringPOD &&
             iDataType.getPod() != kWstringPOD );
-    
+
     // Open the data set.
     hid_t dsetId = H5Dopen( iParent, iName.c_str(), H5P_DEFAULT );
     ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
@@ -467,7 +483,11 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
 
         foundDigest = ReadKey( dsetId, "key", key );
 
+        std::cout << "ReadArray(): checking cache for key.digest " << key.digest.str()
+                  << " for sample " << iName << std::endl;
+
         AbcA::ReadArraySampleID found = iCache->find( key );
+
         if ( found )
         {
             AbcA::ArraySamplePtr ret = found.getSample();
@@ -481,6 +501,7 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
             }
 
             // Got it!
+            std::cout << "ReadArray(): returning cached " << iName << std::endl;
             return ret;
         }
     }
@@ -503,11 +524,12 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
     if ( dspaceClass == H5S_SIMPLE )
     {
         // Get the dimensions
-        Dimensions dims;
+        //Dimensions dims;
+
         int rank = H5Sget_simple_extent_ndims( dspaceId );
         ABCA_ASSERT( rank >= 0,
                      "H5Sget_simple_extent_ndims() failed." );
-        
+
         HDimensions hdims;
         hdims.setRank( rank );
         rank = H5Sget_simple_extent_dims( dspaceId, hdims.rootPtr(), NULL );
@@ -517,20 +539,21 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
                      << std::endl
                      << "Expected rank: " << hdims.rank()
                      << " instead it was: " << rank );
-        
-        dims = hdims;
+
+        Dimensions dims( hdims );
+
         ABCA_ASSERT( dims.numPoints() > 0,
                      "Degenerate dims in Dataset read" );
-    
+
         // Create a buffer into which we shall read.
         ret = AbcA::AllocateArraySample( iDataType, dims );
         assert( ret->getData() );
-    
+
         // And... read into it.
         herr_t status = H5Dread( dsetId, iNativeType,
                                  H5S_ALL, H5S_ALL, H5P_DEFAULT,
                                  const_cast<void*>( ret->getData() ) );
-        
+
         ABCA_ASSERT( status >= 0, "H5Dread() failed." );
     }
     else if ( dspaceClass == H5S_NULL )
@@ -556,6 +579,11 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
         AbcA::ReadArraySampleID stored = iCache->store( key, ret );
         if ( stored )
         {
+            std::cout << "ReadArray(): storing " << iName << " with digest "
+                      << key.digest.str() << std::endl;
+
+            std::cout << "ReadArray(): stored dims: " << stored.getSample()->getDimensions() << std::endl;
+
             return stored.getSample();
         }
     }
@@ -574,7 +602,7 @@ bool ReadNumSamples( hid_t iParent,
                      uint32_t &oNumUniqueSamples )
 {
     ABCA_ASSERT( iParent >= 0, "Invalid parent in ReadNumSamples" );
-    
+
     // First, look to see whether the attribute exists in the first place.
     std::string numSamplesName = iPropName + ".nums";
     if ( H5Aexists( iParent, numSamplesName.c_str() ) > 0 )
@@ -648,18 +676,18 @@ ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
     {
         //std::cout << "Reading times from group: "
         //          << iTimeAttrName << std::endl;
-        
+
         // Create a buffer into which we shall read.
         AbcA::ArraySamplePtr ret =
             AbcA::AllocateArraySample( AbcA::DataType( kFloat64POD, 1 ),
                                        Dimensions( 1 ) );
         assert( ret->getData() );
-        
+
         ReadScalar( iParent, iTimeAttrName,
                     H5T_IEEE_F64LE,
                     H5T_NATIVE_DOUBLE,
                     const_cast<void*>( ret->getData() ) );
-        
+
         return ret;
     }
     else if ( DatasetExists( iParent, iTimeAttrName ) )
@@ -676,7 +704,7 @@ ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
         //std::cout << "Didn't find time samps thing named: "
         //          << iTimeAttrName << ", so making an array length 1."
         //          << std::endl;
-        
+
         // Create a buffer of 1, fill it with zero.
         // CJH: I'm not sure this is wise anymore.
         AbcA::ArraySamplePtr ret =

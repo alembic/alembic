@@ -59,6 +59,12 @@ struct ArraySampleKey : public boost::totally_ordered<ArraySampleKey>
 
     bool operator==( const ArraySampleKey &iRhs ) const
     {
+        std::cout << std::endl << "ArraySampleKey::==" << std::endl
+                  << "numBytes = " << numBytes << ", iRhs.numBytes = " << iRhs.numBytes << std::endl
+                  << "origPOD = " << origPOD << ", iRhs.origPOD = " << iRhs.origPOD << std::endl
+                  << "readPOD = " << readPOD << ", iRhs.readPOD = " << iRhs.readPOD << std::endl
+                  << "digest = " << digest << ", iRhs.digest = " << iRhs.digest << std::endl
+                  << std::endl;
         return ( ( numBytes == iRhs.numBytes ) &&
                  ( origPOD  == iRhs.origPOD  ) &&
                  ( readPOD  == iRhs.readPOD  ) &&
@@ -69,13 +75,13 @@ struct ArraySampleKey : public boost::totally_ordered<ArraySampleKey>
     {
         return ( numBytes < iRhs.numBytes ? true :
                  ( numBytes > iRhs.numBytes ? false :
-                   
+
                    ( origPOD < iRhs.origPOD ? true :
                      ( origPOD > iRhs.origPOD ? false :
-                       
+
                        ( readPOD < iRhs.readPOD ? true :
                          ( readPOD > iRhs.readPOD ? false :
-                           
+
                            ( digest < iRhs.digest ) ) ) ) ) ) );
     };
 
