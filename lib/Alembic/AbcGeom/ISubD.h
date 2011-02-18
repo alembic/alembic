@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/IGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -268,6 +269,15 @@ public:
         return smp;
     }
 
+    Abc::IV3fArrayProperty getPositions()
+    {
+        return m_positions;
+    }
+
+    IV2fGeomParam &getUVs() { return m_uvs; }
+
+    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -296,6 +306,10 @@ public:
         m_holes.reset();
 
         m_subdScheme.reset();
+
+        m_uvs.reset();
+
+        m_arbGeomParams.reset();
 
         Abc::ISchema<SubDSchemaInfo>::reset();
     }
@@ -340,6 +354,12 @@ protected:
 
     // subdivision scheme
     Abc::IStringProperty m_subdScheme;
+
+    // UVs
+    IV2fGeomParam m_uvs;
+
+    // random geometry parameters
+    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

@@ -98,6 +98,21 @@ void IArrayProperty::get( AbcA::ArraySamplePtr& oSamp,
 }
 
 //-*****************************************************************************
+bool IArrayProperty::getKey( AbcA::ArraySampleKey& oKey,
+                          const ISampleSelector &iSS )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getKey()" );
+
+    return m_property->getKey( iSS.getIndex( m_property->getTimeSampling() ),
+                           oKey );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // for error handler that don't throw
+    return false;
+}
+
+//-*****************************************************************************
 ICompoundProperty IArrayProperty::getParent()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getParent()" );

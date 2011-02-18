@@ -69,11 +69,11 @@ public:
 
     //! This templated, primary constructor creates a new simple xform writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
+    //! which can intrusively be converted to an CompoundPropertyReaderPtr
     //! to use as a parent, from which the error handler policy for
     //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set SchemaMatching.
+    //! can be used to override the ErrorHandlerPolicy, and to set
+    //! SchemaMatching.
     template <class COMPOUND_PTR>
     ISimpleXformSchema( COMPOUND_PTR iParent,
                         const std::string &iName,

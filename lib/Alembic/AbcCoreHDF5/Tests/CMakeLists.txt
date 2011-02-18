@@ -68,9 +68,14 @@ TARGET_LINK_LIBRARIES( AbcCoreHDF5_TimeSamplingTests ${TEST_LIBS} )
 ADD_EXECUTABLE( AbcCoreHDF5_ObjectTests ObjectTests.cpp )
 TARGET_LINK_LIBRARIES( AbcCoreHDF5_ObjectTests ${TEST_LIBS} )
 
+ADD_EXECUTABLE( AbcCoreHDF5_ConstantPropsTest ConstantPropsNumSampsTest.cpp )
+TARGET_LINK_LIBRARIES( AbcCoreHDF5_ConstantPropsTest ${TEST_LIBS} )
+
+
 ADD_TEST( AbcCoreHDF5_TEST1 AbcCoreHDF5_Test1 )
 ADD_TEST( AbcCoreHDF5_ArchiveTESTS AbcCoreHDF5_ArchiveTests )
 ADD_TEST( AbcCoreHDF5_ArrayPropertyTESTS AbcCoreHDF5_ArrayPropertyTests )
 ADD_TEST( AbcCoreHDF5_ScalarPropertyTESTS AbcCoreHDF5_ScalarPropertyTests )
 ADD_TEST( AbcCoreHDF5_TimeSamplingTESTS AbcCoreHDF5_TimeSamplingTests )
 ADD_TEST( AbcCoreHDF5_ObjectTESTS AbcCoreHDF5_ObjectTests )
+ADD_TEST( AbcCoreHDF5_ConstantPropsTest_TEST AbcCoreHDF5_ConstantPropsTest )

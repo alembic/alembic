@@ -42,18 +42,6 @@
 namespace Alembic {
 namespace AbcGeom {
 
-
-//! \brief Enum that indicates the type of transformational operation.
-//! This enum is used when encoding and decoding the transform operation data.
-enum XformOperationType
-{
-    kScaleOperation = 0,
-    kTranslateOperation = 1,
-    kRotateOperation = 2,
-    kMatrixOperation = 3
-};
-
-
 //! \brief The Matrix identifier hint.
 //! Some 3d packages (like Maya) may have certain transformation operations
 //! that aren't supported in other packages.  MatrixHint is meant to 
@@ -209,100 +197,6 @@ private:
 };
 
 typedef std::vector < XformOp > XformOpVec;
-
-//! Base class for holding transform operations, and the data which defines
-//! them.  This is useful for applications which only care about the operation
-//! type and the data that goes along with it, and not which channels are
-//! static or animated.
-class XformSample
-{
-public:
-    XformSample(XformOperationType iType) : m_type(iType) {}
-    XformOperationType getType() const {return m_type;}
-private:
-    XformOperationType m_type;
-};
-
-typedef boost::shared_ptr < XformSample > XformSamplePtr;
-typedef std::vector < XformSamplePtr > XformSampleVec;
-
-//! TranslateSample holds the translate vector.
-class TranslateSample : public XformSample
-{
-public:
-
-    TranslateSample(const Abc::V3d & iData);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kTranslateOperation then
-    //! the translate vector defaults to (0, 0, 0)
-    TranslateSample(XformSamplePtr iXform);
-
-    Abc::V3d get() const {return m_data;}
-
-    Abc::M44d getMatrix() const;
-
-private:
-    Abc::V3d m_data;
-};
-
-//! ScaleSample holds the scale vector.
-class ScaleSample : public XformSample
-{
-public:
-    ScaleSample(const Abc::V3d & iData);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kScaleOperation then
-    //! the scale vector defaults to (1, 1, 1)
-    ScaleSample(XformSamplePtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::V3d get() const {return m_data;}
-
-private:
-    Abc::V3d m_data;
-};
-
-class RotateSample : public XformSample
-{
-public:
-    RotateSample(const Abc::V3d & iAxis, double iAngle);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kRotateOperation then
-    //! the rotation axis defaults to (0, 0, 0) and the rotation angle
-    //! defaults to 0.
-    RotateSample(XformSamplePtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::V3d getAxis() const {return m_axis;}
-    double getAngle() const {return m_angle;}
-
-private:
-    Abc::V3d m_axis;
-    double m_angle;
-};
-
-class MatrixSample : public XformSample
-{
-public:
-    MatrixSample(const Abc::M44d & iMatrix);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kMatrixOperation then
-    //! the matrix defaults to identity.
-    MatrixSample(XformSamplePtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::M44d get() const {return m_matrix;}
-
-private:
-    Abc::M44d m_matrix;
-};
 
 } // End namespace AbcGeom
 } // End namespace Alembic

@@ -52,13 +52,6 @@ void AprImpl::readSample( hid_t iGroup,
                           AbcA::ArraySamplePtr& oSamplePtr )
 {
     assert( iGroup >= 0 );
-    
-    // If we've got it, use it!
-    if ( m_mostRecentSampleIndex == iSampleIndex && m_mostRecentSample )
-    {
-        oSamplePtr = m_mostRecentSample;
-        return;
-    }
 
     // Check index integrity.
     assert( iSampleIndex >= 0 && iSampleIndex < m_numUniqueSamples );
@@ -70,9 +63,50 @@ void AprImpl::readSample( hid_t iGroup,
     oSamplePtr = ReadArray( cachePtr, iGroup, iSampleName, dataType,
                             m_fileDataType,
                             m_nativeDataType );
-    
-    m_mostRecentSample = oSamplePtr;
-    m_mostRecentSampleIndex = iSampleIndex;
+}
+
+//-*****************************************************************************
+bool AprImpl::readKey( hid_t iGroup,
+                          const std::string &iSampleName,
+                          AbcA::ArraySampleKey& oKey )
+{
+    assert( iGroup >= 0 );
+
+    // Open the data set.
+    hid_t dsetId = H5Dopen( iGroup, iSampleName.c_str(), H5P_DEFAULT );
+    ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iSampleName );
+    DsetCloser dsetCloser( dsetId );
+
+    const AbcA::DataType &dataType = m_header->getDataType();
+    if (ReadKey( dsetId, "key", oKey ))
+    {
+        hid_t dspaceId = H5Dget_space( dsetId );
+        ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
+            << iSampleName );
+        DspaceCloser dspaceCloser( dspaceId );
+
+        oKey.readPOD = m_header->getDataType().getPod();
+        oKey.origPOD = oKey.readPOD;
+
+        oKey.numBytes = H5Sget_simple_extent_npoints( dspaceId );
+        if (oKey.origPOD == kStringPOD || oKey.origPOD == kWstringPOD)
+        {
+
+            hid_t dsetFtype = H5Dget_type( dsetId );
+            DtypeCloser dtypeCloser( dsetFtype );
+
+            // string arrays get packed together
+            oKey.numBytes *= H5Tget_size( dsetFtype );
+        }
+        else
+        {
+            oKey.numBytes *= m_header->getDataType().getNumBytes();
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 } // End namespace AbcCoreHDF5

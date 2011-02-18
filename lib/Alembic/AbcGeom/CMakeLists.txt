@@ -35,20 +35,24 @@
 # C++ files for this project
 SET( CXX_FILES
 
-  #ISimpleTransform.cpp
+  GeometryScope.cpp
 
   OSubD.cpp
   ISubD.cpp
 
-  #ICamera.cpp
-  #OCamera.cpp
+  OGeomParam.cpp
+  IGeomParam.cpp
 
-  GeometryScope.cpp
   OPolyMesh.cpp
   IPolyMesh.cpp
 
   OSimpleXform.cpp
   ISimpleXform.cpp
+
+  XformOp.cpp
+  XformSample.cpp
+  IXform.cpp
+  OXform.cpp
 
   OPoints.cpp
   IPoints.cpp
@@ -60,15 +64,14 @@ SET( H_FILES
 
   Foundation.h
 
-  SchemaInfoDeclarations.h
+  GeometryScope.h
+
+  OGeomParam.h
+  IGeomParam.h
 
   OSubD.h
   ISubD.h
 
-  #ICamera.h
-  #OCamera.h
-
-  GeometryScope.h
   OPolyMesh.h
   IPolyMesh.h
 
@@ -77,14 +80,14 @@ SET( H_FILES
   ISimpleXform.h
 
   XformOp.h
-  XformOp.cpp
+  XformSample.h
   IXform.h
-  IXform.cpp
   OXform.h
-  OXform.cpp
 
   OPoints.h
   IPoints.h
+
+  SchemaInfoDeclarations.h
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )

@@ -91,7 +91,7 @@ public:
     //! ...
     static const uint32_t ACYCLIC_NUM_SAMPLES; // set to infinity
     static const chrono_t ACYCLIC_TIME_PER_CYCLE; // set to infinity
-    
+
     //! IDENTITY
     //! ...
     TimeSamplingType()
@@ -123,13 +123,13 @@ public:
         ABCA_ASSERT(
             // Identity
             ( m_timePerCycle == 0.0 && m_numSamplesPerCycle == 0 ) ||
-            
+
             // Acyclic
-            ( m_timePerCycle == ACYCLIC_TIME_PER_CYCLE && 
+            ( m_timePerCycle == ACYCLIC_TIME_PER_CYCLE &&
               m_numSamplesPerCycle == ACYCLIC_NUM_SAMPLES ) ||
 
             // valid time per cycle
-            ( m_timePerCycle > 0.0 && 
+            ( m_timePerCycle > 0.0 &&
               m_timePerCycle < ACYCLIC_TIME_PER_CYCLE &&
 
               // and valid samples per cycle
@@ -193,6 +193,32 @@ private:
     chrono_t m_timePerCycle;
     bool m_retainConstantSampleTimes;
 };
+
+//-*****************************************************************************
+//! Prints out relevant information about the TimeSamplingType instance
+static std::ostream &operator<<( std::ostream &ostr, const TimeSamplingType &tst )
+{
+    std::string baseType( "" );
+
+    if ( tst.isIdentity() ) { baseType = "Identity"; }
+    else if ( tst.isUniform() ) { baseType = "Uniform"; }
+    else if ( tst.isCyclic() ) { baseType = "Cyclic"; }
+    else { baseType = "Acyclic"; }
+
+    ostr << baseType << " time sampling";
+
+    if ( tst.isUniform() )
+    {
+        ostr << " with " << tst.getTimePerCycle() << " chrono_ts/cycle";
+    }
+    else if ( tst.isCyclic() )
+    {
+        ostr << " with " << tst.getNumSamplesPerCycle() << " samps/cycle "
+             << "and " << tst.getTimePerCycle() << " chrono_ts/cycle";
+    }
+
+    return ostr;
+}
 
 } // End namespace v1
 } // End namespace AbcCoreAbstract

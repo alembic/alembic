@@ -24,8 +24,19 @@
         also end up here
 
  prman
-     `-- Procedural - start of a Renderman DSO suitable for use in a
+ |
+ `-- Procedural - start of a Renderman DSO suitable for use in a
          'Procedural "DynamicLoad"' RIB statement.
+
+ maya
+ |
+ `-- AbcExport - Official Maya export plugin.
+ |
+ `-- AbcImport - Official Maya import plugin.
+
+ python
+ |
+ `-- alembic - Start of Boost.Python bindings.
 
  examples - Unsupported examples that use Alembic
  |

@@ -44,6 +44,7 @@ SET( H_FILES
      IPolyMeshDrw.h
      ISimpleXformDrw.h
      ISubDDrw.h
+     IXformDrw.h
      MeshDrwHelper.h
      Scene.h
      Transport.h
@@ -56,6 +57,7 @@ SET( CXX_FILES
      IPolyMeshDrw.cpp
      ISimpleXformDrw.cpp
      ISubDDrw.cpp
+     IXformDrw.cpp
      MeshDrwHelper.cpp
      Scene.cpp
      Transport.cpp
@@ -63,7 +65,7 @@ SET( CXX_FILES
      main.cpp )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
-SET( THIS_LIBS 
+SET( THIS_LIBS
      AlembicAbcGeom
      AlembicAbc
      AlembicAbcCoreHDF5

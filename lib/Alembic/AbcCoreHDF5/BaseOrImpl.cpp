@@ -99,7 +99,7 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
     // Verify that it's a group.
     ABCA_ASSERT( oinfo.type == H5O_TYPE_GROUP,
                  "Only groups allowed in Objects" );
-    
+
     // If the name is ".prop", mark properties found
     if ( std::string( iName ) == ".prop" )
     {
@@ -139,7 +139,7 @@ BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
 
     hsize_t idx = 0;
     hid_t id = m_proto->getGroup();
-    
+
     herr_t status = H5Literate( id,
                                 H5_INDEX_CRT_ORDER,
                                 H5_ITER_INC,
@@ -222,7 +222,7 @@ const AbcA::ObjectHeader & BaseOrImpl::getChildHeader( size_t i )
         ABCA_THROW( "Out of range index in OrImpl::getChildHeader: "
                      << i );
     }
-    
+
     return m_protoObjects[i]->getHeader();
 }
 

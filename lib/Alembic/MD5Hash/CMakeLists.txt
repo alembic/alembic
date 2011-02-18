@@ -44,7 +44,6 @@ SET( H_FILES
      Digest.h 
      Foundation.h 
      MD5.h 
-     MapUtil.h 
      Process.h )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )

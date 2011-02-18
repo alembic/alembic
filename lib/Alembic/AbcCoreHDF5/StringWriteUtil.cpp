@@ -388,6 +388,7 @@ WriteStringArrayT( WrittenArraySampleMap &iMap,
         dsetId = H5Dcreate2( iGroup, iName.c_str(), GetFileDtype<CharT>(),
                              dspaceId, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
     }
+    DsetCloser dsetCloser(dsetId);
 
     ABCA_ASSERT( dsetId >= 0,
                  "WriteArray() Failed in dataset constructor" );

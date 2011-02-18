@@ -1,0 +1,79 @@
+##-*****************************************************************************
+##
+## Copyright (c) 2009-2010, Industrial Light & Magic,
+##   a division of Lucasfilm Entertainment Company Ltd.
+##
+## All rights reserved.
+##
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions are
+## met:
+## *       Redistributions of source code must retain the above copyright
+## notice, this list of conditions and the following disclaimer.
+## *       Redistributions in binary form must reproduce the above
+## copyright notice, this list of conditions and the following disclaimer
+## in the documentation and/or other materials provided with the
+## distribution.
+## *       Neither the name of Industrial Light & Magic nor the names of
+## its contributors may be used to endorse or promote products derived
+## from this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+## LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+## A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+## OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+## SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+## LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+## DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+## THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##
+##-*****************************************************************************
+
+FIND_FILE( ALEMBIC_PYTHON_LIBRARY libpython2.6.a
+           PATHS /usr/lib64/python2.6/config
+                 /usr/lib64
+                 /usr/lib )
+
+IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
+
+  MESSAGE( STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}" )
+
+  SET( PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY} )
+
+  SET( CORE_LIBS
+    AlembicAbcGeom
+    AlembicAbc
+    AlembicAbcCoreHDF5
+    AlembicAbcCoreAbstract
+    AlembicMD5Hash
+    AlembicUtil )
+
+  SET( CPP_FILES
+    AbcEnums.cpp
+    SampleSelector.cpp
+    IObject.cpp
+    IArchive.cpp
+    CoreAbstractTypes.cpp
+    ICompoundProperty.cpp
+    ITypedScalarProperties.cpp
+    IUntypedProperties.cpp
+    main.cpp )
+
+  LINK_LIBRARIES( ${CORE_LIBS}
+                  ${ALEMBIC_HDF5_LIBS}
+                  ${PLIBS}
+                  ${ALEMBIC_ILMBASE_LIBS}
+                  ${ZLIB_LIBRARIES}
+                  m )
+
+  INCLUDE_DIRECTORIES( "/usr/include/python2.6" "${ALEMBIC_SOURCE_DIR}/lib" )
+
+  ADD_LIBRARY( _abc SHARED ${CPP_FILES} )
+
+  INSTALL( TARGETS _abc
+           LIBRARY DESTINATION lib )
+
+ENDIF()

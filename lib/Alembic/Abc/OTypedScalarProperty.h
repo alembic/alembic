@@ -229,6 +229,16 @@ typedef OTypedScalarProperty<V3iTPTraits>             OV3iProperty;
 typedef OTypedScalarProperty<V3fTPTraits>             OV3fProperty;
 typedef OTypedScalarProperty<V3dTPTraits>             OV3dProperty;
 
+typedef OTypedScalarProperty<P2sTPTraits>             OP2sProperty;
+typedef OTypedScalarProperty<P2iTPTraits>             OP2iProperty;
+typedef OTypedScalarProperty<P2fTPTraits>             OP2fProperty;
+typedef OTypedScalarProperty<P2dTPTraits>             OP2dProperty;
+
+typedef OTypedScalarProperty<P3sTPTraits>             OP3sProperty;
+typedef OTypedScalarProperty<P3iTPTraits>             OP3iProperty;
+typedef OTypedScalarProperty<P3fTPTraits>             OP3fProperty;
+typedef OTypedScalarProperty<P3dTPTraits>             OP3dProperty;
+
 typedef OTypedScalarProperty<Box2sTPTraits>           OBox2sProperty;
 typedef OTypedScalarProperty<Box2iTPTraits>           OBox2iProperty;
 typedef OTypedScalarProperty<Box2fTPTraits>           OBox2fProperty;
@@ -254,6 +264,9 @@ typedef OTypedScalarProperty<C3cTPTraits>             OC3cProperty;
 typedef OTypedScalarProperty<C4hTPTraits>             OC4hProperty;
 typedef OTypedScalarProperty<C4fTPTraits>             OC4fProperty;
 typedef OTypedScalarProperty<C4cTPTraits>             OC4cProperty;
+
+typedef OTypedScalarProperty<N2fTPTraits>             ON2fProperty;
+typedef OTypedScalarProperty<N2dTPTraits>             ON2dProperty;
 
 typedef OTypedScalarProperty<N3fTPTraits>             ON3fProperty;
 typedef OTypedScalarProperty<N3dTPTraits>             ON3dProperty;

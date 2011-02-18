@@ -58,12 +58,55 @@ void OPolyMeshSchema::set( const Sample &iSamp,
         m_positions.set( iSamp.getPositions(), iSS );
         m_indices.set( iSamp.getIndices(), iSS );
         m_counts.set( iSamp.getCounts(), iSS );
+
+        if ( iSamp.getUVs().getVals() )
+        {
+            if ( iSamp.getUVs().getIndices() )
+            {
+                // UVs are indexed
+                m_uvs = OV2fGeomParam( *this, "uv", true,
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
+            }
+            else
+            {
+                // UVs are not indexed
+                m_uvs = OV2fGeomParam( *this, "uv", false,
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
+            }
+
+            m_uvs.set( iSamp.getUVs(), iSS );
+        }
+        if ( iSamp.getNormals().getVals() )
+        {
+            if ( iSamp.getNormals().getIndices() )
+            {
+                // normals are indexed
+                m_normals = ON3fGeomParam( *this, "N", true,
+                                           iSamp.getNormals().getScope(),
+                                           1, this->getTimeSamplingType() );
+            }
+            else
+            {
+                // normals are not indexed
+                m_normals = ON3fGeomParam( *this, "N", false,
+                                           iSamp.getNormals().getScope(), 1,
+                                           this->getTimeSamplingType() );
+            }
+
+            m_normals.set( iSamp.getNormals(), iSS );
+        }
     }
     else
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions(), iSS );
         SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
         SetPropUsePrevIfNull( m_counts, iSamp.getCounts(), iSS );
+
+        // OGeomParam will automatically use SetPropUsePrevIfNull internally
+        if ( m_uvs ) { m_uvs.set( iSamp.getUVs(), iSS ); }
+        if ( m_normals ) { m_normals.set( iSamp.getNormals(), iSS ); }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -77,6 +120,9 @@ void OPolyMeshSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     m_positions.setFromPrevious( iSS );
     m_indices.setFromPrevious( iSS );
     m_counts.setFromPrevious( iSS );
+
+    if ( m_uvs ) { m_uvs.setFromPrevious( iSS ); }
+    if ( m_normals ) { m_normals.setFromPrevious( iSS ); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -94,7 +140,27 @@ void OPolyMeshSchema::init( const AbcA::TimeSamplingType &iTst )
 
     m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
 
+    // UVs and Normals are created on first call to set()
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
 }
 
 } // End namespace AbcGeom

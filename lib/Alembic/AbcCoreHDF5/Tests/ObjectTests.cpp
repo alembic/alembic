@@ -120,6 +120,14 @@ void testObjects()
         gchild = child->getChild(2);
         TESTING_ASSERT(gchild->getNumChildren() == 0);
         TESTING_ASSERT(gchild->getName() == "pizza");
+
+        A5::ReadArchive r2;
+        AbcA::ArchiveReaderPtr a2 = r2( archiveName );
+        AbcA::ObjectReaderPtr archive2 = a2->getTop();
+        AbcA::ObjectReaderPtr child2 = archive->getChild(0);
+        AbcA::ObjectReaderPtr gchild2 = child2->getChild(0);
+        TESTING_ASSERT(gchild2->getNumChildren() == 0);
+        TESTING_ASSERT(gchild2->getName() == "food");
     }
 }
 

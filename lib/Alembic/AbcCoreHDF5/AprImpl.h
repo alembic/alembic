@@ -57,7 +57,6 @@ public:
       : SimplePrImpl<AbcA::ArrayPropertyReader,
                      AprImpl,
                      AbcA::ArraySamplePtr&>( iParent, iParentGroup, iHeader )
-      , m_mostRecentSampleIndex( -1 )
     {
         if ( m_header->getPropertyType() != AbcA::kArrayProperty )
         {
@@ -81,10 +80,11 @@ protected:
                      AbcA::ArraySamplePtr& oSamplePtr );
 
     //-*************************************************************************
-    // The most recently read sample, cached for ease. This might be really
-    // super dumb.
-    AbcA::ArraySamplePtr m_mostRecentSample;
-    AbcA::index_t m_mostRecentSampleIndex;
+    // This function is called by SimplePrImpl to provide the actual key reading
+    bool readKey( hid_t iGroup,
+                  const std::string &iSampleName,
+                  AbcA::ArraySampleKey & oSamplePtr );
+
 };
 
 } // End namespace AbcCoreHDF5

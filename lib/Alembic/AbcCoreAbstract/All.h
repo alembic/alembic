@@ -42,6 +42,7 @@
 #include <Alembic/AbcCoreAbstract/ArrayPropertyReader.h>
 #include <Alembic/AbcCoreAbstract/ArrayPropertyWriter.h>
 #include <Alembic/AbcCoreAbstract/ArraySample.h>
+#include <Alembic/AbcCoreAbstract/ArraySampleKey.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyReader.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyWriter.h>
 #include <Alembic/AbcCoreAbstract/CompoundPropertyReader.h>

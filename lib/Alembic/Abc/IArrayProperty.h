@@ -126,6 +126,11 @@ public:
     void get( AbcA::ArraySamplePtr& oSample,
               const ISampleSelector &iSS = ISampleSelector() );
 
+    //! Get a key from an address of a datum.
+    //! ...
+    bool getKey( AbcA::ArraySampleKey& oKey,
+              const ISampleSelector &iSS = ISampleSelector() );
+
     //! Return the parent compound property, handily wrapped in a
     //! ICompoundProperty wrapper.
     ICompoundProperty getParent();

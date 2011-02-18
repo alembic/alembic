@@ -61,8 +61,21 @@ ProtoObjectReader::ProtoObjectReader( hid_t iParent,
     AbcA::MetaData mdata;
     ReadMetaData( m_group, ".prop.meta", mdata );
 
+    std::string fullChildName;
+
+    if ( iParentFullPathName == "/" )
+    {
+        fullChildName = "/" + iName;
+    }
+    else
+    {
+        fullChildName = iParentFullPathName + "/" + iName;
+    }
+
+    if ( fullChildName == "/ABC" ) { fullChildName = "/"; }
+
     m_header = AbcA::ObjectHeader( iName,
-                                   iParentFullPathName + "/" + iName,
+                                   fullChildName,
                                    mdata );
 }
 

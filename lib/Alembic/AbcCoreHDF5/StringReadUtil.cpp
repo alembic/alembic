@@ -364,14 +364,31 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
     ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
     DsetCloser dsetCloser( dsetId );
 
+    // Read the data space.
+    hid_t dspaceId = H5Dget_space( dsetId );
+    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
+                 << iName );
+    DspaceCloser dspaceCloser( dspaceId );
+
     // Read the digest, if there's a cache.
     AbcA::ArraySample::Key key;
-    bool foundDigest = ReadKey( dsetId, "key", key );
+    bool foundDigest = false;
 
     // If we found a digest and there's a cache, see
     // if we're in there, and return it if so.
-    if ( foundDigest && iCache )
+    if ( iCache )
     {
+        key.origPOD = iDataType.getPod();
+        key.readPOD = key.origPOD;
+
+        hid_t dsetFtype = H5Dget_type( dsetId );
+        DtypeCloser dtypeCloser( dsetFtype );
+
+        // string arrays get packed together
+        key.numBytes = H5Sget_simple_extent_npoints( dspaceId ) *
+            H5Tget_size( dsetFtype );
+
+        foundDigest = ReadKey( dsetId, "key", key );
         AbcA::ReadArraySampleID found = iCache->find( key );
         if ( found )
         {
@@ -422,12 +439,6 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
     ReadDimensions( dsetId, "dims", realDims );
     ABCA_ASSERT( realDims.rank() > 0,
                  "Degenerate rank in Dataset read" );
-
-    // Read the data space.
-    hid_t dspaceId = H5Dget_space( dsetId );
-    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
-                 << iName );
-    DspaceCloser dspaceCloser( dspaceId );
 
     AbcA::ArraySamplePtr ret;
 

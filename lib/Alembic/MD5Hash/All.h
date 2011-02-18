@@ -39,7 +39,6 @@
 
 #include <Alembic/MD5Hash/Foundation.h>
 #include <Alembic/MD5Hash/Digest.h>
-#include <Alembic/MD5Hash/MapUtil.h>
 #include <Alembic/MD5Hash/MD5.h>
 #include <Alembic/MD5Hash/Process.h>
 

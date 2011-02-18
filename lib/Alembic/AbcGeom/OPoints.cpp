@@ -77,6 +77,24 @@ void OPointsSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 }
 
 //-*****************************************************************************
+Abc::OCompoundProperty OPointsSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
+}
+
+//-*****************************************************************************
 void OPointsSchema::init( const AbcA::TimeSamplingType &iTst )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::init()" );

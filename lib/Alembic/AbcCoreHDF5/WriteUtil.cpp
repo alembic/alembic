@@ -129,7 +129,7 @@ WriteKey( hid_t iHashDset,
                      H5T_STD_U8LE,
                      H5T_NATIVE_UINT8,
                      16,
-                     ( const void * )&iKey );
+                     ( const void * )&iKey.digest );
 }
 
 //-*****************************************************************************
@@ -375,7 +375,8 @@ WriteArray( WrittenArraySampleMap &iMap,
                              iFileType, dspaceId,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
     }
-    
+    DsetCloser dsetCloser(dsetId);
+
     ABCA_ASSERT( dsetId >= 0,
                  "WriteArray() Failed in dataset constructor" );
 
@@ -409,16 +410,29 @@ CopyWrittenArray( hid_t iGroup,
     ABCA_ASSERT( ( bool )iRef,
                   "CopyWrittenArray() passed a bogus ref" );
 
+    hid_t fid = H5Iget_file_id(iGroup);
+    ABCA_ASSERT( fid >= 0,
+                "CopyWrittenArray() Could not get file ID from iGroup" );
+
+    hid_t did = H5Dopen( fid,
+        iRef->getObjectLocation().c_str(), H5P_DEFAULT );
+    DsetCloser dcloser(did);
+
     // We have a reference. Create a link to it.
-    herr_t status = H5Lcreate_hard( iRef->getObjectLocationID(),
+    // We are manually getting the source dataset instead of using
+    // fid and iName because of a bug in HDF5 1.8.5 and earlier.
+    // Files written using that approach would sometimes be corrupted.
+    herr_t status = H5Lcreate_hard( did,
                                     ".",
                                     iGroup,
                                     iName.c_str(),
                                     H5P_DEFAULT,
                                     H5P_DEFAULT );
+
+    H5Fclose( fid );
     ABCA_ASSERT( status >= 0,
                  "H5Lcreate_hard failed!" << std::endl
-                  << "Dset obj id: " << iRef->getObjectLocationID() << std::endl
+                  << "Dset obj id: " << did << std::endl
                   << "Link loc id: " << iGroup << std::endl
                   << "Link name: " << iName );
 }

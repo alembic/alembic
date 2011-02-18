@@ -193,6 +193,16 @@ typedef TypedArraySample<V3iTPTraits> V3iArraySample;
 typedef TypedArraySample<V3fTPTraits> V3fArraySample;
 typedef TypedArraySample<V3dTPTraits> V3dArraySample;
 
+typedef TypedArraySample<P2sTPTraits> P2sArraySample;
+typedef TypedArraySample<P2iTPTraits> P2iArraySample;
+typedef TypedArraySample<P2fTPTraits> P2fArraySample;
+typedef TypedArraySample<P2dTPTraits> P2dArraySample;
+
+typedef TypedArraySample<P3sTPTraits> P3sArraySample;
+typedef TypedArraySample<P3iTPTraits> P3iArraySample;
+typedef TypedArraySample<P3fTPTraits> P3fArraySample;
+typedef TypedArraySample<P3dTPTraits> P3dArraySample;
+
 typedef TypedArraySample<Box3sTPTraits> Box3sArraySample;
 typedef TypedArraySample<Box3iTPTraits> Box3iArraySample;
 typedef TypedArraySample<Box3fTPTraits> Box3fArraySample;
@@ -214,6 +224,9 @@ typedef TypedArraySample<C3cTPTraits> C3cArraySample;
 typedef TypedArraySample<C4hTPTraits> C4hArraySample;
 typedef TypedArraySample<C4fTPTraits> C4fArraySample;
 typedef TypedArraySample<C4cTPTraits> C4cArraySample;
+
+typedef TypedArraySample<N2fTPTraits> N2fArraySample;
+typedef TypedArraySample<N2dTPTraits> N2dArraySample;
 
 typedef TypedArraySample<N3fTPTraits> N3fArraySample;
 typedef TypedArraySample<N3dTPTraits> N3dArraySample;
@@ -244,6 +257,16 @@ typedef boost::shared_ptr<V3iArraySample> V3iArraySamplePtr;
 typedef boost::shared_ptr<V3fArraySample> V3fArraySamplePtr;
 typedef boost::shared_ptr<V3dArraySample> V3dArraySamplePtr;
 
+typedef boost::shared_ptr<P2sArraySample> P2sArraySamplePtr;
+typedef boost::shared_ptr<P2iArraySample> P2iArraySamplePtr;
+typedef boost::shared_ptr<P2fArraySample> P2fArraySamplePtr;
+typedef boost::shared_ptr<P2dArraySample> P2dArraySamplePtr;
+
+typedef boost::shared_ptr<P3sArraySample> P3sArraySamplePtr;
+typedef boost::shared_ptr<P3iArraySample> P3iArraySamplePtr;
+typedef boost::shared_ptr<P3fArraySample> P3fArraySamplePtr;
+typedef boost::shared_ptr<P3dArraySample> P3dArraySamplePtr;
+
 typedef boost::shared_ptr<Box3sArraySample> Box3sArraySamplePtr;
 typedef boost::shared_ptr<Box3iArraySample> Box3iArraySamplePtr;
 typedef boost::shared_ptr<Box3fArraySample> Box3fArraySamplePtr;
@@ -265,6 +288,9 @@ typedef boost::shared_ptr<C3cArraySample> C3cArraySamplePtr;
 typedef boost::shared_ptr<C4hArraySample> C4hArraySamplePtr;
 typedef boost::shared_ptr<C4fArraySample> C4fArraySamplePtr;
 typedef boost::shared_ptr<C4cArraySample> C4cArraySamplePtr;
+
+typedef boost::shared_ptr<N2fArraySample> N2fArraySamplePtr;
+typedef boost::shared_ptr<N2dArraySample> N2dArraySamplePtr;
 
 typedef boost::shared_ptr<N3fArraySample> N3fArraySamplePtr;
 typedef boost::shared_ptr<N3dArraySample> N3dArraySamplePtr;

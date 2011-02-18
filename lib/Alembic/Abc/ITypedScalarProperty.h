@@ -252,6 +252,16 @@ typedef ITypedScalarProperty<V3iTPTraits>             IV3iProperty;
 typedef ITypedScalarProperty<V3fTPTraits>             IV3fProperty;
 typedef ITypedScalarProperty<V3dTPTraits>             IV3dProperty;
 
+typedef ITypedScalarProperty<P2sTPTraits>             IP2sProperty;
+typedef ITypedScalarProperty<P2iTPTraits>             IP2iProperty;
+typedef ITypedScalarProperty<P2fTPTraits>             IP2fProperty;
+typedef ITypedScalarProperty<P2dTPTraits>             IP2dProperty;
+
+typedef ITypedScalarProperty<P3sTPTraits>             IP3sProperty;
+typedef ITypedScalarProperty<P3iTPTraits>             IP3iProperty;
+typedef ITypedScalarProperty<P3fTPTraits>             IP3fProperty;
+typedef ITypedScalarProperty<P3dTPTraits>             IP3dProperty;
+
 typedef ITypedScalarProperty<Box2sTPTraits>           IBox2sProperty;
 typedef ITypedScalarProperty<Box2iTPTraits>           IBox2iProperty;
 typedef ITypedScalarProperty<Box2fTPTraits>           IBox2fProperty;
@@ -277,6 +287,9 @@ typedef ITypedScalarProperty<C3cTPTraits>             IC3cProperty;
 typedef ITypedScalarProperty<C4hTPTraits>             IC4hProperty;
 typedef ITypedScalarProperty<C4fTPTraits>             IC4fProperty;
 typedef ITypedScalarProperty<C4cTPTraits>             IC4cProperty;
+
+typedef ITypedScalarProperty<N2fTPTraits>             IN2fProperty;
+typedef ITypedScalarProperty<N2dTPTraits>             IN2dProperty;
 
 typedef ITypedScalarProperty<N3fTPTraits>             IN3fProperty;
 typedef ITypedScalarProperty<N3dTPTraits>             IN3dProperty;

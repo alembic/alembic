@@ -69,6 +69,8 @@
 // to keep this example code clean.
 #include <Alembic/AbcGeom/Tests/MeshData.h>
 
+#include "Assert.h"
+
 //-*****************************************************************************
 //-*****************************************************************************
 // NAMESPACES
@@ -101,7 +103,7 @@ void Example1_MeshOut()
 
         // The hard link to the implementation.
         Alembic::AbcCoreHDF5::WriteArchive(),
-        
+
         // The file name.
         // Because we're an OArchive, this is creating (or clobbering)
         // the archive with this filename.
@@ -111,11 +113,16 @@ void Example1_MeshOut()
     OPolyMesh meshyObj( OObject( archive, kTop ), "meshy" );
     OPolyMeshSchema &mesh = meshyObj.getSchema();
 
-    // Add normals & UVs to it.
-    MetaData normsUvsMeta;
-    SetGeometryScope( normsUvsMeta, kFacevaryingScope );
-    OV3fArrayProperty Nprop( mesh, "N", normsUvsMeta );
-    OV2fArrayProperty STprop( mesh, "st", normsUvsMeta );
+    // UVs and Normals use GeomParams, which can be written or read
+    // as indexed or not, as you'd like.
+    OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
+                                                  g_numUVs ),
+                                  kFacevaryingScope );
+    // indexed normals
+    ON3fGeomParam::Sample nsamp( N3fArraySample( (const N3f *)g_normals,
+                                                 g_numNormals ),
+                                 UInt32ArraySample( g_uindices, g_numIndices),
+                                                    kFacevaryingScope );
 
     // Set a mesh sample.
     // We're creating the sample inline here,
@@ -124,12 +131,11 @@ void Example1_MeshOut()
     OPolyMeshSchema::Sample mesh_samp(
         V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
         Int32ArraySample( g_indices, g_numIndices ),
-        Int32ArraySample( g_counts, g_numCounts ) );
+        Int32ArraySample( g_counts, g_numCounts ),
+        uvsamp, nsamp );
 
     // Set the sample.
     mesh.set( mesh_samp );
-    Nprop.set( V3fArraySample( ( const V3f * )g_normals, g_numNormals ) );
-    STprop.set( V2fArraySample( ( const V2f * )g_uvs, g_numUVs ) );
 
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish
@@ -145,17 +151,36 @@ void Example1_MeshIn()
 
     IPolyMesh meshyObj( IObject( archive, kTop ), "meshy" );
     IPolyMeshSchema &mesh = meshyObj.getSchema();
-    IV3fArrayProperty N( mesh, "N" );
-    IV2fArrayProperty st( mesh, "st" );
-    
+    IN3fGeomParam N = mesh.getNormals();
+    IV2fGeomParam uv = mesh.getUVs();
+
+    TESTING_ASSERT( N.isIndexed() );
+
+    TESTING_ASSERT( ! uv.isIndexed() );
+
     IPolyMeshSchema::Sample mesh_samp;
     mesh.get( mesh_samp );
 
-    V3fArraySamplePtr Nsamp;
-    N.get( Nsamp );
+    ICompoundProperty arbattrs = mesh.getArbGeomParams();
 
-    V2fArraySamplePtr stSamp;
-    st.get( stSamp );
+    // we didn't set any on write, so on read, it should be an invalid container
+    TESTING_ASSERT( ! arbattrs );
+
+    // getExpandedValue() takes an optional ISampleSelector;
+    // getVals() returns a TypedArraySamplePtr
+    N3fArraySamplePtr nsp = N.getExpandedValue().getVals();
+
+    N3f n0 = (*nsp)[0];
+
+    TESTING_ASSERT( n0 == N3f( -1.0f, 0.0f, 0.0f ) );
+    std::cout << "0th normal: " << n0 << std::endl;
+
+    IV2fGeomParam::Sample uvsamp = uv.getIndexedValue();
+
+    TESTING_ASSERT( (*(uvsamp.getIndices()))[1] == 1 );
+    V2f uv2 = (*(uvsamp.getVals()))[2];
+    TESTING_ASSERT( uv2 == V2f( 1.0f, 1.0f ) );
+    std::cout << "2th UV: " << uv2 << std::endl;
 
     std::cout << "Mesh num vertices: "
               << mesh_samp.getPositions()->size() << std::endl;
@@ -227,8 +252,8 @@ void Time_Sampled_Mesh_Test0_Reader()
         //   std::cout << posSamp->get()[0] << std::endl;
     }
 
-    
-    
+
+
 
     IPolyMeshTrait::Sample mesh_samp;
     mesh.get( mesh_samp );

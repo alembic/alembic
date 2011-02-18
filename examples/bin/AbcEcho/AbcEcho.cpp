@@ -50,16 +50,6 @@ static const std::string g_sep( ";" );
 void visitProperties( ICompoundProperty, std::string & );
 
 //-*****************************************************************************
-std::string stripABC( const std::string &iPath )
-{
-    if ( iPath.substr( 0, 4 ) == "/ABC" )
-    {
-        return iPath.substr( 4, iPath.size() );
-    }
-    else { return iPath; }
-}
-
-//-*****************************************************************************
 template <class PROP>
 void visitSimpleProperty( PROP iProp, const std::string &iIndent )
 {
@@ -79,7 +69,8 @@ void visitSimpleProperty( PROP iProp, const std::string &iIndent )
     mdstring += dtype.str();
 
     std::cout << iIndent << "  " << ptype << "name=" << iProp.getName()
-              << g_sep << mdstring << std::endl;
+              << g_sep << mdstring << g_sep << "numsamps="
+              << iProp.getNumSamples() << std::endl;
 }
 
 //-*****************************************************************************
@@ -138,10 +129,9 @@ void visitObject( IObject iObj,
     // and then it has a compound property full of properties.
     std::string path = iObj.getFullName();
 
-    if ( path != "/ABC" )
+    if ( path != "/" )
     {
-        std::cout << "Object " << "name=" << stripABC( path )
-                  << std::endl;
+        std::cout << "Object " << "name=" << path << std::endl;
     }
 
     // Get the properties.

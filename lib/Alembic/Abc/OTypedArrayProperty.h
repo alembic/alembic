@@ -67,7 +67,7 @@ public:
 
     //! This will check whether or not a given entity (as represented by
     //! a metadata) strictly matches the interpretation of this
-    //! schema object
+    //! typed property
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
@@ -77,8 +77,8 @@ public:
     }
 
     //! This will check whether or not a given object (as represented by
-    //! an object header) strictly matches the interpretation of this
-    //! schema object, as well as the data type.
+    //! an property header) strictly matches the interpretation of this
+    //! typed property, as well as the data type.
     static bool matches( const AbcA::PropertyHeader &iHeader,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
@@ -233,6 +233,16 @@ typedef OTypedArrayProperty<V3iTPTraits>             OV3iArrayProperty;
 typedef OTypedArrayProperty<V3fTPTraits>             OV3fArrayProperty;
 typedef OTypedArrayProperty<V3dTPTraits>             OV3dArrayProperty;
 
+typedef OTypedArrayProperty<P2sTPTraits>             OP2sArrayProperty;
+typedef OTypedArrayProperty<P2iTPTraits>             OP2iArrayProperty;
+typedef OTypedArrayProperty<P2fTPTraits>             OP2fArrayProperty;
+typedef OTypedArrayProperty<P2dTPTraits>             OP2dArrayProperty;
+
+typedef OTypedArrayProperty<P3sTPTraits>             OP3sArrayProperty;
+typedef OTypedArrayProperty<P3iTPTraits>             OP3iArrayProperty;
+typedef OTypedArrayProperty<P3fTPTraits>             OP3fArrayProperty;
+typedef OTypedArrayProperty<P3dTPTraits>             OP3dArrayProperty;
+
 typedef OTypedArrayProperty<Box2sTPTraits>           OBox2sArrayProperty;
 typedef OTypedArrayProperty<Box2iTPTraits>           OBox2iArrayProperty;
 typedef OTypedArrayProperty<Box2fTPTraits>           OBox2fArrayProperty;
@@ -258,6 +268,9 @@ typedef OTypedArrayProperty<C3cTPTraits>             OC3cArrayProperty;
 typedef OTypedArrayProperty<C4hTPTraits>             OC4hArrayProperty;
 typedef OTypedArrayProperty<C4fTPTraits>             OC4fArrayProperty;
 typedef OTypedArrayProperty<C4cTPTraits>             OC4cArrayProperty;
+
+typedef OTypedArrayProperty<N2fTPTraits>             ON2fArrayProperty;
+typedef OTypedArrayProperty<N2dTPTraits>             ON2dArrayProperty;
 
 typedef OTypedArrayProperty<N3fTPTraits>             ON3fArrayProperty;
 typedef OTypedArrayProperty<N3dTPTraits>             ON3dArrayProperty;

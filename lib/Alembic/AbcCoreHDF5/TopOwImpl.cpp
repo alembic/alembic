@@ -47,11 +47,11 @@ TopOwImpl::TopOwImpl( AwImpl &iArchive,
                       const AbcA::MetaData &iMetaData )
   : BaseOwImpl( iParentGroup, "ABC", iMetaData )
   , m_archiveRef( iArchive )
-  , m_header( "ABC", "/ABC", iMetaData )
+  , m_header( "ABC", "/", iMetaData )
 {
     // Nothing!
 }
-    
+
 //-*****************************************************************************
 const AbcA::ObjectHeader & TopOwImpl::getHeader() const
 {

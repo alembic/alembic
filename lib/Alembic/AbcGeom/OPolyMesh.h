@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -62,16 +63,23 @@ public:
         Sample( const Abc::V3fArraySample &iPos )
           : m_positions( iPos ) {}
 
-        //! Creates a sample with position data, index data, and count data.
+
+        //! Creates a sample with position data, index data, count data,
+        //! and optional UV and Normals data.
         //! For specifying samples with an explicit topology. The first
         //! sample must be full like this. Subsequent samples may also
         //! be full like this, which would indicate a change of topology
         Sample( const Abc::V3fArraySample &iPos,
                 const Abc::Int32ArraySample &iInd,
-                const Abc::Int32ArraySample &iCnt )
+                const Abc::Int32ArraySample &iCnt,
+                const OV2fGeomParam::Sample &iUVs = OV2fGeomParam::Sample(),
+                const ON3fGeomParam::Sample &iNormals = ON3fGeomParam::Sample() )
           : m_positions( iPos )
           , m_indices( iInd )
-          , m_counts( iCnt ) {}
+          , m_counts( iCnt )
+          , m_uvs( iUVs )
+          , m_normals( iNormals )
+        {}
 
         const Abc::V3fArraySample &getPositions() const { return m_positions; }
         void setPositions( const Abc::V3fArraySample &iSmp )
@@ -85,17 +93,31 @@ public:
         void setCounts( const Abc::Int32ArraySample &iCnt )
         { m_counts = iCnt; }
 
+        const OV2fGeomParam::Sample &getUVs() const { return m_uvs; }
+        void setUVs( const OV2fGeomParam::Sample &iUVs )
+        { m_uvs = iUVs; }
+
+        const ON3fGeomParam::Sample &getNormals() const { return m_normals; }
+        void setNormals( const ON3fGeomParam::Sample &iNormals )
+        { m_normals = iNormals; }
+
         void reset()
         {
             m_positions.reset();
             m_indices.reset();
             m_counts.reset();
+
+            m_uvs.reset();
+            m_normals.reset();
         }
 
     protected:
         Abc::V3fArraySample m_positions;
         Abc::Int32ArraySample m_indices;
         Abc::Int32ArraySample m_counts;
+
+        OV2fGeomParam::Sample m_uvs;
+        ON3fGeomParam::Sample m_normals;
     };
 
     //-*************************************************************************
@@ -179,6 +201,8 @@ public:
     //! indices, and counts.
     void setFromPrevious( const Abc::OSampleSelector &iSS );
 
+    Abc::OCompoundProperty getArbGeomParams();
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -192,6 +216,9 @@ public:
         m_positions.reset();
         m_indices.reset();
         m_counts.reset();
+        m_uvs.reset();
+        m_normals.reset();
+        m_arbGeomParams.reset();
         Abc::OSchema<PolyMeshSchemaInfo>::reset();
     }
 
@@ -215,6 +242,11 @@ protected:
     Abc::OV3fArrayProperty m_positions;
     Abc::OInt32ArrayProperty m_indices;
     Abc::OInt32ArrayProperty m_counts;
+
+    OV2fGeomParam m_uvs;
+    ON3fGeomParam m_normals;
+
+    Abc::OCompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

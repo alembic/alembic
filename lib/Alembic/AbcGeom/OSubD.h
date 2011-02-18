@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -193,6 +194,11 @@ public:
         void setSubdivisionScheme( const std::string &iScheme )
         { m_subdScheme = iScheme; }
 
+        // UVs; need to set these outside the Sample constructor
+        const OV2fGeomParam::Sample &getUVs() const { return m_uvs; }
+        void setUVs( const OV2fGeomParam::Sample &iUVs )
+        { m_uvs = iUVs; }
+
         void reset()
         {
             m_positions.reset();
@@ -213,6 +219,8 @@ public:
             m_holes.reset();
 
             m_subdScheme = "catmull-clark";
+
+            m_uvs.reset();
         }
 
     protected:
@@ -238,6 +246,9 @@ public:
 
         // subdivision scheme
         std::string m_subdScheme;
+
+        // UVs
+        OV2fGeomParam::Sample m_uvs;
 
     }; // end OSubDSchema::Sample
 
@@ -322,6 +333,9 @@ public:
     //! indices, and counts.
     void setFromPrevious( const Abc::OSampleSelector &iSS );
 
+
+    Abc::OCompoundProperty getArbGeomParams();
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -346,6 +360,10 @@ public:
         m_holes.reset();
 
         m_subdScheme.reset();
+
+        m_uvs.reset();
+
+        m_arbGeomParams.reset();
 
         Abc::OSchema<SubDSchemaInfo>::reset();
     }
@@ -390,6 +408,12 @@ protected:
 
     // subdivision scheme
     Abc::OStringProperty m_subdScheme;
+
+    // UVs
+    OV2fGeomParam m_uvs;
+
+    // arbitrary geometry parameters
+    Abc::OCompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

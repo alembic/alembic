@@ -62,6 +62,17 @@ enum MeshTopologyVariance
 };
 
 //-*****************************************************************************
+//! \brief Enum that indicates the type of transformational operation.
+//! This enum is used when encoding and decoding the transform operation data.
+enum XformOperationType
+{
+    kScaleOperation = 0,
+    kTranslateOperation = 1,
+    kRotateOperation = 2,
+    kMatrixOperation = 3
+};
+
+//-*****************************************************************************
 //! This utility function sets an array prorperty sample using "set" if
 //! the sample is non-null, otherwise calls setFromPrevious.
 template <class PROP, class SAMP>

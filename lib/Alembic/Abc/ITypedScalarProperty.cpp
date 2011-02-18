@@ -51,7 +51,7 @@ static void __test( IObject &iObject )
                           "intProp" );
     IInt32Property intProp2( intProp.getPtr(), kWrapExisting );
 
-    int i;
+    int32_t i;
     intProp.get( i );
     intProp2.get( i, 1 );
 
