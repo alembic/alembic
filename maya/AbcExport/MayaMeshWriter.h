@@ -66,10 +66,13 @@ class MayaMeshWriter
         std::vector< int32_t > & oFacePoints,
         std::vector< int32_t > & oPointCounts);
 
-    void writePoly(double iFrame);
-    void writeSubD(double iFrame, MDagPath & iDag);
+    void writePoly(double iFrame,
+        const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
 
-    void getUVs(std::vector<float> & uvs, std::vector<int32_t> & indices);
+    void writeSubD(double iFrame, MDagPath & iDag,
+        const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
+
+    void getUVs(std::vector<float> & uvs, std::vector<uint32_t> & indices);
 
     void getPolyNormals(std::vector<float> & oNormals);
 
