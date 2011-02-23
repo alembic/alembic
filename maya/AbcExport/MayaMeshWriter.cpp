@@ -112,6 +112,9 @@ MayaMeshWriter::MayaMeshWriter(
     if (util::isAnimated(surface))
         mIsGeometryAnimated = true;
 
+    std::vector<float> uvs;
+    std::vector<uint32_t> indices;
+
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
     if ( !plug.isNull() && plug.asBool() )
@@ -122,13 +125,10 @@ MayaMeshWriter::MayaMeshWriter(
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
         if ( iWriteUVs )
         {
-            std::vector<float> uvs;
-            std::vector<uint32_t> indices;
             getUVs(uvs, indices);
 
             if (!uvs.empty())
             {
-
                 uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
                 uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
                     (const Imath::V2f *) &uvs.front(), uvs.size() / 2));
@@ -155,8 +155,6 @@ MayaMeshWriter::MayaMeshWriter(
 
         if ( iWriteUVs )
         {
-            std::vector<float> uvs;
-            std::vector<uint32_t> indices;
             getUVs(uvs, indices);
 
             if (!uvs.empty())
