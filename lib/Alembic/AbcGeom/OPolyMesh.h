@@ -93,6 +93,14 @@ public:
         void setCounts( const Abc::Int32ArraySample &iCnt )
         { m_counts = iCnt; }
 
+        const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }
+        void setSelfBounds( const Abc::Box3d &iBnds )
+        { m_selfBounds = iBnds; }
+
+        const Abc::Box3d &getChildBounds() const { return m_childBounds; }
+        void setChildBounds( const Abc::Box3d &iBnds )
+        { m_childBounds = iBnds; }
+
         const OV2fGeomParam::Sample &getUVs() const { return m_uvs; }
         void setUVs( const OV2fGeomParam::Sample &iUVs )
         { m_uvs = iUVs; }
@@ -107,6 +115,9 @@ public:
             m_indices.reset();
             m_counts.reset();
 
+            m_selfBounds.makeEmpty();
+            m_childBounds.makeEmpty();
+
             m_uvs.reset();
             m_normals.reset();
         }
@@ -115,6 +126,9 @@ public:
         Abc::V3fArraySample m_positions;
         Abc::Int32ArraySample m_indices;
         Abc::Int32ArraySample m_counts;
+
+        Abc::Box3d m_selfBounds;
+        Abc::Box3d m_childBounds;
 
         OV2fGeomParam::Sample m_uvs;
         ON3fGeomParam::Sample m_normals;
@@ -242,6 +256,9 @@ protected:
     Abc::OV3fArrayProperty m_positions;
     Abc::OInt32ArrayProperty m_indices;
     Abc::OInt32ArrayProperty m_counts;
+
+    Abc::OBox3dProperty m_selfBounds;
+    Abc::OBox3dProperty m_childBounds;
 
     OV2fGeomParam m_uvs;
     ON3fGeomParam m_normals;

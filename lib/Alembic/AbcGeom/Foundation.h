@@ -92,6 +92,39 @@ inline void SetPropUsePrevIfNull<Abc::OStringProperty, std::string>(
     else { iProp.setFromPrevious( iSS ); }
 }
 
+template <>
+inline void SetPropUsePrevIfNull<Abc::OWstringProperty, Alembic::Util::wstring>(
+    Abc::OWstringProperty iProp, Alembic::Util::wstring iSamp,
+    const Abc::OSampleSelector &iSS )
+{
+    if ( iSamp != L"" ) { iProp.set( iSamp, iSS ); }
+    else { iProp.setFromPrevious( iSS ); }
+}
+
+template <>
+inline void SetPropUsePrevIfNull<Abc::OBox3dProperty, Abc::Box3d>(
+    Abc::OBox3dProperty iProp, Abc::Box3d iSamp,
+    const Abc::OSampleSelector &iSS )
+{
+    if ( iSamp.hasVolume() ) { iProp.set( iSamp, iSS ); }
+    else { iProp.setFromPrevious( iSS ); }
+}
+
+//-*****************************************************************************
+//! This utility function computes an axis-aligned bounding box from a
+//! positions sample
+static Abc::Box3d ComputeBoundsFromPositions( const Abc::V3fArraySample &iSamp )
+{
+    Abc::Box3d ret;
+    size_t size = iSamp.size();
+    for ( size_t i = 0 ; i < size ; ++i )
+    {
+        ret.extendBy( iSamp[i] );
+    }
+
+    return ret;
+}
+
 } // End namespace AbcGeom
 } // End namespace Alembic
 
