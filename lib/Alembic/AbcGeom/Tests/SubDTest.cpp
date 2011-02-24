@@ -152,6 +152,10 @@ void Example1_MeshIn()
     ISubDSchema::Sample samp2;
     mesh.get( samp2, 2 );
 
+    TESTING_ASSERT( samp2.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
+
+    TESTING_ASSERT( samp2.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
+
     TESTING_ASSERT( 0 == samp2.getInterpolateBoundary() );
 
     std::cout << "Interpolate boundary at 2th sample: "
