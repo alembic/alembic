@@ -98,6 +98,10 @@ public:
         std::string getSubdivisionScheme() const
         { return m_subdScheme; }
 
+        // bounds
+        Abc::Box3d getSelfBounds() const { return m_selfBounds; }
+        Abc::Box3d getChildBounds() const { return m_childBounds; }
+
 
         bool valid() const
         {
@@ -124,6 +128,9 @@ public:
             m_holes.reset();
 
             m_subdScheme = "catmull-clark";
+
+            m_selfBounds.makeEmpty();
+            m_childBounds.makeEmpty();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
@@ -153,6 +160,11 @@ public:
 
         // subdivision scheme
         std::string m_subdScheme;
+
+        // bounds
+        Abc::Box3d m_selfBounds;
+        Abc::Box3d m_childBounds;
+
     }; // end ISubDSchema::Sample
 
     //-*************************************************************************
@@ -354,6 +366,10 @@ protected:
 
     // subdivision scheme
     Abc::IStringProperty m_subdScheme;
+
+    // bounds
+    Abc::IBox3dProperty m_selfBounds;
+    Abc::IBox3dProperty m_childBounds;
 
     // UVs
     IV2fGeomParam m_uvs;

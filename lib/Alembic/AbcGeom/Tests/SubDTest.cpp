@@ -137,6 +137,11 @@ void Example1_MeshIn()
     // get the 1th sample by value
     ISubDSchema::Sample samp1 = mesh.getValue( 1 );
 
+    TESTING_ASSERT( samp1.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
+
+    TESTING_ASSERT( samp1.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
+
+
     // test the second sample has '1' as the interpolate boundary value
     TESTING_ASSERT( 1 == samp1.getInterpolateBoundary() );
 
