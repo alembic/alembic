@@ -232,7 +232,10 @@ public:
         m_counts.reset();
         m_uvs.reset();
         m_normals.reset();
+        m_selfBounds.reset();
+        m_childBounds.reset();
         m_arbGeomParams.reset();
+
         Abc::OSchema<PolyMeshSchemaInfo>::reset();
     }
 
