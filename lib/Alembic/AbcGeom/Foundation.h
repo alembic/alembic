@@ -113,7 +113,8 @@ inline void SetPropUsePrevIfNull<Abc::OBox3dProperty, Abc::Box3d>(
 //-*****************************************************************************
 //! This utility function computes an axis-aligned bounding box from a
 //! positions sample
-static Abc::Box3d ComputeBoundsFromPositions( const Abc::V3fArraySample &iSamp )
+template <class ARRAYSAMP>
+static Abc::Box3d ComputeBoundsFromPositions( const ARRAYSAMP &iSamp )
 {
     Abc::Box3d ret;
     size_t size = iSamp.size();
