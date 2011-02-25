@@ -157,6 +157,8 @@ public:
         m_translateY.reset();
         m_translateZ.reset();
 
+        m_childBounds.reset();
+
         super_type::reset();
     }
 
@@ -184,6 +186,8 @@ protected:
     Abc::IDoubleProperty m_translateX;
     Abc::IDoubleProperty m_translateY;
     Abc::IDoubleProperty m_translateZ;
+
+    Abc::IBox3dProperty m_childBounds;
 
     // Time stuff, cached.
     size_t m_numSamples;

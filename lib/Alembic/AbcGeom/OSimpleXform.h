@@ -144,6 +144,8 @@ public:
         m_translateY.reset();
         m_translateZ.reset();
 
+        m_childBounds.reset();
+
         super_type::reset();
     }
 
@@ -252,6 +254,8 @@ protected:
     ODefaultedDoubleProperty m_translateX;
     ODefaultedDoubleProperty m_translateY;
     ODefaultedDoubleProperty m_translateZ;
+
+    OBox3dProperty m_childBounds;
 };
 
 //-*****************************************************************************
