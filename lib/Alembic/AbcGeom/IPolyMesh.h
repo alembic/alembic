@@ -198,8 +198,17 @@ public:
         m_positions.get( oSample.m_positions, iSS );
         m_indices.get( oSample.m_indices, iSS );
         m_counts.get( oSample.m_counts, iSS );
-        m_selfBounds.get( oSample.m_selfBounds, iSS );
-        m_childBounds.get( oSample.m_childBounds, iSS );
+
+        // a minor hedge against older Archives that don't have these
+        // properties.  Will remove before 1.0. --JDA, 2011-02-24
+        if ( m_selfBounds )
+        {
+            m_selfBounds.get( oSample.m_selfBounds, iSS );
+        }
+        if ( m_childBounds )
+        {
+            m_childBounds.get( oSample.m_childBounds, iSS );
+        }
         // Could error check here.
 
         ALEMBIC_ABC_SAFE_CALL_END();
