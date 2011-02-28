@@ -255,7 +255,7 @@ protected:
     ODefaultedDoubleProperty m_translateY;
     ODefaultedDoubleProperty m_translateZ;
 
-    OBox3dProperty m_childBounds;
+    Abc::OBox3dProperty m_childBounds;
 };
 
 //-*****************************************************************************
