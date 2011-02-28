@@ -58,6 +58,9 @@ public:
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
         Abc::UInt64ArraySamplePtr getIds() const { return m_ids; }
 
+        Abc::Box3d getSelfBounds() const { return m_selfBounds; }
+        Abc::Box3d getChildBounds() const { return m_childBounds; }
+
         bool valid() const
         {
             return m_positions && m_ids;
@@ -67,6 +70,9 @@ public:
         {
             m_positions.reset();
             m_ids.reset();
+
+            m_selfBounds.makeEmpty();
+            m_childBounds.makeEmpty();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
@@ -75,6 +81,9 @@ public:
         friend class IPointsSchema;
         Abc::V3fArraySamplePtr m_positions;
         Abc::UInt64ArraySamplePtr m_ids;
+
+        Abc::Box3d m_selfBounds;
+        Abc::Box3d m_childBounds;
     };
 
     //-*************************************************************************
@@ -167,6 +176,10 @@ public:
 
         m_positions.get( iSample.m_positions, iSS );
         m_ids.get( iSample.m_ids, iSS );
+
+        m_selfBounds.get( iSample.m_selfBounds, iSS );
+        m_childBounds.get( iSample.m_childBounds, iSS );
+
         // Could error check here.
 
         ALEMBIC_ABC_SAFE_CALL_END();
@@ -194,6 +207,9 @@ public:
         m_positions.reset();
         m_ids.reset();
 
+        m_selfBounds.reset();
+        m_childBounds.reset();
+
         m_arbGeomParams.reset();
 
         Abc::ISchema<PointsSchemaInfo>::reset();
@@ -218,6 +234,9 @@ protected:
 
     Abc::IV3fArrayProperty m_positions;
     Abc::IUInt64ArrayProperty m_ids;
+
+    Abc::IBox3dProperty m_selfBounds;
+    Abc::IBox3dProperty m_childBounds;
 
     Abc::ICompoundProperty m_arbGeomParams;
 };

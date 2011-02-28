@@ -149,6 +149,8 @@ void OSimpleXformSchema::init( const AbcA::TimeSamplingType &iTst )
     m_translateY = ODefaultedDoubleProperty( cptr, ".ty", pcy, iTst, 0.0 );
     m_translateZ = ODefaultedDoubleProperty( cptr, ".tz", pcy, iTst, 0.0 );
 
+    m_childBounds = Abc::OBox3dProperty( cptr, ".childBnds", pcy, iTst );
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
@@ -167,6 +169,8 @@ void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
     // Get an index and a time
     index_t idx = iSS.getIndex();
     chrono_t time = iSS.getTime();
+
+    m_childBounds.set( iSamp.getChildBounds(), iSS );
 
     // Push back the times if we need to.
     if ( m_times.size() == idx  )
@@ -222,6 +226,8 @@ void OSimpleXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     // Get an index and a time
     index_t idx = iSS.getIndex();
     chrono_t time = iSS.getTime();
+
+    m_childBounds.setFromPrevious( iSS );
 
     // Push back the times if we need to.
     if ( m_times.size() == idx )

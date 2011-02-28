@@ -174,6 +174,13 @@ public:
 
     const std::string &getName();
 
+    Abc::ICompoundProperty getParent();
+
+    const AbcA::PropertyHeader &getHeader();
+
+    const AbcA::MetaData &getMetaData();
+
+
     void reset()
     {
         m_valProp.reset();
@@ -414,6 +421,30 @@ const std::string &ITypedGeomParam<TRAITS>::getName()
 
     static const std::string ret( "" );
     return ret;
+}
+
+//-*****************************************************************************
+template <class TRAITS>
+Abc::ICompoundProperty ITypedGeomParam<TRAITS>::getParent()
+{
+    if ( m_isIndexed ) { return m_cprop.getParent(); }
+    else { return m_valProp.getParent(); }
+}
+
+//-*****************************************************************************
+template <class TRAITS>
+const AbcA::PropertyHeader &ITypedGeomParam<TRAITS>::getHeader()
+{
+    if ( m_isIndexed ) { return m_cprop.getHeader(); }
+    else { return m_valProp.getHeader(); }
+}
+
+//-*****************************************************************************
+template <class TRAITS>
+const AbcA::MetaData &ITypedGeomParam<TRAITS>::getMetaData()
+{
+    if ( m_isIndexed ) { return m_cprop.getMetaData(); }
+    else { return m_valProp.getMetaData(); }
 }
 
 //-*****************************************************************************

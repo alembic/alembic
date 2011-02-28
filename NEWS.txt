@@ -29,6 +29,10 @@ is low-traffic, but anyone can sign up and participate:
 
 http://groups.google.com/group/alembic-discussion
 
+As always, discussion is welcome on the discussion list:
+
+
+
 2010-12-13, Alembic 0.9.1:
 
 Just a minor update to enable Alembic on 32-bit systems, along with

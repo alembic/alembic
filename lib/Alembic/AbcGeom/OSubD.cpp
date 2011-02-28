@@ -73,6 +73,19 @@ void OSubDSchema::set( const Sample &iSamp,
         m_faceIndices.set( iSamp.getFaceIndices(), iSS );
         m_faceCounts.set( iSamp.getFaceCounts(), iSS );
 
+        m_childBounds.set( iSamp.getChildBounds(), iSS );
+
+        if ( iSamp.getSelfBounds().isEmpty() )
+        {
+            // OTypedScalarProperty::set() is not referentially transparent,
+            // so we need a a placeholder variable.
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
+
         if ( iSamp.getUVs().getVals() )
         {
             if ( iSamp.getUVs().getIndices() )
@@ -217,6 +230,22 @@ void OSubDSchema::set( const Sample &iSamp,
         SetPropUsePrevIfNull( m_subdScheme, iSamp.getSubdivisionScheme(),
                               iSS );
 
+        if ( iSamp.getSelfBounds().hasVolume() )
+        {
+            m_selfBounds.set( iSamp.getSelfBounds(), iSS );
+        }
+        else if ( iSamp.getPositions() )
+        {
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else
+        {
+            m_selfBounds.setFromPrevious( iSS );
+        }
+
         if ( m_uvs ) { m_uvs.set( iSamp.getUVs(), iSS ); }
     }
 
@@ -246,6 +275,9 @@ void OSubDSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     m_holes.setFromPrevious( iSS );
 
     m_subdScheme.setFromPrevious( iSS );
+
+    m_selfBounds.setFromPrevious( iSS );
+    m_childBounds.setFromPrevious( iSS );
 
     if ( m_uvs ) { m_uvs.setFromPrevious( iSS ); }
 
@@ -307,6 +339,9 @@ void OSubDSchema::init( const AbcA::TimeSamplingType &iTst )
     m_holes = Abc::OInt32ArrayProperty( *this, ".holes", iTst );
 
     m_subdScheme = Abc::OStringProperty( *this, ".scheme", iTst );
+
+    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTst );
+    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

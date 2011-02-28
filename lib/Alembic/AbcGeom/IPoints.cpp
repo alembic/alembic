@@ -54,6 +54,9 @@ void IPointsSchema::init( const Abc::IArgument &iArg0,
     m_ids = Abc::IUInt64ArrayProperty( *this, ".pointIds",
                                       args.getSchemaInterpMatching() );
 
+    m_selfBounds = Abc::IBox3dProperty( *this, ".selfBnds", iArg0, iArg1 );
+    m_childBounds = Abc::IBox3dProperty( *this, ".childBnds", iArg0, iArg1 );
+
     if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
     {
         m_arbGeomParams = Abc::ICompoundProperty( *this, ".arbGeomParams",

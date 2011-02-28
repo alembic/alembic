@@ -120,6 +120,9 @@ void ISubDSchema::get( ISubDSchema::Sample &iSample,
 
     m_subdScheme.get( iSample.m_subdScheme, iSS );
 
+    m_selfBounds.get( iSample.m_selfBounds, iSS );
+    m_childBounds.get( iSample.m_childBounds, iSS );
+
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -171,6 +174,9 @@ void ISubDSchema::init( const Abc::IArgument &iArg0,
 
     m_subdScheme = Abc::IStringProperty( *this, ".scheme",
                                          args.getSchemaInterpMatching() );
+
+    m_selfBounds = Abc::IBox3dProperty( *this, ".selfBnds", iArg0, iArg1 );
+    m_childBounds = Abc::IBox3dProperty( *this, ".childBnds", iArg0, iArg1 );
 
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )

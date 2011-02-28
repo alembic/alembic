@@ -32,12 +32,20 @@
 ##
 ##-*****************************************************************************
 
-IF ( Boost_PROGRAM_OPTIONS_FOUND AND GLUT_Xmu_LIBRARY-ADVANCED )
-  ADD_SUBDIRECTORY( SimpleAbcViewer )
-ENDIF()
-
-IF ( GLUT_Xmu_LIBRARY-ADVANCED )
+IF ( GLUT_Xmu_LIBRARY )
+  MESSAGE( STATUS "Including GlutSkeleton" )
   ADD_SUBDIRECTORY( GlutSkeleton )
+
+  IF ( Boost_PROGRAM_OPTIONS_FOUND )
+    MESSAGE( STATUS "Including SimpleAbcViewer" )
+    ADD_SUBDIRECTORY( SimpleAbcViewer )
+  ELSE()
+    MESSAGE( STATUS "Not including SimpleAbcViewer" )
+  ENDIF()
+
+ELSE()
+  MESSAGE( STATUS "Not including GlutSkeleton" )
+  MESSAGE( STATUS "Not including SimpleAbcViewer" )
 ENDIF()
 
 ADD_SUBDIRECTORY( AbcEcho )

@@ -192,7 +192,7 @@ public:
         return ret;
     }
 
-    Abc::M44d getMatrix( 
+    Abc::M44d getMatrix(
         const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
 
     Abc::DoubleArraySamplePtr getStaticData() { return m_static; }
@@ -208,12 +208,25 @@ public:
     void get(XformSample & oVec,
         const Abc::ISampleSelector &iSS = Abc::ISampleSelector());
 
-    XformSample getValue( 
+    XformSample getValue(
         const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
     {
         XformSample smp;
         get( smp, iSS );
         return smp;
+    }
+
+    Abc::Box3d getChildBounds( const Abc::ISampleSelector &iSS =
+                               Abc::ISampleSelector() )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getChildBounds()" );
+
+        return m_childBounds.getValue( iSS );
+
+        ALEMBIC_ABC_SAFE_CALL_END();
+
+        Abc::Box3d ret;
+        return ret;
     }
 
     //-*************************************************************************
@@ -230,6 +243,9 @@ public:
 
         m_anim.reset();
         m_inherits.reset();
+
+        m_childBounds.reset();
+
         Abc::ISchema<XformSchemaInfo>::reset();
     }
 
@@ -251,6 +267,8 @@ protected:
     Abc::IBoolProperty m_inherits;
     XformOpVec m_ops;
     Abc::DoubleArraySamplePtr m_static;
+
+    Abc::IBox3dProperty m_childBounds;
 
 };
 

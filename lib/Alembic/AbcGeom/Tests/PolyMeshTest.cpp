@@ -161,6 +161,10 @@ void Example1_MeshIn()
     IPolyMeshSchema::Sample mesh_samp;
     mesh.get( mesh_samp );
 
+    TESTING_ASSERT( mesh_samp.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
+
+    TESTING_ASSERT( mesh_samp.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
+
     ICompoundProperty arbattrs = mesh.getArbGeomParams();
 
     // we didn't set any on write, so on read, it should be an invalid container
