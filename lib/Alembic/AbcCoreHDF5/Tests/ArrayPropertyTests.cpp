@@ -346,6 +346,29 @@ void testReadWriteArrays()
         }
 
         {
+            ABC::DataType dtype(Alembic::Util::kUint8POD, 1);
+            ABC::ArrayPropertyWriterPtr uint8WrtPtr =
+                props->createArrayProperty(
+                    ABC::PropertyHeader("uint8_newDims", ABC::kArrayProperty,
+                    ABC::MetaData(), dtype, staticSampling));
+
+            std::vector< Alembic::Util::uint8_t > vals(4);
+            vals[0] = 200;
+            vals[1] = 45;
+            vals[2] = 37;
+            vals[3] = 192;
+
+            TESTING_ASSERT(uint8WrtPtr->getNumSamples() == 0);
+            Alembic::Util::Dimensions dims;
+            dims.setRank(2);
+            dims[0] = 2;
+            dims[1] = 2;
+            uint8WrtPtr->setSample(0, 0,
+                ABC::ArraySample(&(vals.front()), dtype, dims));
+            TESTING_ASSERT(uint8WrtPtr->getNumSamples() == 1);
+        }
+
+        {
             ABC::DataType dtype(Alembic::Util::kInt8POD, 1);
             ABC::ArrayPropertyWriterPtr charWrtPtr =
                 props->createArrayProperty(
@@ -547,7 +570,7 @@ void testReadWriteArrays()
         ABC::ObjectReaderPtr archive = a->getTop();
         ABC::CompoundPropertyReaderPtr parent = archive->getProperties();
 
-        TESTING_ASSERT(parent->getNumProperties() == 14);
+        TESTING_ASSERT(parent->getNumProperties() == 15);
 
         ABC::ArraySampleKey key;
         for ( size_t i = 0; i < parent->getNumProperties(); ++i )
@@ -588,24 +611,36 @@ void testReadWriteArrays()
 
                 case Alembic::Util::kUint8POD:
                 {
-                    TESTING_ASSERT(ap->getName() == "uint8");
+                    TESTING_ASSERT(ap->getName() == "uint8" || 
+                        ap->getName() == "uint8_newDims");
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
-                    TESTING_ASSERT(val->getDimensions().numPoints() == 4);
-                    TESTING_ASSERT(val->getDimensions().rank() == 1);
+
                     Alembic::Util::uint8_t * data =
                         (Alembic::Util::uint8_t *)(val->getData());
                     TESTING_ASSERT(data[0] == 200);
                     TESTING_ASSERT(data[1] == 45);
                     TESTING_ASSERT(data[2] == 37);
                     TESTING_ASSERT(data[3] == 192);
-
+                    TESTING_ASSERT(val->getDimensions().numPoints() == 4);
                     TESTING_ASSERT(ap->getKey(0, key));
                     TESTING_ASSERT(key.numBytes == 4);
                     TESTING_ASSERT(key.origPOD == Alembic::Util::kUint8POD);
                     TESTING_ASSERT(key.readPOD == Alembic::Util::kUint8POD);
                     TESTING_ASSERT(key.digest.str() ==
                         "097ec357f4cddaeb5faf1e506c4b1348");
+
+                    if (ap->getName() == "uint8")
+                    {
+                        TESTING_ASSERT(val->getDimensions().rank() == 1);
+                        TESTING_ASSERT(val->getDimensions()[0] == 4);
+                    }
+                    else if (ap->getName() == "uint8_newDims")
+                    {
+                        TESTING_ASSERT(val->getDimensions().rank() == 2);
+                        TESTING_ASSERT(val->getDimensions()[0] == 2);
+                        TESTING_ASSERT(val->getDimensions()[1] == 2);
+                    }
                 }
                 break;
 
