@@ -117,6 +117,11 @@ void ISimpleXformSchema::init( Abc::SchemaInterpMatching )
     m_translateY = Abc::IDoubleProperty( *this, ".ty", qnp );
     m_translateZ = Abc::IDoubleProperty( *this, ".tz", qnp );
 
+    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( *this, ".childBnds", qnp );
+    }
+
     m_numSamples = 0;
     m_isConstant = true;
 
@@ -167,11 +172,16 @@ void ISimpleXformSchema::get( SimpleXformSample &oSample,
     if ( m_translateY ) { m_translateY.get( translate.y, sampIndex ); }
     if ( m_translateZ ) { m_translateZ.get( translate.z, sampIndex ); }
 
-    oSample.makeIdentity();
+    oSample.reset();
     oSample.setScale( scale );
     oSample.setShear( shear );
     oSample.setXYZRotation( rotate );
     oSample.setTranslation( translate );
+
+    if ( m_childBounds )
+    {
+        oSample.setChildBounds( m_childBounds.getValue( iSS ) );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

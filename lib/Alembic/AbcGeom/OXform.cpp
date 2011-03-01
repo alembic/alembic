@@ -42,7 +42,7 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 void OXformSchema::setXform( const XformOpVec & iOp,
-    const Abc::DoubleArraySample & iStatic )
+                             const Abc::DoubleArraySample & iStatic )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setXform()" );
 
@@ -91,7 +91,7 @@ void OXformSchema::setXform( const XformOpVec & iOp,
 
 //-*****************************************************************************
 void OXformSchema::set( const Abc::DoubleArraySample & iAnim,
-    const Abc::OSampleSelector &iSS  )
+                        const Abc::OSampleSelector &iSS  )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
@@ -141,6 +141,8 @@ void OXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     if (m_inherits)
         m_inherits.setFromPrevious( iSS );
 
+    m_childBounds.setFromPrevious( iSS );
+
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -152,6 +154,9 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
     m_time = iTst;
     m_writtenOps = false;
     m_numAnimated = 0;
+
+    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 

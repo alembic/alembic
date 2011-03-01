@@ -194,6 +194,15 @@ public:
         void setSubdivisionScheme( const std::string &iScheme )
         { m_subdScheme = iScheme; }
 
+        // bounding boxes
+        const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }
+        void setSelfBounds( const Abc::Box3d &iBnds )
+        { m_selfBounds = iBnds; }
+
+        const Abc::Box3d &getChildBounds() const { return m_childBounds; }
+        void setChildBounds( const Abc::Box3d &iBnds )
+        { m_childBounds = iBnds; }
+
         // UVs; need to set these outside the Sample constructor
         const OV2fGeomParam::Sample &getUVs() const { return m_uvs; }
         void setUVs( const OV2fGeomParam::Sample &iUVs )
@@ -219,6 +228,9 @@ public:
             m_holes.reset();
 
             m_subdScheme = "catmull-clark";
+
+            m_selfBounds.makeEmpty();
+            m_childBounds.makeEmpty();
 
             m_uvs.reset();
         }
@@ -246,6 +258,10 @@ public:
 
         // subdivision scheme
         std::string m_subdScheme;
+
+        // bounds
+        Abc::Box3d m_selfBounds;
+        Abc::Box3d m_childBounds;
 
         // UVs
         OV2fGeomParam::Sample m_uvs;
@@ -361,6 +377,9 @@ public:
 
         m_subdScheme.reset();
 
+        m_selfBounds.reset();
+        m_childBounds.reset();
+
         m_uvs.reset();
 
         m_arbGeomParams.reset();
@@ -408,6 +427,10 @@ protected:
 
     // subdivision scheme
     Abc::OStringProperty m_subdScheme;
+
+    // bounds
+    Abc::OBox3dProperty m_selfBounds;
+    Abc::OBox3dProperty m_childBounds;
 
     // UVs
     OV2fGeomParam m_uvs;

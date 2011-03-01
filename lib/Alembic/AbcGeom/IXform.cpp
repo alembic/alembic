@@ -77,6 +77,12 @@ void IXformSchema::init( const Abc::IArgument &iArg0,
     if (this->getPropertyHeader(".inherits") != NULL)
         m_inherits = Abc::IBoolProperty( *this, ".inherits" );
 
+    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( *this, ".childBnds", iArg0,
+                                             iArg1 );
+    }
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 

@@ -133,10 +133,17 @@ public:
 
     //! Set the inherits transform hint
     void setInherits(bool iInherits,
-        const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+                     const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
 
     //! Set from previous sample. Will hold the animated channels.
     void setFromPrevious( const Abc::OSampleSelector &iSS );
+
+    //! Normally, setting the child bounds is done through the Sample, but
+    //! this Xform implementation is non-standard.
+    void setChildBounds( const Abc::Box3d &iBnds,
+                         const Abc::OSampleSelector &iSS =
+                         Abc::OSampleSelector() )
+    { m_childBounds.set( iBnds, iSS ); }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -152,6 +159,7 @@ public:
         m_inherits.reset();
         m_writtenOps = false;
         m_numAnimated = 0;
+        m_childBounds.reset();
         m_time = AbcA::TimeSamplingType();
         Abc::OSchema<XformSchemaInfo>::reset();
     }
@@ -171,6 +179,8 @@ protected:
 
     Abc::ODoubleArrayProperty m_anim;
     Abc::OBoolProperty m_inherits;
+
+    Abc::OBox3dProperty m_childBounds;
 
 private:
     bool m_writtenOps;

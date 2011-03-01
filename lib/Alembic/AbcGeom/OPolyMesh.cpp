@@ -59,6 +59,19 @@ void OPolyMeshSchema::set( const Sample &iSamp,
         m_indices.set( iSamp.getIndices(), iSS );
         m_counts.set( iSamp.getCounts(), iSS );
 
+        m_childBounds.set( iSamp.getChildBounds(), iSS );
+
+        if ( iSamp.getSelfBounds().isEmpty() )
+        {
+            // OTypedScalarProperty::set() is not referentially transparent,
+            // so we need a a placeholder variable.
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
+
         if ( iSamp.getUVs().getVals() )
         {
             if ( iSamp.getUVs().getIndices() )
@@ -103,6 +116,23 @@ void OPolyMeshSchema::set( const Sample &iSamp,
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions(), iSS );
         SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
         SetPropUsePrevIfNull( m_counts, iSamp.getCounts(), iSS );
+        SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds(), iSS );
+
+        if ( iSamp.getSelfBounds().hasVolume() )
+        {
+            m_selfBounds.set( iSamp.getSelfBounds(), iSS );
+        }
+        else if ( iSamp.getPositions() )
+        {
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else
+        {
+            m_selfBounds.setFromPrevious( iSS );
+        }
 
         // OGeomParam will automatically use SetPropUsePrevIfNull internally
         if ( m_uvs ) { m_uvs.set( iSamp.getUVs(), iSS ); }
@@ -120,6 +150,9 @@ void OPolyMeshSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     m_positions.setFromPrevious( iSS );
     m_indices.setFromPrevious( iSS );
     m_counts.setFromPrevious( iSS );
+
+    m_selfBounds.setFromPrevious( iSS );
+    m_childBounds.setFromPrevious( iSS );
 
     if ( m_uvs ) { m_uvs.setFromPrevious( iSS ); }
     if ( m_normals ) { m_normals.setFromPrevious( iSS ); }
@@ -139,6 +172,10 @@ void OPolyMeshSchema::init( const AbcA::TimeSamplingType &iTst )
     m_indices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTst );
 
     m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
+
+    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTst );
+
+    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
 
     // UVs and Normals are created on first call to set()
 

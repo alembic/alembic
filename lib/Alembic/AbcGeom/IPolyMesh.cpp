@@ -83,6 +83,20 @@ void IPolyMeshSchema::init( const Abc::IArgument &iArg0,
     m_counts = Abc::IInt32ArrayProperty( *this, ".faceCounts",
                                        args.getSchemaInterpMatching() );
 
+    // older Alembic archives won't have the bounding box properties; before 1.0,
+    // we should remove the if statements and assert that older archives will
+    // not be readable without a no-op error handling policy
+    if ( this->getPropertyHeader( ".selfBnds" ) != NULL )
+    {
+        m_selfBounds = Abc::IBox3dProperty( *this, ".selfBnds", iArg0, iArg1 );
+    }
+
+    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( *this, ".childBnds", iArg0,
+                                             iArg1 );
+    }
+
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {

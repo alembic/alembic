@@ -51,7 +51,7 @@ static void __test( OObject &iObject )
                                "intProp" );
     OInt32ArrayProperty intProp2( intProp.getPtr(), kWrapExisting );
 
-    int i[] = { 1, 2, 3, 4, 5 };
+    int32_t i[] = { 1, 2, 3, 4, 5 };
     intProp.set( Int32ArraySample( i, 5 ) );
     intProp2.set( Int32ArraySample( i, 5 ), 1 );
 
