@@ -565,9 +565,10 @@ void MayaMeshWriter::fillTopology(
 
     lMesh.getPoints(pts);
 
-    if (pts.length() < 3)
+    if (pts.length() < 3 && pts.length() > 0)
     {
-        MString err = "Cannot form valid mesh with ";
+        MString err = lMesh.fullPathName() +
+            " is not a valid mesh, because it only has ";
         err += pts.length();
         err += " points.";
         MGlobal::displayError(err);
@@ -578,7 +579,7 @@ void MayaMeshWriter::fillTopology(
 
     if (numPolys == 0)
     {
-        MGlobal::displayWarning("lMesh.numPolygons() returned 0");
+        MGlobal::displayWarning(lMesh.fullPathName() + " has no polygons.");
         return;
     }
 

@@ -294,7 +294,8 @@ bool util::isAnimated(MObject & object, bool checkParent)
                 node.hasFn(MFn::kTweak) ||
                 node.hasFn(MFn::kPolyTweak) ||
                 node.hasFn(MFn::kSubdTweak) ||
-                node.hasFn(MFn::kCluster))
+                node.hasFn(MFn::kCluster) ||
+                node.hasFn(MFn::kFluid))
         {
             return true;
         }
