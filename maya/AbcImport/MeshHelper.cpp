@@ -215,54 +215,109 @@ namespace
 
     // normal vector is packed differently in file
     // from the format Maya accepts directly
-    void setPolyNormals(MFnMesh & ioMesh, std::vector<float> & normals)
+    void setPolyNormals(double iFrame, MFnMesh & ioMesh,
+        Alembic::AbcGeom::IN3fGeomParam iNormals)
     {
-        int size = normals.size()/3;
-        if (size == 0) return;
-
-        int numFaces = ioMesh.numPolygons();
-        if (size == ioMesh.numVertices())
+        if (iNormals.getScope() != Alembic::AbcGeom::kVertexScope &&
+            iNormals.getScope() != Alembic::AbcGeom::kFacevaryingScope)
         {
-            // per vertex normal
-            MVectorArray normalsIn;
-            MIntArray vertexList;
-            for (int i = 0, nIndex = 0; i < size; i++, nIndex += 3)
-            {
-                MVector normal(normals[nIndex],
-                                normals[nIndex+1],
-                                normals[nIndex+2]);
-                normalsIn.append(normal);
-                vertexList.append(i);
-            }
-            MStatus status = ioMesh.setVertexNormals(normalsIn, vertexList);
-            if (status != MS::kSuccess)
-                printError("Error setting per vertex normals");
+            printWarning(ioMesh.fullPathName() +
+                " normal vector has an unsupported scope, skipping normals");
+            return;
         }
-        else if (size == ioMesh.numFaceVertices())
+
+        int64_t index, ceilIndex;
+        double alpha = getWeightAndIndex(iFrame,
+            iNormals.getTimeSampling(), index, ceilIndex);
+
+        Alembic::AbcGeom::IN3fGeomParam::Sample samp;
+        iNormals.getExpanded(samp, Alembic::Abc::ISampleSelector(index));
+
+        MVectorArray normalsIn;
+
+        Alembic::Abc::N3fArraySamplePtr sampVal = samp.getVals();
+        size_t sampSize = sampVal->size();
+
+        Alembic::Abc::N3fArraySamplePtr ceilVals;
+        if (alpha != 0 && index != ceilIndex)
         {
-            // per vertex per-polygon normal
-            int nIndex = 0;
-            for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
+            Alembic::AbcGeom::IN3fGeomParam::Sample ceilSamp;
+            iNormals.getExpanded(ceilSamp,
+                Alembic::Abc::ISampleSelector(ceilIndex));
+            ceilVals = ceilSamp.getVals();
+            if (sampSize == ceilVals->size())
             {
-                MIntArray vertexList;
-                ioMesh.getPolygonVertices(faceIndex, vertexList);
-                unsigned int numVertices = vertexList.length();
-                // re-pack the order of normals in this vector before writing
-                // into prop so that Renderman can also use it
-                for ( int v = numVertices-1; v >= 0; v-- )
+                Alembic::Abc::N3fArraySamplePtr ceilVal = ceilSamp.getVals();
+                for (size_t i = 0; i < sampSize; ++i)
                 {
-                    unsigned int vertexIndex = vertexList[v];
-                    MVector normal(normals[nIndex],
-                                normals[nIndex+1],
-                                normals[nIndex+2]);
-                    ioMesh.setFaceVertexNormal(normal, faceIndex, vertexIndex);
-                    nIndex += 3;
+                    MVector normal(
+                        simpleLerp<float>(alpha, (*sampVal)[i].x,
+                            (*ceilVal)[i].x),
+                        simpleLerp<float>(alpha, (*sampVal)[i].y,
+                            (*ceilVal)[i].y),
+                        simpleLerp<float>(alpha, (*sampVal)[i].z,
+                            (*ceilVal)[i].z));
+                    normalsIn.append(normal);
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < sampSize; ++i)
+                {
+                    MVector normal((*sampVal)[i].x, (*sampVal)[i].y,
+                        (*sampVal)[i].z);
+                    normalsIn.append(normal);
                 }
             }
         }
         else
         {
-            printError("Normal vector is not of the correct length");
+            for (size_t i = 0; i < sampSize; ++i)
+            {
+                MVector normal((*sampVal)[i].x, (*sampVal)[i].y,
+                    (*sampVal)[i].z);
+                normalsIn.append(normal);
+            }
+        }
+
+        if (iNormals.getScope() == Alembic::AbcGeom::kVertexScope &&
+            sampSize == ioMesh.numVertices())
+        {
+            MIntArray vertexList;
+            for (size_t i = 0; i < sampSize; ++i)
+            {
+                vertexList.append(i);
+            }
+
+            ioMesh.setVertexNormals(normalsIn, vertexList);
+
+        }
+        else if (sampSize == ioMesh.numFaceVertices() &&
+            iNormals.getScope() == Alembic::AbcGeom::kFacevaryingScope)
+        {
+            // per vertex per-polygon normal
+            int numFaces = ioMesh.numPolygons();
+            for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
+            {
+                MIntArray vertexList;
+                ioMesh.getPolygonVertices(faceIndex, vertexList);
+                unsigned int numVertices = vertexList.length();
+                int nIndex;
+
+                for ( int v = numVertices-1; v >= 0; --v, ++nIndex )
+                {
+                    unsigned int vertexIndex = vertexList[v];
+
+                    ioMesh.setFaceVertexNormal(normalsIn[nIndex],
+                        faceIndex, vertexIndex);
+                }
+            }
+        }
+        else
+        {
+            printWarning(ioMesh.fullPathName() +
+                " normal vector scope does not match size of data, " +
+                "skipping normals");
         }
     }
 
@@ -496,14 +551,12 @@ void connectToPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
     fillPoints(ptArray, samp.getPositions(), ceilPoints, alpha);
     fnMesh.setPoints(ptArray, MSpace::kObject);
 
-    /*
-    if ( schema.hasNormals() )
-    {
-        setPolyNormals(fnMesh, normals);
-    }
-    */
 
-    //else
+    if ( schema.getNormals().valid() )
+    {
+        setPolyNormals(iFrame, fnMesh, schema.getNormals());
+    }
+    else
     {
         MStatus status = MS::kSuccess;
         MPlug plug = fnMesh.findPlug("noNormals", &status);
@@ -552,18 +605,9 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
     MString pathName = fnMesh.partialPathName();
     setInitialShadingGroup(pathName);
 
-    //if ( schema.hasNormals() )
-    //    setPolyNormals(fnMesh, samp.getNormals());
-    //else
-    {
-        MPlug plug = fnMesh.findPlug("noNormals", &status);
-        if (status == MS::kSuccess)
-            plug.setValue(false);
-    }
-
-    setUVs(iFrame, fnMesh, schema.getUVs());
-
-    //if (!schema.hasNormals())
+    if ( schema.getNormals().valid() )
+        setPolyNormals(iFrame, fnMesh, schema.getNormals());
+    else
     {
         MFnNumericAttribute attr;
         MString attrName("noNormals");
@@ -574,6 +618,8 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
         MFnMesh fnMesh(obj);
         fnMesh.addAttribute(attrObj, MFnDependencyNode::kLocalDynamicAttr);
     }
+
+    setUVs(iFrame, fnMesh, schema.getUVs());
 
     // add other properties
 
