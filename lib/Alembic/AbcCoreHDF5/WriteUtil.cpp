@@ -162,7 +162,7 @@ WriteDimensions( hid_t iParent,
                      H5T_NATIVE_UINT32,
                      rank,
                      ( const void * )&dimStorage.front() );
-}   
+}
 
 //-*****************************************************************************
 void
@@ -219,7 +219,7 @@ WritePropertyAndDataType( hid_t iGroup,
                  H5T_STD_U16LE,
                  H5T_NATIVE_UINT16,
                  ( const void * )&bitField );
-}   
+}
 
 //-*****************************************************************************
 static void
@@ -232,7 +232,7 @@ WriteTimeSamplingType( hid_t iGroup,
 
     const uint32_t spc = iTimeSamplingType.getNumSamplesPerCycle();
     const chrono_t tpc = iTimeSamplingType.getTimePerCycle();
-    
+
     if ( iTimeSamplingType.isIdentity() )
     {
         // We don't bother writing it at all
@@ -316,7 +316,7 @@ WriteArray( WrittenArraySampleMap &iMap,
         return WriteWstringArray( iMap, iGroup, iName, iSamp, iKey,
                                   iCompressionLevel );
     }
-    
+
     // See whether or not we've already stored this.
     WrittenArraySampleIDPtr writeID = iMap.find( iKey );
     if ( writeID )
@@ -328,7 +328,7 @@ WriteArray( WrittenArraySampleMap &iMap,
     // Okay, need to actually store it.
     // It will be a dataset with an internal attribute for storing
     // the hash id.
-    
+
     // Make a dataspace from the dimensions
     Dimensions dims = iSamp.getDimensions();
 
@@ -364,7 +364,7 @@ WriteArray( WrittenArraySampleMap &iMap,
         hid_t zipPlist = DsetGzipCreatePlist( dims,
             iCompressionLevel > 9 ? 9 : iCompressionLevel );
         PlistCloser plistCloser( zipPlist );
-        
+
         // Make the dataset.
         dsetId = H5Dcreate2( iGroup, iName.c_str(), iFileType, dspaceId,
                              H5P_DEFAULT, zipPlist, H5P_DEFAULT );
@@ -385,6 +385,9 @@ WriteArray( WrittenArraySampleMap &iMap,
     {
         H5Dwrite( dsetId, iNativeType, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                   iSamp.getData() );
+
+        // flush?
+        H5Fflush( dsetId, H5F_SCOPE_LOCAL );
     }
 
     // Write the array sample key.
@@ -509,7 +512,7 @@ void WriteSampling( WrittenArraySampleMap &iMap,
     }
 
     if ( numTimes < 2 )
-    {   
+    {
         // Only one time.
         WriteScalar( iGroup, timeSampsName,
                      H5T_IEEE_F64LE,
