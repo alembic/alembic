@@ -101,25 +101,27 @@ void ISimpleXformSchema::init( Abc::SchemaInterpMatching )
     static const Abc::ErrorHandler::Policy qnp =
         Abc::ErrorHandler::kQuietNoopPolicy;
 
-    m_scaleX = Abc::IDoubleProperty( *this, ".sx", qnp );
-    m_scaleY = Abc::IDoubleProperty( *this, ".sy", qnp );
-    m_scaleZ = Abc::IDoubleProperty( *this, ".sz", qnp );
+    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    m_shear0 = Abc::IDoubleProperty( *this, ".h0", qnp );
-    m_shear1 = Abc::IDoubleProperty( *this, ".h1", qnp );
-    m_shear2 = Abc::IDoubleProperty( *this, ".h2", qnp );
+    m_scaleX = Abc::IDoubleProperty( _this, ".sx", qnp );
+    m_scaleY = Abc::IDoubleProperty( _this, ".sy", qnp );
+    m_scaleZ = Abc::IDoubleProperty( _this, ".sz", qnp );
 
-    m_rotateX = Abc::IDoubleProperty( *this, ".rx", qnp );
-    m_rotateY = Abc::IDoubleProperty( *this, ".ry", qnp );
-    m_rotateZ = Abc::IDoubleProperty( *this, ".rz", qnp );
+    m_shear0 = Abc::IDoubleProperty( _this, ".h0", qnp );
+    m_shear1 = Abc::IDoubleProperty( _this, ".h1", qnp );
+    m_shear2 = Abc::IDoubleProperty( _this, ".h2", qnp );
 
-    m_translateX = Abc::IDoubleProperty( *this, ".tx", qnp );
-    m_translateY = Abc::IDoubleProperty( *this, ".ty", qnp );
-    m_translateZ = Abc::IDoubleProperty( *this, ".tz", qnp );
+    m_rotateX = Abc::IDoubleProperty( _this, ".rx", qnp );
+    m_rotateY = Abc::IDoubleProperty( _this, ".ry", qnp );
+    m_rotateZ = Abc::IDoubleProperty( _this, ".rz", qnp );
+
+    m_translateX = Abc::IDoubleProperty( _this, ".tx", qnp );
+    m_translateY = Abc::IDoubleProperty( _this, ".ty", qnp );
+    m_translateZ = Abc::IDoubleProperty( _this, ".tz", qnp );
 
     if ( this->getPropertyHeader( ".childBnds" ) != NULL )
     {
-        m_childBounds = Abc::IBox3dProperty( *this, ".childBnds", qnp );
+        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", qnp );
     }
 
     m_numSamples = 0;

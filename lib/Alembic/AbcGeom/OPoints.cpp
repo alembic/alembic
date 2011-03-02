@@ -133,13 +133,16 @@ void OPointsSchema::init( const AbcA::TimeSamplingType &iTst )
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVaryingScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTst );
 
-    m_ids = Abc::OUInt64ArrayProperty( *this, ".pointIds", mdata, iTst );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTst );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTst );
 
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+    m_ids = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata, iTst );
+
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTst );
+
+    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTst );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

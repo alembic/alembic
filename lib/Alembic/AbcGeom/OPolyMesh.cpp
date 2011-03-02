@@ -167,15 +167,18 @@ void OPolyMeshSchema::init( const AbcA::TimeSamplingType &iTst )
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTst );
 
-    m_indices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTst );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTst );
 
-    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTst );
+    m_indices = Abc::OInt32ArrayProperty( _this, ".faceIndices", iTst );
 
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+    m_counts = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTst );
+
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTst );
+
+    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTst );
 
     // UVs and Normals are created on first call to set()
 

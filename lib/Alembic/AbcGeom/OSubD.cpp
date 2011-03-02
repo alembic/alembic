@@ -309,39 +309,42 @@ void OSubDSchema::init( const AbcA::TimeSamplingType &iTst )
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTst );
 
-    m_faceIndices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTst );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_faceCounts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTst );
+
+    m_faceIndices = Abc::OInt32ArrayProperty( _this, ".faceIndices", iTst );
+
+    m_faceCounts = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTst );
 
     m_faceVaryingInterpolateBoundary =
-        Abc::OInt32Property( *this, ".faceVaryingInterpolateBoundary", iTst );
+        Abc::OInt32Property( _this, ".faceVaryingInterpolateBoundary", iTst );
 
     m_faceVaryingPropagateCorners =
-        Abc::OInt32Property( *this, ".faceVaryingPropagateCorners", iTst );
+        Abc::OInt32Property( _this, ".faceVaryingPropagateCorners", iTst );
 
     m_interpolateBoundary =
-        Abc::OInt32Property( *this, ".interpolateBoundary", iTst );
+        Abc::OInt32Property( _this, ".interpolateBoundary", iTst );
 
-    m_creaseIndices = Abc::OInt32ArrayProperty( *this, ".creaseIndices", iTst );
+    m_creaseIndices = Abc::OInt32ArrayProperty( _this, ".creaseIndices", iTst );
 
-    m_creaseLengths = Abc::OInt32ArrayProperty( *this, ".creaseLengths", iTst );
+    m_creaseLengths = Abc::OInt32ArrayProperty( _this, ".creaseLengths", iTst );
 
-    m_creaseSharpnesses = Abc::OFloatArrayProperty( *this, ".creaseSharpnesses",
+    m_creaseSharpnesses = Abc::OFloatArrayProperty( _this, ".creaseSharpnesses",
                                                iTst );
 
-    m_cornerIndices = Abc::OInt32ArrayProperty( *this, ".cornerIndices", iTst );
+    m_cornerIndices = Abc::OInt32ArrayProperty( _this, ".cornerIndices", iTst );
 
-    m_cornerSharpnesses = Abc::OFloatArrayProperty( *this, ".cornerSharpnesses",
+    m_cornerSharpnesses = Abc::OFloatArrayProperty( _this, ".cornerSharpnesses",
                                                iTst );
 
-    m_holes = Abc::OInt32ArrayProperty( *this, ".holes", iTst );
+    m_holes = Abc::OInt32ArrayProperty( _this, ".holes", iTst );
 
-    m_subdScheme = Abc::OStringProperty( *this, ".scheme", iTst );
+    m_subdScheme = Abc::OStringProperty( _this, ".scheme", iTst );
 
-    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTst );
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTst );
+    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTst );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

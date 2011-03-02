@@ -155,7 +155,9 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
     m_writtenOps = false;
     m_numAnimated = 0;
 
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTst );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
