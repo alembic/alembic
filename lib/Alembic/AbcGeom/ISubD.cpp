@@ -136,57 +136,59 @@ void ISubDSchema::init( const Abc::IArgument &iArg0,
     iArg0.setInto( args );
     iArg1.setInto( args );
 
-    m_positions = Abc::IV3fArrayProperty( *this, "P",
+    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
+
+    m_positions = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
-    m_faceIndices = Abc::IInt32ArrayProperty( *this, ".faceIndices",
+    m_faceIndices = Abc::IInt32ArrayProperty( _this, ".faceIndices",
                                             args.getSchemaInterpMatching() );
-    m_faceCounts = Abc::IInt32ArrayProperty( *this, ".faceCounts",
+    m_faceCounts = Abc::IInt32ArrayProperty( _this, ".faceCounts",
                                            args.getSchemaInterpMatching() );
 
     m_faceVaryingInterpolateBoundary =
-        Abc::IInt32Property( *this, ".faceVaryingInterpolateBoundary",
+        Abc::IInt32Property( _this, ".faceVaryingInterpolateBoundary",
                            args.getSchemaInterpMatching() );
     m_faceVaryingPropagateCorners =
-        Abc::IInt32Property( *this, ".faceVaryingPropagateCorners",
+        Abc::IInt32Property( _this, ".faceVaryingPropagateCorners",
                            args.getSchemaInterpMatching() );
     m_interpolateBoundary =
-        Abc::IInt32Property( *this, ".interpolateBoundary",
+        Abc::IInt32Property( _this, ".interpolateBoundary",
                            args.getSchemaInterpMatching() );
 
-    m_creaseIndices = Abc::IInt32ArrayProperty( *this, ".creaseIndices",
+    m_creaseIndices = Abc::IInt32ArrayProperty( _this, ".creaseIndices",
                                               args.getSchemaInterpMatching() );
     m_creaseLengths =
-        Abc::IInt32ArrayProperty( *this, ".creaseLengths",
+        Abc::IInt32ArrayProperty( _this, ".creaseLengths",
                                 args.getSchemaInterpMatching() );
     m_creaseSharpnesses =
-        Abc::IFloatArrayProperty( *this, ".creaseSharpnesses",
+        Abc::IFloatArrayProperty( _this, ".creaseSharpnesses",
                                   args.getSchemaInterpMatching() );
 
-    m_cornerIndices = Abc::IInt32ArrayProperty( *this, ".cornerIndices",
+    m_cornerIndices = Abc::IInt32ArrayProperty( _this, ".cornerIndices",
                                               args.getSchemaInterpMatching() );
     m_cornerSharpnesses =
-        Abc::IFloatArrayProperty( *this, ".cornerSharpnesses",
+        Abc::IFloatArrayProperty( _this, ".cornerSharpnesses",
                                   args.getSchemaInterpMatching() );
 
 
-    m_holes = Abc::IInt32ArrayProperty( *this, ".holes",
+    m_holes = Abc::IInt32ArrayProperty( _this, ".holes",
                                       args.getSchemaInterpMatching() );
 
-    m_subdScheme = Abc::IStringProperty( *this, ".scheme",
+    m_subdScheme = Abc::IStringProperty( _this, ".scheme",
                                          args.getSchemaInterpMatching() );
 
-    m_selfBounds = Abc::IBox3dProperty( *this, ".selfBnds", iArg0, iArg1 );
-    m_childBounds = Abc::IBox3dProperty( *this, ".childBnds", iArg0, iArg1 );
+    m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
+    m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0, iArg1 );
 
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
-        m_uvs = IV2fGeomParam( *this, "uv", iArg0, iArg1 );
+        m_uvs = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
     {
-        m_arbGeomParams = Abc::ICompoundProperty( *this, ".arbGeomParams",
+        m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
                                                   args.getErrorHandlerPolicy()
                                                 );
     }
