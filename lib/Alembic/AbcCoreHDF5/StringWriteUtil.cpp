@@ -313,16 +313,11 @@ WriteStringArrayT( WrittenArraySampleMap &iMap,
     // It will be a dataset with an internal attribute for storing
     // the hash id.
     
-    // Make a dataspace from the dimensions
     Dimensions dims = iSamp.getDimensions();
-
-    // Dimensions of rank 0 is not allowed for an array property.
-    // However, the extent of any particular dimension can reach 0
-    // (as in the case of a particle-simulation with zero particles).
-    // In this case, we would want to know the dimensions, and can
-    // skip the dataset altogether.
     ABCA_ASSERT( dims.rank() > 0,
-                 "Cannot have a rank-0 array sample in WriteArray" );
+        "String type can not have a rank-0 array sample" );
+    std::string dimsName = iName + ".dims";
+    WriteDimensions( iGroup, dimsName, dims );
 
     bool hasData = dims.numPoints() > 0;
     hid_t dspaceId = -1;
@@ -402,10 +397,6 @@ WriteStringArrayT( WrittenArraySampleMap &iMap,
 
     // Write the key
     WriteKey( dsetId, "key", iKey );
-
-    // Write the "true" dimensions, since we clobbered them
-    // with the compacted string.
-    WriteDimensions( dsetId, "dims", dims );
 
     writeID.reset( new WrittenArraySampleID( iKey, dsetId ) );
 

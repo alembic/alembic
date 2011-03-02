@@ -127,7 +127,8 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
              suffix != ".ttpc" &&
              suffix != ".nums" &&
              suffix != ".time" &&
-             suffix != ".smp0" )
+             suffix != ".smp0" &&
+             suffix != ".dims")
         {
             ABCA_THROW( "Invalid attribute in compound property group: "
                         << attrName

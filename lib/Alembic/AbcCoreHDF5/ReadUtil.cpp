@@ -157,7 +157,8 @@ ReadDimensions( hid_t iParent,
     ReadSmallArray( iParent, iAttrName, H5T_STD_U32LE, H5T_NATIVE_UINT32,
                     maxRank, readRank, ( void * )dimVals );
 
-    Dimensions retDims( readRank );
+    Dimensions retDims;
+    retDims.setRank( readRank );
     for ( size_t r = 0; r < readRank; ++r )
     {
         retDims[r] = ( size_t )dimVals[r];
@@ -512,7 +513,16 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
                      << "Expected rank: " << hdims.rank()
                      << " instead it was: " << rank );
 
-        Dimensions dims( hdims );
+        Dimensions dims;
+        std::string dimName = iName + ".dims";
+        if ( H5Aexists( iParent, dimName.c_str() ) )
+        {
+            ReadDimensions( iParent, dimName, dims );
+        }
+        else
+        {
+            dims = hdims;
+        }
 
         ABCA_ASSERT( dims.numPoints() > 0,
                      "Degenerate dims in Dataset read" );
@@ -531,12 +541,21 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
     else if ( dspaceClass == H5S_NULL )
     {
         Dimensions dims;
-        ReadDimensions( dsetId, "dims", dims );
-        ABCA_ASSERT( dims.rank() > 0,
+        std::string dimName = iName + ".dims";
+        if ( H5Aexists( iParent, dimName.c_str() ) )
+        {
+            ReadDimensions( iParent, dimName, dims );
+            ABCA_ASSERT( dims.rank() > 0,
                      "Degenerate rank in Dataset read" );
-        // Num points should be zero here.
-        ABCA_ASSERT( dims.numPoints() == 0,
+            // Num points should be zero here.
+            ABCA_ASSERT( dims.numPoints() == 0,
                      "Expecting zero points in dimensions" );
+        }
+        else
+        {
+            dims.setRank(1);
+            dims[0] = 0;
+        }
 
         ret = AbcA::AllocateArraySample( iDataType, dims );
     }

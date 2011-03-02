@@ -434,9 +434,9 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
     // String array datatypes require a "dimensions" to be stored
     // externally, since the strings themselves are stored in a compacted
     // array of rank 1.
-    // This is an attribute called "dims" that lives in the dset itself.
     Dimensions realDims;
-    ReadDimensions( dsetId, "dims", realDims );
+    std::string dimName = iName + ".dims";
+    ReadDimensions( iParent, dimName, realDims );
     ABCA_ASSERT( realDims.rank() > 0,
                  "Degenerate rank in Dataset read" );
 
