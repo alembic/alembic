@@ -91,14 +91,14 @@ void OSubDSchema::set( const Sample &iSamp,
             if ( iSamp.getUVs().getIndices() )
             {
                 // UVs are indexed
-                m_uvs = OV2fGeomParam( *this, "uv", true,
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", true,
                                        iSamp.getUVs().getScope(), 1,
                                        this->getTimeSamplingType() );
             }
             else
             {
                 // UVs are not indexed
-                m_uvs = OV2fGeomParam( *this, "uv", false,
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", false,
                                        iSamp.getUVs().getScope(), 1,
                                        this->getTimeSamplingType() );
             }
@@ -291,7 +291,8 @@ Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".arbGeomParams" );
     }
 
     return m_arbGeomParams;

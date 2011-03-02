@@ -78,14 +78,14 @@ size_t ISubDSchema::getNumSamples()
         {
             max = std::max( max,
                             Abc::IArrayProperty(
-                                *this,
+                                this->getPtr(),
                                 ph.getName() ).getNumSamples() );
         }
         else if ( ph.isScalar() )
         {
             max = std::max( max,
                             Abc::IScalarProperty(
-                                *this,
+                                this->getPtr(),
                                 ph.getName() ).getNumSamples() );
         }
     }

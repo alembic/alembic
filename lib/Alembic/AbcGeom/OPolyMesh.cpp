@@ -77,14 +77,14 @@ void OPolyMeshSchema::set( const Sample &iSamp,
             if ( iSamp.getUVs().getIndices() )
             {
                 // UVs are indexed
-                m_uvs = OV2fGeomParam( *this, "uv", true,
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", true,
                                        iSamp.getUVs().getScope(), 1,
                                        this->getTimeSamplingType() );
             }
             else
             {
                 // UVs are not indexed
-                m_uvs = OV2fGeomParam( *this, "uv", false,
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", false,
                                        iSamp.getUVs().getScope(), 1,
                                        this->getTimeSamplingType() );
             }
@@ -96,14 +96,14 @@ void OPolyMeshSchema::set( const Sample &iSamp,
             if ( iSamp.getNormals().getIndices() )
             {
                 // normals are indexed
-                m_normals = ON3fGeomParam( *this, "N", true,
+                m_normals = ON3fGeomParam( this->getPtr(), "N", true,
                                            iSamp.getNormals().getScope(),
                                            1, this->getTimeSamplingType() );
             }
             else
             {
                 // normals are not indexed
-                m_normals = ON3fGeomParam( *this, "N", false,
+                m_normals = ON3fGeomParam( this->getPtr(), "N", false,
                                            iSamp.getNormals().getScope(), 1,
                                            this->getTimeSamplingType() );
             }
@@ -192,7 +192,8 @@ Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".arbGeomParams" );
     }
 
     return m_arbGeomParams;
