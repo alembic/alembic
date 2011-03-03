@@ -375,7 +375,7 @@ WriteArray( WrittenArraySampleMap &iMap,
                              iFileType, dspaceId,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
     }
-    DsetCloser dsetCloser(dsetId);
+    DsetCloser dsetCloser( dsetId );
 
     ABCA_ASSERT( dsetId >= 0,
                  "WriteArray() Failed in dataset constructor" );
@@ -385,9 +385,6 @@ WriteArray( WrittenArraySampleMap &iMap,
     {
         H5Dwrite( dsetId, iNativeType, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                   iSamp.getData() );
-
-        // flush?
-        H5Fflush( dsetId, H5F_SCOPE_LOCAL );
     }
 
     // Write the array sample key.
