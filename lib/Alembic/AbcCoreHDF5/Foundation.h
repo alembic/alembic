@@ -109,7 +109,10 @@ inline std::string getSampleName( const std::string &iName,
     }
     else
     {
-        return ( boost::format( ".smp_%08d" ) % iSampleIndex ).str();
+        // could use boost::lexical_cast
+        std::ostringstream strm;
+        strm << iSampleIndex;
+        return strm.str();
     }
 }
 
