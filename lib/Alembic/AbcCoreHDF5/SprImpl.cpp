@@ -57,6 +57,7 @@ void SprImpl::readSample( hid_t iGroup,
     assert( oSampleBytes );
 
     const AbcA::DataType &dtype = m_header->getDataType();
+    uint8_t extent = dtype.getExtent();
     if ( dtype.getPod() == kStringPOD )
     {
         std::string *strings
@@ -64,7 +65,7 @@ void SprImpl::readSample( hid_t iGroup,
         ABCA_ASSERT( strings != NULL,
                      "Invalid data buffer in scalar read sample" );
         
-        if ( dtype.getExtent() == 1 )
+        if ( extent == 1 )
         {
             ReadString( iGroup, iSampleName, *strings );
         }
@@ -80,7 +81,7 @@ void SprImpl::readSample( hid_t iGroup,
         ABCA_ASSERT( wstrings != NULL,
                      "Invalid data buffer in scalar read sample" );
         
-        if ( dtype.getExtent() == 1 )
+        if ( extent == 1 )
         {
             ReadWstring( iGroup, iSampleName, *wstrings );
         }
@@ -95,10 +96,18 @@ void SprImpl::readSample( hid_t iGroup,
     {
         assert( m_fileDataType >= 0 );
         assert( m_nativeDataType >= 0 );
-        ReadScalar( iGroup, iSampleName,
-                    m_fileDataType,
-                    m_nativeDataType,
-                    oSampleBytes );
+
+        if ( extent == 1 )
+        {
+            ReadScalar( iGroup, iSampleName, m_fileDataType, m_nativeDataType,
+                oSampleBytes );
+        }
+        else
+        {
+            size_t readElements = 0;
+            ReadSmallArray( iGroup, iSampleName, m_fileDataType,
+                m_nativeDataType, extent, readElements, oSampleBytes );
+        }
     }
 }
 

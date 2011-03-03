@@ -171,6 +171,8 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
     ABCA_ASSERT( m_parent, "Invalid parent" );
     ABCA_ASSERT( m_header, "Invalid property header" );
     ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
+    ABCA_ASSERT( m_header->getDataType().getExtent() > 0,
+        "Invalid DatatType extent");
 
     // Get data types
     PlainOldDataType POD = m_header->getDataType().getPod();

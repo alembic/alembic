@@ -83,13 +83,15 @@ void SpwImpl::copyPreviousSample( hid_t iGroup,
     
     // Write the sample.
     const AbcA::DataType &dtype = m_header->getDataType();
+    uint8_t extent = dtype.getExtent();
+
     if ( dtype.getPod() == kStringPOD )
     {
         const std::string *strings
             = reinterpret_cast<const std::string *>(
                 m_previousSample.getData() );
         
-        if ( dtype.getExtent() == 1 )
+        if ( extent == 1 )
         {
             WriteString( iGroup, iSampleName, *strings );
         }
@@ -104,7 +106,7 @@ void SpwImpl::copyPreviousSample( hid_t iGroup,
             = reinterpret_cast<const std::wstring *>(
                 m_previousSample.getData() );
         
-        if ( dtype.getExtent() == 1 )
+        if ( extent == 1 )
         {
             WriteWstring( iGroup, iSampleName, *wstrings );
         }
@@ -117,10 +119,21 @@ void SpwImpl::copyPreviousSample( hid_t iGroup,
     {
         assert( m_fileDataType >= 0 );
         assert( m_nativeDataType >= 0 );
-        WriteScalar( iGroup, iSampleName,
-                     m_fileDataType,
-                     m_nativeDataType,
-                     m_previousSample.getData() );
+        if (extent == 1)
+        {
+            WriteScalar( iGroup, iSampleName,
+                         m_fileDataType,
+                         m_nativeDataType,
+                         m_previousSample.getData() );
+        }
+        else
+        {
+            WriteSmallArray( iGroup, iSampleName,
+                         m_fileDataType,
+                         m_nativeDataType,
+                         extent,
+                         m_previousSample.getData() );
+        }
     }
 }
 

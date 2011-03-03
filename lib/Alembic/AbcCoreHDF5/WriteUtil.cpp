@@ -346,8 +346,8 @@ WriteArray( WrittenArraySampleMap &iMap,
     hid_t dspaceId = -1;
     if ( hasData )
     {
-        HDimensions hdims( dims );
-        dspaceId = H5Screate_simple( hdims.rank(), hdims.rootPtr(), NULL );
+        hsize_t hdim = dims.numPoints() * dataType.getExtent();
+        dspaceId = H5Screate_simple( 1, &hdim, NULL );
     }
     else
     {

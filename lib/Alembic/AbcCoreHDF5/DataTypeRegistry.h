@@ -47,7 +47,6 @@ namespace AbcCoreHDF5 {
 // Still, they're kinda handy.
 hid_t GetNativeH5T( const AbcA::DataType &adt, bool &oCleanUp );
 hid_t GetFileH5T( const AbcA::DataType &adt, bool &oCleanUp );
-AbcA::DataType InterpretH5T( hid_t iDataType );
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

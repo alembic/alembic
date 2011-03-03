@@ -500,18 +500,12 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
     {
         // Get the dimensions
         int rank = H5Sget_simple_extent_ndims( dspaceId );
-        ABCA_ASSERT( rank >= 0,
-                     "H5Sget_simple_extent_ndims() failed." );
+        ABCA_ASSERT( rank == 1,
+                     "H5Sget_simple_extent_ndims() must be 1." );
 
-        HDimensions hdims;
-        hdims.setRank( rank );
-        rank = H5Sget_simple_extent_dims( dspaceId, hdims.rootPtr(), NULL );
-        ABCA_ASSERT( rank == hdims.rank(),
-                     "H5Sget_simple_extent_dims() "
-                     "found inconsistent ranks."
-                     << std::endl
-                     << "Expected rank: " << hdims.rank()
-                     << " instead it was: " << rank );
+        hsize_t hdim = 0;
+
+        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
 
         Dimensions dims;
         std::string dimName = iName + ".dims";
@@ -521,7 +515,8 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
         }
         else
         {
-            dims = hdims;
+            dims.setRank(1);
+            dims[0] = hdim / iDataType.getExtent();
         }
 
         ABCA_ASSERT( dims.numPoints() > 0,
