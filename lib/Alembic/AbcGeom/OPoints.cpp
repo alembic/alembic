@@ -56,7 +56,8 @@ void OPointsSchema::set( const Sample &iSamp,
         m_positions.set( iSamp.getPositions(), iSS );
         m_ids.set( iSamp.getIds(), iSS );
 
-        m_childBounds.set( iSamp.getChildBounds(), iSS );
+        if ( iSamp.getChildBounds().hasVolume() )
+        { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -73,6 +74,7 @@ void OPointsSchema::set( const Sample &iSamp,
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions(), iSS );
         SetPropUsePrevIfNull( m_ids, iSamp.getIds(), iSS );
+        SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds(), iSS );
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {

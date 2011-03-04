@@ -94,34 +94,36 @@ size_t ISubDSchema::getNumSamples()
 }
 
 //-*****************************************************************************
-void ISubDSchema::get( ISubDSchema::Sample &iSample,
+void ISubDSchema::get( ISubDSchema::Sample &oSample,
                        const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::get()" );
 
-    m_positions.get( iSample.m_positions, iSS );
-    m_faceIndices.get( iSample.m_faceIndices, iSS );
-    m_faceCounts.get( iSample.m_faceCounts, iSS );
+    m_positions.get( oSample.m_positions, iSS );
+    m_faceIndices.get( oSample.m_faceIndices, iSS );
+    m_faceCounts.get( oSample.m_faceCounts, iSS );
 
     m_faceVaryingInterpolateBoundary.get(
-        iSample.m_faceVaryingInterpolateBoundary, iSS );
+        oSample.m_faceVaryingInterpolateBoundary, iSS );
     m_faceVaryingPropagateCorners.get(
-        iSample.m_faceVaryingPropagateCorners, iSS );
-    m_interpolateBoundary.get( iSample.m_interpolateBoundary, iSS );
+        oSample.m_faceVaryingPropagateCorners, iSS );
+    m_interpolateBoundary.get( oSample.m_interpolateBoundary, iSS );
 
-    m_creaseIndices.get( iSample.m_creaseIndices, iSS );
-    m_creaseLengths.get( iSample.m_creaseLengths, iSS );
-    m_creaseSharpnesses.get( iSample.m_creaseSharpnesses, iSS );
+    m_creaseIndices.get( oSample.m_creaseIndices, iSS );
+    m_creaseLengths.get( oSample.m_creaseLengths, iSS );
+    m_creaseSharpnesses.get( oSample.m_creaseSharpnesses, iSS );
 
-    m_cornerIndices.get( iSample.m_cornerIndices, iSS );
-    m_cornerSharpnesses.get( iSample.m_cornerSharpnesses, iSS );
+    m_cornerIndices.get( oSample.m_cornerIndices, iSS );
+    m_cornerSharpnesses.get( oSample.m_cornerSharpnesses, iSS );
 
-    m_holes.get( iSample.m_holes, iSS );
+    m_holes.get( oSample.m_holes, iSS );
 
-    m_subdScheme.get( iSample.m_subdScheme, iSS );
+    m_subdScheme.get( oSample.m_subdScheme, iSS );
 
-    m_selfBounds.get( iSample.m_selfBounds, iSS );
-    m_childBounds.get( iSample.m_childBounds, iSS );
+    m_selfBounds.get( oSample.m_selfBounds, iSS );
+
+    if ( m_childBounds.getNumSamples() > 0 )
+    { m_childBounds.get( oSample.m_childBounds, iSS ); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

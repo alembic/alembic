@@ -59,7 +59,8 @@ void OPolyMeshSchema::set( const Sample &iSamp,
         m_indices.set( iSamp.getIndices(), iSS );
         m_counts.set( iSamp.getCounts(), iSS );
 
-        m_childBounds.set( iSamp.getChildBounds(), iSS );
+        if ( iSamp.getChildBounds().hasVolume() )
+        { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {

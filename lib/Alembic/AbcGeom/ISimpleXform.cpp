@@ -182,8 +182,10 @@ void ISimpleXformSchema::get( SimpleXformSample &oSample,
 
     if ( m_childBounds )
     {
+        std::cout << "Getting childBounds" << std::endl;
         oSample.setChildBounds( m_childBounds.getValue( iSS ) );
     }
+    else std::cout << "not getting childBounds" << std::endl;
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

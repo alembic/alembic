@@ -73,7 +73,8 @@ void OSubDSchema::set( const Sample &iSamp,
         m_faceIndices.set( iSamp.getFaceIndices(), iSS );
         m_faceCounts.set( iSamp.getFaceCounts(), iSS );
 
-        m_childBounds.set( iSamp.getChildBounds(), iSS );
+        if ( iSamp.getChildBounds().hasVolume() )
+        { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -229,6 +230,8 @@ void OSubDSchema::set( const Sample &iSamp,
 
         SetPropUsePrevIfNull( m_subdScheme, iSamp.getSubdivisionScheme(),
                               iSS );
+
+        SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds(), iSS );
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {

@@ -169,16 +169,18 @@ public:
     }
 
     //-*************************************************************************
-    void get( Sample &iSample,
+    void get( Sample &oSample,
               const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPointsSchema::get()" );
 
-        m_positions.get( iSample.m_positions, iSS );
-        m_ids.get( iSample.m_ids, iSS );
+        m_positions.get( oSample.m_positions, iSS );
+        m_ids.get( oSample.m_ids, iSS );
 
-        m_selfBounds.get( iSample.m_selfBounds, iSS );
-        m_childBounds.get( iSample.m_childBounds, iSS );
+        m_selfBounds.get( oSample.m_selfBounds, iSS );
+
+        if ( m_childBounds.getNumSamples() > 0 )
+        { m_childBounds.get( oSample.m_childBounds, iSS ); }
 
         // Could error check here.
 

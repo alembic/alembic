@@ -170,7 +170,8 @@ void OSimpleXformSchema::set( const SimpleXformSample &iSamp,
     index_t idx = iSS.getIndex();
     chrono_t time = iSS.getTime();
 
-    m_childBounds.set( iSamp.getChildBounds(), iSS );
+    if ( iSamp.getChildBounds().hasVolume() )
+    { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
 
     // Push back the times if we need to.
     if ( m_times.size() == idx  )

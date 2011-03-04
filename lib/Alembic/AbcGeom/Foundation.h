@@ -106,6 +106,9 @@ inline void SetPropUsePrevIfNull<Abc::OBox3dProperty, Abc::Box3d>(
     Abc::OBox3dProperty iProp, Abc::Box3d iSamp,
     const Abc::OSampleSelector &iSS )
 {
+    if ( iProp.getNumSamples() < iSS.getIndex() )
+    { return; }
+
     if ( iSamp.hasVolume() ) { iProp.set( iSamp, iSS ); }
     else { iProp.setFromPrevious( iSS ); }
 }

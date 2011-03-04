@@ -205,7 +205,7 @@ public:
         {
             m_selfBounds.get( oSample.m_selfBounds, iSS );
         }
-        if ( m_childBounds )
+        if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
         {
             m_childBounds.get( oSample.m_childBounds, iSS );
         }
