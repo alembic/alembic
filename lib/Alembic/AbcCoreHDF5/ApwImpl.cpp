@@ -40,6 +40,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_ABCHDF5_VERSION_NS {
 
 //-*****************************************************************************
 ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
@@ -104,5 +105,6 @@ void ApwImpl::writeSample( hid_t iGroup,
                     awp->getCompressionHint() );
 }
 
+} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

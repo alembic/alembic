@@ -67,13 +67,16 @@
 
 #include <H5LTpublic.h>
 
+#define ALEMBIC_ABCHDF5_VERSION_NS v1
+
 //-*****************************************************************************
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_ABCHDF5_VERSION_NS {
 
 //-*****************************************************************************
-namespace AbcA = ::Alembic::AbcCoreAbstract::v1;
+namespace AbcA = ::Alembic::AbcCoreAbstract;
 
 using namespace ::Alembic::Util;
 using AbcA::index_t;
@@ -115,6 +118,10 @@ inline std::string getSampleName( const std::string &iName,
         return strm.str();
     }
 }
+
+} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+
+using namespace ALEMBIC_ABCHDF5_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

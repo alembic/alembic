@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_ABCHDF5_VERSION_NS {
 
 //-*****************************************************************************
 typedef boost::weak_ptr<AbcA::ArraySample> ArraySampleWeakPtr;
@@ -148,6 +149,10 @@ private:
 
 //-*****************************************************************************
 AbcA::ReadArraySampleCachePtr MakeCacheImplPtr();
+
+} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+
+using namespace ALEMBIC_ABCHDF5_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

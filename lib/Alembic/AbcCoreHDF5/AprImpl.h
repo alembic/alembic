@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_ABCHDF5_VERSION_NS {
 
 //-*****************************************************************************
 class AprImpl
@@ -86,6 +87,10 @@ protected:
                   AbcA::ArraySampleKey & oSamplePtr );
 
 };
+
+} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+
+using namespace ALEMBIC_ABCHDF5_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

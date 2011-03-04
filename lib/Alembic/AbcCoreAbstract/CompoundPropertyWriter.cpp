@@ -40,7 +40,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_ABCA_VERSION_NS {
 
 //-*****************************************************************************
 CompoundPropertyWriter::~CompoundPropertyWriter()
@@ -72,6 +72,6 @@ CompoundPropertyWriter::createProperty( const PropertyHeader & iHeader )
     }
 }
 
-} // End namespace v1
+} // End namespace ALEMBIC_ABCA_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

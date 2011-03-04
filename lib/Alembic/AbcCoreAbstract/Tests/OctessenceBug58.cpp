@@ -44,7 +44,7 @@
 //-*****************************************************************************
 namespace A5 = Alembic::AbcCoreHDF5;
 
-namespace AA = Alembic::AbcCoreAbstract::v1;
+namespace AA = Alembic::AbcCoreAbstract;
 
 //-*****************************************************************************
 void WriteTestArchive( const std::string &iArchiveName )

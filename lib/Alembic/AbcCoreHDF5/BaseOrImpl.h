@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_ABCHDF5_VERSION_NS {
 
 //-*****************************************************************************
 class TopCprImpl;
@@ -119,6 +120,10 @@ protected:
     ProtoObjects m_protoObjects;
     ChildrenMap m_children;
 };
+
+} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+
+using namespace ALEMBIC_ABCHDF5_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

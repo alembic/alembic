@@ -49,7 +49,7 @@
 #include <boost/preprocessor/stringize.hpp>
 
 //-*****************************************************************************
-namespace AbcA = Alembic::AbcCoreAbstract::v1;
+namespace AbcA = Alembic::AbcCoreAbstract;
 using AbcA::chrono_t;
 
 typedef std::vector<chrono_t> TimeVector;

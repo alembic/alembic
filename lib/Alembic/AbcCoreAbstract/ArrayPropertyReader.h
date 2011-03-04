@@ -43,7 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_ABCA_VERSION_NS {
 
 //-*****************************************************************************
 //! An Array Property is a Rank N (usually 1-3) property which has a
@@ -97,7 +97,10 @@ public:
     virtual bool getKey( index_t iSampleIndex, ArraySampleKey & oKey ) = 0;
 };
 
-} // End namespace v1
+} // End namespace ALEMBIC_ABCA_VERSION_NS
+
+using namespace ALEMBIC_ABCA_VERSION_NS;
+
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

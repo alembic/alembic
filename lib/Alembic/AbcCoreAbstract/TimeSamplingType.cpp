@@ -38,7 +38,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_ABCA_VERSION_NS {
 
 //-*****************************************************************************
 // static instancing
@@ -50,7 +50,7 @@ const chrono_t TimeSamplingType::ACYCLIC_TIME_PER_CYCLE =
     std::numeric_limits<chrono_t>::max() / 10.0;
 
 
-} // End namespace v1
+} // End namespace ALEMBIC_ABCA_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

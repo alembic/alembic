@@ -40,6 +40,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_ABCHDF5_VERSION_NS {
 
 //-*****************************************************************************
 BOOST_STATIC_ASSERT( sizeof( char ) == sizeof( int8_t ) );
@@ -548,5 +549,6 @@ ReadWstringArray( AbcA::ReadArraySampleCachePtr iCache,
         ( iCache, iParent, iName, iDataType );
 }
 
+} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic
