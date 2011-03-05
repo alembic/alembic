@@ -114,6 +114,8 @@ inline std::string getSampleName( const std::string &iName,
     {
         // could use boost::lexical_cast
         std::ostringstream strm;
+        strm.width(4);
+        strm.fill('0');
         strm << iSampleIndex;
         return strm.str();
     }
