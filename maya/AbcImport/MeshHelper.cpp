@@ -302,7 +302,7 @@ namespace
                 MIntArray vertexList;
                 ioMesh.getPolygonVertices(faceIndex, vertexList);
                 unsigned int numVertices = vertexList.length();
-                int nIndex;
+                int nIndex = 0;
 
                 for ( int v = numVertices-1; v >= 0; --v, ++nIndex )
                 {

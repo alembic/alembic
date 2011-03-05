@@ -217,7 +217,7 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
 
     // no normals bail early
     MPlug plug = lMesh.findPlug("noNormals", true, &status);
-    if ( status != MS::kSuccess || plug.asBool() == true )
+    if ( status == MS::kSuccess && plug.asBool() == true )
         return;
 
     bool flipNormals = false;
