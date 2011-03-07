@@ -60,6 +60,11 @@ ArImpl::ArImpl( const std::string &iFileName,
 
     // Read the top object
     m_top = new TopOrImpl( *this, m_file );
+
+    int version = 0;
+    version = atoi(m_top->getMetaData().get("abc_version").c_str());
+    ABCA_ASSERT( version > 0 && version <= 1,
+        "Unsupported file version detected.");
 }
 
 //-*****************************************************************************

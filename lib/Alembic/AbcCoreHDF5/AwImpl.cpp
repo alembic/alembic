@@ -69,6 +69,11 @@ AwImpl::AwImpl( const std::string &iFileName,
         ABCA_THROW( "Could not open file: " << m_fileName );
     }
 
+    // set the version
+    std::string key = "abc_version";
+    std::string version = "1";
+    m_metaData.set(key, version);
+
     // Create top explicitly.
     m_top = new TopOwImpl( *this, m_file, m_metaData );
 }
