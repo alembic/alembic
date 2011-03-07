@@ -58,13 +58,19 @@ ArImpl::ArImpl( const std::string &iFileName,
     ABCA_ASSERT( m_file >= 0,
                  "Could not open file: " << m_fileName );
 
+    // get the version using HDF5 native calls
+    int version = -100;
+    if (H5Aexists(m_file, "abc_version"))
+    {
+        H5LTget_attribute_int(m_file, ".", "abc_version", &version);
+    }
+    ABCA_ASSERT(version == -10,
+        "Unsupported file version detected.");
+
     // Read the top object
     m_top = new TopOrImpl( *this, m_file );
 
-    int version = 0;
-    version = atoi(m_top->getMetaData().get("abc_version").c_str());
-    ABCA_ASSERT( version > 0 && version <= 1,
-        "Unsupported file version detected.");
+
 }
 
 //-*****************************************************************************

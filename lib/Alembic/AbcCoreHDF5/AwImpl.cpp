@@ -69,10 +69,9 @@ AwImpl::AwImpl( const std::string &iFileName,
         ABCA_THROW( "Could not open file: " << m_fileName );
     }
 
-    // set the version
-    std::string key = "abc_version";
-    std::string version = "1";
-    m_metaData.set(key, version);
+    // set the version using HDF5 native calls
+    int version = -10;
+    H5LTset_attribute_int(m_file, ".", "abc_version", &version, 1);
 
     // Create top explicitly.
     m_top = new TopOwImpl( *this, m_file, m_metaData );
