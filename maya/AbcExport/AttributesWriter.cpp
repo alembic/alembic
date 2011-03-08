@@ -229,7 +229,7 @@ AttributesWriter::AttributesWriter(
                     Alembic::Abc::OCharProperty bp(iParent.getProperties(),
                         "visible", iTimeType);
                     bp.set(visVal,
-                        Alembic::Abc::OSampleSelector(mCurIndex, iFrame/24.0));
+                        Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
                     visPlug.prop = bp;
                     mAnimVisibility = visPlug;
                 }
@@ -257,7 +257,7 @@ AttributesWriter::AttributesWriter(
                 Alembic::Abc::OCharProperty bp(iParent.getProperties(),
                     "visible", iTimeType);
                 bp.set(visVal,
-                    Alembic::Abc::OSampleSelector(mCurIndex, iFrame/24.0));
+                    Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
                 visPlug.prop = bp;
                 mAnimVisibility = visPlug;
 
@@ -334,7 +334,7 @@ void AttributesWriter::write(double iFrame)
         }
 
         mAnimVisibility.prop.set(&visVal,
-            Alembic::Abc::OSampleSelector(mCurIndex, iFrame/24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
     }
 
 }

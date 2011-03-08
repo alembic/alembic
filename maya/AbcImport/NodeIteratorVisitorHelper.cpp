@@ -57,6 +57,7 @@
 #include <maya/MFnNurbsCurve.h>
 #include <maya/MFnNurbsSurface.h>
 #include <maya/MFnCamera.h>
+#include <maya/MTime.h>
 
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
 
@@ -1257,11 +1258,12 @@ MString connectAttr(ArgData & iArgData)
     plug.setValue(iArgData.mFileName);
 
     // set sequence start and end in frames
+    MTime sec(1.0, MTime::kSeconds);
     plug = alembicNodeFn.findPlug("startFrame", true, &status);
-    plug.setValue(iArgData.mSequenceStartTime * 24.0);
+    plug.setValue(iArgData.mSequenceStartTime * sec.as(MTime::uiUnit()));
 
     plug = alembicNodeFn.findPlug("endFrame", true, &status);
-    plug.setValue(iArgData.mSequenceEndTime * 24.0);
+    plug.setValue(iArgData.mSequenceEndTime * sec.as(MTime::uiUnit()));
 
     // set connect input info
     plug = alembicNodeFn.findPlug("connect", true, &status);

@@ -291,7 +291,7 @@ void MayaMeshWriter::write(double iFrame)
                 Alembic::AbcGeom::OV2fGeomParam::Sample(),
                 normalsSamp);
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame/24.0);
+            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             mPolySchema.set(samp, s);
         }
         else if (mSubDSchema.valid())
@@ -302,7 +302,7 @@ void MayaMeshWriter::write(double iFrame)
                 Alembic::Abc::Int32ArraySample( facePoints ),
                 Alembic::Abc::Int32ArraySample( faceList ) );
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame/24.0);
+            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             mSubDSchema.set(samp, s);
         }
     }
@@ -338,7 +338,7 @@ void MayaMeshWriter::write(double iFrame)
                     (const Imath::V3f *) &normals.front(), normals.size() / 3));
             }
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame/24.0);
+            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
                 Alembic::Abc::V3fArraySample(
                     (const Imath::V3f *)&points.front(), points.size() / 3),
@@ -351,7 +351,7 @@ void MayaMeshWriter::write(double iFrame)
         }
         else if (mSubDSchema.valid())
         {
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame/24.0);
+            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             Alembic::AbcGeom::OSubDSchema::Sample samp;
             samp.setPositions( Alembic::Abc::V3fArraySample(
                 (const Imath::V3f *) &points.front(), points.size() / 3) );
@@ -405,7 +405,7 @@ void MayaMeshWriter::writePoly(double iFrame,
     if (mIsGeometryAnimated)
     {
         mPolySchema.set(samp,
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/ 24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     }
     else
     {
@@ -540,7 +540,7 @@ void MayaMeshWriter::writeSubD(double iFrame, MDagPath & iDag,
     if (mIsGeometryAnimated)
     {
         mSubDSchema.set(samp,
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     }
     else
     {

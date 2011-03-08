@@ -453,7 +453,7 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
             if (animData.empty())
             {
                 mSchema.set(Alembic::Abc::DoubleArraySample(animData),
-                    Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+                    Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
             }
 
             return;
@@ -487,7 +487,7 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
             if (animData.empty())
             {
                 mSchema.set(Alembic::Abc::DoubleArraySample(animData),
-                    Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+                    Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
             }
 
             return;
@@ -568,7 +568,7 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     if (animData.size() > 0)
     {
         mSchema.set(Alembic::Abc::DoubleArraySample(animData),
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     }
 }
 
@@ -625,7 +625,7 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     if (animData.size() > 0)
     {
         mSchema.set(Alembic::Abc::DoubleArraySample(animData),
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     }
 }
 
@@ -650,7 +650,7 @@ void MayaTransformWriter::write(double iFrame)
                 samples[i] = mSampledList[i].first.asDouble();
         }
         mSchema.set(Alembic::Abc::DoubleArraySample(samples),
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     }
     mAttrs->write(iFrame);
 }

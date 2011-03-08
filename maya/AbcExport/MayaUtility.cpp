@@ -36,6 +36,13 @@
 
 #include "MayaUtility.h"
 
+// return seconds per frame
+double util::spf()
+{
+    static const MTime sec(1.0, MTime::kSeconds);
+    return 1.0 / sec.as(MTime::uiUnit());
+}
+
 bool util::isAncestorDescendentRelationship(const MDagPath & path1,
     const MDagPath & path2)
 {
