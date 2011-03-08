@@ -89,35 +89,18 @@ OSimpleXformSchema::ODefaultedDoubleProperty::set(
 
         // set the final one.
         m_property.set( iVal, iSS );
-
-        // And return true, because the property exists
-        return;
     }
-
-    // Property does not (and does not need to yet) exist.
-    return;
 }
 
 //-*****************************************************************************
 void
 OSimpleXformSchema::ODefaultedDoubleProperty::setFromPrevious(
-    const Abc::OSampleSelector &iSS,
-    const std::vector<chrono_t> &iTimes )
+    const Abc::OSampleSelector &iSS )
 {
     if ( m_property )
     {
-        if ( ! iTimes.empty() )
-        {
-            m_property.setFromPrevious( iSS );
-        }
-        else
-        {
-            m_property.setFromPrevious( iSS.getIndex() );
-        }
-        return;
+        m_property.setFromPrevious( iSS );
     }
-
-    return;
 }
 
 //-*****************************************************************************
@@ -228,49 +211,47 @@ void OSimpleXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     index_t idx = iSS.getIndex();
     chrono_t time = iSS.getTime();
 
-    m_childBounds.setFromPrevious( iSS );
+    if ( m_childBounds.getNumSamples() > 0 )
+    { m_childBounds.setFromPrevious( iSS ); }
 
     // Push back the times if we need to.
     if ( m_times.size() == idx )
     {
         m_times.push_back( time );
 
-        m_scaleX.setFromPrevious( iSS, m_times );
-        m_scaleY.setFromPrevious( iSS, m_times );
-        m_scaleZ.setFromPrevious( iSS, m_times );
+        m_scaleX.setFromPrevious( iSS );
+        m_scaleY.setFromPrevious( iSS );
+        m_scaleZ.setFromPrevious( iSS );
 
-        m_shear0.setFromPrevious( iSS, m_times );
-        m_shear1.setFromPrevious( iSS, m_times );
-        m_shear2.setFromPrevious( iSS, m_times );
+        m_shear0.setFromPrevious( iSS );
+        m_shear1.setFromPrevious( iSS );
+        m_shear2.setFromPrevious( iSS );
 
-        m_rotateX.setFromPrevious( iSS, m_times );
-        m_rotateY.setFromPrevious( iSS, m_times );
-        m_rotateZ.setFromPrevious( iSS, m_times );
+        m_rotateX.setFromPrevious( iSS );
+        m_rotateY.setFromPrevious( iSS );
+        m_rotateZ.setFromPrevious( iSS );
 
-        m_translateX.setFromPrevious( iSS, m_times );
-        m_translateY.setFromPrevious( iSS, m_times );
-        m_translateZ.setFromPrevious( iSS, m_times );
+        m_translateX.setFromPrevious( iSS );
+        m_translateY.setFromPrevious( iSS );
+        m_translateZ.setFromPrevious( iSS );
     }
     else
     {
-        std::vector<chrono_t> empty;
-        empty.clear();
+        m_scaleX.setFromPrevious( iSS );
+        m_scaleY.setFromPrevious( iSS );
+        m_scaleZ.setFromPrevious( iSS );
 
-        m_scaleX.setFromPrevious( iSS, empty );
-        m_scaleY.setFromPrevious( iSS, empty );
-        m_scaleZ.setFromPrevious( iSS, empty );
+        m_shear0.setFromPrevious( iSS );
+        m_shear1.setFromPrevious( iSS );
+        m_shear2.setFromPrevious( iSS );
 
-        m_shear0.setFromPrevious( iSS, empty );
-        m_shear1.setFromPrevious( iSS, empty );
-        m_shear2.setFromPrevious( iSS, empty );
+        m_rotateX.setFromPrevious( iSS );
+        m_rotateY.setFromPrevious( iSS );
+        m_rotateZ.setFromPrevious( iSS );
 
-        m_rotateX.setFromPrevious( iSS, empty );
-        m_rotateY.setFromPrevious( iSS, empty );
-        m_rotateZ.setFromPrevious( iSS, empty );
-
-        m_translateX.setFromPrevious( iSS, empty );
-        m_translateY.setFromPrevious( iSS, empty );
-        m_translateZ.setFromPrevious( iSS, empty );
+        m_translateX.setFromPrevious( iSS );
+        m_translateY.setFromPrevious( iSS );
+        m_translateZ.setFromPrevious( iSS );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
