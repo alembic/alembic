@@ -119,14 +119,6 @@ public:
     size_t getNumSamples()
     { return m_anim.getNumSamples(); }
 
-    //! Sets up the xform operations. This function be called before calling
-    //! set.
-    //! \param iOp Operations (translate, rotate scale) which make up the
-    //! the transform and decides what is static, and what is animated.
-    //! \param iStatic For the parts of the operations that do not change
-    void setXform( const XformOpVec & iOp,
-        const Abc::DoubleArraySample & iStatic );
-
     //! Set an animated sample.  setXform needs to be called first.
     void set( const Abc::DoubleArraySample & iAnim,
               const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
@@ -137,13 +129,6 @@ public:
 
     //! Set from previous sample. Will hold the animated channels.
     void setFromPrevious( const Abc::OSampleSelector &iSS );
-
-    //! Normally, setting the child bounds is done through the Sample, but
-    //! this Xform implementation is non-standard.
-    void setChildBounds( const Abc::Box3d &iBnds,
-                         const Abc::OSampleSelector &iSS =
-                         Abc::OSampleSelector() )
-    { m_childBounds.set( iBnds, iSS ); }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -157,10 +142,8 @@ public:
     {
         m_anim.reset();
         m_inherits.reset();
-        m_writtenOps = false;
-        m_numAnimated = 0;
         m_childBounds.reset();
-        m_time = AbcA::TimeSamplingType();
+        m_timeSamplingType = AbcA::TimeSamplingType();
         Abc::OSchema<XformSchemaInfo>::reset();
     }
 
@@ -177,15 +160,10 @@ public:
 protected:
     void init( const AbcA::TimeSamplingType &iTst );
 
-    Abc::ODoubleArrayProperty m_anim;
-    Abc::OBoolProperty m_inherits;
-
     Abc::OBox3dProperty m_childBounds;
 
 private:
-    bool m_writtenOps;
-    size_t m_numAnimated;
-    AbcA::TimeSamplingType m_time;
+    AbcA::TimeSamplingType m_timeSamplingType;
 };
 
 //-*****************************************************************************

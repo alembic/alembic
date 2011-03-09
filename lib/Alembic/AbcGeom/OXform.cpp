@@ -141,7 +141,8 @@ void OXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     if (m_inherits)
         m_inherits.setFromPrevious( iSS );
 
-    m_childBounds.setFromPrevious( iSS );
+    if ( m_childBounds.getNumSamples() > 0 )
+    { m_childBounds.setFromPrevious( iSS ); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

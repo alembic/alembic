@@ -44,20 +44,20 @@ namespace AbcGeom {
 
 //! \brief The Matrix identifier hint.
 //! Some 3d packages (like Maya) may have certain transformation operations
-//! that aren't supported in other packages.  MatrixHint is meant to 
+//! that aren't supported in other packages.  MatrixHint is meant to
 //! help with reading back into applications that natively support the type.
 enum MatrixHint
 {
     //! Regular Matrix
     kMatrixHint = 0,
 
-    //! Matrix represents Maya's version of Shear 
+    //! Matrix represents Maya's version of Shear
     kMayaShearHint = 1
 };
 
 //! \brief The Rotate identifier hint.
 //! Some 3d packages (like Maya) have multiple rotation operations
-//! that are mathmatically of the same type.  RotateHint is meant to 
+//! that are mathmatically of the same type.  RotateHint is meant to
 //! help disambiguate these similiar mathmatical types when reading back
 //! into applications that natively support the type.
 enum RotateHint
@@ -72,7 +72,7 @@ enum RotateHint
 
 //! \brief The Scale identifier hint.
 //! Some 3d packages (like Maya) have multiple transformation operations
-//! that are mathmatically of the same type.  ScaleHint is meant to 
+//! that are mathmatically of the same type.  ScaleHint is meant to
 //! help disambiguate these similiar mathmatical types when reading back
 //! into applications that natively support that type.
 enum ScaleHint
@@ -84,7 +84,7 @@ enum ScaleHint
 
 //! \brief The Translation identifier hint.
 //! Some 3d packages (like Maya) have multiple transformation operations
-//! that are mathmatically of the same type.  TranslateHint is meant to 
+//! that are mathmatically of the same type.  TranslateHint is meant to
 //! help disambiguate these similiar mathmatical types when reading back
 //! into applications that natively support the type.
 enum TranslateHint
@@ -117,7 +117,7 @@ class XformOp
 {
 public:
     XformOp();
-    XformOp(XformOperationType iType, Alembic::Util::uint8_t iHint);
+    XformOp( XformOperationType iType, Alembic::Util::uint8_t iHint );
 
     //! Get the type of transform operation. (Translate, Rotate, Scale, Matrix)
     XformOperationType getType() const;
@@ -132,47 +132,27 @@ public:
 
     //! Set the hint, if it is an illegal value for the type, then the hint
     //! is set to the default, 0.
-    void setHint(Alembic::Util::uint8_t iHint);
+    void setHint( Alembic::Util::uint8_t iHint );
 
     //! Returns whether the x component (index 0) is animated.
     bool isXAnimated() const;
 
-    //! Sets whether the x component (index 0) is animated.
-    void setXAnimated(bool iAnim);
-
     //! Returns whether the y component (index 1) is animated.
     bool isYAnimated() const;
 
-    //! Sets whether the y component (index 1) is animated.
-    void setYAnimated(bool iAnim);
-
     //! Returns whether the z component (index 2) is animated.
     bool isZAnimated() const;
-
-    //! Sets whether the z component (index 2) is animated.
-    void setZAnimated(bool iAnim);
 
     //! Returns whether the angle component (index 3) is animated.
     //! Since Scale and Translate do not have an angle component,
     //! false is returned for those types.
     bool isAngleAnimated() const;
 
-    //! Sets whether the angle component (index 3) is animated.
-    //! Since Scale and Translate do not have an angle component,
-    //! nothing is set for those types.
-    void setAngleAnimated(bool iAnim);
-
     //! Returns whether a particular index is animated.
     //! Scale and Translate only have 3 components, Rotate has 4, and
     //! Matrix has 16.  Indices greater than the number of components will
     //! return false.
     bool isIndexAnimated(Alembic::Util::uint8_t iIndex) const;
-
-    //! Sets whether a particular index is animated.
-    //! Scale and Translate only have 3 components, Rotate has 4, and
-    //! Matrix has 16.  Trying to set indices that are greater than the number 
-    //! of components will be ignored.
-    void setIndexAnimated(Alembic::Util::uint8_t iIndex, bool iAnim);
 
     //! Get the number of components that this operation has based on the type.
     //! Translate and Scale have 3, Rotate has 4 and Matrix has 16.
@@ -194,6 +174,8 @@ private:
     XformOperationType m_type;
     Alembic::Util::uint16_t m_anim;
     Alembic::Util::uint8_t m_hint;
+
+    double m_default;
 };
 
 typedef std::vector < XformOp > XformOpVec;
