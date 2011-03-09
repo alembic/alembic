@@ -59,12 +59,12 @@ ArImpl::ArImpl( const std::string &iFileName,
                  "Could not open file: " << m_fileName );
 
     // get the version using HDF5 native calls
-    int version = -100;
+    int version = -INT_MAX;
     if (H5Aexists(m_file, "abc_version"))
     {
         H5LTget_attribute_int(m_file, ".", "abc_version", &version);
     }
-    ABCA_ASSERT(version == -10,
+    ABCA_ASSERT(version == ALEMBIC_HDF5_FILE_VERSION,
         "Unsupported file version detected.");
 
     // Read the top object

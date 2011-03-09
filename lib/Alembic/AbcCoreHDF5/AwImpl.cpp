@@ -70,7 +70,7 @@ AwImpl::AwImpl( const std::string &iFileName,
     }
 
     // set the version using HDF5 native calls
-    int version = -10;
+    int version = ALEMBIC_HDF5_FILE_VERSION;
     H5LTset_attribute_int(m_file, ".", "abc_version", &version, 1);
 
     // Create top explicitly.

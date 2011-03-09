@@ -68,6 +68,7 @@
 #include <H5LTpublic.h>
 
 #define ALEMBIC_ABCHDF5_VERSION_NS v1
+#define ALEMBIC_HDF5_FILE_VERSION -10
 
 //-*****************************************************************************
 
