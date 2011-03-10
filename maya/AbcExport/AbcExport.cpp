@@ -221,7 +221,7 @@ MStatus AbcExport::doIt(const MArgList & args)
     if (argData.isFlagSet("selection"))
         useSelectionList = true;
 
-    double startEvaluationTime = FLT_MAX;
+    double startEvaluationTime = DBL_MAX;
     if (argData.isFlagSet("startAt"))
     {
         double startAt = 0.0;
@@ -487,15 +487,14 @@ MStatus AbcExport::doIt(const MArgList & args)
         transSamples = origSamples;
         geoSamples = origSamples;
 
-        Alembic::AbcCoreAbstract::v1::chrono_t fps24 = 1/24.0;
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType transTime(fps24);
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType geoTime(fps24);
+        Alembic::AbcCoreAbstract::v1::TimeSamplingType transTime(util::spf());
+        Alembic::AbcCoreAbstract::v1::TimeSamplingType geoTime(util::spf());
 
         // post process, add extra motion blur samples
         if (numSamples > 1 && shutterOpen < shutterClose)
         {
             transTime = Alembic::AbcCoreAbstract::v1::TimeSamplingType(
-                numSamples, fps24);
+                numSamples, util::spf());
 
             // if we are't subsampling the geometry, leave it as uniform
             if (sampleGeo)
@@ -612,7 +611,7 @@ MStatus AbcExport::doIt(const MArgList & args)
     // ================ end of argument parsing =========================
 
     // add extra evaluation run up, if necessary
-    if (startEvaluationTime != FLT_MAX && !allFrameRange.empty())
+    if (startEvaluationTime != DBL_MAX && !allFrameRange.empty())
     {
         double firstFrame = *allFrameRange.begin();
         for (double f = startEvaluationTime; f < firstFrame; ++f)

@@ -81,6 +81,9 @@ inline MStatus isUnsigned(MString str, const MString & usage)
     return status;
 }
 
+// seconds per frame
+double spf();
+
 bool isAncestorDescendentRelationship(const MDagPath & path1,
     const MDagPath & path2);
 

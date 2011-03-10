@@ -75,110 +75,121 @@ namespace
         status = ioMesh.setUVs(uArray, vArray, &uvSetName);
         status = ioMesh.assignUVs(uvCounts, uvIds);
         if (status != MS::kSuccess)
-            printError("Assign UVs failed");
+            printError(ioMesh.fullPathName() + " Assign UVs failed");
 
         return status;
     }  // setMeshUVs
 
 
     void setUVs(double iFrame, MFnMesh & ioMesh,
-        Alembic::Abc::IObject & iParent)
+        Alembic::AbcGeom::IV2fGeomParam & iUVs)
     {
-        // this will need to change once UVs are part of the schema
-        Alembic::Abc::IV3fArrayProperty stValProp(iParent.getProperties(),
-            "st", Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
-        Alembic::Abc::IInt32ArrayProperty stIndexProp(iParent.getProperties(),
-            "st.index", Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
 
-        if (!stValProp.valid())
+        if (!iUVs.valid())
             return;
 
-        Alembic::Abc::V3fArraySamplePtr stValPtr;
-        int64_t zero = 0;
-        stValProp.get(stValPtr, Alembic::Abc::ISampleSelector(zero));
+        // no interpolation for now
+        int64_t index, ceilIndex;
+        double alpha = getWeightAndIndex(iFrame, iUVs.getTimeSampling(),
+            index, ceilIndex);
 
-        Alembic::Abc::Int32ArraySamplePtr stIndexPtr;
-        if (stIndexProp.valid())
-            stIndexProp.get(stIndexPtr, Alembic::Abc::ISampleSelector(zero));
+        MFloatArray uArray;
+        MFloatArray vArray;
 
-        // Get uv values
-        size_t numUVs = stValPtr->size();
-        MFloatArray uArray(numUVs, 0.0);
-        MFloatArray vArray(numUVs, 0.0);
-        int uvIndex = 0;
-        int valueIndex = 0;
+        size_t numFaceVertices = ioMesh.numFaceVertices();
+        MIntArray uvCounts(ioMesh.numPolygons(), 0);
+        MIntArray uvIds(numFaceVertices, 0);
 
-        for (size_t i = 0; i < numUVs; ++i)
+        if (iUVs.isIndexed())
         {
-            uArray[i] = (*stValPtr)[i].x;
-            vArray[i] = 1.0 - (*stValPtr)[i].y;
-        }
+            Alembic::AbcGeom::IV2fGeomParam::Sample samp;
+            iUVs.getIndexed(samp, Alembic::Abc::ISampleSelector(index));
 
-        const int numFaceVertices = ioMesh.numFaceVertices();
-        const int faceCount = ioMesh.numPolygons();
+            Alembic::AbcGeom::V2fArraySamplePtr uvPtr = samp.getVals();
+            Alembic::Abc::UInt32ArraySamplePtr indexPtr = samp.getIndices();
 
-        // no indices found
-        if ((stIndexPtr != NULL) && (numUVs == numFaceVertices))
-        {
-            MIntArray uvCounts(faceCount, 0);
-            MIntArray uvIds(numFaceVertices, 0);
+            if (numFaceVertices != indexPtr->size())
+            {
+                printWarning(
+                    ioMesh.fullPathName() +
+                        " UVs aren't per-polygon per-vertex, skipping");
+                return;
+            }
 
-            // Set connectivity info
-            uvIndex = 0;
-            int uvCountsIndex = 0;
-            unsigned int vIndex = 0;
+            size_t numUVs = uvPtr->size();
+            uArray.setLength(numUVs);
+            vArray.setLength(numUVs);
+            for (size_t i = 0; i < numUVs; ++i)
+            {
+                uArray[i] = (*uvPtr)[i].x;
+                vArray[i] = 1.0 - (*uvPtr)[i].y;
+            }
+
+            size_t uvIndex = 0;
+            size_t uvCountsIndex = 0;
+            size_t vIndex = 0;
             MItMeshPolygon meshPolygonIter(ioMesh.object());
             do
             {
-                const int numPolygonVertices(
-                    meshPolygonIter.polygonVertexCount() );
+                size_t numPolygonVertices(meshPolygonIter.polygonVertexCount());
                 uvCounts[uvCountsIndex++] = numPolygonVertices;
+                size_t startPoint = uvIndex + numPolygonVertices - 1;
 
-                for (int vertexIndex = 0;
+                for (size_t vertexIndex = 0;
                     vertexIndex < numPolygonVertices; vertexIndex++)
                 {
-                    uvIds[uvIndex] = vIndex;
-                    uvIndex++;
-                    vIndex++;
+                    uvIds[uvIndex++] = (*indexPtr)[startPoint - vertexIndex];
                 }
             }
             while (meshPolygonIter.next() == MS::kSuccess
                 && !meshPolygonIter.isDone());
-
-            setMeshUVs(ioMesh, uArray, vArray, uvCounts, uvIds);
-        }
-        else if (stIndexPtr->size() == numFaceVertices)
-        {
-            MIntArray uvCounts(faceCount, 0);
-            MIntArray uvIds(numFaceVertices, 0);
-
-            // Set connectivity info
-            uvIndex = 0;
-            int uvCountsIndex = 0;
-            MItMeshPolygon meshPolygonIter(ioMesh.object());
-            do
-            {
-                int numPolygonVertices(meshPolygonIter.polygonVertexCount());
-                uvCounts[uvCountsIndex++] = numPolygonVertices;
-                int startPoint = uvIndex + numPolygonVertices - 1;
-
-                for (int vertexIndex = 0;
-                    vertexIndex < numPolygonVertices; vertexIndex++)
-                {
-                    uvIds[uvIndex] = (*stIndexPtr)[startPoint - vertexIndex];
-                    uvIndex++;
-                }
-            }
-            while (meshPolygonIter.next() == MS::kSuccess
-                && !meshPolygonIter.isDone());
-
-            setMeshUVs(ioMesh, uArray, vArray, uvCounts, uvIds);
         }
         else
         {
-            printWarning(
-                "UV indices can't be used as per-polygon per-vertex uv");
+            Alembic::AbcGeom::IV2fGeomParam::Sample samp;
+            iUVs.getExpanded(samp, Alembic::Abc::ISampleSelector(index));
+
+            Alembic::AbcGeom::V2fArraySamplePtr uvPtr = samp.getVals();
+
+            size_t numUVs = uvPtr->size();
+            if (numFaceVertices != numUVs)
+            {
+                printWarning(
+                    ioMesh.fullPathName() +
+                        " UVs aren't per-polygon per-vertex, skipping");
+                return;
+            }
+
+            uArray.setLength(numUVs);
+            vArray.setLength(numUVs);
+            for (size_t i = 0; i < numUVs; ++i)
+            {
+                uArray[i] = (*uvPtr)[i].x;
+                vArray[i] = 1.0 - (*uvPtr)[i].y;
+            }
+
+            // Set the fake connectivity info
+            size_t uvIndex = 0;
+            size_t uvCountsIndex = 0;
+            size_t vIndex = 0;
+            MItMeshPolygon meshPolygonIter(ioMesh.object());
+            do
+            {
+                size_t numPolygonVertices(
+                    meshPolygonIter.polygonVertexCount() );
+                uvCounts[uvCountsIndex++] = numPolygonVertices;
+
+                for (size_t vertexIndex = 0;
+                    vertexIndex < numPolygonVertices; vertexIndex++)
+                {
+                    uvIds[uvIndex++] = vIndex++;
+                }
+            }
+            while (meshPolygonIter.next() == MS::kSuccess
+                && !meshPolygonIter.isDone());
         }
+
+        setMeshUVs(ioMesh, uArray, vArray, uvCounts, uvIds);
     }  // setUVs
 
     // utility to clear pt when doing a swap otherwise
@@ -204,54 +215,109 @@ namespace
 
     // normal vector is packed differently in file
     // from the format Maya accepts directly
-    void setPolyNormals(MFnMesh & ioMesh, std::vector<float> & normals)
+    void setPolyNormals(double iFrame, MFnMesh & ioMesh,
+        Alembic::AbcGeom::IN3fGeomParam iNormals)
     {
-        int size = normals.size()/3;
-        if (size == 0) return;
-
-        int numFaces = ioMesh.numPolygons();
-        if (size == ioMesh.numVertices())
+        if (iNormals.getScope() != Alembic::AbcGeom::kVertexScope &&
+            iNormals.getScope() != Alembic::AbcGeom::kFacevaryingScope)
         {
-            // per vertex normal
-            MVectorArray normalsIn;
-            MIntArray vertexList;
-            for (int i = 0, nIndex = 0; i < size; i++, nIndex += 3)
+            printWarning(ioMesh.fullPathName() +
+                " normal vector has an unsupported scope, skipping normals");
+            return;
+        }
+
+        int64_t index, ceilIndex;
+        double alpha = getWeightAndIndex(iFrame,
+            iNormals.getTimeSampling(), index, ceilIndex);
+
+        Alembic::AbcGeom::IN3fGeomParam::Sample samp;
+        iNormals.getExpanded(samp, Alembic::Abc::ISampleSelector(index));
+
+        MVectorArray normalsIn;
+
+        Alembic::Abc::N3fArraySamplePtr sampVal = samp.getVals();
+        size_t sampSize = sampVal->size();
+
+        Alembic::Abc::N3fArraySamplePtr ceilVals;
+        if (alpha != 0 && index != ceilIndex)
+        {
+            Alembic::AbcGeom::IN3fGeomParam::Sample ceilSamp;
+            iNormals.getExpanded(ceilSamp,
+                Alembic::Abc::ISampleSelector(ceilIndex));
+            ceilVals = ceilSamp.getVals();
+            if (sampSize == ceilVals->size())
             {
-                MVector normal(normals[nIndex],
-                                normals[nIndex+1],
-                                normals[nIndex+2]);
+                Alembic::Abc::N3fArraySamplePtr ceilVal = ceilSamp.getVals();
+                for (size_t i = 0; i < sampSize; ++i)
+                {
+                    MVector normal(
+                        simpleLerp<float>(alpha, (*sampVal)[i].x,
+                            (*ceilVal)[i].x),
+                        simpleLerp<float>(alpha, (*sampVal)[i].y,
+                            (*ceilVal)[i].y),
+                        simpleLerp<float>(alpha, (*sampVal)[i].z,
+                            (*ceilVal)[i].z));
+                    normalsIn.append(normal);
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < sampSize; ++i)
+                {
+                    MVector normal((*sampVal)[i].x, (*sampVal)[i].y,
+                        (*sampVal)[i].z);
+                    normalsIn.append(normal);
+                }
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < sampSize; ++i)
+            {
+                MVector normal((*sampVal)[i].x, (*sampVal)[i].y,
+                    (*sampVal)[i].z);
                 normalsIn.append(normal);
+            }
+        }
+
+        if (iNormals.getScope() == Alembic::AbcGeom::kVertexScope &&
+            sampSize == ioMesh.numVertices())
+        {
+            MIntArray vertexList;
+            for (size_t i = 0; i < sampSize; ++i)
+            {
                 vertexList.append(i);
             }
-            MStatus status = ioMesh.setVertexNormals(normalsIn, vertexList);
-            if (status != MS::kSuccess)
-                printError("Error setting per vertex normals");
+
+            ioMesh.setVertexNormals(normalsIn, vertexList);
+
         }
-        else if (size == ioMesh.numFaceVertices())
+        else if (sampSize == ioMesh.numFaceVertices() &&
+            iNormals.getScope() == Alembic::AbcGeom::kFacevaryingScope)
         {
             // per vertex per-polygon normal
+            int numFaces = ioMesh.numPolygons();
             int nIndex = 0;
             for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
             {
                 MIntArray vertexList;
                 ioMesh.getPolygonVertices(faceIndex, vertexList);
                 unsigned int numVertices = vertexList.length();
-                // re-pack the order of normals in this vector before writing
-                // into prop so that Renderman can also use it
-                for ( int v = numVertices-1; v >= 0; v-- )
+
+                for ( int v = numVertices-1; v >= 0; --v, ++nIndex )
                 {
                     unsigned int vertexIndex = vertexList[v];
-                    MVector normal(normals[nIndex],
-                                normals[nIndex+1],
-                                normals[nIndex+2]);
-                    ioMesh.setFaceVertexNormal(normal, faceIndex, vertexIndex);
-                    nIndex += 3;
+
+                    ioMesh.setFaceVertexNormal(normalsIn[nIndex],
+                        faceIndex, vertexIndex);
                 }
             }
         }
         else
         {
-            printError("Normal vector is not of the correct length");
+            printWarning(ioMesh.fullPathName() +
+                " normal vector scope does not match size of data, " +
+                "skipping normals");
         }
     }
 
@@ -485,14 +551,12 @@ void connectToPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
     fillPoints(ptArray, samp.getPositions(), ceilPoints, alpha);
     fnMesh.setPoints(ptArray, MSpace::kObject);
 
-    /*
-    if ( schema.hasNormals() )
-    {
-        setPolyNormals(fnMesh, normals);
-    }
-    */
 
-    //else
+    if ( schema.getNormals().valid() )
+    {
+        setPolyNormals(iFrame, fnMesh, schema.getNormals());
+    }
+    else
     {
         MStatus status = MS::kSuccess;
         MPlug plug = fnMesh.findPlug("noNormals", &status);
@@ -500,7 +564,7 @@ void connectToPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
             plug.setValue(false);
     }
 
-    setUVs(iFrame, fnMesh, iNode);
+    setUVs(iFrame, fnMesh, schema.getUVs());
 
 }
 
@@ -541,18 +605,9 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
     MString pathName = fnMesh.partialPathName();
     setInitialShadingGroup(pathName);
 
-    //if ( schema.hasNormals() )
-    //    setPolyNormals(fnMesh, samp.getNormals());
-    //else
-    {
-        MPlug plug = fnMesh.findPlug("noNormals", &status);
-        if (status == MS::kSuccess)
-            plug.setValue(false);
-    }
-
-    setUVs(iFrame, fnMesh, iNode);
-
-    //if (!schema.hasNormals())
+    if ( schema.getNormals().valid() )
+        setPolyNormals(iFrame, fnMesh, schema.getNormals());
+    else
     {
         MFnNumericAttribute attr;
         MString attrName("noNormals");
@@ -563,6 +618,8 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
         MFnMesh fnMesh(obj);
         fnMesh.addAttribute(attrObj, MFnDependencyNode::kLocalDynamicAttr);
     }
+
+    setUVs(iFrame, fnMesh, schema.getUVs());
 
     // add other properties
 
@@ -628,7 +685,7 @@ void connectToSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
 
     fillPoints(ptArray, samp.getPositions(), ceilPoints, alpha);
     fnMesh.setPoints(ptArray, MSpace::kObject);
-    setUVs(iFrame, fnMesh, iNode);
+    setUVs(iFrame, fnMesh, schema.getUVs());
 
 }
 
@@ -662,7 +719,7 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
 
     //addProperties(iFrame, iNode, obj, oSampledPropNameList);
 
-    setUVs(iFrame, fnMesh, iNode);
+    setUVs(iFrame, fnMesh, schema.getUVs());
 
     // add the mFn-specific attributes to fnMesh node
     MFnNumericAttribute numAttr;

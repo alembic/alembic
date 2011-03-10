@@ -44,6 +44,7 @@
 #include <maya/MStringArray.h>
 #include <maya/MString.h>
 #include <maya/MSyntax.h>
+#include <maya/MTime.h>
 
 #include "util.h"
 #include "AbcImport.h"
@@ -223,13 +224,17 @@ MStatus AbcImport::doIt(const MArgList & args)
             {
                 if (argData.isFlagSet("fitTimeRange"))
                 {
-                    setPlayback(inputData.mSequenceStartTime * 24,
-                        inputData.mSequenceEndTime * 24);
+                    MTime sec(1.0, MTime::kSeconds);
+                    setPlayback(
+                        inputData.mSequenceStartTime * sec.as(MTime::uiUnit()),
+                        inputData.mSequenceEndTime * sec.as(MTime::uiUnit()) );
                 }
 
                 if (argData.isFlagSet("setToStartFrame"))
                 {
-                    MGlobal::viewFrame(inputData.mSequenceStartTime * 24);
+                    MTime sec(1.0, MTime::kSeconds);
+                    MGlobal::viewFrame( inputData.mSequenceStartTime *
+                        sec.as(MTime::uiUnit()) );
                 }
             }
         }

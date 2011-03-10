@@ -79,7 +79,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     if (size == 0)
     {
         mSchema.set(samp,
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
         return;
     }
 
@@ -133,7 +133,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     }
 
     // ignoring width and the velocity vectors for now
-    mSchema.set(samp, Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+    mSchema.set(samp, Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     mAttrs->write(iFrame);
 }
 

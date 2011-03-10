@@ -39,7 +39,7 @@
 
 // assumption is we don't support multiple uv sets as well as animated uvs
 void MayaMeshWriter::getUVs(std::vector<float> & uvs,
-    std::vector<int32_t> & indices)
+    std::vector<uint32_t> & indices)
 {
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
@@ -112,6 +112,9 @@ MayaMeshWriter::MayaMeshWriter(
     if (util::isAnimated(surface))
         mIsGeometryAnimated = true;
 
+    std::vector<float> uvs;
+    std::vector<uint32_t> indices;
+
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
     if ( !plug.isNull() && plug.asBool() )
@@ -119,37 +122,28 @@ MayaMeshWriter::MayaMeshWriter(
         Alembic::AbcGeom::OSubD obj(iParent, lMesh.name().asChar(), iTimeType);
         mSubDSchema = obj.getSchema();
 
+        Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
         if ( iWriteUVs )
         {
-            std::vector<float> uvs;
-            std::vector<int32_t> indices;
             getUVs(uvs, indices);
 
             if (!uvs.empty())
             {
-                // for now unpack the UVs, until they are part of the schema
-                size_t numIndices = indices.size();
-                std::vector<float> st(numIndices * 2);
-                for (size_t i = 0; i < numIndices; ++i)
+                uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
+                uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
+                    (const Imath::V2f *) &uvs.front(), uvs.size() / 2));
+                if (!indices.empty())
                 {
-                    st[2*i] = uvs[2 * indices[i]];
-                    st[2*i + 1] = uvs[2 * indices[i] + 1];
+                    uvSamp.setIndices(Alembic::Abc::UInt32ArraySample(
+                        &indices.front(), indices.size()));
                 }
-
-                Alembic::AbcCoreAbstract::v1::MetaData uvsMeta;
-                SetGeometryScope( uvsMeta,
-                    Alembic::AbcGeom::kFacevaryingScope );
-                Alembic::AbcGeom::OV2fArrayProperty stProp( mSubDSchema,
-                    "st", uvsMeta );
-                stProp.set( Alembic::AbcGeom::V2fArraySample(
-                    (const Imath::V2f *) &st.front(), st.size() / 2) );
             }
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(
             iFrame, obj, lMesh, iTimeType, iWriteVisibility));
 
-        writeSubD(iFrame, iDag);
+        writeSubD(iFrame, iDag, uvSamp);
     }
     else
     {
@@ -157,30 +151,23 @@ MayaMeshWriter::MayaMeshWriter(
             iTimeType);
         mPolySchema = obj.getSchema();
 
+        Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
+
         if ( iWriteUVs )
         {
-            std::vector<float> uvs;
-            std::vector<int32_t> indices;
             getUVs(uvs, indices);
 
             if (!uvs.empty())
             {
-                // for now unpack the UVs, until they are part of the schema
-                size_t numIndices = indices.size();
-                std::vector<float> st(numIndices * 2);
-                for (size_t i = 0; i < numIndices; ++i)
-                {
-                    st[2*i] = uvs[2 * indices[i]];
-                    st[2*i + 1] = uvs[2 * indices[i] + 1];
-                }
 
-                Alembic::AbcCoreAbstract::v1::MetaData uvsMeta;
-                SetGeometryScope( uvsMeta,
-                    Alembic::AbcGeom::kFacevaryingScope );
-                Alembic::AbcGeom::OV2fArrayProperty stProp( mSubDSchema,
-                    "st", uvsMeta );
-                stProp.set( Alembic::AbcGeom::V2fArraySample(
-                    (const Imath::V2f *) &st.front(), st.size() / 2) );
+                uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
+                uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
+                    (const Imath::V2f *) &uvs.front(), uvs.size() / 2));
+                if (!indices.empty())
+                {
+                    uvSamp.setIndices(Alembic::Abc::UInt32ArraySample(
+                        &indices.front(), indices.size()));
+                }
             }
         }
 
@@ -188,7 +175,7 @@ MayaMeshWriter::MayaMeshWriter(
         mAttrs = AttributesWriterPtr(new AttributesWriter(
             iFrame, obj, lMesh, iTimeType, iWriteVisibility));
 
-       writePoly(iFrame);
+       writePoly(iFrame, uvSamp);
     }
 }
 
@@ -230,7 +217,7 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
 
     // no normals bail early
     MPlug plug = lMesh.findPlug("noNormals", true, &status);
-    if ( status != MS::kSuccess || plug.asBool() == true )
+    if ( status == MS::kSuccess && plug.asBool() == true )
         return;
 
     bool flipNormals = false;
@@ -286,16 +273,25 @@ void MayaMeshWriter::write(double iFrame)
         fillTopology(points, facePoints, faceList);
         if (mPolySchema.valid())
         {
+            Alembic::AbcGeom::ON3fGeomParam::Sample normalsSamp;
             std::vector<float> normals;
             getPolyNormals(normals);
+            if (!normals.empty())
+            {
+                normalsSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
+                normalsSamp.setVals(Alembic::AbcGeom::N3fArraySample(
+                    (const Imath::V3f *) &normals.front(), normals.size() / 3));
+            }
 
             Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
                 Alembic::Abc::V3fArraySample(
                     (const Imath::V3f *)&points.front(), points.size() / 3 ),
                 Alembic::Abc::Int32ArraySample( facePoints ),
-                Alembic::Abc::Int32ArraySample( faceList ) );
+                Alembic::Abc::Int32ArraySample( faceList ),
+                Alembic::AbcGeom::OV2fGeomParam::Sample(),
+                normalsSamp);
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame/24.0);
+            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             mPolySchema.set(samp, s);
         }
         else if (mSubDSchema.valid())
@@ -306,7 +302,7 @@ void MayaMeshWriter::write(double iFrame)
                 Alembic::Abc::Int32ArraySample( facePoints ),
                 Alembic::Abc::Int32ArraySample( faceList ) );
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame/24.0);
+            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             mSubDSchema.set(samp, s);
         }
     }
@@ -331,19 +327,31 @@ void MayaMeshWriter::write(double iFrame)
 
         if (mPolySchema.valid())
         {
+            Alembic::AbcGeom::ON3fGeomParam::Sample normalsSamp;
             std::vector<float> normals;
             getPolyNormals(normals);
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame/24.0);
+            if (!normals.empty())
+            {
+                normalsSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
+                normalsSamp.setVals(Alembic::AbcGeom::N3fArraySample(
+                    (const Imath::V3f *) &normals.front(), normals.size() / 3));
+            }
+
+            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
                 Alembic::Abc::V3fArraySample(
-                    (const Imath::V3f *)&points.front(), points.size() / 3) );
+                    (const Imath::V3f *)&points.front(), points.size() / 3),
+                Alembic::Abc::Int32ArraySample(),
+                Alembic::Abc::Int32ArraySample(),
+                Alembic::AbcGeom::OV2fGeomParam::Sample(),
+                normalsSamp);
 
             mPolySchema.set(samp, s);
         }
         else if (mSubDSchema.valid())
         {
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame/24.0);
+            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             Alembic::AbcGeom::OSubDSchema::Sample samp;
             samp.setPositions( Alembic::Abc::V3fArraySample(
                 (const Imath::V3f *) &points.front(), points.size() / 3) );
@@ -359,7 +367,8 @@ bool MayaMeshWriter::isAnimated() const
     return mIsGeometryAnimated || (mAttrs != NULL && mAttrs->isAnimated());
 }
 
-void MayaMeshWriter::writePoly(double iFrame)
+void MayaMeshWriter::writePoly(double iFrame,
+    const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs)
 {
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
@@ -376,19 +385,27 @@ void MayaMeshWriter::writePoly(double iFrame)
 
     mNumPoints = lMesh.numVertices();
 
+    Alembic::AbcGeom::ON3fGeomParam::Sample normalsSamp;
     std::vector<float> normals;
     getPolyNormals(normals);
+    if (!normals.empty())
+    {
+        normalsSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
+        normalsSamp.setVals(Alembic::AbcGeom::N3fArraySample(
+            (const Imath::V3f *) &normals.front(), normals.size() / 3));
+    }
+
     Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
         Alembic::Abc::V3fArraySample((const Imath::V3f *)&points.front(),
             points.size() / 3),
         Alembic::Abc::Int32ArraySample(facePoints),
-        Alembic::Abc::Int32ArraySample(pointCounts) );
+        Alembic::Abc::Int32ArraySample(pointCounts), iUVs, normalsSamp);
 
     // if this mesh is animated, write out the animated geometry
     if (mIsGeometryAnimated)
     {
         mPolySchema.set(samp,
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/ 24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     }
     else
     {
@@ -397,7 +414,8 @@ void MayaMeshWriter::writePoly(double iFrame)
 
 }
 
-void MayaMeshWriter::writeSubD(double iFrame, MDagPath & iDag)
+void MayaMeshWriter::writeSubD(double iFrame, MDagPath & iDag,
+    const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs)
 {
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
@@ -416,7 +434,8 @@ void MayaMeshWriter::writeSubD(double iFrame, MDagPath & iDag)
         Alembic::AbcGeom::V3fArraySample((const Imath::V3f *)&points.front(),
             points.size() / 3),
         Alembic::Abc::Int32ArraySample(facePoints),
-        Alembic::Abc::Int32ArraySample(pointCounts) );
+        Alembic::Abc::Int32ArraySample(pointCounts));
+    samp.setUVs( iUVs );
 
     mNumPoints = lMesh.numVertices();
 
@@ -521,7 +540,7 @@ void MayaMeshWriter::writeSubD(double iFrame, MDagPath & iDag)
     if (mIsGeometryAnimated)
     {
         mSubDSchema.set(samp,
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame/24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     }
     else
     {
@@ -546,9 +565,10 @@ void MayaMeshWriter::fillTopology(
 
     lMesh.getPoints(pts);
 
-    if (pts.length() < 3)
+    if (pts.length() < 3 && pts.length() > 0)
     {
-        MString err = "Cannot form valid mesh with ";
+        MString err = lMesh.fullPathName() +
+            " is not a valid mesh, because it only has ";
         err += pts.length();
         err += " points.";
         MGlobal::displayError(err);
@@ -559,7 +579,7 @@ void MayaMeshWriter::fillTopology(
 
     if (numPolys == 0)
     {
-        MGlobal::displayWarning("lMesh.numPolygons() returned 0");
+        MGlobal::displayWarning(lMesh.fullPathName() + " has no polygons.");
         return;
     }
 
