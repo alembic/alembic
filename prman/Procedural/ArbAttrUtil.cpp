@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include "ArbAttrUtil.h"
+#include <sstream>
 
 //-*****************************************************************************
 void ParamListBuilder::add( const std::string & declaration, RtPointer value,
@@ -112,6 +113,93 @@ std::string GetPrmanScopeString( GeometryScope scope )
         return "constant";
     }
 }
+
+//-*****************************************************************************
+template <typename T>
+void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
+                                             const PropertyHeader &propHeader,
+                                             ISampleSelector &sampleSelector,
+                                             const std::string &rmanBaseType,
+                                             ParamListBuilder &ParamListBuilder,
+                                             size_t baseArrayExtent,
+                                             const std::string & overrideName
+                                           )
+{
+    T param( parent, propHeader.getName(),
+            Abc::IArgument(), Abc::IArgument() );
+    
+    if ( !param.valid() )
+    {
+        //TODO error message?
+        return;
+    }
+    
+    std::string rmanType = GetPrmanScopeString( param.getScope() ) + " ";
+    
+    rmanType += rmanBaseType;
+    
+    size_t arrayExtent = baseArrayExtent * param.getArrayExtent();
+    if (arrayExtent > 1)
+    {
+        std::ostringstream buffer;
+        buffer << "[" << arrayExtent << "]";
+        rmanType += buffer.str();
+    }
+    
+    rmanType += " " + (
+            overrideName.empty() ? propHeader.getName() : overrideName );
+    
+    
+    typename T::prop_type::sample_ptr_type valueSample =
+            param.getExpandedValue( sampleSelector ).getVals();
+    
+    ParamListBuilder.add( rmanType, (RtPointer)valueSample->get(), valueSample );
+    
+}
+
+//-*****************************************************************************
+void AddStringGeomParamToParamListBuilder(
+        ICompoundProperty &parent,
+        const PropertyHeader &propHeader,
+        ISampleSelector &sampleSelector,
+        ParamListBuilder &ParamListBuilder
+                                         )
+{
+    IStringGeomParam param( parent, propHeader.getName(),
+            Abc::IArgument(), Abc::IArgument() );
+    
+    if ( !param.valid() )
+    {
+        //TODO error message?
+        return;
+    }
+    
+    std::string rmanType = GetPrmanScopeString( param.getScope() ) + " ";
+    rmanType += "string";
+    
+    if ( param.getArrayExtent() > 1 )
+    {
+        std::ostringstream buffer;
+        buffer << "[" << param.getArrayExtent() << "]";
+        rmanType += buffer.str();
+    }
+    
+    rmanType += " " + propHeader.getName();
+    
+    StringArraySamplePtr valueSample = param.getExpandedValue(
+            sampleSelector ).getVals();
+    
+    RtPointer dataStart = NULL;
+    for ( size_t i = 0; i < valueSample->size(); ++i )
+    {
+        RtPointer data = ParamListBuilder.addStringValue( (*valueSample)[i] );
+        if ( i == 0 ) { dataStart = data; }
+    }
+    
+    ParamListBuilder.add(rmanType, dataStart, valueSample);
+    
+}
+
 
 //-*****************************************************************************
 template <typename T>
@@ -256,5 +344,104 @@ void AddArbitraryProperties( ICompoundProperty &parent,
                 ParamListBuilder );
         }
 
+    }
+}
+
+void AddArbitraryGeomParams( ICompoundProperty &parent,
+                             ISampleSelector &sampleSelector,
+                             ParamListBuilder &ParamListBuilder,
+                             const std::set<std::string> * excludeNames
+                           )
+{
+    if ( !parent.valid() )
+    {
+        return;
+    }
+    
+    for ( size_t i = 0; i < parent.getNumProperties(); ++i )
+    {
+        const PropertyHeader &propHeader = parent.getPropertyHeader( i );
+        const std::string &propName = propHeader.getName();
+        
+        if (propName.empty()
+            || ( excludeNames
+                 && excludeNames->find( propName ) != excludeNames->end() ) )
+        {
+            continue;
+        }
+        
+        if ( IFloatGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IFloatGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "float",
+                ParamListBuilder);
+        }
+        else if ( IInt32GeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IInt32GeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "int",
+                ParamListBuilder);
+        }
+        else if ( IStringGeomParam::matches( propHeader ) )
+        {
+            AddStringGeomParamToParamListBuilder(
+                parent,
+                propHeader,
+                sampleSelector,
+                ParamListBuilder);
+        }
+        else if ( IV2fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IV2fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "float",
+                ParamListBuilder,
+                2);
+        }
+        else if ( IV3fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IV3fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "point",
+                ParamListBuilder);
+        }
+        else if ( IN3fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IN3fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "normal",
+                ParamListBuilder);
+        }
+        else if ( IC3fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IC3fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "color",
+                ParamListBuilder);
+        }
+        if ( IM44fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IM44fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "matrix",
+                ParamListBuilder);
+        }
+        
     }
 }

@@ -179,11 +179,35 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 
         ParamListBuilder.add( "P", (RtPointer)sample.getPositions()->get() );
 
-        std::set<std::string> excludeNames;
-        excludeNames.insert( "P" );
-
-        AddArbitraryProperties( ps, sampleSelector, ParamListBuilder,
-                                &excludeNames );
+        IV2fGeomParam uvParam = ps.getUVs();
+        if ( uvParam.valid() )
+        {
+            AddGeomParamToParamListBuilder<IV2fGeomParam>(
+                ps, //TODO, replace this with uvParam.getParent()
+                *ps.getPropertyHeader( uvParam.getName() ), //TODO, relace this with uvParam.getHeader()
+                sampleSelector,
+                "float",
+                ParamListBuilder,
+                2,
+                "st");
+        }
+        IN3fGeomParam nParam = ps.getNormals();
+        if ( nParam.valid() )
+        {
+            AddGeomParamToParamListBuilder<IN3fGeomParam>(
+                ps, //TODO, replace this with uvParam.getParent()
+                *ps.getPropertyHeader( nParam.getName() ), //TODO, relace this with uvParam.getHeader()
+                sampleSelector,
+                "normal",
+                ParamListBuilder);
+        
+        }
+        
+        
+        
+        ICompoundProperty arbGeomParams = ps.getArbGeomParams();
+        AddArbitraryGeomParams( arbGeomParams,
+                    sampleSelector, ParamListBuilder );
 
         RiPointsPolygonsV(
             npolys,
@@ -228,12 +252,23 @@ void ProcessSubD( ISubD &subd, ProcArgs &args )
 
         ParamListBuilder.add( "P", (RtPointer)sample.getPositions()->get() );
 
-        std::set<std::string> excludeNames;
-        excludeNames.insert( "P" );
-
-        AddArbitraryProperties( ss, sampleSelector, ParamListBuilder,
-                                &excludeNames );
-
+        IV2fGeomParam uvParam = ss.getUVs();
+        if ( uvParam.valid() )
+        {
+            AddGeomParamToParamListBuilder<IV2fGeomParam>(
+                ss, //TODO, replace this with uvParam.getParent()
+                *ss.getPropertyHeader( uvParam.getName() ), //TODO, relace this with uvParam.getHeader()
+                sampleSelector,
+                "float",
+                ParamListBuilder,
+                2,
+                "st");
+        }
+        
+        ICompoundProperty arbGeomParams = ss.getArbGeomParams();
+        AddArbitraryGeomParams( arbGeomParams,
+                    sampleSelector, ParamListBuilder );
+        
         std::string subdScheme = sample.getSubdivisionScheme();
 
         SubDTagBuilder tags;
