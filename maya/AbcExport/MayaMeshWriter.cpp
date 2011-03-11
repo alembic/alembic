@@ -140,8 +140,10 @@ MayaMeshWriter::MayaMeshWriter(
             }
         }
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(
-            iFrame, obj, lMesh, iTimeType, iWriteVisibility));
+        Alembic::Abc::OCompoundProperty cp = mSubDSchema.getArbGeomParams();
+
+        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, lMesh,
+            iTimeType, iWriteVisibility));
 
         writeSubD(iFrame, iDag, uvSamp);
     }
@@ -171,9 +173,11 @@ MayaMeshWriter::MayaMeshWriter(
             }
         }
 
+        Alembic::Abc::OCompoundProperty cp = mPolySchema.getArbGeomParams();
+
         // set the rest of the props and write to the writer node
-        mAttrs = AttributesWriterPtr(new AttributesWriter(
-            iFrame, obj, lMesh, iTimeType, iWriteVisibility));
+        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, lMesh,
+            iTimeType, iWriteVisibility));
 
        writePoly(iFrame, uvSamp);
     }

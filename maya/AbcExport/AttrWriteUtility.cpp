@@ -38,734 +38,725 @@
 
 namespace {
 
-bool CreatePropertyFromNumeric(MFnNumericData::Type iType,
+void CreatePropertyFromNumeric(MFnNumericData::Type iType,
     const MPlug& iPlug, Alembic::Abc::OCompoundProperty & iParent,
-    std::vector < PlugAndObjScalar > & oScalarVec,
+    Alembic::AbcCoreAbstract::TimeSamplingType & iTimeType,
     std::vector < PlugAndObjArray > & oArrayVec)
 {
-    bool isArray =  iPlug.isArray();
     std::string plugName = iPlug.partialName(0, 0, 0, 0, 0, 1).asChar();
     switch (iType)
     {
         case MFnNumericData::kBoolean:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OBoolArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OBoolProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OBoolArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::kByte:
         case MFnNumericData::kChar:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OCharArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OCharProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OCharArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::kShort:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OInt16ArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OInt16Property(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OInt16ArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::kInt:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OInt32ArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OInt32Property(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OInt32ArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
 
         case MFnNumericData::kFloat:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OFloatArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OFloatProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OFloatArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::kDouble:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = ODoubleArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = ODoubleProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::ODoubleArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k2Short:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV2sArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV2sProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OV2sArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k3Short:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV3sArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV3sProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OV3sArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k2Int:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV2iArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV2iProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OV2iArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k3Int:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV3iArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV3iProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OV3iArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k2Float:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV2fArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV2fProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OV2fArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k3Float:
         {
-            if (isArray)
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+
+            MFnAttribute mfnAttr(attr);
+            if (mfnAttr.isUsedAsColor())
             {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-
-                MFnAttribute mfnAttr(attr);
-                if (mfnAttr.isUsedAsColor())
-                {
-                    p.prop = OC3fArrayProperty(iParent, plugName, iTimeType);
-                }
-                else
-                {
-                    p.prop = OV3fArrayProperty(iParent, plugName, iTimeType);
-                }
-
-                oArrayVec.push_back(p);
+                p.prop = Alembic::Abc::OC3fArrayProperty(iParent, plugName,
+                    iTimeType);
             }
             else
             {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                MFnAttribute mfnAttr(attr);
-                if (mfnAttr.isUsedAsColor())
-                {
-                    p.prop = OC3fProperty(iParent, plugName, iTimeType);
-                }
-                else
-                {
-                    p.prop = OV3fProperty(iParent, plugName, iTimeType);
-                }
-
-                oStaticVec.push_back(p);
+                p.prop = Alembic::Abc::OV3fArrayProperty(iParent, plugName,
+                    iTimeType);
             }
 
-            return true;
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k2Double:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV2dArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV2dProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OV2dArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k3Double:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV3dArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV3dProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            p.prop = Alembic::Abc::OV3dArrayProperty(iParent, plugName,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         case MFnNumericData::k4Double:
         {
-            if (isArray)
-            {
-                PlugAndObjArray p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV4dArrayProperty(iParent, plugName, iTimeType);
-                oArrayVec.push_back(p);
-            }
-            else
-            {
-                PlugAndObjScalar p;
-                p.plug = iPlug;
-                p.obj = iAttr;
-                p.prop = OV4dProperty(iParent, plugName, iTimeType);
-                oStaticVec.push_back(p);
-            }
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            Alembic::AbcCoreAbstract::v1::DataType dtype(
+                Alembic::Util::kFloat64POD, 4);
+            p.prop = Alembic::Abc::OArrayProperty(iParent, plugName, dtype,
+                iTimeType);
+            oArrayVec.push_back(p);
         }
         break;
 
         default:
         break;
     }
-
-    return false;
 }
 
-
-template <class PROP>
 bool MFnNumericDataToSample(MFnNumericData::Type iType,
     const MPlug& iPlug,
     const OSampleSelector & iSelect,
-    PROP & oProp)
+    OArrayProperty & oProp)
 {
     size_t numElements =  iPlug.numElements();
-    bool isScalar = oProp.isScalar();
+    bool isArray = iPlug.isArray();
+
+    size_t dimSize = numElements;
+    if (!isArray)
+        dimSize = 1;
 
     switch (iType)
     {
         case MFnNumericData::kBoolean:
         {
-            if (numElements == 0)
+            std::vector<bool_t> val(dimSize);
+            if (!isArray)
             {
-                bool_t val = iPlug.asBool();
-                if ( isScalar )
-                {
-                    oProp.set(&val, iSelect);
-                }
-                else
-                {
-                    AbcA::ArraySample samp(&iVal, oProp.getDataType(),
-                        Dimensions(1));
-                    oProp.set(samp, iSelect);
+                val[0] = iPlug.asBool();
             }
             else
             {
-                // store in int16_t to avoid storing it in a string
-                std::vector<bool_t> val(numElements);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asBool();
                 }
-                oProp.first = val;
             }
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::kByte:
         case MFnNumericData::kChar:
         {
-            if (numElements == 0)
+            std::vector<int8_t> val(dimSize);
+            if (!isArray)
             {
-                int8_t val = static_cast<int8_t>(iPlug.asShort());
-                oSamp.
-                oProp.first = val;
+                val[0] = iPlug.asChar();
             }
             else
             {
-                // store in int16_t to avoid storing it in a string
-                std::vector<int16_t> val(numElements);
                 for (size_t i = 0; i < numElements; ++i)
                 {
-                    val[i] = iPlug[i].asShort();
+                    val[i] = iPlug[i].asChar();
                 }
-                oProp.first = val;
             }
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::kShort:
         {
-            if (numElements == 0)
+            std::vector<int16_t> val(dimSize);
+            if (!isArray)
             {
-                int16_t val = iPlug.asShort();
-                oProp.first = val;
+                val[0] = iPlug.asShort();
             }
             else
             {
-                std::vector<int16_t> val(numElements);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asShort();
                 }
-                oProp.first = val;
             }
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::kInt:
         {
-            if (numElements == 0)
+            std::vector<int32_t> val(dimSize);
+            if (!isArray)
             {
-                int32_t val = iPlug.asInt();
-                oProp.first = val;
+                val[0] = iPlug.asInt();
             }
             else
             {
-                std::vector<int32_t> val(numElements);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asInt();
                 }
-                oProp.first = val;
             }
-
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
 
         case MFnNumericData::kFloat:
         {
-            if (numElements == 0)
+            std::vector<float> val(dimSize);
+            if (!isArray)
             {
-                float val = iPlug.asFloat();
-                oProp.first = val;
+                val[0] = iPlug.asFloat();
             }
             else
             {
-                std::vector<float> val(numElements);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asFloat();
                 }
-                oProp.first = val;
             }
-
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::kDouble:
         {
-            if (numElements == 0)
+            std::vector<float> val(dimSize);
+            if (!isArray)
             {
-                double val = iPlug.asDouble();
-                oProp.first = val;
+                val[0] = iPlug.asDouble();
             }
             else
             {
-                std::vector<double> val(numElements);
                 for (size_t i = 0; i < numElements; ++i)
                 {
-                    val[i] = iPlug[i].asFloat();
+                    val[i] = iPlug[i].asDouble();
                 }
-                oProp.first = val;
             }
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k2Short:
         {
-            if (numElements == 0)
+            std::vector<int16_t> val(dimSize*2);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <int16_t> val(2);
                 numdFn.getData(val[0], val[1]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<int16_t> val(numElements*2);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[2*i], val[2*i+1]);
                 }
-                oProp.first = val;
             }
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k3Short:
         {
-            if (numElements == 0)
+            std::vector<int16_t> val(dimSize*3);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <int16_t> val(3);
                 numdFn.getData(val[0], val[1], val[2]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<int16_t> val(numElements*3);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
                 }
-                oProp.first = val;
             }
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k2Int:
         {
-            if (numElements == 0)
+            std::vector<int32_t> val(dimSize*2);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <int32_t> val(2);
                 numdFn.getData(val[0], val[1]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<int32_t> val(numElements*2);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[2*i], val[2*i+1]);
                 }
-                oProp.first = val;
             }
-
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k3Int:
         {
-            if (numElements == 0)
+            std::vector<int32_t> val(dimSize*3);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <int32_t> val(3);
                 numdFn.getData(val[0], val[1], val[2]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<int32_t> val(numElements*3);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
                 }
-                oProp.first = val;
             }
-
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k2Float:
         {
-            if (numElements == 0)
+            std::vector<float> val(dimSize*2);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <float> val(2);
                 numdFn.getData(val[0], val[1]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<float> val(numElements*2);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[2*i], val[2*i+1]);
                 }
-                oProp.first = val;
             }
-
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k3Float:
         {
-            if (numElements == 0)
+            std::vector<float> val(dimSize*3);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <float> val(3);
                 numdFn.getData(val[0], val[1], val[2]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<float> val(numElements*3);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
                 }
-                oProp.first = val;
             }
-
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k2Double:
         {
-            if (numElements == 0)
+            std::vector<double> val(dimSize*2);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <double> val(2);
                 numdFn.getData(val[0], val[1]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<double> val(numElements*2);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[2*i], val[2*i+1]);
                 }
-                oProp.first = val;
             }
-
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k3Double:
         {
-            if (numElements == 0)
+            std::vector<double> val(dimSize*3);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <double> val(3);
                 numdFn.getData(val[0], val[1], val[2]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<double> val(numElements*3);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
                 }
-                oProp.first = val;
             }
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         case MFnNumericData::k4Double:
         {
-            if (numElements == 0)
+            std::vector<double> val(dimSize*4);
+            if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-
-                std::vector <double> val(4);
                 numdFn.getData(val[0], val[1], val[2], val[3]);
-                oProp.first = val;
             }
             else
             {
-                std::vector<double> val(numElements*4);
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData(val[4*i], val[4*i+1], val[4*i+2],
                         val[4*i+3]);
                 }
-                oProp.first = val;
             }
-            return true;
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(dimSize));
+            oProp.set(samp, iSelect);
         }
         break;
 
         default:
+            return false;
         break;
     }
+
+    return true;
 }
 
+bool MFnNumericDataToSample(MFnData::Type iType,
+    const MPlug& iPlug,
+    const OSampleSelector & iSelect,
+    OArrayProperty & oProp)
+{
+    size_t numElements =  iPlug.numElements();
+    bool isArray = iPlug.isArray();
 
-void CreatePropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
+    size_t dimSize = numElements;
+    if (!isArray)
+        dimSize = 1;
+
+    switch (iType)
+    {
+        case MFnData::kNumeric:
+        {
+            MFnNumericData numObj(iPlug.asMObject());
+            return MFnNumericDataToSample(numObj.numericType(), iPlug, iSelect,
+                oProp);
+        }
+        break;
+
+        case MFnData::kString:
+        {
+            std::vector< std::string > val(1);
+            val[0] = iPlug.asString().asChar();
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(1));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kStringArray:
+        {
+            MFnStringArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< std::string > val(length);
+            for (; i < length; i++)
+            {
+                val[i] = arr[i].asChar();
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kDoubleArray:
+        {
+            MFnDoubleArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< double > val(length);
+            for (; i < length; i++)
+            {
+                val[i] = arr[i];
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kIntArray:
+        {
+            MFnIntArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< int32_t > val(length);
+            for (; i < length; i++)
+            {
+                val[i] = arr[i];
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kPointArray:
+        {
+            MFnPointArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< double > val(length*3);
+            for (; i < length; i++)
+            {
+                MPoint pt(arr[i]);
+                val[3*i] = pt.x;
+                val[3*i+1] = pt.y;
+                val[3*i+2] = pt.z;
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kVectorArray:
+        {
+            MFnVectorArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< double > val(length*3);
+            for (; i < length; i++)
+            {
+                MVector v(arr[i]);
+                val[3*i] = v.x;
+                val[3*i+1] = v.y;
+                val[3*i+2] = v.z;
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        class MFnData::kMatrix:
+        {
+            MFnMatrixData arr(iPlug.asMObject());
+            MMatrix mat = arr.matrix();
+            std::vector<double> val(16);
+
+            unsigned int r, c, i = 0;
+            for (r = 0; r < 4; r++)
+            {
+                for (c = 0; c < 4; c++, i++)
+                {
+                    val[i] = mat[r][c];
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Dimensions(1));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        default:
+            return false;
+        break;
+    }
+
+    return true;
+}
+
+}
+
+bool attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
+    const Alembic::Abc::OSampleSelector & iSelect,
+    Alembic::Abc::OArrayProperty & oProp)
+{
+    if (iAttr.hasFn(MFn::kTypedAttribute))
+    {
+    }
+    else if (iAttr.hasFn(MFn::kNumericAttribute))
+    {
+        MFnNumericAttribute numAttr(iAttr);
+        return MFnNumericDataToSample(numAttr.unitType(), iPlug, iSelect,
+            oProp);
+    }
+    else if (iAttr.hasFn(MFn::kUnitAttribute))
+    {
+        double val = iPlug.asDouble();
+        AbcA::ArraySample samp(&val, oProp.getDataType(), Dimensions(1));
+        oProp.set(samp, iSelect);
+        return true;
+    }
+    else if (iAttr.hasFn(MFn::kEnumAttribute))
+    {
+        int16_t val = iPlug.asShort();
+        AbcA::ArraySample samp(&val, oProp.getDataType(), Dimensions(1));
+        oProp.set(samp, iSelect);
+        return true;
+    }
+
+    return false;
+}
+
+void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
     Alembic::Abc::OCompoundProperty & iParent,
-    std::vector < PlugAndObjScalar > & oScalarVec,
+    Alembic::AbcCoreAbstract::TimeSamplingType & iTimeType,
     std::vector < PlugAndObjArray > & oArrayVec)
 {
     // for some reason we have just 1 of the elements of an array, bail
@@ -789,8 +780,8 @@ void CreatePropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
             return;
         }
 
-        CreatePropertyFromNumeric(numFn.unitType(), iPlug, iParent,
-            oScalarVec, oArrayVec);
+        CreatePropertyFromNumeric(numFn.unitType(), iPlug, iParent, iTimeType,
+            oArrayVec);
     }
     else if (iAttr.hasFn(MFn::kTypedAttribute))
     {
@@ -813,8 +804,9 @@ void CreatePropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 PlugAndObjScalar p;
                 p.plug = iPlug;
                 p.obj = iAttr;
-                p.prop = OStringProperty(iParent, plugName, iTimeType);
-                oScalarVec.push_back(p);
+                p.prop = Alembic::Abc::OStringArrayProperty(iParent, plugName,
+                    iTimeType);
+                oArrayVec.push_back(p);
             }
             break;
 
@@ -823,7 +815,7 @@ void CreatePropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 PlugAndObjArray p;
                 p.plug = iPlug;
                 p.obj = iAttr;
-                p.prop = OStringArrayProperty(iParent, plugName,
+                p.prop = Alembic::Abc::OStringArrayProperty(iParent, plugName,
                     iTimeType);
                 oArrayVec.push_back(p);
             }
@@ -834,7 +826,7 @@ void CreatePropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 PlugAndObjArray p;
                 p.plug = iPlug;
                 p.obj = iAttr;
-                p.prop = ODoubleArrayProperty(iParent, plugName,
+                p.prop = Alembic::Abc::ODoubleArrayProperty(iParent, plugName,
                     iTimeType);
                 oArrayVec.push_back(p);
             }
@@ -845,7 +837,7 @@ void CreatePropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 PlugAndObjArray p;
                 p.plug = iPlug;
                 p.obj = iAttr;
-                p.prop = OInt32ArrayProperty(iParent, plugName,
+                p.prop = Alembic::Abc::OInt32ArrayProperty(iParent, plugName,
                     iTimeType);
                 oArrayVec.push_back(p);
             }
@@ -856,11 +848,8 @@ void CreatePropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 PlugAndObjArray p;
                 p.plug = iPlug;
                 p.obj = iAttr;
-
-                // should one day be OP4dArray when it exists
-                p.prop = ODoubleArrayProperty(iParent, plugName,
+                p.prop = Alembic::Abc::OP3dArrayProperty(iParent, plugName,
                     iTimeType);
-
                 oArrayVec.push_back(p);
             }
             break;
@@ -870,245 +859,50 @@ void CreatePropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 PlugAndObjArray p;
                 p.plug = iPlug;
                 p.obj = iAttr;
-
-                // should one day be OP4dArray when it exists
-                p.prop = OV3dArrayProperty(iParent, plugName,
+                p.prop = Alembic::Abc::OV3dArrayProperty(iParent, plugName,
                     iTimeType);
-
                 oArrayVec.push_back(p);
             }
             break;
 
             case MFnData::kMatrix:
             {
-                PlugAndObjScalar p;
+                PlugAndObjArray p;
                 p.plug = iPlug;
                 p.obj = iAttr;
-
-                // should one day be OP4dArray when it exists
-                p.prop = OM44dProperty(iParent, plugName, iTimeType);
-
-                oScalarVec.push_back(p);
+                p.prop = Alembic::Abc::OM44dArrayProperty(iParent, plugName,
+                    iTimeType);
+                oArrayVec.push_back(p);
             }
             break;
 
             case MFnData::kNumeric:
             {
                 CreatePropertyFromNumeric(numObj.numericType(), iPlug, iParent,
-                    oScalarVec, oArrayVec);
+                    iTimeType, oArrayVec);
             }
             break;
 
             default:
             break;
         }
-    }
-
-}
-
-bool MFnAttrToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
-    SPI::SceneGraph::PropertyPair& oProp)
-{
-    MStatus stat;
-
-    if (iAttr.hasFn(MFn::kNumericAttribute))
-    {
-        MFnNumericAttribute numFn(iAttr, &stat);
-
-        if (!stat)
-        {
-            MString err = "Couldn't instantiate MFnNumericAttribute\n\tType: ";
-            err += iAttr.apiTypeStr();
-            MGlobal::displayError(err);
-
-            return false;
-        }
-
-        return MFnNumericDataToPropertyPair(numFn.unitType(), iPlug, oProp);
-    }
-    else if (iAttr.hasFn(MFn::kTypedAttribute))
-    {
-        MFnTypedAttribute typeFn(iAttr, &stat);
-
-        if (!stat)
-        {
-            MString err = "Couldn't instantiate MFnTypedAttribute\n\tType: ";
-            err += iAttr.apiTypeStr();
-
-            MGlobal::displayError(err);
-
-            return false;
-        }
-
-        switch (typeFn.attrType())
-        {
-            case MFnData::kString:
-            {
-                std::string val = iPlug.asString().asChar();
-                oProp.first = val;
-                return true;
-            }
-            break;
-
-            case MFnData::kStringArray:
-            {
-                MFnStringArrayData arr(iPlug.asMObject());
-
-                unsigned int i = 0;
-                unsigned int length = arr.length();
-                std::vector< std::string > val(length);
-                for (; i < length; i++)
-                {
-                    val[i] = arr[i].asChar();
-                }
-                oProp.first = val;
-                return true;
-            }
-            break;
-
-            case MFnData::kDoubleArray:
-            {
-                MFnDoubleArrayData arr(iPlug.asMObject());
-
-                unsigned int i = 0;
-                unsigned int length = arr.length();
-                std::vector< double > val(length);
-                for (; i < length; i++)
-                {
-                    val[i] = arr[i];
-                }
-                oProp.first = val;
-                return true;
-            }
-            break;
-
-            case MFnData::kIntArray:
-            {
-                MFnIntArrayData arr(iPlug.asMObject());
-
-                unsigned int i = 0;
-                unsigned int length = arr.length();
-                std::vector< int32_t > val(length);
-                for (; i < length; i++)
-                {
-                    val[i] = arr[i];
-                }
-                oProp.first = val;
-                return true;
-            }
-            break;
-
-            case MFnData::kPointArray:
-            {
-                MFnPointArrayData arr(iPlug.asMObject());
-
-                unsigned int i = 0;
-                unsigned int length = arr.length();
-                std::vector< double > val(length*4);
-                for (; i < length; i++)
-                {
-                    MPoint pt(arr[i]);
-                    val[4*i] = pt.x;
-                    val[4*i+1] = pt.y;
-                    val[4*i+2] = pt.z;
-                    val[4*i+3] = pt.w;
-                }
-                oProp.first = val;
-                oProp.second.inputType = SPI::SceneGraph::ARBATTR_POINT4;
-                return true;
-            }
-            break;
-
-            case MFnData::kVectorArray:
-            {
-                MFnVectorArrayData arr(iPlug.asMObject());
-
-                unsigned int i = 0;
-                unsigned int length = arr.length();
-                std::vector< double > val(length*3);
-                for (; i < length; i++)
-                {
-                    MVector v = arr[i];
-                    val[3*i] = v.x;
-                    val[3*i+1] = v.y;
-                    val[3*i+2] = v.z;
-                }
-                oProp.first = val;
-                oProp.second.inputType = SPI::SceneGraph::ARBATTR_VECTOR3;
-                return true;
-            }
-            break;
-
-            case MFnData::kMatrix:
-            {
-                MFnMatrixData arr(iPlug.asMObject());
-                MMatrix mat = arr.matrix();
-                std::vector<double> val(16);
-
-                unsigned int r, c, i = 0;
-                for (r = 0; r < 4; r++)
-                {
-                    for (c = 0; c < 4; c++, i++)
-                    {
-                        val[i] = mat[r][c];
-                    }
-                }
-                oProp.first = val;
-                return true;
-            }
-            break;
-
-            case MFnData::kNumeric:
-            {
-                MFnNumericData numObj(iPlug.asMObject());
-                return MFnNumericDataToPropertyPair(numObj.numericType(),
-                    iPlug, oProp);
-            }
-            break;
-
-            default:
-            break;
-        }
-
-        return false;
-    }
-    return false;
-}
-
-}
-
-
-bool util::attributeToPropertyPair(
-    const MObject& iAttr,
-    const MPlug& iPlug,
-    SPI::SceneGraph::PropertyPair& oProp)
-{
-    if (iAttr.hasFn(MFn::kNumericAttribute) ||
-        iAttr.hasFn(MFn::kTypedAttribute))
-    {
-        return MFnAttrToPropertyPair(iAttr, iPlug, oProp);
     }
     else if (iAttr.hasFn(MFn::kUnitAttribute))
     {
-        double val = iPlug.asDouble();
-        oProp.first = val;
-        return true;
-    }
-    else if (iAttr.hasFn(MFn::kGenericAttribute))
-    {
-        return false;
+        PlugAndObjArray p;
+        p.plug = iPlug;
+        p.obj = iAttr;
+        p.prop = Alembic::Abc::ODoubleArrayProperty(iParent, plugName,
+            iTimeType);
+        oArrayVec.push_back(p);
     }
     else if (iAttr.hasFn(MFn::kEnumAttribute))
     {
-        int16_t val = iPlug.asShort();
-        oProp.first = val;
-        return true;
+        PlugAndObjArray p;
+        p.plug = iPlug;
+        p.obj = iAttr;
+        p.prop = Alembic::Abc::OInt16ArrayProperty(iParent, plugName,
+            iTimeType);
+        oArrayVec.push_back(p);
     }
-
-    return false;
 }
-
-
-// Converts a Maya attribute to a SceneGraph Property
-void attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
-    std::vector < PlugAndObjScalar > & oScalarProps, );

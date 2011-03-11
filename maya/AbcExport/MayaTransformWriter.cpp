@@ -430,8 +430,9 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         Alembic::AbcGeom::OXform obj(iParent, joint.name().asChar(), iTimeType);
         mSchema = obj.getSchema();
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, obj,
-            joint, iTimeType, iWriteVisibility));
+        Alembic::Abc::OCompoundProperty cp = obj.getProperties();
+        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, joint,
+            iTimeType, iWriteVisibility));
 
         if (!iAddWorld)
         {
@@ -465,8 +466,9 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         Alembic::AbcGeom::OXform obj(iParent, trans.name().asChar(), iTimeType);
         mSchema = obj.getSchema();
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, obj,
-            trans, iTimeType, iWriteVisibility));
+        Alembic::Abc::OCompoundProperty cp = obj.getProperties();
+        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, trans,
+            iTimeType, iWriteVisibility));
 
         if (!iAddWorld)
         {
@@ -591,8 +593,9 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
             iTimeType);
         mSchema = obj.getSchema();
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, obj,
-            joint, iTimeType, iWriteVisibility));
+        Alembic::Abc::OCompoundProperty cp = obj.getProperties();
+        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, joint,
+            iTimeType, iWriteVisibility));
 
         pushTransformStack(iFrame, joint, opVec, staticData, animData);
     }
@@ -603,8 +606,9 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
             iTimeType);
         mSchema = obj.getSchema();
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, obj,
-            trans, iTimeType, iWriteVisibility));
+        Alembic::Abc::OCompoundProperty cp = obj.getProperties();
+        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, trans,
+            iTimeType, iWriteVisibility));
 
         pushTransformStack(iFrame, trans, opVec, staticData, animData);
     }
