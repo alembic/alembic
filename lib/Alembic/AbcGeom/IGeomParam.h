@@ -314,7 +314,7 @@ ITypedGeomParam<TRAITS>::ITypedGeomParam( PROP iThis,
 //-*****************************************************************************
 template <class TRAITS>
 void
-ITypedGeomParam<TRAITS>::getIndexed( ITypedGeomParam<TRAITS>::Sample &oSamp,
+ITypedGeomParam<TRAITS>::getIndexed( typename ITypedGeomParam<TRAITS>::Sample &oSamp,
                                      const Abc::ISampleSelector &iSS )
 {
     m_valProp.get( oSamp.m_vals, iSS );
@@ -344,7 +344,7 @@ ITypedGeomParam<TRAITS>::getIndexed( ITypedGeomParam<TRAITS>::Sample &oSamp,
 //-*****************************************************************************
 template <class TRAITS>
 void
-ITypedGeomParam<TRAITS>::getExpanded( ITypedGeomParam<TRAITS>::Sample &oSamp,
+ITypedGeomParam<TRAITS>::getExpanded( typename ITypedGeomParam<TRAITS>::Sample &oSamp,
                                       const Abc::ISampleSelector &iSS )
 {
     typedef typename TRAITS::value_type value_type;
