@@ -197,6 +197,10 @@ public:
 
     ALEMBIC_OPERATOR_BOOL( this_type::valid() );
 
+    prop_type getValueProperty() { return m_valProp; }
+
+    Abc::IUInt32ArrayProperty getIndexProperty() { return m_indices; }
+
 private:
     Abc::ErrorHandler &getErrorHandler() const
     { return m_valProp.getErrorHandler(); }
