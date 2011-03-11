@@ -78,7 +78,7 @@ void validateTimeSampling( const AbcA::TimeSampling &timeSampling,
     const chrono_t period = timeSamplingType.getTimePerCycle();
 
     if ( timePerCycle > 0.0 &&
-         timePerCycle < AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE )
+         timePerCycle < AbcA::TimeSamplingType::AcyclicTimePerCycle() )
     {
         TESTING_MESSAGE_ASSERT( period == timePerCycle,
                      "calculated cycle period does not match given time/cycle" );
@@ -116,12 +116,12 @@ void validateTimeSampling( const AbcA::TimeSampling &timeSampling,
 
     //-*************************************************************************
     // acyclic case
-    if ( timePerCycle == AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE
-         || numSamplesPerCycle == AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES )
+    if ( timePerCycle == AbcA::TimeSamplingType::AcyclicTimePerCycle()
+         || numSamplesPerCycle == AbcA::TimeSamplingType::AcyclicNumSamples() )
     {
         TESTING_MESSAGE_ASSERT(
-            timePerCycle == AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE
-            && numSamplesPerCycle == AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES,
+            timePerCycle == AbcA::TimeSamplingType::AcyclicTimePerCycle()
+            && numSamplesPerCycle == AbcA::TimeSamplingType::AcyclicNumSamples(),
             "Given time and samples per cycle should be infinite."
                    );
 
@@ -541,9 +541,9 @@ void testAcyclicTime1()
     TimeVector tvec;
 
     // construct with explicit values
-    const chrono_t timePerCycle = AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE;
+    const chrono_t timePerCycle = AbcA::TimeSamplingType::AcyclicTimePerCycle();
     const size_t numSamplesPerCycle =
-        AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES;
+        AbcA::TimeSamplingType::AcyclicNumSamples();
     const size_t numSamps = 44;
 
     for ( size_t i = 0 ; i < numSamps ; ++i )
@@ -572,9 +572,9 @@ void testAcyclicTime2()
     TimeVector tvec;
 
     // construct with explicit values
-    const chrono_t timePerCycle = AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE;
+    const chrono_t timePerCycle = AbcA::TimeSamplingType::AcyclicTimePerCycle();
     const size_t numSamplesPerCycle =
-        AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES;
+        AbcA::TimeSamplingType::AcyclicNumSamples();
     const size_t numSamps = 44;
 
     chrono_t ranTime = 0.0;
@@ -607,9 +607,9 @@ void testAcyclicTime3()
     TimeVector tvec;
 
     // construct with acyclic enum
-    const chrono_t timePerCycle = AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE;
+    const chrono_t timePerCycle = AbcA::TimeSamplingType::AcyclicTimePerCycle();
     const size_t numSamplesPerCycle =
-        AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES;
+        AbcA::TimeSamplingType::AcyclicNumSamples();
     const size_t numSamps = 79;
 
     chrono_t ranTime = 0.0;
@@ -642,18 +642,19 @@ void testAcyclicTime3()
 void testBadTypes()
 {
     AbcA::TimeSamplingType t;
-    TESTING_ASSERT_THROW(t = AbcA::TimeSamplingType(1,
-        AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE),
+    TESTING_ASSERT_THROW( t =
+                          AbcA::TimeSamplingType(1,
+                                                 AbcA::TimeSamplingType::AcyclicTimePerCycle()),
         Alembic::Util::Exception);
 
     TESTING_ASSERT_THROW(t = AbcA::TimeSamplingType(
-        AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES, 3.0),
+                             AbcA::TimeSamplingType::AcyclicNumSamples(), 3.0),
         Alembic::Util::Exception);
 
     TESTING_ASSERT_THROW(t = AbcA::TimeSamplingType(0.0),
         Alembic::Util::Exception);
 
-    chrono_t val = AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE;
+    chrono_t val = AbcA::TimeSamplingType::AcyclicTimePerCycle();
 
     TESTING_ASSERT_THROW(t = AbcA::TimeSamplingType(val),
         Alembic::Util::Exception);

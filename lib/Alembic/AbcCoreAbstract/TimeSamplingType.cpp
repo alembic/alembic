@@ -47,7 +47,19 @@ const uint32_t TimeSamplingType::ACYCLIC_NUM_SAMPLES =
 
 // Not all the way to the max.
 const chrono_t TimeSamplingType::ACYCLIC_TIME_PER_CYCLE =
-    std::numeric_limits<chrono_t>::max() / 10.0;
+    std::numeric_limits<chrono_t>::max() / 32.0;
+
+//-*****************************************************************************
+// get these constants; similar to std::numeric_limits<>()
+uint32_t const TimeSamplingType::AcyclicNumSamples()
+{
+    return ACYCLIC_NUM_SAMPLES;
+}
+
+chrono_t const TimeSamplingType::AcyclicTimePerCycle()
+{
+    return ACYCLIC_TIME_PER_CYCLE;
+}
 
 
 } // End namespace v1

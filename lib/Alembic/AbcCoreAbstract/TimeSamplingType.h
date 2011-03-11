@@ -89,8 +89,8 @@ class TimeSamplingType
 public:
     //! CONSTANTS
     //! ...
-    static const uint32_t ACYCLIC_NUM_SAMPLES; // set to infinity
-    static const chrono_t ACYCLIC_TIME_PER_CYCLE; // set to infinity
+    //static const uint32_t ACYCLIC_NUM_SAMPLES; // set to infinity
+    //static const chrono_t ACYCLIC_TIME_PER_CYCLE; // set to infinity
 
     //! IDENTITY
     //! ...
@@ -169,6 +169,9 @@ public:
     bool isAcyclic() const
     { return m_numSamplesPerCycle == ACYCLIC_NUM_SAMPLES; }
 
+    static const uint32_t AcyclicNumSamples();
+    static const chrono_t AcyclicTimePerCycle();
+
     uint32_t getNumSamplesPerCycle() const { return m_numSamplesPerCycle; }
 
     chrono_t getTimePerCycle() const { return m_timePerCycle; }
@@ -192,6 +195,9 @@ private:
     uint32_t m_numSamplesPerCycle;
     chrono_t m_timePerCycle;
     bool m_retainConstantSampleTimes;
+
+    static const uint32_t ACYCLIC_NUM_SAMPLES;
+    static const chrono_t ACYCLIC_TIME_PER_CYCLE;
 };
 
 //-*****************************************************************************

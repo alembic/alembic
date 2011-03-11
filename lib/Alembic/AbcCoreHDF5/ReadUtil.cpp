@@ -327,7 +327,7 @@ ReadTimeSamplingType( hid_t iParent,
                     ( void * )&spc );
         ABCA_ASSERT( spc > 0, "Invalid Samples Per Cycle: " << spc );
 
-        if ( spc == AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES )
+        if ( spc == AbcA::TimeSamplingType::AcyclicNumSamples() )
         {
             // Acyclic.
             oTimeSamplingType = AbcA::TimeSamplingType(
@@ -352,7 +352,7 @@ ReadTimeSamplingType( hid_t iParent,
                     ( void * )&tpc );
 
         ABCA_ASSERT( tpc > 0.0 && tpc <
-                     AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE,
+                     AbcA::TimeSamplingType::AcyclicTimePerCycle(),
                      "Invalid Time Per Cycle: " << tpc );
 
         // Cyclic with time per cycle
