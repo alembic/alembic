@@ -228,7 +228,7 @@ private:
                const IArgument &iArg0,
                const IArgument &iArg1 );
 
-public:
+protected:
     AbcA::ObjectReaderPtr m_object;
 };
 
