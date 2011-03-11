@@ -244,6 +244,7 @@ AbcWriteJob::AbcWriteJob(const util::ShapeSet & iDagPath,
     MStatus status;
     mDagPath = iDagPath;
     mFileName = iFileName;
+    mBoxIndex = 0;
 
     mUseSelectionList = iUseSelectionList;
     if (mUseSelectionList)
@@ -316,16 +317,6 @@ AbcWriteJob::AbcWriteJob(const util::ShapeSet & iDagPath,
     mMelPostCallback = iMelPostCallback;
     mPythonPerFrameCallback = iPythonPerFrameCallback;
     mPythonPostCallback = iPythonPostCallback;
-    // shortcut to see if we ever need to calculate the bounds
-    // when writing per frame geometry
-    mPerFrameBounds = false;
-    if (mMelPerFrameCallback.find("#BOUNDS#") != std::string::npos ||
-        mPythonPerFrameCallback.find("#BOUNDS#") != std::string::npos ||
-        mMelPerFrameCallback.find("#BOUNDSARRAY#") != std::string::npos ||
-        mPythonPerFrameCallback.find("#BOUNDSARRAY#") != std::string::npos)
-    {
-        mPerFrameBounds = true;
-    }
 }
 
 void AbcWriteJob::getBoundingBox(const MMatrix & eMInvMat)
@@ -797,6 +788,8 @@ bool AbcWriteJob::eval(double iFrame)
 
         mRoot = Alembic::Abc::OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             mFileName, Alembic::Abc::ErrorHandler::kThrowPolicy );
+        mBoxProp = Alembic::Abc::OBox3dProperty(mRoot.getTop().getProperties(),
+            ".childBnds", mTransTimeType);
 
         if (!mRoot.valid())
         {
@@ -874,29 +867,31 @@ void AbcWriteJob::perFrameCallback(double iFrame)
 {
     MBoundingBox bbox;
 
-    if (mPerFrameBounds)
+    util::ShapeSet::iterator it = mDagPath.begin();
+    const util::ShapeSet::iterator end = mDagPath.end();
+    for (; it != end; it ++)
     {
-        util::ShapeSet::iterator it = mDagPath.begin();
-        const util::ShapeSet::iterator end = mDagPath.end();
-        for (; it != end; it ++)
+        mCurDag = *it;
+
+        mCurBBox.clear();
+        MMatrix eMInvMat;
+        if (mWorldSpace)
         {
-            mCurDag = *it;
-
-            mCurBBox.clear();
-            MMatrix eMInvMat;
-            if (mWorldSpace)
-            {
-                eMInvMat.setToIdentity();
-            }
-            else
-            {
-                eMInvMat = mCurDag.exclusiveMatrixInverse();
-            }
-
-            getBoundingBox(eMInvMat);
-            bbox.expand(mCurBBox);
+            eMInvMat.setToIdentity();
         }
+        else
+        {
+            eMInvMat = mCurDag.exclusiveMatrixInverse();
+        }
+
+        getBoundingBox(eMInvMat);
+        bbox.expand(mCurBBox);
     }
+
+    Alembic::Abc::V3d min(bbox.min().x, bbox.min().y, bbox.min().z);
+    Alembic::Abc::V3d max(bbox.max().x, bbox.max().y, bbox.max().z);
+    Alembic::Abc::Box3d b(min, max);
+    mBoxProp.set(b, Alembic::Abc::OSampleSelector(mBoxIndex++, iFrame));
 
     processCallback(mMelPerFrameCallback, true, iFrame, bbox);
     processCallback(mPythonPerFrameCallback, false, iFrame, bbox);

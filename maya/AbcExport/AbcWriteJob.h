@@ -255,8 +255,10 @@ class AbcWriteJob
     // then we also call the post callback
     double mLastFrame;
 
+    Alembic::Abc::OBox3dProperty mBoxProp;
+    unsigned int mBoxIndex;
+
     // for the callbacks
-    bool mPerFrameBounds;
     std::string mMelPerFrameCallback;
     std::string mMelPostCallback;
     std::string mPythonPerFrameCallback;
