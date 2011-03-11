@@ -61,6 +61,33 @@ chrono_t const TimeSamplingType::AcyclicTimePerCycle()
     return ACYCLIC_TIME_PER_CYCLE;
 }
 
+//-*****************************************************************************
+//! Prints out relevant information about the TimeSamplingType instance
+std::ostream &operator<<( std::ostream &ostr, const TimeSamplingType &tst )
+{
+    std::string baseType( "" );
+
+    if ( tst.isIdentity() ) { baseType = "Identity"; }
+    else if ( tst.isUniform() ) { baseType = "Uniform"; }
+    else if ( tst.isCyclic() ) { baseType = "Cyclic"; }
+    else { baseType = "Acyclic"; }
+
+    ostr << baseType << " time sampling";
+
+    if ( tst.isUniform() )
+    {
+        ostr << " with " << tst.getTimePerCycle() << " chrono_ts/cycle";
+    }
+    else if ( tst.isCyclic() )
+    {
+        ostr << " with " << tst.getNumSamplesPerCycle() << " samps/cycle "
+             << "and " << tst.getTimePerCycle() << " chrono_ts/cycle";
+    }
+
+    return ostr;
+}
+
+
 
 } // End namespace v1
 } // End namespace AbcCoreAbstract
