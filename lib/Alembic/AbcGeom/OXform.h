@@ -44,6 +44,9 @@
 namespace Alembic {
 namespace AbcGeom {
 
+// forward for sample UUID
+class boost::uuids::uuid;
+
 //-*****************************************************************************
 class OXformSchema : public Abc::OSchema<XformSchemaInfo>
 {
@@ -91,7 +94,7 @@ public:
                               const Abc::OArgument &iArg1 = Abc::OArgument(),
                               const Abc::OArgument &iArg2 = Abc::OArgument() )
       : Abc::OSchema<XformSchemaInfo>( iParentObject,
-                                            iArg0, iArg1, iArg2 )
+                                       iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
@@ -140,8 +143,6 @@ public:
     //! state.
     void reset()
     {
-        m_anim.reset();
-        m_inherits.reset();
         m_childBounds.reset();
         m_timeSamplingType = AbcA::TimeSamplingType();
         Abc::OSchema<XformSchemaInfo>::reset();
@@ -157,13 +158,104 @@ public:
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OXformSchema::valid() );
 
-protected:
+
+private:
     void init( const AbcA::TimeSamplingType &iTst );
+
+protected:
+    //-*************************************************************************
+    // HELPER CLASS
+    //-*************************************************************************
+
+    //! The defaulted double property will only create a property
+    //! and only bother setting a value when it the value differs from a
+    //! known default value. This allows transforms to disappear when they
+    //! are identity.
+    //! It has some SimpleXform-specific stuff in here, so not worth
+    //! making general (yet).
+    class ODefaultedDoubleProperty
+    {
+    public:
+        void reset()
+        {
+            m_parent.reset();
+            m_name = "";
+            m_errorHandlerPolicy = Abc::ErrorHandler::kThrowPolicy;
+            m_timeSamplingType = AbcA::TimeSamplingType();
+            m_default = 0.0;
+            m_epsilon = kSIMPLE_XFORM_DELTA_TOLERANCE;
+            m_property.reset();
+        }
+
+        ODefaultedDoubleProperty() { reset(); }
+
+        ODefaultedDoubleProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                                  const std::string &iName,
+                                  Abc::ErrorHandler::Policy iPolicy,
+                                  const AbcA::TimeSamplingType &iTst,
+                                  double iDefault,
+                                  double iEpsilon=kSIMPLE_XFORM_DELTA_TOLERANCE )
+          : m_parent( Abc::GetCompoundPropertyWriterPtr( iParent ) )
+          , m_name( iName )
+          , m_errorHandlerPolicy( iPolicy )
+          , m_timeSamplingType( iTst )
+          , m_default( iDefault )
+          , m_epsilon( iEpsilon )
+        {
+            // We don't build the property until we need it for sure.
+        }
+
+        void set( const double &iSamp,
+                  const Abc::OSampleSelector &iSS,
+
+                  // If we haven't made a property yet,
+                  // these time samples correspond to the times
+                  // not yet sampled.
+                  // Otherwise, this vector will be empty.
+                  const std::vector<chrono_t> &iTimeSamples );
+
+        void setFromPrevious( const Abc::OSampleSelector &iSS );
+
+        double getDefaultValue() const { return m_default; }
+
+    protected:
+        // Parent.
+        AbcA::CompoundPropertyWriterPtr m_parent;
+
+        // We cache the init stuff.
+        std::string m_name;
+        Abc::ErrorHandler::Policy m_errorHandlerPolicy;
+        AbcA::TimeSamplingType m_timeSamplingType;
+        double m_default;
+        double m_epsilon;
+
+        // The "it". This may not exist.
+        Abc::ODoubleProperty m_property;
+    };
+
+protected:
+    // Times for the properties set as non-default
+    std::vector<chrono_t> m_times;
 
     Abc::OBox3dProperty m_childBounds;
 
-private:
     AbcA::TimeSamplingType m_timeSamplingType;
+
+    Abc::OUInt32ArrayProperty m_ops;
+
+    std::vector<ODefaultedDoubleProperty> m_props;
+
+    Abc::OBoolProperty m_isToWorld;
+
+    // how was this set up?
+    bool m_setWithStack;
+    // ensure that our sample is kept pristine.
+    boost::uuids::uuid m_sampID;
+
+private:
+    _setXformOpProps( const XformSample &iSamp, const OSampleSelector &iSS,
+                      const std::vector<chrono_t> &iTimes );
+
 };
 
 //-*****************************************************************************
