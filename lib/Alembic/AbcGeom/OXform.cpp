@@ -63,7 +63,7 @@ void OXformSchema::_setXformOpProps( const XformSample &iSamp,
 
 
 //-*****************************************************************************
-void OXformSchema::set( const XformSample &iSamp,
+void OXformSchema::set( XformSample &ioSamp,
                         const Abc::OSampleSelector &iSS  )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
@@ -73,34 +73,45 @@ void OXformSchema::set( const XformSample &iSamp,
     index_t idx = iSS.getIndex();
     chrono_t time = iSS.getTime();
 
-    if ( iSamp.getChildBounds.hasVolume() )
-    { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
+    if ( ioSamp.getChildBounds.hasVolume() )
+    { m_childBounds.set( ioSamp.getChildBounds(), iSS ); }
+
+    m_isToWorld.set( ioSamp.getIsToWorld(), iSS );
+
+    // this property will be constant, but it will also contain the xform's
+    // timesampling information; the op properties won't have time info on them.
+    m_ops.set( ioSamp.m_ops, iSS );
 
     if ( iSS.getIndex() == 0 )
     {
-        m_sampID = iSamp.m_id;
+        // set this to true, so that additional calls to sample's addOp()
+        // won't change the topology of the sample, but instead will merely
+        // update values.
+        ioSamp.m_hasBeenUsed = true;
 
-        m_ops.set( iSamp.m_ops );
+        m_sampID = ioSamp.m_id;
+
 
         m_times.push_back( time );
 
         AbcA::CompoundPropertyWriterPtr cptr = this->getPtr();
         Abc::ErrorHandler::Policy pcy = this->getErrorHandlerPolicy();
 
-        std::string namebase = ".oc";
-
         // Create our well-named Properties, push them into our propvec,
         // and set them.
-        for ( size_t i = 0 ; i < iSamp.m_ops.size() ; ++i )
+        for ( size_t i = 0 ; i < ioSamp.m_ops.size() ; ++i )
         {
-            XformOp op = iSamp.m_ops[i];
+            XformOp op = ioSamp.m_ops[i];
+            std::string oname = boost::lexical_cast<std::string>( i );
 
             for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
             {
-                std::string channame = boost::lexical_cast<std::string>( i + j );
-                prop = ODefaultedDoubleProperty( cptr, namebase + channame,
-                                                 pcy, m_timeSamplingType,
-                                                 op.getDefaultValue() );
+                // eg, ".tx"
+                std::string channame = op.getChannelName( j );
+
+                // name will be, eg, ".tx0"
+                prop = ODefaultedDoubleProperty( cptr, channame + oname,
+                                                 pcy, op.getDefaultValue() );
 
                 prop.set( op.getValue( j ), iSS, m_times );
 
@@ -110,31 +121,20 @@ void OXformSchema::set( const XformSample &iSamp,
     }
     else
     {
-        ABCA_ASSERT( m_sampID == iSamp.m_id, "Invalid sample ID!" );
+        ABCA_ASSERT( m_sampID == ioSamp.m_id, "Invalid sample ID!" );
 
         if ( m_times.size() == idx )
         {
             m_times.push_back( time );
-            this->_setXformOpProps( iSamp, iSS, m_times );
+            this->_setXformOpProps( ioSamp, iSS, m_times );
         }
         else
         {
             std::vector<chrono_t> empty;
             empty.clear();
-            this->_setXformOpProps( iSamp, iSS, empty );
+            this->_setXformOpProps( ioSamp, iSS, empty );
         }
     }
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-}
-
-//-*****************************************************************************
-void OXformSchema::setIsToWorld( bool iIsToWorld,
-                                 const Abc::OSampleSelector &iSS  )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setIsToWorld()" );
-
-    m_isToWorld.set( iIsToWorld, iSS );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -144,8 +144,9 @@ void OXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious" );
 
-    if ( m_isToWorld.getNumSamples() > 0 )
-    { m_isToWorld.setFromPrevious( iSS ); }
+    m_isToWorld.setFromPrevious( iSS );
+
+    m_ops.setFromPrevious( iSS );
 
     if ( m_childBounds.getNumSamples() > 0 )
     { m_childBounds.setFromPrevious( iSS ); }
@@ -162,10 +163,12 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
 
     m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", iTst );
 
-    // This will hold the shape of the xform
-    m_ops = Abc::OUInt32ArrayProperty( this->getPtr(), ".ops" );
-
     m_isToWorld = Abc::OBoolProperty( this->getPtr(), ".istoworld", iTst );
+
+    // This will hold the shape of the xform
+    m_timeSamplingType.setRetainConstantSampleTimes( true );
+    m_ops = Abc::OUcharArrayProperty( this->getPtr(), ".ops",
+                                      m_timeSamplingType );
 
     m_setWithStack = false;
 
