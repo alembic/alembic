@@ -118,7 +118,7 @@ public:
             matches( iHeader.getMetaData(), iMatching );
     }
 
-    ITypedGeomParam() {}
+    ITypedGeomParam() {m_isIndexed = false;}
 
     template <class CPROP>
     ITypedGeomParam( CPROP iParent,
