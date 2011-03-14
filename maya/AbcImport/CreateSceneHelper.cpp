@@ -409,7 +409,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
             checkShaderSelection(fn, mCurrentDagNode.instanceNumber());
         }
 
-        connectToSubD(mFrame, iNode, propNameList, subDObj);
+        disconnectMesh(subDObj, propNameList);
 
     }
 
@@ -474,7 +474,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
             checkShaderSelection(fn, mCurrentDagNode.instanceNumber());
         }
 
-        connectToPoly(mFrame, iNode, propNameList, polyObj);
+        disconnectMesh(polyObj, propNameList);
 
     }
 

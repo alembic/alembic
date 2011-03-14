@@ -269,9 +269,9 @@ bool stripFileName(const MString & filePath, MString & fileName)
     str = str.substr(found+1);
 
     // str is now in the form of xxx.abc
+    found = str.find_first_of(".");
     str = str.substr(0, found);
     fileName = MString(str.c_str());
-
     return true;
 }
 
