@@ -50,13 +50,13 @@ void OXformSchema::_setXformOpProps( const XformSample &iSamp,
                                      const OSampleSelector &iSS,
                                      const std::vector<chrono_t> &iTimes )
 {
-    for ( size_t i = 0 ; i < iSamp.m_ops.size() ; ++i )
+    for ( size_t i = 0 ; i < iSamp.getNumOps() ; ++i )
     {
-        XformOp op = iSamp.m_ops[i];
+        XformOp op = iSamp.getOp( i );
 
         for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
         {
-            m_props[i + j].set( op.getValue( j ), iSS, iTimes );
+            m_props[i + j].set( op.getChannelValue( j ), iSS, iTimes );
         }
     }
 }
@@ -68,7 +68,7 @@ void OXformSchema::set( XformSample &ioSamp,
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
-    ABCA_ASSERT( !iSamp.m_id.is_nil(), "Sample has been reset!" );
+    ABCA_ASSERT( !iSamp.getID().is_nil(), "Sample has been reset!" );
 
     index_t idx = iSS.getIndex();
     chrono_t time = iSS.getTime();
@@ -78,19 +78,20 @@ void OXformSchema::set( XformSample &ioSamp,
 
     m_isToWorld.set( ioSamp.getIsToWorld(), iSS );
 
-    // this property will be constant, but it will also contain the xform's
-    // timesampling information; the op properties won't have time info on them.
-    m_ops.set( ioSamp.m_ops, iSS );
 
     if ( iSS.getIndex() == 0 )
     {
         // set this to true, so that additional calls to sample's addOp()
         // won't change the topology of the sample, but instead will merely
         // update values.
-        ioSamp.m_hasBeenUsed = true;
+        ioSamp.setHasBeenRead( true );
 
-        m_sampID = ioSamp.m_id;
+        m_sampID = ioSamp.getID();
 
+        // this property will be constant, but it will also contain the xform's
+        // timesampling information; the op properties won't have time info on
+        // them.
+        m_ops.set( ioSamp.getOpsArray(), iSS );
 
         m_times.push_back( time );
 
@@ -99,9 +100,9 @@ void OXformSchema::set( XformSample &ioSamp,
 
         // Create our well-named Properties, push them into our propvec,
         // and set them.
-        for ( size_t i = 0 ; i < ioSamp.m_ops.size() ; ++i )
+        for ( size_t i = 0 ; i < ioSamp.getNumOps() ; ++i )
         {
-            XformOp op = ioSamp.m_ops[i];
+            XformOp op = ioSamp.getOp( i );
             std::string oname = boost::lexical_cast<std::string>( i );
 
             for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
@@ -110,10 +111,11 @@ void OXformSchema::set( XformSample &ioSamp,
                 std::string channame = op.getChannelName( j );
 
                 // name will be, eg, ".tx0"
-                prop = ODefaultedDoubleProperty( cptr, channame + oname,
-                                                 pcy, op.getDefaultValue() );
+                prop = ODefaultedDoubleProperty(
+                    cptr, channame + oname, pcy,
+                    op.getDefaultChannelValue( j ) );
 
-                prop.set( op.getValue( j ), iSS, m_times );
+                prop.set( op.getChannelValue( j ), iSS, m_times );
 
                 m_props.push_back( prop );
             }
@@ -121,7 +123,10 @@ void OXformSchema::set( XformSample &ioSamp,
     }
     else
     {
-        ABCA_ASSERT( m_sampID == ioSamp.m_id, "Invalid sample ID!" );
+        ABCA_ASSERT( m_sampID == ioSamp.getID() && !m_sampID.is_nil(),
+                     "Invalid sample ID!" );
+
+        m_ops.setFromPrevious( iSS );
 
         if ( m_times.size() == idx )
         {
@@ -169,8 +174,6 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
     m_timeSamplingType.setRetainConstantSampleTimes( true );
     m_ops = Abc::OUcharArrayProperty( this->getPtr(), ".ops",
                                       m_timeSamplingType );
-
-    m_setWithStack = false;
 
     boost::uuids::nil_generator ng;
     m_sampID = ng();
