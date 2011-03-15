@@ -50,7 +50,7 @@ void OXformSchema::set( XformSample &ioSamp,
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
-    ABCA_ASSERT( !iSamp.getID().is_nil(), "Sample has been reset!" );
+    ABCA_ASSERT( !ioSamp.getID().is_nil(), "Sample has been reset!" );
 
     if ( ioSamp.getChildBounds.hasVolume() )
     { m_childBounds.set( ioSamp.getChildBounds(), iSS ); }
@@ -106,8 +106,7 @@ void OXformSchema::set( XformSample &ioSamp,
     }
     else
     {
-        ABCA_ASSERT( m_sampID == ioSamp.getID() && !m_sampID.is_nil(),
-                     "Invalid sample ID!" );
+        ABCA_ASSERT( m_sampID == ioSamp.getID(), "Invalid sample ID!" );
 
         m_ops.setFromPrevious( iSS );
 
