@@ -45,24 +45,6 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-// minor helper function
-void OXformSchema::_setXformOpProps( const XformSample &iSamp,
-                                     const OSampleSelector &iSS,
-                                     const std::vector<chrono_t> &iTimes )
-{
-    for ( size_t i = 0 ; i < iSamp.getNumOps() ; ++i )
-    {
-        XformOp op = iSamp.getOp( i );
-
-        for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
-        {
-            m_props[i + j].set( op.getChannelValue( j ), iSS, iTimes );
-        }
-    }
-}
-
-
-//-*****************************************************************************
 void OXformSchema::set( XformSample &ioSamp,
                         const Abc::OSampleSelector &iSS  )
 {
@@ -70,14 +52,13 @@ void OXformSchema::set( XformSample &ioSamp,
 
     ABCA_ASSERT( !iSamp.getID().is_nil(), "Sample has been reset!" );
 
-    index_t idx = iSS.getIndex();
-    chrono_t time = iSS.getTime();
-
     if ( ioSamp.getChildBounds.hasVolume() )
     { m_childBounds.set( ioSamp.getChildBounds(), iSS ); }
 
     m_isToWorld.set( ioSamp.getIsToWorld(), iSS );
 
+    // bump our set count
+    ++m_numSetSamples;
 
     if ( iSS.getIndex() == 0 )
     {
@@ -88,12 +69,14 @@ void OXformSchema::set( XformSample &ioSamp,
 
         m_sampID = ioSamp.getID();
 
-        // this property will be constant, but it will also contain the xform's
+        // This property will be constant, but it will also contain the xform's
         // timesampling information; the op properties won't have time info on
         // them.
+        //
+        // The "ops array" is actually an array of packed uchars that encode
+        // the type of the op and the op's hint.  Actually getting the XformOps
+        // from the sample is via XformSample::getOp( size_t ).
         m_ops.set( ioSamp.getOpsArray(), iSS );
-
-        m_times.push_back( time );
 
         AbcA::CompoundPropertyWriterPtr cptr = this->getPtr();
         Abc::ErrorHandler::Policy pcy = this->getErrorHandlerPolicy();
@@ -110,12 +93,12 @@ void OXformSchema::set( XformSample &ioSamp,
                 // eg, ".tx"
                 std::string channame = op.getChannelName( j );
 
-                // name will be, eg, ".tx0"
-                prop = ODefaultedDoubleProperty(
+                // name will be, eg, ".tx0"k
+                ODefaultedDoubleProperty prop(
                     cptr, channame + oname, pcy,
                     op.getDefaultChannelValue( j ) );
 
-                prop.set( op.getChannelValue( j ), iSS, m_times );
+                prop.set( op.getChannelValue( j ), iSS, m_numSetSamples );
 
                 m_props.push_back( prop );
             }
@@ -128,16 +111,15 @@ void OXformSchema::set( XformSample &ioSamp,
 
         m_ops.setFromPrevious( iSS );
 
-        if ( m_times.size() == idx )
+        for ( size_t i = 0 ; i < ioSamp.getNumOps() ; ++i )
         {
-            m_times.push_back( time );
-            this->_setXformOpProps( ioSamp, iSS, m_times );
-        }
-        else
-        {
-            std::vector<chrono_t> empty;
-            empty.clear();
-            this->_setXformOpProps( ioSamp, iSS, empty );
+            XformOp op = ioSamp.getOp( i );
+
+            for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
+            {
+                m_props[i + j].set( op.getChannelValue( j ), iSS,
+                                    m_numSetSamples );
+            }
         }
     }
 
@@ -149,12 +131,19 @@ void OXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious" );
 
+    ++m_numSetSamples;
+
     m_isToWorld.setFromPrevious( iSS );
 
     m_ops.setFromPrevious( iSS );
 
     if ( m_childBounds.getNumSamples() > 0 )
     { m_childBounds.setFromPrevious( iSS ); }
+
+    for ( size_t i = 0 ; i < m_props.size() ; ++i )
+    {
+        m_props[i].setFromPrevious( iSS );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -177,6 +166,8 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
 
     boost::uuids::nil_generator ng;
     m_sampID = ng();
+
+    m_numSetSamples = 0;
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

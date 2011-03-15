@@ -235,26 +235,20 @@ protected:
 
 protected:
     // Times for the properties set as non-default
-    std::vector<chrono_t> m_times;
+    std::size_t m_numSetSamples;
 
     Abc::OBox3dProperty m_childBounds;
 
     AbcA::TimeSamplingType m_timeSamplingType;
 
-    Abc::OUInt32ArrayProperty m_ops;
+    Abc::OUcharArrayProperty m_ops;
 
     std::vector<ODefaultedDoubleProperty> m_props;
 
     Abc::OBoolProperty m_isToWorld;
 
-    // how was this set up?
-    bool m_setWithStack;
     // ensure that our sample is kept pristine.
     boost::uuids::uuid m_sampID;
-
-private:
-    _setXformOpProps( const XformSample &iSamp, const OSampleSelector &iSS,
-                      const std::vector<chrono_t> &iTimes );
 
 };
 
