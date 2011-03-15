@@ -42,7 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace ALEMBIC_ABCA_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! The ObjectHeader is a collection of MetaData which helps define a
@@ -99,9 +99,9 @@ private:
     MetaData m_metaData;
 };
 
-} // End namespace ALEMBIC_ABCA_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_ABCA_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

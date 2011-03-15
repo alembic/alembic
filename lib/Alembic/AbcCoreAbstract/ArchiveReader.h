@@ -43,7 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace ALEMBIC_ABCA_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! In order for an implementation to concretely provide a starting point
@@ -110,9 +110,9 @@ public:
     virtual ArchiveReaderPtr asArchivePtr() = 0;
 };
 
-} // End namespace ALEMBIC_ABCA_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_ABCA_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

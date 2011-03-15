@@ -41,7 +41,7 @@
 
 namespace Alembic {
 namespace Util {
-namespace ALEMBIC_UTIL_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 template <class T>
@@ -88,9 +88,9 @@ template<class T> boost::once_flag Singleton<T>::m_flag =
     BOOST_ONCE_INIT;
 #endif
 
-} // End namespace ALEMBIC_UTIL_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_UTIL_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

@@ -38,7 +38,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace ALEMBIC_ABCA_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 ObjectWriter::~ObjectWriter()
@@ -55,6 +55,6 @@ ObjectWriter::getChild( size_t i )
     return getChild( ohead.getName() );
 }
 
-} // End namespace ALEMBIC_ABCA_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

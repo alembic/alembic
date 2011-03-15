@@ -44,7 +44,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // A Written Array Sample ID is a receipt that contains information that
@@ -126,9 +126,9 @@ protected:
     Map m_map;
 };
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_ABCHDF5_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

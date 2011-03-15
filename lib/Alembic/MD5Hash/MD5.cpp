@@ -39,7 +39,7 @@
 
 namespace Alembic {
 namespace MD5Hash {
-namespace ALEMBIC_MD5HASH_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 #ifdef MD5HASH_BIG_ENDIAN
@@ -205,7 +205,7 @@ MD5 &operator<<( MD5 &md5, std::istream &istr )
     return md5;
 }
 
-} // End namespace ALEMBIC_MD5HASH_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace MD5Hash
 } // End namespace Alembic
 

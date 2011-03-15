@@ -38,7 +38,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 CacheImpl::CacheImpl()
@@ -152,6 +152,6 @@ AbcA::ReadArraySampleCachePtr MakeCacheImplPtr()
     return boost::make_shared<CacheImpl>();
 }
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

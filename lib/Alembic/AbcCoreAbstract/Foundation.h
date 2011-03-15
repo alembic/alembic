@@ -55,11 +55,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define ALEMBIC_ABCA_VERSION_NS v1
-
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace ALEMBIC_ABCA_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 // Just pull the whole Util namespace in. This is safe.
 using namespace ::Alembic::Util;
@@ -97,9 +95,9 @@ do                                              \
 while( 0 )
 
 
-} // End namespace ALEMBIC_ABCA_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_ABCA_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

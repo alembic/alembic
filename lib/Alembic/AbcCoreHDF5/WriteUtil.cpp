@@ -42,7 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -526,6 +526,6 @@ void WriteSampling( WrittenArraySampleMap &iMap,
     }
 }
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

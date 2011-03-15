@@ -40,7 +40,7 @@
 
 namespace Alembic {
 namespace Util {
-namespace ALEMBIC_UTIL_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 template <class T>
@@ -190,9 +190,9 @@ std::ostream &operator<<( std::ostream &ostr, const BaseDimensions<T> &a )
 //-*****************************************************************************
 typedef BaseDimensions<size_t> Dimensions;
 
-} // End namespace ALEMBIC_UTIL_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_UTIL_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

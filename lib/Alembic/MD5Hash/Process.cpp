@@ -67,7 +67,7 @@
 
 namespace Alembic {
 namespace MD5Hash {
-namespace ALEMBIC_MD5HASH_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 #define T_MASK ((UINT4)~0)
@@ -451,7 +451,7 @@ MD5Digest Process::unrecoverableBakeIntoDigest()
     return digest;
 }
 
-} // End namespace ALEMBIC_MD5HASH_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace MD5Hash
 } // End namespace Alembic
 

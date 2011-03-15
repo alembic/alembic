@@ -42,7 +42,7 @@
 
 namespace Alembic {
 namespace Util {
-namespace ALEMBIC_UTIL_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! Bytes are unsigned chars, by definition.
@@ -426,9 +426,9 @@ inline void PODSetDefault( PlainOldDataType pod, void *bytes )
     };
 }
 
-} // End namespace ALEMBIC_UTIL_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_UTIL_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

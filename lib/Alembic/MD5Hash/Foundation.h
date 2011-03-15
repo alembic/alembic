@@ -60,11 +60,9 @@
 #include <string.h>
 #include <assert.h>
 
-#define ALEMBIC_MD5HASH_VERSION_NS v1
-
 namespace Alembic {
 namespace MD5Hash {
-namespace ALEMBIC_MD5HASH_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 using Alembic::Util::uint8_t;
@@ -84,9 +82,9 @@ typedef uint64_t UINT8;
 typedef uint32_t UINT4;
 typedef uint8_t UCHAR;
 
-} // End namespace ALEMBIC_MD5HASH_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_MD5HASH_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace MD5Hash
 } // End namespace Alembic

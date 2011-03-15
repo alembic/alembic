@@ -41,7 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class BaseCprImpl : public AbcA::CompoundPropertyReader
@@ -94,9 +94,9 @@ protected:
     SubPropertiesMap m_subProperties;
 };
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_ABCHDF5_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

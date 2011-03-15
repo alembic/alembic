@@ -38,7 +38,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace ALEMBIC_ABCA_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 ArrayPropertyWriter::~ArrayPropertyWriter()
@@ -46,6 +46,6 @@ ArrayPropertyWriter::~ArrayPropertyWriter()
     // Nothing
 }
 
-} // End namespace ALEMBIC_ABCA_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

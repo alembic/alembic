@@ -42,7 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace ALEMBIC_ABCA_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 struct ArraySampleKey : public boost::totally_ordered<ArraySampleKey>
 {
@@ -136,9 +136,9 @@ typedef boost::unordered_set<ArraySampleKey,
                              ArraySampleKeyStdHash,
                              ArraySampleKeyEqualTo> UnorderedArraySampleKeySet;
 
-} // End namespace ALEMBIC_ABCA_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_ABCA_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

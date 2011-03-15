@@ -42,7 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*************************************************************************
 SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
@@ -155,6 +155,6 @@ void SpwImpl::writeSample( hid_t iGroup,
     copyPreviousSample( iGroup, iSampleName, iSampleIndex );
 }
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

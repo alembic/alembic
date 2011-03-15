@@ -41,7 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 ArImpl::ArImpl( const std::string &iFileName,
@@ -141,6 +141,6 @@ ArImpl::~ArImpl()
     }
 }
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

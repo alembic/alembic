@@ -39,7 +39,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // With the compound property writer as an input.
@@ -102,7 +102,7 @@ CpwImpl::~CpwImpl()
     // Nothing!
 }
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic
 

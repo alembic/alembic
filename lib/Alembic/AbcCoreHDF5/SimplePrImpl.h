@@ -47,7 +47,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // This templated base class implements the common logic behind both the
@@ -481,9 +481,9 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::~SimplePrImpl()
     }
 }
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_ABCHDF5_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

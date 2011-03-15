@@ -63,17 +63,17 @@
 #include <string.h>
 #include <assert.h>
 
-#define ALEMBIC_UTIL_VERSION_NS v1
+#define ALEMBIC_VERSION_NS v1
 
 namespace Alembic {
 namespace Util {
-namespace ALEMBIC_UTIL_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 // Nothing!
 
-} // End namespace ALEMBIC_UTIL_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_UTIL_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

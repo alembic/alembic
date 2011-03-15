@@ -42,7 +42,7 @@
 
 namespace Alembic {
 namespace Util {
-namespace ALEMBIC_UTIL_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! The VecN class is explicitly designed to handle "POD" types, which are
@@ -169,9 +169,9 @@ inline std::ostream &operator<<( std::ostream &ostr, const VecN<T,N> &iVecN )
     return ostr;
 }
 
-} // End namespace ALEMBIC_UTIL_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_UTIL_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

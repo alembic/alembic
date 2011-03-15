@@ -41,7 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-namespace ALEMBIC_ABCHDF5_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // You should never need to call these directly, use the tuple below.
@@ -49,9 +49,9 @@ namespace ALEMBIC_ABCHDF5_VERSION_NS {
 hid_t GetNativeH5T( const AbcA::DataType &adt, bool &oCleanUp );
 hid_t GetFileH5T( const AbcA::DataType &adt, bool &oCleanUp );
 
-} // End namespace ALEMBIC_ABCHDF5_VERSION_NS
+} // End namespace ALEMBIC_VERSION_NS
 
-using namespace ALEMBIC_ABCHDF5_VERSION_NS;
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic
