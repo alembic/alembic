@@ -1058,11 +1058,11 @@ AttributesWriter::AttributesWriter(
         // skip it if it doesn't start with our filter, or it ends with our
         // special case attrs or it is a child attr and the parent is a
         // kData* and it is not in our attribute set
-        if ( (filtLen == 0 ||
+        if ( propStr.find("[") != std::string::npos || ((filtLen == 0 ||
             propStr.compare(0, filtLen, *mFilter) != 0 ||
             endsWithArbAttr(propStr) ||
             (plug.isChild() && isDataAttr(plug.parent())) ) &&
-            (!mAttribs || mAttribs->find(propStr) == mAttribs->end()) )
+            (!mAttribs || mAttribs->find(propStr) == mAttribs->end())) )
         {
             continue;
         }
