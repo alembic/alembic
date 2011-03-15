@@ -54,16 +54,9 @@ struct CprAttrVisitor
 
     void createNewProperty( const std::string &iName )
     {
-        if ( std::find( properties.begin(),
-                        properties.end(),
-                        iName ) != properties.end() )
-        {
-            ABCA_THROW( "Duplicate property: " << iName );
-        }
-
         properties.push_back( iName );
     }
-};  
+};
 
 //-*****************************************************************************
 herr_t CprVisitAllAttrsCB( hid_t iGroup,
