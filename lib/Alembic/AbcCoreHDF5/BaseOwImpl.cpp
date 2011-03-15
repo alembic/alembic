@@ -66,6 +66,15 @@ BaseOwImpl::BaseOwImpl( hid_t iParentGroup,
 }
 
 //-*****************************************************************************
+BaseOwImpl::BaseOwImpl( const BaseOwImpl &iCopy )
+  : m_archive( iCopy.m_archive )
+  , m_group( iCopy.m_group )
+  , m_properties( iCopy.m_properties )
+  , m_childHeaders( iCopy.m_childHeaders )
+  , m_madeChildren( iCopy.m_madeChildren )
+{}
+
+//-*****************************************************************************
 AbcA::ArchiveWriterPtr BaseOwImpl::getArchive()
 {
     ABCA_ASSERT( m_archive, "Invalid archive in BaseOwImpl::getArchive()" );

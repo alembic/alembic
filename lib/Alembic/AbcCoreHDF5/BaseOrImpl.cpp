@@ -122,6 +122,16 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
 //-*****************************************************************************
 
 //-*****************************************************************************
+BaseOrImpl::BaseOrImpl( const BaseOrImpl &iCopy )
+  : m_proto( iCopy.m_proto )
+  , m_properties( iCopy.m_properties )
+  , m_foundPropertiesGroup( iCopy.m_foundPropertiesGroup )
+  , m_archive( iCopy.m_archive )
+  , m_protoObjects( iCopy.m_protoObjects )
+  , m_children( iCopy.m_children )
+{}
+
+//-*****************************************************************************
 // Reading as a child of a parent.
 BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
   : m_proto( iProto )
