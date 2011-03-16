@@ -45,6 +45,57 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+void
+OXformSchema::ODefaultedDoubleProperty::set(
+    const double &iVal,
+    const Abc::OSampleSelector &iSS,
+    const std::size_t &iNumSampsSoFar )
+{
+    if ( m_property )
+    {
+        m_property.set( iVal, iSS );
+        return;
+    }
+
+    if ( ! Imath::equalWithAbsError( iVal - m_default, 0.0, m_epsilon ) )
+    {
+        // A change!
+        m_property = Abc::ODoubleProperty( m_parent, m_name,
+                                           m_errorHandlerPolicy );
+
+        // Run up the defaults.
+        for ( size_t jdx = 0 ; jdx < iNumSampsSoFar ; ++jdx )
+        {
+            Abc::OSampleSelector jSS( jdx );
+
+            if ( jdx == 0 )
+            {
+                m_property.set( m_default, jSS );
+            }
+            else
+            {
+                m_property.setFromPrevious( jSS );
+            }
+        }
+
+        // set the final one.
+        m_property.set( iVal, iSS );
+    }
+}
+
+//-*****************************************************************************
+void
+OXformSchema::ODefaultedDoubleProperty::setFromPrevious(
+    const Abc::OSampleSelector &iSS )
+{
+    if ( m_property )
+    {
+        m_property.setFromPrevious( iSS );
+    }
+}
+
+
+//-*****************************************************************************
 void OXformSchema::set( XformSample &ioSamp,
                         const Abc::OSampleSelector &iSS  )
 {
@@ -56,9 +107,6 @@ void OXformSchema::set( XformSample &ioSamp,
     { m_childBounds.set( ioSamp.getChildBounds(), iSS ); }
 
     m_isToWorld.set( ioSamp.getIsToWorld(), iSS );
-
-    // bump our set count
-    ++m_numSetSamples;
 
     if ( iSS.getIndex() == 0 )
     {
@@ -122,6 +170,9 @@ void OXformSchema::set( XformSample &ioSamp,
         }
     }
 
+    // bump our set count
+    ++m_numSetSamples;
+
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -139,9 +190,10 @@ void OXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     if ( m_childBounds.getNumSamples() > 0 )
     { m_childBounds.setFromPrevious( iSS ); }
 
-    for ( size_t i = 0 ; i < m_props.size() ; ++i )
+    for ( std::vector<ODefaultedDoubleProperty>::iterator it = m_props.begin()
+              ; it != m_props.end() ; ++it )
     {
-        m_props[i].setFromPrevious( iSS );
+        it->setFromPrevious( iSS );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();

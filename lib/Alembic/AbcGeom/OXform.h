@@ -153,18 +153,20 @@ public:
         m_numSetSamples = 0;
         m_sampID = m_nilGen();
         m_ops.reset();
-        Abc::OSchema<XformSchemaInfo>::reset();
+        m_props.clear();
+        m_props.resize( 0 );
+        super_type::reset();
     }
 
     //! Valid returns whether this function set is valid.
     bool valid() const
     {
-        return ( m_ops && Abc::OSchema<XformSchemaInfo>::valid() );
+        return ( m_ops && super_type::valid() );
     }
 
     //! unspecified-bool-type operator overload.
     //! ...
-    ALEMBIC_OVERRIDE_OPERATOR_BOOL( OXformSchema::valid() );
+    ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
 
 
 private:
@@ -180,7 +182,7 @@ protected:
     //! and only bother setting a value when it the value differs from a
     //! known default value. This allows transforms to disappear when they
     //! are identity.
-    //! It has some SimpleXform-specific stuff in here, so not worth
+    //! It has some Xform-specific stuff in here, so not worth
     //! making general (yet).
     class ODefaultedDoubleProperty
     {
@@ -231,7 +233,8 @@ protected:
 
         // The "it". This may not exist.
         Abc::ODoubleProperty m_property;
-    };
+    }; // END DEFAULTED DOUBLE PROPERTY CLASS DECLARATION
+
 
 protected:
     // Number of set samples.
