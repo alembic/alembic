@@ -117,7 +117,7 @@ class XformOp
 {
 public:
     XformOp();
-    XformOp( XformOperationType iType, Alembic::Util::uint8_t iHint );
+    XformOp( XformOperationType iType, Alembic::Util::uint8_t iHint = 0 );
 
     //! Get the type of transform operation. (Translate, Rotate, Scale, Matrix)
     XformOperationType getType() const;
@@ -190,6 +190,10 @@ private:
     //! Convenience function for returning the combined encoded type and hint.
     //! The type is in the first four bits, the hint in the second.
     Alembic::Util::uint8_t getOpEncoding() const;
+
+    //! The XformSample can tell the op if its channels are animated
+    //! by directly inserting keys into the m_animChannels set.
+
 
 };
 

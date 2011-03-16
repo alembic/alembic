@@ -40,17 +40,16 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-XformOp::XformOp() : m_type(kTranslateOperation), m_anim(0), m_hint(0) 
-{
-};
+XformOp::XformOp()
+  : m_type( kTranslateOperation )
+  , m_hint( 0 )
+{}
 
 //-*****************************************************************************
-XformOp::XformOp(XformOperationType iType, Alembic::Util::uint8_t iHint)
-    : m_type(iType)
-{
-    setHint(iHint);
-    m_anim = 0;
-}
+XformOp::XformOp( XformOperationType iType, Alembic::Util::uint8_t iHint )
+    : m_type( iType )
+    , m_hint( iHint )
+{}
 
 //-*****************************************************************************
 XformOperationType XformOp::getType() const
@@ -59,11 +58,10 @@ XformOperationType XformOp::getType() const
 }
 
 //-*****************************************************************************
-void XformOp::setType(XformOperationType iType)
+void XformOp::setType( XformOperationType iType )
 {
     m_type = iType;
     m_hint = 0;
-    m_anim = 0;
 }
 
 //-*****************************************************************************
@@ -80,7 +78,7 @@ void XformOp::setHint(Alembic::Util::uint8_t iHint)
     {
         m_hint = 0;
     }
-    else if ( m_type == kTranslateOperation && iHint > 
+    else if ( m_type == kTranslateOperation && iHint >
         kRotatePivotTranslationHint )
     {
         m_hint = 0;
@@ -102,78 +100,43 @@ void XformOp::setHint(Alembic::Util::uint8_t iHint)
 //-*****************************************************************************
 bool XformOp::isXAnimated() const
 {
-    return isIndexAnimated(0);
-}
-
-//-*****************************************************************************
-void XformOp::setXAnimated(bool iAnim)
-{
-    setIndexAnimated(0, iAnim);
+    return m_animChannels.count( 0 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isYAnimated() const
 {
-    return isIndexAnimated(1);
-}
-
-//-*****************************************************************************
-void XformOp::setYAnimated(bool iAnim)
-{
-    setIndexAnimated(1, iAnim);
+    return m_animChannels.count( 1 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isZAnimated() const
 {
-    return isIndexAnimated(2);
-}
-
-//-*****************************************************************************
-void XformOp::setZAnimated(bool iAnim)
-{
-    setIndexAnimated(2, iAnim);
+    return m_animChannels.count( 2 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isAngleAnimated() const
 {
-    return isIndexAnimated(3);
+    return m_animChannels.count( 3 ) > 0;
 }
 
 //-*****************************************************************************
-void XformOp::setAngleAnimated(bool iAnim)
-{
-    setIndexAnimated(3, iAnim);
-}
-
-//-*****************************************************************************
-bool XformOp::isIndexAnimated(uint8_t iIndex) const
-{
-    return ( m_anim >> iIndex ) & 0x01;
-}
-
-//-*****************************************************************************
-void XformOp::setIndexAnimated(uint8_t iIndex, bool iAnim)
+bool XformOp::isChannelAnimated( std::size_t iIndex ) const
 {
     // if the index is not correct for the operation, then just return
     if ( iIndex > 15 || (m_type == kRotateOperation && iIndex > 3) ||
-        ((m_type == kTranslateOperation || m_type == kScaleOperation) &&
-        iIndex > 2) )
+         ((m_type == kTranslateOperation || m_type == kScaleOperation) &&
+          iIndex > 2) )
     {
-        return;
+        return false;
     }
 
-    // set the bit
-    if (iAnim)
-        m_anim = m_anim | (0x1 << iIndex);
-    // unset the bit
-    else
-        m_anim = m_anim & (0xffff ^ (0x1 << iIndex));
+    return m_animChannels.count( iIndex ) > 0;
 }
 
 //-*****************************************************************************
-Alembic::Util::uint8_t XformOp::getNumIndices() const
+std::size_t XformOp::getNumChannels() const
 {
     switch (m_type)
     {
@@ -198,31 +161,9 @@ Alembic::Util::uint8_t XformOp::getNumIndices() const
 }
 
 //-*****************************************************************************
-Alembic::Util::uint32_t XformOp::getEncodedValue() const
+Alembic::Util::uint8_t XformOp::getOpEncoding() const
 {
-    return (m_anim << 16) | (m_hint << 8) | m_type;
-}
-
-//-*****************************************************************************
-void XformOp::setEncodedValue(Alembic::Util::uint32_t iVal)
-{
-    // do it this way to make sure every byte is sane, or end up being
-    // broken down into a sane value
-
-    Alembic::Util::uint32_t rawType = iVal & 0xff;
-
-    // beyond matrix reset to type scale
-    if (rawType > 3)
-        rawType = 0;
-
-    XformOperationType type = (XformOperationType)(rawType);
-    this->setType(type);
-    this->setHint((iVal >> 8) & 0xff);
-    uint16_t anim = (iVal >> 16) & 0xffff;
-    for (size_t i = 0; i < 16; ++i)
-    {
-        this->setIndexAnimated(i, (anim >> i) & 0x1);
-    }
+    return ( m_hint << 4 ) | ( m_type & 0xF )
 }
 
 } // End namespace AbcGeom
