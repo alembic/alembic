@@ -124,7 +124,7 @@ public:
 
     //! Set the type of transform operation. (Translate, Rotate, Scale, Matrix)
     //! Setting the type resets the hint, and sets all the channels to static.
-    void setType(XformOperationType iType);
+    void setType( XformOperationType iType );
 
     //! Get the MatrixHint, RotateHint, TranslateHint, or ScaleHint to help
     //! disambiguate certain options that may have the same type.
@@ -148,34 +148,49 @@ public:
     //! false is returned for those types.
     bool isAngleAnimated() const;
 
-    //! Returns whether a particular index is animated.
-    //! Scale and Translate only have 3 components, Rotate has 4, and
-    //! Matrix has 16.  Indices greater than the number of components will
+    //! Returns whether a particular channel is animated.
+    //! Scale and Translate only have 3 channels, Rotate has 4, and
+    //! Matrix has 16.  Indices greater than the number of channels will
     //! return false.
-    bool isIndexAnimated(Alembic::Util::uint8_t iIndex) const;
+    bool isChannelAnimated( std::size_t iIndex ) const;
 
     //! Get the number of components that this operation has based on the type.
     //! Translate and Scale have 3, Rotate has 4 and Matrix has 16.
-    Alembic::Util::uint8_t getNumIndices() const;
+    std::size_t getNumChannels() const;
 
-    //! Convenience function for returning the combined encoded type, hint, and
-    //! animated value.  The type is encoded into the first byte, the hint into
-    //! the second, and the animated value into the third and fourth byte.
-    Alembic::Util::uint32_t getEncodedValue() const;
+    //! Every channel has a name based on the type of the op, and the index of
+    //! the channel. This is used to interact with well-named Properties of
+    //! an xform that may or may not exist.
+    std::string getChannelName() const;
 
-    //! Convenience function for setting the combined encoded type, hint, and
-    //! animated value.  The type is encoded into the first byte, the hint into
-    //! the second, and the animated value into the third and fourth byte.
-    //! If an illegal type value is passed in, it defaults to scale.
-    //! If an invalid hint gets passed in, it defaults to 0.
-    void setEncodedValue(Alembic::Util::uint32_t iVal);
+    //! For every channel, there's a default value.  Typically, for each op
+    //! type, it's the same across channels. But matrix ops have different
+    //! defaults to allow the identity matrix to be defaulted (most channels
+    //! there are 0.0, the determinant channels are 1.0).
+    double getDefaultChannelValue( std::size_t iIndex ) const;
+
+    double getChannelValue( std::size_t iIndex ) const;
+
+    //! Set a single channel; will throw if iIndex is greater than
+    //! numchannels - 1.
+    void setChannelValue( std::size_t iIndex, double iVal );
+
 
 private:
     XformOperationType m_type;
-    Alembic::Util::uint16_t m_anim;
     Alembic::Util::uint8_t m_hint;
 
-    double m_default;
+    std::vector<double> m_channels;
+
+    std::set<std::size_t> m_animChannels;
+
+private:
+    friend class XformSample;
+
+    //! Convenience function for returning the combined encoded type and hint.
+    //! The type is in the first four bits, the hint in the second.
+    Alembic::Util::uint8_t getOpEncoding() const;
+
 };
 
 typedef std::vector < XformOp > XformOpVec;
