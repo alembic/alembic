@@ -35,11 +35,9 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/OXform.h>
-#include <Alembic/AbcGeom/GeometryScope.h>
+#include <Alembic/AbcGeom/XformSample.h>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
 
 namespace Alembic {
 namespace AbcGeom {

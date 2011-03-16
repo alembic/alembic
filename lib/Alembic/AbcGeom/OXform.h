@@ -40,11 +40,14 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+
 namespace Alembic {
 namespace AbcGeom {
 
-// forward for sample UUID
-class boost::uuids::uuid;
+// forward for sample
+class XformSample;
 
 //! The default value for determining whether a property is actually
 //! different from the default.  If it's within this tolerance, the
