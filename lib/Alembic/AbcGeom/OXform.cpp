@@ -116,6 +116,8 @@ void OXformSchema::set( XformSample &ioSamp,
 
         m_sampID = ioSamp.getID();
 
+        m_props.reserve( ioSamp.getNumOpChannels() );
+
         // This property will be constant, but it will also contain the xform's
         // timesampling information; the op properties won't have time info on
         // them.
