@@ -138,13 +138,12 @@ BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
 
     ObjectGroupVisitor visitor( *this );
 
-    hsize_t idx = 0;
     hid_t id = m_proto->getGroup();
 
     herr_t status = H5Literate( id,
                                 H5_INDEX_CRT_ORDER,
                                 H5_ITER_INC,
-                                &idx,
+                                NULL,
                                 VisitAllLinksCB,
                                 ( void * )&visitor );
 

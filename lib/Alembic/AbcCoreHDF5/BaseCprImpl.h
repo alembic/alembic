@@ -86,11 +86,13 @@ protected:
     {
         PropertyHeaderPtr header;
         WeakBprPtr made;
+        std::string name;
     };
     
-    typedef std::map<std::string,SubProperty> SubPropertiesMap;
+    typedef std::map<std::string, size_t> SubPropertiesMap;
+    typedef std::vector<SubProperty> SubPropertyVec;
 
-    PropertyHeaderPtrs m_propertyHeaders;
+    SubPropertyVec m_propertyHeaders;
     SubPropertiesMap m_subProperties;
 };
 
