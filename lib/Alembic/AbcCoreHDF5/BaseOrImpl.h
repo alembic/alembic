@@ -59,9 +59,6 @@ public:
     // Not really public
     void createProtoObject( hid_t iGroup, const std::string &iName );
 
-    // Also not really public
-    void foundPropertiesGroup();
-
     virtual ~BaseOrImpl();
 
     //-*************************************************************************
@@ -110,11 +107,6 @@ protected:
     // They are a special kind of compound property which only weak links
     // back up to us, so no pointer cycles.
     TopCprImpl *m_properties;
-
-    // If there are no children properties, there will not be a .props
-    // group. Therefore, cache whether or not we found such a group in
-    // our initial scan.
-    bool m_foundPropertiesGroup;
 
     // The children
     ProtoObjects m_protoObjects;
