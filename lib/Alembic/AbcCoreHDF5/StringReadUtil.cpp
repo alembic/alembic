@@ -152,9 +152,7 @@ ReadStringT<std::string,char>( hid_t iParent,
     hid_t attrFtype = H5Aget_type( attrId );
     DtypeCloser dtypeCloser( attrFtype );
 
-    ssize_t numChars = H5Tget_size( attrFtype );
-    ABCA_ASSERT( numChars >= 0,
-                 "ReadStringT() H5Aget_size() failed" );
+    size_t numChars = H5Tget_size( attrFtype );
 
     // Read and check space
     {
