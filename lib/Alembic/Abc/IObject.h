@@ -74,23 +74,21 @@ public:
     template <class OBJECT_PTR>
     IObject( OBJECT_PTR iParentObject,
              const std::string &iName,
-
-             const IArgument &iArg0 = IArgument(),
-             const IArgument &iArg1 = IArgument() );
+             ErrorHandler::Policy iPcy = kThrowPolicy
+           );
 
     //! This attaches an IObject wrapper around an existing
     //! ObjectReaderPtr, with an optional error handling policy.
     template <class OBJECT_PTR>
     IObject( OBJECT_PTR iPtr,
              WrapExistingFlag iFlag,
-
-             const IArgument &iArg0 = IArgument(),
-             const IArgument &iArg1 = IArgument() )
+             ErrorHandler::Policy iPcy = kThrowPolicy
+           )
       : m_object( GetObjectReaderPtr( iPtr ) )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iPtr, iArg0, iArg1 ) );
+            GetErrorHandlerPolicy( iPtr, iPcy ) );
     }
 
     //! This attaches an IObject wrapper around the top
@@ -98,13 +96,12 @@ public:
     template <class ARCHIVE_PTR>
     IObject( ARCHIVE_PTR iPtr,
              TopFlag iFlag,
-
-             const IArgument &iArg0 = IArgument(),
-             const IArgument &iArg1 = IArgument() )
+             ErrorHandler::Policy iPcy = kThrowPolicy
+           )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iPtr, iArg0, iArg1 ) );
+            GetErrorHandlerPolicy( iPtr, iPcy ) );
 
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::IObject( top )" );
 
@@ -225,8 +222,7 @@ private:
     void init( AbcA::ObjectReaderPtr iParentObject,
                const std::string &iName,
                ErrorHandler::Policy iParentPolicy,
-               const IArgument &iArg0,
-               const IArgument &iArg1 );
+               const IArgument &iArg0 );
 
 protected:
     AbcA::ObjectReaderPtr m_object;
@@ -244,14 +240,20 @@ GetObjectReaderPtr( IObject& iPrp ) { return iPrp.getPtr(); }
 template <class OBJECT_PTR>
 inline IObject::IObject( OBJECT_PTR iParentObject,
                          const std::string &iName,
-                         const IArgument &iArg0,
-                         const IArgument &iArg1 )
+                         ErrorHandler::Policy iPcy )
 {
-    init( GetObjectReaderPtr( iParentObject ),
-          iName,
+    IArgument arg( iPcy );
+    init( GetObjectReaderPtr( iParentObject ), iName,
+          GetErrorHandlerPolicy( iParentObject ), arg );
+}
 
-          GetErrorHandlerPolicy( iParentObject ),
-          iArg0, iArg1 );
+//-*****************************************************************************
+template <class OBJ>
+inline ErrorHandler::Policy GetErrorHandlerPolicy( OBJ iObj,
+                                                   ErrorHandler::Policy iPcy )
+{
+    IArgument arg( iPcy );
+    return GetErrorHandlerPolicy( iObj, arg );
 }
 
 } // End namespace Abc
