@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -191,40 +191,13 @@ bool XformOp::isAngleAnimated() const
 //-*****************************************************************************
 bool XformOp::isChannelAnimated( std::size_t iIndex ) const
 {
-    // if the index is not correct for the operation, then just return false.
-    if ( iIndex > 15 || (m_type == kRotateOperation && iIndex > 3) ||
-         ( ( m_type == kTranslateOperation || m_type == kScaleOperation ) &&
-          iIndex > 2 ) )
-    {
-        return false;
-    }
-
     return m_animChannels.count( iIndex ) > 0;
 }
 
 //-*****************************************************************************
 std::size_t XformOp::getNumChannels() const
 {
-    switch (m_type)
-    {
-        case kScaleOperation:
-        case kTranslateOperation:
-            return 3;
-        break;
-
-        case kRotateOperation:
-            return 4;
-        break;
-
-        case kMatrixOperation:
-            return 16;
-        break;
-
-        default:
-            return 0;
-        break;
-    }
-    return 0;
+    return m_channels.size();
 }
 
 //-*****************************************************************************
