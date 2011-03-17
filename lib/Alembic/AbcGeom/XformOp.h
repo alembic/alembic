@@ -117,14 +117,18 @@ class XformOp
 {
 public:
     XformOp();
-    XformOp( XformOperationType iType, Alembic::Util::uint8_t iHint = 0 );
+
+    XformOp( const XformOperationType iType,
+             const Alembic::Util::uint8_t iHint );
+
+    XformOp( const Alembic::Util::uint8_t iEncodedOp );
 
     //! Get the type of transform operation. (Translate, Rotate, Scale, Matrix)
     XformOperationType getType() const;
 
     //! Set the type of transform operation. (Translate, Rotate, Scale, Matrix)
     //! Setting the type resets the hint, and sets all the channels to static.
-    void setType( XformOperationType iType );
+    void setType( const XformOperationType iType );
 
     //! Get the MatrixHint, RotateHint, TranslateHint, or ScaleHint to help
     //! disambiguate certain options that may have the same type.
@@ -132,7 +136,7 @@ public:
 
     //! Set the hint, if it is an illegal value for the type, then the hint
     //! is set to the default, 0.
-    void setHint( Alembic::Util::uint8_t iHint );
+    void setHint( const Alembic::Util::uint8_t iHint );
 
     //! Returns whether the x component (index 0) is animated.
     bool isXAnimated() const;
@@ -161,7 +165,7 @@ public:
     //! Every channel has a name based on the type of the op, and the index of
     //! the channel. This is used to interact with well-named Properties of
     //! an xform that may or may not exist.
-    std::string getChannelName() const;
+    std::string getChannelName( std::size_t iIndex ) const;
 
     //! For every channel, there's a default value.  Typically, for each op
     //! type, it's the same across channels. But matrix ops have different
@@ -175,6 +179,11 @@ public:
     //! numchannels - 1.
     void setChannelValue( std::size_t iIndex, double iVal );
 
+    //! Function for returning the combined encoded type and hint.
+    //! The type is in the first four bits, the hint in the second.
+    //!
+    //! This is not really intended for use by human clients of this class.
+    Alembic::Util::uint8_t getOpEncoding() const;
 
 private:
     XformOperationType m_type;
@@ -184,16 +193,12 @@ private:
 
     std::set<std::size_t> m_animChannels;
 
+    std::string m_opName;
+
 private:
-    friend class XformSample;
-
-    //! Convenience function for returning the combined encoded type and hint.
-    //! The type is in the first four bits, the hint in the second.
-    Alembic::Util::uint8_t getOpEncoding() const;
-
     //! The XformSample can tell the op if its channels are animated
     //! by directly inserting keys into the m_animChannels set.
-
+    friend class XformSample;
 
 };
 
