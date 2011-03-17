@@ -151,7 +151,7 @@ ReadStringT<std::string,char>( hid_t iParent,
     hid_t attrFtype = H5Aget_type( attrId );
     DtypeCloser dtypeCloser( attrFtype );
 
-    ssize_t numChars = H5Tget_size( attrFtype );
+    size_t numChars = H5Tget_size( attrFtype );
     ABCA_ASSERT( numChars >= 0,
                  "ReadStringT() H5Aget_size() failed" );
 
@@ -161,7 +161,7 @@ ReadStringT<std::string,char>( hid_t iParent,
         ABCA_ASSERT( attrSpace >= 0,
                      "Couldn't get dataspace for attribute: " << iAttrName );
         DspaceCloser dspaceCloser( attrSpace );
-        
+
         H5S_class_t attrSpaceClass = H5Sget_simple_extent_type( attrSpace );
         ABCA_ASSERT( attrSpaceClass == H5S_SCALAR,
                      "Tried to read non-scalar attribute: " << iAttrName
@@ -465,16 +465,16 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
                      << std::endl
                      << "Expecting rank: " << hdims.rank()
                      << " instead was: " << rank );
-        
+
         dims = hdims;
         ABCA_ASSERT( dims.numPoints() > 0,
                      "Degenerate dims in Dataset read" );
-        
+
 
         // Create temporary char storage buffer.
         size_t totalNumChars = dims.numPoints() + 1;
         std::vector<CharT> charStorage( totalNumChars, ( CharT )0 );
-        
+
         // Read into it.
         herr_t status = H5Dread( dsetId, GetNativeDtype<CharT>(),
                                  H5S_ALL, H5S_ALL, H5P_DEFAULT,
