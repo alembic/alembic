@@ -89,6 +89,14 @@ void Example1_MeshOut()
     mesh_samp.setCreases( creases, creaseLengths, creaseSharpnesses );
     mesh_samp.setCorners( corners, cornerSharpnesses );
 
+    // UVs
+    OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
+                                                  g_numUVs ),
+                                  kFacevaryingScope );
+
+    mesh_samp.setUVs( uvsamp );
+
+
     // Set the sample.
     mesh.set( mesh_samp, 0 );
 
@@ -114,8 +122,25 @@ void Example1_MeshIn()
 
     TESTING_ASSERT( 3 == mesh.getNumSamples() );
 
+    // UVs
+    IV2fGeomParam uv = mesh.getUVs();
+    TESTING_ASSERT( ! uv.isIndexed() );
+
+    // we can fake like the UVs are indexed
+    IV2fGeomParam::Sample uvsamp = uv.getIndexedValue();
+    TESTING_ASSERT( (*(uvsamp.getIndices()))[1] == 1 );
+    V2f uv2 = (*(uvsamp.getVals()))[2];
+    TESTING_ASSERT( uv2 == V2f( 1.0f, 1.0f ) );
+    std::cout << "2th UV: " << uv2 << std::endl;
+
+
     // get the 1th sample by value
     ISubDSchema::Sample samp1 = mesh.getValue( 1 );
+
+    TESTING_ASSERT( samp1.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
+
+    TESTING_ASSERT( samp1.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
+
 
     // test the second sample has '1' as the interpolate boundary value
     TESTING_ASSERT( 1 == samp1.getInterpolateBoundary() );
@@ -126,6 +151,10 @@ void Example1_MeshIn()
     // get the twoth sample by reference
     ISubDSchema::Sample samp2;
     mesh.get( samp2, 2 );
+
+    TESTING_ASSERT( samp2.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
+
+    TESTING_ASSERT( samp2.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
 
     TESTING_ASSERT( 0 == samp2.getInterpolateBoundary() );
 

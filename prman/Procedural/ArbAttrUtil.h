@@ -78,4 +78,23 @@ void AddArbitraryProperties( ICompoundProperty & parent,
                              ParamListBuilder & ParamListBuilder,
                              const std::set<std::string> * excludeNames = NULL );
 
+//-*****************************************************************************
+template <typename T>
+void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
+                                             const PropertyHeader &propHeader,
+                                             ISampleSelector &sampleSelector,
+                                             const std::string &rmanBaseType,
+                                             ParamListBuilder &ParamListBuilder,
+                                             size_t baseArrayExtent = 1,
+                                             const std::string & overrideName = ""
+                                           );
+
+//-*****************************************************************************
+
+void AddArbitraryGeomParams( ICompoundProperty &parent,
+                             ISampleSelector &sampleSelector,
+                             ParamListBuilder &ParamListBuilder,
+                             const std::set<std::string> * excludeNames = NULL
+                           );
+
 #endif

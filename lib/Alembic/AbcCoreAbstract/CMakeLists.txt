@@ -61,6 +61,7 @@ SET( H_FILES
      ForwardDeclarations.h
 
      ArraySample.h
+     ArraySampleKey.h
      ReadArraySampleCache.h
      ScalarSample.h
 

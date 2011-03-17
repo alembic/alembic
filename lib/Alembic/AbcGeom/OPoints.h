@@ -78,15 +78,30 @@ public:
         void setIds( const Abc::UInt64ArraySample &iSmp )
         { m_ids = iSmp; }
 
+        const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }
+        void setSelfBounds( const Abc::Box3d &iBnds )
+        { m_selfBounds = iBnds; }
+
+        const Abc::Box3d &getChildBounds() const { return m_childBounds; }
+        void setChildBounds( const Abc::Box3d &iBnds )
+        { m_childBounds = iBnds; }
+
+
         void reset()
         {
             m_positions.reset();
             m_ids.reset();
+
+            m_selfBounds.makeEmpty();
+            m_childBounds.makeEmpty();
         }
 
     protected:
         Abc::V3fArraySample m_positions;
         Abc::UInt64ArraySample m_ids;
+
+        Abc::Box3d m_selfBounds;
+        Abc::Box3d m_childBounds;
     };
 
     //-*************************************************************************
@@ -170,6 +185,10 @@ public:
     //! ids, and counts.
     void setFromPrevious( const Abc::OSampleSelector &iSS );
 
+    //! A container for arbitrary geom params (pseudo-properties settable and
+    //! gettable as indexed or not).
+    Abc::OCompoundProperty getArbGeomParams();
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -182,6 +201,12 @@ public:
     {
         m_positions.reset();
         m_ids.reset();
+
+        m_selfBounds.reset();
+        m_childBounds.reset();
+
+        m_arbGeomParams.reset();
+
         Abc::OSchema<PointsSchemaInfo>::reset();
     }
 
@@ -203,6 +228,11 @@ protected:
 
     Abc::OV3fArrayProperty m_positions;
     Abc::OUInt64ArrayProperty m_ids;
+
+    Abc::OBox3dProperty m_selfBounds;
+    Abc::OBox3dProperty m_childBounds;
+
+    Abc::OCompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

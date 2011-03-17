@@ -58,6 +58,9 @@ public:
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
         Abc::UInt64ArraySamplePtr getIds() const { return m_ids; }
 
+        Abc::Box3d getSelfBounds() const { return m_selfBounds; }
+        Abc::Box3d getChildBounds() const { return m_childBounds; }
+
         bool valid() const
         {
             return m_positions && m_ids;
@@ -67,6 +70,9 @@ public:
         {
             m_positions.reset();
             m_ids.reset();
+
+            m_selfBounds.makeEmpty();
+            m_childBounds.makeEmpty();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
@@ -75,6 +81,9 @@ public:
         friend class IPointsSchema;
         Abc::V3fArraySamplePtr m_positions;
         Abc::UInt64ArraySamplePtr m_ids;
+
+        Abc::Box3d m_selfBounds;
+        Abc::Box3d m_childBounds;
     };
 
     //-*************************************************************************
@@ -160,13 +169,19 @@ public:
     }
 
     //-*************************************************************************
-    void get( Sample &iSample,
+    void get( Sample &oSample,
               const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPointsSchema::get()" );
 
-        m_positions.get( iSample.m_positions, iSS );
-        m_ids.get( iSample.m_ids, iSS );
+        m_positions.get( oSample.m_positions, iSS );
+        m_ids.get( oSample.m_ids, iSS );
+
+        m_selfBounds.get( oSample.m_selfBounds, iSS );
+
+        if ( m_childBounds.getNumSamples() > 0 )
+        { m_childBounds.get( oSample.m_childBounds, iSS ); }
+
         // Could error check here.
 
         ALEMBIC_ABC_SAFE_CALL_END();
@@ -178,6 +193,8 @@ public:
         get( smp, iSS );
         return smp;
     }
+
+    Abc::ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -191,6 +208,12 @@ public:
     {
         m_positions.reset();
         m_ids.reset();
+
+        m_selfBounds.reset();
+        m_childBounds.reset();
+
+        m_arbGeomParams.reset();
+
         Abc::ISchema<PointsSchemaInfo>::reset();
     }
 
@@ -213,6 +236,11 @@ protected:
 
     Abc::IV3fArrayProperty m_positions;
     Abc::IUInt64ArrayProperty m_ids;
+
+    Abc::IBox3dProperty m_selfBounds;
+    Abc::IBox3dProperty m_childBounds;
+
+    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

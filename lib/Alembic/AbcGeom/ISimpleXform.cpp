@@ -75,7 +75,7 @@ void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
         if ( ( isMoreDynamic( iProp.getTimeSampling(), m_timeSampling )
                && numSamps >= m_numSamples )
              || ( localNumSampsPerCycle == propNumSampsPerCycle
-                  && numSamps > m_numSamples )
+             && numSamps > m_numSamples )
            )
         {
             m_timeSampling = iProp.getTimeSampling();
@@ -83,6 +83,13 @@ void ISimpleXformSchema::_getTimeData( Abc::IDoubleProperty& iProp )
         }
 
         m_isConstant = m_isConstant ? iProp.isConstant() : m_isConstant;
+    }
+
+    // just making sure we're not erroneously saying 0 samples when there is
+    // at least 1.
+    if ( iProp && ( iProp.getNumSamples() > m_numSamples ) )
+    {
+        m_numSamples = iProp.getNumSamples();
     }
 }
 
@@ -94,21 +101,28 @@ void ISimpleXformSchema::init( Abc::SchemaInterpMatching )
     static const Abc::ErrorHandler::Policy qnp =
         Abc::ErrorHandler::kQuietNoopPolicy;
 
-    m_scaleX = Abc::IDoubleProperty( *this, ".sx", qnp );
-    m_scaleY = Abc::IDoubleProperty( *this, ".sy", qnp );
-    m_scaleZ = Abc::IDoubleProperty( *this, ".sz", qnp );
+    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    m_shear0 = Abc::IDoubleProperty( *this, ".h0", qnp );
-    m_shear1 = Abc::IDoubleProperty( *this, ".h1", qnp );
-    m_shear2 = Abc::IDoubleProperty( *this, ".h2", qnp );
+    m_scaleX = Abc::IDoubleProperty( _this, ".sx", qnp );
+    m_scaleY = Abc::IDoubleProperty( _this, ".sy", qnp );
+    m_scaleZ = Abc::IDoubleProperty( _this, ".sz", qnp );
 
-    m_rotateX = Abc::IDoubleProperty( *this, ".rx", qnp );
-    m_rotateY = Abc::IDoubleProperty( *this, ".ry", qnp );
-    m_rotateZ = Abc::IDoubleProperty( *this, ".rz", qnp );
+    m_shear0 = Abc::IDoubleProperty( _this, ".h0", qnp );
+    m_shear1 = Abc::IDoubleProperty( _this, ".h1", qnp );
+    m_shear2 = Abc::IDoubleProperty( _this, ".h2", qnp );
 
-    m_translateX = Abc::IDoubleProperty( *this, ".tx", qnp );
-    m_translateY = Abc::IDoubleProperty( *this, ".ty", qnp );
-    m_translateZ = Abc::IDoubleProperty( *this, ".tz", qnp );
+    m_rotateX = Abc::IDoubleProperty( _this, ".rx", qnp );
+    m_rotateY = Abc::IDoubleProperty( _this, ".ry", qnp );
+    m_rotateZ = Abc::IDoubleProperty( _this, ".rz", qnp );
+
+    m_translateX = Abc::IDoubleProperty( _this, ".tx", qnp );
+    m_translateY = Abc::IDoubleProperty( _this, ".ty", qnp );
+    m_translateZ = Abc::IDoubleProperty( _this, ".tz", qnp );
+
+    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", qnp );
+    }
 
     m_numSamples = 0;
     m_isConstant = true;
@@ -160,11 +174,16 @@ void ISimpleXformSchema::get( SimpleXformSample &oSample,
     if ( m_translateY ) { m_translateY.get( translate.y, sampIndex ); }
     if ( m_translateZ ) { m_translateZ.get( translate.z, sampIndex ); }
 
-    oSample.makeIdentity();
+    oSample.reset();
     oSample.setScale( scale );
     oSample.setShear( shear );
     oSample.setXYZRotation( rotate );
     oSample.setTranslation( translate );
+
+    if ( m_childBounds )
+    {
+        oSample.setChildBounds( m_childBounds.getValue( iSS ) );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

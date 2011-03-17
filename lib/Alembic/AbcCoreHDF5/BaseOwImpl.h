@@ -53,7 +53,9 @@ protected:
     BaseOwImpl( hid_t iParentGroup,
                 const std::string &iName,
                 const AbcA::MetaData &iMetaData );
-    
+
+    BaseOwImpl( const BaseOwImpl &iCopy );
+
 public:
     virtual ~BaseOwImpl();
 

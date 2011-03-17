@@ -1,7 +1,8 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010, Industrial Light & Magic,
-//   a division of Lucasfilm Entertainment Company Ltd.
+// Copyright (c) 2009-2010,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
 //
@@ -14,9 +15,10 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-// *       Neither the name of Industrial Light & Magic nor the names of
-// its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,62 +34,68 @@
 //
 //-*****************************************************************************
 
-#include <AlembicAsset/AlembicAsset.h>
+#include <boost/python/detail/wrap_python.hpp>
+
+#include <Alembic/Abc/All.h>
 
 #include <boost/python.hpp>
 
-#include <Python.h>
+
+//#include <Python.h>
 
 using namespace boost::python;
 
-using namespace AlembicAsset;
+namespace Abc = ::Alembic::Abc;
+namespace AbcA = ::Alembic::AbcCoreAbstract::v1;
 
 //-*****************************************************************************
 void register_iobject()
 {
-    PropertyInfo ( IObject::*propinfo1 )( size_t ) const = \
-        &IObject::propertyInfo;
-    PropertyInfo ( IObject::*propinfo2 )( const std::string&,
-                                          const std::string& ) const =  \
-        &IObject::propertyInfo;
+    // overloads
+    Abc::IObject ( Abc::IObject::*getChildByIndex )( size_t ) = \
+        &Abc::IObject::getChild;
+    Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) = \
+        &Abc::IObject::getChild;
 
-    ObjectInfo ( IObject::*childInfo1 )( size_t ) const = &IObject::childInfo;
-    ObjectInfo ( IObject::*childInfo2 )( const std::string&,
-                                         const std::string& ) const =   \
-        &IObject::childInfo;
+    const AbcA::ObjectHeader&
+        ( Abc::IObject::*getChildHeaderByIndex )( size_t ) = \
+        &Abc::IObject::getChildHeader;
 
-    void ( IObject::*klose )() = &IObject::close;
+    const AbcA::ObjectHeader*
+        ( Abc::IObject::*getChildHeaderByName )( const std::string & ) = \
+        &Abc::IObject::getChildHeader;
 
-    class_<PropertyInfoBody>( "PropertyInfoBody" )
-        .def_readonly( "name", &PropertyInfoBody::name )
-        .def_readonly( "protocol", &PropertyInfoBody::protocol )
-        .def_readonly( "ptype", &PropertyInfoBody::ptype )
-        .def_readonly( "dtype", &PropertyInfoBody::dtype )
-        ;
 
-    register_ptr_to_python<PropertyInfo>();
-
-    class_<IObject, bases<IParentObject> >( "IObject",
-                                            init<const IParentObject&,
-                                            const std::string&,
-                                            const std::string&,
-                                            optional<const IContext&> >() )
-        .def( init<const IParentObject&, ObjectInfo,
-              optional<const IContext&> >() )
-        .def( init<const IParentObject&, size_t, optional<const IContext&> >() )
-        .def( "name", &IObject::name )
-        .def( "fullPathName", &IObject::fullPathName )
-        .def( "protocol", &IObject::protocol )
-        .def( "comments", &IObject::comments )
-        .def( "propertyInfo", propinfo1 )
-        .def( "propertyInfo", propinfo2 )
-        .def( "numProperties", &IObject::numProperties )
-        .def( "numChildren", &IObject::numChildren )
-        .def( "childInfo", childInfo1 )
-        .def( "childInfo", childInfo2 )
-        .def( "valid", &IObject::valid )
-        .def( "close", klose )
-        .def( "release", &IObject::release )
-        .def( "__str__", &IObject::fullPathName )
+    class_<Abc::IObject>( "IObject",
+                          init<Abc::IObject, const std::string&>() )
+        .def( init<>() )
+        .def( "getHeader", &Abc::IObject::getHeader,
+              return_internal_reference<1>() )
+        .def( "getName", &Abc::IObject::getName,
+              return_value_policy<copy_const_reference>() )
+        .def( "getFullName", &Abc::IObject::getFullName,
+              return_value_policy<copy_const_reference>() )
+        .def( "getNumChildren", &Abc::IObject::getNumChildren )
+        .def( "getChildHeader", getChildHeaderByIndex,
+              return_internal_reference<1>() )
+        .def( "getChildHeader", getChildHeaderByName,
+              return_value_policy<reference_existing_object>() )
+        .def( "getProperties", &Abc::IObject::getProperties,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getChild", getChildByIndex,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getChild", getChildByName,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "valid", &Abc::IObject::valid )
+        .def( "getArchive", &Abc::IObject::getArchive,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getParent", &Abc::IObject::getParent,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getMetaData", &Abc::IObject::getMetaData,
+              return_internal_reference<1>() )
+        .def( "reset", &Abc::IObject::reset )
+        .def( "__str__", &Abc::IObject::getFullName,
+              return_value_policy<copy_const_reference>() )
+        .def( "__nonzero__", &Abc::IObject::valid )
         ;
 }

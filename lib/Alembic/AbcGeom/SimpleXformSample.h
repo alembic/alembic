@@ -76,6 +76,10 @@ public:
     const Abc::V3d &getTranslation() const { return m_translation; }
     void setTranslation( const Abc::V3d &iTrn ) { m_translation = iTrn; }
 
+    const Abc::Box3d &getChildBounds() const { return m_childBounds; }
+    void setChildBounds( const Abc::Box3d &iBnds )
+    { m_childBounds = iBnds; }
+
     Abc::M44d getMatrix() const
     {
         Imath::Eulerd euler;
@@ -100,11 +104,18 @@ public:
         m_translation = Abc::V3d( 0.0 );
     }
 
+    void reset()
+    {
+        this->makeIdentity();
+        m_childBounds.makeEmpty();
+    }
+
 protected:
     Abc::V3d m_scale;
     Abc::V3d m_shear;
     Abc::V3d m_xyzRotation;
     Abc::V3d m_translation;
+    Abc::Box3d m_childBounds;
 };
 
 //-*****************************************************************************

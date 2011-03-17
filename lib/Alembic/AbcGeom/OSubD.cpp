@@ -73,6 +73,40 @@ void OSubDSchema::set( const Sample &iSamp,
         m_faceIndices.set( iSamp.getFaceIndices(), iSS );
         m_faceCounts.set( iSamp.getFaceCounts(), iSS );
 
+        if ( iSamp.getChildBounds().hasVolume() )
+        { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
+
+        if ( iSamp.getSelfBounds().isEmpty() )
+        {
+            // OTypedScalarProperty::set() is not referentially transparent,
+            // so we need a a placeholder variable.
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
+
+        if ( iSamp.getUVs().getVals() )
+        {
+            if ( iSamp.getUVs().getIndices() )
+            {
+                // UVs are indexed
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", true,
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
+            }
+            else
+            {
+                // UVs are not indexed
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", false,
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
+            }
+
+            m_uvs.set( iSamp.getUVs(), iSS );
+        }
+
         if ( iSamp.getFaceVaryingInterpolateBoundary() ==
              ABC_GEOM_SUBD_NULL_INT_VALUE )
         {
@@ -196,6 +230,26 @@ void OSubDSchema::set( const Sample &iSamp,
 
         SetPropUsePrevIfNull( m_subdScheme, iSamp.getSubdivisionScheme(),
                               iSS );
+
+        SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds(), iSS );
+
+        if ( iSamp.getSelfBounds().hasVolume() )
+        {
+            m_selfBounds.set( iSamp.getSelfBounds(), iSS );
+        }
+        else if ( iSamp.getPositions() )
+        {
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else
+        {
+            m_selfBounds.setFromPrevious( iSS );
+        }
+
+        if ( m_uvs ) { m_uvs.set( iSamp.getUVs(), iSS ); }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -225,7 +279,31 @@ void OSubDSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 
     m_subdScheme.setFromPrevious( iSS );
 
+    m_selfBounds.setFromPrevious( iSS );
+    m_childBounds.setFromPrevious( iSS );
+
+    if ( m_uvs ) { m_uvs.setFromPrevious( iSS ); }
+
     ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
 }
 
 //-*****************************************************************************
@@ -235,36 +313,42 @@ void OSubDSchema::init( const AbcA::TimeSamplingType &iTst )
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTst );
 
-    m_faceIndices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTst );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_faceCounts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTst );
+
+    m_faceIndices = Abc::OInt32ArrayProperty( _this, ".faceIndices", iTst );
+
+    m_faceCounts = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTst );
 
     m_faceVaryingInterpolateBoundary =
-        Abc::OInt32Property( *this, ".faceVaryingInterpolateBoundary", iTst );
+        Abc::OInt32Property( _this, ".faceVaryingInterpolateBoundary", iTst );
 
     m_faceVaryingPropagateCorners =
-        Abc::OInt32Property( *this, ".faceVaryingPropagateCorners", iTst );
+        Abc::OInt32Property( _this, ".faceVaryingPropagateCorners", iTst );
 
     m_interpolateBoundary =
-        Abc::OInt32Property( *this, ".interpolateBoundary", iTst );
+        Abc::OInt32Property( _this, ".interpolateBoundary", iTst );
 
-    m_creaseIndices = Abc::OInt32ArrayProperty( *this, ".creaseIndices", iTst );
+    m_creaseIndices = Abc::OInt32ArrayProperty( _this, ".creaseIndices", iTst );
 
-    m_creaseLengths = Abc::OInt32ArrayProperty( *this, ".creaseLengths", iTst );
+    m_creaseLengths = Abc::OInt32ArrayProperty( _this, ".creaseLengths", iTst );
 
-    m_creaseSharpnesses = Abc::OFloatArrayProperty( *this, ".creaseSharpnesses",
+    m_creaseSharpnesses = Abc::OFloatArrayProperty( _this, ".creaseSharpnesses",
                                                iTst );
 
-    m_cornerIndices = Abc::OInt32ArrayProperty( *this, ".cornerIndices", iTst );
+    m_cornerIndices = Abc::OInt32ArrayProperty( _this, ".cornerIndices", iTst );
 
-    m_cornerSharpnesses = Abc::OFloatArrayProperty( *this, ".cornerSharpnesses",
+    m_cornerSharpnesses = Abc::OFloatArrayProperty( _this, ".cornerSharpnesses",
                                                iTst );
 
-    m_holes = Abc::OInt32ArrayProperty( *this, ".holes", iTst );
+    m_holes = Abc::OInt32ArrayProperty( _this, ".holes", iTst );
 
-    m_subdScheme = Abc::OStringProperty( *this, ".scheme", iTst );
+    m_subdScheme = Abc::OStringProperty( _this, ".scheme", iTst );
+
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTst );
+    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTst );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

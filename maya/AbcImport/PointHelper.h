@@ -1,7 +1,8 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010, Industrial Light & Magic,
-//   a division of Lucasfilm Entertainment Company Ltd.
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks, Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
 //
@@ -14,9 +15,10 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-// *       Neither the name of Industrial Light & Magic nor the names of
-// its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,17 +34,22 @@
 //
 //-*****************************************************************************
 
-#include <AlembicAsset/Init.h>
+#ifndef ABCIMPORT_POINTHELPER_H_
+#define ABCIMPORT_POINTHELPER_H_
 
-#include <boost/python.hpp>
+#include <maya/MObject.h>
 
-#include <Python.h>
+#include <vector>
+#include <string>
 
-using namespace boost::python;
+#include <Alembic/AbcGeom/IPoints.h>
 
-using namespace AlembicAsset;
+MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
+    MObject & iParent, MObject & iObject,
+    std::vector<std::string> & iSampledPropNameList,
+    bool iSwap = false);
 
-void register_init()
-{
-    def( "Init", Init );
-}
+MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
+    MObject & iObject);
+
+#endif  // ABCIMPORT_POINTHELPER_H_

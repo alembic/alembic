@@ -55,11 +55,42 @@ void OPointsSchema::set( const Sample &iSamp,
                      "Sample 0 must have valid data for points and ids" );
         m_positions.set( iSamp.getPositions(), iSS );
         m_ids.set( iSamp.getIds(), iSS );
+
+        if ( iSamp.getChildBounds().hasVolume() )
+        { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
+
+        if ( iSamp.getSelfBounds().isEmpty() )
+        {
+            // OTypedScalarProperty::set() is not referentially transparent,
+            // so we need a a placeholder variable.
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
     }
     else
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions(), iSS );
         SetPropUsePrevIfNull( m_ids, iSamp.getIds(), iSS );
+        SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds(), iSS );
+
+        if ( iSamp.getSelfBounds().hasVolume() )
+        {
+            m_selfBounds.set( iSamp.getSelfBounds(), iSS );
+        }
+        else if ( iSamp.getPositions() )
+        {
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else
+        {
+            m_selfBounds.setFromPrevious( iSS );
+        }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -73,7 +104,29 @@ void OPointsSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     m_positions.setFromPrevious( iSS );
     m_ids.setFromPrevious( iSS );
 
+    m_selfBounds.setFromPrevious( iSS );
+    m_childBounds.setFromPrevious( iSS );
+
     ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+Abc::OCompoundProperty OPointsSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
 }
 
 //-*****************************************************************************
@@ -83,9 +136,16 @@ void OPointsSchema::init( const AbcA::TimeSamplingType &iTst )
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVaryingScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTst );
 
-    m_ids = Abc::OUInt64ArrayProperty( *this, ".pointIds", mdata, iTst );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTst );
+
+    m_ids = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata, iTst );
+
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTst );
+
+    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTst );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

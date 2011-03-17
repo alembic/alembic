@@ -37,17 +37,23 @@
 using namespace boost::python;
 
 // forwards
-void register_iasset();
+void register_coreabstracttypes();
 void register_iobject();
-void register_init();
-void register_iparentobject();
-void register_icontext();
+void register_iarchive();
+void register_icompoundproperty();
+void register_itypedscalarproperties();
+void register_abcenums();
+void register_sampleselector();
+void register_iuntypedproperties();
 
-BOOST_PYTHON_MODULE( _asset )
+BOOST_PYTHON_MODULE( alembic )
 {
-    register_init();
-    register_icontext();
-    register_iparentobject();
-    register_iasset();
+    register_coreabstracttypes();
+    register_abcenums();
+    register_iarchive();
     register_iobject();
+    register_icompoundproperty();
+    register_itypedscalarproperties();
+    register_sampleselector();
+    register_iuntypedproperties();
 }

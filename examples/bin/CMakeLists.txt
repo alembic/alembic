@@ -32,8 +32,22 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY( SimpleAbcViewer )
-ADD_SUBDIRECTORY( GlutSkeleton )
+IF ( GLUT_Xmu_LIBRARY )
+  MESSAGE( STATUS "Including GlutSkeleton" )
+  ADD_SUBDIRECTORY( GlutSkeleton )
+
+  IF ( Boost_PROGRAM_OPTIONS_FOUND )
+    MESSAGE( STATUS "Including SimpleAbcViewer" )
+    ADD_SUBDIRECTORY( SimpleAbcViewer )
+  ELSE()
+    MESSAGE( STATUS "Not including SimpleAbcViewer" )
+  ENDIF()
+
+ELSE()
+  MESSAGE( STATUS "Not including GlutSkeleton" )
+  MESSAGE( STATUS "Not including SimpleAbcViewer" )
+ENDIF()
+
 ADD_SUBDIRECTORY( AbcEcho )
 
 # NOTE: uncomment the following line if you have the GTO libraries and wish

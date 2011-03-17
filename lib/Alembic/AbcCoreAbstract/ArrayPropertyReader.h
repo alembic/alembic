@@ -92,6 +92,9 @@ public:
     //! arrays of std::string and std::wstring, respectively.
     virtual void getSample( index_t iSampleIndex,
                             ArraySamplePtr &oSample ) = 0;
+
+    //! Expose the key for apps that use their own custom cache management.
+    virtual bool getKey( index_t iSampleIndex, ArraySampleKey & oKey ) = 0;
 };
 
 } // End namespace v1

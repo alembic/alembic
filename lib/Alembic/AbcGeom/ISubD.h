@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/IGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -97,6 +98,10 @@ public:
         std::string getSubdivisionScheme() const
         { return m_subdScheme; }
 
+        // bounds
+        Abc::Box3d getSelfBounds() const { return m_selfBounds; }
+        Abc::Box3d getChildBounds() const { return m_childBounds; }
+
 
         bool valid() const
         {
@@ -123,6 +128,9 @@ public:
             m_holes.reset();
 
             m_subdScheme = "catmull-clark";
+
+            m_selfBounds.makeEmpty();
+            m_childBounds.makeEmpty();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
@@ -152,6 +160,11 @@ public:
 
         // subdivision scheme
         std::string m_subdScheme;
+
+        // bounds
+        Abc::Box3d m_selfBounds;
+        Abc::Box3d m_childBounds;
+
     }; // end ISubDSchema::Sample
 
     //-*************************************************************************
@@ -268,6 +281,15 @@ public:
         return smp;
     }
 
+    Abc::IV3fArrayProperty getPositions()
+    {
+        return m_positions;
+    }
+
+    IV2fGeomParam &getUVs() { return m_uvs; }
+
+    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -296,6 +318,10 @@ public:
         m_holes.reset();
 
         m_subdScheme.reset();
+
+        m_uvs.reset();
+
+        m_arbGeomParams.reset();
 
         Abc::ISchema<SubDSchemaInfo>::reset();
     }
@@ -340,6 +366,16 @@ protected:
 
     // subdivision scheme
     Abc::IStringProperty m_subdScheme;
+
+    // bounds
+    Abc::IBox3dProperty m_selfBounds;
+    Abc::IBox3dProperty m_childBounds;
+
+    // UVs
+    IV2fGeomParam m_uvs;
+
+    // random geometry parameters
+    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

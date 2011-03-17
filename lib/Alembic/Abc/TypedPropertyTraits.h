@@ -93,15 +93,25 @@ DECLARE_POD_TRAITS( wstring, WstringTPTraits );
 #undef DECLARE_POD_TRAITS
 
 //-*****************************************************************************
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2s, kInt16POD, 2, "point", V2sTPTraits );
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2i, kInt32POD, 2, "point", V2iTPTraits );
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2f, kFloat32POD, 2, "point", V2fTPTraits );
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2d, kFloat64POD, 2, "point", V2dTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2s, kInt16POD, 2, "vector", V2sTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2i, kInt32POD, 2, "vector", V2iTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2f, kFloat32POD, 2, "vector", V2fTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2d, kFloat64POD, 2, "vector", V2dTPTraits );
 
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3s, kInt16POD, 3, "point", V3sTPTraits );
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3i, kInt32POD, 3, "point", V3iTPTraits );
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3f, kFloat32POD, 3, "point", V3fTPTraits );
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3d, kFloat64POD, 3, "point", V3dTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3s, kInt16POD, 3, "vector", V3sTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3i, kInt32POD, 3, "vector", V3iTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3f, kFloat32POD, 3, "vector", V3fTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3d, kFloat64POD, 3, "vector", V3dTPTraits );
+
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2s, kInt16POD, 2, "point", P2sTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2i, kInt32POD, 2, "point", P2iTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2f, kFloat32POD, 2, "point", P2fTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2d, kFloat64POD, 2, "point", P2dTPTraits );
+
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3s, kInt16POD, 3, "point", P3sTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3i, kInt32POD, 3, "point", P3iTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3f, kFloat32POD, 3, "point", P3fTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V3d, kFloat64POD, 3, "point", P3dTPTraits );
 
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( Box2s, kInt16POD, 4, "box", Box2sTPTraits );
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( Box2i, kInt32POD, 4, "box", Box2iTPTraits );
@@ -133,6 +143,10 @@ ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C4c, kUint8POD, 4, "rgba", C4cTPTraits );
 
 //-*****************************************************************************
 // Normals.
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2f, kFloat32POD, 2, "normal", N2fTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2d, kFloat64POD, 2, "normal", N2dTPTraits );
+
+// N3f and N3d is typedefed in Foundation from V3f and V3d
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( N3f, kFloat32POD, 3, "normal", N3fTPTraits );
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( N3d, kFloat64POD, 3, "normal", N3dTPTraits );
 

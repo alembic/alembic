@@ -41,8 +41,6 @@
 #include <Alembic/AbcGeom/SimpleXformSample.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 
-#include <set>
-
 namespace Alembic {
 namespace AbcGeom {
 
@@ -144,6 +142,8 @@ public:
         m_translateY.reset();
         m_translateZ.reset();
 
+        m_childBounds.reset();
+
         super_type::reset();
     }
 
@@ -194,26 +194,16 @@ protected:
             // We don't build the property until we need it for sure.
         }
 
-        // Returns whether or not the property exists, or whether
-        // it is still default value.
         void set( const double &iSamp,
                   const Abc::OSampleSelector &iSS,
 
                   // If we haven't made a property yet,
                   // these time samples correspond to the times
                   // not yet sampled.
-                  // Otherwise, these will be NULL.
+                  // Otherwise, this vector will be empty.
                   const std::vector<chrono_t> &iTimeSamples );
 
-        // Returns whether or not the property exists, or whether
-        // it is still default value.
-        void setFromPrevious( const Abc::OSampleSelector &iSS,
-
-                              // If we haven't made a property yet,
-                              // these time samples correspond to the times
-                              // not yet sampled.
-                              // Otherwise, these will be NULL.
-                              const std::vector<chrono_t> &iTimeSamples );
+        void setFromPrevious( const Abc::OSampleSelector &iSS );
 
         double getDefaultValue() const { return m_default; }
 
@@ -252,6 +242,8 @@ protected:
     ODefaultedDoubleProperty m_translateX;
     ODefaultedDoubleProperty m_translateY;
     ODefaultedDoubleProperty m_translateZ;
+
+    Abc::OBox3dProperty m_childBounds;
 };
 
 //-*****************************************************************************

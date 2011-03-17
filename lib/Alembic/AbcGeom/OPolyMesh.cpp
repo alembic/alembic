@@ -58,12 +58,86 @@ void OPolyMeshSchema::set( const Sample &iSamp,
         m_positions.set( iSamp.getPositions(), iSS );
         m_indices.set( iSamp.getIndices(), iSS );
         m_counts.set( iSamp.getCounts(), iSS );
+
+        if ( iSamp.getChildBounds().hasVolume() )
+        { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
+
+        if ( iSamp.getSelfBounds().isEmpty() )
+        {
+            // OTypedScalarProperty::set() is not referentially transparent,
+            // so we need a a placeholder variable.
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
+
+        if ( iSamp.getUVs().getVals() )
+        {
+            if ( iSamp.getUVs().getIndices() )
+            {
+                // UVs are indexed
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", true,
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
+            }
+            else
+            {
+                // UVs are not indexed
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", false,
+                                       iSamp.getUVs().getScope(), 1,
+                                       this->getTimeSamplingType() );
+            }
+
+            m_uvs.set( iSamp.getUVs(), iSS );
+        }
+        if ( iSamp.getNormals().getVals() )
+        {
+            if ( iSamp.getNormals().getIndices() )
+            {
+                // normals are indexed
+                m_normals = ON3fGeomParam( this->getPtr(), "N", true,
+                                           iSamp.getNormals().getScope(),
+                                           1, this->getTimeSamplingType() );
+            }
+            else
+            {
+                // normals are not indexed
+                m_normals = ON3fGeomParam( this->getPtr(), "N", false,
+                                           iSamp.getNormals().getScope(), 1,
+                                           this->getTimeSamplingType() );
+            }
+
+            m_normals.set( iSamp.getNormals(), iSS );
+        }
     }
     else
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions(), iSS );
         SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
         SetPropUsePrevIfNull( m_counts, iSamp.getCounts(), iSS );
+        SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds(), iSS );
+
+        if ( iSamp.getSelfBounds().hasVolume() )
+        {
+            m_selfBounds.set( iSamp.getSelfBounds(), iSS );
+        }
+        else if ( iSamp.getPositions() )
+        {
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() )
+                           );
+            m_selfBounds.set( bnds, iSS );
+        }
+        else
+        {
+            m_selfBounds.setFromPrevious( iSS );
+        }
+
+        // OGeomParam will automatically use SetPropUsePrevIfNull internally
+        if ( m_uvs ) { m_uvs.set( iSamp.getUVs(), iSS ); }
+        if ( m_normals ) { m_normals.set( iSamp.getNormals(), iSS ); }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -78,6 +152,12 @@ void OPolyMeshSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     m_indices.setFromPrevious( iSS );
     m_counts.setFromPrevious( iSS );
 
+    m_selfBounds.setFromPrevious( iSS );
+    m_childBounds.setFromPrevious( iSS );
+
+    if ( m_uvs ) { m_uvs.setFromPrevious( iSS ); }
+    if ( m_normals ) { m_normals.setFromPrevious( iSS ); }
+
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -88,13 +168,41 @@ void OPolyMeshSchema::init( const AbcA::TimeSamplingType &iTst )
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTst );
 
-    m_indices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTst );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTst );
+
+    m_indices = Abc::OInt32ArrayProperty( _this, ".faceIndices", iTst );
+
+    m_counts = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTst );
+
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTst );
+
+    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTst );
+
+    // UVs and Normals are created on first call to set()
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
 }
 
 } // End namespace AbcGeom

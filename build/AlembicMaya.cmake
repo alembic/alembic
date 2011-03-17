@@ -89,7 +89,8 @@ FIND_LIBRARY( MAYA_FOUNDATION_LIBRARY Foundation
               PATHS
 	      "${ALEMBIC_MAYA_LIB_ROOT}"
               "${ALEMBIC_MAYA_ROOT}/lib"
-              DOC "The directory where Foundation.lib resides" )
+              DOC "The directory where Foundation.lib resides"
+              NO_DEFAULT_PATH )
 
 FIND_LIBRARY( MAYA_OPENMAYA_LIBRARY OpenMaya
               PATHS

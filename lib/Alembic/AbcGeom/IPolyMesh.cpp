@@ -76,12 +76,46 @@ void IPolyMeshSchema::init( const Abc::IArgument &iArg0,
     iArg0.setInto( args );
     iArg1.setInto( args );
 
-    m_positions = Abc::IV3fArrayProperty( *this, "P",
+    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
+
+    m_positions = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
-    m_indices = Abc::IInt32ArrayProperty( *this, ".faceIndices",
+    m_indices = Abc::IInt32ArrayProperty( _this, ".faceIndices",
                                         args.getSchemaInterpMatching() );
-    m_counts = Abc::IInt32ArrayProperty( *this, ".faceCounts",
+    m_counts = Abc::IInt32ArrayProperty( _this, ".faceCounts",
                                        args.getSchemaInterpMatching() );
+
+    // older Alembic archives won't have the bounding box properties; before 1.0,
+    // we should remove the if statements and assert that older archives will
+    // not be readable without a no-op error handling policy
+    if ( this->getPropertyHeader( ".selfBnds" ) != NULL )
+    {
+        m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
+    }
+
+    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0,
+                                             iArg1 );
+    }
+
+    // none of the things below here are guaranteed to exist
+    if ( this->getPropertyHeader( "uv" ) != NULL )
+    {
+        m_uvs = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
+    }
+
+    if ( this->getPropertyHeader( "N" ) != NULL )
+    {
+        m_normals = IN3fGeomParam( _this, "N", iArg0, iArg1 );
+    }
+
+    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
+    {
+        m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
+                                                  args.getErrorHandlerPolicy()
+                                                );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

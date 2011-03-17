@@ -54,6 +54,8 @@ protected:
 
     BaseOrImpl( ProtoObjectReaderPtr iProto );
 
+    BaseOrImpl( const BaseOrImpl& iCopy );
+
 public:
     // Not really public
     void createProtoObject( hid_t iGroup, const std::string &iName );

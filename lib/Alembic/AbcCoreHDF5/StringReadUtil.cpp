@@ -151,7 +151,7 @@ ReadStringT<std::string,char>( hid_t iParent,
     hid_t attrFtype = H5Aget_type( attrId );
     DtypeCloser dtypeCloser( attrFtype );
 
-    ssize_t numChars = H5Tget_size( attrFtype );
+    size_t numChars = H5Tget_size( attrFtype );
     ABCA_ASSERT( numChars >= 0,
                  "ReadStringT() H5Aget_size() failed" );
 
@@ -161,7 +161,7 @@ ReadStringT<std::string,char>( hid_t iParent,
         ABCA_ASSERT( attrSpace >= 0,
                      "Couldn't get dataspace for attribute: " << iAttrName );
         DspaceCloser dspaceCloser( attrSpace );
-        
+
         H5S_class_t attrSpaceClass = H5Sget_simple_extent_type( attrSpace );
         ABCA_ASSERT( attrSpaceClass == H5S_SCALAR,
                      "Tried to read non-scalar attribute: " << iAttrName
@@ -364,14 +364,31 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
     ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
     DsetCloser dsetCloser( dsetId );
 
+    // Read the data space.
+    hid_t dspaceId = H5Dget_space( dsetId );
+    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
+                 << iName );
+    DspaceCloser dspaceCloser( dspaceId );
+
     // Read the digest, if there's a cache.
     AbcA::ArraySample::Key key;
-    bool foundDigest = ReadKey( dsetId, "key", key );
+    bool foundDigest = false;
 
     // If we found a digest and there's a cache, see
     // if we're in there, and return it if so.
-    if ( foundDigest && iCache )
+    if ( iCache )
     {
+        key.origPOD = iDataType.getPod();
+        key.readPOD = key.origPOD;
+
+        hid_t dsetFtype = H5Dget_type( dsetId );
+        DtypeCloser dtypeCloser( dsetFtype );
+
+        // string arrays get packed together
+        key.numBytes = H5Sget_simple_extent_npoints( dspaceId ) *
+            H5Tget_size( dsetFtype );
+
+        foundDigest = ReadKey( dsetId, "key", key );
         AbcA::ReadArraySampleID found = iCache->find( key );
         if ( found )
         {
@@ -423,12 +440,6 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
     ABCA_ASSERT( realDims.rank() > 0,
                  "Degenerate rank in Dataset read" );
 
-    // Read the data space.
-    hid_t dspaceId = H5Dget_space( dsetId );
-    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
-                 << iName );
-    DspaceCloser dspaceCloser( dspaceId );
-
     AbcA::ArraySamplePtr ret;
 
     H5S_class_t dspaceClass = H5Sget_simple_extent_type( dspaceId );
@@ -454,16 +465,16 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
                      << std::endl
                      << "Expecting rank: " << hdims.rank()
                      << " instead was: " << rank );
-        
+
         dims = hdims;
         ABCA_ASSERT( dims.numPoints() > 0,
                      "Degenerate dims in Dataset read" );
-        
+
 
         // Create temporary char storage buffer.
         size_t totalNumChars = dims.numPoints() + 1;
         std::vector<CharT> charStorage( totalNumChars, ( CharT )0 );
-        
+
         // Read into it.
         herr_t status = H5Dread( dsetId, GetNativeDtype<CharT>(),
                                  H5S_ALL, H5S_ALL, H5P_DEFAULT,

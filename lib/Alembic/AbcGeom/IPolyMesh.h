@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/IGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -58,6 +59,8 @@ public:
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
         Abc::Int32ArraySamplePtr getIndices() const { return m_indices; }
         Abc::Int32ArraySamplePtr getCounts() const { return m_counts; }
+        Abc::Box3d getSelfBounds() const { return m_selfBounds; }
+        Abc::Box3d getChildBounds() const { return m_childBounds; }
 
         bool valid() const
         {
@@ -69,6 +72,9 @@ public:
             m_positions.reset();
             m_indices.reset();
             m_counts.reset();
+
+            m_selfBounds.makeEmpty();
+            m_childBounds.makeEmpty();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
@@ -78,6 +84,9 @@ public:
         Abc::V3fArraySamplePtr m_positions;
         Abc::Int32ArraySamplePtr m_indices;
         Abc::Int32ArraySamplePtr m_counts;
+
+        Abc::Box3d m_selfBounds;
+        Abc::Box3d m_childBounds;
     };
 
     //-*************************************************************************
@@ -181,14 +190,25 @@ public:
     }
 
     //-*************************************************************************
-    void get( Sample &iSample,
+    void get( Sample &oSample,
               const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::get()" );
 
-        m_positions.get( iSample.m_positions, iSS );
-        m_indices.get( iSample.m_indices, iSS );
-        m_counts.get( iSample.m_counts, iSS );
+        m_positions.get( oSample.m_positions, iSS );
+        m_indices.get( oSample.m_indices, iSS );
+        m_counts.get( oSample.m_counts, iSS );
+
+        // a minor hedge against older Archives that don't have these
+        // properties.  Will remove before 1.0. --JDA, 2011-02-24
+        if ( m_selfBounds )
+        {
+            m_selfBounds.get( oSample.m_selfBounds, iSS );
+        }
+        if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
+        {
+            m_childBounds.get( oSample.m_childBounds, iSS );
+        }
         // Could error check here.
 
         ALEMBIC_ABC_SAFE_CALL_END();
@@ -199,6 +219,19 @@ public:
         Sample smp;
         get( smp, iSS );
         return smp;
+    }
+
+    IV2fGeomParam &getUVs() { return m_uvs; }
+
+    IN3fGeomParam &getNormals() { return m_normals; }
+
+    // compound property to use as parent for any arbitrary GeomParams
+    // underneath it
+    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+
+    Abc::IV3fArrayProperty getPositions()
+    {
+        return m_positions;
     }
 
     //-*************************************************************************
@@ -214,6 +247,15 @@ public:
         m_positions.reset();
         m_indices.reset();
         m_counts.reset();
+
+        m_selfBounds.reset();
+        m_childBounds.reset();
+
+        m_uvs.reset();
+        m_normals.reset();
+
+        m_arbGeomParams.reset();
+
         Abc::ISchema<PolyMeshSchemaInfo>::reset();
     }
 
@@ -238,6 +280,14 @@ protected:
     Abc::IV3fArrayProperty m_positions;
     Abc::IInt32ArrayProperty m_indices;
     Abc::IInt32ArrayProperty m_counts;
+
+    IV2fGeomParam m_uvs;
+    IN3fGeomParam m_normals;
+
+    Abc::IBox3dProperty m_selfBounds;
+    Abc::IBox3dProperty m_childBounds;
+
+    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

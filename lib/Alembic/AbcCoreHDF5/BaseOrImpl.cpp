@@ -99,7 +99,7 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
     // Verify that it's a group.
     ABCA_ASSERT( oinfo.type == H5O_TYPE_GROUP,
                  "Only groups allowed in Objects" );
-    
+
     // If the name is ".prop", mark properties found
     if ( std::string( iName ) == ".prop" )
     {
@@ -122,6 +122,16 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
 //-*****************************************************************************
 
 //-*****************************************************************************
+BaseOrImpl::BaseOrImpl( const BaseOrImpl &iCopy )
+  : m_proto( iCopy.m_proto )
+  , m_properties( iCopy.m_properties )
+  , m_foundPropertiesGroup( iCopy.m_foundPropertiesGroup )
+  , m_archive( iCopy.m_archive )
+  , m_protoObjects( iCopy.m_protoObjects )
+  , m_children( iCopy.m_children )
+{}
+
+//-*****************************************************************************
 // Reading as a child of a parent.
 BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
   : m_proto( iProto )
@@ -139,7 +149,7 @@ BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
 
     hsize_t idx = 0;
     hid_t id = m_proto->getGroup();
-    
+
     herr_t status = H5Literate( id,
                                 H5_INDEX_CRT_ORDER,
                                 H5_ITER_INC,
@@ -222,7 +232,7 @@ const AbcA::ObjectHeader & BaseOrImpl::getChildHeader( size_t i )
         ABCA_THROW( "Out of range index in OrImpl::getChildHeader: "
                      << i );
     }
-    
+
     return m_protoObjects[i]->getHeader();
 }
 

@@ -98,6 +98,8 @@ public:
     virtual void getSample( index_t iSampleIndex,
                             SAMPLE oSample );
 
+    virtual bool getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey );
+
 protected:
     // Parent compound property writer. It must exist.
     AbcA::CompoundPropertyReaderPtr m_parent;
@@ -381,6 +383,76 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
                                                  sampleName,
                                                  iSampleIndex,
                                                  oSample );
+    }
+}
+
+//-*****************************************************************************
+template <class ABSTRACT, class IMPL, class SAMPLE>
+bool
+SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
+                                               AbcA::ArraySampleKey & oKey )
+{
+    // Verify sample index
+    ABCA_ASSERT( iSampleIndex >= 0 &&
+                 iSampleIndex < m_numSamples,
+                 "Invalid sample index: " << iSampleIndex
+                 << ", should be between 0 and " << m_numSamples-1 );
+
+    if ( iSampleIndex >= m_numUniqueSamples )
+    {
+        iSampleIndex = m_numUniqueSamples-1;
+    }
+
+    // Get our name.
+    const std::string &myName = m_header->getName();
+
+    if ( iSampleIndex == 0 )
+    {
+        // Read the sample from the parent group.
+        // Sample 0 is always on the parent group, with
+        // our name + ".sample_0" as the name of it.
+        std::string sample0Name = getSampleName( myName, 0 );
+        if ( m_header->getPropertyType() == AbcA::kScalarProperty )
+        {
+            ABCA_ASSERT( H5Aexists( m_parentGroup, sample0Name.c_str() ),
+                         "Invalid property: " << myName
+                         << ", missing smp0" );
+        }
+        else
+        {
+            ABCA_ASSERT( DatasetExists( m_parentGroup, sample0Name ),
+                         "Invalid property: " << myName
+                         << ", missing smp1" );
+        }
+
+        return static_cast<IMPL *>( this )->readKey( m_parentGroup,
+                                                    sample0Name,
+                                                    oKey );
+    }
+    else
+    {
+        // Create the subsequent samples group.
+        if ( m_samplesIGroup < 0 )
+        {
+            std::string samplesIName = myName + ".smpi";
+            ABCA_ASSERT( GroupExists( m_parentGroup,
+                                      samplesIName ),
+                         "Invalid property: " << myName
+                         << ", missing smpi" );
+
+            m_samplesIGroup = H5Gopen2( m_parentGroup,
+                                        samplesIName.c_str(),
+                                        H5P_DEFAULT );
+            ABCA_ASSERT( m_samplesIGroup >= 0,
+                         "Invalid property: " << myName
+                         << ", invalid smpi group" );
+        }
+
+        // Read the sample.
+        std::string sampleName = getSampleName( myName, iSampleIndex );
+        return static_cast<IMPL *>( this )->readKey( m_samplesIGroup,
+                                                    sampleName,
+                                                    oKey );
     }
 }
 

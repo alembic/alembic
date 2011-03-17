@@ -229,7 +229,8 @@ AttributesWriter::AttributesWriter(
                     Alembic::Abc::OCharProperty bp(iParent.getProperties(),
                         "visible", iTimeType);
                     bp.set(visVal,
-                        Alembic::Abc::OSampleSelector(mCurIndex, iFrame/24.0));
+                        Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
+                    visPlug.prop = bp;
                     mAnimVisibility = visPlug;
                 }
                 // force static case
@@ -256,7 +257,8 @@ AttributesWriter::AttributesWriter(
                 Alembic::Abc::OCharProperty bp(iParent.getProperties(),
                     "visible", iTimeType);
                 bp.set(visVal,
-                    Alembic::Abc::OSampleSelector(mCurIndex, iFrame/24.0));
+                    Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
+                visPlug.prop = bp;
                 mAnimVisibility = visPlug;
 
             }
@@ -267,7 +269,6 @@ AttributesWriter::AttributesWriter(
             break;
         }
     }
-    mCurIndex ++;
 }
 
 AttributesWriter::~AttributesWriter()
@@ -282,6 +283,8 @@ bool AttributesWriter::isAnimated()
 
 void AttributesWriter::write(double iFrame)
 {
+    mCurIndex ++;
+
     std::vector< PlugAndObjScalar >::const_iterator i =
         mPlugObjScalarVec.begin();
     std::vector< PlugAndObjScalar >::const_iterator iend =
@@ -331,10 +334,9 @@ void AttributesWriter::write(double iFrame)
         }
 
         mAnimVisibility.prop.set(&visVal,
-            Alembic::Abc::OSampleSelector(mCurIndex, iFrame/24.0));
+            Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
     }
 
-    mCurIndex ++;
 }
 
 

@@ -41,15 +41,17 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 void IXformSchema::init( const Abc::IArgument &iArg0,
-                            const Abc::IArgument &iArg1 )
+                         const Abc::IArgument &iArg1 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::init()" );
 
     // .ops, .static, .anim and .inherits do not need to exist
 
+    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
+
     if (this->getPropertyHeader(".ops") != NULL)
     {
-        Abc::IUInt32ArrayProperty ops( *this, ".ops" );
+        Abc::IUInt32ArrayProperty ops( _this, ".ops" );
         Abc::UInt32ArraySamplePtr opSamp;
         ops.get(opSamp);
         if (opSamp)
@@ -67,15 +69,21 @@ void IXformSchema::init( const Abc::IArgument &iArg0,
 
     if (this->getPropertyHeader(".static") != NULL)
     {
-        Abc::IDoubleArrayProperty staticData( *this, ".static");
+        Abc::IDoubleArrayProperty staticData( _this, ".static");
         staticData.get(m_static);
     }
 
     if (this->getPropertyHeader(".anim") != NULL)
-        m_anim = Abc::IDoubleArrayProperty( *this, ".anim" );
+        m_anim = Abc::IDoubleArrayProperty( _this, ".anim" );
 
     if (this->getPropertyHeader(".inherits") != NULL)
-        m_inherits = Abc::IBoolProperty( *this, ".inherits" );
+        m_inherits = Abc::IBoolProperty( _this, ".inherits" );
+
+    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0,
+                                             iArg1 );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
@@ -193,7 +201,7 @@ bool IXformSchema::isOpStatic( size_t iIndex ) const
 
 //-*****************************************************************************
 void IXformSchema::get( XformSample & oSamp,
-    const Abc::ISampleSelector &iSS )
+                        const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::getSample()" );
 

@@ -811,7 +811,7 @@ bool AbcWriteJob::eval(double iFrame)
         for (std::set< MDagPath >::iterator it = mDagPath.begin(); it != end; it++)
         {
             mCurDag = *it;
-            setup(iFrame, MayaTransformWriterPtr());
+            setup(iFrame * util::spf(), MayaTransformWriterPtr());
         }
         perFrameCallback(iFrame);
     }
@@ -825,7 +825,7 @@ bool AbcWriteJob::eval(double iFrame)
             foundShapeFrame = true;
             std::vector< MayaNodePtr >::iterator it = mShapeList.begin();
             std::vector< MayaNodePtr >::iterator end = mShapeList.end();
-            CallWriteVisitor visit(iFrame);
+            CallWriteVisitor visit(iFrame * util::spf());
             IncrementCVCountsVisitor cntVisitor;
             for (; it != end; it++)
             {
@@ -853,7 +853,7 @@ bool AbcWriteJob::eval(double iFrame)
 
             for (; tcur != tend; tcur++)
             {
-                (*tcur)->write(iFrame);
+                (*tcur)->write(iFrame*util::spf());
             }
         }
 

@@ -37,6 +37,7 @@
 IF( ${MAYA_FOUND} )
 
 ADD_SUBDIRECTORY( AbcExport )
+ADD_SUBDIRECTORY( AbcImport )
 
 ENDIF()
 

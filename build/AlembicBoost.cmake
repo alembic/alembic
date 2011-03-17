@@ -110,7 +110,7 @@ SET( Boost_USE_STATIC_LIBS TRUE )
 SET( Boost_USE_MULTITHREADED TRUE )
 
 SET( Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45.0" )
-FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options thread REQUIRED)
+FIND_PACKAGE( Boost COMPONENTS program_options python )
 
 
 #-******************************************************************************
@@ -118,6 +118,10 @@ FIND_PACKAGE( Boost 1.42.0 COMPONENTS program_options thread REQUIRED)
 # Wrap it all ups
 #-******************************************************************************
 #-******************************************************************************
+IF ( DEFINED Boost_INCLUDE_DIRS )
+  SET( BOOST_FOUND TRUE )
+ENDIF()
+
 IF ( BOOST_FOUND )
   SET( Boost_FOUND TRUE )
 ENDIF()
@@ -134,7 +138,7 @@ MESSAGE( STATUS "BOOST_VERSION: ${BOOST_VERSION}" )
 
 IF (Boost_FOUND)
   IF( Boost_VERSION LESS 104200 )
-    MESSAGE(FATAL_ERROR "FOUND INCORRECT BOOST VERSION: ${Boost_LIB_VERSION}")
+    MESSAGE( STATUS "FOUND INCORRECT BOOST VERSION: ${Boost_LIB_VERSION}")
   ENDIF()
 
   MESSAGE( STATUS "BOOST FOUND: ${Boost_FOUND}" )

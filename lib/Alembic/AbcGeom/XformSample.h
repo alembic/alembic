@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -42,120 +42,49 @@
 namespace Alembic {
 namespace AbcGeom {
 
-//! Base class for holding transform operations, and the data which defines
-//! them.  This is useful for applications which only care about the operation
-//! type and the data that goes along with it, and not which channels are
-//! static or animated.
-class XformData
-{
-public:
-    XformData(XformOperationType iType) : m_type(iType) {}
-    XformOperationType getType() const {return m_type;}
-private:
-    XformOperationType m_type;
-};
+// forwards
+class XformOp;
+class boost::uuids::uuid;
 
-typedef boost::shared_ptr < XformData > XformDataPtr;
-
-//! Holds a translate vector.
-class TranslateData : public XformData
-{
-public:
-
-    TranslateData(const Abc::V3d & iData);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kTranslateOperation then
-    //! the translate vector defaults to (0, 0, 0)
-    TranslateData(XformDataPtr iXform);
-
-    Abc::V3d get() const {return m_data;}
-
-    Abc::M44d getMatrix() const;
-
-private:
-    Abc::V3d m_data;
-};
-
-//! Holds a scale vector.
-class ScaleData : public XformData
-{
-public:
-    ScaleData(const Abc::V3d & iData);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kScaleOperation then
-    //! the scale vector defaults to (1, 1, 1)
-    ScaleData(XformDataPtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::V3d get() const {return m_data;}
-
-private:
-    Abc::V3d m_data;
-};
-
-//! Holds the rotate vector and the rotate angle
-class RotateData : public XformData
-{
-public:
-    RotateData(const Abc::V3d & iAxis, double iAngle);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kRotateOperation then
-    //! the rotation axis defaults to (0, 0, 0) and the rotation angle
-    //! defaults to 0.
-    RotateData(XformDataPtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::V3d getAxis() const {return m_axis;}
-    double getAngle() const {return m_angle;}
-
-private:
-    Abc::V3d m_axis;
-    double m_angle;
-};
-
-//! Holds the 4x4 matrix
-class MatrixData : public XformData
-{
-public:
-    MatrixData(const Abc::M44d & iMatrix);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kMatrixOperation then
-    //! the matrix defaults to identity.
-    MatrixData(XformDataPtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::M44d get() const {return m_matrix;}
-
-private:
-    Abc::M44d m_matrix;
-};
-
-//! Class which holds the data for multiple transform operations.
+//-*****************************************************************************
 class XformSample
 {
 public:
     XformSample();
 
-    //! Returns the total number of transform operations
-    size_t getNum() {return m_xforms.size();}
+    // translate or scale
+    void addOp( const XformOp iOp, const Abc::V3d &iVal );
 
-    //! Returns a specific transform operation at iIndex.  If iIndex exceeds
-    //! the total number of transform operations an empty XformDataPtr is
-    //! returned.
-    XformDataPtr get(size_t iIndex);
+    // rotate
+    void addOp( const XformOp iOp, const Abc::V3d &iAxis,
+                const double iAngle );
 
-    void push(XformDataPtr iXform) {m_xforms.push_back(iXform);};
-    void clear() {m_xforms.clear();};
+    // matrix
+    void addOp( const XformOp iOp, const Abc::M44d &iMatrix );
+
+    XformOp getOp( std::size_t iIndex );
+
+    const boost::uuids::uuid &getID() const;
+
+    std::size_t getNumOpChannels() const;
+
+    std::size_t getNumOps() const;
+
+
 private:
-    std::vector < XformDataPtr > m_xforms;
-};
+    friend class OXform;
+    friend class IXform;
+    void setHasBeenRead( bool iHasBeenRead );
+
+private:
+    bool m_setWithOpStack;
+    boost::uuids::uuid m_id;
+    std::vector<Alembic::Util::uint8_t> m_opsArray;
+
+    bool m_hasBeenRead;
+
+}
+
 
 } // End namespace AbcGeom
 } // End namespace Alembic

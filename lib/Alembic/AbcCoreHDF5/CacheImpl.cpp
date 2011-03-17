@@ -63,6 +63,7 @@ CacheImpl::find( const AbcA::ArraySample::Key &iKey )
         AbcA::ArraySamplePtr deleterPtr =
             (*foundIter).second.weakDeleter.lock();
         assert( deleterPtr );
+
         return AbcA::ReadArraySampleID( iKey, deleterPtr );
     }
 
@@ -99,10 +100,6 @@ CacheImpl::store( const AbcA::ArraySample::Key &iKey,
     AbcA::ReadArraySampleID foundID = find( iKey );
     if ( foundID )
     {
-#ifdef DEBUG_HARD
-        ABCA_ASSERT( foundID.getSample()->getKey() == iKey,
-                     "Stored sample doesn't match given sample" );
-#endif
         return foundID;
     }
 

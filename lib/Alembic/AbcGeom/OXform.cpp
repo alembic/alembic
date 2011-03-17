@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -35,97 +35,144 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/OXform.h>
-#include <Alembic/AbcGeom/GeometryScope.h>
+#include <Alembic/AbcGeom/XformSample.h>
+#include <Alembic/AbcGeom/XformOp.h>
+
+#include <boost/lexical_cast.hpp>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-void OXformSchema::setXform( const XformOpVec & iOp,
-    const Abc::DoubleArraySample & iStatic )
+void
+OXformSchema::ODefaultedDoubleProperty::set(
+    const double &iVal,
+    const Abc::OSampleSelector &iSS,
+    const std::size_t &iNumSampsSoFar )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setXform()" );
-
-    ABCA_ASSERT( !m_writtenOps,
-        "Xform operations have already been written." );
-
-    XformOpVec::const_iterator it = iOp.begin();
-    XformOpVec::const_iterator itEnd = iOp.end();
-
-    std::vector < uint32_t > data(iOp.size());
-    size_t i = 0;
-    size_t numStatic = 0;
-    for ( ; it != itEnd; ++it, ++i )
+    if ( m_property )
     {
-        size_t numChannels = it->getNumIndices();
-        for ( size_t j = 0; j < numChannels; ++j )
+        m_property.set( iVal, iSS );
+        return;
+    }
+
+    if ( ! Imath::equalWithAbsError( iVal - m_default, 0.0, m_epsilon ) )
+    {
+        // A change!
+        m_property = Abc::ODoubleProperty( m_parent, m_name,
+                                           m_errorHandlerPolicy );
+
+        // Run up the defaults.
+        for ( size_t jdx = 0 ; jdx < iNumSampsSoFar ; ++jdx )
         {
-            if ( it->isIndexAnimated(j) )
+            Abc::OSampleSelector jSS( jdx );
+
+            if ( jdx == 0 )
             {
-                m_numAnimated ++;
+                m_property.set( m_default, jSS );
             }
             else
             {
-                numStatic ++;
+                m_property.setFromPrevious( jSS );
             }
         }
 
-        data[i] = it->getEncodedValue();
+        // set the final one.
+        m_property.set( iVal, iSS );
     }
-
-    ABCA_ASSERT( numStatic == iStatic.size(),
-        "Not enough static data provided in OXformSchema::setXform");
-
-    if ( !data.empty() )
-    {
-        OUInt32ArrayProperty ops( *this, ".ops" );
-        ops.set(data);
-
-        Abc::ODoubleArrayProperty staticData( *this, ".static" );
-        staticData.set(iStatic);
-    }
-
-    m_writtenOps = true;
-    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 //-*****************************************************************************
-void OXformSchema::set( const Abc::DoubleArraySample & iAnim,
-    const Abc::OSampleSelector &iSS  )
+void
+OXformSchema::ODefaultedDoubleProperty::setFromPrevious(
+    const Abc::OSampleSelector &iSS )
+{
+    if ( m_property )
+    {
+        m_property.setFromPrevious( iSS );
+    }
+}
+
+
+//-*****************************************************************************
+void OXformSchema::set( XformSample &ioSamp,
+                        const Abc::OSampleSelector &iSS  )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
-    ABCA_ASSERT( m_writtenOps,
-        "Must write xform operations before writing animated samples." );
+    ABCA_ASSERT( !ioSamp.getID().is_nil(), "Sample has been reset!" );
 
-    size_t animSize = iAnim.size();
-    ABCA_ASSERT( m_numAnimated == animSize, "Sample doesn't have enough data.");
+    if ( ioSamp.getChildBounds.hasVolume() )
+    { m_childBounds.set( ioSamp.getChildBounds(), iSS ); }
 
-    if (!m_anim)
-        m_anim = Abc::ODoubleArrayProperty( *this, ".anim", m_time );
+    m_isToWorld.set( ioSamp.getIsToWorld(), iSS );
 
     if ( iSS.getIndex() == 0 )
     {
-        m_anim.set( iAnim, iSS );
+        // set this to true, so that additional calls to sample's addOp()
+        // won't change the topology of the sample, but instead will merely
+        // update values.
+        ioSamp.setHasBeenRead( true );
+
+        m_sampID = ioSamp.getID();
+
+        m_props.reserve( ioSamp.getNumOpChannels() );
+
+        // This property will be constant, but it will also contain the xform's
+        // timesampling information; the op properties won't have time info on
+        // them.
+        //
+        // The "ops array" is actually an array of packed uchars that encode
+        // the type of the op and the op's hint.  Actually getting the XformOps
+        // from the sample is via XformSample::getOp( size_t ).
+        m_ops.set( ioSamp.getOpsArray(), iSS );
+
+        AbcA::CompoundPropertyWriterPtr cptr = this->getPtr();
+        Abc::ErrorHandler::Policy pcy = this->getErrorHandlerPolicy();
+
+        // Create our well-named Properties, push them into our propvec,
+        // and set them.
+        for ( size_t i = 0 ; i < ioSamp.getNumOps() ; ++i )
+        {
+            XformOp op = ioSamp.getOp( i );
+            std::string oname = boost::lexical_cast<std::string>( i );
+
+            for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
+            {
+                // eg, ".tx"
+                std::string channame = op.getChannelName( j );
+
+                // name will be, eg, ".tx0"k
+                ODefaultedDoubleProperty prop(
+                    cptr, channame + oname, pcy,
+                    op.getDefaultChannelValue( j ) );
+
+                prop.set( op.getChannelValue( j ), iSS, m_numSetSamples );
+
+                m_props.push_back( prop );
+            }
+        }
     }
     else
     {
-        SetPropUsePrevIfNull( m_anim, iAnim, iSS );
+        ABCA_ASSERT( m_sampID == ioSamp.getID(), "Invalid sample ID!" );
+
+        m_ops.setFromPrevious( iSS );
+
+        for ( size_t i = 0 ; i < ioSamp.getNumOps() ; ++i )
+        {
+            XformOp op = ioSamp.getOp( i );
+
+            for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
+            {
+                m_props[i + j].set( op.getChannelValue( j ), iSS,
+                                    m_numSetSamples );
+            }
+        }
     }
 
-    ALEMBIC_ABC_SAFE_CALL_END();
-}
-
-//-*****************************************************************************
-void OXformSchema::setInherits( bool iInherits,
-    const Abc::OSampleSelector &iSS  )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setInherits()" );
-
-    if (!m_inherits)
-        m_inherits = Abc::OBoolProperty( *this, ".inherits", m_time );
-
-    m_inherits.set( iInherits, iSS );
+    // bump our set count
+    ++m_numSetSamples;
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -135,11 +182,20 @@ void OXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious" );
 
-    if (m_anim)
-        m_anim.setFromPrevious( iSS );
+    ++m_numSetSamples;
 
-    if (m_inherits)
-        m_inherits.setFromPrevious( iSS );
+    m_isToWorld.setFromPrevious( iSS );
+
+    m_ops.setFromPrevious( iSS );
+
+    if ( m_childBounds.getNumSamples() > 0 )
+    { m_childBounds.setFromPrevious( iSS ); }
+
+    for ( std::vector<ODefaultedDoubleProperty>::iterator it = m_props.begin()
+              ; it != m_props.end() ; ++it )
+    {
+        it->setFromPrevious( iSS );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -149,9 +205,22 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::init()" );
 
-    m_time = iTst;
-    m_writtenOps = false;
-    m_numAnimated = 0;
+    m_timeSamplingType = iTst;
+
+    m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", iTst );
+
+    m_isToWorld = Abc::OBoolProperty( this->getPtr(), ".istoworld", iTst );
+
+    // This will hold the shape of the xform
+    m_timeSamplingType.setRetainConstantSampleTimes( true );
+    m_ops = Abc::OUcharArrayProperty( this->getPtr(), ".ops",
+                                      m_timeSamplingType );
+
+    boost::uuids::nil_generator ng;
+    m_sampID = ng();
+
+    m_numSetSamples = 0;
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
