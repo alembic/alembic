@@ -181,7 +181,8 @@ ISchemaObject<SCHEMA>::ISchemaObject
     const std::string &iName,
     const IArgument &iArg0,
     const IArgument &iArg1 )
-  : IObject( iParentObject, iName, iArg0, iArg1 )
+  : IObject( iParentObject, iName,
+             GetErrorHandlerPolicy( iArg0, iArg1 ) )
 {
     IArguments args;
     iArg0.setInto( args );
@@ -239,6 +240,16 @@ inline ISchemaObject<SCHEMA>::ISchemaObject(
                        GetSchemaInterpMatching( iArg0, iArg1 ) );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+inline ErrorHandler::Policy GetErrorHandlerPolicy( IArgument iArg0,
+                                                   IArgument iArg1 )
+{
+    IArguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    return args.getErrorHandlerPolicy();
 }
 
 

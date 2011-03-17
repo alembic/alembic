@@ -74,7 +74,7 @@ public:
     template <class OBJECT_PTR>
     IObject( OBJECT_PTR iParentObject,
              const std::string &iName,
-             ErrorHandler::Policy iPcy = kThrowPolicy
+             ErrorHandler::Policy iPcy = ErrorHandler::kThrowPolicy
            );
 
     //! This attaches an IObject wrapper around an existing
@@ -82,7 +82,7 @@ public:
     template <class OBJECT_PTR>
     IObject( OBJECT_PTR iPtr,
              WrapExistingFlag iFlag,
-             ErrorHandler::Policy iPcy = kThrowPolicy
+             ErrorHandler::Policy iPcy = ErrorHandler::kThrowPolicy
            )
       : m_object( GetObjectReaderPtr( iPtr ) )
     {
@@ -96,7 +96,7 @@ public:
     template <class ARCHIVE_PTR>
     IObject( ARCHIVE_PTR iPtr,
              TopFlag iFlag,
-             ErrorHandler::Policy iPcy = kThrowPolicy
+             ErrorHandler::Policy iPcy = ErrorHandler::kThrowPolicy
            )
     {
         // Set the error handling policy
