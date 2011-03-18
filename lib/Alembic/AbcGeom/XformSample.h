@@ -52,35 +52,66 @@ class XformSample
 public:
     XformSample();
 
-    // translate or scale
+    // odd translate or scale op
     void addOp( const XformOp iOp, const Abc::V3d &iVal );
 
-    // rotate
+    // add rotate op
     void addOp( const XformOp iOp, const Abc::V3d &iAxis,
                 const double iAngle );
 
-    // matrix
+    // add matrix op
     void addOp( const XformOp iOp, const Abc::M44d &iMatrix );
 
-    XformOp getOp( std::size_t iIndex );
+    const XformOp &getOp( std::size_t iIndex ) const;
 
-    const boost::uuids::uuid &getID() const;
-
-    std::size_t getNumOpChannels() const;
+    const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
 
     std::size_t getNumOps() const;
+    std::size_t getNumOpChannels() const;
 
+    void setIsToWorld( bool iIsToWorld );
+    bool getIsToWorld() const;
+
+    void setChildBounds( const Abc::Box3d &iBnds );
+    const Abc::Box3d &getChildBounds() const;
+
+    // non-op-based methods; the getters will compute their return values
+    // from the ops under the hood.
+    void setTranslation( const Abc::V3d &iTrans );
+    const Abc::V3d &getTranslation() const;
+
+    void setRotation( const Abc::V3d &iAxis, const double iAngle );
+    const Abc::V3d &getAxis() const;
+    const double getAngle() const;
+
+    void setScale( const Abc::V3d &iScale );
+    const Abc::V3d &getScale() const;
+
+    void setMatrix( const Abc::M44d iMatrix );
+    const Abc::M44d &getMatrix() const;
 
 private:
     friend class OXform;
     friend class IXform;
     void setHasBeenRead( bool iHasBeenRead );
+    const boost::uuids::uuid &getID() const;
 
 private:
-    bool m_setWithOpStack;
+    // 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
+    int m_setWithOpStack;
     boost::uuids::uuid m_id;
+
+    // This will be populated by the addOp() methods or setFoo() methods
+    // in the case of the sample being used to write data, and by the
+    // IXform in the case of the sample being used to read data.
     std::vector<Alembic::Util::uint8_t> m_opsArray;
 
+    bool m_isToWorld;
+    Abc::Box3d m_childBounds;
+
+    // This starts out false, but is set to true by the OXform and controls
+    // whether or not addOp() changes the topology of the Sample, in the form
+    // of the layout of the m_opsArray.
     bool m_hasBeenRead;
 
 }

@@ -134,7 +134,7 @@ void OXformSchema::set( XformSample &ioSamp,
         // and set them.
         for ( size_t i = 0 ; i < ioSamp.getNumOps() ; ++i )
         {
-            XformOp op = ioSamp.getOp( i );
+            const XformOp &op = ioSamp.getOp( i );
             std::string oname = boost::lexical_cast<std::string>( i );
 
             for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
