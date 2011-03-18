@@ -68,21 +68,8 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
     CprAttrVisitor *visitor = ( CprAttrVisitor * )iOpData;
     assert( visitor != NULL );
 
-    // std::cout << "Visiting attr: " << iAttrName << std::endl;
-    if ( iAttrName == NULL )
+    if ( iAttrName == NULL || iAttrName[0] == 0 )
     {
-        // std::cout << "Weird. NULL attr name. Info: "
-        //          << ( const void * )iAinfo
-        //          << ", op data: "
-        //          << ( const void * )iOpData << std::endl;
-        return 0;
-    }
-    if ( iAttrName[0] == 0 )
-    {
-        // std::cout << "Weird. Empty attr name. Info: "
-        //          << ( const void * )iAinfo
-        //          << ", op data: "
-        //          << ( const void * )iOpData << std::endl;
         return 0;
     }
 
@@ -92,7 +79,15 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
     // $NAME.meta       Meta Data
     // $NAME.tspc       Time Sampling Num Samples Per Cycle
     // $NAME.ttpc       Time Sampling Time Per Cycle
-    // or we ignore it.
+    // $NAME.nums       Total number of samples and number of unique samples
+    //                  (only if they are different)
+    // $NAME.smp0       First sample for smaller properties.
+    //                  Larger properties store it in an HDF5 dataset.
+    // $NAME.dims       Dimension hint for strings and complex multi-dimensional
+    //                  data sets.
+    // $NAME.sclr       Hint on only array properties about whether it is scalar
+    //                  like, meaning every sample only has 1 DataType in it.
+    // we ignore it everything else
     std::string attrName( iAttrName );
     size_t attrNameLen = attrName.size();
     if ( attrNameLen < 6 )
@@ -113,22 +108,6 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
     {
         std::string propertyName( attrName, 0, attrNameLen-5 );
         visitor->createNewProperty( propertyName );
-    }
-    else
-    {
-        if ( suffix != ".meta" &&
-             suffix != ".tspc" &&
-             suffix != ".ttpc" &&
-             suffix != ".nums" &&
-             suffix != ".time" &&
-             suffix != ".smp0" &&
-             suffix != ".dims")
-        {
-            ABCA_THROW( "Invalid attribute in compound property group: "
-                        << attrName
-                        << std::endl
-                        << "Unknown suffix: " << suffix );
-        }
     }
 
     return 0;

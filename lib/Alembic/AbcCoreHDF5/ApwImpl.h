@@ -101,6 +101,10 @@ public:
 protected:
     // Previous written array sample identifier!
     WrittenArraySampleIDPtr m_previousWrittenArraySampleID;
+
+private:
+    bool m_isScalarLike;
+
 };
 
 } // End namespace ALEMBIC_VERSION_NS

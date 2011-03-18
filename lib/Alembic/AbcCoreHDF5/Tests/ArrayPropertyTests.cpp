@@ -627,6 +627,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kBooleanPOD:
                 {
                     TESTING_ASSERT(ap->getName() == "bool");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 3);
@@ -650,6 +651,7 @@ void testReadWriteArrays()
                 {
                     TESTING_ASSERT(ap->getName() == "uint8" || 
                         ap->getName() == "uint8_newDims");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
 
@@ -684,6 +686,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kInt8POD:
                 {
                     TESTING_ASSERT(ap->getName() == "int8");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 2);
@@ -698,6 +701,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kUint16POD:
                 {
                     TESTING_ASSERT(ap->getName() == "uint16");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 3);
@@ -713,6 +717,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kInt16POD:
                 {
                     TESTING_ASSERT(ap->getName() == "int16");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 2);
@@ -727,6 +732,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kUint32POD:
                 {
                     TESTING_ASSERT(ap->getName() == "uint32");
+                    TESTING_ASSERT(ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 1);
@@ -740,6 +746,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kInt32POD:
                 {
                     TESTING_ASSERT(ap->getName() == "int32");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 4);
@@ -756,6 +763,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kUint64POD:
                 {
                     TESTING_ASSERT(ap->getName() == "uint64");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 3);
@@ -771,6 +779,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kInt64POD:
                 {
                     TESTING_ASSERT(ap->getName() == "int64");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 2);
@@ -785,6 +794,7 @@ void testReadWriteArrays()
                 case Alembic::Util::kFloat16POD:
                 {
                     TESTING_ASSERT(ap->getName() == "float16");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().numPoints() == 2);
@@ -800,6 +810,7 @@ void testReadWriteArrays()
                 {
                     TESTING_ASSERT(ap->getName() == "float32" ||
                         ap->getName() == "float32_ext1");
+                    TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
 
@@ -828,6 +839,7 @@ void testReadWriteArrays()
                 {
                     TESTING_ASSERT(ap->getName() == "float64" || 
                         ap->getName() == "float64_ext3");
+                    TESTING_ASSERT(!ap->isScalarLike());
 
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
@@ -854,6 +866,7 @@ void testReadWriteArrays()
                     TESTING_ASSERT(ap->getName() == "str");
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
+                    TESTING_ASSERT(!ap->isScalarLike());
                     TESTING_ASSERT(val->getDimensions().numPoints() == 4);
                     TESTING_ASSERT(val->getDimensions().rank() == 1);
                     Alembic::Util::string * data =
@@ -870,6 +883,7 @@ void testReadWriteArrays()
                 TESTING_ASSERT(ap->getName() == "wstr");
                 ABC::ArraySamplePtr val;
                 ap->getSample(0, val);
+                TESTING_ASSERT(!ap->isScalarLike());
                 TESTING_ASSERT(val->getDimensions().numPoints() == 4);
                 TESTING_ASSERT(val->getDimensions().rank() == 1);
                 Alembic::Util::wstring * data =
@@ -1045,6 +1059,9 @@ void testEmptyArray()
             if (ap->getName() == "veryEmptyInt32")
             {
                 TESTING_ASSERT(ap->getNumSamples() == 0);
+
+                // no samples?  it's scalar like
+                TESTING_ASSERT(ap->isScalarLike());
             }
             else if (ap->getName() == "emptyInt64")
             {
@@ -1054,6 +1071,7 @@ void testEmptyArray()
                 ABC::ArraySamplePtr samp;
                 ap->getSample(0, samp);
                 TESTING_ASSERT(samp->getDimensions().numPoints() == 0);
+                TESTING_ASSERT(!ap->isScalarLike());
                 TESTING_ASSERT(ap->getKey(0, key));
                 TESTING_ASSERT(key.numBytes == 0);
                 TESTING_ASSERT(key.origPOD == Alembic::Util::kInt64POD);

@@ -52,22 +52,12 @@ class AprImpl
     , public boost::enable_shared_from_this<AprImpl>
 {
 public:
-    AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-             hid_t iParentGroup,
-             PropertyHeaderPtr iHeader )
-      : SimplePrImpl<AbcA::ArrayPropertyReader,
-                     AprImpl,
-                     AbcA::ArraySamplePtr&>( iParent, iParentGroup, iHeader )
-    {
-        if ( m_header->getPropertyType() != AbcA::kArrayProperty )
-        {
-            ABCA_THROW( "Attempted to create a ArrayPropertyReader from a "
-                        "non-array property type" );
-        }
-    }
+    AprImpl( AbcA::CompoundPropertyReaderPtr iParent, hid_t iParentGroup,
+             PropertyHeaderPtr iHeader );
 
     virtual AbcA::ArrayPropertyReaderPtr asArrayPtr();
-    
+    virtual bool isScalarLike();
+
 protected:
     friend class SimplePrImpl<AbcA::ArrayPropertyReader, AprImpl,
                               AbcA::ArraySamplePtr&>;
@@ -86,6 +76,8 @@ protected:
                   const std::string &iSampleName,
                   AbcA::ArraySampleKey & oSamplePtr );
 
+private:
+    bool m_isScalarLike;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
