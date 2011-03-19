@@ -205,7 +205,10 @@ class AbcWriteJob
     bool checkCurveGrp();
 
     std::vector< MayaTransformWriterPtr > mTransList;
+    std::vector< AttributesWriterPtr > mTransAttrList;
+
     std::vector< MayaNodePtr > mShapeList;
+    std::vector< AttributesWriterPtr > mShapeAttrList;
 
     // helper bounding box for recursive calculation
     MBoundingBox mCurBBox;

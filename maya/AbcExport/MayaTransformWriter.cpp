@@ -656,12 +656,11 @@ void MayaTransformWriter::write(double iFrame)
         mSchema.set(Alembic::Abc::DoubleArraySample(samples),
             Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
     }
-    mAttrs->write(iFrame);
 }
 
 bool MayaTransformWriter::isAnimated() const
 {
-    return mAttrs->isAnimated() || mSampledList.size() > 0;
+    return mSampledList.size() > 0;
 }
 
 void MayaTransformWriter::pushTransformStack(double iFrame,

@@ -1116,6 +1116,25 @@ AttributesWriter::AttributesWriter(
 
     Abc::OSampleSelector sel(0, frame);
 
+    // write the statics
+    for (; j != jend; j++)
+    {
+        MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
+        bool filledProp = attributeToPropertyPair(j->obj, j->plug, sel, 
+            j->prop);
+
+        if (!filledProp)
+        {
+            MString msg = "WARNING: Couldn't get static property ";
+            msg += j->plug.partialName(1, 0, 0, 0, 1, 1);
+            msg += ", so skipping.";
+            MGlobal::displayWarning(msg);
+            continue;
+        }
+    }
+
+    j = mPlugObjArrayVec.begin();
+    jend = mPlugObjArrayVec.end();
     for (; j != jend; j++)
     {
         MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);

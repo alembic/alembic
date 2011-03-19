@@ -258,6 +258,7 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
 
 void MayaMeshWriter::write(double iFrame)
 {
+
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
     if ( !status )
@@ -362,13 +363,11 @@ void MayaMeshWriter::write(double iFrame)
             mSubDSchema.set(samp, s);
         }
     }
-
-    mAttrs->write(iFrame);
 }
 
 bool MayaMeshWriter::isAnimated() const
 {
-    return mIsGeometryAnimated || (mAttrs != NULL && mAttrs->isAnimated());
+    return mIsGeometryAnimated;
 }
 
 void MayaMeshWriter::writePoly(double iFrame,
