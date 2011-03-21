@@ -82,7 +82,7 @@ bool IArrayProperty::isScalarLike()
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, so return a default.
-    return true;
+    return false;
 }
 
 //-*****************************************************************************
