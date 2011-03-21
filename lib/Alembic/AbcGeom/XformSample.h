@@ -52,17 +52,20 @@ class XformSample
 public:
     XformSample();
 
-    // odd translate or scale op
-    void addOp( const XformOp iOp, const Abc::V3d &iVal );
+    // add translate or scale op
+    // returns the index of the op in its op-stack
+    std::size_t addOp( XformOp iOp, const Abc::V3d &iVal );
 
     // add rotate op
-    void addOp( const XformOp iOp, const Abc::V3d &iAxis,
+    // returns the index of the op in its op-stack
+    std::size_t addOp( XformOp iOp, const Abc::V3d &iAxis,
                 const double iAngle );
 
     // add matrix op
-    void addOp( const XformOp iOp, const Abc::M44d &iMatrix );
+    // returns the index of the op in its op-stack
+    std::size_t addOp( XformOp iOp, const Abc::M44d &iMatrix );
 
-    const XformOp &getOp( std::size_t iIndex ) const;
+    XformOp getOp( std::size_t iIndex ) const;
 
     const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
 
@@ -106,6 +109,8 @@ private:
     // IXform in the case of the sample being used to read data.
     std::vector<Alembic::Util::uint8_t> m_opsArray;
 
+    std::vector<XformOp> m_ops;
+
     bool m_isToWorld;
     Abc::Box3d m_childBounds;
 
@@ -113,6 +118,8 @@ private:
     // whether or not addOp() changes the topology of the Sample, in the form
     // of the layout of the m_opsArray.
     bool m_hasBeenRead;
+
+    size_t m_opIndex;
 
 }
 

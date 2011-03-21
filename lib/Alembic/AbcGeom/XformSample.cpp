@@ -35,134 +35,87 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/XformSample.h>
+#include <Alembic/AbcGeom/XformOp.h>
+
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-TranslateData::TranslateData(const Abc::V3d & iData)
-    : XformData(kTranslateOperation), m_data(iData)
-{
-}
-
-//-*****************************************************************************
-TranslateData::TranslateData(XformDataPtr iXform)
-    : XformData(kTranslateOperation)
-{
-    if (iXform && iXform->getType() == kTranslateOperation)
-    {
-        boost::shared_ptr < TranslateData > t =
-            boost::static_pointer_cast < TranslateData > (iXform);
-
-        m_data = t->get();
-    }
-    else
-    {
-        m_data = V3d(0, 0, 0);
-    }
-}
-
-//-*****************************************************************************
-Abc::M44d TranslateData::getMatrix() const
-{
-    return Abc::M44d().setTranslation(m_data);
-}
-
-//-*****************************************************************************
-ScaleData::ScaleData(const Abc::V3d & iData)
-    : XformData(kScaleOperation), m_data(iData)
-{
-}
-
-//-*****************************************************************************
-ScaleData::ScaleData(XformDataPtr iXform) : XformData(kScaleOperation)
-{
-    if (iXform && iXform->getType() == kScaleOperation)
-    {
-        boost::shared_ptr < ScaleData > s =
-            boost::static_pointer_cast < ScaleData > (iXform);
-        m_data = s->get();
-    }
-    else
-    {
-        m_data = V3d(1, 1, 1);
-    }
-}
-
-//-*****************************************************************************
-Abc::M44d ScaleData::getMatrix() const
-{
-    return Abc::M44d().setScale(m_data);
-}
-
-//-*****************************************************************************
-RotateData::RotateData(const Abc::V3d & iAxis, double iAngle)
-    : XformData(kRotateOperation), m_axis(iAxis), m_angle(iAngle)
-{
-}
-
-//-*****************************************************************************
-RotateData::RotateData(XformDataPtr iXform)
-    : XformData(kRotateOperation)
-{
-    if (iXform && iXform->getType() == kRotateOperation)
-    {
-        boost::shared_ptr < RotateData > r =
-            boost::static_pointer_cast < RotateData > (iXform);
-        m_angle = r->getAngle();
-        m_axis = r->getAxis();
-    }
-    else
-    {
-        m_angle = 0;
-        m_axis = V3d(0, 0, 0);
-    }
-}
-
-//-*****************************************************************************
-Abc::M44d RotateData::getMatrix() const
-{
-    return Abc::M44d().setAxisAngle(m_axis, m_angle);
-}
-
-//-*****************************************************************************
-MatrixData::MatrixData(const Abc::M44d & iMatrix)
-    : XformData(kMatrixOperation), m_matrix(iMatrix)
-{
-}
-
-//-*****************************************************************************
-MatrixData::MatrixData(XformDataPtr iXform)
-    : XformData(kMatrixOperation)
-{
-    if (iXform && iXform->getType() == kMatrixOperation)
-    {
-        boost::shared_ptr < MatrixData > m =
-            boost::static_pointer_cast < MatrixData > (iXform);
-        m_matrix = m->get();
-    }
-}
-
-//-*****************************************************************************
-Abc::M44d MatrixData::getMatrix() const
-{
-    return m_matrix;
-}
-
-//-*****************************************************************************
 XformSample::XformSample()
+  : m_setWithOpStack( 0 )
+  , m_isToWorld( false )
+  , m_hasBeenRead( false )
+  , m_opIndex( 0 )
 {
+    boost::uuids::random_generator gen;
+    m_id = gen();
 }
 
 //-*****************************************************************************
-XformDataPtr XformSample::get(size_t iIndex)
+std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iVal )
 {
-    if (iIndex >= m_xforms.size())
+    for ( size_t i = 0 ; i < 3 ; ++i )
     {
-        return XformDataPtr();
+        iOp.setChannelValue( i, iVal[i] );
     }
 
-    return m_xforms[iIndex];
+    if ( ! m_hasBeenRead )
+    {
+        m_ops.push_back( iOp );
+        m_opsArray.push_back( iOp.getOpEncoding() );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = iOp;
+        m_opIndex = ++m_opIndex % m_ops.size();
+
+        return ret;
+    }
+}
+
+//-*****************************************************************************
+std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
+                                const double iAngle )
+{
+    {
+        for ( size_t i = 0 ; i < 3 ; ++i )
+        {
+            iOp.setChannelValue( i, iAxis[i] );
+        }
+        iOp.setChannelValue( 3, iAngle );
+
+        if ( ! m_hasBeenRead )
+        {
+            m_ops.push_back( iOp );
+            m_opsArray.push_back( iOp.getOpEncoding() );
+
+            return m_ops.size() - 1;
+        }
+        else
+        {
+            std::size_t ret = m_opIndex;
+
+            ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                         "Cannot update mismatched op-type in already-setted "
+                         << "XformSample!" );
+
+            m_ops[ret] = iOp;
+            m_opIndex = ++m_opIndex % m_ops.size();
+
+            return ret;
+        }
+    }
 }
 
 } // End namespace AbcGeom
