@@ -40,6 +40,10 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
+#include <ImathMatrix.h>
+#include <ImathMatrixAlgo.h>
+#include <ImathQuat.h>
+
 namespace Alembic {
 namespace AbcGeom {
 
@@ -64,6 +68,11 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iVal )
 
     if ( ! m_hasBeenRead )
     {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
         m_ops.push_back( iOp );
         m_opsArray.push_back( iOp.getOpEncoding() );
 
@@ -72,6 +81,9 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iVal )
     else
     {
         std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
 
         ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
                      "Cannot update mismatched op-type in already-setted "
@@ -97,6 +109,11 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
 
         if ( ! m_hasBeenRead )
         {
+            ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                         "Cannot mix addOp() and set<Foo>() methods." );
+
+            m_setWithOpStack = 1;
+
             m_ops.push_back( iOp );
             m_opsArray.push_back( iOp.getOpEncoding() );
 
@@ -110,6 +127,9 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
                          "Cannot update mismatched op-type in already-setted "
                          << "XformSample!" );
 
+            ABCA_ASSERT( m_setWithOpStack == 1,
+                         "Cannot mix addOp() and set<Foo>() methods." );
+
             m_ops[ret] = iOp;
             m_opIndex = ++m_opIndex % m_ops.size();
 
@@ -117,6 +137,331 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
         }
     }
 }
+
+//-*****************************************************************************
+std::size_t XformSample::addOp( XformOp iOp, const Abc::M44d &iVal )
+{
+    for ( size_t i = 0 ; i < 16 ; ++i )
+    {
+        iOp.setChannelValue( i, iVal[i] );
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
+        m_ops.push_back( iOp );
+        m_opsArray.push_back( iOp.getOpEncoding() );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_ops[ret] = iOp;
+        m_opIndex = ++m_opIndex % m_ops.size();
+
+        return ret;
+    }
+}
+
+//-*****************************************************************************
+XformOp XformSample::getOp( std::size_t iIndex ) const
+{
+    return m_ops[iIndex];
+}
+
+//-*****************************************************************************
+const std::vector<Alembic::Util::uint8_t> &XformSample::getOpsArray() const
+{
+    return m_opsArray;
+}
+
+//-*****************************************************************************
+std::size_t XformSample::getNumOps() const
+{
+    return m_opsArray.size();
+}
+
+//-*****************************************************************************
+std::size_t XformSample::getNumOpChannels() const
+{
+    std::size_t ret = 0;
+    for ( size_t i = 0 ; i < m_ops.size() ; ++i )
+    {
+        ret += m_ops[i].getNumChannels();
+    }
+
+    return ret;
+}
+
+//-*****************************************************************************
+void XformSample::setIsToWorld( bool iIsToWorld )
+{
+    m_isToWorld = iIsToWorld;
+}
+
+//-*****************************************************************************
+bool XformSample::getIsToWorld() const
+{
+    return m_isToWorld;
+}
+
+//-*****************************************************************************
+void XformSample::setChildBounds( const Abc::Box3d &iBnds )
+{
+    m_childBounds = iBnds;
+}
+
+//-*****************************************************************************
+const Abc::Box3d &XformSample::getChildBounds() const
+{
+    return m_childBounds;
+}
+
+//-*****************************************************************************
+void XformSample::setTranslation( const Abc::V3d &iTrans )
+{
+    XformOp op( kTranslateOperation, kTranslateHint );
+
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        op.setChannelValue( i, iTrans[i] );
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+        m_opsArray.push_back( op.getOpEncoding() );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        m_opIndex = ++m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setRotation( const Abc::V3d &iAxis, const double iAngle )
+{
+    XformOp op( kRotateOperation, kRotateHint );
+
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        op.setChannelValue( i, iAxis[i] );
+    }
+    op.setChannelValue( 3, iAngle );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+        m_opsArray.push_back( op.getOpEncoding() );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        m_opIndex = ++m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setScale( const Abc::V3d &iScale )
+{
+    XformOp op( kScaleOperation, kScaleHint );
+
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        op.setChannelValue( i, iScale[i] );
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+        m_opsArray.push_back( op.getOpEncoding() );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        m_opIndex = ++m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setMatrix( const Abc::M44d &iMatrix )
+{
+    XformOp op( kMatrixOperation, kMatrixHint );
+
+    for ( size_t i = 0 ; i < 16 ; ++i )
+    {
+        op.setChannelValue( i, iMatrix[i] );
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+        m_opsArray.push_back( op.getOpEncoding() );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        m_opIndex = ++m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+const Abc::M44d &XformSample::getMatrix() const
+{
+    Abc::M44d ret;
+
+    for ( std::size_t i = 0 ; i < m_ops.size() ; ++i )
+    {
+        Abc::M44d m;
+        op = m_ops[i];
+
+        XformOperationType otype = op.getType();
+
+        if ( otype == kMatrixOperation )
+        {
+            for ( std::size_t j = 0 ; j < 16 ; ++j )
+            {
+                m[j] = op.getChannelValue( j );
+            }
+        }
+        else
+        {
+            Abc::V3d vec( op.getChannelValue( 0 ),
+                          op.getChannelValue( 1 ),
+                          op.getChannelValue( 2 ) );
+
+            if ( otype == kScaleOperation )
+            {
+                m.setScale( vec );
+            }
+            else if ( otype == kTranslateOperation )
+            {
+                m.setTranslation( vec );
+            }
+            else // must be rotation
+            {
+                m.setAxisAngle( vec, op.getChannelValue( 3 ) );
+            }
+        }
+        ret = m * ret;
+    }
+
+    return ret;
+}
+
+//-*****************************************************************************
+const Abc::V3d &XformSample::getTranslation() const
+{
+    return this->getMatrix().translation();
+}
+
+//-*****************************************************************************
+const Abc::V3d &XformSample::getScale() const
+{
+    Abc::V3d scl;
+    Imath::extractScaling( this->getMatrix(), scl );
+    return scl;
+}
+
+//-*****************************************************************************
+const Abc::V3d &XformSample::getAxis() const
+{
+    Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
+
+    return q.axis();
+}
+
+//-*****************************************************************************
+const double XformSample::getAngle() const
+{
+    Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
+
+    return q.angle();
+}
+
+//-*****************************************************************************
+void XformSample::setHasBeenRead( bool iHasBeenRead )
+{
+    m_hasBeenRead = iHasBeenRead;
+}
+
+//-*****************************************************************************
+const boost::uuids::uuid &XformSample::getID() const
+{
+    return m_id;
+}
+
+
 
 } // End namespace AbcGeom
 } // End namespace Alembic
