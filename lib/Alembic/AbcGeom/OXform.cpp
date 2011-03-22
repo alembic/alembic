@@ -159,15 +159,19 @@ void OXformSchema::set( XformSample &ioSamp,
 
         m_ops.setFromPrevious( iSS );
 
+        size_t prevIdx = 0;
         for ( size_t i = 0 ; i < ioSamp.getNumOps() ; ++i )
         {
             XformOp op = ioSamp.getOp( i );
 
             for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
             {
-                m_props[i + j].set( op.getChannelValue( j ), iSS,
+                size_t idx = prevIdx + j;
+
+                m_props[idx].set( op.getChannelValue( j ), iSS,
                                     m_numSetSamples );
             }
+            prevIdx += op.getNumChannels();
         }
     }
 

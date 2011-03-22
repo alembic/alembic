@@ -73,7 +73,7 @@ void xformOut()
         trans1.y = ( i * 1.01 );
         trans2.z = ( i * 1.2 );
 
-        //asamp.addOp( transop, trans1 );
+        asamp.addOp( transop, trans1 );
         asamp.addOp( transop, trans2 );
 
         asamp.addOp( XformOp( kRotateOperation, kRotateHint ),

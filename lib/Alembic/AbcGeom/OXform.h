@@ -224,6 +224,8 @@ protected:
 
         double getDefaultValue() const { return m_default; }
 
+        std::string getName() const { return m_name; }
+
     protected:
         // Parent.
         AbcA::CompoundPropertyWriterPtr m_parent;
