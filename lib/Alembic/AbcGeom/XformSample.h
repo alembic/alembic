@@ -68,8 +68,8 @@ public:
 
     XformOp getOp( std::size_t iIndex ) const;
 
-    XformOp &operator[]( std::size_t iIndex ) const;
-    const XformOp &operator[]( std::size_t iIndex ) const;
+    XformOp &operator[]( const std::size_t &iIndex );
+    const XformOp &operator[]( const std::size_t &iIndex ) const;
 
     std::size_t getNumOps() const;
     std::size_t getNumOpChannels() const;

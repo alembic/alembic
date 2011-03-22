@@ -37,9 +37,6 @@
 #include <Alembic/AbcGeom/XformSample.h>
 #include <Alembic/AbcGeom/XformOp.h>
 
-//#include <Alembic/AbcGeom/OXform.h>
-
-#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
 #include <ImathMatrix.h>
@@ -186,13 +183,13 @@ XformOp XformSample::getOp( std::size_t iIndex ) const
 }
 
 //-*****************************************************************************
-XformOp &XformSample::operator[]( std::size_t iIndex ) const
+XformOp &XformSample::operator[]( const std::size_t &iIndex )
 {
     return m_ops[iIndex];
 }
 
 //-*****************************************************************************
-const XformOp &XformSample::operator[]( std::size_t iIndex ) const
+const XformOp &XformSample::operator[]( const std::size_t &iIndex ) const
 {
     return m_ops[iIndex];
 }

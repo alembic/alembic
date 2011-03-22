@@ -35,7 +35,6 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/OXform.h>
-#include <Alembic/AbcGeom/XformSample.h>
 #include <Alembic/AbcGeom/XformOp.h>
 
 #include <boost/lexical_cast.hpp>
