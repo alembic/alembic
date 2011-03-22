@@ -68,6 +68,8 @@ void xformOut()
 
     XformSample asamp;
 
+    M44d mat;
+
     for (size_t i = 0; i < 20; ++i)
     {
         trans1.y = ( i * 1.01 );
@@ -78,6 +80,9 @@ void xformOut()
 
         asamp.addOp( XformOp( kRotateOperation, kRotateHint ),
                      trans1, i * 2.4 );
+
+        asamp.addOp( XformOp( kMatrixOperation, kMatrixHint ),
+                     mat.setScale( trans1 ) );
 
         a.getSchema().set( asamp, OSampleSelector( i ) );
     }

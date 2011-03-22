@@ -186,6 +186,18 @@ XformOp XformSample::getOp( std::size_t iIndex ) const
 }
 
 //-*****************************************************************************
+XformOp &XformSample::operator[]( std::size_t iIndex ) const
+{
+    return m_ops[iIndex];
+}
+
+//-*****************************************************************************
+const XformOp &XformSample::operator[]( std::size_t iIndex ) const
+{
+    return m_ops[iIndex];
+}
+
+//-*****************************************************************************
 const std::vector<Alembic::Util::uint8_t> &XformSample::getOpsArray() const
 {
     return m_opsArray;

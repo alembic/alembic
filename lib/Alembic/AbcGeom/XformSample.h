@@ -68,7 +68,8 @@ public:
 
     XformOp getOp( std::size_t iIndex ) const;
 
-    const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
+    XformOp &operator[]( std::size_t iIndex ) const;
+    const XformOp &operator[]( std::size_t iIndex ) const;
 
     std::size_t getNumOps() const;
     std::size_t getNumOpChannels() const;
@@ -99,6 +100,7 @@ private:
     friend class IXformSchema;
     void setHasBeenRead( bool iHasBeenRead );
     const boost::uuids::uuid &getID() const;
+    const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
 
 private:
     // 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
