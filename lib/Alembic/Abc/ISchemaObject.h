@@ -252,6 +252,13 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy( IArgument iArg0,
     return args.getErrorHandlerPolicy();
 }
 
+//-*****************************************************************************
+inline ErrorHandler::Policy GetErrorHandlerPolicy( IArgument iArg0 )
+{
+    IArguments args;
+    iArg0.setInto( args );
+    return args.getErrorHandlerPolicy();
+}
 
 } // End namespace Abc
 } // End namespace Alembic
