@@ -45,7 +45,7 @@ namespace AbcGeom {
 XformOp::XformOp()
   : m_type( kTranslateOperation )
   , m_hint( 0 )
-  , m_opName( ".t" );
+  , m_opName( ".t" )
 {
     m_channels.clear();
     m_channels.resize( 3 );
@@ -83,7 +83,7 @@ XformOp::XformOp( const XformOperationType iType,
 //-*****************************************************************************
 XformOp::XformOp( const Alembic::Util::uint8_t iEncodedOp )
 {
-    m_type = iEncodedOp >> 4;
+    m_type = (XformOperationType)(iEncodedOp >> 4);
     m_hint = iEncodedOp & 0xF;
 
     switch ( m_type )
@@ -291,11 +291,11 @@ std::string XformOp::getChannelName( std::size_t iIndex ) const
         break;
     }
 
-    return boost::format( "%s%s" ) % m_opName % c;
+    return ( boost::format( "%s%s" ) % m_opName % c ).str();
 }
 
 //-*****************************************************************************
-double XformOp::getDefaultChannelValue( std::size_t iIndex )
+double XformOp::getDefaultChannelValue( std::size_t iIndex ) const
 {
     switch ( m_type )
     {

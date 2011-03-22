@@ -102,7 +102,7 @@ void OXformSchema::set( XformSample &ioSamp,
 
     ABCA_ASSERT( !ioSamp.getID().is_nil(), "Sample has been reset!" );
 
-    if ( ioSamp.getChildBounds.hasVolume() )
+    if ( ioSamp.m_childBounds.hasVolume() )
     { m_childBounds.set( ioSamp.getChildBounds(), iSS ); }
 
     m_isToWorld.set( ioSamp.getIsToWorld(), iSS );

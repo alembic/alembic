@@ -51,7 +51,7 @@ SET( CXX_FILES
 
   XformOp.cpp
   XformSample.cpp
-  IXform.cpp
+  #IXform.cpp
   OXform.cpp
 
   OPoints.cpp
@@ -81,7 +81,7 @@ SET( H_FILES
 
   XformOp.h
   XformSample.h
-  IXform.h
+  #IXform.h
   OXform.h
 
   OPoints.h

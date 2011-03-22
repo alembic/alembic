@@ -37,6 +37,8 @@
 #include <Alembic/AbcGeom/XformSample.h>
 #include <Alembic/AbcGeom/XformOp.h>
 
+//#include <Alembic/AbcGeom/OXform.h>
+
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
@@ -54,6 +56,7 @@ XformSample::XformSample()
   , m_hasBeenRead( false )
   , m_opIndex( 0 )
 {
+    m_childBounds.makeEmpty();
     boost::uuids::random_generator gen;
     m_id = gen();
 }
@@ -143,7 +146,7 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::M44d &iVal )
 {
     for ( size_t i = 0 ; i < 16 ; ++i )
     {
-        iOp.setChannelValue( i, iVal[i] );
+        iOp.setChannelValue( i, *(iVal[i]) );
     }
 
     if ( ! m_hasBeenRead )
@@ -346,7 +349,7 @@ void XformSample::setMatrix( const Abc::M44d &iMatrix )
 
     for ( size_t i = 0 ; i < 16 ; ++i )
     {
-        op.setChannelValue( i, iMatrix[i] );
+        op.setChannelValue( i, *(iMatrix[i]) );
     }
 
     if ( ! m_hasBeenRead )
@@ -376,14 +379,14 @@ void XformSample::setMatrix( const Abc::M44d &iMatrix )
 }
 
 //-*****************************************************************************
-const Abc::M44d &XformSample::getMatrix() const
+Abc::M44d XformSample::getMatrix() const
 {
     Abc::M44d ret;
 
     for ( std::size_t i = 0 ; i < m_ops.size() ; ++i )
     {
         Abc::M44d m;
-        op = m_ops[i];
+        XformOp op = m_ops[i];
 
         XformOperationType otype = op.getType();
 
@@ -391,7 +394,7 @@ const Abc::M44d &XformSample::getMatrix() const
         {
             for ( std::size_t j = 0 ; j < 16 ; ++j )
             {
-                m[j] = op.getChannelValue( j );
+                *(m[j]) = op.getChannelValue( j );
             }
         }
         else
@@ -420,13 +423,13 @@ const Abc::M44d &XformSample::getMatrix() const
 }
 
 //-*****************************************************************************
-const Abc::V3d &XformSample::getTranslation() const
+Abc::V3d XformSample::getTranslation() const
 {
     return this->getMatrix().translation();
 }
 
 //-*****************************************************************************
-const Abc::V3d &XformSample::getScale() const
+Abc::V3d XformSample::getScale() const
 {
     Abc::V3d scl;
     Imath::extractScaling( this->getMatrix(), scl );
@@ -434,7 +437,7 @@ const Abc::V3d &XformSample::getScale() const
 }
 
 //-*****************************************************************************
-const Abc::V3d &XformSample::getAxis() const
+Abc::V3d XformSample::getAxis() const
 {
     Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
 
@@ -442,7 +445,7 @@ const Abc::V3d &XformSample::getAxis() const
 }
 
 //-*****************************************************************************
-const double XformSample::getAngle() const
+double XformSample::getAngle() const
 {
     Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
 

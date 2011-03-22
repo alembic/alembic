@@ -95,10 +95,10 @@ TARGET_LINK_LIBRARIES( AbcGeom_SchemaMatchingTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_SchemaMatching_TEST AbcGeom_SchemaMatchingTest )
 
 #-******************************************************************************
-ADD_EXECUTABLE( AbcGeom_XformTest
-		XformTests.cpp )
-TARGET_LINK_LIBRARIES( AbcGeom_XformTest  ${TEST_LIBS} )
-ADD_TEST( AbcGeom_XformTEST  AbcGeom_XformTest  )
+ADD_EXECUTABLE( AbcGeom_XformTest2
+		XformTests2.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_XformTest2  ${TEST_LIBS} )
+ADD_TEST( AbcGeom_Xform2TEST  AbcGeom_XformTest2  )
 
 ##-*****************************************************************************
 ADD_EXECUTABLE( AbcGeom_ConstantSimpleXformTest

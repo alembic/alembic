@@ -39,12 +39,13 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
+#include <boost/uuid/uuid.hpp>
+
 namespace Alembic {
 namespace AbcGeom {
 
 // forwards
 class XformOp;
-class boost::uuids::uuid;
 
 //-*****************************************************************************
 class XformSample
@@ -79,23 +80,23 @@ public:
     const Abc::Box3d &getChildBounds() const;
 
     // non-op-based methods; the getters will compute their return values
-    // from the ops under the hood.
+    // from the ops under the hood, hence return-by-value.
     void setTranslation( const Abc::V3d &iTrans );
-    const Abc::V3d &getTranslation() const;
+    Abc::V3d getTranslation() const;
 
     void setRotation( const Abc::V3d &iAxis, const double iAngle );
-    const Abc::V3d &getAxis() const;
-    const double getAngle() const;
+    Abc::V3d getAxis() const;
+    double getAngle() const;
 
     void setScale( const Abc::V3d &iScale );
-    const Abc::V3d &getScale() const;
+    Abc::V3d getScale() const;
 
-    void setMatrix( const Abc::M44d iMatrix );
-    const Abc::M44d &getMatrix() const;
+    void setMatrix( const Abc::M44d &iMatrix );
+    Abc::M44d getMatrix() const;
 
 private:
-    friend class OXform;
-    friend class IXform;
+    friend class OXformSchema;
+    friend class IXformSchema;
     void setHasBeenRead( bool iHasBeenRead );
     const boost::uuids::uuid &getID() const;
 
@@ -120,8 +121,7 @@ private:
     bool m_hasBeenRead;
 
     size_t m_opIndex;
-
-}
+};
 
 
 } // End namespace AbcGeom

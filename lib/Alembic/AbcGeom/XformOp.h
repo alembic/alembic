@@ -39,6 +39,8 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
+#include <set>
+
 namespace Alembic {
 namespace AbcGeom {
 
