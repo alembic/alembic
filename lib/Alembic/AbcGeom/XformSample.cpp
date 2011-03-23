@@ -428,15 +428,20 @@ Abc::M44d XformSample::getMatrix() const
     for ( std::size_t i = 0 ; i < m_ops.size() ; ++i )
     {
         Abc::M44d m;
+        m.makeIdentity();
+
         XformOp op = m_ops[i];
 
         XformOperationType otype = op.getType();
 
         if ( otype == kMatrixOperation )
         {
-            for ( std::size_t j = 0 ; j < 16 ; ++j )
+            for ( std::size_t j = 0 ; j < 4 ; ++j )
             {
-                *(m[j]) = op.getChannelValue( j );
+                for ( std::size_t k = 0 ; k < 4 ; ++k )
+                {
+                    m.x[j][k] = op.getChannelValue( ( 4 * j ) + k );
+                }
             }
         }
         else
@@ -467,7 +472,8 @@ Abc::M44d XformSample::getMatrix() const
 //-*****************************************************************************
 Abc::V3d XformSample::getTranslation() const
 {
-    return this->getMatrix().translation();
+    Abc::M44d m = this->getMatrix();
+    return m.translation();
 }
 
 //-*****************************************************************************
