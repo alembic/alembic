@@ -175,6 +175,10 @@ namespace
     void setPolyNormals(double iFrame, MFnMesh & ioMesh,
         Alembic::AbcGeom::IN3fGeomParam iNormals)
     {
+        // no normals to set?  bail early
+        if (!iNormals)
+            return;
+
         if (iNormals.getScope() != Alembic::AbcGeom::kVertexScope &&
             iNormals.getScope() != Alembic::AbcGeom::kFacevaryingScope)
         {
@@ -627,17 +631,19 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
         fnMesh.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
     }
 
-    if (!samp.getHoles()->size() == 0)
+    if (samp.getHoles() && !samp.getHoles()->size() == 0)
     {
         printWarning("Hole Poly Indices not yet supported.");
     }
 
-    if (!samp.getCreaseSharpnesses()->size() == 0)
+    if (samp.getCreaseSharpnesses() && 
+        !samp.getCreaseSharpnesses()->size() == 0)
     {
         printWarning("Creases not yet supported.");
     }
 
-    if (!samp.getCornerSharpnesses()->size() == 0)
+    if (samp.getCornerSharpnesses() && 
+        !samp.getCornerSharpnesses()->size() == 0)
     {
         printWarning("Corners not yet supported.");
     }
