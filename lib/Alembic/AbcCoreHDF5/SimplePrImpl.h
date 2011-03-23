@@ -269,6 +269,14 @@ template <class ABSTRACT, class IMPL, class SAMPLE>
 AbcA::TimeSampling
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getTimeSampling()
 {
+
+    // we've filled it in already, just return a copy of it.
+    if (m_timeSamplingPtr)
+    {
+        AbcA::TimeSampling ret = *m_timeSamplingPtr;
+        return ret;
+    }
+
     //-*************************************************************************
     // Read the time samples as an array ptr
     // check their sizes, convert to times, create time sampling ptr.
