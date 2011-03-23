@@ -245,16 +245,16 @@ public:
         int32_t m_interpolateBoundary;
 
         // Creases
-        Abc::Int32ArraySample    m_creaseIndices;
-        Abc::Int32ArraySample    m_creaseLengths;
-        Abc::FloatArraySample  m_creaseSharpnesses;
+        Abc::Int32ArraySample m_creaseIndices;
+        Abc::Int32ArraySample m_creaseLengths;
+        Abc::FloatArraySample m_creaseSharpnesses;
 
         // Corners
-        Abc::Int32ArraySample    m_cornerIndices;
-        Abc::FloatArraySample  m_cornerSharpnesses;
+        Abc::Int32ArraySample m_cornerIndices;
+        Abc::FloatArraySample m_cornerSharpnesses;
 
         // Holes
-        Abc::Int32ArraySample    m_holes;
+        Abc::Int32ArraySample m_holes;
 
         // subdivision scheme
         std::string m_subdScheme;
@@ -417,13 +417,16 @@ protected:
     Abc::OInt32ArrayProperty m_creaseIndices;
     Abc::OInt32ArrayProperty m_creaseLengths;
     Abc::OFloatArrayProperty m_creaseSharpnesses;
+    std::vector < Abc::OSampleSelector > m_nullCreaseSamples;
 
     // Corners
     Abc::OInt32ArrayProperty m_cornerIndices;
     Abc::OFloatArrayProperty m_cornerSharpnesses;
+    std::vector < Abc::OSampleSelector > m_nullCornerSamples;
 
     // Holes
     Abc::OInt32ArrayProperty m_holes;
+    std::vector < Abc::OSampleSelector > m_nullHoleSamples;
 
     // subdivision scheme
     Abc::OStringProperty m_subdScheme;
@@ -437,6 +440,12 @@ protected:
 
     // arbitrary geometry parameters
     Abc::OCompoundProperty m_arbGeomParams;
+
+private:
+    void initCreases();
+    void initCorners();
+    void initHoles();
+
 };
 
 //-*****************************************************************************

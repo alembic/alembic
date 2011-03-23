@@ -109,14 +109,23 @@ void ISubDSchema::get( ISubDSchema::Sample &iSample,
         iSample.m_faceVaryingPropagateCorners, iSS );
     m_interpolateBoundary.get( iSample.m_interpolateBoundary, iSS );
 
-    m_creaseIndices.get( iSample.m_creaseIndices, iSS );
-    m_creaseLengths.get( iSample.m_creaseLengths, iSS );
-    m_creaseSharpnesses.get( iSample.m_creaseSharpnesses, iSS );
+    if ( m_creaseIndices )
+        m_creaseIndices.get( iSample.m_creaseIndices, iSS );
 
-    m_cornerIndices.get( iSample.m_cornerIndices, iSS );
-    m_cornerSharpnesses.get( iSample.m_cornerSharpnesses, iSS );
+    if ( m_creaseLengths )
+        m_creaseLengths.get( iSample.m_creaseLengths, iSS );
 
-    m_holes.get( iSample.m_holes, iSS );
+    if ( m_creaseSharpnesses )
+        m_creaseSharpnesses.get( iSample.m_creaseSharpnesses, iSS );
+
+    if ( m_cornerIndices )
+        m_cornerIndices.get( iSample.m_cornerIndices, iSS );
+
+    if ( m_cornerSharpnesses )
+        m_cornerSharpnesses.get( iSample.m_cornerSharpnesses, iSS );
+
+    if ( m_holes )
+        m_holes.get( iSample.m_holes, iSS );
 
     m_subdScheme.get( iSample.m_subdScheme, iSS );
 
@@ -153,24 +162,42 @@ void ISubDSchema::init( const Abc::IArgument &iArg0,
         Abc::IInt32Property( *this, ".interpolateBoundary",
                            args.getSchemaInterpMatching() );
 
-    m_creaseIndices = Abc::IInt32ArrayProperty( *this, ".creaseIndices",
-                                              args.getSchemaInterpMatching() );
-    m_creaseLengths =
-        Abc::IInt32ArrayProperty( *this, ".creaseLengths",
-                                args.getSchemaInterpMatching() );
-    m_creaseSharpnesses =
-        Abc::IFloatArrayProperty( *this, ".creaseSharpnesses",
-                                  args.getSchemaInterpMatching() );
+    // creases, corners, and holes optionally exist
+    if ( this->getPropertyHeader(".creaseIndices") != NULL)
+    {
+        m_creaseIndices = Abc::IInt32ArrayProperty( *this, ".creaseIndices",
+            args.getSchemaInterpMatching() );
+    }
 
-    m_cornerIndices = Abc::IInt32ArrayProperty( *this, ".cornerIndices",
-                                              args.getSchemaInterpMatching() );
-    m_cornerSharpnesses =
-        Abc::IFloatArrayProperty( *this, ".cornerSharpnesses",
-                                  args.getSchemaInterpMatching() );
+    if ( this->getPropertyHeader(".creaseLengths") != NULL)
+    {
+        m_creaseLengths = Abc::IInt32ArrayProperty( *this, ".creaseLengths",
+            args.getSchemaInterpMatching() );
+    }
 
+    if ( this->getPropertyHeader(".creaseSharpnesses") != NULL)
+    {
+        m_creaseSharpnesses = Abc::IFloatArrayProperty( *this,
+            ".creaseSharpnesses", args.getSchemaInterpMatching() );
+    }
 
-    m_holes = Abc::IInt32ArrayProperty( *this, ".holes",
-                                      args.getSchemaInterpMatching() );
+    if ( this->getPropertyHeader(".cornerIndices") != NULL)
+    {
+        m_cornerIndices = Abc::IInt32ArrayProperty( *this, ".cornerIndices",
+            args.getSchemaInterpMatching() );
+    }
+
+    if ( this->getPropertyHeader(".cornerSharpnesses") != NULL)
+    {
+        m_cornerSharpnesses = Abc::IFloatArrayProperty( *this,
+            ".cornerSharpnesses", args.getSchemaInterpMatching() );
+    }
+
+    if ( this->getPropertyHeader(".holes") != NULL)
+    {
+        m_holes = Abc::IInt32ArrayProperty( *this, ".holes",
+            args.getSchemaInterpMatching() );
+    }
 
     m_subdScheme = Abc::IStringProperty( *this, ".scheme",
                                          args.getSchemaInterpMatching() );

@@ -141,64 +141,64 @@ void OSubDSchema::set( const Sample &iSamp,
         std::vector<int32_t> emptyInt32Array;
         std::vector<float32_t> emptyFloatArray;
 
-        emptyInt32Array.resize( 0 );
-        emptyFloatArray.resize( 0 );
+        if ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
+            iSamp.getCreaseSharpnesses() )
+        {
+            initCreases();
+        }
+        else
+        {
+            m_nullCreaseSamples.push_back( iSS );
+        }
 
         if ( iSamp.getCreaseIndices() )
         {
             m_creaseIndices.set( iSamp.getCreaseIndices(), iSS );
-        }
-        else
-        {
-            m_creaseIndices.set( Abc::Int32ArraySample( emptyInt32Array ), iSS );
         }
 
         if ( iSamp.getCreaseLengths() )
         {
             m_creaseLengths.set( iSamp.getCreaseLengths(), iSS );
         }
-        else
-        {
-            m_creaseLengths.set( Abc::Int32ArraySample( emptyInt32Array ), iSS );
-        }
 
         if ( iSamp.getCreaseSharpnesses() )
         {
             m_creaseSharpnesses.set( iSamp.getCreaseSharpnesses(), iSS );
         }
+
+        if ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() )
+        {
+            initCorners();
+        }
         else
         {
-            m_creaseSharpnesses.set( Abc::FloatArraySample( emptyFloatArray ),
-                                     iSS );
+            m_nullCornerSamples.push_back( iSS );
         }
 
         if ( iSamp.getCornerIndices() )
         {
             m_cornerIndices.set( iSamp.getCornerIndices(), iSS );
         }
-        else
-        {
-            m_cornerIndices.set( Abc::Int32ArraySample( emptyInt32Array ), iSS );
-        }
 
         if ( iSamp.getCornerSharpnesses() )
         {
             m_cornerSharpnesses.set( iSamp.getCornerSharpnesses(), iSS );
         }
+
+        if ( iSamp.getHoles() )
+        {
+            initHoles();
+        }
         else
         {
-            m_cornerSharpnesses.set( Abc::FloatArraySample( emptyFloatArray ),
-                                     iSS );
+            m_nullHoleSamples.push_back( iSS );
         }
 
         if ( iSamp.getHoles() )
         {
             m_holes.set( iSamp.getHoles(), iSS );
         }
-        else
-        {
-            m_holes.set( Abc::Int32ArraySample( emptyInt32Array ), iSS );
-        }
+
     }
     else
     {
@@ -213,22 +213,61 @@ void OSubDSchema::set( const Sample &iSamp,
         SetPropUsePrevIfNull( m_interpolateBoundary,
                               iSamp.getInterpolateBoundary(), iSS );
 
-        SetPropUsePrevIfNull( m_creaseIndices,
+        if ( ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
+            iSamp.getCreaseSharpnesses() ) && !m_creaseIndices )
+        {
+            initCreases();
+        }
+
+        if ( m_creaseIndices )
+        {
+            SetPropUsePrevIfNull( m_creaseIndices,
                               iSamp.getCreaseIndices(), iSS );
-        SetPropUsePrevIfNull( m_creaseLengths,
+            SetPropUsePrevIfNull( m_creaseLengths,
                               iSamp.getCreaseLengths(), iSS );
-        SetPropUsePrevIfNull( m_creaseSharpnesses,
+            SetPropUsePrevIfNull( m_creaseSharpnesses,
                               iSamp.getCreaseSharpnesses(), iSS );
+        }
+        else
+        {
+            m_nullCreaseSamples.push_back( iSS );
+        }
 
-        SetPropUsePrevIfNull( m_cornerIndices,
+        if ( ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() ) && 
+            !m_cornerIndices )
+        {
+            initCorners();
+        }
+
+        if ( m_cornerIndices )
+        {
+            SetPropUsePrevIfNull( m_cornerIndices,
                               iSamp.getCornerIndices(), iSS );
-        SetPropUsePrevIfNull( m_cornerSharpnesses,
+            SetPropUsePrevIfNull( m_cornerSharpnesses,
                               iSamp.getCornerSharpnesses(), iSS );
+        }
+        else
+        {
+            m_nullCornerSamples.push_back( iSS );
+        }
 
-        SetPropUsePrevIfNull( m_holes, iSamp.getHoles(), iSS );
+        if ( iSamp.getHoles() && !m_holes )
+        {
+            initHoles();
+        }
+
+        if ( m_holes )
+        {
+            SetPropUsePrevIfNull( m_holes, iSamp.getHoles(), iSS );
+        }
+        else
+        {
+            m_nullHoleSamples.push_back( iSS );
+        }
 
         SetPropUsePrevIfNull( m_subdScheme, iSamp.getSubdivisionScheme(),
                               iSS );
+
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
@@ -265,14 +304,35 @@ void OSubDSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
     m_faceVaryingPropagateCorners.setFromPrevious( iSS );
     m_interpolateBoundary.setFromPrevious( iSS );
 
-    m_creaseIndices.setFromPrevious( iSS );
-    m_creaseLengths.setFromPrevious( iSS );
-    m_creaseSharpnesses.setFromPrevious( iSS );
+    if ( m_creaseIndices )
+    {
+        m_creaseIndices.setFromPrevious( iSS );
+        m_creaseLengths.setFromPrevious( iSS );
+        m_creaseSharpnesses.setFromPrevious( iSS );
+    }
+    else
+    {
+        m_nullCreaseSamples.push_back( iSS );
+    }
 
-    m_cornerIndices.setFromPrevious( iSS );
-    m_cornerSharpnesses.setFromPrevious( iSS );
+    if ( m_cornerIndices )
+    {
+        m_cornerIndices.setFromPrevious( iSS );
+        m_cornerSharpnesses.setFromPrevious( iSS );
+    }
+    else
+    {
+        m_nullCornerSamples.push_back( iSS );
+    }
 
-    m_holes.setFromPrevious( iSS );
+    if ( m_holes )
+    {
+        m_holes.setFromPrevious( iSS );
+    }
+    else
+    {
+        m_nullHoleSamples.push_back( iSS );
+    }
 
     m_subdScheme.setFromPrevious( iSS );
 
@@ -324,24 +384,108 @@ void OSubDSchema::init( const AbcA::TimeSamplingType &iTst )
     m_interpolateBoundary =
         Abc::OInt32Property( *this, ".interpolateBoundary", iTst );
 
-    m_creaseIndices = Abc::OInt32ArrayProperty( *this, ".creaseIndices", iTst );
-
-    m_creaseLengths = Abc::OInt32ArrayProperty( *this, ".creaseLengths", iTst );
-
-    m_creaseSharpnesses = Abc::OFloatArrayProperty( *this, ".creaseSharpnesses",
-                                               iTst );
-
-    m_cornerIndices = Abc::OInt32ArrayProperty( *this, ".cornerIndices", iTst );
-
-    m_cornerSharpnesses = Abc::OFloatArrayProperty( *this, ".cornerSharpnesses",
-                                               iTst );
-
-    m_holes = Abc::OInt32ArrayProperty( *this, ".holes", iTst );
-
     m_subdScheme = Abc::OStringProperty( *this, ".scheme", iTst );
 
     m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTst );
     m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+void OSubDSchema::initCreases()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::initCreases()" );
+
+    AbcA::TimeSamplingType tst = m_positions.getTimeSamplingType();
+
+    m_creaseIndices = Abc::OInt32ArrayProperty( *this, ".creaseIndices", tst );
+
+    m_creaseLengths = Abc::OInt32ArrayProperty( *this, ".creaseLengths", tst );
+
+    m_creaseSharpnesses = Abc::OFloatArrayProperty( *this, ".creaseSharpnesses",
+        tst );
+
+    std::vector<int32_t> emptyInt;
+    std::vector<float32_t> emptyFloat;
+
+    // set the appropriate samples to empty
+    std::vector < Abc::OSampleSelector >::iterator it =
+        m_nullCreaseSamples.begin();
+    std::vector < Abc::OSampleSelector >::iterator itEnd =
+        m_nullCreaseSamples.end();
+
+    for (; it != itEnd; ++it)
+    {
+        m_creaseIndices.set( Abc::Int32ArraySample( emptyInt ), *it );
+        m_creaseLengths.set( Abc::Int32ArraySample( emptyInt ), *it );
+        m_creaseSharpnesses.set( Abc::FloatArraySample( emptyFloat ), *it );
+    }
+
+    // we no longer need these for creating empty samples
+    m_nullCreaseSamples.clear();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+void OSubDSchema::initCorners()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::initCorners()" );
+
+    AbcA::TimeSamplingType tst = m_positions.getTimeSamplingType();
+
+    m_cornerIndices = Abc::OInt32ArrayProperty( *this, ".cornerIndices", tst );
+
+    m_cornerSharpnesses = Abc::OFloatArrayProperty( *this, ".cornerSharpnesses",
+        tst );
+
+    std::vector<int32_t> emptyInt;
+    std::vector<float32_t> emptyFloat;
+
+    // set the appropriate samples to empty
+    std::vector < Abc::OSampleSelector >::iterator it =
+        m_nullCornerSamples.begin();
+    std::vector < Abc::OSampleSelector >::iterator itEnd =
+        m_nullCornerSamples.end();
+
+    for (; it != itEnd; ++it)
+    {
+        m_cornerIndices.set( Abc::Int32ArraySample( emptyInt ), *it );
+        m_cornerSharpnesses.set( Abc::FloatArraySample( emptyFloat ), *it );
+    }
+
+    // we no longer need these for creating empty samples
+    m_nullCornerSamples.clear();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+
+//-*****************************************************************************
+void OSubDSchema::initHoles()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::initHoles()" );
+
+    AbcA::TimeSamplingType tst = m_positions.getTimeSamplingType();
+
+    m_holes = Abc::OInt32ArrayProperty( *this, ".holes", tst );
+
+    std::vector<int32_t> emptyInt;
+
+    // set the appropriate samples to empty
+    std::vector < Abc::OSampleSelector >::iterator it =
+        m_nullHoleSamples.begin();
+    std::vector < Abc::OSampleSelector >::iterator itEnd =
+        m_nullHoleSamples.end();
+
+    for (; it != itEnd; ++it)
+    {
+        m_holes.set( Abc::Int32ArraySample( emptyInt ), *it );
+    }
+
+    // we no longer need these for creating empty samples
+    m_nullHoleSamples.clear();
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
