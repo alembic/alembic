@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
 // Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks Inc. and
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -39,7 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
-#include <Alembic/AbcGeom/XformOp.h>
+
 #include <Alembic/AbcGeom/XformSample.h>
 
 namespace Alembic {
@@ -48,230 +48,189 @@ namespace AbcGeom {
 //-*****************************************************************************
 class IXformSchema : public Abc::ISchema<XformSchemaInfo>
 {
-
     //-*************************************************************************
     // XFORM SCHEMA
     //-*************************************************************************
 public:
+
     //! By convention we always define this_type in AbcGeom classes.
     //! Used by unspecified-bool-type conversion below
+    typedef Abc::ISchema<XformSchemaInfo> super_type;
     typedef IXformSchema this_type;
+    typedef XformSample sample_type;
 
     //-*************************************************************************
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
     //-*************************************************************************
 
-    //! The default constructor creates an empty IXformSchema
+    //! The default constructor creates an empty OPolyMeshSchema
     //! ...
     IXformSchema() {}
 
-    //! This templated, explicit function creates a new scalar property reader.
+    //! This templated, primary constructor creates a new xform writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyReaderPtr
+    //! which can intrusively be converted to an CompoundPropertyWriterPtr
     //! to use as a parent, from which the error handler policy for
     //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy and to specify
-    //! schema interpretation matching.
+    //! can be used to override the ErrorHandlerPolicy, to specify
+    //! MetaData, and to set TimeSamplingType.
     template <class CPROP_PTR>
     IXformSchema( CPROP_PTR iParentObject,
-                     const std::string &iName,
-
-                     const Abc::IArgument &iArg0 = Abc::IArgument(),
-                     const Abc::IArgument &iArg1 = Abc::IArgument() )
-      : Abc::ISchema<XformSchemaInfo>( iParentObject, iName, iArg0, iArg1 )
+                  const std::string &iName,
+                  const Abc::IArgument &iArg0 = Abc::IArgument(),
+                  const Abc::IArgument &iArg1 = Abc::IArgument() )
+      : Abc::ISchema<XformSchemaInfo>( iParentObject, iName,
+                                       iArg0, iArg1 )
     {
-        init( iArg0, iArg1 );
+        // Meta data and error handling are eaten up by
+        // the super type, so all that's left is SchemaInterpMatching.
+        init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }
 
-    //! This constructor is the same as above, but with default
-    //! schema name used.
+    //! This constructor does the same as the above, but uses the default
+    //! name from the XformSchemaInfo struct.
     template <class CPROP_PTR>
     explicit IXformSchema( CPROP_PTR iParentObject,
-                              const Abc::IArgument &iArg0 = Abc::IArgument(),
-                              const Abc::IArgument &iArg1 = Abc::IArgument() )
+
+                           const Abc::IArgument &iArg0 = Abc::IArgument(),
+                           const Abc::IArgument &iArg1 = Abc::IArgument() )
       : Abc::ISchema<XformSchemaInfo>( iParentObject, iArg0, iArg1 )
     {
-        init( iArg0, iArg1 );
+        init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }
 
-    //! Default copy constructor used.
-    //! Default assignment operator used.
+    //! Wrap an existing IXform object
+    template <class CPROP_PTR>
+    explicit IXformSchema( CPROP_PTR iThis,
+                           Abc::WrapExistingFlag iFlag,
 
-    //! Return the number of samples contained in the animated property.
-    //! This can be any number, including zero.
-    //! This returns the number of samples that were written, independently
-    //! of whether or not they were constant.
-    size_t getNumAnimSamples()
+                           const Abc::IArgument &iArg0 = Abc::IArgument(),
+                           const Abc::IArgument &iArg1 = Abc::IArgument() )
+      : Abc::ISchema<XformSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
-        if ( m_anim.valid() )
-            return m_anim.getNumSamples();
-
-        return 0;
+        init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }
 
-    //! Return the number of samples contained in the inherits property.
-    //! This can be any number, including zero.
-    //! This returns the number of samples that were written, independently
-    //! of whether or not they were constant.
-    size_t getNumInheritsSamples()
-    {
-        if ( m_inherits.valid() )
-            return m_inherits.getNumSamples();
+    AbcA::TimeSampling getTimeSampling() const;
 
-        return 0;
-    }
+    bool isConstant() const { return m_isConstant; }
 
-    //! Time sampling type for inherits property
-    AbcA::TimeSamplingType getInheritsTimeSamplingType() const
-    {
-        if ( m_inherits.valid() )
-            return m_inherits.getTimeSamplingType();
+    size_t getNumSamples() const;
 
-        return AbcA::TimeSamplingType();
-    }
+    //! fill the supplied sample reference with values
+    void get( XformSample &oSamp,
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
 
-    //! Time sampling type.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    {
-        if ( m_anim.valid() )
-            return m_anim.getTimeSamplingType();
+    XformSample getValue( const Abc::ISampleSelector &iSS =
+                          Abc::ISampleSelector() );
 
-        return AbcA::TimeSamplingType();
-    }
+    // lightweight get to avoid constructing a sample
+    bool getIsToWorld( const Abc::ISampleSelector &iSS =
+                       Abc::ISampleSelector() );
 
-    //! Time information.
-    //! Defaults to Identity.
-    AbcA::TimeSampling getInheritsTimeSampling()
-    {
-        if ( m_inherits.valid() )
-            return m_inherits.getTimeSampling();
 
-        return AbcA::TimeSampling();
-    }
-
-    //! Time information for inherits property.
-    //! Defaults to Identity.
-    AbcA::TimeSampling getTimeSampling()
-    {
-        if ( m_anim.valid() )
-            return m_anim.getTimeSampling();
-
-        return AbcA::TimeSampling();
-    }
-
-    //-*************************************************************************
-    Abc::DoubleArraySamplePtr getAnimData(
-        const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
-    {
-        Abc::DoubleArraySamplePtr ret;
-
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getAnim()" );
-
-        m_anim.get( ret, iSS );
-
-        // Could error check here.
-
-        ALEMBIC_ABC_SAFE_CALL_END();
-        return ret;
-    }
-
-    bool inherits(
-        const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
-    {
-        // if m_inherits doesn't exist we'll default to true
-        Alembic::Util::bool_t ret = true;
-
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::inherits()" );
-
-        if ( m_inherits.valid() )
-            m_inherits.get( ret, iSS );
-
-        // Could error check here.
-
-        ALEMBIC_ABC_SAFE_CALL_END();
-        return ret;
-    }
-
-    Abc::M44d getMatrix(
-        const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
-
-    Abc::DoubleArraySamplePtr getStaticData() { return m_static; }
-
-    const XformOpVec & getOps() { return m_ops; }
-
-    //! Returns the total number of operations.
-    size_t getNumOps() const { return m_ops.size(); }
-
-    //! Returns true if a particular op has no animated components.
-    bool isOpStatic( size_t iIndex ) const;
-
-    void get(XformSample & oVec,
-        const Abc::ISampleSelector &iSS = Abc::ISampleSelector());
-
-    XformSample getValue(
-        const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
-    {
-        XformSample smp;
-        get( smp, iSS );
-        return smp;
-    }
-
-    Abc::Box3d getChildBounds( const Abc::ISampleSelector &iSS =
-                               Abc::ISampleSelector() )
-    {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getChildBounds()" );
-
-        return m_childBounds.getValue( iSS );
-
-        ALEMBIC_ABC_SAFE_CALL_END();
-
-        Abc::Box3d ret;
-        return ret;
-    }
-
-    //-*************************************************************************
-    // ABC BASE MECHANISMS
-    // These functions are used by Abc to deal with errors, rewrapping,
-    // and so on.
-    //-*************************************************************************
-
-    //! Reset returns this function set to an empty, default state.
+    //! Reset returns this function set to an empty, default
+    //! state.
     void reset()
     {
-        m_ops.clear();
-        m_static.reset();
-
-        m_anim.reset();
-        m_inherits.reset();
+        m_props.resize( 0 );
 
         m_childBounds.reset();
+        m_ops.reset();
+        m_isToWorld.reset();
+        m_isConstant = true;
 
-        Abc::ISchema<XformSchemaInfo>::reset();
+        super_type::reset();
     }
 
     //! Valid returns whether this function set is valid.
     bool valid() const
     {
-        return ( Abc::ISchema<XformSchemaInfo>::valid() );
+        return ( m_ops && super_type::valid() );
     }
 
     //! unspecified-bool-type operator overload.
     //! ...
-    ALEMBIC_OVERRIDE_OPERATOR_BOOL( IXformSchema::valid() );
+    ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
+
 
 protected:
-    void init( const Abc::IArgument &iArg0,
-               const Abc::IArgument &iArg1 );
-
-    Abc::IDoubleArrayProperty m_anim;
-    Abc::IBoolProperty m_inherits;
-    XformOpVec m_ops;
-    Abc::DoubleArraySamplePtr m_static;
-
     Abc::IBox3dProperty m_childBounds;
+
+    Abc::IUcharArrayProperty m_ops;
+
+    std::vector<XformOp> m_opArray;
+
+    std::vector<IDefaultedDoubleProperty> m_props;
+
+    Abc::IBoolProperty m_isToWorld;
+
+    bool m_isConstant;
+
+private:
+    void init( Abc::SchemaInterpMatching &iMatching );
+
+protected:
+    //-*************************************************************************
+    // HELPER CLASS
+    //-*************************************************************************
+
+    //! The defaulted double property will only create a property
+    //! and only bother setting a value when it the value differs from a
+    //! known default value. This allows transforms to disappear when they
+    //! are identity.
+    //! It has some Xform-specific stuff in here, so not worth
+    //! making general (yet).
+    class IDefaultedDoubleProperty
+    {
+    public:
+        void reset()
+        {
+            m_parent.reset();
+            m_name = "";
+            m_constantValue = 0.0;
+            m_property.reset();
+        }
+
+        IDefaultedDoubleProperty() { reset(); }
+
+        IDefaultedDoubleProperty( AbcA::CompoundPropertyReaderPtr iParent,
+                                  const std::string &iName,
+                                  double iDefault )
+          : m_parent( Abc::GetCompoundPropertyReaderPtr( iParent ) )
+          , m_name( iName )
+          , m_constantValue( iDefault )
+          , m_isConstant( true )
+        {
+            init();
+        }
+
+        double getValue( const Abc::ISampleSelector &iSS );
+
+        std::string getName() const { return m_name; }
+
+        bool isConstant() const { return m_isConstant; }
+
+    protected:
+        // Parent.
+        AbcA::CompoundPropertyReaderPtr m_parent;
+
+        // We cache the init stuff.
+        std::string m_name;
+        double m_constantValue;
+        bool m_isConstant;
+
+        // The "it". This may not exist.
+        Abc::IDoubleProperty m_property;
+
+    private:
+        void init();
+    }; // END DEFAULTED DOUBLE PROPERTY CLASS DECLARATION
 
 };
 
+//-*****************************************************************************
+// SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IXformSchema> IXform;
 
