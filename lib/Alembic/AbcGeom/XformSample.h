@@ -60,7 +60,7 @@ public:
     // add rotate op
     // returns the index of the op in its op-stack
     std::size_t addOp( XformOp iOp, const Abc::V3d &iAxis,
-                const double iAngle );
+                       const double iAngleInDegrees );
 
     // add matrix op
     // returns the index of the op in its op-stack
@@ -88,7 +88,7 @@ public:
     void setTranslation( const Abc::V3d &iTrans );
     Abc::V3d getTranslation() const;
 
-    void setRotation( const Abc::V3d &iAxis, const double iAngle );
+    void setRotation( const Abc::V3d &iAxis, const double iAngleInDegrees );
     Abc::V3d getAxis() const;
     double getAngle() const;
 

@@ -59,7 +59,6 @@ void xformOut()
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
                       "xformInspection.abc" );
 
-    //OXform a( OObject( archive, kTop ), "a" );
 
     OXform b( OObject( archive, kTop ), "b" );
 
@@ -74,13 +73,16 @@ void xformOut()
     XformSample asamp;
     XformSample bsamp;
 
+    bsamp.addOp( transop, trans1 );
     bsamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ), 15.0 );
     bsamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ), 25.0);
 
     b.getSchema().set( bsamp );
 
-    M44d mat;
+    #if 0
+    OXform a( OObject( archive, kTop ), "a" );
 
+    M44d mat;
     for (size_t i = 0; i < 20; ++i)
     {
         trans1.y = ( i * 1.01 );
@@ -95,8 +97,9 @@ void xformOut()
         asamp.addOp( XformOp( kMatrixOperation, kMatrixHint ),
                      mat.setScale( trans1 ) );
 
-        //a.getSchema().set( asamp, OSampleSelector( i ) );
+        a.getSchema().set( asamp, OSampleSelector( i ) );
     }
+    #endif
 }
 
 #if 1
@@ -117,7 +120,12 @@ void xformIn()
 
     std::cout << "rotation is " << xs.getAngle() << std::endl;
 
-    //TESTING_ASSERT( 40.0 == xs.getAngle() );
+    TESTING_ASSERT( almostEqual( 40.0, xs.getAngle() ) );
+
+    V3d trans( 12.0, 20.0, 0.0 );
+
+    TESTING_ASSERT( trans.equalWithAbsError( xs.getTranslation(),
+                                             VAL_EPSILON ) );
 }
 #endif
 

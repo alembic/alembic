@@ -129,6 +129,19 @@ static Abc::Box3d ComputeBoundsFromPositions( const ARRAYSAMP &iSamp )
     return ret;
 }
 
+//-*****************************************************************************
+//! used in xform rotation conversion
+inline double DegreesToRadians( double iDegrees )
+{
+    return ( iDegrees * M_PI ) / 180.0;
+}
+
+inline double RadiansToDegrees( double iRadians )
+{
+    return iRadians * ( 180.0 / M_PI );
+}
+
+
 } // End namespace AbcGeom
 } // End namespace Alembic
 

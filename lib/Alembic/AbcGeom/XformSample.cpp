@@ -43,6 +43,8 @@
 #include <ImathMatrixAlgo.h>
 #include <ImathQuat.h>
 
+#include <math.h>
+
 namespace Alembic {
 namespace AbcGeom {
 
@@ -98,14 +100,14 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iVal )
 
 //-*****************************************************************************
 std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
-                                const double iAngle )
+                                const double iAngleInDegrees )
 {
     {
         for ( size_t i = 0 ; i < 3 ; ++i )
         {
             iOp.setChannelValue( i, iAxis[i] );
         }
-        iOp.setChannelValue( 3, iAngle );
+        iOp.setChannelValue( 3, iAngleInDegrees );
 
         if ( ! m_hasBeenRead )
         {
@@ -312,7 +314,8 @@ void XformSample::setTranslation( const Abc::V3d &iTrans )
 }
 
 //-*****************************************************************************
-void XformSample::setRotation( const Abc::V3d &iAxis, const double iAngle )
+void XformSample::setRotation( const Abc::V3d &iAxis,
+                               const double iAngleInDegrees )
 {
     XformOp op( kRotateOperation, kRotateHint );
 
@@ -320,7 +323,7 @@ void XformSample::setRotation( const Abc::V3d &iAxis, const double iAngle )
     {
         op.setChannelValue( i, iAxis[i] );
     }
-    op.setChannelValue( 3, iAngle );
+    op.setChannelValue( 3, DegreesToRadians( iAngleInDegrees ) );
 
     if ( ! m_hasBeenRead )
     {
@@ -460,7 +463,8 @@ Abc::M44d XformSample::getMatrix() const
             }
             else // must be rotation
             {
-                m.setAxisAngle( vec, op.getChannelValue( 3 ) );
+                m.setAxisAngle( vec,
+                                DegreesToRadians( op.getChannelValue( 3 ) ) );
             }
         }
         ret = m * ret;
@@ -497,7 +501,7 @@ double XformSample::getAngle() const
 {
     Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
 
-    return q.angle();
+    return RadiansToDegrees( q.angle() );
 }
 
 //-*****************************************************************************
