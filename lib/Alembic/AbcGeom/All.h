@@ -59,7 +59,7 @@
 
 #include <Alembic/AbcGeom/XformOp.h>
 #include <Alembic/AbcGeom/OXform.h>
-//#include <Alembic/AbcGeom/IXform.h>
+#include <Alembic/AbcGeom/IXform.h>
 #include <Alembic/AbcGeom/XformSample.h>
 
 #endif

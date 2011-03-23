@@ -111,11 +111,11 @@ public:
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }
 
-    AbcA::TimeSampling getTimeSampling() const;
+    AbcA::TimeSampling getTimeSampling();
 
     bool isConstant() const { return m_isConstant; }
 
-    size_t getNumSamples() const;
+    size_t getNumSamples();
 
     //! fill the supplied sample reference with values
     void get( XformSample &oSamp,
@@ -155,6 +155,8 @@ public:
 
 
 protected:
+    class IDefaultedDoubleProperty; // forward
+
     Abc::IBox3dProperty m_childBounds;
 
     Abc::IUcharArrayProperty m_ops;
@@ -168,7 +170,7 @@ protected:
     bool m_isConstant;
 
 private:
-    void init( Abc::SchemaInterpMatching &iMatching );
+    void init( Abc::SchemaInterpMatching iMatching );
 
 protected:
     //-*************************************************************************
@@ -196,11 +198,13 @@ protected:
 
         IDefaultedDoubleProperty( AbcA::CompoundPropertyReaderPtr iParent,
                                   const std::string &iName,
+                                  Abc::ErrorHandler &iHndlr,
                                   double iDefault )
           : m_parent( Abc::GetCompoundPropertyReaderPtr( iParent ) )
           , m_name( iName )
           , m_constantValue( iDefault )
           , m_isConstant( true )
+          , m_errorHandler( iHndlr )
         {
             init();
         }
@@ -211,6 +215,10 @@ protected:
 
         bool isConstant() const { return m_isConstant; }
 
+        Abc::ErrorHandler &getErrorHandler() { return m_errorHandler; }
+        Abc::ErrorHandler::Policy getErrorHandlerPolicy() const
+        { return m_errorHandler.getPolicy(); }
+
     protected:
         // Parent.
         AbcA::CompoundPropertyReaderPtr m_parent;
@@ -219,6 +227,8 @@ protected:
         std::string m_name;
         double m_constantValue;
         bool m_isConstant;
+
+        Abc::ErrorHandler m_errorHandler;
 
         // The "it". This may not exist.
         Abc::IDoubleProperty m_property;

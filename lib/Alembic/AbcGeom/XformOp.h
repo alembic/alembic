@@ -198,9 +198,9 @@ private:
     std::string m_opName;
 
 private:
-    //! The XformSample can tell the op if its channels are animated
+    //! The IXform can tell the op if its channels are animated
     //! by directly inserting keys into the m_animChannels set.
-    friend class XformSample;
+    friend class IXformSchema;
 
 };
 

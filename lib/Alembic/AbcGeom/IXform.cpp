@@ -43,7 +43,8 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-void IXformSchema::IDefaultedDoubleProperty::init()
+void
+IXformSchema::IDefaultedDoubleProperty::init()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "IXformSchema::IDefaultedDoubleProperty::init()" );
@@ -52,7 +53,8 @@ void IXformSchema::IDefaultedDoubleProperty::init()
 
     if ( ptr )
     {
-        m_property( ptr, kWrapExisting );
+        m_property = Abc::IDoubleProperty( ptr, kWrapExisting,
+                                           m_errorHandler.getPolicy() );
 
         m_isConstant = m_property.isConstant();
 
@@ -76,6 +78,8 @@ IXformSchema::IDefaultedDoubleProperty::getValue(
     { return m_property.getValue( iSS ); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
+
+    return 0.0;
 }
 
 //-*****************************************************************************
@@ -98,7 +102,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     // well-formed naming mechanism from OXform::set() to make an array of
     // IDefaultedDoubleProperties.
 
-    opSampArray = *(m_ops.getValue());
+    Abc::UcharArraySample opSampArray = *(m_ops.getValue());
 
     std::size_t numOps = opSampArray.size();
 
@@ -118,7 +122,8 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
             std::string channame = op.getChannelName( j );
 
             IDefaultedDoubleProperty prop(
-                ptr, channame + oname, op.getDefaultChannelValue( j ) );
+                ptr, channame + oname, this->getErrorHandler(),
+                op.getDefaultChannelValue( j ) );
 
             m_props.push_back( prop );
 
@@ -130,7 +135,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 }
 
 //-*****************************************************************************
-AbcA::Timesampling IXformSchema::getTimeSampling() const
+AbcA::TimeSampling IXformSchema::getTimeSampling()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getTimeSampling()" );
 
@@ -143,7 +148,7 @@ AbcA::Timesampling IXformSchema::getTimeSampling() const
 }
 
 //-*****************************************************************************
-std::size_t IXformSchema::getNumSamples() const
+std::size_t IXformSchema::getNumSamples()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getNumSamples()" );
 
@@ -159,7 +164,7 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::get()" );
 
-    Alembic::Util::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
 
     oSamp.clear();
 
@@ -202,11 +207,13 @@ bool IXformSchema::getIsToWorld( const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getIsToWorld()" );
 
-    Alembic::Util::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
 
     return m_isToWorld.getValue( sampIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END();
+
+    return false;
 }
 
 } // End namespace AbcGeom
