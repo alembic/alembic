@@ -49,11 +49,11 @@ IXformSchema::IDefaultedDoubleProperty::init()
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "IXformSchema::IDefaultedDoubleProperty::init()" );
 
-    AbcA::ScalarPropertyReaderPtr ptr = m_parent->getScalarProperty( m_name );
+    const AbcA::PropertyHeader *ph = m_parent->getPropertyHeader( m_name );
 
-    if ( ptr )
+    if ( ph != NULL )
     {
-        m_property = Abc::IDoubleProperty( ptr, kWrapExisting,
+        m_property = Abc::IDoubleProperty( m_parent, m_name,
                                            m_errorHandler.getPolicy() );
 
         m_isConstant = m_property.isConstant();
@@ -113,6 +113,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     for ( std::size_t i = 0 ; i < numOps ; ++i )
     {
         XformOp op( opSampArray[i] );
+
         std::string oname = boost::lexical_cast<std::string>( i );
 
         m_opArray.push_back( op );

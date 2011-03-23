@@ -83,6 +83,7 @@ XformOp::XformOp( const XformOperationType iType,
 //-*****************************************************************************
 XformOp::XformOp( const Alembic::Util::uint8_t iEncodedOp )
 {
+
     m_type = (XformOperationType)(iEncodedOp >> 4);
     m_hint = iEncodedOp & 0xF;
 
@@ -90,15 +91,19 @@ XformOp::XformOp( const Alembic::Util::uint8_t iEncodedOp )
     {
     case kScaleOperation:
         m_opName = ".s";
+        m_channels.resize( 3 );
         break;
     case kTranslateOperation:
         m_opName = ".t";
+        m_channels.resize( 3 );
         break;
     case kRotateOperation:
         m_opName = ".r";
+        m_channels.resize( 4 );
         break;
     case kMatrixOperation:
         m_opName = ".m";
+        m_channels.resize( 16 );
         break;
     }
 }

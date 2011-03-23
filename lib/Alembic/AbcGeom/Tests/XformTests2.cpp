@@ -58,15 +58,26 @@ void xformOut()
 {
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
                       "xformInspection.abc" );
-    OXform a( OObject( archive, kTop ), "a" );
+
+    //OXform a( OObject( archive, kTop ), "a" );
+
+    OXform b( OObject( archive, kTop ), "b" );
 
     XformOp transop( kTranslateOperation, kTranslateHint );
+
+    XformOp rotop( kRotateOperation, kRotateHint );
 
     V3d trans1( 12.0, 20.0, 0.0 );
 
     V3d trans2( 1.0, 1.0, 0.0 );
 
     XformSample asamp;
+    XformSample bsamp;
+
+    bsamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ), 15.0 );
+    bsamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ), 25.0);
+
+    b.getSchema().set( bsamp );
 
     M44d mat;
 
@@ -84,84 +95,29 @@ void xformOut()
         asamp.addOp( XformOp( kMatrixOperation, kMatrixHint ),
                      mat.setScale( trans1 ) );
 
-        a.getSchema().set( asamp, OSampleSelector( i ) );
+        //a.getSchema().set( asamp, OSampleSelector( i ) );
     }
 }
 
-#if 0
+#if 1
 //-*****************************************************************************
 void xformIn()
 {
     IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      "Xform1.abc" );
-    IXform a( IObject( archive, kTop ), "a" );
-    XformOpVec ops = a.getSchema().getOps();
-    TESTING_ASSERT( ops.size() == a.getSchema().getNumOps() );
-    TESTING_ASSERT( ops.size() == 1 );
-    TESTING_ASSERT( a.getSchema().isOpStatic(0) == false );
-
-    TESTING_ASSERT( a.getSchema().getNumAnimSamples() == 20 );
-    TESTING_ASSERT( a.getSchema().inherits() );
-    for ( index_t i = 0; i < 20; ++i )
-    {
-        XformSample xs;
-        a.getSchema().get(xs, Abc::ISampleSelector(i));
-        TESTING_ASSERT(xs.getNum() == 1);
-        TESTING_ASSERT( xs.get(0)->getType() == kTranslateOperation );
-        TranslateData t( xs.get(0) );
-        TESTING_ASSERT( t.get() == V3d(12.0, i+42.0, 20.0) );
-        TESTING_ASSERT( t.getMatrix() ==
-            Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
-        Abc::M44d mat = a.getSchema().getMatrix(Abc::ISampleSelector(i));
-        TESTING_ASSERT( mat ==
-            Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
-    }
-
-    Abc::M44d identity;
+                      "xformInspection.abc" );
+    //IXform a( IObject( archive, kTop ), "a" );
 
     XformSample xs;
 
-    IXform b( a, "b" );
-    b.getSchema().get(xs);
-    TESTING_ASSERT( b.getSchema().getTimeSamplingType().isIdentity() );
-    TESTING_ASSERT( b.getSchema().getTimeSampling().isStatic() );
-    TESTING_ASSERT( b.getSchema().getInheritsTimeSamplingType().isIdentity() );
-    TESTING_ASSERT( !b.getSchema().getInheritsTimeSampling().isStatic() );
-    TESTING_ASSERT( xs.getNum() == 0 );
-    TESTING_ASSERT( b.getSchema().getNumInheritsSamples() == 20 );
-    TESTING_ASSERT( b.getSchema().getNumAnimSamples() == 0 );
-    TESTING_ASSERT( b.getSchema().getOps().size() == 0 );
-    TESTING_ASSERT( b.getSchema().getNumOps() == 0 );
-    TESTING_ASSERT( b.getSchema().getMatrix() == identity );
-    for (size_t i = 0; i < 20; ++i)
-    {
-        AbcA::index_t j = i;
-        TESTING_ASSERT( b.getSchema().inherits(ISampleSelector( j )) == (i&1) );
-    }
+    IXform b( archive.getTop(), "b" );
 
-    IXform c( b, "c" );
-    xs = c.getSchema().getValue();
-    TESTING_ASSERT( xs.getNum() == 0 );
-    TESTING_ASSERT( c.getSchema().getOps().size() == 0 );
-    TESTING_ASSERT( c.getSchema().getNumOps() == 0 );
-    TESTING_ASSERT( c.getSchema().getMatrix() == identity );
-    TESTING_ASSERT( c.getSchema().inherits() );
+    b.getSchema().get( xs );
 
-    IXform d( c, "d" );
-    xs = d.getSchema().getValue();
-    TESTING_ASSERT( xs.getNum() == 1 );
-    TESTING_ASSERT( d.getSchema().getNumOps() == 1 );
-    TESTING_ASSERT( xs.get(0)->getType() == kScaleOperation );
-    TESTING_ASSERT( d.getSchema().isOpStatic(0) );
-    ScaleData s( xs.get(0) );
-    TESTING_ASSERT( s.get() == V3d(3.0, 6.0, 9.0) );
-    TESTING_ASSERT( s.getMatrix() ==
-        Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
-    TESTING_ASSERT( d.getSchema().getOps().size() == 1 );
-    TESTING_ASSERT( d.getSchema().inherits() );
-    Abc::M44d mat = d.getSchema().getMatrix();
-    TESTING_ASSERT( mat ==
-        Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
+    std::cout << "translation is " << xs.getTranslation() << std::endl;
+
+    std::cout << "rotation is " << xs.getAngle() << std::endl;
+
+    //TESTING_ASSERT( 40.0 == xs.getAngle() );
 }
 #endif
 
@@ -423,7 +379,7 @@ void someOpsXform()
 int main( int argc, char *argv[] )
 {
     xformOut();
-    //xformIn();
+    xformIn();
     //someOpsXform();
 
     return 0;
