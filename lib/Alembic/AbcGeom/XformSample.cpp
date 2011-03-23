@@ -177,6 +177,39 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::M44d &iVal )
 }
 
 //-*****************************************************************************
+std::size_t XformSample::addOp( const XformOp &iOp )
+{
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
+        m_ops.push_back( iOp );
+        m_opsArray.push_back( iOp.getOpEncoding() );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_ops[ret] = iOp;
+        m_opIndex = ++m_opIndex % m_ops.size();
+
+        return ret;
+    }
+}
+
+//-*****************************************************************************
 XformOp XformSample::getOp( std::size_t iIndex ) const
 {
     return m_ops[iIndex];
@@ -462,9 +495,17 @@ double XformSample::getAngle() const
 }
 
 //-*****************************************************************************
-void XformSample::setHasBeenRead( bool iHasBeenRead )
+void XformSample::setHasBeenRead()
 {
-    m_hasBeenRead = iHasBeenRead;
+    m_hasBeenRead = true;
+}
+
+//-*****************************************************************************
+void XformSample::clear()
+{
+    m_hasBeenRead = false;
+    m_ops.resize( 0 );
+    m_setWithOpStack = 0;
 }
 
 //-*****************************************************************************

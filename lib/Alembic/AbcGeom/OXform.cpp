@@ -111,7 +111,7 @@ void OXformSchema::set( XformSample &ioSamp,
         // set this to true, so that additional calls to sample's addOp()
         // won't change the topology of the sample, but instead will merely
         // update values.
-        ioSamp.setHasBeenRead( true );
+        ioSamp.setHasBeenRead();
 
         m_sampID = ioSamp.getID();
 

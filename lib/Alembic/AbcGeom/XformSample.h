@@ -66,6 +66,9 @@ public:
     // returns the index of the op in its op-stack
     std::size_t addOp( XformOp iOp, const Abc::M44d &iMatrix );
 
+    // add an op with values already set on the op
+    std::size_t addOp( const XformOp &iOp );
+
     XformOp getOp( std::size_t iIndex ) const;
 
     XformOp &operator[]( const std::size_t &iIndex );
@@ -98,9 +101,11 @@ public:
 private:
     friend class OXformSchema;
     friend class IXformSchema;
-    void setHasBeenRead( bool iHasBeenRead );
+    void setHasBeenRead();
     const boost::uuids::uuid &getID() const;
     const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
+    void clear();
+
 
 private:
     // 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
