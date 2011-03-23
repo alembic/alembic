@@ -941,7 +941,8 @@ void AbcWriteJob::perFrameCallback(double iFrame)
     Alembic::Abc::V3d min(bbox.min().x, bbox.min().y, bbox.min().z);
     Alembic::Abc::V3d max(bbox.max().x, bbox.max().y, bbox.max().z);
     Alembic::Abc::Box3d b(min, max);
-    mBoxProp.set(b, Alembic::Abc::OSampleSelector(mBoxIndex++, iFrame));
+    mBoxProp.set(b, Alembic::Abc::OSampleSelector(mBoxIndex++,
+        iFrame * util::spf()));
 
     processCallback(mMelPerFrameCallback, true, iFrame, bbox);
     processCallback(mPythonPerFrameCallback, false, iFrame, bbox);
