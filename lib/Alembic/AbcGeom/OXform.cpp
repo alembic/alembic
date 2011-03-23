@@ -138,10 +138,10 @@ void OXformSchema::set( XformSample &ioSamp,
 
             for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
             {
-                // eg, ".tx"
+                // eg, ".tx_"
                 std::string channame = op.getChannelName( j );
 
-                // name will be, eg, ".tx0"k
+                // name will be, eg, ".tx_0"
                 ODefaultedDoubleProperty prop(
                     cptr, channame + oname, pcy,
                     op.getDefaultChannelValue( j ) );
