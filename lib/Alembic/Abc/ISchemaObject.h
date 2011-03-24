@@ -108,7 +108,14 @@ public:
     static bool matches( const AbcA::ObjectHeader &iHeader,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        return matches( iHeader.getMetaData(), iMatching );
+        if ( iMatching == kNoMatching )
+        {
+            return true;
+        }
+        else
+        {
+            return matches( iHeader.getMetaData(), iMatching );
+        }
     }
 
 

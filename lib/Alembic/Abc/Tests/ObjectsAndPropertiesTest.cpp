@@ -72,6 +72,11 @@ void simpleTestOut( const std::string &iArchiveName )
     // 0th archive child child
     OObject acc0( ac0, "acc0" );
 
+    // 1th archive child
+    OObject ac1( archiveTop, "ac1" );
+
+    OInt32ArrayProperty ac1iap0( ac1.getProperties(), "iap0" );
+
     // all property manipulation is through a hidden compound property named
     // ".prop" automatically by Alembic.
     //
@@ -171,6 +176,16 @@ void simpleTestIn( const std::string &iArchiveName )
 
     IObject ac0( archiveTop, "ac0" );
     IObject acc0( ac0, "acc0" );
+
+    IObject ac1( archiveTop, "ac1" );
+
+    IInt32ArrayProperty ac1iap0( ac1.getProperties(), "iap0" );
+
+    ISampleSelector ac1iap0iss;
+
+    AbcA::index_t sampIdx = ac1iap0iss.getIndex( ac1iap0.getTimeSampling() );
+
+    std::cout << "sampIdx: " << sampIdx << std::endl;
 
 
     // an object contains a single compound property that contains all
