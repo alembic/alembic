@@ -95,6 +95,8 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_ops = Abc::IUcharArrayProperty( ptr, ".ops", iMatching );
 
+    m_timeSampling = m_ops.getTimeSampling();
+
     // OK, now the fun stuff!
     //
     // All the above Properties are guaranteed to exist.  None of the actual
@@ -132,6 +134,8 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
         }
     }
 
+    m_isConstant = m_isConstant && m_isToWorld.isConstant();
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
@@ -165,9 +169,13 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::get()" );
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
-
     oSamp.clear();
+
+    //std::cout << m_ops.getPtr().use_count() << std::endl;
+
+    AbcA::index_t sampIdx = iSS.getIndex( m_timeSampling );
+
+    if ( sampIdx < 0 ) { return; }
 
     std::size_t prevIdx = 0;
     for ( std::size_t i = 0 ; i < m_opArray.size() ; ++i )
@@ -208,7 +216,9 @@ bool IXformSchema::getIsToWorld( const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getIsToWorld()" );
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+    AbcA::index_t sampIdx = iSS.getIndex( m_timeSampling );
+
+    if ( sampIdx < 0 ) { return false; }
 
     return m_isToWorld.getValue( sampIdx );
 

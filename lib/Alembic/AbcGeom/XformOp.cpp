@@ -343,5 +343,29 @@ Alembic::Util::uint8_t XformOp::getOpEncoding() const
     return ( m_type << 4 ) | ( m_hint & 0xF );
 }
 
+//-*****************************************************************************
+bool XformOp::isTranslateOp() const
+{
+    return m_type == kTranslateOperation;
+}
+
+//-*****************************************************************************
+bool XformOp::isScaleOp() const
+{
+    return m_type == kScaleOperation;
+}
+
+//-*****************************************************************************
+bool XformOp::isRotateOp() const
+{
+    return m_type == kRotateOperation;
+}
+
+//-*****************************************************************************
+bool XformOp::isMatrixOp() const
+{
+    return m_type == kMatrixOperation;
+}
+
 } // End namespace AbcGeom
 } // End namespace Alembic

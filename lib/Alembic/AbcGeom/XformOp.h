@@ -187,6 +187,14 @@ public:
     //! This is not really intended for use by human clients of this class.
     Alembic::Util::uint8_t getOpEncoding() const;
 
+    bool isTranslateOp() const;
+
+    bool isScaleOp() const;
+
+    bool isRotateOp() const;
+
+    bool isMatrixOp() const;
+
 private:
     XformOperationType m_type;
     Alembic::Util::uint8_t m_hint;

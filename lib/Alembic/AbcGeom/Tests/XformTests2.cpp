@@ -56,78 +56,103 @@ using namespace Alembic::AbcGeom;
 //-*****************************************************************************
 void xformOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                      "xformInspection.abc" );
-
-
-    OXform b( OObject( archive, kTop ), "b" );
+    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform1.abc" );
+    OXform a( OObject( archive, kTop ), "a" );
+    OXform b( a, "b" );
+    OXform c( b, "c" );
+    OXform d( c, "d" );
 
     XformOp transop( kTranslateOperation, kTranslateHint );
-
-    XformOp rotop( kRotateOperation, kRotateHint );
-
-    V3d trans1( 12.0, 20.0, 0.0 );
-
-    V3d trans2( 1.0, 1.0, 0.0 );
+    XformOp scaleop( kScaleOperation, kScaleHint );
 
     XformSample asamp;
-    XformSample bsamp;
-
-    bsamp.addOp( transop, trans1 );
-    bsamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ), 15.0 );
-    bsamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ), 25.0);
-
-    b.getSchema().set( bsamp );
-
-    #if 0
-    OXform a( OObject( archive, kTop ), "a" );
-
-    M44d mat;
-    for (size_t i = 0; i < 20; ++i)
+    for ( size_t i = 0; i < 20; ++i )
     {
-        trans1.y = ( i * 1.01 );
-        trans2.z = ( i * 1.2 );
-
-        asamp.addOp( transop, trans1 );
-        asamp.addOp( transop, trans2 );
-
-        asamp.addOp( XformOp( kRotateOperation, kRotateHint ),
-                     trans1, i * 2.4 );
-
-        asamp.addOp( XformOp( kMatrixOperation, kMatrixHint ),
-                     mat.setScale( trans1 ) );
+        asamp.addOp( transop, V3d( 12.0, i + 42.0, 20.0 ) );
 
         a.getSchema().set( asamp, OSampleSelector( i ) );
     }
-    #endif
+
+    XformSample bsamp;
+    for ( size_t i = 0 ; i < 20 ; ++i )
+    {
+        bsamp.setIsToWorld( (bool)(i&1) );
+
+        b.getSchema().set( bsamp, OSampleSelector( i ) );
+    }
+
+    // for c we write nothing
+
+    XformSample dsamp;
+    dsamp.addOp( scaleop, V3d( 3.0, 6.0, 9.0 ) );
+    d.getSchema().set( dsamp );
 }
 
-#if 1
 //-*****************************************************************************
 void xformIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      "xformInspection.abc" );
-    //IXform a( IObject( archive, kTop ), "a" );
+    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "Xform1.abc" );
 
+    Abc::M44d identity;
     XformSample xs;
 
-    IXform b( archive.getTop(), "b" );
+    IXform a( IObject( archive, kTop ), "a" );
+    XformOpVec ops = a.getSchema().getOps();
+    TESTING_ASSERT( ops.size() == a.getSchema().getNumOps() );
+    TESTING_ASSERT( ops.size() == 1 );
+    TESTING_ASSERT( ! a.getSchema().getIsToWorld() );
+    for ( index_t i = 0; i < 20; ++i )
+    {
+        XformSample xs;
+        a.getSchema().get( xs, Abc::ISampleSelector( i ) );
+        TESTING_ASSERT( xs.getNumOps() == 1 );
+        TESTING_ASSERT( xs[0].isTranslateOp() );
+        TESTING_ASSERT( xs[0].isYAnimated() == true );
+        TESTING_ASSERT( xs[0].isXAnimated() == false );
+        TESTING_ASSERT( xs[0].isZAnimated() == false );
 
+        TESTING_ASSERT( xs.getTranslation() == V3d( 12.0, i+42.0, 20.0 ) );
+        TESTING_ASSERT( xs.getMatrix() ==
+                        Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
+    }
+
+    IXform b( a, "b" );
     b.getSchema().get( xs );
+    TESTING_ASSERT( b.getSchema().getTimeSampling().getTimeSamplingType().isIdentity() );
+    // the schema is not static, because set() was called 20 times on it.
+    TESTING_ASSERT( !b.getSchema().getTimeSampling().isStatic() );
+    TESTING_ASSERT( xs.getNumOps() == 0 );
+    TESTING_ASSERT( b.getSchema().getOps().size() == 0 );
+    TESTING_ASSERT( b.getSchema().getNumOps() == 0 );
+    TESTING_ASSERT( xs.getMatrix() == identity );
+    for (size_t i = 0; i < 20; ++i)
+    {
+        AbcA::index_t j = i;
+        TESTING_ASSERT( b.getSchema().getIsToWorld( ISampleSelector( j ) )
+                        == (i&1) );
+    }
 
-    std::cout << "translation is " << xs.getTranslation() << std::endl;
+    IXform c( b, "c" );
+    xs = c.getSchema().getValue();
+    TESTING_ASSERT( xs.getNumOps() == 0 );
+    TESTING_ASSERT( c.getSchema().getOps().size() == 0 );
+    TESTING_ASSERT( c.getSchema().getNumOps() == 0 );
+    TESTING_ASSERT( xs.getMatrix() == identity );
+    TESTING_ASSERT( !c.getSchema().getIsToWorld() );
 
-    std::cout << "rotation is " << xs.getAngle() << std::endl;
-
-    TESTING_ASSERT( almostEqual( 40.0, xs.getAngle() ) );
-
-    V3d trans( 12.0, 20.0, 0.0 );
-
-    TESTING_ASSERT( trans.equalWithAbsError( xs.getTranslation(),
-                                             VAL_EPSILON ) );
+    IXform d( c, "d" );
+    xs = d.getSchema().getValue();
+    TESTING_ASSERT( xs.getNumOps() == 1 );
+    TESTING_ASSERT( d.getSchema().getNumOps() == 1 );
+    TESTING_ASSERT( xs[0].isScaleOp() );
+    TESTING_ASSERT( ! ( xs[0].isXAnimated() && xs[0].isYAnimated()
+                        && xs[0].isZAnimated() ) );
+    TESTING_ASSERT( xs.getScale() == V3d( 3.0, 6.0, 9.0 ) );
+    TESTING_ASSERT( xs.getMatrix() ==
+                    Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
+    TESTING_ASSERT( d.getSchema().getOps().size() == 1 );
+    TESTING_ASSERT( ! d.getSchema().getIsToWorld() );
 }
-#endif
 
 #if 0
 //-*****************************************************************************
