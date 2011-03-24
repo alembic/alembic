@@ -97,9 +97,7 @@ void xformIn()
     XformSample xs;
 
     IXform a( IObject( archive, kTop ), "a" );
-    XformOpVec ops = a.getSchema().getOps();
-    TESTING_ASSERT( ops.size() == a.getSchema().getNumOps() );
-    TESTING_ASSERT( ops.size() == 1 );
+    TESTING_ASSERT( a.getSchema().getNumOps() == 1 );
     TESTING_ASSERT( ! a.getSchema().getIsToWorld() );
     for ( index_t i = 0; i < 20; ++i )
     {
@@ -122,7 +120,6 @@ void xformIn()
     // the schema is not static, because set() was called 20 times on it.
     TESTING_ASSERT( !b.getSchema().getTimeSampling().isStatic() );
     TESTING_ASSERT( xs.getNumOps() == 0 );
-    TESTING_ASSERT( b.getSchema().getOps().size() == 0 );
     TESTING_ASSERT( b.getSchema().getNumOps() == 0 );
     TESTING_ASSERT( xs.getMatrix() == identity );
     for (size_t i = 0; i < 20; ++i)
@@ -135,7 +132,6 @@ void xformIn()
     IXform c( b, "c" );
     xs = c.getSchema().getValue();
     TESTING_ASSERT( xs.getNumOps() == 0 );
-    TESTING_ASSERT( c.getSchema().getOps().size() == 0 );
     TESTING_ASSERT( c.getSchema().getNumOps() == 0 );
     TESTING_ASSERT( xs.getMatrix() == identity );
     TESTING_ASSERT( !c.getSchema().getIsToWorld() );
@@ -145,12 +141,11 @@ void xformIn()
     TESTING_ASSERT( xs.getNumOps() == 1 );
     TESTING_ASSERT( d.getSchema().getNumOps() == 1 );
     TESTING_ASSERT( xs[0].isScaleOp() );
-    TESTING_ASSERT( ! ( xs[0].isXAnimated() && xs[0].isYAnimated()
-                        && xs[0].isZAnimated() ) );
+    TESTING_ASSERT( ! ( xs[0].isXAnimated() || xs[0].isYAnimated()
+                        || xs[0].isZAnimated() ) );
     TESTING_ASSERT( xs.getScale() == V3d( 3.0, 6.0, 9.0 ) );
     TESTING_ASSERT( xs.getMatrix() ==
                     Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
-    TESTING_ASSERT( d.getSchema().getOps().size() == 1 );
     TESTING_ASSERT( ! d.getSchema().getIsToWorld() );
 }
 

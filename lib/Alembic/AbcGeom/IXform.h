@@ -128,9 +128,7 @@ public:
     bool getIsToWorld( const Abc::ISampleSelector &iSS =
                        Abc::ISampleSelector() );
 
-    // for low-level access; not recommended
     size_t getNumOps() const { return m_opArray.size(); }
-    std::vector<XformOp> getOps() const { return m_opArray; }
 
     //! Reset returns this function set to an empty, default
     //! state.
@@ -164,18 +162,18 @@ protected:
 
     Abc::IUcharArrayProperty m_ops;
 
-    std::vector<XformOp> m_opArray;
-
     std::vector<IDefaultedDoubleProperty> m_props;
 
     Abc::IBoolProperty m_isToWorld;
 
     bool m_isConstant;
 
-    AbcA::TimeSampling m_timeSampling;
-
 private:
     void init( Abc::SchemaInterpMatching iMatching );
+    // the op array is strictly for default names and values
+    // for the IDefaultedDoubleProperties made in init()
+    std::vector<XformOp> m_opArray;
+
 
 protected:
     //-*************************************************************************
