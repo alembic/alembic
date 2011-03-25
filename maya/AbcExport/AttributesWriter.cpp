@@ -37,6 +37,10 @@
 #include "AttributesWriter.h"
 #include "MayaUtility.h"
 
+namespace Abc = Alembic::Abc;
+namespace AbcGeom = Alembic::AbcGeom;
+namespace AbcA = Alembic::AbcCoreAbstract;
+
 namespace {
 
 static const char * cAttrScope = "_AttrScope";
@@ -66,23 +70,23 @@ bool isDataAttr(const MPlug & iParent)
     return false;
 }
 
-Alembic::AbcGeom::GeometryScope strToScope(MString iStr)
+AbcGeom::GeometryScope strToScope(MString iStr)
 {
     iStr.toLowerCase();
     if (iStr == "point")
     {
-        return Alembic::AbcGeom::kVertexScope;
+        return AbcGeom::kVertexScope;
     }
     else if (iStr == "vertex")
     {
-        return Alembic::AbcGeom::kFacevaryingScope;
+        return AbcGeom::kFacevaryingScope;
     }
     else if (iStr == "face")
     {
-        return Alembic::AbcGeom::kUniformScope;
+        return AbcGeom::kUniformScope;
     }
 
-    return Alembic::AbcGeom::kConstantScope;
+    return AbcGeom::kConstantScope;
 }
 
 // returns true if the string ends with _AttrScope
@@ -93,6 +97,914 @@ bool endsWithArbAttr(const std::string & iStr)
     return (len >= 10 && iStr.compare(len - 10, 10, cAttrScope) == 0);
 }
 
+
+void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
+    const MPlug& iPlug, Abc::OCompoundProperty & iParent,
+    AbcA::TimeSamplingType & iTimeType,
+    AbcGeom::GeometryScope iScope,
+    std::vector < PlugAndObjArray > & oArrayVec)
+{
+    std::string plugName = iPlug.partialName(0, 0, 0, 0, 0, 1).asChar();
+    switch (iType)
+    {
+        case MFnNumericData::kBoolean:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OBoolGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::kByte:
+        case MFnNumericData::kChar:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OCharGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::kShort:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OInt16GeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::kInt:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OInt32GeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::kFloat:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OFloatGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::kDouble:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::ODoubleGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k2Short:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OV2sGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k3Short:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OV3sGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k2Int:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OV2iGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k3Int:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OV3iGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k2Float:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OV2fGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k3Float:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+
+            MFnAttribute mfnAttr(iAttr);
+            if (mfnAttr.isUsedAsColor())
+            {
+                AbcGeom::OC3fGeomParam gp(iParent, plugName, false, iScope, 1,
+                    iTimeType);
+                p.prop = gp.getValueProperty();
+            }
+            else
+            {
+                AbcGeom::OV3fGeomParam gp(iParent, plugName, false, iScope, 1,
+                    iTimeType);
+                p.prop = gp.getValueProperty();
+            }
+
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k2Double:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OV2dGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k3Double:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcGeom::OV3dGeomParam gp(iParent, plugName, false, iScope, 1,
+                iTimeType);
+            p.prop = gp.getValueProperty();
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        case MFnNumericData::k4Double:
+        {
+            PlugAndObjArray p;
+            p.plug = iPlug;
+            p.obj = iAttr;
+            AbcA::DataType dtype(Alembic::Util::kFloat64POD, 4);
+            p.prop = Abc::OArrayProperty(iParent, plugName, dtype, iTimeType);
+            oArrayVec.push_back(p);
+        }
+        break;
+
+        default:
+        break;
+    }
+}
+
+bool MFnNumericDataToSample(MFnNumericData::Type iType,
+    const MPlug& iPlug,
+    const Abc::OSampleSelector & iSelect,
+    Abc::OArrayProperty & oProp)
+{
+    size_t numElements =  iPlug.numElements();
+    bool isArray = iPlug.isArray();
+
+    size_t dimSize = numElements;
+    if (!isArray)
+        dimSize = 1;
+
+    switch (iType)
+    {
+        case MFnNumericData::kBoolean:
+        {
+            std::vector< Alembic::Util::bool_t > val(dimSize);
+            if (!isArray)
+            {
+                val[0] = iPlug.asBool();
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    val[i] = iPlug[i].asBool();
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::kByte:
+        case MFnNumericData::kChar:
+        {
+            std::vector<int8_t> val(dimSize);
+            if (!isArray)
+            {
+                val[0] = iPlug.asChar();
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    val[i] = iPlug[i].asChar();
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::kShort:
+        {
+            std::vector<int16_t> val(dimSize);
+            if (!isArray)
+            {
+                val[0] = iPlug.asShort();
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    val[i] = iPlug[i].asShort();
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::kInt:
+        {
+            std::vector<int32_t> val(dimSize);
+            if (!isArray)
+            {
+                val[0] = iPlug.asInt();
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    val[i] = iPlug[i].asInt();
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::kFloat:
+        {
+            std::vector<float> val(dimSize);
+            if (!isArray)
+            {
+                val[0] = iPlug.asFloat();
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    val[i] = iPlug[i].asFloat();
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::kDouble:
+        {
+            std::vector<float> val(dimSize);
+            if (!isArray)
+            {
+                val[0] = iPlug.asDouble();
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    val[i] = iPlug[i].asDouble();
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k2Short:
+        {
+            std::vector<int16_t> val(dimSize*2);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[2*i], val[2*i+1]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k3Short:
+        {
+            std::vector<int16_t> val(dimSize*3);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1], val[2]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k2Int:
+        {
+            std::vector<int32_t> val(dimSize*2);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[2*i], val[2*i+1]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k3Int:
+        {
+            std::vector<int32_t> val(dimSize*3);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1], val[2]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k2Float:
+        {
+            std::vector<float> val(dimSize*2);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[2*i], val[2*i+1]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k3Float:
+        {
+            std::vector<float> val(dimSize*3);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1], val[2]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k2Double:
+        {
+            std::vector<double> val(dimSize*2);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[2*i], val[2*i+1]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k3Double:
+        {
+            std::vector<double> val(dimSize*3);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1], val[2]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnNumericData::k4Double:
+        {
+            std::vector<double> val(dimSize*4);
+            if (!isArray)
+            {
+                MFnNumericData numdFn(iPlug.asMObject());
+                numdFn.getData(val[0], val[1], val[2], val[3]);
+            }
+            else
+            {
+                for (size_t i = 0; i < numElements; ++i)
+                {
+                    MFnNumericData numdFn(iPlug[i].asMObject());
+                    numdFn.getData(val[4*i], val[4*i+1], val[4*i+2],
+                        val[4*i+3]);
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(dimSize));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        default:
+            return false;
+        break;
+    }
+
+    return true;
+}
+
+bool MFnTypedDataToSample(MFnData::Type iType,
+    const MPlug& iPlug,
+    const Abc::OSampleSelector & iSelect,
+    Abc::OArrayProperty & oProp)
+{
+    size_t numElements =  iPlug.numElements();
+    bool isArray = iPlug.isArray();
+
+    size_t dimSize = numElements;
+    if (!isArray)
+        dimSize = 1;
+
+    switch (iType)
+    {
+        case MFnData::kNumeric:
+        {
+            MFnNumericData numObj(iPlug.asMObject());
+            return MFnNumericDataToSample(numObj.numericType(), iPlug, iSelect,
+                oProp);
+        }
+        break;
+
+        case MFnData::kString:
+        {
+            std::vector< std::string > val(1);
+            val[0] = iPlug.asString().asChar();
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(1));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kStringArray:
+        {
+            MFnStringArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< std::string > val(length);
+            for (; i < length; i++)
+            {
+                val[i] = arr[i].asChar();
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kDoubleArray:
+        {
+            MFnDoubleArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< double > val(length);
+            for (; i < length; i++)
+            {
+                val[i] = arr[i];
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kIntArray:
+        {
+            MFnIntArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< int32_t > val(length);
+            for (; i < length; i++)
+            {
+                val[i] = arr[i];
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kPointArray:
+        {
+            MFnPointArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< double > val(length*3);
+            for (; i < length; i++)
+            {
+                MPoint pt(arr[i]);
+                val[3*i] = pt.x;
+                val[3*i+1] = pt.y;
+                val[3*i+2] = pt.z;
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kVectorArray:
+        {
+            MFnVectorArrayData arr(iPlug.asMObject());
+
+            unsigned int i = 0;
+            unsigned int length = arr.length();
+            std::vector< double > val(length*3);
+            for (; i < length; i++)
+            {
+                MVector v(arr[i]);
+                val[3*i] = v.x;
+                val[3*i+1] = v.y;
+                val[3*i+2] = v.z;
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(length));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        case MFnData::kMatrix:
+        {
+            MFnMatrixData arr(iPlug.asMObject());
+            MMatrix mat = arr.matrix();
+            std::vector<double> val(16);
+
+            unsigned int r, c, i = 0;
+            for (r = 0; r < 4; r++)
+            {
+                for (c = 0; c < 4; c++, i++)
+                {
+                    val[i] = mat[r][c];
+                }
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(1));
+            oProp.set(samp, iSelect);
+        }
+        break;
+
+        default:
+            return false;
+        break;
+    }
+
+    return true;
+}
+
+
+bool attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
+    const Abc::OSampleSelector & iSelect,
+    Abc::OArrayProperty & oProp)
+{
+    if (iAttr.hasFn(MFn::kTypedAttribute))
+    {
+        MFnTypedAttribute typedAttr(iAttr);
+        return MFnTypedDataToSample(typedAttr.attrType(), iPlug, iSelect,
+            oProp);
+    }
+    else if (iAttr.hasFn(MFn::kNumericAttribute))
+    {
+        MFnNumericAttribute numAttr(iAttr);
+        return MFnNumericDataToSample(numAttr.unitType(), iPlug, iSelect,
+            oProp);
+    }
+    else if (iAttr.hasFn(MFn::kUnitAttribute))
+    {
+        double val = iPlug.asDouble();
+        AbcA::ArraySample samp(&val, oProp.getDataType(),
+            Alembic::Util::Dimensions(1));
+        oProp.set(samp, iSelect);
+        return true;
+    }
+    else if (iAttr.hasFn(MFn::kEnumAttribute))
+    {
+        int16_t val = iPlug.asShort();
+        AbcA::ArraySample samp(&val, oProp.getDataType(),
+            Alembic::Util::Dimensions(1));
+        oProp.set(samp, iSelect);
+        return true;
+    }
+
+    return false;
+}
+
+void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
+    Abc::OCompoundProperty & iParent,
+    AbcA::TimeSamplingType & iTimeType,
+    AbcGeom::GeometryScope iScope,
+    std::vector < PlugAndObjArray > & oArrayVec)
+{
+    // for some reason we have just 1 of the elements of an array, bail
+    if (iPlug.isElement())
+        return;
+
+    MStatus stat;
+
+    std::string plugName = iPlug.partialName(0, 0, 0, 0, 0, 1).asChar();
+
+    if (iAttr.hasFn(MFn::kNumericAttribute))
+    {
+        MFnNumericAttribute numFn(iAttr, &stat);
+
+        if (!stat)
+        {
+            MString err = "Couldn't instantiate MFnNumericAttribute\n\tType: ";
+            err += iAttr.apiTypeStr();
+            MGlobal::displayError(err);
+
+            return;
+        }
+
+        createPropertyFromNumeric(numFn.unitType(), iAttr, iPlug, iParent,
+            iTimeType, iScope, oArrayVec);
+    }
+    else if (iAttr.hasFn(MFn::kTypedAttribute))
+    {
+        MFnTypedAttribute typeFn(iAttr, &stat);
+
+        if (!stat)
+        {
+            MString err = "Couldn't instantiate MFnTypedAttribute\n\tType: ";
+            err += iAttr.apiTypeStr();
+
+            MGlobal::displayError(err);
+
+            return;
+        }
+
+        switch (typeFn.attrType())
+        {
+            case MFnData::kString:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                AbcGeom::OStringGeomParam gp(iParent, plugName, false, iScope,
+                    1, iTimeType);
+                p.prop = gp.getValueProperty();
+                oArrayVec.push_back(p);
+            }
+            break;
+
+            case MFnData::kStringArray:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                AbcGeom::OStringGeomParam gp(iParent, plugName, false, iScope,
+                    1, iTimeType);
+                p.prop = gp.getValueProperty();
+                oArrayVec.push_back(p);
+            }
+            break;
+
+            case MFnData::kDoubleArray:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                AbcGeom::ODoubleGeomParam gp(iParent, plugName, false, iScope,
+                    1, iTimeType);
+                p.prop = gp.getValueProperty();
+                oArrayVec.push_back(p);
+            }
+            break;
+
+            case MFnData::kIntArray:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                AbcGeom::OInt32GeomParam gp(iParent, plugName, false, iScope,
+                    1, iTimeType);
+                p.prop = gp.getValueProperty();
+                oArrayVec.push_back(p);
+            }
+            break;
+
+            case MFnData::kPointArray:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                AbcGeom::OP3dGeomParam gp(iParent, plugName, false, iScope, 1,
+                    iTimeType);
+                p.prop = gp.getValueProperty();
+                oArrayVec.push_back(p);
+            }
+            break;
+
+            case MFnData::kVectorArray:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                AbcGeom::OV3dGeomParam gp(iParent, plugName, false, iScope, 1,
+                    iTimeType);
+                p.prop = gp.getValueProperty();
+                oArrayVec.push_back(p);
+            }
+            break;
+
+            case MFnData::kMatrix:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                AbcGeom::OM44dGeomParam gp(iParent, plugName, false, iScope, 1,
+                    iTimeType);
+                p.prop = gp.getValueProperty();
+                oArrayVec.push_back(p);
+            }
+            break;
+
+            case MFnData::kNumeric:
+            {
+                MFnNumericAttribute numAttr(iPlug.asMObject());
+                createPropertyFromNumeric(numAttr.unitType(), iAttr,
+                    iPlug, iParent, iTimeType, iScope, oArrayVec);
+            }
+            break;
+
+            default:
+            {
+                // get the full property name for the warning
+                MString msg = "WARNING: Couldn't convert ";
+                msg += iPlug.partialName(1, 0, 0, 0, 1, 1);
+                msg += " to a property, so skipping.";
+                MGlobal::displayWarning(msg);
+            }
+            break;
+        }
+    }
+    else if (iAttr.hasFn(MFn::kUnitAttribute))
+    {
+        PlugAndObjArray p;
+        p.plug = iPlug;
+        p.obj = iAttr;
+        AbcGeom::ODoubleGeomParam gp(iParent, plugName, false, iScope, 1,
+            iTimeType);
+        p.prop = gp.getValueProperty();
+        oArrayVec.push_back(p);
+    }
+    else if (iAttr.hasFn(MFn::kEnumAttribute))
+    {
+        PlugAndObjArray p;
+        p.plug = iPlug;
+        p.obj = iAttr;
+        AbcGeom::OInt16GeomParam gp(iParent, plugName, false, iScope, 1,
+            iTimeType);
+        p.prop = gp.getValueProperty();
+        oArrayVec.push_back(p);
+    }
+}
+
 }
 
 std::string * AttributesWriter::mFilter = NULL;
@@ -100,9 +1012,9 @@ std::set<std::string> * AttributesWriter::mAttribs = NULL;
 
 AttributesWriter::AttributesWriter(
     double iFrame,
-    Alembic::Abc::OObject & iParent,
+    Abc::OCompoundProperty & iParent,
     const MFnDagNode & iNode,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+    AbcA::TimeSamplingType & iTimeType,
     bool iWriteVisibility)
 {
     mCurIndex = 0;
@@ -115,6 +1027,8 @@ AttributesWriter::AttributesWriter(
     int filtLen = 0;
     if (mFilter != NULL)
         filtLen = mFilter->length();
+
+    std::vector< PlugAndObjArray > staticPlugObjArrayVec;
 
     for (i = 0; i < attrCount; i++)
     {
@@ -144,11 +1058,11 @@ AttributesWriter::AttributesWriter(
         // skip it if it doesn't start with our filter, or it ends with our
         // special case attrs or it is a child attr and the parent is a
         // kData* and it is not in our attribute set
-        if ( (filtLen == 0 ||
+        if ( propStr.find("[") != std::string::npos || ((filtLen == 0 ||
             propStr.compare(0, filtLen, *mFilter) != 0 ||
             endsWithArbAttr(propStr) ||
             (plug.isChild() && isDataAttr(plug.parent())) ) &&
-            (!mAttribs || mAttribs->find(propStr) == mAttribs->end()) )
+            (!mAttribs || mAttribs->find(propStr) == mAttribs->end())) )
         {
             continue;
         }
@@ -161,21 +1075,8 @@ AttributesWriter::AttributesWriter(
             sampType = util::getSampledType(plug);
         }
 
-        bool filledProp = true; // util::attributeToPropertyPair(attr, plug, prop);
-
-        if (!filledProp)
-        {
-            // get the full property name for the warning
-            MString msg = "WARNING: Couldn't convert ";
-            msg += plug.partialName(1, 0, 0, 0, 1, 1);
-            msg += " to a property, so skipping.";
-            MGlobal::displayWarning(msg);
-            continue;
-        }
-
         MPlug scopePlug = iNode.findPlug(propName + cAttrScope);
-        Alembic::AbcGeom::GeometryScope scope =
-            Alembic::AbcGeom::kConstantScope;
+        AbcGeom::GeometryScope scope = AbcGeom::kUnknownScope;
 
         if (!scopePlug.isNull())
         {
@@ -187,7 +1088,8 @@ AttributesWriter::AttributesWriter(
             // static
             case 0:
             {
-                // create a static plug
+                createPropertyFromMFnAttr(attr, plug, iParent, iTimeType, scope,
+                    staticPlugObjArrayVec);
             }
             break;
 
@@ -196,9 +1098,56 @@ AttributesWriter::AttributesWriter(
             // curve treat like sampled
             case 2:
             {
-                // add the plug to mPlugObjScalarVec or mPlugObjArrayVec
+                createPropertyFromMFnAttr(attr, plug, iParent, iTimeType, scope,
+                    mPlugObjArrayVec);
             }
             break;
+        }
+    }
+
+    std::vector< PlugAndObjArray >::iterator j =
+        staticPlugObjArrayVec.begin();
+    std::vector< PlugAndObjArray >::iterator jend =
+        staticPlugObjArrayVec.end();
+
+    double frame = iFrame;
+    if (frame == DBL_MAX)
+        frame = 0;
+
+    Abc::OSampleSelector sel(0, frame);
+
+    // write the statics
+    for (; j != jend; j++)
+    {
+        MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
+        bool filledProp = attributeToPropertyPair(j->obj, j->plug, sel, 
+            j->prop);
+
+        if (!filledProp)
+        {
+            MString msg = "WARNING: Couldn't get static property ";
+            msg += j->plug.partialName(1, 0, 0, 0, 1, 1);
+            msg += ", so skipping.";
+            MGlobal::displayWarning(msg);
+            continue;
+        }
+    }
+
+    j = mPlugObjArrayVec.begin();
+    jend = mPlugObjArrayVec.end();
+    for (; j != jend; j++)
+    {
+        MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
+        bool filledProp = attributeToPropertyPair(j->obj, j->plug, sel, 
+            j->prop);
+
+        if (!filledProp)
+        {
+            MString msg = "WARNING: Couldn't get static property ";
+            msg += j->plug.partialName(1, 0, 0, 0, 1, 1);
+            msg += ", so skipping.";
+            MGlobal::displayWarning(msg);
+            continue;
         }
     }
 
@@ -213,8 +1162,7 @@ AttributesWriter::AttributesWriter(
             {
                 int8_t visVal = 0;
 
-                Alembic::Abc::OCharProperty bp(iParent.getProperties(),
-                    "visible");
+                Abc::OCharProperty bp(iParent, "visible");
                 bp.set(visVal);
             }
             break;
@@ -226,18 +1174,16 @@ AttributesWriter::AttributesWriter(
 
                 if (iFrame != DBL_MAX)
                 {
-                    Alembic::Abc::OCharProperty bp(iParent.getProperties(),
-                        "visible", iTimeType);
-                    bp.set(visVal,
-                        Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
+                    Abc::OCharProperty bp(iParent, "visible",
+                        iTimeType);
+                    bp.set(visVal, Abc::OSampleSelector(mCurIndex, iFrame));
                     visPlug.prop = bp;
                     mAnimVisibility = visPlug;
                 }
                 // force static case
                 else
                 {
-                    Alembic::Abc::OCharProperty bp(iParent.getProperties(),
-                        "visible");
+                    Abc::OCharProperty bp(iParent, "visible");
                     bp.set(visVal);
                 }
             }
@@ -254,10 +1200,8 @@ AttributesWriter::AttributesWriter(
 
                 mAnimVisibility = visPlug;
                 int8_t visVal = -1;
-                Alembic::Abc::OCharProperty bp(iParent.getProperties(),
-                    "visible", iTimeType);
-                bp.set(visVal,
-                    Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
+                Abc::OCharProperty bp(iParent, "visible", iTimeType);
+                bp.set(visVal, Abc::OSampleSelector(mCurIndex, iFrame));
                 visPlug.prop = bp;
                 mAnimVisibility = visPlug;
 
@@ -277,43 +1221,25 @@ AttributesWriter::~AttributesWriter()
 
 bool AttributesWriter::isAnimated()
 {
-    return  !mPlugObjScalarVec.empty() || !mPlugObjArrayVec.empty() ||
-        !mAnimVisibility.plug.isNull();
+    return  !mPlugObjArrayVec.empty() || !mAnimVisibility.plug.isNull();
 }
 
 void AttributesWriter::write(double iFrame)
 {
     mCurIndex ++;
 
-    std::vector< PlugAndObjScalar >::const_iterator i =
-        mPlugObjScalarVec.begin();
-    std::vector< PlugAndObjScalar >::const_iterator iend =
-        mPlugObjScalarVec.end();
-
-    for (; i != iend; i++)
-    {
-        MString propName = i->plug.partialName(0, 0, 0, 0, 0, 1);
-        bool filledProp = true; //util::attributeToPropertyPair(i->obj, i->plug, prop);
-
-        if (!filledProp)
-        {
-            MString msg = "WARNING: Couldn't get sampled property ";
-            msg += i->plug.partialName(1, 0, 0, 0, 1, 1);
-            msg += ", so skipping.";
-            MGlobal::displayWarning(msg);
-            continue;
-        }
-    }
-
-    std::vector< PlugAndObjArray >::const_iterator j =
+    std::vector< PlugAndObjArray >::iterator j =
         mPlugObjArrayVec.begin();
-    std::vector< PlugAndObjArray >::const_iterator jend =
+    std::vector< PlugAndObjArray >::iterator jend =
         mPlugObjArrayVec.end();
+
+    Abc::OSampleSelector sel(mCurIndex, iFrame);
 
     for (; j != jend; j++)
     {
         MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
-        bool filledProp = true; //util::attributeToPropertyPair(j->obj, j->plug, prop);
+        bool filledProp = attributeToPropertyPair(j->obj, j->plug, sel, 
+            j->prop);
 
         if (!filledProp)
         {
@@ -333,8 +1259,7 @@ void AttributesWriter::write(double iFrame)
             visVal = 0;
         }
 
-        mAnimVisibility.prop.set(&visVal,
-            Alembic::Abc::OSampleSelector(mCurIndex, iFrame));
+        mAnimVisibility.prop.set(&visVal, sel);
     }
 
 }

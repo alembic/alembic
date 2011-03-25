@@ -47,8 +47,9 @@ MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
     Alembic::AbcGeom::OPoints obj(iParent, particle.name().asChar(), iTimeType);
     mSchema = obj.getSchema();
 
-    mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, obj,
-        particle, iTimeType, iWriteVisibility));
+    Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
+    mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, particle,
+        iTimeType, iWriteVisibility));
 
     MObject object = iDag.node();
     if (util::isAnimated(object))
@@ -134,7 +135,6 @@ void MayaPointPrimitiveWriter::write(double iFrame)
 
     // ignoring width and the velocity vectors for now
     mSchema.set(samp, Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
-    mAttrs->write(iFrame);
 }
 
 unsigned int MayaPointPrimitiveWriter::getNumCVs()
@@ -145,5 +145,5 @@ unsigned int MayaPointPrimitiveWriter::getNumCVs()
 
 bool MayaPointPrimitiveWriter::isAnimated() const
 {
-    return  mIsAnimated || (mAttrs != NULL && mAttrs->isAnimated());
+    return  mIsAnimated;
 }

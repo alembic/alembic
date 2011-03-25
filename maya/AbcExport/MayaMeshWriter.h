@@ -58,6 +58,7 @@ class MayaMeshWriter
     bool isSubD();
     unsigned int getNumCVs();
     unsigned int getNumFaces();
+    AttributesWriterPtr getAttrs() {return mAttrs;};
 
   private:
 

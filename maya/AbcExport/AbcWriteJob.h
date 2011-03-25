@@ -205,7 +205,10 @@ class AbcWriteJob
     bool checkCurveGrp();
 
     std::vector< MayaTransformWriterPtr > mTransList;
+    std::vector< AttributesWriterPtr > mTransAttrList;
+
     std::vector< MayaNodePtr > mShapeList;
+    std::vector< AttributesWriterPtr > mShapeAttrList;
 
     // helper bounding box for recursive calculation
     MBoundingBox mCurBBox;
@@ -255,8 +258,10 @@ class AbcWriteJob
     // then we also call the post callback
     double mLastFrame;
 
+    Alembic::Abc::OBox3dProperty mBoxProp;
+    unsigned int mBoxIndex;
+
     // for the callbacks
-    bool mPerFrameBounds;
     std::string mMelPerFrameCallback;
     std::string mMelPostCallback;
     std::string mPythonPerFrameCallback;

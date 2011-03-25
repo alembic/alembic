@@ -140,8 +140,10 @@ MayaMeshWriter::MayaMeshWriter(
             }
         }
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(
-            iFrame, obj, lMesh, iTimeType, iWriteVisibility));
+        Alembic::Abc::OCompoundProperty cp = mSubDSchema.getArbGeomParams();
+
+        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, lMesh,
+            iTimeType, iWriteVisibility));
 
         writeSubD(iFrame, iDag, uvSamp);
     }
@@ -171,9 +173,11 @@ MayaMeshWriter::MayaMeshWriter(
             }
         }
 
+        Alembic::Abc::OCompoundProperty cp = mPolySchema.getArbGeomParams();
+
         // set the rest of the props and write to the writer node
-        mAttrs = AttributesWriterPtr(new AttributesWriter(
-            iFrame, obj, lMesh, iTimeType, iWriteVisibility));
+        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, lMesh,
+            iTimeType, iWriteVisibility));
 
        writePoly(iFrame, uvSamp);
     }
@@ -254,6 +258,7 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
 
 void MayaMeshWriter::write(double iFrame)
 {
+
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
     if ( !status )
@@ -358,13 +363,11 @@ void MayaMeshWriter::write(double iFrame)
             mSubDSchema.set(samp, s);
         }
     }
-
-    mAttrs->write(iFrame);
 }
 
 bool MayaMeshWriter::isAnimated() const
 {
-    return mIsGeometryAnimated || (mAttrs != NULL && mAttrs->isAnimated());
+    return mIsGeometryAnimated;
 }
 
 void MayaMeshWriter::writePoly(double iFrame,

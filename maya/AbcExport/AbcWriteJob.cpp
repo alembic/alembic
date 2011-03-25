@@ -244,6 +244,7 @@ AbcWriteJob::AbcWriteJob(const util::ShapeSet & iDagPath,
     MStatus status;
     mDagPath = iDagPath;
     mFileName = iFileName;
+    mBoxIndex = 0;
 
     mUseSelectionList = iUseSelectionList;
     if (mUseSelectionList)
@@ -316,16 +317,6 @@ AbcWriteJob::AbcWriteJob(const util::ShapeSet & iDagPath,
     mMelPostCallback = iMelPostCallback;
     mPythonPerFrameCallback = iPythonPerFrameCallback;
     mPythonPostCallback = iPythonPostCallback;
-    // shortcut to see if we ever need to calculate the bounds
-    // when writing per frame geometry
-    mPerFrameBounds = false;
-    if (mMelPerFrameCallback.find("#BOUNDS#") != std::string::npos ||
-        mPythonPerFrameCallback.find("#BOUNDS#") != std::string::npos ||
-        mMelPerFrameCallback.find("#BOUNDSARRAY#") != std::string::npos ||
-        mPythonPerFrameCallback.find("#BOUNDSARRAY#") != std::string::npos)
-    {
-        mPerFrameBounds = true;
-    }
 }
 
 void AbcWriteJob::getBoundingBox(const MMatrix & eMInvMat)
@@ -511,6 +502,10 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
             mStats.mCurveStaticCurves += nurbsCurve->getNumCurves();
             mStats.mCurveStaticCVs += nurbsCurve->getNumCVs();
         }
+
+        AttributesWriterPtr attrs = nurbsCurve->getAttrs();
+        if (!mShapesStatic && attrs->isAnimated())
+            mShapeAttrList.push_back(attrs);
 */
     }
     else if (ob.hasFn(MFn::kTransform))
@@ -548,6 +543,10 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         }
         else
             mStats.mTransStaticNum++;
+
+        AttributesWriterPtr attrs = trans->getAttrs();
+        if (!mTransStatic && attrs->isAnimated())
+            mTransAttrList.push_back(attrs);
 
         // loop through the children, making sure to push and pop them
         // from the MDagPath
@@ -590,6 +589,10 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
                 mStats.mPointStaticNum++;
                 mStats.mPointStaticCVs += particle->getNumCVs();
             }
+
+            AttributesWriterPtr attrs = particle->getAttrs();
+            if (!mShapesStatic && attrs->isAnimated())
+                mShapeAttrList.push_back(attrs);
         }
         else
         {
@@ -648,6 +651,10 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
                     mStats.mPolyStaticFaces += mesh->getNumFaces();
                 }
             }
+
+            AttributesWriterPtr attrs = mesh->getAttrs();
+            if (!mShapesStatic && attrs->isAnimated())
+                mShapeAttrList.push_back(attrs);
         }
         else
         {
@@ -683,6 +690,10 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
             }
             else
                 mStats.mCameraStaticNum++;
+
+            AttributesWriterPtr attrs = camera->getAttrs();
+            if (!mShapesStatic && attrs->isAnimated())
+                mShapeAttrList.push_back(attrs);
         }
         else
         {
@@ -721,6 +732,10 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
                 mStats.mNurbsStaticNum++;
                 mStats.mNurbsStaticCVs += nurbsSurface->getNumCVs();
             }
+
+            AttributesWriterPtr attrs = camera->getAttrs();
+            if (!mShapesStatic && attrs->isAnimated())
+                mShapeAttrList.push_back(attrs);
         }
         else
         {
@@ -762,6 +777,10 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
                 mStats.mCurveStaticCurves++;
                 mStats.mCurveStaticCVs += nurbsCurve->getNumCVs();
             }
+
+            AttributesWriterPtr attrs = nurbsCurve->getAttrs();
+            if (!mShapesStatic && attrs->isAnimated())
+                mShapeAttrList.push_back(attrs);
         }
         else
         {
@@ -797,6 +816,8 @@ bool AbcWriteJob::eval(double iFrame)
 
         mRoot = Alembic::Abc::OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             mFileName, Alembic::Abc::ErrorHandler::kThrowPolicy );
+        mBoxProp = Alembic::Abc::OBox3dProperty(mRoot.getTop().getProperties(),
+            ".childBnds", mTransTimeType);
 
         if (!mRoot.valid())
         {
@@ -837,6 +858,17 @@ bool AbcWriteJob::eval(double iFrame)
             mStats.mPointAnimCVs += cntVisitor.mCVsArray[2];
             mStats.mSubDAnimCVs  += cntVisitor.mCVsArray[3];
             mStats.mPolyAnimCVs  += cntVisitor.mCVsArray[4];
+
+            std::vector< AttributesWriterPtr >::iterator sattrCur =
+                mShapeAttrList.begin();
+
+            std::vector< AttributesWriterPtr >::iterator sattrEnd =
+                mShapeAttrList.end();
+
+            for(; sattrCur != sattrEnd; sattrCur++)
+            {
+                (*sattrCur)->write(iFrame*util::spf());
+            }
         }
 
         checkFrame = mTransFrames.find(iFrame);
@@ -854,6 +886,17 @@ bool AbcWriteJob::eval(double iFrame)
             for (; tcur != tend; tcur++)
             {
                 (*tcur)->write(iFrame*util::spf());
+            }
+
+            std::vector< AttributesWriterPtr >::iterator tattrCur =
+                mTransAttrList.begin();
+
+            std::vector< AttributesWriterPtr >::iterator tattrEnd =
+                mTransAttrList.end();
+
+            for(; tattrCur != tattrEnd; tattrCur++)
+            {
+                (*tattrCur)->write(iFrame*util::spf());
             }
         }
 
@@ -874,29 +917,32 @@ void AbcWriteJob::perFrameCallback(double iFrame)
 {
     MBoundingBox bbox;
 
-    if (mPerFrameBounds)
+    util::ShapeSet::iterator it = mDagPath.begin();
+    const util::ShapeSet::iterator end = mDagPath.end();
+    for (; it != end; it ++)
     {
-        util::ShapeSet::iterator it = mDagPath.begin();
-        const util::ShapeSet::iterator end = mDagPath.end();
-        for (; it != end; it ++)
+        mCurDag = *it;
+
+        mCurBBox.clear();
+        MMatrix eMInvMat;
+        if (mWorldSpace)
         {
-            mCurDag = *it;
-
-            mCurBBox.clear();
-            MMatrix eMInvMat;
-            if (mWorldSpace)
-            {
-                eMInvMat.setToIdentity();
-            }
-            else
-            {
-                eMInvMat = mCurDag.exclusiveMatrixInverse();
-            }
-
-            getBoundingBox(eMInvMat);
-            bbox.expand(mCurBBox);
+            eMInvMat.setToIdentity();
         }
+        else
+        {
+            eMInvMat = mCurDag.exclusiveMatrixInverse();
+        }
+
+        getBoundingBox(eMInvMat);
+        bbox.expand(mCurBBox);
     }
+
+    Alembic::Abc::V3d min(bbox.min().x, bbox.min().y, bbox.min().z);
+    Alembic::Abc::V3d max(bbox.max().x, bbox.max().y, bbox.max().z);
+    Alembic::Abc::Box3d b(min, max);
+    mBoxProp.set(b, Alembic::Abc::OSampleSelector(mBoxIndex++,
+        iFrame * util::spf()));
 
     processCallback(mMelPerFrameCallback, true, iFrame, bbox);
     processCallback(mPythonPerFrameCallback, false, iFrame, bbox);

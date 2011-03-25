@@ -63,6 +63,7 @@ class MayaTransformWriter
     void write(double iFrame);
     bool isAnimated() const;
     Alembic::Abc::OObject getObject() {return mSchema.getObject();};
+    AttributesWriterPtr getAttrs() {return mAttrs;};
 
   private:
 
