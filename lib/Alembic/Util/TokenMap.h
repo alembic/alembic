@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace Util {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // TOKEN MAP
@@ -305,6 +306,10 @@ inline bool operator==( const TokenMap &iA, const TokenMap &iB )
 {
     return iA.exactMatch( iB );
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

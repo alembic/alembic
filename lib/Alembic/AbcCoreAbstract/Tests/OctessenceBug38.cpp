@@ -44,7 +44,7 @@
 #include <vector>
 
 //-*****************************************************************************
-namespace AbcA = Alembic::AbcCoreAbstract::v1;
+namespace AbcA = Alembic::AbcCoreAbstract;
 
 using namespace Alembic::Util;
 

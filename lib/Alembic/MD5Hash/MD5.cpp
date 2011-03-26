@@ -39,14 +39,14 @@
 
 namespace Alembic {
 namespace MD5Hash {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 #ifdef MD5HASH_BIG_ENDIAN
 
 //-*****************************************************************************
 template <class POD_TYPE>
-inline void StoreLittleEndian( void *destination,
-                               const POD_TYPE &source )
+inline void StoreLittleEndian( void *destination, const POD_TYPE &source )
 {
     boost::detail::store_little_endian<POD_TYPE,sizeof(POD_TYPE)>(
         destination, source );
@@ -205,6 +205,7 @@ MD5 &operator<<( MD5 &md5, std::istream &istr )
     return md5;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace MD5Hash
 } // End namespace Alembic
 

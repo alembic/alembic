@@ -41,7 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
-
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -85,5 +85,6 @@ TopOrImpl::~TopOrImpl()
     // Nothing.
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

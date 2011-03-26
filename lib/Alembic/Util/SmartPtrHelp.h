@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace Util {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! The NullDeleter is for use as a custom deleter with boost shared_ptrs
@@ -53,6 +54,9 @@ struct NullDeleter
     }
 };
 
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 }
 }

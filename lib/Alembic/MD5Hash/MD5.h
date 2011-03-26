@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace MD5Hash {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class MD5
@@ -92,12 +93,15 @@ MD5 &operator<<( MD5 &md5, const std::string &str );
 MD5 &operator<<( MD5 &md5, std::istream &istr );
 
 template <class ITERATOR>
-inline MD5 &operator<<( MD5 &md5,
-                        const std::pair<ITERATOR,ITERATOR> &range )
+inline MD5 &operator<<( MD5 &md5, const std::pair<ITERATOR,ITERATOR> &range )
 {
     md5.updateIter<ITERATOR>( range.first, range.second );
     return md5;
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace MD5Hash
 } // End namespace Alembic

@@ -108,6 +108,21 @@ void Example1_MeshOut()
     mesh_samp.setInterpolateBoundary( 0 );
     mesh.set( mesh_samp, 2 );
 
+    C3f color_val( 1.0, 0.0, 0.0 );
+
+    OCompoundProperty arbParams = mesh.getArbGeomParams();
+    C3fArraySample val_samp( &color_val, 1 );
+
+    OC3fGeomParam color( arbParams, "color", false, kConstantScope, 1 );
+    OC3fGeomParam::Sample color_samp( val_samp, kConstantScope );
+
+    // write red
+    color.set( color_samp, OSampleSelector(0, 0.0) );
+
+    // now purple
+    color_val.z = 1.0;
+    color.set( color_samp, OSampleSelector(1, 1.0) );
+
     std::cout << "Writing: " << archive.getName() << std::endl;
 }
 
@@ -169,6 +184,21 @@ void Example1_MeshIn()
 
     std::cout << "0th vertex from the mesh sample with get method: "
               << samp2.getPositions()->get()[0] << std::endl;
+
+    ICompoundProperty arbattrs = mesh.getArbGeomParams();
+
+    // This better exist since we wrote custom attr called color to it
+    TESTING_ASSERT( arbattrs );
+    TESTING_ASSERT( IC3fGeomParam::matches(
+        arbattrs.getPropertyHeader(0).getMetaData() ) );
+    IC3fGeomParam color(arbattrs, "color");
+    TESTING_ASSERT( color.getValueProperty().isScalarLike() );
+
+    IC3fGeomParam::Sample cSamp0, cSamp1;
+    color.getExpanded(cSamp0, 0);
+    color.getExpanded(cSamp1, 1);
+    TESTING_ASSERT( (*(cSamp0.getVals()))[0] == C3f( 1.0, 0.0, 0.0 ) );
+    TESTING_ASSERT( (*(cSamp1.getVals()))[0] == C3f( 1.0, 0.0, 1.0 ) );
 }
 
 //-*****************************************************************************

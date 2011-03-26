@@ -44,6 +44,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // This templated base class implements the common logic behind both the
@@ -171,6 +172,8 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
     ABCA_ASSERT( m_parent, "Invalid parent" );
     ABCA_ASSERT( m_header, "Invalid property header" );
     ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
+    ABCA_ASSERT( m_header->getDataType().getExtent() > 0,
+        "Invalid DatatType extent");
 
     // Get data types
     PlainOldDataType POD = m_header->getDataType().getPod();
@@ -486,6 +489,10 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::~SimplePwImpl()
     m_fileDataType = -1;
     m_nativeDataType = -1;
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

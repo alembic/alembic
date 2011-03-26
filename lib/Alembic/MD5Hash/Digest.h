@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace MD5Hash {
+namespace ALEMBIC_VERSION_NS {
 
 //-*************************************************************************
 // Digest class. This is what the MD5 produces. it is handy!
@@ -122,6 +123,10 @@ inline std::ostream &operator<<( std::ostream &ostr, const MD5Digest &a )
     a.print( ostr );
     return ostr;
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace MD5Hash
 } // End namespace Alembic

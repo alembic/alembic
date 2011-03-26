@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // The Scalar Property Reader fills up bytes corresponding to memory for
@@ -90,6 +91,10 @@ protected:
                   AbcA::ArraySampleKey & oSamplePtr ) { return false; }
 
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

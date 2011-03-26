@@ -43,7 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! In order for an implementation to concretely provide a starting point
@@ -115,7 +115,10 @@ private:
     int8_t m_compressionHint;
 };
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
+
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

@@ -47,6 +47,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // This templated base class implements the common logic behind both the
@@ -268,6 +269,14 @@ template <class ABSTRACT, class IMPL, class SAMPLE>
 AbcA::TimeSampling
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getTimeSampling()
 {
+
+    // we've filled it in already, just return a copy of it.
+    if (m_timeSamplingPtr)
+    {
+        AbcA::TimeSampling ret = *m_timeSamplingPtr;
+        return ret;
+    }
+
     //-*************************************************************************
     // Read the time samples as an array ptr
     // check their sizes, convert to times, create time sampling ptr.
@@ -479,6 +488,10 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::~SimplePrImpl()
         m_nativeDataType = -1;
     }
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

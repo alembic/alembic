@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // With the object as an input.
@@ -250,5 +251,6 @@ BaseCpwImpl::~BaseCpwImpl()
     }
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

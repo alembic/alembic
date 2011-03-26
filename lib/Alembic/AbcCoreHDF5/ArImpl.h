@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class TopOrImpl;
@@ -55,8 +56,6 @@ private:
 
     ArImpl( const std::string &iFileName,
             AbcA::ReadArraySampleCachePtr iCache );
-
-    ArImpl( const ArImpl &iCopy );
 
 public:
     virtual ~ArImpl();
@@ -91,6 +90,10 @@ private:
 
     AbcA::ReadArraySampleCachePtr m_readArraySampleCache;
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

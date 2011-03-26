@@ -44,7 +44,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! A CompoundProperty is a group of other properties, possibly Simple
@@ -129,7 +129,10 @@ public:
 
 };
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
+
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

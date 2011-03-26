@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class BaseCpwImpl : public AbcA::CompoundPropertyWriter
@@ -100,6 +101,10 @@ protected:
     PropertyHeaderPtrs m_propertyHeaders;
     MadeProperties m_madeProperties;
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // We're creating the top group.
@@ -83,5 +84,6 @@ TopOwImpl::~TopOwImpl()
     // Nothing!
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

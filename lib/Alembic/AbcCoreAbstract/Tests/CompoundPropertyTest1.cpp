@@ -46,7 +46,7 @@
 //-*****************************************************************************
 namespace A5 = Alembic::AbcCoreHDF5;
 
-namespace ABC = Alembic::AbcCoreAbstract::v1;
+namespace ABC = Alembic::AbcCoreAbstract;
 
 using ABC::chrono_t;
 using Alembic::Util::float32_t;

@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -64,11 +65,6 @@ public:
         m_parent.createProtoObject( iGroup, iName );
     }
 
-    void foundPropertiesGroup()
-    {
-        m_parent.foundPropertiesGroup();
-    }
-
 private:
     BaseOrImpl &m_parent;
 };
@@ -79,33 +75,10 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
                                const H5L_info_t *iLinfo,
                                void *iOpData )
 {
-    hid_t obj;
-
-    // Get the visitor class. This being NULL is a programmer error
     ObjectGroupVisitor *visitor = ( ObjectGroupVisitor * )iOpData;
-    assert( visitor != NULL );
 
-    // Verify that it's a hard link.
-    ABCA_ASSERT( iLinfo->type == H5L_TYPE_HARD,
-                 "Only Hard Links allowed in Alembic Groups" );
-
-    // Stat the object
-    H5O_info_t oinfo;
-    herr_t status = H5Oget_info_by_name( iGroup, iName,
-                                         &oinfo, H5P_DEFAULT );
-    ABCA_ASSERT( status >= 0,
-                 "H5Oget_info_by_name_failed for object: " << iName );
-
-    // Verify that it's a group.
-    ABCA_ASSERT( oinfo.type == H5O_TYPE_GROUP,
-                 "Only groups allowed in Objects" );
-
-    // If the name is ".prop", mark properties found
-    if ( std::string( iName ) == ".prop" )
-    {
-        visitor->foundPropertiesGroup();
-    }
-    else
+    // ".prop" is special
+    if ( std::string( iName ) != ".prop" )
     {
         // Create a proto object.
         visitor->createProtoObject( iGroup, iName );
@@ -122,21 +95,10 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
 //-*****************************************************************************
 
 //-*****************************************************************************
-BaseOrImpl::BaseOrImpl( const BaseOrImpl &iCopy )
-  : m_proto( iCopy.m_proto )
-  , m_properties( iCopy.m_properties )
-  , m_foundPropertiesGroup( iCopy.m_foundPropertiesGroup )
-  , m_archive( iCopy.m_archive )
-  , m_protoObjects( iCopy.m_protoObjects )
-  , m_children( iCopy.m_children )
-{}
-
-//-*****************************************************************************
 // Reading as a child of a parent.
 BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
   : m_proto( iProto )
   , m_properties( NULL )
-  , m_foundPropertiesGroup( false )
 {
     // Check validity of all inputs.
     ABCA_ASSERT( m_proto, "Invalid proto" );
@@ -147,13 +109,12 @@ BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
 
     ObjectGroupVisitor visitor( *this );
 
-    hsize_t idx = 0;
     hid_t id = m_proto->getGroup();
 
     herr_t status = H5Literate( id,
                                 H5_INDEX_CRT_ORDER,
                                 H5_ITER_INC,
-                                &idx,
+                                NULL,
                                 VisitAllLinksCB,
                                 ( void * )&visitor );
 
@@ -175,14 +136,6 @@ void BaseOrImpl::createProtoObject( hid_t iGroup, const std::string &iName )
 
     m_protoObjects.push_back( child.proto );
     m_children[iName] = child;
-}
-
-//-*****************************************************************************
-void BaseOrImpl::foundPropertiesGroup()
-{
-    ABCA_ASSERT( !m_foundPropertiesGroup,
-                 "Can't find properties group twice..." );
-    m_foundPropertiesGroup = true;
 }
 
 //-*****************************************************************************
@@ -285,5 +238,6 @@ BaseOrImpl::~BaseOrImpl()
     // Rest will take care of themselves
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

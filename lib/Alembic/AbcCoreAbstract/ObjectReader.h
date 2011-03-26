@@ -43,7 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! An Object consists of a list of children objects, which may be empty,
@@ -159,7 +159,10 @@ public:
     virtual ObjectReaderPtr asObjectPtr() = 0;
 };
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
+
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

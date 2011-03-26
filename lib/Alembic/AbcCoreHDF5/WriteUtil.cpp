@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -143,11 +144,8 @@ WriteDimensions( hid_t iParent,
                  const std::string &iAttrName,
                  const Dimensions &iDims )
 {
-    // Only bother to write dimensions if they exist,
-    // which means rank > 0.
+
     size_t rank = iDims.rank();
-    ABCA_ASSERT( rank > 0,
-                 "Pointless to write rank0 dimensions" );
 
     // Create temporary storage to write
     std::vector<uint32_t> dimStorage( rank );
@@ -219,7 +217,7 @@ WritePropertyAndDataType( hid_t iGroup,
                  H5T_STD_U16LE,
                  H5T_NATIVE_UINT16,
                  ( const void * )&bitField );
-}
+}   
 
 //-*****************************************************************************
 static void
@@ -232,7 +230,7 @@ WriteTimeSamplingType( hid_t iGroup,
 
     const uint32_t spc = iTimeSamplingType.getNumSamplesPerCycle();
     const chrono_t tpc = iTimeSamplingType.getTimePerCycle();
-
+    
     if ( iTimeSamplingType.isIdentity() )
     {
         // We don't bother writing it at all
@@ -252,7 +250,7 @@ WriteTimeSamplingType( hid_t iGroup,
         // Here we have to write SPC, and if TPC is 1.0 we don't
         // bother writing it.
         assert( spc > 1 );
-        assert( tpc < AbcA::TimeSamplingType::AcyclicTimePerCycle() );
+        assert( tpc < AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE );
         WriteScalar( iGroup, nameSPC,
                      H5T_STD_U32LE,
                      H5T_NATIVE_UINT32,
@@ -270,7 +268,7 @@ WriteTimeSamplingType( hid_t iGroup,
         //std::cout << "TOTALLY WRITING THESE HERE ACYCLIC SAMPLES: "
         //          << spc << std::endl;
         assert( iTimeSamplingType.isAcyclic() );
-        assert( spc == AbcA::TimeSamplingType::AcyclicNumSamples() );
+        assert( spc == AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES );
         WriteScalar( iGroup, nameSPC,
                      H5T_STD_U32LE,
                      H5T_NATIVE_UINT32,
@@ -304,6 +302,7 @@ WriteArray( WrittenArraySampleMap &iMap,
             hid_t iNativeType,
             int iCompressionLevel )
 {
+
     // Dispatch to string writing utils.
     const AbcA::DataType &dataType = iSamp.getDataType();
     if ( dataType.getPod() == kStringPOD )
@@ -315,6 +314,20 @@ WriteArray( WrittenArraySampleMap &iMap,
     {
         return WriteWstringArray( iMap, iGroup, iName, iSamp, iKey,
                                   iCompressionLevel );
+    }
+
+    // write the dimensions as necessary
+    Dimensions dims = iSamp.getDimensions();
+    size_t rank = dims.rank();
+
+    ABCA_ASSERT( rank > 0, "Cannot have a rank-0 array sample" );
+
+    // rank 1 is the most common case, and we can easily infer it's size
+    // from the dataspace for non-strings, so don't bother writing it out
+    if (rank > 1)
+    {
+        std::string dimsName = iName + ".dims";
+        WriteDimensions( iGroup, dimsName, dims );
     }
 
     // See whether or not we've already stored this.
@@ -329,24 +342,13 @@ WriteArray( WrittenArraySampleMap &iMap,
     // It will be a dataset with an internal attribute for storing
     // the hash id.
 
-    // Make a dataspace from the dimensions
-    Dimensions dims = iSamp.getDimensions();
-
-    // Dimensions of rank 0 is not allowed for an array property.
-    // However, the extent of any particular dimension can reach 0
-    // (as in the case of a particle-simulation with zero particles).
-    // In this case, we would want to know the dimensions, and can
-    // skip the dataset altogether.
-    ABCA_ASSERT( dims.rank() > 0,
-                 "Cannot have a rank-0 array sample in WriteArray" );
-
     bool hasData = dims.numPoints() > 0;
 
     hid_t dspaceId = -1;
     if ( hasData )
     {
-        HDimensions hdims( dims );
-        dspaceId = H5Screate_simple( hdims.rank(), hdims.rootPtr(), NULL );
+        hsize_t hdim = dims.numPoints() * dataType.getExtent();
+        dspaceId = H5Screate_simple( 1, &hdim, NULL );
     }
     else
     {
@@ -364,7 +366,7 @@ WriteArray( WrittenArraySampleMap &iMap,
         hid_t zipPlist = DsetGzipCreatePlist( dims,
             iCompressionLevel > 9 ? 9 : iCompressionLevel );
         PlistCloser plistCloser( zipPlist );
-
+        
         // Make the dataset.
         dsetId = H5Dcreate2( iGroup, iName.c_str(), iFileType, dspaceId,
                              H5P_DEFAULT, zipPlist, H5P_DEFAULT );
@@ -375,7 +377,7 @@ WriteArray( WrittenArraySampleMap &iMap,
                              iFileType, dspaceId,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
     }
-    DsetCloser dsetCloser( dsetId );
+    DsetCloser dsetCloser(dsetId);
 
     ABCA_ASSERT( dsetId >= 0,
                  "WriteArray() Failed in dataset constructor" );
@@ -389,10 +391,6 @@ WriteArray( WrittenArraySampleMap &iMap,
 
     // Write the array sample key.
     WriteKey( dsetId, "key", iKey );
-
-    // If we don't have data, write the dimensions, which may
-    // still contain useful information.
-    WriteDimensions( dsetId, "dims", dims );
 
     writeID.reset( new WrittenArraySampleID( iKey, dsetId ) );
     iMap.store( writeID );
@@ -509,7 +507,7 @@ void WriteSampling( WrittenArraySampleMap &iMap,
     }
 
     if ( numTimes < 2 )
-    {
+    {   
         // Only one time.
         WriteScalar( iGroup, timeSampsName,
                      H5T_IEEE_F64LE,
@@ -528,5 +526,6 @@ void WriteSampling( WrittenArraySampleMap &iMap,
     }
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

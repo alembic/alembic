@@ -43,7 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 
 //-*****************************************************************************
@@ -153,7 +153,10 @@ protected:
     const chrono_t *_getTimeSamplesAsChrono_tPtr() const;
 };
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
+
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

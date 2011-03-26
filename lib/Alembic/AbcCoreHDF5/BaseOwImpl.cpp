@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 BaseOwImpl::BaseOwImpl( hid_t iParentGroup,
@@ -64,15 +65,6 @@ BaseOwImpl::BaseOwImpl( hid_t iParentGroup,
     // Create the properties
     m_properties = new TopCpwImpl( *this, m_group, iMetaData );
 }
-
-//-*****************************************************************************
-BaseOwImpl::BaseOwImpl( const BaseOwImpl &iCopy )
-  : m_archive( iCopy.m_archive )
-  , m_group( iCopy.m_group )
-  , m_properties( iCopy.m_properties )
-  , m_childHeaders( iCopy.m_childHeaders )
-  , m_madeChildren( iCopy.m_madeChildren )
-{}
 
 //-*****************************************************************************
 AbcA::ArchiveWriterPtr BaseOwImpl::getArchive()
@@ -185,5 +177,6 @@ BaseOwImpl::~BaseOwImpl()
     }
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

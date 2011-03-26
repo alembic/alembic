@@ -42,7 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! Helper types forward declared.
@@ -105,7 +105,10 @@ typedef boost::shared_ptr<ArrayPropertyReader> ArrayPropertyReaderPtr;
 typedef boost::shared_ptr<ScalarPropertyReader> ScalarPropertyReaderPtr;
 typedef boost::shared_ptr<BasePropertyReader> BasePropertyReaderPtr;
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
+
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

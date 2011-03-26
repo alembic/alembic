@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // Forwards
@@ -53,9 +54,7 @@ protected:
     BaseOwImpl( hid_t iParentGroup,
                 const std::string &iName,
                 const AbcA::MetaData &iMetaData );
-
-    BaseOwImpl( const BaseOwImpl &iCopy );
-
+    
 public:
     virtual ~BaseOwImpl();
 
@@ -105,6 +104,10 @@ private:
     ChildHeaders m_childHeaders;
     MadeChildren m_madeChildren;
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

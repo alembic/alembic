@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -118,6 +119,10 @@ AbcA::ArraySamplePtr
 ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
                  hid_t iGroup,
                  const std::string &iPropName );
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

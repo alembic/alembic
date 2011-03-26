@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 using namespace AbcA;
@@ -140,30 +141,7 @@ hid_t GetNativeH5T( const AbcA::DataType &adt, bool &oCleanUp )
 
     ABCA_ASSERT( baseDtype >= 0, "Bad base datatype id" );
 
-    if ( adt.getExtent() == 1 )
-    {
-        // Non-arrayed. The return object is shared,
-        // but it just a light envelope, id
-        return baseDtype;
-    }
-    else
-    {
-        ABCA_ASSERT( adt.getExtent() != 0,
-                     "Cannot create a DataType of extent 0!" );
-
-        // Have to make an arrayed type.
-        Dimensions dims( adt.getExtent() );
-        HDimensions hdims( dims );
-        hid_t ret = H5Tarray_create2( baseDtype, hdims.rank(),
-                                      hdims.rootPtr() );
-        if ( oCleanUp )
-        {
-            H5Tclose( baseDtype );
-        }
-        oCleanUp = true;
-        ABCA_ASSERT( ret >= 0, "Bad array datatype id" );
-        return ret;
-    }
+    return baseDtype;
 }
 
 //-*****************************************************************************
@@ -197,142 +175,9 @@ hid_t GetFileH5T( const AbcA::DataType &adt, bool &oCleanUp )
 
     ABCA_ASSERT( baseDtype >= 0, "Bad base datatype id" );
 
-    if ( adt.getExtent() == 1 )
-    {
-        // Non-arrayed.
-        return baseDtype;
-    }
-    else
-    {
-        ABCA_ASSERT( adt.getExtent() != 0,
-                     "Cannot create a DataType of extent 0!" );
-
-        // Have to make an arrayed type.
-        Dimensions dims( adt.getExtent() );
-        HDimensions hdims( dims );
-        hid_t ret = H5Tarray_create2( baseDtype, hdims.rank(),
-                                      hdims.rootPtr() );
-        if ( oCleanUp )
-        {
-            H5Tclose( baseDtype );
-        }
-        oCleanUp = true;
-        ABCA_ASSERT( ret >= 0, "Bad array datatype id" );
-        return ret;
-    }
+    return baseDtype;
 }
 
-//-*****************************************************************************
-static AbcA::DataType interpretH5TNonArrayed( hid_t dtype )
-{
-    AbcA::DataType ret;
-
-    // Determine class to switch over.
-    H5T_class_t dtypeClass = H5Tget_class( dtype );
-    ABCA_ASSERT( dtypeClass != H5T_NO_CLASS, "H5Tget_class failed" );
-
-    //-*************************************************************************
-    //-*************************************************************************
-    // INTEGER:
-    // Choices are signed/unsigned, 8,16,32,64
-    if ( dtypeClass == H5T_INTEGER )
-    {
-        // Not arrayed.
-        ret.setExtent( 1 );
-
-        bool isSigned = ( bool )H5Tget_sign( dtype );
-        size_t bytes = H5Tget_size( dtype );
-        if ( bytes == 1 )
-        {
-            if ( H5Tget_precision( dtype ) < 8 )
-            {
-                ret.setPod( kBooleanPOD );
-            }
-            else
-            {
-                ret.setPod( isSigned ? kInt8POD : kUint8POD );
-            }
-        }
-        else if ( bytes == 2 )
-        {
-            ret.setPod( isSigned ? kInt16POD : kUint16POD );
-        }
-        else if ( bytes == 4 )
-        {
-            ret.setPod( isSigned ? kInt32POD : kUint32POD );
-        }
-        else if ( bytes == 8 )
-        {
-            ret.setPod( isSigned ? kInt64POD : kUint64POD );
-        }
-        else
-        {
-            ABCA_THROW( "Unknown dtype bit depth: " << (8*bytes) );
-        }
-    }
-    //-*************************************************************************
-    //-*************************************************************************
-    // FLOAT:
-    // Choices are 16/32/64 bit
-    else if ( dtypeClass == H5T_FLOAT )
-    {
-        // Not arrayed.
-        ret.setExtent( 1 );
-
-        // Figure out num bytes
-        size_t bytes = H5Tget_size( dtype );
-        if ( bytes == 2 )
-        {
-            ret.setPod( kFloat16POD );
-        }
-        else if ( bytes == 4 )
-        {
-            ret.setPod( kFloat32POD );
-        }
-        else if ( bytes == 8 )
-        {
-            ret.setPod( kFloat64POD );
-        }
-        else
-        {
-            ABCA_THROW( "Unknown dtype bit depth: " << (8*bytes) );
-        }
-    }
-    //-*************************************************************************
-    //-*************************************************************************
-    // EVERYTHING ELSE is an error
-    else
-    {
-        ABCA_THROW( "Invalid non-arrayed datatype" );
-    }
-
-    return ret;
-}
-
-//-*****************************************************************************
-DataType InterpretH5T( hid_t dtype )
-{
-    if ( H5Tget_class( dtype ) == H5T_ARRAY )
-    {
-        AbcA::DataType baseType =
-            interpretH5TNonArrayed( H5Tget_super( dtype ) );
-
-        int ndims = H5Tget_array_ndims( dtype );
-        ABCA_ASSERT( ndims > 0, "H5Tget_array_ndims failed" );
-
-        HDimensions hdims( ( size_t )ndims );
-        ndims = H5Tget_array_dims2( dtype, hdims.rootPtr() );
-        ABCA_ASSERT( ndims > 0, "H5Tget_array_dims2 failed" );
-        ABCA_ASSERT( ndims == hdims.rank(),
-                     "H5Tget_array_dims2 inconsistent ranks" );
-
-        return AbcA::DataType( baseType.getPod(), hdims.numPoints() );
-    }
-    else
-    {
-        return interpretH5TNonArrayed( dtype );
-    }
-}
-
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

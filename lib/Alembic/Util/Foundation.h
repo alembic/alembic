@@ -46,7 +46,6 @@
 #include <boost/array.hpp>
 #include <boost/operators.hpp>
 #include <boost/foreach.hpp>
-// #include <boost/exception/all.hpp>
 
 #include <half.h>
 
@@ -64,10 +63,17 @@
 #include <string.h>
 #include <assert.h>
 
+#define ALEMBIC_VERSION_NS v1
+
 namespace Alembic {
 namespace Util {
+namespace ALEMBIC_VERSION_NS {
 
 // Nothing!
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

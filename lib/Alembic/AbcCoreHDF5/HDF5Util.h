@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 typedef ::Alembic::Util::BaseDimensions<hsize_t> HDimensions;
@@ -104,6 +105,10 @@ bool EquivalentDatatypes( hid_t idA, hid_t idB );
 //-*****************************************************************************
 bool GroupExists( hid_t iParent, const std::string &iName );
 bool DatasetExists( hid_t iParent, const std::string &iName );
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

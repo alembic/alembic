@@ -67,6 +67,7 @@
 
 namespace Alembic {
 namespace MD5Hash {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 #define T_MASK ((UINT4)~0)
@@ -127,7 +128,7 @@ void Process::append( const UCHAR *data, size_t nbytesUnsigned )
 
     if ( nbytes <= 0 )
     {
-	return;
+        return;
     }
 
     // Update the message length.
@@ -141,17 +142,15 @@ void Process::append( const UCHAR *data, size_t nbytesUnsigned )
     // Process an initial partial block.
     if ( offset )
     {
-	size_t copy = ( offset + nbytes > 64 ?
-                        64 - offset :
-                        nbytes );
+        size_t copy = ( offset + nbytes > 64 ? 64 - offset : nbytes );
 
-	memcpy( m_buf + offset, p, copy );
-	if ( offset + copy < 64 )
+        memcpy( m_buf + offset, p, copy );
+        if ( offset + copy < 64 )
         {
-	    return;
+            return;
         }
-	p += copy;
-	left -= copy;
+        p += copy;
+        left -= copy;
         process64bytes( m_buf );
     }
 
@@ -164,7 +163,7 @@ void Process::append( const UCHAR *data, size_t nbytesUnsigned )
     // Process a final partial block.
     if ( left )
     {
-	memcpy( m_buf, p, left );
+        memcpy( m_buf, p, left );
     }
 }
 
@@ -433,7 +432,7 @@ MD5Digest Process::unrecoverableBakeIntoDigest()
     // Save the length before padding.
     for ( int i = 0; i < 8; ++i )
     {
-	data[i] = ( UCHAR )( m_count[i >> 2] >> ( ( i & 3 ) << 3 ) );
+        data[i] = ( UCHAR )( m_count[i >> 2] >> ( ( i & 3 ) << 3 ) );
     }
     
     // Pad to 56 bytes mod 64.
@@ -452,6 +451,7 @@ MD5Digest Process::unrecoverableBakeIntoDigest()
     return digest;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace MD5Hash
 } // End namespace Alembic
 

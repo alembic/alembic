@@ -318,6 +318,10 @@ public:
         m_isIndexed = false;
     }
 
+    prop_type getValueProperty() { return m_valProp; }
+
+    OUInt32ArrayProperty getIndexProperty() { return m_indices; }
+
 private:
     Abc::ErrorHandler &getErrorHandler() const
     { return m_valProp.getErrorHandler(); }

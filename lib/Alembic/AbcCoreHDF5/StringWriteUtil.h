@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void
@@ -89,6 +90,10 @@ WriteWstringArray( WrittenArraySampleMap &iMap,
                    const AbcA::ArraySample &iSamp,
                    const AbcA::ArraySample::Key &iKey,
                    int iCompressionLevel );
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

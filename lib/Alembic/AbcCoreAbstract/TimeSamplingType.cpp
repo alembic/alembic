@@ -38,7 +38,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // static instancing
@@ -47,49 +47,10 @@ const uint32_t TimeSamplingType::ACYCLIC_NUM_SAMPLES =
 
 // Not all the way to the max.
 const chrono_t TimeSamplingType::ACYCLIC_TIME_PER_CYCLE =
-    std::numeric_limits<chrono_t>::max() / 32.0;
-
-//-*****************************************************************************
-// get these constants; similar to std::numeric_limits<>()
-uint32_t const TimeSamplingType::AcyclicNumSamples()
-{
-    return ACYCLIC_NUM_SAMPLES;
-}
-
-chrono_t const TimeSamplingType::AcyclicTimePerCycle()
-{
-    return ACYCLIC_TIME_PER_CYCLE;
-}
-
-//-*****************************************************************************
-//! Prints out relevant information about the TimeSamplingType instance
-std::ostream &operator<<( std::ostream &ostr, const TimeSamplingType &tst )
-{
-    std::string baseType( "" );
-
-    if ( tst.isIdentity() ) { baseType = "Identity"; }
-    else if ( tst.isUniform() ) { baseType = "Uniform"; }
-    else if ( tst.isCyclic() ) { baseType = "Cyclic"; }
-    else { baseType = "Acyclic"; }
-
-    ostr << baseType << " time sampling";
-
-    if ( tst.isUniform() )
-    {
-        ostr << " with " << tst.getTimePerCycle() << " chrono_ts/cycle";
-    }
-    else if ( tst.isCyclic() )
-    {
-        ostr << " with " << tst.getNumSamplesPerCycle() << " samps/cycle "
-             << "and " << tst.getTimePerCycle() << " chrono_ts/cycle";
-    }
-
-    return ostr;
-}
+    std::numeric_limits<chrono_t>::max() / 10.0;
 
 
-
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

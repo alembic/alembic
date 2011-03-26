@@ -40,6 +40,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 BOOST_STATIC_ASSERT( sizeof( char ) == sizeof( int8_t ) );
@@ -152,8 +153,6 @@ ReadStringT<std::string,char>( hid_t iParent,
     DtypeCloser dtypeCloser( attrFtype );
 
     size_t numChars = H5Tget_size( attrFtype );
-    ABCA_ASSERT( numChars >= 0,
-                 "ReadStringT() H5Aget_size() failed" );
 
     // Read and check space
     {
@@ -161,7 +160,7 @@ ReadStringT<std::string,char>( hid_t iParent,
         ABCA_ASSERT( attrSpace >= 0,
                      "Couldn't get dataspace for attribute: " << iAttrName );
         DspaceCloser dspaceCloser( attrSpace );
-
+        
         H5S_class_t attrSpaceClass = H5Sget_simple_extent_type( attrSpace );
         ABCA_ASSERT( attrSpaceClass == H5S_SCALAR,
                      "Tried to read non-scalar attribute: " << iAttrName
@@ -434,9 +433,9 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
     // String array datatypes require a "dimensions" to be stored
     // externally, since the strings themselves are stored in a compacted
     // array of rank 1.
-    // This is an attribute called "dims" that lives in the dset itself.
     Dimensions realDims;
-    ReadDimensions( dsetId, "dims", realDims );
+    std::string dimName = iName + ".dims";
+    ReadDimensions( iParent, dimName, realDims );
     ABCA_ASSERT( realDims.rank() > 0,
                  "Degenerate rank in Dataset read" );
 
@@ -465,16 +464,16 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
                      << std::endl
                      << "Expecting rank: " << hdims.rank()
                      << " instead was: " << rank );
-
+        
         dims = hdims;
         ABCA_ASSERT( dims.numPoints() > 0,
                      "Degenerate dims in Dataset read" );
-
+        
 
         // Create temporary char storage buffer.
         size_t totalNumChars = dims.numPoints() + 1;
         std::vector<CharT> charStorage( totalNumChars, ( CharT )0 );
-
+        
         // Read into it.
         herr_t status = H5Dread( dsetId, GetNativeDtype<CharT>(),
                                  H5S_ALL, H5S_ALL, H5P_DEFAULT,
@@ -548,5 +547,6 @@ ReadWstringArray( AbcA::ReadArraySampleCachePtr iCache,
         ( iCache, iParent, iName, iDataType );
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

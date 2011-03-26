@@ -38,7 +38,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 ScalarPropertyWriter::~ScalarPropertyWriter()
@@ -46,6 +46,6 @@ ScalarPropertyWriter::~ScalarPropertyWriter()
     // Nothing
 }
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

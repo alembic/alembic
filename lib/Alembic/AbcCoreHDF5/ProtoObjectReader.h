@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class ProtoObjectReader : private boost::noncopyable
@@ -73,6 +74,10 @@ MakeProtoObjectReaderPtr( hid_t iParentProperty,
                                                   iParentFullPathName,
                                                   iName );
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

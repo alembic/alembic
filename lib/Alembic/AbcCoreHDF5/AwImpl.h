@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class TopOwImpl;
@@ -53,11 +54,9 @@ class AwImpl : public AbcA::ArchiveWriter
 {
 private:
     friend struct WriteArchive;
-
+    
     AwImpl( const std::string &iFileName,
             const AbcA::MetaData &iMetaData );
-
-    AwImpl( const AwImpl &iCopy );
 
 public:
     virtual ~AwImpl();
@@ -93,6 +92,10 @@ private:
 
     WrittenArraySampleMap m_writtenArraySampleMap;
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

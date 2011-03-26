@@ -38,7 +38,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 BasePropertyReader::~BasePropertyReader()
@@ -67,6 +67,6 @@ CompoundPropertyReaderPtr BasePropertyReader::asCompoundPtr()
     return CompoundPropertyReaderPtr();
 }
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

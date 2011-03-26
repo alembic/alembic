@@ -44,9 +44,6 @@
 
 #include <functional>
 
-// These seem not to be installed.
-// #include <unordered_map>
-// #include <unordered_set>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 
@@ -65,6 +62,7 @@
 
 namespace Alembic {
 namespace MD5Hash {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 using Alembic::Util::uint8_t;
@@ -83,6 +81,10 @@ using Alembic::Util::float64_t;
 typedef uint64_t UINT8;
 typedef uint32_t UINT4;
 typedef uint8_t UCHAR;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace MD5Hash
 } // End namespace Alembic

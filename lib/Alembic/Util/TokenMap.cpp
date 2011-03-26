@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace Util {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 #define NULLDEF "__NULL__"
@@ -178,7 +179,7 @@ std::string TokenMap::get( char pairSep,
     return output.str();
 }
 
-
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Util
 } // End namespace Alembic
 

@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class TopCprImpl;
@@ -54,14 +55,9 @@ protected:
 
     BaseOrImpl( ProtoObjectReaderPtr iProto );
 
-    BaseOrImpl( const BaseOrImpl& iCopy );
-
 public:
     // Not really public
     void createProtoObject( hid_t iGroup, const std::string &iName );
-
-    // Also not really public
-    void foundPropertiesGroup();
 
     virtual ~BaseOrImpl();
 
@@ -112,15 +108,14 @@ protected:
     // back up to us, so no pointer cycles.
     TopCprImpl *m_properties;
 
-    // If there are no children properties, there will not be a .props
-    // group. Therefore, cache whether or not we found such a group in
-    // our initial scan.
-    bool m_foundPropertiesGroup;
-
     // The children
     ProtoObjects m_protoObjects;
     ChildrenMap m_children;
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

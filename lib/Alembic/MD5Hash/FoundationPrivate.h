@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace MD5Hash {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 #define MD5HASH_STATIC_ASSERT BOOST_STATIC_ASSERT
@@ -61,6 +62,10 @@ namespace MD5Hash {
 #undef MD5HASH_BIG_ENDIAN
 
 #endif
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace MD5Hash
 } // End namespace Alembic

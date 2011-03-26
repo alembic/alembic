@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace MD5Hash {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class Process
@@ -62,16 +63,20 @@ protected:
         // and storing types to little-endian from elsewhere.
         process64bytesLE( data );
     }
-        
+
     void process64bytesLE( const UCHAR *data );
     void process64bytesBE( const UCHAR *data );
     void process64bytesAligned( const UINT4 *data );
     MD5Digest unrecoverableBakeIntoDigest();
-    
+
     size_t m_count[2];
     UINT4 m_abcd[4];
     UCHAR m_buf[64];
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace MD5Hash
 } // End namespace Alembic

@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 struct CprAttrVisitor
@@ -53,16 +54,9 @@ struct CprAttrVisitor
 
     void createNewProperty( const std::string &iName )
     {
-        if ( std::find( properties.begin(),
-                        properties.end(),
-                        iName ) != properties.end() )
-        {
-            ABCA_THROW( "Duplicate property: " << iName );
-        }
-
         properties.push_back( iName );
     }
-};  
+};
 
 //-*****************************************************************************
 herr_t CprVisitAllAttrsCB( hid_t iGroup,
@@ -74,21 +68,8 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
     CprAttrVisitor *visitor = ( CprAttrVisitor * )iOpData;
     assert( visitor != NULL );
 
-    // std::cout << "Visiting attr: " << iAttrName << std::endl;
-    if ( iAttrName == NULL )
+    if ( iAttrName == NULL || iAttrName[0] == 0 )
     {
-        // std::cout << "Weird. NULL attr name. Info: "
-        //          << ( const void * )iAinfo
-        //          << ", op data: "
-        //          << ( const void * )iOpData << std::endl;
-        return 0;
-    }
-    if ( iAttrName[0] == 0 )
-    {
-        // std::cout << "Weird. Empty attr name. Info: "
-        //          << ( const void * )iAinfo
-        //          << ", op data: "
-        //          << ( const void * )iOpData << std::endl;
         return 0;
     }
 
@@ -98,7 +79,15 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
     // $NAME.meta       Meta Data
     // $NAME.tspc       Time Sampling Num Samples Per Cycle
     // $NAME.ttpc       Time Sampling Time Per Cycle
-    // or we ignore it.
+    // $NAME.nums       Total number of samples and number of unique samples
+    //                  (only if they are different)
+    // $NAME.smp0       First sample for smaller properties.
+    //                  Larger properties store it in an HDF5 dataset.
+    // $NAME.dims       Dimension hint for strings and complex multi-dimensional
+    //                  data sets.
+    // $NAME.sclr       Hint on only array properties about whether it is scalar
+    //                  like, meaning every sample only has 1 DataType in it.
+    // we ignore it everything else
     std::string attrName( iAttrName );
     size_t attrNameLen = attrName.size();
     if ( attrNameLen < 6 )
@@ -114,26 +103,11 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
     }
 
     // Last 5 characters.
-    std::string propertyName( attrName, 0, attrNameLen-5 );
     std::string suffix( attrName, attrNameLen-5 );
     if ( suffix == ".type" )
     {
+        std::string propertyName( attrName, 0, attrNameLen-5 );
         visitor->createNewProperty( propertyName );
-    }
-    else
-    {
-        if ( suffix != ".meta" &&
-             suffix != ".tspc" &&
-             suffix != ".ttpc" &&
-             suffix != ".nums" &&
-             suffix != ".time" &&
-             suffix != ".smp0" )
-        {
-            ABCA_THROW( "Invalid attribute in compound property group: "
-                        << attrName
-                        << std::endl
-                        << "Unknown suffix: " << suffix );
-        }
     }
 
     return 0;
@@ -175,11 +149,10 @@ BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
     CprAttrVisitor visitor;
     try
     {
-        hsize_t idx = 0;
         herr_t status = H5Aiterate2( m_group,
                                      H5_INDEX_CRT_ORDER,
                                      H5_ITER_INC,
-                                     &idx,
+                                     NULL,
                                      CprVisitAllAttrsCB,
                                      ( void * )&visitor );
 
@@ -197,19 +170,15 @@ BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
                     << iName << ", unknown reason" );
     }
 
+    size_t index = 0;
+    m_propertyHeaders.resize(visitor.properties.size());
+
     // For each property name, read the various pieces of information
     for ( std::vector<std::string>::iterator siter = visitor.properties.begin();
-          siter != visitor.properties.end(); ++siter )
+          siter != visitor.properties.end(); ++siter, ++index )
     {
-        PropertyHeaderPtr iPtr( new AbcA::PropertyHeader() );
-        iPtr->setName( (*siter) );
-        ReadPropertyHeader( m_group, (*siter), *iPtr );
-
-        // Put them in our whatnots.
-        m_propertyHeaders.push_back( iPtr );
-        SubProperty sprop;
-        sprop.header = iPtr;
-        m_subProperties[(*siter)] = sprop;
+        m_subProperties[(*siter)] = index;
+        m_propertyHeaders[index].name = (*siter);
     }
 }
 
@@ -240,7 +209,18 @@ const AbcA::PropertyHeader &BaseCprImpl::getPropertyHeader( size_t i )
                     << "CprImpl::getPropertyHeader: " << i );
     }
 
-    return *(m_propertyHeaders[i]);
+    // read the property header stuff if we haven't yet
+    if (m_propertyHeaders[i].header == NULL)
+    {
+        PropertyHeaderPtr iPtr( new AbcA::PropertyHeader() );
+        ReadPropertyHeader( m_group, m_propertyHeaders[i].name, *iPtr );
+        m_propertyHeaders[i].header = iPtr;
+
+        // don't need name anymore
+        m_propertyHeaders[i].name = "";
+    }
+
+    return *(m_propertyHeaders[i].header);
 }
 
 //-*****************************************************************************
@@ -253,7 +233,7 @@ BaseCprImpl::getPropertyHeader( const std::string &iName )
         return NULL;
     }
 
-    return (*fiter).second.header.get();
+    return &(getPropertyHeader(fiter->second));
 }
 
 //-*****************************************************************************
@@ -266,11 +246,12 @@ BaseCprImpl::getScalarProperty( const std::string &iName )
         return AbcA::ScalarPropertyReaderPtr();
     }
 
-    SubProperty &sub = (*fiter).second;
+    // make sure we've read the header
+    getPropertyHeader(fiter->second);
+    SubProperty & sub = m_propertyHeaders[fiter->second];
 
     if ( !(sub.header->isScalar()) )
     {
-        // return AbcA::ScalarPropertyReaderPtr();
         ABCA_THROW( "Tried to read a scalar property from a non-scalar: "
                     << iName << ", type: "
                     << sub.header->getPropertyType() );
@@ -280,15 +261,14 @@ BaseCprImpl::getScalarProperty( const std::string &iName )
     if ( sub.made.expired() )
     {
         // Make a new one.
-        bptr.reset( new SprImpl( this->asCompoundPtr(),
-                                 m_group,
-                                 sub.header ) );
+        bptr.reset( new SprImpl( this->asCompoundPtr(), m_group, sub.header ) );
         sub.made = bptr;
     }
     else
     {
         bptr = sub.made.lock();
     }
+
     AbcA::ScalarPropertyReaderPtr ret =
         boost::dynamic_pointer_cast<AbcA::ScalarPropertyReader,
         AbcA::BasePropertyReader>( bptr );
@@ -305,11 +285,12 @@ BaseCprImpl::getArrayProperty( const std::string &iName )
         return AbcA::ArrayPropertyReaderPtr();
     }
 
-    SubProperty &sub = (*fiter).second;
+    // make sure we've read the header
+    getPropertyHeader(fiter->second);
+    SubProperty & sub = m_propertyHeaders[fiter->second];
 
     if ( !(sub.header->isArray()) )
     {
-        // return AbcA::ArrayPropertyReaderPtr();
         ABCA_THROW( "Tried to read an array property from a non-array: "
                     << iName << ", type: "
                     << sub.header->getPropertyType() );
@@ -319,15 +300,14 @@ BaseCprImpl::getArrayProperty( const std::string &iName )
     if ( sub.made.expired() )
     {
         // Make a new one.
-        bptr.reset( new AprImpl( this->asCompoundPtr(),
-                                 m_group,
-                                 sub.header ) );
+        bptr.reset( new AprImpl( this->asCompoundPtr(), m_group, sub.header ) );
         sub.made = bptr;
     }
     else
     {
         bptr = sub.made.lock();
     }
+
     AbcA::ArrayPropertyReaderPtr ret =
         boost::dynamic_pointer_cast<AbcA::ArrayPropertyReader,
         AbcA::BasePropertyReader>( bptr );
@@ -344,11 +324,12 @@ BaseCprImpl::getCompoundProperty( const std::string &iName )
         return AbcA::CompoundPropertyReaderPtr();
     }
 
-    SubProperty &sub = (*fiter).second;
+    // make sure we've read the header
+    getPropertyHeader(fiter->second);
+    SubProperty & sub = m_propertyHeaders[fiter->second];
 
-    if ( !(sub.header->isCompound() ) )
+    if ( !(sub.header->isCompound()) )
     {
-        // return AbcA::CompoundPropertyReaderPtr();
         ABCA_THROW( "Tried to read a compound property from a non-compound: "
                     << iName << ", type: "
                     << sub.header->getPropertyType() );
@@ -358,15 +339,14 @@ BaseCprImpl::getCompoundProperty( const std::string &iName )
     if ( sub.made.expired() )
     {
         // Make a new one.
-        bptr.reset( new CprImpl( this->asCompoundPtr(),
-                                 m_group,
-                                 sub.header ) );
+        bptr.reset( new CprImpl( this->asCompoundPtr(), m_group, sub.header ) );
         sub.made = bptr;
     }
     else
     {
         bptr = sub.made.lock();
     }
+
     AbcA::CompoundPropertyReaderPtr ret =
         boost::dynamic_pointer_cast<AbcA::CompoundPropertyReader,
         AbcA::BasePropertyReader>( bptr );
@@ -383,5 +363,6 @@ BaseCprImpl::~BaseCprImpl()
     }
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

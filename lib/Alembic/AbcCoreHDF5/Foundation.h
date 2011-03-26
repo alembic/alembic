@@ -67,13 +67,16 @@
 
 #include <H5LTpublic.h>
 
+#define ALEMBIC_HDF5_FILE_VERSION -9
+
 //-*****************************************************************************
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-namespace AbcA = ::Alembic::AbcCoreAbstract::v1;
+namespace AbcA = ::Alembic::AbcCoreAbstract;
 
 using namespace ::Alembic::Util;
 using AbcA::index_t;
@@ -109,9 +112,18 @@ inline std::string getSampleName( const std::string &iName,
     }
     else
     {
-        return ( boost::format( ".smp_%08d" ) % iSampleIndex ).str();
+        // could use boost::lexical_cast
+        std::ostringstream strm;
+        strm.width(4);
+        strm.fill('0');
+        strm << iSampleIndex;
+        return strm.str();
     }
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

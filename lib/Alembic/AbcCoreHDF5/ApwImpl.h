@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class ApwImpl
@@ -100,7 +101,15 @@ public:
 protected:
     // Previous written array sample identifier!
     WrittenArraySampleIDPtr m_previousWrittenArraySampleID;
+
+private:
+    bool m_isScalarLike;
+
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

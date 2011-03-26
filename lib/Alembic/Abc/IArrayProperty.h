@@ -117,6 +117,9 @@ public:
     //! regardless of the time sampling.
     bool isConstant();
 
+    //! Ask if we are like a scalar - we have 1 and only 1 DataType per sample.
+    bool isScalarLike();
+
     //! Time information.
     //! This will be valid regardless of TimeSamplingType or number of samples.
     AbcA::TimeSampling getTimeSampling();

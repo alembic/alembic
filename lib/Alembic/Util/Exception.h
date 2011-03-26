@@ -47,6 +47,7 @@
 //! ...
 namespace Alembic {
 namespace Util {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! \brief Base class for all exceptions in the Alembic libraries. Derived
@@ -96,6 +97,10 @@ while( 0 )
 //! \brief convenient macro which may be used with std::iostream syntax
 //! \details Same as \ref ABC_THROW
 #define ALEMBIC_THROW( TEXT ) ABC_THROW( TEXT )
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

@@ -38,11 +38,44 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
+//-*****************************************************************************
+AprImpl::AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
+    hid_t iParentGroup,
+    PropertyHeaderPtr iHeader )
+    : SimplePrImpl<AbcA::ArrayPropertyReader, AprImpl, AbcA::ArraySamplePtr&>
+        ( iParent, iParentGroup, iHeader )
+{
+    if ( m_header->getPropertyType() != AbcA::kArrayProperty )
+    {
+        ABCA_THROW( "Attempted to create a ArrayPropertyReader from a "
+                    "non-array property type" );
+    }
+
+    m_isScalarLike = true;
+    std::string scalarName = m_header->getName() + ".sclr";
+
+    // if the attr doesn't exist, then we are scalar like
+    if ( H5Aexists(m_parentGroup, scalarName.c_str()) )
+    {
+        char scalarLike = 1;
+        size_t numRead = 0;
+        ReadSmallArray( m_parentGroup, scalarName, H5T_NATIVE_CHAR,
+            H5T_NATIVE_CHAR, 1, numRead, &scalarLike);
+        m_isScalarLike = scalarLike;
+    }
+}
 //-*****************************************************************************
 AbcA::ArrayPropertyReaderPtr AprImpl::asArrayPtr()
 {
     return shared_from_this();
+}
+
+//-*****************************************************************************
+bool AprImpl::isScalarLike()
+{
+    return m_isScalarLike;
 }
 
 //-*****************************************************************************
@@ -109,5 +142,6 @@ bool AprImpl::readKey( hid_t iGroup,
     return false;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

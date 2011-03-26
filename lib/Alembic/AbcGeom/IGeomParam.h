@@ -118,7 +118,9 @@ public:
             matches( iHeader.getMetaData(), iMatching );
     }
 
-    ITypedGeomParam() {}
+    ITypedGeomParam()
+     : m_isIndexed( false )
+    {}
 
     template <class CPROP>
     ITypedGeomParam( CPROP iParent,
@@ -196,6 +198,10 @@ public:
     }
 
     ALEMBIC_OPERATOR_BOOL( this_type::valid() );
+
+    prop_type getValueProperty() { return m_valProp; }
+
+    Abc::IUInt32ArrayProperty getIndexProperty() { return m_indices; }
 
 private:
     Abc::ErrorHandler &getErrorHandler() const

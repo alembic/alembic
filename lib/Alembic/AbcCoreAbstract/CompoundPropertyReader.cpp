@@ -40,7 +40,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 CompoundPropertyReader::~CompoundPropertyReader()
@@ -142,6 +142,6 @@ CompoundPropertyReader::getProperty( size_t i )
     }
 }
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

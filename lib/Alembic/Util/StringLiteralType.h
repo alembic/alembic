@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace Util {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // String trait, or "Strait". Just a way of turning a const string literal into
@@ -54,6 +55,9 @@ struct TRAIT_TYPE_NAME
     }
 }
 
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Util
 } // End namespace Alembic

@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -110,35 +111,9 @@ static void getDatatypeArrayDims( hid_t iDtype, Dimensions &dims )
 //-*****************************************************************************
 bool EquivalentDatatypes( hid_t iA, hid_t iB )
 {
-    if ( iA >= 0 && iB >= 0 )
-    {
-        if ( H5Tequal( iA, iB ) > 0 )
-        {
-            return true;
-        }
+    if ( iA >= 0 && iB >= 0 && H5Tequal( iA, iB ) > 0 )
+        return true;
 
-        // If they're not equal, but they are both arrayed and
-        // both have the same super type
-        // and dimensions, they're equivalent
-        if ( H5Tget_class( iA ) == H5T_ARRAY &&
-             H5Tget_class( iB ) == H5T_ARRAY )
-        {
-            hid_t superA = H5Tget_super( iA );
-            hid_t superB = H5Tget_super( iB );
-            if ( superA >= 0 && superB >= 0 &&
-                 H5Tequal( superA, superB ) > 0 )
-            {
-                Dimensions aDims;
-                getDatatypeArrayDims( iA, aDims );
-                Dimensions bDims;
-                getDatatypeArrayDims( iB, bDims );
-                if ( aDims == bDims )
-                {
-                    return true;
-                }
-            }
-        }
-    }
     return false;
 }
 
@@ -202,7 +177,7 @@ bool DatasetExists( hid_t iParent, const std::string &iName )
     return true;
 }
 
-
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic
 

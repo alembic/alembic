@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 AwImpl::AwImpl( const std::string &iFileName,
@@ -68,18 +69,13 @@ AwImpl::AwImpl( const std::string &iFileName,
         ABCA_THROW( "Could not open file: " << m_fileName );
     }
 
+    // set the version using HDF5 native calls
+    int version = ALEMBIC_HDF5_FILE_VERSION;
+    H5LTset_attribute_int(m_file, ".", "abc_version", &version, 1);
+
     // Create top explicitly.
     m_top = new TopOwImpl( *this, m_file, m_metaData );
 }
-
-//-*****************************************************************************
-AwImpl::AwImpl( const AwImpl &iCopy )
-  : m_fileName( iCopy.m_fileName )
-  , m_metaData( iCopy.m_metaData )
-  , m_file( iCopy.m_file )
-  , m_top( iCopy.m_top )
-  , m_writtenArraySampleMap( iCopy.m_writtenArraySampleMap )
-{}
 
 //-*****************************************************************************
 const std::string &AwImpl::getName() const
@@ -152,5 +148,6 @@ AwImpl::~AwImpl()
     }
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

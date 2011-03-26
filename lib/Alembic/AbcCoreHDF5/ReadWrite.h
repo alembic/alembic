@@ -38,18 +38,20 @@
 #define _Alembic_AbcCoreHDF5_ReadWrite_h_
 
 #include <Alembic/AbcCoreAbstract/All.h>
+#include <Alembic/AbcCoreHDF5/Foundation.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! Will return a shared pointer to the archive writer
 //! There is only one way to create an archive writer in AbcCoreHDF5.
 struct WriteArchive
 {
-    ::Alembic::AbcCoreAbstract::v1::ArchiveWriterPtr
+    ::Alembic::AbcCoreAbstract::ArchiveWriterPtr
     operator()( const std::string &iFileName,
-                const ::Alembic::AbcCoreAbstract::v1::MetaData &iMetaData )
+                const ::Alembic::AbcCoreAbstract::MetaData &iMetaData )
         const;
 };
 
@@ -59,7 +61,7 @@ struct WriteArchive
 //! This would only be used if you wished to create a global cache separately
 //! from an archive - this is actually fairly common, though, which is why
 //! it is exposed here.
-::Alembic::AbcCoreAbstract::v1::ReadArraySampleCachePtr
+::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr
 CreateCache( void );
 
 //-*****************************************************************************
@@ -68,15 +70,19 @@ CreateCache( void );
 struct ReadArchive
 {
     // Make our own cache.
-    ::Alembic::AbcCoreAbstract::v1::ArchiveReaderPtr
+    ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::string &iFileName ) const;
 
     // Take the given cache.
-    ::Alembic::AbcCoreAbstract::v1::ArchiveReaderPtr
+    ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::string &iFileName,
-                ::Alembic::AbcCoreAbstract::v1::ReadArraySampleCachePtr iCache )
+                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache )
         const;
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic

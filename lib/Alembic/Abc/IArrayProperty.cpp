@@ -73,6 +73,19 @@ bool IArrayProperty::isConstant()
 }
 
 //-*****************************************************************************
+bool IArrayProperty::isScalarLike()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::isScalarLike()" );
+
+    return m_property->isScalarLike();
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw, so return a default.
+    return false;
+}
+
+//-*****************************************************************************
 AbcA::TimeSampling IArrayProperty::getTimeSampling()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getTimeSampling()" );

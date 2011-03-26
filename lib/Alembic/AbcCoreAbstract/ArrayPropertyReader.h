@@ -43,7 +43,7 @@
 
 namespace Alembic {
 namespace AbcCoreAbstract {
-namespace v1 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! An Array Property is a Rank N (usually 1-3) property which has a
@@ -95,9 +95,17 @@ public:
 
     //! Expose the key for apps that use their own custom cache management.
     virtual bool getKey( index_t iSampleIndex, ArraySampleKey & oKey ) = 0;
+
+    //! A hint about whether this property has 1 and only 1 DataType
+    //! for each of it's samples.  Array Properties with no samples written to
+    //! it are still considered scalar like.
+    virtual bool isScalarLike() = 0;
 };
 
-} // End namespace v1
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
+
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
 

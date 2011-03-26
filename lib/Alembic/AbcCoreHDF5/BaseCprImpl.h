@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class BaseCprImpl : public AbcA::CompoundPropertyReader
@@ -85,13 +86,19 @@ protected:
     {
         PropertyHeaderPtr header;
         WeakBprPtr made;
+        std::string name;
     };
     
-    typedef std::map<std::string,SubProperty> SubPropertiesMap;
+    typedef std::map<std::string, size_t> SubPropertiesMap;
+    typedef std::vector<SubProperty> SubPropertyVec;
 
-    PropertyHeaderPtrs m_propertyHeaders;
+    SubPropertyVec m_propertyHeaders;
     SubPropertiesMap m_subProperties;
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreHDF5
 } // End namespace Alembic
