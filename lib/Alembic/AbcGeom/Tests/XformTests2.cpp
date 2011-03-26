@@ -143,13 +143,14 @@ void xformIn()
     TESTING_ASSERT( xs[0].isScaleOp() );
     TESTING_ASSERT( ! ( xs[0].isXAnimated() || xs[0].isYAnimated()
                         || xs[0].isZAnimated() ) );
-    TESTING_ASSERT( xs.getScale() == V3d( 3.0, 6.0, 9.0 ) );
+    TESTING_ASSERT( xs.getScale().equalWithAbsError( V3d( 3.0, 6.0, 9.0 ),
+                                                     VAL_EPSILON ) );
     TESTING_ASSERT( xs.getMatrix() ==
                     Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
     TESTING_ASSERT( ! d.getSchema().getIsToWorld() );
 }
 
-#if 0
+#if 1
 //-*****************************************************************************
 void someOpsXform()
 {
@@ -158,99 +159,65 @@ void someOpsXform()
         OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
         OXform a( OObject( archive, kTop ), "a" );
 
-        XformOpVec aVec;
+        XformOp transop( kTranslateOperation, kTranslateHint );
+        XformOp scaleop( kScaleOperation, kScaleHint );
 
-        std::vector <double> staticVec;
-        std::vector <double> animVec;
+        XformSample asamp;
 
-        // scale with animated x
-        XformOp op(kScaleOperation, kScaleHint);
-        op.setXAnimated(true);
-        aVec.push_back(op);
-        animVec.push_back(2.0);   // x
-        staticVec.push_back(1.0); // y
-        staticVec.push_back(2.0); // z
+        // scale
+        asamp.addOp( scaleop, V3d( 2.0, 1.0, 2.0 ) );
 
-        // Maya like shear xy, xz, yz will all be animated
-        op = XformOp(kMatrixOperation, kMayaShearHint);
-        op.setIndexAnimated(4, true);
-        op.setIndexAnimated(8, true);
-        op.setIndexAnimated(9, true);
-        aVec.push_back(op);
-        staticVec.push_back(1.0); // [0][0]
-        staticVec.push_back(0.0); // [0][1]
-        staticVec.push_back(0.0); // [0][2]
-        staticVec.push_back(0.0); // [0][3]
-        animVec.push_back(0.0);   // [1][0] xy
-        staticVec.push_back(1.0); // [1][1]
-        staticVec.push_back(0.0); // [1][2]
-        staticVec.push_back(0.0); // [1][3]
-        animVec.push_back(0.0);   // [2][0] xz
-        animVec.push_back(0.0);   // [2][1] yz
-        staticVec.push_back(1.0); // [2][2]
-        staticVec.push_back(0.0); // [2][3]
-        staticVec.push_back(0.0); // [3][0]
-        staticVec.push_back(0.0); // [3][1]
-        staticVec.push_back(0.0); // [3][2]
-        staticVec.push_back(1.0); // [3][3]
+        // Maya-like shear
+        XformOp shearmatrixop( kMatrixOperation, kMayaShearHint );
 
-        // rotate x axis, static
-        op = XformOp(kRotateOperation, kRotateHint);
-        aVec.push_back(op);
-        staticVec.push_back(1.0);  // x
-        staticVec.push_back(0.0);  // y
-        staticVec.push_back(0.0);  // z
-        staticVec.push_back(1.57); // angle
+        M44d shearmat( 1.0, 0.0, 0.0, 0.0,
+                       0.0, 1.0, 0.0, 0.0,
+                       0.0, 0.0, 1.0, 0.0,
+                       0.0, 0.0, 0.0, 1.0 );
+        asamp.addOp( shearmatrixop, shearmat );
+
+        // rotate x axis
+        XformOp rotop( kRotateOperation, kRotateHint );
+        asamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ), 1.57 );
 
         // rotate y axis, angle will be animated
-        op.setAngleAnimated(true);
-        aVec.push_back(op);
-        staticVec.push_back(0.0); // x
-        staticVec.push_back(1.0); // y
-        staticVec.push_back(0.0); // z
-        animVec.push_back(0.125); // angle
+        asamp.addOp( rotop, V3d( 0.0, 1.0, 0.0 ), 0.125 );
 
-        // rotate z axis, angle will be animated, use a different hint for fun
-        op = XformOp(kRotateOperation, kRotateOrientationHint);
-        op.setAngleAnimated(true);
-        aVec.push_back(op);
-        staticVec.push_back(0.0); // x
-        staticVec.push_back(0.0); // y
-        staticVec.push_back(1.0); // z
-        animVec.push_back(0.1); // angle
+        // rotate z axis, use a different hint for fun
+        rotop.setHint( kRotateOrientationHint );
+        asamp.addOp( rotop, V3d( 0.0, 0.0, 1.0 ), 0.1 );
 
         // translate with animated y and z, different hint for fun
-        op = XformOp(kTranslateOperation, kRotatePivotPointHint);
-        op.setYAnimated(true);
-        op.setZAnimated(true);
-        aVec.push_back(op);
-        staticVec.push_back(0.0); // x
-        animVec.push_back(0.0);   // y
-        animVec.push_back(0.0);   // z
+        transop.setHint( kRotatePivotPointHint );
+        asamp.addOp( transop, V3d( 0.0, 0.0, 0.0 ) );
 
-        Abc::DoubleArraySample data(staticVec);
-        a.getSchema().setXform( aVec, data);
-
-        data = Abc::DoubleArraySample(animVec);
-        a.getSchema().set( data, OSampleSelector( 0 ) );
+        a.getSchema().set( asamp, OSampleSelector( 0 ) );
 
         for (size_t i = 1; i < 5; ++i)
         {
-            animVec[0] = 2 * (i + 1); // scale x
-            animVec[1] = i;  // shear xy
-            animVec[2] = -(double)(i);  // shear xz
-            animVec[3] = 0;  // shear yz
-            animVec[4] = 0.125 * (i + 1); // rot y angle
-            animVec[5] = 0.1 * (i + 1); // rot z angle
-            animVec[6] = 3 * i;
-            animVec[7] = 4 * i;
+            asamp.addOp( scaleop, V3d( 2 * ( i + 1 ),
+                                       1.0, 2.0 ) );
 
-            data = Abc::DoubleArraySample(animVec);
-            a.getSchema().set( data, OSampleSelector( i ) );
+            shearmat.x[1][0] = (double)i;
+            shearmat.x[2][0] = (double)(-i);
+            shearmat.x[2][1] = 0.0;
+            asamp.addOp( shearmatrixop, shearmat );
+
+            asamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ),
+                         1.57 );
+            asamp.addOp( rotop, V3d( 0.0, 1.0, 0.0 ),
+                         0.125 * ( i + 1 ) );
+            asamp.addOp( rotop, V3d( 0.0, 0.0, 1.0 ),
+                         0.1 * ( i + 1 ) );
+
+            asamp.addOp( transop, V3d( 0.0, 3.0 * i, 4.0 * i ) );
+
+            a.getSchema().set( asamp, OSampleSelector( i ) );
         }
 
     }
 
+    #if 0
     {
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
         IXform a( IObject( archive, kTop ), "a" );
@@ -400,6 +367,7 @@ void someOpsXform()
             TESTING_ASSERT( t.get() == Abc::V3d(0.0, 3.0 * i, 4.0 * i) );
         }
     }
+    #endif
 }
 #endif
 
@@ -408,7 +376,7 @@ int main( int argc, char *argv[] )
 {
     xformOut();
     xformIn();
-    //someOpsXform();
+    someOpsXform();
 
     return 0;
 }
