@@ -109,6 +109,8 @@ void ISubDSchema::get( ISubDSchema::Sample &oSample,
         oSample.m_faceVaryingPropagateCorners, iSS );
     m_interpolateBoundary.get( oSample.m_interpolateBoundary, iSS );
 
+    m_selfBounds.get( oSample.m_selfBounds, iSS );
+
     if ( m_creaseIndices )
     { m_creaseIndices.get( oSample.m_creaseIndices, iSS ); }
 

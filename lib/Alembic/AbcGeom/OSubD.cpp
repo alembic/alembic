@@ -85,7 +85,8 @@ void OSubDSchema::set( const Sample &iSamp,
                            );
             m_selfBounds.set( bnds, iSS );
         }
-        else { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
+        else
+        { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
 
         if ( iSamp.getUVs().getVals() )
         {

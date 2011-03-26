@@ -152,6 +152,9 @@ void Example1_MeshIn()
     // get the 1th sample by value
     ISubDSchema::Sample samp1 = mesh.getValue( 1 );
 
+    std::cout << "bounds: " << samp1.getSelfBounds().min << ", "
+              << samp1.getSelfBounds().max << std::endl;
+
     TESTING_ASSERT( samp1.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
 
     TESTING_ASSERT( samp1.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
