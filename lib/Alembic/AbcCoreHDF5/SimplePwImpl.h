@@ -124,10 +124,6 @@ protected:
     // The group corresponding to this property.
     // It may never be created or written.
     hid_t m_sampleIGroup;
-    
-    // The time samples. The number of these will be determined by
-    // the TimeSamplingType
-    std::vector<chrono_t> m_timeSamples;
 
     // Index of the next sample to write
     uint32_t m_nextSampleIndex;
@@ -174,7 +170,7 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
     ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
     ABCA_ASSERT( m_header->getDataType().getExtent() > 0,
         "Invalid DatatType extent");
-
+ 
     // Get data types
     PlainOldDataType POD = m_header->getDataType().getPod();
     if ( POD != kStringPOD && POD != kWstringPOD )
@@ -188,16 +184,7 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
         ABCA_ASSERT( m_nativeDataType >= 0, "Couldn't get native datatype" );
     }
 
-    // Write the property header.
-    // We don't write the time info yet, because there's
-    // an optimization that the abstract API allows us to make which has a
-    // surprisingly significant effect on file size. This optimization
-    // is that when a "constant" property is written - that is, when
-    // all the samples are identical, we can skip the writing of the
-    // time sampling type and time samples and treat the sample as though
-    // it were written with identity time sampling.
-    // Since we can't know this until the end, we don't write time
-    // sampling yet.
+
     WritePropertyHeaderExceptTime( m_parentGroup,
                                    m_header->getName(), *m_header );
 }

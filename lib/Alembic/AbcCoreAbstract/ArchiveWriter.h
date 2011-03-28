@@ -111,6 +111,14 @@ public:
     //! May sometimes be spoofed.
     virtual ArchiveWriterPtr asArchivePtr() = 0;
 
+    //! Adds the TimeSampling to the Archive TimeSampling pool.
+    //! If the TimeSampling already exists in the pool, the index for the match
+    //! should be returned.
+    virtual uint32_t addTimeSampling( const TimeSampling & iTs ) = 0;
+
+    //! Returns the TimeSampling at a given index.
+    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex) = 0;
+
 private:
     int8_t m_compressionHint;
 };

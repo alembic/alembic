@@ -85,7 +85,8 @@ public:
         m_propertyType( kScalarProperty ),
         m_metaData(),
         m_dataType(),
-        m_timeSamplingType() {}
+        m_timeSampling(),
+        m_timeSamplingIndex(0) {}
 
     //! Construct a compound property header.
     //! Just give a name and metadata, the rest is redundant or unused.
@@ -95,7 +96,8 @@ public:
         m_propertyType( kCompoundProperty ),
         m_metaData( iMetaData ),
         m_dataType(),
-        m_timeSamplingType() {}
+        m_timeSampling(),
+        m_timeSamplingIndex(0) {}
 
     //! Construct a simple property header.
     //! Use this for array or scalar properties.
@@ -103,12 +105,13 @@ public:
                     PropertyType iPropType,
                     const MetaData &iMetaData,
                     const DataType &iDataType,
-                    const TimeSamplingType &iTsampType )
+                    const TimeSamplingPtr & iTsamp )
       : m_name( iName ),
         m_propertyType( iPropType ),
         m_metaData( iMetaData ),
         m_dataType( iDataType ),
-        m_timeSamplingType( iTsampType ) {}
+        m_timeSampling( iTsamp ),
+        m_timeSamplingIndex(0) {}
 
     //! Copy constructor
     //! ...
@@ -117,7 +120,8 @@ public:
         m_propertyType( iCopy.m_propertyType ),
         m_metaData( iCopy.m_metaData ),
         m_dataType( iCopy.m_dataType ),
-        m_timeSamplingType( iCopy.m_timeSamplingType ) {}
+        m_timeSampling( iCopy.m_timeSampling ),
+        m_timeSamplingIndex( iCopy.m_timeSamplingIndex ) {}
 
     //! Assignment operator
     //! ...
@@ -127,7 +131,8 @@ public:
         m_propertyType = iCopy.m_propertyType;
         m_metaData = iCopy.m_metaData;
         m_dataType = iCopy.m_dataType;
-        m_timeSamplingType = iCopy.m_timeSamplingType;
+        m_timeSampling = iCopy.m_timeSampling;
+        m_timeSamplingIndex = iCopy.m_timeSamplingIndex;
         return *this;
     }
 
@@ -173,22 +178,33 @@ public:
     
     void setDataType( const DataType &iDataType ) { m_dataType = iDataType; }
 
-    //! Non-compound properties have a time sampling type.
+    //! Non-compound properties have time sampling, or a time sampling index
     //! If this is called for a Compound Property (basically, one which
-    //! retursn kCompoundProperty from getType() above)
+    //! returns kCompoundProperty from getType() above)
     //! it will throw an exception.
-    TimeSamplingType getTimeSamplingType() const
-    { return m_timeSamplingType; }
+    TimeSamplingPtr getTimeSampling() const
+    { return m_timeSampling; }
     
-    void setTimeSamplingType( const TimeSamplingType &iTsamp )
-    { m_timeSamplingType = iTsamp; }
+    void setTimeSampling( const TimeSamplingPtr &iTsamp )
+    { m_timeSampling = iTsamp; }
+
+    //! Non-compound properties have time sampling, or a time sampling index
+    //! If this is called for a Compound Property (basically, one which
+    //! returns kCompoundProperty from getType() above)
+    //! it will throw an exception.
+    uint32_t getTimeSamplingIndex() const
+    { return m_timeSamplingIndex; }
+
+    void setTimeSamplingIndex( uint32_t iTsampIndex )
+    { m_timeSamplingIndex = iTsampIndex; }
 
 private:
     std::string m_name;
     PropertyType m_propertyType;
     MetaData m_metaData;
     DataType m_dataType;
-    TimeSamplingType m_timeSamplingType;
+    TimeSamplingPtr m_timeSampling;
+    uint32_t m_timeSamplingIndex;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
