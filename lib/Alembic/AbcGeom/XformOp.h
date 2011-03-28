@@ -181,11 +181,18 @@ public:
     //! numchannels - 1.
     void setChannelValue( std::size_t iIndex, double iVal );
 
-    //! Function for returning the combined encoded type and hint.
-    //! The type is in the first four bits, the hint in the second.
-    //!
-    //! This is not really intended for use by human clients of this class.
-    Alembic::Util::uint8_t getOpEncoding() const;
+    void setVector( const Abc::V3d &iVec );
+    void setScale( const Abc::V3d &iScale );
+    void setAxis( const Abc::V3d &iAxis );
+    void setAngle( const double iAngle );
+    void setMatrix( const Abc::M44d &iMatrix );
+
+    // synthetic getters return by value
+    Abc::V3d getVector() const;
+    Abc::V3d getScale() const;
+    Abc::V3d getAxis() const;
+    double getAngle() const;
+    Abc::M44d getMatrix() const;
 
     bool isTranslateOp() const;
 
@@ -194,6 +201,13 @@ public:
     bool isRotateOp() const;
 
     bool isMatrixOp() const;
+
+    //! Function for returning the combined encoded type and hint.
+    //! The type is in the first four bits, the hint in the second.
+    //!
+    //! This is not really intended for use by human clients of this class.
+    Alembic::Util::uint8_t getOpEncoding() const;
+
 
 private:
     XformOperationType m_type;

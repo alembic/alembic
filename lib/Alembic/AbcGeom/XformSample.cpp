@@ -147,9 +147,12 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
 //-*****************************************************************************
 std::size_t XformSample::addOp( XformOp iOp, const Abc::M44d &iVal )
 {
-    for ( size_t i = 0 ; i < 16 ; ++i )
+    for ( size_t i = 0 ; i < 4 ; ++i )
     {
-        iOp.setChannelValue( i, *(iVal[i]) );
+        for ( size_t j = 0 ; j < 4 ; ++j )
+        {
+            iOp.setChannelValue( ( i * 4 ) + j, iVal.x[i][j] );
+        }
     }
 
     if ( ! m_hasBeenRead )

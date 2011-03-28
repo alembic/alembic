@@ -367,5 +367,113 @@ bool XformOp::isMatrixOp() const
     return m_type == kMatrixOperation;
 }
 
+//-*****************************************************************************
+void XformOp::setVector( const Abc::V3d &iVec )
+{
+    ABCA_ASSERT( m_type != kMatrixOperation,
+                 "Meaningless to set Abc::V3d on matrix op" );
+
+    m_channels[0] = iVec.x;
+    m_channels[1] = iVec.y;
+    m_channels[2] = iVec.z;
+}
+
+//-*****************************************************************************
+void XformOp::setScale( const Abc::V3d &iScale )
+{
+    ABCA_ASSERT( m_type == kScaleOperation,
+                 "Meaningless to set scale on non-scale op." );
+
+    this->setVector( iScale );
+}
+
+//-*****************************************************************************
+void XformOp::setAxis( const Abc::V3d &iAxis )
+{
+    ABCA_ASSERT( m_type == kRotateOperation,
+                 "Meaningless to set rotation axis on non-rotation op." );
+
+    this->setVector( iAxis );
+}
+
+//-*****************************************************************************
+void XformOp::setAngle( const double iAngle )
+{
+    ABCA_ASSERT( m_type == kRotateOperation,
+                 "Meaningless to set rotation angle on non-rotation op." );
+
+    m_channels[3] = iAngle;
+}
+
+//-*****************************************************************************
+void XformOp::setMatrix( const Abc::M44d &iMatrix )
+{
+    ABCA_ASSERT( m_type == kMatrixOperation,
+                 "Cannot set non-matrix op from Abc::M44d" );
+
+    for ( size_t i = 0 ; i < 4 ; ++i )
+    {
+        for ( size_t j = 0 ; j < 4 ; ++j )
+        {
+            m_channels[( i * 4 ) + j] = iMatrix.x[i][j];
+        }
+    }
+}
+
+//-*****************************************************************************
+Abc::V3d XformOp::getVector() const
+{
+    ABCA_ASSERT( m_type != kMatrixOperation,
+                 "Meaningless to get Abc::V3d from matrix op" );
+
+    return Abc::V3d( m_channels[0], m_channels[1], m_channels[2] );
+}
+
+//-*****************************************************************************
+Abc::V3d XformOp::getScale() const
+{
+    ABCA_ASSERT( m_type == kScaleOperation,
+                 "Meaningless to get scaling vector from non-scale op." );
+
+    return this->getVector();
+}
+
+//-*****************************************************************************
+Abc::V3d XformOp::getAxis() const
+{
+    ABCA_ASSERT( m_type == kRotateOperation,
+                 "Meaningless to get rotation axis from non-rotation op." );
+
+    return this->getVector();
+}
+
+//-*****************************************************************************
+double XformOp::getAngle() const
+{
+    ABCA_ASSERT( m_type == kRotateOperation,
+                 "Meaningless to get rotation angle from non-rotation op." );
+
+    return m_channels[3];
+}
+
+//-*****************************************************************************
+Abc::M44d XformOp::getMatrix() const
+{
+    ABCA_ASSERT( m_type == kMatrixOperation,
+                 "Can't get matrix from non-matrix op." );
+
+    Abc::M44d ret;
+
+    for ( size_t i = 0 ; i < 4 ; ++i )
+    {
+        for ( size_t j = 0 ; j < 4 ; ++j )
+        {
+            ret.x[i][j] = m_channels[( i * 4 ) + j];
+        }
+    }
+
+    return ret;
+}
+
 } // End namespace AbcGeom
 } // End namespace Alembic

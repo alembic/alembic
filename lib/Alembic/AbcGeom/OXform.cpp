@@ -49,7 +49,6 @@ OXformSchema::ODefaultedDoubleProperty::set(
     const Abc::OSampleSelector &iSS,
     const std::size_t &iNumSampsSoFar )
 {
-    std::cout << "setting " << m_name << " with " << iVal << std::endl;
     if ( m_property )
     {
         m_property.set( iVal, iSS );
@@ -168,9 +167,11 @@ void OXformSchema::set( XformSample &ioSamp,
             {
                 size_t idx = prevIdx + j;
 
+                /*
                 std::cout << "setting " << idx << "th prop, "
                           << m_props[idx].getName() << ", with "
                           << op.getChannelValue( j ) << std::endl;
+                */
 
                 m_props[idx].set( op.getChannelValue( j ), iSS,
                                     m_numSetSamples );
