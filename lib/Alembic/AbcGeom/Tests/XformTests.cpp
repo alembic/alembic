@@ -61,218 +61,177 @@ void xformOut()
     OXform b( a, "b" );
     OXform c( b, "c" );
     OXform d( c, "d" );
+    OXform e( d, "e" );
 
-    XformOpVec aVec;
-    XformOp op(kTranslateOperation, kTranslateHint);
+    XformOp transop( kTranslateOperation, kTranslateHint );
+    XformOp scaleop( kScaleOperation, kScaleHint );
 
-    std::vector <double> valVec;
-    valVec.push_back(12.0);  // translate x
-    valVec.push_back(20.0);  // translate z
-    Abc::DoubleArraySample data(valVec);
-
-    op.setYAnimated(true);
-    aVec.push_back(op);
-    a.getSchema().setXform( aVec, data);
-
-    for (size_t i = 0; i < 20; ++i)
+    XformSample asamp;
+    for ( size_t i = 0; i < 20; ++i )
     {
-        valVec.clear();
-        valVec.push_back(i+42.0);
-        data = Abc::DoubleArraySample(valVec);
-        a.getSchema().set( data, OSampleSelector( i ) );
+        asamp.addOp( transop, V3d( 12.0, i + 42.0, 20.0 ) );
+
+        a.getSchema().set( asamp, OSampleSelector( i ) );
     }
 
-    for (size_t i = 0; i < 20; ++i)
+    XformSample bsamp;
+    for ( size_t i = 0 ; i < 20 ; ++i )
     {
-        b.getSchema().setInherits( i&1, OSampleSelector( i ) );
+        bsamp.setInheritsXforms( (bool)(i&1) );
+
+        b.getSchema().set( bsamp, OSampleSelector( i ) );
     }
 
     // for c we write nothing
 
-    XformOpVec dVec;
-    op = XformOp(kScaleOperation, kScaleHint);
-    dVec.push_back(op);
+    XformSample dsamp;
+    dsamp.addOp( scaleop, V3d( 3.0, 6.0, 9.0 ) );
+    d.getSchema().set( dsamp );
 
-    valVec.clear();
-    valVec.push_back(3.0);
-    valVec.push_back(6.0);
-    valVec.push_back(9.0);
-    data = Abc::DoubleArraySample(valVec);
+    XformSample esamp;
+    M44d identmat;
+    identmat.makeIdentity();
 
-    d.getSchema().setXform( dVec, data );
+    esamp.addOp( transop, V3d( 0.0, 0.0, 0.0 ) );
+    esamp.addOp( XformOp( kMatrixOperation, kMatrixHint ), identmat );
+    esamp.addOp( scaleop, V3d( 1.0, 1.0, 1.0 ) );
+    e.getSchema().set( esamp );
+
 }
 
 //-*****************************************************************************
 void xformIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      "Xform1.abc" );
-    IXform a( IObject( archive, kTop ), "a" );
-    XformOpVec ops = a.getSchema().getOps();
-    TESTING_ASSERT( ops.size() == a.getSchema().getNumOps() );
-    TESTING_ASSERT( ops.size() == 1 );
-    TESTING_ASSERT( a.getSchema().isOpStatic(0) == false );
+    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "Xform1.abc" );
 
-    TESTING_ASSERT( a.getSchema().getNumAnimSamples() == 20 );
-    TESTING_ASSERT( a.getSchema().inherits() );
+    Abc::M44d identity;
+    XformSample xs;
+
+    IXform a( IObject( archive, kTop ), "a" );
+    TESTING_ASSERT( a.getSchema().getNumOps() == 1 );
+    TESTING_ASSERT( a.getSchema().getInheritsXforms() );
     for ( index_t i = 0; i < 20; ++i )
     {
         XformSample xs;
-        a.getSchema().get(xs, Abc::ISampleSelector(i));
-        TESTING_ASSERT(xs.getNum() == 1);
-        TESTING_ASSERT( xs.get(0)->getType() == kTranslateOperation );
-        TranslateData t( xs.get(0) );
-        TESTING_ASSERT( t.get() == V3d(12.0, i+42.0, 20.0) );
-        TESTING_ASSERT( t.getMatrix() ==
-            Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
-        Abc::M44d mat = a.getSchema().getMatrix(Abc::ISampleSelector(i));
-        TESTING_ASSERT( mat ==
-            Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
+        a.getSchema().get( xs, Abc::ISampleSelector( i ) );
+        TESTING_ASSERT( xs.getNumOps() == 1 );
+        TESTING_ASSERT( xs[0].isTranslateOp() );
+        TESTING_ASSERT( xs[0].isYAnimated() == true );
+        TESTING_ASSERT( xs[0].isXAnimated() == false );
+        TESTING_ASSERT( xs[0].isZAnimated() == false );
+
+        TESTING_ASSERT( xs.getTranslation() == V3d( 12.0, i+42.0, 20.0 ) );
+        TESTING_ASSERT( xs.getMatrix() ==
+                        Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
     }
 
-    Abc::M44d identity;
-
-    XformSample xs;
-
     IXform b( a, "b" );
-    b.getSchema().get(xs);
-    TESTING_ASSERT( b.getSchema().getTimeSamplingType().isIdentity() );
-    TESTING_ASSERT( b.getSchema().getTimeSampling().isStatic() );
-    TESTING_ASSERT( b.getSchema().getInheritsTimeSamplingType().isIdentity() );
-    TESTING_ASSERT( !b.getSchema().getInheritsTimeSampling().isStatic() );
-    TESTING_ASSERT( xs.getNum() == 0 );
-    TESTING_ASSERT( b.getSchema().getNumInheritsSamples() == 20 );
-    TESTING_ASSERT( b.getSchema().getNumAnimSamples() == 0 );
-    TESTING_ASSERT( b.getSchema().getOps().size() == 0 );
+    b.getSchema().get( xs );
+    TESTING_ASSERT( b.getSchema().getTimeSampling().getTimeSamplingType().isIdentity() );
+    // the schema is not static, because set() was called 20 times on it.
+    TESTING_ASSERT( !b.getSchema().getTimeSampling().isStatic() );
+    TESTING_ASSERT( xs.getNumOps() == 0 );
     TESTING_ASSERT( b.getSchema().getNumOps() == 0 );
-    TESTING_ASSERT( b.getSchema().getMatrix() == identity );
+    TESTING_ASSERT( xs.getMatrix() == identity );
     for (size_t i = 0; i < 20; ++i)
     {
         AbcA::index_t j = i;
-        TESTING_ASSERT( b.getSchema().inherits(ISampleSelector( j )) == (i&1) );
+        TESTING_ASSERT( b.getSchema().getInheritsXforms( ISampleSelector( j ) )
+                        == (i&1) );
     }
 
     IXform c( b, "c" );
     xs = c.getSchema().getValue();
-    TESTING_ASSERT( xs.getNum() == 0 );
-    TESTING_ASSERT( c.getSchema().getOps().size() == 0 );
+    TESTING_ASSERT( xs.getNumOps() == 0 );
     TESTING_ASSERT( c.getSchema().getNumOps() == 0 );
-    TESTING_ASSERT( c.getSchema().getMatrix() == identity );
-    TESTING_ASSERT( c.getSchema().inherits() );
+    TESTING_ASSERT( xs.getMatrix() == identity );
+    TESTING_ASSERT( c.getSchema().getInheritsXforms() );
+    TESTING_ASSERT( c.getSchema().isConstantIdentity() );
+
 
     IXform d( c, "d" );
     xs = d.getSchema().getValue();
-    TESTING_ASSERT( xs.getNum() == 1 );
+    TESTING_ASSERT( xs.getNumOps() == 1 );
     TESTING_ASSERT( d.getSchema().getNumOps() == 1 );
-    TESTING_ASSERT( xs.get(0)->getType() == kScaleOperation );
-    TESTING_ASSERT( d.getSchema().isOpStatic(0) );
-    ScaleData s( xs.get(0) );
-    TESTING_ASSERT( s.get() == V3d(3.0, 6.0, 9.0) );
-    TESTING_ASSERT( s.getMatrix() ==
-        Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
-    TESTING_ASSERT( d.getSchema().getOps().size() == 1 );
-    TESTING_ASSERT( d.getSchema().inherits() );
-    Abc::M44d mat = d.getSchema().getMatrix();
-    TESTING_ASSERT( mat ==
-        Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
+    TESTING_ASSERT( xs[0].isScaleOp() );
+    TESTING_ASSERT( ! ( xs[0].isXAnimated() || xs[0].isYAnimated()
+                        || xs[0].isZAnimated() ) );
+    TESTING_ASSERT( xs.getScale().equalWithAbsError( V3d( 3.0, 6.0, 9.0 ),
+                                                     VAL_EPSILON ) );
+    TESTING_ASSERT( xs.getMatrix() ==
+                    Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
+    TESTING_ASSERT( d.getSchema().getInheritsXforms() );
+
+    IXform e( d, "e" );
+    TESTING_ASSERT( e.getSchema().isConstantIdentity() );
+    TESTING_ASSERT( e.getSchema().isConstant() );
+    TESTING_ASSERT( e.getSchema().getNumOps() == 3 );
 }
+
 //-*****************************************************************************
 void someOpsXform()
 {
     std::string name = "Xform2.abc";
     {
         OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
+
+        archive.setCompressionHint( 3 );
+
         OXform a( OObject( archive, kTop ), "a" );
 
-        XformOpVec aVec;
+        XformOp transop( kTranslateOperation, kTranslateHint );
+        XformOp scaleop( kScaleOperation, kScaleHint );
 
-        std::vector <double> staticVec;
-        std::vector <double> animVec;
+        XformSample asamp;
 
-        // scale with animated x
-        XformOp op(kScaleOperation, kScaleHint);
-        op.setXAnimated(true);
-        aVec.push_back(op);
-        animVec.push_back(2.0);   // x
-        staticVec.push_back(1.0); // y
-        staticVec.push_back(2.0); // z
+        // scale
+        asamp.addOp( scaleop, V3d( 2.0, 1.0, 2.0 ) );
 
-        // Maya like shear xy, xz, yz will all be animated
-        op = XformOp(kMatrixOperation, kMayaShearHint);
-        op.setIndexAnimated(4, true);
-        op.setIndexAnimated(8, true);
-        op.setIndexAnimated(9, true);
-        aVec.push_back(op);
-        staticVec.push_back(1.0); // [0][0]
-        staticVec.push_back(0.0); // [0][1]
-        staticVec.push_back(0.0); // [0][2]
-        staticVec.push_back(0.0); // [0][3]
-        animVec.push_back(0.0);   // [1][0] xy
-        staticVec.push_back(1.0); // [1][1]
-        staticVec.push_back(0.0); // [1][2]
-        staticVec.push_back(0.0); // [1][3]
-        animVec.push_back(0.0);   // [2][0] xz
-        animVec.push_back(0.0);   // [2][1] yz
-        staticVec.push_back(1.0); // [2][2]
-        staticVec.push_back(0.0); // [2][3]
-        staticVec.push_back(0.0); // [3][0]
-        staticVec.push_back(0.0); // [3][1]
-        staticVec.push_back(0.0); // [3][2]
-        staticVec.push_back(1.0); // [3][3]
+        // Maya-like shear
+        XformOp shearmatrixop( kMatrixOperation, kMayaShearHint );
+        M44d shearmat;
+        shearmat.makeIdentity();
 
-        // rotate x axis, static
-        op = XformOp(kRotateOperation, kRotateHint);
-        aVec.push_back(op);
-        staticVec.push_back(1.0);  // x
-        staticVec.push_back(0.0);  // y
-        staticVec.push_back(0.0);  // z
-        staticVec.push_back(1.57); // angle
+        asamp.addOp( shearmatrixop, shearmat );
+
+        // rotate x axis
+        XformOp rotop( kRotateOperation, kRotateHint );
+        asamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ), 1.57 );
 
         // rotate y axis, angle will be animated
-        op.setAngleAnimated(true);
-        aVec.push_back(op);
-        staticVec.push_back(0.0); // x
-        staticVec.push_back(1.0); // y
-        staticVec.push_back(0.0); // z
-        animVec.push_back(0.125); // angle
+        asamp.addOp( rotop, V3d( 0.0, 1.0, 0.0 ), 0.125 );
 
-        // rotate z axis, angle will be animated, use a different hint for fun
-        op = XformOp(kRotateOperation, kRotateOrientationHint);
-        op.setAngleAnimated(true);
-        aVec.push_back(op);
-        staticVec.push_back(0.0); // x
-        staticVec.push_back(0.0); // y
-        staticVec.push_back(1.0); // z
-        animVec.push_back(0.1); // angle
+        // rotate z axis, use a different hint for fun
+        XformOp rotorientop( kRotateOperation, kRotateOrientationHint );
+        asamp.addOp( rotorientop, V3d( 0.0, 0.0, 1.0 ), 0.1 );
 
         // translate with animated y and z, different hint for fun
-        op = XformOp(kTranslateOperation, kRotatePivotPointHint);
-        op.setYAnimated(true);
-        op.setZAnimated(true);
-        aVec.push_back(op);
-        staticVec.push_back(0.0); // x
-        animVec.push_back(0.0);   // y
-        animVec.push_back(0.0);   // z
+        XformOp transpivotop( kTranslateOperation, kRotatePivotPointHint );
+        asamp.addOp( transpivotop, V3d( 0.0, 0.0, 0.0 ) );
 
-        Abc::DoubleArraySample data(staticVec);
-        a.getSchema().setXform( aVec, data);
-
-        data = Abc::DoubleArraySample(animVec);
-        a.getSchema().set( data, OSampleSelector( 0 ) );
+        a.getSchema().set( asamp, OSampleSelector( 0 ) );
 
         for (size_t i = 1; i < 5; ++i)
         {
-            animVec[0] = 2 * (i + 1); // scale x
-            animVec[1] = i;  // shear xy
-            animVec[2] = -(double)(i);  // shear xz
-            animVec[3] = 0;  // shear yz
-            animVec[4] = 0.125 * (i + 1); // rot y angle
-            animVec[5] = 0.1 * (i + 1); // rot z angle
-            animVec[6] = 3 * i;
-            animVec[7] = 4 * i;
+            asamp.addOp( scaleop, V3d( 2 * ( i + 1 ),
+                                       1.0, 2.0 ) );
 
-            data = Abc::DoubleArraySample(animVec);
-            a.getSchema().set( data, OSampleSelector( i ) );
+            shearmat.x[1][0] = (double)i;
+            shearmat.x[2][0] = (double)( (int)i * -1.0 );
+            shearmat.x[2][1] = 0.0;
+
+            asamp.addOp( shearmatrixop, shearmat );
+
+            asamp.addOp( rotop, V3d( 1.0, 0.0, 0.0 ),
+                         1.57 );
+            asamp.addOp( rotop, V3d( 0.0, 1.0, 0.0 ),
+                         0.125 * ( i + 1 ) );
+            asamp.addOp( rotorientop, V3d( 0.0, 0.0, 1.0 ),
+                         0.1 * ( i + 1 ) );
+
+            asamp.addOp( transpivotop, V3d( 0.0, 3.0 * i, 4.0 * i ) );
+
+            a.getSchema().set( asamp, OSampleSelector( i ) );
         }
 
     }
@@ -280,150 +239,119 @@ void someOpsXform()
     {
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
         IXform a( IObject( archive, kTop ), "a" );
-        XformOpVec ops = a.getSchema().getOps();
-        TESTING_ASSERT( ops.size() == 6 );
+
+        XformSample asamp;
+
+        a.getSchema().get( asamp );
+
         TESTING_ASSERT( a.getSchema().getNumOps() == 6 );
-        TESTING_ASSERT( ops[0].getType() == kScaleOperation );
-        TESTING_ASSERT( ops[0].getHint() == kScaleHint );
-        TESTING_ASSERT( ops[0].isXAnimated() );
-        TESTING_ASSERT( !ops[0].isYAnimated() );
-        TESTING_ASSERT( !ops[0].isZAnimated() );
-        TESTING_ASSERT( !a.getSchema().isOpStatic(0) );
 
-        TESTING_ASSERT( ops[1].getType() == kMatrixOperation );
-        TESTING_ASSERT( ops[1].getHint() == kMayaShearHint );
-        TESTING_ASSERT( !a.getSchema().isOpStatic(1) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(0) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(1) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(2) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(3) );
-        TESTING_ASSERT( ops[1].isIndexAnimated(4) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(5) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(6) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(7) );
-        TESTING_ASSERT( ops[1].isIndexAnimated(8) );
-        TESTING_ASSERT( ops[1].isIndexAnimated(9) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(10) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(11) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(12) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(13) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(14) );
-        TESTING_ASSERT( !ops[1].isIndexAnimated(15) );
+        TESTING_ASSERT( asamp[0].isScaleOp() );
+        TESTING_ASSERT( asamp[0].getHint() == kScaleHint );
 
-        TESTING_ASSERT( ops[2].getType() == kRotateOperation );
-        TESTING_ASSERT( ops[2].getHint() == kRotateHint );
-        TESTING_ASSERT( a.getSchema().isOpStatic(2) );
-        TESTING_ASSERT( !ops[2].isXAnimated() );
-        TESTING_ASSERT( !ops[2].isYAnimated() );
-        TESTING_ASSERT( !ops[2].isZAnimated() );
-        TESTING_ASSERT( !ops[2].isAngleAnimated() );
+        TESTING_ASSERT( asamp[1].isMatrixOp() );
+        TESTING_ASSERT( asamp[1].getHint() == kMayaShearHint );
 
-        TESTING_ASSERT( ops[3].getType() == kRotateOperation );
-        TESTING_ASSERT( ops[3].getHint() == kRotateHint );
-        TESTING_ASSERT( !a.getSchema().isOpStatic(3) );
-        TESTING_ASSERT( !ops[3].isXAnimated() );
-        TESTING_ASSERT( !ops[3].isYAnimated() );
-        TESTING_ASSERT( !ops[3].isZAnimated() );
-        TESTING_ASSERT( ops[3].isAngleAnimated() );
 
-        TESTING_ASSERT( ops[4].getType() == kRotateOperation );
-        TESTING_ASSERT( ops[4].getHint() == kRotateOrientationHint );
-        TESTING_ASSERT( !a.getSchema().isOpStatic(4) );
-        TESTING_ASSERT( !ops[4].isXAnimated() );
-        TESTING_ASSERT( !ops[4].isYAnimated() );
-        TESTING_ASSERT( !ops[4].isZAnimated() );
-        TESTING_ASSERT( ops[4].isAngleAnimated() );
+        TESTING_ASSERT( asamp[2].isRotateOp() );
+        TESTING_ASSERT( asamp[2].getHint() == kRotateHint );
 
-        TESTING_ASSERT( ops[5].getType() == kTranslateOperation );
-        TESTING_ASSERT( ops[5].getHint() == kRotatePivotPointHint );
-        TESTING_ASSERT( !a.getSchema().isOpStatic(5) );
-        TESTING_ASSERT( !ops[5].isXAnimated() );
-        TESTING_ASSERT( ops[5].isYAnimated() );
-        TESTING_ASSERT( ops[5].isZAnimated() );
+        TESTING_ASSERT( asamp[3].getType() == kRotateOperation );
+        TESTING_ASSERT( asamp[3].getHint() == kRotateHint );
 
-        Abc::DoubleArraySamplePtr s = a.getSchema().getStaticData();
-        TESTING_ASSERT( s->size() == 26 );
-        TESTING_ASSERT( (*s)[0] == 1.0 );
-        TESTING_ASSERT( (*s)[1] == 2.0 );
-        TESTING_ASSERT( (*s)[2] == 1.0 );
-        TESTING_ASSERT( (*s)[3] == 0.0 );
-        TESTING_ASSERT( (*s)[4] == 0.0 );
-        TESTING_ASSERT( (*s)[5] == 0.0 );
-        TESTING_ASSERT( (*s)[6] == 1.0 );
-        TESTING_ASSERT( (*s)[7] == 0.0 );
-        TESTING_ASSERT( (*s)[8] == 0.0 );
-        TESTING_ASSERT( (*s)[9] == 1.0 );
-        TESTING_ASSERT( (*s)[10] == 0.0 );
-        TESTING_ASSERT( (*s)[11] == 0.0 );
-        TESTING_ASSERT( (*s)[12] == 0.0 );
-        TESTING_ASSERT( (*s)[13] == 0.0 );
-        TESTING_ASSERT( (*s)[14] == 1.0 );
-        TESTING_ASSERT( (*s)[15] == 1.0 );
-        TESTING_ASSERT( (*s)[16] == 0.0 );
-        TESTING_ASSERT( (*s)[17] == 0.0 );
-        TESTING_ASSERT( (*s)[18] == 1.57 );
-        TESTING_ASSERT( (*s)[19] == 0.0 );
-        TESTING_ASSERT( (*s)[20] == 1.0 );
-        TESTING_ASSERT( (*s)[21] == 0.0 );
-        TESTING_ASSERT( (*s)[22] == 0.0 );
-        TESTING_ASSERT( (*s)[23] == 0.0 );
-        TESTING_ASSERT( (*s)[24] == 1.0 );
-        TESTING_ASSERT( (*s)[25] == 0.0 );
+        TESTING_ASSERT( asamp[4].getType() == kRotateOperation );
+        TESTING_ASSERT( asamp[4].getHint() == kRotateOrientationHint );
 
-        for (index_t i = 0; i < 5; ++i)
+        TESTING_ASSERT( asamp[5].getType() == kTranslateOperation );
+        TESTING_ASSERT( asamp[5].getHint() == kRotatePivotPointHint );
+
+        TESTING_ASSERT( asamp[0].isXAnimated() );
+        TESTING_ASSERT( !asamp[0].isYAnimated() );
+        TESTING_ASSERT( !asamp[0].isZAnimated() );
+
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(0) );  // [0][0]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(1) );  // [0][1]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(2) );  // [0][2]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(3) );  // [0][3]
+        TESTING_ASSERT( asamp[1].isChannelAnimated(4) );   // [1][0]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(5) );  // [1][1]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(6) );  // [1][2]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(7) );  // [1][3]
+        TESTING_ASSERT( asamp[1].isChannelAnimated(8) );   // [2][0]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(9) );  // [2][1]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(10) ); // [2][2]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(11) ); // [2][3]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(12) ); // [3][0]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(13) ); // [3][1]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(14) ); // [3][2]
+        TESTING_ASSERT( !asamp[1].isChannelAnimated(15) ); // [3][3]
+
+        TESTING_ASSERT( !asamp[2].isXAnimated() );
+        TESTING_ASSERT( !asamp[2].isYAnimated() );
+        TESTING_ASSERT( !asamp[2].isZAnimated() );
+        TESTING_ASSERT( !asamp[2].isAngleAnimated() );
+
+        TESTING_ASSERT( !asamp[3].isXAnimated() );
+        TESTING_ASSERT( !asamp[3].isYAnimated() );
+        TESTING_ASSERT( !asamp[3].isZAnimated() );
+        TESTING_ASSERT( asamp[3].isAngleAnimated() );
+
+        TESTING_ASSERT( !asamp[4].isXAnimated() );
+        TESTING_ASSERT( !asamp[4].isYAnimated() );
+        TESTING_ASSERT( !asamp[4].isZAnimated() );
+        TESTING_ASSERT( asamp[4].isAngleAnimated() );
+
+        TESTING_ASSERT( !asamp[5].isXAnimated() );
+        TESTING_ASSERT( asamp[5].isYAnimated() );
+        TESTING_ASSERT( asamp[5].isZAnimated() );
+
+        // OK, now check the values came through
+        M44d shearmat;
+        shearmat.makeIdentity();
+
+        TESTING_ASSERT( asamp[0].getScale() == V3d( 2.0, 1.0, 2.0 ) );
+
+        TESTING_ASSERT( asamp[1].getMatrix() == shearmat );
+
+        TESTING_ASSERT( asamp[2].getAxis() == V3d( 1.0, 0.0, 0.0 ) );
+        TESTING_ASSERT( almostEqual( asamp[2].getAngle(), 1.57 ) );
+
+        TESTING_ASSERT( asamp[3].getAxis() == V3d( 0.0, 1.0, 0.0 ) );
+        TESTING_ASSERT( almostEqual( asamp[3].getAngle(), 0.125 ) );
+
+        TESTING_ASSERT( asamp[4].getAxis() == V3d( 0.0, 0.0, 1.0 ) );
+        TESTING_ASSERT( almostEqual( asamp[4].getAngle(), 0.1 ) );
+
+        TESTING_ASSERT( asamp[5].getTranslate() == V3d( 0.0, 0.0, 0.0 ) );
+
+        for ( index_t i = 1; i < 5; ++i )
         {
-            Abc::DoubleArraySamplePtr anim =
-                a.getSchema().getAnimData( Abc::ISampleSelector(i) );
-            TESTING_ASSERT( anim->size() == 8 );
-            TESTING_ASSERT( almostEqual( (*anim)[0], 2.0 * (i + 1) ) );
-            TESTING_ASSERT( almostEqual( (*anim)[1], i ) );
-            TESTING_ASSERT( almostEqual( (*anim)[2], -i ) );
-            TESTING_ASSERT( almostEqual( (*anim)[3], 0 ) );
-            TESTING_ASSERT( almostEqual( (*anim)[4], 0.125 * (i+1) ) );
-            TESTING_ASSERT( almostEqual( (*anim)[5], 0.1 * (i+1) ) );
-            TESTING_ASSERT( almostEqual( (*anim)[6], 3.0 * i ) );
-            TESTING_ASSERT( almostEqual( (*anim)[7], 4.0 * i ) );
+            a.getSchema().get( asamp, ISampleSelector( i ) );
 
-            XformSample xs;
-            a.getSchema().get(xs, Abc::ISampleSelector(i));
-            TESTING_ASSERT( xs.getNum() == 6 );
+            TESTING_ASSERT( asamp[0].getScale()
+                            == V3d( 2 * ( i + 1 ), 1.0, 2.0 ) );
 
-            XformDataPtr xp = xs.get(0);
-            TESTING_ASSERT( xp->getType() == kScaleOperation );
-            ScaleData s( xp );
-            TESTING_ASSERT( s.get() == Abc::V3d(2.0 * (i+1), 1.0, 2.0) );
+            shearmat.x[1][0] = (double)i;
+            shearmat.x[2][0] = (double)( (int)i * -1.0 );
+            shearmat.x[2][1] = 0.0;
 
-            xp = xs.get(1);
-            TESTING_ASSERT( xp->getType() == kMatrixOperation );
-            MatrixData m( xp );
-            TESTING_ASSERT( m.get() == Abc::M44d(
-                1.0, 0.0, 0.0, 0.0,
-                  i, 1.0, 0.0, 0.0,
-                 -i, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0) );
+            TESTING_ASSERT( asamp[1].getMatrix() == shearmat );
 
-            xp = xs.get(2);
-            TESTING_ASSERT( xp->getType() == kRotateOperation );
-            RotateData rx( xp );
-            TESTING_ASSERT( rx.getAxis() == Abc::V3d(1.0, 0.0, 0.0) );
-            TESTING_ASSERT( rx.getAngle() == 1.57 );
+            TESTING_ASSERT( asamp[2].getAxis() == V3d( 1.0, 0.0, 0.0 ) );
+            TESTING_ASSERT( almostEqual( asamp[2].getAngle(), 1.57 ) );
 
-            xp = xs.get(3);
-            TESTING_ASSERT( xp->getType() == kRotateOperation );
-            RotateData ry(xp);
-            TESTING_ASSERT( ry.getAxis() == Abc::V3d(0.0, 1.0, 0.0) );
-            TESTING_ASSERT( ry.getAngle() == 0.125 * (i+1) );
+            TESTING_ASSERT( asamp[3].getAxis() == V3d( 0.0, 1.0, 0.0 ) );
+            TESTING_ASSERT( almostEqual( asamp[3].getAngle(),
+                                         0.125 * ( i + 1 ) ) );
 
-            xp = xs.get(4);
-            TESTING_ASSERT( xp->getType() == kRotateOperation );
-            RotateData rz( xp );
-            TESTING_ASSERT( rz.getAxis() == Abc::V3d(0.0, 0.0, 1.0) );
-            TESTING_ASSERT( rz.getAngle() == 0.1 * (i+1) );
+            TESTING_ASSERT( asamp[4].getAxis() == V3d( 0.0, 0.0, 1.0 ) );
+            TESTING_ASSERT( almostEqual( asamp[4].getAngle(),
+                                         0.1 * ( i + 1 ) ) );
 
-            xp = xs.get(5);
-            TESTING_ASSERT( xp->getType() == kTranslateOperation );
-            TranslateData t( xp );
-            TESTING_ASSERT( t.get() == Abc::V3d(0.0, 3.0 * i, 4.0 * i) );
+            V3d tvec( 0.0, 3.0 * i, 4.0 * i );
+
+            TESTING_ASSERT( tvec.equalWithAbsError( asamp[5].getTranslate(),
+                                                    VAL_EPSILON ) );
         }
     }
 }
