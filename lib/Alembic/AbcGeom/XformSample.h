@@ -77,8 +77,10 @@ public:
     std::size_t getNumOps() const;
     std::size_t getNumOpChannels() const;
 
-    void setIsToWorld( bool iIsToWorld );
-    bool getIsToWorld() const;
+    //! "Inherits xforms" means, "Does this xform concatenate to or ignore the
+    //! transforms of its parents?"
+    void setInheritsXforms( bool iInherits );
+    bool getInheritsXforms() const;
 
     void setChildBounds( const Abc::Box3d &iBnds );
     const Abc::Box3d &getChildBounds() const;
@@ -119,7 +121,7 @@ private:
 
     std::vector<XformOp> m_ops;
 
-    bool m_isToWorld;
+    bool m_inherits;
     Abc::Box3d m_childBounds;
 
     // This starts out false, but is set to true by the OXform and controls

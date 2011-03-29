@@ -104,7 +104,7 @@ void OXformSchema::set( XformSample &ioSamp,
     if ( ioSamp.m_childBounds.hasVolume() )
     { m_childBounds.set( ioSamp.getChildBounds(), iSS ); }
 
-    m_isToWorld.set( ioSamp.getIsToWorld(), iSS );
+    m_inherits.set( ioSamp.getInheritsXforms(), iSS );
 
     if ( iSS.getIndex() == 0 )
     {
@@ -193,7 +193,7 @@ void OXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
 
     ++m_numSetSamples;
 
-    m_isToWorld.setFromPrevious( iSS );
+    m_inherits.setFromPrevious( iSS );
 
     m_ops.setFromPrevious( iSS );
 
@@ -218,7 +218,7 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
 
     m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", iTst );
 
-    m_isToWorld = Abc::OBoolProperty( this->getPtr(), ".istoworld", iTst );
+    m_inherits = Abc::OBoolProperty( this->getPtr(), ".inherits", iTst );
 
     // This will hold the shape of the xform
     m_timeSamplingType.setRetainConstantSampleTimes( true );

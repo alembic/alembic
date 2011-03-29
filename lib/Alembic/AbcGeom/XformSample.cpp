@@ -55,7 +55,7 @@ namespace AbcGeom {
 //-*****************************************************************************
 XformSample::XformSample()
   : m_setWithOpStack( 0 )
-  , m_isToWorld( false )
+  , m_inherits( true )
   , m_hasBeenRead( false )
   , m_opIndex( 0 )
 {
@@ -261,15 +261,15 @@ std::size_t XformSample::getNumOpChannels() const
 }
 
 //-*****************************************************************************
-void XformSample::setIsToWorld( bool iIsToWorld )
+void XformSample::setInheritsXforms( bool iInherits )
 {
-    m_isToWorld = iIsToWorld;
+    m_inherits = iInherits;
 }
 
 //-*****************************************************************************
-bool XformSample::getIsToWorld() const
+bool XformSample::getInheritsXforms() const
 {
-    return m_isToWorld;
+    return m_inherits;
 }
 
 //-*****************************************************************************

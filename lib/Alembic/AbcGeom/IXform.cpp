@@ -91,7 +91,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_childBounds = Abc::IBox3dProperty( ptr, ".childBnds", iMatching );
 
-    m_isToWorld = Abc::IBoolProperty( ptr, ".istoworld", iMatching );
+    m_inherits = Abc::IBoolProperty( ptr, ".inherits", iMatching );
 
     m_ops = Abc::IUcharArrayProperty( ptr, ".ops", iMatching );
 
@@ -102,13 +102,19 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     // well-formed naming mechanism from OXform::set() to make an array of
     // IDefaultedDoubleProperties.
 
-    Abc::UcharArraySample opSampArray = *(m_ops.getValue());
 
-    std::size_t numOps = opSampArray.size();
+    Abc::UcharArraySample opSampArray;
+    if ( m_ops.getNumSamples() > 0 ) { opSampArray = *(m_ops.getValue()); }
+
+    std::size_t numOps = 0;
+
+    if ( opSampArray )
+    { numOps = opSampArray.size(); }
 
     m_opArray.reserve( numOps );
 
     m_isConstant = true;
+    m_isConstantIdentity = true;
 
     for ( std::size_t i = 0 ; i < numOps ; ++i )
     {
@@ -129,12 +135,17 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
             m_props.push_back( prop );
 
             m_isConstant = m_isConstant && prop.isConstant();
+
+            m_isConstantIdentity = m_isConstantIdentity
+                && ( ! prop.isNonDefault() );
         }
     }
 
-    m_isConstant = m_isConstant && m_isToWorld.isConstant();
+    m_isConstantIdentity = m_isConstantIdentity && m_isConstant;
 
-    ALEMBIC_ABC_SAFE_CALL_END();
+    m_isConstant = m_isConstant && m_inherits.isConstant();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************
@@ -194,7 +205,7 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
         oSamp.addOp( op );
     }
 
-    oSamp.setIsToWorld( m_isToWorld.getValue( sampIdx ) );
+    oSamp.setInheritsXforms( m_inherits.getValue( sampIdx ) );
 
     oSamp.setChildBounds( m_childBounds.getValue( sampIdx ) );
 
@@ -210,19 +221,19 @@ XformSample IXformSchema::getValue( const Abc::ISampleSelector &iSS )
 }
 
 //-*****************************************************************************
-bool IXformSchema::getIsToWorld( const Abc::ISampleSelector &iSS )
+bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getIsToWorld()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getInheritsXforms()" );
 
     AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
 
-    if ( sampIdx < 0 ) { return false; }
+    if ( sampIdx < 0 ) { return true; }
 
-    return m_isToWorld.getValue( sampIdx );
+    return m_inherits.getValue( sampIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    return false;
+    return true;
 }
 
 } // End namespace AbcGeom

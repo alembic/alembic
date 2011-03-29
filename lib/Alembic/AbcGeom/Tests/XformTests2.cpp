@@ -76,7 +76,7 @@ void xformOut()
     XformSample bsamp;
     for ( size_t i = 0 ; i < 20 ; ++i )
     {
-        bsamp.setIsToWorld( (bool)(i&1) );
+        bsamp.setInheritsXforms( (bool)(i&1) );
 
         b.getSchema().set( bsamp, OSampleSelector( i ) );
     }
@@ -98,7 +98,7 @@ void xformIn()
 
     IXform a( IObject( archive, kTop ), "a" );
     TESTING_ASSERT( a.getSchema().getNumOps() == 1 );
-    TESTING_ASSERT( ! a.getSchema().getIsToWorld() );
+    TESTING_ASSERT( a.getSchema().getInheritsXforms() );
     for ( index_t i = 0; i < 20; ++i )
     {
         XformSample xs;
@@ -125,7 +125,7 @@ void xformIn()
     for (size_t i = 0; i < 20; ++i)
     {
         AbcA::index_t j = i;
-        TESTING_ASSERT( b.getSchema().getIsToWorld( ISampleSelector( j ) )
+        TESTING_ASSERT( b.getSchema().getInheritsXforms( ISampleSelector( j ) )
                         == (i&1) );
     }
 
@@ -134,7 +134,9 @@ void xformIn()
     TESTING_ASSERT( xs.getNumOps() == 0 );
     TESTING_ASSERT( c.getSchema().getNumOps() == 0 );
     TESTING_ASSERT( xs.getMatrix() == identity );
-    TESTING_ASSERT( !c.getSchema().getIsToWorld() );
+    TESTING_ASSERT( c.getSchema().getInheritsXforms() );
+    TESTING_ASSERT( c.getSchema().isConstantIdentity() );
+
 
     IXform d( c, "d" );
     xs = d.getSchema().getValue();
@@ -147,7 +149,7 @@ void xformIn()
                                                      VAL_EPSILON ) );
     TESTING_ASSERT( xs.getMatrix() ==
                     Abc::M44d().setScale( V3d(3.0, 6.0, 9.0)) );
-    TESTING_ASSERT( ! d.getSchema().getIsToWorld() );
+    TESTING_ASSERT( d.getSchema().getInheritsXforms() );
 }
 
 //-*****************************************************************************
@@ -304,7 +306,7 @@ void someOpsXform()
         TESTING_ASSERT( asamp[4].getAxis() == V3d( 0.0, 0.0, 1.0 ) );
         TESTING_ASSERT( almostEqual( asamp[4].getAngle(), 0.1 ) );
 
-        TESTING_ASSERT( asamp[5].getVector() == V3d( 0.0, 0.0, 0.0 ) );
+        TESTING_ASSERT( asamp[5].getTranslate() == V3d( 0.0, 0.0, 0.0 ) );
 
         for ( index_t i = 1; i < 5; ++i )
         {
@@ -332,7 +334,7 @@ void someOpsXform()
 
             V3d tvec( 0.0, 3.0 * i, 4.0 * i );
 
-            TESTING_ASSERT( tvec.equalWithAbsError( asamp[5].getVector(),
+            TESTING_ASSERT( tvec.equalWithAbsError( asamp[5].getTranslate(),
                                                     VAL_EPSILON ) );
         }
     }

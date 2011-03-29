@@ -379,6 +379,15 @@ void XformOp::setVector( const Abc::V3d &iVec )
 }
 
 //-*****************************************************************************
+void XformOp::setTranslate( const Abc::V3d &iTrans )
+{
+    ABCA_ASSERT( m_type == kTranslateOperation,
+                 "Meaningless to set translate on non-translate op." );
+
+    this->setVector( iTrans );
+}
+
+//-*****************************************************************************
 void XformOp::setScale( const Abc::V3d &iScale )
 {
     ABCA_ASSERT( m_type == kScaleOperation,
@@ -427,6 +436,15 @@ Abc::V3d XformOp::getVector() const
                  "Meaningless to get Abc::V3d from matrix op" );
 
     return Abc::V3d( m_channels[0], m_channels[1], m_channels[2] );
+}
+
+//-*****************************************************************************
+Abc::V3d XformOp::getTranslate() const
+{
+    ABCA_ASSERT( m_type == kTranslateOperation,
+                 "Meaningless to get translate vector from non-translate op." );
+
+    return this->getVector();
 }
 
 //-*****************************************************************************

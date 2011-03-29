@@ -115,6 +115,9 @@ public:
 
     bool isConstant() const { return m_isConstant; }
 
+    //! is this xform both constant and identity?
+    bool isConstantIdentity() const { return m_isConstantIdentity; }
+
     size_t getNumSamples();
 
     //! fill the supplied sample reference with values
@@ -125,8 +128,9 @@ public:
                           Abc::ISampleSelector() );
 
     // lightweight get to avoid constructing a sample
-    bool getIsToWorld( const Abc::ISampleSelector &iSS =
-                       Abc::ISampleSelector() );
+    // see XformSample.h for explanation of this property
+    bool getInheritsXforms( const Abc::ISampleSelector &iSS =
+                            Abc::ISampleSelector() );
 
     size_t getNumOps() const { return m_opArray.size(); }
 
@@ -138,7 +142,7 @@ public:
 
         m_childBounds.reset();
         m_ops.reset();
-        m_isToWorld.reset();
+        m_inherits.reset();
         m_isConstant = true;
 
         super_type::reset();
@@ -164,9 +168,11 @@ protected:
 
     std::vector<IDefaultedDoubleProperty> m_props;
 
-    Abc::IBoolProperty m_isToWorld;
+    Abc::IBoolProperty m_inherits;
 
     bool m_isConstant;
+
+    bool m_isConstantIdentity;
 
 private:
     void init( Abc::SchemaInterpMatching iMatching );
@@ -217,6 +223,8 @@ protected:
         std::string getName() const { return m_name; }
 
         bool isConstant() const { return m_isConstant; }
+
+        bool isNonDefault() const { return m_property; }
 
         Abc::ErrorHandler &getErrorHandler() { return m_errorHandler; }
         Abc::ErrorHandler::Policy getErrorHandlerPolicy() const

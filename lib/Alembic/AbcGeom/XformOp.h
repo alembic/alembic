@@ -182,6 +182,7 @@ public:
     void setChannelValue( std::size_t iIndex, double iVal );
 
     void setVector( const Abc::V3d &iVec );
+    void setTranslate( const Abc::V3d &iTrans );
     void setScale( const Abc::V3d &iScale );
     void setAxis( const Abc::V3d &iAxis );
     void setAngle( const double iAngle );
@@ -189,6 +190,7 @@ public:
 
     // synthetic getters return by value
     Abc::V3d getVector() const;
+    Abc::V3d getTranslate() const;
     Abc::V3d getScale() const;
     Abc::V3d getAxis() const;
     double getAngle() const;

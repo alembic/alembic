@@ -151,7 +151,7 @@ public:
     {
         m_childBounds.reset();
         m_timeSamplingType = AbcA::TimeSamplingType();
-        m_isToWorld.reset();
+        m_inherits.reset();
         m_numSetSamples = 0;
         m_sampID = m_nilGen();
         m_ops.reset();
@@ -252,7 +252,7 @@ protected:
 
     std::vector<ODefaultedDoubleProperty> m_props;
 
-    Abc::OBoolProperty m_isToWorld;
+    Abc::OBoolProperty m_inherits;
 
     // ensure that our sample is kept pristine.
     boost::uuids::uuid m_sampID;
