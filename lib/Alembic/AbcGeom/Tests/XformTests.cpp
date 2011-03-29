@@ -62,6 +62,7 @@ void xformOut()
     OXform c( b, "c" );
     OXform d( c, "d" );
     OXform e( d, "e" );
+    OXform f( e, "f" );
 
     XformOp transop( kTranslateOperation, kTranslateHint );
     XformOp scaleop( kScaleOperation, kScaleHint );
@@ -97,6 +98,9 @@ void xformOut()
     esamp.addOp( scaleop, V3d( 1.0, 1.0, 1.0 ) );
     e.getSchema().set( esamp );
 
+    XformSample fsamp;
+    fsamp.addOp( transop, V3d( 3.0, -4.0, 5.0 ) );
+    f.getSchema().set( fsamp );
 }
 
 //-*****************************************************************************
@@ -166,6 +170,10 @@ void xformIn()
     TESTING_ASSERT( e.getSchema().isConstantIdentity() );
     TESTING_ASSERT( e.getSchema().isConstant() );
     TESTING_ASSERT( e.getSchema().getNumOps() == 3 );
+
+    IXform f( e, "f" );
+    TESTING_ASSERT( f.getSchema().isConstant() ); // is constant
+    TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
 }
 
 //-*****************************************************************************
