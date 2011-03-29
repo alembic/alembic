@@ -95,7 +95,9 @@ void IXformDrw::setTime( chrono_t iSeconds )
     // Use nearest to get our matrix.
     // Use nearest for now.
     ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
-    m_localToParent = m_xform.getSchema().getMatrix( ss );
+    XformSample xs;
+    m_xform.getSchema().get( xs, ss );
+    m_localToParent = xs.getMatrix();
 
     // Okay, now we need to recalculate the bounds.
     m_bounds.makeEmpty();

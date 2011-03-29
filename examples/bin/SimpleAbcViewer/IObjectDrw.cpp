@@ -36,7 +36,6 @@
 
 #include "IObjectDrw.h"
 #include "IPolyMeshDrw.h"
-#include "ISimpleXformDrw.h"
 #include "IXformDrw.h"
 #include "IPointsDrw.h"
 #include "ISubDDrw.h"
@@ -74,14 +73,6 @@ IObjectDrw::IObjectDrw( IObject &iObj, bool iResetIfNoChildren )
             if ( points )
             {
                 dptr.reset( new IPointsDrw( points ) );
-            }
-        }
-        else if ( ISimpleXform::matches( ohead ) )
-        {
-            ISimpleXform xform( m_object, ohead.getName() );
-            if ( xform )
-            {
-                dptr.reset( new ISimpleXformDrw( xform ) );
             }
         }
         else if ( IXform::matches( ohead ) )

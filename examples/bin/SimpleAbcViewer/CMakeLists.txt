@@ -42,7 +42,6 @@ SET( H_FILES
      IObjectDrw.h
      IPointsDrw.h
      IPolyMeshDrw.h
-     ISimpleXformDrw.h
      ISubDDrw.h
      IXformDrw.h
      MeshDrwHelper.h
@@ -55,7 +54,6 @@ SET( CXX_FILES
      IObjectDrw.cpp
      IPointsDrw.cpp
      IPolyMeshDrw.cpp
-     ISimpleXformDrw.cpp
      ISubDDrw.cpp
      IXformDrw.cpp
      MeshDrwHelper.cpp
