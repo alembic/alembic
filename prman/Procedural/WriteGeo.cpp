@@ -106,7 +106,7 @@ void ProcessXform( IXform &xform, ProcArgs &args )
 
     //loop through the operators individually since a MotionBegin block
     //can enclose only homogenous statements
-    for ( size_t i = 0, e = sampleVectors.front().getNumOps(); i < e; ++i )
+    for ( size_t i = 0, e = xs.getNumOps(); i < e; ++i )
     {
         if ( multiSample ) { WriteMotionBegin(args, sampleTimes); }
 
