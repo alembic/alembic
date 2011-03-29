@@ -106,41 +106,38 @@ void ProcessXform( IXform &xform, ProcArgs &args )
 
     //loop through the operators individually since a MotionBegin block
     //can enclose only homogenous statements
-    for ( size_t i = 0, e = sampleVectors.front().getNum(); i < e; ++i )
+    for ( size_t i = 0, e = sampleVectors.front().getNumOps(); i < e; ++i )
     {
         if ( multiSample ) { WriteMotionBegin(args, sampleTimes); }
 
         for ( size_t j = 0; j < sampleVectors.size(); ++j )
         {
-            XformDataPtr sample = sampleVectors[j].get(i);
+            XformOp &op = sampleVectors[j][i];
 
-            switch ( sample->getType() )
+            switch ( op.getType() )
             {
             case kScaleOperation:
             {
-                V3d value = ScaleData( sample ).get();
+                V3d value = op.getScale();
                 RiScale( value.x, value.y, value.z );
                 break;
             }
             case kTranslateOperation:
             {
-                V3d value = TranslateData( sample ).get();
+                V3d value = op.getTranslate();
                 RiTranslate( value.x, value.y, value.z );
                 break;
             }
             case kRotateOperation:
             {
-                RotateData rotateSample( sample );
-                V3d axis = rotateSample.getAxis();
-                // Xform stores rotation in radians, rman wants it in degrees
-                float degrees = 180.0 * rotateSample.getAngle() / M_PI;
+                V3d axis = op.getAxis();
+                float degrees = op.getAngle();
                 RiRotate( degrees, axis.x, axis.y, axis.z );
                 break;
             }
             case kMatrixOperation:
             {
-                M44d m = MatrixData( sample ).get();
-                WriteConcatTransform( m );
+                WriteConcatTransform( op.getMatrix() );
                 break;
             }
             }
@@ -200,11 +197,11 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
                 sampleSelector,
                 "normal",
                 ParamListBuilder);
-        
+
         }
-        
-        
-        
+
+
+
         ICompoundProperty arbGeomParams = ps.getArbGeomParams();
         AddArbitraryGeomParams( arbGeomParams,
                     sampleSelector, ParamListBuilder );
@@ -264,11 +261,11 @@ void ProcessSubD( ISubD &subd, ProcArgs &args )
                 2,
                 "st");
         }
-        
+
         ICompoundProperty arbGeomParams = ss.getArbGeomParams();
         AddArbitraryGeomParams( arbGeomParams,
                     sampleSelector, ParamListBuilder );
-        
+
         std::string subdScheme = sample.getSubdivisionScheme();
 
         SubDTagBuilder tags;

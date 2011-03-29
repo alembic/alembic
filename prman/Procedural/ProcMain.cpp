@@ -56,14 +56,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     //set this if we should continue traversing
     IObject nextParentObject;
 
-    if ( ISimpleXform::matches( ohead ) )
-    {
-        ISimpleXform xform( parent, ohead.getName() );
-        ProcessSimpleTransform( xform, args );
-
-        nextParentObject = xform; //we do want to keep walking
-    }
-    else if ( IXform::matches( ohead ) )
+    if ( IXform::matches( ohead ) )
     {
         IXform xform( parent, ohead.getName() );
         ProcessXform( xform, args );
