@@ -580,8 +580,9 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
 bool ReadNumSamples( hid_t iParent,
                      const std::string &iPropName,
                      bool isScalar,
-                     uint32_t &oNumSamples,
-                     uint32_t &oNumUniqueSamples )
+                     uint32_t & oNumSamples,
+                     uint32_t & oFirstChangedIndex,
+                     uint32_t & oLastChangedIndex )
 {
     ABCA_ASSERT( iParent >= 0, "Invalid parent in ReadNumSamples" );
 
@@ -590,26 +591,44 @@ bool ReadNumSamples( hid_t iParent,
     if ( H5Aexists( iParent, numSamplesName.c_str() ) > 0 )
     {
         // We have a num samples attr, read it.
-        uint32_t numSamps[2];
+        uint32_t numSamps[3];
+        numSamps[0] = 0;
+        numSamps[1] = 0;
+        numSamps[2] = 0;
+
         size_t sampsRead;
         ReadSmallArray( iParent, numSamplesName,
                         H5T_STD_U32LE,
                         H5T_NATIVE_UINT32,
-                        2, sampsRead,
+                        3, sampsRead,
                         ( void * )numSamps );
 
+        // one thing read means first and last changed can be inferred
         if ( sampsRead == 1 )
         {
             oNumSamples = numSamps[0];
-            oNumUniqueSamples = numSamps[0];
+            if (oNumSamples > 1)
+            {
+                oFirstChangedIndex = 1;
+                oLastChangedIndex = oNumSamples - 1;
+            }
+
+            return true;
+        }
+        // two things read means last can be inferred
+        else if ( sampsRead == 2 )
+        {
+            oNumSamples = numSamps[0];
+            oFirstChangedIndex = numSamps[1];
+            oLastChangedIndex = oNumSamples - 1;
             return true;
         }
         else
         {
-            assert( sampsRead == 2 );
+            assert(sampsRead == 3);
             oNumSamples = numSamps[0];
-            oNumUniqueSamples = numSamps[1];
-            return true;
+            oFirstChangedIndex = numSamps[1];
+            oLastChangedIndex = numSamps[2];
         }
     }
 
@@ -621,12 +640,14 @@ bool ReadNumSamples( hid_t iParent,
         if ( H5Aexists( iParent, samp0name.c_str() ) > 0 )
         {
             oNumSamples = 1;
-            oNumUniqueSamples = 1;
+            oFirstChangedIndex = 0;
+            oLastChangedIndex = 0;
         }
         else
         {
             oNumSamples = 0;
-            oNumUniqueSamples = 0;
+            oFirstChangedIndex = 0;
+            oLastChangedIndex = 0;
         }
     }
     else
@@ -634,12 +655,14 @@ bool ReadNumSamples( hid_t iParent,
         if ( DatasetExists( iParent, samp0name ) )
         {
             oNumSamples = 1;
-            oNumUniqueSamples = 1;
+            oFirstChangedIndex = 0;
+            oLastChangedIndex = 0;
         }
         else
         {
             oNumSamples = 0;
-            oNumUniqueSamples = 0;
+            oFirstChangedIndex = 0;
+            oLastChangedIndex = 0;
         }
     }
 
@@ -647,48 +670,52 @@ bool ReadNumSamples( hid_t iParent,
 }
 
 //-*****************************************************************************
-// returns whether or not it is reading the default.
-AbcA::ArraySamplePtr
-ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
-                 hid_t iParent,
-                 const std::string &iTimeAttrName )
+void
+ReadTimeSamples( hid_t iParent,
+                 std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples )
 {
-    // Check to see if the times are stored as an attr.
-    if ( H5Aexists( iParent, iTimeAttrName.c_str() ) > 0 )
-    {
-        // Create a buffer into which we shall read.
-        AbcA::ArraySamplePtr ret =
-            AbcA::AllocateArraySample( AbcA::DataType( kFloat64POD, 1 ),
-                                       Dimensions( 1 ) );
-        assert( ret->getData() );
+    oTimeSamples.clear();
+    // add the intrinsic default sampling
+    AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling() );
+    oTimeSamples.push_back( ts );
 
-        ReadScalar( iParent, iTimeAttrName,
-                    H5T_IEEE_F64LE,
-                    H5T_NATIVE_DOUBLE,
-                    const_cast<void*>( ret->getData() ) );
+    uint32_t i = 1;
+    AbcA::TimeSamplingType tst;
+    std::string tstname = "1";
 
-        return ret;
-    }
-    else if ( DatasetExists( iParent, iTimeAttrName ) )
+    // keep trying to read till we can't find anymore
+    while ( ReadTimeSamplingType( iParent, tstname, tst ) )
     {
-        return ReadArray( iCache, iParent, iTimeAttrName,
-                          AbcA::DataType( kFloat64POD, 1 ),
-                          H5T_IEEE_F64LE,
-                          H5T_NATIVE_DOUBLE );
-    }
-    else
-    {
-        // Create a buffer of 1, fill it with zero.
-        // CJH: I'm not sure this is wise anymore.
-        AbcA::ArraySamplePtr ret =
-            AbcA::AllocateArraySample( AbcA::DataType( kFloat64POD, 1 ),
-                                       Dimensions( 1 ) );
-        assert( ret->getData() );
-        chrono_t *cdata = reinterpret_cast<chrono_t*>(
-            const_cast<void*>( ret->getData() ) );
-        *cdata = 0.0;
+        // try to open the time samples attribute
+        std::string timeName = tstname + ".time";
+        hid_t aid = H5Aopen( iParent, timeName.c_str(), H5P_DEFAULT );
+        ABCA_ASSERT( aid >= 0,
+            "Couldn't open time samples named: " << timeName );
+        AttrCloser attrCloser( aid );
 
-        return ret;
+        // figure out how big it is
+        hid_t sid = H5Aget_space( aid );
+        ABCA_ASSERT( sid >= 0,
+            "Couldn't get dataspace for time samples: " << timeName );
+        DspaceCloser dspaceCloser( sid );
+
+        hssize_t numPoints = H5Sget_simple_extent_npoints( sid );
+        ABCA_ASSERT( numPoints > 0, "No time samples data: " << timeName );
+        std::vector < chrono_t > times(numPoints);
+
+        // do the read
+        herr_t status = H5Aread( aid, H5T_NATIVE_DOUBLE, &(times.front()) );
+        ABCA_ASSERT( status >= 0, "Can't read time samples: " << timeName );
+
+        // create the TimeSampling and add it to our vector
+        ts.reset( AbcA::TimeSamplingPtr( new AbcA::TimeSampling(tst, times) ) );
+        oTimeSamples.push_back( ts );
+
+        // increment to try and read the next one
+        i++;
+        std::stringstream strm;
+        strm << i;
+        tstname = strm.str();
     }
 }
 

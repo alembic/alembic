@@ -50,6 +50,11 @@ AwImpl::AwImpl( const std::string &iFileName,
   , m_metaData( iMetaData )
   , m_file( -1 )
 {
+
+    // add default time sampling
+    AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling() );
+    m_timeSampling.push_back(ts);
+
     // OPEN THE FILE!
     hid_t faid = H5Pcreate( H5P_FILE_ACCESS );
     if ( faid < 0 )
@@ -103,6 +108,39 @@ AbcA::ObjectWriterPtr AwImpl::getTop()
     AbcA::ObjectWriterPtr ret( m_top,
                                Alembic::Util::NullDeleter() );
     return ret;
+}
+
+//-*****************************************************************************
+index_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
+{
+    index_t numTS = m_timeSampling.size();
+    for (index_t i = 0; i < numTS; ++i)
+    {
+        if (iTS == *(m_timeSampling[i]))
+            return i;
+    }
+
+    // we've got a new TimeSampling, write it and add it to our vector
+    AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling(iTs) );
+    m_timeSampling.push_back(ts);
+
+    index_t latestSample = m_timeSampling.size() - 1;
+
+    std::stringstream strm;
+    strm << latestSample;
+    std::string name = strm.str();
+
+    WriteTimeSampling(m_file, name, *ts);
+    return latestSample;
+}
+
+//-*****************************************************************************
+AbcA::TimeSamplingPtr getTimeSampling( index_t iIndex )
+{
+    ABCA_ASSERT( iIndex < m_timeSampling.size(),
+        "Invalid index provided to getTimeSampling." );
+
+    return m_timeSampling[iIndex];
 }
 
 //-*****************************************************************************

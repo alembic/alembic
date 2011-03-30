@@ -69,6 +69,8 @@ public:
 
     virtual AbcA::ObjectReaderPtr getTop();
 
+    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex );
+
     virtual AbcA::ArchiveReaderPtr asArchivePtr();
 
     virtual AbcA::ReadArraySampleCachePtr getReadArraySampleCachePtr()
@@ -82,11 +84,18 @@ public:
         m_readArraySampleCache = iPtr;
     }
 
+    virtual uint32_t getNumTimeSampling()
+    {
+        return m_timeSampling.size();
+    }
+
 private:
     std::string m_fileName;
     hid_t m_file;
 
     TopOrImpl *m_top;
+
+    std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
 
     AbcA::ReadArraySampleCachePtr m_readArraySampleCache;
 };

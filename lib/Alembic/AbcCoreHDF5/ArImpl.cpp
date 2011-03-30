@@ -70,7 +70,7 @@ ArImpl::ArImpl( const std::string &iFileName,
     // Read the top object
     m_top = new TopOrImpl( *this, m_file );
 
-
+    ReadTimeSamples( m_file, m_timeSamples );
 }
 
 //-*****************************************************************************
@@ -93,6 +93,15 @@ AbcA::ObjectReaderPtr ArImpl::getTop()
     AbcA::ObjectReaderPtr ret( m_top,
                                Alembic::Util::NullDeleter() );
     return ret;
+}
+
+//-*****************************************************************************
+TimeSamplingPtr AbcA::getTimeSampling( uint32_t iIndex )
+{
+    ABCA_ASSERT( iIndex < m_timeSampling.size(),
+        "Invalid index provided to getTimeSampling." );
+
+    return m_timeSampling[iIndex];
 }
 
 //-*****************************************************************************

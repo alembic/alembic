@@ -39,7 +39,6 @@
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/OArgument.h>
-#include <Alembic/Abc/OSampleSelector.h>
 #include <Alembic/Abc/OBaseProperty.h>
 #include <Alembic/Abc/OCompoundProperty.h>
 
@@ -115,12 +114,11 @@ public:
 
     //! Set a sample from the address of a datum.
     //! ...
-    void set( const AbcA::ArraySample &iSample,
-              const OSampleSelector &iSS = OSampleSelector() );
+    void set( const AbcA::ArraySample &iSample );
 
     //! Set a sample from the previous sample.
     //! ...
-    void setFromPrevious( const OSampleSelector &iSS );
+    void setFromPrevious( );
 
     //! Return the parent compound property, handily wrapped in a
     //! OCompoundProperty wrapper.

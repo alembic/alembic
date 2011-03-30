@@ -230,13 +230,8 @@ WriteTimeSamplingType( hid_t iGroup,
 
     const uint32_t spc = iTimeSamplingType.getNumSamplesPerCycle();
     const chrono_t tpc = iTimeSamplingType.getTimePerCycle();
-    
-    if ( iTimeSamplingType.isIdentity() )
-    {
-        // We don't bother writing it at all
-        assert( spc == 0 );
-    }
-    else if ( iTimeSamplingType.isUniform() )
+
+    if ( iTimeSamplingType.isUniform() )
     {
         // With uniform, we JUST write the time per sample
         assert( spc == 1 );
@@ -265,8 +260,6 @@ WriteTimeSamplingType( hid_t iGroup,
     }
     else
     {
-        //std::cout << "TOTALLY WRITING THESE HERE ACYCLIC SAMPLES: "
-        //          << spc << std::endl;
         assert( iTimeSamplingType.isAcyclic() );
         assert( spc == AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES );
         WriteScalar( iGroup, nameSPC,
@@ -436,94 +429,71 @@ CopyWrittenArray( hid_t iGroup,
 }
 
 //-*****************************************************************************
-void WriteSampling( WrittenArraySampleMap &iMap,
-                    hid_t iGroup,
+void WriteSampling( hid_t iGroup,
                     const std::string &iName,
-                    const AbcA::TimeSamplingType &iTsmpType,
                     uint32_t iNumSamples,
-                    uint32_t iNumUniqueSamples,
-                    const chrono_t *iTimes )
+                    uint32_t iFirstChangedIndex,
+                    uint32_t iLastChangedIndex )
 {
-    // Check to see if we need to write anything at all.
-    // If the time sampling type indicated that we should not retain
-    // constant sample times, and we have one or less unique samples,
-    // we leave.
-    // Since we haven't written the time sampling type yet, this effectively
-    // reduces the time sampling type to "identity" because there was no
-    // variation amongst the samples.
-    if ( iTsmpType.getRetainConstantSampleTimes() == false &&
-         iNumUniqueSamples < 2 )
-    {
-        return;
-    }
 
-    // If we get here, write the time sampling type.
-    WriteTimeSamplingType( iGroup, iName, iTsmpType );
+    ABCA_ASSERT( iFirstChangedIndex <= iNumSamples &&
+        iLastChangedIndex <= iNumSamples &&
+        iFirstChangedIndex <= iLastChangedIndex,
+        "Illegal Sampling!" << std::endl <<
+        "Num Samples: " << iNumSamples << std::endl <<
+        "First Changed Index: " << iFirstChangedIndex << std::endl <<
+        "Last Changed Index: " << iLastChangedIndex << std::endl );
 
     // Write the num samples. Only bother writing if
-    // the num samples is greater than 1. The reader can infer
-    // that the num samples are 0 or 1 based on the presence
-    // of attributes.
+    // the num samples is greater than 1.  Existence of name.smp0
+    // is used by the reader to determine if 0 or 1 sample.
     if ( iNumSamples > 1 )
     {
-        // If the num unique samples is different than the
-        // num samples, write a uint32[2], with the num unique
-        // samples as the second element. Otherwise, just write
-        // the num samples as uint32.
-        if ( iNumUniqueSamples < iNumSamples )
+        uint32_t samps[3];
+        samps[0] = iNumSamples;
+        samps[1] = iFirstChangedIndex;
+        samps[2] = iLastChangedIndex;
+
+        uint32_t numWrite = 3;
+
+        // if the first change is at index 1, and the last change is at index
+        // numSamples - 1, then we'll only write the number of samples
+        if ( samps[1] == 1 && samps[2] == samps[0] - 1 )
         {
-            assert( iNumUniqueSamples > 0 );
-
-            uint32_t samps[2];
-            samps[0] = iNumSamples;
-            samps[1] = iNumUniqueSamples;
-
-            WriteSmallArray( iGroup, iName + ".nums",
-                             H5T_STD_U32LE,
-                             H5T_NATIVE_UINT32,
-                             2,
-                             ( const void * )samps );
+            numWrite = 1;
         }
-        else
+        // last change is at index numSamples - 1, so we'll write the number
+        // of samples and the first change index
+        else if ( samps[2] == samps[0] - 1 )
         {
-            WriteSmallArray( iGroup, iName + ".nums",
-                             H5T_STD_U32LE,
-                             H5T_NATIVE_UINT32,
-                             1,
-                             ( const void * )&iNumSamples );
+            numWrite = 2;
+        }
+
+        WriteSmallArray( iGroup, iName + ".nums",
+            H5T_STD_U32LE, H5T_NATIVE_UINT32, numWrite,
+                ( const void * )samps);
         }
     }
+}
+
+//-*****************************************************************************
+void WriteTimeSampling( hid_t iGroup,
+                    const std::string &iName,
+                    const AbcA::TimeSampling &iTsmp )
+{
+
+    TimeSamplingType tst = iTsmp.getTimeSamplingType();
+    WriteTimeSamplingType( iGroup, iName, tst );
 
     //-*************************************************************************
     // WRITE TIMES.
     //-*************************************************************************
     std::string timeSampsName = iName + ".time";
-    size_t numTimes = std::min( ( size_t )iNumSamples,
-                                ( size_t )iTsmpType.getNumSamplesPerCycle() );
-    if ( numTimes < 1 )
-    {
-        // No times to write.
-        return;
-    }
 
-    if ( numTimes < 2 )
-    {   
-        // Only one time.
-        WriteScalar( iGroup, timeSampsName,
-                     H5T_IEEE_F64LE,
-                     H5T_NATIVE_DOUBLE,
-                     ( const void * )iTimes );
-    }
-    else
-    {
-        AbcA::ArraySample samp( ( const void * )iTimes,
-                                AbcA::DataType( kFloat64POD, 1 ),
-                                AbcA::Dimensions( numTimes ) );
-
-        WriteArray( iMap, iGroup, timeSampsName, samp, samp.getKey(),
-                    H5T_IEEE_F64LE,
-                    H5T_NATIVE_DOUBLE, -1 );
-    }
+    const std::vector < chrono_t > & samps = iTsmp.getSampleTimes();
+    ABCA_ASSERT( samps.size() > 0, "No TimeSamples to write!");
+    H5LTset_attribute_double ( iGroup, ".", timeSampsName.c_str(),
+        &samps.front(), samps.size() );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

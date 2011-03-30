@@ -106,19 +106,18 @@ bool
 ReadNumSamples( hid_t iGroup,
                 const std::string &iPropName,
                 bool isScalar,
-                uint32_t &oNumSamples,
-                uint32_t &oNumUniqueSamples );
+                uint32_t & oNumSamples,
+                uint32_t & oFirstChangedIndex,
+                uint32_t & oLastChangedIndex );
 
 //-*****************************************************************************
-// Returns whether it actually found the data you're writing out (true)
-// or whether you're faking an array of 1 double == 0.0 (false)
-// It returns them as an ArraySamplePtr, because that is the object which
-// contains the resource management and therefore we want store a reference
-// to it for storage. It is trivially convertable to a ChronoArrayPtr.
-AbcA::ArraySamplePtr
-ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
-                 hid_t iGroup,
-                 const std::string &iPropName );
+// Fills in oTimeSamples with the different TimeSampling that the archive uses
+// Intrinsically all archives have the first TimeSampling for uniform time 
+// sampling with a start time of 0 and time per cycle of 1
+// (aka identity sampling)
+void
+ReadTimeSamples( hid_t iParent,
+                 std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples );
 
 } // End namespace ALEMBIC_VERSION_NS
 

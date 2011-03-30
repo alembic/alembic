@@ -71,11 +71,6 @@ public:
     //! regardless of the time sampling.
     virtual bool isConstant() = 0;
 
-    //! Time information.
-    //! Even with identity time sampling, the Time Sampling will be
-    //! valid. 
-    virtual TimeSampling getTimeSampling() = 0;
-
     //! Returns the single sample value for the requested sample
     //! by reference. Out-of-range indices will cause an
     //! exception to be thrown.
@@ -93,6 +88,22 @@ public:
     //! and std::wstring as core language-level primitives.
     virtual void getSample( index_t iSample,
                             void *iIntoLocation ) = 0;
+
+    //! Find the largest valid index that has a time less than or equal
+    //! to the given time. Invalid to call this with zero samples.
+    //! If the minimum sample time is greater than iTime, index
+    //! 0 will be returned.
+    virtual std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime ) = 0;
+
+    //! Find the smallest valid index that has a time greater
+    //! than the given time. Invalid to call this with zero samples.
+    //! If the maximum sample time is less than iTime, index
+    //! numSamples-1 will be returned.
+    virtual std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime ) = 0;
+
+    //! Find the valid index with the closest time to the given
+    //! time. Invalid to call this with zero samples.
+    virtual std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime ) = 0;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

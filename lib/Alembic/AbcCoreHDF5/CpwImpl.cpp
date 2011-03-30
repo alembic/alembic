@@ -45,10 +45,11 @@ namespace ALEMBIC_VERSION_NS {
 // With the compound property writer as an input.
 CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   hid_t iParentGroup,
-                  PropertyHeaderPtr iHeader )
+                  const std::string & iName,
+                  const AbcA::MetaData & iMeta )
   : BaseCpwImpl( iParentGroup )
   , m_parent( iParent )
-  , m_header( iHeader )
+  , m_header( new PropertyHeader(iName, iMeta) )
 {
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );

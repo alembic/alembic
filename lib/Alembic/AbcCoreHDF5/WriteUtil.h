@@ -117,13 +117,18 @@ WriteArray( WrittenArraySampleMap &iMap,
             int iCompressionLevel );
 
 //-*****************************************************************************
-void WriteSampling( WrittenArraySampleMap &iMap,
-                    hid_t iGroup,
-                    const std::string &iName,
-                    const AbcA::TimeSamplingType &iTsmpType,
-                    uint32_t iNumSamples,
-                    uint32_t iNumUniqueSamples,
-                    const chrono_t *iTimes );
+void
+WriteSampling( hid_t iGroup,
+               const std::string &iName,
+               uint32_t iNumSamples,
+               uint32_t iFirstChangedIndex,
+               uint32_t iLastChangedIndex );
+
+//-*****************************************************************************
+void
+WriteTimeSampling( hid_t iGroup,
+                   const std::string &iName,
+                   const AbcA::TimeSampling &iTsmp );
 
 } // End namespace ALEMBIC_VERSION_NS
 

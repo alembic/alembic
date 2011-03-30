@@ -80,6 +80,12 @@ public:
         return m_writtenArraySampleMap;
     }
 
+    virtual index_t addTimeSampling( const AbcA::TimeSampling & iTs );
+
+    virtual AbcA::TimeSamplingPtr getTimeSampling( index_t iIndex );
+
+    virtual uint32_t getNumTimeSampling() { return m_timeSampling.size(); }
+
 private:
     std::string m_fileName;
     AbcA::MetaData m_metaData;
@@ -89,6 +95,8 @@ private:
     // TopObjectWriter we create is special and doesn't like back up
     // like a normal object writer would.
     TopOwImpl *m_top;
+
+    std::vector < AbcA::TimeSamplingPtr > m_timeSampling;
 
     WrittenArraySampleMap m_writtenArraySampleMap;
 };

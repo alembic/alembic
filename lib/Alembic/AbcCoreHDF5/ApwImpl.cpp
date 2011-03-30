@@ -45,13 +45,20 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   hid_t iParentGroup,
-                  PropertyHeaderPtr iHeader )
+                  const std::string & iName,
+                  const AbcA::MetaData & iMetaData,
+                  const AbcA::DataType & iDataType,
+                  uint32_t iTimeSamplingIndex )
   : SimplePwImpl<AbcA::ArrayPropertyWriter,
                  ApwImpl,
                  const AbcA::ArraySample &,
                  AbcA::ArraySample::Key>( iParent,
                                           iParentGroup,
-                                          iHeader )
+                                          iName,
+                                          iMetaData,
+                                          iDataType,
+                                          iTimeSamplingIndex,
+                                          AbcA::kArrayProperty)
 {
     if ( m_header->getPropertyType() != AbcA::kArrayProperty )
     {

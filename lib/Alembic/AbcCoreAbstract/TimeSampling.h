@@ -65,7 +65,7 @@ public:
     TimeSampling( const TimeSamplingType & iTimeSamplingType,
 
                   //! The number of time samples per cycle
-                  std::vector < chrono_t > iSampeTimes);
+                  const std::vector < chrono_t > & iSampleTimes );
 
     TimeSampling( const TimeSampling &copy );
 
@@ -79,13 +79,13 @@ public:
         return m_sampleTimes.size();
     }
 
+    const std::vector < chrono_t > & getSampleTimes() { return m_sampleTimes; }
     TimeSamplingType getTimeSamplingType() const
     {
         return m_timeSamplingType;
     }
 
     //! Get the time of any sample
-    //! This will return NON_TIME if the sampling is static
     //! it is invalid to call this for out-of-range indices.
     chrono_t getSampleTime( index_t iIndex ) const;
 
@@ -107,13 +107,6 @@ public:
     //! time. Invalid to call this with zero samples.
     std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime,
         index_t iNumSamples ) const;
-
-    //! This returns whether or not the time sampling is static
-    //! Static time sampling means one or less samples
-    bool isStatic() const
-    {
-        return m_sampleTimes.size() < 2;
-    }
 
 protected:
     //! A TimeSamplingType

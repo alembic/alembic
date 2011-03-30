@@ -114,10 +114,18 @@ public:
     //! Adds the TimeSampling to the Archive TimeSampling pool.
     //! If the TimeSampling already exists in the pool, the index for the match
     //! should be returned.
+    //! index 0 is automatically reserved for uniform time sampling with a start
+    //! time of 0 and time per cycle of 1 (aka identity sampling)
     virtual uint32_t addTimeSampling( const TimeSampling & iTs ) = 0;
 
     //! Returns the TimeSampling at a given index.
-    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex) = 0;
+    //! index 0 is automatically reserved for uniform time sampling with a start
+    //! time of 0 and time per cycle of 1 (aka identity sampling)
+    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex ) = 0;
+
+    //! Returns the total number of TimeSamplingPtrs in the Archive
+    //! TimeSampling pool.
+    virtual uint32_t getNumTimeSampling() = 0;
 
 private:
     int8_t m_compressionHint;

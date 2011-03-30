@@ -74,7 +74,11 @@ class SimplePwImpl : public ABSTRACT
 protected:
     SimplePwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   hid_t iParentGroup,
-                  PropertyHeaderPtr iHeader );
+                  const std::string & iName,
+                  const AbcA::MetaData & iMetaData,
+                  const AbcA::DataType & iDataType,
+                  uint32_t iTimeSamplingIndex,
+                  AbcA::PropertyType iPropType );
 
 public:
     virtual ~SimplePwImpl();
@@ -94,12 +98,9 @@ private:
 
 public:
     // Scalar/Array API
-    virtual void setSample( index_t iSampleIndex,
-                            chrono_t iSampleTime,
-                            SAMPLE iSamp );
+    virtual void setSample( SAMPLE iSamp );
 
-    virtual void setFromPreviousSample( index_t iSampleIndex,
-                                        chrono_t iSampleTime );
+    virtual void setFromPreviousSample( );
     
     virtual size_t getNumSamples();
 
@@ -128,13 +129,13 @@ protected:
     // Index of the next sample to write
     uint32_t m_nextSampleIndex;
 
-    // Number of unique samples.
-    // If this is zero, it means we haven't written a sample yet.
-    // Otherwise, it is the number of samples we've actually written.
-    // It is common for the tail end of sampling blocks to be repeated
-    // values, so we don't bother writing them out if the tail is
-    // non-varying.
-    uint32_t m_numUniqueSamples;
+    // Index representing the first sample that is different from sample 0
+    uint32_t m_firstChangeIndex;
+
+    // Index representing the last sample in which a change has occured
+    // There is no need to repeat samples if they are the same between this
+    // index and m_nextSampleIndex
+    uint32_t m_lastChangeIndex;
 };
 
 //-*****************************************************************************
@@ -149,23 +150,35 @@ protected:
 template <class ABSTRACT, class IMPL, class SAMPLE, class KEY>
 SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
 (
-    AbcA::CompoundPropertyWriterPtr iParent,
-    hid_t iParentGrp,
-    PropertyHeaderPtr iHeader
+  AbcA::CompoundPropertyWriterPtr iParent,
+  hid_t iParentGroup,
+  const std::string & iName,
+  const AbcA::MetaData & iMetaData,
+  const AbcA::DataType & iDataType,
+  uint32_t iTimeSamplingIndex,
+  AbcA::PropertyType iPropType
 )
   : m_parent( iParent )
   , m_parentGroup( iParentGrp )
-  , m_header( iHeader )
   , m_fileDataType( -1 )
   , m_cleanFileDataType( false )
   , m_nativeDataType( -1 )
   , m_cleanNativeDataType( false )
   , m_sampleIGroup( -1 )
   , m_nextSampleIndex( 0 )
-  , m_numUniqueSamples( 0 )
+  , m_firstChangeIndex( 0 )
+  , m_lastChangeIndex( 0 )
 {
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
+
+    // will assert if TimeSamplingPtr not found
+    TimeSamplingPtr ts = m_parent->getObject()->getArchive()->getTimeSampling(
+        iTimeSamplingIndex );
+
+    m_header = PropertyHeaderPtr( new PropertyHeader( iName, iPropType,
+        iMetaData, iDataType, ts );
+
     ABCA_ASSERT( m_header, "Invalid property header" );
     ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
     ABCA_ASSERT( m_header->getDataType().getExtent() > 0,
@@ -187,6 +200,14 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
 
     WritePropertyHeaderExceptTime( m_parentGroup,
                                    m_header->getName(), *m_header );
+
+    // write the time sampling index, if it isn't the intrinsic default value
+    if (iTimeSamplingIndex > 0)
+    {
+        std::name tsidName = m_header->getName() + ".tsid";
+        WriteScalar( m_parentGroup, tsidName, H5T_STD_U32LE, H5T_NATIVE_UINT32,
+            &iTimeSamplingIndex );
+    }
 }
 
 //-*****************************************************************************
@@ -231,7 +252,7 @@ hid_t SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::getSampleIGroup()
     }
 
     ABCA_ASSERT( m_parentGroup >= 0, "invalid parent group" );
-    ABCA_ASSERT( m_numUniqueSamples > 0,
+    ABCA_ASSERT( m_nextSampleIndex > 0,
                  "can't create sampleI group before numSamples > 1" );
 
     const std::string groupName = m_header->getName() + ".smpi";
@@ -254,161 +275,80 @@ hid_t SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::getSampleIGroup()
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE, class KEY>
 void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setSample
-(
-    index_t iSampleIndex,
-    chrono_t iSampleTime,
-    SAMPLE iSamp )
+( SAMPLE iSamp )
 {
-    // Check errors.
-    ABCA_ASSERT( iSampleIndex == m_nextSampleIndex,
-                 "Out-of-order sample writing. Expecting: "
-                 << m_nextSampleIndex
-                 << ", but got: " << iSampleIndex );
+    // Make sure we aren't writing more samples than we have times for
+    // This applies to acyclic sampling only
+    ABCA_ASSERT(
+        !m_header->getTimeSampling()->getTimeSamplingType().isAcyclic() ||
+        m_header->getTimeSampling()->getNumSamples() > m_nextSampleIndex,
+        "Can not write more samples than we have times for when using "
+        "Acyclic sampling." );
 
-    bool pushTimeSamples = false;
-
-    // decide whether we should push back the sample time later on
-    // don't do it now because there are a few more checks that need to pass
-    if ( m_timeSamples.size() <
-         m_header->getTimeSamplingType().getNumSamplesPerCycle() )
-    {
-        ABCA_ASSERT(m_timeSamples.empty() || iSampleTime > m_timeSamples.back(),
-            "Out-of-order time writing. Last time: " << m_timeSamples.back() <<
-            " is greater than or equal to: " << iSampleTime);
-
-        // if we are cyclic sampling make sure the difference between the our
-        // first sample time and the one we want to push does not exceed the
-        // time per cycle.  Doing so would violate the strictly increasing
-        // rule we have for our samples
-        ABCA_ASSERT(!m_header->getTimeSamplingType().isCyclic() ||
-            m_timeSamples.empty() || iSampleTime - m_timeSamples.front() <
-            m_header->getTimeSamplingType().getTimePerCycle(),
-            "Out-of-order cyclic time writing.  This time: " << iSampleTime <<
-            " minus first time: " << m_timeSamples.front() <<
-            " is greater than or equal to: " <<
-            m_header->getTimeSamplingType().getTimePerCycle());
-
-        pushTimeSamples = true;
-    }
-
-    // Get my name
-    const std::string &myName = m_header->getName();
-    
     // Figure out if we need to write the sample. At first, no.
     bool needToWriteSample = false;
 
     // The Key helps us analyze the sample.
     KEY key = static_cast<IMPL*>(this)->computeSampleKey( iSamp );
-    if ( m_numUniqueSamples == 0 )
-    {
-        // This means we are now writing the very first sample.
-        assert( iSampleIndex == 0 );
-        needToWriteSample = true;
-    }
-    else
-    {
-        // Check to see if there have been any changes.
-        // Only if they're different do we bother.
-        // We use the Key to check.
-        // We also rely on the IMPL template parameter, which is
-        // a variant of the CRTP
-        assert( m_numUniqueSamples > 0 );
-        needToWriteSample =
-            !( static_cast<IMPL*>(this)->sameAsPreviousSample( iSamp, key ) );
-    }
 
-    // If we need to write sample, write sample!
-    if ( needToWriteSample )
-    {   
-        // Write all the samples, starting from the last unique sample,
-        // up to this sample.
+    // We need to write the sample
+    if ( m_nextSampleIndex == 0  ||
+        !(static_cast<IMPL*>(this)->sameAsPreviousSample( iSamp, key )) )
+    {
+        const std::string &myName = m_header->getName();
 
-        // This is tricky. If we get in here, and we have to write,
-        // we want to write all the previously-thought-to-be-constant
-        // samples. If we've already written them, then m_numUniqueSamples
-        // will equal iSampleIndex-1, and this loop will skip.
-        // If we haven't written them, this loop will do the right thing.
-        // If this is the FIRST sample, iSampleIndex is zero, and this
-        // will fail.
-        // It's just tricky.
-        for ( index_t smpI = m_numUniqueSamples;
-              smpI < iSampleIndex; ++smpI )
+        // we only need to repeat samples if this is not the first change
+        if (m_firstChangeIndex != 0)
         {
-            assert( smpI > 0 );
-            static_cast<IMPL*>(this)->copyPreviousSample(
-                getSampleIGroup(),
-                getSampleName( myName, smpI ),
-                smpI );
+            // copy the samples from after the last change to the latest index
+            for ( index_t smpI = m_lastChangeIndex + 1;
+                smpI < m_nextSampleIndex; ++smpI )
+            {
+                assert( smpI > 0 );
+                static_cast<IMPL*>(this)->copyPreviousSample(
+                    getSampleIGroup(),
+                    getSampleName( myName, smpI ),
+                    smpI );
+            }
+        }
+        else
+        {
+            m_firstIndex = m_nextSampleIndex;
         }
 
         // Write this sample, which will update its internal
         // cache of what the previously written sample was.
         static_cast<IMPL*>(this)->writeSample(
-            iSampleIndex == 0 ? m_parentGroup : getSampleIGroup(),
-            getSampleName( myName, iSampleIndex ),
-            iSampleIndex, iSamp, key );
-        
-        // Time sample written, all is well.
-        m_numUniqueSamples = iSampleIndex+1;
+            m_nextSampleIndex == 0 ? m_parentGroup : getSampleIGroup(),
+            getSampleName( myName, m_nextSampleIndex ),
+            m_nextSampleIndex, iSamp, key );
+
+        // this index is now the last change
+        m_lastChangeIndex = m_nextSampleIndex;
     }
 
-    if (pushTimeSamples)
-    {
-        m_timeSamples.push_back( iSampleTime );
-    }
 
-    // Set the previous sample index.
-    m_nextSampleIndex = iSampleIndex+1;
+    m_nextSampleIndex ++;
 }
 
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE, class KEY>
 void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setFromPreviousSample
-(
-    index_t iSampleIndex,
-    chrono_t iSampleTime
-    )
+()
 {
-    // Various programmer error checks
-    // Check errors.
-    ABCA_ASSERT( iSampleIndex == m_nextSampleIndex,
-                 "Out-of-order sample writing. Expecting: "
-                 << m_nextSampleIndex
-                 << ", but got: " << iSampleIndex );
 
-    // Verify indices
-    if ( m_nextSampleIndex < 1 || m_numUniqueSamples < 1 )
-    {
-        ABCA_THROW( "Cannot set from previous sample before any "
-                     "samples have been written" );
-    }
+    // Make sure we aren't writing more samples than we have times for
+    // This applies to acyclic sampling only
+    ABCA_ASSERT(
+        !m_header->getTimeSampling()->getTimeSamplingType().isAcyclic() ||
+        m_header->getTimeSampling()->getNumSamples() > m_nextSampleIndex,
+        "Can not set more samples than we have times for when using "
+        "Acyclic sampling." );
 
-    // Push back the sample time.
-    if ( m_timeSamples.size() <
-         m_header->getTimeSamplingType().getNumSamplesPerCycle() )
-    {
-        ABCA_ASSERT(m_timeSamples.empty() || iSampleTime > m_timeSamples.back(),
-            "Out-of-order time writing. Last time: " << m_timeSamples.back() <<
-            " is greater than or equal to: " << iSampleTime);
+    ABCA_ASSERT( m_nextSampleIndex < 1,
+        "Can't set from previous sample before any samples have been written" );
 
-        // if we are cyclic sampling make sure the difference between the our
-        // first sample time and the one we want to push does not exceed the
-        // time per cycle.  Doing so would violate the strictly increasing
-        // rule we have for our samples
-        ABCA_ASSERT(!m_header->getTimeSamplingType().isCyclic() ||
-            m_timeSamples.empty() || iSampleTime - m_timeSamples.front() <
-            m_header->getTimeSamplingType().getTimePerCycle(),
-            "Out-of-order cyclic time writing.  This time: " << iSampleTime <<
-            " minus first time: " << m_timeSamples.front() <<
-            " is greater than or equal to: " <<
-            m_header->getTimeSamplingType().getTimePerCycle());
-
-        m_timeSamples.push_back( iSampleTime );
-    }
-
-    // Just increase the previous sample index without increasing
-    // the number of unique samples.
-    m_nextSampleIndex = iSampleIndex + 1;
+    m_nextSampleIndex ++;
 }
 
 //-*****************************************************************************
@@ -435,26 +375,20 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::~SimplePwImpl()
         
         // Check validity of the group.
         ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
-        
-        uint32_t numSamples = m_nextSampleIndex;
 
-        // Write all the sampling information.
+        // Write the sampling information.
         // This function, which is non-templated and lives in WriteUtil.cpp,
         // contains all of the logic regarding which information needs
         // to be written.
-        WriteSampling( GetWrittenArraySampleMap(
-                           this->getObject()->getArchive() ),
-                       m_parentGroup, myName,
-                       m_header->getTimeSamplingType(),
-                       numSamples,
-                       m_numUniqueSamples,
-                       m_timeSamples.empty() ? NULL :
-                       &m_timeSamples.front() );
+        WriteSampling( m_parentGroup, myName, m_nextSampleIndex,
+            m_firstChangedIndex, m_lastChangedIndex );
 
         // Close the sampleIGroup if it was open
         if ( m_sampleIGroup >= 0 )
         {
-            ABCA_ASSERT( m_numUniqueSamples > 1, "Corrupt SimplePwImpl" );
+            // this should never have been openened, if a change was never
+            // detected.
+            ABCA_ASSERT( m_firstChangedIndex > 0, "Corrupt SimplePwImpl" );
             H5Gclose( m_sampleIGroup );
             m_sampleIGroup = -1;
         }

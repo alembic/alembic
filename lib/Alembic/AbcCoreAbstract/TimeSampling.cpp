@@ -58,7 +58,7 @@ static const chrono_t kCHRONO_TOLERANCE = kCHRONO_EPSILON * 32.0;
 
 //-*****************************************************************************
 TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
-                            std::vector< chrono_t > iSampleTimes )
+                            const std::vector< chrono_t > & iSampleTimes )
   : m_timeSamplingType( iTimeSamplingType )
   , m_sampleTimes( iSampleTimes )
 {

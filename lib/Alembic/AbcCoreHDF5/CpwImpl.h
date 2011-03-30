@@ -55,7 +55,8 @@ public:
     // Built from a compound property writer
     CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
              hid_t iParentGroup,
-             PropertyHeaderPtr iHeader );
+             const std::string & iName,
+             const AbcA::MetaData & iMeta );
 
 public:
     virtual ~CpwImpl();
