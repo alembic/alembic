@@ -38,7 +38,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/OArgument.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/OBaseProperty.h>
 #include <Alembic/Abc/OCompoundProperty.h>
 
@@ -74,9 +74,9 @@ public:
                     const std::string &iName,
                     const AbcA::DataType &iDataType,
 
-                    const OArgument &iArg0 = OArgument(),
-                    const OArgument &iArg1 = OArgument(),
-                    const OArgument &iArg2 = OArgument() );
+                    const Argument &iArg0 = Argument(),
+                    const Argument &iArg1 = Argument(),
+                    const Argument &iArg2 = Argument() );
 
     //! This attaches an OArrayProperty wrapper around an existing
     //! ArrayPropertyWriterPtr, with an optional error handling policy.
@@ -131,9 +131,9 @@ private:
 
                ErrorHandler::Policy iParentPolicy,
 
-               const OArgument &iArg0,
-               const OArgument &iArg1,
-               const OArgument &iArg2 );
+               const Argument &iArg0,
+               const Argument &iArg1,
+               const Argument &iArg2 );
 };
 
 //-*****************************************************************************
@@ -145,9 +145,9 @@ template <class CPROP_PTR>
 inline OArrayProperty::OArrayProperty( CPROP_PTR iParentProp,
                                        const std::string &iName,
                                        const AbcA::DataType &iDataType,
-                                       const OArgument &iArg0,
-                                       const OArgument &iArg1,
-                                       const OArgument &iArg2 )
+                                       const Argument &iArg0,
+                                       const Argument &iArg1,
+                                       const Argument &iArg2 )
 {
     init( GetCompoundPropertyWriterPtr( iParentProp ),
           iName, iDataType,

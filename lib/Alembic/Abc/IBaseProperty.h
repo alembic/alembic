@@ -39,7 +39,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/IArgument.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/IObject.h>
 #include <Alembic/Abc/IArchive.h>
 

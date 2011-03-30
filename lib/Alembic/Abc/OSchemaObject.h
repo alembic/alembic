@@ -125,18 +125,18 @@ public:
     OSchemaObject( OBJECT_PTR iParentObject,
                    const std::string &iName,
 
-                   const OArgument &iArg0 = OArgument(),
-                   const OArgument &iArg1 = OArgument(),
-                   const OArgument &iArg2 = OArgument() );
+                   const Argument &iArg0 = Argument(),
+                   const Argument &iArg1 = Argument(),
+                   const Argument &iArg2 = Argument() );
 
     //! Wrap an existing schema object.
     //! ...
     template <class OBJECT_PTR>
     OSchemaObject( OBJECT_PTR iThisObject,
                    WrapExistingFlag iFlag,
-                   const OArgument &iArg0 = OArgument(),
-                   const OArgument &iArg1 = OArgument(),
-                   const OArgument &iArg2 = OArgument() );
+                   const Argument &iArg0 = Argument(),
+                   const Argument &iArg1 = Argument(),
+                   const Argument &iArg2 = Argument() );
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -179,11 +179,11 @@ OSchemaObject<SCHEMA>::OSchemaObject
 (
     OBJECT_PTR iParentObject,
     const std::string &iName,
-    const OArgument &iArg0,
-    const OArgument &iArg1,
-    const OArgument &iArg2 )
+    const Argument &iArg0,
+    const Argument &iArg1,
+    const Argument &iArg2 )
 {
-    OArguments args( GetErrorHandlerPolicy( iParentObject ) );
+    Arguments args( GetErrorHandlerPolicy( iParentObject ) );
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
@@ -222,9 +222,9 @@ template<class OBJECT_PTR>
 inline OSchemaObject<SCHEMA>::OSchemaObject(
     OBJECT_PTR iObject,
     WrapExistingFlag iFlag,
-    const OArgument &iArg0,
-    const OArgument &iArg1,
-    const OArgument &iArg2 )
+    const Argument &iArg0,
+    const Argument &iArg1,
+    const Argument &iArg2 )
   : OObject( iObject,
              iFlag,
              GetErrorHandlerPolicy( iObject,

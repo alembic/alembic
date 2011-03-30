@@ -149,9 +149,9 @@ public:
                      bool iIsIndexed,
                      GeometryScope iScope,
                      size_t iArrayExtent,
-                     const OArgument &iArg0 = OArgument(),
-                     const OArgument &iArg1 = OArgument(),
-                     const OArgument &iArg2 = OArgument()
+                     const Argument &iArg0 = Argument(),
+                     const Argument &iArg1 = Argument(),
+                     const Argument &iArg2 = Argument()
                  )
       : m_name( iName )
       , m_isIndexed( iIsIndexed )
@@ -198,8 +198,8 @@ public:
     template <class PROP>
     OTypedGeomParam( PROP iThis,
                      WrapExistingFlag iWrapFlag,
-                     const Abc::OArgument &iArg0 = Abc::OArgument(),
-                     const Abc::OArgument &iArg1 = Abc::OArgument() )
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument() )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam( wrap )" );
 

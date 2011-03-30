@@ -39,7 +39,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/OArgument.h>
+#include <Alembic/Abc/Argument.h>
 
 namespace Alembic {
 namespace Abc {
@@ -76,9 +76,9 @@ public:
     OObject( OBJECT_PTR iParentObject,
              const std::string &iName,
 
-             const OArgument &iArg0 = OArgument(),
-             const OArgument &iArg1 = OArgument(),
-             const OArgument &iArg2 = OArgument() );
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument() );
 
     //! This attaches an OObject wrapper around an existing
     //! ObjectWriterPtr, with an optional error handling policy.
@@ -88,9 +88,9 @@ public:
 
              WrapExistingFlag iFlag,
 
-             const OArgument &iArg0 = OArgument(),
-             const OArgument &iArg1 = OArgument(),
-             const OArgument &iArg2 = OArgument() )
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument() )
       : m_object( GetObjectWriterPtr( iPtr ) )
     {
         // Set the error handling policy
@@ -106,9 +106,9 @@ public:
 
              TopFlag iTop,
 
-             const OArgument &iArg0 = OArgument(),
-             const OArgument &iArg1 = OArgument(),
-             const OArgument &iArg2 = OArgument() )
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument() )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
@@ -227,9 +227,9 @@ private:
                const std::string &iName,
                ErrorHandler::Policy iParentPolicy,
 
-               const OArgument &iArg0,
-               const OArgument &iArg1,
-               const OArgument &iARg2 );
+               const Argument &iArg0,
+               const Argument &iArg1,
+               const Argument &iARg2 );
 
 protected:
     AbcA::ObjectWriterPtr m_object;
@@ -250,9 +250,9 @@ GetObjectWriterPtr( OObject& iPrp )
 template <class OBJECT_PTR>
 inline OObject::OObject( OBJECT_PTR iParentObject,
                          const std::string &iName,
-                         const OArgument &iArg0,
-                         const OArgument &iArg1,
-                         const OArgument &iArg2 )
+                         const Argument &iArg0,
+                         const Argument &iArg1,
+                         const Argument &iArg2 )
 {
     init( GetObjectWriterPtr( iParentObject ),
           iName,

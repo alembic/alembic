@@ -39,7 +39,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/IArgument.h>
+#include <Alembic/Abc/Argument.h>
 
 namespace Alembic {
 namespace Abc {
@@ -75,8 +75,8 @@ public:
     IObject( OBJECT_PTR iParentObject,
              const std::string &iName,
 
-             const IArgument &iArg0 = IArgument(),
-             const IArgument &iArg1 = IArgument() );
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument() );
 
     //! This attaches an IObject wrapper around an existing
     //! ObjectReaderPtr, with an optional error handling policy.
@@ -84,8 +84,8 @@ public:
     IObject( OBJECT_PTR iPtr,
              WrapExistingFlag iFlag,
 
-             const IArgument &iArg0 = IArgument(),
-             const IArgument &iArg1 = IArgument() )
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument() )
       : m_object( GetObjectReaderPtr( iPtr ) )
     {
         // Set the error handling policy
@@ -99,8 +99,8 @@ public:
     IObject( ARCHIVE_PTR iPtr,
              TopFlag iFlag,
 
-             const IArgument &iArg0 = IArgument(),
-             const IArgument &iArg1 = IArgument() )
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument() )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
@@ -225,8 +225,8 @@ private:
     void init( AbcA::ObjectReaderPtr iParentObject,
                const std::string &iName,
                ErrorHandler::Policy iParentPolicy,
-               const IArgument &iArg0,
-               const IArgument &iArg1 );
+               const Argument &iArg0,
+               const Argument &iArg1 );
 
 public:
     AbcA::ObjectReaderPtr m_object;
@@ -244,8 +244,8 @@ GetObjectReaderPtr( IObject& iPrp ) { return iPrp.getPtr(); }
 template <class OBJECT_PTR>
 inline IObject::IObject( OBJECT_PTR iParentObject,
                          const std::string &iName,
-                         const IArgument &iArg0,
-                         const IArgument &iArg1 )
+                         const Argument &iArg0,
+                         const Argument &iArg1 )
 {
     init( GetObjectReaderPtr( iParentObject ),
           iName,

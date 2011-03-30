@@ -76,8 +76,8 @@ public:
     IXformSchema( CPROP_PTR iParentObject,
                      const std::string &iName,
 
-                     const Abc::IArgument &iArg0 = Abc::IArgument(),
-                     const Abc::IArgument &iArg1 = Abc::IArgument() )
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<XformSchemaInfo>( iParentObject, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -87,8 +87,8 @@ public:
     //! schema name used.
     template <class CPROP_PTR>
     explicit IXformSchema( CPROP_PTR iParentObject,
-                              const Abc::IArgument &iArg0 = Abc::IArgument(),
-                              const Abc::IArgument &iArg1 = Abc::IArgument() )
+                              const Abc::Argument &iArg0 = Abc::Argument(),
+                              const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<XformSchemaInfo>( iParentObject, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -260,8 +260,8 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( IXformSchema::valid() );
 
 protected:
-    void init( const Abc::IArgument &iArg0,
-               const Abc::IArgument &iArg1 );
+    void init( const Abc::Argument &iArg0,
+               const Abc::Argument &iArg1 );
 
     Abc::IDoubleArrayProperty m_anim;
     Abc::IBoolProperty m_inherits;

@@ -67,12 +67,12 @@ MeshTopologyVariance IPolyMeshSchema::getTopologyVariance()
 }
 
 //-*****************************************************************************
-void IPolyMeshSchema::init( const Abc::IArgument &iArg0,
-                            const Abc::IArgument &iArg1 )
+void IPolyMeshSchema::init( const Abc::Argument &iArg0,
+                            const Abc::Argument &iArg1 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshTrait::init()" );
 
-    Abc::IArguments args;
+    Abc::Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
 

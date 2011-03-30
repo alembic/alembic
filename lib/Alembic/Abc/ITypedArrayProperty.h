@@ -111,16 +111,16 @@ public:
     ITypedArrayProperty( COMPOUND_PTR iParent,
                          const std::string &iName,
 
-                         const IArgument &iArg0 = IArgument(),
-                         const IArgument &iArg1 = IArgument() );
+                         const Argument &iArg0 = Argument(),
+                         const Argument &iArg1 = Argument() );
 
     //! Explicitly wrap an existing property
     //! It will check the data type and also verify the schema,
     //! if requested.
     ITypedArrayProperty( AbcA::ArrayPropertyReaderPtr iProp,
                          WrapExistingFlag iWrapFlag,
-                         const IArgument &iArg0 = IArgument(),
-                         const IArgument &iArg1 = IArgument() );
+                         const Argument &iArg0 = Argument(),
+                         const Argument &iArg1 = Argument() );
 
 
     //-*************************************************************************
@@ -158,10 +158,10 @@ ITypedArrayProperty<TRAITS>::ITypedArrayProperty
 (
     COMPOUND_PTR iParent,
     const std::string &iName,
-    const IArgument &iArg0,
-    const IArgument &iArg1 )
+    const Argument &iArg0,
+    const Argument &iArg1 )
 {
-    IArguments args( GetErrorHandlerPolicy( iParent ) );
+    Arguments args( GetErrorHandlerPolicy( iParent ) );
     iArg0.setInto( args );
     iArg1.setInto( args );
 
@@ -202,8 +202,8 @@ template <class TRAITS>
 ITypedArrayProperty<TRAITS>::ITypedArrayProperty(
     AbcA::ArrayPropertyReaderPtr iProperty,
     WrapExistingFlag iFlag,
-    const IArgument &iArg0,
-    const IArgument &iArg1 )
+    const Argument &iArg0,
+    const Argument &iArg1 )
   : IArrayProperty( iProperty,
                     iFlag,
                     GetErrorHandlerPolicy( iProperty, iArg0, iArg1 ) )

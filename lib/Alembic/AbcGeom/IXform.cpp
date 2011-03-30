@@ -40,8 +40,8 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-void IXformSchema::init( const Abc::IArgument &iArg0,
-                         const Abc::IArgument &iArg1 )
+void IXformSchema::init( const Abc::Argument &iArg0,
+                         const Abc::Argument &iArg1 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::init()" );
 

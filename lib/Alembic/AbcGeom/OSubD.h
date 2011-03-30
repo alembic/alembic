@@ -295,9 +295,9 @@ public:
     OSubDSchema( CPROP_PTR iParentObject,
                      const std::string &iName,
 
-                     const Abc::OArgument &iArg0 = Abc::OArgument(),
-                     const Abc::OArgument &iArg1 = Abc::OArgument(),
-                     const Abc::OArgument &iArg2 = Abc::OArgument() )
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument(),
+                     const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<SubDSchemaInfo>( iParentObject, iName,
                                    iArg0, iArg1, iArg2 )
     {
@@ -308,9 +308,9 @@ public:
 
     template <class CPROP_PTR>
     explicit OSubDSchema( CPROP_PTR iParentObject,
-                          const Abc::OArgument &iArg0 = Abc::OArgument(),
-                          const Abc::OArgument &iArg1 = Abc::OArgument(),
-                          const Abc::OArgument &iArg2 = Abc::OArgument() )
+                          const Abc::Argument &iArg0 = Abc::Argument(),
+                          const Abc::Argument &iArg1 = Abc::Argument(),
+                          const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<SubDSchemaInfo>( iParentObject,
                                    iArg0, iArg1, iArg2 )
     {

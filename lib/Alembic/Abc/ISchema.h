@@ -119,8 +119,8 @@ public:
     ISchema( CPROP_PTR iParentObject,
              const std::string &iName,
 
-             const IArgument &iArg0 = IArgument(),
-             const IArgument &iArg1 = IArgument() )
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument() )
     {
         this_type::init( iParentObject, iName, iArg0, iArg1 );
     }
@@ -130,8 +130,8 @@ public:
     template <class CPROP_PTR>
     explicit ISchema( CPROP_PTR iParentObject,
 
-                      const IArgument &iArg0 = IArgument(),
-                      const IArgument &iArg1 = IArgument() )
+                      const Argument &iArg0 = Argument(),
+                      const Argument &iArg1 = Argument() )
     {
         this_type::init( iParentObject,
                          INFO::defaultName(),
@@ -144,8 +144,8 @@ public:
     template<class CPROP_PTR>
     ISchema( CPROP_PTR iProperty,
              WrapExistingFlag iFlag,
-             const IArgument &iArg0 = IArgument(),
-             const IArgument &iArg1 = IArgument() );
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument() );
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -154,8 +154,8 @@ private:
     template <class CPROP_PTR>
     void init( CPROP_PTR iParentObject,
                const std::string &iName,
-               const IArgument &iArg0,
-               const IArgument &iArg1 );
+               const Argument &iArg0,
+               const Argument &iArg1 );
 };
 
 //-*****************************************************************************
@@ -165,10 +165,10 @@ template <class INFO>
 template <class CPROP_PTR>
 void ISchema<INFO>::init( CPROP_PTR iParent,
                             const std::string &iName,
-                            const IArgument &iArg0,
-                            const IArgument &iArg1 )
+                            const Argument &iArg0,
+                            const Argument &iArg1 )
 {
-    IArguments args;
+    Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
 
@@ -208,8 +208,8 @@ template<class COMPOUND_PTR>
 inline ISchema<INFO>::ISchema(
     COMPOUND_PTR iProperty,
     WrapExistingFlag iFlag,
-    const IArgument &iArg0,
-    const IArgument &iArg1 )
+    const Argument &iArg0,
+    const Argument &iArg1 )
   : ICompoundProperty( iProperty,
                        iFlag,
                        GetErrorHandlerPolicy( iProperty,

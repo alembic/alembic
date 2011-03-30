@@ -99,11 +99,11 @@ void OScalarProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
                             const AbcA::DataType &iDataType,
 
                             ErrorHandler::Policy iParentPolicy,
-                            const OArgument &iArg0,
-                            const OArgument &iArg1,
-                            const OArgument &iArg2 )
+                            const Argument &iArg0,
+                            const Argument &iArg1,
+                            const Argument &iArg2 )
 {
-    OArguments args( iParentPolicy );
+    Arguments args( iParentPolicy );
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );

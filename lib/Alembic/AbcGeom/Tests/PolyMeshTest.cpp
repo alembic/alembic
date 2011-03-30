@@ -80,6 +80,7 @@
 //-*****************************************************************************
 //-*****************************************************************************
 
+using namespace std;
 using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 
 //-*****************************************************************************
@@ -150,7 +151,9 @@ void Example1_MeshIn()
     std::cout << "Reading: " << archive.getName() << std::endl;
 
     IPolyMesh meshyObj( IObject( archive, kTop ), "meshy" );
+    std::cout << "getting schema\n";
     IPolyMeshSchema &mesh = meshyObj.getSchema();
+    std::cout << "done getting schema";
     IN3fGeomParam N = mesh.getNormals();
     IV2fGeomParam uv = mesh.getUVs();
 
@@ -294,7 +297,7 @@ int main( int argc, char *argv[] )
     // Mesh out
     Example1_MeshOut();
     Example1_MeshIn();
-
+    
     //Time_Sampled_Mesh_Test0();
     return 0;
 }

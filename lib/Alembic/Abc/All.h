@@ -42,7 +42,7 @@
 #include <Alembic/Abc/Foundation.h>
 
 #include <Alembic/Abc/IArchive.h>
-#include <Alembic/Abc/IArgument.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/IArrayProperty.h>
 #include <Alembic/Abc/IBaseProperty.h>
 #include <Alembic/Abc/ICompoundProperty.h>
@@ -55,7 +55,7 @@
 #include <Alembic/Abc/ITypedScalarProperty.h>
 
 #include <Alembic/Abc/OArchive.h>
-#include <Alembic/Abc/OArgument.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/OArrayProperty.h>
 #include <Alembic/Abc/OBaseProperty.h>
 #include <Alembic/Abc/OCompoundProperty.h>

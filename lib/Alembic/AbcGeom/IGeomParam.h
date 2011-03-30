@@ -123,14 +123,14 @@ public:
     template <class CPROP>
     ITypedGeomParam( CPROP iParent,
                      const std::string &iName,
-                     const Abc::IArgument &iArg0 = Abc::IArgument(),
-                     const Abc::IArgument &iArg1 = Abc::IArgument() );
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument() );
 
     template <class PROP>
     ITypedGeomParam( PROP iThis,
                      WrapExistingFlag iWrapFlag,
-                     const Abc::IArgument &iArg0 = Abc::IArgument(),
-                     const Abc::IArgument &iArg1 = Abc::IArgument() );
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument() );
 
     void getIndexed( sample_type &oSamp,
                      const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
@@ -222,10 +222,10 @@ template <class TRAITS>
 template <class CPROP>
 ITypedGeomParam<TRAITS>::ITypedGeomParam( CPROP iParent,
                                           const std::string &iName,
-                                          const Abc::IArgument &iArg0,
-                                          const Abc::IArgument &iArg1 )
+                                          const Abc::Argument &iArg0,
+                                          const Abc::Argument &iArg1 )
 {
-    IArguments args( GetErrorHandlerPolicy( iParent ) );
+    Arguments args( GetErrorHandlerPolicy( iParent ) );
     iArg0.setInto( args );
     iArg1.setInto( args );
 
@@ -274,10 +274,10 @@ template <class TRAITS>
 template <class PROP>
 ITypedGeomParam<TRAITS>::ITypedGeomParam( PROP iThis,
                                           WrapExistingFlag iWrapFlag,
-                                          const Abc::IArgument &iArg0,
-                                          const Abc::IArgument &iArg1 )
+                                          const Abc::Argument &iArg0,
+                                          const Abc::Argument &iArg1 )
 {
-    IArguments args( GetErrorHandlerPolicy( iThis ) );
+    Arguments args( GetErrorHandlerPolicy( iThis ) );
     iArg0.setInto( args );
     iArg1.setInto( args );
 

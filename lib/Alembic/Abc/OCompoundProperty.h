@@ -38,7 +38,7 @@
 #define _Alembic_Abc_OCompoundProperty_h_
 
 #include <Alembic/Abc/Foundation.h>
-#include <Alembic/Abc/OArgument.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/OBaseProperty.h>
 
@@ -73,8 +73,8 @@ public:
     OCompoundProperty( CPROP_PTR iParentObject,
                        const std::string &iName,
 
-                       const OArgument &iArg0 = OArgument(),
-                       const OArgument &iArg1 = OArgument() );
+                       const Argument &iArg0 = Argument(),
+                       const Argument &iArg1 = Argument() );
 
     //! This attaches an OCompoundProperty wrapper around an existing
     //! CompoundPropertyWriterPtr, with an optional error handling policy.
@@ -82,8 +82,8 @@ public:
     OCompoundProperty(
         CPROP_PTR iThisObject,
         WrapExistingFlag iWrapFlag,
-        const OArgument &iArg0 = OArgument(),
-        const OArgument &iArg1 = OArgument() );
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
 
     //! This attaches an OCompoundProperty wrapper around the top
     //! properties of an OObject.
@@ -91,8 +91,8 @@ public:
     OCompoundProperty(
         OBJECT_PTR iObject,
         TopFlag iTopFlag,
-        const OArgument &iArg0 = OArgument(),
-        const OArgument &iArg1 = OArgument() );
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -145,8 +145,8 @@ private:
 
                ErrorHandler::Policy iParentPolicy,
 
-               const OArgument &iArg0,
-               const OArgument &iArg1 );
+               const Argument &iArg0,
+               const Argument &iArg1 );
 };
 
 //-*****************************************************************************
@@ -162,8 +162,8 @@ GetCompoundPropertyWriterPtr
 template <class CPROP_PTR>
 inline OCompoundProperty::OCompoundProperty( CPROP_PTR iParentProp,
                                              const std::string &iName,
-                                             const OArgument &iArg0,
-                                             const OArgument &iArg1 )
+                                             const Argument &iArg0,
+                                             const Argument &iArg1 )
 {
     init( GetCompoundPropertyWriterPtr( iParentProp ),
           iName,
@@ -176,8 +176,8 @@ inline OCompoundProperty::OCompoundProperty( CPROP_PTR iParentProp,
 template <class CPROP_PTR>
 inline OCompoundProperty::OCompoundProperty( CPROP_PTR iThisObject,
                                              WrapExistingFlag iWrap,
-                                             const OArgument &iArg0,
-                                             const OArgument &iArg1 )
+                                             const Argument &iArg0,
+                                             const Argument &iArg1 )
   : OBasePropertyT<AbcA::CompoundPropertyWriterPtr>(
       GetCompoundPropertyWriterPtr( iThisObject ),
       iWrap,
@@ -190,8 +190,8 @@ inline OCompoundProperty::OCompoundProperty( CPROP_PTR iThisObject,
 template <class OBJECT_PTR>
 inline OCompoundProperty::OCompoundProperty( OBJECT_PTR iThisObject,
                                              TopFlag iTop,
-                                             const OArgument &iArg0,
-                                             const OArgument &iArg1 )
+                                             const Argument &iArg0,
+                                             const Argument &iArg1 )
 {
     getErrorHandler().setPolicy(
         GetErrorHandlerPolicy( iThisObject, iArg0, iArg1 ) );

@@ -158,9 +158,9 @@ public:
     OSchema( CPROP_PTR iParentObject,
              const std::string &iName,
 
-             const OArgument &iArg0 = OArgument(),
-             const OArgument &iArg1 = OArgument(),
-             const OArgument &iArg2 = OArgument() )
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument() )
     {
         this_type::init( iParentObject, iName, iArg0, iArg1, iArg2 );
     }
@@ -170,9 +170,9 @@ public:
     template <class CPROP_PTR>
     explicit OSchema( CPROP_PTR iParentObject,
 
-                      const OArgument &iArg0 = OArgument(),
-                      const OArgument &iArg1 = OArgument(),
-                      const OArgument &iArg2 = OArgument() )
+                      const Argument &iArg0 = Argument(),
+                      const Argument &iArg1 = Argument(),
+                      const Argument &iArg2 = Argument() )
     {
         this_type::init( iParentObject,
                          INFO::defaultName(),
@@ -185,9 +185,9 @@ public:
     template<class CPROP_PTR>
     OSchema( CPROP_PTR iProperty,
              WrapExistingFlag iFlag,
-             const OArgument &iArg0 = OArgument(),
-             const OArgument &iArg1 = OArgument(),
-             const OArgument &iArg2 = OArgument() );
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument() );
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -196,9 +196,9 @@ private:
     template <class CPROP_PTR>
     void init( CPROP_PTR iParentObject,
                const std::string &iName,
-               const OArgument &iArg0,
-               const OArgument &iArg1,
-               const OArgument &iArg2 );
+               const Argument &iArg0,
+               const Argument &iArg1,
+               const Argument &iArg2 );
 };
 
 //-*****************************************************************************
@@ -208,11 +208,11 @@ template <class INFO>
 template <class CPROP_PTR>
 void OSchema<INFO>::init( CPROP_PTR iParent,
                             const std::string &iName,
-                            const OArgument &iArg0,
-                            const OArgument &iArg1,
-                            const OArgument &iArg2 )
+                            const Argument &iArg0,
+                            const Argument &iArg1,
+                            const Argument &iArg2 )
 {
-    OArguments args;
+    Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
@@ -249,9 +249,9 @@ template<class COMPOUND_PTR>
 inline OSchema<INFO>::OSchema(
     COMPOUND_PTR iProperty,
     WrapExistingFlag iFlag,
-    const OArgument &iArg0,
-    const OArgument &iArg1,
-    const OArgument &iArg2 )
+    const Argument &iArg0,
+    const Argument &iArg1,
+    const Argument &iArg2 )
   : OCompoundProperty( iProperty,
                        iFlag,
                        GetErrorHandlerPolicy( iProperty,

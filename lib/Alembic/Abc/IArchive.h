@@ -39,7 +39,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/IArgument.h>
+#include <Alembic/Abc/Argument.h>
 
 namespace Alembic {
 namespace Abc {
@@ -76,13 +76,10 @@ public:
 
         //! The file name.
         const std::string &iFileName,
-
-        //! Could be the cache or the error handling policy
-        const IArgument &iArg0 = IArgument(),
-
-        //! Could be the cache or the error handling policy
-        const IArgument &iArg1 = IArgument() );
-
+    
+        ErrorHandler::Policy iPolicy = ErrorHandler::Policy(),
+        AbcA::ReadArraySampleCachePtr iCachePtr = AbcA::ReadArraySampleCachePtr());
+    
     //! This attaches an IArchive wrapper around an existing
     //! ArchiveReaderPtr, with an optional error handling policy.
     IArchive(
@@ -173,30 +170,25 @@ GetArchiveReaderPtr( IArchive& iPrp ) { return iPrp.getPtr(); }
 //-*****************************************************************************
 template <class ARCHIVE_CTOR>
 IArchive::IArchive( ARCHIVE_CTOR iCtor,
-                    const std::string &iFileName,
-                    const IArgument &iArg0,
-                    const IArgument &iArg1 )
+                     const std::string &iFileName,
+                     ErrorHandler::Policy iPolicy,
+                     AbcA::ReadArraySampleCachePtr iCachePtr )
 {
-    // Create arguments
-    IArguments args( ErrorHandler::kThrowPolicy );
-    iArg0.setInto( args );
-    iArg1.setInto( args );
+     // Set the error handling policy.
+     getErrorHandler().setPolicy( iPolicy );
 
-    // Set the error handling policy.
-    getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
+     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
 
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
+     if ( iCachePtr )
+     {
+         m_archive = iCtor( iFileName, iCachePtr );
+     }
+     else
+     {
+         m_archive = iCtor( iFileName );
+     }
 
-    if ( args.getCacheWasSet() )
-    {
-        m_archive = iCtor( iFileName, args.getReadArraySampleCachePtr() );
-    }
-    else
-    {
-        m_archive = iCtor( iFileName );
-    }
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 } // End namespace Abc
