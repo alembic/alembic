@@ -52,12 +52,13 @@ namespace AbcGeom {
 
 //-*****************************************************************************
 XformSample::XformSample()
-  : m_setWithOpStack( 0 )
-  , m_inherits( true )
-  , m_hasBeenRead( false )
-  , m_opIndex( 0 )
-  , m_id( 0 )
 {
+    m_setWithOpStack = 0;
+    m_inherits = true;
+    m_id = 0;
+    m_opIndex = 0;
+    m_hasBeenRead = false;
+
     m_childBounds.makeEmpty();
 }
 

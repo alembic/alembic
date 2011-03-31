@@ -39,11 +39,10 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
+#include <Alembic/AbcGeom/XformOp.h>
+
 namespace Alembic {
 namespace AbcGeom {
-
-// forwards
-class XformOp;
 
 //-*****************************************************************************
 class XformSample

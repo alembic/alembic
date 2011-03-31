@@ -48,7 +48,6 @@ OSimpleXformSchema::ODefaultedDoubleProperty::set(
     const Abc::OSampleSelector &iSS,
     const std::vector<chrono_t> &iTimes )
 {
-    chrono_t t = iSS.getTime();
     if ( m_property )
     {
         m_property.set( iVal, iSS );
