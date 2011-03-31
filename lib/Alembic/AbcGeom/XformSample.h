@@ -39,8 +39,6 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
-#include <boost/uuid/uuid.hpp>
-
 namespace Alembic {
 namespace AbcGeom {
 
@@ -100,11 +98,13 @@ public:
     void setMatrix( const Abc::M44d &iMatrix );
     Abc::M44d getMatrix() const;
 
+    void reset();
+
 private:
     friend class OXformSchema;
     friend class IXformSchema;
     void setHasBeenRead();
-    const boost::uuids::uuid &getID() const;
+    const std::size_t getID() const { return m_id; }
     const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
     void clear();
 
@@ -112,7 +112,9 @@ private:
 private:
     // 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
     int m_setWithOpStack;
-    boost::uuids::uuid m_id;
+
+    // set to the address of the OXformSchema's 'this' member.
+    std::size_t m_id;
 
     // This will be populated by the addOp() methods or setFoo() methods
     // in the case of the sample being used to write data, and by the

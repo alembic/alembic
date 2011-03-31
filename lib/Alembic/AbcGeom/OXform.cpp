@@ -99,7 +99,6 @@ void OXformSchema::set( XformSample &ioSamp,
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
-    ABCA_ASSERT( !ioSamp.getID().is_nil(), "Sample has been reset!" );
 
     if ( ioSamp.m_childBounds.hasVolume() )
     { m_childBounds.set( ioSamp.getChildBounds(), iSS ); }
@@ -112,6 +111,8 @@ void OXformSchema::set( XformSample &ioSamp,
         // won't change the topology of the sample, but instead will merely
         // update values.
         ioSamp.setHasBeenRead();
+
+        ioSamp.m_id = reinterpret_cast<std::size_t>( this );
 
         m_sampID = ioSamp.getID();
 
@@ -154,6 +155,8 @@ void OXformSchema::set( XformSample &ioSamp,
     }
     else
     {
+        ABCA_ASSERT( ioSamp.getID() != 0, "Sample has been reset!" );
+
         ABCA_ASSERT( m_sampID == ioSamp.getID(), "Invalid sample ID!" );
 
         m_ops.setFromPrevious( iSS );
@@ -166,12 +169,6 @@ void OXformSchema::set( XformSample &ioSamp,
             for ( size_t j = 0 ; j < op.getNumChannels() ; ++j )
             {
                 size_t idx = prevIdx + j;
-
-                /*
-                std::cout << "setting " << idx << "th prop, "
-                          << m_props[idx].getName() << ", with "
-                          << op.getChannelValue( j ) << std::endl;
-                */
 
                 m_props[idx].set( op.getChannelValue( j ), iSS,
                                     m_numSetSamples );
@@ -225,8 +222,7 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
     m_ops = Abc::OUcharArrayProperty( this->getPtr(), ".ops",
                                       m_timeSamplingType );
 
-    boost::uuids::nil_generator ng;
-    m_sampID = ng();
+    m_sampID = 0;
 
     m_numSetSamples = 0;
 

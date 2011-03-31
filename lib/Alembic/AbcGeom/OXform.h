@@ -42,9 +42,6 @@
 
 #include <Alembic/AbcGeom/XformSample.h>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-
 namespace Alembic {
 namespace AbcGeom {
 
@@ -153,7 +150,7 @@ public:
         m_timeSamplingType = AbcA::TimeSamplingType();
         m_inherits.reset();
         m_numSetSamples = 0;
-        m_sampID = m_nilGen();
+        m_sampID = 0;
         m_ops.reset();
         m_props.clear();
         m_props.resize( 0 );
@@ -173,7 +170,6 @@ public:
 
 private:
     void init( const AbcA::TimeSamplingType &iTst );
-    boost::uuids::nil_generator m_nilGen;
 
 protected:
     //-*************************************************************************
@@ -255,7 +251,7 @@ protected:
     Abc::OBoolProperty m_inherits;
 
     // ensure that our sample is kept pristine.
-    boost::uuids::uuid m_sampID;
+    std::size_t m_sampID;
 };
 
 //-*****************************************************************************

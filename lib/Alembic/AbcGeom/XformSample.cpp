@@ -37,8 +37,6 @@
 #include <Alembic/AbcGeom/XformSample.h>
 #include <Alembic/AbcGeom/XformOp.h>
 
-#include <boost/uuid/uuid_generators.hpp>
-
 #include <ImathMatrix.h>
 #include <ImathMatrixAlgo.h>
 #include <ImathQuat.h>
@@ -58,10 +56,9 @@ XformSample::XformSample()
   , m_inherits( true )
   , m_hasBeenRead( false )
   , m_opIndex( 0 )
+  , m_id( 0 )
 {
     m_childBounds.makeEmpty();
-    boost::uuids::random_generator gen;
-    m_id = gen();
 }
 
 //-*****************************************************************************
@@ -523,12 +520,16 @@ void XformSample::clear()
     m_hasBeenRead = false;
     m_ops.resize( 0 );
     m_setWithOpStack = 0;
+    m_opIndex = 0;
+    m_inherits = true;
+    m_childBounds.makeEmpty();
 }
 
 //-*****************************************************************************
-const boost::uuids::uuid &XformSample::getID() const
+void XformSample::reset()
 {
-    return m_id;
+    this->clear();
+    m_id = 0;
 }
 
 
