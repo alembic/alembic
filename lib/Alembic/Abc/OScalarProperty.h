@@ -39,7 +39,6 @@
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/Argument.h>
-#include <Alembic/Abc/OSampleSelector.h>
 #include <Alembic/Abc/OBaseProperty.h>
 #include <Alembic/Abc/OCompoundProperty.h>
 
@@ -69,7 +68,7 @@ public:
     //! to use as a parent, from which the error handler policy for
     //! inheritance is also derived.  The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to specify time sampling type.
+    //! MetaData, and to specify time sampling or time sampling index.
     template <class OBJECT_PTR>
     OScalarProperty( OBJECT_PTR iParentObject,
                      const std::string &iName,
@@ -120,12 +119,11 @@ public:
 
     //! Set a sample from the address of a datum.
     //! ...
-    void set( const void *iSample,
-              const OSampleSelector &iSS = OSampleSelector() );
+    void set( const void *iSample );
 
     //! Set a sample from the previous sample.
     //! ...
-    void setFromPrevious( const OSampleSelector &iSS );
+    void setFromPrevious( );
 
     //! Return the parent compound property, handily wrapped in a
     //! OCompoundProperty wrapper.

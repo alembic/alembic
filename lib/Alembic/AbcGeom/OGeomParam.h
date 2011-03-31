@@ -232,35 +232,34 @@ public:
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
 
-    void set( const sample_type &iSamp,
-              const OSampleSelector &iSS = OSampleSelector() )
+    void set( const sample_type &iSamp )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::set()" );
 
-        if ( iSS.getIndex() == 0 )
+        if ( iSamp.getNumSamples() == 0 )
         {
-            m_valProp.set( iSamp.getVals(), iSS );
-            if ( m_isIndexed ) { m_indices.set( iSamp.getIndices(), iSS ); }
+            m_valProp.set( iSamp.getVals() );
+            if ( m_isIndexed ) { m_indices.set( iSamp.getIndices() ); }
         }
         else
         {
-            SetPropUsePrevIfNull( m_valProp, iSamp.getVals(), iSS );
+            SetPropUsePrevIfNull( m_valProp, iSamp.getVals() );
             if ( m_isIndexed )
             {
-                SetPropUsePrevIfNull( m_indices, iSamp.getIndices(), iSS );
+                SetPropUsePrevIfNull( m_indices, iSamp.getIndices() );
             }
         }
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
 
-    void setFromPrevious( const OSampleSelector &iSS )
+    void setFromPrevious()
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::setFromPrevious()" );
 
-        m_valProp.setFromPrevious( iSS );
+        m_valProp.setFromPrevious();
 
-        if ( m_isIndexed ) { m_indices.setFromPrevious( iSS ); }
+        if ( m_isIndexed ) { m_indices.setFromPrevious(); }
 
         ALEMBIC_ABC_SAFE_CALL_END();
     }

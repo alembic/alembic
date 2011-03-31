@@ -60,7 +60,6 @@
 #include <Alembic/Abc/OBaseProperty.h>
 #include <Alembic/Abc/OCompoundProperty.h>
 #include <Alembic/Abc/OObject.h>
-#include <Alembic/Abc/OSampleSelector.h>
 #include <Alembic/Abc/OScalarProperty.h>
 #include <Alembic/Abc/OSchema.h>
 #include <Alembic/Abc/OSchemaObject.h>

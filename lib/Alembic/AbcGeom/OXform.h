@@ -82,7 +82,7 @@ public:
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        init( Abc::GetTimeSampling( iArg0, iArg1, iArg2 ) );
     }
 
     template <class CPROP_PTR>
@@ -128,22 +128,18 @@ public:
         const Abc::DoubleArraySample & iStatic );
 
     //! Set an animated sample.  setXform needs to be called first.
-    void set( const Abc::DoubleArraySample & iAnim,
-              const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+    void set( const Abc::DoubleArraySample & iAnim );
 
     //! Set the inherits transform hint
-    void setInherits(bool iInherits,
-                     const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+    void setInherits( bool iInherits );
 
     //! Set from previous sample. Will hold the animated channels.
-    void setFromPrevious( const Abc::OSampleSelector &iSS );
+    void setFromPrevious( );
 
     //! Normally, setting the child bounds is done through the Sample, but
     //! this Xform implementation is non-standard.
-    void setChildBounds( const Abc::Box3d &iBnds,
-                         const Abc::OSampleSelector &iSS =
-                         Abc::OSampleSelector() )
-    { m_childBounds.set( iBnds, iSS ); }
+    void setChildBounds( const Abc::Box3d &iBnds )
+    { m_childBounds.set( iBnds ); }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -185,7 +181,7 @@ protected:
 private:
     bool m_writtenOps;
     size_t m_numAnimated;
-    AbcA::TimeSamplingType m_time;
+    AbcA::TimeSamplingPtr m_time;
 };
 
 //-*****************************************************************************

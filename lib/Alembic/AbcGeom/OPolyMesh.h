@@ -208,12 +208,11 @@ public:
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
-    void set( const Sample &iSamp,
-              const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+    void set( const Sample &iSamp );
 
     //! Set from previous sample. Will apply to each of positions,
     //! indices, and counts.
-    void setFromPrevious( const Abc::OSampleSelector &iSS );
+    void setFromPrevious();
 
     Abc::OCompoundProperty getArbGeomParams();
 

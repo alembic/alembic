@@ -178,12 +178,11 @@ public:
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, ids and counts.
-    void set( const Sample &iSamp,
-              const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+    void set( const Sample &iSamp );
 
     //! Set from previous sample. Will apply to each of positions,
     //! ids, and counts.
-    void setFromPrevious( const Abc::OSampleSelector &iSS );
+    void setFromPrevious( );
 
     //! A container for arbitrary geom params (pseudo-properties settable and
     //! gettable as indexed or not).

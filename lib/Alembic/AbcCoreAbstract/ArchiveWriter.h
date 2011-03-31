@@ -121,11 +121,11 @@ public:
     //! Returns the TimeSampling at a given index.
     //! index 0 is automatically reserved for uniform time sampling with a start
     //! time of 0 and time per cycle of 1 (aka identity sampling)
-    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex ) = 0;
+    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex ) const = 0;
 
     //! Returns the total number of TimeSamplingPtrs in the Archive
     //! TimeSampling pool.
-    virtual uint32_t getNumTimeSampling() = 0;
+    virtual uint32_t getNumTimeSampling() const = 0;
 
 private:
     int8_t m_compressionHint;

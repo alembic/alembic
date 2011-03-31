@@ -68,7 +68,7 @@ public:
     //! to use as a parent, from which the error handler policy for
     //! inheritance is also derived.  The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to specify time sampling type.
+    //! MetaData, and to specify time sampling or time sampling index.
     template <class OBJECT_PTR>
     OArrayProperty( OBJECT_PTR iParentObject,
                     const std::string &iName,

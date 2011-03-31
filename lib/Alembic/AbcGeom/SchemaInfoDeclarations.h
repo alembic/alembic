@@ -103,14 +103,6 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Points_v1",
 #define ALEMBIC_ABCGEOM_POINTS_SCHEMA (PointsSchemaInfo::title())
 
 //-*****************************************************************************
-// SimpleXform
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_SimpleXform_v1",
-                                     ".xform",
-                                     SimpleXformSchemaInfo );
-
-#define ALEMBIC_ABCGEOM_SIMPLEXFORM_SCHEMA (SimpleXformSchemaInfo::title())
-
-//-*****************************************************************************
 // Xform
 ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v1",
                                      ".xform",

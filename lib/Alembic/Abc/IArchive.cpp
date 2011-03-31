@@ -89,6 +89,32 @@ AbcA::ReadArraySampleCachePtr IArchive::getReadArraySampleCachePtr()
 }
 
 //-*****************************************************************************
+AbcA::TimeSamplingPtr IArchive::getTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive:::getTimeSampling" );
+
+    return m_archive->getTimeSampling( iIndex );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw, so here is a default behavior.
+    return AbcA::TimeSamplingPtr();
+}
+
+//-*****************************************************************************
+uint32_t IArchive::getNumTimeSampling( )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive:::getNumTimeSampling" );
+
+    return m_archive->getNumTimeSampling( );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw, so here is a default behavior.
+    return 0;
+}
+
+//-*****************************************************************************
 void IArchive::setReadArraySampleCachePtr( AbcA::ReadArraySampleCachePtr iPtr )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::setReadArraySampleCachePtr" );

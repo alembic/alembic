@@ -75,10 +75,6 @@ SET( H_FILES
   OPolyMesh.h
   IPolyMesh.h
 
-  SimpleXformSample.h
-  OSimpleXform.h
-  ISimpleXform.h
-
   XformOp.h
   XformSample.h
   IXform.h

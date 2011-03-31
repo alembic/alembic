@@ -76,38 +76,34 @@ enum XformOperationType
 //! This utility function sets an array prorperty sample using "set" if
 //! the sample is non-null, otherwise calls setFromPrevious.
 template <class PROP, class SAMP>
-inline void SetPropUsePrevIfNull( PROP iProp, SAMP iSamp,
-                                  const Abc::OSampleSelector &iSS )
+inline void SetPropUsePrevIfNull( PROP iProp, SAMP iSamp )
 {
-    if ( iSamp ) { iProp.set( iSamp, iSS ); }
-    else { iProp.setFromPrevious( iSS ); }
+    if ( iSamp ) { iProp.set( iSamp ); }
+    else { iProp.setFromPrevious( ; }
 }
 
 template <>
 inline void SetPropUsePrevIfNull<Abc::OStringProperty, std::string>(
-    Abc::OStringProperty iProp, std::string iSamp,
-    const Abc::OSampleSelector &iSS )
+    Abc::OStringProperty iProp, std::string iSamp )
 {
-    if ( iSamp != "" ) { iProp.set( iSamp, iSS ); }
-    else { iProp.setFromPrevious( iSS ); }
+    if ( iSamp != "" ) { iProp.set( iSamp ); }
+    else { iProp.setFromPrevious(); }
 }
 
 template <>
 inline void SetPropUsePrevIfNull<Abc::OWstringProperty, Alembic::Util::wstring>(
-    Abc::OWstringProperty iProp, Alembic::Util::wstring iSamp,
-    const Abc::OSampleSelector &iSS )
+    Abc::OWstringProperty iProp, Alembic::Util::wstring iSamp )
 {
-    if ( iSamp != L"" ) { iProp.set( iSamp, iSS ); }
-    else { iProp.setFromPrevious( iSS ); }
+    if ( iSamp != L"" ) { iProp.set( iSamp ); }
+    else { iProp.setFromPrevious(); }
 }
 
 template <>
 inline void SetPropUsePrevIfNull<Abc::OBox3dProperty, Abc::Box3d>(
-    Abc::OBox3dProperty iProp, Abc::Box3d iSamp,
-    const Abc::OSampleSelector &iSS )
+    Abc::OBox3dProperty iProp, Abc::Box3d iSamp )
 {
-    if ( iSamp.hasVolume() ) { iProp.set( iSamp, iSS ); }
-    else { iProp.setFromPrevious( iSS ); }
+    if ( iSamp.hasVolume() ) { iProp.set( iSamp ); }
+    else { iProp.setFromPrevious(); }
 }
 
 //-*****************************************************************************

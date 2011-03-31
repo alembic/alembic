@@ -90,8 +90,7 @@ void OXformSchema::setXform( const XformOpVec & iOp,
 }
 
 //-*****************************************************************************
-void OXformSchema::set( const Abc::DoubleArraySample & iAnim,
-                        const Abc::OSampleSelector &iSS  )
+void OXformSchema::set( const Abc::DoubleArraySample & iAnim )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
@@ -106,48 +105,47 @@ void OXformSchema::set( const Abc::DoubleArraySample & iAnim,
 
     if ( iSS.getIndex() == 0 )
     {
-        m_anim.set( iAnim, iSS );
+        m_anim.set( iAnim );
     }
     else
     {
-        SetPropUsePrevIfNull( m_anim, iAnim, iSS );
+        SetPropUsePrevIfNull( m_anim, iAnim );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 //-*****************************************************************************
-void OXformSchema::setInherits( bool iInherits,
-    const Abc::OSampleSelector &iSS  )
+void OXformSchema::setInherits( bool iInherits )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setInherits()" );
 
     if (!m_inherits)
         m_inherits = Abc::OBoolProperty( *this, ".inherits", m_time );
 
-    m_inherits.set( iInherits, iSS );
+    m_inherits.set( iInherits );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 //-*****************************************************************************
-void OXformSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
+void OXformSchema::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious" );
 
     if (m_anim)
-        m_anim.setFromPrevious( iSS );
+        m_anim.setFromPrevious();
 
     if (m_inherits)
-        m_inherits.setFromPrevious( iSS );
+        m_inherits.setFromPrevious();
 
-    m_childBounds.setFromPrevious( iSS );
+    m_childBounds.setFromPrevious();
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 //-*****************************************************************************
-void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
+void OXformSchema::init( const AbcA::TimeSamplingPtr &iTst )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::init()" );
 

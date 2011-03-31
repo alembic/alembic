@@ -73,7 +73,7 @@ bool IScalarProperty::isConstant()
 }
 
 //-*****************************************************************************
-AbcA::TimeSampling IScalarProperty::getTimeSampling()
+AbcA::TimeSamplingPtr IScalarProperty::getTimeSampling()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IScalarProperty::getTimeSampling()" );
 
@@ -82,7 +82,7 @@ AbcA::TimeSampling IScalarProperty::getTimeSampling()
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, so return a default.
-    return AbcA::TimeSampling();
+    return AbcA::TimeSamplingPtr();
 }
 
 //-*****************************************************************************

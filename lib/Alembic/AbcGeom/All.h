@@ -50,10 +50,6 @@
 #include <Alembic/AbcGeom/OPolyMesh.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
 
-#include <Alembic/AbcGeom/SimpleXformSample.h>
-#include <Alembic/AbcGeom/OSimpleXform.h>
-#include <Alembic/AbcGeom/ISimpleXform.h>
-
 #include <Alembic/AbcGeom/OPoints.h>
 #include <Alembic/AbcGeom/IPoints.h>
 

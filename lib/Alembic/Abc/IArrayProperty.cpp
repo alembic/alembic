@@ -86,7 +86,7 @@ bool IArrayProperty::isScalarLike()
 }
 
 //-*****************************************************************************
-AbcA::TimeSampling IArrayProperty::getTimeSampling()
+AbcA::TimeSamplingPtr IArrayProperty::getTimeSampling()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getTimeSampling()" );
 
@@ -95,7 +95,7 @@ AbcA::TimeSampling IArrayProperty::getTimeSampling()
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, so return a default.
-    return AbcA::TimeSampling();
+    return AbcA::TimeSamplingPtr();
 }
 
 //-*****************************************************************************

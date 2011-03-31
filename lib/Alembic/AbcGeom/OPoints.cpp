@@ -41,53 +41,50 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-void OPointsSchema::set( const Sample &iSamp,
-                         const Abc::OSampleSelector &iSS  )
+void OPointsSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::set()" );
 
     // We could add sample integrity checking here.
-    if ( iSS.getIndex() == 0 )
+    if ( m_positions.getNumSamples() == 0 )
     {
         // First sample must be valid on all points.
         ABCA_ASSERT( iSamp.getPositions() &&
                      iSamp.getIds(),
                      "Sample 0 must have valid data for points and ids" );
-        m_positions.set( iSamp.getPositions(), iSS );
-        m_ids.set( iSamp.getIds(), iSS );
+        m_positions.set( iSamp.getPositions() );
+        m_ids.set( iSamp.getIds() );
 
-        m_childBounds.set( iSamp.getChildBounds(), iSS );
+        m_childBounds.set( iSamp.getChildBounds() );
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
             // OTypedScalarProperty::set() is not referentially transparent,
             // so we need a a placeholder variable.
             Abc::Box3d bnds(
-                ComputeBoundsFromPositions( iSamp.getPositions() )
-                           );
-            m_selfBounds.set( bnds, iSS );
+                ComputeBoundsFromPositions( iSamp.getPositions() ) );
+            m_selfBounds.set( bnds );
         }
-        else { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
+        else { m_selfBounds.set( iSamp.getSelfBounds() ); }
     }
     else
     {
-        SetPropUsePrevIfNull( m_positions, iSamp.getPositions(), iSS );
-        SetPropUsePrevIfNull( m_ids, iSamp.getIds(), iSS );
+        SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
+        SetPropUsePrevIfNull( m_ids, iSamp.getIds() );
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
-            m_selfBounds.set( iSamp.getSelfBounds(), iSS );
+            m_selfBounds.set( iSamp.getSelfBounds() );
         }
         else if ( iSamp.getPositions() )
         {
             Abc::Box3d bnds(
-                ComputeBoundsFromPositions( iSamp.getPositions() )
-                           );
-            m_selfBounds.set( bnds, iSS );
+                ComputeBoundsFromPositions( iSamp.getPositions() ) );
+            m_selfBounds.set( bnds );
         }
         else
         {
-            m_selfBounds.setFromPrevious( iSS );
+            m_selfBounds.setFromPrevious();
         }
     }
 
@@ -95,15 +92,15 @@ void OPointsSchema::set( const Sample &iSamp,
 }
 
 //-*****************************************************************************
-void OPointsSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
+void OPointsSchema::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::setFromPrevious" );
 
-    m_positions.setFromPrevious( iSS );
-    m_ids.setFromPrevious( iSS );
+    m_positions.setFromPrevious();
+    m_ids.setFromPrevious();
 
-    m_selfBounds.setFromPrevious( iSS );
-    m_childBounds.setFromPrevious( iSS );
+    m_selfBounds.setFromPrevious();
+    m_childBounds.setFromPrevious();
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -127,7 +124,7 @@ Abc::OCompoundProperty OPointsSchema::getArbGeomParams()
 }
 
 //-*****************************************************************************
-void OPointsSchema::init( const AbcA::TimeSamplingType &iTst )
+void OPointsSchema::init( const AbcA::TimeSamplingPtr &iTst )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::init()" );
 

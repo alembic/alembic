@@ -342,12 +342,11 @@ public:
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
-    void set( const Sample &iSamp,
-              const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+    void set( const Sample &iSamp );
 
     //! Set from previous sample. Will apply to each of positions,
     //! indices, and counts.
-    void setFromPrevious( const Abc::OSampleSelector &iSS );
+    void setFromPrevious( );
 
 
     Abc::OCompoundProperty getArbGeomParams();
@@ -369,11 +368,14 @@ public:
         m_creaseIndices.reset();
         m_creaseLengths.reset();
         m_creaseSharpnesses.reset();
+        m_numNullCreaseSamples = 0;
 
         m_cornerIndices.reset();
         m_cornerSharpnesses.reset();
+        m_numNullCornerSamples = 0;
 
         m_holes.reset();
+        m_numNullHoleSamples = 0;
 
         m_subdScheme.reset();
 
@@ -417,16 +419,16 @@ protected:
     Abc::OInt32ArrayProperty m_creaseIndices;
     Abc::OInt32ArrayProperty m_creaseLengths;
     Abc::OFloatArrayProperty m_creaseSharpnesses;
-    std::vector < Abc::OSampleSelector > m_nullCreaseSamples;
+    uint32_t m_numNullCreaseSamples;
 
     // Corners
     Abc::OInt32ArrayProperty m_cornerIndices;
     Abc::OFloatArrayProperty m_cornerSharpnesses;
-    std::vector < Abc::OSampleSelector > m_nullCornerSamples;
+    uint32_t m_numNullCornerSamples;
 
     // Holes
     Abc::OInt32ArrayProperty m_holes;
-    std::vector < Abc::OSampleSelector > m_nullHoleSamples;
+    uint32_t m_numNullHoleSamples;
 
     // subdivision scheme
     Abc::OStringProperty m_subdScheme;

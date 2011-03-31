@@ -141,9 +141,16 @@ public:
     //! ArchiveReaderPtr.
     AbcA::ArchiveReaderPtr getPtr() { return m_archive; }
 
-    //! Reset reeturns this function et to an empty, default
+    //! Reset returns this function et to an empty, default
     //! state.
     void reset() { m_archive.reset(); Base::reset(); }
+
+    //! Returns the TimeSampling at a given index.
+    AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex ) const;
+
+    //! Returns the total number of TimeSamplingPtrs in the Archive
+    //! TimeSampling pool.
+    uint32_t getNumTimeSampling() const;
 
     //! Valid returns whether this function set is
     //! valid.

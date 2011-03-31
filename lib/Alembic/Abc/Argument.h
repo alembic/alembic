@@ -53,15 +53,18 @@ class Arguments : public boost::static_visitor<>
 public:
     Arguments( ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
                 const AbcA::MetaData &iMetaData = AbcA::MetaData(),
-                const AbcA::TimeSamplingType &iTimeSamplingType =
-                AbcA::TimeSamplingType(),
+                const AbcA::TimeSamplingPtr &iTimeSampling =
+                AbcA::TimeSamplingPtr(),
+                uint32_t iTimeIndex = 0,
                 SchemaInterpMatching iMatch = kNoMatching )
       : m_errorHandlerPolicy( iPolicy ),
         m_metaData( iMetaData ),
-        m_timeSamplingType( iTimeSamplingType ),
+        m_timeSampling( iTimeSampling ),
+        m_timeSamplinIndex( iTimeIndex ),
         m_matching( iMatch ){}
 
-    void operator()( const int & ) {}
+    void operator()( const uint32_t & iTimeSamplingIndex)
+    { m_timeSamplingIndex = iTimeSamplingIndex; }
     void operator()( const ErrorHandler::Policy &iPolicy )
     { m_errorHandlerPolicy = iPolicy; }
     void operator()( const AbcA::MetaData &iMetaData )
@@ -74,8 +77,8 @@ public:
     { return m_errorHandlerPolicy; }
     const AbcA::MetaData &getMetaData() const
     { return m_metaData; }
-    const AbcA::TimeSamplingType &getTimeSamplingType() const
-    { return m_timeSamplingType; }
+    const AbcA::TimeSamplingPtr &getTimeSampling() const
+    { return m_timeSampling; }
 
     SchemaInterpMatching getSchemaInterpMatching() const
     { return m_matching; }
@@ -83,7 +86,8 @@ public:
 private:
     ErrorHandler::Policy m_errorHandlerPolicy;
     AbcA::MetaData m_metaData;
-    AbcA::TimeSamplingType m_timeSamplingType;
+    AbcA::TimeSamplingPtr m_timeSampling;
+    uint32_t m_timeSamplingIndex;
     SchemaInterpMatching m_matching;
 };
 
@@ -96,10 +100,11 @@ private:
 class Argument
 {
 public:
-    Argument() : m_variant( ( int )0 ) {}
+    Argument() : m_variant( ( uint32_t )0 ) {}
+    Argument( uint32_t iTsIndex) : m_variant( tsIndex ) {}
     Argument( ErrorHandler::Policy iPolicy ) : m_variant( iPolicy ) {}
     Argument( const AbcA::MetaData &iMetaData ) : m_variant( iMetaData ) {}
-    Argument( const AbcA::TimeSamplingType &iTst ) : m_variant( iTst ) {}
+    Argument( const AbcA::TimeSamplingPtr &iTsPtr ) : m_variant( iTsPtr ) {}
     Argument( SchemaInterpMatching iMatch ) : m_variant( iMatch ) {}
 
     void setInto( Arguments &iArgs ) const
@@ -108,9 +113,8 @@ public:
     }
 
 private:
-    typedef boost::variant<int,
+    typedef boost::variant<uint32_t,
                            ErrorHandler::Policy,
-                           AbcA::TimeSamplingType,
                            AbcA::MetaData,
                            SchemaInterpMatching> ArgVariant;
 
@@ -149,7 +153,7 @@ inline AbcA::MetaData GetMetaData
 }
 
 //-*****************************************************************************
-inline AbcA::TimeSamplingType GetTimeSamplingType
+inline AbcA::TimeSamplingPtr GetTimeSampling
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
   const Argument &iArg2 = Argument() )
@@ -158,7 +162,20 @@ inline AbcA::TimeSamplingType GetTimeSamplingType
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
-    return args.getTimeSamplingType();
+    return args.getTimeSampling();
+}
+
+//-*****************************************************************************
+inline uint32_t GetTimeSamplingIndex
+( const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument() )
+{
+    Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    iArg2.setInto( args );
+    return args.getTimeSamplingIndex();
 }
 
 //-*****************************************************************************

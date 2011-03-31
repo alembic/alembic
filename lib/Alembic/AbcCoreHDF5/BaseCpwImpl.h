@@ -74,13 +74,20 @@ private:
 
 public:
     virtual AbcA::ScalarPropertyWriterPtr
-    createScalarProperty( const AbcA::PropertyHeader & iHeader );
-    
+    createScalarProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData,
+        const AbcA::DataType & iDataType,
+        uint32_t iTimeSamplingIndex );
+
     virtual AbcA::ArrayPropertyWriterPtr
-    createArrayProperty( const AbcA::PropertyHeader & iHeader );
-    
+    createArrayProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData,
+        const AbcA::DataType & iDataType,
+        uint32_t iTimeSamplingIndex );
+
     virtual AbcA::CompoundPropertyWriterPtr
-    createCompoundProperty( const AbcA::PropertyHeader & iHeader );
+    createCompoundProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData );
 
 protected:
     // The object we belong to. For TopCpwImpls, this will be NULL

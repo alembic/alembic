@@ -237,8 +237,7 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
     }
 
     // Create property.
-    AbcA::PropertyHeader ohdr( iName, mdata );
-    m_property = parent->createCompoundProperty( ohdr );
+    m_property = parent->createCompoundProperty( iName, mdata );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
