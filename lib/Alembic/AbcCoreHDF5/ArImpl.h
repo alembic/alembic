@@ -69,7 +69,7 @@ public:
 
     virtual AbcA::ObjectReaderPtr getTop();
 
-    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex );
+    virtual AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
 
     virtual AbcA::ArchiveReaderPtr asArchivePtr();
 
@@ -86,7 +86,7 @@ public:
 
     virtual uint32_t getNumTimeSampling()
     {
-        return m_timeSampling.size();
+        return m_timeSamples.size();
     }
 
 private:

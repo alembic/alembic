@@ -159,7 +159,7 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
   AbcA::PropertyType iPropType
 )
   : m_parent( iParent )
-  , m_parentGroup( iParentGrp )
+  , m_parentGroup( iParentGroup )
   , m_fileDataType( -1 )
   , m_cleanFileDataType( false )
   , m_nativeDataType( -1 )
@@ -173,11 +173,12 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
     ABCA_ASSERT( m_parent, "Invalid parent" );
 
     // will assert if TimeSamplingPtr not found
-    TimeSamplingPtr ts = m_parent->getObject()->getArchive()->getTimeSampling(
-        iTimeSamplingIndex );
+    AbcA::TimeSamplingPtr ts =
+        m_parent->getObject()->getArchive()->getTimeSampling(
+            iTimeSamplingIndex );
 
-    m_header = PropertyHeaderPtr( new PropertyHeader( iName, iPropType,
-        iMetaData, iDataType, ts );
+    m_header = PropertyHeaderPtr( new AbcA::PropertyHeader( iName, iPropType,
+        iMetaData, iDataType, ts ) );
 
     ABCA_ASSERT( m_header, "Invalid property header" );
     ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
@@ -204,7 +205,7 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
     // write the time sampling index, if it isn't the intrinsic default value
     if (iTimeSamplingIndex > 0)
     {
-        std::name tsidName = m_header->getName() + ".tsid";
+        std::string tsidName = m_header->getName() + ".tsid";
         WriteScalar( m_parentGroup, tsidName, H5T_STD_U32LE, H5T_NATIVE_UINT32,
             &iTimeSamplingIndex );
     }
@@ -313,7 +314,7 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setSample
         }
         else
         {
-            m_firstIndex = m_nextSampleIndex;
+            m_firstChangeIndex = m_nextSampleIndex;
         }
 
         // Write this sample, which will update its internal
@@ -381,14 +382,14 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::~SimplePwImpl()
         // contains all of the logic regarding which information needs
         // to be written.
         WriteSampling( m_parentGroup, myName, m_nextSampleIndex,
-            m_firstChangedIndex, m_lastChangedIndex );
+            m_firstChangeIndex, m_lastChangeIndex );
 
         // Close the sampleIGroup if it was open
         if ( m_sampleIGroup >= 0 )
         {
             // this should never have been openened, if a change was never
             // detected.
-            ABCA_ASSERT( m_firstChangedIndex > 0, "Corrupt SimplePwImpl" );
+            ABCA_ASSERT( m_firstChangeIndex > 0, "Corrupt SimplePwImpl" );
             H5Gclose( m_sampleIGroup );
             m_sampleIGroup = -1;
         }

@@ -59,7 +59,10 @@ protected:
     //-*************************************************************************
     ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
              hid_t iParentGroup,
-             PropertyHeaderPtr iHeader );
+             const std::string & iName,
+             const AbcA::MetaData & iMetaData,
+             const AbcA::DataType & iDataType,
+             uint32_t iTimeSamplingIndex );
 
     virtual AbcA::ArrayPropertyWriterPtr asArrayPtr();
     

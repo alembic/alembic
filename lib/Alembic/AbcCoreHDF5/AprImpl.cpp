@@ -87,7 +87,7 @@ void AprImpl::readSample( hid_t iGroup,
     assert( iGroup >= 0 );
 
     // Check index integrity.
-    assert( iSampleIndex >= 0 && iSampleIndex < m_numUniqueSamples );
+    assert( iSampleIndex >= 0 && iSampleIndex <= m_lastChangeIndex );
 
     // Read the array sample, possibly from the cache.
     const AbcA::DataType &dataType = m_header->getDataType();

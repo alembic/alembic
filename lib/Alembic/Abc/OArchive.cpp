@@ -105,11 +105,11 @@ uint32_t OArchive::addTimeSampling( const AbcA::TimeSampling & iTs )
 }
 
 //-*****************************************************************************
-AbcA::TimeSamplingPtr OArchive::getTimeSampling( uint32_t )
+AbcA::TimeSamplingPtr OArchive::getTimeSampling( uint32_t iIndex )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArchive::getTimeSampling" );
 
-    return m_archive->getTimeSampling( );
+    return m_archive->getTimeSampling( iIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 

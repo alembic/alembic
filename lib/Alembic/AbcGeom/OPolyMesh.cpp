@@ -87,7 +87,7 @@ void OPolyMeshSchema::set( const Sample &iSamp )
                                        this->getTimeSampling() );
             }
 
-            m_uvs.set( iSamp.getUVs(), iSS );
+            m_uvs.set( iSamp.getUVs() );
         }
         if ( iSamp.getNormals().getVals() )
         {
@@ -158,21 +158,21 @@ void OPolyMeshSchema::setFromPrevious()
 }
 
 //-*****************************************************************************
-void OPolyMeshSchema::init( const AbcA::TimeSamplingPtr &iTst )
+void OPolyMeshSchema::init( uint32_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::init()" );
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTst );
+    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTsIdx );
 
-    m_indices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTst );
+    m_indices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTsIdx );
 
-    m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTst );
+    m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTsIdx );
 
-    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTst );
+    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTsIdx );
 
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTsIdx );
 
     // UVs and Normals are created on first call to set()
 

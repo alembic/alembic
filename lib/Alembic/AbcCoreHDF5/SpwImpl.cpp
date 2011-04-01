@@ -47,12 +47,21 @@ namespace ALEMBIC_VERSION_NS {
 //-*************************************************************************
 SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   hid_t iParentGroup,
-                  PropertyHeaderPtr iHeader )
+                  const std::string & iName,
+                  const AbcA::MetaData & iMetaData,
+                  const AbcA::DataType & iDataType,
+                  uint32_t iTimeSamplingIndex )
   : SimplePwImpl<AbcA::ScalarPropertyWriter,
                  SpwImpl,
                  const void *,
-                 ScalarSampleKey>( iParent, iParentGroup, iHeader )
-  , m_previousSample( iHeader->getDataType() )
+                 ScalarSampleKey>( iParent,
+                                   iParentGroup,
+                                   iName,
+                                   iMetaData,
+                                   iDataType,
+                                   iTimeSamplingIndex,
+                                   AbcA::kScalarProperty )
+  , m_previousSample( iDataType )
 {
     if ( m_header->getPropertyType() != AbcA::kScalarProperty )
     {

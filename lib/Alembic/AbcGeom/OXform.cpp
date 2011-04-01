@@ -101,9 +101,9 @@ void OXformSchema::set( const Abc::DoubleArraySample & iAnim )
     ABCA_ASSERT( m_numAnimated == animSize, "Sample doesn't have enough data.");
 
     if (!m_anim)
-        m_anim = Abc::ODoubleArrayProperty( *this, ".anim", m_time );
+        m_anim = Abc::ODoubleArrayProperty( *this, ".anim", m_tsidx );
 
-    if ( iSS.getIndex() == 0 )
+    if ( m_anim.getNumSamples() == 0 )
     {
         m_anim.set( iAnim );
     }
@@ -121,7 +121,7 @@ void OXformSchema::setInherits( bool iInherits )
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setInherits()" );
 
     if (!m_inherits)
-        m_inherits = Abc::OBoolProperty( *this, ".inherits", m_time );
+        m_inherits = Abc::OBoolProperty( *this, ".inherits", m_tsidx );
 
     m_inherits.set( iInherits );
 
@@ -145,15 +145,14 @@ void OXformSchema::setFromPrevious()
 }
 
 //-*****************************************************************************
-void OXformSchema::init( const AbcA::TimeSamplingPtr &iTst )
+void OXformSchema::init()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::init()" );
 
-    m_time = iTst;
     m_writtenOps = false;
     m_numAnimated = 0;
 
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", m_tsidx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

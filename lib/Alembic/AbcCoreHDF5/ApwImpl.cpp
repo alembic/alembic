@@ -58,7 +58,7 @@ ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                                           iMetaData,
                                           iDataType,
                                           iTimeSamplingIndex,
-                                          AbcA::kArrayProperty)
+                                          AbcA::kArrayProperty )
 {
     if ( m_header->getPropertyType() != AbcA::kArrayProperty )
     {

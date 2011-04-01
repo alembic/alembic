@@ -70,7 +70,7 @@ public:
     //! to use as a parent, from which the error handler policy for
     //! inheritance is also derived.  The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
+    //! MetaData, and to set TimeSampling.
     template <class CPROP_PTR>
     OXformSchema( CPROP_PTR iParentObject,
                      const std::string &iName,
@@ -80,9 +80,19 @@ public:
       : Abc::OSchema<XformSchemaInfo>( iParentObject, iName,
                                             iArg0, iArg1, iArg2 )
     {
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSampling( iArg0, iArg1, iArg2 ) );
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+        m_tsidx = Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            m_tsidx = iParentObject->getArchive()->addTimeSampling(*tsPtr);
+        }
+
+        init();
     }
 
     template <class CPROP_PTR>
@@ -93,9 +103,20 @@ public:
       : Abc::OSchema<XformSchemaInfo>( iParentObject,
                                             iArg0, iArg1, iArg2 )
     {
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+        m_tsidx = Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            m_tsidx = iParentObject->getArchive()->addTimeSampling(*tsPtr);
+        }
+
+        init();
     }
 
     //! Default copy constructor used.
@@ -107,8 +128,10 @@ public:
 
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    { return m_anim.getTimeSamplingType(); }
+    AbcA::TimeSamplingPtr getTimeSampling()
+    {
+        return getObject().getArchive().getTimeSampling(m_tsidx);
+    }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -155,8 +178,8 @@ public:
         m_inherits.reset();
         m_writtenOps = false;
         m_numAnimated = 0;
+        m_tsidx = 0;
         m_childBounds.reset();
-        m_time = AbcA::TimeSamplingType();
         Abc::OSchema<XformSchemaInfo>::reset();
     }
 
@@ -171,7 +194,7 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OXformSchema::valid() );
 
 protected:
-    void init( const AbcA::TimeSamplingType &iTst );
+    void init();
 
     Abc::ODoubleArrayProperty m_anim;
     Abc::OBoolProperty m_inherits;
@@ -181,7 +204,7 @@ protected:
 private:
     bool m_writtenOps;
     size_t m_numAnimated;
-    AbcA::TimeSamplingPtr m_time;
+    uint32_t m_tsidx;
 };
 
 //-*****************************************************************************

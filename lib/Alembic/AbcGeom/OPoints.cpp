@@ -124,19 +124,19 @@ Abc::OCompoundProperty OPointsSchema::getArbGeomParams()
 }
 
 //-*****************************************************************************
-void OPointsSchema::init( const AbcA::TimeSamplingPtr &iTst )
+void OPointsSchema::init( uint32_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::init()" );
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVaryingScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTst );
+    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTsIdx );
 
-    m_ids = Abc::OUInt64ArrayProperty( *this, ".pointIds", mdata, iTst );
+    m_ids = Abc::OUInt64ArrayProperty( *this, ".pointIds", mdata, iTsIdx );
 
-    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTst );
+    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTsIdx );
 
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTst );
+    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

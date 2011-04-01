@@ -137,9 +137,22 @@ public:
       : Abc::OSchema<PointsSchemaInfo>( iParentObject, iName,
                                           iArg0, iArg1, iArg2 )
     {
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+        uint32_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            tsIndex = iParentObject->getArchive()->addTimeSampling(*tsPtr);
+        }
+
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        init( tsIndex );
     }
 
     template <class CPROP_PTR>
@@ -150,9 +163,22 @@ public:
       : Abc::OSchema<PointsSchemaInfo>( iParentObject,
                                      iArg0, iArg1, iArg2 )
     {
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+        uint32_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            tsIndex = iParentObject->getArchive()->addTimeSampling(*tsPtr);
+        }
+
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        init( tsIndex );
     }
 
     //! Default copy constructor used.
@@ -162,10 +188,9 @@ public:
     // SCHEMA STUFF
     //-*************************************************************************
 
-    //! Return the time sampling type, which is stored on each of the
-    //! sub properties.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    { return m_positions.getTimeSamplingType(); }
+    //! Return the time sampling
+    AbcA::TimeSamplingPtr getTimeSampling() const
+    { return m_positions.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -223,7 +248,7 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OPointsSchema::valid() );
 
 protected:
-    void init( const AbcA::TimeSamplingType &iTst );
+    void init( uint32_t iTsIdx );
 
     Abc::OV3fArrayProperty m_positions;
     Abc::OUInt64ArrayProperty m_ids;

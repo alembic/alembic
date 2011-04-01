@@ -46,9 +46,6 @@ SET( CXX_FILES
   OPolyMesh.cpp
   IPolyMesh.cpp
 
-  OSimpleXform.cpp
-  ISimpleXform.cpp
-
   XformOp.cpp
   XformSample.cpp
   IXform.cpp

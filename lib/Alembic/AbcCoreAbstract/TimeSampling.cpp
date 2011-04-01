@@ -71,10 +71,10 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
         numSamples );
 
     // we need to check to make sure we are strictly increasing
-    if (numSamples > 1)
+    if ( numSamples > 1 )
     {
         chrono_t curVal = m_sampleTimes[0];
-        for (size_t i = 1; i < numSamples; ++i)
+        for ( size_t i = 1; i < numSamples; ++i )
         {
             chrono_t newVal = m_sampleTimes[i];
             ABCA_ASSERT( curVal < newVal, "Sample " << i << " value: " <<
@@ -83,9 +83,15 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
             curVal = newVal;
         }
 
-        curVal = m_sampleTimes[m_sampleTimes.size() - 1] - m_sampleTimes[0];
-        ABCA_ASSERT ( curVal <= m_timeSampling.getTimePerCycle() );
-
+        // make sure cyclic samples fall within the time per cycle
+        if ( m_timeSamplingType.isCyclic() )
+        {
+            curVal = m_sampleTimes[m_sampleTimes.size() - 1] - m_sampleTimes[0];
+            ABCA_ASSERT ( curVal <= m_timeSamplingType.getTimePerCycle(),
+                "Cyclic samples provided are greater than the time per cycle."
+                " Expected: " << m_timeSamplingType.getTimePerCycle() <<
+                " Found: " << curVal );
+        }
     }
 
 }
@@ -165,11 +171,11 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
 
         assert( iTime >= minTime );
         chrono_t prevTime = minTime;
-        const chrono_t *sampleTimes;
-        sampleTimes = this->_getTimeSamplesAsChrono_tPtr();
-        for ( index_t idx = 1; idx < m_sampleTimes->size(); ++idx )
+        size_t numSamples = m_sampleTimes.size();
+
+        for ( index_t idx = 1; idx < numSamples; ++idx )
         {
-            chrono_t thisTime = sampleTimes[idx];
+            chrono_t thisTime = m_sampleTimes[idx];
             assert( iTime >= prevTime );
             if ( iTime < thisTime )
             {
@@ -189,7 +195,7 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
         // on maxTime.
         ABCA_THROW( "Corrupt acyclic time samples, iTime = "
                     << iTime << ", maxTime = " << maxTime );
-        return std::pair<index_t, chrono_t>( m_sampleTimes->size()-1, maxTime );
+        return std::pair<index_t, chrono_t>( m_sampleTimes.size()-1, maxTime );
     }
     else if ( m_timeSamplingType.isUniform() )
     {
@@ -251,12 +257,11 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
 
         index_t sampIdx = 0;
 
-        const chrono_t *sampleTimes = this->_getTimeSamplesAsChrono_tPtr();
         for ( index_t i = 0 ; i < N ; ++i )
         {
-            chrono_t sampleTimesTime = sampleTimes[i];
+            chrono_t sampleTime = m_sampleTimes[i];
 
-            if ( sampleTimesTime > rem )
+            if ( sampleTime > rem )
             {
                 sampIdx = i - 1;
                 break;
@@ -268,7 +273,7 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
         if ( sampIdx < 0 ) { sampIdx = 0; }
 
         const chrono_t sampTime = cycleBlockTime +
-            this->_getTimeSamplesAsChrono_tPtr()[sampIdx];
+            m_sampleTimes[sampIdx];
 
         return std::pair<index_t, chrono_t>( cycleBlockIndex + sampIdx,
                                              sampTime );
@@ -302,14 +307,6 @@ TimeSampling::getCeilIndex( chrono_t iTime, index_t iNumSamples ) const
 
     if ( iNumSamples < 1 ) { return std::pair<index_t, chrono_t>( 0, 0.0 ); }
 
-    if ( m_timeSamplingType.isIdentity() )
-    {
-        index_t idx = ( index_t )ceil( iTime );
-        idx = idx >= iNumSamples ? iNumSamples - 1 : idx;
-        idx = idx < 0 ? 0 : idx;
-        return std::pair<index_t, chrono_t>( idx, ( chrono_t )idx );
-    }
-
     iTime -= kCHRONO_EPSILON;
 
     const index_t _maxind = iNumSamples - 1;
@@ -327,7 +324,8 @@ TimeSampling::getCeilIndex( chrono_t iTime, index_t iNumSamples ) const
         return std::pair<index_t, chrono_t>( maxIndex, maxTime );
     }
 
-    std::pair<index_t, chrono_t> floorPair = this->getFloorIndex( iTime );
+    std::pair<index_t, chrono_t> floorPair = this->getFloorIndex( iTime,
+        iNumSamples );
 
     return getCeilIndexHelper( this, iTime, floorPair.first, floorPair.second,
                                maxIndex );
@@ -342,15 +340,6 @@ TimeSampling::getNearIndex( chrono_t iTime, index_t iNumSamples ) const
     //! : getCeilIndex( iTime );
 
     if ( iNumSamples < 1 ) { return std::pair<index_t, chrono_t>( 0, 0.0 ); }
-
-    if ( m_timeSamplingType.isIdentity() )
-    {
-        // floor of blah + 0.5 is round( blah )
-        index_t idx = ( index_t )floor( iTime + 0.5 );
-        idx = idx >= iNumSamples ? iNumSamples - 1 : idx;
-        idx = idx < 0 ? 0 : idx;
-        return std::pair<index_t, chrono_t>( idx, ( chrono_t )idx );
-    }
 
     const index_t _maxind = iNumSamples - 1;
     const size_t maxIndex = _maxind > -1 ? _maxind : 0;
@@ -367,8 +356,10 @@ TimeSampling::getNearIndex( chrono_t iTime, index_t iNumSamples ) const
         return std::pair<index_t, chrono_t>( maxIndex, maxTime );
     }
 
-    std::pair<index_t, chrono_t> floorPair = this->getFloorIndex( iTime );
-    std::pair<index_t, chrono_t> ceilPair = this->getCeilIndex( iTime );
+    std::pair<index_t, chrono_t> floorPair =
+        this->getFloorIndex( iTime, iNumSamples );
+    std::pair<index_t, chrono_t> ceilPair =
+        this->getCeilIndex( iTime, iNumSamples );
 
     assert( ( floorPair.second <= iTime ||
               Imath::equalWithAbsError( iTime, floorPair.second,

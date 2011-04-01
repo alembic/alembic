@@ -95,7 +95,6 @@ public:
                       chrono_t iTimePerCycle )
       : m_numSamplesPerCycle( iNumSamplesPerCycle )
       , m_timePerCycle( iTimePerCycle )
-      , m_retainConstantSampleTimes( false )
     {
         ABCA_ASSERT(
 
@@ -123,11 +122,16 @@ public:
     enum AcyclicFlag { kAcyclic };
     explicit TimeSamplingType( AcyclicFlag iAF )
       : m_numSamplesPerCycle( ACYCLIC_NUM_SAMPLES )
-      , m_timePerCycle( ACYCLIC_TIME_PER_CYCLE )
-      , m_retainConstantSampleTimes( false ) {}
+      , m_timePerCycle( ACYCLIC_TIME_PER_CYCLE ) {}
 
     //! Using Default Copy Constructor
     //! Using Default Assignment Operator
+
+    bool operator==( const TimeSamplingType & iRhs ) const
+    {
+        return ( m_numSamplesPerCycle == iRhs.m_numSamplesPerCycle &&
+            m_timePerCycle == iRhs.m_timePerCycle );
+    }
 
     //! Asks if the sampling is:
     //! Uniform (1 sample per cycle)

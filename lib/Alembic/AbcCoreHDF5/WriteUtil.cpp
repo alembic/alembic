@@ -472,7 +472,6 @@ void WriteSampling( hid_t iGroup,
         WriteSmallArray( iGroup, iName + ".nums",
             H5T_STD_U32LE, H5T_NATIVE_UINT32, numWrite,
                 ( const void * )samps);
-        }
     }
 }
 
@@ -482,7 +481,7 @@ void WriteTimeSampling( hid_t iGroup,
                     const AbcA::TimeSampling &iTsmp )
 {
 
-    TimeSamplingType tst = iTsmp.getTimeSamplingType();
+    AbcA::TimeSamplingType tst = iTsmp.getTimeSamplingType();
     WriteTimeSamplingType( iGroup, iName, tst );
 
     //-*************************************************************************

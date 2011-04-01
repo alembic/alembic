@@ -77,7 +77,6 @@ class BasePropertyReader;
 //! a reliable and standard feature of C++, and worthy of inclusion in a
 //! standard.
 typedef boost::shared_ptr<ArraySample> ArraySamplePtr;
-typedef boost::shared_ptr<TimeSampling> TimeSamplingPtr;
 
 //-*****************************************************************************
 //! Smart Ptrs to Writers.

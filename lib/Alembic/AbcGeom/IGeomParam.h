@@ -455,20 +455,14 @@ const AbcA::MetaData &ITypedGeomParam<TRAITS>::getMetaData()
 template <class TRAITS>
 AbcA::TimeSampling ITypedGeomParam<TRAITS>::getTimeSampling()
 {
-    if ( m_indices && m_valProp )
+    if ( m_valProp )
     {
-        AbcA::TimeSamplingType itst =
-            m_indices.getTimeSampling().getTimeSamplingType();
-        AbcA::TimeSamplingType vtst =
-            m_valProp.getTimeSampling().getTimeSamplingType();
-
-        if ( itst.getNumSamplesPerCycle() > vtst.getNumSamplesPerCycle() )
-        { return m_indices.getTimeSampling(); }
-        else
-        { return m_valProp.getTimeSampling(); }
+        return m_valProp.getTimeSampling();
     }
-    else if ( m_indices ) { return m_indices.getTimeSampling(); }
-    else { return m_valProp.getTimeSampling(); }
+    else if ( m_indices )
+    {
+        return m_indices.getTimeSampling();
+    }
 }
 
 //-*****************************************************************************

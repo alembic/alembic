@@ -104,8 +104,10 @@ void IArrayProperty::get( AbcA::ArraySamplePtr& oSamp,
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::get()" );
 
-    m_property->getSample( iSS.getIndex( m_property->getTimeSampling() ),
-                           oSamp );
+    m_property->getSample(
+        iSS.getIndex( m_property->getTimeSampling(),
+            m_property->getNumSamples() ),
+        oSamp );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -116,8 +118,10 @@ bool IArrayProperty::getKey( AbcA::ArraySampleKey& oKey,
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getKey()" );
 
-    return m_property->getKey( iSS.getIndex( m_property->getTimeSampling() ),
-                           oKey );
+    return m_property->getKey(
+        iSS.getIndex( m_property->getTimeSampling(),
+            m_property->getNumSamples() ),
+        oKey );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 

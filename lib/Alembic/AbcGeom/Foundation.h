@@ -79,7 +79,7 @@ template <class PROP, class SAMP>
 inline void SetPropUsePrevIfNull( PROP iProp, SAMP iSamp )
 {
     if ( iSamp ) { iProp.set( iSamp ); }
-    else { iProp.setFromPrevious( ; }
+    else { iProp.setFromPrevious(); }
 }
 
 template <>

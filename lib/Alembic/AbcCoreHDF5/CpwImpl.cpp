@@ -49,7 +49,7 @@ CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   const AbcA::MetaData & iMeta )
   : BaseCpwImpl( iParentGroup )
   , m_parent( iParent )
-  , m_header( new PropertyHeader(iName, iMeta) )
+  , m_header( new AbcA::PropertyHeader(iName, iMeta) )
 {
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );

@@ -53,7 +53,7 @@ AwImpl::AwImpl( const std::string &iFileName,
 
     // add default time sampling
     AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling() );
-    m_timeSampling.push_back(ts);
+    m_timeSamples.push_back(ts);
 
     // OPEN THE FILE!
     hid_t faid = H5Pcreate( H5P_FILE_ACCESS );
@@ -111,20 +111,20 @@ AbcA::ObjectWriterPtr AwImpl::getTop()
 }
 
 //-*****************************************************************************
-index_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
+uint32_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
 {
-    index_t numTS = m_timeSampling.size();
+    index_t numTS = m_timeSamples.size();
     for (index_t i = 0; i < numTS; ++i)
     {
-        if (iTS == *(m_timeSampling[i]))
+        if (iTs == *(m_timeSamples[i]))
             return i;
     }
 
     // we've got a new TimeSampling, write it and add it to our vector
     AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling(iTs) );
-    m_timeSampling.push_back(ts);
+    m_timeSamples.push_back(ts);
 
-    index_t latestSample = m_timeSampling.size() - 1;
+    index_t latestSample = m_timeSamples.size() - 1;
 
     std::stringstream strm;
     strm << latestSample;
@@ -135,12 +135,12 @@ index_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
 }
 
 //-*****************************************************************************
-AbcA::TimeSamplingPtr getTimeSampling( index_t iIndex )
+AbcA::TimeSamplingPtr AwImpl::getTimeSampling( uint32_t iIndex )
 {
-    ABCA_ASSERT( iIndex < m_timeSampling.size(),
+    ABCA_ASSERT( iIndex < m_timeSamples.size(),
         "Invalid index provided to getTimeSampling." );
 
-    return m_timeSampling[iIndex];
+    return m_timeSamples[iIndex];
 }
 
 //-*****************************************************************************

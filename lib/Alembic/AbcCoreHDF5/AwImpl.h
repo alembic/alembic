@@ -80,11 +80,11 @@ public:
         return m_writtenArraySampleMap;
     }
 
-    virtual index_t addTimeSampling( const AbcA::TimeSampling & iTs );
+    virtual uint32_t addTimeSampling( const AbcA::TimeSampling & iTs );
 
-    virtual AbcA::TimeSamplingPtr getTimeSampling( index_t iIndex );
+    virtual AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
 
-    virtual uint32_t getNumTimeSampling() { return m_timeSampling.size(); }
+    virtual uint32_t getNumTimeSampling() { return m_timeSamples.size(); }
 
 private:
     std::string m_fileName;
@@ -96,7 +96,7 @@ private:
     // like a normal object writer would.
     TopOwImpl *m_top;
 
-    std::vector < AbcA::TimeSamplingPtr > m_timeSampling;
+    std::vector < AbcA::TimeSamplingPtr > m_timeSamples;
 
     WrittenArraySampleMap m_writtenArraySampleMap;
 };

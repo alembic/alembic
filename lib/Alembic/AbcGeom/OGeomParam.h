@@ -155,10 +155,15 @@ public:
                  )
       : m_name( iName )
       , m_isIndexed( iIsIndexed )
-      , m_timeSamplingType( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) )
       , m_scope( iScope )
     {
-        AbcA::MetaData md = Abc::GetMetaData( iArg0, iArg1, iArg2 );
+        Arguments args( Abc::GetErrorHandlerPolicy( iParent ) );
+        iArg0.setInto( args );
+        iArg1.setInto( args );
+        iArg2.setInto( args );
+
+        AbcA::MetaData md = args.getMetaData();
+
         SetGeometryScope( md, iScope );
 
         md.set( "isGeomParam", "true" );
@@ -175,23 +180,32 @@ public:
         md.set( "arrayExtent",
                 boost::lexical_cast<std::string>( iArrayExtent ) );
 
-        Abc::ErrorHandler::Policy ehp(
-            Abc::GetErrorHandlerPolicy( iParent, iArg0, iArg1, iArg2 ) );
+        Abc::ErrorHandler::Policy ehp = args.getErrorHandlerPolicy();
+
+        AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
+        uint32_t tsIndex = args.getTimeSamplingIndex();
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the
+        // intrinsic 0 index
+        if (tsPtr)
+        {
+            tsIndex =
+                iParent.getObject().getArchive().addTimeSampling(*tsPtr);
+        }
 
         if ( m_isIndexed )
         {
             m_cprop = Abc::OCompoundProperty( iParent, iName, md, ehp );
 
-            m_valProp = prop_type( m_cprop, ".vals", md, ehp,
-                                   m_timeSamplingType );
+            m_valProp = prop_type( m_cprop, ".vals", md, ehp, tsIndex );
 
             m_indices = Abc::OUInt32ArrayProperty( m_cprop, ".indices",
-                                                   m_timeSamplingType );
+                tsIndex );
         }
         else
         {
-            m_valProp = prop_type( iParent, iName, md, ehp,
-                                   m_timeSamplingType );
+            m_valProp = prop_type( iParent, iName, md, ehp, tsIndex );
         }
     }
 
@@ -220,13 +234,11 @@ public:
             m_indices = Abc::OUInt32ArrayProperty( m_cprop, ".indices" );
 
             m_isIndexed = true;
-            m_timeSamplingType = m_valProp.getTimeSamplingType();
         }
         else
         {
             m_valProp = prop_type( iThis, iWrapFlag, iArg0, iArg1 );
             m_isIndexed = false;
-            m_timeSamplingType = m_valProp.getTimeSamplingType();
         }
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
@@ -236,7 +248,7 @@ public:
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::set()" );
 
-        if ( iSamp.getNumSamples() == 0 )
+        if ( m_valProp.getNumSamples() == 0 )
         {
             m_valProp.set( iSamp.getVals() );
             if ( m_isIndexed ) { m_indices.set( iSamp.getIndices() ); }
@@ -294,7 +306,10 @@ public:
 
     GeometryScope getScope() { return m_scope; }
 
-    TimeSamplingType getTimeSamplingType() { return m_timeSamplingType; }
+    AbcA::TimeSamplingPtr getTimeSampling()
+    {
+        return m_valProp->getTimeSampling();
+    }
 
     const std::string &getName() { return m_name; }
 
@@ -308,7 +323,6 @@ public:
 
     void reset()
     {
-        m_timeSamplingType = AbcA::TimeSamplingType();
         m_name = "";
         m_valProp.reset();
         m_indices.reset();
@@ -331,7 +345,6 @@ protected:
     prop_type m_valProp;
     OUInt32ArrayProperty m_indices;
     bool m_isIndexed;
-    TimeSamplingType m_timeSamplingType;
 
     GeometryScope m_scope;
 

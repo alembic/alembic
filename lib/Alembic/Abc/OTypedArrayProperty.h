@@ -171,11 +171,11 @@ OTypedArrayProperty<TRAITS>::OTypedArrayProperty
     // otherwise we'll use the index, which defaults to the intrinsic 0 index
     if (tsPtr)
     {
-        tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
+        tsIndex = parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
     }
 
-    m_property = iParent->createArrayProperty( iName, args.getMetaData(), 
-        iDataType, tsIndex );
+    m_property = parent->createArrayProperty( iName, args.getMetaData(), 
+        TRAITS::dataType(), tsIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

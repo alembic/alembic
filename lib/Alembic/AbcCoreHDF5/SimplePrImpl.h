@@ -130,11 +130,11 @@ protected:
     uint32_t m_numSamples;
 
     // The first sample index that is different from sample 0
-    uint32_t m_firstChangedIndex;
+    uint32_t m_firstChangeIndex;
 
     // The last sample index that needed to be written out, if the last sample
     // repeats m_numSamples will be greater than this.
-    uint32_t m_lastChangedIndex;
+    uint32_t m_lastChangeIndex;
 
     // The simple properties only store samples after the first
     // sample in a sub group. Therefore, there may not actually be
@@ -165,9 +165,9 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
   , m_cleanFileDataType( false )
   , m_nativeDataType( -1 )
   , m_cleanNativeDataType( false )
-  , m_numSamples( 0 ),
-  , m_firstChangedIndex( 0 ),
-  , m_lastChangedIndex( 0 ),
+  , m_numSamples( 0 )
+  , m_firstChangeIndex( 0 )
+  , m_lastChangeIndex( 0 )
   , m_samplesIGroup( -1 )
 {
     // Validate all inputs.
@@ -195,30 +195,17 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
                     myName,
                     isScalar,
                     m_numSamples,
-                    m_firstChangedIndex,
-                    m_lastChangedIndex );
+                    m_firstChangeIndex,
+                    m_lastChangeIndex );
 
     // Validate the first and last changed index
-    ABCA_ASSERT( m_firstChangedIndex <= m_numSamples &&
-        m_lastChangedIndex <= m_numSamples &&
-        m_firstChangedIndex <= m_lastChangedIndex,
+    ABCA_ASSERT( m_firstChangeIndex <= m_numSamples &&
+        m_lastChangeIndex <= m_numSamples &&
+        m_firstChangeIndex <= m_lastChangeIndex,
         "Corrupt sampling information for property: " << myName
-            << " first change index: " << m_firstChangedIndex
-            << " last change index: " << m_lastChangedIndex
+            << " first change index: " << m_firstChangeIndex
+            << " last change index: " << m_lastChangeIndex
             << " total number of samples: " << m_numSamples );
-
-    // try to get the time sampling index (default to 0 if it doesn't exist)
-    // and use that to get the TimeSamplingPtr from the archive
-    uint32_t tsid = 0;
-    std::string tsidName = myName + ".tsid";
-    if ( H5Aexists( iParentGroup, tsidName.c_str() ) )
-    {
-        ReadScalar( iParentGroup, tsidName.c_str(), H5T_STD_U32LE,
-            H5T_NATIVE_UINT32, &tsid );
-    }
-    AbcA::TimeSamplingPtr tsPtr =
-        m_parent->getObject()->getArchive()->getTimeSampling( tsid );
-    m_header.setTimeSampling(tsPtr);
 }
 
 //-*****************************************************************************
@@ -265,26 +252,29 @@ template <class ABSTRACT, class IMPL, class SAMPLE>
 bool SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::isConstant()
 {
     // No first change means no changes at all
-    return ( m_firstChangedIndex == 0 );
+    return ( m_firstChangeIndex == 0 );
 }
 
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE>
-std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime )
+std::pair<index_t, chrono_t>
+SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getFloorIndex( chrono_t iTime )
 {
     return m_header->getTimeSampling()->getFloorIndex( iTime, m_numSamples );
 }
 
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE>
-std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime )
+std::pair<index_t, chrono_t>
+SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getCeilIndex( chrono_t iTime )
 {
     return m_header->getTimeSampling()->getCeilIndex( iTime, m_numSamples );
 }
 
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE>
-std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime )
+std::pair<index_t, chrono_t>
+SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getNearIndex( chrono_t iTime )
 {
     return m_header->getTimeSampling()->getNearIndex( iTime, m_numSamples );
 }
@@ -302,12 +292,12 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
                  << ", should be between 0 and " << m_numSamples-1 );
 
     // greater than the last index that had a change?  read it from there
-    if ( iSampleIndex > m_lastChangedIndex )
+    if ( iSampleIndex > m_lastChangeIndex )
     {
-        iSampleIndex = m_lastChangedIndex;
+        iSampleIndex = m_lastChangeIndex;
     }
     // less than the first change?  map to 0
-    else if ( iSampleIndex < m_firstChangedIndex )
+    else if ( iSampleIndex < m_firstChangeIndex )
     {
         iSampleIndex = 0;
     }
@@ -380,12 +370,12 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
                  << ", should be between 0 and " << m_numSamples-1 );
 
     // greater than the last index that had a change?  read it from there
-    if ( iSampleIndex > m_lastChangedIndex )
+    if ( iSampleIndex > m_lastChangeIndex )
     {
-        iSampleIndex = m_lastChangedIndex;
+        iSampleIndex = m_lastChangeIndex;
     }
     // less than the first change?  map to 0
-    else if ( iSampleIndex < m_firstChangedIndex )
+    else if ( iSampleIndex < m_firstChangeIndex )
     {
         iSampleIndex = 0;
     }

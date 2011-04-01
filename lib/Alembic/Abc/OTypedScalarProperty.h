@@ -168,7 +168,7 @@ OTypedScalarProperty<TRAITS>::OTypedScalarProperty(
     // otherwise we'll use the index, which defaults to the intrinsic 0 index
     if (tsPtr)
     {
-        tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
+        tsIndex = parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
     }
 
     m_property = parent->createScalarProperty( iName, mdata,

@@ -53,32 +53,42 @@ class Arguments : public boost::static_visitor<>
 public:
     Arguments( ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
                 const AbcA::MetaData &iMetaData = AbcA::MetaData(),
-                const AbcA::TimeSamplingPtr &iTimeSampling =
+                AbcA::TimeSamplingPtr iTimeSampling =
                 AbcA::TimeSamplingPtr(),
                 uint32_t iTimeIndex = 0,
                 SchemaInterpMatching iMatch = kNoMatching )
       : m_errorHandlerPolicy( iPolicy ),
         m_metaData( iMetaData ),
         m_timeSampling( iTimeSampling ),
-        m_timeSamplinIndex( iTimeIndex ),
+        m_timeSamplingIndex( iTimeIndex ),
         m_matching( iMatch ){}
 
     void operator()( const uint32_t & iTimeSamplingIndex)
     { m_timeSamplingIndex = iTimeSamplingIndex; }
+
     void operator()( const ErrorHandler::Policy &iPolicy )
     { m_errorHandlerPolicy = iPolicy; }
+
     void operator()( const AbcA::MetaData &iMetaData )
     { m_metaData = iMetaData; }
-    void operator()( const AbcA::TimeSamplingType &iTimeSamplingType )
-    { m_timeSamplingType = iTimeSamplingType; }
+
+    void operator()( const AbcA::TimeSamplingPtr & iTimeSampling )
+    { m_timeSampling = iTimeSampling; }
+
     void operator()( const SchemaInterpMatching &iMatching )
     { m_matching = iMatching; }
+
     ErrorHandler::Policy getErrorHandlerPolicy() const
     { return m_errorHandlerPolicy; }
+
     const AbcA::MetaData &getMetaData() const
     { return m_metaData; }
-    const AbcA::TimeSamplingPtr &getTimeSampling() const
+
+    AbcA::TimeSamplingPtr getTimeSampling() const
     { return m_timeSampling; }
+
+    uint32_t getTimeSamplingIndex() const
+    { return m_timeSamplingIndex; }
 
     SchemaInterpMatching getSchemaInterpMatching() const
     { return m_matching; }
@@ -96,15 +106,16 @@ private:
 // our various classes for construction.
 // ErrorHandlerPolicy - always defaults to QuietNoop
 // MetaData - always defaults to ""
-// TimeSamplingType - always defaults to Static
+// TimeSampling - always defaults to default uniform
+// TimeSamplingIndex - always defaults to 0
 class Argument
 {
 public:
     Argument() : m_variant( ( uint32_t )0 ) {}
-    Argument( uint32_t iTsIndex) : m_variant( tsIndex ) {}
+    Argument( uint32_t iTsIndex) : m_variant( iTsIndex ) {}
     Argument( ErrorHandler::Policy iPolicy ) : m_variant( iPolicy ) {}
     Argument( const AbcA::MetaData &iMetaData ) : m_variant( iMetaData ) {}
-    Argument( const AbcA::TimeSamplingPtr &iTsPtr ) : m_variant( iTsPtr ) {}
+    Argument( const AbcA::TimeSamplingPtr & iTsPtr ) : m_variant( iTsPtr ) {}
     Argument( SchemaInterpMatching iMatch ) : m_variant( iMatch ) {}
 
     void setInto( Arguments &iArgs ) const
@@ -116,6 +127,7 @@ private:
     typedef boost::variant<uint32_t,
                            ErrorHandler::Policy,
                            AbcA::MetaData,
+                           AbcA::TimeSamplingPtr,
                            SchemaInterpMatching> ArgVariant;
 
     ArgVariant m_variant;

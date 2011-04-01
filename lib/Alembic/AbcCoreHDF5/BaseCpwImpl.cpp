@@ -200,7 +200,7 @@ BaseCpwImpl::createArrayProperty( const std::string & iName,
 
     PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );
     m_propertyHeaders.push_back( headerPtr );
-    m_madeProperties[pName] = WeakBpwPtr( ret );
+    m_madeProperties[iName] = WeakBpwPtr( ret );
 
     return ret;
 }
@@ -224,7 +224,7 @@ BaseCpwImpl::createCompoundProperty( const std::string & iName,
     PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );
     m_propertyHeaders.push_back( headerPtr );
     m_propertyHeaders.push_back( headerPtr );
-    m_madeProperties[pName] = WeakBpwPtr( ret );
+    m_madeProperties[iName] = WeakBpwPtr( ret );
 
     return ret;
 }

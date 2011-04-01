@@ -40,7 +40,7 @@
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/MetaData.h>
 #include <Alembic/AbcCoreAbstract/DataType.h>
-#include <Alembic/AbcCoreAbstract/TimeSamplingType.h>
+#include <Alembic/AbcCoreAbstract/TimeSampling.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {

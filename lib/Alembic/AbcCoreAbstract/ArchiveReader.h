@@ -106,11 +106,11 @@ public:
     virtual void setReadArraySampleCachePtr( ReadArraySampleCachePtr iPtr ) = 0;
 
     //! Returns the TimeSampling at a given index.
-    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex ) const = 0;
+    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex ) = 0;
 
     //! Returns the total number of TimeSamplingPtrs in the Archive
     //! TimeSampling pool.
-    virtual uint32_t getNumTimeSampling() const = 0;
+    virtual uint32_t getNumTimeSampling() = 0;
 
     //! Return self
     //! ...

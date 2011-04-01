@@ -398,17 +398,14 @@ ReadPropertyHeader( hid_t iParent,
     AbcA::MetaData oMetaData;
     ReadMetaData( iParent, iPropName + ".meta", oMetaData );
 
-    // Lastly, the time sampling
     if ( oPropertyType != AbcA::kCompoundProperty )
     {
-        AbcA::TimeSamplingType oTsType;
-        ReadTimeSamplingType( iParent, iPropName, oTsType );
-
+        // the time sampling index will be read and set later
         oHeader = AbcA::PropertyHeader( iPropName,
                                         oPropertyType,
                                         oMetaData,
                                         oDataType,
-                                        oTsType );
+                                        AbcA::TimeSamplingPtr() );
     }
     else
     {
@@ -708,7 +705,7 @@ ReadTimeSamples( hid_t iParent,
         ABCA_ASSERT( status >= 0, "Can't read time samples: " << timeName );
 
         // create the TimeSampling and add it to our vector
-        ts.reset( AbcA::TimeSamplingPtr( new AbcA::TimeSampling(tst, times) ) );
+        ts.reset( new AbcA::TimeSampling(tst, times) );
         oTimeSamples.push_back( ts );
 
         // increment to try and read the next one

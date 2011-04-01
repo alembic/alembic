@@ -97,8 +97,8 @@ public:
     //! or time sampling index is illegal.
     virtual ScalarPropertyWriterPtr
     createScalarProperty( const std::string & iName,
-        const AbcA::MetaData & iMetaData,
-        const AbcA::DataType & iDataType,
+        const MetaData & iMetaData,
+        const DataType & iDataType,
         uint32_t iTimeSamplingIndex ) = 0;
 
     //! Create and return the requested array property.
@@ -107,8 +107,8 @@ public:
     //! or time sampling index is illegal.
     virtual ArrayPropertyWriterPtr
     createArrayProperty( const std::string & iName,
-        const AbcA::MetaData & iMetaData,
-        const AbcA::DataType & iDataType,
+        const MetaData & iMetaData,
+        const DataType & iDataType,
         uint32_t iTimeSamplingIndex ) = 0;
     
     //! Create and return the requested compound property.
@@ -116,7 +116,7 @@ public:
     //! an exception.
     virtual CompoundPropertyWriterPtr
     createCompoundProperty( const std::string & iName,
-        const AbcA::MetaData & iMetaData ) = 0;
+        const MetaData & iMetaData ) = 0;
 
 };
 

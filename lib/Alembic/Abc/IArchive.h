@@ -146,11 +146,11 @@ public:
     void reset() { m_archive.reset(); Base::reset(); }
 
     //! Returns the TimeSampling at a given index.
-    AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex ) const;
+    AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
 
     //! Returns the total number of TimeSamplingPtrs in the Archive
     //! TimeSampling pool.
-    uint32_t getNumTimeSampling() const;
+    uint32_t getNumTimeSampling();
 
     //! Valid returns whether this function set is
     //! valid.

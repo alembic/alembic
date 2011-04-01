@@ -142,11 +142,11 @@ public:
     //! Returns the TimeSampling at a given index.
     //! index 0 is automatically reserved for uniform time sampling with a start
     //! time of 0 and time per cycle of 1 (aka identity sampling)
-    AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex ) const;
+    AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
 
     //! Returns the total number of TimeSamplingPtrs in the Archive
     //! TimeSampling pool.
-    uint32_t getNumTimeSampling() const;
+    uint32_t getNumTimeSampling();
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

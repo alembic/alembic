@@ -71,6 +71,12 @@ public:
 
     TimeSampling();
 
+    bool operator==( const TimeSampling & iRhs ) const
+    {
+        return (m_timeSamplingType == iRhs.m_timeSamplingType && 
+            m_sampleTimes == iRhs.m_sampleTimes);
+    }
+
     //! Get the number of samples
     //! In the case of a property which had no samples written,
     //! this can be zero.
@@ -79,7 +85,11 @@ public:
         return m_sampleTimes.size();
     }
 
-    const std::vector < chrono_t > & getSampleTimes() { return m_sampleTimes; }
+    const std::vector < chrono_t > & getSampleTimes() const
+    {
+        return m_sampleTimes;
+    }
+
     TimeSamplingType getTimeSamplingType() const
     {
         return m_timeSamplingType;
@@ -115,6 +125,8 @@ protected:
 
     std::vector < chrono_t > m_sampleTimes;
 };
+
+typedef boost::shared_ptr<TimeSampling> TimeSamplingPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

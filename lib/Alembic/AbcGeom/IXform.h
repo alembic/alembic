@@ -121,42 +121,16 @@ public:
         return 0;
     }
 
-    //! Time sampling type for inherits property
-    AbcA::TimeSamplingType getInheritsTimeSamplingType() const
-    {
-        if ( m_inherits.valid() )
-            return m_inherits.getTimeSamplingType();
-
-        return AbcA::TimeSamplingType();
-    }
-
-    //! Time sampling type.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    {
-        if ( m_anim.valid() )
-            return m_anim.getTimeSamplingType();
-
-        return AbcA::TimeSamplingType();
-    }
-
-    //! Time information.
-    //! Defaults to Identity.
-    AbcA::TimeSampling getInheritsTimeSampling()
-    {
-        if ( m_inherits.valid() )
-            return m_inherits.getTimeSampling();
-
-        return AbcA::TimeSampling();
-    }
-
-    //! Time information for inherits property.
-    //! Defaults to Identity.
-    AbcA::TimeSampling getTimeSampling()
+    //! Time sampling, return the default time sampling if there is no
+    //! animated data
+    AbcA::TimeSamplingPtr getTimeSampling()
     {
         if ( m_anim.valid() )
             return m_anim.getTimeSampling();
+        else if ( m_inherits.valid() )
+            return m_inherits.getTimeSampling();
 
-        return AbcA::TimeSampling();
+        return getObject().getArchive().getTimeSampling(0);
     }
 
     //-*************************************************************************

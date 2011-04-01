@@ -214,6 +214,25 @@ const AbcA::PropertyHeader &BaseCprImpl::getPropertyHeader( size_t i )
     {
         PropertyHeaderPtr iPtr( new AbcA::PropertyHeader() );
         ReadPropertyHeader( m_group, m_propertyHeaders[i].name, *iPtr );
+
+        if ( iPtr->isSimple() )
+        {
+
+            // try to get the time sampling index (default to 0 if it doesn't
+            // exist) and use that to get the TimeSamplingPtr from the archive
+            uint32_t tsid = 0;
+            std::string tsidName = m_propertyHeaders[i].name + ".tsid";
+            if ( H5Aexists( m_group, tsidName.c_str() ) )
+            {
+                ReadScalar( m_group, tsidName.c_str(), H5T_STD_U32LE,
+                    H5T_NATIVE_UINT32, &tsid );
+            }
+            AbcA::TimeSamplingPtr tsPtr =
+                getObject()->getArchive()->getTimeSampling( tsid );
+
+            iPtr->setTimeSampling(tsPtr);
+        }
+
         m_propertyHeaders[i].header = iPtr;
 
         // don't need name anymore
