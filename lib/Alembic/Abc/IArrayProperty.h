@@ -117,7 +117,10 @@ public:
     //! regardless of the time sampling.
     bool isConstant();
 
-    //! Ask if we are like a scalar - we have 1 and only 1 DataType per sample.
+    //! Ask if we are like a scalar - we have 1 and only 1 element (which
+    //! may have an extent greater than one, eg, a single V3f in a
+    //! V3fArrayProperty) per sample.  Alternately, an ArrayProperty with
+    //! no samples at all is also considered scalar-like.
     bool isScalarLike();
 
     //! Time information.
