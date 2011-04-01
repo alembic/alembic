@@ -57,7 +57,9 @@ void accumXform( M44d &xf, IObject obj )
     else if ( IXform::matches( obj.getMetaData() ) )
     {
         IXform x( obj, kWrapExisting );
-        xf *= x.getSchema().getMatrix();
+        XformSample xs;
+        x.getSchema().get( xs );
+        xf *= xs.getMatrix();
     }
 }
 
