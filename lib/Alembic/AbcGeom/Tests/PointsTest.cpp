@@ -234,8 +234,7 @@ void RunAndWriteParticles
     ParticleSystem parts( iParams );
 
     // Create the time sampling type.
-    TimeSamplingType tsmp( iFps );
-    TimeSampling ts(tsmp, 0.0);
+    TimeSampling ts(iFps, 0.0);
     uint32_t tsidx = iParent.getArchive().addTimeSampling(ts);
 
     // Create our object.

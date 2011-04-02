@@ -69,8 +69,7 @@ void Example1_MeshOut()
 
     OObject top = archive.getTop();
 
-    TimeSamplingType tst( g_dt );
-    TimeSamplingPtr ts( new TimeSampling(tst, g_t0) );
+    TimeSamplingPtr ts( new TimeSampling(g_dt, g_t0) );
 
     OXform xf( top, "xf", ts );
 

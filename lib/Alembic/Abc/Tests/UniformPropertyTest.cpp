@@ -64,8 +64,7 @@ void writeProperty(const std::string &archiveName)
     OObject child( archiveTop, name );
     OCompoundProperty childProps = child.getProperties();
 
-    std::vector < chrono_t > timeSamps(1, startTime);
-    TimeSamplingPtr ts ( new TimeSampling(TimeSamplingType( dt ), timeSamps) );
+    TimeSamplingPtr ts ( new TimeSampling( dt, startTime ) );
     // Create a scalar property on this child object named 'mass'
     //  with metadata that indicates it's expressed in kilograms
     MetaData units;

@@ -65,12 +65,13 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
     init();
 }
 
-TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
-                            chrono_t iTime )
-  : m_timeSamplingType( iTimeSamplingType )
+TimeSampling::TimeSampling( chrono_t iTimePerCycle,
+                            chrono_t iStartTime )
+  : m_timeSamplingType( iTimePerCycle )
 {
     m_sampleTimes.resize(1);
-    m_sampleTimes[0] = iTime;
+    m_sampleTimes[0] = iStartTime;
+    init();
 }
 
 void TimeSampling::init()

@@ -103,9 +103,7 @@ void simpleTestOut( const std::string &iArchiveName )
     OBoolProperty acc0bp0( acc0Props, "acc0bp0" );
     acc0bp0.set( false );
 
-    TimeSamplingType tst( 1.0/24.0 );
-    std::vector < chrono_t > timeSamps(1, 0.0);
-    TimeSamplingPtr ts( new TimeSampling(tst, timeSamps) );
+    TimeSamplingPtr ts( new TimeSampling(1.0/24.0, v3fStartTime) );
 
     // now some array props
     OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0", ts );
@@ -114,6 +112,7 @@ void simpleTestOut( const std::string &iArchiveName )
 
     ON3fArrayProperty acc0N3fap0( acc0Props, "acc0N3fap0", ts );
 
+    ts.reset( new TimeSampling(1.0/24.0, intStartTime) );
     OInt32ArrayProperty ac0iap0( ac0Props, "ac0iap0", ts );
 
     // make some data for our array props

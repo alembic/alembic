@@ -68,9 +68,9 @@ void writeProperty(const std::string &archiveName)
 
     // Create cyclic time sampling
      std::vector<chrono_t> tvec;
-    tvec.push_back(  0.0 );
-    tvec.push_back(  g_dt/3.0 );
-    tvec.push_back(  2.0*g_dt/3.0 );
+    tvec.push_back(  g_startTime );
+    tvec.push_back(  g_startTime + g_dt/3.0 );
+    tvec.push_back(  g_startTime + 2.0*g_dt/3.0 );
     const chrono_t timePerCycle = g_dt;
     const size_t numSamplesPerCycle = 3;
 

@@ -60,14 +60,14 @@ public:
     //! via aggregation, that the SimplePropertyReaders and Writers (and
     //! their derived classes) can use to provide consistent time-sampling
     //! introspection to clients.
-    //! The iSampleTimes passed in have a shared ptr so that this instance
-    //! may ensure they exist.
     TimeSampling( const TimeSamplingType & iTimeSamplingType,
 
                   //! The number of time samples per cycle
                   const std::vector < chrono_t > & iSampleTimes );
 
-    TimeSampling( const TimeSamplingType & iTimeSamplingType, chrono_t iTime );
+    //! Convenience constructor which creates uniform time sampling with
+    //! the specified time per cycle and the specified start time.
+    TimeSampling( chrono_t iTimePerCycle, chrono_t iStartTime );
 
     TimeSampling( const TimeSampling &copy );
 

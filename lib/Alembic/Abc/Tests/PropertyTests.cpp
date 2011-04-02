@@ -58,8 +58,7 @@ void writeSimpleProperties(const std::string &archiveName)
     const unsigned int numSamples = 5;
     const chrono_t dt = 1.0 / 24.0;
 
-    TimeSamplingType tst( dt ); // uniform with cycle=dt
-    TimeSampling ts(tst, 666.0);
+    TimeSampling ts(dt, 666.0); // uniform with cycle=dt starting at 666.0
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.

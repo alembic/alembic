@@ -174,7 +174,7 @@ OTypedArrayProperty<TRAITS>::OTypedArrayProperty
         tsIndex = parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
     }
 
-    m_property = parent->createArrayProperty( iName, args.getMetaData(), 
+    m_property = parent->createArrayProperty( iName, mdata, 
         TRAITS::dataType(), tsIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
