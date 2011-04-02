@@ -67,6 +67,8 @@ public:
                   //! The number of time samples per cycle
                   const std::vector < chrono_t > & iSampleTimes );
 
+    TimeSampling( const TimeSamplingType & iTimeSamplingType, chrono_t iTime );
+
     TimeSampling( const TimeSampling &copy );
 
     TimeSampling();
@@ -77,9 +79,9 @@ public:
             m_sampleTimes == iRhs.m_sampleTimes);
     }
 
-    //! Get the number of samples
-    //! In the case of a property which had no samples written,
-    //! this can be zero.
+    //! Get the number of samples in sample times, this is the same as the
+    //! samples per cycle in the time sampling type.  There will always be
+    //! at least one sample because a start time is always needed.
     size_t getNumSamples() const
     {
         return m_sampleTimes.size();
@@ -124,6 +126,10 @@ protected:
     TimeSamplingType m_timeSamplingType;
 
     std::vector < chrono_t > m_sampleTimes;
+
+private:
+    // sanity checks the data coming in
+    void init();
 };
 
 typedef boost::shared_ptr<TimeSampling> TimeSamplingPtr;

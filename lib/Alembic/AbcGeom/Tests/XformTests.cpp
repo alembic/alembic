@@ -79,12 +79,12 @@ void xformOut()
         valVec.clear();
         valVec.push_back(i+42.0);
         data = Abc::DoubleArraySample(valVec);
-        a.getSchema().set( data, OSampleSelector( i ) );
+        a.getSchema().set( data );
     }
 
     for (size_t i = 0; i < 20; ++i)
     {
-        b.getSchema().setInherits( i&1, OSampleSelector( i ) );
+        b.getSchema().setInherits( i&1 );
     }
 
     // for c we write nothing
@@ -136,10 +136,8 @@ void xformIn()
 
     IXform b( a, "b" );
     b.getSchema().get(xs);
-    TESTING_ASSERT( b.getSchema().getTimeSamplingType().isIdentity() );
-    TESTING_ASSERT( b.getSchema().getTimeSampling().isStatic() );
-    TESTING_ASSERT( b.getSchema().getInheritsTimeSamplingType().isIdentity() );
-    TESTING_ASSERT( !b.getSchema().getInheritsTimeSampling().isStatic() );
+    TESTING_ASSERT( b.getSchema().getTimeSampling(
+        )->getTimeSamplingType().isUniform() );
     TESTING_ASSERT( xs.getNum() == 0 );
     TESTING_ASSERT( b.getSchema().getNumInheritsSamples() == 20 );
     TESTING_ASSERT( b.getSchema().getNumAnimSamples() == 0 );
@@ -258,7 +256,7 @@ void someOpsXform()
         a.getSchema().setXform( aVec, data);
 
         data = Abc::DoubleArraySample(animVec);
-        a.getSchema().set( data, OSampleSelector( 0 ) );
+        a.getSchema().set( data );
 
         for (size_t i = 1; i < 5; ++i)
         {
@@ -272,7 +270,7 @@ void someOpsXform()
             animVec[7] = 4 * i;
 
             data = Abc::DoubleArraySample(animVec);
-            a.getSchema().set( data, OSampleSelector( i ) );
+            a.getSchema().set( data );
         }
 
     }

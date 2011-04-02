@@ -70,19 +70,6 @@ TARGET_LINK_LIBRARIES( AbcGeom_SubDTest ${TEST_LIBS} )
 #
 ADD_TEST( AbcGeom_SubDTEST AbcGeom_SubDTest )
 
-#-******************************************************************************
-ADD_EXECUTABLE( AbcGeom_SimpleXformTest
-		SimpleXformTest.cpp )
-TARGET_LINK_LIBRARIES( AbcGeom_SimpleXformTest ${TEST_LIBS} )
-
-ADD_TEST( AbcGeom_SimpleXformTEST AbcGeom_SimpleXformTest )
-
-#-******************************************************************************
-ADD_EXECUTABLE( AbcGeom_SimpleXformTest2
-		SimpleXformTest2.cpp )
-TARGET_LINK_LIBRARIES( AbcGeom_SimpleXformTest2 ${TEST_LIBS} )
-ADD_TEST( AbcGeom_SimpleXform2_TEST AbcGeom_SimpleXformTest2 )
-
 ##-*****************************************************************************
 ADD_EXECUTABLE( AbcGeom_SchemaMatchingTest
 		SchemaMatchingTest.cpp )
@@ -94,12 +81,6 @@ ADD_EXECUTABLE( AbcGeom_XformTest
 		XformTests.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest  ${TEST_LIBS} )
 ADD_TEST( AbcGeom_XformTEST  AbcGeom_XformTest  )
-
-##-*****************************************************************************
-ADD_EXECUTABLE( AbcGeom_ConstantSimpleXformTest
-		SimpleXformConstantSamplesTest.cpp )
-TARGET_LINK_LIBRARIES( AbcGeom_ConstantSimpleXformTest  ${TEST_LIBS} )
-ADD_TEST( AbcGeom_ConstantSimpleXformTest_TEST AbcGeom_ConstantSimpleXformTest )
 
 ##-*****************************************************************************
 ADD_EXECUTABLE( AbcGeom_TransformingMeshTest MeshData.cpp

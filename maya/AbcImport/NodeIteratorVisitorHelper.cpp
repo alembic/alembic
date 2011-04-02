@@ -153,8 +153,8 @@ void addAttr(double iFrame, Alembic::Abc::IScalarProperty & iProp,
     Alembic::Util::uint8_t extent = dtype.getExtent();
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), 
+        iProp.getNumSamples(), index, ceilIndex);
 
     switch (dtype.getPod())
     {
@@ -478,8 +478,8 @@ void addAttr(double iFrame, Alembic::Abc::IArrayProperty & iProp,
     Alembic::Util::uint8_t extent = dtype.getExtent();
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
+        iProp.getNumSamples(), index, ceilIndex);
 
     switch (dtype.getPod())
     {
@@ -684,8 +684,8 @@ void readAttr(double iFrame, Alembic::Abc::IScalarProperty & iProp,
     Alembic::Util::uint8_t extent = dtype.getExtent();
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
+        iProp.getNumSamples(), index, ceilIndex);
 
     switch (dtype.getPod())
     {
@@ -910,8 +910,8 @@ void readAttr(double iFrame, Alembic::Abc::IArrayProperty & iProp,
     Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp, ceilSamp;
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
+        iProp.getNumSamples(), index, ceilIndex);
 
     switch (dtype.getPod())
     {

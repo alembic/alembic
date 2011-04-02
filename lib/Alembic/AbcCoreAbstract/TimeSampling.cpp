@@ -62,7 +62,19 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
   : m_timeSamplingType( iTimeSamplingType )
   , m_sampleTimes( iSampleTimes )
 {
+    init();
+}
 
+TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
+                            chrono_t iTime )
+  : m_timeSamplingType( iTimeSamplingType )
+{
+    m_sampleTimes.resize(1);
+    m_sampleTimes[0] = iTime;
+}
+
+void TimeSampling::init()
+{
     size_t numSamples = m_sampleTimes.size();
     ABCA_ASSERT ( numSamples == 
         m_timeSamplingType.getNumSamplesPerCycle(),
@@ -102,7 +114,6 @@ TimeSampling::TimeSampling()
 {
     m_sampleTimes.resize(1);
     m_sampleTimes[0] = 0.0;
-    Dimensions dims;
 }
 
 //-*****************************************************************************

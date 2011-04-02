@@ -91,13 +91,12 @@ MayaMeshWriter::MayaMeshWriter(
     double iFrame,
     MDagPath & iDag,
     Alembic::Abc::OObject & iParent,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+    uint32_t iTimeIndex,
     bool iWriteVisibility,
     bool iWriteUVs)
   : mIsGeometryAnimated(false),
     mDagPath(iDag),
-    mNumPoints(0),
-    mCurIndex(0)
+    mNumPoints(0)
 {
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
@@ -119,7 +118,7 @@ MayaMeshWriter::MayaMeshWriter(
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
     if ( !plug.isNull() && plug.asBool() )
     {
-        Alembic::AbcGeom::OSubD obj(iParent, lMesh.name().asChar(), iTimeType);
+        Alembic::AbcGeom::OSubD obj(iParent, lMesh.name().asChar(), iTimeIndex);
         mSubDSchema = obj.getSchema();
 
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
@@ -143,14 +142,14 @@ MayaMeshWriter::MayaMeshWriter(
         Alembic::Abc::OCompoundProperty cp = mSubDSchema.getArbGeomParams();
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, lMesh,
-            iTimeType, iWriteVisibility));
+            iTimeIndex, iWriteVisibility));
 
         writeSubD(iFrame, iDag, uvSamp);
     }
     else
     {
         Alembic::AbcGeom::OPolyMesh obj(iParent, lMesh.name().asChar(),
-            iTimeType);
+            iTimeIndex);
         mPolySchema = obj.getSchema();
 
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
@@ -177,7 +176,7 @@ MayaMeshWriter::MayaMeshWriter(
 
         // set the rest of the props and write to the writer node
         mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, lMesh,
-            iTimeType, iWriteVisibility));
+            iTimeIndex, iWriteVisibility));
 
        writePoly(iFrame, uvSamp);
     }
@@ -296,8 +295,7 @@ void MayaMeshWriter::write(double iFrame)
                 Alembic::AbcGeom::OV2fGeomParam::Sample(),
                 normalsSamp);
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
-            mPolySchema.set(samp, s);
+            mPolySchema.set(samp);
         }
         else if (mSubDSchema.valid())
         {
@@ -307,8 +305,7 @@ void MayaMeshWriter::write(double iFrame)
                 Alembic::Abc::Int32ArraySample( facePoints ),
                 Alembic::Abc::Int32ArraySample( faceList ) );
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
-            mSubDSchema.set(samp, s);
+            mSubDSchema.set(samp);
         }
     }
     // topology has not changed just write the point data
@@ -343,7 +340,6 @@ void MayaMeshWriter::write(double iFrame)
                     (const Imath::V3f *) &normals.front(), normals.size() / 3));
             }
 
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
                 Alembic::Abc::V3fArraySample(
                     (const Imath::V3f *)&points.front(), points.size() / 3),
@@ -352,15 +348,14 @@ void MayaMeshWriter::write(double iFrame)
                 Alembic::AbcGeom::OV2fGeomParam::Sample(),
                 normalsSamp);
 
-            mPolySchema.set(samp, s);
+            mPolySchema.set(samp);
         }
         else if (mSubDSchema.valid())
         {
-            Alembic::Abc::OSampleSelector s(mCurIndex++, iFrame);
             Alembic::AbcGeom::OSubDSchema::Sample samp;
             samp.setPositions( Alembic::Abc::V3fArraySample(
                 (const Imath::V3f *) &points.front(), points.size() / 3) );
-            mSubDSchema.set(samp, s);
+            mSubDSchema.set(samp);
         }
     }
 }
@@ -407,8 +402,7 @@ void MayaMeshWriter::writePoly(double iFrame,
     // if this mesh is animated, write out the animated geometry
     if (mIsGeometryAnimated)
     {
-        mPolySchema.set(samp,
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
+        mPolySchema.set(samp);
     }
     else
     {
@@ -539,16 +533,8 @@ void MayaMeshWriter::writeSubD(double iFrame, MDagPath & iDag,
         }
     }
 
-    // if this mesh is animated, write out the animated geometry first
-    if (mIsGeometryAnimated)
-    {
-        mSubDSchema.set(samp,
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
-    }
-    else
-    {
-        mSubDSchema.set(samp);
-    }
+    mSubDSchema.set(samp);
+
 }
 
 // the arrays being passed in are assumed to be empty

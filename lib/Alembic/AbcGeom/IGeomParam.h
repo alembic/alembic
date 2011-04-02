@@ -170,7 +170,7 @@ public:
     GeometryScope getScope()
     { return GetGeometryScope( m_valProp.getMetaData() ); }
 
-    AbcA::TimeSampling getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling();
 
     const std::string &getName();
 
@@ -453,7 +453,7 @@ const AbcA::MetaData &ITypedGeomParam<TRAITS>::getMetaData()
 
 //-*****************************************************************************
 template <class TRAITS>
-AbcA::TimeSampling ITypedGeomParam<TRAITS>::getTimeSampling()
+AbcA::TimeSamplingPtr ITypedGeomParam<TRAITS>::getTimeSampling()
 {
     if ( m_valProp )
     {

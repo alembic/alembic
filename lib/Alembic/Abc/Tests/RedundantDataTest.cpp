@@ -72,7 +72,7 @@ void makeDeepHierarchy( OObject parent, const int level )
     if ( level > DEPTH )
     {
         OCompoundProperty p = parent.getProperties();
-        OInt32ArrayProperty iap( p, "intArrayProp", TimeSamplingType() );
+        OInt32ArrayProperty iap( p, "intArrayProp", 0 );
         iap.set( intArraySamp );
         return;
     }

@@ -415,10 +415,9 @@ void addScale(const MFnDependencyNode & iTrans,
 
 MayaTransformWriter::MayaTransformWriter(double iFrame,
     Alembic::AbcGeom::OObject & iParent, MDagPath & iDag,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+    uint32_t iTimeIndex,
     bool iAddWorld, bool iWriteVisibility)
 {
-    mCurIndex = 0;
 
     Alembic::AbcGeom::XformOpVec opVec;
     std::vector<double> staticData;
@@ -427,12 +426,13 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     if (iDag.hasFn(MFn::kJoint))
     {
         MFnIkJoint joint(iDag);
-        Alembic::AbcGeom::OXform obj(iParent, joint.name().asChar(), iTimeType);
+        Alembic::AbcGeom::OXform obj(iParent, joint.name().asChar(),
+            iTimeIndex);
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
         mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, joint,
-            iTimeType, iWriteVisibility));
+            iTimeIndex, iWriteVisibility));
 
         if (!iAddWorld)
         {
@@ -453,8 +453,7 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
 
             if (animData.empty())
             {
-                mSchema.set(Alembic::Abc::DoubleArraySample(animData),
-                    Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
+                mSchema.set(Alembic::Abc::DoubleArraySample(animData));
             }
 
             return;
@@ -463,12 +462,13 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     else
     {
         MFnTransform trans(iDag);
-        Alembic::AbcGeom::OXform obj(iParent, trans.name().asChar(), iTimeType);
+        Alembic::AbcGeom::OXform obj(iParent, trans.name().asChar(),
+            iTimeIndex);
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
         mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, trans,
-            iTimeType, iWriteVisibility));
+            iTimeIndex, iWriteVisibility));
 
         if (!iAddWorld)
         {
@@ -488,8 +488,7 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
 
             if (animData.empty())
             {
-                mSchema.set(Alembic::Abc::DoubleArraySample(animData),
-                    Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
+                mSchema.set(Alembic::Abc::DoubleArraySample(animData));
             }
 
             return;
@@ -569,17 +568,15 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
 
     if (animData.size() > 0)
     {
-        mSchema.set(Alembic::Abc::DoubleArraySample(animData),
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
+        mSchema.set(Alembic::Abc::DoubleArraySample(animData));
     }
 }
 
 MayaTransformWriter::MayaTransformWriter(double iFrame,
     MayaTransformWriter & iParent, MDagPath & iDag,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+    uint32_t iTimeIndex,
     bool iWriteVisibility)
 {
-    mCurIndex = 0;
 
     Alembic::AbcGeom::XformOpVec opVec;
     std::vector<double> staticData;
@@ -590,12 +587,12 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         MFnIkJoint joint(iDag);
 
         Alembic::AbcGeom::OXform obj(iParent.getObject(), joint.name().asChar(),
-            iTimeType);
+            iTimeIndex);
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
         mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, joint,
-            iTimeType, iWriteVisibility));
+            iTimeIndex, iWriteVisibility));
 
         pushTransformStack(iFrame, joint, opVec, staticData, animData);
     }
@@ -603,12 +600,12 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     {
         MFnTransform trans(iDag);
         Alembic::AbcGeom::OXform obj(iParent.getObject(), trans.name().asChar(),
-            iTimeType);
+            iTimeIndex);
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
         mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, trans,
-            iTimeType, iWriteVisibility));
+            iTimeIndex, iWriteVisibility));
 
         pushTransformStack(iFrame, trans, opVec, staticData, animData);
     }
@@ -628,8 +625,7 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
 
     if (animData.size() > 0)
     {
-        mSchema.set(Alembic::Abc::DoubleArraySample(animData),
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
+        mSchema.set(Alembic::Abc::DoubleArraySample(animData));
     }
 }
 
@@ -653,8 +649,7 @@ void MayaTransformWriter::write(double iFrame)
             else
                 samples[i] = mSampledList[i].first.asDouble();
         }
-        mSchema.set(Alembic::Abc::DoubleArraySample(samples),
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
+        mSchema.set(Alembic::Abc::DoubleArraySample(samples));
     }
 }
 

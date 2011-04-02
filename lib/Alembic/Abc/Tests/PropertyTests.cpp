@@ -59,7 +59,7 @@ void writeSimpleProperties(const std::string &archiveName)
     const chrono_t dt = 1.0 / 24.0;
 
     TimeSamplingType tst( dt ); // uniform with cycle=dt
-    tst.setRetainConstantSampleTimes( true ); // don't throw time info away
+    TimeSampling ts(tst, 666.0);
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
@@ -67,15 +67,15 @@ void writeSimpleProperties(const std::string &archiveName)
                       archiveName, ErrorHandler::kThrowPolicy );
     OObject archiveTop = archive.getTop();
 
+    uint32_t tsidx = archive.addTimeSampling(ts);
 
     OObject foochild( archiveTop, "foochild" );
 
-    ODoubleProperty foodub( foochild.getProperties(), "foodub",
-                            TimeSamplingType() );
+    ODoubleProperty foodub( foochild.getProperties(), "foodub", 0 );
 
     for ( size_t i = 0 ; i < 10 ; i++ )
     {
-        foodub.set( 2.0, i );
+        foodub.set( 2.0 );
     }
 
     for (int ii=0; ii<numChildren; ii++)
@@ -90,15 +90,13 @@ void writeSimpleProperties(const std::string &archiveName)
         // Create a scalar property on this child object named 'mass'
         ODoubleProperty mass( childProps,  // owner
                               "mass", // name
-                              tst );
+                              tsidx );
 
         // Write out the samples
         for (int tt=0; tt<numSamples; tt++)
         {
             double mm = (1.0 + 0.1*tt); // vary the mass
-            // either one works. Is one the 'correct' method?
-            mass.set( mm,  OSampleSelector(tt, 666.0 + tt*dt ) );
-            //mass.set( mm,  OSampleSelector(tt) );
+            mass.set( mm );
 
         }
     }
@@ -232,19 +230,15 @@ void readSimpleProperties(const std::string &archiveName)
                     std::cout << " Unknown! (this is bad)" << std::endl;
             };
 
-            const TimeSampling &ts =
+            TimeSamplingPtr ts =
                 GetCompoundPropertyReaderPtr(props)->
                 getScalarProperty( propNames[jj] )->getTimeSampling();
 
-            bool hasSampleTimes = GetCompoundPropertyReaderPtr( props )->
-                getScalarProperty( propNames[jj] )->
-                getTimeSamplingType().getRetainConstantSampleTimes();
-
-            size_t numSamples = ts.getNumSamples();
+            size_t numSamples = ts->getNumSamples();
 
 
             std::cout << "    ..and "
-                      << ts.getTimeSamplingType() << std::endl
+                      << ts->getTimeSamplingType() << std::endl
                       << "    ..and " << numSamples << " samples at times: ";
 
 
@@ -252,7 +246,7 @@ void readSimpleProperties(const std::string &archiveName)
             {
                 std::cout << " ( ";
                 for (int ss=0; ss<numSamples; ss++)
-                    std::cout << ts.getSampleTime(ss) << " ";
+                    std::cout << ts->getSampleTime(ss) << " ";
                 std::cout << ")";
             }
             std::cout << std::endl;

@@ -68,7 +68,9 @@ void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
 {
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
-        iNode.getSchema().getTimeSampling(), index, ceilIndex);
+        iNode.getSchema().getTimeSampling(),
+        iNode.getSchema().getNumAnimSamples(),
+        index, ceilIndex);
 
     Alembic::Abc::M44d m; 
 
@@ -151,7 +153,8 @@ void read(double iFrame, Alembic::AbcGeom::IXform & iNode,
 {
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
-        iNode.getSchema().getTimeSampling(), index, ceilIndex);
+        iNode.getSchema().getTimeSampling(),
+        iNode.getSchema().getNumAnimSamples(), index, ceilIndex);
 
     if (alpha != 0 && index != ceilIndex &&
         iNode.getSchema().getNumAnimSamples() > 0)
@@ -526,7 +529,9 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
 
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
-        iNode.getSchema().getTimeSampling(), index, ceilIndex);
+        iNode.getSchema().getTimeSampling(), 
+        iNode.getSchema().getNumAnimSamples(),
+        index, ceilIndex);
 
     // there could be just one sample if it is repeated
     bool isAnim = (iNode.getSchema().getNumAnimSamples() > 1);

@@ -98,15 +98,15 @@ void Example1_MeshOut()
 
 
     // Set the sample.
-    mesh.set( mesh_samp, 0 );
+    mesh.set( mesh_samp );
 
     // change one of the schema's parameter's
     mesh_samp.setInterpolateBoundary( 1 );
-    mesh.set( mesh_samp, 1 );
+    mesh.set( mesh_samp );
 
     // test that the integer property doesn't latch to non-zero
     mesh_samp.setInterpolateBoundary( 0 );
-    mesh.set( mesh_samp, 2 );
+    mesh.set( mesh_samp );
 
     C3f color_val( 1.0, 0.0, 0.0 );
 
@@ -117,11 +117,11 @@ void Example1_MeshOut()
     OC3fGeomParam::Sample color_samp( val_samp, kConstantScope );
 
     // write red
-    color.set( color_samp, OSampleSelector(0, 0.0) );
+    color.set( color_samp );
 
     // now purple
     color_val.z = 1.0;
-    color.set( color_samp, OSampleSelector(1, 1.0) );
+    color.set( color_samp );
 
     std::cout << "Writing: " << archive.getName() << std::endl;
 }

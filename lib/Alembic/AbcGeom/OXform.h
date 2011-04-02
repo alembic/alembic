@@ -89,7 +89,8 @@ public:
         // 0 index
         if (tsPtr)
         {
-            m_tsidx = iParentObject->getArchive()->addTimeSampling(*tsPtr);
+            m_tsidx = iParentObject->getObject()->getArchive(
+                )->addTimeSampling(*tsPtr);
         }
 
         init();
@@ -113,7 +114,8 @@ public:
         // 0 index
         if (tsPtr)
         {
-            m_tsidx = iParentObject->getArchive()->addTimeSampling(*tsPtr);
+            m_tsidx = iParentObject->getObject()->getArchive(
+                )->addTimeSampling(*tsPtr);
         }
 
         init();

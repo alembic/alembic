@@ -78,9 +78,12 @@ void simpleTestOut( const std::string &iArchiveName )
     OV3fProperty ac0V3fp0( ac0Props, "ac0V3fp0" );
     ac0V3fp0.set( scalarV3fval );
 
+    std::vector < chrono_t > timeSamps(1, startTime);
+    TimeSampling ts(TimeSamplingType( dt ), timeSamps);
+    uint32_t tsidx = archive.addTimeSampling(ts);
+
     // now some array props
-    OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0",
-                                  TimeSamplingType( dt ) );
+    OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0", tsidx );
 
     chrono_t t = startTime;
     const size_t numPoints = 7;
@@ -90,14 +93,13 @@ void simpleTestOut( const std::string &iArchiveName )
 
     for ( size_t i = 0 ; i < numSamps ; ++i )
     {
-        OSampleSelector oss( i, t );
         for ( std::vector<V3f>::iterator iter = points.begin() ;
               iter != points.end() ; ++iter )
         {
             (*iter) = V3f( i + t, i + t, i + t );
         }
 
-        acc0V3fap0.set( points, oss );
+        acc0V3fap0.set( points );
         t += dt;
     }
 
@@ -160,7 +162,7 @@ void simpleTestIn( const std::string &iArchiveName )
         acc0V3fap0.get( acc0V3fap0SampPtr, i );
         size_t numPoints = acc0V3fap0SampPtr->size();
 
-        chrono_t time = acc0V3fap0.getTimeSampling().getSampleTime( i );
+        chrono_t time = acc0V3fap0.getTimeSampling()->getSampleTime( i );
 
         chrono_t compTime = startTime + ( i * dt );
 

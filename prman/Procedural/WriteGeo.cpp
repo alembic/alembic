@@ -40,54 +40,16 @@
 #include "SubDTags.h"
 
 //-*****************************************************************************
-void ProcessSimpleTransform( ISimpleXform &xform, ProcArgs &args )
-{
-    ISimpleXformSchema &xs = xform.getSchema();
-
-    const TimeSampling &ts = xs.getTimeSampling();
-
-    SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes( args, ts, sampleTimes );
-
-    bool multiSample = sampleTimes.size() > 1;
-
-    if ( multiSample )
-    {
-        WriteMotionBegin( args, sampleTimes );
-    }
-
-    for ( SampleTimeSet::iterator iter = sampleTimes.begin();
-          iter != sampleTimes.end(); ++iter )
-    {
-        ISampleSelector iss( *iter );
-
-        SimpleXformSample sample = xs.getValue( iss );
-
-        M44d m = sample.getMatrix();
-
-        if ( ! multiSample && m == M44d() )
-        {
-            continue;
-        }
-
-        WriteConcatTransform( m );
-    }
-
-    if ( multiSample )
-    {
-        RiMotionEnd();
-    }
-}
-
-//-*****************************************************************************
 void ProcessXform( IXform &xform, ProcArgs &args )
 {
     IXformSchema &xs = xform.getSchema();
 
-    const TimeSampling &ts = xs.getTimeSampling();
+    TimeSamplingPtr ts = xs.getTimeSampling();
+
+    size_t xformSamps = xs.getNumAnimSamples();
 
     SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes( args, ts, sampleTimes );
+    GetRelevantSampleTimes( args, ts, xformSamps, sampleTimes );
 
     bool multiSample = sampleTimes.size() > 1;
 
@@ -155,10 +117,10 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 {
     IPolyMeshSchema &ps = polymesh.getSchema();
 
-    const TimeSampling &ts = ps.getTimeSampling();
+    TimeSamplingPtr ts = ps.getTimeSampling();
 
     SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes( args, ts, sampleTimes );
+    GetRelevantSampleTimes( args, ts, ps.getNumSamples(), sampleTimes );
 
     bool multiSample = sampleTimes.size() > 1;
 
@@ -203,10 +165,10 @@ void ProcessSubD( ISubD &subd, ProcArgs &args )
 {
     ISubDSchema &ss = subd.getSchema();
 
-    const TimeSampling &ts = ss.getTimeSampling();
+    TimeSamplingPtr ts = ss.getTimeSampling();
 
     SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes( args, ts, sampleTimes );
+    GetRelevantSampleTimes( args, ts, ss.getNumSamples(), sampleTimes );
 
     bool multiSample = sampleTimes.size() > 1;
 

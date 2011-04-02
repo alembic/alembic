@@ -103,18 +103,18 @@ void simpleTestOut( const std::string &iArchiveName )
     OBoolProperty acc0bp0( acc0Props, "acc0bp0" );
     acc0bp0.set( false );
 
+    TimeSamplingType tst( 1.0/24.0 );
+    std::vector < chrono_t > timeSamps(1, 0.0);
+    TimeSamplingPtr ts( new TimeSampling(tst, timeSamps) );
+
     // now some array props
-    OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0",
-                                  TimeSamplingType( 1.0/24.0 ) );
+    OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0", ts );
 
-    OP3fArrayProperty acc0P3fap0( acc0Props, "acc0P3fap0",
-                                  TimeSamplingType( 1.0/24.0 ) );
+    OP3fArrayProperty acc0P3fap0( acc0Props, "acc0P3fap0", ts );
 
-    ON3fArrayProperty acc0N3fap0( acc0Props, "acc0N3fap0",
-                                  TimeSamplingType( 1.0/24.0 ) );
+    ON3fArrayProperty acc0N3fap0( acc0Props, "acc0N3fap0", ts );
 
-    OInt32ArrayProperty ac0iap0( ac0Props, "ac0iap0",
-                               TimeSamplingType( 1.0/24.0 ) );
+    OInt32ArrayProperty ac0iap0( ac0Props, "ac0iap0", ts );
 
     // make some data for our array props
     std::vector<V3f> v3fpoints( numV3fPoints );
@@ -124,16 +124,15 @@ void simpleTestOut( const std::string &iArchiveName )
 
     for ( size_t i = 0 ; i < numV3fSamps ; ++i )
     {
-        OSampleSelector oss( i, t );
         for ( std::vector<V3f>::iterator iter = v3fpoints.begin() ;
               iter != v3fpoints.end() ; ++iter )
         {
             (*iter) = V3f( i + t, i + t, i + t );
         }
 
-        acc0V3fap0.set( v3fpoints, oss );
-        acc0P3fap0.set( v3fpoints, oss );
-        acc0N3fap0.set( v3fpoints, oss );
+        acc0V3fap0.set( v3fpoints );
+        acc0P3fap0.set( v3fpoints );
+        acc0N3fap0.set( v3fpoints );
 
         t += dt;
     }
@@ -142,13 +141,12 @@ void simpleTestOut( const std::string &iArchiveName )
 
     for ( int i = 0 ; i < numIntSamps ; ++i )
     {
-        OSampleSelector oss( i, t );
         for ( int j = 0 ; j < numIntPoints ; ++j )
         {
             intpoints[j] = j + i;
         }
 
-        ac0iap0.set( intpoints, oss );
+        ac0iap0.set( intpoints );
         t += dt;
     }
 
@@ -279,7 +277,7 @@ void simpleTestIn( const std::string &iArchiveName )
         acc0P3fap0.get( acc0P3fap0SampPtr, i );
 
         size_t numPoints = acc0V3fap0SampPtr->size();
-        chrono_t time = acc0V3fap0.getTimeSampling().getSampleTime( i );
+        chrono_t time = acc0V3fap0.getTimeSampling()->getSampleTime( i );
 
         chrono_t compTime = v3fStartTime + ( i * dt );
 
@@ -314,7 +312,7 @@ void simpleTestIn( const std::string &iArchiveName )
         ac0iap0.get( ac0iap0SampPtr, i );
 
         size_t numPoints = ac0iap0SampPtr->size();
-        chrono_t time = ac0iap0.getTimeSampling().getSampleTime( i );
+        chrono_t time = ac0iap0.getTimeSampling()->getSampleTime( i );
 
         chrono_t compTime = intStartTime + ( i * dt );
 

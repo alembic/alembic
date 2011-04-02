@@ -100,7 +100,7 @@ bool endsWithArbAttr(const std::string & iStr)
 
 void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
     const MPlug& iPlug, Abc::OCompoundProperty & iParent,
-    AbcA::TimeSamplingType & iTimeType,
+    uint32_t iTimeIndex,
     AbcGeom::GeometryScope iScope,
     std::vector < PlugAndObjArray > & oArrayVec)
 {
@@ -113,7 +113,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OBoolGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -126,7 +126,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OCharGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -138,7 +138,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OInt16GeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -150,7 +150,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OInt32GeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -162,7 +162,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OFloatGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -174,7 +174,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::ODoubleGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -186,7 +186,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OV2sGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -198,7 +198,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OV3sGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -210,7 +210,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OV2iGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -222,7 +222,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OV3iGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -234,7 +234,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OV2fGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -250,13 +250,13 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             if (mfnAttr.isUsedAsColor())
             {
                 AbcGeom::OC3fGeomParam gp(iParent, plugName, false, iScope, 1,
-                    iTimeType);
+                    iTimeIndex);
                 p.prop = gp.getValueProperty();
             }
             else
             {
                 AbcGeom::OV3fGeomParam gp(iParent, plugName, false, iScope, 1,
-                    iTimeType);
+                    iTimeIndex);
                 p.prop = gp.getValueProperty();
             }
 
@@ -270,7 +270,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OV2dGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -282,7 +282,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcGeom::OV3dGeomParam gp(iParent, plugName, false, iScope, 1,
-                iTimeType);
+                iTimeIndex);
             p.prop = gp.getValueProperty();
             oArrayVec.push_back(p);
         }
@@ -294,7 +294,7 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
             p.plug = iPlug;
             p.obj = iAttr;
             AbcA::DataType dtype(Alembic::Util::kFloat64POD, 4);
-            p.prop = Abc::OArrayProperty(iParent, plugName, dtype, iTimeType);
+            p.prop = Abc::OArrayProperty(iParent, plugName, dtype, iTimeIndex);
             oArrayVec.push_back(p);
         }
         break;
@@ -306,7 +306,6 @@ void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
 
 bool MFnNumericDataToSample(MFnNumericData::Type iType,
     const MPlug& iPlug,
-    const Abc::OSampleSelector & iSelect,
     Abc::OArrayProperty & oProp)
 {
     size_t numElements =  iPlug.numElements();
@@ -334,7 +333,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -355,7 +354,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -375,7 +374,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -395,7 +394,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -415,7 +414,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -435,7 +434,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -457,7 +456,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -479,7 +478,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -501,7 +500,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -523,7 +522,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -545,7 +544,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -567,7 +566,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -589,7 +588,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -611,7 +610,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -634,7 +633,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(dimSize));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -648,7 +647,6 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
 
 bool MFnTypedDataToSample(MFnData::Type iType,
     const MPlug& iPlug,
-    const Abc::OSampleSelector & iSelect,
     Abc::OArrayProperty & oProp)
 {
     size_t numElements =  iPlug.numElements();
@@ -663,7 +661,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
         case MFnData::kNumeric:
         {
             MFnNumericData numObj(iPlug.asMObject());
-            return MFnNumericDataToSample(numObj.numericType(), iPlug, iSelect,
+            return MFnNumericDataToSample(numObj.numericType(), iPlug,
                 oProp);
         }
         break;
@@ -674,7 +672,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
             val[0] = iPlug.asString().asChar();
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(1));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -691,7 +689,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(length));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -708,7 +706,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(length));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -725,7 +723,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(length));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -745,7 +743,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(length));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -765,7 +763,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(length));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -785,7 +783,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
                 Alembic::Util::Dimensions(1));
-            oProp.set(samp, iSelect);
+            oProp.set(samp);
         }
         break;
 
@@ -799,19 +797,18 @@ bool MFnTypedDataToSample(MFnData::Type iType,
 
 
 bool attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
-    const Abc::OSampleSelector & iSelect,
     Abc::OArrayProperty & oProp)
 {
     if (iAttr.hasFn(MFn::kTypedAttribute))
     {
         MFnTypedAttribute typedAttr(iAttr);
-        return MFnTypedDataToSample(typedAttr.attrType(), iPlug, iSelect,
+        return MFnTypedDataToSample(typedAttr.attrType(), iPlug,
             oProp);
     }
     else if (iAttr.hasFn(MFn::kNumericAttribute))
     {
         MFnNumericAttribute numAttr(iAttr);
-        return MFnNumericDataToSample(numAttr.unitType(), iPlug, iSelect,
+        return MFnNumericDataToSample(numAttr.unitType(), iPlug,
             oProp);
     }
     else if (iAttr.hasFn(MFn::kUnitAttribute))
@@ -819,7 +816,7 @@ bool attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
         double val = iPlug.asDouble();
         AbcA::ArraySample samp(&val, oProp.getDataType(),
             Alembic::Util::Dimensions(1));
-        oProp.set(samp, iSelect);
+        oProp.set(samp);
         return true;
     }
     else if (iAttr.hasFn(MFn::kEnumAttribute))
@@ -827,7 +824,7 @@ bool attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
         int16_t val = iPlug.asShort();
         AbcA::ArraySample samp(&val, oProp.getDataType(),
             Alembic::Util::Dimensions(1));
-        oProp.set(samp, iSelect);
+        oProp.set(samp);
         return true;
     }
 
@@ -836,7 +833,7 @@ bool attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
 
 void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
     Abc::OCompoundProperty & iParent,
-    AbcA::TimeSamplingType & iTimeType,
+    uint32_t iTimeIndex,
     AbcGeom::GeometryScope iScope,
     std::vector < PlugAndObjArray > & oArrayVec)
 {
@@ -862,7 +859,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
         }
 
         createPropertyFromNumeric(numFn.unitType(), iAttr, iPlug, iParent,
-            iTimeType, iScope, oArrayVec);
+            iTimeIndex, iScope, oArrayVec);
     }
     else if (iAttr.hasFn(MFn::kTypedAttribute))
     {
@@ -886,7 +883,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::OStringGeomParam gp(iParent, plugName, false, iScope,
-                    1, iTimeType);
+                    1, iTimeIndex);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -898,7 +895,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::OStringGeomParam gp(iParent, plugName, false, iScope,
-                    1, iTimeType);
+                    1, iTimeIndex);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -910,7 +907,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::ODoubleGeomParam gp(iParent, plugName, false, iScope,
-                    1, iTimeType);
+                    1, iTimeIndex);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -922,7 +919,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::OInt32GeomParam gp(iParent, plugName, false, iScope,
-                    1, iTimeType);
+                    1, iTimeIndex);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -934,7 +931,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::OP3dGeomParam gp(iParent, plugName, false, iScope, 1,
-                    iTimeType);
+                    iTimeIndex);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -946,7 +943,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::OV3dGeomParam gp(iParent, plugName, false, iScope, 1,
-                    iTimeType);
+                    iTimeIndex);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -958,7 +955,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::OM44dGeomParam gp(iParent, plugName, false, iScope, 1,
-                    iTimeType);
+                    iTimeIndex);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -968,7 +965,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
             {
                 MFnNumericAttribute numAttr(iPlug.asMObject());
                 createPropertyFromNumeric(numAttr.unitType(), iAttr,
-                    iPlug, iParent, iTimeType, iScope, oArrayVec);
+                    iPlug, iParent, iTimeIndex, iScope, oArrayVec);
             }
             break;
 
@@ -989,7 +986,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
         p.plug = iPlug;
         p.obj = iAttr;
         AbcGeom::ODoubleGeomParam gp(iParent, plugName, false, iScope, 1,
-            iTimeType);
+            iTimeIndex);
         p.prop = gp.getValueProperty();
         oArrayVec.push_back(p);
     }
@@ -999,7 +996,7 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
         p.plug = iPlug;
         p.obj = iAttr;
         AbcGeom::OInt16GeomParam gp(iParent, plugName, false, iScope, 1,
-            iTimeType);
+            iTimeIndex);
         p.prop = gp.getValueProperty();
         oArrayVec.push_back(p);
     }
@@ -1014,11 +1011,9 @@ AttributesWriter::AttributesWriter(
     double iFrame,
     Abc::OCompoundProperty & iParent,
     const MFnDagNode & iNode,
-    AbcA::TimeSamplingType & iTimeType,
+    uint32_t iTimeIndex,
     bool iWriteVisibility)
 {
-    mCurIndex = 0;
-
     PlugAndObjScalar visPlug;
 
     unsigned int attrCount = iNode.attributeCount();
@@ -1088,8 +1083,8 @@ AttributesWriter::AttributesWriter(
             // static
             case 0:
             {
-                createPropertyFromMFnAttr(attr, plug, iParent, iTimeType, scope,
-                    staticPlugObjArrayVec);
+                createPropertyFromMFnAttr(attr, plug, iParent, iTimeIndex,
+                    scope, staticPlugObjArrayVec);
             }
             break;
 
@@ -1098,8 +1093,8 @@ AttributesWriter::AttributesWriter(
             // curve treat like sampled
             case 2:
             {
-                createPropertyFromMFnAttr(attr, plug, iParent, iTimeType, scope,
-                    mPlugObjArrayVec);
+                createPropertyFromMFnAttr(attr, plug, iParent, iTimeIndex,
+                    scope, mPlugObjArrayVec);
             }
             break;
         }
@@ -1110,18 +1105,11 @@ AttributesWriter::AttributesWriter(
     std::vector< PlugAndObjArray >::iterator jend =
         staticPlugObjArrayVec.end();
 
-    double frame = iFrame;
-    if (frame == DBL_MAX)
-        frame = 0;
-
-    Abc::OSampleSelector sel(0, frame);
-
     // write the statics
     for (; j != jend; j++)
     {
         MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
-        bool filledProp = attributeToPropertyPair(j->obj, j->plug, sel, 
-            j->prop);
+        bool filledProp = attributeToPropertyPair(j->obj, j->plug, j->prop);
 
         if (!filledProp)
         {
@@ -1138,8 +1126,7 @@ AttributesWriter::AttributesWriter(
     for (; j != jend; j++)
     {
         MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
-        bool filledProp = attributeToPropertyPair(j->obj, j->plug, sel, 
-            j->prop);
+        bool filledProp = attributeToPropertyPair(j->obj, j->plug,j->prop);
 
         if (!filledProp)
         {
@@ -1174,9 +1161,8 @@ AttributesWriter::AttributesWriter(
 
                 if (iFrame != DBL_MAX)
                 {
-                    Abc::OCharProperty bp(iParent, "visible",
-                        iTimeType);
-                    bp.set(visVal, Abc::OSampleSelector(mCurIndex, iFrame));
+                    Abc::OCharProperty bp(iParent, "visible", iTimeIndex);
+                    bp.set(visVal);
                     visPlug.prop = bp;
                     mAnimVisibility = visPlug;
                 }
@@ -1200,8 +1186,8 @@ AttributesWriter::AttributesWriter(
 
                 mAnimVisibility = visPlug;
                 int8_t visVal = -1;
-                Abc::OCharProperty bp(iParent, "visible", iTimeType);
-                bp.set(visVal, Abc::OSampleSelector(mCurIndex, iFrame));
+                Abc::OCharProperty bp(iParent, "visible", iTimeIndex);
+                bp.set(visVal);
                 visPlug.prop = bp;
                 mAnimVisibility = visPlug;
 
@@ -1224,22 +1210,18 @@ bool AttributesWriter::isAnimated()
     return  !mPlugObjArrayVec.empty() || !mAnimVisibility.plug.isNull();
 }
 
-void AttributesWriter::write(double iFrame)
+void AttributesWriter::write()
 {
-    mCurIndex ++;
 
     std::vector< PlugAndObjArray >::iterator j =
         mPlugObjArrayVec.begin();
     std::vector< PlugAndObjArray >::iterator jend =
         mPlugObjArrayVec.end();
 
-    Abc::OSampleSelector sel(mCurIndex, iFrame);
-
     for (; j != jend; j++)
     {
         MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
-        bool filledProp = attributeToPropertyPair(j->obj, j->plug, sel, 
-            j->prop);
+        bool filledProp = attributeToPropertyPair(j->obj, j->plug, j->prop);
 
         if (!filledProp)
         {
@@ -1259,7 +1241,7 @@ void AttributesWriter::write(double iFrame)
             visVal = 0;
         }
 
-        mAnimVisibility.prop.set(&visVal, sel);
+        mAnimVisibility.prop.set(&visVal);
     }
 
 }

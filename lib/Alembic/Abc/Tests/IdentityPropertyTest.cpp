@@ -44,7 +44,7 @@ using namespace Abc;
 
 //
 // The tests in this file are intended to exercize the Abc API;
-//  specifically writing and reading of identity( default) sampled
+//  specifically writing and reading of default sampled
 //  properties
 //
 
@@ -74,7 +74,7 @@ void writeProperty(const std::string &archiveName)
     for (int tt=0; tt<numSamples; tt++)
     {
         double mm = (33.0 + 0.1*tt); // vary the mass
-        mass.set( mm,  OSampleSelector(tt) );
+        mass.set( mm );
     }    
 
     std::cout << archiveName << " was successfully written" << std::endl;

@@ -178,7 +178,8 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParentObject->getArchive()->addTimeSampling(*tsPtr);
+            tsIndex = iParentObject->getObject()->getArchive(
+                )->addTimeSampling(*tsPtr);
         }
 
         // Meta data and error handling are eaten up by
@@ -205,7 +206,8 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParentObject->getArchive()->addTimeSampling(*tsPtr);
+            tsIndex = iParentObject->getObject()->getArchive(
+                )->addTimeSampling(*tsPtr);
         }
 
         // Meta data and error handling are eaten up by

@@ -51,12 +51,12 @@ class MayaTransformWriter
 
     MayaTransformWriter(double iFrame, Alembic::Abc::OObject & iParent,
         MDagPath & iDag, 
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+        uint32_t iTimeIndex,
         bool addWorld, bool iWriteVisibility);
 
     MayaTransformWriter(double iFrame, MayaTransformWriter & iParent,
         MDagPath & iDag,
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+        uint32_t iTimeIndex,
         bool iWriteVisibility);
 
     ~MayaTransformWriter();
@@ -69,7 +69,6 @@ class MayaTransformWriter
 
     Alembic::AbcGeom::OXformSchema mSchema;
     AttributesWriterPtr mAttrs;
-    size_t mCurIndex;
 
     void pushTransformStack(double iFrame, const MFnTransform & iTrans,
         Alembic::AbcGeom::XformOpVec & oOpVec,

@@ -301,17 +301,23 @@ bool removeDangleAlembicNodes()
 }
 
 double getWeightAndIndex(double iFrame,
-    const Alembic::AbcCoreAbstract::v1::TimeSampling & iTime,
+    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iTime, size_t numSamps,
     int64_t & oIndex, int64_t & oCeilIndex)
 {
-    std::pair<int64_t, double> floorIndex = iTime.getFloorIndex(iFrame);
+    if (numSamps == 0)
+        numSamps = 1;
+
+    std::pair<int64_t, double> floorIndex =
+        iTime->getFloorIndex(iFrame, numSamps);
+
     oIndex = floorIndex.first;
     oCeilIndex = oIndex;
 
     if (fabs(iFrame - floorIndex.second) < 0.0001)
         return 0.0;
 
-    std::pair<int64_t, double> ceilIndex = iTime.getCeilIndex(iFrame);
+    std::pair<int64_t, double> ceilIndex =
+        iTime->getCeilIndex(iFrame, numSamps);
 
     if (oIndex == ceilIndex.first)
         return 0.0;
