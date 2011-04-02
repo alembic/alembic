@@ -95,14 +95,10 @@ extern "C" GLEWContext *glewGetContext();
 
 #include <GL/gl.h>
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #include <GL/wglew.h>
-#endif
-#ifdef WIN64
-#include <GL/wglew.h>
-
+#include <GL/glut.h>
 #else
-
 #include <GL/glxew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>

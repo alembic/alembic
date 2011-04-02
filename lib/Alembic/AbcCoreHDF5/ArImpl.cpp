@@ -53,7 +53,7 @@ ArImpl::ArImpl( const std::string &iFileName,
     // OPEN THE FILE!
     htri_t exi = H5Fis_hdf5( m_fileName.c_str() );
     ABCA_ASSERT( exi == 1, "Nonexistent File: " << m_fileName );
-    
+
     m_file = H5Fopen( m_fileName.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
     ABCA_ASSERT( m_file >= 0,
                  "Could not open file: " << m_fileName );
@@ -69,9 +69,15 @@ ArImpl::ArImpl( const std::string &iFileName,
 
     // Read the top object
     m_top = new TopOrImpl( *this, m_file );
-
-
 }
+
+//-*****************************************************************************
+ArImpl::ArImpl( const ArImpl &iCopy )
+  : m_fileName( iCopy.m_fileName )
+  , m_file( iCopy.m_file )
+  , m_top( iCopy.m_top )
+  , m_readArraySampleCache( iCopy.m_readArraySampleCache )
+{}
 
 //-*****************************************************************************
 const std::string &ArImpl::getName() const

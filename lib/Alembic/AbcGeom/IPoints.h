@@ -133,7 +133,12 @@ public:
         init( iArg0, iArg1 );
     }
 
-    //! Default copy constructor used.
+    //! Copy constructor.
+    IPointsSchema(const IPointsSchema& iCopy)
+    {
+        *this = iCopy;
+    }
+
     //! Default assignment operator used.
 
     //-*************************************************************************

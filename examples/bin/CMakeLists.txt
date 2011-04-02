@@ -32,7 +32,7 @@
 ##
 ##-*****************************************************************************
 
-IF ( GLUT_Xmu_LIBRARY )
+IF ( GLUT_Xmu_LIBRARY OR WINDOWS)
   MESSAGE( STATUS "Including GlutSkeleton" )
   ADD_SUBDIRECTORY( GlutSkeleton )
 

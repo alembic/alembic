@@ -73,13 +73,17 @@ public:
     //-*************************************************************************
     // From std::vector
     TypedArraySample( const value_vector &iVec )
-      : AbcA::ArraySample( reinterpret_cast<const void *>( &iVec.front() ),
+      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ? 
+                                                           &iVec.front() :
+                                                           NULL ),
                            TRAITS::dataType(), Dimensions( iVec.size() ) ) {}
 
     // This is for the case in which the data is multi-dimensional
     TypedArraySample( const value_vector &iVec,
                       const Dimensions &iDims )
-      : AbcA::ArraySample( reinterpret_cast<const void *>( &iVec.front() ),
+      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ? 
+                                                           &iVec.front() :
+                                                           NULL ),
                            TRAITS::dataType(), iDims )
     {
         ABCA_ASSERT( iDims.numPoints() == iVec.size(),

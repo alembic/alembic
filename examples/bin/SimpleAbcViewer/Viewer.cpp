@@ -251,8 +251,13 @@ void RenderIt()
     const char *templ = "/var/tmp/SimpleAbcViewer_camera.XXXXXX";
     char *buffer = new char[strlen( templ ) + 1];
     strcpy( buffer, templ );
+#ifndef PLATFORM_WINDOWS
     int _dummy1 = mkstemp( buffer );
+#endif
     std::string cameraFileName = buffer;
+#ifdef PLATFORM_WINDOWS
+    cameraFileName = "SimpleAbcViewer_camera.XXXXXX";
+#endif
 
     float shutterOpenTime = -0.125f + ( float )g_transport->getCurrentFrame();
     float shutterCloseTime = 0.125f + ( float )g_transport->getCurrentFrame();

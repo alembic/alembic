@@ -115,7 +115,7 @@ ArraySample::Key ArraySample::getKey() const
                 for (size_t k = 0; k < wlen; ++k)
                     v[k] = wstr[k];
 
-                md5.update(&(v.front()), v.size());
+                md5.update( v.size() == 0 ? NULL : &(v.front()), v.size() );
             }
 
             // append a 0 for the NULL seperator character

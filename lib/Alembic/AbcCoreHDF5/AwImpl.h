@@ -54,9 +54,11 @@ class AwImpl : public AbcA::ArchiveWriter
 {
 private:
     friend struct WriteArchive;
-    
+
     AwImpl( const std::string &iFileName,
             const AbcA::MetaData &iMetaData );
+
+    AwImpl( const AwImpl &iCopy );
 
 public:
     virtual ~AwImpl();

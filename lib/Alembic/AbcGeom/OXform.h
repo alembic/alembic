@@ -109,7 +109,12 @@ public:
         init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
     }
 
-    //! Default copy constructor used.
+    //! Explicit copy constructor to work around MSVC bug
+    OXformSchema( const OXformSchema &iCopy )
+    {
+        *this = iCopy;
+    }
+
     //! Default assignment operator used.
 
     //-*************************************************************************

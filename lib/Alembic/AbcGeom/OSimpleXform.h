@@ -73,6 +73,12 @@ public:
     //! SimpleXform function set
     OSimpleXformSchema() {}
 
+    //! Copy constructor.
+    OSimpleXformSchema(const OSimpleXformSchema& iCopy)
+    {
+        *this = iCopy;
+    }
+
     //! This templated, primary constructor creates a new simple xform writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object
     //! which can intrusively be converted to an CompoundPropertyWriterPtr

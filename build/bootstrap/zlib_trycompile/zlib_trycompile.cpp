@@ -19,7 +19,9 @@
  */
 
 #include <stdio.h>
-#include <unistd.h>
+#ifdef PLATFORM_WINDOWS
+#  include <unistd111.h>
+#endif
 #include <string.h>
 #include <assert.h>
 #include "zlib.h"

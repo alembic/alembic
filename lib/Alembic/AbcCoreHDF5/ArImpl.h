@@ -57,6 +57,8 @@ private:
     ArImpl( const std::string &iFileName,
             AbcA::ReadArraySampleCachePtr iCache );
 
+    ArImpl( const ArImpl &iCopy );
+
 public:
     virtual ~ArImpl();
 

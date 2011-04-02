@@ -76,8 +76,8 @@ protected:
     std::string m_currentObjectName;
 
     std::vector<V3f> m_vertices;
-    std::vector<int> m_indices;
-    std::vector<int> m_counts;
+    std::vector<int32_t> m_indices;
+    std::vector<int32_t> m_counts;
 };
 
 } // End namespace WFObjConvert

@@ -153,8 +153,8 @@ IF ( NOT WINDOWS )
   ENDIF()
 ELSE()
   SET( MAYA_EXTENSION ".mll" )
-  SET( MAYA_COMPILE_FLAGS "/MT" )
-  SET( MAYA_LINK_FLAGS "/MT" )
+  SET( MAYA_COMPILE_FLAGS "/MD" )
+  SET( MAYA_LINK_FLAGS " " )
 ENDIF()
 
 #-******************************************************************************
@@ -163,7 +163,8 @@ ENDIF()
 #-******************************************************************************
 #-******************************************************************************
 IF( MAYA_INCLUDE_PATH )
-  SET( MAYA_FOUND 1 CACHE STRING "Set to 1 if Maya is found, 0 otherwise" )
+#  SET( MAYA_FOUND 1 CACHE STRING "Set to 1 if Maya is found, 0 otherwise" )
+  SET( MAYA_FOUND 1 )
   MESSAGE( STATUS "Found Maya2011!" )
 ELSE( MAYA_INCLUDE_PATH )
   SET( MAYA_FOUND 0 CACHE STRING "Set to 1 if Maya is found, 0 otherwise" )

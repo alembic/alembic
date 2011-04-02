@@ -309,9 +309,14 @@ void doParseOBJ( Reader &iReadInto,
     size_t lineCount = 1;
     while ( std::getline( iStream, str ) )
     {
-        if ( str.empty() )
+        if ( iStream.eof() )
         {
             break;
+        }
+        
+        if ( str.empty() )
+        {
+            continue;
         }
 
         std::string::const_iterator iter = str.begin();

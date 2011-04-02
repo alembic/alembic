@@ -78,6 +78,15 @@ AwImpl::AwImpl( const std::string &iFileName,
 }
 
 //-*****************************************************************************
+AwImpl::AwImpl( const AwImpl &iCopy )
+  : m_fileName( iCopy.m_fileName )
+  , m_metaData( iCopy.m_metaData )
+  , m_file( iCopy.m_file )
+  , m_top( iCopy.m_top )
+  , m_writtenArraySampleMap( iCopy.m_writtenArraySampleMap )
+{}
+
+//-*****************************************************************************
 const std::string &AwImpl::getName() const
 {
     return m_fileName;

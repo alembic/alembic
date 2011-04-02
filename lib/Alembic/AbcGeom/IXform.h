@@ -111,6 +111,12 @@ public:
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }
 
+    //! explicit copy constructor to work around Windows compiler bug
+    IXformSchema( const IXformSchema &iCopy )
+    {
+        *this = iCopy;
+    }
+
     AbcA::TimeSampling getTimeSampling();
 
     bool isConstant() const { return m_isConstant; }

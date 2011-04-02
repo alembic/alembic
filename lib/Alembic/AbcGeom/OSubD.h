@@ -319,7 +319,12 @@ public:
         init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
     }
 
-    //! Default copy constructor used.
+    //! Copy constructor.
+    OSubDSchema(const OSubDSchema& iCopy)
+    {
+        *this = iCopy;
+    }
+
     //! Default assignment operator used.
 
     //-*************************************************************************

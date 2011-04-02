@@ -67,7 +67,7 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
                   ${PLIBS}
                   ${ALEMBIC_ILMBASE_LIBS}
                   ${ZLIB_LIBRARIES}
-                  m )
+                  ${EXTERNAL_MATH_LIBS} )
 
   INCLUDE_DIRECTORIES( "/usr/include/python2.6" "${ALEMBIC_SOURCE_DIR}/lib" )
 

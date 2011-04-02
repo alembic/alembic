@@ -292,8 +292,14 @@ MStatus AbcExportSelected( const Parameters &iConfig )
 
 } // End namespace AlembicSimpleAbcExport
 
+#ifdef PLATFORM_WINDOWS
+  #define MLL_EXPORT __declspec(dllexport)
+#else
+  #define MLL_EXPORT
+#endif
+
 //-*****************************************************************************
-MStatus initializePlugin( MObject obj )
+MLL_EXPORT MStatus initializePlugin( MObject obj )
 {
     MStatus status;
     MFnPlugin plugin( obj, "Alembic", "1.0", "Any" );
@@ -314,7 +320,7 @@ MStatus initializePlugin( MObject obj )
 }
 
 //-*****************************************************************************
-MStatus uninitializePlugin( MObject obj )
+MLL_EXPORT MStatus uninitializePlugin( MObject obj )
 {
     
     MStatus status;

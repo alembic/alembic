@@ -111,6 +111,12 @@ public:
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }
 
+    //! Copy constructor.
+    ISimpleXformSchema(const ISimpleXformSchema& iCopy)
+    {
+        *this = iCopy;
+    }
+
     //-*************************************************************************
     // SAMPLE STUFF
     //-*************************************************************************

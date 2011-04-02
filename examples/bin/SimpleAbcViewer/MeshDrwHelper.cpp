@@ -112,12 +112,12 @@ void MeshDrwHelper::update( V3fArraySamplePtr iP,
     }
 
     // Make triangles.
-    ssize_t faceIndexBegin = 0;
-    ssize_t faceIndexEnd = 0;
+    size_t faceIndexBegin = 0;
+    size_t faceIndexEnd = 0;
     for ( size_t face = 0; face < numFaces; ++face )
     {
         faceIndexBegin = faceIndexEnd;
-        ssize_t count = (*m_meshCounts)[face];
+        size_t count = (*m_meshCounts)[face];
         faceIndexEnd = faceIndexBegin + count;
 
         // Check this face is valid
@@ -139,7 +139,7 @@ void MeshDrwHelper::update( V3fArraySamplePtr iP,
 
         // Checking indices are valid.
         bool goodFace = true;
-        for ( ssize_t fidx = faceIndexBegin;
+        for ( size_t fidx = faceIndexBegin;
               fidx < faceIndexEnd; ++fidx )
         {
             if ( (*m_meshIndices)[fidx] >= numPoints )

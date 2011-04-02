@@ -58,16 +58,6 @@ SET( VERSION ${PROJECT_VERSION} )
 
 MESSAGE(STATUS "CMAKE SYSTEM NAME = ${CMAKE_SYSTEM_NAME}" )
 
-# Set some debug vs opt flags
-IF ( "${CMAKE_BUILD_TYPE}" MATCHES "Debug" )
-  ADD_DEFINITIONS( -DDEBUG=1 -UNDEBUG )
-  IF ( NOT WINDOWS )
-    SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wreturn-type -Werror" )
-  ENDIF()
-ELSEIF ( "${CMAKE_BUILD_TYPE}" MATCHES "Release" )
-  ADD_DEFINITIONS( -DNDEBUG=1 -UDEBUG -O3 )
-ENDIF()
-
 # Windows flag
 SET( WINDOWS FALSE )
 IF( "${CMAKE_SYSTEM_NAME}" MATCHES "Windows" )
@@ -84,6 +74,25 @@ IF( "${CMAKE_SYSTEM_NAME}" MATCHES "Linux" )
   SET( LINUX TRUE )
 ENDIF()
 
+# Set some debug vs opt flags
+IF ( "${CMAKE_BUILD_TYPE}" MATCHES "Debug" )
+  ADD_DEFINITIONS( -DDEBUG=1 -UNDEBUG )
+ELSEIF ( "${CMAKE_BUILD_TYPE}" MATCHES "Release" )
+  ADD_DEFINITIONS( -DNDEBUG=1 -UDEBUG )
+  IF ( NOT WINDOWS )
+    ADD_DEFINITIONS( -O3 )
+  ENDIF()
+ENDIF()
+
+IF ( NOT WINDOWS )
+  SET(EXTERNAL_MATH_LIBS "-lm")
+ELSE()
+  SET(EXTERNAL_MATH_LIBS "")
+ENDIF()
+
+IF ( NOT WINDOWS )
+  SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wreturn-type -Werror" )
+ENDIF()
 
 IF( ${WINDOWS} )
   ADD_DEFINITIONS( -DPLATFORM_WINDOWS -DPLATFORM=WINDOWS )
@@ -93,6 +102,16 @@ ELSEIF( ${DARWIN} )
 ELSE()
   ADD_DEFINITIONS( -DPLATFORM_LINUX -DPLATFORM=LINUX )
 ENDIF()
+
+if (MSVC AND DEFINED BUILD_STATIC_LIBS AND BUILD_STATIC_LIBS)
+	MESSAGE(STATUS "Replacing /MD with /MT for compiles" )
+	foreach (MODE "_DEBUG" "_MINSIZEREL" "_RELEASE" "_RELWITHDEBINFO")
+		string(REPLACE "/MD" "/MT" TMP "${CMAKE_C_FLAGS${MODE}}")
+		set(CMAKE_C_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
+		string(REPLACE "/MD" "/MT" TMP "${CMAKE_CXX_FLAGS${MODE}}")
+		set(CMAKE_CXX_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
+	endforeach (MODE)
+endif ()
 
 #-******************************************************************************
 #-******************************************************************************
