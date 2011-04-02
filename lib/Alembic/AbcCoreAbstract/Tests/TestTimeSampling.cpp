@@ -89,11 +89,9 @@ void validateTimeSampling( const AbcA::TimeSampling &timeSampling,
     std::cout << std::endl << "with a period of " << period << std::endl
               << std::endl;
 
-    // acyclic can't be sampled more times than it has samples for
-    TESTING_MESSAGE_ASSERT( timeSamplingType.isAcyclic() &&
+    TESTING_MESSAGE_ASSERT( timeSamplingType.isAcyclic() ||
         numSamplesPerCycle == timeSampling.getNumSamples(),
-        "Number of samples given does not match number of samples returned"
-               );
+        "Number of samples given doesn't match number returned" );
 
     //-*************************************************************************
     // acyclic case
@@ -141,7 +139,8 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
 
     const size_t numStoredTimes = timeSampling.getNumSamples();
 
-    TESTING_MESSAGE_ASSERT( numStoredTimes == numSamplesPerCycle,
+    TESTING_MESSAGE_ASSERT( timeSamplingType.isAcyclic() ||
+        numStoredTimes == numSamplesPerCycle,
         "The number of stored times in the vector of times must match the "
         "number of samples per cycle." );
 

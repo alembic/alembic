@@ -345,13 +345,12 @@ ReadTimeSamplingType( hid_t iParent,
         ABCA_ASSERT( spc > 1, "Corrupt TimeSamplingType spc: " << spc );
 
         chrono_t tpc = 1.0;
-        ABCA_ASSERT( H5Aexists( iParent, nameTPC.c_str() ) > 0,
-                     "Missing time per cycle attribute: " << nameTPC );
 
-        ReadScalar( iParent, nameTPC,
-                    H5T_IEEE_F64LE,
-                    H5T_NATIVE_DOUBLE,
-                    ( void * )&tpc );
+        if (H5Aexists( iParent, nameTPC.c_str() ) > 0)
+        {
+            ReadScalar( iParent, nameTPC, H5T_IEEE_F64LE,
+                H5T_NATIVE_DOUBLE, ( void * )&tpc );
+        }
 
         ABCA_ASSERT( tpc > 0.0 && tpc <
                      AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE,
@@ -627,6 +626,8 @@ bool ReadNumSamples( hid_t iParent,
             oFirstChangedIndex = numSamps[1];
             oLastChangedIndex = numSamps[2];
         }
+
+        return true;
     }
 
     // If we get here, we have to infer the number of samples based

@@ -74,7 +74,7 @@ void testTimeSamplingScalar()
 
         AbcA::ScalarPropertyWriterPtr swp =
             parent->createScalarProperty("uniform", AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kInt32POD, 1), 0);
+                AbcA::DataType(Alembic::Util::kInt32POD, 1), tsid);
 
         Alembic::Util::int32_t i = 0;
 

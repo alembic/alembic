@@ -118,13 +118,14 @@ void testProps()
         TESTING_ASSERT( props->getNumProperties() == 2 );
 
         ScalarPropertyReaderPtr intProp = props->getScalarProperty( "intProp" );
-
+        TESTING_ASSERT( intProp->isConstant() );
         TESTING_ASSERT( intProp->getNumSamples() == 1 );
 
         ArrayPropertyReaderPtr floatArrayProp = \
             props->getArrayProperty( "floatArrayProp" );
 
-        TESTING_ASSERT( floatArrayProp->getNumSamples() == 1 );
+        TESTING_ASSERT( floatArrayProp->getNumSamples() == 500 );
+        TESTING_ASSERT( floatArrayProp->isConstant() );
 
     }
 }

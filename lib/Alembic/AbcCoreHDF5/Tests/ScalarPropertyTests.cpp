@@ -113,7 +113,7 @@ void testWeirdStringScalar()
 
             AbcA::ScalarPropertyWriterPtr allEmptyWrtPtr =
                 props->createScalarProperty("allEmpty", AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kStringPOD, 3), 1);
+                    AbcA::DataType(Alembic::Util::kStringPOD, 3), 0);
 
             // one of the strings has a NULL char in it
             TESTING_ASSERT_THROW(
@@ -124,7 +124,7 @@ void testWeirdStringScalar()
 
             AbcA::ScalarPropertyWriterPtr partEmptyStrPtr =
                 props->createScalarProperty("partEmpty", AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kStringPOD, 6), 1);
+                    AbcA::DataType(Alembic::Util::kStringPOD, 6), 0);
 
             partEmptyStrPtr->setSample(&(partEmptyStr.front()));
         }
@@ -514,11 +514,7 @@ void testRepeatedScalarData()
         swp->setSample(&(ui2.front()));
         swp->setSample(&(ui.front()));
         swp->setSample(&(ui.front()));
-        swp->setSample( &(ui.front()));
-
-        // we already wrote this
-        TESTING_ASSERT_THROW(swp->setSample(&(ui2.front())),
-            Alembic::Util::Exception);
+        swp->setSample(&(ui.front()));
 
         AbcA::ScalarPropertyWriterPtr swp2 =
             parent->createScalarProperty("float32", AbcA::MetaData(),
@@ -580,7 +576,7 @@ void testRepeatedScalarData()
             {
                 case Alembic::Util::kUint16POD:
                 {
-                    TESTING_ASSERT( sp->getNumSamples() == 1 );
+                    TESTING_ASSERT( sp->getNumSamples() == 4 );
 
                     const AbcA::TimeSamplingPtr t = sp->getTimeSampling();
                     TESTING_ASSERT( sp->isConstant() );

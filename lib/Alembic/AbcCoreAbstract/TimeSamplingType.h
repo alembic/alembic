@@ -107,7 +107,7 @@ public:
               m_timePerCycle < ACYCLIC_TIME_PER_CYCLE &&
 
               // and valid samples per cycle
-              m_numSamplesPerCycle > 1 &&
+              m_numSamplesPerCycle > 0 &&
               m_numSamplesPerCycle < ACYCLIC_NUM_SAMPLES ),
             "Invalid Time Sampling Type, time per cycle: "
             << m_timePerCycle << " samples per cycle: "

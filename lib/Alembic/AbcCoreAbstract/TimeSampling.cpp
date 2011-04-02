@@ -76,7 +76,7 @@ TimeSampling::TimeSampling( const TimeSamplingType &iTimeSamplingType,
 void TimeSampling::init()
 {
     size_t numSamples = m_sampleTimes.size();
-    ABCA_ASSERT ( numSamples == 
+    ABCA_ASSERT ( m_timeSamplingType.isAcyclic() || numSamples == 
         m_timeSamplingType.getNumSamplesPerCycle(),
         "Incorrect number of time samples specified, expected " << 
         m_timeSamplingType.getNumSamplesPerCycle() << ", got: " << 
