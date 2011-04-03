@@ -78,16 +78,17 @@ void simpleTestOut( const std::string &iArchiveName )
                       iArchiveName );
     OObject archiveTop = archive.getTop();
 
-    std::vector < chrono_t > timeSamps(1, g_doubleStartTime);
+    std::vector < chrono_t > timeSamps(g_numDoubleSamps);
 
     TimeSamplingType utst( g_dt  ); // uniform time sampling
-    TimeSamplingPtr uts( new TimeSampling(utst, timeSamps) );
+    TimeSamplingPtr uts( new TimeSampling(g_dt, g_doubleStartTime) );
 
     TimeSamplingType atst( TimeSamplingType::kAcyclic ); // acyclic
-    chrono_t t = g_doubleStartTime + g_dt;
-    for ( size_t j = 1 ; j < g_numDoubleSamps ; j++ )
+    chrono_t t = g_doubleStartTime;
+    for ( size_t j = 0 ; j < g_numDoubleSamps ; j++ )
     {
-        timeSamps.push_back(t);
+        timeSamps[j] = t;
+        t += g_dt;
     }
     TimeSamplingPtr ats( new TimeSampling(atst, timeSamps) );
 

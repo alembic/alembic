@@ -92,7 +92,7 @@ void simpleTestOut()
             OCompoundProperty( spaniard, kTop ),
             "pointy", tsidx);
 
-        for ( index_t idx = 0; idx < 37; ++idx )
+        for ( index_t idx = 0; idx < 36; ++idx )
         {
             if ( idx == 0 || gen() > 0.7 )
             {
@@ -102,9 +102,7 @@ void simpleTestOut()
                     (*piter) = V3d( gen(), gen(), gen() );
                 }
             }
-
             pointy.set( points );
-
             sampTime += gen();
         }
 

@@ -78,8 +78,7 @@ void simpleTestOut( const std::string &iArchiveName )
     OV3fProperty ac0V3fp0( ac0Props, "ac0V3fp0" );
     ac0V3fp0.set( scalarV3fval );
 
-    std::vector < chrono_t > timeSamps(1, startTime);
-    TimeSampling ts(TimeSamplingType( dt ), timeSamps);
+    TimeSampling ts(dt, startTime);
     uint32_t tsidx = archive.addTimeSampling(ts);
 
     // now some array props

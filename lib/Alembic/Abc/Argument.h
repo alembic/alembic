@@ -43,6 +43,14 @@
 namespace Alembic {
 namespace Abc {
 
+// place holder used by the default constructor of Argument, used so the visitor
+// can differentiate between no arguments being set and the uint32_t time
+// sampling index
+enum ArgumentDefaultFlag
+{
+    kArgumentDefault
+};
+
 //-*****************************************************************************
 // CJH: I'm not terribly fond of the boost::variant class, and I particularly
 // dislike that I'm copying MetaData by value. However, at the moment, it is
@@ -63,6 +71,7 @@ public:
         m_timeSamplingIndex( iTimeIndex ),
         m_matching( iMatch ){}
 
+    void operator()( const ArgumentDefaultFlag & ) {}
     void operator()( const uint32_t & iTimeSamplingIndex)
     { m_timeSamplingIndex = iTimeSamplingIndex; }
 
@@ -111,7 +120,7 @@ private:
 class Argument
 {
 public:
-    Argument() : m_variant( ( uint32_t )0 ) {}
+    Argument() : m_variant( kArgumentDefault ) {}
     Argument( uint32_t iTsIndex) : m_variant( iTsIndex ) {}
     Argument( ErrorHandler::Policy iPolicy ) : m_variant( iPolicy ) {}
     Argument( const AbcA::MetaData &iMetaData ) : m_variant( iMetaData ) {}
@@ -124,7 +133,8 @@ public:
     }
 
 private:
-    typedef boost::variant<uint32_t,
+    typedef boost::variant<ArgumentDefaultFlag,
+                           uint32_t,
                            ErrorHandler::Policy,
                            AbcA::MetaData,
                            AbcA::TimeSamplingPtr,
