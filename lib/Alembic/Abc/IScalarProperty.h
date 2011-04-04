@@ -38,7 +38,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/IArgument.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/ISampleSelector.h>
 #include <Alembic/Abc/IBaseProperty.h>
 #include <Alembic/Abc/ICompoundProperty.h>
@@ -73,7 +73,7 @@ public:
     IScalarProperty( OBJECT_PTR iParentObject,
                      const std::string &iName,
 
-                     const IArgument &iArg0 = IArgument() );
+                     const Argument &iArg0 = Argument() );
 
     //! This attaches an IScalarProperty wrapper around an existing
     //! ScalarPropertyReaderPtr, with an optional error handling policy.
@@ -133,7 +133,7 @@ private:
 
                ErrorHandler::Policy iParentPolicy,
 
-               const IArgument &iArg0 );
+               const Argument &iArg0 );
 };
 
 //-*****************************************************************************
@@ -144,7 +144,7 @@ private:
 template <class CPROP_PTR>
 inline IScalarProperty::IScalarProperty( CPROP_PTR iParentProp,
                                          const std::string &iName,
-                                         const IArgument &iArg0 )
+                                         const Argument &iArg0 )
 {
     init( GetCompoundPropertyReaderPtr( iParentProp ), iName,
           GetErrorHandlerPolicy( iParentProp ), iArg0 );

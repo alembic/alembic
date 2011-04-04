@@ -188,11 +188,11 @@ ICompoundProperty IObject::getProperties()
 void IObject::init( AbcA::ObjectReaderPtr iParent,
                     const std::string &iName,
                     ErrorHandler::Policy iParentPolicy,
-                    const IArgument &iArg0 )
+                    const Argument &iArg0 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::init()" );
 
-    IArguments args( iParentPolicy );
+    Arguments args( iParentPolicy );
     iArg0.setInto( args );
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );

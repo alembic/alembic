@@ -77,8 +77,8 @@ public:
     template <class CPROP_PTR>
     IXformSchema( CPROP_PTR iParentObject,
                   const std::string &iName,
-                  const Abc::IArgument &iArg0 = Abc::IArgument(),
-                  const Abc::IArgument &iArg1 = Abc::IArgument() )
+                  const Abc::Argument &iArg0 = Abc::Argument(),
+                  const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<XformSchemaInfo>( iParentObject, iName,
                                        iArg0, iArg1 )
     {
@@ -92,8 +92,8 @@ public:
     template <class CPROP_PTR>
     explicit IXformSchema( CPROP_PTR iParentObject,
 
-                           const Abc::IArgument &iArg0 = Abc::IArgument(),
-                           const Abc::IArgument &iArg1 = Abc::IArgument() )
+                           const Abc::Argument &iArg0 = Abc::Argument(),
+                           const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<XformSchemaInfo>( iParentObject, iArg0, iArg1 )
     {
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
@@ -104,8 +104,8 @@ public:
     explicit IXformSchema( CPROP_PTR iThis,
                            Abc::WrapExistingFlag iFlag,
 
-                           const Abc::IArgument &iArg0 = Abc::IArgument(),
-                           const Abc::IArgument &iArg1 = Abc::IArgument() )
+                           const Abc::Argument &iArg0 = Abc::Argument(),
+                           const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<XformSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );

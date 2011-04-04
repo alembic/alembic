@@ -38,7 +38,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/IArgument.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/ISampleSelector.h>
 #include <Alembic/Abc/IBaseProperty.h>
 #include <Alembic/Abc/ICompoundProperty.h>
@@ -74,8 +74,8 @@ public:
     IArrayProperty( OBJECT_PTR iParentObject,
                     const std::string &iName,
 
-                    const IArgument &iArg0 = IArgument(),
-                    const IArgument &iArg1 = IArgument() );
+                    const Argument &iArg0 = Argument(),
+                    const Argument &iArg1 = Argument() );
 
     //! This attaches an IArrayProperty wrapper around an existing
     //! ArrayPropertyReaderPtr, with an optional error handling policy.
@@ -147,8 +147,8 @@ private:
 
                ErrorHandler::Policy iParentPolicy,
 
-               const IArgument &iArg0,
-               const IArgument &iArg1 );
+               const Argument &iArg0,
+               const Argument &iArg1 );
 };
 
 //-*****************************************************************************
@@ -159,8 +159,8 @@ private:
 template <class CPROP_PTR>
 inline IArrayProperty::IArrayProperty( CPROP_PTR iParentProp,
                                        const std::string &iName,
-                                       const IArgument &iArg0,
-                                       const IArgument &iArg1 )
+                                       const Argument &iArg0,
+                                       const Argument &iArg1 )
 {
     init( GetCompoundPropertyReaderPtr( iParentProp ),
           iName,

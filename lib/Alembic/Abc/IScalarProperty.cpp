@@ -116,9 +116,9 @@ void IScalarProperty::init( AbcA::CompoundPropertyReaderPtr iParent,
                             const std::string &iName,
 
                             ErrorHandler::Policy iParentPolicy,
-                            const IArgument &iArg0 )
+                            const Argument &iArg0 )
 {
-    IArguments args( iParentPolicy );
+    Arguments args( iParentPolicy );
     iArg0.setInto( args );
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );

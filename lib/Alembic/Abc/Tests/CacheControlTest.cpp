@@ -84,7 +84,9 @@ void cacheControlTest( const std::string &iArchiveBaseName )
         {
             // Create an implementation with a NULL cache.
             IArchive archive2( Alembic::AbcCoreHDF5::ReadArchive(),
-                               iArchiveName, ReadArraySampleCachePtr() );
+                               iArchiveName,
+                               ErrorHandler::kThrowPolicy,
+                               ReadArraySampleCachePtr() );
         }
 
         if ( i == 2 )
@@ -93,7 +95,9 @@ void cacheControlTest( const std::string &iArchiveBaseName )
             ReadArraySampleCachePtr externalCache =
                 Alembic::AbcCoreHDF5::CreateCache();
             IArchive archive3( Alembic::AbcCoreHDF5::ReadArchive(),
-                               iArchiveName, externalCache );
+                               iArchiveName,
+                               ErrorHandler::kThrowPolicy,
+                               externalCache );
         }
     }
 }

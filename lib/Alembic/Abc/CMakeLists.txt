@@ -63,9 +63,9 @@ SET( H_FILES
   Base.h
   ErrorHandler.h
   Foundation.h
+  Argument.h
 
   IArchive.h
-  IArgument.h
   IArrayProperty.h
   IBaseProperty.h
   ICompoundProperty.h
@@ -78,7 +78,6 @@ SET( H_FILES
   ITypedScalarProperty.h
 
   OArchive.h
-  OArgument.h
   OArrayProperty.h
   OBaseProperty.h
   OCompoundProperty.h

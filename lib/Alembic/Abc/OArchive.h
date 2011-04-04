@@ -39,7 +39,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/OArgument.h>
+#include <Alembic/Abc/Argument.h>
 
 namespace Alembic {
 namespace Abc {
@@ -77,10 +77,10 @@ public:
         const std::string &iFileName,
 
         //! Optionally could be the error handling policy, or the meta data.
-        const OArgument &iArg0 = OArgument(),
+        const Argument &iArg0 = Argument(),
 
         //! Optionally could be the error handling policy, or the meta data.
-        const OArgument &iArg1 = OArgument() );
+        const Argument &iArg1 = Argument() );
 
     //! This attaches an OArchive wrapper around an existing
     //! ArchiveWriterPtr, with an optional error handling policy.
@@ -173,11 +173,11 @@ inline AbcA::ArchiveWriterPtr GetArchiveWriterPtr( OArchive &iArch )
 template <class ARCHIVE_CTOR>
 OArchive::OArchive( ARCHIVE_CTOR iCtor,
                     const std::string &iFileName,
-                    const OArgument &iArg0,
-                    const OArgument &iArg1 )
+                    const Argument &iArg0,
+                    const Argument &iArg1 )
 {
     // Create arguments
-    OArguments args( ErrorHandler::kThrowPolicy );
+    Arguments args( ErrorHandler::kThrowPolicy );
     iArg0.setInto( args );
     iArg1.setInto( args );
 

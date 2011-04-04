@@ -77,8 +77,8 @@ public:
     template <class COMPOUND_PTR>
     ISimpleXformSchema( COMPOUND_PTR iParent,
                         const std::string &iName,
-                        const Abc::IArgument &iArg0 = Abc::IArgument(),
-                        const Abc::IArgument &iArg1 = Abc::IArgument() )
+                        const Abc::Argument &iArg0 = Abc::Argument(),
+                        const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<SimpleXformSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         // Error Handling is eaten up by the super type, all that's
@@ -90,8 +90,8 @@ public:
     //! ...
     template <class COMPOUND_PTR>
     explicit ISimpleXformSchema( COMPOUND_PTR iParent,
-                                 const Abc::IArgument &iArg0 = Abc::IArgument(),
-                                 const Abc::IArgument &iArg1 = Abc::IArgument() )
+                                 const Abc::Argument &iArg0 = Abc::Argument(),
+                                 const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<SimpleXformSchemaInfo>( iParent, iArg0, iArg1 )
     {
         // Error Handling is eaten up by the super type, all that's
@@ -104,8 +104,8 @@ public:
     ISimpleXformSchema( CPROP_PTR iThis,
                         Abc::WrapExistingFlag iFlag,
 
-                        const Abc::IArgument &iArg0 = Abc::IArgument(),
-                        const Abc::IArgument &iArg1 = Abc::IArgument() )
+                        const Abc::Argument &iArg0 = Abc::Argument(),
+                        const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<SimpleXformSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );

@@ -180,8 +180,6 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
     oSamp.clear();
 
-    //std::cout << m_ops.getPtr().use_count() << std::endl;
-
     AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
 
     if ( sampIdx < 0 ) { return; }
@@ -207,7 +205,10 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
     oSamp.setInheritsXforms( m_inherits.getValue( sampIdx ) );
 
-    oSamp.setChildBounds( m_childBounds.getValue( sampIdx ) );
+    if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
+    {
+        oSamp.setChildBounds( m_childBounds.getValue( sampIdx ) );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

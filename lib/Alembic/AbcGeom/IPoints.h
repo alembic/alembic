@@ -113,8 +113,8 @@ public:
     IPointsSchema( CPROP_PTR iParentObject,
                    const std::string &iName,
 
-                   const Abc::IArgument &iArg0 = Abc::IArgument(),
-                   const Abc::IArgument &iArg1 = Abc::IArgument() )
+                   const Abc::Argument &iArg0 = Abc::Argument(),
+                   const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<PointsSchemaInfo>( iParentObject, iName,
                                           iArg0, iArg1 )
     {
@@ -125,8 +125,8 @@ public:
     //! schema name used.
     template <class CPROP_PTR>
     explicit IPointsSchema( CPROP_PTR iParentObject,
-                            const Abc::IArgument &iArg0 = Abc::IArgument(),
-                            const Abc::IArgument &iArg1 = Abc::IArgument() )
+                            const Abc::Argument &iArg0 = Abc::Argument(),
+                            const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<PointsSchemaInfo>( iParentObject,
                                      iArg0, iArg1 )
     {
@@ -236,8 +236,8 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( IPointsSchema::valid() );
 
 protected:
-    void init( const Abc::IArgument &iArg0,
-               const Abc::IArgument &iArg1 );
+    void init( const Abc::Argument &iArg0,
+               const Abc::Argument &iArg1 );
 
     Abc::IV3fArrayProperty m_positions;
     Abc::IUInt64ArrayProperty m_ids;

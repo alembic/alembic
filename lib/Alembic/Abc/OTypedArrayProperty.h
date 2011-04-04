@@ -102,17 +102,17 @@ public:
         COMPOUND_PTR iParent,
         const std::string &iName,
 
-        const OArgument &iArg0 = OArgument(),
-        const OArgument &iArg1 = OArgument(),
-        const OArgument &iArg2 = OArgument() );
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument(),
+        const Argument &iArg2 = Argument() );
 
     //! Wrap an existing property. This will check to make sure
     //! it can wrap.
     OTypedArrayProperty(
         AbcA::ArrayPropertyWriterPtr iProp,
         WrapExistingFlag iWrapFlag,
-        const OArgument &iArg0 = OArgument(),
-        const OArgument &iArg1 = OArgument() );
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
 
     //-*************************************************************************
     // ARRAY PROPERTY FEATURES
@@ -139,11 +139,11 @@ OTypedArrayProperty<TRAITS>::OTypedArrayProperty
     COMPOUND_PTR iParent,
     const std::string &iName,
 
-    const OArgument &iArg0,
-    const OArgument &iArg1,
-    const OArgument &iArg2 )
+    const Argument &iArg0,
+    const Argument &iArg1,
+    const Argument &iArg2 )
 {
-    OArguments args( GetErrorHandlerPolicy( iParent ) );
+    Arguments args( GetErrorHandlerPolicy( iParent ) );
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
@@ -179,8 +179,8 @@ template<class TRAITS>
 inline OTypedArrayProperty<TRAITS>::OTypedArrayProperty(
     AbcA::ArrayPropertyWriterPtr iProperty,
     WrapExistingFlag iFlag,
-    const OArgument &iArg0,
-    const OArgument &iArg1 )
+    const Argument &iArg0,
+    const Argument &iArg1 )
   : OArrayProperty( iProperty,
                     iFlag,
                     GetErrorHandlerPolicy( iProperty, iArg0, iArg1 ) )

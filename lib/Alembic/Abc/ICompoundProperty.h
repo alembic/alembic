@@ -38,7 +38,7 @@
 #define _Alembic_Abc_ICompoundProperty_h_
 
 #include <Alembic/Abc/Foundation.h>
-#include <Alembic/Abc/IArgument.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/IBaseProperty.h>
 
@@ -71,7 +71,7 @@ public:
     template <class OBJECT_PTR>
     ICompoundProperty( OBJECT_PTR iParentObject,
                        const std::string &iName,
-                       const IArgument &iArg0 = IArgument() );
+                       const Argument &iArg0 = Argument() );
 
     //! This attaches an ICompoundProperty wrapper around an existing
     //! CompoundPropertyReaderPtr, with an optional error handling policy.
@@ -82,8 +82,8 @@ public:
     ICompoundProperty(
         CPROP_PTR iThisObject,
         WrapExistingFlag iWrapFlag,
-        const IArgument &iArg0 = IArgument(),
-        const IArgument &iArg1 = IArgument() );
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
 
     //! This attaches an ICompoundProperty wrapper around the top
     //! properties of any object, with an optional error handling policy.
@@ -94,8 +94,8 @@ public:
     ICompoundProperty(
         OBJECT_PTR iThisObject,
         TopFlag iTopFlag,
-        const IArgument &iArg0 = IArgument(),
-        const IArgument &iArg1 = IArgument() );
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -137,7 +137,7 @@ private:
 
                ErrorHandler::Policy iParentPolicy,
 
-               const IArgument &iArg0 );
+               const Argument &iArg0 );
 };
 
 //-*****************************************************************************
@@ -153,7 +153,7 @@ GetCompoundPropertyReaderPtr
 template <class CPROP_PTR>
 inline ICompoundProperty::ICompoundProperty( CPROP_PTR iParentProp,
                                              const std::string &iName,
-                                             const IArgument &iArg0 )
+                                             const Argument &iArg0 )
 {
     init( GetCompoundPropertyReaderPtr( iParentProp ),
           iName,
@@ -166,8 +166,8 @@ inline ICompoundProperty::ICompoundProperty( CPROP_PTR iParentProp,
 template <class CPROP_PTR>
 inline ICompoundProperty::ICompoundProperty( CPROP_PTR iThisObject,
                                              WrapExistingFlag iWrap,
-                                             const IArgument &iArg0,
-                                             const IArgument &iArg1 )
+                                             const Argument &iArg0,
+                                             const Argument &iArg1 )
   : IBasePropertyT<AbcA::CompoundPropertyReaderPtr>(
       GetCompoundPropertyReaderPtr( iThisObject ),
       iWrap,
@@ -180,8 +180,8 @@ inline ICompoundProperty::ICompoundProperty( CPROP_PTR iThisObject,
 template <class OBJECT_PTR>
 inline ICompoundProperty::ICompoundProperty( OBJECT_PTR iThisObject,
                                              TopFlag iTop,
-                                             const IArgument &iArg0,
-                                             const IArgument &iArg1 )
+                                             const Argument &iArg0,
+                                             const Argument &iArg1 )
 {
     getErrorHandler().setPolicy(
         GetErrorHandlerPolicy( iThisObject, iArg0, iArg1 ) );

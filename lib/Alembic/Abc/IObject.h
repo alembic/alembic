@@ -39,7 +39,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/IArgument.h>
+#include <Alembic/Abc/Argument.h>
 
 namespace Alembic {
 namespace Abc {
@@ -87,8 +87,7 @@ public:
       : m_object( GetObjectReaderPtr( iPtr ) )
     {
         // Set the error handling policy
-        getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iPtr, iPcy ) );
+        getErrorHandler().setPolicy( iPcy );
     }
 
     //! This attaches an IObject wrapper around the top
@@ -100,8 +99,7 @@ public:
            )
     {
         // Set the error handling policy
-        getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iPtr, iPcy ) );
+        getErrorHandler().setPolicy( iPcy );
 
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::IObject( top )" );
 
@@ -222,7 +220,7 @@ private:
     void init( AbcA::ObjectReaderPtr iParentObject,
                const std::string &iName,
                ErrorHandler::Policy iParentPolicy,
-               const IArgument &iArg0 );
+               const Argument &iArg0 );
 
 protected:
     AbcA::ObjectReaderPtr m_object;
@@ -242,18 +240,9 @@ inline IObject::IObject( OBJECT_PTR iParentObject,
                          const std::string &iName,
                          ErrorHandler::Policy iPcy )
 {
-    IArgument arg( iPcy );
+    Argument arg( iPcy );
     init( GetObjectReaderPtr( iParentObject ), iName,
           GetErrorHandlerPolicy( iParentObject ), arg );
-}
-
-//-*****************************************************************************
-template <class OBJ>
-inline ErrorHandler::Policy GetErrorHandlerPolicy( OBJ iObj,
-                                                   ErrorHandler::Policy iPcy )
-{
-    IArgument arg( iPcy );
-    return GetErrorHandlerPolicy( iObj, arg );
 }
 
 } // End namespace Abc

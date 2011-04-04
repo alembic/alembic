@@ -194,8 +194,8 @@ public:
     ISubDSchema( CPROP_PTR iParentObject,
                  const std::string &iName,
 
-                 const Abc::IArgument &iArg0 = Abc::IArgument(),
-                 const Abc::IArgument &iArg1 = Abc::IArgument() )
+                 const Abc::Argument &iArg0 = Abc::Argument(),
+                 const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<SubDSchemaInfo>( iParentObject, iName,
                                       iArg0, iArg1 )
     {
@@ -206,8 +206,8 @@ public:
     //! ".geom".
     template <class CPROP_PTR>
     explicit ISubDSchema( CPROP_PTR iParentObject,
-                          const Abc::IArgument &iArg0 = Abc::IArgument(),
-                          const Abc::IArgument &iArg1 = Abc::IArgument() )
+                          const Abc::Argument &iArg0 = Abc::Argument(),
+                          const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<SubDSchemaInfo>( iParentObject,
                                       iArg0, iArg1 )
     {
@@ -219,8 +219,8 @@ public:
     ISubDSchema( CPROP_PTR iThis,
                  Abc::WrapExistingFlag iFlag,
 
-                 const Abc::IArgument &iArg0 = Abc::IArgument(),
-                 const Abc::IArgument &iArg1 = Abc::IArgument() )
+                 const Abc::Argument &iArg0 = Abc::Argument(),
+                 const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<SubDSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -346,7 +346,7 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( ISubDSchema::valid() );
 
 protected:
-    void init( const Abc::IArgument &iArg0, const Abc::IArgument &iArg1 );
+    void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
     Abc::IV3fArrayProperty m_positions;
     Abc::IInt32ArrayProperty m_faceIndices;

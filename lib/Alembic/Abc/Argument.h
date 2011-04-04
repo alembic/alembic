@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_IArgument_h_
-#define _Alembic_Abc_IArgument_h_
+#ifndef _Alembic_Abc_Argument_h_
+#define _Alembic_Abc_Argument_h_
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/ErrorHandler.h>
@@ -48,61 +48,61 @@ namespace Abc {
 // dislike that I'm copying MetaData by value. However, at the moment, it is
 // a welcome shortcut. (I'm tired). I'll fix this soon, but it doesn't
 // affect the public API at all.
-class IArguments : public boost::static_visitor<>
+class Arguments : public boost::static_visitor<>
 {
 public:
-    IArguments( ErrorHandler::Policy iPolicy = ErrorHandler::kQuietNoopPolicy,
+    Arguments( ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
+                const AbcA::MetaData &iMetaData = AbcA::MetaData(),
+                const AbcA::TimeSamplingType &iTimeSamplingType =
+                AbcA::TimeSamplingType(),
                 SchemaInterpMatching iMatch = kNoMatching )
-      : m_errorHandlerPolicy( iPolicy )
-      , m_matching( iMatch )
-      , m_cachePtr()
-      , m_cacheWasSet( false ) {}
+      : m_errorHandlerPolicy( iPolicy ),
+        m_metaData( iMetaData ),
+        m_timeSamplingType( iTimeSamplingType ),
+        m_matching( iMatch ){}
 
     void operator()( const int & ) {}
     void operator()( const ErrorHandler::Policy &iPolicy )
     { m_errorHandlerPolicy = iPolicy; }
-    void operator()( const SchemaInterpMatching &iMatch )
-    { m_matching = iMatch; }
-    void operator()( const AbcA::ReadArraySampleCachePtr &iCachePtr )
-    {
-        m_cachePtr = iCachePtr;
-        m_cacheWasSet = true;
-    }
-
+    void operator()( const AbcA::MetaData &iMetaData )
+    { m_metaData = iMetaData; }
+    void operator()( const AbcA::TimeSamplingType &iTimeSamplingType )
+    { m_timeSamplingType = iTimeSamplingType; }
+    void operator()( const SchemaInterpMatching &iMatching )
+    { m_matching = iMatching; }
     ErrorHandler::Policy getErrorHandlerPolicy() const
     { return m_errorHandlerPolicy; }
+    const AbcA::MetaData &getMetaData() const
+    { return m_metaData; }
+    const AbcA::TimeSamplingType &getTimeSamplingType() const
+    { return m_timeSamplingType; }
 
     SchemaInterpMatching getSchemaInterpMatching() const
     { return m_matching; }
-
-    AbcA::ReadArraySampleCachePtr getReadArraySampleCachePtr() const
-    { return m_cachePtr; }
-
-    bool getCacheWasSet() const
-    { return m_cacheWasSet; }
-
+    
 private:
     ErrorHandler::Policy m_errorHandlerPolicy;
+    AbcA::MetaData m_metaData;
+    AbcA::TimeSamplingType m_timeSamplingType;
     SchemaInterpMatching m_matching;
-    AbcA::ReadArraySampleCachePtr m_cachePtr;
-    bool m_cacheWasSet;
 };
 
 //-*****************************************************************************
 // Right now there are 4 types of arguments that you'd pass into
-// our various O classes for construction.
+// our various classes for construction.
 // ErrorHandlerPolicy - always defaults to QuietNoop
 // MetaData - always defaults to ""
 // TimeSamplingType - always defaults to Static
-class IArgument
+class Argument
 {
 public:
-    IArgument() : m_variant( ( int )0 ) {}
-    IArgument( ErrorHandler::Policy iPolicy ) : m_variant( iPolicy ) {}
-    IArgument( SchemaInterpMatching iMatch ) : m_variant( iMatch ) {}
-    IArgument( AbcA::ReadArraySampleCachePtr iCache ) : m_variant( iCache ) {}
+    Argument() : m_variant( ( int )0 ) {}
+    Argument( ErrorHandler::Policy iPolicy ) : m_variant( iPolicy ) {}
+    Argument( const AbcA::MetaData &iMetaData ) : m_variant( iMetaData ) {}
+    Argument( const AbcA::TimeSamplingType &iTst ) : m_variant( iTst ) {}
+    Argument( SchemaInterpMatching iMatch ) : m_variant( iMatch ) {}
 
-    void setInto( IArguments &iArgs ) const
+    void setInto( Arguments &iArgs ) const
     {
         boost::apply_visitor( iArgs, m_variant );
     }
@@ -110,8 +110,9 @@ public:
 private:
     typedef boost::variant<int,
                            ErrorHandler::Policy,
-                           SchemaInterpMatching,
-                           AbcA::ReadArraySampleCachePtr> ArgVariant;
+                           AbcA::TimeSamplingType,
+                           AbcA::MetaData,
+                           SchemaInterpMatching> ArgVariant;
 
     ArgVariant m_variant;
 };
@@ -123,11 +124,23 @@ private:
 template <class SOMETHING>
 inline ErrorHandler::Policy GetErrorHandlerPolicy
 ( SOMETHING iSomething,
-  const IArgument &iArg0,
-  const IArgument &iArg1 = IArgument(),
-  const IArgument &iArg2 = IArgument() )
+  const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument() )
 {
-    IArguments args( GetErrorHandlerPolicy( iSomething ) );
+    Arguments args( GetErrorHandlerPolicy( iSomething ) );
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    iArg2.setInto( args );
+    return args.getErrorHandlerPolicy();
+}
+
+inline ErrorHandler::Policy GetErrorHandlerPolicy
+( const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument() )
+{
+    Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
@@ -135,12 +148,38 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy
 }
 
 //-*****************************************************************************
-inline SchemaInterpMatching GetSchemaInterpMatching
-( const IArgument &iArg0,
-  const IArgument &iArg1 = IArgument(),
-  const IArgument &iArg2 = IArgument() )
+inline AbcA::MetaData GetMetaData
+( const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument() )
 {
-    IArguments args;
+    Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    iArg2.setInto( args );
+    return args.getMetaData();
+}
+
+//-*****************************************************************************
+inline AbcA::TimeSamplingType GetTimeSamplingType
+( const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument() )
+{
+    Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    iArg2.setInto( args );
+    return args.getTimeSamplingType();
+}
+
+//-*****************************************************************************
+inline SchemaInterpMatching GetSchemaInterpMatching
+( const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument() )
+{
+    Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );

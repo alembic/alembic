@@ -83,9 +83,9 @@ public:
     template <class CPROP_PTR>
     OXformSchema( CPROP_PTR iParentObject,
                   const std::string &iName,
-                  const Abc::OArgument &iArg0 = Abc::OArgument(),
-                  const Abc::OArgument &iArg1 = Abc::OArgument(),
-                  const Abc::OArgument &iArg2 = Abc::OArgument() )
+                  const Abc::Argument &iArg0 = Abc::Argument(),
+                  const Abc::Argument &iArg1 = Abc::Argument(),
+                  const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<XformSchemaInfo>( iParentObject, iName,
                                        iArg0, iArg1, iArg2 )
     {
@@ -98,9 +98,9 @@ public:
     //! name from the XformSchemaInfo struct.
     template <class CPROP_PTR>
     explicit OXformSchema( CPROP_PTR iParentObject,
-                           const Abc::OArgument &iArg0 = Abc::OArgument(),
-                           const Abc::OArgument &iArg1 = Abc::OArgument(),
-                           const Abc::OArgument &iArg2 = Abc::OArgument() )
+                           const Abc::Argument &iArg0 = Abc::Argument(),
+                           const Abc::Argument &iArg1 = Abc::Argument(),
+                           const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<XformSchemaInfo>( iParentObject,
                                        iArg0, iArg1, iArg2 )
     {

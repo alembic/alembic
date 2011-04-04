@@ -125,19 +125,18 @@ void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
                                              const std::string & overrideName
                                            )
 {
-    T param( parent, propHeader.getName(),
-            Abc::IArgument(), Abc::IArgument() );
-    
+    T param( parent, propHeader.getName() );
+
     if ( !param.valid() )
     {
         //TODO error message?
         return;
     }
-    
+
     std::string rmanType = GetPrmanScopeString( param.getScope() ) + " ";
-    
+
     rmanType += rmanBaseType;
-    
+
     size_t arrayExtent = baseArrayExtent * param.getArrayExtent();
     if (arrayExtent > 1)
     {
@@ -145,16 +144,16 @@ void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
         buffer << "[" << arrayExtent << "]";
         rmanType += buffer.str();
     }
-    
+
     rmanType += " " + (
             overrideName.empty() ? propHeader.getName() : overrideName );
-    
-    
+
+
     typename T::prop_type::sample_ptr_type valueSample =
             param.getExpandedValue( sampleSelector ).getVals();
-    
+
     ParamListBuilder.add( rmanType, (RtPointer)valueSample->get(), valueSample );
-    
+
 }
 
 //-*****************************************************************************
@@ -165,39 +164,38 @@ void AddStringGeomParamToParamListBuilder(
         ParamListBuilder &ParamListBuilder
                                          )
 {
-    IStringGeomParam param( parent, propHeader.getName(),
-            Abc::IArgument(), Abc::IArgument() );
-    
+    IStringGeomParam param( parent, propHeader.getName() );
+
     if ( !param.valid() )
     {
         //TODO error message?
         return;
     }
-    
+
     std::string rmanType = GetPrmanScopeString( param.getScope() ) + " ";
     rmanType += "string";
-    
+
     if ( param.getArrayExtent() > 1 )
     {
         std::ostringstream buffer;
         buffer << "[" << param.getArrayExtent() << "]";
         rmanType += buffer.str();
     }
-    
+
     rmanType += " " + propHeader.getName();
-    
+
     StringArraySamplePtr valueSample = param.getExpandedValue(
             sampleSelector ).getVals();
-    
+
     RtPointer dataStart = NULL;
     for ( size_t i = 0; i < valueSample->size(); ++i )
     {
         RtPointer data = ParamListBuilder.addStringValue( (*valueSample)[i] );
         if ( i == 0 ) { dataStart = data; }
     }
-    
+
     ParamListBuilder.add(rmanType, dataStart, valueSample);
-    
+
 }
 
 
@@ -357,19 +355,19 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
     {
         return;
     }
-    
+
     for ( size_t i = 0; i < parent.getNumProperties(); ++i )
     {
         const PropertyHeader &propHeader = parent.getPropertyHeader( i );
         const std::string &propName = propHeader.getName();
-        
+
         if (propName.empty()
             || ( excludeNames
                  && excludeNames->find( propName ) != excludeNames->end() ) )
         {
             continue;
         }
-        
+
         if ( IFloatGeomParam::matches( propHeader ) )
         {
             AddGeomParamToParamListBuilder<IFloatGeomParam>(
@@ -442,6 +440,6 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 "matrix",
                 ParamListBuilder);
         }
-        
+
     }
 }
