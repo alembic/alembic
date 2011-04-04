@@ -84,33 +84,26 @@ public:
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        
+
         uint32_t match_int = iMatching;
-        std::cout << "match_int" << match_int << std::endl;
-        
+
         if ( getSchemaTitle() == "" || iMatching == kNoMatching )
         {
-            std::cout << "no matching" << std::endl;
             return true;
         }
 
 
         if ( iMatching == kStrictMatching )
         {
-
-            std::cout << "strict matching" << std::endl;
             return iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ||
                 iMetaData.get( "schema" ) == getSchemaObjTitle();
         }
 
         if ( iMatching == kSchemaTitleMatching )
         {
-            std::cout << "title matching" << std::endl;
             return iMetaData.get( "schema" ) == getSchemaTitle();
         }
 
-        std::cout << "default return" << std::endl;
-        
         return false;
     }
 

@@ -463,6 +463,8 @@ AbcA::TimeSamplingPtr ITypedGeomParam<TRAITS>::getTimeSampling()
     {
         return m_indices.getTimeSampling();
     }
+
+    return AbcA::TimeSamplingPtr();
 }
 
 //-*****************************************************************************

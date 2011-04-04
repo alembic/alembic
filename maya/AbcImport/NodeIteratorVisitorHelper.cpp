@@ -1109,40 +1109,44 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     oMax = -DBL_MAX;
 
     size_t i, iEnd;
-    Alembic::AbcCoreAbstract::v1::TimeSampling ts;
+    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr ts;
 
     iEnd = mPointsList.size();
     for (i = 0; i < iEnd; ++i)
     {
         ts = mPointsList[i].getSchema().getTimeSampling();
-        oMin = std::min(ts.getSampleTime(0), oMin);
-        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+        size_t numSamples = mPointsList[i].getSchema().getNumSamples();
+        oMin = std::min(ts->getSampleTime(0), oMin);
+        oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
     }
 
     iEnd = mPolyMeshList.size();
     for (i = 0; i < iEnd; ++i)
     {
         ts = mPolyMeshList[i].getSchema().getTimeSampling();
-        oMin = std::min(ts.getSampleTime(0), oMin);
-        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+        size_t numSamples = mPolyMeshList[i].getSchema().getNumSamples();
+        oMin = std::min(ts->getSampleTime(0), oMin);
+        oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
     }
 
     iEnd = mSubDList.size();
     for (i = 0; i < iEnd; ++i)
     {
         ts = mSubDList[i].getSchema().getTimeSampling();
-        oMin = std::min(ts.getSampleTime(0), oMin);
-        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+        size_t numSamples = mSubDList[i].getSchema().getNumSamples();
+        oMin = std::min(ts->getSampleTime(0), oMin);
+        oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
     }
 
     iEnd = mXformList.size();
     for (i = 0; i < iEnd; ++i)
     {
         ts = mXformList[i].getSchema().getTimeSampling();
-        if (ts.getNumSamples() > 1)
+        size_t numSamples = mXformList[i].getSchema().getNumAnimSamples();
+        if (numSamples > 1)
         {
-            oMin = std::min(ts.getSampleTime(0), oMin);
-            oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
         }
     }
 }
@@ -1192,7 +1196,7 @@ MString createScene(ArgData & iArgData)
 
     // no caching!
     Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
-        iArgData.mFileName.asChar(),
+        iArgData.mFileName.asChar(), Alembic::Abc::ErrorHandler::Policy(),
         Alembic::AbcCoreAbstract::v1::ReadArraySampleCachePtr());
 
     CreateSceneVisitor::Action action = CreateSceneVisitor::CREATE;

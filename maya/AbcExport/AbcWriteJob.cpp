@@ -872,7 +872,7 @@ bool AbcWriteJob::eval(double iFrame)
 
             for(; sattrCur != sattrEnd; sattrCur++)
             {
-                (*sattrCur)->write(iFrame*util::spf());
+                (*sattrCur)->write();
             }
         }
 
@@ -901,7 +901,7 @@ bool AbcWriteJob::eval(double iFrame)
 
             for(; tattrCur != tattrEnd; tattrCur++)
             {
-                (*tattrCur)->write(iFrame*util::spf());
+                (*tattrCur)->write();
             }
         }
 
@@ -946,8 +946,7 @@ void AbcWriteJob::perFrameCallback(double iFrame)
     Alembic::Abc::V3d min(bbox.min().x, bbox.min().y, bbox.min().z);
     Alembic::Abc::V3d max(bbox.max().x, bbox.max().y, bbox.max().z);
     Alembic::Abc::Box3d b(min, max);
-    mBoxProp.set(b, Alembic::Abc::OSampleSelector(mBoxIndex++,
-        iFrame * util::spf()));
+    mBoxProp.set(b);
 
     processCallback(mMelPerFrameCallback, true, iFrame, bbox);
     processCallback(mPythonPerFrameCallback, false, iFrame, bbox);

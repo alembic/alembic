@@ -346,7 +346,7 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setFromPreviousSample
         "Can not set more samples than we have times for when using "
         "Acyclic sampling." );
 
-    ABCA_ASSERT( m_nextSampleIndex < 1,
+    ABCA_ASSERT( m_nextSampleIndex > 0,
         "Can't set from previous sample before any samples have been written" );
 
     m_nextSampleIndex ++;
