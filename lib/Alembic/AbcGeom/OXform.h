@@ -155,7 +155,8 @@ public:
         m_timeSamplingType = AbcA::TimeSamplingType();
         m_inherits.reset();
         m_numSetSamples = 0;
-        m_sampID = 0;
+        m_opstack.clear();
+        m_opstack.resize( 0 );
         m_ops.reset();
         m_props.clear();
         m_props.resize( 0 );
@@ -255,8 +256,9 @@ protected:
 
     Abc::OBoolProperty m_inherits;
 
-    // ensure that our sample is kept pristine.
-    std::size_t m_sampID;
+    // ensure that our sample's topology doesn't change; see usage
+    // in OXformSchema::set()
+    std::vector<Alembic::Util::uint8_t> m_opstack;
 };
 
 //-*****************************************************************************

@@ -112,10 +112,6 @@ void OXformSchema::set( XformSample &ioSamp,
         // update values.
         ioSamp.setHasBeenRead();
 
-        ioSamp.m_id = reinterpret_cast<std::size_t>( this );
-
-        m_sampID = ioSamp.getID();
-
         m_props.reserve( ioSamp.getNumOpChannels() );
 
         // This property will be constant, but it will also contain the xform's
@@ -126,6 +122,8 @@ void OXformSchema::set( XformSample &ioSamp,
         // the type of the op and the op's hint.  Actually getting the XformOps
         // from the sample is via XformSample::getOp( size_t ).
         m_ops.set( ioSamp.getOpsArray(), iSS );
+
+        m_opstack = ioSamp.getOpsArray();
 
         AbcA::CompoundPropertyWriterPtr cptr = this->getPtr();
         Abc::ErrorHandler::Policy pcy = this->getErrorHandlerPolicy();
@@ -155,8 +153,8 @@ void OXformSchema::set( XformSample &ioSamp,
     }
     else
     {
-        ABCA_ASSERT( ioSamp.getID() == 0 || m_sampID == ioSamp.getID(),
-                     "Invalid sample ID!" );
+        ABCA_ASSERT( m_opstack == ioSamp.getOpsArray(),
+                     "Invalid sample topology!" );
 
         m_ops.setFromPrevious( iSS );
 
@@ -220,8 +218,6 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
     m_timeSamplingType.setRetainConstantSampleTimes( true );
     m_ops = Abc::OUcharArrayProperty( this->getPtr(), ".ops",
                                       m_timeSamplingType );
-
-    m_sampID = 0;
 
     m_numSetSamples = 0;
 

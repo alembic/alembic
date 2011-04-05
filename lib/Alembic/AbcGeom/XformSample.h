@@ -103,7 +103,6 @@ private:
     friend class OXformSchema;
     friend class IXformSchema;
     void setHasBeenRead();
-    const std::size_t getID() const { return m_id; }
     const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
     void clear();
 
@@ -111,9 +110,6 @@ private:
 private:
     // 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
     int m_setWithOpStack;
-
-    // set to the address of the OXformSchema's 'this' member.
-    std::size_t m_id;
 
     // This will be populated by the addOp() methods or setFoo() methods
     // in the case of the sample being used to write data, and by the

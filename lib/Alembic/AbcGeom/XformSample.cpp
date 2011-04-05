@@ -55,7 +55,6 @@ XformSample::XformSample()
 {
     m_setWithOpStack = 0;
     m_inherits = true;
-    m_id = 0;
     m_opIndex = 0;
     m_hasBeenRead = false;
 
@@ -533,7 +532,8 @@ void XformSample::clear()
 void XformSample::reset()
 {
     this->clear();
-    m_id = 0;
+    m_opsArray.clear();
+    m_opsArray.resize( 0 );
 }
 
 
