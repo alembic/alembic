@@ -100,6 +100,12 @@ ADD_EXECUTABLE( AbcGeom_XformTest
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest  ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Xform_TEST  AbcGeom_XformTest  )
 
+#-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_XformTest2
+		XformTests2.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_XformTest2  ${TEST_LIBS} )
+ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2  )
+
 ##-*****************************************************************************
 ADD_EXECUTABLE( AbcGeom_ConstantSimpleXformTest
 		SimpleXformConstantSamplesTest.cpp )

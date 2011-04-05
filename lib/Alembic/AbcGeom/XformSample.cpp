@@ -397,9 +397,12 @@ void XformSample::setMatrix( const Abc::M44d &iMatrix )
 {
     XformOp op( kMatrixOperation, kMatrixHint );
 
-    for ( size_t i = 0 ; i < 16 ; ++i )
+    for ( size_t i = 0 ; i < 4 ; ++i )
     {
-        op.setChannelValue( i, *(iMatrix[i]) );
+        for ( size_t j = 0 ; j < 4 ; ++j )
+        {
+            op.setChannelValue( ( i * 4 ) + j, iMatrix.x[i][j] );
+        }
     }
 
     if ( ! m_hasBeenRead )

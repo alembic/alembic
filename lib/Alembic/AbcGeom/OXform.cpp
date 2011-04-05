@@ -155,9 +155,8 @@ void OXformSchema::set( XformSample &ioSamp,
     }
     else
     {
-        ABCA_ASSERT( ioSamp.getID() != 0, "Sample has been reset!" );
-
-        ABCA_ASSERT( m_sampID == ioSamp.getID(), "Invalid sample ID!" );
+        ABCA_ASSERT( ioSamp.getID() == 0 || m_sampID == ioSamp.getID(),
+                     "Invalid sample ID!" );
 
         m_ops.setFromPrevious( iSS );
 
