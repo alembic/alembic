@@ -91,7 +91,7 @@ ELSE()
 ENDIF()
 
 IF ( NOT WINDOWS )
-  SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wreturn-type -Werror" )
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type -Werror" )
 ENDIF()
 
 IF( ${WINDOWS} )
