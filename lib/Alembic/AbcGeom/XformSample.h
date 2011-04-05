@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,123 +39,96 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
+#include <Alembic/AbcGeom/XformOp.h>
+
 namespace Alembic {
 namespace AbcGeom {
 
-//! Base class for holding transform operations, and the data which defines
-//! them.  This is useful for applications which only care about the operation
-//! type and the data that goes along with it, and not which channels are
-//! static or animated.
-class XformData
-{
-public:
-    XformData(XformOperationType iType) : m_type(iType) {}
-    XformOperationType getType() const {return m_type;}
-private:
-    XformOperationType m_type;
-};
-
-typedef boost::shared_ptr < XformData > XformDataPtr;
-
-//! Holds a translate vector.
-class TranslateData : public XformData
-{
-public:
-
-    TranslateData(const Abc::V3d & iData);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kTranslateOperation then
-    //! the translate vector defaults to (0, 0, 0)
-    TranslateData(XformDataPtr iXform);
-
-    Abc::V3d get() const {return m_data;}
-
-    Abc::M44d getMatrix() const;
-
-private:
-    Abc::V3d m_data;
-};
-
-//! Holds a scale vector.
-class ScaleData : public XformData
-{
-public:
-    ScaleData(const Abc::V3d & iData);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kScaleOperation then
-    //! the scale vector defaults to (1, 1, 1)
-    ScaleData(XformDataPtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::V3d get() const {return m_data;}
-
-private:
-    Abc::V3d m_data;
-};
-
-//! Holds the rotate vector and the rotate angle
-class RotateData : public XformData
-{
-public:
-    RotateData(const Abc::V3d & iAxis, double iAngle);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kRotateOperation then
-    //! the rotation axis defaults to (0, 0, 0) and the rotation angle
-    //! defaults to 0.
-    RotateData(XformDataPtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::V3d getAxis() const {return m_axis;}
-    double getAngle() const {return m_angle;}
-
-private:
-    Abc::V3d m_axis;
-    double m_angle;
-};
-
-//! Holds the 4x4 matrix
-class MatrixData : public XformData
-{
-public:
-    MatrixData(const Abc::M44d & iMatrix);
-
-    //! Copies (and casts) the data from iXform.
-    //! If iXform is NULL, or the type is not kMatrixOperation then
-    //! the matrix defaults to identity.
-    MatrixData(XformDataPtr iXform);
-
-    Abc::M44d getMatrix() const;
-
-    Abc::M44d get() const {return m_matrix;}
-
-private:
-    Abc::M44d m_matrix;
-};
-
-//! Class which holds the data for multiple transform operations.
+//-*****************************************************************************
 class XformSample
 {
 public:
     XformSample();
 
-    //! Returns the total number of transform operations
-    size_t getNum() {return m_xforms.size();}
+    // add translate or scale op
+    // returns the index of the op in its op-stack
+    std::size_t addOp( XformOp iOp, const Abc::V3d &iVal );
 
-    //! Returns a specific transform operation at iIndex.  If iIndex exceeds
-    //! the total number of transform operations an empty XformDataPtr is
-    //! returned.
-    XformDataPtr get(size_t iIndex);
+    // add rotate op
+    // returns the index of the op in its op-stack
+    std::size_t addOp( XformOp iOp, const Abc::V3d &iAxis,
+                       const double iAngleInDegrees );
 
-    void push(XformDataPtr iXform) {m_xforms.push_back(iXform);};
-    void clear() {m_xforms.clear();};
+    // add matrix op
+    // returns the index of the op in its op-stack
+    std::size_t addOp( XformOp iOp, const Abc::M44d &iMatrix );
+
+    // add an op with values already set on the op
+    std::size_t addOp( const XformOp &iOp );
+
+    XformOp getOp( std::size_t iIndex ) const;
+
+    XformOp &operator[]( const std::size_t &iIndex );
+    const XformOp &operator[]( const std::size_t &iIndex ) const;
+
+    std::size_t getNumOps() const;
+    std::size_t getNumOpChannels() const;
+
+    //! "Inherits xforms" means, "Does this xform concatenate to or ignore the
+    //! transforms of its parents?"
+    void setInheritsXforms( bool iInherits );
+    bool getInheritsXforms() const;
+
+    void setChildBounds( const Abc::Box3d &iBnds );
+    const Abc::Box3d &getChildBounds() const;
+
+    // non-op-based methods; the getters will compute their return values
+    // from the ops under the hood, hence return-by-value.
+    void setTranslation( const Abc::V3d &iTrans );
+    Abc::V3d getTranslation() const;
+
+    void setRotation( const Abc::V3d &iAxis, const double iAngleInDegrees );
+    Abc::V3d getAxis() const;
+    double getAngle() const;
+
+    void setScale( const Abc::V3d &iScale );
+    Abc::V3d getScale() const;
+
+    void setMatrix( const Abc::M44d &iMatrix );
+    Abc::M44d getMatrix() const;
+
+    void reset();
+
 private:
-    std::vector < XformDataPtr > m_xforms;
+    friend class OXformSchema;
+    friend class IXformSchema;
+    void setHasBeenRead();
+    const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
+    void clear();
+
+
+private:
+    // 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
+    int m_setWithOpStack;
+
+    // This will be populated by the addOp() methods or setFoo() methods
+    // in the case of the sample being used to write data, and by the
+    // IXform in the case of the sample being used to read data.
+    std::vector<Alembic::Util::uint8_t> m_opsArray;
+
+    std::vector<XformOp> m_ops;
+
+    bool m_inherits;
+    Abc::Box3d m_childBounds;
+
+    // This starts out false, but is set to true by the OXform and controls
+    // whether or not addOp() changes the topology of the Sample, in the form
+    // of the layout of the m_opsArray.
+    bool m_hasBeenRead;
+
+    size_t m_opIndex;
 };
+
 
 } // End namespace AbcGeom
 } // End namespace Alembic

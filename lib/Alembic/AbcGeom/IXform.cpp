@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -35,275 +35,206 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/IXform.h>
+#include <Alembic/AbcGeom/XformOp.h>
+
+#include <boost/lexical_cast.hpp>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-void IXformSchema::init( const Abc::Argument &iArg0,
-                         const Abc::Argument &iArg1 )
+void
+IXformSchema::IDefaultedDoubleProperty::init()
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::init()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IXformSchema::IDefaultedDoubleProperty::init()" );
 
-    // .ops, .static, .anim and .inherits do not need to exist
+    const AbcA::PropertyHeader *ph = m_parent->getPropertyHeader( m_name );
 
-    if (this->getPropertyHeader(".ops") != NULL)
+    if ( ph != NULL )
     {
-        Abc::IUInt32ArrayProperty ops( *this, ".ops" );
-        Abc::UInt32ArraySamplePtr opSamp;
-        ops.get(opSamp);
-        if (opSamp)
-        {
-            size_t numOps = opSamp->size();
-            m_ops.resize(numOps);
-            for (size_t i = 0; i < numOps; ++i)
-            {
-                XformOp op;
-                op.setEncodedValue( (*opSamp)[i] );
-                m_ops[i] =  op;
-            }
-        }
-    }
+        m_property = Abc::IDoubleProperty( m_parent, m_name,
+                                           m_errorHandler.getPolicy() );
 
-    if (this->getPropertyHeader(".static") != NULL)
-    {
-        Abc::IDoubleArrayProperty staticData( *this, ".static");
-        staticData.get(m_static);
-    }
+        m_isConstant = m_property.isConstant();
 
-    if (this->getPropertyHeader(".anim") != NULL)
-        m_anim = Abc::IDoubleArrayProperty( *this, ".anim" );
-
-    if (this->getPropertyHeader(".inherits") != NULL)
-        m_inherits = Abc::IBoolProperty( *this, ".inherits" );
-
-    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
-    {
-        m_childBounds = Abc::IBox3dProperty( *this, ".childBnds", iArg0,
-                                             iArg1 );
+        m_property.get( m_constantValue );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************
-Abc::M44d IXformSchema::getMatrix( const Abc::ISampleSelector &iSS )
+double
+IXformSchema::IDefaultedDoubleProperty::getValue(
+    const Abc::ISampleSelector &iSS )
 {
-    Abc::M44d ret;
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::getMatrix()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IXformSchema::IDefaultedDoubleProperty::getValue()" );
 
-    Abc::DoubleArraySamplePtr anim;
-    if ( m_anim.valid() )
-        m_anim.get( anim, iSS );
+    if ( m_isConstant )
+    { return m_constantValue; }
+    else
+    { return m_property.getValue( iSS ); }
 
-    size_t staticIndex = 0;
-    size_t animIndex = 0;
-
-    size_t numOps = m_ops.size();
-    for (size_t i = 0; i < numOps; ++i)
-    {
-        Abc::M44d m;
-        XformOperationType type = m_ops[i].getType();
-        if (type == kMatrixOperation)
-        {
-            for (size_t j = 0; j < 4; ++j)
-            {
-                for (size_t k = 0; k < 4; ++k)
-                {
-                    if (m_ops[i].isIndexAnimated(j*4 + k))
-                    {
-                        m.x[j][k] = (*anim)[animIndex++];
-                    }
-                    else
-                    {
-                        m.x[j][k] = (*m_static)[staticIndex++];
-                    }
-                }
-            }
-        }
-        else
-        {
-            double x, y, z;
-            if (m_ops[i].isXAnimated())
-            {
-                x = (*anim)[animIndex++];
-            }
-            else
-            {
-                x = (*m_static)[staticIndex++];
-            }
-
-            if (m_ops[i].isYAnimated())
-            {
-                y = (*anim)[animIndex++];
-            }
-            else
-            {
-                y = (*m_static)[staticIndex++];
-            }
-
-            if (m_ops[i].isZAnimated())
-            {
-                z = (*anim)[animIndex++];
-            }
-            else
-            {
-                z = (*m_static)[staticIndex++];
-            }
-
-            if (type == kScaleOperation)
-            {
-                m.setScale( V3d(x,y,z) );
-            }
-            else if (type == kTranslateOperation)
-            {
-                m.setTranslation( V3d(x, y, z) );
-            }
-            else if (type == kRotateOperation)
-            {
-                double angle;
-                if (m_ops[i].isAngleAnimated())
-                {
-                    angle = (*anim)[animIndex++];
-                }
-                else
-                {
-                    angle = (*m_static)[staticIndex++];
-                }
-
-                m.setAxisAngle( V3d(x,y,z), angle );
-            }
-        }
-
-        ret = m * ret;
-    }
     ALEMBIC_ABC_SAFE_CALL_END();
 
+    return 0.0;
+}
+
+//-*****************************************************************************
+void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::init()" );
+
+    AbcA::CompoundPropertyReaderPtr ptr = this->getPtr();
+
+    m_childBounds = Abc::IBox3dProperty( ptr, ".childBnds", iMatching );
+
+    m_inherits = Abc::IBoolProperty( ptr, ".inherits", iMatching );
+
+    m_ops = Abc::IUcharArrayProperty( ptr, ".ops", iMatching );
+
+    // OK, now the fun stuff!
+    //
+    // All the above Properties are guaranteed to exist.  None of the actual
+    // xform-data-having properties need to exist, though.  So we use the same
+    // well-formed naming mechanism from OXform::set() to make an array of
+    // IDefaultedDoubleProperties.
+
+
+    Abc::UcharArraySample opSampArray;
+    if ( m_ops.getNumSamples() > 0 ) { opSampArray = *(m_ops.getValue()); }
+
+    std::size_t numOps = 0;
+
+    if ( opSampArray )
+    { numOps = opSampArray.size(); }
+
+    m_opArray.reserve( numOps );
+
+    m_isConstant = true;
+    m_isConstantIdentity = true;
+
+    for ( std::size_t i = 0 ; i < numOps ; ++i )
+    {
+        XformOp op( opSampArray[i] );
+
+        std::string oname = boost::lexical_cast<std::string>( i );
+
+        m_opArray.push_back( op );
+
+        for ( std::size_t j = 0 ; j < op.getNumChannels() ; ++j )
+        {
+            std::string channame = op.getChannelName( j );
+
+            IDefaultedDoubleProperty prop(
+                ptr, channame + oname, this->getErrorHandler(),
+                op.getDefaultChannelValue( j ) );
+
+            m_props.push_back( prop );
+
+            m_isConstant = m_isConstant && prop.isConstant();
+
+            m_isConstantIdentity = m_isConstantIdentity
+                && ( ! prop.isNonDefault() );
+        }
+    }
+
+    m_isConstantIdentity = m_isConstantIdentity && m_isConstant;
+
+    m_isConstant = m_isConstant && m_inherits.isConstant();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+AbcA::TimeSampling IXformSchema::getTimeSampling()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getTimeSampling()" );
+
+    return m_ops.getTimeSampling();
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    AbcA::TimeSampling ret;
     return ret;
 }
 
 //-*****************************************************************************
-bool IXformSchema::isOpStatic( size_t iIndex ) const
+std::size_t IXformSchema::getNumSamples()
 {
-    if ( iIndex >= m_ops.size() )
-        return true;
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getNumSamples()" );
 
-    const XformOp & op = m_ops[iIndex];
-    for ( uint8_t i = 0; i < op.getNumIndices(); ++i )
-    {
-        if (op.isIndexAnimated(i))
-            return false;
-    }
-    return true;
+    return m_ops.getNumSamples();
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return 0;
 }
 
 //-*****************************************************************************
-void IXformSchema::get( XformSample & oSamp,
-                        const Abc::ISampleSelector &iSS )
+void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformTrait::getSample()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::get()" );
 
-    Abc::DoubleArraySamplePtr anim;
-    if ( m_anim.valid() )
-        m_anim.get( anim, iSS );
-
-    size_t staticIndex = 0;
-    size_t animIndex = 0;
-
-    size_t numOps = m_ops.size();
     oSamp.clear();
-    for (size_t i = 0; i < numOps; ++i)
+
+    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+
+    if ( sampIdx < 0 ) { return; }
+
+    std::size_t prevIdx = 0;
+    for ( std::size_t i = 0 ; i < m_opArray.size() ; ++i )
     {
-        XformOperationType type = m_ops[i].getType();
-        if (type == kMatrixOperation)
+        XformOp op = m_opArray[i];
+        for ( std::size_t j = 0 ; j < op.getNumChannels() ; ++j )
         {
-            Abc::M44d m;
-            for (size_t j = 0; j < 4; ++j)
-            {
-                for (size_t k = 0; k < 4; ++k)
-                {
-                    if (m_ops[i].isIndexAnimated(j*4 + k))
-                    {
-                        m.x[j][k] = (*anim)[animIndex];
-                        animIndex ++;
-                    }
-                    else
-                    {
-                        m.x[j][k] = (*m_static)[staticIndex];
-                        staticIndex ++;
-                    }
-                }
-            }
-            XformDataPtr p(new MatrixData(m));
-            oSamp.push( p );
-        }
-        else
-        {
-            double x, y, z;
-            if (m_ops[i].isXAnimated())
-            {
-                x = (*anim)[animIndex];
-                animIndex ++;
-            }
-            else
-            {
-                x = (*m_static)[staticIndex];
-                staticIndex ++;
-            }
+            size_t pidx = j + prevIdx;
 
-            if (m_ops[i].isYAnimated())
-            {
-                y = (*anim)[animIndex];
-                animIndex ++;
-            }
-            else
-            {
-                y = (*m_static)[staticIndex];
-                staticIndex ++;
-            }
+            op.setChannelValue( j, m_props[pidx].getValue( sampIdx ) );
 
-            if (m_ops[i].isZAnimated())
+            if ( ! m_props[pidx].isConstant() )
             {
-                z = (*anim)[animIndex];
-                animIndex ++;
-            }
-            else
-            {
-                z = (*m_static)[staticIndex];
-                staticIndex ++;
-            }
-
-            if (type == kScaleOperation)
-            {
-                XformDataPtr p( new ScaleData(V3d(x,y,z)) );
-                oSamp.push( p );
-            }
-            else if (type == kTranslateOperation)
-            {
-                XformDataPtr p( new TranslateData(V3d(x,y,z)) );
-                oSamp.push( p );
-            }
-            else if (type == kRotateOperation)
-            {
-                double angle;
-                if (m_ops[i].isAngleAnimated())
-                {
-                    angle = (*anim)[animIndex];
-                    animIndex ++;
-                }
-                else
-                {
-                    angle = (*m_static)[staticIndex];
-                    staticIndex ++;
-                }
-
-                XformDataPtr p( new RotateData(V3d(x,y,z), angle) );
-                oSamp.push( p );
+                op.m_animChannels.insert( j );
             }
         }
-
+        prevIdx += op.getNumChannels();
+        oSamp.addOp( op );
     }
+
+    oSamp.setInheritsXforms( m_inherits.getValue( sampIdx ) );
+
+    if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
+    {
+        oSamp.setChildBounds( m_childBounds.getValue( sampIdx ) );
+    }
+
     ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+XformSample IXformSchema::getValue( const Abc::ISampleSelector &iSS )
+{
+    XformSample ret;
+    this->get( ret, iSS );
+    return ret;
+}
+
+//-*****************************************************************************
+bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getInheritsXforms()" );
+
+    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+
+    if ( sampIdx < 0 ) { return true; }
+
+    return m_inherits.getValue( sampIdx );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return true;
 }
 
 } // End namespace AbcGeom

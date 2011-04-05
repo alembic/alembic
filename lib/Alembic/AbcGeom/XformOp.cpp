@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -36,20 +36,76 @@
 
 #include <Alembic/AbcGeom/XformOp.h>
 
+#include <boost/format.hpp>
+
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-XformOp::XformOp() : m_type(kTranslateOperation), m_anim(0), m_hint(0) 
+XformOp::XformOp()
+  : m_type( kTranslateOperation )
+  , m_hint( 0 )
+  , m_opName( ".t" )
 {
-};
+    m_channels.clear();
+    m_channels.resize( 3 );
+}
 
 //-*****************************************************************************
-XformOp::XformOp(XformOperationType iType, Alembic::Util::uint8_t iHint)
-    : m_type(iType)
+XformOp::XformOp( const XformOperationType iType,
+                  const Alembic::Util::uint8_t iHint )
+    : m_type( iType )
+    , m_hint( iHint )
 {
-    setHint(iHint);
-    m_anim = 0;
+    m_channels.clear();
+
+    switch ( m_type )
+    {
+    case kScaleOperation:
+        m_opName = ".s";
+        m_channels.resize( 3 );
+        break;
+    case kTranslateOperation:
+        m_opName = ".t";
+        m_channels.resize( 3 );
+        break;
+    case kRotateOperation:
+        m_opName = ".r";
+        m_channels.resize( 4 );
+        break;
+    case kMatrixOperation:
+        m_opName = ".m";
+        m_channels.resize( 16 );
+        break;
+    }
+}
+
+//-*****************************************************************************
+XformOp::XformOp( const Alembic::Util::uint8_t iEncodedOp )
+{
+
+    m_type = (XformOperationType)(iEncodedOp >> 4);
+    m_hint = iEncodedOp & 0xF;
+
+    switch ( m_type )
+    {
+    case kScaleOperation:
+        m_opName = ".s";
+        m_channels.resize( 3 );
+        break;
+    case kTranslateOperation:
+        m_opName = ".t";
+        m_channels.resize( 3 );
+        break;
+    case kRotateOperation:
+        m_opName = ".r";
+        m_channels.resize( 4 );
+        break;
+    case kMatrixOperation:
+        m_opName = ".m";
+        m_channels.resize( 16 );
+        break;
+    }
 }
 
 //-*****************************************************************************
@@ -59,11 +115,25 @@ XformOperationType XformOp::getType() const
 }
 
 //-*****************************************************************************
-void XformOp::setType(XformOperationType iType)
+void XformOp::setType( const XformOperationType iType )
 {
     m_type = iType;
-    m_hint = 0;
-    m_anim = 0;
+
+    switch ( m_type )
+    {
+    case kScaleOperation:
+        m_opName = ".s";
+        break;
+    case kTranslateOperation:
+        m_opName = ".t";
+        break;
+    case kRotateOperation:
+        m_opName = ".r";
+        break;
+    case kMatrixOperation:
+        m_opName = ".m";
+        break;
+    }
 }
 
 //-*****************************************************************************
@@ -73,14 +143,14 @@ uint8_t XformOp::getHint() const
 }
 
 //-*****************************************************************************
-void XformOp::setHint(Alembic::Util::uint8_t iHint)
+void XformOp::setHint( const Alembic::Util::uint8_t iHint )
 {
     // if a non-existant hint value is set, default it to 0
     if ( m_type == kScaleOperation && iHint > kScaleHint )
     {
         m_hint = 0;
     }
-    else if ( m_type == kTranslateOperation && iHint > 
+    else if ( m_type == kTranslateOperation && iHint >
         kRotatePivotTranslationHint )
     {
         m_hint = 0;
@@ -102,127 +172,325 @@ void XformOp::setHint(Alembic::Util::uint8_t iHint)
 //-*****************************************************************************
 bool XformOp::isXAnimated() const
 {
-    return isIndexAnimated(0);
-}
-
-//-*****************************************************************************
-void XformOp::setXAnimated(bool iAnim)
-{
-    setIndexAnimated(0, iAnim);
+    return m_animChannels.count( 0 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isYAnimated() const
 {
-    return isIndexAnimated(1);
-}
-
-//-*****************************************************************************
-void XformOp::setYAnimated(bool iAnim)
-{
-    setIndexAnimated(1, iAnim);
+    return m_animChannels.count( 1 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isZAnimated() const
 {
-    return isIndexAnimated(2);
-}
-
-//-*****************************************************************************
-void XformOp::setZAnimated(bool iAnim)
-{
-    setIndexAnimated(2, iAnim);
+    return m_animChannels.count( 2 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isAngleAnimated() const
 {
-    return isIndexAnimated(3);
+    return m_animChannels.count( 3 ) > 0;
 }
 
 //-*****************************************************************************
-void XformOp::setAngleAnimated(bool iAnim)
+bool XformOp::isChannelAnimated( std::size_t iIndex ) const
 {
-    setIndexAnimated(3, iAnim);
+    return m_animChannels.count( iIndex ) > 0;
 }
 
 //-*****************************************************************************
-bool XformOp::isIndexAnimated(uint8_t iIndex) const
+std::size_t XformOp::getNumChannels() const
 {
-    return ( m_anim >> iIndex ) & 0x01;
+    return m_channels.size();
 }
 
 //-*****************************************************************************
-void XformOp::setIndexAnimated(uint8_t iIndex, bool iAnim)
+std::string XformOp::getChannelName( std::size_t iIndex ) const
 {
-    // if the index is not correct for the operation, then just return
-    if ( iIndex > 15 || (m_type == kRotateOperation && iIndex > 3) ||
-        ((m_type == kTranslateOperation || m_type == kScaleOperation) &&
-        iIndex > 2) )
+    std::string c;
+
+    switch ( iIndex )
     {
-        return;
+    case 0:
+        if ( m_type != kMatrixOperation ) { c = "x_"; }
+        else { c = "00_"; }
+        break;
+    case 1:
+        if ( m_type != kMatrixOperation ) { c = "y_"; }
+        else { c = "01_"; }
+        break;
+    case 2:
+        if ( m_type != kMatrixOperation ) { c = "z_"; }
+        else { c = "02_"; }
+        break;
+    case 3:
+        if ( m_type == kRotateOperation ) { c = "r_"; }
+        else if ( m_type == kMatrixOperation ) { c = "03_"; }
+        else
+        {
+            ABCA_ASSERT( false,
+                         "Bad index '" << iIndex << "' for non-matrix or "
+                         << "non-rotation xform op." );
+        }
+        break;
+    case 4:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "10_";
+        break;
+    case 5:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "11_";
+        break;
+    case 6:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "12_";
+        break;
+    case 7:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "13_";
+        break;
+    case 8:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "20_";
+        break;
+    case 9:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "21_";
+        break;
+    case 10:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "22_";
+        break;
+    case 11:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "23_";
+        break;
+    case 12:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "30_";
+        break;
+    case 13:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "31_";
+        break;
+    case 14:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "32_";
+        break;
+    case 15:
+        ABCA_ASSERT( m_type == kMatrixOperation,
+                     "Bad index '" << iIndex << "' for non-matrix xform op." );
+        c = "33_";
+        break;
     }
 
-    // set the bit
-    if (iAnim)
-        m_anim = m_anim | (0x1 << iIndex);
-    // unset the bit
-    else
-        m_anim = m_anim & (0xffff ^ (0x1 << iIndex));
+    return ( boost::format( "%s%s" ) % m_opName % c ).str();
 }
 
 //-*****************************************************************************
-Alembic::Util::uint8_t XformOp::getNumIndices() const
+double XformOp::getDefaultChannelValue( std::size_t iIndex ) const
 {
-    switch (m_type)
+    switch ( m_type )
     {
-        case kScaleOperation:
-        case kTranslateOperation:
-            return 3;
-        break;
-
-        case kRotateOperation:
-            return 4;
-        break;
-
-        case kMatrixOperation:
-            return 16;
-        break;
-
+    case kTranslateOperation:
+    case kRotateOperation:
+        return 0.0;
+    case kScaleOperation:
+        return 1.0;
+    case kMatrixOperation:
+        switch ( iIndex )
+        {
+        case 0:
+        case 5:
+        case 10:
+        case 15:
+            return 1.0;
         default:
-            return 0;
-        break;
+            return 0.0;
+        }
+    default:
+        return 0.0;
     }
-    return 0;
 }
 
 //-*****************************************************************************
-Alembic::Util::uint32_t XformOp::getEncodedValue() const
+double XformOp::getChannelValue( std::size_t iIndex ) const
 {
-    return (m_anim << 16) | (m_hint << 8) | m_type;
+    return m_channels[iIndex];
 }
 
 //-*****************************************************************************
-void XformOp::setEncodedValue(Alembic::Util::uint32_t iVal)
+void XformOp::setChannelValue( std::size_t iIndex, double iVal )
 {
-    // do it this way to make sure every byte is sane, or end up being
-    // broken down into a sane value
+    m_channels[iIndex] = iVal;
+}
 
-    Alembic::Util::uint32_t rawType = iVal & 0xff;
+//-*****************************************************************************
+Alembic::Util::uint8_t XformOp::getOpEncoding() const
+{
+    return ( m_type << 4 ) | ( m_hint & 0xF );
+}
 
-    // beyond matrix reset to type scale
-    if (rawType > 3)
-        rawType = 0;
+//-*****************************************************************************
+bool XformOp::isTranslateOp() const
+{
+    return m_type == kTranslateOperation;
+}
 
-    XformOperationType type = (XformOperationType)(rawType);
-    this->setType(type);
-    this->setHint((iVal >> 8) & 0xff);
-    uint16_t anim = (iVal >> 16) & 0xffff;
-    for (size_t i = 0; i < 16; ++i)
+//-*****************************************************************************
+bool XformOp::isScaleOp() const
+{
+    return m_type == kScaleOperation;
+}
+
+//-*****************************************************************************
+bool XformOp::isRotateOp() const
+{
+    return m_type == kRotateOperation;
+}
+
+//-*****************************************************************************
+bool XformOp::isMatrixOp() const
+{
+    return m_type == kMatrixOperation;
+}
+
+//-*****************************************************************************
+void XformOp::setVector( const Abc::V3d &iVec )
+{
+    ABCA_ASSERT( m_type != kMatrixOperation,
+                 "Meaningless to set Abc::V3d on matrix op" );
+
+    m_channels[0] = iVec.x;
+    m_channels[1] = iVec.y;
+    m_channels[2] = iVec.z;
+}
+
+//-*****************************************************************************
+void XformOp::setTranslate( const Abc::V3d &iTrans )
+{
+    ABCA_ASSERT( m_type == kTranslateOperation,
+                 "Meaningless to set translate on non-translate op." );
+
+    this->setVector( iTrans );
+}
+
+//-*****************************************************************************
+void XformOp::setScale( const Abc::V3d &iScale )
+{
+    ABCA_ASSERT( m_type == kScaleOperation,
+                 "Meaningless to set scale on non-scale op." );
+
+    this->setVector( iScale );
+}
+
+//-*****************************************************************************
+void XformOp::setAxis( const Abc::V3d &iAxis )
+{
+    ABCA_ASSERT( m_type == kRotateOperation,
+                 "Meaningless to set rotation axis on non-rotation op." );
+
+    this->setVector( iAxis );
+}
+
+//-*****************************************************************************
+void XformOp::setAngle( const double iAngle )
+{
+    ABCA_ASSERT( m_type == kRotateOperation,
+                 "Meaningless to set rotation angle on non-rotation op." );
+
+    m_channels[3] = iAngle;
+}
+
+//-*****************************************************************************
+void XformOp::setMatrix( const Abc::M44d &iMatrix )
+{
+    ABCA_ASSERT( m_type == kMatrixOperation,
+                 "Cannot set non-matrix op from Abc::M44d" );
+
+    for ( size_t i = 0 ; i < 4 ; ++i )
     {
-        this->setIndexAnimated(i, (anim >> i) & 0x1);
+        for ( size_t j = 0 ; j < 4 ; ++j )
+        {
+            m_channels[( i * 4 ) + j] = iMatrix.x[i][j];
+        }
     }
+}
+
+//-*****************************************************************************
+Abc::V3d XformOp::getVector() const
+{
+    ABCA_ASSERT( m_type != kMatrixOperation,
+                 "Meaningless to get Abc::V3d from matrix op" );
+
+    return Abc::V3d( m_channels[0], m_channels[1], m_channels[2] );
+}
+
+//-*****************************************************************************
+Abc::V3d XformOp::getTranslate() const
+{
+    ABCA_ASSERT( m_type == kTranslateOperation,
+                 "Meaningless to get translate vector from non-translate op." );
+
+    return this->getVector();
+}
+
+//-*****************************************************************************
+Abc::V3d XformOp::getScale() const
+{
+    ABCA_ASSERT( m_type == kScaleOperation,
+                 "Meaningless to get scaling vector from non-scale op." );
+
+    return this->getVector();
+}
+
+//-*****************************************************************************
+Abc::V3d XformOp::getAxis() const
+{
+    ABCA_ASSERT( m_type == kRotateOperation,
+                 "Meaningless to get rotation axis from non-rotation op." );
+
+    return this->getVector();
+}
+
+//-*****************************************************************************
+double XformOp::getAngle() const
+{
+    ABCA_ASSERT( m_type == kRotateOperation,
+                 "Meaningless to get rotation angle from non-rotation op." );
+
+    return m_channels[3];
+}
+
+//-*****************************************************************************
+Abc::M44d XformOp::getMatrix() const
+{
+    ABCA_ASSERT( m_type == kMatrixOperation,
+                 "Can't get matrix from non-matrix op." );
+
+    Abc::M44d ret;
+
+    for ( size_t i = 0 ; i < 4 ; ++i )
+    {
+        for ( size_t j = 0 ; j < 4 ; ++j )
+        {
+            ret.x[i][j] = m_channels[( i * 4 ) + j];
+        }
+    }
+
+    return ret;
 }
 
 } // End namespace AbcGeom

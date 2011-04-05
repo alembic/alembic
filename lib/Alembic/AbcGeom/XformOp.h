@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,25 +39,27 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
+#include <set>
+
 namespace Alembic {
 namespace AbcGeom {
 
 //! \brief The Matrix identifier hint.
 //! Some 3d packages (like Maya) may have certain transformation operations
-//! that aren't supported in other packages.  MatrixHint is meant to 
+//! that aren't supported in other packages.  MatrixHint is meant to
 //! help with reading back into applications that natively support the type.
 enum MatrixHint
 {
     //! Regular Matrix
     kMatrixHint = 0,
 
-    //! Matrix represents Maya's version of Shear 
+    //! Matrix represents Maya's version of Shear
     kMayaShearHint = 1
 };
 
 //! \brief The Rotate identifier hint.
 //! Some 3d packages (like Maya) have multiple rotation operations
-//! that are mathmatically of the same type.  RotateHint is meant to 
+//! that are mathmatically of the same type.  RotateHint is meant to
 //! help disambiguate these similiar mathmatical types when reading back
 //! into applications that natively support the type.
 enum RotateHint
@@ -72,7 +74,7 @@ enum RotateHint
 
 //! \brief The Scale identifier hint.
 //! Some 3d packages (like Maya) have multiple transformation operations
-//! that are mathmatically of the same type.  ScaleHint is meant to 
+//! that are mathmatically of the same type.  ScaleHint is meant to
 //! help disambiguate these similiar mathmatical types when reading back
 //! into applications that natively support that type.
 enum ScaleHint
@@ -84,7 +86,7 @@ enum ScaleHint
 
 //! \brief The Translation identifier hint.
 //! Some 3d packages (like Maya) have multiple transformation operations
-//! that are mathmatically of the same type.  TranslateHint is meant to 
+//! that are mathmatically of the same type.  TranslateHint is meant to
 //! help disambiguate these similiar mathmatical types when reading back
 //! into applications that natively support the type.
 enum TranslateHint
@@ -117,14 +119,18 @@ class XformOp
 {
 public:
     XformOp();
-    XformOp(XformOperationType iType, Alembic::Util::uint8_t iHint);
+
+    XformOp( const XformOperationType iType,
+             const Alembic::Util::uint8_t iHint );
+
+    XformOp( const Alembic::Util::uint8_t iEncodedOp );
 
     //! Get the type of transform operation. (Translate, Rotate, Scale, Matrix)
     XformOperationType getType() const;
 
     //! Set the type of transform operation. (Translate, Rotate, Scale, Matrix)
     //! Setting the type resets the hint, and sets all the channels to static.
-    void setType(XformOperationType iType);
+    void setType( const XformOperationType iType );
 
     //! Get the MatrixHint, RotateHint, TranslateHint, or ScaleHint to help
     //! disambiguate certain options that may have the same type.
@@ -132,68 +138,94 @@ public:
 
     //! Set the hint, if it is an illegal value for the type, then the hint
     //! is set to the default, 0.
-    void setHint(Alembic::Util::uint8_t iHint);
+    void setHint( const Alembic::Util::uint8_t iHint );
 
     //! Returns whether the x component (index 0) is animated.
     bool isXAnimated() const;
 
-    //! Sets whether the x component (index 0) is animated.
-    void setXAnimated(bool iAnim);
-
     //! Returns whether the y component (index 1) is animated.
     bool isYAnimated() const;
 
-    //! Sets whether the y component (index 1) is animated.
-    void setYAnimated(bool iAnim);
-
     //! Returns whether the z component (index 2) is animated.
     bool isZAnimated() const;
-
-    //! Sets whether the z component (index 2) is animated.
-    void setZAnimated(bool iAnim);
 
     //! Returns whether the angle component (index 3) is animated.
     //! Since Scale and Translate do not have an angle component,
     //! false is returned for those types.
     bool isAngleAnimated() const;
 
-    //! Sets whether the angle component (index 3) is animated.
-    //! Since Scale and Translate do not have an angle component,
-    //! nothing is set for those types.
-    void setAngleAnimated(bool iAnim);
-
-    //! Returns whether a particular index is animated.
-    //! Scale and Translate only have 3 components, Rotate has 4, and
-    //! Matrix has 16.  Indices greater than the number of components will
+    //! Returns whether a particular channel is animated.
+    //! Scale and Translate only have 3 channels, Rotate has 4, and
+    //! Matrix has 16.  Indices greater than the number of channels will
     //! return false.
-    bool isIndexAnimated(Alembic::Util::uint8_t iIndex) const;
-
-    //! Sets whether a particular index is animated.
-    //! Scale and Translate only have 3 components, Rotate has 4, and
-    //! Matrix has 16.  Trying to set indices that are greater than the number 
-    //! of components will be ignored.
-    void setIndexAnimated(Alembic::Util::uint8_t iIndex, bool iAnim);
+    bool isChannelAnimated( std::size_t iIndex ) const;
 
     //! Get the number of components that this operation has based on the type.
     //! Translate and Scale have 3, Rotate has 4 and Matrix has 16.
-    Alembic::Util::uint8_t getNumIndices() const;
+    std::size_t getNumChannels() const;
 
-    //! Convenience function for returning the combined encoded type, hint, and
-    //! animated value.  The type is encoded into the first byte, the hint into
-    //! the second, and the animated value into the third and fourth byte.
-    Alembic::Util::uint32_t getEncodedValue() const;
+    //! Every channel has a name based on the type of the op, and the index of
+    //! the channel. This is used to interact with well-named Properties of
+    //! an xform that may or may not exist.
+    std::string getChannelName( std::size_t iIndex ) const;
 
-    //! Convenience function for setting the combined encoded type, hint, and
-    //! animated value.  The type is encoded into the first byte, the hint into
-    //! the second, and the animated value into the third and fourth byte.
-    //! If an illegal type value is passed in, it defaults to scale.
-    //! If an invalid hint gets passed in, it defaults to 0.
-    void setEncodedValue(Alembic::Util::uint32_t iVal);
+    //! For every channel, there's a default value.  Typically, for each op
+    //! type, it's the same across channels. But matrix ops have different
+    //! defaults to allow the identity matrix to be defaulted (most channels
+    //! there are 0.0, the determinant channels are 1.0).
+    double getDefaultChannelValue( std::size_t iIndex ) const;
+
+    double getChannelValue( std::size_t iIndex ) const;
+
+    //! Set a single channel; will throw if iIndex is greater than
+    //! numchannels - 1.
+    void setChannelValue( std::size_t iIndex, double iVal );
+
+    void setVector( const Abc::V3d &iVec );
+    void setTranslate( const Abc::V3d &iTrans );
+    void setScale( const Abc::V3d &iScale );
+    void setAxis( const Abc::V3d &iAxis );
+    void setAngle( const double iAngle );
+    void setMatrix( const Abc::M44d &iMatrix );
+
+    // synthetic getters return by value
+    Abc::V3d getVector() const;
+    Abc::V3d getTranslate() const;
+    Abc::V3d getScale() const;
+    Abc::V3d getAxis() const;
+    double getAngle() const;
+    Abc::M44d getMatrix() const;
+
+    bool isTranslateOp() const;
+
+    bool isScaleOp() const;
+
+    bool isRotateOp() const;
+
+    bool isMatrixOp() const;
+
+    //! Function for returning the combined encoded type and hint.
+    //! The type is in the first four bits, the hint in the second.
+    //!
+    //! This is not really intended for use by human clients of this class.
+    Alembic::Util::uint8_t getOpEncoding() const;
+
 
 private:
     XformOperationType m_type;
-    Alembic::Util::uint16_t m_anim;
     Alembic::Util::uint8_t m_hint;
+
+    std::vector<double> m_channels;
+
+    std::set<std::size_t> m_animChannels;
+
+    std::string m_opName;
+
+private:
+    //! The IXform can tell the op if its channels are animated
+    //! by directly inserting keys into the m_animChannels set.
+    friend class IXformSchema;
+
 };
 
 typedef std::vector < XformOp > XformOpVec;
