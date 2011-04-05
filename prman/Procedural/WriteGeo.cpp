@@ -40,46 +40,6 @@
 #include "SubDTags.h"
 
 //-*****************************************************************************
-void ProcessSimpleTransform( ISimpleXform &xform, ProcArgs &args )
-{
-    ISimpleXformSchema &xs = xform.getSchema();
-
-    const TimeSampling &ts = xs.getTimeSampling();
-
-    SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes( args, ts, sampleTimes );
-
-    bool multiSample = sampleTimes.size() > 1;
-
-    if ( multiSample )
-    {
-        WriteMotionBegin( args, sampleTimes );
-    }
-
-    for ( SampleTimeSet::iterator iter = sampleTimes.begin();
-          iter != sampleTimes.end(); ++iter )
-    {
-        ISampleSelector iss( *iter );
-
-        SimpleXformSample sample = xs.getValue( iss );
-
-        M44d m = sample.getMatrix();
-
-        if ( ! multiSample && m == M44d() )
-        {
-            continue;
-        }
-
-        WriteConcatTransform( m );
-    }
-
-    if ( multiSample )
-    {
-        RiMotionEnd();
-    }
-}
-
-//-*****************************************************************************
 void ProcessXform( IXform &xform, ProcArgs &args )
 {
     IXformSchema &xs = xform.getSchema();
@@ -321,7 +281,7 @@ void ProcessSubD( ISubD &subd, ProcArgs &args )
 void WriteIdentifier( const ObjectHeader &ohead )
 {
     std::string name = ohead.getFullName();
-    name = name.substr( 4, name.size() - 1 ); //for now, shave off the /ABC
+    //name = name.substr( 4, name.size() - 1 ); //for now, shave off the /ABC
     char* nameArray[] = { const_cast<char*>( name.c_str() ), RI_NULL };
 
     RiAttribute(const_cast<char*>( "identifier" ), const_cast<char*>( "name" ),

@@ -45,8 +45,6 @@ using namespace Alembic::AbcGeom;
 
 void WriteIdentifier( const ObjectHeader &ohead );
 
-void ProcessSimpleTransform( ISimpleXform &xform, ProcArgs &args );
-
 void ProcessXform( IXform &xform, ProcArgs &args );
 
 void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args );
