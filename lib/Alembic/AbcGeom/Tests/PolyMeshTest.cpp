@@ -121,8 +121,7 @@ void Example1_MeshOut()
     // indexed normals
     ON3fGeomParam::Sample nsamp( N3fArraySample( (const N3f *)g_normals,
                                                  g_numNormals ),
-                                 UInt32ArraySample( g_uindices, g_numIndices),
-                                                    kFacevaryingScope );
+                                 kFacevaryingScope );
 
     // Set a mesh sample.
     // We're creating the sample inline here,
@@ -154,7 +153,7 @@ void Example1_MeshIn()
     IN3fGeomParam N = mesh.getNormals();
     IV2fGeomParam uv = mesh.getUVs();
 
-    TESTING_ASSERT( N.isIndexed() );
+    TESTING_ASSERT( ! N.isIndexed() );
 
     TESTING_ASSERT( ! uv.isIndexed() );
 
@@ -175,6 +174,11 @@ void Example1_MeshIn()
     N3fArraySamplePtr nsp = N.getExpandedValue().getVals();
 
     N3f n0 = (*nsp)[0];
+
+    for ( size_t i = 0 ; i < nsp->size() ; ++i )
+    {
+        std::cout << i << "th normal: " << (*nsp)[i] << std::endl;
+    }
 
     TESTING_ASSERT( n0 == N3f( -1.0f, 0.0f, 0.0f ) );
     std::cout << "0th normal: " << n0 << std::endl;
