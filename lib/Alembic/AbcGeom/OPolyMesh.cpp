@@ -58,7 +58,26 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         m_indices.set( iSamp.getIndices() );
         m_counts.set( iSamp.getCounts() );
 
-        m_childBounds.set( iSamp.getChildBounds() );
+        // do we need to create child bounds?
+        if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+        {
+            m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", 
+                m_positions.getTimeSampling() );
+            Abc::Box3d emptyBox;
+            emptyBox.makeEmpty();
+
+            // -1 because we just dis an m_positions set above
+            size_t numSamples = m_positions.getNumSamples() - 1;
+
+            // set all the missing samples
+            for ( size_t i = 0; i < numSamples; ++i )
+            {
+                m_childBounds.set( emptyBox );
+            }
+        }
+
+        if (m_childBounds)
+        { m_childBounds.set( iSamp.getChildBounds() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -114,7 +133,11 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_indices, iSamp.getIndices() );
         SetPropUsePrevIfNull( m_counts, iSamp.getCounts() );
-        SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() );
+
+        if ( m_childBounds )
+        {
+            SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() );
+        }
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
@@ -149,7 +172,9 @@ void OPolyMeshSchema::setFromPrevious()
     m_counts.setFromPrevious();
 
     m_selfBounds.setFromPrevious();
-    m_childBounds.setFromPrevious();
+
+    if (m_childBounds)
+        m_childBounds.setFromPrevious();
 
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
     if ( m_normals ) { m_normals.setFromPrevious(); }
@@ -164,15 +189,16 @@ void OPolyMeshSchema::init( uint32_t iTsIdx )
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTsIdx );
 
-    m_indices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTsIdx );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_counts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTsIdx );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
 
-    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTsIdx );
+    m_indices = Abc::OInt32ArrayProperty( _this, ".faceIndices", iTsIdx );
 
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTsIdx );
+    m_counts = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTsIdx );
+
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 
     // UVs and Normals are created on first call to set()
 
@@ -186,7 +212,8 @@ Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".arbGeomParams" );
     }
 
     return m_arbGeomParams;

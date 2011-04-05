@@ -163,8 +163,7 @@ public:
 
     //! Normally, setting the child bounds is done through the Sample, but
     //! this Xform implementation is non-standard.
-    void setChildBounds( const Abc::Box3d &iBnds )
-    { m_childBounds.set( iBnds ); }
+    void setChildBounds( const Abc::Box3d &iBnds );
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

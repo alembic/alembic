@@ -71,7 +71,26 @@ void OSubDSchema::set( const Sample &iSamp )
         m_faceIndices.set( iSamp.getFaceIndices() );
         m_faceCounts.set( iSamp.getFaceCounts() );
 
-        m_childBounds.set( iSamp.getChildBounds() );
+        // do we need to create child bounds?
+        if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+        {
+            m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", 
+                m_positions.getTimeSampling() );
+            Abc::Box3d emptyBox;
+            emptyBox.makeEmpty();
+
+            // -1 because we just dis an m_positions set above
+            size_t numSamples = m_positions.getNumSamples() - 1;
+
+            // set all the missing samples
+            for ( size_t i = 0; i < numSamples; ++i )
+            {
+                m_childBounds.set( emptyBox );
+            }
+        }
+
+        if (m_childBounds)
+        { m_childBounds.set( iSamp.getChildBounds() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -139,17 +158,10 @@ void OSubDSchema::set( const Sample &iSamp )
 
         m_subdScheme.set( iSamp.getSubdivisionScheme() );
 
-        std::vector<int32_t> emptyInt32Array;
-        std::vector<float32_t> emptyFloatArray;
-
         if ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
             iSamp.getCreaseSharpnesses() )
         {
-            initCreases();
-        }
-        else
-        {
-            m_numNullCreaseSamples++;
+            initCreases(0);
         }
 
         if ( iSamp.getCreaseIndices() )
@@ -169,11 +181,7 @@ void OSubDSchema::set( const Sample &iSamp )
 
         if ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() )
         {
-            initCorners();
-        }
-        else
-        {
-            m_numNullCornerSamples = 0;
+            initCorners(0);
         }
 
         if ( iSamp.getCornerIndices() )
@@ -188,11 +196,7 @@ void OSubDSchema::set( const Sample &iSamp )
 
         if ( iSamp.getHoles() )
         {
-            initHoles();
-        }
-        else
-        {
-            m_numNullHoleSamples ++;
+            initHoles(0);
         }
 
         if ( iSamp.getHoles() )
@@ -217,7 +221,7 @@ void OSubDSchema::set( const Sample &iSamp )
         if ( ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
             iSamp.getCreaseSharpnesses() ) && !m_creaseIndices )
         {
-            initCreases();
+            initCreases(m_positions.getNumSamples() - 1);
         }
 
         if ( m_creaseIndices )
@@ -229,15 +233,11 @@ void OSubDSchema::set( const Sample &iSamp )
             SetPropUsePrevIfNull( m_creaseSharpnesses,
                               iSamp.getCreaseSharpnesses() );
         }
-        else
-        {
-            m_numNullCreaseSamples ++;
-        }
 
         if ( ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() ) && 
             !m_cornerIndices )
         {
-            initCorners();
+            initCorners(m_positions.getNumSamples() - 1);
         }
 
         if ( m_cornerIndices )
@@ -247,27 +247,23 @@ void OSubDSchema::set( const Sample &iSamp )
             SetPropUsePrevIfNull( m_cornerSharpnesses,
                               iSamp.getCornerSharpnesses() );
         }
-        else
-        {
-            m_numNullCornerSamples ++;
-        }
 
         if ( iSamp.getHoles() && !m_holes )
         {
-            initHoles();
+            initHoles(m_positions.getNumSamples() - 1);
         }
 
         if ( m_holes )
         {
             SetPropUsePrevIfNull( m_holes, iSamp.getHoles() );
         }
-        else
-        {
-            m_numNullHoleSamples ++;
-        }
 
         SetPropUsePrevIfNull( m_subdScheme, iSamp.getSubdivisionScheme() );
 
+        if ( m_childBounds )
+        {
+            SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() );
+        }
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
@@ -310,34 +306,24 @@ void OSubDSchema::setFromPrevious()
         m_creaseLengths.setFromPrevious();
         m_creaseSharpnesses.setFromPrevious();
     }
-    else
-    {
-        m_numNullCreaseSamples ++;
-    }
 
     if ( m_cornerIndices )
     {
         m_cornerIndices.setFromPrevious();
         m_cornerSharpnesses.setFromPrevious();
     }
-    else
-    {
-        m_numNullCornerSamples ++;
-    }
 
     if ( m_holes )
     {
         m_holes.setFromPrevious();
     }
-    else
-    {
-        m_numNullHoleSamples ++;
-    }
 
     m_subdScheme.setFromPrevious();
 
     m_selfBounds.setFromPrevious();
-    m_childBounds.setFromPrevious();
+
+    if ( m_childBounds )
+        m_childBounds.setFromPrevious();
 
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
 
@@ -351,7 +337,8 @@ Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+            ".arbGeomParams" );
     }
 
     return m_arbGeomParams;
@@ -367,54 +354,54 @@ void OSubDSchema::init( uint32_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::init()" );
 
-    m_numNullCreaseSamples = 0;
-    m_numNullCornerSamples = 0;
-    m_numNullHoleSamples = 0;
-
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTsIdx );
 
-    m_faceIndices = Abc::OInt32ArrayProperty( *this, ".faceIndices", iTsIdx );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_faceCounts = Abc::OInt32ArrayProperty( *this, ".faceCounts", iTsIdx );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
+
+    m_faceIndices = Abc::OInt32ArrayProperty( _this, ".faceIndices", iTsIdx );
+
+    m_faceCounts = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTsIdx );
 
     m_faceVaryingInterpolateBoundary =
-        Abc::OInt32Property( *this, ".faceVaryingInterpolateBoundary", iTsIdx );
+        Abc::OInt32Property( _this, ".faceVaryingInterpolateBoundary", iTsIdx );
 
     m_faceVaryingPropagateCorners =
-        Abc::OInt32Property( *this, ".faceVaryingPropagateCorners", iTsIdx );
+        Abc::OInt32Property( _this, ".faceVaryingPropagateCorners", iTsIdx );
 
     m_interpolateBoundary =
-        Abc::OInt32Property( *this, ".interpolateBoundary", iTsIdx );
+        Abc::OInt32Property( _this, ".interpolateBoundary", iTsIdx );
 
-    m_subdScheme = Abc::OStringProperty( *this, ".scheme", iTsIdx );
+    m_subdScheme = Abc::OStringProperty( _this, ".scheme", iTsIdx );
 
-    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTsIdx );
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTsIdx );
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************
-void OSubDSchema::initCreases()
+void OSubDSchema::initCreases(uint32_t iNumSamples)
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::initCreases()" );
 
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
     AbcA::TimeSamplingPtr ts = m_positions.getTimeSampling();
 
-    m_creaseIndices = Abc::OInt32ArrayProperty( *this, ".creaseIndices", ts );
+    m_creaseIndices = Abc::OInt32ArrayProperty( _this, ".creaseIndices", ts );
 
-    m_creaseLengths = Abc::OInt32ArrayProperty( *this, ".creaseLengths", ts );
+    m_creaseLengths = Abc::OInt32ArrayProperty( _this, ".creaseLengths", ts );
 
-    m_creaseSharpnesses = Abc::OFloatArrayProperty( *this, ".creaseSharpnesses",
+    m_creaseSharpnesses = Abc::OFloatArrayProperty( _this, ".creaseSharpnesses",
         ts );
 
     std::vector<int32_t> emptyInt;
     std::vector<float32_t> emptyFloat;
 
     // set the appropriate samples to empty
-    for (uint32_t i = 0; i < m_numNullCreaseSamples; ++i)
+    for (uint32_t i = 0; i < iNumSamples; ++i)
     {
         m_creaseIndices.set( Abc::Int32ArraySample( emptyInt ) );
         m_creaseLengths.set( Abc::Int32ArraySample( emptyInt ) );
@@ -425,22 +412,24 @@ void OSubDSchema::initCreases()
 }
 
 //-*****************************************************************************
-void OSubDSchema::initCorners()
+void OSubDSchema::initCorners(uint32_t iNumSamples)
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::initCorners()" );
 
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
     AbcA::TimeSamplingPtr ts = m_positions.getTimeSampling();
 
-    m_cornerIndices = Abc::OInt32ArrayProperty( *this, ".cornerIndices", ts );
+    m_cornerIndices = Abc::OInt32ArrayProperty( _this, ".cornerIndices", ts );
 
-    m_cornerSharpnesses = Abc::OFloatArrayProperty( *this, ".cornerSharpnesses",
+    m_cornerSharpnesses = Abc::OFloatArrayProperty( _this, ".cornerSharpnesses",
         ts );
 
     std::vector<int32_t> emptyInt;
     std::vector<float32_t> emptyFloat;
 
     // set the appropriate samples to empty
-    for (uint32_t i = 0; i < m_numNullCornerSamples; ++i)
+    for (uint32_t i = 0; i < iNumSamples; ++i)
     {
         m_cornerIndices.set( Abc::Int32ArraySample( emptyInt ) );
         m_cornerSharpnesses.set( Abc::FloatArraySample( emptyFloat ) );
@@ -451,18 +440,18 @@ void OSubDSchema::initCorners()
 
 
 //-*****************************************************************************
-void OSubDSchema::initHoles()
+void OSubDSchema::initHoles(uint32_t iNumSamples)
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::initHoles()" );
 
     AbcA::TimeSamplingPtr ts = m_positions.getTimeSampling();
 
-    m_holes = Abc::OInt32ArrayProperty( *this, ".holes", ts );
+    m_holes = Abc::OInt32ArrayProperty( this->getPtr(), ".holes", ts );
 
     std::vector<int32_t> emptyInt;
 
     // set the appropriate samples to empty
-    for (uint32_t i = 0; i < m_numNullHoleSamples; ++i)
+    for (uint32_t i = 0; i < iNumSamples; ++i)
     {
         m_holes.set( Abc::Int32ArraySample( emptyInt ) );
     }

@@ -148,7 +148,12 @@ public:
         init( iArg0, iArg1 );
     }
 
-    //! Default copy constructor used.
+    //! Copy constructor.
+    IPolyMeshSchema(const IPolyMeshSchema& iCopy)
+    {
+        *this = iCopy;
+    }
+
     //! Default assignment operator used.
 
 
@@ -195,7 +200,7 @@ public:
         {
             m_selfBounds.get( oSample.m_selfBounds, iSS );
         }
-        if ( m_childBounds )
+        if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
         {
             m_childBounds.get( oSample.m_childBounds, iSS );
         }

@@ -55,7 +55,26 @@ void OPointsSchema::set( const Sample &iSamp )
         m_positions.set( iSamp.getPositions() );
         m_ids.set( iSamp.getIds() );
 
-        m_childBounds.set( iSamp.getChildBounds() );
+        // do we need to create child bounds?
+        if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+        {
+            m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", 
+                m_positions.getTimeSampling() );
+            Abc::Box3d emptyBox;
+            emptyBox.makeEmpty();
+
+            // -1 because we just dis an m_positions set above
+            size_t numSamples = m_positions.getNumSamples() - 1;
+
+            // set all the missing samples
+            for ( size_t i = 0; i < numSamples; ++i )
+            {
+                m_childBounds.set( emptyBox );
+            }
+        }
+
+        if (m_childBounds)
+        { m_childBounds.set( iSamp.getChildBounds() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -71,6 +90,11 @@ void OPointsSchema::set( const Sample &iSamp )
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_ids, iSamp.getIds() );
+
+        if ( m_childBounds )
+        {
+            SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() );
+        }
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
@@ -100,7 +124,9 @@ void OPointsSchema::setFromPrevious()
     m_ids.setFromPrevious();
 
     m_selfBounds.setFromPrevious();
-    m_childBounds.setFromPrevious();
+
+    if (m_childBounds)
+        m_childBounds.setFromPrevious();
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -112,7 +138,8 @@ Abc::OCompoundProperty OPointsSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".arbGeomParams" );
     }
 
     return m_arbGeomParams;
@@ -130,13 +157,13 @@ void OPointsSchema::init( uint32_t iTsIdx )
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVaryingScope );
-    m_positions = Abc::OV3fArrayProperty( *this, "P", mdata, iTsIdx );
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_ids = Abc::OUInt64ArrayProperty( *this, ".pointIds", mdata, iTsIdx );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
 
-    m_selfBounds = Abc::OBox3dProperty( *this, ".selfBnds", iTsIdx );
+    m_ids = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata, iTsIdx );
 
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", iTsIdx );
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

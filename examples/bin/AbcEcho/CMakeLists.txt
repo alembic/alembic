@@ -42,7 +42,7 @@ SET( FULL_ABC_LIBS
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_ILMBASE_LIBS}
      ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} m )
+     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
 #-******************************************************************************
 ADD_EXECUTABLE( abcecho AbcEcho.cpp )

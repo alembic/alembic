@@ -85,8 +85,6 @@ public:
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
 
-        uint32_t match_int = iMatching;
-
         if ( getSchemaTitle() == "" || iMatching == kNoMatching )
         {
             return true;

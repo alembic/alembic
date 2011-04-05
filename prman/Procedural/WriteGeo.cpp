@@ -251,7 +251,6 @@ void ProcessSubD( ISubD &subd, ProcArgs &args )
 void WriteIdentifier( const ObjectHeader &ohead )
 {
     std::string name = ohead.getFullName();
-    name = name.substr( 4, name.size() - 1 ); //for now, shave off the /ABC
     char* nameArray[] = { const_cast<char*>( name.c_str() ), RI_NULL };
 
     RiAttribute(const_cast<char*>( "identifier" ), const_cast<char*>( "name" ),

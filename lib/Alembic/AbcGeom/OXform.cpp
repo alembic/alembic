@@ -139,9 +139,19 @@ void OXformSchema::setFromPrevious()
     if (m_inherits)
         m_inherits.setFromPrevious();
 
-    m_childBounds.setFromPrevious();
+    if (!m_childBounds)
+        m_childBounds.setFromPrevious();
 
     ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OXformSchema::setChildBounds( const Abc::Box3d &iBnds )
+{
+    if (!m_childBounds)
+        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", m_tsidx );
+
+    m_childBounds.set( iBnds );
 }
 
 //-*****************************************************************************
@@ -151,8 +161,6 @@ void OXformSchema::init()
 
     m_writtenOps = false;
     m_numAnimated = 0;
-
-    m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", m_tsidx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

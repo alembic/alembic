@@ -64,11 +64,11 @@ writeSample( const Abc::OSampleSelector &iSS )
     MStatus status;
 
     if ( !this->m_nodeHandle.isValid() ||
-         !this->m_attrHandle.isValid() ||
-         this->m_plug.isNull() )
+        !this->m_attrHandle.isValid() ||
+        this->m_plug.isNull() )
     {
         MGlobal::displayError( "ERROR: Invalid node or attr handle in "
-                               "SingularPODTypedAttribute<T>::writeSample()" );
+            "SingularPODTypedAttribute<T>::writeSample()" );
         return;
     }
 
@@ -76,7 +76,7 @@ writeSample( const Abc::OSampleSelector &iSS )
     // MObject attrObj = m_attrHandle.objectRef();
     // MPlug plug( nodeObj, attrObj, &status );
     // CHECK_MAYA_STATUS;
-    
+
     // value_type value;
     char value;
     status = this->m_plug.getValue( value );
@@ -85,5 +85,37 @@ writeSample( const Abc::OSampleSelector &iSS )
     m_property.set( ( Abc::int8_t )value, iSS );
 }
 
+//-*****************************************************************************
+template <>
+void
+SingularPODTypedAttribute<Abc::OInt32Property>::writeSample
+( const Abc::OSampleSelector &iSS )
+{
+    MStatus status;
+
+    if ( !m_nodeHandle.isValid() ||
+        !m_attrHandle.isValid() ||
+        m_plug.isNull() )
+    {
+        MGlobal::displayError( "ERROR: Invalid node or attr handle in "
+            "SingularPODTypedAttribute<T>::writeSample()" );
+        return;
+    }
+
+    // MObject nodeObj = m_nodeHandle.objectRef();
+    // MObject attrObj = m_attrHandle.objectRef();
+    // MPlug plug( nodeObj, attrObj, &status );
+    // CHECK_MAYA_STATUS;
+
+    // value_type value;
+    int value;
+    status = m_plug.getValue( value );
+    CHECK_MAYA_STATUS;
+
+    if ( iSS.getIndex() == 0 || m_animated )
+    {
+        m_property.set( value, iSS );
+    }
+}
 
 }  //  End namespace AlembicSimpleAbcExport

@@ -25,7 +25,11 @@ IF(DEFINED HDF5_C_INCLUDE_DIR)
 
     # Added -lm to the front to work around a bug in CMake TRY_RUN that doesn't
     # accept a string variable to LINK_LIBRARIES
-    SET(TRYCOMPILE_LIBS "-lm ${HDF5_hdf5_hl_LIBRARY}")
+    IF ( NOT WINDOWS )
+        SET(TRYCOMPILE_LIBS "-lm ${HDF5_hdf5_hl_LIBRARY}")
+    ELSE()
+        SET(TRYCOMPILE_LIBS "${HDF5_hdf5_hl_LIBRARY}")
+    ENDIF()
     SET(USING_THESE_LIBS "-DLINK_LIBRARIES:INTERNAL=${TRYCOMPILE_LIBS}")
     TRY_RUN(HDF5_RUN_RESULT HDF5_COMPILE_RESULT
             ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/hdf5_trycompile.cpp 

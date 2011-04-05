@@ -118,6 +118,7 @@ inline void SetGeometryScope( AbcA::MetaData &ioMetaData, GeometryScope iScope )
     case kVaryingScope: ioMetaData.set( "geoScope", "var" ); return;
     case kVertexScope: ioMetaData.set( "geoScope", "vtx" ); return;
     case kFacevaryingScope: ioMetaData.set( "geoScope", "fvr" ); return;
+    case kUnknownScope: return;
     default: return;
     }
 }

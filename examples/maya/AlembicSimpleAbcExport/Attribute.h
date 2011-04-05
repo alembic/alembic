@@ -184,6 +184,12 @@ SingularPODTypedAttribute<ABC_PROPERTY>::writeSample
 //-*****************************************************************************
 template <>
 void
+SingularPODTypedAttribute<Abc::OInt32Property>::
+writeSample( const Abc::OSampleSelector &iSS );
+
+//-*****************************************************************************
+template <>
+void
 SingularPODTypedAttribute<Abc::OCharProperty>::
 writeSample( const Abc::OSampleSelector &iSS );
 

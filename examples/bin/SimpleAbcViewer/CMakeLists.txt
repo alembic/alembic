@@ -42,7 +42,6 @@ SET( H_FILES
      IObjectDrw.h
      IPointsDrw.h
      IPolyMeshDrw.h
-     ISimpleXformDrw.h
      ISubDDrw.h
      IXformDrw.h
      MeshDrwHelper.h
@@ -55,7 +54,6 @@ SET( CXX_FILES
      IObjectDrw.cpp
      IPointsDrw.cpp
      IPolyMeshDrw.cpp
-     ISimpleXformDrw.cpp
      ISubDDrw.cpp
      IXformDrw.cpp
      MeshDrwHelper.cpp
@@ -78,7 +76,7 @@ SET( THIS_LIBS
      ${ALEMBIC_ILMBASE_LIBS}
      ${Boost_PROGRAM_OPTIONS_LIBRARY}
      ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} m )
+     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
 ADD_EXECUTABLE( SimpleAbcViewer ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( SimpleAbcViewer ${THIS_LIBS} )

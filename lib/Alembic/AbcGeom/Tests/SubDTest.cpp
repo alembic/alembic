@@ -77,13 +77,13 @@ void Example1_MeshOut()
     {
         creases.push_back( g_indices[i] );
         corners.push_back( g_indices[i] );
-        cornerSharpnesses.push_back( 1.0e38 );
+        cornerSharpnesses.push_back( 10.0 );
     }
 
     for ( size_t i = 0 ; i < 6 ; i++ )
     {
         creaseLengths.push_back( 4 );
-        creaseSharpnesses.push_back( 1.0e38 );
+        creaseSharpnesses.push_back( 0.5 );
     }
 
     mesh_samp.setCreases( creases, creaseLengths, creaseSharpnesses );
@@ -152,9 +152,26 @@ void Example1_MeshIn()
     // get the 1th sample by value
     ISubDSchema::Sample samp1 = mesh.getValue( 1 );
 
+    std::cout << "bounds: " << samp1.getSelfBounds().min << ", "
+              << samp1.getSelfBounds().max << std::endl;
+
     TESTING_ASSERT( samp1.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
 
     TESTING_ASSERT( samp1.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
+
+    for ( size_t i = 0 ; i < samp1.getCreaseSharpnesses()->size() ; ++i )
+    {
+        std::cout << "crease sharpness[" << i << "]: "
+                  << (*(samp1.getCreaseSharpnesses()))[i] << std::endl;
+        TESTING_ASSERT( 0.5 == (*(samp1.getCreaseSharpnesses()))[i] );
+    }
+
+    for ( size_t i = 0 ; i < samp1.getCornerSharpnesses()->size() ; ++i )
+    {
+        std::cout << "corner sharpness[" << i << "]: "
+                  << (*(samp1.getCornerSharpnesses()))[i] << std::endl;
+        TESTING_ASSERT( 10.0 == (*(samp1.getCornerSharpnesses()))[i] );
+    }
 
 
     // test the second sample has '1' as the interpolate boundary value

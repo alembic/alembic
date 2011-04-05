@@ -183,7 +183,7 @@ public:
         init( tsIndex );
     }
 
-    //! Default copy constructor used.
+    //! Default copy constructor.
     //! Default assignment operator used.
 
     //-*************************************************************************

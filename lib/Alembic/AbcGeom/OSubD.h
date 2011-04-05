@@ -348,7 +348,7 @@ public:
         init( tsIndex );
     }
 
-    //! Default copy constructor used.
+    //! Default copy constructor.
     //! Default assignment operator used.
 
     //-*************************************************************************
@@ -397,14 +397,11 @@ public:
         m_creaseIndices.reset();
         m_creaseLengths.reset();
         m_creaseSharpnesses.reset();
-        m_numNullCreaseSamples = 0;
 
         m_cornerIndices.reset();
         m_cornerSharpnesses.reset();
-        m_numNullCornerSamples = 0;
 
         m_holes.reset();
-        m_numNullHoleSamples = 0;
 
         m_subdScheme.reset();
 
@@ -448,16 +445,13 @@ protected:
     Abc::OInt32ArrayProperty m_creaseIndices;
     Abc::OInt32ArrayProperty m_creaseLengths;
     Abc::OFloatArrayProperty m_creaseSharpnesses;
-    uint32_t m_numNullCreaseSamples;
 
     // Corners
     Abc::OInt32ArrayProperty m_cornerIndices;
     Abc::OFloatArrayProperty m_cornerSharpnesses;
-    uint32_t m_numNullCornerSamples;
 
     // Holes
     Abc::OInt32ArrayProperty m_holes;
-    uint32_t m_numNullHoleSamples;
 
     // subdivision scheme
     Abc::OStringProperty m_subdScheme;
@@ -473,9 +467,9 @@ protected:
     Abc::OCompoundProperty m_arbGeomParams;
 
 private:
-    void initCreases();
-    void initCorners();
-    void initHoles();
+    void initCreases(uint32_t iNumSamples);
+    void initCorners(uint32_t iNumSamples);
+    void initHoles(uint32_t iNumSamples);
 
 };
 

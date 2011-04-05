@@ -80,7 +80,7 @@ void writeUInt32ArrayProperty(const std::string &archiveName)
                                "primes", // name
                                ts ); // uniform with cycle=dt
 
-    std::vector<unsigned int> vals;
+    std::vector<uint32_t> vals;
     for (int ss=0; ss<5; ss++)
     {
         // This vector increases in length as we go, increasing the

@@ -217,7 +217,7 @@ WritePropertyAndDataType( hid_t iGroup,
                  H5T_STD_U16LE,
                  H5T_NATIVE_UINT16,
                  ( const void * )&bitField );
-}   
+}
 
 //-*****************************************************************************
 static void
@@ -245,7 +245,7 @@ WriteTimeSamplingType( hid_t iGroup,
         // Here we have to write SPC, and if TPC is 1.0 we don't
         // bother writing it.
         assert( spc > 1 );
-        assert( tpc < AbcA::TimeSamplingType::ACYCLIC_TIME_PER_CYCLE );
+        assert( tpc < AbcA::TimeSamplingType::AcyclicTimePerCycle() );
         WriteScalar( iGroup, nameSPC,
                      H5T_STD_U32LE,
                      H5T_NATIVE_UINT32,
@@ -261,7 +261,7 @@ WriteTimeSamplingType( hid_t iGroup,
     else
     {
         assert( iTimeSamplingType.isAcyclic() );
-        assert( spc == AbcA::TimeSamplingType::ACYCLIC_NUM_SAMPLES );
+        assert( spc == AbcA::TimeSamplingType::AcyclicNumSamples() );
         WriteScalar( iGroup, nameSPC,
                      H5T_STD_U32LE,
                      H5T_NATIVE_UINT32,
@@ -359,7 +359,7 @@ WriteArray( WrittenArraySampleMap &iMap,
         hid_t zipPlist = DsetGzipCreatePlist( dims,
             iCompressionLevel > 9 ? 9 : iCompressionLevel );
         PlistCloser plistCloser( zipPlist );
-        
+
         // Make the dataset.
         dsetId = H5Dcreate2( iGroup, iName.c_str(), iFileType, dspaceId,
                              H5P_DEFAULT, zipPlist, H5P_DEFAULT );
