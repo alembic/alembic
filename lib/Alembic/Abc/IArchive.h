@@ -77,7 +77,7 @@ public:
         //! The file name.
         const std::string &iFileName,
 
-        ErrorHandler::Policy iPolicy = ErrorHandler::Policy(),
+        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
         AbcA::ReadArraySampleCachePtr iCachePtr = AbcA::ReadArraySampleCachePtr());
 
     //! This attaches an IArchive wrapper around an existing
