@@ -110,3 +110,7 @@ ADD_TEST( Abc_CacheControl_TEST Abc_CacheControlTest )
 ADD_EXECUTABLE( Abc_RedundantDataPathsTest RedundantDataTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_RedundantDataPathsTest ${TEST_LIBS} )
 ADD_TEST( Abc_RedundantDataPaths_TEST Abc_RedundantDataPathsTest )
+
+ADD_EXECUTABLE( Abc_TypedArraySampleTest TypedArraySampleTest.cpp )
+TARGET_LINK_LIBRARIES( Abc_TypedArraySampleTest ${TEST_LIBS} )
+ADD_TEST( Abc_TypedArraySample_TEST Abc_TypedArraySampleTest )
