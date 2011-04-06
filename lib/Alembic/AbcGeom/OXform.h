@@ -173,7 +173,6 @@ public:
     void reset()
     {
         m_childBounds.reset();
-        m_timeSamplingType = AbcA::TimeSamplingType();
         m_inherits.reset();
         m_numSetSamples = 0;
         m_opstack.clear();
@@ -181,6 +180,7 @@ public:
         m_ops.reset();
         m_props.clear();
         m_props.resize( 0 );
+        m_tsidx = 0;
         super_type::reset();
     }
 
@@ -238,11 +238,9 @@ protected:
             // We don't build the property until we need it for sure.
         }
 
-        void set( const double &iSamp,
-                  const Abc::OSampleSelector &iSS,
-                  const std::size_t &iNumSampsSoFar );
+        void set( const double &iSamp, const std::size_t &iNumSampsSoFar );
 
-        void setFromPrevious( const Abc::OSampleSelector &iSS );
+        void setFromPrevious();
 
         double getDefaultValue() const { return m_default; }
 

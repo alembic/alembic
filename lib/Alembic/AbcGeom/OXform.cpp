@@ -95,15 +95,14 @@ void OXformSchema::set( XformSample &ioSamp )
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
     // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    if ( ioSamp.getChildBounds().hasVolume() && !m_childBounds )
     {
-        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", 
-            m_positions.getTimeSampling() );
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
+            m_tsidx );
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
-        // -1 because we just dis an m_positions set above
-        size_t numSamples = m_positions.getNumSamples() - 1;
+        size_t numSamples = m_ops.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
@@ -113,7 +112,7 @@ void OXformSchema::set( XformSample &ioSamp )
     }
 
     if (m_childBounds)
-    { m_childBounds.set( iSamp.getChildBounds() ); }
+    { m_childBounds.set( ioSamp.getChildBounds() ); }
 
 
     m_inherits.set( ioSamp.getInheritsXforms() );
@@ -201,7 +200,7 @@ void OXformSchema::setFromPrevious()
 
     m_ops.setFromPrevious();
 
-    if ( m_childBounds.getNumSamples() > 0 )
+    if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
     { m_childBounds.setFromPrevious(); }
 
     for ( std::vector<ODefaultedDoubleProperty>::iterator it = m_props.begin()

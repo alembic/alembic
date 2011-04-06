@@ -423,7 +423,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
 
     size_t numSamples = iNode.getSchema().getNumSamples();
 
-    // add animated SubDs to the list
+    // add animated poly mesh to the list
     if (numSamples > 1)
         mData.mPolyMeshList.push_back(iNode);
 
@@ -487,9 +487,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
     MObject transObj;
 
     size_t numChildren = iNode.getNumChildren();
-    size_t numSamples = iNode.getSchema().getNumAnimSamples();
+    bool isConstant = iNode.getSchema().isConstant();
 
-    if (numSamples > 1)
+    if (!isConstant)
     {
         mData.mXformList.push_back(iNode);
         mData.mIsComplexXform.push_back(isComplex(iNode));
@@ -566,7 +566,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         dstPlug = trans.findPlug("inheritsTransform");
         if (!dstPlug.isNull())
         {
-            dstPlug.setBool( iNode.getSchema().inherits(
+            dstPlug.setBool( iNode.getSchema().getInheritsXforms(
                 Alembic::Abc::ISampleSelector(mFrame,
                     Alembic::Abc::ISampleSelector::kNearIndex)) );
         }
@@ -598,7 +598,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
                     mData.mIsSampledXformOpAngle.push_back(false);
             }
 
-            if (numSamples > 1)
+            if (!isConstant)
             {
                 SampledPair mSampledPair(transObj, transopNameList);
                 mData.mXformOpList.push_back(mSampledPair);

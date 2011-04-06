@@ -438,7 +438,8 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 }
                 else
                 {
-                    read(mCurTime, mData.mXformList[i], sampleList);
+                    Alembic::AbcGeom::XformSample samp;
+                    read(mCurTime, mData.mXformList[i], sampleList, samp);
                 }
 
                 unsigned int sampleSize = sampleList.size();

@@ -117,7 +117,7 @@ public:
         *this = iCopy;
     }
 
-    AbcA::TimeSampling getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling();
 
     bool isConstant() const { return m_isConstant; }
 

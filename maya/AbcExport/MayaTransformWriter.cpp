@@ -40,10 +40,8 @@
 void addTranslate(const MFnDependencyNode & iTrans,
     MString parentName, MString xName, MString yName, MString zName,
     uint8_t iHint, bool inverse, bool forceStatic,
-    Alembic::AbcGeom::XformOpVec & oOpVec,
-    std::vector<double> & oStatic,
-    std::vector<double> & oAnim,
-    std::vector< std::pair<MPlug, bool > > & oSampledList)
+    Alembic::AbcGeom::XformSample & oSample,
+    std::vector < AnimChan > & oAnimChanList)
 {
     Alembic::AbcGeom::XformOp op(Alembic::AbcGeom::kTranslateOperation, iHint);
 
@@ -93,40 +91,47 @@ void addTranslate(const MFnDependencyNode & iTrans,
             zVal = -zVal;
         }
 
-        if (xSamp == 0)
+        op.setChannelValue(0, xVal);
+        op.setChannelValue(1, yVal);
+        op.setChannelValue(2, zVal);
+
+        if (xSamp != 0)
         {
-            oStatic.push_back(xVal);
-        }
-        else
-        {
-            oAnim.push_back(xVal);
-            op.setXAnimated(true);
-            oSampledList.push_back(std::pair<MPlug, bool >(xPlug, inverse));
+            AnimChan chan;
+            chan.plug = xPlug;
+            chan.scale = 1.0;
+            if (inverse)
+                chan.scale = -1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 0;
+            oAnimChanList.push_back(chan);
         }
 
-        if (ySamp == 0)
+        if (ySamp != 0)
         {
-            oStatic.push_back(yVal);
-        }
-        else
-        {
-            oAnim.push_back(yVal);
-            op.setYAnimated(true);
-            oSampledList.push_back(std::pair< MPlug, bool >(yPlug, inverse));
-        }
-
-        if (zSamp == 0)
-        {
-            oStatic.push_back(zVal);
-        }
-        else
-        {
-            oAnim.push_back(zVal);
-            op.setZAnimated(true);
-            oSampledList.push_back(std::pair< MPlug, bool >(zPlug, inverse));
+            AnimChan chan;
+            chan.plug = yPlug;
+            chan.scale = 1.0;
+            if (inverse)
+                chan.scale = -1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 1;
+            oAnimChanList.push_back(chan);
         }
 
-        oOpVec.push_back(op);
+        if (zSamp != 0)
+        {
+            AnimChan chan;
+            chan.plug = zPlug;
+            chan.scale = 1.0;
+            if (inverse)
+                chan.scale = -1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 2;
+            oAnimChanList.push_back(chan);
+        }
+
+        oSample.addOp(op);
     }
 }
 
@@ -135,10 +140,8 @@ void addTranslate(const MFnDependencyNode & iTrans,
 void addRotate(const MFnDependencyNode & iTrans,
     MString parentName, const MString* iNames, const unsigned int* iOrder,
     uint8_t iHint, bool forceStatic, bool forceAnimated,
-    Alembic::AbcGeom::XformOpVec & oOpVec,
-    std::vector<double> & oStatic,
-    std::vector<double> & oAnim,
-    std::vector< std::pair<MPlug, bool > > & oSampledList)
+    Alembic::AbcGeom::XformSample & oSample,
+    std::vector < AnimChan > & oAnimChanList)
 {
     Alembic::AbcGeom::XformOp op(Alembic::AbcGeom::kRotateOperation, iHint);
 
@@ -185,44 +188,36 @@ void addRotate(const MFnDependencyNode & iTrans,
 
         double plugVal = plug.asDouble();
 
+
+        // setup the rotation vec
+        op.setChannelValue(0, rotVecs[index][0]);
+        op.setChannelValue(1, rotVecs[index][1]);
+        op.setChannelValue(2, rotVecs[index][2]);
+        op.setChannelValue(3, Alembic::AbcGeom::RadiansToDegrees(plugVal));
+
         // the sampled case
         if (samp != 0)
         {
-            // push the rotation axis first
-            oStatic.push_back(rotVecs[index][0]);
-            oStatic.push_back(rotVecs[index][1]);
-            oStatic.push_back(rotVecs[index][2]);
-
-            op.setAngleAnimated(true);
-            oAnim.push_back(plugVal);
-            oSampledList.push_back(std::pair< MPlug, bool >(plug, false));
+            AnimChan chan;
+            chan.plug = plug;
+            chan.scale = Alembic::AbcGeom::RadiansToDegrees(1.0);
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 3;
+            oAnimChanList.push_back(chan);
         }
-        // the non XYZ axis or nonzero angle case
-        else if (!isXYZ || plugVal != 0.0)
-        {
-
-            // push the rotation axis first
-            oStatic.push_back(rotVecs[index][0]);
-            oStatic.push_back(rotVecs[index][1]);
-            oStatic.push_back(rotVecs[index][2]);
-
-            oStatic.push_back(plugVal);
-        }
-
         // non sampled, XYZ axis and the angle is 0, do not add to the stack
-        else
+        else if (isXYZ && plugVal == 0.0)
             continue;
 
-        oOpVec.push_back(op);
+        oSample.addOp(op);
     }
 }
 
 // the test on whether or not to add it is very similiar to addTranslate
 // but the operation it creates is very different
 void addShear(const MFnDependencyNode & iTrans, bool forceStatic,
-    Alembic::AbcGeom::XformOpVec & oOpVec, std::vector<double> & oStatic,
-    std::vector<double> & oAnim,
-    std::vector< std::pair<MPlug, bool > > & oSampledList)
+    Alembic::AbcGeom::XformSample & oSample,
+    std::vector < AnimChan > & oAnimChanList)
 {
     Alembic::AbcGeom::XformOp op(Alembic::AbcGeom::kMatrixOperation,
         Alembic::AbcGeom::kMayaShearHint);
@@ -270,57 +265,44 @@ void addShear(const MFnDependencyNode & iTrans, bool forceStatic,
     if (xySamp != 0 || xzSamp != 0 || yzSamp != 0 ||
         xyVal != 0.0 || xzVal != 0.0 || yzVal != 0.0)
     {
-        oStatic.push_back(1.0);
-        oStatic.push_back(0.0);
-        oStatic.push_back(0.0);
-        oStatic.push_back(0.0);
+        Alembic::Abc::M44d m;
+        m.makeIdentity();
+        op.setMatrix(m);
+        op.setChannelValue(4, xyVal);
+        op.setChannelValue(8, xzVal);
+        op.setChannelValue(9, yzVal);
 
-        if (xySamp == 0)
+        if (xySamp != 0)
         {
-            oStatic.push_back(xyVal);
-        }
-        else
-        {
-            oAnim.push_back(xyVal);
-            op.setIndexAnimated(4, true);
-            oSampledList.push_back(std::pair< MPlug, bool >(xyPlug, false));
-        }
-
-        oStatic.push_back(1.0);
-        oStatic.push_back(0.0);
-        oStatic.push_back(0.0);
-
-        if (xzSamp == 0)
-        {
-            oStatic.push_back(xzVal);
-        }
-        else
-        {
-            oAnim.push_back(xzVal);
-            op.setIndexAnimated(8, true);
-            oSampledList.push_back(std::pair< MPlug, bool >(xzPlug, false));
+            AnimChan chan;
+            chan.plug = xyPlug;
+            chan.scale = 1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 4;
+            oAnimChanList.push_back(chan);
         }
 
-        if (yzSamp == 0)
+        if (xzSamp != 0)
         {
-            oStatic.push_back(yzVal);
+            AnimChan chan;
+            chan.plug = xzPlug;
+            chan.scale = 1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 8;
+            oAnimChanList.push_back(chan);
         }
-        else
+
+        if (yzSamp != 0)
         {
-            oAnim.push_back(yzVal);
-            op.setIndexAnimated(9, true);
-            oSampledList.push_back(std::pair< MPlug, bool >(yzPlug, false));
+            AnimChan chan;
+            chan.plug = yzPlug;
+            chan.scale = 1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 9;
+            oAnimChanList.push_back(chan);
         }
 
-        oStatic.push_back(1.0);
-        oStatic.push_back(0.0);
-
-        oStatic.push_back(0.0);
-        oStatic.push_back(0.0);
-        oStatic.push_back(0.0);
-        oStatic.push_back(1.0);
-
-        oOpVec.push_back(op);
+        oSample.addOp(op);
     }
 }
 
@@ -328,10 +310,8 @@ void addShear(const MFnDependencyNode & iTrans, bool forceStatic,
 // to the stack if x,y, and z are 1.0
 void addScale(const MFnDependencyNode & iTrans,
     MString parentName, MString xName, MString yName, MString zName,
-    bool forceStatic, Alembic::AbcGeom::XformOpVec & oOpVec,
-    std::vector<double> & oStatic,
-    std::vector<double> & oAnim,
-    std::vector< std::pair<MPlug, bool > > & oSampledList)
+    bool forceStatic, Alembic::AbcGeom::XformSample & oSample,
+    std::vector < AnimChan > & oAnimChanList)
 {
 
     Alembic::AbcGeom::XformOp op(Alembic::AbcGeom::kScaleOperation,
@@ -376,40 +356,42 @@ void addScale(const MFnDependencyNode & iTrans,
     if (xSamp != 0 || ySamp != 0 || zSamp != 0 || xVal != 1.0 || yVal != 1.0 ||
         zVal != 1.0)
     {
-        if (xSamp == 0)
+
+        op.setChannelValue(0, xVal);
+        op.setChannelValue(1, yVal);
+        op.setChannelValue(2, zVal);
+
+        if (xSamp != 0)
         {
-            oStatic.push_back(xVal);
-        }
-        else
-        {
-            oAnim.push_back(xVal);
-            op.setXAnimated(true);
-            oSampledList.push_back(std::pair< MPlug, bool >(xPlug, false));
+            AnimChan chan;
+            chan.plug = xPlug;
+            chan.scale = 1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 0;
+            oAnimChanList.push_back(chan);
         }
 
-        if (ySamp == 0)
+        if (ySamp != 0)
         {
-            oStatic.push_back(yVal);
-        }
-        else
-        {
-            oAnim.push_back(yVal);
-            op.setYAnimated(true);
-            oSampledList.push_back(std::pair< MPlug, bool >(yPlug, false));
-        }
-
-        if (zSamp == 0)
-        {
-            oStatic.push_back(zVal);
-        }
-        else
-        {
-            oAnim.push_back(zVal);
-            op.setZAnimated(true);
-            oSampledList.push_back(std::pair< MPlug, bool >(zPlug, false));
+            AnimChan chan;
+            chan.plug = yPlug;
+            chan.scale = 1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 1;
+            oAnimChanList.push_back(chan);
         }
 
-        oOpVec.push_back(op);
+        if (zSamp != 0)
+        {
+            AnimChan chan;
+            chan.plug = zPlug;
+            chan.scale = 1.0;
+            chan.opNum = oSample.getNumOps();
+            chan.channelNum = 2;
+            oAnimChanList.push_back(chan);
+        }
+
+        oSample.addOp(op);
     }
 }
 
@@ -418,10 +400,6 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     uint32_t iTimeIndex,
     bool iAddWorld, bool iWriteVisibility)
 {
-
-    Alembic::AbcGeom::XformOpVec opVec;
-    std::vector<double> staticData;
-    std::vector<double> animData;
 
     if (iDag.hasFn(MFn::kJoint))
     {
@@ -436,25 +414,24 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
 
         if (!iAddWorld)
         {
-            pushTransformStack(iFrame, joint, opVec, staticData,
-                animData);
+            pushTransformStack(iFrame, joint);
 
             // need to look at inheritsTransform
             MFnDagNode dagNode(iDag);
             MPlug inheritPlug = dagNode.findPlug("inheritsTransform");
-            if (!inheritPlug.isNull() && inheritPlug.asBool() == false)
-                mSchema.setInherits(false);
+            if (!inheritPlug.isNull())
+            {
+                if (util::getSampledType(inheritPlug) != 0)
+                    mInheritsPlug = inheritPlug;
 
-            if (opVec.empty())
+                mSample.setInheritsXforms(inheritPlug.asBool());
+            }
+
+            // everything is default, don't write anything
+            if (mSample.getNumOps() == 0 && mSample.getInheritsXforms())
                 return;
 
-            mSchema.setXform(opVec,
-                Alembic::Abc::DoubleArraySample(staticData));
-
-            if (animData.empty())
-            {
-                mSchema.set(Alembic::Abc::DoubleArraySample(animData));
-            }
+            mSchema.set(mSample);
 
             return;
         }
@@ -472,25 +449,25 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
 
         if (!iAddWorld)
         {
-            pushTransformStack(iFrame, trans, opVec, staticData, animData);
+            pushTransformStack(iFrame, trans);
 
             // need to look at inheritsTransform
             MFnDagNode dagNode(iDag);
             MPlug inheritPlug = dagNode.findPlug("inheritsTransform");
-            if (!inheritPlug.isNull() && inheritPlug.asBool() == false)
-                mSchema.setInherits(false);
-
-            if (opVec.empty())
-                return;
-
-            mSchema.setXform(opVec,
-                Alembic::Abc::DoubleArraySample(staticData));
-
-            if (animData.empty())
+            if (!inheritPlug.isNull())
             {
-                mSchema.set(Alembic::Abc::DoubleArraySample(animData));
+                if (util::getSampledType(inheritPlug) != 0)
+                    mInheritsPlug = inheritPlug;
+
+                mSample.setInheritsXforms(inheritPlug.asBool());
             }
 
+
+            // everything is default, don't write anything
+            if (mSample.getNumOps() == 0 && mSample.getInheritsXforms())
+                return;
+
+            mSchema.set(mSample);
             return;
         }
     }
@@ -533,12 +510,12 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         if (iCur->hasFn(MFn::kJoint))
         {
             MFnIkJoint joint(*iCur);
-            pushTransformStack(iFrame, joint, opVec, staticData, animData);
+            pushTransformStack(iFrame, joint);
         }
         else
         {
             MFnTransform trans(*iCur);
-            pushTransformStack(iFrame, trans, opVec, staticData, animData);
+            pushTransformStack(iFrame, trans);
         }
     }
 
@@ -546,30 +523,32 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     if (iCur->hasFn(MFn::kJoint))
     {
         MFnIkJoint joint(*iCur);
-        pushTransformStack(iFrame, joint, opVec, staticData, animData);
+        pushTransformStack(iFrame, joint);
     }
     else
     {
         MFnTransform trans(*iCur);
-        pushTransformStack(iFrame, trans, opVec, staticData, animData);
+        pushTransformStack(iFrame, trans);
     }
 
     // need to look at inheritsTransform
     MFnDagNode dagNode(iDag);
     MPlug inheritPlug = dagNode.findPlug("inheritsTransform");
-    if (!inheritPlug.isNull() && inheritPlug.asBool() == false)
-        mSchema.setInherits(false);
+    if (!inheritPlug.isNull())
+    {
+        if (util::getSampledType(inheritPlug) != 0)
+            mInheritsPlug = inheritPlug;
 
-    // we don't need to write anything since no operations were added
-    if (opVec.empty())
+        mSample.setInheritsXforms(inheritPlug.asBool());
+    }
+
+
+    // everything is default, don't write anything
+    if (mSample.getNumOps() == 0 && mSample.getInheritsXforms())
         return;
 
-    mSchema.setXform(opVec, Alembic::Abc::DoubleArraySample(staticData));
+    mSchema.set(mSample);
 
-    if (animData.size() > 0)
-    {
-        mSchema.set(Alembic::Abc::DoubleArraySample(animData));
-    }
 }
 
 MayaTransformWriter::MayaTransformWriter(double iFrame,
@@ -577,11 +556,6 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     uint32_t iTimeIndex,
     bool iWriteVisibility)
 {
-
-    Alembic::AbcGeom::XformOpVec opVec;
-    std::vector<double> staticData;
-    std::vector<double> animData;
-
     if (iDag.hasFn(MFn::kJoint))
     {
         MFnIkJoint joint(iDag);
@@ -594,7 +568,7 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, joint,
             iTimeIndex, iWriteVisibility));
 
-        pushTransformStack(iFrame, joint, opVec, staticData, animData);
+        pushTransformStack(iFrame, joint);
     }
     else
     {
@@ -607,26 +581,24 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, trans,
             iTimeIndex, iWriteVisibility));
 
-        pushTransformStack(iFrame, trans, opVec, staticData, animData);
+        pushTransformStack(iFrame, trans);
     }
 
 
     // need to look at inheritsTransform
     MFnDagNode dagNode(iDag);
     MPlug inheritPlug = dagNode.findPlug("inheritsTransform");
-    if (!inheritPlug.isNull() && inheritPlug.asBool() == false)
-        mSchema.setInherits(false);
-
-    // we don't need to write anything since no operations were added
-    if (opVec.empty())
-        return;
-
-    mSchema.setXform(opVec, Alembic::Abc::DoubleArraySample(staticData));
-
-    if (animData.size() > 0)
+    if (!inheritPlug.isNull())
     {
-        mSchema.set(Alembic::Abc::DoubleArraySample(animData));
+        if (util::getSampledType(inheritPlug) != 0)
+            mInheritsPlug = inheritPlug;
+
+        mSample.setInheritsXforms(inheritPlug.asBool());
     }
+
+    // everything is default, don't write anything
+    if (mSample.getNumOps() == 0 && mSample.getInheritsXforms())
+        return;
 }
 
 
@@ -636,49 +608,57 @@ MayaTransformWriter::~MayaTransformWriter()
 
 void MayaTransformWriter::write(double iFrame)
 {
-    size_t numSamples = mSampledList.size();
+    size_t numSamples = mAnimChanList.size();
     if (numSamples > 0)
     {
-        std::vector<double> samples(numSamples);
-        size_t i;
-        for (i = 0; i < numSamples; ++i)
+        std::vector < AnimChan >::iterator it, itEnd;
+
+        for (it = mAnimChanList.begin(), itEnd = mAnimChanList.end();
+            it != itEnd; ++it)
         {
-            // the invert case
-            if (mSampledList[i].second)
-                samples[i] = -mSampledList[i].first.asDouble();
-            else
-                samples[i] = mSampledList[i].first.asDouble();
+            double val = it->plug.asDouble();
+
+            if (it->scale != 1.0)
+                val *= it->scale;
+
+            mSample[it->opNum].setChannelValue(it->channelNum, val);
         }
-        mSchema.set(Alembic::Abc::DoubleArraySample(samples));
+
+        if (!mInheritsPlug.isNull())
+        {
+            mSample.setInheritsXforms(mInheritsPlug.asBool());
+        }
+
+        mSchema.set(mSample);
     }
 }
 
 bool MayaTransformWriter::isAnimated() const
 {
-    return mSampledList.size() > 0;
+    return mAnimChanList.size() > 0 || !mInheritsPlug.isNull();
 }
 
 void MayaTransformWriter::pushTransformStack(double iFrame,
-    const MFnTransform & iTrans, Alembic::AbcGeom::XformOpVec & oOpVec,
-    std::vector<double> & oStatic, std::vector<double> & oAnim)
+    const MFnTransform & iTrans)
 {
     bool forceStatic = (iFrame == DBL_MAX);
 
     // inspect the translate
     addTranslate(iTrans, "translate", "translateX", "translateY", "translateZ",
-        Alembic::AbcGeom::kTranslateHint, false, forceStatic, oOpVec,
-        oStatic, oAnim, mSampledList);
+        Alembic::AbcGeom::kTranslateHint, false, forceStatic, mSample,
+        mAnimChanList);
+
 
     // inspect the rotate pivot translate
     addTranslate(iTrans, "rotatePivotTranslate", "rotatePivotTranslateX",
         "rotatePivotTranslateY", "rotatePivotTranslateZ",
         Alembic::AbcGeom::kRotatePivotTranslationHint, false,
-            forceStatic, oOpVec, oStatic, oAnim, mSampledList);
+            forceStatic, mSample, mAnimChanList);
 
     // inspect the rotate pivot
     addTranslate(iTrans, "rotatePivot", "rotatePivotX", "rotatePivotY",
         "rotatePivotZ",  Alembic::AbcGeom::kRotatePivotPointHint,
-        false, forceStatic, oOpVec, oStatic, oAnim, mSampledList);
+        false, forceStatic, mSample, mAnimChanList);
 
     // inspect rotate names
     MString rotateNames[3];
@@ -693,8 +673,8 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
         rotOrder[2]))
     {
         addRotate(iTrans, "rotate", rotateNames, rotOrder,
-            Alembic::AbcGeom::kRotateHint, forceStatic, false, 
-            oOpVec, oStatic, oAnim, mSampledList);
+            Alembic::AbcGeom::kRotateHint, forceStatic, false,
+            mSample, mAnimChanList);
     }
 
     // now look at the rotation orientation, aka rotate axis
@@ -706,51 +686,50 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
     rotOrder[2] = 2;
     addRotate(iTrans, "rotateAxis", rotateNames, rotOrder,
         Alembic::AbcGeom::kRotateOrientationHint, forceStatic, false,
-        oOpVec, oStatic, oAnim, mSampledList);
+        mSample, mAnimChanList);
 
     // invert the rotate pivot if necessary
     addTranslate(iTrans, "rotatePivot", "rotatePivotX", "rotatePivotY",
         "rotatePivotZ", Alembic::AbcGeom::kRotatePivotPointHint,
-        true, forceStatic, oOpVec, oStatic, oAnim, mSampledList);
+        true, forceStatic, mSample, mAnimChanList);
 
     // inspect the scale pivot translation
     addTranslate(iTrans, "scalePivotTranslate", "scalePivotTranslateX",
         "scalePivotTranslateY", "scalePivotTranslateZ",
         Alembic::AbcGeom::kScalePivotTranslationHint, false, forceStatic,
-        oOpVec, oStatic, oAnim, mSampledList);
+        mSample, mAnimChanList);
 
     // inspect the scale pivot point
     addTranslate(iTrans, "scalePivot", "scalePivotX", "scalePivotY",
         "scalePivotZ", Alembic::AbcGeom::kScalePivotPointHint, false,
-        forceStatic, oOpVec, oStatic, oAnim, mSampledList);
+        forceStatic, mSample, mAnimChanList);
 
     // inspect the shear
-    addShear(iTrans, forceStatic, oOpVec, oStatic, oAnim, mSampledList);
+    addShear(iTrans, forceStatic, mSample, mAnimChanList);
 
     // add the scale
     addScale(iTrans, "scale", "scaleX", "scaleY", "scaleZ", forceStatic,
-        oOpVec, oStatic, oAnim, mSampledList);
+        mSample, mAnimChanList);
 
     // inverse the scale pivot point if necessary
     addTranslate(iTrans, "scalePivot", "scalePivotX", "scalePivotY",
         "scalePivotZ", Alembic::AbcGeom::kScalePivotPointHint, true,
-        forceStatic, oOpVec, oStatic, oAnim, mSampledList);
+        forceStatic, mSample, mAnimChanList);
 }
 
 void MayaTransformWriter::pushTransformStack(double iFrame,
-    const MFnIkJoint & iJoint, Alembic::AbcGeom::XformOpVec & oOpVec,
-    std::vector<double> & oStatic, std::vector<double> & oAnim)
+    const MFnIkJoint & iJoint)
 {
     bool forceStatic = (iFrame == DBL_MAX);
 
     // inspect the translate
     addTranslate(iJoint, "translate", "translateX", "translateY", "translateZ",
         Alembic::AbcGeom::kTranslateHint, false, forceStatic,
-        oOpVec, oStatic, oAnim, mSampledList);
+        mSample, mAnimChanList);
 
     // inspect the inverseParent scale
     addScale(iJoint, "inverseScale", "inverseScaleX", "inverseScaleY",
-        "inverseScaleZ", forceStatic, oOpVec, oStatic, oAnim, mSampledList);
+        "inverseScaleZ", forceStatic, mSample, mAnimChanList);
 
     MTransformationMatrix::RotationOrder order;
     double vals[3];
@@ -769,7 +748,7 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
     {
         addRotate(iJoint, "jointOrient", rotateNames, rotOrder,
             Alembic::AbcGeom::kRotateHint, forceStatic, true,
-            oOpVec, oStatic, oAnim, mSampledList);
+            mSample, mAnimChanList);
     }
 
     rotateNames[0] = "rotateX";
@@ -782,7 +761,7 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
     {
         addRotate(iJoint, "rotate", rotateNames, rotOrder,
             Alembic::AbcGeom::kRotateHint, forceStatic, true,
-            oOpVec, oStatic, oAnim, mSampledList);
+            mSample, mAnimChanList);
     }
 
     // now look at the rotation orientation, aka rotate axis
@@ -795,10 +774,10 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
     {
         addRotate(iJoint, "rotateAxis", rotateNames, rotOrder,
             Alembic::AbcGeom::kRotateOrientationHint, forceStatic, true,
-            oOpVec, oStatic, oAnim, mSampledList);
+            mSample, mAnimChanList);
     }
 
     // inspect the scale
     addScale(iJoint, "scale", "scaleX", "scaleY", "scaleZ", forceStatic,
-        oOpVec, oStatic, oAnim, mSampledList);
+        mSample, mAnimChanList);
 }

@@ -89,7 +89,10 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     AbcA::CompoundPropertyReaderPtr ptr = this->getPtr();
 
-    m_childBounds = Abc::IBox3dProperty( ptr, ".childBnds", iMatching );
+    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( ptr, ".childBnds", iMatching );
+    }
 
     m_inherits = Abc::IBoolProperty( ptr, ".inherits", iMatching );
 
@@ -149,7 +152,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 }
 
 //-*****************************************************************************
-AbcA::TimeSampling IXformSchema::getTimeSampling()
+AbcA::TimeSamplingPtr IXformSchema::getTimeSampling()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getTimeSampling()" );
 
@@ -157,7 +160,7 @@ AbcA::TimeSampling IXformSchema::getTimeSampling()
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    AbcA::TimeSampling ret;
+    AbcA::TimeSamplingPtr ret;
     return ret;
 }
 
@@ -180,7 +183,8 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
     oSamp.clear();
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling(),
+        m_ops.getNumSamples() );
 
     if ( sampIdx < 0 ) { return; }
 
@@ -226,7 +230,8 @@ bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getInheritsXforms()" );
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling(),
+        m_ops.getNumSamples() );
 
     if ( sampIdx < 0 ) { return true; }
 

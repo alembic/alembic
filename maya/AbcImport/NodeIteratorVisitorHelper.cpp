@@ -1142,7 +1142,7 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     for (i = 0; i < iEnd; ++i)
     {
         ts = mXformList[i].getSchema().getTimeSampling();
-        size_t numSamples = mXformList[i].getSchema().getNumAnimSamples();
+        size_t numSamples = mXformList[i].getSchema().getNumSamples();
         if (numSamples > 1)
         {
             oMin = std::min(ts->getSampleTime(0), oMin);
