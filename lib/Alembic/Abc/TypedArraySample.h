@@ -73,7 +73,7 @@ public:
     //-*************************************************************************
     // From std::vector
     TypedArraySample( const value_vector &iVec )
-      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ? 
+      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ?
                                                            &iVec.front() :
                                                            NULL ),
                            TRAITS::dataType(), Dimensions( iVec.size() ) ) {}
@@ -81,7 +81,7 @@ public:
     // This is for the case in which the data is multi-dimensional
     TypedArraySample( const value_vector &iVec,
                       const Dimensions &iDims )
-      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ? 
+      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ?
                                                            &iVec.front() :
                                                            NULL ),
                            TRAITS::dataType(), iDims )
@@ -135,39 +135,6 @@ public:
     //-*************************************************************************
     ALEMBIC_OPERATOR_BOOL( ArraySample::valid() );
 };
-
-//-*****************************************************************************
-// We need a "side-along" TypedArraySamplePtr. Taking advantage of the fact
-// that static-cast is valid here.
-template <class TRAITS>
-inline boost::shared_ptr<TypedArraySample<TRAITS> >
-AllocateTypedArraySample( const Dimensions &iDims )
-{
-    typedef typename TRAITS::value_type value_type;
-
-    const AbcA::DataType &dtype = TRAITS::dataType();
-    size_t numElems = iDims.numPoints();
-    if ( numElems > 0 )
-    {
-        // Allocate data
-        value_type *data = new value_type[numElems];
-
-        // Allocate typed array sample with fancy deleter
-        boost::shared_ptr<TypedArraySample<TRAITS> >
-            ret( new TypedArraySample<TRAITS>(
-                     reinterpret_cast<const void *>( data ),
-                     dtype, iDims ),
-                 AbcA::TArrayDeleter<value_type>() );
-        return ret;
-    }
-    else
-    {
-        boost::shared_ptr<TypedArraySample<TRAITS> >
-            ret( new TypedArraySample<TRAITS>(
-                     ( const void * )NULL, iDims ) );
-        return ret;
-    }
-}
 
 //-*****************************************************************************
 // TYPEDEFS
