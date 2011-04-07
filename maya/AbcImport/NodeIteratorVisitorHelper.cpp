@@ -1098,7 +1098,6 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     mXformOpList = rhs.mXformOpList;
 
     mIsComplexXform = rhs.mIsComplexXform;
-    mIsSampledXformOpAngle = rhs.mIsSampledXformOpAngle;
 
     return *this;
 }
@@ -1284,19 +1283,6 @@ MString connectAttr(ArgData & iArgData)
     MObject intArrayObj;
     MIntArray intArray;
     unsigned length;
-
-    // set the mIsSampledXformOpAngle
-    length = iArgData.mData.mIsSampledXformOpAngle.size();
-    if (length > 0)
-    {
-        plug = alembicNodeFn.findPlug("transOpAngle", true, &status);
-        intArray.setLength(length);
-        for (unsigned int i = 0; i < length; i++)
-            intArray.set(iArgData.mData.mIsSampledXformOpAngle[i], i);
-        status = fnIntArray.set(intArray);
-        intArrayObj = fnIntArray.object(&status);
-        status = plug.setValue(intArrayObj);
-    }
 
     // set the mNurbsCurveNumCurveList
     length = 0;//iArgData.mData.mNurbsCurveNumCurveList.size();
@@ -1590,15 +1576,8 @@ MString connectAttr(ArgData & iArgData)
 
     if (xformSize > 0)
     {
-        unsigned int isSampledAngleIndex = 0;
-
         unsigned int logicalIndex = 0;
         MPlug srcArrayPlug = alembicNodeFn.findPlug("transOp", true);
-
-        // for angleArray Attribute
-        unsigned int angleLogicalIndex = 0;
-        MPlug srcAngleArrayPlug =
-            alembicNodeFn.findPlug("outTransOpAngle", true);
 
         for (unsigned int i = 0 ; i < xformSize; i++)
         {
@@ -1608,18 +1587,8 @@ MString connectAttr(ArgData & iArgData)
             unsigned int sampleSize = mSampledPair.sampledChannelSize();
             for (unsigned int j = 0; j < sampleSize; j ++)
             {
-                // is angle channel
-                if (iArgData.mData.mIsSampledXformOpAngle[isSampledAngleIndex++]
-                    == true)
-                {
-                    srcPlug = srcAngleArrayPlug.elementByLogicalIndex(
-                        angleLogicalIndex++);
-                }
-                else
-                {
-                    srcPlug = srcArrayPlug.elementByLogicalIndex(
-                        logicalIndex++);
-                }
+
+                srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
 
                 std::string attrName = mSampledPair.getSampleElement(j);
                 dstPlug = mFn.findPlug(attrName.c_str(), true);

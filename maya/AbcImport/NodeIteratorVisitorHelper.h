@@ -126,7 +126,6 @@ public:
     std::vector<Alembic::AbcGeom::IPoints>   mPointsList;
     std::vector<Alembic::AbcGeom::IXform>    mXformList;
 
-    std::vector<bool>           mIsSampledXformOpAngle;
     std::vector<bool>           mIsComplexXform;
 
 };  // WriterData

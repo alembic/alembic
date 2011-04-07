@@ -60,7 +60,7 @@ public:
         mCurTime = DBL_MAX;
 
         // 0 mOutPropArrayAttr
-        // 1 mOutTransOpArrayAttr, mOutTransOpAngleArrayAttr
+        // 1 mOutTransOpArrayAttr
         // 2 mOutSubDArrayAttr
         // 3 mOutPolyArrayAttr
         // 4 mOutCameraArrayAttr
@@ -87,7 +87,6 @@ public:
 
     // data attributes
     static MObject mSampledNurbsCurveNumCurveAttr;
-    static MObject mIsSampledTransOpAngleAttr;
 
     // output attributes
     static MObject mOutPropArrayAttr;
@@ -97,7 +96,6 @@ public:
     static MObject mOutNurbsCurveGrpArrayAttr;
     static MObject mOutNurbsSurfaceArrayAttr;
     static MObject mOutTransOpArrayAttr;
-    static MObject mOutTransOpAngleArrayAttr;
 
     // output informational attrs
     static MObject mStartFrameAttr;
