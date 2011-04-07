@@ -207,7 +207,10 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
         oSamp.addOp( op );
     }
 
-    oSamp.setInheritsXforms( m_inherits.getValue( sampIdx ) );
+    if ( m_inherits.getNumSamples() > 0 )
+        oSamp.setInheritsXforms( m_inherits.getValue( sampIdx ) );
+    else
+        oSamp.setInheritsXforms(true);
 
     if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
     {
@@ -230,8 +233,8 @@ bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getInheritsXforms()" );
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling(),
-        m_ops.getNumSamples() );
+    AbcA::index_t sampIdx = iSS.getIndex( m_inherits.getTimeSampling(),
+        m_inherits.getNumSamples() );
 
     if ( sampIdx < 0 ) { return true; }
 

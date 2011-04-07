@@ -41,7 +41,7 @@ namespace Abc {
 
 //-*****************************************************************************
 index_t ISampleSelector::getIndex( const AbcA::TimeSamplingPtr & iTsmp,
-    uint32_t iNumSamples ) const
+    index_t iNumSamples ) const
 {
     index_t retIdx;
 
