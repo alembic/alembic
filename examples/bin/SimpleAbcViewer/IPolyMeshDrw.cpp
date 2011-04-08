@@ -54,15 +54,15 @@ IPolyMeshDrw::IPolyMeshDrw( IPolyMesh &iPmesh )
     // all the children.
     // if we have a non-constant time sampling, we should get times
     // out of it.
-    const TimeSampling iTsmp = m_polyMesh.getSchema().getTimeSampling();
-    if ( !iTsmp.isStatic() )
+    TimeSamplingPtr iTsmp = m_polyMesh.getSchema().getTimeSampling();
+    if ( !m_polyMesh.getSchema().isConstant() )
     {
-        size_t numSamps = iTsmp.getNumSamples();
+        size_t numSamps =  m_polyMesh.getSchema().getNumSamples();
         if ( numSamps > 0 )
         {
-            chrono_t minTime = iTsmp.getSampleTime( 0 );
+            chrono_t minTime = iTsmp->getSampleTime( 0 );
             m_minTime = std::min( m_minTime, minTime );
-            chrono_t maxTime = iTsmp.getSampleTime( numSamps-1 );
+            chrono_t maxTime = iTsmp->getSampleTime( numSamps-1 );
             m_maxTime = std::max( m_maxTime, maxTime );
         }
     }
