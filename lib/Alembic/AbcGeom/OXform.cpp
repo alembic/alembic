@@ -102,10 +102,8 @@ void OXformSchema::set( XformSample &ioSamp )
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
-        size_t numSamples = m_ops.getNumSamples();
-
         // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
+        for ( size_t i = 0; i < m_numSetSamples; ++i )
         {
             m_childBounds.set( emptyBox );
         }
@@ -157,8 +155,7 @@ void OXformSchema::set( XformSample &ioSamp )
                     cptr, channame + oname, pcy,
                     op.getDefaultChannelValue( j ) );
 
-                prop.set( op.getChannelValue( j ), m_numSetSamples);
-
+                prop.set( op.getChannelValue( j ), 0);
                 m_props.push_back( prop );
             }
         }

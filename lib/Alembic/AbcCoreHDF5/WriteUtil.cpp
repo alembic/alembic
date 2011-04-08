@@ -66,12 +66,6 @@ WriteDataToAttr( hid_t iParent,
                  hid_t iNativeType,
                  const void *iData )
 {
-    htri_t exi = H5Aexists( iParent, iAttrName.c_str() );
-    if ( exi != 0 )
-    {
-        ABCA_THROW( "Duplicate attribute: " << iAttrName );
-    }
-
     hid_t attrId = H5Acreate2( iParent, iAttrName.c_str(),
                                iFileType, iDspace,
                                H5P_DEFAULT, H5P_DEFAULT );
