@@ -91,7 +91,7 @@ public:
         if (index < sampleNameList.size())
             return sampleNameList[index];
         else
-            return 0;
+            return std::string();
     }
 
 private:

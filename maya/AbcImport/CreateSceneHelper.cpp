@@ -582,7 +582,6 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         {
             std::vector<std::string> transopNameList;
             std::vector<std::string> propNameList;
-            bool isComplex = false;
             connectToXform(mFrame, iNode, transObj, propNameList,
                 transopNameList);
 

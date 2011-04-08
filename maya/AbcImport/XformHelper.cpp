@@ -653,7 +653,6 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
 
     bool scPivot = false;
     bool roPivot = false;
-    size_t statPos = 0;
     size_t animPos = 0;
 
     MTransformationMatrix::RotationOrder rotOrder[2];
@@ -809,7 +808,8 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                     }
 
                     MVector axis(x, y, z);
-                    MQuaternion quat(angle, axis);
+                    MQuaternion quat(
+                        Alembic::AbcGeom::DegreesToRadians(angle), axis);
                     trans.rotateBy(quat, gSpace);
                 }
                 // kRotateOrientationHint
@@ -830,7 +830,8 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                             angle = op.getChannelValue(3);
                         }
 
-                        quat.setToXAxis(angle);
+                        quat.setToXAxis(
+                            Alembic::AbcGeom::DegreesToRadians(angle));
 
                     }
                     else if (x == 0 && y == 1 && z == 0)
@@ -845,7 +846,8 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         {
                             angle = op.getChannelValue(3);
                         }
-                        quat.setToYAxis(angle);
+                        quat.setToYAxis(
+                            Alembic::AbcGeom::DegreesToRadians(angle));
                     }
                     else if (x == 0 && y == 0 && z == 1)
                     {
@@ -859,7 +861,8 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         {
                             angle = op.getChannelValue(3);
                         }
-                        quat.setToZAxis(angle);
+                        quat.setToZAxis(
+                            Alembic::AbcGeom::DegreesToRadians(angle));
                     }
 
                     MQuaternion curq = trans.rotateOrientation(gSpace);
