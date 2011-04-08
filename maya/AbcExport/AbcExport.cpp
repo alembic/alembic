@@ -665,7 +665,6 @@ MStatus AbcExport::doIt(const MArgList & args)
         {
             bool lastFrame = (*j)->eval(*it);
 
-            //
             if (lastFrame)
             {
                 j = jobList.erase(j);

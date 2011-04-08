@@ -599,6 +599,8 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     // everything is default, don't write anything
     if (mSample.getNumOps() == 0 && mSample.getInheritsXforms())
         return;
+
+    mSchema.set(mSample);
 }
 
 

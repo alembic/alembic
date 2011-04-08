@@ -284,7 +284,8 @@ bool util::isAnimated(MObject & object, bool checkParent)
         {
             return true;
         }
-        if (node.hasFn( MFn::kConstraint ) ||
+        if (node.hasFn(MFn::kPluginDependNode) ||
+                node.hasFn( MFn::kConstraint ) ||
                 node.hasFn(MFn::kPointConstraint) ||
                 node.hasFn(MFn::kAimConstraint) ||
                 node.hasFn(MFn::kOrientConstraint) ||
