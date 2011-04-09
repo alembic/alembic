@@ -132,7 +132,12 @@ public:
         init();
     }
 
-    //! Default copy constructor used.
+    //! Explicit copy constructor to work around MSVC bug
+    OXformSchema( const OXformSchema &iCopy )
+    {
+        *this = iCopy;
+    }
+
     //! Default assignment operator used.
 
     //-*************************************************************************

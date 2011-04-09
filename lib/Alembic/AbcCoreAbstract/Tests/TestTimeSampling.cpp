@@ -42,6 +42,7 @@
 #include <stdlib.h>
 
 #include <ImathMath.h>
+#include <ImathRandom.h>
 
 #include <vector>
 #include <iostream>

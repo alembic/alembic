@@ -183,7 +183,12 @@ public:
         init( tsIndex );
     }
 
-    //! Default copy constructor.
+    //! Copy constructor.
+    OPointsSchema(const OPointsSchema& iCopy)
+    {
+        *this = iCopy;    
+    }
+
     //! Default assignment operator used.
 
     //-*************************************************************************

@@ -215,7 +215,12 @@ public:
         init( tsIndex );
     }
 
-    //! Default copy constructor.
+    //! Copy constructor.
+    OPolyMeshSchema(const OPolyMeshSchema& iCopy)
+    {
+        *this = iCopy;
+    }
+
     //! Default assignment operator used.
 
     //-*************************************************************************

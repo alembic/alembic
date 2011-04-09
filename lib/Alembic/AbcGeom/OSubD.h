@@ -348,7 +348,12 @@ public:
         init( tsIndex );
     }
 
-    //! Default copy constructor.
+    //! Copy constructor.
+    OSubDSchema(const OSubDSchema& iCopy)
+    {
+        *this = iCopy;
+    }
+
     //! Default assignment operator used.
 
     //-*************************************************************************
