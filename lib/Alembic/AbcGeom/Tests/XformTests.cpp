@@ -54,6 +54,60 @@ bool almostEqual( const double &a, const double &b,
 using namespace Alembic::AbcGeom;
 
 //-*****************************************************************************
+void recurseCreateXform(OObject & iParent, int children, int level,
+                        std::vector<OXform> & oCreated)
+{
+    std::string levelName = boost::lexical_cast<std::string>( level );
+    for (int i = 0; i < children; ++i)
+    {
+        std::string xformName = levelName + "_" + boost::lexical_cast<std::string>( i );
+        OXform xform( iParent, xformName );
+        XformSample samp;
+        XformOp transop( kTranslateOperation, kTranslateHint );
+        XformOp rotatop( kRotateOperation, kRotateHint );
+        XformOp scaleop( kScaleOperation, kScaleHint );
+        samp.addOp( transop, V3d(0.0, 0.0, 0.0) );
+        samp.addOp( rotatop, V3d(0.0, 0.0, 1.0), 0.0 );
+        samp.addOp( rotatop, V3d(0.0, 1.0, 0.0), 0.0 );
+        samp.addOp( rotatop, V3d(1.0, 0.0, 0.0), 0.0 );
+        samp.addOp( scaleop, V3d(1.0, 1.0, 1.0) );
+        xform.getSchema().set(samp);
+        oCreated.push_back( xform );
+        if ( level > 0 )
+        {
+            recurseCreateXform( xform, children, level - 1, oCreated );
+        }
+    }
+}
+
+//-*****************************************************************************
+void xformTreeCreate()
+{
+    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform_tree.abc" );
+    std::vector<OXform> xforms;
+    OObject root( archive, kTop);
+    recurseCreateXform( root, 4, 6, xforms );
+    std::cout << "Total xforms created " << xforms.size() << std::endl;
+
+    XformSample samp;
+    XformOp transop( kTranslateOperation, kTranslateHint );
+    XformOp rotatop( kRotateOperation, kRotateHint );
+    XformOp scaleop( kScaleOperation, kScaleHint );
+    samp.addOp( transop, V3d(42.0, 42.0, 42.0) );
+    samp.addOp( rotatop, V3d(0.0, 0.0, 1.0), 10.0 );
+    samp.addOp( rotatop, V3d(0.0, 1.0, 0.0), 20.0 );
+    samp.addOp( rotatop, V3d(1.0, 0.0, 0.0), 30.0 );
+    samp.addOp( scaleop, V3d(4.0, 4.0, 4.0) );
+
+    for (std::vector<OXform>::iterator i = xforms.begin(); i != xforms.end();
+         ++i)
+    {
+        i->getSchema().set(samp);
+    }
+
+}
+
+//-*****************************************************************************
 void xformOut()
 {
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform1.abc" );
@@ -395,6 +449,6 @@ int main( int argc, char *argv[] )
     xformOut();
     xformIn();
     someOpsXform();
-
+    xformTreeCreate();
     return 0;
 }
