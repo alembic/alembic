@@ -63,6 +63,7 @@ void xformOut()
     OXform d( c, "d" );
     OXform e( d, "e" );
     OXform f( e, "f" );
+    OXform g( f, "g" );
 
     XformOp transop( kTranslateOperation, kTranslateHint );
     XformOp scaleop( kScaleOperation, kScaleHint );
@@ -101,6 +102,28 @@ void xformOut()
     XformSample fsamp;
     fsamp.addOp( transop, V3d( 3.0, -4.0, 5.0 ) );
     f.getSchema().set( fsamp );
+
+    XformSample gsamp;
+    gsamp.addOp( transop, V3d( 0.0, 0.0, 0.0 ) );
+    gsamp.addOp( transop, V3d( 0.0, 0.0, 0.0 ) );
+    gsamp.addOp( transop, V3d( 0.0, 0.0, 0.0 ) );
+    gsamp.addOp( scaleop, V3d( 1.0, 1.0, 1.0 ) );
+    g.getSchema().set( gsamp );
+
+    for (int i = 0; i < 10; ++i)
+    {
+        if (i == 5)
+        {
+            gsamp[0].setChannelValue(0, i);
+            gsamp[1].setChannelValue(0, i);
+        }
+        if (i == 7)
+        {
+            gsamp[2].setChannelValue(2, i);
+            gsamp[3].setChannelValue(2, i);
+        }
+        g.getSchema().set( gsamp );
+    }
 }
 
 //-*****************************************************************************
@@ -173,6 +196,9 @@ void xformIn()
     IXform f( e, "f" );
     TESTING_ASSERT( f.getSchema().isConstant() ); // is constant
     TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
+
+    IXform g( f, "g" );
+    TESTING_ASSERT( !g.getSchema().isConstant() ); 
 }
 
 //-*****************************************************************************

@@ -190,8 +190,10 @@ public:
         // intrinsic 0 index
         if (tsPtr)
         {
+            AbcA::CompoundPropertyWriterPtr parent =
+                GetCompoundPropertyWriterPtr(iParent);
             tsIndex =
-                iParent.getObject().getArchive().addTimeSampling(*tsPtr);
+                parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
         }
 
         if ( m_isIndexed )

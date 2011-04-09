@@ -74,7 +74,7 @@ void OSubDSchema::set( const Sample &iSamp )
         // do we need to create child bounds?
         if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
         {
-            m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", 
+            m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", 
                 m_positions.getTimeSampling() );
             Abc::Box3d emptyBox;
             emptyBox.makeEmpty();
@@ -111,14 +111,14 @@ void OSubDSchema::set( const Sample &iSamp )
             if ( iSamp.getUVs().getIndices() )
             {
                 // UVs are indexed
-                m_uvs = OV2fGeomParam( *this, "uv", true,
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", true,
                                        iSamp.getUVs().getScope(), 1,
                                        this->getTimeSampling() );
             }
             else
             {
                 // UVs are not indexed
-                m_uvs = OV2fGeomParam( *this, "uv", false,
+                m_uvs = OV2fGeomParam( this->getPtr(), "uv", false,
                                        iSamp.getUVs().getScope(), 1,
                                        this->getTimeSampling() );
             }

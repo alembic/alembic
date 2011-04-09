@@ -229,7 +229,7 @@ protected:
                                   Abc::ErrorHandler::Policy iPolicy,
                                   double iDefault,
                                   double iEpsilon=kXFORM_DELTA_TOLERANCE )
-          : m_parent( Abc::GetCompoundPropertyWriterPtr( iParent ) )
+          : m_parent( iParent )
           , m_name( iName )
           , m_errorHandlerPolicy( iPolicy )
           , m_default( iDefault )

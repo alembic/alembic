@@ -58,7 +58,7 @@ void OPointsSchema::set( const Sample &iSamp )
         // do we need to create child bounds?
         if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
         {
-            m_childBounds = Abc::OBox3dProperty( *this, ".childBnds", 
+            m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", 
                 m_positions.getTimeSampling() );
             Abc::Box3d emptyBox;
             emptyBox.makeEmpty();
