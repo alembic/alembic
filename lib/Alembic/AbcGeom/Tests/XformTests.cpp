@@ -86,7 +86,7 @@ void xformTreeCreate()
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform_tree.abc" );
     std::vector<OXform> xforms;
     OObject root( archive, kTop);
-    recurseCreateXform( root, 4, 6, xforms );
+    recurseCreateXform( root, 4, 4, xforms );
     std::cout << "Total xforms created " << xforms.size() << std::endl;
 
     XformSample samp;
