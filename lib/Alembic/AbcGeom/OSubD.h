@@ -60,7 +60,12 @@ public:
     public:
         //! Creates a default sample with no data in it.
         //! ...
-        Sample() {}
+        Sample()
+          : m_faceVaryingInterpolateBoundary( ABC_GEOM_SUBD_NULL_INT_VALUE )
+          , m_faceVaryingPropagateCorners( ABC_GEOM_SUBD_NULL_INT_VALUE )
+          , m_interpolateBoundary( ABC_GEOM_SUBD_NULL_INT_VALUE )
+          , m_subdScheme( "catmull-clark" )
+        {}
 
         //! Creates a sample with position data, index data, and count data.
         //! For specifying samples with an explicit topology. The first
@@ -84,7 +89,6 @@ public:
 
                 const Abc::Int32ArraySample &iHoles = Abc::Int32ArraySample()
               )
-
           : m_positions( iPositions )
           , m_faceIndices( iFaceIndices )
           , m_faceCounts( iFaceCounts )
