@@ -32,19 +32,26 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Util_All_h_
-#define _Alembic_Util_All_h_
+// MurmurHash3 was written by Austin Appleby, and is placed in the public
+// domain. The author hereby disclaims copyright to this source code.
+
+#ifndef _Alembic_Util_Murmur3_h_
+#define _Alembic_Util_Murmur3_h_
 
 #include <Alembic/Util/Foundation.h>
-#include <Alembic/Util/Digest.h>
-#include <Alembic/Util/Dimensions.h>
-#include <Alembic/Util/Exception.h>
-#include <Alembic/Util/Murmur3.h>
-#include <Alembic/Util/OperatorBool.h>
-#include <Alembic/Util/PlainOldDataType.h>
-#include <Alembic/Util/Singleton.h>
-#include <Alembic/Util/SmartPtrHelp.h>
-#include <Alembic/Util/TokenMap.h>
-#include <Alembic/Util/VecN.h>
+
+namespace Alembic {
+namespace Util {
+namespace ALEMBIC_VERSION_NS {
+
+void MurmurHash3_x64_128 ( const void * key, const size_t len,
+    const size_t podSize, void * out );
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
+
+} // End namespace Util
+} // End namespace Alembic
 
 #endif

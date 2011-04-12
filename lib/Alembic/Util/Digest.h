@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
 // Copyright (c) 2009-2011,
-//  Sony Pictures Imageworks, Inc. and
+//  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic nor the names of their contributors may be used
+// Industrial Light & Magic, nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,68 +34,89 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreAbstract_Foundation_h_
-#define _Alembic_AbcCoreAbstract_Foundation_h_
+#ifndef _Alembic_Util_Digest_h_
+#define _Alembic_Util_Digest_h_
 
-#include <Alembic/Util/All.h>
-
-#include <boost/smart_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/operators.hpp>
+#include <Alembic/Util/Foundation.h>
 #include <boost/format.hpp>
 
-#include <limits>
-#include <utility>
-#include <vector>
-
-#include <assert.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
 namespace Alembic {
-namespace AbcCoreAbstract {
+namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-// Just pull the whole Util namespace in. This is safe.
-using namespace ::Alembic::Util;
+//-*************************************************************************
+// Digest class. This is a 128 bit hash key produced by our hashing algorithm.
+// It is totally ordered, by way of the boost::totally_ordered
+// operator template.
+struct Digest : public boost::totally_ordered<Digest>
+{
+    union
+    {
+        uint8_t d[16];
+        uint64_t words[2];
+    };
 
-//! Index type
-//! Just being pedantic.
-typedef int64_t index_t;
+    Digest() { words[0] = words[1] = 0; }
+    Digest( const Digest &copy )
+    {
+        words[0] = copy.words[0];
+        words[1] = copy.words[1];
+    }
 
-//! Chrono type.
-//! This is used whenever time values are needed in the library. They are
-//! generally assumed to be seconds, but this does not need to be explicitly
-//! enforced by the API.
-typedef float64_t chrono_t;
-// Util/PlainOldDataType.h defines the enum PlainOldDataType
-#define kChrono_TPOD  kFloat64POD
+    Digest &operator=( const Digest &copy )
+    {
+        words[0] = copy.words[0];
+        words[1] = copy.words[1];
+        return *this;
+    }
 
+    uint8_t& operator[]( size_t i ) { return d[i]; }
+    uint8_t operator[]( size_t i ) const { return d[i]; }
+
+    void print( std::ostream &ostr ) const
+    {
+        for ( int i = 0; i < 16; ++i )
+        {
+            ostr << ( boost::format( "%02x" ) % ( int )(d[i]) );
+        }
+    }
+
+    std::string str() const
+    {
+        std::stringstream sstr;
+        print( sstr );
+        return sstr.str();
+    }
+
+    //-*************************************************************************
+    // ORDERING AND COMPARISON OPERATORS
+    //-*************************************************************************
+    bool operator==( const Digest &iRhs ) const
+    {
+        return ( ( words[0] == iRhs.words[0] ) &&
+                 ( words[1] == iRhs.words[1] ) );
+    }
+
+    bool operator<( const Digest &iRhs ) const
+    {
+        return ( words[0] < iRhs.words[0] ? true :
+                 ( words[0] > iRhs.words[0] ? false :
+                   ( words[1] < iRhs.words[1] ) ) );
+    }
+};
 
 //-*****************************************************************************
-//! Exception types borrowed from Alembic::Util. We should probably eventually
-//! create specific exception types.
-#define ABCA_THROW( TEXT ) ABC_THROW( TEXT )
-
-//-*****************************************************************************
-#define ABCA_ASSERT( COND, TEXT )               \
-do                                              \
-{                                               \
-    if ( !( COND ) )                            \
-    {                                           \
-        ABCA_THROW( TEXT );                     \
-    }                                           \
-}                                               \
-while( 0 )
-
+inline std::ostream &operator<<( std::ostream &ostr, const Digest &a )
+{
+    a.print( ostr );
+    return ostr;
+}
 
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;
 
-} // End namespace AbcCoreAbstract
+} // End namespace Util
 } // End namespace Alembic
 
 #endif

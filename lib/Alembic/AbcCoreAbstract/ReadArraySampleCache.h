@@ -103,7 +103,7 @@ private:
 //-*****************************************************************************
 
 //-*****************************************************************************
-//! Alembic caches array samples based on an MD5 checksum key.
+//! Alembic caches array samples based on a Murmur3 128bit checksum key.
 //! This is an abstract interface to these caches, which can be implemented
 //! in any number of ways.
 class ReadArraySampleCache

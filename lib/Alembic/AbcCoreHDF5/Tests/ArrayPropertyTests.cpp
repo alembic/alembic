@@ -609,7 +609,7 @@ void testReadWriteArrays()
                     TESTING_ASSERT(key.origPOD == Alembic::Util::kBooleanPOD);
                     TESTING_ASSERT(key.readPOD == Alembic::Util::kBooleanPOD);
                     TESTING_ASSERT(key.digest.str() ==
-                        "418f2796e56f1a882529d8be1664eed0");
+                        "bbde8ffe4b7e061c7e03081c2bf184c4");
                 }
                 break;
 
@@ -633,7 +633,7 @@ void testReadWriteArrays()
                     TESTING_ASSERT(key.origPOD == Alembic::Util::kUint8POD);
                     TESTING_ASSERT(key.readPOD == Alembic::Util::kUint8POD);
                     TESTING_ASSERT(key.digest.str() ==
-                        "097ec357f4cddaeb5faf1e506c4b1348");
+                        "2972c92c7f534e37ee116ae01c707741");
 
                     if (ap->getName() == "uint8")
                     {
@@ -1017,7 +1017,7 @@ void testEmptyArray()
                 TESTING_ASSERT(key.origPOD == Alembic::Util::kInt64POD);
                 TESTING_ASSERT(key.readPOD == Alembic::Util::kInt64POD);
                 TESTING_ASSERT(key.digest.str() ==
-                    "d41d8cd98f00b204e9800998ecf8427e");
+                    "00000000000000000000000000000000");
             }
         }
     }
@@ -1125,7 +1125,7 @@ void testExtentArrayStrings()
         TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.digest.str() ==
-            "5f49283b940d4a3030996c015f221f9a");
+            "88d5ea1d772131992c9be9a192938df7");
 
         ap->getSample(1, val);
         TESTING_ASSERT(val->getDimensions().numPoints() == 2);
@@ -1140,7 +1140,7 @@ void testExtentArrayStrings()
         TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.digest.str() ==
-            "2c3a6e05a5853e252922865e88bc0664");
+            "126ebab40166a642d3c8cc4c5929074d");
 
         ap->getSample(2, val);
         TESTING_ASSERT(val->getDimensions().numPoints() == 2);
@@ -1155,7 +1155,7 @@ void testExtentArrayStrings()
         TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.digest.str() ==
-            "f12b670336b184fb5f181f1f0a294fc0");
+            "a197a3747b0666dfacdc17634f5cabff");
     }
 }
 
