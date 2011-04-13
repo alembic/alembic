@@ -79,6 +79,30 @@ void OScalarProperty::setFromPrevious()
 }
 
 //-*****************************************************************************
+void OScalarProperty::setTimeSamplingIndex( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::setTimeSamplingIndex()" );
+
+    m_property->setTimeSamplingIndex(iIndex);
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OScalarProperty::setTimeSampling(  AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::setTimeSampling()" );
+
+    uint32_t tsIndex =
+        m_property->getParent()->getObject()->getArchive()->addTimeSampling(
+            *iTime);
+
+    m_property->setTimeSamplingIndex(tsIndex);
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
 OCompoundProperty OScalarProperty::getParent()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::getParent()" );

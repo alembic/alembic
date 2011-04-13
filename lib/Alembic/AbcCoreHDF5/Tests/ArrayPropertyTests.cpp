@@ -635,12 +635,12 @@ void testReadWriteArrays()
                     TESTING_ASSERT(key.digest.str() ==
                         "2972c92c7f534e37ee116ae01c707741");
 
-                    if (ap->getName() == "uint8")
+                    /*if (ap->getName() == "uint8")
                     {
                         TESTING_ASSERT(val->getDimensions().rank() == 1);
                         TESTING_ASSERT(val->getDimensions()[0] == 4);
                     }
-                    /*else if (ap->getName() == "uint8_newDims")
+                    else if (ap->getName() == "uint8_newDims")
                     {
                         TESTING_ASSERT(val->getDimensions().rank() == 2);
                         TESTING_ASSERT(val->getDimensions()[0] == 2);

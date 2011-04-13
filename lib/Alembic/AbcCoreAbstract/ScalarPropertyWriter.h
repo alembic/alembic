@@ -81,6 +81,12 @@ public:
     //! Return the number of samples that have been written so far.
     //! This changes as samples are written.
     virtual size_t getNumSamples() = 0;
+
+    //! Changes the TimeSampling used by this property.
+    //! If the TimeSampling is changed to Acyclic and the number of samples
+    //! currently set is more than the number of times provided in the Acyclic
+    //! TimeSampling, an exception will be thrown.
+    virtual void setTimeSamplingIndex( uint32_t iIndex ) = 0;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

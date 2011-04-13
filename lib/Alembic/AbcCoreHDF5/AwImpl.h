@@ -84,7 +84,7 @@ public:
 
     virtual AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
 
-    virtual uint32_t getNumTimeSampling() { return m_timeSamples.size(); }
+    virtual uint32_t getNumTimeSamplings() { return m_timeSamples.size(); }
 
 private:
     std::string m_fileName;

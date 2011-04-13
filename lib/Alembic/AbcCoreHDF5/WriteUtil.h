@@ -69,12 +69,6 @@ WriteMetaData( hid_t iParent,
 
 //-*****************************************************************************
 void
-WritePropertyHeaderExceptTime( hid_t iParent,
-                               const std::string &iName,
-                               const AbcA::PropertyHeader &iHeader );
-
-//-*****************************************************************************
-void
 WriteDataToAttr( hid_t iParent,
                  hid_t iDspace,
                  const std::string &iAttrName,
@@ -118,11 +112,15 @@ WriteArray( WrittenArraySampleMap &iMap,
 
 //-*****************************************************************************
 void
-WriteSampling( hid_t iGroup,
-               const std::string &iName,
-               uint32_t iNumSamples,
-               uint32_t iFirstChangedIndex,
-               uint32_t iLastChangedIndex );
+WritePropertyInfo( hid_t iGroup,
+                   const std::string &iName,
+                   AbcA::PropertyType iPropertyType,
+                   const AbcA::DataType &iDataType,
+                   bool isScalarLike,
+                   uint32_t iTimeSamplingIndex,
+                   uint32_t iNumSamples,
+                   uint32_t iFirstChangedIndex,
+                   uint32_t iLastChangedIndex );
 
 //-*****************************************************************************
 void

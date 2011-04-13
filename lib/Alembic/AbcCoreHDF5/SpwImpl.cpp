@@ -71,10 +71,12 @@ SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
 }
 
 //-*****************************************************************************
-// Just here to support debugging, if necessary. ScalarSample deletes itself.
 SpwImpl::~SpwImpl()
 {
-    // Nothing
+    WritePropertyInfo( m_parentGroup, m_header->getName(),
+        m_header->getPropertyType(), m_header->getDataType(), true,
+        m_timeSamplingIndex, m_nextSampleIndex, m_firstChangedIndex,
+        m_lastChangedIndex );
 }
 
 //-*****************************************************************************

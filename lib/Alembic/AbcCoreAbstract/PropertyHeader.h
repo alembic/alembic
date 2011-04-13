@@ -55,19 +55,20 @@ namespace ALEMBIC_VERSION_NS {
 //! Scalar and Array Properties.
 enum PropertyType
 {
+
+    //! Compound Properties are groups of other properties, with their own
+    //! unique name and set of MetaData. All objects have a single root
+    //! compound property as the base of their property description.
+    kCompoundProperty = 0,
+
     //! Scalar Properties represent Rank-0 properties, which contain a
     //! single element value for any given time sample.
-    kScalarProperty = 0,
+    kScalarProperty = 1,
 
     //! Array Properties represent Rank-N properties, which contain an
     //! array of values for any given time sample. Array properties may have
     //! any rank of 1 or higher, but will most often be ranks 1, 2, 3.
-    kArrayProperty = 1,
-
-    //! Compund Properties are groups of other properties, with their own
-    //! unique name and set of MetaData. All objects have a single root
-    //! compound property as the base of their property description.
-    kCompoundProperty = 2
+    kArrayProperty = 2
 };
 
 //-*****************************************************************************
@@ -189,7 +190,6 @@ private:
     MetaData m_metaData;
     DataType m_dataType;
     TimeSamplingPtr m_timeSampling;
-    uint32_t m_timeSamplingIndex;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

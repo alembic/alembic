@@ -150,7 +150,7 @@ public:
 
     //! Returns the total number of TimeSamplingPtrs in the Archive
     //! TimeSampling pool.
-    uint32_t getNumTimeSampling();
+    uint32_t getNumTimeSamplings();
 
     //! Valid returns whether this function set is
     //! valid.

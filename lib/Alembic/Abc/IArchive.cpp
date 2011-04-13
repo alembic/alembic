@@ -102,11 +102,11 @@ AbcA::TimeSamplingPtr IArchive::getTimeSampling( uint32_t iIndex )
 }
 
 //-*****************************************************************************
-uint32_t IArchive::getNumTimeSampling( )
+uint32_t IArchive::getNumTimeSamplings( )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive:::getNumTimeSampling" );
 
-    return m_archive->getNumTimeSampling( );
+    return m_archive->getNumTimeSamplings( );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 

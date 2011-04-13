@@ -84,7 +84,7 @@ public:
         m_readArraySampleCache = iPtr;
     }
 
-    virtual uint32_t getNumTimeSampling()
+    virtual uint32_t getNumTimeSamplings()
     {
         return m_timeSamples.size();
     }

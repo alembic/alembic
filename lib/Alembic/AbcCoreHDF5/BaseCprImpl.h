@@ -85,10 +85,18 @@ protected:
     struct SubProperty
     {
         PropertyHeaderPtr header;
+
+        // extra data that doesn't quite fit into the property header
+        // but is stuff we only want to read once
+        uint32_t numSamples;
+        uint32_t firstChangedIndex;
+        uint32_t lastChangedIndex;
+        bool isScalarLike;
+
         WeakBprPtr made;
         std::string name;
     };
-    
+
     typedef std::map<std::string, size_t> SubPropertiesMap;
     typedef std::vector<SubProperty> SubPropertyVec;
 

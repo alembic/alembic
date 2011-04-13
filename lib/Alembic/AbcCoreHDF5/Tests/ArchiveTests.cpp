@@ -103,7 +103,7 @@ void testReadWriteEmptyArchive()
 
         // even though we didn't write anything make sure we intrincially have
         // the default sampling
-        TESTING_ASSERT(a->getNumTimeSampling() == 1);
+        TESTING_ASSERT(a->getNumTimeSamplings() == 1);
         TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
 
         ABC::CompoundPropertyReaderPtr parent = archive->getProperties();
@@ -127,7 +127,7 @@ void testReadWriteTimeSamplingArchive()
         ABC::ArchiveWriterPtr a = w(archiveName, ABC::MetaData());
 
         // we always have 1
-        TESTING_ASSERT(a->getNumTimeSampling() == 1);
+        TESTING_ASSERT(a->getNumTimeSamplings() == 1);
 
         // getting a time sampling that doesn't exist should throw
         TESTING_ASSERT_THROW(a->getTimeSampling(43),
@@ -164,14 +164,14 @@ void testReadWriteTimeSamplingArchive()
         TESTING_ASSERT(index == 3);
 
         // now we should have 4
-        TESTING_ASSERT(a->getNumTimeSampling() == 4);
+        TESTING_ASSERT(a->getNumTimeSamplings() == 4);
     }
 
     {
         A5::ReadArchive r;
         ABC::ArchiveReaderPtr a = r( archiveName );
 
-        TESTING_ASSERT(a->getNumTimeSampling() == 4);
+        TESTING_ASSERT(a->getNumTimeSamplings() == 4);
 
         // first one is the default time sampling
         TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());

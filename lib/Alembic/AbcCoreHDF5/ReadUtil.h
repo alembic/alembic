@@ -63,9 +63,14 @@ ReadMetaData( hid_t iGroup,
 
 //-*****************************************************************************
 void
-ReadPropertyHeader( hid_t iGroup,
-                    const std::string &iPropName,
-                    AbcA::PropertyHeader &oHeader );
+ReadPropertyHeader( hid_t iParent,
+                    const std::string & iPropName,
+                    AbcA::PropertyHeader & oHeader,
+                    bool & oIsScalarLike,
+                    uint32_t & oNumSamples,
+                    uint32_t & oFirstChangedIndex,
+                    uint32_t & oLastChangedIndex,
+                    uint32_t & oTimeSamplingIndex );
 
 //-*****************************************************************************
 void
@@ -99,16 +104,6 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
            const AbcA::DataType &iDataType,
            hid_t iFileType,
            hid_t iNativeType );
-
-//-*****************************************************************************
-// Returns whether or not info was read directly, or inferred.
-bool
-ReadNumSamples( hid_t iGroup,
-                const std::string &iPropName,
-                bool isScalar,
-                uint32_t & oNumSamples,
-                uint32_t & oFirstChangedIndex,
-                uint32_t & oLastChangedIndex );
 
 //-*****************************************************************************
 // Fills in oTimeSamples with the different TimeSampling that the archive uses

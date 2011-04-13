@@ -76,7 +76,10 @@ class SimplePrImpl : public ABSTRACT
 protected:
     SimplePrImpl( AbcA::CompoundPropertyReaderPtr iParent,
                   hid_t iParentGroup,
-                  PropertyHeaderPtr iHeader );
+                  PropertyHeaderPtr iHeader,
+                  uint32_t iNumSamples,
+                  uint32_t iFirstChangedIndex,
+                  uint32_t iLastChangedIndex );
 
 public:
     //-*************************************************************************
@@ -130,11 +133,11 @@ protected:
     uint32_t m_numSamples;
 
     // The first sample index that is different from sample 0
-    uint32_t m_firstChangeIndex;
+    uint32_t m_firstChangedIndex;
 
     // The last sample index that needed to be written out, if the last sample
     // repeats m_numSamples will be greater than this.
-    uint32_t m_lastChangeIndex;
+    uint32_t m_lastChangedIndex;
 
     // The simple properties only store samples after the first
     // sample in a sub group. Therefore, there may not actually be
@@ -156,7 +159,10 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
 (
     AbcA::CompoundPropertyReaderPtr iParent,
     hid_t iParentGroup,
-    PropertyHeaderPtr iHeader
+    PropertyHeaderPtr iHeader,
+    uint32_t iNumSamples,
+    uint32_t iFirstChangedIndex,
+    uint32_t iLastChangedIndex
 )
   : m_parent( iParent )
   , m_parentGroup( iParentGroup )
@@ -165,9 +171,9 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
   , m_cleanFileDataType( false )
   , m_nativeDataType( -1 )
   , m_cleanNativeDataType( false )
-  , m_numSamples( 0 )
-  , m_firstChangeIndex( 0 )
-  , m_lastChangeIndex( 0 )
+  , m_numSamples( iNumSamples )
+  , m_firstChangedIndex( iFirstChangedIndex )
+  , m_lastChangedIndex( iLastChangedIndex )
   , m_samplesIGroup( -1 )
 {
     // Validate all inputs.
@@ -190,21 +196,13 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
     // Get our name.
     const std::string &myName = m_header->getName();
 
-    bool isScalar = m_header->getPropertyType() == AbcA::kScalarProperty;
-    ReadNumSamples( m_parentGroup,
-                    myName,
-                    isScalar,
-                    m_numSamples,
-                    m_firstChangeIndex,
-                    m_lastChangeIndex );
-
     // Validate the first and last changed index
-    ABCA_ASSERT( m_firstChangeIndex <= m_numSamples &&
-        m_lastChangeIndex <= m_numSamples &&
-        m_firstChangeIndex <= m_lastChangeIndex,
+    ABCA_ASSERT( m_firstChangedIndex <= m_numSamples &&
+        m_lastChangedIndex <= m_numSamples &&
+        m_firstChangedIndex <= m_lastChangedIndex,
         "Corrupt sampling information for property: " << myName
-            << " first change index: " << m_firstChangeIndex
-            << " last change index: " << m_lastChangeIndex
+            << " first change index: " << m_firstChangedIndex
+            << " last change index: " << m_lastChangedIndex
             << " total number of samples: " << m_numSamples );
 }
 
@@ -252,7 +250,7 @@ template <class ABSTRACT, class IMPL, class SAMPLE>
 bool SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::isConstant()
 {
     // No first change means no changes at all
-    return ( m_firstChangeIndex == 0 );
+    return ( m_firstChangedIndex == 0 );
 }
 
 //-*****************************************************************************
@@ -292,12 +290,12 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
                  << ", should be between 0 and " << m_numSamples-1 );
 
     // greater than the last index that had a change?  read it from there
-    if ( iSampleIndex > m_lastChangeIndex )
+    if ( iSampleIndex > m_lastChangedIndex )
     {
-        iSampleIndex = m_lastChangeIndex;
+        iSampleIndex = m_lastChangedIndex;
     }
     // less than the first change?  map to 0
-    else if ( iSampleIndex < m_firstChangeIndex )
+    else if ( iSampleIndex < m_firstChangedIndex )
     {
         iSampleIndex = 0;
     }
@@ -370,12 +368,12 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
                  << ", should be between 0 and " << m_numSamples-1 );
 
     // greater than the last index that had a change?  read it from there
-    if ( iSampleIndex > m_lastChangeIndex )
+    if ( iSampleIndex > m_lastChangedIndex )
     {
-        iSampleIndex = m_lastChangeIndex;
+        iSampleIndex = m_lastChangedIndex;
     }
     // less than the first change?  map to 0
-    else if ( iSampleIndex < m_firstChangeIndex )
+    else if ( iSampleIndex < m_firstChangedIndex )
     {
         iSampleIndex = 0;
     }

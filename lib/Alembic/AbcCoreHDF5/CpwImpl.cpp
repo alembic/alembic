@@ -67,9 +67,12 @@ CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
     m_object = optr;
 
     // Write the property header.
-    WritePropertyHeaderExceptTime( iParentGroup,
-                                   m_header->getName(),
-                                   *m_header );
+    WritePropertyInfo( iParentGroup, m_header->getName(),
+        m_header->getPropertyType(), m_header->getDataType(),
+        false, 0, 0, 0, 0 );
+
+    WriteMetaData( iParentGroup, m_header->getName() + ".meta",
+        m_header->getMetaData() );
 }
 
 //-*****************************************************************************

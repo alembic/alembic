@@ -178,43 +178,6 @@ WriteMetaData( hid_t iGroup,
 
 //-*****************************************************************************
 static void
-WritePropertyAndDataType( hid_t iGroup,
-                          const std::string &iName,
-                          AbcA::PropertyType iPropertyType,
-                          const AbcA::DataType &iDataType )
-{
-    uint16_t bitField = 0;
-
-    static const uint16_t ptypeMask =
-        ( uint16_t )BOOST_BINARY( 0000 0000 0000 0011 );
-    static const uint16_t podMask =
-        ( uint16_t )BOOST_BINARY( 0000 0000 0011 1100 );
-    static const uint16_t extentMask =
-        ( uint16_t )BOOST_BINARY( 1111 1111 0000 0000 );
-
-    // Slam the property type in there.
-    bitField |= ptypeMask & ( uint16_t )iPropertyType;
-    if ( iPropertyType == AbcA::kCompoundProperty )
-    {
-        bitField |= COMPOUND_MAGIC & ~ptypeMask;
-    }
-    else
-    {
-        uint16_t pod = ( uint16_t )iDataType.getPod();
-        bitField |= podMask & ( pod << 2 );
-
-        uint16_t extent = ( uint16_t )iDataType.getExtent();
-        bitField |= extentMask & ( extent << 8 );
-    }
-
-    WriteScalar( iGroup, iName,
-                 H5T_STD_U16LE,
-                 H5T_NATIVE_UINT16,
-                 ( const void * )&bitField );
-}
-
-//-*****************************************************************************
-static void
 WriteTimeSamplingType( hid_t iGroup,
                        const std::string &iName,
                        const AbcA::TimeSamplingType &iTimeSamplingType )
@@ -261,21 +224,6 @@ WriteTimeSamplingType( hid_t iGroup,
                      H5T_NATIVE_UINT32,
                      ( const void * )&spc );
     }
-}
-
-//-*****************************************************************************
-void
-WritePropertyHeaderExceptTime( hid_t iGroup,
-                               const std::string &iName,
-                               const AbcA::PropertyHeader &iHeader )
-{
-    // First the type.
-    WritePropertyAndDataType( iGroup, iName + ".type",
-                              iHeader.getPropertyType(),
-                              iHeader.getDataType() );
-
-    // Then the meta data.
-    WriteMetaData( iGroup, iName + ".meta", iHeader.getMetaData() );
 }
 
 //-*****************************************************************************
@@ -423,50 +371,96 @@ CopyWrittenArray( hid_t iGroup,
 }
 
 //-*****************************************************************************
-void WriteSampling( hid_t iGroup,
+void WritePropertyInfo( hid_t iGroup,
                     const std::string &iName,
+                    AbcA::PropertyType iPropertyType,
+                    const AbcA::DataType &iDataType,
+                    bool isScalarLike,
+                    uint32_t iTimeSamplingIndex,
                     uint32_t iNumSamples,
                     uint32_t iFirstChangedIndex,
                     uint32_t iLastChangedIndex )
 {
 
-    ABCA_ASSERT( iFirstChangedIndex <= iNumSamples &&
-        iLastChangedIndex <= iNumSamples &&
-        iFirstChangedIndex <= iLastChangedIndex,
-        "Illegal Sampling!" << std::endl <<
-        "Num Samples: " << iNumSamples << std::endl <<
-        "First Changed Index: " << iFirstChangedIndex << std::endl <<
-        "Last Changed Index: " << iLastChangedIndex << std::endl );
+    uint32_t info[5] = {0, 0, 0, 0, 0};
+    uint32_t numFields = 1;
 
-    // Write the num samples. Only bother writing if
-    // the num samples is greater than 1.  Existence of name.smp0
-    // is used by the reader to determine if 0 or 1 sample.
-    if ( iNumSamples > 1 )
+    static const uint32_t ptypeMask = ( uint32_t )BOOST_BINARY (
+        0000 0000 0000 0000 0000 0000 0000 0011 );
+
+    static const uint32_t podMask = ( uint32_t )BOOST_BINARY (
+        0000 0000 0000 0000 0000 0000 0011 1100 );
+
+    static const uint32_t hasTsidxMask = ( uint32_t )BOOST_BINARY (
+        0000 0000 0000 0000 0000 0000 0100 0000 );
+
+    static const uint32_t noRepeatsMask = ( uint32_t )BOOST_BINARY (
+        0000 0000 0000 0000 0000 0000 1000 0000 );
+
+    static const uint32_t extentMask = ( uint32_t )BOOST_BINARY(
+        0000 0000 0000 0000 1111 1111 0000 0000 );
+
+    // for compounds we just write out 0
+    if ( iPropertyType != AbcA::kCompoundProperty )
     {
-        uint32_t samps[3];
-        samps[0] = iNumSamples;
-        samps[1] = iFirstChangedIndex;
-        samps[2] = iLastChangedIndex;
+        // Slam the property type in there.
+        info[0] |= ptypeMask & ( uint32_t )iPropertyType;
 
-        uint32_t numWrite = 3;
+        // arrays may be scalar like, scalars are already scalar like
+        info[0] |= ( uint32_t ) isScalarLike;
 
-        // if the first change is at index 1, and the last change is at index
-        // numSamples - 1, then we'll only write the number of samples
-        if ( samps[1] == 1 && samps[2] == samps[0] - 1 )
+        uint32_t pod = ( uint32_t )iDataType.getPod();
+        info[0] |= podMask & ( pod << 2 );
+
+        if (iTimeSamplingIndex != 0)
         {
-            numWrite = 1;
-        }
-        // last change is at index numSamples - 1, so we'll write the number
-        // of samples and the first change index
-        else if ( samps[2] == samps[0] - 1 )
-        {
-            numWrite = 2;
+            info[0] |= hasTsidxMask;
         }
 
-        WriteSmallArray( iGroup, iName + ".nums",
-            H5T_STD_U32LE, H5T_NATIVE_UINT32, numWrite,
-                ( const void * )samps);
+        if (iFirstChangedIndex == 1 && iLastChangedIndex == iNumSamples - 1)
+        {
+            info[0] |= noRepeatsMask;
+        }
+
+        uint32_t extent = ( uint32_t )iDataType.getExtent();
+        info[0] |= extentMask & ( extent << 8 );
+
+        ABCA_ASSERT( iFirstChangedIndex <= iNumSamples &&
+            iLastChangedIndex <= iNumSamples &&
+            iFirstChangedIndex <= iLastChangedIndex,
+            "Illegal Sampling!" << std::endl <<
+            "Num Samples: " << iNumSamples << std::endl <<
+            "First Changed Index: " << iFirstChangedIndex << std::endl <<
+            "Last Changed Index: " << iLastChangedIndex << std::endl );
+
+        // Write the num samples. Only bother writing if
+        // the num samples is greater than 1.  Existence of name.smp0
+        // is used by the reader to determine if 0 or 1 sample.
+        if ( iNumSamples > 1 )
+        {
+            info[1] = iNumSamples;
+            numFields ++;
+            if ( iFirstChangedIndex > 1 || ( iLastChangedIndex != 0 &&
+                iLastChangedIndex != iNumSamples - 1 ) )
+            {
+                info[2] = iFirstChangedIndex;
+                info[3] = iLastChangedIndex;
+                numFields += 2;
+            }
+        }
+
+        // finally set time sampling index on the end if necessary
+        if (iTimeSamplingIndex != 0)
+        {
+            info[numFields] = iTimeSamplingIndex;
+            numFields ++;
+        }
+
     }
+
+    WriteSmallArray( iGroup, iName + ".info",
+        H5T_STD_U32LE, H5T_NATIVE_UINT32, numFields,
+        ( const void * ) info );
 }
 
 //-*****************************************************************************

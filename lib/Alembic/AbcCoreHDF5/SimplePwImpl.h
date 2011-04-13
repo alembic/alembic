@@ -101,8 +101,10 @@ public:
     virtual void setSample( SAMPLE iSamp );
 
     virtual void setFromPreviousSample( );
-    
+
     virtual size_t getNumSamples();
+
+    virtual void setTimeSamplingIndex( uint32_t iIndex );
 
 protected:
     // The parent compound property writer.
@@ -130,12 +132,15 @@ protected:
     uint32_t m_nextSampleIndex;
 
     // Index representing the first sample that is different from sample 0
-    uint32_t m_firstChangeIndex;
+    uint32_t m_firstChangedIndex;
 
     // Index representing the last sample in which a change has occured
     // There is no need to repeat samples if they are the same between this
     // index and m_nextSampleIndex
-    uint32_t m_lastChangeIndex;
+    uint32_t m_lastChangedIndex;
+
+    // Index representing which TimeSampling from the ArchiveWriter to use.
+    uint32_t m_timeSamplingIndex;
 };
 
 //-*****************************************************************************
@@ -160,14 +165,15 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
 )
   : m_parent( iParent )
   , m_parentGroup( iParentGroup )
+  , m_timeSamplingIndex(iTimeSamplingIndex)
   , m_fileDataType( -1 )
   , m_cleanFileDataType( false )
   , m_nativeDataType( -1 )
   , m_cleanNativeDataType( false )
   , m_sampleIGroup( -1 )
   , m_nextSampleIndex( 0 )
-  , m_firstChangeIndex( 0 )
-  , m_lastChangeIndex( 0 )
+  , m_firstChangedIndex( 0 )
+  , m_lastChangedIndex( 0 )
 {
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
@@ -175,7 +181,7 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =
         m_parent->getObject()->getArchive()->getTimeSampling(
-            iTimeSamplingIndex );
+            m_timeSamplingIndex );
 
     m_header = PropertyHeaderPtr( new AbcA::PropertyHeader( iName, iPropType,
         iMetaData, iDataType, ts ) );
@@ -198,17 +204,8 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
         ABCA_ASSERT( m_nativeDataType >= 0, "Couldn't get native datatype" );
     }
 
-
-    WritePropertyHeaderExceptTime( m_parentGroup,
-                                   m_header->getName(), *m_header );
-
-    // write the time sampling index, if it isn't the intrinsic default value
-    if (iTimeSamplingIndex > 0)
-    {
-        std::string tsidName = m_header->getName() + ".tsid";
-        WriteScalar( m_parentGroup, tsidName, H5T_STD_U32LE, H5T_NATIVE_UINT32,
-            &iTimeSamplingIndex );
-    }
+    WriteMetaData( m_parentGroup, m_header->getName() + ".meta",
+        m_header->getMetaData() );
 }
 
 //-*****************************************************************************
@@ -299,10 +296,10 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setSample
         const std::string &myName = m_header->getName();
 
         // we only need to repeat samples if this is not the first change
-        if (m_firstChangeIndex != 0)
+        if (m_firstChangedIndex != 0)
         {
             // copy the samples from after the last change to the latest index
-            for ( index_t smpI = m_lastChangeIndex + 1;
+            for ( index_t smpI = m_lastChangedIndex + 1;
                 smpI < m_nextSampleIndex; ++smpI )
             {
                 assert( smpI > 0 );
@@ -314,7 +311,7 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setSample
         }
         else
         {
-            m_firstChangeIndex = m_nextSampleIndex;
+            m_firstChangedIndex = m_nextSampleIndex;
         }
 
         // Write this sample, which will update its internal
@@ -325,7 +322,7 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setSample
             m_nextSampleIndex, iSamp, key );
 
         // this index is now the last change
-        m_lastChangeIndex = m_nextSampleIndex;
+        m_lastChangedIndex = m_nextSampleIndex;
     }
 
 
@@ -359,6 +356,24 @@ size_t SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::getNumSamples()
     return ( size_t )m_nextSampleIndex;
 }
 
+template <class ABSTRACT, class IMPL, class SAMPLE, class KEY>
+void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setTimeSamplingIndex
+( uint32_t iIndex )
+{
+    // will assert if TimeSamplingPtr not found
+    AbcA::TimeSamplingPtr ts =
+        m_parent->getObject()->getArchive()->getTimeSampling(
+            iIndex );
+
+    ABCA_ASSERT( !ts->getTimeSamplingType().isAcyclic() ||
+        ts->getNumSamples() > m_nextSampleIndex,
+        "Already have written more samples than we have times for when using "
+        "Acyclic sampling." );
+
+    m_header->setTimeSampling(ts);
+    m_timeSamplingIndex = iIndex;
+}
+
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE, class KEY>
 SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::~SimplePwImpl()
@@ -377,19 +392,12 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::~SimplePwImpl()
         // Check validity of the group.
         ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
 
-        // Write the sampling information.
-        // This function, which is non-templated and lives in WriteUtil.cpp,
-        // contains all of the logic regarding which information needs
-        // to be written.
-        WriteSampling( m_parentGroup, myName, m_nextSampleIndex,
-            m_firstChangeIndex, m_lastChangeIndex );
-
         // Close the sampleIGroup if it was open
         if ( m_sampleIGroup >= 0 )
         {
             // this should never have been openened, if a change was never
             // detected.
-            ABCA_ASSERT( m_firstChangeIndex > 0, "Corrupt SimplePwImpl" );
+            ABCA_ASSERT( m_firstChangedIndex > 0, "Corrupt SimplePwImpl" );
             H5Gclose( m_sampleIGroup );
             m_sampleIGroup = -1;
         }

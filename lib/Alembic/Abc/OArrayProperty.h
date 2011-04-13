@@ -120,6 +120,18 @@ public:
     //! ...
     void setFromPrevious( );
 
+    //! Changes the TimeSampling used by this property.
+    //! If the TimeSampling is changed to Acyclic and the number of samples
+    //! currently set is more than the number of times provided in the Acyclic
+    //! TimeSampling, an exception will be thrown.
+    void setTimeSamplingIndex( uint32_t iIndex );
+
+    //! Changes the TimeSampling used by this property.
+    //! If the TimeSampling is changed to Acyclic and the number of samples
+    //! currently set is more than the number of times provided in the Acyclic
+    //! TimeSampling, an exception will be thrown.
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
+
     //! Return the parent compound property, handily wrapped in a
     //! OCompoundProperty wrapper.
     OCompoundProperty getParent();

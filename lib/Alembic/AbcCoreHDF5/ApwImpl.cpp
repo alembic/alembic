@@ -76,7 +76,10 @@ ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
 //-*****************************************************************************
 ApwImpl::~ApwImpl()
 {
-    // Nothing now.
+    WritePropertyInfo( m_parentGroup, m_header->getName(),
+        m_header->getPropertyType(), m_header->getDataType(), m_isScalarLike,
+        m_timeSamplingIndex, m_nextSampleIndex, m_firstChangedIndex,
+        m_lastChangedIndex );
 }
 
 
@@ -105,9 +108,6 @@ void ApwImpl::writeSample( hid_t iGroup,
     if (m_isScalarLike && iSamp.getDimensions().numPoints() != 1)
     {
         m_isScalarLike = false;
-        char z = 0;
-        std::string scalarName = m_header->getName() + ".sclr";
-        H5LTset_attribute_char(m_parentGroup, ".", scalarName.c_str(), &z, 1);
     }
 
     // Write the sample.

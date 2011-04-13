@@ -110,7 +110,7 @@ public:
 
     //! Returns the total number of TimeSamplingPtrs in the Archive
     //! TimeSampling pool.
-    virtual uint32_t getNumTimeSampling() = 0;
+    virtual uint32_t getNumTimeSamplings() = 0;
 
     //! Return self
     //! ...

@@ -79,6 +79,30 @@ void OArrayProperty::setFromPrevious()
 }
 
 //-*****************************************************************************
+void OArrayProperty::setTimeSamplingIndex( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::setTimeSamplingIndex()" );
+
+    m_property->setTimeSamplingIndex(iIndex);
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OArrayProperty::setTimeSampling(  AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::setTimeSampling()" );
+
+    uint32_t tsIndex =
+        m_property->getParent()->getObject()->getArchive()->addTimeSampling(
+            *iTime);
+
+    m_property->setTimeSamplingIndex(tsIndex);
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
 OCompoundProperty OArrayProperty::getParent()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::getParent()" );
