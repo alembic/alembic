@@ -259,8 +259,8 @@ void RenderIt()
     cameraFileName = "SimpleAbcViewer_camera.XXXXXX";
 #endif
 
-    float shutterOpenTime = -0.125f + ( float )g_transport->getCurrentFrame();
-    float shutterCloseTime = 0.125f + ( float )g_transport->getCurrentFrame();
+    float shutterOpenTime = -0.25f; // + ( float )g_transport->getCurrentFrame();
+    float shutterCloseTime = 0.25f; //+ ( float )g_transport->getCurrentFrame();
     float openTime = -0.5f + ( float )g_transport->getCurrentFrame();
     float closeTime = 1.0f + openTime;
 
