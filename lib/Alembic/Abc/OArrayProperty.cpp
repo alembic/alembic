@@ -79,9 +79,9 @@ void OArrayProperty::setFromPrevious()
 }
 
 //-*****************************************************************************
-void OArrayProperty::setTimeSamplingIndex( uint32_t iIndex )
+void OArrayProperty::setTimeSampling( uint32_t iIndex )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::setTimeSamplingIndex()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::setTimeSampling(uint32_t)" );
 
     m_property->setTimeSamplingIndex(iIndex);
 

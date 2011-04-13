@@ -88,8 +88,7 @@ void writeSimpleProperties(const std::string &archiveName)
 
         // Create a scalar property on this child object named 'mass'
         ODoubleProperty mass( childProps,  // owner
-                              "mass", // name
-                              tsidx );
+                              "mass"); // name
 
         // Write out the samples
         for (int tt=0; tt<numSamples; tt++)
@@ -98,6 +97,7 @@ void writeSimpleProperties(const std::string &archiveName)
             mass.set( mm );
 
         }
+        mass.setTimeSampling(tsidx);
     }
 
     // Done - the archive closes itself

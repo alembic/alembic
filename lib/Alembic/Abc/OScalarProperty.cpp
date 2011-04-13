@@ -79,9 +79,9 @@ void OScalarProperty::setFromPrevious()
 }
 
 //-*****************************************************************************
-void OScalarProperty::setTimeSamplingIndex( uint32_t iIndex )
+void OScalarProperty::setTimeSampling( uint32_t iIndex )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::setTimeSamplingIndex()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::setTimeSampling(uint32_t)" );
 
     m_property->setTimeSamplingIndex(iIndex);
 

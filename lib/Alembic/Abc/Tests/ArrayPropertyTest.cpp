@@ -72,13 +72,9 @@ void writeUInt32ArrayProperty(const std::string &archiveName)
     OObject child( archiveTop, name );
     OCompoundProperty childProps = child.getProperties();
 
-    std::vector < chrono_t > timeSamps(1, startTime);
-    TimeSamplingPtr ts( new TimeSampling(TimeSamplingType( dt ), timeSamps) );
-
     // Create a scalar property on this child object named 'primes'
     OUInt32ArrayProperty primes( childProps,  // owner
-                               "primes", // name
-                               ts ); // uniform with cycle=dt
+                               "primes"); // uniform with cycle=dt
 
     std::vector<uint32_t> vals;
     for (int ss=0; ss<5; ss++)
@@ -88,6 +84,10 @@ void writeUInt32ArrayProperty(const std::string &archiveName)
         vals.push_back( g_primes[ss] );
         primes.set( vals );
     }
+
+    std::vector < chrono_t > timeSamps(1, startTime);
+    TimeSamplingPtr ts( new TimeSampling(TimeSamplingType( dt ), timeSamps) );
+    primes.setTimeSampling( ts );
 
     std::cout << archiveName << " was successfully written" << std::endl;
     // Done - the archive closes itself
@@ -195,8 +195,7 @@ void writeV3fArrayProperty(const std::string &archiveName)
 
     // Create a scalar property on this child object named 'positions'
     OV3fArrayProperty positions( childProps,      // owner
-                                 "positions", // name
-                                 tsid ); // uniform with cycle=dt
+                                 "positions");
 
     std::vector<V3f> vals;
     vals.push_back( g_vectors[0] );
@@ -225,6 +224,8 @@ void writeV3fArrayProperty(const std::string &archiveName)
     positions.set( vals );
 
     std::cout << archiveName << " was successfully written" << std::endl;
+    positions.setTimeSampling(tsid);
+
     // Done - the archive closes itself
 }
 

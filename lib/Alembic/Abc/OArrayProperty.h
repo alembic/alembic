@@ -124,7 +124,7 @@ public:
     //! If the TimeSampling is changed to Acyclic and the number of samples
     //! currently set is more than the number of times provided in the Acyclic
     //! TimeSampling, an exception will be thrown.
-    void setTimeSamplingIndex( uint32_t iIndex );
+    void setTimeSampling( uint32_t iIndex );
 
     //! Changes the TimeSampling used by this property.
     //! If the TimeSampling is changed to Acyclic and the number of samples
