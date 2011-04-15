@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks, Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic nor the names of their contributors may be used
+// Industrial Light & Magic, nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,36 +34,60 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_All_h_
-#define _Alembic_AbcGeom_All_h_
-
-#include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/Basis.h>
 
-#include <Alembic/AbcGeom/OSubD.h>
-#include <Alembic/AbcGeom/ISubD.h>
+namespace Alembic {
+namespace AbcGeom {
 
-#include <Alembic/AbcGeom/GeometryScope.h>
+//-*****************************************************************************
+std::string GetBasisNameFromBasisType( const BasisType basis )
+{
+    switch ( basis )
+    {
+    case kBezierBasis:
+        return "bezier";
 
-#include <Alembic/AbcGeom/OGeomParam.h>
-#include <Alembic/AbcGeom/IGeomParam.h>
+    case kBsplineBasis:
+        return "b-spline";
 
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/IPolyMesh.h>
+    case kCatmullromBasis:
+        return "catmull-rom";
 
-#include <Alembic/AbcGeom/OCurves.h>
-#include <Alembic/AbcGeom/ICurves.h>
+    case kHermiteBasis:
+        return "hermite";
 
-#include <Alembic/AbcGeom/SimpleXformSample.h>
-#include <Alembic/AbcGeom/OSimpleXform.h>
-#include <Alembic/AbcGeom/ISimpleXform.h>
+    case kPowerBasis:
+        return "power";
 
-#include <Alembic/AbcGeom/OPoints.h>
-#include <Alembic/AbcGeom/IPoints.h>
+    default:
+        return "none";
+    }
+}
 
-#include <Alembic/AbcGeom/XformOp.h>
-#include <Alembic/AbcGeom/OXform.h>
-#include <Alembic/AbcGeom/IXform.h>
-#include <Alembic/AbcGeom/XformSample.h>
+//-*****************************************************************************
+int GetStepFromBasisType( const BasisType basis )
+{
+    switch ( basis )
+    {
+    case kBezierBasis:
+        return 3;
 
-#endif
+    case kBsplineBasis:
+        return 1;
+
+    case kCatmullromBasis:
+        return 1;
+
+    case kHermiteBasis:
+        return 2;
+
+    case kPowerBasis:
+        return 4;
+
+    default:
+        return 1;
+    }
+}
+
+}
+}

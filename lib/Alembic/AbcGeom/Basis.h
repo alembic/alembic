@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks, Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic nor the names of their contributors may be used
+// Industrial Light & Magic, nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,36 +34,28 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_All_h_
-#define _Alembic_AbcGeom_All_h_
+#ifndef _Alembic_AbcGeom_Basis_h_
+#define _Alembic_AbcGeom_Basis_h_
 
-#include <Alembic/AbcGeom/Foundation.h>
-#include <Alembic/AbcGeom/Basis.h>
+#include <string>
 
-#include <Alembic/AbcGeom/OSubD.h>
-#include <Alembic/AbcGeom/ISubD.h>
+namespace Alembic {
+namespace AbcGeom {
 
-#include <Alembic/AbcGeom/GeometryScope.h>
+enum BasisType {
+  kNoBasis = 0,
+  kBezierBasis = 1,
+  kBsplineBasis = 2,
+  kCatmullromBasis = 3,
+  kHermiteBasis = 4,
+  kPowerBasis = 5
+};
 
-#include <Alembic/AbcGeom/OGeomParam.h>
-#include <Alembic/AbcGeom/IGeomParam.h>
+std::string GetBasisNameFromBasisType( const BasisType basis );
 
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/IPolyMesh.h>
+int GetStepFromBasisType(const BasisType basis );
 
-#include <Alembic/AbcGeom/OCurves.h>
-#include <Alembic/AbcGeom/ICurves.h>
-
-#include <Alembic/AbcGeom/SimpleXformSample.h>
-#include <Alembic/AbcGeom/OSimpleXform.h>
-#include <Alembic/AbcGeom/ISimpleXform.h>
-
-#include <Alembic/AbcGeom/OPoints.h>
-#include <Alembic/AbcGeom/IPoints.h>
-
-#include <Alembic/AbcGeom/XformOp.h>
-#include <Alembic/AbcGeom/OXform.h>
-#include <Alembic/AbcGeom/IXform.h>
-#include <Alembic/AbcGeom/XformSample.h>
+}
+}
 
 #endif

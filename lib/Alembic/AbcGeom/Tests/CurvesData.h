@@ -34,36 +34,26 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_All_h_
-#define _Alembic_AbcGeom_All_h_
+#ifndef _Alembic_AbcGeom_Tests_CurvesData_h_
+#define _Alembic_AbcGeom_Tests_CurvesData_h_
 
-#include <Alembic/AbcGeom/Foundation.h>
-#include <Alembic/AbcGeom/Basis.h>
+#include <Alembic/AbcGeom/All.h>
 
-#include <Alembic/AbcGeom/OSubD.h>
-#include <Alembic/AbcGeom/ISubD.h>
+namespace Abc = Alembic::Abc;
 
-#include <Alembic/AbcGeom/GeometryScope.h>
+//-*****************************************************************************
+// This data is used by both the PolyMesh and SubD tests.
+extern const size_t g_numCurves;
+extern const size_t g_totalVerts;
+extern const Abc::int32_t g_numVerts[];
+extern const Abc::float32_t g_verts[];
 
-#include <Alembic/AbcGeom/OGeomParam.h>
-#include <Alembic/AbcGeom/IGeomParam.h>
+extern const size_t g_numWidths;
+extern const Abc::float32_t g_widths[];
 
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/IPolyMesh.h>
+extern const Abc::float32_t g_uvs[];
 
-#include <Alembic/AbcGeom/OCurves.h>
-#include <Alembic/AbcGeom/ICurves.h>
 
-#include <Alembic/AbcGeom/SimpleXformSample.h>
-#include <Alembic/AbcGeom/OSimpleXform.h>
-#include <Alembic/AbcGeom/ISimpleXform.h>
-
-#include <Alembic/AbcGeom/OPoints.h>
-#include <Alembic/AbcGeom/IPoints.h>
-
-#include <Alembic/AbcGeom/XformOp.h>
-#include <Alembic/AbcGeom/OXform.h>
-#include <Alembic/AbcGeom/IXform.h>
-#include <Alembic/AbcGeom/XformSample.h>
+//-*******************************
 
 #endif

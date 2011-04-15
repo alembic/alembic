@@ -35,6 +35,7 @@
 # C++ files for this project
 SET( CXX_FILES
 
+  Basis.cpp
   GeometryScope.cpp
 
   OSubD.cpp
@@ -45,6 +46,9 @@ SET( CXX_FILES
 
   OPolyMesh.cpp
   IPolyMesh.cpp
+
+  OCurves.cpp
+  ICurves.cpp
 
   OSimpleXform.cpp
   ISimpleXform.cpp
@@ -63,6 +67,7 @@ SET( H_FILES
   All.h
 
   Foundation.h
+  Basis.h
 
   GeometryScope.h
 
@@ -74,6 +79,9 @@ SET( H_FILES
 
   OPolyMesh.h
   IPolyMesh.h
+
+  OCurves.h
+  ICurves.h
 
   SimpleXformSample.h
   OSimpleXform.h
