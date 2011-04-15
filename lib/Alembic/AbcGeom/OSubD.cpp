@@ -58,6 +58,24 @@ void OSubDSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::set()" );
 
+    // do we need to create child bounds?
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    {
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", 
+            m_positions.getTimeSampling() );
+        Abc::Box3d emptyBox;
+        emptyBox.makeEmpty();
+
+        // -1 because we just dis an m_positions set above
+        size_t numSamples = m_positions.getNumSamples() - 1;
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_childBounds.set( emptyBox );
+        }
+    }
+
     // We could add sample integrity checking here.
     if ( m_positions.getNumSamples() == 0 )
     {
@@ -70,24 +88,6 @@ void OSubDSchema::set( const Sample &iSamp )
         m_positions.set( iSamp.getPositions() );
         m_faceIndices.set( iSamp.getFaceIndices() );
         m_faceCounts.set( iSamp.getFaceCounts() );
-
-        // do we need to create child bounds?
-        if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
-        {
-            m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", 
-                m_positions.getTimeSampling() );
-            Abc::Box3d emptyBox;
-            emptyBox.makeEmpty();
-
-            // -1 because we just dis an m_positions set above
-            size_t numSamples = m_positions.getNumSamples() - 1;
-
-            // set all the missing samples
-            for ( size_t i = 0; i < numSamples; ++i )
-            {
-                m_childBounds.set( emptyBox );
-            }
-        }
 
         if (m_childBounds)
         { m_childBounds.set( iSamp.getChildBounds() ); }
@@ -326,6 +326,63 @@ void OSubDSchema::setFromPrevious()
         m_childBounds.setFromPrevious();
 
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OSubDSchema::setTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OSubDSchema::setTimeSampling( uint32_t )" );
+
+    m_positions.setTimeSampling( iIndex );
+    m_faceIndices.setTimeSampling( iIndex );
+    m_faceCounts.setTimeSampling( iIndex );
+    m_faceVaryingInterpolateBoundary.setTimeSampling( iIndex );
+    m_faceVaryingPropagateCorners.setTimeSampling( iIndex );
+    m_interpolateBoundary.setTimeSampling( iIndex );
+    m_subdScheme.setTimeSampling( iIndex );
+    m_selfBounds.setTimeSampling( iIndex );
+
+    if ( m_creaseIndices )
+        m_creaseIndices.setTimeSampling( iIndex );
+
+    if ( m_creaseLengths )
+        m_creaseLengths.setTimeSampling( iIndex );
+
+    if (m_creaseSharpnesses )
+        m_creaseSharpnesses.setTimeSampling( iIndex );
+
+    if ( m_cornerIndices )
+        m_cornerIndices.setTimeSampling( iIndex );
+
+    if ( m_cornerSharpnesses )
+        m_cornerSharpnesses.setTimeSampling( iIndex );
+
+    if ( m_holes )
+        m_holes.setTimeSampling( iIndex );
+
+    if ( m_childBounds )
+        m_childBounds.setTimeSampling( iIndex );
+
+    if ( m_uvs )
+        m_uvs.setTimeSampling( iIndex );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OSubDSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OSubDSchema::setTimeSampling( TimeSamplingPtr )" );
+
+    if (iTime)
+    {
+        uint32_t tsIndex = getObject().getArchive().addTimeSampling(*iTime);
+        setTimeSampling( tsIndex );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

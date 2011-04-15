@@ -45,6 +45,24 @@ void OPolyMeshSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::set()" );
 
+    // do we need to create child bounds?
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    {
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
+            m_positions.getTimeSampling() );
+        Abc::Box3d emptyBox;
+        emptyBox.makeEmpty();
+
+        // -1 because we just dis an m_positions set above
+        size_t numSamples = m_positions.getNumSamples() - 1;
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_childBounds.set( emptyBox );
+        }
+    }
+
     // We could add sample integrity checking here.
     if ( m_positions.getNumSamples() == 0 )
     {
@@ -57,24 +75,6 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         m_positions.set( iSamp.getPositions() );
         m_indices.set( iSamp.getIndices() );
         m_counts.set( iSamp.getCounts() );
-
-        // do we need to create child bounds?
-        if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
-        {
-            m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
-                m_positions.getTimeSampling() );
-            Abc::Box3d emptyBox;
-            emptyBox.makeEmpty();
-
-            // -1 because we just dis an m_positions set above
-            size_t numSamples = m_positions.getNumSamples() - 1;
-
-            // set all the missing samples
-            for ( size_t i = 0; i < numSamples; ++i )
-            {
-                m_childBounds.set( emptyBox );
-            }
-        }
 
         if (m_childBounds)
         { m_childBounds.set( iSamp.getChildBounds() ); }
@@ -178,6 +178,44 @@ void OPolyMeshSchema::setFromPrevious()
 
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
     if ( m_normals ) { m_normals.setFromPrevious(); }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OPolyMeshSchema::setTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OPolyMeshSchema::setTimeSampling( uint32_t )" );
+
+    m_positions.setTimeSampling( iIndex );
+    m_indices.setTimeSampling( iIndex );
+    m_counts.setTimeSampling( iIndex );
+    m_selfBounds.setTimeSampling( iIndex );
+
+    if ( m_childBounds )
+        m_childBounds.setTimeSampling( iIndex );
+
+    if ( m_uvs )
+        m_uvs.setTimeSampling( iIndex );
+
+    if ( m_normals )
+        m_normals.setTimeSampling( iIndex );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OPolyMeshSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OPolyMeshSchema::setTimeSampling( TimeSamplingPtr )" );
+
+    if (iTime)
+    {
+        uint32_t tsIndex = getObject().getArchive().addTimeSampling( *iTime );
+        setTimeSampling( tsIndex );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

@@ -45,6 +45,24 @@ void OPointsSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::set()" );
 
+    // do we need to create child bounds?
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    {
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", 
+            m_positions.getTimeSampling() );
+        Abc::Box3d emptyBox;
+        emptyBox.makeEmpty();
+
+        // -1 because we just dis an m_positions set above
+        size_t numSamples = m_positions.getNumSamples() - 1;
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_childBounds.set( emptyBox );
+        }
+    }
+
     // We could add sample integrity checking here.
     if ( m_positions.getNumSamples() == 0 )
     {
@@ -54,24 +72,6 @@ void OPointsSchema::set( const Sample &iSamp )
                      "Sample 0 must have valid data for points and ids" );
         m_positions.set( iSamp.getPositions() );
         m_ids.set( iSamp.getIds() );
-
-        // do we need to create child bounds?
-        if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
-        {
-            m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", 
-                m_positions.getTimeSampling() );
-            Abc::Box3d emptyBox;
-            emptyBox.makeEmpty();
-
-            // -1 because we just dis an m_positions set above
-            size_t numSamples = m_positions.getNumSamples() - 1;
-
-            // set all the missing samples
-            for ( size_t i = 0; i < numSamples; ++i )
-            {
-                m_childBounds.set( emptyBox );
-            }
-        }
 
         if (m_childBounds)
         { m_childBounds.set( iSamp.getChildBounds() ); }
@@ -127,6 +127,37 @@ void OPointsSchema::setFromPrevious()
 
     if (m_childBounds)
         m_childBounds.setFromPrevious();
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OPointsSchema::setTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OPointsSchema::setTimeSampling( uint32_t )" );
+
+    m_positions.setTimeSampling( iIndex );
+    m_ids.setTimeSampling( iIndex );
+    m_selfBounds.setTimeSampling( iIndex );
+
+    if ( m_childBounds )
+        m_childBounds.setTimeSampling( iIndex );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OPointsSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OPointsSchema::setTimeSampling( TimeSamplingPtr )" );
+
+    if (iTime)
+    {
+        uint32_t tsIndex = getObject().getArchive().addTimeSampling( *iTime );
+        setTimeSampling( tsIndex );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

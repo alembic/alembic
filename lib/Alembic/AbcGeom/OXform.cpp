@@ -212,6 +212,38 @@ void OXformSchema::setFromPrevious()
 }
 
 //-*****************************************************************************
+void OXformSchema::setTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OXformSchema::setTimeSampling( uint32_t )" );
+
+    m_inherits.setTimeSampling( iIndex );
+    m_ops.setTimeSampling( iIndex );
+
+    if ( m_childBounds )
+        m_childBounds.setTimeSampling( iIndex );
+
+    m_tsidx = iIndex;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OXformSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OXformSchema::setTimeSampling( TimeSamplingPtr )" );
+
+    if (iTime)
+    {
+        uint32_t tsIndex = getObject().getArchive().addTimeSampling(*iTime);
+        setTimeSampling( tsIndex );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
 void OXformSchema::init()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::init()" );

@@ -110,6 +110,14 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v1",
 
 #define ALEMBIC_ABCGEOM_XFORM_SCHEMA (XformSchemaInfo::title())
 
+//-*****************************************************************************
+// Camera
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Camera_v1",
+                                     ".geom",
+                                     CameraSchemaInfo );
+
+#define ALEMBIC_ABCGEOM_CAMERA_SCHEMA (CameraSchemaInfo::title())
+
 }
 }
 

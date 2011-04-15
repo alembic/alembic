@@ -249,6 +249,9 @@ public:
     //! indices, and counts.
     void setFromPrevious();
 
+    void setTimeSampling( uint32_t iIndex );
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
+
     Abc::OCompoundProperty getArbGeomParams();
 
     //-*************************************************************************

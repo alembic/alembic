@@ -216,6 +216,9 @@ public:
     //! ids, and counts.
     void setFromPrevious( );
 
+    void setTimeSampling( uint32_t iIndex );
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
+
     //! A container for arbitrary geom params (pseudo-properties settable and
     //! gettable as indexed or not).
     Abc::OCompoundProperty getArbGeomParams();

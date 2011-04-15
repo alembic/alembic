@@ -167,6 +167,9 @@ public:
     //! Set from previous sample. Will hold the animated channels.
     void setFromPrevious( );
 
+    void setTimeSampling( uint32_t iIndex );
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,

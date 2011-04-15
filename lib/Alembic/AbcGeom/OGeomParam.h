@@ -278,6 +278,34 @@ public:
         ALEMBIC_ABC_SAFE_CALL_END();
     }
 
+    void setTimeSampling( uint32_t iIndex )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "OTypedGeomParam::setTimeSampling( uint32_t )" );
+
+        m_valProp.setTimeSampling( iIndex );
+
+        if ( m_isIndexed ) { m_indices.setTimeSampling( iIndex ); }
+
+        ALEMBIC_ABC_SAFE_CALL_END();
+    }
+
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "OTypedGeomParam::setTimeSampling( TimeSamplingPtr )" );
+
+        if (iTime)
+        {
+            uint32_t tsIndex =
+                m_valProp.getParent().getObject().getArchive().addTimeSampling(
+                    *iTime);
+            setTimeSampling( tsIndex );
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END();
+    }
+
     size_t getNumSamples()
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::getNumSamples()" );
