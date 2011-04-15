@@ -43,15 +43,16 @@ namespace AbcGeom {
 //-*****************************************************************************
 OXformSchema::~OXformSchema()
 {
-    if ( m_isIdentityValue )
+    std::cout << this->getObject().getName() << " DESTRUCTED" << std::endl;
+
+    if ( m_isIdentity.getNumSamples() == 0 )
     {
-        m_isIdentity = Abc::OBoolProperty( *this, ".isIdty" );
-        m_isIdentity.set( true );
-    }
-    else
-    {
-        m_staticChannels = Abc::OBoolArrayProperty( *this, ".staticChans" );
-        m_staticChannels.set( m_statChanVec );
+        if ( ! m_isIdentityValue )
+        {
+            m_staticChannels.set( m_statChanVec );
+        }
+
+        m_isIdentity.set( m_isIdentityValue );
     }
 
 }
@@ -158,6 +159,10 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
                                       m_timeSamplingType );
 
     m_vals = Abc::ODoubleArrayProperty( this->getPtr(), ".vals" );
+
+    m_isIdentity = Abc::OBoolProperty( this->getPtr(), ".isIdty" );
+
+    m_staticChannels = Abc::OBoolArrayProperty( this->getPtr(), ".staticChans" );
 
     m_isIdentityValue = true;
 

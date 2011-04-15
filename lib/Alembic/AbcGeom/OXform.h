@@ -181,6 +181,7 @@ public:
 
 private:
     void init( const AbcA::TimeSamplingType &iTst );
+    AbcA::CompoundPropertyWriterPtr m_this;
 
 protected:
 
