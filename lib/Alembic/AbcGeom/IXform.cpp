@@ -37,50 +37,8 @@
 #include <Alembic/AbcGeom/IXform.h>
 #include <Alembic/AbcGeom/XformOp.h>
 
-#include <boost/lexical_cast.hpp>
-
 namespace Alembic {
 namespace AbcGeom {
-
-//-*****************************************************************************
-void
-IXformSchema::IDefaultedDoubleProperty::init()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "IXformSchema::IDefaultedDoubleProperty::init()" );
-
-    const AbcA::PropertyHeader *ph = m_parent->getPropertyHeader( m_name );
-
-    if ( ph != NULL )
-    {
-        m_property = Abc::IDoubleProperty( m_parent, m_name,
-                                           m_errorHandler.getPolicy() );
-
-        m_isConstant = m_property.isConstant();
-
-        m_property.get( m_constantValue );
-    }
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-double
-IXformSchema::IDefaultedDoubleProperty::getValue(
-    const Abc::ISampleSelector &iSS )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "IXformSchema::IDefaultedDoubleProperty::getValue()" );
-
-    if ( m_isConstant )
-    { return m_constantValue; }
-    else
-    { return m_property.getValue( iSS ); }
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    return 0.0;
-}
 
 //-*****************************************************************************
 void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
@@ -95,13 +53,24 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_ops = Abc::IUcharArrayProperty( ptr, ".ops", iMatching );
 
-    // OK, now the fun stuff!
-    //
-    // All the above Properties are guaranteed to exist.  None of the actual
-    // xform-data-having properties need to exist, though.  So we use the same
-    // well-formed naming mechanism from OXform::set() to make an array of
-    // IDefaultedDoubleProperties.
+    m_vals = Abc::IDoubleArrayProperty( ptr, ".vals", iMatching );
 
+    m_isConstantIdentity = false;
+
+    if ( ptr->getPropertyHeader( ".staticChans" ) )
+    {
+        Abc::IBoolArrayProperty p( ptr, ".staticChannels" );
+        m_staticChannels = *(p.getValue());
+    }
+
+    if ( ptr->getPropertyHeader( ".isIdty" ) )
+    {
+        // If the property is there at all, we're identity, and therefore
+        // constant, too.
+        m_isConstantIdentity = true;
+    }
+
+    m_isConstant = m_vals.isConstant();
 
     Abc::UcharArraySample opSampArray;
     if ( m_ops.getNumSamples() > 0 ) { opSampArray = *(m_ops.getValue()); }
@@ -113,37 +82,10 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_opArray.reserve( numOps );
 
-    m_isConstant = true;
-    m_isConstantIdentity = true;
-
     for ( std::size_t i = 0 ; i < numOps ; ++i )
     {
-        XformOp op( opSampArray[i] );
-
-        std::string oname = boost::lexical_cast<std::string>( i );
-
-        m_opArray.push_back( op );
-
-        for ( std::size_t j = 0 ; j < op.getNumChannels() ; ++j )
-        {
-            std::string channame = op.getChannelName( j );
-
-            IDefaultedDoubleProperty prop(
-                ptr, channame + oname, this->getErrorHandler(),
-                op.getDefaultChannelValue( j ) );
-
-            m_props.push_back( prop );
-
-            m_isConstant = m_isConstant && prop.isConstant();
-
-            m_isConstantIdentity = m_isConstantIdentity
-                && ( ! prop.isNonDefault() );
-        }
+        m_opArray.push_back( opSampArray[i] );
     }
-
-    m_isConstantIdentity = m_isConstantIdentity && m_isConstant;
-
-    m_isConstant = m_isConstant && m_inherits.isConstant();
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
@@ -192,9 +134,9 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
         {
             size_t pidx = j + prevIdx;
 
-            op.setChannelValue( j, m_props[pidx].getValue( sampIdx ) );
+            op.setChannelValue( j, (*(m_vals.getValue( sampIdx )))[pidx] );
 
-            if ( ! m_props[pidx].isConstant() )
+            if ( ! m_staticChannels[pidx] )
             {
                 op.m_animChannels.insert( j );
             }

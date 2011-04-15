@@ -73,6 +73,8 @@ public:
     //! ...
     OXformSchema() {}
 
+    ~OXformSchema();
+
     //! This templated, primary constructor creates a new xform writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object
     //! which can intrusively be converted to an CompoundPropertyWriterPtr
@@ -130,7 +132,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples() const { return m_numSetSamples; }
+    size_t getNumSamples() { return m_ops.getNumSamples(); }
 
     //! Set an animated sample.  On first call to set, the sample is modified,
     //! so it can't be const.
@@ -154,12 +156,15 @@ public:
         m_childBounds.reset();
         m_timeSamplingType = AbcA::TimeSamplingType();
         m_inherits.reset();
-        m_numSetSamples = 0;
-        m_opstack.clear();
-        m_opstack.resize( 0 );
         m_ops.reset();
-        m_props.clear();
-        m_props.resize( 0 );
+        m_vals.reset();
+        m_protoSample.reset();
+
+        m_statChanVec.clear();
+        m_statChanVec.resize( 0 );
+
+        m_isIdentityValue = true;
+
         super_type::reset();
     }
 
@@ -178,73 +183,6 @@ private:
     void init( const AbcA::TimeSamplingType &iTst );
 
 protected:
-    //-*************************************************************************
-    // HELPER CLASS
-    //-*************************************************************************
-
-    //! The defaulted double property will only create a property
-    //! and only bother setting a value when it the value differs from a
-    //! known default value. This allows transforms to disappear when they
-    //! are identity.
-    //! It has some Xform-specific stuff in here, so not worth
-    //! making general (yet).
-    class ODefaultedDoubleProperty
-    {
-    public:
-        void reset()
-        {
-            m_parent.reset();
-            m_name = "";
-            m_errorHandlerPolicy = Abc::ErrorHandler::kThrowPolicy;
-            m_default = 0.0;
-            m_epsilon = kXFORM_DELTA_TOLERANCE;
-            m_property.reset();
-        }
-
-        ODefaultedDoubleProperty() { reset(); }
-
-        ODefaultedDoubleProperty( AbcA::CompoundPropertyWriterPtr iParent,
-                                  const std::string &iName,
-                                  Abc::ErrorHandler::Policy iPolicy,
-                                  double iDefault,
-                                  double iEpsilon=kXFORM_DELTA_TOLERANCE )
-          : m_parent( Abc::GetCompoundPropertyWriterPtr( iParent ) )
-          , m_name( iName )
-          , m_errorHandlerPolicy( iPolicy )
-          , m_default( iDefault )
-          , m_epsilon( iEpsilon )
-        {
-            // We don't build the property until we need it for sure.
-        }
-
-        void set( const double &iSamp,
-                  const Abc::OSampleSelector &iSS,
-                  const std::size_t &iNumSampsSoFar );
-
-        void setFromPrevious( const Abc::OSampleSelector &iSS );
-
-        double getDefaultValue() const { return m_default; }
-
-        std::string getName() const { return m_name; }
-
-    protected:
-        // Parent.
-        AbcA::CompoundPropertyWriterPtr m_parent;
-
-        // We cache the init stuff.
-        std::string m_name;
-        Abc::ErrorHandler::Policy m_errorHandlerPolicy;
-        double m_default;
-        double m_epsilon;
-
-        // The "it". This may not exist.
-        Abc::ODoubleProperty m_property;
-    }; // END DEFAULTED DOUBLE PROPERTY CLASS DECLARATION
-
-
-protected:
-    // Number of set samples.
-    std::size_t m_numSetSamples;
 
     Abc::OBox3dProperty m_childBounds;
 
@@ -252,13 +190,23 @@ protected:
 
     Abc::OUcharArrayProperty m_ops;
 
-    std::vector<ODefaultedDoubleProperty> m_props;
+    Abc::ODoubleArrayProperty m_vals;
 
     Abc::OBoolProperty m_inherits;
 
+    // written on destruction, as needed
+    Abc::OBoolProperty m_isIdentity;
+    Abc::OBoolArrayProperty m_staticChannels;
+
+
     // ensure that our sample's topology doesn't change; see usage
     // in OXformSchema::set()
-    std::vector<Alembic::Util::uint8_t> m_opstack;
+    XformSample m_protoSample;
+
+    // information about whether or not this thing is identity, and what
+    // channels are static
+    bool m_isIdentityValue;
+    std::vector<Alembic::Util::bool_t> m_statChanVec;
 };
 
 //-*****************************************************************************
