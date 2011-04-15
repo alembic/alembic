@@ -71,9 +71,8 @@ public:
 
     //! The default constructor creates an empty OPolyMeshSchema
     //! ...
-    OXformSchema() {}
-
-    ~OXformSchema();
+    OXformSchema()
+    {}
 
     //! This templated, primary constructor creates a new xform writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object

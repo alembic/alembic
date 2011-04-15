@@ -41,23 +41,6 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-OXformSchema::~OXformSchema()
-{
-    std::cout << this->getObject().getName() << " DESTRUCTED" << std::endl;
-
-    if ( m_isIdentity.getNumSamples() == 0 )
-    {
-        if ( ! m_isIdentityValue )
-        {
-            m_staticChannels.set( m_statChanVec );
-        }
-
-        m_isIdentity.set( m_isIdentityValue );
-    }
-
-}
-
-//-*****************************************************************************
 void OXformSchema::set( XformSample &ioSamp,
                         const Abc::OSampleSelector &iSS  )
 {
@@ -113,12 +96,21 @@ void OXformSchema::set( XformSample &ioSamp,
             chanvals.push_back( op.getChannelValue( j ) );
 
             m_statChanVec[j + ii] = m_statChanVec[j + ii] &&
-                ( op.getChannelValue( j ) == protop.getChannelValue( j ) );
+                Imath::equalWithAbsError( op.getChannelValue( j ),
+                                          protop.getChannelValue( j ),
+                                          kXFORM_DELTA_TOLERANCE );
 
             m_isIdentityValue = m_isIdentityValue &&
-                ( op.getChannelValue( j ) == op.getDefaultChannelValue( j ) );
+                Imath::equalWithAbsError( op.getChannelValue( j ),
+                                          protop.getDefaultChannelValue( j ),
+                                          kXFORM_DELTA_TOLERANCE );
         }
+
+        ii += op.getNumChannels();
     }
+
+    m_staticChannels.set( m_statChanVec, iSS );
+    m_isIdentity.set( m_isIdentityValue, iSS );
 
     m_vals.set( chanvals, iSS );
 

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -57,6 +57,7 @@ using namespace Alembic::AbcGeom;
 void xformOut()
 {
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform1.abc" );
+
     OXform a( OObject( archive, kTop ), "a" );
     OXform b( a, "b" );
     OXform c( b, "c" );
@@ -107,6 +108,7 @@ void xformOut()
 void xformIn()
 {
     IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "Xform1.abc" );
+
 
     Abc::M44d identity;
     XformSample xs;
@@ -183,8 +185,6 @@ void someOpsXform()
     {
         OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
 
-        archive.setCompressionHint( 3 );
-
         OXform a( OObject( archive, kTop ), "a" );
 
         XformOp transop( kTranslateOperation, kTranslateHint );
@@ -246,9 +246,23 @@ void someOpsXform()
 
     {
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+
         IXform a( IObject( archive, kTop ), "a" );
 
         XformSample asamp;
+
+        #if 0
+        IBoolArrayProperty bap( a.getSchema(), ".staticChans" );
+
+        BoolArraySamplePtr bas = bap.getValue( 0 );
+
+        for ( size_t i = 0 ; i < bas->size() ; ++i )
+        {
+            std::cout << (*bas)[i] << std::endl;
+        }
+
+        return;
+        #endif
 
         a.getSchema().get( asamp );
 

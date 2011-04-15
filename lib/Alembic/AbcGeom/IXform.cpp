@@ -61,7 +61,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     {
         Abc::IBoolArrayProperty p( ptr, ".staticChans" );
         if ( p.getNumSamples() > 0 )
-        { m_staticChannels = *(p.getValue()); }
+        { m_staticChannels = *(p.getValue( p.getNumSamples() - 1 )); }
     }
 
     if ( ptr->getPropertyHeader( ".isIdty" ) )
@@ -69,13 +69,15 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
         // If the property is there at all, we're identity, and therefore
         // constant, too.
         Abc::IBoolProperty p( ptr, ".isIdty" );
-        m_isConstantIdentity = p.getValue();
+        if ( p.getNumSamples() > 0 )
+        { m_isConstantIdentity = p.getValue( p.getNumSamples() - 1 ); }
     }
 
     m_isConstant = m_vals.isConstant();
 
     Abc::UcharArraySample opSampArray;
     if ( m_ops.getNumSamples() > 0 ) { opSampArray = *(m_ops.getValue()); }
+    else { m_isConstantIdentity = true; }
 
     std::size_t numOps = 0;
 
