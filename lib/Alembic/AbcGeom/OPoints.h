@@ -135,7 +135,7 @@ public:
                    const Abc::Argument &iArg1 = Abc::Argument(),
                    const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<PointsSchemaInfo>( iParentObject, iName,
-                                          iArg0, iArg1, iArg2 )
+                                        iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
@@ -148,7 +148,7 @@ public:
                             const Abc::Argument &iArg1 = Abc::Argument(),
                             const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<PointsSchemaInfo>( iParentObject,
-                                     iArg0, iArg1, iArg2 )
+                                        iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
@@ -156,9 +156,9 @@ public:
     }
 
     //! Copy constructor.
-    OPointsSchema(const OPointsSchema& iCopy)
+    OPointsSchema( const OPointsSchema& iCopy )
     {
-        *this = iCopy;    
+        *this = iCopy;
     }
 
     //! Default assignment operator used.
