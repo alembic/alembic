@@ -61,14 +61,14 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     {
         Abc::IBoolArrayProperty p( ptr, ".staticChans" );
         if ( p.getNumSamples() > 0 )
-        { m_staticChannels = *(p.getValue( p.getNumSamples() - 1 )); }
+        { m_staticChannels = *(p.getValue()); }
     }
 
     if ( ptr->getPropertyHeader( ".isIdty" ) )
     {
-        // If the property is there at all, we're *not* identity
-        m_isConstantIdentity = false;
-
+        Abc::IBoolProperty p( ptr, ".isIdty" );
+        if ( p.getNumSamples() > 0 )
+        { m_isConstantIdentity = p.getValue(); }
     }
 
     m_isConstant = m_vals.isConstant();
@@ -138,7 +138,7 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
             op.setChannelValue( j, (*(m_vals.getValue( sampIdx )))[pidx] );
 
-            if ( ! m_staticChannels[pidx] )
+            if ( m_staticChannels.size() > 0 && ( ! m_staticChannels[pidx] ) )
             {
                 op.m_animChannels.insert( j );
             }
