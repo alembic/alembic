@@ -73,6 +73,17 @@ enum XformOperationType
 };
 
 //-*****************************************************************************
+//! \brief Enum that indicates the type of 2d operation for cameras.
+//! This enum is used when encoding and decoding the 2d filmback data for
+//! cameras.
+enum FilmBackXformOperationType
+{
+    kScaleFilmBackOperation = 0,
+    kTranslateFilmBackOperation = 1,
+    kMatrixFilmBackOperation = 1,
+};
+
+//-*****************************************************************************
 //! This utility function sets an array prorperty sample using "set" if
 //! the sample is non-null, otherwise calls setFromPrevious.
 template <class PROP, class SAMP>
