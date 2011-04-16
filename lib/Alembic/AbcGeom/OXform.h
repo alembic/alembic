@@ -71,8 +71,8 @@ public:
 
     //! The default constructor creates an empty OPolyMeshSchema
     //! ...
-    OXformSchema()
-    {}
+    OXformSchema() {}
+    ~OXformSchema();
 
     //! This templated, primary constructor creates a new xform writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object
@@ -112,9 +112,17 @@ public:
 
     //! Explicit copy constructor to work around MSVC bug
     OXformSchema( const OXformSchema &iCopy )
-    {
-        *this = iCopy;
-    }
+      : m_childBounds( iCopy.m_childBounds )
+      , m_timeSamplingType( iCopy.m_timeSamplingType )
+      , m_ops( iCopy.m_ops )
+      , m_vals( iCopy.m_vals )
+      , m_inherits( iCopy.m_inherits )
+      , m_isIdentity( iCopy.m_isIdentity )
+      , m_staticChannels( iCopy.m_staticChannels )
+      , m_protoSample( iCopy.m_protoSample )
+      , m_isIdentityValue( iCopy.m_isIdentityValue )
+      , m_statChanVec( iCopy.m_statChanVec )
+    {}
 
     //! Default assignment operator used.
 
@@ -158,6 +166,8 @@ public:
         m_ops.reset();
         m_vals.reset();
         m_protoSample.reset();
+        m_staticChannels.reset();
+        m_isIdentity.reset();
 
         m_statChanVec.clear();
         m_statChanVec.resize( 0 );
@@ -180,7 +190,6 @@ public:
 
 private:
     void init( const AbcA::TimeSamplingType &iTst );
-    AbcA::CompoundPropertyWriterPtr m_this;
 
 protected:
 

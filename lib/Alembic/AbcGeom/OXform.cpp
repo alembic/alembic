@@ -41,6 +41,34 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+OXformSchema::~OXformSchema()
+{
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+    std::string fn = _this->getObject()->getFullName();
+
+    if ( _this.use_count() == 2 )
+    {
+        std::cout << "writing out static shit for " << fn << std::endl;
+
+        if ( ! m_isIdentityValue )
+        {
+            m_isIdentity = Abc::OBoolProperty( _this, ".isIdty" );
+            m_isIdentity.set( m_isIdentityValue );
+        }
+
+        m_staticChannels = Abc::OBoolArrayProperty( _this, ".staticChans" );
+        m_staticChannels.set( m_statChanVec );
+    }
+    else
+    {
+        std::cout << "not writing out static shit for "
+                  << fn << " at use_count "
+                  << _this.use_count() << std::endl;
+    }
+}
+
+//-*****************************************************************************
 void OXformSchema::set( XformSample &ioSamp,
                         const Abc::OSampleSelector &iSS  )
 {
@@ -109,9 +137,6 @@ void OXformSchema::set( XformSample &ioSamp,
         ii += op.getNumChannels();
     }
 
-    m_staticChannels.set( m_statChanVec, iSS );
-    m_isIdentity.set( m_isIdentityValue, iSS );
-
     m_vals.set( chanvals, iSS );
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -151,10 +176,6 @@ void OXformSchema::init( const AbcA::TimeSamplingType &iTst )
                                       m_timeSamplingType );
 
     m_vals = Abc::ODoubleArrayProperty( this->getPtr(), ".vals" );
-
-    m_isIdentity = Abc::OBoolProperty( this->getPtr(), ".isIdty" );
-
-    m_staticChannels = Abc::OBoolArrayProperty( this->getPtr(), ".staticChans" );
 
     m_isIdentityValue = true;
 
