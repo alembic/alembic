@@ -72,7 +72,6 @@ public:
     //! The default constructor creates an empty OPolyMeshSchema
     //! ...
     OXformSchema() {}
-    ~OXformSchema();
 
     //! This templated, primary constructor creates a new xform writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object
@@ -112,17 +111,7 @@ public:
 
     //! Explicit copy constructor to work around MSVC bug
     OXformSchema( const OXformSchema &iCopy )
-      : m_childBounds( iCopy.m_childBounds )
-      , m_timeSamplingType( iCopy.m_timeSamplingType )
-      , m_ops( iCopy.m_ops )
-      , m_vals( iCopy.m_vals )
-      , m_inherits( iCopy.m_inherits )
-      , m_isIdentity( iCopy.m_isIdentity )
-      , m_staticChannels( iCopy.m_staticChannels )
-      , m_protoSample( iCopy.m_protoSample )
-      , m_isIdentityValue( iCopy.m_isIdentityValue )
-      , m_statChanVec( iCopy.m_statChanVec )
-    {}
+    { *this = iCopy; }
 
     //! Default assignment operator used.
 
@@ -166,13 +155,12 @@ public:
         m_ops.reset();
         m_vals.reset();
         m_protoSample.reset();
-        m_staticChannels.reset();
-        m_isIdentity.reset();
+        m_animChannels.reset();
 
-        m_statChanVec.clear();
-        m_statChanVec.resize( 0 );
-
-        m_isIdentityValue = true;
+        m_staticChans.clear();
+        m_staticChans.resize( 0 );
+        m_opVec.clear();
+        m_opVec.resize( 0 );
 
         super_type::reset();
     }
@@ -197,25 +185,23 @@ protected:
 
     AbcA::TimeSamplingType m_timeSamplingType;
 
-    Abc::OUcharArrayProperty m_ops;
+    Abc::OUInt32ArrayProperty m_ops;
 
     Abc::ODoubleArrayProperty m_vals;
 
     Abc::OBoolProperty m_inherits;
 
     // written on destruction, as needed
-    Abc::OBoolProperty m_isIdentity;
-    Abc::OBoolArrayProperty m_staticChannels;
+    Abc::OUInt32ArrayProperty m_animChannels;
 
 
     // ensure that our sample's topology doesn't change; see usage
     // in OXformSchema::set()
     XformSample m_protoSample;
 
-    // information about whether or not this thing is identity, and what
-    // channels are static
-    bool m_isIdentityValue;
-    std::vector<Alembic::Util::bool_t> m_statChanVec;
+    std::vector<bool> m_staticChans;
+
+    std::vector<Alembic::Util::uint32_t> m_opVec;
 };
 
 //-*****************************************************************************

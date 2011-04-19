@@ -109,7 +109,6 @@ void xformIn()
 {
     IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "Xform1.abc" );
 
-
     Abc::M44d identity;
     XformSample xs;
 
@@ -176,12 +175,14 @@ void xformIn()
     IXform f( e, "f" );
     TESTING_ASSERT( f.getSchema().isConstant() ); // is constant
     TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
+
+    std::cout << "Tested all xforms in first test!" << std::endl;
 }
 
 //-*****************************************************************************
 void someOpsXform()
 {
-    std::string name = "Xform2.abc";
+    std::string name = "someOpsXform.abc";
     {
         OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
 
@@ -251,19 +252,6 @@ void someOpsXform()
 
         XformSample asamp;
 
-        #if 0
-        IBoolArrayProperty bap( a.getSchema(), ".staticChans" );
-
-        BoolArraySamplePtr bas = bap.getValue( 0 );
-
-        for ( size_t i = 0 ; i < bas->size() ; ++i )
-        {
-            std::cout << (*bas)[i] << std::endl;
-        }
-
-        return;
-        #endif
-
         a.getSchema().get( asamp );
 
         TESTING_ASSERT( a.getSchema().getNumOps() == 6 );
@@ -273,7 +261,6 @@ void someOpsXform()
 
         TESTING_ASSERT( asamp[1].isMatrixOp() );
         TESTING_ASSERT( asamp[1].getHint() == kMayaShearHint );
-
 
         TESTING_ASSERT( asamp[2].isRotateOp() );
         TESTING_ASSERT( asamp[2].getHint() == kRotateHint );
@@ -375,6 +362,8 @@ void someOpsXform()
             TESTING_ASSERT( tvec.equalWithAbsError( asamp[5].getTranslate(),
                                                     VAL_EPSILON ) );
         }
+
+        std::cout << "tested all xforms in " << name << std::endl;
     }
 }
 

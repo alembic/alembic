@@ -138,7 +138,7 @@ public:
     bool getInheritsXforms( const Abc::ISampleSelector &iSS =
                             Abc::ISampleSelector() );
 
-    size_t getNumOps() const { return m_opArray.size(); }
+    size_t getNumOps() const { return m_numOps; }
 
     //! Reset returns this function set to an empty, default
     //! state.
@@ -166,11 +166,11 @@ public:
 protected:
     Abc::IBox3dProperty m_childBounds;
 
-    Abc::IUcharArrayProperty m_ops;
+    Abc::IUInt32ArrayProperty m_ops;
 
     Abc::IDoubleArrayProperty m_vals;
 
-    Abc::BoolArraySample m_staticChannels;
+    Abc::UInt32ArraySample m_animChannels;
 
     Abc::IBoolProperty m_inherits;
 
@@ -178,11 +178,10 @@ protected:
 
     bool m_isConstantIdentity;
 
+    std::size_t m_numOps;
+
 private:
     void init( Abc::SchemaInterpMatching iMatching );
-    // the op array is strictly for default names and values
-    // for the IDefaultedDoubleProperties made in init()
-    std::vector<XformOp> m_opArray;
 };
 
 //-*****************************************************************************

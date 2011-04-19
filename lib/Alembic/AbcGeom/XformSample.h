@@ -103,7 +103,7 @@ private:
     friend class OXformSchema;
     friend class IXformSchema;
     void setHasBeenRead();
-    const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
+    const std::vector<Alembic::Util::uint32_t> &getOpsArray() const;
     void clear();
 
 
@@ -114,7 +114,7 @@ private:
     // This will be populated by the addOp() methods or setFoo() methods
     // in the case of the sample being used to write data, and by the
     // IXform in the case of the sample being used to read data.
-    std::vector<Alembic::Util::uint8_t> m_opsArray;
+    std::vector<Alembic::Util::uint32_t> m_opsArray;
 
     std::vector<XformOp> m_ops;
 

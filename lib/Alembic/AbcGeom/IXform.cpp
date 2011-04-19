@@ -51,42 +51,33 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_inherits = Abc::IBoolProperty( ptr, ".inherits", iMatching );
 
-    m_ops = Abc::IUcharArrayProperty( ptr, ".ops", iMatching );
+    m_ops = Abc::IUInt32ArrayProperty( ptr, ".ops", iMatching );
 
     m_vals = Abc::IDoubleArrayProperty( ptr, ".vals", iMatching );
 
     m_isConstantIdentity = true;
 
-    if ( ptr->getPropertyHeader( ".staticChans" ) )
+    if ( ptr->getPropertyHeader( ".animChans" ) )
     {
-        Abc::IBoolArrayProperty p( ptr, ".staticChans" );
+        Abc::IUInt32ArrayProperty p( ptr, ".animChans" );
         if ( p.getNumSamples() > 0 )
-        { m_staticChannels = *(p.getValue()); }
+        { m_animChannels = *(p.getValue( p.getNumSamples() - 1 )); }
     }
 
-    if ( ptr->getPropertyHeader( ".isIdty" ) )
+    if ( m_ops.getNumSamples() > 0 )
     {
-        Abc::IBoolProperty p( ptr, ".isIdty" );
-        if ( p.getNumSamples() > 0 )
-        { m_isConstantIdentity = p.getValue(); }
+        m_numOps = m_ops.getValue( 0 )->size();
+    }
+    else
+    {
+        m_numOps = 0;
     }
 
     m_isConstant = m_vals.isConstant();
 
-    Abc::UcharArraySample opSampArray;
-    if ( m_ops.getNumSamples() > 0 ) { opSampArray = *(m_ops.getValue()); }
-    else { m_isConstantIdentity = true; }
-
-    std::size_t numOps = 0;
-
-    if ( opSampArray )
-    { numOps = opSampArray.size(); }
-
-    m_opArray.reserve( numOps );
-
-    for ( std::size_t i = 0 ; i < numOps ; ++i )
+    if ( m_vals && m_vals.getNumSamples() > 0 )
     {
-        m_opArray.push_back( opSampArray[i] );
+        m_isConstantIdentity = m_isConstant && m_vals.getValue()->size() == 0;
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
@@ -128,23 +119,42 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
     if ( sampIdx < 0 ) { return; }
 
-    std::size_t prevIdx = 0;
-    for ( std::size_t i = 0 ; i < m_opArray.size() ; ++i )
+    Abc::UInt32ArraySamplePtr opsamp = m_ops.getValue( iSS );
+
+    std::size_t curIdx = 0;
+    for ( std::size_t i = 0 ; i < opsamp->size() ; ++i )
     {
-        XformOp op = m_opArray[i];
+        Alembic::Util::uint32_t openc = (*opsamp)[i];
+        XformOp op( openc );
+        // vidx == "value index"; will be -1 if the op is all default values.
+        Alembic::Util::int16_t vidx = openc >> 16;
+
         for ( std::size_t j = 0 ; j < op.getNumChannels() ; ++j )
         {
-            size_t pidx = j + prevIdx;
-
-            op.setChannelValue( j, (*(m_vals.getValue( sampIdx )))[pidx] );
-
-            if ( m_staticChannels.size() > 0 && ( ! m_staticChannels[pidx] ) )
+            const std::size_t animIdx = curIdx + j;
+            for ( std::size_t k = 0 ; k < m_animChannels.size() ; ++k )
             {
-                op.m_animChannels.insert( j );
+                if ( static_cast<std::size_t>( m_animChannels[k] ) == animIdx )
+                {
+                    op.m_animChannels.insert( j );
+                }
+            }
+
+            if ( vidx < 0 )
+            {
+                op.setChannelValue( j,
+                                    op.getDefaultChannelValue( j ) );
+            }
+            else
+            {
+                // nvidx == "normalized value index"; the index of the channel's
+                // slot in the vals sample
+                size_t nvidx = j + vidx;
+                op.setChannelValue( j, (*(m_vals.getValue( sampIdx )))[nvidx] );
             }
         }
-        prevIdx += op.getNumChannels();
         oSamp.addOp( op );
+        curIdx += op.getNumChannels();
     }
 
     oSamp.setInheritsXforms( m_inherits.getValue( sampIdx ) );

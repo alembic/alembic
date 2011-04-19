@@ -234,7 +234,7 @@ const XformOp &XformSample::operator[]( const std::size_t &iIndex ) const
 }
 
 //-*****************************************************************************
-const std::vector<Alembic::Util::uint8_t> &XformSample::getOpsArray() const
+const std::vector<Alembic::Util::uint32_t> &XformSample::getOpsArray() const
 {
     return m_opsArray;
 }

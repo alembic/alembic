@@ -36,7 +36,7 @@
 
 #include <Alembic/AbcGeom/XformOp.h>
 
-#include <boost/format.hpp>
+#include <boost/utility.hpp>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -45,7 +45,6 @@ namespace AbcGeom {
 XformOp::XformOp()
   : m_type( kTranslateOperation )
   , m_hint( 0 )
-  , m_opName( ".t" )
 {
     m_channels.clear();
     m_channels.resize( 3 );
@@ -62,47 +61,48 @@ XformOp::XformOp( const XformOperationType iType,
     switch ( m_type )
     {
     case kScaleOperation:
-        m_opName = ".s";
         m_channels.resize( 3 );
         break;
     case kTranslateOperation:
-        m_opName = ".t";
         m_channels.resize( 3 );
         break;
     case kRotateOperation:
-        m_opName = ".r";
         m_channels.resize( 4 );
         break;
     case kMatrixOperation:
-        m_opName = ".m";
         m_channels.resize( 16 );
         break;
     }
 }
 
 //-*****************************************************************************
-XformOp::XformOp( const Alembic::Util::uint8_t iEncodedOp )
+XformOp::XformOp( const Alembic::Util::uint32_t iEncodedOp )
 {
+    Alembic::Util::uint32_t tmask =
+        BOOST_BINARY( 00000000 00000000 11111111 00000000 );
 
-    m_type = (XformOperationType)(iEncodedOp >> 4);
-    m_hint = iEncodedOp & 0xF;
+    Alembic::Util::uint32_t hmask =
+        BOOST_BINARY( 00000000 00000000 00000000 11111111 );
+
+    Alembic::Util::uint32_t mask = tmask | hmask;
+
+    m_type = (XformOperationType)(( iEncodedOp & mask ) >> 8);
+
+    //m_type = (XformOperationType)(iEncodedOp >> 8);
+    m_hint = iEncodedOp & hmask;
 
     switch ( m_type )
     {
     case kScaleOperation:
-        m_opName = ".s";
         m_channels.resize( 3 );
         break;
     case kTranslateOperation:
-        m_opName = ".t";
         m_channels.resize( 3 );
         break;
     case kRotateOperation:
-        m_opName = ".r";
         m_channels.resize( 4 );
         break;
     case kMatrixOperation:
-        m_opName = ".m";
         m_channels.resize( 16 );
         break;
     }
@@ -122,16 +122,12 @@ void XformOp::setType( const XformOperationType iType )
     switch ( m_type )
     {
     case kScaleOperation:
-        m_opName = ".s";
         break;
     case kTranslateOperation:
-        m_opName = ".t";
         break;
     case kRotateOperation:
-        m_opName = ".r";
         break;
     case kMatrixOperation:
-        m_opName = ".m";
         break;
     }
 }
@@ -206,100 +202,6 @@ std::size_t XformOp::getNumChannels() const
 }
 
 //-*****************************************************************************
-std::string XformOp::getChannelName( std::size_t iIndex ) const
-{
-    std::string c;
-
-    switch ( iIndex )
-    {
-    case 0:
-        if ( m_type != kMatrixOperation ) { c = "x_"; }
-        else { c = "00_"; }
-        break;
-    case 1:
-        if ( m_type != kMatrixOperation ) { c = "y_"; }
-        else { c = "01_"; }
-        break;
-    case 2:
-        if ( m_type != kMatrixOperation ) { c = "z_"; }
-        else { c = "02_"; }
-        break;
-    case 3:
-        if ( m_type == kRotateOperation ) { c = "r_"; }
-        else if ( m_type == kMatrixOperation ) { c = "03_"; }
-        else
-        {
-            ABCA_ASSERT( false,
-                         "Bad index '" << iIndex << "' for non-matrix or "
-                         << "non-rotation xform op." );
-        }
-        break;
-    case 4:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "10_";
-        break;
-    case 5:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "11_";
-        break;
-    case 6:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "12_";
-        break;
-    case 7:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "13_";
-        break;
-    case 8:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "20_";
-        break;
-    case 9:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "21_";
-        break;
-    case 10:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "22_";
-        break;
-    case 11:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "23_";
-        break;
-    case 12:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "30_";
-        break;
-    case 13:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "31_";
-        break;
-    case 14:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "32_";
-        break;
-    case 15:
-        ABCA_ASSERT( m_type == kMatrixOperation,
-                     "Bad index '" << iIndex << "' for non-matrix xform op." );
-        c = "33_";
-        break;
-    }
-
-    return ( boost::format( "%s%s" ) % m_opName % c ).str();
-}
-
-//-*****************************************************************************
 double XformOp::getDefaultChannelValue( std::size_t iIndex ) const
 {
     switch ( m_type )
@@ -338,9 +240,23 @@ void XformOp::setChannelValue( std::size_t iIndex, double iVal )
 }
 
 //-*****************************************************************************
-Alembic::Util::uint8_t XformOp::getOpEncoding() const
+Alembic::Util::uint32_t XformOp::getOpEncoding() const
 {
-    return ( m_type << 4 ) | ( m_hint & 0xF );
+    Alembic::Util::uint32_t ret = 0;
+
+    Alembic::Util::uint32_t tmask =
+        BOOST_BINARY( 00000000 00000000 11111111 00000000 );
+
+    Alembic::Util::uint32_t hmask =
+        BOOST_BINARY( 00000000 00000000 00000000 11111111 );
+
+    Alembic::Util::uint32_t mask = tmask | hmask;
+
+    ret = ( m_type << 8 ) & tmask;
+
+    ret |= ( m_hint & hmask );
+
+    return ret & mask;
 }
 
 //-*****************************************************************************
@@ -488,6 +404,19 @@ Abc::M44d XformOp::getMatrix() const
         {
             ret.x[i][j] = m_channels[( i * 4 ) + j];
         }
+    }
+
+    return ret;
+}
+
+//-*****************************************************************************
+bool XformOp::isDefault() const
+{
+    bool ret = true;
+
+    for ( size_t i = 0 ; i < getNumChannels() ; ++i )
+    {
+        ret = ret && ( getChannelValue( i ) == getDefaultChannelValue( i ) );
     }
 
     return ret;
