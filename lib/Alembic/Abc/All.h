@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -41,8 +41,8 @@
 #include <Alembic/Abc/ErrorHandler.h>
 #include <Alembic/Abc/Foundation.h>
 
-#include <Alembic/Abc/IArchive.h>
 #include <Alembic/Abc/Argument.h>
+#include <Alembic/Abc/IArchive.h>
 #include <Alembic/Abc/IArrayProperty.h>
 #include <Alembic/Abc/IBaseProperty.h>
 #include <Alembic/Abc/ICompoundProperty.h>
@@ -55,12 +55,10 @@
 #include <Alembic/Abc/ITypedScalarProperty.h>
 
 #include <Alembic/Abc/OArchive.h>
-#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/OArrayProperty.h>
 #include <Alembic/Abc/OBaseProperty.h>
 #include <Alembic/Abc/OCompoundProperty.h>
 #include <Alembic/Abc/OObject.h>
-#include <Alembic/Abc/OSampleSelector.h>
 #include <Alembic/Abc/OScalarProperty.h>
 #include <Alembic/Abc/OSchema.h>
 #include <Alembic/Abc/OSchemaObject.h>

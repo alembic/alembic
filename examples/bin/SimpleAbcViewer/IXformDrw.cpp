@@ -61,15 +61,15 @@ IXformDrw::IXformDrw( IXform &iXform )
     // all the children.
     // if we have a non-constant time sampling, we should get times
     // out of it.
-    const TimeSampling iTsmp = m_xform.getSchema().getTimeSampling();
-    if ( !iTsmp.isStatic() )
+    TimeSamplingPtr iTsmp = m_xform.getSchema().getTimeSampling();
+    if ( !m_xform.getSchema().isConstant() )
     {
-        size_t numSamps = iTsmp.getNumSamples();
+        size_t numSamps = m_xform.getSchema().getNumSamples();
         if ( numSamps > 0 )
         {
-            chrono_t minTime = iTsmp.getSampleTime( 0 );
+            chrono_t minTime = iTsmp->getSampleTime( 0 );
             m_minTime = std::min( m_minTime, minTime );
-            chrono_t maxTime = iTsmp.getSampleTime( numSamps-1 );
+            chrono_t maxTime = iTsmp->getSampleTime( numSamps-1 );
             m_maxTime = std::max( m_maxTime, maxTime );
         }
     }
@@ -105,10 +105,8 @@ void IXformDrw::setTime( chrono_t iSeconds )
     else
     {
         ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
-        XformSample xs = m_xform.getSchema().getValue( ss );
-        m_localToParent = xs.getMatrix();
+        m_localToParent = m_xform.getSchema().getValue( ss ).getMatrix();
     }
-
     // Okay, now we need to recalculate the bounds.
     m_bounds.makeEmpty();
     for ( DrawablePtrVec::iterator iter = m_children.begin();
