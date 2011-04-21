@@ -100,7 +100,7 @@ public:
     //! Default assignment operator used.
 
     //! Return the time sampling.
-    AbcA::TimeSamplingPtr getTimeSampling() const
+    AbcA::TimeSamplingPtr getTimeSampling()
     { return m_coreProperties.getTimeSampling(); }
 
     //! Return the number of samples contained in the property.
@@ -120,7 +120,7 @@ public:
     CameraSample getValue(
         const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
     {
-        Sample smp;
+        CameraSample smp;
         get( smp, iSS );
         return smp;
     }
@@ -136,7 +136,7 @@ public:
         m_coreProperties.reset();
         m_childBounds.reset();
         m_arbGeomParams.reset();
-
+        m_ops.clear();
         Abc::ISchema<CameraSchemaInfo>::reset();
     }
 
@@ -161,12 +161,18 @@ protected:
 
     Abc::ICompoundProperty m_arbGeomParams;
 
+    Abc::IScalarProperty m_smallFilmBackChannels;
+    Abc::IDoubleArrayProperty m_largeFilmBackChannels;
+
+private:
+    std::vector < FilmBackXformOp > m_ops;
+
 };
 
 //-*****************************************************************************
 // SCHEMA OBJECT
 //-*****************************************************************************
-typedef Abc::ISchemaObject<OCameraSchema> ICamera;
+typedef Abc::ISchemaObject<ICameraSchema> ICamera;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

@@ -38,6 +38,7 @@
 #define _Alembic_AbcGeom_CameraSample_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
+#include <Alembic/AbcGeom/FilmBackXformOp.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -48,7 +49,7 @@ class CameraSample
 public:
 
     //! Creates a default sample with a bunch of defaults set
-    CameraSample() { reset() };
+    CameraSample() { reset(); }
 
     //! Create a default sample and set the defaults so that they
     //! calculate the provided screen window.
@@ -57,27 +58,27 @@ public:
     void getScreenWindow( double & iTop, double & iBottom, double & iLeft,
         double & iRight );
 
-    double getFocalLength() { return m_focalLength; }
+    double getFocalLength() const { return m_focalLength; }
     void  setFocalLength( double iVal )
     { m_focalLength = iVal; }
 
-    double getHorizontalAperture() { return m_horizontalAperture; }
+    double getHorizontalAperture() const { return m_horizontalAperture; }
     void setHorizontalAperture( double iVal )
     { m_horizontalAperture = iVal; }
 
-    double getHorizontalFilmOffset() { return m_horizontalFilmOffset; }
+    double getHorizontalFilmOffset() const { return m_horizontalFilmOffset; }
     void setHorizontalFilmOffset( double iVal )
     { m_horizontalFilmOffset = iVal; }
 
-    double getVerticalAperture() { return m_verticalAperture; }
+    double getVerticalAperture() const { return m_verticalAperture; }
     void setVerticalAperture( double iVal )
     { m_verticalAperture = iVal; }
 
-    double getVerticalFilmOffset() { return m_verticalFilmOffset; }
+    double getVerticalFilmOffset() const { return m_verticalFilmOffset; }
     void setVerticalFilmOffset( double iVal )
     { m_verticalFilmOffset = iVal; }
 
-    double getLensSqueezeRatio() { return m_lensSqueezeRatio; }
+    double getLensSqueezeRatio() const { return m_lensSqueezeRatio; }
     void setLensSqueezeRatio( double iVal )
     { m_lensSqueezeRatio = iVal; }
 
@@ -85,45 +86,65 @@ public:
     void setOverScanLeft( double iVal )
     { m_overscanLeft = iVal; }
 
-    double getOverScanRight() { return m_overscanRight; }
+    double getOverScanRight() const { return m_overscanRight; }
     void setOverScanRight( double iVal )
     { m_overscanRight = iVal; }
 
-    double getOverScanTop() { return m_overscanTop; }
+    double getOverScanTop() const { return m_overscanTop; }
     void setOverScanTop( double iVal )
     { m_overscanTop = iVal; }
 
-    double getOverScanBottom() { return m_overscanBottom; }
+    double getOverScanBottom() const { return m_overscanBottom; }
     void setOverScanBottom( double iVal )
     { m_overscanBottom = iVal; }
 
-    double getFStop() { return m_fStop; }
+    double getFStop() const { return m_fStop; }
     void setFStop( double iVal )
     { m_fStop = iVal; }
 
-    double getFocusDistance() { return m_focusDistance; }
+    double getFocusDistance() const { return m_focusDistance; }
     void setFocusDistance( double iVal )
     { m_focusDistance = iVal; }
 
-    double getShutterOpen() { return m_shutterOpen; }
+    double getShutterOpen() const { return m_shutterOpen; }
     void setShutterOpen( double iVal )
     { m_shutterOpen = iVal; }
 
-    double getShutterClose() { return m_shutterClose; }
+    double getShutterClose() const { return m_shutterClose; }
     void setShutterClose( double iVal )
     { m_shutterClose = iVal; }
 
-    double getNearClippingPlane() { return m_nearClippingPlane; }
+    double getNearClippingPlane() const { return m_nearClippingPlane; }
     void setNearClippingPlane( double iVal )
     { m_nearClippingPlane = iVal; }
 
-    double getFarClippingPlane() { return m_farClippingPlane; }
+    double getFarClippingPlane() const { return m_farClippingPlane; }
     void setFarClippingPlane( double iVal )
     { m_farClippingPlane = iVal; }
 
-    Abc::Box3d getChildBounds() { return m_childBounds; }
+    Abc::Box3d getChildBounds() const { return m_childBounds; }
     void setChildBounds( const Abc::Box3d & iBounds )
     { m_childBounds = iBounds; }
+
+
+    // helper function for getting one of the 16 core, non film back xform op
+    // related values
+    double getCoreValue( std::size_t iIndex ) const;
+
+    // calculated the field of view in degrees
+    double getFieldOfView() const;;
+
+    // add an op and return the index of the op in its op-stack
+    std::size_t addOp( FilmBackXformOp iOp );
+
+    FilmBackXformOp getOp( std::size_t iIndex ) const;
+    FilmBackXformOp &operator[]( const std::size_t &iIndex );
+    const FilmBackXformOp &operator[]( const std::size_t &iIndex ) const;
+
+    Abc::M33d getFilmBackMatrix () const;
+
+    std::size_t getNumOps() const;
+    std::size_t getNumOpChannels() const;
 
     void reset()
     {
@@ -133,16 +154,16 @@ public:
         // in cm
         m_horizontalAperture = 3.6;
         m_horizontalFilmOffset = 0.0;
-        m_verticleAperture = 2.4;
+        m_verticalAperture = 2.4;
         m_verticalFilmOffset = 0.0;
 
         // width/height lens aspect ratio
         m_lensSqueezeRatio = 1.0;
 
-        m_overscanLeft = 1.0;
-        m_overscanRight = 1.0;
-        m_overscanTop = 1.0;
-        m_overscanBottom = 1.0;
+        m_overscanLeft = 0.0;
+        m_overscanRight = 0.0;
+        m_overscanTop = 0.0;
+        m_overscanBottom = 0.0;
 
         // optical property of the lens, focal length divided by 
         // "effective" lens diameter
@@ -156,13 +177,14 @@ public:
         m_farClippingPlane = 100000.0;
 
         m_childBounds.makeEmpty();
+        m_ops.clear();
     }
 
-protected:
+private:
     double m_focalLength;
     double m_horizontalAperture;
     double m_horizontalFilmOffset;
-    double m_verticleAperture;
+    double m_verticalAperture;
     double m_verticalFilmOffset;
     double m_lensSqueezeRatio;
 
@@ -180,6 +202,8 @@ protected:
     double m_farClippingPlane;
 
     Abc::Box3d m_childBounds;
+
+    std::vector<FilmBackXformOp> m_ops;
 };
 
 } // End namespace AbcGeom

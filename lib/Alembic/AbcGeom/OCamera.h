@@ -142,7 +142,7 @@ public:
 
     //! Return the time sampling.
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positions.getTimeSampling(); }
+    { return m_coreProperties.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -154,7 +154,7 @@ public:
     { return m_coreProperties.getNumSamples(); }
 
     //! Set a sample
-    void set( const Sample &iSamp );
+    void set( const CameraSample &iSamp );
 
     //! Set from previous sample.
     void setFromPrevious();
@@ -201,8 +201,12 @@ protected:
 
     Abc::OCompoundProperty m_arbGeomParams;
 
+    Abc::ODoubleArrayProperty m_bigFilmBackChannels;
+
+    Abc::OScalarProperty m_smallFilmBackChannels;
+
 private:
-    double m_initialSample[16];
+    CameraSample m_initialSample;
 
 };
 

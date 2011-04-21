@@ -48,8 +48,7 @@ void OCameraSchema::set( const CameraSample &iSamp )
     // do we need to create child bounds?
     if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
     {
-        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
-            m_coreProperties.getTimeSampling() );
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds" );
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
@@ -64,40 +63,105 @@ void OCameraSchema::set( const CameraSample &iSamp )
     }
 
     double sampleData[16];
-    sampleData[0] = m_focalLength;
-    sampleData[1] = m_horizontalAperture;
-    sampleData[2] = m_horizontalFilmOffset;
-    sampleData[3] = m_verticleAperture;
-    sampleData[4] = m_verticalFilmOffset;
-    sampleData[5] = m_lensSqueezeRatio;
-
-    sampleData[6] = m_overscanLeft;
-    sampleData[7] = m_overscanRight;
-    sampleData[8] = m_overscanTop;
-    sampleData[9] = m_overscanBottom;
-
-    sampleData[10] = m_fStop;
-    sampleData[11] = m_focusDistance;
-    sampleData[12] = m_shutterOpen;
-    sampleData[13] = m_shutterClose;
-
-    sampleData[14] = m_nearClippingPlane;
-    sampleData[15] = m_farClippingPlane;
+    for ( size_t i = 0; i < 16; ++i )
+        sampleData[i] = iSamp.getCoreValue( i );
 
     if ( m_coreProperties.getNumSamples() == 0 )
     {
-        for (size_t i = 0; i < 16; ++i)
+        m_initialSample = iSamp;
+
+        std::size_t numChannels = iSamp.getNumOpChannels();
+        std::size_t numOps = iSamp.getNumOps();
+
+        std::vector < std::string > filmBackOps( numOps );
+        std::vector <double> opChannels ( numChannels );
+
+        std::size_t curChannel = 0;
+        for ( std::size_t i; i < numOps; ++i )
         {
-            m_initialSample[i] = sampleData[i];
+            const FilmBackXformOp & op = iSamp[i];
+            filmBackOps[i] = op.getTypeAndHint();
+            for ( std::size_t j; j < op.getNumChannels(); ++j, ++curChannel )
+            {
+                opChannels[curChannel] = op.getChannelValue( j );
+            }
         }
 
-        if (m_childBounds)
+        // we are in scalar territory, write the ops as scalar
+        if ( numOps > 0 && numOps < 256 )
+        {
+            AbcA::DataType dType( Util::kStringPOD, numOps );
+            Abc::OScalarProperty filmBackOpsProp( this->getPtr(),
+                ".filmBackOps", dType );
+            filmBackOpsProp.set( &filmBackOps.front() );
+        }
+        // too big for scalar, write ops as an array
+        else if ( numChannels >= 256 )
+        {
+            OStringArrayProperty filmBackOpsProp( this->getPtr(),
+                ".filmBackOps" );
+            StringArraySample ssamp( &filmBackOps.front(), filmBackOps.size() );
+            filmBackOpsProp.set( ssamp );
+        }
+
+        // do the same thing for the channels
+        if ( numChannels > 0 && numChannels < 256 )
+        {
+            AbcA::DataType dType( Util::kFloat64POD, numChannels );
+            m_smallFilmBackChannels = Abc::OScalarProperty( this->getPtr(),
+                ".filmBackChannels", dType );
+            m_smallFilmBackChannels.set( &opChannels.front() );
+
+        }
+        else if ( numChannels >= 256 )
+        {
+            m_bigFilmBackChannels = Abc::ODoubleArrayProperty( this->getPtr(),
+                ".filmBackChannels" );
+            DoubleArraySample dsamp( &opChannels.front(), opChannels.size() );
+            m_bigFilmBackChannels.set( dsamp );
+        }
+
+        if ( m_childBounds )
         {
             m_childBounds.set( iSamp.getChildBounds() );
         }
     }
     else
     {
+        std::size_t numOps = iSamp.getNumOps();
+        ABCA_ASSERT( numOps == m_initialSample.getNumOps(),
+            "Number of Film Back Xform Ops differ expected: " <<
+            m_initialSample.getNumOps() << " got: " << numOps );
+
+        std::vector <double> opChannels ( m_initialSample.getNumOpChannels() );
+        std::size_t chan = 0;
+        for ( std::size_t i = 0; i < numOps; ++i )
+        {
+            const FilmBackXformOp & op = iSamp[i];
+            const FilmBackXformOp & oldOp = m_initialSample[i];
+
+            ABCA_ASSERT( oldOp.getType() == op.getType(),
+                "Film Back Xform Operation type differs from initial sample"
+                " at index: " << i );
+
+            std::size_t numChannels = op.getNumChannels();
+            for ( std::size_t j = 0; j < numChannels; ++j, ++chan )
+            {
+                opChannels[chan] = op.getChannelValue( j );
+            }
+        }
+
+        if ( m_smallFilmBackChannels )
+        {
+            m_smallFilmBackChannels.set( &opChannels.front() );
+        }
+        else if ( m_bigFilmBackChannels )
+        {
+            DoubleArraySample dsamp( &opChannels.front(), opChannels.size() );
+            m_bigFilmBackChannels.set( dsamp );
+        }
+        // else no film back channels
+
         if ( m_childBounds )
         {
             SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() );
@@ -116,8 +180,14 @@ void OCameraSchema::setFromPrevious()
 
     m_coreProperties.setFromPrevious();
 
-    if (m_childBounds)
+    if ( m_childBounds )
         m_childBounds.setFromPrevious();
+
+    if ( m_smallFilmBackChannels )
+        m_smallFilmBackChannels.setFromPrevious();
+
+    if ( m_bigFilmBackChannels )
+        m_bigFilmBackChannels.setFromPrevious();
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -129,9 +199,6 @@ void OCameraSchema::setTimeSampling( uint32_t iIndex )
         "OCameraSchema::setTimeSampling( uint32_t )" );
 
     m_coreProperties.setTimeSampling( iIndex );
-
-    if ( m_childBounds )
-        m_childBounds.setTimeSampling( iIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -159,7 +226,7 @@ void OCameraSchema::init( uint32_t iTsIdx )
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
     // 14 double values
-    AbcA::DataType dType( Util::kFloat64POD, 14 );
+    AbcA::DataType dType( Util::kFloat64POD, 16 );
     m_coreProperties = Abc::OScalarProperty( _this, ".core", dType, iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

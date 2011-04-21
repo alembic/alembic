@@ -39,8 +39,6 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
-#include <set>
-
 namespace Alembic {
 namespace AbcGeom {
 
@@ -65,17 +63,10 @@ public:
     //! same type.
     std::string getHint() const;
 
-    //! Returns whether the x component (index 0) is animated.
-    bool isXAnimated() const;
-
-    //! Returns whether the y component (index 1) is animated.
-    bool isYAnimated() const;
-
-    //! Returns whether a particular channel is animated.
-    //! Scale and Translate only have 2 channels, and
-    //! Matrix has 9.  Indices greater than the number of channels will
-    //! return false.
-    bool isChannelAnimated( std::size_t iIndex ) const;
+    //! Get the type and hint, where the first character is the type
+    //! (t for translate, s for scale, m for matrix) and the rest of the
+    //! returned string is the optional hint value.
+    std::string getTypeAndHint() const;
 
     //! Get the number of components that this operation has based on the type.
     //! Translate and Scale have 2, and Matrix has 9.
@@ -105,20 +96,17 @@ public:
     bool isMatrixOp() const;
 
 private:
-    FlimBackXformOperationType m_type;
+
+    // friend to have access to the private constructor
+    friend class ICameraSchema;
+    FilmBackXformOp( const std::string & iTypeAndHint );
+
+    FilmBackXformOperationType m_type;
     std::string m_hint;
 
     std::vector<double> m_channels;
-    std::vector<bool> m_animChannels;
-
-private:
-    //! The ICamera can tell the op if its channels are animated
-    //! by directly inserting keys into the m_animChannels set.
-    friend class ICameraSchema;
 
 };
-
-typedef std::vector < FlimBackXformOp > FilmBackXformOpVec;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

@@ -53,28 +53,81 @@ void ICameraSchema::init( const Abc::Argument &iArg0,
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
     m_coreProperties = Abc::IScalarProperty( _this, ".core",
-                                          args.getSchemaInterpMatching() );
+        args.getSchemaInterpMatching() );
 
     // none of the things below here are guaranteed to exist
 
     if ( this->getPropertyHeader( ".childBnds" ) != NULL )
     {
         m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0,
-                                             iArg1 );
+            iArg1 );
     }
 
     if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
     {
         m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
-                                                  args.getErrorHandlerPolicy()
-                                                );
+            args.getErrorHandlerPolicy() );
+    }
+
+    // read the film back operations
+    const AbcA::PropertyHeader * header = 
+        this->getPropertyHeader(".filmBackOps");
+
+    // read it from the scalar property
+    if ( header != NULL && header->isScalar() )
+    {
+        Abc::IScalarProperty opsProp( _this, ".filmBackOps",
+            args.getErrorHandlerPolicy() );
+
+        size_t numOps = opsProp.getDataType().getExtent();
+
+        std::vector < std::string > ops( numOps );
+        opsProp.get( &ops.front() );
+        m_ops.resize( ops.size() );
+
+
+        for ( size_t i = 0; i < numOps; ++i )
+        {
+            m_ops[i] = FilmBackXformOp( ops[i] );
+        }
+
+    }
+    // read it from the array property
+    else if ( header != NULL && header->isArray() )
+    {
+        Abc::IStringArrayProperty opsProp( _this, ".filmBackOps",
+            iArg0, iArg1 );
+
+        Abc::StringArraySamplePtr ops;
+        opsProp.get( ops );
+        size_t numOps = ops->size();
+        m_ops.resize( numOps );
+
+
+        for ( size_t i = 0; i < numOps; ++i )
+        {
+            m_ops[i] = FilmBackXformOp( (*ops)[i] );
+        }
+    }
+
+    header = this->getPropertyHeader( ".filmBackChannels" );
+
+    if ( header != NULL && header->isScalar() )
+    {
+        m_smallFilmBackChannels = Abc::IScalarProperty( _this,
+            ".filmBackChannels", args.getErrorHandlerPolicy() );
+    }
+    else if ( header != NULL && header->isArray() )
+    {
+        m_largeFilmBackChannels = Abc::IDoubleArrayProperty( _this,
+            ".filmBackChannels", iArg0, iArg1 );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
-void ICameraSchema::get( CameraSample & oSample, 
-    const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+void ICameraSchema::get( CameraSample & oSample,
+    const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICameraSchema::get()" );
 
@@ -84,7 +137,7 @@ void ICameraSchema::get( CameraSample & oSample,
     Abc::Box3d bounds;
     bounds.makeEmpty();
 
-    if ( m_childBounds.isValid() )
+    if ( m_childBounds )
     {
         m_childBounds.get( bounds, iSS );
     }
@@ -92,9 +145,9 @@ void ICameraSchema::get( CameraSample & oSample,
     oSample.setChildBounds( bounds );
 
     oSample.setFocalLength( sampleData[0] );
-    oSample.setHorizontalFilmAperture( sampleData[1] );
+    oSample.setHorizontalAperture( sampleData[1] );
     oSample.setHorizontalFilmOffset( sampleData[2] );
-    oSample.setVerticalFilmAperture( sampleData[3] );
+    oSample.setVerticalAperture( sampleData[3] );
     oSample.setVerticalFilmOffset( sampleData[4] );
     oSample.setLensSqueezeRatio( sampleData[5] );
 
@@ -103,13 +156,51 @@ void ICameraSchema::get( CameraSample & oSample,
     oSample.setOverScanTop(sampleData[8]);
     oSample.setOverScanBottom(sampleData[9]);
 
-    oSample.setOverScanFStop(sampleData[10]);
+    oSample.setFStop(sampleData[10]);
     oSample.setFocusDistance(sampleData[11]);
     oSample.setShutterOpen(sampleData[12]);
     oSample.setShutterClose(sampleData[13]);
 
     oSample.setNearClippingPlane(sampleData[14]);
     oSample.setFarClippingPlane(sampleData[15]);
+
+    if ( m_smallFilmBackChannels )
+    {
+        std::vector < double > channels (
+            m_smallFilmBackChannels.getDataType().getExtent() );
+        m_smallFilmBackChannels.get( &channels.front() );
+
+        std::size_t numOps = m_ops.size();
+        std::size_t curChan = 0;
+        for ( std::size_t i = 0; i < numOps; ++i )
+        {
+            oSample.addOp( m_ops[i] );
+            FilmBackXformOp & curOp = oSample[i];
+            std::size_t opChannels = curOp.getNumChannels();
+            for ( std::size_t j = 0; j < opChannels; ++j, ++curChan )
+            {
+                curOp.setChannelValue( j, channels[curChan] );
+            }
+        }
+    }
+    else if ( m_largeFilmBackChannels )
+    {
+        Abc::DoubleArraySamplePtr chanSamp;
+        m_largeFilmBackChannels.get( chanSamp );
+
+        std::size_t numOps = m_ops.size();
+        std::size_t curChan = 0;
+        for ( std::size_t i = 0; i < numOps; ++i )
+        {
+            oSample.addOp( m_ops[i] );
+            FilmBackXformOp & curOp = oSample[i];
+            std::size_t opChannels = curOp.getNumChannels();
+            for ( std::size_t j = 0; j < opChannels; ++j, ++curChan )
+            {
+                curOp.setChannelValue( j, (*chanSamp)[curChan] );
+            }
+        }
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

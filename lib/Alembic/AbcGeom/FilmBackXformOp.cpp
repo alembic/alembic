@@ -42,8 +42,7 @@ namespace AbcGeom {
 //-*****************************************************************************
 FilmBackXformOp::FilmBackXformOp()
   : m_type( kTranslateFilmBackOperation )
-  , m_channels( 2, 0 ),
-  , m_channels( 2, false)
+  , m_channels( 2, 0 )
 {
 }
 
@@ -61,27 +60,57 @@ FilmBackXformOp::FilmBackXformOp( const FilmBackXformOperationType iType,
         case kScaleFilmBackOperation:
         {
             m_channels = std::vector<double>( 2, 1.0 );
-            m_animChannels = std::vector<bool>( 2, false );
         }
         break;
 
         case kTranslateFilmBackOperation:
         {
-        {
             m_channels = std::vector<double>( 2, 0.0 );
-            m_animChannels = std::vector<bool>( 2, false );
         }
         break;
 
-        case kMatrixOperation:
+        case kMatrixFilmBackOperation:
         {
             m_channels = std::vector<double>( 9, 0.0 );
             m_channels[0] = 1.0;
             m_channels[4] = 1.0;
             m_channels[8] = 1.0;
-            m_animChannels = std::vector<bool>( 9, false );
         }
         break;
+    }
+}
+
+//-*****************************************************************************
+FilmBackXformOp::FilmBackXformOp( const std::string & iTypeAndHint )
+{
+    if ( iTypeAndHint.empty() )
+    {
+        m_type = kTranslateFilmBackOperation;
+        m_channels = std::vector<double> ( 2, 0.0 );
+    }
+    else
+    {
+        if ( iTypeAndHint[0] == 'm' )
+        {
+            m_type = kMatrixFilmBackOperation;
+            m_hint = iTypeAndHint.substr(1);
+            m_channels = std::vector<double>( 9, 0.0 );
+            m_channels[0] = 1.0;
+            m_channels[4] = 1.0;
+            m_channels[8] = 1.0;
+        }
+        else if ( iTypeAndHint[0] == 's' )
+        {
+            m_type = kScaleFilmBackOperation;
+            m_hint = iTypeAndHint.substr(1);
+            m_channels = std::vector<double>( 2, 1.0 );
+        }
+        else
+        {
+            m_type = kTranslateFilmBackOperation;
+            m_hint = iTypeAndHint.substr(1);
+            m_channels = std::vector<double>( 2, 0.0 );
+        }
     }
 }
 
@@ -98,23 +127,30 @@ std::string FilmBackXformOp::getHint() const
 }
 
 //-*****************************************************************************
-bool FilmBackXformOp::isXAnimated() const
+std::string FilmBackXformOp::getTypeAndHint() const
 {
-    return m_animChannels[0];
-}
+    switch ( m_type )
+    {
+        case kScaleFilmBackOperation:
+        {
+            return "s" + m_hint;
+        }
+        break;
 
-//-*****************************************************************************
-bool FilmBackXformOp::isYAnimated() const
-{
-    return m_animChannels[1];
-}
+        case kTranslateFilmBackOperation:
+        {
+            return "t" + m_hint;
+        }
+        break;
 
-//-*****************************************************************************
-bool FilmBackXformOp::isChannelAnimated( std::size_t iIndex ) const
-{
-    if ( iIndex <= m_animChannels.size() )
-        return m_animChannels[iIndex];
-    return false;
+        case kMatrixFilmBackOperation:
+        {
+            return "m" + m_hint;
+        }
+        break;
+    }
+
+    return "";
 }
 
 //-*****************************************************************************
@@ -167,7 +203,7 @@ void FilmBackXformOp::setTranslate( const Abc::V2d &iTrans )
 }
 
 //-*****************************************************************************
-void FilmBackXformOp::setScale( const Abc::V3d &iScale )
+void FilmBackXformOp::setScale( const Abc::V2d &iScale )
 {
     ABCA_ASSERT( m_type == kScaleFilmBackOperation,
                  "Meaningless to set scale on non-scale op." );
@@ -213,7 +249,7 @@ Abc::V2d FilmBackXformOp::getScale() const
 }
 
 //-*****************************************************************************
-Abc::M33d XformOp::getMatrix() const
+Abc::M33d FilmBackXformOp::getMatrix() const
 {
     ABCA_ASSERT( m_type == kMatrixFilmBackOperation,
                  "Can't get matrix from non-matrix op." );

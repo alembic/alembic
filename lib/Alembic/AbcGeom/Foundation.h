@@ -80,7 +80,7 @@ enum FilmBackXformOperationType
 {
     kScaleFilmBackOperation = 0,
     kTranslateFilmBackOperation = 1,
-    kMatrixFilmBackOperation = 1,
+    kMatrixFilmBackOperation = 2
 };
 
 //-*****************************************************************************

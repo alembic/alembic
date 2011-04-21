@@ -39,21 +39,27 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
-#include <Alembic/AbcGeom/OSubD.h>
-#include <Alembic/AbcGeom/ISubD.h>
-
 #include <Alembic/AbcGeom/GeometryScope.h>
 
 #include <Alembic/AbcGeom/OGeomParam.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
 
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/IPolyMesh.h>
+#include <Alembic/AbcGeom/FilmBackXformOp.h>
+#include <Alembic/AbcGeom/CameraSample.h>
+#include <Alembic/AbcGeom/OCamera.h>
+#include <Alembic/AbcGeom/ICamera.h>
 
 #include <Alembic/AbcGeom/OPoints.h>
 #include <Alembic/AbcGeom/IPoints.h>
 
+#include <Alembic/AbcGeom/OPolyMesh.h>
+#include <Alembic/AbcGeom/IPolyMesh.h>
+
+#include <Alembic/AbcGeom/OSubD.h>
+#include <Alembic/AbcGeom/ISubD.h>
+
 #include <Alembic/AbcGeom/XformOp.h>
+#include <Alembic/AbcGeom/XformSample.h>
 #include <Alembic/AbcGeom/OXform.h>
 #include <Alembic/AbcGeom/IXform.h>
 

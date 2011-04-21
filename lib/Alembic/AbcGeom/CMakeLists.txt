@@ -37,6 +37,11 @@ SET( CXX_FILES
 
   GeometryScope.cpp
 
+  FilmBackXformOp.cpp
+  CameraSample.cpp
+  ICamera.cpp
+  OCamera.cpp
+
   OSubD.cpp
   ISubD.cpp
 
@@ -65,6 +70,11 @@ SET( H_FILES
 
   OGeomParam.h
   IGeomParam.h
+
+  FilmBackXformOp.h
+  CameraSample.h
+  ICamera.h
+  OCamera.h
 
   OSubD.h
   ISubD.h
