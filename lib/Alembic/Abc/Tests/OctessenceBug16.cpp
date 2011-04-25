@@ -214,7 +214,7 @@ void readSimpleProperties(const std::string &archiveName)
         bool hasSampleTimes = GetCompoundPropertyReaderPtr( props )->
             getScalarProperty( propNames[jj] )->getNumSamples() > 1;
 
-        size_t numSamples = ts->getNumSamples();
+        size_t numSamples = ts->getNumStoredTimes();
 
 
         std::cout << "    ..with time sampling: ";

@@ -279,7 +279,8 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setSample
     // This applies to acyclic sampling only
     ABCA_ASSERT(
         !m_header->getTimeSampling()->getTimeSamplingType().isAcyclic() ||
-        m_header->getTimeSampling()->getNumSamples() > m_nextSampleIndex,
+        m_header->getTimeSampling()->getNumStoredTimes() > 
+        m_nextSampleIndex,
         "Can not write more samples than we have times for when using "
         "Acyclic sampling." );
 
@@ -339,7 +340,8 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setFromPreviousSample
     // This applies to acyclic sampling only
     ABCA_ASSERT(
         !m_header->getTimeSampling()->getTimeSamplingType().isAcyclic() ||
-        m_header->getTimeSampling()->getNumSamples() > m_nextSampleIndex,
+        m_header->getTimeSampling()->getNumStoredTimes() >
+        m_nextSampleIndex,
         "Can not set more samples than we have times for when using "
         "Acyclic sampling." );
 
@@ -366,7 +368,7 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setTimeSamplingIndex
             iIndex );
 
     ABCA_ASSERT( !ts->getTimeSamplingType().isAcyclic() ||
-        ts->getNumSamples() > m_nextSampleIndex,
+        ts->getNumStoredTimes() > m_nextSampleIndex,
         "Already have written more samples than we have times for when using "
         "Acyclic sampling." );
 

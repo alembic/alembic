@@ -79,15 +79,16 @@ public:
             m_sampleTimes == iRhs.m_sampleTimes);
     }
 
-    //! Get the number of samples in sample times, this is the same as the
-    //! samples per cycle in the time sampling type.  There will always be
-    //! at least one sample because a start time is always needed.
-    size_t getNumSamples() const
+    //! Get the number of stored times.
+    //! This is same as the samples per cycle in the time sampling type except
+    //! for acyclic time sampling.  There will always be at least one sample
+    //! because a start time is always needed.
+    size_t getNumStoredTimes() const
     {
         return m_sampleTimes.size();
     }
 
-    const std::vector < chrono_t > & getSampleTimes() const
+    const std::vector < chrono_t > & getStoredTimes() const
     {
         return m_sampleTimes;
     }

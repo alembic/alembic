@@ -91,7 +91,7 @@ void validateTimeSampling( const AbcA::TimeSampling &timeSampling,
               << std::endl;
 
     TESTING_MESSAGE_ASSERT( timeSamplingType.isAcyclic() ||
-        numSamplesPerCycle == timeSampling.getNumSamples(),
+        numSamplesPerCycle == timeSampling.getNumStoredTimes(),
         "Number of samples given doesn't match number returned" );
 
     //-*************************************************************************
@@ -138,7 +138,7 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
     const chrono_t timePerCycle = timeSamplingType.getTimePerCycle();
     const size_t numSamplesPerCycle = timeSamplingType.getNumSamplesPerCycle();
 
-    const size_t numStoredTimes = timeSampling.getNumSamples();
+    const size_t numStoredTimes = timeSampling.getNumStoredTimes();
 
     TESTING_MESSAGE_ASSERT( timeSamplingType.isAcyclic() ||
         numStoredTimes == numSamplesPerCycle,

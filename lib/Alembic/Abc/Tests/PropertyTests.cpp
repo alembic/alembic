@@ -233,7 +233,7 @@ void readSimpleProperties(const std::string &archiveName)
                 GetCompoundPropertyReaderPtr(props)->
                 getScalarProperty( propNames[jj] )->getTimeSampling();
 
-            size_t numSamples = ts->getNumSamples();
+            size_t numSamples = ts->getNumStoredTimes();
 
 
             std::cout << "    ..and "
