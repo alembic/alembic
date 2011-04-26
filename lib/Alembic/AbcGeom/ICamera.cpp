@@ -142,6 +142,8 @@ void ICameraSchema::get( CameraSample & oSample,
         m_childBounds.get( bounds, iSS );
     }
 
+    oSample.reset();
+
     oSample.setChildBounds( bounds );
 
     oSample.setFocalLength( sampleData[0] );
@@ -168,7 +170,7 @@ void ICameraSchema::get( CameraSample & oSample,
     {
         std::vector < double > channels (
             m_smallFilmBackChannels.getDataType().getExtent() );
-        m_smallFilmBackChannels.get( &channels.front() );
+        m_smallFilmBackChannels.get( &channels.front(), iSS );
 
         std::size_t numOps = m_ops.size();
         std::size_t curChan = 0;
@@ -186,7 +188,7 @@ void ICameraSchema::get( CameraSample & oSample,
     else if ( m_largeFilmBackChannels )
     {
         Abc::DoubleArraySamplePtr chanSamp;
-        m_largeFilmBackChannels.get( chanSamp );
+        m_largeFilmBackChannels.get( chanSamp, iSS );
 
         std::size_t numOps = m_ops.size();
         std::size_t curChan = 0;

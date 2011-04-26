@@ -87,6 +87,12 @@ ADD_EXECUTABLE( AbcGeom_XformTest2
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest2  ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2  )
 
+#-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_CameraTest
+		CameraTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_CameraTest  ${TEST_LIBS} )
+ADD_TEST( AbcGeom_Camera_TEST  AbcGeom_CameraTest )
+
 ##-*****************************************************************************
 #ADD_EXECUTABLE( AbcGeom_TransformingMeshTest MeshData.cpp
 #                                             TransformingMeshTest.cpp )
