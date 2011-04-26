@@ -117,15 +117,15 @@ void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
     double rot[3];
     MTransformationMatrix::RotationOrder order;
     mmat.getRotation(rot, order);
-    oSampleList.push_back(rot[0]);
-    oSampleList.push_back(rot[1]);
-    oSampleList.push_back(rot[2]);
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(rot[0]));
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(rot[1]));
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(rot[2]));
 
     MQuaternion quat = mmat.rotationOrientation();
     vec = quat.asEulerRotation().asVector();
-    oSampleList.push_back(vec.x);
-    oSampleList.push_back(vec.y);
-    oSampleList.push_back(vec.z);
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(vec.x));
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(vec.y));
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(vec.z));
 
     pt = mmat.scalePivotTranslation(tSpace);
     oSampleList.push_back(vec.x);
