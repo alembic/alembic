@@ -36,8 +36,10 @@
 #define _Alembic_Util_All_h_
 
 #include <Alembic/Util/Foundation.h>
+#include <Alembic/Util/Digest.h>
 #include <Alembic/Util/Dimensions.h>
 #include <Alembic/Util/Exception.h>
+#include <Alembic/Util/Murmur3.h>
 #include <Alembic/Util/OperatorBool.h>
 #include <Alembic/Util/PlainOldDataType.h>
 #include <Alembic/Util/Singleton.h>

@@ -68,24 +68,28 @@ void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
 {
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
-        iNode.getSchema().getTimeSampling(), index, ceilIndex);
+        iNode.getSchema().getTimeSampling(),
+        iNode.getSchema().getNumSamples(),
+        index, ceilIndex);
 
     Alembic::Abc::M44d m; 
 
     if (alpha != 0.0 && index != ceilIndex)
     {
-        Alembic::Abc::M44d mlo = iNode.getSchema().getMatrix(
-            Alembic::Abc::ISampleSelector(index));
+        Alembic::AbcGeom::XformSample samp;
+        iNode.getSchema().get(samp, Alembic::Abc::ISampleSelector(index));
+        Alembic::Abc::M44d mlo = samp.getMatrix();
 
-        Alembic::Abc::M44d mhi = iNode.getSchema().getMatrix(
-            Alembic::Abc::ISampleSelector(ceilIndex));
+        iNode.getSchema().get(samp, Alembic::Abc::ISampleSelector(ceilIndex));
+        Alembic::Abc::M44d mhi = samp.getMatrix();
 
         m = ((1 - alpha) * mlo) + (alpha * mhi);
     }
     else
     {
-        m = iNode.getSchema().getMatrix(
-            Alembic::Abc::ISampleSelector(index));
+        Alembic::AbcGeom::XformSample samp;
+         iNode.getSchema().get(samp, Alembic::Abc::ISampleSelector(index));
+        m = samp.getMatrix();
     }
 
     MTransformationMatrix mmat(MMatrix(m.x));
@@ -147,55 +151,82 @@ void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
 }
 
 void read(double iFrame, Alembic::AbcGeom::IXform & iNode,
-    std::vector<double> & oSampleList)
+    std::vector<double> & oSampleList,
+    Alembic::AbcGeom::XformSample & oSamp)
 {
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
-        iNode.getSchema().getTimeSampling(), index, ceilIndex);
+        iNode.getSchema().getTimeSampling(),
+        iNode.getSchema().getNumSamples(), index, ceilIndex);
 
     if (alpha != 0 && index != ceilIndex &&
-        iNode.getSchema().getNumAnimSamples() > 0)
+        !iNode.getSchema().isConstant())
     {
-        Alembic::Abc::DoubleArraySamplePtr loPtr =
-            iNode.getSchema().getAnimData(
+            iNode.getSchema().get(oSamp,
                 Alembic::Abc::ISampleSelector(index));
 
-        Alembic::Abc::DoubleArraySamplePtr hiPtr =
-            iNode.getSchema().getAnimData(
+        Alembic::AbcGeom::XformSample hiSamp;
+            iNode.getSchema().get(hiSamp,
                 Alembic::Abc::ISampleSelector(ceilIndex));
 
-        size_t numAnim = loPtr->size();
+        // loop over the operations and channels and add only the animated
+        // values
+        std::vector<double> loVec, hiVec;
+        size_t numOps = oSamp.getNumOps();
+        for (size_t i = 0; i < numOps; ++i)
+        {
+            Alembic::AbcGeom::XformOp loOp = oSamp[i];
+            Alembic::AbcGeom::XformOp hiOp = hiSamp[i];
+            size_t numChannels = loOp.getNumChannels();
+            for (size_t j = 0; j < numChannels; ++j)
+            {
+                if (loOp.isChannelAnimated(j))
+                {
+                    loVec.push_back(loOp.getChannelValue(j));
+                    hiVec.push_back(hiOp.getChannelValue(j));
+                }
+            }
+        }
+
+        size_t numAnim = loVec.size();
         oSampleList.resize(numAnim);
         for (size_t i = 0; i < numAnim; ++i)
         {
-            oSampleList[i] = simpleLerp<double>(alpha,(*loPtr)[i], (*hiPtr)[i]);
+            oSampleList[i] = simpleLerp<double>(alpha,loVec[i], hiVec[i]);
         }
     }
-    else if (iNode.getSchema().getNumAnimSamples() > 0)
+    else
     {
-        Alembic::Abc::DoubleArraySamplePtr valPtr =
-            iNode.getSchema().getAnimData(
-                Alembic::Abc::ISampleSelector(index));
+        iNode.getSchema().get(oSamp, Alembic::Abc::ISampleSelector(index));
 
-        size_t numAnim = valPtr->size();
-        oSampleList.resize(numAnim);
-        for (size_t i = 0; i < numAnim; ++i)
+        oSampleList.clear();
+        // add only animated values
+        size_t numOps = oSamp.getNumOps();
+        for (size_t i = 0; i < numOps; ++i)
         {
-            oSampleList[i] = (*valPtr)[i];
+            Alembic::AbcGeom::XformOp op = oSamp[i];
+
+            size_t numChannels = op.getNumChannels();
+            for (size_t j = 0; j < numChannels; ++j)
+            {
+                if (op.isChannelAnimated(j))
+                {
+                    oSampleList.push_back(op.getChannelValue(j));
+                }
+            }
         }
     }
 }
 
 bool isComplex(Alembic::AbcGeom::IXform & iNode)
 {
-    Alembic::AbcGeom::XformOpVec opVec = iNode.getSchema().getOps();
-    Alembic::AbcGeom::XformOpVec::iterator i = opVec.begin();
-    Alembic::AbcGeom::XformOpVec::iterator iEnd = opVec.end();
-    Alembic::Abc::DoubleArraySamplePtr staticPtr =
-        iNode.getSchema().getStaticData();
-    size_t statPos = 0;
-    int state = 0;
+    if (iNode.getSchema().isConstantIdentity())
+        return false;
 
+    Alembic::AbcGeom::XformSample samp;
+    iNode.getSchema().get(samp);
+
+    int state = 0;
 
     bool scPivot = false;
     bool roPivot = false;
@@ -203,9 +234,11 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
     bool yAxis = false;
     bool zAxis = false;
 
-    for (; i != iEnd; ++i)
+    size_t numOps = samp.getNumOps();
+    for (size_t i = 0; i < numOps; ++i)
     {
-        switch (i->getType())
+        Alembic::AbcGeom::XformOp op = samp[i];
+        switch (op.getType())
         {
             case Alembic::AbcGeom::kScaleOperation:
             {
@@ -220,7 +253,7 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
 
             case Alembic::AbcGeom::kTranslateOperation:
             {
-                switch (i->getHint())
+                switch (op.getHint())
                 {
                     case Alembic::AbcGeom::kTranslateHint:
                     {
@@ -298,29 +331,28 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
             case Alembic::AbcGeom::kRotateOperation:
             {
                 // if any axis is animated, we have a complex xform
-                if (i->isXAnimated() || i->isYAnimated() || i->isZAnimated())
+                if (op.isXAnimated() || op.isYAnimated() || op.isZAnimated())
                     return true;
 
-                double x = (*staticPtr)[statPos];
-                double y = (*staticPtr)[statPos + 1];
-                double z = (*staticPtr)[statPos + 2];
+                Alembic::Abc::V3d v = op.getVector();
 
-                switch (i->getHint())
+                switch (op.getHint())
                 {
                     case Alembic::AbcGeom::kRotateHint:
                     {
-                        if (x == 1 && y == 0 && z == 0 && !xAxis && state <= 4)
+                        if (v.x == 1 && v.y == 0 && v.z == 0 &&
+                            !xAxis && state <= 4)
                         {
                             state = 4;
                             xAxis = true;
                         }
-                        else if (x == 0 && y == 1 && z == 0 && !yAxis && 
+                        else if (v.x == 0 && v.y == 1 && v.z == 0 && !yAxis && 
                             state <= 4)
                         {
                             state = 4;
                             yAxis = true;
                         }
-                        else if (x == 0 && y == 0 && z == 1 && !zAxis && 
+                        else if (v.x == 0 && v.y == 0 && v.z == 1 && !zAxis && 
                             state <= 4)
                         {
                             state = 4;
@@ -333,15 +365,15 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
 
                     case Alembic::AbcGeom::kRotateOrientationHint:
                     {
-                        if (x == 1 && y == 0 && z == 0 && state < 7)
+                        if (v.x == 1 && v.y == 0 && v.z == 0 && state < 7)
                         {
                             state = 7;
                         }
-                        else if (x == 0 && y == 1 && z == 0 && state < 6)
+                        else if (v.x == 0 && v.y == 1 && v.z == 0 && state < 6)
                         {
                             state = 6;
                         }
-                        else if (x == 0 && y == 0 && z == 1 && state < 5)
+                        else if (v.x == 0 && v.y == 0 && v.z == 1 && state < 5)
                         {
                             state = 5;
                         }
@@ -359,7 +391,7 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
 
             case Alembic::AbcGeom::kMatrixOperation:
             {
-                if (i->getHint() == Alembic::AbcGeom::kMayaShearHint &&
+                if (op.getHint() == Alembic::AbcGeom::kMayaShearHint &&
                     state < 11)
                 {
                     state = 11;
@@ -375,15 +407,6 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
             }
             break;
         } // switch
-
-        // increment the static data position in case we come across any
-        // rotations since we need to check the rotate axis
-        Alembic::Util::uint8_t numIndices = i->getNumIndices();
-        for (Alembic::Util::uint8_t j = 0; j < numIndices; ++j)
-        {
-            if (!i->isIndexAnimated(j))
-                statPos++;
-        }
 
     } // for i
 
@@ -526,10 +549,12 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
 
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
-        iNode.getSchema().getTimeSampling(), index, ceilIndex);
+        iNode.getSchema().getTimeSampling(), 
+        iNode.getSchema().getNumSamples(),
+        index, ceilIndex);
 
     // there could be just one sample if it is repeated
-    bool isAnim = (iNode.getSchema().getNumAnimSamples() > 1);
+    bool isAnim = !(iNode.getSchema().isConstant());
 
     if (isComplex(iNode))
     {
@@ -568,18 +593,21 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
 
         if (alpha != 0.0 && index != ceilIndex)
         {
-            Alembic::Abc::M44d mlo = iNode.getSchema().getMatrix(
-                Alembic::Abc::ISampleSelector(index));
+            Alembic::AbcGeom::XformSample samp;
+            iNode.getSchema().get(samp, Alembic::Abc::ISampleSelector(index));
+            Alembic::Abc::M44d mlo = samp.getMatrix();
 
-            Alembic::Abc::M44d mhi = iNode.getSchema().getMatrix(
+            iNode.getSchema().get(samp,
                 Alembic::Abc::ISampleSelector(ceilIndex));
+            Alembic::Abc::M44d mhi = samp.getMatrix();
 
             m = ((1 - alpha) * mlo) + (alpha * mhi);
         }
         else
         {
-            m = iNode.getSchema().getMatrix(
-                Alembic::Abc::ISampleSelector(index));
+            Alembic::AbcGeom::XformSample samp;
+             iNode.getSchema().get(samp, Alembic::Abc::ISampleSelector(index));
+            m = samp.getMatrix();
         }
 
         MTransformationMatrix mmat(MMatrix(m.x));
@@ -618,66 +646,58 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
     }
 
     std::vector<double> animValue;
-    Alembic::Abc::DoubleArraySamplePtr staticPtr =
-        iNode.getSchema().getStaticData();
 
-    read(iFrame, iNode, animValue);
+    Alembic::AbcGeom::XformSample samp;
+
+    read(iFrame, iNode, animValue, samp);
 
     bool scPivot = false;
     bool roPivot = false;
-    size_t statPos = 0;
     size_t animPos = 0;
 
     MTransformationMatrix::RotationOrder rotOrder[2];
     rotOrder[0] = MTransformationMatrix::kInvalid;
     rotOrder[1] = MTransformationMatrix::kInvalid;
 
-    Alembic::AbcGeom::XformOpVec opVec = iNode.getSchema().getOps();
-    Alembic::AbcGeom::XformOpVec::iterator op = opVec.begin();
-    Alembic::AbcGeom::XformOpVec::iterator opEnd = opVec.end();
+    size_t numOps = samp.getNumOps();
 
-    for (; op != opEnd; ++op)
+    for (size_t i = 0; i < numOps; ++i)
     {
-        switch (op->getType())
+        Alembic::AbcGeom::XformOp op = samp[i];
+        switch (op.getType())
         {
             case Alembic::AbcGeom::kScaleOperation:
             {
                 double scale[3];
 
-                if (op->isXAnimated())
+                if (op.isXAnimated())
                 {
                     scale[0] = animValue[animPos++];
-
-                    if (isAnim)
-                        oSampledTransOpNameList.push_back("scaleX");
+                    oSampledTransOpNameList.push_back("scaleX");
                 }
                 else
                 {
-                    scale[0] = (*staticPtr)[statPos++];
+                    scale[0] = op.getChannelValue(0);
                 }
 
-                if (op->isYAnimated())
+                if (op.isYAnimated())
                 {
                     scale[1] = animValue[animPos++];
-
-                    if (isAnim)
-                        oSampledTransOpNameList.push_back("scaleY");
+                    oSampledTransOpNameList.push_back("scaleY");
                 }
                 else
                 {
-                    scale[1] = (*staticPtr)[statPos++];
+                    scale[1] = op.getChannelValue(1);
                 }
 
-                if (op->isZAnimated())
+                if (op.isZAnimated())
                 {
                     scale[2] = animValue[animPos++];
-
-                    if (isAnim)
-                        oSampledTransOpNameList.push_back("scaleZ");
+                    oSampledTransOpNameList.push_back("scaleZ");
                 }
                 else
                 {
-                    scale[2] = (*staticPtr)[statPos++];
+                    scale[2] = op.getChannelValue(2);
                 }
                 trans.setScale(scale);
             }
@@ -685,25 +705,23 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
 
             case Alembic::AbcGeom::kRotateOperation:
             {
-                double x = (*staticPtr)[statPos++];
-                double y = (*staticPtr)[statPos++];
-                double z = (*staticPtr)[statPos++];
+                double x = op.getChannelValue(0);
+                double y = op.getChannelValue(1);
+                double z = op.getChannelValue(2);
                 double angle = 0.0;
 
-                if (op->getHint() == Alembic::AbcGeom::kRotateHint)
+                if (op.getHint() == Alembic::AbcGeom::kRotateHint)
                 {
                     if (x == 1 && y == 0 && z == 0)
                     {
-                        if (op->isAngleAnimated())
+                        if (op.isAngleAnimated())
                         {
                             angle = animValue[animPos++];
-
-                            if (isAnim)
-                                oSampledTransOpNameList.push_back("rotateX");
+                            oSampledTransOpNameList.push_back("rotateX");
                         }
                         else
                         {
-                            angle = (*staticPtr)[statPos++];
+                            angle = op.getChannelValue(3);
                         }
 
                         // we have encountered the first rotation, set it
@@ -728,16 +746,14 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                     else if (x == 0 && y == 1 && z == 0)
                     {
 
-                        if (op->isAngleAnimated())
+                        if (op.isAngleAnimated())
                         {
                             angle = animValue[animPos++];
-
-                            if (isAnim)
-                                oSampledTransOpNameList.push_back("rotateY");
+                            oSampledTransOpNameList.push_back("rotateY");
                         }
                         else
                         {
-                            angle = (*staticPtr)[statPos++];
+                            angle = op.getChannelValue(3);;
                         }
 
                         // we have encountered the first rotation, set it
@@ -761,16 +777,14 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                     }
                     else if (x == 0 && y == 0 && z == 1)
                     {
-                        if (op->isAngleAnimated())
+                        if (op.isAngleAnimated())
                         {
                             angle = animValue[animPos++];
-
-                            if (isAnim)
-                                oSampledTransOpNameList.push_back("rotateZ");
+                            oSampledTransOpNameList.push_back("rotateZ");
                         }
                         else
                         {
-                            angle = (*staticPtr)[statPos++];
+                            angle = op.getChannelValue(3);;
                         }
 
                         // we have encountered the first rotation, set it
@@ -794,7 +808,8 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                     }
 
                     MVector axis(x, y, z);
-                    MQuaternion quat(angle, axis);
+                    MQuaternion quat(
+                        Alembic::AbcGeom::DegreesToRadians(angle), axis);
                     trans.rotateBy(quat, gSpace);
                 }
                 // kRotateOrientationHint
@@ -804,59 +819,50 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
 
                     if (x == 1 && y == 0 && z == 0)
                     {
-                        if (op->isAngleAnimated())
+                        if (op.isAngleAnimated())
                         {
                             angle = animValue[animPos++];
-
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
+                            oSampledTransOpNameList.push_back(
                                     "rotateAxisX");
-                            }
                         }
                         else
                         {
-                            angle = (*staticPtr)[statPos++];
+                            angle = op.getChannelValue(3);
                         }
 
-                        quat.setToXAxis(angle);
+                        quat.setToXAxis(
+                            Alembic::AbcGeom::DegreesToRadians(angle));
 
                     }
                     else if (x == 0 && y == 1 && z == 0)
                     {
-                        if (op->isAngleAnimated())
+                        if (op.isAngleAnimated())
                         {
                             angle = animValue[animPos++];
+                            oSampledTransOpNameList.push_back("rotateAxisY");
 
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
-                                    "rotateAxisY");
-                            }
                         }
                         else
                         {
-                            angle = (*staticPtr)[statPos++];
+                            angle = op.getChannelValue(3);
                         }
-                        quat.setToYAxis(angle);
+                        quat.setToYAxis(
+                            Alembic::AbcGeom::DegreesToRadians(angle));
                     }
                     else if (x == 0 && y == 0 && z == 1)
                     {
-                        if (op->isAngleAnimated())
+                        if (op.isAngleAnimated())
                         {
                             angle = animValue[animPos++];
 
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
-                                    "rotateAxisZ");
-                            }
+                            oSampledTransOpNameList.push_back("rotateAxisZ");
                         }
                         else
                         {
-                            angle = (*staticPtr)[statPos++];
+                            angle = op.getChannelValue(3);
                         }
-                        quat.setToZAxis(angle);
+                        quat.setToZAxis(
+                            Alembic::AbcGeom::DegreesToRadians(angle));
                     }
 
                     MQuaternion curq = trans.rotateOrientation(gSpace);
@@ -877,46 +883,38 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
 
                 for (size_t j = 0; j < 13; ++j)
                 {
-                    if (op->isIndexAnimated(otherVals[j]))
+                    if (op.isChannelAnimated(otherVals[j]))
                         animPos ++;
-                    else
-                        statPos ++;
                 }
 
-                if (op->isIndexAnimated(4))
+                if (op.isChannelAnimated(4))
                 {
                     shear[0] = animValue[animPos++];
-
-                    if (isAnim)
-                        oSampledTransOpNameList.push_back("shearXY");
+                    oSampledTransOpNameList.push_back("shearXY");
                 }
                 else
                 {
-                    shear[0] = (*staticPtr)[statPos++];
+                    shear[0] = op.getChannelValue(4);
                 }
 
-                if (op->isIndexAnimated(8))
+                if (op.isChannelAnimated(8))
                 {
                     shear[1] = animValue[animPos++];
-
-                    if (isAnim)
-                        oSampledTransOpNameList.push_back("shearXZ");
+                    oSampledTransOpNameList.push_back("shearXZ");
                 }
                 else
                 {
-                    shear[1] = (*staticPtr)[statPos++];
+                    shear[1] = op.getChannelValue(8);
                 }
 
-                if (op->isIndexAnimated(9))
+                if (op.isChannelAnimated(9))
                 {
                     shear[2] = animValue[animPos++];
-
-                    if (isAnim)
-                        oSampledTransOpNameList.push_back("shearYZ");
+                    oSampledTransOpNameList.push_back("shearYZ");
                 }
                 else
                 {
-                    shear[2] = (*staticPtr)[statPos++];
+                    shear[2] = op.getChannelValue(9);
                 }
 
                 trans.setShear(shear);
@@ -925,47 +923,41 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
 
             case Alembic::AbcGeom::kTranslateOperation:
             {
-                Alembic::Util::uint8_t hint = op->getHint();
+                Alembic::Util::uint8_t hint = op.getHint();
                 switch (hint)
                 {
                     case Alembic::AbcGeom::kTranslateHint:
                     {
                         MVector vec;
 
-                        if (op->isXAnimated())
+                        if (op.isXAnimated())
                         {
                             vec.x = animValue[animPos++];
-
-                            if (isAnim)
-                                oSampledTransOpNameList.push_back("translateX");
+                            oSampledTransOpNameList.push_back("translateX");
                         }
                         else
                         {
-                            vec.x = (*staticPtr)[statPos++];
+                            vec.x = op.getChannelValue(0);
                         }
 
-                        if (op->isYAnimated())
+                        if (op.isYAnimated())
                         {
                             vec.y = animValue[animPos++];
-
-                            if (isAnim)
-                                oSampledTransOpNameList.push_back("translateY");
+                            oSampledTransOpNameList.push_back("translateY");
                         }
                         else
                         {
-                            vec.y = (*staticPtr)[statPos++];
+                            vec.y = op.getChannelValue(1);
                         }
 
-                        if (op->isZAnimated())
+                        if (op.isZAnimated())
                         {
                             vec.z = animValue[animPos++];
-
-                            if (isAnim)
-                                oSampledTransOpNameList.push_back("translateZ");
+                            oSampledTransOpNameList.push_back("translateZ");
                         }
                         else
                         {
-                            vec.z = (*staticPtr)[statPos++];
+                            vec.z = op.getChannelValue(2);
                         }
                         trans.setTranslation(vec, gSpace);
                     }
@@ -976,15 +968,15 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         MPoint point;
                         point.w = 1.0;
 
-                        if (op->isXAnimated())
+                        if (op.isXAnimated())
                         {
                             point.x = animValue[animPos++];
-                            if (!scPivot && isAnim)
+                            if (!scPivot)
                             {
                                 oSampledTransOpNameList.push_back(
                                     "scalePivotX");
                             }
-                            else if (isAnim)
+                            else
                             {
                                 oSampledTransOpNameList.push_back(
                                     "scalePivotXInv");
@@ -992,18 +984,18 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         }
                         else
                         {
-                            point.x = (*staticPtr)[statPos++];
+                            point.x = op.getChannelValue(0);
                         }
 
-                        if (op->isYAnimated())
+                        if (op.isYAnimated())
                         {
                             point.y = animValue[animPos++];
-                            if (!scPivot && isAnim)
+                            if (!scPivot)
                             {
                                 oSampledTransOpNameList.push_back(
                                     "scalePivotY");
                             }
-                            else if (isAnim)
+                            else
                             {
                                 oSampledTransOpNameList.push_back(
                                     "scalePivotYInv");
@@ -1011,18 +1003,18 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         }
                         else
                         {
-                            point.y = (*staticPtr)[statPos++];
+                            point.y = op.getChannelValue(1);
                         }
 
-                        if (op->isZAnimated())
+                        if (op.isZAnimated())
                         {
                             point.z = animValue[animPos++];
-                            if (!scPivot && isAnim)
+                            if (!scPivot)
                             {
                                 oSampledTransOpNameList.push_back(
                                     "scalePivotZ");
                             }
-                            else if (isAnim)
+                            else
                             {
                                 oSampledTransOpNameList.push_back(
                                     "scalePivotZInv");
@@ -1030,7 +1022,7 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         }
                         else
                         {
-                            point.z = (*staticPtr)[statPos++];
+                            point.z = op.getChannelValue(2);
                         }
 
                         // we only want to apply this to the first one
@@ -1048,49 +1040,39 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                     {
                         MVector vec;
 
-                        if (op->isXAnimated())
+                        if (op.isXAnimated())
                         {
                             vec.x = animValue[animPos++];
-
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
-                                   "scalePivotTranslateX");
-                            }
+                            oSampledTransOpNameList.push_back(
+                                "scalePivotTranslateX");
                         }
                         else
                         {
-                            vec.x = (*staticPtr)[statPos++];
+                            vec.x = op.getChannelValue(0);
                         }
 
-                        if (op->isYAnimated())
+                        if (op.isYAnimated())
                         {
                             vec.y = animValue[animPos++];
 
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
-                                    "scalePivotTranslateY");
-                            }
+                            oSampledTransOpNameList.push_back(
+                                "scalePivotTranslateY");
                         }
                         else
                         {
-                            vec.y = (*staticPtr)[statPos++];
+                            vec.y = op.getChannelValue(1);
                         }
 
-                        if (op->isZAnimated())
+                        if (op.isZAnimated())
                         {
                             vec.z = animValue[animPos++];
 
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
-                                    "scalePivotTranslateZ");
-                            }
+                            oSampledTransOpNameList.push_back(
+                                "scalePivotTranslateZ");
                         }
                         else
                         {
-                            vec.z = (*staticPtr)[statPos++];
+                            vec.z = op.getChannelValue(2);
                         }
                         trans.setScalePivotTranslation(vec, gSpace);
                     }
@@ -1101,15 +1083,15 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         MPoint point;
                         point.w = 1.0;
 
-                        if (op->isXAnimated())
+                        if (op.isXAnimated())
                         {
                             point.x = animValue[animPos++];
-                            if (!roPivot && isAnim)
+                            if (!roPivot)
                             {
                                 oSampledTransOpNameList.push_back(
                                     "rotatePivotX");
                             }
-                            else if (isAnim)
+                            else
                             {
                                 oSampledTransOpNameList.push_back(
                                     "rotatePivotXInv");
@@ -1117,18 +1099,18 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         }
                         else
                         {
-                            point.x = (*staticPtr)[statPos++];
+                            point.x = op.getChannelValue(0);
                         }
 
-                        if (op->isYAnimated())
+                        if (op.isYAnimated())
                         {
                             point.y = animValue[animPos++];
-                            if (!roPivot && isAnim)
+                            if (!roPivot)
                             {
                                 oSampledTransOpNameList.push_back(
                                     "rotatePivotY");
                             }
-                            else if (isAnim)
+                            else
                             {
                                 oSampledTransOpNameList.push_back(
                                     "rotatePivotYInv");
@@ -1136,18 +1118,18 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         }
                         else
                         {
-                            point.y = (*staticPtr)[statPos++];
+                            point.y = op.getChannelValue(1);
                         }
 
-                        if (op->isZAnimated())
+                        if (op.isZAnimated())
                         {
                             point.z = animValue[animPos++];
-                            if (!roPivot && isAnim)
+                            if (!roPivot)
                             {
                                 oSampledTransOpNameList.push_back(
                                     "rotatePivotZ");
                             }
-                            else if (isAnim)
+                            else
                             {
                                 oSampledTransOpNameList.push_back(
                                     "rotatePivotZInv");
@@ -1155,7 +1137,7 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                         }
                         else
                         {
-                            point.z = (*staticPtr)[statPos++];
+                            point.z = op.getChannelValue(2);
                         }
 
                         // only set rotate pivot on the first one, the second
@@ -1171,49 +1153,40 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
                     {
                         MVector vec;
 
-                        if (op->isXAnimated())
+                        if (op.isXAnimated())
                         {
                             vec.x = animValue[animPos++];
 
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
-                                    "rotatePivotTranslateX");
-                            }
+                            oSampledTransOpNameList.push_back(
+                                "rotatePivotTranslateX");
                         }
                         else
                         {
-                            vec.x = (*staticPtr)[statPos++];
+                            vec.x = op.getChannelValue(0);
                         }
 
-                        if (op->isYAnimated())
+                        if (op.isYAnimated())
                         {
                             vec.y = animValue[animPos++];
 
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
-                                    "rotatePivotTranslateY");
-                            }
+                            oSampledTransOpNameList.push_back(
+                                "rotatePivotTranslateY");
                         }
                         else
                         {
-                            vec.y = (*staticPtr)[statPos++];
+                            vec.y = op.getChannelValue(1);
                         }
 
-                        if (op->isZAnimated())
+                        if (op.isZAnimated())
                         {
                             vec.z = animValue[animPos++];
 
-                            if (isAnim)
-                            {
-                                oSampledTransOpNameList.push_back(
-                                    "rotatePivotTranslateZ");
-                            }
+                            oSampledTransOpNameList.push_back(
+                                "rotatePivotTranslateZ");
                         }
                         else
                         {
-                            vec.z = (*staticPtr)[statPos++];
+                            vec.z = op.getChannelValue(2);
                         }
                         trans.setRotatePivotTranslation(vec, gSpace);
                     }

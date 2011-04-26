@@ -91,6 +91,48 @@ void OArchive::setCompressionHint( int8_t iCh )
 }
 
 //-*****************************************************************************
+uint32_t OArchive::addTimeSampling( const AbcA::TimeSampling & iTs )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArchive::addTimeSampling" );
+
+    return m_archive->addTimeSampling( iTs );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw,
+    // so return a NO-OP value
+    return 0;
+}
+
+//-*****************************************************************************
+AbcA::TimeSamplingPtr OArchive::getTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArchive::getTimeSampling" );
+
+    return m_archive->getTimeSampling( iIndex );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw,
+    // so return a NO-OP value
+    return AbcA::TimeSamplingPtr();
+}
+
+//-*****************************************************************************
+uint32_t OArchive::getNumTimeSamplings()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArchive::getNumTimeSampling" );
+
+    return m_archive->getNumTimeSamplings( );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw,
+    // so return a NO-OP value
+    return 0;
+}
+
+//-*****************************************************************************
 OObject OArchive::getTop()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArchive::getTop()" );

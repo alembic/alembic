@@ -74,8 +74,7 @@ void writeUInt32ArrayProperty(const std::string &archiveName)
 
     // Create a scalar property on this child object named 'primes'
     OUInt32ArrayProperty primes( childProps,  // owner
-                               "primes", // name
-                               TimeSamplingType( dt ) ); // uniform with cycle=dt
+                               "primes"); // uniform with cycle=dt
 
     std::vector<uint32_t> vals;
     for (int ss=0; ss<5; ss++)
@@ -83,8 +82,12 @@ void writeUInt32ArrayProperty(const std::string &archiveName)
         // This vector increases in length as we go, increasing the
         //  extent of each successive sample
         vals.push_back( g_primes[ss] );
-        primes.set( vals,  OSampleSelector( ss, startTime ) );
+        primes.set( vals );
     }
+
+    std::vector < chrono_t > timeSamps(1, startTime);
+    TimeSamplingPtr ts( new TimeSampling(TimeSamplingType( dt ), timeSamps) );
+    primes.setTimeSampling( ts );
 
     std::cout << archiveName << " was successfully written" << std::endl;
     // Done - the archive closes itself
@@ -140,13 +143,13 @@ void readUInt32ArrayProperty(const std::string &archiveName)
     std::cout << ".. it has " << numSamples << " samples" << std::endl;
     ABCA_ASSERT( numSamples == 5, "Expected 5 samples, found " << numSamples );
 
-    const TimeSampling ts = primes.getTimeSampling();
+    const TimeSamplingPtr ts = primes.getTimeSampling();
     std::cout << "..with time/value pairs: " << std::endl;;
     for (int ss=0; ss<numSamples; ss++)
     {
         std::cout << "   ";
         ISampleSelector iss( (index_t) ss);
-        std::cout << ts.getSampleTime( (index_t) ss ) << " / ";
+        std::cout << ts->getSampleTime( (index_t) ss ) << " / ";
 
         UInt32ArraySamplePtr samplePtr;
         primes.get( samplePtr, iss );
@@ -185,17 +188,21 @@ void writeV3fArrayProperty(const std::string &archiveName)
     OObject child( archiveTop, name );
     OCompoundProperty childProps = child.getProperties();
 
+    // add the time sampling the other way
+    std::vector < chrono_t > timeSamps(1, startTime);
+    TimeSampling ts(TimeSamplingType( dt ), timeSamps);
+    uint32_t tsid = archive.addTimeSampling(ts);
+
     // Create a scalar property on this child object named 'positions'
     OV3fArrayProperty positions( childProps,      // owner
-                                 "positions", // name
-                                 TimeSamplingType( dt ) ); // uniform with cycle=dt
+                                 "positions");
 
     std::vector<V3f> vals;
     vals.push_back( g_vectors[0] );
-    positions.set( vals,  OSampleSelector( 0, startTime ) );
+    positions.set( vals );
 
     vals.push_back( g_vectors[1] );
-    positions.set( vals,  OSampleSelector( 1, startTime ) );
+    positions.set( vals );
 
 
     // The next statement will kill this test with the following error:
@@ -205,18 +212,20 @@ void writeV3fArrayProperty(const std::string &archiveName)
     //  Degenerate array sample in WriteArray
     //  Abort
     vals.clear();
-    positions.set( vals,  OSampleSelector( 2, startTime ) );
+    positions.set( vals );
 
     vals.push_back( g_vectors[0] );
     vals.push_back( g_vectors[1] );
     vals.push_back( g_vectors[2] );
     vals.push_back( g_vectors[3] );
-    positions.set( vals,  OSampleSelector( 3, startTime ) );
+    positions.set( vals );
 
     vals.push_back( g_vectors[4] );
-    positions.set( vals,  OSampleSelector( 4, startTime ) );
+    positions.set( vals );
 
     std::cout << archiveName << " was successfully written" << std::endl;
+    positions.setTimeSampling(tsid);
+
     // Done - the archive closes itself
 }
 
@@ -270,13 +279,13 @@ void readV3fArrayProperty(const std::string &archiveName)
     std::cout << ".. it has " << numSamples << " samples" << std::endl;
     ABCA_ASSERT( numSamples == 5, "Expected 5 samples, found " << numSamples );
 
-    const TimeSampling ts = positions.getTimeSampling();
+    TimeSamplingPtr ts = positions.getTimeSampling();
     std::cout << "..with time/value pairs: " << std::endl;;
     for (int ss=0; ss<numSamples; ss++)
     {
         std::cout << "   ";
         ISampleSelector iss( (index_t) ss);
-        std::cout << ts.getSampleTime( (index_t) ss ) << " / ";
+        std::cout << ts->getSampleTime( (index_t) ss ) << " / ";
 
         V3fArraySamplePtr samplePtr;
         positions.get( samplePtr, iss );
@@ -318,8 +327,7 @@ void readWriteColorArrayProperty(const std::string &archiveName)
         OObject child( archiveTop, "test" );
         OCompoundProperty childProps = child.getProperties();
 
-        OC3fArrayProperty shades( childProps, "shades",
-            TimeSamplingType( 1.0 ) );
+        OC3fArrayProperty shades( childProps, "shades", 0 );
 
         std::vector < C3f > grays(8);
         grays[0].x = 0.0; grays[0].y = 0.0; grays[0].z = 0.0;

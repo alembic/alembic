@@ -40,7 +40,8 @@ namespace Alembic {
 namespace Abc {
 
 //-*****************************************************************************
-index_t ISampleSelector::getIndex( const AbcA::TimeSampling & iTsmp ) const
+index_t ISampleSelector::getIndex( const AbcA::TimeSamplingPtr & iTsmp,
+    index_t iNumSamples ) const
 {
     index_t retIdx;
 
@@ -50,21 +51,19 @@ index_t ISampleSelector::getIndex( const AbcA::TimeSampling & iTsmp ) const
     }
     else if ( m_requestedTimeIndexType == kNearIndex )
     {
-        retIdx = iTsmp.getNearIndex( m_requestedTime ).first;
+        retIdx = iTsmp->getNearIndex( m_requestedTime, iNumSamples ).first;
     }
     else if ( m_requestedTimeIndexType == kFloorIndex )
     {
-        retIdx = iTsmp.getFloorIndex( m_requestedTime ).first;
+        retIdx = iTsmp->getFloorIndex( m_requestedTime, iNumSamples ).first;
     }
     else
     {
         assert( m_requestedTimeIndexType == kCeilIndex );
-        retIdx = iTsmp.getCeilIndex( m_requestedTime ).first;
+        retIdx = iTsmp->getCeilIndex( m_requestedTime, iNumSamples ).first;
     }
 
-    const index_t N = iTsmp.getNumSamples();
-
-    return retIdx < 0 ? 0 : ( retIdx < N ? retIdx : N-1 );
+    return retIdx < 0 ? 0 : ( retIdx < iNumSamples ? retIdx : iNumSamples-1 );
 }
 
 

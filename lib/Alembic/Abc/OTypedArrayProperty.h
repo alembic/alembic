@@ -120,10 +120,9 @@ public:
 
     //! Set a sample using a reference to a typed array sample-type,
     //! instead of a void* ArraySample
-    void set( const sample_type &iVal,
-              const OSampleSelector &iSS = OSampleSelector() )
+    void set( const sample_type &iVal )
     {
-        OArrayProperty::set( iVal, iSS );
+        OArrayProperty::set( iVal );
     }
 };
 
@@ -165,11 +164,18 @@ OTypedArrayProperty<TRAITS>::OTypedArrayProperty
     }
 
     // Create property.
-    AbcA::PropertyHeader ohdr( iName, AbcA::kArrayProperty,
-                               mdata,
-                               TRAITS::dataType(),
-                               args.getTimeSamplingType() );
-    m_property = parent->createArrayProperty( ohdr );
+    AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
+    uint32_t tsIndex = args.getTimeSamplingIndex();
+
+    // if we specified a valid TimeSamplingPtr, use it to determine the index
+    // otherwise we'll use the index, which defaults to the intrinsic 0 index
+    if (tsPtr)
+    {
+        tsIndex = parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
+    }
+
+    m_property = parent->createArrayProperty( iName, mdata, 
+        TRAITS::dataType(), tsIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

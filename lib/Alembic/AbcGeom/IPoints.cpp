@@ -43,13 +43,13 @@ namespace AbcGeom {
 void IPointsSchema::init( const Abc::Argument &iArg0,
                           const Abc::Argument &iArg1 )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPointsTrait::init()" );
-
-    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPointsSchema::init()" );
 
     Abc::Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
+
+    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
     m_positions = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
@@ -57,7 +57,11 @@ void IPointsSchema::init( const Abc::Argument &iArg0,
                                       args.getSchemaInterpMatching() );
 
     m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
-    m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0, iArg1 );
+
+    if ( this->getPropertyHeader(".childBnds") != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0, iArg1);
+    }
 
     if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
     {

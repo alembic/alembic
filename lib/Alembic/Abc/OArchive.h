@@ -132,6 +132,22 @@ public:
     //! compressed data, at the expense of time.
     void setCompressionHint( int8_t iCh );
 
+    //! Adds the TimeSampling to the Archive TimeSampling pool.
+    //! If the TimeSampling already exists in the pool, the index for the match
+    //! should be returned.
+    //! index 0 is automatically reserved for uniform time sampling with a start
+    //! time of 0 and time per cycle of 1 (aka identity sampling)
+    uint32_t addTimeSampling( const AbcA::TimeSampling & iTs );
+
+    //! Returns the TimeSampling at a given index.
+    //! index 0 is automatically reserved for uniform time sampling with a start
+    //! time of 0 and time per cycle of 1 (aka identity sampling)
+    AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
+
+    //! Returns the total number of TimeSamplingPtrs in the Archive
+    //! TimeSampling pool.
+    uint32_t getNumTimeSamplings();
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,

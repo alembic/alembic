@@ -67,8 +67,7 @@ std::ostream &operator<<( std::ostream &ostr, const TimeSamplingType &tst )
 {
     std::string baseType( "" );
 
-    if ( tst.isIdentity() ) { baseType = "Identity"; }
-    else if ( tst.isUniform() ) { baseType = "Uniform"; }
+    if ( tst.isUniform() ) { baseType = "Uniform"; }
     else if ( tst.isCyclic() ) { baseType = "Cyclic"; }
     else { baseType = "Acyclic"; }
 

@@ -60,14 +60,7 @@ public:
     // NEW FUNCTIONS
     //-*************************************************************************
 
-    //! Sets a sample at a given sample index, with
-    //! a given time. Depending on the time sampling type,
-    //! the sampleTime may be ignored, or it may be checked for consistency
-    //! to ensure synchronization.
-    //! Samples must always be written starting at index 0, and
-    //! moving incrementally forward, writing each subsequent index in order.
-    //! An exception will be thrown if the samples are written out of order,
-    //! or if the sample times are inconsistent.
+    //! Sets a sample.
     //!
     //! For specifying the sample, this takes a void pointer which
     //! points to the beginning of the memory corresponding to the scalar.
@@ -79,18 +72,21 @@ public:
     //! The data passed into this function will be used or copied locally
     //! by this function, and need not live (in the calling context)
     //! outside the return scope of this function call.
-    virtual void setSample( index_t iSampleIndex,
-                            chrono_t iSampleTime,
-                            const void *iSamp ) = 0;
+    virtual void setSample( const void *iSamp ) = 0;
 
     //! Simply copies the previously written sample's value.
     //! This is an important feature.
-    virtual void setFromPreviousSample( index_t iSampleIndex,
-                                        chrono_t iSampleTime ) = 0;
+    virtual void setFromPreviousSample() = 0;
 
     //! Return the number of samples that have been written so far.
     //! This changes as samples are written.
     virtual size_t getNumSamples() = 0;
+
+    //! Changes the TimeSampling used by this property.
+    //! If the TimeSampling is changed to Acyclic and the number of samples
+    //! currently set is more than the number of times provided in the Acyclic
+    //! TimeSampling, an exception will be thrown.
+    virtual void setTimeSamplingIndex( uint32_t iIndex ) = 0;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

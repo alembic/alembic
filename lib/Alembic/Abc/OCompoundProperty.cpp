@@ -150,8 +150,7 @@ void OCompoundProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
 
-    AbcA::PropertyHeader ohdr( iName, args.getMetaData() );
-    m_property = iParent->createCompoundProperty( ohdr );
+    m_property = iParent->createCompoundProperty( iName, args.getMetaData() );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

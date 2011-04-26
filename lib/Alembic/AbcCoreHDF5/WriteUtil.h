@@ -69,12 +69,6 @@ WriteMetaData( hid_t iParent,
 
 //-*****************************************************************************
 void
-WritePropertyHeaderExceptTime( hid_t iParent,
-                               const std::string &iName,
-                               const AbcA::PropertyHeader &iHeader );
-
-//-*****************************************************************************
-void
 WriteDataToAttr( hid_t iParent,
                  hid_t iDspace,
                  const std::string &iAttrName,
@@ -117,13 +111,22 @@ WriteArray( WrittenArraySampleMap &iMap,
             int iCompressionLevel );
 
 //-*****************************************************************************
-void WriteSampling( WrittenArraySampleMap &iMap,
-                    hid_t iGroup,
-                    const std::string &iName,
-                    const AbcA::TimeSamplingType &iTsmpType,
-                    uint32_t iNumSamples,
-                    uint32_t iNumUniqueSamples,
-                    const chrono_t *iTimes );
+void
+WritePropertyInfo( hid_t iGroup,
+                   const std::string &iName,
+                   AbcA::PropertyType iPropertyType,
+                   const AbcA::DataType &iDataType,
+                   bool isScalarLike,
+                   uint32_t iTimeSamplingIndex,
+                   uint32_t iNumSamples,
+                   uint32_t iFirstChangedIndex,
+                   uint32_t iLastChangedIndex );
+
+//-*****************************************************************************
+void
+WriteTimeSampling( hid_t iGroup,
+                   const std::string &iName,
+                   const AbcA::TimeSampling &iTsmp );
 
 } // End namespace ALEMBIC_VERSION_NS
 

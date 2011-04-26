@@ -56,22 +56,6 @@ CompoundPropertyWriter::getProperty( size_t i )
     return getProperty( header.getName() );
 }
 
-//-*****************************************************************************
-BasePropertyWriterPtr
-CompoundPropertyWriter::createProperty( const PropertyHeader & iHeader )
-{
-    switch ( iHeader.getPropertyType() )
-    {
-    default:
-    case kScalarProperty:
-        return createScalarProperty( iHeader );
-    case kArrayProperty:
-        return createArrayProperty( iHeader );
-    case kCompoundProperty:
-        return createCompoundProperty( iHeader );
-    }
-}
-
 } // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

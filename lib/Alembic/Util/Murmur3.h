@@ -1,8 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks, Inc. and
-//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+// Copyright (c) 2009-2010, Industrial Light & Magic,
+//   a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
 //
@@ -15,10 +14,9 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-// *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic nor the names of their contributors may be used
-// to endorse or promote products derived from this software without specific
-// prior written permission.
+// *       Neither the name of Industrial Light & Magic nor the names of
+// its contributors may be used to endorse or promote products derived
+// from this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,35 +32,26 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_OSampleSelector_h_
-#define _Alembic_Abc_OSampleSelector_h_
+// MurmurHash3 was written by Austin Appleby, and is placed in the public
+// domain. The author hereby disclaims copyright to this source code.
 
-#include <Alembic/Abc/Foundation.h>
+#ifndef _Alembic_Util_Murmur3_h_
+#define _Alembic_Util_Murmur3_h_
+
+#include <Alembic/Util/Foundation.h>
 
 namespace Alembic {
-namespace Abc {
+namespace Util {
+namespace ALEMBIC_VERSION_NS {
 
-class OSampleSelector
-{
-public:
-    OSampleSelector()
-      : m_index( 0 ), m_time( 0.0 ) {}
+void MurmurHash3_x64_128 ( const void * key, const size_t len,
+    const size_t podSize, void * out );
 
-    OSampleSelector( index_t iIdx )
-      : m_index( iIdx ), m_time( 0.0 ) {}
+} // End namespace ALEMBIC_VERSION_NS
 
-    OSampleSelector( index_t iIdx, const chrono_t iTime )
-      : m_index( iIdx ), m_time( iTime ) {}
+using namespace ALEMBIC_VERSION_NS;
 
-    index_t getIndex() const { return m_index; }
-    chrono_t getTime() const { return m_time; }
-
-private:
-    index_t m_index;
-    chrono_t m_time;
-};
-
-} // End namespace Abc
+} // End namespace Util
 } // End namespace Alembic
 
 #endif

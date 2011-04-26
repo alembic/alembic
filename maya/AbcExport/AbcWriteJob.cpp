@@ -231,9 +231,9 @@ AbcWriteJob::AbcWriteJob(const util::ShapeSet & iDagPath,
     bool iWriteVisibility,
     bool iWriteUVs,
     std::set<double> & iTransFrames,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTransTimeType,
+    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iTransTime,
     std::set<double> & iShapeFrames,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingType & iShapeTimeType,
+    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iShapeTime,
     std::string & iMelPerFrameCallback,
     std::string & iMelPostCallback,
     std::string & iPythonPerFrameCallback,
@@ -289,8 +289,10 @@ AbcWriteJob::AbcWriteJob(const util::ShapeSet & iDagPath,
     mAttribs = iAttribs;
 
     // only needed during creation of the transforms and shapes
-    mTransTimeType = iTransTimeType;
-    mShapeTimeType = iShapeTimeType;
+    mTransTime = iTransTime;
+    mTransTimeIndex = 0;
+    mShapeTime = iShapeTime;
+    mShapeTimeIndex = 0;
 
     // should have at least 1 value
     assert(!mTransFrames.empty() && !mShapeFrames.empty());
@@ -527,13 +529,13 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         {
             Alembic::Abc::OObject obj = mRoot.getTop();
             trans = MayaTransformWriterPtr(new MayaTransformWriter(transFrame,
-                obj, mCurDag, mTransTimeType, mWorldSpace,
+                obj, mCurDag, mTransTimeIndex, mWorldSpace,
                 mWriteVisibility));
         }
         else
         {
             trans = MayaTransformWriterPtr(new MayaTransformWriter(transFrame,
-                *iParent, mCurDag, mTransTimeType, mWriteVisibility));
+                *iParent, mCurDag, mTransTimeIndex, mWriteVisibility));
         }
 
         if (trans->isAnimated() && !mTransStatic)
@@ -574,7 +576,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         {
             Alembic::Abc::OObject obj = iParent->getObject();
             MayaPointPrimitiveWriterPtr particle(new MayaPointPrimitiveWriter(
-                shapesFrame, mCurDag, obj, mShapeTimeType,
+                shapesFrame, mCurDag, obj, mShapeTimeIndex,
                 mWriteVisibility));
 
             if (particle->isAnimated() && !mShapesStatic)
@@ -617,7 +619,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         {
             Alembic::Abc::OObject obj = iParent->getObject();
             MayaMeshWriterPtr mesh(new MayaMeshWriter(shapesFrame, mCurDag,
-                obj, mShapeTimeType, mWriteVisibility, mWriteUVs));
+                obj, mShapeTimeIndex, mWriteVisibility, mWriteUVs));
 
             if (mesh->isAnimated() && !mShapesStatic)
             {
@@ -816,8 +818,11 @@ bool AbcWriteJob::eval(double iFrame)
 
         mRoot = Alembic::Abc::OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             mFileName, Alembic::Abc::ErrorHandler::kThrowPolicy );
+        mShapeTimeIndex = mRoot.addTimeSampling(*mShapeTime);
+        mTransTimeIndex = mRoot.addTimeSampling(*mTransTime);
+
         mBoxProp = Alembic::Abc::OBox3dProperty(mRoot.getTop().getProperties(),
-            ".childBnds", mTransTimeType);
+            ".childBnds", mTransTimeIndex);
 
         if (!mRoot.valid())
         {
@@ -867,7 +872,7 @@ bool AbcWriteJob::eval(double iFrame)
 
             for(; sattrCur != sattrEnd; sattrCur++)
             {
-                (*sattrCur)->write(iFrame*util::spf());
+                (*sattrCur)->write();
             }
         }
 
@@ -896,7 +901,7 @@ bool AbcWriteJob::eval(double iFrame)
 
             for(; tattrCur != tattrEnd; tattrCur++)
             {
-                (*tattrCur)->write(iFrame*util::spf());
+                (*tattrCur)->write();
             }
         }
 
@@ -941,8 +946,7 @@ void AbcWriteJob::perFrameCallback(double iFrame)
     Alembic::Abc::V3d min(bbox.min().x, bbox.min().y, bbox.min().z);
     Alembic::Abc::V3d max(bbox.max().x, bbox.max().y, bbox.max().z);
     Alembic::Abc::Box3d b(min, max);
-    mBoxProp.set(b, Alembic::Abc::OSampleSelector(mBoxIndex++,
-        iFrame * util::spf()));
+    mBoxProp.set(b);
 
     processCallback(mMelPerFrameCallback, true, iFrame, bbox);
     processCallback(mPythonPerFrameCallback, false, iFrame, bbox);

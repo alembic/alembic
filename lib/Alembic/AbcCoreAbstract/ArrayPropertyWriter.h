@@ -62,15 +62,7 @@ public:
     // NEW FUNCTIONS
     //-*************************************************************************
 
-    //! Sets a sample at a given sample index, with
-    //! a given time. Depending on the time sampling type,
-    //! the sampleTime may be ignored, or it may be checked for consistency
-    //! to ensure synchronization.
-    //!
-    //! Samples must always be written starting at index 0, and
-    //! moving incrementally forward, writing each subsequent index in order.
-    //! An exception will be thrown if the samples are written out of order,
-    //! or if the sample times are inconsistent.
+    //! Sets a sample
     //!
     //! This takes a read-only ArraySample by const reference. The class
     //! will make an internal copy (or the functional equivalent of ),
@@ -79,18 +71,21 @@ public:
     //!
     //! Arrays of std::string and std::wstring are assumed to be
     //! treated just like regular data elements.
-    virtual void setSample( index_t iSampleIndex,
-                            chrono_t iSampleTime,
-                            const ArraySample & iSamp ) = 0;
+    virtual void setSample( const ArraySample & iSamp ) = 0;
 
     //! Set the next sample to equal the previous sample.
     //! An important feature!
-    virtual void setFromPreviousSample( index_t iSampleIndex,
-                                        chrono_t iSampleTime ) = 0;
+    virtual void setFromPreviousSample() = 0;
 
     //! Return the number of samples that have been written so far.
     //! This changes as samples are written.
     virtual size_t getNumSamples() = 0;
+
+    //! Changes the TimeSampling used by this property.
+    //! If the TimeSampling is changed to Acyclic and the number of samples
+    //! currently set is more than the number of times provided in the Acyclic
+    //! TimeSampling, an exception will be thrown.
+    virtual void setTimeSamplingIndex( uint32_t iIndex ) = 0;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -135,11 +135,25 @@ public:
                    const Abc::Argument &iArg1 = Abc::Argument(),
                    const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<PointsSchemaInfo>( iParentObject, iName,
-                                        iArg0, iArg1, iArg2 )
+                                          iArg0, iArg1, iArg2 )
     {
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+        uint32_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            tsIndex = iParentObject->getObject()->getArchive(
+                )->addTimeSampling(*tsPtr);
+        }
+
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        init( tsIndex );
     }
 
     template <class CPROP_PTR>
@@ -148,17 +162,31 @@ public:
                             const Abc::Argument &iArg1 = Abc::Argument(),
                             const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<PointsSchemaInfo>( iParentObject,
-                                        iArg0, iArg1, iArg2 )
+                                     iArg0, iArg1, iArg2 )
     {
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+        uint32_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            tsIndex = iParentObject->getObject()->getArchive(
+                )->addTimeSampling(*tsPtr);
+        }
+
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        init( tsIndex );
     }
 
     //! Copy constructor.
-    OPointsSchema( const OPointsSchema& iCopy )
+    OPointsSchema(const OPointsSchema& iCopy)
     {
-        *this = iCopy;
+        *this = iCopy;    
     }
 
     //! Default assignment operator used.
@@ -167,10 +195,9 @@ public:
     // SCHEMA STUFF
     //-*************************************************************************
 
-    //! Return the time sampling type, which is stored on each of the
-    //! sub properties.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    { return m_positions.getTimeSamplingType(); }
+    //! Return the time sampling
+    AbcA::TimeSamplingPtr getTimeSampling() const
+    { return m_positions.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -183,12 +210,14 @@ public:
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, ids and counts.
-    void set( const Sample &iSamp,
-              const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+    void set( const Sample &iSamp );
 
     //! Set from previous sample. Will apply to each of positions,
     //! ids, and counts.
-    void setFromPrevious( const Abc::OSampleSelector &iSS );
+    void setFromPrevious( );
+
+    void setTimeSampling( uint32_t iIndex );
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
 
     //! A container for arbitrary geom params (pseudo-properties settable and
     //! gettable as indexed or not).
@@ -229,7 +258,7 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OPointsSchema::valid() );
 
 protected:
-    void init( const AbcA::TimeSamplingType &iTst );
+    void init( uint32_t iTsIdx );
 
     Abc::OV3fArrayProperty m_positions;
     Abc::OUInt64ArrayProperty m_ids;

@@ -157,20 +157,13 @@ public:
     //! regardless of the time sampling.
     bool isConstant() { return m_positions.isConstant() && m_ids.isConstant(); }
 
-    //! Time sampling type.
+    //! Time sampling Information.
     //!
-    AbcA::TimeSamplingType getTimeSamplingType() const
+    AbcA::TimeSamplingPtr getTimeSampling()
     {
-        return m_positions.getTimeSamplingType();
-    }
-
-    //! Time information.
-    //! ...
-    AbcA::TimeSampling getTimeSampling()
-    {
-        if ( !m_positions.getTimeSampling().isStatic() )
-        { return m_positions.getTimeSampling(); }
-        else { return m_ids.getTimeSampling(); }
+        if ( m_positions.valid() )
+            return m_positions.getTimeSampling();
+        return getObject().getArchive().getTimeSampling(0);
     }
 
     //-*************************************************************************
@@ -184,7 +177,7 @@ public:
 
         m_selfBounds.get( oSample.m_selfBounds, iSS );
 
-        if ( m_childBounds.getNumSamples() > 0 )
+        if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
         { m_childBounds.get( oSample.m_childBounds, iSS ); }
 
         // Could error check here.

@@ -104,7 +104,14 @@ public:
     //! Caches can be shared amongst separate archives, and caching
     //! will be disabled if a NULL cache is passed here.
     virtual void setReadArraySampleCachePtr( ReadArraySampleCachePtr iPtr ) = 0;
-    
+
+    //! Returns the TimeSampling at a given index.
+    virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex ) = 0;
+
+    //! Returns the total number of TimeSamplingPtrs in the Archive
+    //! TimeSampling pool.
+    virtual uint32_t getNumTimeSamplings() = 0;
+
     //! Return self
     //! ...
     virtual ArchiveReaderPtr asArchivePtr() = 0;

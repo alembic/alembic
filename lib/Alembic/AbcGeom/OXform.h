@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -91,7 +91,21 @@ public:
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+
+        AbcA::index_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        if ( tsPtr )
+        {
+            tsIndex = iParentObject->getObject()->getArchive()->
+                addTimeSampling( *tsPtr );
+        }
+
+        m_timeSamplingIndex = tsIndex;
+
+        init( tsIndex );
     }
 
     //! This constructor does the same as the above, but uses the default
@@ -106,7 +120,21 @@ public:
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+
+        AbcA::index_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        if ( tsPtr )
+        {
+            tsIndex = iParentObject->getObject()->getArchive()->
+                addTimeSampling( *tsPtr );
+        }
+
+        m_timeSamplingIndex = tsIndex;
+
+        init( tsIndex );
     }
 
     //! Explicit copy constructor to work around MSVC bug
@@ -119,8 +147,10 @@ public:
     // SCHEMA STUFF
     //-*************************************************************************
 
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    { return m_timeSamplingType; }
+    AbcA::TimeSamplingPtr getTimeSampling() const
+    {
+        return m_inherits.getTimeSampling();
+    }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -128,16 +158,14 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples() { return m_ops.getNumSamples(); }
+    size_t getNumSamples() { return m_ops->getNumSamples(); }
 
     //! Set an animated sample.  On first call to set, the sample is modified,
     //! so it can't be const.
-    void set( XformSample &ioSamp,
-              const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
-
+    void set( XformSample &ioSamp );
 
     //! Set from previous sample. Will hold the animated channels.
-    void setFromPrevious( const Abc::OSampleSelector &iSS );
+    void setFromPrevious();
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -150,7 +178,7 @@ public:
     void reset()
     {
         m_childBounds.reset();
-        m_timeSamplingType = AbcA::TimeSamplingType();
+        m_timeSamplingIndex = 0;
         m_inherits.reset();
         m_ops.reset();
         m_vals.reset();
@@ -177,17 +205,20 @@ public:
 
 
 private:
-    void init( const AbcA::TimeSamplingType &iTst );
+    void init( const AbcA::index_t iTSIndex );
+
+    std::size_t m_numChannels;
+    std::size_t m_numOps;
 
 protected:
 
     Abc::OBox3dProperty m_childBounds;
 
-    AbcA::TimeSamplingType m_timeSamplingType;
+    AbcA::index_t m_timeSamplingIndex;
 
-    Abc::OUInt32ArrayProperty m_ops;
+    AbcA::ScalarPropertyWriterPtr m_ops;
 
-    Abc::ODoubleArrayProperty m_vals;
+    AbcA::ScalarPropertyWriterPtr m_vals;
 
     Abc::OBoolProperty m_inherits;
 

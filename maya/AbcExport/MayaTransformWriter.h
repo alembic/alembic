@@ -44,6 +44,20 @@
 
 #include "AttributesWriter.h"
 
+// AnimChan contains what animated plugs to get as a double, and the helper
+// info about what operation and which channel to set in mSample
+struct AnimChan
+{
+    MPlug plug;
+
+    // extra value to multiply the data off of the plug by, used to invert
+    // certain operations, and convert radians to degrees
+    double scale;
+
+    uint32_t opNum;
+    uint32_t channelNum;
+};
+
 // Writes an MFnTransform
 class MayaTransformWriter
 {
@@ -51,12 +65,12 @@ class MayaTransformWriter
 
     MayaTransformWriter(double iFrame, Alembic::Abc::OObject & iParent,
         MDagPath & iDag, 
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+        uint32_t iTimeIndex,
         bool addWorld, bool iWriteVisibility);
 
     MayaTransformWriter(double iFrame, MayaTransformWriter & iParent,
         MDagPath & iDag,
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+        uint32_t iTimeIndex,
         bool iWriteVisibility);
 
     ~MayaTransformWriter();
@@ -69,19 +83,15 @@ class MayaTransformWriter
 
     Alembic::AbcGeom::OXformSchema mSchema;
     AttributesWriterPtr mAttrs;
-    size_t mCurIndex;
 
-    void pushTransformStack(double iFrame, const MFnTransform & iTrans,
-        Alembic::AbcGeom::XformOpVec & oOpVec,
-        std::vector<double> & oStatic, std::vector<double> & oAnim);
+    void pushTransformStack(double iFrame, const MFnTransform & iTrans);
 
-    void pushTransformStack(double iFrame, const MFnIkJoint & iTrans,
-        Alembic::AbcGeom::XformOpVec & oOpVec,
-        std::vector<double> & oStatic, std::vector<double> & oAnim);
+    void pushTransformStack(double iFrame, const MFnIkJoint & iTrans);
 
-    // list of plugs to get as doubles, the bool indicates
-    // whether we need to flip the value for an inverse evaluation
-    std::vector < std::pair < MPlug, bool > > mSampledList;
+    Alembic::AbcGeom::XformSample mSample;
+
+    std::vector < AnimChan > mAnimChanList;
+    MPlug mInheritsPlug;
 };
 
 typedef boost::shared_ptr < MayaTransformWriter > MayaTransformWriterPtr;

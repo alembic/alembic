@@ -59,22 +59,45 @@ size_t OArrayProperty::getNumSamples()
 }
 
 //-*****************************************************************************
-void OArrayProperty::set( const AbcA::ArraySample &iSamp,
-                          const OSampleSelector &iSS )
+void OArrayProperty::set( const AbcA::ArraySample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::set()" );
 
-    m_property->setSample( iSS.getIndex(), iSS.getTime(), iSamp );
+    m_property->setSample( iSamp );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 //-*****************************************************************************
-void OArrayProperty::setFromPrevious( const OSampleSelector &iSS )
+void OArrayProperty::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::setFromPrevious()" );
 
-    m_property->setFromPreviousSample( iSS.getIndex(), iSS.getTime() );
+    m_property->setFromPreviousSample();
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OArrayProperty::setTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::setTimeSampling(uint32_t)" );
+
+    m_property->setTimeSamplingIndex(iIndex);
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OArrayProperty::setTimeSampling(  AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::setTimeSampling()" );
+
+    uint32_t tsIndex =
+        m_property->getParent()->getObject()->getArchive()->addTimeSampling(
+            *iTime);
+
+    m_property->setTimeSamplingIndex(tsIndex);
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -113,9 +136,18 @@ void OArrayProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::init()" );
 
-    AbcA::PropertyHeader phdr( iName, AbcA::kArrayProperty, args.getMetaData(),
-                               iDataType, args.getTimeSamplingType() );
-    m_property = iParent->createArrayProperty( phdr );
+    AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
+    uint32_t tsIndex = args.getTimeSamplingIndex();
+
+    // if we specified a valid TimeSamplingPtr, use it to determine the index
+    // otherwise we'll use the index, which defaults to the intrinsic 0 index
+    if (tsPtr)
+    {
+        tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
+    }
+
+    m_property = iParent->createArrayProperty( iName, args.getMetaData(), 
+        iDataType, tsIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

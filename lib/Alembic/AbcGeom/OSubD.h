@@ -60,12 +60,7 @@ public:
     public:
         //! Creates a default sample with no data in it.
         //! ...
-        Sample()
-          : m_faceVaryingInterpolateBoundary( ABC_GEOM_SUBD_NULL_INT_VALUE )
-          , m_faceVaryingPropagateCorners( ABC_GEOM_SUBD_NULL_INT_VALUE )
-          , m_interpolateBoundary( ABC_GEOM_SUBD_NULL_INT_VALUE )
-          , m_subdScheme( "catmull-clark" )
-        {}
+        Sample() {}
 
         //! Creates a sample with position data, index data, and count data.
         //! For specifying samples with an explicit topology. The first
@@ -89,6 +84,7 @@ public:
 
                 const Abc::Int32ArraySample &iHoles = Abc::Int32ArraySample()
               )
+
           : m_positions( iPositions )
           , m_faceIndices( iFaceIndices )
           , m_faceCounts( iFaceCounts )
@@ -305,9 +301,24 @@ public:
       : Abc::OSchema<SubDSchemaInfo>( iParentObject, iName,
                                    iArg0, iArg1, iArg2 )
     {
+
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+        uint32_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            tsIndex = iParentObject->getObject()->getArchive(
+                )->addTimeSampling(*tsPtr);
+        }
+
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        init( tsIndex );
     }
 
     template <class CPROP_PTR>
@@ -318,9 +329,23 @@ public:
       : Abc::OSchema<SubDSchemaInfo>( iParentObject,
                                    iArg0, iArg1, iArg2 )
     {
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+        uint32_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            tsIndex = iParentObject->getObject()->getArchive(
+                )->addTimeSampling(*tsPtr);
+        }
+
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        init( tsIndex );
     }
 
     //! Copy constructor.
@@ -335,10 +360,10 @@ public:
     // SCHEMA STUFF
     //-*************************************************************************
 
-    //! Return the time sampling type, which is stored on each of the
+    //! Return the time sampling, which is stored on each of the
     //! sub properties.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    { return m_positions.getTimeSamplingType(); }
+    AbcA::TimeSamplingPtr getTimeSampling() const
+    { return m_positions.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -351,13 +376,14 @@ public:
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
-    void set( const Sample &iSamp,
-              const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+    void set( const Sample &iSamp );
 
     //! Set from previous sample. Will apply to each of positions,
     //! indices, and counts.
-    void setFromPrevious( const Abc::OSampleSelector &iSS );
+    void setFromPrevious( );
 
+    void setTimeSampling( uint32_t iIndex );
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
 
     Abc::OCompoundProperty getArbGeomParams();
 
@@ -411,7 +437,7 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OSubDSchema::valid() );
 
 protected:
-    void init( const AbcA::TimeSamplingType &iTst );
+    void init( uint32_t iTsIdx );
 
     Abc::OV3fArrayProperty m_positions;
     Abc::OInt32ArrayProperty m_faceIndices;
@@ -426,16 +452,13 @@ protected:
     Abc::OInt32ArrayProperty m_creaseIndices;
     Abc::OInt32ArrayProperty m_creaseLengths;
     Abc::OFloatArrayProperty m_creaseSharpnesses;
-    std::vector < Abc::OSampleSelector > m_nullCreaseSamples;
 
     // Corners
     Abc::OInt32ArrayProperty m_cornerIndices;
     Abc::OFloatArrayProperty m_cornerSharpnesses;
-    std::vector < Abc::OSampleSelector > m_nullCornerSamples;
 
     // Holes
     Abc::OInt32ArrayProperty m_holes;
-    std::vector < Abc::OSampleSelector > m_nullHoleSamples;
 
     // subdivision scheme
     Abc::OStringProperty m_subdScheme;
@@ -451,9 +474,9 @@ protected:
     Abc::OCompoundProperty m_arbGeomParams;
 
 private:
-    void initCreases();
-    void initCorners();
-    void initHoles();
+    void initCreases(uint32_t iNumSamples);
+    void initCorners(uint32_t iNumSamples);
+    void initHoles(uint32_t iNumSamples);
 
 };
 

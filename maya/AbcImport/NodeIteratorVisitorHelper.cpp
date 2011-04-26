@@ -153,8 +153,8 @@ void addAttr(double iFrame, Alembic::Abc::IScalarProperty & iProp,
     Alembic::Util::uint8_t extent = dtype.getExtent();
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), 
+        iProp.getNumSamples(), index, ceilIndex);
 
     switch (dtype.getPod())
     {
@@ -478,8 +478,8 @@ void addAttr(double iFrame, Alembic::Abc::IArrayProperty & iProp,
     Alembic::Util::uint8_t extent = dtype.getExtent();
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
+        iProp.getNumSamples(), index, ceilIndex);
 
     switch (dtype.getPod())
     {
@@ -684,8 +684,8 @@ void readAttr(double iFrame, Alembic::Abc::IScalarProperty & iProp,
     Alembic::Util::uint8_t extent = dtype.getExtent();
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
+        iProp.getNumSamples(), index, ceilIndex);
 
     switch (dtype.getPod())
     {
@@ -910,8 +910,8 @@ void readAttr(double iFrame, Alembic::Abc::IArrayProperty & iProp,
     Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp, ceilSamp;
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
+        iProp.getNumSamples(), index, ceilIndex);
 
     switch (dtype.getPod())
     {
@@ -1098,7 +1098,6 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     mXformOpList = rhs.mXformOpList;
 
     mIsComplexXform = rhs.mIsComplexXform;
-    mIsSampledXformOpAngle = rhs.mIsSampledXformOpAngle;
 
     return *this;
 }
@@ -1109,40 +1108,44 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     oMax = -DBL_MAX;
 
     size_t i, iEnd;
-    Alembic::AbcCoreAbstract::v1::TimeSampling ts;
+    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr ts;
 
     iEnd = mPointsList.size();
     for (i = 0; i < iEnd; ++i)
     {
         ts = mPointsList[i].getSchema().getTimeSampling();
-        oMin = std::min(ts.getSampleTime(0), oMin);
-        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+        size_t numSamples = mPointsList[i].getSchema().getNumSamples();
+        oMin = std::min(ts->getSampleTime(0), oMin);
+        oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
     }
 
     iEnd = mPolyMeshList.size();
     for (i = 0; i < iEnd; ++i)
     {
         ts = mPolyMeshList[i].getSchema().getTimeSampling();
-        oMin = std::min(ts.getSampleTime(0), oMin);
-        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+        size_t numSamples = mPolyMeshList[i].getSchema().getNumSamples();
+        oMin = std::min(ts->getSampleTime(0), oMin);
+        oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
     }
 
     iEnd = mSubDList.size();
     for (i = 0; i < iEnd; ++i)
     {
         ts = mSubDList[i].getSchema().getTimeSampling();
-        oMin = std::min(ts.getSampleTime(0), oMin);
-        oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+        size_t numSamples = mSubDList[i].getSchema().getNumSamples();
+        oMin = std::min(ts->getSampleTime(0), oMin);
+        oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
     }
 
     iEnd = mXformList.size();
     for (i = 0; i < iEnd; ++i)
     {
         ts = mXformList[i].getSchema().getTimeSampling();
-        if (ts.getNumSamples() > 1)
+        size_t numSamples = mXformList[i].getSchema().getNumSamples();
+        if (numSamples > 1)
         {
-            oMin = std::min(ts.getSampleTime(0), oMin);
-            oMax = std::max(ts.getSampleTime(ts.getNumSamples()-1), oMax);
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
         }
     }
 }
@@ -1192,7 +1195,7 @@ MString createScene(ArgData & iArgData)
 
     // no caching!
     Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
-        iArgData.mFileName.asChar(),
+        iArgData.mFileName.asChar(), Alembic::Abc::ErrorHandler::Policy(),
         Alembic::AbcCoreAbstract::v1::ReadArraySampleCachePtr());
 
     CreateSceneVisitor::Action action = CreateSceneVisitor::CREATE;
@@ -1280,19 +1283,6 @@ MString connectAttr(ArgData & iArgData)
     MObject intArrayObj;
     MIntArray intArray;
     unsigned length;
-
-    // set the mIsSampledXformOpAngle
-    length = iArgData.mData.mIsSampledXformOpAngle.size();
-    if (length > 0)
-    {
-        plug = alembicNodeFn.findPlug("transOpAngle", true, &status);
-        intArray.setLength(length);
-        for (unsigned int i = 0; i < length; i++)
-            intArray.set(iArgData.mData.mIsSampledXformOpAngle[i], i);
-        status = fnIntArray.set(intArray);
-        intArrayObj = fnIntArray.object(&status);
-        status = plug.setValue(intArrayObj);
-    }
 
     // set the mNurbsCurveNumCurveList
     length = 0;//iArgData.mData.mNurbsCurveNumCurveList.size();
@@ -1586,15 +1576,8 @@ MString connectAttr(ArgData & iArgData)
 
     if (xformSize > 0)
     {
-        unsigned int isSampledAngleIndex = 0;
-
         unsigned int logicalIndex = 0;
         MPlug srcArrayPlug = alembicNodeFn.findPlug("transOp", true);
-
-        // for angleArray Attribute
-        unsigned int angleLogicalIndex = 0;
-        MPlug srcAngleArrayPlug =
-            alembicNodeFn.findPlug("outTransOpAngle", true);
 
         for (unsigned int i = 0 ; i < xformSize; i++)
         {
@@ -1604,18 +1587,8 @@ MString connectAttr(ArgData & iArgData)
             unsigned int sampleSize = mSampledPair.sampledChannelSize();
             for (unsigned int j = 0; j < sampleSize; j ++)
             {
-                // is angle channel
-                if (iArgData.mData.mIsSampledXformOpAngle[isSampledAngleIndex++]
-                    == true)
-                {
-                    srcPlug = srcAngleArrayPlug.elementByLogicalIndex(
-                        angleLogicalIndex++);
-                }
-                else
-                {
-                    srcPlug = srcArrayPlug.elementByLogicalIndex(
-                        logicalIndex++);
-                }
+
+                srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
 
                 std::string attrName = mSampledPair.getSampleElement(j);
                 dstPlug = mFn.findPlug(attrName.c_str(), true);

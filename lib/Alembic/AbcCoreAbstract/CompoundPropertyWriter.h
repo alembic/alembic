@@ -93,33 +93,31 @@ public:
 
     //! Create and return the requested scalar property.
     //! If a property already exists with the same name, throws
-    //! an exception. An exception will also be thrown if the header's
-    //! configuration does not correctly specify a ScalarProperty.
+    //! an exception. An exception will also be thrown if the DataType, 
+    //! or time sampling index is illegal.
     virtual ScalarPropertyWriterPtr
-    createScalarProperty( const PropertyHeader & iHeader ) = 0;
-    
+    createScalarProperty( const std::string & iName,
+        const MetaData & iMetaData,
+        const DataType & iDataType,
+        uint32_t iTimeSamplingIndex ) = 0;
+
     //! Create and return the requested array property.
     //! If a property already exists with the same name, throws.
-    //! an exception. An exception will also be thrown if the header's
-    //! configuration does not correctly specify an ArrayProperty.
+    //! an exception. An exception will also be thrown if the DataType, 
+    //! or time sampling index is illegal.
     virtual ArrayPropertyWriterPtr
-    createArrayProperty( const PropertyHeader & iHeader ) = 0;
+    createArrayProperty( const std::string & iName,
+        const MetaData & iMetaData,
+        const DataType & iDataType,
+        uint32_t iTimeSamplingIndex ) = 0;
     
     //! Create and return the requested compound property.
     //! If a property already exists with the same name, throws
-    //! an exception. An exception will also be thrown if the header's
-    //! configuration does not correctly specify a CompoundProperty.
+    //! an exception.
     virtual CompoundPropertyWriterPtr
-    createCompoundProperty( const PropertyHeader & iHeader ) = 0;
+    createCompoundProperty( const std::string & iName,
+        const MetaData & iMetaData ) = 0;
 
-    //! Create and return the requested "any type" property, returned
-    //! as a BasePropertyWriterPtr. If a property already exists with
-    //! the same name, throws an exception. This is a convenience function that
-    //! wraps the specific functions above.
-    BasePropertyWriterPtr
-    createProperty( const PropertyHeader & iHeader );
-
-    //-*************************************************************************
 };
 
 } // End namespace ALEMBIC_VERSION_NS

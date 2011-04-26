@@ -174,24 +174,14 @@ public:
     //! regardless of the time sampling.
     bool isConstant() { return getTopologyVariance() == kConstantTopology; }
 
-    //! Time sampling type.
-    //!
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    {
-        return m_positions.getTimeSamplingType();
-    }
-
     //! Time information.
     //! Any of the properties could be the bearer of the time
     //! sampling information, which otherwise defaults to Identity.
-    AbcA::TimeSampling getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling()
     {
-        if ( !m_positions.getTimeSampling().isStatic() )
-        { return m_positions.getTimeSampling(); }
-        else if ( !m_indices.getTimeSampling().isStatic() )
-        { return m_indices.getTimeSampling(); }
-        else
-        { return m_counts.getTimeSampling(); }
+        if ( m_positions.valid() )
+            return m_positions.getTimeSampling();
+        return getObject().getArchive().getTimeSampling(0);
     }
 
     //-*************************************************************************

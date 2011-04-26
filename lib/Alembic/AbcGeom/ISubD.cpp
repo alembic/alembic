@@ -131,7 +131,7 @@ void ISubDSchema::get( ISubDSchema::Sample &oSample,
 
     m_subdScheme.get( oSample.m_subdScheme, iSS );
 
-    if ( m_childBounds.getNumSamples() > 0 )
+    if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
     { m_childBounds.get( oSample.m_childBounds, iSS ); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -212,7 +212,11 @@ void ISubDSchema::init( const Abc::Argument &iArg0,
                                          args.getSchemaInterpMatching() );
 
     m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
-    m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0, iArg1 );
+
+    if ( this->getPropertyHeader(".childBnds") != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0, iArg1);
+    }
 
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )

@@ -64,6 +64,7 @@ void writeProperty(const std::string &archiveName)
     OObject child( archiveTop, name );
     OCompoundProperty childProps = child.getProperties();
 
+    TimeSamplingPtr ts ( new TimeSampling( dt, startTime ) );
     // Create a scalar property on this child object named 'mass'
     //  with metadata that indicates it's expressed in kilograms
     MetaData units;
@@ -71,12 +72,12 @@ void writeProperty(const std::string &archiveName)
     ODoubleProperty mass( childProps,  // owner
                           "mass", // name
                           units,
-                          TimeSamplingType( dt ) ); // uniform with cycle=dt
+                          ts ); // uniform with cycle=dt
 
     for (int tt=0; tt<numSamples; tt++)
     {
         double mm = (1.0 + 0.1*tt); // vary the mass
-        mass.set( mm,  OSampleSelector(tt, startTime + tt*dt ) );
+        mass.set( mm );
     }
 
     std::cout << archiveName << " was successfully written" << std::endl;
@@ -144,13 +145,13 @@ void readProperty(const std::string &archiveName)
     std::cout << ".. it has " << numSamples << " samples" << std::endl;
     ABCA_ASSERT( numSamples == 5, "Expected 5 samples, found " << numSamples );
 
-    const TimeSampling ts = mass.getTimeSampling();
+    TimeSamplingPtr ts = mass.getTimeSampling();
 
     std::cout << "..with time/value pairs: ";
     for (int ss=0; ss<numSamples; ss++)
     {
         ISampleSelector iss( (index_t) ss);
-        std::cout << ts.getSampleTime( (index_t) ss ) << "/";
+        std::cout << ts->getSampleTime( (index_t) ss ) << "/";
         printSampleValue( mass, iss );
         std::cout << " ";
     }

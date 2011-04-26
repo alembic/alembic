@@ -54,12 +54,15 @@ void writeSimpleProperties(const std::string &archiveName)
     const chrono_t dt = 1.0 / 24.0;
 
     TimeSamplingType tst( dt ); // uniform with cycle=dt
-    tst.setRetainConstantSampleTimes( true ); // don't throw time info away
-
+    std::vector < chrono_t > timeSamp(1, 666.0);
+    TimeSampling ts(tst, timeSamp);
+    
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
                       archiveName, ErrorHandler::kThrowPolicy );
+
+    uint32_t tsidx = archive.addTimeSampling(ts);
     OObject archiveTop = archive.getTop();
 
     // Create a child, parented under  the archive
@@ -70,14 +73,14 @@ void writeSimpleProperties(const std::string &archiveName)
     // Create a scalar property on this child object named 'mass'
     ODoubleProperty mass( childProps,  // owner
                           "mass", // name
-                          tst );
+                          tsidx );
 
     // Write out the samples
     for (int tt=0; tt<numSamples; tt++)
     {
         double mm = (1.0 + 0.1*tt); // vary the mass
         // either one works. Is one the 'correct' method?
-        mass.set( mm,  OSampleSelector(tt, 666.0 + tt*dt ) );
+        mass.set( mm );
     }
 
     // Done - the archive closes itself
@@ -204,15 +207,14 @@ void readSimpleProperties(const std::string &archiveName)
                 std::cout << " Unknown! (this is bad)" << std::endl;
         };
 
-        const TimeSampling &ts =
+        TimeSamplingPtr ts =
             GetCompoundPropertyReaderPtr(props)->
             getScalarProperty( propNames[jj] )->getTimeSampling();
 
         bool hasSampleTimes = GetCompoundPropertyReaderPtr( props )->
-            getScalarProperty( propNames[jj] )->
-            getTimeSamplingType().getRetainConstantSampleTimes();
+            getScalarProperty( propNames[jj] )->getNumSamples() > 1;
 
-        size_t numSamples = ts.getNumSamples();
+        size_t numSamples = ts->getNumStoredTimes();
 
 
         std::cout << "    ..with time sampling: ";
@@ -222,7 +224,7 @@ void readSimpleProperties(const std::string &archiveName)
         {
             std::cout << " ( ";
             for (int ss=0; ss<numSamples; ss++)
-                std::cout << ts.getSampleTime(ss) << " ";
+                std::cout << ts->getSampleTime(ss) << " ";
             std::cout << ")";
         }
         std::cout << std::endl;

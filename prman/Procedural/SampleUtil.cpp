@@ -80,10 +80,10 @@ void WriteConcatTransform( const M44d &m )
 }
 
 //-*****************************************************************************
-void GetRelevantSampleTimes( ProcArgs &args, const TimeSampling &timeSampling,
-                             SampleTimeSet &output )
+void GetRelevantSampleTimes( ProcArgs &args, TimeSamplingPtr timeSampling,
+                             size_t numSamples, SampleTimeSet &output )
 {
-    if ( timeSampling.isStatic() )
+    if ( numSamples < 2 )
     {
         output.insert( 0.0 );
         return;
@@ -96,10 +96,10 @@ void GetRelevantSampleTimes( ProcArgs &args, const TimeSampling &timeSampling,
     chrono_t shutterCloseTime = ( args.frame + args.shutterClose ) / args.fps;
 
     std::pair<index_t, chrono_t> shutterOpenFloor =
-        timeSampling.getFloorIndex( shutterOpenTime );
+        timeSampling->getFloorIndex( shutterOpenTime, numSamples );
 
     std::pair<index_t, chrono_t> shutterCloseCeil =
-        timeSampling.getCeilIndex( shutterCloseTime );
+        timeSampling->getCeilIndex( shutterCloseTime, numSamples );
 
     //TODO, what's a reasonable episilon?
     static const chrono_t epsilon = 1.0 / 10000.0;
@@ -114,7 +114,7 @@ void GetRelevantSampleTimes( ProcArgs &args, const TimeSampling &timeSampling,
         if ( shutterOpenFloor.second < shutterOpenTime )
         {
             chrono_t nextSampleTime =
-                     timeSampling.getSampleTime( shutterOpenFloor.first + 1 );
+                     timeSampling->getSampleTime( shutterOpenFloor.first + 1 );
 
             if ( fabs( nextSampleTime - shutterOpenTime ) < epsilon )
             {
@@ -127,7 +127,7 @@ void GetRelevantSampleTimes( ProcArgs &args, const TimeSampling &timeSampling,
 
     for ( index_t i = shutterOpenFloor.first; i < shutterCloseCeil.first; ++i )
     {
-        output.insert( timeSampling.getSampleTime( i ) );
+        output.insert( timeSampling->getSampleTime( i ) );
     }
 
     //no samples above? put frame time in there and get out

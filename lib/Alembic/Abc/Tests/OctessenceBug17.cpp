@@ -78,30 +78,37 @@ void simpleTestOut( const std::string &iArchiveName )
                       iArchiveName );
     OObject archiveTop = archive.getTop();
 
-    TimeSamplingType utst( g_dt  ); // uniform time sampling
-    TimeSamplingType atst( TimeSamplingType::kAcyclic ); // acyclic
+    std::vector < chrono_t > timeSamps(g_numDoubleSamps);
 
-    utst.setRetainConstantSampleTimes( true );
+    TimeSamplingType utst( g_dt  ); // uniform time sampling
+    TimeSamplingPtr uts( new TimeSampling(g_dt, g_doubleStartTime) );
+
+    TimeSamplingType atst( TimeSamplingType::kAcyclic ); // acyclic
+    chrono_t t = g_doubleStartTime;
+    for ( size_t j = 0 ; j < g_numDoubleSamps ; j++ )
+    {
+        timeSamps[j] = t;
+        t += g_dt;
+    }
+    TimeSamplingPtr ats( new TimeSampling(atst, timeSamps) );
 
     OObject c0( archiveTop, "c0" );
     OCompoundProperty c0Props = c0.getProperties();
-    ODoubleProperty dp0( c0Props, "uniformdoubleprop", utst );
-    ODoubleProperty dp1( c0Props, "acyclicdoubleprop", atst );
+    ODoubleProperty dp0( c0Props, "uniformdoubleprop", uts );
+    ODoubleProperty dp1( c0Props, "acyclicdoubleprop", ats );
 
-    chrono_t t = g_doubleStartTime;
+    t = g_doubleStartTime;
 
     for ( size_t j = 0 ; j < g_numDoubleSamps ; j++ )
     {
-        dp0.set( 1.0 + 0.1 * j,
-                 OSampleSelector( j, t ) );
+        dp0.set( 1.0 + 0.1 * j );
 
-        dp1.set( 1.0 + 0.1 * j,
-                 OSampleSelector( j, t ) );
+        dp1.set( 1.0 + 0.1 * j );
 
         t += g_dt;
     }
 
-    TimeSamplingType _utst = dp0.getTimeSamplingType();
+    TimeSamplingType _utst = dp0.getTimeSampling()->getTimeSamplingType();
     TESTING_ASSERT( _utst.isUniform() );
 }
 
@@ -115,10 +122,10 @@ void simpleTestIn( const std::string &iArchiveName )
     IObject c0( archiveTop, "c0" );
     ICompoundProperty c0Props = c0.getProperties();
 
-    const TimeSampling uts = c0Props.getPtr()->
+    TimeSamplingPtr uts = c0Props.getPtr()->
         getScalarProperty( "uniformdoubleprop" )->getTimeSampling();
 
-    const TimeSampling ats = c0Props.getPtr()->
+    TimeSamplingPtr ats = c0Props.getPtr()->
         getScalarProperty( "acyclicdoubleprop" )->getTimeSampling();
 
     //IDoubleProperty dp0( c0Props, "uniformdoubleprop" );
@@ -131,13 +138,13 @@ void simpleTestIn( const std::string &iArchiveName )
     //scramble_heap();
 
     //const TimeSamplingType &utst = uts.getTimeSamplingType();
-    const TimeSamplingType utst = c0Props.getPtr()->
-        getScalarProperty( "uniformdoubleprop" )->getTimeSamplingType();
+    const TimeSamplingType utst = c0Props.getPtr()->getScalarProperty(
+        "uniformdoubleprop" )->getTimeSampling()->getTimeSamplingType();
 
     for ( size_t j = 0 ; j < g_numDoubleSamps ; j++ )
     {
-        chrono_t utime = uts.getSampleTime( j );
-        chrono_t atime = ats.getSampleTime( j );
+        chrono_t utime = uts->getSampleTime( j );
+        chrono_t atime = ats->getSampleTime( j );
 
         chrono_t reftime = g_doubleStartTime + ( j * g_dt );
 

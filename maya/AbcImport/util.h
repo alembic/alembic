@@ -88,7 +88,7 @@ bool stripFileName(const MString & filePath, MString & fileName);
 bool removeDangleAlembicNodes();
 
 double getWeightAndIndex(double iFrame,
-    const Alembic::AbcCoreAbstract::v1::TimeSampling & iTime,
+    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iTime, size_t numSamps,
     int64_t & oIndex, int64_t & oCeilIndex);
     
 template<typename T>

@@ -49,12 +49,12 @@ class AttributesWriter
     // the initial write at iFrame for sampled data
     AttributesWriter(double iFrame, Alembic::Abc::OCompoundProperty & iParent,
         const MFnDagNode & iNode,
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+        uint32_t iTimeIndex,
         bool iWriteVisibility);
 
     ~AttributesWriter();
 
-    void write(double iFrame);
+    void write();
     bool isAnimated();
 
     static std::string * mFilter;
@@ -67,7 +67,6 @@ class AttributesWriter
     // animated visibility plug
     PlugAndObjScalar mAnimVisibility;
 
-    size_t mCurIndex;
 };
 
 typedef boost::shared_ptr<AttributesWriter> AttributesWriterPtr;

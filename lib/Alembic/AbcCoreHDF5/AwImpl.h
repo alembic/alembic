@@ -58,8 +58,6 @@ private:
     AwImpl( const std::string &iFileName,
             const AbcA::MetaData &iMetaData );
 
-    AwImpl( const AwImpl &iCopy );
-
 public:
     virtual ~AwImpl();
 
@@ -82,6 +80,12 @@ public:
         return m_writtenArraySampleMap;
     }
 
+    virtual uint32_t addTimeSampling( const AbcA::TimeSampling & iTs );
+
+    virtual AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
+
+    virtual uint32_t getNumTimeSamplings() { return m_timeSamples.size(); }
+
 private:
     std::string m_fileName;
     AbcA::MetaData m_metaData;
@@ -91,6 +95,8 @@ private:
     // TopObjectWriter we create is special and doesn't like back up
     // like a normal object writer would.
     TopOwImpl *m_top;
+
+    std::vector < AbcA::TimeSamplingPtr > m_timeSamples;
 
     WrittenArraySampleMap m_writtenArraySampleMap;
 };

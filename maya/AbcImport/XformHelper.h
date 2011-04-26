@@ -53,7 +53,7 @@ void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
     std::vector<double> & oSampleList);
 
 void read(double iFrame, Alembic::AbcGeom::IXform & iNode,
-    std::vector<double> & oSampleList);
+    std::vector<double> & oSampleList, Alembic::AbcGeom::XformSample & oSamp);
 
 // used during creation of the scene
 // This function traverses the transform operation stack, and returns true if

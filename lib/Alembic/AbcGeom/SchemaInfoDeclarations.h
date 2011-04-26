@@ -79,15 +79,6 @@ struct STDEF                                                            \
 //! elaborate typeid
 
 //-*****************************************************************************
-// Curve
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Curve_v1",
-                                     ".geom",
-                                     CurvesSchemaInfo );
-
-#define ALEMBIC_ABCGEOM_CURVE_SCHEMA (CurvesSchemaInfo::title())
-
-
-//-*****************************************************************************
 // PolyMesh
 ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
                                      ".geom",
@@ -112,20 +103,20 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Points_v1",
 #define ALEMBIC_ABCGEOM_POINTS_SCHEMA (PointsSchemaInfo::title())
 
 //-*****************************************************************************
-// SimpleXform
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_SimpleXform_v1",
-                                     ".xform",
-                                     SimpleXformSchemaInfo );
-
-#define ALEMBIC_ABCGEOM_SIMPLEXFORM_SCHEMA (SimpleXformSchemaInfo::title())
-
-//-*****************************************************************************
 // Xform
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v2",
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v1",
                                      ".xform",
                                      XformSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_XFORM_SCHEMA (XformSchemaInfo::title())
+
+//-*****************************************************************************
+// Camera
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Camera_v1",
+                                     ".geom",
+                                     CameraSchemaInfo );
+
+#define ALEMBIC_ABCGEOM_CAMERA_SCHEMA (CameraSchemaInfo::title())
 
 }
 }

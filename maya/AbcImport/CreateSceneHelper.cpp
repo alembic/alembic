@@ -211,7 +211,6 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
 {
     MStatus status = MS::kSuccess;
 
-    mData.mIsSampledXformOpAngle.clear();
     MObject saveParent = mParent;
 
     Alembic::Abc::IObject top = iRoot.getTop();
@@ -423,7 +422,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
 
     size_t numSamples = iNode.getSchema().getNumSamples();
 
-    // add animated SubDs to the list
+    // add animated poly mesh to the list
     if (numSamples > 1)
         mData.mPolyMeshList.push_back(iNode);
 
@@ -487,9 +486,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
     MObject transObj;
 
     size_t numChildren = iNode.getNumChildren();
-    size_t numSamples = iNode.getSchema().getNumAnimSamples();
+    bool isConstant = iNode.getSchema().isConstant();
 
-    if (numSamples > 1)
+    if (!isConstant)
     {
         mData.mXformList.push_back(iNode);
         mData.mIsComplexXform.push_back(isComplex(iNode));
@@ -566,7 +565,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         dstPlug = trans.findPlug("inheritsTransform");
         if (!dstPlug.isNull())
         {
-            dstPlug.setBool( iNode.getSchema().inherits(
+            dstPlug.setBool( iNode.getSchema().getInheritsXforms(
                 Alembic::Abc::ISampleSelector(mFrame,
                     Alembic::Abc::ISampleSelector::kNearIndex)) );
         }
@@ -583,22 +582,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         {
             std::vector<std::string> transopNameList;
             std::vector<std::string> propNameList;
-            bool isComplex = false;
             connectToXform(mFrame, iNode, transObj, propNameList,
                 transopNameList);
 
-            unsigned int size = transopNameList.size();
-            for (unsigned int i = 0; i < size; i++)
-            {
-                if (transopNameList[i].find("rotate") != std::string::npos
-                    && transopNameList[i].find("rotatePivot")
-                        == std::string::npos)
-                    mData.mIsSampledXformOpAngle.push_back(true);
-                else
-                    mData.mIsSampledXformOpAngle.push_back(false);
-            }
-
-            if (numSamples > 1)
+            if (!isConstant)
             {
                 SampledPair mSampledPair(transObj, transopNameList);
                 mData.mXformOpList.push_back(mSampledPair);
@@ -621,14 +608,6 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
             printError(theError);
         }
     }
-
-    /*
-    for (size_t i = 0; i < numChildren; ++i)
-    {
-        Alembic::Abc::IObject child = iNode.getChild(i);
-        this->visit(child);
-    }
-    */
 
     MObject saveParent = transObj;
     MDagPath saveDag = mCurrentDagNode;

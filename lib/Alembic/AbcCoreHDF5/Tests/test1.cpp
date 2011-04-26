@@ -48,63 +48,34 @@ void veryVerySimpleTest()
     ArchiveWriterPtr archive = w( "misterBigStuffSimp.abc", MetaData() );
 
     ObjectWriterPtr top = archive->getTop();
-    
+
     ObjectWriterPtr objectLayer1 =
         top->createChild( ObjectHeader( "layer1", MetaData() ) );
-    
+
     CompoundPropertyWriterPtr layer1Props = objectLayer1->getProperties();
 
-#if 0
-    {
-        ArrayPropertyWriterPtr spuds =
-            layer1Props->createArrayProperty(
-                PropertyHeader( "spuds", kArrayProperty, MetaData(),
-                                DataType( kFloat32POD, 5 ),
-                                TimeSamplingType() ) );
-        
-        std::cout << "A" << std::endl;
-        
-        float blah[] = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f };
-        std::cout << "SPUDS: " << spuds << std::endl;
-
-        ArraySample asamp( ( const void * )blah,
-                           DataType( kFloat32POD, 5 ),
-                           Dimensions( 1 ) );
-        
-        spuds->setSample( 0, 0.0, asamp );
-
-        std::cout << "SPUDS: " << spuds << std::endl;
-    }
-#else
     {
         ScalarPropertyWriterPtr spuds =
-            layer1Props->createScalarProperty(
-                PropertyHeader( "spuds", kScalarProperty, MetaData(),
-                                DataType( kFloat32POD, 5 ),
-                                TimeSamplingType() ) );
-        
+            layer1Props->createScalarProperty("spuds", MetaData(),
+                DataType( kFloat32POD, 5 ), 0);
+
         float blah[] = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f };
 
-        spuds->setSample( 0, 0.0, ( const void * )blah );
+        spuds->setSample( ( const void * )blah );
         float blah2[] = { 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f };
-        spuds->setSample( 1, 1.0, ( const void * )blah2 );
+        spuds->setSample( ( const void * )blah2 );
     }
-#endif
+
 
     std::cout << "B" << std::endl;
 
     {
         ScalarPropertyWriterPtr pancake =
-            layer1Props->createScalarProperty(
-                PropertyHeader( "pancake", kScalarProperty, MetaData(),
-                                DataType( kUint8POD, 1 ),
-                                TimeSamplingType() ) );
-        
+            layer1Props->createScalarProperty( "pancake", MetaData(),
+                                DataType( kUint8POD, 1 ), 0 );
+
         std::cout << "C" << std::endl;
     }
-
-    //uint8_t pancakeVal = true;
-    //pancake->setSample( 0, 0.0, ( const void * )&pancakeVal );
 
 }
 

@@ -39,17 +39,18 @@
 
 MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
     double iFrame, MDagPath & iDag, Alembic::AbcGeom::OObject & iParent,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+    uint32_t iTimeIndex,
     bool iWriteVisibility) :
-    mIsAnimated(false), mDagPath(iDag), mCurIndex(0)
+    mIsAnimated(false), mDagPath(iDag)
 {
     MFnParticleSystem particle(mDagPath);
-    Alembic::AbcGeom::OPoints obj(iParent, particle.name().asChar(), iTimeType);
+    Alembic::AbcGeom::OPoints obj(iParent, particle.name().asChar(),
+        iTimeIndex);
     mSchema = obj.getSchema();
 
     Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
     mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, particle,
-        iTimeType, iWriteVisibility));
+        iTimeIndex, iWriteVisibility));
 
     MObject object = iDag.node();
     if (util::isAnimated(object))
@@ -79,8 +80,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
 
     if (size == 0)
     {
-        mSchema.set(samp,
-            Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
+        mSchema.set(samp);
         return;
     }
 
@@ -134,7 +134,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     }
 
     // ignoring width and the velocity vectors for now
-    mSchema.set(samp, Alembic::Abc::OSampleSelector(mCurIndex++, iFrame));
+    mSchema.set(samp);
 }
 
 unsigned int MayaPointPrimitiveWriter::getNumCVs()

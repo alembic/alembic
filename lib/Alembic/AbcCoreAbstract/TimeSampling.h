@@ -60,36 +60,37 @@ public:
     //! via aggregation, that the SimplePropertyReaders and Writers (and
     //! their derived classes) can use to provide consistent time-sampling
     //! introspection to clients.
-    //! The iSampleTimes passed in have a shared ptr so that this instance
-    //! may ensure they exist.
     TimeSampling( const TimeSamplingType & iTimeSamplingType,
 
-                  //! We have to pass in the number of samples explicitly
-                  //! because the sample times, in the case of a
-                  //! uniform or cyclic time sampling will only contain
-                  //! as many times as there are per cycle.
-                  size_t iNumSamples,
+                  //! The number of time samples per cycle
+                  const std::vector < chrono_t > & iSampleTimes );
 
-                  //! The num sample times is always equal to
-                  //! std::min( iNumSamples,
-                  //!           iTimeSamplingType.getNumSamplesPerCycle() )
-                  //! Therefore we just need a pointer to times
-                  //! here. We can infer the size appropriately.
-
-                  //! Float64 (chrono_t) with rank 1 - the actual times
-                  //! when samples were recorded for this property.
-                  ArraySamplePtr iSampleTimes );
+    //! Convenience constructor which creates uniform time sampling with
+    //! the specified time per cycle and the specified start time.
+    TimeSampling( chrono_t iTimePerCycle, chrono_t iStartTime );
 
     TimeSampling( const TimeSampling &copy );
 
     TimeSampling();
 
-    //! Get the number of samples
-    //! In the case of a property which had no samples written,
-    //! this can be zero.
-    size_t getNumSamples() const
+    bool operator==( const TimeSampling & iRhs ) const
     {
-        return m_numSamples;
+        return (m_timeSamplingType == iRhs.m_timeSamplingType && 
+            m_sampleTimes == iRhs.m_sampleTimes);
+    }
+
+    //! Get the number of stored times.
+    //! This is same as the samples per cycle in the time sampling type except
+    //! for acyclic time sampling.  There will always be at least one sample
+    //! because a start time is always needed.
+    size_t getNumStoredTimes() const
+    {
+        return m_sampleTimes.size();
+    }
+
+    const std::vector < chrono_t > & getStoredTimes() const
+    {
+        return m_sampleTimes;
     }
 
     TimeSamplingType getTimeSamplingType() const
@@ -98,7 +99,6 @@ public:
     }
 
     //! Get the time of any sample
-    //! This will return NON_TIME if the sampling is static
     //! it is invalid to call this for out-of-range indices.
     chrono_t getSampleTime( index_t iIndex ) const;
 
@@ -106,52 +106,34 @@ public:
     //! to the given time. Invalid to call this with zero samples.
     //! If the minimum sample time is greater than iTime, index
     //! 0 will be returned.
-    std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime ) const;
+    std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime,
+        index_t iNumSamples ) const;
 
     //! Find the smallest valid index that has a time greater
     //! than the given time. Invalid to call this with zero samples.
     //! If the maximum sample time is less than iTime, index
     //! numSamples-1 will be returned.
-    std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime ) const;
+    std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime, 
+        index_t iNumSamples ) const;
 
     //! Find the valid index with the closest time to the given
     //! time. Invalid to call this with zero samples.
-    std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime ) const;
-
-    //! This returns whether or not the time sampling is static
-    //! Static time sampling means one or less samples with identity
-    //! time sampling.
-    bool isStatic() const
-    {
-        return m_timeSamplingType.isIdentity() &&
-            m_numSamples < 2;
-    }
-
-    //! How many stored times are there really?
-    size_t getNumStoredTimes() const
-    {
-        return m_sampleTimes->size();
-    }
+    std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime,
+        index_t iNumSamples ) const;
 
 protected:
     //! A TimeSamplingType
-    //! This is "Identity", "Uniform", "Cyclic", or "Acyclic".
-    //! In the case of identity time sampling, no actual times are
-    //! required.
+    //! This is "Uniform", "Cyclic", or "Acyclic".
     TimeSamplingType m_timeSamplingType;
 
-    //! The number of samples.
-    //! This needs to be distinct from the sample times below, because
-    //! if the time sampling is anything other than acyclic, there will
-    //! only be numSamplesPerCycle time samples below.
-    size_t m_numSamples;
+    std::vector < chrono_t > m_sampleTimes;
 
-    ArraySamplePtr  m_sampleTimes;
-
-    //! Convenience, internal utility to access the array of
-    //! choron_t values held in m_sampleTimes as a simple array.
-    const chrono_t *_getTimeSamplesAsChrono_tPtr() const;
+private:
+    // sanity checks the data coming in
+    void init();
 };
+
+typedef boost::shared_ptr<TimeSampling> TimeSamplingPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

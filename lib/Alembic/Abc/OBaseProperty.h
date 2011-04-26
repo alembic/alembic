@@ -39,6 +39,7 @@
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/OObject.h>
 #include <Alembic/Abc/OArchive.h>
 
@@ -138,12 +139,12 @@ public:
     const AbcA::DataType &getDataType() const
     { return getHeader().getDataType(); }
 
-    //! Non-compound properties have a TimeSamplingType. It is an error
+    //! Non-compound properties have a TimeSamplingPtr. It is an error
     //! to call this function for CompoundProperties, and an exception will
     //! be thrown. This is a convenience function which just returns the
-    //! TimeSamplingType from the header that was used in creation.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    { return getHeader().getTimeSamplingType(); }
+    //! TimeSamplingPtr from the header that was used in creation.
+    AbcA::TimeSamplingPtr getTimeSampling() const
+    { return getHeader().getTimeSampling(); }
 
     //! This function returns the property's object, handily
     //! wrapped in an OObject wrapper.

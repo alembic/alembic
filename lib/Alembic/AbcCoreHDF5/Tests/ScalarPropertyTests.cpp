@@ -88,59 +88,45 @@ void testWeirdStringScalar()
 
         AbcA::CompoundPropertyWriterPtr props = archive->getProperties();
 
-        const AbcA::TimeSamplingType staticSampling;
-
         {
 
             AbcA::ScalarPropertyWriterPtr emptyWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("empty", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kStringPOD, 1),
-                    staticSampling));
+                props->createScalarProperty("empty", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kStringPOD, 1), 0);
 
             // this should fail because of the NULL char in the string
-            TESTING_ASSERT_THROW(emptyWrtPtr->setSample(0, 0.0, &weirdStr),
+            TESTING_ASSERT_THROW(emptyWrtPtr->setSample(&weirdStr),
                 Alembic::Util::Exception);
 
-            emptyWrtPtr->setSample(0, 0.0, &empty);
+            emptyWrtPtr->setSample(&empty);
 
             AbcA::ScalarPropertyWriterPtr wemptyWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("wempty", AbcA::kScalarProperty,
-                                        AbcA::MetaData(),
-                                        AbcA::DataType(Alembic::Util::kWstringPOD, 1),
-                                        staticSampling));
+                props->createScalarProperty("wempty", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kWstringPOD, 1), 0);
 
             // this should fail because of the NULL char in the string
-            TESTING_ASSERT_THROW(wemptyWrtPtr->setSample(0, 0.0, &weirdWstr),
+            TESTING_ASSERT_THROW(wemptyWrtPtr->setSample(&weirdWstr),
                                  Alembic::Util::Exception);
 
-            wemptyWrtPtr->setSample(0, 0.0, &wempty);
+            wemptyWrtPtr->setSample(&wempty);
 
 
             AbcA::ScalarPropertyWriterPtr allEmptyWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("allEmpty", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kStringPOD, 3),
-                    staticSampling));
+                props->createScalarProperty("allEmpty", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kStringPOD, 3), 0);
 
             // one of the strings has a NULL char in it
             TESTING_ASSERT_THROW(
-                allEmptyWrtPtr->setSample(0, 0.0, &(weirdStrArray.front())),
+                allEmptyWrtPtr->setSample(&(weirdStrArray.front())),
                 Alembic::Util::Exception);
 
-            allEmptyWrtPtr->setSample(0, 0.0, &(allEmptyStr.front()));
+            allEmptyWrtPtr->setSample(&(allEmptyStr.front()));
 
             AbcA::ScalarPropertyWriterPtr partEmptyStrPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("partEmpty", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kStringPOD, 6),
-                    staticSampling));
+                props->createScalarProperty("partEmpty", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kStringPOD, 6), 0);
 
-            partEmptyStrPtr->setSample(0, 0.0, &(partEmptyStr.front()));
+            partEmptyStrPtr->setSample(&(partEmptyStr.front()));
         }
     }
 
@@ -209,163 +195,129 @@ void testReadWriteScalars()
 
         {
             AbcA::ScalarPropertyWriterPtr boolWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("bool", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kBooleanPOD, 1),
-                    staticSampling));
+                props->createScalarProperty("bool",  AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kBooleanPOD, 1), 0);
             Alembic::Util::bool_t b = true;
-            boolWrtPtr->setSample(0, 0.0, &b);
+            boolWrtPtr->setSample(&b);
         }
 
 
         {
             AbcA::ScalarPropertyWriterPtr ucharWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("uchar", AbcA::kScalarProperty,
-                    AbcA::MetaData(), AbcA::DataType(Alembic::Util::kUint8POD, 1),
-                    staticSampling));
+                props->createScalarProperty("uchar",  AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kUint8POD, 1), 0);
 
             Alembic::Util::uint8_t uc = 200;
 
             TESTING_ASSERT(ucharWrtPtr->getNumSamples() == 0);
-            ucharWrtPtr->setSample(0, 0.0, &uc);
+            ucharWrtPtr->setSample(&uc);
             TESTING_ASSERT(ucharWrtPtr->getNumSamples() == 1);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr charWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("char", AbcA::kScalarProperty,
-                    AbcA::MetaData(), AbcA::DataType(Alembic::Util::kInt8POD, 1),
-                    staticSampling));
+                props->createScalarProperty("char",  AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kInt8POD, 1), 0);
+
             Alembic::Util::int8_t c = -20;
-            charWrtPtr->setSample(0, 0.0, &c);
+            charWrtPtr->setSample(&c);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr ushortWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("ushort", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kUint16POD, 1),
-                    staticSampling));
+                props->createScalarProperty("ushort", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kUint16POD, 1), 0);
+
             Alembic::Util::uint16_t us = 60000;
-            ushortWrtPtr->setSample(0, 0.0, &us);
+            ushortWrtPtr->setSample(&us);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr shortWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("short", AbcA::kScalarProperty,
-                    AbcA::MetaData(), AbcA::DataType(Alembic::Util::kInt16POD, 1),
-                    staticSampling));
+                props->createScalarProperty("short", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kInt16POD, 1), 0);
             Alembic::Util::int16_t s = -20000;
-            shortWrtPtr->setSample(0, 0.0, &s);
+            shortWrtPtr->setSample(&s);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr uintWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("uint", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kUint32POD, 1),
-                    staticSampling));
+                props->createScalarProperty("uint", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kUint32POD, 1), 0);
             Alembic::Util::uint32_t ui = 1000000;
-            uintWrtPtr->setSample(0, 0.0, &ui);
+            uintWrtPtr->setSample(&ui);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr intWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("int", AbcA::kScalarProperty,
-                    AbcA::MetaData(), AbcA::DataType(Alembic::Util::kInt32POD, 1),
-                    staticSampling));
+                props->createScalarProperty("int", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kInt32POD, 1), 0);
             Alembic::Util::int32_t i = -1000000;
-            intWrtPtr->setSample(0, 0.0, &i);
+            intWrtPtr->setSample(&i);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr ui64WrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("uint64", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kUint64POD, 1),
-                    staticSampling));
+                props->createScalarProperty("uint64", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kUint64POD, 1), 0);
             Alembic::Util::uint64_t ui = 5000000000LL;
-            ui64WrtPtr->setSample(0, 0.0, &ui);
+            ui64WrtPtr->setSample(&ui);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr i64WrtPtr =
-                props->createScalarProperty(
-                AbcA::PropertyHeader("i64", AbcA::kScalarProperty,
-                AbcA::MetaData(), AbcA::DataType(Alembic::Util::kInt64POD, 1),
-                staticSampling));
+                props->createScalarProperty("i64", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kInt64POD, 1), 0);
+
             Alembic::Util::int64_t i = -5000000000LL;
-            i64WrtPtr->setSample(0, 0.0, &i);
+            i64WrtPtr->setSample(&i);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr halfWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("half", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kFloat16POD, 1),
-                    staticSampling));
+                props->createScalarProperty("half", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kFloat16POD, 1), 0);
 
             Alembic::Util::float16_t h = 16.0;
-            halfWrtPtr->setSample(0, 0.0, &h);
+            halfWrtPtr->setSample(&h);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr floatWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("float", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kFloat32POD, 1),
-                    staticSampling));
+                props->createScalarProperty("float", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kFloat32POD, 1), 0);
+
             Alembic::Util::float32_t f = 128.0;
-            floatWrtPtr->setSample(0, 0.0, &f);
+            floatWrtPtr->setSample(&f);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr doubleWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("double", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kFloat64POD, 1),
-                    staticSampling));
+                props->createScalarProperty("double", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kFloat64POD, 1), 0);
 
             Alembic::Util::float64_t d = 32768.0;
             TESTING_ASSERT(doubleWrtPtr->getNumSamples() == 0);
-            doubleWrtPtr->setSample(0, 0.0, &d);
+            doubleWrtPtr->setSample(&d);
             TESTING_ASSERT(doubleWrtPtr->getNumSamples() == 1);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr strWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader("str", AbcA::kScalarProperty,
-                    AbcA::MetaData(),
-                    AbcA::DataType(Alembic::Util::kStringPOD, 1),
-                    staticSampling));
+                props->createScalarProperty("str", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kStringPOD, 1), 0);
 
             Alembic::Util::string c = "This was a triumph!";
-            strWrtPtr->setSample(0, 0.0, &c);
+            strWrtPtr->setSample(&c);
         }
 
         {
             AbcA::ScalarPropertyWriterPtr wstrWrtPtr =
-                props->createScalarProperty(
-                    AbcA::PropertyHeader(
-                        "wstr", AbcA::kScalarProperty,
-                        AbcA::MetaData(),
-                        AbcA::DataType(Alembic::Util::kWstringPOD, 1),
-                        staticSampling));
+                props->createScalarProperty("wstr", AbcA::MetaData(),
+                    AbcA::DataType(Alembic::Util::kWstringPOD, 1), 0);
 
             Alembic::Util::wstring c( L"Matt Lauer can suck it! \u2697" );
-            wstrWrtPtr->setSample(0, 0.0, &c);
+            wstrWrtPtr->setSample(&c);
         }
 
     }
@@ -540,10 +492,8 @@ void testRepeatedScalarData()
         AbcA::CompoundPropertyWriterPtr parent = archive->getProperties();
 
         AbcA::ScalarPropertyWriterPtr swp =
-            parent->createScalarProperty(AbcA::PropertyHeader("int32",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kInt32POD, 3),
-                AbcA::TimeSamplingType(1.0)));
+            parent->createScalarProperty("int32", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kInt32POD, 3), 0);
 
         std::vector <Alembic::Util::uint32_t> ui(3);
         ui[0] = 0;
@@ -555,65 +505,45 @@ void testRepeatedScalarData()
         ui2[1] = 43;
         ui2[2] = 47;
 
-        swp->setSample(0, 0.0, &(ui.front()));
-        swp->setSample(1, 1.0, &(ui.front()));
-        swp->setSample(2, 2.0, &(ui2.front()));
-        swp->setSample(3, 3.0, &(ui.front()));
-        swp->setSample(4, 4.0, &(ui2.front()));
-        swp->setSample(5, 5.0, &(ui2.front()));
-        swp->setSample(6, 6.0, &(ui2.front()));
-        swp->setSample(7, 7.0, &(ui.front()));
-        swp->setSample(8, 8.0, &(ui.front()));
-        swp->setSample(9, 9.0, &(ui.front()));
-
-        // we already wrote this
-        TESTING_ASSERT_THROW(swp->setSample(0, 0.0, &(ui2.front())),
-            Alembic::Util::Exception);
+        swp->setSample(&(ui.front()));
+        swp->setSample(&(ui.front()));
+        swp->setSample(&(ui2.front()));
+        swp->setSample(&(ui.front()));
+        swp->setSample(&(ui2.front()));
+        swp->setSample(&(ui2.front()));
+        swp->setSample(&(ui2.front()));
+        swp->setSample(&(ui.front()));
+        swp->setSample(&(ui.front()));
+        swp->setSample(&(ui.front()));
 
         AbcA::ScalarPropertyWriterPtr swp2 =
-            parent->createScalarProperty(AbcA::PropertyHeader("float32",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kFloat32POD, 1),
-                AbcA::TimeSamplingType(1.0)));
+            parent->createScalarProperty("float32", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kFloat32POD, 1), 0);
 
         Alembic::Util::float32_t f = 42.0;
         Alembic::Util::float32_t f2 = -3.0;
 
-        // have to write the indices in order starting from 0
-        TESTING_ASSERT_THROW(swp2->setSample(7, 7.0, &f),
-            Alembic::Util::Exception);
-
-        swp2->setSample(0, 0.0, &f);
-
-        // fails because we haven't written 1 yet
-        TESTING_ASSERT_THROW(swp2->setSample(2, 2.0, &f),
-            Alembic::Util::Exception);
-
-        swp2->setSample(1, 1.0, &f);
-
-        // for this sampling type, the time part should be ignored
-        swp2->setSample(2, 7000.0, &f);
-        swp2->setSample(3, 3.0, &f2);
-        swp2->setSample(4, 4.0, &f2);
-        swp2->setSample(5, 5.0, &f2);
+        swp2->setSample(&f);
+        swp2->setSample(&f);
+        swp2->setSample(&f);
+        swp2->setSample(&f2);
+        swp2->setSample(&f2);
+        swp2->setSample(&f2);
 
         AbcA::ScalarPropertyWriterPtr swp3 =
-            parent->createScalarProperty(AbcA::PropertyHeader("uint16",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kUint16POD, 1),
-                AbcA::TimeSamplingType(2.0)));
+            parent->createScalarProperty("uint16", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kUint16POD, 1), 0);
+
         Alembic::Util::uint16_t ui16 = 17;
 
-        swp3->setSample(0, 234.0, &ui16);
-        swp3->setSample(1, 3.0, &ui16);
-        swp3->setSample(2, -45.0, &ui16);
-        swp3->setSample(3, 67.0, &ui16);
+        swp3->setSample(&ui16);
+        swp3->setSample(&ui16);
+        swp3->setSample(&ui16);
+        swp3->setSample(&ui16);
 
         AbcA::ScalarPropertyWriterPtr swp4 =
-            parent->createScalarProperty(AbcA::PropertyHeader("str",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kStringPOD, 3),
-                AbcA::TimeSamplingType(2.0)));
+            parent->createScalarProperty("str", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kStringPOD, 3), 0);
 
         std::vector < Alembic::Util::string > strVec(3);
         strVec[0] = "Please";
@@ -625,10 +555,10 @@ void testRepeatedScalarData()
         strVec2[1] = "going";
         strVec2[2] = "on?";
 
-        swp4->setSample(0, 234.0, &(strVec.front()));
-        swp4->setSample(1, 234.0, &(strVec.front()));
-        swp4->setSample(2, 234.0, &(strVec2.front()));
-        swp4->setSample(3, 234.0, &(strVec2.front()));
+        swp4->setSample(&(strVec.front()));
+        swp4->setSample(&(strVec.front()));
+        swp4->setSample(&(strVec2.front()));
+        swp4->setSample(&(strVec2.front()));
     }
 
     {
@@ -646,14 +576,10 @@ void testRepeatedScalarData()
             {
                 case Alembic::Util::kUint16POD:
                 {
-                    TESTING_ASSERT( sp->getNumSamples() == 1 );
+                    TESTING_ASSERT( sp->getNumSamples() == 4 );
 
-                    const AbcA::TimeSampling t = sp->getTimeSampling();
+                    const AbcA::TimeSamplingPtr t = sp->getTimeSampling();
                     TESTING_ASSERT( sp->isConstant() );
-
-                    // this is how it used to work
-                    //TESTING_ASSERT( sp->getNumSamples() == t->getNumSamples() );
-                    //TESTING_ASSERT( t->getSampleTime(0) == 234.0 );
 
                     Alembic::Util::uint16_t us;
 

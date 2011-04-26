@@ -117,7 +117,7 @@ public:
         *this = iCopy;
     }
 
-    AbcA::TimeSampling getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling();
 
     bool isConstant() const { return m_isConstant; }
 
@@ -166,9 +166,9 @@ public:
 protected:
     Abc::IBox3dProperty m_childBounds;
 
-    Abc::IUInt32ArrayProperty m_ops;
+    AbcA::ScalarPropertyReaderPtr m_ops;
 
-    Abc::IDoubleArrayProperty m_vals;
+    AbcA::ScalarPropertyReaderPtr m_vals;
 
     Abc::UInt32ArraySample m_animChannels;
 
@@ -179,6 +179,10 @@ protected:
     bool m_isConstantIdentity;
 
     std::size_t m_numOps;
+    std::size_t m_numChannels;
+
+    std::vector<Alembic::Util::uint32_t> m_opVec;
+    std::vector<Alembic::Util::float64_t> m_valVec;
 
 private:
     void init( Abc::SchemaInterpMatching iMatching );

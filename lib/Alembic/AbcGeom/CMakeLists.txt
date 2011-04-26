@@ -35,8 +35,12 @@
 # C++ files for this project
 SET( CXX_FILES
 
-  Basis.cpp
   GeometryScope.cpp
+
+  FilmBackXformOp.cpp
+  CameraSample.cpp
+  ICamera.cpp
+  OCamera.cpp
 
   OSubD.cpp
   ISubD.cpp
@@ -46,12 +50,6 @@ SET( CXX_FILES
 
   OPolyMesh.cpp
   IPolyMesh.cpp
-
-  OCurves.cpp
-  ICurves.cpp
-
-  OSimpleXform.cpp
-  ISimpleXform.cpp
 
   XformOp.cpp
   XformSample.cpp
@@ -67,25 +65,22 @@ SET( H_FILES
   All.h
 
   Foundation.h
-  Basis.h
 
   GeometryScope.h
 
   OGeomParam.h
   IGeomParam.h
 
+  FilmBackXformOp.h
+  CameraSample.h
+  ICamera.h
+  OCamera.h
+
   OSubD.h
   ISubD.h
 
   OPolyMesh.h
   IPolyMesh.h
-
-  OCurves.h
-  ICurves.h
-
-  SimpleXformSample.h
-  OSimpleXform.h
-  ISimpleXform.h
 
   XformOp.h
   XformSample.h

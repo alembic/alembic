@@ -76,7 +76,10 @@ class SimplePrImpl : public ABSTRACT
 protected:
     SimplePrImpl( AbcA::CompoundPropertyReaderPtr iParent,
                   hid_t iParentGroup,
-                  PropertyHeaderPtr iHeader );
+                  PropertyHeaderPtr iHeader,
+                  uint32_t iNumSamples,
+                  uint32_t iFirstChangedIndex,
+                  uint32_t iLastChangedIndex );
 
 public:
     //-*************************************************************************
@@ -94,10 +97,14 @@ public:
 
     virtual bool isConstant();
 
-    virtual AbcA::TimeSampling getTimeSampling();
-
     virtual void getSample( index_t iSampleIndex,
                             SAMPLE oSample );
+
+    virtual std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime );
+
+    virtual std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime );
+
+    virtual std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime );
 
     virtual bool getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey );
 
@@ -121,25 +128,16 @@ protected:
     bool m_cleanNativeDataType;
 
     // The number of samples that were written. This may be greater
-    // than the number of samples that were stored, because on the tail
-    // of the property we don't write the same sample out over and over
-    // until it changes.
+    // than the number of samples that were stored, because we don't
+    // repeat head or tail samples that repeat
     uint32_t m_numSamples;
 
-    // The number of unique samples
-    // This may be the same as the number of samples,
-    // or it may be less. This corresponds to the number of samples
-    // that are actually stored. In the case of a "constant" property,
-    // this will be 1.
-    uint32_t m_numUniqueSamples;
+    // The first sample index that is different from sample 0
+    uint32_t m_firstChangedIndex;
 
-    // Value of the single time sample, if there's only one unique
-    // sample.
-    chrono_t m_timeSample0;
-
-    // The time sampling ptr.
-    // Contains Array Sample corresponding to the time samples
-    AbcA::TimeSamplingPtr m_timeSamplingPtr;
+    // The last sample index that needed to be written out, if the last sample
+    // repeats m_numSamples will be greater than this.
+    uint32_t m_lastChangedIndex;
 
     // The simple properties only store samples after the first
     // sample in a sub group. Therefore, there may not actually be
@@ -161,7 +159,10 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
 (
     AbcA::CompoundPropertyReaderPtr iParent,
     hid_t iParentGroup,
-    PropertyHeaderPtr iHeader
+    PropertyHeaderPtr iHeader,
+    uint32_t iNumSamples,
+    uint32_t iFirstChangedIndex,
+    uint32_t iLastChangedIndex
 )
   : m_parent( iParent )
   , m_parentGroup( iParentGroup )
@@ -170,7 +171,9 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
   , m_cleanFileDataType( false )
   , m_nativeDataType( -1 )
   , m_cleanNativeDataType( false )
-  , m_timeSample0( 0.0 )
+  , m_numSamples( iNumSamples )
+  , m_firstChangedIndex( iFirstChangedIndex )
+  , m_lastChangedIndex( iLastChangedIndex )
   , m_samplesIGroup( -1 )
 {
     // Validate all inputs.
@@ -193,28 +196,14 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
     // Get our name.
     const std::string &myName = m_header->getName();
 
-    // Read the num samples.
-    m_numSamples = 0;
-    m_numUniqueSamples = 0;
-    uint32_t numSamples32 = 0;
-    uint32_t numUniqueSamples32 = 0;
-    bool isScalar = m_header->getPropertyType() == AbcA::kScalarProperty;
-    ReadNumSamples( m_parentGroup,
-                    myName,
-                    isScalar,
-                    numSamples32,
-                    numUniqueSamples32 );
-    m_numSamples = numSamples32;
-    m_numUniqueSamples = numUniqueSamples32;
-
-    // Validate num unique samples.
-    ABCA_ASSERT( m_numUniqueSamples <= m_numSamples,
-                 "Corrupt numUniqueSamples: " << m_numUniqueSamples
-                 << "in property: " << myName
-                 << " which has numSamples: " << m_numSamples );
-
-    // Leave timeSamples and timeSamplingPtr until
-    // somebody asks for them.
+    // Validate the first and last changed index
+    ABCA_ASSERT( m_firstChangedIndex <= m_numSamples &&
+        m_lastChangedIndex <= m_numSamples &&
+        m_firstChangedIndex <= m_lastChangedIndex,
+        "Corrupt sampling information for property: " << myName
+            << " first change index: " << m_firstChangedIndex
+            << " last change index: " << m_lastChangedIndex
+            << " total number of samples: " << m_numSamples );
 }
 
 //-*****************************************************************************
@@ -260,67 +249,32 @@ size_t SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getNumSamples()
 template <class ABSTRACT, class IMPL, class SAMPLE>
 bool SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::isConstant()
 {
-    return ( m_numUniqueSamples < 2 );
+    // No first change means no changes at all
+    return ( m_firstChangedIndex == 0 );
 }
 
 //-*****************************************************************************
-// This class reads the time sampling on demand.
 template <class ABSTRACT, class IMPL, class SAMPLE>
-AbcA::TimeSampling
-SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getTimeSampling()
+std::pair<index_t, chrono_t>
+SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getFloorIndex( chrono_t iTime )
 {
+    return m_header->getTimeSampling()->getFloorIndex( iTime, m_numSamples );
+}
 
-    // we've filled it in already, just return a copy of it.
-    if (m_timeSamplingPtr)
-    {
-        AbcA::TimeSampling ret = *m_timeSamplingPtr;
-        return ret;
-    }
+//-*****************************************************************************
+template <class ABSTRACT, class IMPL, class SAMPLE>
+std::pair<index_t, chrono_t>
+SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getCeilIndex( chrono_t iTime )
+{
+    return m_header->getTimeSampling()->getCeilIndex( iTime, m_numSamples );
+}
 
-    //-*************************************************************************
-    // Read the time samples as an array ptr
-    // check their sizes, convert to times, create time sampling ptr.
-    // whew.
-    const std::string &myName = m_header->getName();
-
-    // Read the array, possibly from the cache.
-    // We are either a brand new shared_ptr <ArraySample>
-    // that owns the memory (and is now in the cache)
-    // OR we are a ref_count ++ of the shared_ptr <ArraySample>
-    // found from the cache.
-    // We'll create a TimeSamplingPtr and it will keep this
-    // reference for us.
-    AbcA::ArraySamplePtr timeSamples =
-        AbcCoreHDF5::ReadTimeSamples( this->getObject()->getArchive()->
-                         getReadArraySampleCachePtr(),
-                         m_parentGroup, myName + ".time" );
-    ABCA_ASSERT( timeSamples,
-                 "Couldn't read time samples for attr: " << myName );
-
-    // Check the byte sizes.
-    const AbcA::TimeSamplingType &tst = m_header->getTimeSamplingType();
-    uint32_t numExpectedTimeSamples =
-        std::min( tst.getNumSamplesPerCycle(), m_numSamples );
-
-    size_t gotNumTimes =
-        timeSamples->getDimensions().numPoints();
-
-    ABCA_ASSERT( numExpectedTimeSamples == 0 ||
-                 numExpectedTimeSamples == gotNumTimes,
-                 "Expected: " << numExpectedTimeSamples
-                 << " time samples, but got: "
-                 << gotNumTimes << " instead." );
-
-    // Build a time sampling ptr.
-    // m_timeSamplingPtr is shared_ptr to TimeSampling.
-    // TimeSampling contains numSamples and handy accessors AND
-    // the ArraySamplePtr of sampleTimes
-    m_timeSamplingPtr.reset( new AbcA::TimeSampling( tst, m_numSamples,
-                                                     timeSamples ) );
-
-    AbcA::TimeSampling ret = *m_timeSamplingPtr;
-    // And return it.
-    return ret;
+//-*****************************************************************************
+template <class ABSTRACT, class IMPL, class SAMPLE>
+std::pair<index_t, chrono_t>
+SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getNearIndex( chrono_t iTime )
+{
+    return m_header->getTimeSampling()->getNearIndex( iTime, m_numSamples );
 }
 
 //-*****************************************************************************
@@ -335,9 +289,15 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
                  "Invalid sample index: " << iSampleIndex
                  << ", should be between 0 and " << m_numSamples-1 );
 
-    if ( iSampleIndex >= m_numUniqueSamples )
+    // greater than the last index that had a change?  read it from there
+    if ( iSampleIndex > m_lastChangedIndex )
     {
-        iSampleIndex = m_numUniqueSamples-1;
+        iSampleIndex = m_lastChangedIndex;
+    }
+    // less than the first change?  map to 0
+    else if ( iSampleIndex < m_firstChangedIndex )
+    {
+        iSampleIndex = 0;
     }
 
     // Get our name.
@@ -407,10 +367,17 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
                  "Invalid sample index: " << iSampleIndex
                  << ", should be between 0 and " << m_numSamples-1 );
 
-    if ( iSampleIndex >= m_numUniqueSamples )
+    // greater than the last index that had a change?  read it from there
+    if ( iSampleIndex > m_lastChangedIndex )
     {
-        iSampleIndex = m_numUniqueSamples-1;
+        iSampleIndex = m_lastChangedIndex;
     }
+    // less than the first change?  map to 0
+    else if ( iSampleIndex < m_firstChangedIndex )
+    {
+        iSampleIndex = 0;
+    }
+
 
     // Get our name.
     const std::string &myName = m_header->getName();
@@ -419,7 +386,7 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
     {
         // Read the sample from the parent group.
         // Sample 0 is always on the parent group, with
-        // our name + ".sample_0" as the name of it.
+        // our name + ".smp0" as the name of it.
         std::string sample0Name = getSampleName( myName, 0 );
         if ( m_header->getPropertyType() == AbcA::kScalarProperty )
         {

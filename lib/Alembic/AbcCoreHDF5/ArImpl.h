@@ -57,8 +57,6 @@ private:
     ArImpl( const std::string &iFileName,
             AbcA::ReadArraySampleCachePtr iCache );
 
-    ArImpl( const ArImpl &iCopy );
-
 public:
     virtual ~ArImpl();
 
@@ -70,6 +68,8 @@ public:
     virtual const AbcA::MetaData &getMetaData() const;
 
     virtual AbcA::ObjectReaderPtr getTop();
+
+    virtual AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
 
     virtual AbcA::ArchiveReaderPtr asArchivePtr();
 
@@ -84,11 +84,18 @@ public:
         m_readArraySampleCache = iPtr;
     }
 
+    virtual uint32_t getNumTimeSamplings()
+    {
+        return m_timeSamples.size();
+    }
+
 private:
     std::string m_fileName;
     hid_t m_file;
 
     TopOrImpl *m_top;
+
+    std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
 
     AbcA::ReadArraySampleCachePtr m_readArraySampleCache;
 };

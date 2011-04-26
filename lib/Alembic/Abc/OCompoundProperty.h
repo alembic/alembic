@@ -131,10 +131,6 @@ public:
     //! This would primarily be used for introspection.
     OBaseProperty getProperty( const std::string &iName );
 
-    //! There's no need for "createProperty" to be exposed. Simply
-    //! use the OScalarProperty, OArrayProperty, and OCompoundProperty
-    //! wrappers.
-
     //! Return the parent compound property, handily wrapped in a
     //! OCompoundProperty wrapper.
     OCompoundProperty getParent();

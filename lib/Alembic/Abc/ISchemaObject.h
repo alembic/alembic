@@ -84,12 +84,15 @@ public:
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
+
         if ( getSchemaTitle() == "" || iMatching == kNoMatching )
-        { return true; }
+        {
+            return true;
+        }
+
 
         if ( iMatching == kStrictMatching )
         {
-
             return iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ||
                 iMetaData.get( "schema" ) == getSchemaObjTitle();
         }
@@ -108,14 +111,7 @@ public:
     static bool matches( const AbcA::ObjectHeader &iHeader,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        if ( iMatching == kNoMatching )
-        {
-            return true;
-        }
-        else
-        {
-            return matches( iHeader.getMetaData(), iMatching );
-        }
+        return matches( iHeader.getMetaData(), iMatching );
     }
 
 
@@ -188,8 +184,7 @@ ISchemaObject<SCHEMA>::ISchemaObject
     const std::string &iName,
     const Argument &iArg0,
     const Argument &iArg1 )
-  : IObject( iParentObject, iName,
-             GetErrorHandlerPolicy( iArg0, iArg1 ) )
+  : IObject( iParentObject, iName, iArg0, iArg1 )
 {
     Arguments args;
     iArg0.setInto( args );
@@ -248,6 +243,7 @@ inline ISchemaObject<SCHEMA>::ISchemaObject(
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
+
 
 } // End namespace Abc
 } // End namespace Alembic

@@ -91,7 +91,7 @@ public:
         if (index < sampleNameList.size())
             return sampleNameList[index];
         else
-            return 0;
+            return std::string();
     }
 
 private:
@@ -126,7 +126,6 @@ public:
     std::vector<Alembic::AbcGeom::IPoints>   mPointsList;
     std::vector<Alembic::AbcGeom::IXform>    mXformList;
 
-    std::vector<bool>           mIsSampledXformOpAngle;
     std::vector<bool>           mIsComplexXform;
 
 };  // WriterData

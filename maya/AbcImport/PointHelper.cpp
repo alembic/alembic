@@ -72,7 +72,8 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     }
 
     Alembic::AbcGeom::IPointsSchema::Sample samp;
-    int64_t index = schema.getTimeSampling().getNearIndex(iFrame).first;
+    int64_t index = schema.getTimeSampling()->getNearIndex(iFrame,
+        schema.getNumSamples()).first;
 
     schema.get(samp, index);
 

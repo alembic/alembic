@@ -116,7 +116,7 @@ public:
 
     //! Time information.
     //! This will be valid regardless of TimeSamplingType or number of samples.
-    AbcA::TimeSampling getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling();
 
     //! Get a sample into the address of a datum.
     //! ...

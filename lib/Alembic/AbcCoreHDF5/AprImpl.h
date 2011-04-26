@@ -53,7 +53,9 @@ class AprImpl
 {
 public:
     AprImpl( AbcA::CompoundPropertyReaderPtr iParent, hid_t iParentGroup,
-             PropertyHeaderPtr iHeader );
+             PropertyHeaderPtr iHeader, bool iIsScalarLike,
+             uint32_t iNumSamples, uint32_t iFirstChangedIndex,
+             uint32_t iLastChangedIndex );
 
     virtual AbcA::ArrayPropertyReaderPtr asArrayPtr();
     virtual bool isScalarLike();

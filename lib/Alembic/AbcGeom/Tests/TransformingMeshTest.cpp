@@ -69,16 +69,36 @@ void Example1_MeshOut()
 
     OObject top = archive.getTop();
 
-    TimeSamplingType tst( g_dt );
+    TimeSamplingPtr ts( new TimeSampling(g_dt, g_t0) );
 
-    OSimpleXform xf( top, "xf", tst );
+    OXform xf( top, "xf", ts );
 
     OPolyMesh meshyObj( xf, "meshy" );
     OPolyMeshSchema &mesh = meshyObj.getSchema();
 
-    SimpleXformSample xsamp;
+    XformOpVec xformVec;
+    XformOp op(kTranslateOperation, kTranslateHint);
+    op.setXAnimated(true);
+    xformVec.push_back(op);
 
-    xsamp.setTranslation( V3d( 0.0, 0.0, 4.04 ) );
+    std::vector < double > staticVec;
+    staticVec.push_back(0.0); // translate y
+    staticVec.push_back(4.04); // translate z
+
+    std::vector < double > animVec;
+    animVec.push_back(0.0); // translate x
+
+    // rotate y axis, animated
+    op = XformOp(kRotateOperation, kRotateHint);
+    op.setAngleAnimated(true);
+    xformVec.push_back(op);
+    staticVec.push_back(0.0);  // x
+    staticVec.push_back(1.0);  // y
+    staticVec.push_back(0.0);  // z
+    animVec.push_back(0.0); // angle
+
+    DoubleArraySample data(staticVec);
+    xf.getSchema().setXform( xformVec, data);
 
     g_ry.push_back( 0 );
     g_ry.push_back( 32.44 );
@@ -91,23 +111,20 @@ void Example1_MeshOut()
     g_ry.push_back( -79.555 );
     g_ry.push_back( -68.0007 );
 
+    data = DoubleArraySample(animVec);
+
     for ( size_t i = 0 ; i < 10 ; i++ )
     {
         chrono_t t = g_t0 + ( i * g_dt );
 
         if ( i == 9 )
         {
-            xsamp.setTranslation( V3d( 2.0, 0.0, 4.04 ) );
+            animVec[0] = 2.0;
         }
 
-        OSampleSelector oss( i, t );
+        animVec[1] = g_ry[i];
 
-        xsamp.setXYZRotation( V3d( 180.0, g_ry[i], 180.0 ) );
-
-        std::cout << "Writing " << i << "th xform sample:" << std::endl
-                  << xsamp << std::endl;
-
-        xf.getSchema().set( xsamp, oss );
+        xf.getSchema().set( data );
 
     }
 
@@ -128,29 +145,26 @@ void Example1_MeshIn()
     IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                       "transformingMesh1.abc" );
 
-    ISimpleXform xf( archive.getTop(), "xf" );
+    IXform xf( archive.getTop(), "xf" );
 
-    ISimpleXformSchema xfs = xf.getSchema();
+    IXformSchema xfs = xf.getSchema();
 
-    TESTING_ASSERT( xfs.getNumSamples() == 10 );
+    TESTING_ASSERT( xfs.getNumAnimSamples() == 10 );
 
-    TimeSampling ts = xfs.getTimeSampling();
+    TimeSamplingPtr ts = xfs.getTimeSampling();
 
-    TESTING_ASSERT( ts.getTimeSamplingType().isUniform() );
+    TESTING_ASSERT( ts->getTimeSamplingType().isUniform() );
 
-    for ( size_t i = 0 ; i < xfs.getNumSamples() ; i++ )
+    for ( size_t i = 0 ; i < xfs.getNumAnimSamples() ; i++ )
     {
         chrono_t t = g_t0 + ( i * g_dt );
 
-        TESTING_ASSERT( Imath::equalWithAbsError( t, ts.getSampleTime( i ),
+        TESTING_ASSERT( Imath::equalWithAbsError( t, ts->getSampleTime( i ),
                                                   CHRONO_EPSILON ) );
 
-        SimpleXformSample samp = xfs.getValue( i );
+        DoubleArraySamplePtr anim = xfs.getAnimData( i );
 
-        std::cout << "Reading " << i << "th xform sample:" << std::endl
-                  << samp << std::endl;
-
-        double ry = samp.getXYZRotation().y;
+        double ry = (*anim)[1];
 
         TESTING_ASSERT( Imath::equalWithAbsError( ry, g_ry[i], VAL_EPSILON ) );
     }

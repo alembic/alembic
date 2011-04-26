@@ -50,6 +50,11 @@ AwImpl::AwImpl( const std::string &iFileName,
   , m_metaData( iMetaData )
   , m_file( -1 )
 {
+
+    // add default time sampling
+    AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling() );
+    m_timeSamples.push_back(ts);
+
     // OPEN THE FILE!
     hid_t faid = H5Pcreate( H5P_FILE_ACCESS );
     if ( faid < 0 )
@@ -78,15 +83,6 @@ AwImpl::AwImpl( const std::string &iFileName,
 }
 
 //-*****************************************************************************
-AwImpl::AwImpl( const AwImpl &iCopy )
-  : m_fileName( iCopy.m_fileName )
-  , m_metaData( iCopy.m_metaData )
-  , m_file( iCopy.m_file )
-  , m_top( iCopy.m_top )
-  , m_writtenArraySampleMap( iCopy.m_writtenArraySampleMap )
-{}
-
-//-*****************************************************************************
 const std::string &AwImpl::getName() const
 {
     return m_fileName;
@@ -112,6 +108,39 @@ AbcA::ObjectWriterPtr AwImpl::getTop()
     AbcA::ObjectWriterPtr ret( m_top,
                                Alembic::Util::NullDeleter() );
     return ret;
+}
+
+//-*****************************************************************************
+uint32_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
+{
+    index_t numTS = m_timeSamples.size();
+    for (index_t i = 0; i < numTS; ++i)
+    {
+        if (iTs == *(m_timeSamples[i]))
+            return i;
+    }
+
+    // we've got a new TimeSampling, write it and add it to our vector
+    AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling(iTs) );
+    m_timeSamples.push_back(ts);
+
+    index_t latestSample = m_timeSamples.size() - 1;
+
+    std::stringstream strm;
+    strm << latestSample;
+    std::string name = strm.str();
+
+    WriteTimeSampling(m_file, name, *ts);
+    return latestSample;
+}
+
+//-*****************************************************************************
+AbcA::TimeSamplingPtr AwImpl::getTimeSampling( uint32_t iIndex )
+{
+    ABCA_ASSERT( iIndex < m_timeSamples.size(),
+        "Invalid index provided to getTimeSampling." );
+
+    return m_timeSamples[iIndex];
 }
 
 //-*****************************************************************************

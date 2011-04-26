@@ -40,6 +40,8 @@
 
 #include <maya/MFnPlugin.h>
 
+namespace AbcA = Alembic::AbcCoreAbstract;
+
 AbcExport::AbcExport()
 {
 }
@@ -487,18 +489,19 @@ MStatus AbcExport::doIt(const MArgList & args)
         transSamples = origSamples;
         geoSamples = origSamples;
 
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType transTime(util::spf());
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType geoTime(util::spf());
+        AbcA::TimeSamplingPtr transTime(new AbcA::TimeSampling());
+        AbcA::TimeSamplingPtr geoTime = transTime;
+
+        if (origSamples.size() > 1)
+        {
+            transTime.reset( new AbcA::TimeSampling(util::spf(),
+                (*(origSamples.begin())) * util::spf()) );
+            geoTime = transTime;
+        }
 
         // post process, add extra motion blur samples
         if (numSamples > 1 && shutterOpen < shutterClose)
         {
-            transTime = Alembic::AbcCoreAbstract::v1::TimeSamplingType(
-                numSamples, util::spf());
-
-            // if we are't subsampling the geometry, leave it as uniform
-            if (sampleGeo)
-                geoTime = transTime;
 
             std::set<double> offsetSamples;
             offsetSamples.insert(shutterOpen);
@@ -556,6 +559,23 @@ MStatus AbcExport::doIt(const MArgList & args)
                     }
                 }  // for offset
             }  // for samp
+
+            std::vector <double> timeSamps(numSamples);
+            samp = transSamples.begin();
+            for (int i = 0; i < numSamples; ++i)
+            {
+                timeSamps[i] = (*samp) * util::spf();
+                samp++;
+            }
+
+            transTime.reset( new AbcA::TimeSampling(
+                AbcA::TimeSamplingType(numSamples, util::spf()), timeSamps) );
+
+            // if we are't subsampling the geometry
+            // leave it as uniform per frame
+            if (sampleGeo)
+                geoTime = transTime;
+
         }  // if we need to apply motion blur
 
         AbcWriteJobPtr job(new AbcWriteJob(dagPath, fileName.c_str(),
@@ -645,7 +665,6 @@ MStatus AbcExport::doIt(const MArgList & args)
         {
             bool lastFrame = (*j)->eval(*it);
 
-            //
             if (lastFrame)
             {
                 j = jobList.erase(j);

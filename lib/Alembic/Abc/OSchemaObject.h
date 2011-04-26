@@ -208,10 +208,20 @@ OSchemaObject<SCHEMA>::OSchemaObject
     AbcA::ObjectHeader ohdr( iName, metaData );
     m_object = parent->createChild( ohdr );
 
+    AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
+    uint32_t tsIndex = args.getTimeSamplingIndex();
+
+    // if we specified a valid TimeSamplingPtr, use it to determine the index
+    // otherwise we'll use the index, which defaults to the intrinsic 0 index
+    if (tsPtr)
+    {
+        tsIndex = parent->getArchive()->addTimeSampling(*tsPtr);
+    }
+
     // Make the schema.
     m_schema = SCHEMA( m_object->getProperties(),
                        this->getErrorHandlerPolicy(),
-                       args.getTimeSamplingType() );
+                       tsIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

@@ -51,7 +51,7 @@ class MayaMeshWriter
 
     MayaMeshWriter(double iFrame, MDagPath & iDag,
         Alembic::Abc::OObject & iParent,
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+        uint32_t iTimeIndex,
         bool iWriteVisibilty, bool iWriteUVs);
     void write(double iFrame);
     bool isAnimated() const;
@@ -81,7 +81,6 @@ class MayaMeshWriter
     MDagPath mDagPath;
 
     size_t  mNumPoints;
-    size_t mCurIndex;
 
     AttributesWriterPtr mAttrs;
     Alembic::AbcGeom::OPolyMeshSchema   mPolySchema;

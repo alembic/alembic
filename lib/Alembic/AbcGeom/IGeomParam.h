@@ -118,9 +118,7 @@ public:
             matches( iHeader.getMetaData(), iMatching );
     }
 
-    ITypedGeomParam()
-     : m_isIndexed( false )
-    {}
+    ITypedGeomParam() {m_isIndexed = false;}
 
     template <class CPROP>
     ITypedGeomParam( CPROP iParent,
@@ -172,7 +170,7 @@ public:
     GeometryScope getScope()
     { return GetGeometryScope( m_valProp.getMetaData() ); }
 
-    AbcA::TimeSampling getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling();
 
     const std::string &getName();
 
@@ -455,22 +453,18 @@ const AbcA::MetaData &ITypedGeomParam<TRAITS>::getMetaData()
 
 //-*****************************************************************************
 template <class TRAITS>
-AbcA::TimeSampling ITypedGeomParam<TRAITS>::getTimeSampling()
+AbcA::TimeSamplingPtr ITypedGeomParam<TRAITS>::getTimeSampling()
 {
-    if ( m_indices && m_valProp )
+    if ( m_valProp )
     {
-        AbcA::TimeSamplingType itst =
-            m_indices.getTimeSampling().getTimeSamplingType();
-        AbcA::TimeSamplingType vtst =
-            m_valProp.getTimeSampling().getTimeSamplingType();
-
-        if ( itst.getNumSamplesPerCycle() > vtst.getNumSamplesPerCycle() )
-        { return m_indices.getTimeSampling(); }
-        else
-        { return m_valProp.getTimeSampling(); }
+        return m_valProp.getTimeSampling();
     }
-    else if ( m_indices ) { return m_indices.getTimeSampling(); }
-    else { return m_valProp.getTimeSampling(); }
+    else if ( m_indices )
+    {
+        return m_indices.getTimeSampling();
+    }
+
+    return AbcA::TimeSamplingPtr();
 }
 
 //-*****************************************************************************

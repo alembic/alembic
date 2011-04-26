@@ -75,18 +75,14 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
 
     // We only care about the attr name.
     // our names are in the form (for header info)
-    // $NAME.type       Property Type, Data Type, Name
+    // $NAME.info       Property Type, Data Type, and possibly TimeSampling
+    //                  index, number of samples, first changed sample,
+    //                  last changed sample, and is scalar like hint.
     // $NAME.meta       Meta Data
-    // $NAME.tspc       Time Sampling Num Samples Per Cycle
-    // $NAME.ttpc       Time Sampling Time Per Cycle
-    // $NAME.nums       Total number of samples and number of unique samples
-    //                  (only if they are different)
     // $NAME.smp0       First sample for smaller properties.
     //                  Larger properties store it in an HDF5 dataset.
     // $NAME.dims       Dimension hint for strings and complex multi-dimensional
     //                  data sets.
-    // $NAME.sclr       Hint on only array properties about whether it is scalar
-    //                  like, meaning every sample only has 1 DataType in it.
     // we ignore it everything else
     std::string attrName( iAttrName );
     size_t attrNameLen = attrName.size();
@@ -104,7 +100,7 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
 
     // Last 5 characters.
     std::string suffix( attrName, attrNameLen-5 );
-    if ( suffix == ".type" )
+    if ( suffix == ".info" )
     {
         std::string propertyName( attrName, 0, attrNameLen-5 );
         visitor->createNewProperty( propertyName );
@@ -179,6 +175,10 @@ BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
     {
         m_subProperties[(*siter)] = index;
         m_propertyHeaders[index].name = (*siter);
+        m_propertyHeaders[index].numSamples = 0;
+        m_propertyHeaders[index].firstChangedIndex = 0;
+        m_propertyHeaders[index].lastChangedIndex = 0;
+        m_propertyHeaders[index].isScalarLike = false;
     }
 }
 
@@ -212,11 +212,26 @@ const AbcA::PropertyHeader &BaseCprImpl::getPropertyHeader( size_t i )
     // read the property header stuff if we haven't yet
     if (m_propertyHeaders[i].header == NULL)
     {
+        uint32_t tsid = 0;
+
         PropertyHeaderPtr iPtr( new AbcA::PropertyHeader() );
-        ReadPropertyHeader( m_group, m_propertyHeaders[i].name, *iPtr );
+        ReadPropertyHeader( m_group, m_propertyHeaders[i].name, *iPtr,
+            m_propertyHeaders[i].isScalarLike,
+            m_propertyHeaders[i].numSamples,
+            m_propertyHeaders[i].firstChangedIndex,
+            m_propertyHeaders[i].lastChangedIndex, tsid );
+
+        if ( iPtr->isSimple() )
+        {
+            AbcA::TimeSamplingPtr tsPtr =
+                getObject()->getArchive()->getTimeSampling( tsid );
+
+            iPtr->setTimeSampling(tsPtr);
+        }
+
         m_propertyHeaders[i].header = iPtr;
 
-        // don't need name anymore
+        // don't need name anymore (it's in the header)
         m_propertyHeaders[i].name = "";
     }
 
@@ -261,7 +276,8 @@ BaseCprImpl::getScalarProperty( const std::string &iName )
     if ( sub.made.expired() )
     {
         // Make a new one.
-        bptr.reset( new SprImpl( this->asCompoundPtr(), m_group, sub.header ) );
+        bptr.reset( new SprImpl( this->asCompoundPtr(), m_group, sub.header,
+            sub.numSamples, sub.firstChangedIndex, sub.lastChangedIndex ) );
         sub.made = bptr;
     }
     else
@@ -300,7 +316,9 @@ BaseCprImpl::getArrayProperty( const std::string &iName )
     if ( sub.made.expired() )
     {
         // Make a new one.
-        bptr.reset( new AprImpl( this->asCompoundPtr(), m_group, sub.header ) );
+        bptr.reset( new AprImpl( this->asCompoundPtr(), m_group, sub.header,
+            sub.isScalarLike, sub.numSamples, sub.firstChangedIndex,
+            sub.lastChangedIndex ) );
         sub.made = bptr;
     }
     else

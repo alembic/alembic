@@ -55,11 +55,9 @@ void simpleTestOut()
     OCompoundProperty clampto( OCompoundProperty( mespa, kTop ),
                                "clampto" );
 
-    OV3fProperty clanker( clampto, "clanker",
-                          TimeSamplingType( 1.0/24.0 ) );
+    OV3fProperty clanker( clampto, "clanker", 0 );
 
-    OInt32Property clunker( clampto, "clunker",
-                          TimeSamplingType( 1.0/24.0 ) );
+    OInt32Property clunker( clampto, "clunker", 0 );
 
     // By scoping it, it deletes itself immediately.
     OBoolProperty( OCompoundProperty( slim, kTop ),
@@ -69,10 +67,6 @@ void simpleTestOut()
     {
         OObject spaniard( jubby, "spaniard" );
 
-        OV3dArrayProperty pointy(
-            OCompoundProperty( spaniard, kTop ),
-            "pointy",
-            TimeSamplingType( TimeSamplingType::kAcyclic ) );
 
         boost::mt19937 rng;
         boost::uniform_01<> dst;
@@ -81,7 +75,24 @@ void simpleTestOut()
 
         chrono_t sampTime = 0.0;
         std::vector<V3d> points( ( size_t )71 );
+
+        // create our random samples
+        std::vector < chrono_t > timeSamps(37);
         for ( index_t idx = 0; idx < 37; ++idx )
+        {
+            timeSamps[idx] = sampTime;
+            sampTime += gen();
+        }
+
+        TimeSampling ts(TimeSamplingType( TimeSamplingType::kAcyclic ),
+            timeSamps);
+        uint32_t tsidx = archive.addTimeSampling(ts);
+
+        OV3dArrayProperty pointy(
+            OCompoundProperty( spaniard, kTop ),
+            "pointy", tsidx);
+
+        for ( index_t idx = 0; idx < 36; ++idx )
         {
             if ( idx == 0 || gen() > 0.7 )
             {
@@ -91,16 +102,14 @@ void simpleTestOut()
                     (*piter) = V3d( gen(), gen(), gen() );
                 }
             }
-
-            pointy.set( points, OSampleSelector( idx, sampTime ) );
-
+            pointy.set( points );
             sampTime += gen();
         }
 
         // Test that zero-sized samples work.
         sampTime += 1.0;
         points.resize( 0 );
-        pointy.set( points, OSampleSelector( 37, sampTime ) );
+        pointy.set( points );
     }
 
     //-*************************************************************************
@@ -110,8 +119,8 @@ void simpleTestOut()
     OStringProperty wildeName(
         OCompoundProperty( oscar, kTop ),
         "wildeName" );
-    wildeName.set( "Oscar", 0 );
-    wildeName.set( "Wilde", 1 );
+    wildeName.set( "Oscar" );
+    wildeName.set( "Wilde" );
 
     // This is Lewis Carroll, not Oscar Wilde, but whatever.
     OStringArrayProperty jabber(
@@ -126,7 +135,7 @@ void simpleTestOut()
         stanza1.push_back( "the" );
         stanza1.push_back( "slithy" );
         stanza1.push_back( "toves" );
-        jabber.set( stanza1, 0 );
+        jabber.set( stanza1 );
     }
 
     {
@@ -138,12 +147,12 @@ void simpleTestOut()
         stanza2.push_back( "in" );
         stanza2.push_back( "the" );
         stanza2.push_back( "wobe" );
-        jabber.set( stanza2, 1 );
+        jabber.set( stanza2 );
     }
 
     {
         std::vector<std::string> emptyStanza;
-        jabber.set( emptyStanza, 2 );
+        jabber.set( emptyStanza );
     }
     
 
@@ -152,12 +161,11 @@ void simpleTestOut()
 
     for ( index_t idx = 0; idx < 1; ++idx )
     {
-        OSampleSelector oss( idx,
-                             ( 1.0/24.0 ) * ( chrono_t )idx );
-        V3f v( ( float )idx );
-        clanker.set( v, idx );
 
-        clunker.set( ( int32_t )( 731 - ( int )idx ), oss );
+        V3f v( ( float )idx );
+        clanker.set( v );
+
+        clunker.set( ( int32_t )( 731 - ( int )idx ) );
     }
 
     std::cout << "Gonna try to close: " << archive.getName()

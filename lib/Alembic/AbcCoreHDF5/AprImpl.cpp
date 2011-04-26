@@ -43,9 +43,14 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 AprImpl::AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
     hid_t iParentGroup,
-    PropertyHeaderPtr iHeader )
+    PropertyHeaderPtr iHeader,
+    bool iIsScalarLike,
+    uint32_t iNumSamples,
+    uint32_t iFirstChangedIndex,
+    uint32_t iLastChangedIndex )
     : SimplePrImpl<AbcA::ArrayPropertyReader, AprImpl, AbcA::ArraySamplePtr&>
-        ( iParent, iParentGroup, iHeader )
+        ( iParent, iParentGroup, iHeader, iNumSamples, iFirstChangedIndex,
+          iLastChangedIndex )
 {
     if ( m_header->getPropertyType() != AbcA::kArrayProperty )
     {
@@ -53,19 +58,9 @@ AprImpl::AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
                     "non-array property type" );
     }
 
-    m_isScalarLike = true;
-    std::string scalarName = m_header->getName() + ".sclr";
-
-    // if the attr doesn't exist, then we are scalar like
-    if ( H5Aexists(m_parentGroup, scalarName.c_str()) )
-    {
-        char scalarLike = 1;
-        size_t numRead = 0;
-        ReadSmallArray( m_parentGroup, scalarName, H5T_NATIVE_CHAR,
-            H5T_NATIVE_CHAR, 1, numRead, &scalarLike);
-        m_isScalarLike = scalarLike;
-    }
+    m_isScalarLike = iIsScalarLike;
 }
+
 //-*****************************************************************************
 AbcA::ArrayPropertyReaderPtr AprImpl::asArrayPtr()
 {
@@ -87,7 +82,7 @@ void AprImpl::readSample( hid_t iGroup,
     assert( iGroup >= 0 );
 
     // Check index integrity.
-    assert( iSampleIndex >= 0 && iSampleIndex < m_numUniqueSamples );
+    assert( iSampleIndex >= 0 && iSampleIndex <= m_lastChangedIndex );
 
     // Read the array sample, possibly from the cache.
     const AbcA::DataType &dataType = m_header->getDataType();

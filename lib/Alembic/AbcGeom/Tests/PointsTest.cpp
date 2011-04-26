@@ -234,19 +234,20 @@ void RunAndWriteParticles
     ParticleSystem parts( iParams );
 
     // Create the time sampling type.
-    TimeSamplingType tsmp( iFps );
+    TimeSampling ts(iFps, 0.0);
+    uint32_t tsidx = iParent.getArchive().addTimeSampling(ts);
 
     // Create our object.
-    OPoints partsOut( iParent, "simpleParticles", tsmp );
+    OPoints partsOut( iParent, "simpleParticles", tsidx );
     std::cout << "Created Simple Particles" << std::endl;
 
     // Add attributes
     OPointsSchema &pSchema = partsOut.getSchema();
     MetaData mdata;
     SetGeometryScope( mdata, kVaryingScope );
-    OV3fArrayProperty velOut( pSchema, "velocity", mdata, tsmp );
-    OC3fArrayProperty rgbOut( pSchema, "Cs", tsmp );
-    OFloatArrayProperty ageOut( pSchema, "age", tsmp );
+    OV3fArrayProperty velOut( pSchema, "velocity", mdata, tsidx );
+    OC3fArrayProperty rgbOut( pSchema, "Cs", tsidx );
+    OFloatArrayProperty ageOut( pSchema, "age", tsidx );
 
     // Get seconds per frame.
     chrono_t iSpf = 1.0 / iFps;
@@ -271,14 +272,13 @@ void RunAndWriteParticles
         chrono_t sampTime = (( chrono_t )sampIndex) * iSpf;
 
         // First, write the sample.
-        OSampleSelector oss( sampIndex, sampTime );
         OPointsSchema::Sample psamp(
             V3fArraySample( parts.positionVec() ),
             UInt64ArraySample( parts.idVec() ) );
-        pSchema.set( psamp, oss );
-        velOut.set( V3fArraySample( parts.velocityVec() ), oss );
-        rgbOut.set( C3fArraySample( parts.colorVec() ), oss );
-        ageOut.set( FloatArraySample( parts.ageVec() ), oss );
+        pSchema.set( psamp );
+        velOut.set( V3fArraySample( parts.velocityVec() ) );
+        rgbOut.set( C3fArraySample( parts.colorVec() ) );
+        ageOut.set( FloatArraySample( parts.ageVec() ) );
 
         // Now time step.
         parts.timeStep( iSpf );

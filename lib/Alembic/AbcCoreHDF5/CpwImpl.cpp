@@ -45,10 +45,11 @@ namespace ALEMBIC_VERSION_NS {
 // With the compound property writer as an input.
 CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   hid_t iParentGroup,
-                  PropertyHeaderPtr iHeader )
+                  const std::string & iName,
+                  const AbcA::MetaData & iMeta )
   : BaseCpwImpl( iParentGroup )
   , m_parent( iParent )
-  , m_header( iHeader )
+  , m_header( new AbcA::PropertyHeader(iName, iMeta) )
 {
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
@@ -66,9 +67,12 @@ CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
     m_object = optr;
 
     // Write the property header.
-    WritePropertyHeaderExceptTime( iParentGroup,
-                                   m_header->getName(),
-                                   *m_header );
+    WritePropertyInfo( iParentGroup, m_header->getName(),
+        m_header->getPropertyType(), m_header->getDataType(),
+        false, 0, 0, 0, 0 );
+
+    WriteMetaData( iParentGroup, m_header->getName() + ".meta",
+        m_header->getMetaData() );
 }
 
 //-*****************************************************************************

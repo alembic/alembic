@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreAbstract/ArraySample.h>
+#include <Alembic/Util/Murmur3.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -43,97 +44,94 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 ArraySample::Key ArraySample::getKey() const
 {
-    MD5 md5;
 
     // Depending on data type, loop over everything.
     size_t numPoints = m_dimensions.numPoints();
     size_t numPods = m_dataType.getExtent() * numPoints;
     size_t numBytes = m_dataType.getNumBytes() * numPoints;
 
+    ArraySample::Key k;
+    k.numBytes = numBytes;
+    k.origPOD = m_dataType.getPod();
+    k.readPOD = k.origPOD;
+
     switch ( m_dataType.getPod() )
     {
     case kBooleanPOD:
     case kUint8POD:
-        md5.update( ( const uint8_t * )m_data, numPods ); break;
     case kInt8POD:
-        md5.update( ( const int8_t * )m_data, numPods ); break;
-
     case kUint16POD:
-        md5.update( ( const uint16_t * )m_data, numPods ); break;
     case kInt16POD:
-        md5.update( ( const int16_t * )m_data, numPods ); break;
-
     case kUint32POD:
-        md5.update( ( const uint32_t * )m_data, numPods ); break;
     case kInt32POD:
-        md5.update( ( const int32_t * )m_data, numPods ); break;
-
     case kUint64POD:
-        md5.update( ( const uint64_t * )m_data, numPods ); break;
     case kInt64POD:
-        md5.update( ( const int64_t * )m_data, numPods ); break;
-
     case kFloat16POD:
-        md5.update( ( const float16_t * )m_data, numPods ); break;
-
     case kFloat32POD:
-        md5.update( ( const float32_t * )m_data, numPods ); break;
-
     case kFloat64POD:
-        md5.update( ( const float64_t * )m_data, numPods ); break;
+    {
+        MurmurHash3_x64_128( m_data, numBytes, PODNumBytes(m_dataType.getPod()),
+            k.digest.words );
+    }
+    break;
 
     case kStringPOD:
+    {
+        std::vector <int8_t> v;
         for ( size_t j = 0; j < numPods; ++j )
         {
             const std::string &str =
                 static_cast<const std::string*>( m_data )[j];
-            md5.update( ( const int8_t * )str.c_str(), str.length() );
+
+            size_t strLen = str.length();
+            for ( size_t k = 0; k < strLen; ++k )
+            {
+                v.push_back(str[k]);
+            }
 
             // append a 0 for the NULL seperator character
-            int8_t zero = 0;
-            md5.update( &zero, 1 );
+            v.push_back(0);
         }
-        break;
+
+        int8_t * vptr = NULL;
+        if ( !v.empty() )
+            vptr = &(v.front());
+
+        MurmurHash3_x64_128( vptr, v.size(), sizeof(int8_t), k.digest.words );
+    }
+    break;
 
     case kWstringPOD:
+    {
+        std::vector <int32_t> v;
         for ( size_t j = 0; j < numPods; ++j )
         {
             const std::wstring &wstr =
                 static_cast<const std::wstring*>( m_data )[j];
 
-            if ( sizeof( wchar_t ) == sizeof( int32_t ) )
+            std::vector <int32_t> v(wstr.length());
+            size_t wlen = wstr.length();
+            for (size_t k = 0; k < wlen; ++k)
             {
-                md5.update( ( const int32_t * )wstr.c_str(), wstr.length() );
-
-            }
-            // if wchar_t is 1 or 2 bytes, convert it to 4 bytes for
-            // purposes of calculating the key
-            else
-            {
-                std::vector <int32_t> v(wstr.length());
-                size_t wlen = wstr.length();
-                for (size_t k = 0; k < wlen; ++k)
-                    v[k] = wstr[k];
-
-                md5.update( v.size() == 0 ? NULL : &(v.front()), v.size() );
+                v[k] = wstr[k];
             }
 
             // append a 0 for the NULL seperator character
-            static const int32_t zero32 = 0;
-            md5.update( &zero32, 1 );
+            v.push_back(0);
         }
-        break;
+
+        int32_t * vptr = NULL;
+        if ( !v.empty() )
+            vptr = &(v.front());
+
+        MurmurHash3_x64_128( vptr, v.size(), sizeof(int32_t), k.digest.words );
+    }
+    break;
 
     default:
         ABCA_THROW( "Can't calculate key for: " << m_dataType ); break;
 
     }
-
-    ArraySample::Key k;
-    k.digest = md5.digest();
-    k.numBytes = numBytes;
-    k.origPOD = m_dataType.getPod();
-    k.readPOD = k.origPOD;
 
     return k;
 }

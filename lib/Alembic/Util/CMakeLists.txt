@@ -33,12 +33,16 @@
 ##-*****************************************************************************
 
 # C++ files for this project
-SET( CXX_FILES 
+SET( CXX_FILES
+     Murmur3.cpp
      TokenMap.cpp )
-SET( H_FILES 
+
+SET( H_FILES
+     Digest.h
      Dimensions.h
      Exception.h
-     Foundation.h  
+     Foundation.h
+     Murmur3.h
      OperatorBool.h
      PlainOldDataType.h
      Singleton.h

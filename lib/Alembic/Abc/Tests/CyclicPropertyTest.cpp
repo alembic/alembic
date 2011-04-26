@@ -68,15 +68,15 @@ void writeProperty(const std::string &archiveName)
 
     // Create cyclic time sampling
      std::vector<chrono_t> tvec;
-    tvec.push_back(  0.0 );
-    tvec.push_back(  g_dt/3.0 );
-    tvec.push_back(  2.0*g_dt/3.0 );
+    tvec.push_back(  g_startTime );
+    tvec.push_back(  g_startTime + g_dt/3.0 );
+    tvec.push_back(  g_startTime + 2.0*g_dt/3.0 );
     const chrono_t timePerCycle = g_dt;
     const size_t numSamplesPerCycle = 3;
 
     numSamples *= numSamplesPerCycle;
     const TimeSamplingType tSampTyp( numSamplesPerCycle, timePerCycle );
-
+    TimeSamplingPtr ts( new TimeSampling( tSampTyp, tvec ) );
 
     // Create a scalar property on this child object named 'mass'
     //  with metadata that indicates it's expressed in kilograms
@@ -85,12 +85,12 @@ void writeProperty(const std::string &archiveName)
     ODoubleProperty mass( childProps,  // owner
                           "mass", // name
                           units,
-                          tSampTyp ); // cyclic, specified above
+                          ts ); // cyclic, specified above
 
     for (int tt=0; tt<numSamples; tt++)
     {
         double mm = (1.0 + 0.1*tt); // vary the mass
-        mass.set( mm,  OSampleSelector(tt, g_startTime + (tt*(g_dt/3.0)) ) );
+        mass.set( mm );
     }
 
     std::cout << archiveName << " was successfully written" << std::endl;
@@ -160,17 +160,17 @@ void readProperty(const std::string &archiveName)
     std::cout << ".. it has " << numSamples << " samples" << std::endl;
     //ABCA_ASSERT( numSamples == 5, "Expected 5 samples, found " << numSamples );
 
-    const TimeSampling ts = mass.getTimeSampling();
+    TimeSamplingPtr ts = mass.getTimeSampling();
 
     std::cout << "..with time/value pairs: ";
     for (int ss=0; ss<numSamples; ss++)
     {
         ISampleSelector iss( (index_t) ss);
-        std::cout << ts.getSampleTime( (index_t) ss ) << "/";
+        std::cout << ts->getSampleTime( (index_t) ss ) << "/";
         printSampleValue( mass, iss );
         std::cout << " ";
 
-        double timeDiff = ts.getSampleTime( (index_t) ss ) -
+        double timeDiff = ts->getSampleTime( (index_t) ss ) -
             (g_startTime + (ss*(g_dt/3.0)));
         ABCA_ASSERT( fabs(timeDiff) < 1e-12, "Incorrect sample time read" );
 

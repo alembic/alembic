@@ -78,32 +78,28 @@ void testProps()
     {
         A5::WriteArchive w;
         ArchiveWriterPtr a = w(archiveName, AbcA::MetaData());
+        std::vector < chrono_t > samps(1, t0);
+        AbcA::TimeSampling ts(TimeSamplingType(dt), samps);
+        a->addTimeSampling(ts);
+
         ObjectWriterPtr top = a->getTop();
         ObjectWriterPtr child = top->createChild(
             ObjectHeader( "wow", MetaData() ) );
 
         CompoundPropertyWriterPtr props = child->getProperties();
 
-        TimeSamplingType tst( dt );
-
-        ScalarPropertyWriterPtr intProp = props->createScalarProperty(
-            PropertyHeader( "intProp", kScalarProperty,
-                            MetaData(), DataType( kInt32POD, 1 ),
-                            tst ) );
+        ScalarPropertyWriterPtr intProp = props->createScalarProperty("intProp",
+            MetaData(), DataType( kInt32POD, 1 ), 1);
 
         ArrayPropertyWriterPtr floatArrayProp = props->createArrayProperty(
-            PropertyHeader( "floatArrayProp", kArrayProperty,
-                            MetaData(), DataType( kFloat32POD, 1 ),
-                            tst ) );
+            "floatArrayProp", MetaData(), DataType( kFloat32POD, 1 ), 1);
 
-        intProp->setSample( 0, t0, &intVal );
+        intProp->setSample( &intVal );
 
         for ( size_t i = 0 ; i < 500 ; i++ )
         {
-            chrono_t time = t0 + ( dt * i );
-            floatArrayProp->setSample(
-                i, time, ArraySample( &(fvals.front()), floatDT,
-                                               dims ) );
+            floatArrayProp->setSample(ArraySample( &(fvals.front()), floatDT,
+                dims ) );
         }
 
     }
@@ -122,28 +118,14 @@ void testProps()
         TESTING_ASSERT( props->getNumProperties() == 2 );
 
         ScalarPropertyReaderPtr intProp = props->getScalarProperty( "intProp" );
-
+        TESTING_ASSERT( intProp->isConstant() );
         TESTING_ASSERT( intProp->getNumSamples() == 1 );
 
         ArrayPropertyReaderPtr floatArrayProp = \
             props->getArrayProperty( "floatArrayProp" );
 
-        TESTING_ASSERT( floatArrayProp->getNumSamples() == 1 );
-
-        std::cout << "intProp tst: "
-                  << intProp->getTimeSamplingType()
-                  << std::endl;
-
-        std::cout << "floatArrayProp tst: "
-                  << floatArrayProp->getTimeSamplingType()
-                  << std::endl;
-
-        std::cout << "intProp has " << intProp->getNumSamples() << " sample"
-                  << std::endl;
-
-        std::cout << "floatArrayProp has " << floatArrayProp->getNumSamples()
-                  << " sample." << std::endl;
-
+        TESTING_ASSERT( floatArrayProp->getNumSamples() == 500 );
+        TESTING_ASSERT( floatArrayProp->isConstant() );
 
     }
 }

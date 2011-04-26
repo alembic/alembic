@@ -82,7 +82,6 @@ SET( H_FILES
   OBaseProperty.h
   OCompoundProperty.h
   OObject.h
-  OSampleSelector.h
   OScalarProperty.h
   OSchema.h
   OSchemaObject.h

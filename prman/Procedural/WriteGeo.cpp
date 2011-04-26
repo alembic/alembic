@@ -44,10 +44,12 @@ void ProcessXform( IXform &xform, ProcArgs &args )
 {
     IXformSchema &xs = xform.getSchema();
 
-    const TimeSampling &ts = xs.getTimeSampling();
+    TimeSamplingPtr ts = xs.getTimeSampling();
+
+    size_t xformSamps = xs.getNumSamples();
 
     SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes( args, ts, sampleTimes );
+    GetRelevantSampleTimes( args, ts, xformSamps, sampleTimes );
 
     bool multiSample = sampleTimes.size() > 1;
 
@@ -112,10 +114,10 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 {
     IPolyMeshSchema &ps = polymesh.getSchema();
 
-    const TimeSampling &ts = ps.getTimeSampling();
+    TimeSamplingPtr ts = ps.getTimeSampling();
 
     SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes( args, ts, sampleTimes );
+    GetRelevantSampleTimes( args, ts, ps.getNumSamples(), sampleTimes );
 
     bool multiSample = sampleTimes.size() > 1;
 
@@ -184,10 +186,10 @@ void ProcessSubD( ISubD &subd, ProcArgs &args )
 {
     ISubDSchema &ss = subd.getSchema();
 
-    const TimeSampling &ts = ss.getTimeSampling();
+    TimeSamplingPtr ts = ss.getTimeSampling();
 
     SampleTimeSet sampleTimes;
-    GetRelevantSampleTimes( args, ts, sampleTimes );
+    GetRelevantSampleTimes( args, ts, ss.getNumSamples(), sampleTimes );
 
     bool multiSample = sampleTimes.size() > 1;
 
@@ -281,7 +283,6 @@ void ProcessSubD( ISubD &subd, ProcArgs &args )
 void WriteIdentifier( const ObjectHeader &ohead )
 {
     std::string name = ohead.getFullName();
-    //name = name.substr( 4, name.size() - 1 ); //for now, shave off the /ABC
     char* nameArray[] = { const_cast<char*>( name.c_str() ), RI_NULL };
 
     RiAttribute(const_cast<char*>( "identifier" ), const_cast<char*>( "name" ),

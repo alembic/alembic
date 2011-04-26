@@ -123,7 +123,7 @@ public:
     XformOp( const XformOperationType iType,
              const Alembic::Util::uint8_t iHint );
 
-    XformOp( const Alembic::Util::uint32_t iEncodedOp );
+    XformOp( const Alembic::Util::uint8_t iEncodedOp );
 
     //! Get the type of transform operation. (Translate, Rotate, Scale, Matrix)
     XformOperationType getType() const;
@@ -164,6 +164,11 @@ public:
     //! Translate and Scale have 3, Rotate has 4 and Matrix has 16.
     std::size_t getNumChannels() const;
 
+    //! Every channel has a name based on the type of the op, and the index of
+    //! the channel. This is used to interact with well-named Properties of
+    //! an xform that may or may not exist.
+    std::string getChannelName( std::size_t iIndex ) const;
+
     //! For every channel, there's a default value.  Typically, for each op
     //! type, it's the same across channels. But matrix ops have different
     //! defaults to allow the identity matrix to be defaulted (most channels
@@ -199,14 +204,11 @@ public:
 
     bool isMatrixOp() const;
 
-    // true if all the channel values are the same as the defaults
-    bool isDefault() const;
-
     //! Function for returning the combined encoded type and hint.
     //! The type is in the first four bits, the hint in the second.
     //!
     //! This is not really intended for use by human clients of this class.
-    Alembic::Util::uint32_t getOpEncoding() const;
+    Alembic::Util::uint8_t getOpEncoding() const;
 
 
 private:
@@ -216,6 +218,8 @@ private:
     std::vector<double> m_channels;
 
     std::set<std::size_t> m_animChannels;
+
+    std::string m_opName;
 
 private:
     //! The IXform can tell the op if its channels are animated

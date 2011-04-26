@@ -74,7 +74,8 @@ public:
     TimeIndexType getRequestedTimeIndexType() const
     { return m_requestedTimeIndexType; }
 
-    index_t getIndex( const AbcA::TimeSampling & iTsmp ) const;
+    index_t getIndex( const AbcA::TimeSamplingPtr & iTsmp, index_t
+        iNumSamples ) const;
 
 private:
     index_t m_requestedIndex;

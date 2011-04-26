@@ -252,28 +252,12 @@ public:
     //! ...
     size_t getNumSamples();
 
-    //! Return the time sampling type, which is stored on each of the
-    //! sub properties.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    { return m_positions.getTimeSamplingType(); }
-
-
-    //! Time information.
-    //! If the time sampling ptr is null, it means we don't have any explicit
-    //! mapping from sample indices to times (identity time sampling). If
-    //! a time needs to be associated with an index, it will simply be
-    //! ( chrono_t )index_t, and similarly ( index_t )chrono_t.
-    AbcA::TimeSampling getTimeSampling()
+    //! Return the time sampling
+    AbcA::TimeSamplingPtr getTimeSampling()
     {
-        if ( !m_positions.getTimeSampling().isStatic() )
-        {
+        if ( m_positions.valid() )
             return m_positions.getTimeSampling();
-        }
-        else if ( !m_faceIndices.getTimeSampling().isStatic() )
-        {
-            return m_faceIndices.getTimeSampling();
-        }
-        else { return m_faceCounts.getTimeSampling(); }
+        return getObject().getArchive().getTimeSampling(0);
     }
 
     void get( Sample &iSamp,

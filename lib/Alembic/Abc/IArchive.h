@@ -76,10 +76,10 @@ public:
 
         //! The file name.
         const std::string &iFileName,
-
+    
         ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
         AbcA::ReadArraySampleCachePtr iCachePtr = AbcA::ReadArraySampleCachePtr());
-
+    
     //! This attaches an IArchive wrapper around an existing
     //! ArchiveReaderPtr, with an optional error handling policy.
     IArchive(
@@ -141,9 +141,16 @@ public:
     //! ArchiveReaderPtr.
     AbcA::ArchiveReaderPtr getPtr() { return m_archive; }
 
-    //! Reset reeturns this function et to an empty, default
+    //! Reset returns this function et to an empty, default
     //! state.
     void reset() { m_archive.reset(); Base::reset(); }
+
+    //! Returns the TimeSampling at a given index.
+    AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
+
+    //! Returns the total number of TimeSamplingPtrs in the Archive
+    //! TimeSampling pool.
+    uint32_t getNumTimeSamplings();
 
     //! Valid returns whether this function set is
     //! valid.
@@ -174,21 +181,21 @@ IArchive::IArchive( ARCHIVE_CTOR iCtor,
                      ErrorHandler::Policy iPolicy,
                      AbcA::ReadArraySampleCachePtr iCachePtr )
 {
-    // Set the error handling policy.
+     // Set the error handling policy.
      getErrorHandler().setPolicy( iPolicy );
 
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
+     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
 
      if ( iCachePtr )
-    {
+     {
          m_archive = iCtor( iFileName, iCachePtr );
-    }
-    else
-    {
-        m_archive = iCtor( iFileName );
-    }
+     }
+     else
+     {
+         m_archive = iCtor( iFileName );
+     }
 
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 } // End namespace Abc

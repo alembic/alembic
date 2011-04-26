@@ -53,7 +53,7 @@ static void __test( OObject &iObject )
 
     int32_t i[] = { 1, 2, 3, 4, 5 };
     intProp.set( Int32ArraySample( i, 5 ) );
-    intProp2.set( Int32ArraySample( i, 5 ), 1 );
+    intProp2.set( Int32ArraySample( i, 5 ) );
 
     std::vector<bool_t> bools( 17 );
     boolProp.set( bools );

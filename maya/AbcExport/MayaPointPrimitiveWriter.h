@@ -49,7 +49,7 @@ class MayaPointPrimitiveWriter
 
     MayaPointPrimitiveWriter(double iFrame, MDagPath & iDag,
         Alembic::AbcGeom::OObject & iParent,
-        Alembic::AbcCoreAbstract::v1::TimeSamplingType & iTimeType,
+        uint32_t iTimeIndex,
         bool iWriteVisibility);
 
     void write(double iFrame);
@@ -64,7 +64,6 @@ class MayaPointPrimitiveWriter
 
     AttributesWriterPtr mAttrs;
     Alembic::AbcGeom::OPointsSchema mSchema;
-    size_t mCurIndex;
 };
 
 #endif  // _AlembicExport_MayaPointPrimitiveWriter_h_

@@ -47,12 +47,21 @@ namespace ALEMBIC_VERSION_NS {
 //-*************************************************************************
 SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   hid_t iParentGroup,
-                  PropertyHeaderPtr iHeader )
+                  const std::string & iName,
+                  const AbcA::MetaData & iMetaData,
+                  const AbcA::DataType & iDataType,
+                  uint32_t iTimeSamplingIndex )
   : SimplePwImpl<AbcA::ScalarPropertyWriter,
                  SpwImpl,
                  const void *,
-                 ScalarSampleKey>( iParent, iParentGroup, iHeader )
-  , m_previousSample( iHeader->getDataType() )
+                 ScalarSampleKey>( iParent,
+                                   iParentGroup,
+                                   iName,
+                                   iMetaData,
+                                   iDataType,
+                                   iTimeSamplingIndex,
+                                   AbcA::kScalarProperty )
+  , m_previousSample( iDataType )
 {
     if ( m_header->getPropertyType() != AbcA::kScalarProperty )
     {
@@ -62,10 +71,12 @@ SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
 }
 
 //-*****************************************************************************
-// Just here to support debugging, if necessary. ScalarSample deletes itself.
 SpwImpl::~SpwImpl()
 {
-    // Nothing
+    WritePropertyInfo( m_parentGroup, m_header->getName(),
+        m_header->getPropertyType(), m_header->getDataType(), true,
+        m_timeSamplingIndex, m_nextSampleIndex, m_firstChangedIndex,
+        m_lastChangedIndex );
 }
 
 //-*****************************************************************************

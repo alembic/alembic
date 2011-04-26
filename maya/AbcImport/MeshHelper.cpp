@@ -92,7 +92,7 @@ namespace
         // no interpolation for now
         int64_t index, ceilIndex;
         double alpha = getWeightAndIndex(iFrame, iUVs.getTimeSampling(),
-            index, ceilIndex);
+            iUVs.getNumSamples(), index, ceilIndex);
 
         MFloatArray uArray;
         MFloatArray vArray;
@@ -189,7 +189,8 @@ namespace
 
         int64_t index, ceilIndex;
         double alpha = getWeightAndIndex(iFrame,
-            iNormals.getTimeSampling(), index, ceilIndex);
+            iNormals.getTimeSampling(), iNormals.getNumSamples(),
+            index, ceilIndex);
 
         Alembic::AbcGeom::IN3fGeomParam::Sample samp;
         iNormals.getExpanded(samp, Alembic::Abc::ISampleSelector(index));
@@ -363,7 +364,7 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
-        schema.getTimeSampling(), index, ceilIndex);
+        schema.getTimeSampling(), schema.getNumSamples(), index, ceilIndex);
 
     MFloatPointArray pointArray;
     Alembic::Abc::V3fArraySamplePtr ceilPoints;
@@ -424,7 +425,7 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
-        schema.getTimeSampling(), index, ceilIndex);
+        schema.getTimeSampling(), schema.getNumSamples(), index, ceilIndex);
 
     MFloatPointArray pointArray;
     Alembic::Abc::V3fArraySamplePtr ceilPoints;
@@ -517,7 +518,7 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
     {
         int64_t index, ceilIndex;
         double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(),
-            index, ceilIndex);
+            schema.getNumSamples(), index, ceilIndex);
 
         Alembic::AbcGeom::IPolyMeshSchema::Sample samp;
         schema.get(samp, Alembic::Abc::ISampleSelector(index));
@@ -564,8 +565,8 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
     Alembic::AbcGeom::ISubDSchema schema = iNode.getSchema();
 
     int64_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(), index,
-        ceilIndex);
+    double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(),
+        schema.getNumSamples(), index, ceilIndex);
 
     Alembic::AbcGeom::ISubDSchema::Sample samp;
     schema.get(samp, Alembic::Abc::ISampleSelector(index));

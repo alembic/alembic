@@ -54,6 +54,60 @@ bool almostEqual( const double &a, const double &b,
 using namespace Alembic::AbcGeom;
 
 //-*****************************************************************************
+void recurseCreateXform(OObject & iParent, int children, int level,
+                        std::vector<OXform> & oCreated)
+{
+    std::string levelName = boost::lexical_cast<std::string>( level );
+    for (int i = 0; i < children; ++i)
+    {
+        std::string xformName = levelName + "_" + boost::lexical_cast<std::string>( i );
+        OXform xform( iParent, xformName );
+        XformSample samp;
+        XformOp transop( kTranslateOperation, kTranslateHint );
+        XformOp rotatop( kRotateOperation, kRotateHint );
+        XformOp scaleop( kScaleOperation, kScaleHint );
+        samp.addOp( transop, V3d(0.0, 0.0, 0.0) );
+        samp.addOp( rotatop, V3d(0.0, 0.0, 1.0), 0.0 );
+        samp.addOp( rotatop, V3d(0.0, 1.0, 0.0), 0.0 );
+        samp.addOp( rotatop, V3d(1.0, 0.0, 0.0), 0.0 );
+        samp.addOp( scaleop, V3d(1.0, 1.0, 1.0) );
+        xform.getSchema().set(samp);
+        oCreated.push_back( xform );
+        if ( level > 0 )
+        {
+            recurseCreateXform( xform, children, level - 1, oCreated );
+        }
+    }
+}
+
+//-*****************************************************************************
+void xformTreeCreate()
+{
+    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform_tree.abc" );
+    std::vector<OXform> xforms;
+    OObject root( archive, kTop);
+    recurseCreateXform( root, 4, 4, xforms );
+    std::cout << "Total xforms created " << xforms.size() << std::endl;
+
+    XformSample samp;
+    XformOp transop( kTranslateOperation, kTranslateHint );
+    XformOp rotatop( kRotateOperation, kRotateHint );
+    XformOp scaleop( kScaleOperation, kScaleHint );
+    samp.addOp( transop, V3d(42.0, 42.0, 42.0) );
+    samp.addOp( rotatop, V3d(0.0, 0.0, 1.0), 10.0 );
+    samp.addOp( rotatop, V3d(0.0, 1.0, 0.0), 20.0 );
+    samp.addOp( rotatop, V3d(1.0, 0.0, 0.0), 30.0 );
+    samp.addOp( scaleop, V3d(4.0, 4.0, 4.0) );
+
+    for (std::vector<OXform>::iterator i = xforms.begin(); i != xforms.end();
+         ++i)
+    {
+        i->getSchema().set(samp);
+    }
+
+}
+
+//-*****************************************************************************
 void xformOut()
 {
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform1.abc" );
@@ -73,15 +127,17 @@ void xformOut()
     {
         asamp.addOp( transop, V3d( 12.0, i + 42.0, 20.0 ) );
 
-        a.getSchema().set( asamp, OSampleSelector( i ) );
+        a.getSchema().set( asamp );
     }
+
+    //return;
 
     XformSample bsamp;
     for ( size_t i = 0 ; i < 20 ; ++i )
     {
         bsamp.setInheritsXforms( (bool)(i&1) );
 
-        b.getSchema().set( bsamp, OSampleSelector( i ) );
+        b.getSchema().set( bsamp );
     }
 
     // for c we write nothing
@@ -113,6 +169,8 @@ void xformIn()
     XformSample xs;
 
     IXform a( IObject( archive, kTop ), "a" );
+    std::cout << "'a' num samples: " << a.getSchema().getNumSamples() << std::endl;
+
     TESTING_ASSERT( a.getSchema().getNumOps() == 1 );
     TESTING_ASSERT( a.getSchema().getInheritsXforms() );
     for ( index_t i = 0; i < 20; ++i )
@@ -127,14 +185,16 @@ void xformIn()
 
         TESTING_ASSERT( xs.getTranslation() == V3d( 12.0, i+42.0, 20.0 ) );
         TESTING_ASSERT( xs.getMatrix() ==
-                        Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
+        Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
     }
+
+    //return;
 
     IXform b( a, "b" );
     b.getSchema().get( xs );
-    TESTING_ASSERT( b.getSchema().getTimeSampling().getTimeSamplingType().isIdentity() );
+    TESTING_ASSERT( b.getSchema().getTimeSampling()->getTimeSamplingType().isUniform() );
     // the schema is not static, because set() was called 20 times on it.
-    TESTING_ASSERT( !b.getSchema().getTimeSampling().isStatic() );
+    TESTING_ASSERT( !b.getSchema().isConstant() );
     TESTING_ASSERT( xs.getNumOps() == 0 );
     TESTING_ASSERT( b.getSchema().getNumOps() == 0 );
     TESTING_ASSERT( xs.getMatrix() == identity );
@@ -168,13 +228,13 @@ void xformIn()
     TESTING_ASSERT( d.getSchema().getInheritsXforms() );
 
     IXform e( d, "e" );
-    TESTING_ASSERT( e.getSchema().isConstantIdentity() );
+    //TESTING_ASSERT( e.getSchema().isConstantIdentity() );
     TESTING_ASSERT( e.getSchema().isConstant() );
     TESTING_ASSERT( e.getSchema().getNumOps() == 3 );
 
     IXform f( e, "f" );
     TESTING_ASSERT( f.getSchema().isConstant() ); // is constant
-    TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
+    //TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
 
     std::cout << "Tested all xforms in first test!" << std::endl;
 }
@@ -218,7 +278,7 @@ void someOpsXform()
         XformOp transpivotop( kTranslateOperation, kRotatePivotPointHint );
         asamp.addOp( transpivotop, V3d( 0.0, 0.0, 0.0 ) );
 
-        a.getSchema().set( asamp, OSampleSelector( 0 ) );
+        a.getSchema().set( asamp );
 
         for (size_t i = 1; i < 5; ++i)
         {
@@ -240,7 +300,7 @@ void someOpsXform()
 
             asamp.addOp( transpivotop, V3d( 0.0, 3.0 * i, 4.0 * i ) );
 
-            a.getSchema().set( asamp, OSampleSelector( i ) );
+            a.getSchema().set( asamp );
         }
 
     }
@@ -373,6 +433,7 @@ int main( int argc, char *argv[] )
     xformOut();
     xformIn();
     someOpsXform();
+    xformTreeCreate();
 
     return 0;
 }

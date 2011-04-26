@@ -195,8 +195,6 @@ ReadKey( hid_t iParent,
 }
 
 //-*****************************************************************************
-//-*****************************************************************************
-//-*****************************************************************************
 bool
 ReadMetaData( hid_t iParent,
               const std::string &iMetaDataName,
@@ -214,94 +212,6 @@ ReadMetaData( hid_t iParent,
     {
         oMetaData = AbcA::MetaData();
         return false;
-    }
-}
-
-//-*****************************************************************************
-static void
-ReadPropertyAndDataType( hid_t iParent,
-                         const std::string &iPADName,
-                         AbcA::PropertyType &oPtype,
-                         AbcA::DataType &oDtype )
-{
-    ABCA_ASSERT( iParent >= 0, "Invalid parent in ReadPropertyAndDataType" );
-
-    // It is an error for this to not exist.
-    ABCA_ASSERT( H5Aexists( iParent, iPADName.c_str() ) > 0,
-                 "Nonexistent property type attr: " << iPADName );
-
-    uint16_t bitField = 0;
-    ReadScalar( iParent, iPADName, H5T_STD_U16LE, H5T_NATIVE_UINT16,
-                ( void * )&bitField );
-
-    static const uint16_t ptypeMask =
-        ( uint16_t )BOOST_BINARY( 0000 0000 0000 0011 );
-    static const uint16_t podMask =
-        ( uint16_t )BOOST_BINARY( 0000 0000 0000 1111 );
-    static const uint16_t extentMask =
-        ( uint16_t )BOOST_BINARY( 0000 0000 1111 1111 );
-
-    // Read the property type from the low two bits.
-    char ipt = ( char )( bitField & ptypeMask );
-    if ( ipt != ( char )AbcA::kScalarProperty &&
-         ipt != ( char )AbcA::kArrayProperty &&
-         ipt != ( char )AbcA::kCompoundProperty )
-    {
-        ABCA_THROW( "Read invalid property type: " << ( int )ipt );
-    }
-
-    if ( ipt == ( char )AbcA::kCompoundProperty )
-    {
-        // Read a magic number from the back 12 bits
-        // TINY bit of version locking & synchro here.
-        uint16_t magic = bitField & ~ptypeMask;
-        if ( magic != COMPOUND_MAGIC )
-        {
-            ABCA_THROW( "Read invalid compound property type magic: "
-                        << magic << ", was expecting: "
-                        << COMPOUND_MAGIC );
-        }
-
-        oPtype = AbcA::kCompoundProperty;
-        return;
-    }
-    else
-    {
-        // Read the pod type out of bits 2-5
-        char podt = ( char )( ( bitField >> 2 ) & podMask );
-        if ( podt != ( char )kBooleanPOD &&
-
-             podt != ( char )kUint8POD &&
-             podt != ( char )kInt8POD &&
-
-             podt != ( char )kUint16POD &&
-             podt != ( char )kInt16POD &&
-
-             podt != ( char )kUint32POD &&
-             podt != ( char )kInt32POD &&
-
-             podt != ( char )kUint64POD &&
-             podt != ( char )kInt64POD &&
-
-             podt != ( char )kFloat16POD &&
-             podt != ( char )kFloat32POD &&
-             podt != ( char )kFloat64POD &&
-
-             podt != ( char )kStringPOD &&
-             podt != ( char )kWstringPOD )
-        {
-            ABCA_THROW( "Read invalid POD type: " << ( int )podt );
-        }
-
-        // Read the extent out of bits 8-15
-        uint8_t extent = ( uint8_t )( ( bitField >> 8 ) & extentMask );
-        if ( extent == 0 )
-        {
-            ABCA_THROW( "Degenerate extent 0" );
-        }
-
-        oPtype = ( AbcA::PropertyType )ipt;
-        oDtype = AbcA::DataType( ( PlainOldDataType )podt, extent );
     }
 }
 
@@ -345,13 +255,12 @@ ReadTimeSamplingType( hid_t iParent,
         ABCA_ASSERT( spc > 1, "Corrupt TimeSamplingType spc: " << spc );
 
         chrono_t tpc = 1.0;
-        ABCA_ASSERT( H5Aexists( iParent, nameTPC.c_str() ) > 0,
-                     "Missing time per cycle attribute: " << nameTPC );
 
-        ReadScalar( iParent, nameTPC,
-                    H5T_IEEE_F64LE,
-                    H5T_NATIVE_DOUBLE,
-                    ( void * )&tpc );
+        if (H5Aexists( iParent, nameTPC.c_str() ) > 0)
+        {
+            ReadScalar( iParent, nameTPC, H5T_IEEE_F64LE,
+                H5T_NATIVE_DOUBLE, ( void * )&tpc );
+        }
 
         ABCA_ASSERT( tpc > 0.0 && tpc <
                      AbcA::TimeSamplingType::AcyclicTimePerCycle(),
@@ -385,35 +294,161 @@ ReadTimeSamplingType( hid_t iParent,
 //-*****************************************************************************
 void
 ReadPropertyHeader( hid_t iParent,
-                    const std::string &iPropName,
-                    AbcA::PropertyHeader &oHeader )
+                    const std::string & iPropName,
+                    AbcA::PropertyHeader & oHeader,
+                    bool & oIsScalarLike,
+                    uint32_t & oNumSamples,
+                    uint32_t & oFirstChangedIndex,
+                    uint32_t & oLastChangedIndex,
+                    uint32_t & oTimeSamplingIndex )
 {
-    // First the type.
-    AbcA::PropertyType oPropertyType;
-    AbcA::DataType oDataType;
-    ReadPropertyAndDataType( iParent, iPropName + ".type",
-                             oPropertyType, oDataType );
+    uint32_t info[5] = {0, 0, 0, 0, 0};
 
-    // Now read the meta data.
-    AbcA::MetaData oMetaData;
-    ReadMetaData( iParent, iPropName + ".meta", oMetaData );
+    static const uint32_t ptypeMask = ( uint32_t )BOOST_BINARY (
+        0000 0000 0000 0000 0000 0000 0000 0011 );
 
-    // Lastly, the time sampling
-    if ( oPropertyType != AbcA::kCompoundProperty )
+    static const uint32_t podMask = ( uint32_t )BOOST_BINARY (
+        0000 0000 0000 0000 0000 0000 0011 1100 );
+
+    static const uint32_t hasTsidxMask = ( uint32_t )BOOST_BINARY (
+        0000 0000 0000 0000 0000 0000 0100 0000 );
+
+    static const uint32_t noRepeatsMask = ( uint32_t )BOOST_BINARY (
+        0000 0000 0000 0000 0000 0000 1000 0000 );
+
+    static const uint32_t extentMask = ( uint32_t )BOOST_BINARY(
+        0000 0000 0000 0000 1111 1111 0000 0000 );
+
+    size_t numFields = 0;
+    size_t fieldsUsed = 1;
+
+    ReadSmallArray(iParent, iPropName + ".info", H5T_STD_U32LE,
+        H5T_NATIVE_UINT32, 5, numFields, (void *) info );
+
+    AbcA::MetaData metaData;
+    ReadMetaData( iParent, iPropName + ".meta", metaData );
+
+    if ( numFields == 1 && info[0] == 0 )
     {
-        AbcA::TimeSamplingType oTsType;
-        ReadTimeSamplingType( iParent, iPropName, oTsType );
-
-        oHeader = AbcA::PropertyHeader( iPropName,
-                                        oPropertyType,
-                                        oMetaData,
-                                        oDataType,
-                                        oTsType );
+        oHeader = AbcA::PropertyHeader( iPropName, metaData );
     }
     else
     {
-        oHeader = AbcA::PropertyHeader( iPropName,
-                                        oMetaData );
+        // low two bits are the property type
+        char ipt = info[0] & ptypeMask;
+
+        // first bit is either scalar, or scalar like
+        oIsScalarLike = ipt & 1;
+
+        // is scalar like is set for this array attribute
+        if (ipt == 3)
+        {
+            oHeader.setPropertyType( AbcA::kArrayProperty );
+        }
+        else
+        {
+            oHeader.setPropertyType( ( AbcA::PropertyType )ipt );
+        }
+
+        // Read the pod type out of bits 2-5
+        char podt = ( char )( ( info[0] & podMask ) >> 2 );
+        if ( podt != ( char )kBooleanPOD &&
+
+             podt != ( char )kUint8POD &&
+             podt != ( char )kInt8POD &&
+
+             podt != ( char )kUint16POD &&
+             podt != ( char )kInt16POD &&
+
+             podt != ( char )kUint32POD &&
+             podt != ( char )kInt32POD &&
+
+             podt != ( char )kUint64POD &&
+             podt != ( char )kInt64POD &&
+
+             podt != ( char )kFloat16POD &&
+             podt != ( char )kFloat32POD &&
+             podt != ( char )kFloat64POD &&
+
+             podt != ( char )kStringPOD &&
+             podt != ( char )kWstringPOD )
+        {
+            ABCA_THROW( "Read invalid POD type: " << ( int )podt );
+        }
+
+        // bit 6 is the hint about whether time sampling index was written
+        // at the end
+        bool hasTsidx = ( (info[0] & hasTsidxMask ) >> 6 ) == 1;
+        oTimeSamplingIndex = 0;
+
+        if ( hasTsidx && numFields > 1 )
+        {
+            oTimeSamplingIndex = info[numFields - 1];
+            fieldsUsed ++;
+        }
+
+        // bit 7 is a hint about whether first and last changed index
+        // are intrinsically 1, and numSamples - 1
+        // (no repeated data from the start or the end)
+        bool noRepeats = ( (info[0] & noRepeatsMask ) >> 7 ) == 1;
+
+        // Time Sampling Index could be written, but the number of samples
+        // may not be.
+        if ( numFields > fieldsUsed )
+        {
+            oNumSamples = info[1];
+
+            if ( numFields >= 4 )
+            {
+                oFirstChangedIndex = info[2];
+                oLastChangedIndex = info[3];
+            }
+            else if ( noRepeats )
+            {
+                oFirstChangedIndex = 1;
+                oLastChangedIndex = oNumSamples - 1;
+            }
+            else
+            {
+                oFirstChangedIndex = 0;
+                oLastChangedIndex = 0;
+            }
+        }
+        else
+        {
+            oNumSamples = 0;
+            oFirstChangedIndex = 0;
+            oLastChangedIndex = 0;
+
+            // if smp0 exists then we have 1 sample
+            std::string smpName = iPropName + ".smp0";
+            if ( oHeader.getPropertyType() == AbcA::kArrayProperty &&
+                H5Lexists( iParent, smpName.c_str(), H5P_DEFAULT ) > 0)
+            {
+                oNumSamples = 1;
+            }
+            else if ( oHeader.getPropertyType() == AbcA::kScalarProperty &&
+                H5Aexists( iParent, smpName.c_str() ) > 0)
+            {
+                oNumSamples = 1;
+            }
+        }
+
+        // Read the extent out of bits 8-15
+        uint8_t extent = ( uint8_t )( ( info[0] & extentMask ) >> 8 );
+        if ( extent == 0 )
+        {
+            ABCA_THROW( "Degenerate extent 0" );
+        }
+
+        // bits 16-31 are currently not being used
+
+        // the time sampling will be set on oHeader by the calling function
+        // since we don't have access to the archive here.
+        oHeader.setName( iPropName );
+        oHeader.setMetaData( metaData );
+        oHeader.setDataType(
+            AbcA::DataType( ( Util::PlainOldDataType ) podt, extent ) );
     }
 }
 
@@ -577,118 +612,52 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
 }
 
 //-*****************************************************************************
-bool ReadNumSamples( hid_t iParent,
-                     const std::string &iPropName,
-                     bool isScalar,
-                     uint32_t &oNumSamples,
-                     uint32_t &oNumUniqueSamples )
+void
+ReadTimeSamples( hid_t iParent,
+                 std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples )
 {
-    ABCA_ASSERT( iParent >= 0, "Invalid parent in ReadNumSamples" );
+    oTimeSamples.clear();
+    // add the intrinsic default sampling
+    AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling() );
+    oTimeSamples.push_back( ts );
 
-    // First, look to see whether the attribute exists in the first place.
-    std::string numSamplesName = iPropName + ".nums";
-    if ( H5Aexists( iParent, numSamplesName.c_str() ) > 0 )
+    uint32_t i = 1;
+    AbcA::TimeSamplingType tst;
+    std::string tstname = "1";
+
+    // keep trying to read till we can't find anymore
+    while ( ReadTimeSamplingType( iParent, tstname, tst ) )
     {
-        // We have a num samples attr, read it.
-        uint32_t numSamps[2];
-        size_t sampsRead;
-        ReadSmallArray( iParent, numSamplesName,
-                        H5T_STD_U32LE,
-                        H5T_NATIVE_UINT32,
-                        2, sampsRead,
-                        ( void * )numSamps );
+        // try to open the time samples attribute
+        std::string timeName = tstname + ".time";
+        hid_t aid = H5Aopen( iParent, timeName.c_str(), H5P_DEFAULT );
+        ABCA_ASSERT( aid >= 0,
+            "Couldn't open time samples named: " << timeName );
+        AttrCloser attrCloser( aid );
 
-        if ( sampsRead == 1 )
-        {
-            oNumSamples = numSamps[0];
-            oNumUniqueSamples = numSamps[0];
-            return true;
-        }
-        else
-        {
-            assert( sampsRead == 2 );
-            oNumSamples = numSamps[0];
-            oNumUniqueSamples = numSamps[1];
-            return true;
-        }
-    }
+        // figure out how big it is
+        hid_t sid = H5Aget_space( aid );
+        ABCA_ASSERT( sid >= 0,
+            "Couldn't get dataspace for time samples: " << timeName );
+        DspaceCloser dspaceCloser( sid );
 
-    // If we get here, we have to infer the number of samples based
-    // on whether sample0 exists or not.
-    std::string samp0name = iPropName + ".smp0";
-    if ( isScalar )
-    {
-        if ( H5Aexists( iParent, samp0name.c_str() ) > 0 )
-        {
-            oNumSamples = 1;
-            oNumUniqueSamples = 1;
-        }
-        else
-        {
-            oNumSamples = 0;
-            oNumUniqueSamples = 0;
-        }
-    }
-    else
-    {
-        if ( DatasetExists( iParent, samp0name ) )
-        {
-            oNumSamples = 1;
-            oNumUniqueSamples = 1;
-        }
-        else
-        {
-            oNumSamples = 0;
-            oNumUniqueSamples = 0;
-        }
-    }
+        hssize_t numPoints = H5Sget_simple_extent_npoints( sid );
+        ABCA_ASSERT( numPoints > 0, "No time samples data: " << timeName );
+        std::vector < chrono_t > times(numPoints);
 
-    return false;
-}
+        // do the read
+        herr_t status = H5Aread( aid, H5T_NATIVE_DOUBLE, &(times.front()) );
+        ABCA_ASSERT( status >= 0, "Can't read time samples: " << timeName );
 
-//-*****************************************************************************
-// returns whether or not it is reading the default.
-AbcA::ArraySamplePtr
-ReadTimeSamples( AbcA::ReadArraySampleCachePtr iCache,
-                 hid_t iParent,
-                 const std::string &iTimeAttrName )
-{
-    // Check to see if the times are stored as an attr.
-    if ( H5Aexists( iParent, iTimeAttrName.c_str() ) > 0 )
-    {
-        // Create a buffer into which we shall read.
-        AbcA::ArraySamplePtr ret =
-            AbcA::AllocateArraySample( AbcA::DataType( kFloat64POD, 1 ),
-                                       Dimensions( 1 ) );
-        assert( ret->getData() );
+        // create the TimeSampling and add it to our vector
+        ts.reset( new AbcA::TimeSampling(tst, times) );
+        oTimeSamples.push_back( ts );
 
-        ReadScalar( iParent, iTimeAttrName,
-                    H5T_IEEE_F64LE,
-                    H5T_NATIVE_DOUBLE,
-                    const_cast<void*>( ret->getData() ) );
-
-        return ret;
-    }
-    else if ( DatasetExists( iParent, iTimeAttrName ) )
-    {
-        return ReadArray( iCache, iParent, iTimeAttrName,
-                          AbcA::DataType( kFloat64POD, 1 ),
-                          H5T_IEEE_F64LE,
-                          H5T_NATIVE_DOUBLE );
-    }
-    else
-    {
-        // Create a buffer of 1, fill it with zero.
-        // CJH: I'm not sure this is wise anymore.
-        AbcA::ArraySamplePtr ret =
-            AbcA::AllocateArraySample( AbcA::DataType( kFloat64POD, 1 ),
-                                       Dimensions( 1 ) );
-        assert( ret->getData() );
-        chrono_t *cdata = reinterpret_cast<chrono_t*>(
-            const_cast<void*>( ret->getData() ) );
-        *cdata = 0.0;
-
-        return ret;
+        // increment to try and read the next one
+        i++;
+        std::stringstream strm;
+        strm << i;
+        tstname = strm.str();
     }
 }
 

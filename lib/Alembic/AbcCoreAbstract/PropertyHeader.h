@@ -40,7 +40,7 @@
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/MetaData.h>
 #include <Alembic/AbcCoreAbstract/DataType.h>
-#include <Alembic/AbcCoreAbstract/TimeSamplingType.h>
+#include <Alembic/AbcCoreAbstract/TimeSampling.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
@@ -55,19 +55,20 @@ namespace ALEMBIC_VERSION_NS {
 //! Scalar and Array Properties.
 enum PropertyType
 {
+
+    //! Compound Properties are groups of other properties, with their own
+    //! unique name and set of MetaData. All objects have a single root
+    //! compound property as the base of their property description.
+    kCompoundProperty = 0,
+
     //! Scalar Properties represent Rank-0 properties, which contain a
     //! single element value for any given time sample.
-    kScalarProperty = 0,
+    kScalarProperty = 1,
 
     //! Array Properties represent Rank-N properties, which contain an
     //! array of values for any given time sample. Array properties may have
     //! any rank of 1 or higher, but will most often be ranks 1, 2, 3.
-    kArrayProperty = 1,
-
-    //! Compund Properties are groups of other properties, with their own
-    //! unique name and set of MetaData. All objects have a single root
-    //! compound property as the base of their property description.
-    kCompoundProperty = 2
+    kArrayProperty = 2
 };
 
 //-*****************************************************************************
@@ -85,7 +86,7 @@ public:
         m_propertyType( kScalarProperty ),
         m_metaData(),
         m_dataType(),
-        m_timeSamplingType() {}
+        m_timeSampling() {}
 
     //! Construct a compound property header.
     //! Just give a name and metadata, the rest is redundant or unused.
@@ -95,7 +96,7 @@ public:
         m_propertyType( kCompoundProperty ),
         m_metaData( iMetaData ),
         m_dataType(),
-        m_timeSamplingType() {}
+        m_timeSampling() {}
 
     //! Construct a simple property header.
     //! Use this for array or scalar properties.
@@ -103,12 +104,12 @@ public:
                     PropertyType iPropType,
                     const MetaData &iMetaData,
                     const DataType &iDataType,
-                    const TimeSamplingType &iTsampType )
+                    const TimeSamplingPtr & iTsamp )
       : m_name( iName ),
         m_propertyType( iPropType ),
         m_metaData( iMetaData ),
         m_dataType( iDataType ),
-        m_timeSamplingType( iTsampType ) {}
+        m_timeSampling( iTsamp ) {}
 
     //! Copy constructor
     //! ...
@@ -117,7 +118,7 @@ public:
         m_propertyType( iCopy.m_propertyType ),
         m_metaData( iCopy.m_metaData ),
         m_dataType( iCopy.m_dataType ),
-        m_timeSamplingType( iCopy.m_timeSamplingType ) {}
+        m_timeSampling( iCopy.m_timeSampling ) {}
 
     //! Assignment operator
     //! ...
@@ -127,7 +128,7 @@ public:
         m_propertyType = iCopy.m_propertyType;
         m_metaData = iCopy.m_metaData;
         m_dataType = iCopy.m_dataType;
-        m_timeSamplingType = iCopy.m_timeSamplingType;
+        m_timeSampling = iCopy.m_timeSampling;
         return *this;
     }
 
@@ -173,22 +174,22 @@ public:
     
     void setDataType( const DataType &iDataType ) { m_dataType = iDataType; }
 
-    //! Non-compound properties have a time sampling type.
+    //! Non-compound properties have time sampling
     //! If this is called for a Compound Property (basically, one which
-    //! retursn kCompoundProperty from getType() above)
+    //! returns kCompoundProperty from getType() above)
     //! it will throw an exception.
-    TimeSamplingType getTimeSamplingType() const
-    { return m_timeSamplingType; }
+    TimeSamplingPtr getTimeSampling() const
+    { return m_timeSampling; }
     
-    void setTimeSamplingType( const TimeSamplingType &iTsamp )
-    { m_timeSamplingType = iTsamp; }
+    void setTimeSampling( const TimeSamplingPtr &iTsamp )
+    { m_timeSampling = iTsamp; }
 
 private:
     std::string m_name;
     PropertyType m_propertyType;
     MetaData m_metaData;
     DataType m_dataType;
-    TimeSamplingType m_timeSamplingType;
+    TimeSamplingPtr m_timeSampling;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

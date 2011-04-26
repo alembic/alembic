@@ -54,7 +54,7 @@ static void __test( OObject &iObject )
     OInt32Property intProp2( intProp.getPtr(), kWrapExisting );
 
     intProp.set( 5 );
-    intProp2.set( 6, 1 );
+    intProp2.set( 6 );
 
     boolProp.set( false );
 }

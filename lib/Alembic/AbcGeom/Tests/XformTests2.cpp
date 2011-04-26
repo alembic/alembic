@@ -73,7 +73,7 @@ void xformOut()
 
         asamp.setMatrix( mat );
 
-        a.getSchema().set( asamp, OSampleSelector( i ) );
+        a.getSchema().set( asamp );
     }
 
 }

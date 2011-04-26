@@ -63,134 +63,141 @@ void testTimeSamplingScalar()
         AbcA::CompoundPropertyWriterPtr parent = archive->getProperties();
 
         // illegal time value
-        TESTING_ASSERT_THROW(parent->createScalarProperty(
-            AbcA::PropertyHeader("uniform", AbcA::kScalarProperty,
-            AbcA::MetaData(), AbcA::DataType(Alembic::Util::kInt32POD, 1),
-            AbcA::TimeSamplingType(-1.0))), Alembic::Util::Exception);
+        TESTING_ASSERT_THROW(parent->createScalarProperty("uniform",
+            AbcA::MetaData(), AbcA::DataType(Alembic::Util::kInt32POD, 1), 42),
+            Alembic::Util::Exception);
 
-        TESTING_ASSERT_THROW(parent->createScalarProperty(
-            AbcA::PropertyHeader("uniform", AbcA::kScalarProperty,
-            AbcA::MetaData(), AbcA::DataType(Alembic::Util::kInt32POD, 1),
-            AbcA::TimeSamplingType(1, 0.0))), Alembic::Util::Exception);
+        std::vector < double > timeSamps(1,-4.0);
+        AbcA::TimeSamplingType tst(3.0);
+        AbcA::TimeSampling ts(tst, timeSamps);
+        uint32_t tsid = a->addTimeSampling(ts);
 
         AbcA::ScalarPropertyWriterPtr swp =
-            parent->createScalarProperty(AbcA::PropertyHeader("uniform",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kInt32POD, 1),
-                AbcA::TimeSamplingType(3.0)));
+            parent->createScalarProperty("uniform", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kInt32POD, 1), tsid);
 
         Alembic::Util::int32_t i = 0;
 
-        swp->setSample(0, -4.0, &i);
+        swp->setSample(&i);
 
         i+=3;
-        swp->setSample(1, 0.0, &i);
+        swp->setSample(&i);
 
         i+=3;
-        swp->setSample(2, 0.0, &i);
+        swp->setSample(&i);
 
-        // you can't skip samples
-        TESTING_ASSERT_THROW(swp->setSample(5, 0.0, &i),
-            Alembic::Util::Exception);
+        timeSamps.clear();
+        timeSamps.push_back(4.0);
+        timeSamps.push_back(4.25);
+        timeSamps.push_back(4.5);
+        tst = AbcA::TimeSamplingType(3, 2.0);
+        ts = AbcA::TimeSampling(tst, timeSamps);
+        tsid = a->addTimeSampling(ts);
 
         AbcA::ScalarPropertyWriterPtr swp2 =
-            parent->createScalarProperty(AbcA::PropertyHeader("cyclic",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kUint32POD, 1),
-                AbcA::TimeSamplingType(3, 2.0)));
+            parent->createScalarProperty("cyclic", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kUint32POD, 1), tsid);
 
         Alembic::Util::uint32_t ui = 0;
 
-        swp2->setSample(0, 4.0, &ui);
-
-        // writing this value for cyclic time would be greater than
-        // our time per cycle
-        TESTING_ASSERT_THROW(swp2->setSample(1, 34.0, &ui),
-            Alembic::Util::Exception);
+        swp2->setSample(&ui);
 
         ui++;
-        swp2->setSample(1, 4.25, &ui);
+        swp2->setSample(&ui);
 
         ui++;
-        swp2->setSample(2, 4.5, &ui);
+        swp2->setSample(&ui);
 
         ui++;
-        swp2->setSample(3, 5.0, &ui);
+        swp2->setSample(&ui);
 
         ui++;
-        swp2->setSample(4, 5.25, &ui);
+        swp2->setSample(&ui);
 
         ui++;
-        swp2->setSample(5, 5.5, &ui);
+        swp2->setSample(&ui);
+
+        timeSamps.clear();
+        timeSamps.push_back(-17.0);
+        timeSamps.push_back(32.0);
+        timeSamps.push_back(50.0);
+        timeSamps.push_back(60.2);
+        timeSamps.push_back(101.1);
+        timeSamps.push_back(700.0);
+        timeSamps.push_back(747.0);
+
+        tst = AbcA::TimeSamplingType(AbcA::TimeSamplingType::kAcyclic);
+        ts = AbcA::TimeSampling(tst, timeSamps);
+        tsid = a->addTimeSampling(ts);
 
         AbcA::ScalarPropertyWriterPtr swp3 =
-            parent->createScalarProperty(AbcA::PropertyHeader("acyclic",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kUint16POD, 1),
-                AbcA::TimeSamplingType(AbcA::TimeSamplingType::kAcyclic)));
+            parent->createScalarProperty("acyclic", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kUint16POD, 1), tsid);
 
         Alembic::Util::uint16_t s = 0;
-        swp3->setSample(0, -17.0, &s);
+        swp3->setSample(&s);
 
         s++;
-        swp3->setSample(1, 32.0, &s);
+        swp3->setSample(&s);
 
         s++;
 
-        // time must be greater than the last sample!
-        TESTING_ASSERT_THROW(swp3->setSample(2, 32.0, &s),
+        swp3->setSample(&s);
+
+
+        s++;
+        swp3->setSample(&s);
+
+        s++;
+        swp3->setSample(&s);
+
+        s++;
+        swp3->setSample(&s);
+
+        s++;
+        swp3->setSample(&s);
+
+        // Setting more than what we have acyclic samples for
+        TESTING_ASSERT_THROW(swp3->setSample(&s),
             Alembic::Util::Exception);
-        TESTING_ASSERT_THROW(swp3->setSample(2, 7.0, &s),
-            Alembic::Util::Exception);
-        swp3->setSample(2, 50.0, &s);
-
-
-        s++;
-        swp3->setSample(3, 60.2, &s);
-
-        s++;
-        swp3->setSample(4, 101.1, &s);
-
-        s++;
-        swp3->setSample(5, 700.0, &s);
-
-        s++;
-        swp3->setSample(6, 747.0, &s);
 
         AbcA::ScalarPropertyWriterPtr swp4 =
-            parent->createScalarProperty(AbcA::PropertyHeader("identity",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kInt16POD, 1),
-                AbcA::TimeSamplingType()));
+            parent->createScalarProperty("identity", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kInt16POD, 1), 0);
+
         Alembic::Util::int16_t ss = 35;
 
-        // -17 shouldn't matter because we are be identity
-        swp4->setSample(0, -17.0, &ss);
+
+        swp4->setSample(&ss);
 
         ss = 37;
-        swp4->setSample(1, 43.0, &ss);
+        swp4->setSample(&ss);
 
         ss = 1000;
-        swp4->setSample(2, 50.0, &ss);
+        swp4->setSample(&ss);
+
+        timeSamps.clear();
+        timeSamps.push_back(0.0);
+        tst = AbcA::TimeSamplingType(1.0);
+        ts = AbcA::TimeSampling(tst, timeSamps);
+        tsid = a->addTimeSampling(ts);
 
         AbcA::ScalarPropertyWriterPtr swp5 =
-            parent->createScalarProperty(AbcA::PropertyHeader("defaultUniform",
-                AbcA::kScalarProperty, AbcA::MetaData(),
-                AbcA::DataType(Alembic::Util::kFloat32POD, 1),
-                AbcA::TimeSamplingType(1.0)));
+            parent->createScalarProperty("defaultUniform", AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kFloat32POD, 1), tsid);
 
         Alembic::Util::float32_t f = 0;
 
-        swp5->setSample(0, 0.0, &f);
+        swp5->setSample(&f);
 
         f+=1.1;
-        swp5->setSample(1, 0.0, &f);
+        swp5->setSample(&f);
 
         f+=1.1;
-        swp5->setSample(2, 0.0, &f);
+        swp5->setSample(&f);
 
         f+=1.1;
-        swp5->setSample(3, 0.0, &f);
+        swp5->setSample(&f);
     }
 
     {
@@ -204,76 +211,67 @@ void testTimeSamplingScalar()
         {
             AbcA::BasePropertyReaderPtr bp = parent->getProperty( i );
             AbcA::ScalarPropertyReaderPtr sp = bp->asScalarPtr();
-            const AbcA::TimeSampling t = sp->getTimeSampling();
+            const AbcA::TimeSamplingPtr t = sp->getTimeSampling();
 
             switch (sp->getDataType().getPod())
             {
                 case Alembic::Util::kInt16POD:
                 {
                     // identity
-                    TESTING_ASSERT( sp->getTimeSamplingType().isIdentity() );
+                    TESTING_ASSERT( t->getTimeSamplingType().isUniform() );
                 }
                 break;
 
                 case Alembic::Util::kUint16POD:
                 {
                     // acylic
-                    TESTING_ASSERT( t.getSampleTime(0) == -17.0 );
-                    TESTING_ASSERT( t.getNumSamples() == 7);
-                    TESTING_ASSERT( sp->getTimeSamplingType().isAcyclic() );
-                    TESTING_ASSERT( t.getSampleTime(1) == 32.0 );
-                    TESTING_ASSERT( t.getSampleTime(2) == 50.0 );
-                    TESTING_ASSERT( t.getSampleTime(3) == 60.2 );
-                    TESTING_ASSERT( t.getSampleTime(4) == 101.1 );
-                    TESTING_ASSERT( t.getSampleTime(5) == 700.0 );
-                    TESTING_ASSERT( t.getSampleTime(6) == 747.0 );
-                    TESTING_ASSERT_THROW( t.getSampleTime(7),
+                    TESTING_ASSERT( t->getSampleTime(0) == -17.0 );
+                    TESTING_ASSERT( sp->getNumSamples() == 7);
+                    TESTING_ASSERT( t->getTimeSamplingType().isAcyclic() );
+                    TESTING_ASSERT( t->getSampleTime(1) == 32.0 );
+                    TESTING_ASSERT( t->getSampleTime(2) == 50.0 );
+                    TESTING_ASSERT( t->getSampleTime(3) == 60.2 );
+                    TESTING_ASSERT( t->getSampleTime(4) == 101.1 );
+                    TESTING_ASSERT( t->getSampleTime(5) == 700.0 );
+                    TESTING_ASSERT( t->getSampleTime(6) == 747.0 );
+                    TESTING_ASSERT_THROW( t->getSampleTime(7),
                         Alembic::Util::Exception);
                 }
                 break;
 
                 case Alembic::Util::kFloat32POD:
                 {
-                    // uniform start time of 0
-                    std::cout << "t.getNumSamples(): " <<
-                        t.getNumSamples() << std::endl;
-                    TESTING_ASSERT( t.getNumSamples() == 4);
-                    TESTING_ASSERT( sp->getTimeSamplingType().isUniform() );
-                    TESTING_ASSERT( t.getSampleTime(0) == 0.0 );
-                    TESTING_ASSERT( t.getSampleTime(1) == 1.0 );
-                    TESTING_ASSERT( t.getSampleTime(2) == 2.0 );
-                    TESTING_ASSERT( t.getSampleTime(3) == 3.0 );
-                    TESTING_ASSERT_THROW( t.getSampleTime(4),
-                        Alembic::Util::Exception);
+                    TESTING_ASSERT( sp->getNumSamples() == 4);
+                    TESTING_ASSERT( t->getTimeSamplingType().isUniform() );
+                    TESTING_ASSERT( t->getSampleTime(0) == 0.0 );
+                    TESTING_ASSERT( t->getSampleTime(1) == 1.0 );
+                    TESTING_ASSERT( t->getSampleTime(2) == 2.0 );
+                    TESTING_ASSERT( t->getSampleTime(3) == 3.0 );
                 }
                 break;
 
                 case Alembic::Util::kInt32POD:
                 {
                     // uniform
-                    TESTING_ASSERT( t.getNumSamples() == 3);
-                    TESTING_ASSERT( sp->getTimeSamplingType().isUniform() );
-                    TESTING_ASSERT( t.getSampleTime(0) == -4.0 );
-                    TESTING_ASSERT( t.getSampleTime(1) == -1.0 );
-                    TESTING_ASSERT( t.getSampleTime(2) == 2.0 );
-                    TESTING_ASSERT_THROW( t.getSampleTime(3),
-                        Alembic::Util::Exception);
+                    TESTING_ASSERT( sp->getNumSamples() == 3);
+                    TESTING_ASSERT( t->getTimeSamplingType().isUniform() );
+                    TESTING_ASSERT( t->getSampleTime(0) == -4.0 );
+                    TESTING_ASSERT( t->getSampleTime(1) == -1.0 );
+                    TESTING_ASSERT( t->getSampleTime(2) == 2.0 );
                 }
                 break;
 
                 case Alembic::Util::kUint32POD:
                 {
                     // cyclic
-                    TESTING_ASSERT( t.getNumSamples() == 6);
-                    TESTING_ASSERT( sp->getTimeSamplingType().isCyclic() );
-                    TESTING_ASSERT( t.getSampleTime(0) == 4.0 );
-                    TESTING_ASSERT( t.getSampleTime(1) == 4.25 );
-                    TESTING_ASSERT( t.getSampleTime(2) == 4.5 );
-                    TESTING_ASSERT( t.getSampleTime(3) == 6.0 );
-                    TESTING_ASSERT( t.getSampleTime(4) == 6.25 );
-                    TESTING_ASSERT( t.getSampleTime(5) == 6.5 );
-                    TESTING_ASSERT_THROW( t.getSampleTime(6),
-                        Alembic::Util::Exception);
+                    TESTING_ASSERT( sp->getNumSamples() == 6);
+                    TESTING_ASSERT( t->getTimeSamplingType().isCyclic() );
+                    TESTING_ASSERT( t->getSampleTime(0) == 4.0 );
+                    TESTING_ASSERT( t->getSampleTime(1) == 4.25 );
+                    TESTING_ASSERT( t->getSampleTime(2) == 4.5 );
+                    TESTING_ASSERT( t->getSampleTime(3) == 6.0 );
+                    TESTING_ASSERT( t->getSampleTime(4) == 6.25 );
+                    TESTING_ASSERT( t->getSampleTime(5) == 6.5 );
                 }
                 break;
 

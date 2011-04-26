@@ -117,15 +117,11 @@ public:
     //! regardless of the time sampling.
     bool isConstant();
 
-    //! Ask if we are like a scalar - we have 1 and only 1 element (which
-    //! may have an extent greater than one, eg, a single V3f in a
-    //! V3fArrayProperty) per sample.  Alternately, an ArrayProperty with
-    //! no samples at all is also considered scalar-like.
+    //! Ask if we are like a scalar - we have 1 and only 1 DataType per sample.
     bool isScalarLike();
 
     //! Time information.
-    //! This will be valid regardless of TimeSamplingType or number of samples.
-    AbcA::TimeSampling getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling();
 
     //! Get a sample into the address of a datum.
     //! ...

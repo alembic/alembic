@@ -51,48 +51,62 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_inherits = Abc::IBoolProperty( ptr, ".inherits", iMatching );
 
-    m_ops = Abc::IUInt32ArrayProperty( ptr, ".ops", iMatching );
+    m_ops = ptr->getScalarProperty(  ".ops" );
 
-    m_vals = Abc::IDoubleArrayProperty( ptr, ".vals", iMatching );
+    m_vals = ptr->getScalarProperty( ".vals" );
 
     m_isConstantIdentity = true;
+
+    m_isConstant = true;
+
+    m_numChannels = 0;
+
+    if ( m_vals )
+    {
+        m_numChannels = m_vals->getHeader().getDataType().getExtent();
+        m_isConstant = m_vals->isConstant();
+    }
+
+    m_isConstant = m_isConstant && m_inherits.isConstant();
+
+    m_valVec.resize( m_numChannels );
 
     if ( ptr->getPropertyHeader( ".animChans" ) )
     {
         Abc::IUInt32ArrayProperty p( ptr, ".animChans" );
         if ( p.getNumSamples() > 0 )
-        { m_animChannels = *(p.getValue( p.getNumSamples() - 1 )); }
+        { m_animChannels = (*(p.getValue( p.getNumSamples() - 1 ))); }
     }
 
-    if ( m_ops.getNumSamples() > 0 )
+    if ( m_ops && m_ops->getNumSamples() > 0 )
     {
-        m_numOps = m_ops.getValue( 0 )->size();
+        m_numOps = m_ops->getHeader().getDataType().getExtent();
     }
     else
     {
         m_numOps = 0;
     }
 
-    m_isConstant = m_vals.isConstant();
+    m_opVec.resize( m_numOps );
 
-    if ( m_vals && m_vals.getNumSamples() > 0 )
+    if ( m_vals && m_vals->getNumSamples() > 0 )
     {
-        m_isConstantIdentity = m_isConstant && m_vals.getValue()->size() == 0;
+        m_isConstantIdentity = m_isConstant && m_numChannels == 0;
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************
-AbcA::TimeSampling IXformSchema::getTimeSampling()
+AbcA::TimeSamplingPtr IXformSchema::getTimeSampling()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getTimeSampling()" );
 
-    return m_ops.getTimeSampling();
+    return m_inherits.getTimeSampling();
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    AbcA::TimeSampling ret;
+    AbcA::TimeSamplingPtr ret;
     return ret;
 }
 
@@ -101,7 +115,7 @@ std::size_t IXformSchema::getNumSamples()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getNumSamples()" );
 
-    return m_ops.getNumSamples();
+    return m_inherits.getNumSamples();
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -115,19 +129,30 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
     oSamp.clear();
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+    if ( ! valid() ) { return; }
+
+    oSamp.setInheritsXforms( m_inherits.getValue( iSS ) );
+
+    if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
+    {
+        oSamp.setChildBounds( m_childBounds.getValue( iSS ) );
+    }
+
+    if ( m_ops == NULL ) { return; }
+
+    AbcA::index_t sampIdx = iSS.getIndex( m_ops->getTimeSampling(),
+                                          m_ops->getNumSamples() );
 
     if ( sampIdx < 0 ) { return; }
 
-    Abc::UInt32ArraySamplePtr opsamp = m_ops.getValue( iSS );
+    m_ops->getSample( sampIdx, &(m_opVec.front()) );
+    m_vals->getSample( sampIdx, &(m_valVec.front()) );
 
     std::size_t curIdx = 0;
-    for ( std::size_t i = 0 ; i < opsamp->size() ; ++i )
+    for ( std::size_t i = 0 ; i < m_numOps ; ++i )
     {
-        Alembic::Util::uint32_t openc = (*opsamp)[i];
+        Alembic::Util::uint32_t openc = m_opVec[i];
         XformOp op( openc );
-        // vidx == "value index"; will be -1 if the op is all default values.
-        Alembic::Util::int16_t vidx = openc >> 16;
 
         for ( std::size_t j = 0 ; j < op.getNumChannels() ; ++j )
         {
@@ -140,28 +165,10 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
                 }
             }
 
-            if ( vidx < 0 )
-            {
-                op.setChannelValue( j,
-                                    op.getDefaultChannelValue( j ) );
-            }
-            else
-            {
-                // nvidx == "normalized value index"; the index of the channel's
-                // slot in the vals sample
-                size_t nvidx = j + vidx;
-                op.setChannelValue( j, (*(m_vals.getValue( sampIdx )))[nvidx] );
-            }
+            op.setChannelValue( j, m_valVec[animIdx] );
         }
         oSamp.addOp( op );
         curIdx += op.getNumChannels();
-    }
-
-    oSamp.setInheritsXforms( m_inherits.getValue( sampIdx ) );
-
-    if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
-    {
-        oSamp.setChildBounds( m_childBounds.getValue( sampIdx ) );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -180,7 +187,10 @@ bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getInheritsXforms()" );
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_ops.getTimeSampling() );
+    if ( ! m_inherits ) { return true; }
+
+    AbcA::index_t sampIdx = iSS.getIndex( m_inherits.getTimeSampling(),
+                                          m_inherits.getNumSamples() );
 
     if ( sampIdx < 0 ) { return true; }
 

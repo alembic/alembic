@@ -49,7 +49,7 @@
 //-*****************************************************************************
 namespace A5 = Alembic::AbcCoreHDF5;
 
-namespace ABC = Alembic::AbcCoreAbstract::v1;
+namespace ABC = Alembic::AbcCoreAbstract;
 
 using ABC::chrono_t;
 using Alembic::Util::float32_t;
@@ -101,6 +101,11 @@ void testReadWriteEmptyArchive()
         TESTING_ASSERT(archive->getParent() == NULL);
         TESTING_ASSERT(archive->getNumChildren() == 0);
 
+        // even though we didn't write anything make sure we intrincially have
+        // the default sampling
+        TESTING_ASSERT(a->getNumTimeSamplings() == 1);
+        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
+
         ABC::CompoundPropertyReaderPtr parent = archive->getProperties();
         TESTING_ASSERT(parent->getNumProperties() == 0);
 
@@ -113,8 +118,89 @@ void testReadWriteEmptyArchive()
     }
 }
 
+void testReadWriteTimeSamplingArchive()
+{
+    std::string archiveName = "timeSampsArchive.abc";
+
+    {
+        A5::WriteArchive w;
+        ABC::ArchiveWriterPtr a = w(archiveName, ABC::MetaData());
+
+        // we always have 1
+        TESTING_ASSERT(a->getNumTimeSamplings() == 1);
+
+        // getting a time sampling that doesn't exist should throw
+        TESTING_ASSERT_THROW(a->getTimeSampling(43),
+            Alembic::Util::Exception);
+
+        // first one is the default time sampling
+        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
+
+        std::vector< double > samps;
+
+        // uniform sampling starts at second 34, 24fps
+        samps.push_back(34.0);
+        ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
+        uint32_t index = a->addTimeSampling(ts);
+        TESTING_ASSERT(index == 1);
+
+        // even though we add the same thing, we get the same index back
+        index = a->addTimeSampling(ts);
+        TESTING_ASSERT(index == 1);
+
+        // cyclic sampling example
+        samps.push_back(34.25);
+        samps.push_back(34.5);
+        ts = ABC::TimeSampling(ABC::TimeSamplingType(3, 1.0), samps);
+        index = a->addTimeSampling(ts);
+        TESTING_ASSERT(index == 2);
+
+        // really weird acyclic example
+        samps.push_back(300.0);
+        samps.push_back(500.0);
+        ts = ABC::TimeSampling(
+            ABC::TimeSamplingType(ABC::TimeSamplingType::kAcyclic), samps);
+        index = a->addTimeSampling(ts);
+        TESTING_ASSERT(index == 3);
+
+        // now we should have 4
+        TESTING_ASSERT(a->getNumTimeSamplings() == 4);
+    }
+
+    {
+        A5::ReadArchive r;
+        ABC::ArchiveReaderPtr a = r( archiveName );
+
+        TESTING_ASSERT(a->getNumTimeSamplings() == 4);
+
+        // first one is the default time sampling
+        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
+
+        std::vector< double > samps;
+
+        // uniform sampling starts at second 34, 24fps
+        samps.push_back(34.0);
+        ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
+        TESTING_ASSERT( ts == *(a->getTimeSampling(1)) );
+
+        // cyclic sampling example
+        samps.push_back(34.25);
+        samps.push_back(34.5);
+        ts = ABC::TimeSampling(ABC::TimeSamplingType(3, 1.0), samps);
+        TESTING_ASSERT( ts == *(a->getTimeSampling(2)) );
+
+        // really weird acyclic example
+        samps.push_back(300.0);
+        samps.push_back(500.0);
+        ts = ABC::TimeSampling(
+            ABC::TimeSamplingType(ABC::TimeSamplingType::kAcyclic), samps);
+        TESTING_ASSERT( ts == *(a->getTimeSampling(3)) );
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testReadWriteEmptyArchive();
+    testReadWriteTimeSamplingArchive();
     return 0;
 }

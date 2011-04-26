@@ -63,17 +63,15 @@ public:
     //-*************************************************************************
 
     //! Return the number of samples contained in the property.
-    //! This is guaranteed to be greater than zero.
+    //! This can be any number, including zero.
+    //! This returns the number of samples that were written, independently
+    //! of whether or not they were constant. Implementations may (and should)
+    //! choose to condense identical samples.
     virtual size_t getNumSamples() = 0;
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
     virtual bool isConstant() = 0;
-
-    //! Time information.
-    //! This will always be valid, even for static, constant, or
-    //! identity time sampling types.
-    virtual TimeSampling getTimeSampling() = 0;
 
     //! It returns a shared pointer to a thing which _is_ the data, in a
     //! locked and retrieved form. This represents the point of demand,
@@ -92,6 +90,22 @@ public:
     //! arrays of std::string and std::wstring, respectively.
     virtual void getSample( index_t iSampleIndex,
                             ArraySamplePtr &oSample ) = 0;
+
+    //! Find the largest valid index that has a time less than or equal
+    //! to the given time. Invalid to call this with zero samples.
+    //! If the minimum sample time is greater than iTime, index
+    //! 0 will be returned.
+    virtual std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime ) = 0;
+
+    //! Find the smallest valid index that has a time greater
+    //! than the given time. Invalid to call this with zero samples.
+    //! If the maximum sample time is less than iTime, index
+    //! numSamples-1 will be returned.
+    virtual std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime ) = 0;
+
+    //! Find the valid index with the closest time to the given
+    //! time. Invalid to call this with zero samples.
+    virtual std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime ) = 0;
 
     //! Expose the key for apps that use their own custom cache management.
     virtual bool getKey( index_t iSampleIndex, ArraySampleKey & oKey ) = 0;

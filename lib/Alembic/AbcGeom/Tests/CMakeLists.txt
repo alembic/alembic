@@ -83,20 +83,4 @@ ADD_TEST( AbcGeom_Xform_TEST  AbcGeom_XformTest  )
 ADD_EXECUTABLE( AbcGeom_XformTest2
 		XformTests2.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest2  ${TEST_LIBS} )
-ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2  )
-
-##-*****************************************************************************
-ADD_EXECUTABLE( AbcGeom_TransformingMeshTest MeshData.cpp
-                TransformingMeshTest.cpp )
-TARGET_LINK_LIBRARIES( AbcGeom_TransformingMeshTest ${TEST_LIBS} )
-ADD_TEST( AbcGeom_TransformingMeshTest_TEST AbcGeom_TransformingMeshTest )
-
-#-*****************************************************************************
-ADD_EXECUTABLE( AbcGeom_CurvesTest
-                CurvesData.h
-                CurvesData.cpp
-                CurvesTest.cpp )
-TARGET_LINK_LIBRARIES( AbcGeom_CurvesTest ${TEST_LIBS} )
-ADD_TEST( AbcGeom_Curves_TEST AbcGeom_CurvesTest )
-
-
+ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2 )

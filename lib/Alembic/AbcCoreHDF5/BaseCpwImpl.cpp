@@ -156,87 +156,74 @@ hid_t BaseCpwImpl::getGroup()
 
 //-*****************************************************************************
 AbcA::ScalarPropertyWriterPtr
-BaseCpwImpl::createScalarProperty( const AbcA::PropertyHeader & iHeader )
+BaseCpwImpl::createScalarProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData,
+        const AbcA::DataType & iDataType,
+        uint32_t iTimeSamplingIndex )
 {
-    const std::string &pName = iHeader.getName();
-    if ( m_madeProperties.count( pName ) )
+    if ( m_madeProperties.count( iName ) )
     {
-        ABCA_THROW( "Already have a property named: " << pName );
+        ABCA_THROW( "Already have a property named: " << iName );
     }
-
-    ABCA_ASSERT( iHeader.getPropertyType() == AbcA::kScalarProperty,
-        "Cannot use createScalarProperty with non-scalar propertyType" );
 
     hid_t myGroup = getGroup();
 
-    // Since the header gets passed around a lot, make a shared ptr
-    // around it.
-    PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( iHeader ) );
-
     AbcA::ScalarPropertyWriterPtr
-        ret( new SpwImpl( asCompoundPtr(), myGroup, headerPtr ) );
+        ret( new SpwImpl( asCompoundPtr(), myGroup, iName, iMetaData,
+            iDataType, iTimeSamplingIndex ) );
 
+    PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );
     m_propertyHeaders.push_back( headerPtr );
-    m_madeProperties[pName] = WeakBpwPtr( ret );
+    m_madeProperties[iName] = WeakBpwPtr( ret );
 
     return ret;
 }
 
 //-*****************************************************************************
 AbcA::ArrayPropertyWriterPtr
-BaseCpwImpl::createArrayProperty( const AbcA::PropertyHeader & iHeader )
+BaseCpwImpl::createArrayProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData,
+        const AbcA::DataType & iDataType,
+        uint32_t iTimeSamplingIndex )
 {
-    const std::string &pName = iHeader.getName();
 
-    if ( m_madeProperties.count( pName ) )
+    if ( m_madeProperties.count( iName ) )
     {
-        ABCA_THROW( "Already have a property named: " << pName );
+        ABCA_THROW( "Already have a property named: " << iName );
     }
-
-    ABCA_ASSERT( iHeader.getPropertyType() == AbcA::kArrayProperty,
-        "Cannot use createArrayProperty with non-array PropertyType");
 
     hid_t myGroup = getGroup();
 
-    // Since the header gets passed around a lot, make a shared ptr
-    // around it.
-    PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( iHeader ) );
-
     AbcA::ArrayPropertyWriterPtr
-        ret( new ApwImpl( this->asCompoundPtr(), myGroup, headerPtr ) );
+        ret( new ApwImpl( asCompoundPtr(), myGroup, iName, iMetaData,
+            iDataType, iTimeSamplingIndex ) );
 
+    PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );
     m_propertyHeaders.push_back( headerPtr );
-    m_madeProperties[pName] = WeakBpwPtr( ret );
+    m_madeProperties[iName] = WeakBpwPtr( ret );
 
     return ret;
 }
 
 //-*****************************************************************************
 AbcA::CompoundPropertyWriterPtr
-BaseCpwImpl::createCompoundProperty( const AbcA::PropertyHeader & iHeader )
+BaseCpwImpl::createCompoundProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData )
 {
-    const std::string &pName = iHeader.getName();
 
-    if ( m_madeProperties.count( pName ) )
+    if ( m_madeProperties.count( iName ) )
     {
-        ABCA_THROW( "Already have a property named: " << pName );
+        ABCA_THROW( "Already have a property named: " << iName );
     }
-
-    ABCA_ASSERT( iHeader.getPropertyType() == AbcA::kCompoundProperty,
-                 "Cannot use createCompoundProperty with non-compound "
-                 << "propertyType" );
 
     hid_t myGroup = getGroup();
 
-    // Since the header gets passed around a lot, make a shared ptr
-    // around it.
-    PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( iHeader ) );
-
     AbcA::CompoundPropertyWriterPtr
-        ret( new CpwImpl( this->asCompoundPtr(), myGroup, headerPtr ) );
+        ret( new CpwImpl( this->asCompoundPtr(), myGroup, iName, iMetaData ) );
 
+    PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );
     m_propertyHeaders.push_back( headerPtr );
-    m_madeProperties[pName] = WeakBpwPtr( ret );
+    m_madeProperties[iName] = WeakBpwPtr( ret );
 
     return ret;
 }

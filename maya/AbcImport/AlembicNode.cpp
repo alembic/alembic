@@ -75,7 +75,6 @@ MObject AlembicNode::mRemoveIfNoUpdateAttr;
 MObject AlembicNode::mConnectRootNodesAttr;
 
 MObject AlembicNode::mSampledNurbsCurveNumCurveAttr;
-MObject AlembicNode::mIsSampledTransOpAngleAttr;
 
 MObject AlembicNode::mOutSubDArrayAttr;
 MObject AlembicNode::mOutPolyArrayAttr;
@@ -83,7 +82,6 @@ MObject AlembicNode::mOutCameraArrayAttr;
 MObject AlembicNode::mOutNurbsCurveGrpArrayAttr;
 MObject AlembicNode::mOutNurbsSurfaceArrayAttr;
 MObject AlembicNode::mOutTransOpArrayAttr;
-MObject AlembicNode::mOutTransOpAngleArrayAttr;
 MObject AlembicNode::mOutPropArrayAttr;
 
 MStatus AlembicNode::initialize()
@@ -206,16 +204,6 @@ MStatus AlembicNode::initialize()
     status = nAttr.setUsesArrayDataBuilder(true);
     status = addAttribute(mOutTransOpArrayAttr);
 
-    // sampled transform operation angle channels
-    mOutTransOpAngleArrayAttr = uAttr.create("outTransOpAngle", "ota",
-        MFnUnitAttribute::kAngle, 0.0);
-    status = uAttr.setStorable(false);
-    status = uAttr.setWritable(false);
-    status = uAttr.setKeyable(false);
-    status = uAttr.setArray(true);
-    status = uAttr.setUsesArrayDataBuilder(true);
-    status = addAttribute(mOutTransOpAngleArrayAttr);
-
     // sampled camera
     // assume the boolean variables cannot be keyed
     mOutCameraArrayAttr = nAttr.create("outCamera", "ocam",
@@ -250,18 +238,11 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mTimeAttr, mOutNurbsSurfaceArrayAttr);
     status = attributeAffects(mTimeAttr, mOutNurbsCurveGrpArrayAttr);
     status = attributeAffects(mTimeAttr, mOutTransOpArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutTransOpAngleArrayAttr);
     status = attributeAffects(mTimeAttr, mOutCameraArrayAttr);
     status = attributeAffects(mTimeAttr, mOutPropArrayAttr);
 
     MFnIntArrayData fnIntArrayData;
     MObject intArrayDefaultObject = fnIntArrayData.create(&status);
-    mIsSampledTransOpAngleAttr = tAttr.create("transOpAngle", "ta",
-        MFnData::kIntArray, intArrayDefaultObject);
-    status = tAttr.setStorable(true);
-    status = tAttr.setWritable(true);
-    status = addAttribute(mIsSampledTransOpAngleAttr);
-
     mSampledNurbsCurveNumCurveAttr = tAttr.create("numCurve", "nc",
         MFnData::kIntArray, intArrayDefaultObject);
     status = tAttr.setStorable(true);
@@ -290,7 +271,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
         // no caching!
         Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
-            fileName.asChar(),
+            fileName.asChar(), Alembic::Abc::ErrorHandler::Policy(),
             Alembic::AbcCoreAbstract::v1::ReadArraySampleCachePtr());
 
         if (!archive.valid())
@@ -348,22 +329,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             visitor.getData(mData);
             mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
         }
-
-        // getting the arrays so there's no need to repeat the tedious work
-        dataHandle = dataBlock.inputValue(mIsSampledTransOpAngleAttr, &status);
-        if (status == MS::kSuccess)
-        {
-            MObject intArrayObj = dataHandle.data();
-            MFnIntArrayData intArray(intArrayObj, &status);
-            if (status == MS::kSuccess)
-            {
-                unsigned int length = intArray.length();
-                mData.mIsSampledXformOpAngle.clear();
-                mData.mIsSampledXformOpAngle.reserve(length);
-                for (unsigned int i = 0; i < length; i++)
-                    mData.mIsSampledXformOpAngle.push_back(intArray[i]);
-            }
-        }
     }
 
     clamp<double>(mSequenceStartTime, mSequenceEndTime, inputTime);
@@ -400,7 +365,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             outArrayHandle.setAllClean();
         }
     }
-    else if (plug == mOutTransOpArrayAttr || plug == mOutTransOpAngleArrayAttr)
+    else if (plug == mOutTransOpArrayAttr )
     {
         if (mOutRead[1])
             return MS::kSuccess;
@@ -411,17 +376,11 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
         if (xformSize > 0)
         {
-            unsigned int isAngleIndex = 0;
 
             MArrayDataHandle outArrayHandle =
                 dataBlock.outputValue(mOutTransOpArrayAttr, &status);
 
             MPlug arrayPlug(thisMObject(), mOutTransOpArrayAttr);
-
-            MArrayDataHandle outAngleArrayHandle = dataBlock.outputValue(
-                mOutTransOpAngleArrayAttr, &status);
-
-            MPlug angleArrayPlug(thisMObject(), mOutTransOpAngleArrayAttr);
 
             MDataHandle outHandle;
 
@@ -438,47 +397,29 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 }
                 else
                 {
-                    read(mCurTime, mData.mXformList[i], sampleList);
+                    Alembic::AbcGeom::XformSample samp;
+                    read(mCurTime, mData.mXformList[i], sampleList, samp);
                 }
 
                 unsigned int sampleSize = sampleList.size();
 
                 for (unsigned int j = 0; j < sampleSize; j++)
                 {
-                    if (mData.mIsSampledXformOpAngle[isAngleIndex++] == true)
+                    // only use the handle if it matches the index.
+                    // The index wont line up in the sparse case so we
+                    // can just skip that element.
+                    if (outArrayHandle.elementIndex() == outHandleIndex++)
                     {
-                        // only use the handle if it matches the index.
-                        // The index wont line up in the sparse case so we
-                        // can just skip that element.
-                        if (outAngleArrayHandle.elementIndex() ==
-                            angleHandleIndex++)
-                        {
-                            outHandle = outAngleArrayHandle.outputValue();
-                        }
-                        else
-                            continue;
-
-                        outAngleArrayHandle.next();
+                        outHandle = outArrayHandle.outputValue(&status);
                     }
                     else
-                    {
-                        // only use the handle if it matches the index.
-                        // The index wont line up in the sparse case so we
-                        // can just skip that element.
-                        if (outArrayHandle.elementIndex() == outHandleIndex++)
-                        {
-                            outHandle = outArrayHandle.outputValue(&status);
-                        }
-                        else
-                            continue;
+                        continue;
 
-                        outArrayHandle.next();
-                    }
+                    outArrayHandle.next();
                     outHandle.set(sampleList[j]);
                 }
             }
             outArrayHandle.setAllClean();
-            outAngleArrayHandle.setAllClean();
         }
     }
     else if (plug == mOutSubDArrayAttr)
