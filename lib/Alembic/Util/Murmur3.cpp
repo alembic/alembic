@@ -51,8 +51,8 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     uint64_t h1 = 0;
     uint64_t h2 = 0;
 
-    uint64_t c1 = 0x87c37b91114253d5;
-    uint64_t c2 = 0x4cf5ad432745937f;
+    uint64_t c1 = 0x87c37b91114253d5LLU;
+    uint64_t c2 = 0x4cf5ad432745937fLLU;
 
     //----------
     // body
@@ -216,15 +216,15 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     h2 += h1;
 
     h1 ^= h1 >> 33;
-    h1 *= 0xff51afd7ed558ccd;
+    h1 *= 0xff51afd7ed558ccdLLU;
     h1 ^= h1 >> 33;
-    h1 *= 0xc4ceb9fe1a85ec53;
+    h1 *= 0xc4ceb9fe1a85ec53LLU;
     h1 ^= h1 >> 33;
 
     h2 ^= h2 >> 33;
-    h2 *= 0xff51afd7ed558ccd;
+    h2 *= 0xff51afd7ed558ccdLLU;
     h2 ^= h2 >> 33;
-    h2 *= 0xc4ceb9fe1a85ec53;
+    h2 *= 0xc4ceb9fe1a85ec53LLU;
     h2 ^= h2 >> 33;
 
     h1 += h2;
