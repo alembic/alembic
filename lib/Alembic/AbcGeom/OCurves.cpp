@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -42,40 +42,40 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-void OCurvesSchema::set( const Sample &iSamp, const Abc::OSampleSelector &iSS  )
+void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::set()" );
 
     // We could add sample integrity checking here.
-    if ( iSS.getIndex() == 0 )
+    if ( m_positions.getNumSamples() == 0 )
     {
         // First sample must be valid on all points.
         ABCA_ASSERT( iSamp.getPositions(),
                      "Sample 0 must have valid data for all mesh components" );
 
-        m_positions.set( iSamp.getPositions(), iSS );
+        m_positions.set( iSamp.getPositions() );
 
         // set wrap, nVertices, and type
-        m_type.set( iSamp.getType(), iSS);
-        m_wrap.set( iSamp.getWrap(), iSS);
-        m_nVertices.set( iSamp.getCurvesNumVertices(), iSS);
+        m_type.set( iSamp.getType() );
+        m_wrap.set( iSamp.getWrap() );
+        m_nVertices.set( iSamp.getCurvesNumVertices() );
 
 	if ( iSamp.getUBasis() )
 	{
 	    m_uBasis = Abc::OUcharProperty( this->getPtr(), "uBasis",
-                                            this->getTimeSamplingType());
-	    m_uBasis.set( iSamp.getUBasis(), iSS);
+                                            m_timeSamplingIndex );
+	    m_uBasis.set( iSamp.getUBasis() );
 	}
 
 	if ( iSamp.getVBasis() )
 	{
 	    m_vBasis = Abc::OUcharProperty( this->getPtr(), "vBasis",
-                                            this->getTimeSamplingType());
-	    m_vBasis.set( iSamp.getVBasis(), iSS);
+                                            m_timeSamplingIndex );
+	    m_vBasis.set( iSamp.getVBasis() );
 	}
 
         if ( iSamp.getChildBounds().hasVolume() )
-        { m_childBounds.set( iSamp.getChildBounds(), iSS ); }
+        { m_childBounds.set( iSamp.getChildBounds() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -85,63 +85,77 @@ void OCurvesSchema::set( const Sample &iSamp, const Abc::OSampleSelector &iSS  )
                 ComputeBoundsFromPositions( iSamp.getPositions() )
                            );
 
-            m_selfBounds.set( bnds, iSS );
+            m_selfBounds.set( bnds );
 
         }
-        else { m_selfBounds.set( iSamp.getSelfBounds(), iSS ); }
+        else { m_selfBounds.set( iSamp.getSelfBounds() ); }
 
         // process uvs
         if ( iSamp.getUVs() )
         {
             m_uvs = Abc::OV2fArrayProperty( this->getPtr(), "uv",
-                                            this->getTimeSamplingType() );
-            m_uvs.set( iSamp.getUVs(), iSS );
+                                            m_timeSamplingIndex );
+            m_uvs.set( iSamp.getUVs() );
         }
 
         // process normals
         if ( iSamp.getNormals() )
         {
             m_normals = Abc::OV3fArrayProperty( this->getPtr(), "N",
-                                                this->getTimeSamplingType() );
-            m_normals.set( iSamp.getNormals(), iSS );
+                                                m_timeSamplingIndex );
+            m_normals.set( iSamp.getNormals() );
         }
 
         // process widths
         if ( iSamp.getWidths() )
         {
             m_widths = Abc::OV2fArrayProperty( this->getPtr(), "width",
-                                               this->getTimeSamplingType() );
+                                               m_timeSamplingIndex );
 
-            m_widths.set( iSamp.getWidths(), iSS );
+            m_widths.set( iSamp.getWidths() );
         }
 
     }
     else
     {
-        SetPropUsePrevIfNull( m_positions, iSamp.getPositions(), iSS );
-        SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds(), iSS );
-	SetPropUsePrevIfNull( m_uvs, iSamp.getUVs(), iSS );
-	SetPropUsePrevIfNull( m_normals, iSamp.getNormals(), iSS );
-	SetPropUsePrevIfNull( m_widths, iSamp.getWidths(), iSS );
-	SetPropUsePrevIfNull( m_uBasis, iSamp.getUBasis(), iSS );
-	SetPropUsePrevIfNull( m_vBasis, iSamp.getVBasis(), iSS );
-        SetPropUsePrevIfNull( m_nVertices, iSamp.getCurvesNumVertices(), iSS );
+        SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
+        SetPropUsePrevIfNull( m_nVertices, iSamp.getCurvesNumVertices() );
+        SetPropUsePrevIfNull( m_type, iSamp.getType() );
+        SetPropUsePrevIfNull( m_wrap, iSamp.getWrap() );
+
+        if ( m_childBounds )
+        { SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() ); }
+
+        if ( m_uvs )
+        { SetPropUsePrevIfNull( m_uvs, iSamp.getUVs() ); }
+
+        if ( m_normals )
+        { SetPropUsePrevIfNull( m_normals, iSamp.getNormals() ); }
+
+        if ( m_widths )
+        { SetPropUsePrevIfNull( m_widths, iSamp.getWidths() ); }
+
+        if ( m_uBasis )
+        { m_uBasis.set( iSamp.getUBasis() ); }
+
+        if ( m_vBasis )
+	{ m_vBasis.set( iSamp.getVBasis() ); }
 
         // update bounds
         if ( iSamp.getSelfBounds().hasVolume() )
         {
-            m_selfBounds.set( iSamp.getSelfBounds(), iSS );
+            m_selfBounds.set( iSamp.getSelfBounds() );
         }
         else if ( iSamp.getPositions() )
         {
             Abc::Box3d bnds(
                 ComputeBoundsFromPositions( iSamp.getPositions() )
                            );
-            m_selfBounds.set( bnds, iSS );
+            m_selfBounds.set( bnds );
         }
         else
         {
-            m_selfBounds.setFromPrevious( iSS );
+            m_selfBounds.setFromPrevious();
         }
     }
 
@@ -149,44 +163,47 @@ void OCurvesSchema::set( const Sample &iSamp, const Abc::OSampleSelector &iSS  )
 }
 
 //-*****************************************************************************
-void OCurvesSchema::setFromPrevious( const Abc::OSampleSelector &iSS )
+void OCurvesSchema::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::setFromPrevious" );
 
-    m_positions.setFromPrevious( iSS );
-    m_type.setFromPrevious( iSS );
-    m_wrap.setFromPrevious( iSS );
-    m_nVertices.setFromPrevious( iSS );
+    m_positions.setFromPrevious();
+    m_type.setFromPrevious();
+    m_wrap.setFromPrevious();
+    m_nVertices.setFromPrevious();
 
-    m_selfBounds.setFromPrevious( iSS );
-    m_childBounds.setFromPrevious( iSS );
+    m_selfBounds.setFromPrevious();
 
-    if ( m_uvs ) { m_uvs.setFromPrevious( iSS ); }
-    if ( m_normals ) { m_normals.setFromPrevious( iSS ); }
-    if ( m_widths ) { m_widths.setFromPrevious( iSS ); }
-    if ( m_uBasis ) { m_uBasis.setFromPrevious( iSS ); }
-    if ( m_vBasis ) { m_vBasis.setFromPrevious( iSS ); }
+    if ( m_childBounds ) { m_childBounds.setFromPrevious(); }
+
+    if ( m_uvs ) { m_uvs.setFromPrevious(); }
+    if ( m_normals ) { m_normals.setFromPrevious(); }
+    if ( m_widths ) { m_widths.setFromPrevious(); }
+    if ( m_uBasis ) { m_uBasis.setFromPrevious(); }
+    if ( m_vBasis ) { m_vBasis.setFromPrevious(); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 //-*****************************************************************************
-void OCurvesSchema::init(   const AbcA::TimeSamplingType &iTst)
+void OCurvesSchema::init( const AbcA::index_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::init()" );
+
+    m_timeSamplingIndex = iTsIdx;
 
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
 
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTst );
-    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTst );
-    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTst );
+    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
+    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
+    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTsIdx );
 
-    m_type = Abc::OStringProperty( _this, "type", iTst);
-    m_nVertices = Abc::OInt32ArrayProperty( _this, "nVertices", iTst);
-    m_wrap = Abc::OStringProperty( _this, "wrap", iTst);
+    m_type = Abc::OStringProperty( _this, "type", iTsIdx );
+    m_nVertices = Abc::OInt32ArrayProperty( _this, "nVertices", iTsIdx);
+    m_wrap = Abc::OStringProperty( _this, "wrap", iTsIdx );
 
     // UVs, Normals, and Widths are created on first call to set()
 

@@ -104,7 +104,7 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Points_v1",
 
 //-*****************************************************************************
 // Xform
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v1",
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v3",
                                      ".xform",
                                      XformSchemaInfo );
 
@@ -117,6 +117,14 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Camera_v1",
                                      CameraSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_CAMERA_SCHEMA (CameraSchemaInfo::title())
+
+//-*****************************************************************************
+// Curves
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Curve_v1",
+                                     ".geom",
+                                     CurvesSchemaInfo );
+
+#define ALEMBIC_ABCGEOM_CURVE_SCHEMA (CurvesSchemaInfo::title())
 
 }
 }

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,33 +34,9 @@
 //
 //-*****************************************************************************
 
-//-*****************************************************************************
-//-*****************************************************************************
-// EXAMPLE1 - INTRODUCTION
-//
-// Hello Alembic User! This is the first Example Usage file, and so we'll
-// start by targeting the thing you'd most often want to do - write and read
-// animated, geometric primitives. To do this, we will be using two main
-// libraries: Alembic::Abc, which provides the basic Alembic Abstractions,
-// and Alembic::AbcGeom, which implements specific Geometric primitives
-// on top of Alembic::Abc.
-//-*****************************************************************************
-//-*****************************************************************************
-
-//-*****************************************************************************
-//-*****************************************************************************
-// INCLUDES
-//
-// Each Library includes the entirety of its public self in a file named "All.h"
-// file. So, you can typically just do include lines like the following.
-//-*****************************************************************************
-//-*****************************************************************************
-
-// Alembic Includes
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
-// Other includes
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,15 +46,6 @@
 #include <Alembic/AbcGeom/Tests/CurvesData.h>
 
 #include "Assert.h"
-
-//-*****************************************************************************
-//-*****************************************************************************
-// NAMESPACES
-//
-// Each library has a namespace which is the same as the name of the library.
-// We shorten those here for brevity.
-//-*****************************************************************************
-//-*****************************************************************************
 
 using namespace std;
 using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
@@ -94,40 +61,13 @@ using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 //-*****************************************************************************
 void Example1_CurvesOut()
 {
-    // Create an OArchive.
-    // Like std::iostreams, we have a completely separate-but-parallel class
-    // hierarchy for output and for input (OArchive, IArchive, and so on). This
-    // maintains the important abstraction that Alembic is for storage,
-    // representation, and archival. (as opposed to being a dynamic scene
-    // manipulation framework).
-    OArchive archive(
+    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+                      "curves1.abc" );
 
-        // The hard link to the implementation.
-        Alembic::AbcCoreHDF5::WriteArchive(),
-
-        // The file name.
-        // Because we're an OArchive, this is creating (or clobbering)
-        // the archive with this filename.
-        "curves1.abc" );
-
-    // Create a Curves class.
-    OCurves myCurves(   OObject( archive, kTop ),
-                        "reallly_long_curves_name");
+    OCurves myCurves( OObject( archive, kTop ),
+                      "reallly_long_curves_name");
 
     OCurvesSchema &curves = myCurves.getSchema();
-
-    // UVs and Normals use GeomParams, which can be written or read
-    // as indexed or not, as you'd like.
-
-    /*
-    OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
-                                                  g_numUVs ),
-                                  kFacevaryingScope );
-    // indexed normals
-    ON3fGeomParam::Sample nsamp( N3fArraySample( (const N3f *)g_normals,
-                                                 g_numNormals ),
-                                                    kFacevaryingScope );
-    */
 
     V2fArraySample widthSample( V2fArraySample( (const V2f *)g_widths,
                                 2));
@@ -138,10 +78,6 @@ void Example1_CurvesOut()
     std::cout << "original size " << widthSample.size() << std::endl;
     std::cout << "uz original size " << uvSample.size() << std::endl;
 
-    // Set a curve sample.
-    // We're creating the sample inline here,
-    // but we could create a static sample and leave it around,
-    // only modifying the parts that have changed.
     std::cout << "creating sample" << std::endl;
     OCurvesSchema::Sample curves_sample(
         V3fArraySample( ( const V3f * ) g_verts, g_totalVerts ),
@@ -150,7 +86,7 @@ void Example1_CurvesOut()
         "nonperiodic",
         widthSample,
         uvSample
-        );
+                                       );
 
     std::cout << "setting sample" << std::endl;
 

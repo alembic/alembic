@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -209,6 +209,7 @@ public:
     //! By convention we always define this_type in AbcGeom classes.
     //! Used by unspecified-bool-type conversion below
     typedef OCurvesSchema this_type;
+    typedef OCurvesSchema::Sample sample_type;
 
     //-*************************************************************************
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
@@ -236,7 +237,21 @@ public:
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+
+        AbcA::index_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        if ( tsPtr )
+        {
+            tsIndex = iParentObject->getObject()->getArchive()->
+                addTimeSampling( *tsPtr );
+        }
+
+        m_timeSamplingIndex = tsIndex;
+
+        init( tsIndex );
     }
 
     template <class CPROP_PTR>
@@ -249,7 +264,21 @@ public:
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( Abc::GetTimeSamplingType( iArg0, iArg1, iArg2 ) );
+        AbcA::TimeSamplingPtr tsPtr =
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+
+        AbcA::index_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        if ( tsPtr )
+        {
+            tsIndex = iParentObject->getObject()->getArchive()->
+                addTimeSampling( *tsPtr );
+        }
+
+        m_timeSamplingIndex = tsIndex;
+
+        init( tsIndex );
     }
 
     OCurvesSchema( const OCurvesSchema& iCopy )
@@ -265,8 +294,8 @@ public:
 
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    { return m_positions.getTimeSamplingType(); }
+    AbcA::TimeSamplingPtr getTimeSampling()
+    { return m_positions.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -279,12 +308,11 @@ public:
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
-    void set( const Sample &iSamp,
-              const Abc::OSampleSelector &iSS = Abc::OSampleSelector() );
+    void set( const sample_type &iSamp );
 
     //! Set from previous sample. Will apply to each of positions,
     //! indices, and counts.
-    void setFromPrevious( const Abc::OSampleSelector &iSS );
+    void setFromPrevious();
 
     Abc::OCompoundProperty getArbGeomParams();
 
@@ -298,10 +326,6 @@ public:
     //! state.
     void reset()
     {
-        //m_nVertices.reset();
-        //m_type.reset();
-        //m_wrap.reset();
-
         m_positions.reset();
         m_uvs.reset();
         m_normals.reset();
@@ -329,10 +353,11 @@ public:
 
     //! unspecified-bool-type operator overload.
     //! ...
-    ALEMBIC_OVERRIDE_OPERATOR_BOOL( OCurvesSchema::valid() );
+    ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
 
 protected:
-    void init(  const AbcA::TimeSamplingType &iTst);
+    void init( const AbcA::index_t iTsIdx );
+    AbcA::index_t m_timeSamplingIndex;
 
     // point data
     Abc::OV3fArrayProperty m_positions;

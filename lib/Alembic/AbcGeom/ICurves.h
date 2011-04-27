@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -60,8 +60,9 @@ public:
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
 
         std::string getType() const { return m_type; }
-        int getNCurves() const { return m_nCurves; }
-        Abc::Int32ArraySamplePtr getNVertices() const { return m_nVertices; }
+        std::size_t getNCurves() const { return m_nCurves; }
+        Abc::Int32ArraySamplePtr getCurvesNumVertices() const
+        { return m_nVertices; }
         std::string getWrap() const { return m_wrap; }
 
         BasisType getUBasis() const { return static_cast<BasisType>( m_uBasis ); }
@@ -133,6 +134,8 @@ public:
     //! Used by unspecified-bool-type conversion below
     typedef ICurvesSchema this_type;
 
+    typedef ICurvesSchema::Sample sample_type;
+
     //-*************************************************************************
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
     //-*************************************************************************
@@ -163,10 +166,10 @@ public:
     //! schema name used.
     template <class CPROP_PTR>
     explicit ICurvesSchema( CPROP_PTR iParentObject,
-                              const Abc::Argument &iArg0 = Abc::Argument(),
-                              const Abc::Argument &iArg1 = Abc::Argument() )
+                            const Abc::Argument &iArg0 = Abc::Argument(),
+                            const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<CurvesSchemaInfo>( iParentObject,
-                                            iArg0, iArg1 )
+                                        iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -176,23 +179,21 @@ public:
     ICurvesSchema( CPROP_PTR iThis,
                      Abc::WrapExistingFlag iFlag,
 
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument() )
+                   const Abc::Argument &iArg0 = Abc::Argument(),
+                   const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<CurvesSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
-    //! Default copy constructor used.
     //! Default assignment operator used.
 
+    ICurvesSchema( const ICurvesSchema &iCopy )
+    {
+        *this = iCopy;
+    }
 
-    //! Return the number of samples contained in the property.
-    //! This can be any number, including zero.
-    //! This returns the number of samples that were written, independently
-    //! of whether or not they were constant.
-    size_t getNumSamples()
-    { return m_positions.getNumSamples(); }
+    size_t getNumSamples() { return m_positions.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
@@ -204,79 +205,25 @@ public:
 
     //! Time sampling type.
     //!
-    AbcA::TimeSamplingType getTimeSamplingType() const
-    {
-        return m_positions.getTimeSamplingType();
-    }
-
-    //! Time information.
-    AbcA::TimeSampling getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling()
     {
         return m_positions.getTimeSampling();
     }
 
     //-*************************************************************************
-    void get( Sample &oSample,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+    void get( sample_type &oSample,
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
+
+    sample_type getValue( const Abc::ISampleSelector &iSS =
+                          Abc::ISampleSelector() )
     {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::get()" );
-
-        m_positions.get( oSample.m_positions, iSS );
-
-        m_type.get( oSample.m_type, iSS);
-        m_nCurves.get( oSample.m_nCurves, iSS );
-        m_nVertices.get( oSample.m_nVertices, iSS );
-        m_wrap.get( oSample.m_wrap, iSS );
-
-        if ( m_uBasis )
-        {
-            m_uBasis.get( oSample.m_uBasis, iSS );
-        }
-
-        if ( m_vBasis )
-        {
-            m_vBasis.get( oSample.m_vBasis, iSS );
-        }
-
-        if ( m_normals )
-        {
-            m_normals.get( oSample.m_normals, iSS);
-        }
-
-        if ( m_uvs )
-        {
-            m_uvs.get( oSample.m_uvs, iSS);
-        }
-
-        if ( m_widths )
-        {
-            m_widths.get( oSample.m_widths, iSS);
-        }
-
-        if ( m_selfBounds )
-        {
-            m_selfBounds.get( oSample.m_selfBounds, iSS );
-        }
-
-        if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
-        {
-            m_childBounds.get( oSample.m_childBounds, iSS );
-        }
-
-        // Could error check here.
-
-        ALEMBIC_ABC_SAFE_CALL_END();
-    }
-
-    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
-    {
-        Sample smp;
+        sample_type smp;
         get( smp, iSS );
         return smp;
     }
 
 
-    Abc::IV3fArrayProperty &getPositions(){ return m_positions; }
+    Abc::IV3fArrayProperty &getPositions() { return m_positions; }
     Abc::IV2fArrayProperty &getUVs() { return m_uvs; }
     Abc::IV3fArrayProperty &getNormals() { return m_normals; }
     Abc::IV2fArrayProperty &getWidths() { return m_widths; }
@@ -330,11 +277,10 @@ public:
 
     //! unspecified-bool-type operator overload.
     //! ...
-    ALEMBIC_OVERRIDE_OPERATOR_BOOL( ICurvesSchema::valid() );
+    ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
 
 protected:
-    void init( const Abc::Argument &iArg0,
-               const Abc::Argument &iArg1 );
+    void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
     Abc::IV3fArrayProperty m_positions;
 
@@ -354,7 +300,6 @@ protected:
 
     Abc::IUcharProperty m_uBasis;
     Abc::IUcharProperty m_vBasis;
-
 };
 
 //-*****************************************************************************

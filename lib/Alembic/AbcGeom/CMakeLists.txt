@@ -42,6 +42,10 @@ SET( CXX_FILES
   ICamera.cpp
   OCamera.cpp
 
+  Basis.cpp
+  ICurves.cpp
+  OCurves.cpp
+
   OSubD.cpp
   ISubD.cpp
 
@@ -75,6 +79,10 @@ SET( H_FILES
   CameraSample.h
   ICamera.h
   OCamera.h
+
+  Basis.h
+  ICurves.h
+  OCurves.h
 
   OSubD.h
   ISubD.h

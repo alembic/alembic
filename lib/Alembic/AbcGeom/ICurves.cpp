@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -44,25 +44,29 @@ MeshTopologyVariance ICurvesSchema::getTopologyVariance()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::getTopologyVariance()" );
 
-    if ( m_positions.isConstant() )
+    if ( m_positions.isConstant() && m_nCurves.isConstant() &&
+         m_nVertices.isConstant() )
     {
         return kConstantTopology;
     }
-    else
+    else if ( m_nCurves.isConstant() && m_nVertices.isConstant() )
     {
         return kHomogenousTopology;
     }
-
+    else
+    {
+        return kHeterogenousTopology;
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw
-    return kConstantTopology;
+    return kHeterogenousTopology;
 }
 
 //-*****************************************************************************
 void ICurvesSchema::init( const Abc::Argument &iArg0,
-                            const Abc::Argument &iArg1 )
+                          const Abc::Argument &iArg1 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesTrait::init()" );
 
@@ -74,18 +78,14 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
 
     m_positions = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
-    
-    // type, ncurves, nvertices, and wrap
+
+    // type, nvertices, and wrap
     m_type = Abc::IStringProperty( _this, "type",
                                     args.getSchemaInterpMatching());
-    
-    m_nCurves = Abc::IInt32Property( _this, "nCurves",
-                                    args.getSchemaInterpMatching());
 
-    
     m_nVertices = Abc::IInt32ArrayProperty( _this, "nVertices",
                                     args.getSchemaInterpMatching());
-    
+
     m_wrap = Abc::IStringProperty( _this, "wrap",
                                    args.getSchemaInterpMatching());
 
@@ -113,7 +113,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     {
         m_normals = Abc::IV3fArrayProperty( _this, "N", iArg0, iArg1 );
     }
-    
+
     if ( this->getPropertyHeader( "width" ) != NULL )
     {
         m_widths = Abc::IV2fArrayProperty( _this, "width", iArg0, iArg1 );
@@ -128,15 +128,65 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
 
     if ( this->getPropertyHeader( "uBasis" ) != NULL )
     {
-        m_uBasis = Abc::IUcharProperty( _this, "uBasis", iArg0, iArg1);
+        m_uBasis = Abc::IUcharProperty( _this, "uBasis", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( "vBasis" ) != NULL )
     {
-        m_vBasis = Abc::IUcharProperty( _this, "vBasis", iArg0, iArg1);
+        m_vBasis = Abc::IUcharProperty( _this, "vBasis", iArg0, iArg1 );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
+                         const Abc::ISampleSelector &iSS )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::get()" );
+
+    m_positions.get( oSample.m_positions, iSS );
+
+    m_type.get( oSample.m_type, iSS);
+    m_nVertices.get( oSample.m_nVertices, iSS );
+    m_wrap.get( oSample.m_wrap, iSS );
+
+    if ( m_uBasis )
+    {
+        m_uBasis.get( oSample.m_uBasis, iSS );
+    }
+
+    if ( m_vBasis )
+    {
+        m_vBasis.get( oSample.m_vBasis, iSS );
+    }
+
+    if ( m_normals )
+    {
+        m_normals.get( oSample.m_normals, iSS);
+    }
+
+    if ( m_uvs )
+    {
+        m_uvs.get( oSample.m_uvs, iSS);
+    }
+
+    if ( m_widths )
+    {
+        m_widths.get( oSample.m_widths, iSS);
+    }
+
+    if ( m_selfBounds )
+    {
+        m_selfBounds.get( oSample.m_selfBounds, iSS );
+    }
+
+    if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
+    {
+        m_childBounds.get( oSample.m_childBounds, iSS );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 } // End namespace AbcGeom

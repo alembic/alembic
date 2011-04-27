@@ -84,3 +84,12 @@ ADD_EXECUTABLE( AbcGeom_XformTest2
 		XformTests2.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest2  ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2 )
+
+##-*****************************************************************************
+ADD_EXECUTABLE( AbcGeom_CurvesTest
+                CurvesData.h
+                CurvesData.cpp
+                CurvesTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_CurvesTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_Curves_TEST AbcGeom_CurvesTest )
+
