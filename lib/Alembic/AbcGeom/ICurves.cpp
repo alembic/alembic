@@ -84,7 +84,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
                                     args.getSchemaInterpMatching());
 
     m_nVertices = Abc::IInt32ArrayProperty( _this, "nVertices",
-                                    args.getSchemaInterpMatching());
+                                            args.getSchemaInterpMatching());
 
     m_wrap = Abc::IStringProperty( _this, "wrap",
                                    args.getSchemaInterpMatching());
