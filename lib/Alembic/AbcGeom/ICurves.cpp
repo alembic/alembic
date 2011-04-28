@@ -44,12 +44,13 @@ MeshTopologyVariance ICurvesSchema::getTopologyVariance()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::getTopologyVariance()" );
 
-    if ( m_positions.isConstant() && m_nCurves.isConstant() &&
-         m_nVertices.isConstant() )
+    if ( m_positions.isConstant() && m_wrap.isConstant() &&
+         m_nVertices.isConstant() && m_type.isConstant() )
     {
         return kConstantTopology;
     }
-    else if ( m_nCurves.isConstant() && m_nVertices.isConstant() )
+    else if ( m_wrap.isConstant() && m_nVertices.isConstant() &&
+              m_type.isConstant() )
     {
         return kHomogenousTopology;
     }

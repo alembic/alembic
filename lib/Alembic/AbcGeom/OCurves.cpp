@@ -36,7 +36,6 @@
 
 #include <Alembic/AbcGeom/OCurves.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
-#include <iostream>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -111,7 +110,6 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         {
             m_widths = Abc::OV2fArrayProperty( this->getPtr(), "width",
                                                m_timeSamplingIndex );
-
             m_widths.set( iSamp.getWidths() );
         }
 

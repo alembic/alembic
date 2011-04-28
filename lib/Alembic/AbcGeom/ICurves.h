@@ -60,7 +60,10 @@ public:
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
 
         std::string getType() const { return m_type; }
-        std::size_t getNCurves() const { return m_nCurves; }
+        std::size_t getNumCurves() const
+        {
+            return m_nVertices->size();
+        }
         Abc::Int32ArraySamplePtr getCurvesNumVertices() const
         { return m_nVertices; }
         std::string getWrap() const { return m_wrap; }
@@ -89,8 +92,6 @@ public:
             m_uvs.reset();
             m_normals.reset();
 
-            m_nCurves = 1;
-
             m_type = "cubic";
             m_nVertices.reset();
             m_wrap = "nonperiodic";
@@ -113,7 +114,7 @@ public:
 
         // type, wrap, and nVertices
         std::string m_type;
-        int m_nCurves;
+        std::size_t m_numCurves;
         Abc::Int32ArraySamplePtr m_nVertices;
         std::string m_wrap;
 
@@ -251,7 +252,6 @@ public:
         m_childBounds.reset();
 
         m_type.reset();
-        m_nCurves.reset();
         m_nVertices.reset();
         m_wrap.reset();
 
@@ -292,7 +292,6 @@ protected:
     Abc::IBox3dProperty m_childBounds;
 
     Abc::IStringProperty m_type;
-    Abc::IInt32Property m_nCurves;
     Abc::IInt32ArrayProperty  m_nVertices;
     Abc::IStringProperty m_wrap;
 
