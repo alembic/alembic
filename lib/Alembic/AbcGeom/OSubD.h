@@ -117,17 +117,17 @@ public:
         // misc subd stuff
         int32_t getFaceVaryingInterpolateBoundary() const
         { return m_faceVaryingInterpolateBoundary; }
-        void setFaceVaryingInterpolateBoundary( int i )
+        void setFaceVaryingInterpolateBoundary( int32_t i )
         { m_faceVaryingInterpolateBoundary = i; }
 
         int32_t getFaceVaryingPropagateCorners() const
         { return m_faceVaryingPropagateCorners; }
-        void setFaceVaryingPropagateCorners( int i )
+        void setFaceVaryingPropagateCorners( int32_t i )
         { m_faceVaryingPropagateCorners = i; }
 
         int32_t getInterpolateBoundary() const
         { return m_interpolateBoundary; }
-        void setInterpolateBoundary( int i )
+        void setInterpolateBoundary( int32_t i )
         { m_interpolateBoundary = i; }
 
         // creases

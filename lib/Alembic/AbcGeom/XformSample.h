@@ -109,7 +109,7 @@ private:
 
 private:
     // 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
-    int m_setWithOpStack;
+    int32_t m_setWithOpStack;
 
     // This will be populated by the addOp() methods or setFoo() methods
     // in the case of the sample being used to write data, and by the
