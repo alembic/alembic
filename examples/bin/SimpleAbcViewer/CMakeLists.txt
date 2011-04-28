@@ -39,6 +39,7 @@ SET( H_FILES
      Drawable.h
      Foundation.h
      GLCamera.h
+     ICurvesDrw.h
      IObjectDrw.h
      IPointsDrw.h
      IPolyMeshDrw.h
@@ -51,6 +52,7 @@ SET( H_FILES
 
 SET( CXX_FILES
      GLCamera.cpp
+     ICurvesDrw.cpp
      IObjectDrw.cpp
      IPointsDrw.cpp
      IPolyMeshDrw.cpp
