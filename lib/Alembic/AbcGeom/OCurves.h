@@ -91,8 +91,8 @@ public:
 
           : m_positions( iPos ),
             m_type( iType ),
-            m_nVertices( iNVertices ),
             m_wrap( iWrap ),
+            m_nVertices( iNVertices ),
             m_uvs( iUVs ),
             m_normals( iNormals ),
             m_widths( iWidths ),
@@ -182,14 +182,13 @@ public:
 
         // properties
         Abc::V3fArraySample m_positions;
+        std::string m_type;
+        std::string m_wrap;
         Abc::Int32ArraySample m_nVertices;
 
         Abc::V2fArraySample m_uvs;
         Abc::V3fArraySample m_normals;
         Abc::V2fArraySample m_widths;
-
-        std::string m_type;
-        std::string m_wrap;
 
 	BasisType m_uBasis;
 	BasisType m_vBasis;
