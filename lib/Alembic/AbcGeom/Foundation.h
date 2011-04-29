@@ -69,7 +69,8 @@ enum XformOperationType
     kScaleOperation = 0,
     kTranslateOperation = 1,
     kRotateOperation = 2,
-    kMatrixOperation = 3
+    kMatrixOperation = 3,
+    kXYZRotateOperation = 4
 };
 
 //-*****************************************************************************

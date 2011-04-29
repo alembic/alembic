@@ -204,6 +204,8 @@ public:
 
     bool isMatrixOp() const;
 
+    bool isXYZRotateOp() const;
+
     //! Function for returning the combined encoded type and hint.
     //! The type is in the first four bits, the hint in the second.
     //!

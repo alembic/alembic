@@ -232,7 +232,7 @@ protected:
 
     std::vector<bool> m_staticChans;
 
-    std::vector<Alembic::Util::uint32_t> m_opVec;
+    std::vector<Alembic::Util::uint8_t> m_opVec;
 };
 
 //-*****************************************************************************
