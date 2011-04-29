@@ -164,11 +164,6 @@ public:
     //! Translate and Scale have 3, Rotate has 4 and Matrix has 16.
     std::size_t getNumChannels() const;
 
-    //! Every channel has a name based on the type of the op, and the index of
-    //! the channel. This is used to interact with well-named Properties of
-    //! an xform that may or may not exist.
-    std::string getChannelName( std::size_t iIndex ) const;
-
     //! For every channel, there's a default value.  Typically, for each op
     //! type, it's the same across channels. But matrix ops have different
     //! defaults to allow the identity matrix to be defaulted (most channels

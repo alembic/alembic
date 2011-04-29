@@ -65,7 +65,7 @@ void OXformSchema::set( XformSample &ioSamp )
         {
             m_ops = this->getPtr()->createScalarProperty(
                 ".ops", AbcA::MetaData(),
-                AbcA::DataType( Alembic::Util::kUint32POD, m_numOps ),
+                AbcA::DataType( Alembic::Util::kUint8POD, m_numOps ),
                 m_timeSamplingIndex
                                                         );
         }
@@ -103,7 +103,7 @@ void OXformSchema::set( XformSample &ioSamp )
     {
         const XformOp &op = ioSamp[i];
 
-        const Alembic::Util::uint32_t &openc = m_opVec[i];
+        const Alembic::Util::uint8_t &openc = m_opVec[i];
 
         const XformOp &protop = m_protoSample[i];
 

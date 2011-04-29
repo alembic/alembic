@@ -181,7 +181,7 @@ protected:
     std::size_t m_numOps;
     std::size_t m_numChannels;
 
-    std::vector<Alembic::Util::uint32_t> m_opVec;
+    std::vector<Alembic::Util::uint8_t> m_opVec;
     std::vector<Alembic::Util::float64_t> m_valVec;
 
 private:

@@ -61,6 +61,8 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_numChannels = 0;
 
+    m_numOps = 0;
+
     if ( m_vals )
     {
         m_numChannels = m_vals->getHeader().getDataType().getExtent();
@@ -81,10 +83,6 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     if ( m_ops && m_ops->getNumSamples() > 0 )
     {
         m_numOps = m_ops->getHeader().getDataType().getExtent();
-    }
-    else
-    {
-        m_numOps = 0;
     }
 
     m_opVec.resize( m_numOps );
