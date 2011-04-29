@@ -326,18 +326,21 @@ public:
     void reset()
     {
         m_positions.reset();
+        m_nVertices.reset();
+        m_wrap.reset();
+        m_type.reset();
+
         m_uvs.reset();
         m_normals.reset();
         m_widths.reset();
-        m_arbGeomParams.reset();
-        m_nVertices.reset();
 
         m_uBasis.reset();
         m_vBasis.reset();
 
-
         m_selfBounds.reset();
         m_childBounds.reset();
+
+        m_arbGeomParams.reset();
 
         Abc::OSchema<CurvesSchemaInfo>::reset();
     }

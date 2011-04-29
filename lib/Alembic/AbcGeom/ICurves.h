@@ -114,7 +114,6 @@ public:
 
         // type, wrap, and nVertices
         std::string m_type;
-        std::size_t m_numCurves;
         Abc::Int32ArraySamplePtr m_nVertices;
         std::string m_wrap;
 
@@ -157,7 +156,7 @@ public:
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<PolyMeshSchemaInfo>( iParentObject, iName,
+      : Abc::ISchema<CurvesSchemaInfo>( iParentObject, iName,
                                             iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
