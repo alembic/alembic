@@ -174,6 +174,9 @@ void Example1_MeshIn()
     // getVals() returns a TypedArraySamplePtr
     N3fArraySamplePtr nsp = N.getExpandedValue().getVals();
 
+    TESTING_ASSERT( N.isConstant() );
+    TESTING_ASSERT( uv.isConstant() );
+
     N3f n0 = (*nsp)[0];
 
     for ( size_t i = 0 ; i < nsp->size() ; ++i )

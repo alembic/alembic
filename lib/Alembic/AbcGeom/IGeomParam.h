@@ -180,6 +180,7 @@ public:
 
     const AbcA::MetaData &getMetaData();
 
+    bool isConstant();
 
     void reset()
     {
@@ -410,6 +411,26 @@ size_t ITypedGeomParam<TRAITS>::getNumSamples()
     ALEMBIC_ABC_SAFE_CALL_END();
 
     return 0;
+}
+
+//-*****************************************************************************
+template <class TRAITS>
+bool ITypedGeomParam<TRAITS>::isConstant()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ITypedGeomParam::isConstant()" );
+
+    if ( m_isIndexed )
+    {
+        return m_valProp.isConstant() && m_indices.isConstant();
+    }
+    else
+    {
+        return m_valProp.isConstant();
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return false;
 }
 
 //-*****************************************************************************
