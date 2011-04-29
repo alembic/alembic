@@ -244,7 +244,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParentObject->getObject()->getArchive()->
+            tsIndex = iParent->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 
@@ -271,7 +271,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParentObject->getObject()->getArchive()->
+            tsIndex = iParent->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 

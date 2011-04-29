@@ -168,7 +168,7 @@ public:
     explicit ICurvesSchema( CPROP_PTR iParent,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iParentObject,
+      : Abc::ISchema<CurvesSchemaInfo>( iParent,
                                         iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
