@@ -216,12 +216,20 @@ MStatus AlembicNode::initialize()
 
     // sampled custom-attributes
     mOutPropArrayAttr = gAttr.create("prop", "pr", &status);
+    status = gAttr.addNumericDataAccept(MFnNumericData::kBoolean);
     status = gAttr.addNumericDataAccept(MFnNumericData::kByte);
     status = gAttr.addNumericDataAccept(MFnNumericData::kShort);
-    status = gAttr.addNumericDataAccept(MFnNumericData::kLong);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k2Short);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k3Short);
     status = gAttr.addNumericDataAccept(MFnNumericData::kInt);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k2Int);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k3Int);
     status = gAttr.addNumericDataAccept(MFnNumericData::kFloat);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k2Float);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k3Float);
     status = gAttr.addNumericDataAccept(MFnNumericData::kDouble);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k2Double);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k3Double);
     status = gAttr.addDataAccept(MFnData::kString);
     status = gAttr.addDataAccept(MFnData::kIntArray);
     status = gAttr.addDataAccept(MFnData::kDoubleArray);
@@ -347,7 +355,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
         mOutRead[0] = true;
 
-        unsigned int propSize = 0; //mData.mPropList.size();
+        unsigned int propSize = mData.mPropList.size();
 
         if (propSize > 0)
         {
@@ -355,13 +363,12 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 mOutPropArrayAttr, &status);
 
             // for all of the nodes with sampled attributes
-            /*
-            for (unsigned int i = 0, handlePos = 0; i < propSize; i++)
+            for (unsigned int i = 0; i < propSize; i++)
             {
-                updateProp(mCurTime, mData.mPropList[i],
-                    outArrayHandle, handlePos);
+                MDataHandle handle = outArrayHandle.outputValue();
+                readProp(mCurTime, mData.mPropList[i], handle);
+                outArrayHandle.next();
             }
-            */
             outArrayHandle.setAllClean();
         }
     }

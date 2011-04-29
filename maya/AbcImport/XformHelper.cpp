@@ -416,9 +416,9 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
 }
 
 MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
-    MObject & iObject,
-    std::vector<std::string> & oSampledPropNameList,
-    std::vector<std::string> & oSampledTransOpNameList)
+    MObject & iObject, std::vector<std::string> & oSampledTransOpNameList,
+    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::size_t iFirstProp)
 {
     MStatus status = MS::kSuccess;
 
@@ -519,33 +519,7 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
     dstPlug.setBool(true);
 
     // disconnect connections to animated props
-    /*
-    loop over properties
-    {
-        std::string propName = propIter->first;
-        // SPT_xxColor is special
-        if ( propName.find("SPT_") != std::string::npos
-            && propName.find("Color") != std::string::npos )
-        {
-            std::string colorR = propName+std::string("R");
-            dstPlug = trans.findPlug(colorR.c_str());
-            disconnectAllPlugsTo(dstPlug);
-            std::string colorG = propName+std::string("G");
-            dstPlug = trans.findPlug(colorG.c_str());
-            disconnectAllPlugsTo(dstPlug);
-            std::string colorB = propName+std::string("B");
-            dstPlug = trans.findPlug(colorB.c_str());
-            disconnectAllPlugsTo(dstPlug);
-        }
-        else
-        {
-            dstPlug = trans.findPlug(propIter->first.c_str());
-            disconnectAllPlugsTo(dstPlug);
-        }
-        propIter++;
-    }
-    addProperties(iFrame, *iNode, ioObject, oSampledPropNameList);
-    */
+    disconnectProps(trans, iSampledPropList, iFirstProp);
 
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,

@@ -103,6 +103,29 @@ MStatus replaceDagObject(MObject & oldObject, MObject & newObject,
     return status;
 }
 
+void disconnectProps(MFnDependencyNode & iNode,
+    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::size_t iFirstProp)
+{
+    // get prop names and make sure they are disconnected before
+    // trying to connect to them
+    std::size_t numProps = iSampledPropList.size();
+    for (std::size_t i = iFirstProp; i < numProps; ++i)
+    {
+        std::string propName = iSampledPropList[i].getName();
+
+        // disconnect connections to animated props
+        MPlug dstPlug = iNode.findPlug(propName.c_str());
+
+        // make sure the long name matches
+        if (dstPlug.partialName(false, false, false, false, false, true) ==
+            propName.c_str())
+        {
+            disconnectAllPlugsTo(dstPlug);
+        }
+    }
+}
+
 MStatus disconnectAllPlugsTo(MPlug & dstPlug)
 {
     MStatus status = MS::kSuccess;

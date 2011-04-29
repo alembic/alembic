@@ -123,7 +123,7 @@ bool CreateSceneVisitor::hasSampledData()
     unsigned int transopSize = mData.mXformList.size();
     unsigned int nSurfaceSize  = 0; //mData.mNurbsList.size();
     unsigned int nCurveSize  = 0; //mData.mCurveList.size();
-    unsigned int propSize = 0; //mData.mPropList.size();
+    unsigned int propSize = mData.mPropList.size();
 
     return ( subDSize > 0 || polySize > 0 || nSurfaceSize > 0 || nCurveSize > 0
             || transopSize > 0 || cameraSize > 0  // || particleSize > 0
@@ -145,6 +145,17 @@ void CreateSceneVisitor::applyShaderSelection()
         curSet.addMembers(i->second);
     }
     mShaderMeshMap.clear();
+}
+
+void CreateSceneVisitor::addToPropList(std::size_t iFirst, MObject & iObject)
+{
+    std::size_t last = mData.mPropList.size();
+    std::vector<std::string> attrList;
+    for (std::size_t i = iFirst; i < last; ++i)
+    {
+        attrList.push_back(mData.mPropList[i].getName());
+    }
+    mData.mPropObjList.push_back(SampledPair(iObject, attrList));
 }
 
 // remembers what sets a mesh was part of, gets those sets as a selection
@@ -327,23 +338,21 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     if (iNode.getSchema().getNumSamples() > 1)
         mData.mPointsList.push_back(iNode);
 
-    // review other arbitrary attributes and add it to the lists
+    // since we don't really support animated points, don't bother
+    // with the animated properties on it
 
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
-        std::vector<std::string> propNameList;
-        status = create(mFrame, iNode, mParent, particleObj, propNameList);
+        status = create(mFrame, iNode, mParent, particleObj);
         if (iNode.getSchema().getNumSamples() > 1)
         {
             mData.mPointsObjList.push_back(particleObj);
         }
 
-        if (propNameList.size() > 0)
-        {
-            SampledPair mSampledPair(particleObj, propNameList);
-            //mData.mPropList.push_back(mSampledPair);
-            //mData.mPropNodePtrList.push_back(iNode);
-        }
+        Alembic::Abc::ICompoundProperty arbProp =
+            iNode.getSchema().getArbGeomParams();
+
+        addProps(arbProp, particleObj);
     }
 
     return status;
@@ -362,27 +371,24 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
         mData.mSubDList.push_back(iNode);
     }
 
-    // review other arbitrary attributes and add it to the lists
+    Alembic::Abc::ICompoundProperty arbProp =
+        iNode.getSchema().getArbGeomParams();
 
-    std::vector<std::string> propNameList;
+    std::size_t firstProp = mData.mPropList.size();
+    getAnimatedProps(arbProp, mData.mPropList);
+
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
-        subDObj = createSubD(mFrame, iNode, mParent, propNameList);
+        subDObj = createSubD(mFrame, iNode, mParent);
         MFnDagNode(subDObj).getPath(mCurrentDagNode);
         if (numSamples > 1)
         {
             mData.mSubDObjList.push_back(subDObj);
         }
 
-        /*
-        if (iNode.hasPropertyFrames())
-        {
-            SampledPair mSampledPair(subDObj, propNameList);
-            mData.mPropList.push_back(mSampledPair);
-            mData.mPropNodePtrList.push_back(iNode);
-        }
-        */
-
+        Alembic::Abc::ICompoundProperty arbProp =
+            iNode.getSchema().getArbGeomParams();
+        addProps(arbProp, subDObj);
     }
 
     if ( mAction >= CONNECT )
@@ -408,7 +414,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
             checkShaderSelection(fn, mCurrentDagNode.instanceNumber());
         }
 
-        disconnectMesh(subDObj, propNameList);
+        disconnectMesh(subDObj, mData.mPropList, firstProp);
+        addToPropList(firstProp, subDObj);
 
     }
 
@@ -426,26 +433,22 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     if (numSamples > 1)
         mData.mPolyMeshList.push_back(iNode);
 
-    // review other arbitrary attributes and add it to the lists
+    Alembic::Abc::ICompoundProperty arbProp =
+        iNode.getSchema().getArbGeomParams();
 
-    std::vector<std::string> propNameList;
+    std::size_t firstProp = mData.mPropList.size();
+    getAnimatedProps(arbProp, mData.mPropList);
+
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
-        polyObj = createPoly(mFrame, iNode, mParent, propNameList);
+        polyObj = createPoly(mFrame, iNode, mParent);
         MFnDagNode(polyObj).getPath(mCurrentDagNode);
         if (numSamples > 1)
         {
             mData.mPolyMeshObjList.push_back(polyObj);
         }
 
-        /*
-        if (iNode.hasPropertyFrames())
-        {
-            SampledPair mSampledPair(subDObj, propNameList);
-            mData.mPropList.push_back(mSampledPair);
-            mData.mPropNodePtrList.push_back(iNode);
-        }
-        */
+        addProps(arbProp, polyObj);
 
     }
 
@@ -473,8 +476,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
             checkShaderSelection(fn, mCurrentDagNode.instanceNumber());
         }
 
-        disconnectMesh(polyObj, propNameList);
-
+        disconnectMesh(polyObj, mData.mPropList, firstProp);
+        addToPropList(firstProp, polyObj);
     }
 
     return status;
@@ -494,8 +497,14 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         mData.mIsComplexXform.push_back(isComplex(iNode));
     }
 
+    Alembic::Abc::ICompoundProperty arbProp;
+        //= iNode.getSchema().getArbGeomParams();
+
+    std::size_t firstProp = mData.mPropList.size();
+    getAnimatedProps(arbProp, mData.mPropList);
+
     // There might be children under the current DAG node that
-    // don't exist in the file.
+    // doesn't exist in the file.
     // Remove them if the -removeIfNoUpdate flag is set
     if (mAction == REMOVE || mAction == CREATE_REMOVE)
     {
@@ -503,7 +512,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         std::vector<MDagPath> dagToBeRemoved;
 
         // get names of immediate children so we can compare with
-        // the hierarchy in teh scene
+        // the hierarchy in the scene
         std::set< std::string > childNodesInFile;
         for (size_t j = 0; j < numChildren; ++j)
         {
@@ -570,7 +579,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
                     Alembic::Abc::ISampleSelector::kNearIndex)) );
         }
 
-        //addProperties(mFrame, iNode, transObj, iSampledPropNameList);
+        addProps(arbProp, transObj);
     }
 
     if ( mAction >= CONNECT )
@@ -581,24 +590,15 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         if (transObj.hasFn(MFn::kTransform))
         {
             std::vector<std::string> transopNameList;
-            std::vector<std::string> propNameList;
-            connectToXform(mFrame, iNode, transObj, propNameList,
-                transopNameList);
+            connectToXform(mFrame, iNode, transObj, transopNameList,
+                mData.mPropList, firstProp);
 
             if (!isConstant)
             {
-                SampledPair mSampledPair(transObj, transopNameList);
-                mData.mXformOpList.push_back(mSampledPair);
+                SampledPair sampPair(transObj, transopNameList);
+                mData.mXformOpList.push_back(sampPair);
             }
-
-            /*
-            if (iNode.hasPropertyFrames())
-            {
-                SampledPair mSampledPair(transObj, propNameList);
-                mData.mPropList.push_back(mSampledPair);
-                mData.mPropNodePtrList.push_back(iNode);
-            }
-            */
+            addToPropList(firstProp, transObj);
         }
         else
         {

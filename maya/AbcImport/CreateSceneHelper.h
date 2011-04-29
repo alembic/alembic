@@ -109,6 +109,8 @@ private:
     // to a previous hierarchy
     void checkShaderSelection(MFnMesh & iMesh, unsigned int iInst);
 
+    void addToPropList(std::size_t iFirst, MObject & iParent);
+
     double mFrame;
     MObject mParent;
 
