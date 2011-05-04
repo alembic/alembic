@@ -63,6 +63,12 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_isConstantIdentity = true;
 
+    if ( ptr->getPropertyHeader( "isNotConstantIdentity" ) )
+    {
+        // that it's here at all means we're not constant identity.
+        m_isConstantIdentity = false;
+    }
+
     m_isConstant = true;
 
     m_numChannels = 0;
@@ -92,11 +98,6 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     }
 
     m_opVec.resize( m_numOps );
-
-    if ( m_vals && m_vals->getNumSamples() > 0 )
-    {
-        m_isConstantIdentity = m_isConstant && m_numChannels == 0;
-    }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

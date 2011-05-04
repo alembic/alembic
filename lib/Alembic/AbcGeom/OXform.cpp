@@ -116,6 +116,11 @@ void OXformSchema::set( XformSample &ioSamp )
                                           protop.getChannelValue( j ),
                                           kXFORM_DELTA_TOLERANCE );
 
+
+            m_isDefault = m_isDefault &&
+                Imath::equalWithAbsError( op.getChannelValue( j ),
+                                          op.getDefaultChannelValue( j ),
+                                          kXFORM_DELTA_TOLERANCE );
         }
 
         ii += op.getNumChannels();
@@ -133,6 +138,14 @@ void OXformSchema::set( XformSample &ioSamp )
     if ( m_ops )
     {
         m_ops->setSample( &(m_opVec.front()) );
+    }
+
+    if ( !m_isNotConstantIdentity && !m_isDefault )
+    {
+        m_isNotConstantIdentity = Abc::OBoolProperty( *this,
+                                                      "isNotConstantIdentity" );
+
+        m_isNotConstantIdentity.set( true );
     }
 
     m_animChannels.set( animchans );
@@ -172,6 +185,8 @@ void OXformSchema::init( const AbcA::index_t iTsIdx )
 
     m_animChannels = Abc::OUInt32ArrayProperty( this->getPtr(),
                                                 ".animChans", iTsIdx );
+
+    m_isDefault = true;
 
     m_numOps = 0;
     m_numChannels = 0;

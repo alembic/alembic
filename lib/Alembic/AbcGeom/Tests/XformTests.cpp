@@ -228,13 +228,13 @@ void xformIn()
     TESTING_ASSERT( d.getSchema().getInheritsXforms() );
 
     IXform e( d, "e" );
-    //TESTING_ASSERT( e.getSchema().isConstantIdentity() );
+    TESTING_ASSERT( e.getSchema().isConstantIdentity() );
     TESTING_ASSERT( e.getSchema().isConstant() );
     TESTING_ASSERT( e.getSchema().getNumOps() == 3 );
 
     IXform f( e, "f" );
     TESTING_ASSERT( f.getSchema().isConstant() ); // is constant
-    //TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
+    TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
 
     std::cout << "Tested all xforms in first test!" << std::endl;
 }

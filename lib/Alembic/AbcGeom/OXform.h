@@ -222,7 +222,8 @@ protected:
 
     Abc::OBoolProperty m_inherits;
 
-    // written on destruction, as needed
+    Abc::OBoolProperty m_isNotConstantIdentity;
+
     Abc::OUInt32ArrayProperty m_animChannels;
 
 
@@ -233,6 +234,8 @@ protected:
     std::vector<bool> m_staticChans;
 
     std::vector<Alembic::Util::uint8_t> m_opVec;
+
+    bool m_isDefault;
 };
 
 //-*****************************************************************************

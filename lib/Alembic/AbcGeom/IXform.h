@@ -148,6 +148,7 @@ public:
         m_ops.reset();
         m_inherits.reset();
         m_isConstant = true;
+        m_isConstantIdentity = true;
 
         super_type::reset();
     }
