@@ -47,9 +47,15 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     AbcA::CompoundPropertyReaderPtr ptr = this->getPtr();
 
-    m_childBounds = Abc::IBox3dProperty( ptr, ".childBnds", iMatching );
+    if ( ptr->getPropertyHeader( ".childBnds" ) )
+    {
+        m_childBounds = Abc::IBox3dProperty( ptr, ".childBnds", iMatching );
+    }
 
-    m_inherits = Abc::IBoolProperty( ptr, ".inherits", iMatching );
+    if ( ptr->getPropertyHeader( ".inherits" ) )
+    {
+        m_inherits = Abc::IBoolProperty( ptr, ".inherits", iMatching );
+    }
 
     m_ops = ptr->getScalarProperty(  ".ops" );
 
@@ -100,7 +106,15 @@ AbcA::TimeSamplingPtr IXformSchema::getTimeSampling()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getTimeSampling()" );
 
-    return m_inherits.getTimeSampling();
+    if ( m_inherits )
+    {
+        return m_inherits.getTimeSampling();
+    }
+    else
+    {
+        AbcA::TimeSamplingPtr ret;
+        return ret;
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -113,7 +127,11 @@ std::size_t IXformSchema::getNumSamples()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getNumSamples()" );
 
-    return m_inherits.getNumSamples();
+    if ( m_inherits )
+    {
+        return m_inherits.getNumSamples();
+    }
+    else { return 0; }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
