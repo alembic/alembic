@@ -1,7 +1,8 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2010, Industrial Light & Magic,
-##   a division of Lucasfilm Entertainment Company Ltd.
+## Copyright (c) 2009-2011,
+##  Sony Pictures Imageworks Inc. and
+##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
 ##
@@ -92,4 +93,10 @@ ADD_EXECUTABLE( AbcGeom_CurvesTest
                 CurvesTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_CurvesTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Curves_TEST AbcGeom_CurvesTest )
+
+##-*****************************************************************************
+# This is just something so that we, the Alembic devs, can noodle around
+# with stuff without having to edit the build setup to build it. --JDA
+ADD_EXECUTABLE( playground PlayGround.cpp )
+TARGET_LINK_LIBRARIES( playground ${TEST_LIBS} )
 
