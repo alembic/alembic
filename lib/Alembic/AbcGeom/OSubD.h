@@ -299,7 +299,7 @@ public:
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<SubDSchemaInfo>( iParentObject, iName,
-                                   iArg0, iArg1, iArg2 )
+                                      iArg0, iArg1, iArg2 )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -327,7 +327,7 @@ public:
                           const Abc::Argument &iArg1 = Abc::Argument(),
                           const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<SubDSchemaInfo>( iParentObject,
-                                   iArg0, iArg1, iArg2 )
+                                      iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
             Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
@@ -347,6 +347,17 @@ public:
         // the super type, so all that's left is time sampling.
         init( tsIndex );
     }
+
+    template <class CPROP_PTR>
+    OSubDSchema( CPROP_PTR iThis,
+                 Abc::WrapExistingFlag iFlag,
+                 const Abc::Argument &iArg0 = Abc::Argument(),
+                 const Abc::Argument &iArg1 = Abc::Argument(),
+                 const Abc::Argument &iArg2 = Abc::Argument() )
+      : Abc::OSchema<SubDSchemaInfo>( iThis, iFlag,
+                                      iArg0, iArg1, iArg2 )
+    {}
+
 
     //! Copy constructor.
     OSubDSchema(const OSubDSchema& iCopy)

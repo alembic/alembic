@@ -245,10 +245,12 @@ inline OSchemaObject<SCHEMA>::OSchemaObject(
 
     const AbcA::ObjectHeader &oheader = this->getHeader();
 
-    m_schema = SCHEMA( GetCompoundPropertyWriterPtr( this->getProperties() ),
-                       iFlag,
-                       this->getErrorHandlerPolicy(),
-                       GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) );
+    m_schema = SCHEMA(
+        this->getProperties().getProperty(
+            SCHEMA::getDefaultSchemaName() ).getPtr()->asCompoundPtr(),
+        iFlag,
+        this->getErrorHandlerPolicy(),
+        GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) );
 
 
     ABCA_ASSERT( matches( oheader,
