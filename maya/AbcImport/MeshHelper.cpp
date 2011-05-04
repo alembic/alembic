@@ -105,7 +105,7 @@ namespace
         iUVs.getIndexed(samp, Alembic::Abc::ISampleSelector(index));
 
         Alembic::AbcGeom::V2fArraySamplePtr uvPtr = samp.getVals();
-        Alembic::Abc::UInt32ArraySamplePtr indexPtr = samp.getFaceIndices();
+        Alembic::Abc::UInt32ArraySamplePtr indexPtr = samp.getIndices();
 
         if (numFaceVertices != indexPtr->size())
         {
@@ -354,7 +354,7 @@ namespace
 
 }  // namespace
 
-// once normals are supported in the polyMesh schema, polyMesh will look 
+// once normals are supported in the polyMesh schema, polyMesh will look
 // different than readSubD
 void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     Alembic::AbcGeom::IPolyMesh & iNode, bool iInitialized)
@@ -637,13 +637,13 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
         printWarning("Hole Poly Indices not yet supported.");
     }
 
-    if (samp.getCreaseSharpnesses() && 
+    if (samp.getCreaseSharpnesses() &&
         !samp.getCreaseSharpnesses()->size() == 0)
     {
         printWarning("Creases not yet supported.");
     }
 
-    if (samp.getCornerSharpnesses() && 
+    if (samp.getCornerSharpnesses() &&
         !samp.getCornerSharpnesses()->size() == 0)
     {
         printWarning("Corners not yet supported.");
