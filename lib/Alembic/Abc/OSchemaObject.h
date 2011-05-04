@@ -239,15 +239,17 @@ inline OSchemaObject<SCHEMA>::OSchemaObject(
              iFlag,
              GetErrorHandlerPolicy( iObject,
                                     iArg0, iArg1, iArg2 ) )
-  , m_schema( this->getProperties(),
-              iFlag,
-              this->getErrorHandlerPolicy(),
-              GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "OSchemaObject::OSchemaObject( wrap )" );
 
     const AbcA::ObjectHeader &oheader = this->getHeader();
+
+    m_schema = SCHEMA( GetCompoundPropertyWriterPtr( this->getProperties() ),
+                       iFlag,
+                       this->getErrorHandlerPolicy(),
+                       GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) );
+
 
     ABCA_ASSERT( matches( oheader,
                           GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) ),
