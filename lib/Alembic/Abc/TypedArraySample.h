@@ -73,7 +73,7 @@ public:
     //-*************************************************************************
     // From std::vector
     TypedArraySample( const value_vector &iVec )
-      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ? 
+      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ?
                                                            &iVec.front() :
                                                            NULL ),
                            TRAITS::dataType(), Dimensions( iVec.size() ) ) {}
@@ -81,7 +81,7 @@ public:
     // This is for the case in which the data is multi-dimensional
     TypedArraySample( const value_vector &iVec,
                       const Dimensions &iDims )
-      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ? 
+      : AbcA::ArraySample( reinterpret_cast<const void *>( iVec.size() > 0 ?
                                                            &iVec.front() :
                                                            NULL ),
                            TRAITS::dataType(), iDims )
@@ -136,6 +136,7 @@ public:
     ALEMBIC_OPERATOR_BOOL( ArraySample::valid() );
 };
 
+#if 0
 //-*****************************************************************************
 // We need a "side-along" TypedArraySamplePtr. Taking advantage of the fact
 // that static-cast is valid here.
@@ -168,6 +169,7 @@ AllocateTypedArraySample( const Dimensions &iDims )
         return ret;
     }
 }
+#endif
 
 //-*****************************************************************************
 // TYPEDEFS
