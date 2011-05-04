@@ -97,8 +97,8 @@ void IPolyMeshDrw::setTime( chrono_t iSeconds )
 
     // Get the stuff.
     V3fArraySamplePtr P = psamp.getPositions();
-    Int32ArraySamplePtr indices = psamp.getIndices();
-    Int32ArraySamplePtr counts = psamp.getCounts();
+    Int32ArraySamplePtr indices = psamp.getFaceIndices();
+    Int32ArraySamplePtr counts = psamp.getFaceCounts();
 
     // Update the mesh hoo-ha.
     m_drwHelper.update( P, V3fArraySamplePtr(),

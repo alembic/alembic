@@ -132,7 +132,7 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 
         IPolyMeshSchema::Sample sample = ps.getValue( sampleSelector );
 
-        RtInt npolys = (RtInt) sample.getCounts()->size();
+        RtInt npolys = (RtInt) sample.getFaceCounts()->size();
 
         ParamListBuilder ParamListBuilder;
 
@@ -170,8 +170,8 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 
         RiPointsPolygonsV(
             npolys,
-            (RtInt*) sample.getCounts()->get(),
-            (RtInt*) sample.getIndices()->get(),
+            (RtInt*) sample.getFaceCounts()->get(),
+            (RtInt*) sample.getFaceIndices()->get(),
             ParamListBuilder.n(),
             ParamListBuilder.nms(),
             ParamListBuilder.vals() );

@@ -68,13 +68,13 @@ void OPolyMeshSchema::set( const Sample &iSamp )
     {
         // First sample must be valid on all points.
         ABCA_ASSERT( iSamp.getPositions() &&
-                     iSamp.getIndices() &&
-                     iSamp.getCounts(),
+                     iSamp.getFaceIndices() &&
+                     iSamp.getFaceCounts(),
                      "Sample 0 must have valid data for all mesh components" );
 
         m_positions.set( iSamp.getPositions() );
-        m_indices.set( iSamp.getIndices() );
-        m_counts.set( iSamp.getCounts() );
+        m_indices.set( iSamp.getFaceIndices() );
+        m_counts.set( iSamp.getFaceCounts() );
 
         if (m_childBounds)
         { m_childBounds.set( iSamp.getChildBounds() ); }
@@ -131,8 +131,8 @@ void OPolyMeshSchema::set( const Sample &iSamp )
     else
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
-        SetPropUsePrevIfNull( m_indices, iSamp.getIndices() );
-        SetPropUsePrevIfNull( m_counts, iSamp.getCounts() );
+        SetPropUsePrevIfNull( m_indices, iSamp.getFaceIndices() );
+        SetPropUsePrevIfNull( m_counts, iSamp.getFaceCounts() );
 
         if ( m_childBounds )
         {

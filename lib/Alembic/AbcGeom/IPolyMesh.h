@@ -57,8 +57,8 @@ public:
         Sample() {}
 
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
-        Abc::Int32ArraySamplePtr getIndices() const { return m_indices; }
-        Abc::Int32ArraySamplePtr getCounts() const { return m_counts; }
+        Abc::Int32ArraySamplePtr getFaceIndices() const { return m_indices; }
+        Abc::Int32ArraySamplePtr getFaceCounts() const { return m_counts; }
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
 

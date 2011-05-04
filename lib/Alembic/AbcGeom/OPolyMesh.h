@@ -85,12 +85,12 @@ public:
         void setPositions( const Abc::V3fArraySample &iSmp )
         { m_positions = iSmp; }
 
-        const Abc::Int32ArraySample &getIndices() const { return m_indices; }
-        void setIndices( const Abc::Int32ArraySample &iSmp )
+        const Abc::Int32ArraySample &getFaceIndices() const { return m_indices; }
+        void setFaceIndices( const Abc::Int32ArraySample &iSmp )
         { m_indices = iSmp; }
 
-        const Abc::Int32ArraySample &getCounts() const { return m_counts; }
-        void setCounts( const Abc::Int32ArraySample &iCnt )
+        const Abc::Int32ArraySample &getFaceCounts() const { return m_counts; }
+        void setFaceCounts( const Abc::Int32ArraySample &iCnt )
         { m_counts = iCnt; }
 
         const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }

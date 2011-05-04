@@ -105,7 +105,7 @@ namespace
         iUVs.getIndexed(samp, Alembic::Abc::ISampleSelector(index));
 
         Alembic::AbcGeom::V2fArraySamplePtr uvPtr = samp.getVals();
-        Alembic::Abc::UInt32ArraySamplePtr indexPtr = samp.getIndices();
+        Alembic::Abc::UInt32ArraySamplePtr indexPtr = samp.getFaceIndices();
 
         if (numFaceVertices != indexPtr->size())
         {
@@ -410,8 +410,8 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
     fillPoints(pointArray, samp.getPositions(), ceilPoints, alpha);
 
-    fillTopology(ioMesh, iParent, pointArray, samp.getIndices(),
-        samp.getCounts());
+    fillTopology(ioMesh, iParent, pointArray, samp.getFaceIndices(),
+        samp.getFaceCounts());
 
     setPolyNormals(iFrame, ioMesh, schema.getNormals());
     setUVs(iFrame, ioMesh, schema.getUVs());
@@ -533,8 +533,8 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
         }
 
         fillPoints(ptArray, samp.getPositions(), ceilPoints, alpha);
-        fillTopology(fnMesh, iParent, ptArray, samp.getIndices(),
-            samp.getCounts());
+        fillTopology(fnMesh, iParent, ptArray, samp.getFaceIndices(),
+            samp.getFaceCounts());
         fnMesh.setName(iNode.getName().c_str());
         setPolyNormals(iFrame, fnMesh, schema.getNormals());
         setUVs(iFrame, fnMesh, schema.getUVs());
