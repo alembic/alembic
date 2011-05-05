@@ -1008,11 +1008,11 @@ std::string * AttributesWriter::mFilter = NULL;
 std::set<std::string> * AttributesWriter::mAttribs = NULL;
 
 AttributesWriter::AttributesWriter(
-    double iFrame,
     Abc::OCompoundProperty & iParent,
     const MFnDagNode & iNode,
     uint32_t iTimeIndex,
-    bool iWriteVisibility)
+    bool iWriteVisibility,
+    bool iForceStatic)
 {
     PlugAndObjScalar visPlug;
 
@@ -1065,7 +1065,7 @@ AttributesWriter::AttributesWriter(
         int sampType = 0;
 
         // if we aren't forcing everything to be static
-        if (iFrame != DBL_MAX)
+        if (!iForceStatic)
         {
             sampType = util::getSampledType(plug);
         }
@@ -1159,7 +1159,7 @@ AttributesWriter::AttributesWriter(
             {
                 int8_t visVal = 0;
 
-                if (iFrame != DBL_MAX)
+                if (!iForceStatic)
                 {
                     Abc::OCharProperty bp(iParent, "visible", iTimeIndex);
                     bp.set(visVal);
@@ -1179,7 +1179,7 @@ AttributesWriter::AttributesWriter(
             case 3:
             {
                 // dont add if we are forcing static
-                if (iFrame == DBL_MAX)
+                if (!iForceStatic)
                 {
                     break;
                 }

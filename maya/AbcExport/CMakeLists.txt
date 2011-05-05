@@ -41,6 +41,7 @@ SET( H_FILES
   AbcWriteJob.h
   AttributesWriter.h
   Foundation.h
+  MayaCameraWriter.h
   MayaMeshWriter.h
   MayaPointPrimitiveWriter.h
   MayaTransformWriter.h
@@ -51,6 +52,7 @@ SET( CXX_FILES
   AbcExport.cpp
   AbcWriteJob.cpp
   AttributesWriter.cpp
+  MayaCameraWriter.cpp
   MayaMeshWriter.cpp
   MayaPointPrimitiveWriter.cpp
   MayaTransformWriter.cpp

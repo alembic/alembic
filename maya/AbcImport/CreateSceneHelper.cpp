@@ -54,6 +54,7 @@
 #include <vector>
 
 #include "util.h"
+#include "CameraHelper.h"
 #include "MeshHelper.h"
 #include "PointHelper.h"
 #include "XformHelper.h"
@@ -117,7 +118,7 @@ bool CreateSceneVisitor::hasSampledData()
 {
     unsigned int subDSize = mData.mSubDList.size();
     unsigned int polySize = mData.mPolyMeshList.size();
-    unsigned int cameraSize = 0; //mData.mCameraList.size();
+    unsigned int cameraSize = mData.mCameraList.size();
     // Currently there's no support for bringing in particle system simulation
     // unsigned int particleSize = mData.mParticleList.size();
     unsigned int transopSize = mData.mXformList.size();
@@ -202,6 +203,11 @@ void CreateSceneVisitor::visit(Alembic::Abc::IObject & iObj)
     {
         Alembic::AbcGeom::IPolyMesh mesh(iObj, Alembic::Abc::kWrapExisting);
         (*this)(mesh);
+    }
+    else if ( Alembic::AbcGeom::ICamera::matches(iObj.getHeader()) )
+    {
+        Alembic::AbcGeom::ICamera cam(iObj, Alembic::Abc::kWrapExisting);
+        (*this)(cam);
     }
     else if ( Alembic::AbcGeom::IPoints::matches(iObj.getHeader()) )
     {
@@ -325,6 +331,63 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
                 this->visit(child);
             }
         }
+    }
+
+    return status;
+}
+
+MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
+{
+    MStatus status = MS::kSuccess;
+    MObject cameraObj = MObject::kNullObj;
+
+    size_t numSamples = iNode.getSchema().getNumSamples();
+
+    // add animated poly mesh to the list
+    if (numSamples > 1)
+        mData.mCameraList.push_back(iNode);
+
+    Alembic::Abc::ICompoundProperty arbProp =
+        iNode.getSchema().getArbGeomParams();
+
+    std::size_t firstProp = mData.mPropList.size();
+    getAnimatedProps(arbProp, mData.mPropList);
+
+    if (mAction == CREATE || mAction == CREATE_REMOVE)
+    {
+        cameraObj = create(iNode, mParent);
+        MFnDagNode(cameraObj).getPath(mCurrentDagNode);
+        if (numSamples > 1)
+        {
+            mData.mCameraObjList.push_back(cameraObj);
+        }
+
+        addProps(arbProp, cameraObj);
+
+    }
+
+
+    if ( mAction >= CONNECT )
+    {
+        if (cameraObj == MObject::kNullObj)
+        {
+            cameraObj = mCurrentDagNode.node();
+
+            // check that the data types are compatible, they might not be
+            // if we have a weird hierarchy, where the node in the scene
+            // differs from the node on disk
+            if ( status != MS::kSuccess )
+            {
+                MString theError("No connection done for node '");
+                theError += MString(iNode.getName().c_str());
+                theError += MString("' with ");
+                theError += mCurrentDagNode.fullPathName();
+                printError(theError);
+                return status;
+            }
+        }
+
+        addToPropList(firstProp, cameraObj);
     }
 
     return status;
@@ -520,7 +583,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
             childNodesInFile.insert(child.getName());
         }
 
-        for ( unsigned int i = 0; i < numDags; i++ )
+        for (unsigned int i = 0; i < numDags; i++)
         {
             MObject child = mCurrentDagNode.child(i);
             MFnDagNode fn(child, &status);

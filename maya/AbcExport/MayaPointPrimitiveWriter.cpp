@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -40,7 +40,7 @@
 MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
     double iFrame, MDagPath & iDag, Alembic::AbcGeom::OObject & iParent,
     uint32_t iTimeIndex,
-    bool iWriteVisibility) :
+    bool iWriteVisibility, bool iForceStatic) :
     mIsAnimated(false), mDagPath(iDag)
 {
     MFnParticleSystem particle(mDagPath);
@@ -49,11 +49,11 @@ MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
     mSchema = obj.getSchema();
 
     Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
-    mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, particle,
-        iTimeIndex, iWriteVisibility));
+    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, particle,
+        iTimeIndex, iWriteVisibility, iForceStatic));
 
     MObject object = iDag.node();
-    if (util::isAnimated(object))
+    if (!iForceStatic && util::isAnimated(object))
         mIsAnimated = true;
 
     write(iFrame);

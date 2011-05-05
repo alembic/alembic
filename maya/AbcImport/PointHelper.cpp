@@ -58,7 +58,7 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 }
 
 MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
-    MObject & iParent, MObject & iObject, bool iSwap)
+    MObject & iParent, MObject & iObject)
 {
     MStatus status = MS::kSuccess;
     Alembic::AbcGeom::IPointsSchema schema = iNode.getSchema();

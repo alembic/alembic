@@ -47,10 +47,11 @@ class AttributesWriter
   public:
     // fills in the property maps for both static and sampled, and does
     // the initial write at iFrame for sampled data
-    AttributesWriter(double iFrame, Alembic::Abc::OCompoundProperty & iParent,
+    AttributesWriter(Alembic::Abc::OCompoundProperty & iParent,
         const MFnDagNode & iNode,
         uint32_t iTimeIndex,
-        bool iWriteVisibility);
+        bool iWriteVisibility,
+        bool iForceStatic);
 
     ~AttributesWriter();
 

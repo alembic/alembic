@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
 // Copyright (c) 2009-2011,
-//  Sony Pictures Imageworks Inc. and
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,57 +34,19 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcExport_MayaMeshWriter_h_
-#define _AbcExport_MayaMeshWriter_h_
+#ifndef ABCIMPORT_CAMERAHELPER_H_
+#define ABCIMPORT_CAMERAHELPER_H_
 
-#include "Foundation.h"
-#include "AttributesWriter.h"
-#include "MayaTransformWriter.h"
+#include <maya/MObject.h>
 
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/OSubD.h>
+#include <vector>
+#include <string>
 
-// Writes an MFnMesh as a poly mesh OR a subd mesh
-class MayaMeshWriter
-{
-  public:
+#include <Alembic/AbcGeom/ICamera.h>
 
-    MayaMeshWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        uint32_t iTimeIndex, bool iWriteVisibilty, bool iWriteUVs,
-        bool iForceStatic);
-    void write();
-    bool isAnimated() const;
-    bool isSubD();
-    unsigned int getNumCVs();
-    unsigned int getNumFaces();
-    AttributesWriterPtr getAttrs() {return mAttrs;};
+MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent);
 
-  private:
+void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
+    std::vector<double> & oArray);
 
-    void fillTopology(
-        std::vector<float> & oPoints,
-        std::vector< int32_t > & oFacePoints,
-        std::vector< int32_t > & oPointCounts);
-
-    void writePoly(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
-
-    void writeSubD(MDagPath & iDag,
-        const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
-
-    void getUVs(std::vector<float> & uvs, std::vector<uint32_t> & indices);
-
-    void getPolyNormals(std::vector<float> & oNormals);
-
-    bool    mIsGeometryAnimated;
-    MDagPath mDagPath;
-
-    size_t  mNumPoints;
-
-    AttributesWriterPtr mAttrs;
-    Alembic::AbcGeom::OPolyMeshSchema   mPolySchema;
-    Alembic::AbcGeom::OSubDSchema       mSubDSchema;
-};
-
-typedef boost::shared_ptr < MayaMeshWriter > MayaMeshWriterPtr;
-
-#endif  // _AbcExport_MayaMeshWriter_h_
+#endif  // ABCIMPORT_CAMERAHELPER_H_

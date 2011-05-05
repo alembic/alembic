@@ -49,9 +49,10 @@
 #include <Alembic/Abc/IScalarProperty.h>
 #include <Alembic/Abc/IObject.h>
 
+#include <Alembic/AbcGeom/ICamera.h>
+#include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
 #include <Alembic/AbcGeom/ISubD.h>
-#include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IXform.h>
 
 bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent);
@@ -108,22 +109,23 @@ public:
     WriterData & operator=(const WriterData & rhs);
     void getFrameRange(double & oMin, double & oMax);
 
+    std::vector<MObject>        mCameraObjList;
     std::vector<MObject>        mPointsObjList;
     std::vector<MObject>        mPolyMeshObjList;
     std::vector<MObject>        mSubDObjList;
 
     // will be used once we have more schemas implemented
     /*
-    std::vector<MObject>        mCameraObjList;
     std::vector<MObject>        mNurbsSurfaceObjList;
     std::vector<MObject>        mNurbsCurveObjList;
     */
 
     std::vector<Alembic::Abc::IArrayProperty> mPropList;
-    std::vector<Alembic::AbcGeom::ISubD>     mSubDList;
-    std::vector<Alembic::AbcGeom::IPolyMesh> mPolyMeshList;
-    std::vector<Alembic::AbcGeom::IPoints>   mPointsList;
-    std::vector<Alembic::AbcGeom::IXform>    mXformList;
+    std::vector<Alembic::AbcGeom::ICamera>    mCameraList;
+    std::vector<Alembic::AbcGeom::IPolyMesh>  mPolyMeshList;
+    std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
+    std::vector<Alembic::AbcGeom::ISubD>      mSubDList;
+    std::vector<Alembic::AbcGeom::IXform>     mXformList;
 
     std::vector<bool>           mIsComplexXform;
 

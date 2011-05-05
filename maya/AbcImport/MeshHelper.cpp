@@ -586,7 +586,6 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
     setInitialShadingGroup(fnMesh.partialPathName());
 
     MObject obj = fnMesh.object();
-    //addProperties(iFrame, iNode, obj, oSampledPropNameList);
 
     setUVs(iFrame, fnMesh, schema.getUVs());
 

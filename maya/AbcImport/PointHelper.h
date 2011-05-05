@@ -45,7 +45,7 @@
 #include <Alembic/AbcGeom/IPoints.h>
 
 MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
-    MObject & iParent, MObject & iObject, bool iSwap = false);
+    MObject & iParent, MObject & iObject);
 
 MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     MObject & iObject);

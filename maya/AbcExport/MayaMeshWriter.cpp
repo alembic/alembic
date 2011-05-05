@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -87,13 +87,9 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
 }
 
 
-MayaMeshWriter::MayaMeshWriter(
-    double iFrame,
-    MDagPath & iDag,
-    Alembic::Abc::OObject & iParent,
-    uint32_t iTimeIndex,
-    bool iWriteVisibility,
-    bool iWriteUVs)
+MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
+    Alembic::Abc::OObject & iParent, uint32_t iTimeIndex,
+    bool iWriteVisibility, bool iWriteUVs, bool iForceStatic)
   : mIsGeometryAnimated(false),
     mDagPath(iDag),
     mNumPoints(0)
@@ -108,7 +104,7 @@ MayaMeshWriter::MayaMeshWriter(
     // intermediate objects aren't translated
     MObject surface = iDag.node();
 
-    if (util::isAnimated(surface))
+    if (!iForceStatic && util::isAnimated(surface))
         mIsGeometryAnimated = true;
 
     std::vector<float> uvs;
@@ -141,10 +137,10 @@ MayaMeshWriter::MayaMeshWriter(
 
         Alembic::Abc::OCompoundProperty cp = mSubDSchema.getArbGeomParams();
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, lMesh,
-            iTimeIndex, iWriteVisibility));
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, lMesh,
+            iTimeIndex, iWriteVisibility, iForceStatic));
 
-        writeSubD(iFrame, iDag, uvSamp);
+        writeSubD(iDag, uvSamp);
     }
     else
     {
@@ -175,10 +171,10 @@ MayaMeshWriter::MayaMeshWriter(
         Alembic::Abc::OCompoundProperty cp = mPolySchema.getArbGeomParams();
 
         // set the rest of the props and write to the writer node
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, lMesh,
-            iTimeIndex, iWriteVisibility));
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, lMesh,
+            iTimeIndex, iWriteVisibility, iForceStatic));
 
-       writePoly(iFrame, uvSamp);
+       writePoly(uvSamp);
     }
 }
 
@@ -255,7 +251,7 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
     }
 }
 
-void MayaMeshWriter::write(double iFrame)
+void MayaMeshWriter::write()
 {
 
     MStatus status = MS::kSuccess;
@@ -365,7 +361,7 @@ bool MayaMeshWriter::isAnimated() const
     return mIsGeometryAnimated;
 }
 
-void MayaMeshWriter::writePoly(double iFrame,
+void MayaMeshWriter::writePoly(
     const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs)
 {
     MStatus status = MS::kSuccess;
@@ -411,7 +407,7 @@ void MayaMeshWriter::writePoly(double iFrame,
 
 }
 
-void MayaMeshWriter::writeSubD(double iFrame, MDagPath & iDag,
+void MayaMeshWriter::writeSubD(MDagPath & iDag,
     const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs)
 {
     MStatus status = MS::kSuccess;

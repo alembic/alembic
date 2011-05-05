@@ -100,9 +100,10 @@ void addArbAttrAndScope(MObject & iParent, const std::string & iAttrName,
 
     std::string attrStr;
 
-    if (iInterp == "rgb")
-        attrStr = "color3";
-    else if (iInterp == "rgba")
+    // rgb isn't needed because we can use setUsedAsColor when we create the
+    // attribute
+
+    if (iInterp == "rgba")
         attrStr = "color4";
     else if (iInterp == "vector")
     {
@@ -147,13 +148,14 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 {
     MFnDependencyNode parentFn(iParent);
     MString attrName(iProp.getName().c_str());
+
     MFnTypedAttribute typedAttr;
-    typedAttr.setKeyable(true);
     MFnNumericAttribute numAttr;
-    numAttr.setKeyable(true);
+
     MObject attrObj;
     Alembic::AbcCoreAbstract::v1::DataType dtype = iProp.getDataType();
     Alembic::Util::uint8_t extent = dtype.getExtent();
+    std::string interp = iProp.getMetaData().get("interpretation");
 
     // the first sample is read only when the property is constant
 
@@ -349,6 +351,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 typedAttr.create(attrName, attrName, MFnData::kDoubleArray,
                     attrObj);
+
             }
             // isScalarLike
             else
@@ -608,10 +611,18 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         break;
     }
 
+    typedAttr.setKeyable(true);
+    numAttr.setKeyable(true);
+
+    if (interp == "rgb")
+    {
+        typedAttr.setUsedAsColor(true);
+        numAttr.setUsedAsColor(true);
+    }
+
     parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
     addArbAttrAndScope(iParent, iProp.getName(),
-        iProp.getMetaData().get("geoScope"),
-        iProp.getMetaData().get("interpretation"), extent);
+        iProp.getMetaData().get("geoScope"), interp, extent);
 
     return true;
 }
@@ -1196,6 +1207,7 @@ WriterData::WriterData(const WriterData & rhs)
 WriterData & WriterData::operator=(const WriterData & rhs)
 {
 
+    mCameraList = rhs.mCameraList;
     mPointsList = rhs.mPointsList;
     mPolyMeshList = rhs.mPolyMeshList;
     mSubDList = rhs.mSubDList;
@@ -1203,6 +1215,7 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     mPropList = rhs.mPropList;
 
     // get all the sampled Maya objects
+    mCameraObjList = rhs.mCameraObjList;
     mPointsObjList = rhs.mPointsObjList;
     mPolyMeshObjList = rhs.mPolyMeshObjList;
     mSubDObjList = rhs.mSubDObjList;
@@ -1253,6 +1266,18 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     {
         ts = mXformList[i].getSchema().getTimeSampling();
         size_t numSamples = mXformList[i].getSchema().getNumSamples();
+        if (numSamples > 1)
+        {
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
+    }
+
+    iEnd = mCameraList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        ts = mCameraList[i].getSchema().getTimeSampling();
+        size_t numSamples = mCameraList[i].getSchema().getNumSamples();
         if (numSamples > 1)
         {
             oMin = std::min(ts->getSampleTime(0), oMin);
@@ -1430,7 +1455,7 @@ MString connectAttr(ArgData & iArgData)
 
     unsigned int subDSize       = iArgData.mData.mSubDObjList.size();
     unsigned int polySize       = iArgData.mData.mPolyMeshObjList.size();
-    unsigned int cameraSize     = 0;//iArgData.mData.mCameraObjList.size();
+    unsigned int cameraSize     = iArgData.mData.mCameraObjList.size();
     unsigned int particleSize   = iArgData.mData.mPointsObjList.size();
     unsigned int xformSize      = iArgData.mData.mXformOpList.size();
     unsigned int nSurfaceSize   = 0;//iArgData.mData.mNurbsSurfaceObjList.size();
@@ -1449,11 +1474,7 @@ MString connectAttr(ArgData & iArgData)
         unsigned int logicalIndex = 0;
         for (unsigned int i = 0; i < cameraSize; i++)
         {
-            MFnCamera fnCamera;//(iArgData.mData.mCameraObjList[i]);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("centerOfInterest", true);
-            modifier.connect(srcPlug, dstPlug);
+            MFnCamera fnCamera(iArgData.mData.mCameraObjList[i]);
 
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
             dstPlug = fnCamera.findPlug("focalLength", true);
@@ -1461,10 +1482,6 @@ MString connectAttr(ArgData & iArgData)
 
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
             dstPlug = fnCamera.findPlug("lensSqueezeRatio", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("cameraScale", true);
             modifier.connect(srcPlug, dstPlug);
 
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
@@ -1484,10 +1501,6 @@ MString connectAttr(ArgData & iArgData)
             modifier.connect(srcPlug, dstPlug);
 
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("filmFitOffset", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
             dstPlug = fnCamera.findPlug("overscan", true);
             modifier.connect(srcPlug, dstPlug);
 
@@ -1497,38 +1510,6 @@ MString connectAttr(ArgData & iArgData)
 
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
             dstPlug = fnCamera.findPlug("farClipPlane", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("preScale", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug  = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("filmTranslateH", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("filmTranslateV", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("horizontalRollPivot", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("verticalRollPivot", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("filmRollValue", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("postScale", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("orthographicWidth", true);
             modifier.connect(srcPlug, dstPlug);
 
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
@@ -1542,18 +1523,6 @@ MString connectAttr(ArgData & iArgData)
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
             dstPlug = fnCamera.findPlug("shutterAngle", true);
             status = modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("tumblePivotX", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("tumblePivotY", true);
-            modifier.connect(srcPlug, dstPlug);
-
-            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-            dstPlug = fnCamera.findPlug("tumblePivotZ", true);
-            modifier.connect(srcPlug, dstPlug);
 
             status = modifier.doIt();
         }

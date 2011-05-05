@@ -59,6 +59,7 @@
 #include "util.h"
 #include "AlembicNode.h"
 #include "CreateSceneHelper.h"
+#include "CameraHelper.h"
 #include "MeshHelper.h"
 #include "PointHelper.h"
 #include "XformHelper.h"
@@ -350,8 +351,12 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
     if (plug == mOutPropArrayAttr)
     {
+
         if (mOutRead[0])
+        {
+            dataBlock.setClean(plug);
             return MS::kSuccess;
+        }
 
         mOutRead[0] = true;
 
@@ -371,11 +376,15 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             }
             outArrayHandle.setAllClean();
         }
+
     }
     else if (plug == mOutTransOpArrayAttr )
     {
         if (mOutRead[1])
+        {
+            dataBlock.setClean(plug);
             return MS::kSuccess;
+        }
 
         mOutRead[1] = true;
 
@@ -383,7 +392,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
         if (xformSize > 0)
         {
-
             MArrayDataHandle outArrayHandle =
                 dataBlock.outputValue(mOutTransOpArrayAttr, &status);
 
@@ -432,7 +440,10 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     else if (plug == mOutSubDArrayAttr)
     {
         if (mOutRead[2])
+        {
+            dataBlock.setClean(plug);
             return MS::kSuccess;
+        }
 
         mOutRead[2] = true;
 
@@ -465,8 +476,8 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                     outHandle.set(obj);
                 }
             }
-            outArrayHandle.setAllClean();
             mSubDInitialized = true;
+            outArrayHandle.setAllClean();
         }
         // for the case where we don't have any nodes, we want to make sure
         // to push out empty meshes on our connections, this can happen if
@@ -496,14 +507,17 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 }
                 while (outArrayHandle.next() == MS::kSuccess);
             }
-            outArrayHandle.setAllClean();
             mSubDInitialized = true;
+            outArrayHandle.setAllClean();
         }
     }
     else if (plug == mOutPolyArrayAttr)
     {
         if (mOutRead[3])
+        {
+            dataBlock.setClean(plug);
             return MS::kSuccess;
+        }
 
         mOutRead[3] = true;
 
@@ -536,8 +550,8 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                     outHandle.set(obj);
                 }
             }
-            outArrayHandle.setAllClean();
             mPolyInitialized = true;
+            outArrayHandle.setAllClean();
         }
         // for the case where we don't have any nodes, we want to make sure
         // to push out empty meshes on our connections, this can happen if
@@ -567,24 +581,26 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 }
                 while (outArrayHandle.next() == MS::kSuccess);
             }
-            outArrayHandle.setAllClean();
             mPolyInitialized = true;
+            outArrayHandle.setAllClean();
         }
     }
     else if (plug == mOutCameraArrayAttr)
     {
         if (mOutRead[4])
+        {
+            dataBlock.setClean(plug);
             return MS::kSuccess;
+        }
 
         mOutRead[4] = true;
 
-        unsigned int cameraSize = 0; //mData.mCameraNodePtrList.size();
+        unsigned int cameraSize = mData.mCameraList.size();
 
         if (cameraSize > 0)
         {
             MArrayDataHandle outArrayHandle =
                 dataBlock.outputValue(mOutCameraArrayAttr, &status);
-
             MPlug arrayPlug(thisMObject(), mOutCameraArrayAttr);
             double angleConversion = 1.0;
 
@@ -609,12 +625,11 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             for (unsigned int cameraIndex = 0; cameraIndex < cameraSize;
                 cameraIndex++)
             {
-                //Alembic::Abc::ICamera cam =
-                //    mData.mCameraList[cameraIndex];
+                Alembic::AbcGeom::ICamera & cam =
+                    mData.mCameraList[cameraIndex];
                 std::vector<double> array;
 
-                //read(mCurTime, camPtr, array);
-
+                read(mCurTime, cam, array);
 
                 for (unsigned int dataIndex = 0; dataIndex < array.size();
                     dataIndex++, index++)
@@ -629,7 +644,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                     outArrayHandle.next();
 
                     // not shutter angle index, so not an angle
-                    if (dataIndex != 22)
+                    if (dataIndex != 11)
                     {
                         outHandle.set(array[dataIndex]);
                     }
@@ -645,7 +660,10 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     else if (plug == mOutNurbsSurfaceArrayAttr)
     {
         if (mOutRead[5])
+        {
+            dataBlock.setClean(plug);
             return MS::kSuccess;
+        }
 
         mOutRead[5] = true;
 
@@ -680,7 +698,10 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     else if (plug == mOutNurbsCurveGrpArrayAttr)
     {
         if (mOutRead[6])
+        {
+            dataBlock.setClean(plug);
             return MS::kSuccess;
+        }
 
         mOutRead[6] = true;
 
@@ -730,6 +751,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         return MS::kUnknownParameter;
     }
 
+    dataBlock.setClean(plug);
     return status;
 }
 

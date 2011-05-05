@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,9 +39,10 @@
 
 #include "Foundation.h"
 
-#include "MayaTransformWriter.h"
+#include "MayaCameraWriter.h"
 #include "MayaMeshWriter.h"
 #include "MayaPointPrimitiveWriter.h"
+#include "MayaTransformWriter.h"
 
 /*
 #include "MayaNurbsSurfaceWriter.h"
@@ -185,10 +186,10 @@ class AbcWriteJob
     /*
         MayaNurbsSurfaceWriterPtr,
         MayaNurbsCurveWriterPtr,
-        MayaCameraWriterPtr,
         MayaLightWriterPtr,
         MayaLocatorWriterPtr,
     */
+        MayaCameraWriterPtr,
         MayaMeshWriterPtr,
         MayaPointPrimitiveWriterPtr > MayaNodePtr;
 
