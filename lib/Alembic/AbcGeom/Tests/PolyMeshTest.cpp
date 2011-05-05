@@ -134,8 +134,16 @@ void Example1_MeshOut()
         Int32ArraySample( g_counts, g_numCounts ),
         uvsamp, nsamp );
 
-    // Set the sample.
+    // not actually the right data; just making it up
+    Box3d cbox;
+    cbox.extendBy( V3d( 1.0, -1.0, 0.0 ) );
+    cbox.extendBy( V3d( -1.0, 1.0, 3.0 ) );
+    mesh_samp.setChildBounds( cbox );
+
+    // Set the sample twice
     mesh.set( mesh_samp );
+    mesh.set( mesh_samp );
+
 
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish

@@ -46,17 +46,16 @@ void OPolyMeshSchema::set( const Sample &iSamp )
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::set()" );
 
     // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds )
     {
-        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
-            m_positions.getTimeSampling() );
+        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds",
+                                             m_positions.getTimeSampling() );
+
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
-        // -1 because we just dis an m_positions set above
-        size_t numSamples = m_positions.getNumSamples() - 1;
+        size_t numSamples = m_positions.getNumSamples();
 
-        // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
             m_childBounds.set( emptyBox );
@@ -173,8 +172,7 @@ void OPolyMeshSchema::setFromPrevious()
 
     m_selfBounds.setFromPrevious();
 
-    if (m_childBounds)
-        m_childBounds.setFromPrevious();
+    if (m_childBounds) { m_childBounds.setFromPrevious(); }
 
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
     if ( m_normals ) { m_normals.setFromPrevious(); }
@@ -194,13 +192,19 @@ void OPolyMeshSchema::setTimeSampling( uint32_t iIndex )
     m_selfBounds.setTimeSampling( iIndex );
 
     if ( m_childBounds )
+    {
         m_childBounds.setTimeSampling( iIndex );
+    }
 
     if ( m_uvs )
+    {
         m_uvs.setTimeSampling( iIndex );
+    }
 
     if ( m_normals )
+    {
         m_normals.setTimeSampling( iIndex );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -211,7 +215,7 @@ void OPolyMeshSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "OPolyMeshSchema::setTimeSampling( TimeSamplingPtr )" );
 
-    if (iTime)
+    if ( iTime )
     {
         uint32_t tsIndex = getObject().getArchive().addTimeSampling( *iTime );
         setTimeSampling( tsIndex );
@@ -250,7 +254,7 @@ Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+        m_arbGeomParams = Abc::OCompoundProperty( *this,
                                                   ".arbGeomParams" );
     }
 

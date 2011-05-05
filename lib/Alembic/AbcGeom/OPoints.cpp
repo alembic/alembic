@@ -48,13 +48,12 @@ void OPointsSchema::set( const Sample &iSamp )
     // do we need to create child bounds?
     if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
     {
-        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", 
-            m_positions.getTimeSampling() );
+        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds",
+                                             m_positions.getTimeSampling() );
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
-        // -1 because we just dis an m_positions set above
-        size_t numSamples = m_positions.getNumSamples() - 1;
+        size_t numSamples = m_positions.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
@@ -73,7 +72,7 @@ void OPointsSchema::set( const Sample &iSamp )
         m_positions.set( iSamp.getPositions() );
         m_ids.set( iSamp.getIds() );
 
-        if (m_childBounds)
+        if ( m_childBounds )
         { m_childBounds.set( iSamp.getChildBounds() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
@@ -125,8 +124,10 @@ void OPointsSchema::setFromPrevious()
 
     m_selfBounds.setFromPrevious();
 
-    if (m_childBounds)
+    if ( m_childBounds )
+    {
         m_childBounds.setFromPrevious();
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -142,7 +143,9 @@ void OPointsSchema::setTimeSampling( uint32_t iIndex )
     m_selfBounds.setTimeSampling( iIndex );
 
     if ( m_childBounds )
+    {
         m_childBounds.setTimeSampling( iIndex );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -169,7 +172,7 @@ Abc::OCompoundProperty OPointsSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+        m_arbGeomParams = Abc::OCompoundProperty( *this,
                                                   ".arbGeomParams" );
     }
 
