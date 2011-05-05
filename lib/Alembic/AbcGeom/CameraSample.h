@@ -55,8 +55,8 @@ public:
     //! calculate the provided screen window.
     CameraSample( double iTop, double iBottom, double iLeft, double iRight );
 
-    void getScreenWindow( double & iTop, double & iBottom, double & iLeft,
-        double & iRight );
+    void getScreenWindow( double & oTop, double & oBottom, double & oLeft,
+        double & oRight );
 
     //! get the camera focal length in millimeters.
     double getFocalLength() const { return m_focalLength; }
@@ -222,7 +222,7 @@ public:
 
         m_focusDistance = 5.0;
         m_shutterOpen = 0.0;
-        m_shutterClose = 1.0;
+        m_shutterClose = 0.020833333333333332;
 
         m_nearClippingPlane = 0.1;
         m_farClippingPlane = 100000.0;
