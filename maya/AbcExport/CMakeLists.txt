@@ -36,7 +36,7 @@
 
 PROJECT( ABC_EXPORT_MAYA_MODULE )
 
-SET( H_FILES 
+SET( H_FILES
   AbcExport.h
   AbcWriteJob.h
   AttributesWriter.h
@@ -47,7 +47,7 @@ SET( H_FILES
   MayaUtility.h
 )
 
-SET( CXX_FILES 
+SET( CXX_FILES
   AbcExport.cpp
   AbcWriteJob.cpp
   AttributesWriter.cpp
@@ -59,12 +59,11 @@ SET( CXX_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-SET( CORE_LIBS 
+SET( CORE_LIBS
   AlembicAbcGeom
   AlembicAbc
   AlembicAbcCoreHDF5
   AlembicAbcCoreAbstract
-  AlembicMD5Hash
   AlembicUtil )
 
 INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )
@@ -74,10 +73,10 @@ ADD_MAYA_CXX_PLUGIN( AbcExport ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( AbcExport
   ${MAYA_LIBRARIES}
   ${CORE_LIBS}
-  ${ALEMBIC_HDF5_LIBS} 
+  ${ALEMBIC_HDF5_LIBS}
   ${ALEMBIC_ILMBASE_LIBS}
   ${CMAKE_THREAD_LIBS_INIT}
-  ${ZLIB_LIBRARIES} m )
+  ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
 INSTALL( TARGETS AbcExport
          DESTINATION maya/plug-ins )

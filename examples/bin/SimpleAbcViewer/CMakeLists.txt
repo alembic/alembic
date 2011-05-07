@@ -70,7 +70,6 @@ SET( THIS_LIBS
      AlembicAbc
      AlembicAbcCoreHDF5
      AlembicAbcCoreAbstract
-     AlembicMD5Hash
      AlembicGLUtil
      AlembicUtil
      ${ALEMBIC_HDF5_LIBS}

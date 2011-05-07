@@ -61,7 +61,6 @@ SET( CORE_LIBS
   AlembicAbc
   AlembicAbcCoreHDF5
   AlembicAbcCoreAbstract
-  AlembicMD5Hash
   AlembicUtil )
 
 ADD_PRMAN_CXX_PLUGIN( AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES} )

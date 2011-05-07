@@ -90,8 +90,8 @@ void IScalarProperty::get( void *oSamp, const ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IScalarProperty::get()" );
 
-    size_t index = iSS.getIndex( m_property->getTimeSampling(),
-        m_property->getNumSamples() );
+    AbcA::index_t index = iSS.getIndex( m_property->getTimeSampling(),
+                                        m_property->getNumSamples() );
     m_property->getSample( index, oSamp );
 
     ALEMBIC_ABC_SAFE_CALL_END();

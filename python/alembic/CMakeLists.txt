@@ -48,7 +48,6 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
     AlembicAbc
     AlembicAbcCoreHDF5
     AlembicAbcCoreAbstract
-    AlembicMD5Hash
     AlembicUtil )
 
   SET( CPP_FILES
