@@ -534,7 +534,7 @@ Abc::V3d XformSample::getXYZRotation() const
 }
 
 //-*****************************************************************************
-void XformSample::setHasBeenRead()
+void XformSample::freezeTopology()
 {
     m_hasBeenRead = true;
 }

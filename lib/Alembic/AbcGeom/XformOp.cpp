@@ -45,7 +45,6 @@ namespace AbcGeom {
 XformOp::XformOp()
   : m_type( kTranslateOperation )
   , m_hint( 0 )
-  , m_opName( ".t" )
 {
     m_channels.clear();
     m_channels.resize( 3 );

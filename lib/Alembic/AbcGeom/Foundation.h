@@ -90,8 +90,14 @@ enum FilmBackXformOperationType
 template <class PROP, class SAMP>
 inline void SetPropUsePrevIfNull( PROP iProp, SAMP iSamp )
 {
-    if ( iSamp ) { iProp.set( iSamp ); }
-    else { iProp.setFromPrevious(); }
+    if ( iProp )
+    {
+        // really only valid with array properties
+        assert( iProp.isArray() );
+
+        if ( iSamp ) { iProp.set( iSamp ); }
+        else { iProp.setFromPrevious(); }
+    }
 }
 
 template <>

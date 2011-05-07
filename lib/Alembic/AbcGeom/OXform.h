@@ -46,10 +46,8 @@ namespace Alembic {
 namespace AbcGeom {
 
 //! The default value for determining whether a property is actually
-//! different from the default.  If it's within this tolerance, the
-//! default value is used, which allows Alembic to more efficiently
-//! store the data, resulting in smaller Archive size.
-static const double kXFORM_DELTA_TOLERANCE = 1.0e-9;
+//! different from the default.
+static const double kXFORM_DELTA_TOLERANCE = 1.0e-12;
 
 //-*****************************************************************************
 class OXformSchema : public Abc::OSchema<XformSchemaInfo>
@@ -227,15 +225,15 @@ protected:
     Abc::OUInt32ArrayProperty m_animChannels;
 
 
-    // ensure that our sample's topology doesn't change; see usage
-    // in OXformSchema::set()
+    // ensure that our sample's topology is unchanging between
+	// calls to set; see usage in OXformSchema::set()
     XformSample m_protoSample;
 
     std::vector<bool> m_staticChans;
 
     std::vector<Alembic::Util::uint8_t> m_opVec;
 
-    bool m_isDefault;
+    bool m_isIdentity;
 };
 
 //-*****************************************************************************

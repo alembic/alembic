@@ -52,7 +52,7 @@ void OXformSchema::set( XformSample &ioSamp )
         // set this to true, so that additional calls to sample's addOp()
         // won't change the topology of the sample, but instead will merely
         // update values.
-        ioSamp.setHasBeenRead();
+        ioSamp.freezeTopology();
 
         m_protoSample = ioSamp;
 
@@ -117,7 +117,7 @@ void OXformSchema::set( XformSample &ioSamp )
                                           kXFORM_DELTA_TOLERANCE );
 
 
-            m_isDefault = m_isDefault &&
+            m_isIdentity = m_isIdentity &&
                 Imath::equalWithAbsError( op.getChannelValue( j ),
                                           op.getDefaultChannelValue( j ),
                                           kXFORM_DELTA_TOLERANCE );
@@ -140,9 +140,9 @@ void OXformSchema::set( XformSample &ioSamp )
         m_ops->setSample( &(m_opVec.front()) );
     }
 
-    if ( !m_isNotConstantIdentity && !m_isDefault )
+    if ( !m_isNotConstantIdentity && !m_isIdentity )
     {
-        m_isNotConstantIdentity = Abc::OBoolProperty( *this,
+        m_isNotConstantIdentity = Abc::OBoolProperty( this->getPtr(),
                                                       "isNotConstantIdentity" );
 
         m_isNotConstantIdentity.set( true );
@@ -186,7 +186,7 @@ void OXformSchema::init( const AbcA::index_t iTsIdx )
     m_animChannels = Abc::OUInt32ArrayProperty( this->getPtr(),
                                                 ".animChans", iTsIdx );
 
-    m_isDefault = true;
+    m_isIdentity = true;
 
     m_numOps = 0;
     m_numChannels = 0;

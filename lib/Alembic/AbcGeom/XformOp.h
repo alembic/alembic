@@ -141,23 +141,28 @@ public:
     void setHint( const Alembic::Util::uint8_t iHint );
 
     //! Returns whether the x component (index 0) is animated.
+	//! Only meaningful on read.
     bool isXAnimated() const;
 
     //! Returns whether the y component (index 1) is animated.
+	//! Only meaningful on read.
     bool isYAnimated() const;
 
     //! Returns whether the z component (index 2) is animated.
+	//! Only meaningful on read.
     bool isZAnimated() const;
 
     //! Returns whether the angle component (index 3) is animated.
     //! Since Scale and Translate do not have an angle component,
     //! false is returned for those types.
+	//! Only meaningful on read.
     bool isAngleAnimated() const;
 
     //! Returns whether a particular channel is animated.
     //! Scale and Translate only have 3 channels, Rotate has 4, and
     //! Matrix has 16.  Indices greater than the number of channels will
     //! return false.
+	//! Only meaningful on read.
     bool isChannelAnimated( std::size_t iIndex ) const;
 
     //! Get the number of components that this operation has based on the type.
