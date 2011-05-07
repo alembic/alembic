@@ -88,8 +88,49 @@ void OWrapExisting()
 }
 
 //-*****************************************************************************
+void PolyMorphicAbstractPtrs()
+{
+    std::string name( "playground_pmap.abc" );
+    Alembic::Abc::OArchive archive(
+        Alembic::AbcCoreHDF5::WriteArchive(),
+        name
+                                  );
+
+    Alembic::Abc::OObject archiveTop = archive.getTop();
+
+    AbcA::BasePropertyWriterPtr pwPtr;
+
+    AbcA::ScalarPropertyWriterPtr swPtr;
+    AbcA::ArrayPropertyWriterPtr awPtr;
+
+    AbcA::DataType dt( Alembic::Util::kUint32POD, 1 );
+
+    swPtr = archiveTop.getProperties().getPtr()->createScalarProperty(
+        "scalarprop", AbcA::MetaData(), dt, 0 );
+
+    awPtr = archiveTop.getProperties().getPtr()->createArrayProperty(
+        "arrayprop", AbcA::MetaData(), dt, 0 );
+
+    uint32_t sval = 2;
+    std::vector<uint32_t> aval( 5, 3 );
+
+    // use base type as scalar prop writer
+    pwPtr = swPtr;
+    pwPtr->asScalarPtr()->setSample( &sval );
+
+    // use base type as array prop writer
+    pwPtr = awPtr;
+    pwPtr->asArrayPtr()->setSample( AbcA::ArraySample( &(aval.front()), dt,
+                                                       Dimensions( 5 ) ) );
+
+
+
+}
+
+//-*****************************************************************************
 int main( int, char** )
 {
-    OWrapExisting();
+    //OWrapExisting();
+    PolyMorphicAbstractPtrs();
     return 0;
 }
