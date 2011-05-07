@@ -226,7 +226,7 @@ protected:
 
 
     // ensure that our sample's topology is unchanging between
-	// calls to set; see usage in OXformSchema::set()
+    // calls to set; see usage in OXformSchema::set()
     XformSample m_protoSample;
 
     std::vector<bool> m_staticChans;

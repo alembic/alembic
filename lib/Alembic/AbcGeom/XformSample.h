@@ -72,7 +72,7 @@ public:
     const XformOp &operator[]( const std::size_t &iIndex ) const;
 
     std::size_t getNumOps() const;
-	//! The sum of the number of channels of all the ops in this Sample.
+    //! The sum of the number of channels of all the ops in this Sample.
     std::size_t getNumOpChannels() const;
 
     //! "Inherits xforms" means, "Does this xform concatenate to or ignore the
@@ -86,12 +86,12 @@ public:
     // non-op-based methods; the getters will compute their return values
     // from the ops under the hood, hence return-by-value.
 
-	//! Order matters when calling different setFoo() methods;
-	//! callstack of methods must be the same for each call to
-	//! OXformSchmea::set() with a given Sample.
-	//! For example, a Sample with calls to setTranslation() and
-	//! setRotation() must make thgose same calls in the same order
-	//! between each use of OXforSchema::set().
+    //! Order matters when calling different setFoo() methods;
+    //! callstack of methods must be the same for each call to
+    //! OXformSchmea::set() with a given Sample.
+    //! For example, a Sample with calls to setTranslation() and
+    //! setRotation() must make thgose same calls in the same order
+    //! between each use of OXforSchema::set().
     void setTranslation( const Abc::V3d &iTrans );
     Abc::V3d getTranslation() const;
 
