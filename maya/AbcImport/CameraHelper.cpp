@@ -212,5 +212,34 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
             sec.as(MTime::uiUnit()) ));
     }
 
-    return obj;
+    // extra transform node is unfortuneatly automatically created above the
+    // camera, let's do some reparenting and delete that extra transform
+    MDagPath path;
+    fnCamera.getPath(path);
+    MObject camObj = path.node();
+
+    MDagModifier dagMod;
+    dagMod.reparentNode(camObj, iParent);
+    dagMod.doIt();
+    dagMod.deleteNode(obj);
+    dagMod.doIt();
+/*
+    MFnDagNode fnDag(iParent);
+
+    // reparent the cameraShape
+    MString cmd("parent -add -shape ");
+    cmd += path.partialPathName();
+    cmd += " ";
+    cmd += fnDag.partialPathName();
+
+    cmd += ";\n";
+    // delete the extra transform node
+    MFnDagNode fnDag1(obj);
+    cmd += "delete ";
+    cmd += fnDag1.partialPathName();
+    cmd += ";";
+    MGlobal::executeCommand(cmd, true);
+*/
+
+    return camObj;
 }

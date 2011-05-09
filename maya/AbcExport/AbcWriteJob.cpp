@@ -657,7 +657,8 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         {
             Alembic::Abc::OObject obj = iParent->getObject();
             MayaCameraWriterPtr camera(new MayaCameraWriter(
-                mCurDag, obj, mWriteVisibility, mShapesStatic));
+                mCurDag, obj, mShapeTimeIndex, mWriteVisibility,
+                mShapesStatic));
 
             if (camera->isAnimated() && !mShapesStatic)
             {

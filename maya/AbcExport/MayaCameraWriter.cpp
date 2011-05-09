@@ -37,7 +37,8 @@
 #include "MayaCameraWriter.h"
 
 MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
-    Alembic::Abc::OObject & iParent, uint32_t iTimeIndex, bool iForceStatic) :
+    Alembic::Abc::OObject & iParent, uint32_t iTimeIndex, bool iWriteVisibility,
+    bool iForceStatic) :
     mIsAnimated(false),
     mDagPath(iDag),
     mUseRenderShutter(false),
@@ -84,7 +85,7 @@ MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
     Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, cam,
-        iTimeIndex, false, iForceStatic));
+        iTimeIndex, iWriteVisibility, iForceStatic));
     write();
 }
 

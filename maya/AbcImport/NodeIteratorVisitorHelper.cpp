@@ -1518,11 +1518,11 @@ MString connectAttr(ArgData & iArgData)
 
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
             dstPlug = fnCamera.findPlug("focusDistance", true);
-            status = modifier.connect(srcPlug, dstPlug);
+            modifier.connect(srcPlug, dstPlug);
 
             srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
             dstPlug = fnCamera.findPlug("shutterAngle", true);
-            status = modifier.connect(srcPlug, dstPlug);
+            modifier.connect(srcPlug, dstPlug);
 
             status = modifier.doIt();
         }
