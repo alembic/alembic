@@ -223,23 +223,6 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
     dagMod.doIt();
     dagMod.deleteNode(obj);
     dagMod.doIt();
-/*
-    MFnDagNode fnDag(iParent);
-
-    // reparent the cameraShape
-    MString cmd("parent -add -shape ");
-    cmd += path.partialPathName();
-    cmd += " ";
-    cmd += fnDag.partialPathName();
-
-    cmd += ";\n";
-    // delete the extra transform node
-    MFnDagNode fnDag1(obj);
-    cmd += "delete ";
-    cmd += fnDag1.partialPathName();
-    cmd += ";";
-    MGlobal::executeCommand(cmd, true);
-*/
 
     return camObj;
 }
