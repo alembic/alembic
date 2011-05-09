@@ -208,6 +208,15 @@ private:
     std::size_t m_numChannels;
     std::size_t m_numOps;
 
+    // should we store are channel values in an ArrayProperty,
+    // or in a ScalarProperty with some Dimension > 0 and < MAX_SCALAR_CHANS
+    bool m_useArrayProp;
+
+    AbcA::DataType m_arrayValuesDataType;
+    Alembic::Util::Dimensions m_arraySampleDimensions;
+
+    void setChannelValues( const std::vector<double> &iVals );
+
 protected:
 
     Abc::OBox3dProperty m_childBounds;
@@ -216,14 +225,13 @@ protected:
 
     AbcA::ScalarPropertyWriterPtr m_ops;
 
-    AbcA::ScalarPropertyWriterPtr m_vals;
+    AbcA::BasePropertyWriterPtr m_vals;
 
     Abc::OBoolProperty m_inherits;
 
     Abc::OBoolProperty m_isNotConstantIdentity;
 
     Abc::OUInt32ArrayProperty m_animChannels;
-
 
     // ensure that our sample's topology is unchanging between
     // calls to set; see usage in OXformSchema::set()

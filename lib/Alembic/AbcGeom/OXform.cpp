@@ -37,8 +37,29 @@
 #include <Alembic/AbcGeom/OXform.h>
 #include <Alembic/AbcGeom/XformOp.h>
 
+#define MAX_SCALAR_CHANS 256
+
 namespace Alembic {
 namespace AbcGeom {
+
+//-*****************************************************************************
+void OXformSchema::setChannelValues( const std::vector<double> &iVals )
+{
+    if ( ! m_vals ) { return; }
+
+    if ( m_useArrayProp )
+    {
+        m_vals->asArrayPtr()->setSample(
+            AbcA::ArraySample( &(iVals.front()),
+                               m_arrayValuesDataType,
+                               m_arraySampleDimensions )
+                                       );
+    }
+    else
+    {
+        m_vals->asScalarPtr()->setSample( &(iVals.front()) );
+    }
+}
 
 //-*****************************************************************************
 void OXformSchema::set( XformSample &ioSamp )
@@ -72,11 +93,32 @@ void OXformSchema::set( XformSample &ioSamp )
 
         if ( m_numChannels > 0 )
         {
-            m_vals = this->getPtr()->createScalarProperty(
-                ".vals", AbcA::MetaData(),
-                AbcA::DataType( Alembic::Util::kFloat64POD, m_numChannels ),
-                m_timeSamplingIndex
-                                                         );
+            if ( m_numChannels <= MAX_SCALAR_CHANS )
+            {
+                m_useArrayProp = false;
+
+                m_vals = this->getPtr()->createScalarProperty(
+                    ".vals", AbcA::MetaData(),
+                    AbcA::DataType( Alembic::Util::kFloat64POD, m_numChannels ),
+                    m_timeSamplingIndex
+                                                             );
+            }
+            else
+            {
+                m_useArrayProp = true;
+
+                m_arraySampleDimensions = Alembic::Util::Dimensions(
+                    m_numChannels );
+
+                m_vals = this->getPtr()->createArrayProperty(
+                    ".vals", AbcA::MetaData(),
+                    // the DataType for an ArrayProperty describes not how big
+                    // each Sample is, but how many values constitute a single
+                    // "element". What is here is the same as creating an
+                    // Abc::ODoubleArrayProperty.
+                    m_arrayValuesDataType, m_timeSamplingIndex
+                                                            );
+            }
         }
 
     }
@@ -131,10 +173,8 @@ void OXformSchema::set( XformSample &ioSamp )
         if ( ! m_staticChans[i] ) { animchans.push_back( i ); }
     }
 
-    if ( m_vals )
-    {
-        m_vals->setSample( &(chanvals.front()) );
-    }
+    this->setChannelValues( chanvals );
+
     if ( m_ops )
     {
         m_ops->setSample( &(m_opVec.front()) );
@@ -162,7 +202,13 @@ void OXformSchema::setFromPrevious()
 
     m_ops->setFromPreviousSample();
 
-    m_vals->setFromPreviousSample();
+    if ( m_vals )
+    {
+        if ( m_useArrayProp )
+        { m_vals->asArrayPtr()->setFromPreviousSample(); }
+        else
+        { m_vals->asScalarPtr()->setFromPreviousSample(); }
+    }
 
     m_animChannels.setFromPrevious();
 
@@ -190,6 +236,9 @@ void OXformSchema::init( const AbcA::index_t iTsIdx )
 
     m_numOps = 0;
     m_numChannels = 0;
+
+    m_arrayValuesDataType = AbcA::DataType( Alembic::Util::kFloat64POD, 1 );
+    m_arraySampleDimensions = Alembic::Util::Dimensions( 1 );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

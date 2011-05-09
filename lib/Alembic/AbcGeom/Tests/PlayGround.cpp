@@ -102,17 +102,24 @@ void PolyMorphicAbstractPtrs()
 
     AbcA::ScalarPropertyWriterPtr swPtr;
     AbcA::ArrayPropertyWriterPtr awPtr;
+    AbcA::ScalarPropertyWriterPtr aswPtr;
 
     AbcA::DataType dt( Alembic::Util::kUint32POD, 1 );
 
+    AbcA::DataType arrayDT( kUint32POD, 254 );
+
     swPtr = archiveTop.getProperties().getPtr()->createScalarProperty(
         "scalarprop", AbcA::MetaData(), dt, 0 );
+
+    aswPtr = archiveTop.getProperties().getPtr()->createScalarProperty(
+        "arrayscalarprop", AbcA::MetaData(), arrayDT, 0 );
 
     awPtr = archiveTop.getProperties().getPtr()->createArrayProperty(
         "arrayprop", AbcA::MetaData(), dt, 0 );
 
     uint32_t sval = 2;
     std::vector<uint32_t> aval( 5, 3 );
+    std::vector<uint32_t> saval( 254, 2 );
 
     // use base type as scalar prop writer
     pwPtr = swPtr;
@@ -122,6 +129,10 @@ void PolyMorphicAbstractPtrs()
     pwPtr = awPtr;
     pwPtr->asArrayPtr()->setSample( AbcA::ArraySample( &(aval.front()), dt,
                                                        Dimensions( 5 ) ) );
+
+    // use base type as "array scalar prop"
+    pwPtr = aswPtr;
+    pwPtr->asScalarPtr()->setSample( &(saval.front()) );
 
 
 
