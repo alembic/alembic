@@ -168,8 +168,8 @@ void IXformSchema::getChannelValues( const AbcA::index_t iSampleIndex )
         m_vals->asArrayPtr()->getSample( iSampleIndex, sptr );
 
         m_valVec.assign(
-            static_cast<const Alembic::Util::float64_t*>( sptr->getData() ),
-            static_cast<const Alembic::Util::float64_t*>( sptr->getData() ) +
+            reinterpret_cast<const Alembic::Util::float64_t*>( sptr->getData() ),
+            reinterpret_cast<const Alembic::Util::float64_t*>( sptr->getData() ) +
             sptr->size() );
     }
     else
