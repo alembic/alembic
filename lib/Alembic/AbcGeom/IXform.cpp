@@ -37,6 +37,8 @@
 #include <Alembic/AbcGeom/IXform.h>
 #include <Alembic/AbcGeom/XformOp.h>
 
+#include <algorithm>
+
 namespace Alembic {
 namespace AbcGeom {
 
@@ -59,7 +61,21 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_ops = ptr->getScalarProperty(  ".ops" );
 
-    m_vals = ptr->getScalarProperty( ".vals" );
+    m_useArrayProp = false;
+
+    const AbcA::PropertyHeader *valsPH = ptr->getPropertyHeader( ".vals" );
+    if ( valsPH != NULL )
+    {
+        if ( valsPH->isScalar() )
+        {
+            m_vals = ptr->getScalarProperty( valsPH->getName() );
+        }
+        else
+        {
+            m_useArrayProp = true;
+            m_vals = ptr->getArrayProperty( valsPH->getName() );
+        }
+    }
 
     m_isConstantIdentity = true;
 
@@ -78,7 +94,11 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     if ( m_vals )
     {
         m_numChannels = m_vals->getHeader().getDataType().getExtent();
-        m_isConstant = m_vals->isConstant();
+
+        if ( m_useArrayProp )
+        { m_isConstant = m_vals->asArrayPtr()->isConstant(); }
+        else
+        { m_isConstant = m_vals->asScalarPtr()->isConstant(); }
     }
 
     m_isConstant = m_isConstant && m_inherits.isConstant();
@@ -140,6 +160,25 @@ std::size_t IXformSchema::getNumSamples()
 }
 
 //-*****************************************************************************
+void IXformSchema::getChannelValues( const AbcA::index_t iSampleIndex )
+{
+    if ( m_useArrayProp )
+    {
+        AbcA::ArraySamplePtr sptr;
+        m_vals->asArrayPtr()->getSample( iSampleIndex, sptr );
+
+        m_valVec.assign(
+            static_cast<const Alembic::Util::float64_t*>( sptr->getData() ),
+            static_cast<const Alembic::Util::float64_t*>( sptr->getData() ) +
+            sptr->size() );
+    }
+    else
+    {
+        m_vals->asScalarPtr()->getSample( iSampleIndex, &(m_valVec.front()) );
+    }
+}
+
+//-*****************************************************************************
 void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::get()" );
@@ -163,7 +202,8 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
     if ( sampIdx < 0 ) { return; }
 
     m_ops->getSample( sampIdx, &(m_opVec.front()) );
-    m_vals->getSample( sampIdx, &(m_valVec.front()) );
+
+    this->getChannelValues( sampIdx );
 
     std::size_t curIdx = 0;
     for ( std::size_t i = 0 ; i < m_numOps ; ++i )

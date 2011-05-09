@@ -169,7 +169,7 @@ protected:
 
     AbcA::ScalarPropertyReaderPtr m_ops;
 
-    AbcA::ScalarPropertyReaderPtr m_vals;
+    AbcA::BasePropertyReaderPtr m_vals;
 
     Abc::UInt32ArraySample m_animChannels;
 
@@ -187,6 +187,12 @@ protected:
 
 private:
     void init( Abc::SchemaInterpMatching iMatching );
+
+    // is m_vals an ArrayProperty, or a ScalarProperty?
+    bool m_useArrayProp;
+
+    // fills m_valVec with data
+    void getChannelValues( const AbcA::index_t iSampleIndex );
 };
 
 //-*****************************************************************************
