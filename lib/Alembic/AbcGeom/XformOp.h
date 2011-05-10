@@ -121,7 +121,7 @@ public:
     XformOp();
 
     XformOp( const XformOperationType iType,
-             const Alembic::Util::uint8_t iHint );
+             const Alembic::Util::uint8_t iHint = 0 );
 
     XformOp( const Alembic::Util::uint8_t iEncodedOp );
 

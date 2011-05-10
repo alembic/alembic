@@ -118,9 +118,11 @@ void xformOut()
     OXform d( c, "d" );
     OXform e( d, "e" );
     OXform f( e, "f" );
+    OXform g( f, "g" );
 
     XformOp transop( kTranslateOperation, kTranslateHint );
     XformOp scaleop( kScaleOperation, kScaleHint );
+    XformOp matrixop( kMatrixOperation, kMatrixHint );
 
     XformSample asamp;
     for ( size_t i = 0; i < 20; ++i )
@@ -158,6 +160,18 @@ void xformOut()
     XformSample fsamp;
     fsamp.addOp( transop, V3d( 3.0, -4.0, 5.0 ) );
     f.getSchema().set( fsamp );
+
+    // this will cause the Xform's values property to be an ArrayProperty,
+    // since there will be 20 * 16 channels.
+    XformSample gsamp;
+    Abc::M44d gmatrix;
+    gmatrix.makeIdentity();
+    for ( size_t i = 0 ; i < 20 ; ++i )
+    {
+        gmatrix.x[0][1] = (double)i;
+        gsamp.addOp( matrixop, gmatrix );
+    }
+    g.getSchema().set( gsamp );
 }
 
 //-*****************************************************************************
@@ -237,6 +251,18 @@ void xformIn()
     TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
 
     std::cout << "Tested all xforms in first test!" << std::endl;
+
+    IXform g( f, "g" );
+    Abc::M44d gmatrix;
+    gmatrix.makeIdentity();
+    XformSample gsamp = g.getSchema().getValue();
+    TESTING_ASSERT( gsamp.getNumOps() == 20 );
+    TESTING_ASSERT( gsamp.getNumOpChannels() == 20 * 16 );
+    for ( size_t i = 0 ; i < 20 ; ++i )
+    {
+        TESTING_ASSERT( gsamp[i].getChannelValue( 1 ) == (double)i );
+    }
+
 }
 
 //-*****************************************************************************
