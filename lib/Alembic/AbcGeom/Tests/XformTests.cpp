@@ -250,8 +250,6 @@ void xformIn()
     TESTING_ASSERT( f.getSchema().isConstant() ); // is constant
     TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
 
-    std::cout << "Tested all xforms in first test!" << std::endl;
-
     IXform g( f, "g" );
     Abc::M44d gmatrix;
     gmatrix.makeIdentity();
@@ -262,6 +260,8 @@ void xformIn()
     {
         TESTING_ASSERT( gsamp[i].getChannelValue( 1 ) == (double)i );
     }
+
+    std::cout << "Tested all xforms in first test!" << std::endl;
 
 }
 
