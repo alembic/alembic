@@ -91,41 +91,211 @@ MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
 
 void MayaCameraWriter::write()
 {
-    Alembic::AbcGeom::CameraSample samp;
     MFnCamera mfnCamera(mDagPath);
 
-    samp.setFocalLength(mfnCamera.focalLength());
-    samp.setLensSqueezeRatio(mfnCamera.lensSqueezeRatio());
-    samp.setHorizontalAperture(mfnCamera.horizontalFilmAperture() * 2.54);
-    samp.setVerticalAperture(mfnCamera.verticalFilmAperture() * 2.54);
-    samp.setHorizontalFilmOffset(mfnCamera.horizontalFilmOffset() * 2.54);
-    samp.setVerticalFilmOffset(mfnCamera.verticalFilmOffset() * 2.54);
+    mSamp.setFocalLength(mfnCamera.focalLength());
+    mSamp.setLensSqueezeRatio(mfnCamera.lensSqueezeRatio());
+    mSamp.setHorizontalAperture(mfnCamera.horizontalFilmAperture() * 2.54);
+    mSamp.setVerticalAperture(mfnCamera.verticalFilmAperture() * 2.54);
+    mSamp.setHorizontalFilmOffset(mfnCamera.horizontalFilmOffset() * 2.54);
+    mSamp.setVerticalFilmOffset(mfnCamera.verticalFilmOffset() * 2.54);
     double overscan = mfnCamera.overscan() - 1.0;
-    samp.setOverScanLeft(overscan);
-    samp.setOverScanRight(overscan);
-    samp.setOverScanTop(overscan);
-    samp.setOverScanBottom(overscan);
-    samp.setNearClippingPlane(mfnCamera.nearClippingPlane());
-    samp.setFarClippingPlane(mfnCamera.farClippingPlane());
-    samp.setFStop(mfnCamera.fStop());
-    samp.setFocusDistance(mfnCamera.focusDistance());
+    mSamp.setOverScanLeft(overscan);
+    mSamp.setOverScanRight(overscan);
+    mSamp.setOverScanTop(overscan);
+    mSamp.setOverScanBottom(overscan);
+    mSamp.setNearClippingPlane(mfnCamera.nearClippingPlane());
+    mSamp.setFarClippingPlane(mfnCamera.farClippingPlane());
+    mSamp.setFStop(mfnCamera.fStop());
+    mSamp.setFocusDistance(mfnCamera.focusDistance());
 
     // should this be based on the shutterAngle?  or the settings passed in?
 
     if (mUseRenderShutter)
     {
-        samp.setShutterOpen(mShutterOpen);
-        samp.setShutterClose(mShutterClose);
+        mSamp.setShutterOpen(mShutterOpen);
+        mSamp.setShutterClose(mShutterClose);
     }
     else
     {
         MTime sec(1.0, MTime::kSeconds);
-        samp.setShutterOpen(0.0);
-        samp.setShutterClose(
+        mSamp.setShutterOpen(0.0);
+        mSamp.setShutterClose(
             Alembic::AbcGeom::RadiansToDegrees(mfnCamera.shutterAngle()) / 
             (360.0 * sec.as(MTime::uiUnit())) );
     }
-    mSchema.set(samp);
+
+    // build up the film fit and post projection matrix
+    if (mSchema.getNumSamples() == 0)
+    {
+        // film fit first
+        std::string filmFitName = "filmFit";
+        mFilmFit = mfnCamera.filmFit();
+        switch (mFilmFit)
+        {
+            case MFnCamera::kFillFilmFit:
+            {
+                Alembic::AbcGeom::FilmBackXformOp fit(
+                    Alembic::AbcGeom::kScaleFilmBackOperation, "filmFitFill");
+                mSamp.addOp(fit);
+            }
+            break;
+
+            case MFnCamera::kHorizontalFilmFit:
+            {
+                Alembic::AbcGeom::FilmBackXformOp fit(
+                    Alembic::AbcGeom::kScaleFilmBackOperation, "filmFitHorz");
+                mSamp.addOp(fit);
+
+                Alembic::AbcGeom::FilmBackXformOp offset(
+                    Alembic::AbcGeom::kTranslateFilmBackOperation,
+                    "filmFitOffs");
+                mSamp.addOp(offset);
+            }
+            break;
+
+            case MFnCamera::kVerticalFilmFit:
+            {
+                Alembic::AbcGeom::FilmBackXformOp fit(
+                    Alembic::AbcGeom::kScaleFilmBackOperation, "filmFitVert");
+                mSamp.addOp(fit);
+
+                Alembic::AbcGeom::FilmBackXformOp offset(
+                    Alembic::AbcGeom::kTranslateFilmBackOperation,
+                    "filmFitOffs");
+                mSamp.addOp(offset);
+            }
+            break;
+
+            case MFnCamera::kOverscanFilmFit:
+            {
+                Alembic::AbcGeom::FilmBackXformOp fit(
+                    Alembic::AbcGeom::kScaleFilmBackOperation, "filmFitOver");
+                mSamp.addOp(fit);
+            }
+            break;
+
+            default:
+            break;
+        }
+
+        Alembic::AbcGeom::FilmBackXformOp preScale(
+            Alembic::AbcGeom::kScaleFilmBackOperation, "preScale");
+        mSamp.addOp(preScale);
+
+        Alembic::AbcGeom::FilmBackXformOp filmTranslate(
+            Alembic::AbcGeom::kScaleFilmBackOperation, "filmTranslate");
+        mSamp.addOp(filmTranslate);
+
+        // skip film roll for now
+
+        Alembic::AbcGeom::FilmBackXformOp postScale(
+            Alembic::AbcGeom::kScaleFilmBackOperation, "postScale");
+        mSamp.addOp(postScale);
+
+        Alembic::AbcGeom::FilmBackXformOp cameraScale(
+            Alembic::AbcGeom::kScaleFilmBackOperation, "cameraScale");
+        mSamp.addOp(cameraScale);
+
+    }
+
+    std::size_t filmBackIndex = 0;
+
+    switch (mFilmFit)
+    {
+        case MFnCamera::kFillFilmFit:
+        {
+            if (mSamp.getLensSqueezeRatio() > 1.0)
+            {
+                mSamp[0].setChannelValue(0, 1.0/mSamp.getLensSqueezeRatio());
+                mSamp[0].setChannelValue(1, 1.0);
+            }
+            else
+            {
+                mSamp[0].setChannelValue(0, 1.0);
+                mSamp[0].setChannelValue(1, mSamp.getLensSqueezeRatio());
+            }
+            filmBackIndex = 1;
+        }
+        break;
+
+        case MFnCamera::kHorizontalFilmFit:
+        {
+            if (mSamp.getLensSqueezeRatio() > 1.0)
+            {
+                mSamp[0].setChannelValue(0, 1.0);
+                mSamp[0].setChannelValue(1, mSamp.getLensSqueezeRatio());
+                mSamp[1].setChannelValue(0, 0.0);
+                mSamp[1].setChannelValue(1, 2.0 *
+                    mfnCamera.filmFitOffset()/
+                    mfnCamera.horizontalFilmAperture() );
+            }
+            else
+            {
+                mSamp[0].setChannelValue(0, 1.0);
+                mSamp[0].setChannelValue(1, 1.0);
+                mSamp[1].setChannelValue(0, 0.0);
+                mSamp[1].setChannelValue(1, 0.0);
+            }
+            filmBackIndex = 2;
+        }
+        break;
+
+        case MFnCamera::kVerticalFilmFit:
+        {
+            if (1.0/mSamp.getLensSqueezeRatio() > 1.0)
+            {
+                mSamp[0].setChannelValue(0, 1.0/mSamp.getLensSqueezeRatio());
+                mSamp[0].setChannelValue(1, 1.0);
+                mSamp[1].setChannelValue(0, 2.0 *
+                    mfnCamera.filmFitOffset() /
+                    mfnCamera.horizontalFilmAperture() );
+                mSamp[1].setChannelValue(1, 0.0);
+            }
+            else
+            {
+                mSamp[0].setChannelValue(0, 1.0);
+                mSamp[0].setChannelValue(1, 1.0);
+                mSamp[1].setChannelValue(0, 0.0);
+                mSamp[1].setChannelValue(1, 0.0);
+            }
+            filmBackIndex = 2;
+        }
+        break;
+
+        case MFnCamera::kOverscanFilmFit:
+        {
+            if (mSamp.getLensSqueezeRatio() < 1.0)
+            {
+                mSamp[0].setChannelValue(0, 1.0);
+                mSamp[0].setChannelValue(1, mSamp.getLensSqueezeRatio());
+            }
+            else
+            {
+                mSamp[0].setChannelValue(0, 1.0/mSamp.getLensSqueezeRatio());
+                mSamp[0].setChannelValue(1, 1.0);
+            }
+            filmBackIndex = 1;
+        }
+        break;
+
+        default:
+        break;
+    }
+
+    mSamp[filmBackIndex].setChannelValue(0, mfnCamera.preScale());
+    mSamp[filmBackIndex].setChannelValue(1, mfnCamera.preScale());
+
+    mSamp[filmBackIndex+1].setChannelValue(0, mfnCamera.filmTranslateH());
+    mSamp[filmBackIndex+1].setChannelValue(1, mfnCamera.filmTranslateV());
+
+    mSamp[filmBackIndex+2].setChannelValue(0, mfnCamera.postScale());
+    mSamp[filmBackIndex+2].setChannelValue(1, mfnCamera.postScale());
+
+    mSamp[filmBackIndex+3].setChannelValue(0, mfnCamera.cameraScale());
+    mSamp[filmBackIndex+3].setChannelValue(1, mfnCamera.cameraScale());
+
+    mSchema.set(mSamp);
 }
 
 bool MayaCameraWriter::isAnimated() const

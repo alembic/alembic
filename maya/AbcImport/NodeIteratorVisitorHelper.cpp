@@ -1524,6 +1524,30 @@ MString connectAttr(ArgData & iArgData)
             dstPlug = fnCamera.findPlug("shutterAngle", true);
             modifier.connect(srcPlug, dstPlug);
 
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnCamera.findPlug("filmFitOffset", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnCamera.findPlug("preScale", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug  = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnCamera.findPlug("filmTranslateH", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnCamera.findPlug("filmTranslateV", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnCamera.findPlug("postScale", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnCamera.findPlug("cameraScale", true);
+            modifier.connect(srcPlug, dstPlug);
+
             status = modifier.doIt();
         }
     }

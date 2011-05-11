@@ -50,6 +50,13 @@
 void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
     std::vector<double> & oArray)
 {
+    oArray.resize(18);
+
+    // set some optional scale values
+    oArray[13] = 1.0;
+    oArray[16] = 1.0;
+    oArray[17] = 1.0;
+
     Alembic::AbcGeom::ICameraSchema schema = iCamera.getSchema();
 
     int64_t index, ceilIndex;
@@ -62,22 +69,20 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
         schema.get(samp, index);
         schema.get(ceilSamp, ceilIndex);
 
-        oArray.push_back( simpleLerp<double>(alpha, samp.getFocalLength(),
-            ceilSamp.getFocalLength()) );
-        oArray.push_back( simpleLerp<double>(alpha, samp.getLensSqueezeRatio(),
-            ceilSamp.getLensSqueezeRatio()) );
-        oArray.push_back(simpleLerp<double>(alpha,
-            samp.getHorizontalAperture()/2.54,
-            ceilSamp.getHorizontalAperture()/2.54));
-        oArray.push_back(simpleLerp<double>(alpha,
-            samp.getVerticalAperture()/2.54,
-            ceilSamp.getVerticalAperture()/2.54));
-        oArray.push_back(simpleLerp<double>(alpha,
+        oArray[0] = simpleLerp<double>(alpha, samp.getFocalLength(),
+            ceilSamp.getFocalLength());
+        oArray[1] = simpleLerp<double>(alpha, samp.getLensSqueezeRatio(),
+            ceilSamp.getLensSqueezeRatio());
+        oArray[2] = simpleLerp<double>(alpha, samp.getHorizontalAperture()/2.54,
+            ceilSamp.getHorizontalAperture()/2.54);
+        oArray[3] = simpleLerp<double>(alpha, samp.getVerticalAperture()/2.54,
+            ceilSamp.getVerticalAperture()/2.54);
+        oArray[4] = simpleLerp<double>(alpha,
             samp.getHorizontalFilmOffset()/2.54,
-            ceilSamp.getHorizontalFilmOffset()/2.54));
-        oArray.push_back(simpleLerp<double>(alpha,
+            ceilSamp.getHorizontalFilmOffset()/2.54);
+        oArray[5] = simpleLerp<double>(alpha,
             samp.getVerticalFilmOffset()/2.54,
-            ceilSamp.getVerticalFilmOffset()/2.54));
+            ceilSamp.getVerticalFilmOffset()/2.54);
 
         if (samp.getOverScanLeft() == samp.getOverScanRight() &&
             samp.getOverScanTop() == samp.getOverScanBottom() &&
@@ -86,76 +91,162 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             ceilSamp.getOverScanTop() == ceilSamp.getOverScanBottom() &&
             ceilSamp.getOverScanLeft() == ceilSamp.getOverScanTop())
         {
-            oArray.push_back(simpleLerp<double>(alpha,
+            oArray[6] = simpleLerp<double>(alpha,
                 samp.getOverScanLeft() + 1.0,
-                ceilSamp.getOverScanLeft() + 1.0));
+                ceilSamp.getOverScanLeft() + 1.0);
         }
         else
         {
-            oArray.push_back(1.0);
+            oArray[6] = 1.0;
         }
 
+        oArray[7] = simpleLerp<double>(alpha, samp.getNearClippingPlane(),
+            ceilSamp.getNearClippingPlane());
 
-        oArray.push_back( simpleLerp<double>(alpha,
-            samp.getNearClippingPlane(),
-            ceilSamp.getNearClippingPlane()) );
-        oArray.push_back( simpleLerp<double>(alpha,
-            samp.getFarClippingPlane(),
-            ceilSamp.getFarClippingPlane()) );
+        oArray[8] = simpleLerp<double>(alpha, samp.getFarClippingPlane(),
+            ceilSamp.getFarClippingPlane());
 
-        oArray.push_back( simpleLerp<double>(alpha, samp.getFStop(),
-            ceilSamp.getFStop()) );
-        oArray.push_back( simpleLerp<double>(alpha, samp.getFocusDistance(),
-            ceilSamp.getFocusDistance()) );
+        oArray[9] = simpleLerp<double>(alpha, samp.getFStop(),
+            ceilSamp.getFStop());
+
+        oArray[10] = simpleLerp<double>(alpha, samp.getFocusDistance(),
+            ceilSamp.getFocusDistance());
 
         double shutterClose = simpleLerp<double>(alpha, samp.getShutterClose(),
             ceilSamp.getShutterClose());
         double shutterOpen = simpleLerp<double>(alpha, samp.getShutterOpen(),
             ceilSamp.getShutterOpen());
         MTime sec(1.0, MTime::kSeconds);
-        oArray.push_back(Alembic::AbcGeom::DegreesToRadians(
+        oArray[11] = Alembic::AbcGeom::DegreesToRadians(
             360.0 * (shutterClose - shutterOpen) /
-            sec.as(MTime::uiUnit()) ));
+            sec.as(MTime::uiUnit()) );
+
+        std::size_t numOps = samp.getNumOps();
+        for (std::size_t i = 0; i < numOps; ++i)
+        {
+            Alembic::AbcGeom::FilmBackXformOp & op = samp[i];
+            Alembic::AbcGeom::FilmBackXformOp & ceilOp = ceilSamp[i];
+            if (op.getHint() == "filmFitOffs")
+            {
+                double val = op.getChannelValue(0) * 0.5 *
+                    samp.getHorizontalAperture() / 2.54;
+
+                double ceilVal = ceilOp.getChannelValue(0) * 0.5 *
+                    ceilSamp.getHorizontalAperture() / 2.54;
+
+                if (val != 0.0)
+                {
+                    oArray[12] = simpleLerp<double>(alpha, val, ceilVal);
+                }
+                else
+                {
+                    val = op.getChannelValue(1) * 0.5 *
+                        samp.getHorizontalAperture() / 2.54;
+
+                    ceilVal = ceilOp.getChannelValue(1) * 0.5 *
+                        ceilSamp.getHorizontalAperture() / 2.54;
+
+                    oArray[12] = simpleLerp<double>(alpha, val, ceilVal);
+                }
+            }
+            else if (op.getHint() == "preScale")
+            {
+                oArray[13] = simpleLerp<double>(alpha,
+                    op.getChannelValue(0), ceilOp.getChannelValue(0));
+            }
+            else if (op.getHint() == "filmTranslate")
+            {
+                oArray[14] = simpleLerp<double>(alpha,
+                    op.getChannelValue(0), ceilOp.getChannelValue(0));
+
+                oArray[15] = simpleLerp<double>(alpha,
+                    op.getChannelValue(1), ceilOp.getChannelValue(1));
+            }
+            else if (op.getHint() == "postScale")
+            {
+                oArray[16] = simpleLerp<double>(alpha,
+                    op.getChannelValue(0), ceilOp.getChannelValue(0));
+            }
+            else if (op.getHint() == "cameraScale")
+            {
+                oArray[17] = simpleLerp<double>(alpha,
+                    op.getChannelValue(0), ceilOp.getChannelValue(0));
+            }
+        }
     }
     else
     {
         Alembic::AbcGeom::CameraSample samp;
         schema.get(samp, index);
-        oArray.push_back(samp.getFocalLength());
-        oArray.push_back(samp.getLensSqueezeRatio());
-        oArray.push_back(samp.getHorizontalAperture()/2.54);
-        oArray.push_back(samp.getVerticalAperture()/2.54);
-        oArray.push_back(samp.getHorizontalFilmOffset()/2.54);
-        oArray.push_back(samp.getVerticalFilmOffset()/2.54);
+        oArray[0] = samp.getFocalLength();
+        oArray[1] = samp.getLensSqueezeRatio();
+        oArray[2] = samp.getHorizontalAperture()/2.54;
+        oArray[3] = samp.getVerticalAperture()/2.54;
+        oArray[4] = samp.getHorizontalFilmOffset()/2.54;
+        oArray[5] = samp.getVerticalFilmOffset()/2.54;
 
         if (samp.getOverScanLeft() == samp.getOverScanRight() &&
             samp.getOverScanTop() == samp.getOverScanBottom() &&
             samp.getOverScanLeft() == samp.getOverScanTop())
         {
-            oArray.push_back(samp.getOverScanLeft() + 1.0);
+            oArray[6] = samp.getOverScanLeft() + 1.0;
         }
         else
         {
-            oArray.push_back(1.0);
+            oArray[6] = 1.0;
         }
 
 
-        oArray.push_back(samp.getNearClippingPlane());
-        oArray.push_back(samp.getFarClippingPlane());
+        oArray[7] = samp.getNearClippingPlane();
+        oArray[8] = samp.getFarClippingPlane();
 
-        oArray.push_back(samp.getFStop());
-        oArray.push_back(samp.getFocusDistance());
+        oArray[9] = samp.getFStop();
+        oArray[10] = samp.getFocusDistance();
 
         MTime sec(1.0, MTime::kSeconds);
-        oArray.push_back(Alembic::AbcGeom::DegreesToRadians(
+        oArray[11] = Alembic::AbcGeom::DegreesToRadians(
             360.0 * (samp.getShutterClose()-samp.getShutterOpen()) /
-            sec.as(MTime::uiUnit()) ));
+            sec.as(MTime::uiUnit()) );
 
         // prescale, film translate H, V, roll pivot H,V, film roll value
         // post scale might be in the 3x3
+        std::size_t numOps = samp.getNumOps();
+        for (std::size_t i = 0; i < numOps; ++i)
+        {
+            Alembic::AbcGeom::FilmBackXformOp & op = samp[i];
+            if (op.getHint() == "filmFitOffs")
+            {
+                if (op.getChannelValue(0) != 0.0)
+                {
+                    oArray[12] = op.getChannelValue(0) * 0.5 *
+                        samp.getHorizontalAperture() / 2.54;
+                }
+                else
+                {
+                    oArray[12] = op.getChannelValue(1) * 0.5 *
+                        samp.getHorizontalAperture() / 2.54;
+                }
+            }
+            else if (op.getHint() == "preScale")
+            {
+                oArray[13] = op.getChannelValue(0);
+            }
+            else if (op.getHint() == "filmTranslate")
+            {
+                oArray[14] = op.getChannelValue(0);
+
+                oArray[15] = op.getChannelValue(1);
+            }
+            else if (op.getHint() == "postScale")
+            {
+                oArray[16] = op.getChannelValue(0);
+            }
+            else if (op.getHint() == "cameraScale")
+            {
+                oArray[17] = op.getChannelValue(0);
+            }
+        }
     }
-
-
 }
 
 MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
@@ -167,10 +258,34 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
     MObject obj = fnCamera.create(iParent);
     fnCamera.setName(name);
 
+    // we need to read this to determine the film fit
+    Alembic::AbcGeom::CameraSample samp;
+    iNode.getSchema().get(samp);
+
+    std::size_t numOps = samp.getNumOps();
+    if (numOps > 0)
+    {
+        std::string hint = samp[0].getHint();
+        if (hint == "filmFitFill")
+        {
+            fnCamera.setFilmFit(MFnCamera::kFillFilmFit);
+        }
+        else if (hint == "filmFitHorz")
+        {
+            fnCamera.setFilmFit(MFnCamera::kHorizontalFilmFit);
+        }
+        else if (hint == "filmFitVert")
+        {
+            fnCamera.setFilmFit(MFnCamera::kVerticalFilmFit);
+        }
+        else if (hint == "filmFitOver")
+        {
+            fnCamera.setFilmFit(MFnCamera::kOverscanFilmFit);
+        }
+    }
+
     if (schema.getNumSamples() == 1)
     {
-        Alembic::AbcGeom::CameraSample samp;
-        iNode.getSchema().get(samp);
 
         // no center of interest
         fnCamera.setFocalLength(samp.getFocalLength());
@@ -182,6 +297,7 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
         fnCamera.setVerticalFilmAperture(samp.getVerticalAperture()/2.54);
         fnCamera.setHorizontalFilmOffset(samp.getHorizontalFilmOffset()/2.54);
         fnCamera.setVerticalFilmOffset(samp.getVerticalFilmOffset()/2.54);
+
         // film fit offset might be in the 3x3
 
         if (samp.getOverScanLeft() == samp.getOverScanRight() &&
@@ -210,6 +326,43 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
         fnCamera.setShutterAngle(Alembic::AbcGeom::DegreesToRadians(
             360.0 * (samp.getShutterClose()-samp.getShutterOpen()) *
             sec.as(MTime::uiUnit()) ));
+
+        for (std::size_t i = 0; i < numOps; ++i)
+        {
+            Alembic::AbcGeom::FilmBackXformOp & op = samp[i];
+            if (op.getHint() == "filmFitOffs")
+            {
+                double val = op.getChannelValue(0) * 0.5 *
+                    samp.getHorizontalAperture() / 2.54;
+
+                if (val != 0.0)
+                {
+                    fnCamera.setFilmFitOffset(val);
+                }
+                else
+                {
+                    fnCamera.setFilmFitOffset(op.getChannelValue(1) * 0.5 *
+                        samp.getHorizontalAperture() / 2.54);
+                }
+            }
+            else if (op.getHint() == "preScale")
+            {
+                fnCamera.setPreScale(op.getChannelValue(0));
+            }
+            else if (op.getHint() == "filmTranslate")
+            {
+                fnCamera.setFilmTranslateH(op.getChannelValue(0));
+                fnCamera.setFilmTranslateV(op.getChannelValue(1));
+            }
+            else if (op.getHint() == "postScale")
+            {
+                fnCamera.setPostScale(op.getChannelValue(0));
+            }
+            else if (op.getHint() == "cameraScale")
+            {
+                fnCamera.setCameraScale(op.getChannelValue(0));
+            }
+        }
     }
 
     // extra transform node is unfortuneatly automatically created above the

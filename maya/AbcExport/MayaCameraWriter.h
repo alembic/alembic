@@ -63,6 +63,9 @@ class MayaCameraWriter
     double mShutterClose;
     Alembic::AbcGeom::OCameraSchema mSchema;
     AttributesWriterPtr mAttrs;
+
+    Alembic::AbcGeom::CameraSample mSamp;
+    MFnCamera::FilmFit mFilmFit;
 };
 
 typedef boost::shared_ptr < MayaCameraWriter > MayaCameraWriterPtr;
