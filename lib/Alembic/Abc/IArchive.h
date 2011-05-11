@@ -76,10 +76,10 @@ public:
 
         //! The file name.
         const std::string &iFileName,
-    
+
         ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
         AbcA::ReadArraySampleCachePtr iCachePtr = AbcA::ReadArraySampleCachePtr());
-    
+
     //! This attaches an IArchive wrapper around an existing
     //! ArchiveReaderPtr, with an optional error handling policy.
     IArchive(
@@ -186,14 +186,7 @@ IArchive::IArchive( ARCHIVE_CTOR iCtor,
 
      ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
 
-     if ( iCachePtr )
-     {
-         m_archive = iCtor( iFileName, iCachePtr );
-     }
-     else
-     {
-         m_archive = iCtor( iFileName );
-     }
+     m_archive = iCtor( iFileName, iCachePtr );
 
      ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
