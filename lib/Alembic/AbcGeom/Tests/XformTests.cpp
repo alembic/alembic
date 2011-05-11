@@ -262,6 +262,9 @@ void xformIn()
     XformSample gsamp = g.getSchema().getValue();
     TESTING_ASSERT( gsamp.getNumOps() == 20 );
     TESTING_ASSERT( gsamp.getNumOpChannels() == 20 * 16 );
+    TESTING_ASSERT( g.getSchema().getNumSamples() == 1 );
+    TESTING_ASSERT( g.getSchema().isConstant() );
+    TESTING_ASSERT( !g.getSchema().isConstantIdentity() );
     for ( size_t i = 0 ; i < 20 ; ++i )
     {
         TESTING_ASSERT( gsamp[i].getChannelValue( 1 ) == (double)i );

@@ -37,8 +37,6 @@
 #include <Alembic/AbcGeom/IXform.h>
 #include <Alembic/AbcGeom/XformOp.h>
 
-#include <algorithm>
-
 namespace Alembic {
 namespace AbcGeom {
 

@@ -91,48 +91,69 @@ void OWrapExisting()
 void PolyMorphicAbstractPtrs()
 {
     std::string name( "playground_pmap.abc" );
-    Alembic::Abc::OArchive archive(
-        Alembic::AbcCoreHDF5::WriteArchive(),
-        name
-                                  );
+    {
+        Alembic::Abc::OArchive archive(
+            Alembic::AbcCoreHDF5::WriteArchive(),
+            name
+                                      );
 
-    Alembic::Abc::OObject archiveTop = archive.getTop();
+        Alembic::Abc::OObject archiveTop = archive.getTop();
 
-    AbcA::BasePropertyWriterPtr pwPtr;
+        AbcA::BasePropertyWriterPtr pwPtr;
 
-    AbcA::ScalarPropertyWriterPtr swPtr;
-    AbcA::ArrayPropertyWriterPtr awPtr;
-    AbcA::ScalarPropertyWriterPtr aswPtr;
+        AbcA::ScalarPropertyWriterPtr swPtr;
+        AbcA::ArrayPropertyWriterPtr awPtr;
+        AbcA::ScalarPropertyWriterPtr aswPtr;
 
-    AbcA::DataType dt( Alembic::Util::kUint32POD, 1 );
+        AbcA::DataType dt( Alembic::Util::kUint32POD, 1 );
 
-    AbcA::DataType arrayDT( kUint32POD, 254 );
+        AbcA::DataType arrayDT( kUint32POD, 254 );
 
-    swPtr = archiveTop.getProperties().getPtr()->createScalarProperty(
-        "scalarprop", AbcA::MetaData(), dt, 0 );
+        swPtr = archiveTop.getProperties().getPtr()->createScalarProperty(
+            "scalarprop", AbcA::MetaData(), dt, 0 );
 
-    aswPtr = archiveTop.getProperties().getPtr()->createScalarProperty(
-        "arrayscalarprop", AbcA::MetaData(), arrayDT, 0 );
+        aswPtr = archiveTop.getProperties().getPtr()->createScalarProperty(
+            "arrayscalarprop", AbcA::MetaData(), arrayDT, 0 );
 
-    awPtr = archiveTop.getProperties().getPtr()->createArrayProperty(
-        "arrayprop", AbcA::MetaData(), dt, 0 );
+        awPtr = archiveTop.getProperties().getPtr()->createArrayProperty(
+            "arrayprop", AbcA::MetaData(), dt, 0 );
 
-    uint32_t sval = 2;
-    std::vector<uint32_t> aval( 5, 3 );
-    std::vector<uint32_t> saval( 254, 2 );
+        uint32_t sval = 2;
+        std::vector<uint32_t> aval( 5, 3 );
+        std::vector<uint32_t> saval( 254, 2 );
 
-    // use base type as scalar prop writer
-    pwPtr = swPtr;
-    pwPtr->asScalarPtr()->setSample( &sval );
+        // use base type as scalar prop writer
+        pwPtr = swPtr;
+        pwPtr->asScalarPtr()->setSample( &sval );
 
-    // use base type as array prop writer
-    pwPtr = awPtr;
-    pwPtr->asArrayPtr()->setSample( AbcA::ArraySample( &(aval.front()), dt,
-                                                       Dimensions( 5 ) ) );
+        // use base type as array prop writer
+        pwPtr = awPtr;
+        pwPtr->asArrayPtr()->setSample( AbcA::ArraySample( &(aval.front()), dt,
+                                                           Dimensions( 5 ) ) );
 
-    // use base type as "array scalar prop"
-    pwPtr = aswPtr;
-    pwPtr->asScalarPtr()->setSample( &(saval.front()) );
+        // use base type as "array scalar prop"
+        pwPtr = aswPtr;
+        pwPtr->asScalarPtr()->setSample( &(saval.front()) );
+    }
+
+    // now read in
+    {
+        ReadArraySampleCachePtr cachePtr;
+
+        if ( cachePtr ) { std::cout << "cachePtr is valid" << std::endl; }
+        if ( cachePtr != NULL ) { std::cout << "cachePtr is not NULL" << std::endl; }
+        else { std::cout << "cachePtr IS NULL" << std::endl; }
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name,
+                          ErrorHandler::kThrowPolicy,
+                          cachePtr );
+
+        IUInt32ArrayProperty p( archive.getTop().getProperties(),
+                                "arrayprop" );
+
+        UInt32ArraySamplePtr samp = p.getValue();
+
+        std::cout << "*samp[0]: " << (*samp)[0] << std::endl;
+    }
 
 
 
