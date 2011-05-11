@@ -43,7 +43,16 @@ namespace AbcGeom {
 CameraSample::CameraSample ( double iTop, double iBottom, double iLeft,
     double iRight )
 {
-    ABCA_THROW("Please implement");
+    reset();
+    m_lensSqueezeRatio = (iRight - iLeft) * 0.5;
+    m_horizontalFilmOffset = (iLeft + m_lensSqueezeRatio) *
+        m_horizontalAperture / (2.0 * m_lensSqueezeRatio);
+
+    m_verticalAperture = (iTop - iBottom) * 0.5 * m_horizontalAperture /
+        m_lensSqueezeRatio;
+
+    m_verticalFilmOffset = ( (m_lensSqueezeRatio * m_verticalAperture) /
+        m_horizontalAperture + iBottom ) * m_horizontalAperture * 0.5;
 }
 
 //-*****************************************************************************
