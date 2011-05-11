@@ -181,21 +181,14 @@ IArchive::IArchive( ARCHIVE_CTOR iCtor,
                      ErrorHandler::Policy iPolicy,
                      AbcA::ReadArraySampleCachePtr iCachePtr )
 {
-     // Set the error handling policy.
-     getErrorHandler().setPolicy( iPolicy );
+    // Set the error handling policy.
+    getErrorHandler().setPolicy( iPolicy );
 
-     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
 
-     if ( iCachePtr )
-     {
-         m_archive = iCtor( iFileName, iCachePtr );
-     }
-     else
-     {
-         m_archive = iCtor( iFileName );
-     }
+    m_archive = iCtor( iFileName, iCachePtr );
 
-     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 } // End namespace Abc
