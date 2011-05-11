@@ -129,6 +129,12 @@ void xformOut()
     {
         asamp.addOp( transop, V3d( 12.0, i + 42.0, 20.0 ) );
 
+        if ( i == 18 )
+        {
+            asamp.setChildBounds( Abc::Box3d( V3d( -1.0, -1.0, -1.0 ),
+                                              V3d( 1.0, 1.0, 1.0 ) ) );
+        }
+
         a.getSchema().set( asamp );
     }
 

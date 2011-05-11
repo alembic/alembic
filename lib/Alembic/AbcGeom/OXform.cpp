@@ -68,6 +68,25 @@ void OXformSchema::set( XformSample &ioSamp )
 
     m_opVec = ioSamp.getOpsArray();
 
+    // do we need to create child bounds?
+    if ( ioSamp.getChildBounds().hasVolume() && !m_childBounds )
+    {
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
+                                             m_inherits.getTimeSampling() );
+
+        Abc::Box3d emptyBox;
+        emptyBox.makeEmpty();
+
+        size_t numSamples = m_inherits.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_childBounds.set( emptyBox );
+        }
+    }
+
+
     if ( m_inherits.getNumSamples() == 0 )
     {
         // set this to true, so that additional calls to sample's addOp()
@@ -222,9 +241,6 @@ void OXformSchema::setFromPrevious()
 void OXformSchema::init( const AbcA::index_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::init()" );
-
-    m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
-                                         iTsIdx );
 
     m_inherits = Abc::OBoolProperty( this->getPtr(), ".inherits",
                                      iTsIdx );
