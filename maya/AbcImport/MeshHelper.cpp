@@ -257,23 +257,26 @@ namespace
         else if (sampSize == ioMesh.numFaceVertices() &&
             iNormals.getScope() == Alembic::AbcGeom::kFacevaryingScope)
         {
+
+            MIntArray faceList(sampSize);
+            MIntArray vertexList(sampSize);
+
             // per vertex per-polygon normal
-            int numFaces = ioMesh.numPolygons();
-            int nIndex = 0;
-            for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
+            std::size_t numFaces = ioMesh.numPolygons();
+            std::size_t nIndex = 0;
+            for (std::size_t faceIndex = 0; faceIndex < numFaces; faceIndex++)
             {
-                MIntArray vertexList;
-                ioMesh.getPolygonVertices(faceIndex, vertexList);
-                unsigned int numVertices = vertexList.length();
-
-                for ( int v = numVertices-1; v >= 0; --v, ++nIndex )
+                MIntArray polyVerts;
+                ioMesh.getPolygonVertices(faceIndex, polyVerts);
+                int numVertices = polyVerts.length();
+                for (int v = numVertices - 1; v >= 0; v--, ++nIndex)
                 {
-                    unsigned int vertexIndex = vertexList[v];
-
-                    ioMesh.setFaceVertexNormal(normalsIn[nIndex],
-                        faceIndex, vertexIndex);
+                    faceList[nIndex] = faceIndex;
+                    vertexList[nIndex] = polyVerts[v];
                 }
             }
+
+            ioMesh.setFaceVertexNormals(normalsIn, faceList, vertexList);
         }
         else
         {
@@ -411,7 +414,7 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     fillPoints(pointArray, samp.getPositions(), ceilPoints, alpha);
 
     fillTopology(ioMesh, iParent, pointArray, samp.getFaceIndices(),
-        samp.getFaceCounts());
+                 samp.getFaceCounts());
 
     setPolyNormals(iFrame, ioMesh, schema.getNormals());
     setUVs(iFrame, ioMesh, schema.getUVs());
@@ -473,7 +476,8 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 }
 
 void disconnectMesh(MObject & iMeshObject,
-    std::vector<std::string> & oSampledPropNameList)
+    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::size_t iFirstProp)
 {
     MFnMesh fnMesh;
     fnMesh.setObject(iMeshObject);
@@ -483,11 +487,7 @@ void disconnectMesh(MObject & iMeshObject,
     MPlug dstPlug = fnMesh.findPlug("inMesh");
     disconnectAllPlugsTo(dstPlug);
 
-    // get prop names and make sure they are disconnected before
-    // trying to connect to them
-    // disconnect connections to animated props
-    //dstPlug = fnMesh.findPlug(propName.c_str());
-    // disconnectAllPlugsTo(dstPlug);
+    disconnectProps(fnMesh, iSampledPropList, iFirstProp);
 
     clearPt(fnMesh);
 
@@ -496,7 +496,7 @@ void disconnectMesh(MObject & iMeshObject,
 }
 
 MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
-    MObject & iParent, std::vector<std::string> & oSampledPropNameList)
+    MObject & iParent)
 {
     Alembic::AbcGeom::IPolyMeshSchema schema = iNode.getSchema();
     MString name(iNode.getName().c_str());
@@ -534,7 +534,7 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
 
         fillPoints(ptArray, samp.getPositions(), ceilPoints, alpha);
         fillTopology(fnMesh, iParent, ptArray, samp.getFaceIndices(),
-            samp.getFaceCounts());
+                     samp.getFaceCounts());
         fnMesh.setName(iNode.getName().c_str());
         setPolyNormals(iFrame, fnMesh, schema.getNormals());
         setUVs(iFrame, fnMesh, schema.getUVs());
@@ -560,7 +560,7 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
 }
 
 MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
-    MObject & iParent, std::vector<std::string> & oSampledPropNameList)
+    MObject & iParent)
 {
     Alembic::AbcGeom::ISubDSchema schema = iNode.getSchema();
 
@@ -586,7 +586,6 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
     setInitialShadingGroup(fnMesh.partialPathName());
 
     MObject obj = fnMesh.object();
-    //addProperties(iFrame, iNode, obj, oSampledPropNameList);
 
     setUVs(iFrame, fnMesh, schema.getUVs());
 

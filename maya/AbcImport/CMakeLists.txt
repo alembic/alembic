@@ -39,6 +39,7 @@ PROJECT( ABC_IMPORT_MAYA_MODULE )
 SET( H_FILES
   AbcImport.h
   AlembicNode.h
+  CameraHelper.h
   CreateSceneHelper.h
   MeshHelper.h
   NodeIteratorVisitorHelper.h
@@ -50,6 +51,7 @@ SET( H_FILES
 SET( CXX_FILES
   AbcImport.cpp
   AlembicNode.cpp
+  CameraHelper.cpp
   CreateSceneHelper.cpp
   main.cpp
   MeshHelper.cpp

@@ -117,15 +117,15 @@ void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
     double rot[3];
     MTransformationMatrix::RotationOrder order;
     mmat.getRotation(rot, order);
-    oSampleList.push_back(rot[0]);
-    oSampleList.push_back(rot[1]);
-    oSampleList.push_back(rot[2]);
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(rot[0]));
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(rot[1]));
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(rot[2]));
 
     MQuaternion quat = mmat.rotationOrientation();
     vec = quat.asEulerRotation().asVector();
-    oSampleList.push_back(vec.x);
-    oSampleList.push_back(vec.y);
-    oSampleList.push_back(vec.z);
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(vec.x));
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(vec.y));
+    oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(vec.z));
 
     pt = mmat.scalePivotTranslation(tSpace);
     oSampleList.push_back(vec.x);
@@ -416,9 +416,9 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
 }
 
 MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
-    MObject & iObject,
-    std::vector<std::string> & oSampledPropNameList,
-    std::vector<std::string> & oSampledTransOpNameList)
+    MObject & iObject, std::vector<std::string> & oSampledTransOpNameList,
+    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::size_t iFirstProp)
 {
     MStatus status = MS::kSuccess;
 
@@ -519,33 +519,7 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
     dstPlug.setBool(true);
 
     // disconnect connections to animated props
-    /*
-    loop over properties
-    {
-        std::string propName = propIter->first;
-        // SPT_xxColor is special
-        if ( propName.find("SPT_") != std::string::npos
-            && propName.find("Color") != std::string::npos )
-        {
-            std::string colorR = propName+std::string("R");
-            dstPlug = trans.findPlug(colorR.c_str());
-            disconnectAllPlugsTo(dstPlug);
-            std::string colorG = propName+std::string("G");
-            dstPlug = trans.findPlug(colorG.c_str());
-            disconnectAllPlugsTo(dstPlug);
-            std::string colorB = propName+std::string("B");
-            dstPlug = trans.findPlug(colorB.c_str());
-            disconnectAllPlugsTo(dstPlug);
-        }
-        else
-        {
-            dstPlug = trans.findPlug(propIter->first.c_str());
-            disconnectAllPlugsTo(dstPlug);
-        }
-        propIter++;
-    }
-    addProperties(iFrame, *iNode, ioObject, oSampledPropNameList);
-    */
+    disconnectProps(trans, iSampledPropList, iFirstProp);
 
     int64_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,

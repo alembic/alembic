@@ -48,9 +48,10 @@
 #include <map>
 #include <vector>
 
+#include <Alembic/AbcGeom/ICamera.h>
+#include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
 #include <Alembic/AbcGeom/ISubD.h>
-#include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IXform.h>
 
 #include "NodeIteratorVisitorHelper.h"
@@ -88,6 +89,7 @@ public:
 
     void visit(Alembic::Abc::IObject & iObj);
 
+    MStatus operator()(Alembic::AbcGeom::ICamera & iNode);
     MStatus operator()(Alembic::AbcGeom::IPoints & iNode);
     MStatus operator()(Alembic::AbcGeom::IPolyMesh & iNode);
     MStatus operator()(Alembic::AbcGeom::ISubD & iNode);
@@ -108,6 +110,8 @@ private:
     // This is only used when -connect flag is set to hook up a AlembicNode
     // to a previous hierarchy
     void checkShaderSelection(MFnMesh & iMesh, unsigned int iInst);
+
+    void addToPropList(std::size_t iFirst, MObject & iParent);
 
     double mFrame;
     MObject mParent;

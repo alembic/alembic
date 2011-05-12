@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -63,18 +63,15 @@ class MayaTransformWriter
 {
   public:
 
-    MayaTransformWriter(double iFrame, Alembic::Abc::OObject & iParent,
-        MDagPath & iDag, 
-        uint32_t iTimeIndex,
-        bool addWorld, bool iWriteVisibility);
+    MayaTransformWriter(Alembic::Abc::OObject & iParent, MDagPath & iDag, 
+        uint32_t iTimeIndex, bool addWorld, bool iWriteVisibility,
+        bool iForceStatic);
 
-    MayaTransformWriter(double iFrame, MayaTransformWriter & iParent,
-        MDagPath & iDag,
-        uint32_t iTimeIndex,
-        bool iWriteVisibility);
+    MayaTransformWriter(MayaTransformWriter & iParent, MDagPath & iDag,
+        uint32_t iTimeIndex, bool iWriteVisibility, bool iForceStatic);
 
     ~MayaTransformWriter();
-    void write(double iFrame);
+    void write();
     bool isAnimated() const;
     Alembic::Abc::OObject getObject() {return mSchema.getObject();};
     AttributesWriterPtr getAttrs() {return mAttrs;};
@@ -84,9 +81,9 @@ class MayaTransformWriter
     Alembic::AbcGeom::OXformSchema mSchema;
     AttributesWriterPtr mAttrs;
 
-    void pushTransformStack(double iFrame, const MFnTransform & iTrans);
+    void pushTransformStack(const MFnTransform & iTrans, bool iForceStatic);
 
-    void pushTransformStack(double iFrame, const MFnIkJoint & iTrans);
+    void pushTransformStack(const MFnIkJoint & iTrans, bool iForceStatic);
 
     Alembic::AbcGeom::XformSample mSample;
 

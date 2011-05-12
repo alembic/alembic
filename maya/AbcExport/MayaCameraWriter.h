@@ -34,57 +34,40 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcExport_MayaMeshWriter_h_
-#define _AbcExport_MayaMeshWriter_h_
+#ifndef _AbcExport_MayaCameraWriter_h_
+#define _AbcExport_MayaCameraWriter_h_
 
 #include "Foundation.h"
 #include "AttributesWriter.h"
 #include "MayaTransformWriter.h"
 
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/OSubD.h>
+#include <Alembic/AbcGeom/OCamera.h>
 
-// Writes an MFnMesh as a poly mesh OR a subd mesh
-class MayaMeshWriter
+// Writes an MFnCamera
+class MayaCameraWriter
 {
   public:
 
-    MayaMeshWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        uint32_t iTimeIndex, bool iWriteVisibilty, bool iWriteUVs,
-        bool iForceStatic);
+    MayaCameraWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
+        uint32_t iTimeIndex, bool iWriteVisibility, bool iForceStatic);
+    AttributesWriterPtr getAttrs() {return mAttrs;};
     void write();
     bool isAnimated() const;
-    bool isSubD();
-    unsigned int getNumCVs();
-    unsigned int getNumFaces();
-    AttributesWriterPtr getAttrs() {return mAttrs;};
 
   private:
 
-    void fillTopology(
-        std::vector<float> & oPoints,
-        std::vector< int32_t > & oFacePoints,
-        std::vector< int32_t > & oPointCounts);
-
-    void writePoly(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
-
-    void writeSubD(MDagPath & iDag,
-        const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
-
-    void getUVs(std::vector<float> & uvs, std::vector<uint32_t> & indices);
-
-    void getPolyNormals(std::vector<float> & oNormals);
-
-    bool    mIsGeometryAnimated;
+    bool mIsAnimated;
     MDagPath mDagPath;
-
-    size_t  mNumPoints;
-
+    bool mUseRenderShutter;
+    double mShutterOpen;
+    double mShutterClose;
+    Alembic::AbcGeom::OCameraSchema mSchema;
     AttributesWriterPtr mAttrs;
-    Alembic::AbcGeom::OPolyMeshSchema   mPolySchema;
-    Alembic::AbcGeom::OSubDSchema       mSubDSchema;
+
+    Alembic::AbcGeom::CameraSample mSamp;
+    MFnCamera::FilmFit mFilmFit;
 };
 
-typedef boost::shared_ptr < MayaMeshWriter > MayaMeshWriterPtr;
+typedef boost::shared_ptr < MayaCameraWriter > MayaCameraWriterPtr;
 
-#endif  // _AbcExport_MayaMeshWriter_h_
+#endif  // _AbcExport_MayaCameraWriter_h_

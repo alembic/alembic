@@ -49,25 +49,26 @@
 #include <Alembic/Abc/IScalarProperty.h>
 #include <Alembic/Abc/IObject.h>
 
+#include <Alembic/AbcGeom/ICamera.h>
+#include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
 #include <Alembic/AbcGeom/ISubD.h>
-#include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IXform.h>
 
-void addAttr(double iFrame, Alembic::Abc::IScalarProperty & iProp,
-    MObject & iParent);
+bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent);
 
-void addAttr(double iFrame, Alembic::Abc::IArrayProperty & iProp,
-    MObject & iParent);
+void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject);
 
-void addProperties(double iFrame, Alembic::Abc::IObject & iNode,
-    MObject & iObject, std::vector<std::string> & iSampledPropNameList);
+void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
+    MDataHandle & iHandle);
 
-//
-// This class is used when sampled properties or sampled transform operations
-// exist, to keep the list of names of sampled channels associated with a
-// particular MObject (mObject)
-//
+void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
+    std::vector<Alembic::Abc::IArrayProperty> & oPropList);
+
+
+// This class is used for connecting to sampled transform operations and
+// properties in order  to keep the list of names of sampled channels
+// associated with a particular MObject (mObject)
 class SampledPair
 {
 public:
@@ -108,25 +109,29 @@ public:
     WriterData & operator=(const WriterData & rhs);
     void getFrameRange(double & oMin, double & oMax);
 
+    std::vector<MObject>        mCameraObjList;
     std::vector<MObject>        mPointsObjList;
     std::vector<MObject>        mPolyMeshObjList;
     std::vector<MObject>        mSubDObjList;
-    std::vector<SampledPair>    mXformOpList;
 
     // will be used once we have more schemas implemented
     /*
-    std::vector<MObject>        mCameraObjList;
     std::vector<MObject>        mNurbsSurfaceObjList;
     std::vector<MObject>        mNurbsCurveObjList;
-    std::vector<SampledPair>    mPropList;
     */
 
-    std::vector<Alembic::AbcGeom::ISubD>     mSubDList;
-    std::vector<Alembic::AbcGeom::IPolyMesh> mPolyMeshList;
-    std::vector<Alembic::AbcGeom::IPoints>   mPointsList;
-    std::vector<Alembic::AbcGeom::IXform>    mXformList;
+    std::vector<Alembic::Abc::IArrayProperty> mPropList;
+    std::vector<Alembic::AbcGeom::ICamera>    mCameraList;
+    std::vector<Alembic::AbcGeom::IPolyMesh>  mPolyMeshList;
+    std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
+    std::vector<Alembic::AbcGeom::ISubD>      mSubDList;
+    std::vector<Alembic::AbcGeom::IXform>     mXformList;
 
     std::vector<bool>           mIsComplexXform;
+
+    // only needed when doing connections
+    std::vector<SampledPair>    mXformOpList;
+    std::vector<SampledPair>    mPropObjList;
 
 };  // WriterData
 

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -395,10 +395,9 @@ void addScale(const MFnDependencyNode & iTrans,
     }
 }
 
-MayaTransformWriter::MayaTransformWriter(double iFrame,
-    Alembic::AbcGeom::OObject & iParent, MDagPath & iDag,
-    uint32_t iTimeIndex,
-    bool iAddWorld, bool iWriteVisibility)
+MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
+    MDagPath & iDag, uint32_t iTimeIndex, bool iAddWorld,
+    bool iWriteVisibility, bool iForceStatic)
 {
 
     if (iDag.hasFn(MFn::kJoint))
@@ -409,12 +408,12 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, joint,
-            iTimeIndex, iWriteVisibility));
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, joint,
+            iTimeIndex, iWriteVisibility, iForceStatic));
 
         if (!iAddWorld)
         {
-            pushTransformStack(iFrame, joint);
+            pushTransformStack(joint, iForceStatic);
 
             // need to look at inheritsTransform
             MFnDagNode dagNode(iDag);
@@ -444,12 +443,12 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, trans,
-            iTimeIndex, iWriteVisibility));
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, trans,
+            iTimeIndex, iWriteVisibility, iForceStatic));
 
         if (!iAddWorld)
         {
-            pushTransformStack(iFrame, trans);
+            pushTransformStack(trans, iForceStatic);
 
             // need to look at inheritsTransform
             MFnDagNode dagNode(iDag);
@@ -510,12 +509,12 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         if (iCur->hasFn(MFn::kJoint))
         {
             MFnIkJoint joint(*iCur);
-            pushTransformStack(iFrame, joint);
+            pushTransformStack(joint, iForceStatic);
         }
         else
         {
             MFnTransform trans(*iCur);
-            pushTransformStack(iFrame, trans);
+            pushTransformStack(trans, iForceStatic);
         }
     }
 
@@ -523,12 +522,12 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
     if (iCur->hasFn(MFn::kJoint))
     {
         MFnIkJoint joint(*iCur);
-        pushTransformStack(iFrame, joint);
+        pushTransformStack(joint, iForceStatic);
     }
     else
     {
         MFnTransform trans(*iCur);
-        pushTransformStack(iFrame, trans);
+        pushTransformStack(trans, iForceStatic);
     }
 
     // need to look at inheritsTransform
@@ -551,10 +550,9 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
 
 }
 
-MayaTransformWriter::MayaTransformWriter(double iFrame,
-    MayaTransformWriter & iParent, MDagPath & iDag,
-    uint32_t iTimeIndex,
-    bool iWriteVisibility)
+MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
+    MDagPath & iDag, uint32_t iTimeIndex, bool iWriteVisibility,
+    bool iForceStatic)
 {
     if (iDag.hasFn(MFn::kJoint))
     {
@@ -565,10 +563,10 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, joint,
-            iTimeIndex, iWriteVisibility));
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, joint,
+            iTimeIndex, iWriteVisibility, iForceStatic));
 
-        pushTransformStack(iFrame, joint);
+        pushTransformStack(joint, iForceStatic);
     }
     else
     {
@@ -578,10 +576,10 @@ MayaTransformWriter::MayaTransformWriter(double iFrame,
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
-        mAttrs = AttributesWriterPtr(new AttributesWriter(iFrame, cp, trans,
-            iTimeIndex, iWriteVisibility));
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, trans,
+            iTimeIndex, iWriteVisibility, iForceStatic));
 
-        pushTransformStack(iFrame, trans);
+        pushTransformStack(trans, iForceStatic);
     }
 
 
@@ -608,7 +606,7 @@ MayaTransformWriter::~MayaTransformWriter()
 {
 }
 
-void MayaTransformWriter::write(double iFrame)
+void MayaTransformWriter::write()
 {
     size_t numSamples = mAnimChanList.size();
     if (numSamples > 0)
@@ -640,14 +638,13 @@ bool MayaTransformWriter::isAnimated() const
     return mAnimChanList.size() > 0 || !mInheritsPlug.isNull();
 }
 
-void MayaTransformWriter::pushTransformStack(double iFrame,
-    const MFnTransform & iTrans)
+void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
+    bool iForceStatic)
 {
-    bool forceStatic = (iFrame == DBL_MAX);
 
     // inspect the translate
     addTranslate(iTrans, "translate", "translateX", "translateY", "translateZ",
-        Alembic::AbcGeom::kTranslateHint, false, forceStatic, mSample,
+        Alembic::AbcGeom::kTranslateHint, false, iForceStatic, mSample,
         mAnimChanList);
 
 
@@ -655,12 +652,12 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
     addTranslate(iTrans, "rotatePivotTranslate", "rotatePivotTranslateX",
         "rotatePivotTranslateY", "rotatePivotTranslateZ",
         Alembic::AbcGeom::kRotatePivotTranslationHint, false,
-            forceStatic, mSample, mAnimChanList);
+            iForceStatic, mSample, mAnimChanList);
 
     // inspect the rotate pivot
     addTranslate(iTrans, "rotatePivot", "rotatePivotX", "rotatePivotY",
         "rotatePivotZ",  Alembic::AbcGeom::kRotatePivotPointHint,
-        false, forceStatic, mSample, mAnimChanList);
+        false, iForceStatic, mSample, mAnimChanList);
 
     // inspect rotate names
     MString rotateNames[3];
@@ -675,7 +672,7 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
         rotOrder[2]))
     {
         addRotate(iTrans, "rotate", rotateNames, rotOrder,
-            Alembic::AbcGeom::kRotateHint, forceStatic, false,
+            Alembic::AbcGeom::kRotateHint, iForceStatic, false,
             mSample, mAnimChanList);
     }
 
@@ -687,51 +684,49 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
     rotOrder[1] = 1;
     rotOrder[2] = 2;
     addRotate(iTrans, "rotateAxis", rotateNames, rotOrder,
-        Alembic::AbcGeom::kRotateOrientationHint, forceStatic, false,
+        Alembic::AbcGeom::kRotateOrientationHint, iForceStatic, false,
         mSample, mAnimChanList);
 
     // invert the rotate pivot if necessary
     addTranslate(iTrans, "rotatePivot", "rotatePivotX", "rotatePivotY",
         "rotatePivotZ", Alembic::AbcGeom::kRotatePivotPointHint,
-        true, forceStatic, mSample, mAnimChanList);
+        true, iForceStatic, mSample, mAnimChanList);
 
     // inspect the scale pivot translation
     addTranslate(iTrans, "scalePivotTranslate", "scalePivotTranslateX",
         "scalePivotTranslateY", "scalePivotTranslateZ",
-        Alembic::AbcGeom::kScalePivotTranslationHint, false, forceStatic,
+        Alembic::AbcGeom::kScalePivotTranslationHint, false, iForceStatic,
         mSample, mAnimChanList);
 
     // inspect the scale pivot point
     addTranslate(iTrans, "scalePivot", "scalePivotX", "scalePivotY",
         "scalePivotZ", Alembic::AbcGeom::kScalePivotPointHint, false,
-        forceStatic, mSample, mAnimChanList);
+        iForceStatic, mSample, mAnimChanList);
 
     // inspect the shear
-    addShear(iTrans, forceStatic, mSample, mAnimChanList);
+    addShear(iTrans, iForceStatic, mSample, mAnimChanList);
 
     // add the scale
-    addScale(iTrans, "scale", "scaleX", "scaleY", "scaleZ", forceStatic,
+    addScale(iTrans, "scale", "scaleX", "scaleY", "scaleZ", iForceStatic,
         mSample, mAnimChanList);
 
     // inverse the scale pivot point if necessary
     addTranslate(iTrans, "scalePivot", "scalePivotX", "scalePivotY",
         "scalePivotZ", Alembic::AbcGeom::kScalePivotPointHint, true,
-        forceStatic, mSample, mAnimChanList);
+        iForceStatic, mSample, mAnimChanList);
 }
 
-void MayaTransformWriter::pushTransformStack(double iFrame,
-    const MFnIkJoint & iJoint)
+void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
+    bool iForceStatic)
 {
-    bool forceStatic = (iFrame == DBL_MAX);
-
     // inspect the translate
     addTranslate(iJoint, "translate", "translateX", "translateY", "translateZ",
-        Alembic::AbcGeom::kTranslateHint, false, forceStatic,
+        Alembic::AbcGeom::kTranslateHint, false, iForceStatic,
         mSample, mAnimChanList);
 
     // inspect the inverseParent scale
     addScale(iJoint, "inverseScale", "inverseScaleX", "inverseScaleY",
-        "inverseScaleZ", forceStatic, mSample, mAnimChanList);
+        "inverseScaleZ", iForceStatic, mSample, mAnimChanList);
 
     MTransformationMatrix::RotationOrder order;
     double vals[3];
@@ -749,7 +744,7 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
     if (util::getRotOrder(order, rotOrder[0], rotOrder[1], rotOrder[2]))
     {
         addRotate(iJoint, "jointOrient", rotateNames, rotOrder,
-            Alembic::AbcGeom::kRotateHint, forceStatic, true,
+            Alembic::AbcGeom::kRotateHint, iForceStatic, true,
             mSample, mAnimChanList);
     }
 
@@ -762,7 +757,7 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
         rotOrder[2]))
     {
         addRotate(iJoint, "rotate", rotateNames, rotOrder,
-            Alembic::AbcGeom::kRotateHint, forceStatic, true,
+            Alembic::AbcGeom::kRotateHint, iForceStatic, true,
             mSample, mAnimChanList);
     }
 
@@ -775,11 +770,11 @@ void MayaTransformWriter::pushTransformStack(double iFrame,
     if (util::getRotOrder(order, rotOrder[0], rotOrder[1], rotOrder[2]))
     {
         addRotate(iJoint, "rotateAxis", rotateNames, rotOrder,
-            Alembic::AbcGeom::kRotateOrientationHint, forceStatic, true,
+            Alembic::AbcGeom::kRotateOrientationHint, iForceStatic, true,
             mSample, mAnimChanList);
     }
 
     // inspect the scale
-    addScale(iJoint, "scale", "scaleX", "scaleY", "scaleZ", forceStatic,
+    addScale(iJoint, "scale", "scaleX", "scaleY", "scaleZ", iForceStatic,
         mSample, mAnimChanList);
 }

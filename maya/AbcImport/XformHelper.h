@@ -46,8 +46,9 @@
 #include <Alembic/AbcGeom/IXform.h>
 
 MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
-    MObject & iObject, std::vector<std::string> & oSampledPropNameList,
-    std::vector<std::string> & oSampledTransOpNameList);
+    MObject & iObject, std::vector<std::string> & oSampledTransOpNameList,
+    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::size_t iFirstProp);
 
 void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
     std::vector<double> & oSampleList);
