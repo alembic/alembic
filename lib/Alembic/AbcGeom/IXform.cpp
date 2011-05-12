@@ -107,7 +107,9 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     {
         Abc::IUInt32ArrayProperty p( ptr, ".animChans" );
         if ( p.getNumSamples() > 0 )
-        { m_animChannels = (*(p.getValue( p.getNumSamples() - 1 ))); }
+        {
+            p.get( m_animChannels, p.getNumSamples() - 1 );
+        }
     }
 
     if ( m_ops && m_ops->getNumSamples() > 0 )
@@ -181,7 +183,7 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::get()" );
 
-    oSamp.clear();
+    oSamp.reset();
 
     if ( ! valid() ) { return; }
 
@@ -212,9 +214,9 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
         for ( std::size_t j = 0 ; j < op.getNumChannels() ; ++j )
         {
             const std::size_t animIdx = curIdx + j;
-            for ( std::size_t k = 0 ; k < m_animChannels.size() ; ++k )
+            for ( std::size_t k = 0 ; k < m_animChannels->size() ; ++k )
             {
-                if ( static_cast<std::size_t>( m_animChannels[k] ) == animIdx )
+                if ( static_cast<std::size_t>( (*m_animChannels)[k] ) == animIdx )
                 {
                     op.m_animChannels.insert( j );
                 }

@@ -189,7 +189,10 @@ void OXformSchema::set( XformSample &ioSamp )
 
     for ( Alembic::Util::uint32_t i = 0 ; i < m_staticChans.size() ; ++i )
     {
-        if ( ! m_staticChans[i] ) { animchans.push_back( i ); }
+        if ( ! m_staticChans[i] )
+        {
+            animchans.push_back( i );
+        }
     }
 
     this->setChannelValues( chanvals );

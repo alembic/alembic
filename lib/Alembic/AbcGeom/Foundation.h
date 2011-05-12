@@ -104,6 +104,7 @@ template <>
 inline void SetPropUsePrevIfNull<Abc::OStringProperty, std::string>(
     Abc::OStringProperty iProp, std::string iSamp )
 {
+    if ( ! iProp ) { return; }
     if ( iSamp != "" ) { iProp.set( iSamp ); }
     else { iProp.setFromPrevious(); }
 }
@@ -112,6 +113,7 @@ template <>
 inline void SetPropUsePrevIfNull<Abc::OWstringProperty, Alembic::Util::wstring>(
     Abc::OWstringProperty iProp, Alembic::Util::wstring iSamp )
 {
+    if ( ! iProp ) { return; }
     if ( iSamp != L"" ) { iProp.set( iSamp ); }
     else { iProp.setFromPrevious(); }
 }
@@ -120,6 +122,7 @@ template <>
 inline void SetPropUsePrevIfNull<Abc::OBox3dProperty, Abc::Box3d>(
     Abc::OBox3dProperty iProp, Abc::Box3d iSamp )
 {
+    if ( ! iProp ) { return; }
     if ( iSamp.hasVolume() ) { iProp.set( iSamp ); }
     else { iProp.setFromPrevious(); }
 }

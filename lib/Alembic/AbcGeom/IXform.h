@@ -171,7 +171,7 @@ protected:
 
     AbcA::BasePropertyReaderPtr m_vals;
 
-    Abc::UInt32ArraySample m_animChannels;
+    Abc::UInt32ArraySamplePtr m_animChannels;
 
     Abc::IBoolProperty m_inherits;
 

@@ -219,7 +219,7 @@ private:
 
     std::vector<double> m_channels;
 
-    std::set<std::size_t> m_animChannels;
+    std::set<Alembic::Util::uint32_t> m_animChannels;
 
 private:
     //! The IXform can tell the op if its channels are animated

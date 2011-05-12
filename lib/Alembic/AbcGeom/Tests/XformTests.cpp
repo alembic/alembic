@@ -315,7 +315,7 @@ void someOpsXform()
 
         a.getSchema().set( asamp );
 
-        for (size_t i = 1; i < 5; ++i)
+        for (size_t i = 1; i < 5 ; ++i)
         {
             asamp.addOp( scaleop, V3d( 2 * ( i + 1 ),
                                        1.0, 2.0 ) );
@@ -428,7 +428,7 @@ void someOpsXform()
 
         TESTING_ASSERT( asamp[5].getTranslate() == V3d( 0.0, 0.0, 0.0 ) );
 
-        for ( index_t i = 1; i < 5; ++i )
+        for ( index_t i = 1; i < 5 ; ++i )
         {
             a.getSchema().get( asamp, ISampleSelector( i ) );
 
