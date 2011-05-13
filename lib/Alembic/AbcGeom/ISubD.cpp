@@ -235,5 +235,85 @@ void ISubDSchema::init( const Abc::Argument &iArg0,
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
+//-*****************************************************************************
+std::vector <std::string>
+ISubDSchema::getFaceSetNames ()
+{
+    std::vector <std::string> faceSetNames;
+    
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::getFaceSetNames()" );
+
+    // iterate over childHeaders, and if header matches FaceSet add to our vec
+    IObject _thisObject = this->getParent().getObject();
+
+    if (!m_faceSetsLoaded)
+    {
+        size_t numChildren = _thisObject.getNumChildren();
+        for ( size_t childIndex = 0 ; childIndex < numChildren; childIndex++ )
+        {
+            ObjectHeader const & header = _thisObject.getChildHeader (childIndex);
+            if ( IFaceSet::matches( header ) )
+            {
+                // start out with an empty (invalid IFaceSet)
+                // accessor later on will create real IFaceSet object.
+                m_faceSets [header.getName ()] = IFaceSet ();
+            }
+        }
+        m_faceSetsLoaded = true;
+    }
+
+    for (std::map<std::string, IFaceSet>::const_iterator faceSetIter = 
+        m_faceSets.begin(); faceSetIter != m_faceSets.end(); ++faceSetIter)
+    {
+        faceSetNames.push_back( faceSetIter->first );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    return faceSetNames;
+}
+
+//-*****************************************************************************
+bool 
+ISubDSchema::hasFaceSet (std::string faceSetName)
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::hasFaceSet (faceSetName)" );
+
+    if (!m_faceSetsLoaded)
+    {
+        getFaceSetNames ();
+    }
+
+    return (m_faceSets.find (faceSetName) != m_faceSets.end ());
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return false;
+}
+
+//-*****************************************************************************
+const IFaceSet &
+ISubDSchema::getFaceSet (std::string faceSetName)
+{
+    
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::getFaceSet()" );
+
+    ABCA_ASSERT( this->hasFaceSet (faceSetName),
+        "The requested FaceSet name can't be found in SubD.");
+
+    if (!m_faceSetsLoaded)
+    {
+        this->getFaceSetNames ();
+    }
+    if (!m_faceSets [faceSetName])
+    {
+        // We haven't yet loaded the faceSet, so create/load it
+        m_faceSets [faceSetName] = IFaceSet ( this->getParent().getObject(), faceSetName );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return m_faceSets [faceSetName];
+}
+
 } // End namespace AbcGeom
 } // End namespace Alembic

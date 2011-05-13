@@ -120,5 +120,90 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
+//-*****************************************************************************
+std::vector<std::string> IPolyMeshSchema::getFaceSetNames()
+{
+    std::vector <std::string> faceSetNames;
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::getFaceSetNames()" );
+
+    // iterate over childHeaders, and if header matches FaceSet add to our vec
+    IObject _thisObject = this->getParent().getObject();
+
+    if (!m_faceSetsLoaded)
+    {
+        size_t numChildren = _thisObject.getNumChildren();
+        for ( size_t childIndex = 0 ; childIndex < numChildren; childIndex++ )
+        {
+            ObjectHeader const & header = _thisObject.getChildHeader (childIndex);
+            if ( IFaceSet::matches( header ) )
+            {
+                // start out with an empty (invalid IFaceSet)
+                // accessor later on will create real IFaceSet object.
+                m_faceSets [header.getName()] = IFaceSet ();
+            }
+        }
+        m_faceSetsLoaded = true;
+    }
+
+    for (std::map<std::string, IFaceSet>::const_iterator faceSetIter =
+        m_faceSets.begin(); faceSetIter != m_faceSets.end(); ++faceSetIter)
+    {
+        faceSetNames.push_back( faceSetIter->first );
+    }
+
+    return faceSetNames;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return faceSetNames;
+}
+
+//-*****************************************************************************
+bool IPolyMeshSchema::hasFaceSet( const std::string &iFaceSetName )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::hasFaceSet()" );
+
+    if ( !m_faceSetsLoaded )
+    {
+        getFaceSetNames();
+    }
+
+    return ( m_faceSets.find(iFaceSetName) != m_faceSets.end() );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return false;
+
+}
+
+//-*****************************************************************************
+const IFaceSet &IPolyMeshSchema::getFaceSet( const std::string &iFaceSetName )
+{
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::getFaceSet()" );
+
+    ABCA_ASSERT( this->hasFaceSet (iFaceSetName),
+        "The requested FaceSet name can't be found in PolyMesh.");
+
+    if (!m_faceSetsLoaded)
+    {
+        this->getFaceSetNames ();
+    }
+    if (!m_faceSets [iFaceSetName])
+    {
+        // We haven't yet loaded the faceSet, so create/load it
+        m_faceSets [iFaceSetName] = IFaceSet ( this->getParent().getObject(), iFaceSetName );
+    }
+
+    return m_faceSets[iFaceSetName];
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    static IFaceSet empty;
+    return empty;
+}
+
+
 } // End namespace AbcGeom
 } // End namespace Alembic

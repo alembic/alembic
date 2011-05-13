@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,19 +34,18 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_ISubD_h_
-#define _Alembic_AbcGeom_ISubD_h_
+#ifndef _Alembic_AbcGeom_IFaceSet_h_
+#define _Alembic_AbcGeom_IFaceSet_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
-#include <Alembic/AbcGeom/IFaceSet.h>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-class ISubDSchema : public Abc::ISchema<SubDSchemaInfo>
+class IFaceSetSchema : public Abc::ISchema<FaceSetSchemaInfo>
 {
 public:
     //-*************************************************************************
@@ -61,74 +60,24 @@ public:
         Sample() {}
 
         // main stuff
-        Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
-        Abc::Int32ArraySamplePtr getFaceIndices() const { return m_faceIndices; }
-        Abc::Int32ArraySamplePtr getFaceCounts() const { return m_faceCounts; }
-
-        // misc subd stuff
-        int32_t getFaceVaryingInterpolateBoundary() const
-        { return m_faceVaryingInterpolateBoundary; }
-
-        int32_t getFaceVaryingPropagateCorners() const
-        { return m_faceVaryingPropagateCorners; }
-
-        int32_t getInterpolateBoundary() const
-        { return m_interpolateBoundary; }
-
-        // creases
-        Abc::Int32ArraySamplePtr getCreaseIndices() const
-        { return m_creaseIndices; }
-
-        Abc::Int32ArraySamplePtr getCreaseLengths() const
-        { return m_creaseLengths; }
-
-        Abc::FloatArraySamplePtr getCreaseSharpnesses() const
-        { return m_creaseSharpnesses; }
-
-        // corners
-        Abc::Int32ArraySamplePtr getCornerIndices() const
-        { return m_cornerIndices; }
-
-        Abc::FloatArraySamplePtr getCornerSharpnesses() const
-        { return m_cornerSharpnesses; }
-
-        // Holes
-        Abc::Int32ArraySamplePtr getHoles() const { return m_holes; }
-
-        // subdivision scheme
-        std::string getSubdivisionScheme() const
-        { return m_subdScheme; }
+        Abc::Int32ArraySamplePtr getFaces() const { return m_faces; }
+        bool isVisible () const { return m_visible; }
+        bool isExclusive() const { return m_isExclusive; }
 
         // bounds
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
 
-
         bool valid() const
         {
-            return m_positions && m_faceIndices && m_faceCounts;
+            return m_faces;
         }
 
         void reset()
         {
-            m_positions.reset();
-            m_faceIndices.reset();
-            m_faceCounts.reset();
-
-            m_faceVaryingInterpolateBoundary = 0;
-            m_faceVaryingPropagateCorners = 0;
-            m_interpolateBoundary = 0;
-
-            m_creaseIndices.reset();
-            m_creaseLengths.reset();
-            m_creaseSharpnesses.reset();
-
-            m_cornerIndices.reset();
-            m_cornerSharpnesses.reset();
-
-            m_holes.reset();
-
-            m_subdScheme = "catmull-clark";
+            m_faces.reset();
+            m_visible = true;
+            m_isExclusive = false;
 
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
@@ -137,54 +86,36 @@ public:
         ALEMBIC_OPERATOR_BOOL( valid() );
 
     protected:
-        friend class ISubDSchema;
+        friend class IFaceSetSchema;
 
-        Abc::V3fArraySamplePtr m_positions;
-        Abc::Int32ArraySamplePtr m_faceIndices;
-        Abc::Int32ArraySamplePtr m_faceCounts;
+        Abc::Int32ArraySamplePtr    m_faces;
+        bool                        m_visible;
+        bool m_isExclusive;
 
-        int32_t m_faceVaryingInterpolateBoundary;
-        int32_t m_faceVaryingPropagateCorners;
-        int32_t m_interpolateBoundary;
-
-        // Creases
-        Abc::Int32ArraySamplePtr    m_creaseIndices;
-        Abc::Int32ArraySamplePtr    m_creaseLengths;
-        Abc::FloatArraySamplePtr  m_creaseSharpnesses;
-
-        // Corners
-        Abc::Int32ArraySamplePtr    m_cornerIndices;
-        Abc::FloatArraySamplePtr  m_cornerSharpnesses;
-
-        // Holes
-        Abc::Int32ArraySamplePtr    m_holes;
-
-        // subdivision scheme
-        std::string m_subdScheme;
 
         // bounds
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
 
-    }; // end ISubDSchema::Sample
+    }; // end IFaceSetSchema::Sample
 
     //-*************************************************************************
-    // SUBD SCHEMA
+    // FACESET SCHEMA
     //-*************************************************************************
 public:
     //! By convention we always define this_type in AbcGeom classes.
     //! Used by unspecified-bool-type conversion below
-    typedef ISubDSchema this_type;
+    typedef IFaceSetSchema this_type;
 
     //-*************************************************************************
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
     //-*************************************************************************
 
-    //! The default constructor creates an empty ISubDSchema
+    //! The default constructor creates an empty IFaceSetSchema
     //! ...
-    ISubDSchema() {}
+    IFaceSetSchema() {}
 
-    //! This templated, primary constructor creates a new subd reader.
+    //! This templated, primary constructor creates a new faceset reader.
     //! The first argument is any Abc (or AbcCoreAbstract) object
     //! which can intrusively be converted to an CompoundPropertyWriterPtr
     //! to use as a parent, from which the error handler policy for
@@ -192,12 +123,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy and to specify
     //! schema interpretation matching.
     template <class CPROP_PTR>
-    ISubDSchema( CPROP_PTR iParentObject,
+    IFaceSetSchema( CPROP_PTR iParentObject,
                  const std::string &iName,
 
                  const Abc::Argument &iArg0 = Abc::Argument(),
                  const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<SubDSchemaInfo>( iParentObject, iName,
+      : Abc::ISchema<FaceSetSchemaInfo>( iParentObject, iName,
                                       iArg0, iArg1 )
     {
         init(  iArg0, iArg1 );
@@ -206,10 +137,10 @@ public:
     //! Same constructor as above, but use the default schema name, ie,
     //! ".geom".
     template <class CPROP_PTR>
-    explicit ISubDSchema( CPROP_PTR iParentObject,
+    explicit IFaceSetSchema( CPROP_PTR iParentObject,
                           const Abc::Argument &iArg0 = Abc::Argument(),
                           const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<SubDSchemaInfo>( iParentObject,
+      : Abc::ISchema<FaceSetSchemaInfo>( iParentObject,
                                       iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -217,18 +148,18 @@ public:
 
     //! wrap an existing schema object
     template <class CPROP_PTR>
-    ISubDSchema( CPROP_PTR iThis,
+    IFaceSetSchema( CPROP_PTR iThis,
                  Abc::WrapExistingFlag iFlag,
 
                  const Abc::Argument &iArg0 = Abc::Argument(),
                  const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<SubDSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : Abc::ISchema<FaceSetSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
-    //! Copy constructor.
-    ISubDSchema(const ISubDSchema& iCopy)
+    //! Copy constructor. (explicit copy ctor for msvc bug workaround)
+    IFaceSetSchema(const IFaceSetSchema& iCopy)
     {
         *this = iCopy;
     }
@@ -240,10 +171,9 @@ public:
     //-*************************************************************************
 
 
-    MeshTopologyVariance getTopologyVariance();
-
     //! if isConstant() is true, the mesh contains no time-varying values
-    bool isConstant() { return getTopologyVariance() == kConstantTopology; }
+    bool isConstant() { return (m_facesProperty.isConstant ()
+        && m_visibilityProperty.isConstant ()); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -256,8 +186,8 @@ public:
     //! Return the time sampling
     AbcA::TimeSamplingPtr getTimeSampling()
     {
-        if ( m_positions.valid() )
-            return m_positions.getTimeSampling();
+        if ( m_facesProperty.valid() )
+            return m_facesProperty.getTimeSampling();
         return getObject().getArchive().getTimeSampling(0);
     }
 
@@ -271,13 +201,6 @@ public:
         return smp;
     }
 
-    Abc::IV3fArrayProperty getPositions()
-    {
-        return m_positions;
-    }
-
-    IV2fGeomParam &getUVs() { return m_uvs; }
-
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
     //-*************************************************************************
@@ -290,101 +213,44 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_faceIndices.reset();
-        m_faceCounts.reset();
-
-        m_faceVaryingInterpolateBoundary.reset();
-        m_faceVaryingPropagateCorners.reset();
-        m_interpolateBoundary.reset();
-
-        m_creaseIndices.reset();
-        m_creaseLengths.reset();
-        m_creaseSharpnesses.reset();
-
-        m_cornerIndices.reset();
-        m_cornerSharpnesses.reset();
-
-        m_holes.reset();
-
-        m_subdScheme.reset();
-
-        m_uvs.reset();
+        m_facesProperty.reset();
 
         m_arbGeomParams.reset();
 
-        Abc::ISchema<SubDSchemaInfo>::reset();
-        m_faceSetsLoaded = false;
+        Abc::ISchema<FaceSetSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::ISchema<SubDSchemaInfo>::valid() &&
-                 m_positions.valid() &&
-                 m_faceIndices.valid() &&
-                 m_faceCounts.valid() );
+        return ( Abc::ISchema<FaceSetSchemaInfo>::valid() &&
+                 m_facesProperty.valid() );
     }
-
-    // FaceSet relate
-    //! Retruns a (possibly empty) vector of the names of FaceSets
-    //! for this SubD.
-    std::vector <std::string>   getFaceSetNames ();
-    const IFaceSet & getFaceSet (std::string iFaceSetName);
-    bool hasFaceSet (std::string iFaceSetName);
 
     //! unspecified-bool-type operator overload.
     //! ...
-    ALEMBIC_OVERRIDE_OPERATOR_BOOL( ISubDSchema::valid() );
+    ALEMBIC_OVERRIDE_OPERATOR_BOOL( IFaceSetSchema::valid() );
 
 protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
-    Abc::IV3fArrayProperty m_positions;
-    Abc::IInt32ArrayProperty m_faceIndices;
-    Abc::IInt32ArrayProperty m_faceCounts;
-
-    // misc
-    Abc::IInt32Property m_faceVaryingInterpolateBoundary;
-    Abc::IInt32Property m_faceVaryingPropagateCorners;
-    Abc::IInt32Property m_interpolateBoundary;
-
-    // Creases
-    Abc::IInt32ArrayProperty    m_creaseIndices;
-    Abc::IInt32ArrayProperty    m_creaseLengths;
-    Abc::IFloatArrayProperty  m_creaseSharpnesses;
-
-    // Corners
-    Abc::IInt32ArrayProperty    m_cornerIndices;
-    Abc::IFloatArrayProperty  m_cornerSharpnesses;
-
-    // Holes
-    Abc::IInt32ArrayProperty    m_holes;
-
-    // subdivision scheme
-    Abc::IStringProperty m_subdScheme;
+    Abc::IBoolProperty          m_visibilityProperty;
+    Abc::IBoolProperty m_exclusivityProp;
+    Abc::IInt32ArrayProperty    m_facesProperty;
 
     // bounds
-    Abc::IBox3dProperty m_selfBounds;
-    Abc::IBox3dProperty m_childBounds;
-
-    // UVs
-    IV2fGeomParam m_uvs;
+    Abc::IBox3dProperty m_selfBoundsProperty;
+    Abc::IBox3dProperty m_childBoundsProperty;
 
     // random geometry parameters
     Abc::ICompoundProperty m_arbGeomParams;
-
-    // FaceSets, this starts as empty until client
-    // code attempts to access facesets.
-    bool                              m_faceSetsLoaded;
-    std::map <std::string, IFaceSet>  m_faceSets;
 };
 
 //-*****************************************************************************
 // SCHEMA OBJECT
 //-*****************************************************************************
-typedef Abc::ISchemaObject<ISubDSchema> ISubD;
+typedef Abc::ISchemaObject<IFaceSetSchema> IFaceSet;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

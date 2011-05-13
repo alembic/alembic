@@ -37,8 +37,10 @@
 #ifndef _Alembic_AbcGeom_OSubD_h_
 #define _Alembic_AbcGeom_OSubD_h_
 
+#include <map>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
@@ -236,6 +238,8 @@ public:
         }
 
     protected:
+        friend class OSubDSchema;
+
         Abc::V3fArraySample m_positions;
         Abc::Int32ArraySample m_faceIndices;
         Abc::Int32ArraySample m_faceCounts;
@@ -443,6 +447,15 @@ public:
                  m_faceCounts.valid() );
     }
 
+    // FaceSet stuff
+    OFaceSet & createFaceSet (std::string iFaceSetName);
+    //! Retruns a (possibly empty) vector of the names of FaceSets
+    //! present in this SubD.
+    std::vector <std::string>   getFaceSetNames ();
+    const OFaceSet & getFaceSet (std::string iFaceSetName);
+    bool hasFaceSet (std::string iFaceSetName);
+
+
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OSubDSchema::valid() );
@@ -489,6 +502,10 @@ private:
     void initCorners(uint32_t iNumSamples);
     void initHoles(uint32_t iNumSamples);
 
+    // FaceSets created on this SubD
+    std::map <std::string, OFaceSet>  m_faceSets;
+
+    friend class OFaceSetSchema;;
 };
 
 //-*****************************************************************************

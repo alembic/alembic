@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/IFaceSet.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
 
 namespace Alembic {
@@ -264,6 +265,13 @@ public:
                  m_counts.valid() );
     }
 
+    // FaceSet relate
+    //! Retruns a (possibly empty) vector of the names of FaceSets
+    //! for this SubD.
+    std::vector <std::string> getFaceSetNames();
+    const IFaceSet &getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
+
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( IPolyMeshSchema::valid() );
@@ -283,6 +291,11 @@ protected:
     Abc::IBox3dProperty m_childBounds;
 
     Abc::ICompoundProperty m_arbGeomParams;
+
+    // FaceSets, this starts as empty until client
+    // code attempts to access facesets.
+    bool m_faceSetsLoaded;
+    std::map<std::string, IFaceSet> m_faceSets;
 };
 
 //-*****************************************************************************
