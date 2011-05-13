@@ -37,8 +37,10 @@
 #ifndef _Alembic_AbcGeom_OSubD_h_
 #define _Alembic_AbcGeom_OSubD_h_
 
+#include <map>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
@@ -236,6 +238,8 @@ public:
         }
 
     protected:
+        friend class OSubDSchema;
+
         Abc::V3fArraySample m_positions;
         Abc::Int32ArraySample m_faceIndices;
         Abc::Int32ArraySample m_faceCounts;
@@ -348,17 +352,6 @@ public:
         init( tsIndex );
     }
 
-    template <class CPROP_PTR>
-    OSubDSchema( CPROP_PTR iThis,
-                 Abc::WrapExistingFlag iFlag,
-                 const Abc::Argument &iArg0 = Abc::Argument(),
-                 const Abc::Argument &iArg1 = Abc::Argument(),
-                 const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<SubDSchemaInfo>( iThis, iFlag,
-                                      iArg0, iArg1, iArg2 )
-    {}
-
-
     //! Copy constructor.
     OSubDSchema(const OSubDSchema& iCopy)
     {
@@ -429,6 +422,7 @@ public:
         m_uvs.reset();
 
         m_arbGeomParams.reset();
+        m_faceSets.clear ();
 
         Abc::OSchema<SubDSchemaInfo>::reset();
     }
@@ -442,6 +436,14 @@ public:
                  m_faceIndices.valid() &&
                  m_faceCounts.valid() );
     }
+
+    // FaceSet stuff
+    OFaceSet & createFaceSet (std::string iFaceSetName);
+    //! Appends the names of any FaceSets for this SubD.
+    void getFaceSetNames (std::vector <std::string> & oFaceSetNames); 
+    const OFaceSet & getFaceSet (std::string iFaceSetName);
+    bool hasFaceSet (std::string iFaceSetName);
+
 
     //! unspecified-bool-type operator overload.
     //! ...
@@ -489,6 +491,10 @@ private:
     void initCorners(uint32_t iNumSamples);
     void initHoles(uint32_t iNumSamples);
 
+    // FaceSets created on this SubD
+    std::map <std::string, OFaceSet>  m_faceSets;
+
+    friend class OFaceSetSchema;;
 };
 
 //-*****************************************************************************

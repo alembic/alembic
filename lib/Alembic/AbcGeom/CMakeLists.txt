@@ -62,6 +62,9 @@ SET( CXX_FILES
 
   OPoints.cpp
   IPoints.cpp
+
+  OFaceSet.cpp
+  IFaceSet.cpp
 )
 
 SET( H_FILES
@@ -98,6 +101,8 @@ SET( H_FILES
   OPoints.h
   IPoints.h
 
+  OFaceSet.h
+  IFaceSet.h
   SchemaInfoDeclarations.h
 )
 

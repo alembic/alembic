@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -36,6 +36,7 @@
 
 #include <Alembic/AbcGeom/OSubD.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
+#include <Alembic/AbcGeom/OFaceSet.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -61,7 +62,7 @@ void OSubDSchema::set( const Sample &iSamp )
     // do we need to create child bounds?
     if ( iSamp.getChildBounds().hasVolume() && !m_childBounds )
     {
-        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds",
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
             m_positions.getTimeSampling() );
 
         Abc::Box3d emptyBox;
@@ -412,7 +413,7 @@ Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( *this,
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
                                                   ".arbGeomParams" );
     }
 
@@ -422,6 +423,26 @@ Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
 
     Abc::OCompoundProperty ret;
     return ret;
+}
+
+//-*****************************************************************************
+OFaceSet &
+OSubDSchema::createFaceSet ( std::string iFaceSetName )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::createFaceSet ()" );
+
+    ABCA_ASSERT( m_faceSets.find (iFaceSetName) == m_faceSets.end (),
+                 "faceSet has already been created in SubD." );
+
+    m_faceSets [iFaceSetName] = OFaceSet (this->getParent ().getObject (), 
+        iFaceSetName);
+
+    return m_faceSets [iFaceSetName];
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    static OFaceSet empty;
+    return empty;
 }
 
 //-*****************************************************************************
@@ -532,6 +553,42 @@ void OSubDSchema::initHoles(uint32_t iNumSamples)
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+void OSubDSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames)
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getFaceSetNames()" );
+
+    for (std::map<std::string, OFaceSet>::const_iterator faceSetIter = 
+        m_faceSets.begin(); faceSetIter != m_faceSets.end(); ++faceSetIter)
+    {
+        oFaceSetNames.push_back( faceSetIter->first );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+bool
+OSubDSchema::hasFaceSet (std::string iFaceSetName)
+{
+    return (m_faceSets.find (iFaceSetName) != m_faceSets.end ());
+}
+
+//-*****************************************************************************
+const OFaceSet &
+OSubDSchema::getFaceSet (std::string iFaceSetName)
+{
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getFaceSet()" );
+
+    return m_faceSets [iFaceSetName];
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    static OFaceSet empty;
+    return empty;
 }
 
 } // End namespace AbcGeom

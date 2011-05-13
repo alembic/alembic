@@ -48,7 +48,7 @@ void OPolyMeshSchema::set( const Sample &iSamp )
     // do we need to create child bounds?
     if ( iSamp.getChildBounds().hasVolume() && !m_childBounds )
     {
-        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds",
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
                                              m_positions.getTimeSampling() );
 
         Abc::Box3d emptyBox;
@@ -56,6 +56,7 @@ void OPolyMeshSchema::set( const Sample &iSamp )
 
         size_t numSamples = m_positions.getNumSamples();
 
+        // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
             m_childBounds.set( emptyBox );
@@ -254,7 +255,7 @@ Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
 
     if ( ! m_arbGeomParams )
     {
-        m_arbGeomParams = Abc::OCompoundProperty( *this,
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
                                                   ".arbGeomParams" );
     }
 
@@ -264,6 +265,66 @@ Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
 
     Abc::OCompoundProperty ret;
     return ret;
+}
+
+//-*****************************************************************************
+bool
+OPolyMeshSchema::hasFaceSet (std::string iFaceSetName)
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::hasFaceSet ()" );
+
+    return (m_faceSets.find (iFaceSetName) != m_faceSets.end ());
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+    return false;
+}
+
+
+//-*****************************************************************************
+OFaceSet &
+OPolyMeshSchema::createFaceSet ( std::string iFaceSetName )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::createFaceSet ()" );
+
+    ABCA_ASSERT( m_faceSets.find (iFaceSetName) == m_faceSets.end (),
+                 "faceSet has already been created in polymesh." );
+
+    m_faceSets[iFaceSetName] = OFaceSet( this->getParent().getObject(),
+                                          iFaceSetName );
+
+    return m_faceSets[iFaceSetName];
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    static OFaceSet emptyFaceSet;
+    return emptyFaceSet;
+}
+
+//-*****************************************************************************
+void OPolyMeshSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames)
+{
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::getFaceSetNames()" );
+    for (std::map<std::string, OFaceSet>::const_iterator faceSetIter =
+        m_faceSets.begin(); faceSetIter != m_faceSets.end(); ++faceSetIter)
+    {
+        oFaceSetNames.push_back( faceSetIter->first );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+const OFaceSet &
+OPolyMeshSchema::getFaceSet (std::string iFaceSetName)
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::getFaceSet()" );
+
+    return m_faceSets[iFaceSetName];
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    static OFaceSet empty;
+    return empty;
 }
 
 } // End namespace AbcGeom

@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,36 +34,24 @@
 //
 //-*****************************************************************************
 
-#include <boost/python/detail/wrap_python.hpp>
+#ifndef _Alembic_AbcGeom_Exclusivity_h_
+#define _Alembic_AbcGeom_Exclusivity_h_
 
-#include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
-#include <string>
+namespace Alembic {
+namespace AbcGeom {
 
-#include <boost/python.hpp>
-
-using namespace boost::python;
-
-namespace Abc = Alembic::Abc;
-
-//-*****************************************************************************
-static boost::shared_ptr<Abc::IArchive> mkIArchive( const std::string &iName )
+//! \brief Hint to indicate face membership is mutally exclusive.
+//! Some structures that group faces only allow a face to belong
+//! in one FaceSet, while other times a face is allowed to belong
+//! to any number of FaceSets. By default FaceSets aren't exclusive.
+enum FaceSetExclusivity 
 {
-    return boost::shared_ptr<Abc::IArchive>(
-        new Abc::IArchive( ::Alembic::AbcCoreHDF5::ReadArchive(), iName ) );
-}
+    kFaceSetNonExclusive,
+    kFaceSetExclusive,
+}; // end OFaceSetSchema::FaceExlusivity
 
 
-//-*****************************************************************************
-void register_iarchive()
-{
-    class_< Abc::IArchive, boost::shared_ptr<Abc::IArchive> >( "IArchive" )
-        .def( "__init__", make_constructor( mkIArchive ), "IArchive ctor\nFirst argument is the pathname to the .abc file to open."  )
-        .def( "getName", &Abc::IArchive::getName )
-        .def( "getTop", &Abc::IArchive::getTop,
-              with_custodian_and_ward_postcall<0,1>() )
-        .def( "valid", &Abc::IArchive::valid )
-        .def( "__nonzero__", &Abc::IArchive::valid )
-        .def( "__str__", &Abc::IArchive::getName )
-        ;
-}
+} // End namespace AbcGeom
+} // End namespace Alembic
+
+#endif

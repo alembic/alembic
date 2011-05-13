@@ -67,6 +67,14 @@ ADD_EXECUTABLE( AbcGeom_SubDTest
 TARGET_LINK_LIBRARIES( AbcGeom_SubDTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_SubDTEST AbcGeom_SubDTest )
 
+#-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_SubDFaceSetTest
+		MeshData.h
+		MeshData.cpp
+		SubDFaceSetTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_SubDFaceSetTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_SubDFaceSetTEST AbcGeom_SubDFaceSetTest )
+
 ##-*****************************************************************************
 ADD_EXECUTABLE( AbcGeom_SchemaMatchingTest
 		SchemaMatchingTest.cpp )

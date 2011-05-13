@@ -110,7 +110,6 @@ void register_coreabstracttypes()
 
     // TimeSamplingType
     class_<AbcA::TimeSamplingType>( "TimeSamplingType" )
-        .def( "isIdentity", &AbcA::TimeSamplingType::isIdentity )
         .def( "isUniform", &AbcA::TimeSamplingType::isUniform )
         .def( "isCyclic", &AbcA::TimeSamplingType::isCyclic )
         .def( "isAcyclic", &AbcA::TimeSamplingType::isAcyclic )

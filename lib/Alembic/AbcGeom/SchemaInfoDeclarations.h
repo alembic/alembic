@@ -95,6 +95,15 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_SubD_v1",
 #define ALEMBIC_ABCGEOM_SUBD_SCHEMA (SubDSchemaInfo::title())
 
 //-*****************************************************************************
+// SubD and PolyMesh FaceSet
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_FaceSet_v1",
+                                     ".faceset",
+                                     FaceSetSchemaInfo );
+
+#define ALEMBIC_ABCGEOM_PARITION_SCHEMA (FaceSetSchemaInfo::title())
+
+
+//-*****************************************************************************
 // Points
 ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Points_v1",
                                      ".geom",
