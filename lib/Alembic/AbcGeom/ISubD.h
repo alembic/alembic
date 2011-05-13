@@ -257,8 +257,13 @@ public:
     AbcA::TimeSamplingPtr getTimeSampling()
     {
         if ( m_positions.valid() )
+        {
             return m_positions.getTimeSampling();
-        return getObject().getArchive().getTimeSampling(0);
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
     }
 
     void get( Sample &iSamp,
@@ -313,8 +318,10 @@ public:
 
         m_arbGeomParams.reset();
 
-        Abc::ISchema<SubDSchemaInfo>::reset();
         m_faceSetsLoaded = false;
+        m_faceSets.clear();
+
+        Abc::ISchema<SubDSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
@@ -329,9 +336,9 @@ public:
 
     // FaceSet related
     //! Appends the names of any FaceSets for this SubD.
-    void getFaceSetNames (std::vector <std::string> & oFaceSetNames); 
-    const IFaceSet & getFaceSet (std::string iFaceSetName);
-    bool hasFaceSet (std::string iFaceSetName);
+    void getFaceSetNames( std::vector <std::string> &oFaceSetNames );
+    const IFaceSet & getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
 
     //! unspecified-bool-type operator overload.
     //! ...

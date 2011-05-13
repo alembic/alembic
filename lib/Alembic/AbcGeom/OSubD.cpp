@@ -427,14 +427,14 @@ Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
 
 //-*****************************************************************************
 OFaceSet &
-OSubDSchema::createFaceSet ( std::string iFaceSetName )
+OSubDSchema::createFaceSet( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::createFaceSet ()" );
 
     ABCA_ASSERT( m_faceSets.find (iFaceSetName) == m_faceSets.end (),
                  "faceSet has already been created in SubD." );
 
-    m_faceSets [iFaceSetName] = OFaceSet (this->getParent ().getObject (), 
+    m_faceSets [iFaceSetName] = OFaceSet (this->getParent ().getObject (),
         iFaceSetName);
 
     return m_faceSets [iFaceSetName];
@@ -560,7 +560,7 @@ void OSubDSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames)
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getFaceSetNames()" );
 
-    for (std::map<std::string, OFaceSet>::const_iterator faceSetIter = 
+    for (std::map<std::string, OFaceSet>::const_iterator faceSetIter =
         m_faceSets.begin(); faceSetIter != m_faceSets.end(); ++faceSetIter)
     {
         oFaceSetNames.push_back( faceSetIter->first );
@@ -571,14 +571,14 @@ void OSubDSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames)
 
 //-*****************************************************************************
 bool
-OSubDSchema::hasFaceSet (std::string iFaceSetName)
+OSubDSchema::hasFaceSet( const std::string &iFaceSetName )
 {
     return (m_faceSets.find (iFaceSetName) != m_faceSets.end ());
 }
 
 //-*****************************************************************************
 const OFaceSet &
-OSubDSchema::getFaceSet (std::string iFaceSetName)
+OSubDSchema::getFaceSet( const std::string &iFaceSetName )
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getFaceSet()" );
@@ -587,7 +587,7 @@ OSubDSchema::getFaceSet (std::string iFaceSetName)
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static OFaceSet empty;
+    static const OFaceSet empty;
     return empty;
 }
 

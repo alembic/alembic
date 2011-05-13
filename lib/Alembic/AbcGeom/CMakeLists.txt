@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2010, Industrial Light & Magic,
+## Copyright (c) 2009-2011, Industrial Light & Magic,
 ##   a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
@@ -46,25 +46,25 @@ SET( CXX_FILES
   ICurves.cpp
   OCurves.cpp
 
-  OSubD.cpp
-  ISubD.cpp
+  OFaceSet.cpp
+  IFaceSet.cpp
 
   OGeomParam.cpp
   IGeomParam.cpp
 
+  OPoints.cpp
+  IPoints.cpp
+
   OPolyMesh.cpp
   IPolyMesh.cpp
+
+  OSubD.cpp
+  ISubD.cpp
 
   XformOp.cpp
   XformSample.cpp
   IXform.cpp
   OXform.cpp
-
-  OPoints.cpp
-  IPoints.cpp
-
-  OFaceSet.cpp
-  IFaceSet.cpp
 )
 
 SET( H_FILES
@@ -75,8 +75,7 @@ SET( H_FILES
 
   GeometryScope.h
 
-  OGeomParam.h
-  IGeomParam.h
+  SchemaInfoDeclarations.h
 
   FilmBackXformOp.h
   CameraSample.h
@@ -87,23 +86,25 @@ SET( H_FILES
   ICurves.h
   OCurves.h
 
-  OSubD.h
-  ISubD.h
+  OFaceSet.h
+  IFaceSet.h
+
+  OGeomParam.h
+  IGeomParam.h
+
+  OPoints.h
+  IPoints.h
 
   OPolyMesh.h
   IPolyMesh.h
+
+  OSubD.h
+  ISubD.h
 
   XformOp.h
   XformSample.h
   IXform.h
   OXform.h
-
-  OPoints.h
-  IPoints.h
-
-  OFaceSet.h
-  IFaceSet.h
-  SchemaInfoDeclarations.h
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )

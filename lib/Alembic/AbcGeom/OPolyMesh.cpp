@@ -269,20 +269,21 @@ Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
 
 //-*****************************************************************************
 bool
-OPolyMeshSchema::hasFaceSet (std::string iFaceSetName)
+OPolyMeshSchema::hasFaceSet( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::hasFaceSet ()" );
 
     return (m_faceSets.find (iFaceSetName) != m_faceSets.end ());
 
     ALEMBIC_ABC_SAFE_CALL_END();
+
     return false;
 }
 
 
 //-*****************************************************************************
 OFaceSet &
-OPolyMeshSchema::createFaceSet ( std::string iFaceSetName )
+OPolyMeshSchema::createFaceSet( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::createFaceSet ()" );
 
@@ -293,6 +294,7 @@ OPolyMeshSchema::createFaceSet ( std::string iFaceSetName )
                                           iFaceSetName );
 
     return m_faceSets[iFaceSetName];
+
     ALEMBIC_ABC_SAFE_CALL_END();
 
     static OFaceSet emptyFaceSet;
@@ -315,7 +317,7 @@ void OPolyMeshSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames
 
 //-*****************************************************************************
 const OFaceSet &
-OPolyMeshSchema::getFaceSet (std::string iFaceSetName)
+OPolyMeshSchema::getFaceSet( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::getFaceSet()" );
 
@@ -323,7 +325,7 @@ OPolyMeshSchema::getFaceSet (std::string iFaceSetName)
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static OFaceSet empty;
+    static const OFaceSet empty;
     return empty;
 }
 

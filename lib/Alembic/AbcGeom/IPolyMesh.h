@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -163,9 +163,7 @@ public:
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
     size_t getNumSamples()
-    { return std::max( m_positions.getNumSamples(),
-                       std::max( m_indices.getNumSamples(),
-                                 m_counts.getNumSamples() ) ); }
+    { return  m_positions.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
@@ -181,8 +179,13 @@ public:
     AbcA::TimeSamplingPtr getTimeSampling()
     {
         if ( m_positions.valid() )
+        {
             return m_positions.getTimeSampling();
-        return getObject().getArchive().getTimeSampling(0);
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
     }
 
     //-*************************************************************************
@@ -195,12 +198,8 @@ public:
         m_indices.get( oSample.m_indices, iSS );
         m_counts.get( oSample.m_counts, iSS );
 
-        // a minor hedge against older Archives that don't have these
-        // properties.  Will remove before 1.0. --JDA, 2011-02-24
-        if ( m_selfBounds )
-        {
-            m_selfBounds.get( oSample.m_selfBounds, iSS );
-        }
+        m_selfBounds.get( oSample.m_selfBounds, iSS );
+
         if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
         {
             m_childBounds.get( oSample.m_childBounds, iSS );
@@ -252,6 +251,9 @@ public:
 
         m_arbGeomParams.reset();
 
+        m_faceSetsLoaded = false;
+        m_faceSets.clear();
+
         Abc::ISchema<PolyMeshSchemaInfo>::reset();
     }
 
@@ -267,9 +269,9 @@ public:
 
     // FaceSet related
     //! Appends the names of any FaceSets for this PolyMesh.
-    void getFaceSetNames (std::vector <std::string> & oFaceSetNames); 
-    const IFaceSet & getFaceSet (std::string iFaceSetName);
-    bool hasFaceSet (std::string iFaceSetName);
+    void getFaceSetNames (std::vector <std::string> & oFaceSetNames);
+    const IFaceSet & getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
 
     //! unspecified-bool-type operator overload.
     //! ...

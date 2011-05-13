@@ -166,7 +166,7 @@ public:
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<PolyMeshSchemaInfo>( iParentObject, iName,
-                                            iArg0, iArg1, iArg2 )
+                                          iArg0, iArg1, iArg2 )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -217,7 +217,7 @@ public:
     }
 
     //! Copy constructor.
-    OPolyMeshSchema(const OPolyMeshSchema& iCopy)
+    OPolyMeshSchema( const OPolyMeshSchema& iCopy )
     {
         *this = iCopy;
     }
@@ -274,8 +274,9 @@ public:
         m_childBounds.reset();
         m_arbGeomParams.reset();
 
-        Abc::OSchema<PolyMeshSchemaInfo>::reset();
         m_faceSets.clear();
+
+        Abc::OSchema<PolyMeshSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
@@ -289,11 +290,11 @@ public:
     }
 
     // FaceSet stuff
-    OFaceSet & createFaceSet (std::string iFaceSetName);
+    OFaceSet & createFaceSet( const std::string &iFaceSetName );
     //! Appends the names of any FaceSets for this PolyMesh.
-    void getFaceSetNames (std::vector <std::string> & oFaceSetNames); 
-    const OFaceSet & getFaceSet (std::string iFaceSetName);
-    bool hasFaceSet (std::string iFaceSetName);
+    void getFaceSetNames (std::vector <std::string> & oFaceSetNames);
+    const OFaceSet & getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
 
     //! unspecified-bool-type operator overload.
     //! ...

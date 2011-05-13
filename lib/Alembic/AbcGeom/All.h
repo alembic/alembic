@@ -39,16 +39,14 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 
+#include <Alembic/AbcGeom/GeometryScope.h>
+
+#include <Alembic/AbcGeom/Basis.h>
 #include <Alembic/AbcGeom/OCurves.h>
 #include <Alembic/AbcGeom/ICurves.h>
 
 #include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/IFaceSet.h>
-
-#include <Alembic/AbcGeom/OSubD.h>
-#include <Alembic/AbcGeom/ISubD.h>
-
-#include <Alembic/AbcGeom/GeometryScope.h>
 
 #include <Alembic/AbcGeom/OGeomParam.h>
 #include <Alembic/AbcGeom/IGeomParam.h>

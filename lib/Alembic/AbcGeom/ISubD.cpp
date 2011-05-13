@@ -272,7 +272,7 @@ void ISubDSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames)
 
 //-*****************************************************************************
 bool
-ISubDSchema::hasFaceSet (std::string faceSetName)
+ISubDSchema::hasFaceSet( const std::string &faceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::hasFaceSet (faceSetName)" );
 
@@ -291,7 +291,7 @@ ISubDSchema::hasFaceSet (std::string faceSetName)
 
 //-*****************************************************************************
 const IFaceSet &
-ISubDSchema::getFaceSet (std::string iFaceSetName)
+ISubDSchema::getFaceSet( const std::string &iFaceSetName )
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::getFaceSet()" );
@@ -310,9 +310,12 @@ ISubDSchema::getFaceSet (std::string iFaceSetName)
         m_faceSets [iFaceSetName] = IFaceSet ( this->getParent().getObject(), iFaceSetName );
     }
 
+    return m_faceSets [iFaceSetName];
+
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    return m_faceSets [iFaceSetName];
+    static const IFaceSet empty;
+    return empty;
 }
 
 } // End namespace AbcGeom

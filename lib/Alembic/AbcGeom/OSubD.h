@@ -438,11 +438,11 @@ public:
     }
 
     // FaceSet stuff
-    OFaceSet & createFaceSet (std::string iFaceSetName);
+    OFaceSet & createFaceSet( const std::string &iFaceSetName );
     //! Appends the names of any FaceSets for this SubD.
-    void getFaceSetNames (std::vector <std::string> & oFaceSetNames); 
-    const OFaceSet & getFaceSet (std::string iFaceSetName);
-    bool hasFaceSet (std::string iFaceSetName);
+    void getFaceSetNames( std::vector <std::string> & oFaceSetNames );
+    const OFaceSet & getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
 
 
     //! unspecified-bool-type operator overload.

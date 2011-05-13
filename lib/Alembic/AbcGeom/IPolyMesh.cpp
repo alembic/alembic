@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -85,13 +85,7 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
     m_counts = Abc::IInt32ArrayProperty( _this, ".faceCounts",
                                        args.getSchemaInterpMatching() );
 
-    // older Alembic archives won't have the bounding box properties; before 1.0,
-    // we should remove the if statements and assert that older archives will
-    // not be readable without a no-op error handling policy
-    if ( this->getPropertyHeader( ".selfBnds" ) != NULL )
-    {
-        m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
-    }
+    m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
 
     if ( this->getPropertyHeader( ".childBnds" ) != NULL )
     {
@@ -123,7 +117,7 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
 }
 
 //-*****************************************************************************
-void IPolyMeshSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames)
+void IPolyMeshSchema::getFaceSetNames( std::vector<std::string> &oFaceSetNames )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::getFaceSetNames()" );
 
@@ -146,8 +140,9 @@ void IPolyMeshSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames
         m_faceSetsLoaded = true;
     }
 
-    for (std::map<std::string, IFaceSet>::const_iterator faceSetIter =
-        m_faceSets.begin(); faceSetIter != m_faceSets.end(); ++faceSetIter)
+    for ( std::map<std::string, IFaceSet>::const_iterator faceSetIter =
+              m_faceSets.begin(); faceSetIter != m_faceSets.end();
+          ++faceSetIter )
     {
         oFaceSetNames.push_back( faceSetIter->first );
     }
@@ -157,7 +152,7 @@ void IPolyMeshSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames
 
 //-*****************************************************************************
 bool
-IPolyMeshSchema::hasFaceSet (std::string iFaceSetName)
+IPolyMeshSchema::hasFaceSet( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::hasFaceSet (iFaceSetName)" );
 
@@ -170,17 +165,15 @@ IPolyMeshSchema::hasFaceSet (std::string iFaceSetName)
     return (m_faceSets.find (iFaceSetName) != m_faceSets.end ());
 
     ALEMBIC_ABC_SAFE_CALL_END();
+
     return false;
 }
 
 //-*****************************************************************************
 const IFaceSet &
-IPolyMeshSchema::getFaceSet (std::string iFaceSetName)
+IPolyMeshSchema::getFaceSet ( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::getFaceSet()" );
-
-    ABCA_ASSERT( this->hasFaceSet (iFaceSetName),
-        "The requested FaceSet name can't be found in PolyMesh.");
 
     if (!m_faceSetsLoaded)
     {
@@ -190,14 +183,15 @@ IPolyMeshSchema::getFaceSet (std::string iFaceSetName)
     if (!m_faceSets [iFaceSetName])
     {
         // We haven't yet loaded the faceSet, so create/load it
-        m_faceSets [iFaceSetName] = IFaceSet ( this->getParent().getObject(), iFaceSetName );
+        m_faceSets [iFaceSetName] = IFaceSet ( this->getParent().getObject(),
+                                               iFaceSetName );
     }
 
     return m_faceSets [iFaceSetName];
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static IFaceSet emptyFaceSet;
+    static const IFaceSet emptyFaceSet;
     return emptyFaceSet;
 }
 
