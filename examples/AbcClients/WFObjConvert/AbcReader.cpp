@@ -93,8 +93,8 @@ void AbcReader::makeCurrentObject()
 
         OPolyMeshSchema::Sample psamp;
         psamp.setPositions( V3fArraySample( m_vertices ) );
-        psamp.setIndices( Int32ArraySample( m_indices ) );
-        psamp.setCounts( Int32ArraySample( m_counts ) );
+        psamp.setFaceIndices( Int32ArraySample( m_indices ) );
+        psamp.setFaceCounts( Int32ArraySample( m_counts ) );
 
         mesh.set( psamp );
     }

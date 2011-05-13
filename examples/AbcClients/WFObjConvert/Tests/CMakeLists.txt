@@ -39,12 +39,11 @@ SET( TEST_LIBS
      AlembicAbc
      AlembicAbcCoreHDF5
      AlembicAbcCoreAbstract
-     AlembicMD5Hash
      AlembicUtil
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_ILMBASE_LIBS}
      ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} m )
+     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
 
 #-******************************************************************************
