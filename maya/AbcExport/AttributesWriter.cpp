@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -340,7 +340,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
         case MFnNumericData::kByte:
         case MFnNumericData::kChar:
         {
-            std::vector<int8_t> val(dimSize);
+            std::vector< Alembic::Util::int8_t > val(dimSize);
             if (!isArray)
             {
                 val[0] = iPlug.asChar();
@@ -360,7 +360,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
 
         case MFnNumericData::kShort:
         {
-            std::vector<int16_t> val(dimSize);
+            std::vector< Alembic::Util::int16_t > val(dimSize);
             if (!isArray)
             {
                 val[0] = iPlug.asShort();
@@ -380,7 +380,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
 
         case MFnNumericData::kInt:
         {
-            std::vector<int32_t> val(dimSize);
+            std::vector< Alembic::Util::int32_t > val(dimSize);
             if (!isArray)
             {
                 val[0] = iPlug.asInt();
@@ -420,7 +420,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
 
         case MFnNumericData::kDouble:
         {
-            std::vector<float> val(dimSize);
+            std::vector<double> val(dimSize);
             if (!isArray)
             {
                 val[0] = iPlug.asDouble();
@@ -440,7 +440,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
 
         case MFnNumericData::k2Short:
         {
-            std::vector<int16_t> val(dimSize*2);
+            std::vector< Alembic::Util::int16_t > val(dimSize*2);
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
@@ -462,7 +462,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
 
         case MFnNumericData::k3Short:
         {
-            std::vector<int16_t> val(dimSize*3);
+            std::vector< Alembic::Util::int16_t > val(dimSize*3);
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
@@ -484,7 +484,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
 
         case MFnNumericData::k2Int:
         {
-            std::vector<int32_t> val(dimSize*2);
+            std::vector< Alembic::Util::int32_t > val(dimSize*2);
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
@@ -506,7 +506,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
 
         case MFnNumericData::k3Int:
         {
-            std::vector<int32_t> val(dimSize*3);
+            std::vector< Alembic::Util::int32_t > val(dimSize*3);
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
@@ -716,7 +716,7 @@ bool MFnTypedDataToSample(MFnData::Type iType,
 
             unsigned int i = 0;
             unsigned int length = arr.length();
-            std::vector< int32_t > val(length);
+            std::vector< Alembic::Util::int32_t > val(length);
             for (; i < length; i++)
             {
                 val[i] = arr[i];
