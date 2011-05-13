@@ -1078,6 +1078,10 @@ void testExtentArrayStrings()
             ABC::ArraySample(&(vals3.front()), dtype,
             Alembic::Util::Dimensions(2)));
 
+        awp->setSample(
+            ABC::ArraySample(&(vals2.front()), dtype,
+            Alembic::Util::Dimensions(2)));
+
         std::vector < Alembic::Util::float32_t > vals5(3);
         vals5[0] = 1.0;
         vals5[1] = 2.0;
@@ -1101,7 +1105,7 @@ void testExtentArrayStrings()
         ABC::BasePropertyReaderPtr bp = parent->getProperty( 0 );
         TESTING_ASSERT(bp->isArray());
         ABC::ArrayPropertyReaderPtr ap = bp->asArrayPtr();
-        TESTING_ASSERT(ap->getNumSamples() == 3);
+        TESTING_ASSERT(ap->getNumSamples() == 4);
 
         ABC::ArraySamplePtr val;
 
@@ -1156,6 +1160,21 @@ void testExtentArrayStrings()
         TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.digest.str() ==
             "a197a3747b0666dfacdc17634f5cabff");
+
+        ap->getSample(3, val);
+        TESTING_ASSERT(val->getDimensions().numPoints() == 2);
+        TESTING_ASSERT(val->getDimensions().rank() == 1);
+        data = (Alembic::Util::string *)(val->getData());
+        TESTING_ASSERT(data[0] == "");
+        TESTING_ASSERT(data[1] == "Is the cake really a lie?");
+        TESTING_ASSERT(data[2] == "");
+        TESTING_ASSERT(data[3] == "I certainly hope not.");
+        TESTING_ASSERT(ap->getKey(1, key));
+        TESTING_ASSERT(key.numBytes == 50);
+        TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
+        TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);
+        TESTING_ASSERT(key.digest.str() ==
+            "126ebab40166a642d3c8cc4c5929074d");
     }
 }
 
