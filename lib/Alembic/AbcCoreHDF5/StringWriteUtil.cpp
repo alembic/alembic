@@ -302,6 +302,13 @@ WriteStringArrayT( WrittenArraySampleMap &iMap,
                    const AbcA::ArraySample::Key &iKey,
                    int iCompressionLevel )
 {
+    // because strings are packed together, always write out the dimensions
+    Dimensions dims = iSamp.getDimensions();
+    ABCA_ASSERT( dims.rank() > 0,
+        "String type can not have a rank-0 array sample" );
+    std::string dimsName = iName + ".dims";
+    WriteDimensions( iGroup, dimsName, dims );
+
     // See whether or not we've already stored this.
     WrittenArraySampleIDPtr writeID = iMap.find( iKey );
     if ( writeID )
@@ -313,12 +320,6 @@ WriteStringArrayT( WrittenArraySampleMap &iMap,
     // Okay, need to actually store it.
     // It will be a dataset with an internal attribute for storing
     // the hash id.
-    
-    Dimensions dims = iSamp.getDimensions();
-    ABCA_ASSERT( dims.rank() > 0,
-        "String type can not have a rank-0 array sample" );
-    std::string dimsName = iName + ".dims";
-    WriteDimensions( iGroup, dimsName, dims );
 
     bool hasData = dims.numPoints() > 0;
     hid_t dspaceId = -1;
