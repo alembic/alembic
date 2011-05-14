@@ -77,11 +77,12 @@ void OCameraSchema::set( const CameraSample &iSamp )
         std::vector <double> opChannels ( numChannels );
 
         std::size_t curChannel = 0;
-        for ( std::size_t i; i < numOps; ++i )
+        for ( std::size_t i = 0; i < numOps; ++i )
         {
             const FilmBackXformOp & op = iSamp[i];
             filmBackOps[i] = op.getTypeAndHint();
-            for ( std::size_t j; j < op.getNumChannels(); ++j, ++curChannel )
+            for ( std::size_t j = 0; j < op.getNumChannels(); 
+                ++j, ++curChannel )
             {
                 opChannels[curChannel] = op.getChannelValue( j );
             }

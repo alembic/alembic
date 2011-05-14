@@ -55,72 +55,122 @@ public:
     //! calculate the provided screen window.
     CameraSample( double iTop, double iBottom, double iLeft, double iRight );
 
-    void getScreenWindow( double & iTop, double & iBottom, double & iLeft,
-        double & iRight );
+    void getScreenWindow( double & oTop, double & oBottom, double & oLeft,
+        double & oRight );
 
+    //! get the camera focal length in millimeters.
     double getFocalLength() const { return m_focalLength; }
-    void  setFocalLength( double iVal )
-    { m_focalLength = iVal; }
 
+    //! set the camera focal length in millimeters.
+    void  setFocalLength( double iVal ) { m_focalLength = iVal; }
+
+    //! get the horizontal camera film back in centimeters
     double getHorizontalAperture() const { return m_horizontalAperture; }
-    void setHorizontalAperture( double iVal )
-    { m_horizontalAperture = iVal; }
 
+    //! set the horizontal camera film back in centimeters
+    void setHorizontalAperture( double iVal ) { m_horizontalAperture = iVal; }
+
+    //! get the horizontal film back offset in centimeters
     double getHorizontalFilmOffset() const { return m_horizontalFilmOffset; }
+
+    //! set the horizontal film back offset in centimeters
     void setHorizontalFilmOffset( double iVal )
     { m_horizontalFilmOffset = iVal; }
 
+    //! get the vertical camera film back in centimeters
     double getVerticalAperture() const { return m_verticalAperture; }
-    void setVerticalAperture( double iVal )
-    { m_verticalAperture = iVal; }
 
+    //! set the vertical camera film back in centimeters
+    void setVerticalAperture( double iVal ) { m_verticalAperture = iVal; }
+
+    //! get the vertical film back offset in centimeters
     double getVerticalFilmOffset() const { return m_verticalFilmOffset; }
-    void setVerticalFilmOffset( double iVal )
-    { m_verticalFilmOffset = iVal; }
 
+    //! set the vertical film back offset in centimeters
+    void setVerticalFilmOffset( double iVal ) { m_verticalFilmOffset = iVal; }
+
+    //! get the amount the camera's lens compresses the image horizontally
+    //! (width / height aspect ratio)
     double getLensSqueezeRatio() const { return m_lensSqueezeRatio; }
+
+    //! set the amount the camera's lens compresses the image horizontally
+    //! (width / height aspect ratio)
     void setLensSqueezeRatio( double iVal )
     { m_lensSqueezeRatio = iVal; }
 
+    //! get over scan fractional percentage for the left part of the
+    //! screen window
     double getOverScanLeft() { return m_overscanLeft; }
-    void setOverScanLeft( double iVal )
-    { m_overscanLeft = iVal; }
 
+    //! set over scan fractional percentage for the left part of the
+    //! screen window
+    void setOverScanLeft( double iVal ) { m_overscanLeft = iVal; }
+
+    //! get over scan fractional percentage for the right part of the
+    //! screen window
     double getOverScanRight() const { return m_overscanRight; }
-    void setOverScanRight( double iVal )
-    { m_overscanRight = iVal; }
 
+    //! set over scan fractional percentage for the right part of the
+    //! screen window
+    void setOverScanRight( double iVal ) { m_overscanRight = iVal; }
+
+    //! get over scan fractional percentage for the top part of the
+    //! screen window
     double getOverScanTop() const { return m_overscanTop; }
-    void setOverScanTop( double iVal )
-    { m_overscanTop = iVal; }
 
+    //! get over scan fractional percentage for the top part of the
+    //! screen window
+    void setOverScanTop( double iVal ) { m_overscanTop = iVal; }
+
+    //! get over scan fractional percentage for the bottom part of the
+    //! screen window
     double getOverScanBottom() const { return m_overscanBottom; }
-    void setOverScanBottom( double iVal )
-    { m_overscanBottom = iVal; }
 
+    //! set over scan fractional percentage for the bottom part of the
+    //! screen window
+    void setOverScanBottom( double iVal ) { m_overscanBottom = iVal; }
+
+    //! get the f-stop (focal length divided by "effective" lens diameter)
     double getFStop() const { return m_fStop; }
-    void setFStop( double iVal )
-    { m_fStop = iVal; }
 
+    //! set the f-stop (focal length divided by "effective" lens diameter)
+    void setFStop( double iVal ) { m_fStop = iVal; }
+
+    //! get the distance from the camera to the object being focused on
+    //! in centimeters
     double getFocusDistance() const { return m_focusDistance; }
-    void setFocusDistance( double iVal )
-    { m_focusDistance = iVal; }
 
+    //! set the distance from the camera to the object being focused on
+    //! in centimeters
+    void setFocusDistance( double iVal ) { m_focusDistance = iVal; }
+
+    //! get the frame relative shutter open time in seconds.
     double getShutterOpen() const { return m_shutterOpen; }
-    void setShutterOpen( double iVal )
-    { m_shutterOpen = iVal; }
 
+    //! set the frame relative shutter open time in seconds.
+    void setShutterOpen( double iVal ) { m_shutterOpen = iVal; }
+
+    //! get the frame relative shutter close time in seconds.
     double getShutterClose() const { return m_shutterClose; }
-    void setShutterClose( double iVal )
-    { m_shutterClose = iVal; }
 
+    //! set the frame relative shutter open time in seconds.
+    void setShutterClose( double iVal ) { m_shutterClose = iVal; }
+
+    //! get the distance from the camera to the near clipping plane in
+    //! centimeters
     double getNearClippingPlane() const { return m_nearClippingPlane; }
-    void setNearClippingPlane( double iVal )
-    { m_nearClippingPlane = iVal; }
 
+    //! set the distance from the camera to the near clipping plane in
+    //! centimeters
+    void setNearClippingPlane( double iVal ) { m_nearClippingPlane = iVal; }
+
+    //! get the distance from the camera to the far clipping plane in
+    //! centimeters
     double getFarClippingPlane() const { return m_farClippingPlane; }
-    void setFarClippingPlane( double iVal )
-    { m_farClippingPlane = iVal; }
+
+    //! set the distance from the camera to the near clipping plane in
+    //! centimeters
+    void setFarClippingPlane( double iVal ) { m_farClippingPlane = iVal; }
 
     Abc::Box3d getChildBounds() const { return m_childBounds; }
     void setChildBounds( const Abc::Box3d & iBounds )
@@ -141,6 +191,7 @@ public:
     FilmBackXformOp &operator[]( const std::size_t &iIndex );
     const FilmBackXformOp &operator[]( const std::size_t &iIndex ) const;
 
+    //! Returns the concatenated 3x3 film back matrix
     Abc::M33d getFilmBackMatrix () const;
 
     std::size_t getNumOps() const;
@@ -171,7 +222,7 @@ public:
 
         m_focusDistance = 5.0;
         m_shutterOpen = 0.0;
-        m_shutterClose = 1.0;
+        m_shutterClose = 0.020833333333333332;
 
         m_nearClippingPlane = 0.1;
         m_farClippingPlane = 100000.0;

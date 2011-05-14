@@ -43,7 +43,16 @@ namespace AbcGeom {
 CameraSample::CameraSample ( double iTop, double iBottom, double iLeft,
     double iRight )
 {
-    ABCA_THROW("Please implement");
+    reset();
+    m_lensSqueezeRatio = (iRight - iLeft) * 0.5;
+    m_horizontalFilmOffset = (iLeft + m_lensSqueezeRatio) *
+        m_horizontalAperture / (2.0 * m_lensSqueezeRatio);
+
+    m_verticalAperture = (iTop - iBottom) * 0.5 * m_horizontalAperture /
+        m_lensSqueezeRatio;
+
+    m_verticalFilmOffset = ( (m_lensSqueezeRatio * m_verticalAperture) /
+        m_horizontalAperture + iBottom ) * m_horizontalAperture * 0.5;
 }
 
 //-*****************************************************************************
@@ -131,34 +140,34 @@ double CameraSample::getFieldOfView () const
 }
 
 //-*****************************************************************************
-void CameraSample::getScreenWindow( double & iTop, double & iBottom,
-    double & iLeft, double & iRight )
+void CameraSample::getScreenWindow( double & oTop, double & oBottom,
+    double & oLeft, double & oRight )
 {
     double offsetX = 2.0 * m_horizontalFilmOffset * m_lensSqueezeRatio /
         m_horizontalAperture;
 
-    iLeft = -( 1.0 + m_overscanLeft ) * m_lensSqueezeRatio + offsetX;
+    oLeft = -( 1.0 + m_overscanLeft ) * m_lensSqueezeRatio + offsetX;
 
-    iRight = ( 1.0 + m_overscanRight ) * m_lensSqueezeRatio + offsetX;
+    oRight = ( 1.0 + m_overscanRight ) * m_lensSqueezeRatio + offsetX;
 
     double aperY = m_lensSqueezeRatio * m_verticalAperture /
         m_horizontalAperture;
     double offsetY = 2.0 * m_verticalFilmOffset / m_horizontalAperture;
 
-    iBottom = -( 1.0 + m_overscanBottom ) * aperY + offsetY;
-    iTop = ( 1.0 + m_overscanTop ) * aperY + offsetY;
+    oBottom = -( 1.0 + m_overscanBottom ) * aperY + offsetY;
+    oTop = ( 1.0 + m_overscanTop ) * aperY + offsetY;
 
-    Abc::V2d lt ( iLeft, iTop );
-    Abc::V2d rb ( iRight, iBottom );
+    Abc::V2d lt ( oLeft, oTop );
+    Abc::V2d rb ( oRight, oBottom );
     Abc::M33d mat = getFilmBackMatrix();
 
     Abc::V2d flt, frb;
     mat.multVecMatrix( lt, flt );
     mat.multVecMatrix( rb, frb );
-    iLeft = lt.x;
-    iTop = lt.y;
-    iRight = rb.x;
-    iBottom = rb.y;
+    oLeft = flt.x;
+    oTop = flt.y;
+    oRight = frb.x;
+    oBottom = frb.y;
 }
 
 //-*****************************************************************************
