@@ -290,7 +290,7 @@ ISubDSchema::hasFaceSet( const std::string &faceSetName )
 }
 
 //-*****************************************************************************
-const IFaceSet &
+IFaceSet
 ISubDSchema::getFaceSet( const std::string &iFaceSetName )
 {
 
@@ -307,14 +307,15 @@ ISubDSchema::getFaceSet( const std::string &iFaceSetName )
     if (!m_faceSets [iFaceSetName])
     {
         // We haven't yet loaded the faceSet, so create/load it
-        m_faceSets [iFaceSetName] = IFaceSet ( this->getParent().getObject(), iFaceSetName );
+        m_faceSets [iFaceSetName] = IFaceSet ( this->getParent().getObject(),
+                                               iFaceSetName );
     }
 
     return m_faceSets [iFaceSetName];
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static const IFaceSet empty;
+    IFaceSet empty;
     return empty;
 }
 

@@ -293,7 +293,7 @@ public:
     OFaceSet & createFaceSet( const std::string &iFaceSetName );
     //! Appends the names of any FaceSets for this PolyMesh.
     void getFaceSetNames (std::vector <std::string> & oFaceSetNames);
-    const OFaceSet & getFaceSet( const std::string &iFaceSetName );
+    OFaceSet getFaceSet( const std::string &iFaceSetName );
     bool hasFaceSet( const std::string &iFaceSetName );
 
     //! unspecified-bool-type operator overload.

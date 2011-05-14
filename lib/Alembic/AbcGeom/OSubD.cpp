@@ -577,7 +577,7 @@ OSubDSchema::hasFaceSet( const std::string &iFaceSetName )
 }
 
 //-*****************************************************************************
-const OFaceSet &
+OFaceSet
 OSubDSchema::getFaceSet( const std::string &iFaceSetName )
 {
 
@@ -587,7 +587,7 @@ OSubDSchema::getFaceSet( const std::string &iFaceSetName )
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static const OFaceSet empty;
+    OFaceSet empty;
     return empty;
 }
 

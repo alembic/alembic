@@ -270,7 +270,7 @@ public:
     // FaceSet related
     //! Appends the names of any FaceSets for this PolyMesh.
     void getFaceSetNames (std::vector <std::string> & oFaceSetNames);
-    const IFaceSet & getFaceSet( const std::string &iFaceSetName );
+    IFaceSet getFaceSet( const std::string &iFaceSetName );
     bool hasFaceSet( const std::string &iFaceSetName );
 
     //! unspecified-bool-type operator overload.

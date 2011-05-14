@@ -316,7 +316,7 @@ void OPolyMeshSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames
 }
 
 //-*****************************************************************************
-const OFaceSet &
+OFaceSet
 OPolyMeshSchema::getFaceSet( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::getFaceSet()" );
@@ -325,7 +325,7 @@ OPolyMeshSchema::getFaceSet( const std::string &iFaceSetName )
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static const OFaceSet empty;
+    OFaceSet empty;
     return empty;
 }
 

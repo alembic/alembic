@@ -170,7 +170,7 @@ IPolyMeshSchema::hasFaceSet( const std::string &iFaceSetName )
 }
 
 //-*****************************************************************************
-const IFaceSet &
+IFaceSet
 IPolyMeshSchema::getFaceSet ( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::getFaceSet()" );
@@ -191,7 +191,7 @@ IPolyMeshSchema::getFaceSet ( const std::string &iFaceSetName )
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static const IFaceSet emptyFaceSet;
+    IFaceSet emptyFaceSet;
     return emptyFaceSet;
 }
 
