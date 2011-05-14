@@ -60,6 +60,14 @@ TARGET_LINK_LIBRARIES( AbcGeom_PointsTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_PointsTEST AbcGeom_PointsTest )
 
 #-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_NurbsTest
+	        NurbsData.h
+		NurbsData.cpp
+		NurbsTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_NurbsTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_NurbsTEST AbcGeom_NurbsTest )
+
+#-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_SubDTest
 		MeshData.h
 		MeshData.cpp

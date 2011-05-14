@@ -38,19 +38,6 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/Abc/Tests/Assert.h>
 
-#include <ImathMath.h>
-
-#include <limits>
-
-static const double VAL_EPSILON = std::numeric_limits<double>::epsilon() \
-    * 1024.0;
-
-bool almostEqual( const double &a, const double &b,
-                  const double &epsilon = VAL_EPSILON )
-{
-    return Imath::equalWithAbsError( a, b, epsilon );
-}
-
 using namespace Alembic::AbcGeom;
 
 //-*****************************************************************************

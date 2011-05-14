@@ -34,12 +34,10 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_ICurves_h_
-#define _Alembic_AbcGeom_ICurves_h_
+#ifndef _Alembic_AbcGeom_INuPatch_h_
+#define _Alembic_AbcGeom_INuPatch_h_
 
 #include <Alembic/AbcGeom/Foundation.h>
-#include <Alembic/AbcGeom/Basis.h>
-#include <Alembic/AbcGeom/CurveType.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
 
@@ -47,7 +45,7 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-class ICurvesSchema : public Abc::ISchema<CurvesSchemaInfo>
+class INuPatchSchema : public Abc::ISchema<NuPatchSchemaInfo>
 {
 public:
     class Sample
@@ -59,86 +57,117 @@ public:
         Sample() {}
 
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
-
-        std::size_t getNumCurves() const
-        {
-            return m_nVertices->size();
-        }
-        Abc::Int32ArraySamplePtr getCurvesNumVertices() const
-        { return m_nVertices; }
-        
-        std::vector<uint8_t> getDescription() const { return m_basisAndType; }
-        
-        CurveType getType() const { return static_cast<CurveType>( m_basisAndType[0] ); }
-        CurvePeriodicity getWrap() const { return static_cast<CurvePeriodicity>( m_basisAndType[1] ); }
-        BasisType getUBasis() const { return static_cast<BasisType>( m_basisAndType[2] ); }
-        BasisType getVBasis() const { return static_cast<BasisType>( m_basisAndType[3] ); }
-
-        Abc::FloatArraySamplePtr getWidths() const { return m_widths; }
-        Abc::V2fArraySamplePtr getUVs() const { return m_uvs; }
-        Abc::V3fArraySamplePtr getNormals() const { return m_normals; }
+        uint64_t getNumU() const { return m_numU; }
+        uint64_t getNumV() const { return m_numV; }
+        uint64_t getUOrder() const { return m_uOrder; }
+        uint64_t getVOrder() const { return m_uOrder; }
+        Abc::FloatArraySamplePtr getUKnot() const { return m_uKnot; }
+        Abc::FloatArraySamplePtr getVKnot() const { return m_vKnot; }
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
+        
+        // trim curve
+	size_t getTrimNumLoops() const { return m_trimNumLoops; }
+	Abc::UInt64ArraySamplePtr getTrimNumVertices() const { return m_trimNumVertices; }
+	Abc::UInt64ArraySamplePtr getTrimNumCurves() const { return m_trimNumCurves; }
+	Abc::UInt64ArraySamplePtr getTrimOrders() const { return m_trimOrder; }
+	Abc::FloatArraySamplePtr getTrimKnots() const { return m_trimKnot; }
+	Abc::FloatArraySamplePtr getTrimMins() const { return m_trimMin; }
+	Abc::FloatArraySamplePtr getTrimMaxes() const { return m_trimMax; }
+	Abc::FloatArraySamplePtr getTrimU() const { return m_trimU; }
+	Abc::FloatArraySamplePtr getTrimV() const { return m_trimV; }
+	Abc::FloatArraySamplePtr getTrimW() const { return m_trimW; }
 
+        
+        bool hasTrimCurve() const { return m_trimNumLoops != 0; }
+        
         bool valid() const
         {
-            return m_positions;
+            return m_positions && m_numU && m_numV && m_uOrder && m_vOrder &&
+		   m_uKnot && m_vKnot;
         }
 
         void reset()
         {
             m_positions.reset();
-            m_nVertices.reset();
-
-            m_widths.reset();
-            m_uvs.reset();
-            m_normals.reset();
-
-            m_basisAndType.clear();
-
+            m_numU = 1;
+            m_numV = 1;
+            m_uOrder = 1;
+            m_vOrder = 1;
+            m_uKnot.reset();
+            m_vKnot.reset();
+	    
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
+            
+            // trim curve
+            m_trimNumLoops = 0;
+            m_trimNumCurves.reset();
+	    m_trimNumVertices.reset();
+	    m_trimOrder.reset();
+	    m_trimKnot.reset();
+	    m_trimMin.reset();
+	    m_trimMax.reset();
+	    m_trimU.reset();
+	    m_trimV.reset();
+	    m_trimW.reset();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
 
     protected:
-        friend class ICurvesSchema;
+        
+        friend class INuPatchSchema;
+        
         Abc::V3fArraySamplePtr m_positions;
+        uint64_t m_numU;
+        uint64_t m_numV;
+        uint64_t m_uOrder;
+        uint64_t m_vOrder;
+        Abc::FloatArraySamplePtr m_uKnot;
+        Abc::FloatArraySamplePtr m_vKnot;
+    
+        // trim curve
+	uint64_t m_trimNumLoops;
+	Abc::UInt64ArraySamplePtr m_trimNumCurves;
+	Abc::UInt64ArraySamplePtr m_trimNumVertices;
+	Abc::UInt64ArraySamplePtr m_trimOrder;
+	Abc::FloatArraySamplePtr m_trimKnot;
+	Abc::FloatArraySamplePtr m_trimMin;
+	Abc::FloatArraySamplePtr m_trimMax;
+	Abc::FloatArraySamplePtr m_trimU;
+	Abc::FloatArraySamplePtr m_trimV;
+	Abc::FloatArraySamplePtr m_trimW;
+	bool m_hasTrimCurve;
 
+        // bounds
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
-
-        // type, wrap, and nVertices
-        std::size_t m_numCurves;
-        Abc::Int32ArraySamplePtr m_nVertices;
-
-        std::vector<Alembic::Util::uint8_t> m_basisAndType;
-
-        Abc::FloatArraySamplePtr m_widths;
-        Abc::V2fArraySamplePtr m_uvs;
-        Abc::V3fArraySamplePtr m_normals;
-
+        
     };
 
     //-*************************************************************************
-    // POLY MESH SCHEMA
+    // NuPatch Schema
     //-*************************************************************************
 public:
     //! By convention we always define this_type in AbcGeom classes.
     //! Used by unspecified-bool-type conversion below
-    typedef ICurvesSchema this_type;
-
-    typedef ICurvesSchema::Sample sample_type;
+    typedef INuPatchSchema this_type;
+    typedef Sample sample_type;
 
     //-*************************************************************************
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
     //-*************************************************************************
 
-    //! The default constructor creates an empty OPolyMeshSchema
-    //! ...
-    ICurvesSchema() {}
+    //! The default constructor
+    INuPatchSchema() {}
+
+    //! copy constructor
+    INuPatchSchema(const INuPatchSchema& iCopy)
+    {
+        *this = iCopy;
+    }
 
     //! This templated, explicit function creates a new scalar property reader.
     //! The first argument is any Abc (or AbcCoreAbstract) object
@@ -148,11 +177,11 @@ public:
     //! can be used to override the ErrorHandlerPolicy and to specify
     //! schema interpretation matching.
     template <class CPROP_PTR>
-    ICurvesSchema( CPROP_PTR iParentObject,
+    INuPatchSchema( CPROP_PTR iParentObject,
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<PolyMeshSchemaInfo>( iParentObject, iName,
+      : Abc::ISchema<NuPatchSchemaInfo>( iParentObject, iName,
                                             iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -161,35 +190,34 @@ public:
     //! This constructor is the same as above, but with default
     //! schema name used.
     template <class CPROP_PTR>
-    explicit ICurvesSchema( CPROP_PTR iParentObject,
-                            const Abc::Argument &iArg0 = Abc::Argument(),
-                            const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iParentObject,
-                                        iArg0, iArg1 )
+    explicit INuPatchSchema( CPROP_PTR iParent,
+                              const Abc::Argument &iArg0 = Abc::Argument(),
+                              const Abc::Argument &iArg1 = Abc::Argument() )
+
+      : Abc::ISchema<NuPatchSchemaInfo>( iParent,
+                                         iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
     //! Wrap an existing schema object
     template <class CPROP_PTR>
-    ICurvesSchema( CPROP_PTR iThis,
+    INuPatchSchema( CPROP_PTR iThis,
                      Abc::WrapExistingFlag iFlag,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument() )
 
-                   const Abc::Argument &iArg0 = Abc::Argument(),
-                   const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : Abc::ISchema<NuPatchSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
-
-    //! Default assignment operator used.
-
-    ICurvesSchema( const ICurvesSchema &iCopy )
-    {
-        *this = iCopy;
-    }
-
-    size_t getNumSamples() { return m_positions.getNumSamples(); }
+    
+    //! Return the number of samples contained in the property.
+    //! This can be any number, including zero.
+    //! This returns the number of samples that were written, independently
+    //! of whether or not they were constant.
+    size_t getNumSamples()
+    { return m_positions.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
@@ -199,33 +227,29 @@ public:
     //! regardless of the time sampling.
     bool isConstant() { return getTopologyVariance() == kConstantTopology; }
 
-    //! Time sampling type.
-    //!
+    //! Time information.
     AbcA::TimeSamplingPtr getTimeSampling()
     {
         return m_positions.getTimeSampling();
     }
 
-    //-*************************************************************************
     void get( sample_type &oSample,
               const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
 
-    sample_type getValue( const Abc::ISampleSelector &iSS =
-                          Abc::ISampleSelector() )
+    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
     {
-        sample_type smp;
+        Sample smp;
         get( smp, iSS );
         return smp;
     }
 
-
-    Abc::IV3fArrayProperty &getPositions() { return m_positions; }
-    Abc::IV2fArrayProperty &getUVs() { return m_uvs; }
-    Abc::IV3fArrayProperty &getNormals() { return m_normals; }
-    Abc::IFloatArrayProperty &getWidths() { return m_widths; }
-
-    // compound property to use as parent for any arbitrary GeomParams
-    // underneath it
+    Abc::IV3fArrayProperty &getPositions(){ return m_positions; }
+    Abc::IBox3dProperty &getBounds() { return m_selfBounds; }
+    
+    bool hasTrimCurve();
+    bool trimCurveTopologyIsHomogenous();
+    bool trimCurveTopologyIsConstant();
+    
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
     //-*************************************************************************
@@ -239,55 +263,90 @@ public:
     void reset()
     {
         m_positions.reset();
-        m_nVertices.reset();
+        m_numU.reset();
+       m_numV.reset();
+        m_uOrder.reset();
+        m_vOrder.reset();
+        m_uKnot.reset();
+        m_vKnot.reset();
+        
+        m_normals.reset();
+        m_uvs.reset();
 
         m_selfBounds.reset();
         m_childBounds.reset();
-
-        m_uvs.reset();
-        m_normals.reset();
-        m_widths.reset();
-
-        m_arbGeomParams.reset();
         
-        m_basisAndType.reset();
+        // reset trim curve attributes
+		m_trimNumLoops.reset();
+        m_trimNumCurves.reset();
+		m_trimNumVertices.reset();
+		m_trimOrder.reset();
+		m_trimKnot.reset();
+		m_trimMin.reset();
+		m_trimMax.reset();
+		m_trimU.reset();
+		m_trimV.reset();
+		m_trimW.reset();
 
-        Abc::ISchema<CurvesSchemaInfo>::reset();
+        Abc::ISchema<NuPatchSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::ISchema<CurvesSchemaInfo>::valid() &&
-                 m_positions.valid() );
+        return ( Abc::ISchema<NuPatchSchemaInfo>::valid() &&
+                 m_positions.valid() &&
+		 m_numU.valid() &&
+		 m_numV.valid() &&
+		 m_uOrder.valid() &&
+		 m_vOrder.valid() &&
+		 m_uKnot.valid() &&
+		 m_vKnot.valid() );
     }
 
     //! unspecified-bool-type operator overload.
     //! ...
-    ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
+    ALEMBIC_OVERRIDE_OPERATOR_BOOL( INuPatchSchema::valid() );
 
 protected:
-    void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
+    void init( const Abc::Argument &iArg0,
+               const Abc::Argument &iArg1 );
 
+    // required properties
     Abc::IV3fArrayProperty m_positions;
-    Abc::IInt32ArrayProperty  m_nVertices;
+    Abc::IUInt64Property m_numU;
+    Abc::IUInt64Property m_numV;
+    Abc::IUInt64Property m_uOrder;
+    Abc::IUInt64Property m_vOrder;
+    Abc::IFloatArrayProperty m_uKnot;
+    Abc::IFloatArrayProperty m_vKnot;
+        
+    // optional
+    IN3fGeomParam m_normals;
+    IV2fGeomParam m_uvs;
+    
+    // optional trim curve properties
+    Abc::IUInt64Property m_trimNumLoops;
+    Abc::IUInt64ArrayProperty m_trimNumVertices;
+    Abc::IUInt64ArrayProperty m_trimNumCurves;
+    Abc::IUInt64ArrayProperty m_trimOrder;
+    Abc::IFloatArrayProperty m_trimKnot;
+    Abc::IFloatArrayProperty m_trimMin;
+    Abc::IFloatArrayProperty m_trimMax;
+    Abc::IFloatArrayProperty m_trimU;
+    Abc::IFloatArrayProperty m_trimV;
+    Abc::IFloatArrayProperty m_trimW;
 
-    // contains type, wrap, ubasis, and vbasis.
-    AbcA::ScalarPropertyReaderPtr m_basisAndType;
-
-    Abc::IFloatArrayProperty m_widths;
-    Abc::IV2fArrayProperty m_uvs;
-    Abc::IV3fArrayProperty m_normals;
-
+    // bounds
     Abc::IBox3dProperty m_selfBounds;
     Abc::IBox3dProperty m_childBounds;
-
+    
     Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************
-typedef Abc::ISchemaObject<ICurvesSchema> ICurves;
+typedef Abc::ISchemaObject<INuPatchSchema> INuPatch;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

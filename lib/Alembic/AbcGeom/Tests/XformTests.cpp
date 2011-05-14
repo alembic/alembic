@@ -36,20 +36,8 @@
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
-#include <Alembic/Abc/Tests/Assert.h>
 
-#include <ImathMath.h>
-
-#include <limits>
-
-static const double VAL_EPSILON = std::numeric_limits<double>::epsilon() \
-    * 1024.0;
-
-bool almostEqual( const double &a, const double &b,
-                  const double &epsilon = VAL_EPSILON )
-{
-    return Imath::equalWithAbsError( a, b, epsilon );
-}
+#include "Assert.h"
 
 using namespace Alembic::AbcGeom;
 
@@ -138,8 +126,6 @@ void xformOut()
         a.getSchema().set( asamp );
     }
 
-    //return;
-
     XformSample bsamp;
     for ( size_t i = 0 ; i < 20 ; ++i )
     {
@@ -205,16 +191,15 @@ void xformIn()
 
         TESTING_ASSERT( xs.getTranslation() == V3d( 12.0, i+42.0, 20.0 ) );
         TESTING_ASSERT( xs.getMatrix() ==
-        Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
+                        Abc::M44d().setTranslation( V3d(12.0, i+42.0, 20.0)) );
     }
-
-    //return;
 
     IXform b( a, "b" );
     b.getSchema().get( xs );
     TESTING_ASSERT( b.getSchema().getTimeSampling()->getTimeSamplingType().isUniform() );
     // the schema is not static, because set() was called 20 times on it.
     TESTING_ASSERT( !b.getSchema().isConstant() );
+    TESTING_ASSERT( b.getSchema().getNumSamples() == 20 );
     TESTING_ASSERT( xs.getNumOps() == 0 );
     TESTING_ASSERT( b.getSchema().getNumOps() == 0 );
     TESTING_ASSERT( xs.getMatrix() == identity );

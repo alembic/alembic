@@ -69,8 +69,8 @@ void Example1_CurvesOut()
 
     OCurvesSchema &curves = myCurves.getSchema();
 
-    V2fArraySample widthSample( V2fArraySample( (const V2f *)g_widths,
-                                2));
+    FloatArraySample widthSample( FloatArraySample( (const float *)g_widths,
+                                                    4));
 
     V2fArraySample uvSample( V2fArraySample( (const V2f *)g_uvs,
                                 12));
@@ -81,9 +81,9 @@ void Example1_CurvesOut()
     std::cout << "creating sample" << std::endl;
     OCurvesSchema::Sample curves_sample(
         V3fArraySample( ( const V3f * ) g_verts, g_totalVerts ),
-        "cubic",
+        kCubic,
         Int32ArraySample( ( const int * ) g_numVerts, g_numCurves),
-        "nonperiodic",
+        kNonPeriodic,
         widthSample,
         uvSample
                                        );
@@ -121,9 +121,6 @@ void Example1_CurvesIn()
     TESTING_ASSERT( curvesSample.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
     std::cout << "bounds max " << curvesSample.getSelfBounds().max << std::endl;
     TESTING_ASSERT( curvesSample.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
-
-    std::cout << curves.getUBasis() << std::endl;
-    std::cout << curves.getVBasis() << std::endl;
 
     // test other attributes
     //TESTING_ASSERT( curvesSample.getPositions() -> size() == 12);

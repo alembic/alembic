@@ -52,6 +52,9 @@ SET( CXX_FILES
   OGeomParam.cpp
   IGeomParam.cpp
 
+  ONuPatch.cpp
+  INuPatch.cpp
+  
   OPoints.cpp
   IPoints.cpp
 
@@ -83,12 +86,16 @@ SET( H_FILES
   OCamera.h
 
   Basis.h
+  CurveType.h
   ICurves.h
   OCurves.h
 
   OFaceSet.h
   IFaceSet.h
 
+  ONuPatch.h
+  INuPatch.h
+  
   OGeomParam.h
   IGeomParam.h
 

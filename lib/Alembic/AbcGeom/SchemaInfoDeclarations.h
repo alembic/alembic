@@ -87,6 +87,14 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
 #define ALEMBIC_ABCGEOM_POLYMESH_SCHEMA (PolyMeshSchemaInfo::title())
 
 //-*****************************************************************************
+// NuPatch
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_NuPatch_v1",
+                                     ".geom",
+                                     NuPatchSchemaInfo );
+
+#define ALEMBIC_ABCGEOM_NUPATCH_SCHEMA (NuPatchSchemaInfo::title())
+
+//-*****************************************************************************
 // Subdivision surface
 ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_SubD_v1",
                                      ".geom",

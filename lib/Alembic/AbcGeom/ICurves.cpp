@@ -44,13 +44,13 @@ MeshTopologyVariance ICurvesSchema::getTopologyVariance()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::getTopologyVariance()" );
 
-    if ( m_positions.isConstant() && m_wrap.isConstant() &&
-         m_nVertices.isConstant() && m_type.isConstant() )
+    if ( m_positions.isConstant() && m_nVertices.isConstant() &&
+         m_basisAndType -> isConstant() )
     {
         return kConstantTopology;
     }
-    else if ( m_wrap.isConstant() && m_nVertices.isConstant() &&
-              m_type.isConstant() )
+    // TODO: we should check is the description is constant here.
+    else if ( m_basisAndType -> isConstant() )
     {
         return kHomogenousTopology;
     }
@@ -80,23 +80,12 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     m_positions = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
 
-    // type, nvertices, and wrap
-    m_type = Abc::IStringProperty( _this, "type",
-                                    args.getSchemaInterpMatching());
-
     m_nVertices = Abc::IInt32ArrayProperty( _this, "nVertices",
                                             args.getSchemaInterpMatching());
 
-    m_wrap = Abc::IStringProperty( _this, "wrap",
-                                   args.getSchemaInterpMatching());
-
-    // older Alembic archives won't have the bounding box properties; before 1.0,
-    // we should remove the if statements and assert that older archives will
-    // not be readable without a no-op error handling policy
-    if ( this->getPropertyHeader( ".selfBnds" ) != NULL )
-    {
-        m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
-    }
+    m_basisAndType = _this->getScalarProperty( "curveBasisAndType" );
+    
+    m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
 
     if ( this->getPropertyHeader( ".childBnds" ) != NULL )
     {
@@ -117,7 +106,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
 
     if ( this->getPropertyHeader( "width" ) != NULL )
     {
-        m_widths = Abc::IV2fArrayProperty( _this, "width", iArg0, iArg1 );
+        m_widths = Abc::IFloatArrayProperty( _this, "width", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
@@ -126,17 +115,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
                                                   args.getErrorHandlerPolicy()
                                                 );
     }
-
-    if ( this->getPropertyHeader( "uBasis" ) != NULL )
-    {
-        m_uBasis = Abc::IUcharProperty( _this, "uBasis", iArg0, iArg1 );
-    }
-
-    if ( this->getPropertyHeader( "vBasis" ) != NULL )
-    {
-        m_vBasis = Abc::IUcharProperty( _this, "vBasis", iArg0, iArg1 );
-    }
-
+    
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
@@ -147,20 +126,13 @@ void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::get()" );
 
     m_positions.get( oSample.m_positions, iSS );
-
-    m_type.get( oSample.m_type, iSS);
     m_nVertices.get( oSample.m_nVertices, iSS );
-    m_wrap.get( oSample.m_wrap, iSS );
 
-    if ( m_uBasis )
-    {
-        m_uBasis.get( oSample.m_uBasis, iSS );
-    }
+    AbcA::index_t sampIdx = iSS.getIndex( m_basisAndType->getTimeSampling(),
+                                          m_basisAndType->getNumSamples() );
 
-    if ( m_vBasis )
-    {
-        m_vBasis.get( oSample.m_vBasis, iSS );
-    }
+    oSample.m_basisAndType.reserve(4);
+    m_basisAndType->getSample( sampIdx, &(oSample.m_basisAndType.front()));
 
     if ( m_normals )
     {

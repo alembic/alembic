@@ -53,25 +53,9 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
                      "Sample 0 must have valid data for all mesh components" );
 
         m_positions.set( iSamp.getPositions() );
+	m_nVertices.set( iSamp.getCurvesNumVertices() );
 
-        // set wrap, nVertices, and type
-        m_type.set( iSamp.getType() );
-        m_wrap.set( iSamp.getWrap() );
-        m_nVertices.set( iSamp.getCurvesNumVertices() );
-
-	if ( iSamp.getUBasis() )
-	{
-	    m_uBasis = Abc::OUcharProperty( this->getPtr(), "uBasis",
-                                            m_timeSamplingIndex );
-	    m_uBasis.set( iSamp.getUBasis() );
-	}
-
-	if ( iSamp.getVBasis() )
-	{
-	    m_vBasis = Abc::OUcharProperty( this->getPtr(), "vBasis",
-                                            m_timeSamplingIndex );
-	    m_vBasis.set( iSamp.getVBasis() );
-	}
+	m_basisAndType->setSample( &(iSamp.getDescription().front()) );
 
         if ( iSamp.getChildBounds().hasVolume() )
         { m_childBounds.set( iSamp.getChildBounds() ); }
@@ -108,7 +92,7 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         // process widths
         if ( iSamp.getWidths() )
         {
-            m_widths = Abc::OV2fArrayProperty( this->getPtr(), "width",
+            m_widths = Abc::OFloatArrayProperty( this->getPtr(), "width",
                                                m_timeSamplingIndex );
             m_widths.set( iSamp.getWidths() );
         }
@@ -118,8 +102,9 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_nVertices, iSamp.getCurvesNumVertices() );
-        SetPropUsePrevIfNull( m_type, iSamp.getType() );
-        SetPropUsePrevIfNull( m_wrap, iSamp.getWrap() );
+	
+	// TODO implement set from previous
+        //SetPropUsePrevIfNull( m_basisAndType, iSamp.getDescription() );
 
         if ( m_childBounds )
         { SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() ); }
@@ -132,12 +117,6 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
 
         if ( m_widths )
         { SetPropUsePrevIfNull( m_widths, iSamp.getWidths() ); }
-
-        if ( m_uBasis )
-        { m_uBasis.set( iSamp.getUBasis() ); }
-
-        if ( m_vBasis )
-	{ m_vBasis.set( iSamp.getVBasis() ); }
 
         // update bounds
         if ( iSamp.getSelfBounds().hasVolume() )
@@ -166,9 +145,9 @@ void OCurvesSchema::setFromPrevious()
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::setFromPrevious" );
 
     m_positions.setFromPrevious();
-    m_type.setFromPrevious();
-    m_wrap.setFromPrevious();
     m_nVertices.setFromPrevious();
+    
+    m_basisAndType -> setFromPreviousSample();
 
     m_selfBounds.setFromPrevious();
 
@@ -177,9 +156,7 @@ void OCurvesSchema::setFromPrevious()
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
     if ( m_normals ) { m_normals.setFromPrevious(); }
     if ( m_widths ) { m_widths.setFromPrevious(); }
-    if ( m_uBasis ) { m_uBasis.setFromPrevious(); }
-    if ( m_vBasis ) { m_vBasis.setFromPrevious(); }
-
+    
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -199,12 +176,13 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
     m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
     m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTsIdx );
 
-    m_type = Abc::OStringProperty( _this, "type", iTsIdx );
     m_nVertices = Abc::OInt32ArrayProperty( _this, "nVertices", iTsIdx);
-    m_wrap = Abc::OStringProperty( _this, "wrap", iTsIdx );
 
-    // UVs, Normals, and Widths are created on first call to set()
-
+    m_basisAndType = _this->createScalarProperty(
+		"curveBasisAndType", AbcA::MetaData(),
+		AbcA::DataType( Alembic::Util::kUint8POD, 4 ),
+		iTsIdx );
+    
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 

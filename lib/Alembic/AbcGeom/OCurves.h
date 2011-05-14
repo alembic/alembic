@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/Basis.h>
+#include <Alembic/AbcGeom/CurveType.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 
 namespace Alembic {
@@ -80,29 +81,32 @@ public:
         //! be full like this, which would indicate a change of topology
         Sample(
                 const Abc::V3fArraySample &iPos,
-                const std::string &iType = "cubic",
+                const CurveType &iType = kCubic,
                 const Abc::Int32ArraySample &iNVertices = Abc::Int32ArraySample(),
-                const std::string &iWrap = "nonperiodic",
-                const Abc::V2fArraySample &iWidths = Abc::V2fArraySample(),
+                const CurvePeriodicity iWrap = kNonPeriodic,
+                const Abc::FloatArraySample &iWidths = Abc::V2fArraySample(),
                 const Abc::V2fArraySample &iUVs = Abc::V2fArraySample(),
                 const Abc::V3fArraySample &iNormals = Abc::V3fArraySample(),
 		const BasisType &iUBasis = kBezierBasis,
 		const BasisType &iVBasis = kBezierBasis )
 
           : m_positions( iPos ),
-            m_type( iType ),
-            m_wrap( iWrap ),
             m_nVertices( iNVertices ),
             m_uvs( iUVs ),
             m_normals( iNormals ),
-            m_widths( iWidths ),
-	    m_uBasis( iUBasis ),
-	    m_vBasis( iVBasis )
-        {}
+            m_widths( iWidths )
+        {
+	    m_basisAndType.clear();
+	    m_basisAndType.reserve(4);
+	    m_basisAndType[0] = iType;
+	    m_basisAndType[1] = iWrap;
+	    m_basisAndType[2] = iUBasis;
+	    m_basisAndType[3] = iVBasis;
+	}
 
         // widths accessor
-        const Abc::V2fArraySample &getWidths() const { return m_widths; }
-        void setWidths( const Abc::V2fArraySample &iWidths )
+        const Abc::FloatArraySample &getWidths() const { return m_widths; }
+        void setWidths( const Abc::FloatArraySample &iWidths )
         { m_widths = iWidths; }
 
         // positions accessor
@@ -111,14 +115,14 @@ public:
         { m_positions = iSmp; }
 
         // type accessors
-        void setType( const std::string &iType )
-        { m_type = iType; }
-        const std::string getType() const { return m_type; }
+        void setType( const CurveType &iType )
+        { m_basisAndType[0] = iType; }
+        const CurveType getType() const { return static_cast<CurveType> (m_basisAndType[0]); }
 
         // wrap accessors
-        void setWrap( const std::string &iWrap )
-        { m_wrap = iWrap; }
-        const std::string &getWrap() const { return m_wrap; }
+        void setWrap( const CurvePeriodicity &iWrap )
+        { m_basisAndType[1] = iWrap; }
+        const CurvePeriodicity getWrap() const { return static_cast<CurvePeriodicity> (m_basisAndType[1]); }
 
         const std::size_t getNumCurves() const { return m_nVertices.size(); }
 
@@ -151,13 +155,15 @@ public:
         { m_normals = iNormals; }
 
 	// basis accessors
-	const BasisType &getUBasis() const { return m_uBasis; }
+	const BasisType getUBasis() const { return static_cast<BasisType> (m_basisAndType[2]); }
         void setUBasis( const BasisType &iUBasis )
-        { m_uBasis = iUBasis; }
+        { m_basisAndType[2] = iUBasis; }
 
-	const BasisType &getVBasis() const { return m_vBasis; }
+	const BasisType getVBasis() const { return static_cast<BasisType> (m_basisAndType[3]); }
         void setVBasis( const BasisType &iVBasis )
-        { m_vBasis = iVBasis; }
+        { m_basisAndType[3] = iVBasis; }
+	
+	const std::vector<Alembic::Util::uint8_t> &getDescription() const { return m_basisAndType; }
 
 
         void reset()
@@ -168,30 +174,30 @@ public:
             m_widths.reset();
 
             m_nVertices.reset();
-            m_type = "cubic";
-            m_wrap = "nonperiodic";
 
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
-
-	    m_uBasis = kBezierBasis;
-	    m_vBasis = kBezierBasis;
+	    
+	    m_basisAndType.clear();
+	    m_basisAndType.reserve(4);
+	    
+	    m_basisAndType[0] = kCubic;
+	    m_basisAndType[1] = kNonPeriodic;
+	    m_basisAndType[2] = kBezierBasis;
+	    m_basisAndType[3] = kBezierBasis;
         }
 
     protected:
 
         // properties
         Abc::V3fArraySample m_positions;
-        std::string m_type;
-        std::string m_wrap;
         Abc::Int32ArraySample m_nVertices;
 
         Abc::V2fArraySample m_uvs;
         Abc::V3fArraySample m_normals;
-        Abc::V2fArraySample m_widths;
+        Abc::FloatArraySample m_widths;
 
-	BasisType m_uBasis;
-	BasisType m_vBasis;
+	std::vector<Alembic::Util::uint8_t> m_basisAndType;
 
         // bounding box attributes
         Abc::Box3d m_selfBounds;
@@ -225,12 +231,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSamplingType.
     template <class CPROP_PTR>
-    OCurvesSchema( CPROP_PTR iParent,
+    OCurvesSchema( CPROP_PTR iParentObject,
                    const std::string &iName,
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument(),
                    const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CurvesSchemaInfo>( iParent, iName,
+      : Abc::OSchema<CurvesSchemaInfo>( iParentObject, iName,
                                         iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
@@ -243,7 +249,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParent->getObject()->getArchive()->
+            tsIndex = iParentObject->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 
@@ -253,11 +259,11 @@ public:
     }
 
     template <class CPROP_PTR>
-    explicit OCurvesSchema( CPROP_PTR iParent,
+    explicit OCurvesSchema( CPROP_PTR iParentObject,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument(),
                             const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CurvesSchemaInfo>( iParent,
+      : Abc::OSchema<CurvesSchemaInfo>( iParentObject,
                                         iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
@@ -270,7 +276,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParent->getObject()->getArchive()->
+            tsIndex = iParentObject->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 
@@ -325,21 +331,16 @@ public:
     void reset()
     {
         m_positions.reset();
-        m_nVertices.reset();
-        m_wrap.reset();
-        m_type.reset();
-
         m_uvs.reset();
         m_normals.reset();
         m_widths.reset();
+        m_arbGeomParams.reset();
+        m_nVertices.reset();
 
-        m_uBasis.reset();
-        m_vBasis.reset();
+	m_basisAndType.reset();
 
         m_selfBounds.reset();
         m_childBounds.reset();
-
-        m_arbGeomParams.reset();
 
         Abc::OSchema<CurvesSchemaInfo>::reset();
     }
@@ -362,26 +363,20 @@ protected:
 
     // point data
     Abc::OV3fArrayProperty m_positions;
-
-    // m_type represents the type of the curve, i.e. "linear" "cubic" etc.
-    Abc::OStringProperty m_type;
     Abc::OInt32ArrayProperty m_nVertices;
-    Abc::OStringProperty m_wrap;
 
     // per-point data
     Abc::OV2fArrayProperty m_uvs;
     Abc::OV3fArrayProperty m_normals;
-    Abc::OV2fArrayProperty m_widths;
+    Abc::OFloatArrayProperty m_widths;
 
     Abc::OCompoundProperty m_arbGeomParams;
-
-    // basis properties
-    Abc::OUcharProperty m_uBasis;
-    Abc::OUcharProperty m_vBasis;
 
     // bounding box attributes
     Abc::OBox3dProperty m_selfBounds;
     Abc::OBox3dProperty m_childBounds;
+    
+    AbcA::ScalarPropertyWriterPtr m_basisAndType;
 };
 
 //-*****************************************************************************

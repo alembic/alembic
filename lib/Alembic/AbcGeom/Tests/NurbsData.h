@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,43 +34,35 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_All_h_
-#define _Alembic_AbcGeom_All_h_
+#ifndef _Alembic_AbcGeom_Tests_NurbsData_h_
+#define _Alembic_AbcGeom_Tests_NurbsData_h_
 
-#include <Alembic/AbcGeom/Foundation.h>
+#include <Alembic/AbcGeom/All.h>
 
-#include <Alembic/AbcGeom/GeometryScope.h>
+namespace Abc = Alembic::Abc;
 
-#include <Alembic/AbcGeom/Basis.h>
-#include <Alembic/AbcGeom/OCurves.h>
-#include <Alembic/AbcGeom/ICurves.h>
+extern const Abc::uint64_t g_nu;
+extern const Abc::uint64_t g_nv;
+extern const Abc::uint64_t g_uOrder;
+extern const Abc::uint64_t g_vOrder;
+extern const Abc::float32_t g_uKnot[];
+extern const Abc::float32_t g_vKnot[];
 
-#include <Alembic/AbcGeom/OFaceSet.h>
-#include <Alembic/AbcGeom/IFaceSet.h>
+extern const Abc::uint64_t g_nP;
+extern const Abc::float32_t g_P[];
 
-#include <Alembic/AbcGeom/OGeomParam.h>
-#include <Alembic/AbcGeom/IGeomParam.h>
+// trim curve
+extern const Abc::uint64_t g_trim_nLoops;
+extern const Abc::uint64_t g_trim_nCurves[];
+extern const Abc::uint64_t g_trim_n[];
+extern const Abc::uint64_t g_trim_order[];
+extern const Abc::float32_t g_trim_knot[];
+extern const Abc::float32_t g_trim_min[];
+extern const Abc::float32_t g_trim_max[];
+extern const Abc::float32_t g_trim_u[];
+extern const Abc::float32_t g_trim_v[];
+extern const Abc::float32_t g_trim_w[];
 
-#include <Alembic/AbcGeom/FilmBackXformOp.h>
-#include <Alembic/AbcGeom/CameraSample.h>
-#include <Alembic/AbcGeom/OCamera.h>
-#include <Alembic/AbcGeom/ICamera.h>
-
-#include <Alembic/AbcGeom/INuPatch.h>
-#include <Alembic/AbcGeom/ONuPatch.h>
-
-#include <Alembic/AbcGeom/OPoints.h>
-#include <Alembic/AbcGeom/IPoints.h>
-
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/IPolyMesh.h>
-
-#include <Alembic/AbcGeom/OSubD.h>
-#include <Alembic/AbcGeom/ISubD.h>
-
-#include <Alembic/AbcGeom/XformOp.h>
-#include <Alembic/AbcGeom/XformSample.h>
-#include <Alembic/AbcGeom/OXform.h>
-#include <Alembic/AbcGeom/IXform.h>
+//-*******************************
 
 #endif
