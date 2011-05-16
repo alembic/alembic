@@ -51,7 +51,7 @@ ENDIF()
 # Declare the version
 SET( PROJECT_VERSION_MAJOR 0 )
 SET( PROJECT_VERSION_MINOR 9 )
-SET( PROJECT_VERSION_PATCH 2 )
+SET( PROJECT_VERSION_PATCH 3 )
 SET( PROJECT_VERSION
      ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
 SET( VERSION ${PROJECT_VERSION} )
@@ -142,7 +142,7 @@ IF(BUILD_TESTING)
   MARK_AS_ADVANCED(BUILDNAME)
 ENDIF(BUILD_TESTING)
 
-IF(UNIX AND NOT WIN32)
+IF(UNIX AND NOT WINDOWS)
   FIND_PROGRAM(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin )
   IF(CMAKE_UNAME)
     EXEC_PROGRAM(uname ARGS -m OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR)
@@ -177,8 +177,8 @@ FIND_PACKAGE(ZLIB REQUIRED)
 # OPEN GL STUFF
 #-******************************************************************************
 #-******************************************************************************
-FIND_PACKAGE( OpenGL REQUIRED )
-FIND_PACKAGE( GLUT REQUIRED )
+FIND_PACKAGE( OpenGL )
+FIND_PACKAGE( GLUT )
 
 IF ( ${WINDOWS} )
   # Do a windows OpenGL thing, whatever that may be
@@ -225,20 +225,6 @@ INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )
 
 INCLUDE( "./build/AlembicIlmBase.cmake" )
 INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
-
-#-******************************************************************************
-#-******************************************************************************
-# OPEN EXR
-#-******************************************************************************
-#-******************************************************************************
-
-# Automatically include ILM Base Stuff.
-#INCLUDE( "./build/AlembicOpenEXR.cmake" )
-#IF ( ALEMBIC_OPENEXR_FOUND )
-#  INCLUDE_DIRECTORIES( ${ALEMBIC_OPENEXR_INCLUDE_PATH} )
-#ENDIF()
-
-
 
 # Include Python stuff
 INCLUDE("./build/AlembicPython.cmake")
@@ -287,6 +273,3 @@ ENDIF()
 ADD_SUBDIRECTORY( examples EXCLUDE_FROM_ALL )
 
 ENDIF()
-
-
-

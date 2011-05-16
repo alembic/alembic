@@ -1,3 +1,28 @@
+2011-05-13, Alembic 0.9.3:
+
+The biggest news in this release is what we hope is the complete set of
+geometric types for ALembic 1.0, which includes curves (fashioned after
+RiCurves), nurbs surfaces, facesets in polygons and subds, and a camera
+definition. See http://code.google.com/p/alembic/wiki/Alembic_Geometric_Types
+for a complete list.
+
+The code changes for this release can be examined here:
+
+http://codereview.appspot.com/4523067/
+
+Some highlights:
+
+ - There is now a single class for expression transforms. Preivously
+   we had both SimpleXform and Xform objects for expressing transformation.
+   The new unified class is simplified and it is faster.
+
+ - We have experimental support for building Alembic on windows. Details
+   for how to perform the build can found in build/Windows/README.txt and
+   build/Windows/WindowsBuildSteps.html
+
+ - We've changed the API in a couple places, most notably, in the way
+   time is handled via the class Alembic::AbcCoreAbstract::TimeSampling.
+
 2011-02-17, Alembic 0.9.2:
 
 This is somewhere between a major and minor update.  Numerous bugs
