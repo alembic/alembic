@@ -69,7 +69,7 @@ void register_iuntypedproperties()
               return_internal_reference<1>() )
         .def( "getDataType", &Abc::IScalarProperty::getDataType,
               return_internal_reference<1>() )
-        .def( "getTimeSamplingType", &Abc::IScalarProperty::getTimeSamplingType )
+        .def( "getTimeSampling", &Abc::IScalarProperty::getTimeSampling )
         .def( "getNumSamples", &Abc::IScalarProperty::getNumSamples )
         .def( "getObject", &Abc::IScalarProperty::getObject,
               with_custodian_and_ward_postcall<0,1>() )
@@ -98,7 +98,7 @@ void register_iuntypedproperties()
               return_internal_reference<1>() )
         .def( "getDataType", &Abc::IArrayProperty::getDataType,
               return_internal_reference<1>() )
-        .def( "getTimeSamplingType", &Abc::IArrayProperty::getTimeSamplingType )
+        .def( "getTimeSampling", &Abc::IArrayProperty::getTimeSampling )
         .def( "getNumSamples", &Abc::IArrayProperty::getNumSamples )
         .def( "getObject", &Abc::IArrayProperty::getObject,
               with_custodian_and_ward_postcall<0,1>() )
