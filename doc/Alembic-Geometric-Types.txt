@@ -7,7 +7,7 @@ The Abc Transform class has these attributes:
   * ops - One or more operations of translation, scale, rotation, or 4x4 Rotation is angle in degrees and axis of rotation.  Operations can optionally indicate a hint (e.g. for Maya to record hinting for pivot behavior).
   * inherits - Does this transform concatenate or ignore the transforms of its parents
   * childBounds - The bounding volume, including all subobjects
-Alembic uses a left handed coordinate system.
+Alembic uses a right handed coordinate system.
 
 == Points ==
 The Abc Points class has these attributes:
