@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,29 +34,36 @@
 //
 //-*****************************************************************************
 
-#include "ICurvesDrw.h"
+#include "INuPatchDrw.h"
 
 namespace SimpleAbcViewer {
 
 //-*****************************************************************************
-ICurvesDrw::ICurvesDrw( ICurves &iCurves )
-  : IObjectDrw( iCurves, false )
-  , m_curves( iCurves )
+INuPatchDrw::INuPatchDrw( INuPatch &iNuPatch )
+  : IObjectDrw( iNuPatch, false )
+  , m_nuPatch( iNuPatch )
 {
+    // create our nurb renderer.
+    nurb = gluNewNurbsRenderer();
+    
+    gluNurbsProperty(nurb, GLU_SAMPLING_TOLERANCE, 25.0);
+    gluNurbsProperty(nurb, GLU_DISPLAY_MODE, GLU_FILL);
+    
     // Get out if problems.
-    if ( !m_curves.valid() )
+    if ( !m_nuPatch.valid() )
     {
         return;
     }
+
 
     // The object has already set up the min time and max time of
     // all the children.
     // if we have a non-constant time sampling, we should get times
     // out of it.
-    TimeSamplingPtr iTsmp = m_curves.getSchema().getTimeSampling();
-    if ( ! iCurves.getSchema().isConstant() )
+    TimeSamplingPtr iTsmp = m_nuPatch.getSchema().getTimeSampling();
+    if ( !m_nuPatch.getSchema().isConstant() )
     {
-        size_t numSamps = iCurves.getSchema().getNumSamples();
+        size_t numSamps = m_nuPatch.getSchema().getNumSamples();
         if ( numSamps > 0 )
         {
             chrono_t minTime = iTsmp->getSampleTime( 0 );
@@ -68,86 +75,83 @@ ICurvesDrw::ICurvesDrw( ICurves &iCurves )
 }
 
 //-*****************************************************************************
-ICurvesDrw::~ICurvesDrw()
+INuPatchDrw::~INuPatchDrw()
 {
-    // Nothing!
+    //delete nurb;
 }
 
 //-*****************************************************************************
-bool ICurvesDrw::valid()
+bool INuPatchDrw::valid()
 {
-    return IObjectDrw::valid() && m_curves.valid();
+    return IObjectDrw::valid() && m_nuPatch.valid();
 }
 
 //-*****************************************************************************
-void ICurvesDrw::setTime( chrono_t iSeconds )
+void INuPatchDrw::setTime( chrono_t iSeconds )
 {
     IObjectDrw::setTime( iSeconds );
 
     // Use nearest for now.
     ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
-    ICurvesSchema::Sample curvesSample;
-    m_curves.getSchema().get( curvesSample, ss );
-
-    m_positions = curvesSample.getPositions();
-    m_nCurves = curvesSample.getNumCurves();
+    INuPatchSchema::Sample nuPatchSample;
+    m_nuPatch.getSchema().get( nuPatchSample, ss );
     
-    m_nVertices = curvesSample.getCurvesNumVertices();
-
+    m_positions = nuPatchSample.getPositions();
+    m_uKnot = nuPatchSample.getUKnot();
+    m_vKnot = nuPatchSample.getVKnot();
+    m_nu = nuPatchSample.getNumU();
+    m_nv = nuPatchSample.getNumV();
+    m_uOrder = nuPatchSample.getUOrder();
+    m_vOrder = nuPatchSample.getVOrder();
+    
+    // Update bounds from positions
     m_bounds.makeEmpty();
+    if ( m_positions )
+    {
+        size_t numPoints = m_positions->size();
+        for ( size_t p = 0; p < numPoints; ++p )
+        {
+            m_bounds.extendBy( (*m_positions)[p] );
+        }
+    }
 
-    m_bounds.extendBy( curvesSample.getSelfBounds() );
+    // The Object update computed child bounds.
+    // Extend them by this.
+    /*
+    if ( !m_drwHelper.getBounds().isEmpty() )
+    {
+        m_bounds.extendBy( m_drwHelper.getBounds() );
+    }
+    */
 }
 
 
 //-*****************************************************************************
-void ICurvesDrw::draw( const DrawContext &iCtx )
+void INuPatchDrw::draw( const DrawContext &iCtx )
 {
 
-    size_t numPoints = m_positions->size();
+    const V3f *points = m_positions -> get();
+    const float *u_knot = m_uKnot -> get();
+    const float *v_knot = m_vKnot -> get();
+    size_t nknotu = m_uKnot -> size();
+    size_t nknotv = m_vKnot -> size();
+    
+    glColor3f(1.0, 1.0, 1.0);
+    
+    gluBeginSurface(nurb);
 
-    const V3f *points = m_positions->get();
-    const uint32_t *nVertices = m_nVertices->get();
-    const C3f *colors = NULL;
-
-    glDisable( GL_LIGHTING );
-
-    // get point data
-    size_t numVerts = numPoints;
-
-    glColor3f( 1.0, 1.0, 1.0 );
-    glEnable( GL_POINT_SMOOTH );
-    glPointSize( 1.0 );
-    glLineWidth( 1.0 );
-
-    for ( size_t currentCurve = 0, currentVertex = 0 ; currentCurve < m_nCurves;
-          currentCurve++ )
-    {
-
-        m_curvePoints.clear();
-        for ( size_t currentCurveVertex = 0;
-              currentCurveVertex < nVertices[currentCurve];
-              currentCurveVertex++, currentVertex++ )
-        {
-            m_curvePoints.push_back(&points[currentVertex]);
-        }
-
-        glMap1f( GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4,
-                 (const GLfloat *)m_curvePoints[0] );
-        glEnable( GL_MAP1_VERTEX_3 );
-
-        glBegin( GL_LINE_STRIP );
-        for ( size_t currentSegment = 0 ; currentSegment < 30 ;
-              ++currentSegment )
-        {
-            glEvalCoord1f(
-                static_cast<GLfloat>( currentSegment ) / static_cast<GLfloat>( 30.0 ) );
-        }
-        glEnd();
-    }
-
-    glEnable( GL_LIGHTING );
-
+        gluNurbsSurface( nurb,
+                        nknotu, (GLfloat *) &u_knot[0],
+                        nknotv, (GLfloat *) &v_knot[0],
+                        m_nu*3, 3, // stride
+                        (GLfloat *) &points[0][0],
+                        m_uOrder, m_vOrder, //orders
+                        GL_MAP2_VERTEX_3
+                        );
+    
+    gluEndSurface(nurb);
+    
+    
     IObjectDrw::draw( iCtx );
 }
 

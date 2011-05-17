@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _SimpleAbcViewer_ICurvesDrw_h_
-#define _SimpleAbcViewer_ICurvesDrw_h_
+#ifndef _SimpleAbcViewer_INuPatchDrw_h_
+#define _SimpleAbcViewer_INuPatchDrw_h_
 
 #include "Foundation.h"
 #include "IObjectDrw.h"
@@ -43,13 +43,13 @@
 namespace SimpleAbcViewer {
 
 //-*****************************************************************************
-//! Draw a curve
-class ICurvesDrw : public IObjectDrw
+//! Draw a nurbs surface
+class INuPatchDrw : public IObjectDrw
 {
 public:
-    ICurvesDrw( ICurves &iCurves );
+    INuPatchDrw( INuPatch &iNuPatch );
 
-    virtual ~ICurvesDrw();
+    virtual ~INuPatchDrw();
 
     virtual bool valid();
 
@@ -58,12 +58,22 @@ public:
     virtual void draw( const DrawContext & iCtx );
 
 protected:
-    ICurves m_curves;
+
+    INuPatch m_nuPatch;
     V3fArraySamplePtr m_positions;
-    UInt32ArraySamplePtr m_nVertices;
-    int               m_nCurves;
+    FloatArraySamplePtr m_uKnot;
+    FloatArraySamplePtr m_vKnot;
+    int m_uOrder;
+    int m_vOrder;
+    int m_nu;
+    int m_nv;
     
-    std::vector<const V3f*> m_curvePoints;
+    // trim curve data
+    
+    
+    // nurbs drawing object
+    GLUnurbsObj *nurb;
+    
 };
 
 } // End namespace SimpleAbcViewer

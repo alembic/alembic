@@ -40,6 +40,7 @@ SET( H_FILES
      Foundation.h
      GLCamera.h
      ICurvesDrw.h
+     INuPatchDrw.h
      IObjectDrw.h
      IPointsDrw.h
      IPolyMeshDrw.h
@@ -53,6 +54,7 @@ SET( H_FILES
 SET( CXX_FILES
      GLCamera.cpp
      ICurvesDrw.cpp
+     INuPatchDrw.cpp
      IObjectDrw.cpp
      IPointsDrw.cpp
      IPolyMeshDrw.cpp
