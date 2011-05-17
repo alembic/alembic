@@ -82,7 +82,7 @@ public:
         Sample(
                 const Abc::V3fArraySample &iPos,
                 const CurveType &iType = kCubic,
-                const Abc::Int32ArraySample &iNVertices = Abc::Int32ArraySample(),
+                const Abc::UInt32ArraySample &iNVertices = Abc::UInt32ArraySample(),
                 const CurvePeriodicity iWrap = kNonPeriodic,
                 const Abc::FloatArraySample &iWidths = Abc::V2fArraySample(),
                 const Abc::V2fArraySample &iUVs = Abc::V2fArraySample(),
@@ -128,9 +128,9 @@ public:
 
         //! an array of ints that corresponds to the number
         //! of vertices per curve
-        void setCurvesNumVertices( const Abc::Int32ArraySample &iNVertices)
+        void setCurvesNumVertices( const Abc::UInt32ArraySample &iNVertices)
         { m_nVertices = iNVertices; }
-        const Abc::Int32ArraySample &getCurvesNumVertices() const
+        const Abc::UInt32ArraySample &getCurvesNumVertices() const
         { return m_nVertices; }
 
         // getUVs getter
@@ -191,7 +191,7 @@ public:
 
         // properties
         Abc::V3fArraySample m_positions;
-        Abc::Int32ArraySample m_nVertices;
+        Abc::UInt32ArraySample m_nVertices;
 
         Abc::V2fArraySample m_uvs;
         Abc::V3fArraySample m_normals;
@@ -363,7 +363,7 @@ protected:
 
     // point data
     Abc::OV3fArrayProperty m_positions;
-    Abc::OInt32ArrayProperty m_nVertices;
+    Abc::OUInt32ArrayProperty m_nVertices;
 
     // per-point data
     Abc::OV2fArrayProperty m_uvs;

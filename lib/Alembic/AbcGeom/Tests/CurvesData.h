@@ -45,7 +45,7 @@ namespace Abc = Alembic::Abc;
 // This data is used by both the PolyMesh and SubD tests.
 extern const size_t g_numCurves;
 extern const size_t g_totalVerts;
-extern const Abc::int32_t g_numVerts[];
+extern const Abc::uint32_t g_numVerts[];
 extern const Abc::float32_t g_verts[];
 
 extern const size_t g_numWidths;

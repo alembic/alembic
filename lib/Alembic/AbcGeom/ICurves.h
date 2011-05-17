@@ -64,7 +64,7 @@ public:
         {
             return m_nVertices->size();
         }
-        Abc::Int32ArraySamplePtr getCurvesNumVertices() const
+        Abc::UInt32ArraySamplePtr getCurvesNumVertices() const
         { return m_nVertices; }
         
         std::vector<uint8_t> getDescription() const { return m_basisAndType; }
@@ -112,7 +112,7 @@ public:
 
         // type, wrap, and nVertices
         std::size_t m_numCurves;
-        Abc::Int32ArraySamplePtr m_nVertices;
+        Abc::UInt32ArraySamplePtr m_nVertices;
 
         std::vector<Alembic::Util::uint8_t> m_basisAndType;
 
@@ -271,7 +271,7 @@ protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
     Abc::IV3fArrayProperty m_positions;
-    Abc::IInt32ArrayProperty  m_nVertices;
+    Abc::IUInt32ArrayProperty  m_nVertices;
 
     // contains type, wrap, ubasis, and vbasis.
     AbcA::ScalarPropertyReaderPtr m_basisAndType;

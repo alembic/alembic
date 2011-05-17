@@ -80,7 +80,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     m_positions = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
 
-    m_nVertices = Abc::IInt32ArrayProperty( _this, "nVertices",
+    m_nVertices = Abc::IUInt32ArrayProperty( _this, "nVertices",
                                             args.getSchemaInterpMatching());
 
     m_basisAndType = _this->getScalarProperty( "curveBasisAndType" );

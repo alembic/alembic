@@ -82,7 +82,7 @@ void Example1_CurvesOut()
     OCurvesSchema::Sample curves_sample(
         V3fArraySample( ( const V3f * ) g_verts, g_totalVerts ),
         kCubic,
-        Int32ArraySample( ( const int * ) g_numVerts, g_numCurves),
+        UInt32ArraySample( g_numVerts, g_numCurves),
         kNonPeriodic,
         widthSample,
         uvSample
