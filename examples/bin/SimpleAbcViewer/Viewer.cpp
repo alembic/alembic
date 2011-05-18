@@ -259,8 +259,8 @@ void RenderIt()
     cameraFileName = "SimpleAbcViewer_camera.XXXXXX";
 #endif
 
-    float shutterOpenTime = -0.125f + ( float )g_transport->getCurrentFrame();
-    float shutterCloseTime = 0.125f + ( float )g_transport->getCurrentFrame();
+    float shutterOpenTime = -0.25f; // + ( float )g_transport->getCurrentFrame();
+    float shutterCloseTime = 0.25f; //+ ( float )g_transport->getCurrentFrame();
     float openTime = -0.5f + ( float )g_transport->getCurrentFrame();
     float closeTime = 1.0f + openTime;
 
@@ -491,7 +491,9 @@ namespace po = boost::program_options;
 int SimpleViewScene( int argc, char *argv[] )
 {
     std::string viewerpath( argv[0] );
+    std::cout << "viewerpath: " << viewerpath << std::endl;
     std::string RenderScript( viewerpath + "Renderit" );
+    std::cout << "renderscript: " << RenderScript << std::endl;
     std::string abcFileName = "";
     float fps = 24.0f;
     std::string AlembicRiPluginDsoPath = "";
@@ -531,7 +533,7 @@ int SimpleViewScene( int argc, char *argv[] )
     if ( vm.count( "help" ) || argc < 2 )
     {
         std::cout << desc << std::endl;
-        return -1;
+        return 0;
     }
 
 #ifndef DEBUG

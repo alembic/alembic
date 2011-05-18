@@ -39,10 +39,14 @@
 
 #include <Alembic/Util/Foundation.h>
 #include <boost/format.hpp>
+#include <boost/cstdint.hpp>
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
+
+using boost::uint8_t;
+using boost::uint64_t;
 
 //-*************************************************************************
 // Digest class. This is a 128 bit hash key produced by our hashing algorithm.

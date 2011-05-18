@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -46,10 +46,8 @@ namespace Alembic {
 namespace AbcGeom {
 
 //! The default value for determining whether a property is actually
-//! different from the default.  If it's within this tolerance, the
-//! default value is used, which allows Alembic to more efficiently
-//! store the data, resulting in smaller Archive size.
-static const double kXFORM_DELTA_TOLERANCE = 1.0e-9;
+//! different from the default.
+static const double kXFORM_DELTA_TOLERANCE = 1.0e-12;
 
 //-*****************************************************************************
 class OXformSchema : public Abc::OSchema<XformSchemaInfo>
@@ -89,20 +87,23 @@ public:
       : Abc::OSchema<XformSchemaInfo>( iParentObject, iName,
                                        iArg0, iArg1, iArg2 )
     {
+        // Meta data and error handling are eaten up by
+        // the super type, so all that's left is time sampling.
         AbcA::TimeSamplingPtr tsPtr =
             Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        m_tsidx = Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
 
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
+        AbcA::index_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        if ( tsPtr )
         {
-            m_tsidx = iParentObject->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = iParentObject->getObject()->getArchive()->
+                addTimeSampling( *tsPtr );
         }
 
-        init();
+        m_timeSamplingIndex = tsIndex;
+
+        init( tsIndex );
     }
 
     //! This constructor does the same as the above, but uses the default
@@ -113,30 +114,30 @@ public:
                            const Abc::Argument &iArg1 = Abc::Argument(),
                            const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<XformSchemaInfo>( iParentObject,
-                                            iArg0, iArg1, iArg2 )
+                                       iArg0, iArg1, iArg2 )
     {
-
+        // Meta data and error handling are eaten up by
+        // the super type, so all that's left is time sampling.
         AbcA::TimeSamplingPtr tsPtr =
             Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        m_tsidx = Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
 
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
+        AbcA::index_t tsIndex =
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+        if ( tsPtr )
         {
-            m_tsidx = iParentObject->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = iParentObject->getObject()->getArchive()->
+                addTimeSampling( *tsPtr );
         }
 
-        init();
+        m_timeSamplingIndex = tsIndex;
+
+        init( tsIndex );
     }
 
     //! Explicit copy constructor to work around MSVC bug
     OXformSchema( const OXformSchema &iCopy )
-    {
-        *this = iCopy;
-    }
+    { *this = iCopy; }
 
     //! Default assignment operator used.
 
@@ -144,11 +145,9 @@ public:
     // SCHEMA STUFF
     //-*************************************************************************
 
-    //! Return the time sampling type, which is stored on each of the
-    //! sub properties.
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     {
-        return getObject().getArchive().getTimeSampling(m_tsidx);
+        return m_inherits.getTimeSampling();
     }
 
     //-*************************************************************************
@@ -157,18 +156,14 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples() const { return m_numSetSamples; }
+    size_t getNumSamples() { return m_ops->getNumSamples(); }
 
     //! Set an animated sample.  On first call to set, the sample is modified,
     //! so it can't be const.
     void set( XformSample &ioSamp );
 
-
     //! Set from previous sample. Will hold the animated channels.
-    void setFromPrevious( );
-
-    void setTimeSampling( uint32_t iIndex );
-    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
+    void setFromPrevious();
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -181,14 +176,18 @@ public:
     void reset()
     {
         m_childBounds.reset();
+        m_timeSamplingIndex = 0;
         m_inherits.reset();
-        m_numSetSamples = 0;
-        m_opstack.clear();
-        m_opstack.resize( 0 );
         m_ops.reset();
-        m_props.clear();
-        m_props.resize( 0 );
-        m_tsidx = 0;
+        m_vals.reset();
+        m_protoSample.reset();
+        m_animChannels.reset();
+
+        m_staticChans.clear();
+        m_staticChans.resize( 0 );
+        m_opVec.clear();
+        m_opVec.resize( 0 );
+
         super_type::reset();
     }
 
@@ -204,88 +203,45 @@ public:
 
 
 private:
-    void init();
+    void init( const AbcA::index_t iTSIndex );
+
+    std::size_t m_numChannels;
+    std::size_t m_numOps;
+
+    // should we store are channel values in an ArrayProperty,
+    // or in a ScalarProperty with some Dimension > 0 and < MAX_SCALAR_CHANS
+    bool m_useArrayProp;
+
+    AbcA::DataType m_arrayValuesDataType;
+    Alembic::Util::Dimensions m_arraySampleDimensions;
+
+    void setChannelValues( const std::vector<double> &iVals );
 
 protected:
-    //-*************************************************************************
-    // HELPER CLASS
-    //-*************************************************************************
-
-    //! The defaulted double property will only create a property
-    //! and only bother setting a value when it the value differs from a
-    //! known default value. This allows transforms to disappear when they
-    //! are identity.
-    //! It has some Xform-specific stuff in here, so not worth
-    //! making general (yet).
-    class ODefaultedDoubleProperty
-    {
-    public:
-        void reset()
-        {
-            m_parent.reset();
-            m_name = "";
-            m_errorHandlerPolicy = Abc::ErrorHandler::kThrowPolicy;
-            m_default = 0.0;
-            m_epsilon = kXFORM_DELTA_TOLERANCE;
-            m_property.reset();
-        }
-
-        ODefaultedDoubleProperty() { reset(); }
-
-        ODefaultedDoubleProperty( AbcA::CompoundPropertyWriterPtr iParent,
-                                  const std::string &iName,
-                                  Abc::ErrorHandler::Policy iPolicy,
-                                  double iDefault,
-                                  double iEpsilon=kXFORM_DELTA_TOLERANCE )
-          : m_parent( iParent )
-          , m_name( iName )
-          , m_errorHandlerPolicy( iPolicy )
-          , m_default( iDefault )
-          , m_epsilon( iEpsilon )
-        {
-            // We don't build the property until we need it for sure.
-        }
-
-        void set( const double &iSamp, const std::size_t &iNumSampsSoFar );
-
-        void setFromPrevious();
-
-        double getDefaultValue() const { return m_default; }
-
-        std::string getName() const { return m_name; }
-
-    protected:
-        // Parent.
-        AbcA::CompoundPropertyWriterPtr m_parent;
-
-        // We cache the init stuff.
-        std::string m_name;
-        Abc::ErrorHandler::Policy m_errorHandlerPolicy;
-        double m_default;
-        double m_epsilon;
-
-        // The "it". This may not exist.
-        Abc::ODoubleProperty m_property;
-    }; // END DEFAULTED DOUBLE PROPERTY CLASS DECLARATION
-
-
-protected:
-    // Number of set samples.
-    std::size_t m_numSetSamples;
 
     Abc::OBox3dProperty m_childBounds;
 
-    Abc::OUcharArrayProperty m_ops;
+    AbcA::index_t m_timeSamplingIndex;
 
-    std::vector<ODefaultedDoubleProperty> m_props;
+    AbcA::ScalarPropertyWriterPtr m_ops;
+
+    AbcA::BasePropertyWriterPtr m_vals;
 
     Abc::OBoolProperty m_inherits;
 
-    // ensure that our sample's topology doesn't change; see usage
-    // in OXformSchema::set()
-    std::vector<Alembic::Util::uint8_t> m_opstack;
+    Abc::OBoolProperty m_isNotConstantIdentity;
 
-    uint32_t m_tsidx;
+    Abc::OUInt32ArrayProperty m_animChannels;
+
+    // ensure that our sample's topology is unchanging between
+    // calls to set; see usage in OXformSchema::set()
+    XformSample m_protoSample;
+
+    std::vector<bool> m_staticChans;
+
+    std::vector<Alembic::Util::uint8_t> m_opVec;
+
+    bool m_isIdentity;
 };
 
 //-*****************************************************************************

@@ -374,7 +374,6 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
 
     }
 
-
     if ( mAction >= CONNECT )
     {
         if (cameraObj == MObject::kNullObj)

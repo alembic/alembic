@@ -344,3 +344,102 @@ void AddArbitraryProperties( ICompoundProperty &parent,
 
     }
 }
+
+void AddArbitraryGeomParams( ICompoundProperty &parent,
+                             ISampleSelector &sampleSelector,
+                             ParamListBuilder &ParamListBuilder,
+                             const std::set<std::string> * excludeNames
+                           )
+{
+    if ( !parent.valid() )
+    {
+        return;
+    }
+
+    for ( size_t i = 0; i < parent.getNumProperties(); ++i )
+    {
+        const PropertyHeader &propHeader = parent.getPropertyHeader( i );
+        const std::string &propName = propHeader.getName();
+
+        if (propName.empty()
+            || ( excludeNames
+                 && excludeNames->find( propName ) != excludeNames->end() ) )
+        {
+            continue;
+        }
+
+        if ( IFloatGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IFloatGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "float",
+                ParamListBuilder);
+        }
+        else if ( IInt32GeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IInt32GeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "int",
+                ParamListBuilder);
+        }
+        else if ( IStringGeomParam::matches( propHeader ) )
+        {
+            AddStringGeomParamToParamListBuilder(
+                parent,
+                propHeader,
+                sampleSelector,
+                ParamListBuilder);
+        }
+        else if ( IV2fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IV2fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "float",
+                ParamListBuilder,
+                2);
+        }
+        else if ( IV3fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IV3fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "point",
+                ParamListBuilder);
+        }
+        else if ( IN3fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IN3fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "normal",
+                ParamListBuilder);
+        }
+        else if ( IC3fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IC3fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "color",
+                ParamListBuilder);
+        }
+        if ( IM44fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IM44fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "matrix",
+                ParamListBuilder);
+        }
+
+    }
+}

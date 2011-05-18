@@ -36,7 +36,6 @@
 SET( TEST_LIBS
      AlembicAbcCoreHDF5
      AlembicAbcCoreAbstract
-     AlembicMD5Hash
      AlembicUtil
      ${ALEMBIC_ILMBASE_LIBS}
      ${ALEMBIC_HDF5_LIBS}

@@ -37,7 +37,6 @@
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/Util/All.h>
-#include <Alembic/MD5Hash/All.h>
 
 #include <iostream>
 

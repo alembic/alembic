@@ -319,7 +319,7 @@ void XformSample::setTranslation( const Abc::V3d &iTrans )
 
 //-*****************************************************************************
 void XformSample::setRotation( const Abc::V3d &iAxis,
-                               const double iAngleInDegrees )
+                               const double iAngleInRadians )
 {
     XformOp op( kRotateOperation, kRotateHint );
 
@@ -327,7 +327,8 @@ void XformSample::setRotation( const Abc::V3d &iAxis,
     {
         op.setChannelValue( i, iAxis[i] );
     }
-    op.setChannelValue( 3, DegreesToRadians( iAngleInDegrees ) );
+
+    op.setChannelValue( 3, iAngleInRadians );
 
     if ( ! m_hasBeenRead )
     {
@@ -352,6 +353,17 @@ void XformSample::setRotation( const Abc::V3d &iAxis,
 
         m_ops[ret] = op;
         m_opIndex = ++m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setXYZRotation( const Abc::V3d &iAnglesInRadians )
+{
+    XformOp op( kXYZRotateOperation, kRotateHint );
+
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        op.setChannelValue( i, iAnglesInRadians[i] );
     }
 }
 
@@ -468,10 +480,13 @@ Abc::M44d XformSample::getMatrix() const
             {
                 m.setTranslation( vec );
             }
-            else // must be rotation
+            else if ( otype == kXYZRotateOperation )
             {
-                m.setAxisAngle( vec,
-                                DegreesToRadians( op.getChannelValue( 3 ) ) );
+                m.setAxisAngle( vec, op.getChannelValue( 3 ) );
+            }
+            else // must be XYZRotation
+            {
+                m.setEulerAngles( vec );
             }
         }
         ret = m * ret;
@@ -508,11 +523,19 @@ double XformSample::getAngle() const
 {
     Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
 
-    return RadiansToDegrees( q.angle() );
+    return q.angle();
 }
 
 //-*****************************************************************************
-void XformSample::setHasBeenRead()
+Abc::V3d XformSample::getXYZRotation() const
+{
+    Abc::V3d ret;
+    Imath::extractEulerXYZ( this->getMatrix(), ret );
+    return ret;
+}
+
+//-*****************************************************************************
+void XformSample::freezeTopology()
 {
     m_hasBeenRead = true;
 }

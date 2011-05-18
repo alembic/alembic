@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/IFaceSet.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
 
 namespace Alembic {
@@ -57,8 +58,8 @@ public:
         Sample() {}
 
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
-        Abc::Int32ArraySamplePtr getIndices() const { return m_indices; }
-        Abc::Int32ArraySamplePtr getCounts() const { return m_counts; }
+        Abc::Int32ArraySamplePtr getFaceIndices() const { return m_indices; }
+        Abc::Int32ArraySamplePtr getFaceCounts() const { return m_counts; }
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
 
@@ -162,9 +163,7 @@ public:
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
     size_t getNumSamples()
-    { return std::max( m_positions.getNumSamples(),
-                       std::max( m_indices.getNumSamples(),
-                                 m_counts.getNumSamples() ) ); }
+    { return  m_positions.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
@@ -180,8 +179,13 @@ public:
     AbcA::TimeSamplingPtr getTimeSampling()
     {
         if ( m_positions.valid() )
+        {
             return m_positions.getTimeSampling();
-        return getObject().getArchive().getTimeSampling(0);
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
     }
 
     //-*************************************************************************
@@ -194,12 +198,8 @@ public:
         m_indices.get( oSample.m_indices, iSS );
         m_counts.get( oSample.m_counts, iSS );
 
-        // a minor hedge against older Archives that don't have these
-        // properties.  Will remove before 1.0. --JDA, 2011-02-24
-        if ( m_selfBounds )
-        {
-            m_selfBounds.get( oSample.m_selfBounds, iSS );
-        }
+        m_selfBounds.get( oSample.m_selfBounds, iSS );
+
         if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
         {
             m_childBounds.get( oSample.m_childBounds, iSS );
@@ -251,6 +251,9 @@ public:
 
         m_arbGeomParams.reset();
 
+        m_faceSetsLoaded = false;
+        m_faceSets.clear();
+
         Abc::ISchema<PolyMeshSchemaInfo>::reset();
     }
 
@@ -263,6 +266,12 @@ public:
                  m_indices.valid() &&
                  m_counts.valid() );
     }
+
+    // FaceSet related
+    //! Appends the names of any FaceSets for this PolyMesh.
+    void getFaceSetNames (std::vector <std::string> & oFaceSetNames);
+    IFaceSet getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
 
     //! unspecified-bool-type operator overload.
     //! ...
@@ -283,6 +292,11 @@ protected:
     Abc::IBox3dProperty m_childBounds;
 
     Abc::ICompoundProperty m_arbGeomParams;
+
+    // FaceSets, this starts as empty until client
+    // code attempts to access facesets.
+    bool                              m_faceSetsLoaded;
+    std::map <std::string, IFaceSet>  m_faceSets;
 };
 
 //-*****************************************************************************

@@ -121,7 +121,7 @@ public:
     XformOp();
 
     XformOp( const XformOperationType iType,
-             const Alembic::Util::uint8_t iHint );
+             const Alembic::Util::uint8_t iHint = 0 );
 
     XformOp( const Alembic::Util::uint8_t iEncodedOp );
 
@@ -141,33 +141,33 @@ public:
     void setHint( const Alembic::Util::uint8_t iHint );
 
     //! Returns whether the x component (index 0) is animated.
+    //! Only meaningful on read.
     bool isXAnimated() const;
 
     //! Returns whether the y component (index 1) is animated.
+    //! Only meaningful on read.
     bool isYAnimated() const;
 
     //! Returns whether the z component (index 2) is animated.
+    //! Only meaningful on read.
     bool isZAnimated() const;
 
     //! Returns whether the angle component (index 3) is animated.
     //! Since Scale and Translate do not have an angle component,
     //! false is returned for those types.
+    //! Only meaningful on read.
     bool isAngleAnimated() const;
 
     //! Returns whether a particular channel is animated.
     //! Scale and Translate only have 3 channels, Rotate has 4, and
     //! Matrix has 16.  Indices greater than the number of channels will
     //! return false.
+    //! Only meaningful on read.
     bool isChannelAnimated( std::size_t iIndex ) const;
 
     //! Get the number of components that this operation has based on the type.
     //! Translate and Scale have 3, Rotate has 4 and Matrix has 16.
     std::size_t getNumChannels() const;
-
-    //! Every channel has a name based on the type of the op, and the index of
-    //! the channel. This is used to interact with well-named Properties of
-    //! an xform that may or may not exist.
-    std::string getChannelName( std::size_t iIndex ) const;
 
     //! For every channel, there's a default value.  Typically, for each op
     //! type, it's the same across channels. But matrix ops have different
@@ -204,6 +204,8 @@ public:
 
     bool isMatrixOp() const;
 
+    bool isXYZRotateOp() const;
+
     //! Function for returning the combined encoded type and hint.
     //! The type is in the first four bits, the hint in the second.
     //!
@@ -217,9 +219,7 @@ private:
 
     std::vector<double> m_channels;
 
-    std::set<std::size_t> m_animChannels;
-
-    std::string m_opName;
+    std::set<Alembic::Util::uint32_t> m_animChannels;
 
 private:
     //! The IXform can tell the op if its channels are animated

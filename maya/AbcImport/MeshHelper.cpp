@@ -357,7 +357,7 @@ namespace
 
 }  // namespace
 
-// once normals are supported in the polyMesh schema, polyMesh will look 
+// once normals are supported in the polyMesh schema, polyMesh will look
 // different than readSubD
 void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     Alembic::AbcGeom::IPolyMesh & iNode, bool iInitialized)
@@ -413,8 +413,8 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
     fillPoints(pointArray, samp.getPositions(), ceilPoints, alpha);
 
-    fillTopology(ioMesh, iParent, pointArray, samp.getIndices(),
-        samp.getCounts());
+    fillTopology(ioMesh, iParent, pointArray, samp.getFaceIndices(),
+        samp.getFaceCounts());
 
     setPolyNormals(iFrame, ioMesh, schema.getNormals());
     setUVs(iFrame, ioMesh, schema.getUVs());
@@ -533,8 +533,8 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
         }
 
         fillPoints(ptArray, samp.getPositions(), ceilPoints, alpha);
-        fillTopology(fnMesh, iParent, ptArray, samp.getIndices(),
-            samp.getCounts());
+        fillTopology(fnMesh, iParent, ptArray, samp.getFaceIndices(),
+            samp.getFaceCounts());
         fnMesh.setName(iNode.getName().c_str());
         setPolyNormals(iFrame, fnMesh, schema.getNormals());
         setUVs(iFrame, fnMesh, schema.getUVs());
@@ -636,13 +636,13 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
         printWarning("Hole Poly Indices not yet supported.");
     }
 
-    if (samp.getCreaseSharpnesses() && 
+    if (samp.getCreaseSharpnesses() &&
         !samp.getCreaseSharpnesses()->size() == 0)
     {
         printWarning("Creases not yet supported.");
     }
 
-    if (samp.getCornerSharpnesses() && 
+    if (samp.getCornerSharpnesses() &&
         !samp.getCornerSharpnesses()->size() == 0)
     {
         printWarning("Corners not yet supported.");

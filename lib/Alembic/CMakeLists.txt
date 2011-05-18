@@ -37,8 +37,10 @@
 # Recurse into all the subdirectories
 
 ADD_SUBDIRECTORY( Util )
-ADD_SUBDIRECTORY( GLUtil )
-ADD_SUBDIRECTORY( MD5Hash )
+
+IF ( GLUT_Xmu_LIBRARY OR WINDOWS )
+  ADD_SUBDIRECTORY( GLUtil )
+ENDIF()
 
 ADD_SUBDIRECTORY( AbcCoreAbstract )
 ADD_SUBDIRECTORY( AbcCoreHDF5 )

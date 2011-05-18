@@ -129,8 +129,6 @@ namespace
                 mCVsArray[0] += iNode->getNumCVs();
             }
 
-            void operator()(MayaLightWriterPtr & iNode) {}
-
             void operator()(MayaLocatorWriterPtr & iNode) {}
             */
 

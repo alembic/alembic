@@ -37,8 +37,10 @@
 #ifndef _Alembic_AbcGeom_OSubD_h_
 #define _Alembic_AbcGeom_OSubD_h_
 
+#include <map>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
@@ -117,17 +119,17 @@ public:
         // misc subd stuff
         int32_t getFaceVaryingInterpolateBoundary() const
         { return m_faceVaryingInterpolateBoundary; }
-        void setFaceVaryingInterpolateBoundary( int i )
+        void setFaceVaryingInterpolateBoundary( int32_t i )
         { m_faceVaryingInterpolateBoundary = i; }
 
         int32_t getFaceVaryingPropagateCorners() const
         { return m_faceVaryingPropagateCorners; }
-        void setFaceVaryingPropagateCorners( int i )
+        void setFaceVaryingPropagateCorners( int32_t i )
         { m_faceVaryingPropagateCorners = i; }
 
         int32_t getInterpolateBoundary() const
         { return m_interpolateBoundary; }
-        void setInterpolateBoundary( int i )
+        void setInterpolateBoundary( int32_t i )
         { m_interpolateBoundary = i; }
 
         // creases
@@ -236,6 +238,8 @@ public:
         }
 
     protected:
+        friend class OSubDSchema;
+
         Abc::V3fArraySample m_positions;
         Abc::Int32ArraySample m_faceIndices;
         Abc::Int32ArraySample m_faceCounts;
@@ -299,7 +303,7 @@ public:
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<SubDSchemaInfo>( iParentObject, iName,
-                                   iArg0, iArg1, iArg2 )
+                                      iArg0, iArg1, iArg2 )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -327,7 +331,7 @@ public:
                           const Abc::Argument &iArg1 = Abc::Argument(),
                           const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<SubDSchemaInfo>( iParentObject,
-                                   iArg0, iArg1, iArg2 )
+                                      iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
             Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
@@ -418,6 +422,7 @@ public:
         m_uvs.reset();
 
         m_arbGeomParams.reset();
+        m_faceSets.clear ();
 
         Abc::OSchema<SubDSchemaInfo>::reset();
     }
@@ -431,6 +436,14 @@ public:
                  m_faceIndices.valid() &&
                  m_faceCounts.valid() );
     }
+
+    // FaceSet stuff
+    OFaceSet & createFaceSet( const std::string &iFaceSetName );
+    //! Appends the names of any FaceSets for this SubD.
+    void getFaceSetNames( std::vector <std::string> & oFaceSetNames );
+    OFaceSet getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
+
 
     //! unspecified-bool-type operator overload.
     //! ...
@@ -478,6 +491,10 @@ private:
     void initCorners(uint32_t iNumSamples);
     void initHoles(uint32_t iNumSamples);
 
+    // FaceSets created on this SubD
+    std::map <std::string, OFaceSet>  m_faceSets;
+
+    friend class OFaceSetSchema;;
 };
 
 //-*****************************************************************************

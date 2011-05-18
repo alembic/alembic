@@ -79,8 +79,9 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
     Alembic::Abc::V3fArraySamplePtr sampPoints = samp.getPositions();
     Alembic::Abc::V3fArraySamplePtr ceilPoints = ceilSamp.getPositions();
 
-    Alembic::Abc::Int32ArraySamplePtr numVertices = samp.getCurvesNumVertices();
-    Alembic::Abc::Int32ArraySamplePtr ceilNumVertices =
+    Alembic::Abc::UInt32ArraySamplePtr numVertices =
+        samp.getCurvesNumVertices();
+    Alembic::Abc::UInt32ArraySamplePtr ceilNumVertices =
         ceilSamp.getCurvesNumVertices();
 
     if (interp && sampPoints->size() != ceilPoints->size())
@@ -143,8 +144,8 @@ MObject createCurves(const std::string & iName,
     MObject returnObj;
 
     std::size_t numCurves = iSample.getNumCurves();
-    Alembic::Abc::V2fArraySamplePtr widths = iSample.getWidths();
-    Alembic::Abc::Int32ArraySamplePtr curvesNumVertices =
+    Alembic::Abc::FloatArraySamplePtr widths = iSample.getWidths();
+    Alembic::Abc::UInt32ArraySamplePtr curvesNumVertices =
         iSample.getCurvesNumVertices();
     Alembic::Abc::V3fArraySamplePtr positions = iSample.getPositions();
 
@@ -178,7 +179,7 @@ MObject createCurves(const std::string & iName,
         {
             MFnNumericAttribute widthAttr;
             attrObj = widthAttr.create("constantwidth", "constantwidth",
-                MFnNumericData::kFloat, (*widths)[0].x);
+                MFnNumericData::kFloat, (*widths)[0]);
             fnTrans.addAttribute(attrObj,
                 MFnDependencyNode::kLocalDynamicAttr);
         }
@@ -219,7 +220,7 @@ MObject createCurves(const std::string & iName,
             {
                 MFnNumericAttribute widthAttr;
                 MObject attrObj = widthAttr.create("constantwidth",
-                    "constantwidth", MFnNumericData::kFloat, (*widths)[0].x);
+                    "constantwidth", MFnNumericData::kFloat, (*widths)[0]);
                 curve.addAttribute(attrObj,
                     MFnDependencyNode::kLocalDynamicAttr);
             }

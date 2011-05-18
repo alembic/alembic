@@ -34,18 +34,10 @@ Specifically:
 
 There are several items that we know aren't in version 0.9. This list is the starting point for our plans as we work toward 1.0:
 * Python bindings for the public-facing API.
-* Missing AbcGeom schemas:
-  * NURBs surfaces
-  * Cameras
-  * Maya-like transform stack
-  * Curves
-  * Optional validation of data on write
 * A full-featured Maya importer and exporter
 * More complete documentation of the Abc and AbcGeom layers
 * An Alembic file stitcher
-* Renderman plugin
 * Katana/Arnold plugin
-* 32-bit support (currently only 64-bit architectures are supported)
 * Exploration of Windows support (currently, we believe Alembic works under
   Windows but we haven't tried all the variations between 32 bit vs. 64 bit,
   and Windows XP, Windows Vista, and Windows 7)

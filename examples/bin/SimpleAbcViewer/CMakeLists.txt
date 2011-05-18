@@ -39,6 +39,8 @@ SET( H_FILES
      Drawable.h
      Foundation.h
      GLCamera.h
+     ICurvesDrw.h
+     INuPatchDrw.h
      IObjectDrw.h
      IPointsDrw.h
      IPolyMeshDrw.h
@@ -51,6 +53,8 @@ SET( H_FILES
 
 SET( CXX_FILES
      GLCamera.cpp
+     ICurvesDrw.cpp
+     INuPatchDrw.cpp
      IObjectDrw.cpp
      IPointsDrw.cpp
      IPolyMeshDrw.cpp
@@ -68,7 +72,6 @@ SET( THIS_LIBS
      AlembicAbc
      AlembicAbcCoreHDF5
      AlembicAbcCoreAbstract
-     AlembicMD5Hash
      AlembicGLUtil
      AlembicUtil
      ${ALEMBIC_HDF5_LIBS}

@@ -138,18 +138,17 @@ public:
     bool getInheritsXforms( const Abc::ISampleSelector &iSS =
                             Abc::ISampleSelector() );
 
-    size_t getNumOps() const { return m_opArray.size(); }
+    size_t getNumOps() const { return m_numOps; }
 
     //! Reset returns this function set to an empty, default
     //! state.
     void reset()
     {
-        m_props.resize( 0 );
-
         m_childBounds.reset();
         m_ops.reset();
         m_inherits.reset();
         m_isConstant = true;
+        m_isConstantIdentity = true;
 
         super_type::reset();
     }
@@ -166,13 +165,13 @@ public:
 
 
 protected:
-    class IDefaultedDoubleProperty; // forward
-
     Abc::IBox3dProperty m_childBounds;
 
-    Abc::IUcharArrayProperty m_ops;
+    AbcA::ScalarPropertyReaderPtr m_ops;
 
-    std::vector<IDefaultedDoubleProperty> m_props;
+    AbcA::BasePropertyReaderPtr m_vals;
+
+    Abc::UInt32ArraySamplePtr m_animChannels;
 
     Abc::IBoolProperty m_inherits;
 
@@ -180,80 +179,20 @@ protected:
 
     bool m_isConstantIdentity;
 
+    std::size_t m_numOps;
+    std::size_t m_numChannels;
+
+    std::vector<Alembic::Util::uint8_t> m_opVec;
+    std::vector<Alembic::Util::float64_t> m_valVec;
+
 private:
     void init( Abc::SchemaInterpMatching iMatching );
-    // the op array is strictly for default names and values
-    // for the IDefaultedDoubleProperties made in init()
-    std::vector<XformOp> m_opArray;
 
+    // is m_vals an ArrayProperty, or a ScalarProperty?
+    bool m_useArrayProp;
 
-protected:
-    //-*************************************************************************
-    // HELPER CLASS
-    //-*************************************************************************
-
-    //! The defaulted double property will only create a property
-    //! and only bother setting a value when it the value differs from a
-    //! known default value. This allows transforms to disappear when they
-    //! are identity.
-    //! It has some Xform-specific stuff in here, so not worth
-    //! making general (yet).
-    class IDefaultedDoubleProperty
-    {
-    public:
-        void reset()
-        {
-            m_parent.reset();
-            m_name = "";
-            m_constantValue = 0.0;
-            m_property.reset();
-        }
-
-        IDefaultedDoubleProperty() { reset(); }
-
-        IDefaultedDoubleProperty( AbcA::CompoundPropertyReaderPtr iParent,
-                                  const std::string &iName,
-                                  Abc::ErrorHandler &iHndlr,
-                                  double iDefault )
-          : m_parent( Abc::GetCompoundPropertyReaderPtr( iParent ) )
-          , m_name( iName )
-          , m_constantValue( iDefault )
-          , m_isConstant( true )
-          , m_errorHandler( iHndlr )
-        {
-            init();
-        }
-
-        double getValue( const Abc::ISampleSelector &iSS );
-
-        std::string getName() const { return m_name; }
-
-        bool isConstant() const { return m_isConstant; }
-
-        bool isNonDefault() const { return m_property; }
-
-        Abc::ErrorHandler &getErrorHandler() { return m_errorHandler; }
-        Abc::ErrorHandler::Policy getErrorHandlerPolicy() const
-        { return m_errorHandler.getPolicy(); }
-
-    protected:
-        // Parent.
-        AbcA::CompoundPropertyReaderPtr m_parent;
-
-        // We cache the init stuff.
-        std::string m_name;
-        double m_constantValue;
-        bool m_isConstant;
-
-        Abc::ErrorHandler m_errorHandler;
-
-        // The "it". This may not exist.
-        Abc::IDoubleProperty m_property;
-
-    private:
-        void init();
-    }; // END DEFAULTED DOUBLE PROPERTY CLASS DECLARATION
-
+    // fills m_valVec with data
+    void getChannelValues( const AbcA::index_t iSampleIndex );
 };
 
 //-*****************************************************************************

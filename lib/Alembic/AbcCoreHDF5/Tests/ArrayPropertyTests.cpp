@@ -37,7 +37,6 @@
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/Util/All.h>
-#include <Alembic/MD5Hash/All.h>
 
 #include <Alembic/AbcCoreHDF5/Tests/Assert.h>
 
@@ -615,7 +614,7 @@ void testReadWriteArrays()
 
                 case Alembic::Util::kUint8POD:
                 {
-                    TESTING_ASSERT(ap->getName() == "uint8" || 
+                    TESTING_ASSERT(ap->getName() == "uint8" ||
                         ap->getName() == "uint8_newDims");
                     TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
@@ -803,7 +802,7 @@ void testReadWriteArrays()
 
                 case Alembic::Util::kFloat64POD:
                 {
-                    TESTING_ASSERT(ap->getName() == "float64" || 
+                    TESTING_ASSERT(ap->getName() == "float64" ||
                         ap->getName() == "float64_ext3");
                     TESTING_ASSERT(!ap->isScalarLike());
 

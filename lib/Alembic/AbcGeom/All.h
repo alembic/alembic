@@ -41,6 +41,13 @@
 
 #include <Alembic/AbcGeom/GeometryScope.h>
 
+#include <Alembic/AbcGeom/Basis.h>
+#include <Alembic/AbcGeom/OCurves.h>
+#include <Alembic/AbcGeom/ICurves.h>
+
+#include <Alembic/AbcGeom/OFaceSet.h>
+#include <Alembic/AbcGeom/IFaceSet.h>
+
 #include <Alembic/AbcGeom/OGeomParam.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
 
@@ -48,6 +55,9 @@
 #include <Alembic/AbcGeom/CameraSample.h>
 #include <Alembic/AbcGeom/OCamera.h>
 #include <Alembic/AbcGeom/ICamera.h>
+
+#include <Alembic/AbcGeom/INuPatch.h>
+#include <Alembic/AbcGeom/ONuPatch.h>
 
 #include <Alembic/AbcGeom/OPoints.h>
 #include <Alembic/AbcGeom/IPoints.h>

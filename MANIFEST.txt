@@ -47,13 +47,9 @@
  |   `-- WFObjConvert - Convert WaveFront OBJ files to Alembic Archives
  |
  `-- bin
- |   |
- |   `-- GlutSkeleton - skeletal template for OpenGL-based Alembic utility
- |   |
- |   `-- GtoMeshesToAbc - Convert GTO mesh files into Alembic Archives
- |   |                    (requires Open-GTO libraries)
- |   `-- SimpleAbcViewer - Simple OpenGL viewer for Alembic Archives
- |
- `-- maya
-     `-- AlembicSimpleAbcExport - A simple plugin to export polygonal geometry
-         to Alembic
+     |
+     `-- GlutSkeleton - skeletal template for OpenGL-based Alembic utility
+     |
+     `-- GtoMeshesToAbc - Convert GTO mesh files into Alembic Archives
+     |                    (requires Open-GTO libraries)
+     `-- SimpleAbcViewer - Simple OpenGL viewer for Alembic Archives

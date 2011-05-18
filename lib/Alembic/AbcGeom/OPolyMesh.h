@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
@@ -85,12 +86,12 @@ public:
         void setPositions( const Abc::V3fArraySample &iSmp )
         { m_positions = iSmp; }
 
-        const Abc::Int32ArraySample &getIndices() const { return m_indices; }
-        void setIndices( const Abc::Int32ArraySample &iSmp )
+        const Abc::Int32ArraySample &getFaceIndices() const { return m_indices; }
+        void setFaceIndices( const Abc::Int32ArraySample &iSmp )
         { m_indices = iSmp; }
 
-        const Abc::Int32ArraySample &getCounts() const { return m_counts; }
-        void setCounts( const Abc::Int32ArraySample &iCnt )
+        const Abc::Int32ArraySample &getFaceCounts() const { return m_counts; }
+        void setFaceCounts( const Abc::Int32ArraySample &iCnt )
         { m_counts = iCnt; }
 
         const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }
@@ -165,7 +166,7 @@ public:
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
       : Abc::OSchema<PolyMeshSchemaInfo>( iParentObject, iName,
-                                            iArg0, iArg1, iArg2 )
+                                          iArg0, iArg1, iArg2 )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -216,7 +217,7 @@ public:
     }
 
     //! Copy constructor.
-    OPolyMeshSchema(const OPolyMeshSchema& iCopy)
+    OPolyMeshSchema( const OPolyMeshSchema& iCopy )
     {
         *this = iCopy;
     }
@@ -273,6 +274,8 @@ public:
         m_childBounds.reset();
         m_arbGeomParams.reset();
 
+        m_faceSets.clear();
+
         Abc::OSchema<PolyMeshSchemaInfo>::reset();
     }
 
@@ -286,6 +289,13 @@ public:
                  m_counts.valid() );
     }
 
+    // FaceSet stuff
+    OFaceSet & createFaceSet( const std::string &iFaceSetName );
+    //! Appends the names of any FaceSets for this PolyMesh.
+    void getFaceSetNames (std::vector <std::string> & oFaceSetNames);
+    OFaceSet getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
+
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OPolyMeshSchema::valid() );
@@ -296,6 +306,9 @@ protected:
     Abc::OV3fArrayProperty m_positions;
     Abc::OInt32ArrayProperty m_indices;
     Abc::OInt32ArrayProperty m_counts;
+
+    // FaceSets created on this PolyMesh
+    std::map <std::string, OFaceSet>  m_faceSets;
 
     Abc::OBox3dProperty m_selfBounds;
     Abc::OBox3dProperty m_childBounds;

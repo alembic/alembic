@@ -36,9 +36,11 @@
 
 #include "IObjectDrw.h"
 #include "IPolyMeshDrw.h"
+#include "ICurvesDrw.h"
 #include "IXformDrw.h"
 #include "IPointsDrw.h"
 #include "ISubDDrw.h"
+#include "INuPatchDrw.h"
 
 namespace SimpleAbcViewer {
 
@@ -73,6 +75,23 @@ IObjectDrw::IObjectDrw( IObject &iObj, bool iResetIfNoChildren )
             if ( points )
             {
                 dptr.reset( new IPointsDrw( points ) );
+            }
+        }
+        else if ( ICurves::matches( ohead ) )
+
+        {
+            ICurves curves( m_object, ohead.getName() );
+            if ( curves )
+            {
+                dptr.reset( new ICurvesDrw( curves ) );
+            }
+        }
+        else if ( INuPatch::matches( ohead ) )
+        {
+            INuPatch nuPatch( m_object, ohead.getName() );
+            if ( nuPatch )
+            {
+                dptr.reset( new INuPatchDrw( nuPatch ) );
             }
         }
         else if ( IXform::matches( ohead ) )

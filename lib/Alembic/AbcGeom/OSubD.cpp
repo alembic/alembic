@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -36,6 +36,7 @@
 
 #include <Alembic/AbcGeom/OSubD.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
+#include <Alembic/AbcGeom/OFaceSet.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -59,15 +60,15 @@ void OSubDSchema::set( const Sample &iSamp )
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::set()" );
 
     // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds )
     {
-        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds", 
+        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
             m_positions.getTimeSampling() );
+
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
-        // -1 because we just dis an m_positions set above
-        size_t numSamples = m_positions.getNumSamples() - 1;
+        size_t numSamples = m_positions.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
@@ -89,7 +90,7 @@ void OSubDSchema::set( const Sample &iSamp )
         m_faceIndices.set( iSamp.getFaceIndices() );
         m_faceCounts.set( iSamp.getFaceCounts() );
 
-        if (m_childBounds)
+        if ( m_childBounds )
         { m_childBounds.set( iSamp.getChildBounds() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
@@ -101,7 +102,7 @@ void OSubDSchema::set( const Sample &iSamp )
                            );
             m_selfBounds.set( bnds );
         }
-        else 
+        else
         {
             m_selfBounds.set( iSamp.getSelfBounds() );
         }
@@ -219,7 +220,7 @@ void OSubDSchema::set( const Sample &iSamp )
                               iSamp.getInterpolateBoundary() );
 
         if ( ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
-            iSamp.getCreaseSharpnesses() ) && !m_creaseIndices )
+               iSamp.getCreaseSharpnesses() ) && !m_creaseIndices )
         {
             initCreases(m_positions.getNumSamples() - 1);
         }
@@ -234,8 +235,8 @@ void OSubDSchema::set( const Sample &iSamp )
                               iSamp.getCreaseSharpnesses() );
         }
 
-        if ( ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() ) && 
-            !m_cornerIndices )
+        if ( ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() ) &&
+             !m_cornerIndices )
         {
             initCorners(m_positions.getNumSamples() - 1);
         }
@@ -323,7 +324,9 @@ void OSubDSchema::setFromPrevious()
     m_selfBounds.setFromPrevious();
 
     if ( m_childBounds )
+    {
         m_childBounds.setFromPrevious();
+    }
 
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
 
@@ -346,28 +349,44 @@ void OSubDSchema::setTimeSampling( uint32_t iIndex )
     m_selfBounds.setTimeSampling( iIndex );
 
     if ( m_creaseIndices )
+    {
         m_creaseIndices.setTimeSampling( iIndex );
+    }
 
     if ( m_creaseLengths )
+    {
         m_creaseLengths.setTimeSampling( iIndex );
+    }
 
-    if (m_creaseSharpnesses )
+    if ( m_creaseSharpnesses )
+    {
         m_creaseSharpnesses.setTimeSampling( iIndex );
+    }
 
     if ( m_cornerIndices )
+    {
         m_cornerIndices.setTimeSampling( iIndex );
+    }
 
     if ( m_cornerSharpnesses )
+    {
         m_cornerSharpnesses.setTimeSampling( iIndex );
+    }
 
     if ( m_holes )
+    {
         m_holes.setTimeSampling( iIndex );
+    }
 
     if ( m_childBounds )
+    {
         m_childBounds.setTimeSampling( iIndex );
+    }
 
     if ( m_uvs )
+    {
         m_uvs.setTimeSampling( iIndex );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -395,7 +414,7 @@ Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
     if ( ! m_arbGeomParams )
     {
         m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
-            ".arbGeomParams" );
+                                                  ".arbGeomParams" );
     }
 
     return m_arbGeomParams;
@@ -404,6 +423,26 @@ Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
 
     Abc::OCompoundProperty ret;
     return ret;
+}
+
+//-*****************************************************************************
+OFaceSet &
+OSubDSchema::createFaceSet( const std::string &iFaceSetName )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::createFaceSet ()" );
+
+    ABCA_ASSERT( m_faceSets.find (iFaceSetName) == m_faceSets.end (),
+                 "faceSet has already been created in SubD." );
+
+    m_faceSets [iFaceSetName] = OFaceSet (this->getParent ().getObject (),
+        iFaceSetName);
+
+    return m_faceSets [iFaceSetName];
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    static OFaceSet empty;
+    return empty;
 }
 
 //-*****************************************************************************
@@ -514,6 +553,42 @@ void OSubDSchema::initHoles(uint32_t iNumSamples)
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+void OSubDSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames)
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getFaceSetNames()" );
+
+    for (std::map<std::string, OFaceSet>::const_iterator faceSetIter =
+        m_faceSets.begin(); faceSetIter != m_faceSets.end(); ++faceSetIter)
+    {
+        oFaceSetNames.push_back( faceSetIter->first );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+bool
+OSubDSchema::hasFaceSet( const std::string &iFaceSetName )
+{
+    return (m_faceSets.find (iFaceSetName) != m_faceSets.end ());
+}
+
+//-*****************************************************************************
+OFaceSet
+OSubDSchema::getFaceSet( const std::string &iFaceSetName )
+{
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getFaceSet()" );
+
+    return m_faceSets [iFaceSetName];
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    OFaceSet empty;
+    return empty;
 }
 
 } // End namespace AbcGeom

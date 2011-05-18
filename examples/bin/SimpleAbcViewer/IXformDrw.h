@@ -63,6 +63,7 @@ public:
 protected:
     IXform m_xform;
     M44d m_localToParent;
+    M44d m_staticMatrix;
 };
 
 } // End namespace SimpleAbcViewer

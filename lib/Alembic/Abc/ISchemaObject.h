@@ -175,6 +175,15 @@ protected:
 // TEMPLATE AND INLINE FUNCTIONS
 //-*****************************************************************************
 
+inline ErrorHandler::Policy GetErrorHandlerPolicy( const Argument &iArg0,
+                                                   const Argument &iArg1 )
+{
+    Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    return args.getErrorHandlerPolicy();
+}
+
 //-*****************************************************************************
 template <class SCHEMA>
 template <class OBJECT_PTR>
@@ -184,7 +193,7 @@ ISchemaObject<SCHEMA>::ISchemaObject
     const std::string &iName,
     const Argument &iArg0,
     const Argument &iArg1 )
-  : IObject( iParentObject, iName, iArg0, iArg1 )
+  : IObject( iParentObject, iName, GetErrorHandlerPolicy( iArg0, iArg1 ) )
 {
     Arguments args;
     iArg0.setInto( args );

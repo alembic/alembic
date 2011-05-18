@@ -43,13 +43,18 @@ IXformDrw::IXformDrw( IXform &iXform )
   : IObjectDrw( iXform, false )
   , m_xform( iXform )
 {
-    if ( !m_xform.valid() )
+    if ( !m_xform.valid() || m_xform.getSchema().isConstantIdentity() )
     {
         return;
     }
 
     m_localToParent.makeIdentity();
+    m_staticMatrix.makeIdentity();
 
+    if ( m_xform.getSchema().isConstant() )
+    {
+        m_staticMatrix = m_xform.getSchema().getValue().getMatrix();
+    }
 
     // The object has already set up the min time and max time of
     // all the children.
@@ -92,10 +97,15 @@ void IXformDrw::setTime( chrono_t iSeconds )
         return;
     }
 
-    // Use nearest to get our matrix.
-    // Use nearest for now.
-    ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
-    m_localToParent = m_xform.getSchema().getValue( ss ).getMatrix();
+    if ( m_xform.getSchema().isConstant() )
+    {
+        m_localToParent = m_staticMatrix;
+    }
+    else
+    {
+        ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
+        m_localToParent = m_xform.getSchema().getValue( ss ).getMatrix();
+    }
 
     // Okay, now we need to recalculate the bounds.
     m_bounds.makeEmpty();

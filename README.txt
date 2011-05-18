@@ -1,16 +1,16 @@
 -------------------------------------------------------------------------------
 - Alembic
 -
-- Copyright 2009-2010 Sony Pictures Imageworks, Inc. and
+- Copyright 2009-2011 Sony Pictures Imageworks, Inc. and
 - Industrial Light and Magic, a division of Lucasfilm Entertainment Company Ltd.
 -------------------------------------------------------------------------------
 
 Installation instructions for Alembic
 
 0) Before Alembic can be built, you will need to satisfy its external
-dependencies.  They are, as of October 26 2010:
+dependencies.  They are, as of May 16th, 2011:
 
-64-bit unix-like OS (Linux, Mac OS X)
+A unix-like OS (Linux, Mac OS X); Windows support is experimental
 CMake (2.8.0) www.cmake.org
 Boost (1.42) www.boost.org
 ilmbase (1.0.1) www.openexr.com
@@ -31,16 +31,14 @@ your discretion; it's best to not install your dependencies under the Alembic
 source root.  Look in your Alembic source root's "doc" directory for
 instructions on building Boost and HDF5; see next step for details.
 
-Additionally, Alembic currently requires a 64-bit system to build properly.
-
 1) Untar the Alembic source into your desired directory:
 
-$ cd ~/ ; tar xzf Alembic_0_9_0.tgz
+$ cd ~/ ; tar xzf Alembic_0_9_3_-xxxxxxxx.tgz
 
-This will create a directory, ~/Alembic_0.9.0, that contains the Alembic
+This will create a directory, ~/Alembic_0.9.3, that contains the Alembic
 source code (if you're reading this, you've probably already done this).
 
-As alluded to in Step 0, ~/Alembic_0.9.0/doc/ will contain instructional
+As alluded to in Step 0, ~/Alembic_0.9.3/doc/ will contain instructional
 files for building Boost and HDF5.  Mostly, those packages' libraries just
 need a little encouragement to build static archives and with -fPIC.
 
@@ -59,7 +57,7 @@ $ cd ~/ALEMBIC_BUILD
 4) Run the Alembic bootstrap script.  Again, assuming your CWD is still
 ~/ALEMBIC_BUILD, the following should work:
 
-$ python ../Alembic_0.9.0/build/bootstrap/alembic_bootstrap.py .
+$ python ../Alembic_0.9.3/build/bootstrap/alembic_bootstrap.py .
 
 You can give it several options and flags; '-h' for a list of them.  If you
 don't specify a complete set of options when you run it, it will prompt you
@@ -113,7 +111,7 @@ $ make
 
 7) To build the API documentation via Doxygen:
 
-$ cd ../Alembic_0.9.0; doxygen Doxyfile
+$ cd ../Alembic_0.9.3; doxygen Doxyfile
 
 This will generate html documentation in the doc/html folder.
 
@@ -121,4 +119,3 @@ This will generate html documentation in the doc/html folder.
 If you get stuck, contact us on the alembic-discussion mailing list. You
 can view the mailing list archives and join the mailing list via
 http://groups.google.com/group/alembic-discussion
-

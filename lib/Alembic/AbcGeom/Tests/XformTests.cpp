@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -99,6 +99,7 @@ void xformTreeCreate()
 void xformOut()
 {
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform1.abc" );
+
     OXform a( OObject( archive, kTop ), "a" );
     OXform b( a, "b" );
     OXform c( b, "c" );
@@ -109,11 +110,18 @@ void xformOut()
 
     XformOp transop( kTranslateOperation, kTranslateHint );
     XformOp scaleop( kScaleOperation, kScaleHint );
+    XformOp matrixop( kMatrixOperation, kMatrixHint );
 
     XformSample asamp;
     for ( size_t i = 0; i < 20; ++i )
     {
         asamp.addOp( transop, V3d( 12.0, i + 42.0, 20.0 ) );
+
+        if ( i == 18 )
+        {
+            asamp.setChildBounds( Abc::Box3d( V3d( -1.0, -1.0, -1.0 ),
+                                              V3d( 1.0, 1.0, 1.0 ) ) );
+        }
 
         a.getSchema().set( asamp );
     }
@@ -145,27 +153,19 @@ void xformOut()
     fsamp.addOp( transop, V3d( 3.0, -4.0, 5.0 ) );
     f.getSchema().set( fsamp );
 
+    // this will cause the Xform's values property to be an ArrayProperty,
+    // since there will be 20 * 16 channels.
     XformSample gsamp;
-    gsamp.addOp( transop, V3d( 0.0, 0.0, 0.0 ) );
-    gsamp.addOp( transop, V3d( 0.0, 0.0, 0.0 ) );
-    gsamp.addOp( transop, V3d( 0.0, 0.0, 0.0 ) );
-    gsamp.addOp( scaleop, V3d( 1.0, 1.0, 1.0 ) );
-    g.getSchema().set( gsamp );
 
-    for (int i = 0; i < 10; ++i)
+    Abc::M44d gmatrix;
+    gmatrix.makeIdentity();
+    for ( size_t i = 0 ; i < 20 ; ++i )
     {
-        if (i == 5)
-        {
-            gsamp[0].setChannelValue(0, i);
-            gsamp[1].setChannelValue(0, i);
-        }
-        if (i == 7)
-        {
-            gsamp[2].setChannelValue(2, i);
-            gsamp[3].setChannelValue(2, i);
-        }
-        g.getSchema().set( gsamp );
+        gmatrix.x[0][1] = (double)i;
+        gsamp.addOp( matrixop, gmatrix );
     }
+
+    g.getSchema().set( gsamp );
 }
 
 //-*****************************************************************************
@@ -177,6 +177,8 @@ void xformIn()
     XformSample xs;
 
     IXform a( IObject( archive, kTop ), "a" );
+    std::cout << "'a' num samples: " << a.getSchema().getNumSamples() << std::endl;
+
     TESTING_ASSERT( a.getSchema().getNumOps() == 1 );
     TESTING_ASSERT( a.getSchema().getInheritsXforms() );
     for ( index_t i = 0; i < 20; ++i )
@@ -197,6 +199,9 @@ void xformIn()
     IXform b( a, "b" );
     b.getSchema().get( xs );
     TESTING_ASSERT( b.getSchema().getTimeSampling()->getTimeSamplingType().isUniform() );
+
+    // the schema is not static, because set() was called 20 times on it.
+    TESTING_ASSERT( !b.getSchema().isConstant() );
     TESTING_ASSERT( b.getSchema().getNumSamples() == 20 );
     TESTING_ASSERT( xs.getNumOps() == 0 );
     TESTING_ASSERT( b.getSchema().getNumOps() == 0 );
@@ -240,17 +245,29 @@ void xformIn()
     TESTING_ASSERT( ! f.getSchema().isConstantIdentity() ); // not identity
 
     IXform g( f, "g" );
-    TESTING_ASSERT( !g.getSchema().isConstant() ); 
+    Abc::M44d gmatrix;
+    gmatrix.makeIdentity();
+    XformSample gsamp = g.getSchema().getValue();
+    TESTING_ASSERT( gsamp.getNumOps() == 20 );
+    TESTING_ASSERT( gsamp.getNumOpChannels() == 20 * 16 );
+    TESTING_ASSERT( g.getSchema().getNumSamples() == 1 );
+    TESTING_ASSERT( g.getSchema().isConstant() );
+    TESTING_ASSERT( !g.getSchema().isConstantIdentity() );
+    for ( size_t i = 0 ; i < 20 ; ++i )
+    {
+        TESTING_ASSERT( gsamp[i].getChannelValue( 1 ) == (double)i );
+    }
+
+    std::cout << "Tested all xforms in first test!" << std::endl;
+
 }
 
 //-*****************************************************************************
 void someOpsXform()
 {
-    std::string name = "Xform2.abc";
+    std::string name = "someOpsXform.abc";
     {
         OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
-
-        archive.setCompressionHint( 3 );
 
         OXform a( OObject( archive, kTop ), "a" );
 
@@ -286,7 +303,7 @@ void someOpsXform()
 
         a.getSchema().set( asamp );
 
-        for (size_t i = 1; i < 5; ++i)
+        for (size_t i = 1; i < 5 ; ++i)
         {
             asamp.addOp( scaleop, V3d( 2 * ( i + 1 ),
                                        1.0, 2.0 ) );
@@ -313,6 +330,7 @@ void someOpsXform()
 
     {
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+
         IXform a( IObject( archive, kTop ), "a" );
 
         XformSample asamp;
@@ -326,7 +344,6 @@ void someOpsXform()
 
         TESTING_ASSERT( asamp[1].isMatrixOp() );
         TESTING_ASSERT( asamp[1].getHint() == kMayaShearHint );
-
 
         TESTING_ASSERT( asamp[2].isRotateOp() );
         TESTING_ASSERT( asamp[2].getHint() == kRotateHint );
@@ -399,7 +416,7 @@ void someOpsXform()
 
         TESTING_ASSERT( asamp[5].getTranslate() == V3d( 0.0, 0.0, 0.0 ) );
 
-        for ( index_t i = 1; i < 5; ++i )
+        for ( index_t i = 1; i < 5 ; ++i )
         {
             a.getSchema().get( asamp, ISampleSelector( i ) );
 
@@ -428,6 +445,8 @@ void someOpsXform()
             TESTING_ASSERT( tvec.equalWithAbsError( asamp[5].getTranslate(),
                                                     VAL_EPSILON ) );
         }
+
+        std::cout << "tested all xforms in " << name << std::endl;
     }
 }
 

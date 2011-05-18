@@ -1,7 +1,8 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2010, Industrial Light & Magic,
-##   a division of Lucasfilm Entertainment Company Ltd.
+## Copyright (c) 2009-2011,
+##  Sony Pictures Imageworks Inc. and
+##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
 ##
@@ -38,12 +39,11 @@ SET( TEST_LIBS
      AlembicAbc
      AlembicAbcCoreHDF5
      AlembicAbcCoreAbstract
-     AlembicMD5Hash
      AlembicUtil
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_ILMBASE_LIBS}
      ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} m )
+     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_PolyMeshTest
@@ -51,15 +51,21 @@ ADD_EXECUTABLE( AbcGeom_PolyMeshTest
 		MeshData.cpp
 		PolyMeshTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_PolyMeshTest ${TEST_LIBS} )
-
 ADD_TEST( AbcGeom_PolyMeshTEST AbcGeom_PolyMeshTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_PointsTest
 		PointsTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_PointsTest ${TEST_LIBS} )
-
 ADD_TEST( AbcGeom_PointsTEST AbcGeom_PointsTest )
+
+#-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_NurbsTest
+	        NurbsData.h
+		NurbsData.cpp
+		NurbsTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_NurbsTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_NurbsTEST AbcGeom_NurbsTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_SubDTest
@@ -67,8 +73,15 @@ ADD_EXECUTABLE( AbcGeom_SubDTest
 		MeshData.cpp
 		SubDTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_SubDTest ${TEST_LIBS} )
-#
 ADD_TEST( AbcGeom_SubDTEST AbcGeom_SubDTest )
+
+#-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_SubDFaceSetTest
+		MeshData.h
+		MeshData.cpp
+		SubDFaceSetTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_SubDFaceSetTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_SubDFaceSetTEST AbcGeom_SubDFaceSetTest )
 
 ##-*****************************************************************************
 ADD_EXECUTABLE( AbcGeom_SchemaMatchingTest
@@ -80,21 +93,26 @@ ADD_TEST( AbcGeom_SchemaMatching_TEST AbcGeom_SchemaMatchingTest )
 ADD_EXECUTABLE( AbcGeom_XformTest
 		XformTests.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest  ${TEST_LIBS} )
-ADD_TEST( AbcGeom_XformTEST  AbcGeom_XformTest  )
+
+ADD_TEST( AbcGeom_Xform_TEST  AbcGeom_XformTest  )
+
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_XformTest2
 		XformTests2.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest2  ${TEST_LIBS} )
-ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2  )
 
-#-******************************************************************************
-ADD_EXECUTABLE( AbcGeom_CameraTest
-		CameraTest.cpp )
-TARGET_LINK_LIBRARIES( AbcGeom_CameraTest  ${TEST_LIBS} )
-ADD_TEST( AbcGeom_Camera_TEST  AbcGeom_CameraTest )
+ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2 )
 
 ##-*****************************************************************************
-#ADD_EXECUTABLE( AbcGeom_TransformingMeshTest MeshData.cpp
-#                                             TransformingMeshTest.cpp )
-#TARGET_LINK_LIBRARIES( AbcGeom_TransformingMeshTest ${TEST_LIBS} )
-#ADD_TEST( AbcGeom_TransformingMeshTest_TEST AbcGeom_TransformingMeshTest )
+ADD_EXECUTABLE( AbcGeom_CurvesTest
+                CurvesData.h
+                CurvesData.cpp
+                CurvesTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_CurvesTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_Curves_TEST AbcGeom_CurvesTest )
+
+##-*****************************************************************************
+# This is just something so that we, the Alembic devs, can noodle around
+# with stuff without having to edit the build setup to build it. --JDA
+ADD_EXECUTABLE( playground PlayGround.cpp )
+TARGET_LINK_LIBRARIES( playground ${TEST_LIBS} )

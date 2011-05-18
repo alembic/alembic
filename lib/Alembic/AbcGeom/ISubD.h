@@ -40,6 +40,7 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
+#include <Alembic/AbcGeom/IFaceSet.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -256,8 +257,13 @@ public:
     AbcA::TimeSamplingPtr getTimeSampling()
     {
         if ( m_positions.valid() )
+        {
             return m_positions.getTimeSampling();
-        return getObject().getArchive().getTimeSampling(0);
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
     }
 
     void get( Sample &iSamp,
@@ -312,6 +318,9 @@ public:
 
         m_arbGeomParams.reset();
 
+        m_faceSetsLoaded = false;
+        m_faceSets.clear();
+
         Abc::ISchema<SubDSchemaInfo>::reset();
     }
 
@@ -324,6 +333,12 @@ public:
                  m_faceIndices.valid() &&
                  m_faceCounts.valid() );
     }
+
+    // FaceSet related
+    //! Appends the names of any FaceSets for this SubD.
+    void getFaceSetNames( std::vector <std::string> &oFaceSetNames );
+    IFaceSet getFaceSet( const std::string &iFaceSetName );
+    bool hasFaceSet( const std::string &iFaceSetName );
 
     //! unspecified-bool-type operator overload.
     //! ...
@@ -365,6 +380,11 @@ protected:
 
     // random geometry parameters
     Abc::ICompoundProperty m_arbGeomParams;
+
+    // FaceSets, this starts as empty until client
+    // code attempts to access facesets.
+    bool                              m_faceSetsLoaded;
+    std::map <std::string, IFaceSet>  m_faceSets;
 };
 
 //-*****************************************************************************

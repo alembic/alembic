@@ -37,13 +37,18 @@
 
 #include <boost/detail/endian.hpp>
 #include <Alembic/Util/Murmur3.h>
+#include <boost/cstdint.hpp>
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
+using boost::uint8_t;
+using boost::uint64_t;
+
+//-*****************************************************************************
 void MurmurHash3_x64_128 ( const void * key, const size_t len,
-    const size_t podSize, void * out )
+                           const size_t podSize, void * out )
 {
     const uint8_t * data = (const uint8_t*)key;
     const size_t nblocks = len / 16;
@@ -51,8 +56,13 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     uint64_t h1 = 0;
     uint64_t h2 = 0;
 
-    uint64_t c1 = 0x87c37b91114253d5;
-    uint64_t c2 = 0x4cf5ad432745937f;
+#ifdef PLATFORM_WINDOWS
+    uint64_t c1 = 0x87c37b91114253d5LL;
+    uint64_t c2 = 0x4cf5ad432745937fLL;
+#else
+    uint64_t c1 = 0x87c37b91114253d5ULL;
+    uint64_t c2 = 0x4cf5ad432745937fULL;
+#endif
 
     //----------
     // body
@@ -215,18 +225,31 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     h1 += h2;
     h2 += h1;
 
+#ifdef PLATFORM_WINDOWS
     h1 ^= h1 >> 33;
-    h1 *= 0xff51afd7ed558ccd;
+    h1 *= 0xff51afd7ed558ccdLL;
     h1 ^= h1 >> 33;
-    h1 *= 0xc4ceb9fe1a85ec53;
+    h1 *= 0xc4ceb9fe1a85ec53LL;
     h1 ^= h1 >> 33;
 
     h2 ^= h2 >> 33;
-    h2 *= 0xff51afd7ed558ccd;
+    h2 *= 0xff51afd7ed558ccdLL;
     h2 ^= h2 >> 33;
-    h2 *= 0xc4ceb9fe1a85ec53;
+    h2 *= 0xc4ceb9fe1a85ec53LL;
     h2 ^= h2 >> 33;
+#else
+    h1 ^= h1 >> 33;
+    h1 *= 0xff51afd7ed558ccdLLU;
+    h1 ^= h1 >> 33;
+    h1 *= 0xc4ceb9fe1a85ec53LLU;
+    h1 ^= h1 >> 33;
 
+    h2 ^= h2 >> 33;
+    h2 *= 0xff51afd7ed558ccdLLU;
+    h2 ^= h2 >> 33;
+    h2 *= 0xc4ceb9fe1a85ec53LLU;
+    h2 ^= h2 >> 33;
+#endif
     h1 += h2;
     h2 += h1;
 

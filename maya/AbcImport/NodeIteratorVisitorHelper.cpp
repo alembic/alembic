@@ -66,6 +66,11 @@
 #include "CreateSceneHelper.h"
 #include "NodeIteratorVisitorHelper.h"
 
+using Alembic::Util::uint8_t;
+using Alembic::Util::int8_t;
+using Alembic::Util::int16_t;
+using Alembic::Util::int32_t;
+
 void unsupportedWarning(Alembic::Abc::IArrayProperty & iProp)
 {
     MString warn = "Unsupported attr, skipping: ";
@@ -937,7 +942,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
                 if (alpha != 0.0 && index != ceilIndex)
                 {
-                    iProp.get(ceilSamp, 
+                    iProp.get(ceilSamp,
                         Alembic::Abc::ISampleSelector(ceilIndex));
 
                     MIntArray arr((int *) samp->getData(), samp->size());
@@ -1057,7 +1062,8 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 if (index != ceilIndex && alpha != 0.0)
                 {
                     iProp.get(samp, Alembic::Abc::ISampleSelector(index));
-                    iProp.get(ceilSamp, 
+
+                    iProp.get(ceilSamp,
                         Alembic::Abc::ISampleSelector(ceilIndex));
                     for (int8_t i = 0; i < extent; ++i)
                     {
@@ -1288,7 +1294,6 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
             oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
         }
     }
-
 
     iEnd = mCurvesList.size();
     for (i = 0; i < iEnd; ++i)
