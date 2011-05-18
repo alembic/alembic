@@ -64,11 +64,6 @@ namespace
                 iNode->write(mFrame);
             }
 
-            void operator()(MayaNurbsCurveWriterPtr & iNode)
-            {
-                iNode->write(mFrame);
-            }
-
             void operator()(MayaLightWriterPtr & iNode)
             {
                 iNode->write(mFrame);
@@ -79,6 +74,12 @@ namespace
                 iNode->write(mFrame);
             }
 */
+
+            void operator()(MayaNurbsCurveWriterPtr & iNode)
+            {
+                iNode->write();
+            }
+
             void operator()(MayaCameraWriterPtr & iNode)
             {
                 iNode->write();
@@ -128,15 +129,15 @@ namespace
                 mCVsArray[0] += iNode->getNumCVs();
             }
 
-            void operator()(MayaNurbsCurveWriterPtr & iNode)
-            {
-                mCVsArray[1] += iNode->getNumCVs();
-            }
-
             void operator()(MayaLightWriterPtr & iNode) {}
 
             void operator()(MayaLocatorWriterPtr & iNode) {}
             */
+
+            void operator()(MayaNurbsCurveWriterPtr & iNode)
+            {
+                mCVsArray[1] += iNode->getNumCVs();
+            }
 
             void operator()(MayaCameraWriterPtr & iNode) {}
 
@@ -342,8 +343,6 @@ void AbcWriteJob::getBoundingBox(const MMatrix & eMInvMat)
     MPlug riCurvesPlug = fnDepNode.findPlug("riCurves", &status);
     if ( status == MS::kSuccess && riCurvesPlug.asBool() == true)
     {
-// don't do anything until curves have been created
-/*
         MFnDagNode mFn(mCurDag, &status);
         if (status == MS::kSuccess)
         {
@@ -351,7 +350,6 @@ void AbcWriteJob::getBoundingBox(const MMatrix & eMInvMat)
             box.transformUsing(mCurDag.exclusiveMatrix()*eMInvMat);
             mCurBBox.expand(box);
         }
-*/
     }
     else if (ob.hasFn(MFn::kTransform))
     {
@@ -368,7 +366,8 @@ void AbcWriteJob::getBoundingBox(const MMatrix & eMInvMat)
         }
     }
     else if (ob.hasFn(MFn::kParticle) || ob.hasFn(MFn::kMesh)
-        /*|| ob.hasFn(MFn::kNurbsSurface) || ob.hasFn(MFn::kNurbsCurve)*/ )
+        || ob.hasFn(MFn::kNurbsCurve)
+        /*|| ob.hasFn(MFn::kNurbsSurface)*/ )
     {
         if (util::isIntermediate(mCurDag.node()))
             return;
@@ -445,24 +444,26 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         if (writeOutAsGroup == false)
         {
             MString msg = "Curves have different degrees or close ";
-            msg += "states, not written out as curve group";
+            msg += "states, not writing out as curve group";
             MGlobal::displayWarning(msg);
         }
     }
     if ( status == MS::kSuccess && riCurvesVal && writeOutAsGroup)
     {
-/*
         MayaNurbsCurveWriterPtr nurbsCurve;
         if (iParent == NULL)
         {
+            Alembic::Abc::OObject obj = mRoot.getTop();
             nurbsCurve = MayaNurbsCurveWriterPtr(new MayaNurbsCurveWriter(
-                mCurDag, mRoot, true, mWriteVisibility, mShapesStatic));
+                mCurDag, obj, mShapeTimeIndex, true, mWriteVisibility,
+                mShapesStatic));
         }
         else
         {
             Alembic::Abc::OObject obj = iParent->getObject();
             nurbsCurve = MayaNurbsCurveWriterPtr(new MayaNurbsCurveWriter(
-                mCurDag, obj, true, mWriteVisibility, mShapesStatic));
+                mCurDag, obj, mShapeTimeIndex, true, mWriteVisibility,
+                mShapesStatic));
         }
 
         if (nurbsCurve->isAnimated() && !mShapesStatic)
@@ -483,7 +484,6 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         AttributesWriterPtr attrs = nurbsCurve->getAttrs();
         if (!mShapesStatic && attrs->isAnimated())
             mShapeAttrList.push_back(attrs);
-*/
     }
     else if (ob.hasFn(MFn::kTransform))
     {
@@ -723,6 +723,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
             MGlobal::displayError(err);
         }
     }
+    */
     else if (ob.hasFn(MFn::kNurbsCurve))
     {
         MFnNurbsCurve fnNurbsCurve(ob, &status);
@@ -739,7 +740,8 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         {
             Alembic::Abc::OObject obj = iParent->getObject();
             MayaNurbsCurveWriterPtr nurbsCurve(new MayaNurbsCurveWriter(
-                mCurDag, obj, false, mWriteVisibility, mShapesStatic));
+                mCurDag, obj, mShapeTimeIndex, false, mWriteVisibility,
+                mShapesStatic));
 
             if (nurbsCurve->isAnimated() && !mShapesStatic)
             {
@@ -767,7 +769,6 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
             MGlobal::displayError(err);
         }
     }
-*/
     else
     {
         MString warn = mCurDag.fullPathName() + " is an unsupported type of ";

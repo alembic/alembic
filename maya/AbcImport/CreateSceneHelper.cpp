@@ -40,11 +40,13 @@
 #include <maya/MDoubleArray.h>
 #include <maya/MPlug.h>
 #include <maya/MDGModifier.h>
+#include <maya/MFnCamera.h>
 #include <maya/MFnDoubleArrayData.h>
 #include <maya/MFnDagNode.h>
 #include <maya/MFnIntArrayData.h>
 #include <maya/MFnStringData.h>
 #include <maya/MFnTransform.h>
+#include <maya/MFnNurbsCurve.h>
 #include <maya/MFnNurbsSurface.h>
 #include <maya/MFnSet.h>
 
@@ -56,6 +58,7 @@
 #include "util.h"
 #include "CameraHelper.h"
 #include "MeshHelper.h"
+#include "NurbsCurveHelper.h"
 #include "PointHelper.h"
 #include "XformHelper.h"
 #include "CreateSceneHelper.h"
@@ -209,6 +212,11 @@ void CreateSceneVisitor::visit(Alembic::Abc::IObject & iObj)
         Alembic::AbcGeom::ICamera cam(iObj, Alembic::Abc::kWrapExisting);
         (*this)(cam);
     }
+    else if ( Alembic::AbcGeom::ICurves::matches(iObj.getHeader()) )
+    {
+        Alembic::AbcGeom::ICurves curves(iObj, Alembic::Abc::kWrapExisting);
+        (*this)(curves);
+    }
     else if ( Alembic::AbcGeom::IPoints::matches(iObj.getHeader()) )
     {
         Alembic::AbcGeom::IPoints pts(iObj, Alembic::Abc::kWrapExisting);
@@ -343,7 +351,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
 
     size_t numSamples = iNode.getSchema().getNumSamples();
 
-    // add animated poly mesh to the list
+    // add animated camera to the list
     if (numSamples > 1)
         mData.mCameraList.push_back(iNode);
 
@@ -372,6 +380,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
         if (cameraObj == MObject::kNullObj)
         {
             cameraObj = mCurrentDagNode.node();
+            MFnCamera fn(cameraObj, &status);
 
             // check that the data types are compatible, they might not be
             // if we have a weird hierarchy, where the node in the scene
@@ -388,6 +397,82 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
         }
 
         addToPropList(firstProp, cameraObj);
+    }
+
+    return status;
+}
+
+MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
+{
+    MStatus status = MS::kSuccess;
+    MObject curvesObj = MObject::kNullObj;
+
+    size_t numSamples = iNode.getSchema().getNumSamples();
+
+    // read sample 0 to determine and use it to set the number of total 
+    // curves.  We can't support changing the number of curves over time.
+    Alembic::AbcGeom::ICurvesSchema::Sample samp;
+    iNode.getSchema().get(samp);
+    Alembic::Abc::ICompoundProperty arbProp =
+        iNode.getSchema().getArbGeomParams();
+    std::size_t numCurves = samp.getNumCurves();
+
+    if (numCurves == 0)
+    {
+        MString theWarning(iNode.getName().c_str());
+        theWarning += " has no curves, skipping.";
+        printWarning(theWarning);
+        return MS::kFailure;
+    }
+    // add animated curves to the list
+    else if (numSamples > 1)
+    {
+        mData.mNumCurves.push_back(numCurves);
+        mData.mCurvesList.push_back(iNode);
+    }
+
+    std::size_t firstProp = mData.mPropList.size();
+    getAnimatedProps(arbProp, mData.mPropList);
+
+    if (mAction == CREATE || mAction == CREATE_REMOVE)
+    {
+        curvesObj = createCurves(iNode.getName(), samp, mParent,
+            mData.mNurbsCurveObjList, numSamples > 1);
+        MFnDagNode(curvesObj).getPath(mCurrentDagNode);
+
+        addProps(arbProp, curvesObj);
+
+    }
+
+
+    if (mAction >= CONNECT)
+    {
+        if (curvesObj == MObject::kNullObj)
+        {
+            curvesObj = mCurrentDagNode.node();
+            MFnNurbsCurve fncurve(curvesObj, &status);
+
+            // not a single curve, try the transform for a group of curves
+            if (status != MS::kSuccess)
+            {
+                MFnTransform fntrans(curvesObj, &status);
+            }
+
+            // check that the data types are compatible, they might not be
+            // if we have a weird hierarchy, where the node in the scene
+            // differs from the node on disk
+            if (status != MS::kSuccess)
+            {
+                MString theError("No connection done for node '");
+                theError += MString(iNode.getName().c_str());
+                theError += MString("' with ");
+                theError += mCurrentDagNode.fullPathName();
+                printError(theError);
+                return status;
+            }
+        }
+
+        addToPropList(firstProp, curvesObj);
     }
 
     return status;

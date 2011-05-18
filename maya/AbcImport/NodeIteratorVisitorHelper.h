@@ -50,6 +50,7 @@
 #include <Alembic/Abc/IObject.h>
 
 #include <Alembic/AbcGeom/ICamera.h>
+#include <Alembic/AbcGeom/ICurves.h>
 #include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
 #include <Alembic/AbcGeom/ISubD.h>
@@ -110,6 +111,7 @@ public:
     void getFrameRange(double & oMin, double & oMax);
 
     std::vector<MObject>        mCameraObjList;
+    std::vector<MObject>        mNurbsCurveObjList;
     std::vector<MObject>        mPointsObjList;
     std::vector<MObject>        mPolyMeshObjList;
     std::vector<MObject>        mSubDObjList;
@@ -117,16 +119,18 @@ public:
     // will be used once we have more schemas implemented
     /*
     std::vector<MObject>        mNurbsSurfaceObjList;
-    std::vector<MObject>        mNurbsCurveObjList;
     */
 
     std::vector<Alembic::Abc::IArrayProperty> mPropList;
     std::vector<Alembic::AbcGeom::ICamera>    mCameraList;
+    std::vector<Alembic::AbcGeom::ICurves>    mCurvesList;
     std::vector<Alembic::AbcGeom::IPolyMesh>  mPolyMeshList;
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
     std::vector<Alembic::AbcGeom::ISubD>      mSubDList;
     std::vector<Alembic::AbcGeom::IXform>     mXformList;
 
+    // number of curves for each animated curve group
+    std::vector<std::size_t>    mNumCurves;
     std::vector<bool>           mIsComplexXform;
 
     // only needed when doing connections

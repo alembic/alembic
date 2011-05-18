@@ -34,55 +34,42 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcExport_MayaMeshWriter_h_
-#define _AbcExport_MayaMeshWriter_h_
+#ifndef _AbcExport_MayaNurbsCurveWriter_h_
+#define _AbcExport_MayaNurbsCurveWriter_h_
 
 #include "Foundation.h"
 #include "AttributesWriter.h"
 #include "MayaTransformWriter.h"
 
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/OSubD.h>
+#include <Alembic/AbcGeom/OCurves.h>
 
-// Writes an MFnMesh as a poly mesh OR a subd mesh
-class MayaMeshWriter
+class MayaNurbsCurveWriter
 {
   public:
 
-    MayaMeshWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        uint32_t iTimeIndex, bool iWriteVisibilty, bool iWriteUVs,
+    MayaNurbsCurveWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
+        uint32_t iTimeIndex, bool iIsCurveGrp, bool iWriteVisibility,
         bool iForceStatic);
+
     void write();
     bool isAnimated() const;
-    bool isSubD();
     unsigned int getNumCVs();
-    unsigned int getNumFaces();
+    unsigned int getNumCurves();
     AttributesWriterPtr getAttrs() {return mAttrs;};
 
   private:
 
-    void fillTopology(
-        std::vector<float> & oPoints,
-        std::vector< int32_t > & oFacePoints,
-        std::vector< int32_t > & oPointCounts);
+    void fillTopology();
 
-    void writePoly(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
-
-    void writeSubD(MDagPath & iDag,
-        const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
-
-    void getUVs(std::vector<float> & uvs, std::vector<uint32_t> & indices);
-
-    void getPolyNormals(std::vector<float> & oNormals);
-
-    bool    mIsGeometryAnimated;
-    MDagPath mDagPath;
-
-    size_t  mNumPoints;
+    bool mIsAnimated;
+    MDagPath mRootDagPath;
+    MDagPathArray mNurbsCurves;
 
     AttributesWriterPtr mAttrs;
-    Alembic::AbcGeom::OPolyMeshSchema   mPolySchema;
-    Alembic::AbcGeom::OSubDSchema       mSubDSchema;
+    Alembic::AbcGeom::OCurvesSchema mSchema;
+
+    bool mIsCurveGrp;
+    unsigned int mCVCount;
 };
 
-#endif  // _AbcExport_MayaMeshWriter_h_
+#endif  // _AbcExport_MayaNurbsCurveWriter_h_

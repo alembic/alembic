@@ -41,12 +41,12 @@
 
 #include "MayaCameraWriter.h"
 #include "MayaMeshWriter.h"
+#include "MayaNurbsCurveWriter.h"
 #include "MayaPointPrimitiveWriter.h"
 #include "MayaTransformWriter.h"
 
 /*
 #include "MayaNurbsSurfaceWriter.h"
-#include "MayaNurbsCurveWriter.h"
 #include "MayaCameraWriter.h"
 #include "MayaLightWriter.h"
 #include "MayaLocatorWriter.h"
@@ -58,8 +58,8 @@ typedef boost::shared_ptr < MayaMeshWriter >
     MayaMeshWriterPtr;
 //typedef boost::shared_ptr < MayaNurbsSurfaceWriter >
 //    MayaNurbsSurfaceWriterPtr;
-//typedef boost::shared_ptr < MayaNurbsCurveWriter >
-//    MayaNurbsCurveWriterPtr;
+typedef boost::shared_ptr < MayaNurbsCurveWriter >
+    MayaNurbsCurveWriterPtr;
 //typedef boost::shared_ptr < MayaCameraWriter >
 //    MayaCameraWriterPtr;
 //typedef boost::shared_ptr < MayaLightWriter >
@@ -185,12 +185,13 @@ class AbcWriteJob
 
     /*
         MayaNurbsSurfaceWriterPtr,
-        MayaNurbsCurveWriterPtr,
         MayaLightWriterPtr,
         MayaLocatorWriterPtr,
     */
+
         MayaCameraWriterPtr,
         MayaMeshWriterPtr,
+        MayaNurbsCurveWriterPtr,
         MayaPointPrimitiveWriterPtr > MayaNodePtr;
 
     void perFrameCallback(double iFrame);

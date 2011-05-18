@@ -49,6 +49,7 @@
 #include <vector>
 
 #include <Alembic/AbcGeom/ICamera.h>
+#include <Alembic/AbcGeom/ICurves.h>
 #include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
 #include <Alembic/AbcGeom/ISubD.h>
@@ -90,6 +91,7 @@ public:
     void visit(Alembic::Abc::IObject & iObj);
 
     MStatus operator()(Alembic::AbcGeom::ICamera & iNode);
+    MStatus operator()(Alembic::AbcGeom::ICurves & iNode);
     MStatus operator()(Alembic::AbcGeom::IPoints & iNode);
     MStatus operator()(Alembic::AbcGeom::IPolyMesh & iNode);
     MStatus operator()(Alembic::AbcGeom::ISubD & iNode);

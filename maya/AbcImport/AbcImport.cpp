@@ -90,8 +90,7 @@ Example:                                                                    \n\
 AbcImport -h;                                                               \n\
 AbcImport -d -m open \"/tmp/test.abc\";                                     \n\
 AbcImport -t 1 24 -ftr -ct \"/\" -crt -rm \"/mcp/test.abc\";                \n\
-AbcImport -ct \"root1 root2 root3 ...\"\"/mcp/test.abc\";                   \n\
-AbcImport -t 1 251 -ftr -sts -cmp \"/mcp/comp.attr\" -uv -n \"/mcp/test.abc\";"
+AbcImport -ct \"root1 root2 root3 ...\" \"/mcp/test.abc\";                  \n"
 );  // usage
 
 };

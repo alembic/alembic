@@ -46,8 +46,8 @@
 
 #include <maya/MFnStringData.h>
 #include <maya/MFnMeshData.h>
-#include <maya/MFnNurbsSurfaceData.h>
 #include <maya/MFnNurbsCurveData.h>
+#include <maya/MFnNurbsSurfaceData.h>
 
 #include <maya/MFnGenericAttribute.h>
 #include <maya/MFnNumericAttribute.h>
@@ -61,6 +61,7 @@
 #include "CreateSceneHelper.h"
 #include "CameraHelper.h"
 #include "MeshHelper.h"
+#include "NurbsCurveHelper.h"
 #include "PointHelper.h"
 #include "XformHelper.h"
 
@@ -74,8 +75,6 @@ MObject AlembicNode::mConnectAttr;
 MObject AlembicNode::mCreateIfNotFoundAttr;
 MObject AlembicNode::mRemoveIfNoUpdateAttr;
 MObject AlembicNode::mConnectRootNodesAttr;
-
-MObject AlembicNode::mSampledNurbsCurveNumCurveAttr;
 
 MObject AlembicNode::mOutSubDArrayAttr;
 MObject AlembicNode::mOutPolyArrayAttr;
@@ -250,14 +249,6 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mTimeAttr, mOutCameraArrayAttr);
     status = attributeAffects(mTimeAttr, mOutPropArrayAttr);
 
-    MFnIntArrayData fnIntArrayData;
-    MObject intArrayDefaultObject = fnIntArrayData.create(&status);
-    mSampledNurbsCurveNumCurveAttr = tAttr.create("numCurve", "nc",
-        MFnData::kIntArray, intArrayDefaultObject);
-    status = tAttr.setStorable(true);
-    status = tAttr.setWritable(true);
-    status = addAttribute(mSampledNurbsCurveNumCurveAttr);
-
     return status;
 }
 
@@ -302,24 +293,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         // initialize some flags for plug update
         mSubDInitialized = false;
         mPolyInitialized = false;
-
-        /*
-        dataHandle =
-            dataBlock.inputValue(mSampledNurbsCurveNumCurveAttr, &status);
-        if (status == MS::kSuccess)
-        {
-            MObject intArrayObj = dataHandle.data();
-            MFnIntArrayData intArray(intArrayObj, &status);
-            if (status == MS::kSuccess)
-            {
-                unsigned int length = intArray.length();
-                mData.mNurbsCurveNumCurveList.clear();
-                mData.mNurbsCurveNumCurveList.reserve(length);
-                for (unsigned int i = 0; i < length; i++)
-                    mData.mNurbsCurveNumCurveList.push_back(intArray[i]);
-            }
-        }
-        */
 
         CreateSceneVisitor visitor(inputTime, MObject::kNullObj, 
             CreateSceneVisitor::NONE, "");
@@ -705,7 +678,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
         mOutRead[6] = true;
 
-        unsigned int nCurveGrpSize = 0;//mData.mCurvesList.size();
+        unsigned int nCurveGrpSize = mData.mCurvesList.size();
 
         if (nCurveGrpSize > 0)
         {
@@ -713,36 +686,30 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 dataBlock.outputValue(mOutNurbsCurveGrpArrayAttr, &status);
             MDataHandle outHandle;
 
-            unsigned int logicalIndex = 0;
-            for (unsigned int curveGrpIndex = 0; curveGrpIndex < nCurveGrpSize;
-                curveGrpIndex++)
+            std::vector<MObject> curvesObj;
+            for (unsigned int i = 0; i < nCurveGrpSize; ++i)
             {
-                std::vector<MObject> ncObj;
-                unsigned int numChild = 0;
-                    //mData.mCurvesList[curveGrpIndex];
-
-                ncObj.reserve(numChild);
-
-                for (unsigned int i = 0; i < numChild; i++)
-                {
-                    MFnNurbsCurveData curveData;
-                    ncObj.push_back(curveData.create());
-                }
-
-                //read(mCurTime, mData.mCurvesList[curveGrpIndex], ncObj);
-
-                for (unsigned int i = 0; i < numChild; i++, logicalIndex++)
-                {
-                    if (outArrayHandle.elementIndex() != logicalIndex)
-                    {
-                        continue;
-                    }
-
-                    outHandle = outArrayHandle.outputValue(&status);
-                    outArrayHandle.next();
-                    status = outHandle.set(ncObj[i]);
-                }
+                readCurves(mCurTime, mData.mCurvesList[i],
+                    mData.mNumCurves[i], curvesObj);
             }
+
+            std::size_t numChild = curvesObj.size();
+
+            // not the best way to do this
+            // only reading bunches of curves based on the connections would be
+            // more efficient when there is a bunch of broken connections
+            for (unsigned int i = 0; i < numChild; i++)
+            {
+                if (outArrayHandle.elementIndex() != i)
+                {
+                    continue;
+                }
+
+                outHandle = outArrayHandle.outputValue(&status);
+                outArrayHandle.next();
+                status = outHandle.set(curvesObj[i]);
+            }
+
             outArrayHandle.setAllClean();
         }
     }

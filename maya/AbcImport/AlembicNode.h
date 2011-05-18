@@ -85,9 +85,6 @@ public:
     static MObject mTimeAttr;
     static MObject mAbcFileNameAttr;
 
-    // data attributes
-    static MObject mSampledNurbsCurveNumCurveAttr;
-
     // output attributes
     static MObject mOutPropArrayAttr;
     static MObject mOutSubDArrayAttr;

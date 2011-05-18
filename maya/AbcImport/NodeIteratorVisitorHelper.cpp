@@ -1208,6 +1208,7 @@ WriterData & WriterData::operator=(const WriterData & rhs)
 {
 
     mCameraList = rhs.mCameraList;
+    mCurvesList = rhs.mCurvesList;
     mPointsList = rhs.mPointsList;
     mPolyMeshList = rhs.mPolyMeshList;
     mSubDList = rhs.mSubDList;
@@ -1216,12 +1217,15 @@ WriterData & WriterData::operator=(const WriterData & rhs)
 
     // get all the sampled Maya objects
     mCameraObjList = rhs.mCameraObjList;
+    mNurbsCurveObjList = rhs.mNurbsCurveObjList;
     mPointsObjList = rhs.mPointsObjList;
     mPolyMeshObjList = rhs.mPolyMeshObjList;
     mSubDObjList = rhs.mSubDObjList;
     mXformOpList = rhs.mXformOpList;
     mPropObjList = rhs.mPropObjList;
     mIsComplexXform = rhs.mIsComplexXform;
+
+    mNumCurves = rhs.mNumCurves;
 
     return *this;
 }
@@ -1278,6 +1282,19 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     {
         ts = mCameraList[i].getSchema().getTimeSampling();
         size_t numSamples = mCameraList[i].getSchema().getNumSamples();
+        if (numSamples > 1)
+        {
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
+    }
+
+
+    iEnd = mCurvesList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        ts = mCurvesList[i].getSchema().getTimeSampling();
+        size_t numSamples = mCurvesList[i].getSchema().getNumSamples();
         if (numSamples > 1)
         {
             oMin = std::min(ts->getSampleTime(0), oMin);
@@ -1432,21 +1449,6 @@ MString connectAttr(ArgData & iArgData)
     MIntArray intArray;
     unsigned length;
 
-    // set the mNurbsCurveNumCurveList
-    length = 0;//iArgData.mData.mNurbsCurveNumCurveList.size();
-    if (length > 0)
-    {
-        plug = alembicNodeFn.findPlug("numCurve", true, &status);
-        intArray.setLength(length);
-        /*
-        for (unsigned int i = 0; i < length; i++)
-            intArray.set(iArgData.mData.mNumCurveList[i], i);
-        */
-        status = fnIntArray.set(intArray);
-        intArrayObj = fnIntArray.object(&status);
-        status = plug.setValue(intArrayObj);
-    }
-
     // make connection: time1.outTime --> alembicNode.intime
     dstPlug = alembicNodeFn.findPlug("time", true, &status);
     status = getPlugByName("time1", "outTime", srcPlug);
@@ -1459,7 +1461,7 @@ MString connectAttr(ArgData & iArgData)
     unsigned int particleSize   = iArgData.mData.mPointsObjList.size();
     unsigned int xformSize      = iArgData.mData.mXformOpList.size();
     unsigned int nSurfaceSize   = 0;//iArgData.mData.mNurbsSurfaceObjList.size();
-    unsigned int nCurveSize     = 0;//iArgData.mData.mNurbsCurveObjList.size();
+    unsigned int nCurveSize     = iArgData.mData.mNurbsCurveObjList.size();
     unsigned int propSize       = iArgData.mData.mPropObjList.size();
 
     // making dynamic connections
@@ -1567,7 +1569,6 @@ MString connectAttr(ArgData & iArgData)
     }
     if (nCurveSize > 0)
     {
-        /*
         MPlug srcArrayPlug = alembicNodeFn.findPlug("outNCurveGrp", true);
         for (unsigned int i = 0; i < nCurveSize; i++)
         {
@@ -1577,7 +1578,6 @@ MString connectAttr(ArgData & iArgData)
             modifier.connect(srcPlug, dstPlug);
             status = modifier.doIt();
         }
-        */
     }
 
     if (propSize > 0)
