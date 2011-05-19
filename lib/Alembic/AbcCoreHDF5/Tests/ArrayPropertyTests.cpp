@@ -50,6 +50,8 @@ namespace A5 = Alembic::AbcCoreHDF5;
 
 namespace ABC = Alembic::AbcCoreAbstract::v1;
 
+using namespace Alembic::Util;
+
 //-*****************************************************************************
 void testDuplicateArray()
 {
