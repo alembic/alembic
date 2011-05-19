@@ -53,9 +53,9 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
                      "Sample 0 must have valid data for all mesh components" );
 
         m_positions.set( iSamp.getPositions() );
-	m_nVertices.set( iSamp.getCurvesNumVertices() );
+        m_nVertices.set( iSamp.getCurvesNumVertices() );
 
-	m_basisAndType->setSample( &(iSamp.getDescription().front()) );
+        m_basisAndType->setSample( &(iSamp.getDescription().front()) );
 
         if ( iSamp.getChildBounds().hasVolume() )
         { m_childBounds.set( iSamp.getChildBounds() ); }
@@ -102,8 +102,8 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_nVertices, iSamp.getCurvesNumVertices() );
-	
-	// TODO implement set from previous
+
+        // TODO implement set from previous
         //SetPropUsePrevIfNull( m_basisAndType, iSamp.getDescription() );
 
         if ( m_childBounds )
@@ -178,11 +178,10 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
 
     m_nVertices = Abc::OUInt32ArrayProperty( _this, "nVertices", iTsIdx);
 
-    m_basisAndType = _this->createScalarProperty(
-		"curveBasisAndType", AbcA::MetaData(),
-		AbcA::DataType( Alembic::Util::kUint8POD, 4 ),
-		iTsIdx );
-    
+    m_basisAndType = _this->createScalarProperty("curveBasisAndType",
+        AbcA::MetaData(), AbcA::DataType( Alembic::Util::kUint8POD, 4 ),
+        iTsIdx );
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 

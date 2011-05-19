@@ -87,22 +87,21 @@ public:
                 const Abc::FloatArraySample &iWidths = Abc::V2fArraySample(),
                 const Abc::V2fArraySample &iUVs = Abc::V2fArraySample(),
                 const Abc::V3fArraySample &iNormals = Abc::V3fArraySample(),
-		const BasisType &iUBasis = kBezierBasis,
-		const BasisType &iVBasis = kBezierBasis )
-
+                const BasisType &iUBasis = kBezierBasis,
+                const BasisType &iVBasis = kBezierBasis )
           : m_positions( iPos ),
             m_nVertices( iNVertices ),
             m_uvs( iUVs ),
             m_normals( iNormals ),
             m_widths( iWidths )
         {
-	    m_basisAndType.clear();
-	    m_basisAndType.reserve(4);
-	    m_basisAndType[0] = iType;
-	    m_basisAndType[1] = iWrap;
-	    m_basisAndType[2] = iUBasis;
-	    m_basisAndType[3] = iVBasis;
-	}
+            m_basisAndType.clear();
+            m_basisAndType.reserve(4);
+            m_basisAndType[0] = iType;
+            m_basisAndType[1] = iWrap;
+            m_basisAndType[2] = iUBasis;
+            m_basisAndType[3] = iVBasis;
+        }
 
         // widths accessor
         const Abc::FloatArraySample &getWidths() const { return m_widths; }
@@ -154,16 +153,16 @@ public:
         void setNormals( const Abc::V3fArraySample &iNormals )
         { m_normals = iNormals; }
 
-	// basis accessors
-	const BasisType getUBasis() const { return static_cast<BasisType> (m_basisAndType[2]); }
+        // basis accessors
+        const BasisType getUBasis() const { return static_cast<BasisType> (m_basisAndType[2]); }
         void setUBasis( const BasisType &iUBasis )
         { m_basisAndType[2] = iUBasis; }
 
-	const BasisType getVBasis() const { return static_cast<BasisType> (m_basisAndType[3]); }
+        const BasisType getVBasis() const { return static_cast<BasisType> (m_basisAndType[3]); }
         void setVBasis( const BasisType &iVBasis )
         { m_basisAndType[3] = iVBasis; }
-	
-	const std::vector<Alembic::Util::uint8_t> &getDescription() const { return m_basisAndType; }
+
+        const std::vector<Alembic::Util::uint8_t> &getDescription() const { return m_basisAndType; }
 
 
         void reset()
@@ -177,14 +176,13 @@ public:
 
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
-	    
-	    m_basisAndType.clear();
-	    m_basisAndType.reserve(4);
-	    
-	    m_basisAndType[0] = kCubic;
-	    m_basisAndType[1] = kNonPeriodic;
-	    m_basisAndType[2] = kBezierBasis;
-	    m_basisAndType[3] = kBezierBasis;
+
+            m_basisAndType.clear();
+            m_basisAndType.reserve(4);
+            m_basisAndType[0] = kCubic;
+            m_basisAndType[1] = kNonPeriodic;
+            m_basisAndType[2] = kBezierBasis;
+            m_basisAndType[3] = kBezierBasis;
         }
 
     protected:
@@ -197,7 +195,7 @@ public:
         Abc::V3fArraySample m_normals;
         Abc::FloatArraySample m_widths;
 
-	std::vector<Alembic::Util::uint8_t> m_basisAndType;
+        std::vector<Alembic::Util::uint8_t> m_basisAndType;
 
         // bounding box attributes
         Abc::Box3d m_selfBounds;
@@ -337,7 +335,7 @@ public:
         m_arbGeomParams.reset();
         m_nVertices.reset();
 
-	m_basisAndType.reset();
+        m_basisAndType.reset();
 
         m_selfBounds.reset();
         m_childBounds.reset();
