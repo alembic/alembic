@@ -45,12 +45,12 @@ MeshTopologyVariance ICurvesSchema::getTopologyVariance()
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::getTopologyVariance()" );
 
     if ( m_positions.isConstant() && m_nVertices.isConstant() &&
-         m_basisAndType -> isConstant() )
+         m_basisAndType.isConstant() )
     {
         return kConstantTopology;
     }
-    // TODO: we should check is the description is constant here.
-    else if ( m_basisAndType -> isConstant() )
+
+    else if ( m_basisAndType.isConstant() )
     {
         return kHomogenousTopology;
     }
@@ -83,7 +83,8 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     m_nVertices = Abc::IUInt32ArrayProperty( _this, "nVertices",
                                             args.getSchemaInterpMatching());
 
-    m_basisAndType = _this->getScalarProperty( "curveBasisAndType" );
+    m_basisAndType = Abc::IScalarProperty( _this, "curveBasisAndType",
+                                          args.getSchemaInterpMatching());
     
     m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
 
@@ -128,11 +129,13 @@ void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
     m_positions.get( oSample.m_positions, iSS );
     m_nVertices.get( oSample.m_nVertices, iSS );
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_basisAndType->getTimeSampling(),
-                                          m_basisAndType->getNumSamples() );
+    Alembic::Util::uint8_t basisAndType[4];
+    m_basisAndType.get( basisAndType, iSS );
 
-    oSample.m_basisAndType.reserve(4);
-    m_basisAndType->getSample( sampIdx, &(oSample.m_basisAndType.front()));
+    oSample.m_type = static_cast<CurveType>( basisAndType[0] );
+    oSample.m_wrap = static_cast<CurvePeriodicity>( basisAndType[1] );
+    oSample.m_basis = static_cast<BasisType>( basisAndType[2] );
+    // we ignore basisAndType[3] since it is the same as basisAndType[2]
 
     if ( m_normals )
     {

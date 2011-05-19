@@ -81,8 +81,8 @@ void Example1_CurvesOut()
     std::cout << "creating sample" << std::endl;
     OCurvesSchema::Sample curves_sample(
         V3fArraySample( ( const V3f * ) g_verts, g_totalVerts ),
-        kCubic,
         UInt32ArraySample( g_numVerts, g_numCurves),
+        kCubic,
         kNonPeriodic,
         widthSample,
         uvSample

@@ -45,6 +45,83 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::set()" );
 
+    Alembic::Util::uint8_t basisAndType[4];
+    basisAndType[0] = iSamp.getType();
+    basisAndType[1] = iSamp.getWrap();
+    basisAndType[2] = iSamp.getBasis();
+
+    // repeat so we don't have to change the data layout and bump up
+    // the version number
+    basisAndType[3] = basisAndType[2];
+
+    // do we need to create child bounds?
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    {
+        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds",
+                                             m_positions.getTimeSampling() );
+        Abc::Box3d emptyBox;
+        emptyBox.makeEmpty();
+
+        size_t numSamples = m_positions.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_childBounds.set( emptyBox );
+        }
+    }
+
+    // do we need to create uvs?
+    if ( iSamp.getUVs() && !m_uvs )
+    {
+        m_uvs = Abc::OV2fArrayProperty( this->getPtr(), "uv",
+            m_positions.getTimeSampling() );
+
+        Abc::V2fArraySample empty;
+
+        size_t numSamples = m_positions.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_uvs.set( empty );
+        }
+    }
+
+    // do we need to create normals?
+    if ( iSamp.getNormals() && !m_normals )
+    {
+        m_normals = Abc::OV3fArrayProperty( this->getPtr(), "N",
+            m_positions.getTimeSampling() );
+
+        Abc::V3fArraySample empty;
+
+        size_t numSamples = m_positions.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_normals.set( empty );
+        }
+    }
+
+    // do we need to create widths?
+    if ( iSamp.getWidths() && !m_widths )
+    {
+        m_widths = Abc::OFloatArrayProperty( this->getPtr(), "width",
+            m_positions.getTimeSampling() );
+
+        Abc::FloatArraySample empty;
+
+        size_t numSamples = m_positions.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_widths.set( empty );
+        }
+    }
+
     // We could add sample integrity checking here.
     if ( m_positions.getNumSamples() == 0 )
     {
@@ -55,7 +132,7 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         m_positions.set( iSamp.getPositions() );
         m_nVertices.set( iSamp.getCurvesNumVertices() );
 
-        m_basisAndType->setSample( &(iSamp.getDescription().front()) );
+        m_basisAndType.set( basisAndType );
 
         if ( iSamp.getChildBounds().hasVolume() )
         { m_childBounds.set( iSamp.getChildBounds() ); }
@@ -76,24 +153,18 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         // process uvs
         if ( iSamp.getUVs() )
         {
-            m_uvs = Abc::OV2fArrayProperty( this->getPtr(), "uv",
-                                            m_timeSamplingIndex );
             m_uvs.set( iSamp.getUVs() );
         }
 
         // process normals
         if ( iSamp.getNormals() )
         {
-            m_normals = Abc::OV3fArrayProperty( this->getPtr(), "N",
-                                                m_timeSamplingIndex );
             m_normals.set( iSamp.getNormals() );
         }
 
         // process widths
         if ( iSamp.getWidths() )
         {
-            m_widths = Abc::OFloatArrayProperty( this->getPtr(), "width",
-                                               m_timeSamplingIndex );
             m_widths.set( iSamp.getWidths() );
         }
 
@@ -103,8 +174,16 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_nVertices, iSamp.getCurvesNumVertices() );
 
-        // TODO implement set from previous
-        //SetPropUsePrevIfNull( m_basisAndType, iSamp.getDescription() );
+        // if number of vertices were specified, then the basis and type
+        // was specified
+        if ( m_nVertices )
+        {
+            m_basisAndType.set( basisAndType );
+        }
+        else
+        {
+            m_basisAndType.setFromPrevious();
+        }
 
         if ( m_childBounds )
         { SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() ); }
@@ -146,8 +225,8 @@ void OCurvesSchema::setFromPrevious()
 
     m_positions.setFromPrevious();
     m_nVertices.setFromPrevious();
-    
-    m_basisAndType -> setFromPreviousSample();
+
+    m_basisAndType.setFromPrevious();
 
     m_selfBounds.setFromPrevious();
 
@@ -165,8 +244,6 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::init()" );
 
-    m_timeSamplingIndex = iTsIdx;
-
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
 
@@ -174,13 +251,11 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
 
     m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
     m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
-    m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTsIdx );
 
     m_nVertices = Abc::OUInt32ArrayProperty( _this, "nVertices", iTsIdx);
 
-    m_basisAndType = _this->createScalarProperty("curveBasisAndType",
-        AbcA::MetaData(), AbcA::DataType( Alembic::Util::kUint8POD, 4 ),
-        iTsIdx );
+    m_basisAndType = Abc::OScalarProperty( _this, "curveBasisAndType",
+        AbcA::DataType( Alembic::Util::kUint8POD, 4 ), iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

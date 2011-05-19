@@ -46,8 +46,8 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-// Curves definition - Similar in form to the Geometric primitive used to specify
-// curves in renderman.
+// Curves definition - Similar in form to the Geometric primitive used to
+// specify curves in renderman.
 // "type"   - linear or cubic, one type for all curves
 // "wrap"   - periodic or nonperiodic, one mode for all curves
 // ---
@@ -66,12 +66,28 @@ public:
     public:
         //! Creates a default sample with no data in it.
         //! ...
-        Sample() {}
+        Sample()
+        {
+            // even though this might not be written out
+            // (unless curvesNumVertices and points is set) give some reasonable
+            // and predictable defaults
+            m_type = kCubic;
+            m_wrap = kNonPeriodic;
+            m_basis = kBezierBasis;
+        }
 
         //! Creates a sample with position data but no index
         //! or count data. For specifying samples after the first one
         Sample( const Abc::V3fArraySample &iPos )
-          : m_positions( iPos ) {}
+          : m_positions( iPos )
+        {
+            // even though this might not be written out
+            // (unless curvesNumVertices is set) give some reasonable
+            // and predictable defaults
+            m_type = kCubic;
+            m_wrap = kNonPeriodic;
+            m_basis = kBezierBasis;
+        }
 
 
         //! Creates a sample with position data, index data, count data,
@@ -81,27 +97,21 @@ public:
         //! be full like this, which would indicate a change of topology
         Sample(
                 const Abc::V3fArraySample &iPos,
-                const CurveType &iType = kCubic,
                 const Abc::UInt32ArraySample &iNVertices = Abc::UInt32ArraySample(),
+                const CurveType &iType = kCubic,
                 const CurvePeriodicity iWrap = kNonPeriodic,
                 const Abc::FloatArraySample &iWidths = Abc::V2fArraySample(),
                 const Abc::V2fArraySample &iUVs = Abc::V2fArraySample(),
                 const Abc::V3fArraySample &iNormals = Abc::V3fArraySample(),
-                const BasisType &iUBasis = kBezierBasis,
-                const BasisType &iVBasis = kBezierBasis )
+                const BasisType &iBasis = kBezierBasis )
           : m_positions( iPos ),
             m_nVertices( iNVertices ),
+            m_type( iType ),
+            m_wrap( iWrap ),
+            m_widths( iWidths ),
             m_uvs( iUVs ),
             m_normals( iNormals ),
-            m_widths( iWidths )
-        {
-            m_basisAndType.clear();
-            m_basisAndType.reserve(4);
-            m_basisAndType[0] = iType;
-            m_basisAndType[1] = iWrap;
-            m_basisAndType[2] = iUBasis;
-            m_basisAndType[3] = iVBasis;
-        }
+            m_basis( iBasis ) {}
 
         // widths accessor
         const Abc::FloatArraySample &getWidths() const { return m_widths; }
@@ -115,13 +125,13 @@ public:
 
         // type accessors
         void setType( const CurveType &iType )
-        { m_basisAndType[0] = iType; }
-        const CurveType getType() const { return static_cast<CurveType> (m_basisAndType[0]); }
+        { m_type = iType; }
+        CurveType getType() const { return m_type; }
 
         // wrap accessors
         void setWrap( const CurvePeriodicity &iWrap )
-        { m_basisAndType[1] = iWrap; }
-        const CurvePeriodicity getWrap() const { return static_cast<CurvePeriodicity> (m_basisAndType[1]); }
+        { m_wrap = iWrap; }
+        CurvePeriodicity getWrap() const { return m_wrap; }
 
         const std::size_t getNumCurves() const { return m_nVertices.size(); }
 
@@ -154,16 +164,9 @@ public:
         { m_normals = iNormals; }
 
         // basis accessors
-        const BasisType getUBasis() const { return static_cast<BasisType> (m_basisAndType[2]); }
-        void setUBasis( const BasisType &iUBasis )
-        { m_basisAndType[2] = iUBasis; }
-
-        const BasisType getVBasis() const { return static_cast<BasisType> (m_basisAndType[3]); }
-        void setVBasis( const BasisType &iVBasis )
-        { m_basisAndType[3] = iVBasis; }
-
-        const std::vector<Alembic::Util::uint8_t> &getDescription() const { return m_basisAndType; }
-
+        BasisType getBasis() const { return m_basis; }
+        void setBasis( const BasisType &iBasis )
+        { m_basis = iBasis; }
 
         void reset()
         {
@@ -177,12 +180,9 @@ public:
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
 
-            m_basisAndType.clear();
-            m_basisAndType.reserve(4);
-            m_basisAndType[0] = kCubic;
-            m_basisAndType[1] = kNonPeriodic;
-            m_basisAndType[2] = kBezierBasis;
-            m_basisAndType[3] = kBezierBasis;
+            m_type = kCubic;
+            m_wrap = kNonPeriodic;
+            m_basis = kBezierBasis;
         }
 
     protected:
@@ -195,7 +195,9 @@ public:
         Abc::V3fArraySample m_normals;
         Abc::FloatArraySample m_widths;
 
-        std::vector<Alembic::Util::uint8_t> m_basisAndType;
+        CurveType m_type;
+        BasisType m_basis;
+        CurvePeriodicity m_wrap;
 
         // bounding box attributes
         Abc::Box3d m_selfBounds;
@@ -251,8 +253,6 @@ public:
                 addTimeSampling( *tsPtr );
         }
 
-        m_timeSamplingIndex = tsIndex;
-
         init( tsIndex );
     }
 
@@ -277,8 +277,6 @@ public:
             tsIndex = iParentObject->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
-
-        m_timeSamplingIndex = tsIndex;
 
         init( tsIndex );
     }
@@ -357,7 +355,6 @@ public:
 
 protected:
     void init( const AbcA::index_t iTsIdx );
-    AbcA::index_t m_timeSamplingIndex;
 
     // point data
     Abc::OV3fArrayProperty m_positions;
@@ -373,8 +370,8 @@ protected:
     // bounding box attributes
     Abc::OBox3dProperty m_selfBounds;
     Abc::OBox3dProperty m_childBounds;
-    
-    AbcA::ScalarPropertyWriterPtr m_basisAndType;
+
+    Abc::OScalarProperty m_basisAndType;
 };
 
 //-*****************************************************************************

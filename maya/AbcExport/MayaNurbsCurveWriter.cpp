@@ -154,12 +154,9 @@ void MayaNurbsCurveWriter::write()
     if (mIsCurveGrp)
         numCurves = mNurbsCurves.length();
 
-    std::vector<float> minCurves(numCurves);
-    std::vector<float> maxCurves(numCurves);
-    std::vector<int32_t> nVertices(numCurves);
+    std::vector<Alembic::Util::uint32_t> nVertices(numCurves);
     std::vector<float> points;
     std::vector<float> width;
-    std::vector<float> knotCurves;
 
     MMatrix transformMatrix;
     bool useConstWidth = false;
@@ -167,13 +164,9 @@ void MayaNurbsCurveWriter::write()
     MFnDependencyNode dep(mRootDagPath.transform());
     MPlug constWidthPlug = dep.findPlug("constantwidth");
 
-    // pushing each width twice for now because width for some
-    // reason is a V2f
-
     if (!constWidthPlug.isNull())
     {
         useConstWidth = true;
-        width.push_back(constWidthPlug.asFloat());
         width.push_back(constWidthPlug.asFloat());
     }
 
@@ -189,20 +182,28 @@ void MayaNurbsCurveWriter::write()
         else
             curve.setObject(mRootDagPath.node());
 
-        /*if (i == 0)
+        if (i == 0)
         {
-            samp.setSpan(curve.numSpans());
-            samp.setDegree(curve.degree());
-            samp.setForm(curve.form()-1);
-        }*/
+            if (curve.form() == MFnNurbsCurve::kOpen)
+            {
+                samp.setWrap(Alembic::AbcGeom::kNonPeriodic);
+            }
+            else
+            {
+                samp.setWrap(Alembic::AbcGeom::kPeriodic);
+            }
 
-        double start, end;
-        curve.getKnotDomain(start, end);
+            if (curve.degree() == 3)
+            {
+                samp.setType(Alembic::AbcGeom::kCubic);
+            }
+            else
+            {
+                samp.setType(Alembic::AbcGeom::kLinear);
+            }
+        }
 
-        minCurves[i] = start;
-        maxCurves[i] = end;
-
-        int32_t numCVs = curve.numCVs(&stat);
+        Alembic::Util::uint32_t numCVs = curve.numCVs(&stat);
         nVertices[i] = numCVs;
         mCVCount += numCVs;
 
@@ -221,38 +222,6 @@ void MayaNurbsCurveWriter::write()
             points.push_back(transformdPt.z);
         }
 
-        // normalize the knot vector for historical reasons
-        /*MDoubleArray knots;
-        stat = curve.getKnots(knots);
-        unsigned int numKnots = knots.length();
-        unsigned int totalNumKnots = knotCurves.size();
-
-        // push_back a dummy value, we will set it below
-        knotCurves.push_back(0.0);
-        for (size_t j = 0 ; j < numKnots ; ++j)
-            knotCurves.push_back(knots[j]);
-
-        // for a knot sequence with multiple end knots, duplicate the existing
-        // first and last knots once more. For a knot sequence with uniform
-        // end knots, create their the new knots offset at an interval equal to
-        // the existing first and last knot intervals
-        double k1 = knotCurves[totalNumKnots+1];
-        double k2 = curveGrp.knot[totalNumKnots+2];
-        double klast_1 = curveGrp.knot[totalNumKnots+numKnots];
-        double klast_2 = curveGrp.knot[totalNumKnots+numKnots-1];
-        if (k1 == knotCurves[totalNumKnots+samp.getDegree()])
-        {
-            knotCurves[totalNumKnots] = k1;
-            knotCurves.push_back(klast_1);
-        }
-        else
-        {
-            // if degree == 1, will not be in this part of code
-            knotCurves[totalNumKnots] = 2* k1 - k2;
-            knotCurves.push_back(2 * klast_1 - klast_2);
-        }
-        */
-
         // width
         MPlug widthPlug = curve.findPlug("width");
 
@@ -263,14 +232,13 @@ void MayaNurbsCurveWriter::write()
             MFnDoubleArrayData fnDoubleArrayData(widthObj, &status);
             MDoubleArray doubleArrayData = fnDoubleArrayData.array();
             size_t arraySum = doubleArrayData.length();
-            size_t correctVecLen = arraySum; //samp.getSpan();
+            size_t correctVecLen = arraySum;
             //if (samp.getForm() == 0)
             //    correctVecLen += 1;
             if (arraySum == correctVecLen)
             {
                 for (size_t i = 0; i < arraySum; i++)
                 {
-                    width.push_back(doubleArrayData[i]);
                     width.push_back(doubleArrayData[i]);
                 }
             }
@@ -284,7 +252,6 @@ void MayaNurbsCurveWriter::write()
 
                 width.clear();
                 width.push_back(0.1);
-                width.push_back(0.1);
                 useConstWidth = true;
             }
         }
@@ -293,15 +260,13 @@ void MayaNurbsCurveWriter::write()
             // pick a default value
             width.clear();
             width.push_back(0.1);
-            width.push_back(0.1);
             useConstWidth = true;
         }
     }
 
-    samp.setCurvesNumVertices(Alembic::Abc::Int32ArraySample(nVertices));
+    samp.setCurvesNumVertices(Alembic::Abc::UInt32ArraySample(nVertices));
     samp.setPositions(Alembic::Abc::V3fArraySample(
         (const Imath::V3f *)&points.front(), points.size() / 3 ));
-    samp.setWidths(Alembic::Abc::V2fArraySample(
-        (const Imath::V2f *)&width.front(), width.size() / 3 ));
+    samp.setWidths(Alembic::Abc::FloatArraySample(width));
     mSchema.set(samp);
 }

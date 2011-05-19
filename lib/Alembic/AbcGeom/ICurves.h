@@ -64,15 +64,13 @@ public:
         {
             return m_nVertices->size();
         }
+
         Abc::UInt32ArraySamplePtr getCurvesNumVertices() const
         { return m_nVertices; }
-        
-        std::vector<uint8_t> getDescription() const { return m_basisAndType; }
-        
-        CurveType getType() const { return static_cast<CurveType>( m_basisAndType[0] ); }
-        CurvePeriodicity getWrap() const { return static_cast<CurvePeriodicity>( m_basisAndType[1] ); }
-        BasisType getUBasis() const { return static_cast<BasisType>( m_basisAndType[2] ); }
-        BasisType getVBasis() const { return static_cast<BasisType>( m_basisAndType[3] ); }
+
+        CurveType getType() const { return m_type; }
+        CurvePeriodicity getWrap() const { return m_wrap; }
+        BasisType getBasis() const { return m_basis; }
 
         Abc::FloatArraySamplePtr getWidths() const { return m_widths; }
         Abc::V2fArraySamplePtr getUVs() const { return m_uvs; }
@@ -95,7 +93,9 @@ public:
             m_uvs.reset();
             m_normals.reset();
 
-            m_basisAndType.clear();
+            m_type = kCubic;
+            m_wrap = kNonPeriodic;
+            m_basis = kBezierBasis;
 
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
@@ -114,7 +114,9 @@ public:
         std::size_t m_numCurves;
         Abc::UInt32ArraySamplePtr m_nVertices;
 
-        std::vector<Alembic::Util::uint8_t> m_basisAndType;
+        CurveType m_type;
+        BasisType m_basis;
+        CurvePeriodicity m_wrap;
 
         Abc::FloatArraySamplePtr m_widths;
         Abc::V2fArraySamplePtr m_uvs;
@@ -123,7 +125,7 @@ public:
     };
 
     //-*************************************************************************
-    // POLY MESH SCHEMA
+    // CURVE SCHEMA
     //-*************************************************************************
 public:
     //! By convention we always define this_type in AbcGeom classes.
@@ -152,8 +154,7 @@ public:
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<PolyMeshSchemaInfo>( iParentObject, iName,
-                                            iArg0, iArg1 )
+      : Abc::ISchema<PolyMeshSchemaInfo>( iParentObject, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -164,8 +165,7 @@ public:
     explicit ICurvesSchema( CPROP_PTR iParentObject,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iParentObject,
-                                        iArg0, iArg1 )
+      : Abc::ISchema<CurvesSchemaInfo>( iParentObject, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -173,8 +173,7 @@ public:
     //! Wrap an existing schema object
     template <class CPROP_PTR>
     ICurvesSchema( CPROP_PTR iThis,
-                     Abc::WrapExistingFlag iFlag,
-
+                   Abc::WrapExistingFlag iFlag,
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<CurvesSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
@@ -249,7 +248,7 @@ public:
         m_widths.reset();
 
         m_arbGeomParams.reset();
-        
+
         m_basisAndType.reset();
 
         Abc::ISchema<CurvesSchemaInfo>::reset();
@@ -274,7 +273,7 @@ protected:
     Abc::IUInt32ArrayProperty  m_nVertices;
 
     // contains type, wrap, ubasis, and vbasis.
-    AbcA::ScalarPropertyReaderPtr m_basisAndType;
+    Abc::IScalarProperty m_basisAndType;
 
     Abc::IFloatArrayProperty m_widths;
     Abc::IV2fArrayProperty m_uvs;
