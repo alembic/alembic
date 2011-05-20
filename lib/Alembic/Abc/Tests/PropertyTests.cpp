@@ -44,6 +44,10 @@
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
+using Alembic::AbcCoreAbstract::chrono_t;
+using Alembic::AbcCoreAbstract::index_t;
+using Alembic::Util::uint32_t;
+
 //
 // The tests in this file are intended to exercize the Abc API;
 //  specifically writing and reading of propertues in parent-child

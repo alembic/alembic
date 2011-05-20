@@ -46,6 +46,11 @@
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
+using Alembic::AbcCoreAbstract::chrono_t;
+using Alembic::AbcCoreAbstract::index_t;
+using Alembic::Util::uint32_t;
+using Alembic::Util::float32_t;
+
 static const V3f scalarV3fval( -1.0f, 32.0f, -90.0f );
 
 static const chrono_t startTime = 5.7;

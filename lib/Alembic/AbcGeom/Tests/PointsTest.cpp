@@ -41,6 +41,13 @@
 namespace AbcG = Alembic::AbcGeom;
 using namespace AbcG;
 
+using Alembic::AbcCoreAbstract::chrono_t;
+using Alembic::AbcCoreAbstract::index_t;
+using Alembic::Util::uint32_t;
+using Alembic::Util::float32_t;
+using Alembic::Util::int32_t;
+using Alembic::Util::uint64_t;
+
 //-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************

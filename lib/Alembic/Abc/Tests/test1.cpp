@@ -41,6 +41,11 @@
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
+using Alembic::AbcCoreAbstract::chrono_t;
+using Alembic::AbcCoreAbstract::index_t;
+using Alembic::Util::uint32_t;
+using Alembic::Util::float32_t;
+
 //-*****************************************************************************
 void simpleTestOut()
 {
@@ -268,7 +273,7 @@ void simpleTestIn()
             }
         }
     }
-    
+
     IFloatProperty radius( clampto, "radius" );
 
     std::cout << "Num clanker samples: "

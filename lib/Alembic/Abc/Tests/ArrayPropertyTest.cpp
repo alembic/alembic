@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -41,6 +41,10 @@
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
+
+using Alembic::AbcCoreAbstract::chrono_t;
+using Alembic::AbcCoreAbstract::index_t;
+using Alembic::Util::uint32_t;
 
 //
 // The tests in this file are intended to exercize the Abc API;
@@ -383,7 +387,7 @@ void readWriteColorArrayProperty(const std::string &archiveName)
         {
             ABCA_ASSERT( (*samplePtr)[i].x == i/8.0 &&
                 (*samplePtr)[i].x == (*samplePtr)[i].y &&
-                (*samplePtr)[i].x == (*samplePtr)[i].z, 
+                (*samplePtr)[i].x == (*samplePtr)[i].z,
                 "Color [" << i << "] is incorrect.");
         }
 

@@ -49,16 +49,21 @@
 #include <maya/MString.h>
 #include <maya/MFnDependencyNode.h>
 
-#include <Alembic/AbcCoreAbstract/TimeSampling.h>
-#include <Alembic/Abc/IArchive.h>
-#include <Alembic/Abc/IArrayProperty.h>
+#include <Alembic/AbcGeom/All.h>
+
+using Alembic::AbcCoreAbstract::chrono_t;
+using Alembic::AbcCoreAbstract::index_t;
+using Alembic::Util::uint32_t;
+using Alembic::Util::float32_t;
+using Alembic::Util::int32_t;
+using Alembic::Util::int64_t;
 
 // replace one MObject with another, while keeping all the old hierarchy intact
 // The objects have to be a Dag object
 MStatus replaceDagObject(MObject & oldObject, MObject & newObject,
     const MString & name);
 
-// disconnect all plugs based on the name of the IArrayProperty 
+// disconnect all plugs based on the name of the IArrayProperty
 // from iSampledPropList[iFirstProp] to the end of iSampledPropList
 void disconnectProps(MFnDependencyNode & iNode,
     std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
@@ -98,7 +103,7 @@ bool removeDangleAlembicNodes();
 double getWeightAndIndex(double iFrame,
     Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iTime, size_t numSamps,
     int64_t & oIndex, int64_t & oCeilIndex);
-    
+
 template<typename T>
 void clamp(T & min, T & max, T & cur)
 {

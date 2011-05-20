@@ -39,6 +39,13 @@
 
 using namespace Alembic::AbcGeom;
 
+using Alembic::AbcCoreAbstract::chrono_t;
+using Alembic::AbcCoreAbstract::index_t;
+using Alembic::Util::uint32_t;
+using Alembic::Util::float32_t;
+using Alembic::Util::int32_t;
+
+
 //-*****************************************************************************
 Alembic::Abc::OObject subdCube( Alembic::Abc::OObject parent )
 {

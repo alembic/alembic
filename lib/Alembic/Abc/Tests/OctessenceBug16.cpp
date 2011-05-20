@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -42,6 +42,11 @@
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
+using Alembic::AbcCoreAbstract::chrono_t;
+using Alembic::AbcCoreAbstract::index_t;
+using Alembic::Util::uint32_t;
+
+
 //
 // The tests in this file are intended to demonstrate Alembic Issue 16
 //  "memcpy error in Alembic::HDF5::Attribute::writeAll" revealed
@@ -50,13 +55,13 @@ using namespace Abc;
 
 void writeSimpleProperties(const std::string &archiveName)
 {
-    const unsigned int numSamples = 5;
+    const uint32_t numSamples = 5;
     const chrono_t dt = 1.0 / 24.0;
 
     TimeSamplingType tst( dt ); // uniform with cycle=dt
     std::vector < chrono_t > timeSamp(1, 666.0);
     TimeSampling ts(tst, timeSamp);
-    
+
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
