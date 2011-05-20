@@ -66,26 +66,25 @@ public:
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
-        
-        // trim curve
-	size_t getTrimNumLoops() const { return m_trimNumLoops; }
-	Abc::UInt64ArraySamplePtr getTrimNumVertices() const { return m_trimNumVertices; }
-	Abc::UInt64ArraySamplePtr getTrimNumCurves() const { return m_trimNumCurves; }
-	Abc::UInt64ArraySamplePtr getTrimOrders() const { return m_trimOrder; }
-	Abc::FloatArraySamplePtr getTrimKnots() const { return m_trimKnot; }
-	Abc::FloatArraySamplePtr getTrimMins() const { return m_trimMin; }
-	Abc::FloatArraySamplePtr getTrimMaxes() const { return m_trimMax; }
-	Abc::FloatArraySamplePtr getTrimU() const { return m_trimU; }
-	Abc::FloatArraySamplePtr getTrimV() const { return m_trimV; }
-	Abc::FloatArraySamplePtr getTrimW() const { return m_trimW; }
 
-        
+        // trim curve
+        size_t getTrimNumLoops() const { return m_trimNumLoops; }
+        Abc::UInt64ArraySamplePtr getTrimNumVertices() const { return m_trimNumVertices; }
+        Abc::UInt64ArraySamplePtr getTrimNumCurves() const { return m_trimNumCurves; }
+        Abc::UInt64ArraySamplePtr getTrimOrders() const { return m_trimOrder; }
+        Abc::FloatArraySamplePtr getTrimKnots() const { return m_trimKnot; }
+        Abc::FloatArraySamplePtr getTrimMins() const { return m_trimMin; }
+        Abc::FloatArraySamplePtr getTrimMaxes() const { return m_trimMax; }
+        Abc::FloatArraySamplePtr getTrimU() const { return m_trimU; }
+        Abc::FloatArraySamplePtr getTrimV() const { return m_trimV; }
+        Abc::FloatArraySamplePtr getTrimW() const { return m_trimW; }
+
         bool hasTrimCurve() const { return m_trimNumLoops != 0; }
-        
+
         bool valid() const
         {
             return m_positions && m_numU && m_numV && m_uOrder && m_vOrder &&
-		   m_uKnot && m_vKnot;
+                m_uKnot && m_vKnot;
         }
 
         void reset()
@@ -97,29 +96,29 @@ public:
             m_vOrder = 1;
             m_uKnot.reset();
             m_vKnot.reset();
-	    
+
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
-            
+
             // trim curve
             m_trimNumLoops = 0;
             m_trimNumCurves.reset();
-	    m_trimNumVertices.reset();
-	    m_trimOrder.reset();
-	    m_trimKnot.reset();
-	    m_trimMin.reset();
-	    m_trimMax.reset();
-	    m_trimU.reset();
-	    m_trimV.reset();
-	    m_trimW.reset();
+            m_trimNumVertices.reset();
+            m_trimOrder.reset();
+            m_trimKnot.reset();
+            m_trimMin.reset();
+            m_trimMax.reset();
+            m_trimU.reset();
+            m_trimV.reset();
+            m_trimW.reset();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
 
     protected:
-        
+
         friend class INuPatchSchema;
-        
+
         Abc::V3fArraySamplePtr m_positions;
         uint64_t m_numU;
         uint64_t m_numV;
@@ -127,19 +126,19 @@ public:
         uint64_t m_vOrder;
         Abc::FloatArraySamplePtr m_uKnot;
         Abc::FloatArraySamplePtr m_vKnot;
-    
+
         // trim curve
-	uint64_t m_trimNumLoops;
-	Abc::UInt64ArraySamplePtr m_trimNumCurves;
-	Abc::UInt64ArraySamplePtr m_trimNumVertices;
-	Abc::UInt64ArraySamplePtr m_trimOrder;
-	Abc::FloatArraySamplePtr m_trimKnot;
-	Abc::FloatArraySamplePtr m_trimMin;
-	Abc::FloatArraySamplePtr m_trimMax;
-	Abc::FloatArraySamplePtr m_trimU;
-	Abc::FloatArraySamplePtr m_trimV;
-	Abc::FloatArraySamplePtr m_trimW;
-	bool m_hasTrimCurve;
+        uint64_t m_trimNumLoops;
+        Abc::UInt64ArraySamplePtr m_trimNumCurves;
+        Abc::UInt64ArraySamplePtr m_trimNumVertices;
+        Abc::UInt64ArraySamplePtr m_trimOrder;
+        Abc::FloatArraySamplePtr m_trimKnot;
+        Abc::FloatArraySamplePtr m_trimMin;
+        Abc::FloatArraySamplePtr m_trimMax;
+        Abc::FloatArraySamplePtr m_trimU;
+        Abc::FloatArraySamplePtr m_trimV;
+        Abc::FloatArraySamplePtr m_trimW;
+        bool m_hasTrimCurve;
 
         // bounds
         Abc::Box3d m_selfBounds;
@@ -264,7 +263,7 @@ public:
     {
         m_positions.reset();
         m_numU.reset();
-       m_numV.reset();
+        m_numV.reset();
         m_uOrder.reset();
         m_vOrder.reset();
         m_uKnot.reset();
@@ -277,16 +276,16 @@ public:
         m_childBounds.reset();
         
         // reset trim curve attributes
-		m_trimNumLoops.reset();
+        m_trimNumLoops.reset();
         m_trimNumCurves.reset();
-		m_trimNumVertices.reset();
-		m_trimOrder.reset();
-		m_trimKnot.reset();
-		m_trimMin.reset();
-		m_trimMax.reset();
-		m_trimU.reset();
-		m_trimV.reset();
-		m_trimW.reset();
+        m_trimNumVertices.reset();
+        m_trimOrder.reset();
+        m_trimKnot.reset();
+        m_trimMin.reset();
+        m_trimMax.reset();
+        m_trimU.reset();
+        m_trimV.reset();
+        m_trimW.reset();
 
         Abc::ISchema<NuPatchSchemaInfo>::reset();
     }
@@ -297,12 +296,12 @@ public:
     {
         return ( Abc::ISchema<NuPatchSchemaInfo>::valid() &&
                  m_positions.valid() &&
-		 m_numU.valid() &&
-		 m_numV.valid() &&
-		 m_uOrder.valid() &&
-		 m_vOrder.valid() &&
-		 m_uKnot.valid() &&
-		 m_vKnot.valid() );
+                 m_numU.valid() &&
+                 m_numV.valid() &&
+                 m_uOrder.valid() &&
+                 m_vOrder.valid() &&
+                 m_uKnot.valid() &&
+                 m_vKnot.valid() );
     }
 
     //! unspecified-bool-type operator overload.
@@ -310,8 +309,7 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( INuPatchSchema::valid() );
 
 protected:
-    void init( const Abc::Argument &iArg0,
-               const Abc::Argument &iArg1 );
+    void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
     // required properties
     Abc::IV3fArrayProperty m_positions;
@@ -321,7 +319,7 @@ protected:
     Abc::IUInt64Property m_vOrder;
     Abc::IFloatArrayProperty m_uKnot;
     Abc::IFloatArrayProperty m_vKnot;
-        
+
     // optional
     IN3fGeomParam m_normals;
     IV2fGeomParam m_uvs;

@@ -47,8 +47,8 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ONuPatchSchema::set()" );
 
-	// TODO: do this the 'simple' way. always create the trim curves
-	// properties within the init, add a boolean property hasTrimCurve.
+    // TODO: do this the 'simple' way. always create the trim curves
+    // properties within the init, add a boolean property hasTrimCurve.
 
     // We could add sample integrity checking here.
     if ( m_positions.getNumSamples() == 0 )
@@ -57,16 +57,16 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
         ABCA_ASSERT( iSamp.getPositions(),
                      "Sample 0 must have valid data for all mesh components" );
 
-	// set required properties
+        // set required properties
         m_positions.set( iSamp.getPositions() );
-	m_numU.set( iSamp.getNu() );
+        m_numU.set( iSamp.getNu() );
         m_numV.set( iSamp.getNv() );
         m_uOrder.set( iSamp.getUOrder() );
         m_vOrder.set( iSamp.getVOrder() );
         m_uKnot.set( iSamp.getUKnot() );
         m_vKnot.set( iSamp.getVKnot() );
 
-	// set optional properties
+        // set optional properties
         if ( iSamp.getUVs().getVals() )
         {
             if ( iSamp.getUVs().getIndices() )
@@ -83,44 +83,42 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
                                        iSamp.getUVs().getScope(), 1,
                                        this->getTimeSampling() );
             }
-	    
-	    m_uvs.set( iSamp.getUVs() );
+
+            m_uvs.set( iSamp.getUVs() );
         }
-        
+
         if ( iSamp.getNormals().getVals() )
         {
-	    
-	    if ( iSamp.getNormals().getIndices() )
-	    {
-		// normals are indexed
-		m_normals = ON3fGeomParam( this->getPtr(), "N", true,
-					   iSamp.getUVs().getScope(), 1,
-					   this->getTimeSampling() );
-	    }
-	    else
-	    {
-		// normals are not indexed
-		m_normals = ON3fGeomParam( this->getPtr(), "N", false,
-					   iSamp.getUVs().getScope(), 1,
-					   this->getTimeSampling() );
-	    }
-	    
+            if ( iSamp.getNormals().getIndices() )
+            {
+                // normals are indexed
+                m_normals = ON3fGeomParam( this->getPtr(), "N", true,
+                iSamp.getUVs().getScope(), 1, this->getTimeSampling() );
+            }
+            else
+            {
+                // normals are not indexed
+                m_normals = ON3fGeomParam( this->getPtr(), "N", false,
+                                            iSamp.getUVs().getScope(), 1,
+                                            this->getTimeSampling() );
+            }
+
             m_normals.set( iSamp.getNormals() );
         }
-        
-	m_trimNumLoops.set( iSamp.getTrimNumLoops() );
 
-	m_trimNumCurves.set( iSamp.getTrimNumCurves() );
-	m_trimNumVertices.set( iSamp.getTrimNumVertices() );
-	m_trimOrder.set( iSamp.getTrimOrder() );
-	m_trimKnot.set( iSamp.getTrimKnot() );
-	m_trimMin.set( iSamp.getTrimMin() );
-	m_trimMax.set( iSamp.getTrimMax() );
-	m_trimU.set( iSamp.getTrimU() );
-	m_trimV.set( iSamp.getTrimV() );
-	m_trimW.set( iSamp.getTrimW() );
-    
-	// set bounds
+        m_trimNumLoops.set( iSamp.getTrimNumLoops() );
+
+        m_trimNumCurves.set( iSamp.getTrimNumCurves() );
+        m_trimNumVertices.set( iSamp.getTrimNumVertices() );
+        m_trimOrder.set( iSamp.getTrimOrder() );
+        m_trimKnot.set( iSamp.getTrimKnot() );
+        m_trimMin.set( iSamp.getTrimMin() );
+        m_trimMax.set( iSamp.getTrimMax() );
+        m_trimU.set( iSamp.getTrimU() );
+        m_trimV.set( iSamp.getTrimV() );
+        m_trimW.set( iSamp.getTrimW() );
+
+        // set bounds
         if ( iSamp.getChildBounds().hasVolume() )
         { m_childBounds.set( iSamp.getChildBounds() ); }
 
@@ -130,60 +128,90 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
             // so we need a a placeholder variable.
             Abc::Box3d bnds(
                 ComputeBoundsFromPositions( iSamp.getPositions() )
-                           );            
+                           );
 
             m_selfBounds.set( bnds );
 
         }
-        else { m_selfBounds.set( iSamp.getSelfBounds() ); }
-		
+        else
+        {
+            m_selfBounds.set( iSamp.getSelfBounds() );
+        }
     }
     else
     {
-		// TODO this would all go away, remove the lightweight constructor
+        // TODO this would all go away, remove the lightweight constructor
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_numU, iSamp.getNu() );
-	SetPropUsePrevIfNull( m_numV, iSamp.getNv() );
-	SetPropUsePrevIfNull( m_uOrder, iSamp.getUOrder() );
-	SetPropUsePrevIfNull( m_vOrder, iSamp.getVOrder() );
-	SetPropUsePrevIfNull( m_uKnot, iSamp.getUKnot() );
-	SetPropUsePrevIfNull( m_vKnot, iSamp.getVKnot() );
-	
-	if ( m_uvs ) { m_uvs.set( iSamp.getUVs() ); }
-	if ( m_normals ) { m_normals.set( iSamp.getNormals() ); }
+        SetPropUsePrevIfNull( m_numV, iSamp.getNv() );
+        SetPropUsePrevIfNull( m_uOrder, iSamp.getUOrder() );
+        SetPropUsePrevIfNull( m_vOrder, iSamp.getVOrder() );
+        SetPropUsePrevIfNull( m_uKnot, iSamp.getUKnot() );
+        SetPropUsePrevIfNull( m_vKnot, iSamp.getVKnot() );
 
-	// handle trim curves
-	if ( m_trimNumLoops )
-	{ SetPropUsePrevIfNull( m_trimNumLoops, iSamp.getTrimNumLoops() ); }
-	
-	if ( m_trimNumCurves )
-	{ SetPropUsePrevIfNull( m_trimNumCurves, iSamp.getTrimNumCurves() ); }
-	
-	if ( m_trimNumVertices )
-	{ SetPropUsePrevIfNull( m_trimNumVertices, iSamp.getTrimNumVertices() ); }
-	
-	if ( m_trimOrder )
-	{ SetPropUsePrevIfNull( m_trimOrder, iSamp.getTrimOrder() ); }
-	
-	if ( m_trimKnot )
-	{ SetPropUsePrevIfNull( m_trimKnot, iSamp.getTrimKnot() ); }
-	
-	if ( m_trimMin )
-	{ SetPropUsePrevIfNull( m_trimMin, iSamp.getTrimMin() ); }
-	
-	if ( m_trimMax )
-	{ SetPropUsePrevIfNull( m_trimMax, iSamp.getTrimMax() ); }
-	
-	if ( m_trimU )
-	{ SetPropUsePrevIfNull( m_trimU, iSamp.getTrimU() ); }
-	
-	if ( m_trimV )
-	{ SetPropUsePrevIfNull( m_trimV, iSamp.getTrimV() ); }
-	
-	if ( m_trimW )
-	{ SetPropUsePrevIfNull( m_trimW, iSamp.getTrimW() ); }
-		
-	// update bounds
+        if ( m_uvs )
+        {
+            m_uvs.set( iSamp.getUVs() );
+        }
+
+        if ( m_normals )
+        {
+            m_normals.set( iSamp.getNormals() );
+        }
+
+        // handle trim curves
+        if ( m_trimNumLoops )
+        {
+            SetPropUsePrevIfNull( m_trimNumLoops, iSamp.getTrimNumLoops() );
+        }
+
+        if ( m_trimNumCurves )
+        {
+            SetPropUsePrevIfNull( m_trimNumCurves, iSamp.getTrimNumCurves() );
+        }
+
+        if ( m_trimNumVertices )
+        {
+            SetPropUsePrevIfNull( m_trimNumVertices,
+                                    iSamp.getTrimNumVertices() );
+        }
+
+        if ( m_trimOrder )
+        {
+            SetPropUsePrevIfNull( m_trimOrder, iSamp.getTrimOrder() );
+        }
+
+        if ( m_trimKnot )
+        {
+            SetPropUsePrevIfNull( m_trimKnot, iSamp.getTrimKnot() );
+        }
+
+        if ( m_trimMin )
+        {
+            SetPropUsePrevIfNull( m_trimMin, iSamp.getTrimMin() );
+        }
+
+        if ( m_trimMax )
+        {
+            SetPropUsePrevIfNull( m_trimMax, iSamp.getTrimMax() );
+        }
+
+        if ( m_trimU )
+        {
+            SetPropUsePrevIfNull( m_trimU, iSamp.getTrimU() );
+        }
+
+        if ( m_trimV )
+        {
+            SetPropUsePrevIfNull( m_trimV, iSamp.getTrimV() );
+        }
+
+        if ( m_trimW )
+        {
+            SetPropUsePrevIfNull( m_trimW, iSamp.getTrimW() );
+        }
+
+        // update bounds
         if ( iSamp.getSelfBounds().hasVolume() )
         {
             m_selfBounds.set( iSamp.getSelfBounds() );
@@ -198,7 +226,7 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
         else
         {
             m_selfBounds.setFromPrevious();
-         }
+        }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -258,11 +286,11 @@ void ONuPatchSchema::init( const AbcA::index_t iTsIdx )
     m_vOrder = Abc::OUInt64Property( _this, "vOrder", mdata, iTsIdx );
     m_uKnot = Abc::OFloatArrayProperty( _this, "uKnot", mdata, iTsIdx );
     m_vKnot = Abc::OFloatArrayProperty( _this, "vKnot", mdata, iTsIdx );
-    
+
     // trim curves
     m_trimNumLoops = Abc::OUInt64Property( _this, "trim_nloops", iTsIdx );
     m_trimNumCurves = Abc::OUInt64ArrayProperty( _this, "trim_ncurves",
-						 iTsIdx );
+                                                iTsIdx );
     m_trimNumVertices = Abc::OUInt64ArrayProperty( _this, "trim_n", iTsIdx );
     m_trimOrder = Abc::OUInt64ArrayProperty( _this, "trim_order", iTsIdx );
     m_trimKnot = Abc::OFloatArrayProperty( _this, "trim_knot", iTsIdx );
@@ -271,10 +299,10 @@ void ONuPatchSchema::init( const AbcA::index_t iTsIdx )
     m_trimU = Abc::OFloatArrayProperty( _this, "trim_u", iTsIdx );
     m_trimV = Abc::OFloatArrayProperty( _this, "trim_v", iTsIdx );
     m_trimW = Abc::OFloatArrayProperty( _this, "trim_w", iTsIdx );
-    
+
     m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
     m_childBounds = Abc::OBox3dProperty( _this, ".childBnds", iTsIdx );
-	
+
     // UVs and Normals are created on first call to set()
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

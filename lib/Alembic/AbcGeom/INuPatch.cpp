@@ -86,14 +86,13 @@ MeshTopologyVariance INuPatchSchema::getTopologyVariance()
         }
         else
         {
-            return kConstantTopology;        
+            return kConstantTopology;
         }
     }
     else if ( m_numU.isConstant() && m_numV.isConstant() &&
               m_uOrder.isConstant() & m_vOrder.isConstant() &&
               m_uKnot.isConstant() && m_vKnot.isConstant() )
     {
-        
         if ( this -> hasTrimCurve() )
         {
             if ( this -> trimCurveTopologyIsHomogenous() )
@@ -133,7 +132,7 @@ bool INuPatchSchema::hasTrimCurve()
 
 //-*****************************************************************************
 void INuPatchSchema::get( sample_type &oSample,
-                          const Abc::ISampleSelector &iSS)
+                          const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "INuPatch::get()" );
 
@@ -144,17 +143,17 @@ void INuPatchSchema::get( sample_type &oSample,
     m_vOrder.get( oSample.m_vOrder, iSS );
     m_uKnot.get( oSample.m_uKnot, iSS );
     m_vKnot.get( oSample.m_vKnot, iSS );
-    
+
     if ( m_selfBounds )
     {
         m_selfBounds.get( oSample.m_selfBounds, iSS );
     }
-    
+
     if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
     {
         m_childBounds.get( oSample.m_childBounds, iSS );
     }
-    
+
     // handle trim curves
     if ( this->hasTrimCurve() )
     {
@@ -169,7 +168,6 @@ void INuPatchSchema::get( sample_type &oSample,
         m_trimV.get( oSample.m_trimV, iSS );
         m_trimW.get( oSample.m_trimW, iSS );
     }
-
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -203,10 +201,10 @@ void INuPatchSchema::init( const Abc::Argument &iArg0,
                                 args.getSchemaInterpMatching() );
 
     m_uKnot = Abc::IFloatArrayProperty( _this, "uKnot",
-                                args.getSchemaInterpMatching() );    
+                                args.getSchemaInterpMatching() );
 
     m_vKnot = Abc::IFloatArrayProperty( _this, "vKnot",
-                                args.getSchemaInterpMatching() ); 
+                                args.getSchemaInterpMatching() );
 
     // optional properties
     if ( this->getPropertyHeader( ".selfBnds" ) != NULL )
@@ -237,7 +235,7 @@ void INuPatchSchema::init( const Abc::Argument &iArg0,
                                                   args.getErrorHandlerPolicy()
                                                 );
     }
-    
+
     if ( this->hasTrimCurve() )
     {
         m_trimNumLoops = Abc::IUInt64Property( _this, "trim_nloops",
