@@ -447,12 +447,6 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
     if (!plug.isNull())
         samp.setFaceVaryingPropagateCorners(plug.asInt());
 
-    MObjectArray sets, comps;
-
-    unsigned int instNum = iDag.instanceNumber();
-    lMesh.getConnectedSetsAndMembers(instNum, sets, comps, false);
-
-    // more than one set could add to creases, corners, and holes
     std::vector <int32_t> creaseIndices;
     std::vector <int32_t> creaseLengths;
     std::vector <float> creaseSharpness;
@@ -460,73 +454,64 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
     std::vector <int32_t> cornerIndices;
     std::vector <float> cornerSharpness;
 
-    std::vector <int32_t> holeIndices;
-
-    // currently we are assuming that in Maya the sets won't change over time
-    size_t i;
-    for (i = 0; i < sets.length(); ++i)
+    MUintArray edgeIds;
+    MDoubleArray creaseData;
+    if (lMesh.getCreaseEdges(edgeIds, creaseData) == MS::kSuccess)
     {
-        MFnSet setFn(sets[i]);
-        MFnSet::Restriction rest = setFn.restriction();
+        std::vector <int32_t> creaseIndices;
+        std::vector <int32_t> creaseLengths;
+        std::vector <float> creaseSharpness;
 
-        if (rest == MFnSet::kEdgesOnly &&
-            !setFn.findPlug("spSubdivCrease").isNull())
+        std::size_t numCreases = creaseData.length();
+        creaseIndices.resize(numCreases * 2);
+        creaseLengths.resize(numCreases, 2);
+        creaseSharpness.resize(numCreases);
+        for (std::size_t i = 0; i < numCreases; ++i)
         {
-            float weight = 0.0;
-            setFn.findPlug("spSubdivCrease").getValue(weight);
-
-            std::vector <int32_t> creaseIndices;
-
-            MItMeshEdge edges(iDag, comps[i]);
-
-            // we may want to have an optimization pass on the indices array
-            // as we may have an extended edge of more than 2 points
-            for (;!edges.isDone();edges.next())
-            {
-                creaseIndices.push_back(edges.index(0));
-                creaseIndices.push_back(edges.index(1));
-                creaseLengths.push_back(2);
-                creaseSharpness.push_back(weight);
-            }
-            samp.setCreases(
-                Alembic::Abc::Int32ArraySample(creaseIndices),
-                Alembic::Abc::Int32ArraySample(creaseLengths),
-                Alembic::Abc::FloatArraySample(creaseSharpness) );
+            int verts[2];
+            lMesh.getEdgeVertices(edgeIds[i], verts);
+            creaseIndices[2 * i] = verts[0];
+            creaseIndices[2 * i + 1] = verts[1];
+            creaseSharpness[i] = creaseData[i];
         }
-        else if (rest == MFnSet::kVerticesOnly &&
-            !setFn.findPlug("spSubDivCorner").isNull())
+
+        samp.setCreaseIndices(Alembic::Abc::Int32ArraySample(creaseIndices));
+        samp.setCreaseLengths(Alembic::Abc::Int32ArraySample(creaseLengths));
+        samp.setCreaseSharpnesses(
+            Alembic::Abc::FloatArraySample(creaseSharpness));
+    }
+
+    MUintArray cornerIds;
+    MDoubleArray cornerData;
+    if (lMesh.getCreaseVertices(cornerIds, cornerData) == MS::kSuccess)
+    {
+        std::size_t numCorners = cornerIds.length();
+        cornerIndices.resize(numCorners);
+        cornerSharpness.resize(numCorners);
+        for (std::size_t i = 0; i < numCorners; ++i)
         {
-            float weight = 0.0;
-            setFn.findPlug("spSubdivCorner").getValue(weight);
-            MItMeshVertex verts(iDag, comps[i]);
-            for (; !verts.isDone(); verts.next())
-            {
-                cornerIndices.push_back(verts.index());
-                cornerSharpness.push_back(weight);
-            }
-            samp.setCorners(
-                Alembic::Abc::Int32ArraySample(cornerIndices),
-                Alembic::Abc::FloatArraySample(cornerSharpness) );
+            cornerIndices[i] = cornerIds[i];
+            cornerSharpness[i] = cornerData[i];
         }
-        else if (rest == MFnSet::kFacetsOnly &&
-            !setFn.findPlug("spSubdivHole").isNull())
-        {
-            float weight = 0.0;
-            setFn.findPlug("spSubdivHole").getValue(weight);
+        samp.setCornerSharpnesses(
+            Alembic::Abc::FloatArraySample(cornerSharpness));
 
-            // find out if this weight is still meaningful
-            // and if it is a good workflow going forward
-            if (weight == 0.0)
-                continue;
+        samp.setCornerIndices(
+            Alembic::Abc::Int32ArraySample(cornerIndices));
+    }
 
-            MItMeshPolygon polys(iDag, comps[i]);
-            for (;polys.isDone(); polys.next())
-            {
-                holeIndices.push_back(polys.index());
-            }
-            samp.setHoles(
-                Alembic::Abc::Int32ArraySample(holeIndices) );
-        }
+
+    MUintArray holes = lMesh.getInvisibleFaces();
+    std::size_t numHoles = holes.length();
+    std::vector <int32_t> holeIndices(numHoles);
+    for (std::size_t i = 0; i < numHoles; ++i)
+    {
+        holeIndices[i] = holes[i];
+    }
+
+    if (!holeIndices.empty())
+    {
+        samp.setHoles(holeIndices);
     }
 
     mSubDSchema.set(samp);

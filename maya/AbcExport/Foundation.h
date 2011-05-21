@@ -99,6 +99,7 @@
 #include <maya/MTime.h>
 #include <maya/MTransformationMatrix.h>
 #include <maya/MTrimBoundaryArray.h>
+#include <maya/MUintArray.h>
 #include <maya/MVector.h>
 #include <maya/MVectorArray.h>
 
