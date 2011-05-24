@@ -38,9 +38,11 @@
 #include <maya/MFloatPoint.h>
 #include <maya/MFloatPointArray.h>
 #include <maya/MIntArray.h>
+#include <maya/MUintArray.h>
 #include <maya/MFnMesh.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MItMeshPolygon.h>
+#include <maya/MItMeshVertex.h>
 #include <maya/MFnAttribute.h>
 #include <maya/MFnNumericData.h>
 #include <maya/MFnNumericAttribute.h>
@@ -631,21 +633,96 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
         fnMesh.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
     }
 
-    if (samp.getHoles() && !samp.getHoles()->size() == 0)
+    Alembic::Abc::Int32ArraySamplePtr holes = samp.getHoles();
+    if (holes && !holes->size() == 0)
     {
-        printWarning("Hole Poly Indices not yet supported.");
+        std::size_t numHoles = holes->size();
+        MUintArray holeData(numHoles);
+        for (std::size_t i = 0; i < numHoles; ++i)
+        {
+            holeData[i] = (*holes)[i];
+        }
+
+        if (fnMesh.setInvisibleFaces(holeData) != MS::kSuccess)
+        {
+            MString warn = "Failed to set holes on: ";
+            warn += iNode.getName().c_str();
+            printWarning(warn);
+        }
     }
 
-    if (samp.getCreaseSharpnesses() &&
-        !samp.getCreaseSharpnesses()->size() == 0)
+    Alembic::Abc::FloatArraySamplePtr creases = samp.getCreaseSharpnesses();
+    if (creases && !creases->size() == 0)
     {
-        printWarning("Creases not yet supported.");
+        Alembic::Abc::Int32ArraySamplePtr indices = samp.getCreaseIndices();
+        Alembic::Abc::Int32ArraySamplePtr lengths = samp.getCreaseLengths();
+        std::size_t numLengths = lengths->size();
+
+        MUintArray edgeIds;
+        MDoubleArray creaseData;
+
+        std::size_t curIndex = 0;
+        // curIndex incremented here to move on to the next crease length
+        for (std::size_t i = 0; i < numLengths; ++i, ++curIndex)
+        {
+            std::size_t len = (*lengths)[i] - 1;
+            float creaseSharpness = (*creases)[i];
+
+            // curIndex incremented here to go between all the edges that make
+            // up a given length
+            for (std::size_t j = 0; j < len; ++j, ++curIndex)
+            {
+                Alembic::Util::int32_t vertA = (*indices)[curIndex];
+                Alembic::Util::int32_t vertB = (*indices)[curIndex+1];
+                MItMeshVertex itv(obj);
+
+                int prev;
+                itv.setIndex(vertA, prev);
+
+                MIntArray edges;
+                itv.getConnectedEdges(edges);
+                std::size_t numEdges = edges.length();
+                std::size_t k;
+                for (k = 0; k < numEdges; ++k)
+                {
+                    int oppVert = -1;
+                    itv.getOppositeVertex(oppVert, edges[k]);
+                    if (oppVert == vertB)
+                    {
+                        creaseData.append(creaseSharpness);
+                        edgeIds.append(edges[k]);
+                        break;
+                    }
+                }
+            }
+        }
+        if (fnMesh.setCreaseEdges(edgeIds, creaseData) != MS::kSuccess)
+        {
+            MString warn = "Failed to set creases on: ";
+            warn += iNode.getName().c_str();
+            printWarning(warn);
+        }
     }
 
-    if (samp.getCornerSharpnesses() &&
-        !samp.getCornerSharpnesses()->size() == 0)
+    Alembic::Abc::FloatArraySamplePtr corners = samp.getCornerSharpnesses();
+    if (corners && !corners->size() == 0)
     {
-        printWarning("Corners not yet supported.");
+        Alembic::Abc::Int32ArraySamplePtr cornerVerts = samp.getCornerIndices();
+        std::size_t numCorners = corners->size();
+        MUintArray vertIds(numCorners);
+        MDoubleArray cornerData(numCorners);
+
+        for (std::size_t i = 0; i < numCorners; ++i)
+        {
+            cornerData[i] = (*corners)[i];
+            vertIds[i] = (*cornerVerts)[i];
+        }
+        if (fnMesh.setCreaseVertices(vertIds, cornerData) != MS::kSuccess)
+        {
+            MString warn = "Failed to set corners on: ";
+            warn += iNode.getName().c_str();
+            printWarning(warn);
+        }
     }
 
     return obj;

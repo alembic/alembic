@@ -447,21 +447,17 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
     if (!plug.isNull())
         samp.setFaceVaryingPropagateCorners(plug.asInt());
 
-    std::vector <int32_t> creaseIndices;
-    std::vector <int32_t> creaseLengths;
+    std::vector <Alembic::Util::int32_t> creaseIndices;
+    std::vector <Alembic::Util::int32_t> creaseLengths;
     std::vector <float> creaseSharpness;
 
-    std::vector <int32_t> cornerIndices;
+    std::vector <Alembic::Util::int32_t> cornerIndices;
     std::vector <float> cornerSharpness;
 
     MUintArray edgeIds;
     MDoubleArray creaseData;
     if (lMesh.getCreaseEdges(edgeIds, creaseData) == MS::kSuccess)
     {
-        std::vector <int32_t> creaseIndices;
-        std::vector <int32_t> creaseLengths;
-        std::vector <float> creaseSharpness;
-
         std::size_t numCreases = creaseData.length();
         creaseIndices.resize(numCreases * 2);
         creaseLengths.resize(numCreases, 2);
@@ -503,7 +499,7 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
 
     MUintArray holes = lMesh.getInvisibleFaces();
     std::size_t numHoles = holes.length();
-    std::vector <int32_t> holeIndices(numHoles);
+    std::vector <Alembic::Util::int32_t> holeIndices(numHoles);
     for (std::size_t i = 0; i < numHoles; ++i)
     {
         holeIndices[i] = holes[i];
