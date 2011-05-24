@@ -93,6 +93,7 @@ SET( H_FILES
   ICurves.h
   OCurves.h
 
+  FaceSetExclusivity.h
   OFaceSet.h
   IFaceSet.h
 

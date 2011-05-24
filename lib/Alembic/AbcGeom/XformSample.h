@@ -52,16 +52,20 @@ public:
 
     // add translate or scale op
     // returns the index of the op in its op-stack
-    std::size_t addOp( XformOp iOp, const Abc::V3d &iVal );
+    std::size_t addOp( XformOp iTransOrScaleOp, const Abc::V3d &iVal );
 
     // add rotate op
     // returns the index of the op in its op-stack
-    std::size_t addOp( XformOp iOp, const Abc::V3d &iAxis,
+    std::size_t addOp( XformOp iRotateOp, const Abc::V3d &iAxis,
                        const double iAngleInDegrees );
 
     // add matrix op
     // returns the index of the op in its op-stack
-    std::size_t addOp( XformOp iOp, const Abc::M44d &iMatrix );
+    std::size_t addOp( XformOp iMatrixOp, const Abc::M44d &iMatrix );
+
+    // add rotateX, rotateY, or rotateZ op
+    std::size_t addOp( XformOp iSingleRotateOp,
+                       const double iSingleAxisRotationInDegrees );
 
     // add an op with values already set on the op
     std::size_t addOp( const XformOp &iOp );
@@ -72,7 +76,6 @@ public:
     const XformOp &operator[]( const std::size_t &iIndex ) const;
 
     std::size_t getNumOps() const;
-
     //! The sum of the number of channels of all the ops in this Sample.
     std::size_t getNumOpChannels() const;
 
@@ -96,12 +99,18 @@ public:
     void setTranslation( const Abc::V3d &iTrans );
     Abc::V3d getTranslation() const;
 
-    void setRotation( const Abc::V3d &iAxis, const double iAngleInRadians );
+    void setRotation( const Abc::V3d &iAxis, const double iAngleInDegress );
     Abc::V3d getAxis() const;
     double getAngle() const;
 
-    void setXYZRotation( const Abc::V3d &iAnglesInRadians );
-    Abc::V3d getXYZRotation() const;
+    void setXRotation( const double iAngleInDegrees );
+    double getXRotation() const;
+
+    void setYRotation( const double iAngleInDegrees );
+    double getYRotation() const;
+
+    void setZRotation( const double iAngleInDegrees );
+    double getZRotation() const;
 
     void setScale( const Abc::V3d &iScale );
     Abc::V3d getScale() const;
@@ -121,8 +130,8 @@ private:
     const std::vector<Alembic::Util::uint8_t> &getOpsArray() const;
     void clear();
 
-private:
 
+private:
     //! 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
     int32_t m_setWithOpStack;
 

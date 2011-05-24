@@ -102,42 +102,78 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iVal )
 //-*****************************************************************************
 std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
                                 const double iAngleInDegrees )
+
 {
+    for ( size_t i = 0 ; i < 3 ; ++i )
     {
-        for ( size_t i = 0 ; i < 3 ; ++i )
-        {
-            iOp.setChannelValue( i, iAxis[i] );
-        }
-        iOp.setChannelValue( 3, iAngleInDegrees );
+        iOp.setChannelValue( i, iAxis[i] );
+    }
+    iOp.setChannelValue( 3, iAngleInDegrees );
 
-        if ( ! m_hasBeenRead )
-        {
-            ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
-                         "Cannot mix addOp() and set<Foo>() methods." );
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
 
-            m_setWithOpStack = 1;
+        m_setWithOpStack = 1;
 
-            m_ops.push_back( iOp );
-            m_opsArray.push_back( iOp.getOpEncoding() );
+        m_ops.push_back( iOp );
+        m_opsArray.push_back( iOp.getOpEncoding() );
 
-            return m_ops.size() - 1;
-        }
-        else
-        {
-            std::size_t ret = m_opIndex;
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
 
-            ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
-                         "Cannot update mismatched op-type in already-setted "
-                         << "XformSample!" );
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
 
-            ABCA_ASSERT( m_setWithOpStack == 1,
-                         "Cannot mix addOp() and set<Foo>() methods." );
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
 
-            m_ops[ret] = iOp;
-            m_opIndex = ++m_opIndex % m_ops.size();
+        m_ops[ret] = iOp;
+        m_opIndex = ++m_opIndex % m_ops.size();
 
-            return ret;
-        }
+        return ret;
+    }
+}
+
+//-*****************************************************************************
+std::size_t XformSample::addOp( XformOp iOp,
+                                const double iSingleAxisRotationInDegrees )
+
+{
+    iOp.setChannelValue( 0, iSingleAxisRotationInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
+        m_ops.push_back( iOp );
+        m_opsArray.push_back( iOp.getOpEncoding() );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_ops[ret] = iOp;
+        m_opIndex = ++m_opIndex % m_ops.size();
+
+        return ret;
     }
 }
 
@@ -319,7 +355,7 @@ void XformSample::setTranslation( const Abc::V3d &iTrans )
 
 //-*****************************************************************************
 void XformSample::setRotation( const Abc::V3d &iAxis,
-                               const double iAngleInRadians )
+                               const double iAngleInDegrees )
 {
     XformOp op( kRotateOperation, kRotateHint );
 
@@ -327,8 +363,7 @@ void XformSample::setRotation( const Abc::V3d &iAxis,
     {
         op.setChannelValue( i, iAxis[i] );
     }
-
-    op.setChannelValue( 3, iAngleInRadians );
+    op.setChannelValue( 3, iAngleInDegrees );
 
     if ( ! m_hasBeenRead )
     {
@@ -357,25 +392,113 @@ void XformSample::setRotation( const Abc::V3d &iAxis,
 }
 
 //-*****************************************************************************
-void XformSample::setXYZRotation( const Abc::V3d &iAnglesInRadians )
-{
-    XformOp op( kXYZRotateOperation, kRotateHint );
-
-    for ( size_t i = 0 ; i < 3 ; ++i )
-    {
-        op.setChannelValue( i, iAnglesInRadians[i] );
-    }
-}
-
-//-*****************************************************************************
 void XformSample::setScale( const Abc::V3d &iScale )
 {
-    XformOp op( kScaleOperation, kScaleHint );
+    XformOp op( kScaleOperation, kSingleRotateHint );
 
     for ( size_t i = 0 ; i < 3 ; ++i )
     {
         op.setChannelValue( i, iScale[i] );
     }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+        m_opsArray.push_back( op.getOpEncoding() );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        m_opIndex = ++m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setXRotation( const double iAngleInDegrees )
+{
+    XformOp op( kRotateXOperation, kSingleRotateHint );
+
+    op.setChannelValue( 0, iAngleInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+        m_opsArray.push_back( op.getOpEncoding() );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        m_opIndex = ++m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setYRotation( const double iAngleInDegrees )
+{
+    XformOp op( kRotateYOperation, kSingleRotateHint );
+
+    op.setChannelValue( 0, iAngleInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+        m_opsArray.push_back( op.getOpEncoding() );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        m_opIndex = ++m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setZRotation( const double iAngleInDegrees )
+{
+    XformOp op( kRotateZOperation, kSingleRotateHint );
+
+    op.setChannelValue( 0, iAngleInDegrees );
 
     if ( ! m_hasBeenRead )
     {
@@ -446,6 +569,7 @@ void XformSample::setMatrix( const Abc::M44d &iMatrix )
 Abc::M44d XformSample::getMatrix() const
 {
     Abc::M44d ret;
+    ret.makeIdentity();
 
     for ( std::size_t i = 0 ; i < m_ops.size() ; ++i )
     {
@@ -480,13 +604,25 @@ Abc::M44d XformSample::getMatrix() const
             {
                 m.setTranslation( vec );
             }
-            else if ( otype == kXYZRotateOperation )
+            else if ( otype == kRotateOperation )
             {
-                m.setAxisAngle( vec, op.getChannelValue( 3 ) );
+                m.setAxisAngle( vec,
+                                DegreesToRadians( op.getChannelValue( 3 ) ) );
             }
-            else // must be XYZRotation
+            else if ( otype == kRotateXOperation )
             {
-                m.setEulerAngles( vec );
+                m.setAxisAngle( Abc::V3d( 1.0, 0.0, 0.0 ),
+                                DegreesToRadians( op.getChannelValue( 0 ) ) );
+            }
+            else if ( otype == kRotateYOperation )
+            {
+                m.setAxisAngle( Abc::V3d( 0.0, 1.0, 0.0 ),
+                                DegreesToRadians( op.getChannelValue( 0 ) ) );
+            }
+            else if ( otype == kRotateZOperation )
+            {
+                m.setAxisAngle( Abc::V3d( 0.0, 0.0, 1.0 ),
+                                DegreesToRadians( op.getChannelValue( 0 ) ) );
             }
         }
         ret = m * ret;
@@ -523,15 +659,34 @@ double XformSample::getAngle() const
 {
     Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
 
-    return q.angle();
+    return RadiansToDegrees( q.angle() );
 }
 
 //-*****************************************************************************
-Abc::V3d XformSample::getXYZRotation() const
+double XformSample::getXRotation() const
 {
-    Abc::V3d ret;
-    Imath::extractEulerXYZ( this->getMatrix(), ret );
-    return ret;
+    Abc::V3d rot;
+    Imath::extractEulerXYZ( this->getMatrix(), rot );
+
+    return RadiansToDegrees( rot[0] );
+}
+
+//-*****************************************************************************
+double XformSample::getYRotation() const
+{
+    Abc::V3d rot;
+    Imath::extractEulerXYZ( this->getMatrix(), rot );
+
+    return RadiansToDegrees( rot[1] );
+}
+
+//-*****************************************************************************
+double XformSample::getZRotation() const
+{
+    Abc::V3d rot;
+    Imath::extractEulerXYZ( this->getMatrix(), rot );
+
+    return RadiansToDegrees( rot[2] );
 }
 
 //-*****************************************************************************

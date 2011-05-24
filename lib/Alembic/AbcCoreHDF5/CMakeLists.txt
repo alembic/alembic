@@ -33,7 +33,7 @@
 ##-*****************************************************************************
 
 # C++ files for this project
-SET( CXX_FILES 
+SET( CXX_FILES
   AprImpl.cpp
   ApwImpl.cpp
   ArImpl.cpp
@@ -107,9 +107,10 @@ INSTALL( TARGETS AlembicAbcCoreHDF5
          ARCHIVE DESTINATION lib/static )
 
 # Only install AbcCoreHDF5.h and ReadArraySampleCache
-INSTALL( FILES 
-  All.h 
-  ReadWrite.h
+INSTALL( FILES
+         All.h
+         ReadWrite.h
+         Foundation.h
          DESTINATION include/Alembic/AbcCoreHDF5
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
 

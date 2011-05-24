@@ -109,6 +109,12 @@ enum TranslateHint
     kRotatePivotTranslationHint = 4
 };
 
+enum SingleRotateHint
+{
+    //! only one kind of hint so far for single-axis rotation operations
+    kSingleRotateHint = 0
+};
+
 //! \brief Xform Operation
 //! This class holds the data about a particular transform operation, but does
 //! not hold the actual data to calculate a 4x4 matrix.  It holds the type of
@@ -166,7 +172,8 @@ public:
     bool isChannelAnimated( std::size_t iIndex ) const;
 
     //! Get the number of components that this operation has based on the type.
-    //! Translate and Scale have 3, Rotate has 4 and Matrix has 16.
+    //! Translate and Scale have 3, Rotate has 4 and Matrix has 16, and
+    //! single-axis rotate ops (rotateX, rotateY, rotateZ) have 1.
     std::size_t getNumChannels() const;
 
     //! For every channel, there's a default value.  Typically, for each op
@@ -188,6 +195,10 @@ public:
     void setAngle( const double iAngle );
     void setMatrix( const Abc::M44d &iMatrix );
 
+    void setXRotation( const double iAngle );
+    void setYRotation( const double iAngle );
+    void setZRotation( const double iAngle );
+
     // synthetic getters return by value
     Abc::V3d getVector() const;
     Abc::V3d getTranslate() const;
@@ -195,6 +206,10 @@ public:
     Abc::V3d getAxis() const;
     double getAngle() const;
     Abc::M44d getMatrix() const;
+
+    double getXRotation() const;
+    double getYRotation() const;
+    double getZRotation() const;
 
     bool isTranslateOp() const;
 
@@ -204,7 +219,9 @@ public:
 
     bool isMatrixOp() const;
 
-    bool isXYZRotateOp() const;
+    bool isRotateXOp() const;
+    bool isRotateYOp() const;
+    bool isRotateZOp() const;
 
     //! Function for returning the combined encoded type and hint.
     //! The type is in the first four bits, the hint in the second.

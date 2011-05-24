@@ -57,6 +57,7 @@ using Alembic::Util::uint32_t;
 using Alembic::Util::float32_t;
 using Alembic::Util::int32_t;
 using Alembic::Util::int64_t;
+using Alembic::Util::int16_t;
 
 // replace one MObject with another, while keeping all the old hierarchy intact
 // The objects have to be a Dag object
