@@ -184,7 +184,7 @@ void MayaCameraWriter::write()
         mSamp.addOp(preScale);
 
         Alembic::AbcGeom::FilmBackXformOp filmTranslate(
-            Alembic::AbcGeom::kScaleFilmBackOperation, "filmTranslate");
+            Alembic::AbcGeom::kTranslateFilmBackOperation, "filmTranslate");
         mSamp.addOp(filmTranslate);
 
         // skip film roll for now
