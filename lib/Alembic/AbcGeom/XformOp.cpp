@@ -328,7 +328,8 @@ void XformOp::setScale( const Abc::V3d &iScale )
 void XformOp::setAxis( const Abc::V3d &iAxis )
 {
     ABCA_ASSERT( m_type == kRotateOperation,
-                 "Meaningless to set rotation axis on non-rotation op." );
+                 "Meaningless to set rotation axis on non-rotation or fixed "
+                 "angle rotation op." );
 
     this->setVector( iAxis );
 }
@@ -336,10 +337,19 @@ void XformOp::setAxis( const Abc::V3d &iAxis )
 //-*****************************************************************************
 void XformOp::setAngle( const double iAngle )
 {
-    ABCA_ASSERT( m_type == kRotateOperation,
-                 "Meaningless to set rotation angle on non-rotation op." );
-
-    m_channels[3] = iAngle;
+    switch ( m_type )
+    {
+    case kRotateOperation:
+        m_channels[3] = iAngle;
+        break;
+    case kRotateXOperation:
+    case kRotateYOperation:
+    case kRotateZOperation:
+        m_channels[0] = iAngle;
+        break;
+    default:
+        ABCA_THROW( "Meaningless to set rotation angle on non-rotation op." );
+    }
 }
 
 //-*****************************************************************************
@@ -387,19 +397,39 @@ Abc::V3d XformOp::getScale() const
 //-*****************************************************************************
 Abc::V3d XformOp::getAxis() const
 {
-    ABCA_ASSERT( m_type == kRotateOperation,
-                 "Meaningless to get rotation axis from non-rotation op." );
+    switch ( m_type )
+    {
+    case kRotateOperation:
+        return this->getVector();
+    case kRotateXOperation:
+        return Abc::V3d(1.0, 0.0, 0.0);
+    case kRotateYOperation:
+        return Abc::V3d(0.0, 1.0, 0.0);
+    case kRotateZOperation:
+        return Abc::V3d(0.0, 0.0, 1.0);
+    default:
+        ABCA_THROW( "Meaningless to get rotation axis from non-rotation op." );
+    }
 
-    return this->getVector();
+    return Abc::V3d(0.0, 0.0, 0.0);
 }
 
 //-*****************************************************************************
 double XformOp::getAngle() const
 {
-    ABCA_ASSERT( m_type == kRotateOperation,
-                 "Meaningless to get rotation angle from non-rotation op." );
+    switch ( m_type )
+    {
+    case kRotateOperation:
+        return m_channels[3];
+    case kRotateXOperation:
+    case kRotateYOperation:
+    case kRotateZOperation:
+        return m_channels[0];
+    default:
+        ABCA_THROW( "Meaningless to get rotation angle from non-rotation op." );
+    }
 
-    return m_channels[3];
+    return 0.0;
 }
 
 //-*****************************************************************************
