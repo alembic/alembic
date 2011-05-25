@@ -176,6 +176,62 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
        writePoly(uvSamp);
     }
+
+    // look for facesets
+    std::size_t attrCount = lMesh.attributeCount();
+    for (std::size_t i = 0; i < attrCount; ++i)
+    {
+        MObject attr = lMesh.attribute(i);
+        MFnAttribute mfnAttr(attr);
+        MPlug plug = lMesh.findPlug(attr, true);
+
+        // if it is not readable, then bail without any more checking
+        if (!mfnAttr.isReadable() || plug.isNull())
+            continue;
+
+        MString propName = plug.partialName(0, 0, 0, 0, 0, 1);
+        std::string propStr = propName.asChar();
+
+        if (propStr.substr(0, 8) == "FACESET_")
+        {
+            MStatus status;
+            MFnIntArrayData arr(plug.asMObject(), &status);
+
+            // not the correct kind of data
+            if (status != MS::kSuccess)
+                continue;
+
+            std::string faceSetName = propStr.substr(8);
+            std::size_t numData = arr.length();
+            std::vector<Alembic::Util::int32_t> faceVals(numData);
+            for (std::size_t j = 0; j < numData; ++j)
+            {
+                faceVals[j] = arr[j];
+            }
+
+            bool isVisible = true;
+            MString visName = "FACESETVIS_";
+            visName += faceSetName.c_str();
+            MPlug visPlug = lMesh.findPlug(visName, true);
+            if (!visPlug.isNull())
+            {
+                isVisible = visPlug.asBool();
+            }
+
+            Alembic::AbcGeom::OFaceSet faceSet;
+            if (mPolySchema)
+            {
+                faceSet = mPolySchema.createFaceSet(faceSetName);
+            }
+            else
+            {
+                faceSet = mPolySchema.createFaceSet(faceSetName);
+            }
+            Alembic::AbcGeom::OFaceSetSchema::Sample samp(
+                Alembic::Abc::Int32ArraySample(faceVals), isVisible);
+            faceSet.getSchema().set(samp);
+        }
+    }
 }
 
 bool MayaMeshWriter::isSubD()
