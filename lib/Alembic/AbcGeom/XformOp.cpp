@@ -54,7 +54,6 @@ XformOp::XformOp()
 XformOp::XformOp( const XformOperationType iType,
                   const Alembic::Util::uint8_t iHint )
     : m_type( iType )
-    , m_hint( iHint )
 {
     m_channels.clear();
 
@@ -76,6 +75,8 @@ XformOp::XformOp( const XformOperationType iType,
         m_channels.resize( 16 );
         break;
     }
+
+    setHint( iHint );
 }
 
 //-*****************************************************************************
@@ -83,7 +84,7 @@ XformOp::XformOp( const Alembic::Util::uint8_t iEncodedOp )
 {
 
     m_type = (XformOperationType)(iEncodedOp >> 4);
-    m_hint = iEncodedOp & 0xF;
+    setHint( iEncodedOp & 0xF );
 
     switch ( m_type )
     {
@@ -156,7 +157,9 @@ void XformOp::setHint( const Alembic::Util::uint8_t iHint )
     {
         m_hint = 0;
     }
-    else if ( m_type == kRotateOperation && iHint > kRotateOrientationHint )
+    else if ( ( m_type == kRotateOperation || m_type == kRotateXOperation ||
+        m_type == kRotateYOperation || m_type == kRotateZOperation )
+         && iHint > kRotateOrientationHint )
     {
         m_hint = 0;
     }

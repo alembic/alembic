@@ -109,12 +109,6 @@ enum TranslateHint
     kRotatePivotTranslationHint = 4
 };
 
-enum SingleRotateHint
-{
-    //! only one kind of hint so far for single-axis rotation operations
-    kSingleRotateHint = 0
-};
-
 //! \brief Xform Operation
 //! This class holds the data about a particular transform operation, but does
 //! not hold the actual data to calculate a 4x4 matrix.  It holds the type of

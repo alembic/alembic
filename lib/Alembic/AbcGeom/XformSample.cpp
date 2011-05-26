@@ -394,7 +394,7 @@ void XformSample::setRotation( const Abc::V3d &iAxis,
 //-*****************************************************************************
 void XformSample::setScale( const Abc::V3d &iScale )
 {
-    XformOp op( kScaleOperation, kSingleRotateHint );
+    XformOp op( kScaleOperation, kScaleHint );
 
     for ( size_t i = 0 ; i < 3 ; ++i )
     {
@@ -430,7 +430,7 @@ void XformSample::setScale( const Abc::V3d &iScale )
 //-*****************************************************************************
 void XformSample::setXRotation( const double iAngleInDegrees )
 {
-    XformOp op( kRotateXOperation, kSingleRotateHint );
+    XformOp op( kRotateXOperation, kRotateHint );
 
     op.setChannelValue( 0, iAngleInDegrees );
 
@@ -463,7 +463,7 @@ void XformSample::setXRotation( const double iAngleInDegrees )
 //-*****************************************************************************
 void XformSample::setYRotation( const double iAngleInDegrees )
 {
-    XformOp op( kRotateYOperation, kSingleRotateHint );
+    XformOp op( kRotateYOperation, kRotateHint );
 
     op.setChannelValue( 0, iAngleInDegrees );
 
@@ -496,7 +496,7 @@ void XformSample::setYRotation( const double iAngleInDegrees )
 //-*****************************************************************************
 void XformSample::setZRotation( const double iAngleInDegrees )
 {
-    XformOp op( kRotateZOperation, kSingleRotateHint );
+    XformOp op( kRotateZOperation, kRotateHint );
 
     op.setChannelValue( 0, iAngleInDegrees );
 
