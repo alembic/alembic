@@ -1374,6 +1374,14 @@ MString createScene(ArgData & iArgData)
     Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
         iArgData.mFileName.asChar(), Alembic::Abc::ErrorHandler::Policy(),
         Alembic::AbcCoreAbstract::v1::ReadArraySampleCachePtr());
+    if (!archive.valid())
+    {
+        MString theError = iArgData.mFileName;
+        theError += MString(" not a valid Alembic file.");
+        printError(theError);
+        return returnName;
+    }
+
 
     CreateSceneVisitor::Action action = CreateSceneVisitor::CREATE;
     if (iArgData.mRemoveIfNoUpdate && iArgData.mCreateIfNotFound)

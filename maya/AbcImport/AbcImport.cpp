@@ -239,10 +239,9 @@ MStatus AbcImport::doIt(const MArgList & args)
         }
         else
         {
-            MString theError("In AbcImport::doIt(), \"");
+            MString theError("In AbcImport::doIt(), ");
             theError += filename;
-            theError += MString("\" doesn't exist");
-            theError += "\""+filename+"\" doesn't exist";
+            theError += MString(" doesn't exist");
             printError(theError);
         }
     }
