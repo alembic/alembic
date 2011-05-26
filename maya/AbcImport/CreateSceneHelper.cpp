@@ -46,9 +46,11 @@
 #include <maya/MFnIntArrayData.h>
 #include <maya/MFnStringData.h>
 #include <maya/MFnTransform.h>
+#include <maya/MFnNumericAttribute.h>
 #include <maya/MFnNurbsCurve.h>
 #include <maya/MFnNurbsSurface.h>
 #include <maya/MFnSet.h>
+#include <maya/MFnTypedAttribute.h>
 
 #include <map>
 #include <set>
@@ -65,6 +67,56 @@
 
 namespace
 {
+    void addFaceSets(MObject & iNode, Alembic::Abc::IObject & iObj)
+    {
+        MStatus status;
+
+        MFnDependencyNode mesh(iNode, &status);
+
+        if (status != MS::kSuccess)
+            return;
+
+        std::size_t numChildren = iObj.getNumChildren();
+        for ( std::size_t i = 0 ; i < numChildren; ++i )
+        {
+            Alembic::Abc::IObject child = iObj.getChild(i);
+            if (Alembic::AbcGeom::IFaceSet::matches(child.getHeader()))
+            {
+                Alembic::AbcGeom::IFaceSet faceSet(child,
+                    Alembic::Abc::kWrapExisting);
+
+                Alembic::AbcGeom::IFaceSetSchema::Sample samp;
+                faceSet.getSchema().get(samp);
+
+                MString faceName = "FACESET_";
+                faceName += faceSet.getName().c_str();
+
+                MFnIntArrayData fnData;
+                MIntArray arr((int *) samp.getFaces()->getData(),
+                    samp.getFaces()->size());
+                MObject attrObj = fnData.create(arr);
+                MFnTypedAttribute typedAttr;
+                MObject faceObj = typedAttr.create(faceName, faceName,
+                    MFnData::kIntArray, attrObj);
+
+                mesh.addAttribute(faceObj,
+                    MFnDependencyNode::kLocalDynamicAttr);
+
+                if (!samp.isVisible())
+                {
+                    MString visName = "FACESETVIS_";
+                    visName += faceSet.getName().c_str();
+
+                    MFnNumericAttribute numAttr;
+                    MObject visObj = numAttr.create(visName, visName,
+                        MFnNumericData::kBoolean, false);
+                    mesh.addAttribute(visObj,
+                        MFnDependencyNode::kLocalDynamicAttr);
+                }
+            }
+        }
+    }
+
     void removeDagNode(MDagPath & dagPath)
     {
 
@@ -563,6 +615,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
 
         disconnectMesh(subDObj, mData.mPropList, firstProp);
         addToPropList(firstProp, subDObj);
+        addFaceSets(subDObj, iNode);
 
     }
 
@@ -597,6 +650,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
 
         addProps(arbProp, polyObj);
 
+        addFaceSets(polyObj, iNode);
     }
 
 
