@@ -269,6 +269,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
             if (!iProp.isScalarLike())
             {
                 MFnIntArrayData fnData;
+                MObject arrObj;
 
                 if (iProp.isConstant())
                 {
@@ -277,16 +278,16 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                     MIntArray arr((int *) samp->getData(), samp->size());
 
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
                 else
                 {
                     MIntArray arr;
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
 
-                typedAttr.create(attrName, attrName, MFnData::kIntArray,
-                    attrObj);
+                attrObj = typedAttr.create(attrName, attrName,
+                    MFnData::kIntArray, arrObj);
             }
             // isScalarLike
             else
@@ -340,22 +341,24 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 // and color array?
 
                 MFnDoubleArrayData fnData;
+                MObject arrObj;
+
                 if (iProp.isConstant())
                 {
                     Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
                     iProp.get(samp);
 
                     MDoubleArray arr((float *) samp->getData(), samp->size());
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
                 else
                 {
                     MDoubleArray arr;
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
 
-                typedAttr.create(attrName, attrName, MFnData::kDoubleArray,
-                    attrObj);
+                attrObj = typedAttr.create(attrName, attrName,
+                    MFnData::kDoubleArray, arrObj);
 
             }
             // isScalarLike
@@ -410,22 +413,24 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 // and color array?
 
                 MFnDoubleArrayData fnData;
+                MObject arrObj;
+
                 if (iProp.isConstant())
                 {
                     Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
                     iProp.get(samp);
 
                     MDoubleArray arr((double *) samp->getData(), samp->size());
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
                 else
                 {
                     MDoubleArray arr;
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
 
-                typedAttr.create(attrName, attrName, MFnData::kDoubleArray,
-                    attrObj);
+                attrObj = typedAttr.create(attrName, attrName,
+                    MFnData::kDoubleArray, arrObj);
             }
             else
             {
@@ -483,6 +488,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
             if (!iProp.isScalarLike())
             {
                 MFnStringArrayData fnData;
+                MObject arrObj;
 
                 if (iProp.isConstant())
                 {
@@ -500,16 +506,16 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                     {
                         arr[i] = strData[i].c_str();
                     }
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
                 else
                 {
                     MStringArray arr;
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
 
-                typedAttr.create(attrName, attrName, MFnData::kStringArray,
-                    attrObj);
+                attrObj = typedAttr.create(attrName, attrName,
+                    MFnData::kStringArray, arrObj);
             }
             // isScalarLike
             else
@@ -548,6 +554,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
             if (!iProp.isScalarLike())
             {
                 MFnStringArrayData fnData;
+                MObject arrObj;
 
                 if (iProp.isConstant())
                 {
@@ -565,16 +572,16 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                     {
                         arr[i] = (wchar_t *)(strData[i].c_str());
                     }
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
                 else
                 {
                     MStringArray arr;
-                    attrObj = fnData.create(arr);
+                    arrObj = fnData.create(arr);
                 }
 
-                typedAttr.create(attrName, attrName, MFnData::kStringArray,
-                    attrObj);
+                attrObj = typedAttr.create(attrName, attrName,
+                    MFnData::kStringArray, arrObj);
             }
             // isScalarLike
             else
