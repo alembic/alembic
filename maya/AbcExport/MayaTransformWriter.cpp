@@ -143,13 +143,11 @@ void addRotate(const MFnDependencyNode & iTrans,
     Alembic::AbcGeom::XformSample & oSample,
     std::vector < AnimChan > & oAnimChanList)
 {
-    Alembic::AbcGeom::XformOp op(Alembic::AbcGeom::kRotateOperation, iHint);
-
-    // for the rotation axis
-    static const float rotVecs[3][3] = {
-         {1.0, 0.0, 0.0},
-         {0.0, 1.0, 0.0},
-         {0.0, 0.0, 1.0}
+    // for each possible rotation axis
+    static const Alembic::AbcGeom::XformOperationType rots[3] = {
+         Alembic::AbcGeom::kRotateXOperation,
+         Alembic::AbcGeom::kRotateYOperation,
+         Alembic::AbcGeom::kRotateZOperation
     };
 
     // this is to handle the case where there is a connection to the parent
@@ -189,11 +187,8 @@ void addRotate(const MFnDependencyNode & iTrans,
         double plugVal = plug.asDouble();
 
 
-        // setup the rotation vec
-        op.setChannelValue(0, rotVecs[index][0]);
-        op.setChannelValue(1, rotVecs[index][1]);
-        op.setChannelValue(2, rotVecs[index][2]);
-        op.setChannelValue(3, Alembic::AbcGeom::RadiansToDegrees(plugVal));
+        Alembic::AbcGeom::XformOp op(rots[index], iHint);
+        op.setChannelValue(0, Alembic::AbcGeom::RadiansToDegrees(plugVal));
 
         // the sampled case
         if (samp != 0)
@@ -202,7 +197,7 @@ void addRotate(const MFnDependencyNode & iTrans,
             chan.plug = plug;
             chan.scale = Alembic::AbcGeom::RadiansToDegrees(1.0);
             chan.opNum = oSample.getNumOps();
-            chan.channelNum = 3;
+            chan.channelNum = 0;
             oAnimChanList.push_back(chan);
         }
         // non sampled, XYZ axis and the angle is 0, do not add to the stack
