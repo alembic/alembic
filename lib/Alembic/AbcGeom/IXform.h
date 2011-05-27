@@ -140,14 +140,14 @@ public:
     bool getInheritsXforms( const Abc::ISampleSelector &iSS =
                             Abc::ISampleSelector() );
 
-    size_t getNumOps() const { return m_numOps; }
+    size_t getNumOps() const { return m_sample.getNumOps(); }
 
     //! Reset returns this function set to an empty, default
     //! state.
     void reset()
     {
         m_childBounds.reset();
-        m_ops.reset();
+        m_sample = XformSample();
         m_inherits.reset();
         m_isConstant = true;
         m_isConstantIdentity = true;
@@ -158,7 +158,7 @@ public:
     //! Valid returns whether this function set is valid.
     bool valid() const
     {
-        return ( m_ops && super_type::valid() );
+        return ( super_type::valid() );
     }
 
     //! unspecified-bool-type operator overload.
@@ -169,11 +169,7 @@ public:
 protected:
     Abc::IBox3dProperty m_childBounds;
 
-    AbcA::ScalarPropertyReaderPtr m_ops;
-
     AbcA::BasePropertyReaderPtr m_vals;
-
-    Abc::UInt32ArraySamplePtr m_animChannels;
 
     Abc::IBoolProperty m_inherits;
 
@@ -181,11 +177,7 @@ protected:
 
     bool m_isConstantIdentity;
 
-    std::size_t m_numOps;
-    std::size_t m_numChannels;
-
-    std::vector<Alembic::Util::uint8_t> m_opVec;
-    std::vector<Alembic::Util::float64_t> m_valVec;
+    XformSample m_sample;
 
 private:
     void init( Abc::SchemaInterpMatching iMatching );
@@ -194,7 +186,8 @@ private:
     bool m_useArrayProp;
 
     // fills m_valVec with data
-    void getChannelValues( const AbcA::index_t iSampleIndex );
+    void getChannelValues( const AbcA::index_t iSampleIndex,
+        XformSample & oSamp );
 };
 
 //-*****************************************************************************

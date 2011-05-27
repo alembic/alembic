@@ -185,8 +185,6 @@ public:
 
         m_staticChans.clear();
         m_staticChans.resize( 0 );
-        m_opVec.clear();
-        m_opVec.resize( 0 );
 
         super_type::reset();
     }
@@ -238,8 +236,6 @@ protected:
     XformSample m_protoSample;
 
     std::vector<bool> m_staticChans;
-
-    std::vector<Alembic::Util::uint8_t> m_opVec;
 
     bool m_isIdentity;
 };

@@ -57,7 +57,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
         m_inherits = Abc::IBoolProperty( ptr, ".inherits", iMatching );
     }
 
-    m_ops = ptr->getScalarProperty(  ".ops" );
+    AbcA::ScalarPropertyReaderPtr ops = ptr->getScalarProperty(  ".ops" );
 
     m_useArrayProp = false;
 
@@ -85,13 +85,8 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_isConstant = true;
 
-    m_numChannels = 0;
-
-    m_numOps = 0;
-
     if ( m_vals )
     {
-        m_numChannels = m_vals->getHeader().getDataType().getExtent();
 
         if ( m_useArrayProp )
         { m_isConstant = m_vals->asArrayPtr()->isConstant(); }
@@ -101,23 +96,73 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 
     m_isConstant = m_isConstant && m_inherits.isConstant();
 
-    m_valVec.resize( m_numChannels );
+    std::set < Alembic::Util::uint32_t > animChannels;
 
     if ( ptr->getPropertyHeader( ".animChans" ) )
     {
         Abc::IUInt32ArrayProperty p( ptr, ".animChans" );
         if ( p.getNumSamples() > 0 )
         {
-            p.get( m_animChannels, p.getNumSamples() - 1 );
+            Abc::UInt32ArraySamplePtr animSamp;
+            p.get( animSamp, p.getNumSamples() - 1 );
+            for ( std::size_t i = 0; i < animSamp->size(); ++i )
+            {
+                animChannels.insert( (*animSamp)[i] );
+            }
         }
     }
 
-    if ( m_ops && m_ops->getNumSamples() > 0 )
+    if ( ops && ops->getNumSamples() > 0 )
     {
-        m_numOps = m_ops->getHeader().getDataType().getExtent();
-    }
 
-    m_opVec.resize( m_numOps );
+        std::size_t numOps = ops->getHeader().getDataType().getExtent();
+        std::vector<Alembic::Util::uint8_t> opVec( numOps );
+        ops->getSample( 0, &(opVec.front()) );
+
+        for ( std::size_t i = 0; i < numOps; ++i )
+        {
+            XformOp op( opVec[i] );
+            m_sample.addOp( op );
+        }
+
+        std::set < Alembic::Util::uint32_t >::iterator it, itEnd;
+        std::vector< XformOp >::iterator op = m_sample.m_ops.begin();
+        std::vector< XformOp >::iterator opEnd = m_sample.m_ops.end();
+        std::size_t curChan = 0;
+        std::size_t chanPos = 0;
+
+        for ( it = animChannels.begin(), itEnd = animChannels.end();
+            it != itEnd; ++it )
+        {
+            Alembic::Util::uint32_t animChan = *it;
+            while ( op != opEnd )
+            {
+                std::size_t numChans = op->getNumChannels();
+                while ( curChan < numChans )
+                {
+                    if ( animChan == chanPos )
+                    {
+                        op->m_animChannels.insert( curChan );
+                        break;
+                    }
+
+                    ++curChan;
+                    ++chanPos;
+                }
+
+                // move on to the next animChan
+                if ( animChan == chanPos )
+                {
+                    ++curChan;
+                    ++chanPos;
+                    break;
+                }
+
+                ++op;
+                curChan = 0;
+            }
+        }
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
@@ -160,21 +205,38 @@ std::size_t IXformSchema::getNumSamples()
 }
 
 //-*****************************************************************************
-void IXformSchema::getChannelValues( const AbcA::index_t iSampleIndex )
+void IXformSchema::getChannelValues( const AbcA::index_t iSampleIndex,
+    XformSample & oSamp )
 {
+    std::vector<Alembic::Util::float64_t> dataVec;
+
     if ( m_useArrayProp )
     {
         AbcA::ArraySamplePtr sptr;
         m_vals->asArrayPtr()->getSample( iSampleIndex, sptr );
 
-        m_valVec.assign(
+        dataVec.assign(
             static_cast<const Alembic::Util::float64_t*>( sptr->getData() ),
             static_cast<const Alembic::Util::float64_t*>( sptr->getData() ) +
             sptr->size() );
     }
     else
     {
-        m_vals->asScalarPtr()->getSample( iSampleIndex, &(m_valVec.front()) );
+        dataVec.resize( m_vals->asScalarPtr()->getDataType().getExtent() );
+        m_vals->asScalarPtr()->getSample( iSampleIndex, &(dataVec.front()) );
+    }
+
+    std::vector< XformOp >::iterator op = oSamp.m_ops.begin();
+    std::vector< XformOp >::iterator opEnd = oSamp.m_ops.end();
+    std::size_t chanPos = 0;
+    while ( op != opEnd )
+    {
+        for ( std::size_t j = 0; j < op->getNumChannels();
+            ++j, ++chanPos )
+        {
+            op->setChannelValue( j, dataVec[chanPos] );
+        }
+        ++op;
     }
 }
 
@@ -187,46 +249,38 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
     if ( ! valid() ) { return; }
 
-    oSamp.setInheritsXforms( m_inherits.getValue( iSS ) );
+    if ( m_inherits.getNumSamples() )
+    {
+        oSamp.setInheritsXforms( m_inherits.getValue( iSS ) );
+    }
 
     if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
     {
         oSamp.setChildBounds( m_childBounds.getValue( iSS ) );
     }
 
-    if ( m_ops == NULL ) { return; }
+    if ( ! m_vals ) { return; }
 
-    AbcA::index_t sampIdx = iSS.getIndex( m_ops->getTimeSampling(),
-                                          m_ops->getNumSamples() );
+    AbcA::index_t numSamples = 0;
+    if ( m_useArrayProp )
+    {
+        numSamples = m_vals->asArrayPtr()->getNumSamples();
+    }
+    else
+    {
+        numSamples = m_vals->asScalarPtr()->getNumSamples();
+    }
+
+    if ( numSamples == 0 ) { return; }
+
+    AbcA::index_t sampIdx = iSS.getIndex( m_vals->getTimeSampling(),
+                                          numSamples );
 
     if ( sampIdx < 0 ) { return; }
 
-    m_ops->getSample( sampIdx, &(m_opVec.front()) );
+    oSamp = m_sample;
 
-    this->getChannelValues( sampIdx );
-
-    std::size_t curIdx = 0;
-    for ( std::size_t i = 0 ; i < m_numOps ; ++i )
-    {
-        Alembic::Util::uint32_t openc = m_opVec[i];
-        XformOp op( openc );
-
-        for ( std::size_t j = 0 ; j < op.getNumChannels() ; ++j )
-        {
-            const std::size_t animIdx = curIdx + j;
-            for ( std::size_t k = 0 ; k < m_animChannels->size() ; ++k )
-            {
-                if ( static_cast<std::size_t>( (*m_animChannels)[k] ) == animIdx )
-                {
-                    op.m_animChannels.insert( j );
-                }
-            }
-
-            op.setChannelValue( j, m_valVec[animIdx] );
-        }
-        oSamp.addOp( op );
-        curIdx += op.getNumChannels();
-    }
+    this->getChannelValues( sampIdx, oSamp );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

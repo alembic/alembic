@@ -66,8 +66,6 @@ void OXformSchema::set( XformSample &ioSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
-    m_opVec = ioSamp.getOpsArray();
-
     // do we need to create child bounds?
     if ( ioSamp.getChildBounds().hasVolume() && !m_childBounds )
     {
@@ -143,7 +141,7 @@ void OXformSchema::set( XformSample &ioSamp )
     }
     else
     {
-        ABCA_ASSERT( m_protoSample.getOpsArray() == ioSamp.getOpsArray(),
+        ABCA_ASSERT( m_protoSample.isTopologyEqual(ioSamp),
                      "Invalid sample topology!" );
     }
 
@@ -163,8 +161,6 @@ void OXformSchema::set( XformSample &ioSamp )
     for ( size_t i = 0, ii = 0 ; i < m_numOps ; ++i )
     {
         const XformOp &op = ioSamp[i];
-
-        const Alembic::Util::uint8_t &openc = m_opVec[i];
 
         const XformOp &protop = m_protoSample[i];
 
@@ -197,9 +193,21 @@ void OXformSchema::set( XformSample &ioSamp )
 
     this->setChannelValues( chanvals );
 
-    if ( m_ops )
+    if ( m_ops && m_ops->getNumSamples() == 0 )
     {
-        m_ops->setSample( &(m_opVec.front()) );
+        std::vector < Alembic::Util::uint8_t > opVec(
+            m_protoSample.getNumOps() );
+
+        for ( std::size_t i = 0; i < opVec.size(); ++i )
+        {
+            opVec[i] = m_protoSample[i].getOpEncoding();
+        }
+
+        m_ops->setSample( &(opVec.front()) );
+    }
+    else if ( m_ops )
+    {
+        m_ops->setFromPreviousSample();
     }
 
     if ( !m_isNotConstantIdentity && !m_isIdentity )

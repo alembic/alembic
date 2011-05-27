@@ -118,6 +118,9 @@ public:
     void setMatrix( const Abc::M44d &iMatrix );
     Abc::M44d getMatrix() const;
 
+    //! Tests whether this sample has the same topology as iSample
+    bool isTopologyEqual( const XformSample & iSample);
+
     //! Has this Sample been used in a call to OXformSchema::set()
     const bool getIsTopologyFrozen() const { return m_hasBeenRead; }
 
@@ -134,11 +137,6 @@ private:
 private:
     //! 0 is unset; 1 is set via addOp; 2 is set via non-op-based methods
     int32_t m_setWithOpStack;
-
-    //! This will be populated by the addOp() methods or setFoo() methods
-    //! in the case of the sample being used to write data, and by the
-    //! IXform in the case of the sample being used to read data.
-    std::vector<Alembic::Util::uint8_t> m_opsArray;
 
     std::vector<XformOp> m_ops;
 
