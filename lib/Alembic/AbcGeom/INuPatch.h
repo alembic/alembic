@@ -242,9 +242,13 @@ public:
         return smp;
     }
 
-    Abc::IV3fArrayProperty &getPositions(){ return m_positions; }
-    Abc::IBox3dProperty &getBounds() { return m_selfBounds; }
-    
+    Abc::IV3fArrayProperty getPositions(){ return m_positions; }
+    Abc::IFloatArrayProperty getUKnots(){ return m_uKnot; }
+    Abc::IFloatArrayProperty getVKnots(){ return m_vKnot; }
+
+    Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
+    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
+
     bool hasTrimCurve();
     bool trimCurveTopologyIsHomogenous();
     bool trimCurveTopologyIsConstant();

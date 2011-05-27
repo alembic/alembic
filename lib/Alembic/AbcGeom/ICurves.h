@@ -218,10 +218,13 @@ public:
     }
 
 
-    Abc::IV3fArrayProperty &getPositions() { return m_positions; }
-    Abc::IV2fArrayProperty &getUVs() { return m_uvs; }
-    Abc::IV3fArrayProperty &getNormals() { return m_normals; }
-    Abc::IFloatArrayProperty &getWidths() { return m_widths; }
+    Abc::IV3fArrayProperty getPositions() { return m_positions; }
+    Abc::IV2fArrayProperty getUVs() { return m_uvs; }
+    Abc::IV3fArrayProperty getNormals() { return m_normals; }
+    Abc::IFloatArrayProperty getWidths() { return m_widths; }
+
+    Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
+    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
 
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it

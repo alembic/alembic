@@ -224,10 +224,12 @@ public:
     // underneath it
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
-    Abc::IV3fArrayProperty getPositions()
-    {
-        return m_positions;
-    }
+    Abc::IInt32ArrayProperty getFaceCounts() { return m_counts; }
+    Abc::IInt32ArrayProperty getFaceIndices() { return m_indices; }
+    Abc::IV3fArrayProperty getPositions() { return m_positions; }
+
+    Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
+    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

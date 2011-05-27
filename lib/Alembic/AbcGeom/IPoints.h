@@ -194,6 +194,26 @@ public:
 
     Abc::ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
+    Abc::IV3fArrayProperty getPositions()
+    {
+        return m_positions;
+    }
+
+    Abc::IUInt64ArrayProperty getIds()
+    {
+        return m_ids;
+    }
+
+    Abc::IBox3dProperty getSelfBounds()
+    {
+        return m_selfBounds;
+    }
+
+    Abc::IBox3dProperty getChildBounds()
+    {
+        return m_childBounds;
+    }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,

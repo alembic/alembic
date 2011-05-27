@@ -203,6 +203,16 @@ public:
 
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
+    Abc::IBox3dProperty getSelfBounds()
+    {
+        return m_selfBoundsProperty;
+    }
+
+    Abc::IBox3dProperty getChildBounds()
+    {
+        return m_childBoundsProperty;
+    }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,

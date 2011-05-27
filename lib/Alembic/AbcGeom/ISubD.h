@@ -276,10 +276,34 @@ public:
         return smp;
     }
 
-    Abc::IV3fArrayProperty getPositions()
-    {
-        return m_positions;
-    }
+    Abc::IInt32ArrayProperty getFaceCounts() { return m_faceCounts; }
+    Abc::IInt32ArrayProperty getFaceIndices() { return m_faceIndices; }
+    Abc::IV3fArrayProperty getPositions() { return m_positions; }
+
+    Abc::IInt32Property getFaceVaryingInterpolateBoundary()
+    { return m_faceVaryingInterpolateBoundary; }
+
+    Abc::IInt32Property getFaceVaryingPropagateCorners()
+    { return m_faceVaryingPropagateCorners; }
+
+    Abc::IInt32Property getInterpolateBoundary()
+    { return m_interpolateBoundary; }
+
+    Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
+    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
+
+    Abc::IInt32ArrayProperty getCreaseIndices() { return m_creaseIndices; }
+    Abc::IInt32ArrayProperty getCreaseLengths() { return m_creaseLengths; }
+    Abc::IFloatArrayProperty getCreaseSharpnesses()
+    { return m_creaseSharpnesses; }
+
+    Abc::IInt32ArrayProperty getCornerIndices() { return m_cornerIndices; }
+    Abc::IFloatArrayProperty getCornerSharpnesses()
+    { return m_cornerSharpnesses; }
+
+    Abc::IInt32ArrayProperty getHoles() { return m_holes; }
+
+    Abc::IStringProperty getSubdivisionScheme() { return m_subdScheme; }
 
     IV2fGeomParam &getUVs() { return m_uvs; }
 
