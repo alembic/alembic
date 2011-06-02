@@ -138,7 +138,7 @@ public:
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
     //-*************************************************************************
 
-    //! The default constructor creates an empty OPolyMeshSchema
+    //! The default constructor creates an empty ICurvesMeshSchema
     //! ...
     ICurvesSchema() {}
 
@@ -154,7 +154,7 @@ public:
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<PolyMeshSchemaInfo>( iParentObject, iName, iArg0, iArg1 )
+      : Abc::ISchema<CurvesSchemaInfo>( iParentObject, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }

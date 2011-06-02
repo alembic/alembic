@@ -12,12 +12,12 @@ dependencies.  They are, as of May 16th, 2011:
 
 A unix-like OS (Linux, Mac OS X); Windows support is experimental
 CMake (2.8.0) www.cmake.org
-Boost (1.42) www.boost.org
+Boost (1.44) www.boost.org
 ilmbase (1.0.1) www.openexr.com
-HDF5 (1.8.5-patch1) www.hdfgroup.org/HDF5
+HDF5 (1.8.7) www.hdfgroup.org/HDF5
 
 Optional:
-Autodesk Maya (2010)
+Autodesk Maya (2011)
 Pixar PRMan (15.x)
 OpenEXR (1.6.1) www.openexr.com
 
