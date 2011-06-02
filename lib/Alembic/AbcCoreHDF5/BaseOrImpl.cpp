@@ -214,18 +214,14 @@ BaseOrImpl::getChild( const std::string &iName )
 
     Child &child = (*fiter).second;
 
-    if ( child.made.expired() )
+    AbcA::ObjectReaderPtr optr = child.made.lock();
+    if ( optr == NULL )
     {
         // Make a new one.
-        AbcA::ObjectReaderPtr obj(
-            new OrImpl( asObjectPtr(), child.proto ) );
-        child.made = obj;
-        return obj;
+        optr.reset ( new OrImpl( asObjectPtr(), child.proto ) );
+        child.made = optr;
     }
-    else
-    {
-        return child.made.lock();
-    }
+    return optr;
 }
 
 //-*****************************************************************************

@@ -272,17 +272,13 @@ BaseCprImpl::getScalarProperty( const std::string &iName )
                     << sub.header->getPropertyType() );
     }
 
-    AbcA::BasePropertyReaderPtr bptr;
-    if ( sub.made.expired() )
+    AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
+    if ( bptr == NULL )
     {
         // Make a new one.
         bptr.reset( new SprImpl( this->asCompoundPtr(), m_group, sub.header,
             sub.numSamples, sub.firstChangedIndex, sub.lastChangedIndex ) );
         sub.made = bptr;
-    }
-    else
-    {
-        bptr = sub.made.lock();
     }
 
     AbcA::ScalarPropertyReaderPtr ret =
@@ -312,18 +308,14 @@ BaseCprImpl::getArrayProperty( const std::string &iName )
                     << sub.header->getPropertyType() );
     }
 
-    AbcA::BasePropertyReaderPtr bptr;
-    if ( sub.made.expired() )
+    AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
+    if ( bptr == NULL )
     {
         // Make a new one.
         bptr.reset( new AprImpl( this->asCompoundPtr(), m_group, sub.header,
             sub.isScalarLike, sub.numSamples, sub.firstChangedIndex,
             sub.lastChangedIndex ) );
         sub.made = bptr;
-    }
-    else
-    {
-        bptr = sub.made.lock();
     }
 
     AbcA::ArrayPropertyReaderPtr ret =
@@ -353,16 +345,12 @@ BaseCprImpl::getCompoundProperty( const std::string &iName )
                     << sub.header->getPropertyType() );
     }
 
-    AbcA::BasePropertyReaderPtr bptr;
-    if ( sub.made.expired() )
+    AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
+    if ( bptr == NULL )
     {
         // Make a new one.
         bptr.reset( new CprImpl( this->asCompoundPtr(), m_group, sub.header ) );
         sub.made = bptr;
-    }
-    else
-    {
-        bptr = sub.made.lock();
     }
 
     AbcA::CompoundPropertyReaderPtr ret =
