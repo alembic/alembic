@@ -201,8 +201,6 @@ public:
 
     FaceSetExclusivity getFaceExclusivity();
 
-    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
-
     Abc::IBox3dProperty getSelfBounds()
     {
         return m_selfBoundsProperty;
@@ -224,8 +222,6 @@ public:
     void reset()
     {
         m_facesProperty.reset();
-
-        m_arbGeomParams.reset();
 
         Abc::ISchema<FaceSetSchemaInfo>::reset();
     }
@@ -252,8 +248,6 @@ protected:
     Abc::IBox3dProperty m_selfBoundsProperty;
     Abc::IBox3dProperty m_childBoundsProperty;
 
-    // random geometry parameters
-    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

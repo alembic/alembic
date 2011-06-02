@@ -39,7 +39,6 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
-#include <Alembic/AbcGeom/OGeomParam.h>
 #include <Alembic/AbcGeom/FaceSetExclusivity.h>
 
 namespace Alembic {
