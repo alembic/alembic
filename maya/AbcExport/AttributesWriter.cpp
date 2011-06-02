@@ -1142,6 +1142,13 @@ AttributesWriter::AttributesWriter(
     {
         int retVis = util::getVisibilityType(visPlug.plug);
 
+        // visible will go on the top most compound
+        Abc::OCompoundProperty parent = iParent;
+        while (parent.getParent().valid())
+        {
+            parent = parent.getParent();
+        }
+
         switch (retVis)
         {
             // static visibility 0 case
@@ -1149,7 +1156,7 @@ AttributesWriter::AttributesWriter(
             {
                 int8_t visVal = 0;
 
-                Abc::OCharProperty bp(iParent, "visible");
+                Abc::OCharProperty bp(parent, "visible");
                 bp.set(visVal);
             }
             break;
@@ -1161,7 +1168,8 @@ AttributesWriter::AttributesWriter(
 
                 if (!iForceStatic)
                 {
-                    Abc::OCharProperty bp(iParent, "visible", iTimeIndex);
+                    Abc::OCharProperty bp(parent, "visible",
+                        iTimeIndex);
                     bp.set(visVal);
                     visPlug.prop = bp;
                     mAnimVisibility = visPlug;
@@ -1169,7 +1177,7 @@ AttributesWriter::AttributesWriter(
                 // force static case
                 else
                 {
-                    Abc::OCharProperty bp(iParent, "visible");
+                    Abc::OCharProperty bp(parent, "visible");
                     bp.set(visVal);
                 }
             }
@@ -1186,7 +1194,7 @@ AttributesWriter::AttributesWriter(
 
                 mAnimVisibility = visPlug;
                 int8_t visVal = -1;
-                Abc::OCharProperty bp(iParent, "visible", iTimeIndex);
+                Abc::OCharProperty bp(parent, "visible", iTimeIndex);
                 bp.set(visVal);
                 visPlug.prop = bp;
                 mAnimVisibility = visPlug;

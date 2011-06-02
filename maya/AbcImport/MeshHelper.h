@@ -47,6 +47,8 @@
 #include <Alembic/AbcGeom/IPolyMesh.h>
 #include <Alembic/AbcGeom/ISubD.h>
 
+#include "NodeIteratorVisitorHelper.h"
+
 void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     Alembic::AbcGeom::IPolyMesh & iNode, bool iInitialized);
 
@@ -60,7 +62,7 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
     MObject & iParent);
 
 void disconnectMesh(MObject & iMeshObject,
-    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::vector<Prop> & iSampledPropList,
     std::size_t iFirstProp);
 
 #endif  // ABCIMPORT_MESHHELPER_H_

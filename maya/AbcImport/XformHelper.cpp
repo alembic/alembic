@@ -417,7 +417,7 @@ bool isComplex(Alembic::AbcGeom::IXform & iNode)
 
 MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
     MObject & iObject, std::vector<std::string> & oSampledTransOpNameList,
-    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::vector<Prop> & iSampledPropList,
     std::size_t iFirstProp)
 {
     MStatus status = MS::kSuccess;

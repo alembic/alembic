@@ -50,6 +50,7 @@
 #include <maya/MFnDependencyNode.h>
 
 #include <Alembic/AbcGeom/All.h>
+#include "NodeIteratorVisitorHelper.h"
 
 using Alembic::AbcCoreAbstract::chrono_t;
 using Alembic::AbcCoreAbstract::index_t;
@@ -67,7 +68,7 @@ MStatus replaceDagObject(MObject & oldObject, MObject & newObject,
 // disconnect all plugs based on the name of the IArrayProperty
 // from iSampledPropList[iFirstProp] to the end of iSampledPropList
 void disconnectProps(MFnDependencyNode & iNode,
-    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::vector<Prop> & iSampledPropList,
     std::size_t iFirstProp);
 
 // disconnect all the plugs that are connected to this plug

@@ -344,7 +344,20 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             for (unsigned int i = 0; i < propSize; i++)
             {
                 MDataHandle handle = outArrayHandle.outputValue();
-                readProp(mCurTime, mData.mPropList[i], handle);
+                if (mData.mPropList[i].mArray.valid())
+                {
+                    readProp(mCurTime, mData.mPropList[i].mArray, handle);
+                }
+                // meant for special properties (like visible)
+                else
+                {
+                    if (mData.mPropList[i].mScalar.getName() == "visible")
+                    {
+                        Alembic::Util::int8_t visVal = 1;
+                        mData.mPropList[i].mScalar.get(&visVal, mCurTime);
+                        handle.setBool(visVal != 0);
+                    }
+                }
                 outArrayHandle.next();
             }
             outArrayHandle.setAllClean();

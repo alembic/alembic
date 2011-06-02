@@ -104,7 +104,7 @@ MStatus replaceDagObject(MObject & oldObject, MObject & newObject,
 }
 
 void disconnectProps(MFnDependencyNode & iNode,
-    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::vector<Prop> & iSampledPropList,
     std::size_t iFirstProp)
 {
     // get prop names and make sure they are disconnected before
@@ -112,7 +112,15 @@ void disconnectProps(MFnDependencyNode & iNode,
     std::size_t numProps = iSampledPropList.size();
     for (std::size_t i = iFirstProp; i < numProps; ++i)
     {
-        std::string propName = iSampledPropList[i].getName();
+        std::string propName;
+        if (iSampledPropList[i].mArray.valid())
+        {
+            propName = iSampledPropList[i].mArray.getName();
+        }
+        else
+        {
+            propName = iSampledPropList[i].mScalar.getName();
+        }
 
         // disconnect connections to animated props
         MPlug dstPlug = iNode.findPlug(propName.c_str());

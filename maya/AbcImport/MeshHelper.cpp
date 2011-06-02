@@ -478,7 +478,7 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 }
 
 void disconnectMesh(MObject & iMeshObject,
-    std::vector<Alembic::Abc::IArrayProperty> & iSampledPropList,
+    std::vector<Prop> & iSampledPropList,
     std::size_t iFirstProp)
 {
     MFnMesh fnMesh;

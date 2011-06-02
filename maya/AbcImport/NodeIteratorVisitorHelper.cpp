@@ -206,15 +206,6 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 val = ((int8_t *) samp->getData())[0];
             }
 
-            // visibility is handled differently from Maya's
-            // visibility model
-            if (attrName == "visible")
-            {
-                MPlug plug = parentFn.findPlug("visibility");
-                plug.setValue(val != 0);
-                return true;
-            }
-
             attrObj = numAttr.create(attrName, attrName,
                 MFnNumericData::kByte, val);
         }
@@ -692,7 +683,7 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject)
 //=============================================================================
 
 void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
-    std::vector<Alembic::Abc::IArrayProperty> & oPropList)
+    std::vector<Prop> & oPropList)
 {
     // if the arbitrary geom params aren't valid, then skip
     if (!iParent)
@@ -790,7 +781,9 @@ void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
             break;
         }
 
-        oPropList.push_back(prop);
+        Prop animProp;
+        animProp.mArray = prop;
+        oPropList.push_back(animProp);
     } // for i
 }
 
@@ -835,14 +828,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
             int8_t val;
 
-            if (iProp.getName() == "visible")
-            {
-                iProp.get(samp, index);
-
-                iHandle.setBool(((int8_t *) samp->getData())[0] != 0);
-                return;
-            }
-            else if (index != ceilIndex && alpha != 0.0)
+            if (index != ceilIndex && alpha != 0.0)
             {
                 iProp.get(samp, index);
                 iProp.get(ceilSamp, ceilIndex);
@@ -1317,8 +1303,18 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     iEnd = mPropList.size();
     for (i = 0; i < iEnd; ++i)
     {
-        ts = mPropList[i].getTimeSampling();
-        size_t numSamples = mPropList[i].getNumSamples();
+        size_t numSamples = 0;
+        if (mPropList[i].mArray.valid())
+        {
+            ts = mPropList[i].mArray.getTimeSampling();
+            numSamples = mPropList[i].mArray.getNumSamples();
+        }
+        else
+        {
+            ts = mPropList[i].mScalar.getTimeSampling();
+            numSamples = mPropList[i].mScalar.getNumSamples();
+        }
+
         if (numSamples > 1)
         {
             oMin = std::min(ts->getSampleTime(0), oMin);
