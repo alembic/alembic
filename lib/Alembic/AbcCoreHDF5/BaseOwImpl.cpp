@@ -129,14 +129,7 @@ BaseOwImpl::getChild( const std::string &iName )
     }
 
     WeakOwPtr wptr = (*fiter).second;
-    if ( wptr.expired() )
-    {
-        return AbcA::ObjectWriterPtr();
-    }
-    else
-    {
-        return wptr.lock();
-    }
+    return wptr.lock();
 }
 
 //-*****************************************************************************

@@ -118,14 +118,7 @@ BaseCpwImpl::getProperty( const std::string &iName )
 
     WeakBpwPtr wptr = (*fiter).second;
 
-    // It is entirely possible that the made thing has expired or
-    // does not exist.
-    if ( !(*fiter).second.expired() )
-    {
-        return wptr.lock();
-    }
-
-    return AbcA::BasePropertyWriterPtr();
+    return wptr.lock();
 }
 
 //-*****************************************************************************
