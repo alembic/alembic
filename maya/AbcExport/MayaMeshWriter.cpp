@@ -552,7 +552,7 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
             Alembic::Abc::Int32ArraySample(cornerIndices));
     }
 
-
+#if MAYA_API_VERSION >= 201100
     MUintArray holes = lMesh.getInvisibleFaces();
     std::size_t numHoles = holes.length();
     std::vector <Alembic::Util::int32_t> holeIndices(numHoles);
@@ -565,6 +565,7 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
     {
         samp.setHoles(holeIndices);
     }
+#endif
 
     mSubDSchema.set(samp);
 
