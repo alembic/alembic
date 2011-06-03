@@ -68,7 +68,7 @@ public:
         Abc::Box3d getChildBounds() const { return m_childBounds; }
 
         // trim curve
-        size_t getTrimNumLoops() const { return m_trimNumLoops; }
+        int64_t getTrimNumLoops() const { return m_trimNumLoops; }
         Abc::UInt64ArraySamplePtr getTrimNumVertices() const { return m_trimNumVertices; }
         Abc::UInt64ArraySamplePtr getTrimNumCurves() const { return m_trimNumCurves; }
         Abc::UInt64ArraySamplePtr getTrimOrders() const { return m_trimOrder; }
@@ -190,8 +190,8 @@ public:
     //! schema name used.
     template <class CPROP_PTR>
     explicit INuPatchSchema( CPROP_PTR iParent,
-                              const Abc::Argument &iArg0 = Abc::Argument(),
-                              const Abc::Argument &iArg1 = Abc::Argument() )
+                             const Abc::Argument &iArg0 = Abc::Argument(),
+                             const Abc::Argument &iArg1 = Abc::Argument() )
 
       : Abc::ISchema<NuPatchSchemaInfo>( iParent,
                                          iArg0, iArg1 )
@@ -202,9 +202,9 @@ public:
     //! Wrap an existing schema object
     template <class CPROP_PTR>
     INuPatchSchema( CPROP_PTR iThis,
-                     Abc::WrapExistingFlag iFlag,
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument() )
+                    Abc::WrapExistingFlag iFlag,
+                    const Abc::Argument &iArg0 = Abc::Argument(),
+                    const Abc::Argument &iArg1 = Abc::Argument() )
 
       : Abc::ISchema<NuPatchSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
@@ -272,7 +272,7 @@ public:
         m_vOrder.reset();
         m_uKnot.reset();
         m_vKnot.reset();
-        
+
         m_normals.reset();
         m_uvs.reset();
 

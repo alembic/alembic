@@ -97,10 +97,10 @@ public:
         //! be full like this, which would indicate a change of topology
         Sample(
                 const Abc::V3fArraySample &iPos,
-                const Abc::UInt32ArraySample &iNVertices = Abc::UInt32ArraySample(),
+                const Abc::UInt32ArraySample &iNVertices,
                 const CurveType &iType = kCubic,
                 const CurvePeriodicity iWrap = kNonPeriodic,
-                const Abc::FloatArraySample &iWidths = Abc::V2fArraySample(),
+                const Abc::FloatArraySample &iWidths = Abc::FloatArraySample(),
                 const Abc::V2fArraySample &iUVs = Abc::V2fArraySample(),
                 const Abc::V3fArraySample &iNormals = Abc::V3fArraySample(),
                 const BasisType &iBasis = kBezierBasis )
@@ -191,13 +191,14 @@ public:
         Abc::V3fArraySample m_positions;
         Abc::UInt32ArraySample m_nVertices;
 
+        CurveType m_type;
+        CurvePeriodicity m_wrap;
+
+        Abc::FloatArraySample m_widths;
         Abc::V2fArraySample m_uvs;
         Abc::V3fArraySample m_normals;
-        Abc::FloatArraySample m_widths;
 
-        CurveType m_type;
         BasisType m_basis;
-        CurvePeriodicity m_wrap;
 
         // bounding box attributes
         Abc::Box3d m_selfBounds;
