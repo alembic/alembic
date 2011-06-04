@@ -710,9 +710,6 @@ AbcA::ScalarPropertyWriterPtr createObjectAndScalar(
 
     AbcA::CompoundPropertyWriterPtr props = child->getProperties();
 
-    AbcA::CompoundPropertyWriterPtr propsChild =
-        props->createCompoundProperty(iName, AbcA::MetaData());
-
     AbcA::ScalarPropertyWriterPtr swp =
             props->createScalarProperty(iName, AbcA::MetaData(),
                 AbcA::DataType(Alembic::Util::kInt32POD, 1), 0);
