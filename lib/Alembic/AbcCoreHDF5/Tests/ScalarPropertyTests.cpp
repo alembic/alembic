@@ -702,8 +702,37 @@ void testRepeatedScalarData()
     }
 }
 
+AbcA::ScalarPropertyWriterPtr createObjectAndScalar(
+    AbcA::ObjectWriterPtr iParent, const std::string & iName )
+{
+    AbcA::ObjectWriterPtr child =
+        iParent->createChild(AbcA::ObjectHeader(iName, AbcA::MetaData()));
+
+    AbcA::CompoundPropertyWriterPtr props = child->getProperties();
+
+    AbcA::CompoundPropertyWriterPtr propsChild =
+        props->createCompoundProperty(iName, AbcA::MetaData());
+
+    AbcA::ScalarPropertyWriterPtr swp =
+            props->createScalarProperty(iName, AbcA::MetaData(),
+                AbcA::DataType(Alembic::Util::kInt32POD, 1), 0);
+    return swp;
+}
+
+void testPropScoping()
+{
+    A5::WriteArchive w;
+    AbcA::ArchiveWriterPtr a = w("scopingTest.abc", AbcA::MetaData());
+    AbcA::ObjectWriterPtr archive = a->getTop();
+    AbcA::ScalarPropertyWriterPtr s = createObjectAndScalar(archive, "test");
+    Alembic::Util::int32_t val = 42;
+    s->setSample(&val);
+
+}
+
 int main ( int argc, char *argv[] )
 {
+    testPropScoping();
     testWeirdStringScalar();
     testRepeatedScalarData();
     testReadWriteScalars();
