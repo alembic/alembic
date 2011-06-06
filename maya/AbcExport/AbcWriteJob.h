@@ -44,30 +44,28 @@
 #include "MayaNurbsCurveWriter.h"
 #include "MayaPointPrimitiveWriter.h"
 #include "MayaTransformWriter.h"
+#include "MayaLocatorWriter.h"
 
 /*
 #include "MayaNurbsSurfaceWriter.h"
-#include "MayaCameraWriter.h"
-#include "MayaLightWriter.h"
-#include "MayaLocatorWriter.h"
 */
 
 #include "MayaUtility.h"
 
 typedef boost::shared_ptr < MayaMeshWriter >
     MayaMeshWriterPtr;
-//typedef boost::shared_ptr < MayaNurbsSurfaceWriter >
-//    MayaNurbsSurfaceWriterPtr;
 typedef boost::shared_ptr < MayaNurbsCurveWriter >
     MayaNurbsCurveWriterPtr;
-//typedef boost::shared_ptr < MayaCameraWriter >
-//    MayaCameraWriterPtr;
-//typedef boost::shared_ptr < MayaLightWriter >
-//    MayaLightWriterPtr;
-//typedef boost::shared_ptr < MayaLocatorWriter >
-//    MayaLocatorWriterPtr;
+typedef boost::shared_ptr < MayaCameraWriter >
+    MayaCameraWriterPtr;
+typedef boost::shared_ptr < MayaLocatorWriter >
+    MayaLocatorWriterPtr;
 typedef boost::shared_ptr < MayaPointPrimitiveWriter >
     MayaPointPrimitiveWriterPtr;
+/*
+typedef boost::shared_ptr < MayaNurbsSurfaceWriter >
+    MayaNurbsSurfaceWriterPtr;
+*/
 
 struct AbcWriteJobStatistics
 {
@@ -107,10 +105,11 @@ struct AbcWriteJobStatistics
         mTransStaticNum = 0;
         mTransAnimNum = 0;
 
+        mLocatorStaticNum = 0;
+        mLocatorAnimNum = 0;
+
         mCameraStaticNum = 0;
         mCameraAnimNum = 0;
-
-        mGenericNum = 0;
     }
 
     // for the statistic string
@@ -148,10 +147,11 @@ struct AbcWriteJobStatistics
     size_t mTransStaticNum;
     size_t mTransAnimNum;
 
+    size_t mLocatorStaticNum;
+    size_t mLocatorAnimNum;
+
     size_t mCameraStaticNum;
     size_t mCameraAnimNum;
-
-    size_t mGenericNum;
 };
 
 class AbcWriteJob
@@ -185,13 +185,12 @@ class AbcWriteJob
 
     /*
         MayaNurbsSurfaceWriterPtr,
-        MayaLightWriterPtr,
-        MayaLocatorWriterPtr,
     */
 
         MayaCameraWriterPtr,
         MayaMeshWriterPtr,
         MayaNurbsCurveWriterPtr,
+        MayaLocatorWriterPtr,
         MayaPointPrimitiveWriterPtr > MayaNodePtr;
 
     void perFrameCallback(double iFrame);

@@ -61,19 +61,14 @@ namespace
 /*
             void operator()(MayaNurbsSurfaceWriterPtr & iNode)
             {
-                iNode->write(mFrame);
+                iNode->write();
             }
-
-            void operator()(MayaLightWriterPtr & iNode)
-            {
-                iNode->write(mFrame);
-            }
+*/
 
             void operator()(MayaLocatorWriterPtr & iNode)
             {
-                iNode->write(mFrame);
+                iNode->write();
             }
-*/
 
             void operator()(MayaNurbsCurveWriterPtr & iNode)
             {
@@ -128,9 +123,9 @@ namespace
             {
                 mCVsArray[0] += iNode->getNumCVs();
             }
+            */
 
             void operator()(MayaLocatorWriterPtr & iNode) {}
-            */
 
             void operator()(MayaNurbsCurveWriterPtr & iNode)
             {
@@ -532,6 +527,47 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
             mCurDag.push(mCurDag.child(i));
             setup(iFrame, trans);
             mCurDag.pop();
+        }
+    }
+    else if (ob.hasFn(MFn::kLocator))
+    {
+        MFnDependencyNode fnLocator(ob, & status);
+        if (status != MS::kSuccess)
+        {
+            MString msg = "Initialize locator node ";
+            msg += mCurDag.fullPathName();
+            msg += " failed, skipping.";
+            MGlobal::displayWarning(msg);
+            return;
+        }
+
+        if (iParent != NULL)
+        {
+            Alembic::Abc::OObject obj = iParent->getObject();
+            MayaLocatorWriterPtr locator(new MayaLocatorWriter(
+                mCurDag, obj, mShapeTimeIndex, mWriteVisibility,
+                mShapesStatic));
+
+            if (locator->isAnimated() && !mShapesStatic)
+            {
+                MayaNodePtr nd = locator;
+                mShapeList.push_back(nd);
+                mStats.mLocatorAnimNum++;
+            }
+            else
+            {
+                mStats.mLocatorStaticNum++;
+            }
+
+            AttributesWriterPtr attrs = locator->getAttrs();
+            if (!mShapesStatic && attrs->isAnimated())
+                mShapeAttrList.push_back(attrs);
+        }
+        else
+        {
+            MString err = "Can't translate ";
+            err += fnLocator.name() + " since it doesn't have a parent.";
+            MGlobal::displayError(err);
         }
     }
     else if (ob.hasFn(MFn::kParticle))
@@ -968,10 +1004,11 @@ void AbcWriteJob::postCallback(double iFrame)
     addToString(statsStr, "TransStaticNum", mStats.mTransStaticNum);
     addToString(statsStr, "TransAnimNum", mStats.mTransAnimNum);
 
+    addToString(statsStr, "LocatorStaticNum", mStats.mLocatorStaticNum);
+    addToString(statsStr, "LocatorAnimNum", mStats.mLocatorAnimNum);
+
     addToString(statsStr, "CameraStaticNum", mStats.mCameraStaticNum);
     addToString(statsStr, "CameraAnimNum", mStats.mCameraAnimNum);
-
-    addToString(statsStr, "GenericNum", mStats.mGenericNum);
 
     if (statsStr.length() > 0)
     {
