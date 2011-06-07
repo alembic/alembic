@@ -354,7 +354,9 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                     if (mData.mPropList[i].mScalar.getName() == "visible")
                     {
                         Alembic::Util::int8_t visVal = 1;
-                        mData.mPropList[i].mScalar.get(&visVal, mCurTime);
+                        mData.mPropList[i].mScalar.get(&visVal,
+                            Alembic::Abc::ISampleSelector(mCurTime,
+                                Alembic::Abc::ISampleSelector::kNearIndex ));
                         handle.setBool(visVal != 0);
                     }
                 }
