@@ -225,6 +225,7 @@ void Example2_NurbsIn()
     TESTING_ASSERT( nurbsSample.getSelfBounds().min == V3d( 0.0, 0.0, -3.0 ) );
     TESTING_ASSERT( nurbsSample.getSelfBounds().max == V3d( 3.0, 3.0, 3.0 ) );
 
+    std::cout << "Number of trim curves: " << nurbsSample.getTrimNumLoops() << std::endl;
     TESTING_ASSERT( nurbsSample.getTrimNumLoops() == 0 );
     TESTING_ASSERT( nurbsSample.hasTrimCurve() == false );
 }
