@@ -40,8 +40,7 @@
 MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent,
     Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibility,
-    bool iForceStatic) :
+    bool iWriteVisibility) :
     mIsAnimated(false), mDagPath(iDag)
 {
     MStatus status = MS::kSuccess;
@@ -72,7 +71,7 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     MPlug scaleZ = fnLocator.findPlug("localScaleZ");
     MPlug scale = fnLocator.findPlug("localScale");
 
-    if ( !iForceStatic && (util::getSampledType(posX) != 0 ||
+    if ( iTimeIndex != 0 && (util::getSampledType(posX) != 0 ||
         util::getSampledType(posY) != 0 ||
         util::getSampledType(posZ) != 0 ||
         util::getSampledType(pos) != 0 ||
@@ -101,7 +100,7 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     mSp.set(val);
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, fnLocator,
-                iTimeIndex, iWriteVisibility, iForceStatic));
+                iTimeIndex, iWriteVisibility));
 }
 
 

@@ -38,7 +38,7 @@
 
 MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibility, bool iForceStatic) :
+    bool iWriteVisibility) :
     mIsAnimated(false),
     mDagPath(iDag),
     mUseRenderShutter(false),
@@ -57,7 +57,7 @@ MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
 
 
     MObject cameraObj = iDag.node();
-    if (!iForceStatic && util::isAnimated(cameraObj))
+    if (iTimeIndex != 0 && util::isAnimated(cameraObj))
         mIsAnimated = true;
 
     MObject renderObj;
@@ -85,7 +85,7 @@ MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
     Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, cam,
-        iTimeIndex, iWriteVisibility, iForceStatic));
+        iTimeIndex, iWriteVisibility));
     write();
 }
 

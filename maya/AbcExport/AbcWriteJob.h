@@ -238,12 +238,6 @@ class AbcWriteJob
     Alembic::AbcCoreAbstract::TimeSamplingPtr mTransTime;
     Alembic::Util::uint32_t mTransTimeIndex;
 
-    // convenience booleans used mainly during setup
-    // indicates whether the shapes and transforms
-    // only have 1 sample in their list
-    bool mShapesStatic;
-    bool mTransStatic;
-
     // when eval is called and the time is the first frame
     // then we run the setup
     double mFirstFrame;

@@ -1011,8 +1011,7 @@ AttributesWriter::AttributesWriter(
     Abc::OCompoundProperty & iParent,
     const MFnDagNode & iNode,
     Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibility,
-    bool iForceStatic)
+    bool iWriteVisibility)
 {
     PlugAndObjScalar visPlug;
 
@@ -1062,13 +1061,7 @@ AttributesWriter::AttributesWriter(
             continue;
         }
 
-        int sampType = 0;
-
-        // if we aren't forcing everything to be static
-        if (!iForceStatic)
-        {
-            sampType = util::getSampledType(plug);
-        }
+        int sampType = util::getSampledType(plug);
 
         MPlug scopePlug = iNode.findPlug(propName + cAttrScope);
         AbcGeom::GeometryScope scope = AbcGeom::kUnknownScope;
@@ -1083,7 +1076,7 @@ AttributesWriter::AttributesWriter(
             // static
             case 0:
             {
-                createPropertyFromMFnAttr(attr, plug, iParent, iTimeIndex,
+                createPropertyFromMFnAttr(attr, plug, iParent, 0,
                     scope, staticPlugObjArrayVec);
             }
             break;
@@ -1166,28 +1159,18 @@ AttributesWriter::AttributesWriter(
             {
                 Alembic::Util::int8_t visVal = 0;
 
-                if (!iForceStatic)
-                {
-                    Abc::OCharProperty bp(parent, "visible",
-                        iTimeIndex);
-                    bp.set(visVal);
-                    visPlug.prop = bp;
-                    mAnimVisibility = visPlug;
-                }
-                // force static case
-                else
-                {
-                    Abc::OCharProperty bp(parent, "visible");
-                    bp.set(visVal);
-                }
+                Abc::OCharProperty bp(parent, "visible", iTimeIndex);
+                bp.set(visVal);
+                visPlug.prop = bp;
+                mAnimVisibility = visPlug;
             }
             break;
 
             // animated visibility 1 case
             case 3:
             {
-                // dont add if we are forcing static
-                if (!iForceStatic)
+                // dont add if we are forcing static (no frame range specified)
+                if (iTimeIndex == 0)
                 {
                     break;
                 }

@@ -50,8 +50,7 @@ class AttributesWriter
     AttributesWriter(Alembic::Abc::OCompoundProperty & iParent,
         const MFnDagNode & iNode,
         Alembic::Util::uint32_t iTimeIndex,
-        bool iWriteVisibility,
-        bool iForceStatic);
+        bool iWriteVisibility);
 
     ~AttributesWriter();
 

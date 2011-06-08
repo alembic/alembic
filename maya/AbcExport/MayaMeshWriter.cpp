@@ -89,7 +89,7 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
 
 MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibility, bool iWriteUVs, bool iForceStatic)
+    bool iWriteVisibility, bool iWriteUVs)
   : mIsGeometryAnimated(false),
     mDagPath(iDag),
     mNumPoints(0)
@@ -104,7 +104,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     // intermediate objects aren't translated
     MObject surface = iDag.node();
 
-    if (!iForceStatic && util::isAnimated(surface))
+    if (iTimeIndex != 0 && util::isAnimated(surface))
         mIsGeometryAnimated = true;
 
     std::vector<float> uvs;
@@ -138,7 +138,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         Alembic::Abc::OCompoundProperty cp = mSubDSchema.getArbGeomParams();
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, lMesh,
-            iTimeIndex, iWriteVisibility, iForceStatic));
+            iTimeIndex, iWriteVisibility));
 
         writeSubD(iDag, uvSamp);
     }
@@ -172,7 +172,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
         // set the rest of the props and write to the writer node
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, lMesh,
-            iTimeIndex, iWriteVisibility, iForceStatic));
+            iTimeIndex, iWriteVisibility));
 
        writePoly(uvSamp);
     }

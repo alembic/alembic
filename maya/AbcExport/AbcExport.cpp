@@ -263,6 +263,7 @@ MStatus AbcExport::doIt(const MArgList & args)
 
         double  startTime = oldCurTime.value();
         double  endTime = oldCurTime.value();
+        bool    hasRange = false;
 
         double  shutterOpen = 0.0;
         double  shutterClose = 0.0;
@@ -316,6 +317,7 @@ MStatus AbcExport::doIt(const MArgList & args)
                     endTime = temp;
                 }
 
+                hasRange = true;
                 argc += 3;
             }
             else if (strArr[argc] == "uv")
@@ -492,7 +494,7 @@ MStatus AbcExport::doIt(const MArgList & args)
         AbcA::TimeSamplingPtr transTime(new AbcA::TimeSampling());
         AbcA::TimeSamplingPtr geoTime = transTime;
 
-        if (origSamples.size() > 1)
+        if (hasRange)
         {
             transTime.reset( new AbcA::TimeSampling(util::spf(),
                 (*(origSamples.begin())) * util::spf()) );

@@ -48,8 +48,7 @@ class MayaNurbsSurfaceWriter
   public:
 
     MayaNurbsSurfaceWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibilty,
-        bool iForceStatic);
+        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibilty);
     void write();
     bool isAnimated() const;
     unsigned int getNumCVs();

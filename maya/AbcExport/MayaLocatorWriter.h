@@ -49,8 +49,7 @@ class MayaLocatorWriter
   public:
 
     MayaLocatorWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility,
-        bool iForceStatic);
+        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility);
 
     ~MayaLocatorWriter();
     void write();

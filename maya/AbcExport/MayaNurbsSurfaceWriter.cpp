@@ -39,7 +39,7 @@
 
 MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibilty, bool iForceStatic) :
+    bool iWriteVisibilty) :
     mIsSurfaceAnimated(false), mIsTrimCurveAnimated(false), mDagPath(iDag)
 {
     MStatus stat;
@@ -58,9 +58,9 @@ MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
     Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, nurbs, iTimeIndex,
-        iWriteVisibilty, iForceStatic));
+        iWriteVisibilty));
 
-    if (!iForceStatic && util::isAnimated(surface))
+    if (iTimeIndex != 0 && util::isAnimated(surface))
         mIsSurfaceAnimated = true;
 
     write();

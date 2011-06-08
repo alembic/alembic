@@ -65,11 +65,10 @@ class MayaTransformWriter
 
     MayaTransformWriter(Alembic::Abc::OObject & iParent, MDagPath & iDag, 
         Alembic::Util::uint32_t iTimeIndex, bool addWorld,
-        bool iWriteVisibility, bool iForceStatic);
+        bool iWriteVisibility);
 
     MayaTransformWriter(MayaTransformWriter & iParent, MDagPath & iDag,
-        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility,
-        bool iForceStatic);
+        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility);
 
     ~MayaTransformWriter();
     void write();

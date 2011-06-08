@@ -392,7 +392,7 @@ void addScale(const MFnDependencyNode & iTrans,
 
 MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
     MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, bool iAddWorld,
-    bool iWriteVisibility, bool iForceStatic)
+    bool iWriteVisibility)
 {
 
     if (iDag.hasFn(MFn::kJoint))
@@ -404,11 +404,11 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, joint,
-            iTimeIndex, iWriteVisibility, iForceStatic));
+            iTimeIndex, iWriteVisibility));
 
         if (!iAddWorld)
         {
-            pushTransformStack(joint, iForceStatic);
+            pushTransformStack(joint, iTimeIndex == 0);
 
             // need to look at inheritsTransform
             MFnDagNode dagNode(iDag);
@@ -439,11 +439,11 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, trans,
-            iTimeIndex, iWriteVisibility, iForceStatic));
+            iTimeIndex, iWriteVisibility));
 
         if (!iAddWorld)
         {
-            pushTransformStack(trans, iForceStatic);
+            pushTransformStack(trans, iTimeIndex == 0);
 
             // need to look at inheritsTransform
             MFnDagNode dagNode(iDag);
@@ -504,12 +504,12 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
         if (iCur->hasFn(MFn::kJoint))
         {
             MFnIkJoint joint(*iCur);
-            pushTransformStack(joint, iForceStatic);
+            pushTransformStack(joint, iTimeIndex == 0);
         }
         else
         {
             MFnTransform trans(*iCur);
-            pushTransformStack(trans, iForceStatic);
+            pushTransformStack(trans, iTimeIndex == 0);
         }
     }
 
@@ -517,12 +517,12 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
     if (iCur->hasFn(MFn::kJoint))
     {
         MFnIkJoint joint(*iCur);
-        pushTransformStack(joint, iForceStatic);
+        pushTransformStack(joint, iTimeIndex == 0);
     }
     else
     {
         MFnTransform trans(*iCur);
-        pushTransformStack(trans, iForceStatic);
+        pushTransformStack(trans, iTimeIndex == 0);
     }
 
     // need to look at inheritsTransform
@@ -546,8 +546,7 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
 }
 
 MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
-    MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility,
-    bool iForceStatic)
+    MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility)
 {
     if (iDag.hasFn(MFn::kJoint))
     {
@@ -559,9 +558,9 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, joint,
-            iTimeIndex, iWriteVisibility, iForceStatic));
+            iTimeIndex, iWriteVisibility));
 
-        pushTransformStack(joint, iForceStatic);
+        pushTransformStack(joint, iTimeIndex == 0);
     }
     else
     {
@@ -572,9 +571,9 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
 
         Alembic::Abc::OCompoundProperty cp = obj.getProperties();
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, trans,
-            iTimeIndex, iWriteVisibility, iForceStatic));
+            iTimeIndex, iWriteVisibility));
 
-        pushTransformStack(trans, iForceStatic);
+        pushTransformStack(trans, iTimeIndex == 0);
     }
 
 
