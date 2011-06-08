@@ -57,7 +57,7 @@ public:
     public:
         //! Creates a default sample with no data in it.
         //! ...
-        Sample() {}
+        Sample() { reset(); }
 
         //! Creates a sample with position data but no index
         //! or count data. For specifying samples after the first one

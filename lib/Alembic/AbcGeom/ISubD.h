@@ -58,7 +58,7 @@ public:
         typedef Sample this_type;
 
         //! Users never create this data directly
-        Sample() {}
+        Sample() { reset(); }
 
         // main stuff
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }

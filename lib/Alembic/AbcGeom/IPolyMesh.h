@@ -55,7 +55,7 @@ public:
         typedef Sample this_type;
 
         // Users don't ever create this data directly.
-        Sample() {}
+        Sample() { reset(); }
 
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
         Abc::Int32ArraySamplePtr getFaceIndices() const { return m_indices; }

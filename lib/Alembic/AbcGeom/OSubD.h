@@ -62,7 +62,7 @@ public:
     public:
         //! Creates a default sample with no data in it.
         //! ...
-        Sample() {}
+        Sample() { reset(); }
 
         //! Creates a sample with position data, index data, and count data.
         //! For specifying samples with an explicit topology. The first

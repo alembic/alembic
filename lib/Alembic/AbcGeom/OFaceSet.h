@@ -64,7 +64,7 @@ public:
 
         //! Creates a default sample with no data in it.
         //! ...
-        Sample() {}
+        Sample() { reset(); }
 
         //! Creates a sample with the list of faces that are in this
         //! faceset.

@@ -66,15 +66,7 @@ public:
     public:
         //! Creates a default sample with no data in it.
         //! ...
-        Sample()
-        {
-            // even though this might not be written out
-            // (unless curvesNumVertices and points is set) give some reasonable
-            // and predictable defaults
-            m_type = kCubic;
-            m_wrap = kNonPeriodic;
-            m_basis = kBezierBasis;
-        }
+        Sample() { reset(); }
 
         //! Creates a sample with position data but no index
         //! or count data. For specifying samples after the first one

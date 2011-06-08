@@ -58,7 +58,7 @@ public:
         typedef Sample this_type;
 
         //! Users never create this data directly
-        Sample() {}
+        Sample() { reset(); }
 
         // main stuff
         Abc::Int32ArraySamplePtr getFaces() const { return m_faces; }

@@ -56,7 +56,7 @@ public:
     public:
         //! Creates a default sample with no data in it.
         //! ...
-        Sample() {}
+        Sample() { reset(); }
 
         Sample(
                 const Abc::V3fArraySample &iPos,
