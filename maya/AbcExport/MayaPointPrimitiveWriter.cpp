@@ -39,7 +39,7 @@
 
 MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
     double iFrame, MDagPath & iDag, Alembic::AbcGeom::OObject & iParent,
-    uint32_t iTimeIndex,
+    Alembic::Util::uint32_t iTimeIndex,
     bool iWriteVisibility, bool iForceStatic) :
     mIsAnimated(false), mDagPath(iDag)
 {
@@ -63,7 +63,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
 {
     std::vector<float> position;
     std::vector<float> velocity;
-    std::vector< uint64_t > particleIds;
+    std::vector< Alembic::Util::uint64_t > particleIds;
     std::vector<float> width;
     float constantwidth = -1.0;
 

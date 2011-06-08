@@ -142,10 +142,10 @@ MStatus AbcExport::doIt(const MArgList & args)
     msg += "Comma seperated list of attributes to write out, these\n";
     msg += "attributes will ignore the attr prefix filter.\n";
     msg += "\n";
-    msg += "writeVisibility bool (default: false)\n";
-    msg += "Whether or not to write the visibility state to the file.\n";
-    msg += "If false then visibility is not written and everything is\n";
-    msg += "assumed to be visible.\n";
+    msg += "writeVisibility\n";
+    msg += "If set, write the visibility state to the file.\n";
+    msg += "If it isn't set everything is assumed to be visible.\n";
+    msg += "By default this flag is not set.\n";
     msg += "\n";
     msg += "worldSpace\n";
     msg += "If set, the root nodes will be stored in world space.\n";
@@ -534,7 +534,8 @@ MStatus AbcExport::doIt(const MArgList & args)
                 for (; offset != offsetEnd; ++offset)
                 {
                     double curVal = curSamp + (*offset);
-                    double rndVal = roundf(curVal);
+                    double rndVal =
+                        (double)(int)(curVal >= 0 ? curVal + .5 : curVal - .5);
 
                     // if the value is close enough to the integer value
                     // insert the integer value

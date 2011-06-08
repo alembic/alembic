@@ -54,8 +54,8 @@ struct AnimChan
     // certain operations, and convert radians to degrees
     double scale;
 
-    uint32_t opNum;
-    uint32_t channelNum;
+    Alembic::Util::uint32_t opNum;
+    Alembic::Util::uint32_t channelNum;
 };
 
 // Writes an MFnTransform
@@ -64,11 +64,12 @@ class MayaTransformWriter
   public:
 
     MayaTransformWriter(Alembic::Abc::OObject & iParent, MDagPath & iDag, 
-        uint32_t iTimeIndex, bool addWorld, bool iWriteVisibility,
-        bool iForceStatic);
+        Alembic::Util::uint32_t iTimeIndex, bool addWorld,
+        bool iWriteVisibility, bool iForceStatic);
 
     MayaTransformWriter(MayaTransformWriter & iParent, MDagPath & iDag,
-        uint32_t iTimeIndex, bool iWriteVisibility, bool iForceStatic);
+        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility,
+        bool iForceStatic);
 
     ~MayaTransformWriter();
     void write();

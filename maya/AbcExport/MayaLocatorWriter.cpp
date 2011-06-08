@@ -39,7 +39,7 @@
 
 MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent,
-    uint32_t iTimeIndex,
+    Alembic::Util::uint32_t iTimeIndex,
     bool iWriteVisibility,
     bool iForceStatic) :
     mIsAnimated(false), mDagPath(iDag)

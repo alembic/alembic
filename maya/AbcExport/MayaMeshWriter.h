@@ -50,8 +50,8 @@ class MayaMeshWriter
   public:
 
     MayaMeshWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        uint32_t iTimeIndex, bool iWriteVisibilty, bool iWriteUVs,
-        bool iForceStatic);
+        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibilty,
+        bool iWriteUVs, bool iForceStatic);
     void write();
     bool isAnimated() const;
     bool isSubD();
@@ -63,15 +63,16 @@ class MayaMeshWriter
 
     void fillTopology(
         std::vector<float> & oPoints,
-        std::vector< int32_t > & oFacePoints,
-        std::vector< int32_t > & oPointCounts);
+        std::vector<Alembic::Util::int32_t> & oFacePoints,
+        std::vector<Alembic::Util::int32_t> & oPointCounts);
 
     void writePoly(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
 
     void writeSubD(MDagPath & iDag,
         const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
 
-    void getUVs(std::vector<float> & uvs, std::vector<uint32_t> & indices);
+    void getUVs(std::vector<float> & uvs,
+        std::vector<Alembic::Util::uint32_t> & indices);
 
     void getPolyNormals(std::vector<float> & oNormals);
 

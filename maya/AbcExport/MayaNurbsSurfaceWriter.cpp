@@ -38,7 +38,7 @@
 #include "MayaUtility.h"
 
 MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
-    Alembic::Abc::OObject & iParent, uint32_t iTimeIndex,
+    Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
     bool iWriteVisibilty, bool iForceStatic) :
     mIsSurfaceAnimated(false), mIsTrimCurveAnimated(false), mDagPath(iDag)
 {

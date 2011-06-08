@@ -39,7 +39,7 @@
 
 void addTranslate(const MFnDependencyNode & iTrans,
     MString parentName, MString xName, MString yName, MString zName,
-    uint8_t iHint, bool inverse, bool forceStatic,
+    Alembic::Util::uint8_t iHint, bool inverse, bool forceStatic,
     Alembic::AbcGeom::XformSample & oSample,
     std::vector < AnimChan > & oAnimChanList)
 {
@@ -139,7 +139,7 @@ void addTranslate(const MFnDependencyNode & iTrans,
 // use these indices
 void addRotate(const MFnDependencyNode & iTrans,
     MString parentName, const MString* iNames, const unsigned int* iOrder,
-    uint8_t iHint, bool forceStatic, bool forceAnimated,
+    Alembic::Util::uint8_t iHint, bool forceStatic, bool forceAnimated,
     Alembic::AbcGeom::XformSample & oSample,
     std::vector < AnimChan > & oAnimChanList)
 {
@@ -391,7 +391,7 @@ void addScale(const MFnDependencyNode & iTrans,
 }
 
 MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
-    MDagPath & iDag, uint32_t iTimeIndex, bool iAddWorld,
+    MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, bool iAddWorld,
     bool iWriteVisibility, bool iForceStatic)
 {
 
@@ -546,7 +546,7 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
 }
 
 MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
-    MDagPath & iDag, uint32_t iTimeIndex, bool iWriteVisibility,
+    MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility,
     bool iForceStatic)
 {
     if (iDag.hasFn(MFn::kJoint))

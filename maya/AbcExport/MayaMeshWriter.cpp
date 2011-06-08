@@ -39,7 +39,7 @@
 
 // assumption is we don't support multiple uv sets as well as animated uvs
 void MayaMeshWriter::getUVs(std::vector<float> & uvs,
-    std::vector<uint32_t> & indices)
+    std::vector<Alembic::Util::uint32_t> & indices)
 {
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
@@ -88,7 +88,7 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
 
 
 MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
-    Alembic::Abc::OObject & iParent, uint32_t iTimeIndex,
+    Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
     bool iWriteVisibility, bool iWriteUVs, bool iForceStatic)
   : mIsGeometryAnimated(false),
     mDagPath(iDag),
@@ -108,7 +108,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         mIsGeometryAnimated = true;
 
     std::vector<float> uvs;
-    std::vector<uint32_t> indices;
+    std::vector<Alembic::Util::uint32_t> indices;
 
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
@@ -322,8 +322,8 @@ void MayaMeshWriter::write()
     if (numPoints != mNumPoints)
     {
         std::vector<float> points;
-        std::vector<int32_t> facePoints;
-        std::vector<int32_t> faceList;
+        std::vector<Alembic::Util::int32_t> facePoints;
+        std::vector<Alembic::Util::int32_t> faceList;
 
         mNumPoints = numPoints;
         fillTopology(points, facePoints, faceList);
@@ -428,8 +428,8 @@ void MayaMeshWriter::writePoly(
     }
 
     std::vector<float> points;
-    std::vector<int32_t> facePoints;
-    std::vector<int32_t> pointCounts;
+    std::vector<Alembic::Util::int32_t> facePoints;
+    std::vector<Alembic::Util::int32_t> pointCounts;
 
     fillTopology(points, facePoints, pointCounts);
 
@@ -474,8 +474,8 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
     }
 
     std::vector<float> points;
-    std::vector<int32_t> facePoints;
-    std::vector<int32_t> pointCounts;
+    std::vector<Alembic::Util::int32_t> facePoints;
+    std::vector<Alembic::Util::int32_t> pointCounts;
 
     fillTopology(points, facePoints, pointCounts);
 
@@ -574,8 +574,8 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
 // the arrays being passed in are assumed to be empty
 void MayaMeshWriter::fillTopology(
     std::vector<float> & oPoints,
-    std::vector<int32_t> & oFacePoints,
-    std::vector<int32_t> & oPointCounts)
+    std::vector<Alembic::Util::int32_t> & oFacePoints,
+    std::vector<Alembic::Util::int32_t> & oPointCounts)
 {
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );

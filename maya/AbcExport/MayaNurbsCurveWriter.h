@@ -48,8 +48,8 @@ class MayaNurbsCurveWriter
   public:
 
     MayaNurbsCurveWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        uint32_t iTimeIndex, bool iIsCurveGrp, bool iWriteVisibility,
-        bool iForceStatic);
+        Alembic::Util::uint32_t iTimeIndex, bool iIsCurveGrp,
+        bool iWriteVisibility, bool iForceStatic);
 
     void write();
     bool isAnimated() const;

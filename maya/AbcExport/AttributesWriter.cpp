@@ -100,7 +100,7 @@ bool endsWithArbAttr(const std::string & iStr)
 
 void createPropertyFromNumeric(MFnNumericData::Type iType, const MObject& iAttr,
     const MPlug& iPlug, Abc::OCompoundProperty & iParent,
-    uint32_t iTimeIndex,
+    Alembic::Util::uint32_t iTimeIndex,
     AbcGeom::GeometryScope iScope,
     std::vector < PlugAndObjArray > & oArrayVec)
 {
@@ -821,7 +821,7 @@ bool attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
     }
     else if (iAttr.hasFn(MFn::kEnumAttribute))
     {
-        int16_t val = iPlug.asShort();
+        Alembic::Util::int16_t val = iPlug.asShort();
         AbcA::ArraySample samp(&val, oProp.getDataType(),
             Alembic::Util::Dimensions(1));
         oProp.set(samp);
@@ -833,7 +833,7 @@ bool attributeToPropertyPair(const MObject& iAttr, const MPlug& iPlug,
 
 void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
     Abc::OCompoundProperty & iParent,
-    uint32_t iTimeIndex,
+    Alembic::Util::uint32_t iTimeIndex,
     AbcGeom::GeometryScope iScope,
     std::vector < PlugAndObjArray > & oArrayVec)
 {
@@ -1010,7 +1010,7 @@ std::set<std::string> * AttributesWriter::mAttribs = NULL;
 AttributesWriter::AttributesWriter(
     Abc::OCompoundProperty & iParent,
     const MFnDagNode & iNode,
-    uint32_t iTimeIndex,
+    Alembic::Util::uint32_t iTimeIndex,
     bool iWriteVisibility,
     bool iForceStatic)
 {
@@ -1154,7 +1154,7 @@ AttributesWriter::AttributesWriter(
             // static visibility 0 case
             case 1:
             {
-                int8_t visVal = 0;
+                Alembic::Util::int8_t visVal = 0;
 
                 Abc::OCharProperty bp(parent, "visible");
                 bp.set(visVal);
@@ -1164,7 +1164,7 @@ AttributesWriter::AttributesWriter(
             // animated visibility 0 case
             case 2:
             {
-                int8_t visVal = 0;
+                Alembic::Util::int8_t visVal = 0;
 
                 if (!iForceStatic)
                 {
@@ -1193,7 +1193,7 @@ AttributesWriter::AttributesWriter(
                 }
 
                 mAnimVisibility = visPlug;
-                int8_t visVal = -1;
+                Alembic::Util::int8_t visVal = -1;
                 Abc::OCharProperty bp(parent, "visible", iTimeIndex);
                 bp.set(visVal);
                 visPlug.prop = bp;
@@ -1243,7 +1243,7 @@ void AttributesWriter::write()
 
     if (!mAnimVisibility.plug.isNull())
     {
-        int8_t visVal = -1;
+        Alembic::Util::int8_t visVal = -1;
         if (!mAnimVisibility.plug.asBool())
         {
             visVal = 0;

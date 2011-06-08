@@ -225,9 +225,9 @@ AbcWriteJob::AbcWriteJob(const util::ShapeSet & iDagPath,
     bool iWriteVisibility,
     bool iWriteUVs,
     std::set<double> & iTransFrames,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iTransTime,
+    Alembic::AbcCoreAbstract::TimeSamplingPtr iTransTime,
     std::set<double> & iShapeFrames,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iShapeTime,
+    Alembic::AbcCoreAbstract::TimeSamplingPtr iShapeTime,
     std::string & iMelPerFrameCallback,
     std::string & iMelPostCallback,
     std::string & iPythonPerFrameCallback,
@@ -842,8 +842,9 @@ bool AbcWriteJob::eval(double iFrame)
         AttributesWriter::mFilter = &mFilter;
         AttributesWriter::mAttribs = &mAttribs;
 
-        const std::set< MDagPath >::iterator end = mDagPath.end();
-        for (std::set< MDagPath >::iterator it = mDagPath.begin(); it != end; it++)
+        util::ShapeSet::const_iterator end = mDagPath.end();
+        for (util::ShapeSet::const_iterator it = mDagPath.begin(); it != end;
+            ++it)
         {
             mCurDag = *it;
             setup(iFrame * util::spf(), MayaTransformWriterPtr());

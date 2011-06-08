@@ -160,9 +160,9 @@ class AbcWriteJob
         bool iWriteVisibility,
         bool iWriteUVs,
         std::set<double> & iTransFrames,
-        Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iTransTime,
+        Alembic::AbcCoreAbstract::TimeSamplingPtr iTransTime,
         std::set<double> & iShapeFrames,
-        Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iShapeTime,
+        Alembic::AbcCoreAbstract::TimeSamplingPtr iShapeTime,
         std::string & iMelPerFrameCallback,
         std::string & iMelPostCallback,
         std::string & iPythonPerFrameCallback,
@@ -232,11 +232,11 @@ class AbcWriteJob
 
     MSelectionList mSList;
     std::set<double> mShapeFrames;
-    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr mShapeTime;
-    uint32_t mShapeTimeIndex;
+    Alembic::AbcCoreAbstract::TimeSamplingPtr mShapeTime;
+    Alembic::Util::uint32_t mShapeTimeIndex;
     std::set<double> mTransFrames;
-    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr mTransTime;
-    uint32_t mTransTimeIndex;
+    Alembic::AbcCoreAbstract::TimeSamplingPtr mTransTime;
+    Alembic::Util::uint32_t mTransTimeIndex;
 
     // convenience booleans used mainly during setup
     // indicates whether the shapes and transforms
