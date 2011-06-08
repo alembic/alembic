@@ -92,7 +92,7 @@ namespace
             return;
 
         // no interpolation for now
-        int64_t index, ceilIndex;
+        Alembic::AbcCoreAbstract::index_t index, ceilIndex;
         double alpha = getWeightAndIndex(iFrame, iUVs.getTimeSampling(),
             iUVs.getNumSamples(), index, ceilIndex);
 
@@ -189,7 +189,7 @@ namespace
             return;
         }
 
-        int64_t index, ceilIndex;
+        Alembic::AbcCoreAbstract::index_t index, ceilIndex;
         double alpha = getWeightAndIndex(iFrame,
             iNormals.getTimeSampling(), iNormals.getNumSamples(),
             index, ceilIndex);
@@ -367,7 +367,7 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     Alembic::AbcGeom::IPolyMeshSchema schema = iNode.getSchema();
     Alembic::AbcGeom::MeshTopologyVariance ttype = schema.getTopologyVariance();
 
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
         schema.getTimeSampling(), schema.getNumSamples(), index, ceilIndex);
 
@@ -428,7 +428,7 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     Alembic::AbcGeom::ISubDSchema schema = iNode.getSchema();
     Alembic::AbcGeom::MeshTopologyVariance ttype = schema.getTopologyVariance();
 
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
         schema.getTimeSampling(), schema.getNumSamples(), index, ceilIndex);
 
@@ -518,7 +518,7 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
     }
     else
     {
-        int64_t index, ceilIndex;
+        Alembic::AbcCoreAbstract::index_t index, ceilIndex;
         double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(),
             schema.getNumSamples(), index, ceilIndex);
 
@@ -566,7 +566,7 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
 {
     Alembic::AbcGeom::ISubDSchema schema = iNode.getSchema();
 
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(),
         schema.getNumSamples(), index, ceilIndex);
 

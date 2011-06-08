@@ -59,7 +59,7 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
 
     Alembic::AbcGeom::ICameraSchema schema = iCamera.getSchema();
 
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
         schema.getTimeSampling(), schema.getNumSamples(), index, ceilIndex);
 

@@ -272,7 +272,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         // no caching!
         Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
             fileName.asChar(), Alembic::Abc::ErrorHandler::Policy(),
-            Alembic::AbcCoreAbstract::v1::ReadArraySampleCachePtr());
+            Alembic::AbcCoreAbstract::ReadArraySampleCachePtr());
 
         if (!archive.valid())
         {

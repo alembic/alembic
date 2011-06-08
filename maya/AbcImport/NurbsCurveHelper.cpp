@@ -57,7 +57,7 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
     MStatus status;
 
     Alembic::AbcGeom::ICurvesSchema schema = iNode.getSchema();
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(),
         schema.getNumSamples(), index, ceilIndex);
 

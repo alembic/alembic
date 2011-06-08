@@ -52,14 +52,6 @@
 #include <Alembic/AbcGeom/All.h>
 #include "NodeIteratorVisitorHelper.h"
 
-using Alembic::AbcCoreAbstract::chrono_t;
-using Alembic::AbcCoreAbstract::index_t;
-using Alembic::Util::uint32_t;
-using Alembic::Util::float32_t;
-using Alembic::Util::int32_t;
-using Alembic::Util::int64_t;
-using Alembic::Util::int16_t;
-
 // replace one MObject with another, while keeping all the old hierarchy intact
 // The objects have to be a Dag object
 MStatus replaceDagObject(MObject & oldObject, MObject & newObject,
@@ -103,8 +95,9 @@ bool stripFileName(const MString & filePath, MString & fileName);
 bool removeDangleAlembicNodes();
 
 double getWeightAndIndex(double iFrame,
-    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr iTime, size_t numSamps,
-    int64_t & oIndex, int64_t & oCeilIndex);
+    Alembic::AbcCoreAbstract::TimeSamplingPtr iTime, size_t numSamps,
+    Alembic::AbcCoreAbstract::index_t & oIndex,
+    Alembic::AbcCoreAbstract::index_t & oCeilIndex);
 
 template<typename T>
 void clamp(T & min, T & max, T & cur)

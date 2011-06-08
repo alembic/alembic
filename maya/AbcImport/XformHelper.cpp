@@ -66,7 +66,7 @@ namespace
 void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
     std::vector<double> & oSampleList)
 {
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
         iNode.getSchema().getTimeSampling(),
         iNode.getSchema().getNumSamples(),
@@ -154,7 +154,7 @@ void read(double iFrame, Alembic::AbcGeom::IXform & iNode,
     std::vector<double> & oSampleList,
     Alembic::AbcGeom::XformSample & oSamp)
 {
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
         iNode.getSchema().getTimeSampling(),
         iNode.getSchema().getNumSamples(), index, ceilIndex);
@@ -521,7 +521,7 @@ MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
     // disconnect connections to animated props
     disconnectProps(trans, iSampledPropList, iFirstProp);
 
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame,
         iNode.getSchema().getTimeSampling(), 
         iNode.getSchema().getNumSamples(),

@@ -155,7 +155,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
     MFnNumericAttribute numAttr;
 
     MObject attrObj;
-    Alembic::AbcCoreAbstract::v1::DataType dtype = iProp.getDataType();
+    Alembic::AbcCoreAbstract::DataType dtype = iProp.getDataType();
     Alembic::Util::uint8_t extent = dtype.getExtent();
     std::string interp = iProp.getMetaData().get("interpretation");
 
@@ -174,7 +174,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
             if (iProp.isConstant())
             {
-                Alembic::AbcCoreAbstract::v1::ArraySamplePtr val;
+                Alembic::AbcCoreAbstract::ArraySamplePtr val;
                 iProp.get(val);
                 bval =
                     ((Alembic::Util::bool_t *)(val->getData()))[0] != false;
@@ -206,7 +206,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
             if (iProp.isConstant())
             {
-                Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                 iProp.get(samp);
                 val = ((Alembic::Util::int8_t *) samp->getData())[0];
             }
@@ -236,7 +236,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
             if (iProp.isConstant())
             {
-                Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                 iProp.get(samp);
                 const Alembic::Util::int16_t * sampData =
                     (const Alembic::Util::int16_t *) samp->getData();
@@ -297,7 +297,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
 
                     MIntArray arr((int *) samp->getData(), samp->size());
@@ -329,7 +329,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
                     const Alembic::Util::int32_t * sampData =
                         (const Alembic::Util::int32_t *)samp->getData();
@@ -393,7 +393,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
 
                     MDoubleArray arr((float *) samp->getData(), samp->size());
@@ -426,7 +426,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
                     const float * sampData = (const float *) samp->getData();
                     for (Alembic::Util::uint8_t i = 0; i < extent; ++i)
@@ -488,7 +488,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
 
                     MDoubleArray arr((double *) samp->getData(), samp->size());
@@ -519,7 +519,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
                     const double * sampData = (const double *) samp->getData();
                     for (Alembic::Util::uint8_t i = 0; i < extent; ++i)
@@ -593,7 +593,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
 
                     size_t sampSize = samp->size();
@@ -636,7 +636,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
                     MString attrValue(
                         ((Alembic::Util::string *) samp->getData())[0].c_str());
@@ -669,7 +669,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
 
                     size_t sampSize = samp->size();
@@ -713,7 +713,7 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
                 if (iProp.isConstant())
                 {
-                    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp;
+                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
                     MString attrValue(
                         ((Alembic::Util::wstring *)samp->getData())[0].c_str());
@@ -843,7 +843,7 @@ void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
             continue;
         }
 
-        Alembic::AbcCoreAbstract::v1::DataType dtype = prop.getDataType();
+        Alembic::AbcCoreAbstract::DataType dtype = prop.getDataType();
         Alembic::Util::uint8_t extent = dtype.getExtent();
 
         switch (dtype.getPod())
@@ -924,12 +924,12 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
     MDataHandle & iHandle)
 {
     MObject attrObj;
-    Alembic::AbcCoreAbstract::v1::DataType dtype = iProp.getDataType();
+    Alembic::AbcCoreAbstract::DataType dtype = iProp.getDataType();
     Alembic::Util::uint8_t extent = dtype.getExtent();
 
-    Alembic::AbcCoreAbstract::v1::ArraySamplePtr samp, ceilSamp;
+    Alembic::AbcCoreAbstract::ArraySamplePtr samp, ceilSamp;
 
-    int64_t index, ceilIndex;
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
     double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
         iProp.getNumSamples(), index, ceilIndex);
 
@@ -1369,7 +1369,7 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     oMax = -DBL_MAX;
 
     size_t i, iEnd;
-    Alembic::AbcCoreAbstract::v1::TimeSamplingPtr ts;
+    Alembic::AbcCoreAbstract::TimeSamplingPtr ts;
 
     iEnd = mPointsList.size();
     for (i = 0; i < iEnd; ++i)
@@ -1503,7 +1503,7 @@ MString createScene(ArgData & iArgData)
     // no caching!
     Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
         iArgData.mFileName.asChar(), Alembic::Abc::ErrorHandler::Policy(),
-        Alembic::AbcCoreAbstract::v1::ReadArraySampleCachePtr());
+        Alembic::AbcCoreAbstract::ReadArraySampleCachePtr());
     if (!archive.valid())
     {
         MString theError = iArgData.mFileName;
