@@ -58,14 +58,17 @@ namespace
         public:
             explicit CallWriteVisitor(double iFrame): mFrame(iFrame) {}
 
-/*
-            void operator()(MayaNurbsSurfaceWriterPtr & iNode)
+            void operator()(MayaCameraWriterPtr & iNode)
             {
                 iNode->write();
             }
-*/
 
             void operator()(MayaLocatorWriterPtr & iNode)
+            {
+                iNode->write();
+            }
+
+            void operator()(MayaMeshWriterPtr & iNode)
             {
                 iNode->write();
             }
@@ -75,7 +78,7 @@ namespace
                 iNode->write();
             }
 
-            void operator()(MayaCameraWriterPtr & iNode)
+            void operator()(MayaNurbsSurfaceWriterPtr & iNode)
             {
                 iNode->write();
             }
@@ -85,10 +88,7 @@ namespace
                 iNode->write(mFrame);
             }
 
-            void operator()(MayaMeshWriterPtr & iNode)
-            {
-                iNode->write();
-            }
+
 
         private:
             double mFrame;
@@ -118,12 +118,11 @@ namespace
                 mCVsArray[4] = 0;   // increment onto PolyAnimCVs
             }
 
-            /*
+
             void operator()(MayaNurbsSurfaceWriterPtr & iNode)
             {
                 mCVsArray[0] += iNode->getNumCVs();
             }
-            */
 
             void operator()(MayaLocatorWriterPtr & iNode) {}
 
@@ -360,7 +359,7 @@ void AbcWriteJob::getBoundingBox(const MMatrix & eMInvMat)
     }
     else if (ob.hasFn(MFn::kParticle) || ob.hasFn(MFn::kMesh)
         || ob.hasFn(MFn::kNurbsCurve)
-        /*|| ob.hasFn(MFn::kNurbsSurface)*/ )
+        || ob.hasFn(MFn::kNurbsSurface) )
     {
         if (util::isIntermediate(mCurDag.node()))
             return;
@@ -714,7 +713,6 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
             MGlobal::displayError(err);
         }
     }
-/*
     else if (ob.hasFn(MFn::kNurbsSurface))
     {
         MFnNurbsSurface fnNurbsSurface(ob, &status);
@@ -731,7 +729,8 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         {
             Alembic::Abc::OObject obj = iParent->getObject();
             MayaNurbsSurfaceWriterPtr nurbsSurface(new MayaNurbsSurfaceWriter(
-                mCurDag, obj, mWriteVisibility, mShapesStatic));
+                mCurDag, obj,  mShapeTimeIndex, mWriteVisibility,
+                mShapesStatic));
 
             if (nurbsSurface->isAnimated() && !mShapesStatic)
             {
@@ -746,7 +745,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
                 mStats.mNurbsStaticCVs += nurbsSurface->getNumCVs();
             }
 
-            AttributesWriterPtr attrs = camera->getAttrs();
+            AttributesWriterPtr attrs = nurbsSurface->getAttrs();
             if (!mShapesStatic && attrs->isAnimated())
                 mShapeAttrList.push_back(attrs);
         }
@@ -757,7 +756,6 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
             MGlobal::displayError(err);
         }
     }
-    */
     else if (ob.hasFn(MFn::kNurbsCurve))
     {
         MFnNurbsCurve fnNurbsCurve(ob, &status);

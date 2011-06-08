@@ -225,7 +225,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             }
             else
             {
-                faceSet = mPolySchema.createFaceSet(faceSetName);
+                faceSet = mSubDSchema.createFaceSet(faceSetName);
             }
             Alembic::AbcGeom::OFaceSetSchema::Sample samp(
                 Alembic::Abc::Int32ArraySample(faceVals), isVisible);

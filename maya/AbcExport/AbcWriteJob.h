@@ -45,10 +45,7 @@
 #include "MayaPointPrimitiveWriter.h"
 #include "MayaTransformWriter.h"
 #include "MayaLocatorWriter.h"
-
-/*
 #include "MayaNurbsSurfaceWriter.h"
-*/
 
 #include "MayaUtility.h"
 
@@ -62,10 +59,8 @@ typedef boost::shared_ptr < MayaLocatorWriter >
     MayaLocatorWriterPtr;
 typedef boost::shared_ptr < MayaPointPrimitiveWriter >
     MayaPointPrimitiveWriterPtr;
-/*
 typedef boost::shared_ptr < MayaNurbsSurfaceWriter >
     MayaNurbsSurfaceWriterPtr;
-*/
 
 struct AbcWriteJobStatistics
 {
@@ -182,14 +177,10 @@ class AbcWriteJob
 
   private:
     typedef boost::variant<
-
-    /*
-        MayaNurbsSurfaceWriterPtr,
-    */
-
         MayaCameraWriterPtr,
         MayaMeshWriterPtr,
         MayaNurbsCurveWriterPtr,
+        MayaNurbsSurfaceWriterPtr,
         MayaLocatorWriterPtr,
         MayaPointPrimitiveWriterPtr > MayaNodePtr;
 
