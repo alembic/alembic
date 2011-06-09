@@ -41,8 +41,9 @@ namespace
     bool hasDuplicates(const util::ShapeSet & dagPath)
     {
         std::set<std::string> roots;
-        const util::ShapeSet::iterator end = dagPath.end();
-        for (util::ShapeSet::iterator it = dagPath.begin(); it != end; it++)
+        const util::ShapeSet::const_iterator end = dagPath.end();
+        for (util::ShapeSet::const_iterator it = dagPath.begin();
+            it != end; it++)
         {
             MFnTransform mFn(it->node());
             if (roots.count(mFn.name().asChar()) > 0)

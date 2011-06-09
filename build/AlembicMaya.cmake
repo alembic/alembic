@@ -39,8 +39,8 @@ IF(NOT DEFINED MAYA_ROOT)
           # TODO: set to default install path when shipping out
           # SET( ALEMBIC_MAYA_ROOT NOTFOUND )
           SET( ALEMBIC_MAYA_ROOT "/Applications/Autodesk/maya2011" )
-	  SET( ALEMBIC_MAYA_INC_ROOT "/Applications/Autodesk/maya2011/devkit/include" )
-	  SET( ALEMBIC_MAYA_LIB_ROOT "/Applications/Autodesk/maya2011/Maya.app/Contents/MacOS" )
+          SET( ALEMBIC_MAYA_INC_ROOT "/Applications/Autodesk/maya2011/devkit/include" )
+          SET( ALEMBIC_MAYA_LIB_ROOT "/Applications/Autodesk/maya2011/Maya.app/Contents/MacOS" )
         ELSE()
           # TODO: set to default install path when shipping out
           # SET( ALEMBIC_MAYA_ROOT "/usr/autodesk/maya2010-x64" )
@@ -82,44 +82,44 @@ MESSAGE( STATUS "Maya lib root: ${ALEMBIC_MAYA_LIB_ROOT}" )
 # Just start with forcing it to ILM's location
 FIND_PATH( MAYA_INCLUDE_PATH maya/MTypes.h
            PATHS
-	   "${ALEMBIC_MAYA_INC_ROOT}"
+           "${ALEMBIC_MAYA_INC_ROOT}"
            "${ALEMBIC_MAYA_ROOT}/include"
            DOC "The directory where MTypes.h resides" )
 
 FIND_LIBRARY( MAYA_FOUNDATION_LIBRARY Foundation
               PATHS
-	      "${ALEMBIC_MAYA_LIB_ROOT}"
+              "${ALEMBIC_MAYA_LIB_ROOT}"
               "${ALEMBIC_MAYA_ROOT}/lib"
               DOC "The directory where Foundation.lib resides"
               NO_DEFAULT_PATH )
 
 FIND_LIBRARY( MAYA_OPENMAYA_LIBRARY OpenMaya
               PATHS
-	      "${ALEMBIC_MAYA_LIB_ROOT}"
+              "${ALEMBIC_MAYA_LIB_ROOT}"
               "${ALEMBIC_MAYA_ROOT}/lib"
               DOC "The directory where OpenMaya.lib resides" )
 
 FIND_LIBRARY( MAYA_OPENMAYAANIM_LIBRARY OpenMayaAnim
               PATHS
-	      "${ALEMBIC_MAYA_LIB_ROOT}"
+              "${ALEMBIC_MAYA_LIB_ROOT}"
               "${ALEMBIC_MAYA_ROOT}/lib"
               DOC "The directory where OpenMayaAnim.lib resides" )
 
 FIND_LIBRARY( MAYA_OPENMAYAFX_LIBRARY OpenMayaFX
               PATHS
-	      "${ALEMBIC_MAYA_LIB_ROOT}"
+              "${ALEMBIC_MAYA_LIB_ROOT}"
               "${ALEMBIC_MAYA_ROOT}/lib"
               DOC "The directory where OpenMayaFX.lib resides" )
 
 FIND_LIBRARY( MAYA_OPENMAYARENDER_LIBRARY OpenMayaRender
               PATHS
-	      "${ALEMBIC_MAYA_LIB_ROOT}"
+              "${ALEMBIC_MAYA_LIB_ROOT}"
               "${ALEMBIC_MAYA_ROOT}/lib"
               DOC "The directory where OpenMayaRender.lib resides" )
 
 FIND_LIBRARY( MAYA_OPENMAYAUI_LIBRARY OpenMayaUI
               PATHS
-	      "${ALEMBIC_MAYA_LIB_ROOT}"
+              "${ALEMBIC_MAYA_LIB_ROOT}"
               "${ALEMBIC_MAYA_ROOT}/lib"
               DOC "The directory where OpenMayaUI.lib resides" )
 
@@ -152,11 +152,11 @@ IF ( NOT WINDOWS )
       #"-shared -g -fPIC "
       "-fno-gnu-keywords -framework System  -framework SystemConfiguration -framework CoreServices -framework Carbon -framework Cocoa -framework ApplicationServices -framework Quicktime -framework IOKit -bundle -fPIC -L${ALEMBIC_MAYA_LIB_ROOT} -Wl,-executable_path,${ALEMBIC_MAYA_LIB_ROOT}" )
   ENDIF()
+  SET ( MAYA_EXTENSION ".so" )
 ELSE()
   SET( MAYA_EXTENSION ".mll" )
-#  SET( MAYA_COMPILE_FLAGS "/MD" )
-  SET( MAYA_COMPILE_FLAGS "-D_BOOL -DREQUIRE_IOSTREAM /MT" )
-  SET( MAYA_LINK_FLAGS " " )
+  SET( MAYA_COMPILE_FLAGS "/MT /D \"NT_PLUGIN\" /D \"REQUIRE_IOSTREAM\" /D \"_BOOL\"" )
+  SET( MAYA_LINK_FLAGS " /export:initializePlugin /export:uninitializePlugin " )
 ENDIF()
 
 #-******************************************************************************
@@ -210,7 +210,8 @@ MACRO(ADD_MAYA_CXX_PLUGIN PluginName SourceFile1 )
                          PROPERTIES
                          COMPILE_FLAGS ${MAYA_COMPILE_FLAGS}
                          LINK_FLAGS ${MAYA_LINK_FLAGS}
-                         PREFIX "" )
+                         PREFIX ""
+                         SUFFIX ${MAYA_EXTENSION} )
 
   # Link the target
   TARGET_LINK_LIBRARIES( ${PluginName} ${MAYA_LIBRARIES} )
