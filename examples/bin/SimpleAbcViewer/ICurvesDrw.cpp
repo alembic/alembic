@@ -44,7 +44,8 @@ ICurvesDrw::ICurvesDrw( ICurves &iCurves )
   , m_curves( iCurves )
 {
     // Get out if problems.
-    if ( !m_curves.valid() )
+    if ( !m_curves.getSchema().valid() ||
+         m_curves.getSchema().getNumSamples() < 1 )
     {
         return;
     }
@@ -91,7 +92,7 @@ void ICurvesDrw::setTime( chrono_t iSeconds )
 
     m_positions = curvesSample.getPositions();
     m_nCurves = curvesSample.getNumCurves();
-    
+
     m_nVertices = curvesSample.getCurvesNumVertices();
 
     m_bounds.makeEmpty();
@@ -103,6 +104,7 @@ void ICurvesDrw::setTime( chrono_t iSeconds )
 //-*****************************************************************************
 void ICurvesDrw::draw( const DrawContext &iCtx )
 {
+    if ( ! ( m_positions && m_nVertices ) ) { return; }
 
     size_t numPoints = m_positions->size();
 

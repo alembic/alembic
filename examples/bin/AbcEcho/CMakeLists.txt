@@ -50,3 +50,8 @@ TARGET_LINK_LIBRARIES( abcecho ${FULL_ABC_LIBS} )
 ADD_EXECUTABLE( abcechobounds AbcBoundsEcho.cpp )
 TARGET_LINK_LIBRARIES( abcechobounds ${FULL_ABC_LIBS} )
 
+IF ( NOT WINDOWS )
+  ADD_EXECUTABLE( multiread multithreaded.cpp )
+  TARGET_LINK_LIBRARIES( multiread ${FULL_ABC_LIBS} pthread )
+ENDIF()
+

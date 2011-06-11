@@ -51,6 +51,7 @@
 
 #include <Alembic/AbcGeom/ICamera.h>
 #include <Alembic/AbcGeom/ICurves.h>
+#include <Alembic/AbcGeom/INuPatch.h>
 #include <Alembic/AbcGeom/IPoints.h>
 #include <Alembic/AbcGeom/IPolyMesh.h>
 #include <Alembic/AbcGeom/ISubD.h>
@@ -121,15 +122,12 @@ public:
     std::vector<MObject>        mPointsObjList;
     std::vector<MObject>        mPolyMeshObjList;
     std::vector<MObject>        mSubDObjList;
-
-    // will be used once we have more schemas implemented
-    /*
-    std::vector<MObject>        mNurbsSurfaceObjList;
-    */
+    std::vector<MObject>        mNurbsObjList;
 
     std::vector<Prop> mPropList;
     std::vector<Alembic::AbcGeom::ICamera>    mCameraList;
     std::vector<Alembic::AbcGeom::ICurves>    mCurvesList;
+    std::vector<Alembic::AbcGeom::INuPatch>   mNurbsList;
     std::vector<Alembic::AbcGeom::IPolyMesh>  mPolyMeshList;
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
     std::vector<Alembic::AbcGeom::ISubD>      mSubDList;

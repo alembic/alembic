@@ -37,96 +37,91 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
-#include <ImathBoxAlgo.h>
-
 #include <iostream>
+
+#include <pthread.h>
 
 //-*****************************************************************************
 using namespace ::Alembic::AbcGeom;
 
-static Box3d g_bounds;
+static const Abc::V3f g_vec( 1.0, 2.0, 3.0 );
+
+static pthread_t g_threads[2];
+static size_t g_tid;
 
 //-*****************************************************************************
-void accumXform( M44d &xf, IObject obj )
+void *visitSimpleProperty( void* prop )
 {
-    if ( IXform::matches( obj.getHeader() ) )
+    Abc::IArrayProperty iProp = *(static_cast<Abc::IArrayProperty *>( prop ));
+    if ( Abc::IV3fArrayProperty::matches( iProp.getHeader() ) &&
+         iProp.getNumSamples() > 0 )
     {
-        IXform x( obj, kWrapExisting );
-        XformSample xs;
-        x.getSchema().get( xs );
-        xf *= xs.getMatrix();
+        Abc::IV3fArrayProperty p( iProp.getPtr(), kWrapExisting );
+
+        for ( size_t i = 0 ; i < p.getNumSamples() ; ++i )
+        {
+            Abc::V3fArraySamplePtr samp = p.getValue( i );
+
+            for ( size_t j = 0 ; j < samp->size() ; ++j )
+            {
+                if ( (*samp)[j] == g_vec )
+                {
+                    std::cout << "That is extremely unlikely!" << std::endl;
+                    std::cout << iProp.getObject().getFullName() << std::endl;
+                }
+            }
+        }
     }
+    return NULL;
 }
 
 //-*****************************************************************************
-M44d getFinalMatrix( IObject &iObj )
+void visitProperties( ICompoundProperty iParent )
 {
-    M44d xf;
-    xf.makeIdentity();
-
-    IObject parent = iObj.getParent();
-
-    while ( parent )
+    for ( size_t i = 0 ; i < iParent.getNumProperties() ; i++ )
     {
-        accumXform( xf, parent );
-        parent = parent.getParent();
-    }
+        PropertyHeader header = iParent.getPropertyHeader( i );
 
-    return xf;
-}
-
-//-*****************************************************************************
-Box3d getBounds( IObject iObj )
-{
-    Box3d bnds;
-    bnds.makeEmpty();
-
-    M44d xf = getFinalMatrix( iObj );
-
-    if ( IPolyMesh::matches( iObj.getMetaData() ) )
-    {
-        IPolyMesh mesh( iObj, kWrapExisting );
-        IPolyMeshSchema ms = mesh.getSchema();
-        V3fArraySamplePtr positions = ms.getValue().getPositions();
-        size_t numPoints = positions->size();
-
-        for ( size_t i = 0 ; i < numPoints ; ++i )
+        if ( header.isCompound() )
         {
-            bnds.extendBy( (*positions)[i] );
+            visitProperties( ICompoundProperty( iParent, header.getName() ) );
         }
-    }
-    else if ( ISubD::matches( iObj.getMetaData() ) )
-    {
-        ISubD mesh( iObj, kWrapExisting );
-        ISubDSchema ms = mesh.getSchema();
-        V3fArraySamplePtr positions = ms.getValue().getPositions();
-        size_t numPoints = positions->size();
-
-        for ( size_t i = 0 ; i < numPoints ; ++i )
+        else if ( header.isArray() )
         {
-            bnds.extendBy( (*positions)[i] );
+            IArrayProperty p( iParent, header.getName() );
+
+            #if 1
+            visitSimpleProperty( &p );
+            #else
+            int64_t id = pthread_create( &g_threads[g_tid], NULL,
+                                         visitSimpleProperty, &p );
+            ++g_tid;
+
+            if ( g_tid > 1 )
+            {
+                for ( size_t j = 0 ; j < 2 ; ++j )
+                {
+                    pthread_join( g_threads[j], NULL );
+                    std::cout << "joined thread " << g_threads[j] << std::endl;
+                }
+                g_tid = 0;
+            }
+            std::cout << "spawned thread " << g_threads[g_tid] << std::endl;
+            #endif
         }
     }
 
-    bnds.extendBy( Imath::transform( bnds, xf ) );
-
-    g_bounds.extendBy( bnds );
-
-    return bnds;
+    for ( size_t i = 0 ; i < g_tid ; ++i )
+    {
+        pthread_join( g_threads[i], NULL );
+    }
 }
 
 //-*****************************************************************************
 void visitObject( IObject iObj )
 {
-    std::string path = iObj.getFullName();
-
-    const MetaData &md = iObj.getMetaData();
-
-    if ( IPolyMeshSchema::matches( md ) || ISubDSchema::matches( md ) )
-    {
-        Box3d bnds = getBounds( iObj );
-        std::cout << path << " " << bnds.min << " " << bnds.max << std::endl;
-    }
+    ICompoundProperty props = iObj.getProperties();
+    visitProperties( props );
 
     // now the child objects
     for ( size_t i = 0 ; i < iObj.getNumChildren() ; i++ )
@@ -149,15 +144,16 @@ int main( int argc, char *argv[] )
         exit( -1 );
     }
 
+    pthread_t t1, t2;
+    g_threads[0] = t1;
+    g_threads[1] = t2;
+
     // Scoped.
-    g_bounds.makeEmpty();
     {
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                          argv[1], ErrorHandler::kQuietNoopPolicy );
+                          argv[1] );
         visitObject( archive.getTop() );
     }
-
-    std::cout << "/" << " " << g_bounds.min << " " << g_bounds.max << std::endl;
 
     return 0;
 }

@@ -92,6 +92,7 @@ public:
 
     MStatus operator()(Alembic::AbcGeom::ICamera & iNode);
     MStatus operator()(Alembic::AbcGeom::ICurves & iNode);
+    MStatus operator()(Alembic::AbcGeom::INuPatch & iNode);
     MStatus operator()(Alembic::AbcGeom::IPoints & iNode);
     MStatus operator()(Alembic::AbcGeom::IPolyMesh & iNode);
     MStatus operator()(Alembic::AbcGeom::ISubD & iNode);

@@ -62,6 +62,7 @@
 #include "CameraHelper.h"
 #include "MeshHelper.h"
 #include "NurbsCurveHelper.h"
+#include "NurbsSurfaceHelper.h"
 #include "PointHelper.h"
 #include "XformHelper.h"
 
@@ -655,7 +656,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
         mOutRead[5] = true;
 
-        unsigned int nSurfaceSize = 0; //mData.mNurbsList.size();
+        unsigned int nSurfaceSize = mData.mNurbsList.size();
 
         if (nSurfaceSize > 0)
         {
@@ -676,7 +677,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 MObject obj = outHandle.data();
                 if (obj.hasFn(MFn::kNurbsSurface))
                 {
-                    //read(mCrame, mData.mNurbsList[j], obj);
+                    readNurbs(mCurTime, mData.mNurbsList[j], obj);
                     outHandle.set(obj);
                 }
             }

@@ -1342,6 +1342,7 @@ WriterData & WriterData::operator=(const WriterData & rhs)
 
     mCameraList = rhs.mCameraList;
     mCurvesList = rhs.mCurvesList;
+    mNurbsList = rhs.mNurbsList;
     mPointsList = rhs.mPointsList;
     mPolyMeshList = rhs.mPolyMeshList;
     mSubDList = rhs.mSubDList;
@@ -1351,6 +1352,7 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     // get all the sampled Maya objects
     mCameraObjList = rhs.mCameraObjList;
     mNurbsCurveObjList = rhs.mNurbsCurveObjList;
+    mNurbsObjList = rhs.mNurbsObjList;
     mPointsObjList = rhs.mPointsObjList;
     mPolyMeshObjList = rhs.mPolyMeshObjList;
     mSubDObjList = rhs.mSubDObjList;
@@ -1427,6 +1429,18 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     {
         ts = mCurvesList[i].getSchema().getTimeSampling();
         size_t numSamples = mCurvesList[i].getSchema().getNumSamples();
+        if (numSamples > 1)
+        {
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
+    }
+
+    iEnd = mNurbsList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        ts = mNurbsList[i].getSchema().getTimeSampling();
+        size_t numSamples = mNurbsList[i].getSchema().getNumSamples();
         if (numSamples > 1)
         {
             oMin = std::min(ts->getSampleTime(0), oMin);
@@ -1610,7 +1624,7 @@ MString connectAttr(ArgData & iArgData)
     unsigned int cameraSize     = iArgData.mData.mCameraObjList.size();
     unsigned int particleSize   = iArgData.mData.mPointsObjList.size();
     unsigned int xformSize      = iArgData.mData.mXformOpList.size();
-    unsigned int nSurfaceSize   = 0;//iArgData.mData.mNurbsSurfaceObjList.size();
+    unsigned int nSurfaceSize   = iArgData.mData.mNurbsObjList.size();
     unsigned int nCurveSize     = iArgData.mData.mNurbsCurveObjList.size();
     unsigned int propSize       = iArgData.mData.mPropObjList.size();
 
@@ -1705,17 +1719,15 @@ MString connectAttr(ArgData & iArgData)
     }
     if (nSurfaceSize > 0)
     {
-        /*
         MPlug srcArrayPlug = alembicNodeFn.findPlug("outNSurface", true);
         for (unsigned int i = 0; i < nSurfaceSize; i++)
         {
             srcPlug = srcArrayPlug.elementByLogicalIndex(i);
-            MFnNurbsSurface fnNSurface(iArgData.mData.mNurbsSurfaceObjList[i]);
+            MFnNurbsSurface fnNSurface(iArgData.mData.mNurbsObjList[i]);
             dstPlug = fnNSurface.findPlug("create", true);
             modifier.connect(srcPlug, dstPlug);
             status = modifier.doIt();
         }
-        */
     }
     if (nCurveSize > 0)
     {

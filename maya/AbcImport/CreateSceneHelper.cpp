@@ -61,6 +61,7 @@
 #include "CameraHelper.h"
 #include "MeshHelper.h"
 #include "NurbsCurveHelper.h"
+#include "NurbsSurfaceHelper.h"
 #include "PointHelper.h"
 #include "XformHelper.h"
 #include "CreateSceneHelper.h"
@@ -214,13 +215,13 @@ bool CreateSceneVisitor::hasSampledData()
     unsigned int cameraSize = mData.mCameraList.size();
 
     // unsigned int particleSize = mData.mParticleList.size();
-    unsigned int nSurfaceSize  = 0; //mData.mNurbsList.size();
+    unsigned int nSurfaceSize  = mData.mNurbsList.size();
 
     // Currently there's no support for bringing in particle system simulation
     return (mData.mSubDList.size() > 0 || mData.mPolyMeshList.size() > 0 ||
         mData.mCurvesList.size() > 0 || mData.mXformList.size() > 0 ||
-        mData.mCameraList.size() > 0 || mData.mPropList.size() > 0 );
-        // || mData.mNurbsList.size() > 0);
+        mData.mCameraList.size() > 0 || mData.mPropList.size() > 0 ||
+        mData.mNurbsList.size() > 0);
 }
 
 // re-add the selection back to the sets
@@ -313,6 +314,11 @@ void CreateSceneVisitor::visit(Alembic::Abc::IObject & iObj)
     {
         Alembic::AbcGeom::ICurves curves(iObj, Alembic::Abc::kWrapExisting);
         (*this)(curves);
+    }
+    else if ( Alembic::AbcGeom::INuPatch::matches(iObj.getHeader()) )
+    {
+        Alembic::AbcGeom::INuPatch nurbs(iObj, Alembic::Abc::kWrapExisting);
+        (*this)(nurbs);
     }
     else if ( Alembic::AbcGeom::IPoints::matches(iObj.getHeader()) )
     {
@@ -739,6 +745,68 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
 
         disconnectMesh(polyObj, mData.mPropList, firstProp);
         addToPropList(firstProp, polyObj);
+    }
+
+    return status;
+}
+
+MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
+{
+    MStatus status = MS::kSuccess;
+    MObject nurbsObj = MObject::kNullObj;
+
+    size_t numSamples = iNode.getSchema().getNumSamples();
+
+    // add animated poly mesh to the list
+    if (numSamples > 1)
+        mData.mNurbsList.push_back(iNode);
+
+    Alembic::Abc::ICompoundProperty arbProp =
+        iNode.getSchema().getArbGeomParams();
+
+    std::size_t firstProp = mData.mPropList.size();
+    getAnimatedProps(arbProp, mData.mPropList);
+    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, mData.mPropList);
+
+    if (mAction == CREATE || mAction == CREATE_REMOVE)
+    {
+        nurbsObj = createNurbs(mFrame, iNode, mParent);
+        MFnDagNode(nurbsObj).getPath(mCurrentDagNode);
+        if (numSamples > 1)
+        {
+            mData.mNurbsObjList.push_back(nurbsObj);
+        }
+
+        setConstantVisibility(visProp, nurbsObj);
+
+        addProps(arbProp, nurbsObj);
+    }
+
+
+    if ( mAction >= CONNECT )
+    {
+        if (nurbsObj == MObject::kNullObj)
+        {
+            nurbsObj = mCurrentDagNode.node();
+            MFnNurbsSurface fn(nurbsObj, &status);
+
+            // check that the data types are compatible, they might not be
+            // if we have a weird hierarchy, where the node in the scene
+            // differs from the node on disk
+            if ( status != MS::kSuccess )
+            {
+                MString theError("No connection done for node '");
+                theError += MString(iNode.getName().c_str());
+                theError += MString("' with ");
+                theError += mCurrentDagNode.fullPathName();
+                printError(theError);
+                return status;
+            }
+
+        }
+
+        disconnectMesh(nurbsObj, mData.mPropList, firstProp);
+        addToPropList(firstProp, nurbsObj);
     }
 
     return status;

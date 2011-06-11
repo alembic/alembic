@@ -44,6 +44,7 @@ SET( H_FILES
   MeshHelper.h
   NodeIteratorVisitorHelper.h
   NurbsCurveHelper.h
+  NurbsSurfaceHelper.h
   PointHelper.h
   util.h
   XformHelper.h
@@ -57,6 +58,7 @@ SET( CXX_FILES
   main.cpp
   MeshHelper.cpp
   NurbsCurveHelper.cpp
+  NurbsSurfaceHelper.cpp
   NodeIteratorVisitorHelper.cpp
   PointHelper.cpp
   util.cpp
