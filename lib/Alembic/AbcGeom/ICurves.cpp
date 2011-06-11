@@ -85,7 +85,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
 
     m_basisAndType = Abc::IScalarProperty( _this, "curveBasisAndType",
                                           args.getSchemaInterpMatching());
-    
+
     m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
 
     if ( this->getPropertyHeader( ".childBnds" ) != NULL )
@@ -116,7 +116,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
                                                   args.getErrorHandlerPolicy()
                                                 );
     }
-    
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 

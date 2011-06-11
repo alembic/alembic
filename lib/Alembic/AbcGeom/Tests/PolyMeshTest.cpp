@@ -212,6 +212,43 @@ void Example1_MeshIn()
 }
 
 //-*****************************************************************************
+void meshUnderXformOut( const std::string &iName )
+{
+    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), iName );
+
+    TimeSamplingPtr ts( new TimeSampling( 1.0 / 24.0, 0.0 ) );
+
+    OXform xfobj( archive.getTop(), "xf", ts );
+
+    OPolyMesh meshobj( xfobj, "mesh", ts );
+
+    OPolyMeshSchema::Sample mesh_samp(
+        V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
+        Int32ArraySample( g_indices, g_numIndices ),
+        Int32ArraySample( g_counts, g_numCounts ) );
+
+    XformSample xf_samp;
+    XformOp rotOp( kRotateYOperation );
+
+    Box3d childBounds;
+    childBounds.makeEmpty();
+    childBounds.extendBy( V3d( 1.0, 1.0, 1.0 ) );
+    childBounds.extendBy( V3d( -1.0, -1.0, -1.0 ) );
+
+    xf_samp.setChildBounds( childBounds );
+
+    double rotation = 0.0;
+
+    for ( std::size_t i = 0 ; i < 100 ; ++i )
+    {
+        xf_samp.addOp( rotOp, rotation );
+        xfobj.getSchema().set( xf_samp );
+        meshobj.getSchema().set( mesh_samp );
+        rotation += 30.0;
+    }
+}
+
+//-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
 // MAIN FUNCTION!
@@ -226,6 +263,8 @@ int main( int argc, char *argv[] )
     // Mesh out
     Example1_MeshOut();
     Example1_MeshIn();
+
+    meshUnderXformOut( "animatedXformedMesh.abc" );
 
     //Time_Sampled_Mesh_Test0();
     return 0;

@@ -59,6 +59,50 @@ using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 // a single animated Transform with a single static PolyMesh as its child.
 //-*****************************************************************************
 //-*****************************************************************************
+void doSample( OCurves iCurves )
+{
+
+    OCurvesSchema &curves = iCurves.getSchema();
+
+    FloatArraySample widthSample( FloatArraySample( (const float *)g_widths,
+                                                    4));
+
+    V2fArraySample uvSample( V2fArraySample( (const V2f *)g_uvs, 12));
+
+    std::cout << "creating sample " << curves.getNumSamples() << std::endl;
+    OCurvesSchema::Sample curves_sample(
+        V3fArraySample( ( const V3f * ) g_verts, g_totalVerts ),
+        UInt32ArraySample( g_numVerts, g_numCurves),
+        kCubic,
+        kNonPeriodic,
+        widthSample,
+        uvSample );
+
+    // Set the sample.
+    curves.set( curves_sample );
+
+}
+
+void Example2_CurvesOut()
+{
+    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+                      "curves2.abc" );
+
+    OCurves myCurves( OObject( archive, kTop ),
+                      "someCurve");
+
+    for ( size_t i = 0 ; i < 5 ; ++i )
+    {
+        doSample( myCurves );
+    }
+
+    // Alembic objects close themselves automatically when they go out
+    // of scope. So - we don't have to do anything to finish
+    // them off!
+    std::cout << "Writing: " << archive.getName() << std::endl;
+}
+
+
 void Example1_CurvesOut()
 {
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
@@ -146,6 +190,8 @@ int main( int argc, char *argv[] )
 {
 
     std::cout << "writing curves" << std::endl;
+
+    Example2_CurvesOut();
 
     // Curves Out
     Example1_CurvesOut();
