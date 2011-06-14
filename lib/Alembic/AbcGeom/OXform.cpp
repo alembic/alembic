@@ -49,10 +49,11 @@ void OXformSchema::setChannelValues( const std::vector<double> &iVals )
 
     if ( m_useArrayProp )
     {
+        Alembic::Util::Dimensions dims(m_numChannels);
         m_vals->asArrayPtr()->setSample(
             AbcA::ArraySample( &(iVals.front()),
-                               m_arrayValuesDataType,
-                               m_arraySampleDimensions )
+                               AbcA::DataType( Alembic::Util::kFloat64POD, 1 ),
+                               dims )
                                        );
     }
     else
@@ -103,13 +104,14 @@ void OXformSchema::set( XformSample &ioSamp )
         {
             m_ops = this->getPtr()->createScalarProperty(
                 ".ops", AbcA::MetaData(),
-                AbcA::DataType( Alembic::Util::kUint8POD, m_numOps ),
-                m_timeSamplingIndex
+                AbcA::DataType( Alembic::Util::kUint8POD, m_numOps ), 0
                                                         );
         }
 
         if ( m_numChannels > 0 )
         {
+            uint32_t tsIndex = getObject().getArchive().addTimeSampling(
+                                       *(m_inherits.getTimeSampling()) );
             if ( m_numChannels <= MAX_SCALAR_CHANS )
             {
                 m_useArrayProp = false;
@@ -117,15 +119,12 @@ void OXformSchema::set( XformSample &ioSamp )
                 m_vals = this->getPtr()->createScalarProperty(
                     ".vals", AbcA::MetaData(),
                     AbcA::DataType( Alembic::Util::kFloat64POD, m_numChannels ),
-                    m_timeSamplingIndex
+                    tsIndex
                                                              );
             }
             else
             {
                 m_useArrayProp = true;
-
-                m_arraySampleDimensions = Alembic::Util::Dimensions(
-                    m_numChannels );
 
                 m_vals = this->getPtr()->createArrayProperty(
                     ".vals", AbcA::MetaData(),
@@ -133,7 +132,7 @@ void OXformSchema::set( XformSample &ioSamp )
                     // each Sample is, but how many values constitute a single
                     // "element". What is here is the same as creating an
                     // Abc::ODoubleArrayProperty.
-                    m_arrayValuesDataType, m_timeSamplingIndex
+                    AbcA::DataType( Alembic::Util::kFloat64POD, 1 ), tsIndex
                                                             );
             }
         }
@@ -264,10 +263,66 @@ void OXformSchema::init( const AbcA::index_t iTsIdx )
     m_numOps = 0;
     m_numChannels = 0;
 
-    m_arrayValuesDataType = AbcA::DataType( Alembic::Util::kFloat64POD, 1 );
-    m_arraySampleDimensions = Alembic::Util::Dimensions( 1 );
-
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+Abc::OCompoundProperty OXformSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
+}
+
+//-*****************************************************************************
+void OXformSchema::setTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OXformSchema::setTimeSampling( uint32_t )" );
+
+    m_animChannels.setTimeSampling( iIndex );
+    m_inherits.setTimeSampling( iIndex );
+
+    if ( m_vals )
+    {
+        if ( m_useArrayProp )
+        { m_vals->asArrayPtr()->setTimeSamplingIndex( iIndex ); }
+        else
+        { m_vals->asScalarPtr()->setTimeSamplingIndex( iIndex ); }
+    }
+
+    if ( m_childBounds )
+    {
+        m_childBounds.setTimeSampling( iIndex );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OXformSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OXformSchema::setTimeSampling( TimeSamplingPtr )" );
+
+    if ( iTime )
+    {
+        uint32_t tsIndex = getObject().getArchive().addTimeSampling( *iTime );
+        setTimeSampling( tsIndex );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 } // End namespace AbcGeom

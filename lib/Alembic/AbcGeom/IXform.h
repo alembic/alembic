@@ -173,6 +173,8 @@ protected:
 
     Abc::IBoolProperty m_inherits;
 
+    Abc::ICompoundProperty m_arbGeomParams;
+
     bool m_isConstant;
 
     bool m_isConstantIdentity;

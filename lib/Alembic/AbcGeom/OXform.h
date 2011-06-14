@@ -101,8 +101,6 @@ public:
                 addTimeSampling( *tsPtr );
         }
 
-        m_timeSamplingIndex = tsIndex;
-
         init( tsIndex );
     }
 
@@ -129,8 +127,6 @@ public:
             tsIndex = iParentObject->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
-
-        m_timeSamplingIndex = tsIndex;
 
         init( tsIndex );
     }
@@ -165,6 +161,11 @@ public:
     //! Set from previous sample. Will hold the animated channels.
     void setFromPrevious();
 
+    void setTimeSampling( uint32_t iIndex );
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
+
+    Abc::OCompoundProperty getArbGeomParams();
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -176,7 +177,6 @@ public:
     void reset()
     {
         m_childBounds.reset();
-        m_timeSamplingIndex = 0;
         m_inherits.reset();
         m_ops.reset();
         m_vals.reset();
@@ -219,8 +219,6 @@ protected:
 
     Abc::OBox3dProperty m_childBounds;
 
-    AbcA::index_t m_timeSamplingIndex;
-
     AbcA::ScalarPropertyWriterPtr m_ops;
 
     AbcA::BasePropertyWriterPtr m_vals;
@@ -238,6 +236,8 @@ protected:
     std::vector<bool> m_staticChans;
 
     bool m_isIdentity;
+
+    Abc::OCompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

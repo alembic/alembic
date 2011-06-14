@@ -164,6 +164,13 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
         }
     }
 
+    if ( ptr->getPropertyHeader( ".arbGeomParams" ) != NULL )
+    {
+        m_arbGeomParams = Abc::ICompoundProperty( ptr, ".arbGeomParams",
+                                                  getErrorHandlerPolicy()
+                                                );
+    }
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
