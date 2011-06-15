@@ -1008,7 +1008,8 @@ std::string * AttributesWriter::mFilter = NULL;
 std::set<std::string> * AttributesWriter::mAttribs = NULL;
 
 AttributesWriter::AttributesWriter(
-    Abc::OCompoundProperty & iParent,
+    Alembic::Abc::OCompoundProperty & iParent,
+    Alembic::Abc::OObject & iParentObj,
     const MFnDagNode & iNode,
     Alembic::Util::uint32_t iTimeIndex,
     bool iWriteVisibility)
@@ -1045,18 +1046,12 @@ AttributesWriter::AttributesWriter(
             {
                 visPlug.plug = plug;
                 visPlug.obj = attr;
+                visPlug.propParent = iParentObj;
             }
             continue;
         }
 
-        // skip it if it doesn't start with our filter, or it ends with our
-        // special case attrs or it is a child attr and the parent is a
-        // kData* and it is not in our attribute set
-        if ( propStr.find("[") != std::string::npos || ((filtLen == 0 ||
-            propStr.compare(0, filtLen, *mFilter) != 0 ||
-            endsWithArbAttr(propStr) ||
-            (plug.isChild() && isDataAttr(plug.parent())) ) &&
-            (!mAttribs || mAttribs->find(propStr) == mAttribs->end())) )
+        if (!iParent.valid() || !matchFilterOrAttribs(plug))
         {
             continue;
         }
@@ -1136,11 +1131,7 @@ AttributesWriter::AttributesWriter(
         int retVis = util::getVisibilityType(visPlug.plug);
 
         // visible will go on the top most compound
-        Abc::OCompoundProperty parent = iParent;
-        while (parent.getParent().valid())
-        {
-            parent = parent.getParent();
-        }
+        Abc::OCompoundProperty parent = visPlug.propParent.getProperties();
 
         switch (retVis)
         {
@@ -1192,8 +1183,72 @@ AttributesWriter::AttributesWriter(
     }
 }
 
+bool AttributesWriter::matchFilterOrAttribs(const MPlug & iPlug)
+{
+
+    MString propName = iPlug.partialName(0, 0, 0, 0, 0, 1);
+    std::string name = propName.asChar();
+
+    if (name.find("[") != std::string::npos)
+    {
+        return false;
+    }
+
+    // check the prefilter and ignore those that match but end with arb attr
+    if (mFilter && mFilter->length() > 0 &&
+        name.compare(0, mFilter->length(), *mFilter) == 0 &&
+        !endsWithArbAttr(name) &&
+        ( !iPlug.isChild() || !isDataAttr(iPlug.parent()) ))
+    {
+        return true;
+    }
+
+    // check our specific list of attributes
+    if (mAttribs && mAttribs->find(name) != mAttribs->end())
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool AttributesWriter::hasAnyAttr(const MFnDagNode & iNode)
+{
+    unsigned int attrCount = iNode.attributeCount();
+    unsigned int i;
+
+    int filtLen = 0;
+    if (mFilter != NULL)
+        filtLen = mFilter->length();
+
+    std::vector< PlugAndObjArray > staticPlugObjArrayVec;
+
+    for (i = 0; i < attrCount; i++)
+    {
+        MObject attr = iNode.attribute(i);
+        MFnAttribute mfnAttr(attr);
+        MPlug plug = iNode.findPlug(attr, true);
+
+        // if it is not readable, then bail without any more checking
+        if (!mfnAttr.isReadable() || plug.isNull())
+        {
+            continue;
+        }
+
+        if (matchFilterOrAttribs(plug))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 AttributesWriter::~AttributesWriter()
 {
+    // if this happens to be set, clear it out before propParent goes out
+    // of scope to work around issue 171
+    mAnimVisibility.prop.reset();
 }
 
 bool AttributesWriter::isAnimated()

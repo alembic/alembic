@@ -826,7 +826,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         mData.mIsComplexXform.push_back(isComplex(iNode));
     }
 
-    Alembic::Abc::ICompoundProperty arbProp = iNode.getProperties();
+    Alembic::Abc::ICompoundProperty arbProp =
+        iNode.getSchema().getArbGeomParams();
 
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);

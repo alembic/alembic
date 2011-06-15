@@ -99,8 +99,15 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     val[5] = scaleZ.asDouble();
     mSp.set(val);
 
-    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, fnLocator,
-                iTimeIndex, iWriteVisibility));
+    Alembic::Abc::OCompoundProperty arbAttr;
+    if (AttributesWriter::hasAnyAttr(fnLocator))
+    {
+        arbAttr = mXform.getSchema().getArbGeomParams();
+    }
+
+    mAttrs = AttributesWriterPtr(new AttributesWriter(arbAttr, mXform,
+        fnLocator, iTimeIndex, iWriteVisibility));
+
 }
 
 

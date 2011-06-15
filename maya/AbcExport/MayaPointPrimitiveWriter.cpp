@@ -48,8 +48,13 @@ MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
         iTimeIndex);
     mSchema = obj.getSchema();
 
-    Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
-    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, particle,
+    Alembic::Abc::OCompoundProperty cp;
+    if (AttributesWriter::hasAnyAttr(particle))
+    {
+        cp = mSchema.getArbGeomParams();
+    }
+
+    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, particle,
         iTimeIndex, iWriteVisibility));
 
     MObject object = iDag.node();

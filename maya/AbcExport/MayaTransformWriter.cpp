@@ -402,8 +402,13 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
             iTimeIndex);
         mSchema = obj.getSchema();
 
-        Alembic::Abc::OCompoundProperty cp = obj.getProperties();
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, joint,
+        Alembic::Abc::OCompoundProperty cp;
+        if (AttributesWriter::hasAnyAttr(joint))
+        {
+            cp = mSchema.getArbGeomParams();
+        }
+
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, joint,
             iTimeIndex, iWriteVisibility));
 
         if (!iAddWorld)
@@ -437,8 +442,13 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
             iTimeIndex);
         mSchema = obj.getSchema();
 
-        Alembic::Abc::OCompoundProperty cp = obj.getProperties();
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, trans,
+        Alembic::Abc::OCompoundProperty cp;
+        if (AttributesWriter::hasAnyAttr(trans))
+        {
+            cp = mSchema.getArbGeomParams();
+        }
+
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, trans,
             iTimeIndex, iWriteVisibility));
 
         if (!iAddWorld)
@@ -556,8 +566,13 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
             iTimeIndex);
         mSchema = obj.getSchema();
 
-        Alembic::Abc::OCompoundProperty cp = obj.getProperties();
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, joint,
+        Alembic::Abc::OCompoundProperty cp;
+        if (AttributesWriter::hasAnyAttr(joint))
+        {
+            cp = mSchema.getArbGeomParams();
+        }
+
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, joint,
             iTimeIndex, iWriteVisibility));
 
         pushTransformStack(joint, iTimeIndex == 0);
@@ -569,8 +584,13 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
             iTimeIndex);
         mSchema = obj.getSchema();
 
-        Alembic::Abc::OCompoundProperty cp = obj.getProperties();
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, trans,
+        Alembic::Abc::OCompoundProperty cp;
+        if (AttributesWriter::hasAnyAttr(trans))
+        {
+            cp = mSchema.getArbGeomParams();
+        }
+
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, trans,
             iTimeIndex, iWriteVisibility));
 
         pushTransformStack(trans, iTimeIndex == 0);

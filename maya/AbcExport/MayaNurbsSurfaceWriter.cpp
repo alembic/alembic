@@ -55,10 +55,14 @@ MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
     Alembic::AbcGeom::ONuPatch obj(iParent, nurbs.name().asChar(), iTimeIndex);
     mSchema = obj.getSchema();
 
-    Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
+    Alembic::Abc::OCompoundProperty cp;
+    if (AttributesWriter::hasAnyAttr(nurbs))
+    {
+        cp = mSchema.getArbGeomParams();
+    }
 
-    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, nurbs, iTimeIndex,
-        iWriteVisibilty));
+    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, nurbs,
+        iTimeIndex, iWriteVisibilty));
 
     if (iTimeIndex != 0 && util::isAnimated(surface))
         mIsSurfaceAnimated = true;

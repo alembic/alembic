@@ -82,10 +82,15 @@ MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
         }
     }
 
-    Alembic::Abc::OCompoundProperty cp = mSchema.getArbGeomParams();
+    Alembic::Abc::OCompoundProperty cp;
+    if (AttributesWriter::hasAnyAttr(cam))
+    {
+        cp = mSchema.getArbGeomParams();
+    }
 
-    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, cam,
+    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, cam,
         iTimeIndex, iWriteVisibility));
+
     write();
 }
 

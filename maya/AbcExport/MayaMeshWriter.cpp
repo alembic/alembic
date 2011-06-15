@@ -135,9 +135,12 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             }
         }
 
-        Alembic::Abc::OCompoundProperty cp = mSubDSchema.getArbGeomParams();
-
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, lMesh,
+        Alembic::Abc::OCompoundProperty cp;
+        if (AttributesWriter::hasAnyAttr(lMesh))
+        {
+            cp = mSubDSchema.getArbGeomParams();
+        }
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, lMesh,
             iTimeIndex, iWriteVisibility));
 
         writeSubD(iDag, uvSamp);
@@ -168,13 +171,17 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             }
         }
 
-        Alembic::Abc::OCompoundProperty cp = mPolySchema.getArbGeomParams();
+        Alembic::Abc::OCompoundProperty cp;
+        if (AttributesWriter::hasAnyAttr(lMesh))
+        {
+            cp = mPolySchema.getArbGeomParams();
+        }
 
         // set the rest of the props and write to the writer node
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, lMesh,
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, lMesh,
             iTimeIndex, iWriteVisibility));
 
-       writePoly(uvSamp);
+        writePoly(uvSamp);
     }
 
     // look for facesets

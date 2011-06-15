@@ -110,6 +110,7 @@ struct PlugAndObjScalar
 {
     MPlug plug;
     MObject obj;
+    Alembic::Abc::OObject propParent;
     Alembic::Abc::OScalarProperty prop;
 };
 

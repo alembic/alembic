@@ -161,6 +161,8 @@ public:
         return ( super_type::valid() );
     }
 
+    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
