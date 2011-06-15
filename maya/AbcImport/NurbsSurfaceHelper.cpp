@@ -190,11 +190,11 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
     MPointArray controlVertices;
     controlVertices.setLength(numCV);
 
-    for (unsigned int u = 0; u < numCVInU; ++u)
+    for (unsigned int v = 0; v < numCVInV; ++v)
     {
-        for (unsigned int v = 0; v < numCVInV; ++v, ++curPos)
+        for (unsigned int u = 0; u < numCVInU; ++u, ++curPos)
         {
-            unsigned int mayaIndex = (numCVInV - v - 1) * numCVInU + u;
+            unsigned int mayaIndex = u * numCVInV + (numCVInV - v - 1);
             MPoint pt((*pos)[curPos].x, (*pos)[curPos].y, (*pos)[curPos].z);
 
             // go from u,v order to reversed v, u order

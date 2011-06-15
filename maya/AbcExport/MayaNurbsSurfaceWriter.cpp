@@ -160,6 +160,9 @@ void MayaNurbsSurfaceWriter::write()
     int numCVsInU = nurbs.numCVsInU();
     int numCVsInV = nurbs.numCVsInV();
 
+    samp.setNu(numCVsInU);
+    samp.setNv(numCVsInV);
+
     std::vector<Alembic::Abc::V3f> sampPos;
     sampPos.reserve(numCVs);
 
