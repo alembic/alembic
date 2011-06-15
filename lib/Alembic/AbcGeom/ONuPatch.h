@@ -95,7 +95,7 @@ public:
         { m_positions = iSmp; }
 
         // nu
-        const uint64_t &getNu() const { return m_numV; }
+        const uint64_t &getNu() const { return m_numU; }
         void setNu( const int &iNu )
         { m_numU = iNu; }
 

@@ -60,7 +60,7 @@ public:
         uint64_t getNumU() const { return m_numU; }
         uint64_t getNumV() const { return m_numV; }
         uint64_t getUOrder() const { return m_uOrder; }
-        uint64_t getVOrder() const { return m_uOrder; }
+        uint64_t getVOrder() const { return m_vOrder; }
         Abc::FloatArraySamplePtr getUKnot() const { return m_uKnot; }
         Abc::FloatArraySamplePtr getVKnot() const { return m_vKnot; }
 
