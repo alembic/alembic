@@ -172,7 +172,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
         schema.getNumSamples(), index, ceilIndex);
 
     Alembic::AbcGeom::INuPatchSchema::Sample samp;
-    schema.get(samp);
+    schema.get(samp, Alembic::Abc::ISampleSelector(index));
 
     Alembic::Abc::V3fArraySamplePtr pos = samp.getPositions();
 
@@ -246,6 +246,9 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
 MObject createNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
     MObject & iParent)
 {
+    // normally we'd only want to do the read if we had only 1 sample, but
+    // since we can't seem to create an empty Nurbs surface like we can a mesh
+    // we will read the data (eventually multiple times on creation)
     MObject obj = readNurbs(iFrame, iNode, iParent);
 
     if (!obj.isNull())
