@@ -39,29 +39,30 @@
 
 #include <Alembic/AbcGeom/All.h>
 
-namespace Abc = Alembic::Abc;
+using Alembic::Util::int32_t;
+using Alembic::Util::float32_t;
 
-extern const Abc::int32_t g_nu;
-extern const Abc::int32_t g_nv;
-extern const Abc::int32_t g_uOrder;
-extern const Abc::int32_t g_vOrder;
-extern const Abc::float32_t g_uKnot[];
-extern const Abc::float32_t g_vKnot[];
+extern const int32_t g_nu;
+extern const int32_t g_nv;
+extern const int32_t g_uOrder;
+extern const int32_t g_vOrder;
+extern const float32_t g_uKnot[];
+extern const float32_t g_vKnot[];
 
-extern const Abc::int32_t g_nP;
-extern const Abc::float32_t g_P[];
+extern const int32_t g_nP;
+extern const float32_t g_P[];
 
 // trim curve
-extern const Abc::int32_t g_trim_nLoops;
-extern const Abc::int32_t g_trim_nCurves[];
-extern const Abc::int32_t g_trim_n[];
-extern const Abc::int32_t g_trim_order[];
-extern const Abc::float32_t g_trim_knot[];
-extern const Abc::float32_t g_trim_min[];
-extern const Abc::float32_t g_trim_max[];
-extern const Abc::float32_t g_trim_u[];
-extern const Abc::float32_t g_trim_v[];
-extern const Abc::float32_t g_trim_w[];
+extern const int32_t g_trim_nLoops;
+extern const int32_t g_trim_nCurves[];
+extern const int32_t g_trim_n[];
+extern const int32_t g_trim_order[];
+extern const float32_t g_trim_knot[];
+extern const float32_t g_trim_min[];
+extern const float32_t g_trim_max[];
+extern const float32_t g_trim_u[];
+extern const float32_t g_trim_v[];
+extern const float32_t g_trim_w[];
 
 //-*******************************
 

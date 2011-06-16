@@ -60,29 +60,12 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
-// Other includes
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <Alembic/AbcGeom/Tests/NurbsData.h>
 
 #include "Assert.h"
 
-//-*****************************************************************************
-//-*****************************************************************************
-// NAMESPACES
-//
-// Each library has a namespace which is the same as the name of the library.
-// We shorten those here for brevity.
-//-*****************************************************************************
-//-*****************************************************************************
-
 using namespace std;
 using namespace Alembic::AbcGeom;
-
-using Alembic::Util::int32_t;
-using Alembic::Util::float32_t;
 
 void Example1_NurbsOut()
 {
@@ -102,14 +85,14 @@ void Example1_NurbsOut()
         // the archive with this filename.
         "nurbs1.abc" );
 
-    ONuPatch myNurbs(   OObject( archive, kTop ),
-                        "nurbs_surface");
+    ONuPatch myNurbs( OObject( archive, kTop ),
+                      "nurbs_surface" );
 
     ONuPatchSchema &myNurbsSchema = myNurbs.getSchema();
 
-    V3fArraySample pSample( V3fArraySample( ( const V3f * ) g_P, g_nP ));
-    FloatArraySample uKnotSample( FloatArraySample( (const float *)g_uKnot, 8));
-    FloatArraySample vKnotSample( FloatArraySample( (const float *)g_vKnot, 8));
+    V3fArraySample pSample( (const V3f *)g_P, g_nP );
+    FloatArraySample uKnotSample( (const float32_t *)g_uKnot, 8 );
+    FloatArraySample vKnotSample( (const float *)g_vKnot, 8 );
 
     ONuPatchSchema::Sample nurbsSample(
         pSample,
@@ -154,9 +137,9 @@ void Example2_NurbsOut()
 
     ONuPatchSchema &myNurbsSchema = myNurbs.getSchema();
 
-    V3fArraySample pSample( V3fArraySample( ( const V3f * ) g_P, g_nP ));
-    FloatArraySample uKnotSample( FloatArraySample( (const float *)g_uKnot, 8));
-    FloatArraySample vKnotSample( FloatArraySample( (const float *)g_vKnot, 8));
+    V3fArraySample pSample( (const V3f *)g_P, g_nP );
+    FloatArraySample uKnotSample( (const float32_t *)g_uKnot, 8 );
+    FloatArraySample vKnotSample( (const float32_t *)g_vKnot, 8 );
 
     ONuPatchSchema::Sample nurbsSample(
         pSample,
