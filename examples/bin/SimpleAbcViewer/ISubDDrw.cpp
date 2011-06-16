@@ -93,7 +93,10 @@ void ISubDDrw::setTime( chrono_t iSeconds )
     // Use nearest for now.
     ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
     ISubDSchema::Sample psamp;
-    m_subD.getSchema().get( psamp, ss );
+    if ( m_subD.getSchema().getNumSamples() > 0 )
+    {
+        m_subD.getSchema().get( psamp, ss );
+    }
 
     // Get the stuff.
     V3fArraySamplePtr P = psamp.getPositions();

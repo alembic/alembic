@@ -189,9 +189,9 @@ void MayaNurbsSurfaceWriter::write()
     unsigned int numRegions = nurbs.numRegions();
 
     // each region is a curvegroup, it can have multiple trim curve segments
-    std::vector<Alembic::Abc::uint64_t> trimNumCurves(numRegions);
-    std::vector<Alembic::Abc::uint64_t> trimNumPos;
-    std::vector<Alembic::Abc::uint64_t> trimOrder;
+    std::vector<Alembic::Util::int32_t> trimNumCurves(numRegions);
+    std::vector<Alembic::Util::int32_t> trimNumPos;
+    std::vector<Alembic::Util::int32_t> trimOrder;
     std::vector<float> trimKnot;
     std::vector<float> trimMin;
     std::vector<float> trimMax;
@@ -271,11 +271,11 @@ void MayaNurbsSurfaceWriter::write()
         } // for j
     } // for i
 
-    Alembic::Util::uint64_t numLoops = numRegions;
+    Alembic::Util::int32_t numLoops = numRegions;
     samp.setTrimCurve(numLoops,
-        Alembic::Abc::UInt64ArraySample(trimNumCurves),
-        Alembic::Abc::UInt64ArraySample(trimNumPos),
-        Alembic::Abc::UInt64ArraySample(trimOrder),
+        Alembic::Abc::Int32ArraySample(trimNumCurves),
+        Alembic::Abc::Int32ArraySample(trimNumPos),
+        Alembic::Abc::Int32ArraySample(trimOrder),
         Alembic::Abc::FloatArraySample(trimKnot),
         Alembic::Abc::FloatArraySample(trimMin),
         Alembic::Abc::FloatArraySample(trimMax),

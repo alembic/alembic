@@ -150,11 +150,11 @@ public:
     //! can be used to override the ErrorHandlerPolicy and to specify
     //! schema interpretation matching.
     template <class CPROP_PTR>
-    ICurvesSchema( CPROP_PTR iParentObject,
+    ICurvesSchema( CPROP_PTR iParent,
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iParentObject, iName, iArg0, iArg1 )
+      : Abc::ISchema<CurvesSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -162,10 +162,10 @@ public:
     //! This constructor is the same as above, but with default
     //! schema name used.
     template <class CPROP_PTR>
-    explicit ICurvesSchema( CPROP_PTR iParentObject,
+    explicit ICurvesSchema( CPROP_PTR iParent,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iParentObject, iArg0, iArg1 )
+      : Abc::ISchema<CurvesSchemaInfo>( iParent, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }

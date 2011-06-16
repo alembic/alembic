@@ -42,6 +42,21 @@ namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
+inline void SetPropUsePrevIfNull( Abc::OInt32Property iProp, int32_t iVal )
+{
+    if ( ! iProp ) { return; }
+
+    if ( iVal != ABC_GEOM_NUPATCH_NULL_INT_VALUE )
+    {
+        iProp.set( iVal );
+    }
+    else
+    {
+        iProp.setFromPrevious();
+    }
+}
+
+//-*****************************************************************************
 void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
 {
 
@@ -122,20 +137,20 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
         }
     }
 
-    if ( iSamp.getTrimNumLoops() && !m_trimNumLoops )
+    if ( iSamp.hasTrimCurve() && !m_trimNumLoops )
     {
         AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
-        Alembic::Abc::UInt64ArraySample emptyInt;
-        Alembic::Abc::FloatArraySample emptyFloat;
+        Alembic::Abc::Int32ArraySample emptyIntSamp;
+        Alembic::Abc::FloatArraySample emptyFloatSamp;
 
         AbcA::TimeSamplingPtr tsPtr = this->getTimeSampling();
 
         // trim curves
-        m_trimNumLoops = Abc::OUInt64Property( _this, "trim_nloops", tsPtr );
-        m_trimNumCurves = Abc::OUInt64ArrayProperty( _this, "trim_ncurves",
+        m_trimNumLoops = Abc::OInt32Property( _this, "trim_nloops", tsPtr );
+        m_trimNumCurves = Abc::OInt32ArrayProperty( _this, "trim_ncurves",
                                                      tsPtr );
-        m_trimNumVertices = Abc::OUInt64ArrayProperty( _this, "trim_n", tsPtr );
-        m_trimOrder = Abc::OUInt64ArrayProperty( _this, "trim_order", tsPtr );
+        m_trimNumVertices = Abc::OInt32ArrayProperty( _this, "trim_n", tsPtr );
+        m_trimOrder = Abc::OInt32ArrayProperty( _this, "trim_order", tsPtr );
         m_trimKnot = Abc::OFloatArrayProperty( _this, "trim_knot", tsPtr );
         m_trimMin = Abc::OFloatArrayProperty( _this, "trim_min", tsPtr );
         m_trimMax = Abc::OFloatArrayProperty( _this, "trim_max", tsPtr );
@@ -150,15 +165,15 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
         {
             m_trimNumLoops.set( 0 );
 
-            m_trimNumCurves.set( emptyInt );
-            m_trimNumVertices.set( emptyInt );
-            m_trimOrder.set( emptyInt );
-            m_trimKnot.set( emptyFloat );
-            m_trimMin.set( emptyFloat );
-            m_trimMax.set( emptyFloat );
-            m_trimU.set( emptyFloat );
-            m_trimV.set( emptyFloat );
-            m_trimW.set( emptyFloat );
+            m_trimNumCurves.set( emptyIntSamp );
+            m_trimNumVertices.set( emptyIntSamp );
+            m_trimOrder.set( emptyIntSamp );
+            m_trimKnot.set( emptyFloatSamp );
+            m_trimMin.set( emptyFloatSamp );
+            m_trimMax.set( emptyFloatSamp );
+            m_trimU.set( emptyFloatSamp );
+            m_trimV.set( emptyFloatSamp );
+            m_trimW.set( emptyFloatSamp );
         }
     }
 
@@ -292,7 +307,7 @@ void ONuPatchSchema::setFromPrevious( )
     // handle option properties
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
     if ( m_normals ) { m_normals.setFromPrevious(); }
-    
+
     // handle trim curves.
     if ( m_trimNumLoops )
     {
@@ -323,10 +338,10 @@ void ONuPatchSchema::init( const AbcA::index_t iTsIdx )
 
     // initialize any required properties
     m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
-    m_numU = Abc::OUInt64Property( _this, "nu", mdata, iTsIdx );
-    m_numV = Abc::OUInt64Property( _this, "nv", mdata, iTsIdx );
-    m_uOrder = Abc::OUInt64Property( _this, "uOrder", mdata, iTsIdx );
-    m_vOrder = Abc::OUInt64Property( _this, "vOrder", mdata, iTsIdx );
+    m_numU = Abc::OInt32Property( _this, "nu", mdata, iTsIdx );
+    m_numV = Abc::OInt32Property( _this, "nv", mdata, iTsIdx );
+    m_uOrder = Abc::OInt32Property( _this, "uOrder", mdata, iTsIdx );
+    m_vOrder = Abc::OInt32Property( _this, "vOrder", mdata, iTsIdx );
     m_uKnot = Abc::OFloatArrayProperty( _this, "uKnot", mdata, iTsIdx );
     m_vKnot = Abc::OFloatArrayProperty( _this, "vKnot", mdata, iTsIdx );
 

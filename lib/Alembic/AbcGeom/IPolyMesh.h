@@ -114,12 +114,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy and to specify
     //! schema interpretation matching.
     template <class CPROP_PTR>
-    IPolyMeshSchema( CPROP_PTR iParentObject,
+    IPolyMeshSchema( CPROP_PTR iParent,
                      const std::string &iName,
 
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<PolyMeshSchemaInfo>( iParentObject, iName,
+      : Abc::ISchema<PolyMeshSchemaInfo>( iParent, iName,
                                             iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -128,10 +128,10 @@ public:
     //! This constructor is the same as above, but with default
     //! schema name used.
     template <class CPROP_PTR>
-    explicit IPolyMeshSchema( CPROP_PTR iParentObject,
+    explicit IPolyMeshSchema( CPROP_PTR iParent,
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<PolyMeshSchemaInfo>( iParentObject,
+      : Abc::ISchema<PolyMeshSchemaInfo>( iParent,
                                             iArg0, iArg1 )
     {
         init( iArg0, iArg1 );

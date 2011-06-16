@@ -128,13 +128,13 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSamplingType.
     template <class CPROP_PTR>
-    OPointsSchema( CPROP_PTR iParentObject,
+    OPointsSchema( CPROP_PTR iParent,
                    const std::string &iName,
 
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument(),
                    const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<PointsSchemaInfo>( iParentObject, iName,
+      : Abc::OSchema<PointsSchemaInfo>( iParent, iName,
                                           iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
@@ -147,7 +147,7 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParentObject->getObject()->getArchive(
+            tsIndex = iParent->getObject()->getArchive(
                 )->addTimeSampling(*tsPtr);
         }
 
@@ -157,11 +157,11 @@ public:
     }
 
     template <class CPROP_PTR>
-    explicit OPointsSchema( CPROP_PTR iParentObject,
+    explicit OPointsSchema( CPROP_PTR iParent,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument(),
                             const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<PointsSchemaInfo>( iParentObject,
+      : Abc::OSchema<PointsSchemaInfo>( iParent,
                                      iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
@@ -174,7 +174,7 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParentObject->getObject()->getArchive(
+            tsIndex = iParent->getObject()->getArchive(
                 )->addTimeSampling(*tsPtr);
         }
 

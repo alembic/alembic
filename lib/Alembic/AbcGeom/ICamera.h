@@ -71,21 +71,21 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSampling.
     template <class CPROP_PTR>
-    ICameraSchema( CPROP_PTR iParentObject,
+    ICameraSchema( CPROP_PTR iParent,
                    const std::string &iName,
 
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CameraSchemaInfo>( iParentObject, iName, iArg0, iArg1 )
+      : Abc::ISchema<CameraSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
     template <class CPROP_PTR>
-    explicit ICameraSchema( CPROP_PTR iParentObject,
+    explicit ICameraSchema( CPROP_PTR iParent,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CameraSchemaInfo>( iParentObject, iArg0, iArg1 )
+      : Abc::ISchema<CameraSchemaInfo>( iParent, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }

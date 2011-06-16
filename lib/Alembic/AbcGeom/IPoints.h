@@ -110,12 +110,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSamplingType.
     template <class CPROP_PTR>
-    IPointsSchema( CPROP_PTR iParentObject,
+    IPointsSchema( CPROP_PTR iParent,
                    const std::string &iName,
 
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<PointsSchemaInfo>( iParentObject, iName,
+      : Abc::ISchema<PointsSchemaInfo>( iParent, iName,
                                           iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -124,10 +124,10 @@ public:
     //! This constructor is the same as above, but with default
     //! schema name used.
     template <class CPROP_PTR>
-    explicit IPointsSchema( CPROP_PTR iParentObject,
+    explicit IPointsSchema( CPROP_PTR iParent,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<PointsSchemaInfo>( iParentObject,
+      : Abc::ISchema<PointsSchemaInfo>( iParent,
                                      iArg0, iArg1 )
     {
         init( iArg0, iArg1 );

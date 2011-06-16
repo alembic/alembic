@@ -75,11 +75,11 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSamplingType.
     template <class CPROP_PTR>
-    IXformSchema( CPROP_PTR iParentObject,
+    IXformSchema( CPROP_PTR iParent,
                   const std::string &iName,
                   const Abc::Argument &iArg0 = Abc::Argument(),
                   const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<XformSchemaInfo>( iParentObject, iName,
+      : Abc::ISchema<XformSchemaInfo>( iParent, iName,
                                        iArg0, iArg1 )
     {
         // Meta data and error handling are eaten up by
@@ -90,11 +90,11 @@ public:
     //! This constructor does the same as the above, but uses the default
     //! name from the XformSchemaInfo struct.
     template <class CPROP_PTR>
-    explicit IXformSchema( CPROP_PTR iParentObject,
+    explicit IXformSchema( CPROP_PTR iParent,
 
                            const Abc::Argument &iArg0 = Abc::Argument(),
                            const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<XformSchemaInfo>( iParentObject, iArg0, iArg1 )
+      : Abc::ISchema<XformSchemaInfo>( iParent, iArg0, iArg1 )
     {
         init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
     }

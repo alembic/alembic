@@ -71,13 +71,13 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSampling.
     template <class CPROP_PTR>
-    OCameraSchema( CPROP_PTR iParentObject,
+    OCameraSchema( CPROP_PTR iParent,
                      const std::string &iName,
 
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CameraSchemaInfo>( iParentObject, iName,
+      : Abc::OSchema<CameraSchemaInfo>( iParent, iName,
                                             iArg0, iArg1, iArg2 )
     {
 
@@ -91,7 +91,7 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParentObject->getObject()->getArchive(
+            tsIndex = iParent->getObject()->getArchive(
                 )->addTimeSampling(*tsPtr);
         }
 
@@ -101,11 +101,11 @@ public:
     }
 
     template <class CPROP_PTR>
-    explicit OCameraSchema( CPROP_PTR iParentObject,
+    explicit OCameraSchema( CPROP_PTR iParent,
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument(),
                               const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CameraSchemaInfo>( iParentObject,
+      : Abc::OSchema<CameraSchemaInfo>( iParent,
                                             iArg0, iArg1, iArg2 )
     {
 
@@ -119,7 +119,7 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParentObject->getObject()->getArchive(
+            tsIndex = iParent->getObject()->getArchive(
                 )->addTimeSampling(*tsPtr);
         }
 

@@ -45,6 +45,11 @@
 namespace Alembic {
 namespace AbcGeom {
 
+//-*****************************************************************************
+// for default "null" values for the int scalar properties
+static const int32_t ABC_GEOM_NUPATCH_NULL_INT_VALUE( INT_MIN / 4 );
+
+//-*****************************************************************************
 class ONuPatchSchema : public Abc::OSchema<NuPatchSchemaInfo>
 {
 public:
@@ -60,10 +65,10 @@ public:
 
         Sample(
                 const Abc::V3fArraySample &iPos,
-                const uint64_t &iNumU,
-                const uint64_t &iNumV,
-                const uint64_t &iUOrder,
-                const uint64_t &iVOrder,
+                const int32_t &iNumU,
+                const int32_t &iNumV,
+                const int32_t &iUOrder,
+                const int32_t &iVOrder,
                 const Abc::FloatArraySample &iUKnot,
                 const Abc::FloatArraySample &iVKnot,
                 const ON3fGeomParam::Sample &iNormals = ON3fGeomParam::Sample(),
@@ -77,15 +82,16 @@ public:
                , m_vKnot( iVKnot )
                , m_normals( iNormals )
                , m_uvs( iUVs )
-               , m_trimNumLoops( 0 )
-               , m_trimNumVertices( Abc::UInt64ArraySample() )
-               , m_trimOrder( Abc::UInt64ArraySample() )
+               , m_trimNumLoops( ABC_GEOM_NUPATCH_NULL_INT_VALUE )
+               , m_trimNumVertices( Abc::Int32ArraySample() )
+               , m_trimOrder( Abc::Int32ArraySample() )
                , m_trimKnot( Abc::FloatArraySample() )
                , m_trimMin( Abc::FloatArraySample() )
                , m_trimMax( Abc::FloatArraySample() )
                , m_trimU( Abc::FloatArraySample() )
                , m_trimV( Abc::FloatArraySample() )
                , m_trimW( Abc::FloatArraySample() )
+               , m_hasTrimCurve( false )
             {}
 
 
@@ -95,23 +101,23 @@ public:
         { m_positions = iSmp; }
 
         // nu
-        const uint64_t &getNu() const { return m_numU; }
-        void setNu( const int &iNu )
+        const int32_t getNu() const { return m_numU; }
+        void setNu( const int32_t iNu )
         { m_numU = iNu; }
 
         // nv
-        const uint64_t &getNv() const { return m_numV; }
-        void setNv( const int &iNv )
+        const int32_t getNv() const { return m_numV; }
+        void setNv( const int32_t iNv )
         { m_numV = iNv; }
 
         // uOrder
-        const uint64_t &getUOrder() const { return m_uOrder; }
-        void setUOrder( const int &iUOrder )
+        const int32_t getUOrder() const { return m_uOrder; }
+        void setUOrder( const int32_t iUOrder )
         { m_uOrder = iUOrder; }
 
         // vOrder
-        const uint64_t &getVOrder() const { return m_vOrder; }
-        void setVOrder( const int &iVOrder )
+        const int32_t getVOrder() const { return m_vOrder; }
+        void setVOrder( const int32_t iVOrder )
         { m_vOrder = iVOrder; }
 
         // uKnot
@@ -144,16 +150,16 @@ public:
         { m_childBounds = iBnds; }
 
         // trim curves
-        void setTrimCurve( const uint64_t &i_trim_nLoops,
-                           const Abc::UInt64ArraySample &i_trim_nCurves,
-                           const Abc::UInt64ArraySample &i_trim_n,
-                           const Abc::UInt64ArraySample &i_trim_order,
+        void setTrimCurve( const int32_t i_trim_nLoops,
+                           const Abc::Int32ArraySample &i_trim_nCurves,
+                           const Abc::Int32ArraySample &i_trim_n,
+                           const Abc::Int32ArraySample &i_trim_order,
                            const Abc::FloatArraySample &i_trim_knot,
                            const Abc::FloatArraySample &i_trim_min,
                            const Abc::FloatArraySample &i_trim_max,
                            const Abc::FloatArraySample &i_trim_u,
                            const Abc::FloatArraySample &i_trim_v,
-                           const Abc::FloatArraySample &i_trim_w)
+                           const Abc::FloatArraySample &i_trim_w )
         {
             m_trimNumLoops = i_trim_nLoops;
             m_trimNumCurves = i_trim_nCurves;
@@ -169,10 +175,13 @@ public:
             m_hasTrimCurve = true;
         }
 
-        const uint64_t &getTrimNumLoops() const { return m_trimNumLoops; }
-        const Abc::UInt64ArraySample &getTrimNumCurves() const { return m_trimNumCurves; }
-        const Abc::UInt64ArraySample &getTrimNumVertices() const { return m_trimNumVertices; }
-        const Abc::UInt64ArraySample &getTrimOrder() const { return m_trimOrder; }
+        const int32_t getTrimNumLoops() const { return m_trimNumLoops; }
+        const Abc::Int32ArraySample &getTrimNumCurves() const
+        { return m_trimNumCurves; }
+        const Abc::Int32ArraySample &getTrimNumVertices() const
+        { return m_trimNumVertices; }
+        const Abc::Int32ArraySample &getTrimOrder() const
+        { return m_trimOrder; }
         const Abc::FloatArraySample &getTrimKnot() const { return m_trimKnot; }
         const Abc::FloatArraySample &getTrimMin() const { return m_trimMin; }
         const Abc::FloatArraySample &getTrimMax() const { return m_trimMax; }
@@ -180,24 +189,18 @@ public:
         const Abc::FloatArraySample &getTrimV() const { return m_trimV; }
         const Abc::FloatArraySample &getTrimW() const { return m_trimW; }
 
-        const bool hasTrimCurve() const { return m_trimNumLoops &&
-                                            m_trimNumCurves &&
-                                            m_trimNumVertices &&
-                                            m_trimOrder &&
-                                            m_trimKnot &&
-                                            m_trimMin &&
-                                            m_trimMax &&
-                                            m_trimU &&
-                                            m_trimV &&
-                                            m_trimW; }
+        const bool hasTrimCurve() const
+        {
+            return m_hasTrimCurve;
+        }
 
         void reset()
         {
             m_positions.reset();
-            m_numU = 1;
-            m_numV = 1;
-            m_uOrder = 1;
-            m_vOrder = 1;
+            m_numU = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
+            m_numV = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
+            m_uOrder = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
+            m_vOrder = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
             m_uKnot.reset();
             m_vKnot.reset();
             m_normals.reset();
@@ -206,7 +209,7 @@ public:
             m_childBounds.makeEmpty();
 
             // reset trim curves
-            m_trimNumLoops = 0;
+            m_trimNumLoops = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
             m_trimNumCurves.reset();
             m_trimNumVertices.reset();
             m_trimOrder.reset();
@@ -223,10 +226,10 @@ public:
 
         // required properties
         Abc::V3fArraySample m_positions;
-        uint64_t m_numU;
-        uint64_t m_numV;
-        uint64_t m_uOrder;
-        uint64_t m_vOrder;
+        int32_t m_numU;
+        int32_t m_numV;
+        int32_t m_uOrder;
+        int32_t m_vOrder;
         Abc::FloatArraySample m_uKnot;
         Abc::FloatArraySample m_vKnot;
 
@@ -236,9 +239,9 @@ public:
 
         // optional trim curves
         uint64_t m_trimNumLoops;
-        Abc::UInt64ArraySample m_trimNumCurves;
-        Abc::UInt64ArraySample m_trimNumVertices;
-        Abc::UInt64ArraySample m_trimOrder;
+        Abc::Int32ArraySample m_trimNumCurves;
+        Abc::Int32ArraySample m_trimNumVertices;
+        Abc::Int32ArraySample m_trimOrder;
         Abc::FloatArraySample m_trimKnot;
         Abc::FloatArraySample m_trimMin;
         Abc::FloatArraySample m_trimMax;
@@ -279,12 +282,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSamplingType.
     template <class CPROP_PTR>
-    ONuPatchSchema( CPROP_PTR iParentObject,
+    ONuPatchSchema( CPROP_PTR iParent,
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<NuPatchSchemaInfo>( iParentObject, iName,
+      : Abc::OSchema<NuPatchSchemaInfo>( iParent, iName,
                                             iArg0, iArg1, iArg2 )
     {
 
@@ -298,7 +301,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParentObject->getObject()->getArchive()->
+            tsIndex = iParent->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 
@@ -357,7 +360,7 @@ public:
     size_t getNumSamples()
     { return m_positions.getNumSamples(); }
 
-    //! Set a sample! 
+    //! Set a sample!
     void set( const sample_type &iSamp );
 
     //! Set from previous sample. Will apply to each of positions,
@@ -383,7 +386,7 @@ public:
         m_vOrder.reset();
         m_uKnot.reset();
         m_vKnot.reset();
-        
+
         m_normals.reset();
         m_uvs.reset();
 
@@ -425,10 +428,10 @@ protected:
     Abc::OV3fArrayProperty m_positions;
 
     // required properties
-    Abc::OUInt64Property m_numU;
-    Abc::OUInt64Property m_numV;
-    Abc::OUInt64Property m_uOrder;
-    Abc::OUInt64Property m_vOrder;
+    Abc::OInt32Property m_numU;
+    Abc::OInt32Property m_numV;
+    Abc::OInt32Property m_uOrder;
+    Abc::OInt32Property m_vOrder;
     Abc::OFloatArrayProperty m_uKnot;
     Abc::OFloatArrayProperty m_vKnot;
 
@@ -437,10 +440,10 @@ protected:
     OV2fGeomParam m_uvs;
 
     // optional trim curves
-    Abc::OUInt64Property m_trimNumLoops;
-    Abc::OUInt64ArrayProperty m_trimNumCurves;
-    Abc::OUInt64ArrayProperty m_trimNumVertices;
-    Abc::OUInt64ArrayProperty m_trimOrder;
+    Abc::OInt32Property m_trimNumLoops;
+    Abc::OInt32ArrayProperty m_trimNumCurves;
+    Abc::OInt32ArrayProperty m_trimNumVertices;
+    Abc::OInt32ArrayProperty m_trimOrder;
     Abc::OFloatArrayProperty m_trimKnot;
     Abc::OFloatArrayProperty m_trimMin;
     Abc::OFloatArrayProperty m_trimMax;

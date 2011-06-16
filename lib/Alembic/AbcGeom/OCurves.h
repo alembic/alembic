@@ -224,12 +224,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSamplingType.
     template <class CPROP_PTR>
-    OCurvesSchema( CPROP_PTR iParentObject,
+    OCurvesSchema( CPROP_PTR iParent,
                    const std::string &iName,
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument(),
                    const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CurvesSchemaInfo>( iParentObject, iName,
+      : Abc::OSchema<CurvesSchemaInfo>( iParent, iName,
                                         iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
@@ -242,7 +242,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParentObject->getObject()->getArchive()->
+            tsIndex = iParent->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 
@@ -250,11 +250,11 @@ public:
     }
 
     template <class CPROP_PTR>
-    explicit OCurvesSchema( CPROP_PTR iParentObject,
+    explicit OCurvesSchema( CPROP_PTR iParent,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument(),
                             const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CurvesSchemaInfo>( iParentObject,
+      : Abc::OSchema<CurvesSchemaInfo>( iParent,
                                         iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
@@ -267,7 +267,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParentObject->getObject()->getArchive()->
+            tsIndex = iParent->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 

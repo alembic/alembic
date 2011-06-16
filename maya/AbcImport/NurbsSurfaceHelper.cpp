@@ -59,7 +59,7 @@ namespace
         MFnNurbsSurface & iFnSurface)
     {
 
-        Alembic::Util::uint64_t numLoops = iSamp.getTrimNumLoops();
+        Alembic::Util::int32_t numLoops = iSamp.getTrimNumLoops();
         if (numLoops == 0)
             return;
 
@@ -73,34 +73,34 @@ namespace
 
         MStatus status = MS::kSuccess;
 
-        Alembic::Abc::UInt64ArraySamplePtr numCurvesPerLoop =
+        Alembic::Abc::Int32ArraySamplePtr numCurvesPerLoop =
             iSamp.getTrimNumCurves();
-        Alembic::Abc::UInt64ArraySamplePtr numCurveVerts =
+        Alembic::Abc::Int32ArraySamplePtr numCurveVerts =
             iSamp.getTrimNumVertices();
-        Alembic::Abc::UInt64ArraySamplePtr orders = iSamp.getTrimOrders();
+        Alembic::Abc::Int32ArraySamplePtr orders = iSamp.getTrimOrders();
         Alembic::Abc::FloatArraySamplePtr knots = iSamp.getTrimKnots();
         Alembic::Abc::FloatArraySamplePtr uVert = iSamp.getTrimU();
         Alembic::Abc::FloatArraySamplePtr vVert = iSamp.getTrimV();
         Alembic::Abc::FloatArraySamplePtr wVert = iSamp.getTrimW();
 
-        Alembic::Util::uint64_t curCurve = 0;
-        Alembic::Util::uint64_t curPos = 0;
-        Alembic::Util::uint64_t curKnot = 0;
+        Alembic::Util::int32_t curCurve = 0;
+        Alembic::Util::int32_t curPos = 0;
+        Alembic::Util::int32_t curKnot = 0;
 
-        for (Alembic::Util::uint64_t i = 0; i < numLoops; ++i)
+        for (Alembic::Util::int32_t i = 0; i < numLoops; ++i)
         {
             MObjectArray trimLoop;
 
-            Alembic::Util::uint64_t numCurves = (*numCurvesPerLoop)[i];
-            for (Alembic::Util::uint64_t j = 0; j < numCurves; ++j, ++curCurve)
+            Alembic::Util::int32_t numCurves = (*numCurvesPerLoop)[i];
+            for (Alembic::Util::int32_t j = 0; j < numCurves; ++j, ++curCurve)
             {
                 unsigned int degree = (*orders)[curCurve] - 1;
-                Alembic::Util::uint64_t numVerts = (*numCurveVerts)[curCurve];
-                Alembic::Util::uint64_t numKnots = numVerts + degree + 1;
+                Alembic::Util::int32_t numVerts = (*numCurveVerts)[curCurve];
+                Alembic::Util::int32_t numKnots = numVerts + degree + 1;
 
                 MPointArray cvs;
                 cvs.setLength(numVerts);
-                for (Alembic::Util::uint64_t k=0 ; k<numVerts; ++k, ++curPos)
+                for (Alembic::Util::int32_t k=0 ; k<numVerts; ++k, ++curPos)
                 {
                     double x = (*uVert)[curPos];
                     double y = (*vVert)[curPos];
@@ -112,7 +112,7 @@ namespace
                 MDoubleArray dknots;
                 dknots.setLength(numKnots - 2);
                 ++curKnot;
-                for (Alembic::Util::uint64_t j = 1; j < numKnots - 1;
+                for (Alembic::Util::int32_t j = 1; j < numKnots - 1;
                     ++j, ++curKnot)
                 {
                     dknots.set((*knots)[curKnot], j - 1);

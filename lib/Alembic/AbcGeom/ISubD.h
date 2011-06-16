@@ -192,12 +192,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy and to specify
     //! schema interpretation matching.
     template <class CPROP_PTR>
-    ISubDSchema( CPROP_PTR iParentObject,
+    ISubDSchema( CPROP_PTR iParent,
                  const std::string &iName,
 
                  const Abc::Argument &iArg0 = Abc::Argument(),
                  const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<SubDSchemaInfo>( iParentObject, iName,
+      : Abc::ISchema<SubDSchemaInfo>( iParent, iName,
                                       iArg0, iArg1 )
     {
         init(  iArg0, iArg1 );
@@ -206,10 +206,10 @@ public:
     //! Same constructor as above, but use the default schema name, ie,
     //! ".geom".
     template <class CPROP_PTR>
-    explicit ISubDSchema( CPROP_PTR iParentObject,
+    explicit ISubDSchema( CPROP_PTR iParent,
                           const Abc::Argument &iArg0 = Abc::Argument(),
                           const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<SubDSchemaInfo>( iParentObject,
+      : Abc::ISchema<SubDSchemaInfo>( iParent,
                                       iArg0, iArg1 )
     {
         init( iArg0, iArg1 );

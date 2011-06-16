@@ -93,7 +93,10 @@ void IPolyMeshDrw::setTime( chrono_t iSeconds )
     // Use nearest for now.
     ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
     IPolyMeshSchema::Sample psamp;
-    m_polyMesh.getSchema().get( psamp, ss );
+    if ( m_polyMesh.getSchema().getNumSamples() > 0 )
+    {
+        m_polyMesh.getSchema().get( psamp, ss );
+    }
 
     // Get the stuff.
     V3fArraySamplePtr P = psamp.getPositions();

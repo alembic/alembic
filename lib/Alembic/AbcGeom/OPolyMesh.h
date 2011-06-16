@@ -159,13 +159,13 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSamplingType.
     template <class CPROP_PTR>
-    OPolyMeshSchema( CPROP_PTR iParentObject,
+    OPolyMeshSchema( CPROP_PTR iParent,
                      const std::string &iName,
 
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<PolyMeshSchemaInfo>( iParentObject, iName,
+      : Abc::OSchema<PolyMeshSchemaInfo>( iParent, iName,
                                           iArg0, iArg1, iArg2 )
     {
 
@@ -179,7 +179,7 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParentObject->getObject()->getArchive(
+            tsIndex = iParent->getObject()->getArchive(
                 )->addTimeSampling(*tsPtr);
         }
 
@@ -189,11 +189,11 @@ public:
     }
 
     template <class CPROP_PTR>
-    explicit OPolyMeshSchema( CPROP_PTR iParentObject,
+    explicit OPolyMeshSchema( CPROP_PTR iParent,
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument(),
                               const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<PolyMeshSchemaInfo>( iParentObject,
+      : Abc::OSchema<PolyMeshSchemaInfo>( iParent,
                                             iArg0, iArg1, iArg2 )
     {
 
@@ -207,7 +207,7 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParentObject->getObject()->getArchive(
+            tsIndex = iParent->getObject()->getArchive(
                 )->addTimeSampling(*tsPtr);
         }
 

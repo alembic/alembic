@@ -79,12 +79,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSampling.
     template <class CPROP_PTR>
-    OXformSchema( CPROP_PTR iParentObject,
+    OXformSchema( CPROP_PTR iParent,
                   const std::string &iName,
                   const Abc::Argument &iArg0 = Abc::Argument(),
                   const Abc::Argument &iArg1 = Abc::Argument(),
                   const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<XformSchemaInfo>( iParentObject, iName,
+      : Abc::OSchema<XformSchemaInfo>( iParent, iName,
                                        iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
@@ -97,7 +97,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParentObject->getObject()->getArchive()->
+            tsIndex = iParent->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 
@@ -107,11 +107,11 @@ public:
     //! This constructor does the same as the above, but uses the default
     //! name from the XformSchemaInfo struct.
     template <class CPROP_PTR>
-    explicit OXformSchema( CPROP_PTR iParentObject,
+    explicit OXformSchema( CPROP_PTR iParent,
                            const Abc::Argument &iArg0 = Abc::Argument(),
                            const Abc::Argument &iArg1 = Abc::Argument(),
                            const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<XformSchemaInfo>( iParentObject,
+      : Abc::OSchema<XformSchemaInfo>( iParent,
                                        iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
@@ -124,7 +124,7 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParentObject->getObject()->getArchive()->
+            tsIndex = iParent->getObject()->getArchive()->
                 addTimeSampling( *tsPtr );
         }
 

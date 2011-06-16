@@ -121,12 +121,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy and to specify
     //! schema interpretation matching.
     template <class CPROP_PTR>
-    IFaceSetSchema( CPROP_PTR iParentObject,
+    IFaceSetSchema( CPROP_PTR iParent,
                  const std::string &iName,
 
                  const Abc::Argument &iArg0 = Abc::Argument(),
                  const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<FaceSetSchemaInfo>( iParentObject, iName,
+      : Abc::ISchema<FaceSetSchemaInfo>( iParent, iName,
                                       iArg0, iArg1 )
     {
         init(  iArg0, iArg1 );
@@ -135,10 +135,10 @@ public:
     //! Same constructor as above, but use the default schema name, ie,
     //! ".geom".
     template <class CPROP_PTR>
-    explicit IFaceSetSchema( CPROP_PTR iParentObject,
+    explicit IFaceSetSchema( CPROP_PTR iParent,
                           const Abc::Argument &iArg0 = Abc::Argument(),
                           const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<FaceSetSchemaInfo>( iParentObject,
+      : Abc::ISchema<FaceSetSchemaInfo>( iParent,
                                       iArg0, iArg1 )
     {
         init( iArg0, iArg1 );

@@ -57,10 +57,10 @@ public:
         Sample() { reset(); }
 
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
-        uint64_t getNumU() const { return m_numU; }
-        uint64_t getNumV() const { return m_numV; }
-        uint64_t getUOrder() const { return m_uOrder; }
-        uint64_t getVOrder() const { return m_vOrder; }
+        int32_t getNumU() const { return m_numU; }
+        int32_t getNumV() const { return m_numV; }
+        int32_t getUOrder() const { return m_uOrder; }
+        int32_t getVOrder() const { return m_vOrder; }
         Abc::FloatArraySamplePtr getUKnot() const { return m_uKnot; }
         Abc::FloatArraySamplePtr getVKnot() const { return m_vKnot; }
 
@@ -68,10 +68,10 @@ public:
         Abc::Box3d getChildBounds() const { return m_childBounds; }
 
         // trim curve
-        int64_t getTrimNumLoops() const { return m_trimNumLoops; }
-        Abc::UInt64ArraySamplePtr getTrimNumVertices() const { return m_trimNumVertices; }
-        Abc::UInt64ArraySamplePtr getTrimNumCurves() const { return m_trimNumCurves; }
-        Abc::UInt64ArraySamplePtr getTrimOrders() const { return m_trimOrder; }
+        int32_t getTrimNumLoops() const { return m_trimNumLoops; }
+        Abc::Int32ArraySamplePtr getTrimNumVertices() const { return m_trimNumVertices; }
+        Abc::Int32ArraySamplePtr getTrimNumCurves() const { return m_trimNumCurves; }
+        Abc::Int32ArraySamplePtr getTrimOrders() const { return m_trimOrder; }
         Abc::FloatArraySamplePtr getTrimKnots() const { return m_trimKnot; }
         Abc::FloatArraySamplePtr getTrimMins() const { return m_trimMin; }
         Abc::FloatArraySamplePtr getTrimMaxes() const { return m_trimMax; }
@@ -90,10 +90,10 @@ public:
         void reset()
         {
             m_positions.reset();
-            m_numU = 1;
-            m_numV = 1;
-            m_uOrder = 1;
-            m_vOrder = 1;
+            m_numU = 0;
+            m_numV = 0;
+            m_uOrder = 0;
+            m_vOrder = 0;
             m_uKnot.reset();
             m_vKnot.reset();
 
@@ -120,18 +120,18 @@ public:
         friend class INuPatchSchema;
 
         Abc::V3fArraySamplePtr m_positions;
-        uint64_t m_numU;
-        uint64_t m_numV;
-        uint64_t m_uOrder;
-        uint64_t m_vOrder;
+        int32_t m_numU;
+        int32_t m_numV;
+        int32_t m_uOrder;
+        int32_t m_vOrder;
         Abc::FloatArraySamplePtr m_uKnot;
         Abc::FloatArraySamplePtr m_vKnot;
 
         // trim curve
-        uint64_t m_trimNumLoops;
-        Abc::UInt64ArraySamplePtr m_trimNumCurves;
-        Abc::UInt64ArraySamplePtr m_trimNumVertices;
-        Abc::UInt64ArraySamplePtr m_trimOrder;
+        int32_t m_trimNumLoops;
+        Abc::Int32ArraySamplePtr m_trimNumCurves;
+        Abc::Int32ArraySamplePtr m_trimNumVertices;
+        Abc::Int32ArraySamplePtr m_trimOrder;
         Abc::FloatArraySamplePtr m_trimKnot;
         Abc::FloatArraySamplePtr m_trimMin;
         Abc::FloatArraySamplePtr m_trimMax;
@@ -143,7 +143,7 @@ public:
         // bounds
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
-        
+
     };
 
     //-*************************************************************************
@@ -176,12 +176,12 @@ public:
     //! can be used to override the ErrorHandlerPolicy and to specify
     //! schema interpretation matching.
     template <class CPROP_PTR>
-    INuPatchSchema( CPROP_PTR iParentObject,
-                     const std::string &iName,
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<NuPatchSchemaInfo>( iParentObject, iName,
-                                            iArg0, iArg1 )
+    INuPatchSchema( CPROP_PTR iParent,
+                    const std::string &iName,
+                    const Abc::Argument &iArg0 = Abc::Argument(),
+                    const Abc::Argument &iArg1 = Abc::Argument() )
+      : Abc::ISchema<NuPatchSchemaInfo>( iParent, iName,
+                                         iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -210,7 +210,7 @@ public:
     {
         init( iArg0, iArg1 );
     }
-    
+
     //! Return the number of samples contained in the property.
     //! This can be any number, including zero.
     //! This returns the number of samples that were written, independently
@@ -249,10 +249,10 @@ public:
     Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
     Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
 
-    bool hasTrimCurve();
+    bool hasTrimCurve() { return m_hasTrimCurve; }
     bool trimCurveTopologyIsHomogenous();
     bool trimCurveTopologyIsConstant();
-    
+
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
     //-*************************************************************************
@@ -278,7 +278,7 @@ public:
 
         m_selfBounds.reset();
         m_childBounds.reset();
-        
+
         // reset trim curve attributes
         m_trimNumLoops.reset();
         m_trimNumCurves.reset();
@@ -313,26 +313,30 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( INuPatchSchema::valid() );
 
 protected:
-    void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
+    bool hasTrimProps();
+
+protected:
+    void init( const Abc::Argument &iArg0,
+               const Abc::Argument &iArg1 );
 
     // required properties
     Abc::IV3fArrayProperty m_positions;
-    Abc::IUInt64Property m_numU;
-    Abc::IUInt64Property m_numV;
-    Abc::IUInt64Property m_uOrder;
-    Abc::IUInt64Property m_vOrder;
+    Abc::IInt32Property m_numU;
+    Abc::IInt32Property m_numV;
+    Abc::IInt32Property m_uOrder;
+    Abc::IInt32Property m_vOrder;
     Abc::IFloatArrayProperty m_uKnot;
     Abc::IFloatArrayProperty m_vKnot;
 
     // optional
     IN3fGeomParam m_normals;
     IV2fGeomParam m_uvs;
-    
+
     // optional trim curve properties
-    Abc::IUInt64Property m_trimNumLoops;
-    Abc::IUInt64ArrayProperty m_trimNumVertices;
-    Abc::IUInt64ArrayProperty m_trimNumCurves;
-    Abc::IUInt64ArrayProperty m_trimOrder;
+    Abc::IInt32Property m_trimNumLoops;
+    Abc::IInt32ArrayProperty m_trimNumVertices;
+    Abc::IInt32ArrayProperty m_trimNumCurves;
+    Abc::IInt32ArrayProperty m_trimOrder;
     Abc::IFloatArrayProperty m_trimKnot;
     Abc::IFloatArrayProperty m_trimMin;
     Abc::IFloatArrayProperty m_trimMax;
@@ -343,8 +347,10 @@ protected:
     // bounds
     Abc::IBox3dProperty m_selfBounds;
     Abc::IBox3dProperty m_childBounds;
-    
+
     Abc::ICompoundProperty m_arbGeomParams;
+
+    bool m_hasTrimCurve;
 };
 
 //-*****************************************************************************
