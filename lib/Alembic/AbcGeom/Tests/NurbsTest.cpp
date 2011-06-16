@@ -81,7 +81,7 @@
 using namespace std;
 using namespace Alembic::AbcGeom;
 
-using Alembic::Util::uint64_t;
+using Alembic::Util::int32_t;
 using Alembic::Util::float32_t;
 
 void Example1_NurbsOut()
@@ -123,9 +123,9 @@ void Example1_NurbsOut()
 
     // set the trim curve
     nurbsSample.setTrimCurve(   g_trim_nLoops,
-                                UInt64ArraySample( (const uint64_t *) &g_trim_nCurves, 1),
-                                UInt64ArraySample( (const uint64_t *) &g_trim_n, 1),
-                                UInt64ArraySample( (const uint64_t *) &g_trim_order, 1),
+                                Int32ArraySample( (const int32_t *) &g_trim_nCurves, 1),
+                                Int32ArraySample( (const int32_t *) &g_trim_n, 1),
+                                Int32ArraySample( (const int32_t *) &g_trim_order, 1),
                                 FloatArraySample( (const float32_t *) &g_trim_knot, 12),
                                 FloatArraySample( (const float32_t *) &g_trim_min, 1),
                                 FloatArraySample( (const float32_t *) &g_trim_max, 1),

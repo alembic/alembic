@@ -41,21 +41,21 @@
 
 namespace Abc = Alembic::Abc;
 
-extern const Abc::uint64_t g_nu;
-extern const Abc::uint64_t g_nv;
-extern const Abc::uint64_t g_uOrder;
-extern const Abc::uint64_t g_vOrder;
+extern const Abc::int32_t g_nu;
+extern const Abc::int32_t g_nv;
+extern const Abc::int32_t g_uOrder;
+extern const Abc::int32_t g_vOrder;
 extern const Abc::float32_t g_uKnot[];
 extern const Abc::float32_t g_vKnot[];
 
-extern const Abc::uint64_t g_nP;
+extern const Abc::int32_t g_nP;
 extern const Abc::float32_t g_P[];
 
 // trim curve
-extern const Abc::uint64_t g_trim_nLoops;
-extern const Abc::uint64_t g_trim_nCurves[];
-extern const Abc::uint64_t g_trim_n[];
-extern const Abc::uint64_t g_trim_order[];
+extern const Abc::int32_t g_trim_nLoops;
+extern const Abc::int32_t g_trim_nCurves[];
+extern const Abc::int32_t g_trim_n[];
+extern const Abc::int32_t g_trim_order[];
 extern const Abc::float32_t g_trim_knot[];
 extern const Abc::float32_t g_trim_min[];
 extern const Abc::float32_t g_trim_max[];

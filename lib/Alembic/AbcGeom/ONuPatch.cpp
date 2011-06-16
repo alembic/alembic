@@ -338,12 +338,12 @@ void ONuPatchSchema::init( const AbcA::index_t iTsIdx )
 
     // initialize any required properties
     m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
-    m_numU = Abc::OInt32Property( _this, "nu", mdata, iTsIdx );
-    m_numV = Abc::OInt32Property( _this, "nv", mdata, iTsIdx );
-    m_uOrder = Abc::OInt32Property( _this, "uOrder", mdata, iTsIdx );
-    m_vOrder = Abc::OInt32Property( _this, "vOrder", mdata, iTsIdx );
-    m_uKnot = Abc::OFloatArrayProperty( _this, "uKnot", mdata, iTsIdx );
-    m_vKnot = Abc::OFloatArrayProperty( _this, "vKnot", mdata, iTsIdx );
+    m_numU = Abc::OInt32Property( _this, "nu", iTsIdx );
+    m_numV = Abc::OInt32Property( _this, "nv", iTsIdx );
+    m_uOrder = Abc::OInt32Property( _this, "uOrder", iTsIdx );
+    m_vOrder = Abc::OInt32Property( _this, "vOrder", iTsIdx );
+    m_uKnot = Abc::OFloatArrayProperty( _this, "uKnot", iTsIdx );
+    m_vKnot = Abc::OFloatArrayProperty( _this, "vKnot", iTsIdx );
 
     m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 

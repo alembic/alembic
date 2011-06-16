@@ -38,15 +38,15 @@
 
 //-*****************************************************************************
 
-const Abc::uint64_t g_nu = 4;
-const Abc::uint64_t g_nv = 4;
-const Abc::uint64_t g_uOrder = 4;
-const Abc::uint64_t g_vOrder = 4;
+const Abc::int32_t g_nu = 4;
+const Abc::int32_t g_nv = 4;
+const Abc::int32_t g_uOrder = 4;
+const Abc::int32_t g_vOrder = 4;
 
 const Abc::float32_t g_uKnot[] = {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 const Abc::float32_t g_vKnot[] = {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
-const Abc::uint64_t g_nP = 16;
+const Abc::int32_t g_nP = 16;
 const Abc::float32_t g_P[] = {   0.0f, 0.0f, -3.0f,
                                         0.0f, 1.0f, -3.0f,
                                         0.0f, 2.0f, -3.0f,
@@ -65,14 +65,14 @@ const Abc::float32_t g_P[] = {   0.0f, 0.0f, -3.0f,
                                         3.0f, 3.0f, -3.0f};
 
 // trim curve
-const Abc::uint64_t g_trim_nLoops = 1;
-const Abc::uint64_t g_trim_nCurves[] = { 1 };
-const Abc::uint64_t g_trim_order[] = { 3 };
+const Abc::int32_t g_trim_nLoops = 1;
+const Abc::int32_t g_trim_nCurves[] = { 1 };
+const Abc::int32_t g_trim_order[] = { 3 };
 const Abc::float32_t g_trim_knot[] = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f, 2.0f,
                                         3.0f, 3.0f, 4.0f, 4.0f, 4.0f };
 const Abc::float32_t g_trim_min[] = { 0.0f };
 const Abc::float32_t g_trim_max[] = { 1.0f };
-const Abc::uint64_t g_trim_n[] = { 9 };
+const Abc::int32_t g_trim_n[] = { 9 };
 const Abc::float32_t g_trim_u[] = { 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 const Abc::float32_t g_trim_v[] = { 0.5f, 1.0f, 2.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f };
 const Abc::float32_t g_trim_w[] = { 1.0f, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 2.0f, 1.0f, 1.0f };
