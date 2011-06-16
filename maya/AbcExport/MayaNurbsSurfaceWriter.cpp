@@ -214,10 +214,10 @@ void MayaNurbsSurfaceWriter::write()
             trimNumCurves[i] += length;
             for (size_t k = 0; k < length; k++)
             {
-                MObject mNurbsCurveObj = boundary[k];
-                if (mNurbsCurveObj.hasFn(MFn::kNurbsCurve))
+                MObject curveObj = boundary[k];
+                if (curveObj.hasFn(MFn::kNurbsCurve))
                 {
-                    MFnNurbsCurve mFnCurve(mNurbsCurveObj);
+                    MFnNurbsCurve mFnCurve(curveObj);
 
                     std::size_t numCVs = mFnCurve.numCVs();
                     trimNumPos.push_back(numCVs);

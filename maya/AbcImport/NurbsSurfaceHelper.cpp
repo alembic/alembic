@@ -104,18 +104,17 @@ namespace
                 {
                     double x = (*uVert)[curPos];
                     double y = (*vVert)[curPos];
-                    double z = 0.0;
                     double w = (*wVert)[curPos];
-                    cvs.set(j, x, offsetV-y, 0.0, w);
+                    cvs.set(k, x, offsetV-y, 0.0, w);
                 }
 
                 MDoubleArray dknots;
                 dknots.setLength(numKnots - 2);
                 ++curKnot;
-                for (Alembic::Util::int32_t j = 1; j < numKnots - 1;
-                    ++j, ++curKnot)
+                for (Alembic::Util::int32_t k = 1; k < numKnots - 1;
+                    ++k, ++curKnot)
                 {
-                    dknots.set((*knots)[curKnot], j - 1);
+                    dknots.set((*knots)[curKnot], k - 1);
                 }
                 ++curKnot;
 
