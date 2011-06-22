@@ -130,6 +130,20 @@ bool IArrayProperty::getKey( AbcA::ArraySampleKey& oKey,
 }
 
 //-*****************************************************************************
+void IArrayProperty::getDimensions( Util::Dimensions & oDim,
+                          const ISampleSelector &iSS )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getDimensions()" );
+
+    m_property->getDimensions(
+        iSS.getIndex( m_property->getTimeSampling(),
+            m_property->getNumSamples() ),
+        oDim );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
 ICompoundProperty IArrayProperty::getParent()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getParent()" );

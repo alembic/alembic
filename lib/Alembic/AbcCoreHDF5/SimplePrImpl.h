@@ -109,6 +109,9 @@ public:
     virtual bool getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey );
 
 protected:
+
+    index_t verifySampleIndex( index_t iSampleIndex );
+
     // Parent compound property writer. It must exist.
     AbcA::CompoundPropertyReaderPtr m_parent;
 
@@ -255,6 +258,30 @@ bool SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::isConstant()
 
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE>
+index_t SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::verifySampleIndex( index_t iIndex)
+{
+    // Verify sample index
+    ABCA_ASSERT( iIndex >= 0 &&
+                 iIndex < m_numSamples,
+                 "Invalid sample index: " << iIndex
+                 << ", should be between 0 and " << m_numSamples-1 );
+
+    // greater than the last index that had a change?  read it from there
+    if ( iIndex > m_lastChangedIndex )
+    {
+        iIndex = m_lastChangedIndex;
+    }
+    // less than the first change?  map to 0
+    else if ( iIndex < m_firstChangedIndex )
+    {
+        iIndex = 0;
+    }
+
+    return iIndex;
+}
+
+//-*****************************************************************************
+template <class ABSTRACT, class IMPL, class SAMPLE>
 std::pair<index_t, chrono_t>
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getFloorIndex( chrono_t iTime )
 {
@@ -283,22 +310,8 @@ void
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
                                                SAMPLE oSample )
 {
-    // Verify sample index
-    ABCA_ASSERT( iSampleIndex >= 0 &&
-                 iSampleIndex < m_numSamples,
-                 "Invalid sample index: " << iSampleIndex
-                 << ", should be between 0 and " << m_numSamples-1 );
 
-    // greater than the last index that had a change?  read it from there
-    if ( iSampleIndex > m_lastChangedIndex )
-    {
-        iSampleIndex = m_lastChangedIndex;
-    }
-    // less than the first change?  map to 0
-    else if ( iSampleIndex < m_firstChangedIndex )
-    {
-        iSampleIndex = 0;
-    }
+    iSampleIndex = verifySampleIndex( iSampleIndex );
 
     // Get our name.
     const std::string &myName = m_header->getName();
@@ -361,23 +374,7 @@ bool
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
                                                AbcA::ArraySampleKey & oKey )
 {
-    // Verify sample index
-    ABCA_ASSERT( iSampleIndex >= 0 &&
-                 iSampleIndex < m_numSamples,
-                 "Invalid sample index: " << iSampleIndex
-                 << ", should be between 0 and " << m_numSamples-1 );
-
-    // greater than the last index that had a change?  read it from there
-    if ( iSampleIndex > m_lastChangedIndex )
-    {
-        iSampleIndex = m_lastChangedIndex;
-    }
-    // less than the first change?  map to 0
-    else if ( iSampleIndex < m_firstChangedIndex )
-    {
-        iSampleIndex = 0;
-    }
-
+    iSampleIndex = verifySampleIndex( iSampleIndex );
 
     // Get our name.
     const std::string &myName = m_header->getName();

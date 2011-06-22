@@ -169,6 +169,45 @@ ReadDimensions( hid_t iParent,
 }
 
 //-*****************************************************************************
+// Get the dimensions directly off of the dataspace on the dataset
+// This isn't suitable for string and wstring
+void
+ReadDataSetDimensions( hid_t iParent,
+                const std::string &iName,
+                hsize_t iExtent,
+                Dimensions &oDims )
+{
+    // Open the data set.
+    hid_t dsetId = H5Dopen( iParent, iName.c_str(), H5P_DEFAULT );
+    ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
+    DsetCloser dsetCloser( dsetId );
+
+    // Read the data space.
+    hid_t dspaceId = H5Dget_space( dsetId );
+    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
+                 << iName );
+    DspaceCloser dspaceCloser( dspaceId );
+
+    H5S_class_t dspaceClass = H5Sget_simple_extent_type( dspaceId );
+    if ( dspaceClass == H5S_SIMPLE )
+    {
+        // Get the dimensions
+        int rank = H5Sget_simple_extent_ndims( dspaceId );
+        ABCA_ASSERT( rank == 1, "H5Sget_simple_extent_ndims() must be 1." );
+
+        hsize_t hdim = 0;
+        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
+        oDims.setRank(1);
+        oDims[0] = hdim / iExtent;
+    }
+    else
+    {
+        oDims.setRank(1);
+        oDims[0] = 0;
+    }
+}
+
+//-*****************************************************************************
 bool
 ReadKey( hid_t iParent,
          const std::string &iAttrName,

@@ -97,6 +97,13 @@ ReadDimensions( hid_t iParent,
                 Dimensions &oDims );
 
 //-*****************************************************************************
+void
+ReadDataSetDimensions( hid_t iParent,
+                       const std::string &iName,
+                       hsize_t iExtent,
+                       Dimensions &oDims );
+
+//-*****************************************************************************
 AbcA::ArraySamplePtr 
 ReadArray( AbcA::ReadArraySampleCachePtr iCache,
            hid_t iGroup,

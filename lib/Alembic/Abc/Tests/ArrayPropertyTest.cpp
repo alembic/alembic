@@ -383,6 +383,21 @@ void readWriteColorArrayProperty(const std::string &archiveName)
         ABCA_ASSERT( samplePtr->getDimensions()[1] == 4,
             "Incorrect size on dimension 1." );
 
+        Alembic::Util::Dimensions dims;
+        shades.getDimensions( dims );
+
+        ABCA_ASSERT( dims.rank() == 2,
+            "Incorrect rank on the sample." );
+
+        ABCA_ASSERT( dims.numPoints() == 8,
+            "Incorrect number of total points." );
+
+        ABCA_ASSERT( dims[0] == 2,
+            "Incorrect size on dimension 0." );
+
+        ABCA_ASSERT( dims[1] == 4,
+            "Incorrect size on dimension 1." );
+
         for (size_t i = 0; i < 8; ++i)
         {
             ABCA_ASSERT( (*samplePtr)[i].x == i/8.0 &&
