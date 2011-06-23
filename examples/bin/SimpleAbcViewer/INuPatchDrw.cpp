@@ -130,7 +130,21 @@ void INuPatchDrw::setTime( chrono_t iSeconds )
 void INuPatchDrw::draw( const DrawContext &iCtx )
 {
 
-    const V3f *points = m_positions -> get();
+    const V3f * oldPoints = m_positions -> get();
+    std::vector<GLfloat> points(m_positions->size() * 3);
+    unsigned int curPos = 0;
+    for (unsigned int v = 0; v < m_nv; ++v)
+    {
+        for (unsigned int u = 0; u < m_nu; ++u, ++curPos)
+        {
+            // go from u,v order to reversed v, u order
+            unsigned int glIndex = (u * m_nv + (m_nv - v - 1)) * 3;
+            points[glIndex] = oldPoints[curPos].x;
+            points[glIndex+1] = oldPoints[curPos].y;
+            points[glIndex+2] = oldPoints[curPos].z;
+        }
+    }
+
     const float *u_knot = m_uKnot -> get();
     const float *v_knot = m_vKnot -> get();
     size_t nknotu = m_uKnot -> size();
@@ -143,8 +157,8 @@ void INuPatchDrw::draw( const DrawContext &iCtx )
         gluNurbsSurface( nurb,
                         nknotu, (GLfloat *) &u_knot[0],
                         nknotv, (GLfloat *) &v_knot[0],
-                        m_nu*3, 3, // stride
-                        (GLfloat *) &points[0][0],
+                        m_nv*3, 3, // stride
+                        &(points.front()),
                         m_uOrder, m_vOrder, //orders
                         GL_MAP2_VERTEX_3
                         );
