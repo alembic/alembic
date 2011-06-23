@@ -91,6 +91,9 @@ void ProcessXform( IXform &xform, ProcArgs &args )
                 break;
             }
             case kRotateOperation:
+            case kRotateXOperation:
+            case kRotateYOperation:
+            case kRotateZOperation:
             {
                 V3d axis = op.getAxis();
                 float degrees = op.getAngle();
