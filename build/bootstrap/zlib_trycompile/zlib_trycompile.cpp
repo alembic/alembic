@@ -20,7 +20,9 @@
 
 #include <stdio.h>
 #ifdef PLATFORM_WINDOWS
-#  include <unistd111.h>
+# include <unistd111.h>
+#else
+#include <unistd.h>
 #endif
 #include <string.h>
 #include <assert.h>
