@@ -39,19 +39,20 @@
 
 #include <Alembic/AbcGeom/All.h>
 
-namespace Abc = Alembic::Abc;
+using Alembic::Util::float32_t;
+using Alembic::Util::int32_t;
 
 //-*****************************************************************************
 // This data is used by both the PolyMesh and SubD tests.
 extern const size_t g_numCurves;
 extern const size_t g_totalVerts;
-extern const Abc::uint32_t g_numVerts[];
-extern const Abc::float32_t g_verts[];
+extern const int32_t g_numVerts[];
+extern const float32_t g_verts[];
 
 extern const size_t g_numWidths;
-extern const Abc::float32_t g_widths[];
+extern const float32_t g_widths[];
 
-extern const Abc::float32_t g_uvs[];
+extern const float32_t g_uvs[];
 
 
 //-*******************************

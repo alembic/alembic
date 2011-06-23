@@ -101,7 +101,7 @@ public:
             m_scope = kUnknownScope;
         }
 
-        bool valid() { return m_vals; }
+        bool valid() const { return m_vals; }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
 

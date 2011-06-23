@@ -66,16 +66,12 @@ public:
             else { return 0; }
         }
 
-        Abc::UInt32ArraySamplePtr getCurvesNumVertices() const
+        Abc::Int32ArraySamplePtr getCurvesNumVertices() const
         { return m_nVertices; }
 
         CurveType getType() const { return m_type; }
         CurvePeriodicity getWrap() const { return m_wrap; }
         BasisType getBasis() const { return m_basis; }
-
-        Abc::FloatArraySamplePtr getWidths() const { return m_widths; }
-        Abc::V2fArraySamplePtr getUVs() const { return m_uvs; }
-        Abc::V3fArraySamplePtr getNormals() const { return m_normals; }
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
@@ -89,10 +85,6 @@ public:
         {
             m_positions.reset();
             m_nVertices.reset();
-
-            m_widths.reset();
-            m_uvs.reset();
-            m_normals.reset();
 
             m_type = kCubic;
             m_wrap = kNonPeriodic;
@@ -112,16 +104,11 @@ public:
         Abc::Box3d m_childBounds;
 
         // type, wrap, and nVertices
-        Abc::UInt32ArraySamplePtr m_nVertices;
+        Abc::Int32ArraySamplePtr m_nVertices;
 
         CurveType m_type;
         BasisType m_basis;
         CurvePeriodicity m_wrap;
-
-        Abc::FloatArraySamplePtr m_widths;
-        Abc::V2fArraySamplePtr m_uvs;
-        Abc::V3fArraySamplePtr m_normals;
-
     };
 
     //-*************************************************************************
@@ -219,9 +206,10 @@ public:
 
 
     Abc::IV3fArrayProperty getPositions() { return m_positions; }
-    Abc::IV2fArrayProperty getUVs() { return m_uvs; }
-    Abc::IV3fArrayProperty getNormals() { return m_normals; }
-    Abc::IFloatArrayProperty getWidths() { return m_widths; }
+
+    IV2fGeomParam &getUVs() { return m_uvs; }
+    IN3fGeomParam &getNormals() { return m_normals; }
+    IFloatGeomParam &getWidths() { return m_widths; }
 
     Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
     Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
@@ -273,14 +261,14 @@ protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
     Abc::IV3fArrayProperty m_positions;
-    Abc::IUInt32ArrayProperty  m_nVertices;
+    Abc::IInt32ArrayProperty  m_nVertices;
 
     // contains type, wrap, ubasis, and vbasis.
     Abc::IScalarProperty m_basisAndType;
 
-    Abc::IFloatArrayProperty m_widths;
-    Abc::IV2fArrayProperty m_uvs;
-    Abc::IV3fArrayProperty m_normals;
+    IFloatGeomParam m_widths;
+    IV2fGeomParam m_uvs;
+    IN3fGeomParam m_normals;
 
     Abc::IBox3dProperty m_selfBounds;
     Abc::IBox3dProperty m_childBounds;

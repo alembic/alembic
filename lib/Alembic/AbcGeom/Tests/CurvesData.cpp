@@ -39,43 +39,45 @@
 //-*****************************************************************************
 
 const size_t g_numCurves = 2;
-const Abc::uint32_t g_numVerts[] = {8, 4};
+const int32_t g_numVerts[] = {8, 4};
 const size_t g_totalVerts = 12;
 
-const Abc::float32_t g_verts[] = {      // first curve
-                                        -1.0f, -1.0f, -1.0f,
-                                        1.0f, -1.0f, -1.0f,
-                                        -1.0f, 1.0f, -1.0f,
-                                        1.0f, 1.0f, -1.0f,
-                                        -1.0f, -1.0f, 1.0f,
-                                        1.0f, -1.0f, 1.0f,
-                                        -1.0f, 1.0f, 1.0f,
-                                        1.0f, 1.0f, 1.0f,
-                                          
-                                        // second curve
-                                        1.0f, 0.0f, 1.0f,
-                                        0.5f, 0.25f, 1.0f,
-                                        0.5f, 0.75f, 1.0f,
-                                        1.0f, 1.0f, 1.0f
-                                        };
+const float32_t g_verts[] = {      // first curve
+    -1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    -1.0f, 1.0f, -1.0f,
+    1.0f, 1.0f, -1.0f,
+    -1.0f, -1.0f, 1.0f,
+    1.0f, -1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
 
-const Abc::float32_t g_uvs[] = {    0.0, 0.0,
-                                    0.1, 0.0,
-                                    0.2, 0.0,
-                                    0.3, 0.0,
-                                    0.4, 0.0,
-                                    0.5, 0.0,
-                                    0.6, 0.0,
-                                    0.7, 0.0,
-                                    0.0, 0.0,
-                                    0.25, 0.0,
-                                    0.5, 0.0,
-                                    1.0, 0.0
-                                };
-                                
-const Abc::float32_t g_widths[] = {    // first curve
-                                        1.0, 0.2,
-                                        
-                                        // second curve
-                                        1.0, 1.0
-                                        };
+    // second curve
+    1.0f, 0.0f, 1.0f,
+    0.5f, 0.25f, 1.0f,
+    0.5f, 0.75f, 1.0f,
+    1.0f, 1.0f, 1.0f
+};
+
+const float32_t g_uvs[] = {    0.0, 0.0,
+                               0.1, 0.0,
+                               0.2, 0.0,
+                               0.3, 0.0,
+                               0.4, 0.0,
+                               0.5, 0.0,
+                               0.6, 0.0,
+                               0.7, 0.0,
+                               0.0, 0.0,
+                               0.25, 0.0,
+                               0.5, 0.0,
+                               1.0, 0.0
+};
+
+const float32_t g_widths[] = {    // first curve
+    1.0, 0.2,
+
+    // second curve
+    1.0, 1.0
+};
+
+const size_t g_numWidths = 4;

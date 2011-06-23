@@ -179,7 +179,7 @@ void INuPatchSchema::get( sample_type &oSample,
 void INuPatchSchema::init( const Abc::Argument &iArg0,
                             const Abc::Argument &iArg1 )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesTrait::init()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "INuPatchSchema::init()" );
 
     Abc::Arguments args;
     iArg0.setInto( args );

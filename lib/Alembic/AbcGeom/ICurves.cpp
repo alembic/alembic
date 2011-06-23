@@ -69,7 +69,7 @@ MeshTopologyVariance ICurvesSchema::getTopologyVariance()
 void ICurvesSchema::init( const Abc::Argument &iArg0,
                           const Abc::Argument &iArg1 )
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesTrait::init()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::init()" );
 
     Abc::Arguments args;
     iArg0.setInto( args );
@@ -80,7 +80,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     m_positions = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
 
-    m_nVertices = Abc::IUInt32ArrayProperty( _this, "nVertices",
+    m_nVertices = Abc::IInt32ArrayProperty( _this, "nVertices",
                                             args.getSchemaInterpMatching());
 
     m_basisAndType = Abc::IScalarProperty( _this, "curveBasisAndType",
@@ -97,17 +97,17 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
-        m_uvs = Abc::IV2fArrayProperty( _this, "uv", iArg0, iArg1 );
+        m_uvs = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( "N" ) != NULL )
     {
-        m_normals = Abc::IV3fArrayProperty( _this, "N", iArg0, iArg1 );
+        m_normals = IN3fGeomParam( _this, "N", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( "width" ) != NULL )
     {
-        m_widths = Abc::IFloatArrayProperty( _this, "width", iArg0, iArg1 );
+        m_widths = IFloatGeomParam( _this, "width", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
@@ -126,6 +126,8 @@ void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::get()" );
 
+    if ( ! valid() ) { return; }
+
     m_positions.get( oSample.m_positions, iSS );
     m_nVertices.get( oSample.m_nVertices, iSS );
 
@@ -136,21 +138,6 @@ void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
     oSample.m_wrap = static_cast<CurvePeriodicity>( basisAndType[1] );
     oSample.m_basis = static_cast<BasisType>( basisAndType[2] );
     // we ignore basisAndType[3] since it is the same as basisAndType[2]
-
-    if ( m_normals )
-    {
-        m_normals.get( oSample.m_normals, iSS);
-    }
-
-    if ( m_uvs )
-    {
-        m_uvs.get( oSample.m_uvs, iSS);
-    }
-
-    if ( m_widths )
-    {
-        m_widths.get( oSample.m_widths, iSS);
-    }
 
     if ( m_selfBounds )
     {

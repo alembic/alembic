@@ -88,7 +88,7 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
 
 //-*****************************************************************************
 // NuPatch
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_NuPatch_v1",
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_NuPatch_v2",
                                      ".geom",
                                      NuPatchSchemaInfo );
 
@@ -137,7 +137,7 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Camera_v1",
 
 //-*****************************************************************************
 // Curves
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Curve_v1",
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Curve_v2",
                                      ".geom",
                                      CurvesSchemaInfo );
 

@@ -72,12 +72,24 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     }
 
     // do we need to create uvs?
-    if ( iSamp.getUVs() && !m_uvs )
+    if ( iSamp.getUVs().getVals() && !m_uvs )
     {
-        m_uvs = Abc::OV2fArrayProperty( this->getPtr(), "uv",
-            m_positions.getTimeSampling() );
+        if ( iSamp.getUVs().getIndices() )
+        {
+            // UVs are indexed
+            m_uvs = OV2fGeomParam( this->getPtr(), "uv", true,
+                                   iSamp.getUVs().getScope(), 1,
+                                   this->getTimeSampling() );
+        }
+        else
+        {
+            // UVs are not indexed
+            m_uvs = OV2fGeomParam( this->getPtr(), "uv", false,
+                                   iSamp.getUVs().getScope(), 1,
+                                   this->getTimeSampling() );
+        }
 
-        Abc::V2fArraySample empty;
+        OV2fGeomParam::Sample empty;
 
         size_t numSamples = m_positions.getNumSamples();
 
@@ -89,12 +101,25 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     }
 
     // do we need to create normals?
-    if ( iSamp.getNormals() && !m_normals )
+    if ( iSamp.getNormals().getVals() && !m_normals )
     {
-        m_normals = Abc::OV3fArrayProperty( this->getPtr(), "N",
-            m_positions.getTimeSampling() );
 
-        Abc::V3fArraySample empty;
+        if ( iSamp.getNormals().getIndices() )
+        {
+            // normals are indexed
+            m_normals = ON3fGeomParam( this->getPtr(), "N", true,
+                                       iSamp.getNormals().getScope(),
+                                       1, this->getTimeSampling() );
+        }
+        else
+        {
+            // normals are not indexed
+            m_normals = ON3fGeomParam( this->getPtr(), "N", false,
+                                       iSamp.getNormals().getScope(), 1,
+                                       this->getTimeSampling() );
+        }
+
+        ON3fGeomParam::Sample empty;
 
         size_t numSamples = m_positions.getNumSamples();
 
@@ -106,12 +131,24 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     }
 
     // do we need to create widths?
-    if ( iSamp.getWidths() && !m_widths )
+    if ( iSamp.getWidths().getVals() && !m_widths )
     {
-        m_widths = Abc::OFloatArrayProperty( this->getPtr(), "width",
-            m_positions.getTimeSampling() );
+        if ( iSamp.getNormals().getIndices() )
+        {
+            // normals are indexed
+            m_widths = OFloatGeomParam( this->getPtr(), "width", true,
+                                        iSamp.getNormals().getScope(),
+                                        1, this->getTimeSampling() );
+        }
+        else
+        {
+            // normals are not indexed
+            m_widths = OFloatGeomParam( this->getPtr(), "width", false,
+                                        iSamp.getNormals().getScope(), 1,
+                                        this->getTimeSampling() );
+        }
 
-        Abc::FloatArraySample empty;
+        OFloatGeomParam::Sample empty;
 
         size_t numSamples = m_positions.getNumSamples();
 
@@ -189,13 +226,13 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         { SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() ); }
 
         if ( m_uvs )
-        { SetPropUsePrevIfNull( m_uvs, iSamp.getUVs() ); }
+        { m_uvs.set( iSamp.getUVs() ); }
 
         if ( m_normals )
-        { SetPropUsePrevIfNull( m_normals, iSamp.getNormals() ); }
+        { m_normals.set( iSamp.getNormals() ); }
 
         if ( m_widths )
-        { SetPropUsePrevIfNull( m_widths, iSamp.getWidths() ); }
+        { m_widths.set( iSamp.getWidths() ); }
 
         // update bounds
         if ( iSamp.getSelfBounds().hasVolume() )
@@ -235,7 +272,7 @@ void OCurvesSchema::setFromPrevious()
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
     if ( m_normals ) { m_normals.setFromPrevious(); }
     if ( m_widths ) { m_widths.setFromPrevious(); }
-    
+
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -252,9 +289,10 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
     m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
     m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 
-    m_nVertices = Abc::OUInt32ArrayProperty( _this, "nVertices", iTsIdx);
+    m_nVertices = Abc::OInt32ArrayProperty( _this, "nVertices", iTsIdx);
 
-    m_basisAndType = Abc::OScalarProperty( _this, "curveBasisAndType",
+    m_basisAndType = Abc::OScalarProperty(
+        _this, "curveBasisAndType",
         AbcA::DataType( Alembic::Util::kUint8POD, 4 ), iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
