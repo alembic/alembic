@@ -42,15 +42,15 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 AprImpl::AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-    hid_t iParentGroup,
-    PropertyHeaderPtr iHeader,
-    bool iIsScalarLike,
-    uint32_t iNumSamples,
-    uint32_t iFirstChangedIndex,
-    uint32_t iLastChangedIndex )
-    : SimplePrImpl<AbcA::ArrayPropertyReader, AprImpl, AbcA::ArraySamplePtr&>
-        ( iParent, iParentGroup, iHeader, iNumSamples, iFirstChangedIndex,
-          iLastChangedIndex )
+                  hid_t iParentGroup,
+                  PropertyHeaderPtr iHeader,
+                  bool iIsScalarLike,
+                  uint32_t iNumSamples,
+                  uint32_t iFirstChangedIndex,
+                  uint32_t iLastChangedIndex )
+  : SimplePrImpl<AbcA::ArrayPropertyReader, AprImpl, AbcA::ArraySamplePtr&>
+    ( iParent, iParentGroup, iHeader, iNumSamples, iFirstChangedIndex,
+      iLastChangedIndex )
 {
     if ( m_header->getPropertyType() != AbcA::kArrayProperty )
     {
@@ -139,8 +139,8 @@ void AprImpl::readSample( hid_t iGroup,
 
 //-*****************************************************************************
 bool AprImpl::readKey( hid_t iGroup,
-                          const std::string &iSampleName,
-                          AbcA::ArraySampleKey& oKey )
+                       const std::string &iSampleName,
+                       AbcA::ArraySampleKey& oKey )
 {
     assert( iGroup >= 0 );
 
@@ -154,7 +154,7 @@ bool AprImpl::readKey( hid_t iGroup,
     {
         hid_t dspaceId = H5Dget_space( dsetId );
         ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
-            << iSampleName );
+                     << iSampleName );
         DspaceCloser dspaceCloser( dspaceId );
 
         oKey.readPOD = m_header->getDataType().getPod();

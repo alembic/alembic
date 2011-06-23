@@ -201,12 +201,12 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
 
     // Validate the first and last changed index
     ABCA_ASSERT( m_firstChangedIndex <= m_numSamples &&
-        m_lastChangedIndex <= m_numSamples &&
-        m_firstChangedIndex <= m_lastChangedIndex,
-        "Corrupt sampling information for property: " << myName
-            << " first change index: " << m_firstChangedIndex
-            << " last change index: " << m_lastChangedIndex
-            << " total number of samples: " << m_numSamples );
+                 m_lastChangedIndex <= m_numSamples &&
+                 m_firstChangedIndex <= m_lastChangedIndex,
+                 "Corrupt sampling information for property: " << myName
+                 << " first change index: " << m_firstChangedIndex
+                 << " last change index: " << m_lastChangedIndex
+                 << " total number of samples: " << m_numSamples );
 }
 
 //-*****************************************************************************
@@ -258,7 +258,7 @@ bool SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::isConstant()
 
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE>
-index_t SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::verifySampleIndex( index_t iIndex)
+index_t SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::verifySampleIndex( index_t iIndex )
 {
     // Verify sample index
     ABCA_ASSERT( iIndex >= 0 &&
@@ -372,7 +372,7 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
 template <class ABSTRACT, class IMPL, class SAMPLE>
 bool
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
-                                               AbcA::ArraySampleKey & oKey )
+                                            AbcA::ArraySampleKey & oKey )
 {
     iSampleIndex = verifySampleIndex( iSampleIndex );
 
@@ -399,8 +399,8 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
         }
 
         return static_cast<IMPL *>( this )->readKey( m_parentGroup,
-                                                    sample0Name,
-                                                    oKey );
+                                                     sample0Name,
+                                                     oKey );
     }
     else
     {
@@ -424,8 +424,8 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
         // Read the sample.
         std::string sampleName = getSampleName( myName, iSampleIndex );
         return static_cast<IMPL *>( this )->readKey( m_samplesIGroup,
-                                                    sampleName,
-                                                    oKey );
+                                                     sampleName,
+                                                     oKey );
     }
 }
 

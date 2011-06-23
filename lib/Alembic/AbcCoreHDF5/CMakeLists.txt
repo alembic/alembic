@@ -60,10 +60,10 @@ SET( CXX_FILES
   TopCpwImpl.cpp
   TopOrImpl.cpp
   TopOwImpl.cpp
-  WriteUtil.cpp 
+  WriteUtil.cpp
 )
 
-SET( H_FILES 
+SET( H_FILES
   All.h
   AprImpl.h
   ApwImpl.h
@@ -110,7 +110,6 @@ INSTALL( TARGETS AlembicAbcCoreHDF5
 INSTALL( FILES
          All.h
          ReadWrite.h
-         Foundation.h
          DESTINATION include/Alembic/AbcCoreHDF5
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
 

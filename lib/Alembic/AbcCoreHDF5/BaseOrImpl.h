@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 #include <Alembic/AbcCoreHDF5/ProtoObjectReader.h>
+#include <boost/thread/mutex.hpp>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -107,10 +108,15 @@ protected:
     // They are a special kind of compound property which only weak links
     // back up to us, so no pointer cycles.
     TopCprImpl *m_properties;
+    boost::mutex    m_propertiesMutex;
 
     // The children
     ProtoObjects m_protoObjects;
     ChildrenMap m_children;
+private:
+    // We aren't copyable
+    BaseOrImpl( const BaseOrImpl & input);
+    const BaseOrImpl & operator=(const BaseOrImpl & rhs);
 };
 
 } // End namespace ALEMBIC_VERSION_NS

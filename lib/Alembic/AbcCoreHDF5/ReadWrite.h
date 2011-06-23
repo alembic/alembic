@@ -38,7 +38,6 @@
 #define _Alembic_AbcCoreHDF5_ReadWrite_h_
 
 #include <Alembic/AbcCoreAbstract/All.h>
-#include <Alembic/AbcCoreHDF5/Foundation.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {

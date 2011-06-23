@@ -173,9 +173,9 @@ ReadDimensions( hid_t iParent,
 // This isn't suitable for string and wstring
 void
 ReadDataSetDimensions( hid_t iParent,
-                const std::string &iName,
-                hsize_t iExtent,
-                Dimensions &oDims )
+                       const std::string &iName,
+                       hsize_t iExtent,
+                       Dimensions &oDims )
 {
     // Open the data set.
     hid_t dsetId = H5Dopen( iParent, iName.c_str(), H5P_DEFAULT );
@@ -298,7 +298,7 @@ ReadTimeSamplingType( hid_t iParent,
         if (H5Aexists( iParent, nameTPC.c_str() ) > 0)
         {
             ReadScalar( iParent, nameTPC, H5T_IEEE_F64LE,
-                H5T_NATIVE_DOUBLE, ( void * )&tpc );
+                        H5T_NATIVE_DOUBLE, ( void * )&tpc );
         }
 
         ABCA_ASSERT( tpc > 0.0 && tpc <
@@ -362,7 +362,7 @@ ReadPropertyHeader( hid_t iParent,
     size_t fieldsUsed = 1;
 
     ReadSmallArray(iParent, iPropName + ".info", H5T_STD_U32LE,
-        H5T_NATIVE_UINT32, 5, numFields, (void *) info );
+                   H5T_NATIVE_UINT32, 5, numFields, (void *) info );
 
     AbcA::MetaData metaData;
     ReadMetaData( iParent, iPropName + ".meta", metaData );
@@ -462,12 +462,12 @@ ReadPropertyHeader( hid_t iParent,
             // if smp0 exists then we have 1 sample
             std::string smpName = iPropName + ".smp0";
             if ( oHeader.getPropertyType() == AbcA::kArrayProperty &&
-                H5Lexists( iParent, smpName.c_str(), H5P_DEFAULT ) > 0)
+                 H5Lexists( iParent, smpName.c_str(), H5P_DEFAULT ) > 0)
             {
                 oNumSamples = 1;
             }
             else if ( oHeader.getPropertyType() == AbcA::kScalarProperty &&
-                H5Aexists( iParent, smpName.c_str() ) > 0)
+                      H5Aexists( iParent, smpName.c_str() ) > 0)
             {
                 oNumSamples = 1;
             }
@@ -616,10 +616,10 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
         {
             ReadDimensions( iParent, dimName, dims );
             ABCA_ASSERT( dims.rank() > 0,
-                     "Degenerate rank in Dataset read" );
+                         "Degenerate rank in Dataset read" );
             // Num points should be zero here.
             ABCA_ASSERT( dims.numPoints() == 0,
-                     "Expecting zero points in dimensions" );
+                         "Expecting zero points in dimensions" );
         }
         else
         {
@@ -671,13 +671,13 @@ ReadTimeSamples( hid_t iParent,
         std::string timeName = tstname + ".time";
         hid_t aid = H5Aopen( iParent, timeName.c_str(), H5P_DEFAULT );
         ABCA_ASSERT( aid >= 0,
-            "Couldn't open time samples named: " << timeName );
+                     "Couldn't open time samples named: " << timeName );
         AttrCloser attrCloser( aid );
 
         // figure out how big it is
         hid_t sid = H5Aget_space( aid );
         ABCA_ASSERT( sid >= 0,
-            "Couldn't get dataspace for time samples: " << timeName );
+                     "Couldn't get dataspace for time samples: " << timeName );
         DspaceCloser dspaceCloser( sid );
 
         hssize_t numPoints = H5Sget_simple_extent_npoints( sid );

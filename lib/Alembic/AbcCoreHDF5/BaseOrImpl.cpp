@@ -125,6 +125,9 @@ BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
 //-*****************************************************************************
 void BaseOrImpl::createProtoObject( hid_t iGroup, const std::string &iName )
 {
+    // We are called from ctor via VisitAllLinksCB(), so
+    // we are multithread safe from changes to m_children,
+    // and m_protoObjects.
     ABCA_ASSERT( m_children.count( iName ) == 0,
                  "Creating multiple children named: " << iName );
 
@@ -141,6 +144,8 @@ void BaseOrImpl::createProtoObject( hid_t iGroup, const std::string &iName )
 //-*****************************************************************************
 const AbcA::ObjectHeader &BaseOrImpl::getHeader() const
 {
+    // ProtoObjectReader created by ctor and then doesn't change,
+    // so multithread safe.
     ABCA_ASSERT( m_proto, "Invalid protoObjectReader in getHeader()" );
 
     return m_proto->getHeader();
@@ -149,6 +154,7 @@ const AbcA::ObjectHeader &BaseOrImpl::getHeader() const
 //-*****************************************************************************
 AbcA::ArchiveReaderPtr BaseOrImpl::getArchive()
 {
+    // OrImpl ctor sets m_archive, so multithread safe.
     ABCA_ASSERT( m_archive, "Invalid archive in BaseOrImpl::getArchive()" );
 
     return m_archive;
@@ -157,8 +163,10 @@ AbcA::ArchiveReaderPtr BaseOrImpl::getArchive()
 //-*****************************************************************************
 AbcA::CompoundPropertyReaderPtr BaseOrImpl::getProperties()
 {
-    // Create compound property writer for properties
+    // Create compound property reader for properties.
     // Top properties share meta data with object.
+    boost::mutex::scoped_lock l(m_propertiesMutex);
+
     if ( !m_properties )
     {
         m_properties = new TopCprImpl( *this,
@@ -174,12 +182,16 @@ AbcA::CompoundPropertyReaderPtr BaseOrImpl::getProperties()
 //-*****************************************************************************
 size_t BaseOrImpl::getNumChildren()
 {
+    // m_protoObjects filled by ctor via VisitAllLinksCB via createProtoObject
+    // so multithread safe.
     return m_protoObjects.size();
 }
 
 //-*****************************************************************************
 const AbcA::ObjectHeader & BaseOrImpl::getChildHeader( size_t i )
 {
+    // m_protoObjects filled by ctor via VisitAllLinksCB via createProtoObject
+    // so multithread safe.
     if ( i < 0 || i >= m_protoObjects.size() )
     {
         ABCA_THROW( "Out of range index in OrImpl::getChildHeader: "
@@ -193,6 +205,8 @@ const AbcA::ObjectHeader & BaseOrImpl::getChildHeader( size_t i )
 const AbcA::ObjectHeader *
 BaseOrImpl::getChildHeader( const std::string &iName )
 {
+    // m_children filled by ctor via VisitAllLinksCB via createProtoObject ,
+    // so multithread safe.
     ChildrenMap::iterator fiter = m_children.find( iName );
     if ( fiter == m_children.end() )
     {
@@ -206,6 +220,8 @@ BaseOrImpl::getChildHeader( const std::string &iName )
 AbcA::ObjectReaderPtr
 BaseOrImpl::getChild( const std::string &iName )
 {
+    // m_children filled by ctor via VisitAllLinksCB via createProtoObject ,
+    // so multithread safe.
     ChildrenMap::iterator fiter = m_children.find( iName );
     if ( fiter == m_children.end() )
     {
@@ -215,7 +231,7 @@ BaseOrImpl::getChild( const std::string &iName )
     Child &child = (*fiter).second;
 
     AbcA::ObjectReaderPtr optr = child.made.lock();
-    if ( optr == NULL )
+    if ( ! optr )
     {
         // Make a new one.
         optr.reset ( new OrImpl( asObjectPtr(), child.proto ) );
