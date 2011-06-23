@@ -58,12 +58,19 @@ void IPointsSchema::init( const Abc::Argument &iArg0,
 
     m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
 
-    if ( this->getPropertyHeader(".childBnds") != NULL )
+    if ( _this->getPropertyHeader( ".velocities" ) != NULL )
     {
-        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0, iArg1);
+        m_velocities = Abc::IV3fArrayProperty( _this, ".velocities",
+                                               iArg0, iArg1 );
     }
 
-    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
+    if ( _this->getPropertyHeader( ".childBnds" ) != NULL )
+    {
+        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds",
+                                             iArg0, iArg1 );
+    }
+
+    if ( _this->getPropertyHeader( ".arbGeomParams" ) != NULL )
     {
         m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
                                                   args.getErrorHandlerPolicy()

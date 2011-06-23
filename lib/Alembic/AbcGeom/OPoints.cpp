@@ -62,6 +62,20 @@ void OPointsSchema::set( const Sample &iSamp )
         }
     }
 
+    // do we need to create velocities prop?
+    if ( iSamp.getVelocities() && !m_velocities )
+    {
+        m_velocities = Abc::OV3fArrayProperty( this->getPtr(), ".velocities",
+                                               m_positions.getTimeSampling() );
+
+        const V3fArraySample empty;
+        const size_t numSamps = m_positions.getNumSamples();
+        for ( size_t i = 0 ; i < numSamps ; ++i )
+        {
+            m_velocities.set( empty );
+        }
+    }
+
     // We could add sample integrity checking here.
     if ( m_positions.getNumSamples() == 0 )
     {
@@ -71,6 +85,9 @@ void OPointsSchema::set( const Sample &iSamp )
                      "Sample 0 must have valid data for points and ids" );
         m_positions.set( iSamp.getPositions() );
         m_ids.set( iSamp.getIds() );
+
+        if ( m_velocities )
+        { m_velocities.set( iSamp.getVelocities() ); }
 
         if ( m_childBounds )
         { m_childBounds.set( iSamp.getChildBounds() ); }
@@ -89,6 +106,7 @@ void OPointsSchema::set( const Sample &iSamp )
     {
         SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_ids, iSamp.getIds() );
+        SetPropUsePrevIfNull( m_velocities, iSamp.getVelocities() );
 
         if ( m_childBounds )
         {

@@ -57,6 +57,7 @@ public:
 
         Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
         Abc::UInt64ArraySamplePtr getIds() const { return m_ids; }
+        Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
@@ -69,6 +70,7 @@ public:
         void reset()
         {
             m_positions.reset();
+            m_velocities.reset();
             m_ids.reset();
 
             m_selfBounds.makeEmpty();
@@ -81,6 +83,7 @@ public:
         friend class IPointsSchema;
         Abc::V3fArraySamplePtr m_positions;
         Abc::UInt64ArraySamplePtr m_ids;
+        Abc::V3fArraySamplePtr m_velocities;
 
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
@@ -162,7 +165,9 @@ public:
     AbcA::TimeSamplingPtr getTimeSampling()
     {
         if ( m_positions.valid() )
+        {
             return m_positions.getTimeSampling();
+        }
         return getObject().getArchive().getTimeSampling(0);
     }
 
@@ -179,6 +184,9 @@ public:
 
         if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
         { m_childBounds.get( oSample.m_childBounds, iSS ); }
+
+        if ( m_velocities && m_velocities.getNumSamples() > 0 )
+        { m_velocities.get( oSample.m_velocities, iSS ); }
 
         // Could error check here.
 
@@ -197,6 +205,11 @@ public:
     Abc::IV3fArrayProperty getPositions()
     {
         return m_positions;
+    }
+
+    Abc::IV3fArrayProperty getVelocities()
+    {
+        return m_velocities;
     }
 
     Abc::IUInt64ArrayProperty getIds()
@@ -225,6 +238,7 @@ public:
     void reset()
     {
         m_positions.reset();
+        m_velocities.reset();
         m_ids.reset();
 
         m_selfBounds.reset();
@@ -254,6 +268,7 @@ protected:
 
     Abc::IV3fArrayProperty m_positions;
     Abc::IUInt64ArrayProperty m_ids;
+    Abc::IV3fArrayProperty m_velocities;
 
     Abc::IBox3dProperty m_selfBounds;
     Abc::IBox3dProperty m_childBounds;

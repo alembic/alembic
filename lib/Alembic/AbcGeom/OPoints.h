@@ -59,16 +59,22 @@ public:
 
         //! Creates a sample with position data but no index
         //! data. For specifying samples after the first one
-        Sample( const Abc::V3fArraySample &iPos )
-          : m_positions( iPos ) {}
+        Sample( const Abc::V3fArraySample &iPos,
+                const Abc::V3fArraySample &iVels = Abc::V3fArraySample() )
+          : m_positions( iPos )
+          , m_velocities( iVels )
+        {}
 
         //! Creates a sample with position data and id data. The first
         //! sample must be full like this. Subsequent samples may also
         //! be full like this, which would indicate a change of topology
         Sample( const Abc::V3fArraySample &iPos,
-                const Abc::UInt64ArraySample &iId )
+                const Abc::UInt64ArraySample &iId,
+                const Abc::V3fArraySample &iVels = Abc::V3fArraySample() )
           : m_positions( iPos )
-          , m_ids( iId ) {}
+          , m_velocities( iVels )
+          , m_ids( iId )
+        {}
 
         const Abc::V3fArraySample &getPositions() const { return m_positions; }
         void setPositions( const Abc::V3fArraySample &iSmp )
@@ -77,6 +83,10 @@ public:
         const Abc::UInt64ArraySample &getIds() const { return m_ids; }
         void setIds( const Abc::UInt64ArraySample &iSmp )
         { m_ids = iSmp; }
+
+        const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
+        void setVelocities( const Abc::V3fArraySample &iVels )
+        { m_velocities = iVels; }
 
         const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }
         void setSelfBounds( const Abc::Box3d &iBnds )
@@ -90,6 +100,7 @@ public:
         void reset()
         {
             m_positions.reset();
+            m_velocities.reset();
             m_ids.reset();
 
             m_selfBounds.makeEmpty();
@@ -98,6 +109,7 @@ public:
 
     protected:
         Abc::V3fArraySample m_positions;
+        Abc::V3fArraySample m_velocities;
         Abc::UInt64ArraySample m_ids;
 
         Abc::Box3d m_selfBounds;
@@ -262,6 +274,7 @@ protected:
 
     Abc::OV3fArrayProperty m_positions;
     Abc::OUInt64ArrayProperty m_ids;
+    Abc::OV3fArrayProperty m_velocities;
 
     Abc::OBox3dProperty m_selfBounds;
     Abc::OBox3dProperty m_childBounds;
