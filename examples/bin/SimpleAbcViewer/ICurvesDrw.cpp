@@ -109,7 +109,7 @@ void ICurvesDrw::draw( const DrawContext &iCtx )
     size_t numPoints = m_positions->size();
 
     const V3f *points = m_positions->get();
-    const uint32_t *nVertices = m_nVertices->get();
+    const int32_t *nVertices = m_nVertices->get();
     const C3f *colors = NULL;
 
     glDisable( GL_LIGHTING );

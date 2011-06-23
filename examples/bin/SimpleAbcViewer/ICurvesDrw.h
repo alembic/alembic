@@ -60,7 +60,7 @@ public:
 protected:
     ICurves m_curves;
     V3fArraySamplePtr m_positions;
-    UInt32ArraySamplePtr m_nVertices;
+    Int32ArraySamplePtr m_nVertices;
     int               m_nCurves;
     
     std::vector<const V3f*> m_curvePoints;
