@@ -141,9 +141,11 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
         IV2fGeomParam uvParam = ps.getUVs();
         if ( uvParam.valid() )
         {
+            ICompoundProperty parent = uvParam.getParent();
+            
             AddGeomParamToParamListBuilder<IV2fGeomParam>(
-                ps, //TODO, replace this with uvParam.getParent()
-                *ps.getPropertyHeader( uvParam.getName() ), //TODO, relace this with uvParam.getHeader()
+                parent,
+                uvParam.getHeader(),
                 sampleSelector,
                 "float",
                 ParamListBuilder,
@@ -153,9 +155,11 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
         IN3fGeomParam nParam = ps.getNormals();
         if ( nParam.valid() )
         {
+            ICompoundProperty parent = nParam.getParent();
+            
             AddGeomParamToParamListBuilder<IN3fGeomParam>(
-                ps, //TODO, replace this with uvParam.getParent()
-                *ps.getPropertyHeader( nParam.getName() ), //TODO, relace this with uvParam.getHeader()
+                parent,
+                nParam.getHeader(),
                 sampleSelector,
                 "normal",
                 ParamListBuilder);
@@ -214,9 +218,11 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
         IV2fGeomParam uvParam = ss.getUVs();
         if ( uvParam.valid() )
         {
+            ICompoundProperty parent = uvParam.getParent();
+            
             AddGeomParamToParamListBuilder<IV2fGeomParam>(
-                ss, //TODO, replace this with uvParam.getParent()
-                *ss.getPropertyHeader( uvParam.getName() ), //TODO, relace this with uvParam.getHeader()
+                parent,
+                uvParam.getHeader(),
                 sampleSelector,
                 "float",
                 ParamListBuilder,
@@ -238,7 +244,6 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
         ProcessHoles( tags, sample );
         ProcessCreases( tags, sample );
         ProcessCorners( tags, sample );
-        
         
         if ( !facesetName.empty() )
         {
@@ -264,7 +269,8 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
                 }
             }
         }
-        
+
+
         if ( isHierarchicalSubD )
         {
             RiHierarchicalSubdivisionMeshV(
@@ -304,6 +310,248 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
 
     if ( multiSample ) { RiMotionEnd(); }
 }
+
+//-*****************************************************************************
+void ProcessNuPatch( INuPatch &patch, ProcArgs &args )
+{
+    INuPatchSchema &ps = patch.getSchema();
+    
+    TimeSamplingPtr ts = ps.getTimeSampling();
+    
+    SampleTimeSet sampleTimes;
+    GetRelevantSampleTimes( args, ts, ps.getNumSamples(), sampleTimes );
+    
+    
+    //trim curves are described outside the motion blocks
+    if ( ps.hasTrimCurve() )
+    {
+        //get the current time sample independent of any shutter values
+        INuPatchSchema::Sample sample = ps.getValue(
+                ISampleSelector( args.frame / args.fps ) );
+        
+        RiTrimCurve( sample.getTrimNumCurves()->size(), //numloops
+                (RtInt*) sample.getTrimNumCurves()->get(),
+                (RtInt*) sample.getTrimOrders()->get(),
+                (RtFloat*) sample.getTrimKnots()->get(),
+                (RtFloat*) sample.getTrimMins()->get(),
+                (RtFloat*) sample.getTrimMaxes()->get(),
+                (RtInt*) sample.getTrimNumVertices()->get(),
+                (RtFloat*) sample.getTrimU()->get(),
+                (RtFloat*) sample.getTrimV()->get(),
+                (RtFloat*) sample.getTrimW()->get() );
+    }
+    
+    
+    bool multiSample = sampleTimes.size() > 1;
+    
+    if ( multiSample ) { WriteMotionBegin( args, sampleTimes ); }
+    
+    for ( SampleTimeSet::iterator iter = sampleTimes.begin();
+          iter != sampleTimes.end(); ++iter )
+    {
+        ISampleSelector sampleSelector( *iter );
+        
+        INuPatchSchema::Sample sample = ps.getValue( sampleSelector );
+        
+        
+        ParamListBuilder ParamListBuilder;
+        
+        //for now, no Pw so go straight with P
+        ParamListBuilder.add( "P", (RtPointer)sample.getPositions()->get() );
+        
+        ICompoundProperty arbGeomParams = ps.getArbGeomParams();
+        AddArbitraryGeomParams( arbGeomParams,
+                    sampleSelector, ParamListBuilder );
+        
+        //for now, use 0 and 1 for umin and umax as it's not described in
+        //alembic data. In theory, setting varying st could accomplish the
+        //same thing for someone who really needs it.
+        
+        RiNuPatchV(
+                sample.getNumU(),
+                sample.getUOrder(),
+                (RtFloat *) sample.getUKnot()->get(),
+                0.0, //umin
+                1.0, //umax
+                sample.getNumV(),
+                sample.getVOrder(),
+                (RtFloat *) sample.getVKnot()->get(),
+                0.0, //vmin
+                1.0, //vmax
+                ParamListBuilder.n(),
+                ParamListBuilder.nms(),
+                ParamListBuilder.vals() );
+    }
+    
+    if ( multiSample ) { RiMotionEnd(); }
+    
+    
+}
+
+//-*****************************************************************************
+void ProcessPoints( IPoints &points, ProcArgs &args )
+{
+    IPointsSchema &ps = points.getSchema();
+    TimeSamplingPtr ts = ps.getTimeSampling();
+    
+    SampleTimeSet sampleTimes;
+    
+    //for now, punt on the changing point count case -- even for frame ranges
+    //for which the point count isn't changing
+    
+    if ( ps.getIds().isConstant() )
+    {
+        //grab only the current time
+        sampleTimes.insert( args.frame / args.fps );
+    }
+    else
+    {
+         GetRelevantSampleTimes( args, ts, ps.getNumSamples(), sampleTimes );
+    }
+    
+    
+    bool multiSample = sampleTimes.size() > 1;
+    
+    if ( multiSample ) { WriteMotionBegin( args, sampleTimes ); }
+    
+    for ( SampleTimeSet::iterator iter = sampleTimes.begin();
+          iter != sampleTimes.end(); ++iter )
+    {
+        ISampleSelector sampleSelector( *iter );
+        
+        IPointsSchema::Sample sample = ps.getValue( sampleSelector );
+        
+        
+        ParamListBuilder ParamListBuilder;
+        ParamListBuilder.add( "P", (RtPointer)sample.getPositions()->get() );
+        
+        ICompoundProperty arbGeomParams = ps.getArbGeomParams();
+        AddArbitraryGeomParams( arbGeomParams,
+                    sampleSelector, ParamListBuilder );
+        
+        RiPointsV(sample.getPositions()->size(),
+                ParamListBuilder.n(),
+                ParamListBuilder.nms(),
+                ParamListBuilder.vals() );
+    }
+    
+    if ( multiSample ) { RiMotionEnd(); }
+    
+}
+
+//-*****************************************************************************
+void ProcessCurves( ICurves &curves, ProcArgs &args )
+{
+    ICurvesSchema &cs = curves.getSchema();
+    TimeSamplingPtr ts = cs.getTimeSampling();
+    
+    SampleTimeSet sampleTimes;
+    
+    GetRelevantSampleTimes( args, ts, cs.getNumSamples(), sampleTimes );
+    
+    bool multiSample = sampleTimes.size() > 1;
+    
+    bool firstSample = true;
+    
+    for ( SampleTimeSet::iterator iter = sampleTimes.begin();
+          iter != sampleTimes.end(); ++iter )
+    {
+        ISampleSelector sampleSelector( *iter );
+        
+        ICurvesSchema::Sample sample = cs.getValue( sampleSelector );
+        
+        //need to set the basis prior to the MotionBegin block
+        if ( firstSample )
+        {
+            firstSample = false;
+            
+            BasisType basisType = sample.getBasis();
+            if ( basisType != kNoBasis )
+            {
+                RtBasis * basis = NULL;
+                RtInt step = 0;
+                
+                switch ( basisType )
+                {
+                case kBezierBasis:
+                    basis = &RiBezierBasis;
+                    step = RI_BEZIERSTEP;
+                    break;
+                case kBsplineBasis:
+                    basis = &RiBSplineBasis;
+                    step = RI_BSPLINESTEP;
+                    break;
+                case kCatmullromBasis:
+                    basis = &RiCatmullRomBasis;
+                    step = RI_CATMULLROMSTEP;
+                    break;
+                case kHermiteBasis:
+                    basis = &RiHermiteBasis;
+                    step = RI_HERMITESTEP;
+                    break;
+                case kPowerBasis:
+                    basis = &RiPowerBasis;
+                    step = RI_POWERSTEP;
+                    break;
+                default:
+                    break;
+                }
+                
+                if ( basis != NULL )
+                {
+                    RiBasis( *basis, step, *basis, step);
+                }
+            }
+            
+            
+            if ( multiSample ) { WriteMotionBegin( args, sampleTimes ); }
+        }
+        
+        ParamListBuilder ParamListBuilder;
+        ParamListBuilder.add( "P", (RtPointer)sample.getPositions()->get() );
+        
+        //TODO, add width, N and uv-as-st when described as GeomParams
+        
+        ICompoundProperty arbGeomParams = cs.getArbGeomParams();
+        AddArbitraryGeomParams( arbGeomParams,
+                    sampleSelector, ParamListBuilder );
+        
+        RtToken curveType;
+        switch ( sample.getType() )
+        {
+        case kCubic:
+            curveType = const_cast<RtToken>( "cubic" );
+            break;
+        default:
+            curveType = const_cast<RtToken>( "linear" );
+        }
+        
+        
+        RtToken wrap;
+        switch ( sample.getWrap() )
+        {
+        case kPeriodic:
+            wrap = const_cast<RtToken>( "periodic" );
+            break;
+        default:
+            wrap = const_cast<RtToken>( "nonperiodic" );
+        }
+
+        RiCurvesV(curveType,
+                sample.getNumCurves(),
+                (RtInt*) sample.getCurvesNumVertices()->get(),
+                wrap,
+                ParamListBuilder.n(),
+                ParamListBuilder.nms(),
+                ParamListBuilder.vals() );
+
+    }
+    
+    if ( multiSample ) { RiMotionEnd(); }
+    
+}
+
+
 
 //-*****************************************************************************
 void WriteIdentifier( const ObjectHeader &ohead )

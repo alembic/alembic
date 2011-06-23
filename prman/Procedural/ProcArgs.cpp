@@ -112,5 +112,11 @@ ProcArgs::ProcArgs( RtString paramStr )
                 objectpath = tokens[i];
             }
         }
+        else if ( tokens[i] == "-excludexform" )
+        {
+            excludeXform = true;
+            
+        }
+        
     }
 }

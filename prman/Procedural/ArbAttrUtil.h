@@ -73,12 +73,6 @@ private:
 std::string GetPrmanScopeString( GeometryScope scope );
 
 //-*****************************************************************************
-void AddArbitraryProperties( ICompoundProperty & parent,
-                             ISampleSelector & sampleSelector,
-                             ParamListBuilder & ParamListBuilder,
-                             const std::set<std::string> * excludeNames = NULL );
-
-//-*****************************************************************************
 template <typename T>
 void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
                                              const PropertyHeader &propHeader,
@@ -87,7 +81,38 @@ void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
                                              ParamListBuilder &ParamListBuilder,
                                              size_t baseArrayExtent = 1,
                                              const std::string & overrideName = ""
-                                           );
+                                           )
+{
+    T param( parent, propHeader.getName() );
+
+    if ( !param.valid() )
+    {
+        //TODO error message?
+        return;
+    }
+
+    std::string rmanType = GetPrmanScopeString( param.getScope() ) + " ";
+
+    rmanType += rmanBaseType;
+
+    size_t arrayExtent = baseArrayExtent * param.getArrayExtent();
+    if (arrayExtent > 1)
+    {
+        std::ostringstream buffer;
+        buffer << "[" << arrayExtent << "]";
+        rmanType += buffer.str();
+    }
+
+    rmanType += " " + (
+            overrideName.empty() ? propHeader.getName() : overrideName );
+
+
+    typename T::prop_type::sample_ptr_type valueSample =
+            param.getExpandedValue( sampleSelector ).getVals();
+
+    ParamListBuilder.add( rmanType, (RtPointer)valueSample->get(), valueSample );
+
+}
 
 //-*****************************************************************************
 

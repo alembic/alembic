@@ -58,10 +58,17 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
 
     if ( IXform::matches( ohead ) )
     {
-        IXform xform( parent, ohead.getName() );
-        ProcessXform( xform, args );
-
-        nextParentObject = xform;
+        if ( args.excludeXform )
+        {
+            nextParentObject = IObject( parent, ohead.getName() );
+        }
+        else
+        {
+            IXform xform( parent, ohead.getName() );
+            ProcessXform( xform, args );
+            
+            nextParentObject = xform;
+        }
     }
     else if ( ISubD::matches( ohead ) )
     {
@@ -95,6 +102,31 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         ProcessPolyMesh( polymesh, args );
 
         nextParentObject = polymesh;
+    }
+    else if ( INuPatch::matches( ohead ) )
+    {
+        INuPatch patch( parent, ohead.getName() );
+        ProcessNuPatch( patch, args );
+        
+        nextParentObject = patch;
+    }
+    else if ( IPoints::matches( ohead ) )
+    {
+        IPoints points( parent, ohead.getName() );
+        ProcessPoints( points, args );
+        
+        nextParentObject = points;
+    }
+    else if ( ICurves::matches( ohead ) )
+    {
+        ICurves curves( parent, ohead.getName() );
+        ProcessCurves( curves, args );
+        
+        nextParentObject = curves;
+    }
+    else if ( IFaceSet::matches( ohead ) )
+    {
+        //don't complain about discovering a faceset upon traversal
     }
     else
     {

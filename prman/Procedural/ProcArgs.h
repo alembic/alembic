@@ -55,6 +55,7 @@ struct ProcArgs
     , fps( rhs.fps )
     , shutterOpen( rhs.shutterOpen )
     , shutterClose( rhs.shutterClose )
+    , excludeXform( false )
     {}
 
     //member variables
@@ -64,6 +65,8 @@ struct ProcArgs
     double fps;
     double shutterOpen;
     double shutterClose;
+
+    bool excludeXform;
 };
 
 #endif
