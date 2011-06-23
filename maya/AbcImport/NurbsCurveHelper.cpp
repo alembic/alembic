@@ -79,9 +79,9 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
     Alembic::Abc::V3fArraySamplePtr sampPoints = samp.getPositions();
     Alembic::Abc::V3fArraySamplePtr ceilPoints = ceilSamp.getPositions();
 
-    Alembic::Abc::UInt32ArraySamplePtr numVertices =
+    Alembic::Abc::Int32ArraySamplePtr numVertices =
         samp.getCurvesNumVertices();
-    Alembic::Abc::UInt32ArraySamplePtr ceilNumVertices =
+    Alembic::Abc::Int32ArraySamplePtr ceilNumVertices =
         ceilSamp.getCurvesNumVertices();
 
     if (interp && sampPoints->size() != ceilPoints->size())
@@ -139,13 +139,14 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
 // otherwise returns the transform node of the curve group
 MObject createCurves(const std::string & iName,
     Alembic::AbcGeom::ICurvesSchema::Sample & iSample,
+    Alembic::AbcGeom::IFloatGeomParam::Sample & iWidths,
     MObject & iParent, std::vector< MObject > & ioCurves, bool isAnimated)
 {
     MObject returnObj;
 
     std::size_t numCurves = iSample.getNumCurves();
-    Alembic::Abc::FloatArraySamplePtr widths = iSample.getWidths();
-    Alembic::Abc::UInt32ArraySamplePtr curvesNumVertices =
+    Alembic::Abc::FloatArraySamplePtr widths = iWidths.getVals();
+    Alembic::Abc::Int32ArraySamplePtr curvesNumVertices =
         iSample.getCurvesNumVertices();
     Alembic::Abc::V3fArraySamplePtr positions = iSample.getPositions();
 

@@ -519,8 +519,13 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
     iNode.getSchema().get(samp);
     Alembic::Abc::ICompoundProperty arbProp =
         iNode.getSchema().getArbGeomParams();
+    Alembic::AbcGeom::IFloatGeomParam::Sample widthSamp;
+    if (iNode.getSchema().getWidths())
+    {
+        iNode.getSchema().getWidths().getExpanded(widthSamp);
+    }
     std::size_t numCurves = samp.getNumCurves();
-
+    
     if (numCurves == 0)
     {
         MString theWarning(iNode.getName().c_str());
@@ -541,7 +546,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
 
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
-        curvesObj = createCurves(iNode.getName(), samp, mParent,
+        curvesObj = createCurves(iNode.getName(), samp, widthSamp, mParent,
             mData.mNurbsCurveObjList, numSamples > 1);
         MFnDagNode(curvesObj).getPath(mCurrentDagNode);
 

@@ -45,7 +45,8 @@
 #include <Alembic/AbcGeom/ICurves.h>
 
 MObject createCurves(const std::string & iName,
-    Alembic::AbcGeom::ICurvesSchema::Sample & iSample, MObject & iParent,
+    Alembic::AbcGeom::ICurvesSchema::Sample & iSample,
+    Alembic::AbcGeom::IFloatGeomParam::Sample & iWidths, MObject & iParent,
     std::vector< MObject > & ioCurves, bool isAnimated);
 
 MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
