@@ -160,7 +160,7 @@ void MayaNurbsCurveWriter::write()
     if (mIsCurveGrp)
         numCurves = mNurbsCurves.length();
 
-    std::vector<Alembic::Util::uint32_t> nVertices(numCurves);
+    std::vector<Alembic::Util::int32_t> nVertices(numCurves);
     std::vector<float> points;
     std::vector<float> width;
 
@@ -209,7 +209,7 @@ void MayaNurbsCurveWriter::write()
             }
         }
 
-        Alembic::Util::uint32_t numCVs = curve.numCVs(&stat);
+        Alembic::Util::int32_t numCVs = curve.numCVs(&stat);
         nVertices[i] = numCVs;
         mCVCount += numCVs;
 
@@ -270,9 +270,14 @@ void MayaNurbsCurveWriter::write()
         }
     }
 
-    samp.setCurvesNumVertices(Alembic::Abc::UInt32ArraySample(nVertices));
+    Alembic::AbcGeom::GeometryScope scope = Alembic::AbcGeom::kVertexScope;
+    if (useConstWidth)
+        scope = Alembic::AbcGeom::kConstantScope;
+
+    samp.setCurvesNumVertices(Alembic::Abc::Int32ArraySample(nVertices));
     samp.setPositions(Alembic::Abc::V3fArraySample(
         (const Imath::V3f *)&points.front(), points.size() / 3 ));
-    samp.setWidths(Alembic::Abc::FloatArraySample(width));
+    samp.setWidths(Alembic::AbcGeom::OFloatGeomParam::Sample(
+        Alembic::Abc::FloatArraySample(width), scope) );
     mSchema.set(samp);
 }
