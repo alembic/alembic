@@ -80,7 +80,7 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
     }
 
     // do we need to create uvs?
-    if ( iSamp.getUVs().getVals() && !m_uvs )
+    if ( iSamp.getUVs() && !m_uvs )
     {
         OV2fGeomParam::Sample empty;
 
@@ -109,7 +109,7 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
     }
 
     // do we need to create normals?
-    if ( iSamp.getNormals().getVals() && !m_normals )
+    if ( iSamp.getNormals() && !m_normals )
     {
 
         ON3fGeomParam::Sample empty;
@@ -207,6 +207,16 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
             m_trimU.set( iSamp.getTrimU() );
             m_trimV.set( iSamp.getTrimV() );
             m_trimW.set( iSamp.getTrimW() );
+        }
+
+        if ( m_uvs )
+        {
+            m_uvs.set( iSamp.getUVs() );
+        }
+
+        if ( m_normals )
+        {
+            m_normals.set( iSamp.getNormals() );
         }
 
         // set bounds

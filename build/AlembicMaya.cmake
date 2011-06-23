@@ -34,30 +34,30 @@
 
 # If MAYA_ROOT not set, use predefined paths
 IF(NOT DEFINED MAYA_ROOT)
-    IF ( ${CMAKE_HOST_UNIX} )
-        IF( ${DARWIN} )
-          # TODO: set to default install path when shipping out
-          # SET( ALEMBIC_MAYA_ROOT NOTFOUND )
-          SET( ALEMBIC_MAYA_ROOT "/Applications/Autodesk/maya2011" )
-          SET( ALEMBIC_MAYA_INC_ROOT "/Applications/Autodesk/maya2011/devkit/include" )
-          SET( ALEMBIC_MAYA_LIB_ROOT "/Applications/Autodesk/maya2011/Maya.app/Contents/MacOS" )
-        ELSE()
-          # TODO: set to default install path when shipping out
-          # SET( ALEMBIC_MAYA_ROOT "/usr/autodesk/maya2010-x64" )
-          SET( ALEMBIC_MAYA_ROOT "/sww/tools/autodesk/maya2010" )
-        ENDIF()
+  IF ( ${CMAKE_HOST_UNIX} )
+    IF( ${DARWIN} )
+      # TODO: set to default install path when shipping out
+      # SET( ALEMBIC_MAYA_ROOT NOTFOUND )
+      SET( ALEMBIC_MAYA_ROOT "/Applications/Autodesk/maya2011" )
+      SET( ALEMBIC_MAYA_INC_ROOT "/Applications/Autodesk/maya2011/devkit/include" )
+      SET( ALEMBIC_MAYA_LIB_ROOT "/Applications/Autodesk/maya2011/Maya.app/Contents/MacOS" )
     ELSE()
-        IF ( ${WINDOWS} )
-          # TODO: set to 32-bit or 64-bit path
-          # SET( ALEMBIC_MAYA_ROOT "C:/Program Files (x86)/Autodesk/Maya2010" )
-          SET( ALEMBIC_MAYA_ROOT "C:/Program Files/Autodesk/Maya2011" )
-        ELSE()
-          SET( ALEMBIC_MAYA_ROOT NOTFOUND )
-        ENDIF()
+      # TODO: set to default install path when shipping out
+      # SET( ALEMBIC_MAYA_ROOT "/usr/autodesk/maya2010-x64" )
+      SET( ALEMBIC_MAYA_ROOT "/sww/tools/autodesk/maya2010" )
     ENDIF()
+  ELSE()
+    IF ( ${WINDOWS} )
+      # TODO: set to 32-bit or 64-bit path
+      # SET( ALEMBIC_MAYA_ROOT "C:/Program Files (x86)/Autodesk/Maya2010" )
+      SET( ALEMBIC_MAYA_ROOT "C:/Program Files/Autodesk/Maya2011" )
+    ELSE()
+      SET( ALEMBIC_MAYA_ROOT NOTFOUND )
+    ENDIF()
+  ENDIF()
 ELSE()
-    # Prefer MAYA_ROOT set from the CMakeCache'd variable than default paths
-    SET( ALEMBIC_MAYA_ROOT ${MAYA_ROOT})
+  # Prefer MAYA_ROOT set from the CMakeCache'd variable than default paths
+  SET( ALEMBIC_MAYA_ROOT ${MAYA_ROOT})
 ENDIF()
 
 # Prefer MAYA_ROOT set from the environment over the CMakeCache'd variable
@@ -81,55 +81,55 @@ MESSAGE( STATUS "Maya lib root: ${ALEMBIC_MAYA_LIB_ROOT}" )
 
 # Just start with forcing it to ILM's location
 FIND_PATH( MAYA_INCLUDE_PATH maya/MTypes.h
-           PATHS
-           "${ALEMBIC_MAYA_INC_ROOT}"
-           "${ALEMBIC_MAYA_ROOT}/include"
-           DOC "The directory where MTypes.h resides" )
+  PATHS
+  "${ALEMBIC_MAYA_INC_ROOT}"
+  "${ALEMBIC_MAYA_ROOT}/include"
+  DOC "The directory where MTypes.h resides" )
 
 FIND_LIBRARY( MAYA_FOUNDATION_LIBRARY Foundation
-              PATHS
-              "${ALEMBIC_MAYA_LIB_ROOT}"
-              "${ALEMBIC_MAYA_ROOT}/lib"
-              DOC "The directory where Foundation.lib resides"
-              NO_DEFAULT_PATH )
+  PATHS
+  "${ALEMBIC_MAYA_LIB_ROOT}"
+  "${ALEMBIC_MAYA_ROOT}/lib"
+  DOC "The directory where Foundation.lib resides"
+  NO_DEFAULT_PATH )
 
 FIND_LIBRARY( MAYA_OPENMAYA_LIBRARY OpenMaya
-              PATHS
-              "${ALEMBIC_MAYA_LIB_ROOT}"
-              "${ALEMBIC_MAYA_ROOT}/lib"
-              DOC "The directory where OpenMaya.lib resides" )
+  PATHS
+  "${ALEMBIC_MAYA_LIB_ROOT}"
+  "${ALEMBIC_MAYA_ROOT}/lib"
+  DOC "The directory where OpenMaya.lib resides" )
 
 FIND_LIBRARY( MAYA_OPENMAYAANIM_LIBRARY OpenMayaAnim
-              PATHS
-              "${ALEMBIC_MAYA_LIB_ROOT}"
-              "${ALEMBIC_MAYA_ROOT}/lib"
-              DOC "The directory where OpenMayaAnim.lib resides" )
+  PATHS
+  "${ALEMBIC_MAYA_LIB_ROOT}"
+  "${ALEMBIC_MAYA_ROOT}/lib"
+  DOC "The directory where OpenMayaAnim.lib resides" )
 
 FIND_LIBRARY( MAYA_OPENMAYAFX_LIBRARY OpenMayaFX
-              PATHS
-              "${ALEMBIC_MAYA_LIB_ROOT}"
-              "${ALEMBIC_MAYA_ROOT}/lib"
-              DOC "The directory where OpenMayaFX.lib resides" )
+  PATHS
+  "${ALEMBIC_MAYA_LIB_ROOT}"
+  "${ALEMBIC_MAYA_ROOT}/lib"
+  DOC "The directory where OpenMayaFX.lib resides" )
 
 FIND_LIBRARY( MAYA_OPENMAYARENDER_LIBRARY OpenMayaRender
-              PATHS
-              "${ALEMBIC_MAYA_LIB_ROOT}"
-              "${ALEMBIC_MAYA_ROOT}/lib"
-              DOC "The directory where OpenMayaRender.lib resides" )
+  PATHS
+  "${ALEMBIC_MAYA_LIB_ROOT}"
+  "${ALEMBIC_MAYA_ROOT}/lib"
+  DOC "The directory where OpenMayaRender.lib resides" )
 
 FIND_LIBRARY( MAYA_OPENMAYAUI_LIBRARY OpenMayaUI
-              PATHS
-              "${ALEMBIC_MAYA_LIB_ROOT}"
-              "${ALEMBIC_MAYA_ROOT}/lib"
-              DOC "The directory where OpenMayaUI.lib resides" )
+  PATHS
+  "${ALEMBIC_MAYA_LIB_ROOT}"
+  "${ALEMBIC_MAYA_ROOT}/lib"
+  DOC "The directory where OpenMayaUI.lib resides" )
 
 SET( MAYA_LIBRARIES
-     ${MAYA_FOUNDATION_LIBRARY}
-     ${MAYA_OPENMAYA_LIBRARY}
-     ${MAYA_OPENMAYAANIM_LIBRARY}
-     ${MAYA_OPENMAYAFX_LIBRARY}
-     ${MAYA_OPENMAYARENDER_LIBRARY}
-     ${MAYA_OPENMAYAUI_LIBRARY} )
+  ${MAYA_FOUNDATION_LIBRARY}
+  ${MAYA_OPENMAYA_LIBRARY}
+  ${MAYA_OPENMAYAANIM_LIBRARY}
+  ${MAYA_OPENMAYAFX_LIBRARY}
+  ${MAYA_OPENMAYARENDER_LIBRARY}
+  ${MAYA_OPENMAYAUI_LIBRARY} )
 
 IF ( NOT WINDOWS )
   IF ( NOT DARWIN )
@@ -203,15 +203,15 @@ MACRO(ADD_MAYA_CXX_PLUGIN PluginName SourceFile1 )
   ELSE()
     ADD_EXECUTABLE( ${PluginName} MACOSX_BUNDLE ${TMP_SOURCES} )
   ENDIF()
-  
+
 
   # Compile and linker flags
   SET_TARGET_PROPERTIES( ${PluginName}
-                         PROPERTIES
-                         COMPILE_FLAGS ${MAYA_COMPILE_FLAGS}
-                         LINK_FLAGS ${MAYA_LINK_FLAGS}
-                         PREFIX ""
-                         SUFFIX ${MAYA_EXTENSION} )
+    PROPERTIES
+    COMPILE_FLAGS ${MAYA_COMPILE_FLAGS}
+    LINK_FLAGS ${MAYA_LINK_FLAGS}
+    PREFIX ""
+    SUFFIX ${MAYA_EXTENSION} )
 
   # Link the target
   TARGET_LINK_LIBRARIES( ${PluginName} ${MAYA_LIBRARIES} )

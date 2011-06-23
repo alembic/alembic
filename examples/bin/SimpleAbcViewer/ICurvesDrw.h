@@ -61,8 +61,8 @@ protected:
     ICurves m_curves;
     V3fArraySamplePtr m_positions;
     Int32ArraySamplePtr m_nVertices;
-    int               m_nCurves;
-    
+    std::size_t m_nCurves;
+
     std::vector<const V3f*> m_curvePoints;
 };
 

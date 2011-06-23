@@ -88,7 +88,10 @@ void ICurvesDrw::setTime( chrono_t iSeconds )
     // Use nearest for now.
     ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
     ICurvesSchema::Sample curvesSample;
-    m_curves.getSchema().get( curvesSample, ss );
+    if ( m_curves.getSchema().getNumSamples() > 0 )
+    { m_curves.getSchema().get( curvesSample, ss ); }
+    else
+    { return; }
 
     m_positions = curvesSample.getPositions();
     m_nCurves = curvesSample.getNumCurves();
@@ -122,14 +125,14 @@ void ICurvesDrw::draw( const DrawContext &iCtx )
     glPointSize( 1.0 );
     glLineWidth( 1.0 );
 
-    for ( size_t currentCurve = 0, currentVertex = 0 ; currentCurve < m_nCurves;
-          currentCurve++ )
+    for ( size_t currentCurve = 0, currentVertex = 0 ; currentCurve < m_nCurves ;
+          ++currentCurve )
     {
 
         m_curvePoints.clear();
-        for ( size_t currentCurveVertex = 0;
+        for ( size_t currentCurveVertex = 0 ;
               currentCurveVertex < nVertices[currentCurve];
-              currentCurveVertex++, currentVertex++ )
+              ++currentCurveVertex, ++currentVertex )
         {
             m_curvePoints.push_back(&points[currentVertex]);
         }
@@ -143,7 +146,7 @@ void ICurvesDrw::draw( const DrawContext &iCtx )
               ++currentSegment )
         {
             glEvalCoord1f(
-                static_cast<GLfloat>( currentSegment ) / static_cast<GLfloat>( 30.0 ) );
+                static_cast<GLfloat>( currentSegment ) / static_cast<GLfloat>( 30.0f ) );
         }
         glEnd();
     }
