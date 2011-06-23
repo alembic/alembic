@@ -65,10 +65,29 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     }
     else if ( ISubD::matches( ohead ) )
     {
+        std::string faceSetName;
+        
         ISubD subd( parent, ohead.getName() );
-        ProcessSubD( subd, args );
+        
+        //if we haven't reached the end of a specified -objectpath,
+        //check to see if the next token is a faceset name.
+        //If it is, send the name to ProcessSubD for addition of
+        //"hole" tags for the non-matching faces
+        if ( I != E )
+        {
+            if ( subd.getSchema().hasFaceSet( *I ) )
+            {
+                faceSetName = *I;
+            }
+        }
 
-        nextParentObject = subd;
+        ProcessSubD( subd, args, faceSetName );
+
+        //if we found a matching faceset, don't traverse below
+        if ( faceSetName.empty() )
+        {
+            nextParentObject = subd;
+        }
     }
     else if ( IPolyMesh::matches( ohead ) )
     {

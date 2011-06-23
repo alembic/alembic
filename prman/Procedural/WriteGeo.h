@@ -49,6 +49,7 @@ void ProcessXform( IXform &xform, ProcArgs &args );
 
 void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args );
 
-void ProcessSubD( ISubD &subd, ProcArgs &args );
+void ProcessSubD( ISubD &subd, ProcArgs &args,
+        const std::string & facesetName = "" );
 
 #endif

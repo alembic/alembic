@@ -182,7 +182,7 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 }
 
 //-*****************************************************************************
-void ProcessSubD( ISubD &subd, ProcArgs &args )
+void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
 {
     ISubDSchema &ss = subd.getSchema();
 
@@ -238,7 +238,33 @@ void ProcessSubD( ISubD &subd, ProcArgs &args )
         ProcessHoles( tags, sample );
         ProcessCreases( tags, sample );
         ProcessCorners( tags, sample );
-
+        
+        
+        if ( !facesetName.empty() )
+        {
+            if ( ss.hasFaceSet( facesetName ) )
+            {
+                IFaceSet faceSet = ss.getFaceSet( facesetName );
+                IFaceSetSchema::Sample faceSetSample = 
+                        faceSet.getSchema().getValue( sampleSelector );
+                
+                std::set<int> facesToKeep;
+                
+                facesToKeep.insert( faceSetSample.getFaces()->get(),
+                        faceSetSample.getFaces()->get() +
+                                faceSetSample.getFaces()->size() );
+                
+                for ( int i = 0; i < npolys; ++i )
+                {
+                    if ( facesToKeep.find( i ) == facesToKeep.end() )
+                    {
+                        tags.add( "hole" );
+                        tags.addIntArg( i );
+                    }
+                }
+            }
+        }
+        
         if ( isHierarchicalSubD )
         {
             RiHierarchicalSubdivisionMeshV(
