@@ -170,7 +170,7 @@ public:
 
 
     //! if isConstant() is true, the mesh contains no time-varying values
-    bool isConstant() { return (m_facesProperty.isConstant () 
+    bool isConstant() { return (m_facesProperty.isConstant ()
         && m_visibilityProperty.isConstant ()); }
 
     //-*************************************************************************
@@ -211,6 +211,8 @@ public:
         return m_childBoundsProperty;
     }
 
+    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -222,6 +224,8 @@ public:
     void reset()
     {
         m_facesProperty.reset();
+
+        m_arbGeomParams.reset();
 
         Abc::ISchema<FaceSetSchemaInfo>::reset();
     }
@@ -248,6 +252,8 @@ protected:
     Abc::IBox3dProperty m_selfBoundsProperty;
     Abc::IBox3dProperty m_childBoundsProperty;
 
+    // random geometry parameters
+    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

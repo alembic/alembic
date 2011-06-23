@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OGeomParam.h>
 #include <Alembic/AbcGeom/FaceSetExclusivity.h>
 
 namespace Alembic {
@@ -255,7 +256,7 @@ public:
     {
         return ( Abc::OSchema<FaceSetSchemaInfo>::valid() &&
                  m_visibilityProperty.valid() &&
-                 m_facesProperty.valid() 
+                 m_facesProperty.valid()
                  );
     }
 

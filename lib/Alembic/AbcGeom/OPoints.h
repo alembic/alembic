@@ -186,7 +186,7 @@ public:
     //! Copy constructor.
     OPointsSchema(const OPointsSchema& iCopy)
     {
-        *this = iCopy;    
+        *this = iCopy;
     }
 
     //! Default assignment operator used.

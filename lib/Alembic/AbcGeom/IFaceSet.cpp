@@ -114,6 +114,12 @@ void IFaceSetSchema::init( const Abc::Argument &iArg0,
             iArg0, iArg1);
     }
 
+    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
+    {
+        m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
+            args.getErrorHandlerPolicy() );
+    }
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 

@@ -55,6 +55,9 @@ static const chrono_t g_t0 = 0.25;
 
 static std::vector<double> g_ry;
 
+static const double VAL_EPSILON = std::numeric_limits<double>::epsilon() \
+    * 1024;
+
 static const chrono_t CHRONO_EPSILON = std::numeric_limits<chrono_t>::epsilon() \
     * 1024;
 

@@ -93,14 +93,12 @@ ADD_TEST( AbcGeom_SchemaMatching_TEST AbcGeom_SchemaMatchingTest )
 ADD_EXECUTABLE( AbcGeom_XformTest
 		XformTests.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest  ${TEST_LIBS} )
-
 ADD_TEST( AbcGeom_Xform_TEST  AbcGeom_XformTest  )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_XformTest2
 		XformTests2.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest2  ${TEST_LIBS} )
-
 ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2 )
 
 ##-*****************************************************************************
@@ -116,3 +114,4 @@ ADD_TEST( AbcGeom_Curves_TEST AbcGeom_CurvesTest )
 # with stuff without having to edit the build setup to build it. --JDA
 ADD_EXECUTABLE( playground PlayGround.cpp )
 TARGET_LINK_LIBRARIES( playground ${TEST_LIBS} )
+

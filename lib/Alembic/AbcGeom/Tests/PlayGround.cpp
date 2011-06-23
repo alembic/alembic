@@ -37,6 +37,8 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
+#include "Assert.h"
+
 using namespace Alembic::AbcGeom;
 
 using Alembic::AbcCoreAbstract::chrono_t;
@@ -167,9 +169,83 @@ void PolyMorphicAbstractPtrs()
 }
 
 //-*****************************************************************************
+void StupidData()
+{
+    std::string archiveName( "stupiddata.abc" );
+
+    // out
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+                          archiveName );
+
+        OObject myobject( archive.getTop(), "myobject" );
+
+        // a compound property to use as the parent for data-containing properties
+        OCompoundProperty props = myobject.getProperties();
+
+        OInt32ArrayProperty intArrayProp( props, "intArrayProp" );
+
+        for ( int32_t i = 0 ; i < 10 ; ++i )
+        {
+            std::vector<int32_t> v( i, i );
+            intArrayProp.set( v );
+            TESTING_ASSERT( intArrayProp.getNumSamples() == i + 1 );
+        }
+        std::cout << std::endl << "Writing " << archiveName << std::endl;
+    }
+
+    // in
+    {
+        std::cout << std::endl << "Reading " << archiveName << std::endl;
+
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                          archiveName );
+
+        IObject myobject( archive.getTop(), "myobject" );
+
+        // a compound property to use as the parent for data-containing properties
+        ICompoundProperty props = myobject.getProperties();
+
+        IInt32ArrayProperty intArrayProp( props, "intArrayProp" );
+
+        TESTING_ASSERT( intArrayProp.getNumSamples() == 10 );
+
+        // try to create a non-existent property
+        IFloatArrayProperty nonProp( props, "doesntexist",
+                                     ErrorHandler::kQuietNoopPolicy );
+
+        if ( nonProp )
+        { std::cout << "this should not be printed" << std::endl; }
+        else
+        { std::cout << "non-existent Property doesn't exist." << std::endl; }
+
+        for ( int32_t i = 0 ; i < 10 ; ++i )
+        {
+            std::vector<int32_t> v( i, i );
+            Int32ArraySamplePtr samp = intArrayProp.getValue( i );
+            size_t numpoints = samp->size();
+
+            TESTING_ASSERT( numpoints == i );
+
+            std::cout << "sample " << i << ": ";
+
+            for ( size_t j = 0 ; j < numpoints ; ++j )
+            {
+                std::cout << (*samp)[j];
+                if ( numpoints > 0 && j < numpoints - 1 )
+                { std::cout << ", "; }
+            }
+            std::cout << std::endl;
+        }
+    }
+
+}
+
+//-*****************************************************************************
 int main( int, char** )
 {
     //OWrapExisting();
     PolyMorphicAbstractPtrs();
+    StupidData();
     return 0;
 }

@@ -119,7 +119,7 @@ public:
     Abc::M44d getMatrix() const;
 
     //! Tests whether this sample has the same topology as iSample
-    bool isTopologyEqual( const XformSample & iSample);
+    bool isTopologyEqual( const XformSample & iSample );
 
     //! Has this Sample been used in a call to OXformSchema::set()
     const bool getIsTopologyFrozen() const { return m_hasBeenRead; }

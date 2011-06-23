@@ -156,7 +156,6 @@ void xformOut()
     // this will cause the Xform's values property to be an ArrayProperty,
     // since there will be 20 * 16 channels.
     XformSample gsamp;
-
     Abc::M44d gmatrix;
     gmatrix.makeIdentity();
     for ( size_t i = 0 ; i < 20 ; ++i )
@@ -164,7 +163,6 @@ void xformOut()
         gmatrix.x[0][1] = (double)i;
         gsamp.addOp( matrixop, gmatrix );
     }
-
     g.getSchema().set( gsamp );
 }
 
@@ -199,7 +197,6 @@ void xformIn()
     IXform b( a, "b" );
     b.getSchema().get( xs );
     TESTING_ASSERT( b.getSchema().getTimeSampling()->getTimeSamplingType().isUniform() );
-
     // the schema is not static, because set() was called 20 times on it.
     TESTING_ASSERT( !b.getSchema().isConstant() );
     TESTING_ASSERT( b.getSchema().getNumSamples() == 20 );
@@ -457,5 +454,6 @@ int main( int argc, char *argv[] )
     xformIn();
     someOpsXform();
     xformTreeCreate();
+
     return 0;
 }

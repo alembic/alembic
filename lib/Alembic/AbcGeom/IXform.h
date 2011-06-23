@@ -191,7 +191,7 @@ private:
 
     // fills m_valVec with data
     void getChannelValues( const AbcA::index_t iSampleIndex,
-        XformSample & oSamp );
+                           XformSample & oSamp );
 };
 
 //-*****************************************************************************

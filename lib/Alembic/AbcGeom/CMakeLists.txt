@@ -54,7 +54,7 @@ SET( CXX_FILES
 
   ONuPatch.cpp
   INuPatch.cpp
-  
+
   OPoints.cpp
   IPoints.cpp
 
@@ -68,9 +68,6 @@ SET( CXX_FILES
   XformSample.cpp
   IXform.cpp
   OXform.cpp
-
-  OPoints.cpp
-  IPoints.cpp
 )
 
 SET( H_FILES
@@ -99,7 +96,7 @@ SET( H_FILES
 
   ONuPatch.h
   INuPatch.h
-  
+
   OGeomParam.h
   IGeomParam.h
 
