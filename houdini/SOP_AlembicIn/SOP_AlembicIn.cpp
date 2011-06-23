@@ -869,7 +869,8 @@ void SOP_AlembicIn::buildPolyMesh( Args & args, IPolyMesh & polymesh,
     size_t startPrimIdx = gdp->primitives().entries();
     
     GB_PrimitiveGroup * primGrp = buildMesh(getFullName(polymesh),
-            sample.getPositions(), sample.getCounts(), sample.getIndices());
+            sample.getPositions(), sample.getFaceCounts(),
+                    sample.getFaceIndices());
     
     addUVs(args, polymesh.getSchema().getUVs(), startPointIdx, startPrimIdx);
     addNormals(args, polymesh.getSchema().getNormals(), startPointIdx,

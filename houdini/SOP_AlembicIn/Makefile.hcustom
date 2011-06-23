@@ -1,22 +1,10 @@
 
 #set these to your alembic check-out and build dirs
-#ABCROOT = /net/soft_scratch/users/stevel/abcdev/millerlucas-dev/lib/
-#ABCBUILDROOT = /net/soft_scratch/users/stevel/abcdev/alembic_lmiller_build/lib/Alembic
-
-ABCROOT = /net/soft_scratch/users/stevel/abcdev/millerlucas-dev-trunk/lib/
-ABCBUILDROOT = /net/soft_scratch/users/stevel/abcdev/millerlucas-dev-trunk-build/lib/Alembic
+ABCROOT = ../../lib
+ABCBUILDROOT = ../../../alembic_build/lib/Alembic
 
 
-
-
-#this is custom to our linux distro
-OPENEXRINC = /usr/include/OpenEXR
-#this is custom to our linux distro
-GLULIB = -L /usr/lib64/xorg.mesa.3d -L /usr/lib64/
-
-INCLUDES = -I /usr/local/spi/include \
-           -I $(OPENEXRINC) \
-           -I $(ABCROOT)
+INCLUDES = -I $(ABCROOT)
            
 LINKPATHS = -L $(ABCBUILDROOT)/MD5Hash \
             -L $(ABCBUILDROOT)/Util \
@@ -30,14 +18,27 @@ LINKS = -l AlembicAbcGeom \
         -l AlembicAbc \
         -l AlembicAbcCoreHDF5 \
         -l AlembicAbcCoreAbstract \
-        -l AlembicMD5Hash \
         -l AlembicUtil \
-        -l hdf5 -l hdf5_hl \
-        -l SpiImath -l SpiIex -l SpiHalf #custom to our facility, get rid of the Spi prefixes
+        -l hdf5 -l hdf5_hl 
+        
+
+HCUSTOM_ADDITIONAL_ARGS = 
+
+#Sony-specific errata you can ignore (and which will go away soon)
+ATSPI = 0
+ifeq ($(ATSPI), 1)
+INCLUDES += -I /usr/local/spi/include
+INCLUDES += -I /usr/include/OpenEXR
+LINKS += -l SpiImath -l SpiIex -l SpiHalf
+LINKS += -L /usr/lib64/xorg.mesa.3d -L /usr/lib64/
+HCUSTOM_ADDITIONAL_ARGS += --appver 11.0.703
+endif
+
 
 INSTALLDIR = /tmp
 
-HCUSTOM_ADDITIONAL_ARGS = --appver 11.0.703
+
+
 
 debug: SOP_AlembicIn.cpp
 	hcustom $(HCUSTOM_ADDITIONAL_ARGS) -e SOP_AlembicIn.cpp $(INCLUDES) $(LINKPATHS) $(LINKS) -i $(INSTALLDIR)
