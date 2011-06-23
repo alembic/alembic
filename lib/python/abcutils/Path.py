@@ -168,7 +168,8 @@ class Path( object ):
 
     def index( self, val ):
         if val in self:
-            return self._plist.index( val )
+            return len( self._plist ) - \
+                list( reversed( self._plist ) ).index( val ) - 1
         else:
             raise ValueError, "%s is not in path." % val
 
