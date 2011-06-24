@@ -93,12 +93,45 @@ void xformIn()
 
 }
 
+void rotateTest()
+{
+    std::string fileName = "rotateXformOp.h";
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), fileName );
+        OXform a( OObject( archive, kTop ), "a" );
+        OXform b( OObject( archive, kTop ), "b" );
+
+        XformSample aSamp;
+        aSamp.addOp( XformOp(kRotateOperation), V3d(0.0, 1.0, 0.0), 45.0 );
+        aSamp.addOp( XformOp(kRotateOperation), V3d(0.0, 0.0, 1.0), 30.0 );
+        aSamp.addOp( XformOp(kRotateOperation), V3d(1.0, 0.0, 0.0), 15.0 );
+        a.getSchema().set( aSamp );
+
+        XformSample bSamp;
+        bSamp.addOp( XformOp(kRotateYOperation), 45.0 );
+        bSamp.addOp( XformOp(kRotateZOperation), 30.0 );
+        bSamp.addOp( XformOp(kRotateXOperation), 15.0 );
+        b.getSchema().set( bSamp );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), fileName );
+        IXform a( IObject( archive, kTop ), "a" );
+        IXform b( IObject( archive, kTop ), "b" );
+
+        M44d aMat = a.getSchema().getValue().getMatrix();
+        M44d bMat = b.getSchema().getValue().getMatrix();
+        TESTING_ASSERT( aMat == bMat );
+    }
+}
 
 //-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     xformOut();
     xformIn();
+
+    rotateTest();
 
     return 0;
 }

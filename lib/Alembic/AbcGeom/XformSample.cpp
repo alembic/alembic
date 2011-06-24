@@ -572,6 +572,21 @@ Abc::M44d XformSample::getMatrix() const
                 }
             }
         }
+        else if ( otype == kRotateXOperation )
+        {
+            m.setAxisAngle( Abc::V3d( 1.0, 0.0, 0.0 ),
+                            DegreesToRadians( op.getChannelValue( 0 ) ) );
+        }
+        else if ( otype == kRotateYOperation )
+        {
+            m.setAxisAngle( Abc::V3d( 0.0, 1.0, 0.0 ),
+                            DegreesToRadians( op.getChannelValue( 0 ) ) );
+        }
+        else if ( otype == kRotateZOperation )
+        {
+            m.setAxisAngle( Abc::V3d( 0.0, 0.0, 1.0 ),
+                            DegreesToRadians( op.getChannelValue( 0 ) ) );
+        }
         else
         {
             Abc::V3d vec( op.getChannelValue( 0 ),
@@ -591,21 +606,7 @@ Abc::M44d XformSample::getMatrix() const
                 m.setAxisAngle( vec,
                                 DegreesToRadians( op.getChannelValue( 3 ) ) );
             }
-            else if ( otype == kRotateXOperation )
-            {
-                m.setAxisAngle( Abc::V3d( 1.0, 0.0, 0.0 ),
-                                DegreesToRadians( op.getChannelValue( 0 ) ) );
-            }
-            else if ( otype == kRotateYOperation )
-            {
-                m.setAxisAngle( Abc::V3d( 0.0, 1.0, 0.0 ),
-                                DegreesToRadians( op.getChannelValue( 0 ) ) );
-            }
-            else if ( otype == kRotateZOperation )
-            {
-                m.setAxisAngle( Abc::V3d( 0.0, 0.0, 1.0 ),
-                                DegreesToRadians( op.getChannelValue( 0 ) ) );
-            }
+
         }
         ret = m * ret;
     }
