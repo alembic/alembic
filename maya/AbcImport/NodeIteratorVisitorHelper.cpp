@@ -1348,6 +1348,7 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     mSubDList = rhs.mSubDList;
     mXformList = rhs.mXformList;
     mPropList = rhs.mPropList;
+    mLocList = rhs.mLocList;
 
     // get all the sampled Maya objects
     mCameraObjList = rhs.mCameraObjList;
@@ -1359,6 +1360,7 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     mXformOpList = rhs.mXformOpList;
     mPropObjList = rhs.mPropObjList;
     mIsComplexXform = rhs.mIsComplexXform;
+    mLocObjList = rhs.mLocObjList;
 
     mNumCurves = rhs.mNumCurves;
 
@@ -1372,6 +1374,16 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
 
     size_t i, iEnd;
     Alembic::AbcCoreAbstract::TimeSamplingPtr ts;
+
+    iEnd = mLocList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        Alembic::Abc::IScalarProperty locProp(mLocList[i].getProperties(), "locator");
+        ts = locProp.getTimeSampling();
+        size_t numSamples = locProp.getNumSamples();
+        oMin = std::min(ts->getSampleTime(0), oMin);
+        oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+    }
 
     iEnd = mPointsList.size();
     for (i = 0; i < iEnd; ++i)
@@ -1627,11 +1639,48 @@ MString connectAttr(ArgData & iArgData)
     unsigned int nSurfaceSize   = iArgData.mData.mNurbsObjList.size();
     unsigned int nCurveSize     = iArgData.mData.mNurbsCurveObjList.size();
     unsigned int propSize       = iArgData.mData.mPropObjList.size();
+    unsigned int locatorSize     = iArgData.mData.mLocObjList.size();
 
     // making dynamic connections
     if (particleSize > 0)
     {
         printWarning("Currently no support for animated particle system");
+    }
+    if (locatorSize > 0)
+    {
+        MPlug srcArrayPlug = alembicNodeFn.findPlug("outLoc", true);
+
+        unsigned int logicalIndex = 0;
+        for (unsigned int i = 0; i < locatorSize; i++)
+        {
+            MFnDagNode fnLocator(iArgData.mData.mLocObjList[i]);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnLocator.findPlug("localPositionX", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnLocator.findPlug("localPositionY", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnLocator.findPlug("localPositionZ", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnLocator.findPlug("localScaleX", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnLocator.findPlug("localScaleY", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+            dstPlug = fnLocator.findPlug("localScaleZ", true);
+            modifier.connect(srcPlug, dstPlug);
+
+            status = modifier.doIt();
+        }
     }
     if (cameraSize > 0)
     {

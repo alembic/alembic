@@ -67,7 +67,8 @@ public:
         // 5 mOutNurbsSurfaceArrayAttr
         // 6 mOutNurbsCurveGrpArrayAttr
         // 7 mOutParticlePosArrayAttr, mOutParticleIdArrayAttr
-        mOutRead = std::vector<bool>(8, false);
+        // 8 mOutLocatorPosScaleArrayAttr
+        mOutRead = std::vector<bool>(9, false);
     }
 
     virtual ~AlembicNode() {}
@@ -93,6 +94,7 @@ public:
     static MObject mOutNurbsCurveGrpArrayAttr;
     static MObject mOutNurbsSurfaceArrayAttr;
     static MObject mOutTransOpArrayAttr;
+    static MObject mOutLocatorPosScaleArrayAttr;
 
     // output informational attrs
     static MObject mStartFrameAttr;

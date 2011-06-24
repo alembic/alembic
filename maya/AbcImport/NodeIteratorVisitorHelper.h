@@ -118,15 +118,17 @@ public:
     void getFrameRange(double & oMin, double & oMax);
 
     std::vector<MObject>        mCameraObjList;
+    std::vector<MObject>        mLocObjList;
+    std::vector<MObject>        mNurbsObjList;
     std::vector<MObject>        mNurbsCurveObjList;
     std::vector<MObject>        mPointsObjList;
     std::vector<MObject>        mPolyMeshObjList;
     std::vector<MObject>        mSubDObjList;
-    std::vector<MObject>        mNurbsObjList;
 
     std::vector<Prop> mPropList;
     std::vector<Alembic::AbcGeom::ICamera>    mCameraList;
     std::vector<Alembic::AbcGeom::ICurves>    mCurvesList;
+    std::vector<Alembic::AbcGeom::IXform>     mLocList;
     std::vector<Alembic::AbcGeom::INuPatch>   mNurbsList;
     std::vector<Alembic::AbcGeom::IPolyMesh>  mPolyMeshList;
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
