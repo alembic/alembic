@@ -104,6 +104,16 @@ bool isAnimated(MObject & object, bool checkParent = false);
 
 // determine if a Maya Object is intermediate
 bool isIntermediate(const MObject & object);
+
+// returns true for visible and lod invisible and not templated objects
+bool isRenderable(const MObject & object);
+
+// strip all namespaces from the node name, go from taco:foo:bar to bar
+MString stripNamespaces(const MString & iNodeName);
+
+// returns the Help string for AbcExport
+MString getHelpText();
+
 } // namespace util
 
 struct PlugAndObjScalar
@@ -119,6 +129,37 @@ struct PlugAndObjArray
     MPlug plug;
     MObject obj;
     Alembic::Abc::OArrayProperty prop;
+};
+
+struct JobArgs
+{
+    JobArgs()
+    {
+        excludeInvisible = false;
+        noNormals = false;
+        stripNamespace = false;
+        useSelectionList = false;
+        worldSpace = false;
+        writeVisibility = false;
+        writeUVs = false;
+    }
+
+    bool excludeInvisible;
+    bool noNormals;
+    bool stripNamespace;
+    bool useSelectionList;
+    bool worldSpace;
+    bool writeVisibility;
+    bool writeUVs;
+
+    std::string melPerFrameCallback;
+    std::string melPostCallback;
+    std::string pythonPerFrameCallback;
+    std::string pythonPostCallback;
+
+    std::vector< std::string > prefixFilters;
+    std::set< std::string > attribs;
+    util::ShapeSet dagPaths;
 };
 
 #endif  // _AlembicExport_MayaUtility_h_

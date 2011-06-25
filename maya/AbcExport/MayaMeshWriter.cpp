@@ -89,8 +89,9 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
 
 MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibility, bool iWriteUVs)
-  : mIsGeometryAnimated(false),
+    const JobArgs & iArgs)
+  : mNoNormals(iArgs.noNormals),
+    mIsGeometryAnimated(false),
     mDagPath(iDag),
     mNumPoints(0)
 {
@@ -110,15 +111,21 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     std::vector<float> uvs;
     std::vector<Alembic::Util::uint32_t> indices;
 
+    MString name = lMesh.name();
+    if (iArgs.stripNamespace)
+    {
+        name = util::stripNamespaces(name);
+    }
+
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
     if ( !plug.isNull() && plug.asBool() )
     {
-        Alembic::AbcGeom::OSubD obj(iParent, lMesh.name().asChar(), iTimeIndex);
+        Alembic::AbcGeom::OSubD obj(iParent, name.asChar(), iTimeIndex);
         mSubDSchema = obj.getSchema();
 
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
-        if ( iWriteUVs )
+        if ( iArgs.writeUVs )
         {
             getUVs(uvs, indices);
 
@@ -136,24 +143,23 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         }
 
         Alembic::Abc::OCompoundProperty cp;
-        if (AttributesWriter::hasAnyAttr(lMesh))
+        if (AttributesWriter::hasAnyAttr(lMesh, iArgs))
         {
             cp = mSubDSchema.getArbGeomParams();
         }
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, lMesh,
-            iTimeIndex, iWriteVisibility));
+            iTimeIndex, iArgs));
 
         writeSubD(iDag, uvSamp);
     }
     else
     {
-        Alembic::AbcGeom::OPolyMesh obj(iParent, lMesh.name().asChar(),
-            iTimeIndex);
+        Alembic::AbcGeom::OPolyMesh obj(iParent, name.asChar(), iTimeIndex);
         mPolySchema = obj.getSchema();
 
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
 
-        if ( iWriteUVs )
+        if ( iArgs.writeUVs )
         {
             getUVs(uvs, indices);
 
@@ -172,14 +178,14 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         }
 
         Alembic::Abc::OCompoundProperty cp;
-        if (AttributesWriter::hasAnyAttr(lMesh))
+        if (AttributesWriter::hasAnyAttr(lMesh, iArgs))
         {
             cp = mPolySchema.getArbGeomParams();
         }
 
         // set the rest of the props and write to the writer node
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, lMesh,
-            iTimeIndex, iWriteVisibility));
+            iTimeIndex, iArgs));
 
         writePoly(uvSamp);
     }
@@ -278,6 +284,9 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
     }
 
     // no normals bail early
+    if ( mNoNormals )
+        return;
+
     MPlug plug = lMesh.findPlug("noNormals", true, &status);
     if ( status == MS::kSuccess && plug.asBool() == true )
         return;

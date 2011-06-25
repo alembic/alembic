@@ -40,22 +40,27 @@
 MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
     double iFrame, MDagPath & iDag, Alembic::AbcGeom::OObject & iParent,
     Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibility) :
+    const JobArgs & iArgs) :
     mIsAnimated(false), mDagPath(iDag)
 {
     MFnParticleSystem particle(mDagPath);
-    Alembic::AbcGeom::OPoints obj(iParent, particle.name().asChar(),
+    MString name = particle.name();
+    if (iArgs.stripNamespace)
+    {
+        name = util::stripNamespaces(name);
+    }
+    Alembic::AbcGeom::OPoints obj(iParent, name.asChar(),
         iTimeIndex);
     mSchema = obj.getSchema();
 
     Alembic::Abc::OCompoundProperty cp;
-    if (AttributesWriter::hasAnyAttr(particle))
+    if (AttributesWriter::hasAnyAttr(particle, iArgs))
     {
         cp = mSchema.getArbGeomParams();
     }
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, particle,
-        iTimeIndex, iWriteVisibility));
+        iTimeIndex, iArgs));
 
     MObject object = iDag.node();
     if (iTimeIndex != 0 && util::isAnimated(object))

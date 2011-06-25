@@ -50,8 +50,7 @@ class MayaMeshWriter
   public:
 
     MayaMeshWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibilty,
-        bool iWriteUVs);
+        Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs);
     void write();
     bool isAnimated() const;
     bool isSubD();
@@ -75,6 +74,7 @@ class MayaMeshWriter
         std::vector<Alembic::Util::uint32_t> & indices);
 
     void getPolyNormals(std::vector<float> & oNormals);
+    bool mNoNormals;
 
     bool    mIsGeometryAnimated;
     MDagPath mDagPath;

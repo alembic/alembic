@@ -39,7 +39,7 @@
 
 MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibilty) :
+    const JobArgs & iArgs) :
     mIsSurfaceAnimated(false), mIsTrimCurveAnimated(false), mDagPath(iDag)
 {
     MStatus stat;
@@ -52,17 +52,23 @@ MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
             "MFnNurbsSurface() failed for MayaNurbsSurfaceWriter" );
     }
 
-    Alembic::AbcGeom::ONuPatch obj(iParent, nurbs.name().asChar(), iTimeIndex);
+    MString name = nurbs.name();
+    if (iArgs.stripNamespace)
+    {
+        name = util::stripNamespaces(name);
+    }
+
+    Alembic::AbcGeom::ONuPatch obj(iParent, name.asChar(), iTimeIndex);
     mSchema = obj.getSchema();
 
     Alembic::Abc::OCompoundProperty cp;
-    if (AttributesWriter::hasAnyAttr(nurbs))
+    if (AttributesWriter::hasAnyAttr(nurbs, iArgs))
     {
         cp = mSchema.getArbGeomParams();
     }
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, nurbs,
-        iTimeIndex, iWriteVisibilty));
+        iTimeIndex, iArgs));
 
     if (iTimeIndex != 0 && util::isAnimated(surface))
         mIsSurfaceAnimated = true;

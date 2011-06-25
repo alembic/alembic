@@ -43,8 +43,8 @@ namespace
     // get all the nurbs curves from below the given dagpath.
     // the curve group is considered animated if at least one curve is animated
 
-    void collectNurbsCurves(const MDagPath &dagPath, MDagPathArray &dagPaths,
-        bool & oIsAnimated)
+    void collectNurbsCurves(const MDagPath &dagPath, bool iExcludeInvisible,
+        MDagPathArray &dagPaths, bool & oIsAnimated)
     {
         MStatus stat;
 
@@ -62,7 +62,8 @@ namespace
                     MObject curve = curvePath.node();
 
                     if ( !util::isIntermediate(curve) &&
-                        curve.hasFn(MFn::kNurbsCurve) )
+                        curve.hasFn(MFn::kNurbsCurve) &&
+                        (!iExcludeInvisible || util::isRenderable(curve)) )
                     {
                         dagPaths.append(curvePath);
                     }
@@ -87,7 +88,7 @@ namespace
 
 MayaNurbsCurveWriter::MayaNurbsCurveWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
-    bool iIsCurveGrp, bool iWriteVisibility) :
+    bool iIsCurveGrp, const JobArgs & iArgs) :
     mIsAnimated(false), mRootDagPath(iDag), mIsCurveGrp(iIsCurveGrp)
 {
     MStatus stat;
@@ -96,7 +97,8 @@ MayaNurbsCurveWriter::MayaNurbsCurveWriter(MDagPath & iDag,
 
     if (mIsCurveGrp)
     {
-        collectNurbsCurves(mRootDagPath, mNurbsCurves, mIsAnimated);
+        collectNurbsCurves(mRootDagPath, iArgs.excludeInvisible,
+            mNurbsCurves, mIsAnimated);
 
         // if no curves were found bail early
         if (mNurbsCurves.length() == 0)
@@ -110,17 +112,22 @@ MayaNurbsCurveWriter::MayaNurbsCurveWriter(MDagPath & iDag,
             mIsAnimated = true;
     }
 
+    if (iArgs.stripNamespace)
+    {
+        name = util::stripNamespaces(name);
+    }
+
     Alembic::AbcGeom::OCurves obj(iParent, name.asChar(), iTimeIndex);
     mSchema = obj.getSchema();
 
     Alembic::Abc::OCompoundProperty cp;
-    if (AttributesWriter::hasAnyAttr(iDag))
+    if (AttributesWriter::hasAnyAttr(iDag, iArgs))
     {
         cp = mSchema.getArbGeomParams();
     }
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, iDag,
-        iTimeIndex, iWriteVisibility));
+        iTimeIndex, iArgs));
 
 
     write();
@@ -239,8 +246,6 @@ void MayaNurbsCurveWriter::write()
             MDoubleArray doubleArrayData = fnDoubleArrayData.array();
             size_t arraySum = doubleArrayData.length();
             size_t correctVecLen = arraySum;
-            //if (samp.getForm() == 0)
-            //    correctVecLen += 1;
             if (arraySum == correctVecLen)
             {
                 for (size_t i = 0; i < arraySum; i++)

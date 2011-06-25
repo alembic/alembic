@@ -49,7 +49,7 @@ class MayaCameraWriter
   public:
 
     MayaCameraWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility);
+        Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs);
     AttributesWriterPtr getAttrs() {return mAttrs;};
     void write();
     bool isAnimated() const;

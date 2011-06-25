@@ -153,22 +153,12 @@ class AbcWriteJob
 {
   public:
 
-    AbcWriteJob(const util::ShapeSet & iDagPath,
-        const char * iFileName,
-        bool iUseSelectionList,
-        bool iWorldSpace,
-        bool iWriteVisibility,
-        bool iWriteUVs,
+    AbcWriteJob(const char * iFileName,
         std::set<double> & iTransFrames,
         Alembic::AbcCoreAbstract::TimeSamplingPtr iTransTime,
         std::set<double> & iShapeFrames,
         Alembic::AbcCoreAbstract::TimeSamplingPtr iShapeTime,
-        std::string & iMelPerFrameCallback,
-        std::string & iMelPostCallback,
-        std::string & iPythonPerFrameCallback,
-        std::string & iPythonPostCallback,
-        std::string & iPrefixFilter,
-        std::set< std::string > & iAttribs);
+        const JobArgs & iArgs);
 
     ~AbcWriteJob();
 
@@ -208,27 +198,10 @@ class AbcWriteJob
     // helper dag path for recursive calculations
     MDagPath mCurDag;
 
-    // list of root transform dag paths
-    util::ShapeSet mDagPath;
-
     // the root world node of the scene
     Alembic::Abc::OArchive mRoot;
 
     std::string mFileName;
-
-    // whether or not we are writing nodes based on selection
-    bool mUseSelectionList;
-
-    // whether our root transforms (in mDagPath) should also have
-    // all of it's ancestors
-    bool mWorldSpace;
-
-    // whether or not to write visibility in a Katana-esque way
-    // if false then visibility state will not be written out
-    bool mWriteVisibility;
-
-    // whether or not to bake current uv set of polygons and subD meshs to file
-    bool mWriteUVs;
 
     MSelectionList mSList;
     std::set<double> mShapeFrames;
@@ -249,17 +222,8 @@ class AbcWriteJob
     Alembic::Abc::OBox3dProperty mBoxProp;
     unsigned int mBoxIndex;
 
-    // for the callbacks
-    std::string mMelPerFrameCallback;
-    std::string mMelPostCallback;
-    std::string mPythonPerFrameCallback;
-    std::string mPythonPostCallback;
-
-    // filtering for attributes
-    std::string mFilter;
-    std::set<std::string> mAttribs;
-
     AbcWriteJobStatistics mStats;
+    JobArgs mArgs;
 };
 
 typedef boost::shared_ptr < AbcWriteJob > AbcWriteJobPtr;

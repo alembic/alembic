@@ -1004,24 +1004,17 @@ void createPropertyFromMFnAttr(const MObject& iAttr, const MPlug& iPlug,
 
 }
 
-std::string * AttributesWriter::mFilter = NULL;
-std::set<std::string> * AttributesWriter::mAttribs = NULL;
-
 AttributesWriter::AttributesWriter(
     Alembic::Abc::OCompoundProperty & iParent,
     Alembic::Abc::OObject & iParentObj,
     const MFnDagNode & iNode,
     Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibility)
+    const JobArgs & iArgs)
 {
     PlugAndObjScalar visPlug;
 
     unsigned int attrCount = iNode.attributeCount();
     unsigned int i;
-
-    int filtLen = 0;
-    if (mFilter != NULL)
-        filtLen = mFilter->length();
 
     std::vector< PlugAndObjArray > staticPlugObjArrayVec;
 
@@ -1042,7 +1035,7 @@ AttributesWriter::AttributesWriter(
         // we handle visibility in a special way
         if (propStr == "visibility")
         {
-            if (iWriteVisibility)
+            if (iArgs.writeVisibility)
             {
                 visPlug.plug = plug;
                 visPlug.obj = attr;
@@ -1051,7 +1044,7 @@ AttributesWriter::AttributesWriter(
             continue;
         }
 
-        if (!iParent.valid() || !matchFilterOrAttribs(plug))
+        if (!iParent.valid() || !matchFilterOrAttribs(plug, iArgs))
         {
             continue;
         }
@@ -1183,7 +1176,8 @@ AttributesWriter::AttributesWriter(
     }
 }
 
-bool AttributesWriter::matchFilterOrAttribs(const MPlug & iPlug)
+bool AttributesWriter::matchFilterOrAttribs(const MPlug & iPlug,
+    const JobArgs & iArgs)
 {
 
     MString propName = iPlug.partialName(0, 0, 0, 0, 0, 1);
@@ -1194,17 +1188,24 @@ bool AttributesWriter::matchFilterOrAttribs(const MPlug & iPlug)
         return false;
     }
 
-    // check the prefilter and ignore those that match but end with arb attr
-    if (mFilter && mFilter->length() > 0 &&
-        name.compare(0, mFilter->length(), *mFilter) == 0 &&
-        !endsWithArbAttr(name) &&
-        ( !iPlug.isChild() || !isDataAttr(iPlug.parent()) ))
+    std::vector<std::string>::const_iterator f;
+    std::vector<std::string>::const_iterator fEnd =
+        iArgs.prefixFilters.end();
+    for (f = iArgs.prefixFilters.begin(); f != fEnd; ++f)
     {
-        return true;
+        // check the prefilter and ignore those that match but end with
+        // arb attr
+        if (f->length() > 0 &&
+            name.compare(0, f->length(), *f) == 0 &&
+            !endsWithArbAttr(name) &&
+            ( !iPlug.isChild() || !isDataAttr(iPlug.parent()) ))
+        {
+            return true;
+        }
     }
 
     // check our specific list of attributes
-    if (mAttribs && mAttribs->find(name) != mAttribs->end())
+    if (iArgs.attribs.find(name) != iArgs.attribs.end())
     {
         return true;
     }
@@ -1212,14 +1213,11 @@ bool AttributesWriter::matchFilterOrAttribs(const MPlug & iPlug)
     return false;
 }
 
-bool AttributesWriter::hasAnyAttr(const MFnDagNode & iNode)
+bool AttributesWriter::hasAnyAttr(const MFnDagNode & iNode,
+    const JobArgs & iArgs)
 {
     unsigned int attrCount = iNode.attributeCount();
     unsigned int i;
-
-    int filtLen = 0;
-    if (mFilter != NULL)
-        filtLen = mFilter->length();
 
     std::vector< PlugAndObjArray > staticPlugObjArrayVec;
 
@@ -1235,7 +1233,7 @@ bool AttributesWriter::hasAnyAttr(const MFnDagNode & iNode)
             continue;
         }
 
-        if (matchFilterOrAttribs(plug))
+        if (matchFilterOrAttribs(plug, iArgs))
         {
             return true;
         }

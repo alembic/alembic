@@ -49,7 +49,7 @@ class MayaPointPrimitiveWriter
 
     MayaPointPrimitiveWriter(double iFrame, MDagPath & iDag,
         Alembic::AbcGeom::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
-        bool iWriteVisibility);
+        const JobArgs & iArgs);
 
     void write(double iFrame);
     bool isAnimated() const;

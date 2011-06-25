@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -54,13 +54,13 @@ MSyntax AbcExport::createSyntax()
 {
     MSyntax syntax;
 
-    syntax.addFlag("-d",  "-debug", MSyntax::kNoArg);
+    syntax.addFlag("-v",  "-verbose", MSyntax::kNoArg);
     syntax.addFlag("-h",  "-help", MSyntax::kNoArg);
-    syntax.addFlag("-sa", "-startAt", MSyntax::kDouble);
-    syntax.addFlag("-sf", "-skipFrame", MSyntax::kNoArg);
-    syntax.addFlag("-sl", "-selection", MSyntax::kNoArg);
-    syntax.addArg(MSyntax::kString);
+    syntax.addFlag("-prs", "-preRollStartFrame", MSyntax::kDouble);
+    syntax.addFlag("-suf", "-skipUnwrittenFrames", MSyntax::kNoArg);
+    syntax.addFlag("-j", "-jobArg", MSyntax::kString);
 
+    syntax.makeFlagMultiUse("-j");
     syntax.enableQuery(true);
     syntax.enableEdit(false);
 
@@ -80,165 +80,34 @@ MStatus AbcExport::doIt(const MArgList & args)
     MTime oldCurTime = MAnimControl::currentTime();
 
     MArgParser argData(syntax(), args, &status);
-    if (status != MS::kSuccess)
-        return status;
 
     unsigned int numberOfArguments = args.length();
 
-    MString msg;
-    msg += "AbcExport  [options] tranlation_jobs_description_string\n\n";
-    msg += "Options:\n";
-    msg += "-h  / help  Print this message.\n";
-    msg += "\n";
-    msg += "-sa / startAt float (default: 0.0f)\n";
-    msg += "The frame to start scene evaluation at. This is used to set\n";
-    msg += "the starting frame for time dependent translations and can\n";
-    msg += "be used to add run-up that isn't actually translated.\n";
-    msg += "\n";
-    msg += "-sf / skipFrame boolean (default: false)\n";
-    msg += "When evaluating multiple translate jobs, this flag decides\n";
-    msg += "whether or not to skip frame if possible.\n";
-    msg += "\n";
-    msg += "-sl / selection\n";
-    msg += "If this flag is present: if tranlation_jobs_description_string\n";
-    msg += "is empty, write out all nodes from the active selection list;\n";
-    msg += "if tranlation_jobs_description_string is not empty, write out\n";
-    msg += "only the nodes in the active selection list.\n";
-    msg += "\n";
-    msg += "-d  / debug  Print debug log\n";
-    msg += "\n";
-    msg += "(Each translation job is seperated by ;)\n";
-    msg += "\n";
-    msg += "per translation job optional flags:\n";
-    msg += "\n";
-    msg += "range float startTime float endTime\n";
-    msg += "The frame range to write.\n";
-    msg += "\n";
-    msg += "uv\n";
-    msg += "If set, AbcExport will bake the current uv set of polygons\n";
-    msg += "and subD meshes into property \"st\" on the nodes.\n";
-    msg += "By default this flag is not set.\n";
-    msg += "\n";
-    msg += "shutterOpen float (default: 0.0)\n";
-    msg += "Motion blur starting time.\n";
-    msg += "\n";
-    msg += "shutterClose float (default: 0.0)\n";
-    msg += "Motion blur end time\n";
-    msg += "\n";
-    msg += "numSamples unsigned int (default: 2)\n";
-    msg += "The number of times to sample within a given frame with\n";
-    msg += "motion blur applied.  If shutterOpen is equal to\n";
-    msg += "shutterClose then numSamples is ignored.\n";
-    msg += "\n";
-    msg += "noSampleGeo\n";
-    msg += "If set, only write out geometry on whole frames, not\n";
-    msg += "subframes. This flag is not set by default.\n";
-    msg += "Transforms may still be written out on subframes.\n";
-    msg += "\n";
-    msg += "attrPrefix string (default: SPT_)\n";
-    msg += "Prefix filter for determining which attributes to write out\n";
-    msg += "\n";
-    msg += "attrs string\n";
-    msg += "Comma seperated list of attributes to write out, these\n";
-    msg += "attributes will ignore the attr prefix filter.\n";
-    msg += "\n";
-    msg += "writeVisibility\n";
-    msg += "If set, write the visibility state to the file.\n";
-    msg += "If it isn't set everything is assumed to be visible.\n";
-    msg += "By default this flag is not set.\n";
-    msg += "\n";
-    msg += "worldSpace\n";
-    msg += "If set, the root nodes will be stored in world space.\n";
-    msg += "By default it is stored in local space.\n";
-    msg += "\n";
-    msg += "melPerFrameCallback string (default: "")\n";
-    msg += "When each frame (and the static frame) is evaluated the\n";
-    msg += "string specified is evaluated as a Mel command.\n";
-    msg += "See below for special processing rules.\n";
-    msg += "Example: melPerFrameCallback print(\"#FRAME#\")\n";
-    msg += "\n";
-    msg += "melPostCallback string (default: "")\n";
-    msg += "When the translation has finished the string specified is\n";
-    msg += "evaluated as a Mel command.\n";
-    msg += "See below for special processing rules.\n";
-    msg += "Example: melPostCallback print(\"Done!\")\n";
-    msg += "\n";
-    msg += "pythonPerFrameCallback string (default: "")\n";
-    msg += "When each frame (and the static frame) is evaluated the\n";
-    msg += "string specified is evaluated as a python command.\n";
-    msg += "See below for special processing rules.\n";
-    msg += "Example: pythonPerFrameCallback print(\"#FRAME#\")\n";
-    msg += "\n";
-    msg += "pythonPostCallback string (default: "")\n";
-    msg += "When the translation has finished the string specified is\n";
-    msg += "evaluated as a python command.\n";
-    msg += "See below for special processing rules.\n";
-    msg += "Example: pythonPostCallback print(\"Done!\")\n";
-    msg += "\n";
-    msg += "On the callbacks, special tokens are replaced with other\n";
-    msg += "data, these tokens and what they are replaced with are as\n";
-    msg += "follows:\n";
-    msg += "\n";
-    msg += "#FRAME# replaced with the frame number being evaluated, if\n";
-    msg += "the static frame is being evaluated then #FRAME# is not\n";
-    msg += "replaced.  #FRAME# is ignored in the post callbacks.\n";
-    msg += "\n";
-    msg += "#BOUNDS# replaced with the bounding box values in minX minY\n";
-    msg += "minZ maxX maxY maxZ space seperated order.\n";
-    msg += "\n";
-    msg += "#BOUNDSARRAY# replaced with the bounding box values as\n";
-    msg += "above, but in array form. In Mel:\n";
-    msg += "In Mel: {minX, minY, minZ, maxX, maxY, maxZ}\n";
-    msg += "In Python: [minX, minY, minZ, maxX, maxY, maxZ]";
-    msg += "\n";
-    msg += "Command Examples:\n";
-    msg += "AbcExport -d -sf \"range 1 24 test_hi test_lo /tmp/test.abc\"\n";
-    msg += "AbcExport \"worldSpace test_hi /tmp/test_hi.abc\"\n";
-    msg += "AbcExport \"range 1 24 shutterOpen 0.0 shutterClose 0.5 ";
-    msg += "numSamples 2 test_hi test_lo /tmp/test.abc\"\n";
-    msg += "AbcExport -d \"range 101 700 test_hi /tmp/test.abc; range 10";
-    msg += " 55 test_lo /tmp/test1.abc\"\n";
-    msg += "\n";
-    msg += "Note that multiple nodes can be written to the same file,\n";
-    msg += "but these nodes should not have any parenting relationships\n";
-    msg += "or the job will not be written out.\n";
-
     if (argData.isFlagSet("help"))
     {
-        MGlobal::displayInfo(msg);
+        MGlobal::displayInfo(util::getHelpText());
         return MS::kSuccess;
     }
 
-    bool debug = argData.isFlagSet("debug");
+    bool verbose = argData.isFlagSet("verbose");
 
     // If skipFrame is true, when going through the playback range of the
     // scene, as much frames are skipped when possible.  This could cause
     // a problem for, time dependent solutions like
     // particle system / hair simulation
     bool skipFrame = false;
-    if (argData.isFlagSet("skipFrame"))
+    if (argData.isFlagSet("skipUnwrittenFrames"))
         skipFrame = true;
 
-    bool useSelectionList = false;
-    if (argData.isFlagSet("selection"))
-        useSelectionList = true;
-
     double startEvaluationTime = DBL_MAX;
-    if (argData.isFlagSet("startAt"))
+    if (argData.isFlagSet("preRollStartFrame"))
     {
         double startAt = 0.0;
-        argData.getFlagArgument("startAt", 0, startAt);
+        argData.getFlagArgument("preRollStartFrame", 0, startAt);
         startEvaluationTime = startAt;
     }
 
-    // Very rudimentary argument parser: no syntax checking at all !!!
-    MString argStr;
-
-    // status = argData.getCommandArgument(0, argStr);
-    argStr = args.asString(numberOfArguments-1, &status);
-    MStringArray jobStringArray;
-    status = argStr.split(';', jobStringArray);
-    unsigned int jobSize = jobStringArray.length();
+    unsigned int jobSize = argData.numberOfFlagUses("jobArg");
 
     if (jobSize == 0)
         return status;
@@ -253,61 +122,50 @@ MStatus AbcExport::doIt(const MArgList & args)
 
     for (unsigned int jobIndex = 0; jobIndex < jobSize; jobIndex++)
     {
-        unsigned int argc = 0;
+        JobArgs jobArgs;
+        MArgList jobArgList;
+        argData.getFlagArgumentList("jobArg", jobIndex, jobArgList);
+        MString jobArgsStr = jobArgList.asString(0);
+        MStringArray jobArgsArray;
+        jobArgsStr.split(' ', jobArgsArray);
 
-        // parse the string
-        MString tstr = jobStringArray[jobIndex];
-        MStringArray strArr;
-        status = tstr.split(' ', strArr);
-        unsigned int length = strArr.length();
-
-        double  startTime = oldCurTime.value();
-        double  endTime = oldCurTime.value();
-        bool    hasRange = false;
-
-        double  shutterOpen = 0.0;
-        double  shutterClose = 0.0;
-        int     numSamples = 1;
-        bool    sampleGeo  = true;     // whether or not to subsample geometry
-
-        bool    worldSpace = false;
-        bool    writeVisibility = false;
-        bool    writeUVs   = false;
-
-        // DAG path array of nodes to be written out as root nodes in the file
-        util::ShapeSet dagPath;
-
-       // name of the abc file the job will be written into
+        double startTime = oldCurTime.value();
+        double endTime = oldCurTime.value();
+        double strideTime = 1.0;
+        bool hasRange = false;
+        bool hasRoot = false;
+        std::set <double> shutterSamples;
+        bool sampleGeo  = true; // whether or not to subsample geometry
         std::string fileName;
 
-        // the list of frames written into the abc file
-        std::set<double> geoSamples;
-        std::set<double> transSamples;
-
-        std::string melPerFrameCallback;
-        std::string melPostCallback;
-        std::string pythonPerFrameCallback;
-        std::string pythonPostCallback;
-
-        // attribute filtering stuff
-        std::string prefixFilter = "SPT_";
-        std::set<std::string> attribsSet;
-
-        // parser for each job
-        while (argc < length)
+        unsigned int numJobArgs = jobArgsArray.length();
+        for (unsigned int i = 0; i < numJobArgs; ++i)
         {
-            if (strArr[argc] == "range")  // range start end
+            MString arg = jobArgsArray[i];
+            arg.toLowerCase();
+
+            if (arg == "-f" || arg == "-file")
             {
-                // guard against overruns
-                if (argc + 2 >= length)
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError("File incorrectly specified.");
                     return MS::kFailure;
+                }
+                fileName = jobArgsArray[++i].asChar();
+            }
 
-                // looking for two floating point numbers
-                util::isFloat(strArr[argc+1], msg);
-                util::isFloat(strArr[argc+2], msg);
+            else if (arg == "-fr" || arg == "-frameRange")
+            {
+                if (i+2 >= numJobArgs || !jobArgsArray[i+1].isDouble() ||
+                    !jobArgsArray[i+2].isDouble())
+                {
+                    MGlobal::displayError("Frame Range incorrectly specified.");
+                    return MS::kFailure;
+                }
 
-                startTime = floor(strArr[argc+1].asDouble());
-                endTime = ceil(strArr[argc+2].asDouble());
+                hasRange = true;
+                startTime = jobArgsArray[++i].asDouble();
+                endTime = jobArgsArray[++i].asDouble();
 
                 // make sure start frame is smaller or equal to endTime
                 if (startTime > endTime)
@@ -316,283 +174,326 @@ MStatus AbcExport::doIt(const MArgList & args)
                     startTime = endTime;
                     endTime = temp;
                 }
+            }
 
-                hasRange = true;
-                argc += 3;
-            }
-            else if (strArr[argc] == "uv")
+            else if (arg == "-frs" || arg == "-framerelativesample")
             {
-                writeUVs = true;
-                argc++;
-            }
-            else if (strArr[argc] == "shutterOpen")
-            {
-                if (argc + 1 >= length)
+                if (i+1 >= numJobArgs || !jobArgsArray[i+1].isDouble())
+                {
+                    MGlobal::displayError(
+                        "Frame Relative Sample incorrectly specified.");
                     return MS::kFailure;
-
-                util::isFloat(strArr[argc+1], msg);
-                shutterOpen = strArr[argc+1].asDouble();
-                argc += 2;
+                }
+                shutterSamples.insert(jobArgsArray[++i].asDouble());
             }
-            else if (strArr[argc] == "shutterClose")
+
+            else if (arg == "-nn" || arg == "-nonormals")
             {
-                if (argc + 1 >= length)
+                jobArgs.noNormals = true;
+            }
+
+            else if (arg == "-ro" || arg == "-renderableOnly")
+            {
+                jobArgs.excludeInvisible = true;
+            }
+
+            else if (arg == "-s" || arg == "-step")
+            {
+                if (i+1 >= numJobArgs || !jobArgsArray[i+1].isDouble())
+                {
+                    MGlobal::displayError("Step incorrectly specified.");
                     return MS::kFailure;
+                }
+                strideTime = jobArgsArray[++i].asDouble();
+            }
 
-                util::isFloat(strArr[argc+1], msg);
-                shutterClose = strArr[argc+1].asDouble();
-                argc += 2;
-            }
-            else if (strArr[argc] == "numSamples")
+            else if (arg == "-sl" || arg == "-selection")
             {
-                if (argc + 1 >= length)
-                    return MS::kFailure;
+                jobArgs.useSelectionList = true;
+            }
 
-                util::isUnsigned(strArr[argc+1], msg);
-                numSamples = strArr[argc+1].asInt();
-                argc += 2;
-            }
-            else if (strArr[argc] == "writeVisibility")
+            else if (arg == "-sn" || arg == "-stripnamespaces")
             {
-                writeVisibility = true;
-                argc++;
+                jobArgs.stripNamespace = true;
             }
-            else if (strArr[argc] == "worldSpace")
+
+            else if (arg == "-uv" || arg == "-uvwrite")
             {
-                worldSpace = true;
-                argc++;
+                jobArgs.writeUVs = true;
             }
-            else if (strArr[argc] == "noSampleGeo")
+
+            else if (arg == "-wfg" || arg == "-wholeframegeo")
             {
                 sampleGeo = false;
-                argc++;
-            }
-            else if (strArr[argc] == "melPerFrameCallback")
-            {
-                if (argc + 1 >= length)
-                    return MS::kFailure;
-
-                melPerFrameCallback = strArr[argc+1].asChar();
-                argc += 2;
-            }
-            else if (strArr[argc] == "melPostCallback")
-            {
-                if (argc + 1 >= length)
-                    return MS::kFailure;
-
-                melPostCallback = strArr[argc+1].asChar();
-                argc += 2;
-            }
-            else if (strArr[argc] == "pythonPerFrameCallback")
-            {
-                if (argc + 1 >= length)
-                    return MS::kFailure;
-
-                pythonPerFrameCallback = strArr[argc+1].asChar();
-                argc += 2;
-            }
-            else if (strArr[argc] == "pythonPostCallback")
-            {
-                if (argc + 1 >= length)
-                    return MS::kFailure;
-
-                pythonPostCallback = strArr[argc+1].asChar();
-                argc += 2;
             }
 
-            else if (strArr[argc] == "attrPrefix")
+            else if (arg == "-ws" || arg == "-worldspace")
             {
-                if (argc + 1 >= length)
-                    return MS::kFailure;
-
-                prefixFilter = strArr[argc+1].asChar();
-                argc += 2;
+                jobArgs.worldSpace = true;
             }
 
-            else if (strArr[argc] == "attrs")
+            else if (arg == "-wv" || arg == "-writevisibility")
             {
-                if (argc + 1 >= length)
-                    return MS::kFailure;
+                jobArgs.writeVisibility = true;
+            }
 
-                MString attrString = strArr[argc+1];
-
-                MStringArray attribs;
-                attrString.split(',', attribs);
-                unsigned int attribsLength = attrString.length();
-                for (unsigned int i = 0; i < attribsLength; ++i)
+            else if (arg == "-mfc" || arg == "-melperframecallback")
+            {
+                if (i+1 >= numJobArgs)
                 {
-                    MString & attrib = attribs[i];
-                    if (attrib != "" && attrib != "visibility")
-                    {
-                        attribsSet.insert(attrib.asChar());
-                    }
+                    MGlobal::displayError(
+                        "melPerFrameCallback incorrectly specified.");
+                    return MS::kFailure;
                 }
-                argc += 2;
+                jobArgs.melPerFrameCallback = jobArgsArray[++i].asChar();
             }
-            else
-            // assume in the order of node names and then abc file name
+
+            else if (arg == "-pfc" || arg == "-pythonperframecallback")
             {
-                for (; argc < length-1; argc++)
+                if (i+1 >= numJobArgs)
                 {
-                    MSelectionList sel;
-                    if (!sel.add(strArr[argc]))
+                    MGlobal::displayError(
+                        "pythonPerFrameCallback incorrectly specified.");
+                    return MS::kFailure;
+                }
+                jobArgs.pythonPerFrameCallback = jobArgsArray[++i].asChar();
+            }
+
+            else if (arg == "-mpc" || arg == "-melpostcallback")
+            {
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "melPostCallback incorrectly specified.");
+                    return MS::kFailure;
+                }
+                jobArgs.melPostCallback = jobArgsArray[++i].asChar();
+            }
+
+            else if (arg == "-ppc" || arg == "-pythonpostcallback")
+            {
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "pythonPostCallback incorrectly specified.");
+                    return MS::kFailure;
+                }
+                jobArgs.pythonPostCallback = jobArgsArray[++i].asChar();
+            }
+
+            // attribute filtering stuff
+            else if (arg == "-ap" || arg == "-attrprefix")
+            {
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "attrPrefix incorrectly specified.");
+                    return MS::kFailure;
+                }
+                jobArgs.prefixFilters.push_back(jobArgsArray[++i].asChar());
+            }
+
+            else if (arg == "-a" || arg == "-attr")
+            {
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "attr incorrectly specified.");
+                    return MS::kFailure;
+                }
+                jobArgs.attribs.insert(jobArgsArray[++i].asChar());
+            }
+
+            else if (arg == "-rt" || arg == "-root")
+            {
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "root incorrectly specified.");
+                    return MS::kFailure;
+                }
+                hasRoot = true;
+                MString root = jobArgsArray[++i];
+
+                MSelectionList sel;
+                if (sel.add(root) != MS::kSuccess)
+                {
+                    MString warn = root;
+                    warn += " could not be select, skipping.";
+                    MGlobal::displayWarning(warn);
+                    continue;
+                }
+
+                unsigned int numRoots = sel.length();
+                for (unsigned int j = 0; j < numRoots; ++j)
+                {
+                    MDagPath path;
+                    if (sel.getDagPath(j, path) != MS::kSuccess)
                     {
-                        MString warn = "Could not select ";
-                        warn += strArr[argc];
-                        warn += ". Skipping...";
+                        MString warn = path.fullPathName();
+                        warn += " (part of ";
+                        warn += root;
+                        warn += " ) not a DAG Node, skipping.";
                         MGlobal::displayWarning(warn);
                         continue;
                     }
-
-                    MDagPath path;
-                    if (!sel.getDagPath(0, path))
-                    {
-                        MGlobal::displayWarning(
-                            "Not a DAG Node. Skipping... ");
-                        continue;
-                    }
-
-                    dagPath.insert(path);
+                    jobArgs.dagPaths.insert(path);
                 }
+            }
+            else
+            {
+                MString warn = "Ignoring unsupported flag: ";
+                warn += jobArgsArray[i];
+                MGlobal::displayWarning(warn);
+            }
+        } //  for i
 
-                // check for validity of the DagPath relationships
-                // complexity : n^2
-                bool isAncestor = false;
-                if (dagPath.size() > 1)
+        if (fileName == "")
+        {
+            MString error = "-file not specified.";
+            MGlobal::displayError(error);
+            return MS::kFailure;
+        }
+
+        if (shutterSamples.empty())
+        {
+            shutterSamples.insert(0.0);
+        }
+
+        if (jobArgs.prefixFilters.empty())
+        {
+            jobArgs.prefixFilters.push_back("ABC_");
+        }
+
+        // the list of frames written into the abc file
+        std::set<double> geoSamples;
+        std::set<double> transSamples;
+        std::set <double>::const_iterator shutter;
+        std::set <double>::const_iterator shutterStart = shutterSamples.begin();
+        std::set <double>::const_iterator shutterEnd = shutterSamples.end();
+        for (double frame = startTime; frame <= endTime; frame += strideTime)
+        {
+            for (shutter = shutterStart; shutter != shutterEnd; ++shutter)
+            {
+                double curFrame = *shutter + frame;
+                if (!sampleGeo)
                 {
-                    util::ShapeSet::iterator m, n;
-                    const util::ShapeSet::iterator end = dagPath.end();
-                    for (m = dagPath.begin(); m != end; )
+                    double intFrame = (double)(int)(
+                        curFrame >= 0 ? curFrame + .5 : curFrame - .5);
+
+                    // only insert samples that are close to being an integer
+                    if (fabs(curFrame - intFrame) < 1e-4)
                     {
-                        MDagPath path1 = *m;
-                        m++;
-                        for (n = m; n != end; n++)
-                        {
-                            MDagPath path2 = *n;
-                            if (util::isAncestorDescendentRelationship(path1, path2))
-                                isAncestor = true;
-                        }  // for n
-                    }  // for m
+                        geoSamples.insert(curFrame);
+                    }
                 }
-                if (isAncestor == true)
-                    return MS::kFailure;
-
-                if (argc >= length)
-                    return MS::kFailure;
-
-                fileName = strArr[argc++].asChar();
+                else
+                {
+                    geoSamples.insert(curFrame);
+                }
+                transSamples.insert(curFrame);
             }
         }
 
-        std::set <double> origSamples;
-        for (double f = startTime; f <= endTime; f++)
-            origSamples.insert(f);
+        if (geoSamples.empty())
+        {
+            geoSamples.insert(startTime);
+        }
 
-        transSamples = origSamples;
-        geoSamples = origSamples;
+        if (transSamples.empty())
+        {
+            transSamples.insert(startTime);
+        }
 
-        AbcA::TimeSamplingPtr transTime(new AbcA::TimeSampling());
-        AbcA::TimeSamplingPtr geoTime = transTime;
+        if (jobArgs.dagPaths.size() > 1)
+        {
+            // check for validity of the DagPath relationships complexity : n^2
+
+            util::ShapeSet::const_iterator m, n;
+            util::ShapeSet::const_iterator end = jobArgs.dagPaths.end();
+            for (m = jobArgs.dagPaths.begin(); m != end; )
+            {
+                MDagPath path1 = *m;
+                m++;
+                for (n = m; n != end; n++)
+                {
+                    MDagPath path2 = *n;
+                    if (util::isAncestorDescendentRelationship(path1,path2))
+                    {
+                        MString errorMsg = path1.fullPathName();
+                        errorMsg += " and ";
+                        errorMsg += path2.fullPathName();
+                        errorMsg += " have an ancestor relationship.";
+                        MGlobal::displayError(errorMsg);
+                        return MS::kFailure;
+                    }
+                }  // for n
+            }  // for m
+        }
+        // no root is specified use the root
+        else if (!hasRoot)
+        {
+            MSelectionList sel;
+            sel.add("|*");
+            unsigned int numRoots = sel.length();
+            for (unsigned int i = 0; i < numRoots; ++i)
+            {
+                MDagPath path;
+                sel.getDagPath(i, path);
+                jobArgs.dagPaths.insert(path);
+            }
+        }
+        // no valid roots were found
+        else
+        {
+            MString errorMsg = "No valid roots were found.";
+            MGlobal::displayError(errorMsg);
+            return MS::kFailure;
+        }
+
+        AbcA::TimeSamplingPtr transTime, geoTime;
+
+        std::vector<double> samples;
+        for (shutter = shutterStart; shutter != shutterEnd; ++shutter)
+        {
+            samples.push_back((startTime + *shutter) * util::spf());
+        }
 
         if (hasRange)
         {
-            transTime.reset( new AbcA::TimeSampling(util::spf(),
-                (*(origSamples.begin())) * util::spf()) );
-            geoTime = transTime;
+            transTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                samples.size(), strideTime * util::spf()), samples));
+        }
+        else
+        {
+            transTime.reset(new AbcA::TimeSampling());
         }
 
-        // post process, add extra motion blur samples
-        if (numSamples > 1 && shutterOpen < shutterClose)
+        if (sampleGeo || !hasRange)
         {
+            geoTime = transTime;
+        }
+        else
+        {
+            double geoStride = strideTime;
+            if (geoStride < 1.0)
+                geoStride = 1.0;
 
-            std::set<double> offsetSamples;
-            offsetSamples.insert(shutterOpen);
-            offsetSamples.insert(shutterClose);
+            samples.clear();
+            samples.push_back(*geoSamples.begin() * util::spf());
+            geoTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                geoStride * util::spf()), samples));
+        }
 
-            double offset = (shutterClose - shutterOpen) / (numSamples-1);
-            double curVal = shutterOpen + offset;
-            for (int i = 0; i < numSamples - 2; ++i, curVal += offset)
-            {
-                offsetSamples.insert(curVal);
-            }
-
-            // Add an extra leading or trailing frame on an
-            // integer boundary for the rest of the pipeline
-            double floorVal = floor(startTime + shutterOpen);
-            double ceilVal = ceil(endTime + shutterClose);
-
-            transSamples.insert(floorVal);
-            transSamples.insert(ceilVal);
-            geoSamples.insert(floorVal);
-            geoSamples.insert(ceilVal);
-
-            std::set<double>::iterator samp = origSamples.begin();
-            std::set<double>::iterator sampEnd = origSamples.end();
-            for (; samp != sampEnd; ++samp)
-            {
-                double curSamp = *samp;
-                std::set<double>::iterator offset = offsetSamples.begin();
-                std::set<double>::iterator offsetEnd = offsetSamples.end();
-                for (; offset != offsetEnd; ++offset)
-                {
-                    double curVal = curSamp + (*offset);
-                    double rndVal =
-                        (double)(int)(curVal >= 0 ? curVal + .5 : curVal - .5);
-
-                    // if the value is close enough to the integer value
-                    // insert the integer value
-                    if (fabs(curVal - rndVal) < 1e-4)
-                    {
-                        transSamples.insert(rndVal);
-
-                        // ignore geometry sampling flag because it is a whole
-                        // frame and for some reason we always want to
-                        // translate the whole frames
-                        geoSamples.insert(rndVal);
-                    }
-                    else if (sampleGeo)
-                    {
-                        transSamples.insert(curVal);
-                        geoSamples.insert(curVal);
-                    }
-                    else
-                    {
-                        // we aren't include subsampled geometry
-                        transSamples.insert(curVal);
-                    }
-                }  // for offset
-            }  // for samp
-
-            std::vector <double> timeSamps(numSamples);
-            samp = transSamples.begin();
-            for (int i = 0; i < numSamples; ++i)
-            {
-                timeSamps[i] = (*samp) * util::spf();
-                samp++;
-            }
-
-            transTime.reset( new AbcA::TimeSampling(
-                AbcA::TimeSamplingType(numSamples, util::spf()), timeSamps) );
-
-            // if we are't subsampling the geometry
-            // leave it as uniform per frame
-            if (sampleGeo)
-                geoTime = transTime;
-
-        }  // if we need to apply motion blur
-
-        AbcWriteJobPtr job(new AbcWriteJob(dagPath, fileName.c_str(),
-            useSelectionList, worldSpace, writeVisibility, writeUVs,
+        AbcWriteJobPtr job(new AbcWriteJob(fileName.c_str(),
             transSamples, transTime, geoSamples, geoTime,
-            melPerFrameCallback, melPostCallback,
-            pythonPerFrameCallback, pythonPostCallback, prefixFilter,
-            attribsSet));
+            jobArgs));
 
        jobList.push_front(job);
 
         // make sure we add additional whole frames, if we arent skipping
         // the inbetween ones
-        if (!skipFrame && !allFrameRange.empty() && !transSamples.empty())
+        if (!skipFrame && !allFrameRange.empty())
         {
             double localMin = *(transSamples.begin());
             std::set<double>::iterator last = transSamples.end();
@@ -627,11 +528,8 @@ MStatus AbcExport::doIt(const MArgList & args)
 
         // right now we just copy over the translation samples since
         // they are guaranteed to contain all the geometry samples
-        if (!transSamples.empty())
-            allFrameRange.insert(transSamples.begin(), transSamples.end());
+        allFrameRange.insert(transSamples.begin(), transSamples.end());
     }
-
-    // ================ end of argument parsing =========================
 
     // add extra evaluation run up, if necessary
     if (startEvaluationTime != DBL_MAX && !allFrameRange.empty())
@@ -653,7 +551,7 @@ MStatus AbcExport::doIt(const MArgList & args)
     // If it doesn't have this frame, then it does nothing
     for (; it != itEnd; it++)
     {
-        if (debug)
+        if (verbose)
         {
             double frame = *it;
             MString info;

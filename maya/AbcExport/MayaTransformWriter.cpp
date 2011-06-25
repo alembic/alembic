@@ -391,27 +391,32 @@ void addScale(const MFnDependencyNode & iTrans,
 }
 
 MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
-    MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, bool iAddWorld,
-    bool iWriteVisibility)
+    MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs)
 {
 
     if (iDag.hasFn(MFn::kJoint))
     {
         MFnIkJoint joint(iDag);
-        Alembic::AbcGeom::OXform obj(iParent, joint.name().asChar(),
+        MString jointName = joint.name();
+        if (iArgs.stripNamespace)
+        {
+            jointName = util::stripNamespaces(jointName);
+        }
+
+        Alembic::AbcGeom::OXform obj(iParent, jointName.asChar(),
             iTimeIndex);
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp;
-        if (AttributesWriter::hasAnyAttr(joint))
+        if (AttributesWriter::hasAnyAttr(joint, iArgs))
         {
             cp = mSchema.getArbGeomParams();
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, joint,
-            iTimeIndex, iWriteVisibility));
+            iTimeIndex, iArgs));
 
-        if (!iAddWorld)
+        if (!iArgs.worldSpace)
         {
             pushTransformStack(joint, iTimeIndex == 0);
 
@@ -438,20 +443,25 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
     else
     {
         MFnTransform trans(iDag);
-        Alembic::AbcGeom::OXform obj(iParent, trans.name().asChar(),
+        MString transName = trans.name();
+        if (iArgs.stripNamespace)
+        {
+            transName = util::stripNamespaces(transName);
+        }
+        Alembic::AbcGeom::OXform obj(iParent, transName.asChar(),
             iTimeIndex);
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp;
-        if (AttributesWriter::hasAnyAttr(trans))
+        if (AttributesWriter::hasAnyAttr(trans, iArgs))
         {
             cp = mSchema.getArbGeomParams();
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, trans,
-            iTimeIndex, iWriteVisibility));
+            iTimeIndex, iArgs));
 
-        if (!iAddWorld)
+        if (!iArgs.worldSpace)
         {
             pushTransformStack(trans, iTimeIndex == 0);
 
@@ -556,42 +566,52 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
 }
 
 MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
-    MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, bool iWriteVisibility)
+    MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs)
 {
     if (iDag.hasFn(MFn::kJoint))
     {
         MFnIkJoint joint(iDag);
+        MString jointName = joint.name();
+        if (iArgs.stripNamespace)
+        {
+            jointName = util::stripNamespaces(jointName);
+        }
 
-        Alembic::AbcGeom::OXform obj(iParent.getObject(), joint.name().asChar(),
+        Alembic::AbcGeom::OXform obj(iParent.getObject(), jointName.asChar(),
             iTimeIndex);
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp;
-        if (AttributesWriter::hasAnyAttr(joint))
+        if (AttributesWriter::hasAnyAttr(joint, iArgs))
         {
             cp = mSchema.getArbGeomParams();
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, joint,
-            iTimeIndex, iWriteVisibility));
+            iTimeIndex, iArgs));
 
         pushTransformStack(joint, iTimeIndex == 0);
     }
     else
     {
         MFnTransform trans(iDag);
-        Alembic::AbcGeom::OXform obj(iParent.getObject(), trans.name().asChar(),
+        MString transName = trans.name();
+        if (iArgs.stripNamespace)
+        {
+            transName = util::stripNamespaces(transName);
+        }
+        Alembic::AbcGeom::OXform obj(iParent.getObject(), transName.asChar(),
             iTimeIndex);
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp;
-        if (AttributesWriter::hasAnyAttr(trans))
+        if (AttributesWriter::hasAnyAttr(trans, iArgs))
         {
             cp = mSchema.getArbGeomParams();
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, trans,
-            iTimeIndex, iWriteVisibility));
+            iTimeIndex, iArgs));
 
         pushTransformStack(trans, iTimeIndex == 0);
     }

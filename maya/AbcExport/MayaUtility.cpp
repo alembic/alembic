@@ -323,3 +323,173 @@ bool util::isIntermediate(const MObject & object)
     else
         return false;
 }
+
+bool util::isRenderable(const MObject & object)
+{
+    MStatus stat;
+    MFnDagNode mFn(object);
+
+    // templated turned on?  return false
+    MPlug plug = mFn.findPlug("template", false, &stat);
+    if (stat == MS::kSuccess && plug.asBool())
+        return false;
+
+    // visibility or lodVisibility off?  return false
+    plug = mFn.findPlug("visibility", false, &stat);
+    if (stat == MS::kSuccess && !plug.asBool())
+        return false;
+
+    plug = mFn.findPlug("lodVisibility", false, &stat);
+    if (stat == MS::kSuccess && !plug.asBool())
+        return false;
+
+    // this shape is renderable
+    return true;
+}
+
+MString util::stripNamespaces(const MString & iNodeName)
+{
+    int lastNamespace = iNodeName.rindex(':');
+    if (lastNamespace != -1)
+    {
+        return iNodeName.substring(lastNamespace + 1, iNodeName.length() - 1);
+    }
+
+    return iNodeName;
+}
+
+MString util::getHelpText()
+{
+    MString ret =
+"AbcExport [options]\n"
+"Options:\n"
+"-h / -help  Print this message.\n"
+"\n"
+"-prs / -preRollStartFrame double\n"
+"The frame to start scene evaluation at.  This is used to set the\n"
+"starting frame for time dependent translations and can be used to evaluate\n"
+"run-up that isn't actually translated.\n"
+"\n"
+"-suf / -skipUnwrittenFrames\n"
+"When evaluating multiple translate jobs, the presence of this flag decides\n"
+"whether to evaluate frames between jobs when there is a gap in their frame\n"
+"ranges.\n"
+"\n"
+"-v / -verbose\n"
+"Prints the current frame that is being evaluated.\n"
+"\n"
+"-j / -jobArg string REQUIRED\n"
+"String which contains flags for writing data to a particular file.\n"
+"Multiple jobArgs can be specified.\n"
+"\n"
+"-jobArg flags:\n"
+"\n"
+"-at / -attr string\n"
+"A specific attribute to write out.  This flag may occur more than once.\n"
+"\n"
+"-atp / -attrPrefix string\n"
+"Prefix filter for determining which attributes to write out.\n"
+"This flag may occur more than once.\n"
+"\n"
+"-f / -file string REQUIRED\n"
+"File location to write the Alembic data.\n"
+"\n"
+"-fr / -frameRange double double\n"
+"The frame range to write.\n"
+"\n"
+"-frs / -frameRelativeSample double\n"
+"frame relative sample that will be written out along the frame range.\n"
+"This flag may occur more than once.\n"
+"\n"
+"-nn / -noNormals\n"
+"If this flag is present normal data for Alembic poly meshes will not be\n"
+"written.\n"
+"\n"
+"-ro / -renderableOnly\n"
+"If this flag is present non-renderable hierarchy (invisible, or templated)\n"
+"will not be written out.\n"
+"\n"
+"-rt / -root\n"
+"Maya dag path which will be parented to the root of the Alembic file.\n"
+"This flag may occur more than once.  If unspecified, it defaults to '|' which\n"
+"means the entire scene will be written out.\n"
+"\n"
+"-s / -step double (default 1.0)\n"
+"The step time between each sample to write out the data.\n"
+"\n"
+"-sl / -selection\n"
+"If this flag is present, write out all all selected nodes from the active\n"
+"selection list that are descendents of the roots specified with -root.\n"
+"\n"
+"-sn / -stripNamespaces\n"
+"If this flag is present all namespaces will be stripped off of the node before\n"
+"being written to Alembic.\n"
+"Example:  taco:foo:bar would be written as just bar.\n"
+"\n"
+"-uv / -uvWrite\n"
+"If this flag is present, uv data for PolyMesh and SubD shapes will be written to\n"
+"the Alembic file.  Only the current uv map is used.\n"
+"\n"
+"-wfg / -wholeFrameGeo\n"
+"If this flag is present data for geometry will only be written out on whole\n"
+"\nframes."
+"\n"
+"-ws / -worldSpace\n"
+"If this flag is present, any root nodes will be stored in world space.\n"
+"\n"
+"-wv / -writeVisibility\n"
+"If this flag is present, visibility state will be stored in the Alembic\n"
+"file.  Otherwise everything written out is treated as visible.\n"
+"\n"
+"-mfc / -melPerFrameCallback string\n"
+"When each frame (and the static frame) is evaluated the string specified is\n"
+"evaluated as a Mel command. See below for special processing rules.\n"
+"\n"
+"-mpc / -melPostFrameCallback string\n"
+"When the translation has finished the string specified is evaluated as a Mel\n"
+"command. See below for special processing rules.\n"
+"\n"
+"-pfc / -pythonPerFrameCallback string\n"
+"When each frame (and the static frame) is evaluated the string specified is\n"
+"evaluated as a python command. See below for special processing rules.\n"
+"\n"
+"-ppc / -pythonPostFrameCallback string\n"
+"When the translation has finished the string specified is evaluated as a\n"
+"python command. See below for special processing rules.\n"
+"\n"
+"Special callback information:\n"
+"On the callbacks, special tokens are replaced with other data, these tokens\n"
+"and what they are replaced with are as follows:\n"
+"\n"
+"#FRAME# replaced with the frame number being evaluated.\n"
+"#FRAME# is ignored in the post callbacks.\n"
+"\n"
+"#BOUNDS# replaced with a string holding bounding box values in minX minY minZ\n"
+"maxX maxY maxZ space seperated order.\n"
+"\n"
+"#BOUNDSARRAY# replaced with the bounding box values as above, but in\n"
+"array form.\n"
+"In Mel: {minX, minY, minZ, maxX, maxY, maxZ}\n"
+"In Python: [minX, minY, minZ, maxX, maxY, maxZ]\n"
+"\n"
+"Examples:\n"
+"\n"
+"AbcExport -j \"-root |group|foo -root |test|path|bar -file /tmp/test.abc\"\n"
+"Writes out everything at foo and below and bar and below to /tmp/test.abc.\n"
+"foo and bar are siblings parented to the root of the Alembic scene.\n"
+"\n"
+"AbcExport -j \"-frameRange 1 5 -step 0.5 -root |group|foo -file /tmp/test.abc\"\n"
+"Writes out everything at foo and below to /tmp/test.abc sampling at frames:\n"
+"1 1.5 2 2.5 3 3.5 4 4.5 5\n"
+"\n"
+"AbcExport -j \"-fr 0 10 -frs -0.1 -frs 0.2 -step 5 -file /tmp/test.abc\"\n"
+"Writes out everything in the scene to /tmp/test.abc sampling at frames:\n"
+"-0.1 0.2 4.9 5.2 9.9 10.2\n"
+"\n"
+"AbcExport -j \"-sel -root |group|foo -file /tmp/test.abc\"\n"
+"Writes out all selected nodes and it's ancestor nodes including up to foo.\n"
+"foo will be parented to the root of the Alembic scene.\n"
+"\n";
+
+    return ret;
+}

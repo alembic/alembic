@@ -51,17 +51,18 @@ class AttributesWriter
         Alembic::Abc::OObject & iParentObj,
         const MFnDagNode & iNode,
         Alembic::Util::uint32_t iTimeIndex,
-        bool iWriteVisibility);
+        const JobArgs & iArgs);
 
     ~AttributesWriter();
 
     void write();
     bool isAnimated();
 
-    static bool matchFilterOrAttribs(const MPlug & iPlug);
-    static bool hasAnyAttr(const MFnDagNode & iNode);
-    static std::string * mFilter;
-    static std::set<std::string> * mAttribs;
+    static bool matchFilterOrAttribs(const MPlug & iPlug,
+        const JobArgs & iArgs);
+
+    static bool hasAnyAttr(const MFnDagNode & iNode,
+        const JobArgs & iArgs);
 
   private:
 

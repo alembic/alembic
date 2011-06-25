@@ -40,7 +40,7 @@
 MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent,
     Alembic::Util::uint32_t iTimeIndex,
-    bool iWriteVisibility) :
+    const JobArgs & iArgs) :
     mIsAnimated(false), mDagPath(iDag)
 {
     MStatus status = MS::kSuccess;
@@ -53,8 +53,12 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
 
     MObject locator = iDag.node();
 
-    mXform = Alembic::AbcGeom::OXform(iParent, fnLocator.name().asChar(),
-        iTimeIndex);
+    MString name = fnLocator.name();
+    if (iArgs.stripNamespace)
+    {
+        name = util::stripNamespaces(name);
+    }
+    mXform = Alembic::AbcGeom::OXform(iParent, name.asChar(), iTimeIndex);
 
     Alembic::Abc::OCompoundProperty cp = mXform.getProperties();
 
@@ -100,13 +104,13 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     mSp.set(val);
 
     Alembic::Abc::OCompoundProperty arbAttr;
-    if (AttributesWriter::hasAnyAttr(fnLocator))
+    if (AttributesWriter::hasAnyAttr(fnLocator, iArgs))
     {
         arbAttr = mXform.getSchema().getArbGeomParams();
     }
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(arbAttr, mXform,
-        fnLocator, iTimeIndex, iWriteVisibility));
+        fnLocator, iTimeIndex, iArgs));
 
 }
 
