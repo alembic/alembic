@@ -57,7 +57,7 @@ MSyntax AbcExport::createSyntax()
     syntax.addFlag("-v",  "-verbose", MSyntax::kNoArg);
     syntax.addFlag("-h",  "-help", MSyntax::kNoArg);
     syntax.addFlag("-prs", "-preRollStartFrame", MSyntax::kDouble);
-    syntax.addFlag("-suf", "-skipUnwrittenFrames", MSyntax::kNoArg);
+    syntax.addFlag("-duf", "-dontSkipUnwrittenFrames", MSyntax::kNoArg);
     syntax.addFlag("-j", "-jobArg", MSyntax::kString);
 
     syntax.makeFlagMultiUse("-j");
@@ -95,9 +95,9 @@ MStatus AbcExport::doIt(const MArgList & args)
     // scene, as much frames are skipped when possible.  This could cause
     // a problem for, time dependent solutions like
     // particle system / hair simulation
-    bool skipFrame = false;
-    if (argData.isFlagSet("skipUnwrittenFrames"))
-        skipFrame = true;
+    bool skipFrame = true;
+    if (argData.isFlagSet("dontSkipUnwrittenFrames"))
+        skipFrame = false;
 
     double startEvaluationTime = DBL_MAX;
     if (argData.isFlagSet("preRollStartFrame"))
@@ -259,23 +259,23 @@ MStatus AbcExport::doIt(const MArgList & args)
                 jobArgs.pythonPerFrameCallback = jobArgsArray[++i].asChar();
             }
 
-            else if (arg == "-mpc" || arg == "-melpostcallback")
+            else if (arg == "-mpc" || arg == "-melpostjobcallback")
             {
                 if (i+1 >= numJobArgs)
                 {
                     MGlobal::displayError(
-                        "melPostCallback incorrectly specified.");
+                        "melPostJobCallback incorrectly specified.");
                     return MS::kFailure;
                 }
                 jobArgs.melPostCallback = jobArgsArray[++i].asChar();
             }
 
-            else if (arg == "-ppc" || arg == "-pythonpostcallback")
+            else if (arg == "-ppc" || arg == "-pythonpostjobcallback")
             {
                 if (i+1 >= numJobArgs)
                 {
                     MGlobal::displayError(
-                        "pythonPostCallback incorrectly specified.");
+                        "pythonPostJobCallback incorrectly specified.");
                     return MS::kFailure;
                 }
                 jobArgs.pythonPostCallback = jobArgsArray[++i].asChar();
@@ -444,7 +444,7 @@ MStatus AbcExport::doIt(const MArgList & args)
             }
         }
         // no valid roots were found
-        else
+        else if (jobArgs.dagPaths.empty())
         {
             MString errorMsg = "No valid roots were found.";
             MGlobal::displayError(errorMsg);
