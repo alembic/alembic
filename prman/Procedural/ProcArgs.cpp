@@ -46,6 +46,7 @@ ProcArgs::ProcArgs( RtString paramStr )
   , fps(24.0)
   , shutterOpen(0)
   , shutterClose(0)
+  , excludeXform(false)
 {
     typedef boost::char_separator<char> Separator;
     typedef boost::tokenizer<Separator> Tokenizer;
