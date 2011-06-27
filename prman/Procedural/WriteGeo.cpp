@@ -513,8 +513,63 @@ void ProcessCurves( ICurves &curves, ProcArgs &args )
         ParamListBuilder ParamListBuilder;
         ParamListBuilder.add( "P", (RtPointer)sample.getPositions()->get() );
         
-        //TODO, add width, N and uv-as-st when described as GeomParams
+        IFloatGeomParam widthParam = cs.getWidths();
+        if ( widthParam.valid() )
+        {
+            ICompoundProperty parent = widthParam.getParent();
+            
+            //prman requires "width" to be named "constantwidth" when
+            //constant instead of declared as "constant float width".
+            //It's even got an error message specifically for it.
+            std::string widthName;
+            if ( widthParam.getScope() == kConstantScope ||
+                    widthParam.getScope() == kUnknownScope )
+            {
+                widthName = "constantwidth";
+            }
+            else
+            {
+                widthName = "width";
+            }
+            
+            AddGeomParamToParamListBuilder<IFloatGeomParam>(
+                parent,
+                widthParam.getHeader(),
+                sampleSelector,
+                "float",
+                ParamListBuilder,
+                1,
+                widthName);
+        }
         
+        IN3fGeomParam nParam = cs.getNormals();
+        if ( nParam.valid() )
+        {
+            ICompoundProperty parent = nParam.getParent();
+            
+            AddGeomParamToParamListBuilder<IN3fGeomParam>(
+                parent,
+                nParam.getHeader(),
+                sampleSelector,
+                "normal",
+                ParamListBuilder);
+        }
+        
+        IV2fGeomParam uvParam = cs.getUVs();
+        if ( uvParam.valid() )
+        {
+            ICompoundProperty parent = uvParam.getParent();
+            
+            AddGeomParamToParamListBuilder<IV2fGeomParam>(
+                parent,
+                uvParam.getHeader(),
+                sampleSelector,
+                "float",
+                ParamListBuilder,
+                2,
+                "st");
+        }
+
         ICompoundProperty arbGeomParams = cs.getArbGeomParams();
         AddArbitraryGeomParams( arbGeomParams,
                     sampleSelector, ParamListBuilder );
