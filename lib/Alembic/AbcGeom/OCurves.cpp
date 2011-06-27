@@ -137,14 +137,14 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         {
             // normals are indexed
             m_widths = OFloatGeomParam( this->getPtr(), "width", true,
-                                        iSamp.getNormals().getScope(),
+                                        iSamp.getWidths().getScope(),
                                         1, this->getTimeSampling() );
         }
         else
         {
             // normals are not indexed
             m_widths = OFloatGeomParam( this->getPtr(), "width", false,
-                                        iSamp.getNormals().getScope(), 1,
+                                        iSamp.getWidths().getScope(), 1,
                                         this->getTimeSampling() );
         }
 

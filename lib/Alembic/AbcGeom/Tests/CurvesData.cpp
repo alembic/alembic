@@ -74,10 +74,10 @@ const float32_t g_uvs[] = {    0.0, 0.0,
 };
 
 const float32_t g_widths[] = {    // first curve
-    1.0, 0.2,
+    0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6,
 
     // second curve
-    1.0, 1.0
+    0.25, 0.5, 0.75, 1.0
 };
 
-const size_t g_numWidths = 4;
+const size_t g_numWidths = 12;  // vertex varying

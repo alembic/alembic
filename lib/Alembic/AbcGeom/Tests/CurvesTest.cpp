@@ -131,9 +131,12 @@ void Example1_CurvesIn()
     TESTING_ASSERT( curvesSample.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
 
     // test other attributes
-    //TESTING_ASSERT( curvesSample.getPositions() -> size() == 12);
+    TESTING_ASSERT( curvesSample.getPositions() -> size() == 12);
 
-    //TESTING_ASSERT( curvesSample.getWidths() -> size() == 2);
+    IFloatGeomParam::Sample widthSample;
+    curves.getWidths().getExpanded( widthSample );
+    TESTING_ASSERT( widthSample.getVals()->size() == 12);
+    TESTING_ASSERT( widthSample.getScope() == kVertexScope );
 
 
 }
