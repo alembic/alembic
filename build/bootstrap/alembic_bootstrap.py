@@ -216,7 +216,7 @@ def configureCMakeBoost( cmake_args ):
 
         cmake_extra_args += " -D BOOST_LIBRARYDIR:PATH=%s" % libdir
 
-        cmake_extra_args += " -D Boost_PROGRAM_OPTIONS_LIBRARY:FILEPATH=%s" % libpath
+        cmake_extra_args += " -D Boost_THREAD_LIBRARY:FILEPATH=%s" % libpath
 
         cmake_extra_args += ' -G "%s"' % cmake_args[3]
     except IndexError:
@@ -420,7 +420,7 @@ def find_boost_include( cmakecache = None ):
 
     boost_include_dir = find_path( mf, default )
     try:
-        bid = boost_include_dir[:boost_include_dir.index( "boost" )]
+        bid = boost_include_dir[:boost_include_dir.rindex( "boost" )]
     except ValueError:
         bid = boost_include_dir.dirname()
         print
@@ -433,22 +433,22 @@ def find_boost_include( cmakecache = None ):
     return bid
 
 ##-*****************************************************************************
-def find_boost_program_options_lib( cmakecache = None ):
+def find_boost_thread_lib( cmakecache = None ):
     print "Please enter the full path to the multithreaded,",
-    print "versioned Boost program_options static library"
+    print "versioned Boost thread static library"
     if os.name == "posix":
-        print '(eg, "/usr/local/lib/libboost_program_options-gcc41-mt-1_42.a")'
+        print '(eg, "/usr/local/lib/libboost_thread-gcc41-mt-1_42.a")'
     elif os.name == "mac":
-        print '(eg, "/usr/local/lib/libboost_program_options-gcc41-mt-1_42.a")'
+        print '(eg, "/usr/local/lib/libboost_thread-gcc41-mt-1_42.a")'
     elif os.name == "nt":
-        print '(eg, "C:\Program Files\\Boost\\boost_1_42\\lib\\libboost_program_options-vc80-mt-s-1_42.lib")'
+        print '(eg, "C:\Program Files\\Boost\\boost_1_42\\lib\\libboost_thread-vc80-mt-s-1_42.lib")'
     else:
         # unknown OS - good luck!
-        print '(eg, "/usr/local/lib/libboost_program_options-gcc41-mt-1_42.a")'
+        print '(eg, "/usr/local/lib/libboost_thread-gcc41-mt-1_42.a")'
     print
 
-    mf = "libboost_program_options"
-    cmakevar = "Boost_PROGRAM_OPTIONS_LIBRARY"
+    mf = "libboost_thread"
+    cmakevar = "Boost_THREAD_LIBRARY"
 
     cmakedefault, defaults = get_defaults( mf, cmakevar, cmakecache )
 
@@ -710,7 +710,7 @@ Boost with STATIC, VERSIONED, and MULTITHREADED options turned on.
 '''
 
     boost_include_dir = ""
-    boost_program_options_library = ""
+    boost_thread_library = ""
 
     cmake_args = []
     cmake_args.append( srcdir )
@@ -721,13 +721,13 @@ Boost with STATIC, VERSIONED, and MULTITHREADED options turned on.
     else:
         boost_include_dir = str( find_boost_include( cmakecache ) )
 
-    if options.boost_program_options_library:
-        boost_program_options_library = options.boost_program_options_library
+    if options.boost_thread_library:
+        boost_thread_library = options.boost_thread_library
     else:
-        boost_program_options_library = str( find_boost_program_options_lib( cmakecache ) )
+        boost_thread_library = str( find_boost_thread_lib( cmakecache ) )
 
     cmake_args.append( boost_include_dir )
-    cmake_args.append( boost_program_options_library )
+    cmake_args.append( boost_thread_library )
 
     if options.generator:
         print "Makesystem generator %s: " % (options.generator)
@@ -739,7 +739,7 @@ Boost with STATIC, VERSIONED, and MULTITHREADED options turned on.
         print "Could not successfully build a Boost test executable!"
         ask_to_exit( errors )
 
-    return boost_status, boost_include_dir, boost_program_options_library
+    return boost_status, boost_include_dir, boost_thread_library
 
 ##-*****************************************************************************
 def configure_zlib( options, srcdir, cmakecache ):
@@ -919,9 +919,9 @@ def runCMake( opts, srcdir, ranBootstrap = False ):
             cmake_extra_args += ' -D BOOST_INCLUDEDIR:PATH="%s"' % \
                 opts.boost_include_dir
 
-        if opts.boost_program_options_library:
-            cmake_extra_args += ' -D Boost_PROGRAM_OPTIONS_LIBRARY:FILEPATH=%s' % \
-                opts.boost_program_options_library
+        if opts.boost_thread_library:
+            cmake_extra_args += ' -D Boost_THREAD_LIBRARY:FILEPATH=%s' % \
+                opts.boost_thread_library
 
         if opts.zlib_include_dir:
             cmake_extra_args += ' -D ZLIB_INCLUDE_DIR:PATH="%s"' % \
@@ -991,11 +991,11 @@ def makeParser( mk_cmake_basename ):
                               type="string", default=None,
                               help="boost_include_dir location",
                               metavar="Boost_INCLUDE_DIR" )
-    configOptions.add_option( "--boost_program_options_library",
-                              dest="boost_program_options_library",
+    configOptions.add_option( "--boost_thread_library",
+                              dest="boost_thread_library",
                               type="string", default=None,
-                              help="boost_program_options library location",
-                              metavar="Boost_PROGRAM_OPTIONS_LIBRARY" )
+                              help="libboost_thread library filepath",
+                              metavar="Boost_THREAD_LIBRARY" )
 
     configOptions.add_option( "--zlib_include_dir", dest="zlib_include_dir",
                               type="string", default=None,
@@ -1025,7 +1025,7 @@ def makeParser( mk_cmake_basename ):
 
     configOptions.add_option( "--shared", dest="sharedLibs",
                               action="store_true", default=False,
-                              help="Build shared libraries" )                              
+                              help="Build shared libraries" )
 
     configOptions.add_option( "--cflags", dest="cflags", type="string",
                               default=None, help="CFLAGS to pass to the compiler",

@@ -1,3 +1,52 @@
+2011-06-28, Alembic 1.0rc1
+
+Hello, Alembic users, welcome to the latest beta version of Alembic.  As we
+close in on a 1.0 release, we hope the API and file format are now stable
+and fully forwards-compatible.  We consider these to be at a first
+"Release Candidate" stage. (note that this doesn't yet apply to the
+application-specific reference implementations). As with all pre-release
+software, we can't guarantee that changes won’t occur between now and a full
+1.0 release.
+
+This release is mostly a bugfix and cleanup release.  We've improved the build
+support for Windows and OS X, as well as conformed the definitions of the Curves
+and NuPatch types more closely to the RI spec.  Those changes, though, do mean
+that Curves and NuPatch geometry written out with previous releases will not be
+recognized with this release.
+
+The complete code changes for this release can be examined here:
+
+http://codereview.appspot.com/4662068
+
+Some highlights:
+
+ - The flags and arguments for the AbcExport Maya plugin have been updated
+   based on feedback from the community, and to be more Maya-idiomatic.
+   You can see all the arguments supported by entering "AbcExport -h"
+   in the script editor.
+
+ - The Makefile setup for the AlembicIn Houdini SOP is greatly simplified,
+   though still not fully integrated with Alembic's CMake setup.
+
+ - The PRMan procedural now supports the Points, NuPatch, Curves, and FaceSet
+   types from AbcGeom.
+
+One other important thing to note: previous releases of Alembic did not
+require any of the compiled Boost libraries, but going forward, Alembic
+requires libboost_thread.
+
+Although this is our initial 1.0 release candidate, it should still be
+considered pre-release software, and should not be used for critical, deadline-
+driven production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list.
+
+##-*****************************************************************************
 2011-05-18, Alembic 0.9.3:
 
 The biggest news in this release is what we hope is the complete set of
@@ -33,6 +82,17 @@ Some highlights:
    transformation channels from the archive.  However, it is not yet integrated
    into the Alembic build infrastructure, so compiling it may take some work.
 
+As this is still a 0.9 release, it is still to be considered Beta, and
+should not be used for critical, deadline-driven production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list.
+
+##-*****************************************************************************
 
 2011-02-17, Alembic 0.9.2:
 
@@ -67,7 +127,7 @@ http://groups.google.com/group/alembic-discussion
 
 As always, discussion is welcome on the discussion list:
 
-
+##-*****************************************************************************
 
 2010-12-13, Alembic 0.9.1:
 

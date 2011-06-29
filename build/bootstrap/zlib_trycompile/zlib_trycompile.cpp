@@ -1,6 +1,6 @@
 //
 // tests compile of zlib with:
-// 
+//
 
 // http://www.zlib.net/zpipe.c
 
@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #ifdef PLATFORM_WINDOWS
-# include <unistd111.h>
+#include <unistd111.h>
 #else
 #include <unistd.h>
 #endif
@@ -183,7 +183,7 @@ void zerr(int ret)
     }
 }
 
-/* Open a testfile and write Testing 1-2-3 to it, then compress is, then open the compressed file and write it to testing_out */ 
+/* Open a testfile and write Testing 1-2-3 to it, then compress is, then open the compressed file and write it to testing_out */
 int main(int argc, char **argv)
 {
     int ret = 1;

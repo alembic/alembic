@@ -166,10 +166,16 @@ class Path( object ):
         except IndexError:
             raise IndexError, "Maximum index is +/- %s" & self._maxindex
 
-    def index( self, val ):
+    def rindex( self, val ):
         if val in self:
             return len( self._plist ) - \
                 list( reversed( self._plist ) ).index( val ) - 1
+        else:
+            raise ValueError, "%s is not in path." % val
+
+    def index( self, val ):
+        if val in self:
+            return self._plist.index( val )
         else:
             raise ValueError, "%s is not in path." % val
 

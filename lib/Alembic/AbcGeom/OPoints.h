@@ -60,9 +60,9 @@ public:
         //! Creates a sample with position data but no index
         //! data. For specifying samples after the first one
         Sample( const Abc::V3fArraySample &iPos,
-                const Abc::V3fArraySample &iVels = Abc::V3fArraySample() )
+                const Abc::V3fArraySample &iVelocities = Abc::V3fArraySample() )
           : m_positions( iPos )
-          , m_velocities( iVels )
+          , m_velocities( iVelocities )
         {}
 
         //! Creates a sample with position data and id data. The first
@@ -70,9 +70,9 @@ public:
         //! be full like this, which would indicate a change of topology
         Sample( const Abc::V3fArraySample &iPos,
                 const Abc::UInt64ArraySample &iId,
-                const Abc::V3fArraySample &iVels = Abc::V3fArraySample() )
+                const Abc::V3fArraySample &iVelocities = Abc::V3fArraySample() )
           : m_positions( iPos )
-          , m_velocities( iVels )
+          , m_velocities( iVelocities )
           , m_ids( iId )
         {}
 
@@ -85,8 +85,8 @@ public:
         { m_ids = iSmp; }
 
         const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
-        void setVelocities( const Abc::V3fArraySample &iVels )
-        { m_velocities = iVels; }
+        void setVelocities( const Abc::V3fArraySample &iVelocities )
+        { m_velocities = iVelocities; }
 
         const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }
         void setSelfBounds( const Abc::Box3d &iBnds )
@@ -247,6 +247,7 @@ public:
     {
         m_positions.reset();
         m_ids.reset();
+        m_velocities.reset();
 
         m_selfBounds.reset();
         m_childBounds.reset();

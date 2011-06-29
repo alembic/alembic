@@ -112,6 +112,7 @@ SET( Boost_USE_MULTITHREADED TRUE )
 #- Alembic's python bridge boost-python 1.44 (for bug fixes)
 SET( Boost_ADDITIONAL_VERSIONS "1.44" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45.0" )
 FIND_PACKAGE( Boost COMPONENTS program_options python )
+FIND_PACKAGE( Boost COMPONENTS thread REQUIRED )
 
 
 #-******************************************************************************
