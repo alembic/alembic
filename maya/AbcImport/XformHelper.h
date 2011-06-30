@@ -46,8 +46,10 @@
 #include <Alembic/AbcGeom/IXform.h>
 #include "NodeIteratorVisitorHelper.h"
 
-MStatus connectToXform(double iFrame, Alembic::AbcGeom::IXform & iNode,
-    MObject & iObject, std::vector<std::string> & oSampledTransOpNameList,
+MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
+    bool isConstant,
+    MObject & iObject,
+    std::vector<std::string> & oSampledTransOpNameList,
     std::vector<Prop> & iSampledPropList,
     std::size_t iFirstProp);
 
@@ -60,6 +62,6 @@ void read(double iFrame, Alembic::AbcGeom::IXform & iNode,
 // used during creation of the scene
 // This function traverses the transform operation stack, and returns true if
 // the transform stack can't be directly mapped to Maya's transform stack
-bool isComplex(Alembic::AbcGeom::IXform & iNode);
+bool isComplex(const Alembic::AbcGeom::XformSample & iSamp);
 
 #endif  // ABCIMPORT_TRANSFORMHELPER_H_

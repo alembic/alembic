@@ -886,10 +886,12 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
 
         size_t numChildren = iNode.getNumChildren();
         bool isConstant = iNode.getSchema().isConstant();
+        Alembic::AbcGeom::XformSample samp;
+        iNode.getSchema().get(samp, 0);
         if (!isConstant)
         {
             mData.mXformList.push_back(iNode);
-            mData.mIsComplexXform.push_back(isComplex(iNode));
+            mData.mIsComplexXform.push_back(isComplex(samp));
         }
 
         // There might be children under the current DAG node that
@@ -958,15 +960,6 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
 
             trans.setName(name);
 
-            MPlug dstPlug;
-            dstPlug = trans.findPlug("inheritsTransform");
-            if (!dstPlug.isNull())
-            {
-                dstPlug.setBool( iNode.getSchema().getInheritsXforms(
-                    Alembic::Abc::ISampleSelector(mFrame,
-                        Alembic::Abc::ISampleSelector::kNearIndex)) );
-            }
-
             setConstantVisibility(visProp, xformObj);
             addProps(arbProp, xformObj);
         }
@@ -979,7 +972,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
             if (xformObj.hasFn(MFn::kTransform))
             {
                 std::vector<std::string> transopNameList;
-                connectToXform(mFrame, iNode, xformObj, transopNameList,
+                connectToXform(samp, isConstant, xformObj, transopNameList,
                     mData.mPropList, firstProp);
 
                 if (!isConstant)
