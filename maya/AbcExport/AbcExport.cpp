@@ -282,7 +282,7 @@ MStatus AbcExport::doIt(const MArgList & args)
             }
 
             // attribute filtering stuff
-            else if (arg == "-ap" || arg == "-attrprefix")
+            else if (arg == "-atp" || arg == "-attrprefix")
             {
                 if (i+1 >= numJobArgs)
                 {
