@@ -256,6 +256,8 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
     if ( ! valid() ) { return; }
 
+    oSamp = m_sample;
+
     if ( m_inherits.getNumSamples() )
     {
         oSamp.setInheritsXforms( m_inherits.getValue( iSS ) );
@@ -284,8 +286,6 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
                                           numSamples );
 
     if ( sampIdx < 0 ) { return; }
-
-    oSamp = m_sample;
 
     this->getChannelValues( sampIdx, oSamp );
 
