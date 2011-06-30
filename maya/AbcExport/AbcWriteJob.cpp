@@ -813,7 +813,7 @@ bool AbcWriteJob::eval(double iFrame)
     {
         std::set<double>::iterator checkFrame = mShapeFrames.find(iFrame);
         bool foundShapeFrame = false;
-        if (checkFrame != mShapeFrames.end() && !mShapeList.empty())
+        if (checkFrame != mShapeFrames.end())
         {
             assert(mRoot != NULL);
             foundShapeFrame = true;
@@ -846,7 +846,7 @@ bool AbcWriteJob::eval(double iFrame)
 
         checkFrame = mTransFrames.find(iFrame);
         bool foundTransFrame = false;
-        if (checkFrame != mTransFrames.end() && !mTransList.empty())
+        if (checkFrame != mTransFrames.end())
         {
             assert(mRoot.valid());
             foundTransFrame = true;
