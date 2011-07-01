@@ -57,7 +57,8 @@
 #include <Alembic/AbcGeom/ISubD.h>
 #include <Alembic/AbcGeom/IXform.h>
 
-// one or the other will be valid (it's too complex for a union)
+// mArray or mScalar will be valid, mObj will be valid for those situations
+// where the property can't be validly read, unless the object stays in scope.
 struct Prop
 {
     Alembic::Abc::IArrayProperty mArray;
@@ -113,6 +114,7 @@ class WriterData
 {
 public:
     WriterData();
+    ~WriterData();
     WriterData(const WriterData & rhs);
     WriterData & operator=(const WriterData & rhs);
     void getFrameRange(double & oMin, double & oMax);
@@ -134,6 +136,10 @@ public:
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
     std::vector<Alembic::AbcGeom::ISubD>      mSubDList;
     std::vector<Alembic::AbcGeom::IXform>     mXformList;
+
+    // objects that aren't animated but have animated visibility need to be
+    // kept alive so the visibility can be read
+    std::vector<Alembic::AbcGeom::IObject>    mAnimVisStaticObjList;
 
     // number of curves for each animated curve group
     std::vector<std::size_t>    mNumCurves;

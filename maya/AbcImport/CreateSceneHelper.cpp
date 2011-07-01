@@ -467,6 +467,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
     Alembic::Abc::IScalarProperty visProp = getVisible(iNode, mData.mPropList);
+    if (numSamples < 2 && visProp.valid() && !visProp.isConstant())
+    {
+         mData.mAnimVisStaticObjList.push_back(iNode);
+    }
 
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
@@ -546,6 +550,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
     Alembic::Abc::IScalarProperty visProp = getVisible(iNode, mData.mPropList);
+    if (numSamples < 2 && visProp.valid() && !visProp.isConstant())
+    {
+         mData.mAnimVisStaticObjList.push_back(iNode);
+    }
 
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
@@ -645,6 +653,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
     Alembic::Abc::IScalarProperty visProp = getVisible(iNode, mData.mPropList);
+    if (numSamples < 2 && visProp.valid() && !visProp.isConstant())
+    {
+         mData.mAnimVisStaticObjList.push_back(iNode);
+    }
 
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
@@ -711,6 +723,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
     Alembic::Abc::IScalarProperty visProp = getVisible(iNode, mData.mPropList);
+    if (numSamples < 2 && visProp.valid() && !visProp.isConstant())
+    {
+         mData.mAnimVisStaticObjList.push_back(iNode);
+    }
 
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
@@ -775,6 +791,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
     Alembic::Abc::IScalarProperty visProp = getVisible(iNode, mData.mPropList);
+    if (numSamples < 2 && visProp.valid() && !visProp.isConstant())
+    {
+         mData.mAnimVisStaticObjList.push_back(iNode);
+    }
 
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
@@ -848,6 +868,11 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
             if (!isConstant)
                 mData.mLocList.push_back(iNode);
 
+            if (!isConstant && visProp.valid() && !visProp.isConstant())
+            {
+                mData.mAnimVisStaticObjList.push_back(iNode);
+            }
+
             if ( mAction == CREATE || mAction == CREATE_REMOVE )
             {
                 xformObj = create(iNode, mParent, locProp, mCurrentDagNode);
@@ -892,6 +917,11 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         {
             mData.mXformList.push_back(iNode);
             mData.mIsComplexXform.push_back(isComplex(samp));
+        }
+
+        if (isConstant && visProp.valid() && !visProp.isConstant())
+        {
+             mData.mAnimVisStaticObjList.push_back(iNode);
         }
 
         // There might be children under the current DAG node that

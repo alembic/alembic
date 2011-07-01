@@ -370,7 +370,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                         mData.mPropList[i].mScalar.get(&visVal,
                             Alembic::Abc::ISampleSelector(mCurTime,
                                 Alembic::Abc::ISampleSelector::kNearIndex ));
-                        handle.setBool(visVal != 0);
+                        handle.setGenericBool(visVal != 0, false);
                     }
                 }
                 outArrayHandle.next();

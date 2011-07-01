@@ -945,7 +945,14 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
             iProp.get(samp, index);
             Alembic::Util::bool_t val =
                 ((Alembic::Util::bool_t *) samp->getData())[0];
-            iHandle.setBool(val != false);
+            if (iHandle.isNumeric())
+            {
+                iHandle.setBool(val != false);
+            }
+            else
+            {
+                iHandle.setGenericBool(val != false, false);
+            }
         }
         break;
 
@@ -975,7 +982,14 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 val = ((Alembic::Util::int8_t *) samp->getData())[0];
             }
 
-            iHandle.setChar(val);
+            if (iHandle.isNumeric())
+            {
+                iHandle.setChar(val);
+            }
+            else
+            {
+                iHandle.setGenericChar(val, false);
+            }
 
         }
         break;
@@ -1007,7 +1021,14 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
             if (extent == 1)
             {
-                iHandle.setShort(val[0]);
+                if (iHandle.isNumeric())
+                {
+                    iHandle.setShort(val[0]);
+                }
+                else
+                {
+                    iHandle.setGenericShort(val[0], false);
+                }
             }
             else if (extent == 2)
             {
@@ -1051,7 +1072,14 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
                 if (extent == 1)
                 {
-                    iHandle.setInt(val[0]);
+                    if (iHandle.isNumeric())
+                    {
+                        iHandle.setInt(val[0]);
+                    }
+                    else
+                    {
+                        iHandle.setGenericInt(val[0], false);
+                    }
                 }
                 else if (extent == 2)
                 {
@@ -1104,7 +1132,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
         {
             // need to differentiate between vectors, points, and color array?
 
-            if (iProp.isScalar() && extent > 4)
+            if (iProp.isScalarLike() && extent < 4)
             {
                 float val[3];
 
@@ -1131,7 +1159,14 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
                 if (extent == 1)
                 {
-                    iHandle.setFloat(val[0]);
+                    if (iHandle.isNumeric())
+                    {
+                        iHandle.setFloat(val[0]);
+                    }
+                    else
+                    {
+                        iHandle.setGenericFloat(val[0], false);
+                    }
                 }
                 else if (extent == 2)
                 {
@@ -1210,7 +1245,14 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
                 if (extent == 1)
                 {
-                    iHandle.setDouble(val[0]);
+                    if (iHandle.isNumeric())
+                    {
+                        iHandle.setDouble(val[0]);
+                    }
+                    else
+                    {
+                        iHandle.setGenericDouble(val[0], false);
+                    }
                 }
                 else if (extent == 2)
                 {
@@ -1332,6 +1374,12 @@ WriterData::WriterData()
 {
 }
 
+WriterData::~WriterData()
+{
+    // prop
+    mPropList.clear();
+}
+
 WriterData::WriterData(const WriterData & rhs)
 {
     *this = rhs;
@@ -1349,6 +1397,7 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     mXformList = rhs.mXformList;
     mPropList = rhs.mPropList;
     mLocList = rhs.mLocList;
+    mAnimVisStaticObjList = rhs.mAnimVisStaticObjList;
 
     // get all the sampled Maya objects
     mCameraObjList = rhs.mCameraObjList;
@@ -1810,9 +1859,9 @@ MString connectAttr(ArgData & iArgData)
                 else
                     dstPlug = mFn.findPlug(attrName.c_str(), true, &status);
 
-                if (status != MS::kSuccess ||
+                if (attrName != "visible" && (status != MS::kSuccess ||
                     dstPlug.partialName(false, false, false, false, false, true)
-                    != attrName.c_str())
+                    != attrName.c_str()))
                 {
                     MString theError(attrName.c_str());
                     theError += MString(" not found for connection");
