@@ -90,6 +90,10 @@ void MayaPointPrimitiveWriter::write(double iFrame)
 
     if (size == 0)
     {
+        samp.setPositions(Alembic::Abc::V3fArraySample(NULL, 0));
+        samp.setVelocities(Alembic::Abc::V3fArraySample(NULL, 0));
+        samp.setIds(Alembic::Abc::UInt64ArraySample(NULL, 0));
+
         mSchema.set(samp);
         return;
     }
@@ -111,7 +115,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     }
     samp.setPositions(
         Alembic::Abc::V3fArraySample((const Imath::V3f *) &position.front(),
-            position.size()) );
+            position.size() / 3) );
 
     // get particle velocity
     MVectorArray vecArray;
@@ -123,24 +127,27 @@ void MayaPointPrimitiveWriter::write(double iFrame)
         velocity.push_back(vec.y);
         velocity.push_back(vec.z);
     }
+    samp.setVelocities(
+        Alembic::Abc::V3fArraySample((const Imath::V3f *) &velocity.front(),
+            velocity.size() / 3) );
 
     // get particleIds
     MIntArray idArray;
     particle.particleIds(idArray);
     for (size_t i = 0; i < size; i++)
         particleIds.push_back(idArray[i]);
+    samp.setIds(
+        Alembic::Abc::UInt64ArraySample(&(particleIds.front()),
+            particleIds.size()) );
 
     // assume radius is width
     MDoubleArray radiusArray;
     particle.radius(radiusArray);
-    constantwidth = radiusArray[0];
-    bool isConstantWidth = true;
+
     for (size_t i = 0; i < size; i++)
     {
         float radius = radiusArray[i];
         width.push_back(radius);
-        if (fabs(constantwidth-radius) > 1e-4)
-            isConstantWidth = false;
     }
 
     // ignoring width and the velocity vectors for now
