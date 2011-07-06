@@ -126,7 +126,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
         }
 
         std::set < Alembic::Util::uint32_t >::iterator it, itEnd;
-        std::vector< XformOp >::iterator op = m_sample.m_ops.begin();
+        std::vector< XformOp >::iterator op =  m_sample.m_ops.begin();
         std::vector< XformOp >::iterator opEnd = m_sample.m_ops.end();
         std::size_t curChan = 0;
         std::size_t chanPos = 0;
@@ -138,11 +138,13 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
             while ( op != opEnd )
             {
                 std::size_t numChans = op->getNumChannels();
+                bool foundChan = false;
                 while ( curChan < numChans )
                 {
                     if ( animChan == chanPos )
                     {
                         op->m_animChannels.insert( curChan );
+                        foundChan = true;
                         break;
                     }
 
@@ -150,8 +152,8 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
                     ++chanPos;
                 }
 
-                // move on to the next animChan
-                if ( animChan == chanPos )
+                // move on to the next animChan, because we found the current one
+                if ( foundChan == true )
                 {
                     ++curChan;
                     ++chanPos;

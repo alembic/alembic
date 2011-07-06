@@ -176,24 +176,48 @@ void XformOp::setHint( const Alembic::Util::uint8_t iHint )
 //-*****************************************************************************
 bool XformOp::isXAnimated() const
 {
+    if ( m_type == kRotateXOperation || m_type == kRotateYOperation ||
+         m_type == kRotateZOperation )
+    {
+        return false;
+    }
+
     return m_animChannels.count( 0 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isYAnimated() const
 {
+    if ( m_type == kRotateXOperation || m_type == kRotateYOperation ||
+         m_type == kRotateZOperation )
+    {
+        return false;
+    }
+
     return m_animChannels.count( 1 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isZAnimated() const
 {
+    if ( m_type == kRotateXOperation || m_type == kRotateYOperation ||
+         m_type == kRotateZOperation )
+    {
+        return false;
+    }
+
     return m_animChannels.count( 2 ) > 0;
 }
 
 //-*****************************************************************************
 bool XformOp::isAngleAnimated() const
 {
+    if ( m_type == kRotateXOperation || m_type == kRotateYOperation ||
+         m_type == kRotateZOperation )
+    {
+        return m_animChannels.count( 0 ) > 0;
+    }
+
     return m_animChannels.count( 3 ) > 0;
 }
 
