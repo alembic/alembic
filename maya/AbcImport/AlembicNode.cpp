@@ -652,14 +652,14 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
             switch (MAngle::uiUnit())
             {
-                case MAngle::kDegrees:
-                    angleConversion = 57.295779513082323;
+                case MAngle::kRadians:
+                    angleConversion = 0.017453292519943295;
                 break;
                 case MAngle::kAngMinutes:
-                    angleConversion = 3437.7467707849391;
+                    angleConversion = 60.0;
                 break;
                 case MAngle::kAngSeconds:
-                    angleConversion = 206264.80624709636;
+                    angleConversion = 3600.0;
                 break;
                 default:
                 break;

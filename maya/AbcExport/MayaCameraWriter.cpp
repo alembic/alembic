@@ -130,9 +130,9 @@ void MayaCameraWriter::write()
     {
         MTime sec(1.0, MTime::kSeconds);
         mSamp.setShutterOpen(0.0);
-        mSamp.setShutterClose(
-            Alembic::AbcGeom::RadiansToDegrees(mfnCamera.shutterAngle()) / 
-            (360.0 * sec.as(MTime::uiUnit())) );
+        mSamp.setShutterClose(sec.as(MTime::uiUnit()) *
+            Alembic::AbcGeom::RadiansToDegrees(mfnCamera.shutterAngle()) /
+            360.0 );
     }
 
     // build up the film fit and post projection matrix
