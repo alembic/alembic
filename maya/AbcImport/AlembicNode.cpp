@@ -242,6 +242,7 @@ MStatus AlembicNode::initialize()
     status = gAttr.addNumericDataAccept(MFnNumericData::kDouble);
     status = gAttr.addNumericDataAccept(MFnNumericData::k2Double);
     status = gAttr.addNumericDataAccept(MFnNumericData::k3Double);
+    status = gAttr.addNumericDataAccept(MFnNumericData::k4Double);
     status = gAttr.addDataAccept(MFnData::kString);
     status = gAttr.addDataAccept(MFnData::kIntArray);
     status = gAttr.addDataAccept(MFnData::kDoubleArray);
@@ -353,13 +354,27 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             MArrayDataHandle outArrayHandle = dataBlock.outputValue(
                 mOutPropArrayAttr, &status);
 
+            unsigned int outHandleIndex = 0;
+            MDataHandle outHandle;
+
             // for all of the nodes with sampled attributes
             for (unsigned int i = 0; i < propSize; i++)
             {
-                MDataHandle handle = outArrayHandle.outputValue();
+                // only use the handle if it matches the index.
+                // The index wont line up in the sparse case so we
+                // can just skip that element.
+                if (outArrayHandle.elementIndex() == outHandleIndex++)
+                {
+                    outHandle = outArrayHandle.outputValue();
+                }
+                else
+                {
+                    continue;
+                }
+
                 if (mData.mPropList[i].mArray.valid())
                 {
-                    readProp(mCurTime, mData.mPropList[i].mArray, handle);
+                    readProp(mCurTime, mData.mPropList[i].mArray, outHandle);
                 }
                 // meant for special properties (like visible)
                 else
@@ -370,7 +385,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                         mData.mPropList[i].mScalar.get(&visVal,
                             Alembic::Abc::ISampleSelector(mCurTime,
                                 Alembic::Abc::ISampleSelector::kNearIndex ));
-                        handle.setGenericBool(visVal != 0, false);
+                        outHandle.setGenericBool(visVal != 0, false);
                     }
                 }
                 outArrayHandle.next();

@@ -945,14 +945,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
             iProp.get(samp, index);
             Alembic::Util::bool_t val =
                 ((Alembic::Util::bool_t *) samp->getData())[0];
-            if (iHandle.isNumeric())
-            {
-                iHandle.setBool(val != false);
-            }
-            else
-            {
-                iHandle.setGenericBool(val != false, false);
-            }
+            iHandle.setGenericBool(val != false, false);
         }
         break;
 
@@ -982,15 +975,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 val = ((Alembic::Util::int8_t *) samp->getData())[0];
             }
 
-            if (iHandle.isNumeric())
-            {
-                iHandle.setChar(val);
-            }
-            else
-            {
-                iHandle.setGenericChar(val, false);
-            }
-
+            iHandle.setGenericChar(val, false);
         }
         break;
 
@@ -1021,22 +1006,21 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
             if (extent == 1)
             {
-                if (iHandle.isNumeric())
-                {
-                    iHandle.setShort(val[0]);
-                }
-                else
-                {
-                    iHandle.setGenericShort(val[0], false);
-                }
+                iHandle.setGenericShort(val[0], false);
             }
             else if (extent == 2)
             {
-                iHandle.set2Short(val[0], val[1]);
+                MFnNumericData numData;
+                numData.create(MFnNumericData::k2Short);
+                numData.setData2Short(val[0], val[1]);
+                iHandle.setMObject(numData.object());
             }
             else if (extent == 3)
             {
-                iHandle.set3Short(val[0], val[1], val[2]);
+                MFnNumericData numData;
+                numData.create(MFnNumericData::k3Short);
+                numData.setData3Short(val[0], val[1], val[2]);
+                iHandle.setMObject(numData.object());
             }
         }
         break;
@@ -1072,22 +1056,21 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
                 if (extent == 1)
                 {
-                    if (iHandle.isNumeric())
-                    {
-                        iHandle.setInt(val[0]);
-                    }
-                    else
-                    {
-                        iHandle.setGenericInt(val[0], false);
-                    }
+                    iHandle.setGenericInt(val[0], false);
                 }
                 else if (extent == 2)
                 {
-                    iHandle.set2Int(val[0], val[1]);
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k2Int);
+                    numData.setData2Int(val[0], val[1]);
+                    iHandle.setMObject(numData.object());
                 }
                 else if (extent == 3)
                 {
-                    iHandle.set3Int(val[0], val[1], val[2]);
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k3Int);
+                    numData.setData3Int(val[0], val[1], val[2]);
+                    iHandle.setMObject(numData.object());
                 }
             }
             else
@@ -1159,22 +1142,21 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
                 if (extent == 1)
                 {
-                    if (iHandle.isNumeric())
-                    {
-                        iHandle.setFloat(val[0]);
-                    }
-                    else
-                    {
-                        iHandle.setGenericFloat(val[0], false);
-                    }
+                    iHandle.setGenericFloat(val[0], false);
                 }
                 else if (extent == 2)
                 {
-                    iHandle.set2Float(val[0], val[1]);
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k2Float);
+                    numData.setData2Float(val[0], val[1]);
+                    iHandle.setMObject(numData.object());
                 }
                 else if (extent == 3)
                 {
-                    iHandle.set3Float(val[0], val[1], val[2]);
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k3Float);
+                    numData.setData3Float(val[0], val[1], val[2]);
+                    iHandle.setMObject(numData.object());
                 }
             }
             else
@@ -1245,26 +1227,28 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
 
                 if (extent == 1)
                 {
-                    if (iHandle.isNumeric())
-                    {
-                        iHandle.setDouble(val[0]);
-                    }
-                    else
-                    {
-                        iHandle.setGenericDouble(val[0], false);
-                    }
+                    iHandle.setGenericDouble(val[0], false);
                 }
                 else if (extent == 2)
                 {
-                    iHandle.set2Double(val[0], val[1]);
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k2Double);
+                    numData.setData2Double(val[0], val[1]);
+                    iHandle.setMObject(numData.object());
                 }
                 else if (extent == 3)
                 {
-                    iHandle.set3Double(val[0], val[1], val[2]);
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k3Double);
+                    numData.setData3Double(val[0], val[1], val[2]);
+                    iHandle.setMObject(numData.object());
                 }
                 else if (extent == 4)
                 {
-                    // not sure how to set this, no set4Double
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k4Double);
+                    numData.setData4Double(val[0], val[1], val[2], val[3]);
+                    iHandle.setMObject(numData.object());
                 }
             }
             else
@@ -1869,47 +1853,21 @@ MString connectAttr(ArgData & iArgData)
                     continue;
                 }
 
-                if (!dstPlug.isCompound())
+                srcPlug = srcArrayPlug.elementByLogicalIndex(index++);
+
+                if (!dstPlug.isConnected())
                 {
-                    srcPlug = srcArrayPlug.elementByLogicalIndex(index++);
-
-                    if (!dstPlug.isConnected())
-                    {
-                        status = modifier.connect(srcPlug, dstPlug);
-                        status = modifier.doIt();
-                    }
-
-                    if (status != MS::kSuccess)
-                    {
-                        MString theError(srcPlug.name());
-                        theError += MString(" --> ");
-                        theError += dstPlug.name();
-                        theError += MString(" connection not made");
-                        printError(theError);
-                    }
+                    status = modifier.connect(srcPlug, dstPlug);
+                    status = modifier.doIt();
                 }
-                else
+
+                if (status != MS::kSuccess)
                 {
-                    unsigned int numChildren = dstPlug.numChildren();
-                    for (unsigned int i = 0; i < numChildren; i++)
-                    {
-                        srcPlug = srcArrayPlug.elementByLogicalIndex(index++);
-                        MPlug childPlug = dstPlug.child(i, &status);
-                        if (status == MS::kSuccess)
-                        {
-                            status = modifier.connect(srcPlug, childPlug);
-                            status = modifier.doIt();
-                            if (status != MS::kSuccess)
-                            {
-                                MString theError(srcPlug.name());
-                                theError += MString(" --> ");
-                                theError += childPlug.name();
-                                theError +=
-                                    MString(" child plug connection not made");
-                                printError(theError);
-                            }
-                        }
-                    }
+                    MString theError(srcPlug.name());
+                    theError += MString(" --> ");
+                    theError += dstPlug.name();
+                    theError += MString(" connection not made");
+                    printError(theError);
                 }
             }
         }
