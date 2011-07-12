@@ -38,6 +38,7 @@
 #include <maya/MIntArray.h>
 #include <maya/MFnIntArrayData.h>
 #include <maya/MPlug.h>
+#include <maya/MPointArray.h>
 #include <maya/MUint64Array.h>
 #include <maya/MStringArray.h>
 #include <maya/MFnData.h>
@@ -47,6 +48,8 @@
 #include <maya/MFnNumericData.h>
 #include <maya/MFnStringData.h>
 #include <maya/MFnStringArrayData.h>
+#include <maya/MFnPointArrayData.h>
+#include <maya/MFnVectorArrayData.h>
 #include <maya/MFnMesh.h>
 #include <maya/MFnTransform.h>
 #include <maya/MFnDependencyNode.h>
@@ -104,25 +107,17 @@ void addArbAttrAndScope(MObject & iParent, const std::string & iAttrName,
     // rgb isn't needed because we can use setUsedAsColor when we create the
     // attribute
 
-    if (iInterp == "rgba")
-        attrStr = "color4";
-    else if (iInterp == "vector")
+    if (iInterp == "vector")
     {
         if (iExtent == 2)
             attrStr = "vector2";
-        else if (iExtent == 3)
-            attrStr = "vector3";
-        else if (iExtent == 4)
-            attrStr = "vector4";
+        // the data type makes it intrinsically a vector3
     }
     else if (iInterp == "point")
     {
         if (iExtent == 2)
             attrStr = "point2";
-        else if (iExtent == 3)
-            attrStr = "point3";
-        else if (iExtent == 4)
-            attrStr = "point4";
+        // the data type is treated intrinsically as a point3
     }
     else if (iInterp == "normal")
     {
@@ -138,9 +133,9 @@ void addArbAttrAndScope(MObject & iParent, const std::string & iAttrName,
         addString(iParent, attrName, attrStr);
     }
 
-    if (iScope != "")
+    if (iScope != "" && iScope != "con")
     {
-        std::string attrName = iAttrName + "_AbcGeoScope";
+        std::string attrName = iAttrName + "_AbcGeomScope";
         addString(iParent, attrName, iScope);
     }
 }
@@ -385,33 +380,124 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         {
             if (!iProp.isScalarLike())
             {
-                // do we need to differentiate between vectors, points
-                // and color array?
-
-                MFnDoubleArrayData fnData;
-                MObject arrObj;
-
-                if (iProp.isConstant())
+                if ((extent == 2 || extent == 3) && (interp == "normal" ||
+                    interp == "vector" || interp == "rgb"))
                 {
-                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
-                    iProp.get(samp);
+                    MFnVectorArrayData fnData;
+                    MObject arrObj;
 
-                    MDoubleArray arr((float *) samp->getData(), samp->size());
-                    arrObj = fnData.create(arr);
-                    if (!plug.isNull())
+                    if (iProp.isConstant())
                     {
-                        plug.setValue(arrObj);
-                        return true;
+                        Alembic::AbcCoreAbstract::ArraySamplePtr samp;
+                        iProp.get(samp);
+
+                        std::size_t sampSize = samp->size();
+                        MVectorArray arr(sampSize);
+                        MVector vec;
+                        const Alembic::Util::float32_t * sampData =
+                            (const Alembic::Util::float32_t *) samp->getData();
+
+                        for (std::size_t i = 0; i < sampSize; ++i)
+                        {
+                            vec.x = sampData[extent*i];
+                            vec.y = sampData[extent*i+1];
+
+                            if (extent == 3)
+                            {
+                                vec.z = sampData[extent*i+2];
+                            }
+                            arr[i] = vec;
+                        }
+
+                        arrObj = fnData.create(arr);
+                        if (!plug.isNull())
+                        {
+                            plug.setValue(arrObj);
+                            return true;
+                        }
                     }
+                    else
+                    {
+                        MVectorArray arr;
+                        arrObj = fnData.create(arr);
+                    }
+
+                    attrObj = typedAttr.create(attrName, attrName,
+                        MFnData::kVectorArray, arrObj);
+                }
+                else if (interp == "point" && (extent == 2 || extent == 3))
+                {
+                    MFnPointArrayData fnData;
+                    MObject arrObj;
+
+                    if (iProp.isConstant())
+                    {
+                        Alembic::AbcCoreAbstract::ArraySamplePtr samp;
+                        iProp.get(samp);
+
+                        std::size_t sampSize = samp->size();
+                        MPointArray arr(sampSize);
+                        MPoint pt;
+
+                        const Alembic::Util::float32_t * sampData =
+                            (const Alembic::Util::float32_t *) samp->getData();
+
+                        for (std::size_t i = 0; i < sampSize; ++i)
+                        {
+                            pt.x = sampData[extent*i];
+                            pt.y = sampData[extent*i+1];
+
+                            if (extent == 3)
+                            {
+                                pt.z = sampData[extent*i+2];
+                            }
+                            arr[i] = pt;
+                        }
+
+                        arrObj = fnData.create(arr);
+                        if (!plug.isNull())
+                        {
+                            plug.setValue(arrObj);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        MPointArray arr;
+                        arrObj = fnData.create(arr);
+                    }
+
+                    attrObj = typedAttr.create(attrName, attrName,
+                        MFnData::kPointArray, arrObj);
                 }
                 else
                 {
-                    MDoubleArray arr;
-                    arrObj = fnData.create(arr);
-                }
+                    MFnDoubleArrayData fnData;
+                    MObject arrObj;
 
-                attrObj = typedAttr.create(attrName, attrName,
-                    MFnData::kDoubleArray, arrObj);
+                    if (iProp.isConstant())
+                    {
+                        Alembic::AbcCoreAbstract::ArraySamplePtr samp;
+                        iProp.get(samp);
+
+                        MDoubleArray arr((float *) samp->getData(),
+                            samp->size());
+                        arrObj = fnData.create(arr);
+                        if (!plug.isNull())
+                        {
+                            plug.setValue(arrObj);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        MDoubleArray arr;
+                        arrObj = fnData.create(arr);
+                    }
+
+                    attrObj = typedAttr.create(attrName, attrName,
+                        MFnData::kDoubleArray, arrObj);
+                }
 
             }
             // isScalarLike
@@ -480,33 +566,126 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         {
             if (!iProp.isScalarLike())
             {
-                // need to differentiate between vectors, points
-                // and color array?
-
-                MFnDoubleArrayData fnData;
-                MObject arrObj;
-
-                if (iProp.isConstant())
+                if ((extent == 2 || extent == 3) && (interp == "normal" ||
+                    interp == "vector" || interp == "rgb"))
                 {
-                    Alembic::AbcCoreAbstract::ArraySamplePtr samp;
-                    iProp.get(samp);
+                    MFnVectorArrayData fnData;
+                    MObject arrObj;
 
-                    MDoubleArray arr((double *) samp->getData(), samp->size());
-                    arrObj = fnData.create(arr);
-                    if (!plug.isNull())
+                    if (iProp.isConstant())
                     {
-                        plug.setValue(arrObj);
-                        return true;
+                        Alembic::AbcCoreAbstract::ArraySamplePtr samp;
+                        iProp.get(samp);
+
+                        std::size_t sampSize = samp->size();
+                        MVectorArray arr(sampSize);
+                        MVector vec;
+                        const Alembic::Util::float64_t * sampData =
+                            (const Alembic::Util::float64_t *) samp->getData();
+
+                        for (std::size_t i = 0; i < sampSize; ++i)
+                        {
+                            vec.x = sampData[extent*i];
+                            vec.y = sampData[extent*i+1];
+
+                            if (extent == 3)
+                            {
+                                vec.z = sampData[extent*i+2];
+                            }
+
+                            arr[i] = vec;
+                        }
+
+                        arrObj = fnData.create(arr);
+                        if (!plug.isNull())
+                        {
+                            plug.setValue(arrObj);
+                            return true;
+                        }
                     }
+                    else
+                    {
+                        MVectorArray arr;
+                        arrObj = fnData.create(arr);
+                    }
+
+                    attrObj = typedAttr.create(attrName, attrName,
+                        MFnData::kVectorArray, arrObj);
+                }
+                else if (interp == "point" && (extent == 2 || extent == 3))
+                {
+                    MFnPointArrayData fnData;
+                    MObject arrObj;
+
+                    if (iProp.isConstant())
+                    {
+                        Alembic::AbcCoreAbstract::ArraySamplePtr samp;
+                        iProp.get(samp);
+
+                        std::size_t sampSize = samp->size();
+                        MPointArray arr(sampSize);
+                        MPoint pt;
+                        const Alembic::Util::float64_t * sampData =
+                            (const Alembic::Util::float64_t *) samp->getData();
+
+                        for (std::size_t i = 0; i < sampSize; ++i)
+                        {
+                            pt.x = sampData[extent*i];
+                            pt.y = sampData[extent*i+1];
+
+                            if (extent == 3)
+                            {
+                                pt.z = sampData[extent*i+2];
+                            }
+
+                            arr[i] = pt;
+                        }
+
+                        arrObj = fnData.create(arr);
+                        if (!plug.isNull())
+                        {
+                            plug.setValue(arrObj);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        MPointArray arr;
+                        arrObj = fnData.create(arr);
+                    }
+
+                    attrObj = typedAttr.create(attrName, attrName,
+                        MFnData::kPointArray, arrObj);
                 }
                 else
                 {
-                    MDoubleArray arr;
-                    arrObj = fnData.create(arr);
+                    MFnDoubleArrayData fnData;
+                    MObject arrObj;
+
+                    if (iProp.isConstant())
+                    {
+                        Alembic::AbcCoreAbstract::ArraySamplePtr samp;
+                        iProp.get(samp);
+
+                        MDoubleArray arr((double *) samp->getData(),
+                            samp->size());
+                        arrObj = fnData.create(arr);
+                        if (!plug.isNull())
+                        {
+                            plug.setValue(arrObj);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        MDoubleArray arr;
+                        arrObj = fnData.create(arr);
+                    }
+
+                    attrObj = typedAttr.create(attrName, attrName,
+                        MFnData::kDoubleArray, arrObj);
                 }
 
-                attrObj = typedAttr.create(attrName, attrName,
-                    MFnData::kDoubleArray, arrObj);
             }
             else
             {
@@ -1110,11 +1289,8 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
         }
         break;
 
-        // look for MFnVectorArrayData?
         case Alembic::Util::kFloat32POD:
         {
-            // need to differentiate between vectors, points, and color array?
-
             if (iProp.isScalarLike() && extent < 4)
             {
                 float val[3];
@@ -1161,36 +1337,188 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
             }
             else
             {
-                MFnDoubleArrayData fnData;
-                iProp.get(samp, Alembic::Abc::ISampleSelector(index));
+                std::string interp = iProp.getMetaData().get("interpretation");
 
-                if (alpha != 0.0 && index != ceilIndex)
+                if ((extent == 2 || extent == 3) && (interp == "normal" ||
+                    interp == "vector" || interp == "rgb"))
                 {
-                    iProp.get(ceilSamp,
-                        Alembic::Abc::ISampleSelector(ceilIndex));
+                    MFnVectorArrayData fnData;
+                    iProp.get(samp, Alembic::Abc::ISampleSelector(index));
+                    std::size_t sampSize = samp->size();
+                    MVectorArray arr(sampSize);
+                    MVector vec;
 
-                    MDoubleArray arr((float *) samp->getData(), samp->size());
-                    size_t sampSize = samp->size();
-
-                    // size is different don't lerp
-                    if (sampSize != ceilSamp->size())
+                    if (alpha != 0.0 && index != ceilIndex)
                     {
+                        iProp.get(ceilSamp,
+                            Alembic::Abc::ISampleSelector(ceilIndex));
+
+                        // size is different don't lerp
+                        if (sampSize != ceilSamp->size())
+                        {
+                            float * vals = (float *) samp->getData();
+                            for (std::size_t i = 0; i < sampSize; ++i)
+                            {
+                                vec.x = vals[extent*i];
+                                vec.y = vals[extent*i+1];
+
+                                if (extent == 3)
+                                {
+                                    vec.z = vals[extent*i+2];
+                                }
+                                arr[i] = vec;
+                            }
+
+                            attrObj = fnData.create(arr);
+                        }
+                        else
+                        {
+                            float * lo = (float *) samp->getData();
+                            float * hi = (float *) ceilSamp->getData();
+
+                            for (size_t i = 0; i < sampSize; ++i)
+                            {
+                                vec.x = simpleLerp<double>(alpha,
+                                    lo[extent*i], hi[extent*i]);
+
+                                vec.y = simpleLerp<double>(alpha,
+                                    lo[extent*i+1], hi[extent*i+1]);
+
+                                if (extent == 3)
+                                {
+                                    vec.z = simpleLerp<double>(alpha,
+                                        lo[extent*i+2], hi[extent*i+2]);
+                                }
+                                arr[i] = vec;
+                            }
+                        }
                         attrObj = fnData.create(arr);
                     }
                     else
                     {
-                        float * hi = (float *) ceilSamp->getData();
-                        for (size_t i = 0; i < sampSize; ++i)
+                        float * vals = (float *) samp->getData();
+                        for (std::size_t i = 0; i < sampSize; ++i)
                         {
-                            arr[i] = simpleLerp<double>(alpha, arr[i], hi[i]);
+                            vec.x = vals[extent*i];
+                            vec.y = vals[extent*i+1];
+
+                            if (extent == 3)
+                            {
+                                vec.z = vals[extent*i+2];
+                            }
+                            arr[i] = vec;
+                        }
+                        attrObj = fnData.create(arr);
+                    }
+                }
+                else if (interp == "point" && (extent == 2 || extent == 3))
+                {
+                    MFnPointArrayData fnData;
+                    iProp.get(samp, Alembic::Abc::ISampleSelector(index));
+
+                    std::size_t sampSize = samp->size();
+                    MPointArray arr(sampSize);
+                    MPoint pt;
+
+                    if (alpha != 0.0 && index != ceilIndex)
+                    {
+                        iProp.get(ceilSamp,
+                            Alembic::Abc::ISampleSelector(ceilIndex));
+
+                        // size is different don't lerp
+                        if (sampSize != ceilSamp->size())
+                        {
+                            float * vals = (float *) samp->getData();
+                            for (std::size_t i = 0; i < sampSize; ++i)
+                            {
+                                pt.x = vals[extent*i];
+                                pt.y = vals[extent*i+1];
+
+                                if (extent == 3)
+                                {
+                                    pt.z = vals[extent*i+2];
+                                }
+                                arr[i] = pt;
+                            }
+
+                            attrObj = fnData.create(arr);
+                        }
+                        else
+                        {
+                            float * lo = (float *) samp->getData();
+                            float * hi = (float *) ceilSamp->getData();
+
+                            for (size_t i = 0; i < sampSize; ++i)
+                            {
+                                pt.x = simpleLerp<double>(alpha,
+                                    lo[extent*i], hi[extent*i]);
+
+                                pt.y = simpleLerp<double>(alpha,
+                                    lo[extent*i+1], hi[extent*i+1]);
+
+                                if (extent == 3)
+                                {
+                                    pt.z = simpleLerp<double>(alpha,
+                                        lo[extent*i+2], hi[extent*i+2]);
+                                }
+                                arr[i] = pt;
+                            }
+                            attrObj = fnData.create(arr);
                         }
                     }
-                    attrObj = fnData.create(arr);
+                    else
+                    {
+                        float * vals = (float *) samp->getData();
+                        for (std::size_t i = 0; i < sampSize; ++i)
+                        {
+                            pt.x = vals[extent*i];
+                            pt.y = vals[extent*i+1];
+
+                            if (extent == 3)
+                            {
+                                pt.z = vals[extent*i+2];
+                            }
+                            arr[i] = pt;
+                        }
+                        attrObj = fnData.create(arr);
+                    }
                 }
                 else
                 {
-                    MDoubleArray arr((float *) samp->getData(), samp->size());
-                    attrObj = fnData.create(arr);
+                    MFnDoubleArrayData fnData;
+                    iProp.get(samp, Alembic::Abc::ISampleSelector(index));
+
+                    if (alpha != 0.0 && index != ceilIndex)
+                    {
+                        iProp.get(ceilSamp,
+                            Alembic::Abc::ISampleSelector(ceilIndex));
+
+                        MDoubleArray arr((float *) samp->getData(),
+                            samp->size());
+                        size_t sampSize = samp->size();
+
+                        // size is different don't lerp
+                        if (sampSize != ceilSamp->size())
+                        {
+                            attrObj = fnData.create(arr);
+                        }
+                        else
+                        {
+                            float * hi = (float *) ceilSamp->getData();
+                            for (size_t i = 0; i < sampSize; ++i)
+                            {
+                                arr[i] = simpleLerp<double>(alpha, arr[i],
+                                    hi[i]);
+                            }
+                        }
+                        attrObj = fnData.create(arr);
+                    }
+                    else
+                    {
+                        MDoubleArray arr((float *) samp->getData(),
+                            samp->size());
+                        attrObj = fnData.create(arr);
+                    }
                 }
             }
         }
@@ -1253,36 +1581,187 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
             }
             else
             {
-                MFnDoubleArrayData fnData;
-                iProp.get(samp, Alembic::Abc::ISampleSelector(index));
+                std::string interp = iProp.getMetaData().get("interpretation");
 
-                if (alpha != 0.0 && index != ceilIndex)
+                if ((extent == 2 || extent == 3) && (interp == "normal" ||
+                    interp == "vector" || interp == "rgb"))
                 {
-                    iProp.get(ceilSamp,
-                        Alembic::Abc::ISampleSelector(ceilIndex));
+                    MFnVectorArrayData fnData;
+                    iProp.get(samp, Alembic::Abc::ISampleSelector(index));
+                    std::size_t sampSize = samp->size();
+                    MVectorArray arr(sampSize);
+                    MVector vec;
 
-                    MDoubleArray arr((double *) samp->getData(), samp->size());
-                    size_t sampSize = samp->size();
-
-                    // size is different don't lerp
-                    if (sampSize != ceilSamp->size())
+                    if (alpha != 0.0 && index != ceilIndex)
                     {
+                        iProp.get(ceilSamp,
+                            Alembic::Abc::ISampleSelector(ceilIndex));
+
+                        // size is different don't lerp
+                        if (sampSize != ceilSamp->size())
+                        {
+                            double * vals = (double *) samp->getData();
+                            for (std::size_t i = 0; i < sampSize; ++i)
+                            {
+                                vec.x = vals[extent*i];
+                                vec.y = vals[extent*i+1];
+
+                                if (extent == 3)
+                                {
+                                    vec.z = vals[extent*i+2];
+                                }
+                                arr[i] = vec;
+                            }
+
+                            attrObj = fnData.create(arr);
+                        }
+                        else
+                        {
+                            double * lo = (double *) samp->getData();
+                            double * hi = (double *) ceilSamp->getData();
+
+                            for (size_t i = 0; i < sampSize; ++i)
+                            {
+                                vec.x = simpleLerp<double>(alpha,
+                                    lo[extent*i], hi[extent*i]);
+
+                                vec.y = simpleLerp<double>(alpha,
+                                    lo[extent*i+1], hi[extent*i+1]);
+
+                                if (extent == 3)
+                                {
+                                    vec.z = simpleLerp<double>(alpha,
+                                        lo[extent*i+2], hi[extent*i+2]);
+                                }
+                                arr[i] = vec;
+                            }
+                        }
                         attrObj = fnData.create(arr);
                     }
                     else
                     {
-                        double * hi = (double *) ceilSamp->getData();
-                        for (size_t i = 0; i < sampSize; ++i)
+                        double * vals = (double *) samp->getData();
+                        for (std::size_t i = 0; i < sampSize; ++i)
                         {
-                            arr[i] = simpleLerp<double>(alpha, arr[i], hi[i]);
+                            vec.x = vals[extent*i];
+                            vec.y = vals[extent*i+1];
+
+                            if (extent == 3)
+                            {
+                                vec.z = vals[extent*i+2];
+                            }
+                            arr[i] = vec;
+                        }
+                        attrObj = fnData.create(arr);
+                    }
+                }
+                else if (interp == "point" && (extent == 2 || extent == 3))
+                {
+                    MFnPointArrayData fnData;
+                    iProp.get(samp, Alembic::Abc::ISampleSelector(index));
+                    std::size_t sampSize = samp->size();
+                    MPointArray arr(sampSize);
+                    MPoint pt;
+
+                    if (alpha != 0.0 && index != ceilIndex)
+                    {
+                        iProp.get(ceilSamp,
+                            Alembic::Abc::ISampleSelector(ceilIndex));
+
+                        // size is different don't lerp
+                        if (sampSize != ceilSamp->size())
+                        {
+                            double * vals = (double *) samp->getData();
+                            for (std::size_t i = 0; i < sampSize; ++i)
+                            {
+                                pt.x = vals[extent*i];
+                                pt.y = vals[extent*i+1];
+
+                                if (extent == 3)
+                                {
+                                    pt.z = vals[extent*i+2];
+                                }
+                                arr[i] = pt;
+                            }
+
+                            attrObj = fnData.create(arr);
+                        }
+                        else
+                        {
+                            double * lo = (double *) samp->getData();
+                            double * hi = (double *) ceilSamp->getData();
+
+                            for (size_t i = 0; i < sampSize; ++i)
+                            {
+                                pt.x = simpleLerp<double>(alpha,
+                                    lo[extent*i], hi[extent*i]);
+
+                                pt.y = simpleLerp<double>(alpha,
+                                    lo[extent*i+1], hi[extent*i+1]);
+
+                                if (extent == 3)
+                                {
+                                    pt.z = simpleLerp<double>(alpha,
+                                        lo[extent*i+2], hi[extent*i+2]);
+                                }
+                                arr[i] = pt;
+                            }
+                            attrObj = fnData.create(arr);
                         }
                     }
-                    attrObj = fnData.create(arr);
+                    else
+                    {
+                        double * vals = (double *) samp->getData();
+                        for (std::size_t i = 0; i < sampSize; ++i)
+                        {
+                            pt.x = vals[extent*i];
+                            pt.y = vals[extent*i+1];
+
+                            if (extent == 3)
+                            {
+                                pt.z = vals[extent*i+2];
+                            }
+                            arr[i] = pt;
+                        }
+                        attrObj = fnData.create(arr);
+                    }
                 }
                 else
                 {
-                    MDoubleArray arr((double *) samp->getData(), samp->size());
-                    attrObj = fnData.create(arr);
+                    MFnDoubleArrayData fnData;
+                    iProp.get(samp, Alembic::Abc::ISampleSelector(index));
+
+                    if (alpha != 0.0 && index != ceilIndex)
+                    {
+                        iProp.get(ceilSamp,
+                            Alembic::Abc::ISampleSelector(ceilIndex));
+
+                        MDoubleArray arr((double *) samp->getData(),
+                            samp->size());
+                        size_t sampSize = samp->size();
+
+                        // size is different don't lerp
+                        if (sampSize != ceilSamp->size())
+                        {
+                            attrObj = fnData.create(arr);
+                        }
+                        else
+                        {
+                            double * hi = (double *) ceilSamp->getData();
+                            for (size_t i = 0; i < sampSize; ++i)
+                            {
+                                arr[i] = simpleLerp<double>(alpha, arr[i],
+                                    hi[i]);
+                            }
+                        }
+                        attrObj = fnData.create(arr);
+                    }
+                    else
+                    {
+                        MDoubleArray arr((double *) samp->getData(),
+                            samp->size());
+                        attrObj = fnData.create(arr);
+                    }
                 }
             }
         }

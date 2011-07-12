@@ -179,7 +179,7 @@ MObject createCurves(const std::string & iName,
         if (widths && widths->size() == 1)
         {
             MFnNumericAttribute widthAttr;
-            attrObj = widthAttr.create("constantwidth", "constantwidth",
+            attrObj = widthAttr.create("width", "width",
                 MFnNumericData::kFloat, (*widths)[0]);
             fnTrans.addAttribute(attrObj,
                 MFnDependencyNode::kLocalDynamicAttr);
@@ -215,19 +215,37 @@ MObject createCurves(const std::string & iName,
         if (numCurves == 1)
         {
             returnObj = curveObj;
-
-            // constant width
-            if (widths && widths->size() == 1)
-            {
-                MFnNumericAttribute widthAttr;
-                MObject attrObj = widthAttr.create("constantwidth",
-                    "constantwidth", MFnNumericData::kFloat, (*widths)[0]);
-                curve.addAttribute(attrObj,
-                    MFnDependencyNode::kLocalDynamicAttr);
-            }
         }
 
-        // deal with other types of width
+        // constant width, 1 curve just put it on the curve shape
+        if (numCurves == 1 && widths && widths->size() == 1 && 
+            iWidths.getScope() ==  Alembic::AbcGeom::kConstantScope)
+        {
+            MFnNumericAttribute widthAttr;
+            MObject attrObj = widthAttr.create("width",
+                "width", MFnNumericData::kFloat, (*widths)[0]);
+            curve.addAttribute(attrObj,
+                MFnDependencyNode::kLocalDynamicAttr);
+        }
+        // per vertex width
+        else if (widths && widths->size() >= curVert && numVerts > 0 &&
+            iWidths.getScope() ==  Alembic::AbcGeom::kVertexScope)
+        {
+            MDoubleArray array((const float *)(
+                &(*widths)[curVert-numVerts]), numVerts);
+            MFnDoubleArrayData mFn;
+            MObject attrObject = mFn.create(array);
+            MFnGenericAttribute attr(attrObject);
+            MObject attrObj = attr.create("width", "width");
+            attr.addDataAccept(MFnData::kDoubleArray);
+            MFnDependencyNode mParentFn(curve);
+            mParentFn.addAttribute(attrObj,
+                MFnDependencyNode::kLocalDynamicAttr);
+
+            MPlug plug(curveObj, attrObj);
+            plug.setValue(attrObject);
+        }
+
     }
 
 
