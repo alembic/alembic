@@ -43,6 +43,7 @@
 #include <maya/MArgParser.h>
 #include <maya/MBoundingBox.h>
 #include <maya/MColor.h>
+#include <maya/MComputation.h>
 #include <maya/MDagModifier.h>
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>

@@ -175,7 +175,7 @@ void MayaNurbsCurveWriter::write()
     bool useConstWidth = false;
 
     MFnDependencyNode dep(mRootDagPath.transform());
-    MPlug constWidthPlug = dep.findPlug("constantwidth");
+    MPlug constWidthPlug = dep.findPlug("width");
 
     if (!constWidthPlug.isNull())
     {
@@ -245,28 +245,32 @@ void MayaNurbsCurveWriter::write()
             MFnDoubleArrayData fnDoubleArrayData(widthObj, &status);
             MDoubleArray doubleArrayData = fnDoubleArrayData.array();
             size_t arraySum = doubleArrayData.length();
-            size_t correctVecLen = arraySum;
-            if (arraySum == correctVecLen)
+            if (arraySum == numCVs)
             {
                 for (size_t i = 0; i < arraySum; i++)
                 {
                     width.push_back(doubleArrayData[i]);
                 }
             }
-            else
+            else if (status == MS::kSuccess)
             {
                 MString msg = "Curve ";
                 msg += curve.partialPathName();
                 msg += " has incorrect size for the width vector.";
-                msg += "\nUsing default constantwidth.";
+                msg += "\nUsing default constant width of 0.1.";
                 MGlobal::displayWarning(msg);
 
                 width.clear();
                 width.push_back(0.1);
                 useConstWidth = true;
             }
+            else
+            {
+                width.push_back(widthPlug.asFloat());
+                useConstWidth = true;
+            }
         }
-        else
+        else if (!useConstWidth)
         {
             // pick a default value
             width.clear();

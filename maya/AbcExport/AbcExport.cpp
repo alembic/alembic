@@ -544,6 +544,9 @@ MStatus AbcExport::doIt(const MArgList & args)
     std::set<double>::iterator it = allFrameRange.begin();
     std::set<double>::iterator itEnd = allFrameRange.end();
 
+    MComputation computation;
+    computation.beginComputation();
+
     // loop through every frame in the list, if a job has that frame in it's
     // list of transform or shape frames, then it will write out data and
     // call the perFrameCallback, if that frame is also the last one it has
@@ -564,6 +567,9 @@ MStatus AbcExport::doIt(const MArgList & args)
         std::list< AbcWriteJobPtr >::iterator jend = jobList.end();
         while (j != jend)
         {
+            if (computation.isInterruptRequested())
+                return MS::kFailure;
+
             bool lastFrame = (*j)->eval(*it);
 
             if (lastFrame)
@@ -574,6 +580,7 @@ MStatus AbcExport::doIt(const MArgList & args)
                 j++;
         }
     }
+    computation.endComputation();
 
     // set the time back
     MGlobal::viewFrame(oldCurTime);

@@ -504,10 +504,7 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
 
     mNumPoints = lMesh.numVertices();
 
-    // look for some of the renderman specific extra flags
-    // The attribute is called facevaryingType because at one time it
-    // was a more complicated enum
-    MPlug plug = lMesh.findPlug("facevaryingType");
+    MPlug plug = lMesh.findPlug("facVaryingInterpolateBoundary");
     if (!plug.isNull())
         samp.setFaceVaryingInterpolateBoundary(plug.asInt());
 
