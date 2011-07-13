@@ -133,16 +133,17 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     // do we need to create widths?
     if ( iSamp.getWidths().getVals() && !m_widths )
     {
-        if ( iSamp.getNormals().getIndices() )
+        if ( iSamp.getWidths().getIndices() )
         {
-            // normals are indexed
+            // widths are indexed for some weird reason which is
+            // technically ok, just wasteful
             m_widths = OFloatGeomParam( this->getPtr(), "width", true,
                                         iSamp.getWidths().getScope(),
                                         1, this->getTimeSampling() );
         }
         else
         {
-            // normals are not indexed
+            // widths are not indexed
             m_widths = OFloatGeomParam( this->getPtr(), "width", false,
                                         iSamp.getWidths().getScope(), 1,
                                         this->getTimeSampling() );
