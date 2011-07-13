@@ -270,6 +270,6 @@ ELSE()
 ENDIF()
 
 # example code not supported
-ADD_SUBDIRECTORY( examples EXCLUDE_FROM_ALL )
+ADD_SUBDIRECTORY( examples )
 
 ENDIF()
