@@ -72,7 +72,8 @@ public:
                 const Abc::FloatArraySample &iUKnot,
                 const Abc::FloatArraySample &iVKnot,
                 const ON3fGeomParam::Sample &iNormals = ON3fGeomParam::Sample(),
-                const OV2fGeomParam::Sample &iUVs = OV2fGeomParam::Sample()
+                const OV2fGeomParam::Sample &iUVs = OV2fGeomParam::Sample(),
+                const Abc::FloatArraySample & iPosWeight = Abc::FloatArraySample()
               ): m_positions( iPos )
                , m_numU( iNumU )
                , m_numV( iNumV )
@@ -80,6 +81,7 @@ public:
                , m_vOrder( iVOrder )
                , m_uKnot( iUKnot )
                , m_vKnot( iVKnot )
+               , m_positionWeights( iPosWeight )
                , m_normals( iNormals )
                , m_uvs( iUVs )
                , m_trimNumLoops( ABC_GEOM_NUPATCH_NULL_INT_VALUE )
@@ -94,11 +96,16 @@ public:
                , m_hasTrimCurve( false )
             {}
 
-
         // positions
         const Abc::V3fArraySample &getPositions() const { return m_positions; }
         void setPositions( const Abc::V3fArraySample &iSmp )
         { m_positions = iSmp; }
+
+        // position weights, if it isn't set, it's 1 for every point
+        const Abc::FloatArraySample &getPositionWeights() const 
+        { return m_positionWeights; }
+        void setPositionWeights( const Abc::FloatArraySample &iSmp )
+        { m_positionWeights = iSmp; }
 
         // nu
         const int32_t getNu() const { return m_numU; }
@@ -203,6 +210,7 @@ public:
             m_vOrder = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
             m_uKnot.reset();
             m_vKnot.reset();
+            m_positionWeights.reset();
             m_normals.reset();
             m_uvs.reset();
             m_selfBounds.makeEmpty();
@@ -234,6 +242,7 @@ public:
         Abc::FloatArraySample m_vKnot;
 
         // optional properties
+        Abc::FloatArraySample m_positionWeights;
         ON3fGeomParam::Sample m_normals;
         OV2fGeomParam::Sample m_uvs;
 
@@ -436,6 +445,7 @@ protected:
     Abc::OFloatArrayProperty m_vKnot;
 
     // optional properties
+    Abc::OFloatArrayProperty m_positionWeights;
     ON3fGeomParam m_normals;
     OV2fGeomParam m_uvs;
 

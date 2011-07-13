@@ -137,6 +137,23 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
         }
     }
 
+    // do we need to create position weights?
+    if ( iSamp.getPositionWeights() && !m_positionWeights)
+    {
+        m_positionWeights = Abc::OFloatArrayProperty( *this, "w",
+                                                      this->getTimeSampling() );
+
+        Alembic::Abc::FloatArraySample emptySamp;
+
+        size_t numSamples = m_positions.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_positionWeights.set( emptySamp );
+        }
+    }
+
     if ( iSamp.hasTrimCurve() && !m_trimNumLoops )
     {
         AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
@@ -209,6 +226,11 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
             m_trimW.set( iSamp.getTrimW() );
         }
 
+        if ( m_positionWeights )
+        {
+            m_positionWeights.set( iSamp.getPositionWeights() );
+        }
+
         if ( m_uvs )
         {
             m_uvs.set( iSamp.getUVs() );
@@ -258,6 +280,11 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
         if ( m_normals )
         {
             m_normals.set( iSamp.getNormals() );
+        }
+
+        if ( m_positionWeights )
+        {
+            m_positionWeights.set( iSamp.getPositionWeights() );
         }
 
         // handle trim curves
@@ -315,6 +342,7 @@ void ONuPatchSchema::setFromPrevious( )
     m_childBounds.setFromPrevious();
 
     // handle option properties
+    if ( m_positionWeights ) { m_positionWeights.setFromPrevious(); }
     if ( m_uvs ) { m_uvs.setFromPrevious(); }
     if ( m_normals ) { m_normals.setFromPrevious(); }
 

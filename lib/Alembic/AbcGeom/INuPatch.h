@@ -64,6 +64,10 @@ public:
         Abc::FloatArraySamplePtr getUKnot() const { return m_uKnot; }
         Abc::FloatArraySamplePtr getVKnot() const { return m_vKnot; }
 
+        // if this is NULL then the weight value of the position for each
+        // point is 1
+        Abc::FloatArraySamplePtr getPositionWeights() const { return m_positionWeights; }
+
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
 
@@ -96,6 +100,7 @@ public:
             m_vOrder = 0;
             m_uKnot.reset();
             m_vKnot.reset();
+            m_positionWeights.reset();
 
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
@@ -126,6 +131,7 @@ public:
         int32_t m_vOrder;
         Abc::FloatArraySamplePtr m_uKnot;
         Abc::FloatArraySamplePtr m_vKnot;
+        Abc::FloatArraySamplePtr m_positionWeights;
 
         // trim curve
         int32_t m_trimNumLoops;
@@ -243,6 +249,9 @@ public:
     }
 
     Abc::IV3fArrayProperty getPositions(){ return m_positions; }
+
+    // if this property is invalid then the weight for every point is 1
+    Abc::IFloatArrayProperty getPositionWeights(){ return m_positionWeights; }
     Abc::IFloatArrayProperty getUKnots(){ return m_uKnot; }
     Abc::IFloatArrayProperty getVKnots(){ return m_vKnot; }
 
@@ -272,6 +281,7 @@ public:
         m_vOrder.reset();
         m_uKnot.reset();
         m_vKnot.reset();
+        m_positionWeights.reset();
 
         m_normals.reset();
         m_uvs.reset();
@@ -329,6 +339,7 @@ protected:
     Abc::IFloatArrayProperty m_vKnot;
 
     // optional
+    Abc::IFloatArrayProperty m_positionWeights;
     IN3fGeomParam m_normals;
     IV2fGeomParam m_uvs;
 

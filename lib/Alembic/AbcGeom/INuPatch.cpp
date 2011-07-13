@@ -86,6 +86,10 @@ MeshTopologyVariance INuPatchSchema::getTopologyVariance()
                 return kHeterogenousTopology;
             }
         }
+        else if ( m_positionWeights && !m_positionWeights.isConstant() )
+        {
+            return kHomogenousTopology;
+        }
         else
         {
             return kConstantTopology;
@@ -157,6 +161,11 @@ void INuPatchSchema::get( sample_type &oSample,
         m_childBounds.get( oSample.m_childBounds, iSS );
     }
 
+    if ( m_positionWeights )
+    {
+        m_positionWeights.get( oSample.m_positionWeights, iSS );
+    }
+
     // handle trim curves
     if ( this->hasTrimCurve() )
     {
@@ -224,6 +233,13 @@ void INuPatchSchema::init( const Abc::Argument &iArg0,
     }
 
     // none of the things below here are guaranteed to exist
+
+    if ( this->getPropertyHeader( "w" ) != NULL )
+    {
+        m_positionWeights = Abc::IFloatArrayProperty( _this, "w",
+                                        args.getSchemaInterpMatching() );
+    }
+
     if ( this->getPropertyHeader( "N" ) != NULL )
     {
         m_normals = IN3fGeomParam( _this, "N", iArg0, iArg1 );

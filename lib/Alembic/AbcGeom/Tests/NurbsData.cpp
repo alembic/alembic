@@ -63,6 +63,8 @@ const float32_t g_P[] = {   0.0f, 0.0f, -3.0f,
                                         3.0f, 1.0f, -3.0f,
                                         3.0f, 2.0f, -3.0f,
                                         3.0f, 3.0f, -3.0f};
+const float32_t g_Pw[] = { 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f,
+                           1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f };
 
 // trim curve
 const int32_t g_trim_nLoops = 1;

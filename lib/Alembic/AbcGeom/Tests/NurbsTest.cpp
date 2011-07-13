@@ -155,6 +155,39 @@ void Example2_NurbsOut()
     myNurbsSchema.set( nurbsSample );
 }
 
+void Example3_NurbsOut()
+{
+    // same as example 1 but without the trim curves
+    OArchive archive(
+        Alembic::AbcCoreHDF5::WriteArchive(),
+        "nurbs3.abc" );
+
+    ONuPatch myNurbs(   OObject( archive, kTop ),
+                        "nurbs_surface_withW");
+
+    ONuPatchSchema &myNurbsSchema = myNurbs.getSchema();
+
+    V3fArraySample pSample( (const V3f *)g_P, g_nP );
+    FloatArraySample uKnotSample( (const float32_t *)g_uKnot, 8 );
+    FloatArraySample vKnotSample( (const float32_t *)g_vKnot, 8 );
+    FloatArraySample pwSample( (const float32_t *)g_Pw, g_nP );
+
+    ONuPatchSchema::Sample nurbsSample(
+        pSample,
+        g_nu,
+        g_nv,
+        g_uOrder,
+        g_vOrder,
+        uKnotSample,
+        vKnotSample
+        );
+
+    nurbsSample.setPositionWeights(pwSample);
+
+    // Set the sample.
+    myNurbsSchema.set( nurbsSample );
+}
+
 void Example1_NurbsIn()
 {
     std::cout << "loading archive" << std::endl;
@@ -182,6 +215,7 @@ void Example1_NurbsIn()
     TESTING_ASSERT( nurbsSample.getTrimNumLoops() == 1 );
     TESTING_ASSERT( nurbsSample.getTrimOrders() -> size() == 1 );
     TESTING_ASSERT( nurbsSample.hasTrimCurve() == true );
+    TESTING_ASSERT( nurbsSchema.isConstant() == true );
 }
 
 void Example2_NurbsIn()
@@ -211,6 +245,39 @@ void Example2_NurbsIn()
     std::cout << "Number of trim curves: " << nurbsSample.getTrimNumLoops() << std::endl;
     TESTING_ASSERT( nurbsSample.getTrimNumLoops() == 0 );
     TESTING_ASSERT( nurbsSample.hasTrimCurve() == false );
+    TESTING_ASSERT( !nurbsSample.getPositionWeights() );
+    TESTING_ASSERT( nurbsSchema.isConstant() == true );
+}
+
+void Example3_NurbsIn()
+{
+    std::cout << "loading archive" << std::endl;
+    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "nurbs3.abc" );
+
+    std::cout << "making INuPatch object" << std::endl;
+    INuPatch myNurbs( IObject( archive, kTop) , "nurbs_surface_withW");
+
+    std::cout << "getting INuPatch schema" << std::endl;
+    INuPatchSchema &nurbsSchema = myNurbs.getSchema();
+
+    // get the samples from the curves
+    std::cout << "getting INuPatch sample" << std::endl;
+    INuPatchSchema::Sample nurbsSample;
+    nurbsSchema.get( nurbsSample );
+
+    // test the bounding box
+
+    std::cout << nurbsSample.getSelfBounds().min << std::endl;
+    std::cout << nurbsSample.getSelfBounds().max << std::endl;
+
+    TESTING_ASSERT( nurbsSample.getSelfBounds().min == V3d( 0.0, 0.0, -3.0 ) );
+    TESTING_ASSERT( nurbsSample.getSelfBounds().max == V3d( 3.0, 3.0, 3.0 ) );
+
+    std::cout << "Number of trim curves: " << nurbsSample.getTrimNumLoops() << std::endl;
+    TESTING_ASSERT( nurbsSample.getTrimNumLoops() == 0 );
+    TESTING_ASSERT( nurbsSample.hasTrimCurve() == false );
+    TESTING_ASSERT( nurbsSample.getPositionWeights()->size() == g_nP );
+    TESTING_ASSERT( nurbsSchema.isConstant() == true );
 }
 
 //-*****************************************************************************
@@ -242,6 +309,13 @@ int main( int argc, char *argv[] )
     std::cout << "reading nurbs 2" << std::endl;
     Example2_NurbsIn();
     std::cout << "done reading nurbs 2" << std::endl;
+
+    Example3_NurbsOut();
+    std::cout << "done writing nurbs 3" << std::endl;
+
+    std::cout << "reading nurbs 3" << std::endl;
+    Example3_NurbsIn();
+    std::cout << "done reading nurbs 3" << std::endl;
 
     return 0;
 }
