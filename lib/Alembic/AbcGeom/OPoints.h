@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -57,12 +58,15 @@ public:
         //! ...
         Sample() { reset(); }
 
-        //! Creates a sample with position data but no index
+        //! Creates a sample with position data but no id
         //! data. For specifying samples after the first one
         Sample( const Abc::V3fArraySample &iPos,
-                const Abc::V3fArraySample &iVelocities = Abc::V3fArraySample() )
+                const Abc::V3fArraySample &iVelocities = Abc::V3fArraySample(),
+                const OFloatGeomParam::Sample &iWidths = \
+                OFloatGeomParam::Sample() )
           : m_positions( iPos )
           , m_velocities( iVelocities )
+          , m_widths( iWidths )
         {}
 
         //! Creates a sample with position data and id data. The first
@@ -70,23 +74,34 @@ public:
         //! be full like this, which would indicate a change of topology
         Sample( const Abc::V3fArraySample &iPos,
                 const Abc::UInt64ArraySample &iId,
-                const Abc::V3fArraySample &iVelocities = Abc::V3fArraySample() )
+                const Abc::V3fArraySample &iVelocities = Abc::V3fArraySample(),
+                const OFloatGeomParam::Sample &iWidths = \
+                OFloatGeomParam::Sample() )
           : m_positions( iPos )
           , m_velocities( iVelocities )
           , m_ids( iId )
+          , m_widths( iWidths )
         {}
 
+        // positions accessor
         const Abc::V3fArraySample &getPositions() const { return m_positions; }
         void setPositions( const Abc::V3fArraySample &iSmp )
         { m_positions = iSmp; }
 
+        // ids accessor
         const Abc::UInt64ArraySample &getIds() const { return m_ids; }
         void setIds( const Abc::UInt64ArraySample &iSmp )
         { m_ids = iSmp; }
 
+        // velocities accessor
         const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
         void setVelocities( const Abc::V3fArraySample &iVelocities )
         { m_velocities = iVelocities; }
+
+        // widths accessor
+        const OFloatGeomParam::Sample &getWidths() const { return m_widths; }
+        void setWidths( const OFloatGeomParam::Sample &iWidths )
+        { m_widths = iWidths; }
 
         const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }
         void setSelfBounds( const Abc::Box3d &iBnds )
@@ -102,6 +117,7 @@ public:
             m_positions.reset();
             m_velocities.reset();
             m_ids.reset();
+            m_widths.reset();
 
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
@@ -111,6 +127,7 @@ public:
         Abc::V3fArraySample m_positions;
         Abc::V3fArraySample m_velocities;
         Abc::UInt64ArraySample m_ids;
+        OFloatGeomParam::Sample m_widths;
 
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
@@ -220,12 +237,11 @@ public:
     size_t getNumSamples()
     { return m_positions.getNumSamples(); }
 
-    //! Set a sample! Sample zero has to have non-degenerate
-    //! positions, ids and counts.
+    //! Set a sample
     void set( const Sample &iSamp );
 
     //! Set from previous sample. Will apply to each of positions,
-    //! ids, and counts.
+    //! ids, velocities, and widths
     void setFromPrevious( );
 
     void setTimeSampling( uint32_t iIndex );
@@ -248,6 +264,7 @@ public:
         m_positions.reset();
         m_ids.reset();
         m_velocities.reset();
+        m_widths.reset();
 
         m_selfBounds.reset();
         m_childBounds.reset();
@@ -276,6 +293,7 @@ protected:
     Abc::OV3fArrayProperty m_positions;
     Abc::OUInt64ArrayProperty m_ids;
     Abc::OV3fArrayProperty m_velocities;
+    OFloatGeomParam m_widths;
 
     Abc::OBox3dProperty m_selfBounds;
     Abc::OBox3dProperty m_childBounds;

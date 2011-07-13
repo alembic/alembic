@@ -76,6 +76,35 @@ void OPointsSchema::set( const Sample &iSamp )
         }
     }
 
+    // do we need to create widths prop?
+    if ( iSamp.getWidths() && !m_widths )
+    {
+        if ( iSamp.getWidths().getIndices() )
+        {
+            // widths are indexed which is wasteful, but technically ok
+            m_widths = OFloatGeomParam( this->getPtr(), ".widths", true,
+                                        iSamp.getWidths().getScope(),
+                                        1, this->getTimeSampling() );
+        }
+        else
+        {
+            // widths are not indexed
+            m_widths = OFloatGeomParam( this->getPtr(), ".widths", false,
+                                        iSamp.getWidths().getScope(), 1,
+                                        this->getTimeSampling() );
+        }
+
+        OFloatGeomParam::Sample empty;
+
+        size_t numSamples = m_positions.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_widths.set( empty );
+        }
+    }
+
     // We could add sample integrity checking here.
     if ( m_positions.getNumSamples() == 0 )
     {
@@ -89,6 +118,9 @@ void OPointsSchema::set( const Sample &iSamp )
         if ( m_velocities )
         { m_velocities.set( iSamp.getVelocities() ); }
 
+        if ( m_widths )
+        { m_widths.set( iSamp.getWidths() ); }
+
         if ( m_childBounds )
         { m_childBounds.set( iSamp.getChildBounds() ); }
 
@@ -101,6 +133,7 @@ void OPointsSchema::set( const Sample &iSamp )
             m_selfBounds.set( bnds );
         }
         else { m_selfBounds.set( iSamp.getSelfBounds() ); }
+
     }
     else
     {
@@ -127,6 +160,9 @@ void OPointsSchema::set( const Sample &iSamp )
         {
             m_selfBounds.setFromPrevious();
         }
+
+        if ( m_widths )
+        { m_widths.set( iSamp.getWidths() ); }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();

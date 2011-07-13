@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/IGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -212,6 +213,11 @@ public:
         return m_velocities;
     }
 
+    IFloatGeomParam &getWidths()
+    {
+        return m_widths;
+    }
+
     Abc::IUInt64ArrayProperty getIds()
     {
         return m_ids;
@@ -239,6 +245,7 @@ public:
     {
         m_positions.reset();
         m_velocities.reset();
+        m_widths.reset();
         m_ids.reset();
 
         m_selfBounds.reset();
@@ -269,6 +276,7 @@ protected:
     Abc::IV3fArrayProperty m_positions;
     Abc::IUInt64ArrayProperty m_ids;
     Abc::IV3fArrayProperty m_velocities;
+    IFloatGeomParam m_widths;
 
     Abc::IBox3dProperty m_selfBounds;
     Abc::IBox3dProperty m_childBounds;

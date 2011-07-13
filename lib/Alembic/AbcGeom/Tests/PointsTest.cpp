@@ -37,6 +37,7 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <ImathRandom.h>
+#include "Assert.h"
 
 namespace AbcG = Alembic::AbcGeom;
 using namespace AbcG;
@@ -335,6 +336,74 @@ void ReadParticles( const std::string &iFileName )
     }
 }
 
+void pointTestReadWrite()
+{
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+            "particlesOut2.abc" );
+        OObject topObj( archive, kTop );
+        OPoints ptsObj(topObj, "somePoints");
+
+        std::vector< V3f > positions;
+        std::vector< V3f > velocities;
+        std::vector< uint64_t > ids;
+        std::vector< float32_t > widths;
+        for (int i = 0; i < 100; ++i)
+        {
+            OFloatGeomParam::Sample widthSamp;
+            widthSamp.setScope(kVertexScope);
+            widthSamp.setVals(FloatArraySample(widths));
+
+            OPointsSchema::Sample psamp(V3fArraySample( positions ),
+                UInt64ArraySample( ids ), V3fArraySample( velocities ),
+                widthSamp );
+
+            ptsObj.getSchema().set(psamp);
+
+            positions.push_back(V3f(i, i, i));
+            velocities.push_back(V3f(100.0-i, 0, 0));
+            ids.push_back(i*10);
+            widths.push_back(0.1 + i * 0.05);
+        }
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                          "particlesOut2.abc" );
+
+        IObject topObj = archive.getTop();
+        IPoints points( topObj, "somePoints" );
+        IPointsSchema& pointsSchema = points.getSchema();
+        IFloatGeomParam widthProp = pointsSchema.getWidths();
+        TESTING_ASSERT( widthProp.getScope() == kVertexScope );
+        for ( int i = 0; i < 100; ++i )
+        {
+            IPointsSchema::Sample pointSamp;
+            pointsSchema.get(pointSamp, i);
+
+            IFloatGeomParam::Sample widthSamp;
+            widthProp.getExpanded(widthSamp, i);
+            TESTING_ASSERT( pointSamp.getPositions()->size() == i );
+            TESTING_ASSERT( pointSamp.getVelocities()->size() == i );
+            TESTING_ASSERT( pointSamp.getIds()->size() == i );
+            TESTING_ASSERT( widthSamp.getVals()->size() == i );
+            for ( int j = 0; j < i; ++j )
+            {
+                TESTING_ASSERT( (*pointSamp.getPositions())[j] ==
+                                V3f(j, j, j) );
+
+                TESTING_ASSERT( (*pointSamp.getVelocities())[j] ==
+                                V3f(100-j, 0, 0) );
+
+                TESTING_ASSERT( (*pointSamp.getIds())[j] == j * 10 );
+
+                TESTING_ASSERT( almostEqual( (*widthSamp.getVals())[j],
+                                0.1 + j * 0.05, 7 ) );
+            }
+        }
+    }
+}
+
 //-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
@@ -360,12 +429,14 @@ int main( int argc, char *argv[] )
                           "particlesOut1.abc" );
         OObject topObj( archive, kTop );
 
-        RunAndWriteParticles( topObj, params, 125, 1.0/24.0 );
+        RunAndWriteParticles( topObj, params, 20, 1.0/24.0 );
     }
 
     std::cout << "Wrote particlesOut1.abc" << std::endl;
 
     ReadParticles( "particlesOut1.abc" );
+
+    pointTestReadWrite();
 
     return 0;
 }

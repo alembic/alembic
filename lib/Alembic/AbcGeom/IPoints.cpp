@@ -64,6 +64,11 @@ void IPointsSchema::init( const Abc::Argument &iArg0,
                                                iArg0, iArg1 );
     }
 
+    if ( _this->getPropertyHeader( ".widths" ) != NULL )
+    {
+        m_widths = IFloatGeomParam( _this, ".widths", iArg0, iArg1 );
+    }
+
     if ( _this->getPropertyHeader( ".childBnds" ) != NULL )
     {
         m_childBounds = Abc::IBox3dProperty( _this, ".childBnds",
