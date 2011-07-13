@@ -159,7 +159,7 @@ void simpleTestOut()
         std::vector<std::string> emptyStanza;
         jabber.set( emptyStanza );
     }
-    
+
 
     OFloatProperty radius( clampto, "radius" );
     radius.set( 217.0f );
@@ -231,7 +231,7 @@ void simpleTestIn()
                   << pointySamp->size() << std::endl;
     }
 
-    
+
     //-*************************************************************************
     // STRING PROPERTIES
     //-*************************************************************************

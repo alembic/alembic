@@ -54,7 +54,8 @@ MeshDrwHelper::~MeshDrwHelper()
 void MeshDrwHelper::update( V3fArraySamplePtr iP,
                             V3fArraySamplePtr iN,
                             Int32ArraySamplePtr iIndices,
-                            Int32ArraySamplePtr iCounts )
+                            Int32ArraySamplePtr iCounts,
+                            Abc::Box3d iBounds )
 {
     // Before doing a ton, just have a quick look.
     if ( m_meshP && iP &&
@@ -132,7 +133,7 @@ void MeshDrwHelper::update( V3fArraySamplePtr iP,
                       << ", numIndices = " << numIndices
                       << ", count = " << count
                       << std::endl;
-            
+
             // Just get out, make no more triangles.
             break;
         }
@@ -180,7 +181,16 @@ void MeshDrwHelper::update( V3fArraySamplePtr iP,
 
     // And now update just the P and N, which will update bounds
     // and calculate new normals if necessary.
-    computeBounds();
+
+    if ( iBounds.isEmpty() )
+    {
+        computeBounds();
+    }
+    else
+    {
+        m_bounds = iBounds;
+    }
+
     updateNormals( iN );
 
     // And that's it.
@@ -188,7 +198,8 @@ void MeshDrwHelper::update( V3fArraySamplePtr iP,
 
 //-*****************************************************************************
 void MeshDrwHelper::update( V3fArraySamplePtr iP,
-                            V3fArraySamplePtr iN )
+                            V3fArraySamplePtr iN,
+                            Abc::Box3d iBounds )
 {
     // Check validity.
     if ( !m_valid || !iP || !m_meshP ||
@@ -200,7 +211,16 @@ void MeshDrwHelper::update( V3fArraySamplePtr iP,
 
     // Set meshP
     m_meshP = iP;
-    computeBounds();
+
+    if ( iBounds.isEmpty() )
+    {
+        computeBounds();
+    }
+    else
+    {
+        m_bounds = iBounds;
+    }
+
     updateNormals( iN );
 }
 
@@ -212,7 +232,7 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
         makeInvalid();
         return;
     }
-    
+
     // Now see if we need to calculate normals.
     if ( ( m_meshN && iN == m_meshN ) ||
          ( !iN && m_customN.size() > 0 ) )
@@ -223,7 +243,7 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
     size_t numPoints = m_meshP->size();
     m_meshN = iN;
     m_customN.clear();
-    
+
     // Right now we only handle "vertex varying" normals,
     // which have the same cardinality as the points
     if ( !m_meshN || m_meshN->size() != numPoints )
@@ -235,18 +255,18 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
 
         //std::cout << "Recalcing normals for object: "
         //          << m_host.name() << std::endl;
-        
+
         for ( size_t tidx = 0; tidx < m_triangles.size(); ++tidx )
         {
             const Tri &tri = m_triangles[tidx];
-            
+
             const V3f &A = (*m_meshP)[tri[0]];
             const V3f &B = (*m_meshP)[tri[1]];
             const V3f &C = (*m_meshP)[tri[2]];
-            
+
             V3f AB = B - A;
             V3f AC = C - A;
-            
+
             V3f wN = AB.cross( AC );
             m_customN[tri[0]] += wN;
             m_customN[tri[1]] += wN;
@@ -291,15 +311,15 @@ void MeshDrwHelper::draw( const DrawContext & iCtx ) const
             GL_NOISY( glNormalPointer( GL_FLOAT, 0,
                                        ( const GLvoid * )normals ) );
         }
-        
+
         GL_NOISY( glVertexPointer( 3, GL_FLOAT, 0,
                                    ( const GLvoid * )points ) );
-        
+
         GL_NOISY( glDrawElements( GL_TRIANGLES,
                                   ( GLsizei )m_triangles.size() * 3,
                                   GL_UNSIGNED_INT,
                                   ( const GLvoid * )&(m_triangles[0]) ) );
-        
+
         if ( normals )
         {
             GL_NOISY( glDisableClientState( GL_NORMAL_ARRAY ) );
@@ -308,24 +328,24 @@ void MeshDrwHelper::draw( const DrawContext & iCtx ) const
     }
 #else
     glBegin( GL_TRIANGLES );
-    
+
     for ( size_t i = 0; i < m_triangles.size(); ++i )
     {
         const Tri &tri = m_triangles[i];
         const V3f &vertA = points[tri[0]];
         const V3f &vertB = points[tri[1]];
         const V3f &vertC = points[tri[2]];
-        
+
         if ( normals )
         {
             const V3f &normA = normals[tri[0]];
             glNormal3fv( ( const GLfloat * )&normA );
             glVertex3fv( ( const GLfloat * )&vertA );
-            
+
             const V3f &normB = normals[tri[1]];
             glNormal3fv( ( const GLfloat * )&normB );
             glVertex3fv( ( const GLfloat * )&vertB );
-            
+
             const V3f &normC = normals[tri[2]];
             glNormal3fv( ( const GLfloat * )&normC );
             glVertex3fv( ( const GLfloat * )&vertC );
@@ -340,16 +360,16 @@ void MeshDrwHelper::draw( const DrawContext & iCtx ) const
                 N.normalize();
                 glNormal3fv( ( const GLfloat * )&N );
             }
-            
+
             glVertex3fv( ( const GLfloat * )&vertA );
-            
+
             glVertex3fv( ( const GLfloat * )&vertB );
-            
+
             glVertex3fv( ( const GLfloat * )&vertC );
         }
-	
+
     }
-    
+
     glEnd();
 
 #endif

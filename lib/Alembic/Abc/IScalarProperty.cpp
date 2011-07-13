@@ -47,7 +47,7 @@ IScalarProperty::~IScalarProperty()
 }
 
 //-*****************************************************************************
-size_t IScalarProperty::getNumSamples()
+size_t IScalarProperty::getNumSamples() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IScalarProperty::getNumSamples()" );
 
@@ -60,7 +60,7 @@ size_t IScalarProperty::getNumSamples()
 }
 
 //-*****************************************************************************
-bool IScalarProperty::isConstant()
+bool IScalarProperty::isConstant() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IScalarProperty::isConstant()" );
 
@@ -69,11 +69,11 @@ bool IScalarProperty::isConstant()
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, so return a default.
-    return true;
+    return false;
 }
 
 //-*****************************************************************************
-AbcA::TimeSamplingPtr IScalarProperty::getTimeSampling()
+AbcA::TimeSamplingPtr IScalarProperty::getTimeSampling() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IScalarProperty::getTimeSampling()" );
 

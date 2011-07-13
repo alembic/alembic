@@ -1,3 +1,28 @@
+ build -- Cmake files and bootstrap utilities
+
+ doc -- Documentation for how to build dependencies, doxygen generated doc will
+        also end up here
+
+ examples - Unsupported examples that use Alembic
+ |
+ `-- AbcClients
+ |   |
+ |   `-- FluidSimDemo - example CUDA simulation, slightly older API, won't
+ |   |                  currently build
+ |   `-- WFObjConvert - Convert WaveFront OBJ files to Alembic Archives
+ |
+ `-- bin
+     |
+     `-- GlutSkeleton - skeletal template for OpenGL-based Alembic utility
+     |
+     `-- GtoMeshesToAbc - Convert GTO mesh files into Alembic Archives
+     |                    (requires Open-GTO libraries)
+     `-- SimpleAbcViewer - Simple OpenGL viewer for Alembic Archives
+
+houdini
+|
+`-- SOP_AlembicIn
+
  lib
  |
  `-- Alembic
@@ -18,38 +43,18 @@
  |
  `-- python - python utilities that help the bootstrap build script
 
- build -- Cmake files and bootstrap utilities
-
- doc -- Documentation for how to build dependencies, doxygen generated doc will
-        also end up here
-
- prman
- |
- `-- Procedural - start of a Renderman DSO suitable for use in a
-         'Procedural "DynamicLoad"' RIB statement.
-
  maya
  |
  `-- AbcExport - Official Maya export plugin.
  |
  `-- AbcImport - Official Maya import plugin.
 
+ prman
+ |
+ `-- Procedural - start of a Renderman DSO suitable for use in a
+         'Procedural "DynamicLoad"' RIB statement.
+
  python
  |
  `-- alembic - Start of Boost.Python bindings.
 
- examples - Unsupported examples that use Alembic
- |
- `-- AbcClients
- |   |
- |   `-- FluidSimDemo - example CUDA simulation, slightly older API, won't
- |   |                  currently build
- |   `-- WFObjConvert - Convert WaveFront OBJ files to Alembic Archives
- |
- `-- bin
-     |
-     `-- GlutSkeleton - skeletal template for OpenGL-based Alembic utility
-     |
-     `-- GtoMeshesToAbc - Convert GTO mesh files into Alembic Archives
-     |                    (requires Open-GTO libraries)
-     `-- SimpleAbcViewer - Simple OpenGL viewer for Alembic Archives

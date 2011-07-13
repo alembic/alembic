@@ -111,17 +111,17 @@ public:
     //! This can be any number, including zero.
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
-    size_t getNumSamples();
+    size_t getNumSamples() const;
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
-    bool isConstant();
+    bool isConstant() const;
 
     //! Ask if we are like a scalar - we have 1 and only 1 DataType per sample.
-    bool isScalarLike();
+    bool isScalarLike() const;
 
     //! Time information.
-    AbcA::TimeSamplingPtr getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling() const;
 
     //! Get a sample into the address of a datum.
     //! ...
@@ -131,11 +131,11 @@ public:
     //! Get a key from an address of a datum.
     //! ...
     bool getKey( AbcA::ArraySampleKey& oKey,
-              const ISampleSelector &iSS = ISampleSelector() );
+                 const ISampleSelector &iSS = ISampleSelector() );
 
     //! Get the dimensions of the datum.
     void getDimensions( Util::Dimensions & oDim,
-              const ISampleSelector &iSS = ISampleSelector() );
+                        const ISampleSelector &iSS = ISampleSelector() );
 
     //! Return the parent compound property, handily wrapped in a
     //! ICompoundProperty wrapper.

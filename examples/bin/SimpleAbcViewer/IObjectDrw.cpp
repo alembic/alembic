@@ -78,7 +78,6 @@ IObjectDrw::IObjectDrw( IObject &iObj, bool iResetIfNoChildren )
             }
         }
         else if ( ICurves::matches( ohead ) )
-
         {
             ICurves curves( m_object, ohead.getName() );
             if ( curves )

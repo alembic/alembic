@@ -49,6 +49,12 @@ ISubDDrw::ISubDDrw( ISubD &iPmesh )
         return;
     }
 
+    if ( m_subD.getSchema().getNumSamples() > 0 )
+    {
+        m_subD.getSchema().get( m_samp );
+    }
+
+    m_boundsProp = m_subD.getSchema().getSelfBounds();
 
     // The object has already set up the min time and max time of
     // all the children.
@@ -93,7 +99,12 @@ void ISubDDrw::setTime( chrono_t iSeconds )
     // Use nearest for now.
     ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
     ISubDSchema::Sample psamp;
-    if ( m_subD.getSchema().getNumSamples() > 0 )
+
+    if ( m_subD.getSchema().isConstant() )
+    {
+        psamp = m_samp;
+    }
+    else if ( m_subD.getSchema().getNumSamples() > 0 )
     {
         m_subD.getSchema().get( psamp, ss );
     }
@@ -103,9 +114,15 @@ void ISubDDrw::setTime( chrono_t iSeconds )
     Int32ArraySamplePtr indices = psamp.getFaceIndices();
     Int32ArraySamplePtr counts = psamp.getFaceCounts();
 
+    Box3d bounds;
+    bounds.makeEmpty();
+
+    if ( m_boundsProp && m_boundsProp.getNumSamples() > 0 )
+    { bounds = m_boundsProp.getValue( ss ); }
+
     // Update the mesh hoo-ha.
     m_drwHelper.update( P, V3fArraySamplePtr(),
-                        indices, counts );
+                        indices, counts, bounds );
 
     if ( !m_drwHelper.valid() )
     {

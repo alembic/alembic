@@ -56,6 +56,7 @@ IXformDrw::IXformDrw( IXform &iXform )
         m_staticMatrix = m_xform.getSchema().getValue().getMatrix();
     }
 
+
     // The object has already set up the min time and max time of
     // all the children.
     // if we have a non-constant time sampling, we should get times
@@ -106,7 +107,6 @@ void IXformDrw::setTime( chrono_t iSeconds )
         ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
         m_localToParent = m_xform.getSchema().getValue( ss ).getMatrix();
     }
-
     // Okay, now we need to recalculate the bounds.
     m_bounds.makeEmpty();
     for ( DrawablePtrVec::iterator iter = m_children.begin();

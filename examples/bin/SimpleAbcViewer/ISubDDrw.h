@@ -60,6 +60,8 @@ public:
 
 protected:
     ISubD m_subD;
+    ISubDSchema::Sample m_samp;
+    IBox3dProperty m_boundsProp;
     MeshDrwHelper m_drwHelper;
 };
 

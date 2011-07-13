@@ -189,7 +189,6 @@ void IObject::init( AbcA::ObjectReaderPtr iParent,
                     const std::string &iName,
                     ErrorHandler::Policy iParentPolicy,
                     ErrorHandler::Policy iChildPolicy )
-
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::init()" );
 

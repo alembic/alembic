@@ -78,7 +78,7 @@ void writeUInt32ArrayProperty(const std::string &archiveName)
 
     // Create a scalar property on this child object named 'primes'
     OUInt32ArrayProperty primes( childProps,  // owner
-                               "primes"); // uniform with cycle=dt
+                                 "primes"); // uniform with cycle=dt
 
     std::vector<uint32_t> vals;
     for (int ss=0; ss<5; ss++)
@@ -325,7 +325,7 @@ void readWriteColorArrayProperty(const std::string &archiveName)
     {
 
         OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), archiveName,
-            ErrorHandler::kThrowPolicy );
+                          ErrorHandler::kThrowPolicy );
         OObject archiveTop = archive.getTop();
 
         OObject child( archiveTop, "test" );
@@ -358,7 +358,7 @@ void readWriteColorArrayProperty(const std::string &archiveName)
     {
         // now read it
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+                          archiveName, ErrorHandler::kThrowPolicy );
         IObject archiveTop = archive.getTop();
 
         const unsigned int numChildren =  archiveTop.getNumChildren();
@@ -372,38 +372,38 @@ void readWriteColorArrayProperty(const std::string &archiveName)
         shades.get( samplePtr );
 
         ABCA_ASSERT( samplePtr->getDimensions().rank() == 2,
-            "Incorrect rank on the sample." );
+                     "Incorrect rank on the sample." );
 
         ABCA_ASSERT( samplePtr->getDimensions().numPoints() == 8,
-            "Incorrect number of total points." );
+                     "Incorrect number of total points." );
 
         ABCA_ASSERT( samplePtr->getDimensions()[0] == 2,
-            "Incorrect size on dimension 0." );
+                     "Incorrect size on dimension 0." );
 
         ABCA_ASSERT( samplePtr->getDimensions()[1] == 4,
-            "Incorrect size on dimension 1." );
+                     "Incorrect size on dimension 1." );
 
         Alembic::Util::Dimensions dims;
         shades.getDimensions( dims );
 
         ABCA_ASSERT( dims.rank() == 2,
-            "Incorrect rank on the sample." );
+                     "Incorrect rank on the sample." );
 
         ABCA_ASSERT( dims.numPoints() == 8,
-            "Incorrect number of total points." );
+                     "Incorrect number of total points." );
 
         ABCA_ASSERT( dims[0] == 2,
-            "Incorrect size on dimension 0." );
+                     "Incorrect size on dimension 0." );
 
         ABCA_ASSERT( dims[1] == 4,
-            "Incorrect size on dimension 1." );
+                     "Incorrect size on dimension 1." );
 
         for (size_t i = 0; i < 8; ++i)
         {
             ABCA_ASSERT( (*samplePtr)[i].x == i/8.0 &&
-                (*samplePtr)[i].x == (*samplePtr)[i].y &&
-                (*samplePtr)[i].x == (*samplePtr)[i].z,
-                "Color [" << i << "] is incorrect.");
+                         (*samplePtr)[i].x == (*samplePtr)[i].y &&
+                         (*samplePtr)[i].x == (*samplePtr)[i].z,
+                         "Color [" << i << "] is incorrect.");
         }
 
     }

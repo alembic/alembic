@@ -50,7 +50,7 @@ class MeshDrwHelper : private boost::noncopyable
 public:
     // Default constructor
     MeshDrwHelper();
-    
+
     // Destructor
     ~MeshDrwHelper();
 
@@ -59,11 +59,13 @@ public:
     void update( V3fArraySamplePtr iP,
                  V3fArraySamplePtr iN,
                  Int32ArraySamplePtr iIndices,
-                 Int32ArraySamplePtr iCounts );
+                 Int32ArraySamplePtr iCounts,
+                 Abc::Box3d iBounds = Abc::Box3d() );
 
     // Update just positions and possibly normals
     void update( V3fArraySamplePtr iP,
-                 V3fArraySamplePtr iN );
+                 V3fArraySamplePtr iN,
+                 Abc::Box3d iBounds = Abc::Box3d() );
 
     // Update just normals
     void updateNormals( V3fArraySamplePtr iN );
@@ -80,10 +82,10 @@ public:
     // This is a weird thing. Just makes the helper invalid
     // by nulling everything out. For internal use.
     void makeInvalid();
-    
+
 protected:
     void computeBounds();
-    
+
     typedef Imath::Vec3<unsigned int> Tri;
     typedef std::vector<Tri> TriArray;
 

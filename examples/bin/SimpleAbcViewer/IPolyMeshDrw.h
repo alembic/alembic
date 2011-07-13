@@ -60,6 +60,8 @@ public:
 
 protected:
     IPolyMesh m_polyMesh;
+    IPolyMeshSchema::Sample m_samp;
+    IBox3dProperty m_boundsProp;
     MeshDrwHelper m_drwHelper;
 };
 
