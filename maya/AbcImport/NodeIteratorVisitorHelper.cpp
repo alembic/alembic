@@ -2317,12 +2317,13 @@ MString connectAttr(ArgData & iArgData)
             for (unsigned int j = 0; j < sampleSize; j ++)
             {
                 std::string attrName = sampPair.getSampleElement(j);
-                if (attrName == "visible")
+                if (attrName == Alembic::AbcGeom::kVisibilityPropertyName)
                     dstPlug = mFn.findPlug("visibility", true, &status);
                 else
                     dstPlug = mFn.findPlug(attrName.c_str(), true, &status);
 
-                if (attrName != "visible" && (status != MS::kSuccess ||
+                if (attrName != Alembic::AbcGeom::kVisibilityPropertyName &&
+                    (status != MS::kSuccess ||
                     dstPlug.partialName(false, false, false, false, false, true)
                     != attrName.c_str()))
                 {

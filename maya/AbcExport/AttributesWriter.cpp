@@ -1193,9 +1193,12 @@ AttributesWriter::AttributesWriter(
             // static visibility 0 case
             case 1:
             {
-                Alembic::Util::int8_t visVal = 0;
+                Alembic::Util::int8_t visVal =
+                    Alembic::AbcGeom::kVisibilityHidden;
 
-                Abc::OCharProperty bp(parent, "visible");
+                Abc::OCharProperty bp =
+                    Alembic::AbcGeom::CreateVisibilityProperty(
+                        visPlug.propParent, 0);
                 bp.set(visVal);
             }
             break;
@@ -1203,9 +1206,13 @@ AttributesWriter::AttributesWriter(
             // animated visibility 0 case
             case 2:
             {
-                Alembic::Util::int8_t visVal = 0;
+                Alembic::Util::int8_t visVal =
+                    Alembic::AbcGeom::kVisibilityHidden;
 
-                Abc::OCharProperty bp(parent, "visible", iTimeIndex);
+                Abc::OCharProperty bp = 
+                    Alembic::AbcGeom::CreateVisibilityProperty(
+                        visPlug.propParent, iTimeIndex);
+
                 bp.set(visVal);
                 visPlug.prop = bp;
                 mAnimVisibility = visPlug;
@@ -1222,8 +1229,14 @@ AttributesWriter::AttributesWriter(
                 }
 
                 mAnimVisibility = visPlug;
-                Alembic::Util::int8_t visVal = -1;
-                Abc::OCharProperty bp(parent, "visible", iTimeIndex);
+
+                Alembic::Util::int8_t visVal =
+                    Alembic::AbcGeom::kVisibilityDeferred;
+
+                Abc::OCharProperty bp = 
+                    Alembic::AbcGeom::CreateVisibilityProperty(
+                        visPlug.propParent, iTimeIndex);
+
                 bp.set(visVal);
                 visPlug.prop = bp;
                 mAnimVisibility = visPlug;

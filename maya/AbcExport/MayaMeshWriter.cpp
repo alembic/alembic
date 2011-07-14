@@ -240,8 +240,17 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             {
                 faceSet = mSubDSchema.createFaceSet(faceSetName);
             }
-            Alembic::AbcGeom::OFaceSetSchema::Sample samp(
-                Alembic::Abc::Int32ArraySample(faceVals), isVisible);
+            Alembic::AbcGeom::OFaceSetSchema::Sample samp;
+            samp.setFaces(Alembic::Abc::Int32ArraySample(faceVals));
+
+            if (!isVisible)
+            {
+                Alembic::AbcGeom::OVisibilityProperty visProp =
+                    Alembic::AbcGeom::CreateVisibilityProperty( faceSet, 0 );
+                Alembic::Abc::int8_t visVal = 0;
+                visProp.set(visVal);
+            }
+
             faceSet.getSchema().set(samp);
         }
     }

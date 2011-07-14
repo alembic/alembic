@@ -73,7 +73,6 @@ void IFaceSetSchema::get( IFaceSetSchema::Sample &oSample,
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IFaceSetSchema::get()" );
 
     m_facesProperty.get( oSample.m_faces, iSS );
-    oSample.m_visible = m_visibilityProperty.getValue( iSS );
 
     // HERE NYI - templated getFaceIndices
     //m_selfBoundsProperty.get( oSample.m_selfBounds, iSS );
@@ -103,18 +102,16 @@ void IFaceSetSchema::init( const Abc::Argument &iArg0,
 
     m_facesProperty = Abc::IInt32ArrayProperty( _this, ".faces",
         args.getSchemaInterpMatching() );
-    m_visibilityProperty = Abc::IBoolProperty( _this, ".visibility",
-        args.getSchemaInterpMatching() );
     m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds", iArg0,
         iArg1 );
 
-    if ( this->getPropertyHeader(".childBnds") != NULL )
+    if ( _this->getPropertyHeader(".childBnds") != NULL )
     {
         m_childBoundsProperty= Abc::IBox3dProperty( _this, ".childBnds",
             iArg0, iArg1);
     }
 
-    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
+    if ( _this->getPropertyHeader( ".arbGeomParams" ) != NULL )
     {
         m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
             args.getErrorHandlerPolicy() );

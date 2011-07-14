@@ -62,7 +62,6 @@ public:
 
         // main stuff
         Abc::Int32ArraySamplePtr getFaces() const { return m_faces; }
-        bool isVisible () const { return m_visible; }
 
         // bounds
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
@@ -76,7 +75,6 @@ public:
         void reset()
         {
             m_faces.reset();
-            m_visible = true;
 
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
@@ -88,7 +86,6 @@ public:
         friend class IFaceSetSchema;
 
         Abc::Int32ArraySamplePtr    m_faces;
-        bool                        m_visible;
 
 
         // bounds
@@ -170,8 +167,7 @@ public:
 
 
     //! if isConstant() is true, the mesh contains no time-varying values
-    bool isConstant() { return (m_facesProperty.isConstant ()
-        && m_visibilityProperty.isConstant ()); }
+    bool isConstant() { return (m_facesProperty.isConstant ()); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -245,7 +241,6 @@ public:
 protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
-    Abc::IBoolProperty          m_visibilityProperty;
     Abc::IInt32ArrayProperty    m_facesProperty;
 
     // bounds

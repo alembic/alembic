@@ -73,4 +73,6 @@
 #include <Alembic/AbcGeom/OXform.h>
 #include <Alembic/AbcGeom/IXform.h>
 
+#include <Alembic/AbcGeom/Visibility.h>
+
 #endif

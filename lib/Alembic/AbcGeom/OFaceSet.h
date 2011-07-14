@@ -74,22 +74,10 @@ public:
         //! e.g. call std::sort (myVecOfFaces.begin (), myVecOfFaces.end ());
         //! if you need to.
         //! The sample must be complete like this. Subsequent samples may also
-        //! consist of faces and visbibility which allows you to change of topology
-        //! of the faceset, or you can use the other sample ctor if you only need
-        //! to change visibility.
-        Sample( const Abc::Int32ArraySample &iFaceNums,
-                const bool visible = true)
-          : m_visible( visible )
-          , m_faces( iFaceNums )
-        {}
-
-        //! Creates a sample with just indication of visibility.
-        //! To use this ctor you must have first created a Sample
-        //! with the list of faces. This second ctor is handy if
-        //! the topology of your faceset hasn't change and you just
-        //! need to animate visibility of the faceset.
-        Sample( const bool visible)
-          : m_visible( visible )
+        //! consist of faces which allows you to change of topology
+        //! of the faceset.
+        Sample( const Abc::Int32ArraySample &iFaceNums)
+          : m_faces( iFaceNums )
         {}
 
         /* main accessors */
@@ -97,10 +85,6 @@ public:
         const Abc::Int32ArraySample &getFaces() const { return m_faces; }
         void setFaces( const Abc::Int32ArraySample &iFaces)
         { m_faces = iFaces; }
-        // Visibility
-        const bool isVisible () const { return m_visible; }
-        void setVisible( const bool visible )
-        { m_visible = visible; }
 
         // Bounding boxes
         const Abc::Box3d &getSelfBounds() const { return m_selfBounds; }
@@ -113,7 +97,6 @@ public:
 
         void reset()
         {
-            m_visible = true;
             m_faces.reset();
 
             m_selfBounds.makeEmpty();
@@ -121,7 +104,6 @@ public:
         }
 
     protected:
-        bool                    m_visible;
         Abc::Int32ArraySample   m_faces;
 
         // bounds
@@ -223,13 +205,17 @@ public:
     //! Get number of samples written so far.
     //! ...
     size_t getNumSamples()
-    { return m_visibilityProperty.getNumSamples(); }
+    { return m_facesProperty.getNumSamples(); }
 
     //! Set a sample! First sample must have the list of faces in the faceset.
     void set( const Sample &iSamp );
 
     void setTimeSampling( uint32_t iTimeSamplingID );
     void setTimeSampling( AbcA::TimeSamplingPtr iTime );
+
+    //! A container for arbitrary geom params (pseudo-properties settable and
+    //! gettable as indexed or not).
+    Abc::OCompoundProperty getArbGeomParams();
 
     void setFaceExclusivity( FaceSetExclusivity iFacesExclusive );
     FaceSetExclusivity getFaceExclusivity() { return m_facesExclusive; }
@@ -245,8 +231,8 @@ public:
     {
         m_selfBoundsProperty.reset();
         m_childBoundsProperty.reset();
-        m_visibilityProperty.reset();
         m_facesProperty.reset();
+        m_arbGeomParams.reset();
 
         Abc::OSchema<FaceSetSchemaInfo>::reset();
     }
@@ -255,7 +241,6 @@ public:
     bool valid() const
     {
         return ( Abc::OSchema<FaceSetSchemaInfo>::valid() &&
-                 m_visibilityProperty.valid() &&
                  m_facesProperty.valid()
                  );
     }
@@ -269,7 +254,6 @@ protected:
 
     void init( uint32_t iTimeSamplingID );
 
-    Abc::OBoolProperty          m_visibilityProperty;
     Abc::OInt32ArrayProperty    m_facesProperty;
 
     Abc::OBox3dProperty         m_selfBoundsProperty;
@@ -278,6 +262,7 @@ protected:
     Abc::OUInt32Property        m_facesExclusiveProperty;
     FaceSetExclusivity          m_facesExclusive;
 
+    Abc::OCompoundProperty      m_arbGeomParams;
 
     friend class OSubDSchema;
     friend class OPolyMeshSchema;

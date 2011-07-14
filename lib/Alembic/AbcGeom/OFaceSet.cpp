@@ -54,10 +54,6 @@ void OFaceSetSchema::init( uint32_t iTimeSamplingID )
 
     m_facesProperty = Abc::OInt32ArrayProperty( _this, ".faces", 
         iTimeSamplingID );
-    // NYI - replace this with library utility funtions that generically
-    // store visibility.
-    m_visibilityProperty = Abc::OBoolProperty( _this, ".visibility", 
-        iTimeSamplingID );
 
     m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", 
         iTimeSamplingID );
@@ -74,7 +70,6 @@ void OFaceSetSchema::setTimeSampling( uint32_t iTimeSamplingID )
         "OFaceSetSchema::setTimeSampling( uint32_t iTimeSamplingID )" );
 
     m_facesProperty.setTimeSampling( iTimeSamplingID );
-    m_visibilityProperty.setTimeSampling( iTimeSamplingID );
     m_selfBoundsProperty.setTimeSampling( iTimeSamplingID );
     if (m_childBoundsProperty)
     {
@@ -173,6 +168,25 @@ Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
 }
 
 //-*****************************************************************************
+Abc::OCompoundProperty OFaceSetSchema::getArbGeomParams()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OFaceSetSchema::getArbGeomParams()" );
+
+    if ( ! m_arbGeomParams )
+    {
+        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
+    }
+
+    return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
+}
+
+
+//-*****************************************************************************
 void OFaceSetSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OFaceSetSchema::set()" );
@@ -202,7 +216,6 @@ void OFaceSetSchema::set( const Sample &iSamp )
         ABCA_ASSERT( iSamp.getFaces() ,
                      "Sample 0 must provide the faces that make up the faceset." );
         m_facesProperty.set( iSamp.getFaces() );
-        m_visibilityProperty.set( iSamp.isVisible() );
 
         if (m_childBoundsProperty)
         { 

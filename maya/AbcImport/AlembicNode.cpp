@@ -55,6 +55,7 @@
 #include <maya/MFnUnitAttribute.h>
 
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
+#include <Alembic/AbcGeom/Visibility.h>
 
 #include "util.h"
 #include "AlembicNode.h"
@@ -379,7 +380,8 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 // meant for special properties (like visible)
                 else
                 {
-                    if (mData.mPropList[i].mScalar.getName() == "visible")
+                    if (mData.mPropList[i].mScalar.getName() ==
+                        Alembic::AbcGeom::kVisibilityPropertyName)
                     {
                         Alembic::Util::int8_t visVal = 1;
                         mData.mPropList[i].mScalar.get(&visVal,

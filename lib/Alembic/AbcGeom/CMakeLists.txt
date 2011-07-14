@@ -64,6 +64,8 @@ SET( CXX_FILES
   OSubD.cpp
   ISubD.cpp
 
+  Visibility.cpp
+
   XformOp.cpp
   XformSample.cpp
   IXform.cpp
@@ -108,6 +110,8 @@ SET( H_FILES
 
   OSubD.h
   ISubD.h
+
+  Visibility.h
 
   XformOp.h
   XformSample.h

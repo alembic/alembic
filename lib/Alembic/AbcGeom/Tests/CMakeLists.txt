@@ -54,6 +54,12 @@ TARGET_LINK_LIBRARIES( AbcGeom_PolyMeshTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_PolyMeshTEST AbcGeom_PolyMeshTest )
 
 #-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_HelperLibTest
+		HelperLibTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_HelperLibTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_HelperLibTEST AbcGeom_HelperLibTest )
+
+#-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_PointsTest
 		PointsTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_PointsTest ${TEST_LIBS} )
