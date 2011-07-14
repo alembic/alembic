@@ -78,7 +78,7 @@ if not os.path.exists(sys.argv[3]):
   raise RuntimeError (sys.argv[3] + ' does not exist')
 else:
   os.environ['AbcStitcher'] = sys.argv[3]
-raw_input('Attach?')
+
 suite = unittest.TestSuite()
 
 main_dir = os.path.dirname(os.path.abspath(__file__))
