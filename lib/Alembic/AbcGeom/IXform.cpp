@@ -126,7 +126,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
         }
 
         std::set < Alembic::Util::uint32_t >::iterator it, itEnd;
-        std::vector< XformOp >::iterator op =  m_sample.m_ops.begin();
+        std::vector< XformOp >::iterator op = m_sample.m_ops.begin();
         std::vector< XformOp >::iterator opEnd = m_sample.m_ops.end();
         std::size_t curChan = 0;
         std::size_t chanPos = 0;

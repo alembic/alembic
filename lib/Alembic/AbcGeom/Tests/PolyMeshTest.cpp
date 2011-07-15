@@ -144,6 +144,7 @@ void Example1_MeshOut()
     mesh.set( mesh_samp );
     mesh.set( mesh_samp );
 
+
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish
     // them off!
@@ -183,6 +184,8 @@ void Example1_MeshIn()
 
     TESTING_ASSERT( N.isConstant() );
     TESTING_ASSERT( uv.isConstant() );
+
+    TESTING_ASSERT( IsGeomParam( N.getMetaData() ) );
 
     N3f n0 = (*nsp)[0];
 

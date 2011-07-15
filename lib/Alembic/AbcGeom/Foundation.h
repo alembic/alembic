@@ -157,6 +157,17 @@ inline double RadiansToDegrees( double iRadians )
     return iRadians * ( 180.0 / M_PI );
 }
 
+//-*****************************************************************************
+//! A couple simple tests for if something is a GeomParam
+static bool IsGeomParam( const AbcA::MetaData &iMetaData )
+{
+    return iMetaData.get( "isGeomParam" ) == "true";
+}
+
+static bool IsGeomParam( const AbcA::PropertyHeader &iHeader )
+{
+    return IsGeomParam( iHeader.getMetaData() );
+}
 
 } // End namespace AbcGeom
 } // End namespace Alembic
