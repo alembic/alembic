@@ -39,48 +39,40 @@
 //-*****************************************************************************
 
 #include <Alembic/Util/TokenMap.h>
-#include <boost/tokenizer.hpp>
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-#define NULLDEF "__NULL__"
-typedef boost::char_separator<char> Sep;
-typedef boost::tokenizer<Sep> Tok;
-
-//-*****************************************************************************
 void TokenMap::set( const std::string &config,
                     char pairSep,
                     char assignSep )
 {
-    char buf[2] = { 0, 0 };
-    buf[0] = pairSep;
-    const Sep PairSep( ( const char * )buf );
-    buf[0] = assignSep;
-    const Sep AssignSep( ( const char * )buf );
-
-    Tok pairTok( config, PairSep );
-    for ( Tok::iterator pairIter = pairTok.begin();
-          pairIter != pairTok.end(); ++pairIter )
+    std::size_t lastPair = 0;
+    while(1)
     {
-        Tok kvTok( (*pairIter), AssignSep );
-        std::vector<std::string> strings;
-        for ( Tok::iterator kvIter = kvTok.begin();
-              kvIter != kvTok.end(); ++kvIter )
+        std::size_t curPair = config.find(pairSep, lastPair);
+        std::size_t curAssign = config.find(assignSep, lastPair);
+
+        if (curAssign != std::string::npos)
         {
-            strings.push_back( (*kvIter) );
+            std::size_t endPos = std::string::npos;
+            if (curPair != endPos)
+            {
+                endPos = curPair - curAssign - 1;
+            }
+
+            m_map[config.substr(lastPair, curAssign - lastPair)] =
+                config.substr(curAssign + 1, endPos);
         }
 
-        if ( strings.size() != 2 )
+        if (curPair == std::string::npos)
         {
-            ALEMBIC_THROW( "Invalid token pair: " << (*pairIter) );
+            return;
         }
-        else
-        {
-            m_map[strings[0]] = strings[1];
-        }
+
+        lastPair = curPair + 1;
     }
 }
 
@@ -90,43 +82,42 @@ void TokenMap::setUnique( const std::string &config,
                           char assignSep,
                           bool quiet )
 {
-    char buf[2] = { 0, 0 };
-    buf[0] = pairSep;
-    const Sep PairSep( ( const char * )buf );
-    buf[0] = assignSep;
-    const Sep AssignSep( ( const char * )buf );
-
-    Tok pairTok( config, PairSep );
-    for ( Tok::iterator pairIter = pairTok.begin();
-          pairIter != pairTok.end(); ++pairIter )
+    std::size_t lastPair = 0;
+    while(1)
     {
-        Tok kvTok( (*pairIter), AssignSep );
-        std::vector<std::string> strings;
-        for ( Tok::iterator kvIter = kvTok.begin();
-              kvIter != kvTok.end(); ++kvIter )
-        {
-            strings.push_back( (*kvIter) );
-        }
+        std::size_t curPair = config.find(pairSep, lastPair);
+        std::size_t curAssign = config.find(assignSep, lastPair);
 
-        if ( strings.size() != 2 )
+        if (curAssign != std::string::npos)
         {
-            ALEMBIC_THROW( "Invalid token pair: " << (*pairIter) );
-        }
-        else
-        {
-            if ( m_map.count( strings[0] ) > 0 )
+            std::size_t endPos = std::string::npos;
+            if (curPair != endPos)
+            {
+                endPos = curPair - curAssign - 1;
+            }
+
+            std::string keyStr = config.substr(lastPair, curAssign - lastPair);
+
+            if ( m_map.count( keyStr ) > 0 )
             {
                 if ( !quiet )
                 {
                     ALEMBIC_THROW( "TokenMap::setUnique: token: "
-                                   << strings[0] << " is not unique." );
+                                   << keyStr << " is not unique." );
                 }
             }
             else
             {
-                m_map[strings[0]] = strings[1];
+                m_map[keyStr] = config.substr(curAssign + 1, endPos);
             }
         }
+
+        if (curPair == std::string::npos)
+        {
+            return;
+        }
+
+        lastPair = curPair + 1;
     }
 }
 
