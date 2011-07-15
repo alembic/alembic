@@ -209,7 +209,7 @@ ITypedArrayProperty<TRAITS>::ITypedArrayProperty(
                     GetErrorHandlerPolicy( iProperty, iArg0, iArg1 ) )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ITypedArrayOTypedArrayProperty::OTypedArrayProperty()" );
+        "ITypedArrayProperty::ITypedArrayProperty()" );
 
     const AbcA::PropertyHeader &pheader = iProperty->getHeader();
 
