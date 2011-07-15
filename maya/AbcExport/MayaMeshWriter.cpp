@@ -293,12 +293,46 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
     }
 
     // no normals bail early
-    if ( mNoNormals )
+    if (mNoNormals)
+    {
         return;
+    }
 
     MPlug plug = lMesh.findPlug("noNormals", true, &status);
-    if ( status == MS::kSuccess && plug.asBool() == true )
+    if (status == MS::kSuccess && plug.asBool() == true)
+    {
         return;
+    }
+    // we need to check the locked state of the normals
+    else if ( status != MS::kSuccess )
+    {
+        bool userSetNormals = false;
+
+        // go through all per face-vertex normals and verify if any of them
+        // has been tweaked by users
+        unsigned int numFaces = lMesh.numPolygons();
+        for (size_t faceIndex = 0; faceIndex < numFaces; faceIndex++)
+        {
+            MIntArray normals;
+            lMesh.getFaceNormalIds(faceIndex, normals);
+            unsigned int numNormals = normals.length();
+            for (int n = 0; n < numNormals; n++)
+            {
+                if (lMesh.isNormalLocked(normals[n]))
+                {
+                    userSetNormals = true;
+                    break;
+                }
+            }
+        }
+
+        // we looped over all the normals and they were all calculated by Maya
+        // so we won't write any of them out
+        if (!userSetNormals)
+        {
+            return;
+        }
+    }
 
     bool flipNormals = false;
     plug = lMesh.findPlug("flipNormals", true, &status);
