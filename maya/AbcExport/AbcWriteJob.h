@@ -207,9 +207,12 @@ class AbcWriteJob
     std::set<double> mShapeFrames;
     Alembic::AbcCoreAbstract::TimeSamplingPtr mShapeTime;
     Alembic::Util::uint32_t mShapeTimeIndex;
+    Alembic::Util::uint32_t mShapeSamples;
+
     std::set<double> mTransFrames;
     Alembic::AbcCoreAbstract::TimeSamplingPtr mTransTime;
     Alembic::Util::uint32_t mTransTimeIndex;
+    Alembic::Util::uint32_t mTransSamples;
 
     // when eval is called and the time is the first frame
     // then we run the setup

@@ -230,6 +230,8 @@ AbcWriteJob::AbcWriteJob(const char * iFileName,
     mFileName = iFileName;
     mBoxIndex = 0;
     mArgs = iArgs;
+    mShapeSamples = 1;
+    mTransSamples = 1;
 
     if (mArgs.useSelectionList)
     {
@@ -817,6 +819,7 @@ bool AbcWriteJob::eval(double iFrame)
         {
             assert(mRoot != NULL);
             foundShapeFrame = true;
+            mShapeSamples ++;
             std::vector< MayaNodePtr >::iterator it = mShapeList.begin();
             std::vector< MayaNodePtr >::iterator end = mShapeList.end();
             CallWriteVisitor visit(iFrame * util::spf());
@@ -850,6 +853,7 @@ bool AbcWriteJob::eval(double iFrame)
         {
             assert(mRoot.valid());
             foundTransFrame = true;
+            mTransSamples ++;
             std::vector< MayaTransformWriterPtr >::iterator tcur =
                 mTransList.begin();
 
@@ -972,6 +976,26 @@ void AbcWriteJob::postCallback(double iFrame)
         Alembic::Abc::OStringProperty stats(mRoot.getTop().getProperties(),
             "statistics");
         stats.set(statsStr);
+    }
+
+    if (mTransTimeIndex != 0)
+    {
+        MString propName;
+        propName += mTransTimeIndex;
+        propName += ".samples";
+        Alembic::Abc::OUInt32Property samp(mRoot.getTop().getProperties(),
+            propName.asChar());
+        samp.set(mTransSamples);
+    }
+
+    if (mShapeTimeIndex != 0 && mShapeTimeIndex != mTransTimeIndex)
+    {
+        MString propName;
+        propName += mShapeTimeIndex;
+        propName += ".samples";
+        Alembic::Abc::OUInt32Property samp(mRoot.getTop().getProperties(),
+            propName.asChar());
+        samp.set(mShapeSamples);
     }
 
     MBoundingBox bbox;
