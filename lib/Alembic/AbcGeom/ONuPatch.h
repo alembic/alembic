@@ -358,7 +358,7 @@ public:
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling()
-    { return m_positions.getTimeSampling(); }
+    { return m_positionsProperty.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -367,7 +367,7 @@ public:
     //! Get number of samples written so far.
     //! ...
     size_t getNumSamples()
-    { return m_positions.getNumSamples(); }
+    { return m_positionsProperty.getNumSamples(); }
 
     //! Set a sample!
     void set( const sample_type &iSamp );
@@ -388,30 +388,31 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_numU.reset();
-        m_numV.reset();
-        m_uOrder.reset();
-        m_vOrder.reset();
-        m_uKnot.reset();
-        m_vKnot.reset();
+        m_positionsProperty.reset();
+        m_positionWeightsProperty.reset();
+        m_numUProperty.reset();
+        m_numVProperty.reset();
+        m_uOrderProperty.reset();
+        m_vOrderProperty.reset();
+        m_uKnotProperty.reset();
+        m_vKnotProperty.reset();
 
-        m_normals.reset();
-        m_uvs.reset();
+        m_normalsParam.reset();
+        m_uvsParam.reset();
 
-        m_selfBounds.reset();
-        m_childBounds.reset();
+        m_selfBoundsProperty.reset();
+        m_childBoundsProperty.reset();
 
         // reset trim curve attributes
-        m_trimNumLoops.reset();
-        m_trimNumVertices.reset();
-        m_trimOrder.reset();
-        m_trimKnot.reset();
-        m_trimMin.reset();
-        m_trimMax.reset();
-        m_trimU.reset();
-        m_trimV.reset();
-        m_trimW.reset();
+        m_trimNumLoopsProperty.reset();
+        m_trimNumVerticesProperty.reset();
+        m_trimOrderProperty.reset();
+        m_trimKnotProperty.reset();
+        m_trimMinProperty.reset();
+        m_trimMaxProperty.reset();
+        m_trimUProperty.reset();
+        m_trimVProperty.reset();
+        m_trimWProperty.reset();
 
         Abc::OSchema<NuPatchSchemaInfo>::reset();
     }
@@ -421,7 +422,7 @@ public:
     bool valid() const
     {
         return ( Abc::OSchema<NuPatchSchemaInfo>::valid() &&
-                 m_positions.valid() );
+                 m_positionsProperty.valid() );
     }
 
     //! unspecified-bool-type operator overload.
@@ -434,37 +435,37 @@ protected:
     AbcA::index_t m_timeSamplingIndex;
 
     // point data
-    Abc::OV3fArrayProperty m_positions;
+    Abc::OV3fArrayProperty m_positionsProperty;
 
     // required properties
-    Abc::OInt32Property m_numU;
-    Abc::OInt32Property m_numV;
-    Abc::OInt32Property m_uOrder;
-    Abc::OInt32Property m_vOrder;
-    Abc::OFloatArrayProperty m_uKnot;
-    Abc::OFloatArrayProperty m_vKnot;
+    Abc::OInt32Property m_numUProperty;
+    Abc::OInt32Property m_numVProperty;
+    Abc::OInt32Property m_uOrderProperty;
+    Abc::OInt32Property m_vOrderProperty;
+    Abc::OFloatArrayProperty m_uKnotProperty;
+    Abc::OFloatArrayProperty m_vKnotProperty;
 
     // optional properties
-    Abc::OFloatArrayProperty m_positionWeights;
-    ON3fGeomParam m_normals;
-    OV2fGeomParam m_uvs;
+    Abc::OFloatArrayProperty m_positionWeightsProperty;
+    ON3fGeomParam m_normalsParam;
+    OV2fGeomParam m_uvsParam;
 
     // optional trim curves
-    Abc::OInt32Property m_trimNumLoops;
-    Abc::OInt32ArrayProperty m_trimNumCurves;
-    Abc::OInt32ArrayProperty m_trimNumVertices;
-    Abc::OInt32ArrayProperty m_trimOrder;
-    Abc::OFloatArrayProperty m_trimKnot;
-    Abc::OFloatArrayProperty m_trimMin;
-    Abc::OFloatArrayProperty m_trimMax;
-    Abc::OFloatArrayProperty m_trimU;
-    Abc::OFloatArrayProperty m_trimV;
-    Abc::OFloatArrayProperty m_trimW;
+    Abc::OInt32Property m_trimNumLoopsProperty;
+    Abc::OInt32ArrayProperty m_trimNumCurvesProperty;
+    Abc::OInt32ArrayProperty m_trimNumVerticesProperty;
+    Abc::OInt32ArrayProperty m_trimOrderProperty;
+    Abc::OFloatArrayProperty m_trimKnotProperty;
+    Abc::OFloatArrayProperty m_trimMinProperty;
+    Abc::OFloatArrayProperty m_trimMaxProperty;
+    Abc::OFloatArrayProperty m_trimUProperty;
+    Abc::OFloatArrayProperty m_trimVProperty;
+    Abc::OFloatArrayProperty m_trimWProperty;
 
 
     // bounds
-    Abc::OBox3dProperty m_selfBounds;
-    Abc::OBox3dProperty m_childBounds;
+    Abc::OBox3dProperty m_selfBoundsProperty;
+    Abc::OBox3dProperty m_childBoundsProperty;
 
     Abc::OCompoundProperty m_arbGeomParams;
 };

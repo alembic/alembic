@@ -525,9 +525,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
     Alembic::Abc::ICompoundProperty arbProp =
         iNode.getSchema().getArbGeomParams();
     Alembic::AbcGeom::IFloatGeomParam::Sample widthSamp;
-    if (iNode.getSchema().getWidths())
+    if (iNode.getSchema().getWidthsParam())
     {
-        iNode.getSchema().getWidths().getExpanded(widthSamp);
+        iNode.getSchema().getWidthsParam().getExpanded(widthSamp);
     }
     std::size_t numCurves = samp.getNumCurves();
 

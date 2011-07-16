@@ -516,9 +516,9 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         {
             ICurvesSchema iSchema =
                 ICurves(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
-            IV2fGeomParam iUVs = iSchema.getUVs();
-            IN3fGeomParam iNormals = iSchema.getNormals();
-            IFloatGeomParam iWidths = iSchema.getWidths();
+            IV2fGeomParam iUVs = iSchema.getUVsParam();
+            IN3fGeomParam iNormals = iSchema.getNormalsParam();
+            IFloatGeomParam iWidths = iSchema.getWidthsParam();
             size_t numSamples = iSchema.getNumSamples();
             if (numSamples > 1)
                 isStatic = false;

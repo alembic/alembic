@@ -378,26 +378,26 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     if (ttype != Alembic::AbcGeom::kHeterogenousTopology && iInitialized)
     {
 
-        Alembic::Abc::V3fArraySamplePtr points = schema.getPositions().getValue(
-            Alembic::Abc::ISampleSelector(index) );
+        Alembic::Abc::V3fArraySamplePtr points = schema.getPositionsProperty(
+            ).getValue(Alembic::Abc::ISampleSelector(index));
 
         if (alpha != 0.0)
         {
-            ceilPoints = schema.getPositions().getValue(
+            ceilPoints = schema.getPositionsProperty().getValue(
                 Alembic::Abc::ISampleSelector(ceilIndex) );
         }
 
         fillPoints(pointArray, points, ceilPoints, alpha);
         ioMesh.setPoints(pointArray, MSpace::kObject);
 
-        if (schema.getNormals().getNumSamples() > 1)
+        if (schema.getNormalsParam().getNumSamples() > 1)
         {
-            setPolyNormals(iFrame, ioMesh, schema.getNormals());
+            setPolyNormals(iFrame, ioMesh, schema.getNormalsParam());
         }
 
-        if (schema.getUVs().getNumSamples() > 1)
+        if (schema.getUVsParam().getNumSamples() > 1)
         {
-            setUVs(iFrame, ioMesh, schema.getUVs());
+            setUVs(iFrame, ioMesh, schema.getUVsParam());
         }
 
         return;
@@ -409,7 +409,7 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
     if (alpha != 0.0 && ttype != Alembic::AbcGeom::kHeterogenousTopology)
     {
-        ceilPoints = schema.getPositions().getValue(
+        ceilPoints = schema.getPositionsProperty().getValue(
             Alembic::Abc::ISampleSelector(ceilIndex) );
     }
 
@@ -418,8 +418,8 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     fillTopology(ioMesh, iParent, pointArray, samp.getFaceIndices(),
         samp.getFaceCounts());
 
-    setPolyNormals(iFrame, ioMesh, schema.getNormals());
-    setUVs(iFrame, ioMesh, schema.getUVs());
+    setPolyNormals(iFrame, ioMesh, schema.getNormalsParam());
+    setUVs(iFrame, ioMesh, schema.getUVsParam());
 }
 
 void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
@@ -439,21 +439,21 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     if (ttype != Alembic::AbcGeom::kHeterogenousTopology && iInitialized)
     {
 
-        Alembic::Abc::V3fArraySamplePtr points = schema.getPositions().getValue(
-            Alembic::Abc::ISampleSelector(index) );
+        Alembic::Abc::V3fArraySamplePtr points = schema.getPositionsProperty(
+            ).getValue(Alembic::Abc::ISampleSelector(index));
 
         if (alpha != 0.0)
         {
-            ceilPoints = schema.getPositions().getValue(
+            ceilPoints = schema.getPositionsProperty().getValue(
                 Alembic::Abc::ISampleSelector(ceilIndex) );
         }
 
         fillPoints(pointArray, points, ceilPoints, alpha);
         ioMesh.setPoints(pointArray, MSpace::kObject);
 
-        if (schema.getUVs().getNumSamples() > 1)
+        if (schema.getUVsParam().getNumSamples() > 1)
         {
-            setUVs(iFrame, ioMesh, schema.getUVs());
+            setUVs(iFrame, ioMesh, schema.getUVsParam());
         }
 
         return;
@@ -465,7 +465,7 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
     if (alpha != 0.0 && ttype != Alembic::AbcGeom::kHeterogenousTopology)
     {
-        ceilPoints = schema.getPositions().getValue(
+        ceilPoints = schema.getPositionsProperty().getValue(
             Alembic::Abc::ISampleSelector(ceilIndex) );
     }
 
@@ -474,7 +474,7 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     fillTopology(ioMesh, iParent, pointArray, samp.getFaceIndices(),
         samp.getFaceCounts());
 
-    setUVs(iFrame, ioMesh, schema.getUVs());
+    setUVs(iFrame, ioMesh, schema.getUVsParam());
 }
 
 void disconnectMesh(MObject & iMeshObject,
@@ -538,15 +538,15 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
         fillTopology(fnMesh, iParent, ptArray, samp.getFaceIndices(),
             samp.getFaceCounts());
         fnMesh.setName(iNode.getName().c_str());
-        setPolyNormals(iFrame, fnMesh, schema.getNormals());
-        setUVs(iFrame, fnMesh, schema.getUVs());
+        setPolyNormals(iFrame, fnMesh, schema.getNormalsParam());
+        setUVs(iFrame, fnMesh, schema.getUVsParam());
         obj = fnMesh.object();
     }
 
     MString pathName = fnMesh.partialPathName();
     setInitialShadingGroup(pathName);
 
-    if ( !schema.getNormals().valid() )
+    if ( !schema.getNormalsParam().valid() )
     {
         MFnNumericAttribute attr;
         MString attrName("noNormals");
@@ -589,7 +589,7 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
 
     MObject obj = fnMesh.object();
 
-    setUVs(iFrame, fnMesh, schema.getUVs());
+    setUVs(iFrame, fnMesh, schema.getUVsParam());
 
     // add the mFn-specific attributes to fnMesh node
     MFnNumericAttribute numAttr;

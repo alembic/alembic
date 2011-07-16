@@ -159,8 +159,8 @@ void Example1_MeshIn()
 
     IPolyMesh meshyObj( IObject( archive, kTop ), "meshy" );
     IPolyMeshSchema &mesh = meshyObj.getSchema();
-    IN3fGeomParam N = mesh.getNormals();
-    IV2fGeomParam uv = mesh.getUVs();
+    IN3fGeomParam N = mesh.getNormalsParam();
+    IV2fGeomParam uv = mesh.getUVsParam();
 
     TESTING_ASSERT( ! N.isIndexed() );
 

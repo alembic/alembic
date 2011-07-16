@@ -298,7 +298,7 @@ public:
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling()
-    { return m_positions.getTimeSampling(); }
+    { return m_positionsProperty.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -307,7 +307,7 @@ public:
     //! Get number of samples written so far.
     //! ...
     size_t getNumSamples()
-    { return m_positions.getNumSamples(); }
+    { return m_positionsProperty.getNumSamples(); }
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
@@ -329,17 +329,17 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_uvs.reset();
-        m_normals.reset();
-        m_widths.reset();
+        m_positionsProperty.reset();
+        m_uvsParam.reset();
+        m_normalsParam.reset();
+        m_widthsParam.reset();
         m_arbGeomParams.reset();
-        m_nVertices.reset();
+        m_nVerticesProperty.reset();
 
-        m_basisAndType.reset();
+        m_basisAndTypeProperty.reset();
 
-        m_selfBounds.reset();
-        m_childBounds.reset();
+        m_selfBoundsProperty.reset();
+        m_childBoundsProperty.reset();
 
         Abc::OSchema<CurvesSchemaInfo>::reset();
     }
@@ -349,7 +349,7 @@ public:
     bool valid() const
     {
         return ( Abc::OSchema<CurvesSchemaInfo>::valid() &&
-                 m_positions.valid() );
+                 m_positionsProperty.valid() );
     }
 
     //! unspecified-bool-type operator overload.
@@ -360,21 +360,21 @@ protected:
     void init( const AbcA::index_t iTsIdx );
 
     // point data
-    Abc::OV3fArrayProperty m_positions;
-    Abc::OInt32ArrayProperty m_nVertices;
+    Abc::OV3fArrayProperty m_positionsProperty;
+    Abc::OInt32ArrayProperty m_nVerticesProperty;
 
     // per-point data
-    OV2fGeomParam m_uvs;
-    ON3fGeomParam m_normals;
-    OFloatGeomParam m_widths;
+    OV2fGeomParam m_uvsParam;
+    ON3fGeomParam m_normalsParam;
+    OFloatGeomParam m_widthsParam;
 
     Abc::OCompoundProperty m_arbGeomParams;
 
     // bounding box attributes
-    Abc::OBox3dProperty m_selfBounds;
-    Abc::OBox3dProperty m_childBounds;
+    Abc::OBox3dProperty m_selfBoundsProperty;
+    Abc::OBox3dProperty m_childBoundsProperty;
 
-    Abc::OScalarProperty m_basisAndType;
+    Abc::OScalarProperty m_basisAndTypeProperty;
 };
 
 //-*****************************************************************************

@@ -46,9 +46,9 @@ void OCameraSchema::set( const CameraSample &iSamp )
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCameraSchema::set()" );
 
     // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty)
     {
-        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds" );
+        m_childBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".childBnds" );
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
@@ -58,7 +58,7 @@ void OCameraSchema::set( const CameraSample &iSamp )
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
-            m_childBounds.set( emptyBox );
+            m_childBoundsProperty.set( emptyBox );
         }
     }
 
@@ -109,22 +109,22 @@ void OCameraSchema::set( const CameraSample &iSamp )
         if ( numChannels > 0 && numChannels < 256 )
         {
             AbcA::DataType dType( Util::kFloat64POD, numChannels );
-            m_smallFilmBackChannels = Abc::OScalarProperty( this->getPtr(),
+            m_smallFilmBackChannelsProperty = Abc::OScalarProperty( this->getPtr(),
                 ".filmBackChannels", dType );
-            m_smallFilmBackChannels.set( &opChannels.front() );
+            m_smallFilmBackChannelsProperty.set( &opChannels.front() );
 
         }
         else if ( numChannels >= 256 )
         {
-            m_bigFilmBackChannels = Abc::ODoubleArrayProperty( this->getPtr(),
+            m_bigFilmBackChannelsProperty = Abc::ODoubleArrayProperty( this->getPtr(),
                 ".filmBackChannels" );
             DoubleArraySample dsamp( &opChannels.front(), opChannels.size() );
-            m_bigFilmBackChannels.set( dsamp );
+            m_bigFilmBackChannelsProperty.set( dsamp );
         }
 
-        if ( m_childBounds )
+        if ( m_childBoundsProperty )
         {
-            m_childBounds.set( iSamp.getChildBounds() );
+            m_childBoundsProperty.set( iSamp.getChildBounds() );
         }
     }
     else
@@ -152,20 +152,20 @@ void OCameraSchema::set( const CameraSample &iSamp )
             }
         }
 
-        if ( m_smallFilmBackChannels )
+        if ( m_smallFilmBackChannelsProperty )
         {
-            m_smallFilmBackChannels.set( &opChannels.front() );
+            m_smallFilmBackChannelsProperty.set( &opChannels.front() );
         }
-        else if ( m_bigFilmBackChannels )
+        else if ( m_bigFilmBackChannelsProperty )
         {
             DoubleArraySample dsamp( &opChannels.front(), opChannels.size() );
-            m_bigFilmBackChannels.set( dsamp );
+            m_bigFilmBackChannelsProperty.set( dsamp );
         }
         // else no film back channels
 
-        if ( m_childBounds )
+        if ( m_childBoundsProperty )
         {
-            SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() );
+            SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() );
         }
     }
 
@@ -181,14 +181,14 @@ void OCameraSchema::setFromPrevious()
 
     m_coreProperties.setFromPrevious();
 
-    if ( m_childBounds )
-        m_childBounds.setFromPrevious();
+    if ( m_childBoundsProperty )
+        m_childBoundsProperty.setFromPrevious();
 
-    if ( m_smallFilmBackChannels )
-        m_smallFilmBackChannels.setFromPrevious();
+    if ( m_smallFilmBackChannelsProperty )
+        m_smallFilmBackChannelsProperty.setFromPrevious();
 
-    if ( m_bigFilmBackChannels )
-        m_bigFilmBackChannels.setFromPrevious();
+    if ( m_bigFilmBackChannelsProperty )
+        m_bigFilmBackChannelsProperty.setFromPrevious();
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

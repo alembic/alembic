@@ -133,7 +133,7 @@ public:
     XformSample getValue( const Abc::ISampleSelector &iSS =
                           Abc::ISampleSelector() );
 
-    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
+    Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
 
     // lightweight get to avoid constructing a sample
     // see XformSample.h for explanation of this property
@@ -146,9 +146,9 @@ public:
     //! state.
     void reset()
     {
-        m_childBounds.reset();
+        m_childBoundsProperty.reset();
         m_sample = XformSample();
-        m_inherits.reset();
+        m_inheritsProperty.reset();
         m_isConstant = true;
         m_isConstantIdentity = true;
 
@@ -169,11 +169,11 @@ public:
 
 
 protected:
-    Abc::IBox3dProperty m_childBounds;
+    Abc::IBox3dProperty m_childBoundsProperty;
 
-    AbcA::BasePropertyReaderPtr m_vals;
+    AbcA::BasePropertyReaderPtr m_valsProperty;
 
-    Abc::IBoolProperty m_inherits;
+    Abc::IBoolProperty m_inheritsProperty;
 
     Abc::ICompoundProperty m_arbGeomParams;
 

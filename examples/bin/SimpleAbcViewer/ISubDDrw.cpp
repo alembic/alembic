@@ -54,7 +54,7 @@ ISubDDrw::ISubDDrw( ISubD &iPmesh )
         m_subD.getSchema().get( m_samp );
     }
 
-    m_boundsProp = m_subD.getSchema().getSelfBounds();
+    m_boundsProp = m_subD.getSchema().getSelfBoundsProperty();
 
     // The object has already set up the min time and max time of
     // all the children.

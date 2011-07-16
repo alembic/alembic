@@ -55,125 +55,125 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     basisAndType[3] = basisAndType[2];
 
     // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty)
     {
-        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds",
-                                             m_positions.getTimeSampling() );
+        m_childBoundsProperty = Abc::OBox3dProperty( *this, ".childBnds",
+                                             m_positionsProperty.getTimeSampling() );
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
-        size_t numSamples = m_positions.getNumSamples();
+        size_t numSamples = m_positionsProperty.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
-            m_childBounds.set( emptyBox );
+            m_childBoundsProperty.set( emptyBox );
         }
     }
 
     // do we need to create uvs?
-    if ( iSamp.getUVs().getVals() && !m_uvs )
+    if ( iSamp.getUVs().getVals() && !m_uvsParam )
     {
         if ( iSamp.getUVs().getIndices() )
         {
             // UVs are indexed
-            m_uvs = OV2fGeomParam( this->getPtr(), "uv", true,
+            m_uvsParam = OV2fGeomParam( this->getPtr(), "uv", true,
                                    iSamp.getUVs().getScope(), 1,
                                    this->getTimeSampling() );
         }
         else
         {
             // UVs are not indexed
-            m_uvs = OV2fGeomParam( this->getPtr(), "uv", false,
+            m_uvsParam = OV2fGeomParam( this->getPtr(), "uv", false,
                                    iSamp.getUVs().getScope(), 1,
                                    this->getTimeSampling() );
         }
 
         OV2fGeomParam::Sample empty;
 
-        size_t numSamples = m_positions.getNumSamples();
+        size_t numSamples = m_positionsProperty.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
-            m_uvs.set( empty );
+            m_uvsParam.set( empty );
         }
     }
 
     // do we need to create normals?
-    if ( iSamp.getNormals().getVals() && !m_normals )
+    if ( iSamp.getNormals().getVals() && !m_normalsParam )
     {
 
         if ( iSamp.getNormals().getIndices() )
         {
             // normals are indexed
-            m_normals = ON3fGeomParam( this->getPtr(), "N", true,
+            m_normalsParam = ON3fGeomParam( this->getPtr(), "N", true,
                                        iSamp.getNormals().getScope(),
                                        1, this->getTimeSampling() );
         }
         else
         {
             // normals are not indexed
-            m_normals = ON3fGeomParam( this->getPtr(), "N", false,
+            m_normalsParam = ON3fGeomParam( this->getPtr(), "N", false,
                                        iSamp.getNormals().getScope(), 1,
                                        this->getTimeSampling() );
         }
 
         ON3fGeomParam::Sample empty;
 
-        size_t numSamples = m_positions.getNumSamples();
+        size_t numSamples = m_positionsProperty.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
-            m_normals.set( empty );
+            m_normalsParam.set( empty );
         }
     }
 
     // do we need to create widths?
-    if ( iSamp.getWidths().getVals() && !m_widths )
+    if ( iSamp.getWidths().getVals() && !m_widthsParam )
     {
         if ( iSamp.getWidths().getIndices() )
         {
             // widths are indexed for some weird reason which is
             // technically ok, just wasteful
-            m_widths = OFloatGeomParam( this->getPtr(), "width", true,
-                                        iSamp.getWidths().getScope(),
-                                        1, this->getTimeSampling() );
+            m_widthsParam = OFloatGeomParam( this->getPtr(), "width", true,
+                                             iSamp.getWidths().getScope(),
+                                             1, this->getTimeSampling() );
         }
         else
         {
             // widths are not indexed
-            m_widths = OFloatGeomParam( this->getPtr(), "width", false,
-                                        iSamp.getWidths().getScope(), 1,
-                                        this->getTimeSampling() );
+            m_widthsParam = OFloatGeomParam( this->getPtr(), "width", false,
+                                             iSamp.getWidths().getScope(), 1,
+                                             this->getTimeSampling() );
         }
 
         OFloatGeomParam::Sample empty;
 
-        size_t numSamples = m_positions.getNumSamples();
+        size_t numSamples = m_positionsProperty.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
-            m_widths.set( empty );
+            m_widthsParam.set( empty );
         }
     }
 
     // We could add sample integrity checking here.
-    if ( m_positions.getNumSamples() == 0 )
+    if ( m_positionsProperty.getNumSamples() == 0 )
     {
         // First sample must be valid on all points.
         ABCA_ASSERT( iSamp.getPositions(),
                      "Sample 0 must have valid data for all mesh components" );
 
-        m_positions.set( iSamp.getPositions() );
-        m_nVertices.set( iSamp.getCurvesNumVertices() );
+        m_positionsProperty.set( iSamp.getPositions() );
+        m_nVerticesProperty.set( iSamp.getCurvesNumVertices() );
 
-        m_basisAndType.set( basisAndType );
+        m_basisAndTypeProperty.set( basisAndType );
 
         if ( iSamp.getChildBounds().hasVolume() )
-        { m_childBounds.set( iSamp.getChildBounds() ); }
+        { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -183,73 +183,73 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
                 ComputeBoundsFromPositions( iSamp.getPositions() )
                            );
 
-            m_selfBounds.set( bnds );
+            m_selfBoundsProperty.set( bnds );
 
         }
-        else { m_selfBounds.set( iSamp.getSelfBounds() ); }
+        else { m_selfBoundsProperty.set( iSamp.getSelfBounds() ); }
 
         // process uvs
         if ( iSamp.getUVs() )
         {
-            m_uvs.set( iSamp.getUVs() );
+            m_uvsParam.set( iSamp.getUVs() );
         }
 
         // process normals
         if ( iSamp.getNormals() )
         {
-            m_normals.set( iSamp.getNormals() );
+            m_normalsParam.set( iSamp.getNormals() );
         }
 
         // process widths
         if ( iSamp.getWidths() )
         {
-            m_widths.set( iSamp.getWidths() );
+            m_widthsParam.set( iSamp.getWidths() );
         }
 
     }
     else
     {
-        SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
-        SetPropUsePrevIfNull( m_nVertices, iSamp.getCurvesNumVertices() );
+        SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
+        SetPropUsePrevIfNull( m_nVerticesProperty, iSamp.getCurvesNumVertices() );
 
         // if number of vertices were specified, then the basis and type
         // was specified
-        if ( m_nVertices )
+        if ( m_nVerticesProperty )
         {
-            m_basisAndType.set( basisAndType );
+            m_basisAndTypeProperty.set( basisAndType );
         }
         else
         {
-            m_basisAndType.setFromPrevious();
+            m_basisAndTypeProperty.setFromPrevious();
         }
 
-        if ( m_childBounds )
-        { SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() ); }
+        if ( m_childBoundsProperty )
+        { SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() ); }
 
-        if ( m_uvs )
-        { m_uvs.set( iSamp.getUVs() ); }
+        if ( m_uvsParam )
+        { m_uvsParam.set( iSamp.getUVs() ); }
 
-        if ( m_normals )
-        { m_normals.set( iSamp.getNormals() ); }
+        if ( m_normalsParam )
+        { m_normalsParam.set( iSamp.getNormals() ); }
 
-        if ( m_widths )
-        { m_widths.set( iSamp.getWidths() ); }
+        if ( m_widthsParam )
+        { m_widthsParam.set( iSamp.getWidths() ); }
 
         // update bounds
         if ( iSamp.getSelfBounds().hasVolume() )
         {
-            m_selfBounds.set( iSamp.getSelfBounds() );
+            m_selfBoundsProperty.set( iSamp.getSelfBounds() );
         }
         else if ( iSamp.getPositions() )
         {
             Abc::Box3d bnds(
                 ComputeBoundsFromPositions( iSamp.getPositions() )
                            );
-            m_selfBounds.set( bnds );
+            m_selfBoundsProperty.set( bnds );
         }
         else
         {
-            m_selfBounds.setFromPrevious();
+            m_selfBoundsProperty.setFromPrevious();
         }
     }
 
@@ -261,18 +261,18 @@ void OCurvesSchema::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::setFromPrevious" );
 
-    m_positions.setFromPrevious();
-    m_nVertices.setFromPrevious();
+    m_positionsProperty.setFromPrevious();
+    m_nVerticesProperty.setFromPrevious();
 
-    m_basisAndType.setFromPrevious();
+    m_basisAndTypeProperty.setFromPrevious();
 
-    m_selfBounds.setFromPrevious();
+    m_selfBoundsProperty.setFromPrevious();
 
-    if ( m_childBounds ) { m_childBounds.setFromPrevious(); }
+    if ( m_childBoundsProperty ) { m_childBoundsProperty.setFromPrevious(); }
 
-    if ( m_uvs ) { m_uvs.setFromPrevious(); }
-    if ( m_normals ) { m_normals.setFromPrevious(); }
-    if ( m_widths ) { m_widths.setFromPrevious(); }
+    if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
+    if ( m_normalsParam ) { m_normalsParam.setFromPrevious(); }
+    if ( m_widthsParam ) { m_widthsParam.setFromPrevious(); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -287,12 +287,12 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
 
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
-    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
+    m_positionsProperty = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
+    m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 
-    m_nVertices = Abc::OInt32ArrayProperty( _this, "nVertices", iTsIdx);
+    m_nVerticesProperty = Abc::OInt32ArrayProperty( _this, "nVertices", iTsIdx);
 
-    m_basisAndType = Abc::OScalarProperty(
+    m_basisAndTypeProperty = Abc::OScalarProperty(
         _this, "curveBasisAndType",
         AbcA::DataType( Alembic::Util::kUint8POD, 4 ), iTsIdx );
 

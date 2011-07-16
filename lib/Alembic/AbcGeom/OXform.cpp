@@ -45,12 +45,12 @@ namespace AbcGeom {
 //-*****************************************************************************
 void OXformSchema::setChannelValues( const std::vector<double> &iVals )
 {
-    if ( ! m_vals ) { return; }
+    if ( ! m_valsPWPtr ) { return; }
 
     if ( m_useArrayProp )
     {
         Alembic::Util::Dimensions dims(m_numChannels);
-        m_vals->asArrayPtr()->setSample(
+        m_valsPWPtr->asArrayPtr()->setSample(
             AbcA::ArraySample( &(iVals.front()),
                                AbcA::DataType( Alembic::Util::kFloat64POD, 1 ),
                                dims )
@@ -58,7 +58,7 @@ void OXformSchema::setChannelValues( const std::vector<double> &iVals )
     }
     else
     {
-        m_vals->asScalarPtr()->setSample( &(iVals.front()) );
+        m_valsPWPtr->asScalarPtr()->setSample( &(iVals.front()) );
     }
 }
 
@@ -68,25 +68,25 @@ void OXformSchema::set( XformSample &ioSamp )
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
     // do we need to create child bounds?
-    if ( ioSamp.getChildBounds().hasVolume() && !m_childBounds )
+    if ( ioSamp.getChildBounds().hasVolume() && !m_childBoundsProperty )
     {
-        m_childBounds = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
-                                             m_inherits.getTimeSampling() );
+        m_childBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
+                                             m_inheritsProperty.getTimeSampling() );
 
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
-        size_t numSamples = m_inherits.getNumSamples();
+        size_t numSamples = m_inheritsProperty.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
-            m_childBounds.set( emptyBox );
+            m_childBoundsProperty.set( emptyBox );
         }
     }
 
 
-    if ( m_inherits.getNumSamples() == 0 )
+    if ( m_inheritsProperty.getNumSamples() == 0 )
     {
         // set this to true, so that additional calls to sample's addOp()
         // won't change the topology of the sample, but instead will merely
@@ -102,7 +102,7 @@ void OXformSchema::set( XformSample &ioSamp )
 
         if ( m_numOps > 0 )
         {
-            m_ops = this->getPtr()->createScalarProperty(
+            m_opsPWPtr = this->getPtr()->createScalarProperty(
                 ".ops", AbcA::MetaData(),
                 AbcA::DataType( Alembic::Util::kUint8POD, m_numOps ), 0
                                                         );
@@ -111,12 +111,12 @@ void OXformSchema::set( XformSample &ioSamp )
         if ( m_numChannels > 0 )
         {
             uint32_t tsIndex = getObject().getArchive().addTimeSampling(
-                                       *(m_inherits.getTimeSampling()) );
+                                       *(m_inheritsProperty.getTimeSampling()) );
             if ( m_numChannels <= MAX_SCALAR_CHANS )
             {
                 m_useArrayProp = false;
 
-                m_vals = this->getPtr()->createScalarProperty(
+                m_valsPWPtr = this->getPtr()->createScalarProperty(
                     ".vals", AbcA::MetaData(),
                     AbcA::DataType( Alembic::Util::kFloat64POD, m_numChannels ),
                     tsIndex
@@ -126,7 +126,7 @@ void OXformSchema::set( XformSample &ioSamp )
             {
                 m_useArrayProp = true;
 
-                m_vals = this->getPtr()->createArrayProperty(
+                m_valsPWPtr = this->getPtr()->createArrayProperty(
                     ".vals", AbcA::MetaData(),
                     // the DataType for an ArrayProperty describes not how big
                     // each Sample is, but how many values constitute a single
@@ -145,11 +145,11 @@ void OXformSchema::set( XformSample &ioSamp )
     }
 
     if ( ioSamp.m_childBounds.hasVolume() )
-    { m_childBounds.set( ioSamp.getChildBounds() ); }
+    { m_childBoundsProperty.set( ioSamp.getChildBounds() ); }
 
-    m_inherits.set( ioSamp.getInheritsXforms() );
+    m_inheritsProperty.set( ioSamp.getInheritsXforms() );
 
-    if ( ! m_ops ) { return; }
+    if ( ! m_opsPWPtr ) { return; }
 
     std::vector<double> chanvals;
     chanvals.reserve( ioSamp.getNumOpChannels() );
@@ -192,7 +192,7 @@ void OXformSchema::set( XformSample &ioSamp )
 
     this->setChannelValues( chanvals );
 
-    if ( m_ops && m_ops->getNumSamples() == 0 )
+    if ( m_opsPWPtr && m_opsPWPtr->getNumSamples() == 0 )
     {
         std::vector < Alembic::Util::uint8_t > opVec(
             m_protoSample.getNumOps() );
@@ -202,22 +202,22 @@ void OXformSchema::set( XformSample &ioSamp )
             opVec[i] = m_protoSample[i].getOpEncoding();
         }
 
-        m_ops->setSample( &(opVec.front()) );
+        m_opsPWPtr->setSample( &(opVec.front()) );
     }
-    else if ( m_ops )
+    else if ( m_opsPWPtr )
     {
-        m_ops->setFromPreviousSample();
+        m_opsPWPtr->setFromPreviousSample();
     }
 
-    if ( !m_isNotConstantIdentity && !m_isIdentity )
+    if ( !m_isNotConstantIdentityProperty && !m_isIdentity )
     {
-        m_isNotConstantIdentity = Abc::OBoolProperty( this->getPtr(),
+        m_isNotConstantIdentityProperty = Abc::OBoolProperty( this->getPtr(),
                                                       "isNotConstantIdentity" );
 
-        m_isNotConstantIdentity.set( true );
+        m_isNotConstantIdentityProperty.set( true );
     }
 
-    m_animChannels.set( animchans );
+    m_animChannelsProperty.set( animchans );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -227,22 +227,22 @@ void OXformSchema::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious" );
 
-    m_inherits.setFromPrevious();
+    m_inheritsProperty.setFromPrevious();
 
-    m_ops->setFromPreviousSample();
+    m_opsPWPtr->setFromPreviousSample();
 
-    if ( m_vals )
+    if ( m_valsPWPtr )
     {
         if ( m_useArrayProp )
-        { m_vals->asArrayPtr()->setFromPreviousSample(); }
+        { m_valsPWPtr->asArrayPtr()->setFromPreviousSample(); }
         else
-        { m_vals->asScalarPtr()->setFromPreviousSample(); }
+        { m_valsPWPtr->asScalarPtr()->setFromPreviousSample(); }
     }
 
-    m_animChannels.setFromPrevious();
+    m_animChannelsProperty.setFromPrevious();
 
-    if ( m_childBounds.getNumSamples() > 0 )
-    { m_childBounds.setFromPrevious(); }
+    if ( m_childBoundsProperty.getNumSamples() > 0 )
+    { m_childBoundsProperty.setFromPrevious(); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -252,10 +252,10 @@ void OXformSchema::init( const AbcA::index_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::init()" );
 
-    m_inherits = Abc::OBoolProperty( this->getPtr(), ".inherits",
+    m_inheritsProperty = Abc::OBoolProperty( this->getPtr(), ".inherits",
                                      iTsIdx );
 
-    m_animChannels = Abc::OUInt32ArrayProperty( this->getPtr(),
+    m_animChannelsProperty = Abc::OUInt32ArrayProperty( this->getPtr(),
                                                 ".animChans", iTsIdx );
 
     m_isIdentity = true;
@@ -291,20 +291,20 @@ void OXformSchema::setTimeSampling( uint32_t iIndex )
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "OXformSchema::setTimeSampling( uint32_t )" );
 
-    m_animChannels.setTimeSampling( iIndex );
-    m_inherits.setTimeSampling( iIndex );
+    m_animChannelsProperty.setTimeSampling( iIndex );
+    m_inheritsProperty.setTimeSampling( iIndex );
 
-    if ( m_vals )
+    if ( m_valsPWPtr )
     {
         if ( m_useArrayProp )
-        { m_vals->asArrayPtr()->setTimeSamplingIndex( iIndex ); }
+        { m_valsPWPtr->asArrayPtr()->setTimeSamplingIndex( iIndex ); }
         else
-        { m_vals->asScalarPtr()->setTimeSamplingIndex( iIndex ); }
+        { m_valsPWPtr->asScalarPtr()->setTimeSamplingIndex( iIndex ); }
     }
 
-    if ( m_childBounds )
+    if ( m_childBoundsProperty )
     {
-        m_childBounds.setTimeSampling( iIndex );
+        m_childBoundsProperty.setTimeSampling( iIndex );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();

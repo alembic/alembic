@@ -134,7 +134,7 @@ void Example1_CurvesIn()
     TESTING_ASSERT( curvesSample.getPositions() -> size() == 12);
 
     IFloatGeomParam::Sample widthSample;
-    curves.getWidths().getExpanded( widthSample );
+    curves.getWidthsParam().getExpanded( widthSample );
     TESTING_ASSERT( widthSample.getVals()->size() == 12);
     TESTING_ASSERT( widthSample.getScope() == kVertexScope );
 

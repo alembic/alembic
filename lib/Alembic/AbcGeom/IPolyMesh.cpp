@@ -44,9 +44,9 @@ MeshTopologyVariance IPolyMeshSchema::getTopologyVariance()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::getTopologyVariance()" );
 
-    if ( m_indices.isConstant() && m_counts.isConstant() )
+    if ( m_indicesProperty.isConstant() && m_countsProperty.isConstant() )
     {
-        if ( m_positions.isConstant() )
+        if ( m_positionsProperty.isConstant() )
         {
             return kConstantTopology;
         }
@@ -78,30 +78,30 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
 
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    m_positions = Abc::IV3fArrayProperty( _this, "P",
+    m_positionsProperty = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
-    m_indices = Abc::IInt32ArrayProperty( _this, ".faceIndices",
+    m_indicesProperty = Abc::IInt32ArrayProperty( _this, ".faceIndices",
                                         args.getSchemaInterpMatching() );
-    m_counts = Abc::IInt32ArrayProperty( _this, ".faceCounts",
+    m_countsProperty = Abc::IInt32ArrayProperty( _this, ".faceCounts",
                                        args.getSchemaInterpMatching() );
 
-    m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
+    m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
 
     if ( this->getPropertyHeader( ".childBnds" ) != NULL )
     {
-        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0,
+        m_childBoundsProperty = Abc::IBox3dProperty( _this, ".childBnds", iArg0,
                                              iArg1 );
     }
 
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
-        m_uvs = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
+        m_uvsParam = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( "N" ) != NULL )
     {
-        m_normals = IN3fGeomParam( _this, "N", iArg0, iArg1 );
+        m_normalsParam = IN3fGeomParam( _this, "N", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )

@@ -179,7 +179,7 @@ void Example1_MeshIn()
     // end of FaceSet testing
 
     // UVs
-    IV2fGeomParam uv = mesh.getUVs();
+    IV2fGeomParam uv = mesh.getUVsParam();
     TESTING_ASSERT( ! uv.isIndexed() );
 
     // we can fake like the UVs are indexed

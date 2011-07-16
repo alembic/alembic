@@ -163,7 +163,7 @@ public:
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
     size_t getNumSamples()
-    { return  m_positions.getNumSamples(); }
+    { return  m_positionsProperty.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
@@ -178,9 +178,9 @@ public:
     //! sampling information, which otherwise defaults to Identity.
     AbcA::TimeSamplingPtr getTimeSampling()
     {
-        if ( m_positions.valid() )
+        if ( m_positionsProperty.valid() )
         {
-            return m_positions.getTimeSampling();
+            return m_positionsProperty.getTimeSampling();
         }
         else
         {
@@ -194,15 +194,15 @@ public:
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::get()" );
 
-        m_positions.get( oSample.m_positions, iSS );
-        m_indices.get( oSample.m_indices, iSS );
-        m_counts.get( oSample.m_counts, iSS );
+        m_positionsProperty.get( oSample.m_positions, iSS );
+        m_indicesProperty.get( oSample.m_indices, iSS );
+        m_countsProperty.get( oSample.m_counts, iSS );
 
-        m_selfBounds.get( oSample.m_selfBounds, iSS );
+        m_selfBoundsProperty.get( oSample.m_selfBounds, iSS );
 
-        if ( m_childBounds && m_childBounds.getNumSamples() > 0 )
+        if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
         {
-            m_childBounds.get( oSample.m_childBounds, iSS );
+            m_childBoundsProperty.get( oSample.m_childBounds, iSS );
         }
         // Could error check here.
 
@@ -216,20 +216,20 @@ public:
         return smp;
     }
 
-    IV2fGeomParam &getUVs() { return m_uvs; }
+    IV2fGeomParam &getUVsParam() { return m_uvsParam; }
 
-    IN3fGeomParam &getNormals() { return m_normals; }
+    IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
 
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
-    Abc::IInt32ArrayProperty getFaceCounts() { return m_counts; }
-    Abc::IInt32ArrayProperty getFaceIndices() { return m_indices; }
-    Abc::IV3fArrayProperty getPositions() { return m_positions; }
+    Abc::IInt32ArrayProperty getFaceCountsProperty() { return m_countsProperty; }
+    Abc::IInt32ArrayProperty getFaceIndicesProperty() { return m_indicesProperty; }
+    Abc::IV3fArrayProperty getPositionsProperty() { return m_positionsProperty; }
 
-    Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
-    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
+    Abc::IBox3dProperty getSelfBoundsProperty() { return m_selfBoundsProperty; }
+    Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -241,15 +241,15 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_indices.reset();
-        m_counts.reset();
+        m_positionsProperty.reset();
+        m_indicesProperty.reset();
+        m_countsProperty.reset();
 
-        m_selfBounds.reset();
-        m_childBounds.reset();
+        m_selfBoundsProperty.reset();
+        m_childBoundsProperty.reset();
 
-        m_uvs.reset();
-        m_normals.reset();
+        m_uvsParam.reset();
+        m_normalsParam.reset();
 
         m_arbGeomParams.reset();
 
@@ -264,9 +264,9 @@ public:
     bool valid() const
     {
         return ( Abc::ISchema<PolyMeshSchemaInfo>::valid() &&
-                 m_positions.valid() &&
-                 m_indices.valid() &&
-                 m_counts.valid() );
+                 m_positionsProperty.valid() &&
+                 m_indicesProperty.valid() &&
+                 m_countsProperty.valid() );
     }
 
     // FaceSet related
@@ -283,15 +283,15 @@ protected:
     void init( const Abc::Argument &iArg0,
                const Abc::Argument &iArg1 );
 
-    Abc::IV3fArrayProperty m_positions;
-    Abc::IInt32ArrayProperty m_indices;
-    Abc::IInt32ArrayProperty m_counts;
+    Abc::IV3fArrayProperty m_positionsProperty;
+    Abc::IInt32ArrayProperty m_indicesProperty;
+    Abc::IInt32ArrayProperty m_countsProperty;
 
-    IV2fGeomParam m_uvs;
-    IN3fGeomParam m_normals;
+    IV2fGeomParam m_uvsParam;
+    IN3fGeomParam m_normalsParam;
 
-    Abc::IBox3dProperty m_selfBounds;
-    Abc::IBox3dProperty m_childBounds;
+    Abc::IBox3dProperty m_selfBoundsProperty;
+    Abc::IBox3dProperty m_childBoundsProperty;
 
     Abc::ICompoundProperty m_arbGeomParams;
 

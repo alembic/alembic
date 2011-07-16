@@ -226,7 +226,7 @@ public:
 
     //! Return the time sampling
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positions.getTimeSampling(); }
+    { return m_positionsProperty.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -235,7 +235,7 @@ public:
     //! Get number of samples written so far.
     //! ...
     size_t getNumSamples()
-    { return m_positions.getNumSamples(); }
+    { return m_positionsProperty.getNumSamples(); }
 
     //! Set a sample
     void set( const Sample &iSamp );
@@ -261,13 +261,13 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_ids.reset();
-        m_velocities.reset();
-        m_widths.reset();
+        m_positionsProperty.reset();
+        m_idsProperty.reset();
+        m_velocitiesProperty.reset();
+        m_widthsParam.reset();
 
-        m_selfBounds.reset();
-        m_childBounds.reset();
+        m_selfBoundsProperty.reset();
+        m_childBoundsProperty.reset();
 
         m_arbGeomParams.reset();
 
@@ -279,8 +279,8 @@ public:
     bool valid() const
     {
         return ( Abc::OSchema<PointsSchemaInfo>::valid() &&
-                 m_positions.valid() &&
-                 m_ids.valid() );
+                 m_positionsProperty.valid() &&
+                 m_idsProperty.valid() );
     }
 
     //! unspecified-bool-type operator overload.
@@ -290,13 +290,13 @@ public:
 protected:
     void init( uint32_t iTsIdx );
 
-    Abc::OV3fArrayProperty m_positions;
-    Abc::OUInt64ArrayProperty m_ids;
-    Abc::OV3fArrayProperty m_velocities;
-    OFloatGeomParam m_widths;
+    Abc::OV3fArrayProperty m_positionsProperty;
+    Abc::OUInt64ArrayProperty m_idsProperty;
+    Abc::OV3fArrayProperty m_velocitiesProperty;
+    OFloatGeomParam m_widthsParam;
 
-    Abc::OBox3dProperty m_selfBounds;
-    Abc::OBox3dProperty m_childBounds;
+    Abc::OBox3dProperty m_selfBoundsProperty;
+    Abc::OBox3dProperty m_childBoundsProperty;
 
     Abc::OCompoundProperty m_arbGeomParams;
 };

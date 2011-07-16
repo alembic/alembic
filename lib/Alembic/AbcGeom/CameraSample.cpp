@@ -129,6 +129,8 @@ double CameraSample::getCoreValue( std::size_t iIndex ) const
                 << iIndex );
         break;
     }
+    // For compiler warning
+    return 0.0;
 }
 
 //-*****************************************************************************

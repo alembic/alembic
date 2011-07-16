@@ -51,28 +51,28 @@ void IPointsSchema::init( const Abc::Argument &iArg0,
 
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    m_positions = Abc::IV3fArrayProperty( _this, "P",
+    m_positionsProperty = Abc::IV3fArrayProperty( _this, "P",
                                           args.getSchemaInterpMatching() );
-    m_ids = Abc::IUInt64ArrayProperty( _this, ".pointIds",
+    m_idsProperty = Abc::IUInt64ArrayProperty( _this, ".pointIds",
                                       args.getSchemaInterpMatching() );
 
-    m_selfBounds = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
+    m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
 
     if ( _this->getPropertyHeader( ".velocities" ) != NULL )
     {
-        m_velocities = Abc::IV3fArrayProperty( _this, ".velocities",
+        m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
                                                iArg0, iArg1 );
     }
 
     if ( _this->getPropertyHeader( ".widths" ) != NULL )
     {
-        m_widths = IFloatGeomParam( _this, ".widths", iArg0, iArg1 );
+        m_widthsParam = IFloatGeomParam( _this, ".widths", iArg0, iArg1 );
     }
 
     if ( _this->getPropertyHeader( ".childBnds" ) != NULL )
     {
-        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds",
-                                             iArg0, iArg1 );
+        m_childBoundsProperty = Abc::IBox3dProperty( _this, ".childBnds",
+                                                     iArg0, iArg1 );
     }
 
     if ( _this->getPropertyHeader( ".arbGeomParams" ) != NULL )

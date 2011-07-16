@@ -367,7 +367,7 @@ public:
     //! Return the time sampling, which is stored on each of the
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positions.getTimeSampling(); }
+    { return m_positionsProperty.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -376,7 +376,7 @@ public:
     //! Get number of samples written so far.
     //! ...
     size_t getNumSamples()
-    { return m_positions.getNumSamples(); }
+    { return m_positionsProperty.getNumSamples(); }
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
@@ -401,25 +401,25 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_faceIndices.reset();
-        m_faceCounts.reset();
+        m_positionsProperty.reset();
+        m_faceIndicesProperty.reset();
+        m_faceCountsProperty.reset();
 
-        m_creaseIndices.reset();
-        m_creaseLengths.reset();
-        m_creaseSharpnesses.reset();
+        m_creaseIndicesProperty.reset();
+        m_creaseLengthsProperty.reset();
+        m_creaseSharpnessesProperty.reset();
 
-        m_cornerIndices.reset();
-        m_cornerSharpnesses.reset();
+        m_cornerIndicesProperty.reset();
+        m_cornerSharpnessesProperty.reset();
 
-        m_holes.reset();
+        m_holesProperty.reset();
 
-        m_subdScheme.reset();
+        m_subdSchemeProperty.reset();
 
-        m_selfBounds.reset();
-        m_childBounds.reset();
+        m_selfBoundsProperty.reset();
+        m_childBoundsProperty.reset();
 
-        m_uvs.reset();
+        m_uvsParam.reset();
 
         m_arbGeomParams.reset();
         m_faceSets.clear ();
@@ -432,9 +432,9 @@ public:
     bool valid() const
     {
         return ( Abc::OSchema<SubDSchemaInfo>::valid() &&
-                 m_positions.valid() &&
-                 m_faceIndices.valid() &&
-                 m_faceCounts.valid() );
+                 m_positionsProperty.valid() &&
+                 m_faceIndicesProperty.valid() &&
+                 m_faceCountsProperty.valid() );
     }
 
     // FaceSet stuff
@@ -452,36 +452,36 @@ public:
 protected:
     void init( uint32_t iTsIdx );
 
-    Abc::OV3fArrayProperty m_positions;
-    Abc::OInt32ArrayProperty m_faceIndices;
-    Abc::OInt32ArrayProperty m_faceCounts;
+    Abc::OV3fArrayProperty m_positionsProperty;
+    Abc::OInt32ArrayProperty m_faceIndicesProperty;
+    Abc::OInt32ArrayProperty m_faceCountsProperty;
 
     // misc
-    Abc::OInt32Property m_faceVaryingInterpolateBoundary;
-    Abc::OInt32Property m_faceVaryingPropagateCorners;
-    Abc::OInt32Property m_interpolateBoundary;
+    Abc::OInt32Property m_faceVaryingInterpolateBoundaryProperty;
+    Abc::OInt32Property m_faceVaryingPropagateCornersProperty;
+    Abc::OInt32Property m_interpolateBoundaryProperty;
 
     // Creases
-    Abc::OInt32ArrayProperty m_creaseIndices;
-    Abc::OInt32ArrayProperty m_creaseLengths;
-    Abc::OFloatArrayProperty m_creaseSharpnesses;
+    Abc::OInt32ArrayProperty m_creaseIndicesProperty;
+    Abc::OInt32ArrayProperty m_creaseLengthsProperty;
+    Abc::OFloatArrayProperty m_creaseSharpnessesProperty;
 
     // Corners
-    Abc::OInt32ArrayProperty m_cornerIndices;
-    Abc::OFloatArrayProperty m_cornerSharpnesses;
+    Abc::OInt32ArrayProperty m_cornerIndicesProperty;
+    Abc::OFloatArrayProperty m_cornerSharpnessesProperty;
 
     // Holes
-    Abc::OInt32ArrayProperty m_holes;
+    Abc::OInt32ArrayProperty m_holesProperty;
 
     // subdivision scheme
-    Abc::OStringProperty m_subdScheme;
+    Abc::OStringProperty m_subdSchemeProperty;
 
     // bounds
-    Abc::OBox3dProperty m_selfBounds;
-    Abc::OBox3dProperty m_childBounds;
+    Abc::OBox3dProperty m_selfBoundsProperty;
+    Abc::OBox3dProperty m_childBoundsProperty;
 
     // UVs
-    OV2fGeomParam m_uvs;
+    OV2fGeomParam m_uvsParam;
 
     // arbitrary geometry parameters
     Abc::OCompoundProperty m_arbGeomParams;

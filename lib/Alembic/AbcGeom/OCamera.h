@@ -175,7 +175,7 @@ public:
     void reset()
     {
         m_coreProperties.reset();
-        m_childBounds.reset();
+        m_childBoundsProperty.reset();
         m_arbGeomParams.reset();
 
         Abc::OSchema<CameraSchemaInfo>::reset();
@@ -197,13 +197,13 @@ protected:
 
     Abc::OScalarProperty m_coreProperties;
 
-    Abc::OBox3dProperty m_childBounds;
+    Abc::OBox3dProperty m_childBoundsProperty;
 
     Abc::OCompoundProperty m_arbGeomParams;
 
-    Abc::ODoubleArrayProperty m_bigFilmBackChannels;
+    Abc::ODoubleArrayProperty m_bigFilmBackChannelsProperty;
 
-    Abc::OScalarProperty m_smallFilmBackChannels;
+    Abc::OScalarProperty m_smallFilmBackChannelsProperty;
 
 private:
     CameraSample m_initialSample;

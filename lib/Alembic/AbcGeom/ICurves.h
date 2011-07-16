@@ -175,7 +175,7 @@ public:
         *this = iCopy;
     }
 
-    size_t getNumSamples() { return m_positions.getNumSamples(); }
+    size_t getNumSamples() { return m_positionsProperty.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
@@ -189,7 +189,7 @@ public:
     //!
     AbcA::TimeSamplingPtr getTimeSampling()
     {
-        return m_positions.getTimeSampling();
+        return m_positionsProperty.getTimeSampling();
     }
 
     //-*************************************************************************
@@ -205,14 +205,23 @@ public:
     }
 
 
-    Abc::IV3fArrayProperty getPositions() { return m_positions; }
+    Abc::IV3fArrayProperty getPositionsProperty()
+    {
+        return m_positionsProperty;
+    }
 
-    IV2fGeomParam &getUVs() { return m_uvs; }
-    IN3fGeomParam &getNormals() { return m_normals; }
-    IFloatGeomParam &getWidths() { return m_widths; }
+    IV2fGeomParam &getUVsParam() { return m_uvsParam; }
+    IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
+    IFloatGeomParam &getWidthsParam() { return m_widthsParam; }
 
-    Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
-    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
+    Abc::IBox3dProperty getSelfBoundsProperty() 
+    { 
+        return m_selfBoundsProperty;
+    }
+    Abc::IBox3dProperty getChildBoundsProperty()
+    {
+        return m_childBoundsProperty;
+    }
 
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
@@ -228,19 +237,19 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_nVertices.reset();
+        m_positionsProperty.reset();
+        m_nVerticesProperty.reset();
 
-        m_selfBounds.reset();
-        m_childBounds.reset();
+        m_selfBoundsProperty.reset();
+        m_childBoundsProperty.reset();
 
-        m_uvs.reset();
-        m_normals.reset();
-        m_widths.reset();
+        m_uvsParam.reset();
+        m_normalsParam.reset();
+        m_widthsParam.reset();
 
         m_arbGeomParams.reset();
 
-        m_basisAndType.reset();
+        m_basisAndTypeProperty.reset();
 
         Abc::ISchema<CurvesSchemaInfo>::reset();
     }
@@ -250,7 +259,7 @@ public:
     bool valid() const
     {
         return ( Abc::ISchema<CurvesSchemaInfo>::valid() &&
-                 m_positions.valid() && m_nVertices.valid() );
+                 m_positionsProperty.valid() && m_nVerticesProperty.valid() );
     }
 
     //! unspecified-bool-type operator overload.
@@ -260,18 +269,18 @@ public:
 protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
-    Abc::IV3fArrayProperty m_positions;
-    Abc::IInt32ArrayProperty  m_nVertices;
+    Abc::IV3fArrayProperty m_positionsProperty;
+    Abc::IInt32ArrayProperty m_nVerticesProperty;
 
     // contains type, wrap, ubasis, and vbasis.
-    Abc::IScalarProperty m_basisAndType;
+    Abc::IScalarProperty m_basisAndTypeProperty;
 
-    IFloatGeomParam m_widths;
-    IV2fGeomParam m_uvs;
-    IN3fGeomParam m_normals;
+    IFloatGeomParam m_widthsParam;
+    IV2fGeomParam m_uvsParam;
+    IN3fGeomParam m_normalsParam;
 
-    Abc::IBox3dProperty m_selfBounds;
-    Abc::IBox3dProperty m_childBounds;
+    Abc::IBox3dProperty m_selfBoundsProperty;
+    Abc::IBox3dProperty m_childBoundsProperty;
 
     Abc::ICompoundProperty m_arbGeomParams;
 };

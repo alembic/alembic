@@ -374,7 +374,7 @@ void pointTestReadWrite()
         IObject topObj = archive.getTop();
         IPoints points( topObj, "somePoints" );
         IPointsSchema& pointsSchema = points.getSchema();
-        IFloatGeomParam widthProp = pointsSchema.getWidths();
+        IFloatGeomParam widthProp = pointsSchema.getWidthsParam();
         TESTING_ASSERT( widthProp.getScope() == kVertexScope );
         for ( int i = 0; i < 100; ++i )
         {

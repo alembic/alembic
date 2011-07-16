@@ -197,12 +197,12 @@ public:
 
     FaceSetExclusivity getFaceExclusivity();
 
-    Abc::IBox3dProperty getSelfBounds()
+    Abc::IBox3dProperty getSelfBoundsProperty()
     {
         return m_selfBoundsProperty;
     }
 
-    Abc::IBox3dProperty getChildBounds()
+    Abc::IBox3dProperty getChildBoundsProperty()
     {
         return m_childBoundsProperty;
     }

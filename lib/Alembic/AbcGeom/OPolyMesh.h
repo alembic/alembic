@@ -231,7 +231,7 @@ public:
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positions.getTimeSampling(); }
+    { return m_positionsProperty.getTimeSampling(); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -240,7 +240,7 @@ public:
     //! Get number of samples written so far.
     //! ...
     size_t getNumSamples()
-    { return m_positions.getNumSamples(); }
+    { return m_positionsProperty.getNumSamples(); }
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
@@ -265,13 +265,13 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_indices.reset();
-        m_counts.reset();
-        m_uvs.reset();
-        m_normals.reset();
-        m_selfBounds.reset();
-        m_childBounds.reset();
+        m_positionsProperty.reset();
+        m_indicesProperty.reset();
+        m_countsProperty.reset();
+        m_uvsParam.reset();
+        m_normalsParam.reset();
+        m_selfBoundsProperty.reset();
+        m_childBoundsProperty.reset();
         m_arbGeomParams.reset();
 
         m_faceSets.clear();
@@ -284,9 +284,9 @@ public:
     bool valid() const
     {
         return ( Abc::OSchema<PolyMeshSchemaInfo>::valid() &&
-                 m_positions.valid() &&
-                 m_indices.valid() &&
-                 m_counts.valid() );
+                 m_positionsProperty.valid() &&
+                 m_indicesProperty.valid() &&
+                 m_countsProperty.valid() );
     }
 
     // FaceSet stuff
@@ -303,18 +303,18 @@ public:
 protected:
     void init( uint32_t iTsIdx );
 
-    Abc::OV3fArrayProperty m_positions;
-    Abc::OInt32ArrayProperty m_indices;
-    Abc::OInt32ArrayProperty m_counts;
+    Abc::OV3fArrayProperty m_positionsProperty;
+    Abc::OInt32ArrayProperty m_indicesProperty;
+    Abc::OInt32ArrayProperty m_countsProperty;
 
     // FaceSets created on this PolyMesh
     std::map <std::string, OFaceSet>  m_faceSets;
 
-    Abc::OBox3dProperty m_selfBounds;
-    Abc::OBox3dProperty m_childBounds;
+    Abc::OBox3dProperty m_selfBoundsProperty;
+    Abc::OBox3dProperty m_childBoundsProperty;
 
-    OV2fGeomParam m_uvs;
-    ON3fGeomParam m_normals;
+    OV2fGeomParam m_uvsParam;
+    ON3fGeomParam m_normalsParam;
 
     Abc::OCompoundProperty m_arbGeomParams;
 };

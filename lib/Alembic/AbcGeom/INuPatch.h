@@ -222,7 +222,7 @@ public:
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
     size_t getNumSamples()
-    { return m_positions.getNumSamples(); }
+    { return m_positionsProperty.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
@@ -235,7 +235,7 @@ public:
     //! Time information.
     AbcA::TimeSamplingPtr getTimeSampling()
     {
-        return m_positions.getTimeSampling();
+        return m_positionsProperty.getTimeSampling();
     }
 
     void get( sample_type &oSample,
@@ -248,15 +248,18 @@ public:
         return smp;
     }
 
-    Abc::IV3fArrayProperty getPositions(){ return m_positions; }
+    Abc::IV3fArrayProperty getPositionsProperty(){ return m_positionsProperty; }
+    Abc::IFloatArrayProperty getUKnotsProperty(){ return m_uKnotProperty; }
+    Abc::IFloatArrayProperty getVKnotsProperty(){ return m_vKnotProperty; }
 
     // if this property is invalid then the weight for every point is 1
-    Abc::IFloatArrayProperty getPositionWeights(){ return m_positionWeights; }
-    Abc::IFloatArrayProperty getUKnots(){ return m_uKnot; }
-    Abc::IFloatArrayProperty getVKnots(){ return m_vKnot; }
+    Abc::IFloatArrayProperty getPositionWeightsProperty()
+    {
+        return m_positionWeightsProperty;
+    }
 
-    Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
-    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
+    Abc::IBox3dProperty getSelfBoundsProperty() { return m_selfBoundsProperty; }
+    Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
 
     bool hasTrimCurve() { return m_hasTrimCurve; }
     bool trimCurveTopologyIsHomogenous();
@@ -274,32 +277,32 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_numU.reset();
-        m_numV.reset();
-        m_uOrder.reset();
-        m_vOrder.reset();
-        m_uKnot.reset();
-        m_vKnot.reset();
-        m_positionWeights.reset();
+        m_positionsProperty.reset();
+        m_numUProperty.reset();
+        m_numVProperty.reset();
+        m_uOrderProperty.reset();
+        m_vOrderProperty.reset();
+        m_uKnotProperty.reset();
+        m_vKnotProperty.reset();
+        m_positionWeightsProperty.reset();
 
-        m_normals.reset();
-        m_uvs.reset();
+        m_normalsParam.reset();
+        m_uvsParam.reset();
 
-        m_selfBounds.reset();
-        m_childBounds.reset();
+        m_selfBoundsProperty.reset();
+        m_childBoundsProperty.reset();
 
         // reset trim curve attributes
-        m_trimNumLoops.reset();
-        m_trimNumCurves.reset();
-        m_trimNumVertices.reset();
-        m_trimOrder.reset();
-        m_trimKnot.reset();
-        m_trimMin.reset();
-        m_trimMax.reset();
-        m_trimU.reset();
-        m_trimV.reset();
-        m_trimW.reset();
+        m_trimNumLoopsProperty.reset();
+        m_trimNumCurvesProperty.reset();
+        m_trimNumVerticesProperty.reset();
+        m_trimOrderProperty.reset();
+        m_trimKnotProperty.reset();
+        m_trimMinProperty.reset();
+        m_trimMaxProperty.reset();
+        m_trimUProperty.reset();
+        m_trimVProperty.reset();
+        m_trimWProperty.reset();
 
         Abc::ISchema<NuPatchSchemaInfo>::reset();
     }
@@ -309,13 +312,13 @@ public:
     bool valid() const
     {
         return ( Abc::ISchema<NuPatchSchemaInfo>::valid() &&
-                 m_positions.valid() &&
-                 m_numU.valid() &&
-                 m_numV.valid() &&
-                 m_uOrder.valid() &&
-                 m_vOrder.valid() &&
-                 m_uKnot.valid() &&
-                 m_vKnot.valid() );
+                 m_positionsProperty.valid() &&
+                 m_numUProperty.valid() &&
+                 m_numVProperty.valid() &&
+                 m_uOrderProperty.valid() &&
+                 m_vOrderProperty.valid() &&
+                 m_uKnotProperty.valid() &&
+                 m_vKnotProperty.valid() );
     }
 
     //! unspecified-bool-type operator overload.
@@ -330,34 +333,34 @@ protected:
                const Abc::Argument &iArg1 );
 
     // required properties
-    Abc::IV3fArrayProperty m_positions;
-    Abc::IInt32Property m_numU;
-    Abc::IInt32Property m_numV;
-    Abc::IInt32Property m_uOrder;
-    Abc::IInt32Property m_vOrder;
-    Abc::IFloatArrayProperty m_uKnot;
-    Abc::IFloatArrayProperty m_vKnot;
+    Abc::IV3fArrayProperty m_positionsProperty;
+    Abc::IInt32Property m_numUProperty;
+    Abc::IInt32Property m_numVProperty;
+    Abc::IInt32Property m_uOrderProperty;
+    Abc::IInt32Property m_vOrderProperty;
+    Abc::IFloatArrayProperty m_uKnotProperty;
+    Abc::IFloatArrayProperty m_vKnotProperty;
 
     // optional
-    Abc::IFloatArrayProperty m_positionWeights;
-    IN3fGeomParam m_normals;
-    IV2fGeomParam m_uvs;
+    Abc::IFloatArrayProperty m_positionWeightsProperty;
+    IN3fGeomParam m_normalsParam;
+    IV2fGeomParam m_uvsParam;
 
     // optional trim curve properties
-    Abc::IInt32Property m_trimNumLoops;
-    Abc::IInt32ArrayProperty m_trimNumVertices;
-    Abc::IInt32ArrayProperty m_trimNumCurves;
-    Abc::IInt32ArrayProperty m_trimOrder;
-    Abc::IFloatArrayProperty m_trimKnot;
-    Abc::IFloatArrayProperty m_trimMin;
-    Abc::IFloatArrayProperty m_trimMax;
-    Abc::IFloatArrayProperty m_trimU;
-    Abc::IFloatArrayProperty m_trimV;
-    Abc::IFloatArrayProperty m_trimW;
+    Abc::IInt32Property m_trimNumLoopsProperty;
+    Abc::IInt32ArrayProperty m_trimNumVerticesProperty;
+    Abc::IInt32ArrayProperty m_trimNumCurvesProperty;
+    Abc::IInt32ArrayProperty m_trimOrderProperty;
+    Abc::IFloatArrayProperty m_trimKnotProperty;
+    Abc::IFloatArrayProperty m_trimMinProperty;
+    Abc::IFloatArrayProperty m_trimMaxProperty;
+    Abc::IFloatArrayProperty m_trimUProperty;
+    Abc::IFloatArrayProperty m_trimVProperty;
+    Abc::IFloatArrayProperty m_trimWProperty;
 
     // bounds
-    Abc::IBox3dProperty m_selfBounds;
-    Abc::IBox3dProperty m_childBounds;
+    Abc::IBox3dProperty m_selfBoundsProperty;
+    Abc::IBox3dProperty m_childBoundsProperty;
 
     Abc::ICompoundProperty m_arbGeomParams;
 

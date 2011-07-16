@@ -138,7 +138,7 @@ void Example1_MeshIn()
     TESTING_ASSERT( 3 == mesh.getNumSamples() );
 
     // UVs
-    IV2fGeomParam uv = mesh.getUVs();
+    IV2fGeomParam uv = mesh.getUVsParam();
     TESTING_ASSERT( ! uv.isIndexed() );
 
     // we can fake like the UVs are indexed

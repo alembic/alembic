@@ -54,7 +54,7 @@ IPolyMeshDrw::IPolyMeshDrw( IPolyMesh &iPmesh )
         m_polyMesh.getSchema().get( m_samp );
     }
 
-    m_boundsProp = m_polyMesh.getSchema().getSelfBounds();
+    m_boundsProp = m_polyMesh.getSchema().getSelfBoundsProperty();
 
     // The object has already set up the min time and max time of
     // all the children.

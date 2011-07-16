@@ -46,83 +46,83 @@ void OPointsSchema::set( const Sample &iSamp )
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::set()" );
 
     // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBounds)
+    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty)
     {
-        m_childBounds = Abc::OBox3dProperty( *this, ".childBnds",
-                                             m_positions.getTimeSampling() );
+        m_childBoundsProperty = Abc::OBox3dProperty( *this, ".childBnds",
+                                             m_positionsProperty.getTimeSampling() );
         Abc::Box3d emptyBox;
         emptyBox.makeEmpty();
 
-        size_t numSamples = m_positions.getNumSamples();
+        size_t numSamples = m_positionsProperty.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
-            m_childBounds.set( emptyBox );
+            m_childBoundsProperty.set( emptyBox );
         }
     }
 
     // do we need to create velocities prop?
-    if ( iSamp.getVelocities() && !m_velocities )
+    if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
-        m_velocities = Abc::OV3fArrayProperty( this->getPtr(), ".velocities",
-                                               m_positions.getTimeSampling() );
+        m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(), ".velocities",
+                                               m_positionsProperty.getTimeSampling() );
 
         const V3fArraySample empty;
-        const size_t numSamps = m_positions.getNumSamples();
+        const size_t numSamps = m_positionsProperty.getNumSamples();
         for ( size_t i = 0 ; i < numSamps ; ++i )
         {
-            m_velocities.set( empty );
+            m_velocitiesProperty.set( empty );
         }
     }
 
     // do we need to create widths prop?
-    if ( iSamp.getWidths() && !m_widths )
+    if ( iSamp.getWidths() && !m_widthsParam )
     {
         if ( iSamp.getWidths().getIndices() )
         {
             // widths are indexed which is wasteful, but technically ok
-            m_widths = OFloatGeomParam( this->getPtr(), ".widths", true,
-                                        iSamp.getWidths().getScope(),
-                                        1, this->getTimeSampling() );
+            m_widthsParam = OFloatGeomParam( this->getPtr(), ".widths", true,
+                                             iSamp.getWidths().getScope(),
+                                             1, this->getTimeSampling() );
         }
         else
         {
             // widths are not indexed
-            m_widths = OFloatGeomParam( this->getPtr(), ".widths", false,
-                                        iSamp.getWidths().getScope(), 1,
-                                        this->getTimeSampling() );
+            m_widthsParam = OFloatGeomParam( this->getPtr(), ".widths", false,
+                                             iSamp.getWidths().getScope(), 1,
+                                             this->getTimeSampling() );
         }
 
         OFloatGeomParam::Sample empty;
 
-        size_t numSamples = m_positions.getNumSamples();
+        size_t numSamples = m_positionsProperty.getNumSamples();
 
         // set all the missing samples
         for ( size_t i = 0; i < numSamples; ++i )
         {
-            m_widths.set( empty );
+            m_widthsParam.set( empty );
         }
     }
 
     // We could add sample integrity checking here.
-    if ( m_positions.getNumSamples() == 0 )
+    if ( m_positionsProperty.getNumSamples() == 0 )
     {
         // First sample must be valid on all points.
         ABCA_ASSERT( iSamp.getPositions() &&
                      iSamp.getIds(),
                      "Sample 0 must have valid data for points and ids" );
-        m_positions.set( iSamp.getPositions() );
-        m_ids.set( iSamp.getIds() );
+        m_positionsProperty.set( iSamp.getPositions() );
+        m_idsProperty.set( iSamp.getIds() );
 
-        if ( m_velocities )
-        { m_velocities.set( iSamp.getVelocities() ); }
+        if ( m_velocitiesProperty )
+        { m_velocitiesProperty.set( iSamp.getVelocities() ); }
 
-        if ( m_widths )
-        { m_widths.set( iSamp.getWidths() ); }
+        if ( m_widthsParam )
+        { m_widthsParam.set( iSamp.getWidths() ); }
 
-        if ( m_childBounds )
-        { m_childBounds.set( iSamp.getChildBounds() ); }
+        if ( m_childBoundsProperty )
+        { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -130,39 +130,38 @@ void OPointsSchema::set( const Sample &iSamp )
             // so we need a a placeholder variable.
             Abc::Box3d bnds(
                 ComputeBoundsFromPositions( iSamp.getPositions() ) );
-            m_selfBounds.set( bnds );
+            m_selfBoundsProperty.set( bnds );
         }
-        else { m_selfBounds.set( iSamp.getSelfBounds() ); }
-
+        else { m_selfBoundsProperty.set( iSamp.getSelfBounds() ); }
     }
     else
     {
-        SetPropUsePrevIfNull( m_positions, iSamp.getPositions() );
-        SetPropUsePrevIfNull( m_ids, iSamp.getIds() );
-        SetPropUsePrevIfNull( m_velocities, iSamp.getVelocities() );
+        SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
+        SetPropUsePrevIfNull( m_idsProperty, iSamp.getIds() );
+        SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() );
 
-        if ( m_childBounds )
+        if ( m_childBoundsProperty )
         {
-            SetPropUsePrevIfNull( m_childBounds, iSamp.getChildBounds() );
+            SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() );
         }
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
-            m_selfBounds.set( iSamp.getSelfBounds() );
+            m_selfBoundsProperty.set( iSamp.getSelfBounds() );
         }
         else if ( iSamp.getPositions() )
         {
             Abc::Box3d bnds(
                 ComputeBoundsFromPositions( iSamp.getPositions() ) );
-            m_selfBounds.set( bnds );
+            m_selfBoundsProperty.set( bnds );
         }
         else
         {
-            m_selfBounds.setFromPrevious();
+            m_selfBoundsProperty.setFromPrevious();
         }
 
-        if ( m_widths )
-        { m_widths.set( iSamp.getWidths() ); }
+        if ( m_widthsParam )
+        { m_widthsParam.set( iSamp.getWidths() ); }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -173,14 +172,19 @@ void OPointsSchema::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::setFromPrevious" );
 
-    m_positions.setFromPrevious();
-    m_ids.setFromPrevious();
+    m_positionsProperty.setFromPrevious();
+    m_idsProperty.setFromPrevious();
 
-    m_selfBounds.setFromPrevious();
+    m_selfBoundsProperty.setFromPrevious();
 
-    if ( m_childBounds )
+    if ( m_childBoundsProperty )
     {
-        m_childBounds.setFromPrevious();
+        m_childBoundsProperty.setFromPrevious();
+    }
+
+    if ( m_widthsParam )
+    {
+        m_widthsParam.setFromPrevious();
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -192,13 +196,18 @@ void OPointsSchema::setTimeSampling( uint32_t iIndex )
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "OPointsSchema::setTimeSampling( uint32_t )" );
 
-    m_positions.setTimeSampling( iIndex );
-    m_ids.setTimeSampling( iIndex );
-    m_selfBounds.setTimeSampling( iIndex );
+    m_positionsProperty.setTimeSampling( iIndex );
+    m_idsProperty.setTimeSampling( iIndex );
+    m_selfBoundsProperty.setTimeSampling( iIndex );
 
-    if ( m_childBounds )
+    if ( m_childBoundsProperty )
     {
-        m_childBounds.setTimeSampling( iIndex );
+        m_childBoundsProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_widthsParam )
+    {
+        m_widthsParam.setTimeSampling( iIndex );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -246,11 +255,11 @@ void OPointsSchema::init( uint32_t iTsIdx )
     SetGeometryScope( mdata, kVaryingScope );
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_positions = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
+    m_positionsProperty = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
 
-    m_ids = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata, iTsIdx );
+    m_idsProperty = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata, iTsIdx );
 
-    m_selfBounds = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
+    m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

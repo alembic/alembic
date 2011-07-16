@@ -256,9 +256,9 @@ public:
     //! Return the time sampling
     AbcA::TimeSamplingPtr getTimeSampling()
     {
-        if ( m_positions.valid() )
+        if ( m_positionsProperty.valid() )
         {
-            return m_positions.getTimeSampling();
+            return m_positionsProperty.getTimeSampling();
         }
         else
         {
@@ -276,36 +276,36 @@ public:
         return smp;
     }
 
-    Abc::IInt32ArrayProperty getFaceCounts() { return m_faceCounts; }
-    Abc::IInt32ArrayProperty getFaceIndices() { return m_faceIndices; }
-    Abc::IV3fArrayProperty getPositions() { return m_positions; }
+    Abc::IInt32ArrayProperty getFaceCountsProperty() { return m_faceCountsProperty; }
+    Abc::IInt32ArrayProperty getFaceIndicesProperty() { return m_faceIndicesProperty; }
+    Abc::IV3fArrayProperty getPositionsProperty() { return m_positionsProperty; }
 
-    Abc::IInt32Property getFaceVaryingInterpolateBoundary()
-    { return m_faceVaryingInterpolateBoundary; }
+    Abc::IInt32Property getFaceVaryingInterpolateBoundaryProperty()
+    { return m_faceVaryingInterpolateBoundaryProperty; }
 
-    Abc::IInt32Property getFaceVaryingPropagateCorners()
-    { return m_faceVaryingPropagateCorners; }
+    Abc::IInt32Property getFaceVaryingPropagateCornersProperty()
+    { return m_faceVaryingPropagateCornersProperty; }
 
-    Abc::IInt32Property getInterpolateBoundary()
-    { return m_interpolateBoundary; }
+    Abc::IInt32Property getInterpolateBoundaryProperty()
+    { return m_interpolateBoundaryProperty; }
 
-    Abc::IBox3dProperty getSelfBounds() { return m_selfBounds; }
-    Abc::IBox3dProperty getChildBounds() { return m_childBounds; }
+    Abc::IBox3dProperty getSelfBoundsProperty() { return m_selfBoundsProperty; }
+    Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
 
-    Abc::IInt32ArrayProperty getCreaseIndices() { return m_creaseIndices; }
-    Abc::IInt32ArrayProperty getCreaseLengths() { return m_creaseLengths; }
-    Abc::IFloatArrayProperty getCreaseSharpnesses()
-    { return m_creaseSharpnesses; }
+    Abc::IInt32ArrayProperty getCreaseIndicesProperty() { return m_creaseIndicesProperty; }
+    Abc::IInt32ArrayProperty getCreaseLengthsProperty() { return m_creaseLengthsProperty; }
+    Abc::IFloatArrayProperty getCreaseSharpnessesProperty()
+    { return m_creaseSharpnessesProperty; }
 
-    Abc::IInt32ArrayProperty getCornerIndices() { return m_cornerIndices; }
-    Abc::IFloatArrayProperty getCornerSharpnesses()
-    { return m_cornerSharpnesses; }
+    Abc::IInt32ArrayProperty getCornerIndicesProperty() { return m_cornerIndicesProperty; }
+    Abc::IFloatArrayProperty getCornerSharpnessesProperty()
+    { return m_cornerSharpnessesProperty; }
 
-    Abc::IInt32ArrayProperty getHoles() { return m_holes; }
+    Abc::IInt32ArrayProperty getHolesProperty() { return m_holesProperty; }
 
-    Abc::IStringProperty getSubdivisionScheme() { return m_subdScheme; }
+    Abc::IStringProperty getSubdivisionSchemeProperty() { return m_subdSchemeProperty; }
 
-    IV2fGeomParam &getUVs() { return m_uvs; }
+    IV2fGeomParam &getUVsParam() { return m_uvsParam; }
 
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
@@ -319,26 +319,26 @@ public:
     //! state.
     void reset()
     {
-        m_positions.reset();
-        m_faceIndices.reset();
-        m_faceCounts.reset();
+        m_positionsProperty.reset();
+        m_faceIndicesProperty.reset();
+        m_faceCountsProperty.reset();
 
-        m_faceVaryingInterpolateBoundary.reset();
-        m_faceVaryingPropagateCorners.reset();
-        m_interpolateBoundary.reset();
+        m_faceVaryingInterpolateBoundaryProperty.reset();
+        m_faceVaryingPropagateCornersProperty.reset();
+        m_interpolateBoundaryProperty.reset();
 
-        m_creaseIndices.reset();
-        m_creaseLengths.reset();
-        m_creaseSharpnesses.reset();
+        m_creaseIndicesProperty.reset();
+        m_creaseLengthsProperty.reset();
+        m_creaseSharpnessesProperty.reset();
 
-        m_cornerIndices.reset();
-        m_cornerSharpnesses.reset();
+        m_cornerIndicesProperty.reset();
+        m_cornerSharpnessesProperty.reset();
 
-        m_holes.reset();
+        m_holesProperty.reset();
 
-        m_subdScheme.reset();
+        m_subdSchemeProperty.reset();
 
-        m_uvs.reset();
+        m_uvsParam.reset();
 
         m_arbGeomParams.reset();
 
@@ -353,9 +353,9 @@ public:
     bool valid() const
     {
         return ( Abc::ISchema<SubDSchemaInfo>::valid() &&
-                 m_positions.valid() &&
-                 m_faceIndices.valid() &&
-                 m_faceCounts.valid() );
+                 m_positionsProperty.valid() &&
+                 m_faceIndicesProperty.valid() &&
+                 m_faceCountsProperty.valid() );
     }
 
     // FaceSet related
@@ -371,36 +371,36 @@ public:
 protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
-    Abc::IV3fArrayProperty m_positions;
-    Abc::IInt32ArrayProperty m_faceIndices;
-    Abc::IInt32ArrayProperty m_faceCounts;
+    Abc::IV3fArrayProperty m_positionsProperty;
+    Abc::IInt32ArrayProperty m_faceIndicesProperty;
+    Abc::IInt32ArrayProperty m_faceCountsProperty;
 
     // misc
-    Abc::IInt32Property m_faceVaryingInterpolateBoundary;
-    Abc::IInt32Property m_faceVaryingPropagateCorners;
-    Abc::IInt32Property m_interpolateBoundary;
+    Abc::IInt32Property m_faceVaryingInterpolateBoundaryProperty;
+    Abc::IInt32Property m_faceVaryingPropagateCornersProperty;
+    Abc::IInt32Property m_interpolateBoundaryProperty;
 
     // Creases
-    Abc::IInt32ArrayProperty    m_creaseIndices;
-    Abc::IInt32ArrayProperty    m_creaseLengths;
-    Abc::IFloatArrayProperty  m_creaseSharpnesses;
+    Abc::IInt32ArrayProperty    m_creaseIndicesProperty;
+    Abc::IInt32ArrayProperty    m_creaseLengthsProperty;
+    Abc::IFloatArrayProperty  m_creaseSharpnessesProperty;
 
     // Corners
-    Abc::IInt32ArrayProperty    m_cornerIndices;
-    Abc::IFloatArrayProperty  m_cornerSharpnesses;
+    Abc::IInt32ArrayProperty    m_cornerIndicesProperty;
+    Abc::IFloatArrayProperty  m_cornerSharpnessesProperty;
 
     // Holes
-    Abc::IInt32ArrayProperty    m_holes;
+    Abc::IInt32ArrayProperty    m_holesProperty;
 
     // subdivision scheme
-    Abc::IStringProperty m_subdScheme;
+    Abc::IStringProperty m_subdSchemeProperty;
 
     // bounds
-    Abc::IBox3dProperty m_selfBounds;
-    Abc::IBox3dProperty m_childBounds;
+    Abc::IBox3dProperty m_selfBoundsProperty;
+    Abc::IBox3dProperty m_childBoundsProperty;
 
     // UVs
-    IV2fGeomParam m_uvs;
+    IV2fGeomParam m_uvsParam;
 
     // random geometry parameters
     Abc::ICompoundProperty m_arbGeomParams;

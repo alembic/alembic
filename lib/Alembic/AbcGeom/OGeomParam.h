@@ -202,7 +202,7 @@ public:
 
             m_valProp = prop_type( m_cprop, ".vals", md, ehp, tsIndex );
 
-            m_indices = Abc::OUInt32ArrayProperty( m_cprop, ".indices",
+            m_indicesProperty = Abc::OUInt32ArrayProperty( m_cprop, ".indices",
                 tsIndex );
         }
         else
@@ -233,7 +233,7 @@ public:
         {
             m_cprop = Abc::OCompoundProperty( iThis, iWrapFlag, iArg0, iArg1 );
             m_valProp = prop_type( m_cprop, ".vals" );
-            m_indices = Abc::OUInt32ArrayProperty( m_cprop, ".indices" );
+            m_indicesProperty = Abc::OUInt32ArrayProperty( m_cprop, ".indices" );
 
             m_isIndexed = true;
         }
@@ -253,14 +253,14 @@ public:
         if ( m_valProp.getNumSamples() == 0 )
         {
             m_valProp.set( iSamp.getVals() );
-            if ( m_isIndexed ) { m_indices.set( iSamp.getIndices() ); }
+            if ( m_isIndexed ) { m_indicesProperty.set( iSamp.getIndices() ); }
         }
         else
         {
             SetPropUsePrevIfNull( m_valProp, iSamp.getVals() );
             if ( m_isIndexed )
             {
-                SetPropUsePrevIfNull( m_indices, iSamp.getIndices() );
+                SetPropUsePrevIfNull( m_indicesProperty, iSamp.getIndices() );
             }
         }
 
@@ -273,7 +273,7 @@ public:
 
         m_valProp.setFromPrevious();
 
-        if ( m_isIndexed ) { m_indices.setFromPrevious(); }
+        if ( m_isIndexed ) { m_indicesProperty.setFromPrevious(); }
 
         ALEMBIC_ABC_SAFE_CALL_END();
     }
@@ -285,7 +285,7 @@ public:
 
         m_valProp.setTimeSampling( iIndex );
 
-        if ( m_isIndexed ) { m_indices.setTimeSampling( iIndex ); }
+        if ( m_isIndexed ) { m_indicesProperty.setTimeSampling( iIndex ); }
 
         ALEMBIC_ABC_SAFE_CALL_END();
     }
@@ -312,9 +312,9 @@ public:
 
         if ( m_isIndexed )
         {
-            if ( m_indices )
+            if ( m_indicesProperty )
             {
-                return std::max( m_indices.getNumSamples(),
+                return std::max( m_indicesProperty.getNumSamples(),
                                  m_valProp.getNumSamples() );
             }
             else { return 0; }
@@ -346,7 +346,7 @@ public:
     bool valid() const
     {
         return ( m_valProp.valid()
-                 && ( ( ! m_isIndexed ) || m_indices ) );
+                 && ( ( ! m_isIndexed ) || m_indicesProperty ) );
     }
 
     ALEMBIC_OPERATOR_BOOL( this_type::valid() );
@@ -355,7 +355,7 @@ public:
     {
         m_name = "";
         m_valProp.reset();
-        m_indices.reset();
+        m_indicesProperty.reset();
         m_cprop.reset();
         m_scope = kUnknownScope;
         m_isIndexed = false;
@@ -363,7 +363,7 @@ public:
 
     prop_type getValueProperty() { return m_valProp; }
 
-    OUInt32ArrayProperty getIndexProperty() { return m_indices; }
+    OUInt32ArrayProperty getIndexProperty() { return m_indicesProperty; }
 
 private:
     Abc::ErrorHandler &getErrorHandler() const
@@ -373,7 +373,7 @@ protected:
     std::string m_name;
 
     prop_type m_valProp;
-    OUInt32ArrayProperty m_indices;
+    OUInt32ArrayProperty m_indicesProperty;
     bool m_isIndexed;
 
     GeometryScope m_scope;
