@@ -225,7 +225,7 @@ void OXformSchema::set( XformSample &ioSamp )
 //-*****************************************************************************
 void OXformSchema::setFromPrevious()
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious()" );
 
     m_inheritsProperty.setFromPrevious();
 
@@ -241,10 +241,29 @@ void OXformSchema::setFromPrevious()
 
     m_animChannelsProperty.setFromPrevious();
 
-    if ( m_childBoundsProperty.getNumSamples() > 0 )
+    if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
     { m_childBoundsProperty.setFromPrevious(); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+size_t OXformSchema::getNumSamples() const
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::getNumSamples()" );
+
+    if ( m_opsPWPtr )
+    {
+        return m_opsPWPtr->getNumSamples();
+    }
+    else
+    {
+        return 0;
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return 0;
 }
 
 //-*****************************************************************************

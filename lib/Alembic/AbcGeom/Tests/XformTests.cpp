@@ -112,6 +112,8 @@ void xformOut()
     XformOp scaleop( kScaleOperation, kScaleHint );
     XformOp matrixop( kMatrixOperation, kMatrixHint );
 
+    TESTING_ASSERT( a.getSchema().getNumSamples() == 0 );
+
     XformSample asamp;
     for ( size_t i = 0; i < 20; ++i )
     {

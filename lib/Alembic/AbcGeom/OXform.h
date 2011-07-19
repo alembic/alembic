@@ -152,7 +152,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples() { return m_opsPWPtr->getNumSamples(); }
+    size_t getNumSamples() const;
 
     //! Set an animated sample.  On first call to set, the sample is modified,
     //! so it can't be const.
