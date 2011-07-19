@@ -44,12 +44,14 @@ GetArchiveInfo(
     IArchive & iArchive,
     std::string & oApplicationWriter,
     std::string & oAlembicVersion,
-    int & oAlembicApiVersion,
+    Util::uint32_t & oAlembicApiVersion,
     std::string & oDateWritten,
     std::string & oUserDescription )
 {
     if ( ! iArchive.getPtr() )
+    {
         return;
+    }
 
     AbcA::MetaData md = iArchive.getPtr()->getMetaData();
     oApplicationWriter = md.get( kApplicationNameKey );

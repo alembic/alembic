@@ -51,7 +51,7 @@ void archiveInfoTest()
         md.set("taco", "bar");
         OArchive archive = CreateArchiveWithInfo(
             Alembic::AbcCoreHDF5::WriteArchive(), "archiveInfo.abc",
-            appWriter, userStr, md);
+            appWriter, userStr, md );
 
         TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
     }
@@ -64,7 +64,7 @@ void archiveInfoTest()
             "salad" );
         std::string appInfo;
         std::string abcVersionStr;
-        int abcVersion = 0;
+        Alembic::Util::uint32_t abcVersion = 0;
         std::string dateWritten;
         std::string userInfo;
         GetArchiveInfo( archive, appInfo, abcVersionStr, abcVersion,

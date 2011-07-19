@@ -37,10 +37,6 @@
 #ifndef _Alembic_Abc_ArchiveInfo_h_
 #define _Alembic_Abc_ArchiveInfo_h_
 
-#include <string.h>
-#include <sstream>
-#include <stdio.h>
-#include <time.h>
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/IArchive.h>
 #include <Alembic/Abc/OArchive.h>
@@ -97,7 +93,7 @@ GetArchiveInfo(
     std::string & oAlembicVersion,
 
     //! Numeric version of the Alembic API that wrote the file
-    int & oAlembicApiVersion,
+    Util::uint32_t & oAlembicApiVersion,
 
     //! The data that the file was originally written
     std::string & oDateWritten,
@@ -124,7 +120,7 @@ OArchive CreateArchiveWithInfo(
 
     md.set( kApplicationNameKey, iApplicationWriter );
 
-    int ver = ALEMBIC_API_VERSION;
+    Util::int32_t ver = ALEMBIC_API_VERSION;
     std::stringstream strm;
     strm << ver;
     md.set( kAlembicApiVersionKey, strm.str() );
