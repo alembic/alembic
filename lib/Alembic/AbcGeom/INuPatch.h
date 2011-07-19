@@ -261,6 +261,9 @@ public:
     Abc::IBox3dProperty getSelfBoundsProperty() { return m_selfBoundsProperty; }
     Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
 
+    IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
+    IV2fGeomParam &getUVsParam() { return m_uvsParam; }
+
     bool hasTrimCurve() { return m_hasTrimCurve; }
     bool trimCurveTopologyIsHomogenous();
     bool trimCurveTopologyIsConstant();
