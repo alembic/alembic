@@ -53,13 +53,50 @@ using namespace Alembic::AbcGeom;
 static const chrono_t g_dt = 1.0 / 24.0;
 static const chrono_t g_t0 = 0.25;
 
-static std::vector<double> g_ry;
+static TimeSamplingPtr g_ts( new TimeSampling( g_dt, g_t0 ) );
 
-static const double VAL_EPSILON = std::numeric_limits<double>::epsilon() \
-    * 1024;
+static OPolyMeshSchema::Sample g_meshsamp(
+    V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
+    Int32ArraySample( g_indices, g_numIndices ),
+    Int32ArraySample( g_counts, g_numCounts ) );
 
-static const chrono_t CHRONO_EPSILON = std::numeric_limits<chrono_t>::epsilon() \
-    * 1024;
+//-*****************************************************************************
+OXform recurseCreateXform( OObject &iParent, size_t children, int32_t level,
+                           size_t numSamps )
+{
+    std::string levelName = boost::lexical_cast<std::string>( level );
+
+    OXform xform;
+
+    for ( size_t i = 0; i < children; ++i )
+    {
+        std::string xformName = levelName + "_" + \
+            boost::lexical_cast<std::string>( i );
+        xform = OXform( iParent, xformName, g_ts );
+
+        OPolyMesh opm( xform, "meshy", g_ts );
+
+        XformSample samp;
+        XformOp transop( kTranslateOperation, kTranslateHint );
+        XformOp rotatop( kRotateOperation, kRotateHint );
+
+        for ( size_t j = 0 ; j < numSamps ; ++j )
+        {
+            samp.addOp( transop, V3d(0.0, -0.01 * level * j, 0.0) );
+            samp.addOp( rotatop, V3d(0.0, 0.0, 1.0), (double)level * 10.0 * j );
+            samp.addOp( rotatop, V3d(0.0, 1.0, 0.0), (double)level * 10.0 * j );
+            samp.addOp( rotatop, V3d(1.0, 0.0, 0.0), (double)level * 20.0 * j );
+            xform.getSchema().set( samp );
+            opm.getSchema().set( g_meshsamp );
+        }
+        if ( level > 0 )
+        {
+            recurseCreateXform( xform, children, level - 1, numSamps );
+        }
+    }
+
+    return xform;
+}
 
 //-*****************************************************************************
 void Example1_MeshOut()
@@ -69,113 +106,38 @@ void Example1_MeshOut()
 
     OObject top = archive.getTop();
 
-    TimeSamplingPtr ts( new TimeSampling(g_dt, g_t0) );
+    OXform parentXform = recurseCreateXform( top, 3, 5, 10 );
 
-    OXform xf( top, "xf", ts );
+    OXform xf( parentXform, "xf", g_ts );
 
     OPolyMesh meshyObj( xf, "meshy" );
     OPolyMeshSchema &mesh = meshyObj.getSchema();
 
-    XformOpVec xformVec;
-    XformOp op(kTranslateOperation, kTranslateHint);
-    op.setXAnimated(true);
-    xformVec.push_back(op);
+    XformOp transop( kTranslateOperation, kTranslateHint );
 
-    std::vector < double > staticVec;
-    staticVec.push_back(0.0); // translate y
-    staticVec.push_back(4.04); // translate z
+    // rotate y axis
+    XformOp rotYop( kRotateYOperation );
 
-    std::vector < double > animVec;
-    animVec.push_back(0.0); // translate x
+    XformSample xfsamp;
 
-    // rotate y axis, animated
-    op = XformOp(kRotateOperation, kRotateHint);
-    op.setAngleAnimated(true);
-    xformVec.push_back(op);
-    staticVec.push_back(0.0);  // x
-    staticVec.push_back(1.0);  // y
-    staticVec.push_back(0.0);  // z
-    animVec.push_back(0.0); // angle
-
-    DoubleArraySample data(staticVec);
-    xf.getSchema().setXform( xformVec, data);
-
-    g_ry.push_back( 0 );
-    g_ry.push_back( 32.44 );
-    g_ry.push_back( 64.88 );
-    g_ry.push_back( 82.66 );
-    g_ry.push_back( 50.2225 );
-    g_ry.push_back( 17.7781 );
-    g_ry.push_back( -14.6662 );
-    g_ry.push_back( -47.1106 );
-    g_ry.push_back( -79.555 );
-    g_ry.push_back( -68.0007 );
-
-    data = DoubleArraySample(animVec);
-
-    for ( size_t i = 0 ; i < 10 ; i++ )
+    for ( size_t i = 0 ; i < 100 ; ++i )
     {
         chrono_t t = g_t0 + ( i * g_dt );
 
-        if ( i == 9 )
-        {
-            animVec[0] = 2.0;
-        }
+        xfsamp.addOp( transop, V3d( t, 0.0, 0.0 ) );
+        xfsamp.addOp( rotYop, 200.0 * t );
 
-        animVec[1] = g_ry[i];
+        xf.getSchema().set( xfsamp );
 
-        xf.getSchema().set( data );
-
+        mesh.set( g_meshsamp );
     }
-
-    OPolyMeshSchema::Sample mesh_samp(
-        V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
-        Int32ArraySample( g_indices, g_numIndices ),
-        Int32ArraySample( g_counts, g_numCounts ) );
-
-    // Set the sample.
-    mesh.set( mesh_samp );
-
-    std::cout << std::endl;
 }
 
-//-*****************************************************************************
-void Example1_MeshIn()
-{
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      "transformingMesh1.abc" );
-
-    IXform xf( archive.getTop(), "xf" );
-
-    IXformSchema xfs = xf.getSchema();
-
-    TESTING_ASSERT( xfs.getNumAnimSamples() == 10 );
-
-    TimeSamplingPtr ts = xfs.getTimeSampling();
-
-    TESTING_ASSERT( ts->getTimeSamplingType().isUniform() );
-
-    for ( size_t i = 0 ; i < xfs.getNumAnimSamples() ; i++ )
-    {
-        chrono_t t = g_t0 + ( i * g_dt );
-
-        TESTING_ASSERT( Imath::equalWithAbsError( t, ts->getSampleTime( i ),
-                                                  CHRONO_EPSILON ) );
-
-        DoubleArraySamplePtr anim = xfs.getAnimData( i );
-
-        double ry = (*anim)[1];
-
-        TESTING_ASSERT( Imath::equalWithAbsError( ry, g_ry[i], VAL_EPSILON ) );
-    }
-
-}
 
 //-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     Example1_MeshOut();
-    Example1_MeshIn();
 
     return 0;
 }
