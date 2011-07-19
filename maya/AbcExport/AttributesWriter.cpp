@@ -459,14 +459,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1]);
+                numdFn.getData2Short(val[0], val[1]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[2*i], val[2*i+1]);
+                    numdFn.getData2Short(val[2*i], val[2*i+1]);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -481,14 +481,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1], val[2]);
+                numdFn.getData3Short(val[0], val[1], val[2]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
+                    numdFn.getData3Short(val[3*i], val[3*i+1], val[3*i+2]);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -503,14 +503,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1]);
+                numdFn.getData2Int(val[0], val[1]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[2*i], val[2*i+1]);
+                    numdFn.getData2Int(val[2*i], val[2*i+1]);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -525,14 +525,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1], val[2]);
+                numdFn.getData3Int(val[0], val[1], val[2]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
+                    numdFn.getData3Int(val[3*i], val[3*i+1], val[3*i+2]);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -547,14 +547,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1]);
+                numdFn.getData2Float(val[0], val[1]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[2*i], val[2*i+1]);
+                    numdFn.getData2Float(val[2*i], val[2*i+1]);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -569,14 +569,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1], val[2]);
+                numdFn.getData3Float(val[0], val[1], val[2]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
+                    numdFn.getData3Float(val[3*i], val[3*i+1], val[3*i+2]);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -591,14 +591,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1]);
+                numdFn.getData2Double(val[0], val[1]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[2*i], val[2*i+1]);
+                    numdFn.getData2Double(val[2*i], val[2*i+1]);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -613,14 +613,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1], val[2]);
+                numdFn.getData3Double(val[0], val[1], val[2]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[3*i], val[3*i+1], val[3*i+2]);
+                    numdFn.getData3Double(val[3*i], val[3*i+1], val[3*i+2]);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -635,14 +635,14 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             if (!isArray)
             {
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData(val[0], val[1], val[2], val[3]);
+                numdFn.getData4Double(val[0], val[1], val[2], val[3]);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData(val[4*i], val[4*i+1], val[4*i+2],
+                    numdFn.getData4Double(val[4*i], val[4*i+1], val[4*i+2],
                         val[4*i+3]);
                 }
             }
