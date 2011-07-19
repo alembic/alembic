@@ -73,6 +73,8 @@ typedef float64_t chrono_t;
 // Util/PlainOldDataType.h defines the enum PlainOldDataType
 #define kChrono_TPOD  kFloat64POD
 
+//! Alembic version number Major/Minor/Patch XX.YY.ZZ
+#define ALEMBIC_API_VERSION 10000
 
 //-*****************************************************************************
 //! Exception types borrowed from Alembic::Util. We should probably eventually

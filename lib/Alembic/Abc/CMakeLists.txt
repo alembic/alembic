@@ -34,6 +34,7 @@
 
 # C++ files for this project
 SET( CXX_FILES 
+  ArchiveInfo.cpp
   ErrorHandler.cpp
 
   IArchive.cpp
@@ -64,6 +65,7 @@ SET( H_FILES
   ErrorHandler.h
   Foundation.h
   Argument.h
+  ArchiveInfo.h
 
   IArchive.h
   IArrayProperty.h

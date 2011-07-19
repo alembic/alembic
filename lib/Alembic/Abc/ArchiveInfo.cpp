@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
-//  Sony Pictures Imageworks, Inc. and
+// Copyright (c) 2009-2011,
+//  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic nor the names of their contributors may be used
+// Industrial Light & Magic, nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,39 +34,43 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_All_h_
-#define _Alembic_Abc_All_h_
-
-#include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/ErrorHandler.h>
-#include <Alembic/Abc/Foundation.h>
-
 #include <Alembic/Abc/ArchiveInfo.h>
-#include <Alembic/Abc/Argument.h>
-#include <Alembic/Abc/IArchive.h>
-#include <Alembic/Abc/IArrayProperty.h>
-#include <Alembic/Abc/IBaseProperty.h>
-#include <Alembic/Abc/ICompoundProperty.h>
-#include <Alembic/Abc/IObject.h>
-#include <Alembic/Abc/ISampleSelector.h>
-#include <Alembic/Abc/IScalarProperty.h>
-#include <Alembic/Abc/ISchema.h>
-#include <Alembic/Abc/ISchemaObject.h>
-#include <Alembic/Abc/ITypedArrayProperty.h>
-#include <Alembic/Abc/ITypedScalarProperty.h>
 
-#include <Alembic/Abc/OArchive.h>
-#include <Alembic/Abc/OArrayProperty.h>
-#include <Alembic/Abc/OBaseProperty.h>
-#include <Alembic/Abc/OCompoundProperty.h>
-#include <Alembic/Abc/OObject.h>
-#include <Alembic/Abc/OScalarProperty.h>
-#include <Alembic/Abc/OSchema.h>
-#include <Alembic/Abc/OSchemaObject.h>
-#include <Alembic/Abc/OTypedArrayProperty.h>
-#include <Alembic/Abc/OTypedScalarProperty.h>
+namespace Alembic {
+namespace Abc {
 
-#include <Alembic/Abc/TypedArraySample.h>
-#include <Alembic/Abc/TypedPropertyTraits.h>
+void
+GetArchiveInfo(
+    IArchive & iArchive,
+    std::string & oApplicationWriter,
+    std::string & oAlembicVersion,
+    int & oAlembicApiVersion,
+    std::string & oDateWritten,
+    std::string & oUserDescription )
+{
+    if ( ! iArchive.getPtr() )
+        return;
 
-#endif
+    AbcA::MetaData md = iArchive.getPtr()->getMetaData();
+    oApplicationWriter = md.get( kApplicationNameKey );
+    oAlembicVersion = md.get( kAlembicVersionKey );
+    oAlembicApiVersion = atoi( md.get( kAlembicApiVersionKey ).c_str() );
+
+    oDateWritten = md.get( kDateWrittenKey );
+    oUserDescription = md.get( kUserDescriptionKey );
+}
+
+std::string GetLibraryVersion()
+{
+    int ver = ALEMBIC_API_VERSION;
+
+    std::stringstream strm;
+    strm << ver/10000 << "." << (ver/100) - (ver / 10000 * 100) << "." <<
+        ver - (ver / 100 * 100) << " (built: " << __DATE__ << " "<<
+        __TIME__ << ")";
+
+    return strm.str();
+}
+
+} // End namespace Abc
+} // End namespace Alembic

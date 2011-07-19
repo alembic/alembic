@@ -162,6 +162,19 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy
 }
 
 //-*****************************************************************************
+inline ErrorHandler::Policy GetErrorHandlerPolicyFromArgs
+( const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument() )
+{
+    Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    iArg2.setInto( args );
+    return args.getErrorHandlerPolicy();
+}
+
+//-*****************************************************************************
 inline AbcA::MetaData GetMetaData
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),

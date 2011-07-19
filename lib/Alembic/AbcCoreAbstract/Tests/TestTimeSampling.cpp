@@ -559,7 +559,7 @@ void testBadTypes()
 {
     AbcA::TimeSamplingType t;
     TESTING_ASSERT_THROW( t =
-    	AbcA::TimeSamplingType(1, AbcA::TimeSamplingType::AcyclicTimePerCycle()),
+        AbcA::TimeSamplingType(1, AbcA::TimeSamplingType::AcyclicTimePerCycle()),
         Alembic::Util::Exception);
 
     TESTING_ASSERT_THROW(t = AbcA::TimeSamplingType(1, 0.0),
@@ -587,6 +587,10 @@ void testBadTypes()
 //-*****************************************************************************
 int main( int, char** )
 {
+    // make sure somebody didn't mess up the ALEMBIC_API_VERSION
+    TESTING_ASSERT(ALEMBIC_API_VERSION > 9999 &&
+        ALEMBIC_API_VERSION < 999999);
+
     // cyclic is trickiest
     testCyclicTime1();
     testCyclicTime2();

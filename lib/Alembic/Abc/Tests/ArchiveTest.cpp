@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,39 +34,53 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_All_h_
-#define _Alembic_Abc_All_h_
+#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/Abc/All.h>
+#include "Assert.h"
 
-#include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/ErrorHandler.h>
-#include <Alembic/Abc/Foundation.h>
+namespace Abc = Alembic::Abc;
+using namespace Abc;
 
-#include <Alembic/Abc/ArchiveInfo.h>
-#include <Alembic/Abc/Argument.h>
-#include <Alembic/Abc/IArchive.h>
-#include <Alembic/Abc/IArrayProperty.h>
-#include <Alembic/Abc/IBaseProperty.h>
-#include <Alembic/Abc/ICompoundProperty.h>
-#include <Alembic/Abc/IObject.h>
-#include <Alembic/Abc/ISampleSelector.h>
-#include <Alembic/Abc/IScalarProperty.h>
-#include <Alembic/Abc/ISchema.h>
-#include <Alembic/Abc/ISchemaObject.h>
-#include <Alembic/Abc/ITypedArrayProperty.h>
-#include <Alembic/Abc/ITypedScalarProperty.h>
+void archiveInfoTest()
+{
+    std::string appWriter = "Alembic unit tests";
+    std::string userStr = "abcdefg";
+    {
+        Alembic::AbcCoreAbstract::MetaData md;
+        md.set("potato", "salad");
+        md.set("taco", "bar");
+        OArchive archive = CreateArchiveWithInfo(
+            Alembic::AbcCoreHDF5::WriteArchive(), "archiveInfo.abc",
+            appWriter, userStr, md);
 
-#include <Alembic/Abc/OArchive.h>
-#include <Alembic/Abc/OArrayProperty.h>
-#include <Alembic/Abc/OBaseProperty.h>
-#include <Alembic/Abc/OCompoundProperty.h>
-#include <Alembic/Abc/OObject.h>
-#include <Alembic/Abc/OScalarProperty.h>
-#include <Alembic/Abc/OSchema.h>
-#include <Alembic/Abc/OSchemaObject.h>
-#include <Alembic/Abc/OTypedArrayProperty.h>
-#include <Alembic/Abc/OTypedScalarProperty.h>
+        TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
+    }
 
-#include <Alembic/Abc/TypedArraySample.h>
-#include <Alembic/Abc/TypedPropertyTraits.h>
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+            "archiveInfo.abc" );
+        TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
+        TESTING_ASSERT( archive.getPtr()->getMetaData().get("potato") ==
+            "salad" );
+        std::string appInfo;
+        std::string abcVersionStr;
+        int abcVersion = 0;
+        std::string dateWritten;
+        std::string userInfo;
+        GetArchiveInfo( archive, appInfo, abcVersionStr, abcVersion,
+            dateWritten, userInfo );
+        TESTING_ASSERT( appWriter ==  appInfo );
+        TESTING_ASSERT( userStr ==  userInfo );
+        TESTING_ASSERT( abcVersion ==  ALEMBIC_API_VERSION );
+        std::cout << "Alembic version: " << abcVersionStr << std::endl;
+        std::cout << "Date written: " << dateWritten << std::endl;
+        TESTING_ASSERT( dateWritten != "" );
+        TESTING_ASSERT( abcVersionStr != "" );
+    }
+}
 
-#endif
+int main( int argc, char *argv[] )
+{
+    archiveInfoTest();
+    return 0;
+}
