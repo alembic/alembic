@@ -1,0 +1,6 @@
+INCLUDE_DIRECTORIES( ${ALEMBIC_ARNOLD_INCLUDE_PATH} )
+
+SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
+
+ADD_EXECUTABLE( arnold_procedural_testbed testbed.cpp )
+TARGET_LINK_LIBRARIES( arnold_procedural_testbed ${ALEMBIC_ARNOLD_LIBARNOLD} dl )

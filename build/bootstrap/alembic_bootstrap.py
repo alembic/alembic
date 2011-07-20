@@ -889,6 +889,11 @@ def runCMake( opts, srcdir, ranBootstrap = False ):
             cmake_extra_args += ' -D USE_PRMAN:BOOL="FALSE"'
             opts.prman = None
 
+        if opts.disable_arnold:
+            cmake_extra_args += ' -D USE_ARNOLD:BOOL="FALSE"'
+            opts.arnold = None
+
+
         if opts.disable_maya:
             cmake_extra_args += ' -D USE_MAYA:BOOL="FALSE"'
             opts.maya = None
@@ -899,6 +904,9 @@ def runCMake( opts, srcdir, ranBootstrap = False ):
 
         if opts.prman:
             cmake_extra_args += ' -D PRMAN_ROOT:STRING="%s"' %opts.prman
+        
+        if opts.arnold:
+            cmake_extra_args += ' -D ARNOLD_ROOT:STRING="%s"' %opts.arnold
 
         if opts.hdf5_include_dir:
             cmake_extra_args += ' -D HDF5_C_INCLUDE_DIR:PATH="%s"' % \
@@ -967,6 +975,11 @@ def makeParser( mk_cmake_basename ):
     configOptions.add_option( "--with-prman", dest="prman", type="string",
                               default=None, help="PRMAN location",
                               metavar="PRMAN_ROOT" )
+
+    configOptions.add_option( "--with-arnold", dest="arnold", type="string",
+                              default=None, help="ARNOLD location",
+                              metavar="ARNOLD_ROOT" )
+    
 
     configOptions.add_option( "--hdf5_include_dir", dest="hdf5_include_dir",
                               type="string", default=None,
@@ -1038,6 +1051,11 @@ def makeParser( mk_cmake_basename ):
     configOptions.add_option( "--disable-prman", dest="disable_prman",
                               action="store_true", default=False,
                               help="Disable PRMAN" )
+
+    configOptions.add_option( "--disable-arnold", dest="disable_arnold",
+                              action="store_true", default=False,
+                              help="Disable Arnold" )
+
 
     configOptions.add_option( "--disable-maya", dest="disable_maya",
                               action="store_true", default=False,

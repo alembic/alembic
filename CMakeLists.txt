@@ -253,6 +253,21 @@ ELSE()
     ENDIF()
 ENDIF()
 
+# Include Arnold stuff
+IF(DEFINED USE_ARNOLD AND NOT USE_ARNOLD)
+    MESSAGE(STATUS "Skipping Arnold plugins")
+ELSE()
+    MESSAGE( STATUS "About to include AlembicArnold.cmake" )
+    INCLUDE( "./build/AlembicArnold.cmake" )
+    IF( ALEMBIC_ARNOLD_FOUND )
+        MESSAGE(STATUS "Building Arnold plugins" )
+        ADD_SUBDIRECTORY( arnold )
+    ELSE()
+        MESSAGE(STATUS "For some reason, ALEMBIC_ARNOLD_FOUND is False?")
+    ENDIF()
+ENDIF()
+
+
 ADD_SUBDIRECTORY( python EXCLUDE_FROM_ALL )
 
 # Include Maya stuff
