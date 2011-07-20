@@ -36,6 +36,7 @@
 
 import maya.cmds as MayaCmds
 import os
+import shutil
 import subprocess
 import unittest
 import util

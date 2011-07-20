@@ -86,13 +86,10 @@ template< class IData, class IDataSchema, class OData, class ODataSchema >
 void init(std::vector< IObject > & iObjects, OObject & oParentObj,
           ODataSchema & oSchema, int NUMINPUTS)
 {
-    bool isStatic = true;
     const std::string fullNodeName = iObjects[0].getFullName();
 
     // gether information from the first input node in the list:
     IDataSchema iSchema0 = IData(iObjects[0], Alembic::Abc::kWrapExisting).getSchema();
-    if (iSchema0.getNumSamples() > 1)
-        isStatic = false;
 
     TimeSamplingPtr tsPtr0 = iSchema0.getTimeSampling();
     TimeSamplingType tsType0 = tsPtr0->getTimeSamplingType();
@@ -119,10 +116,6 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
     {
         IDataSchema iSchema =
             IData(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
-
-        size_t numSamples = iSchema.getNumSamples();
-        if (numSamples > 1)
-            isStatic = false;
 
         TimeSamplingPtr tsPtr = iSchema.getTimeSampling();
         TimeSamplingType tsType = tsPtr->getTimeSamplingType();
@@ -183,7 +176,6 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
 void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
 {
     const AbcA::ObjectHeader & header = iObjects[0].getHeader();
-    bool isStatic = true;
 
     // there are a number of things that needs to be checked for each node
     // to make sure they can be properly stitched together
@@ -207,9 +199,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         //
         IXformSchema xformSchema0 = IXform(iObjects[0], Alembic::Abc::kWrapExisting).getSchema();
         size_t numSamples = xformSchema0.getNumSamples();
-        if (numSamples > 1)
-            isStatic = false;
-
         size_t numOps0 = xformSchema0.getNumOps();
         XformSample samp0 = xformSchema0.getValue(0);
 
@@ -242,9 +231,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         for (size_t i = 1; i < NUMINPUTS; i++)
         {
             IXformSchema xformSchema = IXform(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
-            if (xformSchema.getNumSamples() > 1)
-                isStatic = false;
-
             TimeSamplingPtr tsPtr = xformSchema.getTimeSampling();
             tsPtrVec.push_back(tsPtr);
 
@@ -271,7 +257,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
 
             chrono_t lastMin = minVec[i-1];
             chrono_t min = minVec[i];
-            if (!isStatic & fabs(min - lastMax - spf) > ZERO)
+            if (!xformSchema.isConstant() & fabs(min - lastMax - spf) > ZERO)
             {
                 std::cerr << "there's a gap between [" << lastMin << ", "
                     << lastMax << "] to " << min << std::endl;
@@ -306,7 +292,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         //
         if (!isLocator)
         {
-            if (isStatic)
+            if (xformSchema0.isConstant())
             {
                 IXform xform(iObjects[0], Alembic::Abc::kWrapExisting);
                 XformSample samp;
@@ -384,8 +370,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             ISubDSchema iSchema =
                 ISubD(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             size_t numSamples = iSchema.getNumSamples();
-            if (numSamples > 1)
-                isStatic = false;
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
                 ISubDSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -436,7 +420,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
 
                 oSchema.set(oSamp);
             }
-            if (isStatic)
+            if (iSchema.isConstant())
                 break;
         }
     }
@@ -448,32 +432,72 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
               OPolyMesh,
               OPolyMeshSchema >(iObjects, oParentObj, oSchema, NUMINPUTS);
 
-        // stitch the CurvesSchemas
+        // stitch the PolySchema
         //
         for (size_t i = 0; i < NUMINPUTS; i++)
         {
             IPolyMeshSchema iSchema =
                 IPolyMesh(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             size_t numSamples = iSchema.getNumSamples();
-            if (numSamples > 1)
-                isStatic = false;
+
+            IN3fGeomParam normals = iSchema.getNormalsParam();
+            IV2fGeomParam uvs = iSchema.getUVsParam();
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
                 IPolyMeshSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OPolyMeshSchema::Sample oSamp;
+
                 Abc::V3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
+
                 Abc::Int32ArraySamplePtr faceIndicesPtr = iSamp.getFaceIndices();
                 if (faceIndicesPtr)
                     oSamp.setFaceIndices(*faceIndicesPtr);
+
                 Abc::Int32ArraySamplePtr faceCntPtr = iSamp.getFaceCounts();
                 if (faceCntPtr)
                     oSamp.setFaceCounts(*faceCntPtr);
+
+                // set normals
+                if (normals && normals.isIndexed())
+                {
+                    IN3fGeomParam::Sample iNormal = normals.getIndexedValue(reqIdx);
+                    ON3fGeomParam::Sample oNormal(*(iNormal.getVals()),
+                                                  *(iNormal.getIndices()),
+                                                  iNormal.getScope());
+                    oSamp.setNormals(oNormal);
+                }
+                else if (normals)
+                {
+                    IN3fGeomParam::Sample iNormal = normals.getExpandedValue(reqIdx);
+                    ON3fGeomParam::Sample oNormal(*(iNormal.getVals()),
+                                                  iNormal.getScope());
+                    oSamp.setNormals(oNormal);
+                }
+
+                // set uvs
+                if (uvs && uvs.isIndexed())
+                {
+                    IV2fGeomParam::Sample iUV = uvs.getIndexedValue(reqIdx);
+                    OV2fGeomParam::Sample oUV(*(iUV.getVals()),
+                                                  *(iUV.getIndices()),
+                                                  iUV.getScope());
+                    oSamp.setUVs(oUV);
+                }
+                else if (uvs)
+                {
+                    IV2fGeomParam::Sample iUV = uvs.getExpandedValue(reqIdx);
+                    OV2fGeomParam::Sample oUV(*(iUV.getVals()),
+                                                  iUV.getScope());
+                    oSamp.setUVs(oUV);
+                }
+
                 oSamp.setChildBounds(iSamp.getChildBounds());
+
                 oSchema.set(oSamp);
             }
-            if (isStatic)
+            if (iSchema.isConstant())
                 break;
         }
     }
@@ -492,13 +516,11 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             ICameraSchema iSchema =
                 ICamera(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             size_t numSamples = iSchema.getNumSamples();
-            if (numSamples > 1)
-                isStatic = false;
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
                 oSchema.set(iSchema.getValue(reqIdx));
             }
-            if (isStatic)
+            if (iSchema.isConstant())
                 break;
         }
     }
@@ -520,8 +542,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IN3fGeomParam iNormals = iSchema.getNormalsParam();
             IFloatGeomParam iWidths = iSchema.getWidthsParam();
             size_t numSamples = iSchema.getNumSamples();
-            if (numSamples > 1)
-                isStatic = false;
+
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
                 ICurvesSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -570,7 +591,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 oSamp.setChildBounds(iSamp.getChildBounds());
                 oSchema.set(oSamp);
             }
-            if (isStatic)
+            if (iSchema.isConstant())
                 break;
         }
     }
@@ -589,8 +610,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IPointsSchema iSchema =
                 IPoints(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             size_t numSamples = iSchema.getNumSamples();
-            if (numSamples > 1)
-                isStatic = false;
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
                 IPointsSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -604,7 +623,102 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 oSamp.setChildBounds(iSamp.getChildBounds());
                 oSchema.set(oSamp);
             }
-            if (isStatic)
+            if (iSchema.isConstant())
+                break;
+        }
+    }
+    else if (INuPatch::matches(header))
+    {
+        ONuPatchSchema oSchema;
+        init< INuPatch,
+              INuPatchSchema,
+              ONuPatch,
+              ONuPatchSchema >(iObjects, oParentObj, oSchema, NUMINPUTS);
+
+        // stitch the NuPatchSchemas
+        //
+        for (size_t i = 0; i < NUMINPUTS; i++)
+        {
+            INuPatchSchema iSchema =
+                INuPatch(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
+            size_t numSamples = iSchema.getNumSamples();
+
+            IN3fGeomParam normals = iSchema.getNormalsParam();
+            IV2fGeomParam uvs = iSchema.getUVsParam();
+
+            for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
+            {
+                INuPatchSchema::Sample iSamp = iSchema.getValue(reqIdx);
+                ONuPatchSchema::Sample oSamp;
+
+                Abc::V3fArraySamplePtr posPtr = iSamp.getPositions();
+                if (posPtr)
+                    oSamp.setPositions(*posPtr);
+
+                oSamp.setNu(iSamp.getNumU());
+                oSamp.setNv(iSamp.getNumV());
+                oSamp.setUOrder(iSamp.getUOrder());
+                oSamp.setVOrder(iSamp.getVOrder());
+
+                Abc::FloatArraySamplePtr uKnotsPtr = iSamp.getUKnot();
+                if (uKnotsPtr)
+                    oSamp.setUKnot(*uKnotsPtr);
+
+                Abc::FloatArraySamplePtr vKnotsPtr = iSamp.getVKnot();
+                if (vKnotsPtr)
+                    oSamp.setVKnot(*vKnotsPtr);
+
+                // set normals
+                if (normals && normals.isIndexed())
+                {
+                    IN3fGeomParam::Sample iNormal = normals.getIndexedValue(reqIdx);
+                    ON3fGeomParam::Sample oNormal(*(iNormal.getVals()),
+                                                  *(iNormal.getIndices()),
+                                                  iNormal.getScope());
+                    oSamp.setNormals(oNormal);
+                }
+                else if (normals)
+                {
+                    IN3fGeomParam::Sample iNormal = normals.getExpandedValue(reqIdx);
+                    ON3fGeomParam::Sample oNormal(*(iNormal.getVals()),
+                                                  iNormal.getScope());
+                    oSamp.setNormals(oNormal);
+                }
+
+                // set uvs
+                if (uvs && uvs.isIndexed())
+                {
+                    IV2fGeomParam::Sample iUV = uvs.getIndexedValue(reqIdx);
+                    OV2fGeomParam::Sample oUV(*(iUV.getVals()),
+                                                  *(iUV.getIndices()),
+                                                  iUV.getScope());
+                    oSamp.setUVs(oUV);
+                }
+                else if (uvs)
+                {
+                    IV2fGeomParam::Sample iUV = uvs.getExpandedValue(reqIdx);
+                    OV2fGeomParam::Sample oUV(*(iUV.getVals()),
+                                                  iUV.getScope());
+                    oSamp.setUVs(oUV);
+                }
+
+                if (iSchema.hasTrimCurve())
+                {
+                    oSamp.setTrimCurve(iSamp.getTrimNumLoops(),
+                                       *(iSamp.getTrimNumCurves()),
+                                       *(iSamp.getTrimNumVertices()),
+                                       *(iSamp.getTrimOrders()),
+                                       *(iSamp.getTrimKnots()),
+                                       *(iSamp.getTrimMins()),
+                                       *(iSamp.getTrimMaxes()),
+                                       *(iSamp.getTrimU()),
+                                       *(iSamp.getTrimV()),
+                                       *(iSamp.getTrimW()));
+                }
+                oSamp.setChildBounds(iSamp.getChildBounds());
+                oSchema.set(oSamp);
+            }
+            if (iSchema.isConstant())
                 break;
         }
     }

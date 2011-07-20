@@ -301,8 +301,8 @@ void MeshDrwHelper::draw( const DrawContext & iCtx ) const
         normals = &(m_customN.front());
     }
 
-#ifndef SIMPLE_ABC_VIEWER_NO_GL_CLIENT_STATE
-//#if 0
+//#ifndef SIMPLE_ABC_VIEWER_NO_GL_CLIENT_STATE
+#if 0
     {
         GL_NOISY( glEnableClientState( GL_VERTEX_ARRAY ) );
         if ( normals )

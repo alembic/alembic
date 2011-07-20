@@ -502,15 +502,21 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             std::vector< Alembic::Util::int32_t > val(dimSize*2);
             if (!isArray)
             {
+                int val0, val1;
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData2Int(val[0], val[1]);
+                numdFn.getData2Int(val0, val1);
+                val[0] = Alembic::Util::int32_t(val0);
+                val[1] = Alembic::Util::int32_t(val1);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
+                    int val0, val1;
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData2Int(val[2*i], val[2*i+1]);
+                    numdFn.getData2Int(val0, val1);
+                    val[2*i] = Alembic::Util::int32_t(val0);
+                    val[2*i+1] = Alembic::Util::int32_t(val1);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
@@ -524,15 +530,23 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             std::vector< Alembic::Util::int32_t > val(dimSize*3);
             if (!isArray)
             {
+                int val0, val1, val2;
                 MFnNumericData numdFn(iPlug.asMObject());
-                numdFn.getData3Int(val[0], val[1], val[2]);
+                numdFn.getData3Int(val0, val1, val2);
+                val[0] = Alembic::Util::int32_t(val0);
+                val[1] = Alembic::Util::int32_t(val1);
+                val[2] = Alembic::Util::int32_t(val2);
             }
             else
             {
                 for (size_t i = 0; i < numElements; ++i)
                 {
+                    int val0, val1, val2;
                     MFnNumericData numdFn(iPlug[i].asMObject());
-                    numdFn.getData3Int(val[3*i], val[3*i+1], val[3*i+2]);
+                    numdFn.getData3Int(val0, val1, val2);
+                    val[3*i] = Alembic::Util::int32_t(val0);
+                    val[3*i+1] = Alembic::Util::int32_t(val1);
+                    val[3*i+2] = Alembic::Util::int32_t(val2);
                 }
             }
             AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
