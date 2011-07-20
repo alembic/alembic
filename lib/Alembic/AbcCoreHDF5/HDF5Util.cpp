@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -88,24 +88,6 @@ hid_t DsetGzipCreatePlist( const Dimensions &dims, int level )
                   "H5Pset_link_creation_order() failed" );
 
     return ID;
-}
-
-//-*****************************************************************************
-static void getDatatypeArrayDims( hid_t iDtype, Dimensions &dims )
-{
-    ABCA_ASSERT( iDtype >= 0, "Invalid datatype in getDatatypeArrayDims" );
-    
-    int ndims = H5Tget_array_ndims( iDtype );
-    ABCA_ASSERT( ndims > 0,
-                  "getDatatypeArrayDims() H5Tget_array_ndims failed" );
-
-    HDimensions hdims( ( size_t )ndims );
-    ndims = H5Tget_array_dims2( iDtype, hdims.rootPtr() );
-    ABCA_ASSERT( ndims > 0,
-                  "getDatatypeArrayDims() H5Tget_array_dims failed" );
-    ABCA_ASSERT( ndims == hdims.rank(),
-                  "getDatatypeArrayDims() inconsistent ranks" );
-    dims = hdims;
 }
 
 //-*****************************************************************************

@@ -52,6 +52,7 @@
 //-*****************************************************************************
 namespace AbcA = Alembic::AbcCoreAbstract::v1;
 using AbcA::chrono_t;
+using AbcA::index_t;
 
 using namespace boost;
 
@@ -131,16 +132,14 @@ void validateTimeSampling( const AbcA::TimeSampling &timeSampling,
 //-*****************************************************************************
 void testTimeSampling( const AbcA::TimeSampling &timeSampling,
                        const AbcA::TimeSamplingType &timeSamplingType,
-                       size_t numSamples )
+                       index_t numSamples )
 {
-    const size_t lastIndex = numSamples - 1;
-    const chrono_t minTime = timeSampling.getSampleTime( 0 );
-    const chrono_t maxTime = timeSampling.getSampleTime( lastIndex );
+    const index_t lastIndex = numSamples - 1;
 
     const chrono_t timePerCycle = timeSamplingType.getTimePerCycle();
-    const size_t numSamplesPerCycle = timeSamplingType.getNumSamplesPerCycle();
+    const index_t numSamplesPerCycle = timeSamplingType.getNumSamplesPerCycle();
 
-    const size_t numStoredTimes = timeSampling.getNumStoredTimes();
+    const index_t numStoredTimes = timeSampling.getNumStoredTimes();
 
     TESTING_MESSAGE_ASSERT( timeSamplingType.isAcyclic() ||
         numStoredTimes == numSamplesPerCycle,
@@ -152,19 +151,20 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
               << "Only the first " << numStoredTimes << " values are stored; "
               << "the rest are computed." << std::endl << std::endl;
 
-    for ( size_t i = 0; i < numSamples ; ++i )
+    for ( index_t i = 0; i < numSamples ; ++i )
     {
         std::cout << i << ": " << timeSampling.getSampleTime( i )
                   << std::endl;
 
         chrono_t timeI = timeSampling.getSampleTime( i );
-        size_t floorIndex = timeSampling.getFloorIndex(
+        index_t floorIndex = timeSampling.getFloorIndex(
             timeI, numSamples ).first;
 
-        size_t ceilIndex = timeSampling.getCeilIndex(
+        index_t ceilIndex = timeSampling.getCeilIndex(
             timeI, numSamples ).first;
 
-        size_t nearIndex = timeSampling.getNearIndex( timeI, numSamples ).first;
+        index_t nearIndex = timeSampling.getNearIndex(
+            timeI, numSamples ).first;
 
         // floor
         TESTING_MESSAGE_ASSERT(
@@ -540,7 +540,7 @@ void testAcyclicTime3()
         tvec.push_back( ranTime );
     }
 
-    AbcA::TimeSamplingType::AcyclicFlag acf;
+    AbcA::TimeSamplingType::AcyclicFlag acf = AbcA::TimeSamplingType::kAcyclic;
 
     const AbcA::TimeSamplingType tSampTyp( acf );
     const AbcA::TimeSampling tSamp( tSampTyp, tvec );

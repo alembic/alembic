@@ -81,8 +81,6 @@ MStatus AbcExport::doIt(const MArgList & args)
 
     MArgParser argData(syntax(), args, &status);
 
-    unsigned int numberOfArguments = args.length();
-
     if (argData.isFlagSet("help"))
     {
         MGlobal::displayInfo(util::getHelpText());

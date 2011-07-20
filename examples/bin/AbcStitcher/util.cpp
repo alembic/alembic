@@ -169,6 +169,8 @@ void stitchScalarProp(const PropertyHeader & propHeader,
             case Alembic::Util::kWstringPOD:
                 scalarPropIO< std::wstring >(reader, extent, writer);
                 break;
+            default:
+                break;
         }
 
         bool isStatic = (reader.getNumSamples() == 1);

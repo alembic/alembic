@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -49,7 +49,7 @@ void AbcReader::parsingEnd( const std::string &iStreamName,
 //-*****************************************************************************
 void AbcReader::v( index_t iIndex, const V3d &iPoint )
 {
-    assert( m_vertices.size()+1 == iIndex );
+    assert( ( index_t ) ( m_vertices.size()+1 ) == iIndex );
 
     V3f pt( iPoint.x, iPoint.y, iPoint.z );
 

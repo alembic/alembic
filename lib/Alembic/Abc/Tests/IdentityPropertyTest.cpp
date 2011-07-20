@@ -70,12 +70,12 @@ void writeProperty(const std::string &archiveName)
     ODoubleProperty mass( childProps,    // owner
                           "mass",   // name
                           units );  // metadata
-        
-    for (int tt=0; tt<numSamples; tt++)
+
+    for (unsigned int tt=0; tt<numSamples; tt++)
     {
         double mm = (33.0 + 0.1*tt); // vary the mass
         mass.set( mm );
-    }    
+    }
 
     std::cout << archiveName << " was successfully written" << std::endl;
     // Done - the archive closes itself
@@ -139,7 +139,7 @@ void readProperty(const std::string &archiveName)
     ABCA_ASSERT( numSamples == 5, "Expected 5 samples, found " << numSamples );
     
     std::cout << "..with values: ";
-    for (int ss=0; ss<numSamples; ss++)
+    for (unsigned int ss=0; ss<numSamples; ss++)
     {
         ISampleSelector iss( (index_t) ss);
         printSampleValue( mass, iss );
@@ -147,7 +147,7 @@ void readProperty(const std::string &archiveName)
         double massDiff = mass.getValue( iss ) -  (33.0 + 0.1*ss);
         ABCA_ASSERT( fabs(massDiff) < 1e-12, "Incorrect sample value read" );
     }
-    std::cout << std::endl;    
+    std::cout << std::endl;
 
     // Done - the archive closes itself
 }

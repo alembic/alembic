@@ -68,7 +68,6 @@ void Example1_MeshIn( const std::string &arkiveFile )
     IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), arkiveFile  );
 
     IPolyMesh pmeshyObj( IObject( archive, kTop ), "polymeshy" );
-    IPolyMeshSchema &pmesh = pmeshyObj.getSchema();
 
     IObject smeshyObj( archive.getTop(), "subdmeshy" );
 

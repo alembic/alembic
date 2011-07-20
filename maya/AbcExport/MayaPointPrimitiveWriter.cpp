@@ -75,7 +75,6 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     std::vector<float> velocity;
     std::vector< Alembic::Util::uint64_t > particleIds;
     std::vector<float> width;
-    float constantwidth = -1.0;
 
     bool runupFromStart = false;
     MTime to(iFrame);

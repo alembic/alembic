@@ -159,12 +159,12 @@ inline double RadiansToDegrees( double iRadians )
 
 //-*****************************************************************************
 //! A couple simple tests for if something is a GeomParam
-static bool IsGeomParam( const AbcA::MetaData &iMetaData )
+inline bool IsGeomParam( const AbcA::MetaData &iMetaData )
 {
     return iMetaData.get( "isGeomParam" ) == "true";
 }
 
-static bool IsGeomParam( const AbcA::PropertyHeader &iHeader )
+inline bool IsGeomParam( const AbcA::PropertyHeader &iHeader )
 {
     return IsGeomParam( iHeader.getMetaData() );
 }

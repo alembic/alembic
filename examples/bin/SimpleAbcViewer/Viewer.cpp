@@ -78,7 +78,6 @@ void init( void )
     {
         GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
         GLfloat mat_shininess[] = { 100.0 };
-        GLfloat light_position[] = { 20.0, 20.0, 20.0, 0.0 };
         GLfloat mat_front_emission[] = {0.0, 0.0, 0.0, 0.0 };
         GLfloat mat_back_emission[] = {1.0f, 0.0, 0.0, 1.0f };
 
@@ -212,7 +211,7 @@ void reshape( int w, int h )
 void glPrint( GLfloat x, GLfloat y, const std::string &text )
 {
     glRasterPos2f( x, y );
-    for ( int p = 0; p < text.size(); ++p )
+    for ( size_t p = 0; p < text.size(); ++p )
     {
         glutBitmapCharacter( GLUT_BITMAP_HELVETICA_18, text[p] );
     }
@@ -252,7 +251,7 @@ void RenderIt()
     char *buffer = new char[strlen( templ ) + 1];
     strcpy( buffer, templ );
 #ifndef PLATFORM_WINDOWS
-    int _dummy1 = mkstemp( buffer );
+    mkstemp( buffer );
 #endif
     std::string cameraFileName = buffer;
 #ifdef PLATFORM_WINDOWS
@@ -304,7 +303,7 @@ void RenderIt()
     std::string cmd = g_state.RenderScript;
     cmd += " ";
     cmd += cmdArgs;
-    int _dummy2= system( cmd.c_str() );
+    system( cmd.c_str() );
 
     delete[] buffer;
 }
@@ -315,7 +314,6 @@ void keyboard( unsigned char key, int x, int y )
     // std::cout << "Key hit: " << ( int )key << std::endl;
 
     static bool bf = true;
-    static bool xray = false;
 
     switch ( key )
     {

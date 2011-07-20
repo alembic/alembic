@@ -222,7 +222,7 @@ void MayaNurbsCurveWriter::write()
 
         MPointArray cvArray;
         stat = curve.getCVs(cvArray, MSpace::kObject);
-        for (size_t j = 0; j < numCVs; j++)
+        for (Alembic::Util::int32_t j = 0; j < numCVs; j++)
         {
             MPoint transformdPt;
             if (mIsCurveGrp)
@@ -244,10 +244,10 @@ void MayaNurbsCurveWriter::write()
             MStatus status = widthPlug.getValue(widthObj);
             MFnDoubleArrayData fnDoubleArrayData(widthObj, &status);
             MDoubleArray doubleArrayData = fnDoubleArrayData.array();
-            size_t arraySum = doubleArrayData.length();
+            Alembic::Util::int32_t arraySum = doubleArrayData.length();
             if (arraySum == numCVs)
             {
-                for (size_t i = 0; i < arraySum; i++)
+                for (Alembic::Util::int32_t i = 0; i < arraySum; i++)
                 {
                     width.push_back(doubleArrayData[i]);
                 }

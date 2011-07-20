@@ -81,7 +81,7 @@ void writeSimpleProperties(const std::string &archiveName)
                           tsidx );
 
     // Write out the samples
-    for (int tt=0; tt<numSamples; tt++)
+    for (uint32_t tt=0; tt<numSamples; tt++)
     {
         double mm = (1.0 + 0.1*tt); // vary the mass
         // either one works. Is one the 'correct' method?
@@ -129,10 +129,10 @@ void readSimpleProperties(const std::string &archiveName)
               << std::endl;
 
     std::vector<std::string> propNames;
-    for (int pp=0; pp<numProperties; pp++)
+    for (unsigned int pp=0; pp<numProperties; pp++)
         propNames.push_back( props.getPropertyHeader(pp).getName() );
 
-    for (int jj=0; jj<numProperties; jj++)
+    for (unsigned int jj=0; jj<numProperties; jj++)
     {
         std::cout << "    ..named " << propNames[jj] << std::endl;
 
@@ -216,11 +216,8 @@ void readSimpleProperties(const std::string &archiveName)
             GetCompoundPropertyReaderPtr(props)->
             getScalarProperty( propNames[jj] )->getTimeSampling();
 
-        bool hasSampleTimes = GetCompoundPropertyReaderPtr( props )->
-            getScalarProperty( propNames[jj] )->getNumSamples() > 1;
-
-        size_t numSamples = ts->getNumStoredTimes();
-
+        size_t numSamples = GetCompoundPropertyReaderPtr( props )->
+            getScalarProperty( propNames[jj] )->getNumSamples();
 
         std::cout << "    ..with time sampling: ";
         std::cout << "  " << numSamples << " samples";
@@ -228,7 +225,7 @@ void readSimpleProperties(const std::string &archiveName)
         if (numSamples > 0)
         {
             std::cout << " ( ";
-            for (int ss=0; ss<numSamples; ss++)
+            for (unsigned int ss=0; ss<numSamples; ss++)
                 std::cout << ts->getSampleTime(ss) << " ";
             std::cout << ")";
         }
@@ -237,7 +234,7 @@ void readSimpleProperties(const std::string &archiveName)
         std::cout << "    ..and values: ";
         if (numSamples > 0)
         {
-            for (int ss=0; ss<numSamples; ss++)
+            for (unsigned int ss=0; ss<numSamples; ss++)
             {
                 ISampleSelector iss( (index_t) ss);
                 switch (dType.getPod())

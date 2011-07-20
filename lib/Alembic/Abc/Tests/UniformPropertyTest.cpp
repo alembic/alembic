@@ -49,7 +49,7 @@ using namespace Abc;
 
 void writeProperty(const std::string &archiveName)
 {
-    const unsigned int numSamples = 5;
+    const int numSamples = 5;
     const chrono_t startTime = 123.0;
     const chrono_t dt = 1.0 / 24.0;
 
@@ -141,7 +141,7 @@ void readProperty(const std::string &archiveName)
     //  statements required to recognize this)
     IDoubleProperty mass( props, propNames[0] );
 
-    size_t numSamples = mass.getNumSamples();
+    int numSamples = mass.getNumSamples();
     std::cout << ".. it has " << numSamples << " samples" << std::endl;
     ABCA_ASSERT( numSamples == 5, "Expected 5 samples, found " << numSamples );
 

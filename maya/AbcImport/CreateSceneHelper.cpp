@@ -213,10 +213,6 @@ void CreateSceneVisitor::getData(WriterData & oData)
 
 bool CreateSceneVisitor::hasSampledData()
 {
-    unsigned int cameraSize = mData.mCameraList.size();
-
-    // unsigned int particleSize = mData.mParticleList.size();
-    unsigned int nSurfaceSize  = mData.mNurbsList.size();
 
     // Currently there's no support for bringing in particle system simulation
     return (mData.mPropList.size() > 0

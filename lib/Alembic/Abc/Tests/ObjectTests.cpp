@@ -50,7 +50,7 @@ using namespace Abc;
 
 void writeFlatHierarchy(const std::string &archiveName)
 {
-    const unsigned int numChildren = 10;
+    const int numChildren = 10;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
@@ -82,7 +82,7 @@ void readFlatHierarchy(const std::string &archiveName)
     IObject archiveTop = archive.getTop();
 
     // Determine the number of (top level) children the archive has
-    const unsigned int numChildren = archiveTop.getNumChildren();
+    const int numChildren = archiveTop.getNumChildren();
     ABCA_ASSERT( numChildren == 10,
                  "Expected 10 children, found " << numChildren );
 
@@ -119,7 +119,7 @@ void recursivelyAddChildren( OObject&           parent,
         return;
 
     d++;
-    for (int ii=0; ii<numChildren; ii++)
+    for (unsigned int ii=0; ii<numChildren; ii++)
     {
         std::string name = "child_";
         name.append( boost::lexical_cast<std::string>( d ) );
@@ -149,7 +149,7 @@ void writeThreeDeepHierarchy(const std::string &archiveName)
 
     // Add children to the top ('archive') level, and then recurse
     //  on these children, adding more as we go
-    for (int ii=0; ii<numChildren; ii++)
+    for (unsigned int ii=0; ii<numChildren; ii++)
     {
         unsigned int d = 0;
         std::string name = "child_0_";
@@ -171,12 +171,12 @@ void recursivelyReadChildren( IObject& parent )
     std::cout << " has " << numChildren << " children"
               << std::endl;
 
-    for (int ii=0; ii<numChildren; ii++)
+    for (unsigned int ii=0; ii<numChildren; ii++)
     {
         IObject child = parent.getChild(ii);
         std::cout << "  " << child.getName();
 
-        int expectedChildren = 2; 
+        unsigned int expectedChildren = 2; 
         if (child.getName().substr(6,1) == "2")
             // bottom of the hierarchy
             expectedChildren = 0; 
@@ -210,7 +210,7 @@ void readDeepHierarchy(const std::string &archiveName)
                  "Expected 2 children, found " << numChildren );
 
     // Iterate through them, print out their names
-    for (int ii=0; ii<numChildren; ii++)
+    for (unsigned int ii=0; ii<numChildren; ii++)
     {
         IObject child( archiveTop, archiveTop.getChildHeader(ii).getName() );
         std::cout << "  " << child.getName();

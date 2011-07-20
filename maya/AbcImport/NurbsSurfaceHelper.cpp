@@ -167,7 +167,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
 
     // no interpolation for now
     Alembic::AbcCoreAbstract::index_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(),
+    getWeightAndIndex(iFrame, schema.getTimeSampling(),
         schema.getNumSamples(), index, ceilIndex);
 
     Alembic::AbcGeom::INuPatchSchema::Sample samp;

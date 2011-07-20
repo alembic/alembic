@@ -98,7 +98,7 @@ void readDeepHierarchy( IObject parent, const int level, const IObject& orig )
 
         TESTING_ASSERT( sampPtr->get()[5] == 5 );
         TESTING_ASSERT( sampPtr->get()[99] == 99 );
-        TESTING_ASSERT( sampPtr->size() == HIGHVAL );
+        TESTING_ASSERT( sampPtr->size() == ( size_t ) HIGHVAL );
 
         TESTING_ASSERT( ret.second );
 
@@ -146,7 +146,7 @@ void simpleTestIn( const std::string &iArchiveName )
 
     IObject archiveTop = archive.getTop();
 
-    TESTING_ASSERT( archiveTop.getNumChildren() == NUM_TOP_CHILDREN );
+    TESTING_ASSERT( archiveTop.getNumChildren() == ( size_t )NUM_TOP_CHILDREN );
 
     for ( int i = 0 ; i < NUM_TOP_CHILDREN ; i++ )
     {
@@ -155,7 +155,7 @@ void simpleTestIn( const std::string &iArchiveName )
         readDeepHierarchy( obj, 0, obj  );
     }
 
-    TESTING_ASSERT( PATHS.size() == NUM_TOP_CHILDREN );
+    TESTING_ASSERT( PATHS.size() == ( size_t ) NUM_TOP_CHILDREN );
 }
 
 //-*****************************************************************************

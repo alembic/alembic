@@ -189,7 +189,8 @@ void StupidData()
         {
             std::vector<int32_t> v( i, i );
             intArrayProp.set( v );
-            TESTING_ASSERT( intArrayProp.getNumSamples() == i + 1 );
+            TESTING_ASSERT( intArrayProp.getNumSamples() ==
+                            ( size_t ) ( i + 1 ) );
         }
         std::cout << std::endl << "Writing " << archiveName << std::endl;
     }
@@ -223,13 +224,13 @@ void StupidData()
         {
             std::vector<int32_t> v( i, i );
             Int32ArraySamplePtr samp = intArrayProp.getValue( i );
-            size_t numpoints = samp->size();
+            int32_t numpoints = samp->size();
 
             TESTING_ASSERT( numpoints == i );
 
             std::cout << "sample " << i << ": ";
 
-            for ( size_t j = 0 ; j < numpoints ; ++j )
+            for ( int32_t j = 0 ; j < numpoints ; ++j )
             {
                 std::cout << (*samp)[j];
                 if ( numpoints > 0 && j < numpoints - 1 )

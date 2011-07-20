@@ -64,6 +64,7 @@ void __test( OObject &iParent )
                 kStrictMatching );
 
     OTestSchema& schm = tst4.getSchema();
+    schm.valid();
 }
 
 } // End anonymous namespace

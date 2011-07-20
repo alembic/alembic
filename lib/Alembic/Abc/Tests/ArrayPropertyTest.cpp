@@ -61,7 +61,6 @@ Imath::V3f g_vectors[5] = { Imath::V3f(1,1,1),
 
 void writeUInt32ArrayProperty(const std::string &archiveName)
 {
-    const unsigned int numSamples = 5;
     const chrono_t dt = 1.0 / 24.0;
     const chrono_t startTime = 123.0;
 
@@ -149,7 +148,7 @@ void readUInt32ArrayProperty(const std::string &archiveName)
 
     const TimeSamplingPtr ts = primes.getTimeSampling();
     std::cout << "..with time/value pairs: " << std::endl;;
-    for (int ss=0; ss<numSamples; ss++)
+    for (size_t ss=0; ss<numSamples; ss++)
     {
         std::cout << "   ";
         ISampleSelector iss( (index_t) ss);
@@ -285,7 +284,7 @@ void readV3fArrayProperty(const std::string &archiveName)
 
     TimeSamplingPtr ts = positions.getTimeSampling();
     std::cout << "..with time/value pairs: " << std::endl;;
-    for (int ss=0; ss<numSamples; ss++)
+    for (size_t ss=0; ss<numSamples; ss++)
     {
         std::cout << "   ";
         ISampleSelector iss( (index_t) ss);
@@ -360,9 +359,6 @@ void readWriteColorArrayProperty(const std::string &archiveName)
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                           archiveName, ErrorHandler::kThrowPolicy );
         IObject archiveTop = archive.getTop();
-
-        const unsigned int numChildren =  archiveTop.getNumChildren();
-
 
         IObject child( archiveTop, archiveTop.getChildHeader(0).getName() );
         ICompoundProperty props = child.getProperties();

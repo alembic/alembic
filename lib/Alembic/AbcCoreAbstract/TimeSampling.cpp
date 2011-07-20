@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -135,7 +135,7 @@ chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
     }
     else if ( m_timeSamplingType.isAcyclic() )
     {
-        ABCA_ASSERT(iIndex < m_sampleTimes.size(),
+        ABCA_ASSERT( ( size_t )iIndex < m_sampleTimes.size(),
             "Out-of-range acyclic index: " << iIndex
             << ", range [0-" <<  m_sampleTimes.size() << "]" );
         return m_sampleTimes[iIndex];
@@ -148,7 +148,7 @@ chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
         const size_t N = m_timeSamplingType.getNumSamplesPerCycle();
         const size_t numCycles = iIndex / N;
         const size_t cycleBlock = numCycles * N;
-        assert( cycleBlock <= iIndex );
+        assert( ( index_t )cycleBlock <= iIndex );
         const size_t rem = iIndex - cycleBlock;
         assert( rem < N );
 
@@ -183,7 +183,7 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
 
         assert( iTime >= minTime );
         chrono_t prevTime = minTime;
-        size_t numSamples = m_sampleTimes.size();
+        index_t numSamples = m_sampleTimes.size();
 
         for ( index_t idx = 1; idx < numSamples; ++idx )
         {
@@ -217,7 +217,8 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
 
         // Clamp it.
         assert( sampIdx >= 0 );
-        sampIdx = ( sampIdx >= iNumSamples ) ? iNumSamples-1 : sampIdx;
+        sampIdx = ( ( index_t )(sampIdx) >= iNumSamples ) ? 
+                    iNumSamples-1 : sampIdx;
 
         // Get the samp time again.
         chrono_t sampTime = minTime +
@@ -269,7 +270,7 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
 
         index_t sampIdx = 0;
 
-        for ( index_t i = 0 ; i < N ; ++i )
+        for ( index_t i = 0 ; i < ( index_t )N ; ++i )
         {
             chrono_t sampleTime = m_sampleTimes[i];
 

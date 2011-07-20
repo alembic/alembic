@@ -143,7 +143,7 @@ void MeshDrwHelper::update( V3fArraySamplePtr iP,
         for ( size_t fidx = faceIndexBegin;
               fidx < faceIndexEnd; ++fidx )
         {
-            if ( (*m_meshIndices)[fidx] >= numPoints )
+            if ( ( size_t ) ( (*m_meshIndices)[fidx] ) >= numPoints )
             {
                 std::cout << "Mesh update quitting on face: "
                           << face

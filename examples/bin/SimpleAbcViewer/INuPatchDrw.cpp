@@ -133,9 +133,9 @@ void INuPatchDrw::draw( const DrawContext &iCtx )
     const V3f * oldPoints = m_positions -> get();
     std::vector<GLfloat> points(m_positions->size() * 3);
     unsigned int curPos = 0;
-    for (unsigned int v = 0; v < m_nv; ++v)
+    for (int v = 0; v < m_nv; ++v)
     {
-        for (unsigned int u = 0; u < m_nu; ++u, ++curPos)
+        for (int u = 0; u < m_nu; ++u, ++curPos)
         {
             // go from u,v order to reversed v, u order
             unsigned int glIndex = (u * m_nv + (m_nv - v - 1)) * 3;

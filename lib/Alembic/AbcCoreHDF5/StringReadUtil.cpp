@@ -452,13 +452,13 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
         // Get the dimensions
         Dimensions dims;
         int rank = H5Sget_simple_extent_ndims( dspaceId );
-        ABCA_ASSERT( rank == realDims.rank(),
+        ABCA_ASSERT( rank == ( int ) realDims.rank(),
                      "H5Sget_simple_extent_ndims() failed." );
 
         HDimensions hdims;
         hdims.setRank( rank );
         rank = H5Sget_simple_extent_dims( dspaceId, hdims.rootPtr(), NULL );
-        ABCA_ASSERT( rank == hdims.rank(),
+        ABCA_ASSERT( rank == ( int ) hdims.rank(),
                      "H5Sget_simple_extent_dims() "
                      "found inconsistent ranks."
                      << std::endl

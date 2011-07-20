@@ -112,7 +112,7 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
 
     // sanity check (no frame range checking here)
     //      - timesamplying type has to be the same and can't be acyclic
-    for (size_t i = 1; i < NUMINPUTS; i++)
+    for (int i = 1; i < NUMINPUTS; i++)
     {
         IDataSchema iSchema =
             IData(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
@@ -160,7 +160,7 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
 
     // stitch arbGeoCompoundParams
     //
-    if (iArbGeomCompoundProps.size() == NUMINPUTS)
+    if (iArbGeomCompoundProps.size() == (size_t) NUMINPUTS)
     {
         OCompoundProperty oArbGeomCompoundProp = oSchema.getArbGeomParams();
         stitchCompoundProp(iArbGeomCompoundProps, oArbGeomCompoundProp);
@@ -257,7 +257,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
 
             chrono_t lastMin = minVec[i-1];
             chrono_t min = minVec[i];
-            if (!xformSchema.isConstant() & fabs(min - lastMax - spf) > ZERO)
+            if (!xformSchema.isConstant() && fabs(min - lastMax - spf) > ZERO)
             {
                 std::cerr << "there's a gap between [" << lastMin << ", "
                     << lastMax << "] to " << min << std::endl;
@@ -304,10 +304,9 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             {
                 for (size_t i = 0; i < NUMINPUTS; i++)
                 {
-                    chrono_t min = minVec[i];
                     IXformSchema iSchema =
                         IXform(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
-                    size_t numSamples = iSchema.getNumSamples();
+                    index_t numSamples = iSchema.getNumSamples();
                     for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
                     {
                         XformSample samp = iSchema.getValue(reqIdx);
@@ -369,7 +368,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         {
             ISubDSchema iSchema =
                 ISubD(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
-            size_t numSamples = iSchema.getNumSamples();
+            index_t numSamples = iSchema.getNumSamples();
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
                 ISubDSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -438,7 +437,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         {
             IPolyMeshSchema iSchema =
                 IPolyMesh(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
-            size_t numSamples = iSchema.getNumSamples();
+            index_t numSamples = iSchema.getNumSamples();
 
             IN3fGeomParam normals = iSchema.getNormalsParam();
             IV2fGeomParam uvs = iSchema.getUVsParam();
@@ -515,7 +514,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         {
             ICameraSchema iSchema =
                 ICamera(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
-            size_t numSamples = iSchema.getNumSamples();
+            index_t numSamples = iSchema.getNumSamples();
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
                 oSchema.set(iSchema.getValue(reqIdx));
@@ -541,7 +540,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IV2fGeomParam iUVs = iSchema.getUVsParam();
             IN3fGeomParam iNormals = iSchema.getNormalsParam();
             IFloatGeomParam iWidths = iSchema.getWidthsParam();
-            size_t numSamples = iSchema.getNumSamples();
+            index_t numSamples = iSchema.getNumSamples();
 
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
@@ -610,7 +609,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IPointsSchema iSchema =
                 IPoints(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             IFloatGeomParam iWidths = iSchema.getWidthsParam();
-            size_t numSamples = iSchema.getNumSamples();
+            index_t numSamples = iSchema.getNumSamples();
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
                 IPointsSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -656,7 +655,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         {
             INuPatchSchema iSchema =
                 INuPatch(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
-            size_t numSamples = iSchema.getNumSamples();
+            index_t numSamples = iSchema.getNumSamples();
 
             IN3fGeomParam normals = iSchema.getNormalsParam();
             IV2fGeomParam uvs = iSchema.getUVsParam();
@@ -767,7 +766,7 @@ int main( int argc, char *argv[] )
 
         std::map< chrono_t, size_t > minIndexMap;
 
-        for (unsigned int i = 2; i < argc; i++)
+        for (int i = 2; i < argc; i++)
         {
             IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                 argv[i], ErrorHandler::kThrowPolicy );

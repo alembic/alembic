@@ -277,8 +277,6 @@ void RunAndWriteParticles
     for ( index_t sampIndex = 0;
           sampIndex < ( index_t )iNumFrames; ++sampIndex )
     {
-        chrono_t sampTime = (( chrono_t )sampIndex) * iSpf;
-
         // First, write the sample.
         OPointsSchema::Sample psamp(
             V3fArraySample( parts.positionVec() ),
@@ -310,7 +308,7 @@ void ReadParticles( const std::string &iFileName )
     IPoints points( topObj, "simpleParticles" );
     IPointsSchema& pointsSchema = points.getSchema();
 
-    size_t numSamps = pointsSchema.getNumSamples();
+    index_t numSamps = pointsSchema.getNumSamples();
     std::cout << "\n\nReading points back in. Num frames: "
               << numSamps << std::endl;
 
@@ -376,7 +374,7 @@ void pointTestReadWrite()
         IPointsSchema& pointsSchema = points.getSchema();
         IFloatGeomParam widthProp = pointsSchema.getWidthsParam();
         TESTING_ASSERT( widthProp.getScope() == kVertexScope );
-        for ( int i = 0; i < 100; ++i )
+        for ( size_t i = 0; i < 100; ++i )
         {
             IPointsSchema::Sample pointSamp;
             pointsSchema.get(pointSamp, i);
@@ -387,7 +385,7 @@ void pointTestReadWrite()
             TESTING_ASSERT( pointSamp.getVelocities()->size() == i );
             TESTING_ASSERT( pointSamp.getIds()->size() == i );
             TESTING_ASSERT( widthSamp.getVals()->size() == i );
-            for ( int j = 0; j < i; ++j )
+            for ( size_t j = 0; j < i; ++j )
             {
                 TESTING_ASSERT( (*pointSamp.getPositions())[j] ==
                                 V3f(j, j, j) );

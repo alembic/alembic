@@ -40,13 +40,14 @@ namespace SimpleAbcViewer {
 
 //-*****************************************************************************
 GLCamera::GLCamera()
-  : m_fovy( 45.0 ),
-    m_size( 100, 100 ),
-    m_aspect( 1.0 ),
-    m_centerOfInterest( 15.0 ),
-    m_rotation( 0.0, 0.0, 0.0 ),
+  : m_rotation( 0.0, 0.0, 0.0 ),
     m_scale( 1.0, 1.0, 1.0 ),
-    m_translation( 0.0, 0.0, 0.0 )
+    m_translation( 0.0, 0.0, 0.0 ),
+    m_centerOfInterest( 15.0 ),
+    m_fovy( 45.0 ),
+    m_clip( 0.0, 1.0 ),
+    m_size( 100, 100 ),
+    m_aspect( 1.0 )
 {
     // Nothing
 }
@@ -103,7 +104,7 @@ void GLCamera::autoSetClippingPlanes( const Box3d &bounds )
     const V3d &eye = m_translation;
     double clipNear = FLT_MAX;
     double clipFar = FLT_MIN;
-	
+
     V3d v( 0.0, 0.0, -m_centerOfInterest );
     rotateVector( rotX, rotY, v );
     const V3d view = eye + v;

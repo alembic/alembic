@@ -50,7 +50,6 @@ void setMaterials( float o, bool negMatrix = false )
 
         GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
         GLfloat mat_shininess[] = { 100.0 };
-        GLfloat light_position[] = { 20.0, 20.0, 20.0, 0.0 };
 
         glClearColor( 0.0, 0.0, 0.0, 0.0 );
         glMaterialfv( GL_FRONT, GL_DIFFUSE, mat_front_diffuse );
@@ -66,7 +65,6 @@ void setMaterials( float o, bool negMatrix = false )
 
         GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
         GLfloat mat_shininess[] = { 100.0 };
-        GLfloat light_position[] = { 20.0, 20.0, 20.0, 0.0 };
         GLfloat mat_front_emission[] = {0.0, 0.0, 0.0, 0.0 };
         GLfloat mat_back_emission[] = {o, 0.0, 0.0, o };
 

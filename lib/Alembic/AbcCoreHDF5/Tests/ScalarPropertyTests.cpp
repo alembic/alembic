@@ -418,7 +418,7 @@ void testReadWriteScalars()
                 case Alembic::Util::kInt64POD:
                 {
                     TESTING_ASSERT(sp->getName() == "i64");
-                    Alembic::Util::uint64_t val = 0;
+                    Alembic::Util::int64_t val = 0;
                     sp->getSample(0, &val);
                     TESTING_ASSERT(val == -5000000000LL);
                 }

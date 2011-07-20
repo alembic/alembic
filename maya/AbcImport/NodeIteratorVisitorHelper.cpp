@@ -2135,7 +2135,6 @@ MString connectAttr(ArgData & iArgData)
     fnIntArray.create();
     MObject intArrayObj;
     MIntArray intArray;
-    unsigned length;
 
     // make connection: time1.outTime --> alembicNode.intime
     dstPlug = alembicNodeFn.findPlug("time", true, &status);

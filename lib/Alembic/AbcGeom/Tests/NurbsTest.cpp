@@ -276,7 +276,8 @@ void Example3_NurbsIn()
     std::cout << "Number of trim curves: " << nurbsSample.getTrimNumLoops() << std::endl;
     TESTING_ASSERT( nurbsSample.getTrimNumLoops() == 0 );
     TESTING_ASSERT( nurbsSample.hasTrimCurve() == false );
-    TESTING_ASSERT( nurbsSample.getPositionWeights()->size() == g_nP );
+    TESTING_ASSERT( nurbsSample.getPositionWeights()->size() ==
+                    ( size_t ) g_nP );
     TESTING_ASSERT( nurbsSchema.isConstant() == true );
 }
 

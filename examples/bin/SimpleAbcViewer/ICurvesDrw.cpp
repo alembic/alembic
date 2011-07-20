@@ -109,16 +109,10 @@ void ICurvesDrw::draw( const DrawContext &iCtx )
 {
     if ( ! ( m_positions && m_nVertices ) ) { return; }
 
-    size_t numPoints = m_positions->size();
-
     const V3f *points = m_positions->get();
     const int32_t *nVertices = m_nVertices->get();
-    const C3f *colors = NULL;
 
     glDisable( GL_LIGHTING );
-
-    // get point data
-    size_t numVerts = numPoints;
 
     glColor3f( 1.0, 1.0, 1.0 );
     glEnable( GL_POINT_SMOOTH );
@@ -131,7 +125,7 @@ void ICurvesDrw::draw( const DrawContext &iCtx )
 
         m_curvePoints.clear();
         for ( size_t currentCurveVertex = 0 ;
-              currentCurveVertex < nVertices[currentCurve];
+              currentCurveVertex < ( size_t ) ( nVertices[currentCurve] );
               ++currentCurveVertex, ++currentVertex )
         {
             m_curvePoints.push_back(&points[currentVertex]);

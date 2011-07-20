@@ -93,7 +93,7 @@ namespace
 
         // no interpolation for now
         Alembic::AbcCoreAbstract::index_t index, ceilIndex;
-        double alpha = getWeightAndIndex(iFrame, iUVs.getTimeSampling(),
+        getWeightAndIndex(iFrame, iUVs.getTimeSampling(),
             iUVs.getNumSamples(), index, ceilIndex);
 
         MFloatArray uArray;
@@ -128,7 +128,6 @@ namespace
 
         size_t uvIndex = 0;
         size_t uvCountsIndex = 0;
-        size_t vIndex = 0;
 
         size_t numPolys = ioMesh.numPolygons();
         for (size_t pIndex = 0; pIndex < numPolys; ++pIndex)
@@ -245,7 +244,7 @@ namespace
         }
 
         if (iNormals.getScope() == Alembic::AbcGeom::kVertexScope &&
-            sampSize == ioMesh.numVertices())
+            sampSize == ( size_t ) ioMesh.numVertices())
         {
             MIntArray vertexList;
             for (size_t i = 0; i < sampSize; ++i)
@@ -256,7 +255,7 @@ namespace
             ioMesh.setVertexNormals(normalsIn, vertexList);
 
         }
-        else if (sampSize == ioMesh.numFaceVertices() &&
+        else if (sampSize == ( size_t ) ioMesh.numFaceVertices() &&
             iNormals.getScope() == Alembic::AbcGeom::kFacevaryingScope)
         {
 
@@ -567,7 +566,7 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
     Alembic::AbcGeom::ISubDSchema schema = iNode.getSchema();
 
     Alembic::AbcCoreAbstract::index_t index, ceilIndex;
-    double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(),
+    getWeightAndIndex(iFrame, schema.getTimeSampling(),
         schema.getNumSamples(), index, ceilIndex);
 
     Alembic::AbcGeom::ISubDSchema::Sample samp;

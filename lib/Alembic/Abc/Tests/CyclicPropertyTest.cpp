@@ -87,7 +87,7 @@ void writeProperty(const std::string &archiveName)
                           units,
                           ts ); // cyclic, specified above
 
-    for (int tt=0; tt<numSamples; tt++)
+    for (unsigned int tt=0; tt<numSamples; tt++)
     {
         double mm = (1.0 + 0.1*tt); // vary the mass
         mass.set( mm );
@@ -163,7 +163,7 @@ void readProperty(const std::string &archiveName)
     TimeSamplingPtr ts = mass.getTimeSampling();
 
     std::cout << "..with time/value pairs: ";
-    for (int ss=0; ss<numSamples; ss++)
+    for (size_t ss=0; ss<numSamples; ss++)
     {
         ISampleSelector iss( (index_t) ss);
         std::cout << ts->getSampleTime( (index_t) ss ) << "/";

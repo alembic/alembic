@@ -39,11 +39,12 @@
 namespace Alembic {
 namespace AbcGeom {
 
-static void __testIGeomParamCompile( Abc::ICompoundProperty &iParent )
+void __testIGeomParamCompile( Abc::ICompoundProperty &iParent )
 {
     IV2fGeomParam uvs( iParent, "uv" );
 
     const AbcA::DataType &dt = uvs.getDataType();
+    dt.getExtent();
 }
 
 

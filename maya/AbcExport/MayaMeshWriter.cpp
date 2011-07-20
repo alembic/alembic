@@ -316,7 +316,7 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
             MIntArray normals;
             lMesh.getFaceNormalIds(faceIndex, normals);
             unsigned int numNormals = normals.length();
-            for (int n = 0; n < numNormals; n++)
+            for (unsigned int n = 0; n < numNormals; n++)
             {
                 if (lMesh.isNormalLocked(normals[n]))
                 {

@@ -143,9 +143,9 @@ void simpleTestOut( const std::string &iArchiveName )
 
     t = intStartTime;
 
-    for ( int i = 0 ; i < numIntSamps ; ++i )
+    for ( size_t i = 0 ; i < numIntSamps ; ++i )
     {
-        for ( int j = 0 ; j < numIntPoints ; ++j )
+        for ( size_t j = 0 ; j < numIntPoints ; ++j )
         {
             intpoints[j] = j + i;
         }
@@ -345,7 +345,7 @@ void simpleTestIn( const std::string &iArchiveName )
         {
             int32_t val = (*ac0iap0SampPtr)[j];
 
-            TESTING_ASSERT( val == i + j );
+            TESTING_ASSERT( val == ( int32_t ) ( i + j ) );
 
             std::cout << val << ", ";
         }

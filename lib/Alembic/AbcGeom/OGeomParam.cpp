@@ -42,7 +42,7 @@ namespace AbcGeom {
 //-*****************************************************************************
 // much like lib/Alembic/Abc/OTypedProperty.cpp, this is just a compile test,
 // due to the implementation being in the .h file, due to templates.
-static void __testOGeomParamCompile( Abc::OCompoundProperty &iParent )
+void __testOGeomParamCompile( Abc::OCompoundProperty &iParent )
 {
     OV2fGeomParam uvs( iParent, "uv", false, kVertexScope, 1 );
 

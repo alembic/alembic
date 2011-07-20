@@ -186,7 +186,6 @@ MObject createCurves(const std::string & iName,
         }
     }
 
-    unsigned int degree = 1; // samp.getDegree();
     std::size_t curVert = 0;
     for (std::size_t i = 0; i < numCurves; ++i)
     {
