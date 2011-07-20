@@ -609,6 +609,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
         {
             IPointsSchema iSchema =
                 IPoints(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
+            IFloatGeomParam iWidths = iSchema.getWidthsParam();
             size_t numSamples = iSchema.getNumSamples();
             for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
             {
@@ -620,6 +621,20 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 Abc::UInt64ArraySamplePtr idPtr = iSamp.getIds();
                 if (idPtr)
                     oSamp.setIds(*idPtr);
+                Abc::V3fArraySamplePtr velocPtr = iSamp.getVelocities();
+                if (velocPtr)
+                    oSamp.setPositions(*velocPtr);
+
+                IFloatGeomParam::Sample iWidthSample;
+                OFloatGeomParam::Sample oWidthSample;
+                if (iWidths)
+                {
+                    getOGeomParamSamp <IFloatGeomParam, IFloatGeomParam::Sample,
+                        OFloatGeomParam::Sample>(iWidths, iWidthSample,
+                                                 oWidthSample, reqIdx);
+                    oSamp.setWidths(oWidthSample);
+                }
+
                 oSamp.setChildBounds(iSamp.getChildBounds());
                 oSchema.set(oSamp);
             }
