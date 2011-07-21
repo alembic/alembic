@@ -522,7 +522,7 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args,
         }
         else
         {
-            AiNodeSetArray(meshNode, "vidxs",
+            AiNodeSetArray(meshNode, "nidxs",
                     AiArrayConvert(vidxs.size(), 1, AI_TYPE_UINT,
                             &(vidxs[0]), TRUE));
         }
