@@ -77,6 +77,9 @@ ENDIF()
 # Set some debug vs opt flags
 IF ( "${CMAKE_BUILD_TYPE}" MATCHES "Debug" )
   ADD_DEFINITIONS( -DDEBUG=1 -UNDEBUG )
+  IF ( NOT WINDOWS )
+    ADD_DEFINITIONS( -Wall )
+  ENDIF()
 ELSEIF ( "${CMAKE_BUILD_TYPE}" MATCHES "Release" )
   ADD_DEFINITIONS( -DNDEBUG=1 -UDEBUG )
   IF ( NOT WINDOWS )
@@ -91,7 +94,7 @@ ELSE()
 ENDIF()
 
 IF ( NOT WINDOWS )
-  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type -Werror -Wall" )
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type -Werror" )
 ENDIF()
 
 IF( ${WINDOWS} )
