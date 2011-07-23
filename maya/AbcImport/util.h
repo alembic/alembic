@@ -75,6 +75,9 @@ MStatus getObjectByName(const MString & name, MObject & object);
 
 MStatus getDagPathByName(const MString & name, MDagPath & dagPath);
 
+bool getDagPathByChildName(MDagPath & ioDagPath,
+    const std::string & iChildName);
+
 MStatus getPlugByName(const MString & objName,
     const MString & attrName, MPlug & plug);
 
@@ -90,9 +93,6 @@ MStatus deleteCurrentSelection();
 
 // assuming this is a valid input of /xxx/xxx/xxx/xxx.abc
 bool stripFileName(const MString & filePath, MString & fileName);
-
-// remove AlembicNodes that have no outgoing connections
-bool removeDangleAlembicNodes();
 
 double getWeightAndIndex(double iFrame,
     Alembic::AbcCoreAbstract::TimeSamplingPtr iTime, size_t numSamps,

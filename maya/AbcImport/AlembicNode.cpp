@@ -74,11 +74,6 @@ MObject AlembicNode::mAbcFileNameAttr;
 MObject AlembicNode::mStartFrameAttr;
 MObject AlembicNode::mEndFrameAttr;
 
-MObject AlembicNode::mConnectAttr;
-MObject AlembicNode::mCreateIfNotFoundAttr;
-MObject AlembicNode::mRemoveIfNoUpdateAttr;
-MObject AlembicNode::mConnectRootNodesAttr;
-
 MObject AlembicNode::mOutSubDArrayAttr;
 MObject AlembicNode::mOutPolyArrayAttr;
 MObject AlembicNode::mOutCameraArrayAttr;
@@ -122,35 +117,6 @@ MStatus AlembicNode::initialize()
     status = nAttr.setWritable(false);
     status = nAttr.setStorable(true);
     status = addAttribute(mEndFrameAttr);
-
-    // set mConnect
-    mConnectAttr = nAttr.create("connect", "ct",
-        MFnNumericData::kBoolean, false, &status);
-    status = nAttr.setWritable(false);
-    status = nAttr.setStorable(true);
-    status = addAttribute(mConnectAttr);
-
-    // set mCreateIfNotFound
-    mCreateIfNotFoundAttr = nAttr.create("createIfNotFound", "crt",
-        MFnNumericData::kBoolean, false, &status);
-    status = nAttr.setWritable(false);
-    status = nAttr.setStorable(true);
-    status = addAttribute(mCreateIfNotFoundAttr);
-
-    // set mRemoveIfNoUpdate
-    mRemoveIfNoUpdateAttr = nAttr.create("removeIfNoUpdate", "rm",
-        MFnNumericData::kBoolean, false, &status);
-    status = nAttr.setWritable(false);
-    status = nAttr.setStorable(true);
-    status = addAttribute(mRemoveIfNoUpdateAttr);
-
-    // set mConnectUpdateNodes
-    fileNameDefaultObject = fileFnStringData.create("");
-    mConnectRootNodesAttr = tAttr.create("connectRoot", "cr",
-        MFnData::kString, fileNameDefaultObject);
-    status = tAttr.setWritable(false);
-    status = tAttr.setStorable(true);
-    status = addAttribute(mConnectRootNodesAttr);
 
     // add the output attributes
     // sampled subD mesh
@@ -295,16 +261,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             printError(theError);
         }
 
-        // connect attributes
-        dataHandle = dataBlock.inputValue(mConnectAttr, &status);
-        mConnect = dataHandle.asBool();
-        dataHandle = dataBlock.inputValue(mCreateIfNotFoundAttr, &status);
-        mCreateIfNotFound = dataHandle.asBool();
-        dataHandle = dataBlock.inputValue(mRemoveIfNoUpdateAttr, &status);
-        mRemoveIfNoUpdate = dataHandle.asBool();
-        dataHandle = dataBlock.inputValue(mConnectRootNodesAttr, &status);
-        mConnectRootNodes = dataHandle.asString();
-
         // initialize some flags for plug update
         mSubDInitialized = false;
         mPolyInitialized = false;
@@ -313,11 +269,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             CreateSceneVisitor::NONE, "");
 
         visitor.walk(archive);
-
-        if ( mConnect )
-        {
-            removeDangleAlembicNodes();
-        }
 
         if (visitor.hasSampledData())
         {

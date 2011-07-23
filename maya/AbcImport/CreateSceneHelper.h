@@ -123,7 +123,7 @@ private:
     // -createIfNotFound and -removeIfNoUpdate
     std::set<std::string> mRootNodes;
 
-    MDagPath mCurrentDagNode;
+    MDagPath mConnectDagNode;
 
     Action mAction;
 

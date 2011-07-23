@@ -218,6 +218,33 @@ MStatus getDagPathByName(const MString & name, MDagPath & dagPath)
     return status;
 }
 
+bool getDagPathByChildName(MDagPath & ioDagPath, const std::string & iChildName)
+{
+    unsigned int numChildren = ioDagPath.childCount();
+    for (unsigned int i = 0; i < numChildren; ++i)
+    {
+        MObject child = ioDagPath.child(i);
+        MFnDagNode dagChild(child);
+        std::string name = dagChild.partialPathName().asChar();
+        if (name == iChildName)
+        {
+            ioDagPath.push(child);
+            return true;
+        }
+
+        unsigned int endLength = name.length() - iChildName.length();
+        if ((name.length() > iChildName.length() + 1) && 
+            (name[endLength - 1] == '|' || name[endLength - 1] == ':') &&
+            (name.substr(endLength) == iChildName))
+        {
+            ioDagPath.push(child);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 MStatus getPlugByName(const MString & objName, const MString & attrName,
             MPlug & plug)
 {
@@ -303,31 +330,6 @@ bool stripFileName(const MString & filePath, MString & fileName)
     found = str.find_first_of(".");
     str = str.substr(0, found);
     fileName = MString(str.c_str());
-    return true;
-}
-
-bool removeDangleAlembicNodes()
-{
-    MStringArray result;
-    MStatus status =
-        MGlobal::executeCommand("ls -type AlembicNode", result, true);
-
-    if (status != MS::kSuccess ) return false;
-
-    unsigned int numOfNodes = result.length();
-    for ( unsigned int n = 0; n < numOfNodes; n++ )
-    {
-        MObject obj;
-        getObjectByName(result[n], obj);
-        MFnDependencyNode mFn(obj);
-        MPlugArray array;
-        status = mFn.getConnections(array);
-        if (status == MS::kSuccess && array.length() == 1)
-        {
-            MGlobal::deleteNode(obj);
-        }
-    }
-
     return true;
 }
 
