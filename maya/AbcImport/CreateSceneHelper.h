@@ -122,6 +122,7 @@ private:
     // member variable related to flags -connect,
     // -createIfNotFound and -removeIfNoUpdate
     std::set<std::string> mRootNodes;
+    bool mAnyRoots;
 
     MDagPath mConnectDagNode;
 
