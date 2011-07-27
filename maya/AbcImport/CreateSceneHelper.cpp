@@ -441,10 +441,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
     MStatus status = MS::kSuccess;
     MObject cameraObj = MObject::kNullObj;
 
-    size_t numSamples = iNode.getSchema().getNumSamples();
+    bool isConstant = iNode.getSchema().isConstant();
 
     // add animated camera to the list
-    if (numSamples > 1)
+    if (!isConstant)
     {
         mData.mCameraList.push_back(iNode);
     }
@@ -454,7 +454,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
 
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
-    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, numSamples < 2,
+    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, isConstant,
         mData.mPropList, mData.mAnimVisStaticObjList);
 
     bool hasDag = false;
@@ -464,7 +464,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
         if (hasDag)
         {
             cameraObj = mConnectDagNode.node();
-            if (numSamples > 1)
+            if (!isConstant)
             {
                 mData.mCameraObjList.push_back(cameraObj);
             }
@@ -474,7 +474,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICamera & iNode)
     if (mAction == CREATE || mAction == CREATE_REMOVE)
     {
         cameraObj = create(iNode, mParent);
-        if (numSamples > 1)
+        if (!isConstant)
         {
             mData.mCameraObjList.push_back(cameraObj);
         }
@@ -514,7 +514,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
     MStatus status = MS::kSuccess;
     MObject curvesObj = MObject::kNullObj;
 
-    size_t numSamples = iNode.getSchema().getNumSamples();
+    bool isConstant = iNode.getSchema().isConstant();
 
     // read sample 0 to determine and use it to set the number of total
     // curves.  We can't support changing the number of curves over time.
@@ -537,7 +537,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
         return MS::kFailure;
     }
     // add animated curves to the list
-    else if (numSamples > 1)
+    else if (!isConstant)
     {
         mData.mNumCurves.push_back(numCurves);
         mData.mCurvesList.push_back(iNode);
@@ -545,7 +545,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
 
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
-    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, numSamples < 2,
+    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, isConstant,
         mData.mPropList, mData.mAnimVisStaticObjList);
 
     bool hasDag = false;
@@ -555,7 +555,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
         if (hasDag)
         {
             curvesObj = mConnectDagNode.node();
-            if (numSamples > 1)
+            if (!isConstant)
             {
                 mData.mNurbsCurveObjList.push_back(curvesObj);
             }
@@ -566,9 +566,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
     {
 
         curvesObj = createCurves(iNode.getName(), samp, widthSamp, mParent,
-            mData.mNurbsCurveObjList, numSamples > 1);
+            mData.mNurbsCurveObjList, !isConstant);
 
-        if (numSamples > 1)
+        if (!isConstant)
         {
             mData.mNurbsCurveObjList.push_back(curvesObj);
         }
@@ -621,7 +621,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     MStatus status = MS::kSuccess;
     MObject particleObj = MObject::kNullObj;
 
-    if (iNode.getSchema().getNumSamples() > 1)
+    bool isConstant = iNode.getSchema().isConstant();
+    if (!isConstant)
         mData.mPointsList.push_back(iNode);
 
     // since we don't really support animated points, don't bother
@@ -641,7 +642,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     {
 
         status = create(mFrame, iNode, mParent, particleObj);
-        if (iNode.getSchema().getNumSamples() > 1)
+        if (!isConstant)
         {
             mData.mPointsObjList.push_back(particleObj);
         }
@@ -675,10 +676,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     MStatus status = MS::kSuccess;
     MObject subDObj = MObject::kNullObj;
 
-    size_t numSamples = iNode.getSchema().getNumSamples();
+    bool isConstant = iNode.getSchema().isConstant();
 
     // add animated SubDs to the list
-    if (numSamples > 1)
+    if (!isConstant)
     {
         mData.mSubDList.push_back(iNode);
     }
@@ -688,7 +689,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
 
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
-    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, numSamples < 2,
+    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, isConstant,
         mData.mPropList, mData.mAnimVisStaticObjList);
 
     bool hasDag = false;
@@ -698,7 +699,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
         if (hasDag)
         {
             subDObj = mConnectDagNode.node();
-            if (numSamples > 1)
+            if (!isConstant)
             {
                 mData.mSubDObjList.push_back(subDObj);
             }
@@ -708,7 +709,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
         subDObj = createSubD(mFrame, iNode, mParent);
-        if (numSamples > 1)
+        if (!isConstant)
         {
             mData.mSubDObjList.push_back(subDObj);
         }
@@ -761,10 +762,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     MStatus status = MS::kSuccess;
     MObject polyObj = MObject::kNullObj;
 
-    size_t numSamples = iNode.getSchema().getNumSamples();
+    bool isConstant = iNode.getSchema().isConstant();
 
     // add animated poly mesh to the list
-    if (numSamples > 1)
+    if (!isConstant)
         mData.mPolyMeshList.push_back(iNode);
 
     Alembic::Abc::ICompoundProperty arbProp =
@@ -772,7 +773,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
 
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
-    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, numSamples < 2,
+    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, isConstant,
         mData.mPropList, mData.mAnimVisStaticObjList);
 
     bool hasDag = false;
@@ -782,7 +783,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
         if (hasDag)
         {
             polyObj = mConnectDagNode.node();
-            if (numSamples > 1)
+            if (!isConstant)
             {
                 mData.mPolyMeshObjList.push_back(polyObj);
             }
@@ -792,8 +793,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
         polyObj = createPoly(mFrame, iNode, mParent);
-        MFnDagNode(polyObj).getPath(mConnectDagNode);
-        if (numSamples > 1)
+        if (!isConstant)
         {
             mData.mPolyMeshObjList.push_back(polyObj);
         }
@@ -843,10 +843,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
     MStatus status = MS::kSuccess;
     MObject nurbsObj = MObject::kNullObj;
 
-    size_t numSamples = iNode.getSchema().getNumSamples();
+    bool isConstant = iNode.getSchema().isConstant();
 
     // add animated poly mesh to the list
-    if (numSamples > 1)
+    if (!isConstant)
         mData.mNurbsList.push_back(iNode);
 
     Alembic::Abc::ICompoundProperty arbProp =
@@ -854,7 +854,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
 
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList);
-    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, numSamples < 2,
+    Alembic::Abc::IScalarProperty visProp = getVisible(iNode, isConstant,
         mData.mPropList, mData.mAnimVisStaticObjList);
 
     bool hasDag = false;
@@ -864,7 +864,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
         if (hasDag)
         {
             nurbsObj = mConnectDagNode.node();
-            if (numSamples > 1)
+            if (!isConstant)
             {
                 mData.mNurbsObjList.push_back(nurbsObj);
             }
@@ -874,7 +874,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
         nurbsObj = createNurbs(mFrame, iNode, mParent);
-        if (numSamples > 1)
+        if (!isConstant)
         {
             mData.mNurbsObjList.push_back(nurbsObj);
         }
@@ -1082,11 +1082,6 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         {
             MFnTransform trans;
             xformObj = trans.create(mParent, &status);
-
-            if (mAnyRoots)
-            {
-                trans.getPath(mConnectDagNode);
-            }
 
             if (status != MS::kSuccess)
             {
