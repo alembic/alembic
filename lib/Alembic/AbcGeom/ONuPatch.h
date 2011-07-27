@@ -247,7 +247,7 @@ public:
         OV2fGeomParam::Sample m_uvs;
 
         // optional trim curves
-        uint64_t m_trimNumLoops;
+        int32_t m_trimNumLoops;
         Abc::Int32ArraySample m_trimNumCurves;
         Abc::Int32ArraySample m_trimNumVertices;
         Abc::Int32ArraySample m_trimOrder;

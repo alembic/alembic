@@ -110,6 +110,7 @@ public:
         }
 
     private:
+        const Context& operator= (const Context&);
         ErrorHandler &m_handler;
         std::string m_message;
     };

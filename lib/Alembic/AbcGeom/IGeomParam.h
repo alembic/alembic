@@ -328,7 +328,7 @@ ITypedGeomParam<TRAITS>::getIndexed( typename ITypedGeomParam<TRAITS>::Sample &o
     if ( m_indicesProperty ) { m_indicesProperty.get( oSamp.m_indices, iSS ); }
     else
     {
-        uint32_t size = oSamp.m_vals->size();
+        uint32_t size = ( uint32_t ) oSamp.m_vals->size();
 
         uint32_t *v = new uint32_t[size];
 

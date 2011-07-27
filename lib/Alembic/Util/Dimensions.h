@@ -55,24 +55,24 @@ public:
     // Default is for a rank-0 dimension.
     BaseDimensions()
       : m_vector()
-      , m_mask( -1 )
+      , m_mask( ~01u )
     {}
 
     // When you specify a single thing, you're specifying a rank-1
     // dimension of a certain size.
     explicit BaseDimensions( const T& t )
       : m_vector( 1, t )
-      , m_mask( -1 )
+      , m_mask( ~01u )
     {}
 
     BaseDimensions( const BaseDimensions &copy )
       : m_vector( copy.m_vector )
-      , m_mask( -1 )
+      , m_mask( ~01u )
     {}
 
     template <class Y>
     BaseDimensions( const BaseDimensions<Y> &copy )
-      : m_mask( -1 )
+      : m_mask( ~01u )
     {
         m_vector.resize( copy.rank() );
         for ( size_t i = 0; i < copy.rank(); ++i )
