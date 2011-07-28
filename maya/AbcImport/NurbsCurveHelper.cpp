@@ -64,7 +64,7 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
     Alembic::AbcGeom::ICurvesSchema::Sample samp, ceilSamp;
     schema.get(samp, index);
 
-    unsigned int numCurves = samp.getNumCurves();
+    unsigned int numCurves = static_cast<unsigned int>(samp.getNumCurves());
 
     bool interp = false;
     if (alpha != 0.0 && index != ceilIndex)

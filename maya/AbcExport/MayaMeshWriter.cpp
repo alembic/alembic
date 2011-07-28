@@ -74,9 +74,9 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
         status = lMesh.getAssignedUVs(uvCounts, uvIds, &uvSetName);
         indices.clear();
         indices.reserve(uvIds.length());
-        size_t faceCount = uvCounts.length();
-        size_t uvIndex = 0;
-        for (size_t f = 0; f < faceCount; f++)
+        unsigned int faceCount = uvCounts.length();
+        unsigned int uvIndex = 0;
+        for (unsigned int f = 0; f < faceCount; f++)
         {
             len = uvCounts[f];
             for (int i = len-1; i >= 0; i--)
@@ -91,9 +91,9 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
     const JobArgs & iArgs)
   : mNoNormals(iArgs.noNormals),
+    mWriteUVs(iArgs.writeUVs),
     mIsGeometryAnimated(false),
-    mDagPath(iDag),
-    mNumPoints(0)
+    mDagPath(iDag)
 {
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
@@ -125,7 +125,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         mSubDSchema = obj.getSchema();
 
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
-        if ( iArgs.writeUVs )
+        if ( mWriteUVs )
         {
             getUVs(uvs, indices);
 
@@ -150,7 +150,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, lMesh,
             iTimeIndex, iArgs));
 
-        writeSubD(iDag, uvSamp);
+        writeSubD(uvSamp);
     }
     else
     {
@@ -159,7 +159,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
 
-        if ( iArgs.writeUVs )
+        if ( mWriteUVs )
         {
             getUVs(uvs, indices);
 
@@ -311,7 +311,7 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
         // go through all per face-vertex normals and verify if any of them
         // has been tweaked by users
         unsigned int numFaces = lMesh.numPolygons();
-        for (size_t faceIndex = 0; faceIndex < numFaces; faceIndex++)
+        for (unsigned int faceIndex = 0; faceIndex < numFaces; faceIndex++)
         {
             MIntArray normals;
             lMesh.getFaceNormalIds(faceIndex, normals);
@@ -359,9 +359,9 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
             if (flipNormals)
                 normal = -normal;
 
-            oNormals.push_back(normal[0]);
-            oNormals.push_back(normal[1]);
-            oNormals.push_back(normal[2]);
+            oNormals.push_back(static_cast<float>(normal[0]));
+            oNormals.push_back(static_cast<float>(normal[1]));
+            oNormals.push_back(static_cast<float>(normal[2]));
         }
     }
 }
@@ -375,99 +375,39 @@ void MayaMeshWriter::write()
     {
         MGlobal::displayError( "MFnMesh() failed for MayaMeshWriter" );
     }
-    size_t numPoints = lMesh.numVertices();
 
-    // the topology has changed since the last sample, so get and write it all
-    if (numPoints != mNumPoints)
+    Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
+    std::vector<float> uvs;
+    std::vector<Alembic::Util::uint32_t> indices;
+
+    if ( mWriteUVs )
     {
-        std::vector<float> points;
-        std::vector<Alembic::Util::int32_t> facePoints;
-        std::vector<Alembic::Util::int32_t> faceList;
+        getUVs(uvs, indices);
 
-        mNumPoints = numPoints;
-        fillTopology(points, facePoints, faceList);
-        if (mPolySchema.valid())
+        if (!uvs.empty())
         {
-            Alembic::AbcGeom::ON3fGeomParam::Sample normalsSamp;
-            std::vector<float> normals;
-            getPolyNormals(normals);
-            if (!normals.empty())
+            uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
+            uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
+                (const Imath::V2f *) &uvs.front(), uvs.size() / 2));
+            if (!indices.empty())
             {
-                normalsSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
-                normalsSamp.setVals(Alembic::AbcGeom::N3fArraySample(
-                    (const Imath::V3f *) &normals.front(), normals.size() / 3));
+                uvSamp.setIndices(Alembic::Abc::UInt32ArraySample(
+                    &indices.front(), indices.size()));
             }
-
-            Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
-                Alembic::Abc::V3fArraySample(
-                    (const Imath::V3f *)&points.front(), points.size() / 3 ),
-                Alembic::Abc::Int32ArraySample( facePoints ),
-                Alembic::Abc::Int32ArraySample( faceList ),
-                Alembic::AbcGeom::OV2fGeomParam::Sample(),
-                normalsSamp);
-
-            mPolySchema.set(samp);
-        }
-        else if (mSubDSchema.valid())
-        {
-            Alembic::AbcGeom::OSubDSchema::Sample samp(
-                Alembic::Abc::V3fArraySample( 
-                    ( const Imath::V3f * )&points.front(), points.size() / 3 ),
-                Alembic::Abc::Int32ArraySample( facePoints ),
-                Alembic::Abc::Int32ArraySample( faceList ) );
-
-            mSubDSchema.set(samp);
         }
     }
-    // topology has not changed just write the point data
-    else
+
+    std::vector<float> points;
+    std::vector<Alembic::Util::int32_t> facePoints;
+    std::vector<Alembic::Util::int32_t> faceList;
+
+    if (mPolySchema.valid())
     {
-        std::vector<float> points;
-        MFloatPointArray pts;
-        lMesh.getPoints(pts);
-
-        size_t i;
-        points.resize(pts.length() * 3);
-
-        // repack the float
-        for (i = 0; i < pts.length(); i++)
-        {
-            size_t local = i * 3;
-            points[local] = pts[i].x;
-            points[local+1] = pts[i].y;
-            points[local+2] = pts[i].z;
-        }
-
-        if (mPolySchema.valid())
-        {
-            Alembic::AbcGeom::ON3fGeomParam::Sample normalsSamp;
-            std::vector<float> normals;
-            getPolyNormals(normals);
-
-            if (!normals.empty())
-            {
-                normalsSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
-                normalsSamp.setVals(Alembic::AbcGeom::N3fArraySample(
-                    (const Imath::V3f *) &normals.front(), normals.size() / 3));
-            }
-
-            Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
-                Alembic::Abc::V3fArraySample(
-                    (const Imath::V3f *)&points.front(), points.size() / 3),
-                Alembic::Abc::Int32ArraySample(),
-                Alembic::Abc::Int32ArraySample(),
-                Alembic::AbcGeom::OV2fGeomParam::Sample(),
-                normalsSamp);
-
-            mPolySchema.set(samp);
-        }
-        else if (mSubDSchema.valid())
-        {
-            Alembic::AbcGeom::OSubDSchema::Sample samp;
-            samp.setPositions( Alembic::Abc::V3fArraySample(
-                (const Imath::V3f *) &points.front(), points.size() / 3) );
-            mSubDSchema.set(samp);
-        }
+        writePoly(uvSamp);
+    }
+    else if (mSubDSchema.valid())
+    {
+        writeSubD(uvSamp);
     }
 }
 
@@ -491,8 +431,6 @@ void MayaMeshWriter::writePoly(
     std::vector<Alembic::Util::int32_t> pointCounts;
 
     fillTopology(points, facePoints, pointCounts);
-
-    mNumPoints = lMesh.numVertices();
 
     Alembic::AbcGeom::ON3fGeomParam::Sample normalsSamp;
     std::vector<float> normals;
@@ -522,7 +460,7 @@ void MayaMeshWriter::writePoly(
 
 }
 
-void MayaMeshWriter::writeSubD(MDagPath & iDag,
+void MayaMeshWriter::writeSubD(
     const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs)
 {
     MStatus status = MS::kSuccess;
@@ -544,8 +482,6 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
         Alembic::Abc::Int32ArraySample(facePoints),
         Alembic::Abc::Int32ArraySample(pointCounts));
     samp.setUVs( iUVs );
-
-    mNumPoints = lMesh.numVertices();
 
     MPlug plug = lMesh.findPlug("facVaryingInterpolateBoundary");
     if (!plug.isNull())
@@ -570,17 +506,17 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
     MDoubleArray creaseData;
     if (lMesh.getCreaseEdges(edgeIds, creaseData) == MS::kSuccess)
     {
-        std::size_t numCreases = creaseData.length();
+        unsigned int numCreases = creaseData.length();
         creaseIndices.resize(numCreases * 2);
         creaseLengths.resize(numCreases, 2);
         creaseSharpness.resize(numCreases);
-        for (std::size_t i = 0; i < numCreases; ++i)
+        for (unsigned int i = 0; i < numCreases; ++i)
         {
             int verts[2];
             lMesh.getEdgeVertices(edgeIds[i], verts);
             creaseIndices[2 * i] = verts[0];
             creaseIndices[2 * i + 1] = verts[1];
-            creaseSharpness[i] = creaseData[i];
+            creaseSharpness[i] = static_cast<float>(creaseData[i]);
         }
 
         samp.setCreaseIndices(Alembic::Abc::Int32ArraySample(creaseIndices));
@@ -593,13 +529,13 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
     MDoubleArray cornerData;
     if (lMesh.getCreaseVertices(cornerIds, cornerData) == MS::kSuccess)
     {
-        std::size_t numCorners = cornerIds.length();
+        unsigned int numCorners = cornerIds.length();
         cornerIndices.resize(numCorners);
         cornerSharpness.resize(numCorners);
-        for (std::size_t i = 0; i < numCorners; ++i)
+        for (unsigned int i = 0; i < numCorners; ++i)
         {
             cornerIndices[i] = cornerIds[i];
-            cornerSharpness[i] = cornerData[i];
+            cornerSharpness[i] = static_cast<float>(cornerData[i]);
         }
         samp.setCornerSharpnesses(
             Alembic::Abc::FloatArraySample(cornerSharpness));
@@ -610,9 +546,9 @@ void MayaMeshWriter::writeSubD(MDagPath & iDag,
 
 #if MAYA_API_VERSION >= 201100
     MUintArray holes = lMesh.getInvisibleFaces();
-    std::size_t numHoles = holes.length();
+    unsigned int numHoles = holes.length();
     std::vector <Alembic::Util::int32_t> holeIndices(numHoles);
-    for (std::size_t i = 0; i < numHoles; ++i)
+    for (unsigned int i = 0; i < numHoles; ++i)
     {
         holeIndices[i] = holes[i];
     }

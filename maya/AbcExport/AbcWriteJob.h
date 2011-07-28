@@ -108,45 +108,45 @@ struct AbcWriteJobStatistics
     }
 
     // for the statistic string
-    size_t mSubDStaticNum;
-    size_t mSubDAnimNum;
-    size_t mSubDStaticFaces;
-    size_t mSubDAnimFaces;
-    size_t mSubDStaticCVs;
-    size_t mSubDAnimCVs;
+    unsigned int mSubDStaticNum;
+    unsigned int mSubDAnimNum;
+    unsigned int mSubDStaticFaces;
+    unsigned int mSubDAnimFaces;
+    unsigned int mSubDStaticCVs;
+    unsigned int mSubDAnimCVs;
 
-    size_t mPolyStaticNum;
-    size_t mPolyAnimNum;
-    size_t mPolyStaticFaces;
-    size_t mPolyAnimFaces;
-    size_t mPolyStaticCVs;
-    size_t mPolyAnimCVs;
+    unsigned int mPolyStaticNum;
+    unsigned int mPolyAnimNum;
+    unsigned int mPolyStaticFaces;
+    unsigned int mPolyAnimFaces;
+    unsigned int mPolyStaticCVs;
+    unsigned int mPolyAnimCVs;
 
-    size_t mCurveStaticNum;
-    size_t mCurveStaticCurves;
-    size_t mCurveAnimNum;
-    size_t mCurveAnimCurves;
-    size_t mCurveStaticCVs;
-    size_t mCurveAnimCVs;
+    unsigned int mCurveStaticNum;
+    unsigned int mCurveStaticCurves;
+    unsigned int mCurveAnimNum;
+    unsigned int mCurveAnimCurves;
+    unsigned int mCurveStaticCVs;
+    unsigned int mCurveAnimCVs;
 
-    size_t mPointStaticNum;
-    size_t mPointAnimNum;
-    size_t mPointStaticCVs;
-    size_t mPointAnimCVs;
+    unsigned int mPointStaticNum;
+    unsigned int mPointAnimNum;
+    unsigned int mPointStaticCVs;
+    unsigned int mPointAnimCVs;
 
-    size_t mNurbsStaticNum;
-    size_t mNurbsAnimNum;
-    size_t mNurbsStaticCVs;
-    size_t mNurbsAnimCVs;
+    unsigned int mNurbsStaticNum;
+    unsigned int mNurbsAnimNum;
+    unsigned int mNurbsStaticCVs;
+    unsigned int mNurbsAnimCVs;
 
-    size_t mTransStaticNum;
-    size_t mTransAnimNum;
+    unsigned int mTransStaticNum;
+    unsigned int mTransAnimNum;
 
-    size_t mLocatorStaticNum;
-    size_t mLocatorAnimNum;
+    unsigned int mLocatorStaticNum;
+    unsigned int mLocatorAnimNum;
 
-    size_t mCameraStaticNum;
-    size_t mCameraAnimNum;
+    unsigned int mCameraStaticNum;
+    unsigned int mCameraAnimNum;
 };
 
 class AbcWriteJob

@@ -204,7 +204,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
     Alembic::Abc::FloatArraySamplePtr uKnot = samp.getUKnot();
     Alembic::Abc::FloatArraySamplePtr vKnot = samp.getVKnot();
 
-    unsigned int numKnotsInU = uKnot->size() - 2;
+    unsigned int numKnotsInU = static_cast<unsigned int>(uKnot->size() - 2);
     MDoubleArray uKnotSequences;
     uKnotSequences.setLength(numKnotsInU);
     for (unsigned int i = 0; i < numKnotsInU; ++i)
@@ -212,7 +212,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
         uKnotSequences.set((*uKnot)[i+1], i);
     }
 
-    unsigned int numKnotsInV = vKnot->size() - 2;
+    unsigned int numKnotsInV = static_cast<unsigned int>(vKnot->size() - 2);
     MDoubleArray vKnotSequences;
     vKnotSequences.setLength(numKnotsInV);
     for (unsigned int i = 0; i < numKnotsInV; i++)

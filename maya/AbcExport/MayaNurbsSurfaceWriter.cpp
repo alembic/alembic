@@ -117,16 +117,16 @@ void MayaNurbsSurfaceWriter::write()
 
         // push_back a dummy value, we will set it below
         sampKnotsInU.push_back(0.0);
-        for (size_t i = 0; i < numKnotsInU; i++)
-            sampKnotsInU.push_back(knotsInU[i]);
+        for (unsigned int i = 0; i < numKnotsInU; i++)
+            sampKnotsInU.push_back( static_cast<float>(knotsInU[i]));
 
         double k1 = sampKnotsInU[1];
         double k2 = sampKnotsInU[2];
         double klast_1 = sampKnotsInU[numKnotsInU];
         double klast_2 = sampKnotsInU[numKnotsInU-1];
 
-        sampKnotsInU[0] = 2 * k1 - k2;
-        sampKnotsInU.push_back(2 * klast_1 - klast_2);
+        sampKnotsInU[0] = static_cast<float>(2.0 * k1 - k2);
+        sampKnotsInU.push_back(static_cast<float>(2.0 * klast_1 - klast_2));
         samp.setUKnot(Alembic::Abc::FloatArraySample(sampKnotsInU));
     }
 
@@ -146,16 +146,16 @@ void MayaNurbsSurfaceWriter::write()
 
         // push_back a dummy value, we will set it below
         sampKnotsInV.push_back(0.0);
-        for (size_t i = 0; i < numKnotsInV; i++)
-            sampKnotsInV.push_back(knotsInV[i]);
+        for (unsigned int i = 0; i < numKnotsInV; i++)
+            sampKnotsInV.push_back(static_cast<float>(knotsInV[i]));
 
         double k1 = sampKnotsInV[1];
         double k2 = sampKnotsInV[2];
         double klast_1 = sampKnotsInV[numKnotsInV];
         double klast_2 = sampKnotsInV[numKnotsInV-1];
 
-        sampKnotsInV[0] = 2 * k1 - k2;
-        sampKnotsInV.push_back(2 * klast_1 - klast_2);
+        sampKnotsInV[0] = static_cast<float>(2.0 * k1 - k2);
+        sampKnotsInV.push_back(static_cast<float>(2.0 * klast_1 - klast_2));
         samp.setVKnot(Alembic::Abc::FloatArraySample(sampKnotsInV));
     }
 
@@ -180,8 +180,10 @@ void MayaNurbsSurfaceWriter::write()
         for (int u = 0; u < numCVsInU; u++)
         {
             int index = u * numCVsInV + v;
-            sampPos.push_back(Alembic::Abc::V3f(cvArray[index].x,
-                cvArray[index].y, cvArray[index].z));
+            sampPos.push_back(Alembic::Abc::V3f(
+                static_cast<float>(cvArray[index].x),
+                static_cast<float>(cvArray[index].y),
+                static_cast<float>(cvArray[index].z) ));
         }
     }
     samp.setPositions(Alembic::Abc::V3fArraySample(sampPos));
@@ -211,42 +213,43 @@ void MayaNurbsSurfaceWriter::write()
 
         // if the 3rd argument is set to be true, return the 2D curve
         nurbs.getTrimBoundaries(result, i, true);
-        size_t numTrimCurve = result.length();
+        unsigned int numTrimCurve = result.length();
         trimNumCurves[i] = 0;
-        for (size_t j = 0; j < numTrimCurve; j++)
+        for (unsigned int j = 0; j < numTrimCurve; j++)
         {
             MObjectArray boundary = result[j];
-            size_t length = boundary.length();
-            trimNumCurves[i] += length;
-            for (size_t k = 0; k < length; k++)
+            unsigned int length = boundary.length();
+            trimNumCurves[i] += static_cast<Alembic::Util::int32_t>(length);
+            for (unsigned int k = 0; k < length; k++)
             {
                 MObject curveObj = boundary[k];
                 if (curveObj.hasFn(MFn::kNurbsCurve))
                 {
                     MFnNurbsCurve mFnCurve(curveObj);
 
-                    std::size_t numCVs = mFnCurve.numCVs();
+                    Alembic::Util::int32_t numCVs = mFnCurve.numCVs();
                     trimNumPos.push_back(numCVs);
                     trimOrder.push_back(mFnCurve.degree()+1);
 
                     double start, end;
                     mFnCurve.getKnotDomain(start, end);
-                    trimMin.push_back(start);
-                    trimMax.push_back(end);
+                    trimMin.push_back(static_cast<float>(start));
+                    trimMax.push_back(static_cast<float>(end));
 
                     MPointArray cvArray;
                     mFnCurve.getCVs(cvArray);
                     //append to curveGrp.cv vector
                     double offsetV = startV+endV;
-                    for (size_t l = 0; l < numCVs; l++)
+                    for (Alembic::Util::int32_t l = 0; l < numCVs; l++)
                     {
-                        trimU.push_back(cvArray[l].x);
+                        trimU.push_back(static_cast<float>(cvArray[l].x));
 
                         // v' = maxV + minV - v
                         // this is because we flipped v on the surface
-                        trimV.push_back(offsetV-cvArray[l].y);
+                        trimV.push_back(
+                            static_cast<float>(offsetV-cvArray[l].y));
 
-                        trimW.push_back(cvArray[l].w);
+                        trimW.push_back(static_cast<float>(cvArray[l].w));
                     }
 
                     MDoubleArray knot;
@@ -256,9 +259,9 @@ void MayaNurbsSurfaceWriter::write()
                     // push_back a dummy value, we will set it below
                     std::size_t totalNumKnots = trimKnot.size();
                     trimKnot.push_back(0.0);
-                    for (size_t l = 0; l < numKnots; l++)
+                    for (unsigned int l = 0; l < numKnots; l++)
                     {
-                        trimKnot.push_back(knot[l]);
+                        trimKnot.push_back(static_cast<float>(knot[l]));
                     }
 
                     // for a knot sequence with multiple end knots, duplicate
@@ -270,8 +273,9 @@ void MayaNurbsSurfaceWriter::write()
                     double k2 = trimKnot[totalNumKnots+2];
                     double klast_1 = trimKnot[trimKnot.size()-1];
                     double klast_2 = trimKnot[trimKnot.size()-2];
-                    trimKnot[totalNumKnots] = 2 * k1 - k2;
-                    trimKnot.push_back(2 * klast_1 - klast_2);
+                    trimKnot[totalNumKnots] = static_cast<float>(2.0 * k1 - k2);
+                    trimKnot.push_back(
+                        static_cast<float>(2.0 * klast_1 - klast_2));
                 }
             } // for k
         } // for j

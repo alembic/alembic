@@ -460,7 +460,8 @@ MStatus AbcExport::doIt(const MArgList & args)
         if (hasRange)
         {
             transTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
-                samples.size(), strideTime * util::spf()), samples));
+                static_cast<Alembic::Util::uint32_t>(samples.size()),
+                strideTime * util::spf()), samples));
         }
         else
         {

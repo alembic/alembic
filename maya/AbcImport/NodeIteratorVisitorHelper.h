@@ -93,7 +93,7 @@ public:
 
     unsigned int sampledChannelSize()
     {
-        return sampleNameList.size();
+        return static_cast<unsigned int>(sampleNameList.size());
     }
 
     std::string getSampleElement(unsigned int index)

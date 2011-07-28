@@ -105,12 +105,12 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     // get particle position
     MVectorArray posArray;
     particle.position(posArray);
-    for (size_t i = 0; i < size; i++)
+    for (unsigned int i = 0; i < size; i++)
     {
         MVector vec = posArray[i];
-        position.push_back(vec.x);
-        position.push_back(vec.y);
-        position.push_back(vec.z);
+        position.push_back(static_cast<float>(vec.x));
+        position.push_back(static_cast<float>(vec.y));
+        position.push_back(static_cast<float>(vec.z));
     }
     samp.setPositions(
         Alembic::Abc::V3fArraySample((const Imath::V3f *) &position.front(),
@@ -119,22 +119,27 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     // get particle velocity
     MVectorArray vecArray;
     particle.velocity(vecArray);
-    for (size_t i = 0; i < size; i++)
+    for (unsigned int i = 0; i < size; i++)
     {
         MVector vec = vecArray[i];
-        velocity.push_back(vec.x);
-        velocity.push_back(vec.y);
-        velocity.push_back(vec.z);
+        velocity.push_back(static_cast<float>(vec.x));
+        velocity.push_back(static_cast<float>(vec.y));
+        velocity.push_back(static_cast<float>(vec.z));
     }
-    samp.setVelocities(
-        Alembic::Abc::V3fArraySample((const Imath::V3f *) &velocity.front(),
-            velocity.size() / 3) );
+    if (!velocity.empty())
+    {
+        samp.setVelocities(
+            Alembic::Abc::V3fArraySample((const Imath::V3f *) &velocity.front(),
+                velocity.size() / 3) );
+    }
 
     // get particleIds
     MIntArray idArray;
     particle.particleIds(idArray);
-    for (size_t i = 0; i < size; i++)
+    for (unsigned int i = 0; i < size; i++)
+    {
         particleIds.push_back(idArray[i]);
+    }
     samp.setIds(
         Alembic::Abc::UInt64ArraySample(&(particleIds.front()),
             particleIds.size()) );
@@ -143,9 +148,9 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     MDoubleArray radiusArray;
     particle.radius(radiusArray);
 
-    for (size_t i = 0; i < size; i++)
+    for (unsigned int i = 0; i < size; i++)
     {
-        float radius = radiusArray[i];
+        float radius = static_cast<float>(radiusArray[i]);
         width.push_back(radius);
     }
 

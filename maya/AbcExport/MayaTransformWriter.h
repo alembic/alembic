@@ -54,7 +54,7 @@ struct AnimChan
     // certain operations, and convert radians to degrees
     double scale;
 
-    Alembic::Util::uint32_t opNum;
+    std::size_t opNum;
     Alembic::Util::uint32_t channelNum;
 };
 

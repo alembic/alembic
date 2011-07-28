@@ -99,7 +99,9 @@ namespace
         MFloatArray uArray;
         MFloatArray vArray;
 
-        size_t numFaceVertices = ioMesh.numFaceVertices();
+        unsigned int numFaceVertices = ioMesh.numFaceVertices();
+        unsigned int numVertices = ioMesh.numVertices();
+
         MIntArray uvCounts(ioMesh.numPolygons(), 0);
         MIntArray uvIds(numFaceVertices, 0);
 
@@ -109,43 +111,71 @@ namespace
         Alembic::AbcGeom::V2fArraySamplePtr uvPtr = samp.getVals();
         Alembic::Abc::UInt32ArraySamplePtr indexPtr = samp.getIndices();
 
-        if (numFaceVertices != indexPtr->size())
+        if (numFaceVertices != indexPtr->size() &&
+            numVertices != indexPtr->size())
         {
             printWarning(
                 ioMesh.fullPathName() +
-                    " UVs aren't per-polygon per-vertex, skipping");
+                " UVs aren't per-vertex or per-polygon per-vertex, skipping");
+
             return;
         }
 
-        size_t numUVs = uvPtr->size();
+        std::size_t numUVs = uvPtr->size();
         uArray.setLength(numUVs);
         vArray.setLength(numUVs);
-        for (size_t i = 0; i < numUVs; ++i)
+        for (std::size_t i = 0; i < numUVs; ++i)
         {
             uArray[i] = (*uvPtr)[i].x;
             vArray[i] = 1.0 - (*uvPtr)[i].y;
         }
 
-        size_t uvIndex = 0;
-        size_t uvCountsIndex = 0;
+        int uvIndex = 0;
+        int uvCountsIndex = 0;
 
-        size_t numPolys = ioMesh.numPolygons();
-        for (size_t pIndex = 0; pIndex < numPolys; ++pIndex)
+        int numPolys = ioMesh.numPolygons();
+
+        // per-polygon per-vertex
+        if (numFaceVertices == indexPtr->size())
         {
-            size_t numPolygonVertices = ioMesh.polygonVertexCount(pIndex);
-            uvCounts[uvCountsIndex++] = numPolygonVertices;
-            if (numPolygonVertices == 0)
-                continue;
-
-            size_t startPoint = uvIndex + numPolygonVertices - 1;
-
-            for (size_t vertexIndex = 0;
-                vertexIndex < numPolygonVertices; vertexIndex++)
+            for (int pIndex = 0; pIndex < numPolys; ++pIndex)
             {
-                uvIds[uvIndex++] = (*indexPtr)[startPoint - vertexIndex];
+                int numPolygonVertices = ioMesh.polygonVertexCount(pIndex);
+                uvCounts[uvCountsIndex++] = numPolygonVertices;
+                if (numPolygonVertices == 0)
+                    continue;
+
+                int startPoint = uvIndex + numPolygonVertices - 1;
+
+                for (int vertexIndex = 0;
+                    vertexIndex < numPolygonVertices; vertexIndex++)
+                {
+                    uvIds[uvIndex++] = (*indexPtr)[startPoint - vertexIndex];
+                }
             }
         }
+        // per-vertex
+        else
+        {
+            MIntArray vertexCount, vertexList;
+            ioMesh.getVertices(vertexCount, vertexList);
+            for (int pIndex = 0; pIndex < numPolys; ++pIndex)
+            {
+                int numPolygonVertices = ioMesh.polygonVertexCount(pIndex);
+                uvCounts[uvCountsIndex++] = numPolygonVertices;
+                if (numPolygonVertices == 0)
+                    continue;
 
+                int startPoint = uvIndex + numPolygonVertices - 1;
+
+                for (int vertexIndex = 0;
+                    vertexIndex < numPolygonVertices; vertexIndex++)
+                {
+                    uvIds[uvIndex++] = (*indexPtr)[
+                        vertexList[startPoint - vertexIndex]];
+                }
+            }
+        }
 
         setMeshUVs(ioMesh, uArray, vArray, uvCounts, uvIds);
     }  // setUVs
@@ -244,10 +274,11 @@ namespace
         }
 
         if (iNormals.getScope() == Alembic::AbcGeom::kVertexScope &&
-            sampSize == ( size_t ) ioMesh.numVertices())
+            sampSize == ( std::size_t ) ioMesh.numVertices())
         {
             MIntArray vertexList;
-            for (size_t i = 0; i < sampSize; ++i)
+            int iEnd = static_cast<int>(sampSize);
+            for (int i = 0; i < iEnd; ++i)
             {
                 vertexList.append(i);
             }
@@ -255,17 +286,17 @@ namespace
             ioMesh.setVertexNormals(normalsIn, vertexList);
 
         }
-        else if (sampSize == ( size_t ) ioMesh.numFaceVertices() &&
+        else if (sampSize == ( std::size_t ) ioMesh.numFaceVertices() &&
             iNormals.getScope() == Alembic::AbcGeom::kFacevaryingScope)
         {
 
-            MIntArray faceList(sampSize);
-            MIntArray vertexList(sampSize);
+            MIntArray faceList(static_cast<unsigned int>(sampSize));
+            MIntArray vertexList(static_cast<unsigned int>(sampSize));
 
             // per vertex per-polygon normal
-            std::size_t numFaces = ioMesh.numPolygons();
-            std::size_t nIndex = 0;
-            for (std::size_t faceIndex = 0; faceIndex < numFaces; faceIndex++)
+            int numFaces = ioMesh.numPolygons();
+            int nIndex = 0;
+            for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
             {
                 MIntArray polyVerts;
                 ioMesh.getPolygonVertices(faceIndex, polyVerts);
@@ -291,12 +322,12 @@ namespace
         Alembic::Abc::V3fArraySamplePtr iPoints,
         Alembic::Abc::V3fArraySamplePtr iCeilPoints, double alpha)
     {
-        size_t numPoints = iPoints->size();
+        unsigned int numPoints = static_cast<unsigned int>(iPoints->size());
         oPointArray.setLength(numPoints);
 
         if (alpha == 0 || iCeilPoints == NULL)
         {
-            for (size_t i = 0; i < numPoints; ++i)
+            for (unsigned int i = 0; i < numPoints; ++i)
             {
                 oPointArray.set(i,
                     (*iPoints)[i].x, (*iPoints)[i].y, (*iPoints)[i].z);
@@ -304,7 +335,7 @@ namespace
         }
         else
         {
-            for (size_t i = 0; i < numPoints; ++i)
+            for (unsigned int i = 0; i < numPoints; ++i)
             {
                 oPointArray.set(i,
                     simpleLerp<float>(alpha,
@@ -326,26 +357,27 @@ namespace
         // since we are changing the topology we will be creating a new mesh
 
         // Get face count info
-        size_t numPolys = iCounts->size();
+        unsigned int numPolys = static_cast<unsigned int>(iCounts->size());
         MIntArray polyCounts;
         polyCounts.setLength(numPolys);
 
-        for (size_t i = 0; i < numPolys; ++i)
+        for (unsigned int i = 0; i < numPolys; ++i)
         {
             polyCounts[i] = (*iCounts)[i];
         }
 
-        size_t numConnects = iIndices->size();
+        unsigned int numConnects = static_cast<unsigned int>(iIndices->size());
 
         MIntArray polyConnects;
         polyConnects.setLength(numConnects);
 
-        size_t facePointIndex = 0, base = 0;
+        unsigned int facePointIndex = 0;
+        unsigned int base = 0;
         for (unsigned int i = 0; i < numPolys; ++i)
         {
             // reverse the order of the faces
-            size_t curNum = polyCounts[i];
-            for (size_t j = 0; j < curNum; ++j, ++facePointIndex)
+            int curNum = polyCounts[i];
+            for (int j = 0; j < curNum; ++j, ++facePointIndex)
                 polyConnects[facePointIndex] = (*iIndices)[base+curNum-j-1];
 
             base += curNum;
@@ -683,8 +715,7 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
                 MIntArray edges;
                 itv.getConnectedEdges(edges);
                 std::size_t numEdges = edges.length();
-                std::size_t k;
-                for (k = 0; k < numEdges; ++k)
+                for (std::size_t k = 0; k < numEdges; ++k)
                 {
                     int oppVert = -1;
                     itv.getOppositeVertex(oppVert, edges[k]);
@@ -709,11 +740,11 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
     if (corners && !corners->size() == 0)
     {
         Alembic::Abc::Int32ArraySamplePtr cornerVerts = samp.getCornerIndices();
-        std::size_t numCorners = corners->size();
+        unsigned int numCorners = static_cast<unsigned int>(corners->size());
         MUintArray vertIds(numCorners);
         MDoubleArray cornerData(numCorners);
 
-        for (std::size_t i = 0; i < numCorners; ++i)
+        for (unsigned int i = 0; i < numCorners; ++i)
         {
             cornerData[i] = (*corners)[i];
             vertIds[i] = (*cornerVerts)[i];

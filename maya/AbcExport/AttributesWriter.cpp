@@ -71,11 +71,9 @@ bool isDataAttr(const MPlug & iParent)
         case MFn::kPointArrayData:
         case MFn::kUInt64ArrayData:
             return true;
-        break;
 
         default:
             return false;
-        break;
     }
     return false;
 }
@@ -323,10 +321,10 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
     const MPlug& iPlug,
     Abc::OArrayProperty & oProp)
 {
-    size_t numElements =  iPlug.numElements();
+    unsigned int numElements =  iPlug.numElements();
     bool isArray = iPlug.isArray();
 
-    size_t dimSize = numElements;
+    unsigned int dimSize = numElements;
     if (!isArray)
         dimSize = 1;
 
@@ -341,7 +339,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asBool();
                 }
@@ -362,7 +360,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asChar();
                 }
@@ -382,7 +380,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asShort();
                 }
@@ -402,7 +400,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asInt();
                 }
@@ -422,7 +420,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asFloat();
                 }
@@ -442,7 +440,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     val[i] = iPlug[i].asDouble();
                 }
@@ -463,7 +461,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData2Short(val[2*i], val[2*i+1]);
@@ -485,7 +483,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData3Short(val[3*i], val[3*i+1], val[3*i+2]);
@@ -510,7 +508,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     int val0, val1;
                     MFnNumericData numdFn(iPlug[i].asMObject());
@@ -539,7 +537,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     int val0, val1, val2;
                     MFnNumericData numdFn(iPlug[i].asMObject());
@@ -565,7 +563,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData2Float(val[2*i], val[2*i+1]);
@@ -587,7 +585,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData3Float(val[3*i], val[3*i+1], val[3*i+2]);
@@ -609,7 +607,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData2Double(val[2*i], val[2*i+1]);
@@ -631,7 +629,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData3Double(val[3*i], val[3*i+1], val[3*i+2]);
@@ -653,7 +651,7 @@ bool MFnNumericDataToSample(MFnNumericData::Type iType,
             }
             else
             {
-                for (size_t i = 0; i < numElements; ++i)
+                for (unsigned int i = 0; i < numElements; ++i)
                 {
                     MFnNumericData numdFn(iPlug[i].asMObject());
                     numdFn.getData4Double(val[4*i], val[4*i+1], val[4*i+2],
@@ -709,10 +707,9 @@ bool MFnTypedDataToSample(MFnData::Type iType,
         {
             MFnStringArrayData arr(iPlug.asMObject());
 
-            unsigned int i = 0;
             unsigned int length = arr.length();
             std::vector< std::string > val(length);
-            for (; i < length; i++)
+            for (unsigned int i = 0; i < length; i++)
             {
                 val[i] = arr[i].asChar();
             }
@@ -726,10 +723,9 @@ bool MFnTypedDataToSample(MFnData::Type iType,
         {
             MFnDoubleArrayData arr(iPlug.asMObject());
 
-            unsigned int i = 0;
             unsigned int length = arr.length();
             std::vector< double > val(length);
-            for (; i < length; i++)
+            for (unsigned int i = 0; i < length; i++)
             {
                 val[i] = arr[i];
             }
@@ -743,10 +739,9 @@ bool MFnTypedDataToSample(MFnData::Type iType,
         {
             MFnIntArrayData arr(iPlug.asMObject());
 
-            unsigned int i = 0;
             unsigned int length = arr.length();
             std::vector< Alembic::Util::int32_t > val(length);
-            for (; i < length; i++)
+            for (unsigned int i = 0; i < length; i++)
             {
                 val[i] = arr[i];
             }
@@ -760,11 +755,10 @@ bool MFnTypedDataToSample(MFnData::Type iType,
         {
             MFnPointArrayData arr(iPlug.asMObject());
 
-            unsigned int i = 0;
             unsigned int length = arr.length();
             unsigned int extent = oProp.getDataType().getExtent();
             std::vector< double > val(length*extent);
-            for (; i < length; i++)
+            for (unsigned int i = 0; i < length; i++)
             {
                 MPoint pt(arr[i]);
                 val[extent*i] = pt.x;
@@ -786,11 +780,10 @@ bool MFnTypedDataToSample(MFnData::Type iType,
         {
             MFnVectorArrayData arr(iPlug.asMObject());
 
-            unsigned int i = 0;
             unsigned int length = arr.length();
             unsigned int extent = oProp.getDataType().getExtent();
             std::vector< double > val(length*extent);
-            for (; i < length; i++)
+            for (unsigned int i = 0; i < length; i++)
             {
                 MVector v(arr[i]);
                 val[extent*i] = v.x;
@@ -811,10 +804,10 @@ bool MFnTypedDataToSample(MFnData::Type iType,
             MMatrix mat = arr.matrix();
             std::vector<double> val(16);
 
-            unsigned int r, c, i = 0;
-            for (r = 0; r < 4; r++)
+            unsigned int i = 0;
+            for (unsigned int r = 0; r < 4; r++)
             {
-                for (c = 0; c < 4; c++, i++)
+                for (unsigned int c = 0; c < 4; c++, i++)
                 {
                     val[i] = mat[r][c];
                 }

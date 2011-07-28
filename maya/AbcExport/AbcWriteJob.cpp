@@ -347,7 +347,7 @@ bool AbcWriteJob::checkCurveGrp()
 
     bool init = false;
     int degree;
-    MFnNurbsCurve::Form form;
+    MFnNurbsCurve::Form form = MFnNurbsCurve::kInvalid;
     for (; !itDag.isDone(); itDag.next())
     {
         MDagPath curvePath;

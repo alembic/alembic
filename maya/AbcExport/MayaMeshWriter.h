@@ -67,19 +67,17 @@ class MayaMeshWriter
 
     void writePoly(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
 
-    void writeSubD(MDagPath & iDag,
-        const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
+    void writeSubD(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
 
     void getUVs(std::vector<float> & uvs,
         std::vector<Alembic::Util::uint32_t> & indices);
 
     void getPolyNormals(std::vector<float> & oNormals);
     bool mNoNormals;
+    bool mWriteUVs;
 
     bool    mIsGeometryAnimated;
     MDagPath mDagPath;
-
-    size_t  mNumPoints;
 
     AttributesWriterPtr mAttrs;
     Alembic::AbcGeom::OPolyMeshSchema   mPolySchema;

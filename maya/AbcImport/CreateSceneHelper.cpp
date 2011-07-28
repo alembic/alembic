@@ -97,7 +97,7 @@ namespace
 
                 MFnIntArrayData fnData;
                 MIntArray arr((int *) samp.getFaces()->getData(),
-                    samp.getFaces()->size());
+                    static_cast<unsigned int>(samp.getFaces()->size()));
                 MObject attrObj = fnData.create(arr);
                 MFnTypedAttribute typedAttr;
                 MObject faceObj = typedAttr.create(faceName, faceName,
@@ -1071,7 +1071,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
             }
             if (dagToBeRemoved.size() > 0)
             {
-                unsigned int dagSize = dagToBeRemoved.size();
+                unsigned int dagSize =
+                    static_cast<unsigned int>(dagToBeRemoved.size());
                 for ( unsigned int i = 0; i < dagSize; i++ )
                     removeDagNode(dagToBeRemoved[i]);
             }
