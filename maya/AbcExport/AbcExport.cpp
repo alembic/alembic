@@ -485,8 +485,7 @@ MStatus AbcExport::doIt(const MArgList & args)
         }
 
         AbcWriteJobPtr job(new AbcWriteJob(fileName.c_str(),
-            transSamples, transTime, geoSamples, geoTime,
-            jobArgs));
+            transSamples, transTime, geoSamples, geoTime, jobArgs));
 
        jobList.push_front(job);
 
@@ -603,6 +602,9 @@ MStatus initializePlugin(MObject obj)
         status.perror("registerCommand");
     }
 
+    MString info = "AbcExport using Alembic ";
+    info += Alembic::Abc::GetLibraryVersion().c_str();
+    MGlobal::displayInfo(info);
 
     return status;
 }

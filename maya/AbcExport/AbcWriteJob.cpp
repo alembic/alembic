@@ -788,8 +788,23 @@ bool AbcWriteJob::eval(double iFrame)
             throw std::runtime_error("The names of root nodes are the same");
         }
 
-        mRoot = Alembic::Abc::OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
-            mFileName, Alembic::Abc::ErrorHandler::kThrowPolicy );
+        std::string appWriter = "Maya ";
+        appWriter += MGlobal::mayaVersion().asChar();
+        appWriter += " AbcExport";
+
+        std::string userInfo = "Exported from: ";
+        userInfo += MFileIO::currentFile().asChar();
+
+        // these symbols can't be in the meta data
+        if (userInfo.find('=') != std::string::npos ||
+            userInfo.find(';') != std::string::npos)
+        {
+            userInfo = "";
+        }
+
+        mRoot = CreateArchiveWithInfo(Alembic::AbcCoreHDF5::WriteArchive(),
+            mFileName, appWriter, userInfo,
+            Alembic::Abc::ErrorHandler::kThrowPolicy);
         mShapeTimeIndex = mRoot.addTimeSampling(*mShapeTime);
         mTransTimeIndex = mRoot.addTimeSampling(*mTransTime);
 

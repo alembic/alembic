@@ -48,6 +48,7 @@
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>
 #include <maya/MDoubleArray.h>
+#include <maya/MFileIO.h>
 #include <maya/MFloatArray.h>
 #include <maya/MFloatPointArray.h>
 #include <maya/MFloatVector.h>

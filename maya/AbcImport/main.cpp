@@ -34,17 +34,19 @@
 //
 //-*****************************************************************************
 
+#include <maya/MGlobal.h>
 #include <maya/MFnPlugin.h>
 #include <maya/MObject.h>
 
 #include "AlembicNode.h"
 #include "AbcImport.h"
 
+// Interesting trivia: 0x2697 is the unicode character for Alembic
 const MTypeId AlembicNode::mMayaNodeId(0x00082697);
 
 MStatus initializePlugin(MObject obj)
 {
-    MFnPlugin plugin(obj, "Sony Pictures Imageworks", "1.0", "Any");
+    MFnPlugin plugin(obj, "Alembic", "1.0", "Any");
 
     MStatus status = plugin.registerCommand("AbcImport",
                                 AbcImport::creator,
@@ -54,6 +56,10 @@ MStatus initializePlugin(MObject obj)
                                 AlembicNode::mMayaNodeId,
                                 &AlembicNode::creator,
                                 &AlembicNode::initialize);
+
+    MString info = "AbcImport using Alembic ";
+    info += Alembic::Abc::GetLibraryVersion().c_str();
+    MGlobal::displayInfo(info);
 
     return status;
 }
