@@ -163,7 +163,7 @@ void readProperty(const std::string &archiveName)
     TimeSamplingPtr ts = mass.getTimeSampling();
 
     std::cout << "..with time/value pairs: ";
-    for (size_t ss=0; ss<numSamples; ss++)
+    for (unsigned int ss=0; ss<numSamples; ss++)
     {
         ISampleSelector iss( (index_t) ss);
         std::cout << ts->getSampleTime( (index_t) ss ) << "/";

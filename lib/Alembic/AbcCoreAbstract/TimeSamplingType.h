@@ -49,7 +49,7 @@ namespace ALEMBIC_VERSION_NS {
 //!
 //! The default behavior is where there is a time value associated with sample
 //! zero, and a uniform time amount between each subsequent sample.
-//! This is called "Uniform" time sampling, and would correspond to sampling 
+//! This is called "Uniform" time sampling, and would correspond to sampling
 //! every frame at 1/24 per second, or similar.
 //!
 //! The second behavior is where there is a period of time over which a fixed
@@ -67,6 +67,10 @@ namespace ALEMBIC_VERSION_NS {
 class TimeSamplingType
 {
 public:
+    static const uint32_t AcyclicNumSamples();
+    static const chrono_t AcyclicTimePerCycle();
+
+public:
 
     //! Uniform default
     TimeSamplingType()
@@ -80,7 +84,7 @@ public:
       , m_timePerCycle( iTimePerCycle )
     {
         ABCA_ASSERT( m_timePerCycle > 0.0 &&
-                     m_timePerCycle < ACYCLIC_TIME_PER_CYCLE,
+                     m_timePerCycle < AcyclicTimePerCycle(),
                      "Time per cycle must be greater than 0 " <<
                      "and can not be ACYCLIC_TIME_PER_CYCLE." );
     }
@@ -95,16 +99,16 @@ public:
         ABCA_ASSERT(
 
             // Acyclic
-            ( m_timePerCycle == ACYCLIC_TIME_PER_CYCLE &&
-              m_numSamplesPerCycle == ACYCLIC_NUM_SAMPLES ) ||
+            ( m_timePerCycle == AcyclicTimePerCycle() &&
+              m_numSamplesPerCycle == AcyclicNumSamples() ) ||
 
             // valid time per cycle
             ( m_timePerCycle > 0.0 &&
-              m_timePerCycle < ACYCLIC_TIME_PER_CYCLE &&
+              m_timePerCycle < AcyclicTimePerCycle() &&
 
               // and valid samples per cycle
               m_numSamplesPerCycle > 0 &&
-              m_numSamplesPerCycle < ACYCLIC_NUM_SAMPLES ),
+              m_numSamplesPerCycle < AcyclicNumSamples() ),
             "Invalid Time Sampling Type, time per cycle: "
             << m_timePerCycle << " samples per cycle: "
             <<  m_numSamplesPerCycle );
@@ -117,8 +121,10 @@ public:
     //! the argument-less acyclic time sampling.
     enum AcyclicFlag { kAcyclic };
     explicit TimeSamplingType( AcyclicFlag iAF )
-      : m_numSamplesPerCycle( ACYCLIC_NUM_SAMPLES )
-      , m_timePerCycle( ACYCLIC_TIME_PER_CYCLE ) {}
+    {
+        m_numSamplesPerCycle = AcyclicNumSamples();
+        m_timePerCycle = AcyclicTimePerCycle();
+    }
 
     //! Using Default Copy Constructor
     //! Using Default Assignment Operator
@@ -137,13 +143,10 @@ public:
     bool isCyclic() const
     {
         return ( ( m_numSamplesPerCycle > 1 ) &&
-                 ( m_numSamplesPerCycle < ACYCLIC_NUM_SAMPLES ) );
+                 ( m_numSamplesPerCycle < AcyclicNumSamples() ) );
     }
     bool isAcyclic() const
-    { return m_numSamplesPerCycle == ACYCLIC_NUM_SAMPLES; }
-
-    static const uint32_t AcyclicNumSamples();
-    static const chrono_t AcyclicTimePerCycle();
+    { return m_numSamplesPerCycle == AcyclicNumSamples(); }
 
     uint32_t getNumSamplesPerCycle() const { return m_numSamplesPerCycle; }
 
@@ -153,8 +156,6 @@ private:
     uint32_t m_numSamplesPerCycle;
     chrono_t m_timePerCycle;
 
-    static const uint32_t ACYCLIC_NUM_SAMPLES;
-    static const chrono_t ACYCLIC_TIME_PER_CYCLE;
 public:
     friend std::ostream &operator<<( std::ostream &ostr,
                                      const TimeSamplingType &tst );

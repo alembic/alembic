@@ -148,7 +148,7 @@ void readUInt32ArrayProperty(const std::string &archiveName)
 
     const TimeSamplingPtr ts = primes.getTimeSampling();
     std::cout << "..with time/value pairs: " << std::endl;;
-    for (size_t ss=0; ss<numSamples; ss++)
+    for (unsigned int ss=0; ss<numSamples; ss++)
     {
         std::cout << "   ";
         ISampleSelector iss( (index_t) ss);
@@ -284,7 +284,7 @@ void readV3fArrayProperty(const std::string &archiveName)
 
     TimeSamplingPtr ts = positions.getTimeSampling();
     std::cout << "..with time/value pairs: " << std::endl;;
-    for (size_t ss=0; ss<numSamples; ss++)
+    for (unsigned int ss=0; ss<numSamples; ss++)
     {
         std::cout << "   ";
         ISampleSelector iss( (index_t) ss);

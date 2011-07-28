@@ -110,10 +110,10 @@ template <class ARCHIVE_CTOR>
 OArchive CreateArchiveWithInfo(
     ARCHIVE_CTOR iCtor,
     const std::string &iFileName,
-    const std::string & iApplicationWriter,
-    const std::string & iUserDescription,
-    const Argument &iArg0 = Argument(),
-    const Argument &iArg1 = Argument() )
+    const std::string &iApplicationWriter,
+    const std::string &iUserDescription,
+    const Argument &iArg0,
+    const Argument &iArg1 )
 {
     AbcA::MetaData md = GetMetaData( iArg0, iArg1 );
     ErrorHandler::Policy policy = GetErrorHandlerPolicyFromArgs( iArg0, iArg1 );
