@@ -98,6 +98,8 @@ public:
         }
     }
 
+    // THIS IS NOT MULTITHREAD SAFE, but currently is only
+    // used during write operations.
     virtual void copyFrom( const void *iData )
     {
         const T *iDataT = reinterpret_cast<const T *>( iData );

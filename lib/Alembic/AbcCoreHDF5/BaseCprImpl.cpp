@@ -207,6 +207,7 @@ size_t BaseCprImpl::getNumProperties()
 //-*****************************************************************************
 const AbcA::PropertyHeader &BaseCprImpl::getPropertyHeader( size_t i )
 {
+    // fixed length and resize called in ctor, so multithread safe.
     if ( i < 0 || i > m_propertyHeaders.size() )
     {
         ABCA_THROW( "Out of range index in "

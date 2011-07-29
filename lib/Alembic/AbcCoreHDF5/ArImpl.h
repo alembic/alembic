@@ -78,6 +78,7 @@ public:
         return m_readArraySampleCache;
     }
 
+    //! THIS METHOD IS NOT MULTITHREAD SAFE
     virtual void
     setReadArraySampleCachePtr( AbcA::ReadArraySampleCachePtr iPtr )
     {
