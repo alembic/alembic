@@ -49,8 +49,7 @@ class MDagPath;
 
 MObject create(Alembic::AbcGeom::IXform & iLocator,
                MObject & iParent,
-               Alembic::Abc::IScalarProperty & iLocProp,
-               MDagPath & oCurrentDagNode);
+               Alembic::Abc::IScalarProperty & iLocProp);
 
 void read(double iFrame,
           Alembic::AbcGeom::IXform & iLocator,

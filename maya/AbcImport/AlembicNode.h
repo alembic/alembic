@@ -100,11 +100,6 @@ public:
     static MObject mStartFrameAttr;
     static MObject mEndFrameAttr;
 
-    static MObject mConnectAttr;
-    static MObject mCreateIfNotFoundAttr;
-    static MObject mRemoveIfNoUpdateAttr;
-    static MObject mConnectRootNodesAttr;
-
     // override virtual methods from MPxNode
     virtual MStatus compute(const MPlug & plug, MDataBlock & dataBlock);
 

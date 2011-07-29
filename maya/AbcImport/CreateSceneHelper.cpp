@@ -182,7 +182,7 @@ CreateSceneVisitor::CreateSceneVisitor(double iFrame,
     mAnyRoots = false;
 
     // parse the input string to extract the nodes that need (re)connection
-    if ( iRootNodes != MString("/") )
+    if (iRootNodes != MString() && iRootNodes != MString("/"))
     {
         MStringArray theArray;
         if (iRootNodes.split(' ', theArray) == MS::kSuccess)
@@ -203,7 +203,7 @@ CreateSceneVisitor::CreateSceneVisitor(double iFrame,
             }
         }
     }
-    else
+    else if (iRootNodes == MString("/"))
     {
         mAnyRoots = true;
     }
@@ -269,7 +269,7 @@ void CreateSceneVisitor::addToPropList(std::size_t iFirst, MObject & iObject)
 
 // remembers what sets a mesh was part of, gets those sets as a selection
 // and then clears the sets for reassignment later  this is only used when
-// hooking up an HDF node to a previous hierarchy (swapping)
+// hooking up an Alembic node to a previous hierarchy (swapping)
 void CreateSceneVisitor::checkShaderSelection(MFnMesh & iMesh,
     unsigned int iInst)
 {
@@ -395,6 +395,7 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
             }
             else
             {
+                mConnectDagNode = MDagPath();
                 connectUpdateNodes.insert(name);
                 this->visit(obj);
                 mParent = saveParent;
@@ -961,7 +962,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
 
             if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
             {
-                xformObj = create(iNode, mParent, locProp, mConnectDagNode);
+                xformObj = create(iNode, mParent, locProp);
                 if (!isConstant)
                 {
                     mData.mLocObjList.push_back(xformObj);

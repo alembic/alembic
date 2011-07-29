@@ -48,8 +48,7 @@
 
 MObject create(Alembic::AbcGeom::IXform & iLocator,
                MObject & iParent,
-               Alembic::Abc::IScalarProperty & iLocProp,
-               MDagPath & oCurrentDagNode)
+               Alembic::Abc::IScalarProperty & iLocProp)
 {
     MStatus status = MS::kSuccess;
     MObject locatorObj = MObject::kNullObj;
@@ -91,8 +90,6 @@ MObject create(Alembic::AbcGeom::IXform & iLocator,
         dstPlug = fnLocator.findPlug("localScaleZ");
         dstPlug.setValue(oSample[5]);
     }
-
-    fnLocator.getPath(oCurrentDagNode);
 
     return locatorObj;
 }
