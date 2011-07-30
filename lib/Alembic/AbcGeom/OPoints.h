@@ -40,12 +40,13 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
+#include <Alembic/AbcGeom/OGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-class OPointsSchema : public Abc::OSchema<PointsSchemaInfo>
+class OPointsSchema : public OGeomBaseSchema<PointsSchemaInfo>
 {
 public:
     //-*************************************************************************
@@ -163,7 +164,7 @@ public:
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument(),
                    const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<PointsSchemaInfo>( iParent, iName,
+      : OGeomBaseSchema<PointsSchemaInfo>( iParent, iName,
                                           iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
@@ -190,7 +191,7 @@ public:
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument(),
                             const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<PointsSchemaInfo>( iParent,
+      : OGeomBaseSchema<PointsSchemaInfo>( iParent,
                                      iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
@@ -247,10 +248,6 @@ public:
     void setTimeSampling( uint32_t iIndex );
     void setTimeSampling( AbcA::TimeSamplingPtr iTime );
 
-    //! A container for arbitrary geom params (pseudo-properties settable and
-    //! gettable as indexed or not).
-    Abc::OCompoundProperty getArbGeomParams();
-
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -266,19 +263,14 @@ public:
         m_velocitiesProperty.reset();
         m_widthsParam.reset();
 
-        m_selfBoundsProperty.reset();
-        m_childBoundsProperty.reset();
-
-        m_arbGeomParams.reset();
-
-        Abc::OSchema<PointsSchemaInfo>::reset();
+        OGeomBaseSchema<PointsSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::OSchema<PointsSchemaInfo>::valid() &&
+        return ( OGeomBaseSchema<PointsSchemaInfo>::valid() &&
                  m_positionsProperty.valid() &&
                  m_idsProperty.valid() );
     }
@@ -295,10 +287,6 @@ protected:
     Abc::OV3fArrayProperty m_velocitiesProperty;
     OFloatGeomParam m_widthsParam;
 
-    Abc::OBox3dProperty m_selfBoundsProperty;
-    Abc::OBox3dProperty m_childBoundsProperty;
-
-    Abc::OCompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

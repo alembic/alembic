@@ -386,28 +386,7 @@ void ONuPatchSchema::init( const AbcA::index_t iTsIdx )
     m_uKnotProperty = Abc::OFloatArrayProperty( _this, "uKnot", iTsIdx );
     m_vKnotProperty = Abc::OFloatArrayProperty( _this, "vKnot", iTsIdx );
 
-    m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
-
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-Abc::OCompoundProperty ONuPatchSchema::getArbGeomParams()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ONuPatchSchema::getArbGeomParams()" );
-
-    if ( ! m_arbGeomParams )
-    {
-        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
-                                                  ".arbGeomParams" );
-    }
-
-    return m_arbGeomParams;
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    Abc::OCompoundProperty ret;
-    return ret;
 }
 
 } // End namespace AbcGeom

@@ -41,12 +41,13 @@
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
 #include <Alembic/AbcGeom/FaceSetExclusivity.h>
+#include <Alembic/AbcGeom/IGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-class IFaceSetSchema : public Abc::ISchema<FaceSetSchemaInfo>
+class IFaceSetSchema : public IGeomBaseSchema<FaceSetSchemaInfo>
 {
 public:
     //-*************************************************************************
@@ -123,7 +124,7 @@ public:
 
                  const Abc::Argument &iArg0 = Abc::Argument(),
                  const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<FaceSetSchemaInfo>( iParent, iName,
+      : IGeomBaseSchema<FaceSetSchemaInfo>( iParent, iName,
                                       iArg0, iArg1 )
     {
         init(  iArg0, iArg1 );
@@ -135,7 +136,7 @@ public:
     explicit IFaceSetSchema( CPROP_PTR iParent,
                           const Abc::Argument &iArg0 = Abc::Argument(),
                           const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<FaceSetSchemaInfo>( iParent,
+      : IGeomBaseSchema<FaceSetSchemaInfo>( iParent,
                                       iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -148,7 +149,7 @@ public:
 
                  const Abc::Argument &iArg0 = Abc::Argument(),
                  const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<FaceSetSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : IGeomBaseSchema<FaceSetSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -197,18 +198,6 @@ public:
 
     FaceSetExclusivity getFaceExclusivity();
 
-    Abc::IBox3dProperty getSelfBoundsProperty()
-    {
-        return m_selfBoundsProperty;
-    }
-
-    Abc::IBox3dProperty getChildBoundsProperty()
-    {
-        return m_childBoundsProperty;
-    }
-
-    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
-
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -221,16 +210,14 @@ public:
     {
         m_facesProperty.reset();
 
-        m_arbGeomParams.reset();
-
-        Abc::ISchema<FaceSetSchemaInfo>::reset();
+        IGeomBaseSchema<FaceSetSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::ISchema<FaceSetSchemaInfo>::valid() &&
+        return ( IGeomBaseSchema<FaceSetSchemaInfo>::valid() &&
                  m_facesProperty.valid() );
     }
 
@@ -242,13 +229,6 @@ protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
     Abc::IInt32ArrayProperty    m_facesProperty;
-
-    // bounds
-    Abc::IBox3dProperty m_selfBoundsProperty;
-    Abc::IBox3dProperty m_childBoundsProperty;
-
-    // random geometry parameters
-    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

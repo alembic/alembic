@@ -42,12 +42,13 @@
 #include <Alembic/AbcGeom/CurveType.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
+#include <Alembic/AbcGeom/IGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-class ICurvesSchema : public Abc::ISchema<CurvesSchemaInfo>
+class ICurvesSchema : public IGeomBaseSchema<CurvesSchemaInfo>
 {
 public:
     class Sample
@@ -141,7 +142,7 @@ public:
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iParent, iName, iArg0, iArg1 )
+      : IGeomBaseSchema<CurvesSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -152,7 +153,7 @@ public:
     explicit ICurvesSchema( CPROP_PTR iParent,
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iParent, iArg0, iArg1 )
+      : IGeomBaseSchema<CurvesSchemaInfo>( iParent, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -163,7 +164,7 @@ public:
                    Abc::WrapExistingFlag iFlag,
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CurvesSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : IGeomBaseSchema<CurvesSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -214,18 +215,7 @@ public:
     IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
     IFloatGeomParam &getWidthsParam() { return m_widthsParam; }
 
-    Abc::IBox3dProperty getSelfBoundsProperty() 
-    { 
-        return m_selfBoundsProperty;
-    }
-    Abc::IBox3dProperty getChildBoundsProperty()
-    {
-        return m_childBoundsProperty;
-    }
 
-    // compound property to use as parent for any arbitrary GeomParams
-    // underneath it
-    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -240,25 +230,20 @@ public:
         m_positionsProperty.reset();
         m_nVerticesProperty.reset();
 
-        m_selfBoundsProperty.reset();
-        m_childBoundsProperty.reset();
-
         m_uvsParam.reset();
         m_normalsParam.reset();
         m_widthsParam.reset();
 
-        m_arbGeomParams.reset();
-
         m_basisAndTypeProperty.reset();
 
-        Abc::ISchema<CurvesSchemaInfo>::reset();
+        IGeomBaseSchema<CurvesSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::ISchema<CurvesSchemaInfo>::valid() &&
+        return ( IGeomBaseSchema<CurvesSchemaInfo>::valid() &&
                  m_positionsProperty.valid() && m_nVerticesProperty.valid() );
     }
 
@@ -278,11 +263,6 @@ protected:
     IFloatGeomParam m_widthsParam;
     IV2fGeomParam m_uvsParam;
     IN3fGeomParam m_normalsParam;
-
-    Abc::IBox3dProperty m_selfBoundsProperty;
-    Abc::IBox3dProperty m_childBoundsProperty;
-
-    Abc::ICompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

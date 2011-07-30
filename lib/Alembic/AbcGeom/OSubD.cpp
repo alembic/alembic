@@ -407,25 +407,6 @@ void OSubDSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
 }
 
 //-*****************************************************************************
-Abc::OCompoundProperty OSubDSchema::getArbGeomParams()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::getArbGeomParams()" );
-
-    if ( ! m_arbGeomParams )
-    {
-        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
-                                                  ".arbGeomParams" );
-    }
-
-    return m_arbGeomParams;
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    Abc::OCompoundProperty ret;
-    return ret;
-}
-
-//-*****************************************************************************
 OFaceSet &
 OSubDSchema::createFaceSet( const std::string &iFaceSetName )
 {
@@ -471,8 +452,6 @@ void OSubDSchema::init( uint32_t iTsIdx )
         Abc::OInt32Property( _this, ".interpolateBoundary", iTsIdx );
 
     m_subdSchemeProperty = Abc::OStringProperty( _this, ".scheme", iTsIdx );
-
-    m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

@@ -41,12 +41,13 @@
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
+#include <Alembic/AbcGeom/OGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-class OPolyMeshSchema : public Abc::OSchema<PolyMeshSchemaInfo>
+class OPolyMeshSchema : public OGeomBaseSchema<PolyMeshSchemaInfo>
 {
 public:
     //-*************************************************************************
@@ -165,7 +166,7 @@ public:
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<PolyMeshSchemaInfo>( iParent, iName,
+      : OGeomBaseSchema<PolyMeshSchemaInfo>( iParent, iName,
                                           iArg0, iArg1, iArg2 )
     {
 
@@ -193,7 +194,7 @@ public:
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument(),
                               const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<PolyMeshSchemaInfo>( iParent,
+      : OGeomBaseSchema<PolyMeshSchemaInfo>( iParent,
                                             iArg0, iArg1, iArg2 )
     {
 
@@ -253,8 +254,6 @@ public:
     void setTimeSampling( uint32_t iIndex );
     void setTimeSampling( AbcA::TimeSamplingPtr iTime );
 
-    Abc::OCompoundProperty getArbGeomParams();
-
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -270,20 +269,17 @@ public:
         m_countsProperty.reset();
         m_uvsParam.reset();
         m_normalsParam.reset();
-        m_selfBoundsProperty.reset();
-        m_childBoundsProperty.reset();
-        m_arbGeomParams.reset();
 
         m_faceSets.clear();
 
-        Abc::OSchema<PolyMeshSchemaInfo>::reset();
+        OGeomBaseSchema<PolyMeshSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::OSchema<PolyMeshSchemaInfo>::valid() &&
+        return ( OGeomBaseSchema<PolyMeshSchemaInfo>::valid() &&
                  m_positionsProperty.valid() &&
                  m_indicesProperty.valid() &&
                  m_countsProperty.valid() );
@@ -310,13 +306,11 @@ protected:
     // FaceSets created on this PolyMesh
     std::map <std::string, OFaceSet>  m_faceSets;
 
-    Abc::OBox3dProperty m_selfBoundsProperty;
-    Abc::OBox3dProperty m_childBoundsProperty;
-
     OV2fGeomParam m_uvsParam;
     ON3fGeomParam m_normalsParam;
 
-    Abc::OCompoundProperty m_arbGeomParams;
+    // self and child bounds and ArbGeomParams and UserProperties
+    // all come from OGeomBaseSchema
 };
 
 //-*****************************************************************************

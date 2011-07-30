@@ -42,6 +42,7 @@
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
+#include <Alembic/AbcGeom/OGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -51,11 +52,11 @@ namespace AbcGeom {
 static const int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( INT_MIN / 2 );
 
 //-*****************************************************************************
-class OSubDSchema : public Abc::OSchema<SubDSchemaInfo>
+class OSubDSchema : public OGeomBaseSchema<SubDSchemaInfo>
 {
 public:
     //-*************************************************************************
-    // POLY MESH SCHEMA SAMPLE TYPE
+    // SUBD SCHEMA SAMPLE TYPE
     //-*************************************************************************
     class Sample
     {
@@ -302,7 +303,7 @@ public:
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<SubDSchemaInfo>( iParent, iName,
+      : OGeomBaseSchema<SubDSchemaInfo>( iParent, iName,
                                       iArg0, iArg1, iArg2 )
     {
 
@@ -330,7 +331,7 @@ public:
                           const Abc::Argument &iArg0 = Abc::Argument(),
                           const Abc::Argument &iArg1 = Abc::Argument(),
                           const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<SubDSchemaInfo>( iParent,
+      : OGeomBaseSchema<SubDSchemaInfo>( iParent,
                                       iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
@@ -389,8 +390,6 @@ public:
     void setTimeSampling( uint32_t iIndex );
     void setTimeSampling( AbcA::TimeSamplingPtr iTime );
 
-    Abc::OCompoundProperty getArbGeomParams();
-
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -416,22 +415,18 @@ public:
 
         m_subdSchemeProperty.reset();
 
-        m_selfBoundsProperty.reset();
-        m_childBoundsProperty.reset();
-
         m_uvsParam.reset();
 
-        m_arbGeomParams.reset();
         m_faceSets.clear ();
 
-        Abc::OSchema<SubDSchemaInfo>::reset();
+        OGeomBaseSchema<SubDSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::OSchema<SubDSchemaInfo>::valid() &&
+        return ( OGeomBaseSchema<SubDSchemaInfo>::valid() &&
                  m_positionsProperty.valid() &&
                  m_faceIndicesProperty.valid() &&
                  m_faceCountsProperty.valid() );
@@ -476,15 +471,8 @@ protected:
     // subdivision scheme
     Abc::OStringProperty m_subdSchemeProperty;
 
-    // bounds
-    Abc::OBox3dProperty m_selfBoundsProperty;
-    Abc::OBox3dProperty m_childBoundsProperty;
-
     // UVs
     OV2fGeomParam m_uvsParam;
-
-    // arbitrary geometry parameters
-    Abc::OCompoundProperty m_arbGeomParams;
 
 private:
     void initCreases(uint32_t iNumSamples);

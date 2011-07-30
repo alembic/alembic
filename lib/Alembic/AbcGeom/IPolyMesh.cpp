@@ -85,14 +85,6 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
     m_countsProperty = Abc::IInt32ArrayProperty( _this, ".faceCounts",
                                        args.getSchemaInterpMatching() );
 
-    m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
-
-    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
-    {
-        m_childBoundsProperty = Abc::IBox3dProperty( _this, ".childBnds", iArg0,
-                                             iArg1 );
-    }
-
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
@@ -102,13 +94,6 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
     if ( this->getPropertyHeader( "N" ) != NULL )
     {
         m_normalsParam = IN3fGeomParam( _this, "N", iArg0, iArg1 );
-    }
-
-    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
-    {
-        m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
-                                                  args.getErrorHandlerPolicy()
-                                                );
     }
 
     m_faceSetsLoaded = false;

@@ -241,30 +241,9 @@ void OPolyMeshSchema::init( uint32_t iTsIdx )
 
     m_countsProperty = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTsIdx );
 
-    m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
-
     // UVs and Normals are created on first call to set()
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-Abc::OCompoundProperty OPolyMeshSchema::getArbGeomParams()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::getArbGeomParams()" );
-
-    if ( ! m_arbGeomParams )
-    {
-        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
-                                                  ".arbGeomParams" );
-    }
-
-    return m_arbGeomParams;
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    Abc::OCompoundProperty ret;
-    return ret;
 }
 
 //-*****************************************************************************

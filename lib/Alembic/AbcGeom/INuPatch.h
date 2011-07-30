@@ -40,12 +40,13 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
+#include <Alembic/AbcGeom/IGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
 
 //-*****************************************************************************
-class INuPatchSchema : public Abc::ISchema<NuPatchSchemaInfo>
+class INuPatchSchema : public IGeomBaseSchema<NuPatchSchemaInfo>
 {
 public:
     class Sample
@@ -68,9 +69,6 @@ public:
         // point is 1
         Abc::FloatArraySamplePtr getPositionWeights() const { return m_positionWeights; }
 
-        Abc::Box3d getSelfBounds() const { return m_selfBounds; }
-        Abc::Box3d getChildBounds() const { return m_childBounds; }
-
         // trim curve
         int32_t getTrimNumLoops() const { return m_trimNumLoops; }
         Abc::Int32ArraySamplePtr getTrimNumVertices() const { return m_trimNumVertices; }
@@ -90,6 +88,9 @@ public:
             return m_positions && m_numU && m_numV && m_uOrder && m_vOrder &&
                 m_uKnot && m_vKnot;
         }
+
+        Abc::Box3d getSelfBounds() const { return m_selfBounds; }
+        Abc::Box3d getChildBounds() const { return m_childBounds; }
 
         void reset()
         {
@@ -186,7 +187,7 @@ public:
                     const std::string &iName,
                     const Abc::Argument &iArg0 = Abc::Argument(),
                     const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<NuPatchSchemaInfo>( iParent, iName,
+      : IGeomBaseSchema<NuPatchSchemaInfo>( iParent, iName,
                                          iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -199,7 +200,7 @@ public:
                              const Abc::Argument &iArg0 = Abc::Argument(),
                              const Abc::Argument &iArg1 = Abc::Argument() )
 
-      : Abc::ISchema<NuPatchSchemaInfo>( iParent,
+      : IGeomBaseSchema<NuPatchSchemaInfo>( iParent,
                                          iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
@@ -212,7 +213,7 @@ public:
                     const Abc::Argument &iArg0 = Abc::Argument(),
                     const Abc::Argument &iArg1 = Abc::Argument() )
 
-      : Abc::ISchema<NuPatchSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : IGeomBaseSchema<NuPatchSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -258,9 +259,6 @@ public:
         return m_positionWeightsProperty;
     }
 
-    Abc::IBox3dProperty getSelfBoundsProperty() { return m_selfBoundsProperty; }
-    Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
-
     IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
     IV2fGeomParam &getUVsParam() { return m_uvsParam; }
 
@@ -268,7 +266,6 @@ public:
     bool trimCurveTopologyIsHomogenous();
     bool trimCurveTopologyIsConstant();
 
-    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -292,9 +289,6 @@ public:
         m_normalsParam.reset();
         m_uvsParam.reset();
 
-        m_selfBoundsProperty.reset();
-        m_childBoundsProperty.reset();
-
         // reset trim curve attributes
         m_trimNumLoopsProperty.reset();
         m_trimNumCurvesProperty.reset();
@@ -307,14 +301,14 @@ public:
         m_trimVProperty.reset();
         m_trimWProperty.reset();
 
-        Abc::ISchema<NuPatchSchemaInfo>::reset();
+        IGeomBaseSchema<NuPatchSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::ISchema<NuPatchSchemaInfo>::valid() &&
+        return ( IGeomBaseSchema<NuPatchSchemaInfo>::valid() &&
                  m_positionsProperty.valid() &&
                  m_numUProperty.valid() &&
                  m_numVProperty.valid() &&
@@ -360,12 +354,6 @@ protected:
     Abc::IFloatArrayProperty m_trimUProperty;
     Abc::IFloatArrayProperty m_trimVProperty;
     Abc::IFloatArrayProperty m_trimWProperty;
-
-    // bounds
-    Abc::IBox3dProperty m_selfBoundsProperty;
-    Abc::IBox3dProperty m_childBoundsProperty;
-
-    Abc::ICompoundProperty m_arbGeomParams;
 
     bool m_hasTrimCurve;
 };

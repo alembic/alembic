@@ -162,6 +162,7 @@ public:
     void setTimeSampling( uint32_t iIndex );
     void setTimeSampling( AbcA::TimeSamplingPtr iTime );
 
+    Abc::OCompoundProperty getUserProperties();
     Abc::OCompoundProperty getArbGeomParams();
 
     //-*************************************************************************
@@ -176,6 +177,7 @@ public:
     {
         m_coreProperties.reset();
         m_childBoundsProperty.reset();
+        m_userProperties.reset();
         m_arbGeomParams.reset();
 
         Abc::OSchema<CameraSchemaInfo>::reset();
@@ -199,6 +201,7 @@ protected:
 
     Abc::OBox3dProperty m_childBoundsProperty;
 
+    Abc::OCompoundProperty m_userProperties;
     Abc::OCompoundProperty m_arbGeomParams;
 
     Abc::ODoubleArrayProperty m_bigFilmBackChannelsProperty;

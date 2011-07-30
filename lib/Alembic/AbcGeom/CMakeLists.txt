@@ -78,6 +78,9 @@ SET( H_FILES
 
   Foundation.h
 
+  IGeomBase.h
+  OGeomBase.h
+
   GeometryScope.h
 
   SchemaInfoDeclarations.h

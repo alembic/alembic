@@ -173,6 +173,12 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
                                                 );
     }
 
+    if ( ptr->getPropertyHeader( ".userProperties" ) != NULL )
+    {
+        m_userProperties = Abc::ICompoundProperty( ptr, ".userProperties",
+                                                  getErrorHandlerPolicy()
+                                                );
+    }
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 

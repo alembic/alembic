@@ -69,6 +69,7 @@ MeshTopologyVariance ICurvesSchema::getTopologyVariance()
 void ICurvesSchema::init( const Abc::Argument &iArg0,
                           const Abc::Argument &iArg1 )
 {
+    // Only callable by ctors (mt-safety)
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::init()" );
 
     Abc::Arguments args;
@@ -86,14 +87,6 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     m_basisAndTypeProperty = Abc::IScalarProperty( _this, "curveBasisAndType",
                                           args.getSchemaInterpMatching());
 
-    m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
-
-    if ( this->getPropertyHeader( ".childBnds" ) != NULL )
-    {
-        m_childBoundsProperty = Abc::IBox3dProperty( _this, ".childBnds", iArg0,
-                                             iArg1 );
-    }
-
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
@@ -108,13 +101,6 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     if ( this->getPropertyHeader( "width" ) != NULL )
     {
         m_widthsParam = IFloatGeomParam( _this, "width", iArg0, iArg1 );
-    }
-
-    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
-    {
-        m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
-                                                  args.getErrorHandlerPolicy()
-                                                );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

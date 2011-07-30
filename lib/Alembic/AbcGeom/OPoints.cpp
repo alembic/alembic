@@ -229,24 +229,6 @@ void OPointsSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
 }
 
 //-*****************************************************************************
-Abc::OCompoundProperty OPointsSchema::getArbGeomParams()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::getArbGeomParams()" );
-
-    if ( ! m_arbGeomParams )
-    {
-        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
-    }
-
-    return m_arbGeomParams;
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    Abc::OCompoundProperty ret;
-    return ret;
-}
-
-//-*****************************************************************************
 void OPointsSchema::init( uint32_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::init()" );
@@ -257,9 +239,8 @@ void OPointsSchema::init( uint32_t iTsIdx )
 
     m_positionsProperty = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
 
-    m_idsProperty = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata, iTsIdx );
-
-    m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
+    m_idsProperty = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata,
+                                               iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

@@ -69,6 +69,12 @@ void ICameraSchema::init( const Abc::Argument &iArg0,
             args.getErrorHandlerPolicy() );
     }
 
+    if ( this->getPropertyHeader( ".userProperties" ) != NULL )
+    {
+        m_userProperties = Abc::ICompoundProperty( _this, ".userProperties",
+            args.getErrorHandlerPolicy() );
+    }
+
     // read the film back operations
     const AbcA::PropertyHeader * header = 
         this->getPropertyHeader(".filmBackOps");

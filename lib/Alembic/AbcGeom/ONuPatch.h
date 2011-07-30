@@ -41,6 +41,7 @@
 #include <Alembic/AbcGeom/Basis.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
+#include <Alembic/AbcGeom/OGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -50,7 +51,7 @@ namespace AbcGeom {
 static const int32_t ABC_GEOM_NUPATCH_NULL_INT_VALUE( INT_MIN / 4 );
 
 //-*****************************************************************************
-class ONuPatchSchema : public Abc::OSchema<NuPatchSchemaInfo>
+class ONuPatchSchema : public OGeomBaseSchema<NuPatchSchemaInfo>
 {
 public:
     //-*************************************************************************
@@ -296,7 +297,7 @@ public:
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<NuPatchSchemaInfo>( iParent, iName,
+      : OGeomBaseSchema<NuPatchSchemaInfo>( iParent, iName,
                                             iArg0, iArg1, iArg2 )
     {
 
@@ -324,7 +325,7 @@ public:
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument(),
                               const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<NuPatchSchemaInfo>( iParent, iArg0, iArg1, iArg2 )
+      : OGeomBaseSchema<NuPatchSchemaInfo>( iParent, iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
@@ -376,8 +377,6 @@ public:
     //! indices, and counts.
     void setFromPrevious();
 
-    Abc::OCompoundProperty getArbGeomParams();
-
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -400,9 +399,6 @@ public:
         m_normalsParam.reset();
         m_uvsParam.reset();
 
-        m_selfBoundsProperty.reset();
-        m_childBoundsProperty.reset();
-
         // reset trim curve attributes
         m_trimNumLoopsProperty.reset();
         m_trimNumVerticesProperty.reset();
@@ -414,14 +410,14 @@ public:
         m_trimVProperty.reset();
         m_trimWProperty.reset();
 
-        Abc::OSchema<NuPatchSchemaInfo>::reset();
+        OGeomBaseSchema<NuPatchSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::OSchema<NuPatchSchemaInfo>::valid() &&
+        return ( OGeomBaseSchema<NuPatchSchemaInfo>::valid() &&
                  m_positionsProperty.valid() );
     }
 
@@ -462,12 +458,6 @@ protected:
     Abc::OFloatArrayProperty m_trimVProperty;
     Abc::OFloatArrayProperty m_trimWProperty;
 
-
-    // bounds
-    Abc::OBox3dProperty m_selfBoundsProperty;
-    Abc::OBox3dProperty m_childBoundsProperty;
-
-    Abc::OCompoundProperty m_arbGeomParams;
 };
 
 //-*****************************************************************************

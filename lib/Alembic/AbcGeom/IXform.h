@@ -152,6 +152,9 @@ public:
         m_isConstant = true;
         m_isConstantIdentity = true;
 
+        m_arbGeomParams.reset();
+        m_userProperties.reset();
+
         super_type::reset();
     }
 
@@ -162,6 +165,8 @@ public:
     }
 
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+
+    ICompoundProperty getUserProperties() { return m_userProperties; }
 
     //! unspecified-bool-type operator overload.
     //! ...
@@ -176,6 +181,7 @@ protected:
     Abc::IBoolProperty m_inheritsProperty;
 
     Abc::ICompoundProperty m_arbGeomParams;
+    Abc::ICompoundProperty m_userProperties;
 
     bool m_isConstant;
 

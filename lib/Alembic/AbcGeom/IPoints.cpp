@@ -56,8 +56,6 @@ void IPointsSchema::init( const Abc::Argument &iArg0,
     m_idsProperty = Abc::IUInt64ArrayProperty( _this, ".pointIds",
                                       args.getSchemaInterpMatching() );
 
-    m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
-
     if ( _this->getPropertyHeader( ".velocities" ) != NULL )
     {
         m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
@@ -67,19 +65,6 @@ void IPointsSchema::init( const Abc::Argument &iArg0,
     if ( _this->getPropertyHeader( ".widths" ) != NULL )
     {
         m_widthsParam = IFloatGeomParam( _this, ".widths", iArg0, iArg1 );
-    }
-
-    if ( _this->getPropertyHeader( ".childBnds" ) != NULL )
-    {
-        m_childBoundsProperty = Abc::IBox3dProperty( _this, ".childBnds",
-                                                     iArg0, iArg1 );
-    }
-
-    if ( _this->getPropertyHeader( ".arbGeomParams" ) != NULL )
-    {
-        m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
-                                                  args.getErrorHandlerPolicy()
-                                                );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

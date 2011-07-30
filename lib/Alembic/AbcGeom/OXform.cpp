@@ -225,7 +225,7 @@ void OXformSchema::set( XformSample &ioSamp )
 //-*****************************************************************************
 void OXformSchema::setFromPrevious()
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious" );
 
     m_inheritsProperty.setFromPrevious();
 
@@ -297,6 +297,25 @@ Abc::OCompoundProperty OXformSchema::getArbGeomParams()
     }
 
     return m_arbGeomParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
+}
+
+//-*****************************************************************************
+Abc::OCompoundProperty OXformSchema::getUserProperties()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::getUserProperties()" );
+
+    if ( ! m_userProperties )
+    {
+        m_userProperties = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".userProperties" );
+    }
+
+    return m_userProperties;
 
     ALEMBIC_ABC_SAFE_CALL_END();
 

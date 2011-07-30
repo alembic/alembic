@@ -288,7 +288,6 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
     m_positionsProperty = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
-    m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", iTsIdx );
 
     m_nVerticesProperty = Abc::OInt32ArrayProperty( _this, "nVertices", iTsIdx);
 
@@ -297,25 +296,6 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
         AbcA::DataType( Alembic::Util::kUint8POD, 4 ), iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-Abc::OCompoundProperty OCurvesSchema::getArbGeomParams()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::getArbGeomParams()" );
-
-    if ( ! m_arbGeomParams )
-    {
-        m_arbGeomParams = Abc::OCompoundProperty( this->getPtr(),
-                                                  ".arbGeomParams" );
-    }
-
-    return m_arbGeomParams;
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    Abc::OCompoundProperty ret;
-    return ret;
 }
 
 } // End namespace AbcGeom

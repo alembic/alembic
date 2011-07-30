@@ -252,5 +252,24 @@ Abc::OCompoundProperty OCameraSchema::getArbGeomParams()
     return ret;
 }
 
+//-*****************************************************************************
+Abc::OCompoundProperty OCameraSchema::getUserProperties()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCameraSchema::getUserProperties()" );
+
+    if ( ! m_userProperties )
+    {
+        m_userProperties = Abc::OCompoundProperty( this->getPtr(),
+                                                  ".userProperties" );
+    }
+
+    return m_userProperties;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    Abc::OCompoundProperty ret;
+    return ret;
+}
+
 } // End namespace AbcGeom
 } // End namespace Alembic

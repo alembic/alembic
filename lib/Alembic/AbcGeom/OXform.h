@@ -165,6 +165,7 @@ public:
     void setTimeSampling( AbcA::TimeSamplingPtr iTime );
 
     Abc::OCompoundProperty getArbGeomParams();
+    Abc::OCompoundProperty getUserProperties();
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -185,6 +186,9 @@ public:
 
         m_staticChans.clear();
         m_staticChans.resize( 0 );
+
+        m_arbGeomParams.reset();
+        m_userProperties.reset();
 
         super_type::reset();
     }
@@ -238,6 +242,8 @@ protected:
     bool m_isIdentity;
 
     Abc::OCompoundProperty m_arbGeomParams;
+
+    Abc::OCompoundProperty m_userProperties;
 };
 
 //-*****************************************************************************

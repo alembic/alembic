@@ -211,24 +211,10 @@ void ISubDSchema::init( const Abc::Argument &iArg0,
     m_subdSchemeProperty = Abc::IStringProperty( _this, ".scheme",
                                          args.getSchemaInterpMatching() );
 
-    m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds", iArg0, iArg1 );
-
-    if ( this->getPropertyHeader(".childBnds") != NULL )
-    {
-        m_childBoundsProperty = Abc::IBox3dProperty( _this, ".childBnds", iArg0, iArg1);
-    }
-
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
         m_uvsParam = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
-    }
-
-    if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
-    {
-        m_arbGeomParams = Abc::ICompoundProperty( _this, ".arbGeomParams",
-                                                  args.getErrorHandlerPolicy()
-                                                );
     }
 
     m_faceSetsLoaded = false;

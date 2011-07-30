@@ -55,9 +55,6 @@ void OFaceSetSchema::init( uint32_t iTimeSamplingID )
     m_facesProperty = Abc::OInt32ArrayProperty( _this, ".faces", 
         iTimeSamplingID );
 
-    m_selfBoundsProperty = Abc::OBox3dProperty( _this, ".selfBnds", 
-        iTimeSamplingID );
-
     m_facesExclusive = kFaceSetNonExclusive;
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
@@ -165,24 +162,6 @@ Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
         }
     }
     return bounds;
-}
-
-//-*****************************************************************************
-Abc::OCompoundProperty OFaceSetSchema::getArbGeomParams()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OFaceSetSchema::getArbGeomParams()" );
-
-    if ( ! m_arbGeomParams )
-    {
-        m_arbGeomParams = Abc::OCompoundProperty( *this, ".arbGeomParams" );
-    }
-
-    return m_arbGeomParams;
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    Abc::OCompoundProperty ret;
-    return ret;
 }
 
 

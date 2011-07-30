@@ -42,6 +42,7 @@
 #include <Alembic/AbcGeom/CurveType.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
+#include <Alembic/AbcGeom/OGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -56,7 +57,7 @@ namespace AbcGeom {
 // "width"  - can be constant or can vary
 // "N"      - (just like PolyMesh, via a geom parameter) Normals
 // "uv"     - (just like PolyMesh, via a geom parameter) u-v coordinates
-class OCurvesSchema : public Abc::OSchema<CurvesSchemaInfo>
+class OCurvesSchema : public OGeomBaseSchema<CurvesSchemaInfo>
 {
 public:
     //-*************************************************************************
@@ -239,7 +240,7 @@ public:
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument(),
                    const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CurvesSchemaInfo>( iParent, iName,
+      : OGeomBaseSchema<CurvesSchemaInfo>( iParent, iName,
                                         iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
@@ -264,7 +265,7 @@ public:
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument(),
                             const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CurvesSchemaInfo>( iParent,
+      : OGeomBaseSchema<CurvesSchemaInfo>( iParent,
                                         iArg0, iArg1, iArg2 )
     {
         // Meta data and error handling are eaten up by
@@ -317,8 +318,6 @@ public:
     //! indices, and counts.
     void setFromPrevious();
 
-    Abc::OCompoundProperty getArbGeomParams();
-
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -333,22 +332,18 @@ public:
         m_uvsParam.reset();
         m_normalsParam.reset();
         m_widthsParam.reset();
-        m_arbGeomParams.reset();
         m_nVerticesProperty.reset();
 
         m_basisAndTypeProperty.reset();
 
-        m_selfBoundsProperty.reset();
-        m_childBoundsProperty.reset();
-
-        Abc::OSchema<CurvesSchemaInfo>::reset();
+        OGeomBaseSchema<CurvesSchemaInfo>::reset();
     }
 
     //! Valid returns whether this function set is
     //! valid.
     bool valid() const
     {
-        return ( Abc::OSchema<CurvesSchemaInfo>::valid() &&
+        return ( OGeomBaseSchema<CurvesSchemaInfo>::valid() &&
                  m_positionsProperty.valid() );
     }
 
@@ -367,12 +362,6 @@ protected:
     OV2fGeomParam m_uvsParam;
     ON3fGeomParam m_normalsParam;
     OFloatGeomParam m_widthsParam;
-
-    Abc::OCompoundProperty m_arbGeomParams;
-
-    // bounding box attributes
-    Abc::OBox3dProperty m_selfBoundsProperty;
-    Abc::OBox3dProperty m_childBoundsProperty;
 
     Abc::OScalarProperty m_basisAndTypeProperty;
 };
