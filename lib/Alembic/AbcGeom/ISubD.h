@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_ISubD_h_
 #define _Alembic_AbcGeom_ISubD_h_
 
+#include <boost/thread/mutex.hpp>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
@@ -228,11 +229,6 @@ public:
         init( iArg0, iArg1 );
     }
 
-    //! Copy constructor.
-    ISubDSchema(const ISubDSchema& iCopy)
-    {
-        *this = iCopy;
-    }
 
     //! Default assignment operator used.
 
@@ -369,6 +365,13 @@ public:
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( ISubDSchema::valid() );
 
+    // Copy constructors
+    ISubDSchema(const ISubDSchema& iCopy)
+    {
+        *this = iCopy;
+    }
+    const ISubDSchema & operator=(const ISubDSchema & rhs);
+
 protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
@@ -403,6 +406,9 @@ protected:
     // code attempts to access facesets.
     bool                              m_faceSetsLoaded;
     std::map <std::string, IFaceSet>  m_faceSets;
+    boost::mutex                      m_faceSetsMutex;
+    void loadFaceSetNames();
+
 };
 
 //-*****************************************************************************

@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_IPolyMesh_h_
 #define _Alembic_AbcGeom_IPolyMesh_h_
 
+#include <boost/thread/mutex.hpp>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IFaceSet.h>
@@ -155,8 +156,7 @@ public:
     {
         *this = iCopy;
     }
-
-    //! Default assignment operator used.
+    const IPolyMeshSchema & operator=(const IPolyMeshSchema & rhs);
 
 
     //! Return the number of samples contained in the property.
@@ -283,6 +283,8 @@ protected:
     // code attempts to access facesets.
     bool                              m_faceSetsLoaded;
     std::map <std::string, IFaceSet>  m_faceSets;
+    boost::mutex                      m_faceSetsMutex;
+    void loadFaceSetNames();
 };
 
 //-*****************************************************************************
