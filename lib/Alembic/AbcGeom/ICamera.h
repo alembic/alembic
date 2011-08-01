@@ -127,7 +127,7 @@ public:
 
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
-    ICompoundProperty getArbGeomParams() { return m_userProperties; }
+    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
     ICompoundProperty getUserProperties() { return m_userProperties; }
 
     //! Reset returns this function set to an empty, default
