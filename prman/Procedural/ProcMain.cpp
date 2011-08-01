@@ -44,15 +44,42 @@
 #include "PathUtil.h"
 #include "WriteGeo.h"
 
+#include <memory>
+
 using namespace Alembic::AbcGeom;
+
+//-*****************************************************************************
+
+class AttributeBlockHelper
+{
+public:
+    AttributeBlockHelper( const ObjectHeader &ohead )
+    {
+        RiAttributeBegin();
+        WriteIdentifier( ohead );
+    }
+    
+    ~AttributeBlockHelper()
+    {
+        RiAttributeEnd();
+    }
+};
+
+typedef std::auto_ptr<AttributeBlockHelper> AttributeBlockHelperAutoPtr;
 
 //-*****************************************************************************
 void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
                  PathList::const_iterator I, PathList::const_iterator E )
 {
-    RiAttributeBegin();
-    WriteIdentifier( ohead );
-
+    // Only add an enclosing AttributeBegin/name/AttributeEnd if we're
+    // not excluding xforms. If we're not adding it here, we're adding for
+    // the individual primitives.
+    AttributeBlockHelperAutoPtr blockHelper;
+    if ( !args.excludeXform )
+    {
+        blockHelper.reset( new AttributeBlockHelper( ohead ) );
+    }
+    
     //set this if we should continue traversing
     IObject nextParentObject;
 
@@ -72,6 +99,12 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     }
     else if ( ISubD::matches( ohead ) )
     {
+        if ( !blockHelper.get() )
+        {
+            blockHelper.reset( new AttributeBlockHelper( ohead ) );
+        }
+        
+        
         std::string faceSetName;
         
         ISubD subd( parent, ohead.getName() );
@@ -98,6 +131,11 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     }
     else if ( IPolyMesh::matches( ohead ) )
     {
+        if ( !blockHelper.get() )
+        {
+            blockHelper.reset( new AttributeBlockHelper( ohead ) );
+        }
+        
         IPolyMesh polymesh( parent, ohead.getName() );
         ProcessPolyMesh( polymesh, args );
 
@@ -105,6 +143,11 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     }
     else if ( INuPatch::matches( ohead ) )
     {
+        if ( !blockHelper.get() )
+        {
+            blockHelper.reset( new AttributeBlockHelper( ohead ) );
+        }
+        
         INuPatch patch( parent, ohead.getName() );
         ProcessNuPatch( patch, args );
         
@@ -112,6 +155,11 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     }
     else if ( IPoints::matches( ohead ) )
     {
+        if ( !blockHelper.get() )
+        {
+            blockHelper.reset( new AttributeBlockHelper( ohead ) );
+        }
+        
         IPoints points( parent, ohead.getName() );
         ProcessPoints( points, args );
         
@@ -119,6 +167,11 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     }
     else if ( ICurves::matches( ohead ) )
     {
+        if ( !blockHelper.get() )
+        {
+            blockHelper.reset( new AttributeBlockHelper( ohead ) );
+        }
+        
         ICurves curves( parent, ohead.getName() );
         ProcessCurves( curves, args );
         
@@ -159,8 +212,9 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             }
         }
     }
-
-    RiAttributeEnd();
+    
+    // RiAttributeEnd will be called by blockHelper falling out of scope
+    // if set.
 }
 
 //-*****************************************************************************
@@ -193,6 +247,11 @@ Subdivide( RtPointer data, RtFloat detail )
 {
     ProcArgs *args = reinterpret_cast<ProcArgs*>( data );
     if ( !args )
+    {
+        return;
+    }
+    
+    if ( args->filename.empty() )
     {
         return;
     }

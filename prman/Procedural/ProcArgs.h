@@ -57,7 +57,9 @@ struct ProcArgs
     , shutterClose( rhs.shutterClose )
     , excludeXform( false )
     {}
-
+    
+    void usage();
+    
     //member variables
     std::string filename;
     std::string objectpath;

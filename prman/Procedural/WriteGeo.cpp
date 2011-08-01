@@ -359,28 +359,60 @@ void ProcessNuPatch( INuPatch &patch, ProcArgs &args )
         
         ParamListBuilder ParamListBuilder;
         
-        //for now, no Pw so go straight with P
-        ParamListBuilder.add( "P", (RtPointer)sample.getPositions()->get() );
+        //build this here so that it's still in scope when RiNuPatchV is
+        //called.
+        std::vector<RtFloat> pwValues;
+        
+        if ( sample.getPositionWeights() )
+        {
+            if ( sample.getPositionWeights()->size() == sample.getPositions()->size() )
+            {
+                //need to combine P with weight form Pw
+                pwValues.reserve( sample.getPositions()->size() * 4 );
+                
+                const float32_t * pStart = reinterpret_cast<const float32_t * >(
+                        sample.getPositions()->get() );
+                const float32_t * wStart = reinterpret_cast<const float32_t * >(
+                        sample.getPositionWeights()->get() );
+                
+                for ( size_t i = 0, e = sample.getPositionWeights()->size();
+                        i < e;  ++i )
+                {
+                    pwValues.push_back( pStart[i*3] );
+                    pwValues.push_back( pStart[i*3+1] );
+                    pwValues.push_back( pStart[i*3+2] );
+                    pwValues.push_back( wStart[i] );
+                }
+                
+                ParamListBuilder.add( "Pw", (RtPointer) &pwValues[0] );
+            }
+        }
+        
+        if ( pwValues.empty() )
+        {
+            //no Pw so go straight with P
+            ParamListBuilder.add( "P",
+                    (RtPointer)sample.getPositions()->get() );
+        }
         
         ICompoundProperty arbGeomParams = ps.getArbGeomParams();
         AddArbitraryGeomParams( arbGeomParams,
                     sampleSelector, ParamListBuilder );
         
-        //for now, use 0 and 1 for umin and umax as it's not described in
-        //alembic data. In theory, setting varying st could accomplish the
-        //same thing for someone who really needs it.
+        //For now, use the last knot value for umin and umax as it's
+        //not described in the alembic data 
         
         RiNuPatchV(
                 sample.getNumU(),
                 sample.getUOrder(),
                 (RtFloat *) sample.getUKnot()->get(),
                 0.0, //umin
-                1.0, //umax
+                sample.getUKnot()->get()[sample.getUKnot()->size()-1],//umax
                 sample.getNumV(),
                 sample.getVOrder(),
                 (RtFloat *) sample.getVKnot()->get(),
                 0.0, //vmin
-                1.0, //vmax
+                sample.getVKnot()->get()[sample.getVKnot()->size()-1], //vmax
                 ParamListBuilder.n(),
                 ParamListBuilder.nms(),
                 ParamListBuilder.vals() );
