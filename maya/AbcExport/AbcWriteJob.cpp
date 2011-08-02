@@ -808,8 +808,8 @@ bool AbcWriteJob::eval(double iFrame)
         mShapeTimeIndex = mRoot.addTimeSampling(*mShapeTime);
         mTransTimeIndex = mRoot.addTimeSampling(*mTransTime);
 
-        mBoxProp = Alembic::Abc::OBox3dProperty(mRoot.getTop().getProperties(),
-            ".childBnds", mTransTimeIndex);
+        mBoxProp =  Alembic::AbcGeom::CreateOArchiveBounds(mRoot,
+            mTransTimeIndex);
 
         if (!mRoot.valid())
         {

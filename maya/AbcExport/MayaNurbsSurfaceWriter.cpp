@@ -172,6 +172,10 @@ void MayaNurbsSurfaceWriter::write()
     std::vector<Alembic::Abc::V3f> sampPos;
     sampPos.reserve(numCVs);
 
+    std::vector<float> sampPosWeights;
+    sampPosWeights.reserve(numCVs);
+    bool weightsOne = true;
+
     // Maya stores the data where v varies the fastest (v,u order)
     // so we need to pack the data differently u,v order
     // (v reversed to make clockwise???)
@@ -184,9 +188,19 @@ void MayaNurbsSurfaceWriter::write()
                 static_cast<float>(cvArray[index].x),
                 static_cast<float>(cvArray[index].y),
                 static_cast<float>(cvArray[index].z) ));
+
+            if (cvArray[index].w != 1.0)
+            {
+                weightsOne = false;
+            }
+            sampPosWeights.push_back(static_cast<float>(cvArray[index].w));
         }
     }
     samp.setPositions(Alembic::Abc::V3fArraySample(sampPos));
+    if (!weightsOne)
+    {
+        samp.setPositionWeights(Alembic::Abc::FloatArraySample(sampPosWeights));
+    }
 
     if (!nurbs.isTrimmedSurface())
     {

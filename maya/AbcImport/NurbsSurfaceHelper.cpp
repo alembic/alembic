@@ -174,6 +174,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
     schema.get(samp, Alembic::Abc::ISampleSelector(index));
 
     Alembic::Abc::V3fArraySamplePtr pos = samp.getPositions();
+    Alembic::Abc::FloatArraySamplePtr weights = samp.getPositionWeights();
 
     MString surfaceName(iNode.getName().c_str());
 
@@ -195,6 +196,11 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
         {
             unsigned int mayaIndex = u * numCVInV + (numCVInV - v - 1);
             MPoint pt((*pos)[curPos].x, (*pos)[curPos].y, (*pos)[curPos].z);
+
+            if (weights)
+            {
+                pt.w = (*weights)[curPos];
+            }
 
             // go from u,v order to reversed v, u order
             controlVertices.set(pt, mayaIndex);
