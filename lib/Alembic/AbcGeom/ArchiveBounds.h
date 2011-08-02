@@ -42,7 +42,8 @@
 namespace Alembic {
 namespace AbcGeom {
 
-//! Helper function that gets the bounds property off of the top object
+//! Helper function that gets the bounds property off of the top object if
+//! it exists, if it doesn't exist an invalid IBox3dProperty is returned.
 //! Arguments can specify error handling policy or protocol matching policy.
 Abc::IBox3dProperty GetIArchiveBounds( IArchive & iArchive,
                                        const Argument &iArg0 = Argument(),
