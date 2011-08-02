@@ -60,7 +60,7 @@ public:
 protected:
 
     INuPatch m_nuPatch;
-    V3fArraySamplePtr m_positions;
+    P3fArraySamplePtr m_positions;
     FloatArraySamplePtr m_uKnot;
     FloatArraySamplePtr m_vKnot;
     int m_uOrder;

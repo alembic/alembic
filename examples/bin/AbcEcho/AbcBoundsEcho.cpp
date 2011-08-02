@@ -87,7 +87,7 @@ Box3d getBounds( IObject iObj )
     {
         IPolyMesh mesh( iObj, kWrapExisting );
         IPolyMeshSchema ms = mesh.getSchema();
-        V3fArraySamplePtr positions = ms.getValue().getPositions();
+        P3fArraySamplePtr positions = ms.getValue().getPositions();
         size_t numPoints = positions->size();
 
         for ( size_t i = 0 ; i < numPoints ; ++i )
@@ -99,7 +99,7 @@ Box3d getBounds( IObject iObj )
     {
         ISubD mesh( iObj, kWrapExisting );
         ISubDSchema ms = mesh.getSchema();
-        V3fArraySamplePtr positions = ms.getValue().getPositions();
+        P3fArraySamplePtr positions = ms.getValue().getPositions();
         size_t numPoints = positions->size();
 
         for ( size_t i = 0 ; i < numPoints ; ++i )

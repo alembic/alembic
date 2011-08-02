@@ -378,7 +378,7 @@ void ONuPatchSchema::init( const AbcA::index_t iTsIdx )
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
     // initialize any required properties
-    m_positionsProperty = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
+    m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, iTsIdx );
     m_numUProperty = Abc::OInt32Property( _this, "nu", iTsIdx );
     m_numVProperty = Abc::OInt32Property( _this, "nv", iTsIdx );
     m_uOrderProperty = Abc::OInt32Property( _this, "uOrder", iTsIdx );

@@ -63,7 +63,7 @@ public:
         Sample() { reset(); }
 
         // main stuff
-        Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
+        Abc::P3fArraySamplePtr getPositions() const { return m_positions; }
         Abc::Int32ArraySamplePtr getFaceIndices() const { return m_faceIndices; }
         Abc::Int32ArraySamplePtr getFaceCounts() const { return m_faceCounts; }
 
@@ -141,7 +141,7 @@ public:
     protected:
         friend class ISubDSchema;
 
-        Abc::V3fArraySamplePtr m_positions;
+        Abc::P3fArraySamplePtr m_positions;
         Abc::Int32ArraySamplePtr m_faceIndices;
         Abc::Int32ArraySamplePtr m_faceCounts;
 
@@ -277,7 +277,7 @@ public:
     { return m_faceCountsProperty; }
     Abc::IInt32ArrayProperty getFaceIndicesProperty()
     { return m_faceIndicesProperty; }
-    Abc::IV3fArrayProperty getPositionsProperty()
+    Abc::IP3fArrayProperty getPositionsProperty()
     { return m_positionsProperty; }
 
     Abc::IInt32Property getFaceVaryingInterpolateBoundaryProperty()
@@ -375,7 +375,7 @@ public:
 protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
-    Abc::IV3fArrayProperty   m_positionsProperty;
+    Abc::IP3fArrayProperty   m_positionsProperty;
     Abc::IInt32ArrayProperty m_faceIndicesProperty;
     Abc::IInt32ArrayProperty m_faceCountsProperty;
 

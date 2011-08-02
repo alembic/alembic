@@ -59,7 +59,7 @@ public:
 
 protected:
     ICurves m_curves;
-    V3fArraySamplePtr m_positions;
+    P3fArraySamplePtr m_positions;
     Int32ArraySamplePtr m_nVertices;
     std::size_t m_nCurves;
 

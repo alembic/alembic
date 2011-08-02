@@ -78,8 +78,9 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
 
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    m_positionsProperty = Abc::IV3fArrayProperty( _this, "P",
-                                          args.getSchemaInterpMatching() );
+    // no matching so we pick up old assets written as V3f
+    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching );
+
     m_indicesProperty = Abc::IInt32ArrayProperty( _this, ".faceIndices",
                                         args.getSchemaInterpMatching() );
     m_countsProperty = Abc::IInt32ArrayProperty( _this, ".faceCounts",

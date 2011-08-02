@@ -65,7 +65,7 @@ public:
         Sample() { reset(); }
 
         Sample(
-                const Abc::V3fArraySample &iPos,
+                const Abc::P3fArraySample &iPos,
                 const int32_t &iNumU,
                 const int32_t &iNumV,
                 const int32_t &iUOrder,
@@ -98,8 +98,8 @@ public:
             {}
 
         // positions
-        const Abc::V3fArraySample &getPositions() const { return m_positions; }
-        void setPositions( const Abc::V3fArraySample &iSmp )
+        const Abc::P3fArraySample &getPositions() const { return m_positions; }
+        void setPositions( const Abc::P3fArraySample &iSmp )
         { m_positions = iSmp; }
 
         // position weights, if it isn't set, it's 1 for every point
@@ -234,7 +234,7 @@ public:
     protected:
 
         // required properties
-        Abc::V3fArraySample m_positions;
+        Abc::P3fArraySample m_positions;
         int32_t m_numU;
         int32_t m_numV;
         int32_t m_uOrder;
@@ -431,7 +431,7 @@ protected:
     AbcA::index_t m_timeSamplingIndex;
 
     // point data
-    Abc::OV3fArrayProperty m_positionsProperty;
+    Abc::OP3fArrayProperty m_positionsProperty;
 
     // required properties
     Abc::OInt32Property m_numUProperty;

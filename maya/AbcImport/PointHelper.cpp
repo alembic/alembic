@@ -91,7 +91,7 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     fnParticle.setName(iNode.getName().c_str());
 
     MPointArray pArray;
-    Alembic::Abc::V3fArraySamplePtr v3ptr = samp.getPositions();
+    Alembic::Abc::P3fArraySamplePtr v3ptr = samp.getPositions();
     MVectorArray vArray;
 
     for (unsigned int pId = 0; pId < pSize; pId++)

@@ -61,7 +61,7 @@ public:
 
         //! Creates a sample with position data but no id
         //! data. For specifying samples after the first one
-        Sample( const Abc::V3fArraySample &iPos,
+        Sample( const Abc::P3fArraySample &iPos,
                 const Abc::V3fArraySample &iVelocities = Abc::V3fArraySample(),
                 const OFloatGeomParam::Sample &iWidths = \
                 OFloatGeomParam::Sample() )
@@ -73,7 +73,7 @@ public:
         //! Creates a sample with position data and id data. The first
         //! sample must be full like this. Subsequent samples may also
         //! be full like this, which would indicate a change of topology
-        Sample( const Abc::V3fArraySample &iPos,
+        Sample( const Abc::P3fArraySample &iPos,
                 const Abc::UInt64ArraySample &iId,
                 const Abc::V3fArraySample &iVelocities = Abc::V3fArraySample(),
                 const OFloatGeomParam::Sample &iWidths = \
@@ -85,8 +85,8 @@ public:
         {}
 
         // positions accessor
-        const Abc::V3fArraySample &getPositions() const { return m_positions; }
-        void setPositions( const Abc::V3fArraySample &iSmp )
+        const Abc::P3fArraySample &getPositions() const { return m_positions; }
+        void setPositions( const Abc::P3fArraySample &iSmp )
         { m_positions = iSmp; }
 
         // ids accessor
@@ -125,7 +125,7 @@ public:
         }
 
     protected:
-        Abc::V3fArraySample m_positions;
+        Abc::P3fArraySample m_positions;
         Abc::V3fArraySample m_velocities;
         Abc::UInt64ArraySample m_ids;
         OFloatGeomParam::Sample m_widths;
@@ -282,7 +282,7 @@ public:
 protected:
     void init( uint32_t iTsIdx );
 
-    Abc::OV3fArrayProperty m_positionsProperty;
+    Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OUInt64ArrayProperty m_idsProperty;
     Abc::OV3fArrayProperty m_velocitiesProperty;
     OFloatGeomParam m_widthsParam;

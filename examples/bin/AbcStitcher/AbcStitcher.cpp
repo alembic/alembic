@@ -374,7 +374,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 ISubDSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OSubDSchema::Sample oSamp;
 
-                Abc::V3fArraySamplePtr posPtr = iSamp.getPositions();
+                Abc::P3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
 
@@ -446,7 +446,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 IPolyMeshSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OPolyMeshSchema::Sample oSamp;
 
-                Abc::V3fArraySamplePtr posPtr = iSamp.getPositions();
+                Abc::P3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
 
@@ -547,7 +547,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 ICurvesSchema::Sample iSamp = iSchema.getValue(reqIdx);
 
                 OCurvesSchema::Sample oSamp;
-                Abc::V3fArraySamplePtr posPtr = iSamp.getPositions();
+                Abc::P3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
                 oSamp.setType(iSamp.getType());
@@ -614,7 +614,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             {
                 IPointsSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OPointsSchema::Sample oSamp;
-                Abc::V3fArraySamplePtr posPtr = iSamp.getPositions();
+                Abc::P3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
                 Abc::UInt64ArraySamplePtr idPtr = iSamp.getIds();
@@ -665,7 +665,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 INuPatchSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 ONuPatchSchema::Sample oSamp;
 
-                Abc::V3fArraySamplePtr posPtr = iSamp.getPositions();
+                Abc::P3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
 

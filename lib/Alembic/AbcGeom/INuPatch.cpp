@@ -200,8 +200,9 @@ void INuPatchSchema::init( const Abc::Argument &iArg0,
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
     // required properties
-    m_positionsProperty = Abc::IV3fArrayProperty( _this, "P",
-                                          args.getSchemaInterpMatching() );
+
+    // no matching so we pick up old assets written as V3f
+    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching );
 
     m_numUProperty = Abc::IInt32Property( _this, "nu",
                                   args.getSchemaInterpMatching() );

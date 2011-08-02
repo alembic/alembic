@@ -173,7 +173,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
     Alembic::AbcGeom::INuPatchSchema::Sample samp;
     schema.get(samp, Alembic::Abc::ISampleSelector(index));
 
-    Alembic::Abc::V3fArraySamplePtr pos = samp.getPositions();
+    Alembic::Abc::P3fArraySamplePtr pos = samp.getPositions();
     Alembic::Abc::FloatArraySamplePtr weights = samp.getPositionWeights();
 
     MString surfaceName(iNode.getName().c_str());

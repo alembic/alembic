@@ -110,7 +110,7 @@ void ISubDDrw::setTime( chrono_t iSeconds )
     }
 
     // Get the stuff.
-    V3fArraySamplePtr P = psamp.getPositions();
+    P3fArraySamplePtr P = psamp.getPositions();
     Int32ArraySamplePtr indices = psamp.getFaceIndices();
     Int32ArraySamplePtr counts = psamp.getFaceCounts();
 

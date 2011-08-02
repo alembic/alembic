@@ -57,7 +57,7 @@ public:
         // Users don't ever create this data directly.
         Sample() { reset(); }
 
-        Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
+        Abc::P3fArraySamplePtr getPositions() const { return m_positions; }
         int32_t getNumU() const { return m_numU; }
         int32_t getNumV() const { return m_numV; }
         int32_t getUOrder() const { return m_uOrder; }
@@ -125,7 +125,7 @@ public:
 
         friend class INuPatchSchema;
 
-        Abc::V3fArraySamplePtr m_positions;
+        Abc::P3fArraySamplePtr m_positions;
         int32_t m_numU;
         int32_t m_numV;
         int32_t m_uOrder;
@@ -249,7 +249,7 @@ public:
         return smp;
     }
 
-    Abc::IV3fArrayProperty getPositionsProperty(){ return m_positionsProperty; }
+    Abc::IP3fArrayProperty getPositionsProperty(){ return m_positionsProperty; }
     Abc::IFloatArrayProperty getUKnotsProperty(){ return m_uKnotProperty; }
     Abc::IFloatArrayProperty getVKnotsProperty(){ return m_vKnotProperty; }
 
@@ -330,7 +330,7 @@ protected:
                const Abc::Argument &iArg1 );
 
     // required properties
-    Abc::IV3fArrayProperty m_positionsProperty;
+    Abc::IP3fArrayProperty m_positionsProperty;
     Abc::IInt32Property m_numUProperty;
     Abc::IInt32Property m_numVProperty;
     Abc::IInt32Property m_uOrderProperty;

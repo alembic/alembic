@@ -69,7 +69,7 @@ public:
         //! For specifying samples with an explicit topology. The first
         //! sample must be full like this. Subsequent samples may also
         //! be full like this, which would indicate a change of topology
-        Sample( const Abc::V3fArraySample &iPositions,
+        Sample( const Abc::P3fArraySample &iPositions,
                 const Abc::Int32ArraySample &iFaceIndices,
                 const Abc::Int32ArraySample &iFaceCounts,
 
@@ -104,8 +104,8 @@ public:
         {}
 
         // main stuff
-        const Abc::V3fArraySample &getPositions() const { return m_positions; }
-        void setPositions( const Abc::V3fArraySample &iSmp )
+        const Abc::P3fArraySample &getPositions() const { return m_positions; }
+        void setPositions( const Abc::P3fArraySample &iSmp )
         { m_positions = iSmp; }
 
         const Abc::Int32ArraySample &getFaceIndices() const { return m_faceIndices; }
@@ -241,7 +241,7 @@ public:
     protected:
         friend class OSubDSchema;
 
-        Abc::V3fArraySample m_positions;
+        Abc::P3fArraySample m_positions;
         Abc::Int32ArraySample m_faceIndices;
         Abc::Int32ArraySample m_faceCounts;
 
@@ -447,7 +447,7 @@ public:
 protected:
     void init( uint32_t iTsIdx );
 
-    Abc::OV3fArrayProperty m_positionsProperty;
+    Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OInt32ArrayProperty m_faceIndicesProperty;
     Abc::OInt32ArrayProperty m_faceCountsProperty;
 

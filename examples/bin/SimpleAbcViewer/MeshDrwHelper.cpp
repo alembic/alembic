@@ -51,7 +51,7 @@ MeshDrwHelper::~MeshDrwHelper()
 }
 
 //-*****************************************************************************
-void MeshDrwHelper::update( V3fArraySamplePtr iP,
+void MeshDrwHelper::update( P3fArraySamplePtr iP,
                             V3fArraySamplePtr iN,
                             Int32ArraySamplePtr iIndices,
                             Int32ArraySamplePtr iCounts,
@@ -197,7 +197,7 @@ void MeshDrwHelper::update( V3fArraySamplePtr iP,
 }
 
 //-*****************************************************************************
-void MeshDrwHelper::update( V3fArraySamplePtr iP,
+void MeshDrwHelper::update( P3fArraySamplePtr iP,
                             V3fArraySamplePtr iN,
                             Abc::Box3d iBounds )
 {

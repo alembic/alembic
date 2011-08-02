@@ -57,7 +57,7 @@ public:
         // Users don't ever create this data directly.
         Sample() { reset(); }
 
-        Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
+        Abc::P3fArraySamplePtr getPositions() const { return m_positions; }
         Abc::UInt64ArraySamplePtr getIds() const { return m_ids; }
         Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
 
@@ -83,7 +83,7 @@ public:
 
     protected:
         friend class IPointsSchema;
-        Abc::V3fArraySamplePtr m_positions;
+        Abc::P3fArraySamplePtr m_positions;
         Abc::UInt64ArraySamplePtr m_ids;
         Abc::V3fArraySamplePtr m_velocities;
 
@@ -202,7 +202,7 @@ public:
         return smp;
     }
 
-    Abc::IV3fArrayProperty getPositionsProperty()
+    Abc::IP3fArrayProperty getPositionsProperty()
     {
         return m_positionsProperty;
     }
@@ -257,7 +257,7 @@ protected:
     void init( const Abc::Argument &iArg0,
                const Abc::Argument &iArg1 );
 
-    Abc::IV3fArrayProperty m_positionsProperty;
+    Abc::IP3fArrayProperty m_positionsProperty;
     Abc::IUInt64ArrayProperty m_idsProperty;
     Abc::IV3fArrayProperty m_velocitiesProperty;
     IFloatGeomParam m_widthsParam;

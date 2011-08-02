@@ -237,7 +237,7 @@ void OPointsSchema::init( uint32_t iTsIdx )
     SetGeometryScope( mdata, kVaryingScope );
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_positionsProperty = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
+    m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, iTsIdx );
 
     m_idsProperty = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata,
                                                iTsIdx );

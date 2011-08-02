@@ -63,7 +63,7 @@ protected:
     IC3fArrayProperty m_colorProp;
     IN3fArrayProperty m_normalProp;
     
-    V3fArraySamplePtr m_positions;
+    P3fArraySamplePtr m_positions;
     C3fArraySamplePtr m_colors;
     N3fArraySamplePtr m_normals;
     

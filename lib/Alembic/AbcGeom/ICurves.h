@@ -59,7 +59,7 @@ public:
         // Users don't ever create this data directly.
         Sample() { reset(); }
 
-        Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
+        Abc::P3fArraySamplePtr getPositions() const { return m_positions; }
 
         std::size_t getNumCurves() const
         {
@@ -99,7 +99,7 @@ public:
 
     protected:
         friend class ICurvesSchema;
-        Abc::V3fArraySamplePtr m_positions;
+        Abc::P3fArraySamplePtr m_positions;
 
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
@@ -206,7 +206,7 @@ public:
     }
 
 
-    Abc::IV3fArrayProperty getPositionsProperty()
+    Abc::IP3fArrayProperty getPositionsProperty()
     {
         return m_positionsProperty;
     }
@@ -254,7 +254,7 @@ public:
 protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
-    Abc::IV3fArrayProperty m_positionsProperty;
+    Abc::IP3fArrayProperty m_positionsProperty;
     Abc::IInt32ArrayProperty m_nVerticesProperty;
 
     // contains type, wrap, ubasis, and vbasis.

@@ -287,7 +287,7 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
 
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_positionsProperty = Abc::OV3fArrayProperty( _this, "P", mdata, iTsIdx );
+    m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, iTsIdx );
 
     m_nVerticesProperty = Abc::OInt32ArrayProperty( _this, "nVertices", iTsIdx);
 

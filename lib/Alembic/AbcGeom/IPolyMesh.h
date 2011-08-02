@@ -59,7 +59,7 @@ public:
         // Users don't ever create this data directly.
         Sample() { reset(); }
 
-        Abc::V3fArraySamplePtr getPositions() const { return m_positions; }
+        Abc::P3fArraySamplePtr getPositions() const { return m_positions; }
         Abc::Int32ArraySamplePtr getFaceIndices() const { return m_indices; }
         Abc::Int32ArraySamplePtr getFaceCounts() const { return m_counts; }
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
@@ -84,7 +84,7 @@ public:
 
     protected:
         friend class IPolyMeshSchema;
-        Abc::V3fArraySamplePtr m_positions;
+        Abc::P3fArraySamplePtr m_positions;
         Abc::Int32ArraySamplePtr m_indices;
         Abc::Int32ArraySamplePtr m_counts;
 
@@ -223,7 +223,7 @@ public:
 
     Abc::IInt32ArrayProperty getFaceCountsProperty() { return m_countsProperty; }
     Abc::IInt32ArrayProperty getFaceIndicesProperty() { return m_indicesProperty; }
-    Abc::IV3fArrayProperty getPositionsProperty() { return m_positionsProperty; }
+    Abc::IP3fArrayProperty getPositionsProperty() { return m_positionsProperty; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -272,7 +272,7 @@ protected:
     void init( const Abc::Argument &iArg0,
                const Abc::Argument &iArg1 );
 
-    Abc::IV3fArrayProperty m_positionsProperty;
+    Abc::IP3fArrayProperty m_positionsProperty;
     Abc::IInt32ArrayProperty m_indicesProperty;
     Abc::IInt32ArrayProperty m_countsProperty;
 

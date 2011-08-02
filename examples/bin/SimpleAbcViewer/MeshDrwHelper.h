@@ -56,14 +56,14 @@ public:
 
     // This is a "full update" of all parameters.
     // If N is empty, normals will be computed.
-    void update( V3fArraySamplePtr iP,
+    void update( P3fArraySamplePtr iP,
                  V3fArraySamplePtr iN,
                  Int32ArraySamplePtr iIndices,
                  Int32ArraySamplePtr iCounts,
                  Abc::Box3d iBounds = Abc::Box3d() );
 
     // Update just positions and possibly normals
-    void update( V3fArraySamplePtr iP,
+    void update( P3fArraySamplePtr iP,
                  V3fArraySamplePtr iN,
                  Abc::Box3d iBounds = Abc::Box3d() );
 
@@ -89,7 +89,7 @@ protected:
     typedef Imath::Vec3<unsigned int> Tri;
     typedef std::vector<Tri> TriArray;
 
-    V3fArraySamplePtr m_meshP;
+    P3fArraySamplePtr m_meshP;
     V3fArraySamplePtr m_meshN;
     Int32ArraySamplePtr m_meshIndices;
     Int32ArraySamplePtr m_meshCounts;

@@ -78,8 +78,8 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
 
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    m_positionsProperty = Abc::IV3fArrayProperty( _this, "P",
-                                          args.getSchemaInterpMatching() );
+    // no matching so we pick up old assets written as V3f
+    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching );
 
     m_nVerticesProperty = Abc::IInt32ArrayProperty( _this, "nVertices",
                                             args.getSchemaInterpMatching());

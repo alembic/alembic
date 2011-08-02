@@ -76,8 +76,8 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
         }
     }
 
-    Alembic::Abc::V3fArraySamplePtr sampPoints = samp.getPositions();
-    Alembic::Abc::V3fArraySamplePtr ceilPoints = ceilSamp.getPositions();
+    Alembic::Abc::P3fArraySamplePtr sampPoints = samp.getPositions();
+    Alembic::Abc::P3fArraySamplePtr ceilPoints = ceilSamp.getPositions();
 
     Alembic::Abc::Int32ArraySamplePtr numVertices =
         samp.getCurvesNumVertices();
@@ -148,7 +148,7 @@ MObject createCurves(const std::string & iName,
     Alembic::Abc::FloatArraySamplePtr widths = iWidths.getVals();
     Alembic::Abc::Int32ArraySamplePtr curvesNumVertices =
         iSample.getCurvesNumVertices();
-    Alembic::Abc::V3fArraySamplePtr positions = iSample.getPositions();
+    Alembic::Abc::P3fArraySamplePtr positions = iSample.getPositions();
 
     MString name(iName.c_str());
 

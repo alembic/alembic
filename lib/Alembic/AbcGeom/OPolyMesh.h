@@ -62,7 +62,7 @@ public:
 
         //! Creates a sample with position data but no index
         //! or count data. For specifying samples after the first one
-        Sample( const Abc::V3fArraySample &iPos )
+        Sample( const Abc::P3fArraySample &iPos )
           : m_positions( iPos ) {}
 
 
@@ -71,7 +71,7 @@ public:
         //! For specifying samples with an explicit topology. The first
         //! sample must be full like this. Subsequent samples may also
         //! be full like this, which would indicate a change of topology
-        Sample( const Abc::V3fArraySample &iPos,
+        Sample( const Abc::P3fArraySample &iPos,
                 const Abc::Int32ArraySample &iInd,
                 const Abc::Int32ArraySample &iCnt,
                 const OV2fGeomParam::Sample &iUVs = OV2fGeomParam::Sample(),
@@ -83,8 +83,8 @@ public:
           , m_normals( iNormals )
         {}
 
-        const Abc::V3fArraySample &getPositions() const { return m_positions; }
-        void setPositions( const Abc::V3fArraySample &iSmp )
+        const Abc::P3fArraySample &getPositions() const { return m_positions; }
+        void setPositions( const Abc::P3fArraySample &iSmp )
         { m_positions = iSmp; }
 
         const Abc::Int32ArraySample &getFaceIndices() const { return m_indices; }
@@ -125,7 +125,7 @@ public:
         }
 
     protected:
-        Abc::V3fArraySample m_positions;
+        Abc::P3fArraySample m_positions;
         Abc::Int32ArraySample m_indices;
         Abc::Int32ArraySample m_counts;
 
@@ -299,7 +299,7 @@ public:
 protected:
     void init( uint32_t iTsIdx );
 
-    Abc::OV3fArrayProperty m_positionsProperty;
+    Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OInt32ArrayProperty m_indicesProperty;
     Abc::OInt32ArrayProperty m_countsProperty;
 

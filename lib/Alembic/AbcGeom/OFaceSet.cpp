@@ -97,7 +97,7 @@ void OFaceSetSchema::setTimeSampling( AbcA::TimeSamplingPtr iTimeSampling )
 Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
     const Int32ArraySample & meshFaceCounts,
     const Int32ArraySample & vertexIndices,
-    const V3fArraySample & meshP)
+    const P3fArraySample & meshP)
 {
     Abc::Box3d     bounds;
     size_t numFaceSetFaces = faces.size ();

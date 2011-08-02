@@ -319,8 +319,8 @@ namespace
     }
 
     void fillPoints(MFloatPointArray & oPointArray,
-        Alembic::Abc::V3fArraySamplePtr iPoints,
-        Alembic::Abc::V3fArraySamplePtr iCeilPoints, double alpha)
+        Alembic::Abc::P3fArraySamplePtr iPoints,
+        Alembic::Abc::P3fArraySamplePtr iCeilPoints, double alpha)
     {
         unsigned int numPoints = static_cast<unsigned int>(iPoints->size());
         oPointArray.setLength(numPoints);
@@ -403,13 +403,13 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
         schema.getTimeSampling(), schema.getNumSamples(), index, ceilIndex);
 
     MFloatPointArray pointArray;
-    Alembic::Abc::V3fArraySamplePtr ceilPoints;
+    Alembic::Abc::P3fArraySamplePtr ceilPoints;
 
     // we can just read the points
     if (ttype != Alembic::AbcGeom::kHeterogenousTopology && iInitialized)
     {
 
-        Alembic::Abc::V3fArraySamplePtr points = schema.getPositionsProperty(
+        Alembic::Abc::P3fArraySamplePtr points = schema.getPositionsProperty(
             ).getValue(Alembic::Abc::ISampleSelector(index));
 
         if (alpha != 0.0)
@@ -464,13 +464,13 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
         schema.getTimeSampling(), schema.getNumSamples(), index, ceilIndex);
 
     MFloatPointArray pointArray;
-    Alembic::Abc::V3fArraySamplePtr ceilPoints;
+    Alembic::Abc::P3fArraySamplePtr ceilPoints;
 
     // we can just read the points
     if (ttype != Alembic::AbcGeom::kHeterogenousTopology && iInitialized)
     {
 
-        Alembic::Abc::V3fArraySamplePtr points = schema.getPositionsProperty(
+        Alembic::Abc::P3fArraySamplePtr points = schema.getPositionsProperty(
             ).getValue(Alembic::Abc::ISampleSelector(index));
 
         if (alpha != 0.0)
@@ -557,7 +557,7 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
         schema.get(samp, Alembic::Abc::ISampleSelector(index));
 
         MFloatPointArray ptArray;
-        Alembic::Abc::V3fArraySamplePtr ceilPoints;
+        Alembic::Abc::P3fArraySamplePtr ceilPoints;
         if (index != ceilIndex)
         {
             Alembic::AbcGeom::IPolyMeshSchema::Sample ceilSamp;
@@ -609,7 +609,7 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
     MFnMesh fnMesh;
 
     MFloatPointArray pointArray;
-    Alembic::Abc::V3fArraySamplePtr emptyPtr;
+    Alembic::Abc::P3fArraySamplePtr emptyPtr;
     fillPoints(pointArray, samp.getPositions(), emptyPtr, 0.0);
 
     fillTopology(fnMesh, iParent, pointArray, samp.getFaceIndices(),
