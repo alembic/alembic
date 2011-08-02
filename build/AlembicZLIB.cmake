@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2010, Industrial Light & Magic, a division of Lucas
+## Copyright (c) 2009-2011, Industrial Light & Magic, a division of Lucas
 ## Entertainment Company Ltd.
 ##
 ## All rights reserved.

@@ -1,10 +1,10 @@
 //-*****************************************************************************
-// Copyright (c) 2009-2010 Alembic Project. All rights reserved.
+// Copyright (c) 2009-2011 Alembic Project. All rights reserved.
 //-*****************************************************************************
 
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010, Industrial Light & Magic,
+// Copyright (c) 2009-2011, Industrial Light & Magic,
 //   a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2010, Industrial Light & Magic,
+## Copyright (c) 2009-2011, Industrial Light & Magic,
 ##   a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
@@ -165,7 +165,7 @@ ENDIF()
 #-******************************************************************************
 #-******************************************************************************
 IF( MAYA_INCLUDE_PATH )
-#  SET( MAYA_FOUND 1 CACHE STRING "Set to 1 if Maya is found, 0 otherwise" )
+  #  SET( MAYA_FOUND 1 CACHE STRING "Set to 1 if Maya is found, 0 otherwise" )
   SET( MAYA_FOUND 1 )
   MESSAGE( STATUS "Found Maya2011!" )
 ELSE( MAYA_INCLUDE_PATH )

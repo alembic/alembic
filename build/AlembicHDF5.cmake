@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2010, Industrial Light & Magic,
+## Copyright (c) 2009-2011, Industrial Light & Magic,
 ##   a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
@@ -68,7 +68,7 @@ ELSE()
   MESSAGE( STATUS "NOT SETTING HDF5_INCLUDE_DIR FROM ENVIRONMENT" )
 ENDIF()
 
-IF( CMAKE_MINOR_VERSION GREATER 7 AND CMAKE_PATCH_VERSION GREATER 4 )
+IF( CMAKE_MINOR_VERSION GREATER 7 AND CMAKE_PATCH_VERSION GREATER 4 OR CMAKE_MAJOR_VERSION GREATER 2 )
   FIND_PACKAGE( HDF5 COMPONENTS C HL REQUIRED )
 ELSE()
   FIND_PACKAGE( HDF5 )
