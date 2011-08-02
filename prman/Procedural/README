@@ -1,0 +1,30 @@
+AlembicRiProcedural usage:
+
+-filename /path/to/some/archive.abc
+
+This is the only required argument. It has no default value.
+
+-frame 42
+
+The frame number to load from within the archive. The default value is 0. This is combined with -fps to map to Alembic time units (double-precision seconds).
+
+-fps 24
+
+Combined with -frame above. The default value is 24
+
+-shutteropen 0.0
+-shutterclose 0.5
+
+These are frame-relative values which specify the shutter window. The procedural will include all samples present in the archive which are relevant to the shutter window. The default value of both is 0.0 (no motion blur).
+
+-objectpath /assetroot/characters
+
+If specified, only objects at or below the provided path (within the archive) will be emitted. When combined with -excludexform, this can also be used to load individual leaf locations within an externally defined hierarchy. If the path points to a single "faceset" object directly beneath a subdivision mesh, it'll add "hole" tags for faces not contained within the "faceset."
+
+-excludexform
+
+If specified, no transformation statements will be written and AttributeBegin blocks and identifiers will only be created around geometric primitives. The default behavior is to write all transformations and include AttributeBegin blocks around each level of the hierarchy.
+
+
+
+
