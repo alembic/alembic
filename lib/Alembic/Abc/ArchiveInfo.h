@@ -118,7 +118,10 @@ OArchive CreateArchiveWithInfo(
     AbcA::MetaData md = GetMetaData( iArg0, iArg1 );
     ErrorHandler::Policy policy = GetErrorHandlerPolicyFromArgs( iArg0, iArg1 );
 
-    md.set( kApplicationNameKey, iApplicationWriter );
+    if ( iApplicationWriter != "" )
+    {
+        md.set( kApplicationNameKey, iApplicationWriter );
+    }
 
     Util::int32_t ver = ALEMBIC_API_VERSION;
     std::stringstream strm;
@@ -132,7 +135,10 @@ OArchive CreateArchiveWithInfo(
     ctime_r( &rawtimeNow, dateBuf );
     md.set( kDateWrittenKey, dateBuf );
 
-    md.set( kUserDescriptionKey, iUserDescription );
+    if ( iUserDescription != "" )
+    {
+        md.set( kUserDescriptionKey, iUserDescription );
+    }
 
     return OArchive( iCtor, iFileName, md, policy );
 

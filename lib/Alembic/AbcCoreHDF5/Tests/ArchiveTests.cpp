@@ -64,7 +64,12 @@ void testReadWriteEmptyArchive()
 
     {
         A5::WriteArchive w;
-        ABC::ArchiveWriterPtr a = w(archiveName, ABC::MetaData());
+        ABC::MetaData m;
+        m.set("Bleep", "bloop");
+        m.set("eep", "");
+        m.set("potato", "salad");
+
+        ABC::ArchiveWriterPtr a = w(archiveName, m);
         ABC::ObjectWriterPtr archive = a->getTop();
 
         TESTING_ASSERT(archive->getFullName() == "/");
@@ -95,6 +100,10 @@ void testReadWriteEmptyArchive()
         A5::ReadArchive r;
         ABC::ArchiveReaderPtr a = r( archiveName );
         ABC::ObjectReaderPtr archive = a->getTop();
+        ABC::MetaData m = archive->getHeader().getMetaData();
+        TESTING_ASSERT(m.get("Bleep") == "bloop");
+        TESTING_ASSERT(m.get("eep") == "");
+        TESTING_ASSERT(m.get("potato") == "salad");
         TESTING_ASSERT(archive->getName() == "ABC");
         TESTING_ASSERT(archive->getFullName() == "/");
         TESTING_ASSERT(archive->getParent() == NULL);
