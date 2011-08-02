@@ -132,6 +132,10 @@ void Example1_MeshIn()
     IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "subD1.abc" );
     std::cout << "Reading: " << archive.getName() << std::endl;
 
+
+    IGeomBaseObject geomBase( IObject( archive, kTop ), "subd" );
+    TESTING_ASSERT( geomBase.getSchema().getSelfBoundsProperty().valid() );
+
     ISubD meshyObj( IObject( archive, kTop ), "subd" );
     ISubDSchema &mesh = meshyObj.getSchema();
 
@@ -151,6 +155,7 @@ void Example1_MeshIn()
 
     // get the 1th sample by value
     ISubDSchema::Sample samp1 = mesh.getValue( 1 );
+    IGeomBase::Sample baseSamp = geomBase.getSchema().getValue( 1 );
 
     std::cout << "bounds: " << samp1.getSelfBounds().min << ", "
               << samp1.getSelfBounds().max << std::endl;
@@ -158,6 +163,10 @@ void Example1_MeshIn()
     TESTING_ASSERT( samp1.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
 
     TESTING_ASSERT( samp1.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
+
+    TESTING_ASSERT( baseSamp.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
+
+    TESTING_ASSERT( baseSamp.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
 
     for ( size_t i = 0 ; i < samp1.getCreaseSharpnesses()->size() ; ++i )
     {

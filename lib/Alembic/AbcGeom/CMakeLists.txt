@@ -35,6 +35,8 @@
 # C++ files for this project
 SET( CXX_FILES
 
+  ArchiveBounds.cpp
+
   GeometryScope.cpp
 
   FilmBackXformOp.cpp
@@ -77,6 +79,8 @@ SET( H_FILES
   All.h
 
   Foundation.h
+
+  ArchiveBounds.h
 
   IGeomBase.h
   OGeomBase.h

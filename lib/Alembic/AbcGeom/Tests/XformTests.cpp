@@ -270,6 +270,8 @@ void someOpsXform()
 
         OXform a( OObject( archive, kTop ), "a" );
 
+        OBox3dProperty bnds = CreateOArchiveBounds( archive );
+
         XformOp transop( kTranslateOperation, kTranslateHint );
         XformOp scaleop( kScaleOperation, kScaleHint );
 
@@ -301,6 +303,8 @@ void someOpsXform()
         asamp.addOp( transpivotop, V3d( 0.0, 0.0, 0.0 ) );
 
         a.getSchema().set( asamp );
+        bnds.set( Box3d( V3d( -0.1, -0.1, -0.1 ),
+                         V3d(  0.1,  0.1,  0.1 ) ) );
 
         for (size_t i = 1; i < 5 ; ++i)
         {
@@ -323,6 +327,9 @@ void someOpsXform()
             asamp.addOp( transpivotop, V3d( 0.0, 3.0 * i, 4.0 * i ) );
 
             a.getSchema().set( asamp );
+            double iVal = static_cast< double >( i );
+            bnds.set( Box3d( V3d( -iVal, -iVal, -iVal ),
+                             V3d(  iVal,  iVal,  iVal ) ) );
         }
 
     }
@@ -331,6 +338,7 @@ void someOpsXform()
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
 
         IXform a( IObject( archive, kTop ), "a" );
+        IBox3dProperty bnds = GetIArchiveBounds( archive );
 
         XformSample asamp;
 
@@ -415,6 +423,9 @@ void someOpsXform()
 
         TESTING_ASSERT( asamp[5].getTranslate() == V3d( 0.0, 0.0, 0.0 ) );
 
+        TESTING_ASSERT( bnds.getValue() == Box3d( V3d( -0.1, -0.1, -0.1 ),
+                                                  V3d(  0.1,  0.1,  0.1 ) ) );
+
         for ( index_t i = 1; i < 5 ; ++i )
         {
             a.getSchema().get( asamp, ISampleSelector( i ) );
@@ -443,6 +454,10 @@ void someOpsXform()
 
             TESTING_ASSERT( tvec.equalWithAbsError( asamp[5].getTranslate(),
                                                     VAL_EPSILON ) );
+            Box3d b = bnds.getValue( ISampleSelector( i ) );
+            double iVal = static_cast< double >( i );
+            TESTING_ASSERT( b == Box3d( V3d( -iVal, -iVal, -iVal ),
+                                        V3d(  iVal,  iVal,  iVal ) ) );
         }
 
         std::cout << "tested all xforms in " << name << std::endl;

@@ -157,6 +157,9 @@ void Example1_MeshIn()
     IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "polyMesh1.abc" );
     std::cout << "Reading: " << archive.getName() << std::endl;
 
+    IGeomBaseObject geomBase( IObject( archive, kTop ), "meshy" );
+    TESTING_ASSERT( geomBase.getSchema().getSelfBoundsProperty().valid() );
+
     IPolyMesh meshyObj( IObject( archive, kTop ), "meshy" );
     IPolyMeshSchema &mesh = meshyObj.getSchema();
     IN3fGeomParam N = mesh.getNormalsParam();
@@ -168,10 +171,16 @@ void Example1_MeshIn()
 
     IPolyMeshSchema::Sample mesh_samp;
     mesh.get( mesh_samp );
+    IGeomBase::Sample baseSamp;
+    geomBase.getSchema().get( baseSamp );
 
     TESTING_ASSERT( mesh_samp.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
 
     TESTING_ASSERT( mesh_samp.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
+
+    TESTING_ASSERT( baseSamp.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
+
+    TESTING_ASSERT( baseSamp.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
 
     ICompoundProperty arbattrs = mesh.getArbGeomParams();
 

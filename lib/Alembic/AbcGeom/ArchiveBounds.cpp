@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2010,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,47 +34,31 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_All_h_
-#define _Alembic_AbcGeom_All_h_
-
 #include <Alembic/AbcGeom/ArchiveBounds.h>
 
-#include <Alembic/AbcGeom/GeometryScope.h>
+namespace Alembic {
+namespace AbcGeom {
 
-#include <Alembic/AbcGeom/GeometryScope.h>
+Abc::IBox3dProperty GetIArchiveBounds( IArchive & iArchive,
+                                       const Argument &iArg0,
+                                       const Argument &iArg1 )
+{
 
-#include <Alembic/AbcGeom/Basis.h>
-#include <Alembic/AbcGeom/OCurves.h>
-#include <Alembic/AbcGeom/ICurves.h>
+    return Alembic::Abc::IBox3dProperty( iArchive.getTop().getProperties(),
+                                         ".childBnds", iArg0, iArg1 );
 
-#include <Alembic/AbcGeom/OFaceSet.h>
-#include <Alembic/AbcGeom/IFaceSet.h>
+}
 
-#include <Alembic/AbcGeom/OGeomParam.h>
-#include <Alembic/AbcGeom/IGeomParam.h>
+Abc::OBox3dProperty CreateOArchiveBounds( OArchive & iArchive,
+                                          const Argument &iArg0,
+                                          const Argument &iArg1,
+                                          const Argument &iArg2 )
+{
 
-#include <Alembic/AbcGeom/FilmBackXformOp.h>
-#include <Alembic/AbcGeom/CameraSample.h>
-#include <Alembic/AbcGeom/OCamera.h>
-#include <Alembic/AbcGeom/ICamera.h>
+    return Alembic::Abc::OBox3dProperty( iArchive.getTop().getProperties(),
+                                         ".childBnds", iArg0, iArg1, iArg2 );
 
-#include <Alembic/AbcGeom/INuPatch.h>
-#include <Alembic/AbcGeom/ONuPatch.h>
+}
 
-#include <Alembic/AbcGeom/OPoints.h>
-#include <Alembic/AbcGeom/IPoints.h>
-
-#include <Alembic/AbcGeom/OPolyMesh.h>
-#include <Alembic/AbcGeom/IPolyMesh.h>
-
-#include <Alembic/AbcGeom/OSubD.h>
-#include <Alembic/AbcGeom/ISubD.h>
-
-#include <Alembic/AbcGeom/XformOp.h>
-#include <Alembic/AbcGeom/XformSample.h>
-#include <Alembic/AbcGeom/OXform.h>
-#include <Alembic/AbcGeom/IXform.h>
-
-#include <Alembic/AbcGeom/Visibility.h>
-
-#endif
+} // End namespace AbcGeom
+} // End namespace Alembic
