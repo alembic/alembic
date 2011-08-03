@@ -242,9 +242,6 @@ public:
         m_uvsParam.reset();
         m_normalsParam.reset();
 
-        m_faceSetsLoaded = false;
-        m_faceSets.clear();
-
         IGeomBaseSchema<PolyMeshSchemaInfo>::reset();
     }
 
