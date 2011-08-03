@@ -33,9 +33,6 @@
 ##-*****************************************************************************
 
 IF ( GLUT_Xmu_LIBRARY OR WINDOWS)
-  MESSAGE( STATUS "Including GlutSkeleton" )
-  ADD_SUBDIRECTORY( GlutSkeleton )
-
   IF ( Boost_PROGRAM_OPTIONS_FOUND )
     MESSAGE( STATUS "Including SimpleAbcViewer" )
     ADD_SUBDIRECTORY( SimpleAbcViewer )
@@ -44,13 +41,8 @@ IF ( GLUT_Xmu_LIBRARY OR WINDOWS)
   ENDIF()
 
 ELSE()
-  MESSAGE( STATUS "Not including GlutSkeleton" )
   MESSAGE( STATUS "Not including SimpleAbcViewer" )
 ENDIF()
 
 ADD_SUBDIRECTORY( AbcEcho )
 ADD_SUBDIRECTORY( AbcStitcher )
-
-# NOTE: uncomment the following line if you have the GTO libraries and wish
-# to try building the GTO->Alembic conversion utility.
-#ADD_SUBDIRECTORY( GtoMeshesToAbc EXCLUDE_FROM_ALL )

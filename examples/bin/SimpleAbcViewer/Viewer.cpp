@@ -552,9 +552,6 @@ int SimpleViewScene( int argc, char *argv[] )
         glutInit( &argc, argv );
         glutCreateWindow( abcFileName.c_str() );
 
-        // Initialize GL.
-        Alembic::GLUtil::InitGL();
-
         // Init local GL stuff
         init();
 

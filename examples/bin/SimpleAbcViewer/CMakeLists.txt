@@ -72,7 +72,6 @@ SET( THIS_LIBS
      AlembicAbc
      AlembicAbcCoreHDF5
      AlembicAbcCoreAbstract
-     AlembicGLUtil
      AlembicUtil
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_GL_LIBS}

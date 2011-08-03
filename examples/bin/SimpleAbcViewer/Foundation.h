@@ -39,7 +39,6 @@
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
-#include <Alembic/GLUtil/All.h>
 #include <Alembic/Util/All.h>
 
 #include <ImathMath.h>
@@ -72,6 +71,60 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
+
+//-*****************************************************************************
+//-*****************************************************************************
+//-*****************************************************************************
+// MAC INCLUDES
+//-*****************************************************************************
+//-*****************************************************************************
+//-*****************************************************************************
+#ifdef PLATFORM_DARWIN
+
+//#include <GL/glew.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <OpenGL/glext.h>
+#include <OpenGL/OpenGL.h>
+#include <GLUT/glut.h>
+
+//-*****************************************************************************
+//-*****************************************************************************
+//-*****************************************************************************
+// NON-MAC INCLUDES (Configured for multiple-context GLEW)
+//-*****************************************************************************
+//-*****************************************************************************
+//-*****************************************************************************
+#else
+
+
+#ifdef ALEMBIC_GLEW_MX
+
+#define GLEW_MX
+#include <GL/glew.h>
+extern "C" GLEWContext *glewGetContext();
+
+#else
+
+#include <GL/glew.h>
+
+#endif // ifdef ALEMBIC_GLEW_MX
+
+#include <GL/gl.h>
+
+#ifdef PLATFORM_WINDOWS
+#include <GL/wglew.h>
+#include <GL/glut.h>
+#else
+#include <GL/glxew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#include <GL/glut.h>
+
+#endif // ifdef WIN64
+
+#endif // ifdef PLATFORM_DARWIN
 
 namespace SimpleAbcViewer {
 

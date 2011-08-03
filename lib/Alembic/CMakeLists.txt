@@ -37,11 +37,6 @@
 # Recurse into all the subdirectories
 
 ADD_SUBDIRECTORY( Util )
-
-IF ( GLUT_Xmu_LIBRARY OR WINDOWS )
-  ADD_SUBDIRECTORY( GLUtil )
-ENDIF()
-
 ADD_SUBDIRECTORY( AbcCoreAbstract )
 ADD_SUBDIRECTORY( AbcCoreHDF5 )
 ADD_SUBDIRECTORY( Abc )

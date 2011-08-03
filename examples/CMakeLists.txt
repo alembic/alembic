@@ -36,6 +36,5 @@ PROJECT( ALEMBIC_EXAMPLE_CODE )
 
 # Recurse into libs, then bins.
 INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/lib" )
-ADD_SUBDIRECTORY( AbcClients )
 ADD_SUBDIRECTORY( bin )
 
