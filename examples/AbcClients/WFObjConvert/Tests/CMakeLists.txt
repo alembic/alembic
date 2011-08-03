@@ -32,10 +32,27 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ALEMBIC_EXAMPLE_CODE )
 
-# Recurse into libs, then bins.
-INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/lib" )
-ADD_SUBDIRECTORY( AbcClients )
-ADD_SUBDIRECTORY( bin )
+SET( TEST_LIBS
+     AbcWFObjConvert
+     AlembicAbcGeom
+     AlembicAbc
+     AlembicAbcCoreHDF5
+     AlembicAbcCoreAbstract
+     AlembicUtil
+     ${ALEMBIC_HDF5_LIBS}
+     ${ALEMBIC_ILMBASE_LIBS}
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
+
+#-******************************************************************************
+#ADD_EXECUTABLE( WFObjConvert_ParserTest parserTest.cpp )
+ADD_EXECUTABLE( WFObjConvert_ParserTest test1.cpp )
+TARGET_LINK_LIBRARIES( WFObjConvert_ParserTest ${TEST_LIBS} )
+
+ADD_EXECUTABLE( WFObjConvert_obj2abc test2.cpp )
+TARGET_LINK_LIBRARIES( WFObjConvert_obj2abc ${TEST_LIBS} )
+
+#ADD_TEST( AbcClients_WFObjConvert_Parser_TEST WFObjConvert_ParserTest )
+#ADD_TEST( AbcClients_WFObjConvert_obj2abc_TEST WFObjConvert_obj2abc )
