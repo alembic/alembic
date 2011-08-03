@@ -1,0 +1,251 @@
+# Dialog script for alembicxform automatically generated 08/02/11 14:14:13
+
+{
+    name	alembicxform
+    script	alembicxform
+    label	"Alembic Xform"
+
+    help {
+	""
+    }
+
+    group {
+	name	"stdswitcher3"
+	label	"Transform"
+	invisibletab
+
+	parm {
+	    name	"keeppos"
+	    baseparm
+	    invisible
+	    joinnext
+	    export	none
+	}
+	parm {
+	    name	"pre_xform"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"xOrd"
+	    baseparm
+	    invisible
+	    joinnext
+	    export	none
+	}
+	parm {
+	    name	"rOrd"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"t"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"r"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"s"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"p"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"scale"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"lookatpath"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"lookup"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"pathobjpath"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"roll"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"pos"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"uparmtype"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"pathorient"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"up"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"bank"
+	    baseparm
+	    invisible
+	    export	none
+	}
+    }
+
+    group {
+	name	"stdswitcher3_1"
+	label	"Subnet"
+	invisibletab
+
+	parm {
+	    name	"label1"
+	    baseparm
+	    invisible
+	    export	dialog
+	}
+	parm {
+	    name	"label2"
+	    baseparm
+	    invisible
+	    export	dialog
+	}
+	parm {
+	    name	"label3"
+	    baseparm
+	    invisible
+	    export	dialog
+	}
+	parm {
+	    name	"label4"
+	    baseparm
+	    invisible
+	    export	dialog
+	}
+	parm {
+	    name	"tdisplay"
+	    baseparm
+	    invisible
+	    joinnext
+	    export	none
+	}
+	parm {
+	    name	"display"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"outputobj"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"visibleobjects"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"picking"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"pickscript"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"caching"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"use_dcolor"
+	    baseparm
+	    invisible
+	    export	none
+	}
+	parm {
+	    name	"dcolor"
+	    baseparm
+	    invisible
+	    export	none
+	}
+    }
+
+    parm {
+	name	"fileName"
+	label	"File Name"
+	type	file
+	default	{ "" }
+	range	{ 0 1 }
+	export	none
+    }
+    parm {
+	name	"objectPath"
+	label	"Object Path"
+	type	string
+	default	{ "" }
+	menureplace	{
+	    [ "__import__('_alembic_hom_extensions').alembicGetObjectPathListForMenu(hou.pwd().evalParm('fileName'))[:16380]" ]
+	    language	python
+	}
+	range	{ 0 1 }
+	export	none
+    }
+    parm {
+	name	"frame"
+	label	"Frame"
+	type	float
+	default	{ "$F" }
+	range	{ 0 10 }
+	export	none
+    }
+    parm {
+	name	"fps"
+	label	"Frames Per Second"
+	type	float
+	default	{ "$FPS" }
+	range	{ 0 10 }
+	export	none
+    }
+}

@@ -1,0 +1,107 @@
+import posixpath
+
+def BuildHierarchyRoot(rootNode):
+    #For now delete the existing children.
+    for child in rootNode.children():
+        child.destroy()
+    
+    import _alembic_hom_extensions as ABC
+    
+    tree = ABC.alembicGetSceneHierarchy(
+            rootNode.evalParm('fileName'), "")
+    
+    pathList = [x for x in rootNode.evalParm('objectPath').strip('/').split('/') if x]
+    
+    for entry in tree[2]:
+        WalkHierarchy(rootNode, rootNode, '', entry, pathList)
+
+_primitiveTypes = frozenset((
+    'polymesh',
+    'subdmesh',
+    'curves',
+    'nupatch',
+    'points',
+))
+
+def ExpressionToParm(srcParm, dstParm, isString=False):
+    relPath = posixpath.relpath(srcParm.node().path(), dstParm.node().path())
+    dstParm.setExpression('ch%s("%s/%s")' % (
+            bool(isString)*'s', relPath, srcParm.name()))
+
+
+def WalkHierarchy(rootNode, parentNode, parentPath, childEntry, pathList):
+    name, typeName, children = childEntry
+    
+    
+    if pathList:
+        if pathList[0] != name:
+            return
+        pathList = pathList[1:]
+    
+    currentPath = parentPath + '/' + name
+    if typeName in _primitiveTypes:
+        currentNode = parentNode.createNode('geo')
+        currentNode.setName(name)
+        for child in currentNode.children():
+            child.destroy()
+        sopNode = currentNode.createNode('Alembic_In')
+        
+        ExpressionToParm(rootNode.parm('fileName'), sopNode.parm('fileName'),
+                isString=True)
+        ExpressionToParm(rootNode.parm('frame'), sopNode.parm('frame'))
+        ExpressionToParm(rootNode.parm('fps'), sopNode.parm('fps'))
+
+        sopNode.parm('objectPath').set(currentPath)
+        sopNode.parm('includeXform').set(0)
+        
+    elif typeName == 'xform':
+        currentNode = parentNode.createNode('alembicxform')
+        currentNode.setName(name)
+        
+        ExpressionToParm(rootNode.parm('fileName'), currentNode.parm('fileName'),
+                isString=True)
+        ExpressionToParm(rootNode.parm('frame'), currentNode.parm('frame'))
+        ExpressionToParm(rootNode.parm('fps'), currentNode.parm('fps'))
+
+
+        currentNode.parm('objectPath').set(currentPath)
+        
+        
+        for entry in children:
+            WalkHierarchy(rootNode, currentNode, currentPath, entry, pathList)
+    elif typeName == 'camera':
+        currentNode = parentNode.createNode('cam')
+        currentNode.setName(name)
+        currentNode.addSpareParmTuple(rootNode.parm('fileName').parmTemplate(),
+                ('Alembic',), True)
+        currentNode.addSpareParmTuple(rootNode.parm('frame').parmTemplate(),
+                ('Alembic',), True)
+        currentNode.addSpareParmTuple(rootNode.parm('fps').parmTemplate(),
+                ('Alembic',), True)
+        
+        ExpressionToParm(rootNode.parm('fileName'), currentNode.parm('fileName'),
+                isString=True)
+        ExpressionToParm(rootNode.parm('frame'), currentNode.parm('frame'))
+        ExpressionToParm(rootNode.parm('fps'), currentNode.parm('fps'))
+        
+        for parmName in (
+                'focal',
+                'near',
+                'far',
+                'focus',
+                #'winx',
+                #'winy',
+                #'winsizex',
+                #'winsizey',
+                'aperture'):
+             currentNode.parm(parmName).setExpression(
+                    'pwd().alembicGetCameraDict(ch("fileName"), "%s", ch("frame")/ch("fps")).get("%s")' % (
+                            currentPath, parmName), hou.exprLanguage.Python)
+        
+    
+    else:
+        return
+
+def GetObjectMenu():
+   return ['b', 'b', 'c', 'c']
+

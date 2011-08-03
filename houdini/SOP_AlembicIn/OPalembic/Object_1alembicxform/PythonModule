@@ -1,0 +1,19 @@
+ConstantXforms = {}
+
+def GetConstantXform(node):
+    return ConstantXforms.get(node.path())
+
+def SetConstantXform(node, entry):
+    ConstantXforms[node.path()] = entry
+
+def ResetConstantXform(node):
+    path = node.path()
+    if path in ConstantXforms:
+        del ConstantXforms[path]
+
+def RenameConstantXform(node, oldName):
+    newPath = node.path()
+    oldPath = newPath.rsplit('/', 1)[0] + '/' + oldName
+    if oldPath in ConstantXforms:
+        ConstantXforms[newPath] = ConstantXforms[oldPath]
+        del ConstantXforms[oldPath]

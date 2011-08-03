@@ -1,0 +1,2 @@
+# This code is called when instances of this object cook.
+# Call hou.pwd().setCookTransform(matrix).

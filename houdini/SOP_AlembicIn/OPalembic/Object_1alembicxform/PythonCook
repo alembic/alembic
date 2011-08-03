@@ -1,0 +1,21 @@
+# This code is called when instances of this object cook.
+import _alembic_hom_extensions as _ahe
+self = hou.pwd()
+abcPath = self.evalParm('fileName')
+objPath = self.evalParm('objectPath')
+
+cacheKey = '%s@%s' % (abcPath, objPath)
+
+cacheTuple = self.hdaModule().GetConstantXform(self)
+
+if isinstance(cacheTuple, tuple) and cacheTuple[0] == cacheKey:
+    hou.pwd().setCookTransform(cacheTuple[1])
+else:
+    sampleTime = self.evalParm('frame') / self.evalParm('fps')
+    xform, isConstant = _ahe.alembicGetLocalXform(abcPath, objPath, sampleTime)
+    m = hou.Matrix4(xform)
+    hou.pwd().setCookTransform(m)
+    
+    if isConstant:
+        self.hdaModule().SetConstantXform(self, (cacheKey, m))
+

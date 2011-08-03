@@ -1,0 +1,12 @@
+ParmsFromVfl := 0;
+PrefixDroppedParmName := 1;
+UseDSParms := 1;
+ForbidOutsideParms := 1;
+LockContents := 0;
+SaveSpareParms := 0;
+CheckExternal := 1;
+GzipContents := 1;
+MakeDefault := 1;
+SaveCachedCode := 0;
+PrefixDroppedParmLabel := 1;
+UnlockOnCreate := 0;

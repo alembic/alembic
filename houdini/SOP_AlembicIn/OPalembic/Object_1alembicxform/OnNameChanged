@@ -1,0 +1,3 @@
+node = kwargs['node']
+node.hdaModule().RenameConstantXform(node, kwargs['old_name'])
+
