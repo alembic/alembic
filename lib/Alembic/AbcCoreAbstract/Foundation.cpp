@@ -34,38 +34,44 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/Abc/ArchiveInfo.h>
+#include <string.h>
+#include <sstream>
+#include <time.h>
+
+#include <Alembic/AbcCoreAbstract/Foundation.h>
+#include <Alembic/AbcCoreAbstract/MetaData.h>
+#include <Alembic/AbcCoreAbstract/ArchiveWriter.h>
+#include <Alembic/AbcCoreAbstract/ArchiveReader.h>
 
 namespace Alembic {
-namespace Abc {
+namespace AbcCoreAbstract {
+namespace ALEMBIC_VERSION_NS {
 
-void
-GetArchiveInfo(
-    IArchive & iArchive,
-    std::string & oApplicationWriter,
-    std::string & oAlembicVersion,
-    Util::uint32_t & oAlembicApiVersion,
-    std::string & oDateWritten,
-    std::string & oUserDescription )
+std::string
+GetLibraryVersionShort()
 {
-    if ( ! iArchive.getPtr() )
-    {
-        return;
-    }
+    int32_t ver = ALEMBIC_LIBRARY_VERSION;
 
-    AbcA::MetaData md = iArchive.getPtr()->getMetaData();
-    oApplicationWriter = md.get( kApplicationNameKey );
-    oAlembicVersion = md.get( "_ai_AlembicVersion" );
-    oAlembicApiVersion = iArchive.getArchiveVersion();
+    std::ostringstream ostrm;
+    ostrm << ( ver / 10000 ) << "." <<
+             ( ( ver / 100 ) - ( ( ver / 10000 ) * 100 ) ) << "." <<
+             ( ver - ( ( ver / 100 ) * 100 ) );
 
-    oDateWritten = md.get( kDateWrittenKey );
-    oUserDescription = md.get( kUserDescriptionKey );
+    return ostrm.str();
 }
 
-std::string GetLibraryVersion()
+std::string
+GetLibraryVersion()
 {
-    return AbcA::GetLibraryVersion ();
+    // "Alembic 1.0.0 (7/6/2011)"
+    std::string alembicVersion = GetLibraryVersionShort();
+    std::ostringstream sversionString;
+    sversionString << "Alembic " << alembicVersion 
+        << " (built " << __DATE__ << " " << __TIME__ ")";
+ 
+    return sversionString.str ();
 }
 
-} // End namespace Abc
+} // End namespace ALEMBIC_VERSION_NS
+} // End namespace AbcCoreAbstract
 } // End namespace Alembic

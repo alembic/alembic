@@ -34,6 +34,7 @@
 
 # C++ files for this project
 SET( CXX_FILES 
+     Foundation.cpp
      TimeSampling.cpp
      TimeSamplingType.cpp
 

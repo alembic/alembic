@@ -159,6 +159,10 @@ public:
         return ( Base::valid() && m_archive );
     }
 
+    //! Returns the Alembic library numeric version (see Foundation.h)
+    //! of this archive file.
+    int32_t getArchiveVersion();
+
     //! The unspecified-bool-type operator casts the object to "true"
     //! if it is valid, and "false" otherwise.
     ALEMBIC_OPERATOR_BOOL( valid() );

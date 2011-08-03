@@ -90,11 +90,18 @@ public:
         return m_timeSamples.size();
     }
 
+    virtual int32_t getArchiveVersion()
+    {
+        return m_archiveVersion;
+    }
+
 private:
     std::string m_fileName;
     hid_t m_file;
 
     TopOrImpl *m_top;
+
+    int32_t m_archiveVersion;
 
     std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
 

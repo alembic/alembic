@@ -52,8 +52,6 @@ namespace Abc {
 //-*****************************************************************************
 // Some MetaData key constants
 static const char * kApplicationNameKey = "_ai_Application";
-static const char * kAlembicVersionKey = "_ai_AlembicVersion";
-static const char * kAlembicApiVersionKey = "_ai_AlembicApiVersion";
 static const char * kDateWrittenKey = "_ai_DateWritten";
 static const char * kUserDescriptionKey = "_ai_Description";
 
@@ -101,9 +99,6 @@ GetArchiveInfo(
     //! Extra information, could be arguments to the tool that wrote the file.
     std::string & oUserDescription );
 
-//! helper function which returns the version and date built in a string
-std::string GetLibraryVersion();
-
 //-*****************************************************************************
 //-*****************************************************************************
 template <class ARCHIVE_CTOR>
@@ -122,12 +117,6 @@ OArchive CreateArchiveWithInfo(
     {
         md.set( kApplicationNameKey, iApplicationWriter );
     }
-
-    Util::int32_t ver = ALEMBIC_API_VERSION;
-    std::stringstream strm;
-    strm << ver;
-    md.set( kAlembicApiVersionKey, strm.str() );
-    md.set( kAlembicVersionKey, GetLibraryVersion() );
 
     time_t rawtimeNow;
     time( &rawtimeNow );

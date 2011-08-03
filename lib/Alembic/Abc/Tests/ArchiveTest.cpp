@@ -62,6 +62,9 @@ void archiveInfoTest()
         TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
         TESTING_ASSERT( archive.getPtr()->getMetaData().get("potato") ==
             "salad" );
+        TESTING_ASSERT( archive.getArchiveVersion() ==
+                        ALEMBIC_LIBRARY_VERSION );
+
         std::string appInfo;
         std::string abcVersionStr;
         Alembic::Util::uint32_t abcVersion = 0;
@@ -71,7 +74,7 @@ void archiveInfoTest()
             dateWritten, userInfo );
         TESTING_ASSERT( appWriter ==  appInfo );
         TESTING_ASSERT( userStr ==  userInfo );
-        TESTING_ASSERT( abcVersion ==  ALEMBIC_API_VERSION );
+        TESTING_ASSERT( abcVersion ==  ALEMBIC_LIBRARY_VERSION );
         std::cout << "Alembic version: " << abcVersionStr << std::endl;
         std::cout << "Date written: " << dateWritten << std::endl;
         TESTING_ASSERT( dateWritten != "" );
