@@ -387,6 +387,15 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                     propHeader,
                     sampleSelector,
                     primNode,
+                    AI_TYPE_VECTOR);
+        }
+        else if ( IP3fGeomParam::matches( propHeader ) )
+        {
+            AddArbitraryGeomParam<IP3fGeomParam>(
+                    parent,
+                    propHeader,
+                    sampleSelector,
+                    primNode,
                     AI_TYPE_POINT);
         }
         else if ( IN3fGeomParam::matches( propHeader ) )

@@ -223,6 +223,15 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 parent,
                 propHeader,
                 sampleSelector,
+                "vector",
+                ParamListBuilder);
+        }
+        else if ( IP3fGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilder<IP3fGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
                 "point",
                 ParamListBuilder);
         }
