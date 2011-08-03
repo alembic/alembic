@@ -45,7 +45,7 @@ namespace Alembic {
 namespace AbcGeom {
 
 
-//! This class holds properties common to all physical-geometric classes
+//! This class holds properties common to all classes with a physical volume.
 //! - selfBounds
 //! - childBounds (optional)
 //! - GeomParams (optional)
