@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class ErrorHandler
@@ -206,6 +207,10 @@ while( 0 )
     }                                                           \
 }                                                               \
 while( 0 )
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

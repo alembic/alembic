@@ -40,6 +40,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 inline void SetPropUsePrevIfNull( Abc::OInt32Property iProp, int32_t iVal )
@@ -389,5 +390,6 @@ void ONuPatchSchema::init( const AbcA::index_t iTsIdx )
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

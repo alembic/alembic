@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // This is mostly here to provide debug support when tracing down
@@ -145,5 +146,6 @@ OObject OArchive::getTop()
     return OObject();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic

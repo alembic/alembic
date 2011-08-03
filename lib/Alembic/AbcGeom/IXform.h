@@ -44,6 +44,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class IXformSchema : public Abc::ISchema<XformSchemaInfo>
@@ -204,6 +205,10 @@ private:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IXformSchema> IXform;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

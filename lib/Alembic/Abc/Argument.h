@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 // place holder used by the default constructor of Argument, used so the visitor
 // can differentiate between no arguments being set and the uint32_t time
@@ -225,6 +226,10 @@ inline SchemaInterpMatching GetSchemaInterpMatching
     iArg2.setInto( args );
     return args.getSchemaInterpMatching();
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

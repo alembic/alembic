@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //! Helper function that gets the bounds property off of the top object if
 //! it exists, if it doesn't exist an invalid IBox3dProperty is returned.
@@ -55,6 +56,10 @@ Abc::OBox3dProperty CreateOArchiveBounds( OArchive & iArchive,
                                           const Argument &iArg0 = Argument(),
                                           const Argument &iArg1 = Argument(),
                                           const Argument &iArg2 = Argument() );
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

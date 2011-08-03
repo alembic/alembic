@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 
@@ -264,6 +265,10 @@ protected:
 // Nice to use typedef for users of this class.
 //-*****************************************************************************
 typedef Abc::OSchemaObject<OFaceSetSchema> OFaceSet;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

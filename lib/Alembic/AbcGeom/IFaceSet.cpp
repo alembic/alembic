@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 size_t IFaceSetSchema::getNumSamples()
@@ -130,5 +131,6 @@ FaceSetExclusivity IFaceSetSchema::getFaceExclusivity()
     return kFaceSetNonExclusive;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

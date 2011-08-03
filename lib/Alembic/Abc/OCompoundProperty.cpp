@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 OCompoundProperty::~OCompoundProperty()
@@ -155,5 +156,6 @@ void OCompoundProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic

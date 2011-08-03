@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
@@ -298,5 +299,6 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx )
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

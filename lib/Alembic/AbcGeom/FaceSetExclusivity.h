@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //! \brief Hint to indicate face membership is mutally exclusive.
 //! Some structures that group faces only allow a face to belong
@@ -50,6 +51,10 @@ enum FaceSetExclusivity
     kFaceSetExclusive,
 }; // end OFaceSetSchema::FaceExlusivity
 
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

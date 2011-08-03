@@ -40,6 +40,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 inline void SetPropUsePrevIfNull( Abc::OInt32Property iProp, int32_t iVal )
@@ -570,5 +571,6 @@ OSubDSchema::getFaceSet( const std::string &iFaceSetName )
     return empty;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

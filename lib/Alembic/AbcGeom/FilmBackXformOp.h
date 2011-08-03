@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //! \brief FilmBack Xform Operation
 //! This class holds the data about a particular transform operation, but does
@@ -107,6 +108,10 @@ private:
     std::vector<double> m_channels;
 
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

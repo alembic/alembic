@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 void __testIGeomParamCompile( Abc::ICompoundProperty &iParent )
 {
@@ -48,5 +49,6 @@ void __testIGeomParamCompile( Abc::ICompoundProperty &iParent )
 }
 
 
-}
-}
+} // End namespace ALEMBIC_VERSION_NS
+} // End namespace AbcGeom
+} // End namespace Alembic

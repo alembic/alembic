@@ -49,6 +49,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 XformSample::XformSample()
@@ -716,5 +717,6 @@ bool XformSample::isTopologyEqual( const XformSample & iSample )
     return true;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

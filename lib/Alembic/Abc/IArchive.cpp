@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 IArchive::~IArchive()
@@ -137,5 +138,6 @@ void IArchive::setReadArraySampleCachePtr( AbcA::ReadArraySampleCachePtr iPtr )
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic

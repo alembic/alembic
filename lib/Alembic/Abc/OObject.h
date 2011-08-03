@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 class OArchive;
 class OCompoundProperty;
@@ -260,6 +261,10 @@ inline OObject::OObject( OBJECT_PTR iParentObject,
           GetErrorHandlerPolicy( iParentObject ),
           iArg0, iArg1, iArg2 );
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

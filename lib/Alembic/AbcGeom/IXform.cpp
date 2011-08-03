@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
@@ -327,5 +328,6 @@ bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS )
     return true;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

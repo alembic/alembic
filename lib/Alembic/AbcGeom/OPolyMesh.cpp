@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void OPolyMeshSchema::set( const Sample &iSamp )
@@ -308,5 +309,6 @@ OPolyMeshSchema::getFaceSet( const std::string &iFaceSetName )
     return empty;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

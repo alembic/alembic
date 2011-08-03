@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 FilmBackXformOp::FilmBackXformOp()
@@ -269,5 +270,6 @@ Abc::M33d FilmBackXformOp::getMatrix() const
     return ret;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

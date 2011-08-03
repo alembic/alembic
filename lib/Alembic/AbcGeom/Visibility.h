@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //! \brief Values for the visibility property
 //! The top-compound object of AbcGeom Schema objects can
@@ -117,6 +118,10 @@ ObjectVisibility GetVisibility( IObject & schemaObject,
 bool IsAncestorInvisible( IObject schemaObject, 
                           const Abc::ISampleSelector &iSS =
                           Abc::ISampleSelector () );
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

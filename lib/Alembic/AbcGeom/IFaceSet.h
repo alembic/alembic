@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class IFaceSetSchema : public IGeomBaseSchema<FaceSetSchemaInfo>
@@ -235,6 +236,10 @@ protected:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IFaceSetSchema> IFaceSet;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

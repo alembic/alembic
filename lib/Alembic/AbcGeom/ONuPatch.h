@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // for default "null" values for the int scalar properties
@@ -464,6 +465,10 @@ protected:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::OSchemaObject<ONuPatchSchema> ONuPatch;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

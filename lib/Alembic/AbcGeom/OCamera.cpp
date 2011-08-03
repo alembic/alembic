@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void OCameraSchema::set( const CameraSample &iSamp )
@@ -271,5 +272,6 @@ Abc::OCompoundProperty OCameraSchema::getUserProperties()
     return ret;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

@@ -39,6 +39,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 OVisibilityProperty
 CreateVisibilityProperty( OObject & iObject,
@@ -146,6 +147,7 @@ bool IsAncestorInvisible( IObject iObject,
     return true;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic
 

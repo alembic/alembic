@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 void
 GetArchiveInfo(
@@ -67,5 +68,6 @@ std::string GetLibraryVersion()
     return AbcA::GetLibraryVersion ();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic

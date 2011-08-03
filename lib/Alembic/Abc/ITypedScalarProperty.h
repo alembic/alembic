@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 template <class TRAITS>
@@ -293,6 +294,10 @@ typedef ITypedScalarProperty<N2dTPTraits>             IN2dProperty;
 
 typedef ITypedScalarProperty<N3fTPTraits>             IN3fProperty;
 typedef ITypedScalarProperty<N3dTPTraits>             IN3dProperty;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

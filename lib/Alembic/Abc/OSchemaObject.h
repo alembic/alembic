@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! An OSchemaObject is an object with a single schema. This is just
@@ -263,6 +264,10 @@ inline OSchemaObject<SCHEMA>::OSchemaObject(
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

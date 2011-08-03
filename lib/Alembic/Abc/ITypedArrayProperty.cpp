@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // This is here as a minimal compile test against which the TypedScalar stuff
@@ -59,6 +60,7 @@ void __test( IObject &iObject )
     boolProp.get( bPtr );
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic
 

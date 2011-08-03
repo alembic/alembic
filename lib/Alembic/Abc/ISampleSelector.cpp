@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 index_t ISampleSelector::getIndex( const AbcA::TimeSamplingPtr & iTsmp,
@@ -67,6 +68,7 @@ index_t ISampleSelector::getIndex( const AbcA::TimeSamplingPtr & iTsmp,
 }
 
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic
 

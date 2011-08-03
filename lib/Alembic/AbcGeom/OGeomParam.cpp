@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // much like lib/Alembic/Abc/OTypedProperty.cpp, this is just a compile test,
@@ -58,5 +59,6 @@ void __testOGeomParamCompile( Abc::OCompoundProperty &iParent )
 }
 
 
-}
-}
+} // End namespace ALEMBIC_VERSION_NS
+} // End namespace AbcGeom
+} // End namespace Alembic

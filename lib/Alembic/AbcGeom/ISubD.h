@@ -46,6 +46,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class ISubDSchema : public IGeomBaseSchema<SubDSchemaInfo>
@@ -412,6 +413,10 @@ protected:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::ISchemaObject<ISubDSchema> ISubD;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

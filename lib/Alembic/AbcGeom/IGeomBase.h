@@ -44,6 +44,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 
 //! This class holds properties common to all geometric classes that have a
@@ -397,6 +398,10 @@ protected:
 
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IGeomBase> IGeomBaseObject;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

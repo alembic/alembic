@@ -46,6 +46,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class IPolyMeshSchema : public IGeomBaseSchema<PolyMeshSchemaInfo>
@@ -286,6 +287,10 @@ protected:
 
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IPolyMeshSchema> IPolyMesh;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

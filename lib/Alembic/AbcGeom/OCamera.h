@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class OCameraSchema : public Abc::OSchema<CameraSchemaInfo>
@@ -217,6 +218,10 @@ private:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::OSchemaObject<OCameraSchema> OCamera;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

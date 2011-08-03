@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // This is a small test suite to validate the templated ISchema stuff
@@ -63,5 +64,6 @@ void __test( IObject &iParent )
 
 } // End anonymous namespace
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic

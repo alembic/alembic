@@ -44,6 +44,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //! The default value for determining whether a property is actually
 //! different from the default.
@@ -250,6 +251,10 @@ protected:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::OSchemaObject<OXformSchema> OXform;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

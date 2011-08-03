@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -152,6 +153,10 @@ ALEMBIC_ABC_DECLARE_TYPE_TRAITS( N3d, kFloat64POD, 3, "normal", N3dTPTraits );
 
 
 
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

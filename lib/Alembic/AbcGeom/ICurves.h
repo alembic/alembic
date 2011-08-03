@@ -46,6 +46,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class ICurvesSchema : public IGeomBaseSchema<CurvesSchemaInfo>
@@ -267,6 +268,10 @@ protected:
 
 //-*****************************************************************************
 typedef Abc::ISchemaObject<ICurvesSchema> ICurves;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

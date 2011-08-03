@@ -44,6 +44,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class OArrayProperty
@@ -167,6 +168,10 @@ inline OArrayProperty::OArrayProperty( CPROP_PTR iParentProp,
           GetErrorHandlerPolicy( iParentProp ),
           iArg0, iArg1, iArg2 );
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

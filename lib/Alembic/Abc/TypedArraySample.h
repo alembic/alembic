@@ -42,6 +42,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 using Alembic::Util::Dimensions;
 
@@ -300,6 +301,10 @@ typedef boost::shared_ptr<N2dArraySample> N2dArraySamplePtr;
 
 typedef boost::shared_ptr<N3fArraySample> N3fArraySamplePtr;
 typedef boost::shared_ptr<N3dArraySample> N3dArraySamplePtr;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

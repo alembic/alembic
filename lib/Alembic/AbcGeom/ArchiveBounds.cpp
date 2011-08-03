@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 Abc::IBox3dProperty GetIArchiveBounds( IArchive & iArchive,
                                        const Argument &iArg0,
@@ -60,5 +61,6 @@ Abc::OBox3dProperty CreateOArchiveBounds( OArchive & iArchive,
 
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

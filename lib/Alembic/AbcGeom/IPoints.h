@@ -44,6 +44,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class IPointsSchema : public IGeomBaseSchema<PointsSchemaInfo>
@@ -265,6 +266,10 @@ protected:
 
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IPointsSchema> IPoints;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

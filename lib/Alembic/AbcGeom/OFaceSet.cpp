@@ -40,6 +40,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 
 //-*****************************************************************************
@@ -260,5 +261,6 @@ void OFaceSetSchema::_recordExclusivityHint()
     m_facesExclusiveProperty.set (m_facesExclusive);
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //! \brief The Matrix identifier hint.
 //! Some 3d packages (like Maya) may have certain transformation operations
@@ -240,6 +241,10 @@ private:
 };
 
 typedef std::vector < XformOp > XformOpVec;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

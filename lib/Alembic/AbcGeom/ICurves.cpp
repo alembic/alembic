@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 MeshTopologyVariance ICurvesSchema::getTopologyVariance()
@@ -138,5 +139,6 @@ void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

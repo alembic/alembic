@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 MeshTopologyVariance ISubDSchema::getTopologyVariance()
@@ -349,5 +350,6 @@ ISubDSchema::getFaceSet( const std::string &iFaceSetName )
     return empty;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

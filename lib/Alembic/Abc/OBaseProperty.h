@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! Most of the functionality of properties (getting information about the
@@ -234,6 +235,10 @@ OObject OBasePropertyT<PROP_PTR>::getObject()
     // Not all error handlers throw. Have a default.
     return OObject();
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

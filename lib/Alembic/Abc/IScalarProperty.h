@@ -45,6 +45,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class IScalarProperty
@@ -149,6 +150,10 @@ inline IScalarProperty::IScalarProperty( CPROP_PTR iParentProp,
     init( GetCompoundPropertyReaderPtr( iParentProp ), iName,
           GetErrorHandlerPolicy( iParentProp ), iArg0 );
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

@@ -40,6 +40,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // Nothing at the moment, this is just here as a debug entry point for
@@ -203,5 +204,6 @@ void IObject::init( AbcA::ObjectReaderPtr iParent,
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic

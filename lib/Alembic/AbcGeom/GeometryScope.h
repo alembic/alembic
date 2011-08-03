@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! "GeometryScope" is the name we use for what is called Primitive Variable
@@ -207,6 +208,10 @@ size_t GeometryScopeNumValuesCubicCurves( GeometryScope iScope,
                                           size_t iSumOfCounts );
 
 
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

@@ -39,26 +39,8 @@
 
 #include <string>
 #include <vector>
-
-
-// a ton of forward declarations
-namespace Alembic{
-    namespace AbcCoreAbstract{
-        namespace v1{
-
-        class TimeSamplingType;
-        class PropertyHeader;
-
-        };
-    };
-
-    namespace Abc{
-
-        class ICompoundProperty;
-        class OCompoundProperty;
-
-    };
-};
+#include <Alembic/Abc/ICompoundProperty.h>
+#include <Alembic/Abc/OCompoundProperty.h>
 
 typedef std::vector< Alembic::Abc::ICompoundProperty > ICompoundPropertyVec;
 

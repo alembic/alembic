@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 CameraSample::CameraSample ( double iTop, double iBottom, double iLeft,
@@ -257,5 +258,6 @@ std::size_t CameraSample::getNumOpChannels() const
     return ret;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

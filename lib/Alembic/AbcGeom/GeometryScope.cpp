@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 size_t GeometryScopeNumValuesQuadrics( GeometryScope iScope )
@@ -235,6 +236,7 @@ size_t GeometryScopeNumValuesCubicCurves( GeometryScope iScope,
     };
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic
 

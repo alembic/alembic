@@ -40,6 +40,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 XformOp::XformOp()
@@ -541,5 +542,6 @@ Abc::M44d XformOp::getMatrix() const
     return ret;
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

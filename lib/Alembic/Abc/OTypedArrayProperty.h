@@ -43,6 +43,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 template <class TRAITS>
@@ -280,6 +281,10 @@ typedef OTypedArrayProperty<N2dTPTraits>             ON2dArrayProperty;
 
 typedef OTypedArrayProperty<N3fTPTraits>             ON3fArrayProperty;
 typedef OTypedArrayProperty<N3dTPTraits>             ON3dArrayProperty;
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

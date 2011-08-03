@@ -45,8 +45,9 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
-namespace Abc = ::Alembic::Abc;
+namespace Abc = ::Alembic::Abc::ALEMBIC_VERSION_NS;
 using namespace Abc;
 
 //-*****************************************************************************
@@ -168,6 +169,10 @@ inline bool IsGeomParam( const AbcA::PropertyHeader &iHeader )
 {
     return IsGeomParam( iHeader.getMetaData() );
 }
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcGeom
 } // End namespace Alembic

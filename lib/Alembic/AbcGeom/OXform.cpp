@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void OXformSchema::setChannelValues( const std::vector<double> &iVals )
@@ -363,5 +364,6 @@ void OXformSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcGeom
 } // End namespace Alembic

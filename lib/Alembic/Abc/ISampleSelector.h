@@ -41,6 +41,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class ISampleSelector
@@ -82,6 +83,10 @@ private:
     chrono_t m_requestedTime;
     TimeIndexType m_requestedTimeIndexType;
 };
+
+} // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace Abc
 } // End namespace Alembic

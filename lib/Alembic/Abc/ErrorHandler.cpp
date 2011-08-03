@@ -38,6 +38,7 @@
 
 namespace Alembic {
 namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void ErrorHandler::operator()( std::exception &iExc,
@@ -81,5 +82,6 @@ void ErrorHandler::handleIt( const std::string &iMsg )
     }
 }
 
+} // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic
