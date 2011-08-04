@@ -604,7 +604,7 @@ MStatus initializePlugin(MObject obj)
 
     MString info = "AbcExport v";
     info += ABCEXPORT_VERSION;
-    info += " using Alembic ";
+    info += " using ";
     info += Alembic::Abc::GetLibraryVersion().c_str();
     MGlobal::displayInfo(info);
 
