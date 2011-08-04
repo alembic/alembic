@@ -51,7 +51,7 @@ using namespace Alembic::AbcGeom;
 static const chrono_t g_dt = 1.0 / 24.0;
 static const chrono_t g_t0 = 0.25;
 
-static TimeSamplingPtr g_ts( new TimeSampling( g_dt, g_t0 ) );
+static TimeSamplingPtr g_ts;
 
 static OPolyMeshSchema::Sample g_meshsamp(
     V3fArraySample( ( const V3f * )g_verts, g_numVerts ),
@@ -138,6 +138,7 @@ void Example1_MeshOut()
 //-*****************************************************************************
 int main( int argc, char *argv[] )
 {
+    g_ts =  TimeSamplingPtr( new TimeSampling( g_dt, g_t0 ) );
     Example1_MeshOut();
 
     return 0;
