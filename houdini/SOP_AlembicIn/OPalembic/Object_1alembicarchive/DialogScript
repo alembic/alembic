@@ -1,4 +1,4 @@
-# Dialog script for alembicarchive automatically generated 07/29/11 16:41:16
+# Dialog script for alembicarchive automatically generated 08/04/11 16:18:08
 
 {
     name	alembicarchive
@@ -249,6 +249,28 @@
 	range	{ 0 10 }
 	export	none
     }
+    multiparm {
+	name	"remapAttributes"
+	label	"Remap Attributes"
+
+	parm {
+	    name	"abcName#"
+	    label	"Alembic Name #"
+	    type	string
+	    default	{ "" }
+	    range	{ 0 1 }
+	    export	none
+	}
+	parm {
+	    name	"hName#"
+	    label	"Houdini Name #"
+	    type	string
+	    default	{ "" }
+	    range	{ 0 1 }
+	    export	none
+	}
+    }
+
     parm {
 	name	"buildHierarchy"
 	label	"Build or Update Hierarchy"
