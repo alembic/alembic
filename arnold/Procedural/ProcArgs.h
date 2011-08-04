@@ -81,6 +81,9 @@ struct ProcArgs
     AtNode * proceduralNode;
     
     std::vector<struct AtNode *> createdNodes;
+    
+    
+    void usage();
 };
 
 #endif

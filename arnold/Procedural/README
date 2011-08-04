@@ -1,0 +1,53 @@
+AlembicArnoldProcedural usage:
+
+-filename /path/to/some/archive.abc
+
+This is the only required argument. It has no default value.
+
+-frame 42
+
+The frame number to load from within the archive. The default value is 0. This is combined with -fps to map to Alembic time units (double-precision seconds).
+
+-fps 24
+
+Combined with -frame above. The default value is 24
+
+-shutteropen 0.0
+-shutterclose 0.5
+
+These are frame-relative values which specify the shutter window. The procedural will include all samples present in the archive which are relevant to the shutter window. The default value of both is 0.0 (no motion blur).
+
+-objectpath /assetroot/characters
+
+If specified, only objects at or below the provided path (within the archive) will be emitted. When combined with -excludexform, this can also be used to load individual leaf locations within an externally defined hierarchy. Be aware that in that case, you'd need to set the "matrix" and "inherit_xform" parameters on the procedural node itself. If the path points to a single "faceset" object directly beneath a polymesh or subdivision mesh, it'll add a "face_visibility" user data array.
+
+
+-excludexform
+
+If specified, the "matrix" parameter will not be set on the resulting primitive nodes.
+
+-subditerations 2
+
+For AbcGeom::ISubD objects, this option specifies the "subdiv_iterations" value. It currently has no effect for other primitive types. The default value is 0.
+
+-nameprefix some_prefix__
+
+Because node names are unique scene-wide in arnold, this allows you control potential name clashes when loading or instancing an archive (or multiple equivalently named archives) multiple times. The default name of each node is its full path within the alembic archive.
+
+-makeinstance
+
+This behavior is disabled by default. If enabled, the procedural will attempt to identify identical primitives (using Alembic's per-array-property hash keys) and create corresponding "ginstance" nodes. Two primitives are considered equivalent if the keys of their relevant point position samples match along with any specified subdivision values. This works across multiple archives or invokations of the procedural. It currently does not write unique user data per instance but will likely do so automatically (when necessary) in a future release. The ray visibility of the source primitive will be set to AI_RAY_NONE and the "ginstance" node's will be set to that of the calling "procedural" node.
+
+STILL TO DO:
+-AbcGeom::IPoints
+-AbcGeom::ICurves
+-AbcGeom::INuPatch
+-AbcGeom::ICamera
+-automatic recognition of unique user data per-instance
+
+
+
+
+
+
+

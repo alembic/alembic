@@ -253,6 +253,11 @@ int ProcInit( struct AtNode *node, void **user_ptr )
     args->proceduralNode = node;
     *user_ptr = args;
 
+    if ( args->filename.empty() )
+    {
+        args->usage();
+        return 1;
+    }
 
     IArchive archive( ::Alembic::AbcCoreHDF5::ReadArchive(),
                       args->filename );
