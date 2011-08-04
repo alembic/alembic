@@ -40,6 +40,7 @@
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/IArchive.h>
 #include <Alembic/Abc/OArchive.h>
+#include <time.h>
 
 namespace Alembic {
 namespace Abc {
@@ -122,7 +123,17 @@ OArchive CreateArchiveWithInfo(
     time_t rawtimeNow;
     time( &rawtimeNow );
     char dateBuf [128];
+#if defined _WIN32 || defined _WIN64
+    ctime_s( dateBuf, 128, &rawtimeNow);
+#else
     ctime_r( &rawtimeNow, dateBuf );
+#endif
+
+    std::size_t bufLen = strlen( dateBuf );
+    if ( bufLen > 0 && dateBuf[bufLen - 1] == '\n' )
+    {
+        dateBuf[bufLen - 1] = '\0';
+    }
     md.set( kDateWrittenKey, dateBuf );
 
     if ( iUserDescription != "" )

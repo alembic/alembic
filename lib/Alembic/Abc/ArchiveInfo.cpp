@@ -63,11 +63,6 @@ GetArchiveInfo(
     oUserDescription = md.get( kUserDescriptionKey );
 }
 
-std::string GetLibraryVersion()
-{
-    return AbcA::GetLibraryVersion ();
-}
-
 } // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic

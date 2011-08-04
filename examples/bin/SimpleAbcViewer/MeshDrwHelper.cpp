@@ -82,6 +82,7 @@ void MeshDrwHelper::update( P3fArraySamplePtr iP,
     m_meshP = iP;
     m_meshIndices = iIndices;
     m_meshCounts = iCounts;
+    m_triangles.clear ();
 
     // Check stuff.
     if ( !m_meshP ||

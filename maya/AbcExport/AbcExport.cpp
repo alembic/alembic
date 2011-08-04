@@ -591,7 +591,7 @@ MStatus AbcExport::doIt(const MArgList & args)
 MStatus initializePlugin(MObject obj)
 {
     MStatus status;
-    MFnPlugin plugin(obj, "Alembic", "1.0", "Any");
+    MFnPlugin plugin(obj, "Alembic", ABCEXPORT_VERSION, "Any");
 
     status = plugin.registerCommand(
         "AbcExport", AbcExport::creator,
@@ -602,7 +602,9 @@ MStatus initializePlugin(MObject obj)
         status.perror("registerCommand");
     }
 
-    MString info = "AbcExport using Alembic ";
+    MString info = "AbcExport v";
+    info += ABCEXPORT_VERSION;
+    info += " using Alembic ";
     info += Alembic::Abc::GetLibraryVersion().c_str();
     MGlobal::displayInfo(info);
 

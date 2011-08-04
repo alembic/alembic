@@ -46,7 +46,8 @@ const MTypeId AlembicNode::mMayaNodeId(0x00082697);
 
 MStatus initializePlugin(MObject obj)
 {
-    MFnPlugin plugin(obj, "Alembic", "1.0", "Any");
+    const char * pluginVersion = "1.0";
+    MFnPlugin plugin(obj, "Alembic", pluginVersion, "Any");
 
     MStatus status = plugin.registerCommand("AbcImport",
                                 AbcImport::creator,
@@ -57,8 +58,10 @@ MStatus initializePlugin(MObject obj)
                                 &AlembicNode::creator,
                                 &AlembicNode::initialize);
 
-    MString info = "AbcImport using Alembic ";
-    info += Alembic::Abc::GetLibraryVersion().c_str();
+    MString info = "AbcImport v";
+    info += pluginVersion;
+    info += " using Alembic ";
+    info += Alembic::AbcCoreAbstract::GetLibraryVersion().c_str();
     MGlobal::displayInfo(info);
 
     return status;

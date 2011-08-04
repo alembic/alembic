@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
+#include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
 #include <iostream>
@@ -164,6 +165,39 @@ int main( int argc, char *argv[] )
     {
         IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                           argv[1], ErrorHandler::kQuietNoopPolicy );
+        if (archive)
+        {
+            std::cout  << "AbcEcho for " 
+                       << Alembic::AbcCoreAbstract::GetLibraryVersion ()
+                       << std::endl;;
+        
+            std::string appName;
+            std::string libraryVersionString;
+            uint32_t libraryVersion;
+            std::string whenWritten;
+            std::string userDescription;
+            GetArchiveInfo (archive,
+                            appName,
+                            libraryVersionString,
+                            libraryVersion,
+                            whenWritten,
+                            userDescription);
+        
+            if (appName != "")
+            {
+                std::cout << "  file written by: " << appName << std::endl;
+                std::cout << "  using Alembic : " << libraryVersionString << std::endl;
+                std::cout << "  written on : " << whenWritten << std::endl;
+                std::cout << "  user description : " << userDescription << std::endl;
+            }
+            else
+            {
+                std::cout << argv[1] << std::endl;
+                std::cout << "  (file doesn't have any ArchiveInfo)" 
+                          << std::endl;
+                std::cout << std::endl;
+            }
+        }
         visitObject( archive.getTop(), "" );
     }
 

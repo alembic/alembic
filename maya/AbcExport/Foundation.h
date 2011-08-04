@@ -131,5 +131,6 @@
 
 #include <Alembic/AbcGeom/All.h>
 
+#define ABCEXPORT_VERSION "1.0"
 
 #endif  // _AbcExport_Foundation_h_
