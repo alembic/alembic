@@ -230,6 +230,26 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     UT_WorkBuffer fileobjecthash;
     fileobjecthash.sprintf("%s:%s:%d", fileName.c_str(), objectPath.c_str(),
             args.includeXform);
+    
+    
+    int nmapSize = evalInt("remapAttributes", 0, now);
+    // Entries are one based (not zero based)
+    for (int i = 1; i <= nmapSize; ++i)
+    {
+        UT_String abcName, hName;
+        evalStringInst("abcName#", &i, abcName, 0, now);
+        evalStringInst("hName#", &i, hName, 0, now);
+        if (abcName.isstring() && hName.isstring())
+        {
+            nameMap[abcName.toStdString()] = hName.toStdString();
+            
+            // Incorporate attribute remapping values into the fileobjecthash
+            // so that recooks reflect the new state even for constant data
+            fileobjecthash.sprintf(":%s->%s",
+                    (const char *)abcName, (const char *)hName);
+        }
+    }
+    
     if (strcmp(myFileObjectCache, fileobjecthash.buffer()) != 0)
     {
         myFileObjectCache.harden(fileobjecthash.buffer());
@@ -264,19 +284,6 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
 #else
         gdp->destroyPointAttrib("internalN", sizeof(UT_Vector3), GB_ATTRIB_MIXED);
 #endif
-    }
-    
-    int nmapSize = evalInt("remapAttributes", 0, now);
-    // Entries are one based (not zero based)
-    for (int i = 1; i <= nmapSize; ++i)
-    {
-        UT_String abcName, hName;
-        evalStringInst("abcName#", &i, abcName, 0, now);
-        evalStringInst("hName#", &i, hName, 0, now);
-        if (abcName.isstring() && hName.isstring())
-        {
-            nameMap[abcName.toStdString()] = hName.toStdString();
-        }
     }
     
     
