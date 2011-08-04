@@ -280,6 +280,7 @@ public:
 
     //! Copy constructor.
     IGeomBase(const IGeomBase & iCopy)
+        : IGeomBaseSchema<GeomBaseSchemaInfo>()
     {
         *this = iCopy;
     }

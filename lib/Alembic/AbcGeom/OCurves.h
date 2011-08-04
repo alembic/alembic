@@ -138,7 +138,7 @@ public:
         { m_wrap = iWrap; }
         CurvePeriodicity getWrap() const { return m_wrap; }
 
-        const std::size_t getNumCurves() const { return m_nVertices.size(); }
+        std::size_t getNumCurves() const { return m_nVertices.size(); }
 
         //! an array of ints that corresponds to the number
         //! of vertices per curve
@@ -287,6 +287,7 @@ public:
     }
 
     OCurvesSchema( const OCurvesSchema& iCopy )
+        : OGeomBaseSchema<CurvesSchemaInfo>()
     {
         *this = iCopy;
     }

@@ -91,7 +91,7 @@ size_t BaseOwImpl::getNumChildren()
 //-*****************************************************************************
 const AbcA::ObjectHeader & BaseOwImpl::getChildHeader( size_t i )
 {
-    if ( i < 0 || i >= m_childHeaders.size() )
+    if ( i >= m_childHeaders.size() )
     {
         ABCA_THROW( "Out of range index in OwImpl::getChildHeader: "
                      << i );

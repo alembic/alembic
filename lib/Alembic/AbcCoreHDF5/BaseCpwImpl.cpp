@@ -79,7 +79,7 @@ size_t BaseCpwImpl::getNumProperties()
 const AbcA::PropertyHeader &
 BaseCpwImpl::getPropertyHeader( size_t i )
 {
-    if ( i < 0 || i > m_propertyHeaders.size() )
+    if ( i > m_propertyHeaders.size() )
     {
         ABCA_THROW( "Out of range index in " <<
                     "CpwImpl::getPropertyHeader: " << i );

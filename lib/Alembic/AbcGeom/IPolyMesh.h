@@ -154,6 +154,7 @@ public:
 
     //! Copy constructor.
     IPolyMeshSchema(const IPolyMeshSchema& iCopy)
+        : IGeomBaseSchema<PolyMeshSchemaInfo>()
     {
         *this = iCopy;
     }

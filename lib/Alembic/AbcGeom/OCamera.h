@@ -131,6 +131,7 @@ public:
 
     //! Copy constructor.
     OCameraSchema(const OCameraSchema& iCopy)
+        : Abc::OSchema<CameraSchemaInfo>()
     {
         *this = iCopy;
     }

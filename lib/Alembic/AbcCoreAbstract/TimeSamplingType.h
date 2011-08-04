@@ -67,8 +67,8 @@ namespace ALEMBIC_VERSION_NS {
 class TimeSamplingType
 {
 public:
-    static const uint32_t AcyclicNumSamples();
-    static const chrono_t AcyclicTimePerCycle();
+    static uint32_t AcyclicNumSamples();
+    static chrono_t AcyclicTimePerCycle();
 
 public:
 

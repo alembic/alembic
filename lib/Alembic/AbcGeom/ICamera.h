@@ -94,6 +94,7 @@ public:
 
     //! Copy constructor.
     ICameraSchema(const ICameraSchema& iCopy)
+        : Abc::ISchema<CameraSchemaInfo>()
     {
         *this = iCopy;
     }

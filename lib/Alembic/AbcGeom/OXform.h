@@ -134,6 +134,7 @@ public:
 
     //! Explicit copy constructor to work around MSVC bug
     OXformSchema( const OXformSchema &iCopy )
+        : Abc::OSchema<XformSchemaInfo>()
     { *this = iCopy; }
 
     //! Default assignment operator used.

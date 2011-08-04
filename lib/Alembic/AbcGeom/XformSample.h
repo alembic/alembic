@@ -123,7 +123,7 @@ public:
     bool isTopologyEqual( const XformSample & iSample );
 
     //! Has this Sample been used in a call to OXformSchema::set()
-    const bool getIsTopologyFrozen() const { return m_hasBeenRead; }
+    bool getIsTopologyFrozen() const { return m_hasBeenRead; }
 
     void reset();
 

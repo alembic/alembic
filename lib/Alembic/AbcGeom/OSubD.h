@@ -356,6 +356,7 @@ public:
 
     //! Copy constructor.
     OSubDSchema(const OSubDSchema& iCopy)
+        : OGeomBaseSchema<SubDSchemaInfo>()
     {
         *this = iCopy;
     }

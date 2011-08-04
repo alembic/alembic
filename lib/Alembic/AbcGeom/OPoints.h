@@ -216,6 +216,7 @@ public:
 
     //! Copy constructor.
     OPointsSchema(const OPointsSchema& iCopy)
+        : OGeomBaseSchema<PointsSchemaInfo>()
     {
         *this = iCopy;
     }

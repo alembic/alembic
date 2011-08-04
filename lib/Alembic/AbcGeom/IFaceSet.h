@@ -157,6 +157,7 @@ public:
 
     //! Copy constructor. (explicit copy ctor for msvc bug workaround)
     IFaceSetSchema(const IFaceSetSchema& iCopy)
+        : IGeomBaseSchema<FaceSetSchemaInfo>()
     {
         *this = iCopy;
     }

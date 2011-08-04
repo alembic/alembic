@@ -173,6 +173,7 @@ public:
     //! Default assignment operator used.
 
     ICurvesSchema( const ICurvesSchema &iCopy )
+      : IGeomBaseSchema<CurvesSchemaInfo>()
     {
         *this = iCopy;
     }

@@ -216,7 +216,6 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
                                           m_timeSamplingType.getTimePerCycle() );
 
         // Clamp it.
-        assert( sampIdx >= 0 );
         sampIdx = ( ( index_t )(sampIdx) >= iNumSamples ) ? 
                     iNumSamples-1 : sampIdx;
 

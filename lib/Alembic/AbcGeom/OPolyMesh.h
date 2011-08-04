@@ -220,6 +220,7 @@ public:
 
     //! Copy constructor.
     OPolyMeshSchema( const OPolyMeshSchema& iCopy )
+        : OGeomBaseSchema<PolyMeshSchemaInfo>()
     {
         *this = iCopy;
     }

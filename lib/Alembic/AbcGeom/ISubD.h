@@ -365,6 +365,7 @@ public:
 
     // Copy constructors
     ISubDSchema(const ISubDSchema& iCopy)
+        : IGeomBaseSchema<SubDSchemaInfo>()
     {
         *this = iCopy;
     }

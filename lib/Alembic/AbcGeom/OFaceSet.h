@@ -190,6 +190,7 @@ public:
 
     //! Copy constructor.
     OFaceSetSchema(const OFaceSetSchema& iCopy)
+        : OGeomBaseSchema<FaceSetSchemaInfo>()
     {
         *this = iCopy;
     }

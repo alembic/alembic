@@ -114,6 +114,7 @@ public:
 
     //! explicit copy constructor to work around Windows compiler bug
     IXformSchema( const IXformSchema &iCopy )
+        : Abc::ISchema<XformSchemaInfo>()
     {
         *this = iCopy;
     }

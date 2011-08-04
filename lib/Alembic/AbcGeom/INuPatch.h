@@ -172,6 +172,7 @@ public:
 
     //! copy constructor
     INuPatchSchema(const INuPatchSchema& iCopy)
+        : IGeomBaseSchema<NuPatchSchemaInfo>()
     {
         *this = iCopy;
     }

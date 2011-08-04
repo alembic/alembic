@@ -141,6 +141,7 @@ public:
 
     //! Copy constructor.
     IPointsSchema(const IPointsSchema& iCopy)
+        : IGeomBaseSchema<PointsSchemaInfo>()
     {
         *this = iCopy;
     }

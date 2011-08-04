@@ -110,22 +110,22 @@ public:
         { m_positionWeights = iSmp; }
 
         // nu
-        const int32_t getNu() const { return m_numU; }
+        int32_t getNu() const { return m_numU; }
         void setNu( const int32_t iNu )
         { m_numU = iNu; }
 
         // nv
-        const int32_t getNv() const { return m_numV; }
+        int32_t getNv() const { return m_numV; }
         void setNv( const int32_t iNv )
         { m_numV = iNv; }
 
         // uOrder
-        const int32_t getUOrder() const { return m_uOrder; }
+        int32_t getUOrder() const { return m_uOrder; }
         void setUOrder( const int32_t iUOrder )
         { m_uOrder = iUOrder; }
 
         // vOrder
-        const int32_t getVOrder() const { return m_vOrder; }
+        int32_t getVOrder() const { return m_vOrder; }
         void setVOrder( const int32_t iVOrder )
         { m_vOrder = iVOrder; }
 
@@ -184,7 +184,7 @@ public:
             m_hasTrimCurve = true;
         }
 
-        const int32_t getTrimNumLoops() const { return m_trimNumLoops; }
+        int32_t getTrimNumLoops() const { return m_trimNumLoops; }
         const Abc::Int32ArraySample &getTrimNumCurves() const
         { return m_trimNumCurves; }
         const Abc::Int32ArraySample &getTrimNumVertices() const
@@ -198,7 +198,7 @@ public:
         const Abc::FloatArraySample &getTrimV() const { return m_trimV; }
         const Abc::FloatArraySample &getTrimW() const { return m_trimW; }
 
-        const bool hasTrimCurve() const
+        bool hasTrimCurve() const
         {
             return m_hasTrimCurve;
         }
@@ -349,6 +349,7 @@ public:
 
     //! Copy constructor.
     ONuPatchSchema(const ONuPatchSchema& iCopy)
+        : OGeomBaseSchema<NuPatchSchemaInfo>()
     {
         *this = iCopy;
     }

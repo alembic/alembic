@@ -51,12 +51,12 @@ const chrono_t ACYCLIC_TIME_PER_CYCLE = std::numeric_limits<chrono_t>::max() / 3
 
 //-*****************************************************************************
 // get these constants; similar to std::numeric_limits<>()
-uint32_t const TimeSamplingType::AcyclicNumSamples()
+uint32_t TimeSamplingType::AcyclicNumSamples()
 {
     return ACYCLIC_NUM_SAMPLES;
 }
 
-chrono_t const TimeSamplingType::AcyclicTimePerCycle()
+chrono_t TimeSamplingType::AcyclicTimePerCycle()
 {
     return ACYCLIC_TIME_PER_CYCLE;
 }
