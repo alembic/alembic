@@ -2,7 +2,9 @@
 #define _SOP_ALEMBICIN_H_
 
 #include <UT/UT_Version.h>
+#include <UT/UT_Interrupt.h>
 #include <SOP/SOP_Node.h>
+
 #include <map>
 
 #include <Alembic/AbcGeom/All.h>
@@ -81,6 +83,16 @@ private:
         
         // Attribute name map
         const std::map<std::string,std::string> *nameMap;
+        
+        
+        UT_Interrupt *boss;
+    };
+    
+    class InterruptedException : public std::runtime_error
+    {
+    public:
+         InterruptedException( const std::string & what_arg )
+                : std::runtime_error( what_arg ){}
     };
     
     

@@ -13,7 +13,7 @@
 #include <PRM/PRM_Include.h>
 #include <PRM/PRM_SpareData.h>
 
-#include <UT/UT_Interrupt.h>
+
 #include <GU/GU_Detail.h>
 #include <GU/GU_PrimNURBSurf.h>
 #include <GU/GU_PrimNURBCurve.h>
@@ -288,6 +288,14 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     args.pointCount = 0;
     args.primCount = 0;
     args.nameMap = &nameMap;
+    args.boss = UTgetInterrupt();
+    
+    
+    if (!args.boss->opStart("Loading and walking Alembic data"))
+    {
+        args.boss->opEnd();
+        return error();
+    }
     
     try
     {
@@ -299,6 +307,7 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
             buffer << "Alembic exception: ";
             buffer << cacheEntry->error;
             addWarning(SOP_MESSAGE, buffer.str().c_str());
+            args.boss->opEnd();
             return error();
         }
         
@@ -335,6 +344,13 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
         }
         myTopologyConstant = args.isTopologyConstant;
     }
+    catch ( const InterruptedException & e )
+    {
+        //currently thrown by WalkObject
+        myEntireSceneIsConstant = false;
+        myTopologyConstant = false;
+        myPrimitiveCountCache.clear();
+    }
     catch ( const std::exception &e )
     {
         std::ostringstream buffer;
@@ -343,6 +359,7 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
         addWarning(SOP_MESSAGE, buffer.str().c_str());
     }
     
+    args.boss->opEnd();
     return error();
 }
 
@@ -558,6 +575,12 @@ void SOP_AlembicIn::walkObject( Args & args, IObject parent, const ObjectHeader 
             PathList::const_iterator I, PathList::const_iterator E,
                     M44d parentXform, bool parentXformIsConstant)
 {
+    if ( args.boss->opInterrupt() )
+    {
+        throw InterruptedException(
+                parent.getFullName() + ohead.getName() );
+    }
+    
     //set this if we should continue traversing
     IObject nextParentObject;
     
