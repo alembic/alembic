@@ -220,17 +220,17 @@ void StupidData()
         else
         { std::cout << "non-existent Property doesn't exist." << std::endl; }
 
-        for ( int32_t i = 0 ; i < 10 ; ++i )
+        for ( size_t i = 0 ; i < 10 ; ++i )
         {
             std::vector<int32_t> v( i, i );
             Int32ArraySamplePtr samp = intArrayProp.getValue( i );
-            int32_t numpoints = samp->size();
+            size_t numpoints = samp->size();
 
             TESTING_ASSERT( numpoints == i );
 
             std::cout << "sample " << i << ": ";
 
-            for ( int32_t j = 0 ; j < numpoints ; ++j )
+            for ( size_t j = 0 ; j < numpoints ; ++j )
             {
                 std::cout << (*samp)[j];
                 if ( numpoints > 0 && j < numpoints - 1 )

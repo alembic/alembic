@@ -56,9 +56,329 @@ using Alembic::Util::uint32_t;
 // library functions.
 //
 
+
+void writeSimpleProperties(const std::string &archiveName)
+{
+    const size_t numChildren = 3;
+
+    const size_t numSamples = 5;
+    const chrono_t dt = 1.0 / 24.0;
+
+    TimeSampling ts(dt, 666.0); // uniform with cycle=dt starting at 666.0
+
+    // Create an archive for writing. Indicate that we want Alembic to
+    //   throw exceptions on errors.
+    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+                      archiveName, ErrorHandler::kThrowPolicy );
+    OObject archiveTop = archive.getTop();
+
+    uint32_t tsidx = archive.addTimeSampling(ts);
+
+    OObject foochild( archiveTop, "foochild" );
+
+    ODoubleProperty foodub( foochild.getProperties(), "foodub", 0 );
+
+    for ( size_t i = 0 ; i < 10 ; i++ )
+    {
+        foodub.set( 2.0 );
+    }
+
+    for ( size_t ii=0 ; ii < numChildren ; ++ii )
+    {
+        // Create 'numChildren' children, all parented under
+        //  the archive
+        std::string name = "child_";
+        name.append( boost::lexical_cast<std::string>( ii ) );
+        OObject child( archiveTop, name );
+        OCompoundProperty childProps = child.getProperties();
+
+        // Create a scalar property on this child object named 'mass'
+        ODoubleProperty mass( childProps,  // owner
+                              "mass"); // name
+
+        // Write out the samples
+        for ( size_t tt=0 ; tt < numSamples ; ++tt )
+        {
+            double mm = (1.0 + 0.1*tt); // vary the mass
+            mass.set( mm );
+
+        }
+        mass.setTimeSampling(tsidx);
+    }
+
+    // Done - the archive closes itself
+}
+
+
+template <class PROPERTY_CLASS>
+void
+printSampleValue( PROPERTY_CLASS& iProp, const ISampleSelector &iSS )
+{
+    std::cout << iProp.getValue( iSS ) << " ";
+}
+
+
+
+void readSimpleProperties(const std::string &archiveName)
+{
+    // Open an existing archive for reading. Indicate that we want
+    //   Alembic to throw exceptions on errors.
+    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                      archiveName, ErrorHandler::kThrowPolicy );
+    IObject archiveTop = archive.getTop();
+
+    // Determine the number of (top level) children the archive has
+    const size_t numChildren = archiveTop.getNumChildren();
+    TESTING_ASSERT( numChildren == 4 );
+    std::cout << "The archive has " << numChildren << " children:"
+              << std::endl;
+
+
+
+    std::cout << "Does the archive-top object have VisibilityProperty? "
+              << (bool) (GetVisibilityProperty (archiveTop))
+              << std::endl;
+
+    // Iterate through them, print out their names
+    for ( size_t ii = 0 ; ii < numChildren ; ++ii )
+    {
+        IObject child( archiveTop, archiveTop.getChildHeader( ii ).getName() );
+        std::cout << "  " << child.getName();
+
+        std::cout << " has " << child.getNumChildren() << " children"
+                  << std::endl;
+
+        // Properties
+        ICompoundProperty props = child.getProperties();
+        size_t numProperties = props.getNumProperties();
+
+        std::cout << "  ..and " << numProperties << " simple properties"
+                  << std::endl;
+
+        std::vector<std::string> propNames;
+        for ( size_t pp=0 ; pp < numProperties ; ++pp )
+        {
+            propNames.push_back( props.getPropertyHeader(pp).getName() );
+        }
+
+        for ( size_t jj=0 ; jj < numProperties ; ++jj )
+        {
+            std::cout << "    ..named " << propNames[jj] << std::endl;
+
+            std::cout << "    ..with type: ";
+            PropertyType pType = props.getPropertyHeader(jj).getPropertyType();
+            if (pType == kCompoundProperty)
+            {
+                std::cout << "compound" << std::endl;
+            }
+            else if (pType == kScalarProperty)
+            {
+                std::cout << "scalar" << std::endl;
+            }
+            else if (pType == kArrayProperty)
+            {
+                std::cout << "array" << std::endl;
+            }
+
+            DataType dType = props.getPropertyHeader(jj).getDataType();
+            std::cout << "    ..with POD-type: ";
+
+            switch (dType.getPod())
+            {
+                case  kBooleanPOD:
+                    std::cout << "boolean" << std::endl;
+                    break;
+
+                // Char/UChar
+                case kUint8POD:
+                    std::cout << "unsigned char" << std::endl;
+                    break;
+                case kInt8POD:
+                    std::cout << "char" << std::endl;
+                    break;
+
+                // Short/UShort
+                case kUint16POD:
+                    std::cout << "short unsigned int" << std::endl;
+                    break;
+                case kInt16POD:
+                    std::cout << "short int" << std::endl;
+                    break;
+
+                // Int/UInt
+                case kUint32POD:
+                    std::cout << "unsigned int" << std::endl;
+                    break;
+                case kInt32POD:
+                    std::cout << "int" << std::endl;
+                    break;
+
+                // Long/ULong
+                case kUint64POD:
+                    std::cout << "unsigned long int" << std::endl;
+                    break;
+                case kInt64POD:
+                    std::cout << "long int" << std::endl;
+                    break;
+
+                // Half/Float/Double
+                case kFloat16POD:
+                    std::cout << "half" << std::endl;
+                    break;
+                case kFloat32POD:
+                    std::cout << "float" << std::endl;
+                    break;
+                case kFloat64POD:
+                    std::cout << "double" << std::endl;
+                    break;
+
+                case kStringPOD:
+                    std::cout << "string" << std::endl;
+                    break;
+
+                case kUnknownPOD:
+                default:
+                    std::cout << " Unknown! (this is bad)" << std::endl;
+            };
+
+            TimeSamplingPtr ts =
+                GetCompoundPropertyReaderPtr(props)->
+                getScalarProperty( propNames[jj] )->getTimeSampling();
+
+            size_t numSamples = ts->getNumStoredTimes();
+
+
+            std::cout << "    ..and "
+                      << ts->getTimeSamplingType() << std::endl
+                      << "    ..and " << numSamples << " samples at times: ";
+
+
+            if (numSamples > 0)
+            {
+                std::cout << " ( ";
+                for ( size_t ss=0 ; ss < numSamples ; ++ss )
+                {
+                    std::cout << ts->getSampleTime(ss) << " ";
+                }
+                std::cout << ")";
+            }
+            std::cout << std::endl;
+
+            std::cout << "    ..and values: ";
+            if (numSamples > 0)
+            {
+                for ( size_t ss=0 ; ss < numSamples ; ++ss )
+                {
+                    ISampleSelector iss( (index_t) ss);
+                    switch (dType.getPod())
+                    {
+                        // Boolean
+                        case  kBooleanPOD:
+                        {
+                            IBoolProperty prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+
+                        // Char/UChar
+                        case kUint8POD:
+                        {
+                            IUcharProperty prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+                        case kInt8POD:
+                        {
+                            ICharProperty prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+
+                        // Short/UShort
+                        case kUint16POD:
+                        {
+                            IUInt16Property prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+                        case kInt16POD:
+                        {
+                            IInt16Property prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+
+                        // Int/UInt
+                        case kUint32POD:
+                        {
+                            IUInt32Property prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+                        case kInt32POD:
+                        {
+                            IInt32Property prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+
+                        // Long/ULong
+                        case kUint64POD:
+                        {
+                            IUInt64Property prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+                        case kInt64POD:
+                        {
+                            IInt64Property prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+
+                        // Half/Float/Double
+                        case kFloat16POD:
+                            // iostream doesn't understand float_16's
+                            //printSampleValue( IHalfProperty( props,  propNames[jj] ),
+                            //                  iss );
+                            break;
+                        case kFloat32POD:
+                        {
+                            IFloatProperty prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+                        case kFloat64POD:
+                        {
+                            IDoubleProperty prop( props,  propNames[jj] );
+                            printSampleValue( prop, iss );
+                            break;
+                        }
+
+                        case kUnknownPOD:
+                        default:
+                            std::cout << " Unknown! (this is bad)" << std::endl;
+                    };
+
+                }
+            }
+            std::cout << std::endl;
+
+
+
+            std::cout << std::endl; // done parsing property
+        }
+    }
+
+    // Done - the archive closes itself
+}
+
+//////////////////
+
+
 void writeNestedCommpoundWithVis(const std::string &archiveName)
 {
-    const int numChildren = 2;
+    const size_t numChildren = 2;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
@@ -72,7 +392,7 @@ void writeNestedCommpoundWithVis(const std::string &archiveName)
 
     // Create several objects under top called "child_N"
     // child_1 will be set to have hidden visibility.
-    for (int ii=0; ii<numChildren; ii++)
+    for ( size_t ii=0 ; ii < numChildren ; ++ii )
     {
         // Create 'numChildren' children, all parented under
         //  the archive
@@ -122,13 +442,13 @@ void readNestedCommpoundWithVis(const std::string &archiveName)
     TESTING_ASSERT( !boxProp.valid() );
 
     ICharProperty topVisibility = GetVisibilityProperty (archiveTop);
-    std::cout << "Does this object have VisibilityProperty? " 
+    std::cout << "Does this object have VisibilityProperty? "
               << (bool) (true == topVisibility)
               << std::endl;
     ABCA_ASSERT( topVisibility == false, "top object should not have a visibility property");
 
     // Determine the number of (top level) children the archive has
-    const int numChildren = archiveTop.getNumChildren();
+    const size_t numChildren = archiveTop.getNumChildren();
     ABCA_ASSERT( numChildren == 2, "Wrong number of children (expected 2)");
     std::cout << "The archive has " << numChildren << " children:"
               << std::endl;
@@ -136,7 +456,7 @@ void readNestedCommpoundWithVis(const std::string &archiveName)
     IObject child1;
     IObject otherChild;
     // Iterate through them, print out their names
-    for (int ii=0; ii<numChildren; ii++)
+    for ( size_t ii=0; ii <numChildren; ii++)
     {
         IObject child( archiveTop, archiveTop.getChildHeader(ii).getName() );
         std::cout << "  " << child.getName();
@@ -146,16 +466,18 @@ void readNestedCommpoundWithVis(const std::string &archiveName)
 
         // Properties
         ICompoundProperty props = child.getProperties();
-        int numProperties = props.getNumProperties();
+        size_t numProperties = props.getNumProperties();
 
         std::cout << "  ..and " << numProperties << " properties"
                   << std::endl;
 
         std::vector<std::string> propNames;
-        for (int pp=0; pp<numProperties; pp++)
+        for ( size_t pp=0 ; pp < numProperties ; ++pp )
+        {
             propNames.push_back( props.getPropertyHeader(pp).getName() );
+        }
 
-        for (int jj=0; jj<numProperties; jj++)
+        for ( size_t jj=0; jj<numProperties; ++jj)
         {
             std::cout << "    ..named " << propNames[jj] << std::endl;
 

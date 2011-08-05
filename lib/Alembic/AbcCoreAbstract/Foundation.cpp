@@ -60,6 +60,7 @@ GetLibraryVersionShort()
     return ostrm.str();
 }
 
+//-*****************************************************************************
 std::string
 GetLibraryVersion()
 {

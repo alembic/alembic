@@ -226,7 +226,7 @@ void OXformSchema::set( XformSample &ioSamp )
 //-*****************************************************************************
 void OXformSchema::setFromPrevious()
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::setFromPrevious()" );
 
     m_inheritsProperty.setFromPrevious();
 
