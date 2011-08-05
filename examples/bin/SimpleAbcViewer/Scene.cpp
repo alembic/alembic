@@ -98,6 +98,27 @@ Scene::Scene( const std::string &abcFileName )
 
     m_archive = IArchive( Alembic::AbcCoreHDF5::ReadArchive(),
                           abcFileName );
+
+    std::string appName;
+    std::string libraryVersionString;
+    uint32_t libraryVersion;
+    std::string whenWritten;
+    std::string userDescription;
+    GetArchiveInfo (m_archive,
+                    appName,
+                    libraryVersionString,
+                    libraryVersion,
+                    whenWritten,
+                    userDescription);
+    if (appName != "")
+    {
+        std::cout << "  file written by: " << appName << std::endl;
+        std::cout << "  using Alembic : " << libraryVersionString << std::endl;
+        std::cout << "  written on : " << whenWritten << std::endl;
+        std::cout << "  user description : " << userDescription << std::endl;
+        std::cout << std::endl;
+    }
+
     m_topObject = IObject( m_archive, kTop );
     
     std::cout << "Opened archive and top object, creating drawables."

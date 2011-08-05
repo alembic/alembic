@@ -189,6 +189,7 @@ int main( int argc, char *argv[] )
                 std::cout << "  using Alembic : " << libraryVersionString << std::endl;
                 std::cout << "  written on : " << whenWritten << std::endl;
                 std::cout << "  user description : " << userDescription << std::endl;
+                std::cout << std::endl;
             }
             else
             {
