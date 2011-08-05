@@ -41,7 +41,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-MeshTopologyVariance ICurvesSchema::getTopologyVariance()
+MeshTopologyVariance ICurvesSchema::getTopologyVariance() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::getTopologyVariance()" );
 

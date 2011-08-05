@@ -178,19 +178,21 @@ public:
         *this = iCopy;
     }
 
-    size_t getNumSamples() { return m_positionsProperty.getNumSamples(); }
+    size_t getNumSamples() const
+    { return m_positionsProperty.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
-    MeshTopologyVariance getTopologyVariance();
+    MeshTopologyVariance getTopologyVariance() const;
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
-    bool isConstant() { return getTopologyVariance() == kConstantTopology; }
+    bool isConstant() const
+    { return getTopologyVariance() == kConstantTopology; }
 
     //! Time sampling type.
     //!
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     {
         return m_positionsProperty.getTimeSampling();
     }
@@ -208,9 +210,14 @@ public:
     }
 
 
-    Abc::IP3fArrayProperty getPositionsProperty()
+    Abc::IP3fArrayProperty getPositionsProperty() const
     {
         return m_positionsProperty;
+    }
+
+    Abc::IInt32ArrayProperty getNumVerticesProperty() const
+    {
+        return m_nVerticesProperty;
     }
 
     IV2fGeomParam &getUVsParam() { return m_uvsParam; }

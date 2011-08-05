@@ -54,7 +54,7 @@ namespace ALEMBIC_VERSION_NS {
 //! - GeomParams (optional)
 //! - UserProperties (optional)
 //!
-//! This class is used to encapsulate common functionality of the 
+//! This class is used to encapsulate common functionality of the
 //! real Geometry schema classes, like IPoints and IPolyMesh and so on
 template <class INFO>
 class IGeomBaseSchema : public Abc::ISchema<INFO>
@@ -160,8 +160,8 @@ public:
                 m_selfBoundsProperty.valid() );
     }
 
-    Abc::IBox3dProperty getSelfBoundsProperty() 
-    { 
+    Abc::IBox3dProperty getSelfBoundsProperty()
+    {
         return m_selfBoundsProperty;
     }
 
@@ -197,8 +197,8 @@ protected:
 //! - userProperties (optional)
 //! This class is a concrete instantiation of IGeomBaseSchema.
 //! Your archive might contain PolyMesh and SubD and Curves
-//! and Points objects etc. This class, IGeomBase, gives you 
-//! access to the generic parts of those objects. For example, if you 
+//! and Points objects etc. This class, IGeomBase, gives you
+//! access to the generic parts of those objects. For example, if you
 //! just wish to iterate through an archive's hierarchy to examine bounding
 //! regions this class could be helpful to you. Then when you actually
 //! need to access the real data in the geometric type you can
@@ -206,6 +206,8 @@ protected:
 class IGeomBase : public IGeomBaseSchema<GeomBaseSchemaInfo>
 {
 public:
+    typedef IGeomBase this_type;
+
     class Sample
     {
     public:
@@ -232,7 +234,6 @@ public:
 public:
     //! By convention we always define this_type in AbcGeom classes.
     //! Used by unspecified-bool-type conversion below
-    typedef IGeomBase this_type;
 
     //-*************************************************************************
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
@@ -249,8 +250,7 @@ public:
 
         // We don't want strict matching of the title because the real schema
         // is going to be something like "AbcGeom_<type>_vX"
-      : IGeomBaseSchema<GeomBaseSchemaInfo>( iParent, iName,
-                                             kNoMatching, iArg0 )
+      : IGeomBaseSchema<GeomBaseSchemaInfo>( iParent, iName, kNoMatching )
     {
         init( iArg0, iArg1 );
     }
@@ -261,7 +261,7 @@ public:
                         const Abc::Argument &iArg1 = Abc::Argument() )
         // We don't want strict matching of the title because the real schema
         // is going to be something like "AbcGeom_<type>_vX"
-      : IGeomBaseSchema<GeomBaseSchemaInfo>( iThis, iArg0, kNoMatching )
+      : IGeomBaseSchema<GeomBaseSchemaInfo>( iThis, kNoMatching )
     {
         init( iArg0, iArg1 );
     }
@@ -295,12 +295,13 @@ public:
     //! This can be any number, including zero.
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
-    size_t getNumSamples()
+    size_t getNumSamples() const
     { return m_selfBoundsProperty.getNumSamples(); }
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
-    bool isConstant() { return m_selfBoundsProperty.isConstant(); }
+    bool isConstant() const
+    { return m_selfBoundsProperty.isConstant(); }
 
     //! Time sampling Information.
     //!
@@ -310,7 +311,10 @@ public:
         {
             return m_selfBoundsProperty.getTimeSampling();
         }
-        return getObject().getArchive().getTimeSampling(0);
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
     }
 
     //-*************************************************************************
@@ -321,7 +325,7 @@ public:
 
         m_selfBoundsProperty.get( oSample.m_selfBounds, iSS );
 
-        if ( m_childBoundsProperty && 
+        if ( m_childBoundsProperty &&
              m_childBoundsProperty.getNumSamples() > 0 )
         {
             m_childBoundsProperty.get( oSample.m_childBounds, iSS );
@@ -339,10 +343,10 @@ public:
     }
 
     //-*************************************************************************
-    Abc::ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+    Abc::ICompoundProperty getArbGeomParams() const { return m_arbGeomParams; }
 
     //-*************************************************************************
-    Abc::ICompoundProperty getUserProperties() { return m_userProperties; }
+    Abc::ICompoundProperty getUserProperties() const { return m_userProperties; }
 
     //-*************************************************************************
     //! Reset returns this function set to an empty, default
@@ -394,7 +398,6 @@ public:
         return matches( iHeader.getMetaData(), iMatching );
     }
 
-protected:
 };
 
 //-*****************************************************************************
