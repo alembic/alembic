@@ -150,6 +150,8 @@ public:
 
     //! Default copy constructor used
     //! Default assignment operator used.
+    //
+    virtual ~ISchema() {}
 
 private:
     template <class CPROP_PTR>
@@ -177,7 +179,7 @@ void ISchema<INFO>::init( CPROP_PTR iParent,
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISchema::ISchema::init()" );
 
-    // Get actual writer for parent.
+    // Get actual reader for parent.
     ABCA_ASSERT( iParent,
                  "NULL parent passed into ISchema ctor" );
     AbcA::CompoundPropertyReaderPtr parent =

@@ -76,17 +76,19 @@ namespace ALEMBIC_VERSION_NS {
 //! Here is a macro for declaring SCHEMA_INFO
 //! It takes three arguments
 //! - the SchemaTitle( a string ),
+//! - the SchemaBaseType( a string ),
 //! - the DefaultSchemaName( a string )
 //! - the name of the SchemaTrait Type to be declared.
 //! - for example:
 //! ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
 //!                                  ".geom",
 //!                                  PolyMeshSchemaInfo );
-#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, SDFLT, STDEF )   \
+#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, SBTYP, SDFLT, STDEF )  \
 struct STDEF                                                            \
 {                                                                       \
     static const char * title() { return ( STITLE ) ; }                 \
     static const char * defaultName() { return ( SDFLT ); }             \
+    static const char * schemaBaseType() { return ( SBTYP ); }          \
 }
 
 //-*****************************************************************************
@@ -109,6 +111,14 @@ public:
     {
         static std::string sTitle = INFO::title();
         return sTitle;
+    }
+
+    //! Return the schema base type expected of this
+    //! property. An empty base type means it's the root type.
+    static const std::string &getSchemaBaseType()
+    {
+        static std::string sBaseType = INFO::schemaBaseType();
+        return sBaseType;
     }
 
     //! Return the default name for instances of this schema. Often
@@ -190,6 +200,8 @@ public:
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() );
 
+    virtual ~OSchema() {}
+
     //! Default copy constructor used
     //! Default assignment operator used.
 
@@ -235,6 +247,10 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
     if ( getSchemaTitle() != "" )
     {
         mdata.set( "schema", getSchemaTitle() );
+    }
+    if ( getSchemaBaseType() != "" )
+    {
+        mdata.set( "schemaBaseType", getSchemaBaseType() );
     }
 
     // Create property.

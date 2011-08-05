@@ -45,7 +45,7 @@ namespace ALEMBIC_VERSION_NS {
 namespace {
 
 // Declare a test schema.
-ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "TestSchema_v1", ".test",
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "TestSchema_v1", "", ".test",
                                  TestSchemaInfo );
 
 typedef ISchema<TestSchemaInfo> ITestSchema;

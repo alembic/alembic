@@ -81,6 +81,7 @@ OArchive CreateArchiveWithInfo(
     //! Optional meta data or error handling policy
     const Argument &iArg1 = Argument() );
 
+//-*****************************************************************************
 void
 GetArchiveInfo(
     //! The Archive whose meta data will be inspected
@@ -101,7 +102,6 @@ GetArchiveInfo(
     //! Extra information, could be arguments to the tool that wrote the file.
     std::string & oUserDescription );
 
-//-*****************************************************************************
 //-*****************************************************************************
 template <class ARCHIVE_CTOR>
 OArchive CreateArchiveWithInfo(

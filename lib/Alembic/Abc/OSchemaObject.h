@@ -204,6 +204,10 @@ OSchemaObject<SCHEMA>::OSchemaObject
     AbcA::MetaData metaData = args.getMetaData();
     metaData.set( "schema", SCHEMA::getSchemaTitle() );
     metaData.set( "schemaObjTitle", getSchemaObjTitle() );
+    if (SCHEMA::getSchemaBaseType() != "" )
+    {
+        metaData.set( "schemaBaseType", SCHEMA::getSchemaBaseType() );
+    }
 
     // Make the object.
     AbcA::ObjectHeader ohdr( iName, metaData );

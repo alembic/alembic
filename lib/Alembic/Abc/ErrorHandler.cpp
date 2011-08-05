@@ -79,6 +79,7 @@ void ErrorHandler::handleIt( const std::string &iMsg )
     default:
     case kThrowPolicy:
         ABCA_THROW( iMsg );
+        return;
     }
 }
 

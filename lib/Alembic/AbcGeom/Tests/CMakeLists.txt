@@ -115,6 +115,14 @@ ADD_EXECUTABLE( AbcGeom_CurvesTest
 TARGET_LINK_LIBRARIES( AbcGeom_CurvesTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Curves_TEST AbcGeom_CurvesTest )
 
+##-*****************************************************************************
+ADD_EXECUTABLE( AbcGeom_GeomBaseTest
+                CurvesData.h
+                CurvesData.cpp
+                GeomBaseTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_GeomBaseTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_GeomBase_TEST AbcGeom_GeomBaseTest )
+
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_TransformingMeshTest
 		MeshData.h

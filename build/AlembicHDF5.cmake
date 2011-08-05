@@ -1,7 +1,8 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011, Industrial Light & Magic,
-##   a division of Lucasfilm Entertainment Company Ltd.
+## Copyright (c) 2009-2011,
+##  Sony Pictures Imageworks Inc. and
+##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
 ##
@@ -52,6 +53,12 @@ IF(NOT DEFINED HDF5_ROOT)
         ENDIF()
     ENDIF()
 ENDIF()
+
+#IF( NOT DEFINED HDF5_USE_STATIC_LIBRARIES )
+#  SET( HDF5_USE_STATIC_LIBRARIES TRUE )
+#ENDIF()
+
+
 
 # Prefer HDF5_ROOT set from the environment over the CMakeCache'd variable
 IF(NOT $ENV{HDF5_ROOT}x STREQUAL "x")

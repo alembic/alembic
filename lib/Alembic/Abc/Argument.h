@@ -116,6 +116,7 @@ private:
 // our various classes for construction.
 // ErrorHandlerPolicy - always defaults to QuietNoop
 // MetaData - always defaults to ""
+// matching - schema interpretation matching
 // TimeSampling - always defaults to default uniform
 // TimeSamplingIndex - always defaults to 0
 class Argument

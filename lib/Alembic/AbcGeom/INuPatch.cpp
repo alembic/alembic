@@ -98,7 +98,7 @@ MeshTopologyVariance INuPatchSchema::getTopologyVariance()
         }
     }
     else if ( m_numUProperty.isConstant() && m_numVProperty.isConstant() &&
-              m_uOrderProperty.isConstant() & m_vOrderProperty.isConstant() &&
+              m_uOrderProperty.isConstant() && m_vOrderProperty.isConstant() &&
               m_uKnotProperty.isConstant() && m_vKnotProperty.isConstant() )
     {
 

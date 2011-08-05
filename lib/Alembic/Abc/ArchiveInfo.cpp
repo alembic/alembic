@@ -40,6 +40,7 @@ namespace Alembic {
 namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
+//-*****************************************************************************
 void
 GetArchiveInfo(
     IArchive & iArchive,
