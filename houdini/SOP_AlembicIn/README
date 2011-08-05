@@ -1,0 +1,74 @@
+--------------------------------------------------------------------------------
+OVERVIEW
+
+The reference implementation for reading Alembic data into Houdini contains three nodes:
+
+1) A SOP named Alembic_In
+2) A python object node named "Alembic Archive"
+3) A python object node named "Alembic Xform"
+
+The Alembic_In SOP can read an entire Alembic archive or a subtree of an Alembic archive with the option of baking in transformations. As such, it can serve as the leaf node for geometric primitives while recreating the transformation hierarchy as Houdini objects. It supports loading arbitrary geometry parameters (AbcGeom::GeomParams) as attributes and provides options to remap attribute names on load. The SOP recognizes when data or topology is constant in order to do as little work as necessary upon frame changes.
+
+The "Alembic Archive" node constructs and contains the hierarchy of object, SOP and camera nodes used to represent an Alembic scene. Its "Build or Update Hierachy" button reads the archive hierarchy (or specified subtree) and expressions the matching parameters of its internal nodes for convenience.
+
+The "Alembic Xform" node queries the local transformation for a specified path within an archive during its cook. It recognizes and caches when transformations are not animated in order to do as little work as necessary on frame changes.
+
+--------------------------------------------------------------------------------
+AVAILABLE PYTHON FUNCTIONS
+
+Both "Alembic Archive" and "Alembic Xform" are dependent upon python functions made available by the Alembic_In SOP. These functions may be of use for other pipeline integration tools. They are available by importing the "_alembic_hom_extensions" module. Here is a quick summary of each:
+
+1) alembicGetLocalXform(archiveFilePath, objectPath, alembicSampleTime)
+
+This returns a tuple in this form:
+(tupleOf16FloatsFor4x4Matrix, boolIsConstant)
+
+The second value lets you know whether there is any animated transformation within the archive at that level.
+
+2) alembicGetSceneHierarchy(archiveFilePath, subtreePath)
+
+This returns a tuple of values in this form:
+(name, typeString, tupleOfChildrenInThisForm)
+
+This allows you to query the structure of the scene without loading any sampled data.
+
+3) alembicClearArchiveCache()
+
+The SOP maintains a cache of Alembic archive handles to avoid reopening the file during multiple cooks across different nodes.
+
+4) alembicSetArchiveMaxCacheSize( maxArchiveHandles )
+
+This allows you to configure the maximum number of archive handles kept open by the SOP at any time. When this limit is exceeded, it will discard handles at random to maintain the limit.
+
+5) alembicGetArchiveMaxCacheSize()
+
+Returns the maximum number of archive handles kept open. The default value is currently 50.
+
+6) alembicGetCameraDict(archiveFilePath, cameraPath, alembicSampleTime)
+
+This returns a dictionary containing keys matching the relevant "View" parameters on the houdini Camera node. Conversion from Alembic's representation to houdini's representation is done within the function.
+
+--------------------------------------------------------------------------------
+BUILDING:
+
+Due to the use of hcustom, the SOP is not yet integrated into Alembic's CMake setup. Makefile.hcustom has targets for building the SOP and compressing the OPalembic directory into an OTL defining the "Alembic Archive" and "Alemic Xform" nodes.
+
+--------------------------------------------------------------------------------
+TASKS LEFT TO DO:
+
+1) Of the geometric primitives, only AbcGeom::IPolyMesh and AbcGeom::ISubD mesh are currently supported. AbcGeom::INuPatch, AbcGeom::ICurves and AbcGeom::IPoints remain to be implemented.
+
+2) Overscan and 2D translation of the camera filmback are not yet fully represented. There's enough information available for this, it's just not fully implemented yet.
+
+3) Subdivision surface creases, corners and holes are not yet represented.
+
+
+
+
+
+
+
+
+
+
+
