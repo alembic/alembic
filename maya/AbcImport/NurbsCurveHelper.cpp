@@ -89,6 +89,12 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
         interp = false;
     }
 
+    unsigned int degree = 1;
+    if (samp.getType() == Alembic::AbcGeom::kCubic)
+    {
+        degree = 3;
+    }
+
     std::size_t curVert = 0;
     for (std::size_t i = 0; i < iExpectedCurves && i < numCurves; ++i)
     {
@@ -96,8 +102,8 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
         MDoubleArray knots;
 
         int numVerts = (*numVertices)[i];
-
-        for (int j = 0; j < numVerts; ++j, ++curVert)
+        int j;
+        for (j = 0; j < numVerts; ++j, ++curVert)
         {
             Alembic::Abc::V3f pos = (*sampPoints)[curVert];
 
@@ -112,15 +118,20 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
             {
                 cvs.append(pos.x, pos.y, pos.z);
             }
+        }
 
-            knots.append(j/(float)(numVerts-1));
+        // for now evenly distribute the knots
+        int numKnots = numVerts + degree - 1;
+        for (j = 0; j < numKnots; ++j)
+        {
+            knots.append(j/(float)(numKnots-1));
         }
 
         MFnNurbsCurveData curveData;
         MObject curveDataObj = curveData.create();
         ioCurveObjects.push_back(curveDataObj);
         MFnNurbsCurve curve;
-        curve.create(cvs, knots, 1, MFnNurbsCurve::kOpen, false, true,
+        curve.create(cvs, knots, degree, MFnNurbsCurve::kOpen, false, true,
             curveDataObj);
     }
 
@@ -186,6 +197,12 @@ MObject createCurves(const std::string & iName,
         }
     }
 
+    unsigned int degree = 1;
+    if (iSample.getType() == Alembic::AbcGeom::kCubic)
+    {
+        degree = 3;
+    }
+
     std::size_t curVert = 0;
     for (std::size_t i = 0; i < numCurves; ++i)
     {
@@ -194,15 +211,22 @@ MObject createCurves(const std::string & iName,
 
         int numVerts = (*curvesNumVertices)[i];
 
-        for (int j = 0; j < numVerts; ++j, ++curVert)
+        int j;
+        for (j = 0; j < numVerts; ++j, ++curVert)
         {
             Alembic::Abc::V3f pos = (*positions)[curVert];
             cvs.append(pos.x, pos.y, pos.z);
-            knots.append(j/(float)(numVerts-1));
+        }
+
+        // for now evenly distribute the knots
+        int numKnots = numVerts + degree - 1;
+        for (j = 0; j < numKnots; ++j)
+        {
+            knots.append(j/(float)(numKnots-1));
         }
 
         MFnNurbsCurve curve;
-        MObject curveObj = curve.create(cvs, knots, 1,
+        MObject curveObj = curve.create(cvs, knots, degree,
             MFnNurbsCurve::kOpen, false, true, parent);
         curve.setName(name);
 
