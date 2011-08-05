@@ -97,10 +97,10 @@ def WalkHierarchy(rootNode, parentNode, parentPath, childEntry, pathList):
                 'near',
                 'far',
                 'focus',
-                #'winx',
-                #'winy',
-                #'winsizex',
-                #'winsizey',
+                'winx',
+                'winy',
+                'winsizex',
+                'winsizey',
                 'aperture'):
              currentNode.parm(parmName).setExpression(
                     'pwd().alembicGetCameraDict(ch("fileName"), "%s", ch("frame")/ch("fps")).get("%s")' % (

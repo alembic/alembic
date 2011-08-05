@@ -1827,24 +1827,56 @@ namespace
                     double top, bottom, left, right;
                     cameraSample.getScreenWindow(top, bottom, left, right);
                     
-//                     val = PY_PyFloat_FromDouble((right-left)/2.0 + left);
-//                     PY_PyDict_SetItemString(resultDict, "winx", val);
-//                     PY_Py_DECREF(val);
-//                     
-//                     val = PY_PyFloat_FromDouble((top-bottom)/2.0 + bottom);
-//                     PY_PyDict_SetItemString(resultDict, "winy", val);
-//                     PY_Py_DECREF(val);
-//                     
-//                     val = PY_PyFloat_FromDouble(right-left);
-//                     PY_PyDict_SetItemString(resultDict, "winsizex", val);
-//                     PY_Py_DECREF(val);
-//                     
-//                     val = PY_PyFloat_FromDouble(top-bottom);
-//                     PY_PyDict_SetItemString(resultDict, "winsizey", val);
-//                     PY_Py_DECREF(val);
+                    double winx = cameraSample.getHorizontalFilmOffset() *
+                            cameraSample.getLensSqueezeRatio() /
+                                    cameraSample.getHorizontalAperture();
+                    
+                    double winy = cameraSample.getVerticalFilmOffset() *
+                            cameraSample.getLensSqueezeRatio() /
+                                    cameraSample.getVerticalAperture();
+                    
+                    //TODO, full 2D transformations
+                    
+                    Abc::V2d postScale(1.0, 1.0);
+                    for ( size_t i = 0; i < cameraSample.getNumOps(); ++i )
+                    {
+                        const FilmBackXformOp & op = cameraSample.getOp(i);
+                        
+                        if ( op.isScaleOp() )
+                        {
+                            postScale *= op.getScale();
+                        }
+                    }
+                    
+                    //TODO overscan
+                    double winsizex =
+                            cameraSample.getLensSqueezeRatio() / postScale[0];
+                    //TODO overscan
+                    double winsizey =
+                            cameraSample.getLensSqueezeRatio() / postScale[1];
+                    
+                    
+                    
+                    
+                    
+                    val = PY_PyFloat_FromDouble(winx);
+                    PY_PyDict_SetItemString(resultDict, "winx", val);
+                    PY_Py_DECREF(val);
+                    
+                    val = PY_PyFloat_FromDouble(winy);
+                    PY_PyDict_SetItemString(resultDict, "winy", val);
+                    PY_Py_DECREF(val);
+                    
+                    val = PY_PyFloat_FromDouble(winsizex);
+                    PY_PyDict_SetItemString(resultDict, "winsizex", val);
+                    PY_Py_DECREF(val);
+                    
+                    val = PY_PyFloat_FromDouble(winsizey);
+                    PY_PyDict_SetItemString(resultDict, "winsizey", val);
+                    PY_Py_DECREF(val);
                     
                     val = PY_PyFloat_FromDouble(
-                            cameraSample.getHorizontalAperture()*10.0*(right-left));
+                            cameraSample.getHorizontalAperture()*10.0);
                     PY_PyDict_SetItemString(resultDict, "aperture", val);
                     PY_Py_DECREF(val);
                     
