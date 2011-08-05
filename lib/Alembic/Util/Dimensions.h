@@ -50,30 +50,25 @@ class BaseDimensions
 private:
     typedef std::vector<T> SizeVec;
     SizeVec m_vector;
-    const size_t m_mask;
 
 public:
     // Default is for a rank-0 dimension.
     BaseDimensions()
       : m_vector()
-      , m_mask( ~01u )
     {}
 
     // When you specify a single thing, you're specifying a rank-1
     // dimension of a certain size.
     explicit BaseDimensions( const T& t )
       : m_vector( 1, t )
-      , m_mask( ~01u )
     {}
 
     BaseDimensions( const BaseDimensions &copy )
       : m_vector( copy.m_vector )
-      , m_mask( ~01u )
     {}
 
     template <class Y>
     BaseDimensions( const BaseDimensions<Y> &copy )
-      : m_mask( ~01u )
     {
         m_vector.resize( copy.rank() );
         for ( size_t i = 0; i < copy.rank(); ++i )
@@ -111,10 +106,10 @@ public:
     }
 
     T &operator[]( size_t i )
-    { return *( ( T * )( m_mask & ((T) &(m_vector[i] ) ) ) ); }
+    { return m_vector[i]; }
 
     const T &operator[]( size_t i ) const
-    { return *( ( const T *)( m_mask & ((T) &( m_vector[i] ) ) ) ); }
+    { return m_vector[i]; }
 
     T *rootPtr() { return ( T * )( &( m_vector.front() ) ); }
     const T *rootPtr() const
