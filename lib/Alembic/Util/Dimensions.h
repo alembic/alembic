@@ -73,7 +73,8 @@ public:
         m_vector.resize( copy.rank() );
         for ( size_t i = 0; i < copy.rank(); ++i )
         {
-            m_vector[i] = static_cast<T>( copy[i] );
+            Y val = copy[i];
+            m_vector[i] = static_cast<T>( val );
         }
     }
 
@@ -89,7 +90,8 @@ public:
         m_vector.resize( copy.rank() );
         for ( size_t i = 0; i < copy.rank(); ++i )
         {
-            m_vector[i] = static_cast<T>( copy[i] );
+            Y val = copy[i];
+            m_vector[i] = static_cast<T>( val );
         }
         return *this;
     }
