@@ -50,6 +50,9 @@
 #include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/IFaceSet.h>
 
+#include <Alembic/AbcGeom/IGeomBase.h>
+#include <Alembic/AbcGeom/OGeomBase.h>
+
 #include <Alembic/AbcGeom/OGeomParam.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
 
