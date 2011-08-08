@@ -17,9 +17,11 @@ ilmbase (1.0.1) www.openexr.com
 HDF5 (1.8.7) www.hdfgroup.org/HDF5
 
 Optional:
+Arnold (3.0)
 Autodesk Maya (2011)
 Pixar PRMan (15.x)
 OpenEXR (1.6.1) www.openexr.com
+
 
 Note that the versions given parenthetically above are minimum-tested
 versions.  You may have good luck with later or earlier versions, but this is
