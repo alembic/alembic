@@ -152,7 +152,7 @@ MStatus AbcExport::doIt(const MArgList & args)
                 fileName = jobArgsArray[++i].asChar();
             }
 
-            else if (arg == "-fr" || arg == "-frameRange")
+            else if (arg == "-fr" || arg == "-framerange")
             {
                 if (i+2 >= numJobArgs || !jobArgsArray[i+1].isDouble() ||
                     !jobArgsArray[i+2].isDouble())

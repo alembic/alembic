@@ -1,0 +1,13 @@
+The AbcExport plugin is used to write an Alembic file.
+It contains a single command named AbcExport.  It isn't a file
+translator so it can write out multiple files with different settings while only
+stepping through the frame range once.
+
+To write out the entire scene from frame 1 to 100:
+AbcExport -j "-fr 1 100 -file scene.abc";
+
+To write out only your selected shapes (and it's ancestor nodes):
+AbcExport -j "-sl -file scene.abc";
+
+Other options can be viewed via:
+AbcExport -h;

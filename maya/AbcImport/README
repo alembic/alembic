@@ -1,0 +1,11 @@
+The AbcImport plugin is used to load an Alembic file.
+It contains a command (AbcImport) and a node (AlembicNode).
+Creation and management of AlembicNode is done via the AbcImport command, and
+is only necessary when the scene contains animated data.  Creating and managing
+an AlembicNode without the AbcImport command is not currently recommended.
+
+The simplest way to load your Alembic scene is:
+AbcImport "scene.abc";
+
+Other options can be viewed via:
+AbcImport -h;
