@@ -1,6 +1,7 @@
  arnold
  |
- `-- Procedural start of a procedural for Arnold
+ `-- Procedural - Arnold "procedural" node with arguments set in the "data"
+                  string parameter.
  |
  `-- Tests
      |
