@@ -25,8 +25,6 @@ is low-traffic, but anyone can sign up and participate:
 
 http://groups.google.com/group/alembic-discussion
 
-As always, discussion is welcome on the discussion list:
-
 2011-06-28, Alembic 1.0rc1
 
 Hello, Alembic users, welcome to the latest beta version of Alembic.  As we
