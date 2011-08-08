@@ -1,3 +1,32 @@
+2011-08--09, Alembic 1.0
+
+Hello, Alembic users, welcome to our first gold release of Alembic.
+
+The complete code changes for this release can be examined here:
+http://codereview.appspot.com/4819067/
+
+Some highlights:
+
+ - Addition of the Arnold procedural.
+
+ - Removal of some things that weren't Alembic related (GLUtil)
+
+ - Addition of python unit test suite for AbcExport and AbcImport.
+
+ - Lots of Houdini SOP improvements.
+
+ - Cleanup many compiler warnings.
+
+This initial 1.0 version can now be used for critical, deadline-driven
+production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list:
+
 2011-06-28, Alembic 1.0rc1
 
 Hello, Alembic users, welcome to the latest beta version of Alembic.  As we
@@ -5,7 +34,7 @@ close in on a 1.0 release, we hope the API and file format are now stable
 and fully forwards-compatible.  We consider these to be at a first
 "Release Candidate" stage. (note that this doesn't yet apply to the
 application-specific reference implementations). As with all pre-release
-software, we can't guarantee that changes won’t occur between now and a full
+software, we can't guarantee that changes won't occur between now and a full
 1.0 release.
 
 This release is mostly a bugfix and cleanup release.  We've improved the build
