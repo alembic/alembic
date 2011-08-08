@@ -11,11 +11,11 @@ Some highlights:
 
  - Removal of some things that weren't Alembic related (GLUtil)
 
- - Addition of python unit test suite for AbcExport and AbcImport.
+ - Addition of a python unit test suite for AbcExport and AbcImport.
 
  - Lots of Houdini SOP improvements.
 
- - Cleanup many compiler warnings.
+ - Cleanup of many compiler warnings.
 
 This initial 1.0 version can now be used for critical, deadline-driven
 production work.
