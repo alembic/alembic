@@ -495,7 +495,7 @@ MString util::getHelpText()
 "Is illegal because the higest and lowerst frameRelativeSamples are 0.3 frames\n"
 "apart.\n"
 "\n"
-"AbcExport -j \"-sel -root |group|foo -file /tmp/test.abc\"\n"
+"AbcExport -j \"-sl -root |group|foo -file /tmp/test.abc\"\n"
 "Writes out all selected nodes and it's ancestor nodes including up to foo.\n"
 "foo will be parented to the root of the Alembic scene.\n"
 "\n";
