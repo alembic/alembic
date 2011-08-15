@@ -433,7 +433,7 @@ MString util::getHelpText()
 "\n"
 "-wfg / -wholeFrameGeo\n"
 "If this flag is present data for geometry will only be written out on whole\n"
-"\nframes."
+"frames.\n"
 "\n"
 "-ws / -worldSpace\n"
 "If this flag is present, any root nodes will be stored in world space.\n"
