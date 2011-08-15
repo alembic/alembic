@@ -110,4 +110,4 @@ class selectionTest(unittest.TestCase):
 
         # we didnt actually select any meshes so there shouldnt
         # be any in the scene
-        self.failIf(MayaCmds.ls(type='mesh') is not None)
+        self.failIf(MayaCmds.ls(type='mesh'))
