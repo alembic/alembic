@@ -492,7 +492,7 @@ MString util::getHelpText()
 "\n"
 "AbcExport -j \"-step 0.25 -frs 0.3 -frs 0.60 -fr 1 5 -root foo -file test.abc\"\n"
 "\n"
-"Is illegal because the higest and lowerst frameRelativeSamples are 0.3 frames\n"
+"Is illegal because the highest and lowest frameRelativeSamples are 0.3 frames\n"
 "apart.\n"
 "\n"
 "AbcExport -j \"-sl -root |group|foo -file /tmp/test.abc\"\n"
