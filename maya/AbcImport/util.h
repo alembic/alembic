@@ -112,9 +112,8 @@ void clamp(T & min, T & max, T & cur)
 template<typename T>
 T simpleLerp(double alpha, T val1, T val2)
 {
-    double ret = ( ( 1.0 - alpha ) * static_cast<double>( val1 ) ) +
-        ( alpha * static_cast<double>( val2 ) );
-    return static_cast<T>( ret );
+    double dv = static_cast<double>( val1 );
+    return static_cast<T>( dv + alpha * (static_cast<double>(val2) - dv) );
 }
 
 template<typename T>
@@ -128,7 +127,8 @@ void vectorLerp(double alpha, std::vector<T> & vec,
     vec.reserve(size);
     for (unsigned int i = 0; i < size; i++)
     {
-        T val = (1 - alpha) * vec1[i] + alpha * vec2[i];
+        T v1 = vec1[i];
+        T val = v1 + alpha * (vec2[i] - vec1[i]);
         vec.push_back(val);
     }
 }

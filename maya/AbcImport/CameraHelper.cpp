@@ -73,16 +73,16 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             ceilSamp.getFocalLength());
         oArray[1] = simpleLerp<double>(alpha, samp.getLensSqueezeRatio(),
             ceilSamp.getLensSqueezeRatio());
-        oArray[2] = simpleLerp<double>(alpha, samp.getHorizontalAperture()/2.54,
-            ceilSamp.getHorizontalAperture()/2.54);
-        oArray[3] = simpleLerp<double>(alpha, samp.getVerticalAperture()/2.54,
-            ceilSamp.getVerticalAperture()/2.54);
+        oArray[2] = simpleLerp<double>(alpha, samp.getHorizontalAperture(),
+            ceilSamp.getHorizontalAperture()) / 2.54;
+        oArray[3] = simpleLerp<double>(alpha, samp.getVerticalAperture(),
+            ceilSamp.getVerticalAperture()) / 2.54;
         oArray[4] = simpleLerp<double>(alpha,
-            samp.getHorizontalFilmOffset()/2.54,
-            ceilSamp.getHorizontalFilmOffset()/2.54);
+            samp.getHorizontalFilmOffset(),
+            ceilSamp.getHorizontalFilmOffset()) / 2.54;
         oArray[5] = simpleLerp<double>(alpha,
-            samp.getVerticalFilmOffset()/2.54,
-            ceilSamp.getVerticalFilmOffset()/2.54);
+            samp.getVerticalFilmOffset(),
+            ceilSamp.getVerticalFilmOffset()) / 2.54;
 
         if (samp.getOverScanLeft() == samp.getOverScanRight() &&
             samp.getOverScanTop() == samp.getOverScanBottom() &&
@@ -127,25 +127,26 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             Alembic::AbcGeom::FilmBackXformOp & ceilOp = ceilSamp[i];
             if (op.getHint() == "filmFitOffs")
             {
-                double val = op.getChannelValue(0) * 0.5 *
-                    samp.getHorizontalAperture() / 2.54;
+                double val = op.getChannelValue(0) *
+                    samp.getHorizontalAperture();
 
-                double ceilVal = ceilOp.getChannelValue(0) * 0.5 *
-                    ceilSamp.getHorizontalAperture() / 2.54;
+                double ceilVal = ceilOp.getChannelValue(0) *
+                    ceilSamp.getHorizontalAperture();
 
                 if (val != 0.0)
                 {
-                    oArray[12] = simpleLerp<double>(alpha, val, ceilVal);
+                    // chanValue(0) * 0.5 * horiz aper / 2.54
+                    oArray[12] = simpleLerp<double>(alpha, val, ceilVal) / 5.08;
                 }
                 else
                 {
-                    val = op.getChannelValue(1) * 0.5 *
-                        samp.getHorizontalAperture() / 2.54;
+                    val = op.getChannelValue(1) * samp.getHorizontalAperture();
 
-                    ceilVal = ceilOp.getChannelValue(1) * 0.5 *
-                        ceilSamp.getHorizontalAperture() / 2.54;
+                    ceilVal = ceilOp.getChannelValue(1) *
+                        ceilSamp.getHorizontalAperture();
 
-                    oArray[12] = simpleLerp<double>(alpha, val, ceilVal);
+                    // chanValue(1)* 0.5 * horiz aper / 2.54
+                    oArray[12] = simpleLerp<double>(alpha, val, ceilVal) / 5.08;
                 }
             }
             else if (op.getHint() == "preScale")
@@ -215,13 +216,13 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             {
                 if (op.getChannelValue(0) != 0.0)
                 {
-                    oArray[12] = op.getChannelValue(0) * 0.5 *
-                        samp.getHorizontalAperture() / 2.54;
+                    oArray[12] = op.getChannelValue(0) *
+                        samp.getHorizontalAperture() / 5.08;
                 }
                 else
                 {
-                    oArray[12] = op.getChannelValue(1) * 0.5 *
-                        samp.getHorizontalAperture() / 2.54;
+                    oArray[12] = op.getChannelValue(1) *
+                        samp.getHorizontalAperture() / 5.08;
                 }
             }
             else if (op.getHint() == "preScale")
@@ -329,8 +330,8 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
             Alembic::AbcGeom::FilmBackXformOp & op = samp[i];
             if (op.getHint() == "filmFitOffs")
             {
-                double val = op.getChannelValue(0) * 0.5 *
-                    samp.getHorizontalAperture() / 2.54;
+                double val = op.getChannelValue(0) *
+                    samp.getHorizontalAperture() / 5.08;
 
                 if (val != 0.0)
                 {
@@ -338,8 +339,8 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
                 }
                 else
                 {
-                    fnCamera.setFilmFitOffset(op.getChannelValue(1) * 0.5 *
-                        samp.getHorizontalAperture() / 2.54);
+                    fnCamera.setFilmFitOffset(op.getChannelValue(1) *
+                        samp.getHorizontalAperture() / 5.08);
                 }
             }
             else if (op.getHint() == "preScale")
