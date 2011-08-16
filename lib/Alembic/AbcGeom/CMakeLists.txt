@@ -52,9 +52,6 @@ SET( CXX_FILES
   OFaceSet.cpp
   IFaceSet.cpp
 
-  OGeomParam.cpp
-  IGeomParam.cpp
-
   ONuPatch.cpp
   INuPatch.cpp
 

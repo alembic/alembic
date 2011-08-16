@@ -47,45 +47,45 @@ SET( TEST_LIBS
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_PolyMeshTest
-		MeshData.h
-		MeshData.cpp
-		PolyMeshTest.cpp )
+                MeshData.h
+                MeshData.cpp
+                PolyMeshTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_PolyMeshTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_PolyMesh_TEST AbcGeom_PolyMeshTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_HelperLibTest
-		HelperLibTest.cpp )
+                HelperLibTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_HelperLibTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_HelperLib_TEST AbcGeom_HelperLibTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_PointsTest
-		PointsTest.cpp )
+                PointsTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_PointsTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Points_TEST AbcGeom_PointsTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_NurbsTest
-	        NurbsData.h
-		NurbsData.cpp
-		NurbsTest.cpp )
+                NurbsData.h
+                NurbsData.cpp
+                NurbsTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_NurbsTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Nurbs_TEST AbcGeom_NurbsTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_SubDTest
-		MeshData.h
-		MeshData.cpp
-		SubDTest.cpp )
+                MeshData.h
+                MeshData.cpp
+                SubDTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_SubDTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_SubD_TEST AbcGeom_SubDTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_SubDFaceSetTest
-		MeshData.h
-		MeshData.cpp
-		SubDFaceSetTest.cpp )
+                MeshData.h
+                MeshData.cpp
+                SubDFaceSetTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_SubDFaceSetTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_SubDFaceSet_TEST AbcGeom_SubDFaceSetTest )
 
@@ -103,7 +103,7 @@ ADD_TEST( AbcGeom_Xform_TEST  AbcGeom_XformTest  )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_XformTest2
-		XformTests2.cpp )
+                XformTests2.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest2  ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Xform2_TEST  AbcGeom_XformTest2 )
 
@@ -125,12 +125,17 @@ ADD_TEST( AbcGeom_GeomBase_TEST AbcGeom_GeomBaseTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_TransformingMeshTest
-		MeshData.h
-		MeshData.cpp
-		TransformingMeshTest.cpp )
+                MeshData.h
+                MeshData.cpp
+                TransformingMeshTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_TransformingMeshTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_TransformingMesh_TEST AbcGeom_TransformingMeshTest )
 
+#-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_CompileTest
+                CompileTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_CompileTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_CompileTest_TEST AbcGeom_CompileTest )
 
 ##-*****************************************************************************
 # playground is just something so that we, the Alembic devs, can noodle around

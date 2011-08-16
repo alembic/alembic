@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
 // Copyright (c) 2009-2011,
-//  Sony Pictures Imageworks Inc. and
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,13 +34,31 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcGeom/IGeomParam.h>
+#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcGeom/All.h>
 
-namespace Alembic {
-namespace AbcGeom {
-namespace ALEMBIC_VERSION_NS {
+using namespace Alembic::Abc;
+using namespace Alembic::AbcGeom;
 
-void __testIGeomParamCompile( Abc::ICompoundProperty &iParent )
+// A bunch of minimal compile tests to make sure the templates compile
+
+
+void testOGeomParam( Abc::OCompoundProperty &iParent )
+{
+    OV2fGeomParam uvs( iParent, "uv", false, kVertexScope, 1 );
+
+    std::vector<V2f> vec;
+
+    vec.push_back( V2f( 1.0f, 2.0f ) );
+
+    V2fArraySample val( vec );
+
+    OV2fGeomParam::Sample samp( val, kUnknownScope );
+
+    uvs.set( samp );
+}
+
+void testIGeomParam( Abc::ICompoundProperty &iParent )
 {
     IV2fGeomParam uvs( iParent, "uv" );
 
@@ -48,7 +66,26 @@ void __testIGeomParamCompile( Abc::ICompoundProperty &iParent )
     dt.getExtent();
 }
 
+int main( int argc, char *argv[] )
+{
 
-} // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcGeom
-} // End namespace Alembic
+    std::string archiveName = "compile_test.abc";
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+                          archiveName, ErrorHandler::kNoisyNoopPolicy );
+        OObject archiveTop = archive.getTop();
+        OObject child( archiveTop, "otherChild" );
+        OCompoundProperty topProp = child.getProperties();
+        testOGeomParam( topProp );
+    }
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), archiveName,
+            ErrorHandler::kNoisyNoopPolicy );
+        IObject archiveTop = archive.getTop();
+        IObject child( archiveTop, "otherChild" );
+        ICompoundProperty topProp = child.getProperties();
+        testIGeomParam( topProp );
+    }
+
+    return 0;
+}
