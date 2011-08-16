@@ -44,20 +44,12 @@ SET( CXX_FILES
   IObject.cpp
   ISampleSelector.cpp
   IScalarProperty.cpp
-  ISchema.cpp
-  ISchemaObject.cpp
-  ITypedArrayProperty.cpp
-  ITypedScalarProperty.cpp
 
   OArchive.cpp
   OArrayProperty.cpp
   OCompoundProperty.cpp
   OObject.cpp
   OScalarProperty.cpp
-  OSchema.cpp
-  OSchemaObject.cpp
-  OTypedArrayProperty.cpp
-  OTypedScalarProperty.cpp
 )
 
 SET( H_FILES 

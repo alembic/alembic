@@ -46,6 +46,7 @@ SET( TEST_LIBS
 
 
 #-******************************************************************************
+
 ADD_EXECUTABLE( Abc_Test1 test1.cpp )
 TARGET_LINK_LIBRARIES( Abc_Test1 ${TEST_LIBS} )
 
@@ -54,6 +55,12 @@ TARGET_LINK_LIBRARIES( Abc_ObjectsAndProperties_Test2 ${TEST_LIBS} )
 
 ADD_TEST( Abc_TEST1 Abc_Test1 )
 ADD_TEST( Abc_Objects_and_Properties_TEST2 Abc_ObjectsAndProperties_Test2 )
+
+#-******************************************************************************
+
+ADD_EXECUTABLE( Abc_CompileTests CompileTest.cpp )
+TARGET_LINK_LIBRARIES( Abc_CompileTests ${TEST_LIBS} )
+ADD_TEST( Abc_Compile_TEST Abc_CompileTests )
 
 #-******************************************************************************
 
@@ -91,25 +98,37 @@ ADD_EXECUTABLE( Abc_ArchiveTest ArchiveTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_ArchiveTest ${TEST_LIBS} )
 ADD_TEST( Abc_Archive_TEST Abc_ArchiveTest )
 
+#-******************************************************************************
+
 ADD_EXECUTABLE( Abc_CyclicPropertyTest CyclicPropertyTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_CyclicPropertyTest ${TEST_LIBS} )
 ADD_TEST( Abc_Cyclic_Property_TEST Abc_CyclicPropertyTest )
+
+#-******************************************************************************
 
 ADD_EXECUTABLE( Abc_ParentingTest ParentingTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_ParentingTest ${TEST_LIBS} )
 ADD_TEST( Abc_Parenting_TEST Abc_ParentingTest )
 
+#-******************************************************************************
+
 ADD_EXECUTABLE( Abc_OctessenceBug17 OctessenceBug17.cpp )
 TARGET_LINK_LIBRARIES( Abc_OctessenceBug17 ${TEST_LIBS} )
 ADD_TEST( Abc_OctessenceBug17_TEST Abc_OctessenceBug17 )
+
+#-******************************************************************************
 
 ADD_EXECUTABLE( Abc_OctessenceBug16 OctessenceBug16.cpp )
 TARGET_LINK_LIBRARIES( Abc_OctessenceBug16 ${TEST_LIBS} )
 ADD_TEST( Abc_OctessenceBug16_TEST Abc_OctessenceBug16 )
 
+#-******************************************************************************
+
 ADD_EXECUTABLE( Abc_CacheControlTest CacheControlTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_CacheControlTest ${TEST_LIBS} )
 ADD_TEST( Abc_CacheControl_TEST Abc_CacheControlTest )
+
+#-******************************************************************************
 
 ADD_EXECUTABLE( Abc_RedundantDataPathsTest RedundantDataTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_RedundantDataPathsTest ${TEST_LIBS} )
