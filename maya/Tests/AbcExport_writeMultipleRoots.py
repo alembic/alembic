@@ -37,6 +37,7 @@
 from maya import cmds as MayaCmds
 import os
 import unittest
+import util
 
 def makeRobot():
     MayaCmds.polyCube(name="head")
