@@ -68,7 +68,7 @@ ArImpl::ArImpl( const std::string &iFileName,
         "Unsupported file version detected.");
 
     // if it isn't there, it's pre 1.0
-    int32_t fileVersion = 9999;
+    int fileVersion = 9999;
     if (H5Aexists( m_file, "abc_release_version" ))
     {
         H5LTget_attribute_int( m_file, ".", "abc_release_version",
