@@ -83,6 +83,17 @@ class selectionTest(unittest.TestCase):
         for f in self.__files:
             os.remove(f)
 
+    def testSelectionNamespace(self):
+        nodes = MayaCmds.polyCube()
+        MayaCmds.namespace(add="potato")
+        MayaCmds.rename(nodes[0], "potato:" + nodes[0])
+        MayaCmds.select(MayaCmds.ls(type="mesh"))
+        self.__files.append(util.expandFileName('selectionTest_namespace.abc'))
+        MayaCmds.AbcExport(j='-sl -file ' + self.__files[-1])
+
+        MayaCmds.AbcImport(self.__files[-1], m='open')
+        self.failUnless(MayaCmds.ls(type="mesh") != 1)
+
     def testSelectionFlag(self):
         makeRobot()
         MayaCmds.select('bottom', 'leftArm', 'head')

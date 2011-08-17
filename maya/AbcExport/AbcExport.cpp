@@ -432,7 +432,7 @@ MStatus AbcExport::doIt(const MArgList & args)
         else if (!hasRoot)
         {
             MSelectionList sel;
-            sel.add("|*");
+            sel.add("|*", true);
             unsigned int numRoots = sel.length();
             for (unsigned int i = 0; i < numRoots; ++i)
             {
