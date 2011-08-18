@@ -80,8 +80,8 @@ OXform recurseCreateXform( OObject &iParent, size_t children, int32_t level,
 
         for ( size_t j = 0 ; j < numSamps ; ++j )
         {
-            V3d translation( pow( -1.0, j ) + 2.0 * j, level * j,
-                             pow( -1.0, j ) + 3.0 * j );
+            V3d translation( pow( -1.0, (double)(j) ) + 2.0 * j, level * j,
+                             pow( -1.0, (double)(j) ) + 3.0 * j );
 
             samp.addOp( transop, translation );
             samp.addOp( rotatop, V3d(0.0, 0.0, 1.0), (double)level * 10.0 * j );

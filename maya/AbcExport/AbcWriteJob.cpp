@@ -997,7 +997,7 @@ void AbcWriteJob::postCallback(double iFrame)
     if (mTransTimeIndex != 0)
     {
         MString propName;
-        propName += mTransTimeIndex;
+        propName += static_cast<int>(mTransTimeIndex);
         propName += ".samples";
         Alembic::Abc::OUInt32Property samp(mRoot.getTop().getProperties(),
             propName.asChar());
@@ -1007,7 +1007,7 @@ void AbcWriteJob::postCallback(double iFrame)
     if (mShapeTimeIndex != 0 && mShapeTimeIndex != mTransTimeIndex)
     {
         MString propName;
-        propName += mShapeTimeIndex;
+        propName += static_cast<int>(mShapeTimeIndex);
         propName += ".samples";
         Alembic::Abc::OUInt32Property samp(mRoot.getTop().getProperties(),
             propName.asChar());

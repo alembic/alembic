@@ -55,9 +55,7 @@
  */
 
 #include <stdio.h>
-#ifdef PLATFORM_WINDOWS
-#include <unistd111.h>
-#else
+#ifndef PLATFORM_WINDOWS
 #include <unistd.h>
 #endif
 #include <string.h>
