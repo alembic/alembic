@@ -65,8 +65,8 @@ void stitchArrayProp(const PropertyHeader & propHeader,
 
     OArrayProperty writer(oCompoundProp, propName, dataType, metaData);
 
-    const size_t NUMINPUTS = iCompoundProps.size();
-    for (size_t iCpIndex = 0; iCpIndex < NUMINPUTS; iCpIndex++)
+    size_t numInputs = iCompoundProps.size();
+    for (size_t iCpIndex = 0; iCpIndex < numInputs; iCpIndex++)
     {
         IArrayProperty reader(iCompoundProps[iCpIndex], propName, metaData);
         size_t numSamples = reader.getNumSamples();
@@ -78,12 +78,9 @@ void stitchArrayProp(const PropertyHeader & propHeader,
             writer.set(*dataPtr);
         }
 
-        bool isStatic = (numSamples == 1);
         if (iCpIndex == 0)
         {
             writer.setTimeSampling(reader.getTimeSampling());
-            if (isStatic)
-                break;
         }
     }
 }
@@ -120,8 +117,8 @@ void stitchScalarProp(const PropertyHeader & propHeader,
 
     OScalarProperty writer(oCompoundProp, propName, dataType, metaData);
 
-    const size_t NUMINPUTS = iCompoundProps.size();
-    for (size_t iCpIndex = 0; iCpIndex < NUMINPUTS; iCpIndex++)
+    size_t numInputs = iCompoundProps.size();
+    for (size_t iCpIndex = 0; iCpIndex < numInputs; iCpIndex++)
     {
         IScalarProperty reader(iCompoundProps[iCpIndex], propName, metaData);
         uint8_t extent = dataType.getExtent();  // dimention of the data
@@ -174,12 +171,9 @@ void stitchScalarProp(const PropertyHeader & propHeader,
                 break;
         }
 
-        bool isStatic = (reader.getNumSamples() == 1);
         if (iCpIndex == 0)
         {
             writer.setTimeSampling(reader.getTimeSampling());
-            if (isStatic)
-                break;
         }
     }
 }
