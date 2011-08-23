@@ -88,13 +88,21 @@ void addString(MObject & iParent, const std::string & iAttrName,
     MFnStringData fnStringData;
     MString attrValue(iValue.c_str());
     MString attrName(iAttrName.c_str());
-    MObject strAttrObject = fnStringData.create(attrValue);
+    MObject strAttrObject = fnStringData.create("");
 
     MFnTypedAttribute attr;
     MObject attrObj = attr.create(attrName, attrName, MFnData::kString,
         strAttrObject);
     MFnDependencyNode parentFn(iParent);
     parentFn.addAttribute(attrObj, MFnDependencyNode::kLocalDynamicAttr);
+
+    // work around bug where this string wasn't getting saved to a file when 
+    // it is the default value
+    MPlug plug = parentFn.findPlug(attrName);
+    if (!plug.isNull())
+    {
+        plug.setString(attrValue);
+    }
 }
 
 void addArbAttrAndScope(MObject & iParent, const std::string & iAttrName,

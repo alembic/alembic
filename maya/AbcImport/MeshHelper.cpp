@@ -540,7 +540,7 @@ MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
     MObject obj;
 
     // add other properties
-    if (schema.getNumSamples() > 1)
+    if (!schema.isConstant())
     {
         MFloatPointArray emptyPt;
         MIntArray emptyInt;
