@@ -662,18 +662,35 @@ int main( int argc, char *argv[] )
 
         minVec.reserve(numInputs);
 
-        std::vector< IObject > iRoots;
-        iRoots.reserve(numInputs);
+        std::vector< IArchive > iArchives;
+        iArchives.reserve(numInputs);
 
         std::map< chrono_t, size_t > minIndexMap;
+        size_t rootChildren = 0;
 
-        for (int i = 2; i < argc; i++)
+        for (int i = 2; i < argc; ++i)
         {
             IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                 argv[i], ErrorHandler::kThrowPolicy );
             IObject iRoot = archive.getTop();
-            if (!iRoot.valid())
-                return -1;
+            size_t numChildren = iRoot.getNumChildren();
+            if (!iRoot.valid() || numChildren < 1)
+            {
+                std::cerr << "ERROR: " << argv[i] <<
+                    " not a valid Alembic file" << std::endl;
+                return 1;
+            }
+
+            if (i == 2)
+            {
+                rootChildren = numChildren;
+            }
+            else if (rootChildren != numChildren)
+            {
+                std::cerr << "ERROR: " << argv[i] <<
+                    " doesn't have the same number of children as: " << 
+                    argv[i-1] << std::endl;
+            }
 
             // reorder the input files according to their mins
             chrono_t min = DBL_MAX;
@@ -686,21 +703,22 @@ int main( int argc, char *argv[] )
                 // the same time or throw here
                 //
                 min = archive.getTimeSampling(1)->getSampleTime(0);
-                if (numSamplings > 2)
+
+                for (uint32_t s = 2; s < numSamplings; ++s)
                 {
-                    for (uint32_t s = 2; s < numSamplings; s++)
+                    chrono_t thisMin =
+                        archive.getTimeSampling(s)->getSampleTime(0);
+
+                    if (fabs(thisMin - min) > 1e-5)
                     {
-                        chrono_t thisMin = archive.getTimeSampling(1)->getSampleTime(0);
-                        if (fabs(thisMin - min) > 1e-5)
-                        {
-                            std::cerr << "WARN: " << argv[i]
-                                << " has more than 2 timesampling objects"
-                                << " that don't start at the same time"
-                                << std::endl;
-                            return 1;
-                        }
+                        std::cerr << "ERROR: " << argv[i]
+                            << " has non-default TimeSampling objects"
+                            << " that don't start at the same time."
+                            << std::endl;
+                        return 1;
                     }
                 }
+
                 minVec.push_back(min);
                 if (minIndexMap.count(min) == 0)
                 {
@@ -708,45 +726,31 @@ int main( int argc, char *argv[] )
                 }
                 else if (argv[2] != argv[i-2])
                 {
-                    std::cerr << "WARN: overlapping frame range between "
+                    std::cerr << "ERROR: overlapping frame range between "
                         << argv[2] << " and " << argv[i-2] << std::endl;
                     return 1;
                 }
             }
 
-            if (iRoot.getNumChildren() == 1)
-            {
-                iRoots.push_back(iRoot.getChild(0));
-            }
-            else
-            {
-                std::cerr << "Error: " << argv[i] << " not valid" << std::endl;
-                return 1;
-            }
+            iArchives.push_back(archive);
         }
 
         // now reorder the input nodes so they are in increasing order of their
         // min values in the frame range
         std::sort(minVec.begin(), minVec.end());
-        std::vector< IObject > iOrderedRoots;
-        iOrderedRoots.reserve(numInputs);
-        // collect the top level compound property
-        //
-        ICompoundPropertyVec iCompoundProps;
-        iCompoundProps.reserve(numInputs);
-        //
-        for (size_t f = 0; f < numInputs; f++)
+        std::vector< IArchive > iOrderedArchives;
+        iOrderedArchives.reserve(numInputs);
+
+        for (size_t f = 0; f < numInputs; ++f)
         {
             size_t index = minIndexMap.find(minVec[f])->second;
-            iOrderedRoots.push_back(iRoots[index]);
-
-            ICompoundProperty cp = iRoots[index].getParent().getProperties();
-            iCompoundProps.push_back(cp);
+            iOrderedArchives.push_back(iArchives[index]);
         }
 
         std::string appWriter = "AbcStitcher";
         std::string fileName = argv[1];
         std::string userStr;
+
         // Create an archive with the default writer
         OArchive oArchive = CreateArchiveWithInfo(
             Alembic::AbcCoreHDF5::WriteArchive(),
@@ -755,10 +759,29 @@ int main( int argc, char *argv[] )
         if (!oRoot.valid())
             return -1;
 
+        std::vector<IObject> iRoots;
+        iRoots.resize(numInputs);
+        for (size_t f = 0; f < rootChildren; ++f)
+        {
+            for (size_t g = 0; g < numInputs; ++g)
+            {
+                iRoots[g] = iOrderedArchives[g].getTop().getChild(f);
+            }
+
+            visitObjects(iRoots, oRoot);
+        }
+
+        // collect the top level compound property
+        ICompoundPropertyVec iCompoundProps;
+        iCompoundProps.reserve(numInputs);
+        for (size_t f = 0; f < numInputs; ++f)
+        {
+            iCompoundProps.push_back(iRoots[f].getParent().getProperties());
+        }
+
         OCompoundProperty oCompoundProperty = oRoot.getProperties();
         stitchCompoundProp(iCompoundProps, oCompoundProperty);
 
-        visitObjects(iOrderedRoots, oRoot);
     }
 
     return 0;
