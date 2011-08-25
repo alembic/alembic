@@ -2163,11 +2163,68 @@ MString connectAttr(ArgData & iArgData)
     std::size_t propSize       = iArgData.mData.mPropObjList.size();
     std::size_t locatorSize    = iArgData.mData.mLocObjList.size();
 
-    // making dynamic connections
-    if (particleSize > 0)
+    if (xformSize > 0)
     {
-        printWarning("Currently no support for animated particle system");
+        unsigned int logicalIndex = 0;
+        MPlug srcArrayPlug = alembicNodeFn.findPlug("transOp", true);
+
+        for (unsigned int i = 0 ; i < xformSize; i++)
+        {
+            SampledPair & sampPair = iArgData.mData.mXformOpList[i];
+            MObject mObject = sampPair.getObject();
+            MFnTransform mFn(mObject, &status);
+            unsigned int sampleSize = sampPair.sampledChannelSize();
+            for (unsigned int j = 0; j < sampleSize; j ++)
+            {
+
+                srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
+
+                std::string attrName = sampPair.getSampleElement(j);
+                dstPlug = mFn.findPlug(attrName.c_str(), true);
+                if (dstPlug.isNull())
+                    continue;
+
+                modifier.connect(srcPlug, dstPlug);
+                status = modifier.doIt();
+            }
+        }
     }
+
+    if (subDSize > 0)
+    {
+        MPlug srcArrayPlug = alembicNodeFn.findPlug("outSubDMesh", true);
+        for (unsigned int i = 0; i < subDSize; i++)
+        {
+            srcPlug = srcArrayPlug.elementByLogicalIndex(i);
+            MFnMesh mFn(iArgData.mData.mSubDObjList[i], &status);
+            dstPlug = mFn.findPlug("inMesh", true, &status);
+            status = modifier.connect(srcPlug, dstPlug);
+            status = modifier.doIt();
+            if (status != MS::kSuccess)
+            {
+                MString theError("AlembicNode.outSubDMesh[");
+                theError += i;
+                theError += "] --> ";
+                theError += mFn.name();
+                theError += ".inMesh connection not made";
+                printError(theError);
+            }
+        }
+    }
+
+    if (polySize > 0)
+    {
+        MPlug srcArrayPlug = alembicNodeFn.findPlug("outPolyMesh", true);
+        for (unsigned int i = 0; i < polySize; i++)
+        {
+            srcPlug = srcArrayPlug.elementByLogicalIndex(i);
+            MFnMesh mFn(iArgData.mData.mPolyMeshObjList[i]);
+            dstPlug = mFn.findPlug("inMesh", true);
+            modifier.connect(srcPlug, dstPlug);
+            status = modifier.doIt();
+        }
+    }
+
     if (locatorSize > 0)
     {
         MPlug srcArrayPlug = alembicNodeFn.findPlug("outLoc", true);
@@ -2204,6 +2261,7 @@ MString connectAttr(ArgData & iArgData)
             status = modifier.doIt();
         }
     }
+
     if (cameraSize > 0)
     {
         MPlug srcArrayPlug = alembicNodeFn.findPlug("outCamera", true);
@@ -2288,30 +2346,6 @@ MString connectAttr(ArgData & iArgData)
             status = modifier.doIt();
         }
     }
-    if (nSurfaceSize > 0)
-    {
-        MPlug srcArrayPlug = alembicNodeFn.findPlug("outNSurface", true);
-        for (unsigned int i = 0; i < nSurfaceSize; i++)
-        {
-            srcPlug = srcArrayPlug.elementByLogicalIndex(i);
-            MFnNurbsSurface fnNSurface(iArgData.mData.mNurbsObjList[i]);
-            dstPlug = fnNSurface.findPlug("create", true);
-            modifier.connect(srcPlug, dstPlug);
-            status = modifier.doIt();
-        }
-    }
-    if (nCurveSize > 0)
-    {
-        MPlug srcArrayPlug = alembicNodeFn.findPlug("outNCurveGrp", true);
-        for (unsigned int i = 0; i < nCurveSize; i++)
-        {
-            srcPlug = srcArrayPlug.elementByLogicalIndex(i);
-            MFnNurbsCurve fnNCurve(iArgData.mData.mNurbsCurveObjList[i]);
-            dstPlug = fnNCurve.findPlug("create", true);
-            modifier.connect(srcPlug, dstPlug);
-            status = modifier.doIt();
-        }
-    }
 
     if (propSize > 0)
     {
@@ -2363,65 +2397,34 @@ MString connectAttr(ArgData & iArgData)
         }
     }
 
-    if (subDSize > 0)
+    if (particleSize > 0)
     {
-        MPlug srcArrayPlug = alembicNodeFn.findPlug("outSubDMesh", true);
-        for (unsigned int i = 0; i < subDSize; i++)
-        {
-            srcPlug = srcArrayPlug.elementByLogicalIndex(i);
-            MFnMesh mFn(iArgData.mData.mSubDObjList[i], &status);
-            dstPlug = mFn.findPlug("inMesh", true, &status);
-            status = modifier.connect(srcPlug, dstPlug);
-            status = modifier.doIt();
-            if (status != MS::kSuccess)
-            {
-                MString theError("AlembicNode.outSubDMesh[");
-                theError += i;
-                theError += "] --> ";
-                theError += mFn.name();
-                theError += ".inMesh connection not made";
-                printError(theError);
-            }
-        }
+        printWarning("Currently no support for animated particle system");
     }
 
-    if (polySize > 0)
+    if (nSurfaceSize > 0)
     {
-        MPlug srcArrayPlug = alembicNodeFn.findPlug("outPolyMesh", true);
-        for (unsigned int i = 0; i < polySize; i++)
+        MPlug srcArrayPlug = alembicNodeFn.findPlug("outNSurface", true);
+        for (unsigned int i = 0; i < nSurfaceSize; i++)
         {
             srcPlug = srcArrayPlug.elementByLogicalIndex(i);
-            MFnMesh mFn(iArgData.mData.mPolyMeshObjList[i]);
-            dstPlug = mFn.findPlug("inMesh", true);
+            MFnNurbsSurface fnNSurface(iArgData.mData.mNurbsObjList[i]);
+            dstPlug = fnNSurface.findPlug("create", true);
             modifier.connect(srcPlug, dstPlug);
             status = modifier.doIt();
         }
     }
 
-    if (xformSize > 0)
+    if (nCurveSize > 0)
     {
-        unsigned int logicalIndex = 0;
-        MPlug srcArrayPlug = alembicNodeFn.findPlug("transOp", true);
-
-        for (unsigned int i = 0 ; i < xformSize; i++)
+        MPlug srcArrayPlug = alembicNodeFn.findPlug("outNCurveGrp", true);
+        for (unsigned int i = 0; i < nCurveSize; i++)
         {
-            SampledPair & sampPair = iArgData.mData.mXformOpList[i];
-            MObject mObject = sampPair.getObject();
-            MFnTransform mFn(mObject, &status);
-            unsigned int sampleSize = sampPair.sampledChannelSize();
-            for (unsigned int j = 0; j < sampleSize; j ++)
-            {
-
-                srcPlug = srcArrayPlug.elementByLogicalIndex(logicalIndex++);
-
-                std::string attrName = sampPair.getSampleElement(j);
-                dstPlug = mFn.findPlug(attrName.c_str(), true);
-                if (dstPlug.isNull())
-                    continue;
-
-                modifier.connect(srcPlug, dstPlug);
-                status = modifier.doIt();
-            }
+            srcPlug = srcArrayPlug.elementByLogicalIndex(i);
+            MFnNurbsCurve fnNCurve(iArgData.mData.mNurbsCurveObjList[i]);
+            dstPlug = fnNCurve.findPlug("create", true);
+            modifier.connect(srcPlug, dstPlug);
+            status = modifier.doIt();
         }
     }
 
