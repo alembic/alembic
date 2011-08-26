@@ -327,10 +327,28 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
         }
 
         // we looped over all the normals and they were all calculated by Maya
-        // so we won't write any of them out
+        // so we just need to check to see if any of the edges are hard
+        // before we decide not to write the normals.
         if (!userSetNormals)
         {
-            return;
+            bool hasHardEdges   = false;
+
+            // go through all edges and verify if any of them is hard edge
+            unsigned int numEdges = lMesh.numEdges();
+            for (unsigned int edgeIndex = 0; edgeIndex < numEdges; edgeIndex++)
+            {
+                if (!lMesh.isEdgeSmooth(edgeIndex))
+                {
+                    hasHardEdges = true;
+                    break;
+                }
+            }
+
+            // all the edges were smooth, we don't need to write the normals
+            if (!hasHardEdges)
+            {
+                return;
+            }
         }
     }
 
