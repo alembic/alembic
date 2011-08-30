@@ -432,7 +432,13 @@ MStatus AbcExport::doIt(const MArgList & args)
         else if (!hasRoot)
         {
             MSelectionList sel;
+#if MAYA_API_VERSION >= 201100
             sel.add("|*", true);
+#else
+            // older versions of Maya will not be able to find top level nodes
+            // within namespaces
+            sel.add("|*");
+#endif
             unsigned int numRoots = sel.length();
             for (unsigned int i = 0; i < numRoots; ++i)
             {
