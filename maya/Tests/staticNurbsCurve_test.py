@@ -136,7 +136,7 @@ class StaticNurbsCurveTest(unittest.TestCase):
         # reading test
         MayaCmds.AbcImport(self.__files[-1], mode='import')
         shapeNames = MayaCmds.ls(exactType='nurbsCurve')
-        util.compareNurbsCurve(shapeNames[0], shapeNames[1])
+        self.failUnless(util.compareNurbsCurve(shapeNames[0], shapeNames[1]))
 
     def testNurbsCurveGrpReadWrite(self):
 

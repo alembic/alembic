@@ -91,7 +91,7 @@ def comparePointArray(array1, array2):
     if len1 != len2 :
         return False
     for i in range(0, len1):
-        if array1[i] != array2[i]:
+        if not array1[i].isEquivalent(array2[i], 1e-6):
             return False
     return True
 
@@ -387,28 +387,31 @@ def compareNurbsCurve(nodeName1, nodeName2):
     # basic error checking
     obj1 = getObjFromName(nodeName1)
     if not obj1.hasFn(OpenMaya.MFn.kNurbsCurve):
+        print nodeName1, "not a curve."
         return False
 
     obj2 = getObjFromName(nodeName2)
     if not obj2.hasFn(OpenMaya.MFn.kNurbsCurve):
+        print nodeName2, "not a curve."
         return False
 
     fn1 = OpenMaya.MFnNurbsCurve(obj1)
     fn2 = OpenMaya.MFnNurbsCurve(obj2)
 
-    if fn1.form() != fn2.form():
-        return False
-
     if fn1.degree() != fn2.degree():
+        print nodeName1, nodeName2, "degrees differ."
         return False
 
     if fn1.numCVs() != fn2.numCVs():
+        print nodeName1, nodeName2, "numCVs differ."
         return False
 
     if fn1.numSpans() != fn2.numSpans():
+        print nodeName1, nodeName2, "spans differ."
         return False
 
     if fn1.numKnots() != fn2.numKnots():
+        print nodeName1, nodeName2, "numKnots differ."
         return False
 
     cv1 = OpenMaya.MPointArray()
@@ -417,14 +420,10 @@ def compareNurbsCurve(nodeName1, nodeName2):
     fn2.getCVs(cv2)
 
     if not comparePointArray(cv1, cv2):
+        print nodeName1, nodeName2, "points differ."
         return False
 
-    knots1 = OpenMaya.MDoubleArray()
-    fn1.getKnots(knots1)
-    knots2 = OpenMaya.MDoubleArray()
-    fn2.getKnots(knots2)
-
-    if compareArray(knots1, knots2) != 0:
-        return False
+    # we do not need to compare knots, since they aren't stored in Alembic
+    # and are currently recreated as uniformly distributed between 0 and 1
 
     return True

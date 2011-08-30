@@ -2421,10 +2421,17 @@ MString connectAttr(ArgData & iArgData)
         for (unsigned int i = 0; i < nCurveSize; i++)
         {
             srcPlug = srcArrayPlug.elementByLogicalIndex(i);
-            MFnNurbsCurve fnNCurve(iArgData.mData.mNurbsCurveObjList[i]);
-            dstPlug = fnNCurve.findPlug("create", true);
-            modifier.connect(srcPlug, dstPlug);
-            status = modifier.doIt();
+            MObject curveObj = iArgData.mData.mNurbsCurveObjList[i];
+
+            // this could be null if there were more Alembic curves in a curve
+            // group than there was dag nodes
+            if (!curveObj.isNull())
+            {
+                MFnNurbsCurve fnNCurve(curveObj);
+                dstPlug = fnNCurve.findPlug("create", true);
+                modifier.connect(srcPlug, dstPlug);
+                status = modifier.doIt();
+            }
         }
     }
 

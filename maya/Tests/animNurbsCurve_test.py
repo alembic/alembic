@@ -84,11 +84,11 @@ class AnimNurbsCurveTest(unittest.TestCase):
         shapeNames = MayaCmds.ls(exactType='nurbsCurve')
 
         MayaCmds.currentTime(1, update=True)
-        util.compareNurbsCurve(shapeNames[0], shapeNames[1])
+        self.failUnless(util.compareNurbsCurve(shapeNames[0], shapeNames[1]))
         MayaCmds.currentTime(12, update=True)
-        util.compareNurbsCurve(shapeNames[0], shapeNames[1])
+        self.failUnless(util.compareNurbsCurve(shapeNames[0], shapeNames[1]))
         MayaCmds.currentTime(24, update=True)
-        util.compareNurbsCurve(shapeNames[0], shapeNames[1])
+        self.failUnless(util.compareNurbsCurve(shapeNames[0], shapeNames[1]))
 
     def testAnimNurbsCurveGrpRW(self):
 
@@ -136,10 +136,13 @@ class AnimNurbsCurveTest(unittest.TestCase):
 
         MayaCmds.currentTime(1, update=True)
         for i in range(0, 3):
-            util.compareNurbsCurve(shapeNames[i], shapeNames[i+3])
+            self.failUnless(
+                util.compareNurbsCurve(shapeNames[i], shapeNames[i+3]))
         MayaCmds.currentTime(12, update=True)
         for i in range(0, 3):
-            util.compareNurbsCurve(shapeNames[i], shapeNames[i+3])
+            self.failUnless(
+                util.compareNurbsCurve(shapeNames[i], shapeNames[i+3]))
         MayaCmds.currentTime(24, update=True)
         for i in range(0, 3):
-            util.compareNurbsCurve(shapeNames[i], shapeNames[i+3])
+            self.failUnless(
+                util.compareNurbsCurve(shapeNames[i], shapeNames[i+3]))

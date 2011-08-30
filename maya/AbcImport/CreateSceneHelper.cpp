@@ -558,21 +558,38 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
             curvesObj = mConnectDagNode.node();
             if (!isConstant)
             {
-                mData.mNurbsCurveObjList.push_back(curvesObj);
+                if (numCurves == 1)
+                {
+                    mData.mNurbsCurveObjList.push_back(curvesObj);
+                }
+                else
+                {
+                    unsigned int childCurves = mConnectDagNode.childCount();
+
+                    for (unsigned int i = 0; i < numCurves; ++i)
+                    {
+                        if (i < childCurves)
+                        {
+                            mData.mNurbsCurveObjList.push_back(
+                                mConnectDagNode.child(i));
+                        }
+                        else
+                        {
+                            // push a null object since we have more Alembic
+                            // curves than we have Maya curves
+                            MObject obj;
+                            mData.mNurbsCurveObjList.push_back(obj);
+                        }
+                    }
+                } // else
             }
-        }
+        } // if hasDag
     }
 
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
-
         curvesObj = createCurves(iNode.getName(), samp, widthSamp, mParent,
             mData.mNurbsCurveObjList, !isConstant);
-
-        if (!isConstant)
-        {
-            mData.mNurbsCurveObjList.push_back(curvesObj);
-        }
     }
 
     if (curvesObj != MObject::kNullObj)
