@@ -877,7 +877,7 @@ def runCMake( opts, srcdir, ranBootstrap = False ):
             cmake_extra_args += ' -D CMAKE_TRY_COMPILE_CONFIGURATION:STRING="Release"'
 
         if opts.sharedLibs:
-            cmake_extra_args += " -U BUILD_STATIC_LIBS"
+            cmake_extra_args += ' -D BUILD_SHARED_LIBS:BOOL="TRUE"'
         else:
             cmake_extra_args += ' -D BUILD_STATIC_LIBS:BOOL="TRUE"'
 
