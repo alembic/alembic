@@ -99,7 +99,6 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
     for (std::size_t i = 0; i < iExpectedCurves && i < numCurves; ++i)
     {
         MPointArray cvs;
-        MDoubleArray knots;
 
         int numVerts = (*numVertices)[i];
         int j;
@@ -120,18 +119,46 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
             }
         }
 
+        MFnNurbsCurve::Form form = MFnNurbsCurve::kOpen;
+
+        // so that we don't have any creation issues, double check the points
+        // line up
+        if (samp.getWrap() == Alembic::AbcGeom::kPeriodic)
+        {
+            if (degree == 3 && numVerts > 2 && cvs[0] == cvs[numVerts-3] && 
+                cvs[1] == cvs[numVerts-2] && cvs[2] == cvs[numVerts-1])
+            {
+                form = MFnNurbsCurve::kPeriodic;
+            }
+            else if (numVerts > 2 && cvs[0] == cvs[numVerts-1])
+            {
+                form = MFnNurbsCurve::kClosed;
+            }
+        }
+
         // for now evenly distribute the knots
+        MDoubleArray knots;
         int numKnots = numVerts + degree - 1;
+
         for (j = 0; j < numKnots; ++j)
         {
-            knots.append(j/(float)(numKnots-1));
+            knots.append(j/(double)(numKnots-1));
+        }
+
+        // we need to make sure the first 3 and last 3 knots repeat
+        if (form == MFnNurbsCurve::kClosed && degree == 3 && numKnots > 2)
+        {
+            knots[1] = knots[0];
+            knots[2] = knots[0];
+            knots[numKnots-2] = knots[numKnots-1];
+            knots[numKnots-3] = knots[numKnots-1];
         }
 
         MFnNurbsCurveData curveData;
         MObject curveDataObj = curveData.create();
         ioCurveObjects.push_back(curveDataObj);
         MFnNurbsCurve curve;
-        curve.create(cvs, knots, degree, MFnNurbsCurve::kOpen, false, true,
+        curve.create(cvs, knots, degree, form, false, true,
             curveDataObj);
     }
 
@@ -207,7 +234,6 @@ MObject createCurves(const std::string & iName,
     for (std::size_t i = 0; i < numCurves; ++i)
     {
         MPointArray cvs;
-        MDoubleArray knots;
 
         int numVerts = (*curvesNumVertices)[i];
 
@@ -218,16 +244,44 @@ MObject createCurves(const std::string & iName,
             cvs.append(pos.x, pos.y, pos.z);
         }
 
+        MFnNurbsCurve::Form form = MFnNurbsCurve::kOpen;
+
+        // so that we don't have any creation issues, double check the points
+        // line up
+        if (iSample.getWrap() == Alembic::AbcGeom::kPeriodic)
+        {
+            if (degree == 3 && numVerts > 2 && cvs[0] == cvs[numVerts-3] && 
+                cvs[1] == cvs[numVerts-2] && cvs[2] == cvs[numVerts-1])
+            {
+                form = MFnNurbsCurve::kPeriodic;
+            }
+            else if (numVerts > 2 && cvs[0] == cvs[numVerts-1])
+            {
+                form = MFnNurbsCurve::kClosed;
+            }
+        }
+
         // for now evenly distribute the knots
+        MDoubleArray knots;
         int numKnots = numVerts + degree - 1;
         for (j = 0; j < numKnots; ++j)
         {
-            knots.append(j/(float)(numKnots-1));
+            knots.append(j/(double)(numKnots-1));
+        }
+
+        // we need to make sure the first 3 and last 3 knots repeat
+        if (form == MFnNurbsCurve::kClosed && degree == 3 && numKnots > 2)
+        {
+            knots[1] = knots[0];
+            knots[2] = knots[0];
+            knots[numKnots-2] = knots[numKnots-1];
+            knots[numKnots-3] = knots[numKnots-1];
         }
 
         MFnNurbsCurve curve;
-        MObject curveObj = curve.create(cvs, knots, degree,
-            MFnNurbsCurve::kOpen, false, true, parent);
+        MObject curveObj = curve.create(cvs, knots, degree, form, false, true,
+            parent);
+
         curve.setName(name);
 
         if (isAnimated)

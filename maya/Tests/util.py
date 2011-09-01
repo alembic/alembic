@@ -414,6 +414,10 @@ def compareNurbsCurve(nodeName1, nodeName2):
         print nodeName1, nodeName2, "numKnots differ."
         return False
 
+    if fn1.form() != fn2.form():
+        print nodeName1, nodeName2, "form differ."
+        return False
+
     cv1 = OpenMaya.MPointArray()
     fn1.getCVs(cv1)
     cv2 = OpenMaya.MPointArray()
