@@ -77,7 +77,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     std::vector<float> width;
 
     bool runupFromStart = false;
-    MTime to(iFrame);
+    MTime to(iFrame, MTime::kSeconds);
 
     // need to force re-evaluation
     MFnParticleSystem particle(mDagPath);

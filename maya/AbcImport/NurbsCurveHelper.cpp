@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#include "NurbsCurveHelper.h"
 #include "util.h"
+#include "NurbsCurveHelper.h"
 
 #include <maya/MString.h>
 #include <maya/MPoint.h>
@@ -315,7 +315,7 @@ MObject createCurves(const std::string & iName,
             MFnGenericAttribute attr(attrObject);
             MObject attrObj = attr.create("width", "width");
             attr.addDataAccept(MFnData::kDoubleArray);
-            MFnDependencyNode mParentFn(curve);
+            MFnDependencyNode mParentFn(curve.object());
             mParentFn.addAttribute(attrObj,
                 MFnDependencyNode::kLocalDynamicAttr);
 

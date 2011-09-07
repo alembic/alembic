@@ -34,6 +34,10 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "NodeIteratorVisitorHelper.h"
+#include "AbcImport.h"
+
 #include <maya/MArgList.h>
 #include <maya/MArgParser.h>
 #include <maya/MFileIO.h>
@@ -46,9 +50,6 @@
 #include <maya/MSyntax.h>
 #include <maya/MTime.h>
 
-#include "util.h"
-#include "AbcImport.h"
-#include "NodeIteratorVisitorHelper.h"
 
 namespace
 {
@@ -209,6 +210,54 @@ MStatus AbcImport::doIt(const MArgList & args)
     MString abcNodeName;
     if (status == MS::kSuccess)
     {
+        {
+            MString fileRule, expandName;
+            MString alembicFileRule = "alembicCache";
+            MString alembicFilePath = "cache/alembic";
+
+            MString queryFileRuleCmd;
+            queryFileRuleCmd.format("workspace -q -fre \"^1s\"",
+                alembicFileRule);
+            MString queryFolderCmd;
+            queryFolderCmd.format("workspace -en `workspace -q -fre \"^1s\"`",
+                alembicFileRule);
+
+            // query the file rule for alembic cache
+            MGlobal::executeCommand(queryFileRuleCmd, fileRule);
+            if (fileRule.length() > 0)
+            {
+                // we have alembic file rule, query the folder
+                MGlobal::executeCommand(queryFolderCmd, expandName);
+            }
+
+            // resolve the expanded file rule
+            if (expandName.length() == 0)
+            {
+                expandName = alembicFilePath;
+            }
+
+            // get the path to the alembic file rule
+            MFileObject directory;
+            directory.setRawFullName(expandName);
+            MString directoryName = directory.resolvedFullName();
+
+            // resolve the relative path
+            MFileObject absoluteFile;
+            absoluteFile.setRawFullName(filename);
+            if (absoluteFile.resolvedFullName() != 
+                absoluteFile.expandedFullName())
+            {
+                // this is a relative path
+                MString absoluteFileName = directoryName + "/" + filename;
+                absoluteFile.setRawFullName(absoluteFileName);
+                filename = absoluteFile.resolvedFullName();
+            }
+            else
+            {
+                filename = absoluteFile.resolvedFullName();
+            }
+        }
+
         MFileObject fileObj;
         status = fileObj.setRawFullName(filename);
         if (status == MS::kSuccess && fileObj.exists())

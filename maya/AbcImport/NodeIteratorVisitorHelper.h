@@ -37,14 +37,6 @@
 #ifndef ABCIMPORT_NODE_ITERATOR_HELPER_H_
 #define ABCIMPORT_NODE_ITERATOR_HELPER_H_
 
-#include <maya/MObject.h>
-#include <maya/MPlug.h>
-#include <maya/MDataHandle.h>
-#include <maya/MArrayDataHandle.h>
-
-#include <vector>
-#include <string>
-
 #include <Alembic/Abc/IArrayProperty.h>
 #include <Alembic/Abc/IScalarProperty.h>
 #include <Alembic/Abc/IObject.h>
@@ -56,6 +48,15 @@
 #include <Alembic/AbcGeom/IPolyMesh.h>
 #include <Alembic/AbcGeom/ISubD.h>
 #include <Alembic/AbcGeom/IXform.h>
+
+#include <maya/MObject.h>
+#include <maya/MPlug.h>
+#include <maya/MDataHandle.h>
+#include <maya/MArrayDataHandle.h>
+#include <maya/MString.h>
+
+#include <vector>
+#include <string>
 
 // mArray or mScalar will be valid, mObj will be valid for those situations
 // where the property can't be validly read, unless the object stays in scope.

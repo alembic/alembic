@@ -183,7 +183,7 @@ void MayaNurbsCurveWriter::write()
         width.push_back(constWidthPlug.asFloat());
     }
 
-    for (std::size_t i = 0; i < numCurves; i++)
+    for (unsigned int i = 0; i < numCurves; i++)
     {
         MFnNurbsCurve curve;
         if (mIsCurveGrp)

@@ -34,6 +34,18 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "CameraHelper.h"
+#include "LocatorHelper.h"
+#include "MeshHelper.h"
+#include "NurbsCurveHelper.h"
+#include "NurbsSurfaceHelper.h"
+#include "PointHelper.h"
+#include "XformHelper.h"
+#include "CreateSceneHelper.h"
+
+#include <Alembic/AbcGeom/Visibility.h>
+
 #include <maya/MString.h>
 #include <maya/MStringArray.h>
 #include <maya/MIntArray.h>
@@ -52,22 +64,10 @@
 #include <maya/MFnSet.h>
 #include <maya/MFnTypedAttribute.h>
 
-#include <Alembic/AbcGeom/Visibility.h>
-
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
-
-#include "util.h"
-#include "CameraHelper.h"
-#include "LocatorHelper.h"
-#include "MeshHelper.h"
-#include "NurbsCurveHelper.h"
-#include "NurbsSurfaceHelper.h"
-#include "PointHelper.h"
-#include "XformHelper.h"
-#include "CreateSceneHelper.h"
 
 namespace
 {

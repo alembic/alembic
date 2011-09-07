@@ -192,7 +192,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
     // look for facesets
     std::size_t attrCount = lMesh.attributeCount();
-    for (std::size_t i = 0; i < attrCount; ++i)
+    for (unsigned int i = 0; i < attrCount; ++i)
     {
         MObject attr = lMesh.attribute(i);
         MFnAttribute mfnAttr(attr);
@@ -217,7 +217,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             std::string faceSetName = propStr.substr(8);
             std::size_t numData = arr.length();
             std::vector<Alembic::Util::int32_t> faceVals(numData);
-            for (std::size_t j = 0; j < numData; ++j)
+            for (unsigned int j = 0; j < numData; ++j)
             {
                 faceVals[j] = arr[j];
             }
@@ -360,7 +360,7 @@ void MayaMeshWriter::getPolyNormals(std::vector<float> & oNormals)
     // get the per vertex per face normals (aka vertex)
     unsigned int numFaces = lMesh.numPolygons();
 
-    for (size_t faceIndex = 0; faceIndex < numFaces; faceIndex++ )
+    for (unsigned int faceIndex = 0; faceIndex < numFaces; faceIndex++ )
     {
         MIntArray vertexList;
         lMesh.getPolygonVertices(faceIndex, vertexList);

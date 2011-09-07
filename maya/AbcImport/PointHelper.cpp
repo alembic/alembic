@@ -34,6 +34,10 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "PointHelper.h"
+#include "NodeIteratorVisitorHelper.h"
+
 #include <maya/MString.h>
 #include <maya/MPoint.h>
 #include <maya/MPointArray.h>
@@ -41,10 +45,6 @@
 #include <maya/MGlobal.h>
 #include <maya/MVectorArray.h>
 #include <maya/MFnParticleSystem.h>
-
-#include "util.h"
-#include "PointHelper.h"
-#include "NodeIteratorVisitorHelper.h"
 
 
 MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,

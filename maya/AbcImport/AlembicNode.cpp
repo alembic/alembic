@@ -34,6 +34,17 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "AlembicNode.h"
+#include "CreateSceneHelper.h"
+#include "CameraHelper.h"
+#include "LocatorHelper.h"
+#include "MeshHelper.h"
+#include "NurbsCurveHelper.h"
+#include "NurbsSurfaceHelper.h"
+#include "PointHelper.h"
+#include "XformHelper.h"
+
 #include <maya/MAngle.h>
 #include <maya/MGlobal.h>
 #include <maya/MTime.h>
@@ -56,17 +67,6 @@
 
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
 #include <Alembic/AbcGeom/Visibility.h>
-
-#include "util.h"
-#include "AlembicNode.h"
-#include "CreateSceneHelper.h"
-#include "CameraHelper.h"
-#include "LocatorHelper.h"
-#include "MeshHelper.h"
-#include "NurbsCurveHelper.h"
-#include "NurbsSurfaceHelper.h"
-#include "PointHelper.h"
-#include "XformHelper.h"
 
 MObject AlembicNode::mTimeAttr;
 MObject AlembicNode::mAbcFileNameAttr;
@@ -103,6 +103,7 @@ MStatus AlembicNode::initialize()
     mAbcFileNameAttr = tAttr.create("abc_File", "fn",
         MFnData::kString, fileNameDefaultObject);
     status = tAttr.setStorable(true);
+    status = tAttr.setUsedAsFilename(true);
     status = addAttribute(mAbcFileNameAttr);
 
     // sequence min and max in frames
@@ -385,7 +386,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                     read(mCurTime, mData.mXformList[i], sampleList, samp);
                 }
 
-                unsigned int sampleSize = sampleList.size();
+                unsigned int sampleSize = (unsigned int)sampleList.size();
 
                 for (unsigned int j = 0; j < sampleSize; j++)
                 {
@@ -434,7 +435,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                 std::vector< double > sampleList;
                 read(mCurTime, mData.mLocList[i], sampleList);
 
-                unsigned int sampleSize = sampleList.size();
+                unsigned int sampleSize = (unsigned int)sampleList.size();
                 for (unsigned int j = 0; j < sampleSize; j++)
                 {
                     // only use the handle if it matches the index.

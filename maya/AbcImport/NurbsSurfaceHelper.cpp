@@ -34,6 +34,10 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "NurbsSurfaceHelper.h"
+#include "NodeIteratorVisitorHelper.h"
+
 #include <maya/MString.h>
 #include <maya/MDagPath.h>
 #include <maya/MDoubleArray.h>
@@ -46,10 +50,6 @@
 #include <maya/MFnTransform.h>
 #include <maya/MCommandResult.h>
 #include <maya/MDagModifier.h>
-
-#include "util.h"
-#include "NurbsSurfaceHelper.h"
-#include "NodeIteratorVisitorHelper.h"
 
 namespace
 {

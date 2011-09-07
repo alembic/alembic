@@ -37,6 +37,15 @@
 #ifndef ABCIMPORT_CREATE_SCENE_H_
 #define ABCIMPORT_CREATE_SCENE_H_
 
+#include <Alembic/AbcGeom/ICamera.h>
+#include <Alembic/AbcGeom/ICurves.h>
+#include <Alembic/AbcGeom/IPoints.h>
+#include <Alembic/AbcGeom/IPolyMesh.h>
+#include <Alembic/AbcGeom/ISubD.h>
+#include <Alembic/AbcGeom/IXform.h>
+
+#include "NodeIteratorVisitorHelper.h"
+
 #include <maya/MObject.h>
 #include <maya/MString.h>
 #include <maya/MDagPath.h>
@@ -47,15 +56,6 @@
 #include <set>
 #include <map>
 #include <vector>
-
-#include <Alembic/AbcGeom/ICamera.h>
-#include <Alembic/AbcGeom/ICurves.h>
-#include <Alembic/AbcGeom/IPoints.h>
-#include <Alembic/AbcGeom/IPolyMesh.h>
-#include <Alembic/AbcGeom/ISubD.h>
-#include <Alembic/AbcGeom/IXform.h>
-
-#include "NodeIteratorVisitorHelper.h"
 
 struct ltMObj
 {

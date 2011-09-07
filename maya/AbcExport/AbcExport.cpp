@@ -39,6 +39,7 @@
 #include "MayaUtility.h"
 
 #include <maya/MFnPlugin.h>
+#include <maya/MFileObject.h>
 
 namespace AbcA = Alembic::AbcCoreAbstract;
 
@@ -125,7 +126,131 @@ MStatus AbcExport::doIt(const MArgList & args)
         argData.getFlagArgumentList("jobArg", jobIndex, jobArgList);
         MString jobArgsStr = jobArgList.asString(0);
         MStringArray jobArgsArray;
-        jobArgsStr.split(' ', jobArgsArray);
+
+        {
+            // parse the job arguments
+            // e.g. -perFrameCallbackMel "print \"something\"" will be splitted to
+            //    [0] -perFrameCallbackMel
+            //    [1] print "something"
+            enum State {
+                kArgument,               // parsing an argument (not quoted)
+                kDoubleQuotedString,     // parsing a double quoted string
+                kSingleQuotedString,     // parsing a single quoted string
+            };
+            
+            State state = kArgument;
+            MString stringBuffer;
+            for (unsigned int charIdx = 0; charIdx < jobArgsStr.numChars();
+                charIdx++)
+            {
+                MString ch = jobArgsStr.substringW(charIdx, charIdx);
+                switch (state)
+                {
+                case kArgument:
+                    if (ch == " ")
+                    {
+                        // space terminates the current argument
+                        if (stringBuffer.length() > 0) {
+                            jobArgsArray.append(stringBuffer);
+                            stringBuffer.clear();
+                        }
+                        // goto another argument
+                        state = kArgument;
+                    }
+                    else if (ch == "\"")
+                    {
+                        if (stringBuffer.length() > 0)
+                        {
+                            // double quote is part of the argument
+                            stringBuffer += ch;
+                        }
+                        else
+                        {
+                            // goto double quoted string
+                            state = kDoubleQuotedString;
+                        }
+                    }
+                    else if (ch == "'")
+                    {
+                        if (stringBuffer.length() > 0)
+                        {
+                            // single quote is part of the argument
+                            stringBuffer += ch;
+                        }
+                        else
+                        {
+                            // goto single quoted string
+                            state = kSingleQuotedString;
+                        }
+                    }
+                    else
+                    {
+                        stringBuffer += ch;
+                    }
+                break;
+
+                case kDoubleQuotedString:
+                    // double quote terminates the current string
+                    if (ch == "\"") 
+                    {
+                        jobArgsArray.append(stringBuffer);
+                        stringBuffer.clear();
+                        state = kArgument;
+                    }
+                    else if (ch == "\\")
+                    {
+                        // escaped character
+                        MString nextCh = (++charIdx < jobArgsStr.numChars())
+                            ? jobArgsStr.substringW(charIdx, charIdx) : "\\";
+                        if (nextCh == "n")       stringBuffer += "\n";
+                        else if (nextCh == "t")  stringBuffer += "\t";
+                        else if (nextCh == "r")  stringBuffer += "\r";
+                        else if (nextCh == "\\") stringBuffer += "\\";
+                        else if (nextCh == "'")  stringBuffer += "'";
+                        else if (nextCh == "\"") stringBuffer += "\"";
+                        else                     stringBuffer += nextCh;
+                    }
+                    else 
+                    {
+                        stringBuffer += ch;
+                    }
+                break;
+
+                case kSingleQuotedString:
+                    // single quote terminates the current string
+                    if (ch == "'")
+                    {
+                        jobArgsArray.append(stringBuffer);
+                        stringBuffer.clear();
+                        state = kArgument;
+                    }
+                    else if (ch == "\\")
+                    {
+                        // escaped character
+                        MString nextCh = (++charIdx < jobArgsStr.numChars())
+                            ? jobArgsStr.substringW(charIdx, charIdx) : "\\";
+                        if (nextCh == "n")       stringBuffer += "\n";
+                        else if (nextCh == "t")  stringBuffer += "\t";
+                        else if (nextCh == "r")  stringBuffer += "\r";
+                        else if (nextCh == "\\") stringBuffer += "\\";
+                        else if (nextCh == "'")  stringBuffer += "'";
+                        else if (nextCh == "\"") stringBuffer += "\"";
+                        else                     stringBuffer += nextCh;
+                    }
+                    else
+                    {
+                        stringBuffer += ch;
+                    }
+                break;
+                }
+            }
+
+            // the rest of the argument
+            if (stringBuffer.length() > 0)
+            {
+                jobArgsArray.append(stringBuffer);
+            }
+        }
 
         double startTime = oldCurTime.value();
         double endTime = oldCurTime.value();
@@ -351,6 +476,79 @@ MStatus AbcExport::doIt(const MArgList & args)
             MString error = "-file not specified.";
             MGlobal::displayError(error);
             return MS::kFailure;
+        }
+
+        {
+            MString fileRule, expandName;
+            MString alembicFileRule = "alembicCache";
+            MString alembicFilePath = "cache/alembic";
+
+            MString queryFileRuleCmd;
+            queryFileRuleCmd.format("workspace -q -fre \"^1s\"",
+                alembicFileRule);
+
+            MString queryFolderCmd;
+            queryFolderCmd.format("workspace -en `workspace -q -fre \"^1s\"`",
+                alembicFileRule);
+
+            // query the file rule for alembic cache
+            MGlobal::executeCommand(queryFileRuleCmd, fileRule);
+            if (fileRule.length() > 0)
+            {
+                // we have alembic file rule, query the folder
+                MGlobal::executeCommand(queryFolderCmd, expandName);
+            }
+            else
+            {
+                // alembic file rule does not exist, create it
+                MString addFileRuleCmd;
+                addFileRuleCmd.format("workspace -fr \"^1s\" \"^2s\"",
+                    alembicFileRule, alembicFilePath);
+                MGlobal::executeCommand(addFileRuleCmd);
+
+                // save the workspace. maya may discard file rules on exit
+                MGlobal::executeCommand("workspace -s");
+
+                // query the folder
+                MGlobal::executeCommand(queryFolderCmd, expandName);
+            }
+
+            // resolve the expanded file rule
+            if (expandName.length() == 0)
+            {
+                expandName = alembicFilePath;
+            }
+
+            // get the path to the alembic file rule
+            MFileObject directory;
+            directory.setRawFullName(expandName);
+            MString directoryName = directory.resolvedFullName();
+
+            // make sure the cache folder exists
+            if (!directory.exists())
+            {
+                // create the cache folder
+                MString createFolderCmd;
+                createFolderCmd.format("sysFile -md \"^1s\"", directoryName);
+                MGlobal::executeCommand(createFolderCmd);
+            }
+
+            // resolve the relative path
+            MFileObject absoluteFile;
+            absoluteFile.setRawFullName(fileName.c_str());
+            if (absoluteFile.resolvedFullName() !=
+                absoluteFile.expandedFullName())
+            {
+                // this is a relative path
+                MString absoluteFileName = directoryName + "/" +
+                    fileName.c_str();
+                absoluteFile.setRawFullName(absoluteFileName);
+                fileName = absoluteFile.resolvedFullName().asChar();
+            }
+            else
+            {
+                fileName = absoluteFile.resolvedFullName().asChar();
+            }
         }
 
         if (shutterSamples.empty())

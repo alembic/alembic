@@ -34,16 +34,16 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "LocatorHelper.h"
+#include "NodeIteratorVisitorHelper.h"
+
 #include <maya/MObject.h>
 #include <maya/MFnTransform.h>
 #include <maya/MString.h>
 #include <maya/MVector.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagModifier.h>
-
-#include "util.h"
-#include "LocatorHelper.h"
-#include "NodeIteratorVisitorHelper.h"
 
 
 MObject create(Alembic::AbcGeom::IXform & iLocator,

@@ -37,6 +37,8 @@
 #ifndef _AbcExport_Foundation_h_
 #define _AbcExport_Foundation_h_
 
+#include <Alembic/AbcGeom/All.h>
+
 #include <maya/MAnimControl.h>
 #include <maya/MAnimUtil.h>
 #include <maya/MArgList.h>
@@ -129,7 +131,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <Alembic/AbcGeom/All.h>
 
 #define ABCEXPORT_VERSION "1.0"
 

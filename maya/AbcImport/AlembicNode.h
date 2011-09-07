@@ -37,6 +37,8 @@
 #ifndef ABCIMPORT_ALEMBIC_NODE_H_
 #define ABCIMPORT_ALEMBIC_NODE_H_
 
+#include "NodeIteratorVisitorHelper.h"
+
 #include <maya/MDataHandle.h>
 #include <maya/MDGContext.h>
 #include <maya/MPlug.h>
@@ -48,8 +50,6 @@
 #include <set>
 #include <vector>
 #include <string>
-
-#include "NodeIteratorVisitorHelper.h"
 
 class AlembicNode : public MPxNode
 {

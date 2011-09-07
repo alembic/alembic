@@ -34,12 +34,13 @@
 //
 //-*****************************************************************************
 
+#include "AlembicNode.h"
+#include "AbcImport.h"
+
 #include <maya/MGlobal.h>
 #include <maya/MFnPlugin.h>
 #include <maya/MObject.h>
-
-#include "AlembicNode.h"
-#include "AbcImport.h"
+#include <maya/MGlobal.h>
 
 // Interesting trivia: 0x2697 is the unicode character for Alembic
 const MTypeId AlembicNode::mMayaNodeId(0x00082697);

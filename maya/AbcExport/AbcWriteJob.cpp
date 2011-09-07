@@ -346,7 +346,7 @@ bool AbcWriteJob::checkCurveGrp()
     itDag.reset(mCurDag, MItDag::kBreadthFirst, MFn::kNurbsCurve);
 
     bool init = false;
-    int degree;
+    int degree = 0;
     MFnNurbsCurve::Form form = MFnNurbsCurve::kInvalid;
     for (; !itDag.isDone(); itDag.next())
     {

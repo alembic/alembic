@@ -34,6 +34,12 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "XformHelper.h"
+#include "NodeIteratorVisitorHelper.h"
+
+#include <Alembic/AbcGeom/IXform.h>
+
 #include <maya/MObject.h>
 #include <maya/MEulerRotation.h>
 #include <maya/MFnTransform.h>
@@ -45,12 +51,6 @@
 #include <maya/MVector.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagModifier.h>
-
-#include "util.h"
-#include "XformHelper.h"
-#include "NodeIteratorVisitorHelper.h"
-
-#include <Alembic/AbcGeom/IXform.h>
 
 namespace
 {

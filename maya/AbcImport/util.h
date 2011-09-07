@@ -42,6 +42,9 @@
 #include <set>
 #include <string>
 
+#include <Alembic/AbcGeom/All.h>
+#include "NodeIteratorVisitorHelper.h"
+
 #include <maya/MGlobal.h>
 #include <maya/MPlug.h>
 #include <maya/MDagPath.h>
@@ -49,8 +52,6 @@
 #include <maya/MString.h>
 #include <maya/MFnDependencyNode.h>
 
-#include <Alembic/AbcGeom/All.h>
-#include "NodeIteratorVisitorHelper.h"
 
 // replace one MObject with another, while keeping all the old hierarchy intact
 // The objects have to be a Dag object

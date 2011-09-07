@@ -34,6 +34,10 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "CameraHelper.h"
+#include "NodeIteratorVisitorHelper.h"
+
 #include <maya/MFnCamera.h>
 #include <maya/MFnAttribute.h>
 #include <maya/MFnNumericData.h>
@@ -42,10 +46,6 @@
 #include <maya/MTime.h>
 #include <maya/MVector.h>
 #include <maya/MDagModifier.h>
-
-#include "util.h"
-#include "CameraHelper.h"
-#include "NodeIteratorVisitorHelper.h"
 
 void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
     std::vector<double> & oArray)

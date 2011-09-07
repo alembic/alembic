@@ -34,6 +34,10 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "MeshHelper.h"
+#include "NodeIteratorVisitorHelper.h"
+
 #include <maya/MString.h>
 #include <maya/MFloatPoint.h>
 #include <maya/MFloatPointArray.h>
@@ -49,10 +53,6 @@
 #include <maya/MGlobal.h>
 #include <maya/MVector.h>
 #include <maya/MDagModifier.h>
-
-#include "util.h"
-#include "MeshHelper.h"
-#include "NodeIteratorVisitorHelper.h"
 
 
 namespace
@@ -121,13 +121,13 @@ namespace
             return;
         }
 
-        std::size_t numUVs = uvPtr->size();
+        unsigned int numUVs = (unsigned int)uvPtr->size();
         uArray.setLength(numUVs);
         vArray.setLength(numUVs);
-        for (std::size_t i = 0; i < numUVs; ++i)
+        for (unsigned int i = 0; i < numUVs; ++i)
         {
             uArray[i] = (*uvPtr)[i].x;
-            vArray[i] = 1.0 - (*uvPtr)[i].y;
+            vArray[i] = 1.0f - (*uvPtr)[i].y;
         }
 
         int uvIndex = 0;
@@ -668,9 +668,9 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
     Alembic::Abc::Int32ArraySamplePtr holes = samp.getHoles();
     if (holes && !holes->size() == 0)
     {
-        std::size_t numHoles = holes->size();
+        unsigned int numHoles = (unsigned int)holes->size();
         MUintArray holeData(numHoles);
-        for (std::size_t i = 0; i < numHoles; ++i)
+        for (unsigned int i = 0; i < numHoles; ++i)
         {
             holeData[i] = (*holes)[i];
         }
@@ -715,7 +715,7 @@ MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
                 MIntArray edges;
                 itv.getConnectedEdges(edges);
                 std::size_t numEdges = edges.length();
-                for (std::size_t k = 0; k < numEdges; ++k)
+                for (unsigned int k = 0; k < numEdges; ++k)
                 {
                     int oppVert = -1;
                     itv.getOppositeVertex(oppVert, edges[k]);

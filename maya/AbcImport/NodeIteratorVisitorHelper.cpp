@@ -34,6 +34,13 @@
 //
 //-*****************************************************************************
 
+#include "util.h"
+#include "AlembicNode.h"
+#include "CreateSceneHelper.h"
+#include "NodeIteratorVisitorHelper.h"
+
+#include <Alembic/AbcCoreHDF5/ReadWrite.h>
+
 #include <maya/MDoubleArray.h>
 #include <maya/MIntArray.h>
 #include <maya/MFnIntArrayData.h>
@@ -61,13 +68,6 @@
 #include <maya/MFnNurbsSurface.h>
 #include <maya/MFnCamera.h>
 #include <maya/MTime.h>
-
-#include <Alembic/AbcCoreHDF5/ReadWrite.h>
-
-#include "util.h"
-#include "AlembicNode.h"
-#include "CreateSceneHelper.h"
-#include "NodeIteratorVisitorHelper.h"
 
 void unsupportedWarning(Alembic::Abc::IArrayProperty & iProp)
 {
@@ -400,13 +400,13 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                         Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                         iProp.get(samp);
 
-                        std::size_t sampSize = samp->size();
+                        unsigned int sampSize = (unsigned int)samp->size();
                         MVectorArray arr(sampSize);
                         MVector vec;
                         const Alembic::Util::float32_t * sampData =
                             (const Alembic::Util::float32_t *) samp->getData();
 
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             vec.x = sampData[extent*i];
                             vec.y = sampData[extent*i+1];
@@ -444,14 +444,14 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                         Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                         iProp.get(samp);
 
-                        std::size_t sampSize = samp->size();
+                        unsigned int sampSize = (unsigned int)samp->size();
                         MPointArray arr(sampSize);
                         MPoint pt;
 
                         const Alembic::Util::float32_t * sampData =
                             (const Alembic::Util::float32_t *) samp->getData();
 
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             pt.x = sampData[extent*i];
                             pt.y = sampData[extent*i+1];
@@ -586,13 +586,13 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                         Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                         iProp.get(samp);
 
-                        std::size_t sampSize = samp->size();
+                        unsigned int sampSize = (unsigned int)samp->size();
                         MVectorArray arr(sampSize);
                         MVector vec;
                         const Alembic::Util::float64_t * sampData =
                             (const Alembic::Util::float64_t *) samp->getData();
 
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             vec.x = sampData[extent*i];
                             vec.y = sampData[extent*i+1];
@@ -631,13 +631,13 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                         Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                         iProp.get(samp);
 
-                        std::size_t sampSize = samp->size();
+                        unsigned int sampSize = (unsigned int)samp->size();
                         MPointArray arr(sampSize);
                         MPoint pt;
                         const Alembic::Util::float64_t * sampData =
                             (const Alembic::Util::float64_t *) samp->getData();
 
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             pt.x = sampData[extent*i];
                             pt.y = sampData[extent*i+1];
@@ -784,14 +784,14 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                     Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
 
-                    std::size_t sampSize = samp->size();
+                    unsigned int sampSize = (unsigned int)samp->size();
                     MStringArray arr;
                     arr.setLength(sampSize);
 
                     Alembic::Util::string * strData =
                         (Alembic::Util::string *) samp->getData();
 
-                    for (std::size_t i = 0; i < sampSize; ++i)
+                    for (unsigned int i = 0; i < sampSize; ++i)
                     {
                         arr[i] = strData[i].c_str();
                     }
@@ -860,14 +860,14 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                     Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                     iProp.get(samp);
 
-                    std::size_t sampSize = samp->size();
+                    unsigned int sampSize = (unsigned int)samp->size();
                     MStringArray arr;
                     arr.setLength(sampSize);
 
                     Alembic::Util::wstring * strData =
                         (Alembic::Util::wstring *) samp->getData();
 
-                    for (std::size_t i = 0; i < sampSize; ++i)
+                    for (unsigned int i = 0; i < sampSize; ++i)
                     {
                         arr[i] = (wchar_t *)(strData[i].c_str());
                     }
@@ -1283,7 +1283,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                     else
                     {
                         int * hi = (int *) ceilSamp->getData();
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             arr[i] = simpleLerp<int>(alpha, arr[i], hi[i]);
                         }
@@ -1355,7 +1355,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 {
                     MFnVectorArrayData fnData;
                     iProp.get(samp, Alembic::Abc::ISampleSelector(index));
-                    std::size_t sampSize = samp->size();
+                    unsigned int sampSize = (unsigned int)samp->size();
                     MVectorArray arr(sampSize);
                     MVector vec;
 
@@ -1368,7 +1368,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                         if (sampSize != ceilSamp->size())
                         {
                             float * vals = (float *) samp->getData();
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 vec.x = vals[extent*i];
                                 vec.y = vals[extent*i+1];
@@ -1387,7 +1387,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                             float * lo = (float *) samp->getData();
                             float * hi = (float *) ceilSamp->getData();
 
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 vec.x = simpleLerp<double>(alpha,
                                     lo[extent*i], hi[extent*i]);
@@ -1408,7 +1408,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                     else
                     {
                         float * vals = (float *) samp->getData();
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             vec.x = vals[extent*i];
                             vec.y = vals[extent*i+1];
@@ -1427,7 +1427,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                     MFnPointArrayData fnData;
                     iProp.get(samp, Alembic::Abc::ISampleSelector(index));
 
-                    std::size_t sampSize = samp->size();
+                    unsigned int sampSize = (unsigned int)samp->size();
                     MPointArray arr(sampSize);
                     MPoint pt;
 
@@ -1440,7 +1440,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                         if (sampSize != ceilSamp->size())
                         {
                             float * vals = (float *) samp->getData();
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 pt.x = vals[extent*i];
                                 pt.y = vals[extent*i+1];
@@ -1459,7 +1459,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                             float * lo = (float *) samp->getData();
                             float * hi = (float *) ceilSamp->getData();
 
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 pt.x = simpleLerp<double>(alpha,
                                     lo[extent*i], hi[extent*i]);
@@ -1480,7 +1480,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                     else
                     {
                         float * vals = (float *) samp->getData();
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             pt.x = vals[extent*i];
                             pt.y = vals[extent*i+1];
@@ -1516,7 +1516,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                         else
                         {
                             float * hi = (float *) ceilSamp->getData();
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 arr[i] = simpleLerp<double>(alpha, arr[i],
                                     hi[i]);
@@ -1599,7 +1599,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 {
                     MFnVectorArrayData fnData;
                     iProp.get(samp, Alembic::Abc::ISampleSelector(index));
-                    std::size_t sampSize = samp->size();
+                    unsigned int sampSize = (unsigned int)samp->size();
                     MVectorArray arr(sampSize);
                     MVector vec;
 
@@ -1612,7 +1612,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                         if (sampSize != ceilSamp->size())
                         {
                             double * vals = (double *) samp->getData();
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 vec.x = vals[extent*i];
                                 vec.y = vals[extent*i+1];
@@ -1631,7 +1631,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                             double * lo = (double *) samp->getData();
                             double * hi = (double *) ceilSamp->getData();
 
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 vec.x = simpleLerp<double>(alpha,
                                     lo[extent*i], hi[extent*i]);
@@ -1652,7 +1652,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                     else
                     {
                         double * vals = (double *) samp->getData();
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             vec.x = vals[extent*i];
                             vec.y = vals[extent*i+1];
@@ -1670,7 +1670,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 {
                     MFnPointArrayData fnData;
                     iProp.get(samp, Alembic::Abc::ISampleSelector(index));
-                    std::size_t sampSize = samp->size();
+                    unsigned int sampSize = (unsigned int)samp->size();
                     MPointArray arr(sampSize);
                     MPoint pt;
 
@@ -1683,7 +1683,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                         if (sampSize != ceilSamp->size())
                         {
                             double * vals = (double *) samp->getData();
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 pt.x = vals[extent*i];
                                 pt.y = vals[extent*i+1];
@@ -1702,7 +1702,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                             double * lo = (double *) samp->getData();
                             double * hi = (double *) ceilSamp->getData();
 
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 pt.x = simpleLerp<double>(alpha,
                                     lo[extent*i], hi[extent*i]);
@@ -1723,7 +1723,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                     else
                     {
                         double * vals = (double *) samp->getData();
-                        for (std::size_t i = 0; i < sampSize; ++i)
+                        for (unsigned int i = 0; i < sampSize; ++i)
                         {
                             pt.x = vals[extent*i];
                             pt.y = vals[extent*i+1];
@@ -1759,7 +1759,7 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                         else
                         {
                             double * hi = (double *) ceilSamp->getData();
-                            for (std::size_t i = 0; i < sampSize; ++i)
+                            for (unsigned int i = 0; i < sampSize; ++i)
                             {
                                 arr[i] = simpleLerp<double>(alpha, arr[i],
                                     hi[i]);
@@ -1792,14 +1792,14 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 MFnStringArrayData fnData;
                 iProp.get(samp, Alembic::Abc::ISampleSelector(index));
 
-                std::size_t sampSize = samp->size();
+                unsigned int sampSize = (unsigned int)samp->size();
                 MStringArray arr;
                 arr.setLength(sampSize);
                 attrObj = fnData.create(arr);
                 Alembic::Util::string * strData =
                     (Alembic::Util::string *) samp->getData();
 
-                for (std::size_t i = 0; i < sampSize; ++i)
+                for (unsigned int i = 0; i < sampSize; ++i)
                 {
                     arr[i] = strData[i].c_str();
                 }
@@ -1821,14 +1821,14 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 MFnStringArrayData fnData;
                 iProp.get(samp, Alembic::Abc::ISampleSelector(index));
 
-                std::size_t sampSize = samp->size();
+                unsigned int sampSize = (unsigned int)samp->size();
                 MStringArray arr;
                 arr.setLength(sampSize);
                 attrObj = fnData.create(arr);
                 Alembic::Util::wstring * strData =
                     (Alembic::Util::wstring *) samp->getData();
 
-                for (std::size_t i = 0; i < sampSize; ++i)
+                for (unsigned int i = 0; i < sampSize; ++i)
                 {
                     arr[i] = (wchar_t *)strData[i].c_str();
                 }
