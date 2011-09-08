@@ -26,4 +26,4 @@ debug: SOP_AlembicIn.C
 	rm SOP_AlembicIn.o
 
 otl:
-	hotl -b -c OPalembic OPalembic.otl
+	hotl -b -c OPalembic alembic.otl

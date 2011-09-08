@@ -332,6 +332,9 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     args.primCount = 0;
     args.nameMap = &nameMap;
     args.boss = UTgetInterrupt();
+    args.rebuiltNurbs = false;
+    args.activePatchRows = 0;
+    args.activePatchCols = 0;
     
     
     if (!args.boss->opStart("Loading and walking Alembic data"))
@@ -386,6 +389,11 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
             myEntireSceneIsConstant = true;
         }
         myTopologyConstant = args.isTopologyConstant;
+        
+        if (args.rebuiltNurbs)
+        {
+            gdp->notifyCache(GU_CACHE_ALL);
+        }
     }
     catch ( const InterruptedException & e )
     {
@@ -689,6 +697,20 @@ void SOP_AlembicIn::walkObject( Args & args, IObject parent, const ObjectHeader 
         
         nextParentObject = polymesh;
     }
+    else if ( INuPatch::matches( ohead ) )
+    {
+        INuPatch nupatch( parent, ohead.getName() );
+        
+        if ( nupatch.getSchema().getTopologyVariance()
+                == kHeterogenousTopology )
+        {
+            args.isTopologyConstant = false;
+        }
+        
+        buildNuPatch( args, nupatch, parentXform, parentXformIsConstant );
+        
+        nextParentObject = nupatch;
+    }
     else
     {
         //For now, silently skip types we don't recognize
@@ -887,6 +909,17 @@ void SOP_AlembicIn::addArbitraryGeomParams(Args & args,
                     startPrimIdx, endPrimIdx,
                     false);
         }
+        else if (IDoubleGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IDoubleGeomParam, double>(
+                    args, parent, propHeader,
+                    GA_STORE_REAL32, //TODO, store as double in h12?
+                    GA_TYPE_VOID,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
         else if (IInt32GeomParam::matches(propHeader))
         {
             processArbitraryGeomParam<IInt32GeomParam, int>(
@@ -1072,6 +1105,7 @@ void SOP_AlembicIn::processArbitraryGeomParam(
     
     setTypeInfo(attrIdx, attrTypeInfo);
     applyArbitraryGeomParamSample<typename geomParamT::sample_type, podT>(
+            args,
             paramSample,
             attrIdx,
             totalExtent,
@@ -1083,6 +1117,7 @@ void SOP_AlembicIn::processArbitraryGeomParam(
 
 template <typename geomParamSampleT, typename podT>
 void SOP_AlembicIn::applyArbitraryGeomParamSample(
+        Args & args,
         geomParamSampleT & paramSample,
         const GA_RWAttributeRef & attrIdx,
         size_t totalExtent,
@@ -1110,6 +1145,17 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample(
     case kVaryingScope:
     case kVertexScope:
     {
+        // TODO, for kVaryingScope on a nupatch, need to interpolate
+        // from the corner values and apply to the points as normal
+        // We'll know if we're a nupatch if args.activePatchRows > 0
+        // For now, skip it
+        if (args.activePatchRows > 0 &&
+                paramSample.getScope() == kVaryingScope )
+        {
+            return;
+        }
+        
+        
         const podT * values = reinterpret_cast<const podT *>(
                 paramSample.getVals()->get());
         
@@ -1178,6 +1224,7 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample(
 template <>
 void SOP_AlembicIn::applyArbitraryGeomParamSample<
             IStringGeomParam::sample_type, std::string>(
+        Args & args,
         IStringGeomParam::sample_type & paramSample,
         const GA_RWAttributeRef & attrIdx,
         size_t totalExtent,
@@ -1469,6 +1516,151 @@ void SOP_AlembicIn::buildPolyMesh( Args & args, IPolyMesh & polymesh,
 
 //-*****************************************************************************
 
+
+void SOP_AlembicIn::buildNuPatch( Args & args, INuPatch & nupatch,
+        M44d parentXform, bool parentXformIsConstant)
+{
+    ISampleSelector sampleSelector( args.abcTime );
+    INuPatchSchema &schema = nupatch.getSchema();
+    if (!schema.isConstant())
+    {
+        args.isConstant = false;
+    }
+    else if (args.reusePrimitives)
+    {
+        if (!args.includeXform || parentXformIsConstant)
+        {
+            return;
+        }
+    }
+    
+    
+    //store the primitive and point start indices
+    size_t startPointIdx = args.pointCount;
+    size_t startPrimIdx = args.primCount;
+    
+    
+    GEO_PrimNURBSurf * surfPrim = 0;
+    
+    
+    GA_PrimitiveGroup * primGrp = 0;
+    if (args.reusePrimitives)
+    {
+        surfPrim = dynamic_cast<GEO_PrimNURBSurf *>(
+                gdp->primitives()[args.primCount]);
+        
+        Abc::P3fArraySamplePtr pSample =
+                schema.getPositionsProperty().getValue(sampleSelector);
+        
+        //only update point positions
+        for (size_t i = 0, e = pSample->size(); i < e; ++i)
+        {
+#if UT_MAJOR_VERSION_INT >= 12
+        GA_Offset pt = gdp->pointOffset(GA_Index(startPointIdx+i));
+        gdp->setPos3(pt, 
+                (*pSample)[i][0],
+                (*pSample)[i][1],
+                (*pSample)[i][2]);
+#else
+        GEO_Point *pt = gdp->points()(startPointIdx+i);
+        pt->setPos(UT_Vector3(
+                (*pSample)[i][0],
+                (*pSample)[i][1],
+                (*pSample)[i][2]));
+#endif
+        }
+        
+        primGrp = gdp->findPrimitiveGroup( nupatch.getFullName().c_str() );
+        
+        
+        
+        args.pointCount += pSample->size();     // Add # points
+        args.primCount += 1;
+        
+        args.rebuiltNurbs = true;
+    }
+    else
+    {
+        INuPatchSchema::Sample sample = schema.getValue( sampleSelector );
+        args.pointCount += sample.getPositions()->size();   // Add # points
+        args.primCount += 1;
+        
+        
+        
+        int cols = sample.getUKnot()->size() - sample.getUOrder();
+        int rows = sample.getVKnot()->size() - sample.getVOrder();
+        
+        
+        GU_PrimNURBSurf *surf = GU_PrimNURBSurf::build(
+                gdp,
+                rows,                   // rows
+                cols,                   // columns
+                sample.getUOrder(),     // U order
+                sample.getVOrder(),     // V order
+                0,                      // wrap U
+                0,                      // wrap V
+                0,//(uClosed) ? 0:1,        // interpEndsU
+                0,//(vClosed) ? 0:1,        // interpEndsV
+                GEO_PATCH_QUADS);
+        
+        //copy in the u and v knots directly
+        memcpy(surf->getUBasis()->getData(), sample.getUKnot()->get(),
+                sample.getUKnot()->size() * sizeof(float));
+        memcpy(surf->getVBasis()->getData(), sample.getVKnot()->get(),
+                sample.getVKnot()->size() * sizeof(float));
+        
+        for (int v = 0; v < rows; ++v)
+        {
+            for( int u = 0; u < cols; ++u )
+            {
+                const V3f & p = sample.getPositions()->get()[v * cols + u];
+                (*surf)(v,u).getPos().assign(p[0], p[1], p[2], 1);
+                
+                //std::cerr << "ptnum: " << (*surf)(v,u).getPt()->getNum() << std::endl;
+            }
+        }
+        
+        //TODO, check for getPositionWeights()
+        //For now, don't throw any W on there.
+        surf->weights(false);
+        
+        primGrp = gdp->newPrimitiveGroup( nupatch.getFullName().c_str() );
+        addToGroup(primGrp, surf);
+        
+        
+        surfPrim = surf;
+    }
+    
+    
+    size_t endPointIdx = args.pointCount;
+    size_t endPrimIdx = args.primCount;
+    
+    
+    if (surfPrim)
+    {
+        // Make sure this is reset back to 0 when we're done even in the case
+        // of an exception.
+        ArgsRowColumnReset argsReset(args,
+                surfPrim->getNumRows(), surfPrim->getNumCols());
+        addArbitraryGeomParams(args, nupatch.getSchema().getArbGeomParams(),
+            startPointIdx, endPointIdx, startPrimIdx, endPrimIdx,
+                    parentXformIsConstant);
+    }
+    
+    //apply xforms via gdp->transform so that we don't have to think
+    //about normals and other affected attributes
+    if (args.includeXform && parentXform != M44d())
+    {
+        UT_DMatrix4 dxform(parentXform.x);
+        UT_Matrix4 xform(dxform);
+        gdp->transform(xform, primGrp);
+    }
+}
+
+
+
+//-*****************************************************************************
+
 GA_PrimitiveGroup * SOP_AlembicIn::reuseMesh(const std::string & groupName,
         P3fArraySamplePtr positions, size_t startPointIdx)
 {
@@ -1561,17 +1753,74 @@ GA_PrimitiveGroup * SOP_AlembicIn::buildMesh(
 void
 newSopOperator(OP_OperatorTable *table)
 {
-    table->addOperator(new OP_Operator(
-        "Alembic_In",             // Internal name
-        "Alembic_In",            // GUI name
+    OP_Operator *alembic_op = new OP_Operator(
+        "alembic",                      // Internal name
+        "Alembic",                      // GUI name
         SOP_AlembicIn::myConstructor,   // Op Constructr
         SOP_AlembicIn::myTemplateList,  // GUI Definition
-        0,0,                         // Min,Max # of Inputs
-        0,OP_FLAG_GENERATOR)         // Local Variables/Generator
-    );
+        0, 0,                           // Min,Max # of Inputs
+        0, OP_FLAG_GENERATOR);          // Local Variables/Generator
+    alembic_op->setIconName("SOP_alembic");
+
+    table->addOperator(alembic_op);
 }
 namespace
 {
+    void DecomposeXForm(
+            const Imath::M44d &mat,
+            Imath::V3d &scale,
+            Imath::V3d &shear,
+            Imath::Quatd &rotation,
+            Imath::V3d &translation
+    )
+    {
+        Imath::M44d mat_remainder(mat);
+        
+        // Extract Scale, Shear
+        Imath::extractAndRemoveScalingAndShear(mat_remainder, scale, shear);
+        
+        // Extract translation
+        translation.x = mat_remainder[3][0];
+        translation.y = mat_remainder[3][1];
+        translation.z = mat_remainder[3][2];
+        
+        // Extract rotation
+        rotation = extractQuat(mat_remainder);
+    }
+    
+    M44d RecomposeXForm(
+            const Imath::V3d &scale,
+            const Imath::V3d &shear,
+            const Imath::Quatd &rotation,
+            const Imath::V3d &translation
+    )
+    {
+        Imath::M44d scale_mtx, shear_mtx, rotation_mtx, translation_mtx;
+        
+        scale_mtx.setScale(scale);
+        shear_mtx.setShear(shear);
+        rotation_mtx = rotation.toMatrix44();
+        translation_mtx.setTranslation(translation);
+        
+        return scale_mtx * shear_mtx * rotation_mtx * translation_mtx;
+    }
+    
+    
+    // when amt is 0, a is returned
+    inline double lerp(double a, double b, double amt)
+    {
+        return (a + (b-a)*amt);
+    }
+    
+    Imath::V3d lerp(const Imath::V3d &a, const Imath::V3d &b, double amt)
+    {
+        return Imath::V3d(lerp(a[0], b[0], amt),
+                          lerp(a[1], b[1], amt),
+                          lerp(a[2], b[2], amt));
+    }
+    
+    
+    
     PY_PyObject *
     Py_AlembicGetLocalXform(PY_PyObject *self, PY_PyObject *args)
     {
@@ -1601,9 +1850,74 @@ namespace
                 {
                     IXform xformObject(currentObject, kWrapExisting);
                     isConstant = xformObject.getSchema().isConstant();
-                    XformSample xformSample = xformObject.getSchema().getValue(
-                            ISampleSelector(sampleTime));
-                    localXform = xformSample.getMatrix();
+                    
+                    
+                    
+                    TimeSamplingPtr timeSampling = xformObject.getSchema().getTimeSampling();
+                    size_t numSamples = xformObject.getSchema().getNumSamples();
+                    
+                    
+                    chrono_t inTime = sampleTime;
+                    chrono_t outTime = sampleTime;
+                    
+                    if (numSamples > 1)
+                    {
+                        const chrono_t epsilon = 1.0 / 10000.0;
+                        
+                        std::pair<index_t, chrono_t> floorIndex =
+                                timeSampling->getFloorIndex(sampleTime, numSamples);
+                        
+                        //make sure we're not equal enough
+                        if (fabs(floorIndex.second - sampleTime) > epsilon)
+                        {
+                            //make sure we're not before the first sample
+                            if (floorIndex.second < sampleTime)
+                            {
+                                //make sure there's another sample available afterwards
+                                if (floorIndex.first+1 < numSamples)
+                                {
+                                    inTime = floorIndex.second;
+                                    outTime = timeSampling->getSampleTime(
+                                            floorIndex.first+1);
+                                }
+                            }
+                        }
+                    }
+                    
+                    //interpolate if necessary
+                    if (inTime != outTime )
+                    {
+                        XformSample inSample = xformObject.getSchema().getValue(
+                                ISampleSelector(inTime));
+                        
+                        XformSample outSample = xformObject.getSchema().getValue(
+                                ISampleSelector(outTime));
+                        
+                        double t = (sampleTime - inTime) / (outTime - inTime);
+                        
+                        Imath::V3d s_l,s_r,h_l,h_r,t_l,t_r;
+                        Imath::Quatd quat_l,quat_r;
+                        
+                        DecomposeXForm(inSample.getMatrix(), s_l, h_l, quat_l, t_l);
+                        DecomposeXForm(outSample.getMatrix(), s_r, h_r, quat_r, t_r);
+                        
+                        if ((quat_l ^ quat_r) < 0)
+                        {
+                            quat_r = -quat_r;
+                        }
+                        
+                        localXform = RecomposeXForm(lerp(s_l, s_r, t),
+                                 lerp(h_l, h_r, t),
+                                 Imath::slerp(quat_l, quat_r, t),
+                                 lerp(t_l, t_r, t));
+                        
+                    }
+                    else
+                    {
+                        XformSample xformSample = xformObject.getSchema().getValue(
+                                ISampleSelector(sampleTime));
+                        localXform = xformSample.getMatrix();
+                    }
                 }
             }
         }

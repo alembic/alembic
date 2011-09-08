@@ -44,7 +44,7 @@ def WalkHierarchy(rootNode, parentNode, parentPath, childEntry, pathList):
         currentNode.setName(name)
         for child in currentNode.children():
             child.destroy()
-        sopNode = currentNode.createNode('Alembic_In')
+        sopNode = currentNode.createNode('alembic')
         
         relPath = sopNode.relativePathTo(rootNode)
         hou.hscript("opmultiparm %s 'abcName#' '%s/abcName#' 'hName#' '%s/hName#'" % (
@@ -110,6 +110,4 @@ def WalkHierarchy(rootNode, parentNode, parentPath, childEntry, pathList):
     else:
         return
 
-def GetObjectMenu():
-   return ['b', 'b', 'c', 'c']
 

@@ -15,7 +15,7 @@
     <toolMenuContext name="network">
       <contextOpType>$HDA_TABLE/$HDA_NAME</contextOpType>
     </toolMenuContext>
-    <toolSubmenu>Digital Assets</toolSubmenu>
+    <toolSubmenu>Geometry</toolSubmenu>
     <script scriptType="python"><![CDATA[import objecttoolutils
 
 objecttoolutils.genericTool(kwargs, '$HDA_NAME')]]></script>

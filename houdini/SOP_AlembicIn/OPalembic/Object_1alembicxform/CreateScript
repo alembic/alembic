@@ -11,6 +11,7 @@ endif
 
 # Node $arg1 (Object/alembicxform)
 opexprlanguage -s hscript $arg1
+opuserdata -n '___Version___' -v '' $arg1
 
 opcf $arg1
 
