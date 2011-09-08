@@ -48,10 +48,24 @@ using namespace Alembic::AbcGeom;
 class ParamListBuilder
 {
 public:
+    
+    ~ParamListBuilder();
+    
     void add( const std::string & declaration, RtPointer value,
               ArraySamplePtr sampleToRetain = ArraySamplePtr() );
-
-    RtPointer addStringValue( const std::string & value,
+    
+    //used for conversion of DoubleGeomParams
+    template <typename T>
+    void addAsFloat( const std::string & declaration, const T * length,
+            size_t numValues );
+    
+    //returns the start of the current vector and pushes a new one
+    RtPointer finishStringVector();
+    
+    //If retainLocally is false, it's expected that "value" remain alive
+    //The common case is out of a StringArraySamplePtr which is provided
+    //as sampleToRetain in the add method
+    void addStringValue( const std::string & value,
                               bool retainLocally = false );
 
     RtInt n();
@@ -64,10 +78,31 @@ private:
     std::vector<RtPointer> m_values;
     std::vector<ArraySamplePtr> m_retainedSamples;
 
-    //Used for converting std::string arrays to RtString arrays
-    std::vector<RtString> m_convertedStrings;
-    std::vector<std::string> m_retainedStrings;
+    std::vector<RtString> m_retainedStrings;
+    
+    typedef boost::shared_ptr<std::vector<RtString> > SharedRtStringVector;
+    std::vector<SharedRtStringVector> m_convertedStringVectors;
+    
+    typedef boost::shared_ptr<std::vector<RtFloat> > SharedRtFloatVector;
+    std::vector<SharedRtFloatVector> m_convertedFloatVectors;
 };
+
+//-*****************************************************************************
+
+template <typename T>
+void ParamListBuilder::addAsFloat( const std::string & declaration,
+        const T * value, size_t length)
+{
+    SharedRtFloatVector convertedValues( new std::vector<RtFloat> );
+    convertedValues->reserve( length );
+    
+    convertedValues->insert( convertedValues->end(), value, value + length );
+    m_convertedFloatVectors.push_back( convertedValues );
+    
+    add( declaration, &( ( *convertedValues )[0] ) );
+}
+
+
 
 //-*****************************************************************************
 std::string GetPrmanScopeString( GeometryScope scope );
@@ -109,8 +144,59 @@ void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
 
     typename T::prop_type::sample_ptr_type valueSample =
             param.getExpandedValue( sampleSelector ).getVals();
+    
+    
+    ParamListBuilder.add( rmanType, (RtPointer)valueSample->get(),
+            valueSample );
+    
+}
 
-    ParamListBuilder.add( rmanType, (RtPointer)valueSample->get(), valueSample );
+
+//-*****************************************************************************
+template <typename T>
+void AddGeomParamToParamListBuilderAsFloat( ICompoundProperty & parent,
+                                             const PropertyHeader &propHeader,
+                                             ISampleSelector &sampleSelector,
+                                             const std::string &rmanBaseType,
+                                             ParamListBuilder &ParamListBuilder,
+                                             size_t baseArrayExtent = 1,
+                                             const std::string & overrideName = ""
+                                           )
+{
+    T param( parent, propHeader.getName() );
+
+    if ( !param.valid() )
+    {
+        //TODO error message?
+        return;
+    }
+
+    std::string rmanType = GetPrmanScopeString( param.getScope() ) + " ";
+
+    rmanType += rmanBaseType;
+
+    size_t arrayExtent = baseArrayExtent * param.getArrayExtent();
+    if (arrayExtent > 1)
+    {
+        std::ostringstream buffer;
+        buffer << "[" << arrayExtent << "]";
+        rmanType += buffer.str();
+    }
+
+    rmanType += " " + (
+            overrideName.empty() ? propHeader.getName() : overrideName );
+
+
+    typename T::prop_type::sample_ptr_type valueSample =
+            param.getExpandedValue( sampleSelector ).getVals();
+    
+    
+    int rawExtent =
+            T::prop_type::traits_type::dataType().getExtent() * arrayExtent;
+
+
+    ParamListBuilder.addAsFloat( rmanType, valueSample->get(), 
+            valueSample->size() * rawExtent );
 
 }
 

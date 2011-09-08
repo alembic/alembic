@@ -89,6 +89,7 @@ int main(int argc, char **argv)
     if (handle == NULL)
     {
         std::cerr << "couldn't open: " << argv[1] << std::endl;
+        std::cerr << dlerror() << std::endl;
         usage();
         return 2;
     }

@@ -36,6 +36,21 @@
 
 #include "ArbAttrUtil.h"
 #include <sstream>
+#include <cstring>
+
+//-*****************************************************************************
+
+ParamListBuilder::~ParamListBuilder()
+{
+    for ( std::vector<RtString>::iterator I = m_retainedStrings.begin();
+            I != m_retainedStrings.end(); ++I )
+    {
+        free( (*I) );
+    }
+    
+    m_retainedStrings.clear();
+}
+
 
 //-*****************************************************************************
 void ParamListBuilder::add( const std::string & declaration, RtPointer value,
@@ -77,22 +92,40 @@ RtPointer* ParamListBuilder::vals()
 }
 
 //-*****************************************************************************
-RtPointer ParamListBuilder::addStringValue( const std::string &value,
+RtPointer ParamListBuilder::finishStringVector()
+{
+    RtPointer previous = NULL;
+    
+    if ( !m_convertedStringVectors.empty() )
+    {
+        previous = &( (*m_convertedStringVectors.back())[0] );
+    }
+    
+    m_convertedStringVectors.push_back( SharedRtStringVector(
+            new std::vector<RtString> ) );
+    
+    return previous;
+}
+
+//-*****************************************************************************
+void ParamListBuilder::addStringValue( const std::string &value,
                                             bool retainLocally )
 {
+    if ( m_convertedStringVectors.empty() )
+    {
+        finishStringVector();
+    }
+    
     if ( retainLocally )
     {
-        m_retainedStrings.push_back( value );
-
-        m_convertedStrings.push_back(
-            const_cast<RtString>( m_retainedStrings.back().c_str() ) );
+        m_retainedStrings.push_back( strdup( value.c_str() ) );
+        m_convertedStringVectors.back()->push_back( m_retainedStrings.back() );
     }
     else
     {
-        m_convertedStrings.push_back(
+        m_convertedStringVectors.back()->push_back(
             const_cast<RtString>( value.c_str() ) );
     }
-    return (RtPointer) &m_convertedStrings.back();
 }
 
 //-*****************************************************************************
@@ -119,7 +152,7 @@ void AddStringGeomParamToParamListBuilder(
         ICompoundProperty &parent,
         const PropertyHeader &propHeader,
         ISampleSelector &sampleSelector,
-        ParamListBuilder &ParamListBuilder
+        ParamListBuilder &paramListBuilder
                                          )
 {
     IStringGeomParam param( parent, propHeader.getName() );
@@ -145,14 +178,15 @@ void AddStringGeomParamToParamListBuilder(
     StringArraySamplePtr valueSample = param.getExpandedValue(
             sampleSelector ).getVals();
 
-    RtPointer dataStart = NULL;
+    
     for ( size_t i = 0; i < valueSample->size(); ++i )
     {
-        RtPointer data = ParamListBuilder.addStringValue( (*valueSample)[i] );
-        if ( i == 0 ) { dataStart = data; }
+        paramListBuilder.addStringValue( (*valueSample)[i] );
     }
-
-    ParamListBuilder.add(rmanType, dataStart, valueSample);
+    
+    RtPointer dataStart = paramListBuilder.finishStringVector();
+    
+    paramListBuilder.add(rmanType, dataStart, valueSample);
 
 }
 
@@ -160,7 +194,7 @@ void AddStringGeomParamToParamListBuilder(
 //-*****************************************************************************
 void AddArbitraryGeomParams( ICompoundProperty &parent,
                              ISampleSelector &sampleSelector,
-                             ParamListBuilder &ParamListBuilder,
+                             ParamListBuilder &paramListBuilder,
                              const std::set<std::string> * excludeNames
                            )
 {
@@ -188,7 +222,16 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 propHeader,
                 sampleSelector,
                 "float",
-                ParamListBuilder);
+                paramListBuilder);
+        }
+        else if ( IDoubleGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilderAsFloat<IDoubleGeomParam>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "float",
+                paramListBuilder);
         }
         else if ( IInt32GeomParam::matches( propHeader ) )
         {
@@ -197,7 +240,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 propHeader,
                 sampleSelector,
                 "int",
-                ParamListBuilder);
+                paramListBuilder);
         }
         else if ( IStringGeomParam::matches( propHeader ) )
         {
@@ -205,7 +248,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 parent,
                 propHeader,
                 sampleSelector,
-                ParamListBuilder);
+                paramListBuilder);
         }
         else if ( IV2fGeomParam::matches( propHeader ) )
         {
@@ -214,7 +257,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 propHeader,
                 sampleSelector,
                 "float",
-                ParamListBuilder,
+                paramListBuilder,
                 2);
         }
         else if ( IV3fGeomParam::matches( propHeader ) )
@@ -224,7 +267,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 propHeader,
                 sampleSelector,
                 "vector",
-                ParamListBuilder);
+                paramListBuilder);
         }
         else if ( IP3fGeomParam::matches( propHeader ) )
         {
@@ -233,7 +276,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 propHeader,
                 sampleSelector,
                 "point",
-                ParamListBuilder);
+                paramListBuilder);
         }
         else if ( IN3fGeomParam::matches( propHeader ) )
         {
@@ -242,7 +285,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 propHeader,
                 sampleSelector,
                 "normal",
-                ParamListBuilder);
+                paramListBuilder);
         }
         else if ( IC3fGeomParam::matches( propHeader ) )
         {
@@ -251,7 +294,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 propHeader,
                 sampleSelector,
                 "color",
-                ParamListBuilder);
+                paramListBuilder);
         }
         if ( IM44fGeomParam::matches( propHeader ) )
         {
@@ -260,7 +303,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 propHeader,
                 sampleSelector,
                 "matrix",
-                ParamListBuilder);
+                paramListBuilder);
         }
 
     }
