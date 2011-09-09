@@ -241,7 +241,7 @@ static void ExtractStrings( StringT *oStrings,
         // Set the string to either the empty string
         // or the appropriate 0-terminated char string.
         StringT &thisString = oStrings[strIdx];
-        if ( nextStringEnd - nextStringBegin < 2 )
+        if ( nextStringEnd - nextStringBegin < 1 )
         {
             // Assuming this makes an empty string.
             thisString = StringT();
