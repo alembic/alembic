@@ -35,12 +35,12 @@ instructions on building Boost and HDF5; see next step for details.
 
 1) Untar the Alembic source into your desired directory:
 
-$ cd ~/ ; tar xzf Alembic_1_0_0_-xxxxxxxx.tgz
+$ cd ~/ ; tar xzf Alembic_1_0_1_-xxxxxxxx.tgz
 
-This will create a directory, ~/Alembic_1.0.0, that contains the Alembic
+This will create a directory, ~/Alembic_1.0.1, that contains the Alembic
 source code (if you're reading this, you've probably already done this).
 
-As alluded to in Step 0, ~/Alembic_1.0.0/doc/ will contain instructional
+As alluded to in Step 0, ~/Alembic_1.0.1/doc/ will contain instructional
 files for building Boost and HDF5.  Mostly, those packages' libraries just
 need a little encouragement to build static archives and with -fPIC.
 
@@ -59,7 +59,7 @@ $ cd ~/ALEMBIC_BUILD
 4) Run the Alembic bootstrap script.  Again, assuming your CWD is still
 ~/ALEMBIC_BUILD, the following should work:
 
-$ python ../Alembic_1.0.0/build/bootstrap/alembic_bootstrap.py .
+$ python ../Alembic_1.0.1/build/bootstrap/alembic_bootstrap.py .
 
 You can give it several options and flags; '-h' for a list of them.  If you
 don't specify a complete set of options when you run it, it will prompt you
@@ -106,14 +106,9 @@ you can either run the bootstrap script again with the option '--debug', or
 run ccmake or cmake-gui (depending on what you installed when you installed
 cmake, as described in 4a), and change the build type to "Debug".
 
-6) If you'd like, build the example programs:
+6) To build the API documentation via Doxygen:
 
-$ cd ~/ALEMBIC_BUILD/examples
-$ make
-
-7) To build the API documentation via Doxygen:
-
-$ cd ../Alembic_1.0.0; doxygen Doxyfile
+$ cd ../Alembic_1.0.1; doxygen Doxyfile
 
 This will generate html documentation in the doc/html folder.
 
