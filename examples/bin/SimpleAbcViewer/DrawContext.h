@@ -47,16 +47,11 @@ class DrawContext
 public:
     DrawContext()
     {
-        m_localToWorld.makeIdentity();
         m_worldToCamera.makeIdentity();
         m_pointSize = 3.0f;
     }
 
     // Default copy & assign.
-
-    // Get/Set local-to-world
-    const M44d &getLocalToWorld() const { return m_localToWorld; }
-    void setLocalToWorld( const M44d & iXf ) { m_localToWorld = iXf; }
 
     // Get/Set world-to-camera
     const M44d &getWorldToCamera() const { return m_worldToCamera; }
@@ -67,7 +62,6 @@ public:
     void setPointSize( float iPs ) { m_pointSize = iPs; }
 
 protected:
-    M44d m_localToWorld;
     M44d m_worldToCamera;
     float m_pointSize;
 };

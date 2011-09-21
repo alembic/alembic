@@ -98,17 +98,22 @@ void IXformDrw::setTime( chrono_t iSeconds )
         return;
     }
 
+    ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
+
+    m_inherits = m_xform.getSchema().getInheritsXforms( ss );
+
     if ( m_xform.getSchema().isConstant() )
     {
         m_localToParent = m_staticMatrix;
     }
     else
     {
-        ISampleSelector ss( iSeconds, ISampleSelector::kNearIndex );
         m_localToParent = m_xform.getSchema().getValue( ss ).getMatrix();
     }
+
     // Okay, now we need to recalculate the bounds.
     m_bounds.makeEmpty();
+    m_nonInheritedBounds.makeEmpty();
     for ( DrawablePtrVec::iterator iter = m_children.begin();
           iter != m_children.end(); ++iter )
     {
@@ -119,7 +124,20 @@ void IXformDrw::setTime( chrono_t iSeconds )
             if ( !bnds.isEmpty() )
             {
                 bnds = Imath::transform( bnds, m_localToParent );
-                m_bounds.extendBy( bnds );
+                if ( !m_inherits )
+                {
+                    m_nonInheritedBounds.extendBy( bnds );
+                }
+                else
+                {
+                    m_bounds.extendBy( bnds );
+                }
+            }
+
+            Box3d ibnds = dptr->getNonInheritedBounds();
+            if ( !ibnds.isEmpty() )
+            {
+                m_nonInheritedBounds.extendBy( ibnds );
             }
         }
     }
@@ -132,7 +150,7 @@ void IXformDrw::draw( const DrawContext & iCtx )
 
     M44d idenMatrix; // Defaults to identity.
     idenMatrix.makeIdentity();
-    if ( m_localToParent.equalWithAbsError( idenMatrix, 1.0e-9 ) )
+    if ( m_localToParent.equalWithAbsError( idenMatrix, 1.0e-9 ) && m_inherits )
     {
         // Don't need to change anything.
         IObjectDrw::draw( iCtx );
@@ -147,15 +165,19 @@ void IXformDrw::draw( const DrawContext & iCtx )
     // We don't use the OpenGL transform stack because we have
     // deep deep hierarchy that exhausts the max stack depth quickly.
     glMatrixMode( GL_MODELVIEW );
-    glMultMatrixd( ( const GLdouble * )&m_localToParent[0][0] );
 
-    // Make a new context.
-    M44d localToWorld = m_localToParent * iCtx.getLocalToWorld();
-    DrawContext thisCtx( iCtx );
-    thisCtx.setLocalToWorld( localToWorld );
+    if ( m_inherits )
+    {
+        glMultMatrixd( ( const GLdouble * )&m_localToParent[0][0] );
+    }
+    else
+    {
+        M44d cameraLocal = iCtx.getWorldToCamera() * m_localToParent;
+        glLoadMatrixd( ( const GLdouble * )&cameraLocal[0][0] );
+    }
 
     // Now draw.
-    IObjectDrw::draw( thisCtx );
+    IObjectDrw::draw( iCtx );
 
     // And back out, restore the matrix.
     glMatrixMode( GL_MODELVIEW );

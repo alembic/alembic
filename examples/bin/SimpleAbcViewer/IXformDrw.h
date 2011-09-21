@@ -60,10 +60,14 @@ public:
 
     virtual void draw( const DrawContext & iCtx );
 
+    virtual Box3d getNonInheritedBounds() { return m_nonInheritedBounds; };
+
 protected:
     IXform m_xform;
     M44d m_localToParent;
     M44d m_staticMatrix;
+    Box3d m_nonInheritedBounds;
+    bool m_inherits;
 };
 
 } // End namespace SimpleAbcViewer

@@ -76,6 +76,10 @@ public:
     //! currently set time.
     virtual Box3d getBounds() = 0;
 
+    //! This function is for getting bounds which we don't want multiplied
+    //! by the local and ancestor transforms
+    virtual Box3d getNonInheritedBounds() { return Box3d(); }
+
     //! Draw the object (and its children) at the current frame.
     //! ...
     virtual void draw( const DrawContext & iCtx ) = 0;

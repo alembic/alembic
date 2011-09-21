@@ -155,6 +155,7 @@ Scene::Scene( const std::string &abcFileName )
 
     // Bounds have been formed!
     m_bounds = m_drawable->getBounds();
+    m_bounds.extendBy(m_drawable->getNonInheritedBounds());
     std::cout << "Bounds at min time: " << m_bounds.min << " to "
               << m_bounds.max << std::endl;
 }
@@ -175,6 +176,7 @@ void Scene::setTime( chrono_t iSeconds )
     }
     
     m_bounds = m_drawable->getBounds();
+    m_bounds.extendBy(m_drawable->getNonInheritedBounds());
 }
 
 //-*****************************************************************************
