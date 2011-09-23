@@ -127,7 +127,7 @@ namespace
         for (unsigned int i = 0; i < numUVs; ++i)
         {
             uArray[i] = (*uvPtr)[i].x;
-            vArray[i] = 1.0f - (*uvPtr)[i].y;
+            vArray[i] = (*uvPtr)[i].y;
         }
 
         int uvIndex = 0;

@@ -12,7 +12,7 @@
 // *       Redistributions of source code must retain the above copyright
 // notice, this list of conditions and the following disclaimer.
 // *       Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
+// copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
@@ -116,7 +116,7 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
         uvs.reserve(len);
         for (unsigned int i = 0; i < len; i++)
         {
-            uvs.push_back(uArray[i]); uvs.push_back(1-vArray[i]);
+            uvs.push_back(uArray[i]); uvs.push_back(vArray[i]);
         }
 
         MIntArray uvCounts, uvIds;
