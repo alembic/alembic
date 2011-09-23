@@ -142,6 +142,7 @@ struct JobArgs
         worldSpace = false;
         writeVisibility = false;
         writeUVs = false;
+        writeColorSets = false;
     }
 
     bool excludeInvisible;
@@ -151,6 +152,7 @@ struct JobArgs
     bool worldSpace;
     bool writeVisibility;
     bool writeUVs;
+    bool writeColorSets;
 
     std::string melPerFrameCallback;
     std::string melPostCallback;

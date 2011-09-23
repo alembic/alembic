@@ -75,6 +75,7 @@ class MayaMeshWriter
     void getPolyNormals(std::vector<float> & oNormals);
     bool mNoNormals;
     bool mWriteUVs;
+    bool mWriteColorSets;
 
     bool    mIsGeometryAnimated;
     MDagPath mDagPath;
@@ -82,6 +83,11 @@ class MayaMeshWriter
     AttributesWriterPtr mAttrs;
     Alembic::AbcGeom::OPolyMeshSchema   mPolySchema;
     Alembic::AbcGeom::OSubDSchema       mSubDSchema;
+
+    void writeColor();
+    std::vector<Alembic::AbcGeom::OC3fGeomParam> mRGBParams;
+    std::vector<Alembic::AbcGeom::OC4fGeomParam> mRGBAParams;
+
 };
 
 #endif  // _AbcExport_MayaMeshWriter_h_

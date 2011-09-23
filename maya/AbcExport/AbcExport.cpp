@@ -345,6 +345,11 @@ MStatus AbcExport::doIt(const MArgList & args)
                 jobArgs.writeUVs = true;
             }
 
+            else if (arg == "-wcs" || arg == "-writecolorsets")
+            {
+                jobArgs.writeColorSets = true;
+            }
+
             else if (arg == "-wfg" || arg == "-wholeframegeo")
             {
                 sampleGeo = false;
