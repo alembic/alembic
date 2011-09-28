@@ -392,7 +392,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
     }
 
     // skip nodes that aren't renderable (and their children)
-    if (mArgs.excludeInvisible && util::isRenderable(ob))
+    if (mArgs.excludeInvisible && !util::isRenderable(ob))
     {
         return;
     }
