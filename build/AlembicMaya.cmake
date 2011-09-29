@@ -134,6 +134,7 @@ SET( MAYA_LIBRARIES
 
 IF ( NOT WINDOWS )
   IF ( NOT DARWIN )
+    SET ( MAYA_EXTENSION ".so" )
     SET( MAYA_COMPILE_FLAGS
       "-m64 -g -pthread -pipe -D_BOOL -DLINUX -DLINUX_64 -DREQUIRE_IOSTREAM -fPIC -Wno-deprecated -fno-gnu-keywords" )
 
@@ -144,7 +145,7 @@ IF ( NOT WINDOWS )
     #  "-DAW_NEW_IOSTREAMS -DCC_GNU_ -DOSMac_ -DOSMacOSX_ -DBits32_ \
     #  -DOSMac_MachO_ -DREQUIRE_IOSTREAM -fno-gnu-keywords -fpascal-strings \
     #-arch i386 -D_LANGUAGE_C_PLUS_PLUS -include ${MAYA_INCLUDE_PATH}/maya/OpenMayaMac.h" ) \
-
+    SET ( MAYA_EXTENSION ".bundle" )
     SET( MAYA_COMPILE_FLAGS
       "-DAW_NEW_IOSTREAMS -DCC_GNU_ -DOSMac_ -DOSMacOSX_ -DOSMac_MachO_ -DREQUIRE_IOSTREAM -fno-gnu-keywords -D_LANGUAGE_C_PLUS_PLUS -include ${MAYA_INCLUDE_PATH}/maya/OpenMayaMac.h" )
 
@@ -153,7 +154,6 @@ IF ( NOT WINDOWS )
       #"-shared -g -fPIC "
       "-fno-gnu-keywords -framework System  -framework SystemConfiguration -framework CoreServices -framework Carbon -framework Cocoa -framework ApplicationServices -framework Quicktime -framework IOKit -bundle -fPIC -L${ALEMBIC_MAYA_LIB_ROOT} -Wl,-executable_path,${ALEMBIC_MAYA_LIB_ROOT}" )
   ENDIF()
-  SET ( MAYA_EXTENSION ".so" )
 ELSE()
   SET( MAYA_EXTENSION ".mll" )
   SET( MAYA_COMPILE_FLAGS "/MT /D \"NT_PLUGIN\" /D \"REQUIRE_IOSTREAM\" /D \"_BOOL\"" )
