@@ -266,8 +266,10 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         mSubDInitialized = false;
         mPolyInitialized = false;
 
-        CreateSceneVisitor visitor(inputTime, MObject::kNullObj,
-            CreateSceneVisitor::NONE, "");
+        MFnDependencyNode dep(thisMObject());
+        MPlug allSetsPlug = dep.findPlug("allColorSets");
+        CreateSceneVisitor visitor(inputTime, !allSetsPlug.isNull(),
+            MObject::kNullObj, CreateSceneVisitor::NONE, "");
 
         visitor.walk(archive);
 

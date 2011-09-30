@@ -62,6 +62,10 @@ Options:                                                                    \n\
                     current Maya scene                                      \n\
 -ftr/ fitTimeRange                                                          \n\
                     Change Maya time slider to fit the range of input file. \n\
+-rcs / recreateAllColorSets                                                 \n\
+                    IC3/4fArrayProperties with face varying scope on        \n\
+                    IPolyMesh and ISubD are treated as color sets even if   \n\
+                    they weren't written out of Maya.                       \n\
 -ct / connect       string node1 node2 ...                                  \n\
                     The nodes specified in the argument string are supposed to\
  be the names of top level nodes from the input file.                       \n\
@@ -113,6 +117,7 @@ MSyntax AbcImport::createSyntax()
     syntax.addFlag("-ftr",  "-fitTimeRange", MSyntax::kNoArg);
     syntax.addFlag("-h",    "-help",         MSyntax::kNoArg);
     syntax.addFlag("-m",    "-mode",         MSyntax::kString);
+    syntax.addFlag("-rcs",  "-recreateAllColorSets", MSyntax::kNoArg);
 
     syntax.addFlag("-ct",   "-connect",          MSyntax::kString);
     syntax.addFlag("-crt",  "-createIfNotFound", MSyntax::kNoArg);
@@ -206,6 +211,14 @@ MStatus AbcImport::doIt(const MArgList & args)
             removeIfNoUpdate = true;
     }
 
+    // if the flag isn't specified we'll only do stuff marked with the Maya
+    // meta data
+    bool recreateColorSets = false;
+    if (argData.isFlagSet("recreateAllColorSets"))
+    {
+        recreateColorSets = true;
+    }
+
     status = argData.getCommandArgument(0, filename);
     MString abcNodeName;
     if (status == MS::kSuccess)
@@ -263,7 +276,8 @@ MStatus AbcImport::doIt(const MArgList & args)
         if (status == MS::kSuccess && fileObj.exists())
         {
             ArgData inputData(filename, debugOn, reparentObj,
-                swap, connectRootNodes, createIfNotFound, removeIfNoUpdate);
+                swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
+                recreateColorSets);
             abcNodeName = createScene(inputData);
 
             if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&

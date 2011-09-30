@@ -100,6 +100,9 @@ double getWeightAndIndex(double iFrame,
     Alembic::AbcCoreAbstract::index_t & oIndex,
     Alembic::AbcCoreAbstract::index_t & oCeilIndex);
 
+bool isColorSet(const Alembic::AbcCoreAbstract::MetaData & iMetaData,
+    bool iUnmarkedFaceVaryingColors);
+
 template<typename T>
 void clamp(T & min, T & max, T & cur)
 {

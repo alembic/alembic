@@ -50,15 +50,15 @@
 #include "NodeIteratorVisitorHelper.h"
 
 void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
-    Alembic::AbcGeom::IPolyMesh & iNode, bool iInitialized);
+    PolyMeshAndColors & iNode, bool iInitialized);
 
 void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
-    Alembic::AbcGeom::ISubD & iNode, bool iInitialized);
+    SubDAndColors & iNode, bool iInitialized);
 
-MObject createPoly(double iFrame, Alembic::AbcGeom::IPolyMesh & iNode,
+MObject createPoly(double iFrame, PolyMeshAndColors & iNode,
     MObject & iParent);
 
-MObject createSubD(double iFrame, Alembic::AbcGeom::ISubD & iNode,
+MObject createSubD(double iFrame, SubDAndColors & iNode,
     MObject & iParent);
 
 void disconnectMesh(MObject & iMeshObject,

@@ -952,7 +952,8 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 //=============================================================================
 
 
-void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject)
+void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
+    bool iUnmarkedFaceVaryingColors)
 {
     // if the arbitrary geom params aren't valid, then skip
     if (!iParent)
@@ -966,7 +967,13 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject)
 
         const std::string & propName = propHeader.getName();
 
-        if (!propHeader.isArray())
+        // we have a color that we want to make a colorset out of
+        if ( iObject.hasFn(MFn::kMesh) && isColorSet(propHeader.getMetaData(),
+            iUnmarkedFaceVaryingColors) )
+        {
+            continue;
+        }
+        else if (!propHeader.isArray())
         {
             MString warn = "Skipping indexed or non-array property: ";
             warn += propName.c_str();
@@ -1002,7 +1009,7 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject)
 //=============================================================================
 
 void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
-    std::vector<Prop> & oPropList)
+    std::vector<Prop> & oPropList, bool iUnmarkedFaceVaryingColors)
 {
     // if the arbitrary geom params aren't valid, then skip
     if (!iParent)
@@ -1016,6 +1023,11 @@ void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
         const std::string & propName = propHeader.getName();
 
         if (!propHeader.isArray())
+        {
+            continue;
+        }
+        else if (isColorSet(propHeader.getMetaData(),
+            iUnmarkedFaceVaryingColors))
         {
             continue;
         }
@@ -1920,19 +1932,60 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     iEnd = mPolyMeshList.size();
     for (i = 0; i < iEnd; ++i)
     {
-        ts = mPolyMeshList[i].getSchema().getTimeSampling();
-        std::size_t numSamples = mPolyMeshList[i].getSchema().getNumSamples();
+        ts = mPolyMeshList[i].mMesh.getSchema().getTimeSampling();
+        std::size_t numSamples =
+            mPolyMeshList[i].mMesh.getSchema().getNumSamples();
         oMin = std::min(ts->getSampleTime(0), oMin);
         oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+
+        std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3s, c3sEnd;
+        c3sEnd = mPolyMeshList[i].mC3s.end();
+        for (c3s = mPolyMeshList[i].mC3s.begin(); c3s != c3sEnd; ++c3s)
+        {
+            ts = c3s->getTimeSampling();
+            numSamples = c3s->getNumSamples();
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
+
+        std::vector< Alembic::AbcGeom::IC4fGeomParam >::iterator c4s, c4sEnd;
+        c4sEnd = mPolyMeshList[i].mC4s.end();
+        for (c4s = mPolyMeshList[i].mC4s.begin(); c4s != c4sEnd; ++c4s)
+        {
+            ts = c4s->getTimeSampling();
+            numSamples = c4s->getNumSamples();
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
     }
 
     iEnd = mSubDList.size();
     for (i = 0; i < iEnd; ++i)
     {
-        ts = mSubDList[i].getSchema().getTimeSampling();
-        std::size_t numSamples = mSubDList[i].getSchema().getNumSamples();
+        ts = mSubDList[i].mMesh.getSchema().getTimeSampling();
+        std::size_t numSamples = mSubDList[i].mMesh.getSchema().getNumSamples();
         oMin = std::min(ts->getSampleTime(0), oMin);
         oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+
+        std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3s, c3sEnd;
+        c3sEnd = mSubDList[i].mC3s.end();
+        for (c3s = mSubDList[i].mC3s.begin(); c3s != c3sEnd; ++c3s)
+        {
+            ts = c3s->getTimeSampling();
+            numSamples = c3s->getNumSamples();
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
+
+        std::vector< Alembic::AbcGeom::IC4fGeomParam >::iterator c4s, c4sEnd;
+        c4sEnd = mSubDList[i].mC4s.end();
+        for (c4s = mSubDList[i].mC4s.begin(); c4s != c4sEnd; ++c4s)
+        {
+            ts = c4s->getTimeSampling();
+            numSamples = c4s->getNumSamples();
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
     }
 
     iEnd = mXformList.size();
@@ -2008,9 +2061,12 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
 
 ArgData::ArgData(MString iFileName,
     bool iDebugOn, MObject iReparentObj, bool iConnect,
-    MString iConnectRootNodes, bool iCreateIfNotFound, bool iRemoveIfNoUpdate) :
+    MString iConnectRootNodes, bool iCreateIfNotFound, bool iRemoveIfNoUpdate,
+    bool iRecreateColorSets) :
         mFileName(iFileName),
-        mDebugOn(iDebugOn), mReparentObj(iReparentObj), mConnect(iConnect),
+        mDebugOn(iDebugOn), mReparentObj(iReparentObj),
+        mRecreateColorSets(iRecreateColorSets),
+        mConnect(iConnect),
         mConnectRootNodes(iConnectRootNodes),
         mCreateIfNotFound(iCreateIfNotFound),
         mRemoveIfNoUpdate(iRemoveIfNoUpdate)
@@ -2033,12 +2089,14 @@ ArgData & ArgData::operator=(const ArgData & rhs)
     mDebugOn = rhs.mDebugOn;
 
     mReparentObj = rhs.mReparentObj;
+    mRecreateColorSets = rhs.mRecreateColorSets;
 
     // optional information for the "connect" flag
     mConnect = rhs.mConnect;
     mConnectRootNodes = rhs.mConnectRootNodes;
     mCreateIfNotFound = rhs.mCreateIfNotFound;
     mRemoveIfNoUpdate = rhs.mRemoveIfNoUpdate;
+
 
     mData = rhs.mData;
 
@@ -2073,7 +2131,8 @@ MString createScene(ArgData & iArgData)
         action = CreateSceneVisitor::CONNECT;
 
     CreateSceneVisitor visitor(iArgData.mSequenceStartTime,
-        iArgData.mReparentObj, action, iArgData.mConnectRootNodes);
+        iArgData.mRecreateColorSets, iArgData.mReparentObj, action,
+        iArgData.mConnectRootNodes);
 
     visitor.walk(archive);
 
@@ -2112,6 +2171,15 @@ MString connectAttr(ArgData & iArgData)
     {
         alembicNodePtr->setReaderPtrList(iArgData.mData);
         alembicNodePtr->setDebugMode(iArgData.mDebugOn);
+    }
+
+    if (iArgData.mRecreateColorSets)
+    {
+        MFnNumericAttribute numAttr;
+        MObject attrObj = numAttr.create("allColorSets", "allColorSets",
+            MFnNumericData::kBoolean);
+        alembicNodeFn.addAttribute(attrObj,
+            MFnDependencyNode::kLocalDynamicAttr);
     }
 
     // set AlembicNode name
@@ -2436,4 +2504,50 @@ MString connectAttr(ArgData & iArgData)
     }
 
     return alembicNodeFn.name();
+}
+
+bool getColorAttrs(Alembic::Abc::ICompoundProperty & iParent,
+    std::vector< Alembic::AbcGeom::IC3fGeomParam > & ioC3s,
+    std::vector< Alembic::AbcGeom::IC4fGeomParam > & ioC4s,
+    bool iUnmarkedFaceVaryingColors)
+{
+    bool anyAnimated = false;
+
+    // invalid geom params bail early
+    if (!iParent)
+        return anyAnimated;
+
+    std::size_t numProps = iParent.getNumProperties();
+    for (std::size_t i = 0; i < numProps; ++i)
+    {
+        const Alembic::Abc::PropertyHeader & propHeader =
+            iParent.getPropertyHeader(i);
+
+        if (!isColorSet(propHeader.getMetaData(), iUnmarkedFaceVaryingColors))
+        {
+            continue;
+        }
+
+        if (Alembic::AbcGeom::IC3fGeomParam::matches(propHeader.getMetaData()))
+        {
+            Alembic::AbcGeom::IC3fGeomParam cgp(iParent, propHeader.getName());
+            if (!anyAnimated)
+            {
+                anyAnimated = !cgp.isConstant();
+            }
+            ioC3s.push_back(cgp);
+        }
+        else if (Alembic::AbcGeom::IC4fGeomParam::matches(
+            propHeader.getMetaData()))
+        {
+            Alembic::AbcGeom::IC4fGeomParam cgp(iParent, propHeader.getName());
+            if (!anyAnimated)
+            {
+                anyAnimated = !cgp.isConstant();
+            }
+            ioC4s.push_back(cgp);
+        }
+    }
+
+    return anyAnimated;
 }

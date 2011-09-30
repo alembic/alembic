@@ -80,6 +80,7 @@ public:
     };
 
     CreateSceneVisitor(double iFrame = 0,
+        bool iUnmarkedFaceVaryingColors = false,
         const MObject & iParent = MObject::kNullObj,
         Action iAction = CREATE, MString iRootNodes = MString());
 
@@ -123,6 +124,12 @@ private:
     // -createIfNotFound and -removeIfNoUpdate
     std::set<std::string> mRootNodes;
     bool mAnyRoots;
+
+    // used with one of the flags (tbd)
+    // determines if C3fGeomParam and C4fGeomParam for MFnMeshes
+    // without the appropriate metadata hint should be treated as a color
+    // set (if true) or as an attribute on the node (if false)
+    bool mUnmarkedFaceVaryingColors;
 
     MDagPath mConnectDagNode;
 
