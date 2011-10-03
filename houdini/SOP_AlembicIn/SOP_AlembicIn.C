@@ -343,6 +343,13 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
         return error();
     }
     
+    if (fileName.empty())
+    {
+        args.boss->opEnd();
+        addWarning(SOP_MESSAGE, "No file specified.");
+        return error();
+    }
+    
     try
     {
         ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(fileName);

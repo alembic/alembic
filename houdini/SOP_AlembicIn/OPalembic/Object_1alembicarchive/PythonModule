@@ -1,4 +1,3 @@
-import posixpath
 
 def BuildHierarchyRoot(rootNode):
     #For now delete the existing children.
@@ -24,7 +23,7 @@ _primitiveTypes = frozenset((
 ))
 
 def ExpressionToParm(srcParm, dstParm, isString=False):
-    relPath = posixpath.relpath(srcParm.node().path(), dstParm.node().path())
+    relPath = dstParm.node().relativePathTo(srcParm.node())
     dstParm.setExpression('ch%s("%s/%s")' % (
             bool(isString)*'s', relPath, srcParm.name()))
 
