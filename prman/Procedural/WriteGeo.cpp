@@ -146,14 +146,33 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
         {
             ICompoundProperty parent = uvParam.getParent();
             
-            AddGeomParamToParamListBuilder<IV2fGeomParam>(
-                parent,
-                uvParam.getHeader(),
-                sampleSelector,
-                "float",
-                paramListBuilder,
-                2,
-                "st");
+            
+            if ( !args.flipv )
+            {
+                AddGeomParamToParamListBuilder<IV2fGeomParam>(
+                    parent,
+                    uvParam.getHeader(),
+                    sampleSelector,
+                    "float",
+                    paramListBuilder,
+                    2,
+                    "st");
+            }
+            else if ( std::vector<float> * values =
+                    AddGeomParamToParamListBuilderAsFloat<IV2fGeomParam, float>(
+                        parent,
+                        uvParam.getHeader(),
+                        sampleSelector,
+                        "float",
+                        paramListBuilder,
+                        2,
+                        "st") )
+            {
+                for ( size_t i = 1, e = values->size(); i < e; i += 2 )
+                {
+                    (*values)[i] = 1.0 - (*values)[i];
+                }
+            }
         }
         IN3fGeomParam nParam = ps.getNormalsParam();
         if ( nParam.valid() )
@@ -223,14 +242,33 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
         {
             ICompoundProperty parent = uvParam.getParent();
             
-            AddGeomParamToParamListBuilder<IV2fGeomParam>(
-                parent,
-                uvParam.getHeader(),
-                sampleSelector,
-                "float",
-                paramListBuilder,
-                2,
-                "st");
+            if ( !args.flipv )
+            {
+                AddGeomParamToParamListBuilder<IV2fGeomParam>(
+                    parent,
+                    uvParam.getHeader(),
+                    sampleSelector,
+                    "float",
+                    paramListBuilder,
+                    2,
+                    "st");
+            }
+            else if ( std::vector<float> * values =
+                    AddGeomParamToParamListBuilderAsFloat<IV2fGeomParam, float>(
+                        parent,
+                        uvParam.getHeader(),
+                        sampleSelector,
+                        "float",
+                        paramListBuilder,
+                        2,
+                        "st") )
+            {
+                for ( size_t i = 1, e = values->size(); i < e; i += 2 )
+                {
+                    (*values)[i] = 1.0 - (*values)[i];
+                }
+            }
+            
         }
 
         ICompoundProperty arbGeomParams = ss.getArbGeomParams();

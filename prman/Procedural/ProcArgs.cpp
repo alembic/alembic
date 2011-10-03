@@ -125,6 +125,10 @@ ProcArgs::ProcArgs( RtString paramStr )
             excludeXform = true;
             
         }
+        else if ( token == "-flipv" )
+        {
+            flipv = true;
+        }
         
     }
     
@@ -200,5 +204,22 @@ void ProcArgs::usage()
                  "is to write all transformations and include AttributeBegin "
                  "blocks around each level of the hierarchy.";
     std::cerr << std::endl;
+    std::cerr << std::endl;
+    
+    
+    
+    std::cerr << "-flipv" << std::endl;
+    std::cerr << std::endl;
+    
+    std::cerr << "Like many systems (Maya included), AbcGeom's default "
+                 "interpretation of texture coordinates is of a bottom-left "
+                 "corner origin. RenderMan's texture lookups assume a top-left "
+                 "corner origin by default. If your shaders are not already "
+                 "compensating for this, enabling -flipv applies (1-v) to "
+                 "texture coordinates of polymesh and subdmesh primitives.";
+    std::cerr << std::endl;
+    std::cerr << std::endl;
+        
+    
 }
 

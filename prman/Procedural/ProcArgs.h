@@ -56,6 +56,7 @@ struct ProcArgs
     , shutterOpen( rhs.shutterOpen )
     , shutterClose( rhs.shutterClose )
     , excludeXform( false )
+    , flipv ( false )
     {}
     
     void usage();
@@ -69,6 +70,7 @@ struct ProcArgs
     double shutterClose;
 
     bool excludeXform;
+    bool flipv;
 };
 
 #endif

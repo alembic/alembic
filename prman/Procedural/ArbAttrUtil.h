@@ -54,9 +54,13 @@ public:
     void add( const std::string & declaration, RtPointer value,
               ArraySamplePtr sampleToRetain = ArraySamplePtr() );
     
-    //used for conversion of DoubleGeomParams
+    // used for conversion of DoubleGeomParams
+    // NOTE: In addition to performing the conversion, this also makes and
+    // returns an internal copy of the data. Even in cases in which you're
+    // starting with float data, this can be usful if you need to manipulate
+    // the values after-the-fact.
     template <typename T>
-    void addAsFloat( const std::string & declaration, const T * length,
+    std::vector<float> * addAsFloat( const std::string & declaration, const T * length,
             size_t numValues );
     
     //returns the start of the current vector and pushes a new one
@@ -90,7 +94,7 @@ private:
 //-*****************************************************************************
 
 template <typename T>
-void ParamListBuilder::addAsFloat( const std::string & declaration,
+std::vector<float> * ParamListBuilder::addAsFloat( const std::string & declaration,
         const T * value, size_t length)
 {
     SharedRtFloatVector convertedValues( new std::vector<RtFloat> );
@@ -100,6 +104,8 @@ void ParamListBuilder::addAsFloat( const std::string & declaration,
     m_convertedFloatVectors.push_back( convertedValues );
     
     add( declaration, &( ( *convertedValues )[0] ) );
+    
+    return &(*convertedValues);
 }
 
 
@@ -153,8 +159,15 @@ void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
 
 
 //-*****************************************************************************
-template <typename T>
-void AddGeomParamToParamListBuilderAsFloat( ICompoundProperty & parent,
+
+// NOTE: In addition to performing the conversion, this also makes and
+// returns an internal copy of the data. Even in cases in which you're
+// starting with float data, this can be usful if you need to manipulate
+// the values after-the-fact. The AddGeomParamToParamListBuilder codepath 
+// normally avoids a copy of the data as the GeomParam samples can be handed
+// to RenderMan directly. 
+template <typename T, typename podT>
+std::vector<float> * AddGeomParamToParamListBuilderAsFloat( ICompoundProperty & parent,
                                              const PropertyHeader &propHeader,
                                              ISampleSelector &sampleSelector,
                                              const std::string &rmanBaseType,
@@ -168,7 +181,7 @@ void AddGeomParamToParamListBuilderAsFloat( ICompoundProperty & parent,
     if ( !param.valid() )
     {
         //TODO error message?
-        return;
+        return 0;
     }
 
     std::string rmanType = GetPrmanScopeString( param.getScope() ) + " ";
@@ -194,9 +207,11 @@ void AddGeomParamToParamListBuilderAsFloat( ICompoundProperty & parent,
     int rawExtent =
             T::prop_type::traits_type::dataType().getExtent() * arrayExtent;
 
-
-    ParamListBuilder.addAsFloat( rmanType, valueSample->get(), 
-            valueSample->size() * rawExtent );
+    
+    
+    return ParamListBuilder.addAsFloat( rmanType,
+            reinterpret_cast<const podT *>( valueSample->get() ),
+                    valueSample->size() * rawExtent );
 
 }
 

@@ -25,6 +25,9 @@ If specified, only objects at or below the provided path (within the archive) wi
 
 If specified, no transformation statements will be written and AttributeBegin blocks and identifiers will only be created around geometric primitives. The default behavior is to write all transformations and include AttributeBegin blocks around each level of the hierarchy.
 
+-flipv
 
+Like many systems (Maya included), AbcGeom's default interpretation of texture coordinates is of a bottom-left corner origin. RenderMan's texture lookups assume a top-left corner origin by default. If your shaders are not already compensating for this, enabling -flipv applies (1-v) to texture coordinates of polymesh and subdmesh primitives.
+   
 
 

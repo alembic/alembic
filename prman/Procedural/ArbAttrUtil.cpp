@@ -226,7 +226,7 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
         }
         else if ( IDoubleGeomParam::matches( propHeader ) )
         {
-            AddGeomParamToParamListBuilderAsFloat<IDoubleGeomParam>(
+            AddGeomParamToParamListBuilderAsFloat<IDoubleGeomParam, double>(
                 parent,
                 propHeader,
                 sampleSelector,
