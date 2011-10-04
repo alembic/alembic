@@ -123,6 +123,23 @@ void Example1_MeshOut()
     color_val.z = 1.0;
     color.set( color_samp );
 
+    OC3fGeomParam colorIndexed( arbParams, "colori", true,
+        kFacevaryingScope, 1);
+
+    std::vector< C3f > color_vals;
+    color_vals.push_back( C3f( 0.0, 1.0, 1.0 ) );
+    color_vals.push_back( C3f( 1.0, 0.0, 1.0 ) );
+    color_vals.push_back( C3f( 1.0, 1.0, 0.0 ) );
+    Alembic::Util::uint32_t indices[24] = { 2, 2, 1, 1, 0, 0, 1, 2,
+        1, 1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 1, 1 };
+
+    C3fArraySample cval_samp( &(color_vals.front()), color_vals.size() );
+    UInt32ArraySample cind_samp( indices, 24 );
+    color_samp.setVals( cval_samp );
+    color_samp.setIndices( cind_samp );
+    color_samp.setScope( kFacevaryingScope );
+    colorIndexed.set( color_samp );
+
     std::cout << "Writing: " << archive.getName() << std::endl;
 }
 
@@ -215,16 +232,45 @@ void Example1_MeshIn()
 
     // This better exist since we wrote custom attr called color to it
     TESTING_ASSERT( arbattrs );
-    TESTING_ASSERT( IC3fGeomParam::matches(
-        arbattrs.getPropertyHeader(0).getMetaData() ) );
-    IC3fGeomParam color(arbattrs, "color");
-    TESTING_ASSERT( color.getValueProperty().isScalarLike() );
 
-    IC3fGeomParam::Sample cSamp0, cSamp1;
-    color.getExpanded(cSamp0, 0);
-    color.getExpanded(cSamp1, 1);
-    TESTING_ASSERT( (*(cSamp0.getVals()))[0] == C3f( 1.0, 0.0, 0.0 ) );
-    TESTING_ASSERT( (*(cSamp1.getVals()))[0] == C3f( 1.0, 0.0, 1.0 ) );
+    for (int i = 0; i < 2; ++ i)
+    {
+        PropertyHeader p = arbattrs.getPropertyHeader(i);
+        TESTING_ASSERT( IC3fGeomParam::matches( p.getMetaData() ) );
+
+        if ( p.getName() == "color" )
+        {
+            IC3fGeomParam color(arbattrs, "color");
+            TESTING_ASSERT( color.getValueProperty().isScalarLike() );
+
+            IC3fGeomParam::Sample cSamp0, cSamp1;
+            color.getExpanded(cSamp0, 0);
+            color.getExpanded(cSamp1, 1);
+            TESTING_ASSERT( (*(cSamp0.getVals()))[0] == C3f( 1.0, 0.0, 0.0 ) );
+            TESTING_ASSERT( (*(cSamp1.getVals()))[0] == C3f( 1.0, 0.0, 1.0 ) );
+        }
+        else if ( p.getName() == "colori" )
+        {
+            IC3fGeomParam color(arbattrs, "colori");
+            TESTING_ASSERT( !color.getValueProperty().isScalarLike() );
+
+            IC3fGeomParam::Sample cSamp;
+            color.getIndexed( cSamp );
+            TESTING_ASSERT( cSamp.getScope() == kFacevaryingScope );
+            TESTING_ASSERT( cSamp.getVals()->size() == 3 );
+            TESTING_ASSERT( (*cSamp.getVals())[0] == C3f( 0.0, 1.0, 1.0 ) );
+            TESTING_ASSERT( (*cSamp.getVals())[1] == C3f( 1.0, 0.0, 1.0 ) );
+            TESTING_ASSERT( (*cSamp.getVals())[2] == C3f( 1.0, 1.0, 0.0 ) );
+
+            Alembic::Util::uint32_t indices[24] = { 2, 2, 1, 1, 0, 0, 1, 2,
+                1, 1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 1, 1};
+
+            for (int j = 0; j < 24; ++j)
+            {
+                TESTING_ASSERT( (*cSamp.getIndices())[j] == indices[j] );
+            }
+        }
+    }
 }
 
 //-*****************************************************************************

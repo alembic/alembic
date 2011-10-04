@@ -181,6 +181,8 @@ public:
         md.set( "arrayExtent",
                 boost::lexical_cast<std::string>( iArrayExtent ) );
 
+        md.set( "interpretation", TRAITS::interpretation() );
+
         Abc::ErrorHandler::Policy ehp = args.getErrorHandlerPolicy();
 
         AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
