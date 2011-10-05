@@ -369,7 +369,7 @@ bool isColorSet(const Alembic::AbcCoreAbstract::MetaData & iMetaData,
     return (Alembic::AbcGeom::IC3fGeomParam::matches(iMetaData) ||
             Alembic::AbcGeom::IC4fGeomParam::matches(iMetaData)) && 
             Alembic::AbcGeom::GetGeometryScope(iMetaData) ==
-                Alembic::AbcGeom::kVaryingScope &&
+                Alembic::AbcGeom::kFacevaryingScope &&
             (iUnmarkedFaceVaryingColors ||
             iMetaData.get("mayaColorSet") != "");
 }

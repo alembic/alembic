@@ -12,7 +12,7 @@
 // *       Redistributions of source code must retain the above copyright
 // notice, this list of conditions and the following disclaimer.
 // *       Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
+// copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
@@ -44,10 +44,35 @@ void getColorSet(MFnMesh & iMesh, const MString * iColorSet, bool isRGBA,
     std::vector< Alembic::Util::uint32_t > & oColorIndices)
 {
     MColorArray colorArray;
-    MColor defaultColor;
-    iMesh.getColors(colorArray, iColorSet, &defaultColor);
+    iMesh.getColors(colorArray, iColorSet);
 
-    colorArray.append(defaultColor);
+    bool addDefaultColor = true;
+
+    int numFaces = iMesh.numPolygons();
+    for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
+    {
+        MIntArray vertexList;
+        iMesh.getPolygonVertices(faceIndex, vertexList);
+
+        int numVertices = iMesh.polygonVertexCount(faceIndex);
+        for ( int v = numVertices-1; v >=0; v-- )
+        {
+            int colorIndex = 0;
+            iMesh.getColorIndex(faceIndex, v, colorIndex, iColorSet);
+
+            if (colorIndex == -1)
+            {
+                if (addDefaultColor)
+                {
+                    addDefaultColor = false;
+                    colorArray.append(MColor(1.0, 1.0, 1.0, 1.0));
+                }
+                colorIndex = colorArray.length() - 1;
+            }
+            oColorIndices.push_back(colorIndex);
+        }
+    }
+
     int colorLen = colorArray.length();
 
     for (int i = 0; i < colorLen; ++i)
@@ -59,27 +84,6 @@ void getColorSet(MFnMesh & iMesh, const MString * iColorSet, bool isRGBA,
         if (isRGBA)
         {
             oColors.push_back(color.a);
-        }
-    }
-
-    unsigned int numFaces = iMesh.numPolygons();
-    for (unsigned int faceIndex = 0; faceIndex < numFaces; faceIndex++)
-    {
-        MIntArray vertexList;
-        iMesh.getPolygonVertices(faceIndex, vertexList);
-
-        unsigned int numVertices = vertexList.length();
-        for ( int v = numVertices-1; v >=0; v-- )
-        {
-            unsigned int vertexIndex = vertexList[v];
-            int colorIndex = 0;
-            iMesh.getColorIndex(faceIndex, vertexIndex, colorIndex, iColorSet);
-
-            if (colorIndex == -1)
-            {
-                colorIndex = colorArray.length() - 1;
-            }
-            oColorIndices.push_back(colorIndex);
         }
     }
 };
@@ -258,26 +262,39 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
                 arbParams =  mSubDSchema.getArbGeomParams();
             }
 
+            std::string currentColorSet = lMesh.currentColorSetName().asChar();
             for (unsigned int i=0; i < colorSetNames.length(); ++i)
             {
                 // Create an array property for each color set
                 std::string colorSetPropName = colorSetNames[i].asChar();
+
+                Alembic::AbcCoreAbstract::MetaData md;
+                if (currentColorSet == colorSetPropName)
+                {
+                    md.set("mayaColorSet", "1");
+                }
+                else
+                {
+                    md.set("mayaColorSet", "0");
+                }
+
                 if (lMesh.getColorRepresentation(colorSetNames[i]) ==
                     MFnMesh::kRGB)
                 {
                     Alembic::AbcGeom::OC3fGeomParam colorProp(arbParams,
                         colorSetPropName, true,
-                        Alembic::AbcGeom::kFacevaryingScope, 1, iTimeIndex);
+                        Alembic::AbcGeom::kFacevaryingScope, 1, iTimeIndex, md);
                     mRGBParams.push_back(colorProp);
                 }
                 else
                 {
                     Alembic::AbcGeom::OC4fGeomParam colorProp(arbParams,
                         colorSetPropName, true,
-                        Alembic::AbcGeom::kFacevaryingScope, 1, iTimeIndex);
+                        Alembic::AbcGeom::kFacevaryingScope, 1, iTimeIndex, md);
                     mRGBAParams.push_back(colorProp);
                 }
             }
+            writeColor();
         }
     }
 
@@ -492,25 +509,13 @@ void MayaMeshWriter::writeColor()
     std::vector<Alembic::AbcGeom::OC4fGeomParam>::iterator rgbaItEnd;
     rgbaIt = mRGBAParams.begin();
     rgbaItEnd = mRGBAParams.end();
-    MString currentColorSet = lMesh.currentColorSetName();
-    std::string mayaColorSetStr = "mayaColorSet";
+
     for (; rgbaIt != rgbaItEnd; ++rgbaIt)
     {
-        MString colorSetName(rgbaIt->getName().c_str());
-
-        Alembic::AbcCoreAbstract::MetaData md;
-        if (currentColorSet == colorSetName)
-        {
-            md.set(mayaColorSetStr, "1");
-        }
-        else
-        {
-            md.set(mayaColorSetStr, "0");
-        }
-
         std::vector<float> colors;
         std::vector< Alembic::Util::uint32_t > colorIndices;
 
+        MString colorSetName(rgbaIt->getName().c_str());
         getColorSet(lMesh, &colorSetName, true, colors, colorIndices);
 
         //cast the vector to the sample type
@@ -530,21 +535,10 @@ void MayaMeshWriter::writeColor()
     for (; rgbIt != rgbItEnd; ++rgbIt)
     {
 
-        MString colorSetName(rgbIt->getName().c_str());
-
-        Alembic::AbcCoreAbstract::MetaData md;
-        if (currentColorSet == colorSetName)
-        {
-            md.set(mayaColorSetStr, "1");
-        }
-        else
-        {
-            md.set(mayaColorSetStr, "0");
-        }
-
         std::vector<float> colors;
         std::vector< Alembic::Util::uint32_t > colorIndices;
 
+        MString colorSetName(rgbIt->getName().c_str());
         getColorSet(lMesh, &colorSetName, false, colors, colorIndices);
 
         //cast the vector to the sample type

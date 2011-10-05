@@ -420,6 +420,11 @@ namespace
                 meshIO.setCurrentColorSetName(setName);
             }
         }
+
+        if (!iC3s.empty() || !iC4s.empty())
+        {
+            meshIO.setDisplayColors(true);
+        }
     }
 
     void setColor(MFnMesh & ioMesh, MColorArray & iColorList,
@@ -433,12 +438,11 @@ namespace
         MIntArray assignmentList(iSampIndices->size());
         for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
         {
-            MIntArray polyVerts;
-            ioMesh.getPolygonVertices(faceIndex, polyVerts);
-            int numVertices = polyVerts.length();
+            int numVertices = ioMesh.polygonVertexCount(faceIndex);
+            int curIndex = nIndex;
             for (int v = numVertices - 1; v >= 0; v--, ++nIndex)
             {
-                assignmentList[nIndex] = (int) (*iSampIndices)[polyVerts[v]];
+                assignmentList[nIndex] = (int) (*iSampIndices)[curIndex + v];
             }
         }
 
@@ -551,7 +555,7 @@ namespace
 
         MColorArray colorList;
 
-        //Interpolate between 2 samples (as long as the indices are contant)
+        //Interpolate between 2 samples
         if (alpha != 0 && index != ceilIndex &&
             iC4f.getIndexProperty().isConstant())
         {
@@ -610,9 +614,9 @@ namespace
         std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3sEnd =
             iC3s.end();
 
-        for ( c3s = iC3s.begin(); c3s != c3sEnd; ++c3s )
+        for (c3s = iC3s.begin(); c3s != c3sEnd; ++c3s)
         {
-            if (iSetStatic || c3s->isConstant())
+            if (c3s->getNumSamples() > 0 && (iSetStatic || c3s->isConstant()))
             {
                 setColor3f(iFrame, ioMesh, *c3s);
             }
@@ -622,11 +626,11 @@ namespace
         std::vector< Alembic::AbcGeom::IC4fGeomParam >::iterator c4sEnd =
             iC4s.end();
 
-        for ( c4s = iC4s.begin(); c4s != c4sEnd; ++c4s )
+        for (c4s = iC4s.begin(); c4s != c4sEnd; ++c4s)
         {
-            if (iSetStatic || c4s->isConstant())
+            if (c4s->getNumSamples() > 0 && (iSetStatic || c4s->isConstant()))
             {
-                setColor3f(iFrame, ioMesh, *c3s);
+                setColor4f(iFrame, ioMesh, *c4s);
             }
         }
     }
