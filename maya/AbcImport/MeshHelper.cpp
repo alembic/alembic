@@ -388,43 +388,22 @@ namespace
 
     }
 
-    void createColorSets(MFnMesh & meshIO,
-        std::vector< Alembic::AbcGeom::IC3fGeomParam > iC3s,
-        std::vector< Alembic::AbcGeom::IC4fGeomParam > iC4s)
+    void createColorSet(MFnMesh & meshIO, MString & iSetName,
+        const Alembic::AbcCoreAbstract::MetaData & iMetaData)
     {
 
-        std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3s;
-        std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3sEnd =
-            iC3s.end();
+        MStatus status = meshIO.createColorSetDataMesh(iSetName);
 
-        for ( c3s = iC3s.begin(); c3s != c3sEnd; ++c3s )
+        if (status != MS::kSuccess)
         {
-            MString setName = c3s->getName().c_str();
-            meshIO.createColorSetWithName(setName, NULL, NULL, NULL);
-            if (c3s->getMetaData().get("mayaColorSet") == "1")
+            meshIO.createColorSetWithName(iSetName, NULL, NULL, NULL);
+            if (iMetaData.get("mayaColorSet") == "1")
             {
-                meshIO.setCurrentColorSetName(setName);
+                meshIO.setCurrentColorSetName(iSetName);
             }
-        }
-
-        std::vector< Alembic::AbcGeom::IC4fGeomParam >::iterator c4s;
-        std::vector< Alembic::AbcGeom::IC4fGeomParam >::iterator c4sEnd =
-            iC4s.end();
-
-        for ( c4s = iC4s.begin(); c4s != c4sEnd; ++c4s )
-        {
-            MString setName = c4s->getName().c_str();
-            meshIO.createColorSetWithName(setName, NULL, NULL, NULL);
-            if (c4s->getMetaData().get("mayaColorSet") == "1")
-            {
-                meshIO.setCurrentColorSetName(setName);
-            }
-        }
-
-        if (!iC3s.empty() || !iC4s.empty())
-        {
             meshIO.setDisplayColors(true);
         }
+
     }
 
     void setColor(MFnMesh & ioMesh, MColorArray & iColorList,
@@ -610,14 +589,21 @@ namespace
         bool iSetStatic)
     {
 
+        if (iC3s.empty() && iC4s.empty())
+        {
+            return;
+        }
+
         std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3s;
         std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3sEnd =
             iC3s.end();
 
         for (c3s = iC3s.begin(); c3s != c3sEnd; ++c3s)
         {
-            if (c3s->getNumSamples() > 0 && (iSetStatic || c3s->isConstant()))
+            if (c3s->getNumSamples() > 0 && (iSetStatic || !c3s->isConstant()))
             {
+                MString setName(c3s->getName().c_str());
+                createColorSet(ioMesh, setName, c3s->getMetaData());
                 setColor3f(iFrame, ioMesh, *c3s);
             }
         }
@@ -628,8 +614,10 @@ namespace
 
         for (c4s = iC4s.begin(); c4s != c4sEnd; ++c4s)
         {
-            if (c4s->getNumSamples() > 0 && (iSetStatic || c4s->isConstant()))
+            if (c4s->getNumSamples() > 0 && (iSetStatic || !c4s->isConstant()))
             {
+                MString setName(c4s->getName().c_str());
+                createColorSet(ioMesh, setName, c4s->getMetaData());
                 setColor4f(iFrame, ioMesh, *c4s);
             }
         }
@@ -752,6 +740,7 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
         samp.getFaceCounts());
 
     setUVs(iFrame, ioMesh, schema.getUVsParam());
+    setColors(iFrame, ioMesh, iNode.mC3s, iNode.mC4s, !iInitialized);
 }
 
 void disconnectMesh(MObject & iMeshObject,
@@ -780,9 +769,6 @@ MObject createPoly(double iFrame, PolyMeshAndColors & iNode,
     Alembic::AbcGeom::IPolyMeshSchema schema = iNode.mMesh.getSchema();
     MString name(iNode.mMesh.getName().c_str());
 
-    MStatus status = MS::kSuccess;
-
-    MFnMesh fnMesh;
     MObject obj;
 
     // add other properties
@@ -790,6 +776,7 @@ MObject createPoly(double iFrame, PolyMeshAndColors & iNode,
     {
         MFloatPointArray emptyPt;
         MIntArray emptyInt;
+        MFnMesh fnMesh;
         obj = fnMesh.create(0, 0, emptyPt, emptyInt, emptyInt, iParent);
         fnMesh.setName(name);
     }
@@ -812,6 +799,8 @@ MObject createPoly(double iFrame, PolyMeshAndColors & iNode,
         }
 
         fillPoints(ptArray, samp.getPositions(), ceilPoints, alpha);
+
+        MFnMesh fnMesh;
         fillTopology(fnMesh, iParent, ptArray, samp.getFaceIndices(),
             samp.getFaceCounts());
         fnMesh.setName(iNode.mMesh.getName().c_str());
@@ -820,24 +809,22 @@ MObject createPoly(double iFrame, PolyMeshAndColors & iNode,
         obj = fnMesh.object();
     }
 
-    createColorSets(fnMesh, iNode.mC3s, iNode.mC4s);
-    if (schema.isConstant())
-    {
-        setColors(iFrame, fnMesh, iNode.mC3s, iNode.mC4s, true);
-    }
+    MFnMesh fnMesh(obj);
 
     MString pathName = fnMesh.partialPathName();
     setInitialShadingGroup(pathName);
+
+    setColors(iFrame, fnMesh, iNode.mC3s, iNode.mC4s, true);
+
 
     if ( !schema.getNormalsParam().valid() )
     {
         MFnNumericAttribute attr;
         MString attrName("noNormals");
         MObject attrObj = attr.create(attrName, attrName,
-        MFnNumericData::kBoolean, true, &status);
+        MFnNumericData::kBoolean, true);
         attr.setKeyable(true);
         attr.setHidden(false);
-        MFnMesh fnMesh(obj);
         fnMesh.addAttribute(attrObj, MFnDependencyNode::kLocalDynamicAttr);
     }
 
@@ -874,7 +861,6 @@ MObject createSubD(double iFrame, SubDAndColors & iNode,
 
     setUVs(iFrame, fnMesh, schema.getUVsParam());
 
-    createColorSets(fnMesh, iNode.mC3s, iNode.mC4s);
     setColors(iFrame, fnMesh, iNode.mC3s, iNode.mC4s, true);
 
     // add the mFn-specific attributes to fnMesh node

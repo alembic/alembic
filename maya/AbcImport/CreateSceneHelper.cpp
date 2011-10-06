@@ -724,7 +724,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
         if (hasDag)
         {
             subDObj = mConnectDagNode.node();
-            if (!isConstant)
+            if (!isConstant || colorAnim)
             {
                 mData.mSubDObjList.push_back(subDObj);
             }
@@ -734,7 +734,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
         subDObj = createSubD(mFrame, subdColors, mParent);
-        if (!isConstant)
+        if (!isConstant || colorAnim)
         {
             mData.mSubDObjList.push_back(subDObj);
         }
@@ -814,7 +814,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
         if (hasDag)
         {
             polyObj = mConnectDagNode.node();
-            if (!isConstant)
+            if (!isConstant || colorAnim)
             {
                 mData.mPolyMeshObjList.push_back(polyObj);
             }
@@ -824,7 +824,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
         polyObj = createPoly(mFrame, meshColors, mParent);
-        if (!isConstant)
+        if (!isConstant || colorAnim)
         {
             mData.mPolyMeshObjList.push_back(polyObj);
         }
