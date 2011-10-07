@@ -44,14 +44,20 @@
 
 typedef std::vector< Alembic::Abc::ICompoundProperty > ICompoundPropertyVec;
 
-void checkAcyclic(const Alembic::AbcCoreAbstract::v1::TimeSamplingType & tsType,
+Alembic::AbcCoreAbstract::index_t
+getIndexSample(Alembic::AbcCoreAbstract::index_t iCurOutIndex,
+    Alembic::AbcCoreAbstract::TimeSamplingPtr iOutTime,
+    Alembic::AbcCoreAbstract::index_t iInNumSamples,
+    Alembic::AbcCoreAbstract::TimeSamplingPtr iInTime);
+
+void checkAcyclic(const Alembic::AbcCoreAbstract::TimeSamplingType & tsType,
                   const std::string & fullNodeName);
 
-void stitchArrayProp(const Alembic::AbcCoreAbstract::v1::PropertyHeader & propHeader,
+void stitchArrayProp(const Alembic::AbcCoreAbstract::PropertyHeader & propHeader,
                      const ICompoundPropertyVec & iCompoundProps,
                      Alembic::Abc::OCompoundProperty & oCompoundProp);
 
-void stitchScalarProp(const Alembic::AbcCoreAbstract::v1::PropertyHeader & propHeader,
+void stitchScalarProp(const Alembic::AbcCoreAbstract::PropertyHeader & propHeader,
                       const ICompoundPropertyVec & iCompoundProps,
                       Alembic::Abc::OCompoundProperty & oCompoundProp);
 

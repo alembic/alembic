@@ -226,7 +226,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IXformSchema iSchema =
                 IXform(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
-            for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
+            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+                oSchema.getTimeSampling(), numSamples,
+                iSchema.getTimeSampling());
+            for (; reqIdx < numSamples; reqIdx++)
             {
                 XformSample samp = iSchema.getValue(reqIdx);
                 oSchema.set(samp);
@@ -261,7 +264,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 ISubD(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
             IV2fGeomParam uvs = iSchema.getUVsParam();
-            for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
+            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+                oSchema.getTimeSampling(), numSamples,
+                iSchema.getTimeSampling());
+            for (; reqIdx < numSamples; reqIdx++)
             {
                 ISubDSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OSubDSchema::Sample oSamp;
@@ -343,7 +349,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
 
             IN3fGeomParam normals = iSchema.getNormalsParam();
             IV2fGeomParam uvs = iSchema.getUVsParam();
-            for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
+            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+                oSchema.getTimeSampling(), numSamples,
+                iSchema.getTimeSampling());
+            for (; reqIdx < numSamples; reqIdx++)
             {
                 IPolyMeshSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OPolyMeshSchema::Sample oSamp;
@@ -404,7 +413,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             ICameraSchema iSchema =
                 ICamera(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
-            for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
+            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+                oSchema.getTimeSampling(), numSamples,
+                iSchema.getTimeSampling());
+            for (; reqIdx < numSamples; reqIdx++)
             {
                 oSchema.set(iSchema.getValue(reqIdx));
             }
@@ -430,7 +442,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IFloatGeomParam iWidths = iSchema.getWidthsParam();
             index_t numSamples = iSchema.getNumSamples();
 
-            for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
+            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+                oSchema.getTimeSampling(), numSamples,
+                iSchema.getTimeSampling());
+            for (; reqIdx < numSamples; reqIdx++)
             {
                 ICurvesSchema::Sample iSamp = iSchema.getValue(reqIdx);
 
@@ -497,7 +512,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 IPoints(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             IFloatGeomParam iWidths = iSchema.getWidthsParam();
             index_t numSamples = iSchema.getNumSamples();
-            for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
+            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+                oSchema.getTimeSampling(), numSamples,
+                iSchema.getTimeSampling());
+            for (; reqIdx < numSamples; reqIdx++)
             {
                 IPointsSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OPointsSchema::Sample oSamp;
@@ -546,7 +564,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IN3fGeomParam normals = iSchema.getNormalsParam();
             IV2fGeomParam uvs = iSchema.getUVsParam();
 
-            for (index_t reqIdx = 0; reqIdx < numSamples; reqIdx++)
+            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+                oSchema.getTimeSampling(), numSamples,
+                iSchema.getTimeSampling());
+            for (; reqIdx < numSamples; reqIdx++)
             {
                 INuPatchSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 ONuPatchSchema::Sample oSamp;

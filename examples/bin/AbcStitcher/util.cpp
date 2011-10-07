@@ -43,6 +43,27 @@ using namespace Alembic::AbcGeom;
 using namespace Alembic::Abc;
 using namespace Alembic::AbcCoreAbstract;
 
+index_t getIndexSample(index_t iCurOutIndex, TimeSamplingPtr iOutTime,
+    index_t iInNumSamples, TimeSamplingPtr iInTime)
+{
+    if (iCurOutIndex == 0)
+    {
+        return 0;
+    }
+
+    chrono_t curTime = iOutTime->getSampleTime(iCurOutIndex);
+
+    for (index_t i = 0; i < iInNumSamples; ++i)
+    {
+        if (curTime < iInTime->getSampleTime(i))
+        {
+            return i;
+        }
+    }
+
+    return iInNumSamples;
+}
+
 void checkAcyclic(const TimeSamplingType & tsType,
                   const std::string & fullNodeName)
 {
@@ -69,10 +90,12 @@ void stitchArrayProp(const PropertyHeader & propHeader,
     for (size_t iCpIndex = 0; iCpIndex < numInputs; iCpIndex++)
     {
         IArrayProperty reader(iCompoundProps[iCpIndex], propName, metaData);
-        size_t numSamples = reader.getNumSamples();
+        index_t numSamples = reader.getNumSamples();
 
         ArraySamplePtr dataPtr;
-        for (size_t k = 0; k < numSamples; k++)
+        index_t k = getIndexSample(writer.getNumSamples(),
+            writer.getTimeSampling(), numSamples, reader.getTimeSampling());
+        for (; k < numSamples; k++)
         {
             reader.get(dataPtr, k);
             writer.set(*dataPtr);
@@ -97,8 +120,10 @@ void scalarPropIO(IScalarProperty & reader,
         exit(1);
     }
 
-    size_t numSamples = reader.getNumSamples();
-    for (size_t k = 0; k < numSamples; k++)
+    index_t numSamples = reader.getNumSamples();
+    index_t k = getIndexSample(writer.getNumSamples(),
+        writer.getTimeSampling(), numSamples, reader.getTimeSampling());
+    for (; k < numSamples; ++k)
     {
         void * vPtr = static_cast< void* >(dataPtr);
         reader.get(vPtr, k);
