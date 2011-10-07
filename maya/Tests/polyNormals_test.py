@@ -62,7 +62,7 @@ class PolyNormalsTest(unittest.TestCase):
         MayaCmds.polyCube(name='polyCube')
         # add the necessary props
         MayaCmds.select('polyCubeShape')
-        MayaCmds.addAttr(longName='subDivisionMesh', attributeType='bool',
+        MayaCmds.addAttr(longName='SubDivisionMesh', attributeType='bool',
             defaultValue=False)
         MayaCmds.addAttr(longName='interpolateBoundary', attributeType='bool',
             defaultValue=True)
@@ -77,7 +77,7 @@ class PolyNormalsTest(unittest.TestCase):
 
         # add the necessary props
         MayaCmds.select('polySphereShape')
-        MayaCmds.addAttr(longName='subDivisionMesh', attributeType='bool',
+        MayaCmds.addAttr(longName='SubDivisionMesh', attributeType='bool',
             defaultValue=False)
         MayaCmds.addAttr(longName='interpolateBoundary', attributeType='bool',
             defaultValue=True)
@@ -110,7 +110,7 @@ class PolyNormalsTest(unittest.TestCase):
 
         # add the necessary props
         MayaCmds.select(polyShapeName)
-        MayaCmds.addAttr(longName='subDivisionMesh', attributeType='bool',
+        MayaCmds.addAttr(longName='SubDivisionMesh', attributeType='bool',
             defaultValue=False)
         MayaCmds.addAttr(longName='noNormals', attributeType='bool',
             defaultValue=False)
@@ -161,7 +161,7 @@ class PolyNormalsTest(unittest.TestCase):
 
         # add the necessary props
         MayaCmds.select(polyShapeName)
-        MayaCmds.addAttr(longName='subDivisionMesh', attributeType='bool',
+        MayaCmds.addAttr(longName='SubDivisionMesh', attributeType='bool',
             defaultValue=False)
         MayaCmds.addAttr(longName='noNormals', attributeType='bool',
             defaultValue=False)

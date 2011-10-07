@@ -721,6 +721,7 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
             setUVs(iFrame, ioMesh, schema.getUVsParam());
         }
 
+        setColors(iFrame, ioMesh, iNode.mC3s, iNode.mC4s, !iInitialized);
         return;
     }
 
