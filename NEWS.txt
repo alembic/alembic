@@ -1,3 +1,27 @@
+2011-10-12, Alembic 1.0.2
+
+Hello, Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes and a couple of new flags for some of our plugins.
+
+Some highlights:
+
+- In Maya don't flip V when reading and writing UVs. (AbcExport and AbcImport)
+
+- Add a flag to the prman Procedural to flip V when necessary.
+
+- Add a flag to AbcExport to write out color sets and have restore them on
+AbcImport.
+
+- In AbcExport the -renderableOnly flag was doing the opposite of what it was
+supposed to do.
+
+- Fix bug in SimpleAbcViewer  where XformSchema::getInheritsXforms() was not
+being respected.
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
 2011-09-15, Alembic 1.0.1
 
 Hello, Alembic users, we've gotten great feedback from the community
