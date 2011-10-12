@@ -15,8 +15,10 @@ AbcImport.
 - In AbcExport the -renderableOnly flag was doing the opposite of what it was
 supposed to do.
 
-- Fix bug in SimpleAbcViewer  where XformSchema::getInheritsXforms() was not
+- Fix bug in SimpleAbcViewer where XformSchema::getInheritsXforms() was not
 being respected.
+
+- Fix bug in AbcStitcher to prevent a segfault.
 
 We welcome your comments on the discussion list.
 
