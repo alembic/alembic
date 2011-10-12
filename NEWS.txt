@@ -24,6 +24,7 @@ We welcome your comments on the discussion list.
 
 http://groups.google.com/group/alembic-discussion
 
+##-*****************************************************************************
 2011-09-15, Alembic 1.0.1
 
 Hello, Alembic users, we've gotten great feedback from the community
