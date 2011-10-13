@@ -7,10 +7,10 @@ Some highlights:
 
 - In Maya don't flip V when reading and writing UVs. (AbcExport and AbcImport)
 
-- Add a flag to the prman Procedural to flip V when necessary.
+- Add a flag (-flipv) to the prman Procedural to flip V when necessary.
 
-- Add a flag to AbcExport to write out color sets and have restore them on
-AbcImport.
+- Add a flag (-wcs / -writeColorSets) to AbcExport to write out color sets and
+restore them on AbcImport.
 
 - In AbcExport the -renderableOnly flag was doing the opposite of what it was
 supposed to do.
