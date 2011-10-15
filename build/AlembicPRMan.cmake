@@ -94,7 +94,7 @@ FIND_LIBRARY( ALEMBIC_PRMAN_LIBPRMAN prman
 
 IF( ${WINDOWS} )
   SET( PRMAN_COMPILE_FLAGS "/c /nologo /MT /TP /DWIN32" )
-  SET( PRMAN_LINK_FLAGS "/nologo /dll /LIBPATH:\"%RMANTREE%\lib\" libprman.lib" )
+  SET( PRMAN_LINK_FLAGS "/nologo /dll /LIBPATH:\"%RMANTREE%\\lib\" libprman.lib" )
 ELSEIF( ${DARWIN} )
   SET( PRMAN_COMPILE_FLAGS "-c" )
   SET( PRMAN_LINK_FLAGS "-bundle -undefined dynamic_lookup" )
