@@ -40,6 +40,7 @@
 
 #include <maya/MFnPlugin.h>
 #include <maya/MFileObject.h>
+#include <maya/MItDependencyNodes.h>
 
 namespace AbcA = Alembic::AbcCoreAbstract;
 
@@ -553,6 +554,16 @@ MStatus AbcExport::doIt(const MArgList & args)
             else
             {
                 fileName = absoluteFile.resolvedFullName().asChar();
+            }
+
+            // check the path must exist before writing
+            MFileObject absoluteFilePath;
+            absoluteFilePath.setRawFullName(absoluteFile.path());
+            if (!absoluteFilePath.exists()) {
+                MString error;
+                error.format("Path ^1s does not exist!", absoluteFilePath.resolvedFullName());
+                MGlobal::displayError(error);
+                return MS::kFailure;
             }
         }
 
