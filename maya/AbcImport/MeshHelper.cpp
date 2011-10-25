@@ -38,6 +38,7 @@
 #include "MeshHelper.h"
 #include "NodeIteratorVisitorHelper.h"
 
+#include <maya/MTypes.h>
 #include <maya/MString.h>
 #include <maya/MFloatPoint.h>
 #include <maya/MFloatPointArray.h>
@@ -401,7 +402,9 @@ namespace
             {
                 meshIO.setCurrentColorSetName(iSetName);
             }
+#if MAYA_API_VERSION > 201200
             meshIO.setDisplayColors(true);
+#endif
         }
 
     }
