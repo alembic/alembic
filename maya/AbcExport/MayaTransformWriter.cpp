@@ -40,7 +40,7 @@
 void addTranslate(const MFnDependencyNode & iTrans,
     MString parentName, MString xName, MString yName, MString zName,
     Alembic::Util::uint8_t iHint, bool inverse, bool forceStatic,
-    Alembic::AbcGeom::XformSample & oSample,
+    bool forceAnimated, Alembic::AbcGeom::XformSample & oSample,
     std::vector < AnimChan > & oAnimChanList)
 {
     Alembic::AbcGeom::XformOp op(Alembic::AbcGeom::kTranslateOperation, iHint);
@@ -49,7 +49,10 @@ void addTranslate(const MFnDependencyNode & iTrans,
     int xSamp = 0;
     if (!forceStatic)
     {
-        xSamp = util::getSampledType(xPlug);
+        if (!forceAnimated)
+            xSamp = util::getSampledType(xPlug);
+        else
+            xSamp = 1;
     }
     double xVal = xPlug.asDouble();
 
@@ -57,7 +60,10 @@ void addTranslate(const MFnDependencyNode & iTrans,
     int ySamp = 0;
     if (!forceStatic)
     {
-        ySamp = util::getSampledType(yPlug);
+        if (!forceAnimated)
+            ySamp = util::getSampledType(yPlug);
+        else
+            ySamp = 1;
     }
     double yVal = yPlug.asDouble();
 
@@ -65,7 +71,10 @@ void addTranslate(const MFnDependencyNode & iTrans,
     int zSamp = 0;
     if (!forceStatic)
     {
-        zSamp = util::getSampledType(zPlug);
+        if (!forceAnimated)
+            zSamp = util::getSampledType(zPlug);
+        else
+            zSamp = 1;
     }
     double zVal = zPlug.asDouble();
 
@@ -73,7 +82,16 @@ void addTranslate(const MFnDependencyNode & iTrans,
     // plug but not to the child plugs, if the connection is there then all
     // of the children are considered animated
     MPlug parentPlug = iTrans.findPlug(parentName);
-    if (!forceStatic && util::getSampledType(parentPlug) != 0)
+    int parentSamp = 0;
+    if (!forceStatic)
+    {
+        if (!forceAnimated)
+            parentSamp = util::getSampledType(parentPlug);
+        else
+            parentSamp = 1;
+    }
+
+    if (parentSamp != 0)
     {
         xSamp = 1;
         ySamp = 1;
@@ -305,7 +323,7 @@ void addShear(const MFnDependencyNode & iTrans, bool forceStatic,
 // to the stack if x,y, and z are 1.0
 void addScale(const MFnDependencyNode & iTrans,
     MString parentName, MString xName, MString yName, MString zName,
-    bool forceStatic, Alembic::AbcGeom::XformSample & oSample,
+    bool forceStatic, bool forceAnimated, Alembic::AbcGeom::XformSample & oSample,
     std::vector < AnimChan > & oAnimChanList)
 {
 
@@ -316,7 +334,10 @@ void addScale(const MFnDependencyNode & iTrans,
     int xSamp = 0;
     if (!forceStatic)
     {
-        xSamp = util::getSampledType(xPlug);
+        if (!forceAnimated)
+            xSamp = util::getSampledType(xPlug);
+        else
+            xSamp = 1;
     }
     double xVal = xPlug.asDouble();
 
@@ -324,7 +345,10 @@ void addScale(const MFnDependencyNode & iTrans,
     int ySamp = 0;
     if (!forceStatic)
     {
-        ySamp = util::getSampledType(yPlug);
+        if (!forceAnimated)
+            ySamp = util::getSampledType(yPlug);
+        else
+            ySamp = 1;
     }
     double yVal = yPlug.asDouble();
 
@@ -332,7 +356,10 @@ void addScale(const MFnDependencyNode & iTrans,
     int zSamp = 0;
     if (!forceStatic)
     {
-        zSamp = util::getSampledType(zPlug);
+        if (!forceAnimated)
+            zSamp = util::getSampledType(zPlug);
+        else
+            zSamp = 1;
     }
     double zVal = zPlug.asDouble();
 
@@ -340,7 +367,16 @@ void addScale(const MFnDependencyNode & iTrans,
     // plug but not to the child plugs, if the connection is there then all
     // of the children are considered animated
     MPlug parentPlug = iTrans.findPlug(parentName);
-    if (!forceStatic && util::getSampledType(parentPlug) != 0)
+    int parentSamp = 0;
+    if (!forceStatic)
+    {
+        if (!forceAnimated)
+            parentSamp = util::getSampledType(parentPlug);
+        else
+            parentSamp = 1;
+    }
+
+    if (parentSamp != 0)
     {
         xSamp = 1;
         ySamp = 1;
@@ -678,7 +714,7 @@ void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
 
     // inspect the translate
     addTranslate(iTrans, "translate", "translateX", "translateY", "translateZ",
-        Alembic::AbcGeom::kTranslateHint, false, iForceStatic, mSample,
+        Alembic::AbcGeom::kTranslateHint, false, iForceStatic, false, mSample,
         mAnimChanList);
 
 
@@ -686,12 +722,12 @@ void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
     addTranslate(iTrans, "rotatePivotTranslate", "rotatePivotTranslateX",
         "rotatePivotTranslateY", "rotatePivotTranslateZ",
         Alembic::AbcGeom::kRotatePivotTranslationHint, false,
-            iForceStatic, mSample, mAnimChanList);
+            iForceStatic, false, mSample, mAnimChanList);
 
     // inspect the rotate pivot
     addTranslate(iTrans, "rotatePivot", "rotatePivotX", "rotatePivotY",
         "rotatePivotZ",  Alembic::AbcGeom::kRotatePivotPointHint,
-        false, iForceStatic, mSample, mAnimChanList);
+        false, iForceStatic, false, mSample, mAnimChanList);
 
     // inspect rotate names
     MString rotateNames[3];
@@ -724,43 +760,54 @@ void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
     // invert the rotate pivot if necessary
     addTranslate(iTrans, "rotatePivot", "rotatePivotX", "rotatePivotY",
         "rotatePivotZ", Alembic::AbcGeom::kRotatePivotPointHint,
-        true, iForceStatic, mSample, mAnimChanList);
+        true, iForceStatic, false, mSample, mAnimChanList);
 
     // inspect the scale pivot translation
     addTranslate(iTrans, "scalePivotTranslate", "scalePivotTranslateX",
         "scalePivotTranslateY", "scalePivotTranslateZ",
         Alembic::AbcGeom::kScalePivotTranslationHint, false, iForceStatic,
-        mSample, mAnimChanList);
+        false, mSample, mAnimChanList);
 
     // inspect the scale pivot point
     addTranslate(iTrans, "scalePivot", "scalePivotX", "scalePivotY",
         "scalePivotZ", Alembic::AbcGeom::kScalePivotPointHint, false,
-        iForceStatic, mSample, mAnimChanList);
+        iForceStatic, false, mSample, mAnimChanList);
 
     // inspect the shear
     addShear(iTrans, iForceStatic, mSample, mAnimChanList);
 
     // add the scale
     addScale(iTrans, "scale", "scaleX", "scaleY", "scaleZ", iForceStatic,
-        mSample, mAnimChanList);
+        false, mSample, mAnimChanList);
 
     // inverse the scale pivot point if necessary
     addTranslate(iTrans, "scalePivot", "scalePivotX", "scalePivotY",
         "scalePivotZ", Alembic::AbcGeom::kScalePivotPointHint, true,
-        iForceStatic, mSample, mAnimChanList);
+        iForceStatic, false, mSample, mAnimChanList);
 }
 
 void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
     bool iForceStatic)
 {
+    // check joints that are driven by Maya FBIK
+    // Maya FBIK has no connection to joints' TRS plugs
+    // but TRS of joints are driven by FBIK, they are not static
+    // Maya 2012's new HumanIK has connections to joints.
+    // FBIK is a special case.
+    bool forceAnimated = false;
+    MStatus status = MS::kSuccess;
+    if (iJoint.hikJointName(&status).length() > 0 && status) {
+        forceAnimated = true;
+    }
+
     // inspect the translate
     addTranslate(iJoint, "translate", "translateX", "translateY", "translateZ",
-        Alembic::AbcGeom::kTranslateHint, false, iForceStatic,
+        Alembic::AbcGeom::kTranslateHint, false, iForceStatic, forceAnimated,
         mSample, mAnimChanList);
 
     // inspect the inverseParent scale
     addScale(iJoint, "inverseScale", "inverseScaleX", "inverseScaleY",
-        "inverseScaleZ", iForceStatic, mSample, mAnimChanList);
+        "inverseScaleZ", iForceStatic, forceAnimated, mSample, mAnimChanList);
 
     MTransformationMatrix::RotationOrder order;
     double vals[3];
@@ -810,5 +857,5 @@ void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
 
     // inspect the scale
     addScale(iJoint, "scale", "scaleX", "scaleY", "scaleZ", iForceStatic,
-        mSample, mAnimChanList);
+        forceAnimated, mSample, mAnimChanList);
 }
