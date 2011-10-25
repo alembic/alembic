@@ -48,6 +48,7 @@
 #include <maya/MAngle.h>
 #include <maya/MGlobal.h>
 #include <maya/MTime.h>
+#include <maya/MFileObject.h>
 
 #include <maya/MArrayDataHandle.h>
 #include <maya/MFloatPointArray.h>
@@ -249,7 +250,9 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         mFileInitialized = true;
 
         MDataHandle dataHandle = dataBlock.inputValue(mAbcFileNameAttr);
-        MString fileName = dataHandle.asString();
+		MFileObject fileObject;
+		fileObject.setRawFullName(dataHandle.asString());
+        MString fileName = fileObject.resolvedFullName();
 
         // no caching!
         Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
