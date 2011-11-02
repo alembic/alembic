@@ -431,13 +431,13 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
 
     MPlug dstPlug;
 
-    dstPlug = trans.findPlug("translateX");
+    dstPlug = trans.findPlug("scalePivotX");
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("translateY");
+    dstPlug = trans.findPlug("scalePivotY");
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("translateZ");
+    dstPlug = trans.findPlug("scalePivotZ");
     disconnectAllPlugsTo(dstPlug);
-    trans.setTranslation(vec, gSpace);
+    trans.setScalePivot(point, gSpace, gBalance);
 
     dstPlug = trans.findPlug("scaleX");
     disconnectAllPlugsTo(dstPlug);
@@ -456,24 +456,6 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
     disconnectAllPlugsTo(dstPlug);
     trans.setShear(zero);
 
-    dstPlug = trans.findPlug("rotateX");
-    disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotateY");
-    disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotateZ");
-    disconnectAllPlugsTo(dstPlug);
-    MTransformationMatrix::RotationOrder order =
-        MTransformationMatrix::kXYZ;
-    trans.setRotation(zero, order);
-
-    dstPlug = trans.findPlug("scalePivotX");
-    disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("scalePivotY");
-    disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("scalePivotZ");
-    disconnectAllPlugsTo(dstPlug);
-    trans.setScalePivot(point, gSpace, gBalance);
-
     dstPlug = trans.findPlug("scalePivotTranslateX");
     disconnectAllPlugsTo(dstPlug);
     dstPlug = trans.findPlug("scalePivotTranslateY");
@@ -490,14 +472,6 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
     disconnectAllPlugsTo(dstPlug);
     trans.setScalePivot(point, gSpace, gBalance);
 
-    dstPlug = trans.findPlug("rotatePivotTranslateX");
-    disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotatePivotTranslateY");
-    disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotatePivotTranslateZ");
-    disconnectAllPlugsTo(dstPlug);
-    trans.setScalePivotTranslation(vec, gSpace);
-
     dstPlug = trans.findPlug("rotateAxisX");
     disconnectAllPlugsTo(dstPlug);
     dstPlug = trans.findPlug("rotateAxisY");
@@ -507,10 +481,37 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
     const MQuaternion quat;
     trans.setRotateOrientation(quat, gSpace, gBalance);
 
+    MTransformationMatrix::RotationOrder order =
+        MTransformationMatrix::kXYZ;
+
     dstPlug = trans.findPlug("rotateOrder");
     disconnectAllPlugsTo(dstPlug);
     bool reorder = true;
     trans.setRotationOrder(order, reorder);
+
+    dstPlug = trans.findPlug("rotateX");
+    disconnectAllPlugsTo(dstPlug);
+    dstPlug = trans.findPlug("rotateY");
+    disconnectAllPlugsTo(dstPlug);
+    dstPlug = trans.findPlug("rotateZ");
+    disconnectAllPlugsTo(dstPlug);
+    trans.setRotation(zero, order);
+
+    dstPlug = trans.findPlug("rotatePivotTranslateX");
+    disconnectAllPlugsTo(dstPlug);
+    dstPlug = trans.findPlug("rotatePivotTranslateY");
+    disconnectAllPlugsTo(dstPlug);
+    dstPlug = trans.findPlug("rotatePivotTranslateZ");
+    disconnectAllPlugsTo(dstPlug);
+    trans.setScalePivotTranslation(vec, gSpace);
+
+    dstPlug = trans.findPlug("translateX");
+    disconnectAllPlugsTo(dstPlug);
+    dstPlug = trans.findPlug("translateY");
+    disconnectAllPlugsTo(dstPlug);
+    dstPlug = trans.findPlug("translateZ");
+    disconnectAllPlugsTo(dstPlug);
+    trans.setTranslation(vec, gSpace);
 
     dstPlug = trans.findPlug("inheritsTransform");
     disconnectAllPlugsTo(dstPlug);
