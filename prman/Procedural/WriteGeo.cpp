@@ -40,6 +40,43 @@
 #include "SubDTags.h"
 
 //-*****************************************************************************
+
+void ApplyResources( IObject object, ProcArgs &args )
+{
+    std::string resourceName;
+    
+    //first check full name...
+    resourceName = args.getResource( object.getFullName() );
+    
+    if ( resourceName.empty() )
+    {
+        //...and then base name
+        resourceName = args.getResource( object.getName() );
+    }
+    
+    if ( !resourceName.empty() )
+    {
+        
+        ParamListBuilder paramListBuilder;
+        paramListBuilder.addStringValue("restore", true);
+        paramListBuilder.add( "string operation",
+                paramListBuilder.finishStringVector() );
+        
+        paramListBuilder.addStringValue("shading", true);
+        paramListBuilder.add( "string subset",
+                paramListBuilder.finishStringVector() );
+        
+        RiResourceV(
+                const_cast<char *>( resourceName.c_str() ),
+                const_cast<char *>( "attributes" ),
+                paramListBuilder.n(),
+                paramListBuilder.nms(),
+                paramListBuilder.vals()
+        );
+    }
+}
+
+//-*****************************************************************************
 void ProcessXform( IXform &xform, ProcArgs &args )
 {
     IXformSchema &xs = xform.getSchema();
@@ -291,6 +328,9 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
             if ( ss.hasFaceSet( facesetName ) )
             {
                 IFaceSet faceSet = ss.getFaceSet( facesetName );
+                
+                ApplyResources( faceSet, args );
+                
                 IFaceSetSchema::Sample faceSetSample = 
                         faceSet.getSchema().getValue( sampleSelector );
                 
@@ -307,6 +347,46 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
                         tags.add( "hole" );
                         tags.addIntArg( i );
                     }
+                }
+            }
+        }
+        else
+        {
+            //loop through the facesets and determine whether there are any
+            //resources assigned to each
+            std::vector <std::string> childFaceSetNames;
+            ss.getFaceSetNames(childFaceSetNames);
+            
+            for (size_t i = 0; i < childFaceSetNames.size(); ++i)
+            {
+                std::string resourceName = args.getResource(
+                        subd.getFullName() + "/" + childFaceSetNames[i] );
+                
+                if ( resourceName.empty() )
+                {
+                    resourceName = args.getResource( childFaceSetNames[i] );
+                }
+                
+                if ( !resourceName.empty() )
+                {
+                    isHierarchicalSubD = true;
+                    
+                    IFaceSet faceSet = ss.getFaceSet(childFaceSetNames[i]);
+                    
+                    tags.add("faceedit");
+                    
+                    Int32ArraySamplePtr faces = faceSet.getSchema().getValue(
+                            sampleSelector ).getFaces();
+                    
+                    for (size_t j = 0, e = faces->size(); j < e; ++j)
+                    {
+                        tags.addIntArg(1); //yep, every face gets a 1 in front of it too
+                        tags.addIntArg( (int) faces->get()[j]);
+                    }
+                    
+                    tags.addStringArg( "attributes" );
+                    tags.addStringArg( resourceName );
+                    tags.addStringArg( "shading" );
                 }
             }
         }

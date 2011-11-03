@@ -65,6 +65,9 @@ public:
     }
 };
 
+
+
+
 typedef std::auto_ptr<AttributeBlockHelper> AttributeBlockHelperAutoPtr;
 
 //-*****************************************************************************
@@ -95,6 +98,8 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             ProcessXform( xform, args );
             
             nextParentObject = xform;
+            
+            ApplyResources( nextParentObject, args );
         }
     }
     else if ( ISubD::matches( ohead ) )
@@ -120,7 +125,9 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
                 faceSetName = *I;
             }
         }
-
+        
+        ApplyResources( subd, args );
+        
         ProcessSubD( subd, args, faceSetName );
 
         //if we found a matching faceset, don't traverse below
@@ -137,6 +144,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         }
         
         IPolyMesh polymesh( parent, ohead.getName() );
+        ApplyResources( polymesh, args );
         ProcessPolyMesh( polymesh, args );
 
         nextParentObject = polymesh;
@@ -149,6 +157,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         }
         
         INuPatch patch( parent, ohead.getName() );
+        ApplyResources( patch, args );
         ProcessNuPatch( patch, args );
         
         nextParentObject = patch;
@@ -161,6 +170,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         }
         
         IPoints points( parent, ohead.getName() );
+        ApplyResources( points, args );
         ProcessPoints( points, args );
         
         nextParentObject = points;
@@ -173,6 +183,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         }
         
         ICurves curves( parent, ohead.getName() );
+        ApplyResources( curves, args );
         ProcessCurves( curves, args );
         
         nextParentObject = curves;
@@ -217,8 +228,16 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     // if set.
 }
 
+
+#ifdef _MSC_VER
+#define RIPROC_DLL_EXPORT __declspec(dllexport)
+#else
+#define RIPROC_DLL_EXPORT
+#endif
+
+
 //-*****************************************************************************
-extern "C" RtPointer
+extern "C" RIPROC_DLL_EXPORT RtPointer
 ConvertParameters( RtString paramstr )
 {
     try
@@ -235,14 +254,14 @@ ConvertParameters( RtString paramstr )
 }
 
 //-*****************************************************************************
-extern "C" RtVoid
+extern "C" RIPROC_DLL_EXPORT RtVoid
 Free( RtPointer data )
 {
     delete reinterpret_cast<ProcArgs*>( data );
 }
 
 //-*****************************************************************************
-extern "C" RtVoid
+extern "C" RIPROC_DLL_EXPORT RtVoid 
 Subdivide( RtPointer data, RtFloat detail )
 {
     ProcArgs *args = reinterpret_cast<ProcArgs*>( data );

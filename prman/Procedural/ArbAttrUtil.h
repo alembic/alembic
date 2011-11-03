@@ -77,7 +77,6 @@ public:
     RtPointer* vals();
 
 private:
-    std::vector<std::string> m_declarations;
     std::vector<RtToken> m_outputDeclarations;
     std::vector<RtPointer> m_values;
     std::vector<ArraySamplePtr> m_retainedSamples;

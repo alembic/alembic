@@ -43,6 +43,8 @@
 using namespace Alembic::AbcGeom;
 //-*****************************************************************************
 
+void ApplyResources( IObject object, ProcArgs &args );
+
 void WriteIdentifier( const ObjectHeader &ohead );
 
 void ProcessXform( IXform &xform, ProcArgs &args );

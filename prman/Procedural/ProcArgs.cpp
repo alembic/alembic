@@ -40,23 +40,80 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <map>
+
+#include <fstream>
+#include <streambuf>
+
+namespace
+{
+    typedef boost::shared_ptr<ProcArgs> ProcArgsSharedPtr;
+    typedef std::map<std::string, ProcArgsSharedPtr> ProcArgsMap;
+    
+    ProcArgsMap g_argsFileCache;
+    
+    ProcArgsSharedPtr readArgsFile( const std::string & filePath )
+    {
+        ProcArgsMap::iterator I = g_argsFileCache.find( filePath );
+        
+        if ( I != g_argsFileCache.end() )
+        {
+            return (*I).second;
+        }
+        
+        std::string workString;
+        
+        try
+        {
+            std::ifstream fs( filePath.c_str() );
+            
+            fs.seekg( 0, std::ios::end );
+            workString.reserve( fs.tellg() );
+            fs.seekg( 0, std::ios::beg );
+            
+            workString.assign(
+                    ( std::istreambuf_iterator<char>( fs ) ),
+                    std::istreambuf_iterator<char>() );
+        }
+        catch ( const std::exception & e )
+        {
+            std::cerr << "AlembicRiProcedural: cannot read arguments file: ";
+            std::cerr << filePath << std::endl;
+            
+            g_argsFileCache[filePath] = ProcArgsSharedPtr();
+            return ProcArgsSharedPtr();
+        }
+        
+        ProcArgsSharedPtr result(
+                new ProcArgs( const_cast<char*>( workString.c_str() ),
+                        true ) );
+        
+        g_argsFileCache[filePath] = result;
+        
+        return result;
+    }
+
+}
+
 
 //-*****************************************************************************
 //INSERT YOUR OWN TOKENIZATION CODE AND STYLE HERE
-ProcArgs::ProcArgs( RtString paramStr )
+ProcArgs::ProcArgs( RtString paramStr, bool fromReference )
   : frame(0.0)
   , fps(24.0)
   , shutterOpen(0)
   , shutterClose(0)
   , excludeXform(false)
+  , flipv(false)
 {
     typedef boost::char_separator<char> Separator;
     typedef boost::tokenizer<Separator> Tokenizer;
 
     std::vector<std::string> tokens;
     std::string params( paramStr );
-
-    Tokenizer tokenizer( params, Separator(" ") );
+    
+    
+    Tokenizer tokenizer( params, Separator(" \n\t") );
     for ( Tokenizer::iterator iter = tokenizer.begin(); iter != tokenizer.end() ;
           ++iter )
     {
@@ -64,7 +121,9 @@ ProcArgs::ProcArgs( RtString paramStr )
 
         tokens.push_back( *iter );
     }
-
+    
+    bool lastResourceWasLocal = true;
+    
     for ( size_t i = 0; i < tokens.size(); ++i )
     {
         std::string token = tokens[i];
@@ -78,6 +137,7 @@ ProcArgs::ProcArgs( RtString paramStr )
             if ( i < tokens.size() )
             {
                 frame = atof( tokens[i].c_str() );
+                frame_defined = true;
             }
         }
         else if ( token == "-fps" )
@@ -86,6 +146,7 @@ ProcArgs::ProcArgs( RtString paramStr )
             if ( i < tokens.size() )
             {
                 fps = atof( tokens[i].c_str() );
+                fps_defined = true;
             }
         }
         else if ( token == "-shutteropen" )
@@ -94,6 +155,7 @@ ProcArgs::ProcArgs( RtString paramStr )
             if ( i < tokens.size() )
             {
                 shutterOpen = atof( tokens[i].c_str() );
+                shutterOpen_defined = true;
             }
         }
         else if ( token == "-shutterclose" )
@@ -102,6 +164,7 @@ ProcArgs::ProcArgs( RtString paramStr )
             if ( i < tokens.size() )
             {
                 shutterClose = atof( tokens[i].c_str() );
+                shutterClose_defined = true;
             }
         }
         else if ( token == "-filename" )
@@ -110,6 +173,7 @@ ProcArgs::ProcArgs( RtString paramStr )
             if ( i < tokens.size() )
             {
                 filename = tokens[i];
+                filename_defined = true;
             }
         }
         else if ( token == "-objectpath" )
@@ -118,25 +182,154 @@ ProcArgs::ProcArgs( RtString paramStr )
             if ( i < tokens.size() )
             {
                 objectpath = tokens[i];
+                objectpath_defined = true;
             }
         }
         else if ( token == "-excludexform" )
         {
             excludeXform = true;
+            excludeXform_defined = true;
             
         }
         else if ( token == "-flipv" )
         {
             flipv = true;
+            flipv_defined = true;
         }
+        else if ( token == "-argsfile" )
+        {
+            ++i;
+            if ( i < tokens.size() )
+            {
+                if ( ProcArgsSharedPtr args = 
+                        readArgsFile( tokens[i] ) )
+                {
+                    size_t beforeSize = resourceSearchPath.size();
+                    
+                    applyArgs( *args );
+                    
+                    if ( beforeSize != resourceSearchPath.size() )
+                    {
+                        lastResourceWasLocal = false;
+                    }
+                }
+            }
+        }
+        else if ( token == "-resource" )
+        {
+            ++i;
+            if ( i < tokens.size() )
+            {
+                std::string objectName = tokens[i];
+                ++i;
+                if ( i < tokens.size() )
+                {
+                    std::string resourceName = tokens[i];
+                    
+                    if ( resourceSearchPath.empty() || !lastResourceWasLocal )
+                    {
+                        resourceSearchPath.push_back( StringMapRefPtr(
+                                new StringMap ) );
+                        lastResourceWasLocal = true;
+                    }
+                    
+                    (*resourceSearchPath.back())[objectName] = resourceName;
+                }
+            }
+        }
+        
+        
         
     }
     
-    if ( filename.empty() )
+    if ( filename.empty() && !fromReference )
     {
         usage();
     }
 }
+
+void ProcArgs::applyArgs(ProcArgs & args)
+{
+    if ( args.filename_defined )
+    {
+        filename = args.filename;
+        filename_defined = true;
+    }
+    
+    if ( args.objectpath_defined )
+    {
+        objectpath = args.objectpath;
+        objectpath_defined = true;
+    }
+    
+    if ( args.frame_defined )
+    {
+        frame = args.frame;
+        frame_defined = true;
+    }
+    
+    if ( args.fps_defined )
+    {
+        fps = args.fps;
+        fps_defined = true;
+    }
+    
+    if ( args.shutterOpen_defined )
+    {
+        shutterOpen = args.shutterOpen;
+        shutterOpen_defined = true;
+    }
+    
+    if ( args.shutterClose_defined )
+    {
+        shutterClose = args.shutterClose;
+        shutterClose_defined = true;
+    }
+    
+    if ( args.excludeXform_defined )
+    {
+        excludeXform = args.excludeXform;
+        excludeXform_defined = true;
+    }
+    
+    if ( args.flipv_defined )
+    {
+        flipv = args.flipv;
+        flipv_defined = true;
+    }
+    
+    if ( !args.resourceSearchPath.empty() )
+    {
+        resourceSearchPath.reserve(
+                resourceSearchPath.size() + args.resourceSearchPath.size() );
+        
+        resourceSearchPath.insert( resourceSearchPath.end(),
+                args.resourceSearchPath.begin(), args.resourceSearchPath.end() );
+    }
+    
+}
+
+std::string ProcArgs::getResource( const std::string & name )
+{
+    for ( StringMapRefPtrVector::reverse_iterator I = 
+            resourceSearchPath.rbegin(), E = resourceSearchPath.rend();
+                    I != E; ++I )
+    {
+        StringMapRefPtr & entry = (*I);
+        
+        if ( entry )
+        {
+            StringMap::iterator I = entry->find(name);
+            if ( I != entry->end() )
+            {
+                return (*I).second;
+            }
+        }
+    }
+    
+    return "";
+}
+
 
 void ProcArgs::usage()
 {
@@ -219,7 +412,41 @@ void ProcArgs::usage()
                  "texture coordinates of polymesh and subdmesh primitives.";
     std::cerr << std::endl;
     std::cerr << std::endl;
-        
+    
+    std::cerr << "-resource nameOrPath resourceName" << std::endl;
+    std::cerr << std::endl;
+    
+    std::cerr << "For each occurance of this flag, resourceName is added to "
+                 "an internal map using nameOrPath as a key. When traversing the "
+                 "scene, the full path and base name of each object (in that "
+                 "order) are looked up from this map. If it contains a value, "
+                 "it will emit an RiResource call to \"restore\" the resource "
+                 "block of that name with the expectation that a resource "
+                 "block of that name has been declared externally. Also, "
+                 "unless an -objectpath flag is pointing directly at a FaceSet "
+                 "object beneath a SubD, this test will be done for each "
+                 "FaceSet. Any matches at the FaceSet level will be added as "
+                 "\"faceedit\" tags to the resulting "
+                 "RiHierarchicalSubdivisionMesh call. This is useful for "
+                 "associating shading information with individual shapes and "
+                 "faces.";
+    
+    std::cerr << std::endl;
+    std::cerr << std::endl;
+    
+    std::cerr << "-argsfile /path/to/some/file" << std::endl;
+    std::cerr << std::endl;
+    
+    std::cerr << "This allows arguments to be stored and shared in external files. "
+                 "The files are parsed once and cached so that they may be shared "
+                 "between invocations of the procedural. They are applied in the "
+                 "same order and manner as if the contents of the file appeared "
+                 "in place of the -argsfile flag. This is mostly useful for defining "
+                 "and sharing large blocks of -resource flags without redundant "
+                 "parsing or copying of the parsed results.";
+    
+    std::cerr << std::endl;
+    std::cerr << std::endl;
     
 }
 

@@ -56,11 +56,10 @@ ParamListBuilder::~ParamListBuilder()
 void ParamListBuilder::add( const std::string & declaration, RtPointer value,
                             ArraySamplePtr sampleToRetain )
 {
-    m_declarations.push_back( declaration );
-
-    m_outputDeclarations.push_back(
-        const_cast<char *>( m_declarations.back().c_str() ) );
-
+    //save a copy of the declaration string
+    m_retainedStrings.push_back( strdup( declaration.c_str() ) );
+    m_outputDeclarations.push_back( m_retainedStrings.back() );
+    
     m_values.push_back( value );
 
     if ( sampleToRetain )

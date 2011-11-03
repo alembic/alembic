@@ -28,6 +28,15 @@ If specified, no transformation statements will be written and AttributeBegin bl
 -flipv
 
 Like many systems (Maya included), AbcGeom's default interpretation of texture coordinates is of a bottom-left corner origin. RenderMan's texture lookups assume a top-left corner origin by default. If your shaders are not already compensating for this, enabling -flipv applies (1-v) to texture coordinates of polymesh and subdmesh primitives.
-   
+
+-resource nameOrPath resourceName
+
+For each occurance of this flag, resourceName is added to an internal map using nameOrPath as a key. When traversing the scene, the full path and base name of each object (in that order) are looked up from this map. If it contains a value, it will emit an RiResource call to "restore" the resource block of that name with the expectation that a resource block of that name has been declared externally. Also, unless an -objectpath flag is pointing directly at a FaceSet object beneath a SubD, this test will be done for each FaceSet. Any matches at the FaceSet level will be added as "faceedit" tags to the resulting RiHierarchicalSubdivisionMesh call. This is useful for associating shading information with individual shapes and faces.
+
+-argsfile /path/to/some/file
+
+This allows arguments to be stored and shared in external files. The files are parsed once and cached so that they may be shared between invocations of the procedural. They are applied in the same order and manner as if the contents of the file appeared in place of the -argsfile flag. This is mostly useful for defining and sharing large blocks of -resource flags without redundant parsing or copying of the parsed results.
+
+
 
 
