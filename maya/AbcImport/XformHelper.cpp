@@ -470,7 +470,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
     disconnectAllPlugsTo(dstPlug);
     dstPlug = trans.findPlug("rotatePivotZ");
     disconnectAllPlugsTo(dstPlug);
-    trans.setScalePivot(point, gSpace, gBalance);
+    trans.setRotatePivot(point, gSpace, gBalance);
 
     dstPlug = trans.findPlug("rotateAxisX");
     disconnectAllPlugsTo(dstPlug);
@@ -503,7 +503,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
     disconnectAllPlugsTo(dstPlug);
     dstPlug = trans.findPlug("rotatePivotTranslateZ");
     disconnectAllPlugsTo(dstPlug);
-    trans.setScalePivotTranslation(vec, gSpace);
+    trans.setRotatePivotTranslation(vec, gSpace);
 
     dstPlug = trans.findPlug("translateX");
     disconnectAllPlugsTo(dstPlug);

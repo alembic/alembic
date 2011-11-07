@@ -250,8 +250,8 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         mFileInitialized = true;
 
         MDataHandle dataHandle = dataBlock.inputValue(mAbcFileNameAttr);
-		MFileObject fileObject;
-		fileObject.setRawFullName(dataHandle.asString());
+        MFileObject fileObject;
+        fileObject.setRawFullName(dataHandle.asString());
         MString fileName = fileObject.resolvedFullName();
 
         // no caching!
