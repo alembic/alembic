@@ -103,6 +103,11 @@ void ProcessXform( IXform &xform, ProcArgs &args )
         xs.get( sampleVectors[sampleTimeIndex], sampleSelector );
     }
 
+    if (xs.getInheritsXforms () == false)
+    {
+        RiIdentity ();
+    }
+
     //loop through the operators individually since a MotionBegin block
     //can enclose only homogenous statements
     for ( size_t i = 0, e = xs.getNumOps(); i < e; ++i )

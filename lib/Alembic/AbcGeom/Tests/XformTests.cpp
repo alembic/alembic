@@ -41,6 +41,38 @@
 
 using namespace Alembic::AbcGeom;
 
+void recurseCreateEmptyOObject(OObject & iParent, int children, int level)
+{
+    std::string levelName = boost::lexical_cast<std::string>( level );
+    for (int i = 0; i < children; ++i)
+    {
+        std::string xformName = levelName + "_" + boost::lexical_cast<std::string>( i );
+        OObject xform( iParent, xformName );
+        OCompoundProperty props = xform.getProperties();
+        OCompoundProperty xformProp(props, ".xform");
+        OInt32Property animChans(xformProp, ".animChans");
+        OBoolProperty inherits(xformProp, ".inherits");
+        if ( level > 0 )
+        {
+            recurseCreateEmptyOObject( xform, children, level - 1);
+        }
+    }
+}
+
+void recurseCreateEmptyXform(OObject & iParent, int children, int level)
+{
+    std::string levelName = boost::lexical_cast<std::string>( level );
+    for (int i = 0; i < children; ++i)
+    {
+        std::string xformName = levelName + "_" + boost::lexical_cast<std::string>( i );
+        OXform xform( iParent, xformName );
+        if ( level > 0 )
+        {
+            recurseCreateEmptyXform( xform, children, level - 1);
+        }
+    }
+}
+
 //-*****************************************************************************
 void recurseCreateXform(OObject & iParent, int children, int level,
                         std::vector<OXform> & oCreated)
@@ -472,5 +504,12 @@ int main( int argc, char *argv[] )
     someOpsXform();
     xformTreeCreate();
 
+    OArchive archiveA( Alembic::AbcCoreHDF5::WriteArchive(), "/mcp/object.abc" );
+    OArchive archiveB( Alembic::AbcCoreHDF5::WriteArchive(), "/mcp/xform.abc" );
+    OObject topA( archiveA, kTop );
+    OObject topB( archiveB, kTop );
+
+    recurseCreateEmptyOObject(topA, 5, 6);
+    recurseCreateEmptyXform(topB, 5, 6);
     return 0;
 }
