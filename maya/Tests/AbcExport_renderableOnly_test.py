@@ -53,7 +53,7 @@ class renderableOnlyTest(unittest.TestCase):
         MayaCmds.polyPlane(name='hidden')
         MayaCmds.setAttr("hidden.visibility", 0)
         self.__files.append(util.expandFileName('renderableOnlyTest.abc'))
-        MayaCmds.AbcExport(j='-ro -file ' + self.__files[-1])
+        MayaCmds.AbcExport(j='-renderableOnly -file ' + self.__files[-1])
         MayaCmds.AbcImport(self.__files[-1], m='open')
         self.failUnless(MayaCmds.objExists('potato'))
         self.failIf(MayaCmds.objExists('hidden'))

@@ -316,7 +316,7 @@ MStatus AbcExport::doIt(const MArgList & args)
                 jobArgs.noNormals = true;
             }
 
-            else if (arg == "-ro" || arg == "-renderableOnly")
+            else if (arg == "-ro" || arg == "-renderableonly")
             {
                 jobArgs.excludeInvisible = true;
             }
