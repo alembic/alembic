@@ -1,43 +1,46 @@
-2011-11-10, Alembic 1.0.3
+2011-11-11, Alembic 1.0.3
 
 Hello, Alembic users, thanks to your feedback we have another collection of
 small but useful bug fixes to our plugins.
 
 Some highlights:
 
-prman Procedural:
+Renderman Procedural:
 
--add windows export information for ConvertParameters/Subdivide/Free
+ - Addition of Windows export information for ConvertParameters/Subdivide/Free
 
--fix an uninitialized variable for -flipv
+ - Fixed an uninitialized variable for -flipv
 
--fix a string-related memory bug for declarations in ParamListBuilder
+ - Fixed a string-related memory bug for declarations in ParamListBuilder
+(issue 241)
 
--add support for reading, caching and sharing argument strings from files
+ - Addition of support for reading, caching and sharing argument strings from
+files.
 
--add support for restoring named resource blocks at specified paths or names
-for objects and facesets
+ - Addition of support for restoring named resource blocks at specified paths
+or names for objects and facesets
 
--support getInheritsXforms on IXforms (issue 247)
+ - Fixed support for getInheritsXforms in IXforms (issue 247)
 
--CMake file wasn't finding libprman.lib because of a typo (issue 229)
+ - Fixed CMake where it failed to find libprman.lib because of a typo
+(issue 229)
 
-Maya AbcImport
+Maya AbcImport:
 
--wrap setDisplayColors(true) in Maya API version #ifdef so it will compile in
-Maya 2011. (issue 244)
+ - Fixed compilation with Maya 2011 by adding an ifdef for the
+setDisplayColors(true) call.  (issue 244)
 
--fix issues with transforms not being properly cleared when connecting to them
-using the -connect flag
+ - Fixed some issues with the -connect option.  Transforms weren't being
+properly cleared when connection.
 
-Maya AbcExport
+Maya AbcExport:
 
--for FBIK joints, there isn't always a connection to translate or scale (like
-rotate for IK joints) so treat them like they are animated.
+ - Change for FBIK joints, there isn't always a connection to translate or
+scale (like rotate for IK joints).  We now treat them like they are animated.
 
--return an error if the file can not be written to.
+ - Return an error if the file can't be written to.
 
--the full -renderableOnly flag was not properly being detected (issue 252)
+ - The full -renderableOnly flag was not properly being detected (issue 252)
 
 We welcome your comments on the discussion list.
 
