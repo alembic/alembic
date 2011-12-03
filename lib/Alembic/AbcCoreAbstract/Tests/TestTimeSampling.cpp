@@ -50,7 +50,7 @@
 #include <boost/preprocessor/stringize.hpp>
 
 //-*****************************************************************************
-namespace AbcA = Alembic::AbcCoreAbstract::v1;
+namespace AbcA = Alembic::AbcCoreAbstract::v2;
 using AbcA::chrono_t;
 using AbcA::index_t;
 

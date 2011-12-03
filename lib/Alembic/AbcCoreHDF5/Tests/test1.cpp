@@ -38,7 +38,7 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <boost/random.hpp>
 
-namespace Abc = Alembic::AbcCoreAbstract::v1;
+namespace Abc = Alembic::AbcCoreAbstract;
 using namespace Abc;
 
 //-*****************************************************************************

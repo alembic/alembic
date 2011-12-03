@@ -511,7 +511,7 @@ namespace
 
         MStatus status = MStatus::kSuccess;
         MString colorSetName(iC3f.getName().c_str());
-        Alembic::Abc::v1::UInt32ArraySamplePtr indices = samp.getIndices();
+        Alembic::Abc::UInt32ArraySamplePtr indices = samp.getIndices();
         setColor(ioMesh, colorList, indices, colorSetName, MFnMesh::kRGB);
     }
 
@@ -582,7 +582,7 @@ namespace
 
         MStatus status = MStatus::kSuccess;
         MString colorSetName(iC4f.getName().c_str());
-        Alembic::Abc::v1::UInt32ArraySamplePtr indices = samp.getIndices();
+        Alembic::Abc::UInt32ArraySamplePtr indices = samp.getIndices();
         setColor(ioMesh, colorList, indices, colorSetName, MFnMesh::kRGBA);
     }
 

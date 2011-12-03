@@ -48,7 +48,7 @@
 //-*****************************************************************************
 namespace A5 = Alembic::AbcCoreHDF5;
 
-namespace AbcA = Alembic::AbcCoreAbstract::v1;
+namespace AbcA = Alembic::AbcCoreAbstract;
 
 //-*****************************************************************************
 void testTimeSamplingScalar()
