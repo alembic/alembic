@@ -135,6 +135,9 @@ void ISubDSchema::get( ISubDSchema::Sample &oSample,
     if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
     { m_childBoundsProperty.get( oSample.m_childBounds, iSS ); }
 
+    if ( m_velocitiesProperty && m_velocitiesProperty.getNumSamples() > 0 )
+    { m_velocitiesProperty.get( oSample.m_velocities, iSS ); }
+
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -145,6 +148,7 @@ ISubDSchema::operator=(const ISubDSchema & rhs)
     IGeomBaseSchema<SubDSchemaInfo>::operator=(rhs);
 
     m_positionsProperty = rhs.m_positionsProperty;
+    m_velocitiesProperty = rhs.m_velocitiesProperty;
     m_faceIndicesProperty = rhs.m_faceIndicesProperty;
     m_faceCountsProperty = rhs.m_faceCountsProperty;
     m_faceVaryingInterpolateBoundaryProperty = 
@@ -248,6 +252,12 @@ void ISubDSchema::init( const Abc::Argument &iArg0,
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
         m_uvsParam = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
+    }
+
+    if ( this->getPropertyHeader( ".velocities" ) != NULL )
+    {
+        m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
+                                               iArg0, iArg1 );
     }
 
     m_faceSetsLoaded = false;

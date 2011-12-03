@@ -61,6 +61,7 @@ public:
         Sample() { reset(); }
 
         Abc::P3fArraySamplePtr getPositions() const { return m_positions; }
+        Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
         Abc::Int32ArraySamplePtr getFaceIndices() const { return m_indices; }
         Abc::Int32ArraySamplePtr getFaceCounts() const { return m_counts; }
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
@@ -74,6 +75,7 @@ public:
         void reset()
         {
             m_positions.reset();
+            m_velocities.reset();
             m_indices.reset();
             m_counts.reset();
 
@@ -86,6 +88,7 @@ public:
     protected:
         friend class IPolyMeshSchema;
         Abc::P3fArraySamplePtr m_positions;
+        Abc::V3fArraySamplePtr m_velocities;
         Abc::Int32ArraySamplePtr m_indices;
         Abc::Int32ArraySamplePtr m_counts;
 
@@ -207,6 +210,12 @@ public:
         {
             m_childBoundsProperty.get( oSample.m_childBounds, iSS );
         }
+
+        if ( m_velocitiesProperty && m_velocitiesProperty.getNumSamples() > 0 )
+        {
+            m_velocitiesProperty.get( oSample.m_velocities, iSS );
+        }
+
         // Could error check here.
 
         ALEMBIC_ABC_SAFE_CALL_END();
@@ -223,9 +232,25 @@ public:
 
     IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
 
-    Abc::IInt32ArrayProperty getFaceCountsProperty() { return m_countsProperty; }
-    Abc::IInt32ArrayProperty getFaceIndicesProperty() { return m_indicesProperty; }
-    Abc::IP3fArrayProperty getPositionsProperty() { return m_positionsProperty; }
+    Abc::IInt32ArrayProperty getFaceCountsProperty() const
+    {
+        return m_countsProperty;
+    }
+
+    Abc::IInt32ArrayProperty getFaceIndicesProperty() const
+    {
+        return m_indicesProperty;
+    }
+
+    Abc::IP3fArrayProperty getPositionsProperty() const
+    {
+        return m_positionsProperty;
+    }
+
+    Abc::IV3fArrayProperty getVelocitiesProperty() const
+    {
+        return m_velocitiesProperty;
+    }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -238,6 +263,7 @@ public:
     void reset()
     {
         m_positionsProperty.reset();
+        m_velocitiesProperty.reset();
         m_indicesProperty.reset();
         m_countsProperty.reset();
 
@@ -272,6 +298,7 @@ protected:
                const Abc::Argument &iArg1 );
 
     Abc::IP3fArrayProperty m_positionsProperty;
+    Abc::IV3fArrayProperty m_velocitiesProperty;
     Abc::IInt32ArrayProperty m_indicesProperty;
     Abc::IInt32ArrayProperty m_countsProperty;
 

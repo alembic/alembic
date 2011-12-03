@@ -88,6 +88,11 @@ public:
         void setPositions( const Abc::P3fArraySample &iSmp )
         { m_positions = iSmp; }
 
+        // velocities accessor
+        const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
+        void setVelocities( const Abc::V3fArraySample &iVelocities )
+        { m_velocities = iVelocities; }
+
         const Abc::Int32ArraySample &getFaceIndices() const { return m_indices; }
         void setFaceIndices( const Abc::Int32ArraySample &iSmp )
         { m_indices = iSmp; }
@@ -121,6 +126,7 @@ public:
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
 
+            m_velocities.reset();
             m_uvs.reset();
             m_normals.reset();
         }
@@ -133,6 +139,7 @@ public:
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
 
+        Abc::V3fArraySample m_velocities;
         OV2fGeomParam::Sample m_uvs;
         ON3fGeomParam::Sample m_normals;
     };
@@ -267,6 +274,7 @@ public:
     void reset()
     {
         m_positionsProperty.reset();
+        m_velocitiesProperty.reset();
         m_indicesProperty.reset();
         m_countsProperty.reset();
         m_uvsParam.reset();
@@ -302,6 +310,7 @@ protected:
     void init( uint32_t iTsIdx );
 
     Abc::OP3fArrayProperty m_positionsProperty;
+    Abc::OV3fArrayProperty m_velocitiesProperty;
     Abc::OInt32ArrayProperty m_indicesProperty;
     Abc::OInt32ArrayProperty m_countsProperty;
 

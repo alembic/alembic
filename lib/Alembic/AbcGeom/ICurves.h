@@ -77,6 +77,7 @@ public:
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
+        Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
 
         bool valid() const
         {
@@ -101,6 +102,7 @@ public:
     protected:
         friend class ICurvesSchema;
         Abc::P3fArraySamplePtr m_positions;
+        Abc::V3fArraySamplePtr m_velocities;
 
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
@@ -209,6 +211,10 @@ public:
         return smp;
     }
 
+    Abc::IV3fArrayProperty getVelocitiesProperty() const
+    {
+        return m_velocitiesProperty;
+    }
 
     Abc::IP3fArrayProperty getPositionsProperty() const
     {
@@ -237,6 +243,7 @@ public:
     void reset()
     {
         m_positionsProperty.reset();
+        m_velocitiesProperty.reset();
         m_nVerticesProperty.reset();
 
         m_uvsParam.reset();
@@ -264,6 +271,7 @@ protected:
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
     Abc::IP3fArrayProperty m_positionsProperty;
+    Abc::IV3fArrayProperty m_velocitiesProperty;
     Abc::IInt32ArrayProperty m_nVerticesProperty;
 
     // contains type, wrap, ubasis, and vbasis.

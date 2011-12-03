@@ -64,6 +64,20 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         }
     }
 
+    // do we need to create velocities prop?
+    if ( iSamp.getVelocities() && !m_velocitiesProperty )
+    {
+        m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(), ".velocities",
+                                               m_positionsProperty.getTimeSampling() );
+
+        const V3fArraySample empty;
+        const size_t numSamps = m_positionsProperty.getNumSamples();
+        for ( size_t i = 0 ; i < numSamps ; ++i )
+        {
+            m_velocitiesProperty.set( empty );
+        }
+    }
+
     // We could add sample integrity checking here.
     if ( m_positionsProperty.getNumSamples() == 0 )
     {
@@ -79,6 +93,9 @@ void OPolyMeshSchema::set( const Sample &iSamp )
 
         if (m_childBoundsProperty)
         { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
+
+        if ( m_velocitiesProperty )
+        { SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() ); }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -140,6 +157,11 @@ void OPolyMeshSchema::set( const Sample &iSamp )
             SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() );
         }
 
+        if ( m_velocitiesProperty )
+        {
+            SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() );
+        }
+
         if ( iSamp.getSelfBounds().hasVolume() )
         {
             m_selfBoundsProperty.set( iSamp.getSelfBounds() );
@@ -174,8 +196,8 @@ void OPolyMeshSchema::setFromPrevious()
 
     m_selfBoundsProperty.setFromPrevious();
 
-    if (m_childBoundsProperty) { m_childBoundsProperty.setFromPrevious(); }
-
+    if ( m_childBoundsProperty ) { m_childBoundsProperty.setFromPrevious(); }
+    if ( m_velocitiesProperty ) { m_velocitiesProperty.setFromPrevious(); }
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
     if ( m_normalsParam ) { m_normalsParam.setFromPrevious(); }
 
@@ -196,6 +218,11 @@ void OPolyMeshSchema::setTimeSampling( uint32_t iIndex )
     if ( m_childBoundsProperty )
     {
         m_childBoundsProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_velocitiesProperty )
+    {
+        m_velocitiesProperty.setTimeSampling( iIndex );
     }
 
     if ( m_uvsParam )

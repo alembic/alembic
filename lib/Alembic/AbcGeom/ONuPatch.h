@@ -158,6 +158,11 @@ public:
         void setChildBounds( const Abc::Box3d &iBnds )
         { m_childBounds = iBnds; }
 
+        // velocities accessor
+        const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
+        void setVelocities( const Abc::V3fArraySample &iVelocities )
+        { m_velocities = iVelocities; }
+
         // trim curves
         void setTrimCurve( const int32_t i_trim_nLoops,
                            const Abc::Int32ArraySample &i_trim_nCurves,
@@ -206,6 +211,7 @@ public:
         void reset()
         {
             m_positions.reset();
+            m_velocities.reset();
             m_numU = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
             m_numV = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
             m_uOrder = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
@@ -236,6 +242,7 @@ public:
 
         // required properties
         Abc::P3fArraySample m_positions;
+        Abc::V3fArraySample m_velocities;
         int32_t m_numU;
         int32_t m_numV;
         int32_t m_uOrder;
@@ -391,6 +398,7 @@ public:
     {
         m_positionsProperty.reset();
         m_positionWeightsProperty.reset();
+        m_velocitiesProperty.reset();
         m_numUProperty.reset();
         m_numVProperty.reset();
         m_uOrderProperty.reset();
@@ -447,6 +455,7 @@ protected:
     Abc::OFloatArrayProperty m_positionWeightsProperty;
     ON3fGeomParam m_normalsParam;
     OV2fGeomParam m_uvsParam;
+    Abc::OV3fArrayProperty m_velocitiesProperty;
 
     // optional trim curves
     Abc::OInt32Property m_trimNumLoopsProperty;

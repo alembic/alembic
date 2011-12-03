@@ -102,6 +102,8 @@ public:
         std::string getSubdivisionScheme() const
         { return m_subdScheme; }
 
+        Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
+
         // bounds
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::Box3d getChildBounds() const { return m_childBounds; }
@@ -115,6 +117,7 @@ public:
         void reset()
         {
             m_positions.reset();
+            m_velocities.reset();
             m_faceIndices.reset();
             m_faceCounts.reset();
 
@@ -143,6 +146,7 @@ public:
         friend class ISubDSchema;
 
         Abc::P3fArraySamplePtr m_positions;
+        Abc::V3fArraySamplePtr m_velocities;
         Abc::Int32ArraySamplePtr m_faceIndices;
         Abc::Int32ArraySamplePtr m_faceCounts;
 
@@ -307,6 +311,9 @@ public:
     Abc::IStringProperty getSubdivisionSchemeProperty()
     { return m_subdSchemeProperty; }
 
+    Abc::IV3fArrayProperty getVelocitiesProperty() const
+    { return m_velocitiesProperty; }
+
     IV2fGeomParam &getUVsParam() { return m_uvsParam; }
 
     //-*************************************************************************
@@ -320,6 +327,7 @@ public:
     void reset()
     {
         m_positionsProperty.reset();
+        m_velocitiesProperty.reset();
         m_faceIndicesProperty.reset();
         m_faceCountsProperty.reset();
 
@@ -400,6 +408,8 @@ protected:
 
     // UVs
     IV2fGeomParam m_uvsParam;
+
+    IV3fArrayProperty m_velocitiesProperty;
 
     // FaceSets, this starts as empty until client
     // code attempts to access facesets.

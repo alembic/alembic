@@ -161,6 +161,11 @@ public:
         void setChildBounds( const Abc::Box3d &iBnds )
         { m_childBounds = iBnds; }
 
+        // velocities accessor
+        const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
+        void setVelocities( const Abc::V3fArraySample &iVelocities )
+        { m_velocities = iVelocities; }
+
         // normal accessors
         const ON3fGeomParam::Sample &getNormals() const { return m_normals; }
         void setNormals( const ON3fGeomParam::Sample &iNormals )
@@ -174,6 +179,7 @@ public:
         void reset()
         {
             m_positions.reset();
+            m_velocities.reset();
             m_uvs.reset();
             m_normals.reset();
             m_widths.reset();
@@ -192,6 +198,7 @@ public:
 
         // properties
         Abc::P3fArraySample m_positions;
+        Abc::V3fArraySample m_velocities;
         Abc::Int32ArraySample m_nVertices;
 
         CurveType m_type;
@@ -360,10 +367,11 @@ protected:
     Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OInt32ArrayProperty m_nVerticesProperty;
 
-    // per-point data
+    // optional data
     OV2fGeomParam m_uvsParam;
     ON3fGeomParam m_normalsParam;
     OFloatGeomParam m_widthsParam;
+    Abc::OV3fArrayProperty m_velocitiesProperty;
 
     Abc::OScalarProperty m_basisAndTypeProperty;
 };

@@ -163,6 +163,11 @@ void INuPatchSchema::get( sample_type &oSample,
         m_childBoundsProperty.get( oSample.m_childBounds, iSS );
     }
 
+    if ( m_velocitiesProperty && m_velocitiesProperty.getNumSamples() > 0 )
+    {
+        m_velocitiesProperty.get( oSample.m_velocities, iSS );
+    }
+
     if ( m_positionWeightsProperty )
     {
         m_positionWeightsProperty.get( oSample.m_positionWeights, iSS );
@@ -230,6 +235,12 @@ void INuPatchSchema::init( const Abc::Argument &iArg0,
     {
         m_positionWeightsProperty = Abc::IFloatArrayProperty( _this, "w",
                                         args.getSchemaInterpMatching() );
+    }
+
+    if ( this->getPropertyHeader( ".velocities" ) != NULL )
+    {
+        m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
+                                               iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( "N" ) != NULL )

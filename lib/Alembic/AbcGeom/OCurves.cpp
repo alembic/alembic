@@ -72,6 +72,20 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         }
     }
 
+    // do we need to create velocities prop?
+    if ( iSamp.getVelocities() && !m_velocitiesProperty )
+    {
+        m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(), ".velocities",
+                                               m_positionsProperty.getTimeSampling() );
+
+        const V3fArraySample empty;
+        const size_t numSamps = m_positionsProperty.getNumSamples();
+        for ( size_t i = 0 ; i < numSamps ; ++i )
+        {
+            m_velocitiesProperty.set( empty );
+        }
+    }
+
     // do we need to create uvs?
     if ( iSamp.getUVs().getVals() && !m_uvsParam )
     {
@@ -173,6 +187,9 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
 
         m_basisAndTypeProperty.set( basisAndType );
 
+        if ( m_velocitiesProperty )
+        { m_velocitiesProperty.set( iSamp.getVelocities() ); }
+
         if ( iSamp.getChildBounds().hasVolume() )
         { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
 
@@ -227,6 +244,9 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         if ( m_childBoundsProperty )
         { SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() ); }
 
+        if ( m_velocitiesProperty )
+        { SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() ); }
+
         if ( m_uvsParam )
         { m_uvsParam.set( iSamp.getUVs() ); }
 
@@ -270,7 +290,7 @@ void OCurvesSchema::setFromPrevious()
     m_selfBoundsProperty.setFromPrevious();
 
     if ( m_childBoundsProperty ) { m_childBoundsProperty.setFromPrevious(); }
-
+    if ( m_velocitiesProperty ) { m_velocitiesProperty.setFromPrevious(); }
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
     if ( m_normalsParam ) { m_normalsParam.setFromPrevious(); }
     if ( m_widthsParam ) { m_widthsParam.setFromPrevious(); }

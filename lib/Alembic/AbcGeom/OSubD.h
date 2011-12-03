@@ -207,6 +207,11 @@ public:
         void setChildBounds( const Abc::Box3d &iBnds )
         { m_childBounds = iBnds; }
 
+        // velocities accessor
+        const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
+        void setVelocities( const Abc::V3fArraySample &iVelocities )
+        { m_velocities = iVelocities; }
+
         // UVs; need to set these outside the Sample constructor
         const OV2fGeomParam::Sample &getUVs() const { return m_uvs; }
         void setUVs( const OV2fGeomParam::Sample &iUVs )
@@ -232,6 +237,8 @@ public:
             m_holes.reset();
 
             m_subdScheme = "catmull-clark";
+
+            m_velocities.reset();
 
             m_selfBounds.makeEmpty();
             m_childBounds.makeEmpty();
@@ -268,6 +275,8 @@ public:
         // bounds
         Abc::Box3d m_selfBounds;
         Abc::Box3d m_childBounds;
+
+        Abc::V3fArraySample m_velocities;
 
         // UVs
         OV2fGeomParam::Sample m_uvs;
@@ -417,6 +426,8 @@ public:
 
         m_subdSchemeProperty.reset();
 
+        m_velocitiesProperty.reset();
+
         m_uvsParam.reset();
 
         m_faceSets.clear ();
@@ -472,6 +483,8 @@ protected:
 
     // subdivision scheme
     Abc::OStringProperty m_subdSchemeProperty;
+
+    Abc::OV3fArrayProperty m_velocitiesProperty;
 
     // UVs
     OV2fGeomParam m_uvsParam;

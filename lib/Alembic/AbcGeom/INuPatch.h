@@ -59,6 +59,7 @@ public:
         Sample() { reset(); }
 
         Abc::P3fArraySamplePtr getPositions() const { return m_positions; }
+        Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
         int32_t getNumU() const { return m_numU; }
         int32_t getNumV() const { return m_numV; }
         int32_t getUOrder() const { return m_uOrder; }
@@ -96,6 +97,7 @@ public:
         void reset()
         {
             m_positions.reset();
+            m_velocities.reset();
             m_numU = 0;
             m_numV = 0;
             m_uOrder = 0;
@@ -127,6 +129,7 @@ public:
         friend class INuPatchSchema;
 
         Abc::P3fArraySamplePtr m_positions;
+        Abc::V3fArraySamplePtr m_velocities;
         int32_t m_numU;
         int32_t m_numV;
         int32_t m_uOrder;
@@ -255,6 +258,11 @@ public:
     Abc::IFloatArrayProperty getUKnotsProperty(){ return m_uKnotProperty; }
     Abc::IFloatArrayProperty getVKnotsProperty(){ return m_vKnotProperty; }
 
+    Abc::IV3fArrayProperty getVelocitiesProperty() const
+    {
+        return m_velocitiesProperty;
+    }
+
     // if this property is invalid then the weight for every point is 1
     Abc::IFloatArrayProperty getPositionWeightsProperty()
     {
@@ -280,6 +288,7 @@ public:
     void reset()
     {
         m_positionsProperty.reset();
+        m_velocitiesProperty.reset();
         m_numUProperty.reset();
         m_numVProperty.reset();
         m_uOrderProperty.reset();
@@ -341,6 +350,7 @@ protected:
     Abc::IFloatArrayProperty m_vKnotProperty;
 
     // optional
+    Abc::IV3fArrayProperty m_velocitiesProperty;
     Abc::IFloatArrayProperty m_positionWeightsProperty;
     IN3fGeomParam m_normalsParam;
     IV2fGeomParam m_uvsParam;

@@ -104,6 +104,12 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
         m_widthsParam = IFloatGeomParam( _this, "width", iArg0, iArg1 );
     }
 
+    if ( this->getPropertyHeader( ".velocities" ) != NULL )
+    {
+        m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
+                                               iArg0, iArg1 );
+    }
+
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
@@ -134,6 +140,11 @@ void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
     if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
     {
         m_childBoundsProperty.get( oSample.m_childBounds, iSS );
+    }
+
+    if ( m_velocitiesProperty && m_velocitiesProperty.getNumSamples() > 0 )
+    {
+        m_velocitiesProperty.get( oSample.m_velocities, iSS );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
