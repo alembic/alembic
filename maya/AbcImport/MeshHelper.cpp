@@ -212,6 +212,7 @@ namespace
             return;
 
         if (iNormals.getScope() != Alembic::AbcGeom::kVertexScope &&
+            iNormals.getScope() != Alembic::AbcGeom::kVaryingScope
             iNormals.getScope() != Alembic::AbcGeom::kFacevaryingScope)
         {
             printWarning(ioMesh.fullPathName() +
@@ -274,7 +275,8 @@ namespace
             }
         }
 
-        if (iNormals.getScope() == Alembic::AbcGeom::kVertexScope &&
+        if ((iNormals.getScope() == Alembic::AbcGeom::kVertexScope || 
+            iNormals.getScope() == Alembic::AbcGeom::kVaryingScope) &&
             sampSize == ( std::size_t ) ioMesh.numVertices())
         {
             MIntArray vertexList;
