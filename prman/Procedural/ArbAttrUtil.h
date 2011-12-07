@@ -60,7 +60,11 @@ public:
     // starting with float data, this can be usful if you need to manipulate
     // the values after-the-fact.
     template <typename T>
-    std::vector<float> * addAsFloat( const std::string & declaration, const T * length,
+    std::vector<RtFloat> * addAsFloat( const std::string & declaration, const T * length,
+            size_t numValues );
+    
+    template <typename T>
+    std::vector<RtInt> * addAsInt( const std::string & declaration, const T * length,
             size_t numValues );
     
     //returns the start of the current vector and pushes a new one
@@ -88,12 +92,16 @@ private:
     
     typedef boost::shared_ptr<std::vector<RtFloat> > SharedRtFloatVector;
     std::vector<SharedRtFloatVector> m_convertedFloatVectors;
+    
+    typedef boost::shared_ptr<std::vector<RtInt> > SharedRtIntVector;
+    std::vector<SharedRtIntVector> m_convertedIntVectors;
+    
 };
 
 //-*****************************************************************************
 
 template <typename T>
-std::vector<float> * ParamListBuilder::addAsFloat( const std::string & declaration,
+std::vector<RtFloat> * ParamListBuilder::addAsFloat( const std::string & declaration,
         const T * value, size_t length)
 {
     SharedRtFloatVector convertedValues( new std::vector<RtFloat> );
@@ -101,6 +109,23 @@ std::vector<float> * ParamListBuilder::addAsFloat( const std::string & declarati
     
     convertedValues->insert( convertedValues->end(), value, value + length );
     m_convertedFloatVectors.push_back( convertedValues );
+    
+    add( declaration, &( ( *convertedValues )[0] ) );
+    
+    return &(*convertedValues);
+}
+
+//-*****************************************************************************
+
+template <typename T>
+std::vector<RtInt> * ParamListBuilder::addAsInt( const std::string & declaration,
+        const T * value, size_t length)
+{
+    SharedRtIntVector convertedValues( new std::vector<RtInt> );
+    convertedValues->reserve( length );
+    
+    convertedValues->insert( convertedValues->end(), value, value + length );
+    m_convertedIntVectors.push_back( convertedValues );
     
     add( declaration, &( ( *convertedValues )[0] ) );
     
@@ -166,7 +191,7 @@ void AddGeomParamToParamListBuilder( ICompoundProperty & parent,
 // normally avoids a copy of the data as the GeomParam samples can be handed
 // to RenderMan directly. 
 template <typename T, typename podT>
-std::vector<float> * AddGeomParamToParamListBuilderAsFloat( ICompoundProperty & parent,
+std::vector<RtFloat> * AddGeomParamToParamListBuilderAsFloat( ICompoundProperty & parent,
                                              const PropertyHeader &propHeader,
                                              ISampleSelector &sampleSelector,
                                              const std::string &rmanBaseType,
@@ -213,6 +238,67 @@ std::vector<float> * AddGeomParamToParamListBuilderAsFloat( ICompoundProperty & 
                     valueSample->size() * rawExtent );
 
 }
+
+//-*****************************************************************************
+
+// NOTE: In addition to performing the conversion, this also makes and
+// returns an internal copy of the data. Even in cases in which you're
+// starting with int data, this can be usful if you need to manipulate
+// the values after-the-fact. The AddGeomParamToParamListBuilder codepath 
+// normally avoids a copy of the data as the GeomParam samples can be handed
+// to RenderMan directly. 
+template <typename T, typename podT>
+std::vector<RtInt> * AddGeomParamToParamListBuilderAsInt( ICompoundProperty & parent,
+                                             const PropertyHeader &propHeader,
+                                             ISampleSelector &sampleSelector,
+                                             const std::string &rmanBaseType,
+                                             ParamListBuilder &ParamListBuilder,
+                                             size_t baseArrayExtent = 1,
+                                             const std::string & overrideName = ""
+                                           )
+{
+    T param( parent, propHeader.getName() );
+
+    if ( !param.valid() )
+    {
+        //TODO error message?
+        return 0;
+    }
+
+    std::string rmanType = GetPrmanScopeString( param.getScope() ) + " ";
+
+    rmanType += rmanBaseType;
+
+    size_t arrayExtent = baseArrayExtent * param.getArrayExtent();
+    if (arrayExtent > 1)
+    {
+        std::ostringstream buffer;
+        buffer << "[" << arrayExtent << "]";
+        rmanType += buffer.str();
+    }
+
+    rmanType += " " + (
+            overrideName.empty() ? propHeader.getName() : overrideName );
+
+
+    typename T::prop_type::sample_ptr_type valueSample =
+            param.getExpandedValue( sampleSelector ).getVals();
+    
+    
+    int rawExtent =
+            T::prop_type::traits_type::dataType().getExtent() * arrayExtent;
+
+    
+    
+    return ParamListBuilder.addAsInt( rmanType,
+            reinterpret_cast<const podT *>( valueSample->get() ),
+                    valueSample->size() * rawExtent );
+
+}
+
+
+
+
 
 //-*****************************************************************************
 

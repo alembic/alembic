@@ -232,6 +232,15 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 "float",
                 paramListBuilder);
         }
+        else if ( IV3dGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilderAsFloat<IV3dGeomParam, double>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "vector",
+                paramListBuilder);
+        }
         else if ( IInt32GeomParam::matches( propHeader ) )
         {
             AddGeomParamToParamListBuilder<IInt32GeomParam>(
@@ -277,6 +286,15 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 "point",
                 paramListBuilder);
         }
+        else if ( IP3dGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilderAsFloat<IP3dGeomParam, double>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "point",
+                paramListBuilder);
+        }
         else if ( IN3fGeomParam::matches( propHeader ) )
         {
             AddGeomParamToParamListBuilder<IN3fGeomParam>(
@@ -295,13 +313,22 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 "color",
                 paramListBuilder);
         }
-        if ( IM44fGeomParam::matches( propHeader ) )
+        else if ( IM44fGeomParam::matches( propHeader ) )
         {
             AddGeomParamToParamListBuilder<IM44fGeomParam>(
                 parent,
                 propHeader,
                 sampleSelector,
                 "matrix",
+                paramListBuilder);
+        }
+        else if ( IBoolGeomParam::matches( propHeader ) )
+        {
+            AddGeomParamToParamListBuilderAsInt<IBoolGeomParam, bool_t>(
+                parent,
+                propHeader,
+                sampleSelector,
+                "int",
                 paramListBuilder);
         }
 
