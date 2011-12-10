@@ -212,7 +212,7 @@ namespace
             return;
 
         if (iNormals.getScope() != Alembic::AbcGeom::kVertexScope &&
-            iNormals.getScope() != Alembic::AbcGeom::kVaryingScope
+            iNormals.getScope() != Alembic::AbcGeom::kVaryingScope &&
             iNormals.getScope() != Alembic::AbcGeom::kFacevaryingScope)
         {
             printWarning(ioMesh.fullPathName() +
