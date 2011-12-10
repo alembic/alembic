@@ -118,6 +118,63 @@ void AprImpl::getDimensions( index_t iSampleIndex, Dimensions & oDim )
 }
 
 //-*****************************************************************************
+void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
+                     PlainOldDataType iPod )
+{
+    PlainOldDataType curPod = m_header->getDataType().getPod();
+
+    ABCA_ASSERT( ( iPod != kStringPOD && iPod != kWstringPOD &&
+        curPod != kStringPOD && curPod != kWstringPOD ) || ( iPod == curPod ),
+        "Cannot convert the data to or from a string or wstring." );
+
+    hid_t nativeType = -1;
+    bool clean = false;
+
+    if ( iPod != kStringPOD && iPod != kWstringPOD )
+    {
+        AbcA::DataType dtype( iPod );
+        nativeType = GetNativeH5T(dtype, clean);
+    }
+
+    iSampleIndex = verifySampleIndex( iSampleIndex );
+
+    std::string sampleName = getSampleName( m_header->getName(), iSampleIndex );
+    hid_t parent = -1;
+
+    if ( iSampleIndex == 0 )
+    {
+        parent = m_parentGroup;
+    }
+    else
+    {
+        // Create the subsequent samples group.
+        if ( m_samplesIGroup < 0 )
+        {
+            std::string samplesIName =  m_header->getName() + ".smpi";
+            ABCA_ASSERT( GroupExists( m_parentGroup, samplesIName ),
+                         "Invalid property: " << m_header->getName()
+                         << ", missing smpi" );
+
+            m_samplesIGroup = H5Gopen2( m_parentGroup,
+                                        samplesIName.c_str(),
+                                        H5P_DEFAULT );
+            ABCA_ASSERT( m_samplesIGroup >= 0,
+                         "Invalid property: " << m_header->getName()
+                         << ", invalid smpi group" );
+        }
+        parent = m_samplesIGroup;
+    }
+
+    ReadArray( iIntoLocation, parent, sampleName, m_header->getDataType(),
+               nativeType );
+
+    if ( clean )
+    {
+        H5Tclose( nativeType );
+    }
+}
+
+//-*****************************************************************************
 void AprImpl::readSample( hid_t iGroup,
                           const std::string &iSampleName,
                           index_t iSampleIndex,

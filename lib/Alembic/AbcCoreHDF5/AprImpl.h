@@ -60,6 +60,8 @@ public:
     virtual AbcA::ArrayPropertyReaderPtr asArrayPtr();
     virtual bool isScalarLike();
     virtual void getDimensions( index_t iSampleIndex, Dimensions & oDim );
+    virtual void getAs( index_t iSample, void *iIntoLocation,
+                        PlainOldDataType iPod );
 protected:
     friend class SimplePrImpl<AbcA::ArrayPropertyReader, AprImpl,
                               AbcA::ArraySamplePtr&>;

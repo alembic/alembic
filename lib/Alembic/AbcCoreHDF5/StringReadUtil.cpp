@@ -526,6 +526,93 @@ ReadStringArrayT( AbcA::ReadArraySampleCachePtr iCache,
 }
 
 //-*****************************************************************************
+template <class StringT, class CharT>
+static void
+ReadStringArrayT( void * iIntoLocation,
+                  hid_t iParent,
+                  const std::string &iName,
+                  const AbcA::DataType &iDataType )
+{
+    assert( iDataType.getExtent() > 0 );
+
+    // Open the data set.
+    hid_t dsetId = H5Dopen( iParent, iName.c_str(), H5P_DEFAULT );
+    ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
+    DsetCloser dsetCloser( dsetId );
+
+    // Read the data space.
+    hid_t dspaceId = H5Dget_space( dsetId );
+    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
+                 << iName );
+    DspaceCloser dspaceCloser( dspaceId );
+
+    // String array datatypes require a "dimensions" to be stored
+    // externally, since the strings themselves are stored in a compacted
+    // array of rank 1.
+    Dimensions realDims;
+    std::string dimName = iName + ".dims";
+    ReadDimensions( iParent, dimName, realDims );
+    ABCA_ASSERT( realDims.rank() > 0,
+                 "Degenerate rank in Dataset read" );
+
+    AbcA::ArraySamplePtr ret;
+
+    H5S_class_t dspaceClass = H5Sget_simple_extent_type( dspaceId );
+
+    if ( dspaceClass == H5S_SIMPLE )
+    {
+        ABCA_ASSERT( realDims.numPoints() > 0,
+                     "Degenerate dims in Dataset read" );
+        size_t totalNumStrings = realDims.numPoints() * iDataType.getExtent();
+
+        // Get the dimensions
+        Dimensions dims;
+        int rank = H5Sget_simple_extent_ndims( dspaceId );
+        ABCA_ASSERT( rank == ( int ) realDims.rank(),
+                     "H5Sget_simple_extent_ndims() failed." );
+
+        HDimensions hdims;
+        hdims.setRank( rank );
+        rank = H5Sget_simple_extent_dims( dspaceId, hdims.rootPtr(), NULL );
+        ABCA_ASSERT( rank == ( int ) hdims.rank(),
+                     "H5Sget_simple_extent_dims() "
+                     "found inconsistent ranks."
+                     << std::endl
+                     << "Expecting rank: " << hdims.rank()
+                     << " instead was: " << rank );
+
+        dims = hdims;
+        ABCA_ASSERT( dims.numPoints() > 0,
+                     "Degenerate dims in Dataset read" );
+
+        // Create temporary char storage buffer.
+        size_t totalNumChars = dims.numPoints() + 1;
+        std::vector<CharT> charStorage( totalNumChars, ( CharT )0 );
+
+        // Read into it.
+        herr_t status = H5Dread( dsetId, GetNativeDtype<CharT>(),
+                                 H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                                 ( void * )&charStorage.front() );
+        ABCA_ASSERT( status >= 0,
+                     "Could not read string array from data set. Weird." );
+
+        StringT *strings = reinterpret_cast<StringT*>( iIntoLocation );
+        assert( strings != NULL );
+
+        // This part is hard. We have to go through the one dimensional
+        // array extracting each string.
+        ExtractStrings<StringT,CharT>( strings,
+                                       ( const CharT * )&charStorage.front(),
+                                       totalNumChars,
+                                       totalNumStrings );
+    }
+    else if ( dspaceClass != H5S_NULL )
+    {
+        ABCA_THROW( "Unexpected scalar dataspace encountered." );
+    }
+}
+
+//-*****************************************************************************
 AbcA::ArraySamplePtr
 ReadStringArray( AbcA::ReadArraySampleCachePtr iCache,
                  hid_t iParent,
@@ -545,6 +632,28 @@ ReadWstringArray( AbcA::ReadArraySampleCachePtr iCache,
 {
     return ReadStringArrayT<std::wstring, wchar_t>
         ( iCache, iParent, iName, iDataType );
+}
+
+//-*****************************************************************************
+void
+ReadStringArray( void * iIntoLocation,
+                 hid_t iParent,
+                 const std::string &iName,
+                 const AbcA::DataType &iDataType )
+{
+    ReadStringArrayT<std::string, char>
+        ( iIntoLocation, iParent, iName, iDataType );
+}
+
+//-*****************************************************************************
+void
+ReadWstringArray( void * iIntoLocation,
+                  hid_t iParent,
+                  const std::string &iName,
+                  const AbcA::DataType &iDataType )
+{
+    ReadStringArrayT<std::wstring, wchar_t>
+        ( iIntoLocation, iParent, iName, iDataType );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -113,6 +113,14 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
            hid_t iNativeType );
 
 //-*****************************************************************************
+void
+ReadArray( void * iIntoLocation,
+           hid_t iParent,
+           const std::string &iName,
+           const AbcA::DataType &iDataType,
+           hid_t iType );
+
+//-*****************************************************************************
 // Fills in oTimeSamples with the different TimeSampling that the archive uses
 // Intrinsically all archives have the first TimeSampling for uniform time 
 // sampling with a start time of 0 and time per cycle of 1

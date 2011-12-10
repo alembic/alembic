@@ -85,6 +85,20 @@ ReadWstringArray( AbcA::ReadArraySampleCachePtr iCache,
                   const std::string &iArrayName,
                   const AbcA::DataType &iDataType );
 
+//-*****************************************************************************
+void
+ReadStringArray( void * iIntoLocation,
+                 hid_t iParent,
+                 const std::string &iName,
+                 const AbcA::DataType &iDataType );
+
+//-*****************************************************************************
+void
+ReadWstringArray( void * iIntoLocation,
+                 hid_t iParent,
+                 const std::string &iName,
+                 const AbcA::DataType &iDataType );
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

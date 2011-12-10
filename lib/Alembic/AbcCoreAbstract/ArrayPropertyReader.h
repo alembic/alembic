@@ -119,6 +119,26 @@ public:
     //! for each of it's samples.  Array Properties with no samples written to
     //! it are still considered scalar like.
     virtual bool isScalarLike() = 0;
+
+    //! Reads the data for the requested sample into the memory location
+    //! specified by iIntoLocation as the requested POD type specified by iPod.
+    //! Out-of-range indices, or incompatible POD types will cause an
+    //! exception to be thrown.
+    //!
+    //! Incompatible POD types include trying to read a std::string or
+    //! std::wstring as anything OTHER than itself.
+    //!
+    //! In all cases EXCEPT String and Wstring, the iPod type and the total
+    //! number of items from getDimensions for this property can be used to
+    //! determine the size of the memory buffer which iIntoLocation must point
+    //! to.  In the case of String and Wstring,
+    //! iIntoLocation should be an array of std::string or std::wstring.
+    //!
+    //! This is one of the only places where we break from POD types at
+    //! the base, and we're making an explicit decision to use std::string
+    //! and std::wstring as core language-level primitives.
+    virtual void getAs( index_t iSample, void *iIntoLocation,
+                        PlainOldDataType iPod ) = 0;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
