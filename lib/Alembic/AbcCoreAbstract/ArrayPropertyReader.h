@@ -125,8 +125,8 @@ public:
     //! Out-of-range indices, or incompatible POD types will cause an
     //! exception to be thrown.
     //!
-    //! Incompatible POD types include trying to read a std::string or
-    //! std::wstring as anything OTHER than itself.
+    //! Incompatible POD types include trying to read a std::string,
+    //! std::wstring, or float16_t as anything OTHER than itself.
     //!
     //! In all cases EXCEPT String and Wstring, the iPod type and the total
     //! number of items from getDimensions for this property can be used to

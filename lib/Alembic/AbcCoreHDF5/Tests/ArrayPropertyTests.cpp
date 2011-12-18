@@ -978,27 +978,16 @@ void testReadWriteArrays()
                     TESTING_ASSERT(data[0] == 16.0);
                     TESTING_ASSERT(data[1] == -3.0);
 
-                    // read as something else
-                    /*
+                    // can't currently read it as another data type
                     Alembic::Util::float32_t data2[2];
-                    ap->getAs(0, data2, kFloat32POD);
-                    TESTING_ASSERT(data2[0] == 16.0);
-                    TESTING_ASSERT(data2[1] == -3.0);
-                    */
-
+                    TESTING_ASSERT_THROW(ap->getAs(0, data2, kFloat32POD),
+                                         Alembic::Util::Exception);
                     // read it as it is
                     Alembic::Util::float16_t data3[2];
                     ap->getAs(0, data3, kFloat16POD);
                     TESTING_ASSERT(data3[0] == 16.0);
                     TESTING_ASSERT(data3[1] == -3.0);
 
-                    // read it as an int32_t
-                    /*
-                    Alembic::Util::int32_t data4[2];
-                    ap->getAs(0, data4, kInt32POD);
-                    TESTING_ASSERT(data4[0] == 16);
-                    TESTING_ASSERT(data4[1] == -3);
-                    */
                 }
                 break;
 

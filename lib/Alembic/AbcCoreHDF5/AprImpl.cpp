@@ -123,9 +123,10 @@ void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
 {
     PlainOldDataType curPod = m_header->getDataType().getPod();
 
-    ABCA_ASSERT( ( iPod != kStringPOD && iPod != kWstringPOD &&
-        curPod != kStringPOD && curPod != kWstringPOD ) || ( iPod == curPod ),
-        "Cannot convert the data to or from a string or wstring." );
+    ABCA_ASSERT( ( iPod != kStringPOD && iPod != kWstringPOD && 
+        iPod != kFloat16POD && curPod != kStringPOD && curPod != kWstringPOD &&
+        curPod != kFloat16POD) || ( iPod == curPod ),
+        "Cannot convert the data to or from a string, wstring or float16_t." );
 
     hid_t nativeType = -1;
     bool clean = false;
