@@ -114,6 +114,37 @@ void IArrayProperty::get( AbcA::ArraySamplePtr& oSamp,
 }
 
 //-*****************************************************************************
+void IArrayProperty::getAs( void * oSample,
+                            AbcA::PlainOldDataType iPod,
+                            const ISampleSelector &iSS )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getAs(PlainOldDataType)" );
+
+    m_property->getAs( iSS.getIndex( m_property->getTimeSampling(),
+                                     m_property->getNumSamples() ),
+                       oSample,
+                       iPod
+                     );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void IArrayProperty::getAs( void * oSample,
+                            const ISampleSelector &iSS )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getAs()" );
+
+    m_property->getAs( iSS.getIndex( m_property->getTimeSampling(),
+                                     m_property->getNumSamples() ),
+                       oSample,
+                       m_property->getDataType().getPod()
+                     );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
 bool IArrayProperty::getKey( AbcA::ArraySampleKey& oKey,
                              const ISampleSelector &iSS )
 {

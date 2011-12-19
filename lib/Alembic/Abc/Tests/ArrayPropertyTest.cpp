@@ -166,6 +166,18 @@ void readUInt32ArrayProperty(const std::string &archiveName)
         for ( size_t jj=0 ; jj<numPoints ; jj++ )
             ABCA_ASSERT( (*samplePtr)[jj] == g_primes[jj],
                          "Incorrect value read from archive." );
+
+        std::vector< uint32_t > uintPrimes( numPoints );
+        primes.getAs( &uintPrimes.front(), iss );
+        for ( size_t jj=0 ; jj<numPoints ; jj++ )
+            ABCA_ASSERT( uintPrimes[jj] == g_primes[jj],
+                         "Incorrect value via getAs from archive." );
+
+        std::vector< int16_t > shortPrimes( numPoints );
+        primes.getAs( &shortPrimes.front(), AbcA::kInt16POD, iss );
+        for ( size_t jj=0 ; jj<numPoints ; jj++ )
+            ABCA_ASSERT( ( unsigned int ) shortPrimes[jj] == g_primes[jj],
+                         "Incorrect value via getAs(POD) from archive." );
     }
     std::cout << std::endl;
     // Done - the archive closes itself

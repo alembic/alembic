@@ -129,6 +129,15 @@ public:
     void get( AbcA::ArraySamplePtr& oSample,
               const ISampleSelector &iSS = ISampleSelector() );
 
+    //! Get a sample into the address of a datum as a particular POD type.
+    void getAs( void *oSample, AbcA::PlainOldDataType iPod,
+                const ISampleSelector &iSS = ISampleSelector() );
+
+    //! Get a sample into the address of a datum as the POD type of this
+    //! array property.
+    void getAs( void *oSample,
+                const ISampleSelector &iSS = ISampleSelector() );
+
     //! Get a key from an address of a datum.
     //! ...
     bool getKey( AbcA::ArraySampleKey& oKey,
