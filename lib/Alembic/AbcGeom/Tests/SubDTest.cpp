@@ -89,6 +89,9 @@ void Example1_MeshOut()
     mesh_samp.setCreases( creases, creaseLengths, creaseSharpnesses );
     mesh_samp.setCorners( corners, cornerSharpnesses );
 
+    // velocities
+    mesh_samp.setVelocities( V3fArraySample( ( const V3f * )g_veloc,
+                                            g_numVerts ) );
     // UVs
     OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
                                                   g_numUVs ),
@@ -199,6 +202,13 @@ void Example1_MeshIn()
         TESTING_ASSERT( 10.0 == (*(samp1.getCornerSharpnesses()))[i] );
     }
 
+    for ( size_t i = 0 ; i < samp1.getVelocities()->size() ; ++i )
+    {
+        V3f veloc( g_veloc[i*3], g_veloc[i*3+1], g_veloc[i*3+2] );
+        std::cout << "velocities[" << i << "]: "
+        << (*(samp1.getVelocities()))[i] << std::endl;
+        TESTING_ASSERT( veloc == (*(samp1.getVelocities()))[i] );
+    }
 
     // test the second sample has '1' as the interpolate boundary value
     TESTING_ASSERT( 1 == samp1.getInterpolateBoundary() );

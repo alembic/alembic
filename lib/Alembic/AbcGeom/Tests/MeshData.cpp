@@ -49,6 +49,17 @@ const Abc::float32_t g_verts[] = { -1.0f, -1.0f, -1.0f,
                                           1.0f, 1.0f, 1.0f };
 
 //-*****************************************************************************
+// optional velocities to go with the vertices
+const Abc::float32_t g_veloc[] = { -0.5f, -0.5f, -0.5f,
+    0.25f, -0.5f, -0.5f,
+    -0.5f, 0.25f, -0.5f,
+    0.25f, 0.25f, -0.5f,
+    -0.5f, -0.5f, 0.25f,
+    0.25f, -0.5f, 0.25f,
+    -0.5f, 0.25f, 0.25f,
+    0.25f, 0.25f, 0.25f };
+
+//-*****************************************************************************
 // Indices of the cube vertices
 const size_t g_numIndices = 24;
 const Abc::int32_t g_indices[] = {
