@@ -419,7 +419,7 @@ namespace
         // per vertex per-polygon color
         int numFaces = ioMesh.numPolygons();
         int nIndex = 0;
-        MIntArray assignmentList(iSampIndices->size());
+        MIntArray assignmentList((unsigned int)iSampIndices->size());
         for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
         {
             int numVertices = ioMesh.polygonVertexCount(faceIndex);

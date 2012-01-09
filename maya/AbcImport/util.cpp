@@ -123,11 +123,19 @@ void disconnectProps(MFnDependencyNode & iNode,
         }
 
         // disconnect connections to animated props
-        MPlug dstPlug = iNode.findPlug(propName.c_str());
+        MPlug dstPlug;
+        if (propName == Alembic::AbcGeom::kVisibilityPropertyName)
+        {
+            dstPlug = iNode.findPlug("visibility");
+        }
+        else
+        {
+            dstPlug = iNode.findPlug(propName.c_str());
+        }
 
         // make sure the long name matches
-        if (dstPlug.partialName(false, false, false, false, false, true) ==
-            propName.c_str())
+        if (propName == Alembic::AbcGeom::kVisibilityPropertyName ||
+            dstPlug.partialName(false, false, false, false, false, true) == propName.c_str())
         {
             disconnectAllPlugsTo(dstPlug);
         }
