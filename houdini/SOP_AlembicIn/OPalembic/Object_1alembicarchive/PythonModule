@@ -27,7 +27,6 @@ def ExpressionToParm(srcParm, dstParm, isString=False):
     dstParm.setExpression('ch%s("%s/%s")' % (
             bool(isString)*'s', relPath, srcParm.name()))
 
-
 def WalkHierarchy(rootNode, parentNode, parentPath, childEntry, pathList):
     name, typeName, children = childEntry
     
@@ -61,14 +60,15 @@ def WalkHierarchy(rootNode, parentNode, parentPath, childEntry, pathList):
         sopNode.parm('includeXform').set(0)
         
         
-    elif typeName == 'xform':
+    elif typeName == 'xform' or typeName == 'cxform':
         currentNode = parentNode.createNode('alembicxform')
         currentNode.setName(name)
         
         ExpressionToParm(rootNode.parm('fileName'), currentNode.parm('fileName'),
                 isString=True)
-        ExpressionToParm(rootNode.parm('frame'), currentNode.parm('frame'))
-        ExpressionToParm(rootNode.parm('fps'), currentNode.parm('fps'))
+        if typeName != 'cxform':
+            ExpressionToParm(rootNode.parm('frame'), currentNode.parm('frame'))
+            ExpressionToParm(rootNode.parm('fps'), currentNode.parm('fps'))
 
 
         currentNode.parm('objectPath').set(currentPath)
@@ -109,4 +109,5 @@ def WalkHierarchy(rootNode, parentNode, parentPath, childEntry, pathList):
     else:
         return
 
-
+def GetObjectMenu():
+   return ['b', 'b', 'c', 'c']

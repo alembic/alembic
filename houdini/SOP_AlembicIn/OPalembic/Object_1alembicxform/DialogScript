@@ -1,4 +1,4 @@
-# Dialog script for alembicxform automatically generated 08/02/11 14:14:13
+# Dialog script for alembicxform automatically generated 08/12/11 12:25:00
 
 {
     name	alembicxform
@@ -236,7 +236,7 @@
 	name	"frame"
 	label	"Frame"
 	type	float
-	default	{ "$F" }
+	default	{ 1 }
 	range	{ 0 10 }
 	export	none
     }

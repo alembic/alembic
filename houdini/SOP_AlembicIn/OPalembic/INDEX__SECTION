@@ -1,7 +1,7 @@
 Operator:     alembicxform
 Label:        Alembic Xform
 Path:         oplib:/Object/alembicxform?Object/alembicxform
-Icon:         MISC_python
+Icon:         SOP_alembic
 Table:        Object
 License:      
 Extra:        
@@ -9,12 +9,12 @@ Inputs:       0 to 0
 Subnet:       false
 Python:       true
 Empty:        false
-Modified:     Tue Aug  2 15:14:13 2011
+Modified:     Fri Aug 12 12:25:00 2011
 
 Operator:     alembicarchive
 Label:        Alembic Archive
 Path:         oplib:/Object/alembicarchive?Object/alembicarchive
-Icon:         MISC_python
+Icon:         SOP_alembic
 Table:        Object
 License:      
 Extra:        
@@ -22,5 +22,5 @@ Inputs:       0 to 0
 Subnet:       false
 Python:       true
 Empty:        false
-Modified:     Thu Aug  4 16:18:08 2011
+Modified:     Wed Sep 21 08:42:02 2011
 
