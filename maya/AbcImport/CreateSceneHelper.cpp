@@ -349,6 +349,8 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
 
     MObject saveParent = mParent;
 
+    if (!iRoot.valid()) return MS::kFailure;
+
     Alembic::Abc::IObject top = iRoot.getTop();
     size_t numChildren = top.getNumChildren();
 
