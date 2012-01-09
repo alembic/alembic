@@ -542,9 +542,13 @@ MStatus AbcExport::doIt(const MArgList & args)
             // resolve the relative path
             MFileObject absoluteFile;
             absoluteFile.setRawFullName(fileName.c_str());
+#if MAYA_API_VERSION < 201300
             if (absoluteFile.resolvedFullName() !=
                 absoluteFile.expandedFullName())
             {
+#else
+            if (!MFileObject::isAbsolutePath(fileName.c_str())) {
+#endif
                 // this is a relative path
                 MString absoluteFileName = directoryName + "/" +
                     fileName.c_str();
