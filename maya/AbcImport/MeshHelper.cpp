@@ -588,6 +588,20 @@ namespace
         setColor(ioMesh, colorList, indices, colorSetName, MFnMesh::kRGBA);
     }
 
+    bool inStrArray( const MStringArray & iArray, const MString & iStr )
+    {
+        unsigned int arrLength = iArray.length();
+
+        for (unsigned int i = 0; i < arrLength; ++i)
+        {
+            if (iArray[i] == iStr)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void setColors(double iFrame, MFnMesh & ioMesh,
         std::vector< Alembic::AbcGeom::IC3fGeomParam > iC3s,
         std::vector< Alembic::AbcGeom::IC4fGeomParam > iC4s,
@@ -603,12 +617,20 @@ namespace
         std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3sEnd =
             iC3s.end();
 
+        MStringArray allSetNames;
+        ioMesh.getColorSetNames(allSetNames);
+
         for (c3s = iC3s.begin(); c3s != c3sEnd; ++c3s)
         {
             if (c3s->getNumSamples() > 0 && (iSetStatic || !c3s->isConstant()))
             {
                 MString setName(c3s->getName().c_str());
-                createColorSet(ioMesh, setName, c3s->getMetaData());
+                if (!inStrArray(allSetNames, setName))
+                {
+                    createColorSet(ioMesh, setName, c3s->getMetaData());
+                    allSetNames.append(setName);
+                }
+
                 setColor3f(iFrame, ioMesh, *c3s);
             }
         }
@@ -622,7 +644,12 @@ namespace
             if (c4s->getNumSamples() > 0 && (iSetStatic || !c4s->isConstant()))
             {
                 MString setName(c4s->getName().c_str());
-                createColorSet(ioMesh, setName, c4s->getMetaData());
+                if (!inStrArray(allSetNames, setName))
+                {
+                    createColorSet(ioMesh, setName, c4s->getMetaData());
+                    allSetNames.append(setName);
+                }
+
                 setColor4f(iFrame, ioMesh, *c4s);
             }
         }
