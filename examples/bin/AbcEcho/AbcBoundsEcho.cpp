@@ -107,6 +107,42 @@ Box3d getBounds( IObject iObj )
             bnds.extendBy( (*positions)[i] );
         }
     }
+    else if ( IFaceSet::matches( iObj.getMetaData() ) )
+    {
+        Int32ArraySamplePtr faces;
+        IFaceSet faceSet( iObj, kWrapExisting );
+        IFaceSetSchema fs = faceSet.getSchema ();
+        faces = fs.getValue().getFaces();
+        
+
+        Int32ArraySamplePtr meshFaceCounts;
+        Int32ArraySamplePtr vertexIndices;
+        P3fArraySamplePtr  meshP;
+
+        IObject parentMesh = iObj.getParent ();
+        if (ISubD::matches (parentMesh.getMetaData ()))
+        {
+            ISubD mesh( parentMesh, kWrapExisting );
+            ISubDSchema ms = mesh.getSchema();
+            ISubDSchema::Sample meshSample = ms.getValue();
+            meshP = meshSample.getPositions();
+            meshFaceCounts = meshSample.getFaceCounts();
+            vertexIndices = meshSample.getFaceIndices();
+        }
+        else if (IPolyMesh::matches (parentMesh.getMetaData ()))
+        {
+            IPolyMesh mesh( parentMesh, kWrapExisting );
+            IPolyMeshSchema ms = mesh.getSchema();
+            IPolyMeshSchema::Sample meshSample = ms.getValue();
+            meshP = meshSample.getPositions();
+            meshFaceCounts = meshSample.getFaceCounts();
+            vertexIndices = meshSample.getFaceIndices();
+        }
+
+        bnds.extendBy (computeBoundsFromPositionsByFaces (*faces,
+            *meshFaceCounts, *vertexIndices, *meshP));
+
+    }
 
     bnds.extendBy( Imath::transform( bnds, xf ) );
 
@@ -122,7 +158,9 @@ void visitObject( IObject iObj )
 
     const MetaData &md = iObj.getMetaData();
 
-    if ( IPolyMeshSchema::matches( md ) || ISubDSchema::matches( md ) )
+    if ( IPolyMeshSchema::matches( md ) || 
+        IFaceSetSchema::matches( md ) || 
+        ISubDSchema::matches( md ) )
     {
         Box3d bnds = getBounds( iObj );
         std::cout << path << " " << bnds.min << " " << bnds.max << std::endl;

@@ -267,6 +267,11 @@ protected:
 //-*****************************************************************************
 typedef Abc::OSchemaObject<OFaceSetSchema> OFaceSet;
 
+Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
+    const Int32ArraySample & meshFaceCounts,
+    const Int32ArraySample & vertexIndices,
+    const P3fArraySample & meshP);
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

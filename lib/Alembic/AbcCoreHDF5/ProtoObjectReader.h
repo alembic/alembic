@@ -38,6 +38,8 @@
 #define _Alembic_AbcCoreHDF5_ProtoObjectReader_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
+#include <Alembic/AbcCoreAbstract/ObjectHeader.h>
+#include <boost/thread/mutex.hpp>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -52,13 +54,15 @@ public:
                        const std::string &iName );
     ~ProtoObjectReader();
 
-    hid_t getGroup() const { return m_group; }
-
-    const AbcA::ObjectHeader &getHeader() const { return m_header; }
+    hid_t getGroup();
+    const Alembic::AbcCoreAbstract::ObjectHeader &getHeader();
 
 protected:
-    hid_t m_group;
+    void _buildHeader ();
 
+    boost::mutex  m_groupOpenMutex;
+    hid_t m_group;
+    hid_t m_parent;
     AbcA::ObjectHeader m_header;
 };
 

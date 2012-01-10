@@ -36,6 +36,7 @@
 
 #include <Alembic/AbcCoreHDF5/ProtoObjectReader.h>
 #include <Alembic/AbcCoreHDF5/ReadUtil.h>
+#include <boost/thread/mutex.hpp>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -44,23 +45,14 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 ProtoObjectReader::ProtoObjectReader( hid_t iParent,
                                       const std::string &iParentFullPathName,
-                                      const std::string &iName )
+                                      const std::string &iName ) :
+                                      m_parent( iParent )
 {
     // Validate.
     ABCA_ASSERT( iParent >= 0,
                  "Invalid group passed into ProtoObjectReader ctor" );
 
-    // Open the HDF5 group corresponding to this object.
-    m_group = H5Gopen2( iParent, iName.c_str(), H5P_DEFAULT );
-    ABCA_ASSERT( m_group >= 0,
-                 "Could not open object group named: "
-                 << iName << " in parent: " << iParentFullPathName );
-
-    // Read the meta data.
-    // Metadata is always named ".prop.meta" for objects,
-    // as it is shared with the underlying property.
-    AbcA::MetaData mdata;
-    ReadMetaData( m_group, ".prop.meta", mdata );
+    m_group = -1;
 
     std::string fullChildName;
 
@@ -75,9 +67,48 @@ ProtoObjectReader::ProtoObjectReader( hid_t iParent,
 
     if ( fullChildName == "/ABC" ) { fullChildName = "/"; }
 
-    m_header = AbcA::ObjectHeader( iName,
-                                   fullChildName,
-                                   mdata );
+    m_header.setName( iName );
+    m_header.setFullName( fullChildName );
+}
+
+//-*****************************************************************************
+void
+ProtoObjectReader::_buildHeader ()
+{
+    // For performance, lazy loading for the object's metadata
+    // and HDF5 group.
+    boost::mutex::scoped_lock l( m_groupOpenMutex );
+    if (m_group == -1)
+    {
+        // Open the HDF5 group corresponding to this object.
+        m_group = H5Gopen2( m_parent, m_header.getName().c_str (),
+                            H5P_DEFAULT );
+
+        ABCA_ASSERT( m_group >= 0,
+                     "Could not open object group: "
+                     << m_header.getFullName() );
+
+        // Read the meta data.
+        // Metadata is always named ".prop.meta" for objects,
+        // as it is shared with the underlying property.
+        ReadMetaData( m_group, ".prop.meta", m_header.getMetaData() );
+    }
+}
+
+//-*****************************************************************************
+const AbcA::ObjectHeader &
+ProtoObjectReader::getHeader()
+{ 
+    _buildHeader ();
+    return m_header; 
+}
+
+//-*****************************************************************************
+hid_t
+ProtoObjectReader::getGroup()
+{
+    _buildHeader ();
+    return m_group;
 }
 
 //-*****************************************************************************

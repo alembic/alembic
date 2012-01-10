@@ -93,7 +93,8 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iVal )
                      << "XformSample!" );
 
         m_ops[ret] = iOp;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
 
         return ret;
     }
@@ -133,7 +134,8 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
                      "Cannot mix addOp() and set<Foo>() methods." );
 
         m_ops[ret] = iOp;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
 
         return ret;
     }
@@ -169,7 +171,8 @@ std::size_t XformSample::addOp( XformOp iOp,
                      "Cannot mix addOp() and set<Foo>() methods." );
 
         m_ops[ret] = iOp;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
 
         return ret;
     }
@@ -209,7 +212,8 @@ std::size_t XformSample::addOp( XformOp iOp, const Abc::M44d &iVal )
                      "Cannot mix addOp() and set<Foo>() methods." );
 
         m_ops[ret] = iOp;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
 
         return ret;
     }
@@ -241,7 +245,8 @@ std::size_t XformSample::addOp( const XformOp &iOp )
                      "Cannot mix addOp() and set<Foo>() methods." );
 
         m_ops[ret] = iOp;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
 
         return ret;
     }
@@ -338,7 +343,8 @@ void XformSample::setTranslation( const Abc::V3d &iTrans )
                      << "XformSample!" );
 
         m_ops[ret] = op;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
     }
 }
 
@@ -375,7 +381,8 @@ void XformSample::setRotation( const Abc::V3d &iAxis,
                      << "XformSample!" );
 
         m_ops[ret] = op;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
     }
 }
 
@@ -410,7 +417,8 @@ void XformSample::setScale( const Abc::V3d &iScale )
                      << "XformSample!" );
 
         m_ops[ret] = op;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
     }
 }
 
@@ -442,7 +450,8 @@ void XformSample::setXRotation( const double iAngleInDegrees )
                      << "XformSample!" );
 
         m_ops[ret] = op;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
     }
 }
 
@@ -474,7 +483,8 @@ void XformSample::setYRotation( const double iAngleInDegrees )
                      << "XformSample!" );
 
         m_ops[ret] = op;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
     }
 }
 
@@ -506,7 +516,8 @@ void XformSample::setZRotation( const double iAngleInDegrees )
                      << "XformSample!" );
 
         m_ops[ret] = op;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
     }
 }
 
@@ -544,7 +555,8 @@ void XformSample::setMatrix( const Abc::M44d &iMatrix )
                      << "XformSample!" );
 
         m_ops[ret] = op;
-        m_opIndex = ++m_opIndex % m_ops.size();
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
     }
 }
 
