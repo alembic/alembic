@@ -471,9 +471,10 @@ namespace
 
         MColorArray colorList;
 
-        //Interpolate between 2 samples (as long as the indices are contant)
-        if (alpha != 0 && index != ceilIndex &&
-            iC3f.getIndexProperty().isConstant())
+        //Interpolate between 2 samples (as long as the indices are constant)
+        //(non index is considered constant)
+        if ( alpha != 0 && index != ceilIndex &&
+            (!iC3f.getIndexProperty() || iC3f.getIndexProperty().isConstant()) )
         {
             Alembic::AbcGeom::IC3fGeomParam::Sample ceilSamp;
             iC3f.getIndexed(ceilSamp,
@@ -540,8 +541,8 @@ namespace
         MColorArray colorList;
 
         //Interpolate between 2 samples
-        if (alpha != 0 && index != ceilIndex &&
-            iC4f.getIndexProperty().isConstant())
+        if ( alpha != 0 && index != ceilIndex &&
+            (!iC4f.getIndexProperty() || iC4f.getIndexProperty().isConstant()) )
         {
             Alembic::AbcGeom::IC4fGeomParam::Sample ceilSamp;
             iC4f.getIndexed(ceilSamp,
