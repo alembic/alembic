@@ -1703,6 +1703,12 @@ void SOP_AlembicIn::buildSubD( Args & args, ISubD &subd, M44d parentXform, bool 
     {
         if (!args.includeXform || parentXformIsConstant)
         {
+	    // Update point/prim counts
+	    Abc::P3fArraySamplePtr pSample =
+		    ss.getPositionsProperty().getValue(sampleSelector);
+	    std::string	groupName = fixAttributeName(getFullName(subd));
+	    args.pointCount += pSample->size();     // Add # points
+	    args.primCount += myPrimitiveCountCache[groupName];
             return;
         }
     }
@@ -1782,6 +1788,12 @@ void SOP_AlembicIn::buildPolyMesh( Args & args, IPolyMesh & polymesh,
     {
         if (!args.includeXform || parentXformIsConstant)
         {
+	    // Update point/prim counts
+	    Abc::P3fArraySamplePtr pSample =
+		    schema.getPositionsProperty().getValue(sampleSelector);
+	    std::string	groupName = fixAttributeName(getFullName(polymesh));
+	    args.pointCount += pSample->size();     // Add # points
+	    args.primCount += myPrimitiveCountCache[groupName];
             return;
         }
     }
@@ -1822,7 +1834,6 @@ void SOP_AlembicIn::buildPolyMesh( Args & args, IPolyMesh & polymesh,
     size_t endPointIdx = args.pointCount;
     size_t endPrimIdx = args.primCount;
     
-    
     addUVs(args, polymesh.getSchema().getUVsParam(),
             startPointIdx, endPointIdx, startPrimIdx, endPrimIdx);
     addNormals(args, polymesh.getSchema().getNormalsParam(),
@@ -1860,6 +1871,12 @@ void SOP_AlembicIn::buildCurves( Args & args, ICurves & curves,
     {
         if (!args.includeXform || parentXformIsConstant)
         {
+	    // Update point/prim counts
+	    Abc::P3fArraySamplePtr pSample =
+		    schema.getPositionsProperty().getValue(sampleSelector);
+	    std::string	groupName = fixAttributeName(getFullName(curves));
+	    args.pointCount += pSample->size();     // Add # points
+	    args.primCount += myPrimitiveCountCache[groupName];
             return;
         }
     }
@@ -1940,6 +1957,11 @@ void SOP_AlembicIn::buildPoints( Args & args, IPoints & points,
     {
         if (!args.includeXform || parentXformIsConstant)
         {
+	    // Update point/prim counts
+	    Abc::P3fArraySamplePtr pSample =
+		    schema.getPositionsProperty().getValue(sampleSelector);
+	    args.pointCount += pSample->size();     // Add # points
+	    args.primCount += 1;
             return;
         }
     }
@@ -1961,7 +1983,7 @@ void SOP_AlembicIn::buildPoints( Args & args, IPoints & points,
         args.pointCount += pSample->size();     // Add # points
         
         //always present in myPrimitiveCountCache if args.reusePrimitives
-        args.primCount += myPrimitiveCountCache[groupName];
+        args.primCount += 1;
     }
     else
     {
@@ -2016,6 +2038,10 @@ void SOP_AlembicIn::buildNuPatch( Args & args, INuPatch & nupatch,
     {
         if (!args.includeXform || parentXformIsConstant)
         {
+	    Abc::P3fArraySamplePtr pSample =
+		    schema.getPositionsProperty().getValue(sampleSelector);
+	    args.pointCount += pSample->size();     // Add # points
+	    args.primCount += 1;
             return;
         }
     }
@@ -2042,17 +2068,17 @@ void SOP_AlembicIn::buildNuPatch( Args & args, INuPatch & nupatch,
         for (size_t i = 0, e = pSample->size(); i < e; ++i)
         {
 #if UT_MAJOR_VERSION_INT >= 12
-        GA_Offset pt = gdp->pointOffset(GA_Index(startPointIdx+i));
-        gdp->setPos3(pt, 
-                (*pSample)[i][0],
-                (*pSample)[i][1],
-                (*pSample)[i][2]);
+	    GA_Offset pt = gdp->pointOffset(GA_Index(startPointIdx+i));
+	    gdp->setPos3(pt, 
+		    (*pSample)[i][0],
+		    (*pSample)[i][1],
+		    (*pSample)[i][2]);
 #else
-        GEO_Point *pt = gdp->points()(startPointIdx+i);
-        pt->setPos(UT_Vector3(
-                (*pSample)[i][0],
-                (*pSample)[i][1],
-                (*pSample)[i][2]));
+	    GEO_Point *pt = gdp->points()(startPointIdx+i);
+	    pt->setPos(UT_Vector3(
+		    (*pSample)[i][0],
+		    (*pSample)[i][1],
+		    (*pSample)[i][2]));
 #endif
         }
         
