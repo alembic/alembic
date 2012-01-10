@@ -367,8 +367,17 @@ double getWeightAndIndex(double iFrame,
 
     oCeilIndex = ceilIndex.first;
 
-    return (iFrame - floorIndex.second) /
+    double alpha = (iFrame - floorIndex.second) /
         (ceilIndex.second - floorIndex.second);
+
+    // we so closely match the ceiling so we'll just use it
+    if (fabs(1.0 - alpha) < 0.0001)
+    {
+        oIndex = oCeilIndex;
+        return 0.0;
+    }
+
+    return alpha;
 }
 
 bool isColorSet(const Alembic::AbcCoreAbstract::MetaData & iMetaData,
