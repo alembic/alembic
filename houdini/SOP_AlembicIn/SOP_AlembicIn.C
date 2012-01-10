@@ -498,7 +498,7 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     
     
     double fps = evalFloat("fps", 0, now);
-    args.abcTime = evalFloat("frame", 0, now) / fps;
+    args.abcTime = (evalFloat("frame", 0, now) - 1.0)/ fps;
     args.isConstant = true;
     args.isTopologyConstant = true;
     args.reusePrimitives = myTopologyConstant && gdp->primitives().entries()>0;
