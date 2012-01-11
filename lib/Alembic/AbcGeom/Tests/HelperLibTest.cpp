@@ -38,6 +38,7 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcGeom/Visibility.h>
 #include <Alembic/AbcGeom/ArchiveBounds.h>
+#include <Alembic/AbcGeom/IGeomParam.h>
 #include <boost/random.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -276,6 +277,8 @@ void readSimpleProperties(const std::string &archiveName)
                         case  kBooleanPOD:
                         {
                             IBoolProperty prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IBoolGeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
@@ -284,12 +287,16 @@ void readSimpleProperties(const std::string &archiveName)
                         case kUint8POD:
                         {
                             IUcharProperty prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IUcharGeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
                         case kInt8POD:
                         {
                             ICharProperty prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !ICharGeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
@@ -298,12 +305,16 @@ void readSimpleProperties(const std::string &archiveName)
                         case kUint16POD:
                         {
                             IUInt16Property prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IUInt16GeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
                         case kInt16POD:
                         {
                             IInt16Property prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IInt16GeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
@@ -312,12 +323,16 @@ void readSimpleProperties(const std::string &archiveName)
                         case kUint32POD:
                         {
                             IUInt32Property prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IUInt32GeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
                         case kInt32POD:
                         {
                             IInt32Property prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IInt32GeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
@@ -326,31 +341,45 @@ void readSimpleProperties(const std::string &archiveName)
                         case kUint64POD:
                         {
                             IUInt64Property prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IUInt64GeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
                         case kInt64POD:
                         {
                             IInt64Property prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IInt64GeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
 
                         // Half/Float/Double
                         case kFloat16POD:
+                        {
                             // iostream doesn't understand float_16's
                             //printSampleValue( IHalfProperty( props,  propNames[jj] ),
                             //                  iss );
+                            IHalfProperty prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IHalfGeomParam::matches(
+                                                prop.getMetaData() ) );
                             break;
+                        }
+
                         case kFloat32POD:
                         {
                             IFloatProperty prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IFloatGeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
                         case kFloat64POD:
                         {
                             IDoubleProperty prop( props,  propNames[jj] );
+                            TESTING_ASSERT( !IDoubleGeomParam::matches(
+                                                prop.getMetaData() ) );
                             printSampleValue( prop, iss );
                             break;
                         }
@@ -546,6 +575,9 @@ int main( int argc, char *argv[] )
         writeNestedCommpoundWithVis( archiveName );
         readNestedCommpoundWithVis( archiveName );
 
+        std::string archiveName2("simpleHelperProps.abc");
+        writeSimpleProperties(archiveName2);
+        readSimpleProperties(archiveName2);
     }
     catch (char * str )
     {
