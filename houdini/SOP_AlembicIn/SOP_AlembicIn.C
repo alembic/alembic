@@ -339,7 +339,7 @@ static PRM_Name prm_objectPathName("objectPath", "Object Path");
 static PRM_Name prm_includeXformName("includeXform", "Include Xform");
 static PRM_Name prm_remapAttribName("remapAttributes", "Remap Attributes");
 
-static PRM_Default prm_frameDefault(1, "$F");
+static PRM_Default prm_frameDefault(1, "$FF");
 static PRM_Default prm_objectPathDefault(0, "");
 static PRM_Default prm_fpsDefault(24, "$FPS");
 static PRM_Default prm_includeXformDefault(true);

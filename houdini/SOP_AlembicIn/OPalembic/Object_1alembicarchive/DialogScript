@@ -237,7 +237,7 @@
 	name	"frame"
 	label	"Frame"
 	type	float
-	default	{ "$F" }
+	default	{ "$FF" }
 	range	{ 0 10 }
 	export	none
     }
