@@ -1,3 +1,50 @@
+2012-1-12, Alembic 1.0.4
+
+Hello, Alembic users, thanks to your feedback we have another collection of
+API additions and small but useful bug fixes.
+
+Some highlights:
+
+API:
+
+ - Support raw reads and reading as a different precision for array properties
+ with the new getAs call.  Currently strings, wstrings, and float16_t
+ can not be read as any other type.
+
+ - Add an optional velocity property to polymeshes, subds, nurbs, and curves.
+ Velocity is considered to be in units per second.
+
+ - Temporarily work around an HDF5 bug where parts of the file could become
+ corrupt.  Always store the HDF5 links in dense storage.  This can lead to
+ larger file sizes when you have a lot of IObjects and those objects are static
+ and contain a small amount of data.
+
+ - Improve performance on partial hierarchy traversal by deferring the HDF5
+ group open and meta data reading until it is needed.
+
+Renderman Procedural:
+
+ - Support V3dGeomParam, P3dGeomParam, and BoolGeomParam
+
+Houdini SOP:
+
+ - Dramatically increase performance under Houdini 12 and pleasantly increase
+ performance under 11.1.
+
+Maya AbcImport:
+
+ - Don't interpolate when the time values closely match the ceiling value.
+
+ - Don't create a new color set every time an animated color set is evaluated.
+
+ - Interpolating non indexed color values would sometimes cause a crash.
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+
 2011-11-11, Alembic 1.0.3
 
 Hello, Alembic users, thanks to your feedback we have another collection of
