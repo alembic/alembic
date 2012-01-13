@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2012,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -52,7 +52,7 @@ ENDIF()
 # Declare the version
 SET( PROJECT_VERSION_MAJOR  1 )
 SET( PROJECT_VERSION_MINOR  0 )
-SET( PROJECT_VERSION_PATCH  3 )
+SET( PROJECT_VERSION_PATCH  4 )
 SET( PROJECT_VERSION
      ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
 SET( VERSION ${PROJECT_VERSION} )
