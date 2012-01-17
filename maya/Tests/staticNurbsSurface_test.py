@@ -87,9 +87,17 @@ def testStaticNurbsWithoutTrim(self, surfacetype, abcFileName):
     self.failUnlessEqual(minV, MayaCmds.getAttr(name+'.minValueV'))
     self.failUnlessEqual(maxV, MayaCmds.getAttr(name+'.maxValueV'))
 
-    # form will always be open
-    self.failUnlessEqual(0, MayaCmds.getAttr(name+'.formU'))
-    self.failUnlessEqual(0, MayaCmds.getAttr(name+'.formV'))
+
+    if (surfacetype == 0):
+        self.failUnlessEqual(0, MayaCmds.getAttr(name+'.formU'))
+        self.failUnlessEqual(0, MayaCmds.getAttr(name+'.formV'))
+    elif (surfacetype == 1):
+        self.failUnlessEqual(0, MayaCmds.getAttr(name+'.formU'))
+        self.failUnlessEqual(2, MayaCmds.getAttr(name+'.formV'))
+    elif (surfacetype == 2):
+        self.failUnlessEqual(2, MayaCmds.getAttr(name+'.formU'))
+        self.failUnlessEqual(2, MayaCmds.getAttr(name+'.formV'))
+
 
     surfaceInfoNode = MayaCmds.createNode('surfaceInfo')
     MayaCmds.connectAttr(name+'.worldSpace', surfaceInfoNode+'.inputSurface',

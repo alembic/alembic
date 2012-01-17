@@ -142,7 +142,113 @@ namespace
             trimBoundaryArray.append(trimLoop);
         }
 
-        if (iFnSurface.trimWithBoundaries(trimBoundaryArray) == MS::kSuccess)
+        MTrimBoundaryArray oneRegion;
+        for (unsigned int i = 0; i < trimBoundaryArray.length(); i++)
+        {
+            if (i > 0)
+            {
+                MObject loopData = trimBoundaryArray.getMergedBoundary(i, &status);
+                if (status != MS::kSuccess) continue;
+
+                MFnNurbsCurve loop(loopData, &status);
+                if (status != MS::kSuccess) continue;
+
+                // Check whether this loop is an outer boundary.
+                bool isOuterBoundary = false;
+
+                double       length  = loop.length();
+                unsigned int segment = std::max(loop.numCVs(), 10);
+
+                MPointArray curvePoints;
+                curvePoints.setLength(segment);
+
+                for (unsigned int j = 0; j < segment; j++)
+                {
+                    double param = loop.findParamFromLength(length * j / segment);
+                    loop.getPointAtParam(param, curvePoints[j]);
+                }
+
+                // Find the right most curve point
+                MPoint       rightMostPoint = curvePoints[0];
+                unsigned int rightMostIndex = 0;
+                for (unsigned int j = 0; j < curvePoints.length(); j++)
+                {
+                    if (rightMostPoint.x < curvePoints[j].x)
+                    {
+                        rightMostPoint = curvePoints[j];
+                        rightMostIndex = j;
+                    }
+                }
+
+                // Find the vertex just before and after the right most vertex
+                int beforeIndex = (rightMostIndex == 0) ? curvePoints.length() - 1 : rightMostIndex - 1;
+                int afterIndex  = (rightMostIndex == curvePoints.length() - 1) ? 0 : rightMostIndex + 1;
+
+                for (unsigned int j = 0; j < curvePoints.length(); j++)
+                {
+                    if (fabs(curvePoints[beforeIndex].x - curvePoints[rightMostIndex].x) < 1e-5)
+                    {
+                        beforeIndex = (beforeIndex == 0) ? curvePoints.length() - 1 : beforeIndex - 1;
+                    }
+                }
+
+                for (unsigned int j = 0; j < curvePoints.length(); j++)
+                {
+                    if (fabs(curvePoints[afterIndex].x - curvePoints[rightMostIndex].x) < 1e-5)
+                    {
+                        afterIndex = (afterIndex == (int)(curvePoints.length()) - 1) ? 0 : afterIndex + 1;
+                    }
+                }
+
+                // failed. not a closed curve.
+                if (fabs(curvePoints[afterIndex].x - curvePoints[rightMostIndex].x) < 1e-5 &&
+                    fabs(curvePoints[beforeIndex].x - curvePoints[rightMostIndex].x) < 1e-5)
+                {
+                    continue;
+                }
+
+                if (beforeIndex < 0)
+                    beforeIndex += curvePoints.length();
+                if (beforeIndex >= (int)(curvePoints.length()))
+                    beforeIndex = beforeIndex & curvePoints.length();
+                if (afterIndex < 0)
+                    afterIndex += curvePoints.length();
+                if (afterIndex >= (int)(curvePoints.length()))
+                    afterIndex = afterIndex & curvePoints.length();
+
+                // Compute the cross product
+                MVector vector1 = curvePoints[beforeIndex] - curvePoints[rightMostIndex];
+                MVector vector2 = curvePoints[afterIndex]  - curvePoints[rightMostIndex];
+                if ((vector1 ^ vector2).z < 0)
+                {
+                    isOuterBoundary = true;
+                }
+
+                // Trim the NURBS surface. An outer boundary starts a new region.
+                if (isOuterBoundary)
+                {
+#if MAYA_API_VERSION < 201300
+                    status = iFnSurface.trimWithBoundaries(oneRegion);
+#else
+                    status = iFnSurface.trimWithBoundaries(oneRegion, false, 1e-3, 1e-5, true);
+#endif
+                    if (status != MS::kSuccess)
+                    {
+                        MGlobal::displayError("Trimming Nurbs Surface failed.");
+                    }
+                    oneRegion.clear();
+                }
+            }
+
+            oneRegion.append(trimBoundaryArray[i]);
+        }
+
+#if MAYA_API_VERSION < 201300
+        status = iFnSurface.trimWithBoundaries(oneRegion);
+#else
+        status = iFnSurface.trimWithBoundaries(oneRegion, false, 1e-3, 1e-5, true);
+#endif
+        if (status == MS::kSuccess)
         {
             unsigned int length = deleteAfterTrim.length();
             for (unsigned int l=0; l<length; l++)
@@ -207,6 +313,61 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
         }
     }
 
+    // Nurbs form
+    // Alemblic file does not record the form of nurb surface, we get the form
+    // by checking the CV data. If the first degree number CV overlap the last
+    // degree number CV, then the form is kPeriodic. If only the first CV overlaps
+    // the last CV, then the form is kClosed.
+    MFnNurbsSurface::Form formU = MFnNurbsSurface::kPeriodic;
+    MFnNurbsSurface::Form formV = MFnNurbsSurface::kPeriodic;
+    // Check all curves
+    bool notOpen = true;
+    for (unsigned int v = 0; notOpen && v < numCVInV; v++) {
+        for (unsigned int u = 0; u < degreeU; u++) {
+            unsigned int firstIndex = u * numCVInV + (numCVInV - v - 1);
+            unsigned int lastPeriodicIndex = (numCVInU - degreeU + u) * numCVInV + (numCVInV - v - 1);
+            if (!controlVertices[firstIndex].isEquivalent(controlVertices[lastPeriodicIndex])) {
+                formU = MFnNurbsSurface::kOpen;
+                notOpen = false;
+                break;
+            }
+        }
+    }
+    
+    if (formU == MFnNurbsSurface::kOpen) {
+        formU = MFnNurbsSurface::kClosed;
+        for (unsigned int v = 0; v < numCVInV; v++) {
+            unsigned int lastUIndex = (numCVInU - 1) * numCVInV + (numCVInV - v - 1);
+            if (! controlVertices[numCVInV-v-1].isEquivalent(controlVertices[lastUIndex])) {
+                formU = MFnNurbsSurface::kOpen;
+                break;
+            }
+        }
+    }
+
+    notOpen = true;
+    for (unsigned int u = 0; notOpen && u < numCVInU; u++) {
+        for (unsigned int v = 0; v < degreeV; v++) {
+            unsigned int firstIndex = u * numCVInV + (numCVInV - v - 1);
+            unsigned int lastPeriodicIndex = u * numCVInV + (degreeV - v - 1); //numV - (numV - vDegree + v) - 1;
+            if (!controlVertices[firstIndex].isEquivalent(controlVertices[lastPeriodicIndex])) {
+                formV = MFnNurbsSurface::kOpen;
+                notOpen = false;
+                break;
+            }
+        }
+    }
+    if (formV == MFnNurbsSurface::kOpen) {
+        formV = MFnNurbsSurface::kClosed;
+        for (unsigned int u = 0; u < numCVInU; u++) {
+            if (! controlVertices[u * numCVInV + (numCVInV-1)].isEquivalent(controlVertices[u * numCVInV])) {
+                formV = MFnNurbsSurface::kOpen;
+                break;
+            }
+        }
+    }
+
+    
     Alembic::Abc::FloatArraySamplePtr uKnot = samp.getUKnot();
     Alembic::Abc::FloatArraySamplePtr vKnot = samp.getVKnot();
 
@@ -229,7 +390,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
     // Node creation try the API first
     MFnNurbsSurface mFn;
     obj = mFn.create(controlVertices, uKnotSequences, vKnotSequences,
-        degreeU, degreeV, MFnNurbsSurface::kOpen, MFnNurbsSurface::kOpen,
+        degreeU, degreeV, formU, formV,
         true, iObject, &status);
 
     if (status == MS::kSuccess)

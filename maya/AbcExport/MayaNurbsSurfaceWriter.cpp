@@ -210,8 +210,19 @@ void MayaNurbsSurfaceWriter::write()
 
     unsigned int numRegions = nurbs.numRegions();
 
-    // each region is a curvegroup, it can have multiple trim curve segments
-    std::vector<Alembic::Util::int32_t> trimNumCurves(numRegions);
+    // each boundary is a curvegroup, it can have multiple trim curve segments
+
+    // A Maya's trimmed NURBS surface has multiple regions.
+    // Inside a region, there are multiple boundaries.
+    // There are one CCW outer boundary and optional CW inner boundaries.
+    // Each boundary is a closed boundary and consists of multiple curves.
+
+    // Alembic has the same semantic as RenderMan.
+    // RenderMan's doc says: "The curves of a loop connect
+    //   in head-to-tail fashion and must be explicitly closed. "
+
+    // A Maya boundary is equivalent to an Alembic/RenderMan loop
+    std::vector<Alembic::Util::int32_t> trimNumCurves;
     std::vector<Alembic::Util::int32_t> trimNumPos;
     std::vector<Alembic::Util::int32_t> trimOrder;
     std::vector<float> trimKnot;
@@ -221,20 +232,21 @@ void MayaNurbsSurfaceWriter::write()
     std::vector<float> trimV;
     std::vector<float> trimW;
 
+    Alembic::Util::int32_t numLoops = 0;
     for (unsigned int i = 0; i < numRegions; i++)
     {
         MTrimBoundaryArray result;
 
         // if the 3rd argument is set to be true, return the 2D curve
         nurbs.getTrimBoundaries(result, i, true);
-        unsigned int numTrimCurve = result.length();
-        trimNumCurves[i] = 0;
-        for (unsigned int j = 0; j < numTrimCurve; j++)
+        unsigned int numBoundaries = result.length();
+        for (unsigned int j = 0; j < numBoundaries; j++)
         {
             MObjectArray boundary = result[j];
-            unsigned int length = boundary.length();
-            trimNumCurves[i] += static_cast<Alembic::Util::int32_t>(length);
-            for (unsigned int k = 0; k < length; k++)
+            unsigned int numTrimCurve = boundary.length();
+            trimNumCurves.push_back(static_cast<Alembic::Util::int32_t>(numTrimCurve));
+            numLoops++;
+            for (unsigned int k = 0; k < numTrimCurve; k++)
             {
                 MObject curveObj = boundary[k];
                 if (curveObj.hasFn(MFn::kNurbsCurve))
@@ -295,7 +307,6 @@ void MayaNurbsSurfaceWriter::write()
         } // for j
     } // for i
 
-    Alembic::Util::int32_t numLoops = numRegions;
     samp.setTrimCurve(numLoops,
         Alembic::Abc::Int32ArraySample(trimNumCurves),
         Alembic::Abc::Int32ArraySample(trimNumPos),
