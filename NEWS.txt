@@ -7,28 +7,27 @@ Some highlights:
 
 API:
 
- - Support raw reads and reading as a different precision for array properties
- with the new getAs call.  Currently strings, wstrings, and float16_t
+ - Now supports raw reads, and reading as a different precision, for array properties
+ via a new method getAs (). Currently strings, wstrings, and float16_t
  can not be read as any other type.
 
- - Add an optional velocity property to polymeshes, subds, nurbs, and curves.
+ - Added an optional velocity property to polymeshes, subds, nurbs, and curves.
  Velocity is considered to be in units per second.
 
- - Temporarily work around an HDF5 bug where parts of the file could become
- corrupt.  Always store the HDF5 links in dense storage.  This can lead to
- larger file sizes when you have a lot of IObjects and those objects are static
- and contain a small amount of data.
+ - Added a temporary work around for an HDF5 bug where parts of the file could become
+ corrupt. This workaround always stores the HDF5 links in dense storage.  This can lead to
+ larger file sizes when you have a lot of IObjects.
 
- - Improve performance on partial hierarchy traversal by deferring the HDF5
- group open and meta data reading until it is needed.
+ - Improved the performance on partial hierarchy traversal by deferring opening of an
+ object's HDF5 group until truly needed.
 
 Renderman Procedural:
 
- - Support V3dGeomParam, P3dGeomParam, and BoolGeomParam
+ - Added support for V3dGeomParam, P3dGeomParam, and BoolGeomParam
 
 Houdini SOP:
 
- - Dramatically increase performance under Houdini 12 and pleasantly increase
+ - Dramatically increased the performance under Houdini 12 and pleasantly increased
  performance under 11.1.
 
 Maya AbcImport:
