@@ -532,7 +532,7 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
         key.origPOD = iDataType.getPod();
         key.readPOD = key.origPOD;
 
-        key.numBytes = iDataType.getNumBytes() *
+        key.numBytes = Util::PODNumBytes( key.readPOD ) *
             H5Sget_simple_extent_npoints( dspaceId );
 
         foundDigest = ReadKey( dsetId, "key", key );
@@ -543,7 +543,7 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
         {
             AbcA::ArraySamplePtr ret = found.getSample();
             assert( ret );
-            if ( ret->getDataType() != iDataType )
+            if ( ret->getDataType().getPod() != iDataType.getPod() )
             {
                 ABCA_THROW( "ERROR: Read data type for dset: " << iName
                             << ": " << ret->getDataType()

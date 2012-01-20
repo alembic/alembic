@@ -998,24 +998,27 @@ void testReadWriteArrays()
                     TESTING_ASSERT(!ap->isScalarLike());
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
+                    ABC::ArraySampleKey key;
 
                     if (ap->getName() == "float32_ext1")
                     {
-                        TESTING_ASSERT(val->getDimensions().numPoints() == 4);
                         Dimensions dims0;
                         ap->getDimensions(0, dims0);
                         TESTING_ASSERT(dims0.rank() == 1);
                         TESTING_ASSERT(dims0.numPoints() == 4);
+                        ap->getKey(0, key);
+                        TESTING_ASSERT(key.numBytes == 16);
                     }
 
                     if (ap->getName() == "float32")
                     {
                         TESTING_ASSERT( ap->getDataType().getExtent() == 2);
-                        TESTING_ASSERT(val->getDimensions().numPoints() == 2);
                         Dimensions dims0;
                         ap->getDimensions(0, dims0);
                         TESTING_ASSERT(dims0.rank() == 1);
                         TESTING_ASSERT(dims0.numPoints() == 2);
+                        ap->getKey(0, key);
+                        TESTING_ASSERT(key.numBytes == 16);
                     }
 
                     TESTING_ASSERT(val->getDimensions().rank() == 1);
@@ -1072,6 +1075,7 @@ void testReadWriteArrays()
                     ABC::ArraySamplePtr val;
                     ap->getSample(0, val);
                     TESTING_ASSERT(val->getDimensions().rank() == 1);
+                    ABC::ArraySampleKey key;
 
                     if (ap->getName() == "float64")
                     {
@@ -1079,7 +1083,8 @@ void testReadWriteArrays()
                         ap->getDimensions(0, dims0);
                         TESTING_ASSERT(dims0.rank() == 1);
                         TESTING_ASSERT(dims0.numPoints() == 30);
-                        TESTING_ASSERT(val->getDimensions().numPoints() == 30);
+                        ap->getKey(0, key);
+                        TESTING_ASSERT(key.numBytes == 240);
                     }
 
                     if (ap->getName() == "float64_ext3")
@@ -1089,7 +1094,8 @@ void testReadWriteArrays()
                         TESTING_ASSERT(dims0.rank() == 1);
                         TESTING_ASSERT(dims0.numPoints() == 10);
                         TESTING_ASSERT( ap->getDataType().getExtent() == 3);
-                        TESTING_ASSERT(val->getDimensions().numPoints() == 10);
+                        ap->getKey(0, key);
+                        TESTING_ASSERT(key.numBytes == 240);
                     }
 
                     Alembic::Util::float64_t * data =

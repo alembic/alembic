@@ -230,7 +230,7 @@ bool AprImpl::readKey( hid_t iGroup,
         }
         else
         {
-            oKey.numBytes *= dataType.getNumBytes();
+            oKey.numBytes *= PODNumBytes(dataType.getPod());
         }
 
         return true;
