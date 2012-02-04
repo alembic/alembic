@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -90,6 +90,25 @@ AbcA::ArrayPropertyWriterPtr ApwImpl::asArrayPtr()
 }
 
 //-*****************************************************************************
+void ApwImpl::copyPreviousSample( hid_t iGroup,
+                                  const std::string &iSampleName,
+                                  index_t iSampleIndex )
+{
+    // Copy the sample.
+    CopyWrittenArray( iGroup, iSampleName,
+                      m_previousWrittenArraySampleID );
+
+    PlainOldDataType pod = m_previousWrittenArraySampleID->getKey().origPOD;
+
+    if ( m_previousNumPoints > 1 && ( pod == kStringPOD || pod == kWstringPOD ))
+    {
+        std::string dimsName = iSampleName + ".dims";
+        Dimensions dims( m_previousNumPoints );
+        WriteDimensions( iGroup, dimsName, dims );
+    }
+}
+
+//-*****************************************************************************
 void ApwImpl::writeSample( hid_t iGroup,
                            const std::string &iSampleName,
                            index_t iSampleIndex,
@@ -119,6 +138,8 @@ void ApwImpl::writeSample( hid_t iGroup,
                     m_fileDataType,
                     m_nativeDataType,
                     awp->getCompressionHint() );
+
+    m_previousNumPoints = iSamp.getDimensions().numPoints();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -87,12 +87,7 @@ public:
     //-*************************************************************************
     void copyPreviousSample( hid_t iGroup,
                              const std::string &iSampleName,
-                             index_t iSampleIndex )
-    {
-        // Copy the sample.
-        CopyWrittenArray( iGroup, iSampleName,
-                          m_previousWrittenArraySampleID );
-    }
+                             index_t iSampleIndex );
 
     //-*************************************************************************
     void writeSample( hid_t iGroup,
@@ -107,6 +102,7 @@ protected:
 
 private:
     bool m_isScalarLike;
+    std::size_t m_previousNumPoints;
 
 };
 

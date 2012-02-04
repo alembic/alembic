@@ -1552,11 +1552,210 @@ void testExtentArrayStrings()
     }
 }
 
+//-*****************************************************************************
+void testArrayStringsRepeats()
+{
+    std::string archiveName = "strArrayRepeats.abc";
+    std::vector < Alembic::Util::string > vals(6);
+    vals[0] = "if you want";
+    vals[1] = "a revolution";
+    vals[2] = "the only";
+    vals[3] = "solution";
+    vals[4] = "...";
+    vals[5] = "evolve";
+
+    std::vector < Alembic::Util::string > vals2(4);
+    vals2[0] = "bom bom";
+    vals2[1] = "bom";
+    vals2[2] = "bom bom";
+    vals2[3] = "bom";
+
+    std::vector < Alembic::Util::string > valsEmpty(4);
+
+    ABC::DataType dtype(Alembic::Util::kStringPOD);
+
+    {
+        A5::WriteArchive w;
+        ABC::ArchiveWriterPtr a = w(archiveName, ABC::MetaData());
+        ABC::ObjectWriterPtr archive = a->getTop();
+
+        ABC::CompoundPropertyWriterPtr parent = archive->getProperties();
+
+        ABC::ArrayPropertyWriterPtr awp =
+            parent->createArrayProperty("str", ABC::MetaData(), dtype, 0);
+
+        // 0
+        awp->setSample(ABC::ArraySample(&(valsEmpty.front()), dtype,
+            Alembic::Util::Dimensions(valsEmpty.size())));
+
+        // 1
+        awp->setSample(ABC::ArraySample(&(valsEmpty.front()), dtype,
+            Alembic::Util::Dimensions(valsEmpty.size())));
+
+        // 2
+        awp->setSample(ABC::ArraySample(&(valsEmpty.front()), dtype,
+            Alembic::Util::Dimensions(valsEmpty.size())));
+
+        // 3
+        awp->setSample(
+            ABC::ArraySample(&(vals.front()), dtype,
+                        Alembic::Util::Dimensions(vals.size())));
+
+        // 4
+        awp->setSample(
+            ABC::ArraySample(&(vals.front()), dtype,
+                        Alembic::Util::Dimensions(vals.size())));
+
+        // 5
+        awp->setSample(
+            ABC::ArraySample(&(vals.front()), dtype,
+                        Alembic::Util::Dimensions(vals.size())));
+
+        // 6
+        awp->setSample(
+            ABC::ArraySample(&(vals2.front()), dtype,
+                        Alembic::Util::Dimensions(vals2.size())));
+
+        // 7
+        awp->setSample(
+            ABC::ArraySample(&(vals2.front()), dtype,
+                        Alembic::Util::Dimensions(vals2.size())));
+
+        // 8
+        awp->setSample(ABC::ArraySample(&(valsEmpty.front()), dtype,
+            Alembic::Util::Dimensions(valsEmpty.size())));
+
+        // 9
+        awp->setSample(ABC::ArraySample(&(valsEmpty.front()), dtype,
+            Alembic::Util::Dimensions(valsEmpty.size())));
+
+        dtype.setExtent(2);
+        ABC::ArrayPropertyWriterPtr awp2 =
+            parent->createArrayProperty("str2", ABC::MetaData(), dtype, 0);
+
+        // 0
+        awp2->setSample(
+            ABC::ArraySample(&(vals.front()), dtype,
+                        Alembic::Util::Dimensions(vals.size() / 2)));
+
+        // 1
+        awp2->setSample(
+            ABC::ArraySample(&(vals.front()), dtype,
+                        Alembic::Util::Dimensions(vals.size() / 2)));
+
+        // 2
+        awp2->setSample(
+            ABC::ArraySample(&(vals.front()), dtype,
+                        Alembic::Util::Dimensions(vals.size() / 2)));
+
+        // 3
+        awp2->setSample(
+            ABC::ArraySample(NULL, dtype, Alembic::Util::Dimensions(0)));
+
+        // 4
+        awp2->setSample(
+            ABC::ArraySample(&(vals2.front()), dtype,
+                        Alembic::Util::Dimensions(vals2.size() / 2)));
+
+        // 5
+        awp2->setSample(
+            ABC::ArraySample(&(vals2.front()), dtype,
+                        Alembic::Util::Dimensions(vals2.size() / 2)));
+
+    }
+
+    {
+        A5::ReadArchive r;
+        ABC::ArchiveReaderPtr a = r( archiveName,
+                                     ABC::ReadArraySampleCachePtr() );
+        ABC::ObjectReaderPtr archive = a->getTop();
+        ABC::CompoundPropertyReaderPtr parent = archive->getProperties();
+        TESTING_ASSERT(parent->getNumProperties() == 2);
+
+        ABC::ArrayPropertyReaderPtr ap = parent->getArrayProperty("str");
+        TESTING_ASSERT(ap->getNumSamples() == 10);
+
+        ABC::ArrayPropertyReaderPtr ap2 = parent->getArrayProperty("str2");
+        TESTING_ASSERT(ap2->getNumSamples() == 6);
+
+        ABC::ArraySamplePtr val;
+        for (int i = 0; i < 10; ++i)
+        {
+            ap->getSample(i, val);
+            Alembic::Util::string * data =
+                (Alembic::Util::string *)(val->getData());
+            if (i < 3 || i > 7)
+            {
+                TESTING_ASSERT(val->getDimensions().numPoints() == 4);
+                TESTING_ASSERT(val->getDimensions().rank() == 1);
+                TESTING_ASSERT(data[0] == "");
+                TESTING_ASSERT(data[1] == "");
+                TESTING_ASSERT(data[2] == "");
+                TESTING_ASSERT(data[3] == "");
+            }
+
+            if (i == 3 || i == 4  || i == 5)
+            {
+                TESTING_ASSERT(val->getDimensions().numPoints() == 6);
+                TESTING_ASSERT(val->getDimensions().rank() == 1);
+                for (unsigned int j = 0; j < vals.size(); ++j)
+                {
+                    TESTING_ASSERT(data[j] == vals[j]);
+                }
+            }
+
+            if (i == 6 || i == 7)
+            {
+                TESTING_ASSERT(val->getDimensions().numPoints() == 4);
+                TESTING_ASSERT(val->getDimensions().rank() == 1);
+                for (unsigned int j = 0; j < vals2.size(); ++j)
+                {
+                    TESTING_ASSERT(data[j] == vals2[j]);
+                }
+            }
+        }
+
+        for (int i = 0; i < 6; ++i)
+        {
+            ap2->getSample(i, val);
+            Alembic::Util::string * data =
+                (Alembic::Util::string *)(val->getData());
+
+            if (i < 3)
+            {
+                TESTING_ASSERT(val->getDimensions().numPoints() == 3);
+                TESTING_ASSERT(val->getDimensions().rank() == 1);
+                for (unsigned int j = 0; j < vals.size(); ++j)
+                {
+                    TESTING_ASSERT(data[j] == vals[j]);
+                }
+            }
+
+            if (i == 3)
+            {
+                TESTING_ASSERT(val->getDimensions().numPoints() == 0);
+                TESTING_ASSERT(val->getDimensions().rank() == 1);
+            }
+
+            if (i > 3)
+            {
+                TESTING_ASSERT(val->getDimensions().numPoints() == 2);
+                TESTING_ASSERT(val->getDimensions().rank() == 1);
+                for (unsigned int j = 0; j < vals2.size(); ++j)
+                {
+                    TESTING_ASSERT(data[j] == vals2[j]);
+                }
+            }
+        }
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testEmptyArray();
     testDuplicateArray();
     testReadWriteArrays();
     testExtentArrayStrings();
+    testArrayStringsRepeats();
     return 0;
 }
