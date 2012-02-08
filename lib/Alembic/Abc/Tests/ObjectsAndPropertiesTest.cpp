@@ -94,26 +94,95 @@ void simpleTestOut( const std::string &iArchiveName )
 
     // some scalar props
     OV3fProperty ac0V3fp0( ac0Props, "ac0V3fp0" );
+    const AbcA::PropertyHeader * ac0V3fp0Header =
+        ac0Props.getPropertyHeader( "ac0V3fp0" );
+    TESTING_ASSERT( OV3fProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( IV3fProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( OFloatProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! ON3fProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! OV3dProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! OV2fProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! OV2dProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! OInt32Property::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! ODoubleProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! OV3fArrayProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! OFloatArrayProperty::matches( *ac0V3fp0Header ) );
     ac0V3fp0.set( scalarV3fval );
 
     ON3fProperty ac0N3fp0( ac0Props, "ac0N3fp0" );
+    const AbcA::PropertyHeader * ac0N3fp0Header =
+        ac0Props.getPropertyHeader( "ac0N3fp0" );
+    TESTING_ASSERT( ON3fProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( IN3fProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( OFloatProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! OV3fProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! ON3dProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! ON2fProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! ON2dProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! OInt32Property::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! ODoubleProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! ON3fArrayProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! OFloatArrayProperty::matches( *ac0N3fp0Header ) );
     ac0N3fp0.set( scalarV3fval );
 
     OP3fProperty ac0P3fp0( ac0Props, "ac0P3fp0" );
+    const AbcA::PropertyHeader * ac0P3fp0Header =
+        ac0Props.getPropertyHeader( "ac0P3fp0" );
+    TESTING_ASSERT( OP3fProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( IP3fProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( OFloatProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! OV3fProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! OP3dProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! OP2fProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! OP2dProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! OInt32Property::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! ODoubleProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! OP3fArrayProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! OFloatArrayProperty::matches( *ac0P3fp0Header ) );
     ac0P3fp0.set( scalarV3fval );
 
     OInt32Property acc0ip0( acc0Props, "acc0ip0" );
+    const AbcA::PropertyHeader * acc0ip0Header =
+        acc0Props.getPropertyHeader( "acc0ip0" );
+    TESTING_ASSERT( OInt32Property::matches( *acc0ip0Header ) );
+    TESTING_ASSERT( IInt32Property::matches( *acc0ip0Header ) );
+    TESTING_ASSERT( ! OFloatProperty::matches( *acc0ip0Header ) );
+    TESTING_ASSERT( ! OInt32ArrayProperty::matches( *acc0ip0Header ) );
     acc0ip0.set( 99 );
 
     OBoolProperty acc0bp0( acc0Props, "acc0bp0" );
+    const AbcA::PropertyHeader * acc0bp0Header =
+        acc0Props.getPropertyHeader( "acc0bp0" );
+    TESTING_ASSERT( OBoolProperty::matches( *acc0bp0Header ) );
+    TESTING_ASSERT( IBoolProperty::matches( *acc0bp0Header ) );
+    TESTING_ASSERT( ! OInt32Property::matches( *acc0bp0Header ) );
+    TESTING_ASSERT( ! OBoolArrayProperty::matches( *acc0bp0Header ) );
     acc0bp0.set( false );
 
     TimeSamplingPtr ts( new TimeSampling(1.0/24.0, v3fStartTime) );
 
     // now some array props
     OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0", ts );
+    const AbcA::PropertyHeader * acc0V3fap0Header =
+        acc0Props.getPropertyHeader( "acc0V3fap0" );
+    TESTING_ASSERT( OV3fArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( IV3fArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( OFloatArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( IFloatArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( ! OInt32ArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( ! OP3fArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( ! OV3fProperty::matches( *acc0V3fap0Header ) );
 
     OP3fArrayProperty acc0P3fap0( acc0Props, "acc0P3fap0", ts );
+    const AbcA::PropertyHeader * acc0P3fap0Header =
+        acc0Props.getPropertyHeader( "acc0P3fap0" );
+    TESTING_ASSERT( OP3fArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( IP3fArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( OFloatArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( IFloatArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( ! OInt32ArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( ! OV3fArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( ! OP3fProperty::matches( *acc0P3fap0Header ) );
 
     ON3fArrayProperty acc0N3fap0( acc0Props, "acc0N3fap0", ts );
 
@@ -177,6 +246,12 @@ void simpleTestIn( const std::string &iArchiveName )
     IObject ac1( archiveTop, "ac1" );
 
     IInt32ArrayProperty ac1iap0( ac1.getProperties(), "iap0" );
+    const AbcA::PropertyHeader * iap0Header =
+        ac1.getProperties().getPropertyHeader( "iap0" );
+    TESTING_ASSERT( IInt32ArrayProperty::matches( *iap0Header ) );
+    TESTING_ASSERT( OInt32ArrayProperty::matches( *iap0Header ) );
+    TESTING_ASSERT( ! IFloatArrayProperty::matches( *iap0Header ) );
+    TESTING_ASSERT( ! IV3fArrayProperty::matches( *iap0Header ) );
 
     ISampleSelector ac1iap0iss;
 
@@ -255,12 +330,39 @@ void simpleTestIn( const std::string &iArchiveName )
     std::cout << "ac0V3fp0 is " << ac0V3fp0.getValue() << std::endl;
 
     IV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0", kStrictMatching );
+    const AbcA::PropertyHeader * acc0V3fap0Header =
+        acc0Props.getPropertyHeader( "acc0V3fap0" );
+    TESTING_ASSERT( OV3fArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( IV3fArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( OFloatArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( IFloatArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( ! IInt32ArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( ! IP3fArrayProperty::matches( *acc0V3fap0Header ) );
+    TESTING_ASSERT( ! IV3fProperty::matches( *acc0V3fap0Header ) );
     V3fArraySamplePtr acc0V3fap0SampPtr;
 
     IP3fArrayProperty acc0P3fap0( acc0Props, "acc0P3fap0", kStrictMatching );
+    const AbcA::PropertyHeader * acc0P3fap0Header =
+        acc0Props.getPropertyHeader( "acc0P3fap0" );
+    TESTING_ASSERT( OP3fArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( IP3fArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( OFloatArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( IFloatArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( ! IInt32ArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( ! IV3fArrayProperty::matches( *acc0P3fap0Header ) );
+    TESTING_ASSERT( ! IP3fProperty::matches( *acc0P3fap0Header ) );
     P3fArraySamplePtr acc0P3fap0SampPtr;
 
     IN3fArrayProperty acc0N3fap0( acc0Props, "acc0N3fap0", kStrictMatching );
+    const AbcA::PropertyHeader * acc0N3fap0Header =
+        acc0Props.getPropertyHeader( "acc0N3fap0" );
+    TESTING_ASSERT( ON3fArrayProperty::matches( *acc0N3fap0Header ) );
+    TESTING_ASSERT( IN3fArrayProperty::matches( *acc0N3fap0Header ) );
+    TESTING_ASSERT( OFloatArrayProperty::matches( *acc0N3fap0Header ) );
+    TESTING_ASSERT( IFloatArrayProperty::matches( *acc0N3fap0Header ) );
+    TESTING_ASSERT( ! IInt32ArrayProperty::matches( *acc0N3fap0Header ) );
+    TESTING_ASSERT( ! IV3fArrayProperty::matches( *acc0N3fap0Header ) );
+    TESTING_ASSERT( ! IP3fProperty::matches( *acc0N3fap0Header ) );
     N3fArraySamplePtr acc0N3fap0SampPtr;
 
     TESTING_ASSERT_THROW (
