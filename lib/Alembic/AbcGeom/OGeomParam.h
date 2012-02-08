@@ -139,8 +139,28 @@ public:
     static bool matches( const AbcA::PropertyHeader &iHeader,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        return ( iHeader.getDataType() == TRAITS::dataType() ) &&
-            matches( iHeader.getMetaData(), iMatching );
+        if ( iHeader.isCompound() )
+        {
+            return ( iHeader.getMetaData().get( "podName" ) ==
+                    Alembic::Util::PODName( TRAITS::dataType().getPod() ) &&
+                    ( getInterpretation() == "" ||
+                      boost::lexical_cast<uint32_t>(
+                        iHeader.getMetaData().get( "podExtent" ) ) ==
+                      TRAITS::dataType().getExtent() ) ) &&
+                    matches( iHeader.getMetaData(), iMatching );
+        }
+        else if ( iHeader.isArray() )
+        {
+            return ( iHeader.getDataType().getPod() ==
+                     TRAITS::dataType().getPod() &&
+                     ( iHeader.getDataType().getExtent() ==
+                       TRAITS::dataType().getExtent() ||
+                   getInterpretation() == "" ) ) &&
+                   matches( iHeader.getMetaData(), iMatching );
+        }
+
+        return false;
+
     }
 
     OTypedGeomParam() {}

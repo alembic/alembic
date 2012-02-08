@@ -248,6 +248,16 @@ void Example1_MeshIn()
         PropertyHeader p = arbattrs.getPropertyHeader(i);
         TESTING_ASSERT( IC3fGeomParam::matches( p.getMetaData() ) );
 
+        TESTING_ASSERT( IC3fGeomParam::matches( p ) );
+        TESTING_ASSERT( OC3fGeomParam::matches( p ) );
+        TESTING_ASSERT( ! IC3cGeomParam::matches( p ) );
+        TESTING_ASSERT( ! OC3cGeomParam::matches( p ) );
+        TESTING_ASSERT( ! IInt32GeomParam::matches( p ) );
+        TESTING_ASSERT( IFloatGeomParam::matches( p ) );
+        TESTING_ASSERT( ! IDoubleGeomParam::matches( p ) );
+        TESTING_ASSERT( ! IV3iGeomParam::matches( p ) );
+        TESTING_ASSERT( ! IV3fGeomParam::matches( p ) );
+
         if ( p.getName() == "color" )
         {
             IC3fGeomParam color(arbattrs, "color");
