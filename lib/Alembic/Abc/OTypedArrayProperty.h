@@ -72,9 +72,8 @@ public:
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        return ( getInterpretation() == "" ||
-                 ( iMetaData.get( "interpretation" ) ==
-                   getInterpretation() ) );
+        return ( iMetaData.get( "interpretation" ) ==
+                 getInterpretation() );
     }
 
     //! This will check whether or not a given object (as represented by

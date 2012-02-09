@@ -128,10 +128,7 @@ public:
         if ( iMatching == kStrictMatching )
         {
             return ( iMetaData.get( "isGeomParam" ) == "true" &&
-                     ( getInterpretation() == "" ||
-                       iMetaData.get( "interpretation" ) == getInterpretation()
-                     ) );
-
+                     iMetaData.get( "interpretation" ) == getInterpretation() );
         }
         return true;
     }

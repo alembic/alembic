@@ -253,7 +253,7 @@ void Example1_MeshIn()
         TESTING_ASSERT( ! IC3cGeomParam::matches( p ) );
         TESTING_ASSERT( ! OC3cGeomParam::matches( p ) );
         TESTING_ASSERT( ! IInt32GeomParam::matches( p ) );
-        TESTING_ASSERT( IFloatGeomParam::matches( p ) );
+        TESTING_ASSERT( ! IFloatGeomParam::matches( p ) );
         TESTING_ASSERT( ! IDoubleGeomParam::matches( p ) );
         TESTING_ASSERT( ! IV3iGeomParam::matches( p ) );
         TESTING_ASSERT( ! IV3fGeomParam::matches( p ) );

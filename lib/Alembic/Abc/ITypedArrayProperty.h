@@ -75,9 +75,8 @@ public:
     {
         if ( iMatching == kStrictMatching )
         {
-            return ( getInterpretation() == "" ||
-                     ( iMetaData.get( "interpretation" ) ==
-                       getInterpretation() ) );
+            return ( iMetaData.get( "interpretation" ) ==
+                     getInterpretation() );
         }
         return true;
     }
