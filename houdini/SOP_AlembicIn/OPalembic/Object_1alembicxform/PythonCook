@@ -13,7 +13,7 @@ if isinstance(cacheTuple, tuple) and cacheTuple[0] == cacheKey:
 else:
     frameParm = self.parm('frame')
     fpsParm = self.parm('fps')
-    sampleTime = (frameParm.eval() - 1) / fpsParm.eval()
+    sampleTime = frameParm.eval() / fpsParm.eval()
     xform, isConstant = _ahe.alembicGetLocalXform(abcPath, objPath, sampleTime)
     m = hou.Matrix4(xform)
     hou.pwd().setCookTransform(m)

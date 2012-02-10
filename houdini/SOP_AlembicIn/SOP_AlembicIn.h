@@ -96,6 +96,10 @@ public:
             OP_Operator *entry);
     static PRM_Template myTemplateList[];
     typedef std::vector<std::string> PathList;
+
+    /// Clear a file out of the read-cache.  If the filename is null, the
+    /// entire cache is cleared.
+    static void	clearCacheFile(const char *filename=NULL);
     
 protected:
     //--------------------------------------------------------------------------

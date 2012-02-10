@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -288,8 +288,29 @@ namespace
         (*g_archiveCache)[path] = entry;
         return entry;
     }
+
+    void	ClearArchiveFile(const std::string &path)
+    {
+        ArchiveCache::iterator it = g_archiveCache->find(path);
+	if (it != g_archiveCache->end())
+	    g_archiveCache->erase(it);
+    }
+    void	ClearArchiveCache()
+    {
+	delete g_archiveCache;
+	g_archiveCache = new ArchiveCache;
+    }
     
     //-**************************************************************************
+}
+
+void
+SOP_AlembicIn::clearCacheFile(const char *filename)
+{
+    if (filename)
+	ClearArchiveFile(filename);
+    else
+	ClearArchiveCache();
 }
 
 // Class to help us walk the tree
@@ -498,7 +519,7 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     
     
     double fps = evalFloat("fps", 0, now);
-    args.abcTime = (evalFloat("frame", 0, now) - 1.0)/ fps;
+    args.abcTime = evalFloat("frame", 0, now) / fps;
     args.isConstant = true;
     args.isTopologyConstant = true;
     args.reusePrimitives = myTopologyConstant && gdp->primitives().entries()>0;
