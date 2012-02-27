@@ -1,3 +1,20 @@
+2012-2-14, Alembic 1.0.5
+
+Bug fix release.
+
+Fix for issue 272.
+
+Core:
+
+String dimensions weren't being written correctly for string arrays when copying
+a previous sample.
+
+Correctness updates to "matches(..)" (data matching functions).
+
+Houdini plugin:
+Reverting frame - 1 change.
+Including a clear cache function.
+
 2012-1-12, Alembic 1.0.4
 
 Hello, Alembic users, thanks to your feedback we have another collection of
