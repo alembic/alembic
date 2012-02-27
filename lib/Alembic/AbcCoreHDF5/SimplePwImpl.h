@@ -365,7 +365,7 @@ void SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::setTimeSamplingIndex
             iIndex );
 
     ABCA_ASSERT( !ts->getTimeSamplingType().isAcyclic() ||
-        ts->getNumStoredTimes() > m_nextSampleIndex,
+        ts->getNumStoredTimes() >= m_nextSampleIndex,
         "Already have written more samples than we have times for when using "
         "Acyclic sampling." );
 

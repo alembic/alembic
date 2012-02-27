@@ -160,6 +160,8 @@ void testTimeSamplingScalar()
         TESTING_ASSERT_THROW(swp3->setSample(&s),
             Alembic::Util::Exception);
 
+        swp3->setTimeSamplingIndex(tsid);
+
         AbcA::ScalarPropertyWriterPtr swp4 =
             parent->createScalarProperty("identity", AbcA::MetaData(),
                 AbcA::DataType(Alembic::Util::kInt16POD, 1), 0);
