@@ -133,14 +133,13 @@ ALEMBIC_ABC_DECLARE_TYPE_TRAITS( Quatf, kFloat32POD, 4, "quat", QuatfTPTraits );
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( Quatd, kFloat64POD, 4, "quat", QuatdTPTraits );
 
 //-*****************************************************************************
-// colors. For now, using "rgb"/"rgba" as the interpretation
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C3h, kFloat16POD, 3, "rgb", C3hTPTraits );
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C3f, kFloat32POD, 3, "rgb", C3fTPTraits );
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C3c, kUint8POD, 3, "rgb", C3cTPTraits );
 
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C4h, kFloat16POD, 4, "rgba", C4hTPTraits );
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C4f, kFloat32POD, 4, "rgba", C4fTPTraits );
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C4c, kUint8POD, 4, "rgba", C4cTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C4h, kFloat16POD, 4, "rgb", C4hTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C4f, kFloat32POD, 4, "rgb", C4fTPTraits );
+ALEMBIC_ABC_DECLARE_TYPE_TRAITS( C4c, kUint8POD, 4, "rgb", C4cTPTraits );
 
 //-*****************************************************************************
 // Normals.
