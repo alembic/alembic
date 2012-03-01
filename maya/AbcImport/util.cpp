@@ -380,13 +380,13 @@ double getWeightAndIndex(double iFrame,
     return alpha;
 }
 
-bool isColorSet(const Alembic::AbcCoreAbstract::MetaData & iMetaData,
+bool isColorSet(const Alembic::AbcCoreAbstract::PropertyHeader & iHeader,
     bool iUnmarkedFaceVaryingColors)
 {
-    return (Alembic::AbcGeom::IC3fGeomParam::matches(iMetaData) ||
-            Alembic::AbcGeom::IC4fGeomParam::matches(iMetaData)) && 
-            Alembic::AbcGeom::GetGeometryScope(iMetaData) ==
+    return (Alembic::AbcGeom::IC3fGeomParam::matches(iHeader) ||
+            Alembic::AbcGeom::IC4fGeomParam::matches(iHeader)) && 
+            Alembic::AbcGeom::GetGeometryScope(iHeader.getMetaData()) ==
                 Alembic::AbcGeom::kFacevaryingScope &&
             (iUnmarkedFaceVaryingColors ||
-            iMetaData.get("mayaColorSet") != "");
+            iHeader.getMetaData().get("mayaColorSet") != "");
 }

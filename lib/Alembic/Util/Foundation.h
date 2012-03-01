@@ -64,7 +64,7 @@
 #include <string.h>
 #include <assert.h>
 
-#define ALEMBIC_VERSION_NS v2
+#define ALEMBIC_VERSION_NS v3
 
 namespace Alembic {
 namespace Util {

@@ -194,8 +194,6 @@ void Example1_MeshIn()
     TESTING_ASSERT( N.isConstant() );
     TESTING_ASSERT( uv.isConstant() );
 
-    TESTING_ASSERT( IsGeomParam( N.getMetaData() ) );
-
     N3f n0 = (*nsp)[0];
 
     for ( size_t i = 0 ; i < nsp->size() ; ++i )

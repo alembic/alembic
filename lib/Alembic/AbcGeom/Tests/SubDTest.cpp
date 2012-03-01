@@ -246,7 +246,6 @@ void Example1_MeshIn()
     for (int i = 0; i < 2; ++ i)
     {
         PropertyHeader p = arbattrs.getPropertyHeader(i);
-        TESTING_ASSERT( IC3fGeomParam::matches( p.getMetaData() ) );
 
         TESTING_ASSERT( IC3fGeomParam::matches( p ) );
         TESTING_ASSERT( OC3fGeomParam::matches( p ) );

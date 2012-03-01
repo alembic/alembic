@@ -100,7 +100,7 @@ double getWeightAndIndex(double iFrame,
     Alembic::AbcCoreAbstract::index_t & oIndex,
     Alembic::AbcCoreAbstract::index_t & oCeilIndex);
 
-bool isColorSet(const Alembic::AbcCoreAbstract::MetaData & iMetaData,
+bool isColorSet(const Alembic::AbcCoreAbstract::PropertyHeader & iHeader,
     bool iUnmarkedFaceVaryingColors);
 
 template<typename T>

@@ -122,17 +122,6 @@ public:
         return sInterpretation;
     }
 
-    static bool matches( const AbcA::MetaData &iMetaData,
-                         SchemaInterpMatching iMatching = kStrictMatching )
-    {
-        if ( iMatching == kStrictMatching )
-        {
-            return ( iMetaData.get( "isGeomParam" ) == "true" &&
-                     iMetaData.get( "interpretation" ) == getInterpretation() );
-        }
-        return true;
-    }
-
     static bool matches( const AbcA::PropertyHeader &iHeader,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
@@ -141,19 +130,14 @@ public:
             return ( iHeader.getMetaData().get( "podName" ) ==
                     Alembic::Util::PODName( TRAITS::dataType().getPod() ) &&
                     ( getInterpretation() == "" ||
-                      boost::lexical_cast<uint32_t>(
-                        iHeader.getMetaData().get( "podExtent" ) ) ==
-                      TRAITS::dataType().getExtent() ) ) &&
-                    matches( iHeader.getMetaData(), iMatching );
+                      atoi(
+                        iHeader.getMetaData().get( "podExtent" ).c_str() ) ==
+                     TRAITS::dataType().getExtent() ) ) &&
+                    prop_type::matches( iHeader.getMetaData(), iMatching );
         }
         else if ( iHeader.isArray() )
         {
-            return ( iHeader.getDataType().getPod() ==
-                     TRAITS::dataType().getPod() &&
-                     ( iHeader.getDataType().getExtent() ==
-                       TRAITS::dataType().getExtent() ||
-                   getInterpretation() == "" ) ) &&
-                   matches( iHeader.getMetaData(), iMatching );
+            return prop_type::matches( iHeader, iMatching );
         }
 
         return false;
@@ -185,19 +169,23 @@ public:
 
         SetGeometryScope( md, iScope );
 
-        md.set( "isGeomParam", "true" );
-
-        std::string podName( Alembic::Util::PODName(
+        if ( m_isIndexed )
+        {
+            std::string podName( Alembic::Util::PODName(
                                  TRAITS::dataType().getPod() ) );
 
-        size_t extent = TRAITS::dataType().getExtent();
+            size_t extent = TRAITS::dataType().getExtent();
 
-        md.set( "podName", podName );
+            md.set( "podName", podName );
 
-        md.set( "podExtent", boost::lexical_cast<std::string>( extent ) );
+            md.set( "podExtent", boost::lexical_cast<std::string>( extent ) );
+        }
 
-        md.set( "arrayExtent",
-                boost::lexical_cast<std::string>( iArrayExtent ) );
+        if ( iArrayExtent > 1 )
+        {
+            md.set( "arrayExtent",
+                    boost::lexical_cast<std::string>( iArrayExtent ) );
+        }
 
         md.set( "interpretation", TRAITS::interpretation() );
 
