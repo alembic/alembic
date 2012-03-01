@@ -158,6 +158,11 @@ std::string TokenMap::get( char pairSep,
                            << assignSepStr );
         }
 
+        if ( value == "" )
+        {
+            continue;
+        }
+
         if ( !start )
         {
             output << pairSepStr;
