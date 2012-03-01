@@ -136,8 +136,7 @@ void Example1_CurvesIn()
     IFloatGeomParam::Sample widthSample;
     curves.getWidthsParam().getExpanded( widthSample );
     TESTING_ASSERT( widthSample.getVals()->size() == 12);
-    TESTING_ASSERT( IFloatGeomParam::matches(
-                        curves.getWidthsParam().getMetaData() ) );
+    TESTING_ASSERT( curves.getWidthsParam().valid() );
     TESTING_ASSERT( widthSample.getScope() == kVertexScope );
 
 

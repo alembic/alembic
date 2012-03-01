@@ -160,14 +160,12 @@ inline double RadiansToDegrees( double iRadians )
 
 //-*****************************************************************************
 //! A couple simple tests for if something is a GeomParam
-inline bool IsGeomParam( const AbcA::MetaData &iMetaData )
-{
-    return iMetaData.get( "isGeomParam" ) == "true";
-}
 
 inline bool IsGeomParam( const AbcA::PropertyHeader &iHeader )
 {
-    return IsGeomParam( iHeader.getMetaData() );
+    return iHeader.isArray() || ( iHeader.isCompound() &&
+        iHeader.getMetaData().get( "podName" ) != "" &&
+        iHeader.getMetaData().get( "podExtent" ) != "" );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

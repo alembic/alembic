@@ -968,7 +968,7 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
         const std::string & propName = propHeader.getName();
 
         // we have a color that we want to make a colorset out of
-        if ( iObject.hasFn(MFn::kMesh) && isColorSet(propHeader.getMetaData(),
+        if ( iObject.hasFn(MFn::kMesh) && isColorSet(propHeader,
             iUnmarkedFaceVaryingColors) )
         {
             continue;
@@ -1026,7 +1026,7 @@ void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
         {
             continue;
         }
-        else if (isColorSet(propHeader.getMetaData(),
+        else if (isColorSet(propHeader,
             iUnmarkedFaceVaryingColors))
         {
             continue;
@@ -2523,12 +2523,12 @@ bool getColorAttrs(Alembic::Abc::ICompoundProperty & iParent,
         const Alembic::Abc::PropertyHeader & propHeader =
             iParent.getPropertyHeader(i);
 
-        if (!isColorSet(propHeader.getMetaData(), iUnmarkedFaceVaryingColors))
+        if (!isColorSet(propHeader, iUnmarkedFaceVaryingColors))
         {
             continue;
         }
 
-        if (Alembic::AbcGeom::IC3fGeomParam::matches(propHeader.getMetaData()))
+        if (Alembic::AbcGeom::IC3fGeomParam::matches(propHeader))
         {
             Alembic::AbcGeom::IC3fGeomParam cgp(iParent, propHeader.getName());
             if (!anyAnimated)
@@ -2537,8 +2537,7 @@ bool getColorAttrs(Alembic::Abc::ICompoundProperty & iParent,
             }
             ioC3s.push_back(cgp);
         }
-        else if (Alembic::AbcGeom::IC4fGeomParam::matches(
-            propHeader.getMetaData()))
+        else if (Alembic::AbcGeom::IC4fGeomParam::matches(propHeader))
         {
             Alembic::AbcGeom::IC4fGeomParam cgp(iParent, propHeader.getName());
             if (!anyAnimated)
