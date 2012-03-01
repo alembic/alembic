@@ -76,8 +76,7 @@ ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
 //-*****************************************************************************
 ApwImpl::~ApwImpl()
 {
-    WritePropertyInfo( m_parentGroup, m_header->getName(),
-        m_header->getPropertyType(), m_header->getDataType(), m_isScalarLike,
+    WritePropertyInfo( m_parentGroup, *m_header, m_isScalarLike,
         m_timeSamplingIndex, m_nextSampleIndex, m_firstChangedIndex,
         m_lastChangedIndex );
 }

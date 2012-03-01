@@ -51,8 +51,8 @@ TopCpwImpl::TopCpwImpl( BaseOwImpl &iObject,
   , m_objectRef( iObject )
   , m_header( ".prop", iMetaData )
 {
-    // Write just the meta data.
-    WriteMetaData( iParentGroup, ".prop.meta", iMetaData );
+    // Write the property header.
+    WritePropertyInfo( iParentGroup, m_header, false, 0, 0, 0, 0 );
 }
 
 //-*****************************************************************************

@@ -203,9 +203,6 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
         ABCA_ASSERT( m_fileDataType >= 0, "Couldn't get file datatype" );
         ABCA_ASSERT( m_nativeDataType >= 0, "Couldn't get native datatype" );
     }
-
-    WriteMetaData( m_parentGroup, m_header->getName() + ".meta",
-        m_header->getMetaData() );
 }
 
 //-*****************************************************************************

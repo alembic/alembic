@@ -358,6 +358,16 @@ ReadPropertyHeader( hid_t iParent,
     static const uint32_t extentMask = ( uint32_t )BOOST_BINARY(
         0000 0000 0000 0000 1111 1111 0000 0000 );
 
+    // extra hints which are set based on metadata
+    static const uint32_t schemaMask = ( uint32_t )BOOST_BINARY(
+        0000 0000 0001 1111 0000 0000 0000 0000 );
+
+    static const uint32_t geoScopeMask = ( uint32_t )BOOST_BINARY(
+        0000 0000 1110 0000 0000 0000 0000 0000 );
+
+    static const uint32_t interpMask = ( uint32_t )BOOST_BINARY(
+        0000 1111 0000 0000 0000 0000 0000 0000 );
+
     size_t numFields = 0;
     size_t fieldsUsed = 1;
 
@@ -367,125 +377,222 @@ ReadPropertyHeader( hid_t iParent,
     AbcA::MetaData metaData;
     ReadMetaData( iParent, iPropName + ".meta", metaData );
 
-    if ( numFields == 1 && info[0] == 0 )
+    // low two bits are the property type
+    char ipt = info[0] & ptypeMask;
+
+    // first bit is either scalar, or scalar like
+    oIsScalarLike = ipt & 1;
+
+    // is scalar like is set for this array attribute
+    if (ipt == 3)
     {
-        oHeader = AbcA::PropertyHeader( iPropName, metaData );
+        oHeader.setPropertyType( AbcA::kArrayProperty );
     }
     else
     {
-        // low two bits are the property type
-        char ipt = info[0] & ptypeMask;
+        oHeader.setPropertyType( ( AbcA::PropertyType )ipt );
+    }
 
-        // first bit is either scalar, or scalar like
-        oIsScalarLike = ipt & 1;
-
-        // is scalar like is set for this array attribute
-        if (ipt == 3)
+    // Read the pod type out of bits 2-5
+    uint32_t podt = ( uint32_t )( ( info[0] & podMask ) >> 2 );
+    if ( ipt == 0)
+    {
+        if ( podt < ( uint32_t )Util::kNumPlainOldDataTypes )
         {
-            oHeader.setPropertyType( AbcA::kArrayProperty );
+            metaData.set( "podName",
+                          PODName( ( Util::PlainOldDataType ) podt ) );
+        }
+    }
+    else if ( podt >= ( uint32_t )Util::kNumPlainOldDataTypes )
+    {
+        ABCA_THROW( "Read invalid POD type: " << ( int )podt );
+    }
+
+
+    // bit 6 is the hint about whether time sampling index was written
+    // at the end
+    bool hasTsidx = ( (info[0] & hasTsidxMask ) >> 6 ) == 1;
+    oTimeSamplingIndex = 0;
+
+    if ( hasTsidx && numFields > 1 )
+    {
+        oTimeSamplingIndex = info[numFields - 1];
+        fieldsUsed ++;
+    }
+
+    // bit 7 is a hint about whether first and last changed index
+    // are intrinsically 1, and numSamples - 1
+    // (no repeated data from the start or the end)
+    bool noRepeats = ( (info[0] & noRepeatsMask ) >> 7 ) == 1;
+
+    // Time Sampling Index could be written, but the number of samples
+    // may not be.
+    if ( numFields > fieldsUsed )
+    {
+        oNumSamples = info[1];
+
+        if ( numFields >= 4 )
+        {
+            oFirstChangedIndex = info[2];
+            oLastChangedIndex = info[3];
+        }
+        else if ( noRepeats )
+        {
+            oFirstChangedIndex = 1;
+            oLastChangedIndex = oNumSamples - 1;
         }
         else
         {
-            oHeader.setPropertyType( ( AbcA::PropertyType )ipt );
-        }
-
-        // Read the pod type out of bits 2-5
-        char podt = ( char )( ( info[0] & podMask ) >> 2 );
-        if ( podt != ( char )kBooleanPOD &&
-
-             podt != ( char )kUint8POD &&
-             podt != ( char )kInt8POD &&
-
-             podt != ( char )kUint16POD &&
-             podt != ( char )kInt16POD &&
-
-             podt != ( char )kUint32POD &&
-             podt != ( char )kInt32POD &&
-
-             podt != ( char )kUint64POD &&
-             podt != ( char )kInt64POD &&
-
-             podt != ( char )kFloat16POD &&
-             podt != ( char )kFloat32POD &&
-             podt != ( char )kFloat64POD &&
-
-             podt != ( char )kStringPOD &&
-             podt != ( char )kWstringPOD )
-        {
-            ABCA_THROW( "Read invalid POD type: " << ( int )podt );
-        }
-
-        // bit 6 is the hint about whether time sampling index was written
-        // at the end
-        bool hasTsidx = ( (info[0] & hasTsidxMask ) >> 6 ) == 1;
-        oTimeSamplingIndex = 0;
-
-        if ( hasTsidx && numFields > 1 )
-        {
-            oTimeSamplingIndex = info[numFields - 1];
-            fieldsUsed ++;
-        }
-
-        // bit 7 is a hint about whether first and last changed index
-        // are intrinsically 1, and numSamples - 1
-        // (no repeated data from the start or the end)
-        bool noRepeats = ( (info[0] & noRepeatsMask ) >> 7 ) == 1;
-
-        // Time Sampling Index could be written, but the number of samples
-        // may not be.
-        if ( numFields > fieldsUsed )
-        {
-            oNumSamples = info[1];
-
-            if ( numFields >= 4 )
-            {
-                oFirstChangedIndex = info[2];
-                oLastChangedIndex = info[3];
-            }
-            else if ( noRepeats )
-            {
-                oFirstChangedIndex = 1;
-                oLastChangedIndex = oNumSamples - 1;
-            }
-            else
-            {
-                oFirstChangedIndex = 0;
-                oLastChangedIndex = 0;
-            }
-        }
-        else
-        {
-            oNumSamples = 0;
             oFirstChangedIndex = 0;
             oLastChangedIndex = 0;
-
-            // if smp0 exists then we have 1 sample
-            std::string smpName = iPropName + ".smp0";
-            if ( oHeader.getPropertyType() == AbcA::kArrayProperty &&
-                 H5Lexists( iParent, smpName.c_str(), H5P_DEFAULT ) > 0)
-            {
-                oNumSamples = 1;
-            }
-            else if ( oHeader.getPropertyType() == AbcA::kScalarProperty &&
-                      H5Aexists( iParent, smpName.c_str() ) > 0)
-            {
-                oNumSamples = 1;
-            }
         }
+    }
+    else
+    {
+        oNumSamples = 0;
+        oFirstChangedIndex = 0;
+        oLastChangedIndex = 0;
 
-        // Read the extent out of bits 8-15
-        uint8_t extent = ( uint8_t )( ( info[0] & extentMask ) >> 8 );
-        if ( extent == 0 )
+        // if smp0 exists then we have 1 sample
+        std::string smpName = iPropName + ".smp0";
+        if ( oHeader.getPropertyType() == AbcA::kArrayProperty &&
+             H5Lexists( iParent, smpName.c_str(), H5P_DEFAULT ) > 0)
         {
-            ABCA_THROW( "Degenerate extent 0" );
+            oNumSamples = 1;
         }
+        else if ( oHeader.getPropertyType() == AbcA::kScalarProperty &&
+                  H5Aexists( iParent, smpName.c_str() ) > 0)
+        {
+            oNumSamples = 1;
+        }
+    }
 
-        // bits 16-31 are currently not being used
+    // Read the extent out of bits 8-15
+    uint8_t extent = ( uint8_t )( ( info[0] & extentMask ) >> 8 );
+    if ( extent == 0 && ipt != 0 )
+    {
+        ABCA_THROW( "Degenerate extent 0" );
+    }
 
-        // the time sampling will be set on oHeader by the calling function
-        // since we don't have access to the archive here.
-        oHeader.setName( iPropName );
-        oHeader.setMetaData( metaData );
+    if ( ipt == 0 && extent != 0 )
+    {
+        std::ostringstream strm;
+        strm << ( uint32_t ) extent;
+        std::string extentStr = strm.str();
+        metaData.set( "podExtent", extentStr.c_str() );
+    }
+
+    // bits 16-20 is a schema hint
+    uint8_t schemaHint = ( info[0] & schemaMask ) >> 16;
+    switch ( schemaHint )
+    {
+        case 1:
+            metaData.set( "schema", "AbcGeom_Xform_v3" );
+        break;
+
+        case 2:
+            metaData.set( "schema", "AbcGeom_PolyMesh_v1" );
+        break;
+
+        case 3:
+            metaData.set( "schema", "AbcGeom_SubD_v1" );
+        break;
+
+        case 4:
+            metaData.set( "schema", "AbcGeom_FaceSet_v1" );
+        break;
+
+        case 5:
+            metaData.set( "schema", "AbcGeom_Curve_v2" );
+        break;
+
+        case 6:
+            metaData.set( "schema", "AbcGeom_Camera_v1" );
+        break;
+
+        case 7:
+            metaData.set( "schema", "AbcGeom_Points_v1" );
+        break;
+
+        case 8:
+            metaData.set( "schema", "AbcGeom_NuPatch_v2" );
+        break;
+
+        default:
+        break;
+    }
+
+    // bits 21-23 scope hint
+    uint8_t geoScopeHint = ( info[0] & geoScopeMask ) >> 21;
+    switch ( geoScopeHint )
+    {
+        case 1:
+            metaData.set( "geoScope", "uni" );
+        break;
+
+        case 2:
+            metaData.set( "geoScope", "var" );
+        break;
+
+        case 3:
+            metaData.set( "geoScope", "vtx" );
+        break;
+
+        case 4:
+            metaData.set( "geoScope", "fvr" );
+        break;
+
+        default:
+            // don't set anything for constant (con), as all attrs have
+            // constant scope
+        break;
+    }
+
+    // bits 24-27 interpretation hint
+    uint8_t interpHint = ( info[0] & interpMask ) >> 24;
+    switch ( interpHint )
+    {
+        case 1:
+            metaData.set( "interpretation", "vector" );
+        break;
+
+        case 2:
+            metaData.set( "interpretation", "point" );
+        break;
+
+        case 3:
+            metaData.set( "interpretation", "box" );
+        break;
+
+        case 4:
+            metaData.set( "interpretation", "normal" );
+        break;
+
+        case 5:
+            metaData.set( "interpretation", "matrix" );
+        break;
+
+        case 6:
+            metaData.set( "interpretation", "rgb" );
+        break;
+
+        case 7:
+            metaData.set( "interpretation", "quat" );
+        break;
+
+        default:
+        break;
+    }
+
+    // bits 28-31 are currently not being used
+
+    // the time sampling will be set on oHeader by the calling function
+    // since we don't have access to the archive here.
+    oHeader.setName( iPropName );
+    oHeader.setMetaData( metaData );
+
+    if ( ipt != 0 )
+    {
         oHeader.setDataType(
             AbcA::DataType( ( Util::PlainOldDataType ) podt, extent ) );
     }

@@ -73,8 +73,7 @@ SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
 //-*****************************************************************************
 SpwImpl::~SpwImpl()
 {
-    WritePropertyInfo( m_parentGroup, m_header->getName(),
-        m_header->getPropertyType(), m_header->getDataType(), true,
+    WritePropertyInfo( m_parentGroup, *m_header, true,
         m_timeSamplingIndex, m_nextSampleIndex, m_firstChangedIndex,
         m_lastChangedIndex );
 }

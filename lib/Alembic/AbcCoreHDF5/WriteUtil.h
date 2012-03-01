@@ -113,9 +113,7 @@ WriteArray( WrittenArraySampleMap &iMap,
 //-*****************************************************************************
 void
 WritePropertyInfo( hid_t iGroup,
-                   const std::string &iName,
-                   AbcA::PropertyType iPropertyType,
-                   const AbcA::DataType &iDataType,
+                   const AbcA::PropertyHeader &iHeader,
                    bool isScalarLike,
                    uint32_t iTimeSamplingIndex,
                    uint32_t iNumSamples,
