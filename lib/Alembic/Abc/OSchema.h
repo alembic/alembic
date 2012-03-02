@@ -113,14 +113,6 @@ public:
         return sTitle;
     }
 
-    //! Return the schema base type expected of this
-    //! property. An empty base type means it's the root type.
-    static const std::string &getSchemaBaseType()
-    {
-        static std::string sBaseType = INFO::schemaBaseType();
-        return sBaseType;
-    }
-
     //! Return the default name for instances of this schema. Often
     //! something like ".geom"
     static const std::string &getDefaultSchemaName()
@@ -247,10 +239,6 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
     if ( getSchemaTitle() != "" )
     {
         mdata.set( "schema", getSchemaTitle() );
-    }
-    if ( getSchemaBaseType() != "" )
-    {
-        mdata.set( "schemaBaseType", getSchemaBaseType() );
     }
 
     // Create property.

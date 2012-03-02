@@ -118,23 +118,14 @@ void Example1_GeomBaseIn()
     std::cout <<"constructing curves" << std::endl;
     IObject myCurvesAsObj( IObject( archive, kTop) , "reallly_long_curves_name");
     ICurves myCurves( IObject( archive, kTop) , "reallly_long_curves_name");
-    IGeomBaseObject geomBaseObject ( myCurvesAsObj, kWrapExisting);
-    TESTING_ASSERT( IGeomBase::matches( myCurves.getMetaData() ) );
-
-    std::cout << "getting schema" << std::endl;
-    IGeomBase geomBase = geomBaseObject.getSchema();
-    std::cout << "done getting schema" << std::endl;
-
-    // get the samples from the curves
-    IGeomBase::Sample geomBaseSample;
-    geomBase.get( geomBaseSample );
 
     // test the bounding box
-    TESTING_ASSERT( geomBaseSample.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
-    std::cout << "bounds max " << geomBaseSample.getSelfBounds().max << std::endl;
-    TESTING_ASSERT( geomBaseSample.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
-
-
+    TESTING_ASSERT(
+        myCurves.getSchema().getSelfBoundsProperty().getValue().min ==
+        V3d( -1.0, -1.0, -1.0 ) );
+    TESTING_ASSERT(
+        myCurves.getSchema().getSelfBoundsProperty().getValue().max ==
+        V3d( 1.0, 1.0, 1.0 ) );
 
 }
 
