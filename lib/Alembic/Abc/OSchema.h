@@ -130,7 +130,7 @@ public:
         if ( getSchemaTitle() == "" || iMatching == kNoMatching )
         { return true; }
 
-        if ( iMatching == kStrictMatching || iMatching == kSchemaTitleMatching )
+        if ( iMatching == kStrictMatching )
         {
             return iMetaData.get( "schema" ) == getSchemaTitle();
         }

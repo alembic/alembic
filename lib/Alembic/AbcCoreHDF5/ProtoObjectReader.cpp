@@ -88,10 +88,15 @@ ProtoObjectReader::_buildHeader ()
                      "Could not open object group: "
                      << m_header.getFullName() );
 
-        // Read the meta data.
-        // Metadata is always named ".prop.meta" for objects,
-        // as it is shared with the underlying property.
-        ReadMetaData( m_group, ".prop.meta", m_header.getMetaData() );
+        // Read the property info and meta data.
+        // Meta data and property info is shared with the underlying
+        // property
+        bool dummyBool = false;
+        uint32_t dummyVal;
+        AbcA::PropertyHeader propHeader;
+        ReadPropertyHeader( m_group, ".prop", propHeader, dummyBool,
+            dummyVal, dummyVal, dummyVal, dummyVal );
+        m_header.getMetaData() = propHeader.getMetaData();
     }
 }
 

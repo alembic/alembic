@@ -59,19 +59,6 @@ public:
     typedef SCHEMA schema_type;
     typedef OSchemaObject<SCHEMA> this_type;
 
-    //! Our schema title contains the schema title of the underlying
-    //! compound property, along with the default name of that compound
-    //! property. So, for example - most AbcGeom types put their
-    //! data in ".geom", so, "AbcGeom_PolyMesh_v1:.geom"
-    //! Sometimes schema titles from underlying schemas are "", but
-    //! ours never are.
-    static const std::string &getSchemaObjTitle()
-    {
-        static std::string soSchemaTitle =
-            SCHEMA::getSchemaTitle() + ":" + SCHEMA::getDefaultSchemaName();
-        return soSchemaTitle;
-    }
-
     static const std::string &getSchemaTitle()
     {
         static std::string sSchemaTitle = SCHEMA::getSchemaTitle();
@@ -88,12 +75,6 @@ public:
         { return true; }
 
         if ( iMatching == kStrictMatching )
-        {
-
-            return iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle();
-        }
-
-        if ( iMatching == kSchemaTitleMatching )
         {
             return iMetaData.get( "schema" ) == getSchemaTitle();
         }
@@ -203,7 +184,6 @@ OSchemaObject<SCHEMA>::OSchemaObject
     // It is never empty.
     AbcA::MetaData metaData = args.getMetaData();
     metaData.set( "schema", SCHEMA::getSchemaTitle() );
-    metaData.set( "schemaObjTitle", getSchemaObjTitle() );
 
     // Make the object.
     AbcA::ObjectHeader ohdr( iName, metaData );
@@ -258,9 +238,9 @@ inline OSchemaObject<SCHEMA>::OSchemaObject(
                           GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) ),
 
                  "Incorrect match of schema: "
-                 << oheader.getMetaData().get( "schemaObjTitle" )
+                 << oheader.getMetaData().get( "schema" )
                  << " to expected: "
-                 << getSchemaObjTitle() );
+                 << getSchemaTitle() );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
