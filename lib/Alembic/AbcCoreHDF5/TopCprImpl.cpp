@@ -52,9 +52,9 @@ namespace ALEMBIC_VERSION_NS {
 TopCprImpl::TopCprImpl( BaseOrImpl &iObject,
                         hid_t iParentGroup,
                         const AbcA::MetaData &iMetaData )
-  : BaseCprImpl( iParentGroup, ".prop" )
+  : BaseCprImpl( iParentGroup, "" )
   , m_objectRef( iObject )
-  , m_header( ".prop", iMetaData )
+  , m_header( "", iMetaData )
 {
     // Nothing
 }

@@ -70,7 +70,7 @@ private:
 };
 
 //-*****************************************************************************
-static herr_t VisitAllLinksCB( hid_t iGroup,
+/*static herr_t VisitAllLinksCB( hid_t iGroup,
                                const char *iName,
                                const H5L_info_t *iLinfo,
                                void *iOpData )
@@ -86,7 +86,7 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
 
     // Keep iterating!
     return 0;
-}
+}*/
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -111,7 +111,19 @@ BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
 
     hid_t id = m_proto->getGroup();
 
-    herr_t status = H5Literate( id,
+    if ( H5Aexists( id, ".obj_names" ) )
+    {
+        std::vector < std::string > objNames;
+        ReadStrings( id, ".obj_names", objNames );
+
+        std::vector < std::string >::iterator namesIt;
+        for ( namesIt = objNames.begin(); namesIt != objNames.end();
+              ++namesIt )
+        {
+            visitor.createProtoObject( id, namesIt->c_str() );
+        }
+    }
+/*    herr_t status = H5Literate( id,
                                 H5_INDEX_CRT_ORDER,
                                 H5_ITER_INC,
                                 NULL,
@@ -120,6 +132,7 @@ BaseOrImpl::BaseOrImpl( ProtoObjectReaderPtr iProto )
 
     ABCA_ASSERT( status >= 0,
                  "BaseOrImpl::init(): H5Literate failed" );
+*/
 }
 
 //-*****************************************************************************

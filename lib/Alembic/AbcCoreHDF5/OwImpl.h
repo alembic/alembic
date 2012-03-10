@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreHDF5_OwImpl_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/BaseOwImpl.h>
+#include <Alembic/AbcCoreHDF5/OwData.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -47,17 +47,19 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 // These are _always_ created as shared ptrs.
 class OwImpl
-    : public BaseOwImpl
+    : public AbcA::ObjectWriter
     , public boost::enable_shared_from_this<OwImpl>
 {
-protected:
-    friend class BaseOwImpl;
+public:
+
+    OwImpl( AbcA::ArchiveWriterPtr iArchive,
+            OwDataPtr iData,
+            const AbcA::MetaData & iMetaData );
 
     OwImpl( AbcA::ObjectWriterPtr iParent,
             hid_t iParentGroup,
             ObjectHeaderPtr iHeader );
-    
-public:
+
     virtual ~OwImpl();
 
     //-*************************************************************************
@@ -66,16 +68,39 @@ public:
     
     virtual const AbcA::ObjectHeader & getHeader() const;
 
+    virtual AbcA::ArchiveWriterPtr getArchive();
+
     virtual AbcA::ObjectWriterPtr getParent();
+
+    virtual AbcA::CompoundPropertyWriterPtr getProperties();
+
+    virtual size_t getNumChildren();
+
+    virtual const AbcA::ObjectHeader & getChildHeader( size_t i );
+
+    virtual const AbcA::ObjectHeader *
+    getChildHeader( const std::string &iName );
+
+    virtual AbcA::ObjectWriterPtr getChild( const std::string &iName );
+
+    virtual AbcA::ObjectWriterPtr
+    createChild( const AbcA::ObjectHeader &iHeader );
 
     virtual AbcA::ObjectWriterPtr asObjectPtr();
 
 private:
-    // The parent object
+    // The parent object, NULL if it is the "top" object
     AbcA::ObjectWriterPtr m_parent;
+
+    // The archive ptr.
+    AbcA::ArchiveWriterPtr m_archive;
 
     // The header which defines this property.
     ObjectHeaderPtr m_header;
+
+    // child object data, this is owned by the archive for "top" objects
+    OwDataPtr m_data;
+
 };
 
 } // End namespace ALEMBIC_VERSION_NS

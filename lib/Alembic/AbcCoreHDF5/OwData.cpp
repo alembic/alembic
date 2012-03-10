@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,22 +34,21 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/BaseOwImpl.h>
+#include <Alembic/AbcCoreHDF5/CpwData.h>
+#include <Alembic/AbcCoreHDF5/CpwImpl.h>
+#include <Alembic/AbcCoreHDF5/OwData.h>
 #include <Alembic/AbcCoreHDF5/OwImpl.h>
-#include <Alembic/AbcCoreHDF5/TopCpwImpl.h>
 #include <Alembic/AbcCoreHDF5/WriteUtil.h>
-#include <Alembic/AbcCoreHDF5/HDF5Util.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-BaseOwImpl::BaseOwImpl( hid_t iParentGroup,
-                        const std::string &iName,
-                        const AbcA::MetaData &iMetaData )
-  : m_group( -1 )
-  , m_properties( NULL )
+OwData::OwData( hid_t iParentGroup,
+                const std::string &iName,
+                const AbcA::MetaData &iMetaData )
+    : m_group( -1 )
 {
     // Check validity of all inputs.
     ABCA_ASSERT( iParentGroup >= 0, "Invalid parent group" );
@@ -62,34 +61,57 @@ BaseOwImpl::BaseOwImpl( hid_t iParentGroup,
     ABCA_ASSERT( m_group >= 0,
                  "Could not create group for object: " << iName );
 
-    // Create the properties
-    m_properties = new TopCpwImpl( *this, m_group, iMetaData );
+    m_data.reset( new CpwData( "", m_group ) );
+
+    AbcA::PropertyHeader topHeader( "", iMetaData );
+    WritePropertyInfo( m_group, topHeader, false, 0, 0, 0, 0 );
 }
 
 //-*****************************************************************************
-AbcA::ArchiveWriterPtr BaseOwImpl::getArchive()
+OwData::~OwData()
 {
-    ABCA_ASSERT( m_archive, "Invalid archive in BaseOwImpl::getArchive()" );
-    return m_archive;
+
+    if ( ! m_childHeaders.empty() )
+    {
+        std::vector< std::string > childNames;
+        childNames.reserve( m_childHeaders.size() );
+        ChildHeaders::iterator childIt;
+        for ( childIt = m_childHeaders.begin();
+            childIt != m_childHeaders.end(); ++childIt )
+        {
+            childNames.push_back( (*childIt)->getName() );
+        }
+        WriteStrings( m_group, ".obj_names", childNames.size(),
+            &( childNames.front() ) );
+    }
+
+    // don't need to close m_group as ~CpwData will if necessary
 }
 
 //-*****************************************************************************
-AbcA::CompoundPropertyWriterPtr BaseOwImpl::getProperties()
+AbcA::CompoundPropertyWriterPtr
+OwData::getProperties( AbcA::ObjectWriterPtr iParent )
 {
-    // Spoof!
-    AbcA::CompoundPropertyWriterPtr ret( m_properties,
-                                         Alembic::Util::NullDeleter() );
+    AbcA::CompoundPropertyWriterPtr ret = m_top.lock();
+    if ( ! ret )
+    {
+        // time to make a new one
+        ret.reset( new CpwImpl( iParent,
+            m_data, iParent->getMetaData() ) );
+        m_top = ret;
+    }
+
     return ret;
 }
 
 //-*****************************************************************************
-size_t BaseOwImpl::getNumChildren()
+size_t OwData::getNumChildren()
 {
     return m_childHeaders.size();
 }
 
 //-*****************************************************************************
-const AbcA::ObjectHeader & BaseOwImpl::getChildHeader( size_t i )
+const AbcA::ObjectHeader & OwData::getChildHeader( size_t i )
 {
     if ( i >= m_childHeaders.size() )
     {
@@ -103,8 +125,7 @@ const AbcA::ObjectHeader & BaseOwImpl::getChildHeader( size_t i )
 }
 
 //-*****************************************************************************
-const AbcA::ObjectHeader *
-BaseOwImpl::getChildHeader( const std::string &iName )
+const AbcA::ObjectHeader * OwData::getChildHeader( const std::string &iName )
 {
     size_t numChildren = m_childHeaders.size();
     for ( size_t i = 0; i < numChildren; ++i )
@@ -119,8 +140,7 @@ BaseOwImpl::getChildHeader( const std::string &iName )
 }
 
 //-*****************************************************************************
-AbcA::ObjectWriterPtr
-BaseOwImpl::getChild( const std::string &iName )
+AbcA::ObjectWriterPtr OwData::getChild( const std::string &iName )
 {
     MadeChildren::iterator fiter = m_madeChildren.find( iName );
     if ( fiter == m_madeChildren.end() )
@@ -132,9 +152,9 @@ BaseOwImpl::getChild( const std::string &iName )
     return wptr.lock();
 }
 
-//-*****************************************************************************
-AbcA::ObjectWriterPtr
-BaseOwImpl::createChild( const AbcA::ObjectHeader &iHeader )
+AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
+                                           const std::string & iFullName,
+                                           const AbcA::ObjectHeader &iHeader )
 {
     if ( m_madeChildren.count( iHeader.getName() ) )
     {
@@ -144,11 +164,10 @@ BaseOwImpl::createChild( const AbcA::ObjectHeader &iHeader )
 
     ObjectHeaderPtr header(
         new AbcA::ObjectHeader( iHeader.getName(),
-                                this->getFullName() + "/" +
-                                iHeader.getName(),
+                                iFullName + "/" + iHeader.getName(),
                                 iHeader.getMetaData() ) );
 
-    AbcA::ObjectWriterPtr ret( new OwImpl( asObjectPtr(),
+    AbcA::ObjectWriterPtr ret( new OwImpl( iParent,
                                            m_group,
                                            header ) );
 
@@ -156,18 +175,6 @@ BaseOwImpl::createChild( const AbcA::ObjectHeader &iHeader )
     m_madeChildren[iHeader.getName()] = WeakOwPtr( ret );
 
     return ret;
-}
-
-//-*****************************************************************************
-BaseOwImpl::~BaseOwImpl()
-{
-    delete m_properties;
-
-    if ( m_group >= 0 )
-    {
-        H5Gclose( m_group );
-        m_group = -1;
-    }
 }
 
 } // End namespace ALEMBIC_VERSION_NS

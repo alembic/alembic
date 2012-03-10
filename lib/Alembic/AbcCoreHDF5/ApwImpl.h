@@ -54,7 +54,7 @@ class ApwImpl
     , public boost::enable_shared_from_this<ApwImpl>
 {
 protected:
-    friend class BaseCpwImpl;
+    friend class CpwData;
 
     //-*************************************************************************
     ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,

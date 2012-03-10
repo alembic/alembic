@@ -337,6 +337,64 @@ void ReadStrings( hid_t iParent,
 }
 
 //-*****************************************************************************
+void ReadStrings( hid_t iParent,
+                  const std::string & iStringsName,
+                  std::vector < std::string > & oStrings )
+{
+    // Open the attribute.
+    hid_t attrId = H5Aopen( iParent, iStringsName.c_str(), H5P_DEFAULT );
+    ABCA_ASSERT( attrId >= 0,
+                 "Couldn't open attribute named: " << iStringsName );
+    AttrCloser attrCloser( attrId );
+
+    hid_t attrSpace = H5Aget_space( attrId );
+    ABCA_ASSERT( attrSpace >= 0,
+                 "Couldn't get dataspace for attribute: " << iStringsName );
+    DspaceCloser dspaceCloser( attrSpace );
+
+    hssize_t numPoints = H5Sget_simple_extent_npoints( attrSpace );
+    ABCA_ASSERT( numPoints > 0,
+                 "Degenerate string dimensions in ReadStringsT" );
+
+    // Create temporary char storage buffer.
+    std::vector<char> charStorage( ( size_t )( numPoints ), ( char )0 );
+
+    // Read into it.
+    herr_t status = H5Aread( attrId, GetNativeDtype<char>(),
+                             ( void * )&charStorage.front() );
+    ABCA_ASSERT( status >= 0,
+                 "Couldn't read from attribute: " << iStringsName );
+
+    size_t nextStringBegin = 0;
+    size_t nextStringEnd = 0;
+    size_t lastChar = charStorage.size();
+    while ( nextStringBegin < lastChar )
+    {
+        // Move the end caliper to the terminating zero, which may be
+        // the beginning character in the case of an empty string.
+        while ( charStorage[nextStringEnd] != '\0' && nextStringEnd < lastChar )
+        {
+            ++nextStringEnd;
+        }
+
+        // Set the string to either the empty string
+        // or the appropriate 0-terminated char string.
+        std::string thisString;
+        if ( nextStringEnd - nextStringBegin > 0 )
+        {
+            thisString = & ( charStorage[nextStringBegin] );
+        }
+
+        oStrings.push_back( thisString );
+
+        // Move the front and end caliper past the terminal zero
+        // to the beginning of the next string.
+        nextStringBegin = nextStringEnd + 1;
+        nextStringEnd = nextStringBegin;
+    }
+}
+
+//-*****************************************************************************
 void ReadWstrings( hid_t iParent,
                    const std::string &iAttrName,
                    size_t iNumStrings,

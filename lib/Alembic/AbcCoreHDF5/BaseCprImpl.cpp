@@ -129,7 +129,7 @@ BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
     // If our group exists, open it. If it does not, this is not a problem!
     // It just means we don't have any subproperties. We essentially are just
     // some floating metadata, at that point.
-    if ( !GroupExists( iParentGroup, iName ) )
+    if ( iName != "" && !GroupExists( iParentGroup, iName ) )
     {
         // No group. It's okay!
         // Just return - it means we have no subprops!
@@ -137,14 +137,28 @@ BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
     }
 
     // Okay now open the group.
-    m_group = H5Gopen2( iParentGroup, iName.c_str(), H5P_DEFAULT );
+
+    if ( iName != "" )
+    {
+        m_group = H5Gopen2( iParentGroup, iName.c_str(), H5P_DEFAULT );
+    }
+    else
+    {
+        m_group = H5Gopen2( iParentGroup, ".", H5P_DEFAULT );
+    }
+
     ABCA_ASSERT( m_group >= 0,
                  "Could not open compound property group named: "
                  << iName << ", H5Gopen2 failed" );
 
     // Do the visiting to gather property names.
     CprAttrVisitor visitor;
-    try
+    if ( H5Aexists( m_group, ".prop_names" ) )
+    {
+        ReadStrings( m_group, ".prop_names", visitor.properties );
+    }
+
+/*    try
     {
         herr_t status = H5Aiterate2( m_group,
                                      H5_INDEX_CRT_ORDER,
@@ -166,6 +180,7 @@ BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
         ABCA_THROW( "Could not attr iterate property group named: "
                     << iName << ", unknown reason" );
     }
+*/
 
     size_t index = 0;
     m_propertyHeaders.resize(visitor.properties.size());

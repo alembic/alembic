@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_BaseCpwImpl_h_
-#define _Alembic_AbcCoreHDF5_BaseCpwImpl_h_
+#ifndef _Alembic_AbcCoreHDF5_CpwData_h_
+#define _Alembic_AbcCoreHDF5_CpwData_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 
@@ -43,57 +43,48 @@ namespace Alembic {
 namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
-//-*****************************************************************************
-class BaseCpwImpl : public AbcA::CompoundPropertyWriter
+// data class owned by CpwImpl, or OwImpl if it is a "top" object
+// it owns and makes child properties as well as the group hid_t
+// when necessary
+class CpwData : public boost::enable_shared_from_this<CpwData>
 {
-protected:
-    // First constructor is for building the top-level compound property
-    // of an ObjectWriter. This one has meta data already written, so we
-    // don't have to write it here.
-    BaseCpwImpl( hid_t iParentGroup );
-
 public:
-    virtual ~BaseCpwImpl();
 
-    // FROM ABSTRACT
-    virtual AbcA::ObjectWriterPtr getObject();
+    CpwData( const std::string & iName, hid_t iParentGroup );
 
-    // COMPOUND API
-    virtual size_t getNumProperties();
+    ~CpwData();
 
-    virtual const AbcA::PropertyHeader & getPropertyHeader( size_t i );
+    size_t getNumProperties();
 
-    virtual const AbcA::PropertyHeader *
-    getPropertyHeader( const std::string &iName );
+    const AbcA::PropertyHeader & getPropertyHeader( size_t i );
 
-    virtual AbcA::BasePropertyWriterPtr
-    getProperty( const std::string & iName );
+    const AbcA::PropertyHeader * getPropertyHeader( const std::string &iName );
 
-private:
-    hid_t getGroup();
+    AbcA::BasePropertyWriterPtr getProperty( const std::string & iName );
 
-public:
-    virtual AbcA::ScalarPropertyWriterPtr
-    createScalarProperty( const std::string & iName,
+    AbcA::ScalarPropertyWriterPtr
+    createScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
+        const std::string & iName,
         const AbcA::MetaData & iMetaData,
         const AbcA::DataType & iDataType,
         uint32_t iTimeSamplingIndex );
 
-    virtual AbcA::ArrayPropertyWriterPtr
-    createArrayProperty( const std::string & iName,
+    AbcA::ArrayPropertyWriterPtr
+    createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
+        const std::string & iName,
         const AbcA::MetaData & iMetaData,
         const AbcA::DataType & iDataType,
         uint32_t iTimeSamplingIndex );
 
-    virtual AbcA::CompoundPropertyWriterPtr
-    createCompoundProperty( const std::string & iName,
+    AbcA::CompoundPropertyWriterPtr
+    createCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
+        const std::string & iName,
         const AbcA::MetaData & iMetaData );
 
-protected:
-    // The object we belong to. For TopCpwImpls, this will be NULL
-    // to avoid circular references.
-    AbcA::ObjectWriterPtr m_object;
-    
+private:
+
+    hid_t getGroup();
+
     // The parent group. We need to keep this around because we
     // don't create our group until we need to. This is guaranteed to
     // exist because our parent (or object) is guaranteed to exist.
@@ -102,12 +93,17 @@ protected:
     // The group corresponding to this property.
     // It may never be created or written.
     hid_t m_group;
-    
-    typedef std::map<std::string,WeakBpwPtr> MadeProperties;
+
+    // if m_group gets created it will be given this name
+    std::string m_name;
+
+    typedef std::map<std::string, WeakBpwPtr> MadeProperties;
 
     PropertyHeaderPtrs m_propertyHeaders;
     MadeProperties m_madeProperties;
 };
+
+typedef boost::shared_ptr<CpwData> CpwDataPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 
@@ -117,4 +113,3 @@ using namespace ALEMBIC_VERSION_NS;
 } // End namespace Alembic
 
 #endif
-

@@ -71,14 +71,6 @@ public:
         return sTitle;
     }
 
-    //! Return the default name for instances of this schema. Often
-    //! something like ".geom"
-    static const std::string &getDefaultSchemaName()
-    {
-        static std::string sName = INFO::defaultName();
-        return sName;
-    }
-
     //! This will check whether or not a given entity (as represented by
     //! a metadata) strictly matches the interpretation of this
     //! schema object
@@ -135,7 +127,7 @@ public:
                       const Argument &iArg1 = Argument() )
     {
         this_type::init( iParentObject,
-                         INFO::defaultName(),
+                         "",
                          iArg0, iArg1 );
     }
 
@@ -186,21 +178,38 @@ void ISchema<INFO>::init( CPROP_PTR iParent,
         GetCompoundPropertyReaderPtr( iParent );
     ABCA_ASSERT( parent, "NULL CompoundPropertyReaderPtr" );
 
-    const AbcA::PropertyHeader *pheader = parent->getPropertyHeader( iName );
+    if ( iName != "" )
+    {
+        const AbcA::PropertyHeader *pheader =
+            parent->getPropertyHeader( iName );
 
-    ABCA_ASSERT( pheader != NULL,
-                 "Nonexistent compound property: " << iName );
+        ABCA_ASSERT( pheader != NULL,
+                     "Nonexistent compound property: " << iName );
 
-    // Check metadata for schema.
-    ABCA_ASSERT( matches( *pheader, args.getSchemaInterpMatching() ),
+        // Check metadata for schema.
+        ABCA_ASSERT( matches( *pheader, args.getSchemaInterpMatching() ),
 
                  "Incorrect match of schema: "
                  << pheader->getMetaData().get( "schema" )
                  << " to expected: "
                  << INFO::title() );
 
-    // Get property.
-    m_property = parent->getCompoundProperty( iName );
+        // Get property.
+        m_property = parent->getCompoundProperty( iName );
+
+    }
+    else
+    {
+        // Check metadata for schema.
+        ABCA_ASSERT( matches( parent->getHeader(),
+                 args.getSchemaInterpMatching() ),
+
+                 "Incorrect match of schema: "
+                 << parent->getHeader().getMetaData().get( "schema" )
+                 << " to expected: "
+                 << INFO::title() );
+        m_property = parent;
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

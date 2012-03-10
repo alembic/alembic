@@ -64,6 +64,13 @@ ReadStrings( hid_t iParent,
              std::string *oStrings );
 
 //-*****************************************************************************
+// For reading a compacted string array
+void
+ReadStrings( hid_t iParent,
+             const std::string &iStringsName,
+             std::vector < std::string > & oStrings );
+
+//-*****************************************************************************
 // For data types with more than one wstring
 void
 ReadWstrings( hid_t iParent,

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2012,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -40,15 +40,15 @@ SET( CXX_FILES
   ArImpl.cpp
   AwImpl.cpp
   BaseCprImpl.cpp
-  BaseCpwImpl.cpp
   BaseOrImpl.cpp
-  BaseOwImpl.cpp
   CacheImpl.cpp
   CprImpl.cpp
+  CpwData.cpp
   CpwImpl.cpp
   DataTypeRegistry.cpp
   HDF5Util.cpp
   OrImpl.cpp
+  OwData.cpp
   OwImpl.cpp
   ProtoObjectReader.cpp
   ReadUtil.cpp
@@ -58,9 +58,7 @@ SET( CXX_FILES
   StringReadUtil.cpp
   StringWriteUtil.cpp
   TopCprImpl.cpp
-  TopCpwImpl.cpp
   TopOrImpl.cpp
-  TopOwImpl.cpp
   WriteUtil.cpp
 )
 
@@ -71,16 +69,16 @@ SET( H_FILES
   ArImpl.h
   AwImpl.h
   BaseCprImpl.h
-  BaseCpwImpl.h
   BaseOrImpl.h
-  BaseOwImpl.h
   CacheImpl.h
   CprImpl.h
+  CpwData.h
   CpwImpl.h
   DataTypeRegistry.h
   HDF5Util.h
   Foundation.h
   OrImpl.h
+  OwData.h
   OwImpl.h
   ProtoObjectReader.h
   ReadUtil.h
@@ -92,9 +90,7 @@ SET( H_FILES
   StringReadUtil.h
   StringWriteUtil.h
   TopCprImpl.h
-  TopCpwImpl.h
   TopOrImpl.h
-  TopOwImpl.h
   WriteUtil.h
   WrittenArraySampleMap.h
 )

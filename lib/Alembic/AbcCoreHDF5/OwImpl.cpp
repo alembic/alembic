@@ -44,29 +44,52 @@ namespace Alembic {
 namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
+OwImpl::OwImpl( AbcA::ArchiveWriterPtr iArchive,
+                OwDataPtr iData,
+                const AbcA::MetaData & iMetaData )
+    : m_archive( iArchive )
+    , m_header( new AbcA::ObjectHeader( "ABC", "/", iMetaData ) )
+    , m_data( iData )
+{
+    ABCA_ASSERT( m_archive, "Invalid archive" );
+    ABCA_ASSERT( m_data, "Invalid data" );
+}
+
 //-*****************************************************************************
 OwImpl::OwImpl( AbcA::ObjectWriterPtr iParent,
                 hid_t iParentGroup,
                 ObjectHeaderPtr iHeader )
-  : BaseOwImpl( iParentGroup, iHeader->getName(), iHeader->getMetaData() )
-  , m_parent( iParent )
+  : m_parent( iParent )
   , m_header( iHeader )
 {
     // Check validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
     ABCA_ASSERT( m_header, "Invalid header" );
 
-    AbcA::ArchiveWriterPtr aptr = m_parent->getArchive();
-    ABCA_ASSERT( aptr, "Invalid archive" );
+    m_archive = m_parent->getArchive();
+    ABCA_ASSERT( m_archive, "Invalid archive" );
 
-    BaseOwImpl::setArchive( aptr );
+    m_data.reset( new OwData( iParentGroup, m_header->getName(),
+                              m_header->getMetaData() ) );
 }
-    
+
+//-*****************************************************************************
+OwImpl::~OwImpl()
+{
+    // Nothing!!
+}
+
 //-*****************************************************************************
 const AbcA::ObjectHeader & OwImpl::getHeader() const
 {
     ABCA_ASSERT( m_header, "Invalid header" );
     return *m_header;
+}
+
+//-*****************************************************************************
+AbcA::ArchiveWriterPtr OwImpl::getArchive()
+{
+    return m_archive;
 }
 
 //-*****************************************************************************
@@ -76,15 +99,45 @@ AbcA::ObjectWriterPtr OwImpl::getParent()
 }
 
 //-*****************************************************************************
-AbcA::ObjectWriterPtr OwImpl::asObjectPtr()
+AbcA::CompoundPropertyWriterPtr OwImpl::getProperties()
 {
-    return shared_from_this();
+    return m_data->getProperties( asObjectPtr() );
 }
 
 //-*****************************************************************************
-OwImpl::~OwImpl()
+size_t OwImpl::getNumChildren()
 {
-    // Nothing!!
+    return m_data->getNumChildren();
+}
+
+//-*****************************************************************************
+const AbcA::ObjectHeader & OwImpl::getChildHeader( size_t i )
+{
+    return m_data->getChildHeader( i );
+}
+
+const AbcA::ObjectHeader * OwImpl::getChildHeader( const std::string &iName )
+{
+    return m_data->getChildHeader( iName );
+}
+
+//-*****************************************************************************
+AbcA::ObjectWriterPtr OwImpl::getChild( const std::string &iName )
+{
+    return m_data->getChild( iName );
+}
+
+//-*****************************************************************************
+AbcA::ObjectWriterPtr OwImpl::createChild( const AbcA::ObjectHeader &iHeader )
+{
+    return m_data->createChild( asObjectPtr(), m_header->getFullName(),
+                                iHeader );
+}
+
+//-*****************************************************************************
+AbcA::ObjectWriterPtr OwImpl::asObjectPtr()
+{
+    return shared_from_this();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -94,7 +94,7 @@ ProtoObjectReader::_buildHeader ()
         bool dummyBool = false;
         uint32_t dummyVal;
         AbcA::PropertyHeader propHeader;
-        ReadPropertyHeader( m_group, ".prop", propHeader, dummyBool,
+        ReadPropertyHeader( m_group, "", propHeader, dummyBool,
             dummyVal, dummyVal, dummyVal, dummyVal );
         m_header.getMetaData() = propHeader.getMetaData();
     }

@@ -131,8 +131,7 @@ public:
         init(  iArg0, iArg1 );
     }
 
-    //! Same constructor as above, but use the default schema name, ie,
-    //! ".geom".
+    //! Same constructor as above, but use the default schema name
     template <class CPROP_PTR>
     explicit IFaceSetSchema( CPROP_PTR iParent,
                           const Abc::Argument &iArg0 = Abc::Argument(),

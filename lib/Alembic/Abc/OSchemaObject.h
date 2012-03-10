@@ -227,8 +227,7 @@ inline OSchemaObject<SCHEMA>::OSchemaObject(
     const AbcA::ObjectHeader &oheader = this->getHeader();
 
     m_schema = SCHEMA(
-        this->getProperties().getProperty(
-            SCHEMA::getDefaultSchemaName() ).getPtr()->asCompoundPtr(),
+        this->getProperties().getPtr()->asCompoundPtr(),
         iFlag,
         this->getErrorHandlerPolicy(),
         GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) );

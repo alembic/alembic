@@ -77,7 +77,6 @@ namespace ALEMBIC_VERSION_NS {
 //! It takes three arguments
 //! - the SchemaTitle( a string ),
 //! - the SchemaBaseType( a string ),
-//! - the DefaultSchemaName( a string )
 //! - the name of the SchemaTrait Type to be declared.
 //! - for example:
 //! ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
@@ -87,7 +86,6 @@ namespace ALEMBIC_VERSION_NS {
 struct STDEF                                                            \
 {                                                                       \
     static const char * title() { return ( STITLE ) ; }                 \
-    static const char * defaultName() { return ( SDFLT ); }             \
     static const char * schemaBaseType() { return ( SBTYP ); }          \
 }
 
@@ -111,14 +109,6 @@ public:
     {
         static std::string sTitle = INFO::title();
         return sTitle;
-    }
-
-    //! Return the default name for instances of this schema. Often
-    //! something like ".geom"
-    static const std::string &getDefaultSchemaName()
-    {
-        static std::string sName = INFO::defaultName();
-        return sName;
     }
 
     //! This will check whether or not a given entity (as represented by
@@ -178,7 +168,7 @@ public:
                       const Argument &iArg2 = Argument() )
     {
         this_type::init( iParentObject,
-                         INFO::defaultName(),
+                         "",
                          iArg0, iArg1, iArg2 );
     }
 
@@ -242,7 +232,14 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
     }
 
     // Create property.
-    m_property = parent->createCompoundProperty( iName, mdata );
+    if ( iName != "" )
+    {
+        m_property = parent->createCompoundProperty( iName, mdata );
+    }
+    else
+    {
+        m_property = parent;
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

@@ -445,8 +445,7 @@ OSubDSchema::createFaceSet( const std::string &iFaceSetName )
     ABCA_ASSERT( m_faceSets.find (iFaceSetName) == m_faceSets.end (),
                  "faceSet has already been created in SubD." );
 
-    m_faceSets [iFaceSetName] = OFaceSet (this->getParent ().getObject (),
-        iFaceSetName);
+    m_faceSets [iFaceSetName] = OFaceSet (getObject (), iFaceSetName);
 
     return m_faceSets [iFaceSetName];
 

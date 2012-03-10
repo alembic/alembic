@@ -293,7 +293,7 @@ void ISubDSchema::loadFaceSetNames()
     {
         // iterate over childHeaders, and if header matches 
         // FaceSet add to our vec
-        IObject _thisObject = this->getParent().getObject();
+        IObject _thisObject = getObject();
 
         size_t numChildren = _thisObject.getNumChildren();
         for ( size_t childIndex = 0 ; childIndex < numChildren; childIndex++ )
@@ -348,8 +348,7 @@ ISubDSchema::getFaceSet( const std::string &iFaceSetName )
     if (!m_faceSets [iFaceSetName])
     {
         // We haven't yet loaded the faceSet, so create/load it
-        m_faceSets [iFaceSetName] = IFaceSet ( this->getParent().getObject(),
-                                               iFaceSetName );
+        m_faceSets [iFaceSetName] = IFaceSet ( getObject(), iFaceSetName );
     }
 
     return m_faceSets [iFaceSetName];
