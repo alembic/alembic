@@ -60,8 +60,8 @@ hid_t CreationOrderPlist()
                   "CreationOrderPlist: "
                   "H5Pset_link_creation_order() failed" );
 
-    // always store as dense to work around a possible phase change bug
-	// see google code issue #258
+    // always store as dense to work around an HDF bug
+    // see google code issue #258, this should be fixed in HDF 1.8.9
     status = H5Pset_link_phase_change( ID, 0, 0 );
 
     ABCA_ASSERT( status >= 0,
