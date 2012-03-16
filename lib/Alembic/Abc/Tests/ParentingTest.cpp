@@ -218,6 +218,68 @@ void simpleTestIn( const std::string &iArchiveName )
     // if the program exits, it means parenting works
 }
 
+void scopingTest()
+{
+    {
+        ODoubleProperty propScalar;
+        ODoubleArrayProperty propArray;
+        {
+            OArchive archive = CreateArchiveWithInfo(
+                Alembic::AbcCoreHDF5::WriteArchive(), "propScopeTest.abc",
+                "Alembic test", "", MetaData() );
+            OObject childA( archive.getTop(), "a" );
+
+            propScalar = ODoubleProperty(childA.getProperties(), "scalar", 0);
+
+            propArray = ODoubleArrayProperty(childA.getProperties(),
+                "array", 0);
+        }
+
+        std::vector< double > values(3, 2.0);
+        propArray.set( values );
+        propScalar.set( 4.0 );
+        propScalar.set( 5.0 );
+        TESTING_ASSERT(
+            propArray.getParent().getObject().getArchive().getName() == 
+            "propScopeTest.abc");
+        TESTING_ASSERT(
+            propScalar.getParent().getObject().getArchive().getName() == 
+            "propScopeTest.abc");
+    }
+
+    {
+        IDoubleProperty propScalar;
+        IDoubleArrayProperty propArray;
+        {
+            IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                "propScopeTest.abc" );
+            IObject top(archive.getTop(), "a");
+            propScalar = IDoubleProperty(top.getProperties(), "scalar");
+            propArray = IDoubleArrayProperty(top.getProperties(), "array");
+        }
+        TESTING_ASSERT(
+            propArray.getParent().getObject().getArchive().getName() == 
+            "propScopeTest.abc");
+        TESTING_ASSERT(
+            propScalar.getParent().getObject().getArchive().getName() == 
+            "propScopeTest.abc");
+
+        DoubleArraySamplePtr samp;
+        size_t sampNum = 0;
+        propArray.get(samp, sampNum);
+        TESTING_ASSERT( samp->size() == 3 );
+        TESTING_ASSERT( (*samp)[0] == 2.0 && (*samp)[1] == 2.0 &&
+                        (*samp)[2] == 2.0 );
+
+        double scalarVal = 0.0;
+        propScalar.get( scalarVal, sampNum );
+        TESTING_ASSERT( scalarVal == 4.0 );
+        sampNum ++;
+        propScalar.get( scalarVal, sampNum );
+        TESTING_ASSERT( scalarVal == 5.0 );
+    }
+}
+
 //-*****************************************************************************
 int main( int argc, char *argv[] )
 {
@@ -226,5 +288,6 @@ int main( int argc, char *argv[] )
     simpleTestOut( arkive );
     simpleTestIn( arkive );
 
+    scopingTest();
     return 0;
 }
