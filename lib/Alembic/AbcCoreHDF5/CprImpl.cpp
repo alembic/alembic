@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -50,12 +50,11 @@ namespace ALEMBIC_VERSION_NS {
 CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
                   hid_t iParentGroup,
                   PropertyHeaderPtr iHeader )
-  : BaseCprImpl( iParentGroup, iHeader->getName() )
-  , m_parent( iParent )
-  , m_header( iHeader )
+    : m_parent( iParent )
+    , m_header( iHeader )
 {
-    ABCA_ASSERT( m_parent, "invalid parent" );
-    ABCA_ASSERT( m_header, "invalid header" );
+    ABCA_ASSERT( m_parent, "Invalid parent in CprImpl(Compound)" );
+    ABCA_ASSERT( m_header, "invalid header in CprImpl(Compound)" );
     
     AbcA::PropertyType pType = m_header->getPropertyType();
     if ( pType != AbcA::kCompoundProperty )
@@ -66,20 +65,43 @@ CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
 
     // Set object.
     AbcA::ObjectReaderPtr optr = m_parent->getObject();
-    ABCA_ASSERT( optr, "Invalid object in CprImpl::CprImpl()" );
+    ABCA_ASSERT( optr, "Invalid object in CprImpl::CprImpl(Compound)" );
     m_object = optr;
+
+    m_data.reset( new CprData( iParentGroup,
+        m_parent->getObject()->getArchive()->getArchiveVersion(),
+        m_header->getName() ) );
 }
 
 //-*****************************************************************************
-// Destructor is at the end, so that this file has a logical ordering that
-// matches the order of operations (create, get children, destroy)
+CprImpl::CprImpl( AbcA::ObjectReaderPtr iObject,
+                  CprDataPtr iData,
+                  hid_t iParentGroup )
+    : m_object( iObject )
+    , m_data( iData )
+{
+    ABCA_ASSERT( m_object, "Invalid object in CprImpl(Object)" );
+    ABCA_ASSERT( m_data, "Invalid data in CprImpl(Object)" );
+
+     m_header.reset( new AbcA::PropertyHeader( "",  m_object->getMetaData() ) );
+}
+
 //-*****************************************************************************
+CprImpl::~CprImpl()
+{
+    // Nothing
+}
 
 //-*****************************************************************************
 const AbcA::PropertyHeader &CprImpl::getHeader() const
 {
     ABCA_ASSERT( m_header, "Invalid header" );
     return *m_header;
+}
+
+AbcA::ObjectReaderPtr CprImpl::getObject()
+{
+    return m_object;
 }
 
 //-*****************************************************************************
@@ -95,9 +117,43 @@ AbcA::CompoundPropertyReaderPtr CprImpl::asCompoundPtr()
 }
 
 //-*****************************************************************************
-CprImpl::~CprImpl()
+size_t CprImpl::getNumProperties()
 {
-    // Nothing
+    return m_data->getNumProperties();
+}
+
+//-*****************************************************************************
+const AbcA::PropertyHeader & CprImpl::getPropertyHeader( size_t i )
+{
+    return m_data->getPropertyHeader( asCompoundPtr(), i );
+}
+
+//-*****************************************************************************
+const AbcA::PropertyHeader *
+CprImpl::getPropertyHeader( const std::string &iName )
+{
+    return m_data->getPropertyHeader( asCompoundPtr(), iName );
+}
+
+//-*****************************************************************************
+AbcA::ScalarPropertyReaderPtr
+CprImpl::getScalarProperty( const std::string &iName )
+{
+    return m_data->getScalarProperty( asCompoundPtr(), iName );
+}
+
+//-*****************************************************************************
+AbcA::ArrayPropertyReaderPtr
+CprImpl::getArrayProperty( const std::string &iName )
+{
+    return m_data->getArrayProperty( asCompoundPtr(), iName );
+}
+
+//-*****************************************************************************
+AbcA::CompoundPropertyReaderPtr
+CprImpl::getCompoundProperty( const std::string &iName )
+{
+    return m_data->getCompoundProperty( asCompoundPtr(), iName );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -35,7 +35,8 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreHDF5/ArImpl.h>
-#include <Alembic/AbcCoreHDF5/TopOrImpl.h>
+#include <Alembic/AbcCoreHDF5/OrData.h>
+#include <Alembic/AbcCoreHDF5/OrImpl.h>
 #include <Alembic/AbcCoreHDF5/ReadUtil.h>
 #include <Alembic/AbcCoreHDF5/HDF5Util.h>
 
@@ -76,9 +77,27 @@ ArImpl::ArImpl( const std::string &iFileName,
     }
     m_archiveVersion = fileVersion;
 
-    // Read the top object
-    m_top = new TopOrImpl( *this, m_file );
+    // set up the data for the "top" object, and header
+    hid_t group = H5Gopen2( m_file, "ABC", H5P_DEFAULT );
 
+    ABCA_ASSERT( group >= 0, "Could not open top object in: "
+                             << iFileName );
+
+    // Read the property info and meta data.
+    // Meta data and property info is shared with the underlying
+    // property
+    bool dummyBool = false;
+    uint32_t dummyVal;
+    AbcA::PropertyHeader propHeader;
+    ReadPropertyHeader( group, "", propHeader, dummyBool,
+                        dummyVal, dummyVal, dummyVal, dummyVal );
+
+    m_header.reset( new AbcA::ObjectHeader( "ABC",
+                                            "/",
+                                            propHeader.getMetaData() ) );
+
+    m_data.reset( new OrData( m_header, m_file, m_archiveVersion ) );
+    H5Gclose( group );
     ReadTimeSamples( m_file, m_timeSamples );
 }
 
@@ -91,16 +110,20 @@ const std::string &ArImpl::getName() const
 //-*****************************************************************************
 const AbcA::MetaData &ArImpl::getMetaData() const
 {
-    ABCA_ASSERT( m_top, "Invalid top object" );
-    return m_top->getMetaData();
+    return m_header->getMetaData();
 }
 
 //-*****************************************************************************
 AbcA::ObjectReaderPtr ArImpl::getTop()
 {
-    ABCA_ASSERT( m_top, "Invalid top object" );
-    AbcA::ObjectReaderPtr ret( m_top,
-                               Alembic::Util::NullDeleter() );
+    AbcA::ObjectReaderPtr ret = m_top.lock();
+    if ( ! ret )
+    {
+        // time to make a new one
+        ret.reset( new OrImpl( asArchivePtr(), m_data, m_header ) );
+        m_top = ret;
+    }
+
     return ret;
 }
 
@@ -122,8 +145,8 @@ AbcA::ArchiveReaderPtr ArImpl::asArchivePtr()
 //-*****************************************************************************
 ArImpl::~ArImpl()
 {
-    delete m_top;
-    m_top = NULL;
+
+    m_data.reset();
 
     if ( m_file >= 0 )
     {

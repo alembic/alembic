@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,12 +34,12 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/BaseCprImpl.h>
-#include <Alembic/AbcCoreHDF5/CprImpl.h>
-#include <Alembic/AbcCoreHDF5/AprImpl.h>
-#include <Alembic/AbcCoreHDF5/SprImpl.h>
+#include <Alembic/AbcCoreHDF5/CprData.h>
 #include <Alembic/AbcCoreHDF5/ReadUtil.h>
 #include <Alembic/AbcCoreHDF5/HDF5Util.h>
+#include <Alembic/AbcCoreHDF5/CprImpl.h>
+#include <Alembic/AbcCoreHDF5/SprImpl.h>
+#include <Alembic/AbcCoreHDF5/AprImpl.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -88,19 +88,12 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
     size_t attrNameLen = attrName.size();
     if ( attrNameLen < 6 )
     {
-        // An error
-        ABCA_THROW( "Invalid attribute in compound property group: "
-                    << attrName
-                    << std::endl
-                    << "... has no suffix" );
-
-        // Continue iterating.
-        // return 0;
+        return 0;
     }
 
     // Last 5 characters.
     std::string suffix( attrName, attrNameLen-5 );
-    if ( suffix == ".info" )
+    if ( suffix == ".info" && attrNameLen > 0)
     {
         std::string propertyName( attrName, 0, attrNameLen-5 );
         visitor->createNewProperty( propertyName );
@@ -110,26 +103,16 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
 }
 
 //-*****************************************************************************
-//-*****************************************************************************
-// CLASS
-//-*****************************************************************************
-//-*****************************************************************************
-
-//-*****************************************************************************
-BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
-                          const std::string &iName )
+CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
+                  const std::string &iName )
   : m_group( -1 )
   , m_subPropertyMutexes( NULL )
 {
     ABCA_ASSERT( iParentGroup >= 0, "invalid parent group" );
 
-    // Object ptr is left NULL.
-    // CprImpl will set it explicitly, and TopCprImpl leaves it NULL.
-
     // If our group exists, open it. If it does not, this is not a problem!
-    // It just means we don't have any subproperties. We essentially are just
-    // some floating metadata, at that point.
-    if ( !GroupExists( iParentGroup, iName ) )
+    // It just means we don't have any subproperties.
+    if ( iName != "" && !GroupExists( iParentGroup, iName ) )
     {
         // No group. It's okay!
         // Just return - it means we have no subprops!
@@ -137,38 +120,57 @@ BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
     }
 
     // Okay now open the group.
-    m_group = H5Gopen2( iParentGroup, iName.c_str(), H5P_DEFAULT );
+    if ( iName != "" )
+    {
+        m_group = H5Gopen2( iParentGroup, iName.c_str(), H5P_DEFAULT );
+    }
+    else
+    {
+        m_group = iParentGroup;
+    }
+
     ABCA_ASSERT( m_group >= 0,
                  "Could not open compound property group named: "
                  << iName << ", H5Gopen2 failed" );
 
     // Do the visiting to gather property names.
-    CprAttrVisitor visitor;
-    try
-    {
-        herr_t status = H5Aiterate2( m_group,
-                                     H5_INDEX_CRT_ORDER,
-                                     H5_ITER_INC,
-                                     NULL,
-                                     CprVisitAllAttrsCB,
-                                     ( void * )&visitor );
 
-        ABCA_ASSERT( status >= 0,
-                     "CprImpl::init(): H5Aiterate failed" );
-    }
-    catch ( std::exception & exc )
+    CprAttrVisitor visitor;
+
+    if ( H5Aexists( m_group, ".prop_names" ) )
     {
-        ABCA_THROW( "Could not attr iterate property group named: "
-                    << iName << ", reason: " << exc.what() );
+        ReadStrings( m_group, ".prop_names", visitor.properties );
     }
-    catch ( ... )
+    // for backwards compatibility (pre -7)
+    else if ( iArchiveVersion < -7 )
     {
-        ABCA_THROW( "Could not attr iterate property group named: "
-                    << iName << ", unknown reason" );
+        try
+        {
+            herr_t status = H5Aiterate2( m_group,
+                                         H5_INDEX_CRT_ORDER,
+                                         H5_ITER_INC,
+                                         NULL,
+                                         CprVisitAllAttrsCB,
+                                         ( void * )&visitor );
+
+            ABCA_ASSERT( status >= 0,
+                     "CprData::CprData(): H5Aiterate failed" );
+        }
+        catch ( std::exception & exc )
+        {
+            ABCA_THROW( "Could not attr iterate property group named: "
+                        << iName << ", reason: " << exc.what() );
+        }
+        catch ( ... )
+        {
+            ABCA_THROW( "Could not attr iterate property group named: "
+                        << iName << ", unknown reason" );
+        }
     }
 
     size_t index = 0;
-    m_propertyHeaders.resize(visitor.properties.size());
+    m_propertyHeaders.resize( visitor.properties.size() );
+    m_subPropertyMutexes = new boost::mutex[ visitor.properties.size() ];
 
     // For each property name, read the various pieces of information
     for ( std::vector<std::string>::iterator siter = visitor.properties.begin();
@@ -181,37 +183,36 @@ BaseCprImpl::BaseCprImpl( hid_t iParentGroup,
         m_propertyHeaders[index].lastChangedIndex = 0;
         m_propertyHeaders[index].isScalarLike = false;
     }
-    m_subPropertyMutexes = new boost::mutex [ visitor.properties.size() ];
 }
 
 //-*****************************************************************************
-// Destructor is at the end, so that this file has a logical ordering that
-// matches the order of operations (create, get children, destroy)
-//-*****************************************************************************
-
-//-*****************************************************************************
-AbcA::ObjectReaderPtr BaseCprImpl::getObject()
+CprData::~CprData()
 {
-    // m_object is assinged once, in CprImpl ctor, so multithread safe.
-    ABCA_ASSERT( m_object, "Invalid object in BaseCprImpl::getObject()" );
-    return m_object;
+    delete[] m_subPropertyMutexes;
+
+    if ( m_group >= 0 )
+    {
+        H5Gclose( m_group );
+        m_group = -1;
+    }
 }
 
 //-*****************************************************************************
-size_t BaseCprImpl::getNumProperties()
+size_t CprData::getNumProperties()
 {
     // fixed length and resize called in ctor, so multithread safe.
     return m_propertyHeaders.size();
 }
 
 //-*****************************************************************************
-const AbcA::PropertyHeader &BaseCprImpl::getPropertyHeader( size_t i )
+const AbcA::PropertyHeader &
+CprData::getPropertyHeader( AbcA::CompoundPropertyReaderPtr iParent, size_t i )
 {
     // fixed length and resize called in ctor, so multithread safe.
     if ( i > m_propertyHeaders.size() )
     {
         ABCA_THROW( "Out of range index in "
-                    << "CprImpl::getPropertyHeader: " << i );
+                    << "CprData::getPropertyHeader: " << i );
     }
     boost::mutex::scoped_lock l( m_subPropertyMutexes[i] );
 
@@ -230,7 +231,7 @@ const AbcA::PropertyHeader &BaseCprImpl::getPropertyHeader( size_t i )
         if ( iPtr->isSimple() )
         {
             AbcA::TimeSamplingPtr tsPtr =
-                getObject()->getArchive()->getTimeSampling( tsid );
+                iParent->getObject()->getArchive()->getTimeSampling( tsid );
 
             iPtr->setTimeSampling(tsPtr);
         }
@@ -246,7 +247,8 @@ const AbcA::PropertyHeader &BaseCprImpl::getPropertyHeader( size_t i )
 
 //-*****************************************************************************
 const AbcA::PropertyHeader *
-BaseCprImpl::getPropertyHeader( const std::string &iName )
+CprData::getPropertyHeader( AbcA::CompoundPropertyReaderPtr iParent,
+                            const std::string &iName )
 {
     // map of names to indexes filled by ctor (CprAttrVistor),
     // so multithread safe.
@@ -256,12 +258,13 @@ BaseCprImpl::getPropertyHeader( const std::string &iName )
         return NULL;
     }
 
-    return &(getPropertyHeader(fiter->second));
+    return &(getPropertyHeader(iParent, fiter->second));
 }
 
 //-*****************************************************************************
 AbcA::ScalarPropertyReaderPtr
-BaseCprImpl::getScalarProperty( const std::string &iName )
+CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
+                            const std::string &iName )
 {
     // map of names to indexes filled by ctor (CprAttrVistor),
     // so multithread safe.
@@ -272,7 +275,7 @@ BaseCprImpl::getScalarProperty( const std::string &iName )
     }
 
     // make sure we've read the header
-    getPropertyHeader(fiter->second);
+    getPropertyHeader( iParent, fiter->second );
     SubProperty & sub = m_propertyHeaders[fiter->second];
 
     if ( !(sub.header->isScalar()) )
@@ -286,7 +289,7 @@ BaseCprImpl::getScalarProperty( const std::string &iName )
     if ( ! bptr )
     {
         // Make a new one.
-        bptr.reset( new SprImpl( this->asCompoundPtr(), m_group, sub.header,
+        bptr.reset( new SprImpl( iParent, m_group, sub.header,
                                  sub.numSamples, sub.firstChangedIndex,
                                  sub.lastChangedIndex ) );
         sub.made = bptr;
@@ -300,7 +303,8 @@ BaseCprImpl::getScalarProperty( const std::string &iName )
 
 //-*****************************************************************************
 AbcA::ArrayPropertyReaderPtr
-BaseCprImpl::getArrayProperty( const std::string &iName )
+CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
+                           const std::string &iName )
 {
     // map of names to indexes filled by ctor (CprAttrVistor),
     // so multithread safe.
@@ -311,7 +315,7 @@ BaseCprImpl::getArrayProperty( const std::string &iName )
     }
 
     // make sure we've read the header
-    getPropertyHeader(fiter->second);
+    getPropertyHeader( iParent, fiter->second );
     SubProperty & sub = m_propertyHeaders[fiter->second];
 
     if ( !(sub.header->isArray()) )
@@ -325,7 +329,7 @@ BaseCprImpl::getArrayProperty( const std::string &iName )
     if ( ! bptr )
     {
         // Make a new one.
-        bptr.reset( new AprImpl( this->asCompoundPtr(), m_group, sub.header,
+        bptr.reset( new AprImpl( iParent, m_group, sub.header,
                                  sub.isScalarLike, sub.numSamples,
                                  sub.firstChangedIndex,
                                  sub.lastChangedIndex ) );
@@ -340,7 +344,8 @@ BaseCprImpl::getArrayProperty( const std::string &iName )
 
 //-*****************************************************************************
 AbcA::CompoundPropertyReaderPtr
-BaseCprImpl::getCompoundProperty( const std::string &iName )
+CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
+                              const std::string &iName )
 {
     // map of names to indexes filled by ctor (CprAttrVistor),
     // so multithread safe.
@@ -351,7 +356,7 @@ BaseCprImpl::getCompoundProperty( const std::string &iName )
     }
 
     // make sure we've read the header
-    getPropertyHeader( fiter->second );
+    getPropertyHeader( iParent, fiter->second );
     SubProperty & sub = m_propertyHeaders[fiter->second];
 
     if ( !(sub.header->isCompound()) )
@@ -365,7 +370,7 @@ BaseCprImpl::getCompoundProperty( const std::string &iName )
     if ( ! bptr )
     {
         // Make a new one.
-        bptr.reset( new CprImpl( this->asCompoundPtr(), m_group, sub.header ) );
+        bptr.reset( new CprImpl( iParent, m_group, sub.header ) );
         sub.made = bptr;
     }
 
@@ -373,17 +378,6 @@ BaseCprImpl::getCompoundProperty( const std::string &iName )
         boost::dynamic_pointer_cast<AbcA::CompoundPropertyReader,
         AbcA::BasePropertyReader>( bptr );
     return ret;
-}
-
-//-*****************************************************************************
-BaseCprImpl::~BaseCprImpl()
-{
-    delete[] m_subPropertyMutexes;
-    if ( m_group >= 0 )
-    {
-        H5Gclose( m_group );
-        m_group = -1;
-    }
 }
 
 } // End namespace ALEMBIC_VERSION_NS

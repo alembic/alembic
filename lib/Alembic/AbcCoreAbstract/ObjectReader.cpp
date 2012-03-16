@@ -46,13 +46,6 @@ ObjectReader::~ObjectReader()
     // Nothing
 }
 
-//-*****************************************************************************
-ObjectReaderPtr ObjectReader::getChild( size_t i )
-{
-    const ObjectHeader &header = getChildHeader( i );
-    return getChild( header.getName() );
-}
-
 } // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
