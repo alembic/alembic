@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreHDF5_OrImpl_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/BaseOrImpl.h>
+#include <Alembic/AbcCoreHDF5/OrData.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -46,25 +46,56 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class OrImpl
-    : public BaseOrImpl
+    : public AbcA::ObjectReader
     , public boost::enable_shared_from_this<OrImpl>
 {
-protected:
-    friend class BaseOrImpl;
-
-    OrImpl( AbcA::ObjectReaderPtr iParent,
-            ProtoObjectReaderPtr iProto );
 
 public:
+
+    OrImpl( AbcA::ArchiveReaderPtr iArchive,
+            OrDataPtr iData,
+            ObjectHeaderPtr iHeader );
+
+    OrImpl( AbcA::ObjectReaderPtr iParent,
+            hid_t iParentGroup,
+            ObjectHeaderPtr iHeader );
+
     virtual ~OrImpl();
 
+    //-*************************************************************************
+    // ABSTRACT
+    //-*************************************************************************
+    virtual const AbcA::ObjectHeader & getHeader() const;
+
+    virtual AbcA::ArchiveReaderPtr getArchive();
+
     virtual AbcA::ObjectReaderPtr getParent();
+
+    virtual AbcA::CompoundPropertyReaderPtr getProperties();
+
+    virtual size_t getNumChildren();
+
+    virtual const AbcA::ObjectHeader & getChildHeader( size_t i );
+
+    virtual const AbcA::ObjectHeader * getChildHeader
+    ( const std::string &iName );
+
+    virtual AbcA::ObjectReaderPtr getChild( const std::string &iName );
+
+    virtual AbcA::ObjectReaderPtr getChild( size_t i );
 
     virtual AbcA::ObjectReaderPtr asObjectPtr();
 
 private:
     // The parent object
     AbcA::ObjectReaderPtr m_parent;
+
+    AbcA::ArchiveReaderPtr m_archive;
+
+    OrDataPtr m_data;
+
+    ObjectHeaderPtr m_header;
+
 };
 
 } // End namespace ALEMBIC_VERSION_NS

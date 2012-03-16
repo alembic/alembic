@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreHDF5_CprImpl_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/BaseCprImpl.h>
+#include <Alembic/AbcCoreHDF5/CprData.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -46,36 +46,65 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class CprImpl
-    : public BaseCprImpl
+    : public AbcA::CompoundPropertyReader
     , public boost::enable_shared_from_this<CprImpl>
-
 {
-protected:
-    friend class BaseCprImpl;
-    
+public:
+
     // For construction from a compound property reader
     CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
              hid_t iParentGroup,
              PropertyHeaderPtr iHeader );
 
-public:
+    CprImpl( AbcA::ObjectReaderPtr iParent,
+             CprDataPtr iData,
+             hid_t iParentGroup );
+
     virtual ~CprImpl();
 
     //-*************************************************************************
-    // FROM ABSTRACT
+    // FROM ABSTRACT BasePropertyReader
     //-*************************************************************************
     virtual const AbcA::PropertyHeader & getHeader() const;
+
+    virtual AbcA::ObjectReaderPtr getObject();
 
     virtual AbcA::CompoundPropertyReaderPtr getParent();
 
     virtual AbcA::CompoundPropertyReaderPtr asCompoundPtr();
 
-protected:
+    //-*************************************************************************
+    // FROM ABSTRACT CompoundPropertyReader
+    //-*************************************************************************
+    virtual size_t getNumProperties();
+
+    virtual const AbcA::PropertyHeader & getPropertyHeader( size_t i );
+
+    virtual const AbcA::PropertyHeader *
+    getPropertyHeader( const std::string &iName );
+
+    virtual AbcA::ScalarPropertyReaderPtr
+    getScalarProperty( const std::string &iName );
+
+    virtual AbcA::ArrayPropertyReaderPtr
+    getArrayProperty( const std::string &iName );
+
+    virtual AbcA::CompoundPropertyReaderPtr
+    getCompoundProperty( const std::string &iName );
+
+
+private:
+
     // Pointer to parent.
     AbcA::CompoundPropertyReaderPtr m_parent;
 
     // My header
     PropertyHeaderPtr m_header;
+
+    // My Object
+    AbcA::ObjectReaderPtr m_object;
+
+    CprDataPtr m_data;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

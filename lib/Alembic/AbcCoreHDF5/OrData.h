@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2012,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,47 +34,70 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_TopOrImpl_h_
-#define _Alembic_AbcCoreHDF5_TopOrImpl_h_
+#ifndef _Alembic_AbcCoreHDF5_OrData_h_
+#define _Alembic_AbcCoreHDF5_OrData_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/BaseOrImpl.h>
+#include <boost/thread/mutex.hpp>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
-//-*****************************************************************************
-class ArImpl;
+class CprData;
 
-//-*****************************************************************************
-class TopOrImpl : public BaseOrImpl
+// data class owned by OrImpl, or ArImpl if it is a "top" object.
+// it owns and makes child objects as well as the group hid_t
+// when necessary
+class OrData : public boost::enable_shared_from_this<OrData>
 {
-protected:
-    friend class ArImpl;
-    
-    TopOrImpl( ArImpl &iArchive,
-               hid_t iRootGroup );
-    
 public:
-    virtual ~TopOrImpl();
+    OrData( ObjectHeaderPtr iHeader,
+            hid_t iParentGroup,
+            int32_t iArchiveVersion );
 
-    //-*************************************************************************
-    // FROM ABSTRACT
-    //-*************************************************************************
+    AbcA::CompoundPropertyReaderPtr
+    getProperties( AbcA::ObjectReaderPtr iParent );
 
-    // Overridden from base - to avoid circular references,
-    // this is implemented differently in the Top
-    virtual AbcA::ArchiveReaderPtr getArchive();
+    size_t getNumChildren();
 
-    virtual AbcA::ObjectReaderPtr getParent();
+    const AbcA::ObjectHeader &
+    getChildHeader( AbcA::ObjectReaderPtr iParent, size_t i );
 
-    virtual AbcA::ObjectReaderPtr asObjectPtr();
+    const AbcA::ObjectHeader *
+    getChildHeader( AbcA::ObjectReaderPtr, const std::string &iName );
 
-private:   
-    // The archive
-    ArImpl &m_archiveRef;
+    AbcA::ObjectReaderPtr
+    getChild( AbcA::ObjectReaderPtr iParent, const std::string &iName );
+
+    AbcA::ObjectReaderPtr
+    getChild( AbcA::ObjectReaderPtr iParent, size_t i );
+
+private:
+
+    struct Child
+    {
+        bool loadedMetaData;
+        ObjectHeaderPtr header;
+        WeakOrPtr made;
+    };
+
+    typedef std::map<std::string, size_t> ChildrenMap;
+    typedef std::vector<Child> ChildrenVec;
+
+    hid_t m_group;
+    boost::mutex m_childObjectsMutex;
+
+    // The children
+    ChildrenVec m_children;
+    ChildrenMap m_childrenMap;
+
+    // Our "top" property.
+    boost::weak_ptr< AbcA::CompoundPropertyReader > m_top;
+    boost::shared_ptr < CprData > m_data;
 };
+
+typedef boost::shared_ptr<OrData> OrDataPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

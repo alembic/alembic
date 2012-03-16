@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
 // Copyright (c) 2009-2012,
-//  Sony Pictures Imageworks, Inc. and
+//  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -34,50 +34,79 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_ProtoObjectReader_h_
-#define _Alembic_AbcCoreHDF5_ProtoObjectReader_h_
+#ifndef _Alembic_AbcCoreHDF5_CprData_h_
+#define _Alembic_AbcCoreHDF5_CprData_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreAbstract/ObjectHeader.h>
 #include <boost/thread/mutex.hpp>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
-//-*****************************************************************************
-class ProtoObjectReader : private boost::noncopyable
+// data class owned by CprImpl, or OrImpl if it is a "top" object
+// it owns and makes child properties as well as the group hid_t
+// when necessary
+class CprData : public boost::enable_shared_from_this<CprData>
 {
 public:
-    ProtoObjectReader( hid_t iParentProperty,
-                       const std::string &iParentFullPathName,
+
+    CprData( hid_t iParentGroup, int32_t iArchiveVersion,
+             const std::string &iName );
+
+    ~CprData();
+
+    size_t getNumProperties();
+
+    const AbcA::PropertyHeader &
+    getPropertyHeader( AbcA::CompoundPropertyReaderPtr iParent, size_t i );
+
+    const AbcA::PropertyHeader *
+    getPropertyHeader( AbcA::CompoundPropertyReaderPtr iParent,
                        const std::string &iName );
-    ~ProtoObjectReader();
 
-    hid_t getGroup();
-    const Alembic::AbcCoreAbstract::ObjectHeader &getHeader();
+    AbcA::ScalarPropertyReaderPtr
+    getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
+                       const std::string &iName );
 
-protected:
-    void _buildHeader ();
+    AbcA::ArrayPropertyReaderPtr
+    getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
+                      const std::string &iName );
 
-    boost::mutex  m_groupOpenMutex;
+    AbcA::CompoundPropertyReaderPtr
+    getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
+                         const std::string &iName );
+
+private:
+    // My group.
     hid_t m_group;
-    hid_t m_parent;
-    AbcA::ObjectHeader m_header;
+
+    // Property Headers and Made Property Pointers.
+    struct SubProperty
+    {
+        PropertyHeaderPtr header;
+
+        // extra data that doesn't quite fit into the property header
+        // but is stuff we only want to read once
+        uint32_t numSamples;
+        uint32_t firstChangedIndex;
+        uint32_t lastChangedIndex;
+        bool isScalarLike;
+
+        WeakBprPtr made;
+        std::string name;
+    };
+
+    typedef std::map<std::string, size_t> SubPropertiesMap;
+    typedef std::vector<SubProperty> SubPropertyVec;
+
+    // Allocated mutexes, one per SubProperty
+    boost::mutex * m_subPropertyMutexes;
+    SubPropertyVec m_propertyHeaders;
+    SubPropertiesMap m_subProperties;
 };
 
-//-*****************************************************************************
-typedef boost::shared_ptr<ProtoObjectReader> ProtoObjectReaderPtr;
-
-inline ProtoObjectReaderPtr
-MakeProtoObjectReaderPtr( hid_t iParentProperty,
-                          const std::string &iParentFullPathName,
-                          const std::string &iName )
-{
-    return boost::make_shared<ProtoObjectReader>( iParentProperty,
-                                                  iParentFullPathName,
-                                                  iName );
-}
+typedef boost::shared_ptr<CprData> CprDataPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

@@ -144,11 +144,11 @@ public:
     //! the various named "get" functions here.
     virtual ObjectReaderPtr getChild( const std::string &iName ) = 0;
 
-    //! Get a base property by index.
+    //! Get a child object by index.
     //! It is an error to call with out-of-range indices.
     //! This is a convenience function that uses getChildHeader and
     //! the various named "get" functions here.
-    ObjectReaderPtr getChild( size_t i );
+    virtual ObjectReaderPtr getChild( size_t i ) = 0;
 
     //-*************************************************************************
     // YUP

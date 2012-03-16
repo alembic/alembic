@@ -90,8 +90,7 @@ private:
 
     boost::weak_ptr< AbcA::CompoundPropertyWriter > m_top;
 
-    // The properties that belong to our "top" property
-    // We own these.
+    // Our "top" property
     boost::shared_ptr < CpwData > m_data;
 };
 

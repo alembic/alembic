@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -44,7 +44,7 @@ namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class TopOrImpl;
+class OrData;
 
 //-*****************************************************************************
 class ArImpl
@@ -99,7 +99,9 @@ private:
     std::string m_fileName;
     hid_t m_file;
 
-    TopOrImpl *m_top;
+    boost::weak_ptr< AbcA::ObjectReader > m_top;
+    boost::shared_ptr < OrData > m_data;
+    ObjectHeaderPtr m_header;
 
     int32_t m_archiveVersion;
 
