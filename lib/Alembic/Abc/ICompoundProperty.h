@@ -63,14 +63,14 @@ public:
     //! ...
     ICompoundProperty() : IBasePropertyT<AbcA::CompoundPropertyReaderPtr>() {}
 
-    //! This templated, explicit function creates a new scalar property reader.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
+    //! This templated, explicit function creates a new compound property
+    //! reader. The first argument is any Abc (or AbcCoreAbstract) object
     //! which can intrusively be converted to an CompoundPropertyReaderPtr
     //! to use as a parent, from which the error handler policy for
     //! inheritance is also derived.  The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy
-    template <class OBJECT_PTR>
-    ICompoundProperty( OBJECT_PTR iParentObject,
+    template <class CPROP_PTR>
+    ICompoundProperty( CPROP_PTR iParentProp,
                        const std::string &iName,
                        const Argument &iArg0 = Argument() );
 
