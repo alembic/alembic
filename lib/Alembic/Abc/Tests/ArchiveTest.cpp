@@ -82,8 +82,46 @@ void archiveInfoTest()
     }
 }
 
+void scopingTest()
+{
+    {
+        OObject top;
+        {
+            OArchive archive = CreateArchiveWithInfo(
+                Alembic::AbcCoreHDF5::WriteArchive(), "archiveScopeTest.abc",
+                "Alembic test", "", MetaData() );
+            top = archive.getTop();
+        }
+        OObject childA( top, "a");
+        OObject childB( top, "b");
+        ODoubleProperty prop(top.getProperties(), "prop", 0);
+        TESTING_ASSERT(prop.getObject().getArchive().getName() == 
+            "archiveScopeTest.abc");
+    }
+
+    {
+        IObject top;
+        {
+            IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                "archiveScopeTest.abc" );
+            top = archive.getTop();
+        }
+        TESTING_ASSERT(top.getNumChildren() == 2 );
+        TESTING_ASSERT(top.getChildHeader("a") != NULL);
+        TESTING_ASSERT(top.getChildHeader("b") != NULL);
+        TESTING_ASSERT( ! top.getParent().valid() );
+        TESTING_ASSERT( top.getArchive().getName() ==
+            "archiveScopeTest.abc");
+        IScalarProperty prop(top.getProperties(), "prop");
+        TESTING_ASSERT(prop.valid());
+        TESTING_ASSERT(prop.getObject().getArchive().getName() == 
+            "archiveScopeTest.abc");
+    }
+}
+
 int main( int argc, char *argv[] )
 {
     archiveInfoTest();
+    scopingTest();
     return 0;
 }
