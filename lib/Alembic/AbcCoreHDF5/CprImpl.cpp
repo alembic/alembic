@@ -55,7 +55,7 @@ CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
 {
     ABCA_ASSERT( m_parent, "Invalid parent in CprImpl(Compound)" );
     ABCA_ASSERT( m_header, "invalid header in CprImpl(Compound)" );
-    
+
     AbcA::PropertyType pType = m_header->getPropertyType();
     if ( pType != AbcA::kCompoundProperty )
     {
@@ -83,7 +83,7 @@ CprImpl::CprImpl( AbcA::ObjectReaderPtr iObject,
     ABCA_ASSERT( m_object, "Invalid object in CprImpl(Object)" );
     ABCA_ASSERT( m_data, "Invalid data in CprImpl(Object)" );
 
-     m_header.reset( new AbcA::PropertyHeader( "",  m_object->getMetaData() ) );
+    m_header.reset( new AbcA::PropertyHeader( "",  m_object->getMetaData() ) );
 }
 
 //-*****************************************************************************

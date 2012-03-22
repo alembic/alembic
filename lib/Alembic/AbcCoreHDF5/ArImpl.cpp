@@ -65,8 +65,8 @@ ArImpl::ArImpl( const std::string &iFileName,
     {
         H5LTget_attribute_int(m_file, ".", "abc_version", &version);
     }
-    ABCA_ASSERT(version == ALEMBIC_HDF5_FILE_VERSION,
-        "Unsupported file version detected.");
+    ABCA_ASSERT(version >= -8 && version <= ALEMBIC_HDF5_FILE_VERSION,
+        "Unsupported file version detected: " << version);
 
     // if it isn't there, it's pre 1.0
     int fileVersion = 9999;
@@ -83,18 +83,28 @@ ArImpl::ArImpl( const std::string &iFileName,
     ABCA_ASSERT( group >= 0, "Could not open top object in: "
                              << iFileName );
 
+    // old style meta data for the archive is under .prop.meta
+    if ( m_archiveVersion < 10100 )
+    {
+        AbcA::MetaData metaData;
+        ReadMetaData( group, ".prop.meta", metaData );
+        m_header.reset( new AbcA::ObjectHeader( "ABC", "/", metaData ) );
+    }
     // Read the property info and meta data.
     // Meta data and property info is shared with the underlying
     // property
-    bool dummyBool = false;
-    uint32_t dummyVal;
-    AbcA::PropertyHeader propHeader;
-    ReadPropertyHeader( group, "", propHeader, dummyBool,
-                        dummyVal, dummyVal, dummyVal, dummyVal );
+    else
+    {
+        bool dummyBool = false;
+        uint32_t dummyVal;
+        AbcA::PropertyHeader propHeader;
+        ReadPropertyHeader( group, "", propHeader, dummyBool,
+                            dummyVal, dummyVal, dummyVal, dummyVal );
 
-    m_header.reset( new AbcA::ObjectHeader( "ABC",
-                                            "/",
-                                            propHeader.getMetaData() ) );
+        m_header.reset( new AbcA::ObjectHeader( "ABC",
+                                                "/",
+                                                propHeader.getMetaData() ) );
+    }
 
     m_data.reset( new OrData( m_header, m_file, m_archiveVersion ) );
     H5Gclose( group );
