@@ -56,6 +56,8 @@ public:
             hid_t iParentGroup,
             int32_t iArchiveVersion );
 
+    ~OrData();
+
     AbcA::CompoundPropertyReaderPtr
     getProperties( AbcA::ObjectReaderPtr iParent );
 
@@ -86,6 +88,8 @@ private:
     typedef std::vector<Child> ChildrenVec;
 
     hid_t m_group;
+    hid_t m_oldGroup;
+
     boost::mutex m_childObjectsMutex;
 
     // The children

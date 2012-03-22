@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -208,7 +208,21 @@ void ISchema<INFO>::init( CPROP_PTR iParent,
                  << parent->getHeader().getMetaData().get( "schema" )
                  << " to expected: "
                  << INFO::title() );
-        m_property = parent;
+
+        // older way to identify where the compound that makes this schema
+        std::string schemaObjTitle =
+            parent->getMetaData().get( "schemaObjTitle" );
+
+        std::size_t nameStart = schemaObjTitle.find( ':' );
+        if ( nameStart != std::string::npos )
+        {
+            std::string name = schemaObjTitle.substr( nameStart + 1 );
+            m_property = parent->getCompoundProperty( name );
+        }
+        else
+        {
+            m_property = parent;
+        }
     }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

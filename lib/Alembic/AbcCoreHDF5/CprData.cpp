@@ -126,7 +126,14 @@ CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
     }
     else
     {
-        m_group = iParentGroup;
+        if ( iArchiveVersion < 10100 )
+        {
+            m_group = H5Gopen2( iParentGroup, ".prop", H5P_DEFAULT );
+        }
+        else
+        {
+            m_group = iParentGroup;
+        }
     }
 
     ABCA_ASSERT( m_group >= 0,
@@ -141,8 +148,8 @@ CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
     {
         ReadStrings( m_group, ".prop_names", visitor.properties );
     }
-    // for backwards compatibility (pre -7)
-    else if ( iArchiveVersion < -7 )
+    // for backwards compatibility (pre 1.1)
+    else if ( iArchiveVersion < 10100 )
     {
         try
         {

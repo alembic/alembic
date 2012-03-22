@@ -53,7 +53,7 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
 {
     std::vector<std::string> *visitor = ( std::vector<std::string> * )iOpData;
 
-    // ".prop" is special
+    // in the old days ".prop" was the special top compound
     std::string name = iName;
     if ( name != ".prop" )
     {
@@ -70,6 +70,7 @@ OrData::OrData( ObjectHeaderPtr iHeader,
                 hid_t iParentGroup,
                 int32_t iArchiveVersion )
     : m_group( -1 )
+    , m_oldGroup( -1 )
 {
     ABCA_ASSERT( iHeader, "Invalid header" );
     ABCA_ASSERT( iParentGroup > -1, "Invalid group" );
@@ -81,8 +82,8 @@ OrData::OrData( ObjectHeaderPtr iHeader,
 
     std::vector<std::string> objNames;
 
-    // the old way
-    if ( iArchiveVersion < -7 )
+    // the old way (prior to 1.1)
+    if ( iArchiveVersion < 10100 )
     {
         herr_t status = H5Literate( m_group,
                                     H5_INDEX_CRT_ORDER,
@@ -111,8 +112,24 @@ OrData::OrData( ObjectHeaderPtr iHeader,
         m_children[i].loadedMetaData = false;
     }
 
+    // the older style ends up opening .prop for the top compound
+    // so we need to make sure the group representing the object gets closed
+    if ( iArchiveVersion < 10100 )
+    {
+        m_oldGroup = m_group;
+    }
 
     m_data.reset( new CprData( m_group, iArchiveVersion, "" ) );
+}
+
+//-*****************************************************************************
+OrData::~OrData()
+{
+    if ( m_oldGroup > -1 )
+    {
+        H5Gclose( m_oldGroup );
+        m_oldGroup = -1;
+    }
 }
 
 //-*****************************************************************************
@@ -153,16 +170,25 @@ OrData::getChildHeader( AbcA::ObjectReaderPtr iParent, size_t i )
         "Could not open object group: "
         << m_children[i].header->getFullName() );
 
-        // Read the property info and meta data.
-        // Meta data and property info is shared with the underlying
-        // property
-        bool dummyBool = false;
-        uint32_t dummyVal;
-        AbcA::PropertyHeader propHeader;
-        ReadPropertyHeader( group, "", propHeader, dummyBool,
-                            dummyVal, dummyVal, dummyVal, dummyVal );
-        m_children[i].header->getMetaData() = propHeader.getMetaData();
-        m_children[i].loadedMetaData = true;
+        // old style meta data for the object is under .prop.meta
+        if ( iParent->getArchive()->getArchiveVersion() < 10100 )
+        {
+            ReadMetaData( group, ".prop.meta",
+                m_children[i].header->getMetaData() );
+        }
+        else
+        {
+            // Read the property info and meta data.
+            // Meta data and property info is shared with the underlying
+            // property
+            bool dummyBool = false;
+            uint32_t dummyVal;
+            AbcA::PropertyHeader propHeader;
+            ReadPropertyHeader( group, "", propHeader, dummyBool,
+                                dummyVal, dummyVal, dummyVal, dummyVal );
+            m_children[i].header->getMetaData() = propHeader.getMetaData();
+            m_children[i].loadedMetaData = true;
+        }
         H5Gclose( group );
     }
 
