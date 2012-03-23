@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -42,8 +42,7 @@ using namespace Alembic::Abc;
 // A bunch of minimal compile tests to make sure the templates compile
 
 // Declare a test schema.
-ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "TestSchema_v1", "", ".test",
-                                   TestSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "TestSchema_v1", TestSchemaInfo );
 
 typedef OSchema<TestSchemaInfo> OTestSchema;
 

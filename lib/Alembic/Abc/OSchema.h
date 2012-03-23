@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -75,18 +75,15 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 //! Here is a macro for declaring SCHEMA_INFO
 //! It takes three arguments
-//! - the SchemaTitle( a string ),
-//! - the SchemaBaseType( a string ),
+//! - the SchemaTitle( a string ),,
 //! - the name of the SchemaTrait Type to be declared.
 //! - for example:
 //! ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
-//!                                  ".geom",
 //!                                  PolyMeshSchemaInfo );
-#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, SBTYP, SDFLT, STDEF )  \
-struct STDEF                                                            \
-{                                                                       \
-    static const char * title() { return ( STITLE ) ; }                 \
-    static const char * schemaBaseType() { return ( SBTYP ); }          \
+#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, STDEF ) \
+struct STDEF                                             \
+{                                                        \
+    static const char * title() { return ( STITLE ) ; }  \
 }
 
 //-*****************************************************************************
