@@ -126,9 +126,15 @@ CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
     }
     else
     {
-        if ( iArchiveVersion < 10100 )
+        if ( iArchiveVersion < 10100 && GroupExists( iParentGroup, ".prop" ) )
         {
             m_group = H5Gopen2( iParentGroup, ".prop", H5P_DEFAULT );
+        }
+        else if ( iArchiveVersion < 10100 )
+        {
+            // we've got no subproperties
+            m_group = -1;
+            return;
         }
         else
         {
