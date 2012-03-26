@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -114,7 +114,7 @@ inline void SetGeometryScope( AbcA::MetaData &ioMetaData, GeometryScope iScope )
 {
     switch ( iScope )
     {
-    case kConstantScope: ioMetaData.set( "geoScope", "con" ); return;
+    case kConstantScope: ioMetaData.set( "geoScope", "" ); return;
     case kUniformScope: ioMetaData.set( "geoScope", "uni" ); return;
     case kVaryingScope: ioMetaData.set( "geoScope", "var" ); return;
     case kVertexScope: ioMetaData.set( "geoScope", "vtx" ); return;
@@ -128,7 +128,7 @@ inline void SetGeometryScope( AbcA::MetaData &ioMetaData, GeometryScope iScope )
 inline GeometryScope GetGeometryScope( const AbcA::MetaData &iMetaData )
 {
     const std::string val = iMetaData.get( "geoScope" );
-    if ( val == "con" ) { return kConstantScope; }
+    if ( val == "con" || val == "" ) { return kConstantScope; }
     else if ( val == "uni" ) { return kUniformScope; }
     else if ( val == "var" ) { return kVaryingScope; }
     else if ( val == "vtx" ) { return kVertexScope; }

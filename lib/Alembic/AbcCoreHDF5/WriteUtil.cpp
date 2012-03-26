@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -519,26 +519,26 @@ void WritePropertyInfo( hid_t iGroup,
         if ( geoScopeStr == "con" )
         {
             geoScopeVal = 0;
+            md.set( "geoScope", "" );
         }
         else if ( geoScopeStr == "uni" )
         {
             geoScopeVal = 1;
+            md.set( "geoScope", "" );
         }
         else if ( geoScopeStr == "var" )
         {
             geoScopeVal = 2;
+            md.set( "geoScope", "" );
         }
         else if ( geoScopeStr == "vtx" )
         {
             geoScopeVal = 3;
+            md.set( "geoScope", "" );
         }
         else if ( geoScopeStr == "fvr" )
         {
             geoScopeVal = 4;
-        }
-
-        if ( geoScopeVal < 5 )
-        {
             md.set( "geoScope", "" );
         }
     }
