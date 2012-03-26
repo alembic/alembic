@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -68,6 +68,7 @@ void testReadWriteEmptyArchive()
         m.set("Bleep", "bloop");
         m.set("eep", "");
         m.set("potato", "salad");
+        m.set("geoScope", "tasty");
 
         ABC::ArchiveWriterPtr a = w(archiveName, m);
         ABC::ObjectWriterPtr archive = a->getTop();
@@ -104,6 +105,7 @@ void testReadWriteEmptyArchive()
         TESTING_ASSERT(m.get("Bleep") == "bloop");
         TESTING_ASSERT(m.get("eep") == "");
         TESTING_ASSERT(m.get("potato") == "salad");
+        TESTING_ASSERT(m.get("geoScope") == "tasty");
         TESTING_ASSERT(archive->getName() == "ABC");
         TESTING_ASSERT(archive->getFullName() == "/");
         TESTING_ASSERT(archive->getParent() == NULL);
