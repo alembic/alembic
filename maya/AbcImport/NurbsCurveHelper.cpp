@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -221,6 +221,7 @@ MObject createCurves(const std::string & iName,
                 MFnNumericData::kFloat, (*widths)[0]);
             fnTrans.addAttribute(attrObj,
                 MFnDependencyNode::kLocalDynamicAttr);
+            fnTrans.findPlug("width").setValue((*widths)[0]);
         }
     }
 
@@ -303,6 +304,7 @@ MObject createCurves(const std::string & iName,
                 "width", MFnNumericData::kFloat, (*widths)[0]);
             curve.addAttribute(attrObj,
                 MFnDependencyNode::kLocalDynamicAttr);
+            curve.findPlug("width").setValue((*widths)[0]);
         }
         // per vertex width
         else if (widths && widths->size() >= curVert && numVerts > 0 &&
