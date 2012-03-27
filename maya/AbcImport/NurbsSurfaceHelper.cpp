@@ -393,6 +393,15 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
         degreeU, degreeV, formU, formV,
         true, iObject, &status);
 
+    // something went wrong, try open/open create
+    if (status != MS::kSuccess && (formU != MFnNurbsSurface::kOpen ||
+        formV != MFnNurbsSurface::kOpen))
+    {
+        obj = mFn.create(controlVertices, uKnotSequences, vKnotSequences,
+            degreeU, degreeV,  MFnNurbsSurface::kOpen,  MFnNurbsSurface::kOpen,
+            true, iObject, &status);
+    }
+
     if (status == MS::kSuccess)
     {
         mFn.setName(surfaceName);
