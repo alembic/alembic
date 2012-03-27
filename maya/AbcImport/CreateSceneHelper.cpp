@@ -985,6 +985,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
                     iNode.getName());
                 if (hasDag)
                 {
+                    xformObj = mConnectDagNode.node();
                     if (!isConstant)
                     {
                         mData.mLocObjList.push_back(xformObj);
