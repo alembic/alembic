@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -35,7 +35,8 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreHDF5/AwImpl.h>
-#include <Alembic/AbcCoreHDF5/TopOwImpl.h>
+#include <Alembic/AbcCoreHDF5/OwData.h>
+#include <Alembic/AbcCoreHDF5/OwImpl.h>
 #include <Alembic/AbcCoreHDF5/WriteUtil.h>
 #include <Alembic/AbcCoreHDF5/HDF5Util.h>
 
@@ -89,8 +90,7 @@ AwImpl::AwImpl( const std::string &iFileName,
 
     m_metaData.set("_ai_AlembicVersion", AbcA::GetLibraryVersion());
 
-    // Create top explicitly.
-    m_top = new TopOwImpl( *this, m_file, m_metaData );
+    m_data.reset( new OwData( m_file, "ABC", m_metaData ) );
 }
 
 //-*****************************************************************************
@@ -114,10 +114,14 @@ AbcA::ArchiveWriterPtr AwImpl::asArchivePtr()
 //-*****************************************************************************
 AbcA::ObjectWriterPtr AwImpl::getTop()
 {
-    assert( m_top );
+    AbcA::ObjectWriterPtr ret = m_top.lock();
+    if ( ! ret )
+    {
+        // time to make a new one
+        ret.reset( new OwImpl( asArchivePtr(), m_data, m_metaData ) );
+        m_top = ret;
+    }
 
-    AbcA::ObjectWriterPtr ret( m_top,
-                               Alembic::Util::NullDeleter() );
     return ret;
 }
 
@@ -157,11 +161,11 @@ AbcA::TimeSamplingPtr AwImpl::getTimeSampling( uint32_t iIndex )
 //-*****************************************************************************
 AwImpl::~AwImpl()
 {
-    delete m_top;
-    m_top = NULL;
-
     // empty out the map so any dataset IDs will be freed up
     m_writtenArraySampleMap.m_map.clear();
+
+    // let go of our reference to the data for the top object
+    m_data.reset();
 
     if ( m_file >= 0 )
     {

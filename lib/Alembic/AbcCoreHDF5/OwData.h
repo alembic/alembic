@@ -1,7 +1,7 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
-//  Sony Pictures Imageworks Inc. and
+// Copyright (c) 2009-2012,
+//  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
 // All rights reserved.
@@ -16,7 +16,7 @@
 // in the documentation and/or other materials provided with the
 // distribution.
 // *       Neither the name of Sony Pictures Imageworks, nor
-// Industrial Light & Magic, nor the names of their contributors may be used
+// Industrial Light & Magic nor the names of their contributors may be used
 // to endorse or promote products derived from this software without specific
 // prior written permission.
 //
@@ -34,61 +34,67 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_TopOwImpl_h_
-#define _Alembic_AbcCoreHDF5_TopOwImpl_h_
+#ifndef _Alembic_AbcCoreHDF5_OwData_h_
+#define _Alembic_AbcCoreHDF5_OwData_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/BaseOwImpl.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class AwImpl;
+// Forwards
+class CpwData;
 
-//-*****************************************************************************
-// The TopOwImpl is never going to be made as a shared ptr, because it
-// is always owned explicitly by the ArchiveWriter that made it.
-class TopOwImpl : public BaseOwImpl
+// data class owned by OwImpl, or AImpl if it is a "top" object.
+// it owns and makes child properties
+class OwData : public boost::enable_shared_from_this<OwData>
 {
-protected:
-    friend class AwImpl;
-    
-    TopOwImpl( AwImpl &iArchive,
-               hid_t iParentGroup,
-               const AbcA::MetaData &iMetaData );
-    
 public:
-    virtual ~TopOwImpl();
+    OwData( hid_t iParentGroup,
+            const std::string &iName,
+            const AbcA::MetaData &iMetaData );
 
-    //-*************************************************************************
-    // FROM ABSTRACT
-    //-*************************************************************************
-    
-    virtual const AbcA::ObjectHeader & getHeader() const;
+    ~OwData();
 
-    // This overrides the base behavior, as we do not set the base's
-    // archive writer ptr directly
-    virtual AbcA::ArchiveWriterPtr getArchive();
+    AbcA::CompoundPropertyWriterPtr getProperties(
+        AbcA::ObjectWriterPtr iParent );
 
-    virtual AbcA::ObjectWriterPtr getParent();
+    size_t getNumChildren();
 
-    //-*************************************************************************
-    // SELF
-    //-*************************************************************************
-    virtual AbcA::ObjectWriterPtr asObjectPtr();
+    const AbcA::ObjectHeader & getChildHeader( size_t i );
 
-private:    
-    // The archive.
-    // If I exist, the archive exists.
-    AwImpl &m_archiveRef;
+    const AbcA::ObjectHeader *
+    getChildHeader( const std::string &iName );
 
-    // I have no parent object.
+    AbcA::ObjectWriterPtr getChild( const std::string &iName );
 
-    // The header which defines this property.
-    AbcA::ObjectHeader m_header;
+    AbcA::ObjectWriterPtr createChild( AbcA::ObjectWriterPtr iParent,
+                                       const std::string & iFullName,
+                                       const AbcA::ObjectHeader &iHeader );
+
+    hid_t getGroup();
+
+private:
+
+    // The group corresponding to the object
+    hid_t m_group;
+
+    typedef std::vector<ObjectHeaderPtr> ChildHeaders;
+    typedef std::map<std::string,WeakOwPtr> MadeChildren;
+
+    // The children
+    ChildHeaders m_childHeaders;
+    MadeChildren m_madeChildren;
+
+    boost::weak_ptr< AbcA::CompoundPropertyWriter > m_top;
+
+    // Our "top" property
+    boost::shared_ptr < CpwData > m_data;
 };
+
+typedef boost::shared_ptr<OwData> OwDataPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

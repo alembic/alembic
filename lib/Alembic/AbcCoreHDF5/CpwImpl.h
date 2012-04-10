@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreHDF5_CpwImpl_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/BaseCpwImpl.h>
+#include <Alembic/AbcCoreHDF5/CpwData.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -46,37 +46,79 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class CpwImpl
-    : public BaseCpwImpl
+    : public AbcA::CompoundPropertyWriter
     , public boost::enable_shared_from_this<CpwImpl>
 {
 public:
-    friend class BaseCpwImpl;
 
-    // Built from a compound property writer
+    // "top" compound creation called by the object
+    CpwImpl( AbcA::ObjectWriterPtr iParent,
+             CpwDataPtr iData,
+             const AbcA::MetaData & iMeta );
+
+    // child compound creation
     CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
              hid_t iParentGroup,
              const std::string & iName,
              const AbcA::MetaData & iMeta );
 
-public:
     virtual ~CpwImpl();
 
     //-*************************************************************************
-    // FROM ABSTRACT
+    // FROM BasePropertyWriter ABSTRACT
     //-*************************************************************************
-    
+
     virtual const AbcA::PropertyHeader & getHeader() const;
+
+    virtual AbcA::ObjectWriterPtr getObject();
 
     virtual AbcA::CompoundPropertyWriterPtr getParent();
 
     virtual AbcA::CompoundPropertyWriterPtr asCompoundPtr();
-   
-protected:
+
+    //-*************************************************************************
+    // FROM CompoundPropertyWriter ABSTRACT
+    //-*************************************************************************
+
+    virtual size_t getNumProperties();
+
+    virtual const AbcA::PropertyHeader & getPropertyHeader( size_t i );
+
+    virtual const AbcA::PropertyHeader *
+    getPropertyHeader( const std::string &iName );
+
+    virtual AbcA::BasePropertyWriterPtr
+    getProperty( const std::string & iName );
+
+    virtual AbcA::ScalarPropertyWriterPtr
+    createScalarProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData,
+        const AbcA::DataType & iDataType,
+        uint32_t iTimeSamplingIndex );
+
+    virtual AbcA::ArrayPropertyWriterPtr
+    createArrayProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData,
+        const AbcA::DataType & iDataType,
+        uint32_t iTimeSamplingIndex );
+
+    virtual AbcA::CompoundPropertyWriterPtr
+    createCompoundProperty( const std::string & iName,
+        const AbcA::MetaData & iMetaData );
+
+private:
+
+    // The object we belong to.
+    AbcA::ObjectWriterPtr m_object;
+
     // The parent compound property writer.
     AbcA::CompoundPropertyWriterPtr m_parent;
-    
+
     // The header which defines this property.
-    PropertyHeaderPtr m_header;
+    AbcA::PropertyHeader m_header;
+
+    // child data, this is owned by the object for "top" compounds
+    CpwDataPtr m_data;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

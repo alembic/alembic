@@ -42,55 +42,69 @@ namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+
+// "top" compound creation called by object writers.
+CpwImpl::CpwImpl( AbcA::ObjectWriterPtr iParent,
+                  CpwDataPtr iData,
+                  const AbcA::MetaData & iMeta )
+    : m_object( iParent)
+    , m_header( "", iMeta )
+    , m_data( iData )
+{
+    // we don't need to write the property info, the object has done it already
+
+    ABCA_ASSERT( m_object, "Invalid object" );
+    ABCA_ASSERT( m_data, "Invalid compound data" );
+}
+
 // With the compound property writer as an input.
 CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   hid_t iParentGroup,
                   const std::string & iName,
                   const AbcA::MetaData & iMeta )
-  : BaseCpwImpl( iParentGroup )
-  , m_parent( iParent )
-  , m_header( new AbcA::PropertyHeader(iName, iMeta) )
+  : m_parent( iParent )
+  , m_header( iName, iMeta )
 {
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
-    ABCA_ASSERT( m_header, "Invalid property header" );
-
-    if ( m_header->getPropertyType() != AbcA::kCompoundProperty )
-    {
-        ABCA_THROW( "Tried to create compound property with the wrong "
-                     "property type: " << m_header->getPropertyType() );
-    }
 
     // Set the object.
     AbcA::ObjectWriterPtr optr = m_parent->getObject();
     ABCA_ASSERT( optr, "Invalid object" );
     m_object = optr;
 
+    m_data.reset( new CpwData( iName, iParentGroup ) );
+
     // Write the property header.
-    WritePropertyInfo( iParentGroup, m_header->getName(),
-        m_header->getPropertyType(), m_header->getDataType(),
+    WritePropertyInfo( iParentGroup, m_header.getName(),
+        m_header.getPropertyType(), m_header.getDataType(),
         false, 0, 0, 0, 0 );
 
-    WriteMetaData( iParentGroup, m_header->getName() + ".meta",
-        m_header->getMetaData() );
+    WriteMetaData( iParentGroup, m_header.getName() + ".meta", iMeta );
 }
 
 //-*****************************************************************************
-// Destructor is at the end, so that this file has a logical ordering that
-// matches the order of operations (create, set samples, destroy)
-//-*****************************************************************************
+CpwImpl::~CpwImpl()
+{
+    // Nothing!
+}
 
 //-*****************************************************************************
 const AbcA::PropertyHeader &CpwImpl::getHeader() const
 {
-    ABCA_ASSERT( m_header, "Invalid header" );
-    return *m_header;
+    return m_header;
+}
+
+//-*****************************************************************************
+AbcA::ObjectWriterPtr CpwImpl::getObject()
+{
+    return m_object;
 }
 
 //-*****************************************************************************
 AbcA::CompoundPropertyWriterPtr CpwImpl::getParent()
 {
-    ABCA_ASSERT( m_parent, "Should not be able to have a NULL parent" );
+    // this will be NULL for "top" compound properties
     return m_parent;
 }
 
@@ -101,9 +115,58 @@ AbcA::CompoundPropertyWriterPtr CpwImpl::asCompoundPtr()
 }
 
 //-*****************************************************************************
-CpwImpl::~CpwImpl()
+size_t CpwImpl::getNumProperties()
 {
-    // Nothing!
+    return m_data->getNumProperties();
+}
+
+//-*****************************************************************************
+const AbcA::PropertyHeader & CpwImpl::getPropertyHeader( size_t i )
+{
+    return m_data->getPropertyHeader( i );
+}
+
+//-*****************************************************************************
+const AbcA::PropertyHeader *
+CpwImpl::getPropertyHeader( const std::string &iName )
+{
+    return m_data->getPropertyHeader( iName );
+}
+
+//-*****************************************************************************
+AbcA::BasePropertyWriterPtr CpwImpl::getProperty( const std::string & iName )
+{
+    return m_data->getProperty( iName );
+}
+
+//-*****************************************************************************
+AbcA::ScalarPropertyWriterPtr
+CpwImpl::createScalarProperty( const std::string & iName,
+                      const AbcA::MetaData & iMetaData,
+                      const AbcA::DataType & iDataType,
+                      uint32_t iTimeSamplingIndex )
+{
+    return m_data->createScalarProperty( asCompoundPtr(), iName, iMetaData,
+                                         iDataType, iTimeSamplingIndex );
+}
+
+//-*****************************************************************************
+AbcA::ArrayPropertyWriterPtr
+CpwImpl::createArrayProperty( const std::string & iName,
+                              const AbcA::MetaData & iMetaData,
+                              const AbcA::DataType & iDataType,
+                              uint32_t iTimeSamplingIndex )
+{
+    return m_data->createArrayProperty( asCompoundPtr(), iName, iMetaData,
+                                        iDataType, iTimeSamplingIndex );
+}
+
+//-*****************************************************************************
+AbcA::CompoundPropertyWriterPtr
+CpwImpl::createCompoundProperty( const std::string & iName,
+                                 const AbcA::MetaData & iMetaData )
+{
+    return m_data->createCompoundProperty( asCompoundPtr(), iName, iMetaData );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

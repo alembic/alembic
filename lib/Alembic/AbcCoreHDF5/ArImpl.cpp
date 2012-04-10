@@ -83,28 +83,9 @@ ArImpl::ArImpl( const std::string &iFileName,
     ABCA_ASSERT( group >= 0, "Could not open top object in: "
                              << iFileName );
 
-    // old style meta data for the archive is under .prop.meta
-    if ( m_archiveVersion < 10100 )
-    {
-        AbcA::MetaData metaData;
-        ReadMetaData( group, ".prop.meta", metaData );
-        m_header.reset( new AbcA::ObjectHeader( "ABC", "/", metaData ) );
-    }
-    // Read the property info and meta data.
-    // Meta data and property info is shared with the underlying
-    // property
-    else
-    {
-        bool dummyBool = false;
-        uint32_t dummyVal;
-        AbcA::PropertyHeader propHeader;
-        ReadPropertyHeader( group, "", propHeader, dummyBool,
-                            dummyVal, dummyVal, dummyVal, dummyVal );
-
-        m_header.reset( new AbcA::ObjectHeader( "ABC",
-                                                "/",
-                                                propHeader.getMetaData() ) );
-    }
+    AbcA::MetaData metaData;
+    ReadMetaData( group, ".prop.meta", metaData );
+    m_header.reset( new AbcA::ObjectHeader( "ABC", "/", metaData ) );
 
     m_data.reset( new OrData( m_header, m_file, m_archiveVersion ) );
     H5Gclose( group );

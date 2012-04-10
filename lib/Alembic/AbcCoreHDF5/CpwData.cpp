@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,7 +34,7 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/BaseCpwImpl.h>
+#include <Alembic/AbcCoreHDF5/CpwData.h>
 #include <Alembic/AbcCoreHDF5/WriteUtil.h>
 #include <Alembic/AbcCoreHDF5/SpwImpl.h>
 #include <Alembic/AbcCoreHDF5/ApwImpl.h>
@@ -45,39 +45,37 @@ namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-// With the object as an input.
-BaseCpwImpl::BaseCpwImpl( hid_t iParentGroup )
-  : m_parentGroup( iParentGroup )
-  , m_group( -1 )
+CpwData::CpwData( const std::string & iName, hid_t iParentGroup )
+    : m_parentGroup( iParentGroup )
+    , m_group( -1 )
+    , m_name( iName )
 {
-    // Check the validity of all inputs.
-    ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
-
-    // The object ptr is left alone. The TopCpwImpl will leave it
-    // alone, the CpwImpl will set it explicitly.
+    // the "top" compound property has no name
+    if ( m_name == "" )
+    {
+        m_group = m_parentGroup;
+    }
 }
 
 //-*****************************************************************************
-// Destructor is at the end, so that this file has a logical ordering that
-// matches the order of operations (create, set samples, destroy)
-//-*****************************************************************************
-
-//-*****************************************************************************
-AbcA::ObjectWriterPtr BaseCpwImpl::getObject()
+CpwData::~CpwData()
 {
-    ABCA_ASSERT( m_object, "Invalid object in BaseCpwImpl::getObject()" );
-    return m_object;
+    if ( m_group >= 0 )
+    {
+        H5Gclose( m_group );
+        m_group = -1;
+    }
 }
 
 //-*****************************************************************************
-size_t BaseCpwImpl::getNumProperties()
+size_t CpwData::getNumProperties()
 {
     return m_propertyHeaders.size();
 }
 
 //-*****************************************************************************
 const AbcA::PropertyHeader &
-BaseCpwImpl::getPropertyHeader( size_t i )
+CpwData::getPropertyHeader( size_t i )
 {
     if ( i > m_propertyHeaders.size() )
     {
@@ -93,7 +91,7 @@ BaseCpwImpl::getPropertyHeader( size_t i )
 
 //-*****************************************************************************
 const AbcA::PropertyHeader *
-BaseCpwImpl::getPropertyHeader( const std::string &iName )
+CpwData::getPropertyHeader( const std::string &iName )
 {
     for ( PropertyHeaderPtrs::iterator piter = m_propertyHeaders.begin();
           piter != m_propertyHeaders.end(); ++piter )
@@ -108,7 +106,7 @@ BaseCpwImpl::getPropertyHeader( const std::string &iName )
 
 //-*****************************************************************************
 AbcA::BasePropertyWriterPtr
-BaseCpwImpl::getProperty( const std::string &iName )
+CpwData::getProperty( const std::string &iName )
 {
     MadeProperties::iterator fiter = m_madeProperties.find( iName );
     if ( fiter == m_madeProperties.end() )
@@ -122,9 +120,9 @@ BaseCpwImpl::getProperty( const std::string &iName )
 }
 
 //-*****************************************************************************
-hid_t BaseCpwImpl::getGroup()
+hid_t CpwData::getGroup()
 {
-    // If we've already made it, return it!
+    // If we've already made it (or set it), return it!
     if ( m_group >= 0 )
     {
         return m_group;
@@ -133,26 +131,32 @@ hid_t BaseCpwImpl::getGroup()
     ABCA_ASSERT( m_parentGroup >= 0, "invalid parent group" );
 
     // Create the HDF5 group corresponding to this property.
-    const std::string groupName = getName();
-
-    hid_t copl = CreationOrderPlist();
-    m_group = H5Gcreate2( m_parentGroup, groupName.c_str(),
-                          H5P_DEFAULT, copl, H5P_DEFAULT );
-    H5Pclose( copl );
+    if ( m_name != "" )
+    {
+        hid_t copl = CreationOrderPlist();
+        m_group = H5Gcreate2( m_parentGroup, m_name.c_str(),
+                              H5P_DEFAULT, copl, H5P_DEFAULT );
+        H5Pclose( copl );
+    }
+    else
+    {
+        m_group = m_parentGroup;
+    }
 
     ABCA_ASSERT( m_group >= 0,
                  "Could not create compound property group named: "
-                 << groupName );
+                 << m_name );
 
     return m_group;
 }
 
 //-*****************************************************************************
 AbcA::ScalarPropertyWriterPtr
-BaseCpwImpl::createScalarProperty( const std::string & iName,
-        const AbcA::MetaData & iMetaData,
-        const AbcA::DataType & iDataType,
-        uint32_t iTimeSamplingIndex )
+CpwData::createScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                               const std::string & iName,
+                               const AbcA::MetaData & iMetaData,
+                               const AbcA::DataType & iDataType,
+                               uint32_t iTimeSamplingIndex )
 {
     if ( m_madeProperties.count( iName ) )
     {
@@ -162,7 +166,7 @@ BaseCpwImpl::createScalarProperty( const std::string & iName,
     hid_t myGroup = getGroup();
 
     AbcA::ScalarPropertyWriterPtr
-        ret( new SpwImpl( asCompoundPtr(), myGroup, iName, iMetaData,
+        ret( new SpwImpl( iParent, myGroup, iName, iMetaData,
             iDataType, iTimeSamplingIndex ) );
 
     PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );
@@ -174,12 +178,12 @@ BaseCpwImpl::createScalarProperty( const std::string & iName,
 
 //-*****************************************************************************
 AbcA::ArrayPropertyWriterPtr
-BaseCpwImpl::createArrayProperty( const std::string & iName,
-        const AbcA::MetaData & iMetaData,
-        const AbcA::DataType & iDataType,
-        uint32_t iTimeSamplingIndex )
+CpwData::createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                              const std::string & iName,
+                              const AbcA::MetaData & iMetaData,
+                              const AbcA::DataType & iDataType,
+                              uint32_t iTimeSamplingIndex )
 {
-
     if ( m_madeProperties.count( iName ) )
     {
         ABCA_THROW( "Already have a property named: " << iName );
@@ -188,7 +192,7 @@ BaseCpwImpl::createArrayProperty( const std::string & iName,
     hid_t myGroup = getGroup();
 
     AbcA::ArrayPropertyWriterPtr
-        ret( new ApwImpl( asCompoundPtr(), myGroup, iName, iMetaData,
+        ret( new ApwImpl( iParent, myGroup, iName, iMetaData,
             iDataType, iTimeSamplingIndex ) );
 
     PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );
@@ -200,10 +204,10 @@ BaseCpwImpl::createArrayProperty( const std::string & iName,
 
 //-*****************************************************************************
 AbcA::CompoundPropertyWriterPtr
-BaseCpwImpl::createCompoundProperty( const std::string & iName,
-        const AbcA::MetaData & iMetaData )
+CpwData::createCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                                 const std::string & iName,
+                                 const AbcA::MetaData & iMetaData )
 {
-
     if ( m_madeProperties.count( iName ) )
     {
         ABCA_THROW( "Already have a property named: " << iName );
@@ -212,23 +216,13 @@ BaseCpwImpl::createCompoundProperty( const std::string & iName,
     hid_t myGroup = getGroup();
 
     AbcA::CompoundPropertyWriterPtr
-        ret( new CpwImpl( this->asCompoundPtr(), myGroup, iName, iMetaData ) );
+        ret( new CpwImpl( iParent, myGroup, iName, iMetaData ) );
 
     PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );
     m_propertyHeaders.push_back( headerPtr );
     m_madeProperties[iName] = WeakBpwPtr( ret );
 
     return ret;
-}
-
-//-*****************************************************************************
-BaseCpwImpl::~BaseCpwImpl()
-{
-    if ( m_group >= 0 )
-    {
-        H5Gclose( m_group );
-        m_group = -1;
-    }
 }
 
 } // End namespace ALEMBIC_VERSION_NS

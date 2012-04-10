@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -46,7 +46,8 @@ namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class TopOwImpl;
+class OwData;
+class OwImpl;
 
 //-*****************************************************************************
 class AwImpl : public AbcA::ArchiveWriter
@@ -91,10 +92,8 @@ private:
     AbcA::MetaData m_metaData;
     hid_t m_file;
 
-    // This won't create a circular reference because the
-    // TopObjectWriter we create is special and doesn't like back up
-    // like a normal object writer would.
-    TopOwImpl *m_top;
+    boost::weak_ptr< AbcA::ObjectWriter > m_top;
+    boost::shared_ptr < OwData > m_data;
 
     std::vector < AbcA::TimeSamplingPtr > m_timeSamples;
 
