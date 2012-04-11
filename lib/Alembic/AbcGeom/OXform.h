@@ -70,7 +70,10 @@ public:
 
     //! The default constructor creates an empty OPolyMeshSchema
     //! ...
-    OXformSchema() {}
+    OXformSchema()
+    {
+        m_tsIdx = 0;
+    }
 
     //! This templated, primary constructor creates a new xform writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object
@@ -145,7 +148,14 @@ public:
 
     AbcA::TimeSamplingPtr getTimeSampling() const
     {
-        return m_inheritsProperty.getTimeSampling();
+        if ( m_inheritsProperty )
+        {
+            return m_inheritsProperty.getTimeSampling();
+        }
+        else
+        {
+            return AbcA::TimeSamplingPtr( new AbcA::TimeSampling() );
+        }
     }
 
     //-*************************************************************************
@@ -207,7 +217,7 @@ public:
 
 
 private:
-    void init( const AbcA::index_t iTSIndex );
+    void init( uint32_t iTSIndex );
 
     std::size_t m_numChannels;
     std::size_t m_numOps;
@@ -216,6 +226,7 @@ private:
     // or in a ScalarProperty with some Dimension > 0 and < MAX_SCALAR_CHANS
     bool m_useArrayProp;
 
+    uint32_t m_tsIdx;
     AbcA::DataType m_arrayValuesDataType;
     Alembic::Util::Dimensions m_arraySampleDimensions;
 

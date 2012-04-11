@@ -95,7 +95,8 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
         { m_isConstant = m_valsProperty->asScalarPtr()->isConstant(); }
     }
 
-    m_isConstant = m_isConstant && m_inheritsProperty.isConstant();
+    m_isConstant = m_isConstant && ( !m_inheritsProperty ||
+        m_inheritsProperty.isConstant() );
 
     std::set < Alembic::Util::uint32_t > animChannels;
 
@@ -194,8 +195,7 @@ AbcA::TimeSamplingPtr IXformSchema::getTimeSampling()
     }
     else
     {
-        AbcA::TimeSamplingPtr ret;
-        return ret;
+        return AbcA::TimeSamplingPtr( new AbcA::TimeSampling() );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -267,7 +267,7 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 
     oSamp = m_sample;
 
-    if ( m_inheritsProperty.getNumSamples() )
+    if ( m_inheritsProperty && m_inheritsProperty.getNumSamples() > 0 )
     {
         oSamp.setInheritsXforms( m_inheritsProperty.getValue( iSS ) );
     }
