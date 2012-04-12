@@ -43,22 +43,86 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-inline void SetPropUsePrevIfNull( Abc::OInt32Property iProp, int32_t iVal )
-{
-    if ( iVal != ABC_GEOM_SUBD_NULL_INT_VALUE )
-    {
-        iProp.set( iVal );
-    }
-    else
-    {
-        iProp.setFromPrevious( );
-    }
-}
-
-//-*****************************************************************************
 void OSubDSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::set()" );
+
+    // do we need to create face varying interpolate boundary
+    if ( iSamp.getFaceVaryingInterpolateBoundary() != 0 &&
+        !m_faceVaryingInterpolateBoundaryProperty )
+    {
+        m_faceVaryingInterpolateBoundaryProperty =
+            Abc::OInt32Property( this->getPtr(),
+                ".faceVaryingInterpolateBoundary",
+                m_positionsProperty.getTimeSampling() );
+
+        int val = 0;
+
+        size_t numSamples = m_positionsProperty.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_faceVaryingInterpolateBoundaryProperty.set( val );
+        }
+    }
+
+    // do we need to create face varying propagate corners
+    if ( iSamp.getFaceVaryingPropagateCorners() != 0 &&
+        !m_faceVaryingPropagateCornersProperty )
+    {
+        m_faceVaryingPropagateCornersProperty =
+            Abc::OInt32Property( this->getPtr(),
+                ".faceVaryingPropagateCorners",
+                m_positionsProperty.getTimeSampling() );
+
+        int val = 0;
+
+        size_t numSamples = m_positionsProperty.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_faceVaryingPropagateCornersProperty.set( val );
+        }
+    }
+
+
+    // do we need to create interpolate boundary?
+    if ( iSamp.getInterpolateBoundary() != 0 &&
+        !m_interpolateBoundaryProperty )
+    {
+        m_interpolateBoundaryProperty =
+            Abc::OInt32Property( this->getPtr(), ".interpolateBoundary",
+                m_positionsProperty.getTimeSampling() );
+
+        int val = 0;
+
+        size_t numSamples = m_positionsProperty.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_interpolateBoundaryProperty.set( val );
+        }
+    }
+
+    if ( iSamp.getSubdivisionScheme() != "catmull-clark" &&
+        !m_subdSchemeProperty )
+    {
+        m_subdSchemeProperty = Abc::OStringProperty( this->getPtr(), ".scheme",
+            m_positionsProperty.getTimeSampling() );
+
+        std::string val = "catmull-clark";
+
+        size_t numSamples = m_positionsProperty.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_subdSchemeProperty.set( val );
+        }
+    }
 
     // do we need to create child bounds?
     if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty )
@@ -145,37 +209,27 @@ void OSubDSchema::set( const Sample &iSamp )
             m_uvsParam.set( iSamp.getUVs() );
         }
 
-        if ( iSamp.getFaceVaryingInterpolateBoundary() ==
-             ABC_GEOM_SUBD_NULL_INT_VALUE )
-        {
-            m_faceVaryingInterpolateBoundaryProperty.set( 0 );
-        }
-        else
+        if ( m_faceVaryingInterpolateBoundaryProperty )
         {
             m_faceVaryingInterpolateBoundaryProperty.set(
                 iSamp.getFaceVaryingInterpolateBoundary() );
         }
-        if ( iSamp.getFaceVaryingPropagateCorners() ==
-             ABC_GEOM_SUBD_NULL_INT_VALUE )
-        {
-            m_faceVaryingPropagateCornersProperty.set( 0 );
-        }
-        else
+
+        if ( m_faceVaryingPropagateCornersProperty )
         {
             m_faceVaryingPropagateCornersProperty.set(
                 iSamp.getFaceVaryingPropagateCorners() );
         }
-        if ( iSamp.getInterpolateBoundary() ==
-             ABC_GEOM_SUBD_NULL_INT_VALUE )
-        {
-            m_interpolateBoundaryProperty.set( 0 );
-        }
-        else
+
+        if ( m_interpolateBoundaryProperty )
         {
             m_interpolateBoundaryProperty.set( iSamp.getInterpolateBoundary() );
         }
 
-        m_subdSchemeProperty.set( iSamp.getSubdivisionScheme() );
+        if ( m_subdSchemeProperty )
+        {
+            m_subdSchemeProperty.set( iSamp.getSubdivisionScheme() );
+        }
 
         if ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
             iSamp.getCreaseSharpnesses() )
@@ -230,12 +284,23 @@ void OSubDSchema::set( const Sample &iSamp )
         SetPropUsePrevIfNull( m_faceIndicesProperty, iSamp.getFaceIndices() );
         SetPropUsePrevIfNull( m_faceCountsProperty, iSamp.getFaceCounts() );
 
-        SetPropUsePrevIfNull( m_faceVaryingInterpolateBoundaryProperty,
-                              iSamp.getFaceVaryingInterpolateBoundary() );
-        SetPropUsePrevIfNull( m_faceVaryingPropagateCornersProperty,
-                              iSamp.getFaceVaryingPropagateCorners() );
-        SetPropUsePrevIfNull( m_interpolateBoundaryProperty,
-                              iSamp.getInterpolateBoundary() );
+        if ( m_faceVaryingInterpolateBoundaryProperty )
+        {
+            m_faceVaryingInterpolateBoundaryProperty.set(
+                iSamp.getFaceVaryingInterpolateBoundary() );
+        }
+
+        if ( m_faceVaryingPropagateCornersProperty )
+        {
+            m_faceVaryingPropagateCornersProperty.set(
+                iSamp.getFaceVaryingPropagateCorners() );
+        }
+
+        if ( m_interpolateBoundaryProperty )
+        {
+            m_interpolateBoundaryProperty.set(
+                iSamp.getInterpolateBoundary() );
+        }
 
         if ( ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
                iSamp.getCreaseSharpnesses() ) && !m_creaseIndicesProperty )
@@ -277,7 +342,10 @@ void OSubDSchema::set( const Sample &iSamp )
             SetPropUsePrevIfNull( m_holesProperty, iSamp.getHoles() );
         }
 
-        SetPropUsePrevIfNull( m_subdSchemeProperty, iSamp.getSubdivisionScheme() );
+        if ( m_subdSchemeProperty )
+        {
+            m_subdSchemeProperty.set( iSamp.getSubdivisionScheme() );
+        }
 
         if ( m_childBoundsProperty )
         {
@@ -320,9 +388,20 @@ void OSubDSchema::setFromPrevious()
     m_faceIndicesProperty.setFromPrevious();
     m_faceCountsProperty.setFromPrevious();
 
-    m_faceVaryingInterpolateBoundaryProperty.setFromPrevious();
-    m_faceVaryingPropagateCornersProperty.setFromPrevious();
-    m_interpolateBoundaryProperty.setFromPrevious();
+    if ( m_faceVaryingInterpolateBoundaryProperty )
+    {
+        m_faceVaryingInterpolateBoundaryProperty.setFromPrevious();
+    }
+
+    if ( m_faceVaryingPropagateCornersProperty )
+    {
+        m_faceVaryingPropagateCornersProperty.setFromPrevious();
+    }
+
+    if ( m_interpolateBoundaryProperty )
+    {
+        m_interpolateBoundaryProperty.setFromPrevious();
+    }
 
     if ( m_creaseIndicesProperty )
     {
@@ -342,7 +421,10 @@ void OSubDSchema::setFromPrevious()
         m_holesProperty.setFromPrevious();
     }
 
-    m_subdSchemeProperty.setFromPrevious();
+    if ( m_subdSchemeProperty )
+    {
+        m_subdSchemeProperty.setFromPrevious();
+    }
 
     m_selfBoundsProperty.setFromPrevious();
 
@@ -470,17 +552,6 @@ void OSubDSchema::init( uint32_t iTsIdx )
     m_faceIndicesProperty = Abc::OInt32ArrayProperty( _this, ".faceIndices", iTsIdx );
 
     m_faceCountsProperty = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTsIdx );
-
-    m_faceVaryingInterpolateBoundaryProperty =
-        Abc::OInt32Property( _this, ".faceVaryingInterpolateBoundary", iTsIdx );
-
-    m_faceVaryingPropagateCornersProperty =
-        Abc::OInt32Property( _this, ".faceVaryingPropagateCorners", iTsIdx );
-
-    m_interpolateBoundaryProperty =
-        Abc::OInt32Property( _this, ".interpolateBoundary", iTsIdx );
-
-    m_subdSchemeProperty = Abc::OStringProperty( _this, ".scheme", iTsIdx );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
