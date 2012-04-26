@@ -94,7 +94,7 @@ a warning will be given and nothing will be done.                           \n\
 Example:                                                                    \n\
 AbcImport -h;                                                               \n\
 AbcImport -d -m open \"/tmp/test.abc\";                                     \n\
-AbcImport -t 1 24 -ftr -ct \"/\" -crt -rm \"/mcp/test.abc\";                \n\
+AbcImport -ftr -ct \"/\" -crt -rm \"/mcp/test.abc\";                        \n\
 AbcImport -ct \"root1 root2 root3 ...\" \"/mcp/test.abc\";                  \n"
 );  // usage
 
