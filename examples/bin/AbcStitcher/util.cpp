@@ -46,6 +46,10 @@ using namespace Alembic::AbcCoreAbstract;
 index_t getIndexSample(index_t iCurOutIndex, TimeSamplingPtr iOutTime,
     index_t iInNumSamples, TimeSamplingPtr iInTime)
 {
+    // borrowed from TimeSampling.cpp
+    static const chrono_t kCHRONO_TOLERANCE =
+        std::numeric_limits<chrono_t>::epsilon() * 32.0 * 32.0;
+
     if (iCurOutIndex == 0)
     {
         return 0;
@@ -55,7 +59,9 @@ index_t getIndexSample(index_t iCurOutIndex, TimeSamplingPtr iOutTime,
 
     for (index_t i = 0; i < iInNumSamples; ++i)
     {
-        if (curTime < iInTime->getSampleTime(i))
+        chrono_t inChrono = iInTime->getSampleTime(i);
+        if (curTime <= inChrono ||
+            Imath::equalWithAbsError(curTime, inChrono, kCHRONO_TOLERANCE))
         {
             return i;
         }
