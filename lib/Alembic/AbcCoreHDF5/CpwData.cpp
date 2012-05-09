@@ -60,20 +60,6 @@ CpwData::CpwData( const std::string & iName, hid_t iParentGroup )
 //-*****************************************************************************
 CpwData::~CpwData()
 {
-    if ( ! m_propertyHeaders.empty() )
-    {
-        std::vector< std::string > childNames;
-        childNames.reserve( m_propertyHeaders.size() );
-        PropertyHeaderPtrs::iterator childIt;
-        for ( childIt = m_propertyHeaders.begin();
-              childIt != m_propertyHeaders.end(); ++childIt )
-        {
-            childNames.push_back( (*childIt)->getName() );
-        }
-        WriteStrings( m_group, ".prop_names", childNames.size(),
-            &( childNames.front() ) );
-    }
-
     if ( m_group >= 0 )
     {
         H5Gclose( m_group );

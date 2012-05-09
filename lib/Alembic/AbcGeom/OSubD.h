@@ -49,6 +49,10 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+// for default values for int scalar properties here
+static const int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( INT_MIN / 2 );
+
+//-*****************************************************************************
 class OSubDSchema : public OGeomBaseSchema<SubDSchemaInfo>
 {
 public:
@@ -88,9 +92,9 @@ public:
           : m_positions( iPositions )
           , m_faceIndices( iFaceIndices )
           , m_faceCounts( iFaceCounts )
-          , m_faceVaryingInterpolateBoundary( 0 )
-          , m_faceVaryingPropagateCorners( 0 )
-          , m_interpolateBoundary( 0 )
+          , m_faceVaryingInterpolateBoundary( ABC_GEOM_SUBD_NULL_INT_VALUE )
+          , m_faceVaryingPropagateCorners( ABC_GEOM_SUBD_NULL_INT_VALUE )
+          , m_interpolateBoundary( ABC_GEOM_SUBD_NULL_INT_VALUE )
           , m_creaseIndices     ( iCreaseIndices )
           , m_creaseLengths     ( iCreaseLengths )
           , m_creaseSharpnesses ( iCreaseSharpnesses )

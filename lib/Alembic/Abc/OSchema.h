@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -75,15 +75,20 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 //! Here is a macro for declaring SCHEMA_INFO
 //! It takes three arguments
-//! - the SchemaTitle( a string ),,
+//! - the SchemaTitle( a string ),
+//! - the SchemaBaseType( a string ),
+//! - the DefaultSchemaName( a string )
 //! - the name of the SchemaTrait Type to be declared.
 //! - for example:
 //! ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
+//!                                  ".geom",
 //!                                  PolyMeshSchemaInfo );
-#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, STDEF ) \
-struct STDEF                                             \
-{                                                        \
-    static const char * title() { return ( STITLE ) ; }  \
+#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, SBTYP, SDFLT, STDEF )  \
+struct STDEF                                                            \
+{                                                                       \
+    static const char * title() { return ( STITLE ) ; }                 \
+    static const char * defaultName() { return ( SDFLT ); }             \
+    static const char * schemaBaseType() { return ( SBTYP ); }          \
 }
 
 //-*****************************************************************************
@@ -108,6 +113,22 @@ public:
         return sTitle;
     }
 
+    //! Return the schema base type expected of this
+    //! property. An empty base type means it's the root type.
+    static const std::string &getSchemaBaseType()
+    {
+        static std::string sBaseType = INFO::schemaBaseType();
+        return sBaseType;
+    }
+
+    //! Return the default name for instances of this schema. Often
+    //! something like ".geom"
+    static const std::string &getDefaultSchemaName()
+    {
+        static std::string sName = INFO::defaultName();
+        return sName;
+    }
+
     //! This will check whether or not a given entity (as represented by
     //! a metadata) strictly matches the interpretation of this
     //! schema object
@@ -117,7 +138,7 @@ public:
         if ( getSchemaTitle() == "" || iMatching == kNoMatching )
         { return true; }
 
-        if ( iMatching == kStrictMatching )
+        if ( iMatching == kStrictMatching || iMatching == kSchemaTitleMatching )
         {
             return iMetaData.get( "schema" ) == getSchemaTitle();
         }
@@ -165,7 +186,7 @@ public:
                       const Argument &iArg2 = Argument() )
     {
         this_type::init( iParentObject,
-                         "",
+                         INFO::defaultName(),
                          iArg0, iArg1, iArg2 );
     }
 
@@ -227,16 +248,13 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
     {
         mdata.set( "schema", getSchemaTitle() );
     }
+    if ( getSchemaBaseType() != "" )
+    {
+        mdata.set( "schemaBaseType", getSchemaBaseType() );
+    }
 
     // Create property.
-    if ( iName != "" )
-    {
-        m_property = parent->createCompoundProperty( iName, mdata );
-    }
-    else
-    {
-        m_property = parent;
-    }
+    m_property = parent->createCompoundProperty( iName, mdata );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

@@ -398,16 +398,6 @@ void WritePropertyInfo( hid_t iGroup,
     static const uint32_t extentMask = ( uint32_t )BOOST_BINARY(
         0000 0000 0000 0000 1111 1111 0000 0000 );
 
-    // extra hints which are set based on metadata
-    static const uint32_t schemaMask = ( uint32_t )BOOST_BINARY(
-        0000 0000 0001 1111 0000 0000 0000 0000 );
-
-    static const uint32_t geoScopeMask = ( uint32_t )BOOST_BINARY(
-        0000 0000 1110 0000 0000 0000 0000 0000 );
-
-    static const uint32_t interpMask = ( uint32_t )BOOST_BINARY(
-        0000 1111 0000 0000 0000 0000 0000 0000 );
-
     // compounds are treated differently
     if ( iHeader.getPropertyType() != AbcA::kCompoundProperty )
     {
@@ -466,157 +456,11 @@ void WritePropertyInfo( hid_t iGroup,
 
     }
 
-    // peel off common metadata and store it in a more compact form
-    // on the header
-    AbcA::MetaData md = iHeader.getMetaData();
-
-    std::string interpStr = md.get( "interpretation" );
-    uint32_t interpVal = 0;
-
-    // interpVal can go up to 15 so we have room for future growth
-    if ( interpStr != "" )
-    {
-        if ( interpStr == "vector" )
-        {
-            interpVal = 1;
-        }
-        else if ( interpStr == "point" )
-        {
-            interpVal = 2;
-        }
-        else if ( interpStr == "box" )
-        {
-            interpVal = 3;
-        }
-        else if ( interpStr == "normal" )
-        {
-            interpVal = 4;
-        }
-        else if ( interpStr == "matrix" )
-        {
-            interpVal = 5;
-        }
-        else if ( interpStr == "rgb" )
-        {
-            interpVal = 6;
-        }
-        else if ( interpStr == "quat" )
-        {
-            interpVal = 7;
-        }
-
-        if ( interpVal > 0 && interpVal < 8 )
-        {
-            md.set( "interpretation", "" );
-        }
-    }
-    info[0] |= interpMask & ( interpVal << 24 );
-
-    std::string geoScopeStr = md.get( "geoScope" );
-    uint32_t geoScopeVal = 0; // constant scope
-    if ( geoScopeStr != "" )
-    {
-        if ( geoScopeStr == "con" )
-        {
-            geoScopeVal = 0;
-            md.set( "geoScope", "" );
-        }
-        else if ( geoScopeStr == "uni" )
-        {
-            geoScopeVal = 1;
-            md.set( "geoScope", "" );
-        }
-        else if ( geoScopeStr == "var" )
-        {
-            geoScopeVal = 2;
-            md.set( "geoScope", "" );
-        }
-        else if ( geoScopeStr == "vtx" )
-        {
-            geoScopeVal = 3;
-            md.set( "geoScope", "" );
-        }
-        else if ( geoScopeStr == "fvr" )
-        {
-            geoScopeVal = 4;
-            md.set( "geoScope", "" );
-        }
-    }
-    info[0] |= geoScopeMask & ( geoScopeVal << 21 );
-
-    std::string schemaStr = md.get( "schema" );
-    uint32_t schemaVal = 0; // schemaVal can grow up to 31
-    if ( schemaStr != "" )
-    {
-        if ( schemaStr == "AbcGeom_Xform_v3" )
-        {
-            schemaVal = 1;
-        }
-        else if ( schemaStr == "AbcGeom_PolyMesh_v1" )
-        {
-            schemaVal = 2;
-        }
-        else if ( schemaStr == "AbcGeom_SubD_v1" )
-        {
-            schemaVal = 3;
-        }
-        else if ( schemaStr == "AbcGeom_FaceSet_v1" )
-        {
-            schemaVal = 4;
-        }
-        else if ( schemaStr == "AbcGeom_Curve_v2" )
-        {
-            schemaVal = 5;
-        }
-        else if ( schemaStr == "AbcGeom_Camera_v1" )
-        {
-            schemaVal = 6;
-        }
-        else if ( schemaStr == "AbcGeom_Points_v1" )
-        {
-            schemaVal = 7;
-        }
-        else if ( schemaStr == "AbcGeom_NuPatch_v2" )
-        {
-            schemaVal = 8;
-        }
-
-        if ( schemaVal > 0 && schemaVal < 9 )
-        {
-            md.set( "schema", "" );
-        }
-    }
-    info[0] |= schemaMask & ( schemaVal << 16 );
-
-    // look for some compound specific metadata that we can remap
-    if ( iHeader.getPropertyType() == AbcA::kCompoundProperty )
-    {
-        std::string podNameStr = md.get( "podName" );
-        uint32_t pod = ( uint32_t ) kUnknownPOD;
-        if ( podNameStr != "" )
-        {
-            pod = ( uint32_t )PODFromName( podNameStr.c_str() );
-
-            if ( pod != ( uint32_t ) kUnknownPOD )
-            {
-                md.set( "podName", "" );
-            }
-        }
-        info[0] |= podMask & ( pod << 2 );
-
-        uint32_t extent = ( uint32_t )atoi( md.get( "podExtent" ).c_str() );
-        if ( extent > 0 && extent < 256 )
-        {
-            info[0] |= extentMask & ( extent << 8 );
-            md.set( "podExtent", "" );
-        }
-    }
-
     WriteSmallArray( iGroup, iHeader.getName() + ".info",
         H5T_STD_U32LE, H5T_NATIVE_UINT32, numFields,
         ( const void * ) info );
 
-    WriteMetaData( iGroup, iHeader.getName() + ".meta", md );
+    WriteMetaData( iGroup, iHeader.getName() + ".meta", iHeader.getMetaData());
 }
 
 //-*****************************************************************************

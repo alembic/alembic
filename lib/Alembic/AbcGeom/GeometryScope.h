@@ -114,7 +114,7 @@ inline void SetGeometryScope( AbcA::MetaData &ioMetaData, GeometryScope iScope )
 {
     switch ( iScope )
     {
-    case kConstantScope: ioMetaData.set( "geoScope", "" ); return;
+    case kConstantScope: ioMetaData.set( "geoScope", "con" ); return;
     case kUniformScope: ioMetaData.set( "geoScope", "uni" ); return;
     case kVaryingScope: ioMetaData.set( "geoScope", "var" ); return;
     case kVertexScope: ioMetaData.set( "geoScope", "vtx" ); return;

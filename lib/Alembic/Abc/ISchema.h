@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2011,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -71,6 +71,14 @@ public:
         return sTitle;
     }
 
+    //! Return the default name for instances of this schema. Often
+    //! something like ".geom"
+    static const std::string &getDefaultSchemaName()
+    {
+        static std::string sName = INFO::defaultName();
+        return sName;
+    }
+
     //! This will check whether or not a given entity (as represented by
     //! a metadata) strictly matches the interpretation of this
     //! schema object
@@ -80,7 +88,7 @@ public:
         if ( getSchemaTitle() == "" || iMatching == kNoMatching )
         { return true; }
 
-        if ( iMatching == kStrictMatching )
+        if ( iMatching == kStrictMatching || iMatching == kSchemaTitleMatching )
         {
             return iMetaData.get( "schema" ) == getSchemaTitle();
         }
@@ -127,7 +135,7 @@ public:
                       const Argument &iArg1 = Argument() )
     {
         this_type::init( iParentObject,
-                         "",
+                         INFO::defaultName(),
                          iArg0, iArg1 );
     }
 
@@ -178,52 +186,21 @@ void ISchema<INFO>::init( CPROP_PTR iParent,
         GetCompoundPropertyReaderPtr( iParent );
     ABCA_ASSERT( parent, "NULL CompoundPropertyReaderPtr" );
 
-    if ( iName != "" )
-    {
-        const AbcA::PropertyHeader *pheader =
-            parent->getPropertyHeader( iName );
+    const AbcA::PropertyHeader *pheader = parent->getPropertyHeader( iName );
 
-        ABCA_ASSERT( pheader != NULL,
-                     "Nonexistent compound property: " << iName );
+    ABCA_ASSERT( pheader != NULL,
+                 "Nonexistent compound property: " << iName );
 
-        // Check metadata for schema.
-        ABCA_ASSERT( matches( *pheader, args.getSchemaInterpMatching() ),
+    // Check metadata for schema.
+    ABCA_ASSERT( matches( *pheader, args.getSchemaInterpMatching() ),
 
                  "Incorrect match of schema: "
                  << pheader->getMetaData().get( "schema" )
                  << " to expected: "
                  << INFO::title() );
 
-        // Get property.
-        m_property = parent->getCompoundProperty( iName );
-
-    }
-    else
-    {
-        // Check metadata for schema.
-        ABCA_ASSERT( matches( parent->getHeader(),
-                 args.getSchemaInterpMatching() ),
-
-                 "Incorrect match of schema: "
-                 << parent->getHeader().getMetaData().get( "schema" )
-                 << " to expected: "
-                 << INFO::title() );
-
-        // older way to identify where the compound that makes this schema
-        std::string schemaObjTitle =
-            parent->getMetaData().get( "schemaObjTitle" );
-
-        std::size_t nameStart = schemaObjTitle.find( ':' );
-        if ( nameStart != std::string::npos )
-        {
-            std::string name = schemaObjTitle.substr( nameStart + 1 );
-            m_property = parent->getCompoundProperty( name );
-        }
-        else
-        {
-            m_property = parent;
-        }
-    }
+    // Get property.
+    m_property = parent->getCompoundProperty( iName );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

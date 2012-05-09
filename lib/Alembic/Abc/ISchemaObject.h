@@ -60,6 +60,19 @@ public:
     typedef SCHEMA schema_type;
     typedef ISchemaObject<SCHEMA> this_type;
 
+    //! Our schema title contains the schema title of the underlying
+    //! compound property, along with the default name of that compound
+    //! property. So, for example - most AbcGeom types put their
+    //! data in ".geom", so, "AbcGeom_PolyMesh_v1:.geom"
+    //! Sometimes schema titles from underlying schemas are "", but
+    //! ours never are.
+    static const std::string &getSchemaObjTitle()
+    {
+        static std::string soSchemaTitle =
+            SCHEMA::getSchemaTitle() + ":" + SCHEMA::getDefaultSchemaName();
+        return soSchemaTitle;
+    }
+
     static const std::string &getSchemaTitle()
     {
         static std::string sSchemaTitle = SCHEMA::getSchemaTitle();
@@ -78,7 +91,14 @@ public:
             return true;
         }
 
+
         if ( iMatching == kStrictMatching )
+        {
+            return iMetaData.get( "schemaObjTitle" ) == getSchemaObjTitle() ||
+                iMetaData.get( "schema" ) == getSchemaObjTitle();
+        }
+
+        if ( iMatching == kSchemaTitleMatching )
         {
             return iMetaData.get( "schema" ) == getSchemaTitle();
         }
@@ -223,9 +243,9 @@ inline ISchemaObject<SCHEMA>::ISchemaObject(
                           GetSchemaInterpMatching( iArg0, iArg1 ) ),
 
                  "Incorrect match of schema: "
-                 << oheader.getMetaData().get( "schema" )
+                 << oheader.getMetaData().get( "schemaObjTitle" )
                  << " to expected: "
-                 << getSchemaTitle() );
+                 << getSchemaObjTitle() );
 
     m_schema = SCHEMA( this->getProperties(),
                        this->getErrorHandlerPolicy(),

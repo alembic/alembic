@@ -61,31 +61,20 @@ OwData::OwData( hid_t iParentGroup,
     ABCA_ASSERT( m_group >= 0,
                  "Could not create group for object: " << iName );
 
-    m_data.reset( new CpwData( "", m_group ) );
+    m_data.reset( new CpwData( ".prop", m_group ) );
 
-    AbcA::PropertyHeader topHeader( "", iMetaData );
+    AbcA::PropertyHeader topHeader( ".prop", iMetaData );
     WritePropertyInfo( m_group, topHeader, false, 0, 0, 0, 0 );
 }
 
 //-*****************************************************************************
 OwData::~OwData()
 {
-
-    if ( ! m_childHeaders.empty() )
+    if ( m_group >= 0 )
     {
-        std::vector< std::string > childNames;
-        childNames.reserve( m_childHeaders.size() );
-        ChildHeaders::iterator childIt;
-        for ( childIt = m_childHeaders.begin();
-            childIt != m_childHeaders.end(); ++childIt )
-        {
-            childNames.push_back( (*childIt)->getName() );
-        }
-        WriteStrings( m_group, ".obj_names", childNames.size(),
-            &( childNames.front() ) );
+        H5Gclose( m_group );
+        m_group = -1;
     }
-
-    // don't need to close m_group as ~CpwData will if necessary
 }
 
 //-*****************************************************************************

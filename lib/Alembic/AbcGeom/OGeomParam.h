@@ -169,23 +169,19 @@ public:
 
         SetGeometryScope( md, iScope );
 
-        if ( m_isIndexed )
-        {
-            std::string podName( Alembic::Util::PODName(
+        md.set( "isGeomParam", "true" );
+
+        std::string podName( Alembic::Util::PODName(
                                  TRAITS::dataType().getPod() ) );
 
-            size_t extent = TRAITS::dataType().getExtent();
+        size_t extent = TRAITS::dataType().getExtent();
 
-            md.set( "podName", podName );
+        md.set( "podName", podName );
 
-            md.set( "podExtent", boost::lexical_cast<std::string>( extent ) );
-        }
+        md.set( "podExtent", boost::lexical_cast<std::string>( extent ) );
 
-        if ( iArrayExtent > 1 )
-        {
-            md.set( "arrayExtent",
-                    boost::lexical_cast<std::string>( iArrayExtent ) );
-        }
+        md.set( "arrayExtent",
+                boost::lexical_cast<std::string>( iArrayExtent ) );
 
         md.set( "interpretation", TRAITS::interpretation() );
 
