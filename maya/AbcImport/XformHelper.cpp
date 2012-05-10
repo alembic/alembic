@@ -643,6 +643,9 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
                 double z = axis.z;
                 double angle = 0.0;
 
+                MEulerRotation rot;
+                trans.getRotation(rot);
+
                 if (op.getHint() == Alembic::AbcGeom::kRotateHint)
                 {
                     if (x == 1 && y == 0 && z == 0)
@@ -652,7 +655,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
                             oSampledTransOpNameList.push_back("rotateX");
                         }
                         angle = op.getAngle();
-
+                        rot.x = Alembic::AbcGeom::DegreesToRadians(angle);
 
                         // we have encountered the first rotation, set it
                         // to the 2 X possibilities
@@ -681,7 +684,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
                             oSampledTransOpNameList.push_back("rotateY");
                         }
                         angle = op.getAngle();
-
+                        rot.y = Alembic::AbcGeom::DegreesToRadians(angle);
 
                         // we have encountered the first rotation, set it
                         // to the 2 X possibilities
@@ -709,6 +712,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
                             oSampledTransOpNameList.push_back("rotateZ");
                         }
                         angle = op.getAngle();
+                        rot.z = Alembic::AbcGeom::DegreesToRadians(angle);
 
                         // we have encountered the first rotation, set it
                         // to the 2 X possibilities
@@ -730,10 +734,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
                         }
                     }
 
-                    MVector axis(x, y, z);
-                    MQuaternion quat(
-                        Alembic::AbcGeom::DegreesToRadians(angle), axis);
-                    trans.rotateBy(quat, gSpace);
+                    trans.setRotation(rot);
                 }
                 // kRotateOrientationHint
                 else
@@ -1044,6 +1045,6 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
         rotOrder[0] =  MTransformationMatrix::kXYZ;
     }
 
-    trans.setRotationOrder(rotOrder[0], true);
+    trans.setRotationOrder(rotOrder[0], false);
     return status;
 }
