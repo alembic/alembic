@@ -98,6 +98,7 @@ public:
     MStatus operator()(Alembic::AbcGeom::IPolyMesh & iNode);
     MStatus operator()(Alembic::AbcGeom::ISubD & iNode);
     MStatus operator()(Alembic::AbcGeom::IXform & iNode);
+    MStatus createEmptyObject(Alembic::Abc::IObject & iNode);
 
     bool hasSampledData();
 

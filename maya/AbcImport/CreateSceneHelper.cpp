@@ -298,40 +298,45 @@ void CreateSceneVisitor::checkShaderSelection(MFnMesh & iMesh,
 
 void CreateSceneVisitor::visit(Alembic::Abc::IObject & iObj)
 {
-    if ( Alembic::AbcGeom::IXform::matches(iObj.getHeader()) )
+    const Alembic::AbcCoreAbstract::ObjectHeader & header = iObj.getHeader();
+    if ( Alembic::AbcGeom::IXform::matches(header) )
     {
         Alembic::AbcGeom::IXform xform(iObj, Alembic::Abc::kWrapExisting);
         (*this)(xform);
     }
-    else if ( Alembic::AbcGeom::ISubD::matches(iObj.getHeader()) )
+    else if ( Alembic::AbcGeom::ISubD::matches(header) )
     {
         Alembic::AbcGeom::ISubD mesh(iObj, Alembic::Abc::kWrapExisting);
         (*this)(mesh);
     }
-    else if ( Alembic::AbcGeom::IPolyMesh::matches(iObj.getHeader()) )
+    else if ( Alembic::AbcGeom::IPolyMesh::matches(header) )
     {
         Alembic::AbcGeom::IPolyMesh mesh(iObj, Alembic::Abc::kWrapExisting);
         (*this)(mesh);
     }
-    else if ( Alembic::AbcGeom::ICamera::matches(iObj.getHeader()) )
+    else if ( Alembic::AbcGeom::ICamera::matches(header) )
     {
         Alembic::AbcGeom::ICamera cam(iObj, Alembic::Abc::kWrapExisting);
         (*this)(cam);
     }
-    else if ( Alembic::AbcGeom::ICurves::matches(iObj.getHeader()) )
+    else if ( Alembic::AbcGeom::ICurves::matches(header) )
     {
         Alembic::AbcGeom::ICurves curves(iObj, Alembic::Abc::kWrapExisting);
         (*this)(curves);
     }
-    else if ( Alembic::AbcGeom::INuPatch::matches(iObj.getHeader()) )
+    else if ( Alembic::AbcGeom::INuPatch::matches(header) )
     {
         Alembic::AbcGeom::INuPatch nurbs(iObj, Alembic::Abc::kWrapExisting);
         (*this)(nurbs);
     }
-    else if ( Alembic::AbcGeom::IPoints::matches(iObj.getHeader()) )
+    else if ( Alembic::AbcGeom::IPoints::matches(header) )
     {
         Alembic::AbcGeom::IPoints pts(iObj, Alembic::Abc::kWrapExisting);
         (*this)(pts);
+    }
+    else if ( header.getMetaData().get("schema") == "" )
+    {
+        createEmptyObject(iObj);
     }
     else
     {
@@ -1178,3 +1183,107 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
 
     return status;
 }
+
+MStatus CreateSceneVisitor::createEmptyObject(Alembic::Abc::IObject & iNode)
+{
+    MStatus status = MS::kSuccess;
+    MObject xformObj = MObject::kNullObj;
+
+    MString name(iNode.getName().c_str());
+
+    size_t numChildren = iNode.getNumChildren();
+
+    bool hasDag = false;
+
+    if (mAction != NONE && mConnectDagNode.isValid())
+    {
+        hasDag = getDagPathByChildName(mConnectDagNode, iNode.getName());
+        if (hasDag)
+        {
+            xformObj = mConnectDagNode.node();
+        }
+    }
+
+    // There might be children under the current DAG node that
+    // doesn't exist in the file.
+    // Remove them if the -removeIfNoUpdate flag is set
+    if ((mAction == REMOVE || mAction == CREATE_REMOVE) &&
+        mConnectDagNode.isValid())
+    {
+        unsigned int numDags = mConnectDagNode.childCount();
+        std::vector<MDagPath> dagToBeRemoved;
+
+        // get names of immediate children so we can compare with
+        // the hierarchy in the scene
+        std::set< std::string > childNodesInFile;
+        for (size_t j = 0; j < numChildren; ++j)
+        {
+            Alembic::Abc::IObject child = iNode.getChild(j);
+            childNodesInFile.insert(child.getName());
+        }
+
+        for (unsigned int i = 0; i < numDags; i++)
+        {
+            MObject child = mConnectDagNode.child(i);
+            MFnDagNode fn(child, &status);
+            if ( status == MS::kSuccess )
+            {
+                std::string childName = fn.fullPathName().asChar();
+                size_t found = childName.rfind("|");
+
+                if (found != std::string::npos)
+                {
+                    childName = childName.substr(
+                        found+1, childName.length() - found);
+                    if (childNodesInFile.find(childName)
+                        == childNodesInFile.end())
+                    {
+                        MDagPath dagPath;
+                        getDagPathByName(fn.fullPathName(), dagPath);
+                        dagToBeRemoved.push_back(dagPath);
+                    }
+                }
+            }
+        }
+        if (dagToBeRemoved.size() > 0)
+        {
+            unsigned int dagSize =
+                static_cast<unsigned int>(dagToBeRemoved.size());
+            for ( unsigned int i = 0; i < dagSize; i++ )
+                removeDagNode(dagToBeRemoved[i]);
+        }
+    }
+
+    // just create the node
+    if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE ))
+    {
+        MFnTransform trans;
+        xformObj = trans.create(mParent, &status);
+
+        if (status != MS::kSuccess)
+        {
+            MString theError("Failed to create transform node ");
+            theError += name;
+            printError(theError);
+            return status;
+        }
+
+        trans.setName(name);
+    }
+
+    MObject saveParent = xformObj;
+    for (size_t i = 0; i < numChildren; ++i)
+    {
+        Alembic::Abc::IObject child = iNode.getChild(i);
+        mParent = saveParent;
+
+        this->visit(child);
+    }
+
+    if (hasDag)
+    {
+        mConnectDagNode.pop();
+    }
+    return status;
+}
+
