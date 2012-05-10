@@ -732,12 +732,18 @@ int main( int argc, char *argv[] )
                 {
                     minIndexMap.insert(std::make_pair(min, i-2));
                 }
-                else if (argv[2] != argv[i-2])
+                else if (argv[2] != argv[i])
                 {
                     std::cerr << "ERROR: overlapping frame range between "
-                        << argv[2] << " and " << argv[i-2] << std::endl;
+                        << argv[2] << " and " << argv[i] << std::endl;
                     return 1;
                 }
+            }
+            else
+            {
+                std::cerr << "ERROR: " << archive.getName() <<
+                    " only has default (static) TimeSampling." << std::endl;
+                return 1;
             }
 
             iArchives.push_back(archive);
