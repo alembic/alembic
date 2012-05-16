@@ -53,7 +53,8 @@ ArImpl::ArImpl( const std::string &iFileName,
 {
     // OPEN THE FILE!
     htri_t exi = H5Fis_hdf5( m_fileName.c_str() );
-    ABCA_ASSERT( exi == 1, "Nonexistent File: " << m_fileName );
+    ABCA_ASSERT( exi == 1, "Nonexistent or not an Alembic file: "
+        << m_fileName );
 
     m_file = H5Fopen( m_fileName.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
     ABCA_ASSERT( m_file >= 0,
