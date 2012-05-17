@@ -95,7 +95,7 @@ void stitchArrayProp(const PropertyHeader & propHeader,
     size_t numInputs = iCompoundProps.size();
     for (size_t iCpIndex = 0; iCpIndex < numInputs; iCpIndex++)
     {
-        IArrayProperty reader(iCompoundProps[iCpIndex], propName, metaData);
+        IArrayProperty reader(iCompoundProps[iCpIndex], propName);
         index_t numSamples = reader.getNumSamples();
 
         ArraySamplePtr dataPtr;
@@ -151,8 +151,8 @@ void stitchScalarProp(const PropertyHeader & propHeader,
     size_t numInputs = iCompoundProps.size();
     for (size_t iCpIndex = 0; iCpIndex < numInputs; iCpIndex++)
     {
-        IScalarProperty reader(iCompoundProps[iCpIndex], propName, metaData);
-        uint8_t extent = dataType.getExtent();  // dimention of the data
+        IScalarProperty reader(iCompoundProps[iCpIndex], propName);
+        uint8_t extent = dataType.getExtent();  // dimension of the data
 
         switch(dataType.getPod())
         {
@@ -218,13 +218,19 @@ void stitchCompoundProp(ICompoundPropertyVec & iCompoundProps,
         const PropertyHeader & propHeader =
             iCompoundProps[0].getPropertyHeader(propIndex);
 
-        // skip for now
         if (propHeader.isCompound())
         {
-            continue;
+            ICompoundPropertyVec childProps(iCompoundProps.size());
+            for (size_t i = 0; i < numProps; ++i)
+            {
+                childProps[i] = ICompoundProperty(iCompoundProps[i],
+                    propHeader.getName());
+            }
+            OCompoundProperty child(oCompoundProp, propHeader.getName(),
+                propHeader.getMetaData());
+            stitchCompoundProp(childProps, child);
         }
-
-        if (propHeader.isScalar())
+        else if (propHeader.isScalar())
         {
             stitchScalarProp(propHeader, iCompoundProps, oCompoundProp);
         }

@@ -276,6 +276,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
 
+                Abc::V3fArraySamplePtr velocPtr = iSamp.getVelocities();
+                if (velocPtr)
+                    oSamp.setVelocities(*velocPtr);
+
                 Abc::Int32ArraySamplePtr faceIndicesPtr = iSamp.getFaceIndices();
                 if (faceIndicesPtr)
                     oSamp.setFaceIndices(*faceIndicesPtr);
@@ -360,6 +364,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 Abc::P3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
+
+                Abc::V3fArraySamplePtr velocPtr = iSamp.getVelocities();
+                if (velocPtr)
+                    oSamp.setVelocities(*velocPtr);
 
                 Abc::Int32ArraySamplePtr faceIndicesPtr = iSamp.getFaceIndices();
                 if (faceIndicesPtr)
@@ -453,6 +461,11 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 Abc::P3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
+
+                Abc::V3fArraySamplePtr velocPtr = iSamp.getVelocities();
+                if (velocPtr)
+                    oSamp.setVelocities(*velocPtr);
+
                 oSamp.setType(iSamp.getType());
                 Abc::Int32ArraySamplePtr curvsNumPtr = iSamp.getCurvesNumVertices();
                 if (curvsNumPtr)
@@ -527,7 +540,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                     oSamp.setIds(*idPtr);
                 Abc::V3fArraySamplePtr velocPtr = iSamp.getVelocities();
                 if (velocPtr)
-                    oSamp.setPositions(*velocPtr);
+                    oSamp.setVelocities(*velocPtr);
 
                 IFloatGeomParam::Sample iWidthSample;
                 OFloatGeomParam::Sample oWidthSample;
@@ -575,6 +588,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 Abc::P3fArraySamplePtr posPtr = iSamp.getPositions();
                 if (posPtr)
                     oSamp.setPositions(*posPtr);
+
+                Abc::V3fArraySamplePtr velocPtr = iSamp.getVelocities();
+                if (velocPtr)
+                    oSamp.setVelocities(*velocPtr);
 
                 oSamp.setNu(iSamp.getNumU());
                 oSamp.setNv(iSamp.getNumV());
@@ -630,8 +647,17 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
     }
     else
     {
-        std::cerr << iObjects[0].getFullName() << " is an unsupported schema" << std::endl;
-        return;
+        outObj = OObject(oParentObj, outObj.getName(), outObj.getMetaData());
+
+        // collect the top level compound property
+        ICompoundPropertyVec iCompoundProps(iObjects.size());
+        for (size_t i = 0; i < iObjects.size(); i++)
+        {
+            iCompoundProps[i] = iObjects[i].getProperties();
+        }
+
+        OCompoundProperty oCompoundProperty = outObj.getProperties();
+        stitchCompoundProp(iCompoundProps, oCompoundProperty);
     }
 
     // After done writing THIS OObject node, if input nodes have children,
