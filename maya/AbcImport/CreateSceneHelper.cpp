@@ -401,6 +401,14 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
                 this->visit(obj);
                 mParent = saveParent;
             }
+            else if (mAction != CREATE && mAction != CREATE_REMOVE)
+            {
+                MString theWarning("Could not find: ");
+                theWarning += name.c_str();
+                theWarning += " in the scene.";
+                theWarning += "  Skipping it and all descendants.";
+                printWarning(theWarning);
+            }
             else
             {
                 mConnectDagNode = MDagPath();
@@ -631,7 +639,13 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
             return status;
         }
 
-        addToPropList(firstProp, curvesObj);
+        if (!fncurve.object().isNull())
+        {
+            MPlug dstPlug = fncurve.findPlug("create");
+            disconnectAllPlugsTo(dstPlug);
+            disconnectProps(fncurve, mData.mPropList, firstProp);
+            addToPropList(firstProp, curvesObj);
+        }
     }
 
     if (hasDag)
@@ -942,7 +956,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
             return status;
         }
 
-        disconnectMesh(nurbsObj, mData.mPropList, firstProp);
+        MPlug dstPlug = fn.findPlug("create");
+        disconnectAllPlugsTo(dstPlug);
+        disconnectProps(fn, mData.mPropList, firstProp);
         addToPropList(firstProp, nurbsObj);
     }
 
