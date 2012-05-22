@@ -272,18 +272,6 @@ bool util::isAnimated(MObject & object, bool checkParent)
         MObject node = iter.thisNode();
         MPlug plug = iter.thisPlug();
 
-        if (node.hasFn(MFn::kExpression))
-        {
-            MFnExpression fn(node, &stat);
-            if (stat == MS::kSuccess && fn.isAnimated())
-            {
-                return true;
-            }
-        }
-        if (MAnimUtil::isAnimated(node, checkParent))
-        {
-            return true;
-        }
         if (node.hasFn(MFn::kPluginDependNode) ||
                 node.hasFn( MFn::kConstraint ) ||
                 node.hasFn(MFn::kPointConstraint) ||
@@ -305,6 +293,20 @@ bool util::isAnimated(MObject & object, bool checkParent)
                 node.hasFn(MFn::kCluster) ||
                 node.hasFn(MFn::kFluid) || 
                 node.hasFn(MFn::kPolyBoolOp))
+        {
+            return true;
+        }
+
+        if (node.hasFn(MFn::kExpression))
+        {
+            MFnExpression fn(node, &stat);
+            if (stat == MS::kSuccess && fn.isAnimated())
+            {
+                return true;
+            }
+        }
+
+        if (MAnimUtil::isAnimated(node, checkParent))
         {
             return true;
         }
