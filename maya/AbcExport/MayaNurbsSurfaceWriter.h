@@ -57,7 +57,6 @@ class MayaNurbsSurfaceWriter
   private:
 
     bool mIsSurfaceAnimated;
-    bool mIsTrimCurveAnimated;
     MDagPath mDagPath;
 
     AttributesWriterPtr mAttrs;
