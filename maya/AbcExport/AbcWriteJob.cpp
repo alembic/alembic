@@ -38,20 +38,44 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 namespace
 {
-    bool hasDuplicates(const util::ShapeSet & dagPath)
+    void hasDuplicates(const util::ShapeSet & dagPath, bool stripNamespace)
     {
-        std::set<std::string> roots;
+        std::map<std::string, MDagPath> roots;
         const util::ShapeSet::const_iterator end = dagPath.end();
         for (util::ShapeSet::const_iterator it = dagPath.begin();
             it != end; it++)
         {
-            MFnTransform mFn(it->node());
-            if (roots.count(mFn.name().asChar()) > 0)
-                return true;
+            std::string fullName = it->fullPathName().asChar();
+            if (!fullName.empty() && fullName[0] == '|')
+            {
+                fullName = fullName.substr(1);
+            }
+
+            if (stripNamespace)
+            {
+                MString name = fullName.c_str();
+                fullName = util::stripNamespaces(name).asChar();
+            }
+
+            std::map<std::string, MDagPath>::iterator strIt =
+                roots.find(fullName);
+            if (strIt != roots.end())
+            {
+                std::string theError = "Conflicting root node names specified: ";
+                theError += it->fullPathName().asChar();
+                theError += " ";
+                theError += strIt->second.fullPathName().asChar();
+                if (stripNamespace)
+                {
+                    theError += " with -stripNamespace specified.";
+                }
+                throw std::runtime_error(theError);
+            }
             else
-                roots.insert(mFn.name().asChar());
+            {
+                roots[fullName] = *it;
+            }
         }
-        return false;
     }
 
     class CallWriteVisitor : public boost::static_visitor<>
@@ -236,6 +260,8 @@ AbcWriteJob::AbcWriteJob(const char * iFileName,
     if (mArgs.useSelectionList)
     {
 
+        bool emptyDagPaths = mArgs.dagPaths.empty();
+
         // get the active selection
         MSelectionList activeList;
         MGlobal::getActiveSelectionList(activeList);
@@ -252,6 +278,11 @@ AbcWriteJob::AbcWriteJob(const char * iFileName,
                 {
                     dagPath.pop();
                     mSList.add(dagPath, MObject::kNullObj, true);
+                }
+
+                if (emptyDagPaths)
+                {
+                    mArgs.dagPaths.insert(dagPath);
                 }
             }
         }
@@ -783,10 +814,7 @@ bool AbcWriteJob::eval(double iFrame)
     {
         // check if the shortnames of any two nodes are the same
         // if so, exit here
-        if (hasDuplicates(mArgs.dagPaths))
-        {
-            throw std::runtime_error("The names of root nodes are the same");
-        }
+        hasDuplicates(mArgs.dagPaths, mArgs.stripNamespace);
 
         std::string appWriter = "Maya ";
         appWriter += MGlobal::mayaVersion().asChar();
@@ -814,8 +842,8 @@ bool AbcWriteJob::eval(double iFrame)
 
         if (!mRoot.valid())
         {
-            MGlobal::displayError("Unable to create abc file");
-            throw std::runtime_error("Unable to create abc file");
+            std::string theError = "Unable to create abc file";
+            throw std::runtime_error(theError);
         }
 
         util::ShapeSet::const_iterator end = mArgs.dagPaths.end();

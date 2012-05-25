@@ -77,6 +77,8 @@ void* AbcExport::creator()
 
 MStatus AbcExport::doIt(const MArgList & args)
 {
+try
+{
     MStatus status;
 
     MTime oldCurTime = MAnimControl::currentTime();
@@ -646,8 +648,10 @@ MStatus AbcExport::doIt(const MArgList & args)
                 }  // for n
             }  // for m
         }
-        // no root is specified use the root
-        else if (!hasRoot)
+        // no root is specified, and we aren't using a selection
+        // so we'll try to translate the whole Maya scene by using all
+        // children of the world as roots.
+        else if (!hasRoot && !jobArgs.useSelectionList)
         {
             MSelectionList sel;
 #if MAYA_API_VERSION >= 201100
@@ -665,12 +669,23 @@ MStatus AbcExport::doIt(const MArgList & args)
                 jobArgs.dagPaths.insert(path);
             }
         }
-        // no valid roots were found
-        else if (jobArgs.dagPaths.empty())
+        else if (hasRoot && jobArgs.dagPaths.empty())
         {
-            MString errorMsg = "No valid roots were found.";
+            MString errorMsg = "No valid root nodes were specified.";
             MGlobal::displayError(errorMsg);
             return MS::kFailure;
+        }
+        else if (jobArgs.useSelectionList)
+        {
+            MSelectionList activeList;
+            MGlobal::getActiveSelectionList(activeList);
+            if (activeList.length() == 0)
+            {
+                MString errorMsg =
+                    "-selection specified but nothing is actively selected.";
+                MGlobal::displayError(errorMsg);
+                return MS::kFailure;
+            }
         }
 
         AbcA::TimeSamplingPtr transTime, geoTime;
@@ -808,6 +823,22 @@ MStatus AbcExport::doIt(const MArgList & args)
     MGlobal::viewFrame(oldCurTime);
 
     return MS::kSuccess;
+}
+catch (Alembic::Util::Exception & e)
+{
+    MString theError("Alembic Exception encountered: ");
+    theError += e.what();
+    MGlobal::displayError(theError);
+    return MS::kFailure;
+}
+catch (std::exception & e)
+{
+    MString theError("std::exception encountered: ");
+    theError += e.what();
+    MGlobal::displayError(theError);
+    return MS::kFailure;
+}
+
 }
 
 
