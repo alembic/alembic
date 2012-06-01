@@ -219,7 +219,7 @@ public:
         return m_idsProperty;
     }
 
-    IFloatGeomParam getWidthsParam()
+    IFloatGeomParam &getWidthsParam()
     {
         return m_widthsParam;
     }
