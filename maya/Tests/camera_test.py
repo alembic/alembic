@@ -46,8 +46,8 @@ def createCamera():
     MayaCmds.setAttr(name[1]+'.horizontalFilmAperture', 0.962)
     MayaCmds.setAttr(name[1]+'.verticalFilmAperture', 0.731)
     MayaCmds.setAttr(name[1]+'.focalLength', 50)
-    MayaCmds.setAttr(name[1]+'.focusDistance', 5)
-    MayaCmds.setAttr(name[1]+'.shutterAngle', 144)
+    MayaCmds.setAttr(name[1]+'.focusDistance', 3)
+    MayaCmds.setAttr(name[1]+'.shutterAngle', 100)
     return name
 
 class cameraTest(unittest.TestCase):
@@ -67,6 +67,24 @@ class cameraTest(unittest.TestCase):
         # write to file
         self.__files.append(util.expandFileName('testStaticCameraReadWrite.abc'))
         MayaCmds.AbcExport(j='-root %s -file %s' % (name[0], self.__files[-1]))
+
+        # read from file
+        MayaCmds.AbcImport(self.__files[-1], mode='import')
+        camList = MayaCmds.ls(type='camera')
+        self.failUnless(util.compareCamera(camList[0], camList[1]))
+
+    def testFakeAnimCameraReadWrite(self):
+        name = createCamera()
+
+        MayaCmds.currentTime(1, update=True)
+        MayaCmds.setKeyframe(name[1], attribute='horizontalFilmAperture')
+        MayaCmds.setKeyframe(name[1], attribute='focalLength')
+        MayaCmds.setKeyframe(name[1], attribute='focusDistance')
+        MayaCmds.setKeyframe(name[1], attribute='shutterAngle')
+
+        # write to file
+        self.__files.append(util.expandFileName('testFakeAnimCameraReadWrite.abc'))
+        MayaCmds.AbcExport(j='-fr 1 10 -root %s -file %s' % (name[0], self.__files[-1]))
 
         # read from file
         MayaCmds.AbcImport(self.__files[-1], mode='import')

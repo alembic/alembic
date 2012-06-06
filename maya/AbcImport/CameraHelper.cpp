@@ -282,7 +282,7 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
         }
     }
 
-    if (schema.getNumSamples() == 1)
+    if (schema.isConstant())
     {
 
         // no center of interest
