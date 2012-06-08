@@ -43,9 +43,6 @@
 #include <Alembic/Util/Murmur3.h>
 #include <Alembic/Util/OperatorBool.h>
 #include <Alembic/Util/PlainOldDataType.h>
-#include <Alembic/Util/Singleton.h>
-#include <Alembic/Util/SmartPtrHelp.h>
 #include <Alembic/Util/TokenMap.h>
-#include <Alembic/Util/VecN.h>
 
 #endif

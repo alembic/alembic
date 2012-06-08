@@ -46,11 +46,8 @@ SET( H_FILES
      Murmur3.h
      OperatorBool.h
      PlainOldDataType.h
-     Singleton.h
-     SmartPtrHelp.h
      TokenMap.h
-     All.h
-     VecN.h )
+     All.h )
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicUtil ${SOURCE_FILES} )
