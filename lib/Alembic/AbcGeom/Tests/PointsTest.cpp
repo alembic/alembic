@@ -37,7 +37,7 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <ImathRandom.h>
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace AbcG = Alembic::AbcGeom;
 using namespace AbcG;

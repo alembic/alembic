@@ -44,7 +44,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 

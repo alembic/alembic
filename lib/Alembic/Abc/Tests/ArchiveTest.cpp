@@ -36,7 +36,7 @@
 
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/Abc/All.h>
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;

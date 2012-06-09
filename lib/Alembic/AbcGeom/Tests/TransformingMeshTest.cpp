@@ -42,7 +42,7 @@
 // Other includes
 #include <math.h>
 
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #include <Alembic/AbcGeom/Tests/MeshData.h>
 

@@ -38,7 +38,6 @@
 #define _Alembic_Util_Digest_h_
 
 #include <Alembic/Util/Foundation.h>
-#include <boost/format.hpp>
 #include <boost/cstdint.hpp>
 
 namespace Alembic {
@@ -81,7 +80,8 @@ struct Digest : public boost::totally_ordered<Digest>
     {
         for ( int i = 0; i < 16; ++i )
         {
-            ostr << ( boost::format( "%02x" ) % ( int )(d[i]) );
+            ostr << std::setfill( '0' ) << std::setw( 2 ) <<
+                std::hex << std::noshowbase << ( int ) d[i];
         }
     }
 

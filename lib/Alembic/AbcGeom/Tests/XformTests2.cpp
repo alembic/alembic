@@ -36,7 +36,7 @@
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
-#include <Alembic/Abc/Tests/Assert.h>
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 using namespace Alembic::AbcGeom;
 

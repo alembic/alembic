@@ -36,8 +36,6 @@
 
 #include <Alembic/AbcGeom/XformOp.h>
 
-#include <boost/format.hpp>
-
 namespace Alembic {
 namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {

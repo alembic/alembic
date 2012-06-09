@@ -50,6 +50,7 @@
 
 #include <half.h>
 
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <exception>

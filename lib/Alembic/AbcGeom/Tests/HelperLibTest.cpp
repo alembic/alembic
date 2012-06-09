@@ -42,7 +42,7 @@
 #include <boost/random.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace Abc = Alembic::Abc;
 

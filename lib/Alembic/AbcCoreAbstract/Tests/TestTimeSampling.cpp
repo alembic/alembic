@@ -46,15 +46,11 @@
 
 #include <vector>
 #include <iostream>
-#include <boost/format.hpp>
-#include <boost/preprocessor/stringize.hpp>
 
 //-*****************************************************************************
 namespace AbcA = Alembic::AbcCoreAbstract::v3;
 using AbcA::chrono_t;
 using AbcA::index_t;
-
-using namespace boost;
 
 typedef std::vector<chrono_t> TimeVector;
 
@@ -167,28 +163,25 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
             timeI, numSamples ).first;
 
         // floor
-        TESTING_MESSAGE_ASSERT(
-            floorIndex == i,
-            ( boost::format( "Sample %d is time %d, and "
-                             "getFloorIndex( %d ) is %d. It should be %d" )
-              % i % timeI % timeI % floorIndex % i )
-                   );
+        std::stringstream floorMsg;
+        floorMsg << "Sample " << i << " is time " << timeI <<
+            ", and getFloorIndex( " << timeI << " ) is " << floorIndex <<
+            ". It should be " << i;
+        TESTING_MESSAGE_ASSERT( floorIndex == i, floorMsg.str() );
 
         // ceiling
-        TESTING_MESSAGE_ASSERT(
-            ceilIndex == i,
-            ( boost::format( "Sample %d is time %d, and "
-                             "getCeilIndex( %d ) is %d. It should be %d" )
-              % i % timeI % timeI % ceilIndex % i )
-                   );
+        std::stringstream ceilMsg;
+        ceilMsg << "Sample " << i << " is time " << timeI <<
+            ", and getCeilIndex( " << timeI << " ) is " << ceilIndex <<
+            ". It should be " << i;
+        TESTING_MESSAGE_ASSERT( ceilIndex == i, ceilMsg.str() );
 
         // nearest
-        TESTING_MESSAGE_ASSERT(
-            nearIndex == i,
-            ( boost::format( "Sample %d is time %d, and "
-                             "getNearIndex( %d ) is %d. It should be %d" )
-              % i % timeI % timeI % nearIndex % i )
-                   );
+        std::stringstream nearMsg;
+        nearMsg << "Sample " << i << " is time " << timeI <<
+            ", and getNearIndex( " << timeI << " ) is " << nearIndex <<
+            ". It should be " << i;
+        TESTING_MESSAGE_ASSERT( nearIndex == i, nearMsg.str() );
 
         if ( i > 0 )
         {

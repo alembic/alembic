@@ -62,7 +62,7 @@
 
 #include <Alembic/AbcGeom/Tests/NurbsData.h>
 
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 using namespace std;
 using namespace Alembic::AbcGeom;

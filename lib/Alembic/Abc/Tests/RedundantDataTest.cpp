@@ -41,7 +41,7 @@
 
 #include <set>
 
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;

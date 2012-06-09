@@ -37,7 +37,7 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <boost/random.hpp>
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #include <ImathMath.h>
 

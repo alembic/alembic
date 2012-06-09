@@ -48,7 +48,6 @@
 
 #include <boost/variant.hpp>
 #include <boost/smart_ptr.hpp>
-#include <boost/format.hpp>
 #include <boost/ref.hpp>
 #include <boost/type_traits.hpp>
 

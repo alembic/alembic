@@ -155,18 +155,15 @@ ArImpl::~ArImpl()
 
         if ( objCount != 0 )
         {
-            std::string excStr =
-                ( boost::format(
-                      "Open HDF5 handles detected during reading:\n"
-                      "DataSets: %d, Groups: %d, "
-                      "DataTypes: %d, Attributes: %d" )
-                  % dsetCount
-                  % grpCount
-                  % dtypCount
-                  % attrCount ).str();
+            std::stringstream strm;
+            strm << "Open HDF5 handles detected during reading:" << std::endl
+                 << "DataSets: " << dsetCount
+                 << ", Groups: " << grpCount
+                 << ", DataTypes: " << dtypCount 
+                 << ", Attributes: " << attrCount;
 
             m_file = -1;
-            ABCA_THROW( excStr );
+            ABCA_THROW( strm.str() );
         }
 
         H5Fclose( m_file );

@@ -69,7 +69,7 @@
 // to keep this example code clean.
 #include <Alembic/AbcGeom/Tests/MeshData.h>
 
-#include "Assert.h"
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 //-*****************************************************************************
 //-*****************************************************************************
