@@ -40,6 +40,11 @@
 #include <Alembic/Util/Foundation.h>
 #include <Alembic/Util/Exception.h>
 
+// stdint.h is not in anything prior to Visual Studio 2010
+#if !defined(__MSC_VER) || __MSC_VER >= 1600
+#include <stdint.h>
+#endif
+
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
@@ -131,19 +136,26 @@ inline bool operator!=( bool a, const bool_t &b )
     return a != b.asBool();
 }
 
-//-*****************************************************************************
-//! Name standardization and namespace promotion of explicit types.
-//! The reason we use the boost types instead of the cstdint types is because
-//! Microsoft has wisely chosen to omit <cstdint> from Windows Visual C++.
-//! Grumble. boost::cstdint.hpp remedies this oversight.
-using boost::uint8_t;
-using boost::int8_t;
-using boost::uint16_t;
-using boost::int16_t;
-using boost::uint32_t;
-using boost::int32_t;
-using boost::uint64_t;
-using boost::int64_t;
+#if !defined(__MSC_VER) || __MSC_VER >= 1600
+using ::uint8_t;
+using ::int8_t;
+using ::uint16_t;
+using ::int16_t;
+using ::uint32_t;
+using ::int32_t;
+using ::uint64_t;
+using ::int64_t;
+#else
+typedef unsigned char           uint8_t;
+typedef signed char             int8_t;
+typedef unsigned short          uint16_t;
+typedef signed short            int16_t;
+typedef unsigned int            uint32_t;
+typedef int                     int32_t;
+typedef unsigned long long      uint64_t;
+typedef long long               int64_t;
+#endif
+
 typedef half                    float16_t;
 typedef float                   float32_t;
 typedef double                  float64_t;

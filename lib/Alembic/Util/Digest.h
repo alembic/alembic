@@ -38,14 +38,11 @@
 #define _Alembic_Util_Digest_h_
 
 #include <Alembic/Util/Foundation.h>
-#include <boost/cstdint.hpp>
+#include <Alembic/Util/PlainOldDataType.h>
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
-
-using boost::uint8_t;
-using boost::uint64_t;
 
 //-*************************************************************************
 // Digest class. This is a 128 bit hash key produced by our hashing algorithm.

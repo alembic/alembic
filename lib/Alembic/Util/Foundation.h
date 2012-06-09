@@ -43,7 +43,6 @@
 #include <boost/static_assert.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/utility.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/array.hpp>
 #include <boost/operators.hpp>
 #include <boost/foreach.hpp>

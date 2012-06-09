@@ -37,14 +37,11 @@
 
 #include <boost/detail/endian.hpp>
 #include <Alembic/Util/Murmur3.h>
-#include <boost/cstdint.hpp>
+#include <Alembic/Util/PlainOldDataType.h>
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
-
-using boost::uint8_t;
-using boost::uint64_t;
 
 //-*****************************************************************************
 void MurmurHash3_x64_128 ( const void * key, const size_t len,
