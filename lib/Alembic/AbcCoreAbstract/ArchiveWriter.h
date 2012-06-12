@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -66,7 +66,7 @@ struct ArchiveWriterConstructor
 //! The Archive is "the file". It has a single object, it's top object.
 //! It has no properties, but does have metadata.
 class ArchiveWriter
-    : private boost::noncopyable
+    : private Alembic::Util::noncopyable
 {
 protected:
     ArchiveWriter()

@@ -40,12 +40,13 @@
 #include <boost/thread/once.hpp>
 #endif
 
-#include <boost/static_assert.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/utility.hpp>
 #include <boost/array.hpp>
 #include <boost/operators.hpp>
 #include <boost/foreach.hpp>
+
+#include <tr1/memory>
+#include <memory>
 
 #include <half.h>
 
@@ -70,7 +71,24 @@ namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-// Nothing!
+using std::tr1::dynamic_pointer_cast;
+using std::tr1::enable_shared_from_this;
+using std::tr1::shared_ptr;
+using std::tr1::static_pointer_cast;
+using std::tr1::weak_ptr;
+
+using std::auto_ptr;
+
+class noncopyable
+{
+protected:
+    noncopyable() {}
+    ~noncopyable() {}
+
+private:
+    noncopyable( const noncopyable& );
+    const noncopyable& operator=( const noncopyable& );
+};
 
 } // End namespace ALEMBIC_VERSION_NS
 

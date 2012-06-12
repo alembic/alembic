@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -44,12 +44,12 @@ namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-typedef boost::weak_ptr<AbcA::ArraySample> ArraySampleWeakPtr;
+typedef Alembic::Util::weak_ptr<AbcA::ArraySample> ArraySampleWeakPtr;
 
 //-*****************************************************************************
 class CacheImpl;
-typedef boost::shared_ptr<CacheImpl> CacheImplPtr;
-typedef boost::weak_ptr<CacheImpl> CacheImplWeakPtr;
+typedef Alembic::Util::shared_ptr<CacheImpl> CacheImplPtr;
+typedef Alembic::Util::weak_ptr<CacheImpl> CacheImplWeakPtr;
 
 //-*****************************************************************************
 //! This class is underimplemented. It ought to allow limits on storage.

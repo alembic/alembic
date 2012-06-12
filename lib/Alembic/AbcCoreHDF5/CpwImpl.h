@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 class CpwImpl
     : public AbcA::CompoundPropertyWriter
-    , public boost::enable_shared_from_this<CpwImpl>
+    , public Alembic::Util::enable_shared_from_this<CpwImpl>
 {
 public:
 

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -137,41 +137,6 @@ public:
     ALEMBIC_OPERATOR_BOOL( ArraySample::valid() );
 };
 
-#if 0
-//-*****************************************************************************
-// We need a "side-along" TypedArraySamplePtr. Taking advantage of the fact
-// that static-cast is valid here.
-template <class TRAITS>
-inline boost::shared_ptr<TypedArraySample<TRAITS> >
-AllocateTypedArraySample( const Dimensions &iDims )
-{
-    typedef typename TRAITS::value_type value_type;
-
-    const AbcA::DataType &dtype = TRAITS::dataType();
-    size_t numElems = iDims.numPoints();
-    if ( numElems > 0 )
-    {
-        // Allocate data
-        value_type *data = new value_type[numElems];
-
-        // Allocate typed array sample with fancy deleter
-        boost::shared_ptr<TypedArraySample<TRAITS> >
-            ret( new TypedArraySample<TRAITS>(
-                     reinterpret_cast<const void *>( data ),
-                     dtype, iDims ),
-                 AbcA::TArrayDeleter<value_type>() );
-        return ret;
-    }
-    else
-    {
-        boost::shared_ptr<TypedArraySample<TRAITS> >
-            ret( new TypedArraySample<TRAITS>(
-                     ( const void * )NULL, iDims ) );
-        return ret;
-    }
-}
-#endif
-
 //-*****************************************************************************
 // TYPEDEFS
 //-*****************************************************************************
@@ -239,68 +204,68 @@ typedef TypedArraySample<N3fTPTraits> N3fArraySample;
 typedef TypedArraySample<N3dTPTraits> N3dArraySample;
 
 //-*****************************************************************************
-typedef boost::shared_ptr<BoolArraySample> BoolArraySamplePtr;
-typedef boost::shared_ptr<UcharArraySample> UcharArraySamplePtr;
-typedef boost::shared_ptr<CharArraySample> CharArraySamplePtr;
-typedef boost::shared_ptr<UInt16ArraySample> UInt16ArraySamplePtr;
-typedef boost::shared_ptr<Int16ArraySample> Int16ArraySamplePtr;
-typedef boost::shared_ptr<UInt32ArraySample> UInt32ArraySamplePtr;
-typedef boost::shared_ptr<Int32ArraySample> Int32ArraySamplePtr;
-typedef boost::shared_ptr<UInt64ArraySample> UInt64ArraySamplePtr;
-typedef boost::shared_ptr<Int64ArraySample> Int64ArraySamplePtr;
-typedef boost::shared_ptr<HalfArraySample> HalfArraySamplePtr;
-typedef boost::shared_ptr<FloatArraySample> FloatArraySamplePtr;
-typedef boost::shared_ptr<DoubleArraySample> DoubleArraySamplePtr;
-typedef boost::shared_ptr<StringArraySample> StringArraySamplePtr;
-typedef boost::shared_ptr<WstringArraySample> WstringArraySamplePtr;
+typedef Alembic::Util::shared_ptr<BoolArraySample> BoolArraySamplePtr;
+typedef Alembic::Util::shared_ptr<UcharArraySample> UcharArraySamplePtr;
+typedef Alembic::Util::shared_ptr<CharArraySample> CharArraySamplePtr;
+typedef Alembic::Util::shared_ptr<UInt16ArraySample> UInt16ArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Int16ArraySample> Int16ArraySamplePtr;
+typedef Alembic::Util::shared_ptr<UInt32ArraySample> UInt32ArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Int32ArraySample> Int32ArraySamplePtr;
+typedef Alembic::Util::shared_ptr<UInt64ArraySample> UInt64ArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Int64ArraySample> Int64ArraySamplePtr;
+typedef Alembic::Util::shared_ptr<HalfArraySample> HalfArraySamplePtr;
+typedef Alembic::Util::shared_ptr<FloatArraySample> FloatArraySamplePtr;
+typedef Alembic::Util::shared_ptr<DoubleArraySample> DoubleArraySamplePtr;
+typedef Alembic::Util::shared_ptr<StringArraySample> StringArraySamplePtr;
+typedef Alembic::Util::shared_ptr<WstringArraySample> WstringArraySamplePtr;
 
-typedef boost::shared_ptr<V2sArraySample> V2sArraySamplePtr;
-typedef boost::shared_ptr<V2iArraySample> V2iArraySamplePtr;
-typedef boost::shared_ptr<V2fArraySample> V2fArraySamplePtr;
-typedef boost::shared_ptr<V2dArraySample> V2dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<V2sArraySample> V2sArraySamplePtr;
+typedef Alembic::Util::shared_ptr<V2iArraySample> V2iArraySamplePtr;
+typedef Alembic::Util::shared_ptr<V2fArraySample> V2fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<V2dArraySample> V2dArraySamplePtr;
 
-typedef boost::shared_ptr<V3sArraySample> V3sArraySamplePtr;
-typedef boost::shared_ptr<V3iArraySample> V3iArraySamplePtr;
-typedef boost::shared_ptr<V3fArraySample> V3fArraySamplePtr;
-typedef boost::shared_ptr<V3dArraySample> V3dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<V3sArraySample> V3sArraySamplePtr;
+typedef Alembic::Util::shared_ptr<V3iArraySample> V3iArraySamplePtr;
+typedef Alembic::Util::shared_ptr<V3fArraySample> V3fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<V3dArraySample> V3dArraySamplePtr;
 
-typedef boost::shared_ptr<P2sArraySample> P2sArraySamplePtr;
-typedef boost::shared_ptr<P2iArraySample> P2iArraySamplePtr;
-typedef boost::shared_ptr<P2fArraySample> P2fArraySamplePtr;
-typedef boost::shared_ptr<P2dArraySample> P2dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<P2sArraySample> P2sArraySamplePtr;
+typedef Alembic::Util::shared_ptr<P2iArraySample> P2iArraySamplePtr;
+typedef Alembic::Util::shared_ptr<P2fArraySample> P2fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<P2dArraySample> P2dArraySamplePtr;
 
-typedef boost::shared_ptr<P3sArraySample> P3sArraySamplePtr;
-typedef boost::shared_ptr<P3iArraySample> P3iArraySamplePtr;
-typedef boost::shared_ptr<P3fArraySample> P3fArraySamplePtr;
-typedef boost::shared_ptr<P3dArraySample> P3dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<P3sArraySample> P3sArraySamplePtr;
+typedef Alembic::Util::shared_ptr<P3iArraySample> P3iArraySamplePtr;
+typedef Alembic::Util::shared_ptr<P3fArraySample> P3fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<P3dArraySample> P3dArraySamplePtr;
 
-typedef boost::shared_ptr<Box3sArraySample> Box3sArraySamplePtr;
-typedef boost::shared_ptr<Box3iArraySample> Box3iArraySamplePtr;
-typedef boost::shared_ptr<Box3fArraySample> Box3fArraySamplePtr;
-typedef boost::shared_ptr<Box3dArraySample> Box3dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Box3sArraySample> Box3sArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Box3iArraySample> Box3iArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Box3fArraySample> Box3fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Box3dArraySample> Box3dArraySamplePtr;
 
-typedef boost::shared_ptr<M33fArraySample> M33fArraySamplePtr;
-typedef boost::shared_ptr<M33dArraySample> M33dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<M33fArraySample> M33fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<M33dArraySample> M33dArraySamplePtr;
 
-typedef boost::shared_ptr<M44fArraySample> M44fArraySamplePtr;
-typedef boost::shared_ptr<M44dArraySample> M44dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<M44fArraySample> M44fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<M44dArraySample> M44dArraySamplePtr;
 
-typedef boost::shared_ptr<QuatfArraySample> QuatfArraySamplePtr;
-typedef boost::shared_ptr<QuatdArraySample> QuatdArraySamplePtr;
+typedef Alembic::Util::shared_ptr<QuatfArraySample> QuatfArraySamplePtr;
+typedef Alembic::Util::shared_ptr<QuatdArraySample> QuatdArraySamplePtr;
 
-typedef boost::shared_ptr<C3hArraySample> C3hArraySamplePtr;
-typedef boost::shared_ptr<C3fArraySample> C3fArraySamplePtr;
-typedef boost::shared_ptr<C3cArraySample> C3cArraySamplePtr;
+typedef Alembic::Util::shared_ptr<C3hArraySample> C3hArraySamplePtr;
+typedef Alembic::Util::shared_ptr<C3fArraySample> C3fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<C3cArraySample> C3cArraySamplePtr;
 
-typedef boost::shared_ptr<C4hArraySample> C4hArraySamplePtr;
-typedef boost::shared_ptr<C4fArraySample> C4fArraySamplePtr;
-typedef boost::shared_ptr<C4cArraySample> C4cArraySamplePtr;
+typedef Alembic::Util::shared_ptr<C4hArraySample> C4hArraySamplePtr;
+typedef Alembic::Util::shared_ptr<C4fArraySample> C4fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<C4cArraySample> C4cArraySamplePtr;
 
-typedef boost::shared_ptr<N2fArraySample> N2fArraySamplePtr;
-typedef boost::shared_ptr<N2dArraySample> N2dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<N2fArraySample> N2fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<N2dArraySample> N2dArraySamplePtr;
 
-typedef boost::shared_ptr<N3fArraySample> N3fArraySamplePtr;
-typedef boost::shared_ptr<N3dArraySample> N3dArraySamplePtr;
+typedef Alembic::Util::shared_ptr<N3fArraySample> N3fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<N3dArraySample> N3dArraySamplePtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -72,37 +72,27 @@ class BasePropertyReader;
 
 //-*****************************************************************************
 //! Smart Ptrs to Helper types.
-//! The Ptr suffix in Alembic _ALWAYS_ refers to a boost::shared_ptr of whatever
-//! class name precedes the Ptr suffix. We consider boost::shared_ptr to be
-//! a reliable and standard feature of C++, and worthy of inclusion in a
-//! standard.
-typedef boost::shared_ptr<ArraySample> ArraySamplePtr;
+//! The Ptr suffix in Alembic _ALWAYS_ refers to a shared_ptr of whatever
+//! class name precedes the Ptr suffix.
+typedef Alembic::Util::shared_ptr<ArraySample> ArraySamplePtr;
 
 //-*****************************************************************************
 //! Smart Ptrs to Writers.
-//! The Ptr suffix in Alembic _ALWAYS_ refers to a boost::shared_ptr of whatever
-//! class name precedes the Ptr suffix. We consider boost::shared_ptr to be
-//! a reliable and standard feature of C++, and worthy of inclusion in a
-//! standard.
-typedef boost::shared_ptr<ArchiveWriter> ArchiveWriterPtr;
-typedef boost::shared_ptr<ObjectWriter> ObjectWriterPtr;
-typedef boost::shared_ptr<CompoundPropertyWriter> CompoundPropertyWriterPtr;
-typedef boost::shared_ptr<ArrayPropertyWriter> ArrayPropertyWriterPtr;
-typedef boost::shared_ptr<ScalarPropertyWriter> ScalarPropertyWriterPtr;
-typedef boost::shared_ptr<BasePropertyWriter> BasePropertyWriterPtr;
+typedef Alembic::Util::shared_ptr<ArchiveWriter> ArchiveWriterPtr;
+typedef Alembic::Util::shared_ptr<ObjectWriter> ObjectWriterPtr;
+typedef Alembic::Util::shared_ptr<CompoundPropertyWriter> CompoundPropertyWriterPtr;
+typedef Alembic::Util::shared_ptr<ArrayPropertyWriter> ArrayPropertyWriterPtr;
+typedef Alembic::Util::shared_ptr<ScalarPropertyWriter> ScalarPropertyWriterPtr;
+typedef Alembic::Util::shared_ptr<BasePropertyWriter> BasePropertyWriterPtr;
 
 //-*****************************************************************************
 //! Smart Ptrs to Readers.
-//! The Ptr suffix in Alembic _ALWAYS_ refers to a boost::shared_ptr of whatever
-//! class name precedes the Ptr suffix. We consider boost::shared_ptr to be
-//! a reliable and standard feature of C++, and worthy of inclusion in a
-//! standard.
-typedef boost::shared_ptr<ArchiveReader> ArchiveReaderPtr;
-typedef boost::shared_ptr<ObjectReader> ObjectReaderPtr;
-typedef boost::shared_ptr<CompoundPropertyReader> CompoundPropertyReaderPtr;
-typedef boost::shared_ptr<ArrayPropertyReader> ArrayPropertyReaderPtr;
-typedef boost::shared_ptr<ScalarPropertyReader> ScalarPropertyReaderPtr;
-typedef boost::shared_ptr<BasePropertyReader> BasePropertyReaderPtr;
+typedef Alembic::Util::shared_ptr<ArchiveReader> ArchiveReaderPtr;
+typedef Alembic::Util::shared_ptr<ObjectReader> ObjectReaderPtr;
+typedef Alembic::Util::shared_ptr<CompoundPropertyReader> CompoundPropertyReaderPtr;
+typedef Alembic::Util::shared_ptr<ArrayPropertyReader> ArrayPropertyReaderPtr;
+typedef Alembic::Util::shared_ptr<ScalarPropertyReader> ScalarPropertyReaderPtr;
+typedef Alembic::Util::shared_ptr<BasePropertyReader> BasePropertyReaderPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

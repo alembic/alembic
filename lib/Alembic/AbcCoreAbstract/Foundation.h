@@ -39,8 +39,6 @@
 
 #include <Alembic/Util/All.h>
 
-#include <boost/smart_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/operators.hpp>
 
 #include <limits>

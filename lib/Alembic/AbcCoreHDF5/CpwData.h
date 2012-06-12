@@ -46,7 +46,7 @@ namespace ALEMBIC_VERSION_NS {
 // data class owned by CpwImpl, or OwImpl if it is a "top" object
 // it owns and makes child properties as well as the group hid_t
 // when necessary
-class CpwData : public boost::enable_shared_from_this<CpwData>
+class CpwData : public Alembic::Util::enable_shared_from_this<CpwData>
 {
 public:
 
@@ -103,7 +103,7 @@ private:
     MadeProperties m_madeProperties;
 };
 
-typedef boost::shared_ptr<CpwData> CpwDataPtr;
+typedef Alembic::Util::shared_ptr<CpwData> CpwDataPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

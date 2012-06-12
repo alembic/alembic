@@ -51,7 +51,7 @@ class OwImpl;
 
 //-*****************************************************************************
 class AwImpl : public AbcA::ArchiveWriter
-             , public boost::enable_shared_from_this<AwImpl>
+             , public Alembic::Util::enable_shared_from_this<AwImpl>
 {
 private:
     friend struct WriteArchive;
@@ -92,8 +92,8 @@ private:
     AbcA::MetaData m_metaData;
     hid_t m_file;
 
-    boost::weak_ptr< AbcA::ObjectWriter > m_top;
-    boost::shared_ptr < OwData > m_data;
+    Alembic::Util::weak_ptr< AbcA::ObjectWriter > m_top;
+    Alembic::Util::shared_ptr < OwData > m_data;
 
     std::vector < AbcA::TimeSamplingPtr > m_timeSamples;
 

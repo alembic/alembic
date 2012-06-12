@@ -58,7 +58,7 @@ public:
     {
     public:
         typedef Sample this_type;
-        typedef boost::shared_ptr< Abc::TypedArraySample<TRAITS> > samp_ptr_type;
+        typedef Alembic::Util::shared_ptr< Abc::TypedArraySample<TRAITS> > samp_ptr_type;
 
         Sample()
         {}
@@ -367,7 +367,7 @@ ITypedGeomParam<TRAITS>::getExpanded( typename ITypedGeomParam<TRAITS>::Sample &
     }
     else
     {
-        boost::shared_ptr< Abc::TypedArraySample<TRAITS> > valPtr = \
+        Alembic::Util::shared_ptr< Abc::TypedArraySample<TRAITS> > valPtr = \
             m_valProp.getValue( iSS );
         Abc::UInt32ArraySamplePtr idxPtr = m_indicesProperty.getValue( iSS );
 

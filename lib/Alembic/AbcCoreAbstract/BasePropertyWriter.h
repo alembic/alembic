@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -53,7 +53,7 @@ namespace ALEMBIC_VERSION_NS {
 //! upcasting capabilities. We don't want to rely on dynamic_cast - it's
 //! slow and potentially has problems across DSO interfaces.
 class BasePropertyWriter
-    : private boost::noncopyable
+    : private Alembic::Util::noncopyable
 {
 public:
     //! Virtual destructor

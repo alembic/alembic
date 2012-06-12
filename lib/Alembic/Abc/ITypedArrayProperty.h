@@ -57,7 +57,7 @@ public:
     typedef ITypedArrayProperty<TRAITS> this_type;
     typedef typename TRAITS::value_type value_type;
     typedef TypedArraySample<TRAITS> sample_type;
-    typedef boost::shared_ptr<sample_type> sample_ptr_type;
+    typedef shared_ptr<sample_type> sample_ptr_type;
 
     //! Return the interpretation expected of this
     //! property. An empty interpretation matches everything
@@ -139,7 +139,8 @@ public:
     {
         AbcA::ArraySamplePtr ptr;
         IArrayProperty::get( ptr, iSS );
-        iVal = boost::static_pointer_cast<sample_type, AbcA::ArraySample>( ptr );
+        iVal = Alembic::Util::static_pointer_cast<sample_type,
+                                                  AbcA::ArraySample>( ptr );
     }
 
     //! Return the typed sample by value.

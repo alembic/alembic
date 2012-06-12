@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 class CprImpl
     : public AbcA::CompoundPropertyReader
-    , public boost::enable_shared_from_this<CprImpl>
+    , public Alembic::Util::enable_shared_from_this<CprImpl>
 {
 public:
 

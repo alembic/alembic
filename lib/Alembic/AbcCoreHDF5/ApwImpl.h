@@ -51,7 +51,7 @@ class ApwImpl
                           ApwImpl,
                           const AbcA::ArraySample &,
                           AbcA::ArraySample::Key>
-    , public boost::enable_shared_from_this<ApwImpl>
+    , public Alembic::Util::enable_shared_from_this<ApwImpl>
 {
 protected:
     friend class CpwData;

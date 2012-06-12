@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -107,8 +107,8 @@ private:
 //! This is an abstract interface to these caches, which can be implemented
 //! in any number of ways.
 class ReadArraySampleCache
-    : private boost::noncopyable
-    , public boost::enable_shared_from_this<ReadArraySampleCache>
+    : private Alembic::Util::noncopyable
+    , public Alembic::Util::enable_shared_from_this<ReadArraySampleCache>
 {
 public:
     //! Virtual destructor
@@ -134,7 +134,7 @@ public:
 };
 
 //-*****************************************************************************
-typedef boost::shared_ptr<ReadArraySampleCache> ReadArraySampleCachePtr;
+typedef Alembic::Util::shared_ptr<ReadArraySampleCache> ReadArraySampleCachePtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

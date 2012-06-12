@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -61,7 +61,7 @@ class SpwImpl
                           SpwImpl,
                           const void *,
                           ScalarSampleKey>
-    , public boost::enable_shared_from_this<SpwImpl>
+    , public Alembic::Util::enable_shared_from_this<SpwImpl>
 {
 protected:
     friend class CpwData;

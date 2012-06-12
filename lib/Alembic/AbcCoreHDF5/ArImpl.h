@@ -49,7 +49,7 @@ class OrData;
 //-*****************************************************************************
 class ArImpl
     : public AbcA::ArchiveReader
-    , public boost::enable_shared_from_this<ArImpl>
+    , public Alembic::Util::enable_shared_from_this<ArImpl>
 {
 private:
     friend struct ReadArchive;
@@ -99,8 +99,8 @@ private:
     std::string m_fileName;
     hid_t m_file;
 
-    boost::weak_ptr< AbcA::ObjectReader > m_top;
-    boost::shared_ptr < OrData > m_data;
+    Alembic::Util::weak_ptr< AbcA::ObjectReader > m_top;
+    Alembic::Util::shared_ptr < OrData > m_data;
     ObjectHeaderPtr m_header;
 
     int32_t m_archiveVersion;

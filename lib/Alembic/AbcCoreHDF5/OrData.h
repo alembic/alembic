@@ -49,7 +49,7 @@ class CprData;
 // data class owned by OrImpl, or ArImpl if it is a "top" object.
 // it owns and makes child objects as well as the group hid_t
 // when necessary
-class OrData : public boost::enable_shared_from_this<OrData>
+class OrData : public Alembic::Util::enable_shared_from_this<OrData>
 {
 public:
     OrData( ObjectHeaderPtr iHeader,
@@ -97,11 +97,11 @@ private:
     ChildrenMap m_childrenMap;
 
     // Our "top" property.
-    boost::weak_ptr< AbcA::CompoundPropertyReader > m_top;
-    boost::shared_ptr < CprData > m_data;
+    Alembic::Util::weak_ptr< AbcA::CompoundPropertyReader > m_top;
+    Alembic::Util::shared_ptr < CprData > m_data;
 };
 
-typedef boost::shared_ptr<OrData> OrDataPtr;
+typedef Alembic::Util::shared_ptr<OrData> OrDataPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

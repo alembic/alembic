@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -41,9 +41,6 @@
 
 #include <Alembic/Util/All.h>
 
-#include <boost/smart_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/operators.hpp>
 #include <boost/utility.hpp>
@@ -80,17 +77,17 @@ using AbcA::index_t;
 using AbcA::chrono_t;
 
 //-*****************************************************************************
-typedef boost::weak_ptr<AbcA::ObjectWriter> WeakOwPtr;
-typedef boost::weak_ptr<AbcA::BasePropertyWriter> WeakBpwPtr;
+typedef Alembic::Util::weak_ptr<AbcA::ObjectWriter> WeakOwPtr;
+typedef Alembic::Util::weak_ptr<AbcA::BasePropertyWriter> WeakBpwPtr;
 
-typedef boost::weak_ptr<AbcA::ObjectReader> WeakOrPtr;
-typedef boost::weak_ptr<AbcA::BasePropertyReader> WeakBprPtr;
+typedef Alembic::Util::weak_ptr<AbcA::ObjectReader> WeakOrPtr;
+typedef Alembic::Util::weak_ptr<AbcA::BasePropertyReader> WeakBprPtr;
 
 //-*****************************************************************************
-typedef boost::shared_ptr<AbcA::PropertyHeader> PropertyHeaderPtr;
+typedef Alembic::Util::shared_ptr<AbcA::PropertyHeader> PropertyHeaderPtr;
 typedef std::vector<PropertyHeaderPtr> PropertyHeaderPtrs;
 
-typedef boost::shared_ptr<AbcA::ObjectHeader> ObjectHeaderPtr;
+typedef Alembic::Util::shared_ptr<AbcA::ObjectHeader> ObjectHeaderPtr;
 
 //-*****************************************************************************
 inline std::string getSampleName( const std::string &iName,

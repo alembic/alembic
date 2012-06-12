@@ -49,7 +49,7 @@ class CpwData;
 
 // data class owned by OwImpl, or AImpl if it is a "top" object.
 // it owns and makes child properties
-class OwData : public boost::enable_shared_from_this<OwData>
+class OwData : public Alembic::Util::enable_shared_from_this<OwData>
 {
 public:
     OwData( hid_t iParentGroup,
@@ -88,13 +88,13 @@ private:
     ChildHeaders m_childHeaders;
     MadeChildren m_madeChildren;
 
-    boost::weak_ptr< AbcA::CompoundPropertyWriter > m_top;
+    Alembic::Util::weak_ptr< AbcA::CompoundPropertyWriter > m_top;
 
     // Our "top" property
-    boost::shared_ptr < CpwData > m_data;
+    Alembic::Util::shared_ptr < CpwData > m_data;
 };
 
-typedef boost::shared_ptr<OwData> OwDataPtr;
+typedef Alembic::Util::shared_ptr<OwData> OwDataPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

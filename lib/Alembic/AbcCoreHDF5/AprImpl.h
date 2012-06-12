@@ -49,7 +49,7 @@ class AprImpl
     : public SimplePrImpl<AbcA::ArrayPropertyReader,
                           AprImpl,
                           AbcA::ArraySamplePtr&>
-    , public boost::enable_shared_from_this<AprImpl>
+    , public Alembic::Util::enable_shared_from_this<AprImpl>
 {
 public:
     AprImpl( AbcA::CompoundPropertyReaderPtr iParent, hid_t iParentGroup,

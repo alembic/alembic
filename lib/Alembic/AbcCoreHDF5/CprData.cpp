@@ -281,7 +281,7 @@ CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
     }
 
     AbcA::ScalarPropertyReaderPtr ret =
-        boost::dynamic_pointer_cast<AbcA::ScalarPropertyReader,
+        Alembic::Util::dynamic_pointer_cast<AbcA::ScalarPropertyReader,
         AbcA::BasePropertyReader>( bptr );
     return ret;
 }
@@ -322,7 +322,7 @@ CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
     }
 
     AbcA::ArrayPropertyReaderPtr ret =
-        boost::dynamic_pointer_cast<AbcA::ArrayPropertyReader,
+        Alembic::Util::dynamic_pointer_cast<AbcA::ArrayPropertyReader,
         AbcA::BasePropertyReader>( bptr );
     return ret;
 }
@@ -360,7 +360,7 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
     }
 
     AbcA::CompoundPropertyReaderPtr ret =
-        boost::dynamic_pointer_cast<AbcA::CompoundPropertyReader,
+        Alembic::Util::dynamic_pointer_cast<AbcA::CompoundPropertyReader,
         AbcA::BasePropertyReader>( bptr );
     return ret;
 }

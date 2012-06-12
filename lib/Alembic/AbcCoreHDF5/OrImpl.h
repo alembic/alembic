@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 class OrImpl
     : public AbcA::ObjectReader
-    , public boost::enable_shared_from_this<OrImpl>
+    , public Alembic::Util::enable_shared_from_this<OrImpl>
 {
 
 public:

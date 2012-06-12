@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -52,7 +52,7 @@ namespace ALEMBIC_VERSION_NS {
 //! Objects have MetaData, which is identical to the MetaData of the root
 //! Compound Property.
 class ObjectReader
-    : private boost::noncopyable
+    : private Alembic::Util::noncopyable
 {
 public:
     //! Virtual destructor

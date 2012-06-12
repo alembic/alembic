@@ -48,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 // These are _always_ created as shared ptrs.
 class OwImpl
     : public AbcA::ObjectWriter
-    , public boost::enable_shared_from_this<OwImpl>
+    , public Alembic::Util::enable_shared_from_this<OwImpl>
 {
 public:
 

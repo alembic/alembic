@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -83,7 +83,7 @@ private:
 };
 
 //-*****************************************************************************
-typedef boost::shared_ptr<WrittenArraySampleID> WrittenArraySampleIDPtr;
+typedef Alembic::Util::shared_ptr<WrittenArraySampleID> WrittenArraySampleIDPtr;
 
 //-*****************************************************************************
 // This class handles the mapping.

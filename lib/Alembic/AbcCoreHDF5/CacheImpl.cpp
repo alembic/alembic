@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -122,7 +122,7 @@ CacheImpl::lock( const AbcA::ArraySample::Key &iKey,
     // This RecordDeleter simply tells this cache instance to nuke
     // us.
     RecordDeleter deleter( iKey,
-                           boost::dynamic_pointer_cast<CacheImpl,
+                           Alembic::Util::dynamic_pointer_cast<CacheImpl,
                            AbcA::ReadArraySampleCache>( shared_from_this() ) );
     AbcA::ArraySamplePtr deleterPtr( iGivenPtr.get(), deleter );
 
@@ -149,7 +149,7 @@ void CacheImpl::unlock( const AbcA::ArraySample::Key &iKey )
 //-*****************************************************************************
 AbcA::ReadArraySampleCachePtr MakeCacheImplPtr()
 {
-    return boost::make_shared<CacheImpl>();
+    return Alembic::Util::shared_ptr<CacheImpl>( new CacheImpl() );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

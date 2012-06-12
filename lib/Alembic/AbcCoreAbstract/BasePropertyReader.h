@@ -48,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 //! Base Property Reader.
 class BasePropertyReader
-    : private boost::noncopyable
+    : private Alembic::Util::noncopyable
 {
 public:
     //! Virtual destructor

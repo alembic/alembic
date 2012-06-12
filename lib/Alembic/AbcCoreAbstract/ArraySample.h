@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -134,7 +134,7 @@ private:
 //! by way of a custom deleter. In this manner, ArraySample and ArraySamplePtr
 //! can be used both as a reference to data and as an explicit ownership of
 //! data. This greatly reduces the redundancy of this library's code.
-typedef boost::shared_ptr<ArraySample> ArraySamplePtr;
+typedef Alembic::Util::shared_ptr<ArraySample> ArraySamplePtr;
 
 //-*****************************************************************************
 //! When creating an actual buffer for reading an array sample into,

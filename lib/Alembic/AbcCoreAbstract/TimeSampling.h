@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -133,7 +133,7 @@ private:
     void init();
 };
 
-typedef boost::shared_ptr<TimeSampling> TimeSamplingPtr;
+typedef Alembic::Util::shared_ptr<TimeSampling> TimeSamplingPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

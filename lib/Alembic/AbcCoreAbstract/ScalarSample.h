@@ -181,7 +181,7 @@ public:
 
 private:
     DataType m_dataType;
-    boost::scoped_ptr<Data> m_data;
+    Alembic::Util::auto_ptr<Data> m_data;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

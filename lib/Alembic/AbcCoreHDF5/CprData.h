@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 // data class owned by CprImpl, or OrImpl if it is a "top" object
 // it owns and makes child properties as well as the group hid_t
 // when necessary
-class CprData : public boost::enable_shared_from_this<CprData>
+class CprData : public Alembic::Util::enable_shared_from_this<CprData>
 {
 public:
 
@@ -106,7 +106,7 @@ private:
     SubPropertiesMap m_subProperties;
 };
 
-typedef boost::shared_ptr<CprData> CprDataPtr;
+typedef Alembic::Util::shared_ptr<CprData> CprDataPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 
