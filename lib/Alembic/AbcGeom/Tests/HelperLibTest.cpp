@@ -40,7 +40,6 @@
 #include <Alembic/AbcGeom/ArchiveBounds.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
 #include <boost/random.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -88,8 +87,9 @@ void writeSimpleProperties(const std::string &archiveName)
     {
         // Create 'numChildren' children, all parented under
         //  the archive
-        std::string name = "child_";
-        name.append( boost::lexical_cast<std::string>( ii ) );
+        std::ostringstream strm;
+        strm << "child_" <<ii;
+        std::string name = strm.str();
         OObject child( archiveTop, name );
         OCompoundProperty childProps = child.getProperties();
 
@@ -425,8 +425,9 @@ void writeNestedCommpoundWithVis(const std::string &archiveName)
     {
         // Create 'numChildren' children, all parented under
         //  the archive
-        std::string name = "child_";
-        name.append( boost::lexical_cast<std::string>( ii ) );
+        std::ostringstream strm;
+        strm << "child_" << ii;
+        std::string name = strm.str();
         OObject child( archiveTop, name );
 
         // Create a compound property on this child object named

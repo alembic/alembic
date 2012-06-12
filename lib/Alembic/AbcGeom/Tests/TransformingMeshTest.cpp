@@ -62,14 +62,13 @@ static OPolyMeshSchema::Sample g_meshsamp(
 OXform recurseCreateXform( OObject &iParent, size_t children, int32_t level,
                            size_t numSamps )
 {
-    std::string levelName = boost::lexical_cast<std::string>( level );
-
     OXform xform;
 
     for ( size_t i = 0; i < children; ++i )
     {
-        std::string xformName = levelName + "_" + \
-            boost::lexical_cast<std::string>( i );
+        std::ostringstream strm;
+        strm << level << "_" << i;
+        std::string xformName = strm.str();
         xform = OXform( iParent, xformName, g_ts );
 
         OPolyMesh opm( xform, "meshy", g_ts );

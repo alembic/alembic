@@ -37,8 +37,6 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
-#include <boost/lexical_cast.hpp>
-
 #include <set>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
@@ -77,9 +75,10 @@ void makeDeepHierarchy( OObject parent, const int level )
         return;
     }
 
-    makeDeepHierarchy( OObject( parent,
-                                boost::lexical_cast<std::string>( level ) ),
-                       level + 1 );
+    std::ostringstream strm;
+    strm << level;
+    std::string levelName = strm.str();
+    makeDeepHierarchy( OObject( parent, levelName ), level + 1 );
 }
 
 //-*****************************************************************************
@@ -118,9 +117,10 @@ void readDeepHierarchy( IObject parent, const int level, const IObject& orig )
         return;
     }
 
-    readDeepHierarchy( IObject( parent,
-                                boost::lexical_cast<std::string>( level ) ),
-                       level + 1, orig );
+    std::ostringstream strm;
+    strm << level;
+    std::string levelName = strm.str();
+    readDeepHierarchy( IObject( parent, levelName ), level + 1, orig );
 }
 
 //-*****************************************************************************
@@ -133,7 +133,10 @@ void simpleTestOut( const std::string &iArchiveName )
     // create 100 top-level children
     for ( int i = 0 ; i < NUM_TOP_CHILDREN ; i++ )
     {
-        OObject obj( archiveTop, boost::lexical_cast<std::string>( i ) );
+        std::ostringstream strm;
+        strm << i;
+        std::string name = strm.str();
+        OObject obj( archiveTop, name );
         makeDeepHierarchy( obj, 0 );
     }
 }
@@ -150,7 +153,9 @@ void simpleTestIn( const std::string &iArchiveName )
 
     for ( int i = 0 ; i < NUM_TOP_CHILDREN ; i++ )
     {
-        std::string cname = boost::lexical_cast<std::string>( i );
+        std::ostringstream strm;
+        strm << i;
+        std::string cname = strm.str();
         IObject obj( archiveTop, cname );
         readDeepHierarchy( obj, 0, obj  );
     }

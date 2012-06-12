@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -37,7 +37,6 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/Abc/All.h>
 #include <boost/random.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;

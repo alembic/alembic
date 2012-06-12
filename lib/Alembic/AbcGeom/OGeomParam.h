@@ -40,8 +40,6 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
 
-#include <boost/lexical_cast.hpp>
-
 namespace Alembic {
 namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
@@ -178,10 +176,15 @@ public:
 
         md.set( "podName", podName );
 
-        md.set( "podExtent", boost::lexical_cast<std::string>( extent ) );
+        std::ostringstream extentStrm;
+        extentStrm << extent;
+        std::string extentStr = extentStrm.str();
+        md.set( "podExtent", extentStr );
 
-        md.set( "arrayExtent",
-                boost::lexical_cast<std::string>( iArrayExtent ) );
+        std::ostringstream arrayExtentStrm;
+        arrayExtentStrm << iArrayExtent;
+        std::string arrayExtentStr = arrayExtentStrm.str();
+        md.set( "arrayExtent", arrayExtentStr );
 
         md.set( "interpretation", TRAITS::interpretation() );
 

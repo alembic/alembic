@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -37,7 +37,6 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/Abc/All.h>
 #include <boost/random.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -62,8 +61,9 @@ void writeFlatHierarchy(const std::string &archiveName)
     {
         // Create 'numChildren' children, all parented under
         //  the archive
-        std::string name = "child_";
-        name.append( boost::lexical_cast<std::string>( ii ) );
+        std::ostringstream strm;
+        strm << "child_" << ii;
+        std::string name = strm.str();
         OObject child( archiveTop, name );
 
         // No properties.
@@ -121,10 +121,9 @@ void recursivelyAddChildren( OObject&           parent,
     d++;
     for (unsigned int ii=0; ii<numChildren; ii++)
     {
-        std::string name = "child_";
-        name.append( boost::lexical_cast<std::string>( d ) );
-        name += "_";
-        name.append( boost::lexical_cast<std::string>( ii ) );
+        std::ostringstream strm;
+        strm << "child_" << d << "_" << ii;
+        std::string name = strm.str();
         OObject child( parent, name );
 
         unsigned int dd = d;
@@ -152,8 +151,9 @@ void writeThreeDeepHierarchy(const std::string &archiveName)
     for (unsigned int ii=0; ii<numChildren; ii++)
     {
         unsigned int d = 0;
-        std::string name = "child_0_";
-        name.append( boost::lexical_cast<std::string>( ii ) );
+        std::ostringstream strm;
+        strm << "child_0_" << ii;
+        std::string name = strm.str();
         OObject child( archiveTop, name );
 
         recursivelyAddChildren( child, depth, d, numChildren);

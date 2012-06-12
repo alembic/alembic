@@ -45,10 +45,11 @@ using namespace Alembic::AbcGeom;
 void recurseCreateXform(OObject & iParent, int children, int level,
                         std::vector<OXform> & oCreated)
 {
-    std::string levelName = boost::lexical_cast<std::string>( level );
     for (int i = 0; i < children; ++i)
     {
-        std::string xformName = levelName + "_" + boost::lexical_cast<std::string>( i );
+        std::ostringstream strm;
+        strm << "level" << "_" << i;
+        std::string xformName = strm.str();
         OXform xform( iParent, xformName );
         XformSample samp;
         XformOp transop( kTranslateOperation, kTranslateHint );

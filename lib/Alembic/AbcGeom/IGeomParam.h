@@ -40,8 +40,6 @@
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/GeometryScope.h>
 
-#include <boost/lexical_cast.hpp>
-
 namespace Alembic {
 namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
@@ -164,7 +162,7 @@ public:
     {
         std::string e = m_valProp.getMetaData().get( "arrayExtent" );
         if ( e == "" ) { return 1; }
-        else { return boost::lexical_cast<size_t>( e ); }
+        else { return atoi( e.c_str() ); }
     }
 
     bool isIndexed() { return m_isIndexed; }

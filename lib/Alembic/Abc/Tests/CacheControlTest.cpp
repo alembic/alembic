@@ -37,7 +37,6 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <iostream>
-#include <boost/lexical_cast.hpp>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -50,7 +49,8 @@ void cacheControlTest( const std::string &iArchiveBaseName )
     for ( size_t i = 0 ; i < 3 ; i++ )
     {
         std::string iArchiveName = iArchiveBaseName;
-        iArchiveName.append( boost::lexical_cast<std::string>( i ) );
+        char a = 'a' + i;
+        iArchiveName += a ;
         iArchiveName.append( ".abc" );
 
         OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
@@ -69,7 +69,8 @@ void cacheControlTest( const std::string &iArchiveBaseName )
     for ( size_t i = 0 ; i < 3 ; i++ )
     {
         std::string iArchiveName = iArchiveBaseName;
-        iArchiveName.append( boost::lexical_cast<std::string>( i ) );
+        char a = 'a' + i;
+        iArchiveName += a ;
         iArchiveName.append( ".abc" );
 
         if ( i == 0 )
