@@ -51,7 +51,8 @@ MeshTopologyVariance ICurvesSchema::getTopologyVariance() const
         return kConstantTopology;
     }
 
-    else if ( m_basisAndTypeProperty.isConstant() )
+    else if ( m_nVerticesProperty.isConstant() &&
+              m_basisAndTypeProperty.isConstant() )
     {
         return kHomogenousTopology;
     }
