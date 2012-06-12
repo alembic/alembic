@@ -57,9 +57,11 @@ using namespace Abc;
 //! that the connectivity and positions may change.
 enum MeshTopologyVariance
 {
-    kConstantTopology,
-    kHomogenousTopology,
-    kHeterogenousTopology
+    kConstantTopology = 0,
+    kHomogenousTopology = 1,
+    kHomogeneousTopology = 1,
+    kHeterogenousTopology = 2,
+    kHeterogeneousTopology = 2
 };
 
 //-*****************************************************************************
