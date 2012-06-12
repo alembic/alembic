@@ -39,7 +39,6 @@
 #include <Alembic/AbcGeom/Visibility.h>
 #include <Alembic/AbcGeom/ArchiveBounds.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
-#include <boost/random.hpp>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 

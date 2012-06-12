@@ -36,7 +36,6 @@
 
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
-#include <boost/random.hpp>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -72,12 +71,6 @@ void simpleTestOut()
     {
         OObject spaniard( jubby, "spaniard" );
 
-
-        boost::mt19937 rng;
-        boost::uniform_01<> dst;
-        boost::variate_generator<boost::mt19937&, boost::uniform_01<> >
-            gen( rng, dst );
-
         chrono_t sampTime = 0.0;
         std::vector<V3d> points( ( size_t )71 );
 
@@ -86,7 +79,7 @@ void simpleTestOut()
         for ( index_t idx = 0; idx < 37; ++idx )
         {
             timeSamps[idx] = sampTime;
-            sampTime += gen();
+            sampTime += 1.0 / ( idx + 1 );
         }
 
         TimeSampling ts(TimeSamplingType( TimeSamplingType::kAcyclic ),
@@ -99,20 +92,18 @@ void simpleTestOut()
 
         for ( index_t idx = 0; idx < 36; ++idx )
         {
-            if ( idx == 0 || gen() > 0.7 )
+            if ( idx == 0 )
             {
                 for ( std::vector<V3d>::iterator piter = points.begin();
                       piter != points.end(); ++piter )
                 {
-                    (*piter) = V3d( gen(), gen(), gen() );
+                    (*piter) = V3d( idx, idx, idx );
                 }
             }
             pointy.set( points );
-            sampTime += gen();
         }
 
         // Test that zero-sized samples work.
-        sampTime += 1.0;
         points.resize( 0 );
         pointy.set( points );
     }
