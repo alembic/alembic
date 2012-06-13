@@ -109,40 +109,28 @@ private:
 class Argument
 {
 public:
-    Argument()
-    {
-        m_whichVariant = kArgumentNone;
-    }
+    Argument() :
+        m_whichVariant( kArgumentNone ) {}
 
-    Argument( ErrorHandler::Policy iPolicy )
-    {
-        m_variant.policy = iPolicy;
-        m_whichVariant = kArgumentErrorHandlerPolicy;
-    }
+    Argument( ErrorHandler::Policy iPolicy ) :
+        m_whichVariant( kArgumentErrorHandlerPolicy ),
+        m_variant( iPolicy ) {}
 
-    Argument( uint32_t iTsIndex)
-    {
-        m_variant.timeSamplingIndex = iTsIndex;
-        m_whichVariant = kArgumentTimeSamplingIndex;
-    }
+    Argument( Alembic::Util::uint32_t iTsIndex ) :
+        m_whichVariant( kArgumentTimeSamplingIndex ),
+        m_variant( iTsIndex ) {}
 
-    Argument( const AbcA::MetaData &iMetaData )
-    {
-        m_variant.metaData = &iMetaData;
-        m_whichVariant = kArgumentMetaData;
-    }
+    Argument( const AbcA::MetaData &iMetaData ) :
+            m_whichVariant( kArgumentMetaData ),
+            m_variant( &iMetaData ) {}
 
-    Argument( const AbcA::TimeSamplingPtr & iTsPtr )
-    {
-        m_variant.timeSamplingPtr = &iTsPtr;
-        m_whichVariant = kArgumentTimeSamplingPtr;
-    }
+    Argument( const AbcA::TimeSamplingPtr &iTsPtr ) :
+        m_whichVariant( kArgumentTimeSamplingPtr ),
+        m_variant( &iTsPtr ) {}
 
-    Argument( SchemaInterpMatching iMatch )
-    {
-        m_variant.schemaInterpMatching = iMatch;
-        m_whichVariant = kArgumentSchemaInterpMatching;
-    }
+    Argument( SchemaInterpMatching iMatch ) :
+        m_whichVariant( kArgumentSchemaInterpMatching ),
+        m_variant( iMatch ) {}
 
     void setInto( Arguments &iArgs ) const
     {
@@ -170,7 +158,11 @@ public:
 
             // no-op
             case kArgumentNone:
+            break;
+
             default:
+                // we added something that we forgot to support in the switch
+                assert(false);
             break;
         }
 
@@ -187,16 +179,33 @@ private:
         kArgumentMetaData,
         kArgumentTimeSamplingPtr,
         kArgumentSchemaInterpMatching
-    } m_whichVariant;
+    } const m_whichVariant;
 
     union ArgumentVariant
     {
+        ArgumentVariant() : timeSamplingIndex( 0 ) {}
+
+        explicit ArgumentVariant( ErrorHandler::Policy iPolicy ) :
+            policy( iPolicy ) {}
+
+        explicit ArgumentVariant( Alembic::Util::uint32_t iTsIndex ) :
+            timeSamplingIndex( iTsIndex ) {}
+
+        explicit ArgumentVariant( const AbcA::MetaData * iMetaData ) :
+            metaData( iMetaData ) {}
+
+        explicit ArgumentVariant( const AbcA::TimeSamplingPtr * iTsPtr ) :
+            timeSamplingPtr( iTsPtr ) {}
+
+        explicit ArgumentVariant( SchemaInterpMatching iMatch ) :
+            schemaInterpMatching( iMatch ) {}
+
         ErrorHandler::Policy policy;
-        uint32_t timeSamplingIndex;
+        Alembic::Util::uint32_t timeSamplingIndex;
         const AbcA::MetaData * metaData;
         const AbcA::TimeSamplingPtr * timeSamplingPtr;
         SchemaInterpMatching schemaInterpMatching;
-    } m_variant;
+    } const m_variant;
 };
 
 
