@@ -383,20 +383,20 @@ void WritePropertyInfo( hid_t iGroup,
     uint32_t info[5] = {0, 0, 0, 0, 0};
     uint32_t numFields = 1;
 
-    static const uint32_t ptypeMask = ( uint32_t )BOOST_BINARY (
-        0000 0000 0000 0000 0000 0000 0000 0011 );
+    // 0000 0000 0000 0000 0000 0000 0000 0011
+    static const uint32_t ptypeMask = 0x0003;
 
-    static const uint32_t podMask = ( uint32_t )BOOST_BINARY (
-        0000 0000 0000 0000 0000 0000 0011 1100 );
+    // 0000 0000 0000 0000 0000 0000 0011 1100
+    static const uint32_t podMask = 0x003c;
 
-    static const uint32_t hasTsidxMask = ( uint32_t )BOOST_BINARY (
-        0000 0000 0000 0000 0000 0000 0100 0000 );
+    // 0000 0000 0000 0000 0000 0000 0100 0000
+    static const uint32_t hasTsidxMask = 0x0040;
 
-    static const uint32_t noRepeatsMask = ( uint32_t )BOOST_BINARY (
-        0000 0000 0000 0000 0000 0000 1000 0000 );
+    // 0000 0000 0000 0000 0000 0000 1000 0000
+    static const uint32_t noRepeatsMask = 0x0080;
 
-    static const uint32_t extentMask = ( uint32_t )BOOST_BINARY(
-        0000 0000 0000 0000 1111 1111 0000 0000 );
+    // 0000 0000 0000 0000 1111 1111 0000 0000
+    static const uint32_t extentMask = 0xff00;
 
     // compounds are treated differently
     if ( iHeader.getPropertyType() != AbcA::kCompoundProperty )

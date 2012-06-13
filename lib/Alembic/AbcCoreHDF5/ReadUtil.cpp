@@ -342,24 +342,23 @@ ReadPropertyHeader( hid_t iParent,
                     uint32_t & oTimeSamplingIndex )
 {
     uint32_t info[5] = {0, 0, 0, 0, 0};
-
-    static const uint32_t ptypeMask = ( uint32_t )BOOST_BINARY (
-        0000 0000 0000 0000 0000 0000 0000 0011 );
-
-    static const uint32_t podMask = ( uint32_t )BOOST_BINARY (
-        0000 0000 0000 0000 0000 0000 0011 1100 );
-
-    static const uint32_t hasTsidxMask = ( uint32_t )BOOST_BINARY (
-        0000 0000 0000 0000 0000 0000 0100 0000 );
-
-    static const uint32_t noRepeatsMask = ( uint32_t )BOOST_BINARY (
-        0000 0000 0000 0000 0000 0000 1000 0000 );
-
-    static const uint32_t extentMask = ( uint32_t )BOOST_BINARY(
-        0000 0000 0000 0000 1111 1111 0000 0000 );
-
     size_t numFields = 0;
     size_t fieldsUsed = 1;
+
+    // 0000 0000 0000 0000 0000 0000 0000 0011
+    static const uint32_t ptypeMask = 0x0003;
+
+    // 0000 0000 0000 0000 0000 0000 0011 1100
+    static const uint32_t podMask = 0x003c;
+
+    // 0000 0000 0000 0000 0000 0000 0100 0000
+    static const uint32_t hasTsidxMask = 0x0040;
+
+    // 0000 0000 0000 0000 0000 0000 1000 0000
+    static const uint32_t noRepeatsMask = 0x0080;
+
+    // 0000 0000 0000 0000 1111 1111 0000 0000
+    static const uint32_t extentMask = 0xff00;
 
     ReadSmallArray(iParent, iPropName + ".info", H5T_STD_U32LE,
                    H5T_NATIVE_UINT32, 5, numFields, (void *) info );

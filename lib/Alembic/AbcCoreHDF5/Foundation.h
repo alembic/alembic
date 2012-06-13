@@ -41,10 +41,6 @@
 
 #include <Alembic/Util/All.h>
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/operators.hpp>
-#include <boost/utility.hpp>
-
 #include <vector>
 #include <string>
 #include <map>

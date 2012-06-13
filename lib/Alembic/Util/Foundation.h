@@ -40,10 +40,8 @@
 #include <boost/thread/once.hpp>
 #endif
 
-#include <boost/utility.hpp>
-#include <boost/array.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/operators.hpp>
-#include <boost/foreach.hpp>
 
 #include <tr1/memory>
 #include <memory>
