@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -45,10 +45,6 @@
 #include <ImathMatrix.h>
 #include <ImathQuat.h>
 #include <ImathColor.h>
-
-#include <boost/variant.hpp>
-#include <boost/ref.hpp>
-#include <boost/type_traits.hpp>
 
 #include <iostream>
 #include <string>

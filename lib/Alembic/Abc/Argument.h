@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -44,20 +44,8 @@ namespace Alembic {
 namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
-// place holder used by the default constructor of Argument, used so the visitor
-// can differentiate between no arguments being set and the uint32_t time
-// sampling index
-enum ArgumentDefaultFlag
-{
-    kArgumentDefault
-};
-
 //-*****************************************************************************
-// CJH: I'm not terribly fond of the boost::variant class, and I particularly
-// dislike that I'm copying MetaData by value. However, at the moment, it is
-// a welcome shortcut. (I'm tired). I'll fix this soon, but it doesn't
-// affect the public API at all.
-class Arguments : public boost::static_visitor<>
+class Arguments
 {
 public:
     Arguments( ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
@@ -72,7 +60,6 @@ public:
         m_timeSamplingIndex( iTimeIndex ),
         m_matching( iMatch ){}
 
-    void operator()( const ArgumentDefaultFlag & ) {}
     void operator()( const uint32_t & iTimeSamplingIndex)
     { m_timeSamplingIndex = iTimeSamplingIndex; }
 
@@ -122,27 +109,94 @@ private:
 class Argument
 {
 public:
-    Argument() : m_variant( kArgumentDefault ) {}
-    Argument( uint32_t iTsIndex) : m_variant( iTsIndex ) {}
-    Argument( ErrorHandler::Policy iPolicy ) : m_variant( iPolicy ) {}
-    Argument( const AbcA::MetaData &iMetaData ) : m_variant( iMetaData ) {}
-    Argument( const AbcA::TimeSamplingPtr & iTsPtr ) : m_variant( iTsPtr ) {}
-    Argument( SchemaInterpMatching iMatch ) : m_variant( iMatch ) {}
+    Argument()
+    {
+        m_whichVariant = kArgumentNone;
+    }
+
+    Argument( ErrorHandler::Policy iPolicy )
+    {
+        m_variant.policy = iPolicy;
+        m_whichVariant = kArgumentErrorHandlerPolicy;
+    }
+
+    Argument( uint32_t iTsIndex)
+    {
+        m_variant.timeSamplingIndex = iTsIndex;
+        m_whichVariant = kArgumentTimeSamplingIndex;
+    }
+
+    Argument( const AbcA::MetaData &iMetaData )
+    {
+        m_variant.metaData = &iMetaData;
+        m_whichVariant = kArgumentMetaData;
+    }
+
+    Argument( const AbcA::TimeSamplingPtr & iTsPtr )
+    {
+        m_variant.timeSamplingPtr = &iTsPtr;
+        m_whichVariant = kArgumentTimeSamplingPtr;
+    }
+
+    Argument( SchemaInterpMatching iMatch )
+    {
+        m_variant.schemaInterpMatching = iMatch;
+        m_whichVariant = kArgumentSchemaInterpMatching;
+    }
 
     void setInto( Arguments &iArgs ) const
     {
-        boost::apply_visitor( iArgs, m_variant );
+        switch ( m_whichVariant )
+        {
+            case kArgumentErrorHandlerPolicy:
+                iArgs( m_variant.policy );
+            break;
+
+            case kArgumentTimeSamplingIndex:
+                iArgs( m_variant.timeSamplingIndex );
+            break;
+
+            case kArgumentMetaData:
+                iArgs( *m_variant.metaData );
+            break;
+
+            case kArgumentTimeSamplingPtr:
+                iArgs( *m_variant.timeSamplingPtr );
+            break;
+
+            case kArgumentSchemaInterpMatching:
+                iArgs( m_variant.schemaInterpMatching );
+            break;
+
+            // no-op
+            case kArgumentNone:
+            default:
+            break;
+        }
+
+
     }
 
 private:
-    typedef boost::variant<ArgumentDefaultFlag,
-                           uint32_t,
-                           ErrorHandler::Policy,
-                           AbcA::MetaData,
-                           AbcA::TimeSamplingPtr,
-                           SchemaInterpMatching> ArgVariant;
 
-    ArgVariant m_variant;
+    enum ArgumentWhichFlag
+    {
+        kArgumentNone,
+        kArgumentErrorHandlerPolicy,
+        kArgumentTimeSamplingIndex,
+        kArgumentMetaData,
+        kArgumentTimeSamplingPtr,
+        kArgumentSchemaInterpMatching
+    } m_whichVariant;
+
+    union ArgumentVariant
+    {
+        ErrorHandler::Policy policy;
+        uint32_t timeSamplingIndex;
+        const AbcA::MetaData * metaData;
+        const AbcA::TimeSamplingPtr * timeSamplingPtr;
+        SchemaInterpMatching schemaInterpMatching;
+    } m_variant;
 };
 
 
