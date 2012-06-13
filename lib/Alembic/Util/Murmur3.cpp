@@ -35,9 +35,12 @@
 // MurmurHash3 was written by Austin Appleby, and is placed in the public
 // domain. The author hereby disclaims copyright to this source code.
 
-#include <boost/detail/endian.hpp>
 #include <Alembic/Util/Murmur3.h>
 #include <Alembic/Util/PlainOldDataType.h>
+
+#ifndef _MSC_VER
+#include <endian.h>
+#endif
 
 namespace Alembic {
 namespace Util {
@@ -53,7 +56,7 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     uint64_t h1 = 0;
     uint64_t h2 = 0;
 
-#ifdef PLATFORM_WINDOWS
+#ifdef _MSC_VER
     uint64_t c1 = 0x87c37b91114253d5LL;
     uint64_t c2 = 0x4cf5ad432745937fLL;
 #else
@@ -72,7 +75,8 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
         uint64_t k1 = blocks[i*2];
         uint64_t k2 = blocks[i*2+1];
 
-#ifdef BOOST_BIG_ENDIAN
+
+#if __BYTE_ORDER == __BIG_ENDIAN
         if (podSize == 8)
         {
             k1 = (k1>>56) |
@@ -157,7 +161,7 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     //----------
     // tail
 
-#ifdef BOOST_BIG_ENDIAN
+#if __BYTE_ORDER == __BIG_ENDIAN
     const uint8_t * unswappedTail = (const uint8_t*)(data + nblocks*16);
     uint8_t tail[16];
     size_t tailSize = len & 15;
@@ -222,7 +226,7 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     h1 += h2;
     h2 += h1;
 
-#ifdef PLATFORM_WINDOWS
+#ifdef _MSC_VER
     h1 ^= h1 >> 33;
     h1 *= 0xff51afd7ed558ccdLL;
     h1 ^= h1 >> 33;
