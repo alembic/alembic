@@ -41,7 +41,7 @@
 #include <Alembic/Util/Exception.h>
 
 // stdint.h is not in anything prior to Visual Studio 2010
-#if !defined(__MSC_VER) || __MSC_VER >= 1600
+#if !defined(_MSC_VER) || _MSC_VER >= 1600
 #include <stdint.h>
 #endif
 
@@ -136,7 +136,7 @@ inline bool operator!=( bool a, const bool_t &b )
     return a != b.asBool();
 }
 
-#if !defined(__MSC_VER) || __MSC_VER >= 1600
+#if !defined(_MSC_VER) || _MSC_VER >= 1600
 using ::uint8_t;
 using ::int8_t;
 using ::uint16_t;
