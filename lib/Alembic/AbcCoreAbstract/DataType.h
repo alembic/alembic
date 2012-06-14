@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 //! The DataType class is a description of how an element of a sample in a
 //! Scalar or an Array property is stored. It does not contain an interpretation
 //! this is left to the metadata of the properties themselves.
-class DataType : boost::totally_ordered<DataType>
+class DataType : Alembic::Util::totally_ordered<DataType>
 {
 public:
     //! Default constructor

@@ -47,7 +47,7 @@ namespace Alembic {
 namespace AbcCoreAbstract {
 namespace ALEMBIC_VERSION_NS {
 
-struct ArraySampleKey : public boost::totally_ordered<ArraySampleKey>
+struct ArraySampleKey : public Alembic::Util::totally_ordered<ArraySampleKey>
 {
     //! total number of bytes of the sample as originally stored
     uint64_t numBytes;

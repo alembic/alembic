@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -59,7 +59,7 @@ namespace ALEMBIC_VERSION_NS {
 //! there will be a need for this extra bit of encapsulation at the abstract
 //! level, which is why I'm putting it here.
 class ScalarSample
-    : public boost::totally_ordered<ScalarSample>
+    : public Alembic::Util::totally_ordered<ScalarSample>
 {
 public:
     //-*************************************************************************

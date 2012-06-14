@@ -39,8 +39,6 @@
 
 #include <Alembic/Util/All.h>
 
-#include <boost/operators.hpp>
-
 #include <limits>
 #include <utility>
 #include <vector>

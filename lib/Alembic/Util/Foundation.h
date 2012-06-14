@@ -41,7 +41,6 @@
 #endif
 
 #include <boost/unordered_map.hpp>
-#include <boost/operators.hpp>
 
 #include <tr1/memory>
 #include <memory>
@@ -77,6 +76,8 @@ using std::tr1::weak_ptr;
 
 using std::auto_ptr;
 
+// similiar to boost::noncopyable
+// explicitly hides copy construction and copy assignment
 class noncopyable
 {
 protected:
@@ -86,6 +87,32 @@ protected:
 private:
     noncopyable( const noncopyable& );
     const noncopyable& operator=( const noncopyable& );
+};
+
+// similiar to boost::totally_ordered
+// only need < and == operators and this fills in the rest
+template < class T >
+class totally_ordered
+{
+    friend bool operator > ( const T& x, const T& y )
+    {
+        return y < x;
+    }
+
+    friend bool operator <= ( const T& x, const T& y )
+    {
+        return !( y < x );
+    }
+
+    friend bool operator >= ( const T& x, const T& y )
+    {
+        return !( x < y );
+    }
+
+    friend bool operator != ( const T& x, const T& y )
+    {
+        return !( x == y );
+    }
 };
 
 } // End namespace ALEMBIC_VERSION_NS
