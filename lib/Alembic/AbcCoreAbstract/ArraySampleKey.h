@@ -37,8 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ArraySampleKey_h_
 #define _Alembic_AbcCoreAbstract_ArraySampleKey_h_
 
-#include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
+#include <tr1/unordered_map>
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/DataType.h>
@@ -121,23 +120,11 @@ struct ArraySampleKeyStdHash :
 template <class MAPPED>
 struct UnorderedMapUtil
 {
-    typedef boost::unordered_map<ArraySampleKey,
-                                 MAPPED,
-                                 ArraySampleKeyStdHash,
-                                 ArraySampleKeyEqualTo> umap_type;
-    typedef boost::unordered_multimap<ArraySampleKey,
-                                      MAPPED,
-                                      ArraySampleKeyStdHash,
-                                      ArraySampleKeyEqualTo> umultimap_type;
+    typedef std::tr1::unordered_map<ArraySampleKey,
+                                    MAPPED,
+                                    ArraySampleKeyStdHash,
+                                    ArraySampleKeyEqualTo> umap_type;
 };
-
-//-*****************************************************************************
-// Unordered sets don't need a wrapping template.
-// This isn't a terribly useful type. And it's meaningless to have
-// multisets in this context.
-typedef boost::unordered_set<ArraySampleKey,
-                             ArraySampleKeyStdHash,
-                             ArraySampleKeyEqualTo> UnorderedArraySampleKeySet;
 
 } // End namespace ALEMBIC_VERSION_NS
 

@@ -40,8 +40,6 @@
 #include <boost/thread/once.hpp>
 #endif
 
-#include <boost/unordered_map.hpp>
-
 #include <tr1/memory>
 #include <memory>
 

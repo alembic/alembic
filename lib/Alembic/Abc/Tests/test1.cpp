@@ -276,6 +276,14 @@ void simpleTestIn()
 
 int main( int argc, char *argv[] )
 {
+    ABCA_ASSERT( sizeof( char ) == sizeof( Alembic::Util::int8_t ),
+                 "Alembic::Util::int8_t isn't 1 byte" );
+    ABCA_ASSERT(
+        ( sizeof( wchar_t ) == sizeof( Alembic::Util::int8_t ) ) ||
+        ( sizeof( wchar_t ) == sizeof( Alembic::Util::int16_t ) ) ||
+        ( sizeof( wchar_t ) == sizeof( Alembic::Util::int32_t ) ),
+        "wchar_t is an unexpedted size." );
+
     simpleTestOut();
     simpleTestIn();
 
