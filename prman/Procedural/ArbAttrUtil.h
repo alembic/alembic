@@ -39,7 +39,7 @@
 #include <ri.h>
 
 #include <Alembic/AbcGeom/All.h>
-
+#include <boost/smart_ptr.hpp>
 #include <set>
 
 using namespace Alembic::AbcGeom;
