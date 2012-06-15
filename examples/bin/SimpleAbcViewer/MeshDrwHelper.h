@@ -45,7 +45,7 @@ namespace SimpleAbcViewer {
 //-*****************************************************************************
 //! \brief Both the SubD and PolyMesh classes draw in the same way, so we
 //! create this helper class to do the common work.
-class MeshDrwHelper : private boost::noncopyable
+class MeshDrwHelper : private Alembic::Util::noncopyable
 {
 public:
     // Default constructor

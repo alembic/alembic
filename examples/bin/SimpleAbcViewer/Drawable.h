@@ -46,7 +46,7 @@ namespace SimpleAbcViewer {
 //! What can a drawable do?
 //! Obviously, it can draw!
 //! It can tell you a set of times that it has samples for.
-class Drawable : private boost::noncopyable
+class Drawable : private Alembic::Util::noncopyable
 {
 public:
     Drawable() {}
