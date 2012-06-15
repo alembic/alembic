@@ -148,7 +148,7 @@ OrData::getChildHeader( AbcA::ObjectReaderPtr iParent, size_t i )
     ABCA_ASSERT( i < m_children.size(),
         "Out of range index in OrData::getChildHeader: " << i );
 
-    boost::mutex::scoped_lock l( m_childObjectsMutex );
+    Alembic::Util::scoped_lock l( m_childObjectsMutex );
     if ( ! m_children[i].loadedMetaData )
     {
         hid_t group = H5Gopen2( m_group,

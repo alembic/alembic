@@ -38,7 +38,6 @@
 #define _Alembic_AbcCoreHDF5_CprData_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <boost/thread/mutex.hpp>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -101,7 +100,7 @@ private:
     typedef std::vector<SubProperty> SubPropertyVec;
 
     // Allocated mutexes, one per SubProperty
-    boost::mutex * m_subPropertyMutexes;
+    Alembic::Util::mutex * m_subPropertyMutexes;
     SubPropertyVec m_propertyHeaders;
     SubPropertiesMap m_subProperties;
 };

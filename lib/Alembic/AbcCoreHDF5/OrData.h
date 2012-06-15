@@ -38,7 +38,6 @@
 #define _Alembic_AbcCoreHDF5_OrData_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <boost/thread/mutex.hpp>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -90,7 +89,7 @@ private:
     hid_t m_group;
     hid_t m_oldGroup;
 
-    boost::mutex m_childObjectsMutex;
+    Alembic::Util::mutex m_childObjectsMutex;
 
     // The children
     ChildrenVec m_children;

@@ -198,7 +198,7 @@ ISubDSchema::operator=(const ISubDSchema & rhs)
         rhs.m_faceVaryingInterpolateBoundaryProperty;
 
     // lock, reset
-    boost::mutex::scoped_lock l(m_faceSetsMutex);
+    Alembic::Util::scoped_lock l(m_faceSetsMutex);
     m_faceSetsLoaded = false;
     m_faceSets.clear();
     return *this;
@@ -314,7 +314,7 @@ void ISubDSchema::getFaceSetNames (std::vector <std::string> & oFaceSetNames)
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::getFaceSetNames()" );
 
-    boost::mutex::scoped_lock l(m_faceSetsMutex);
+    Alembic::Util::scoped_lock l(m_faceSetsMutex);
     loadFaceSetNames();
 
     for (std::map<std::string, IFaceSet>::const_iterator faceSetIter =
@@ -362,7 +362,7 @@ ISubDSchema::hasFaceSet( const std::string &faceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::hasFaceSet (faceSetName)" );
 
-    boost::mutex::scoped_lock l(m_faceSetsMutex);
+    Alembic::Util::scoped_lock l(m_faceSetsMutex);
     if (!m_faceSetsLoaded)
     {
         loadFaceSetNames();
@@ -380,7 +380,7 @@ IFaceSet
 ISubDSchema::getFaceSet( const std::string &iFaceSetName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::getFaceSet()" );
-    boost::mutex::scoped_lock l(m_faceSetsMutex);
+    Alembic::Util::scoped_lock l(m_faceSetsMutex);
     if (!m_faceSetsLoaded)
     {
         loadFaceSetNames();

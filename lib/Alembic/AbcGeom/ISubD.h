@@ -37,7 +37,6 @@
 #ifndef _Alembic_AbcGeom_ISubD_h_
 #define _Alembic_AbcGeom_ISubD_h_
 
-#include <boost/thread/mutex.hpp>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
@@ -415,7 +414,7 @@ protected:
     // code attempts to access facesets.
     bool                              m_faceSetsLoaded;
     std::map <std::string, IFaceSet>  m_faceSets;
-    boost::mutex                      m_faceSetsMutex;
+    Alembic::Util::mutex              m_faceSetsMutex;
     void loadFaceSetNames();
 
 };

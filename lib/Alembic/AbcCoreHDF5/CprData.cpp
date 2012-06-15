@@ -155,7 +155,8 @@ CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
 
     size_t index = 0;
     m_propertyHeaders.resize( visitor.properties.size() );
-    m_subPropertyMutexes = new boost::mutex[ visitor.properties.size() ];
+    m_subPropertyMutexes =
+        new Alembic::Util::mutex[ visitor.properties.size() ];
 
     // For each property name, read the various pieces of information
     for ( std::vector<std::string>::iterator siter = visitor.properties.begin();
@@ -199,7 +200,7 @@ CprData::getPropertyHeader( AbcA::CompoundPropertyReaderPtr iParent, size_t i )
         ABCA_THROW( "Out of range index in "
                     << "CprData::getPropertyHeader: " << i );
     }
-    boost::mutex::scoped_lock l( m_subPropertyMutexes[i] );
+    Alembic::Util::scoped_lock l( m_subPropertyMutexes[i] );
 
     // read the property header stuff if we haven't yet
     if ( m_propertyHeaders[i].header == NULL )

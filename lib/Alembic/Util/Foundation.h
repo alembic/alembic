@@ -36,10 +36,6 @@
 #ifndef _Alembic_Util_Foundation_h_
 #define _Alembic_Util_Foundation_h_
 
-#ifdef ALEMBIC_USE_BOOST_THREADS
-#include <boost/thread/once.hpp>
-#endif
-
 #include <tr1/memory>
 #include <memory>
 
@@ -59,6 +55,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+#ifdef _MSC_VER
+// needed for mutex stuff
+#include <Windows.h>
+#endif
 
 #define ALEMBIC_VERSION_NS v3
 
@@ -111,6 +112,85 @@ class totally_ordered
     {
         return !( x == y );
     }
+};
+
+// inspired by boost::mutex
+#ifdef _MSC_VER
+
+class mutex : noncopyable
+{
+public:
+    mutex()
+    {
+        m = CreateMutex( NULL, FALSE, NULL );
+    }
+
+    ~mutex()
+    {
+        CloseHandle( m );
+    }
+
+    void lock()
+    {
+        WaitForSingleObject( m, INFINITE );
+    }
+
+    void unlock()
+    {
+        ReleaseMutex( m );
+    }
+
+private:
+    HANDLE m;
+};
+
+#else
+
+
+class mutex : noncopyable
+{
+public:
+    mutex()
+    {
+        pthread_mutex_init( &m, NULL );
+    }
+
+    ~mutex()
+    {
+        pthread_mutex_destroy( &m );
+    }
+
+    void lock()
+    {
+        pthread_mutex_lock( &m );
+    }
+
+    void unlock()
+    {
+        pthread_mutex_unlock( &m );
+    }
+
+private:
+    pthread_mutex_t m;
+};
+
+#endif
+
+class scoped_lock : noncopyable
+{
+public:
+    scoped_lock( mutex & l ) : m( l )
+    {
+        m.lock();
+    }
+
+    ~scoped_lock()
+    {
+        m.unlock();
+    }
+
+private:
+    mutex & m;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
