@@ -38,7 +38,9 @@
 #include <Alembic/Util/Murmur3.h>
 #include <Alembic/Util/PlainOldDataType.h>
 
-#ifndef _MSC_VER
+#ifdef __APPLE__
+#include <machine/endian.h>
+#elif !defined(_MSC_VER)
 #include <endian.h>
 #endif
 
@@ -55,6 +57,7 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
 
     uint64_t h1 = 0;
     uint64_t h2 = 0;
+
 
 #ifdef _MSC_VER
     uint64_t c1 = 0x87c37b91114253d5LL;
@@ -76,7 +79,7 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
         uint64_t k2 = blocks[i*2+1];
 
 
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if __BYTE_ORDER == __BIG_ENDIAN  || BYTE_ORDER == BIG_ENDIAN
         if (podSize == 8)
         {
             k1 = (k1>>56) |
@@ -161,7 +164,7 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     //----------
     // tail
 
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if __BYTE_ORDER == __BIG_ENDIAN  || BYTE_ORDER == BIG_ENDIAN
     const uint8_t * unswappedTail = (const uint8_t*)(data + nblocks*16);
     uint8_t tail[16];
     size_t tailSize = len & 15;
