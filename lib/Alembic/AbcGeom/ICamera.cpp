@@ -60,8 +60,8 @@ void ICameraSchema::init( const Abc::Argument &iArg0,
 
     if ( this->getPropertyHeader( ".childBnds" ) != NULL )
     {
-        m_childBounds = Abc::IBox3dProperty( _this, ".childBnds", iArg0,
-            iArg1 );
+        m_childBoundsProperty = Abc::IBox3dProperty( _this, ".childBnds",
+            iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader( ".arbGeomParams" ) != NULL )
@@ -144,9 +144,9 @@ void ICameraSchema::get( CameraSample & oSample,
     Abc::Box3d bounds;
     bounds.makeEmpty();
 
-    if ( m_childBounds )
+    if ( m_childBoundsProperty )
     {
-        m_childBounds.get( bounds, iSS );
+        m_childBoundsProperty.get( bounds, iSS );
     }
 
     oSample.reset();

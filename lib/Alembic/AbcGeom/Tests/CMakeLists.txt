@@ -137,6 +137,12 @@ ADD_EXECUTABLE( AbcGeom_CompileTest
 TARGET_LINK_LIBRARIES( AbcGeom_CompileTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_CompileTest_TEST AbcGeom_CompileTest )
 
+#-******************************************************************************
+ADD_EXECUTABLE( AbcGeom_LightTest
+                LightTest.cpp )
+TARGET_LINK_LIBRARIES( AbcGeom_LightTest ${TEST_LIBS} )
+ADD_TEST( AbcGeom_LightTest_TEST AbcGeom_LightTest )
+
 ##-*****************************************************************************
 # playground is just something so that we, the Alembic devs, can noodle around
 # with stuff without having to edit the build setup to build it. --JDA

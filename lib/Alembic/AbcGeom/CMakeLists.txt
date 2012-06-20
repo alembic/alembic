@@ -52,6 +52,9 @@ SET( CXX_FILES
   OFaceSet.cpp
   IFaceSet.cpp
 
+  OLight.cpp
+  ILight.cpp
+
   ONuPatch.cpp
   INuPatch.cpp
 
@@ -86,6 +89,9 @@ SET( H_FILES
   GeometryScope.h
 
   SchemaInfoDeclarations.h
+
+  OLight.h
+  ILight.h
 
   FilmBackXformOp.h
   CameraSample.h

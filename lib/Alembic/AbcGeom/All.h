@@ -61,6 +61,9 @@
 #include <Alembic/AbcGeom/OCamera.h>
 #include <Alembic/AbcGeom/ICamera.h>
 
+#include <Alembic/AbcGeom/ILight.h>
+#include <Alembic/AbcGeom/OLight.h>
+
 #include <Alembic/AbcGeom/INuPatch.h>
 #include <Alembic/AbcGeom/ONuPatch.h>
 

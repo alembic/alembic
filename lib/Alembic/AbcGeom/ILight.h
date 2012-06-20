@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,37 +34,37 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_ICamera_h_
-#define _Alembic_AbcGeom_ICamera_h_
+#ifndef _Alembic_AbcGeom_ILight_h_
+#define _Alembic_AbcGeom_ILight_h_
 
+#include <Alembic/AbcGeom/ICamera.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
-#include <Alembic/AbcGeom/CameraSample.h>
 
 namespace Alembic {
 namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ICameraSchema : public Abc::ISchema<CameraSchemaInfo>
+class ILightSchema : public Abc::ISchema<LightSchemaInfo>
 {
     //-*************************************************************************
-    // CAMERA SCHEMA
+    // LIGHT SCHEMA (container schema which has a camera schema)
     //-*************************************************************************
 public:
     //! By convention we always define this_type in AbcGeom classes.
     //! Used by unspecified-bool-type conversion below
-    typedef ICameraSchema this_type;
+    typedef ILightSchema this_type;
 
     //-*************************************************************************
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
     //-*************************************************************************
 
-    //! The default constructor creates an empty OCameraMeshSchema
+    //! The default constructor creates an empty OLightMeshSchema
     //! ...
-    ICameraSchema() {}
+    ILightSchema() {}
 
-    //! This templated, primary constructor creates a new camera writer.
+    //! This templated, primary constructor creates a new light writer.
     //! The first argument is any Abc (or AbcCoreAbstract) object
     //! which can intrusively be converted to an CompoundPropertyWriterPtr
     //! to use as a parent, from which the error handler policy for
@@ -72,114 +72,98 @@ public:
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, and to set TimeSampling.
     template <class CPROP_PTR>
-    ICameraSchema( CPROP_PTR iParent,
-                   const std::string &iName,
-
-                   const Abc::Argument &iArg0 = Abc::Argument(),
-                   const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CameraSchemaInfo>( iParent, iName, iArg0, iArg1 )
+    ILightSchema( CPROP_PTR iParent,
+                  const std::string &iName,
+                  const Abc::Argument &iArg0 = Abc::Argument(),
+                  const Abc::Argument &iArg1 = Abc::Argument() )
+      : Abc::ISchema<LightSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
     template <class CPROP_PTR>
-    explicit ICameraSchema( CPROP_PTR iParent,
-                            const Abc::Argument &iArg0 = Abc::Argument(),
-                            const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CameraSchemaInfo>( iParent, iArg0, iArg1 )
+    explicit ILightSchema( CPROP_PTR iParent,
+                           const Abc::Argument &iArg0 = Abc::Argument(),
+                           const Abc::Argument &iArg1 = Abc::Argument() )
+      : Abc::ISchema<LightSchemaInfo>( iParent, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
+    //! Wrap an existing ILight object
+    template <class CPROP_PTR>
+    explicit ILightSchema( CPROP_PTR iThis,
+                           Abc::WrapExistingFlag iFlag,
+                           const Abc::Argument &iArg0 = Abc::Argument(),
+                           const Abc::Argument &iArg1 = Abc::Argument() )
+      : Abc::ISchema<LightSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+    {
+        init( iArg0, iArg1 );
+    }
 
     //! Copy constructor.
-    ICameraSchema(const ICameraSchema& iCopy)
-        : Abc::ISchema<CameraSchemaInfo>()
+    ILightSchema(const ILightSchema& iCopy)
+        : Abc::ISchema<LightSchemaInfo>()
     {
         *this = iCopy;
     }
 
-    //! Default assignment operator used.
+    //! Access to the camera schema.
+    ICameraSchema getCameraSchema() { return m_cameraSchema; }
 
-    //! Return the time sampling.
-    AbcA::TimeSamplingPtr getTimeSampling()
-    { return m_coreProperties.getTimeSampling(); }
-
-    //! Return the number of samples contained in the property.
-    //! This can be any number, including zero.
-    //! This returns the number of samples that were written, independently
-    //! of whether or not they were constant.
-    size_t getNumSamples()
-    { return m_coreProperties.getNumSamples(); }
-
-    //! Ask if we're constant - no change in value amongst samples,
-    //! regardless of the time sampling.
-    bool isConstant() { return m_coreProperties.isConstant(); }
-
-    void get( CameraSample &oSample,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
-
-    CameraSample getValue(
-        const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+    //! Access to the child bounds property
+    Abc::IBox3dProperty getChildBoundsProperty()
     {
-        CameraSample smp;
-        get( smp, iSS );
-        return smp;
+        return m_childBoundsProperty;
     }
+
+    AbcA::TimeSamplingPtr getTimeSampling();
+
+    bool isConstant() const;
+
+    size_t getNumSamples() const;
 
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
     ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
     ICompoundProperty getUserProperties() { return m_userProperties; }
 
-    Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
-
     //! Reset returns this function set to an empty, default
     //! state.
     void reset()
     {
-        m_coreProperties.reset();
         m_childBoundsProperty.reset();
         m_arbGeomParams.reset();
         m_userProperties.reset();
-        m_ops.clear();
-        Abc::ISchema<CameraSchemaInfo>::reset();
+        m_cameraSchema.reset();
+        Abc::ISchema<LightSchemaInfo>::reset();
     }
 
     //! Returns whether this function set is valid.
     bool valid() const
     {
-        return ( Abc::ISchema<CameraSchemaInfo>::valid() &&
-                 m_coreProperties.valid() );
+        return ( Abc::ISchema<LightSchemaInfo>::valid() );
     }
 
     //! unspecified-bool-type operator overload.
     //! ...
-    ALEMBIC_OVERRIDE_OPERATOR_BOOL( ICameraSchema::valid() );
+    ALEMBIC_OVERRIDE_OPERATOR_BOOL( ILightSchema::valid() );
 
-protected:
-    void init( const Abc::Argument &iArg0,
-               const Abc::Argument &iArg1 );
+  protected:
+    void init( const Abc::Argument& iArg0,
+               const Abc::Argument& iArg1 );
 
-    Abc::IScalarProperty m_coreProperties;
-
-    Abc::IBox3dProperty m_childBoundsProperty;
-
+    Abc::IBox3dProperty    m_childBoundsProperty;
     Abc::ICompoundProperty m_arbGeomParams;
     Abc::ICompoundProperty m_userProperties;
 
-    Abc::IScalarProperty m_smallFilmBackChannels;
-    Abc::IDoubleArrayProperty m_largeFilmBackChannels;
-
-private:
-    std::vector < FilmBackXformOp > m_ops;
-
+    Alembic::AbcGeom::ICameraSchema m_cameraSchema;
 };
 
 //-*****************************************************************************
 // SCHEMA OBJECT
 //-*****************************************************************************
-typedef Abc::ISchemaObject<ICameraSchema> ICamera;
+typedef Abc::ISchemaObject< ILightSchema > ILight;
 
 } // End namespace ALEMBIC_VERSION_NS
 

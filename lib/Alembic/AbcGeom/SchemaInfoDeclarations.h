@@ -154,13 +154,22 @@ ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Curve_v2",
                                      CurvesSchemaInfo );
 
 //-*****************************************************************************
-// IGeomBase
+// GeomBase
 ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_GeomBase_v1",
                                      "",
                                      ".geom",
                                      GeomBaseSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_CURVE_SCHEMA (CurvesSchemaInfo::title())
+
+//-*****************************************************************************
+// Light
+ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Light_v1",
+                                     "",
+                                     ".geom",
+                                     LightSchemaInfo );
+
+#define ALEMBIC_ABCGEOM_LIGHT_SCHEMA (LightSchemaInfo::title())
 
 } // End namespace ALEMBIC_VERSION_NS
 
