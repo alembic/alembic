@@ -68,6 +68,9 @@ CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
 
+    ABCA_ASSERT( iName != "" && iName.find('/') == std::string::npos,
+                 "Invalid name" );
+
     // Set the object.
     AbcA::ObjectWriterPtr optr = m_parent->getObject();
     ABCA_ASSERT( optr, "Invalid object" );

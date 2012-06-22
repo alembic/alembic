@@ -178,6 +178,9 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
 
+    ABCA_ASSERT( iName != "" && iName.find('/') == std::string::npos,
+                 "Invalid name" );
+
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =
         m_parent->getObject()->getArchive()->getTimeSampling(
