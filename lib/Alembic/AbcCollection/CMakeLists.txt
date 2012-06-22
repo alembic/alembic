@@ -15,10 +15,9 @@
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## *       Neither the name of Sony Pictures Imageworks, nor
-## Industrial Light & Magic, nor the names of their contributors may be used
-## to endorse or promote products derived from this software without specific
-## prior written permission.
+## *       Neither the name of Industrial Light & Magic nor the names of
+## its contributors may be used to endorse or promote products derived
+## from this software without specific prior written permission.
 ##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,11 +33,29 @@
 ##
 ##-*****************************************************************************
 
-# Recurse into all the subdirectories
+# C++ files for this project
+SET( CXX_FILES
+  OCollections.cpp
+  ICollections.cpp
+)
 
-ADD_SUBDIRECTORY( Util )
-ADD_SUBDIRECTORY( AbcCoreAbstract )
-ADD_SUBDIRECTORY( AbcCoreHDF5 )
-ADD_SUBDIRECTORY( Abc )
-ADD_SUBDIRECTORY( AbcGeom )
-ADD_SUBDIRECTORY( AbcCollection )
+SET( H_FILES
+ All.h
+ SchemaInfoDeclarations.h
+ OCollections.h
+ ICollections.h
+)
+
+SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+
+ADD_LIBRARY( AlembicAbcCollection ${SOURCE_FILES} )
+
+INSTALL( TARGETS AlembicAbcCollection
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib/static )
+
+INSTALL( FILES ${H_FILES}
+         DESTINATION include/Alembic/AbcCollection
+         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
+
+ADD_SUBDIRECTORY( Tests )
