@@ -38,6 +38,7 @@
 #define _Alembic_AbcGeom_Basis_h_
 
 #include <string>
+#include <Alembic/Util/Foundation.h>
 
 namespace Alembic {
 namespace AbcGeom {
