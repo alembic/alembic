@@ -52,21 +52,13 @@ hid_t CreationOrderPlist()
     ABCA_ASSERT( ID >= 0,
                   "CreationOrderPlist: "
                   "H5Pcreate() failed" );
-    
+
     status = H5Pset_link_creation_order( ID,
                                          ( H5P_CRT_ORDER_TRACKED |
                                            H5P_CRT_ORDER_INDEXED ) );
     ABCA_ASSERT( status >= 0,
                   "CreationOrderPlist: "
                   "H5Pset_link_creation_order() failed" );
-
-    // always store as dense to work around an HDF bug
-    // see google code issue #258, this should be fixed in HDF 1.8.9
-    status = H5Pset_link_phase_change( ID, 0, 0 );
-
-    ABCA_ASSERT( status >= 0,
-                  "CreationOrderPlist: "
-                  "H5Pset_link_phase_change() failed" );
 
     return ID;
 }
