@@ -1086,8 +1086,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         // There might be children under the current DAG node that
         // doesn't exist in the file.
         // Remove them if the -removeIfNoUpdate flag is set
-        if ((mAction == REMOVE || mAction == CREATE_REMOVE) &&
-            mConnectDagNode.isValid())
+        if ((mAction == REMOVE || mAction == CREATE_REMOVE) && hasDag)
         {
             unsigned int numDags = mConnectDagNode.childCount();
             std::vector<MDagPath> dagToBeRemoved;
@@ -1171,7 +1170,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
                 }
                 addToPropList(firstProp, xformObj);
             }
-            else
+            else if (xformObj != MObject::kNullObj)
             {
                 MString theError = mConnectDagNode.partialPathName();
                 theError += MString(" is not compatible as a transform node. ");
