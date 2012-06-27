@@ -253,6 +253,34 @@ class AbcImportSwapTest(unittest.TestCase):
         self.failUnlessAlmostEqual(
             MayaCmds.getAttr('sun.rotateZ'),  0.0000, 4)
 
+    def testRemoveIfNoUpdateLessGeo(self):
+        createStaticSolarSystem()
+
+        # delete earth so that only the sun and the moon should exist
+        MayaCmds.delete('earth')
+
+        MayaCmds.AbcImport(self.__files[1], connect='/',
+            removeIfNoUpdate=True)
+
+        # check to make sure earth still does not exist
+        self.failUnlessEqual(MayaCmds.objExists('earth'), False)
+
+        # check the swapped scene is the same as frame #12
+        # tranform node moon
+        self.failUnlessAlmostEqual(
+            MayaCmds.getAttr('moon.translateX'), -4.1942, 4)
+        self.failUnlessAlmostEqual(
+            MayaCmds.getAttr('moon.translateY'),  0.0000, 4)
+        self.failUnlessAlmostEqual(
+            MayaCmds.getAttr('moon.translateZ'),  2.9429, 4)
+        # transform node sun
+        self.failUnlessAlmostEqual(
+            MayaCmds.getAttr('sun.rotateX'),  0.0000, 4)
+        self.failUnlessAlmostEqual(
+            MayaCmds.getAttr('sun.rotateY'), 16.569, 4)
+        self.failUnlessAlmostEqual(
+            MayaCmds.getAttr('sun.rotateZ'),  0.0000, 4)
+
     def testCreateIfNotFound(self):
         createStaticSolarSystem()
         # delete some nodes
