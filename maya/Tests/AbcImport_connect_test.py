@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2012,
 ##  Sony Pictures Imageworks, Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -339,6 +339,23 @@ class AbcImportSwapTest(unittest.TestCase):
             MayaCmds.getAttr('sun.rotateY'), 0.0000, 4)
         self.failUnlessAlmostEqual(
             MayaCmds.getAttr('sun.rotateZ'),  0.0000, 4)
+
+    def testStaticMeshSwap(self):
+        moon = MayaCmds.polyCube( sx=1, name="moon", ch=False )[0]
+        MayaCmds.move( -2, 0.0, 0.0, r=1 )
+        earth  = MayaCmds.polyCube( sx=1, name="earth", ch=False )[0]
+        MayaCmds.select( moon, earth )
+        MayaCmds.group(name='group1')
+
+        MayaCmds.polyCube( sx=1, name="sun", ch=False )[0]
+        MayaCmds.move( 10, 0.0, 0.0, r=1 )
+        MayaCmds.group(name='group2')
+        MayaCmds.AbcImport(self.__files[1], connect='/', debug=False )
+
+        self.failUnless(len(MayaCmds.ls(type='mesh')) == 3)
+        self.failUnless(MayaCmds.polyEvaluate('sunShape', face=True) == 400)
+        self.failUnless(MayaCmds.polyEvaluate('earthShape', face=True) == 400)
+        self.failUnless(MayaCmds.polyEvaluate('moonShape', face=True) == 400)
 
     def testAnimatedMeshSwap(self):
 

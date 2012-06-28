@@ -386,8 +386,16 @@ namespace
             base += curNum;
         }
 
-        MObject shape = ioMesh.create(iPoints.length(), numPolys, iPoints,
-            polyCounts, polyConnects, iParent);
+        if (ioMesh.parentCount() != 0)
+        {
+            ioMesh.createInPlace(iPoints.length(), numPolys, iPoints,
+                polyCounts, polyConnects);
+        }
+        else
+        {
+            ioMesh.create(iPoints.length(), numPolys, iPoints,
+               polyCounts, polyConnects, iParent);
+        }
 
     }
 
