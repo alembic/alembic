@@ -805,10 +805,6 @@ void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
         Alembic::AbcGeom::kTranslateHint, false, iForceStatic, forceAnimated,
         mSample, mAnimChanList);
 
-    // inspect the inverseParent scale
-    addScale(iJoint, "inverseScale", "inverseScaleX", "inverseScaleY",
-        "inverseScaleZ", iForceStatic, forceAnimated, mSample, mAnimChanList);
-
     MTransformationMatrix::RotationOrder order;
     double vals[3];
 
