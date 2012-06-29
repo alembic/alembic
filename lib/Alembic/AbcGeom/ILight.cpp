@@ -80,7 +80,23 @@ void ILightSchema::init( const Abc::Argument &iArg0,
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
-AbcA::TimeSamplingPtr getTimeSampling();
+AbcA::TimeSamplingPtr ILightSchema::getTimeSampling()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "ILightSchema::getTimeSampling" );
+
+    if ( m_childBoundsProperty )
+    {
+        return m_childBoundsProperty.getTimeSampling();
+    }
+    else if ( m_cameraSchema )
+    {
+        return m_cameraSchema.getTimeSampling();
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return AbcA::TimeSamplingPtr();
+}
 
 bool ILightSchema::isConstant() const
 {
@@ -100,6 +116,10 @@ size_t ILightSchema::getNumSamples() const
     if ( m_childBoundsProperty )
     {
         return m_childBoundsProperty.getNumSamples();
+    }
+    else if ( m_cameraSchema )
+    {
+        return m_cameraSchema.getNumSamples();
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
