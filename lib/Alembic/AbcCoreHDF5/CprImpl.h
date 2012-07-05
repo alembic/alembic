@@ -53,12 +53,11 @@ public:
 
     // For construction from a compound property reader
     CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-             hid_t iParentGroup,
+             H5Node & iParentGroup,
              PropertyHeaderPtr iHeader );
 
     CprImpl( AbcA::ObjectReaderPtr iParent,
-             CprDataPtr iData,
-             hid_t iParentGroup );
+             CprDataPtr iData );
 
     virtual ~CprImpl();
 

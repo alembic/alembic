@@ -34,65 +34,28 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_SprImpl_h_
-#define _Alembic_AbcCoreHDF5_SprImpl_h_
+#ifndef _Alembic_AbcCoreHDF5_HDF5HierarchyReader_h_
+#define _Alembic_AbcCoreHDF5_HDF5HierarchyReader_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/SimplePrImpl.h>
+#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-// The Scalar Property Reader fills up bytes corresponding to memory for
-// a single scalar sample at a particular index.
-class SprImpl
-    : public SimplePrImpl<AbcA::ScalarPropertyReader,
-                          SprImpl,
-                          void*>
-    , public Alembic::Util::enable_shared_from_this<SprImpl>
+class HDF5HierarchyReader
 {
 public:
-    SprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-             H5Node & iParentGroup,
-             PropertyHeaderPtr iHeader,
-             uint32_t iNumSamples,
-             uint32_t iFirstChangedIndex,
-             uint32_t iLastChangedIndex )
-      : SimplePrImpl<AbcA::ScalarPropertyReader, SprImpl, void*>
-        ( iParent, iParentGroup, iHeader, iNumSamples, iFirstChangedIndex,
-          iLastChangedIndex )
-    {
-        if ( m_header->getPropertyType() != AbcA::kScalarProperty )
-        {
-            ABCA_THROW( "Attempted to create a ScalarPropertyReader from a "
-                        "non-scalar property type" );
-        }
-    }
+    HDF5HierarchyReader( hid_t iFile,
+                         HDF5Hierarchy& iH5H,
+                         const bool iCacheHierarchy );
 
-    virtual AbcA::ScalarPropertyReaderPtr asScalarPtr();
+private:
+    void readHierarchy( hid_t iFile );
 
-protected:
-    friend class SimplePrImpl<AbcA::ScalarPropertyReader,
-                              SprImpl,
-                              void*>;
-    
-    // This function is called by SimplePrImpl to provide the actual
-    // property reading.
-    // It will dispatch its work out to different read utils, based
-    // on the type of the property.
-    void readSample( hid_t iGroup,
-                     const std::string &iSampleName,
-                     index_t iSampleIndex,
-                     void *oSampleBytes );
-    
-    //-*************************************************************************
-    // This function is called by SimplePrImpl, scalar props do not have keys.
-    bool readKey( hid_t iGroup,
-                  const std::string &iSampleName,
-                  AbcA::ArraySampleKey & oSamplePtr ) { return false; }
-
+    HDF5Hierarchy& m_H5H;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

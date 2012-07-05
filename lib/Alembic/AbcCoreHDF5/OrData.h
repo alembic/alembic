@@ -37,7 +37,9 @@
 #ifndef _Alembic_AbcCoreHDF5_OrData_h_
 #define _Alembic_AbcCoreHDF5_OrData_h_
 
+#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
 #include <Alembic/AbcCoreHDF5/Foundation.h>
+
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -52,7 +54,7 @@ class OrData : public Alembic::Util::enable_shared_from_this<OrData>
 {
 public:
     OrData( ObjectHeaderPtr iHeader,
-            hid_t iParentGroup,
+            H5Node & iParentGroup,
             int32_t iArchiveVersion );
 
     ~OrData();
@@ -86,8 +88,8 @@ private:
     typedef std::map<std::string, size_t> ChildrenMap;
     typedef std::vector<Child> ChildrenVec;
 
-    hid_t m_group;
-    hid_t m_oldGroup;
+    H5Node m_group;
+    H5Node m_oldGroup;
 
     Alembic::Util::mutex m_childObjectsMutex;
 

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -47,10 +47,12 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 AbcA::ArchiveWriterPtr
 WriteArchive::operator()( const std::string &iFileName,
-                          const AbcA::MetaData &iMetaData ) const
+                          const AbcA::MetaData &iMetaData,
+                          const bool iCacheHierarchy ) const
 {
     AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iFileName,
-                                                   iMetaData ) );
+                                                   iMetaData,
+                                                   iCacheHierarchy ) );
     return archivePtr;
 }
 
@@ -66,10 +68,13 @@ CreateCache()
 //-*****************************************************************************
 // This version creates a cache.
 AbcA::ArchiveReaderPtr
-ReadArchive::operator()( const std::string &iFileName ) const
+ReadArchive::operator()( const std::string &iFileName,
+                         const bool iCacheHierarchy ) const
 {
     AbcA::ReadArraySampleCachePtr cachePtr = CreateCache();
-    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName, cachePtr ) );
+    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName,
+                                                   cachePtr,
+                                                   iCacheHierarchy ) );
     return archivePtr;
 }
 
@@ -77,10 +82,12 @@ ReadArchive::operator()( const std::string &iFileName ) const
 // This version takes a cache from outside.
 AbcA::ArchiveReaderPtr
 ReadArchive::operator()( const std::string &iFileName,
-                         AbcA::ReadArraySampleCachePtr iCachePtr ) const
+                         AbcA::ReadArraySampleCachePtr iCachePtr,
+                         const bool iCacheHierarchy ) const
 {
     AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName,
-                                                   iCachePtr ) );
+                                                   iCachePtr,
+                                                   iCacheHierarchy ) );
     return archivePtr;
 }
 

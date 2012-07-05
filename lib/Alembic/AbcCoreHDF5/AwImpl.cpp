@@ -39,6 +39,8 @@
 #include <Alembic/AbcCoreHDF5/OwImpl.h>
 #include <Alembic/AbcCoreHDF5/WriteUtil.h>
 #include <Alembic/AbcCoreHDF5/HDF5Util.h>
+#include <Alembic/AbcCoreHDF5/HDF5HierarchyWriter.h>
+#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -46,10 +48,12 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 AwImpl::AwImpl( const std::string &iFileName,
-                const AbcA::MetaData &iMetaData )
+                const AbcA::MetaData &iMetaData,
+                bool iCacheHierarchy )
   : m_fileName( iFileName )
   , m_metaData( iMetaData )
   , m_file( -1 )
+  , m_cacheHierarchy( iCacheHierarchy )
 {
 
     // add default time sampling
@@ -161,6 +165,13 @@ AbcA::TimeSamplingPtr AwImpl::getTimeSampling( uint32_t iIndex )
 //-*****************************************************************************
 AwImpl::~AwImpl()
 {
+    // write the cache if necessary
+    if ( m_file >= 0 && m_cacheHierarchy )
+    {
+        HDF5Hierarchy h5H;
+        HDF5HierarchyWriter writer( m_file, h5H );
+    }
+
     // empty out the map so any dataset IDs will be freed up
     m_writtenArraySampleMap.m_map.clear();
 

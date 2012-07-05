@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -75,7 +75,7 @@ class SimplePrImpl : public ABSTRACT
 {
 protected:
     SimplePrImpl( AbcA::CompoundPropertyReaderPtr iParent,
-                  hid_t iParentGroup,
+                  H5Node & iParentGroup,
                   PropertyHeaderPtr iHeader,
                   uint32_t iNumSamples,
                   uint32_t iFirstChangedIndex,
@@ -116,7 +116,7 @@ protected:
     AbcA::CompoundPropertyReaderPtr m_parent;
 
     // The HDF5 Group associated with the parent property reader.
-    hid_t m_parentGroup;
+    H5Node m_parentGroup;
 
     // We don't hold a pointer to the object, but instead
     // get it from the compound property reader.
@@ -145,7 +145,7 @@ protected:
     // The simple properties only store samples after the first
     // sample in a sub group. Therefore, there may not actually be
     // a group associated with this property.
-    hid_t m_samplesIGroup;
+    H5Node m_samplesIGroup;
 };
 
 //-*****************************************************************************
@@ -161,7 +161,7 @@ template <class ABSTRACT, class IMPL, class SAMPLE>
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
 (
     AbcA::CompoundPropertyReaderPtr iParent,
-    hid_t iParentGroup,
+    H5Node & iParentGroup,
     PropertyHeaderPtr iHeader,
     uint32_t iNumSamples,
     uint32_t iFirstChangedIndex,
@@ -177,11 +177,10 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::SimplePrImpl
   , m_numSamples( iNumSamples )
   , m_firstChangedIndex( iFirstChangedIndex )
   , m_lastChangedIndex( iLastChangedIndex )
-  , m_samplesIGroup( -1 )
 {
     // Validate all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
-    ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
+    ABCA_ASSERT( m_parentGroup.isValidObject(), "Invalid parent group" );
     ABCA_ASSERT( m_header, "Invalid header" );
     ABCA_ASSERT( m_header->getPropertyType() != AbcA::kCompoundProperty,
                  "Tried to create a simple property with a compound header" );
@@ -310,7 +309,6 @@ void
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
                                                SAMPLE oSample )
 {
-
     iSampleIndex = verifySampleIndex( iSampleIndex );
 
     // Get our name.
@@ -324,18 +322,18 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
         std::string sample0Name = getSampleName( myName, 0 );
         if ( m_header->getPropertyType() == AbcA::kScalarProperty )
         {
-            ABCA_ASSERT( H5Aexists( m_parentGroup, sample0Name.c_str() ),
-                         "Invalid property: " << myName
-                         << ", missing smp0" );
+            ABCA_ASSERT( AttrExists( m_parentGroup, sample0Name.c_str() ),
+                         "Invalid property in SimplePrImpl getSample: "
+                         << myName << ", missing smp0" );
         }
         else
         {
             ABCA_ASSERT( DatasetExists( m_parentGroup, sample0Name ),
-                         "Invalid property: " << myName
-                         << ", missing smp1" );
+                         "Invalid propertyin SimplePrImpl getSample: "
+                         << myName << ", missing smp1" );
         }
 
-        static_cast<IMPL *>( this )->readSample( m_parentGroup,
+        static_cast<IMPL *>( this )->readSample( m_parentGroup.getObject(),
                                                  sample0Name,
                                                  iSampleIndex,
                                                  oSample );
@@ -343,25 +341,24 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
     else
     {
         // Create the subsequent samples group.
-        if ( m_samplesIGroup < 0 )
+        if ( !m_samplesIGroup.isValidObject() )
         {
             std::string samplesIName = myName + ".smpi";
-            ABCA_ASSERT( GroupExists( m_parentGroup,
-                                      samplesIName ),
-                         "Invalid property: " << myName
-                         << ", missing smpi" );
 
-            m_samplesIGroup = H5Gopen2( m_parentGroup,
-                                        samplesIName.c_str(),
-                                        H5P_DEFAULT );
-            ABCA_ASSERT( m_samplesIGroup >= 0,
-                         "Invalid property: " << myName
-                         << ", invalid smpi group" );
+            m_samplesIGroup = OpenGroup( m_parentGroup,
+                                         samplesIName.c_str() );
+
+            ABCA_ASSERT( m_samplesIGroup.isValidObject(),
+                         "Invalid property in SimplePrImpl getSample: "
+                         << myName 
+                         << ( GroupExists( m_parentGroup, samplesIName ) ?
+                              ", invalid" : ", missing" )
+                         << ", smpi group" );
         }
 
         // Read the sample.
         std::string sampleName = getSampleName( myName, iSampleIndex );
-        static_cast<IMPL *>( this )->readSample( m_samplesIGroup,
+        static_cast<IMPL *>( this )->readSample( m_samplesIGroup.getObject(),
                                                  sampleName,
                                                  iSampleIndex,
                                                  oSample );
@@ -387,45 +384,44 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
         std::string sample0Name = getSampleName( myName, 0 );
         if ( m_header->getPropertyType() == AbcA::kScalarProperty )
         {
-            ABCA_ASSERT( H5Aexists( m_parentGroup, sample0Name.c_str() ),
-                         "Invalid property: " << myName
-                         << ", missing smp0" );
+            ABCA_ASSERT( AttrExists( m_parentGroup, sample0Name.c_str() ),
+                         "Invalid property in SimplePrImpl getKey: "
+                         << myName << ", missing smp0" );
         }
         else
         {
             ABCA_ASSERT( DatasetExists( m_parentGroup, sample0Name ),
-                         "Invalid property: " << myName
-                         << ", missing smp1" );
+                         "Invalid property in SimplePrImpl getKey: "
+                         << myName << ", missing smp1" );
         }
 
-        return static_cast<IMPL *>( this )->readKey( m_parentGroup,
+        return static_cast<IMPL *>( this )->readKey( m_parentGroup.getObject(),
                                                      sample0Name,
                                                      oKey );
     }
     else
     {
         // Create the subsequent samples group.
-        if ( m_samplesIGroup < 0 )
+        if ( !m_samplesIGroup.isValidObject() )
         {
             std::string samplesIName = myName + ".smpi";
-            ABCA_ASSERT( GroupExists( m_parentGroup,
-                                      samplesIName ),
-                         "Invalid property: " << myName
-                         << ", missing smpi" );
 
-            m_samplesIGroup = H5Gopen2( m_parentGroup,
-                                        samplesIName.c_str(),
-                                        H5P_DEFAULT );
-            ABCA_ASSERT( m_samplesIGroup >= 0,
-                         "Invalid property: " << myName
-                         << ", invalid smpi group" );
+            m_samplesIGroup = OpenGroup( m_parentGroup,
+                                         samplesIName.c_str() );
+
+            ABCA_ASSERT( m_samplesIGroup.isValidObject(),
+                         "Invalid propertyin SimplePrImpl getKey: "
+                         << myName
+                         << ( GroupExists( m_parentGroup, samplesIName ) ?
+                              ", invalid" : ", missing" )
+                         << ", smpi group" );
         }
 
         // Read the sample.
         std::string sampleName = getSampleName( myName, iSampleIndex );
-        return static_cast<IMPL *>( this )->readKey( m_samplesIGroup,
-                                                     sampleName,
-                                                     oKey );
+        return static_cast<IMPL*>( this )->readKey( m_samplesIGroup.getObject(),
+                                                    sampleName,
+                                                    oKey );
     }
 }
 
@@ -434,11 +430,7 @@ template <class ABSTRACT, class IMPL, class SAMPLE>
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::~SimplePrImpl()
 {
     // Clean up our samples group, if necessary.
-    if ( m_samplesIGroup >= 0 )
-    {
-        H5Gclose( m_samplesIGroup );
-        m_samplesIGroup = -1;
-    }
+    CloseObject( m_samplesIGroup );
 
     if ( m_fileDataType >= 0 && m_cleanFileDataType )
     {

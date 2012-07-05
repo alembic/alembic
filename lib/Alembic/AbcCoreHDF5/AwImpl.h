@@ -57,7 +57,8 @@ private:
     friend struct WriteArchive;
 
     AwImpl( const std::string &iFileName,
-            const AbcA::MetaData &iMetaData );
+            const AbcA::MetaData &iMetaData,
+            bool iCacheHistory );
 
 public:
     virtual ~AwImpl();
@@ -91,6 +92,7 @@ private:
     std::string m_fileName;
     AbcA::MetaData m_metaData;
     hid_t m_file;
+    bool m_cacheHierarchy;
 
     Alembic::Util::weak_ptr< AbcA::ObjectWriter > m_top;
     Alembic::Util::shared_ptr < OwData > m_data;

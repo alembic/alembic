@@ -48,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-                  hid_t iParentGroup,
+                  H5Node & iParentGroup,
                   PropertyHeaderPtr iHeader )
     : m_parent( iParent )
     , m_header( iHeader )
@@ -75,8 +75,7 @@ CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
 
 //-*****************************************************************************
 CprImpl::CprImpl( AbcA::ObjectReaderPtr iObject,
-                  CprDataPtr iData,
-                  hid_t iParentGroup )
+                  CprDataPtr iData )
     : m_object( iObject )
     , m_data( iData )
 {

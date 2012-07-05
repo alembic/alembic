@@ -49,7 +49,7 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 // Reading as a child of a parent.
 OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
-                hid_t iParentGroup,
+                H5Node & iParentGroup,
                 ObjectHeaderPtr iHeader )
     : m_parent( iParent )
     , m_header( iHeader )

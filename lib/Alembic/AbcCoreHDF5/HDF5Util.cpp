@@ -101,63 +101,176 @@ bool EquivalentDatatypes( hid_t iA, hid_t iB )
 }
 
 //-*****************************************************************************
-bool GroupExists( hid_t iParent, const std::string &iName )
+bool ObjectExists( H5Node& iParent, const std::string &iName )
 {
-    ABCA_ASSERT( iParent >= 0, "Invalid Parent in GroupExists" );
-    
-    // First, check to make sure the link exists.
-    htri_t exi = H5Lexists( iParent, iName.c_str(), H5P_DEFAULT );
-    if ( exi < 1 )
-    {
-        return false;
-    }
-    
-    // Now make sure it is a group.
-    H5O_info_t oinfo;
-    herr_t status = H5Oget_info_by_name( iParent,
-                                         iName.c_str(), &oinfo,
-                                         H5P_DEFAULT );
-    if ( status < 0 )
-    {
-        return false;
-    }
-    
-    if ( oinfo.type != H5O_TYPE_GROUP )
-    {
-        return false;
-    }
+    ABCA_ASSERT( iParent.isValidObject(),
+                 "Invalid parent node passed into HDF5Util GroupExists: "
+                 << iName << std::endl );
 
-    return true;
+    HDF5Hierarchy* H5HPtr = iParent.getH5HPtr();
+
+    if ( H5HPtr )
+    {
+        return H5HPtr->childExists( iParent.getRef(), iName );
+    }
+    else
+    {
+        // First, check to make sure the link exists.
+        hid_t iParentObject = iParent.getObject();
+
+        htri_t exi = H5Lexists( iParentObject, iName.c_str(), H5P_DEFAULT );
+        if ( exi < 1 )
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
 }
 
 //-*****************************************************************************
-bool DatasetExists( hid_t iParent, const std::string &iName )
+bool GroupExists( H5Node& iParent, const std::string &iName )
 {
-    ABCA_ASSERT( iParent >= 0, "Invalid Parent in DatasetExists" );
-    
-    // First, check to make sure the link exists.
-    htri_t exi = H5Lexists( iParent, iName.c_str(), H5P_DEFAULT );
-    if ( exi < 1 )
-    {
-        return false;
-    }
-    
-    // Now make sure it is a group.
-    H5O_info_t oinfo;
-    herr_t status = H5Oget_info_by_name( iParent,
-                                         iName.c_str(), &oinfo,
-                                         H5P_DEFAULT );
-    if ( status < 0 )
-    {
-        return false;
-    }
-    
-    if ( oinfo.type != H5O_TYPE_DATASET )
-    {
-        return false;
-    }
+    ABCA_ASSERT( iParent.isValidObject(),
+                 "Invalid parent node passed into HDF5Util GroupExists: "
+                 << iName << std::endl );
 
-    return true;
+    HDF5Hierarchy* h5HPtr = iParent.getH5HPtr();
+
+    if ( h5HPtr )
+    {
+        return h5HPtr->childExists( iParent.getRef(), iName );
+    }
+    else
+    {
+        // First, check to make sure the link exists.
+        hid_t iParentObject = iParent.getObject();
+
+        htri_t exi = H5Lexists( iParentObject, iName.c_str(), H5P_DEFAULT );
+        if ( exi < 1 )
+        {
+            return false;
+        }
+
+        // Now make sure it is a group.
+        H5O_info_t oinfo;
+        herr_t status = H5Oget_info_by_name( iParentObject,
+                                             iName.c_str(), &oinfo,
+                                             H5P_DEFAULT );
+        if ( status < 0 )
+        {
+            return false;
+        }
+
+        if ( oinfo.type != H5O_TYPE_GROUP )
+        {
+            return false;
+        }
+
+        return true;
+    }
+}
+
+//-*****************************************************************************
+bool DatasetExists( H5Node& iParent, const std::string &iName )
+{
+    ABCA_ASSERT( iParent.isValidObject(),
+                 "Invalid parent group passed into HDF5Util DatasetExists: "
+                 << iName << std::endl );
+
+    HDF5Hierarchy* h5HPtr = iParent.getH5HPtr();
+
+    if ( h5HPtr )
+    {
+        return h5HPtr->childExists( iParent.getRef(), iName );
+    }
+    else
+    {
+        hid_t iParentObject = iParent.getObject();
+
+        // First, check to make sure the link exists.
+        htri_t exi = H5Lexists( iParentObject, iName.c_str(), H5P_DEFAULT );
+        if ( exi < 1 )
+        {
+            return false;
+        }
+
+        // Now make sure it is a group.
+        H5O_info_t oinfo;
+        herr_t status = H5Oget_info_by_name( iParentObject,
+                                             iName.c_str(), &oinfo,
+                                             H5P_DEFAULT );
+        if ( status < 0 )
+        {
+            return false;
+        }
+
+        if ( oinfo.type != H5O_TYPE_DATASET )
+        {
+            return false;
+        }
+
+        return true;
+    }
+}
+
+//-*****************************************************************************
+H5Node OpenGroup( H5Node& iParent, const std::string& iName )
+{
+    ABCA_ASSERT( iParent.isValidObject(),
+                 "Invalid parent group passed into HDF5Util OpenGroup: "
+                 << iName << std::endl );
+
+    HDF5Hierarchy* h5HPtr = iParent.getH5HPtr();
+
+    if ( h5HPtr )
+    {
+        hobj_ref_t childRef = h5HPtr->getChildRef( iParent.getRef(), iName );
+
+        hid_t childId = H5Rdereference( iParent.getObject(),
+                                        H5R_OBJECT,
+                                        &childRef );
+
+        return H5Node( childId, childRef, h5HPtr );
+    }
+    else
+    {
+        hid_t childId = H5Gopen2( iParent.getObject(),
+                                  iName.c_str(),
+                                  H5P_DEFAULT );
+
+        return H5Node( childId, 0, NULL );
+    }
+}
+
+//-*****************************************************************************
+void CloseObject( H5Node& iNode )
+{
+    if ( iNode.isValidObject() )
+    {
+        H5Oclose( iNode.getObject() );
+        iNode.setObject( -1 );
+    }
+}
+
+//-*****************************************************************************
+bool AttrExists( H5Node& iParent, const std::string& iName )
+{
+    ABCA_ASSERT( iParent.isValidObject(),
+                 "Invalid parent object in ReadMetaData" );
+
+    HDF5Hierarchy* h5HPtr = iParent.getH5HPtr();
+
+    if ( h5HPtr )
+    {
+        return h5HPtr->attrExists( iParent.getRef(), iName );
+    }
+    else
+    {
+        return H5Aexists( iParent.getObject(), iName.c_str() ) > 0;
+    }
 }
 
 } // End namespace ALEMBIC_VERSION_NS

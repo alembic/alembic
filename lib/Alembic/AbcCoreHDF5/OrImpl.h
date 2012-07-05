@@ -57,7 +57,7 @@ public:
             ObjectHeaderPtr iHeader );
 
     OrImpl( AbcA::ObjectReaderPtr iParent,
-            hid_t iParentGroup,
+            H5Node & iParentGroup,
             ObjectHeaderPtr iHeader );
 
     virtual ~OrImpl();

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -44,6 +44,13 @@
 namespace Alembic {
 namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
+
+//-*****************************************************************************
+void
+WriteReferences( hid_t iParent,
+                 const std::string& iRefName,
+                 size_t iNumRefs,
+                 const void *iRefs );
 
 //-*****************************************************************************
 WrittenArraySampleMap& GetWrittenArraySampleMap(

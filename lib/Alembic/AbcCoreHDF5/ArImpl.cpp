@@ -39,6 +39,8 @@
 #include <Alembic/AbcCoreHDF5/OrImpl.h>
 #include <Alembic/AbcCoreHDF5/ReadUtil.h>
 #include <Alembic/AbcCoreHDF5/HDF5Util.h>
+#include <Alembic/AbcCoreHDF5/HDF5Util.h>
+#include <Alembic/AbcCoreHDF5/HDF5HierarchyReader.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -46,7 +48,8 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 ArImpl::ArImpl( const std::string &iFileName,
-                AbcA::ReadArraySampleCachePtr iCache )
+                AbcA::ReadArraySampleCachePtr iCache,
+                const bool iCacheHierarchy )
   : m_fileName( iFileName )
   , m_file( -1 )
   , m_readArraySampleCache( iCache )
@@ -78,18 +81,16 @@ ArImpl::ArImpl( const std::string &iFileName,
     }
     m_archiveVersion = fileVersion;
 
-    // set up the data for the "top" object, and header
-    hid_t group = H5Gopen2( m_file, "ABC", H5P_DEFAULT );
-
-    ABCA_ASSERT( group >= 0, "Could not open top object in: "
-                             << iFileName );
+    HDF5HierarchyReader reader( m_file, m_H5H, iCacheHierarchy );
+    H5Node node = m_H5H.createNode( m_file );
+    H5Node abcRoot = OpenGroup( node, "ABC" );
 
     AbcA::MetaData metaData;
-    ReadMetaData( group, ".prop.meta", metaData );
+    ReadMetaData( abcRoot, ".prop.meta", metaData );
     m_header.reset( new AbcA::ObjectHeader( "ABC", "/", metaData ) );
 
-    m_data.reset( new OrData( m_header, m_file, m_archiveVersion ) );
-    H5Gclose( group );
+    m_data.reset( new OrData( m_header, node, m_archiveVersion ) );
+    CloseObject( abcRoot );
     ReadTimeSamples( m_file, m_timeSamples );
 }
 
@@ -161,6 +162,63 @@ ArImpl::~ArImpl()
                  << ", Groups: " << grpCount
                  << ", DataTypes: " << dtypCount 
                  << ", Attributes: " << attrCount;
+
+            std::vector< hid_t > objList;
+
+            // when getting the name corresponding to a hid_t, the get_name
+            // functions always append a NULL character, which we strip off
+            // when injecting into out stream.
+            std::string name;
+
+            if ( dsetCount > 0 )
+            {
+                strm << std::endl << "DataSets: " << std::endl;
+                objList.resize( dsetCount );
+                H5Fget_obj_ids( m_file, H5F_OBJ_LOCAL | H5F_OBJ_DATASET,
+                    dsetCount, &objList.front() );
+                for ( int i = 0; i < dsetCount; ++i )
+                {
+                    int strLen = H5Iget_name( objList[i], NULL, 0 ) + 1;
+                    name.resize( strLen );
+                    H5Iget_name( objList[i], &(name[0]), strLen );
+                    strm << name.substr(0, name.size() - 1) << std::endl;
+                }
+            }
+
+            if ( grpCount > 0 )
+            {
+                strm << std::endl << std::endl << "Groups:" << std::endl;
+                objList.resize( grpCount );
+                H5Fget_obj_ids( m_file, H5F_OBJ_LOCAL | H5F_OBJ_GROUP,
+                    grpCount, &objList.front() );
+                for ( int i = 0; i < grpCount; ++i )
+                {
+                    int strLen = H5Iget_name( objList[i], NULL, 0 ) + 1;
+                    name.resize( strLen );
+                    H5Iget_name( objList[i], &(name[0]), strLen );
+                    strm << std::endl << name.substr(0, name.size() - 1);
+                }
+            }
+
+            if ( attrCount > 0 )
+            {
+                strm << std::endl << std::endl << "Attrs:" << std::endl;
+                objList.resize( attrCount );
+                H5Fget_obj_ids( m_file, H5F_OBJ_LOCAL | H5F_OBJ_ATTR,
+                    attrCount, &objList.front() );
+                for ( int i = 0; i < attrCount; ++i )
+                {
+                    int strLen = H5Aget_name( objList[i], NULL, 0 ) + 1;
+                    H5Iget_name( objList[i], &(name[0]), strLen );
+                    strm << std::endl << name.substr(0, name.size() - 1);
+                }
+            }
+
+            // just for formatting purposes
+            if ( dtypCount > 0 )
+            {
+                strm << std::endl;
+            }
 
             m_file = -1;
             ABCA_THROW( strm.str() );

@@ -52,7 +52,7 @@ struct CprAttrVisitor
 
     std::vector<std::string> properties;
 
-    void createNewProperty( const std::string &iName )
+    void operator() ( const std::string &iName )
     {
         properties.push_back( iName );
     }
@@ -96,19 +96,18 @@ herr_t CprVisitAllAttrsCB( hid_t iGroup,
     if ( suffix == ".info" && attrNameLen > 0)
     {
         std::string propertyName( attrName, 0, attrNameLen-5 );
-        visitor->createNewProperty( propertyName );
+        (*visitor)( propertyName );
     }
 
     return 0;
 }
 
 //-*****************************************************************************
-CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
+CprData::CprData( H5Node & iParentGroup, int32_t iArchiveVersion,
                   const std::string &iName )
-  : m_group( -1 )
-  , m_subPropertyMutexes( NULL )
+  : m_subPropertyMutexes( NULL )
 {
-    ABCA_ASSERT( iParentGroup >= 0, "invalid parent group" );
+    ABCA_ASSERT( iParentGroup.isValidObject(), "invalid parent group" );
 
     // If our group exists, open it. If it does not, this is not a problem!
     // It just means we don't have any subproperties.
@@ -119,9 +118,9 @@ CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
         return;
     }
 
-    m_group = H5Gopen2( iParentGroup, iName.c_str(), H5P_DEFAULT );
+    m_group = OpenGroup( iParentGroup, iName.c_str() );
 
-    ABCA_ASSERT( m_group >= 0,
+    ABCA_ASSERT( m_group.isValidObject(),
                  "Could not open compound property group named: "
                  << iName << ", H5Gopen2 failed" );
 
@@ -129,27 +128,35 @@ CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
 
     CprAttrVisitor visitor;
 
-    try
+    HDF5Hierarchy* h5HPtr = iParentGroup.getH5HPtr();
+    if ( h5HPtr )
     {
-        herr_t status = H5Aiterate2( m_group,
-                                     H5_INDEX_CRT_ORDER,
-                                     H5_ITER_INC,
-                                     NULL,
-                                     CprVisitAllAttrsCB,
-                                     ( void * )&visitor );
+        h5HPtr->visitAllAttributes( iParentGroup.getRef(), iName, visitor );
+    }
+    else
+    {
+        try
+        {
+            herr_t status = H5Aiterate2( m_group.getObject(),
+                                         H5_INDEX_CRT_ORDER,
+                                         H5_ITER_INC,
+                                         NULL,
+                                         CprVisitAllAttrsCB,
+                                         ( void * )&visitor );
 
-        ABCA_ASSERT( status >= 0,
-                 "CprData::CprData(): H5Aiterate failed" );
-    }
-    catch ( std::exception & exc )
-    {
-        ABCA_THROW( "Could not attr iterate property group named: "
-                    << iName << ", reason: " << exc.what() );
-    }
-    catch ( ... )
-    {
-        ABCA_THROW( "Could not attr iterate property group named: "
-                    << iName << ", unknown reason" );
+            ABCA_ASSERT( status >= 0,
+                     "CprData::CprData(): H5Aiterate failed" );
+        }
+        catch ( std::exception & exc )
+        {
+            ABCA_THROW( "Could not attr iterate property group named: "
+                        << iName << ", reason: " << exc.what() );
+        }
+        catch ( ... )
+        {
+            ABCA_THROW( "Could not attr iterate property group named: "
+                        << iName << ", unknown reason" );
+        }
     }
 
 
@@ -175,12 +182,7 @@ CprData::CprData( hid_t iParentGroup, int32_t iArchiveVersion,
 CprData::~CprData()
 {
     delete[] m_subPropertyMutexes;
-
-    if ( m_group >= 0 )
-    {
-        H5Gclose( m_group );
-        m_group = -1;
-    }
+    CloseObject( m_group );
 }
 
 //-*****************************************************************************

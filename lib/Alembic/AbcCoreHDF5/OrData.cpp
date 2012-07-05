@@ -67,22 +67,20 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
 
 //-*****************************************************************************
 OrData::OrData( ObjectHeaderPtr iHeader,
-                hid_t iParentGroup,
+                H5Node & iParentGroup,
                 int32_t iArchiveVersion )
-    : m_group( -1 )
-    , m_oldGroup( -1 )
 {
     ABCA_ASSERT( iHeader, "Invalid header" );
-    ABCA_ASSERT( iParentGroup > -1, "Invalid group" );
+    ABCA_ASSERT( iParentGroup.isValidObject(), "Invalid group" );
 
-    m_group = H5Gopen2( iParentGroup, iHeader->getName().c_str(), H5P_DEFAULT );
-    ABCA_ASSERT( m_group >= 0,
+    m_group = OpenGroup( iParentGroup, iHeader->getName().c_str() );
+    ABCA_ASSERT( m_group.isValidObject(),
         "Could not open object group: "
         << iHeader->getFullName() );
 
     std::vector<std::string> objNames;
 
-    herr_t status = H5Literate( m_group,
+    herr_t status = H5Literate( m_group.getObject(),
                                 H5_INDEX_CRT_ORDER,
                                 H5_ITER_INC,
                                 NULL,
@@ -113,11 +111,7 @@ OrData::OrData( ObjectHeaderPtr iHeader,
 //-*****************************************************************************
 OrData::~OrData()
 {
-    if ( m_oldGroup > -1 )
-    {
-        H5Gclose( m_oldGroup );
-        m_oldGroup = -1;
-    }
+    CloseObject( m_oldGroup );
 }
 
 //-*****************************************************************************
@@ -128,7 +122,7 @@ OrData::getProperties( AbcA::ObjectReaderPtr iParent )
     if ( ! ret )
     {
         // time to make a new one
-        ret.reset( new CprImpl( iParent, m_data, m_group ) );
+        ret.reset( new CprImpl( iParent, m_data ) );
         m_top = ret;
     }
 
@@ -151,17 +145,17 @@ OrData::getChildHeader( AbcA::ObjectReaderPtr iParent, size_t i )
     Alembic::Util::scoped_lock l( m_childObjectsMutex );
     if ( ! m_children[i].loadedMetaData )
     {
-        hid_t group = H5Gopen2( m_group,
-            m_children[i].header->getName().c_str(), H5P_DEFAULT );
-
-        ABCA_ASSERT( group >= 0,
+        H5Node group = OpenGroup( m_group,
+            m_children[i].header->getName().c_str() );
+;
+        ABCA_ASSERT( group.isValidObject(),
         "Could not open object group: "
         << m_children[i].header->getFullName() );
 
         ReadMetaData( group, ".prop.meta",
             m_children[i].header->getMetaData() );
 
-        H5Gclose( group );
+        CloseObject( group );
     }
 
     return *( m_children[i].header );

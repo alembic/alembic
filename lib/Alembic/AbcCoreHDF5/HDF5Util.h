@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreHDF5_HDF5Util_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
+#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -50,7 +51,7 @@ typedef ::Alembic::Util::BaseDimensions<hsize_t> HDimensions;
 struct AttrCloser
 {
     AttrCloser( hid_t id ) : m_id( id ) {}
-    ~AttrCloser() { H5Aclose( m_id ); }
+    ~AttrCloser() { if ( m_id >= 0 ) H5Aclose( m_id ); }
     hid_t m_id;
 };
 
@@ -58,7 +59,7 @@ struct AttrCloser
 struct DspaceCloser
 {
     DspaceCloser( hid_t id ) : m_id( id ) {}
-    ~DspaceCloser() { H5Sclose( m_id ); }
+    ~DspaceCloser() { if ( m_id >= 0 ) H5Sclose( m_id ); }
     hid_t m_id;
 };
 
@@ -66,7 +67,7 @@ struct DspaceCloser
 struct DsetCloser
 {
     DsetCloser( hid_t id ) : m_id( id ) {}
-    ~DsetCloser() { H5Dclose( m_id ); }
+    ~DsetCloser() { if (m_id >= 0 ) H5Dclose( m_id ); }
     hid_t m_id;
 };
 
@@ -75,7 +76,7 @@ struct DsetCloser
 struct GroupCloser
 {
     GroupCloser( hid_t id ) : m_id( id ) {}
-    ~GroupCloser() { H5Gclose( m_id ); }
+    ~GroupCloser() { if ( m_id >= 0 ) H5Gclose( m_id ); }
     hid_t m_id;
 };
 
@@ -83,7 +84,7 @@ struct GroupCloser
 struct DtypeCloser
 {
     DtypeCloser( hid_t id ) : m_id( id ) {}
-    ~DtypeCloser() { H5Tclose( m_id ); }
+    ~DtypeCloser() { if ( m_id >= 0 ) H5Tclose( m_id ); }
     hid_t m_id;
 };
 
@@ -91,7 +92,7 @@ struct DtypeCloser
 struct PlistCloser
 {
     PlistCloser( hid_t id ) : m_id( id ) {}
-    ~PlistCloser() { H5Pclose( m_id ); }
+    ~PlistCloser() { if ( m_id >= 0 ) H5Pclose( m_id ); }
     hid_t m_id;
 };
 
@@ -103,8 +104,22 @@ hid_t DsetGzipCreatePlist( const Dimensions &dims, int level );
 bool EquivalentDatatypes( hid_t idA, hid_t idB );
 
 //-*****************************************************************************
-bool GroupExists( hid_t iParent, const std::string &iName );
-bool DatasetExists( hid_t iParent, const std::string &iName );
+H5Node OpenGroup( H5Node& iParent, const std::string& iName );
+
+//-*****************************************************************************
+void CloseObject (H5Node& iNode );
+
+//-*****************************************************************************
+bool GroupExists( H5Node& iParent, const std::string &iName );
+
+//-*****************************************************************************
+bool ObjectExists( H5Node& iParent, const std::string &iName );
+
+//-*****************************************************************************
+bool AttrExists( H5Node& iParent, const std::string &iName );
+
+//-*****************************************************************************
+bool DatasetExists( H5Node& iParent, const std::string &iName );
 
 } // End namespace ALEMBIC_VERSION_NS
 

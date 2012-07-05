@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreHDF5_ReadUtil_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
+#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
 #include <Alembic/AbcCoreHDF5/StringReadUtil.h>
 
 namespace Alembic {
@@ -50,6 +51,12 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 
 //-*****************************************************************************
+void
+ReadReferences ( hid_t iParent,
+                 const std::string& iRefName,
+                 std::vector<hobj_ref_t>& oRefs );
+
+//-*****************************************************************************
 bool
 ReadKey( hid_t iHashDset,
          const std::string &iAttrName,
@@ -57,13 +64,13 @@ ReadKey( hid_t iHashDset,
 
 //-*****************************************************************************
 bool
-ReadMetaData( hid_t iGroup,
+ReadMetaData( H5Node& iGroup,
               const std::string &iMetaDataName,
               AbcA::MetaData &oMetaData );
 
 //-*****************************************************************************
 void
-ReadPropertyHeader( hid_t iParent,
+ReadPropertyHeader( H5Node& iParent,
                     const std::string & iPropName,
                     AbcA::PropertyHeader & oHeader,
                     bool & oIsScalarLike,

@@ -45,6 +45,9 @@ SET( CXX_FILES
   CpwData.cpp
   CpwImpl.cpp
   DataTypeRegistry.cpp
+  HDF5Hierarchy.cpp
+  HDF5HierarchyReader.cpp
+  HDF5HierarchyWriter.cpp
   HDF5Util.cpp
   OrData.cpp
   OrImpl.cpp
@@ -71,6 +74,9 @@ SET( H_FILES
   CpwData.h
   CpwImpl.h
   DataTypeRegistry.h
+  HDF5Hierarchy.h
+  HDF5HierarchyReader.h
+  HDF5HierarchyWriter.h
   HDF5Util.h
   Foundation.h
   OrData.h

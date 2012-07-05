@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreHDF5_CprData_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
+#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -50,7 +51,7 @@ class CprData : public Alembic::Util::enable_shared_from_this<CprData>
 {
 public:
 
-    CprData( hid_t iParentGroup, int32_t iArchiveVersion,
+    CprData( H5Node & iParentGroup, int32_t iArchiveVersion,
              const std::string &iName );
 
     ~CprData();
@@ -78,7 +79,7 @@ public:
 
 private:
     // My group.
-    hid_t m_group;
+    H5Node m_group;
 
     // Property Headers and Made Property Pointers.
     struct SubProperty

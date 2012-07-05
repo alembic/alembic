@@ -49,6 +49,28 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 
 //-*****************************************************************************
+void
+WriteReferences( hid_t iParent,
+                 const std::string& iRefName,
+                 size_t iNumRefs,
+                 const void *iRefs )
+{
+    hsize_t dims[1];
+    dims[0] = iNumRefs;
+
+    hid_t dspaceId = H5Screate_simple( 1, dims, NULL );
+    DspaceCloser dspaceCloser( dspaceId );
+
+    hid_t dsetId = H5Dcreate2( iParent, iRefName.c_str(), H5T_STD_REF_OBJ,
+                               dspaceId, H5P_DEFAULT, H5P_DEFAULT,H5P_DEFAULT);
+    DsetCloser dsetCloser( dsetId );
+
+    herr_t status = H5Dwrite( dsetId, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL,
+                       H5P_DEFAULT, iRefs);
+
+    ABCA_ASSERT( status >= 0, "Couldn't write reference: " << iRefName );
+}
+//-*****************************************************************************
 WrittenArraySampleMap &
 GetWrittenArraySampleMap( AbcA::ArchiveWriterPtr iVal )
 {

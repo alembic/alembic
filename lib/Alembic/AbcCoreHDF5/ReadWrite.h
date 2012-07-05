@@ -50,8 +50,8 @@ struct WriteArchive
 {
     ::Alembic::AbcCoreAbstract::ArchiveWriterPtr
     operator()( const std::string &iFileName,
-                const ::Alembic::AbcCoreAbstract::MetaData &iMetaData )
-        const;
+                const ::Alembic::AbcCoreAbstract::MetaData &iMetaData,
+                bool iCacheHierarchy = false ) const;
 };
 
 //-*****************************************************************************
@@ -70,13 +70,14 @@ struct ReadArchive
 {
     // Make our own cache.
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
-    operator()( const std::string &iFileName ) const;
+    operator()( const std::string &iFileName,
+                const bool iCacheHierarchy = false ) const;
 
     // Take the given cache.
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::string &iFileName,
-                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache )
-        const;
+                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache,
+                bool iCacheHierarchy = false ) const;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

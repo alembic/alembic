@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreHDF5_ArImpl_h_
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
+#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -55,7 +56,8 @@ private:
     friend struct ReadArchive;
 
     ArImpl( const std::string &iFileName,
-            AbcA::ReadArraySampleCachePtr iCache );
+            AbcA::ReadArraySampleCachePtr iCache,
+            const bool iCacheHierarchy );
 
 public:
     virtual ~ArImpl();
@@ -108,6 +110,8 @@ private:
     std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
 
     AbcA::ReadArraySampleCachePtr m_readArraySampleCache;
+
+    HDF5Hierarchy m_H5H;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
