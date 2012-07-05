@@ -109,7 +109,7 @@ public:
     //! This can be any number, including zero.
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
-    size_t getNumSamples()
+    size_t getNumSamples() const
     { return m_coreProperties.getNumSamples(); }
 
     //! Ask if we're constant - no change in value amongst samples,
