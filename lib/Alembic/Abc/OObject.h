@@ -127,7 +127,7 @@ public:
 
     //! Destructor
     //! ...
-    ~OObject();
+    virtual ~OObject();
 
     //-*************************************************************************
     // OBJECT WRITER FUNCTIONALITY

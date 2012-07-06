@@ -39,6 +39,8 @@
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
+#include <memory.h>
+
 using namespace Alembic::AbcGeom;
 
 using Alembic::AbcCoreAbstract::chrono_t;
@@ -48,12 +50,15 @@ using Alembic::Util::float32_t;
 using Alembic::Util::int32_t;
 
 
+
 //-*****************************************************************************
-Alembic::Abc::OObject subdCube( Alembic::Abc::OObject parent )
+Alembic::Util::shared_ptr< Alembic::Abc::OObject >
+subdCube( Alembic::Abc::OObject parent )
 {
-    Alembic::AbcGeom::OSubD subdObj( parent, "mySubD",
-                                     Alembic::Abc::ErrorHandler::kNoisyNoopPolicy );
-    Alembic::AbcGeom::OSubDSchema &schema = subdObj.getSchema();
+    Alembic::Util::shared_ptr< Alembic::AbcGeom::OSubD > subdObjPtr
+        ( new Alembic::AbcGeom::OSubD( parent, "mySubD" ) );
+
+    Alembic::AbcGeom::OSubDSchema &schema = subdObjPtr->getSchema();
 
     std::vector<V3f> verts( 8 );
     std::vector<int32_t> indices( 8 );
@@ -62,7 +67,7 @@ Alembic::Abc::OObject subdCube( Alembic::Abc::OObject parent )
 
     schema.set( sample );
 
-    return subdObj;
+    return subdObjPtr;
 }
 
 //-*****************************************************************************
@@ -74,25 +79,29 @@ void OWrapExisting()
                                   );
     Alembic::Abc::OObject archiveTop = archive.getTop();
 
-    Alembic::Abc::OObject obj = subdCube( archiveTop );
+    Alembic::Util::shared_ptr< Alembic::Abc::OObject > objPtr =
+        subdCube( archiveTop );
 
     //
     // NOW THE FUN BEGINS
     //
-
-    if( Alembic::AbcGeom::OSubD::matches( obj.getHeader() ) )
+    if( Alembic::AbcGeom::OSubD::matches( objPtr->getHeader() ) )
     {
-        Alembic::AbcGeom::OSubD subdObj( obj, Alembic::Abc::kWrapExisting );
+        Alembic::Util::shared_ptr< Alembic::AbcGeom::OSubD > subdObjPtr =
+            Alembic::Util::dynamic_pointer_cast< Alembic::AbcGeom::OSubD >
+                ( objPtr );
+        Alembic::AbcGeom::OSubD subdObj = *subdObjPtr;
 
         std::cout << "wrapped-existing subd has "
                   << subdObj.getSchema().getNumSamples() << " num samples."
                   << std::endl;
 
 
-        //Alembic::AbcGeom::OSubDSchema::Sample sample;
-        //sample.setPositions( Alembic::Abc::V3fArraySample( ( const Alembic::Abc::V3f* )g_verts,
-        //                                                   g_numVerts ) );
-        //schema().set( sample, Alembic::Abc::OSampleSelector( 1 ) );
+        std::vector<V3f> verts( 8, V3f(2.0, 2.0, 2.0 ) );
+        Alembic::AbcGeom::OSubDSchema::Sample sample;
+        sample.setPositions( Alembic::Abc::V3fArraySample( &(verts[0]),
+                                                           verts.size() ) );
+        subdObj.getSchema().set( sample );
     }
 }
 
@@ -245,7 +254,7 @@ void StupidData()
 //-*****************************************************************************
 int main( int, char** )
 {
-    //OWrapExisting();
+    OWrapExisting();
     PolyMorphicAbstractPtrs();
     StupidData();
     return 0;
