@@ -50,10 +50,31 @@ using Alembic::Util::float32_t;
 using Alembic::Util::int32_t;
 
 
+//-*****************************************************************************
+Alembic::Util::shared_ptr< Alembic::Abc::OObject >
+makeXform( Alembic::Abc::OObject & parent )
+{
+    Alembic::Util::shared_ptr< Alembic::AbcGeom::OXform > xformObjPtr
+        ( new Alembic::AbcGeom::OXform( parent, "myXform" ) );
+
+    // add a couple of ops
+    XformOp transop( kTranslateOperation, kTranslateHint );
+    XformOp scaleop( kScaleOperation, kScaleHint );
+
+    XformSample samp;
+    samp.addOp( transop, V3d( 1.0, 2.0, 3.0 ) );
+    samp.addOp( scaleop, V3d( 2.0, 4.0, 6.0 ) );
+
+    Alembic::AbcGeom::OXformSchema &schema = xformObjPtr->getSchema();
+
+    schema.set( samp );
+
+    return xformObjPtr;
+}
 
 //-*****************************************************************************
 Alembic::Util::shared_ptr< Alembic::Abc::OObject >
-subdCube( Alembic::Abc::OObject parent )
+subdCube( Alembic::Abc::OObject & parent )
 {
     Alembic::Util::shared_ptr< Alembic::AbcGeom::OSubD > subdObjPtr
         ( new Alembic::AbcGeom::OSubD( parent, "mySubD" ) );
@@ -77,19 +98,23 @@ void OWrapExisting()
         Alembic::AbcCoreHDF5::WriteArchive(),
         "playground_owrap.abc"
                                   );
+
     Alembic::Abc::OObject archiveTop = archive.getTop();
 
-    Alembic::Util::shared_ptr< Alembic::Abc::OObject > objPtr =
-        subdCube( archiveTop );
+    Alembic::Util::shared_ptr< Alembic::Abc::OObject > objAPtr =
+        makeXform( archiveTop );
+
+    Alembic::Util::shared_ptr< Alembic::Abc::OObject > objBPtr =
+        subdCube( *objAPtr );
 
     //
     // NOW THE FUN BEGINS
     //
-    if( Alembic::AbcGeom::OSubD::matches( objPtr->getHeader() ) )
+    TESTING_ASSERT( Alembic::AbcGeom::OSubD::matches( objBPtr->getHeader() ) );
     {
         Alembic::Util::shared_ptr< Alembic::AbcGeom::OSubD > subdObjPtr =
             Alembic::Util::dynamic_pointer_cast< Alembic::AbcGeom::OSubD >
-                ( objPtr );
+                ( objBPtr );
         Alembic::AbcGeom::OSubD subdObj = *subdObjPtr;
 
         std::cout << "wrapped-existing subd has "
@@ -102,6 +127,24 @@ void OWrapExisting()
         sample.setPositions( Alembic::Abc::V3fArraySample( &(verts[0]),
                                                            verts.size() ) );
         subdObj.getSchema().set( sample );
+        TESTING_ASSERT( subdObj.getSchema().getNumSamples() == 2 );
+    }
+
+    TESTING_ASSERT( Alembic::AbcGeom::OXform::matches( objAPtr->getHeader() ) );
+    {
+        XformOp transop( kTranslateOperation, kTranslateHint );
+        XformOp scaleop( kScaleOperation, kScaleHint );
+
+        XformSample samp;
+        samp.addOp( transop, V3d( 4.0, 5.0, 6.0 ) );
+        samp.addOp( scaleop, V3d( 8.0, 10.0, 12.0 ) );
+
+        Alembic::Util::shared_ptr< Alembic::AbcGeom::OXform > xformObjPtr =
+            Alembic::Util::dynamic_pointer_cast< Alembic::AbcGeom::OXform >
+                ( objAPtr );
+        Alembic::AbcGeom::OXform xformObj = *xformObjPtr;
+        xformObj.getSchema().set( samp );
+        TESTING_ASSERT( xformObj.getSchema().getNumSamples() == 2 );
     }
 }
 
