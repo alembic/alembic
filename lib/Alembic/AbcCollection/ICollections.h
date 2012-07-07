@@ -117,6 +117,8 @@ protected:
 //! Object declaration
 typedef Abc::ISchemaObject<ICollectionsSchema> ICollections;
 
+typedef Util::shared_ptr< ICollections > ICollectionsPtr;
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

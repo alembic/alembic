@@ -403,7 +403,7 @@ public:
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
-    // These functions are used by Abc to deal with errors, rewrapping,
+    // These functions are used by Abc to deal with errors, validity,
     // and so on.
     //-*************************************************************************
 
@@ -508,6 +508,8 @@ private:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::OSchemaObject<OSubDSchema> OSubD;
+
+typedef Util::shared_ptr< OSubD > OSubDPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

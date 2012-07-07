@@ -315,6 +315,8 @@ protected:
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IPolyMeshSchema> IPolyMesh;
 
+typedef Util::shared_ptr< IPolyMesh > IPolyMeshPtr;
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

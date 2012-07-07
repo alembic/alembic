@@ -130,18 +130,9 @@ public:
                    const Argument &iArg1 = Argument(),
                    const Argument &iArg2 = Argument() );
 
-    //! Wrap an existing schema object.
-    //! ...
-    template <class OBJECT_PTR>
-    OSchemaObject( OBJECT_PTR iThisObject,
-                   WrapExistingFlag iFlag,
-                   const Argument &iArg0 = Argument(),
-                   const Argument &iArg1 = Argument(),
-                   const Argument &iArg2 = Argument() );
-
     //-*************************************************************************
     // ABC BASE MECHANISMS
-    // These functions are used by Abc to deal with errors, rewrapping,
+    // These functions are used by Abc to deal with errors, validity,
     // and so on.
     //-*************************************************************************
 
@@ -227,44 +218,6 @@ OSchemaObject<SCHEMA>::OSchemaObject
     m_schema = SCHEMA( m_object->getProperties(),
                        this->getErrorHandlerPolicy(),
                        tsIndex );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-template<class SCHEMA>
-template<class OBJECT_PTR>
-inline OSchemaObject<SCHEMA>::OSchemaObject(
-    OBJECT_PTR iObject,
-    WrapExistingFlag iFlag,
-    const Argument &iArg0,
-    const Argument &iArg1,
-    const Argument &iArg2 )
-  : OObject( iObject,
-             iFlag,
-             GetErrorHandlerPolicy( iObject,
-                                    iArg0, iArg1, iArg2 ) )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "OSchemaObject::OSchemaObject( wrap )" );
-
-    const AbcA::ObjectHeader &oheader = this->getHeader();
-
-    m_schema = SCHEMA(
-        this->getProperties().getProperty(
-            SCHEMA::getDefaultSchemaName() ).getPtr()->asCompoundPtr(),
-        iFlag,
-        this->getErrorHandlerPolicy(),
-        GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) );
-
-
-    ABCA_ASSERT( matches( oheader,
-                          GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) ),
-
-                 "Incorrect match of schema: "
-                 << oheader.getMetaData().get( "schemaObjTitle" )
-                 << " to expected: "
-                 << getSchemaObjTitle() );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

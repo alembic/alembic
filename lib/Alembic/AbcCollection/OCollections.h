@@ -111,6 +111,8 @@ protected:
 //! Object declaration
 typedef Abc::OSchemaObject<OCollectionsSchema> OCollections;
 
+typedef Util::shared_ptr< OCollections > OCollectionsPtr;
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

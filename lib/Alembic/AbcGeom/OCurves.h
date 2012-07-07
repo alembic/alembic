@@ -329,7 +329,7 @@ public:
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
-    // These functions are used by Abc to deal with errors, rewrapping,
+    // These functions are used by Abc to deal with errors, validity,
     // and so on.
     //-*************************************************************************
 
@@ -380,6 +380,8 @@ protected:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::OSchemaObject<OCurvesSchema> OCurves;
+
+typedef Util::shared_ptr< OCurves > OCurvesPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

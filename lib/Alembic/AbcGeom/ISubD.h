@@ -424,6 +424,8 @@ protected:
 //-*****************************************************************************
 typedef Abc::ISchemaObject<ISubDSchema> ISubD;
 
+typedef Util::shared_ptr< ISubD > ISubDPtr;
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

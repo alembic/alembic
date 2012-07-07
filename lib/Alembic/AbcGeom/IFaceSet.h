@@ -238,6 +238,8 @@ protected:
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IFaceSetSchema> IFaceSet;
 
+typedef Util::shared_ptr< IFaceSet > IFaceSetPtr;
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

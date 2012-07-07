@@ -165,6 +165,8 @@ public:
 //-*****************************************************************************
 typedef Abc::ISchemaObject< ILightSchema > ILight;
 
+typedef Util::shared_ptr< ILight > ILightPtr;
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

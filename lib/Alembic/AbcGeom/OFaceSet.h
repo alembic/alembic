@@ -220,7 +220,7 @@ public:
     FaceSetExclusivity getFaceExclusivity() { return m_facesExclusive; }
     //-*************************************************************************
     // ABC BASE MECHANISMS
-    // These functions are used by Abc to deal with errors, rewrapping,
+    // These functions are used by Abc to deal with errors, validity,
     // and so on.
     //-*************************************************************************
 
@@ -266,6 +266,8 @@ protected:
 // Nice to use typedef for users of this class.
 //-*****************************************************************************
 typedef Abc::OSchemaObject<OFaceSetSchema> OFaceSet;
+
+typedef Util::shared_ptr< OFaceSet > OFaceSetPtr;
 
 Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
     const Int32ArraySample & meshFaceCounts,

@@ -126,8 +126,6 @@ public:
         init( tsIndex );
     }
 
-    // kWrap existing ctor will be provided by OSchema
-
     void init( uint32_t iTsHandle)
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::init()" );

@@ -190,16 +190,6 @@ public:
                          iArg0, iArg1, iArg2 );
     }
 
-    //! Wrap an existing compound property, checking that it matches
-    //! the schema title info, if strict matching has been selected.
-    //! Arguments allow selection of error handling and matching strictness
-    template<class CPROP_PTR>
-    OSchema( CPROP_PTR iProperty,
-             WrapExistingFlag iFlag,
-             const Argument &iArg0 = Argument(),
-             const Argument &iArg1 = Argument(),
-             const Argument &iArg2 = Argument() );
-
     virtual ~OSchema() {}
 
     //! Default copy constructor used
@@ -258,37 +248,6 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
-
-//-*****************************************************************************
-template<class INFO>
-template<class COMPOUND_PTR>
-inline OSchema<INFO>::OSchema(
-    COMPOUND_PTR iProperty,
-    WrapExistingFlag iFlag,
-    const Argument &iArg0,
-    const Argument &iArg1,
-    const Argument &iArg2 )
-  : OCompoundProperty( iProperty,
-                       iFlag,
-                       GetErrorHandlerPolicy( iProperty,
-                                              iArg0, iArg1, iArg2 ) )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "OSchema::OSchema( wrap )" );
-
-    const AbcA::PropertyHeader &pheader = this->getHeader();
-
-    ABCA_ASSERT( matches( pheader,
-                          GetSchemaInterpMatching( iArg0, iArg1, iArg2 ) ),
-
-                 "Incorrect match of schema: "
-                 << pheader.getMetaData().get( "schema" )
-                 << " to expected: "
-                 << INFO::title() );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
 
 } // End namespace ALEMBIC_VERSION_NS
 

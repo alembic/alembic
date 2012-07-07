@@ -388,7 +388,7 @@ public:
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
-    // These functions are used by Abc to deal with errors, rewrapping,
+    // These functions are used by Abc to deal with errors, validity,
     // and so on.
     //-*************************************************************************
 
@@ -475,6 +475,8 @@ protected:
 // SCHEMA OBJECT
 //-*****************************************************************************
 typedef Abc::OSchemaObject<ONuPatchSchema> ONuPatch;
+
+typedef Util::shared_ptr< ONuPatch > ONuPatchPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

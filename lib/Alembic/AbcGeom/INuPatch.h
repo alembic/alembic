@@ -373,6 +373,8 @@ protected:
 //-*****************************************************************************
 typedef Abc::ISchemaObject<INuPatchSchema> INuPatch;
 
+typedef Util::shared_ptr< INuPatch > INuPatchPtr;
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

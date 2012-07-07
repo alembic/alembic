@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -267,6 +267,8 @@ protected:
 
 //-*****************************************************************************
 typedef Abc::ISchemaObject<IPointsSchema> IPoints;
+
+typedef Util::shared_ptr< IPoints > IPointsPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

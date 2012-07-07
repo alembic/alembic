@@ -285,6 +285,8 @@ protected:
 //-*****************************************************************************
 typedef Abc::ISchemaObject<ICurvesSchema> ICurves;
 
+typedef Util::shared_ptr< ICurves > ICurvesPtr;
+
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

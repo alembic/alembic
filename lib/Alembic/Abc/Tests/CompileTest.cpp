@@ -56,11 +56,11 @@ typedef ISchemaObject<ITestSchema> ITest;
 void testOSchemaObject( OObject &iParent )
 {
     OTest tst( iParent, "childTestObject" );
-    OTest tst2( tst.getPtr(), kWrapExisting,
+    OTest tst2( tst.getPtr(), "foo",
                 ErrorHandler::kQuietNoopPolicy );
-    OTest tst3( tst2.getPtr(), kWrapExisting,
+    OTest tst3( tst2.getPtr(), "bar",
                 kNoMatching );
-    OTest tst4( tst3, kWrapExisting,
+    OTest tst4( tst3, "baz",
                 ErrorHandler::kNoisyNoopPolicy,
                 kStrictMatching );
 
@@ -71,11 +71,11 @@ void testOSchemaObject( OObject &iParent )
 void testOSchema( OObject & iParent )
 {
     OTestSchema tst( OCompoundProperty( iParent, kTop ) );
-    OTestSchema tst2( tst.getPtr(), kWrapExisting,
+    OTestSchema tst2( tst.getPtr(), "foo",
                       ErrorHandler::kQuietNoopPolicy );
-    OTestSchema tst3( tst2.getPtr(), kWrapExisting,
+    OTestSchema tst3( tst2.getPtr(), "bar",
                       kNoMatching );
-    OTestSchema tst4( tst3, kWrapExisting,
+    OTestSchema tst4( tst3, "baz",
                       ErrorHandler::kNoisyNoopPolicy,
                       kStrictMatching );
 }

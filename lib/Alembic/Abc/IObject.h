@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -114,7 +114,7 @@ public:
 
     //! Destructor
     //! ...
-    ~IObject();
+    virtual ~IObject();
 
     //-*************************************************************************
     // OBJECT READER FUNCTIONALITY
@@ -226,6 +226,8 @@ private:
 public:
     AbcA::ObjectReaderPtr m_object;
 };
+
+typedef Alembic::Util::shared_ptr< IObject > IObjectPtr;
 
 //-*****************************************************************************
 inline AbcA::ObjectReaderPtr
