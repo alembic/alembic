@@ -277,7 +277,7 @@ try
                     MGlobal::displayError("File incorrectly specified.");
                     return MS::kFailure;
                 }
-                fileName = jobArgsArray[++i].asChar();
+                fileName = jobArgsArray[++i].asUTF8();
             }
 
             else if (arg == "-fr" || arg == "-framerange")

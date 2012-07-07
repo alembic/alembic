@@ -2109,7 +2109,7 @@ MString createScene(ArgData & iArgData)
 
     // no caching!
     Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
-        iArgData.mFileName.asChar(), Alembic::Abc::ErrorHandler::Policy(),
+        iArgData.mFileName.asUTF8(), Alembic::Abc::ErrorHandler::Policy(),
         Alembic::AbcCoreAbstract::ReadArraySampleCachePtr());
     if (!archive.valid())
     {
