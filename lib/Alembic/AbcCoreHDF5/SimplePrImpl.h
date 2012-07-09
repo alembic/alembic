@@ -112,6 +112,8 @@ protected:
 
     index_t verifySampleIndex( index_t iSampleIndex );
 
+    void checkSamplesIGroup();
+
     // Parent compound property writer. It must exist.
     AbcA::CompoundPropertyReaderPtr m_parent;
 
@@ -146,6 +148,9 @@ protected:
     // sample in a sub group. Therefore, there may not actually be
     // a group associated with this property.
     H5Node m_samplesIGroup;
+
+    // used to prevent race condition when setting m_samplesIGroup
+    Alembic::Util::mutex m_samplesIGroupMutex;
 };
 
 //-*****************************************************************************
@@ -281,6 +286,31 @@ index_t SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::verifySampleIndex( index_t iIndex )
 
 //-*****************************************************************************
 template <class ABSTRACT, class IMPL, class SAMPLE>
+void SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::checkSamplesIGroup()
+{
+    // Create the subsequent samples group.
+    if ( !m_samplesIGroup.isValidObject() )
+    {
+        Alembic::Util::scoped_lock l( m_samplesIGroupMutex );
+
+        if ( m_samplesIGroup.isValidObject() )
+            return;
+
+        std::string samplesIName =  m_header->getName() + ".smpi";
+        ABCA_ASSERT( GroupExists( m_parentGroup, samplesIName ),
+                     "Invalid property: " << m_header->getName()
+                     << ", missing smpi" );
+
+        m_samplesIGroup = OpenGroup( m_parentGroup,
+                                     samplesIName.c_str() );
+        ABCA_ASSERT( m_samplesIGroup.isValidObject(),
+                     "Invalid property: " << m_header->getName()
+                     << ", invalid smpi group" );
+    }
+}
+
+//-*****************************************************************************
+template <class ABSTRACT, class IMPL, class SAMPLE>
 std::pair<index_t, chrono_t>
 SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getFloorIndex( chrono_t iTime )
 {
@@ -340,21 +370,7 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getSample( index_t iSampleIndex,
     }
     else
     {
-        // Create the subsequent samples group.
-        if ( !m_samplesIGroup.isValidObject() )
-        {
-            std::string samplesIName = myName + ".smpi";
-
-            m_samplesIGroup = OpenGroup( m_parentGroup,
-                                         samplesIName.c_str() );
-
-            ABCA_ASSERT( m_samplesIGroup.isValidObject(),
-                         "Invalid property in SimplePrImpl getSample: "
-                         << myName 
-                         << ( GroupExists( m_parentGroup, samplesIName ) ?
-                              ", invalid" : ", missing" )
-                         << ", smpi group" );
-        }
+        checkSamplesIGroup();
 
         // Read the sample.
         std::string sampleName = getSampleName( myName, iSampleIndex );
@@ -401,21 +417,7 @@ SimplePrImpl<ABSTRACT,IMPL,SAMPLE>::getKey( index_t iSampleIndex,
     }
     else
     {
-        // Create the subsequent samples group.
-        if ( !m_samplesIGroup.isValidObject() )
-        {
-            std::string samplesIName = myName + ".smpi";
-
-            m_samplesIGroup = OpenGroup( m_parentGroup,
-                                         samplesIName.c_str() );
-
-            ABCA_ASSERT( m_samplesIGroup.isValidObject(),
-                         "Invalid propertyin SimplePrImpl getKey: "
-                         << myName
-                         << ( GroupExists( m_parentGroup, samplesIName ) ?
-                              ", invalid" : ", missing" )
-                         << ", smpi group" );
-        }
+        checkSamplesIGroup();
 
         // Read the sample.
         std::string sampleName = getSampleName( myName, iSampleIndex );

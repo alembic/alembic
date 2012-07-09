@@ -87,20 +87,7 @@ void AprImpl::getDimensions( index_t iSampleIndex, Dimensions & oDim )
     }
     else
     {
-        // Create the subsequent samples group.
-        if ( !m_samplesIGroup.isValidObject() )
-        {
-            std::string samplesIName =  m_header->getName() + ".smpi";
-            ABCA_ASSERT( GroupExists( m_parentGroup, samplesIName ),
-                         "Invalid property: " << m_header->getName()
-                         << ", missing smpi" );
-
-            m_samplesIGroup = OpenGroup( m_parentGroup,
-                                         samplesIName.c_str() );
-            ABCA_ASSERT( m_samplesIGroup.isValidObject(),
-                         "Invalid property: " << m_header->getName()
-                         << ", invalid smpi group" );
-        }
+        checkSamplesIGroup();
         parent = m_samplesIGroup;
     }
 
@@ -147,21 +134,7 @@ void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
     }
     else
     {
-        // Create the subsequent samples group.
-        if ( !m_samplesIGroup.isValidObject() )
-        {
-            std::string samplesIName =  m_header->getName() + ".smpi";
-
-            ABCA_ASSERT( GroupExists( m_parentGroup, samplesIName ),
-                         "Invalid property: " << m_header->getName()
-                         << ", missing smpi" );
-
-            m_samplesIGroup = OpenGroup( m_parentGroup,
-                                         samplesIName.c_str() );
-            ABCA_ASSERT( m_samplesIGroup.isValidObject(),
-                         "Invalid property: " << m_header->getName()
-                         << ", invalid smpi group" );
-        }
+        checkSamplesIGroup();
         parent = m_samplesIGroup;
     }
 
