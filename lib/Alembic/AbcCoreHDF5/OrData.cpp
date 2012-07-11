@@ -93,12 +93,20 @@ OrData::OrData( ObjectHeaderPtr iHeader,
     std::vector < std::string >::iterator namesIt;
     uint32_t i = 0;
     m_children.resize(objNames.size());
+
+    std::string parentFullName = iHeader->getFullName();
+    if ( parentFullName != "/" )
+    {
+        parentFullName += "/";
+    }
+
     for ( namesIt = objNames.begin(); namesIt != objNames.end();
           ++namesIt, ++i )
     {
         m_childrenMap[ *namesIt ] = i;
+
         m_children[i].header.reset( new AbcA::ObjectHeader( *namesIt,
-            iHeader->getFullName() + "/" + *namesIt, AbcA::MetaData() ) );
+            parentFullName + *namesIt, AbcA::MetaData() ) );
         m_children[i].loadedMetaData = false;
     }
 

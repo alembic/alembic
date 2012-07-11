@@ -53,35 +53,79 @@ void testObjects()
         A5::WriteArchive w;
         AbcA::ArchiveWriterPtr a = w(archiveName, AbcA::MetaData());
         AbcA::ObjectWriterPtr archive = a->getTop();
+        TESTING_ASSERT(archive->getName() == "ABC");
+        TESTING_ASSERT(archive->getFullName() == "/");
+
         AbcA::ObjectWriterPtr child1 = archive->createChild(
             AbcA::ObjectHeader("wow", AbcA::MetaData()));
+        TESTING_ASSERT(child1->getName() == "wow");
+        TESTING_ASSERT(child1->getFullName() == "/wow");
+
         AbcA::ObjectWriterPtr child2 = archive->createChild(
             AbcA::ObjectHeader("bar", AbcA::MetaData()));
+        TESTING_ASSERT(child2->getName() == "bar");
+        TESTING_ASSERT(child2->getFullName() == "/bar");
+
         AbcA::ObjectWriterPtr child3 = archive->createChild(
             AbcA::ObjectHeader("foo", AbcA::MetaData()));
+        TESTING_ASSERT(child3->getName() == "foo");
+        TESTING_ASSERT(child3->getFullName() == "/foo");
+
         TESTING_ASSERT(archive->getNumChildren() == 3);
 
         TESTING_ASSERT(child1->getNumChildren() == 0);
-        child1->createChild(
+        AbcA::ObjectWriterPtr gchild = child1->createChild(
             AbcA::ObjectHeader("food", AbcA::MetaData()));
         TESTING_ASSERT(child1->getNumChildren() == 1);
+        TESTING_ASSERT(gchild->getNumChildren() == 0);
+        TESTING_ASSERT(gchild->getName() == "food");
+        TESTING_ASSERT(gchild->getFullName() == "/wow/food");
 
-        child2->createChild(
+        gchild = child2->createChild(
             AbcA::ObjectHeader("hat", AbcA::MetaData()));
+        TESTING_ASSERT(gchild->getNumChildren() == 0);
+        TESTING_ASSERT(gchild->getName() == "hat");
+        TESTING_ASSERT(gchild->getFullName() == "/bar/hat");
         TESTING_ASSERT_THROW(child2->createChild(
             AbcA::ObjectHeader("hat", AbcA::MetaData())),
             Alembic::Util::Exception);
-        child2->createChild(
+        TESTING_ASSERT_THROW(child2->createChild(
+            AbcA::ObjectHeader("slashy/", AbcA::MetaData())),
+            Alembic::Util::Exception);
+        TESTING_ASSERT_THROW(child2->createChild(
+            AbcA::ObjectHeader("sla/shy", AbcA::MetaData())),
+            Alembic::Util::Exception);
+        TESTING_ASSERT_THROW(child2->createChild(
+            AbcA::ObjectHeader("/slashy", AbcA::MetaData())),
+            Alembic::Util::Exception);
+        TESTING_ASSERT_THROW(child2->createChild(
+            AbcA::ObjectHeader("", AbcA::MetaData())),
+            Alembic::Util::Exception);
+        gchild = child2->createChild(
             AbcA::ObjectHeader("bowling", AbcA::MetaData()));
+        TESTING_ASSERT(gchild->getNumChildren() == 0);
+        TESTING_ASSERT(gchild->getName() == "bowling");
+        TESTING_ASSERT(gchild->getFullName() == "/bar/bowling");
         TESTING_ASSERT(child2->getNumChildren() == 2);
 
-        child3->createChild(
+        gchild = child3->createChild(
             AbcA::ObjectHeader("hamburger", AbcA::MetaData()));
-        child3->createChild(
+        TESTING_ASSERT(gchild->getNumChildren() == 0);
+        TESTING_ASSERT(gchild->getName() == "hamburger");
+        TESTING_ASSERT(gchild->getFullName() == "/foo/hamburger");
+
+        gchild = child3->createChild(
             AbcA::ObjectHeader("burrito", AbcA::MetaData()));
-        child3->createChild(
+        TESTING_ASSERT(gchild->getNumChildren() == 0);
+        TESTING_ASSERT(gchild->getName() == "burrito");
+        TESTING_ASSERT(gchild->getFullName() == "/foo/burrito");
+
+        gchild = child3->createChild(
             AbcA::ObjectHeader("pizza", AbcA::MetaData()));
         TESTING_ASSERT(child3->getNumChildren() == 3);
+        TESTING_ASSERT(gchild->getNumChildren() == 0);
+        TESTING_ASSERT(gchild->getName() == "pizza");
+        TESTING_ASSERT(gchild->getFullName() == "/foo/pizza");
     }
 
     {
@@ -89,35 +133,46 @@ void testObjects()
         AbcA::ArchiveReaderPtr a = r( archiveName );
         AbcA::ObjectReaderPtr archive = a->getTop();
         TESTING_ASSERT(archive->getNumChildren() == 3);
+        TESTING_ASSERT(archive->getName() == "ABC");
+        TESTING_ASSERT(archive->getFullName() == "/");
 
         AbcA::ObjectReaderPtr child = archive->getChild(0);
         TESTING_ASSERT(child->getName() == "wow");
+        TESTING_ASSERT(child->getFullName() == "/wow");
         TESTING_ASSERT(child->getNumChildren() == 1);
         AbcA::ObjectReaderPtr gchild = child->getChild(0);
         TESTING_ASSERT(gchild->getNumChildren() == 0);
         TESTING_ASSERT(gchild->getName() == "food");
+        TESTING_ASSERT(gchild->getFullName() == "/wow/food");
 
         child = archive->getChild(1);
         TESTING_ASSERT(child->getName() == "bar");
+        TESTING_ASSERT(child->getFullName() == "/bar");
         TESTING_ASSERT(child->getNumChildren() == 2);
         gchild = child->getChild(0);
         TESTING_ASSERT(gchild->getNumChildren() == 0);
         TESTING_ASSERT(gchild->getName() == "hat");
+        TESTING_ASSERT(gchild->getFullName() == "/bar/hat");
         gchild = child->getChild(1);
         TESTING_ASSERT(gchild->getNumChildren() == 0);
         TESTING_ASSERT(gchild->getName() == "bowling");
+        TESTING_ASSERT(gchild->getFullName() == "/bar/bowling");
 
         child = archive->getChild(2);
         TESTING_ASSERT(child->getName() == "foo");
+        TESTING_ASSERT(child->getFullName() == "/foo");
         TESTING_ASSERT(child->getNumChildren() == 3);
         gchild = child->getChild(0);
         TESTING_ASSERT(gchild->getNumChildren() == 0);
         TESTING_ASSERT(gchild->getName() == "hamburger");
+        TESTING_ASSERT(gchild->getFullName() == "/foo/hamburger");
         gchild = child->getChild(1);
         TESTING_ASSERT(gchild->getNumChildren() == 0);
         TESTING_ASSERT(gchild->getName() == "burrito");
+        TESTING_ASSERT(gchild->getFullName() == "/foo/burrito");
         gchild = child->getChild(2);
         TESTING_ASSERT(gchild->getNumChildren() == 0);
+        TESTING_ASSERT(gchild->getFullName() == "/foo/pizza");
         TESTING_ASSERT(gchild->getName() == "pizza");
 
         A5::ReadArchive r2;
@@ -127,6 +182,7 @@ void testObjects()
         AbcA::ObjectReaderPtr gchild2 = child2->getChild(0);
         TESTING_ASSERT(gchild2->getNumChildren() == 0);
         TESTING_ASSERT(gchild2->getName() == "food");
+        TESTING_ASSERT(gchild2->getFullName() == "/wow/food");
     }
 }
 

@@ -145,15 +145,34 @@ AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
                                            const std::string & iFullName,
                                            const AbcA::ObjectHeader &iHeader )
 {
-    if ( m_madeChildren.count( iHeader.getName() ) )
+    std::string name = iHeader.getName();
+
+    if ( m_madeChildren.count( name ) )
     {
         ABCA_THROW( "Already have an Object named: "
+                     << name );
+    }
+
+    if ( name.empty() )
+    {
+        ABCA_THROW( "Object not given a name, parent is: " <<
+                    iFullName );
+    }
+    else if ( iHeader.getName().find('/') != std::string::npos )
+    {
+        ABCA_THROW( "Object has illegal name: "
                      << iHeader.getName() );
+    }
+
+    std::string parentName = iFullName;
+    if ( parentName != "/" )
+    {
+        parentName += "/";
     }
 
     ObjectHeaderPtr header(
         new AbcA::ObjectHeader( iHeader.getName(),
-                                iFullName + "/" + iHeader.getName(),
+                                parentName + iHeader.getName(),
                                 iHeader.getMetaData() ) );
 
     AbcA::ObjectWriterPtr ret( new OwImpl( iParent,
