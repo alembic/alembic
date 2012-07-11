@@ -212,8 +212,8 @@ void writeArchive( const std::string & iName, bool iCache )
 {
     ABC::MetaData m;
     ABC::ObjectHeader header("a", m);
-    A5::WriteArchive w;
-    ABC::ArchiveWriterPtr a = w(iName, m, iCache);
+    A5::WriteArchive w( iCache );
+    ABC::ArchiveWriterPtr a = w(iName, m );
     ABC::ObjectWriterPtr root = a->getTop();
     std::vector< ABC::ObjectWriterPtr > objVec;
 
@@ -260,8 +260,8 @@ void writeArchive( const std::string & iName, bool iCache )
 
 void readArchive( const std::string & iName, bool iCache )
 {
-    Alembic::AbcCoreHDF5::ReadArchive r;
-    ABC::ArchiveReaderPtr a = r( iName, iCache );
+    Alembic::AbcCoreHDF5::ReadArchive r( iCache );
+    ABC::ArchiveReaderPtr a = r( iName );
     std::vector< ABC::ObjectReaderPtr > objs;
     objs.push_back( a->getTop() );
     TESTING_ASSERT( objs[0]->getNumChildren() == 2 );
@@ -297,14 +297,14 @@ void readArchive( const std::string & iName, bool iCache )
 void writeVeryEmptyArchive( const std::string & iName, bool iCache )
 {
     ABC::MetaData m;
-    A5::WriteArchive w;
-    ABC::ArchiveWriterPtr a = w(iName, m, iCache);
+    A5::WriteArchive w( iCache );
+    ABC::ArchiveWriterPtr a = w(iName, m);
 }
 
 void readVeryEmptyArchive( const std::string & iName, bool iCache )
 {
-    Alembic::AbcCoreHDF5::ReadArchive r;
-    ABC::ArchiveReaderPtr a = r( iName, iCache );
+    Alembic::AbcCoreHDF5::ReadArchive r( iCache );
+    ABC::ArchiveReaderPtr a = r( iName );
     TESTING_ASSERT(a->getTop()->getNumChildren() == 0);
 }
 

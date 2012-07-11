@@ -45,14 +45,25 @@ namespace AbcCoreHDF5 {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+WriteArchive::WriteArchive()
+{
+    m_cacheHierarchy = false;
+}
+
+//-*****************************************************************************
+WriteArchive::WriteArchive( bool iCacheHierarchy )
+{
+    m_cacheHierarchy = iCacheHierarchy;
+}
+
+//-*****************************************************************************
 AbcA::ArchiveWriterPtr
 WriteArchive::operator()( const std::string &iFileName,
-                          const AbcA::MetaData &iMetaData,
-                          const bool iCacheHierarchy ) const
+                          const AbcA::MetaData &iMetaData ) const
 {
     AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iFileName,
                                                    iMetaData,
-                                                   iCacheHierarchy ) );
+                                                   m_cacheHierarchy ) );
     return archivePtr;
 }
 
@@ -66,15 +77,26 @@ CreateCache()
 
 
 //-*****************************************************************************
+ReadArchive::ReadArchive()
+{
+    m_cacheHierarchy = false;
+}
+
+//-*****************************************************************************
+ReadArchive::ReadArchive( bool iCacheHierarchy )
+{
+    m_cacheHierarchy = iCacheHierarchy;
+}
+
+//-*****************************************************************************
 // This version creates a cache.
 AbcA::ArchiveReaderPtr
-ReadArchive::operator()( const std::string &iFileName,
-                         const bool iCacheHierarchy ) const
+ReadArchive::operator()( const std::string &iFileName ) const
 {
     AbcA::ReadArraySampleCachePtr cachePtr = CreateCache();
     AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName,
                                                    cachePtr,
-                                                   iCacheHierarchy ) );
+                                                   m_cacheHierarchy ) );
     return archivePtr;
 }
 
@@ -82,12 +104,11 @@ ReadArchive::operator()( const std::string &iFileName,
 // This version takes a cache from outside.
 AbcA::ArchiveReaderPtr
 ReadArchive::operator()( const std::string &iFileName,
-                         AbcA::ReadArraySampleCachePtr iCachePtr,
-                         const bool iCacheHierarchy ) const
+                         AbcA::ReadArraySampleCachePtr iCachePtr ) const
 {
     AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName,
                                                    iCachePtr,
-                                                   iCacheHierarchy ) );
+                                                   m_cacheHierarchy ) );
     return archivePtr;
 }
 
