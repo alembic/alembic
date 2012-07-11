@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -255,7 +255,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         MString fileName = fileObject.resolvedFullName();
 
         // no caching!
-        Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
+        Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(true),
             fileName.asUTF8(), Alembic::Abc::ErrorHandler::Policy(),
             Alembic::AbcCoreAbstract::ReadArraySampleCachePtr());
 

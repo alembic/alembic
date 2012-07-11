@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -2108,7 +2108,7 @@ MString createScene(ArgData & iArgData)
     MString returnName("");
 
     // no caching!
-    Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
+    Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(true),
         iArgData.mFileName.asUTF8(), Alembic::Abc::ErrorHandler::Policy(),
         Alembic::AbcCoreAbstract::ReadArraySampleCachePtr());
     if (!archive.valid())
