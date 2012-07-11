@@ -71,13 +71,13 @@ struct ReadArchive
     // Make our own cache.
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::string &iFileName,
-                const bool iCacheHierarchy = false ) const;
+                const bool iCacheHierarchy = true ) const;
 
     // Take the given cache.
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::string &iFileName,
                 ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache,
-                bool iCacheHierarchy = false ) const;
+                bool iCacheHierarchy = true ) const;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

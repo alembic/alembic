@@ -208,9 +208,126 @@ void testReadWriteTimeSamplingArchive()
     }
 }
 
+void writeArchive( const std::string & iName, bool iCache )
+{
+    ABC::MetaData m;
+    ABC::ObjectHeader header("a", m);
+    A5::WriteArchive w;
+    ABC::ArchiveWriterPtr a = w(iName, m, iCache);
+    ABC::ObjectWriterPtr root = a->getTop();
+    std::vector< ABC::ObjectWriterPtr > objVec;
+
+    objVec.push_back(root);
+    objVec.push_back(root->createChild(header));
+    header.setName("b");
+    objVec.push_back(root->createChild(header));
+
+    // add some number of objects to the existing ones (that aren't the root)
+    int numObjs = objVec.size();
+    for (int i = 1; i < numObjs; ++i)
+    {
+        header.setName("a");
+        objVec.push_back(objVec[i]->createChild(header));
+        header.setName("b");
+        objVec.push_back(objVec[i]->createChild(header));
+        header.setName("c");
+        objVec.push_back(objVec[i]->createChild(header));
+    }
+
+    ABC::DataType i32d(Alembic::Util::kInt32POD, 1);
+
+    // let's add 3 array properties to EVERY object
+    for (std::size_t i = 0; i < objVec.size(); ++i)
+    {
+        ABC::CompoundPropertyWriterPtr top = objVec[i]->getProperties();
+        std::vector<ABC::ArrayPropertyWriterPtr> props;
+        props.push_back(top->createArrayProperty("a", m, i32d, 0));
+        props.push_back(top->createArrayProperty("b", m, i32d, 0));
+        props.push_back(top->createArrayProperty("c", m, i32d, 0));
+
+        for (std::size_t i = 1; i < props.size(); ++i)
+        {
+            std::vector <Alembic::Util::int32_t> vali(i, 0);
+            Alembic::Util::Dimensions dims(i);
+            for (std::size_t j = i; j < props.size(); ++j)
+            {
+                props[j]->setSample(
+                    ABC::ArraySample(&(vali.front()), i32d, dims));
+            }
+        }
+    }
+}
+
+void readArchive( const std::string & iName, bool iCache )
+{
+    Alembic::AbcCoreHDF5::ReadArchive r;
+    ABC::ArchiveReaderPtr a = r( iName, iCache );
+    std::vector< ABC::ObjectReaderPtr > objs;
+    objs.push_back( a->getTop() );
+    TESTING_ASSERT( objs[0]->getNumChildren() == 2 );
+    objs.push_back( objs[0]->getChild(0) );
+    objs.push_back( objs[0]->getChild(1) );
+
+    std::size_t numObjs = objs.size();
+    for (std::size_t i = 1; i < numObjs; ++i)
+    {
+        TESTING_ASSERT( objs[i]->getNumChildren() == 3 );
+        for (std::size_t j = 0; j < numObjs; ++j)
+        {
+            objs.push_back( objs[i]->getChild(j) );
+        }
+    }
+
+    for (std::size_t i = 0; i < objs.size(); ++i)
+    {
+        TESTING_ASSERT( objs[i]->getProperties()->getNumProperties() == 3 );
+
+        ABC::CompoundPropertyReaderPtr cpr = objs[i]->getProperties();
+        ABC::ArrayPropertyReaderPtr apr = cpr->getArrayProperty("a");
+
+        TESTING_ASSERT( 0 ==
+            objs[i]->getProperties()->getArrayProperty("a")->getNumSamples() );
+        TESTING_ASSERT( 1 ==
+            objs[i]->getProperties()->getArrayProperty("b")->getNumSamples() );
+        TESTING_ASSERT( 2 ==
+            objs[i]->getProperties()->getArrayProperty("c")->getNumSamples() );
+    }
+}
+
+void writeVeryEmptyArchive( const std::string & iName, bool iCache )
+{
+    ABC::MetaData m;
+    A5::WriteArchive w;
+    ABC::ArchiveWriterPtr a = w(iName, m, iCache);
+}
+
+void readVeryEmptyArchive( const std::string & iName, bool iCache )
+{
+    Alembic::AbcCoreHDF5::ReadArchive r;
+    ABC::ArchiveReaderPtr a = r( iName, iCache );
+    TESTING_ASSERT(a->getTop()->getNumChildren() == 0);
+}
+
 int main ( int argc, char *argv[] )
 {
     testReadWriteEmptyArchive();
     testReadWriteTimeSamplingArchive();
+
+    writeArchive("noCacheTest.abc", false);
+    readArchive("noCacheTest.abc", false);
+    readArchive("noCacheTest.abc", true);
+
+    writeArchive("cacheTest.abc", true);
+    readArchive("cacheTest.abc", false);
+    readArchive("cacheTest.abc", true);
+
+    writeVeryEmptyArchive("noCacheTestEmpty.abc", false);
+    readVeryEmptyArchive("noCacheTestEmpty.abc", false);
+    readVeryEmptyArchive("noCacheTestEmpty.abc", true);
+
+    writeVeryEmptyArchive("cacheTestEmpty.abc", true);
+    readVeryEmptyArchive("cacheTestEmpty.abc", false);
+    readVeryEmptyArchive("cacheTestEmpty.abc", true);
+
     return 0;
 }

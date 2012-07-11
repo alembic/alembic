@@ -121,7 +121,20 @@ public:
         for( AttrInfoArray::iterator it = attrs.begin();
              it != attrs.end(); ++it )
         {
-            iVisitor( it->m_name );
+            std::string attrName( it->m_name );
+            size_t attrNameLen = attrName.size();
+            if ( attrNameLen < 6 )
+            {
+                return;
+            }
+
+            // Last 5 characters.
+            std::string suffix( attrName, attrNameLen-5 );
+            if ( suffix == ".info" )
+            {
+                std::string propertyName( attrName, 0, attrNameLen-5 );
+                iVisitor( propertyName );
+            }
         }
     }
 

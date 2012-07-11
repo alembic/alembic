@@ -48,7 +48,7 @@ HDF5HierarchyReader::HDF5HierarchyReader( hid_t iFile,
     : m_H5H( iH5H )
 {
     int enabled( 0 );
-    if (H5Aexists( iFile, "abc_ref_hierarchy" ))
+    if (iCacheHierarchy && H5Aexists( iFile, "abc_ref_hierarchy" ))
     {
         H5LTget_attribute_int( iFile, ".", "abc_ref_hierarchy", &enabled );
     }
@@ -60,11 +60,7 @@ HDF5HierarchyReader::HDF5HierarchyReader( hid_t iFile,
     {
         readHierarchy( iFile );
     }
-    else if ( iCacheHierarchy )
-    {
-        m_H5H.build( iFile );
-        m_H5H.setEnabled( true );
-    }
+
 }
 
 //-*****************************************************************************
