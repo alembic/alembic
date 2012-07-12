@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -103,15 +103,17 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     val[5] = scaleZ.asDouble();
     mSp.set(val);
 
-    Alembic::Abc::OCompoundProperty arbAttr;
+    Alembic::Abc::OCompoundProperty arbGeom;
+    Alembic::Abc::OCompoundProperty userProps;
     if (AttributesWriter::hasAnyAttr(fnLocator, iArgs))
     {
-        arbAttr = mXform.getSchema().getArbGeomParams();
+        arbGeom = mXform.getSchema().getArbGeomParams();
+        userProps = mXform.getSchema().getUserProperties();
     }
 
-    mAttrs = AttributesWriterPtr(new AttributesWriter(arbAttr, mXform,
-        fnLocator, iTimeIndex, iArgs));
-
+    mAttrs = AttributesWriterPtr(new AttributesWriter(arbGeom, userProps,
+                                                      mXform, fnLocator,
+                                                      iTimeIndex, iArgs));
 }
 
 

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -196,11 +196,13 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         }
 
         Alembic::Abc::OCompoundProperty cp;
+        Alembic::Abc::OCompoundProperty up;
         if (AttributesWriter::hasAnyAttr(lMesh, iArgs))
         {
             cp = mSubDSchema.getArbGeomParams();
+            up = mSubDSchema.getUserProperties();
         }
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, lMesh,
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, lMesh,
             iTimeIndex, iArgs));
 
         writeSubD(uvSamp);
@@ -231,13 +233,15 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         }
 
         Alembic::Abc::OCompoundProperty cp;
+        Alembic::Abc::OCompoundProperty up;
         if (AttributesWriter::hasAnyAttr(lMesh, iArgs))
         {
             cp = mPolySchema.getArbGeomParams();
+            up = mPolySchema.getUserProperties();
         }
 
         // set the rest of the props and write to the writer node
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, lMesh,
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, lMesh,
             iTimeIndex, iArgs));
 
         writePoly(uvSamp);

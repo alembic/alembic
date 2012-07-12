@@ -62,12 +62,14 @@ MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
     mSchema = obj.getSchema();
 
     Alembic::Abc::OCompoundProperty cp;
+    Alembic::Abc::OCompoundProperty up;
     if (AttributesWriter::hasAnyAttr(nurbs, iArgs))
     {
         cp = mSchema.getArbGeomParams();
+        up = mSchema.getUserProperties();
     }
 
-    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, nurbs,
+    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, nurbs,
         iTimeIndex, iArgs));
 
     // for now if it a trim surface, treat it like it's animated

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -120,7 +120,6 @@ struct PlugAndObjScalar
 {
     MPlug plug;
     MObject obj;
-    Alembic::Abc::OObject propParent;
     Alembic::Abc::OScalarProperty prop;
 };
 
@@ -159,8 +158,14 @@ struct JobArgs
     std::string pythonPerFrameCallback;
     std::string pythonPostCallback;
 
+    // to put into .arbGeomParam
     std::vector< std::string > prefixFilters;
     std::set< std::string > attribs;
+
+    // to put into .userProperties
+    std::vector< std::string > userPrefixFilters;
+    std::set< std::string > userAttribs;
+
     util::ShapeSet dagPaths;
 };
 

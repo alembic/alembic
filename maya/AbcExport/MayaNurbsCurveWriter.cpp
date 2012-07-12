@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -121,14 +121,15 @@ MayaNurbsCurveWriter::MayaNurbsCurveWriter(MDagPath & iDag,
     mSchema = obj.getSchema();
 
     Alembic::Abc::OCompoundProperty cp;
+    Alembic::Abc::OCompoundProperty up;
     if (AttributesWriter::hasAnyAttr(iDag, iArgs))
     {
         cp = mSchema.getArbGeomParams();
+        up = mSchema.getUserProperties();
     }
 
-    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, iDag,
+    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, iDag,
         iTimeIndex, iArgs));
-
 
     write();
 }

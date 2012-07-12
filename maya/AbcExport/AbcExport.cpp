@@ -412,7 +412,7 @@ try
                 jobArgs.pythonPostCallback = jobArgsArray[++i].asChar();
             }
 
-            // attribute filtering stuff
+            // geomArbParams - attribute filtering stuff
             else if (arg == "-atp" || arg == "-attrprefix")
             {
                 if (i+1 >= numJobArgs)
@@ -433,6 +433,29 @@ try
                     return MS::kFailure;
                 }
                 jobArgs.attribs.insert(jobArgsArray[++i].asChar());
+            }
+
+            // userProperties - attribute filtering stuff
+            else if (arg == "-uatp" || arg == "-userattrprefix")
+            {
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "userAttrPrefix incorrectly specified.");
+                    return MS::kFailure;
+                }
+                jobArgs.userPrefixFilters.push_back(jobArgsArray[++i].asChar());
+            }
+
+            else if (arg == "-u" || arg == "-userattr")
+            {
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "userAttr incorrectly specified.");
+                    return MS::kFailure;
+                }
+                jobArgs.userAttribs.insert(jobArgsArray[++i].asChar());
             }
 
             else if (arg == "-rt" || arg == "-root")

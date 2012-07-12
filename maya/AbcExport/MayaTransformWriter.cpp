@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -444,12 +444,14 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp;
+        Alembic::Abc::OCompoundProperty up;
         if (AttributesWriter::hasAnyAttr(joint, iArgs))
         {
             cp = mSchema.getArbGeomParams();
+            up = mSchema.getUserProperties();
         }
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, joint,
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, joint,
             iTimeIndex, iArgs));
 
         if (!iArgs.worldSpace)
@@ -489,12 +491,14 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp;
+        Alembic::Abc::OCompoundProperty up;
         if (AttributesWriter::hasAnyAttr(trans, iArgs))
         {
             cp = mSchema.getArbGeomParams();
+            up = mSchema.getUserProperties();
         }
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, trans,
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, trans,
             iTimeIndex, iArgs));
 
         if (!iArgs.worldSpace)
@@ -618,12 +622,14 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp;
+        Alembic::Abc::OCompoundProperty up;
         if (AttributesWriter::hasAnyAttr(joint, iArgs))
         {
             cp = mSchema.getArbGeomParams();
+            up = mSchema.getUserProperties();
         }
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, joint,
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, joint,
             iTimeIndex, iArgs));
 
         pushTransformStack(joint, iTimeIndex == 0);
@@ -641,12 +647,14 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
         mSchema = obj.getSchema();
 
         Alembic::Abc::OCompoundProperty cp;
+        Alembic::Abc::OCompoundProperty up;
         if (AttributesWriter::hasAnyAttr(trans, iArgs))
         {
             cp = mSchema.getArbGeomParams();
+            up = mSchema.getUserProperties();
         }
 
-        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, obj, trans,
+        mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, trans,
             iTimeIndex, iArgs));
 
         pushTransformStack(trans, iTimeIndex == 0);

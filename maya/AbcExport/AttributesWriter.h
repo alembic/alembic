@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -47,11 +47,12 @@ class AttributesWriter
   public:
     // fills in the property maps for both static and sampled, and does
     // the initial write at iFrame for sampled data
-    AttributesWriter(Alembic::Abc::OCompoundProperty & iParent,
-        Alembic::Abc::OObject & iParentObj,
-        const MFnDagNode & iNode,
-        Alembic::Util::uint32_t iTimeIndex,
-        const JobArgs & iArgs);
+    AttributesWriter(Alembic::Abc::OCompoundProperty & iArgGeom,
+                     Alembic::Abc::OCompoundProperty & iUserProps,
+                     Alembic::Abc::OObject & iParentObj,
+                     const MFnDagNode & iNode,
+                     Alembic::Util::uint32_t iTimeIndex,
+                     const JobArgs & iArgs);
 
     ~AttributesWriter();
 
@@ -59,18 +60,19 @@ class AttributesWriter
     bool isAnimated();
 
     static bool matchFilterOrAttribs(const MPlug & iPlug,
-        const JobArgs & iArgs);
+                                     const JobArgs & iArgs,
+                                     bool& userAttrOut);
 
     static bool hasAnyAttr(const MFnDagNode & iNode,
-        const JobArgs & iArgs);
+                           const JobArgs & iArgs);
 
   private:
 
-    std::vector < PlugAndObjArray > mPlugObjArrayVec;
+    std::vector < PlugAndObjArray >     mPlugObjArrayVec;
+    std::vector < PlugAndObjScalar >    mPlugObjScalarVec;
 
     // animated visibility plug
     PlugAndObjScalar mAnimVisibility;
-
 };
 
 typedef boost::shared_ptr<AttributesWriter> AttributesWriterPtr;
