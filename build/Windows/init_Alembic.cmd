@@ -29,7 +29,7 @@ set platOut=%rootOut%\%SYS%
 set BOOST_ROOT=%rootOut%\boost
 set ILMBASE_ROOT=%platOut%\IlmBase
 set OPENEXR_ROOT=%ALEMBIC_ROOT%\contrib\openexr-1.6.1
-set HDF5_ROOT=%ALEMBIC_ROOT%\contrib\hdf5-1.8.5-patch1\src
+set HDF5_ROOT=%ALEMBIC_ROOT%\contrib\hdf5-1.8.9\src
 set MAYA_ROOT=%ALEMBIC_ROOT%\contrib\maya2011
 
 REM ******************************************************************************************
