@@ -69,7 +69,8 @@
 #include <maya/MFnCamera.h>
 #include <maya/MTime.h>
 
-void unsupportedWarning(Alembic::Abc::IArrayProperty & iProp)
+template <class T>
+void unsupportedWarning(T & iProp)
 {
     MString warn = "Unsupported attr, skipping: ";
     warn += iProp.getName().c_str();
@@ -148,7 +149,7 @@ void addArbAttrAndScope(MObject & iParent, const std::string & iAttrName,
     }
 }
 
-bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
+bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 {
     MFnDependencyNode parentFn(iParent);
     MString attrName(iProp.getName().c_str());
@@ -163,7 +164,6 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
     std::string interp = iProp.getMetaData().get("interpretation");
 
     // the first sample is read only when the property is constant
-
     switch (dtype.getPod())
     {
         case Alembic::Util::kBooleanPOD:
@@ -949,13 +949,336 @@ bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
     return true;
 }
 
+template <class PODTYPE>
+AddPropResult
+addScalarExtentOneProp(Alembic::Abc::IScalarProperty& iProp,
+                       Alembic::Util::uint8_t extent,
+                       PODTYPE defaultVal,
+                       MPlug& plug,
+                       MString& attrName,
+                       MFnNumericAttribute& numAttr,
+                       MObject& attrObj,
+                       MFnNumericData::Type type)
+{
+    if (extent != 1)
+        return INVALID;
+
+    static const Alembic::Abc::ISampleSelector iss((Alembic::Abc::index_t)0);
+
+    PODTYPE val = defaultVal;
+    if (iProp.isConstant())
+        iProp.get(&val, iss);
+
+    if (plug.isNull())
+    {
+        attrObj = numAttr.create(attrName, attrName, type, val);
+    }
+    else
+    {
+        plug.setValue(val);
+        return VALID_DONE;
+    }
+
+    return VALID_NOTDONE;
+}
+
+template <class PODTYPE>
+AddPropResult
+addScalarExtentThreeProp(Alembic::Abc::IScalarProperty& iProp,
+                         Alembic::Util::uint8_t extent,
+                         PODTYPE defaultVal,
+                         MPlug& plug,
+                         MString& attrName,
+                         MFnNumericAttribute& numAttr,
+                         MObject& attrObj,
+                         MFnNumericData::Type type1,
+                         MFnNumericData::Type type2,
+                         MFnNumericData::Type type3)
+{
+    if (extent > 3)
+        return INVALID;
+
+    static const Alembic::Abc::ISampleSelector iss((Alembic::Abc::index_t)0);
+
+    PODTYPE val[3] = {defaultVal, defaultVal, defaultVal};
+
+    if (iProp.isConstant())
+        iProp.get(&val, iss);
+
+    if (!plug.isNull())
+    {
+        unsigned int numChildren = plug.numChildren();
+        if (numChildren == 0)
+        {
+            plug.setValue(val[0]);
+        }
+        else
+        {
+            if (numChildren > extent)
+                numChildren = extent;
+                  
+            for (unsigned int i = 0; i < numChildren; ++i)
+                plug.child(i).setValue(val[i]);
+        }
+        return VALID_DONE;
+    }
+    else if (extent == 1)
+    {
+        attrObj = numAttr.create(attrName, attrName, type1);
+        numAttr.setDefault(val[0]);
+    }
+    else if (extent == 2)
+    {
+        attrObj = numAttr.create(attrName, attrName, type2);
+        numAttr.setDefault(val[0], val[1]);
+    }
+    else if (extent == 3)
+    {
+        attrObj = numAttr.create(attrName, attrName, type3);
+        numAttr.setDefault(val[0], val[1], val[2]);
+    }
+
+    return VALID_NOTDONE;
+}
+
+template <class PODTYPE>
+AddPropResult
+addScalarExtentFourProp(Alembic::Abc::IScalarProperty& iProp,
+                        Alembic::Util::uint8_t extent,
+                        PODTYPE defaultVal,
+                        MPlug& plug,
+                        MString& attrName,
+                        MFnNumericAttribute& numAttr,
+                        MObject& attrObj,
+                        MFnNumericData::Type type1,
+                        MFnNumericData::Type type2,
+                        MFnNumericData::Type type3,
+                        MFnNumericData::Type type4)
+{
+    if (extent > 4)
+        return INVALID;
+
+    static const Alembic::Abc::ISampleSelector iss((Alembic::Abc::index_t)0);
+
+    PODTYPE val[4] = {defaultVal, defaultVal, defaultVal, defaultVal};
+
+    if (iProp.isConstant())
+        iProp.get(&val, iss);
+
+    if (!plug.isNull())
+    {
+        unsigned int numChildren = plug.numChildren();
+        if (numChildren == 0)
+        {
+            plug.setValue(val[0]);
+        }
+        else
+        {
+            if (numChildren > extent)
+                numChildren = extent;
+
+            for (unsigned int i = 0; i < numChildren; ++i)
+            {
+                plug.child(i).setValue(val[i]);
+            }
+        }
+
+        return VALID_DONE;
+    }
+    else if (extent == 1)
+    {
+        attrObj = numAttr.create(attrName, attrName, type1);
+        numAttr.setDefault(val[0]);
+    }
+    else if (extent == 2)
+    {
+        attrObj = numAttr.create(attrName, attrName, type2);
+        numAttr.setDefault(val[0], val[1]);
+    }
+    else if (extent == 3)
+    {
+        attrObj = numAttr.create(attrName, attrName, type3);
+        numAttr.setDefault(val[0], val[1], val[2]);
+    }
+    else if (extent == 4)
+    {
+        attrObj = numAttr.create(attrName, attrName, type4);
+        numAttr.setDefault(val[0], val[1], val[2], val[4]);
+    }
+
+    return VALID_NOTDONE;
+}
+
+bool addScalarProp(Alembic::Abc::IScalarProperty & iProp, MObject & iParent)
+{
+    MFnDependencyNode parentFn(iParent);
+    MString attrName(iProp.getName().c_str());
+    MPlug plug = parentFn.findPlug(attrName);
+
+    MFnTypedAttribute typedAttr;
+    MFnNumericAttribute numAttr;
+
+    MObject attrObj;
+    Alembic::AbcCoreAbstract::DataType dtype = iProp.getDataType();
+    Alembic::Util::uint8_t extent = dtype.getExtent();
+    std::string interp = iProp.getMetaData().get("interpretation");
+
+    switch (dtype.getPod())
+    {
+      case Alembic::Util::kBooleanPOD:
+      {
+          AddPropResult result = addScalarExtentOneProp<bool>
+              (iProp, extent, false, plug, attrName, numAttr, attrObj,
+               MFnNumericData::kBoolean);
+
+          if (result == INVALID)
+              return false;
+          else if (result == VALID_DONE)
+              return true;
+      }
+      break;
+
+      case Alembic::Util::kUint8POD:
+      case Alembic::Util::kInt8POD:
+      {
+          AddPropResult result = addScalarExtentOneProp<Alembic::Util::int8_t>
+              (iProp, extent, 1, plug, attrName, numAttr, attrObj,
+               MFnNumericData::kByte);
+
+          if (result == INVALID)
+              return false;
+          else if (result == VALID_DONE)
+              return true;
+      }
+      break;
+
+      case Alembic::Util::kInt16POD:
+      case Alembic::Util::kUint16POD:
+      {
+          AddPropResult result = addScalarExtentThreeProp<Alembic::Util::int16_t>
+              (iProp, extent, 0, plug, attrName, numAttr, attrObj,
+               MFnNumericData::kShort,
+               MFnNumericData::k2Short,
+               MFnNumericData::k3Short);
+
+          if (result == INVALID)
+              return false;
+          else if (result == VALID_DONE)
+              return true;
+      }
+      break;
+
+      case Alembic::Util::kUint32POD:
+      case Alembic::Util::kInt32POD:
+      {
+          AddPropResult result = addScalarExtentThreeProp<Alembic::Util::int32_t>
+              (iProp, extent, 0, plug, attrName, numAttr, attrObj,
+               MFnNumericData::kInt,
+               MFnNumericData::k2Int,
+               MFnNumericData::k3Int);
+
+          if (result == INVALID)
+              return false;
+          else if (result == VALID_DONE)
+              return true;
+      }
+      break;
+
+      case Alembic::Util::kFloat32POD:
+      {
+          AddPropResult result = addScalarExtentThreeProp<float>
+              (iProp, extent, 0.f, plug, attrName, numAttr, attrObj,
+               MFnNumericData::kFloat,
+               MFnNumericData::k2Float,
+               MFnNumericData::k3Float);
+
+          if (result == INVALID)
+              return false;
+          else if (result == VALID_DONE)
+              return true;
+      }
+      break;
+
+      case Alembic::Util::kFloat64POD:
+      {
+          AddPropResult result = addScalarExtentFourProp<double>
+              (iProp, extent, 0.f, plug, attrName, numAttr, attrObj,
+               MFnNumericData::kDouble,
+               MFnNumericData::k2Double,
+               MFnNumericData::k3Double,
+               MFnNumericData::k4Double);
+
+          if (result == INVALID)
+              return false;
+          else if (result == VALID_DONE)
+              return true;
+      }
+      break;
+
+      case Alembic::Util::kStringPOD:
+      {
+          if (extent != 1)
+              return false;
+
+          MFnStringData fnStringData;
+          MObject strAttrObject;
+
+          if (iProp.isConstant())
+          {
+              Alembic::Abc::IStringProperty strProp( iProp.getPtr(),
+                                                     Alembic::Abc::kWrapExisting );
+              if (!strProp.valid())
+                  return false;
+
+              if (strProp.getNumSamples() == 0)
+                  return false;
+
+              static const Alembic::Abc::ISampleSelector iss((Alembic::Abc::index_t)0);
+              std::string val = strProp.getValue(iss);
+
+              MString attrValue(val.c_str());
+              strAttrObject = fnStringData.create(attrValue);
+              if (!plug.isNull())
+              {
+                  plug.setValue(strAttrObject);
+                  return true;
+              }
+          }
+          
+          attrObj = typedAttr.create(attrName, attrName, MFnData::kString,
+                                     strAttrObject);
+      }
+      break;
+
+      default:
+          std::cout << "Type not yet supported.\n";
+          break;
+    }
+
+    typedAttr.setKeyable(true);
+    numAttr.setKeyable(true);
+
+    if (interp == "rgb")
+    {
+        typedAttr.setUsedAsColor(true);
+        numAttr.setUsedAsColor(true);
+    }
+
+    parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+    addArbAttrAndScope(iParent, iProp.getName(),
+        iProp.getMetaData().get("geoScope"), interp, extent);
+
+    return true;
+}
+
 //=============================================================================
 
 
 void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
     bool iUnmarkedFaceVaryingColors)
 {
-    // if the arbitrary geom params aren't valid, then skip
+    // if the params CompoundProperty (.arbGeomParam or .userProperties)
+    // aren't valid, then skip
     if (!iParent)
         return;
 
@@ -973,13 +1296,6 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
         {
             continue;
         }
-        else if (!propHeader.isArray())
-        {
-            MString warn = "Skipping indexed or non-array property: ";
-            warn += propName.c_str();
-
-            printWarning(warn);
-        }
         else if (propName.empty() || propName[0] == '.' ||
             propName.find('[') != std::string::npos)
         {
@@ -990,17 +1306,37 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
         }
         else
         {
-            Alembic::Abc::IArrayProperty prop(iParent, propName);
-            if (prop.getNumSamples() == 0)
+            if (propHeader.isArray())
             {
-                MString warn = "Skipping property with no samples: ";
-                warn += propName.c_str();
+                Alembic::Abc::IArrayProperty prop(iParent, propName);
+                if (prop.getNumSamples() == 0)
+                {
+                    MString warn = "Skipping property with no samples: ";
+                    warn += propName.c_str();
+                    
+                    printWarning(warn);
+                }
 
-                printWarning(warn);
+                if (!addArrayProp(prop, iObject))
+                {
+                    unsupportedWarning<Alembic::Abc::IArrayProperty>(prop);
+                }
             }
-            else if (!addProp(prop, iObject))
+            else if (propHeader.isScalar())
             {
-                unsupportedWarning(prop);
+                Alembic::Abc::IScalarProperty prop(iParent, propName);
+                if (prop.getNumSamples() == 0)
+                {
+                    MString warn = "Skipping property with no samples: ";
+                    warn += propName.c_str();
+                    
+                    printWarning(warn);
+                }
+
+                if (!addScalarProp(prop, iObject))
+                {
+                    unsupportedWarning<Alembic::Abc::IScalarProperty>(prop);
+                }
             }
         }
     }
@@ -1008,8 +1344,141 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
 
 //=============================================================================
 
+void getAnimatedArrayProp(Alembic::Abc::IArrayProperty prop,
+                          std::vector<Prop> & oPropList)
+{
+    Alembic::AbcCoreAbstract::DataType dtype = prop.getDataType();
+    Alembic::Util::uint8_t extent = dtype.getExtent();
+
+    switch (dtype.getPod())
+    {
+      case Alembic::Util::kBooleanPOD:
+      case Alembic::Util::kUint8POD:
+      case Alembic::Util::kInt8POD:
+      {
+          // we only support scalar bool, and int8
+          if (extent != 1 || !prop.isScalarLike())
+              return;
+      }
+      break;
+
+      case Alembic::Util::kInt16POD:
+      case Alembic::Util::kUint16POD:
+      {
+          // we only support scalar int16
+          if (extent > 3 || !prop.isScalarLike())
+              return;
+      }
+      break;
+
+      case Alembic::Util::kUint32POD:
+      case Alembic::Util::kInt32POD:
+      case Alembic::Util::kFloat32POD:
+      {
+          if (prop.isScalarLike() && extent > 3)
+              return;
+      }
+      break;
+
+      case Alembic::Util::kFloat64POD:
+      {
+          if (prop.isScalarLike() && extent > 4)
+              return;
+      }
+      break;
+      
+          // MFnStringArrayData
+      case Alembic::Util::kStringPOD:
+      case Alembic::Util::kWstringPOD:
+      {
+          if (prop.isScalarLike() && extent > 1)
+              return;
+      }
+      break;
+
+      default:
+      {
+          // Not sure what to do with kFloat16POD, kInt64POD, kUInt64POD
+          // so we'll just skip them for now
+          return;
+      }
+      break;
+    }
+
+    Prop animProp;
+    animProp.mArray = prop;
+    oPropList.push_back(animProp);
+}
+
+void getAnimatedScalarProp(Alembic::Abc::IScalarProperty prop,
+                           std::vector<Prop> & oPropList)
+{
+    Alembic::AbcCoreAbstract::DataType dtype = prop.getDataType();
+    Alembic::Util::uint8_t extent = dtype.getExtent();
+
+    switch (dtype.getPod())
+    {
+      case Alembic::Util::kBooleanPOD:
+      case Alembic::Util::kUint8POD:
+      case Alembic::Util::kInt8POD:
+      {
+          // we only support scalar bool, and int8
+          if (extent != 1)
+              return;
+      }
+      break;
+
+      case Alembic::Util::kInt16POD:
+      case Alembic::Util::kUint16POD:
+      {
+          // we only support scalar int16
+          if (extent > 3)
+              return;
+      }
+      break;
+      
+      case Alembic::Util::kUint32POD:
+      case Alembic::Util::kInt32POD:
+      case Alembic::Util::kFloat32POD:
+      {
+          if (extent > 3)
+              return;
+      }
+      break;
+
+      case Alembic::Util::kFloat64POD:
+      {
+          if (extent > 4)
+              return;
+      }
+      break;
+
+          // MFnStringArrayData
+      case Alembic::Util::kStringPOD:
+      case Alembic::Util::kWstringPOD:
+      {
+          if (extent > 1)
+              return;
+      }
+      break;
+      
+      default:
+      {
+          // Not sure what to do with kFloat16POD, kInt64POD, kUInt64POD
+          // so we'll just skip them for now
+          return;
+      }
+      break;
+    }
+
+    Prop animProp;
+    animProp.mScalar = prop;
+    oPropList.push_back(animProp);
+}
+
 void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
-    std::vector<Prop> & oPropList, bool iUnmarkedFaceVaryingColors)
+                      std::vector<Prop> & oPropList,
+                      bool iUnmarkedFaceVaryingColors)
 {
     // if the arbitrary geom params aren't valid, then skip
     if (!iParent)
@@ -1022,12 +1491,9 @@ void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
             iParent.getPropertyHeader(i);
         const std::string & propName = propHeader.getName();
 
-        if (!propHeader.isArray())
-        {
-            continue;
-        }
-        else if (isColorSet(propHeader,
-            iUnmarkedFaceVaryingColors))
+        // we have a color that we want to make a colorset out of
+        // and we will do so elsewhere
+        if ( isColorSet(propHeader, iUnmarkedFaceVaryingColors) )
         {
             continue;
         }
@@ -1036,92 +1502,33 @@ void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
         {
             continue;
         }
-
-        Alembic::Abc::IArrayProperty prop(iParent, propName);
-        if (prop.getNumSamples() == 0 || prop.isConstant())
+        else if (propHeader.isArray())
         {
-            continue;
-        }
-
-        Alembic::AbcCoreAbstract::DataType dtype = prop.getDataType();
-        Alembic::Util::uint8_t extent = dtype.getExtent();
-
-        switch (dtype.getPod())
-        {
-            case Alembic::Util::kBooleanPOD:
-            case Alembic::Util::kUint8POD:
-            case Alembic::Util::kInt8POD:
+            Alembic::Abc::IArrayProperty prop(iParent, propName);
+            if (prop.getNumSamples() == 0 || prop.isConstant())
             {
-                // we only support scalar bool, and int8
-                if (extent != 1 || !prop.isScalarLike())
-                {
-                    continue;
-                }
-
-            }
-            break;
-
-            case Alembic::Util::kInt16POD:
-            case Alembic::Util::kUint16POD:
-            {
-                // we only support scalar int16
-                if (extent > 3 || !prop.isScalarLike())
-                {
-                    continue;
-                }
-            }
-            break;
-
-            case Alembic::Util::kUint32POD:
-            case Alembic::Util::kInt32POD:
-            case Alembic::Util::kFloat32POD:
-            {
-                if (prop.isScalarLike() && extent > 3)
-                {
-                    continue;
-                }
-            }
-            break;
-
-            case Alembic::Util::kFloat64POD:
-            {
-                if (prop.isScalarLike() && extent > 4)
-                {
-                    continue;
-                }
-            }
-            break;
-
-            // MFnStringArrayData
-            case Alembic::Util::kStringPOD:
-            case Alembic::Util::kWstringPOD:
-            {
-                if (prop.isScalarLike() && extent > 1)
-                {
-                    continue;
-                }
-            }
-            break;
-
-            default:
-            {
-                // Not sure what to do with kFloat16POD, kInt64POD, kUInt64POD
-                // so we'll just skip them for now
                 continue;
             }
-            break;
+            getAnimatedArrayProp(prop, oPropList);
         }
+        else if (propHeader.isScalar())
+        {
+            Alembic::Abc::IScalarProperty prop(iParent, propName);
+            if (prop.getNumSamples() == 0 || prop.isConstant())
+            {
+                continue;
+            }
 
-        Prop animProp;
-        animProp.mArray = prop;
-        oPropList.push_back(animProp);
+            getAnimatedScalarProp(prop, oPropList);
+        }
     } // for i
 }
 
 //=============================================================================
 
-void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
-    MDataHandle & iHandle)
+void readProp(double iFrame,
+              Alembic::Abc::IArrayProperty & iProp,
+              MDataHandle & iHandle)
 {
     MObject attrObj;
     Alembic::AbcCoreAbstract::DataType dtype = iProp.getDataType();
@@ -1844,6 +2251,281 @@ void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
                 {
                     arr[i] = (wchar_t *)strData[i].c_str();
                 }
+            }
+        }
+        break;
+
+        default:
+        break;
+    }
+
+    if (!attrObj.isNull())
+        iHandle.set(attrObj);
+}
+
+void readProp(double iFrame,
+              Alembic::Abc::IScalarProperty & iProp,
+              MDataHandle & iHandle)
+{
+    MObject attrObj;
+    Alembic::AbcCoreAbstract::DataType dtype = iProp.getDataType();
+    Alembic::Util::uint8_t extent = dtype.getExtent();
+
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
+    double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
+                                     iProp.getNumSamples(), index, ceilIndex);
+
+    switch (dtype.getPod())
+    {
+        case Alembic::Util::kBooleanPOD:
+        {
+            if (extent != 1)
+                return;
+
+            Alembic::Util::bool_t val;
+            iProp.get(&val, index);
+
+            iHandle.setGenericBool(val != false, false);
+        }
+        break;
+
+        case Alembic::Util::kUint8POD:
+        case Alembic::Util::kInt8POD:
+        {
+            if (extent != 1)
+                return;
+
+            Alembic::Util::int8_t val;
+
+            if (index != ceilIndex && alpha != 0.0)
+            {
+                Alembic::Util::int8_t lo;
+                Alembic::Util::int8_t hi;
+
+                iProp.get(&lo, index);
+                iProp.get(&hi, ceilIndex);
+                val = simpleLerp<Alembic::Util::int8_t>(alpha, lo, hi);
+            }
+            else
+            {
+                iProp.get(&val, index);
+            }
+
+            iHandle.setGenericChar(val, false);
+        }
+        break;
+
+        case Alembic::Util::kInt16POD:
+        case Alembic::Util::kUint16POD:
+        {
+            Alembic::Util::int16_t val[3];
+
+            if (index != ceilIndex && alpha != 0.0)
+            {
+                Alembic::Util::int16_t lo[3];
+                Alembic::Util::int16_t hi[3];
+
+                iProp.get(lo, index);
+                iProp.get(hi, ceilIndex);
+
+                for (Alembic::Util::uint8_t i = 0; i < extent; ++i)
+                {
+                    val[i] = simpleLerp<Alembic::Util::int16_t>(alpha,
+                                                                lo[i],
+                                                                hi[i]);
+                }
+            }
+            else
+            {
+                iProp.get(val, index);
+            }
+
+            if (extent == 1)
+            {
+                iHandle.setGenericShort(val[0], false);
+            }
+            else if (extent == 2)
+            {
+                MFnNumericData numData;
+                numData.create(MFnNumericData::k2Short);
+                numData.setData2Short(val[0], val[1]);
+                iHandle.setMObject(numData.object());
+            }
+            else if (extent == 3)
+            {
+                MFnNumericData numData;
+                numData.create(MFnNumericData::k3Short);
+                numData.setData3Short(val[0], val[1], val[2]);
+                iHandle.setMObject(numData.object());
+            }
+        }
+        break;
+
+        case Alembic::Util::kUint32POD:
+        case Alembic::Util::kInt32POD:
+        {
+            if (extent < 4)
+            {
+                Alembic::Util::int32_t val[3];
+
+                if (index != ceilIndex && alpha != 0.0)
+                {
+                    Alembic::Util::int32_t lo[3];
+                    Alembic::Util::int32_t hi[3];
+
+                    iProp.get(lo, index);
+                    iProp.get(hi, ceilIndex);
+
+                    for (Alembic::Util::uint8_t i = 0; i < extent; ++i)
+                    {
+                         val[i] = simpleLerp<Alembic::Util::int32_t>(alpha,
+                                                                     lo[i],
+                                                                     hi[i]);
+                    }
+                }
+                else
+                {
+                    iProp.get(val, index);
+                }
+
+                if (extent == 1)
+                {
+                    iHandle.setGenericInt(val[0], false);
+                }
+                else if (extent == 2)
+                {
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k2Int);
+                    numData.setData2Int(val[0], val[1]);
+                    iHandle.setMObject(numData.object());
+                }
+                else if (extent == 3)
+                {
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k3Int);
+                    numData.setData3Int(val[0], val[1], val[2]);
+                    iHandle.setMObject(numData.object());
+                }
+            }
+        }
+        break;
+
+        case Alembic::Util::kFloat32POD:
+        {
+            if (extent < 4)
+            {
+                float val[3];
+
+                if (index != ceilIndex && alpha != 0.0)
+                {
+                    float lo[3];
+                    float hi[3];
+
+                    iProp.get(lo, index);
+                    iProp.get(hi, ceilIndex);
+
+                    for (Alembic::Util::uint8_t i = 0; i < extent; ++i)
+                        val[i] = simpleLerp<float>(alpha, lo[i], hi[i]);
+                }
+                else
+                {
+                    iProp.get(val, index);
+                }
+
+                if (extent == 1)
+                {
+                    iHandle.setGenericFloat(val[0], false);
+                }
+                else if (extent == 2)
+                {
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k2Float);
+                    numData.setData2Float(val[0], val[1]);
+                    iHandle.setMObject(numData.object());
+                }
+                else if (extent == 3)
+                {
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k3Float);
+                    numData.setData3Float(val[0], val[1], val[2]);
+                    iHandle.setMObject(numData.object());
+                }
+            }
+        }
+        break;
+
+        case Alembic::Util::kFloat64POD:
+        {
+            // need to differentiate between vectors, points, and color array?
+            if (extent < 5)
+            {
+                double val[4];
+
+                if (index != ceilIndex && alpha != 0.0)
+                {
+                    double lo[4];
+                    double hi[4];
+
+                    iProp.get(lo, index);
+                    iProp.get(hi, index);
+
+                    for (Alembic::Util::uint8_t i = 0; i < extent; ++i)
+                        val[i] = simpleLerp<double>(alpha, lo[i], hi[i]);
+                }
+                else
+                {
+                    iProp.get(val, index);
+                }
+
+                if (extent == 1)
+                {
+                    iHandle.setGenericDouble(val[0], false);
+                }
+                else if (extent == 2)
+                {
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k2Double);
+                    numData.setData2Double(val[0], val[1]);
+                    iHandle.setMObject(numData.object());
+                }
+                else if (extent == 3)
+                {
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k3Double);
+                    numData.setData3Double(val[0], val[1], val[2]);
+                    iHandle.setMObject(numData.object());
+                }
+                else if (extent == 4)
+                {
+                    MFnNumericData numData;
+                    numData.create(MFnNumericData::k4Double);
+                    numData.setData4Double(val[0], val[1], val[2], val[3]);
+                    iHandle.setMObject(numData.object());
+                }
+            }
+        }
+        break;
+
+        // MFnStringArrayData
+        case Alembic::Util::kStringPOD:
+        {
+            if (extent == 1)
+            {
+                Alembic::Abc::IStringProperty strProp( iProp.getPtr(),
+                                                       Alembic::Abc::kWrapExisting );
+                iHandle.setString(strProp.getValue(index).c_str());
+            }
+        }
+        break;
+
+        // MFnStringArrayData
+        case Alembic::Util::kWstringPOD:
+        {
+            if (extent == 1)
+            {
+                Alembic::Abc::IWstringProperty strProp( iProp.getPtr(),
+                                                        Alembic::Abc::kWrapExisting );
+                iHandle.setString(strProp.getValue(index).c_str());
             }
         }
         break;

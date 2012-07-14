@@ -85,6 +85,9 @@ public:
     // input attributes
     static MObject mTimeAttr;
     static MObject mAbcFileNameAttr;
+    static MObject mSpeedAttr;
+    static MObject mOffsetAttr;
+    static MObject mCycleTypeAttr;
 
     // output attributes
     static MObject mOutPropArrayAttr;
@@ -116,6 +119,23 @@ public:
     void   setDebugMode(bool iDebugOn){ mDebugOn = iDebugOn; }
 
 private:
+    // compute the adjusted time from inputTime, speed and time offset.
+    double computeAdjustedTime(const double inputTime,
+                               const double speed,
+                               const double timeOffset);
+
+    // retime based on the playstyle: hold(use current time), loop and bound
+    enum
+    {
+        PLAYTYPE_HOLD = 0,
+        PLAYTYPE_LOOP,
+        PLAYTYPE_BOUNCE
+    };
+    double computeRetime(const double inputTime,
+                         const double firstTime,
+                         const double lastTime,
+                         const short playStyle);
+    double getFPS();
 
     // flag indicating if the input file should be opened again
     bool    mFileInitialized;

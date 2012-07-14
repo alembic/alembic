@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -54,6 +54,8 @@
 #include <maya/MDataHandle.h>
 #include <maya/MArrayDataHandle.h>
 #include <maya/MString.h>
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnNumericData.h>
 
 #include <vector>
 #include <string>
@@ -66,16 +68,82 @@ struct Prop
     Alembic::Abc::IScalarProperty mScalar;
 };
 
-bool addProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent);
-
 void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
-    bool iUnmarkedFaceVaryingColors);
+              bool iUnmarkedFaceVaryingColors);
 
-void readProp(double iFrame, Alembic::Abc::IArrayProperty & iProp,
-    MDataHandle & iHandle);
+bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent);
+bool addScalarProp(Alembic::Abc::IScalarProperty & iProp, MObject & iParent);
+
+enum AddPropResult
+{
+    INVALID = 0,
+    VALID_DONE = 1,
+    VALID_NOTDONE = 2
+};
+
+//
+// Three possible return states, invalid, valid and done (attribute
+// already existed and has been updated), valid and not done (new
+// attribute needs calling method to continue).
+//
+
+//
+// Avoiding some duplicated code with these templated versions.
+//
+template<class PODTYPE>
+AddPropResult
+addScalarExtentOneProp(Alembic::Abc::IScalarProperty& iProp,
+                       Alembic::Util::uint8_t extent,
+                       PODTYPE defaultVal,
+                       MPlug& plug,
+                       MString& attrName,
+                       MFnNumericAttribute& numAttr,
+                       MObject& attrObj,
+                       MFnNumericData::Type type);
+
+template <class PODTYPE>
+AddPropResult
+addScalarExtentThreeProp(Alembic::Abc::IScalarProperty& iProp,
+                         Alembic::Util::uint8_t extent,
+                         PODTYPE defaultVal,
+                         MPlug& plug,
+                         MString& attrName,
+                         MFnNumericAttribute& numAttr,
+                         MObject& attrObj,
+                         MFnNumericData::Type type1,
+                         MFnNumericData::Type type2,
+                         MFnNumericData::Type type3);
+
+template <class PODTYPE>
+AddPropResult
+addScalarExtentFourProp(Alembic::Abc::IScalarProperty& iProp,
+                        Alembic::Util::uint8_t extent,
+                        PODTYPE defaultVal,
+                        MPlug& plug,
+                        MString& attrName,
+                        MFnNumericAttribute& numAttr,
+                        MObject& attrObj,
+                        MFnNumericData::Type type1,
+                        MFnNumericData::Type type2,
+                        MFnNumericData::Type type3,
+                        MFnNumericData::Type type4);
+
+void readProp(double iFrame,
+              Alembic::Abc::IArrayProperty & iProp,
+              MDataHandle & iHandle);
+
+void readProp(double iFrame,
+              Alembic::Abc::IScalarProperty & iProp,
+              MDataHandle & iHandle);
 
 void getAnimatedProps(Alembic::Abc::ICompoundProperty & iParent,
     std::vector<Prop> & oPropList, bool iUnmarkedFaceVaryingColors);
+
+void getAnimatedArrayProp(Alembic::Abc::IArrayProperty prop,
+                          std::vector<Prop> & oPropList);
+
+void getAnimatedScalarProp(Alembic::Abc::IScalarProperty prop,
+                           std::vector<Prop> & oPropList);
 
 // This class is used for connecting to sampled transform operations and
 // properties in order  to keep the list of names of sampled channels
