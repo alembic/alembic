@@ -48,7 +48,7 @@ class ICollectionsSchema : public Abc::ISchema<CollectionsSchemaInfo>
 {
 public:
 
-    typedef CollectionsSchemaInfo this_type;
+    typedef ICollectionsSchema this_type;
 
     // default constructor creates an empty ICollectionSchema
     ICollectionsSchema() {}
