@@ -252,6 +252,19 @@ int ProcInit( struct AtNode *node, void **user_ptr )
     ProcArgs * args = new ProcArgs( AiNodeGetStr( node, "data" ) );
     args->proceduralNode = node;
     *user_ptr = args;
+    
+#if (AI_VERSION_ARCH_NUM == 3 && AI_VERSION_MAJOR_NUM < 3) || AI_VERSION_ARCH_NUM < 3
+    #error Arnold version 3.3+ required for AlembicArnoldProcedural
+#endif
+    
+    if (!AiCheckAPIVersion(AI_VERSION_ARCH, AI_VERSION_MAJOR, AI_VERSION_MINOR))
+    {
+        std::cout << "AlembicArnoldProcedural compiled with arnold-"
+                  << AI_VERSION
+                  << " but is running with incompatible arnold-"
+                  << AiGetVersion(NULL, NULL, NULL, NULL) << std::endl;
+        return 1;
+    }
 
     if ( args->filename.empty() )
     {

@@ -154,7 +154,7 @@ ProcArgs::ProcArgs( const char * paramStr )
 
 void ProcArgs::usage()
 {
-    std::cerr << "AlembicRiProcedural usage:" << std::endl;
+    std::cerr << "AlembicArnoldProcedural usage:" << std::endl;
     std::cerr << std::endl;
     
     
