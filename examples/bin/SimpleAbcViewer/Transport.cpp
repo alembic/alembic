@@ -44,7 +44,7 @@ Transport::Transport( const std::string &iAbcFileName,
   : m_scene( iAbcFileName )
   , m_framesPerSecond( iFramesPerSecond )
   , m_secondsPerFrame( 1.0f / iFramesPerSecond )
-  , m_currentSeconds( 0.0 )
+  , m_currentSeconds( m_scene.getMinTime() )
 {
     // Nothing
 }
