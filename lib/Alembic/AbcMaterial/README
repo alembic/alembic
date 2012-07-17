@@ -1,0 +1,98 @@
+This is a prototype implemenation of significant portions of the previous first-pass specification document (which also incorporates ideas discussed only in previous phone conversations). It does not yet contain an implementation of the network-style material definition but it's straightforward to extrapolate from here. The property naming conventions within this implementation are derived from but not identical to those within the first-pass specification. (They've been altered be be more Alembic-friendly -- but in a way still compatible with their katana inspiration.)
+
+AbcMaterial is a module which sits above Abc. It is not dependent upon AbcGeom -- nor is AbcGeom currently dependent upon it. It provides schema and object types for representing materials and material bindings.
+
+-----------------------------
+Major classes:
+
+(I|O)MaterialSchema: classes which provide an interface for writing data and metadata to a compound property representing a material definition.
+
+(I|O)Material: classes which interface a MaterialSchema onto an IObject in an "is a" pattern. You use this for creating objects which are themselves material definitions.
+
+MaterialFlatten: utility class for flattening material inheritance as a result of assignment or local definition. For applications concerned only with the resulting material of an object -- regardless of what techniques are used to defined it -- this is the primary interface.
+
+-----------------------------
+Explanation of terms:
+
+target: a string representing a target application or renderer by name and agreed-upon convention. Examples include "prman," "arnold" and "maya." The library could also include a document of conventions for interchange via a reserved "abc" target value. (More on this later).
+
+shader type: a string representing a shader classification by name and agreed-upon convention. Examples include "surface," "displacement" and "light." This could also express things like "coshader_taco" in which the value text following the "coshader_" prefix is used as a coshader instance name.
+
+shader name: a string identifying a shader object within a specified target and shader type. Examples include "paintedplastic" and "spot_light_v12."
+
+assignment: binding of a material object onto another object via an alembic object path
+
+inheritance/flattening: combining the contributions of multiple material definitions. The common case is the flattening of a hierarchy of material objects following assignment. It can also reference to the combination of a locally defined material with that of an assigned material.
+
+-----------------------------
+How to build and test:
+Place the AbcMaterial directory within this archive within the lib/Alembic directory of an Alembic 1.0.5 checkout. You'll also need to add ADD_SUBDIRECTORY( AbcMaterial ) to the CMakeLists.txt file within that directory.
+
+-----------------------------
+Explanation of the most comprehesive test case included:
+
+AbcMaterial/Tests/MaterialAssignAndFlattenTest.cpp
+
+This test case demonstrates material object creation (is a), material schema creation (has a), material assignment and practical material flattening.
+
+Once compiled, you can run it from your build directory from here:
+lib/Alembic/AbcMaterial/Tests/AbcMaterial_MaterialAssignAndFlattenTest
+
+
+It creates this hierarchy:
+
+/materials
+  materialA
+     materialB
+/geometry
+  geoA
+  geoB
+  geoC
+ 
+
+/materials/materialA is a Material object which defines a "prman" "surface" shader with "Kd" and "roughness" parameters set.
+
+/materials/materialA/materialB is a Material object which defines a "prman" "displacement" shader and sets the value of "roughness" for "prman" "surface." In practice, it inherits the data defined in its parent. The interpretation of that inheritance is done outside of the IMaterial or IMaterialSchema classes -- which return only data locally defined.
+
+
+/geometry/geoA is a generic object which contains a material assignment to /materials/materialA. As that material doesn't inherit from any other Material objects, the resulting material is identical to the values locally defined there.
+
+/geometry/geoB is a generic object which contains a material assignment to /materials/materialA/materialB. As that material is a child of /materials/A, it combines the data defined locally for each. In this case, the "prman" "displacement" shader will be present and the "roughness" value of the "prman" "surface" shader will be overriden to 0.1.
+
+/geometry/geoC  is a generic object which contains a material assignment to /materials/materialA/materialB. It also "has a" local material definition which sets the "prman" "surface" "roughness" value. Its resulting material will combine this local definition with the flattened results from /materials/materialA/materialB. If differs from geoB in that its "roughness" will be 0.3.
+
+The traversal function within this example uses the MaterialFlatten class to query the resulting material and isn't directly aware of assignment, local definitions and inheritance. That information is available in lower-level functions available via MaterialAssignment.h.
+
+
+-----------------------------
+How this relates to lights
+
+In the applications we use, a light is typically a camera plus a shader. The impetus to develop AbcMaterial is support materials and material bindings in a general manner that could initially be used by a Light schema and object.
+
+I see two different approaches for handling the material aspect of a light.
+1) Have the LightSchema contain a MaterialSchema within its own enclosing compound. The LightSchema would return a MaterialSchema in response to a getMaterial() method. In this case, the Light object neither "is a" nor "has a" material in the general object sense.
+2) The LightSchema could have no direct knowledge of the material and instead rely on the same "has a" or assignment mechanisms available to any other object. This is the simpler approach but is less self-contained.
+
+
+-----------------------------
+About the "abc" target
+
+If we wanted lowest-common-denominator interchange for light (or other shader types) between different systems, we could use a reserved target name of "abc." Documentation and reference shaders could describe the behavior and parameters for things like "abc" "light" "spotlight". The "abc" target can coexist with the more targeted and facility-specific data we add for things like "prman," "arnold" or "ilm."
+
+-----------------------------
+About the not-yet-included network materials
+
+Supporting network materials is a matter of adding additional methods on the MaterialSchema and MaterialFlatten classes. They don't introduce any significant wrinkles to the overall approach.
+
+
+
+
+
+
+
+ 
+
+
+
+
+
