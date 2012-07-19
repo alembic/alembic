@@ -42,73 +42,157 @@ namespace Alembic {
 namespace AbcMaterial {
 namespace ALEMBIC_VERSION_NS {
 
+class OMaterialSchema::Data
+{
+public:
+
+    // writes out the data we were holding onto
+    ~Data()
+    {
+        size_t mapSize = shaderNames.size();
+        if ( mapSize > 0 )
+        {
+            std::vector<std::string> strVec;
+            strVec.reserve( mapSize * 2 );
+            std::map<std::string, std::string>::iterator i;
+            for ( i = shaderNames.begin(); i != shaderNames.end(); ++i )
+            {
+                strVec.push_back( i->first );
+                strVec.push_back( i->second );
+            }
+            Abc::OStringArrayProperty prop( parent, ".shaderNames" );
+            prop.set( Abc::StringArraySample( strVec ) );
+        }
+
+        // now do it for terminals
+        mapSize = terminals.size();
+        if ( mapSize > 0 )
+        {
+            std::vector<std::string> strVec;
+            strVec.reserve( mapSize * 2 );
+            std::map<std::string, std::string>::iterator i;
+            for ( i = terminals.begin(); i != terminals.end(); ++i )
+            {
+                strVec.push_back( i->first );
+                strVec.push_back( i->second );
+            }
+            Abc::OStringArrayProperty prop( parent, ".terminals" );
+            prop.set( Abc::StringArraySample( strVec ) );
+        }
+
+        // now write out the connections for each node
+        Data::NodeMap::iterator i;
+        for ( i = nodes.begin(); i != nodes.end(); ++i )
+        {
+            mapSize = i->second.connections.size();
+
+            // don't write anything if our map is empty
+            if ( mapSize == 0 )
+            {
+                continue;
+            }
+
+            std::vector<std::string> strVec;
+            strVec.reserve( mapSize * 2 );
+            std::map<std::string, std::string>::iterator j;
+            for ( j = i->second.connections.begin();
+                  j != i->second.connections.end(); ++j )
+           {
+                strVec.push_back( j->first );
+                strVec.push_back( j->second );
+            }
+        Abc::OStringArrayProperty prop( i->second.prop, ".connections" );
+        prop.set( Abc::StringArraySample( strVec ) );
+    }
+
+    if ( ! interface.empty() )
+    {
+        Abc::OStringArrayProperty prop( parent, ".interface" );
+        prop.set( Abc::StringArraySample( interface ) );
+    }
+}
+
+    AbcCoreAbstract::CompoundPropertyWriterPtr parent;
+
+    struct Node
+    {
+        Abc::OCompoundProperty prop;
+        Abc::OCompoundProperty params;
+        std::map<std::string, std::string> connections;
+    };
+
+    typedef std::map<std::string, Node> NodeMap;
+    NodeMap nodes;
+    std::map<std::string, std::string> shaderNames;
+    std::map<std::string, std::string> terminals;
+
+    Abc::OCompoundProperty interfaceParams;
+    std::vector<std::string> interface;
+};
+
+void OMaterialSchema::init()
+{
+    m_data = Alembic::Util::shared_ptr< Data >( new Data() );
+    m_data->parent = this->getPtr();
+}
 
 void OMaterialSchema::setShader(
         const std::string & target,
         const std::string & shaderType,
         const std::string & shaderName )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::setShader" );
     Util::validateName( target, "target" );
     Util::validateName( shaderType, "shaderType" );
 
     std::string propertyName = Util::buildTargetName(
-            target, shaderType, "shader" );
+            target, shaderType, "" );
 
-    if ( m_shaderNames.find( propertyName ) != m_shaderNames.end() )
-    {
-        //TODO, throw if already set. This is not replaceable
-        return;
-    }
+    m_data->shaderNames[propertyName] = shaderName;
 
-    Abc::OStringProperty prop( this->getPtr(), propertyName );
-
-    prop.set( shaderName );
-
-    m_shaderNames[propertyName] = prop;
-
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
-
 
 Abc::OCompoundProperty OMaterialSchema::getShaderParameters(
         const std::string & target,
         const std::string & shaderType )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::getShaderParameters" );
+
     Util::validateName( target, "target" );
     Util::validateName( shaderType, "shaderType" );
 
     std::string propertyName = Util::buildTargetName(
         target, shaderType, "params" );
 
-    CompoundPropertyMap::iterator I = m_compounds.find( propertyName );
+    Data::NodeMap::iterator i = m_data->nodes.find( propertyName );
 
-    if ( I != m_compounds.end() )
+    if ( i != m_data->nodes.end() )
     {
-        return (*I).second;
+        return i->second.params;
     }
 
-    Abc::OCompoundProperty prop( this->getPtr(), propertyName );
+    Data::Node n;
+    n.params = Abc::OCompoundProperty( this->getPtr(), propertyName );
 
-    m_compounds[propertyName] = prop;
+    m_data->nodes[propertyName] = n;
 
-    return prop;
+    return n.params;
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return Abc::OCompoundProperty();
 }
 
-Abc::OCompoundProperty OMaterialSchema::getInternalCompound(
-        const std::string & name )
+void OMaterialSchema::createNodeCompound()
 {
-    Abc::OCompoundProperty compound;
-    CompoundPropertyMap::iterator I = m_compounds.find( name );
-    if ( I != m_compounds.end() )
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::createNodeCompound" );
+
+    if ( ! m_node.valid() )
     {
-        compound = (*I).second;
-    }
-    else
-    {
-        m_compounds[name] = compound = Abc::OCompoundProperty(
-            this->getPtr(), name );
+        m_node =  Abc::OCompoundProperty( this->getPtr(), ".nodes" );
     }
 
-    return compound;
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 
@@ -117,26 +201,25 @@ void OMaterialSchema::addNetworkNode(
         const std::string & target,
         const std::string & nodeType )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::addNetworkNode" );
     Util::validateName( nodeName, "nodeName" );
     Util::validateName( target, "target" );
 
     std::string dstName = "nodes/" + nodeName;
 
-    if ( m_compounds.find( dstName ) != m_compounds.end() )
-    {
-        //TODO, throw if already set. This is not replaceable
-        return;
-    }
+    ABCA_ASSERT( m_data->nodes.find( dstName ) == m_data->nodes.end(),
+        "Node already added: " << nodeName );
 
-    Abc::OCompoundProperty nodesCompound = getInternalCompound( "nodes" );
+    createNodeCompound();
 
-    Abc::OCompoundProperty nodeCompound =
-            Abc::OCompoundProperty( nodesCompound.getPtr(), nodeName );
+    Data::Node n;
+    n.prop = Abc::OCompoundProperty( m_node.getPtr(), nodeName );
 
-    m_compounds[dstName] = nodeCompound;
+    m_data->nodes[dstName] = n;
 
-    Abc::OStringProperty( nodeCompound.getPtr(), "target" ).set( target );
-    Abc::OStringProperty( nodeCompound.getPtr(), "type" ).set( nodeType );
+    Abc::OStringProperty( n.prop, "target" ).set( target );
+    Abc::OStringProperty( n.prop, "type" ).set( nodeType );
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 
@@ -147,33 +230,18 @@ void OMaterialSchema::setNetworkNodeConnection(
         const std::string & connectedNodeName,
         const std::string & connectedOutputName )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::setNetworkNodeConnection" );
     std::string nodeDstName = "nodes/" + nodeName;
 
-    if ( m_compounds.find(nodeDstName) == m_compounds.end() )
+    if ( m_data->nodes.find( nodeDstName ) == m_data->nodes.end() )
     {
         //make the empty node, this is legit for a child material
         //overriding something other than target or nodeType
 
-        Abc::OCompoundProperty nodesCompound = getInternalCompound( "nodes" );
-        Abc::OCompoundProperty nodeCompound =
-                Abc::OCompoundProperty( nodesCompound.getPtr(), nodeName );
-        m_compounds[nodeDstName] = nodeCompound;
-    }
-
-    Abc::OCompoundProperty connectionsCompound;
-
-    std::string connectionsDstName = nodeDstName + "/connections";
-    CompoundPropertyMap::iterator I = m_compounds.find( connectionsDstName );
-
-    if ( I != m_compounds.end() )
-    {
-        connectionsCompound = (*I).second;
-    }
-    else
-    {
-        m_compounds[connectionsDstName] = connectionsCompound =
-                Abc::OCompoundProperty( m_compounds[nodeDstName].getPtr(),
-                         "connections" );
+        createNodeCompound();
+        Data::Node n;
+        n.prop = Abc::OCompoundProperty( m_node.getPtr(), nodeName );
+        m_data->nodes[nodeDstName] = n;
     }
 
     std::string connectionValue = connectedNodeName;
@@ -182,8 +250,8 @@ void OMaterialSchema::setNetworkNodeConnection(
         connectionValue += "." + connectedOutputName;
     }
 
-    Abc::OStringProperty( connectionsCompound.getPtr(), inputName).set(
-            connectionValue );
+    m_data->nodes[nodeDstName].connections[inputName] = connectionValue;
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 
@@ -191,30 +259,33 @@ void OMaterialSchema::setNetworkNodeConnection(
 Abc::OCompoundProperty OMaterialSchema::getNetworkNodeParameters(
         const std::string & nodeName )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::getNetworkNodeParameters" );
     std::string nodeDstName = "nodes/" + nodeName;
-    std::string paramsDstName = nodeDstName + "/params";
 
-    CompoundPropertyMap::iterator I = m_compounds.find( paramsDstName );
-    if ( I != m_compounds.end() )
-    {
-        return (*I).second;
-    }
+    Abc::OCompoundProperty params;
 
-    I = m_compounds.find( nodeDstName );
-    if ( I == m_compounds.end() )
+    Data::NodeMap::iterator i = m_data->nodes.find( nodeDstName );
+    if ( i == m_data->nodes.end() )
     {
         //make the empty node, this is legit for a child material
         //overriding something other than target or nodeType
-        Abc::OCompoundProperty nodesCompound = getInternalCompound( "nodes" );
-        Abc::OCompoundProperty nodeCompound =
-                Abc::OCompoundProperty( nodesCompound.getPtr(), nodeName );
-        m_compounds[nodeDstName] = nodeCompound;
+        createNodeCompound();
+        Data::Node n;
+        n.prop = Abc::OCompoundProperty( m_node.getPtr(), nodeName );
+        m_data->nodes[nodeDstName] = n;
     }
 
-    Abc::OCompoundProperty result( (*I).second.getPtr(), "params" );
-    m_compounds[paramsDstName] = result;
+    if ( i->second.params.valid() )
+    {
+        return i->second.params;
+    }
 
-    return result;
+    i->second.params = Abc::OCompoundProperty( i->second.prop, "params" );
+
+    return i->second.params;
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return Abc::OCompoundProperty();
 }
 
 
@@ -225,11 +296,11 @@ void OMaterialSchema::setNetworkTerminal(
         const std::string & nodeName,
         const std::string & outputName )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::setNetworkTerminal" );
+
     Util::validateName( target, "target" );
     Util::validateName( shaderType, "shaderType" );
     Util::validateName( nodeName, "nodeName" );
-
-    Abc::OCompoundProperty terminals = getInternalCompound( "terminals" );
 
     std::string connectionValue = nodeName;
     if ( !outputName.empty() )
@@ -238,9 +309,10 @@ void OMaterialSchema::setNetworkTerminal(
         connectionValue += outputName;
     }
 
-    Abc::OStringProperty( terminals.getPtr(),
-            Util::buildTargetName( target, shaderType, "") ).set(
-                connectionValue );
+    std::string terminalName = Util::buildTargetName( target, shaderType, "");
+    m_data->terminals[terminalName] = connectionValue;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 void OMaterialSchema::setNetworkInterfaceParameterMapping(
@@ -248,19 +320,35 @@ void OMaterialSchema::setNetworkInterfaceParameterMapping(
         const std::string & mapToNodeName,
         const std::string & mapToParamName )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OMaterialSchema::setNetworkInterfaceParameterMapping" );
+
     //TODO, validate interface paramName?
     Util::validateName( mapToNodeName, "mapToNodeName" );
 
-    Abc::OCompoundProperty interfaceCompound =
-            getInternalCompound("interface");
+    // order is important
+    m_data->interface.push_back( interfaceParamName );
+    m_data->interface.push_back( mapToNodeName + "." + mapToParamName );
 
-    Abc::OStringProperty(interfaceCompound, interfaceParamName).set(
-            mapToNodeName + "." + mapToParamName );
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 Abc::OCompoundProperty OMaterialSchema::getNetworkInterfaceParameters()
 {
-    return getInternalCompound("parameters");
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OMaterialSchema::getNetworkInterfaceParameters" );
+
+    if ( ! m_data->interfaceParams.valid() )
+    {
+        m_data->interfaceParams =
+            Abc::OCompoundProperty( this->getPtr(), ".interfaceParams" );
+    }
+
+    return m_data->interfaceParams;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return Abc::OCompoundProperty();
 }
 
 

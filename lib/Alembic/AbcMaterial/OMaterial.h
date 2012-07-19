@@ -68,8 +68,9 @@ public:
                      const Abc::Argument &iArg2 = Abc::Argument() )
     : Abc::OSchema<MaterialSchemaInfo>( iParent, iName, iArg0, iArg1, iArg2 )
     {
+        init();
     }
-    
+
     template <class CPROP_PTR>
     explicit OMaterialSchema( CPROP_PTR iParent,
                               const Abc::Argument &iArg0 = Abc::Argument(),
@@ -77,19 +78,19 @@ public:
                               const Abc::Argument &iArg2 = Abc::Argument() )
     : Abc::OSchema<MaterialSchemaInfo>( iParent, iArg0, iArg1, iArg2 )
     {
+        init();
     }
-    
+
     //! Copy constructor.
     OMaterialSchema( const OMaterialSchema& iCopy )
     : Abc::OSchema<MaterialSchemaInfo>()
     {
         *this = iCopy;
     }
-    
+
     //-------------------------------------------------------------------------
     //ACTUAL STUFF
-    
-    
+
     //! Declare shader for a given target and shaderType.
     //! "Target's" value is an agreed upon convention for a renderer
     //! or application (i.e. "prman")
@@ -138,13 +139,17 @@ public:
     Abc::OCompoundProperty getNetworkInterfaceParameters();
 
 protected:
-    std::map<std::string, Abc::OStringProperty> m_shaderNames;
 
-    typedef std::map<std::string, Abc::OCompoundProperty> CompoundPropertyMap;
-    CompoundPropertyMap m_compounds;
+    void init();
 
-    Abc::OCompoundProperty getInternalCompound( const std::string & name );
+    // all the network nodes will be placed under this property
+    Abc::OCompoundProperty m_node;
+    void createNodeCompound();
 
+    class Data;
+
+    // shared and not scoped because we want this to survive a copy
+    Util::shared_ptr< Data > m_data;
 };
 
 //! Object declaration

@@ -67,6 +67,7 @@ public:
 
       : Abc::ISchema<MaterialSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
+        init();
     }
 
     //! This constructor is the same as above, but with default
@@ -77,6 +78,7 @@ public:
                               const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<MaterialSchemaInfo>( iParent, iArg0, iArg1 )
     {
+        init();
     }
 
     //! Wrap an existing schema object
@@ -87,6 +89,7 @@ public:
                      const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<MaterialSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
+        init();
     }
 
     //! Copy constructor.
@@ -103,6 +106,7 @@ public:
     //! parameter definitions are locally present.
     //! Target name values match an upon convention for a renderer
     //! or application (i.e. "prman")
+    //! This gets the target names for the monolithic shaders
     void getTargetNames( std::vector<std::string> & targetNames );
 
     //! Fills a list of shader type strings for which either shader or
@@ -158,9 +162,8 @@ public:
         Abc::ICompoundProperty m_compound;
 
         bool m_connectionsChecked;
-        Abc::ICompoundProperty m_connections;
-
-        Abc::ICompoundProperty getConnectionsCompound();
+        std::vector< std::string > m_connections;
+        std::map< std::string, std::string > m_connectionsMap;
 
         void splitConnectionValue( const std::string & v,
                                    std::string & a,
@@ -203,11 +206,15 @@ protected:
 
 private:
 
-    Abc::ICompoundProperty getInternalCompound( const std::string & name );
+    void init();
 
-    typedef std::map<std::string, Abc::ICompoundProperty> CompoundPropertyMap;
-    CompoundPropertyMap m_compounds;
+    std::map<std::string, std::string> m_shaderNames;
+    std::map<std::string, std::string> m_terminals;
+    std::map<std::string, std::string> m_interfaceMap;
+    std::vector<std::string> m_interface;
 
+    Abc::ICompoundProperty m_interfaceParams;
+    Abc::ICompoundProperty m_node;
 };
 
 //! Object declaration
