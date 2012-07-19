@@ -56,7 +56,7 @@ buildTargetName( const std::string & target,
 
     if (!suffix.empty())
     {
-        name += suffix;
+        name += "." + suffix;
     }
 
     return name;
