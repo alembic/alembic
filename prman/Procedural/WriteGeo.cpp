@@ -39,7 +39,47 @@
 #include "ArbAttrUtil.h"
 #include "SubDTags.h"
 
+#ifdef PRMAN_USE_ABCMATERIAL
+#include "WriteMaterial.h"
+#endif
 //-*****************************************************************************
+
+
+
+void RestoreResource( const std::string & resourceName )
+{
+    ParamListBuilder paramListBuilder;
+    paramListBuilder.addStringValue("restore", true);
+    paramListBuilder.add( "string operation",
+            paramListBuilder.finishStringVector() );
+
+    paramListBuilder.addStringValue("shading", true);
+    paramListBuilder.add( "string subset",
+            paramListBuilder.finishStringVector() );
+
+    RiResourceV(
+            const_cast<char *>( resourceName.c_str() ),
+            const_cast<char *>( "attributes" ),
+            paramListBuilder.n(),
+            paramListBuilder.nms(),
+            paramListBuilder.vals());
+}
+
+void SaveResource( const std::string & resourceName )
+{
+    ParamListBuilder paramListBuilder;
+    paramListBuilder.addStringValue("save", true);
+    paramListBuilder.add( "string operation",
+            paramListBuilder.finishStringVector() );
+    
+    RiResourceV(
+            const_cast<char *>( resourceName.c_str() ),
+            const_cast<char *>( "attributes" ),
+            paramListBuilder.n(),
+            paramListBuilder.nms(),
+            paramListBuilder.vals());
+}
+
 
 void ApplyResources( IObject object, ProcArgs &args )
 {
@@ -56,23 +96,7 @@ void ApplyResources( IObject object, ProcArgs &args )
     
     if ( !resourceName.empty() )
     {
-        
-        ParamListBuilder paramListBuilder;
-        paramListBuilder.addStringValue("restore", true);
-        paramListBuilder.add( "string operation",
-                paramListBuilder.finishStringVector() );
-        
-        paramListBuilder.addStringValue("shading", true);
-        paramListBuilder.add( "string subset",
-                paramListBuilder.finishStringVector() );
-        
-        RiResourceV(
-                const_cast<char *>( resourceName.c_str() ),
-                const_cast<char *>( "attributes" ),
-                paramListBuilder.n(),
-                paramListBuilder.nms(),
-                paramListBuilder.vals()
-        );
+        RestoreResource(resourceName);
     }
 }
 
@@ -207,7 +231,6 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
                         sampleSelector,
                         "float",
                         paramListBuilder,
-                        2,
                         "st") )
             {
                 for ( size_t i = 1, e = values->size(); i < e; i += 2 )
@@ -263,12 +286,78 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
 
     //include this code path for future expansion
     bool isHierarchicalSubD = false;
+    bool hasLocalResources = false;
+    
+    
+    
+    std::vector<IFaceSet> faceSets;
+    std::vector<std::string> faceSetResourceNames;
+    if ( facesetName.empty() )
+    {
+        std::vector <std::string> childFaceSetNames;
+        ss.getFaceSetNames(childFaceSetNames);
+        
+        faceSets.reserve(childFaceSetNames.size());
+        faceSetResourceNames.reserve(childFaceSetNames.size());
+        
+        for (size_t i = 0; i < childFaceSetNames.size(); ++i)
+        {
+            faceSets.push_back(ss.getFaceSet(childFaceSetNames[i]));
+            
+            IFaceSet & faceSet = faceSets.back();
+            
+            std::string resourceName = args.getResource(
+                    faceSet.getFullName() );
+            
+            if ( resourceName.empty() )
+            {
+                resourceName = args.getResource( faceSet.getName() );
+            }
+            
+#ifdef PRMAN_USE_ABCMATERIAL
+                
+                Mat::MaterialFlatten mafla(faceSet);
+                
+                if (!mafla.empty())
+                {
+                    if (!hasLocalResources)
+                    {
+                        RiResourceBegin();
+                        hasLocalResources = true;
+                    }
+                    
+                    RiAttributeBegin();
+                    
+                    if ( !resourceName.empty() )
+                    {
+                        //restore existing resource state here
+                        RestoreResource( resourceName );
+                    }
+                    
+                    
+                    WriteMaterial( mafla, args );
+                    
+                    resourceName = faceSet.getFullName();
+                    SaveResource( resourceName );
+                    
+                    RiAttributeEnd();
+                }
+#endif
+            faceSetResourceNames.push_back(resourceName);
+            
+        }
+    }
+    //TODO, handle single faceset material directly
+    
+    
+    
 
     if ( multiSample ) { WriteMotionBegin( args, sampleTimes ); }
 
     for ( SampleTimeSet::iterator iter = sampleTimes.begin();
           iter != sampleTimes.end(); ++iter )
     {
+        
         ISampleSelector sampleSelector( *iter );
 
         ISubDSchema::Sample sample = ss.getValue( sampleSelector );
@@ -302,7 +391,6 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
                         sampleSelector,
                         "float",
                         paramListBuilder,
-                        2,
                         "st") )
             {
                 for ( size_t i = 1, e = values->size(); i < e; i += 2 )
@@ -336,6 +424,8 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
                 
                 ApplyResources( faceSet, args );
                 
+                //TODO,move this out of the MotionBeginBlock
+                
                 IFaceSetSchema::Sample faceSetSample = 
                         faceSet.getSchema().getValue( sampleSelector );
                 
@@ -359,24 +449,18 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
         {
             //loop through the facesets and determine whether there are any
             //resources assigned to each
-            std::vector <std::string> childFaceSetNames;
-            ss.getFaceSetNames(childFaceSetNames);
             
-            for (size_t i = 0; i < childFaceSetNames.size(); ++i)
+            for (size_t i = 0; i < faceSetResourceNames.size(); ++i)
             {
-                std::string resourceName = args.getResource(
-                        subd.getFullName() + "/" + childFaceSetNames[i] );
+                const std::string & resourceName = faceSetResourceNames[i];
                 
-                if ( resourceName.empty() )
-                {
-                    resourceName = args.getResource( childFaceSetNames[i] );
-                }
+                //TODO, visibility?
                 
                 if ( !resourceName.empty() )
                 {
-                    isHierarchicalSubD = true;
+                    IFaceSet & faceSet = faceSets[i];
                     
-                    IFaceSet faceSet = ss.getFaceSet(childFaceSetNames[i]);
+                    isHierarchicalSubD = true;
                     
                     tags.add("faceedit");
                     
@@ -435,6 +519,8 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
     }
 
     if ( multiSample ) { RiMotionEnd(); }
+    
+    if ( hasLocalResources ) { RiResourceEnd(); }
 }
 
 //-*****************************************************************************

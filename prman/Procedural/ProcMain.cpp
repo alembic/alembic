@@ -44,6 +44,10 @@
 #include "PathUtil.h"
 #include "WriteGeo.h"
 
+#ifdef PRMAN_USE_ABCMATERIAL
+#include "WriteMaterial.h"
+#endif
+
 #include <memory>
 
 using namespace Alembic::AbcGeom;
@@ -100,6 +104,11 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             nextParentObject = xform;
             
             ApplyResources( nextParentObject, args );
+
+#ifdef PRMAN_USE_ABCMATERIAL
+            ApplyObjectMaterial(nextParentObject, args );
+#endif
+            
         }
     }
     else if ( ISubD::matches( ohead ) )
@@ -128,6 +137,10 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         
         ApplyResources( subd, args );
         
+#ifdef PRMAN_USE_ABCMATERIAL
+            ApplyObjectMaterial(subd, args );
+#endif
+
         ProcessSubD( subd, args, faceSetName );
 
         //if we found a matching faceset, don't traverse below
@@ -145,6 +158,10 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         
         IPolyMesh polymesh( parent, ohead.getName() );
         ApplyResources( polymesh, args );
+        
+#ifdef PRMAN_USE_ABCMATERIAL
+            ApplyObjectMaterial(polymesh, args );
+#endif
         ProcessPolyMesh( polymesh, args );
 
         nextParentObject = polymesh;
@@ -158,6 +175,9 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         
         INuPatch patch( parent, ohead.getName() );
         ApplyResources( patch, args );
+#ifdef PRMAN_USE_ABCMATERIAL
+            ApplyObjectMaterial(patch, args );
+#endif
         ProcessNuPatch( patch, args );
         
         nextParentObject = patch;
@@ -170,6 +190,9 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         }
         
         IPoints points( parent, ohead.getName() );
+#ifdef PRMAN_USE_ABCMATERIAL
+            ApplyObjectMaterial(points, args );
+#endif
         ApplyResources( points, args );
         ProcessPoints( points, args );
         
@@ -184,6 +207,10 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         
         ICurves curves( parent, ohead.getName() );
         ApplyResources( curves, args );
+        
+#ifdef PRMAN_USE_ABCMATERIAL
+            ApplyObjectMaterial( curves, args );
+#endif
         ProcessCurves( curves, args );
         
         nextParentObject = curves;
@@ -194,11 +221,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     }
     else
     {
-        std::cerr << "could not determine type of " << ohead.getName()
-                  << std::endl;
-
-        std::cerr << ohead.getName() << " has MetaData: "
-                  << ohead.getMetaData().serialize() << std::endl;
+        //Don't complain but don't walk beneath other types
     }
 
     if ( nextParentObject.valid() )

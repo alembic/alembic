@@ -328,7 +328,6 @@ void AddArbitraryGeomParams( ICompoundProperty &parent,
                 parent,
                 propHeader,
                 sampleSelector,
-                "int",
                 paramListBuilder);
         }
 

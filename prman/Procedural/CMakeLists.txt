@@ -45,6 +45,7 @@ SET( H_FILES
   SampleUtil.h
   SubDTags.h
   WriteGeo.h
+  WriteMaterial.h
   )
 
 SET( CXX_FILES
@@ -55,14 +56,17 @@ SET( CXX_FILES
   SampleUtil.cpp
   SubDTags.cpp
   WriteGeo.cpp
+  WriteMaterial.cpp
 )
 
 SET( CORE_LIBS
+  AlembicAbcMaterial
   AlembicAbcGeom
   AlembicAbc
   AlembicAbcCoreHDF5
   AlembicAbcCoreAbstract
-  AlembicUtil )
+  AlembicUtil 
+  )
 
 ADD_PRMAN_CXX_PLUGIN( AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES} )
 TARGET_LINK_LIBRARIES( AlembicRiProcedural

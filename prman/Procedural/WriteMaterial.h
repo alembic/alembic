@@ -1,3 +1,5 @@
+
+
 //-*****************************************************************************
 //
 // Copyright (c) 2009-2011,
@@ -34,82 +36,22 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Prman_ProcArgs_h_
-#define _Alembic_Prman_ProcArgs_h_
+#ifndef _Alembic_Prman_WriteMaterial_h_
+#define _Alembic_Prman_WriteMaterial_h_
 
-#define PRMAN_USE_ABCMATERIAL
+#include "ProcArgs.h"
+
+#ifdef PRMAN_USE_ABCMATERIAL
+
+#include <Alembic/AbcGeom/All.h>
+#include <Alembic/AbcMaterial/MaterialFlatten.h>
+
+using namespace Alembic::AbcGeom;
+namespace Mat = Alembic::AbcMaterial;
+
+void ApplyObjectMaterial(IObject object, ProcArgs &args);
+void WriteMaterial(Mat::MaterialFlatten & materialInput, ProcArgs &args);
 
 
-#include <string>
-#include <map>
-#include <vector>
-
-#include <ri.h>
-
-#include <boost/shared_ptr.hpp>
-
-//-*****************************************************************************
-struct ProcArgs
-{
-    //constructor parses
-    ProcArgs( RtString paramStr, bool fromReference = false );
-
-    //copy constructor
-    ProcArgs( const ProcArgs &rhs )
-    : filename( rhs.filename )
-    , objectpath( rhs.objectpath )
-    , frame( rhs.frame )
-    , fps( rhs.fps )
-    , shutterOpen( rhs.shutterOpen )
-    , shutterClose( rhs.shutterClose )
-    , excludeXform( false )
-    , flipv ( false )
-    
-    , filename_defined(false)
-    , objectpath_defined(false)
-    , frame_defined(false)
-    , fps_defined(false)
-    , shutterOpen_defined(false)
-    , shutterClose_defined(false)
-    , excludeXform_defined(false)
-    , flipv_defined(false)
-    {}
-    
-    void usage();
-    
-    //member variables
-    std::string filename;
-    std::string objectpath;
-    double frame;
-    double fps;
-    double shutterOpen;
-    double shutterClose;
-    bool excludeXform;
-    bool flipv;
-    
-    std::string getResource( const std::string & name );
-    
-private:
-    
-    void applyArgs(ProcArgs & args);
-    
-    
-    bool filename_defined;
-    bool objectpath_defined;
-    bool frame_defined;
-    bool fps_defined;
-    bool shutterOpen_defined;
-    bool shutterClose_defined;
-    bool excludeXform_defined;
-    bool flipv_defined;
-    
-    typedef std::map<std::string, std::string> StringMap;
-    typedef boost::shared_ptr<StringMap> StringMapRefPtr;
-    typedef std::vector<StringMapRefPtr> StringMapRefPtrVector;
-    
-    StringMapRefPtrVector resourceSearchPath;
-    
-    
-};
-
+#endif
 #endif
