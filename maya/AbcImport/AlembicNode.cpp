@@ -465,6 +465,12 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             // and given to AlembicNode to provide update
             visitor.getData(mData);
             mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
+            MDataHandle startFrameHandle = dataBlock.inputValue(mStartFrameAttr,
+                                                                &status);
+            startFrameHandle.set(mSequenceStartTime*fps);
+            MDataHandle endFrameHandle = dataBlock.inputValue(mEndFrameAttr,
+                                                                &status);
+            endFrameHandle.set(mSequenceEndTime*fps);
         }
     }
 
