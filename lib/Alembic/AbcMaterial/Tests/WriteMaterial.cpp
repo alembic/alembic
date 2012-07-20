@@ -40,6 +40,8 @@
 #include <Alembic/AbcMaterial/OMaterial.h>
 #include <Alembic/AbcMaterial/IMaterial.h>
 
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
+
 namespace Abc =  Alembic::Abc;
 namespace Mat = Alembic::AbcMaterial;
 
@@ -91,7 +93,10 @@ void read()
     std::vector<std::string> shaderTypeNames;
     
     matObj.getSchema().getTargetNames(targetNames);
-    
+    TESTING_ASSERT( targetNames.size() == 2 );
+    TESTING_ASSERT((targetNames[0] == "arnold" && targetNames[1] == "prman")
+                || (targetNames[1] == "arnold" && targetNames[0] == "prman"));
+
     std::cout << "targets: " << std::endl;
     for (std::vector<std::string>::iterator I = targetNames.begin();
             I != targetNames.end(); ++I)
@@ -102,7 +107,21 @@ void read()
         
         matObj.getSchema().getShaderTypesForTarget(
                 targetName, shaderTypeNames);
-        
+
+        if (targetName == "prman")
+        {
+            TESTING_ASSERT(shaderTypeNames.size() == 2 &&
+                ((shaderTypeNames[0] == "surface" && 
+                  shaderTypeNames[1] == "displacement") ||
+                 (shaderTypeNames[1] == "surface" && 
+                  shaderTypeNames[0] == "displacement")));
+        }
+        else
+        {
+            TESTING_ASSERT(targetName == "arnold" && 
+                shaderTypeNames.size() == 1 && shaderTypeNames[0] == "surface");
+        }
+
         for (std::vector<std::string>::iterator I = shaderTypeNames.begin();
                 I != shaderTypeNames.end(); ++I)
         {
@@ -113,6 +132,19 @@ void read()
             matObj.getSchema().getShader(targetName, shaderTypeName,
                     shaderName);
             
+            if (targetName == "prman" && shaderTypeName == "surface")
+            {
+                TESTING_ASSERT(shaderName == "paintedplastic");
+            }
+            else if (targetName == "prman" && shaderTypeName == "displacement")
+            {
+                TESTING_ASSERT(shaderName == "knobby");
+            }
+            else if (targetName == "arnold" && shaderTypeName == "surface")
+            {
+                TESTING_ASSERT(shaderName == "paintedplastic");
+            }
+
             std::cout << "    " << shaderTypeName << ": ";
             std::cout << shaderName << std::endl;
             
@@ -122,6 +154,9 @@ void read()
             
             if (params.valid())
             {
+                TESTING_ASSERT(targetName == "prman" &&
+                    shaderTypeName == "surface");
+
                 for (size_t i = 0; i < params.getNumProperties(); ++i)
                 {
                     const Abc::PropertyHeader &propHeader =
@@ -140,6 +175,8 @@ void read()
                                     propHeader.getName());
                             std::cout << "        " << prop.getValue();
                             std::cout << std::endl;
+                            TESTING_ASSERT(propHeader.getName() == "texname" &&
+                                prop.getValue() == "taco");
                         }
                         
                         else if (Abc::IFloatProperty::matches(propHeader))
@@ -149,6 +186,8 @@ void read()
                             
                             std::cout << "        " << prop.getValue();
                             std::cout << std::endl;
+                            TESTING_ASSERT(propHeader.getName() == "Kd" &&
+                                prop.getValue() == 0.5);
                         }
                     }
                 }

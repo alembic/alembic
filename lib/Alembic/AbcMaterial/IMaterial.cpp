@@ -46,11 +46,13 @@ namespace ALEMBIC_VERSION_NS {
 
 void IMaterialSchema::init()
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::init()" );
+
     AbcCoreAbstract::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    if ( this->getPropertyHeader( "nodes" ) != NULL )
+    if ( this->getPropertyHeader( ".nodes" ) != NULL )
     {
-        m_node = Abc::ICompoundProperty( _this, "nodes" );
+        m_node = Abc::ICompoundProperty( _this, ".nodes" );
     }
 
     if ( this->getPropertyHeader( ".interfaceParams" ) != NULL )
@@ -98,10 +100,12 @@ void IMaterialSchema::init()
             m_interface.push_back( ( *samp )[2 * i] );
         }
     }
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 void IMaterialSchema::getTargetNames( std::vector<std::string> & targetNames )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterial::getTargetNames" );
     std::set<std::string> uniqueNames;
 
     std::vector<std::string> tokens;
@@ -122,12 +126,15 @@ void IMaterialSchema::getTargetNames( std::vector<std::string> & targetNames )
     targetNames.reserve( uniqueNames.size() );
     targetNames.insert( targetNames.end(), uniqueNames.begin(),
                         uniqueNames.end() );
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 
 void IMaterialSchema::getShaderTypesForTarget( const std::string & targetName,
     std::vector<std::string> & shaderTypeNames )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShaderTypesForTarget" );
     std::set<std::string> uniqueNames;
 
     std::vector<std::string> tokens;
@@ -150,22 +157,26 @@ void IMaterialSchema::getShaderTypesForTarget( const std::string & targetName,
     shaderTypeNames.reserve( uniqueNames.size() );
     shaderTypeNames.insert( shaderTypeNames.end(),
             uniqueNames.begin(), uniqueNames.end() );
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 bool IMaterialSchema::getShader( const std::string & target,
                                  const std::string & shaderType,
                                  std::string & result )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShader" );
     std::string propName = Util::buildTargetName( target, shaderType, "" );
 
-     std::map<std::string, std::string>::iterator i =
+    std::map<std::string, std::string>::iterator i =
         m_shaderNames.find( propName );
 
     if ( i != m_shaderNames.end() )
     {
         result = i->second;
+        return true;
     }
 
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
     return false;
 }
 
@@ -174,6 +185,9 @@ Abc::ICompoundProperty IMaterialSchema::getShaderParameters(
         const std::string & target,
         const std::string & shaderType )
 {
+    Abc::ICompoundProperty result;
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShaderParameters" );
     std::string propName = Util::buildTargetName( target, shaderType,
                                                   "params" );
 
@@ -186,23 +200,26 @@ Abc::ICompoundProperty IMaterialSchema::getShaderParameters(
             result = Abc::ICompoundProperty( *this, propName );
         }
     }
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 
     return result;
 }
 
 size_t IMaterialSchema::getNumNetworkNodes()
 {
-
-    if ( !m_node.valid() )
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getNumNetworkNodes" );
+    if ( m_node.valid() )
     {
-        return 0;
+        return m_node.getNumProperties();
     }
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 
-    return m_node.getNumProperties();
+    return 0;
 }
 
 void IMaterialSchema::getNetworkNodeNames( std::vector<std::string> & names )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMateriaSchema::getNetworkNodeNames" );
     names.clear();
 
     if ( !m_node.valid() )
@@ -221,11 +238,12 @@ void IMaterialSchema::getNetworkNodeNames( std::vector<std::string> & names )
             names.push_back( header.getName() );
         }
     }
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode( size_t index )
 {
-
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMateriaSchema::getNetworkNode" );
     if ( !m_node.valid() || index >= m_node.getNumProperties() )
     {
         return NetworkNode();
@@ -240,6 +258,9 @@ IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode( size_t index )
 
     return NetworkNode(
             Abc::ICompoundProperty( m_node, header.getName() ) );
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return NetworkNode();
 }
 
 
@@ -253,6 +274,8 @@ IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode(
 void IMaterialSchema::getNetworkTerminalTargetNames(
     std::vector<std::string> & targetNames )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkTerminalTargetNames" );
     targetNames.clear();
 
     std::set<std::string> uniqueNames;
@@ -273,12 +296,16 @@ void IMaterialSchema::getNetworkTerminalTargetNames(
     targetNames.reserve( uniqueNames.size() );
     targetNames.insert( targetNames.end(),
             uniqueNames.begin(), uniqueNames.end() );
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 void IMaterialSchema::getNetworkTerminalShaderTypesForTarget(
     const std::string & targetName,
     std::vector<std::string> & shaderTypeNames)
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkTerminalShaderTypesForTarget" );
+
     shaderTypeNames.clear();
 
     std::set<std::string> uniqueNames;
@@ -301,6 +328,8 @@ void IMaterialSchema::getNetworkTerminalShaderTypesForTarget(
     shaderTypeNames.reserve( uniqueNames.size() );
     shaderTypeNames.insert( shaderTypeNames.end(),
         uniqueNames.begin(), uniqueNames.end() );
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 bool IMaterialSchema::getNetworkTerminal(
@@ -309,6 +338,8 @@ bool IMaterialSchema::getNetworkTerminal(
         std::string & nodeName,
         std::string & outputName)
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkTerminal" );
 
     std::string propName = target + "." + shaderType;
 
@@ -327,7 +358,9 @@ bool IMaterialSchema::getNetworkTerminal(
     outputName = tokens.size() > 1 ? tokens[1] : "";
 
     return true;
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 
+    return false;
 }
 
 size_t IMaterialSchema::getNumNetworkInterfaceParameterMappings()
@@ -340,6 +373,9 @@ bool IMaterialSchema::getNetworkInterfaceParameterMapping( size_t index,
     std::string & interfaceParamName, std::string & mapToNodeName,
     std::string & mapToParamName )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkInterfaceParameterMapping(size_t,...)" );
+
     if ( index >= m_interface.size() )
     {
         return false;
@@ -350,6 +386,9 @@ bool IMaterialSchema::getNetworkInterfaceParameterMapping( size_t index,
     return getNetworkInterfaceParameterMapping( interfaceParamName,
                                                 mapToNodeName,
                                                 mapToParamName );
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return false;
 }
 
 
@@ -367,6 +406,8 @@ bool IMaterialSchema::getNetworkInterfaceParameterMapping(
     std::string & mapToNodeName,
     std::string & mapToParamName )
 {
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkInterfaceParameterMapping" );
 
     std::map<std::string, std::string>::iterator i =
         m_interfaceMap.find( interfaceParamName );
@@ -384,6 +425,9 @@ bool IMaterialSchema::getNetworkInterfaceParameterMapping(
     mapToParamName = tokens.size() > 1 ? tokens[1] : "";
 
     return true;
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return false;
 }
 
 Abc::ICompoundProperty IMaterialSchema::getNetworkInterfaceParameters()

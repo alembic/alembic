@@ -3,6 +3,7 @@
 
 #include <Alembic/AbcMaterial/OMaterial.h>
 #include <Alembic/AbcMaterial/IMaterial.h>
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #include "PrintMaterial.h"
 
@@ -78,23 +79,26 @@ void read()
     std::cout << "----" << std::endl;
     std::cout << "NODES" << std::endl;
     
-        
+    std::cout << matObj.getSchema().getNumNetworkNodes() << std::endl;
+    TESTING_ASSERT(matObj.getSchema().getNumNetworkNodes() == 2);
     for (size_t i = 0, e = matObj.getSchema().getNumNetworkNodes(); i < e; ++i)
     {
         Mat::IMaterialSchema::NetworkNode node = matObj.getSchema().getNetworkNode(i);
         
-        if (!node.valid()) { continue; }
-        
+        TESTING_ASSERT(node.valid());
+
         std::cout << "  ----" << std::endl;
         
         std::string target = "<undefined>";
         node.getTarget(target);
+        TESTING_ASSERT(target == "abc");
         std::string nodeType = "<undefined>";
         node.getNodeType(nodeType);
         
         std::cout << "  NODE: " << node.getName() << ", TARGET: " <<
                 target << ", TYPE: " << nodeType << std::endl;
-        
+        TESTING_ASSERT((nodeType == "blinn" && node.getName() == "mainshader")||
+            (nodeType == "texture_read" && node.getName() == "colormap"));
         Abc::ICompoundProperty parameters = node.getParameters();
         if (parameters.valid())
         {

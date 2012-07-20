@@ -5,7 +5,7 @@
 #include <Alembic/AbcMaterial/IMaterial.h>
 
 #include <Alembic/AbcMaterial/MaterialAssignment.h>
-
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #include "PrintMaterial.h"
 
@@ -70,6 +70,7 @@ void read()
     if (const Abc::PropertyHeader * header =
             an_object.getProperties().getPropertyHeader(".byanyothername"))
     {
+        TESTING_ASSERT(Mat::OMaterialSchema::matches(*header));
         if (Mat::OMaterialSchema::matches(*header))
         {
             std::cout << ".byanyothername yes.\n";
@@ -89,6 +90,7 @@ void read()
     if (const Abc::PropertyHeader * header =
             an_object.getProperties().getPropertyHeader("butnotbythisone"))
     {
+        TESTING_ASSERT( !Mat::OMaterialSchema::matches(*header) );
         if (Mat::OMaterialSchema::matches(*header))
         {
             std::cout << "butnotbythisone yes.\n";
@@ -103,6 +105,7 @@ void read()
     if (const Abc::PropertyHeader * header =
             an_object.getProperties().getPropertyHeader(".material"))
     {
+        TESTING_ASSERT(!Mat::OMaterialSchema::matches(*header));
         if (Mat::OMaterialSchema::matches(*header))
         {
             std::cout << "manually built .material yes.\n";
@@ -124,9 +127,11 @@ void read()
         std::cout << "another_object assignment path: " << assignmentPath;
         std::cout << std::endl;
     }
-    
+    TESTING_ASSERT(assignmentPath == "/some/material");
+
     Mat::IMaterialSchema hasMat;
     
+    TESTING_ASSERT(Mat::hasMaterial(anotherObj, hasMat));
     if (Mat::hasMaterial(anotherObj, hasMat))
     {
         std::cout << "another_object has local material: " << std::endl;

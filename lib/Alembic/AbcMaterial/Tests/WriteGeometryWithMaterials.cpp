@@ -2,7 +2,7 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcMaterial/MaterialAssignment.h>
-
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace Abc =  Alembic::Abc;
 namespace Mat = Alembic::AbcMaterial;
