@@ -153,6 +153,7 @@ MStatus AlembicNode::initialize()
     mCycleTypeAttr = eAttr.create("cycleType", "ct", 0,  &status );
     status = eAttr.addField("Hold", PLAYTYPE_HOLD);
     status = eAttr.addField("Loop", PLAYTYPE_LOOP);
+    status = eAttr.addField("Reverse", PLAYTYPE_REVERSE);
     status = eAttr.addField("Bounce", PLAYTYPE_BOUNCE);
     status = eAttr.setWritable(true);
     status = eAttr.setStorable(true);
@@ -338,7 +339,7 @@ double AlembicNode::computeAdjustedTime(const double inputTime,
                                         const double speed,
                                         const double timeOffset)
 {
-   return ( inputTime * speed ) + ( timeOffset );
+   return ( inputTime - timeOffset ) * speed;
 }
 
 double AlembicNode::computeRetime(const double inputTime,
@@ -347,6 +348,7 @@ double AlembicNode::computeRetime(const double inputTime,
                                   const short playStyle)
 {
     const double playTime = lastTime - firstTime;
+    static const double eps = 0.001;
     double retime = inputTime;
     
     switch (playStyle)
@@ -354,10 +356,7 @@ double AlembicNode::computeRetime(const double inputTime,
       case PLAYTYPE_HOLD:
           break;
       case PLAYTYPE_LOOP:
-          if ((inputTime < firstTime &&
-               fabs(inputTime-firstTime) > 0.001) ||
-              (inputTime > lastTime &&
-               fabs(inputTime-lastTime) > 0.001))
+          if (inputTime < (firstTime - eps) || inputTime > (lastTime + eps))
           {
               const double timeOffset = inputTime - firstTime;
               const double playOffset = floor(timeOffset/playTime);
@@ -366,11 +365,26 @@ double AlembicNode::computeRetime(const double inputTime,
               retime = firstTime + playTime * fraction;
           }
           break;
+      case PLAYTYPE_REVERSE:
+          if (inputTime > (firstTime + eps) && inputTime < (lastTime - eps))
+          {
+              const double timeOffset = inputTime - firstTime;
+              const double playOffset = floor(timeOffset/playTime);
+              const double fraction = fabs(timeOffset/playTime - playOffset);
+
+              retime = lastTime - playTime * fraction;
+          }
+          else if (inputTime < (firstTime + eps))
+          {
+              retime = lastTime;
+          }
+          else
+          {
+              retime = firstTime;
+          }
+          break;
       case PLAYTYPE_BOUNCE:
-         if ((inputTime < firstTime &&
-               fabs(inputTime-firstTime) > 0.001) ||
-              (inputTime > lastTime &&
-               fabs(inputTime-lastTime) > 0.001))
+          if (inputTime < (firstTime - eps) || inputTime > (lastTime + eps))
           {
               const double timeOffset = inputTime - firstTime;
               const double playOffset = floor(timeOffset/playTime);

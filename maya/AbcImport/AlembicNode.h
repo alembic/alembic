@@ -129,6 +129,7 @@ private:
     {
         PLAYTYPE_HOLD = 0,
         PLAYTYPE_LOOP,
+        PLAYTYPE_REVERSE,
         PLAYTYPE_BOUNCE
     };
     double computeRetime(const double inputTime,
