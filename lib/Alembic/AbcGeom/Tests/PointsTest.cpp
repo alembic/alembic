@@ -403,6 +403,82 @@ void pointTestReadWrite()
 }
 
 //-*****************************************************************************
+void optPropTest()
+{
+    std::string name = "pointsOptPropTest.abc";
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
+        OPoints ptObj( OObject( archive, kTop ), "pts" );
+        OPointsSchema &pt= ptObj.getSchema();
+
+        size_t numVerts = 10;
+
+        std::vector<float> widths( numVerts );
+        std::vector<V3f> veloc( numVerts );
+        std::vector<V3f> verts( numVerts );
+        std::vector< uint64_t > ids( numVerts );
+        OFloatGeomParam::Sample widthSamp;
+        widthSamp.setScope(kVertexScope);
+        widthSamp.setVals(FloatArraySample(widths));
+
+        for ( size_t i = 0; i < numVerts; ++i )
+        {
+            ids[i] = i;
+            verts[i] = V3f( i, i * 2.0, i * 3.0 );
+            veloc[i] = V3f( 0.0, i, 0.0);
+            widths[i] = i + 0.1;
+        }
+
+        OPointsSchema::Sample samp;
+        samp.setPositions( P3fArraySample( verts ) );
+        samp.setIds( UInt64ArraySample( ids ) );
+
+        for ( size_t i = 0; i < 2; ++i )
+        {
+            pt.set( samp );
+            for ( size_t j = 0; j < numVerts; ++j )
+            {
+                verts[j] *= 2;
+            }
+        }
+
+        samp.setWidths( widthSamp );
+        samp.setVelocities( V3fArraySample( veloc ) );
+        pt.set( samp );
+
+        samp.setWidths( OFloatGeomParam::Sample() );
+        samp.setVelocities( V3fArraySample() );
+        pt.set( samp );
+
+
+        samp.setWidths( widthSamp );
+        samp.setVelocities( V3fArraySample( veloc ) );
+
+        for ( size_t i = 0; i < 2; ++i )
+        {
+            pt.set( samp );
+            for ( size_t j = 0; j < numVerts; ++j )
+            {
+                verts[j] *= 2;
+            }
+        }
+
+        samp.setVelocities( V3fArraySample() );
+        samp.setWidths( OFloatGeomParam::Sample() );
+        pt.set( samp );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+
+        IPoints ptsObj( IObject( archive, kTop ), "pts" );
+        IPointsSchema &pts = ptsObj.getSchema();
+        TESTING_ASSERT( 7 == pts.getNumSamples() );
+        TESTING_ASSERT( 7 == pts.getVelocitiesProperty().getNumSamples() );
+    }
+}
+
+//-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
 // Particles Test
@@ -435,6 +511,8 @@ int main( int argc, char *argv[] )
     ReadParticles( "particlesOut1.abc" );
 
     pointTestReadWrite();
+
+    optPropTest();
 
     return 0;
 }

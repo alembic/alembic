@@ -291,8 +291,9 @@ void Example1_MeshIn()
         }
     }
 }
+
 //-*****************************************************************************
-void VelocTest()
+void optPropTest()
 {
     std::string name = "subdVelocTest.abc";
     {
@@ -312,7 +313,7 @@ void VelocTest()
             Int32ArraySample( g_indices, g_numIndices ),
             Int32ArraySample( g_counts, g_numCounts ) );
 
-        for ( size_t i = 0; i < 3; ++i )
+        for ( size_t i = 0; i < 2; ++i )
         {
             mesh.set( mesh_samp );
             for ( size_t j = 0; j < g_numVerts; ++j )
@@ -321,8 +322,35 @@ void VelocTest()
             }
         }
 
+        OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
+                                      g_numUVs ), kFacevaryingScope );
+        mesh_samp.setUVs( uvsamp );
+
         mesh_samp.setVelocities( V3fArraySample( ( const V3f * )g_veloc,
                                                g_numVerts ) );
+
+        mesh.set( mesh_samp );
+
+        mesh_samp.setUVs( OV2fGeomParam::Sample() );
+        mesh_samp.setVelocities( V3fArraySample() );
+        mesh.set( mesh_samp );
+
+
+        mesh_samp.setVelocities( V3fArraySample( ( const V3f * )g_veloc,
+                                               g_numVerts ) );
+        mesh_samp.setUVs( uvsamp );
+
+        for ( size_t i = 0; i < 2; ++i )
+        {
+            mesh.set( mesh_samp );
+            for ( size_t j = 0; j < g_numVerts; ++j )
+            {
+                verts[j] *= 2;
+            }
+        }
+
+        mesh_samp.setUVs( OV2fGeomParam::Sample() );
+        mesh_samp.setVelocities( V3fArraySample() );
         mesh.set( mesh_samp );
     }
 
@@ -331,7 +359,9 @@ void VelocTest()
 
         ISubD meshyObj( IObject( archive, kTop ), "subd" );
         ISubDSchema &mesh = meshyObj.getSchema();
-        TESTING_ASSERT( 4 == mesh.getNumSamples() );
+        TESTING_ASSERT( 7 == mesh.getNumSamples() );
+        TESTING_ASSERT( 7 == mesh.getVelocitiesProperty().getNumSamples() );
+        TESTING_ASSERT( 7 == mesh.getUVsParam().getNumSamples() );
     }
 }
 
@@ -341,6 +371,6 @@ int main( int argc, char *argv[] )
     Example1_MeshOut();
     Example1_MeshIn();
 
-    VelocTest();
+    optPropTest();
     return 0;
 }

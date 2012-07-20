@@ -261,6 +261,85 @@ void meshUnderXformOut( const std::string &iName )
 }
 
 //-*****************************************************************************
+void optPropTest()
+{
+    std::string name = "meshOptPropTest.abc";
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
+        OPolyMesh meshyObj( OObject( archive, kTop ), "mesh" );
+        OPolyMeshSchema &mesh = meshyObj.getSchema();
+
+        // copy because we'll be changing these values
+        std::vector< V3f > verts( g_numVerts );
+        for ( size_t i = 0; i < g_numVerts; ++i )
+        {
+            verts[i] = V3f( g_verts[3*i], g_verts[3*i+1], g_verts[3*i+2] );
+        }
+
+        OPolyMeshSchema::Sample mesh_samp(
+            V3fArraySample( verts ),
+            Int32ArraySample( g_indices, g_numIndices ),
+            Int32ArraySample( g_counts, g_numCounts ) );
+
+        for ( size_t i = 0; i < 2; ++i )
+        {
+            mesh.set( mesh_samp );
+            for ( size_t j = 0; j < g_numVerts; ++j )
+            {
+                verts[j] *= 2;
+            }
+        }
+
+        ON3fGeomParam::Sample nsamp( N3fArraySample( (const N3f *)g_normals,
+            g_numNormals ), kFacevaryingScope );
+        mesh_samp.setNormals( nsamp );
+
+        OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
+                                      g_numUVs ), kFacevaryingScope );
+        mesh_samp.setUVs( uvsamp );
+        mesh_samp.setVelocities( V3fArraySample( ( const V3f * )g_veloc,
+                                               g_numVerts ) );
+        mesh.set( mesh_samp );
+
+        mesh_samp.setNormals( ON3fGeomParam::Sample() );
+        mesh_samp.setUVs( OV2fGeomParam::Sample() );
+        mesh_samp.setVelocities( V3fArraySample() );
+        mesh.set( mesh_samp );
+
+
+        mesh_samp.setVelocities( V3fArraySample( ( const V3f * )g_veloc,
+                                               g_numVerts ) );
+        mesh_samp.setUVs( uvsamp );
+        mesh_samp.setNormals( nsamp );
+
+        for ( size_t i = 0; i < 2; ++i )
+        {
+            mesh.set( mesh_samp );
+            for ( size_t j = 0; j < g_numVerts; ++j )
+            {
+                verts[j] *= 2;
+            }
+        }
+
+        mesh_samp.setUVs( OV2fGeomParam::Sample() );
+        mesh_samp.setNormals( ON3fGeomParam::Sample() );
+        mesh_samp.setVelocities( V3fArraySample() );
+        mesh.set( mesh_samp );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+
+        IPolyMesh meshyObj( IObject( archive, kTop ), "mesh" );
+        IPolyMeshSchema &mesh = meshyObj.getSchema();
+        TESTING_ASSERT( 7 == mesh.getNumSamples() );
+        TESTING_ASSERT( 7 == mesh.getVelocitiesProperty().getNumSamples() );
+        TESTING_ASSERT( 7 == mesh.getUVsParam().getNumSamples() );
+        TESTING_ASSERT( 7 == mesh.getNormalsParam().getNumSamples() );
+    }
+}
+
+//-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
 // MAIN FUNCTION!
@@ -278,6 +357,6 @@ int main( int argc, char *argv[] )
 
     meshUnderXformOut( "animatedXformedMesh.abc" );
 
-    //Time_Sampled_Mesh_Test0();
+    optPropTest();
     return 0;
 }
