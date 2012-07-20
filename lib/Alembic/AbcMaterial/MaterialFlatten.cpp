@@ -94,23 +94,24 @@ MaterialFlatten::MaterialFlatten( Abc::IObject object,
         }
 
 
-        size_t lastPos = assignedPath.size();
+        size_t lastPos = 0;
         bool isDone = false;
 
         while ( ! isDone )
         {
-            size_t curPos = assignedPath.rfind( '/', lastPos );
+            size_t curPos = assignedPath.find( '/', lastPos );
             size_t length = 0;
 
             if ( curPos == std::string::npos )
             {
                 isDone = true;
-                length = lastPos + 1;
+                length = std::string::npos;
             }
-            else if ( lastPos <= curPos + 1 )
+            // no other characters between / (starting / or multiple / in a row)
+            else if ( lastPos == curPos )
             {
-                lastPos = curPos - 1;
-                if ( curPos == 0 )
+                lastPos = curPos + 1;
+                if ( lastPos == assignedPath.size() )
                 {
                     isDone = true;
                 }
@@ -118,11 +119,11 @@ MaterialFlatten::MaterialFlatten( Abc::IObject object,
             }
             else
             {
-                length = lastPos - curPos;
-                lastPos = curPos - 1;
+                length = curPos - lastPos;
             }
 
-            std::string childName = assignedPath.substr( curPos + 1, length );
+            std::string childName = assignedPath.substr( lastPos, length );
+            lastPos = curPos + 1;
 
             if ( parent.getChildHeader( childName ) )
             {

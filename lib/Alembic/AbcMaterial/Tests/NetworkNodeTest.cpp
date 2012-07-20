@@ -100,10 +100,17 @@ void read()
         TESTING_ASSERT((nodeType == "blinn" && node.getName() == "mainshader")||
             (nodeType == "texture_read" && node.getName() == "colormap"));
         Abc::ICompoundProperty parameters = node.getParameters();
+        TESTING_ASSERT(parameters.valid());
+        TESTING_ASSERT(parameters.getNumProperties() == 1);
         if (parameters.valid())
         {
             std::cout << "    PARAMETERS:" << std::endl;
-            
+
+            TESTING_ASSERT( (node.getName() == "mainshader" &&
+                parameters.getPropertyHeader(0).getName() == "Kd") ||
+                (node.getName() == "colormap" &&
+                parameters.getPropertyHeader(0).getName() == "map_name") );
+
             for (size_t i = 0, e = parameters.getNumProperties(); i < e; ++i)
             {
                 const Abc::PropertyHeader & header =
@@ -114,6 +121,10 @@ void read()
         }
         
         size_t numConnections = node.getNumConnections();
+        TESTING_ASSERT(
+            (node.getName() == "mainshader" && numConnections == 1) ||
+            (node.getName() == "colormap" && numConnections == 0) );
+
         if (numConnections)
         {
             std::string inputName, connectedNodeName, connectedOutputName;
@@ -125,6 +136,9 @@ void read()
                 if (node.getConnection(i,
                         inputName, connectedNodeName, connectedOutputName))
                 {
+                    TESTING_ASSERT( inputName == "Cs" &&
+                        connectedNodeName == "colormap" &&
+                        connectedOutputName == "color_out" );
                     std::cout << "      " << inputName << " -> NODE: " << connectedNodeName;
                     
                     if (!connectedOutputName.empty())
@@ -142,7 +156,7 @@ void read()
     
     std::vector<std::string> targetNames;
     matObj.getSchema().getNetworkTerminalTargetNames(targetNames);
-    
+    TESTING_ASSERT(targetNames.size() == 1);
     for (std::vector<std::string>::iterator I = targetNames.begin();
             I != targetNames.end(); ++I)
     {
@@ -168,6 +182,11 @@ void read()
             if (matObj.getSchema().getNetworkTerminal(
                     targetName, shaderType, connectedNodeName, connectedOutputName))
             {
+                TESTING_ASSERT(targetName == "abc" &&
+                    shaderType == "surface" &&
+                    connectedNodeName == "mainshader" &&
+                    connectedOutputName == "out");
+
                 std::cout << ", NODE: " << connectedNodeName;
                 
                 if (!connectedOutputName.empty())
@@ -189,7 +208,7 @@ void read()
     matObj.getSchema().getNetworkInterfaceParameterMappingNames(mappingNames);
     
     std::cout << "INTERFACE MAPPINGS" << std::endl;
-    
+    TESTING_ASSERT(mappingNames.size() == 1);
     for (std::vector<std::string>::iterator I = mappingNames.begin();
             I != mappingNames.end(); ++I)
     {
@@ -198,6 +217,9 @@ void read()
         if (matObj.getSchema().getNetworkInterfaceParameterMapping(
                 (*I), mapToNodeName, mapToParamName))
         {
+            TESTING_ASSERT(mapToNodeName == "colormap" &&
+                mapToParamName == "map_name");
+
             std::cout << "  PARAM NAME: " << (*I) << ", MAPTONODE: " <<
                     mapToNodeName << ", MAPTOPARAMNAME: " << mapToParamName;
             std::cout << std::endl;

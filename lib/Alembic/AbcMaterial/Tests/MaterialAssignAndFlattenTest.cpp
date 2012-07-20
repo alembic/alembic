@@ -3,7 +3,7 @@
 
 #include <Alembic/AbcMaterial/MaterialAssignment.h>
 #include "PrintMaterial.h"
-
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace Abc =  Alembic::Abc;
 namespace Mat = Alembic::AbcMaterial;
@@ -78,14 +78,23 @@ void traverse(Abc::IObject object, bool includeSelf)
         if (Mat::IMaterial::matches(object.getHeader()))
         {
             std::cout << "(is material, local data shown)\n";
-            
-            printMaterialSchema(
-                    Mat::IMaterial(object, Abc::kWrapExisting).getSchema());
-        
+            Mat::IMaterial mat(object, Abc::kWrapExisting);
+            printMaterialSchema(mat.getSchema());
+            TESTING_ASSERT(object.getName() == "materialA" ||
+                object.getName() == "materialB");
         }
         else
         {
             Mat::MaterialFlatten mafla(object);
+
+            std::string name = object.getName();
+            std::cout << name << " " << mafla.empty() << std::endl;
+            TESTING_ASSERT(
+                (!mafla.empty() &&
+                    (name == "geoA" || name == "geoB" || name == "geoC")) ||
+                (mafla.empty() &&
+                    (name == "geometry" || name == "materials")));
+
             if (!mafla.empty())
             {
                 std::cout << "(flattened material via has and/or assigned)\n";
