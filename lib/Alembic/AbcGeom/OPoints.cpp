@@ -69,7 +69,8 @@ void OPointsSchema::set( const Sample &iSamp )
         m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(), ".velocities",
                                                m_positionsProperty.getTimeSampling() );
 
-        const V3fArraySample empty;
+        std::vector<V3f> emptyVec;
+        const V3fArraySample empty( emptyVec );
         const size_t numSamps = m_positionsProperty.getNumSamples();
         for ( size_t i = 0 ; i < numSamps ; ++i )
         {
@@ -80,8 +81,16 @@ void OPointsSchema::set( const Sample &iSamp )
     // do we need to create widths prop?
     if ( iSamp.getWidths() && !m_widthsParam )
     {
+        std::vector<float> emptyVals;
+        std::vector<Util::uint32_t> emptyIndices;
+        OFloatGeomParam::Sample empty;
+
         if ( iSamp.getWidths().getIndices() )
         {
+            empty = OFloatGeomParam::Sample( Abc::FloatArraySample( emptyVals ),
+                Abc::UInt32ArraySample( emptyIndices ),
+                iSamp.getWidths().getScope() );
+
             // widths are indexed which is wasteful, but technically ok
             m_widthsParam = OFloatGeomParam( this->getPtr(), ".widths", true,
                                              iSamp.getWidths().getScope(),
@@ -89,13 +98,14 @@ void OPointsSchema::set( const Sample &iSamp )
         }
         else
         {
+            empty = OFloatGeomParam::Sample( Abc::FloatArraySample( emptyVals ),
+                                             iSamp.getWidths().getScope() );
+
             // widths are not indexed
             m_widthsParam = OFloatGeomParam( this->getPtr(), ".widths", false,
                                              iSamp.getWidths().getScope(), 1,
                                              this->getTimeSampling() );
         }
-
-        OFloatGeomParam::Sample empty;
 
         size_t numSamples = m_positionsProperty.getNumSamples();
 

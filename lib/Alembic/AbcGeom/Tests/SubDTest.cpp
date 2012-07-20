@@ -291,6 +291,49 @@ void Example1_MeshIn()
         }
     }
 }
+//-*****************************************************************************
+void VelocTest()
+{
+    std::string name = "subdVelocTest.abc";
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
+        OSubD meshyObj( OObject( archive, kTop ), "subd" );
+        OSubDSchema &mesh = meshyObj.getSchema();
+
+        // copy because we'll be changing these values
+        std::vector< V3f > verts( g_numVerts );
+        for ( size_t i = 0; i < g_numVerts; ++i )
+        {
+            verts[i] = V3f( g_verts[3*i], g_verts[3*i+1], g_verts[3*i+2] );
+        }
+
+        OSubDSchema::Sample mesh_samp(
+            V3fArraySample( verts ),
+            Int32ArraySample( g_indices, g_numIndices ),
+            Int32ArraySample( g_counts, g_numCounts ) );
+
+        for ( size_t i = 0; i < 3; ++i )
+        {
+            mesh.set( mesh_samp );
+            for ( size_t j = 0; j < g_numVerts; ++j )
+            {
+                verts[j] *= 2;
+            }
+        }
+
+        mesh_samp.setVelocities( V3fArraySample( ( const V3f * )g_veloc,
+                                               g_numVerts ) );
+        mesh.set( mesh_samp );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+
+        ISubD meshyObj( IObject( archive, kTop ), "subd" );
+        ISubDSchema &mesh = meshyObj.getSchema();
+        TESTING_ASSERT( 4 == mesh.getNumSamples() );
+    }
+}
 
 //-*****************************************************************************
 int main( int argc, char *argv[] )
@@ -298,5 +341,6 @@ int main( int argc, char *argv[] )
     Example1_MeshOut();
     Example1_MeshIn();
 
+    VelocTest();
     return 0;
 }
