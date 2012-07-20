@@ -59,7 +59,7 @@ public:
     //-*************************************************************************
     // Default
     TypedArraySample()
-      : AbcA::ArraySample() {}
+      : AbcA::ArraySample( NULL, TRAITS::dataType(), Dimensions() ) {}
 
     //-*************************************************************************
     // From pointer+num or pointer+dims
