@@ -254,7 +254,7 @@ void MaterialFlatten::getShaderParameters( const std::string & target,
 
         for ( size_t j = 0; j < params.getNumProperties(); ++j )
         {
-            const Abc::PropertyHeader &propHeader =
+            const AbcCoreAbstract::PropertyHeader &propHeader =
                 params.getPropertyHeader( j );
 
             if ( uniqueNames.find( propHeader.getName() ) != uniqueNames.end() )
@@ -539,7 +539,7 @@ MaterialFlatten::NetworkNode::getParameters( ParameterEntryVector & result )
             {
                 Abc::ICompoundProperty & networkParams = ( *j );
 
-                if ( const Abc::PropertyHeader * header =
+                if ( const AbcCoreAbstract::PropertyHeader * header =
                      networkParams.getPropertyHeader( networkParamName ) )
                 {
                     result.push_back( ParameterEntry( nodeParamName,
@@ -565,7 +565,7 @@ MaterialFlatten::NetworkNode::getParameters( ParameterEntryVector & result )
 
         for ( size_t j = 0; j < nodeParameters.getNumProperties(); ++j)
         {
-            const Abc::PropertyHeader &propHeader =
+            const AbcCoreAbstract::PropertyHeader &propHeader =
                 nodeParameters.getPropertyHeader( j );
 
             if ( uniqueNames.find(propHeader.getName()) != uniqueNames.end() )

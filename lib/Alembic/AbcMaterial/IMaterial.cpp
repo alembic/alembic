@@ -193,7 +193,8 @@ Abc::ICompoundProperty IMaterialSchema::getShaderParameters(
 
     Abc::ICompoundProperty result;
 
-    if (const Abc::PropertyHeader * header = getPropertyHeader( propName ) )
+    if (const AbcCoreAbstract::PropertyHeader * header =
+        getPropertyHeader( propName ) )
     {
         if ( header->isCompound() )
         {
@@ -231,7 +232,8 @@ void IMaterialSchema::getNetworkNodeNames( std::vector<std::string> & names )
 
     for ( size_t i = 0, e = m_node.getNumProperties(); i < e; ++i )
     {
-        const Abc::PropertyHeader &header = m_node.getPropertyHeader( i );
+        const AbcCoreAbstract::PropertyHeader &header =
+            m_node.getPropertyHeader( i );
 
         if ( header.isCompound() )
         {
@@ -249,7 +251,8 @@ IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode( size_t index )
         return NetworkNode();
     }
 
-    const Abc::PropertyHeader &header = m_node.getPropertyHeader( index );
+    const AbcCoreAbstract::PropertyHeader &header =
+        m_node.getPropertyHeader( index );
 
     if ( !header.isCompound() )
     {
@@ -457,7 +460,7 @@ IMaterialSchema::NetworkNode::NetworkNode( Abc::ICompoundProperty parent,
 {
     if ( parent.valid() )
     {
-        if ( const Abc::PropertyHeader * header =
+        if ( const AbcCoreAbstract::PropertyHeader * header =
             parent.getPropertyHeader( nodeName ) )
         {
             if ( header->isCompound() )
@@ -492,7 +495,7 @@ bool IMaterialSchema::NetworkNode::getTarget( std::string & result )
         return false;
     }
 
-    if ( const Abc::PropertyHeader * header =
+    if ( const AbcCoreAbstract::PropertyHeader * header =
         m_compound.getPropertyHeader( "target" ) )
     {
         if ( header->isScalar() && Abc::IStringProperty::matches( *header) )
@@ -514,7 +517,7 @@ bool IMaterialSchema::NetworkNode::getNodeType( std::string & result )
         return false;
     }
 
-    if ( const Abc::PropertyHeader * header =
+    if ( const AbcCoreAbstract::PropertyHeader * header =
         m_compound.getPropertyHeader( "type" ) )
     {
         if ( header->isScalar() && Abc::IStringProperty::matches( *header ) )
@@ -537,7 +540,7 @@ Abc::ICompoundProperty IMaterialSchema::NetworkNode::getParameters()
         return result;
     }
 
-    if (const Abc::PropertyHeader * header =
+    if (const AbcCoreAbstract::PropertyHeader * header =
         m_compound.getPropertyHeader( "params" ) )
     {
         if ( header->isCompound() )

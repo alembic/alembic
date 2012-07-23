@@ -107,7 +107,7 @@ public:
 
         ParameterEntry( const std::string & iName,
                         Abc::ICompoundProperty iParent,
-                        const Abc::PropertyHeader * iHeader )
+                        const AbcCoreAbstract::PropertyHeader * iHeader )
         : name(iName)
         , parent(iParent)
         , header(iHeader)
@@ -116,7 +116,7 @@ public:
 
         std::string name;
         Abc::ICompoundProperty parent;
-        const Abc::PropertyHeader * header;
+        const AbcCoreAbstract::PropertyHeader * header;
     };
 
     typedef std::vector<ParameterEntry> ParameterEntryVector;

@@ -62,7 +62,7 @@ bool getMaterialAssignmentPath( Abc::ICompoundProperty prop,
         return false;
     }
 
-    if ( const Abc::PropertyHeader * header =
+    if ( const AbcCoreAbstract::PropertyHeader * header =
             prop.getPropertyHeader(propName) )
     {
 
@@ -102,7 +102,7 @@ bool hasMaterial( Abc::ICompoundProperty compound,
         return false;
     }
     
-    if ( const Abc::PropertyHeader * header =
+    if ( const AbcCoreAbstract::PropertyHeader * header =
             compound.getPropertyHeader(propName) )
     {
         if ( IMaterialSchema::matches(*header) )
