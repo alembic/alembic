@@ -191,8 +191,6 @@ Abc::ICompoundProperty IMaterialSchema::getShaderParameters(
     std::string propName = Util::buildTargetName( target, shaderType,
                                                   "params" );
 
-    Abc::ICompoundProperty result;
-
     if (const AbcCoreAbstract::PropertyHeader * header =
         getPropertyHeader( propName ) )
     {
