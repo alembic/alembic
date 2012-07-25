@@ -148,10 +148,12 @@ public:
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<FaceSetSchemaInfo>( iParentCompound, iName,
-                                   iArg0, iArg1, iArg2 )
+      : OGeomBaseSchema<FaceSetSchemaInfo>( 
+                    GetCompoundPropertyWriterPtr( iParentCompound ),
+                    iName, iArg0, iArg1, iArg2 )
     {
-        _initTimeSampling ( iParentCompound, iArg0, iArg1, iArg2 );
+        _initTimeSampling ( GetCompoundPropertyWriterPtr( iParentCompound ),
+                            iArg0, iArg1, iArg2 );
     }
 
     template <class CPROP_PTR>
@@ -182,10 +184,12 @@ public:
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument(),
                               const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<FaceSetSchemaInfo>( iParentCompound,
-                                            iArg0, iArg1, iArg2 )
+      : OGeomBaseSchema<FaceSetSchemaInfo>(
+                            GetCompoundPropertyWriterPtr( iParentCompound ),
+                            iArg0, iArg1, iArg2 )
     {
-        _initTimeSampling ( iParentCompound, iArg0, iArg1, iArg2 );
+        _initTimeSampling ( GetCompoundPropertyWriterPtr( iParentCompound ),
+                            iArg0, iArg1, iArg2 );
     }
 
     //! Copy constructor.

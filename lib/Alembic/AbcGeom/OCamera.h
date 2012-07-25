@@ -78,8 +78,9 @@ public:
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CameraSchemaInfo>( iParent, iName,
-                                            iArg0, iArg1, iArg2 )
+      : Abc::OSchema<CameraSchemaInfo>(
+                            GetCompoundPropertyWriterPtr( iParent ),
+                            iName, iArg0, iArg1, iArg2 )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -92,8 +93,8 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParent->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                )->getArchive()->addTimeSampling(*tsPtr);
         }
 
         // Meta data and error handling are eaten up by
@@ -106,8 +107,9 @@ public:
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument(),
                               const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CameraSchemaInfo>( iParent,
-                                            iArg0, iArg1, iArg2 )
+      : Abc::OSchema<CameraSchemaInfo>( 
+                                    GetCompoundPropertyWriterPtr( iParent ),
+                                    iArg0, iArg1, iArg2 )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -120,8 +122,8 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParent->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                )->getArchive()->addTimeSampling(*tsPtr);
         }
 
         // Meta data and error handling are eaten up by

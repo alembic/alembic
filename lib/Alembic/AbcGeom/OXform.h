@@ -98,8 +98,8 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParent->getObject()->getArchive()->
-                addTimeSampling( *tsPtr );
+            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                        )->getArchive()->addTimeSampling( *tsPtr );
         }
 
         init( tsIndex );
@@ -125,8 +125,8 @@ public:
 
         if ( tsPtr )
         {
-            tsIndex = iParent->getObject()->getArchive()->
-                addTimeSampling( *tsPtr );
+            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                    )->getArchive()->addTimeSampling( *tsPtr );
         }
 
         init( tsIndex );

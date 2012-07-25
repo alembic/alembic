@@ -338,7 +338,7 @@ public:
         return 0;
     }
 
-    const AbcA::DataType &getDataType() { return TRAITS::dataType(); }
+    AbcA::DataType getDataType() { return TRAITS::dataType(); }
 
     bool isIndexed() { return m_isIndexed; }
 
@@ -346,7 +346,7 @@ public:
 
     AbcA::TimeSamplingPtr getTimeSampling()
     {
-        return m_valProp->getTimeSampling();
+        return m_valProp.getTimeSampling();
     }
 
     const std::string &getName() { return m_name; }

@@ -92,14 +92,14 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParent->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                )->getArchive()->addTimeSampling(*tsPtr);
             m_tsPtr = tsPtr;
         }
         else
         {
-            m_tsPtr =
-                iParent->getObject()->getArchive()->getTimeSampling( tsIndex );
+            m_tsPtr = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                )->getArchive()->getTimeSampling( tsIndex );
         }
     }
 
@@ -122,14 +122,14 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParent->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                )->getArchive()->addTimeSampling(*tsPtr);
             m_tsPtr = tsPtr;
         }
         else
         {
-            m_tsPtr =
-                iParent->getObject()->getArchive()->getTimeSampling( tsIndex );
+            m_tsPtr = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                )->getArchive()->getTimeSampling( tsIndex );
         }
     }
 

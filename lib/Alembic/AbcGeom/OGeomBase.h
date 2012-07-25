@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -93,8 +93,8 @@ public:
         // index otherwise use the default index of 0 - uniform.
         if ( tsPtr )
         {
-            tsIndex = iParentCompound->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = GetCompoundPropertyWriterPtr(iParentCompound)->getObject(
+                        )->getArchive()->addTimeSampling(*tsPtr);
         }
 
         // Create our always present property
@@ -118,13 +118,14 @@ public:
         // 0 index
         if ( tsPtr )
         {
-            tsIndex = iParentCompound->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = GetCompoundPropertyWriterPtr(iParentCompound)->getObject(
+                        )->getArchive()->addTimeSampling(*tsPtr);
         }
 
         // Create our always present property
         init( tsIndex );
     }
+
 
     void init( uint32_t iTsHandle)
     {

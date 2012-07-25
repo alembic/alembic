@@ -313,8 +313,9 @@ public:
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<SubDSchemaInfo>( iParent, iName,
-                                      iArg0, iArg1, iArg2 )
+      : OGeomBaseSchema<SubDSchemaInfo>( 
+                        GetCompoundPropertyWriterPtr( iParent ),
+                        iName, iArg0, iArg1, iArg2 )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -327,8 +328,8 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParent->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = GetCompoundPropertyWriterPtr( iParent )
+                        ->getObject()->getArchive()->addTimeSampling(*tsPtr);
         }
 
         // Meta data and error handling are eaten up by
@@ -341,8 +342,9 @@ public:
                           const Abc::Argument &iArg0 = Abc::Argument(),
                           const Abc::Argument &iArg1 = Abc::Argument(),
                           const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<SubDSchemaInfo>( iParent,
-                                      iArg0, iArg1, iArg2 )
+      : OGeomBaseSchema<SubDSchemaInfo>(
+                            GetCompoundPropertyWriterPtr( iParent ),
+                            iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
             Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
@@ -354,8 +356,8 @@ public:
         // 0 index
         if (tsPtr)
         {
-            tsIndex = iParent->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
+            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+            )->getArchive()->addTimeSampling(*tsPtr);
         }
 
         // Meta data and error handling are eaten up by
