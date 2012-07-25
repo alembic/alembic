@@ -103,7 +103,7 @@ void IMaterialSchema::init()
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
-void IMaterialSchema::getTargetNames( std::vector<std::string> & targetNames )
+void IMaterialSchema::getTargetNames( std::vector<std::string> & oTargetNames )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterial::getTargetNames" );
     std::set<std::string> uniqueNames;
@@ -122,17 +122,17 @@ void IMaterialSchema::getTargetNames( std::vector<std::string> & targetNames )
         }
     }
 
-    targetNames.clear();
-    targetNames.reserve( uniqueNames.size() );
-    targetNames.insert( targetNames.end(), uniqueNames.begin(),
-                        uniqueNames.end() );
+    oTargetNames.clear();
+    oTargetNames.reserve( uniqueNames.size() );
+    oTargetNames.insert( oTargetNames.end(), uniqueNames.begin(),
+                         uniqueNames.end() );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 
-void IMaterialSchema::getShaderTypesForTarget( const std::string & targetName,
-    std::vector<std::string> & shaderTypeNames )
+void IMaterialSchema::getShaderTypesForTarget( const std::string & iTargetName,
+    std::vector<std::string> & oShaderTypeNames )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShaderTypesForTarget" );
     std::set<std::string> uniqueNames;
@@ -146,33 +146,33 @@ void IMaterialSchema::getShaderTypesForTarget( const std::string & targetName,
 
         if ( tokens.size() == 2 )
         {
-            if ( tokens[0] == targetName )
+            if ( tokens[0] == iTargetName )
             {
                 uniqueNames.insert( tokens[1] );
             }
         }
     }
 
-    shaderTypeNames.clear();
-    shaderTypeNames.reserve( uniqueNames.size() );
-    shaderTypeNames.insert( shaderTypeNames.end(),
+    oShaderTypeNames.clear();
+    oShaderTypeNames.reserve( uniqueNames.size() );
+    oShaderTypeNames.insert( oShaderTypeNames.end(),
             uniqueNames.begin(), uniqueNames.end() );
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
-bool IMaterialSchema::getShader( const std::string & target,
-                                 const std::string & shaderType,
-                                 std::string & result )
+bool IMaterialSchema::getShader( const std::string & iTarget,
+                                 const std::string & iShaderType,
+                                 std::string & oResult )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShader" );
-    std::string propName = Util::buildTargetName( target, shaderType, "" );
+    std::string propName = Util::buildTargetName( iTarget, iShaderType, "" );
 
     std::map<std::string, std::string>::iterator i =
         m_shaderNames.find( propName );
 
     if ( i != m_shaderNames.end() )
     {
-        result = i->second;
+        oResult = i->second;
         return true;
     }
 
@@ -182,13 +182,13 @@ bool IMaterialSchema::getShader( const std::string & target,
 
 
 Abc::ICompoundProperty IMaterialSchema::getShaderParameters(
-        const std::string & target,
-        const std::string & shaderType )
+        const std::string & iTarget,
+        const std::string & iShaderType )
 {
     Abc::ICompoundProperty result;
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShaderParameters" );
-    std::string propName = Util::buildTargetName( target, shaderType,
+    std::string propName = Util::buildTargetName( iTarget, iShaderType,
                                                   "params" );
 
     if (const AbcCoreAbstract::PropertyHeader * header =
@@ -216,17 +216,17 @@ size_t IMaterialSchema::getNumNetworkNodes()
     return 0;
 }
 
-void IMaterialSchema::getNetworkNodeNames( std::vector<std::string> & names )
+void IMaterialSchema::getNetworkNodeNames( std::vector<std::string> & oNames )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMateriaSchema::getNetworkNodeNames" );
-    names.clear();
+    oNames.clear();
 
     if ( !m_node.valid() )
     {
         return;
     }
 
-    names.reserve( m_node.getNumProperties() );
+    oNames.reserve( m_node.getNumProperties() );
 
     for ( size_t i = 0, e = m_node.getNumProperties(); i < e; ++i )
     {
@@ -235,22 +235,22 @@ void IMaterialSchema::getNetworkNodeNames( std::vector<std::string> & names )
 
         if ( header.isCompound() )
         {
-            names.push_back( header.getName() );
+            oNames.push_back( header.getName() );
         }
     }
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
-IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode( size_t index )
+IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode( size_t iIndex )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMateriaSchema::getNetworkNode" );
-    if ( !m_node.valid() || index >= m_node.getNumProperties() )
+    if ( !m_node.valid() || iIndex >= m_node.getNumProperties() )
     {
         return NetworkNode();
     }
 
     const AbcCoreAbstract::PropertyHeader &header =
-        m_node.getPropertyHeader( index );
+        m_node.getPropertyHeader( iIndex );
 
     if ( !header.isCompound() )
     {
@@ -266,18 +266,18 @@ IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode( size_t index )
 
 
 IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode(
-    const std::string & nodeName )
+    const std::string & iNodeName )
 {
-    return NetworkNode( m_node, nodeName );
+    return NetworkNode( m_node, iNodeName );
 }
 
 
 void IMaterialSchema::getNetworkTerminalTargetNames(
-    std::vector<std::string> & targetNames )
+    std::vector<std::string> & oTargetNames )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "IMateriaSchema::getNetworkTerminalTargetNames" );
-    targetNames.clear();
+    oTargetNames.clear();
 
     std::set<std::string> uniqueNames;
 
@@ -294,20 +294,20 @@ void IMaterialSchema::getNetworkTerminalTargetNames(
         }
     }
 
-    targetNames.reserve( uniqueNames.size() );
-    targetNames.insert( targetNames.end(),
+    oTargetNames.reserve( uniqueNames.size() );
+    oTargetNames.insert( oTargetNames.end(),
             uniqueNames.begin(), uniqueNames.end() );
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 void IMaterialSchema::getNetworkTerminalShaderTypesForTarget(
-    const std::string & targetName,
-    std::vector<std::string> & shaderTypeNames)
+    const std::string & iTargetName,
+    std::vector<std::string> & oShaderTypeNames)
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "IMateriaSchema::getNetworkTerminalShaderTypesForTarget" );
 
-    shaderTypeNames.clear();
+    oShaderTypeNames.clear();
 
     std::set<std::string> uniqueNames;
 
@@ -319,30 +319,30 @@ void IMaterialSchema::getNetworkTerminalShaderTypesForTarget(
 
         if ( tokens.size() == 2 )
         {
-            if ( tokens[0] == targetName )
+            if ( tokens[0] == iTargetName )
             {
                 uniqueNames.insert( tokens[1] );
             }
         }
     }
 
-    shaderTypeNames.reserve( uniqueNames.size() );
-    shaderTypeNames.insert( shaderTypeNames.end(),
+    oShaderTypeNames.reserve( uniqueNames.size() );
+    oShaderTypeNames.insert( oShaderTypeNames.end(),
         uniqueNames.begin(), uniqueNames.end() );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 bool IMaterialSchema::getNetworkTerminal(
-        const std::string & target,
-        const std::string & shaderType,
-        std::string & nodeName,
-        std::string & outputName)
+        const std::string & iTarget,
+        const std::string & iShaderType,
+        std::string & oNodeName,
+        std::string & oOutputName)
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "IMateriaSchema::getNetworkTerminal" );
 
-    std::string propName = target + "." + shaderType;
+    std::string propName = iTarget + "." + iShaderType;
 
     std::map<std::string, std::string>::iterator i =
         m_terminals.find( propName );
@@ -355,8 +355,8 @@ bool IMaterialSchema::getNetworkTerminal(
     std::vector<std::string> tokens;
     Util::split_tokens( i->second, tokens, 1 );
 
-    nodeName = tokens[0];
-    outputName = tokens.size() > 1 ? tokens[1] : "";
+    oNodeName = tokens[0];
+    oOutputName = tokens.size() > 1 ? tokens[1] : "";
 
     return true;
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
@@ -370,23 +370,23 @@ size_t IMaterialSchema::getNumNetworkInterfaceParameterMappings()
 }
 
 
-bool IMaterialSchema::getNetworkInterfaceParameterMapping( size_t index,
-    std::string & interfaceParamName, std::string & mapToNodeName,
-    std::string & mapToParamName )
+bool IMaterialSchema::getNetworkInterfaceParameterMapping( size_t iIndex,
+    std::string & oInterfaceParamName, std::string & oMapToNodeName,
+    std::string & oMapToParamName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "IMateriaSchema::getNetworkInterfaceParameterMapping(size_t,...)" );
 
-    if ( index >= m_interface.size() )
+    if ( iIndex >= m_interface.size() )
     {
         return false;
     }
 
-    interfaceParamName = m_interface[index];
+    oInterfaceParamName = m_interface[iIndex];
 
-    return getNetworkInterfaceParameterMapping( interfaceParamName,
-                                                mapToNodeName,
-                                                mapToParamName );
+    return getNetworkInterfaceParameterMapping( oInterfaceParamName,
+                                                oMapToNodeName,
+                                                oMapToParamName );
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 
     return false;
@@ -396,22 +396,22 @@ bool IMaterialSchema::getNetworkInterfaceParameterMapping( size_t index,
 
 
 void IMaterialSchema::getNetworkInterfaceParameterMappingNames(
-    std::vector<std::string> & names )
+    std::vector<std::string> & oNames )
 {
-    names = m_interface;
+    oNames = m_interface;
 }
 
 
 bool IMaterialSchema::getNetworkInterfaceParameterMapping(
-    const std::string & interfaceParamName,
-    std::string & mapToNodeName,
-    std::string & mapToParamName )
+    const std::string & iInterfaceParamName,
+    std::string & oMapToNodeName,
+    std::string & oMapToParamName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "IMateriaSchema::getNetworkInterfaceParameterMapping" );
 
     std::map<std::string, std::string>::iterator i =
-        m_interfaceMap.find( interfaceParamName );
+        m_interfaceMap.find( iInterfaceParamName );
 
     if ( i == m_interfaceMap.end() )
     {
@@ -422,8 +422,8 @@ bool IMaterialSchema::getNetworkInterfaceParameterMapping(
 
     Util::split_tokens( i->second, tokens, 1 );
 
-    mapToNodeName = tokens[0];
-    mapToParamName = tokens.size() > 1 ? tokens[1] : "";
+    oMapToNodeName = tokens[0];
+    oMapToParamName = tokens.size() > 1 ? tokens[1] : "";
 
     return true;
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
@@ -445,25 +445,25 @@ IMaterialSchema::NetworkNode::NetworkNode()
 }
 
 
-IMaterialSchema::NetworkNode::NetworkNode( Abc::ICompoundProperty compound )
-: m_compound( compound )
+IMaterialSchema::NetworkNode::NetworkNode( Abc::ICompoundProperty iCompound )
+: m_compound( iCompound )
 , m_connectionsChecked( false )
 {
 }
 
 
-IMaterialSchema::NetworkNode::NetworkNode( Abc::ICompoundProperty parent,
-                                           const std::string & nodeName )
+IMaterialSchema::NetworkNode::NetworkNode( Abc::ICompoundProperty iParent,
+                                           const std::string & iNodeName )
 : m_connectionsChecked( false )
 {
-    if ( parent.valid() )
+    if ( iParent.valid() )
     {
         if ( const AbcCoreAbstract::PropertyHeader * header =
-            parent.getPropertyHeader( nodeName ) )
+            iParent.getPropertyHeader( iNodeName ) )
         {
             if ( header->isCompound() )
             {
-                m_compound =  Abc::ICompoundProperty( parent, nodeName );
+                m_compound =  Abc::ICompoundProperty( iParent, iNodeName );
             }
         }
     }
@@ -486,7 +486,7 @@ std::string IMaterialSchema::NetworkNode::getName()
 }
 
 
-bool IMaterialSchema::NetworkNode::getTarget( std::string & result )
+bool IMaterialSchema::NetworkNode::getTarget( std::string & oResult )
 {
     if ( !valid() )
     {
@@ -500,7 +500,7 @@ bool IMaterialSchema::NetworkNode::getTarget( std::string & result )
         {
             Abc::IStringProperty prop( m_compound, header->getName() );
 
-            result = prop.getValue();
+            oResult = prop.getValue();
             return true;
         }
     }
@@ -508,7 +508,7 @@ bool IMaterialSchema::NetworkNode::getTarget( std::string & result )
     return false;
 }
 
-bool IMaterialSchema::NetworkNode::getNodeType( std::string & result )
+bool IMaterialSchema::NetworkNode::getNodeType( std::string & oResult )
 {
     if ( !valid() )
     {
@@ -522,7 +522,7 @@ bool IMaterialSchema::NetworkNode::getNodeType( std::string & result )
         {
             Abc::IStringProperty prop( m_compound, header->getName() );
 
-            result = prop.getValue();
+            oResult = prop.getValue();
             return true;
         }
     }
@@ -587,30 +587,31 @@ void IMaterialSchema::NetworkNode::splitConnectionValue( const std::string & v,
 }
 
 bool IMaterialSchema::NetworkNode::getConnection(
-    size_t index,
-    std::string & inputName,
-    std::string & connectedNodeName,
-    std::string & connectedOutputName )
+    size_t iIndex,
+    std::string & oInputName,
+    std::string & oConnectedNodeName,
+    std::string & oConnectedOutputName )
 {
-    if ( index >= getNumConnections() )
+    if ( iIndex >= getNumConnections() )
     {
         return false;
     }
 
-    inputName = m_connections[index];
-    return getConnection( inputName, connectedNodeName, connectedOutputName );
+    oInputName = m_connections[iIndex];
+    return getConnection( oInputName, oConnectedNodeName,
+        oConnectedOutputName );
 }
 
 bool IMaterialSchema::NetworkNode::getConnection(
-    const std::string & inputName,
-    std::string & connectedNodeName,
-    std::string & connectedOutputName )
+    const std::string & iInputName,
+    std::string & oConnectedNodeName,
+    std::string & oConnectedOutputName )
 {
     // loads the connections if it hasn't already
     getNumConnections();
 
     std::map< std::string, std::string >::iterator i =
-        m_connectionsMap.find( inputName );
+        m_connectionsMap.find( iInputName );
 
     if ( i == m_connectionsMap.end() )
     {
@@ -618,7 +619,7 @@ bool IMaterialSchema::NetworkNode::getConnection(
     }
 
     std::string value = i->second;
-    splitConnectionValue( value, connectedNodeName, connectedOutputName );
+    splitConnectionValue( value, oConnectedNodeName, oConnectedOutputName );
 
     return true;
 }

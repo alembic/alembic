@@ -40,36 +40,36 @@ namespace Alembic {
 namespace AbcMaterial {
 namespace ALEMBIC_VERSION_NS {
 
-bool getMaterialAssignmentPath( Abc::IObject object,
-                                std::string & result,
-                                const std::string & propName )
+bool getMaterialAssignmentPath( Abc::IObject iObject,
+                                std::string & oResult,
+                                const std::string & iPropName )
 {
-    if ( !object.valid() )
+    if ( !iObject.valid() )
     {
         return false;
     }
 
-    return getMaterialAssignmentPath( object.getProperties(), result,
-                                      propName );
+    return getMaterialAssignmentPath( iObject.getProperties(), oResult,
+                                      iPropName );
 }
 
-bool getMaterialAssignmentPath( Abc::ICompoundProperty prop,
-                                std::string & result,
-                                const std::string & propName )
+bool getMaterialAssignmentPath( Abc::ICompoundProperty iProp,
+                                std::string & oResult,
+                                const std::string & iPropName )
 {
-    if ( !prop.valid() )
+    if ( !iProp.valid() )
     {
         return false;
     }
 
     if ( const AbcCoreAbstract::PropertyHeader * header =
-            prop.getPropertyHeader(propName) )
+            iProp.getPropertyHeader( iPropName ) )
     {
 
         if ( header->isScalar() && Abc::IStringProperty::matches(*header) )
         {
-            Abc::IStringProperty sprop( prop, propName );
-            result = sprop.getValue();
+            Abc::IStringProperty sprop( iProp, iPropName );
+            oResult = sprop.getValue();
             return true;
         }
     }
@@ -77,37 +77,37 @@ bool getMaterialAssignmentPath( Abc::ICompoundProperty prop,
     return false;
 }
 
-bool hasMaterial( Abc::IObject object,
-                  IMaterialSchema & result,
-                  const std::string & propName)
+bool hasMaterial( Abc::IObject iObject,
+                  IMaterialSchema & oResult,
+                  const std::string & iPropName)
 {
     //don't indicate has-a for matching Material objects
-    if ( object.valid() && propName == MATERIAL_PROPNAME )
+    if ( iObject.valid() && iPropName == MATERIAL_PROPNAME )
     {
-        if ( IMaterial::matches( object.getHeader() ) )
+        if ( IMaterial::matches( iObject.getHeader() ) )
         {
             return false;
         }
     }
 
-    return hasMaterial( object.getProperties(), result, propName );
+    return hasMaterial( iObject.getProperties(), oResult, iPropName );
 }
 
-bool hasMaterial( Abc::ICompoundProperty compound,
-                  IMaterialSchema & result,
-                  const std::string & propName )
+bool hasMaterial( Abc::ICompoundProperty iCompound,
+                  IMaterialSchema & oResult,
+                  const std::string & iPropName )
 {
-    if ( !compound.valid() )
+    if ( !iCompound.valid() )
     {
         return false;
     }
     
     if ( const AbcCoreAbstract::PropertyHeader * header =
-            compound.getPropertyHeader(propName) )
+            iCompound.getPropertyHeader( iPropName ) )
     {
-        if ( IMaterialSchema::matches(*header) )
+        if ( IMaterialSchema::matches( *header ) )
         {
-            result = IMaterialSchema( compound, propName );
+            oResult = IMaterialSchema( iCompound, iPropName );
             return true;
         }
     }
@@ -115,31 +115,31 @@ bool hasMaterial( Abc::ICompoundProperty compound,
     return false;
 }
 
-void addMaterialAssignment( Abc::OObject object,
-                            const std::string & value,
-                            const std::string & propName )
+void addMaterialAssignment( Abc::OObject iObject,
+                            const std::string & iValue,
+                            const std::string & iPropName )
 {
-    addMaterialAssignment( object.getProperties(), value, propName );
+    addMaterialAssignment( iObject.getProperties(), iValue, iPropName );
 }
 
-void addMaterialAssignment( Abc::OCompoundProperty prop,
-                            const std::string & value,
-                            const std::string & propName )
+void addMaterialAssignment( Abc::OCompoundProperty iProp,
+                            const std::string & iValue,
+                            const std::string & iPropName )
 {
-    Abc::OStringProperty assignProp( prop, propName );
-    assignProp.set( value );
+    Abc::OStringProperty assignProp( iProp, iPropName );
+    assignProp.set( iValue );
 }
 
-OMaterialSchema addMaterial( Abc::OObject object,
-                             const std::string & propName )
+OMaterialSchema addMaterial( Abc::OObject iObject,
+                             const std::string & iPropName )
 {
-    return addMaterial( object.getProperties(), propName );
+    return addMaterial( iObject.getProperties(), iPropName );
 }
 
-OMaterialSchema addMaterial( Abc::OCompoundProperty prop,
-                             const std::string & propName )
+OMaterialSchema addMaterial( Abc::OCompoundProperty iProp,
+                             const std::string & iPropName )
 {
-    return OMaterialSchema( prop, propName );
+    return OMaterialSchema( iProp, iPropName );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

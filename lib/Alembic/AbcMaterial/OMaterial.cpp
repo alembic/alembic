@@ -137,33 +137,33 @@ void OMaterialSchema::init()
 }
 
 void OMaterialSchema::setShader(
-        const std::string & target,
-        const std::string & shaderType,
-        const std::string & shaderName )
+        const std::string & iTarget,
+        const std::string & iShaderType,
+        const std::string & iShaderName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::setShader" );
-    Util::validateName( target, "target" );
-    Util::validateName( shaderType, "shaderType" );
+    Util::validateName( iTarget, "target" );
+    Util::validateName( iShaderType, "shaderType" );
 
     std::string propertyName = Util::buildTargetName(
-            target, shaderType, "" );
+            iTarget, iShaderType, "" );
 
-    m_data->shaderNames[propertyName] = shaderName;
+    m_data->shaderNames[propertyName] = iShaderName;
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 Abc::OCompoundProperty OMaterialSchema::getShaderParameters(
-        const std::string & target,
-        const std::string & shaderType )
+        const std::string & iTarget,
+        const std::string & iShaderType )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::getShaderParameters" );
 
-    Util::validateName( target, "target" );
-    Util::validateName( shaderType, "shaderType" );
+    Util::validateName( iTarget, "target" );
+    Util::validateName( iShaderType, "shaderType" );
 
     std::string propertyName = Util::buildTargetName(
-        target, shaderType, "params" );
+        iTarget, iShaderType, "params" );
 
     Data::NodeMap::iterator i = m_data->nodes.find( propertyName );
 
@@ -197,41 +197,41 @@ void OMaterialSchema::createNodeCompound()
 
 
 void OMaterialSchema::addNetworkNode(
-        const std::string & nodeName,
-        const std::string & target,
-        const std::string & nodeType )
+        const std::string & iNodeName,
+        const std::string & iTarget,
+        const std::string & iNodeType )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::addNetworkNode" );
-    Util::validateName( nodeName, "nodeName" );
-    Util::validateName( target, "target" );
+    Util::validateName( iNodeName, "nodeName" );
+    Util::validateName( iTarget, "target" );
 
-    std::string dstName = "nodes/" + nodeName;
+    std::string dstName = "nodes/" + iNodeName;
 
     ABCA_ASSERT( m_data->nodes.find( dstName ) == m_data->nodes.end(),
-        "Node already added: " << nodeName );
+        "Node already added: " << iNodeName );
 
     createNodeCompound();
 
     Data::Node n;
-    n.prop = Abc::OCompoundProperty( m_node.getPtr(), nodeName );
+    n.prop = Abc::OCompoundProperty( m_node.getPtr(), iNodeName );
 
     m_data->nodes[dstName] = n;
 
-    Abc::OStringProperty( n.prop, "target" ).set( target );
-    Abc::OStringProperty( n.prop, "type" ).set( nodeType );
+    Abc::OStringProperty( n.prop, "target" ).set( iTarget );
+    Abc::OStringProperty( n.prop, "type" ).set( iNodeType );
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 
 
 void OMaterialSchema::setNetworkNodeConnection(
-        const std::string & nodeName,
-        const std::string & inputName,
-        const std::string & connectedNodeName,
-        const std::string & connectedOutputName )
+        const std::string & iNodeName,
+        const std::string & iInputName,
+        const std::string & iConnectedNodeName,
+        const std::string & iConnectedOutputName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::setNetworkNodeConnection" );
-    std::string nodeDstName = "nodes/" + nodeName;
+    std::string nodeDstName = "nodes/" + iNodeName;
 
     if ( m_data->nodes.find( nodeDstName ) == m_data->nodes.end() )
     {
@@ -240,27 +240,27 @@ void OMaterialSchema::setNetworkNodeConnection(
 
         createNodeCompound();
         Data::Node n;
-        n.prop = Abc::OCompoundProperty( m_node.getPtr(), nodeName );
+        n.prop = Abc::OCompoundProperty( m_node.getPtr(), iNodeName );
         m_data->nodes[nodeDstName] = n;
     }
 
-    std::string connectionValue = connectedNodeName;
-    if ( !connectedOutputName.empty() )
+    std::string connectionValue = iConnectedNodeName;
+    if ( !iConnectedOutputName.empty() )
     {
-        connectionValue += "." + connectedOutputName;
+        connectionValue += "." + iConnectedOutputName;
     }
 
-    m_data->nodes[nodeDstName].connections[inputName] = connectionValue;
+    m_data->nodes[nodeDstName].connections[iInputName] = connectionValue;
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 
 
 Abc::OCompoundProperty OMaterialSchema::getNetworkNodeParameters(
-        const std::string & nodeName )
+        const std::string & iNodeName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::getNetworkNodeParameters" );
-    std::string nodeDstName = "nodes/" + nodeName;
+    std::string nodeDstName = "nodes/" + iNodeName;
 
     Abc::OCompoundProperty params;
 
@@ -271,7 +271,7 @@ Abc::OCompoundProperty OMaterialSchema::getNetworkNodeParameters(
         //overriding something other than target or nodeType
         createNodeCompound();
         Data::Node n;
-        n.prop = Abc::OCompoundProperty( m_node.getPtr(), nodeName );
+        n.prop = Abc::OCompoundProperty( m_node.getPtr(), iNodeName );
         m_data->nodes[nodeDstName] = n;
     }
 
@@ -291,44 +291,44 @@ Abc::OCompoundProperty OMaterialSchema::getNetworkNodeParameters(
 
 
 void OMaterialSchema::setNetworkTerminal(
-        const std::string & target,
-        const std::string & shaderType,
-        const std::string & nodeName,
-        const std::string & outputName )
+        const std::string & iTarget,
+        const std::string & iShaderType,
+        const std::string & iNodeName,
+        const std::string & iOutputName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::setNetworkTerminal" );
 
-    Util::validateName( target, "target" );
-    Util::validateName( shaderType, "shaderType" );
-    Util::validateName( nodeName, "nodeName" );
+    Util::validateName( iTarget, "target" );
+    Util::validateName( iShaderType, "shaderType" );
+    Util::validateName( iNodeName, "nodeName" );
 
-    std::string connectionValue = nodeName;
-    if ( !outputName.empty() )
+    std::string connectionValue = iNodeName;
+    if ( !iOutputName.empty() )
     {
         connectionValue += ".";
-        connectionValue += outputName;
+        connectionValue += iOutputName;
     }
 
-    std::string terminalName = Util::buildTargetName( target, shaderType, "");
+    std::string terminalName = Util::buildTargetName( iTarget, iShaderType, "");
     m_data->terminals[terminalName] = connectionValue;
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 void OMaterialSchema::setNetworkInterfaceParameterMapping(
-        const std::string & interfaceParamName,
-        const std::string & mapToNodeName,
-        const std::string & mapToParamName )
+        const std::string & iInterfaceParamName,
+        const std::string & iMapToNodeName,
+        const std::string & iMapToParamName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "OMaterialSchema::setNetworkInterfaceParameterMapping" );
 
     //TODO, validate interface paramName?
-    Util::validateName( mapToNodeName, "mapToNodeName" );
+    Util::validateName( iMapToNodeName, "mapToNodeName" );
 
     // order is important
-    m_data->interface.push_back( interfaceParamName );
-    m_data->interface.push_back( mapToNodeName + "." + mapToParamName );
+    m_data->interface.push_back( iInterfaceParamName );
+    m_data->interface.push_back( iMapToNodeName + "." + iMapToParamName );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }

@@ -46,72 +46,72 @@ namespace ALEMBIC_VERSION_NS {
 namespace Util {
 
 std::string
-buildTargetName( const std::string & target,
-                 const std::string & shaderType,
-                 const std::string & suffix )
+buildTargetName( const std::string & iTarget,
+                 const std::string & iShaderType,
+                 const std::string & iSuffix )
 {
-    std::string name = target;
+    std::string name = iTarget;
     name += ".";
-    name += shaderType;
+    name += iShaderType;
 
-    if (!suffix.empty())
+    if (!iSuffix.empty())
     {
-        name += "." + suffix;
+        name += "." + iSuffix;
     }
 
     return name;
 }
 
 
-void validateName( const std::string & name,
-                   const std::string & exceptionVariableName )
+void validateName( const std::string & iName,
+                   const std::string & iExceptionVariableName )
 {
-    if ( name.find('.') != std::string::npos ||
-         name.find('/') != std::string::npos )
+    if ( iName.find('.') != std::string::npos ||
+         iName.find('/') != std::string::npos )
     {
-        ABC_THROW( "invalid name for " << exceptionVariableName <<
-                   ":" << name );
+        ABC_THROW( "invalid name for " << iExceptionVariableName <<
+                   ":" << iName );
     }
 }
 
 
-void split_tokens( const std::string & value,
-                   std::vector<std::string> & result,
-                   size_t maxSplit )
+void split_tokens( const std::string & iValue,
+                   std::vector<std::string> & oResult,
+                   size_t iMaxSplit )
 {
-    result.clear();
+    oResult.clear();
 
-    if ( value.empty() )
+    if ( iValue.empty() )
     {
-        result.push_back("");
+        oResult.push_back("");
         return;
     }
 
     size_t pos = 0;
 
     for ( size_t i = 0;
-        ( maxSplit == 0 || i < maxSplit ) && pos < value.size(); ++i )
+        ( iMaxSplit == 0 || i < iMaxSplit ) && pos < iValue.size(); ++i )
     {
-        size_t nextDotIndex = value.find('.', pos);
+        size_t nextDotIndex = iValue.find('.', pos);
 
         if ( nextDotIndex == std::string::npos )
         {
             break;
         }
 
-        result.push_back( value.substr( pos, nextDotIndex-pos ) );
+        oResult.push_back( iValue.substr( pos, nextDotIndex-pos ) );
 
-        if ( nextDotIndex == value.size() - 1 )
+        if ( nextDotIndex == iValue.size() - 1 )
         {
-            result.push_back( "" );
+            oResult.push_back( "" );
         }
 
         pos = nextDotIndex + 1;
     }
 
-    if ( pos < value.size() )
+    if ( pos < iValue.size() )
     {
-        result.push_back( value.substr( pos ) );
+        oResult.push_back( iValue.substr( pos ) );
     }
 }
 

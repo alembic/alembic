@@ -53,11 +53,11 @@ public:
     MaterialFlatten();
 
     //! Create with a single materialSchema
-    MaterialFlatten( IMaterialSchema materialSchema );
+    MaterialFlatten( IMaterialSchema iMaterialSchema );
 
     //! Create from a material object. The schemas of matching parent
     //! material objects are automatically append
-    MaterialFlatten( IMaterial materialObject );
+    MaterialFlatten( IMaterial iMaterialObject );
 
     //! Create from an IObject. This will interpret values for hasMaterial
     //! and getMaterialAssignmentPath to flatten the full assignment
@@ -68,15 +68,15 @@ public:
     //! An alternate archive can be optionally specified. If provided,
     //! assigned material paths will be traversed within that archive
     //! instead of the archive of the object itself.
-    MaterialFlatten( Abc::IObject object,
-                     Abc::IArchive alternateSearchArchive=Abc::IArchive() );
+    MaterialFlatten( Abc::IObject iObject,
+                     Abc::IArchive iAlternateSearchArchive=Abc::IArchive() );
     //TODO: need an append equivalent!
 
     //! Manually append a schema to the inheritance hierarchy
-    void append( IMaterialSchema materialSchema );
+    void append( IMaterialSchema iMaterialSchema );
     
     //! Append the schemas of matching parent material objects
-    void append( IMaterial materialObject );
+    void append( IMaterial iMaterialObject );
     
     
     //! Returns true is there are no schema in the inheritance path
@@ -84,19 +84,19 @@ public:
     
     //! Fill the list with a union of target names defined within
     //! the inheritance hierarchy
-    void getTargetNames( std::vector<std::string> & targetNames );
+    void getTargetNames( std::vector<std::string> & oTargetNames );
     
     //! Fill the list with a union of shader types define for the specified
     //! target within the inheritance hierarchy
-    void getShaderTypesForTarget( const std::string & targetName,
-                                  std::vector<std::string> & shaderTypeNames );
+    void getShaderTypesForTarget( const std::string & iTargetName,
+                                  std::vector<std::string> & oShaderTypeNames );
     
     //! Returns true and fills result with the shader name of first defined
     //! for the target and shaderType within the inheritance hierarchy. False
     //! if not defined.
-    bool getShader( const std::string & target,
-                    const std::string & shaderType,
-                    std::string & result );
+    bool getShader( const std::string & iTarget,
+                    const std::string & iShaderType,
+                    std::string & oResult );
 
     struct ParameterEntry
     {
@@ -125,21 +125,22 @@ public:
     //! shader parameters defined for the target and shader type within
     //! the inheritance hierarchy. Shallower definitions mask deeper ones
     //! (i.e. you'll only get one entry for a given name)
-    void getShaderParameters( const std::string & target,
-                              const std::string & shaderType,
-                              ParameterEntryVector & result );
+    void getShaderParameters( const std::string & iTarget,
+                              const std::string & iShaderType,
+                              ParameterEntryVector & oResult );
 
     ///////////////////////////////////////////////////////////////////////////
     /// network stuff
 
-    void getNetworkTerminalTargetNames(std::vector<std::string> & targetNames);
-    void getNetworkTerminalShaderTypesForTarget( const std::string & targetName,
-        std::vector<std::string> & shaderTypeNames );
+    void getNetworkTerminalTargetNames(std::vector<std::string> & iTargetNames);
+    void getNetworkTerminalShaderTypesForTarget(
+        const std::string & iTargetName,
+        std::vector<std::string> & oShaderTypeNames );
 
-    bool getNetworkTerminal( const std::string & target,
-                             const std::string & shaderType,
-                             std::string & nodeName,
-                             std::string & outputName );
+    bool getNetworkTerminal( const std::string & iTarget,
+                             const std::string & iShaderType,
+                             std::string & oNodeName,
+                             std::string & oOutputName );
 
     typedef std::map<std::string, std::string> StringMap;
     typedef Alembic::Util::shared_ptr<StringMap> StringMapPtr;
@@ -154,9 +155,9 @@ public:
         bool valid();
 
         std::string getName();
-        bool getTarget( std::string & result );
-        bool getNodeType( std::string & result );
-        void getParameters( ParameterEntryVector & result );
+        bool getTarget( std::string & oResult );
+        bool getNodeType( std::string & oResult );
+        void getParameters( ParameterEntryVector & oResult );
         
         struct Connection
         {
@@ -176,15 +177,15 @@ public:
 
         typedef std::vector<Connection> ConnectionVector;
 
-        void getConnections( ConnectionVector & result );
+        void getConnections( ConnectionVector & oResult );
 
     private:
 
         friend class MaterialFlatten;
 
-        NetworkNode( const std::string & name,
-                     SchemaVector & schemas,
-                     StringMapPtr interfaceMappings);
+        NetworkNode( const std::string & iName,
+                     SchemaVector & iSchemas,
+                     StringMapPtr iInterfaceMappings );
 
         std::string m_name;
         std::vector<IMaterialSchema::NetworkNode> m_nodes;
@@ -193,8 +194,8 @@ public:
     };
 
     size_t getNumNetworkNodes();
-    NetworkNode getNetworkNode( size_t index );
-    NetworkNode getNetworkNode( const std::string & nodeName );
+    NetworkNode getNetworkNode( size_t iIndex );
+    NetworkNode getNetworkNode( const std::string & iNodeName );
 
     // TODO: no method to get the node names?
 

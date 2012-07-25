@@ -57,18 +57,18 @@ namespace ALEMBIC_VERSION_NS {
 //! of the library. You may provide an alternative value for custom
 //! solutions that want to make use of this convenience.
 void addMaterialAssignment(
-        Abc::OObject object,
-        const std::string & value,
-        const std::string & propName = MATERIALASSIGN_PROPNAME );
+        Abc::OObject iObject,
+        const std::string & iValue,
+        const std::string & iPropName = MATERIALASSIGN_PROPNAME );
 
 //! Adds a material assignment within a compound property. The conventions
 //! and concerns are identical as with applying to an object. This exists
 //! primarily for custom solutions which want to make use of the convenience
 //! within nested compounds.
 void addMaterialAssignment(
-        Abc::OCompoundProperty prop,
-        const std::string & value,
-        const std::string & propName = MATERIALASSIGN_PROPNAME );
+        Abc::OCompoundProperty iProp,
+        const std::string & iValue,
+        const std::string & iPropName = MATERIALASSIGN_PROPNAME );
 
 //! Adds a local material schema to any object. This is intended for
 //! "has-a" cases such as "this polymesh has a material locally defined."
@@ -76,13 +76,15 @@ void addMaterialAssignment(
 //! The default value for "propName" is officially supported convention
 //! of the library. You may provide an alternative value for custom
 //! solutions that want to make use of this convenience.
-OMaterialSchema addMaterial( Abc::OObject object,
-                             const std::string & propName = MATERIAL_PROPNAME );
+OMaterialSchema addMaterial(
+    Abc::OObject iObject,
+    const std::string & iPropName = MATERIAL_PROPNAME );
 
 //! Adds a local material schema within any compound. This is intended
 //! for the "has-a" cases for nested compound properties.
-OMaterialSchema addMaterial( Abc::OCompoundProperty prop,
-                             const std::string & propName = MATERIAL_PROPNAME );
+OMaterialSchema addMaterial(
+    Abc::OCompoundProperty iProp,
+    const std::string & iPropName = MATERIAL_PROPNAME );
 
 
 //! Returns true and fills result with the value of previously defined
@@ -93,9 +95,9 @@ OMaterialSchema addMaterial( Abc::OCompoundProperty prop,
 //! of the library. You may provide an alternative value for custom
 //! solutions that want to make use of this convenience.
 bool getMaterialAssignmentPath(
-        Abc::IObject object,
-        std::string & result,
-        const std::string & propName = MATERIALASSIGN_PROPNAME );
+    Abc::IObject iObject,
+    std::string & oResult,
+    const std::string & iPropName = MATERIALASSIGN_PROPNAME );
 
 //! Returns true and fills result with the value of previously defined
 //! material assignment path within a given compound property.
@@ -103,9 +105,9 @@ bool getMaterialAssignmentPath(
 //! The common case is at the object level but this is here as a convenince
 //! for custom solutions
 bool getMaterialAssignmentPath(
-        Abc::ICompoundProperty prop,
-        std::string & result,
-        const std::string & propName = MATERIALASSIGN_PROPNAME );
+    Abc::ICompoundProperty iProp,
+    std::string & oResult,
+    const std::string & iPropName = MATERIALASSIGN_PROPNAME );
 
 //! Returns true and fills result a previously defined local material
 //! on this object following the "has a" pattern.
@@ -114,18 +116,18 @@ bool getMaterialAssignmentPath(
 //! of the library. You may provide an alternative value for custom
 //! solutions that want to make use of this convenience.
 bool hasMaterial(
-        Abc::IObject object, 
-        IMaterialSchema & result,
-        const std::string & propName = MATERIAL_PROPNAME );
+        Abc::IObject iObject, 
+        IMaterialSchema & oResult,
+        const std::string & iPropName = MATERIAL_PROPNAME );
 
 //! Returns true and fills result a previously defined local material
 //! within the given compound property. This is useful for solutions
 //! in which another schema wants to contain a material definition
 //! but not advertise it as such at the object level
 bool hasMaterial(
-        Abc::ICompoundProperty compound,
-        IMaterialSchema & result,
-        const std::string & propName = MATERIAL_PROPNAME );
+        Abc::ICompoundProperty iCompound,
+        IMaterialSchema & oResult,
+        const std::string & iPropName = MATERIAL_PROPNAME );
 
 
 } // End namespace ALEMBIC_VERSION_NS

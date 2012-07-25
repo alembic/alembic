@@ -44,16 +44,16 @@ namespace AbcMaterial {
 namespace ALEMBIC_VERSION_NS {
 namespace Util {
 
-std::string buildTargetName( const std::string & target,
-                             const std::string & shaderType,
-                             const std::string & suffix);
+std::string buildTargetName( const std::string & iTarget,
+                             const std::string & iShaderType,
+                             const std::string & iSuffix);
 
-void validateName( const std::string & name,
-                   const std::string & exceptionVariableName );
+void validateName( const std::string & iName,
+                   const std::string & iExceptionVariableName );
 
-void split_tokens( const std::string & value,
-                   std::vector<std::string> & result,
-                   size_t maxSplit = 0 );
+void split_tokens( const std::string & iValue,
+                   std::vector<std::string> & oResult,
+                   size_t iMaxSplit = 0 );
 
 }
 }

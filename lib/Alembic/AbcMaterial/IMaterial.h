@@ -107,26 +107,26 @@ public:
     //! Target name values match an upon convention for a renderer
     //! or application (i.e. "prman")
     //! This gets the target names for the monolithic shaders
-    void getTargetNames( std::vector<std::string> & targetNames );
+    void getTargetNames( std::vector<std::string> & iTargetNames );
 
     //! Fills a list of shader type strings for which either shader or
     //! parameter definitions are locally present for a given target.
     //! Shader type names match an agreed upon convention for shader terminals
     //! such as "surface," "displacement," "light", "coshader_somename."
-    void getShaderTypesForTarget( const std::string & targetName,
-                                  std::vector<std::string> & shaderTypeNames );
+    void getShaderTypesForTarget( const std::string & iTargetName,
+                                  std::vector<std::string> & oShaderTypeNames );
 
     //! Returns true and fills result with the shader name for a given
     //! target and shaderType if locally defined
-    bool getShader( const std::string & target,
-                    const std::string & shaderType,
-                    std::string & result );
+    bool getShader( const std::string & iTarget,
+                    const std::string & iShaderType,
+                    std::string & oResult );
 
     //! Returns the enclosing compound property for the given target and
     //! shader type. Call .valid() on the result to determine whether it's
     //! locally defined or not.
-    Abc::ICompoundProperty getShaderParameters( const std::string & target,
-                                                const std::string & shaderType);
+    Abc::ICompoundProperty getShaderParameters(
+        const std::string & iTarget, const std::string & iShaderType );
 
     //-------------------------------------------------------------------------
 
@@ -135,28 +135,28 @@ public:
     public:
 
         NetworkNode();
-        NetworkNode( Abc::ICompoundProperty compound );
-        NetworkNode( Abc::ICompoundProperty parent,
-                     const std::string & nodeName );
+        NetworkNode( Abc::ICompoundProperty iCompound );
+        NetworkNode( Abc::ICompoundProperty iParent,
+                     const std::string & iNodeName );
 
         bool valid();
 
         std::string getName();
 
-        bool getTarget( std::string & result );
-        bool getNodeType( std::string & result );
+        bool getTarget( std::string & oResult );
+        bool getNodeType( std::string & oResult );
 
         Abc::ICompoundProperty getParameters();
 
         size_t getNumConnections();
-        bool getConnection( size_t index,
-                            std::string & inputName,
-                            std::string & connectedNodeName,
-                            std::string & connectedOutputName );
+        bool getConnection( size_t iIndex,
+                            std::string & oInputName,
+                            std::string & oConnectedNodeName,
+                            std::string & oConnectedOutputName );
 
-        bool getConnection( const std::string & inputName,
-                            std::string & connectedNodeName,
-                            std::string & connectedOutputName );
+        bool getConnection( const std::string & iInputName,
+                            std::string & oConnectedNodeName,
+                            std::string & oConnectedOutputName );
 
     private:
         Abc::ICompoundProperty m_compound;
@@ -171,34 +171,36 @@ public:
     };
 
     size_t getNumNetworkNodes();
-    void getNetworkNodeNames( std::vector<std::string> & names );
+    void getNetworkNodeNames( std::vector<std::string> & oNames );
 
-    NetworkNode getNetworkNode( size_t index );
-    NetworkNode getNetworkNode( const std::string & nodeName );
+    NetworkNode getNetworkNode( size_t iIndex );
+    NetworkNode getNetworkNode( const std::string & iNodeName );
 
-    void getNetworkTerminalTargetNames( std::vector<std::string> & targetNames);
+    void getNetworkTerminalTargetNames(
+        std::vector<std::string> & oTargetNames );
 
-    void getNetworkTerminalShaderTypesForTarget( const std::string & targetName,
-        std::vector<std::string> & shaderTypeNames );
+    void getNetworkTerminalShaderTypesForTarget(
+        const std::string & iTargetName,
+        std::vector<std::string> & oShaderTypeNames );
 
-    bool getNetworkTerminal( const std::string & target,
-                             const std::string & shaderType,
-                             std::string & nodeName,
-                             std::string & outputName );
+    bool getNetworkTerminal( const std::string & iTarget,
+                             const std::string & iShaderType,
+                             std::string & oNodeName,
+                             std::string & oOutputName );
 
     size_t getNumNetworkInterfaceParameterMappings();
-    bool getNetworkInterfaceParameterMapping( size_t index,
-                                              std::string & interfaceParamName,
-                                              std::string & mapToNodeName,
-                                              std::string & mapToParamName );
+    bool getNetworkInterfaceParameterMapping( size_t iIndex,
+                                              std::string & oInterfaceParamName,
+                                              std::string & oMapToNodeName,
+                                              std::string & oMapToParamName );
 
     void getNetworkInterfaceParameterMappingNames(
-        std::vector<std::string> & names );
+        std::vector<std::string> & oNames );
 
     bool getNetworkInterfaceParameterMapping(
-        const std::string & interfaceParamName,
-        std::string & mapToNodeName,
-        std::string & mapToParamName );
+        const std::string & iInterfaceParamName,
+        std::string & oMapToNodeName,
+        std::string & oMapToParamName );
 
     Abc::ICompoundProperty getNetworkInterfaceParameters();
 

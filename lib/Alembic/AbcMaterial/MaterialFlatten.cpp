@@ -48,33 +48,33 @@ MaterialFlatten::MaterialFlatten()
 {
 }
 
-MaterialFlatten::MaterialFlatten( IMaterialSchema materialSchema )
+MaterialFlatten::MaterialFlatten( IMaterialSchema iMaterialSchema )
 : m_networkFlattened( false )
 {
-    m_schemas.push_back( materialSchema );
+    m_schemas.push_back( iMaterialSchema );
 }
 
-MaterialFlatten::MaterialFlatten( IMaterial materialObject )
+MaterialFlatten::MaterialFlatten( IMaterial iMaterialObject )
 : m_networkFlattened( false )
 {
-    append( materialObject );
+    append( iMaterialObject );
 }
 
-MaterialFlatten::MaterialFlatten( Abc::IObject object,
-        Abc::IArchive alternateSearchArchive )
+MaterialFlatten::MaterialFlatten( Abc::IObject iObject,
+        Abc::IArchive iAlternateSearchArchive )
 : m_networkFlattened( false )
 {
     //first apply a local material
     IMaterialSchema localMaterial;
 
-    if ( hasMaterial( object, localMaterial ) )
+    if ( hasMaterial( iObject, localMaterial ) )
     {
         append( localMaterial );
     }
 
     //then apply the inheritance chain of an assigned material
     std::string assignedPath;
-    if ( getMaterialAssignmentPath( object, assignedPath ) )
+    if ( getMaterialAssignmentPath( iObject, assignedPath ) )
     {
         //now walk to that object, confirm it's a material,
         //and then append it.
@@ -83,14 +83,14 @@ MaterialFlatten::MaterialFlatten( Abc::IObject object,
         //eventually, support relative paths
 
         Abc::IObject parent;
-        if ( alternateSearchArchive.valid() &&
-             alternateSearchArchive.getTop().valid() )
+        if ( iAlternateSearchArchive.valid() &&
+             iAlternateSearchArchive.getTop().valid() )
         {
-            parent = alternateSearchArchive.getTop();
+            parent = iAlternateSearchArchive.getTop();
         }
         else
         {
-            parent = object.getArchive().getTop();
+            parent = iObject.getArchive().getTop();
         }
 
 
@@ -143,20 +143,20 @@ MaterialFlatten::MaterialFlatten( Abc::IObject object,
     }
 }
 
-void MaterialFlatten::append( IMaterialSchema materialSchema )
+void MaterialFlatten::append( IMaterialSchema iMaterialSchema )
 {
-    m_schemas.push_back( materialSchema );
+    m_schemas.push_back( iMaterialSchema );
 
     m_networkFlattened = false;
 }
 
 
-void MaterialFlatten::append( IMaterial materialObject )
+void MaterialFlatten::append( IMaterial iMaterialObject )
 {
     //append the schema objects
-    m_schemas.push_back( materialObject.getSchema() );
+    m_schemas.push_back( iMaterialObject.getSchema() );
 
-    Abc::IObject parent = materialObject.getParent();
+    Abc::IObject parent = iMaterialObject.getParent();
 
     while ( parent.valid() )
     {
@@ -180,50 +180,52 @@ bool MaterialFlatten::empty()
     return m_schemas.empty();
 }
 
-void MaterialFlatten::getTargetNames( std::vector<std::string> & targetNames )
+void MaterialFlatten::getTargetNames( std::vector<std::string> & oTargetNames )
 {
     std::set<std::string> uniqueNames;
 
     for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
           ++i )
     {
-        ( *i ).getTargetNames( targetNames );
-        uniqueNames.insert( targetNames.begin(), targetNames.end() );
+        std::vector<std::string> names;
+        ( *i ).getTargetNames( names );
+        uniqueNames.insert( names.begin(), names.end() );
     }
 
-    targetNames.clear();
+    oTargetNames.clear();
 
-    targetNames.reserve( uniqueNames.size() );
-    targetNames.insert( targetNames.end(), uniqueNames.begin(),
-                        uniqueNames.end() );
+    oTargetNames.reserve( uniqueNames.size() );
+    oTargetNames.insert( oTargetNames.end(), uniqueNames.begin(),
+                         uniqueNames.end() );
 }
 
-void MaterialFlatten::getShaderTypesForTarget( const std::string & targetName,
-    std::vector<std::string> & shaderTypeNames )
+void MaterialFlatten::getShaderTypesForTarget( const std::string & iTargetName,
+    std::vector<std::string> & oShaderTypeNames )
 {
     std::set<std::string> uniqueNames;
 
     for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
           ++i )
     {
-        ( *i ).getShaderTypesForTarget( targetName, shaderTypeNames );
-        uniqueNames.insert( shaderTypeNames.begin(), shaderTypeNames.end() );
+        std::vector<std::string> names;
+        ( *i ).getShaderTypesForTarget( iTargetName, names );
+        uniqueNames.insert( names.begin(), names.end() );
     }
 
-    shaderTypeNames.clear();
-    shaderTypeNames.reserve( uniqueNames.size() );
-    shaderTypeNames.insert( shaderTypeNames.end(), uniqueNames.begin(),
+    oShaderTypeNames.clear();
+    oShaderTypeNames.reserve( uniqueNames.size() );
+    oShaderTypeNames.insert( oShaderTypeNames.end(), uniqueNames.begin(),
                             uniqueNames.end() );
 }
 
-bool MaterialFlatten::getShader( const std::string & target,
-                                 const std::string & shaderType,
-                                 std::string & result)
+bool MaterialFlatten::getShader( const std::string & iTarget,
+                                 const std::string & iShaderType,
+                                 std::string & oResult)
 {
     for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
           ++i )
     {
-        if ( ( *i ).getShader( target, shaderType, result ) )
+        if ( ( *i ).getShader( iTarget, iShaderType, oResult ) )
         {
             return true;
         }
@@ -232,25 +234,25 @@ bool MaterialFlatten::getShader( const std::string & target,
     return false;
 }
 
-void MaterialFlatten::getShaderParameters( const std::string & target,
-                                           const std::string & shaderType,
-                                           ParameterEntryVector & result )
+void MaterialFlatten::getShaderParameters( const std::string & iTarget,
+                                           const std::string & iShaderType,
+                                           ParameterEntryVector & oResult )
 {
-    result.clear();
+    oResult.clear();
     std::set<std::string> uniqueNames;
 
     for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
           ++i )
     {
         Abc::ICompoundProperty params = ( *i ).getShaderParameters(
-            target, shaderType );
+            iTarget, iShaderType );
 
         if (!params.valid())
         {
             continue;
         }
 
-        result.reserve(params.getNumProperties());
+        oResult.reserve(params.getNumProperties());
 
         for ( size_t j = 0; j < params.getNumProperties(); ++j )
         {
@@ -264,60 +266,63 @@ void MaterialFlatten::getShaderParameters( const std::string & target,
 
             uniqueNames.insert( propHeader.getName() );
 
-            result.push_back( ParameterEntry( propHeader.getName(),
-                                              params, &propHeader ) );
+            oResult.push_back( ParameterEntry( propHeader.getName(),
+                                               params, &propHeader ) );
         }
     }
 }
 
 void MaterialFlatten::getNetworkTerminalTargetNames(
-    std::vector<std::string> & targetNames )
+    std::vector<std::string> & oTargetNames )
 {
     std::set<std::string> uniqueNames;
 
     for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
           ++i)
     {
-        ( *i ).getNetworkTerminalTargetNames( targetNames );
-        uniqueNames.insert( targetNames.begin(), targetNames.end() );
+        std::vector<std::string> names;
+        ( *i ).getNetworkTerminalTargetNames( names );
+        uniqueNames.insert( names.begin(), names.end() );
     }
 
-    targetNames.clear();
-    targetNames.reserve( uniqueNames.size() );
-    targetNames.insert( targetNames.end(), uniqueNames.begin(),
-                        uniqueNames.end() );
+    oTargetNames.clear();
+    oTargetNames.reserve( uniqueNames.size() );
+    oTargetNames.insert( oTargetNames.end(), uniqueNames.begin(),
+                         uniqueNames.end() );
 }
 
 void MaterialFlatten::getNetworkTerminalShaderTypesForTarget(
-    const std::string & targetName, std::vector<std::string> & shaderTypeNames )
+    const std::string & iTargetName,
+    std::vector<std::string> & oShaderTypeNames )
 {
     std::set<std::string> uniqueNames;
 
     for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
           ++i )
     {
+        std::vector<std::string> names;
         ( *i ).getNetworkTerminalShaderTypesForTarget(
-            targetName, shaderTypeNames );
+            iTargetName, names );
 
-        uniqueNames.insert( shaderTypeNames.begin(), shaderTypeNames.end() );
+        uniqueNames.insert( names.begin(), names.end() );
     }
 
-    shaderTypeNames.clear();
-    shaderTypeNames.reserve( uniqueNames.size() );
-    shaderTypeNames.insert( shaderTypeNames.end(), uniqueNames.begin(),
-                            uniqueNames.end() );
+    oShaderTypeNames.clear();
+    oShaderTypeNames.reserve( uniqueNames.size() );
+    oShaderTypeNames.insert( oShaderTypeNames.end(), uniqueNames.begin(),
+                             uniqueNames.end() );
 }
 
-bool MaterialFlatten::getNetworkTerminal( const std::string & target,
-                                          const std::string & shaderType,
-                                          std::string & nodeName,
-                                          std::string & outputName )
+bool MaterialFlatten::getNetworkTerminal( const std::string & iTarget,
+                                          const std::string & iShaderType,
+                                          std::string & oNodeName,
+                                          std::string & oOutputName )
 {
     for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
           ++i)
     {
-        if ( ( *i ).getNetworkTerminal( target, shaderType, nodeName,
-                                        outputName ) )
+        if ( ( *i ).getNetworkTerminal( iTarget, iShaderType, oNodeName,
+                                        oOutputName ) )
         {
             return true;
         }
@@ -404,31 +409,31 @@ size_t MaterialFlatten::getNumNetworkNodes()
     return m_nodeNames.size();
 }
 
-MaterialFlatten::NetworkNode MaterialFlatten::getNetworkNode( size_t index )
+MaterialFlatten::NetworkNode MaterialFlatten::getNetworkNode( size_t iIndex )
 {
     flattenNetwork();
 
-    if ( index >= m_nodeNames.size() )
+    if ( iIndex >= m_nodeNames.size() )
     {
         return NetworkNode();
     }
 
-    return getNetworkNode( m_nodeNames[index] );
+    return getNetworkNode( m_nodeNames[iIndex] );
 }
 
 MaterialFlatten::NetworkNode MaterialFlatten::getNetworkNode(
-    const std::string & nodeName)
+    const std::string & iNodeName)
 {
     flattenNetwork();
 
     StringMapPtr interfaceMappings;
-    StringMapMap::iterator i = m_nodesToInterfaceMappings.find( nodeName );
+    StringMapMap::iterator i = m_nodesToInterfaceMappings.find( iNodeName );
     if ( i != m_nodesToInterfaceMappings.end() )
     {
         interfaceMappings = ( *i ).second;
     }
 
-   return NetworkNode( nodeName, m_schemas, interfaceMappings );
+   return NetworkNode( iNodeName, m_schemas, interfaceMappings );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -438,25 +443,26 @@ MaterialFlatten::NetworkNode::NetworkNode()
 }
 
 
-MaterialFlatten::NetworkNode::NetworkNode( const std::string & name,
-    SchemaVector & schemas, StringMapPtr interfaceMappings )
-: m_name( name )
-, m_interfaceMappings( interfaceMappings )
+MaterialFlatten::NetworkNode::NetworkNode( const std::string & iName,
+    SchemaVector & iSchemas, StringMapPtr iInterfaceMappings )
+: m_name( iName )
+, m_interfaceMappings( iInterfaceMappings )
 {
-    m_nodes.reserve( schemas.size() );
-    m_networkParameters.reserve( schemas.size() );
+    m_nodes.reserve( iSchemas.size() );
+    m_networkParameters.reserve( iSchemas.size() );
 
-    for ( SchemaVector::iterator i = schemas.begin(); i != schemas.end(); ++i )
+    for ( SchemaVector::iterator i = iSchemas.begin(); i != iSchemas.end();
+          ++i )
     {
         IMaterialSchema & schema = ( *i );
 
-        IMaterialSchema::NetworkNode node = schema.getNetworkNode( name );
+        IMaterialSchema::NetworkNode node = schema.getNetworkNode( iName );
         if ( node.valid() )
         {
             m_nodes.push_back( node );
         }
 
-        Abc::ICompoundProperty networkParams = 
+        Abc::ICompoundProperty networkParams =
             schema.getNetworkInterfaceParameters();
 
         if ( networkParams.valid() )
@@ -485,12 +491,12 @@ std::string MaterialFlatten::NetworkNode::getName()
     return m_name;
 }
 
-bool MaterialFlatten::NetworkNode::getTarget( std::string & result )
+bool MaterialFlatten::NetworkNode::getTarget( std::string & oResult )
 {
     for ( std::vector<IMaterialSchema::NetworkNode>::iterator i =
           m_nodes.begin(); i != m_nodes.end(); ++i)
     {
-        if ( ( *i ).getTarget( result ) && !result.empty() )
+        if ( ( *i ).getTarget( oResult ) && !oResult.empty() )
         {
             return true;
         }
@@ -500,12 +506,12 @@ bool MaterialFlatten::NetworkNode::getTarget( std::string & result )
 }
 
 
-bool MaterialFlatten::NetworkNode::getNodeType( std::string & result )
+bool MaterialFlatten::NetworkNode::getNodeType( std::string & oResult )
 {
     for ( std::vector<IMaterialSchema::NetworkNode>::iterator i =
           m_nodes.begin(); i != m_nodes.end(); ++i )
     {
-        if ( ( *i ).getNodeType( result ) && !result.empty() )
+        if ( ( *i ).getNodeType( oResult ) && !oResult.empty() )
         {
             return true;
         }
@@ -515,9 +521,9 @@ bool MaterialFlatten::NetworkNode::getNodeType( std::string & result )
 }
 
 void
-MaterialFlatten::NetworkNode::getParameters( ParameterEntryVector & result )
+MaterialFlatten::NetworkNode::getParameters( ParameterEntryVector & oResult )
 {
-    result.clear();
+    oResult.clear();
     std::set<std::string> uniqueNames;
 
     if ( m_interfaceMappings )
@@ -542,8 +548,9 @@ MaterialFlatten::NetworkNode::getParameters( ParameterEntryVector & result )
                 if ( const AbcCoreAbstract::PropertyHeader * header =
                      networkParams.getPropertyHeader( networkParamName ) )
                 {
-                    result.push_back( ParameterEntry( nodeParamName,
-                                                      networkParams, header ) );
+                    oResult.push_back( ParameterEntry( nodeParamName,
+                                                       networkParams,
+                                                       header ) );
                     uniqueNames.insert( nodeParamName );
                     break;
                 }
@@ -575,16 +582,16 @@ MaterialFlatten::NetworkNode::getParameters( ParameterEntryVector & result )
 
             uniqueNames.insert(propHeader.getName());
 
-            result.push_back( ParameterEntry( propHeader.getName(),
-                                              nodeParameters, &propHeader ) );
+            oResult.push_back( ParameterEntry( propHeader.getName(),
+                                               nodeParameters, &propHeader ) );
         }
     }
 }
 
 
-void MaterialFlatten::NetworkNode::getConnections( ConnectionVector & result )
+void MaterialFlatten::NetworkNode::getConnections( ConnectionVector & oResult )
 {
-    result.clear();
+    oResult.clear();
 
     std::set<std::string> uniqueNames;
 
@@ -608,7 +615,7 @@ void MaterialFlatten::NetworkNode::getConnections( ConnectionVector & result )
                 }
 
                 uniqueNames.insert( inputName );
-                result.push_back( NetworkNode::Connection( inputName,
+                oResult.push_back( NetworkNode::Connection( inputName,
                     connectedNodeName, connectedOutputName ) );
             }
         }

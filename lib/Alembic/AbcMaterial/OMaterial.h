@@ -99,42 +99,43 @@ public:
     //! "ShaderName's" value is an identifier meaningful to the target
     //! application (i.e. "paintedplastic," "fancy_spot_light").
     //! It's only valid to call this once per target/shaderType combo.
-    void setShader( const std::string & target,
-                    const std::string & shaderType,
-                    const std::string & shaderName );
+    void setShader( const std::string & iTarget,
+                    const std::string & iShaderType,
+                    const std::string & iShaderName );
     
     //! Declare and retrieve a container for storing properties representing
     //! parameters for the target and shaderType. You put them in there
     //! yourself since there are no restrictions on type or sampling other
     //! than what's appropriate and meaningful for the target application.
     //! Repeated calls will return the same object.
-    Abc::OCompoundProperty getShaderParameters( const std::string & target,
-                                                const std::string & shaderType);
+    Abc::OCompoundProperty getShaderParameters(
+        const std::string & iTarget, const std::string & iShaderType );
 
     //add node by name, target, type, set node connection?, set node 
     //terminals? 
 
-    void addNetworkNode( const std::string & nodeName,
-                         const std::string & target,
-                         const std::string & nodeType );
+    void addNetworkNode( const std::string & iNodeName,
+                         const std::string & iTarget,
+                         const std::string & iNodeType );
 
-    void setNetworkNodeConnection( const std::string & nodeName,
-                                   const std::string & inputName,
-                                   const std::string & connectedNodeName,
-                                   const std::string & connectedOutputName );
+    void setNetworkNodeConnection( const std::string & iNodeName,
+                                   const std::string & iInputName,
+                                   const std::string & iConnectedNodeName,
+                                   const std::string & iConnectedOutputName );
 
     Abc::OCompoundProperty
-    getNetworkNodeParameters( const std::string & nodeName );
+    getNetworkNodeParameters( const std::string & iNodeName );
 
-    void setNetworkTerminal( const std::string & target,
-                             const std::string & shaderType,
-                             const std::string & nodeName,
-                             const std::string & outputName = "" );
+    void setNetworkTerminal( const std::string & iTarget,
+                             const std::string & iShaderType,
+                             const std::string & iNodeName,
+                             const std::string & iOutputName = "" );
 
     void
-    setNetworkInterfaceParameterMapping( const std::string & interfaceParamName,
-                                         const std::string & mapToNodeName,
-                                         const std::string & mapToParamName );
+    setNetworkInterfaceParameterMapping(
+        const std::string & iInterfaceParamName,
+        const std::string & iMapToNodeName,
+        const std::string & iMapToParamName );
 
     Abc::OCompoundProperty getNetworkInterfaceParameters();
 
