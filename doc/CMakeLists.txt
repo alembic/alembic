@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2012,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -15,10 +15,9 @@
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## *       Neither the name of Sony Pictures Imageworks, nor
-## Industrial Light & Magic, nor the names of their contributors may be used
-## to endorse or promote products derived from this software without specific
-## prior written permission.
+## *       Neither the name of Industrial Light & Magic nor the names of
+## its contributors may be used to endorse or promote products derived
+## from this software without specific prior written permission.
 ##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,28 +33,51 @@
 ##
 ##-*****************************************************************************
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+FIND_PACKAGE( Sphinx REQUIRED )
 
-PROJECT(Alembic_bootstrap)
-
-SET(CMAKE_VERBOSE_MAKEFILE TRUE)
-
-IF(BOOTSTRAP_BOOST AND NOT Boost_FOUND)
-    ADD_SUBDIRECTORY(boost_trycompile)
+# set default Sphinx theme
+IF( NOT DEFINED SPHINX_THEME )
+    SET( SPHINX_THEME default )
 ENDIF()
 
-IF(BOOTSTRAP_ZLIB AND NOT ZLIB_FOUND)
-    ADD_SUBDIRECTORY(zlib_trycompile)
+# Sphinx themes location
+IF( NOT DEFINED SPHINX_THEME_DIR )
+    SET( SPHINX_THEME_DIR )
 ENDIF()
 
-IF(BOOTSTRAP_HDF5 AND NOT HDF5_FOUND)
-    ADD_SUBDIRECTORY(hdf5_trycompile)
-ENDIF()
+# configured documentation tools and intermediate build results
+SET(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
 
-IF(BOOTSTRAP_ILMBASE AND NOT ILMBASE_FOUND)
-    ADD_SUBDIRECTORY(ilmbase_trycompile)
-ENDIF()
+# location of Sphinx source files
+SET(SPHINX_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
-IF(BOOTSTRAP_PYILMBASE AND NOT PYILMBASE_FOUND)
-    ADD_SUBDIRECTORY(pyilmbase_trycompile)
-ENDIF()
+# Sphinx cache with pickled ReST documents
+SET(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
+
+# HTML output directory
+SET(SPHINX_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/html")
+
+# copy the conf.py file and parse @ vars
+CONFIGURE_FILE(
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/conf.py.in"
+    "${BINARY_BUILD_DIR}/conf.py"
+    @ONLY)
+
+# attemp to get boost python in LD_LIBRARY_PATH
+# http://www.cmake.org/Bug/view.php?id=5145
+GET_FILENAME_COMPONENT(BOOST_LIBRARY_DIR ${BOOST_PYTHON_LIBRARY} PATH)
+SET(ENV{LD_LIBRARY_PATH} ${BOOST_LIBRARY_DIR})
+MESSAGE(STATUS "LD_LIBRARY_PATH: " $ENV{LD_LIBRARY_PATH})
+
+# runs the Sphinx command
+ADD_CUSTOM_TARGET(docs
+    ${SPHINX_EXECUTABLE}
+    -b html
+    -c "${BINARY_BUILD_DIR}"
+    -d "${SPHINX_CACHE_DIR}"
+    "${SPHINX_SOURCE_DIR}"
+    "${SPHINX_HTML_DIR}"
+    COMMENT "Building Alembic Python bindings documentation")
+
+ADD_DEPENDENCIES(docs alembicmodule)
+

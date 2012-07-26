@@ -44,6 +44,7 @@
 
 
 IF(NOT DEFINED ILMBASE_ROOT)
+    MESSAGE( "ILMBASE_ROOT is undefined" )
     IF ( ${CMAKE_HOST_UNIX} )
         IF( ${DARWIN} )
           # TODO: set to default install path when shipping out

@@ -15,10 +15,9 @@
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## *       Neither the name of Sony Pictures Imageworks, nor
-## Industrial Light & Magic, nor the names of their contributors may be used
-## to endorse or promote products derived from this software without specific
-## prior written permission.
+## *       Neither the name of Industrial Light & Magic nor the names of
+## its contributors may be used to endorse or promote products derived
+## from this software without specific prior written permission.
 ##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,28 +33,14 @@
 ##
 ##-*****************************************************************************
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-PROJECT(Alembic_bootstrap)
+FIND_PACKAGE( PyIlmBase )
 
-SET(CMAKE_VERBOSE_MAKEFILE TRUE)
-
-IF(BOOTSTRAP_BOOST AND NOT Boost_FOUND)
-    ADD_SUBDIRECTORY(boost_trycompile)
+IF( PYILMBASE_FOUND )
+  SET( ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} )
+  SET( ALEMBIC_PYILMBASE_LIBRARIES ${ALEMBIC_PYILMBASE_LIBS} )
+  SET( ALEMBIC_PYILMBASE_FOUND 1 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise" )
+ELSE()
+  SET( ALEMBIC_PYILMBASE_FOUND 0 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise" )
 ENDIF()
 
-IF(BOOTSTRAP_ZLIB AND NOT ZLIB_FOUND)
-    ADD_SUBDIRECTORY(zlib_trycompile)
-ENDIF()
-
-IF(BOOTSTRAP_HDF5 AND NOT HDF5_FOUND)
-    ADD_SUBDIRECTORY(hdf5_trycompile)
-ENDIF()
-
-IF(BOOTSTRAP_ILMBASE AND NOT ILMBASE_FOUND)
-    ADD_SUBDIRECTORY(ilmbase_trycompile)
-ENDIF()
-
-IF(BOOTSTRAP_PYILMBASE AND NOT PYILMBASE_FOUND)
-    ADD_SUBDIRECTORY(pyilmbase_trycompile)
-ENDIF()

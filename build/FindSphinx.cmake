@@ -1,6 +1,6 @@
-##-*****************************************************************************
+#-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2012,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -15,10 +15,9 @@
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## *       Neither the name of Sony Pictures Imageworks, nor
-## Industrial Light & Magic, nor the names of their contributors may be used
-## to endorse or promote products derived from this software without specific
-## prior written permission.
+## *       Neither the name of Industrial Light & Magic nor the names of
+## its contributors may be used to endorse or promote products derived
+## from this software without specific prior written permission.
 ##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,28 +33,29 @@
 ##
 ##-*****************************************************************************
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-
-PROJECT(Alembic_bootstrap)
-
-SET(CMAKE_VERBOSE_MAKEFILE TRUE)
-
-IF(BOOTSTRAP_BOOST AND NOT Boost_FOUND)
-    ADD_SUBDIRECTORY(boost_trycompile)
-ENDIF()
-
-IF(BOOTSTRAP_ZLIB AND NOT ZLIB_FOUND)
-    ADD_SUBDIRECTORY(zlib_trycompile)
-ENDIF()
-
-IF(BOOTSTRAP_HDF5 AND NOT HDF5_FOUND)
-    ADD_SUBDIRECTORY(hdf5_trycompile)
-ENDIF()
-
-IF(BOOTSTRAP_ILMBASE AND NOT ILMBASE_FOUND)
-    ADD_SUBDIRECTORY(ilmbase_trycompile)
-ENDIF()
-
-IF(BOOTSTRAP_PYILMBASE AND NOT PYILMBASE_FOUND)
-    ADD_SUBDIRECTORY(pyilmbase_trycompile)
+IF(DEFINED USE_PYALEMBIC)
+    IF(NOT USE_PYALEMBIC)
+        MESSAGE(STATUS "Skipping Sphinx docs")
+    ELSE()
+        FIND_FILE(ALEMBIC_PYILMBASE_PYIMATH_MODULE
+          NAMES imathmodule.so
+          PATHS ${ALEMBIC_PYILMBASE_PYIMATH_MODULE_DIRECTORY}
+        )
+        FIND_PROGRAM(SPHINX_EXECUTABLE 
+          NAMES sphinx-build
+          HINTS
+          $ENV{SPHINX_DIR}
+          PATH_SUFFIXES bin\r\n  DOC "Sphinx documentation generator"
+        )
+        INCLUDE(FindPackageHandleStandardArgs)
+        FIND_PACKAGE_HANDLE_STANDARD_ARGS(Sphinx DEFAULT_MSG\r\n  SPHINX_EXECUTABLE
+        )
+        MARK_AS_ADVANCED(
+          SPHINX_EXECUTABLE
+        )
+        MESSAGE(STATUS "Found Sphinx: ${SPHINX_EXECUTABLE}")
+        MESSAGE(STATUS "Found imath module: ${ALEMBIC_PYILMBASE_PYIMATH_MODULE}")
+    ENDIF()
+ELSE()
+    MESSAGE(STATUS "USE_PYALEMBIC undefined")
 ENDIF()
