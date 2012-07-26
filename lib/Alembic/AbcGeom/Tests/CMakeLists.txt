@@ -91,13 +91,13 @@ ADD_TEST( AbcGeom_SubDFaceSet_TEST AbcGeom_SubDFaceSetTest )
 
 ##-*****************************************************************************
 ADD_EXECUTABLE( AbcGeom_SchemaMatchingTest
-		SchemaMatchingTest.cpp )
+                SchemaMatchingTest.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_SchemaMatchingTest ${TEST_LIBS} )
 ADD_TEST( AbcGeom_SchemaMatching_TEST AbcGeom_SchemaMatchingTest )
 
 #-******************************************************************************
 ADD_EXECUTABLE( AbcGeom_XformTest
-		XformTests.cpp )
+                XformTests.cpp )
 TARGET_LINK_LIBRARIES( AbcGeom_XformTest  ${TEST_LIBS} )
 ADD_TEST( AbcGeom_Xform_TEST  AbcGeom_XformTest  )
 

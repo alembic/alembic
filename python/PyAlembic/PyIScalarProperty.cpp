@@ -360,7 +360,7 @@ void register_iscalarproperty()
     // List and Iterator for scalar samples
     //
     class_<SampleList<Abc::IScalarProperty> >
-	( "ScalarSampleList", no_init )
+        ( "ScalarSampleList", no_init )
         .def( "__len__", &SampleList<Abc::IScalarProperty>::len )
         .def( "__getitem__", &SampleList<Abc::IScalarProperty>::getItem )
         .def( "__iter__", &SampleList<Abc::IScalarProperty>::getIterator,

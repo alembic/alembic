@@ -293,7 +293,7 @@ void register_iarrayproperty()
     // List and Iterator for array samples
     //
     class_< SampleList<Abc::IArrayProperty> >
-	( "ArraySampleList", no_init )
+        ( "ArraySampleList", no_init )
         .def( "__len__", &SampleList<Abc::IArrayProperty>::len )
         .def( "__getitem__", &SampleList<Abc::IArrayProperty>::getItem )
         .def( "__iter__", &SampleList<Abc::IArrayProperty>::getIterator,

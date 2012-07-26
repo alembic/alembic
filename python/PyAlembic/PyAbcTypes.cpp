@@ -46,7 +46,7 @@ void register_abctypes()
     // Argument
     //
     class_<Abc::Argument>( "Argument", no_init )
-	.def( init<AbcU::uint32_t>() )
+    .def( init<AbcU::uint32_t>() )
         .def( init<const AbcA::MetaData&>() )
         .def( init<const AbcA::TimeSamplingPtr&>() )
         .def( init<Abc::SchemaInterpMatching>() )

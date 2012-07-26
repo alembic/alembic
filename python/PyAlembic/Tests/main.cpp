@@ -97,7 +97,7 @@ main (int argc, char *argv[])
 #ifdef PLATFORM_WINDOWS
     WSADATA info;
     if (WSAStartup(MAKEWORD(2,0), &info)) {
-	//	    throw "Could not start WSA";
+    //    throw "Could not start WSA";
     }
 
     //

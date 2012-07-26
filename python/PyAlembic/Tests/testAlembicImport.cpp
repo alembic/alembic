@@ -381,8 +381,8 @@ testAlembicImport()
     }
     catch (const exception &e)
     {
-	cerr << "Unexpected exception: " << e.what() << endl;
-	assert(false);
+        cerr << "Unexpected exception: " << e.what() << endl;
+        assert(false);
     }
 
     cout << "ok\n" << endl;
