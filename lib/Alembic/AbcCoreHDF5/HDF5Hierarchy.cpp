@@ -195,11 +195,12 @@ void HDF5Hierarchy::addAttr( hid_t iParent, const char *iName )
                      "A property header mask alreasy exists." );
 
         info.m_mask = new MaskInfo;
-        info.m_mask->first = 0;
+        info.m_mask->m_numFields = 0;
 
         ReadSmallArray( iParent, iName, H5T_STD_U32LE,
                         H5T_NATIVE_UINT32, 5, 
-                        info.m_mask->first, ( void * ) info.m_mask->second );
+                        info.m_mask->m_numFields,
+                        ( void * ) info.m_mask->m_data );
     }
 
     // meta data string
@@ -290,8 +291,8 @@ void HDF5Hierarchy::readMaskInfo( hobj_ref_t iParentRef,
     }
 
     MaskInfo& p = *it->m_mask;
-    oNumFields = p.first;
-    memcpy( oData, p.second, sizeof( uint32_t ) * oNumFields );
+    oNumFields = p.m_numFields;
+    memcpy( oData, p.m_data, sizeof( uint32_t ) * oNumFields );
 }
 
 //-*****************************************************************************
@@ -359,17 +360,17 @@ void HDF5Hierarchy::makeCompactObjectHierarchy(
                 oAttrNames.push_back( itc->m_name );
 
                 // mask
-                if ( itc->m_mask && itc->m_mask->first > 0 )
+                if ( itc->m_mask && itc->m_mask->m_numFields > 0 )
                 {
                     MaskInfo& p = *itc->m_mask;
                     oHasMask.push_back( 1 );
 
-                    oMaskBits.push_back( p.first );
-                    oMaskBits.push_back( p.second[0] );
-                    oMaskBits.push_back( p.second[1] );
-                    oMaskBits.push_back( p.second[2] );
-                    oMaskBits.push_back( p.second[3] );
-                    oMaskBits.push_back( p.second[4] );
+                    oMaskBits.push_back( p.m_numFields );
+                    oMaskBits.push_back( p.m_data[0] );
+                    oMaskBits.push_back( p.m_data[1] );
+                    oMaskBits.push_back( p.m_data[2] );
+                    oMaskBits.push_back( p.m_data[3] );
+                    oMaskBits.push_back( p.m_data[4] );
                 }
                 else
                 {
@@ -449,8 +450,9 @@ void HDF5Hierarchy::extractFromCompactObjectHierarchy(
                 const uint32_t* data = &iMaskBits[idxMask*6+1];
 
                 info.m_mask = new MaskInfo;
-                info.m_mask->first = length;
-                memcpy( info.m_mask->second, data, sizeof(uint32_t) * length );
+                info.m_mask->m_numFields = length;
+                memcpy( info.m_mask->m_data,
+                        data, sizeof(uint32_t) * length );
 
                 idxMask++;
             }

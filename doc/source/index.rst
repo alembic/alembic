@@ -6,47 +6,33 @@
 :mod:`alembic` -- Alembic Python Bindings Documentation
 =======================================================
 
-This module provides Python bindings for `Alembic <http://alembic.io>`_, the 
-open computer graphics interchange framework.
+Alembic is an open source geometry caching format that promotes interoperability
+between authoring tools. From `alembic.io <http://alembic.io>`_:
 
-
-Introduction
-============
-
-Alembic distills complex, animated scenes into a non-procedural, application-independent 
+*Alembic distills complex, animated scenes into a non-procedural, application-independent 
 set of baked geometric results. This ‘distillation' of scenes into baked geometry is 
 exactly analogous to the distillation of lighting and rendering scenes into rendered 
-image data.
+image data.*
 
-For more information about Alembic, please visit the Alembic website at 
-http://alembic.io.
+This module provides Python bindings for Alembic.
 
 
 Getting Started
 ---------------
 
-The following sections should get you started using Alembic in Python.
- 
-**Alembic Quickstart**: An overview of basic Alembic tasks.
+The Alembic Python bindings have been tested with 
+`Python 2.6 <http://www.python.org/download/releases/2.6.8/>`_, 
+and require `PyImath <http://github.com/openexr/openexr>`_ and 
+`Boost::Python <http://boost.org>`_ libraries to run. 
+In order to use Alembic in Python, you must first build both Alembic and the Alembic 
+Python bindings using the bootstrap script: `build/bootstrap/alembic_bootstrap.py`.
 
-.. toctree::
-   :maxdepth: 1
-
-   quickstart
-
-**Usage Examples**: More detailed usage examples are explored here.
+**Usage Examples**: Some basic Alembic tasks are explored here.
 
 .. toctree::
    :maxdepth: 1
 
    examples
-
-**Module Index**: A comprehensive list of all object classes and functions.
-
-.. toctree::
-   :maxdepth: 2
-
-   alembic/index
 
 
 Get Alembic

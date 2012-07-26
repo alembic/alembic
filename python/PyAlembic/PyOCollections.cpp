@@ -87,7 +87,9 @@ void register_ocollections()
         .def( "createCollection",
               &AbcC::OCollectionsSchema::createCollection,
               ( arg( "name" ), 
-                arg( "argument" ), arg( "argument" ), arg( "argument" ) ) )
+                arg( "argument" ) = Abc::Argument(), 
+                arg( "argument" ) = Abc::Argument(), 
+                arg( "argument" ) = Abc::Argument() ) )
         .def( "getNumCollections", &AbcC::OCollectionsSchema::getNumCollections )
         .def( "getCollection", getCollectionByIndex,
               ( arg( "index" ) ) )

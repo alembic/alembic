@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2012,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -59,3 +59,4 @@ INSTALL( FILES ${H_FILES}
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
 
 ADD_SUBDIRECTORY( Tests )
+

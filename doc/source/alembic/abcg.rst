@@ -1,5 +1,5 @@
-alembic.AbcG
-============
+:mod:`alembic.AbcG` -- AbcGeom
+==============================
 
 .. automodule:: alembic.AbcG
    :members:

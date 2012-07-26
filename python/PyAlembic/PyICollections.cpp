@@ -65,7 +65,7 @@ void register_icollections()
     //
     class_<AbcC::ICollectionsSchema,
            bases<Abc::ISchema<AbcC::CollectionsSchemaInfo> > >(
-          "ICollections",
+          "ICollectionsSchema",
           "The ICollectionsSchema class is a collections schema reader.",
           init<>() )
         .def( init<Abc::ICompoundProperty,

@@ -168,7 +168,6 @@ private:
     void addAttr( hid_t iParent, const char *iName );
 
     friend class ObjectVisitor;
-    typedef std::pair<size_t, uint32_t[5]> MaskInfo;
 
     struct ChildInfo
     {
@@ -182,6 +181,12 @@ private:
         {     
             return x.m_name < y.m_name;
         }
+    };
+
+    struct MaskInfo
+    {
+        size_t          m_numFields;
+        uint32_t        m_data[5];
     };
 
     struct AttrInfo

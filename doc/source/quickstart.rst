@@ -14,7 +14,7 @@ Alembic Library
 ---------------
 
 In order to use Alembic in Python, you must first build both Alembic and the
-Alembic Python bindings. Run the bootstrap script from the source root: ::
+Alembic Python bindings using the bootstrap script from the source root: ::
 
 > build/bootstrap/alembic_bootstrap.py [OPTIONS]
 
@@ -37,12 +37,12 @@ Usage Basics
 
 Importing Alembic is simply, ::
 
-> import alembic
+    > import alembic
 
 Namespaces
 ----------
 
-Each module has a namespace which is similar to the name of the module itsel, but
+Each module has a namespace which is similar to the name of the module itself, but
 shortened for brevity.
 
 .. toctree::
@@ -54,14 +54,21 @@ shortened for brevity.
 Reading an Archive
 ------------------
 
-To read an archive, also referred to as an IArchive, ::
+Reading an Alembic archive, also referred to as an IArchive: ::
 
-> iarch = alembic.IArchive('file.abc')
+    > iarch = alembic.Abc.IArchive('octopus.abc')
+    > print "Reading", iarch.getName()
+    Reading octopus.abc
 
 
 Hierarchy Navigation
 --------------------
 
+Usually, we want to start by getting the top of the object hierarchy: ::
+
+    > top = iarch.getTop()
+    > top.getName()
+    'ABC'
 
 
 Getting the Data
