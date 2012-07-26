@@ -108,8 +108,12 @@ void read()
     TESTING_ASSERT(!group2.getSchema().getCollection(45));
     TESTING_ASSERT(!group2.getSchema().getCollection("potato"));
 
-    Abc::IStringArrayProperty prop = group.getSchema().getCollection(0);
+    Abc::IStringArrayProperty prop = group.getSchema().getCollection("prop");
     Abc::IStringArrayProperty prop2 = group.getSchema().getCollection("cool");
+    TESTING_ASSERT(group.getSchema().getCollection(0).getName() == "cool" ||
+        group.getSchema().getCollection(0).getName() == "prop");
+    TESTING_ASSERT(group.getSchema().getCollection(1).getName() == "cool" ||
+        group.getSchema().getCollection(1).getName() == "prop");
     TESTING_ASSERT(prop2.getMetaData().get("coupe") == "de ville");
     TESTING_ASSERT(archive.getTimeSampling(1) == prop2.getTimeSampling());
     TESTING_ASSERT(prop2.getNumSamples() == 2);
