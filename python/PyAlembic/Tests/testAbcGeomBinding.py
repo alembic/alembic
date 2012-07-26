@@ -1,0 +1,10 @@
+import testGeomParam
+import testXform
+import testPolyMesh
+import testCurves
+import testNurbs
+import testPoints
+import testXform
+import testCamera
+import testSubDFaceSet
+import testLight
