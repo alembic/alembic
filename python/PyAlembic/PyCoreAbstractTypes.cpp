@@ -318,6 +318,7 @@ void register_coreabstracttypes()
               TimeSamplingOverloads::getNearIndex,
               ( arg( "time" ), arg( "numSamples" ) ),
               "Find the valid index with the closest time to the given time" )
+        .def( self == self )
         ;
 
     // TimeSampling time vector

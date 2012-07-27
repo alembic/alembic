@@ -327,7 +327,8 @@ void register_oscalarproperty()
 
     // OScalarProperty
     //
-    class_<Abc::OScalarProperty>(
+    class_<Abc::OScalarProperty,
+           bases<Abc::OBasePropertyT<AbcA::ScalarPropertyWriterPtr> > >(
          "OScalarProperty",
          "The OScalarProperty class is a scalar property writer",
          init<>( "Create an empty OScalarProperty" ) )

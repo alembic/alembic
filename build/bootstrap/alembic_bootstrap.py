@@ -944,14 +944,14 @@ Boost with STATIC, VERSIONED, and MULTITHREADED options turned on.
 
     if options.boost_python_library:
         boost_python_library = options.boost_python_library
-    elif not options.disable_pyalembic:
+    elif options.enable_pyalembic:
         boost_python_library = str( find_boost_python_lib( cmakecache ) )
 
     cmake_args.append( boost_include_dir )
     cmake_args.append( boost_thread_library )
 
     # we only need boost::python for alembic python bindings
-    if not options.disable_pyalembic and boost_python_library:
+    if options.enable_pyalembic and boost_python_library:
         cmake_args.append( boost_python_library )
 
     if options.generator:
@@ -1101,6 +1101,9 @@ def configure_pyilmbase( options, srcdir, cmakecache ):
 
 ##-*****************************************************************************
 def runBootstrap( options, srcdir, cmakecache = None ):
+    """
+    config various libs
+    """
     configure_boost( options, srcdir, cmakecache )
     print
     print
@@ -1118,7 +1121,7 @@ def runBootstrap( options, srcdir, cmakecache = None ):
     print
 
     # we only need pyilmbase/pyimath if we're building pyalembic
-    if not options.disable_pyalembic:
+    if options.enable_pyalembic:
         configure_pyilmbase( options, srcdir, cmakecache )
         print
         print
@@ -1158,23 +1161,29 @@ def runCMake( opts, srcdir, ranBootstrap = False ):
         else:
             cmake_extra_args += " -U QUIET"
 
-        if opts.disable_prman:
+        if opts.prman:
+            cmake_extra_args += ' -D USE_PRMAN:BOOL="TRUE"'
+        else:
             cmake_extra_args += ' -D USE_PRMAN:BOOL="FALSE"'
             opts.prman = None
 
-        if opts.disable_arnold:
+        if opts.arnold:
+            cmake_extra_args += ' -D USE_ARNOLD:BOOL="TRUE"'
+        else:
             cmake_extra_args += ' -D USE_ARNOLD:BOOL="FALSE"'
             opts.arnold = None
 
-        if opts.disable_maya:
+        if opts.maya:
+            cmake_extra_args += ' -D USE_MAYA:BOOL="TRUE"'
+        else:
             cmake_extra_args += ' -D USE_MAYA:BOOL="FALSE"'
             opts.maya = None
 
-        if opts.disable_pyalembic:
+        if opts.enable_pyalembic:
+            cmake_extra_args += ' -D USE_PYALEMBIC:BOOL="TRUE"'
+        else:
             cmake_extra_args += ' -D USE_PYALEMBIC:BOOL="FALSE"'
             opts.pyalembic = None
-        else:
-            cmake_extra_args += ' -D USE_PYALEMBIC:BOOL="TRUE"'
 
         if opts.maya:
             cmake_extra_args += ' -D MAYA_ROOT:STRING="%s"' %opts.maya
@@ -1268,16 +1277,18 @@ def makeParser( mk_cmake_basename ):
                              default=None, help="Filesystem subtree location of "
                              "library dependencies")
 
+    # App roots / triggers plugin builds
     configOptions.add_option( "--with-maya", dest="maya", type="string",
-                              default=None, help="Maya location",
+                              default=None, help="Maya location, build Maya plugins",
                               metavar="MAYA_ROOT" )
     configOptions.add_option( "--with-prman", dest="prman", type="string",
-                              default=None, help="PRMAN location",
+                              default=None, help="PRMAN location, bulid prman procedural",
                               metavar="PRMAN_ROOT" )
     configOptions.add_option( "--with-arnold", dest="arnold", type="string",
-                              default=None, help="ARNOLD location",
+                              default=None, help="ARNOLD location, build arnold plugin",
                               metavar="ARNOLD_ROOT" )
 
+    # HDF5 lib
     configOptions.add_option( "--hdf5_include_dir", dest="hdf5_include_dir",
                               type="string", default=None,
                               help="hdf5_include_dir location",
@@ -1287,6 +1298,7 @@ def makeParser( mk_cmake_basename ):
                               help="hdf5_library location",
                               metavar="HDF5_HDF5_LIBRARY" )
 
+    # IlmBase lib
     configOptions.add_option( "--ilmbase_include_dir", dest="ilmbase_include_dir",
                               type="string", default=None,
                               help="ilmbase_include_dir location",
@@ -1297,6 +1309,7 @@ def makeParser( mk_cmake_basename ):
                               help="ilmbase_library_dir location",
                               metavar="ILMBASE_LIBRARY_DIR" )
 
+    # PyIlmBase lib
     configOptions.add_option( "--pyilmbase_include_dir", dest="pyilmbase_include_dir",
                               type="string", default=None,
                               help="pyilmbase_include_dir location",
@@ -1312,6 +1325,7 @@ def makeParser( mk_cmake_basename ):
                               help="pyilmbase_module location",
                               metavar="PYILMBASE_MODULE_DIR" )
 
+    # Boost lib
     configOptions.add_option( "--boost_include_dir", dest="boost_include_dir",
                               type="string", default=None,
                               help="boost_include_dir location",
@@ -1327,6 +1341,7 @@ def makeParser( mk_cmake_basename ):
                               help="libboost_python library filepath",
                               metavar="BOOST_PYTHON_LIBRARY" )
 
+    # Zlib
     configOptions.add_option( "--zlib_include_dir", dest="zlib_include_dir",
                               type="string", default=None,
                               help="zlib_include_dir location",
@@ -1365,21 +1380,10 @@ def makeParser( mk_cmake_basename ):
                               default=None, help="CXXFLAGS to pass to the compiler",
                               metavar="CXXFLAGS" )
 
-    configOptions.add_option( "--disable-prman", dest="disable_prman",
+    # Alembic Python bindings
+    configOptions.add_option( "--enable-pyalembic", dest="enable_pyalembic",
                               action="store_true", default=False,
-                              help="Disable PRMAN" )
-
-    configOptions.add_option( "--disable-arnold", dest="disable_arnold",
-                              action="store_true", default=False,
-                              help="Disable Arnold" )
-
-    configOptions.add_option( "--disable-maya", dest="disable_maya",
-                              action="store_true", default=False,
-                              help="Disable Maya" )
-
-    configOptions.add_option( "--disable-pyalembic", dest="disable_pyalembic",
-                              action="store_true", default=False,
-                              help="Disable Alembic Python bindings" )
+                              help="Build the Alembic Python bindings" )
 
     parser.add_option_group(configOptions)
 
