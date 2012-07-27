@@ -19,9 +19,10 @@ that exist today. However we have reserved the name "abc" for a target
 we will define at a later time; the hope is that this material target would
 become the standard for material interchange.
 
-- AbcLight. Alembic now supports the concept of a light. You can optionally
-specify a camera, and all properties about the light are expressed via an
-IMaterialSchema stored in the ILight object.
+- AbcLight. Alembic now supports the concept of a light. Light objects are 
+distinct objects that contain both a camera and a material schema.  The material
+on the light controls the shader parameters associated with the light and the
+camera can contain all relevant camera-like light information.
 
 - Python bindings.  At long last the Alembic team has finally completed the
 python bindings to allow scripters to access the full power of the alembic
@@ -37,9 +38,11 @@ datastructure within the HDF5 file that maps the HDF5 hierarchy to HDF5 object
 references which results in lookups that are  much faster. You pay the price
 of a slight disk size increase and memory footprint.
 
-- Maya plugin updates. You can now read and write "user properties". You can
-now change the cache timing on import and set it to loop, reverse, or bounce
-playback.
+- Maya plugin updates. The ".userProperties" compound property that is available
+on most Alembic objects is now supported for both read and write with full 
+support for animated values. Additional parameters have also been added to the 
+AlembicNode to allow cache retiming along with support for loop, reverse and
+bounce.
 
 - Boost removal from the core. We are no longer dependent on boost to give us
 an implementation of a shared pointer (for example) so we were able to remove 
