@@ -53,7 +53,7 @@ public:
         return _p.getChild( _iter++ );
     }
 private:
-    Abc::IObject& _p;
+    Abc::IObject _p;
     AbcA::index_t _iter;
     AbcA::index_t _end;
 };
@@ -80,7 +80,7 @@ public:
         return new ChildIterator( _p );
     }
 private:
-    Abc::IObject& _p;
+    Abc::IObject _p;
 };
 
 //-*****************************************************************************

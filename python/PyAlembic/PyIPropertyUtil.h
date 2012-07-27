@@ -75,7 +75,7 @@ public:
         return getValue<PROP>( _p, _iter++, _returnType );
     }
 private:
-    PROP&         _p;
+    PROP          _p;
     AbcA::index_t _iter;
     AbcA::index_t _end;
     ReturnTypeEnum _returnType;
@@ -104,7 +104,7 @@ public:
         return new SampleIterator<PROP>( _p, _returnType );
     }
 private:
-    PROP&          _p;
+    PROP           _p;
     ReturnTypeEnum _returnType;
 };
 

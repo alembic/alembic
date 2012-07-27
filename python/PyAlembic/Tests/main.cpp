@@ -72,9 +72,18 @@ runTests (int argc, char *argv[])
     {
         std::string code = 
             "import testCacheCube\n"
-            "import testCacheCube2\n"
+            "import testCacheCube2\n";
+
+        PyRun_SimpleString (code.c_str());
+    }
+
+    // Test 5: Geom, Material and Collection bindings, iterators 
+    {
+        std::string code = 
+            "import testIterators\n";
             "import testAbcGeomBinding\n"
-            "import testMaterial\n";
+            "import testMaterial\n"
+            "import testCollections\n";
 
         PyRun_SimpleString (code.c_str());
     }

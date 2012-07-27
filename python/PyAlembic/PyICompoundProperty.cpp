@@ -54,7 +54,7 @@ public:
         return _p.getPropertyHeader( _iter++ );
     }
 private:
-    Abc::ICompoundProperty& _p;
+    Abc::ICompoundProperty _p;
     AbcA::index_t _iter;
     AbcA::index_t _end;
 };
@@ -81,7 +81,7 @@ public:
         return new PropertyHeaderIterator( _p );
     }
 private:
-    Abc::ICompoundProperty& _p;
+    Abc::ICompoundProperty _p;
 };
 
 //-*****************************************************************************

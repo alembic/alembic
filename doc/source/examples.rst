@@ -10,12 +10,6 @@ Alembic has a completely separate but parallel class hierarchy for input and out
 maintains the important abstraction that Alembic is for storage, representation, and archival
 as opposed to being a dynamic scene manipulation framework.
 
-We'll start by targeting the thing you'd most often want to do - write and read
-animated, geometric primitives. To do this, we will be using two main
-modules: :doc:`alembic.Abc </alembic/abc>`, which provides the basic Alembic Abstractions,
-and :doc:`alembic.AbcG </alembic/abcg>`, which implements specific Geometric primitives
-on top of alembic.Abc.
-
 Importing Alembic is simply: ::
 
     >>> import alembic
@@ -40,6 +34,13 @@ shortened for brevity.
 Setting & Getting Data
 ======================
 
+We'll start by targeting the thing you'd most often want to do - write and read
+animated, geometric primitives. To do this, we will be using two main
+modules: :doc:`alembic.Abc </alembic/abc>`, which provides the basic Alembic Abstractions,
+and :doc:`alembic.AbcG </alembic/abcg>`, which implements specific Geometric primitives
+on top of alembic.Abc (this example is taken from python/PyAlembic/Tests/testPolyMesh.py).
+
+
 Archives
 --------
 
@@ -56,7 +57,7 @@ the archive file with this filename: ::
 Objects
 -------
 
-(insert something about objects and schemas here.)
+.. TODO: insert something about objects and schemas here.
 
 Create a PolyMesh class object. An :py:class:`.OPolyMesh` is-an OObject that has-an 
 :py:class:`.OPolyMeshSchema`. An OPolyMeshSchema is-an :py:class:`.OCompoundProperty`. In this case, 
@@ -175,13 +176,101 @@ two unique samples in them. ::
     >>>     assert positions[i] == verts[i]
 
 
-Accumulating a Transform
-========================
-
-
 Finding a Mesh By Name
 ======================
 
+In this example, we'll crawl through an IArchive, and find a mesh by a particular name. This example is 
+adapted from the previous example and we're only bothering to match against the
+:py:class:`.IPolyMesh` and :py:class:`.ISubD` object classes. 
 
-Write a Set of Particles
+::
+
+    def visitObject(obj, name):
+        md = obj.getMetaData()
+        if IPolyMesh.matches(md) or ISubD.matches(md):
+            if obj.getName() == name:
+                print "Found it!", obj.getFullName()
+                return
+        for childObject in obj.children:
+            visitObject(childObject, name)
+
+    arch = IArchive("octopus.abc")
+    visitObject(arch.getTop(), "octopus_lowShape")
+
+
+Accumulating a Transform
 ========================
+
+In this example, given a node in an Alembic Archive, we'll figure out what the final xform is. We 
+proceed from the leaf to the root. We're going to change :py:func:`visitObject()` slightly. Instead of checking the object's 
+name, we're going to call a new function, :py:func:`getBounds()`. This example is adapted from
+
+http://code.google.com/p/alembic/wiki/CookingWithAlembic#Accumulating_a_Transform
+
+::
+    
+    gBounds = imath.Box3d()
+    gBounds.makeEmpty()
+    kWrapExisting = alembic.Abc.WrapExistingFlag.kWrapExisting
+
+    def accumXform(xf, obj):
+        if IXform.matches(obj.getHeader()):
+            x = IXform(obj.getParent(), obj.getName())
+            xs = x.getSchema().getValue()
+            xf *= xs.getMatrix()
+
+    def getFinalMatrix(obj):
+        xf = imath.M44d()
+        xf.makeIdentity()
+        parent = obj.getParent()
+        while parent:
+            accumXform(xf, parent)
+            parent = parent.getParent()
+        return xf
+
+    def getBounds(obj):
+        bnds = imath.Box3d()
+        bnds.makeEmpty()
+        md = obj.getMetaData()
+        if IPolyMesh.matches(md) or ISubD.matches(md):
+            mesh = IPolyMesh(obj.getParent(), obj.getName())
+            ms = mesh.getSchema()
+            positions = ms.getValue().getPositions()
+            numPoints = len(positions)
+            for i in range(numPoints):
+                bnds.extendBy(imath.V3d(positions[i]))
+        bnds.extendBy(imath.transform(bnds, xf))
+        gBounds.extendBy(bnds)
+
+    def visitObject(obj):
+        md = obj.getMetaData()
+        if IPolyMesh.matches(md) or ISubD.matches(md):
+            getBounds(obj)
+        for childObject in obj.children:
+            visitObject(childObject)
+
+
+Write Non-Standard Data for a PolyMesh
+======================================
+
+In this example, we'll store some non-standard data in a PolyMesh. This would only be supported by custom
+workflows. Here we need an :py:class:`.OCompoundProperty` to use as the parent of our user Property.
+
+::
+
+    archive = OArchive("crazyPolyMesh1.abc")
+
+    meshObj = OPolyMesh(archive.getTop(), "crazy")
+    mesh = meshObj.getSchema()
+
+    myCrazyDataContainer = mesh.getUserProperties()
+    mass = ODoubleProperty(myCrazyDataContainer, "mass")
+    mesh_samp = OPolyMeshSchemaSample(
+            OP3fGeomParamSample(verts, numVerts),
+            OInt32GeomParamSample(indices, numIndices),
+            OInt32GeomParamSample(counts, numCounts)
+        )
+
+    mesh.set(mesh_samp)
+    mass.set(2.0)
+
