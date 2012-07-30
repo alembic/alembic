@@ -36,7 +36,6 @@
 
 #include <Foundation.h>
 #include <PyOBaseProperty.h>
-#include <PyOPropertyUtil.h>
 #include <PyTypeBindingTraits.h>
 
 using namespace boost::python;

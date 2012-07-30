@@ -1,3 +1,4 @@
+#-******************************************************************************
 #
 # Copyright (c) 2012,
 #  Sony Pictures Imageworks Inc. and
@@ -31,15 +32,15 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-#-*****************************************************************************
+#-******************************************************************************
 
-import imath
-import alembic
-import traceback
+from imath import *
+from alembic.Abc import *
+from alembic.AbcGeom import *
 
 testList = []
 
-kConstantScope = alembic.AbcG.GeometryScope.kConstantScope
+kConstantScope = GeometryScope.kConstantScope
 
 def almostEqual(a0, a1, error=0.01):
     return abs(a0 - a1) <= error
@@ -47,31 +48,30 @@ def almostEqual(a0, a1, error=0.01):
 def lightOut():
     """write out light archive"""
 
-    archive = alembic.Abc.OArchive("light1.abc")
-    emptyLightObj = alembic.AbcG.OLight(archive.getTop(), "emptyLight")
-    lightObj = alembic.AbcG.OLight(archive.getTop(), "myLight" )
+    archive = OArchive("light1.abc")
+    emptyLightObj = OLight(archive.getTop(), "emptyLight")
+    lightObj = OLight(archive.getTop(), "myLight" )
 
-    samp = alembic.AbcG.CameraSample()
+    samp = CameraSample()
     lightObj.getSchema().setCameraSample( samp )
 
-    samp = alembic.AbcG.CameraSample( -0.35, 0.75, 0.1, 0.5 )
-    samp.setChildBounds( imath.Box3d( imath.V3d( 0.0, 0.1, 0.2 ),
-                                      imath.V3d( 0.3, 0.4, 0.5 ) ) )
+    samp = CameraSample( -0.35, 0.75, 0.1, 0.5 )
+    samp.setChildBounds( Box3d( V3d( 0.0, 0.1, 0.2 ), V3d( 0.3, 0.4, 0.5 ) ) )
 
     lightObj.getSchema().setCameraSample( samp )
 
     arg = lightObj.getSchema().getArbGeomParams()
-    param = alembic.AbcG.OFloatGeomParam( arg, "test", False,
+    param = OFloatGeomParam( arg, "test", False,
                                           kConstantScope, 1 )
     user = lightObj.getSchema().getUserProperties()
-    alembic.Abc.OFloatProperty( user, "test" )
+    OFloatProperty( user, "test" )
 
 def lightIn():
     """read in light archive"""
 
-    archive = alembic.Abc.IArchive("light1.abc")
-    emptyLightObj = alembic.AbcG.ILight(archive.getTop(), "emptyLight" )
-    lightObj = alembic.AbcG.ILight(archive.getTop(), "myLight" )
+    archive = IArchive("light1.abc")
+    emptyLightObj = ILight(archive.getTop(), "emptyLight" )
+    lightObj = ILight(archive.getTop(), "myLight" )
 
     assert not emptyLightObj.getSchema().getArbGeomParams()
     assert not emptyLightObj.getSchema().getUserProperties()
@@ -112,4 +112,3 @@ for test in testList:
     print "passed"
 
 print ""
-

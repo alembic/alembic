@@ -1,3 +1,4 @@
+#-******************************************************************************
 #
 # Copyright (c) 2012,
 #  Sony Pictures Imageworks Inc. and
@@ -31,12 +32,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-#-*****************************************************************************
+#-******************************************************************************
 
 from imath import *
+from alembic.AbcCoreAbstract import *
 from alembic.Abc import *
-from alembic.AbcA import *
-from alembic.AbcG import *
+from alembic.AbcGeom import *
 from curvesData import *
 
 testList = []

@@ -1,3 +1,4 @@
+#-******************************************************************************
 #
 # Copyright (c) 2012,
 #  Sony Pictures Imageworks Inc. and
@@ -31,40 +32,36 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-#-*****************************************************************************
+#-******************************************************************************
 
-import imath
-import alembic
-import traceback
-import meshData
+from imath import *
+from alembic.Abc import *
+from alembic.AbcGeom import *
+from meshData import *
 
 testList = []
 
-kFaceSetExclusive = alembic.AbcG.FaceSetExclusivity.kFaceSetExclusive
+kFaceSetExclusive = FaceSetExclusivity.kFaceSetExclusive
 
 def subDFaceSetOut():
     """Tests OSubD and OFaceSet"""
     
-    archive = alembic.Abc.OArchive("facesetSubD1.abc")
+    archive = OArchive("facesetSubD1.abc")
 
-    meshyObj = alembic.AbcG.OSubD(archive.getTop(), "subd")
+    meshyObj = OSubD(archive.getTop(), "subd")
     mesh = meshyObj.getSchema()
 
-    mesh_samp = alembic.AbcG.OSubDSchemaSample(
-            meshData.verts, 
-            meshData.indices, 
-            meshData.counts
-            )
+    mesh_samp = OSubDSchemaSample( verts, indices, counts )
     
-    creases = imath.IntArray(24)
-    corners = imath.IntArray(24)
-    creaseLengths = imath.IntArray(24)
-    creaseSharpnesses = imath.FloatArray(24)
-    cornerSharpnesses = imath.FloatArray(24)
+    creases = IntArray(24)
+    corners = IntArray(24)
+    creaseLengths = IntArray(24)
+    creaseSharpnesses = FloatArray(24)
+    cornerSharpnesses = FloatArray(24)
 
     for i in range(24):
-        creases[i] = meshData.indices[i]
-        corners[i] = meshData.indices[i]
+        creases[i] = indices[i]
+        corners[i] = indices[i]
         cornerSharpnesses[i] = 1.0e38
 
     for i in range(6):
@@ -75,8 +72,8 @@ def subDFaceSetOut():
     mesh_samp.setCorners(corners, cornerSharpnesses)
 
     # UVs
-    uvsamp = alembic.AbcG.OV2fGeomParamSample(meshData.uvs,
-            alembic.AbcG.GeometryScope.kFacevaryingScope)
+    uvsamp = OV2fGeomParamSample(uvs,
+            GeometryScope.kFacevaryingScope)
     mesh_samp.setUVs(uvsamp)
 
     # set the sample
@@ -99,11 +96,11 @@ def subDFaceSetOut():
     #print "created faceset called", my_face_set_obj.getName()
 
     # our FaceSet is composed of faces 1-3
-    face_nums = imath.IntArray(3)
+    face_nums = IntArray(3)
     face_nums[0] = 1
     face_nums[1] = 2
     face_nums[2] = 3
-    my_face_set_samp = alembic.AbcG.OFaceSetSchemaSample(face_nums)
+    my_face_set_samp = OFaceSetSchemaSample(face_nums)
 
     # faceset is visible, doesn't change
     my_face_set.set(my_face_set_samp)
@@ -118,8 +115,8 @@ def subDFaceSetOut():
 def subDFaceSetIn():
     """tests ISubD and IFaceSet"""
 
-    archive = alembic.Abc.IArchive("facesetSubD1.abc")
-    meshyObj = alembic.AbcG.ISubD(archive.getTop(), "subd")
+    archive = IArchive("facesetSubD1.abc")
+    meshyObj = ISubD(archive.getTop(), "subd")
     mesh = meshyObj.getSchema()
     
     assert mesh.getNumSamples() == 3
@@ -138,7 +135,7 @@ def subDFaceSetIn():
     faceSet = faceSetObj.getSchema()
     assert faceSet.getFaceExclusivity() == kFaceSetExclusive
 
-    faceSetSamp0 = faceSet.getValue(alembic.Abc.ISampleSelector(0))
+    faceSetSamp0 = faceSet.getValue(ISampleSelector(0))
     faces = faceSetSamp0.getFaces()
     assert faces[0] == 1 and faces[1] == 2 and faces[2] == 3
 
@@ -150,20 +147,17 @@ def subDFaceSetIn():
     uvsamp = uv.getIndexedValue()
     assert uvsamp.getIndices()[1] == 1
     uv2 = uvsamp.getVals()[2]
-    assert uv2 == imath.V2f(1.0, 1.0)
+    assert uv2 == V2f(1.0, 1.0)
 
-    samp1 = mesh.getValue(alembic.Abc.ISampleSelector(1))
-    assert samp1.getSelfBounds().min() == imath.V3d(-1.0, -1.0, -1.0)
-    assert samp1.getSelfBounds().max() == imath.V3d(1.0, 1.0, 1.0 )
+    samp1 = mesh.getValue(ISampleSelector(1))
+    assert samp1.getSelfBounds().min() == V3d(-1.0, -1.0, -1.0)
+    assert samp1.getSelfBounds().max() == V3d(1.0, 1.0, 1.0 )
     assert samp1.getInterpolateBoundary() == 1
 
-    samp2 = mesh.getValue(alembic.Abc.ISampleSelector(2))
-    assert samp2.getSelfBounds().min() == imath.V3d(-1.0, -1.0, -1.0)
-    assert samp2.getSelfBounds().max() == imath.V3d(1.0, 1.0, 1.0)
+    samp2 = mesh.getValue(ISampleSelector(2))
+    assert samp2.getSelfBounds().min() == V3d(-1.0, -1.0, -1.0)
+    assert samp2.getSelfBounds().max() == V3d(1.0, 1.0, 1.0)
     assert samp2.getInterpolateBoundary() == 0
-
-    #print "mesh num verts", len(samp2.getPositions())
-    #print "0th vertex from mesh sample", samp2.getPositions()[0]
 
 def testSubDFaceSetBinding():
     subDFaceSetOut()

@@ -121,26 +121,35 @@ BOOST_PYTHON_MODULE( alembic )
     package.attr( "__path__" ) = "alembic";
 
     {
-        object abcaModule(
-            handle<>( borrowed( PyImport_AddModule( "alembic.AbcA" ) ) ) );
-        scope().attr( "AbcA" ) = abcaModule;
-        scope within( abcaModule );
+        const char* scopeName = "AbcCoreAbstract";
+        const char* moduleName = "alembic.AbcCoreAbstract";
+        object module( handle<>( borrowed( PyImport_AddModule(
+                                            moduleName ) ) ) );
+        scope().attr( scopeName ) = module;
+        scope within( module );
+
         register_coreabstracttypes();
     }
 
     {
-        object abcuModule(
-            handle<>( borrowed( PyImport_AddModule( "alembic.Util" ) ) ) );
-        scope().attr( "Util" ) = abcuModule;
-        scope within( abcuModule );
+        const char* scopeName = "Util";
+        const char* moduleName = "alembic.Util";
+
+        object module( handle<>( borrowed( PyImport_AddModule(
+                                            moduleName ) ) ) );
+        scope().attr( scopeName ) = module;
+        scope within( module );
+
         register_utiltypes();
     }
 
     {
-        object abcModule(
-            handle<>( borrowed( PyImport_AddModule( "alembic.Abc" ) ) ) );
-        scope().attr( "Abc" ) = abcModule;
-        scope within( abcModule );
+        const char* scopeName = "Abc";
+        const char* moduleName = "alembic.Abc";
+        object module( handle<>( borrowed( PyImport_AddModule(
+                                            moduleName ) ) ) );
+        scope().attr( scopeName ) = module;
+        scope within( module );
 
         register_abctypes();
         register_archiveinfo();
@@ -163,10 +172,12 @@ BOOST_PYTHON_MODULE( alembic )
     }
 
     {
-        object abcgModule(
-            handle<>( borrowed( PyImport_AddModule( "alembic.AbcG" ) ) ) );
-        scope().attr( "AbcG" ) = abcgModule;
-        scope within( abcgModule );
+        const char* scopeName = "AbcGeom";
+        const char* moduleName = "alembic.AbcGeom";
+        object module( handle<>( borrowed( PyImport_AddModule(
+                                            moduleName ) ) ) );
+        scope().attr( scopeName ) = module;
+        scope within( module );
 
         register_abcgeomtypes();
 
@@ -211,19 +222,24 @@ BOOST_PYTHON_MODULE( alembic )
    }
 
    {
-        object abccModule(
-            handle<>( borrowed( PyImport_AddModule( "alembic.AbcC" ) ) ) );
-        scope().attr( "AbcC" ) = abccModule;
-        scope within( abccModule );
+        const char* scopeName = "AbcCollection";
+        const char* moduleName = "alembic.AbcCollection";
+        object module( handle<>( borrowed( PyImport_AddModule(
+                                            moduleName ) ) ) );
+        scope().attr( scopeName ) = module;
+        scope within( module );
+
         register_icollections();
         register_ocollections();
    }
 
    {
-        object abcmModule(
-            handle<>( borrowed( PyImport_AddModule( "alembic.AbcM" ) ) ) );
-        scope().attr( "AbcM" ) = abcmModule;
-        scope within( abcmModule );
+        const char* scopeName = "AbcMaterial";
+        const char* moduleName = "alembic.AbcMaterial";
+        object module( handle<>( borrowed( PyImport_AddModule(
+                                            moduleName ) ) ) );
+        scope().attr( scopeName ) = module;
+        scope within( module );
 
         register_imaterial();
         register_omaterial();

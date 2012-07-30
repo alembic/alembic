@@ -1,3 +1,4 @@
+#-******************************************************************************
 #
 # Copyright (c) 2012,
 #  Sony Pictures Imageworks Inc. and
@@ -31,11 +32,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-#-*****************************************************************************
+#-******************************************************************************
 
-import alembic, sys
+import sys
+
+from alembic.AbcCoreAbstract import *
 from alembic.Abc import *
-from alembic.AbcA import *
 from alembic.Util import *
 
 def visitSmallArraySamples( iProp, iIndent ):

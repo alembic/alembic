@@ -49,7 +49,7 @@ void register_coreabstracttypes()
             "The DataType class is a description of how an element of a "
             "sample in a Scalar or an Array property is stored",
             init<>( "Create an unknown DataType with extent 0" ) )
-    .def( init<AbcU::PlainOldDataType, AbcU::uint8_t>(
+        .def( init<AbcU::PlainOldDataType, AbcU::uint8_t>(
                   ( arg( "plaintOldDataType"), arg( "extent" ) = 1 ),
                   "Create a DataType with the given pod type and extent" ) )
         .def( "getPod",

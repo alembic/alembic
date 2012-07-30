@@ -1,3 +1,4 @@
+#-******************************************************************************
 #
 # Copyright (c) 2012,
 #  Sony Pictures Imageworks Inc. and
@@ -31,16 +32,17 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-#-*****************************************************************************
+#-******************************************************************************
 
-import imath
-import alembic
-import traceback
+from imath import *
+from alembic.AbcCoreAbstract import *
+from alembic.Abc import *
+from alembic.AbcGeom import *
 
 testList = []
 
-kScaleFilmBackOperation = alembic.AbcG.FilmBackXformOperationType.kScaleFilmBackOperation
-kTranslateFilmBackOperation = alembic.AbcG.FilmBackXformOperationType.kTranslateFilmBackOperation
+kScaleFilmBackOperation = FilmBackXformOperationType.kScaleFilmBackOperation
+kTranslateFilmBackOperation = FilmBackXformOperationType.kTranslateFilmBackOperation
 
 def almostEqual(a0, a1, error=0.01):
     return abs(a0 - a1) <= error
@@ -48,18 +50,18 @@ def almostEqual(a0, a1, error=0.01):
 def cameraOut():
     """write out camera archive"""
 
-    archive = alembic.Abc.OArchive("camera1.abc")
-    simpleCamObj = alembic.AbcG.OCamera(archive.getTop(), "simpleCam")
-    samp = alembic.AbcG.CameraSample()
+    archive = OArchive("camera1.abc")
+    simpleCamObj = OCamera(archive.getTop(), "simpleCam")
+    samp = CameraSample()
     simpleCamObj.getSchema().set(samp)
 
-    camObj = alembic.AbcG.OCamera(archive.getTop(), "cam")
+    camObj = OCamera(archive.getTop(), "cam")
     camSchema = camObj.getSchema()
-    samp.addOp(alembic.AbcG.FilmBackXformOp(kScaleFilmBackOperation, "scale"))
-    samp.addOp(alembic.AbcG.FilmBackXformOp(kTranslateFilmBackOperation, "offset"))
+    samp.addOp(FilmBackXformOp(kScaleFilmBackOperation, "scale"))
+    samp.addOp(FilmBackXformOp(kTranslateFilmBackOperation, "offset"))
     camSchema.set(samp)
 
-    samp[0].setScale(imath.V2d(2.0, 3.0))
+    samp[0].setScale(V2d(2.0, 3.0))
     samp[1].setChannelValue(0, 4.0)
     samp[1].setChannelValue(1, 5.0)
 
@@ -72,14 +74,14 @@ def cameraOut():
 def cameraIn():
     """read in camera archive"""
 
-    archive = alembic.Abc.IArchive("camera1.abc")
-    identity = imath.M33d()
+    archive = IArchive("camera1.abc")
+    identity = M33d()
     identity.makeIdentity()
 
-    samp = alembic.AbcG.CameraSample()
+    samp = CameraSample()
 
-    simpleCam = alembic.AbcG.ICamera(archive.getTop(), "simpleCam")
-    cam = alembic.AbcG.ICamera(archive.getTop(), "cam")
+    simpleCam = ICamera(archive.getTop(), "simpleCam")
+    cam = ICamera(archive.getTop(), "cam")
 
     # test camera "simpleCam" default values
     samp = simpleCam.getSchema().getValue()
@@ -139,7 +141,7 @@ def cameraIn():
     assert samp.getFilmBackMatrix() == identity 
 
     # test cam values at sample 1
-    samp = cam.getSchema().getValue(alembic.Abc.ISampleSelector(1))
+    samp = cam.getSchema().getValue(ISampleSelector(1))
     assert almostEqual(samp.getFocalLength(), 35.0) 
     assert almostEqual(samp.getHorizontalAperture(), 4.8) 
     assert almostEqual(samp.getVerticalAperture(), 2.4) 
