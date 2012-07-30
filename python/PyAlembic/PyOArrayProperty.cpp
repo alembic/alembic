@@ -237,7 +237,8 @@ void register_oarrayproperty()
 
     // OArrayProperty
     //
-    class_<Abc::OArrayProperty>(
+    class_<Abc::OArrayProperty,
+           bases<Abc::OBasePropertyT<AbcA::ArrayPropertyWriterPtr> > >(
         "OArrayProperty",
         "The OArrayProperty class is an array property writer",
         init<>( "Create an empty OArrayProperty" ) )

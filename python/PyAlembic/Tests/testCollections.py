@@ -1,3 +1,4 @@
+#-*****************************************************************************
 #
 # Copyright (c) 2012,
 #  Sony Pictures Imageworks Inc. and
@@ -42,6 +43,7 @@ testList = []
 
 def collectionOut():
     """test OCollecions Python bindings"""
+
     archive = OArchive("Collection.abc")
     test = OObject(archive.getTop(), "test")
 
@@ -70,15 +72,13 @@ def collectionOut():
 
     assert group.getSchema().getNumCollections() == 1
 
-    def x():
-        group.getSchema().createCollection("cool", md, ts)
-        assert group.getSchema().getCollection(1).getMetaData().get("coupe") == "de ville"
-
-        strVec = StringArray(2)
-        strVec[0] = "/foo"
-        strVec[1] = "/bar"
-        group.getSchema().getCollection(1).setValue(strVec)
-    x()
+    group.getSchema().createCollection("cool", md, ts)
+    assert ( group.getSchema().getCollection(1).getMetaData().get("coupe")
+             == "de ville" )
+    strVec = StringArray(2)
+    strVec[0] = "/foo"
+    strVec[1] = "/bar"
+    group.getSchema().getCollection(1).setValue(strVec)
 
     strVec = StringArray(1)
     strVec[0] = "potato"
@@ -86,6 +86,7 @@ def collectionOut():
 
 def collectionIn():
     """test ICollections Python bindings"""
+
     archive = IArchive("Collection.abc")
 
     test = IObject(archive.getTop(), "test")
@@ -98,12 +99,13 @@ def collectionIn():
     assert not group2.getSchema().getCollection(45)
     assert not group2.getSchema().getCollection("potato")
 
-    prop = group.getSchema().getCollection(0)
+    prop = group.getSchema().getCollection("prop")
     prop2 = group.getSchema().getCollection("cool")
     assert prop2.getMetaData().get("coupe") == "de ville"
     assert archive.getTimeSampling(1) == prop2.getTimeSampling()
     assert prop2.getNumSamples() == 2
-    samp = prop.getValue(1)
+    samp = prop.getValue(0)
+    assert len(samp) == 3
     assert samp[0] == "/a/b/c/1"
     assert samp[1] == "/a/b/c/2"
     assert samp[2] == "/a/b/c/3"

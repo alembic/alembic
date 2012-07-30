@@ -33,51 +33,58 @@
 ##
 ##-*****************************************************************************
 
-FIND_PACKAGE( Sphinx REQUIRED )
+IF(DEFINED USE_PYALEMBIC AND NOT USE_PYALEMBIC)
 
-# set default Sphinx theme
-IF( NOT DEFINED SPHINX_THEME )
-    SET( SPHINX_THEME default )
+    MESSAGE(STATUS "Skipping finding Sphinx")
+
+ELSEIF(DEFINED USE_PYALEMBIC AND USE_PYALEMBIC)
+
+    FIND_PACKAGE( Sphinx REQUIRED )
+
+    # set default Sphinx theme
+    IF( NOT DEFINED SPHINX_THEME )
+        SET( SPHINX_THEME default )
+    ENDIF()
+
+    # Sphinx themes location
+    IF( NOT DEFINED SPHINX_THEME_DIR )
+        SET( SPHINX_THEME_DIR )
+    ENDIF()
+
+    # configured documentation tools and intermediate build results
+    SET(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
+
+    # location of Sphinx source files
+    SET(SPHINX_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source")
+
+    # Sphinx cache with pickled ReST documents
+    SET(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
+
+    # HTML output directory
+    SET(SPHINX_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/html")
+
+    # copy the conf.py file and parse @ vars
+    CONFIGURE_FILE(
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/conf.py.in"
+        "${BINARY_BUILD_DIR}/conf.py"
+        @ONLY)
+
+    # attemp to get boost python in LD_LIBRARY_PATH
+    # http://www.cmake.org/Bug/view.php?id=5145
+    GET_FILENAME_COMPONENT(BOOST_LIBRARY_DIR ${BOOST_PYTHON_LIBRARY} PATH)
+    SET(ENV{LD_LIBRARY_PATH} ${BOOST_LIBRARY_DIR})
+    MESSAGE(STATUS "LD_LIBRARY_PATH: " $ENV{LD_LIBRARY_PATH})
+
+    # runs the Sphinx command
+    ADD_CUSTOM_TARGET(docs
+        ${SPHINX_EXECUTABLE}
+        -b html
+        -c "${BINARY_BUILD_DIR}"
+        -d "${SPHINX_CACHE_DIR}"
+        "${SPHINX_SOURCE_DIR}"
+        "${SPHINX_HTML_DIR}"
+        COMMENT "Building Alembic Python bindings documentation")
+
+    ADD_DEPENDENCIES(docs alembicmodule)
+
 ENDIF()
-
-# Sphinx themes location
-IF( NOT DEFINED SPHINX_THEME_DIR )
-    SET( SPHINX_THEME_DIR )
-ENDIF()
-
-# configured documentation tools and intermediate build results
-SET(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
-
-# location of Sphinx source files
-SET(SPHINX_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source")
-
-# Sphinx cache with pickled ReST documents
-SET(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
-
-# HTML output directory
-SET(SPHINX_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/html")
-
-# copy the conf.py file and parse @ vars
-CONFIGURE_FILE(
-    "${CMAKE_CURRENT_SOURCE_DIR}/source/conf.py.in"
-    "${BINARY_BUILD_DIR}/conf.py"
-    @ONLY)
-
-# attemp to get boost python in LD_LIBRARY_PATH
-# http://www.cmake.org/Bug/view.php?id=5145
-GET_FILENAME_COMPONENT(BOOST_LIBRARY_DIR ${BOOST_PYTHON_LIBRARY} PATH)
-SET(ENV{LD_LIBRARY_PATH} ${BOOST_LIBRARY_DIR})
-MESSAGE(STATUS "LD_LIBRARY_PATH: " $ENV{LD_LIBRARY_PATH})
-
-# runs the Sphinx command
-ADD_CUSTOM_TARGET(docs
-    ${SPHINX_EXECUTABLE}
-    -b html
-    -c "${BINARY_BUILD_DIR}"
-    -d "${SPHINX_CACHE_DIR}"
-    "${SPHINX_SOURCE_DIR}"
-    "${SPHINX_HTML_DIR}"
-    COMMENT "Building Alembic Python bindings documentation")
-
-ADD_DEPENDENCIES(docs alembicmodule)
-
