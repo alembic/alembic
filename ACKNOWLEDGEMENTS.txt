@@ -10,13 +10,14 @@ Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 individuals for their contributions to Alembic:
 
 ©2010 Christopher Horvath
-©2011 Luxology LLC
-©2011 Autodesk, Inc.
-©2011 Side Effects Software Inc.
+©2011-2012 Luxology LLC
+©2011-2012 Autodesk, Inc.
+©2011-2012 Side Effects Software Inc.
 ©2011 Mark Elendt, Senior Mathematician, Side Effects Software Inc.
 ©2011 Nicholas Yue
-©2011 Fabric Technologies, Inc.
+©2011 Fabric Engine, Inc.
 ©2011 Luma Pictures
+©2012 Solid Angle S.L.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -50,4 +51,4 @@ Thank You
 
 
 
-Last Changed - 2012-01-18
+Last Changed - 2012-07-27
