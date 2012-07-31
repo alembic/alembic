@@ -80,7 +80,10 @@ void walkFromNode(Mat::MaterialFlatten & mafla,
     
     Mat::MaterialFlatten::NetworkNode::ConnectionVector connections;
     node.getConnections(connections);
-    
+    Mat::MaterialFlatten::NetworkNode::Connection a("foo", "bar", "baz");
+    Mat::MaterialFlatten::NetworkNode::Connection b("foo", "bar", "boop");
+    bool same = a == b;
+    std::cout << same << std::endl;
     std::cout << "        connections:" << std::endl;
     
     for (Mat::MaterialFlatten::NetworkNode::ConnectionVector::iterator I =

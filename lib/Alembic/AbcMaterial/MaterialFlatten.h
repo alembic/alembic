@@ -114,9 +114,17 @@ public:
         {
         }
 
+        bool operator==( const ParameterEntry &iRhs ) const
+        {
+            return name == iRhs.name &&
+                   parent == iRhs.parent &&
+                   header == iRhs.header;
+        }
+
         std::string name;
         Abc::ICompoundProperty parent;
         const AbcCoreAbstract::PropertyHeader * header;
+        // header is owned by parent, so it is safe to hold onto the pointer
     };
 
     typedef std::vector<ParameterEntry> ParameterEntryVector;
@@ -168,6 +176,13 @@ public:
             , connectedNodeName( iConnectedNodeName )
             , connectedOutputName( iConnectedOutputName )
             {
+            }
+
+            bool operator==( const Connection & iRhs ) const
+            {
+                return inputName == iRhs.inputName &&
+                       connectedNodeName == iRhs.connectedNodeName &&
+                       connectedOutputName == iRhs.connectedOutputName;
             }
 
             std::string inputName;
