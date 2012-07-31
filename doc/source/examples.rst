@@ -22,8 +22,7 @@ Importing Alembic is simply: ::
 Namespaces
 ----------
 
-Each module has a namespace which is similar to the name of the module itself, but
-shortened for brevity.
+Each module has a namespace which is similar to the name of the module itself.
 
 .. toctree::
    :maxdepth: 2
@@ -37,7 +36,7 @@ Setting & Getting Data
 We'll start by targeting the thing you'd most often want to do - write and read
 animated, geometric primitives. To do this, we will be using two main
 modules: :doc:`alembic.Abc </alembic/abc>`, which provides the basic Alembic Abstractions,
-and :doc:`alembic.AbcG </alembic/abcg>`, which implements specific Geometric primitives
+and :doc:`alembic.AbcGeom </alembic/abcg>`, which implements specific Geometric primitives
 on top of alembic.Abc (this example is taken from python/PyAlembic/Tests/testPolyMesh.py).
 
 
@@ -48,7 +47,7 @@ An "Archive" is Alembic's term for the actual file on disk containing all of the
 data.
 
 Our sample output Archive will contain a single animated Transform with a single static PolyMesh 
-as its child. Because we're creating an :py:class:`.OArchive`, this is creating (or clobbering) 
+as its child. Because we're creating an :py:class:`.OArchive`, this will create (or clobber) 
 the archive file with this filename: ::
 
     >>> oarch = OArchive('polyMesh1.abc')
@@ -57,7 +56,7 @@ the archive file with this filename: ::
 Objects
 -------
 
-.. TODO: insert something about objects and schemas here.
+.. TODO: explain objects, schemas here.
 
 Create a PolyMesh class object. An :py:class:`.OPolyMesh` is-an OObject that has-an 
 :py:class:`.OPolyMeshSchema`. An OPolyMeshSchema is-an :py:class:`.OCompoundProperty`. In this case, 
@@ -69,6 +68,8 @@ we're parenting the PolyMesh under the Archive's top node and naming it "meshy".
 
 Samples
 -------
+
+.. TODO: explain geomparams, indexing.
 
 UVs and Normals use GeomParams, which can be written or read as indexed or not, as you'd like. 
 The typed GeomParams have an inner Sample class that is used for setting and getting data. ::
@@ -100,6 +101,8 @@ but note that two samples have been set. ::
 Alembic objects close themselves automatically when they go out of scope, so - we don't have to do
 anything to write them to disk. 
 
+.. TODO: more on timesampling
+
 
 Reading an Archive
 ------------------
@@ -127,6 +130,13 @@ All scene data is parented under this top node. ::
     >>> mesh = meshObj.getSchema()
     >>> N = mesh.getNormalsParam()
     >>> uv = mesh.getUVsParam()
+
+Alternateively, if you don't know the object type of the input data, you can check the object metadata
+and match it to a specific type. ::
+
+    >>> obj = top.children[0]
+    >>> if IPolyMeshSchema.matches(obj):
+    >>> ... meshObj = IPolyMesh(obj, KWrapExisting)
 
 N and uv are GeomParams, which can be stored as indexed or not. ::
 
@@ -215,7 +225,7 @@ http://code.google.com/p/alembic/wiki/CookingWithAlembic#Accumulating_a_Transfor
 
     def accumXform(xf, obj):
         if IXform.matches(obj.getHeader()):
-            x = IXform(obj.getParent(), obj.getName())
+            x = IXform(obj, kWrapExisting)
             xs = x.getSchema().getValue()
             xf *= xs.getMatrix()
 
@@ -233,7 +243,7 @@ http://code.google.com/p/alembic/wiki/CookingWithAlembic#Accumulating_a_Transfor
         bnds.makeEmpty()
         md = obj.getMetaData()
         if IPolyMesh.matches(md) or ISubD.matches(md):
-            mesh = IPolyMesh(obj.getParent(), obj.getName())
+            mesh = IPolyMesh(obj, kWrapExisting)
             ms = mesh.getSchema()
             positions = ms.getValue().getPositions()
             numPoints = len(positions)

@@ -1,6 +1,6 @@
-:mod:`alembic.AbcM` -- AbcMaterial
-==================================
+:mod:`alembic.AbcMaterial`
+==========================
 
-.. automodule:: alembic.AbcM
+.. automodule:: alembic.AbcMaterial
    :members:
    :undoc-members:

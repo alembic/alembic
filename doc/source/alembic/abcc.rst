@@ -1,6 +1,6 @@
-:mod:`alembic.AbcC` -- AbcCollections
-=====================================
+:mod:`alembic.AbcCollection`
+============================
 
-.. automodule:: alembic.AbcC
+.. automodule:: alembic.AbcCollection
    :members:
    :undoc-members:

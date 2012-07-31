@@ -80,6 +80,14 @@ void register_ISchema( const char *iName )
                    const Abc::Argument&> >(
                    ( arg( "parent" ), arg( "argument" ), arg( "argument" ) ),
                    "doc") )
+        .def( init<Abc::ICompoundProperty,
+                   const Abc::WrapExistingFlag,
+                   optional<
+                   const Abc::Argument&,
+                   const Abc::Argument&> >(
+                   ( arg( "parent" ), arg( "name" ), 
+                     arg( "argument" ), arg( "argument" ) ),
+                   "doc") )
         .def( "getSchemaTitle",
               ISchema::getSchemaTitle,
               "Return the schema title expected of this property."

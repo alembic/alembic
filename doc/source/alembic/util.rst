@@ -1,5 +1,5 @@
-:mod:`alembic.Util` -- Util
-===========================
+:mod:`alembic.Util`
+===================
 
 .. automodule:: alembic.Util
    :members:

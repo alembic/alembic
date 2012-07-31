@@ -75,6 +75,11 @@ void register_ISchemaObject( const char *iName )
                     optional<
                         const Abc::Argument&,
                         const Abc::Argument&> >() )
+        .def ( init<Abc::IObject,
+                    const Abc::WrapExistingFlag,
+                    optional<
+                        const Abc::Argument&,
+                        const Abc::Argument&> >() )
         .def( "getSchemaObjTitle",
               &ISCHEMAOBJECT::getSchemaObjTitle,
               "doc",
