@@ -133,6 +133,17 @@ void WriteMaterial(Mat::MaterialFlatten & materialInput, ProcArgs & args)
                                     entry.name,
                                     plb);
                 }
+                else if (Abc::IInt32Property::matches(*entry.header))
+                {
+                    AddScalarPropertyAsFloatToParamListBuilder<
+                            Abc::IInt32Property, Abc::uint32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "float",
+                                    plb);
+                }
                 else if (Abc::IBoolProperty::matches(*entry.header))
                 {
                     AddScalarPropertyAsFloatToParamListBuilder<
@@ -144,8 +155,51 @@ void WriteMaterial(Mat::MaterialFlatten & materialInput, ProcArgs & args)
                                     "float",
                                     plb);
                 }
+                else if (Abc::IN3fProperty::matches(*entry.header))
+                {
+                    AddScalarPropertyAsFloatToParamListBuilder<
+                            Abc::IN3fProperty, Abc::float32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "normal",
+                                    plb);
+                }
+                else if (Abc::IM44fProperty::matches(*entry.header))
+                {
+                    AddScalarPropertyAsFloatToParamListBuilder<
+                            Abc::IM44fProperty, Abc::float32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "matrix",
+                                    plb);
+                }
+                else if (Abc::IP3fProperty::matches(*entry.header))
+                {
+                    AddScalarPropertyAsFloatToParamListBuilder<
+                            Abc::IP3fProperty, Abc::float32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "point",
+                                    plb);
+                }
+                else if (Abc::IV3fProperty::matches(*entry.header))
+                {
+                    AddScalarPropertyAsFloatToParamListBuilder<
+                            Abc::IV3fProperty, Abc::float32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "vector",
+                                    plb);
+                }
                 
-                //TODO, remaining scalars
             }
             else if (entry.header->isArray())
             {
@@ -171,8 +225,71 @@ void WriteMaterial(Mat::MaterialFlatten & materialInput, ProcArgs & args)
                                     "color",
                                     plb);
                 }
-                
-                //TODO, all arrays
+                else if (Abc::IP3fArrayProperty::matches(*entry.header))
+                {
+                    AddArrayPropertyAsFloatToParamListBuilder<
+                            Abc::IP3fArrayProperty, Abc::float32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "point",
+                                    plb);
+                }
+                else if (Abc::IStringArrayProperty::matches(*entry.header))
+                {
+                    AddArrayPropertyAsStringToParamListBuilder<
+                            Abc::IStringArrayProperty>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    plb);
+                }
+                else if (Abc::IV3fArrayProperty::matches(*entry.header))
+                {
+                    AddArrayPropertyAsFloatToParamListBuilder<
+                            Abc::IV3fArrayProperty, Abc::float32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "vector",
+                                    plb);
+                }
+                else if (Abc::IN3fArrayProperty::matches(*entry.header))
+                {
+                    AddArrayPropertyAsFloatToParamListBuilder<
+                            Abc::IN3fArrayProperty, Abc::float32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "normal",
+                                    plb);
+                }
+                else if (Abc::IM44fArrayProperty::matches(*entry.header))
+                {
+                    AddArrayPropertyAsFloatToParamListBuilder<
+                            Abc::IM44fArrayProperty, Abc::float32_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "matrix",
+                                    plb);
+                }
+                else if (Abc::IBoolArrayProperty::matches(*entry.header))
+                {
+                    AddArrayPropertyAsFloatToParamListBuilder<
+                            Abc::IBoolArrayProperty, Abc::bool_t>(
+                                    entry.parent,
+                                    *entry.header,
+                                    sampleSelector,
+                                    entry.name,
+                                    "float",
+                                    plb);
+                }
                 
                 
             }

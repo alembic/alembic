@@ -347,7 +347,20 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
             
         }
     }
-    //TODO, handle single faceset material directly
+#ifdef PRMAN_USE_ABCMATERIAL    
+    else
+    {
+        //handle single faceset material directly
+        if ( ss.hasFaceSet( facesetName ) )
+        {
+            IFaceSet faceSet = ss.getFaceSet( facesetName );
+            ApplyObjectMaterial(faceSet, args);
+            
+        }
+    }
+#endif
+    
+    
     
     
     
@@ -424,7 +437,8 @@ void ProcessSubD( ISubD &subd, ProcArgs &args, const std::string & facesetName )
                 
                 ApplyResources( faceSet, args );
                 
-                //TODO,move this out of the MotionBeginBlock
+                // TODO, move the hold test outside of MotionBegin
+                // as it's not meaningful to change per sample
                 
                 IFaceSetSchema::Sample faceSetSample = 
                         faceSet.getSchema().getValue( sampleSelector );

@@ -426,14 +426,40 @@ void AddScalarPropertyAsIntToParamListBuilder(
                     dataTypeExtent);
 }
 
-// template <typename propT>
-// void AddArrayPropertyAsStringToParamListBuilder(
-//         ICompoundProperty & parent, 
-//         const PropertyHeader &propHeader,
-//         ISampleSelector &sampleSelector,
-//         const std::string & name,
-//         ParamListBuilder &ParamListBuilder);
-// 
+template <typename propT>
+void AddArrayPropertyAsStringToParamListBuilder(
+        ICompoundProperty & parent, 
+        const PropertyHeader &propHeader,
+        ISampleSelector &sampleSelector,
+        const std::string & name,
+        ParamListBuilder &paramListBuilder)
+{
+    propT prop(parent, propHeader.getName());
+    
+    
+    StringArraySamplePtr valueSample = prop.getValue(sampleSelector);
+    
+    std::ostringstream buffer;
+    buffer << "string";
+    
+    if (valueSample->size() > 1)
+    {
+        buffer << "[" << valueSample->size() << "]";
+    }
+    
+    buffer << " " << name;
+    
+    for ( size_t i = 0; i < valueSample->size(); ++i )
+    {
+        paramListBuilder.addStringValue( (*valueSample)[i] );
+    }
+    
+    RtPointer dataStart = paramListBuilder.finishStringVector();
+    
+    paramListBuilder.add(buffer.str(), dataStart, valueSample);
+}
+
+
 
 template <typename propT>
 void AddScalarPropertyAsStringToParamListBuilder(
