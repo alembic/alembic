@@ -76,7 +76,8 @@ typedef std::auto_ptr<AttributeBlockHelper> AttributeBlockHelperAutoPtr;
 
 //-*****************************************************************************
 void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
-                 PathList::const_iterator I, PathList::const_iterator E )
+                 PathList::const_iterator I, PathList::const_iterator E,
+                 bool visible=true)
 {
     // Only add an enclosing AttributeBegin/name/AttributeEnd if we're
     // not excluding xforms. If we're not adding it here, we're adding for
@@ -89,7 +90,24 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     
     //set this if we should continue traversing
     IObject nextParentObject;
-
+    
+    //construct the baseObject first so that we can perform visibility
+    //testing on it.
+    IObject baseObject( parent, ohead.getName() );
+    switch( GetVisibility(baseObject,
+            ISampleSelector(args.frame / args.fps ) ) )
+    {
+    case kVisibilityVisible:
+        visible = true;
+        break;
+    case kVisibilityHidden:
+        visible = false;
+        break;
+    default:
+        break;
+    }
+    
+    
     if ( IXform::matches( ohead ) )
     {
         if ( args.excludeXform )
@@ -98,7 +116,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         }
         else
         {
-            IXform xform( parent, ohead.getName() );
+            IXform xform( baseObject, kWrapExisting );
             ProcessXform( xform, args );
             
             nextParentObject = xform;
@@ -121,7 +139,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         
         std::string faceSetName;
         
-        ISubD subd( parent, ohead.getName() );
+        ISubD subd( baseObject, kWrapExisting );
         
         //if we haven't reached the end of a specified -objectpath,
         //check to see if the next token is a faceset name.
@@ -140,9 +158,12 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial(subd, args );
 #endif
-
-        ProcessSubD( subd, args, faceSetName );
-
+        
+        if ( visible )
+        {
+            ProcessSubD( subd, args, faceSetName );
+        }
+        
         //if we found a matching faceset, don't traverse below
         if ( faceSetName.empty() )
         {
@@ -156,7 +177,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
         
-        IPolyMesh polymesh( parent, ohead.getName() );
+        IPolyMesh polymesh( baseObject, kWrapExisting );
         ApplyResources( polymesh, args );
         
 #ifdef PRMAN_USE_ABCMATERIAL
@@ -173,12 +194,15 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
         
-        INuPatch patch( parent, ohead.getName() );
+        INuPatch patch( baseObject, kWrapExisting );
         ApplyResources( patch, args );
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial(patch, args );
 #endif
-        ProcessNuPatch( patch, args );
+        if ( visible )
+        {
+            ProcessNuPatch( patch, args );
+        }
         
         nextParentObject = patch;
     }
@@ -189,12 +213,16 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
         
-        IPoints points( parent, ohead.getName() );
+        IPoints points( baseObject, kWrapExisting );
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial(points, args );
 #endif
         ApplyResources( points, args );
-        ProcessPoints( points, args );
+        
+        if ( visible )
+        {
+            ProcessPoints( points, args );
+        }
         
         nextParentObject = points;
     }
@@ -205,13 +233,16 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
         
-        ICurves curves( parent, ohead.getName() );
+        ICurves curves( baseObject, kWrapExisting );
         ApplyResources( curves, args );
         
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial( curves, args );
 #endif
-        ProcessCurves( curves, args );
+        if ( visible )
+        {
+            ProcessCurves( curves, args );
+        }
         
         nextParentObject = curves;
     }
@@ -232,7 +263,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             {
                 WalkObject( nextParentObject,
                             nextParentObject.getChildHeader( i ),
-                            args, I, E );
+                            args, I, E, visible);
             }
         }
         else
@@ -242,7 +273,8 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
 
             if ( nextChildHeader != NULL )
             {
-                WalkObject( nextParentObject, *nextChildHeader, args, I+1, E );
+                WalkObject( nextParentObject, *nextChildHeader, args, I+1, E,
+                        visible);
             }
         }
     }
