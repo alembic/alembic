@@ -59,13 +59,13 @@ We'll start by targeting the thing you'd most often want to do - write and read
 animated, geometric primitives. To do this, we will be using two main
 modules: :doc:`alembic.Abc </alembic/abc>`, which provides the basic Alembic Abstractions,
 and :doc:`alembic.AbcGeom </alembic/abcg>`, which implements specific Geometric primitives
-on top of alembic.Abc (this example is taken from python/PyAlembic/Tests/testPolyMesh.py).
+on top of alembic.Abc (this example is taken from ``python/PyAlembic/Tests/testPolyMesh.py``).
 
 
 Archives
 --------
 
-An "Archive" is Alembic's term for the actual file on disk and is the top-level container 
+An *Archive* is Alembic's term for the actual file on disk and is the top-level container 
 with all of the scene data. Archives contain Objects.
 
 Our sample output Archive will contain a single animated Transform with a single static PolyMesh 
@@ -198,13 +198,13 @@ anything to write them to disk.
 Time Sampling
 ^^^^^^^^^^^^^
 
-Alembic files consist of a series of samples of properties at different times. Every property, therefore, 
+Alembic files consist of a series of Samples of Properties at different times. Every property, therefore, 
 has a notion of when it has been 'sampled' (both during write and during read). There are four types of 
 time sampling that Alembic supports:
 
 **Uniform**
 
-One sample per dt where the dt is defined during construction. This is probably the most common 
+One Sample per dt where the dt is defined during construction. This is probably the most common 
 time sampling type; specifically properties that are sampled every 24th of a second.
 
 **Identity**
@@ -214,7 +214,7 @@ for each sample, i, the time of that sample is i.
 
 **Cyclic**
 
-Some finite number of samples per dt; for example, shutter open and shutter close.
+Some finite number of Samples per dt; for example, shutter open and shutter close.
 
 **Acyclic**
 
@@ -222,7 +222,7 @@ Sample times are arbitrary and follow no particular cycle. This is the least com
 cause the most amount of data to be stored in the Alembic file (explicit values for each sample 
 time must be stored, for every acyclic property). 
 
-All samples must be written in strictly increasing temporal order. 
+.. note:: All Samples must be written in strictly increasing temporal order. 
 
 
 Reading an Archive
@@ -238,13 +238,13 @@ Read an Alembic archive, also referred to as an :py:class:`.IArchive`. ::
 Hierarchy Navigation
 --------------------
 
-Because of its intention to store samples of scene graphs, Alembic has a notion of parent/child hierarchy. 
+Because of its intention to store Samples of scene graphs, Alembic has a notion of parent/child hierarchy. 
 At the apex of this hierarchy is the Archive, which can be treated as an Object. Beneath this top-level 
-Archive can be many child objects, each of which can be the parent to any number of other objects, and so on. 
+Archive can be many child Objects, each of which can be the parent to any number of other Objects, and so on. 
 Ancestry is acyclic -- a descendant of an object cannot be the ancestor of that same object.
 
-As mentioned above, If an object contains any properties, it contains them within a top-level compound property. 
-A compound property can have any number of child properties of any time (scalar, array or compound). Again, 
+As mentioned above, If an object contains any Properties, it contains them within a top-level Compound Property. 
+A Compound Property can have any number of child properties of any time (scalar, array or compound). Again, 
 this relationship is acyclic. 
 
 Usually, we want to start by getting the top node of the scene hierarchy, which will always be
@@ -262,20 +262,20 @@ All scene data is parented under this top node. ::
     >>> uv = mesh.getUVsParam()
 
 
-.. note::
-    Alternateively, if you don't know the object type of the input data, you can check the object metadata
+.. hint::
+    If you don't know the object type of the input data, you can check the Object MetaData
     and match it to a specific type. ::
 
     >>> obj = top.children[0]
     >>> if IPolyMeshSchema.matches(obj):
     >>> ... meshObj = IPolyMesh(obj, KWrapExisting)
 
-N and uv are GeomParams, which can be stored as indexed or not. ::
+``N`` and ``uv`` are GeomParams, which can be stored as indexed or not. ::
 
     >>> assert not N.isIndexed()
     >>> assert not uv.isIndexed()
 
-Get the samples. ::
+Get the Samples. ::
 
     >>> meshSamp = mesh.getValue()
 
@@ -292,12 +292,13 @@ evaluate as True. ::
     >>> arbattrs = mesh.getArbGeomParams()
     >>> assert not arbattrs
 
-:py:func:`getExpandedValue()` takes an optional ISampleSelector, and returns an
-:py:class:`.IGeomParamSample`.  IGeomParamSample.getVals() returns an TypedArraySamplePtr. ::
+:py:func:`getExpandedValue()` takes an optional ISampleSelector, and returns an typed
+:py:class:`.IGeomParamSample`.  :py:func:`.IGeomParamSample.getVals()` returns an 
+TypedArraySamplePtr. ::
 
     >>> nsp = N.getExpandedValue().getVals()
 
-GeomParams and Properties have a method, isConstant(), that returns if there are fewer than 
+GeomParams and Properties have a method, :py:func:`.isConstant()`, that returns if there are fewer than 
 two unique samples in them. ::
 
     >>> assert N.isConstant()

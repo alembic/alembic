@@ -9,10 +9,10 @@
 Alembic is an open source geometry caching format that promotes interoperability
 between authoring tools. From `alembic.io <http://alembic.io>`_:
 
-*Alembic distills complex, animated scenes into a non-procedural, application-independent 
-set of baked geometric results. This ‘distillation' of scenes into baked geometry is 
-exactly analogous to the distillation of lighting and rendering scenes into rendered 
-image data.*
+    *Alembic distills complex, animated scenes into a non-procedural, application-
+    independent set of baked geometric results. This ‘distillation' of scenes into 
+    baked geometry is exactly analogous to the distillation of lighting and rendering 
+    scenes into rendered image data.*
 
 Alembic is focused on efficiently storing the computed results of complex procedural 
 geometric constructions. It is specifically NOT concerned with storing the complex 
