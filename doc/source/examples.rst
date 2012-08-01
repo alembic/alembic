@@ -6,9 +6,29 @@
 Introduction
 ============
 
+The Alembic system is intended to facilitate baked (cached) geometry workflows and 
+platform-independent geometry interchange and sharing. It accomplishes this by being, 
+at its core, a library for efficiently storing samples of hierarchically related typed 
+data. Layered on top of that is a system for interpreting that data as geometry or geometric 
+transforms, but it’s important to keep in mind the primacy of data management at its center. 
+
+Major Concepts
+--------------
+
 Alembic has a completely separate but parallel class hierarchy for input and output. This
 maintains the important abstraction that Alembic is for storage, representation, and archival
 as opposed to being a dynamic scene manipulation framework.
+
+An alembic Archive consists of multiple Objects, which may or may not have Properties, in a 
+hierarchical parent/child tree that forms an acyclic directed graph. Data are written as Samples 
+at specific times, and are read back similarly. Interpolation between these samples is not the 
+function of Alembic and, if required, must be done by the plug-in that uses Alembic. However, 
+Alembic provides a rich interface for retrieving multiple Samples based on time through the 
+TimeSampling class, defined in AbcCoreAbstract. Using that, client code may get all the required 
+data for whatever interpolation is desired.
+
+Importing
+---------
 
 Importing Alembic is simply: ::
 
@@ -22,7 +42,9 @@ Importing Alembic is simply: ::
 Namespaces
 ----------
 
-Each module has a namespace which is similar to the name of the module itself.
+Alembic itself is composed of several layers of libraries, each of which builds extensively 
+on the layer below it. The lowest level library is an abstract interface layer called
+:py:mod:`.AbcCoreAbstract` which all the other user-facing layers are built.
 
 .. toctree::
    :maxdepth: 2
@@ -43,8 +65,8 @@ on top of alembic.Abc (this example is taken from python/PyAlembic/Tests/testPol
 Archives
 --------
 
-An "Archive" is Alembic's term for the actual file on disk containing all of the scene
-data.
+An "Archive" is Alembic's term for the actual file on disk and is the top-level container 
+with all of the scene data. Archives contain Objects.
 
 Our sample output Archive will contain a single animated Transform with a single static PolyMesh 
 as its child. Because we're creating an :py:class:`.OArchive`, this will create (or clobber) 
@@ -56,32 +78,104 @@ the archive file with this filename: ::
 Objects
 -------
 
-.. TODO: explain objects, schemas here.
+An Alembic Object is the main unit of hierarchy in Alembic. You can think of an Alembic Archive 
+as a typical UNIX-style filesystem (eg, ext2fs), and of Alembic Objects as directories in that 
+filesystem. The analogy is not perfect, as will be seen shortly, but it’s not bad. Objects don’t 
+contain data directly, but instead provide structure for filling with more directly-data-containing 
+entities. Alembic Objects are the primary unit of encapsulation. Objects contain Properties.
 
-Create a PolyMesh class object. An :py:class:`.OPolyMesh` is-an OObject that has-an 
+A Schema is a minimal set of expected properties which implement some complex Object, such as a PolyMesh. 
+In the simplest, standard case, there will be a compound property at the top with a certain name, and 
+inside the compound property will be some number of additional properties that implement the Object. 
+In the case of a PolyMesh, these properties would include a list of vertices (a V3fArray), a list of 
+indices (an IntArray), and a list of "per-face counts" (more on this later).
+
+**Create a PolyMesh class object**
+
+An :py:class:`.OPolyMesh` is-an OObject that has-an 
 :py:class:`.OPolyMeshSchema`. An OPolyMeshSchema is-an :py:class:`.OCompoundProperty`. In this case, 
 we're parenting the PolyMesh under the Archive's top node and naming it "meshy". ::
 
     >>> meshObj = OPolyMesh(oarch.getTop(), "meshy")
     >>> mesh = meshyObj.getSchema()
 
+Remember that an IPolyMesh is an IObject, and an IPolyMeshSchema *is an* ICompoundProperty (and an IPolyMesh 
+*has an* IPolyMeshSchema). So, just like any other Object in Alembic, it can be constructed with its parent 
+Object and its name. Every Object in Alembic is the child of some other Object, EXCEPT for the TopObject, 
+which is the lone direct child of the Archive.
+
+
+Properties
+----------
+
+Data in Alembic is stored in Samples, which are then stored in Properties.
+
+There are two types of Alembic properties, Simple and Compound. A CompoundProperty is used to hold properties.
+It is the main type of container you’ll be working with. Simple Properties hold samples and can be either 
+Scalar or Array. These samples are what actually holds your data.
+
+The major semantic difference between scalar and array properties is that to say that a Property is Scalar 
+is to say, "There is one single value per Sample for this Property". Because of this, it is meaningless to 
+talk about a Scalar Property changing topology (eg, mass will be one floating point value; it won't sometimes 
+be two floating point values); array properties have no such restriction. Furthermore, array properties are 
+cached and indexed in such a way that repeatedly storing identical samples will not store multiple copies of 
+the data. Scalar properties do not cache in this way.
+
+**Scalar Properties**
+
+An Alembic ScalarProperty is a Simple Property that contains Samples whose type and number of elements 
+(the extent) is fixed and known prior to writing. Examples of ScalarProperties are FloatProperty (each Sample 
+is a 32-bit floating point number; extent = 1), StringProperty (each sample is a single string, of whatever 
+size; extent = 1), or an M44dProperty (each Sample is sixteen 64-bit floating point numbers; extent = 16). 
+The maximum extent for a ScalarProperty is 256.
+
+Examples of ScalarProperties:
+
+    * The mass of a rigid body (extent=1, a single numerical value)
+    * A color (for an RGB vector, extent=3, three floating point values)
+    * A bounding box (extent=6, two three-vectors of floating point values)
+
+**Array Properties**
+
+An Alembic ArrayProperty is a Simple Property that contains Samples whose type is fixed and known prior to 
+writing, but whose extent is variable. Examples of ArrayProperties are DoubleArrayProperty (each Sample is 
+an array of varying length, each array element being a single 64-bit floating point number), V3fArrayProperty 
+(each Sample is an array of varying length, and each element in the array being an Imath::Vec3f, which is 
+three 32-bit floating point numbers), or M44fArrayProperty (each Sample is an array of varying length, and each 
+array element is an Imath::M44f, or sixteen 32-bit floating point numbers). 
+
+Examples of Array Properties:
+
+    * A list of the vertices of a polygonal mesh
+    * A list of particles in a fluid simulation
+
+**Compound Properties**
+
+Compound properties are a special type of property in that they are not properties per se but rather containers 
+for other properties (compound properties included). If an object has any properties, it must have a compound 
+property which contains all other properties.
+
 
 Samples
 -------
 
-.. TODO: explain geomparams, indexing.
+An Alembic Sample is the container that composes raw data and a time into a single entity. As with Properties, 
+Samples are either Scalar or Array. 
 
 UVs and Normals use GeomParams, which can be written or read as indexed or not, as you'd like. 
-The typed GeomParams have an inner Sample class that is used for setting and getting data. ::
+The typed GeomParams have an inner Sample class that is used for setting and getting data. GeomParams are typed
+according to the type of data they will contain, for example the :py:class:`.OV2fGeomParamSample` is
+used to store V2f data, such as UVs. Continuing our example: ::
 
     >>> uvsamp = OV2fGeomParamSample(uvs, kFacevaryingScope) 
 
-Indexed normals: ::
+Normals have their own type. ::
 
     >>> nsamp  = ON3fGeomParamSample(normals, kFacevaryingScope)
 
-Create a :py:class:`.OPolyMeshSchemaSample` sample. We're creating the sample inline here, but we could 
-create a static sample and leave it around, only modifying the parts that have changed. :: 
+Create a :py:class:`.OPolyMeshSchemaSample` Sample. We're creating the Sample inline here, but we could 
+create a static sample and leave it around, only modifying the parts that have changed. The first sample
+should contain at least all of the required data for a PolyMesh. :: 
 
     >>> mesh_samp = OPolyMeshSchemaSample(verts, indices, counts, uvsamp, nsamp)
 
@@ -101,7 +195,34 @@ but note that two samples have been set. ::
 Alembic objects close themselves automatically when they go out of scope, so - we don't have to do
 anything to write them to disk. 
 
-.. TODO: more on timesampling
+Time Sampling
+^^^^^^^^^^^^^
+
+Alembic files consist of a series of samples of properties at different times. Every property, therefore, 
+has a notion of when it has been 'sampled' (both during write and during read). There are four types of 
+time sampling that Alembic supports:
+
+**Uniform**
+
+One sample per dt where the dt is defined during construction. This is probably the most common 
+time sampling type; specifically properties that are sampled every 24th of a second.
+
+**Identity**
+
+Identity time sampling is the default, and is merely a special case of uniform sampling where 
+for each sample, i, the time of that sample is i.
+
+**Cyclic**
+
+Some finite number of samples per dt; for example, shutter open and shutter close.
+
+**Acyclic**
+
+Sample times are arbitrary and follow no particular cycle. This is the least common case and will 
+cause the most amount of data to be stored in the Alembic file (explicit values for each sample 
+time must be stored, for every acyclic property). 
+
+All samples must be written in strictly increasing temporal order. 
 
 
 Reading an Archive
@@ -117,8 +238,17 @@ Read an Alembic archive, also referred to as an :py:class:`.IArchive`. ::
 Hierarchy Navigation
 --------------------
 
-Usually, we want to start by getting the top node of the scene hierarchy, which
-will always be called *ABC*: ::
+Because of its intention to store samples of scene graphs, Alembic has a notion of parent/child hierarchy. 
+At the apex of this hierarchy is the Archive, which can be treated as an Object. Beneath this top-level 
+Archive can be many child objects, each of which can be the parent to any number of other objects, and so on. 
+Ancestry is acyclic -- a descendant of an object cannot be the ancestor of that same object.
+
+As mentioned above, If an object contains any properties, it contains them within a top-level compound property. 
+A compound property can have any number of child properties of any time (scalar, array or compound). Again, 
+this relationship is acyclic. 
+
+Usually, we want to start by getting the top node of the scene hierarchy, which will always be
+called *ABC*. So, in our example: ::
 
     >>> top = iarch.getTop()
     >>> top.getName()
@@ -131,8 +261,10 @@ All scene data is parented under this top node. ::
     >>> N = mesh.getNormalsParam()
     >>> uv = mesh.getUVsParam()
 
-Alternateively, if you don't know the object type of the input data, you can check the object metadata
-and match it to a specific type. ::
+
+.. note::
+    Alternateively, if you don't know the object type of the input data, you can check the object metadata
+    and match it to a specific type. ::
 
     >>> obj = top.children[0]
     >>> if IPolyMeshSchema.matches(obj):
@@ -249,7 +381,7 @@ http://code.google.com/p/alembic/wiki/CookingWithAlembic#Accumulating_a_Transfor
             numPoints = len(positions)
             for i in range(numPoints):
                 bnds.extendBy(imath.V3d(positions[i]))
-        bnds.extendBy(imath.transform(bnds, xf))
+        bnds.extendBy(transform(bnds, xf))
         gBounds.extendBy(bnds)
 
     def visitObject(obj):

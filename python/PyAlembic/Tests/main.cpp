@@ -80,7 +80,6 @@ runTests (int argc, char *argv[])
     // Test 5: Geom, Material and Collection bindings, iterators 
     {
         std::string code = 
-            "import testIterators\n"
             "import testAbcGeomBinding\n"
             "import testMaterial\n"
             "import testCollections\n";
