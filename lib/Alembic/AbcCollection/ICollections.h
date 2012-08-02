@@ -85,8 +85,12 @@ public:
         init( iArg0, iArg1 );
     }
 
-    //! Default assignment operator used.
-
+    //! Copy constructor.
+    ICollectionsSchema( const ICollectionsSchema& iCopy )
+        : Abc::ISchema<CollectionsSchemaInfo>()
+    {
+        *this = iCopy;
+    }
 
     //! Returns the number of collections that we have
     size_t getNumCollections() { return m_collections.size(); }

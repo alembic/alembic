@@ -55,8 +55,8 @@ public:
     }
 private:
     Abc::ICompoundProperty _p;
-    AbcA::index_t _iter;
-    AbcA::index_t _end;
+    size_t _iter;
+    size_t _end;
 };
 
 //-*****************************************************************************

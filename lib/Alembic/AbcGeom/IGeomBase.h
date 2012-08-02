@@ -65,7 +65,6 @@ public:
     //-*************************************************************************
 
     typedef INFO info_type;
-    typedef ISchema<INFO> this_type;
 
 
     //-*************************************************************************
@@ -84,8 +83,7 @@ public:
 
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument() )
-       : ISchema<info_type>( iParentCompound, iName,
-                              iArg0, iArg1 )
+       : Abc::ISchema<info_type>( iParentCompound, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -95,8 +93,7 @@ public:
 
                       const Argument &iArg0 = Argument(),
                       const Argument &iArg1 = Argument() )
-      : ISchema<info_type>( iParentCompound,
-                            iArg0, iArg1 )
+      : Abc::ISchema<info_type>( iParentCompound, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -110,6 +107,13 @@ public:
       : Abc::ISchema<info_type>( iThis, iFlag, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
+    }
+
+    //! Copy constructor
+    IGeomBaseSchema( const IGeomBaseSchema& iCopy )
+      : Abc::ISchema<info_type>()
+    {
+        *this = iCopy;
     }
 
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 )

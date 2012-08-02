@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ArraySampleKey_h_
 #define _Alembic_AbcCoreAbstract_ArraySampleKey_h_
 
-#if !defined(_MSC_VER) || _MSC_VER >= 1600
+#if !defined(_MSC_VER)
 #include <tr1/unordered_map>
 #else
 #include <unordered_map>

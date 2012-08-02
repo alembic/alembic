@@ -136,7 +136,7 @@ inline bool operator!=( bool a, const bool_t &b )
     return a != b.asBool();
 }
 
-#if !defined(_MSC_VER) || _MSC_VER >= 1600
+#if !defined(_MSC_VER)
 using ::uint8_t;
 using ::int8_t;
 using ::uint16_t;

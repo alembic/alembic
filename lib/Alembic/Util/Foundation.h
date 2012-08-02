@@ -36,8 +36,8 @@
 #ifndef _Alembic_Util_Foundation_h_
 #define _Alembic_Util_Foundation_h_
 
-// tr1/memory is not in anything prior to Visual Studio 2010
-#if !defined(_MSC_VER) || _MSC_VER >= 1600
+// tr1/memory is not avaliable in Visual Studio.
+#if !defined(_MSC_VER)
 #include <tr1/memory>
 #endif
 

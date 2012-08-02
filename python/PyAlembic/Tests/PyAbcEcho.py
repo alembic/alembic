@@ -35,7 +35,6 @@
 #-******************************************************************************
 
 import sys
-
 from alembic.AbcCoreAbstract import *
 from alembic.Abc import *
 from alembic.Util import *
