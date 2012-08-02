@@ -197,14 +197,6 @@ struct NetworkNodeOverloads
 //-*****************************************************************************
 void register_materialflatten()
 {
-    // IMaterial
-    //
-    register_ISchemaObject<AbcM::IMaterial>( "IMaterial" );
-
-    // ISchema base class
-    //
-    register_ISchema<AbcM::MaterialSchemaInfo>( "ISchema_Material" );
-
     // MaterialFlatten
     //
     class_<AbcM::MaterialFlatten>(
