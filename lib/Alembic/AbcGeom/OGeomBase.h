@@ -63,7 +63,6 @@ public:
     //-*************************************************************************
 
     typedef INFO info_type;
-    typedef OSchema<INFO> this_type;
 
 
     //-*************************************************************************
@@ -82,7 +81,7 @@ public:
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
-       : OSchema<info_type>( iParentCompound, iName, iArg0, iArg1, iArg2 )
+       : Abc::OSchema<info_type>( iParentCompound, iName, iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
             Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
@@ -106,7 +105,7 @@ public:
                       const Argument &iArg0 = Argument(),
                       const Argument &iArg1 = Argument(),
                       const Argument &iArg2 = Argument() )
-      : OSchema<info_type>( iParentCompound, iArg0, iArg1, iArg2 )
+      : Abc::OSchema<info_type>( iParentCompound, iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
             Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
@@ -126,6 +125,12 @@ public:
         init( tsIndex );
     }
 
+    //! Copy constructor
+    OGeomBaseSchema( const OGeomBaseSchema& iCopy )
+      : Abc::OSchema<info_type>()
+    {
+        *this = iCopy;
+    }
 
     void init( uint32_t iTsHandle)
     {
