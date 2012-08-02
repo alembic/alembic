@@ -146,7 +146,7 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
         }
 
         // we need to make sure the first 3 and last 3 knots repeat
-        if (form == MFnNurbsCurve::kClosed && degree == 3 && numKnots > 2)
+        if (form != MFnNurbsCurve::kPeriodic && degree == 3 && numKnots > 2)
         {
             knots[1] = knots[0];
             knots[2] = knots[0];
@@ -271,7 +271,7 @@ MObject createCurves(const std::string & iName,
         }
 
         // we need to make sure the first 3 and last 3 knots repeat
-        if (form == MFnNurbsCurve::kClosed && degree == 3 && numKnots > 2)
+        if (form != MFnNurbsCurve::kPeriodic && degree == 3 && numKnots > 2)
         {
             knots[1] = knots[0];
             knots[2] = knots[0];
