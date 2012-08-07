@@ -26,6 +26,21 @@ This document is intended to serve as a brief introduction and  programmer's gui
 using the Alembic Python bindings. 
 
 
+Get Alembic
+-----------
+
+The Alembic code can be found in a Mercurial repository at 
+http://code.google.com/p/alembic.
+
+These docs were built by `sphinx <http://sphinx.pocoo.org>`_. If you built the Python
+bindings using the provided bootstrap with the `--enable-pyalembic` flag, then building
+these docs is straight-forward. From the build root: ::
+
+    $ make docs
+
+The source code for these docs can be found in the directory `docs/source`.
+
+
 Getting Started
 ---------------
 
@@ -42,13 +57,6 @@ Python bindings using the bootstrap script: `build/bootstrap/alembic_bootstrap.p
    :maxdepth: 2
 
    examples
-
-
-Get Alembic
------------
-
-The Alembic code can be found in a Mercurial repository at 
-http://code.google.com/p/alembic.
 
 
 Indices and tables
