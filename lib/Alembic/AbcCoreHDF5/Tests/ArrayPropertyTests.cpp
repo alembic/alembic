@@ -48,7 +48,7 @@
 //-*****************************************************************************
 namespace A5 = Alembic::AbcCoreHDF5;
 
-namespace ABC = Alembic::AbcCoreAbstract::v3;
+namespace ABC = Alembic::AbcCoreAbstract::v4;
 
 using namespace Alembic::Util;
 
