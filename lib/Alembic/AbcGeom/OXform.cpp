@@ -36,12 +36,50 @@
 
 #include <Alembic/AbcGeom/OXform.h>
 #include <Alembic/AbcGeom/XformOp.h>
-
+#include <algorithm>
 #define MAX_SCALAR_CHANS 256
 
 namespace Alembic {
 namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
+
+//-*****************************************************************************
+class OXformSchema::Data
+{
+public:
+
+    Data()
+    {
+        tsIdx = 0;
+    }
+
+    // writes out animChan data if necessary
+    ~Data()
+    {
+        bool animVal = 1;
+        if ( std::find( animChans.begin(), animChans.end(), animVal ) !=
+             animChans.end() )
+        {
+            // store only the animated indices
+            std::vector< Alembic::Util::uint32_t > animData;
+            for ( std::size_t i = 0; i < animChans.size(); ++i )
+            {
+                if ( animChans[i] )
+                {
+                    animData.push_back( i );
+                }
+            }
+
+            Abc::OUInt32ArrayProperty prop = Abc::OUInt32ArrayProperty( parent,
+                ".animChans", tsIdx );
+            prop.set( animData );
+        }
+    }
+
+    AbcCoreAbstract::CompoundPropertyWriterPtr parent;
+    std::vector< bool > animChans;
+    AbcA::index_t tsIdx;
+};
 
 //-*****************************************************************************
 void OXformSchema::setChannelValues( const std::vector<double> &iVals )
@@ -99,7 +137,8 @@ void OXformSchema::set( XformSample &ioSamp )
         m_numChannels = ioSamp.getNumOpChannels();
         m_numOps = ioSamp.getNumOps();
 
-        m_staticChans = std::vector<bool>( m_numChannels, true );
+        m_data->animChans.clear();
+        m_data->animChans.resize( m_numChannels, 0 );
 
         if ( m_numOps > 0 )
         {
@@ -155,9 +194,6 @@ void OXformSchema::set( XformSample &ioSamp )
     std::vector<double> chanvals;
     chanvals.reserve( ioSamp.getNumOpChannels() );
 
-    std::vector<Alembic::Util::uint32_t> animchans;
-    animchans.reserve( ioSamp.getNumOpChannels() );
-
     for ( size_t i = 0, ii = 0 ; i < m_numOps ; ++i )
     {
         const XformOp &op = ioSamp[i];
@@ -168,8 +204,8 @@ void OXformSchema::set( XformSample &ioSamp )
         {
             chanvals.push_back( op.getChannelValue( j ) );
 
-            m_staticChans[j + ii] = m_staticChans[j + ii] &&
-                Imath::equalWithAbsError( op.getChannelValue( j ),
+            m_data->animChans[j + ii] = m_data->animChans[j + ii] ||
+               !Imath::equalWithAbsError( op.getChannelValue( j ),
                                           protop.getChannelValue( j ),
                                           kXFORM_DELTA_TOLERANCE );
 
@@ -181,14 +217,6 @@ void OXformSchema::set( XformSample &ioSamp )
         }
 
         ii += op.getNumChannels();
-    }
-
-    for ( Alembic::Util::uint32_t i = 0 ; i < m_staticChans.size() ; ++i )
-    {
-        if ( ! m_staticChans[i] )
-        {
-            animchans.push_back( i );
-        }
     }
 
     this->setChannelValues( chanvals );
@@ -218,8 +246,6 @@ void OXformSchema::set( XformSample &ioSamp )
         m_isNotConstantIdentityProperty.set( true );
     }
 
-    m_animChannelsProperty.set( animchans );
-
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -239,8 +265,6 @@ void OXformSchema::setFromPrevious()
         else
         { m_valsPWPtr->asScalarPtr()->setFromPreviousSample(); }
     }
-
-    m_animChannelsProperty.setFromPrevious();
 
     if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
     { m_childBoundsProperty.setFromPrevious(); }
@@ -275,8 +299,9 @@ void OXformSchema::init( const AbcA::index_t iTsIdx )
     m_inheritsProperty = Abc::OBoolProperty( this->getPtr(), ".inherits",
                                      iTsIdx );
 
-    m_animChannelsProperty = Abc::OUInt32ArrayProperty( this->getPtr(),
-                                                ".animChans", iTsIdx );
+    m_data = Alembic::Util::shared_ptr< Data >( new Data() );
+    m_data->parent = this->getPtr();
+    m_data->tsIdx = iTsIdx;
 
     m_isIdentity = true;
 
@@ -330,7 +355,6 @@ void OXformSchema::setTimeSampling( uint32_t iIndex )
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "OXformSchema::setTimeSampling( uint32_t )" );
 
-    m_animChannelsProperty.setTimeSampling( iIndex );
     m_inheritsProperty.setTimeSampling( iIndex );
 
     if ( m_valsPWPtr )
@@ -344,6 +368,11 @@ void OXformSchema::setTimeSampling( uint32_t iIndex )
     if ( m_childBoundsProperty )
     {
         m_childBoundsProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_data )
+    {
+        m_data->tsIdx = iIndex;
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
