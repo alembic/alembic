@@ -36,6 +36,7 @@
 
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/Abc/All.h>
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -417,6 +418,98 @@ void readWriteColorArrayProperty(const std::string &archiveName)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void emptyAndValueTest(const std::string &archiveName)
+{
+    std::vector<std::string> strVec;
+    strVec.push_back( "potato" );
+
+    std::vector<C3f> colorVec;
+    colorVec.push_back( C3f( 0.0, 0.5, 0.75 ) );
+
+    std::vector<Alembic::Util::int32_t> intVec;
+    intVec.push_back(42);
+
+    StringArraySample strSamp( strVec );
+    C3fArraySample colorSamp( colorVec );
+    Int32ArraySample intSamp( intVec );
+
+    StringArraySample emptyStrSamp = StringArraySample::emptySample();
+    C3fArraySample emptyColorSamp = C3fArraySample::emptySample();
+    Int32ArraySample emptyIntSamp = Int32ArraySample::emptySample();
+
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), archiveName );
+        OCompoundProperty root = archive.getTop().getProperties();
+        OC3fArrayProperty colorProp( root, "colors" );
+        OInt32ArrayProperty numProp( root, "numbers" );
+        OStringArrayProperty strProp( root, "strings" );
+
+        colorProp.set( emptyColorSamp );
+        colorProp.set( colorSamp );
+        colorProp.set( emptyColorSamp );
+        colorProp.set( colorSamp );
+
+        numProp.set( emptyIntSamp );
+        numProp.set( intSamp );
+        numProp.set( emptyIntSamp );
+        numProp.set( intSamp );
+
+        strProp.set( emptyStrSamp );
+        strProp.set( strSamp );
+        strProp.set( emptyStrSamp );
+        strProp.set( strSamp );
+    }
+
+    {
+        StringArraySamplePtr strSampPtr;
+        C3fArraySamplePtr colorSampPtr;
+        Int32ArraySamplePtr intSampPtr;
+
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), archiveName );
+        ICompoundProperty root = archive.getTop().getProperties();
+        IC3fArrayProperty colorProp( root, "colors" );
+        IInt32ArrayProperty numProp( root, "numbers" );
+        IStringArrayProperty strProp( root, "strings" );
+
+        TESTING_ASSERT( colorProp.getNumSamples() == 4 );
+        TESTING_ASSERT( strProp.getNumSamples() == 4 );
+        TESTING_ASSERT( numProp.getNumSamples() == 4 );
+
+        colorProp.get( colorSampPtr, 0 );
+        strProp.get( strSampPtr, 0 );
+        numProp.get( intSampPtr, 0 );
+        TESTING_ASSERT( colorSampPtr->size() == 0 );
+        TESTING_ASSERT( strSampPtr->size() == 0 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+
+        colorProp.get( colorSampPtr, 2 );
+        strProp.get( strSampPtr, 2 );
+        numProp.get( intSampPtr, 2 );
+        TESTING_ASSERT( colorSampPtr->size() == 0 );
+        TESTING_ASSERT( strSampPtr->size() == 0 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+
+        colorProp.get( colorSampPtr, 1 );
+        strProp.get( strSampPtr, 1 );
+        numProp.get( intSampPtr, 1 );
+        TESTING_ASSERT( colorSampPtr->size() == 1 &&
+            colorSamp[0] == ( *colorSampPtr )[0] );
+        TESTING_ASSERT( strSampPtr->size() == 1 &&
+            strSamp[0] == ( *strSampPtr )[0] );
+        TESTING_ASSERT( intSampPtr->size() == 1 &&
+            intSamp[0] == ( *intSampPtr )[0] );
+
+        colorProp.get( colorSampPtr, 3 );
+        strProp.get( strSampPtr, 3 );
+        numProp.get( intSampPtr, 3 );
+        TESTING_ASSERT( colorSampPtr->size() == 1 &&
+            colorSamp[0] == ( *colorSampPtr )[0] );
+        TESTING_ASSERT( strSampPtr->size() == 1 &&
+            strSamp[0] == ( *strSampPtr )[0] );
+        TESTING_ASSERT( intSampPtr->size() == 1 &&
+            intSamp[0] == ( *intSampPtr )[0] );
+    }
+}
 
 int main( int argc, char *argv[] )
 {
@@ -452,7 +545,8 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    readWriteColorArrayProperty("c3_2_array_test.abc");
+    readWriteColorArrayProperty( "c3_2_array_test.abc" );
+    emptyAndValueTest( "empty_and_value_prop_test.abc" );
     return 0;
 }
 

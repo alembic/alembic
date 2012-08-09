@@ -133,6 +133,12 @@ public:
     //-*************************************************************************
     size_t size() const { return this->getDimensions().numPoints(); }
 
+    static TypedArraySample<TRAITS> emptySample()
+    {
+        static std::vector<value_type> emptyVec;
+        return TypedArraySample<TRAITS>( emptyVec );
+    }
+
     //-*************************************************************************
     ALEMBIC_OPERATOR_BOOL( ArraySample::valid() );
 };
