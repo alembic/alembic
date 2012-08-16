@@ -68,6 +68,6 @@ class MayaCameraWriter
     MFnCamera::FilmFit mFilmFit;
 };
 
-typedef boost::shared_ptr < MayaCameraWriter > MayaCameraWriterPtr;
+typedef Alembic::Util::shared_ptr < MayaCameraWriter > MayaCameraWriterPtr;
 
 #endif  // _AbcExport_MayaCameraWriter_h_

@@ -75,6 +75,6 @@ class AttributesWriter
     PlugAndObjScalar mAnimVisibility;
 };
 
-typedef boost::shared_ptr<AttributesWriter> AttributesWriterPtr;
+typedef Alembic::Util::shared_ptr<AttributesWriter> AttributesWriterPtr;
 
 #endif  // _maya2hdf_AttributesWriter_h_

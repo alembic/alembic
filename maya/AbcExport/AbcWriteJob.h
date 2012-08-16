@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -49,17 +49,17 @@
 
 #include "MayaUtility.h"
 
-typedef boost::shared_ptr < MayaMeshWriter >
+typedef Alembic::Util::shared_ptr < MayaMeshWriter >
     MayaMeshWriterPtr;
-typedef boost::shared_ptr < MayaNurbsCurveWriter >
+typedef Alembic::Util::shared_ptr < MayaNurbsCurveWriter >
     MayaNurbsCurveWriterPtr;
-typedef boost::shared_ptr < MayaCameraWriter >
+typedef Alembic::Util::shared_ptr < MayaCameraWriter >
     MayaCameraWriterPtr;
-typedef boost::shared_ptr < MayaLocatorWriter >
+typedef Alembic::Util::shared_ptr < MayaLocatorWriter >
     MayaLocatorWriterPtr;
-typedef boost::shared_ptr < MayaPointPrimitiveWriter >
+typedef Alembic::Util::shared_ptr < MayaPointPrimitiveWriter >
     MayaPointPrimitiveWriterPtr;
-typedef boost::shared_ptr < MayaNurbsSurfaceWriter >
+typedef Alembic::Util::shared_ptr < MayaNurbsSurfaceWriter >
     MayaNurbsSurfaceWriterPtr;
 
 struct AbcWriteJobStatistics
@@ -166,13 +166,6 @@ class AbcWriteJob
     bool eval(double iFrame);
 
   private:
-    typedef boost::variant<
-        MayaCameraWriterPtr,
-        MayaMeshWriterPtr,
-        MayaNurbsCurveWriterPtr,
-        MayaNurbsSurfaceWriterPtr,
-        MayaLocatorWriterPtr,
-        MayaPointPrimitiveWriterPtr > MayaNodePtr;
 
     void perFrameCallback(double iFrame);
     void postCallback(double iFrame);
@@ -189,7 +182,12 @@ class AbcWriteJob
     std::vector< MayaTransformWriterPtr > mTransList;
     std::vector< AttributesWriterPtr > mTransAttrList;
 
-    std::vector< MayaNodePtr > mShapeList;
+    std::vector< MayaCameraWriterPtr > mCameraList;
+    std::vector< MayaMeshWriterPtr > mMeshList;
+    std::vector< MayaNurbsCurveWriterPtr > mCurveList;
+    std::vector< MayaNurbsSurfaceWriterPtr > mNurbsList;
+    std::vector< MayaLocatorWriterPtr > mLocatorList;
+    std::vector< MayaPointPrimitiveWriterPtr > mPointList;
     std::vector< AttributesWriterPtr > mShapeAttrList;
 
     // helper bounding box for recursive calculation
@@ -229,6 +227,6 @@ class AbcWriteJob
     JobArgs mArgs;
 };
 
-typedef boost::shared_ptr < AbcWriteJob > AbcWriteJobPtr;
+typedef Alembic::Util::shared_ptr < AbcWriteJob > AbcWriteJobPtr;
 
 #endif  // _AbcExport_AbcWriteJob_h_

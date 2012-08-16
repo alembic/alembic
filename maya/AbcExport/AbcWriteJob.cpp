@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -78,47 +78,6 @@ namespace
         }
     }
 
-    class CallWriteVisitor : public boost::static_visitor<>
-    {
-        public:
-            explicit CallWriteVisitor(double iFrame): mFrame(iFrame) {}
-
-            void operator()(MayaCameraWriterPtr & iNode)
-            {
-                iNode->write();
-            }
-
-            void operator()(MayaLocatorWriterPtr & iNode)
-            {
-                iNode->write();
-            }
-
-            void operator()(MayaMeshWriterPtr & iNode)
-            {
-                iNode->write();
-            }
-
-            void operator()(MayaNurbsCurveWriterPtr & iNode)
-            {
-                iNode->write();
-            }
-
-            void operator()(MayaNurbsSurfaceWriterPtr & iNode)
-            {
-                iNode->write();
-            }
-
-            void operator()(MayaPointPrimitiveWriterPtr & iNode)
-            {
-                iNode->write(mFrame);
-            }
-
-
-
-        private:
-            double mFrame;
-    };
-
     void addToString(std::string & str,
         const std::string & name, unsigned int value)
     {
@@ -129,50 +88,6 @@ namespace
             str += name + std::string(" ") + ss.str() + std::string(" ");
         }
     }
-
-    // increment each CV counter according to the node type in mShapeList
-    class IncrementCVCountsVisitor : public boost::static_visitor<>
-    {
-        public:
-            IncrementCVCountsVisitor()
-            {
-                mCVsArray[0] = 0;   // increment onto NurbsAnimCVs
-                mCVsArray[1] = 0;   // increment onto CurveAnimCVs
-                mCVsArray[2] = 0;   // increment onto PointAnimCVs
-                mCVsArray[3] = 0;   // increment onto SubDAnimCVs
-                mCVsArray[4] = 0;   // increment onto PolyAnimCVs
-            }
-
-
-            void operator()(MayaNurbsSurfaceWriterPtr & iNode)
-            {
-                mCVsArray[0] += iNode->getNumCVs();
-            }
-
-            void operator()(MayaLocatorWriterPtr & iNode) {}
-
-            void operator()(MayaNurbsCurveWriterPtr & iNode)
-            {
-                mCVsArray[1] += iNode->getNumCVs();
-            }
-
-            void operator()(MayaCameraWriterPtr & iNode) {}
-
-            void operator()(MayaPointPrimitiveWriterPtr & iNode)
-            {
-                mCVsArray[2] += iNode->getNumCVs();
-            }
-
-            void operator()(MayaMeshWriterPtr & iNode)
-            {
-                if (iNode->isSubD())
-                    mCVsArray[3] += iNode->getNumCVs();
-                else
-                    mCVsArray[4] += iNode->getNumCVs();
-            }
-
-        unsigned int mCVsArray[5];
-    };
 
     void processCallback(std::string iCallback, bool isMelCallback,
         double iFrame, const MBoundingBox & iBbox)
@@ -461,8 +376,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
 
         if (nurbsCurve->isAnimated() && mShapeTimeIndex != 0)
         {
-            MayaNodePtr nd = nurbsCurve;
-            mShapeList.push_back(nd);
+            mCurveList.push_back(nurbsCurve);
             mStats.mCurveAnimNum++;
             mStats.mCurveAnimCurves += nurbsCurve->getNumCurves();
             mStats.mCurveAnimCVs += nurbsCurve->getNumCVs();
@@ -547,8 +461,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
 
             if (locator->isAnimated() && mShapeTimeIndex != 0)
             {
-                MayaNodePtr nd = locator;
-                mShapeList.push_back(nd);
+                mLocatorList.push_back(locator);
                 mStats.mLocatorAnimNum++;
             }
             else
@@ -587,8 +500,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
 
             if (particle->isAnimated() && mShapeTimeIndex != 0)
             {
-                MayaNodePtr nd = particle;
-                mShapeList.push_back(nd);
+                mPointList.push_back(particle);
                 mStats.mPointAnimNum++;
                 mStats.mPointAnimCVs += particle->getNumCVs();
             }
@@ -629,8 +541,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
 
             if (mesh->isAnimated() && mShapeTimeIndex != 0)
             {
-                MayaNodePtr nd = mesh;
-                mShapeList.push_back(nd);
+                mMeshList.push_back(mesh);
                 if (mesh->isSubD())
                 {
                     mStats.mSubDAnimNum++;
@@ -691,8 +602,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
 
             if (camera->isAnimated() && mShapeTimeIndex != 0)
             {
-                MayaNodePtr nd = camera;
-                mShapeList.push_back(nd);
+                mCameraList.push_back(camera);
                 mStats.mCameraAnimNum++;
             }
             else
@@ -729,8 +639,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
 
             if (nurbsSurface->isAnimated() && mShapeTimeIndex != 0)
             {
-                MayaNodePtr nd = nurbsSurface;
-                mShapeList.push_back(nd);
+                mNurbsList.push_back(nurbsSurface);
                 mStats.mNurbsAnimNum++;
                 mStats.mNurbsAnimCVs += nurbsSurface->getNumCVs();
             }
@@ -771,8 +680,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
 
             if (nurbsCurve->isAnimated() && mShapeTimeIndex != 0)
             {
-                MayaNodePtr nd = nurbsCurve;
-                mShapeList.push_back(nd);
+                mCurveList.push_back(nurbsCurve);
                 mStats.mCurveAnimNum++;
                 mStats.mCurveAnimCurves++;
                 mStats.mCurveAnimCVs += nurbsCurve->getNumCVs();
@@ -864,20 +772,60 @@ bool AbcWriteJob::eval(double iFrame)
             assert(mRoot != NULL);
             foundShapeFrame = true;
             mShapeSamples ++;
-            std::vector< MayaNodePtr >::iterator it = mShapeList.begin();
-            std::vector< MayaNodePtr >::iterator end = mShapeList.end();
-            CallWriteVisitor visit(iFrame * util::spf());
-            IncrementCVCountsVisitor cntVisitor;
-            for (; it != end; it++)
+            double curTime = iFrame * util::spf();
+
+            std::vector< MayaCameraWriterPtr >::iterator camIt, camEnd;
+            camEnd = mCameraList.end();
+            for (camIt = mCameraList.begin(); camIt != camEnd; camIt++)
             {
-                boost::apply_visitor(visit, *it);
-                boost::apply_visitor(cntVisitor, *it);
+                (*camIt)->write();
             }
-            mStats.mNurbsAnimCVs += cntVisitor.mCVsArray[0];
-            mStats.mCurveAnimCVs += cntVisitor.mCVsArray[1];
-            mStats.mPointAnimCVs += cntVisitor.mCVsArray[2];
-            mStats.mSubDAnimCVs  += cntVisitor.mCVsArray[3];
-            mStats.mPolyAnimCVs  += cntVisitor.mCVsArray[4];
+
+            std::vector< MayaMeshWriterPtr >::iterator meshIt, meshEnd;
+            meshEnd = mMeshList.end();
+            for (meshIt = mMeshList.begin(); meshIt != meshEnd; meshIt++)
+            {
+                (*meshIt)->write();
+                if ((*meshIt)->isSubD())
+                {
+                    mStats.mSubDAnimCVs += (*meshIt)->getNumCVs();
+                }
+                else
+                {
+                    mStats.mPolyAnimCVs += (*meshIt)->getNumCVs();
+                }
+            }
+
+            std::vector< MayaNurbsCurveWriterPtr >::iterator curveIt, curveEnd;
+            curveEnd = mCurveList.end();
+            for (curveIt = mCurveList.begin(); curveIt != curveEnd; curveIt++)
+            {
+                (*curveIt)->write();
+                mStats.mCurveAnimCVs += (*curveIt)->getNumCVs();
+            }
+
+            std::vector< MayaNurbsSurfaceWriterPtr >::iterator nurbsIt,nurbsEnd;
+            nurbsEnd = mNurbsList.end();
+            for (nurbsIt = mNurbsList.begin(); nurbsIt != nurbsEnd; nurbsIt++)
+            {
+                (*nurbsIt)->write();
+                mStats.mNurbsAnimCVs += (*nurbsIt)->getNumCVs();
+            }
+
+            std::vector< MayaLocatorWriterPtr >::iterator locIt, locEnd;
+            locEnd = mLocatorList.end();
+            for (locIt = mLocatorList.begin(); locIt != locEnd; locIt++)
+            {
+                (*locIt)->write();
+            }
+
+            std::vector< MayaPointPrimitiveWriterPtr >::iterator ptIt, ptEnd;
+            ptEnd = mPointList.end();
+            for (ptIt = mPointList.begin(); ptIt != ptEnd; ptIt++)
+            {
+                (*ptIt)->write(curTime);
+                mStats.mPointAnimCVs += (*ptIt)->getNumCVs();
+            }
 
             std::vector< AttributesWriterPtr >::iterator sattrCur =
                 mShapeAttrList.begin();

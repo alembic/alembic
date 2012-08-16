@@ -90,6 +90,7 @@ class MayaTransformWriter
     MPlug mInheritsPlug;
 };
 
-typedef boost::shared_ptr < MayaTransformWriter > MayaTransformWriterPtr;
+typedef Alembic::Util::shared_ptr < MayaTransformWriter >
+    MayaTransformWriterPtr;
 
 #endif  // _AlembicExport_MayaTransformWriter_h_

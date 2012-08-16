@@ -66,6 +66,6 @@ class MayaLocatorWriter
     AttributesWriterPtr mAttrs;
 };
 
-typedef boost::shared_ptr < MayaLocatorWriter > MayaLocatorWriterPtr;
+typedef Alembic::Util::shared_ptr < MayaLocatorWriter > MayaLocatorWriterPtr;
 
 #endif  // _AlembicExport_MayaLocatorWriter_h_

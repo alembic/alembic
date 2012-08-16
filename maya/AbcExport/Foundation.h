@@ -107,10 +107,6 @@
 #include <maya/MVector.h>
 #include <maya/MVectorArray.h>
 
-#include <boost/smart_ptr.hpp>
-#include <boost/format.hpp>
-#include <boost/variant.hpp>
-
 #include <utility>
 #include <limits>
 
