@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2012,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -39,19 +39,15 @@ IF(NOT DEFINED MAYA_ROOT)
     IF( ${DARWIN} )
       # TODO: set to default install path when shipping out
       # SET( ALEMBIC_MAYA_ROOT NOTFOUND )
-      SET( ALEMBIC_MAYA_ROOT "/Applications/Autodesk/maya2011" )
-      SET( ALEMBIC_MAYA_INC_ROOT "/Applications/Autodesk/maya2011/devkit/include" )
-      SET( ALEMBIC_MAYA_LIB_ROOT "/Applications/Autodesk/maya2011/Maya.app/Contents/MacOS" )
+      SET( ALEMBIC_MAYA_ROOT "/Applications/Autodesk/maya2012" )
+      SET( ALEMBIC_MAYA_INC_ROOT "/Applications/Autodesk/maya2012/include" )
+      SET( ALEMBIC_MAYA_LIB_ROOT "/Applications/Autodesk/maya2012/Maya.app/Contents/MacOS" )
     ELSE()
-      # TODO: set to default install path when shipping out
-      # SET( ALEMBIC_MAYA_ROOT "/usr/autodesk/maya2010-x64" )
-      SET( ALEMBIC_MAYA_ROOT "/sww/tools/autodesk/maya2010" )
+      SET( ALEMBIC_MAYA_ROOT "/usr/autodesk/maya2012-x64" )
     ENDIF()
   ELSE()
     IF ( ${WINDOWS} )
-      # TODO: set to 32-bit or 64-bit path
-      # SET( ALEMBIC_MAYA_ROOT "C:/Program Files (x86)/Autodesk/Maya2010" )
-      SET( ALEMBIC_MAYA_ROOT "C:/Program Files/Autodesk/Maya2011" )
+      SET( ALEMBIC_MAYA_ROOT "C:/Program Files/Autodesk/Maya2012" )
     ELSE()
       SET( ALEMBIC_MAYA_ROOT NOTFOUND )
     ENDIF()
@@ -68,14 +64,14 @@ IF(NOT $ENV{MAYA_ROOT}x STREQUAL "x")
 ENDIF()
 
 IF( NOT DEFINED ALEMBIC_MAYA_INC_ROOT )
-  SET( ALEMBIC_MAYA_INC_ROOT "${ALEMBIC_MAYA_ROOT}/devkit/include" )
+  SET( ALEMBIC_MAYA_INC_ROOT "${ALEMBIC_MAYA_ROOT}/include" )
 ENDIF()
 
 IF( NOT DEFINED ALEMBIC_MAYA_LIB_ROOT )
   IF ( ${DARWIN} )
     SET( ALEMBIC_MAYA_LIB_ROOT "${ALEMBIC_MAYA_ROOT}/Maya.app/Contents/MacOS" )
   ELSE()
-    SET( ALEMBIC_MAYA_LIB_ROOT "${ALEMBIC_MAYA_ROOT}/devkit/lib" )
+    SET( ALEMBIC_MAYA_LIB_ROOT "${ALEMBIC_MAYA_ROOT}/lib" )
   ENDIF()
 ENDIF()
 
@@ -176,10 +172,10 @@ ENDIF()
 IF( MAYA_INCLUDE_PATH )
   #  SET( MAYA_FOUND 1 CACHE STRING "Set to 1 if Maya is found, 0 otherwise" )
   SET( MAYA_FOUND 1 )
-  MESSAGE( STATUS "Found Maya2011!" )
+  MESSAGE( STATUS "Found Maya!" )
 ELSE( MAYA_INCLUDE_PATH )
   SET( MAYA_FOUND 0 CACHE STRING "Set to 1 if Maya is found, 0 otherwise" )
-  MESSAGE( STATUS "Could not find Maya2011. :(" )
+  MESSAGE( STATUS "Could not find Maya." )
 ENDIF( MAYA_INCLUDE_PATH )
 
 #MARK_AS_ADVANCED( MAYA_FOUND )
@@ -192,7 +188,7 @@ ENDIF( MAYA_INCLUDE_PATH )
 MACRO(ADD_MAYA_CXX_PLUGIN PluginName SourceFile1 )
 
   IF( NOT ${MAYA_FOUND} )
-    MESSAGE( FATAL_ERROR "Could not find Maya2010. :(" )
+    MESSAGE( FATAL_ERROR "Could not find Maya. " )
   ENDIF()
 
   # Get various filename permutations
