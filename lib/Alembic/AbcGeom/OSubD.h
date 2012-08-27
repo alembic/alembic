@@ -190,7 +190,7 @@ public:
         const Abc::Int32ArraySample &getHoles() const
         { return m_holes; }
         void setHoles( const Abc::Int32ArraySample &iHoles )
-        { m_cornerIndices = iHoles; }
+        { m_holes = iHoles; }
 
         // subdivision scheme
         std::string getSubdivisionScheme() const
