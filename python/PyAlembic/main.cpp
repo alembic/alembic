@@ -105,6 +105,7 @@ void register_olight();
 void register_imaterial();
 void register_omaterial();
 void register_materialflatten();
+void register_materialassignment();
 
 void register_icollections();
 void register_ocollections();
@@ -245,5 +246,6 @@ BOOST_PYTHON_MODULE( alembic )
         register_imaterial();
         register_omaterial();
         register_materialflatten();
+        register_materialassignment();
    }
 }

@@ -87,6 +87,7 @@ IF ( BOOST_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
     PyITypedScalarProperty.cpp
     PyIXform.cpp
     PyMaterialFlatten.cpp
+    PyMaterialAssignment.cpp
     PyOArchive.cpp
     PyOArrayProperty.cpp
     PyOCamera.cpp
