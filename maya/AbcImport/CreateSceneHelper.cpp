@@ -69,6 +69,7 @@
 #include <string>
 #include <vector>
 
+
 namespace
 {
     void addFaceSets(MObject & iNode, Alembic::Abc::IObject & iObj)
@@ -171,12 +172,36 @@ namespace
         }
     }
 
+    bool matchesNameWithRegex (const MString& iName,
+                               const MStringArray & iPatterns)
+    {
+        unsigned int length = iPatterns.length();
+        if (length == 0)
+            return true;
+
+        for (size_t i=0; i<length; ++i)
+        {
+            // use 'match' function provided in the maya mel script.
+            MString scriptStr, result;
+            scriptStr.format("match \"^1s\" \"^2s\";", iPatterns[i], iName);
+            MGlobal::executeCommand(scriptStr, result);
+
+            // found a match!
+            if (result.length() > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 
 CreateSceneVisitor::CreateSceneVisitor(double iFrame,
-    bool iUnmarkedFaceVaryingColors, const MObject & iParent, Action iAction,
-    MString iRootNodes) :
+    bool iUnmarkedFaceVaryingColors, const MObject & iParent,
+    Action iAction, MString iRootNodes,
+    MString iIncludeFilterString, MString iExcludeFilterString) :
     mFrame(iFrame), mParent(iParent),
     mUnmarkedFaceVaryingColors(iUnmarkedFaceVaryingColors), mAction(iAction)
 {
@@ -207,6 +232,20 @@ CreateSceneVisitor::CreateSceneVisitor(double iFrame,
     else if (iRootNodes == MString("/"))
     {
         mAnyRoots = true;
+    }
+
+    mOnlyPatterns.clear();
+    if (iIncludeFilterString != MString() &&
+        iIncludeFilterString != MString("*"))
+    {
+        iIncludeFilterString.split(' ', mOnlyPatterns);
+    }
+
+    mExceptPatterns.clear();
+    if (iExcludeFilterString != MString() &&
+        iExcludeFilterString != MString("*"))
+    {
+        iExcludeFilterString.split(' ', mExceptPatterns);
     }
 }
 
@@ -296,47 +335,48 @@ void CreateSceneVisitor::checkShaderSelection(MFnMesh & iMesh,
     }
 }
 
-void CreateSceneVisitor::visit(Alembic::Abc::IObject & iObj)
+void CreateSceneVisitor::visit(AlembicObjectPtr iObject)
 {
-    const Alembic::AbcCoreAbstract::ObjectHeader & header = iObj.getHeader();
-    if ( Alembic::AbcGeom::IXform::matches(header) )
+    Alembic::Abc::IObject iObj = iObject->object();
+
+    if ( Alembic::AbcGeom::IXform::matches(iObj.getHeader()) )
     {
         Alembic::AbcGeom::IXform xform(iObj, Alembic::Abc::kWrapExisting);
-        (*this)(xform);
+        (*this)(xform, iObject);
     }
-    else if ( Alembic::AbcGeom::ISubD::matches(header) )
+    else if ( Alembic::AbcGeom::ISubD::matches(iObj.getHeader()) )
     {
         Alembic::AbcGeom::ISubD mesh(iObj, Alembic::Abc::kWrapExisting);
         (*this)(mesh);
     }
-    else if ( Alembic::AbcGeom::IPolyMesh::matches(header) )
+    else if ( Alembic::AbcGeom::IPolyMesh::matches(iObj.getHeader()) )
     {
         Alembic::AbcGeom::IPolyMesh mesh(iObj, Alembic::Abc::kWrapExisting);
         (*this)(mesh);
     }
-    else if ( Alembic::AbcGeom::ICamera::matches(header) )
+    else if ( Alembic::AbcGeom::ICamera::matches(iObj.getHeader()) )
     {
         Alembic::AbcGeom::ICamera cam(iObj, Alembic::Abc::kWrapExisting);
         (*this)(cam);
     }
-    else if ( Alembic::AbcGeom::ICurves::matches(header) )
+    else if ( Alembic::AbcGeom::ICurves::matches(iObj.getHeader()) )
     {
         Alembic::AbcGeom::ICurves curves(iObj, Alembic::Abc::kWrapExisting);
         (*this)(curves);
     }
-    else if ( Alembic::AbcGeom::INuPatch::matches(header) )
+    else if ( Alembic::AbcGeom::INuPatch::matches(iObj.getHeader()) )
     {
         Alembic::AbcGeom::INuPatch nurbs(iObj, Alembic::Abc::kWrapExisting);
         (*this)(nurbs);
     }
-    else if ( Alembic::AbcGeom::IPoints::matches(header) )
+    else if ( Alembic::AbcGeom::IPoints::matches(iObj.getHeader()) )
     {
         Alembic::AbcGeom::IPoints pts(iObj, Alembic::Abc::kWrapExisting);
         (*this)(pts);
     }
-    else if ( header.getMetaData().get("schema") == "" )
+    else if ( iObj.getHeader().getMetaData().get("schema") == "" )
     {
-        createEmptyObject(iObj);
+        createEmptyObject(iObject);
     }
     else
     {
@@ -345,6 +385,44 @@ void CreateSceneVisitor::visit(Alembic::Abc::IObject & iObj)
         theWarning += iObj.getMetaData().get("schema").c_str();
         printWarning(theWarning);
     }
+}
+
+AlembicObjectPtr CreateSceneVisitor::previsit(AlembicObjectPtr iParentObject)
+{
+    Alembic::Abc::IObject parent = iParentObject->object();
+    const MString name = parent.getName().c_str();
+    const size_t numChildren = parent.getNumChildren();
+
+    // Apply exclude filters first as a preorder traversal.
+    if (mExceptPatterns.length() > 0 && 
+        matchesNameWithRegex(name, mExceptPatterns))
+    {
+        return AlembicObjectPtr();
+    }
+
+    for (size_t i = 0; i < numChildren; ++i)
+    {
+        Alembic::Abc::IObject child = parent.getChild(i);
+        AlembicObjectPtr childObject =
+            previsit(AlembicObjectPtr(new AlembicObject(child)));
+
+        if (childObject)
+        {
+            iParentObject->addChild(childObject);
+        }
+    }
+
+    // We traverse a tree in postorder. The invarient is that iParentObject
+    // will have no child unless any descendent of it has the matching name. 
+    if (iParentObject->getNumChildren() == 0)
+    {
+        if (!matchesNameWithRegex(name, mOnlyPatterns))
+        {
+            return AlembicObjectPtr();
+        }
+    }
+
+    return iParentObject;
 }
 
  // root of file, no creation of DG node
@@ -356,8 +434,13 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
 
     if (!iRoot.valid()) return MS::kFailure;
 
-    Alembic::Abc::IObject top = iRoot.getTop();
-    size_t numChildren = top.getNumChildren();
+    // preload the cache hierarchy with an optional filtering.
+    AlembicObjectPtr topObject =
+        previsit(AlembicObjectPtr(new AlembicObject(iRoot.getTop())));
+
+    if (!topObject) return status;
+
+    size_t numChildren = topObject->getNumChildren();
 
     if (numChildren == 0) return status;
 
@@ -365,8 +448,7 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
     {
         for (size_t i = 0; i < numChildren; i++)
         {
-            Alembic::Abc::IObject child = top.getChild(i);
-            this->visit(child);
+            this->visit(topObject->getChild(i));
             mParent = saveParent;
         }
         return status;
@@ -380,8 +462,8 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
         connectCurNodesInFile.end();
     for (size_t i = 0; i < numChildren; i++)
     {
-        Alembic::Abc::IObject obj = top.getChild(i);
-        std::string name = obj.getName();
+        AlembicObjectPtr object = topObject->getChild(i);
+        std::string name = object->object().getName();
         connectCurNodesInFile.insert(name);
 
         // see if this name is part of the input to AlembicNode
@@ -398,7 +480,7 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
                 connectUpdateNodes.insert(name);
                 mConnectDagNode = dagPath;
                 mConnectDagNode.pop();
-                this->visit(obj);
+                this->visit(object);
                 mParent = saveParent;
             }
             else if (mAction != CREATE && mAction != CREATE_REMOVE)
@@ -413,7 +495,7 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
             {
                 mConnectDagNode = MDagPath();
                 connectUpdateNodes.insert(name);
-                this->visit(obj);
+                this->visit(object);
                 mParent = saveParent;
 
             }
@@ -1009,7 +1091,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
     return status;
 }
 
-MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
+MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode,
+                                       AlembicObjectPtr iNodeObject)
 {
     MStatus status = MS::kSuccess;
     MObject xformObj = MObject::kNullObj;
@@ -1099,7 +1182,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
     {
         MString name(iNode.getName().c_str());
 
-        size_t numChildren = iNode.getNumChildren();
+        size_t numChildren = iNodeObject->getNumChildren();
         bool isConstant = iNode.getSchema().isConstant();
 
         Alembic::Abc::IScalarProperty visProp = getVisible(iNode,
@@ -1141,7 +1224,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
             std::set< std::string > childNodesInFile;
             for (size_t j = 0; j < numChildren; ++j)
             {
-                Alembic::Abc::IObject child = iNode.getChild(j);
+                Alembic::Abc::IObject child = iNodeObject->getChild(j)->object();
                 childNodesInFile.insert(child.getName());
             }
 
@@ -1230,10 +1313,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
         MObject saveParent = xformObj;
         for (size_t i = 0; i < numChildren; ++i)
         {
-            Alembic::Abc::IObject child = iNode.getChild(i);
             mParent = saveParent;
 
-            this->visit(child);
+            this->visit(iNodeObject->getChild(i));
         }
 
         if (hasDag)
@@ -1245,14 +1327,16 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode)
     return status;
 }
 
-MStatus CreateSceneVisitor::createEmptyObject(Alembic::Abc::IObject & iNode)
+MStatus CreateSceneVisitor::createEmptyObject(AlembicObjectPtr iNodeObject)
 {
+    Alembic::Abc::IObject iNode = iNodeObject->object();
+
     MStatus status = MS::kSuccess;
     MObject xformObj = MObject::kNullObj;
 
     MString name(iNode.getName().c_str());
 
-    size_t numChildren = iNode.getNumChildren();
+    size_t numChildren = iNodeObject->getNumChildren();
 
     bool hasDag = false;
 
@@ -1279,7 +1363,7 @@ MStatus CreateSceneVisitor::createEmptyObject(Alembic::Abc::IObject & iNode)
         std::set< std::string > childNodesInFile;
         for (size_t j = 0; j < numChildren; ++j)
         {
-            Alembic::Abc::IObject child = iNode.getChild(j);
+            Alembic::Abc::IObject child = iNodeObject->getChild(j)->object();
             childNodesInFile.insert(child.getName());
         }
 
@@ -1335,10 +1419,9 @@ MStatus CreateSceneVisitor::createEmptyObject(Alembic::Abc::IObject & iNode)
     MObject saveParent = xformObj;
     for (size_t i = 0; i < numChildren; ++i)
     {
-        Alembic::Abc::IObject child = iNode.getChild(i);
         mParent = saveParent;
 
-        this->visit(child);
+        this->visit(iNodeObject->getChild(i));
     }
 
     if (hasDag)

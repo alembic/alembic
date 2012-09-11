@@ -2744,14 +2744,17 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
 ArgData::ArgData(MString iFileName,
     bool iDebugOn, MObject iReparentObj, bool iConnect,
     MString iConnectRootNodes, bool iCreateIfNotFound, bool iRemoveIfNoUpdate,
-    bool iRecreateColorSets) :
+    bool iRecreateColorSets, MString iFilterString,
+    MString iExcludeFilterString) :
         mFileName(iFileName),
         mDebugOn(iDebugOn), mReparentObj(iReparentObj),
         mRecreateColorSets(iRecreateColorSets),
         mConnect(iConnect),
         mConnectRootNodes(iConnectRootNodes),
         mCreateIfNotFound(iCreateIfNotFound),
-        mRemoveIfNoUpdate(iRemoveIfNoUpdate)
+        mRemoveIfNoUpdate(iRemoveIfNoUpdate),
+        mIncludeFilterString(iFilterString),
+        mExcludeFilterString(iExcludeFilterString)
 {
     mSequenceStartTime = -DBL_MAX;
     mSequenceEndTime = DBL_MAX;
@@ -2772,13 +2775,14 @@ ArgData & ArgData::operator=(const ArgData & rhs)
 
     mReparentObj = rhs.mReparentObj;
     mRecreateColorSets = rhs.mRecreateColorSets;
+    mIncludeFilterString = rhs.mIncludeFilterString;
+    mExcludeFilterString = rhs.mExcludeFilterString;
 
     // optional information for the "connect" flag
     mConnect = rhs.mConnect;
     mConnectRootNodes = rhs.mConnectRootNodes;
     mCreateIfNotFound = rhs.mCreateIfNotFound;
     mRemoveIfNoUpdate = rhs.mRemoveIfNoUpdate;
-
 
     mData = rhs.mData;
 
@@ -2814,7 +2818,8 @@ MString createScene(ArgData & iArgData)
 
     CreateSceneVisitor visitor(iArgData.mSequenceStartTime,
         iArgData.mRecreateColorSets, iArgData.mReparentObj, action,
-        iArgData.mConnectRootNodes);
+        iArgData.mConnectRootNodes, iArgData.mIncludeFilterString,
+        iArgData.mExcludeFilterString);
 
     visitor.walk(archive);
 
@@ -2853,6 +2858,8 @@ MString connectAttr(ArgData & iArgData)
     {
         alembicNodePtr->setReaderPtrList(iArgData.mData);
         alembicNodePtr->setDebugMode(iArgData.mDebugOn);
+        alembicNodePtr->setIncludeFilterString(iArgData.mIncludeFilterString);
+        alembicNodePtr->setExcludeFilterString(iArgData.mExcludeFilterString);
     }
 
     if (iArgData.mRecreateColorSets)

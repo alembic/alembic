@@ -247,7 +247,9 @@ public:
         MString iConnectRootNodes = MString("/"),
         bool    iCreateIfNotFound = false,
         bool    iRemoveIfNoUpdate = false,
-        bool    iRecreateColorSets = false);
+        bool    iRecreateColorSets = false,
+        MString iIncludeFilterString = MString(""),
+        MString iExcludeFilterString = MString(""));
     ArgData(const ArgData & rhs);
     ArgData & operator=(const ArgData & rhs);
 
@@ -265,6 +267,8 @@ public:
     MString     mConnectRootNodes;
     bool        mCreateIfNotFound;
     bool        mRemoveIfNoUpdate;
+    MString     mIncludeFilterString;
+    MString     mExcludeFilterString;
 
     WriterData  mData;
 };  // ArgData

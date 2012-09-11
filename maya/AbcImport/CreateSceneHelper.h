@@ -57,12 +57,38 @@
 #include <map>
 #include <vector>
 
+#ifndef _MSC_VER
+#include <tr1/memory>
+#endif
+
+#include <memory>
+
 struct ltMObj
 {
   bool operator()(const MObject & s1, const MObject & s2) const
   {
     return (&s1) < (&s2);
   }
+};
+
+class AlembicObject;
+typedef std::tr1::shared_ptr<AlembicObject> AlembicObjectPtr;
+
+class AlembicObject
+{
+public:
+    AlembicObject(const Alembic::Abc::IObject& iObject) : mObject( iObject ) {}
+
+    const   Alembic::Abc::IObject&  object() const { return mObject; }
+            Alembic::Abc::IObject&  object()       { return mObject; }
+            
+    void    addChild(AlembicObjectPtr iChild)   { mChildren.push_back(iChild); }
+    size_t  getNumChildren()                    { return mChildren.size(); }
+
+    AlembicObjectPtr      getChild(size_t index){ return mChildren[index]; } 
+private:
+    Alembic::Abc::IObject       mObject;
+    std::vector<AlembicObjectPtr> mChildren;
 };
 
 /// static visitor that create the scene hierarchy
@@ -82,14 +108,19 @@ public:
     CreateSceneVisitor(double iFrame = 0,
         bool iUnmarkedFaceVaryingColors = false,
         const MObject & iParent = MObject::kNullObj,
-        Action iAction = CREATE, MString iRootNodes = MString());
+        Action iAction = CREATE, MString iRootNodes = MString(),
+        MString iFilterString = MString(),
+        MString iExcludeFilterString = MString());
 
     ~CreateSceneVisitor();
+
+    // previsit the hierarchy and return a tree of selected nodes.
+    AlembicObjectPtr previsit(AlembicObjectPtr iParentObj);
 
     // gets the ball rolling starting the hierarchy walk
     MStatus walk(Alembic::Abc::IArchive & iRoot);
 
-    void visit(Alembic::Abc::IObject & iObj);
+    void visit(AlembicObjectPtr iAlembicObj);
 
     MStatus operator()(Alembic::AbcGeom::ICamera & iNode);
     MStatus operator()(Alembic::AbcGeom::ICurves & iNode);
@@ -97,8 +128,9 @@ public:
     MStatus operator()(Alembic::AbcGeom::IPoints & iNode);
     MStatus operator()(Alembic::AbcGeom::IPolyMesh & iNode);
     MStatus operator()(Alembic::AbcGeom::ISubD & iNode);
-    MStatus operator()(Alembic::AbcGeom::IXform & iNode);
-    MStatus createEmptyObject(Alembic::Abc::IObject & iNode);
+    MStatus operator()(Alembic::AbcGeom::IXform & iNode,
+                       AlembicObjectPtr iNodeObject);
+    MStatus createEmptyObject(AlembicObjectPtr iNodeObject);
 
     bool hasSampledData();
 
@@ -137,6 +169,10 @@ private:
     Action mAction;
 
     WriterData  mData;
+
+    // regular expression strings for filtering the input cache.
+    MStringArray mOnlyPatterns;
+    MStringArray mExceptPatterns;
 
     // special map of shaders to selection lists that have selections
     // of parts of meshes.  They are to get around a problem where a shape

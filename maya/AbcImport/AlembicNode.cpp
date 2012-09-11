@@ -78,6 +78,8 @@ MObject AlembicNode::mOffsetAttr;
 MObject AlembicNode::mCycleTypeAttr;
 MObject AlembicNode::mStartFrameAttr;
 MObject AlembicNode::mEndFrameAttr;
+MObject AlembicNode::mIncludeFilterAttr;
+MObject AlembicNode::mExcludeFilterAttr;
 
 MObject AlembicNode::mOutSubDArrayAttr;
 MObject AlembicNode::mOutPolyArrayAttr;
@@ -159,6 +161,24 @@ MStatus AlembicNode::initialize()
     status = eAttr.setStorable(true);
     status = eAttr.setKeyable(true);
     status = addAttribute(mCycleTypeAttr);
+
+    // Regex Filter
+    // This is a hidden variable to preserve a regexIncludefilter string
+    // into a .ma file.
+    mIncludeFilterAttr = tAttr.create("regexIncludeFilter", "ift",
+        MFnData::kString);
+    status = tAttr.setStorable(true);
+    status = tAttr.setHidden(true);
+    status = addAttribute(mIncludeFilterAttr);
+
+    // Regex Filter
+    // This is a hidden variable to preserve a regexExcludefilter string
+    // into a .ma file.
+    mExcludeFilterAttr = tAttr.create("regexExcludeFilter", "eft",
+        MFnData::kString);
+    status = tAttr.setStorable(true);
+    status = tAttr.setHidden(true);
+    status = addAttribute(mExcludeFilterAttr);
 
     // sequence min and max in frames
     mStartFrameAttr = nAttr.create("startFrame", "sf",
@@ -426,7 +446,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
     // scale and offset inputTime.
     inputTime = computeAdjustedTime(inputTime, speed, offset/fps);
- 
+
     // this should be done only once per file
     if (mFileInitialized == false)
     {
@@ -452,10 +472,45 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         mSubDInitialized = false;
         mPolyInitialized = false;
 
+        // When an alembic cache will be imported at the first time using
+        // AbcImport, we need to set mIncludeFilterAttr (filterHandle) to be 
+        // mIncludeFilterString for later use. When we save a maya scene(.ma) 
+        // mIncludeFilterAttr will be saved. Then when we load the saved 
+        // .ma file, mIncludeFilterString will be set to be mIncludeFilterAttr.
+        MDataHandle includeFilterHandle =
+                        dataBlock.inputValue(mIncludeFilterAttr, &status);
+        MString& includeFilterString = includeFilterHandle.asString();
+        
+       if (mIncludeFilterString.length() > 0)
+        {
+            includeFilterHandle.set(mIncludeFilterString);
+            dataBlock.setClean(mIncludeFilterAttr);
+        }
+        else if (includeFilterString.length() > 0)
+        {
+            mIncludeFilterString = includeFilterString;
+        }
+
+        MDataHandle excludeFilterHandle =
+                        dataBlock.inputValue(mExcludeFilterAttr, &status);
+        MString& excludeFilterString = excludeFilterHandle.asString();
+        
+       if (mExcludeFilterString.length() > 0)
+        {
+            excludeFilterHandle.set(mExcludeFilterString);
+            dataBlock.setClean(mExcludeFilterAttr);
+        }
+        else if (excludeFilterString.length() > 0)
+        {
+            mExcludeFilterString = excludeFilterString;
+        }
+
+
         MFnDependencyNode dep(thisMObject());
         MPlug allSetsPlug = dep.findPlug("allColorSets");
         CreateSceneVisitor visitor(inputTime, !allSetsPlug.isNull(),
-            MObject::kNullObj, CreateSceneVisitor::NONE, "");
+            MObject::kNullObj, CreateSceneVisitor::NONE, "",
+            mIncludeFilterString, mExcludeFilterString);
 
         visitor.walk(archive);
 

@@ -89,6 +89,11 @@ a warning will be given and nothing will be done.                           \n\
                     Set the current time to the start of the frame range    \n\
 -m  / mode          string (\"open\"|\"import\"|\"replace\")                \n\
                     Set read mode to open/import/replace (default to import)\n\
+-ft / filterObjects \"regex1 regex2 ...\"                                   \n\
+                    Selective import cache objects whose name matches with  \n\
+-eft / excludeFilterObjects \"regex1 regex2 ...\"                          \n\
+                    Selective exclude cache objects whose name matches with \n\
+the input regular expressions.                                              \n\
 -h  / help          Print this message                                      \n\
 -d  / debug         Turn on debug message printout                        \n\n\
 Example:                                                                    \n\
@@ -126,6 +131,9 @@ MSyntax AbcImport::createSyntax()
     syntax.addFlag("-rpr",  "-reparent",     MSyntax::kString);
     syntax.addFlag("-sts",  "-setToStartFrame",  MSyntax::kNoArg);
 
+    syntax.addFlag("-ft",   "-filterObjects",    MSyntax::kString);
+    syntax.addFlag("-eft",  "-excludeFilterObjects",    MSyntax::kString);
+
     syntax.addArg(MSyntax::kString);
 
     syntax.enableQuery(true);
@@ -149,6 +157,8 @@ MStatus AbcImport::doIt(const MArgList & args)
 
     MString filename("");
     MString connectRootNodes("");
+    MString filterString("");
+    MString excludeFilterString("");
 
     MObject reparentObj = MObject::kNullObj;
 
@@ -209,6 +219,16 @@ MStatus AbcImport::doIt(const MArgList & args)
 
         if (argData.isFlagSet("removeIfNoUpdate"))
             removeIfNoUpdate = true;
+    }
+
+    if (argData.isFlagSet("filterObjects"))
+    {
+        argData.getFlagArgument("filterObjects", 0, filterString);
+    }
+
+    if (argData.isFlagSet("excludeFilterObjects"))
+    {
+        argData.getFlagArgument("excludeFilterObjects", 0, excludeFilterString);
     }
 
     // if the flag isn't specified we'll only do stuff marked with the Maya
@@ -281,7 +301,7 @@ MStatus AbcImport::doIt(const MArgList & args)
         {
             ArgData inputData(filename, debugOn, reparentObj,
                 swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
-                recreateColorSets);
+                recreateColorSets, filterString, excludeFilterString);
             abcNodeName = createScene(inputData);
 
             if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&

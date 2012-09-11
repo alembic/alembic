@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,59 +34,20 @@
 //
 //-*****************************************************************************
 
-#include "AlembicNode.h"
-#include "AbcImport.h"
 #include "AlembicImportFileTranslator.h"
 
 #include <maya/MGlobal.h>
-#include <maya/MFnPlugin.h>
-#include <maya/MObject.h>
-#include <maya/MGlobal.h>
 
-// Interesting trivia: 0x2697 is the unicode character for Alembic
-const MTypeId AlembicNode::mMayaNodeId(0x00082697);
-
-MStatus initializePlugin(MObject obj)
+MStatus AlembicImportFileTranslator::reader(
+                                        const MFileObject& file,
+                                        const MString& optionsString,
+                                        MPxFileTranslator::FileAccessMode mode)
 {
-    const char * pluginVersion = "1.0";
-    MFnPlugin plugin(obj, "Alembic", pluginVersion, "Any");
+    MString fileName = file.fullName();
 
-    MStatus status;
-
-    status = plugin.registerCommand("AbcImport",
-                                AbcImport::creator,
-                                AbcImport::createSyntax);
-
-    status = plugin.registerNode("AlembicNode",
-                                AlembicNode::mMayaNodeId,
-                                &AlembicNode::creator,
-                                &AlembicNode::initialize);
-
-    status = plugin.registerFileTranslator("Alembic",
-                                NULL,
-                                AlembicImportFileTranslator::creator,
-                                NULL,
-                                NULL,
-                                true);
-
-    MString info = "AbcImport v";
-    info += pluginVersion;
-    info += " using ";
-    info += Alembic::AbcCoreAbstract::GetLibraryVersion().c_str();
-    MGlobal::displayInfo(info);
-
-    return status;
-}
-
-MStatus uninitializePlugin(MObject obj)
-{
-    MFnPlugin plugin(obj);
-
-    MStatus status;
-
-    status = plugin.deregisterCommand("AlembicImport");
-    status = plugin.deregisterNode(AlembicNode::mMayaNodeId);
-    status = plugin.deregisterFileTranslator("AlembicImport");
+    MString script;
+    script.format ("AbcImport \"^1s\";", file.fullName());
+    MStatus status = MGlobal::executeCommand (script);
 
     return status;
 }
