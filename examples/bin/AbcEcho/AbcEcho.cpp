@@ -37,6 +37,8 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/Util/All.h>
+#include <Alembic/Abc/TypedPropertyTraits.h>
 
 #include <iostream>
 #include <sstream>
@@ -52,11 +54,18 @@ void visitProperties( ICompoundProperty, std::string & );
 
 //-*****************************************************************************
 template <class PROP>
-void visitSimpleProperty( PROP iProp, const std::string &iIndent )
+void visitSimpleArrayProperty( PROP iProp, const std::string &iIndent )
 {
-    std::string ptype = "ScalarProperty ";
-    if ( iProp.isArray() ) { ptype = "ArrayProperty "; }
+    std::string ptype = "ArrayProperty ";
+    size_t asize = 0;
 
+    AbcA::ArraySamplePtr samp;
+    index_t maxSamples = iProp.getNumSamples();
+    for ( index_t i = 0 ; i < maxSamples; ++i )
+    {
+        iProp.get( samp, ISampleSelector( i ) );
+        asize = samp->size();
+    };
 
     std::string mdstring = "interpretation=";
     mdstring += iProp.getMetaData().get( "interpretation" );
@@ -65,9 +74,57 @@ void visitSimpleProperty( PROP iProp, const std::string &iIndent )
     dtype << "datatype=";
     dtype << iProp.getDataType();
 
+    std::stringstream asizestr;
+    asizestr << ";arraysize=";
+    asizestr << asize;
+
     mdstring += g_sep;
 
     mdstring += dtype.str();
+
+    mdstring += asizestr.str();
+
+    std::cout << iIndent << "  " << ptype << "name=" << iProp.getName()
+              << g_sep << mdstring << g_sep << "numsamps="
+              << iProp.getNumSamples() << std::endl;
+}
+
+//-*****************************************************************************
+template <class PROP>
+void visitSimpleScalarProperty( PROP iProp, const std::string &iIndent )
+{
+    std::string ptype = "ScalarProperty ";
+    size_t asize = 0;
+
+    const AbcA::DataType &dt = iProp.getDataType();
+    const Alembic::Util ::uint8_t extent = dt.getExtent();
+    Alembic::Util::Dimensions dims( extent );
+    AbcA::ArraySamplePtr samp = 
+        AbcA::AllocateArraySample( dt, dims );
+    index_t maxSamples = iProp.getNumSamples();
+    for ( index_t i = 0 ; i < maxSamples; ++i )
+    {
+        iProp.get( const_cast<void*>( samp->getData() ), 
+                                      ISampleSelector( i ) );
+        asize = samp->size();
+    };
+
+    std::string mdstring = "interpretation=";
+    mdstring += iProp.getMetaData().get( "interpretation" );
+
+    std::stringstream dtype;
+    dtype << "datatype=";
+    dtype << dt;
+
+    std::stringstream asizestr;
+    asizestr << ";arraysize=";
+    asizestr << asize;
+
+    mdstring += g_sep;
+
+    mdstring += dtype.str();
+
+    mdstring += asizestr.str();
 
     std::cout << iIndent << "  " << ptype << "name=" << iProp.getName()
               << g_sep << mdstring << g_sep << "numsamps="
@@ -108,13 +165,15 @@ void visitProperties( ICompoundProperty iParent,
         }
         else if ( header.isScalar() )
         {
-            visitSimpleProperty( IScalarProperty( iParent, header.getName() ),
+            visitSimpleScalarProperty( IScalarProperty( iParent,
+                                                        header.getName() ),
                                  ioIndent );
         }
         else
         {
             assert( header.isArray() );
-            visitSimpleProperty( IArrayProperty( iParent, header.getName() ),
+            visitSimpleArrayProperty( IArrayProperty( iParent,
+                                                      header.getName() ),
                                  ioIndent );
         }
     }
