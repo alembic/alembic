@@ -105,10 +105,10 @@ public:
         prop.set( Abc::StringArraySample( strVec ) );
     }
 
-    if ( ! interface.empty() )
+    if ( ! interfaceStrVec.empty() )
     {
         Abc::OStringArrayProperty prop( parent, ".interface" );
-        prop.set( Abc::StringArraySample( interface ) );
+        prop.set( Abc::StringArraySample( interfaceStrVec ) );
     }
 }
 
@@ -127,7 +127,7 @@ public:
     std::map<std::string, std::string> terminals;
 
     Abc::OCompoundProperty interfaceParams;
-    std::vector<std::string> interface;
+    std::vector<std::string> interfaceStrVec;
 };
 
 void OMaterialSchema::init()
@@ -327,8 +327,8 @@ void OMaterialSchema::setNetworkInterfaceParameterMapping(
     Util::validateName( iMapToNodeName, "mapToNodeName" );
 
     // order is important
-    m_data->interface.push_back( iInterfaceParamName );
-    m_data->interface.push_back( iMapToNodeName + "." + iMapToParamName );
+    m_data->interfaceStrVec.push_back( iInterfaceParamName );
+    m_data->interfaceStrVec.push_back( iMapToNodeName + "." + iMapToParamName );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
