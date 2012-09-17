@@ -61,6 +61,7 @@
 #include <assert.h>
 
 #ifdef _MSC_VER
+#define NOMINMAX
 // needed for mutex stuff
 #include <Windows.h>
 #endif
