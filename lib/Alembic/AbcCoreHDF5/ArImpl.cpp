@@ -208,8 +208,9 @@ ArImpl::~ArImpl()
                     attrCount, &objList.front() );
                 for ( int i = 0; i < attrCount; ++i )
                 {
-                    int strLen = H5Aget_name( objList[i], NULL, 0 ) + 1;
-                    H5Iget_name( objList[i], &(name[0]), strLen );
+                    int strLen = H5Aget_name( objList[i], 0, NULL ) + 1;
+                    name.resize( strLen );
+                    H5Aget_name( objList[i], strLen, &(name[0]) );
                     strm << std::endl << name.substr(0, name.size() - 1);
                 }
             }
