@@ -80,7 +80,7 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
         uint64_t k2 = blocks[i*2+1];
 
 
-#if __BYTE_ORDER == __BIG_ENDIAN  || BYTE_ORDER == BIG_ENDIAN
+#if (defined(__BYTE_ORDER) && defined(__BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN) || (defined(BYTE_ORDER) && defined(BIG_ENDIAN) && BYTE_ORDER == BIG_ENDIAN)
         if (podSize == 8)
         {
             k1 = (k1>>56) |
@@ -165,7 +165,7 @@ void MurmurHash3_x64_128 ( const void * key, const size_t len,
     //----------
     // tail
 
-#if __BYTE_ORDER == __BIG_ENDIAN  || BYTE_ORDER == BIG_ENDIAN
+#if (defined(__BYTE_ORDER) && defined(__BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN) || (defined(BYTE_ORDER) && defined(BIG_ENDIAN) && BYTE_ORDER == BIG_ENDIAN)
     const uint8_t * unswappedTail = (const uint8_t*)(data + nblocks*16);
     uint8_t tail[16];
     size_t tailSize = len & 15;
