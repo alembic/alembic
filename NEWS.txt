@@ -1,3 +1,20 @@
+2012-9-20, Alembic 1.1.1
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful and important bug fixes.
+
+Bug fixes:
+
+Issue 291
+Fix for some compile issues/warnings on Windows.
+
+Issue 292
+Hash keys are being computed incorrectly on Windows.
+
+Some small CMake updates.
+
+Fixed typo in OSubD::setHoles
+
+
 2012-7-26, Alembic 1.1.0
 
 Hello Alembic users.  We are excited to announce another release of Alembic
