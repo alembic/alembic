@@ -1,0 +1,1094 @@
+#! /usr/bin/env python
+#-******************************************************************************
+#
+# Copyright (c) 2012,
+#  Sony Pictures Imageworks Inc. and
+#  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+# *       Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+# *       Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+# *       Neither the name of Sony Pictures Imageworks, nor
+# Industrial Light & Magic, nor the names of their contributors may be used
+# to endorse or promote products derived from this software without specific
+# prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#-******************************************************************************
+
+import os
+import re
+import sys
+import copy
+import time
+import commands
+import traceback
+import subprocess
+
+from PyQt4 import QtCore
+from PyQt4 import QtGui
+from PyQt4 import uic
+
+import imath
+import alembic
+
+style = """
+* {
+    background: #777;
+    color: #222;
+    border: 0px;
+}
+QGroupBox {
+    border: 0px;
+    margin: 0px;
+    padding: 0px;
+    background: #000;
+}
+QPlainTextEdit {
+    background: #222;
+    color: #aaabac;
+}
+QHeaderView::section {
+    background-image: none;
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 #aaa, stop: 1.0 #868686);
+    color: #111;
+    font-weight: bold;
+    font-size: 11px;
+    font-family: Arial;
+    padding-left: 5px;
+    border-top: 1px solid #c9c9c9;
+    border-right: 1px solid #5e5e5e;
+    border-left: 1px solid #a9a9a9;
+    border-bottom: 0px solid #282828;
+    height: 17px;
+    margin: 0px;
+}
+QTreeView {
+    background-color: #373737;
+    alternate-background-color: #313131;
+    border: 0px;
+}
+QTreeView::branch {
+    width: 0px;
+}
+QTreeView::item {
+    color: #dddddd;
+    border-bottom: 1px solid #333;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    height: 20px;
+}
+QTreeView::item:selected {
+    background: #273;
+}
+QTreeView::indicator {
+    padding-left: -9px;
+}
+QLineEdit {
+    border: 0px;
+    background: #666;
+    color: #3e6;
+}
+QToolBar {
+    spacing: 0px;
+    padding: 4px;
+}
+QToolButton {
+    color: #444;
+}
+QSplitter {
+    background: #777
+}
+QSplitter::handle:hover {
+    background: #7a7;
+}
+QSplitter::handle:horizontal {
+    width: 3px;
+}
+QSplitter::handle:vertical {
+    height: 3px;
+}
+QProgressBar {
+    border: 0px;
+    background: #444;
+    height: 8px;
+}
+QProgressBar::chunk {
+    background: #4a4;
+}
+"""
+def getSchemaTitleBase(obj):
+    """
+    Returns a tuple of the shema, title and base strings.
+
+    Example ::
+    
+        >>> obj.getMetaData().serialize()
+        'schema=AbcGeom_Xform_v3;schemaObjTitle=AbcGeom_Xform_v3:.xform'
+    
+        >>> getSchemaTitleBase(obj)
+        ('AbcGeom_Xform_v3', 'AbcGeom_Xform_v3:.xform', None)
+
+    :param obj: Alembic IObject.
+
+    :return: Tuple of strings.
+    """
+    md = obj.getMetaData()
+    return md.get('schema'), md.get('schemaObjTitle'), md.get('schemaBaseType')
+
+def getPropertyClass(prop):
+    """
+    Given an IProperty object, tries to return the corresponding OProperty class that
+    was used to create it in the first place.
+
+        +-------------------------------------------------------------------------------+
+        | Existing Alembic POD types                                                    |
+        +=================+===============+===========================+=================+
+        | POD.kBooleanPOD | POD.kInt16POD | POD.kNumPlainOldDataTypes | POD.kUint64POD  |
+        +-----------------+---------------+---------------------------+-----------------+
+        | POD.kFloat16POD | POD.kInt32POD | POD.kStringPOD            | POD.kUint8POD   |
+        +-----------------+---------------+---------------------------+-----------------+
+        | POD.kFloat32POD | POD.kInt64POD | POD.kUint16POD            | POD.kUnknownPOD |
+        +-----------------+---------------+---------------------------+-----------------+
+        | POD.kFloat64POD | POD.kInt8POD  | POD.kUint32POD            | POD.kWstringPOD |
+        +-----------------+---------------+---------------------------+-----------------+
+
+    Example ::
+
+        >>> oProp = getPropertyClass(iProp)(*args)
+
+    :param prop: Input IProperty object (result of a getProperty(name) call).
+
+    :return: Corresponding OProperty.
+    """
+
+    klass = None
+    dt = prop.getDataType()
+    pod = dt.getPod()
+
+    # bool_t
+    if pod == alembic.Util.POD.kBooleanPOD:
+        if prop.isScalar():
+            klass = alembic.Abc.OBoolProperty
+        elif prop.isArray():
+            klass = alembic.Abc.OBoolArrayProperty
+    # string
+    elif pod == alembic.Util.POD.kStringPOD:
+        if prop.isScalar():
+            klass = alembic.Abc.OStringProperty
+        elif prop.isArray():
+            klass = alembic.Abc.OStringArrayProperty
+    # uint8_t
+    elif pod == alembic.Util.POD.kUint8POD:
+        if prop.isScalar():
+            klass = alembic.Abc.OUcharProperty
+        elif prop.isArray():
+            klass = alembic.Abc.OUcharArrayProperty
+    # uint16_t
+    elif pod == alembic.Util.POD.kUint16POD:
+        if prop.isScalar():
+            klass = alembic.Abc.OUInt16Property
+        elif prop.isArray():
+            klass = alembic.Abc.OUInt16ArrayProperty
+    # int16_t
+    elif pod == alembic.Util.POD.kInt16POD:
+        if prop.isScalar():
+            klass = alembic.Abc.OInt16Property
+        elif prop.isArray():
+            klass = alembic.Abc.OInt16ArrayProperty
+    # uint32_t
+    elif pod == alembic.Util.POD.kUint32POD:
+        if prop.isScalar():
+            klass = alembic.Abc.OUInt32Property
+        elif prop.isArray():
+            klass = alembic.Abc.OUInt32ArrayProperty
+    # int32_t
+    elif pod == alembic.Util.POD.kInt32POD:
+        if prop.isScalar():
+            klass = alembic.Abc.OInt32Property
+        elif prop.isArray():
+            klass = alembic.Abc.OInt32ArrayProperty
+    # float32_t
+    elif pod == alembic.Util.POD.kFloat32POD:
+        if prop.isScalar():
+            klass = alembic.Abc.OP3fProperty
+        elif prop.isArray():
+            if dt.getExtent() == 3:
+                klass = alembic.Abc.OV3fArrayProperty
+            elif dt.getExtent() == 2:
+                klass = alembic.Abc.OV2fArrayProperty
+            else:
+                klass = alembic.Abc.OP3fArrayProperty
+    # float64_t
+    elif pod == alembic.Util.POD.kFloat64POD:
+        if prop.isScalar():
+            if dt.getExtent() == 16:
+                klass = alembic.Abc.OM44dProperty
+            elif dt.getExtent() == 9:
+                klass = alembic.Abc.OM33dProperty
+            elif dt.getExtent() == 6:
+                # @TODO: deletable?  they aren't used...
+                V3d = imath.V3d
+                Box3d = imath.Box3d
+                klass = alembic.Abc.OBox3dProperty
+    else:
+        logger.log.warning('Unsupported property type: %s' % pod)
+
+    return klass
+
+def findObjects(obj, name):
+    """
+    Recursive generator function that yields objects with
+    names matching given name regex.
+
+    :param obj: Alembic object
+    :param name: Name regular expression to match
+    :yeild: Alembic object
+    """
+    if re.match(name, obj.getName()):
+        yield obj
+    else:
+        for childObject in obj.children:
+            for obj in findObjects(childObject, name):
+                yield obj
+
+class SimpleAbcViewerThread(QtCore.QThread):
+    """
+    A Qthread that launches SimpleAbcViewer and emits
+    a Qt signal that contains the subprocess object and
+    X11 winid.
+    """
+    def __init__(self, parent, filepath):
+        """
+        :param parent: parent PyQt object calling thread
+        :param filepath: Alembic archive filepath
+        """
+        super(SimpleAbcViewerThread, self).__init__(parent)
+        self.filepath = filepath
+        self.command = "SimpleAbcViewer"
+
+    def run(self):
+        d = None
+        i = 0
+        proc = subprocess.Popen(" ".join([self.command, self.filepath]), 
+                startupinfo=None, shell=True)
+        while not d:
+            d = commands.getoutput("xwininfo -root -tree -int | grep \"Archive = %s\"" 
+                    % self.filepath)
+            self.emit(QtCore.SIGNAL("progress (PyQt_PyObject)"), i)
+            time.sleep(0.1)
+            i += 1
+            if proc.poll():
+                self.emit(QtCore.SIGNAL("error (PyQt_PyObject)"), 
+                        "Error generating GL view for %s" % self.filepath)
+                return
+        wid = int(d.split()[0])
+        self.emit(QtCore.SIGNAL('done (PyQt_PyObject)'), (proc, wid))
+
+class ArrayThread(QtCore.QThread):
+    """
+    Simple Qthread that emits values from a (long) array. Takes a
+    QWidget parent, an array and a max number of elements to emit
+    as arguments (if max is None, get all of them).
+    """
+    def __init__(self, parent, array, start=0, end=10):
+        super(ArrayThread, self).__init__(parent)
+        self.array = array
+        self._start = start
+        self._end = end
+
+    def run(self):
+        try:
+            for index, value in enumerate(self.array[self._start:]):
+                index = index + self._start
+                self.emit(QtCore.SIGNAL('arrayValue (PyQt_PyObject)'), (index, value))
+                if index >= self._end:
+                    break
+        except TypeError, e:
+            self.emit(QtCore.SIGNAL('arrayValue (PyQt_PyObject)'), (0, str(self.array)))
+
+class AbcConsole(QtGui.QPlainTextEdit):
+    """
+    Simple PyQt-based Python interpreter widget. 
+    """
+    def __init__(self, prompt='>>> ', startup_message='', parent=None, main=None):
+        super(AbcConsole, self).__init__(parent)
+        self.setObjectName('AbcConsole')
+        self.main = main
+        self.prompt = prompt
+        self.history = []
+        self.namespace = {}
+        self.construct = []
+
+        self.setGeometry(50, 75, 600, 400)
+        self.setWordWrapMode(QtGui.QTextOption.WrapAnywhere)
+        self.setUndoRedoEnabled(False)
+        self.document().setDefaultFont(QtGui.QFont("monospace", 10, QtGui.QFont.Normal))
+        
+        self.newPrompt()
+
+    def updateNamespace(self, namespace):
+        self.namespace.update(namespace)
+
+    def exit(self):
+        self.main.close()
+
+    def handleHelp(self, arg=None):
+        self.showMessage("""
+Welcome to the AbcView Python Console. 
+
+Built-in functions:
+
+\tfind(regex)    Finds an object in the archive
+\texit()         Quit AbcView
+
+Built-in objects:
+
+\talembic      Alembic Python Package
+\tarchive      Alembic IArchive
+\tobjects      Alembic IObjects Tree Widget
+\tproperties   Alembic IProperties Tree Widget
+\tsamples      Alembic ISamples Tree Widget
+
+To find an object from a regular expression:
+
+\t>>> find(".*Shape")
+
+To get the selected item from the Objects Tree,
+
+\t>>> obj = objects.selected()""")
+
+    def showMessage(self, message):
+        self.appendPlainText(message)
+        self.newPrompt()
+
+    def newPrompt(self):
+        if self.construct:
+            prompt = '.' * len(self.prompt)
+        else:
+            prompt = self.prompt
+        self.appendPlainText(prompt)
+        self.moveCursor(QtGui.QTextCursor.End)
+
+    def getCommand(self):
+        doc = self.document()
+        curr_line = unicode(doc.findBlockByLineNumber(doc.lineCount() - 1).text())
+        curr_line = curr_line.rstrip()
+        curr_line = curr_line[len(self.prompt):]
+        return curr_line
+
+    def setCommand(self, command):
+        if self.getCommand() == command:
+            return
+        self.moveCursor(QtGui.QTextCursor.End)
+        self.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor)
+        for i in range(len(self.prompt)):
+            self.moveCursor(QtGui.QTextCursor.Right, QtGui.QTextCursor.KeepAnchor)
+        self.textCursor().removeSelectedText()
+        self.textCursor().insertText(command)
+        self.moveCursor(QtGui.QTextCursor.End)
+
+    def getConstruct(self, command):
+        if self.construct:
+            prev_command = self.construct[-1]
+            self.construct.append(command)
+            if not prev_command and not command:
+                ret_val = '\n'.join(self.construct)
+                self.construct = []
+                return ret_val
+            else:
+                return ''
+        else:
+            if command and command[-1] == (':'):
+                self.construct.append(command)
+                return ''
+            else:
+                return command
+
+    def getHistory(self):
+        return self.history
+
+    def setHisory(self, history):
+        self.history = history
+
+    def addToHistory(self, command):
+        if command and (not self.history or self.history[-1] != command):
+            self.history.append(command)
+        self.history_index = len(self.history)
+
+    def getPrevHistoryEntry(self):
+        if self.history:
+            self.history_index = max(0, self.history_index - 1)
+            return self.history[self.history_index]
+        return ''
+
+    def getNextHistoryEntry(self):
+        if self.history:
+            hist_len = len(self.history)
+            self.history_index = min(hist_len, self.history_index + 1)
+            if self.history_index < hist_len:
+                return self.history[self.history_index]
+        return ''
+
+    def getCursorPosition(self):
+        return self.textCursor().columnNumber() - len(self.prompt)
+
+    def setCursorPosition(self, position):
+        self.moveCursor(QtGui.QTextCursor.StartOfLine)
+        for i in range(len(self.prompt) + position):
+            self.moveCursor(QtGui.QTextCursor.Right)
+
+    def runCommand(self):
+        command = self.getCommand()
+        self.addToHistory(command)
+
+        command = self.getConstruct(command)
+
+        if command:
+            tmp_stdout = sys.stdout
+
+            class stdoutProxy():
+                def __init__(self, write_func):
+                    self.write_func = write_func
+                    self.skip = False
+
+                def write(self, text):
+                    if not self.skip:
+                        stripped_text = text.rstrip('\n')
+                        self.write_func(stripped_text)
+                        QtCore.QCoreApplication.processEvents()
+                    self.skip = not self.skip
+
+            sys.stdout = stdoutProxy(self.appendPlainText)
+            try:
+                try:
+                    result = eval(command, self.namespace, self.namespace)
+                    if result != None:
+                        self.appendPlainText(repr(result))
+                except SyntaxError:
+                    exec command in self.namespace
+            except SystemExit:
+                self.close()
+            except:
+                traceback_lines = traceback.format_exc().split('\n')
+                # Remove traceback mentioning this file, and a linebreak
+                for i in (3,2,1,-1):
+                    traceback_lines.pop(i)
+                self.appendPlainText('\n'.join(traceback_lines))
+            sys.stdout = tmp_stdout
+        self.newPrompt()
+
+    def keyPressEvent(self, event):
+        if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return):
+            self.runCommand()
+            return
+        if event.key() == QtCore.Qt.Key_Home:
+            self.setCursorPosition(0)
+            return
+        if event.key() == QtCore.Qt.Key_PageUp:
+            return
+        elif event.key() in (QtCore.Qt.Key_Left, QtCore.Qt.Key_Backspace):
+            if self.getCursorPosition() == 0:
+                return
+        elif event.key() == QtCore.Qt.Key_Up:
+            self.setCommand(self.getPrevHistoryEntry())
+            return
+        elif event.key() == QtCore.Qt.Key_Down:
+            self.setCommand(self.getNextHistoryEntry())
+            return
+        super(AbcConsole, self).keyPressEvent(event)
+
+class MainToolBar(QtGui.QToolBar):
+    """
+    The Main toolbar for the application.
+    """
+    def __init__(self, parent, main):
+        super(QtGui.QToolBar, self).__init__(parent)
+        self.main = main
+        self.addAction("Find", self.handleFind)
+        self.lineEdit = QtGui.QLineEdit()
+        self.lineEdit.setSizePolicy(QtGui.QSizePolicy.Expanding, 
+                QtGui.QSizePolicy.Maximum)
+        self.lineEdit.setToolTip("Find objects using regex")
+        self.addWidget(self.lineEdit)
+        self.addAction("[>]", self.handleConsole)
+
+        self.connect(self.lineEdit, QtCore.SIGNAL("returnPressed ()"), 
+                self.handleFind)
+
+    def handleConsole(self):
+        self.main.toggleConsole()
+
+    def handleFind(self, text=None):
+        if text is None:
+            text = self.lineEdit.text()
+        self.main.find(str(text.toAscii()))
+
+class AbcTreeWidgetItem(QtGui.QTreeWidgetItem):
+    """
+    Base class from which all other tree widgets are derived.
+    """
+    def __init__(self, parent, object=None):
+        super(QtGui.QTreeWidgetItem, self).__init__(parent)
+        self._seen = False
+        self.object = object
+
+    def getObject(self):
+        return self.object
+
+    def wasSeen(self):
+        return self._seen
+
+    def setSeen(self, seen=True):
+        self._seen = seen
+
+class ObjectTreeWidgetItem(AbcTreeWidgetItem):
+    def __init__(self, parent, object):
+        super(ObjectTreeWidgetItem, self).__init__(parent, object)
+        self.object = object
+        if self.object.getNumChildren() > 0:
+            self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
+        else:
+            self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.DontShowIndicator)
+        self.setExpanded(False)
+        self.setText(self.treeWidget().colnum('name'), object.getName())
+        schema, title, base = getSchemaTitleBase(self.object)
+        self.setText(self.treeWidget().colnum('schema'), schema)
+        self.setToolTip(self.treeWidget().colnum('name'), 
+                QtCore.QString(object.getFullName()))
+
+    def children(self):
+        return self.object.children
+
+    def properties(self):
+        props = self.object.getProperties()
+        for header in props.propertyheaders:
+            yield props.getProperty(header.getName())
+
+class PropertyTreeWidgetItem(AbcTreeWidgetItem):
+    def __init__(self, parent, property):
+        super(PropertyTreeWidgetItem, self).__init__(parent, property)
+        self.property = property
+        if self.property.isCompound():
+            self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
+        else:
+            self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.DontShowIndicator)
+        self.setText(self.treeWidget().colnum('name'), self.property.getName())
+        self.setText(self.treeWidget().colnum('type'), self.getType())
+        self.setText(self.treeWidget().colnum('datatype'), str(self.property.getDataType()))
+        self.setText(self.treeWidget().colnum('class'), self.getClass())
+   
+    def getObject(self):
+        return self.property
+
+    def getType(self):
+        if self.property.isCompound():
+            return 'compound'
+        elif self.property.isScalar():
+            return 'scalar'
+        elif self.property.isArray():
+            return 'array'
+        else:
+            return 'unknown'
+
+    def getClass(self):
+        if self.property.isCompound():
+            return ''
+        else:
+            return str(getPropertyClass(self.property))
+
+    def isConstant(self):
+        return self.property.isConstant
+
+    def properties(self):
+        for header in self.property.propertyheaders:
+            yield self.property.getProperty(header.getName())
+
+    def samples(self):
+        if self.property.isCompound():
+            return []
+        else:
+            return self.property.samples
+
+class SampleTreeWidgetItem(AbcTreeWidgetItem):
+    def __init__(self, parent, index, sample, property=None):
+        super(SampleTreeWidgetItem, self).__init__(parent, sample)
+        self.property = property
+        self.sample = sample
+        self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.DontShowIndicator)
+        self.setText(self.treeWidget().colnum('index'), str(index))
+
+        if property and property.getObject().isArray():
+            size = len(sample)
+            if size <= 5:
+                value = ", ".join([str(v) for v in sample])
+            else:
+                value = str(sample)
+        else:
+            size = 1
+            value = str(sample)
+        self.setText(self.treeWidget().colnum('value'), value)
+
+        try:
+           self.setText(self.treeWidget().colnum('size'), str(size))
+        except TypeError:
+            self.setText(self.treeWidget().colnum('size'), "1")
+
+    def getObject(self):
+        return self.sample
+
+class ArrayTreeWidgetItem(AbcTreeWidgetItem):
+    def __init__(self, parent, index, value, array=None):
+        super(ArrayTreeWidgetItem, self).__init__(parent, array)
+        self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.DontShowIndicator)
+        self.setText(self.treeWidget().colnum('index'), str(index))
+        self.setText(self.treeWidget().colnum('value'), str(value))
+
+class AbcTreeWidget(QtGui.QTreeWidget):
+
+    DEFAULT_COLUMN_NAMES = ['name', 'schema', ]
+
+    DEFAULT_COLUMNS = dict(enumerate(DEFAULT_COLUMN_NAMES))
+    DEFAULT_COLUMNS.update(dict(zip(DEFAULT_COLUMN_NAMES, range(len(DEFAULT_COLUMN_NAMES)))))
+    COLUMNS = copy.copy(DEFAULT_COLUMNS)
+
+    def colnum(self, name):
+        return self.COLUMNS.get(name, -1)
+
+    @property
+    def columnNames(self):
+        return [self.COLUMNS[elm] for elm in sorted(elm for elm in self.COLUMNS if type(elm) == int)]
+
+    def __init__(self, parent=None, main=None):
+        super(QtGui.QTreeWidget, self).__init__(parent)
+        self.main = main
+        self.setIconSize(QtCore.QSize(20, 20))
+        self.setAllColumnsShowFocus(True)
+        self.setAnimated(False)
+        self.setUniformRowHeights(True)
+        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
+
+        self.initHeader()
+
+        self.connect(self, QtCore.SIGNAL("itemSelectionChanged ()"), 
+                self.handleItemSelected)
+        self.connect(self, QtCore.SIGNAL("itemClicked (QTreeWidgetItem *, int)"), 
+                self.handleClick)
+        self.connect(self, QtCore.SIGNAL("itemDoubleClicked (QTreeWidgetItem *, int)"), 
+                self.handleDoubleClick)
+        self.connect(self, QtCore.SIGNAL("itemExpanded (QTreeWidgetItem *)"), 
+                self.handleExpand)
+
+    def initHeader(self):
+        self.COLUMNS = copy.copy(self.DEFAULT_COLUMNS)
+        self.setupHeader()
+        self.setSortingEnabled(True)
+        self.sortByColumn(self.colnum('date'), QtCore.Qt.DescendingOrder)
+
+    def setupHeader(self):
+        self.setColumnCount(len(self.COLUMNS)/2)
+        self.setHeaderLabels(self.columnNames)
+        self.header().resizeSection(self.colnum('index'), 50)
+        self.header().resizeSection(self.colnum('size'), 75)
+        self.header().resizeSection(self.colnum('name'), 300)
+
+    def rowHeight(self):
+        return 24
+
+    def handleItemSelected(self):
+        items = self.selectedItems()
+        if not items:
+            return
+        self.handleClick(items[0])
+
+    def handleClick(self, item):
+        self.emit(QtCore.SIGNAL('itemClicked (PyQt_PyObject)'), item)
+
+    def handleDoubleClick(self, item):
+        self.emit(QtCore.SIGNAL('itemDoubleClicked (PyQt_PyObject)'), item)
+
+    def handleExpand(self, item):
+        raise NotImplementedError
+
+    def selected(self):
+        if self.selectedItems():
+            selected = [item.getObject() for item in self.selectedItems()]
+            return selected[0]
+        return None
+
+    def find(self, name):
+        # search each top level item for name, starting with
+        # nodes under /ABC, the top
+        if name.startswith('/'):
+            name = name[1:]
+        item = self.topLevelItem(0)
+        found = False
+        for object in findObjects(item.getObject(), name):
+            parts = [p for p in object.getFullName().split('/') if p]
+            item.setExpanded(True)
+            while parts:
+                part = parts.pop(0)
+                for i in range(0, item.childCount()):
+                    child = item.child(i)
+                    check = str(child.text(self.colnum('name')))
+                    if part == check:
+                        child.setExpanded(True)
+                        item = child
+                        found = True
+                        break
+                    else:
+                        child.setExpanded(False)
+                        found = False
+
+        if found:
+            self.scrollToItem(item)
+            item.setExpanded(False)
+            self.setItemSelected(item, True)
+        else:
+            self.main.message("No objects found")
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        mod = event.modifiers()
+        
+        if mod == QtCore.Qt.ControlModifier:
+            if key == QtCore.Qt.Key_F:
+                text, ok = QtGui.QInputDialog.getText(self, "Find", 
+                        "Find Object", QtGui.QLineEdit.Normal)
+                if ok and not text.isEmpty():
+                    self.find(str(text.toAscii()))
+
+        self.main.keyPressEvent(event)
+
+class ObjectTreeWidget(AbcTreeWidget):
+    def __init__(self, parent, main):
+        super(ObjectTreeWidget, self).__init__(parent, main)
+
+    def handleExpand(self, item):
+        if not item.wasSeen():
+            for child in item.children():
+                item.addChild(ObjectTreeWidgetItem(item, child))
+            item.setSeen(True)
+
+class PropertyTreeWidget(AbcTreeWidget):
+    
+    DEFAULT_COLUMN_NAMES = ['name', 'type', 'datatype', 'class', ]
+
+    DEFAULT_COLUMNS = dict(enumerate(DEFAULT_COLUMN_NAMES))
+    DEFAULT_COLUMNS.update(dict(zip(DEFAULT_COLUMN_NAMES, range(len(DEFAULT_COLUMN_NAMES)))))
+    COLUMNS = copy.copy(DEFAULT_COLUMNS)
+
+    def __init__(self, parent, main):
+        super(PropertyTreeWidget, self).__init__(parent, main)
+
+    def setupHeader(self):
+        self.setColumnCount(len(self.COLUMNS)/2)
+        self.setHeaderLabels(self.columnNames)
+        self.header().resizeSection(self.colnum('name'), 150)
+
+    def showProps(self, item):
+        self.clear()
+        self.main.sampleTree.clear()
+        self.main.arrayTree.clear()
+        for property in item.properties():    
+            self.addTopLevelItem(PropertyTreeWidgetItem(self, property))
+
+    def handleExpand(self, item):
+        if not item.wasSeen():
+            for property in item.properties():
+                item.addChild(PropertyTreeWidgetItem(item, property))
+            item.setSeen(True)
+
+class SampleTreeWidget(AbcTreeWidget):
+    
+    DEFAULT_COLUMN_NAMES = ['index', 'size', 'value', ]
+
+    DEFAULT_COLUMNS = dict(enumerate(DEFAULT_COLUMN_NAMES))
+    DEFAULT_COLUMNS.update(dict(zip(DEFAULT_COLUMN_NAMES, range(len(DEFAULT_COLUMN_NAMES)))))
+    COLUMNS = copy.copy(DEFAULT_COLUMNS)
+
+    def __init__(self, parent, main):
+        super(SampleTreeWidget, self).__init__(parent, main)
+        self.setRootIsDecorated(False)
+
+    def showSamples(self, item):
+        self.clear()
+        self.main.arrayTree.clear()
+        for index, sample in enumerate(item.samples()):
+            self.addTopLevelItem(SampleTreeWidgetItem(self, index, sample, item))
+
+class ArrayTreeWidget(AbcTreeWidget):
+    
+    DEFAULT_COLUMN_NAMES = ['index', 'value', ]
+
+    DEFAULT_COLUMNS = dict(enumerate(DEFAULT_COLUMN_NAMES))
+    DEFAULT_COLUMNS.update(dict(zip(DEFAULT_COLUMN_NAMES, range(len(DEFAULT_COLUMN_NAMES)))))
+    COLUMNS = copy.copy(DEFAULT_COLUMNS)
+
+    def __init__(self, parent, main):
+        super(ArrayTreeWidget, self).__init__(parent, main)
+        self.setRootIsDecorated(False)
+
+    def numRows(self):
+        return (self.main.arrayTree.size().height() / self.rowHeight()) + 20
+
+    def wheelEvent(self, event):
+        index = self.indexAt(self.viewport().rect().bottomLeft())
+        lastRow = self.itemFromIndex(index)
+        if lastRow:
+            lastIndex = lastRow.text(self.colnum("index"))
+            if self.index >= (len(self.item.getObject()) - 1):
+                pass
+            elif (int(lastIndex) + 10) >= int(self.index):
+                self.getRows(self.index, self.index + self.numRows())
+        super(AbcTreeWidget, self).wheelEvent(event)
+
+    def getRows(self, start, end):
+        thread = ArrayThread(self.main, self.item.getObject(), start=start, end=end)
+        self.connect(thread, QtCore.SIGNAL("arrayValue (PyQt_PyObject)"), self.handleAddValue)
+        thread.start()
+
+    def showValues(self, item):
+        self.clear()
+        self.item = item
+        self.getRows(0, self.numRows())
+
+    def handleAddValue(self, indexValue):
+        self.index, value = indexValue
+        self.addTopLevelItem(ArrayTreeWidgetItem(self, self.index, value))
+
+class AbcView(QtGui.QMainWindow):
+    """
+    The main application.
+    """
+    def __init__(self, filepath=None):
+        QtGui.QMainWindow.__init__(self)
+        self.setWindowState(QtCore.Qt.WindowActive)
+        self.setWindowFlags(QtCore.Qt.Window)
+        self.setWindowTitle('AbcView ' + filepath)
+        self.setStyle(QtGui.QStyleFactory.create('cleanlooks'))
+        self.setStyleSheet(style)
+
+        self.mainToolBar = MainToolBar(self, main=self)
+        self.addToolBar(QtCore.Qt.TopToolBarArea, self.mainToolBar)
+
+        self.objectTree = ObjectTreeWidget(self, main=self)
+        self.propertyTree = PropertyTreeWidget(self, main=self)
+        self.sampleTree = SampleTreeWidget(self, main=self)
+        self.arrayTree = ArrayTreeWidget(self, main=self)
+
+        # setup the python console widget and set the default context
+        self.console = AbcConsole(parent=self, main=self)
+        self.console.updateNamespace({
+            'help': self.console.handleHelp,
+            'exit': self.console.exit,
+            'find': self.find,
+            'objects': self.objectTree,
+            'properties': self.propertyTree,
+            'samples': self.sampleTree,
+            'alembic': alembic
+            })
+
+        # setup the signal connections
+        self.connect(self.objectTree, QtCore.SIGNAL('itemDoubleClicked (PyQt_PyObject)'),
+                self.handleDoubleClick)
+        self.connect(self.propertyTree, QtCore.SIGNAL('itemDoubleClicked (PyQt_PyObject)'),
+                self.handleDoubleClick)
+        self.connect(self.sampleTree, QtCore.SIGNAL('itemDoubleClicked (PyQt_PyObject)'),
+                self.handleDoubleClick)
+        self.propertyTree.connect(self.objectTree, QtCore.SIGNAL('itemClicked (PyQt_PyObject)'), 
+                self.propertyTree.showProps)
+        self.sampleTree.connect(self.propertyTree, QtCore.SIGNAL('itemClicked (PyQt_PyObject)'), 
+                self.sampleTree.showSamples)
+        self.arrayTree.connect(self.sampleTree, QtCore.SIGNAL('itemClicked (PyQt_PyObject)'), 
+                self.arrayTree.showValues)
+        self.progressBar = QtGui.QProgressBar(self)
+
+        # viewer
+        self.viewerGroup = QtGui.QGroupBox(self)
+        self.viewerLayout = QtGui.QVBoxLayout(self.viewerGroup)
+        self.viewerLayout.setSpacing(0)
+        self.progressBar.setRange(1, 100)
+        self.progressBar.setTextVisible(False)
+        self.progressBar.hide()
+        self.viewer = QtGui.QX11EmbedContainer(self)
+        self.viewerLayout.addWidget(self.progressBar)
+        self.viewerLayout.addWidget(self.viewer)
+
+        # setup the splitters
+        self.mainSplitter = QtGui.QSplitter(QtCore.Qt.Vertical, self)
+        self.consoleSplitter = QtGui.QSplitter(QtCore.Qt.Vertical, self)
+        
+        self.objectSplitter = QtGui.QSplitter(QtCore.Qt.Horizontal, self)
+        self.objectSplitter.addWidget(self.objectTree)
+        self.objectSplitter.addWidget(self.viewerGroup)
+        
+        self.propertySplitter = QtGui.QSplitter(QtCore.Qt.Horizontal, self)
+        self.propertySplitter.addWidget(self.propertyTree)
+        self.propertySplitter.addWidget(self.sampleTree)
+        self.propertySplitter.addWidget(self.arrayTree)
+
+        self.mainSplitter.addWidget(self.objectSplitter)
+        self.mainSplitter.addWidget(self.propertySplitter)
+
+        self.consoleSplitter.addWidget(self.mainSplitter)
+        self.consoleSplitter.addWidget(self.console)
+
+        self.setCentralWidget(self.consoleSplitter)
+
+        # restore saved state
+        self.settings = QtCore.QSettings('Alembic', 'AbcView');
+        self.restoreGeometry(self.settings.value('geometry').toByteArray())
+        self.restoreState(self.settings.value('windowState').toByteArray())
+        self.mainSplitter.restoreState(
+                self.settings.value('mainSplitter').toByteArray())
+        self.objectSplitter.restoreState(
+                self.settings.value('objectSplitter').toByteArray())
+        self.propertySplitter.restoreState(
+                self.settings.value('propertySplitter').toByteArray())
+        self.consoleSplitter.restoreState(
+                self.settings.value('consoleSplitter').toByteArray())
+
+        if filepath:
+            self.setCache(filepath)
+
+    def message(self, message):
+        dialog = QtGui.QMessageBox()
+        dialog.setText(message)
+        dialog.exec_()
+
+    def setCache(self, filepath):
+        # kill old simpleabcviewer GL process, if any
+        if hasattr(self, "proc"):
+            self.proc.kill()
+        try:
+            self.cache = alembic.Abc.IArchive(filepath)
+        except Exception, e:
+            self.message(str(e))
+
+        # create top level item
+        item = ObjectTreeWidgetItem(self.objectTree, self.cache.getTop())
+        self.objectTree.addTopLevelItem(item)
+
+        # set console context info
+        self.console.updateNamespace({'archive': self.cache})
+
+        # start simpleabcviewer thread to show GL window
+        self.simpleThread = SimpleAbcViewerThread(self, filepath)
+        self.simpleThread.start()
+        self.progressBar.show()
+        self.connect(self.simpleThread, QtCore.SIGNAL("progress (PyQt_PyObject)"), 
+                self.handleViewerProgress)
+        self.connect(self.simpleThread, QtCore.SIGNAL("error (PyQt_PyObject)"), 
+                self.handleViewerError)
+        self.connect(self.simpleThread, QtCore.SIGNAL("done (PyQt_PyObject)"), 
+                self.handleViewerDone)
+
+    def find(self, name):
+        self.objectTree.find(name)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        mod = event.modifiers()
+        
+        if mod == QtCore.Qt.ControlModifier:
+            if key == QtCore.Qt.Key_Q:
+                self.close()
+            elif key == QtCore.Qt.Key_O:
+                text, ok = QtGui.QInputDialog.getText(self, "Open", 
+                        "Open Archive", QtGui.QLineEdit.Normal)
+                if ok and not text.isEmpty():
+                    self.setCache(str(text.toAscii()))
+            elif key == QtCore.Qt.Key_C:
+                self.toggleConsole()
+        super(AbcView, self).keyPressEvent(event)
+
+    def handleViewerProgress(self, value):
+        self.progressBar.setValue(value)
+
+    def handleViewerError(self, msg):
+        self.progressBar.setValue(0)
+        self.progressBar.hide()
+        self.message(msg)
+
+    def handleViewerDone(self, processWid):
+        self.proc, self.wid = processWid
+        self.viewer.embedClient(self.wid)
+        self.progressBar.hide()
+
+    def handleDoubleClick(self, item):
+        h = self.objectSplitter.size().height()
+        w = self.size().width()
+        if type(item) == ObjectTreeWidgetItem:
+            if self.propertySplitter.size().height() <= 0:
+                d = self.objectSplitter.size().height() / 2
+                self.mainSplitter.moveSplitter(h - d, 1)
+        elif type(item) == PropertyTreeWidgetItem:
+            if self.sampleTree.size().width() <= 0:
+                d = self.propertySplitter.size().width() / 2
+                self.propertySplitter.moveSplitter(w - d, 1)
+        elif type(item) == SampleTreeWidgetItem:
+            if self.arrayTree.size().width() <= 0:
+                d = self.propertySplitter.size().width() / 3
+                self.propertySplitter.moveSplitter(w - d, 2)
+
+    def toggleConsole(self):
+        h = self.size().height()
+        if self.console.size().height() == 0:
+            self.consoleSplitter.moveSplitter(h - 100, 1)
+        else:
+            self.consoleSplitter.moveSplitter(h, 1)
+
+    def closeEvent(self, evt):
+        self.settings.setValue("geometry", self.saveGeometry());
+        self.settings.setValue("windowState", self.saveState());
+        self.settings.setValue("mainSplitter", self.mainSplitter.saveState())
+        self.settings.setValue("objectSplitter", self.objectSplitter.saveState())
+        self.settings.setValue("propertySplitter", self.propertySplitter.saveState())
+        self.settings.setValue("consoleSplitter", self.consoleSplitter.saveState())
+        evt.accept()
+        QtGui.QMainWindow.closeEvent(self, evt)
+        if hasattr(self, "proc"):
+            self.proc.kill()
+
+def main(filepath):
+    app = QtGui.QApplication(sys.argv)
+    win = AbcView(filepath)
+    win.show()
+    win.raise_()
+    return app.exec_()
+
+if __name__ == '__main__':
+    try:
+        filepath = None
+        if len(sys.argv) == 2:
+            filepath = sys.argv[1]
+        else:
+            print "%s <file.abc>" % sys.argv[0]
+            sys.exit(1)
+        sys.exit(main(filepath))
+    except Exception, e:
+        traceback.print_exc()
+    except KeyboardInterrupt:
+        print 'Stopping...'
+        sys.exit(1)
