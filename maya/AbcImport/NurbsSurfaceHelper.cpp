@@ -234,7 +234,8 @@ namespace
 #endif
                     if (status != MS::kSuccess)
                     {
-                        MGlobal::displayError("Trimming Nurbs Surface failed.");
+                        MGlobal::displayError(
+                            "Trimming Nurbs Surface outer failed.");
                     }
                     oneRegion.clear();
                 }
@@ -248,17 +249,15 @@ namespace
 #else
         status = iFnSurface.trimWithBoundaries(oneRegion, false, 1e-3, 1e-5, true);
 #endif
-        if (status == MS::kSuccess)
-        {
-            unsigned int length = deleteAfterTrim.length();
-            for (unsigned int l=0; l<length; l++)
-            {
-                MGlobal::deleteNode(deleteAfterTrim[l]);
-            }
-        }
-        else
+        if (status != MS::kSuccess)
         {
             MGlobal::displayError("Trimming Nurbs Surface failed.");
+        }
+
+        unsigned int length = deleteAfterTrim.length();
+        for (unsigned int l=0; l<length; l++)
+        {
+            MGlobal::deleteNode(deleteAfterTrim[l]);
         }
     }
 }
@@ -333,7 +332,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
             }
         }
     }
-    
+
     if (formU == MFnNurbsSurface::kOpen) {
         formU = MFnNurbsSurface::kClosed;
         for (unsigned int v = 0; v < numCVInV; v++) {
@@ -367,7 +366,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
         }
     }
 
-    
+
     Alembic::Abc::FloatArraySamplePtr uKnot = samp.getUKnot();
     Alembic::Abc::FloatArraySamplePtr vKnot = samp.getVKnot();
 
