@@ -320,7 +320,7 @@ bool AbcWriteJob::checkCurveGrp()
     return true;
 }
 
-void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
+void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMembersMap& gmMap)
 {
     MStatus status;
 
@@ -437,7 +437,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         for (unsigned int i = 0; i < numChild; ++i)
         {
             mCurDag.push(mCurDag.child(i));
-            setup(iFrame, trans);
+            setup(iFrame, trans, gmMap);
             mCurDag.pop();
         }
     }
@@ -537,7 +537,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent)
         {
             Alembic::Abc::OObject obj = iParent->getObject();
             MayaMeshWriterPtr mesh(new MayaMeshWriter(mCurDag, obj,
-                mShapeTimeIndex, mArgs));
+                mShapeTimeIndex, mArgs, gmMap));
 
             if (mesh->isAnimated() && mShapeTimeIndex != 0)
             {
@@ -755,11 +755,12 @@ bool AbcWriteJob::eval(double iFrame)
         }
 
         util::ShapeSet::const_iterator end = mArgs.dagPaths.end();
+        GetMembersMap gmMap;
         for (util::ShapeSet::const_iterator it = mArgs.dagPaths.begin();
             it != end; ++it)
         {
             mCurDag = *it;
-            setup(iFrame * util::spf(), MayaTransformWriterPtr());
+            setup(iFrame * util::spf(), MayaTransformWriterPtr(), gmMap);
         }
         perFrameCallback(iFrame);
     }

@@ -50,7 +50,7 @@ class AttributesWriter
     AttributesWriter(Alembic::Abc::OCompoundProperty & iArgGeom,
                      Alembic::Abc::OCompoundProperty & iUserProps,
                      Alembic::Abc::OObject & iParentObj,
-                     const MFnDagNode & iNode,
+                     const MFnDependencyNode & iNode,
                      Alembic::Util::uint32_t iTimeIndex,
                      const JobArgs & iArgs);
 
@@ -63,7 +63,7 @@ class AttributesWriter
                                      const JobArgs & iArgs,
                                      bool& userAttrOut);
 
-    static bool hasAnyAttr(const MFnDagNode & iNode,
+    static bool hasAnyAttr(const MFnDependencyNode & iNode,
                            const JobArgs & iArgs);
 
   private:

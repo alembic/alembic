@@ -122,13 +122,13 @@ MayaNurbsCurveWriter::MayaNurbsCurveWriter(MDagPath & iDag,
 
     Alembic::Abc::OCompoundProperty cp;
     Alembic::Abc::OCompoundProperty up;
-    if (AttributesWriter::hasAnyAttr(iDag, iArgs))
+    if (AttributesWriter::hasAnyAttr(fnDepNode, iArgs))
     {
         cp = mSchema.getArbGeomParams();
         up = mSchema.getUserProperties();
     }
 
-    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, iDag,
+    mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, fnDepNode,
         iTimeIndex, iArgs));
 
     write();

@@ -45,9 +45,62 @@
 #include <maya/MItDag.h>
 #include <maya/MSelectionList.h>
 #include <maya/MStringArray.h>
+#include <maya/MObjectArray.h>
 #include <maya/MTime.h>
+#include <maya/MItDependencyGraph.h>
 
 #include <algorithm>
+
+MObject createShadingGroup(const MString& iName)
+{
+    MStatus status;
+
+    MFnSet fnSet;
+    MSelectionList selList;
+    MObject shadingGroup = fnSet.create(selList,
+                                        MFnSet::kRenderableOnly,
+                                        &status);
+    if (status != MS::kSuccess)
+    {
+        MString theError("Could not create shading engine: ");
+        theError += iName;
+        MGlobal::displayError(theError);
+
+        return shadingGroup;
+    }
+
+    fnSet.setName(iName);
+
+    return shadingGroup;
+}
+
+MObjectArray getOutConnectedSG( const MDagPath &shapeDPath )
+{
+    MStatus status;
+
+    // Array of connected Shaging Engines
+    MObjectArray connSG;
+
+    // Iterator through the dependency graph to find if there are 
+    // shading engines connected
+    MObject obj(shapeDPath.node()); // non const MObject
+    MItDependencyGraph itDG( obj, MFn::kShadingEngine, 
+                             MItDependencyGraph::kDownstream, 
+                             MItDependencyGraph::kBreadthFirst, 
+                             MItDependencyGraph::kNodeLevel, &status );
+
+    if( status == MS::kFailure )
+        return connSG;    
+
+    // we want to prune the iteration if the node is not a shading engine 
+    itDG.enablePruningOnFilter();
+
+    // iterate through the output connected shading engines
+    for( ; itDG.isDone()!= true; itDG.next() )
+        connSG.append( itDG.thisNode() );
+
+    return connSG;
+}
 
 MStatus replaceDagObject(MObject & oldObject, MObject & newObject,
             const MString & name)

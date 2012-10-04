@@ -44,13 +44,25 @@
 #include <Alembic/AbcGeom/OPolyMesh.h>
 #include <Alembic/AbcGeom/OSubD.h>
 
+// Mechanism to cache the MFnSet::getMembers results
+struct mObjectCmp
+{
+    bool operator()(const MObject& o1, const MObject& o2) const
+        {
+            return strcmp(MFnDependencyNode(o1).name().asChar(), MFnDependencyNode(o2).name().asChar()) < 0;
+        }
+};
+
+typedef std::map <MObject, MSelectionList, mObjectCmp> GetMembersMap;
+
 // Writes an MFnMesh as a poly mesh OR a subd mesh
 class MayaMeshWriter
 {
   public:
 
     MayaMeshWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs);
+        Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs,
+        GetMembersMap& gmMap);
     void write();
     bool isAnimated() const;
     bool isSubD();

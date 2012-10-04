@@ -353,6 +353,11 @@ try
                 jobArgs.writeColorSets = true;
             }
 
+            else if (arg == "-wfs" || arg == "-writefacesets")
+            {
+                jobArgs.writeFaceSets = true;
+            }
+
             else if (arg == "-wfg" || arg == "-wholeframegeo")
             {
                 sampleGeo = false;

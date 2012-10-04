@@ -52,6 +52,11 @@
 #include <maya/MString.h>
 #include <maya/MFnDependencyNode.h>
 
+// Return the output connected shading groups from a shape object
+MObjectArray getOutConnectedSG( const MDagPath &shapeDPath );
+
+// Create a new shading group with the given name
+MObject createShadingGroup(const MString& iName);
 
 // replace one MObject with another, while keeping all the old hierarchy intact
 // The objects have to be a Dag object

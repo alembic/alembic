@@ -1660,7 +1660,7 @@ AttributesWriter::AttributesWriter(
     Alembic::Abc::OCompoundProperty & iArbGeom,
     Alembic::Abc::OCompoundProperty & iUserProps,
     Alembic::Abc::OObject & iParentObj,
-    const MFnDagNode & iNode,
+    const MFnDependencyNode & iNode,
     Alembic::Util::uint32_t iTimeIndex,
     const JobArgs & iArgs)
 {
@@ -2027,7 +2027,7 @@ bool AttributesWriter::matchFilterOrAttribs(const MPlug & iPlug,
     return false;
 }
 
-bool AttributesWriter::hasAnyAttr(const MFnDagNode & iNode,
+bool AttributesWriter::hasAnyAttr(const MFnDependencyNode & iNode,
                                   const JobArgs & iArgs)
 {
     unsigned int attrCount = iNode.attributeCount();

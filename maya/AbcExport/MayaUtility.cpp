@@ -340,11 +340,29 @@ bool util::isRenderable(const MObject & object)
     // visibility or lodVisibility off?  return false
     plug = mFn.findPlug("visibility", false, &stat);
     if (stat == MS::kSuccess && !plug.asBool())
-        return false;
+    {
+        // the value is off. let's check if it has any in-connection,
+        // otherwise, it means it is not animated.
+        MPlugArray arrayIn;
+        plug.connectedTo(arrayIn, true, false, &stat);
+
+        if (stat == MS::kSuccess && arrayIn.length() == 0)
+        {
+            return false;
+        }
+    }
 
     plug = mFn.findPlug("lodVisibility", false, &stat);
     if (stat == MS::kSuccess && !plug.asBool())
-        return false;
+    {
+        MPlugArray arrayIn;
+        plug.connectedTo(arrayIn, true, false, &stat);
+
+        if (stat == MS::kSuccess && arrayIn.length() == 0)
+        {
+            return false;
+        }
+    }
 
     // this shape is renderable
     return true;
@@ -446,6 +464,9 @@ MString util::getHelpText()
 "-wcs / -writeColorSets\n"
 "Write all color sets on MFnMeshes as color 3 or color 4 indexed geometry \n"
 "parameters with face varying scope.\n"
+"\n"
+"-wfs / -writeFaceSets\n"
+"Write all Face sets on MFnMeshes.\n"
 "\n"
 "-wfg / -wholeFrameGeo\n"
 "If this flag is present data for geometry will only be written out on whole\n"

@@ -63,6 +63,9 @@
 #include <maya/MFnNurbsSurface.h>
 #include <maya/MFnSet.h>
 #include <maya/MFnTypedAttribute.h>
+#include <maya/MFnSingleIndexedComponent.h>
+#include <maya/MItSelectionList.h>
+#include <maya/MItDependencyGraph.h>
 
 #include <map>
 #include <set>
@@ -72,6 +75,95 @@
 
 namespace
 {
+    void copyIndicesToNode(MIntArray& iIndices, const MObject& iNode,
+                           MObject& iSet)
+    {   
+        MStatus status;
+
+        MFnDagNode mFnNode(iNode);
+
+        MDagPath dpShape;
+        status = mFnNode.getPath(dpShape);
+
+        // Empty the set
+        MFnSet         fnSet( iSet );    
+        MSelectionList selList;
+        fnSet.getMembers   ( selList, false );    
+        MItSelectionList iterSelList( selList );
+        for( ; iterSelList.isDone()!=true; iterSelList.next() )
+        {
+            MDagPath curDag;
+            MObject  curCompObj;
+            iterSelList.getDagPath(curDag, curCompObj);
+
+            if ((curDag==dpShape) && curCompObj.isNull())
+                fnSet.removeMember(curDag, curCompObj);
+        }
+
+        // Feed the indexed component 
+        MFnSingleIndexedComponent fnSComp;
+        MObject comp = fnSComp.create( MFn::kMeshPolygonComponent );
+        fnSComp.addElements( iIndices );
+
+        // Remove the elements from all other sets (exclusivity constraint)
+        MObjectArray   connSGObjs( getOutConnectedSG(dpShape) );
+        MObject	   connSGObj;
+        MFnSet	   fnOtherSet;
+        MSelectionList setList, otherSetList, xorList;
+        setList.add( dpShape, comp );
+        int nSG = connSGObjs.length();
+        for( int i=0; i<nSG; i++ )
+        {
+            // Get the current SG Object
+            connSGObj = connSGObjs[i];
+            if( connSGObj != iSet )
+            {
+                // Build the intersection list and remove it from the set
+                otherSetList.clear();
+                fnOtherSet.setObject( connSGObj );
+                fnOtherSet.getMembers( otherSetList, false );
+            
+                // test if it's a full partition
+                if (otherSetList.length()>=1)
+                {
+                    MItSelectionList itSelList( otherSetList );
+                    for( ; itSelList.isDone()!=true; itSelList.next() )
+                    {
+                        MDagPath dp;
+                        MObject  compObj;
+                        itSelList.getDagPath(dp, compObj);
+               
+                        if (!(dp==dpShape) || !compObj.isNull())
+                            continue;
+
+                        fnOtherSet.removeMember( dp, compObj );
+                        
+                        // create a component with the full list
+                        MFnMesh fnMesh(dpShape);
+                        MFnSingleIndexedComponent fnFullSComp;                    
+                        compObj = fnFullSComp.create(
+                                        MFn::kMeshPolygonComponent ); 
+                        fnFullSComp.setCompleteData(fnMesh.numPolygons());
+                        
+                        // fill the sel list
+                        otherSetList.clear();
+                        otherSetList.add( dpShape, compObj );
+                        break;
+                    }
+                }            
+            
+                xorList = otherSetList;
+                xorList.merge( setList, MSelectionList::kXORWithList );
+                otherSetList.merge( xorList, MSelectionList::kRemoveFromList);
+                if( !otherSetList.isEmpty() )
+                    fnOtherSet.removeMembers( otherSetList );
+            }
+        }    
+
+        // Feed the set
+        fnSet.addMember(dpShape, comp);
+    }
+
     void addFaceSets(MObject & iNode, Alembic::Abc::IObject & iObj)
     {
         MStatus status;
@@ -90,35 +182,37 @@ namespace
                 Alembic::AbcGeom::IFaceSet faceSet(child,
                     Alembic::Abc::kWrapExisting);
 
+                // create a shading group for this faceset.
+                MObject shadingGroup;
+                const MString& faceSetName(faceSet.getName().c_str());
+
+                // check if this SG already exists.
+                status = getObjectByName(faceSetName, shadingGroup);
+                if (shadingGroup.isNull())
+                {
+                    shadingGroup = createShadingGroup(faceSetName);
+                }
+
+                // retrive face indices.
                 Alembic::AbcGeom::IFaceSetSchema::Sample samp;
                 faceSet.getSchema().get(samp);
 
-                MString faceName = "FACESET_";
-                faceName += faceSet.getName().c_str();
-
                 MFnIntArrayData fnData;
-                MIntArray arr((int *) samp.getFaces()->getData(),
-                    static_cast<unsigned int>(samp.getFaces()->size()));
-                MObject attrObj = fnData.create(arr);
-                MFnTypedAttribute typedAttr;
-                MObject faceObj = typedAttr.create(faceName, faceName,
-                    MFnData::kIntArray, attrObj);
+                const int* faceArray((int *)samp.getFaces()->getData());
+                const size_t size = samp.getFaces()->size();
 
-                mesh.addAttribute(faceObj,
-                    MFnDependencyNode::kLocalDynamicAttr);
+                MIntArray arr(faceArray, size);
 
-                if (Alembic::AbcGeom::GetVisibility(faceSet) ==
-                    Alembic::AbcGeom::kVisibilityHidden)
-                {
-                    MString visName = "FACESETVIS_";
-                    visName += faceSet.getName().c_str();
+                // copy indices to the set
+                copyIndicesToNode(arr, iNode, shadingGroup);
+                Alembic::Abc::ICompoundProperty arbProp =
+                    faceSet.getSchema().getArbGeomParams();
 
-                    MFnNumericAttribute numAttr;
-                    MObject visObj = numAttr.create(visName, visName,
-                        MFnNumericData::kBoolean, false);
-                    mesh.addAttribute(visObj,
-                        MFnDependencyNode::kLocalDynamicAttr);
-                }
+                Alembic::Abc::ICompoundProperty userProp =
+                    faceSet.getSchema().getUserProperties();
+
+                addProps(arbProp, shadingGroup, false);
+                addProps(userProp, shadingGroup, false);
             }
         }
     }
@@ -870,6 +964,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
         setConstantVisibility(visProp, subDObj);
         addProps(arbProp, subDObj, mUnmarkedFaceVaryingColors);
         addProps(userProp, subDObj, mUnmarkedFaceVaryingColors);
+        addFaceSets(subDObj, iNode);
     }
 
     if ( mAction >= CONNECT )
@@ -900,7 +995,6 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
             readSubD(mFrame, fn, subDObj, subdColors, false);
         }
         addToPropList(firstProp, subDObj);
-        addFaceSets(subDObj, iNode);
     }
 
     if (hasDag)
