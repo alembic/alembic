@@ -48,7 +48,7 @@ OScalarProperty::~OScalarProperty()
 }
 
 //-*****************************************************************************
-size_t OScalarProperty::getNumSamples()
+size_t OScalarProperty::getNumSamples() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::getNumSamples()" );
 
@@ -104,7 +104,7 @@ void OScalarProperty::setTimeSampling(  AbcA::TimeSamplingPtr iTime )
 }
 
 //-*****************************************************************************
-OCompoundProperty OScalarProperty::getParent()
+OCompoundProperty OScalarProperty::getParent() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::getParent()" );
 

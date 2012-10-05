@@ -361,7 +361,7 @@ public:
 
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     { return m_positionsProperty.getTimeSampling(); }
 
     //-*************************************************************************
@@ -370,7 +370,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples()
+    size_t getNumSamples() const
     { return m_positionsProperty.getNumSamples(); }
 
     //! Set a sample!

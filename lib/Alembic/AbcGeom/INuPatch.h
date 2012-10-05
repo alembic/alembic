@@ -227,36 +227,36 @@ public:
     //! This can be any number, including zero.
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
-    size_t getNumSamples()
+    size_t getNumSamples() const
     { return m_positionsProperty.getNumSamples(); }
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
-    MeshTopologyVariance getTopologyVariance();
+    MeshTopologyVariance getTopologyVariance() const;
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
-    bool isConstant() { return getTopologyVariance() == kConstantTopology; }
+    bool isConstant() const { return getTopologyVariance() == kConstantTopology; }
 
     //! Time information.
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     {
         return m_positionsProperty.getTimeSampling();
     }
 
     void get( sample_type &oSample,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const;
 
-    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
         Sample smp;
         get( smp, iSS );
         return smp;
     }
 
-    Abc::IP3fArrayProperty getPositionsProperty(){ return m_positionsProperty; }
-    Abc::IFloatArrayProperty getUKnotsProperty(){ return m_uKnotProperty; }
-    Abc::IFloatArrayProperty getVKnotsProperty(){ return m_vKnotProperty; }
+    Abc::IP3fArrayProperty getPositionsProperty() const { return m_positionsProperty; }
+    Abc::IFloatArrayProperty getUKnotsProperty() const { return m_uKnotProperty; }
+    Abc::IFloatArrayProperty getVKnotsProperty() const { return m_vKnotProperty; }
 
     Abc::IV3fArrayProperty getVelocitiesProperty() const
     {
@@ -264,17 +264,19 @@ public:
     }
 
     // if this property is invalid then the weight for every point is 1
-    Abc::IFloatArrayProperty getPositionWeightsProperty()
+    Abc::IFloatArrayProperty getPositionWeightsProperty() const
     {
         return m_positionWeightsProperty;
     }
 
     IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
+    const IN3fGeomParam &getNormalsParam() const { return m_normalsParam; }
     IV2fGeomParam &getUVsParam() { return m_uvsParam; }
+    const IV2fGeomParam &getUVsParam() const { return m_uvsParam; }
 
-    bool hasTrimCurve() { return m_hasTrimCurve; }
-    bool trimCurveTopologyIsHomogenous();
-    bool trimCurveTopologyIsConstant();
+    bool hasTrimCurve() const { return m_hasTrimCurve; }
+    bool trimCurveTopologyIsHomogenous() const;
+    bool trimCurveTopologyIsConstant() const;
 
 
     //-*************************************************************************
@@ -334,7 +336,7 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( INuPatchSchema::valid() );
 
 protected:
-    bool hasTrimProps();
+    bool hasTrimProps() const;
 
 protected:
     void init( const Abc::Argument &iArg0,

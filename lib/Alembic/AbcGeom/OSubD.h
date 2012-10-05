@@ -190,7 +190,7 @@ public:
         const Abc::Int32ArraySample &getHoles() const
         { return m_holes; }
         void setHoles( const Abc::Int32ArraySample &iHoles )
-        { m_holes = iHoles; }
+        { m_cornerIndices = iHoles; }
 
         // subdivision scheme
         std::string getSubdivisionScheme() const
@@ -383,7 +383,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples()
+    size_t getNumSamples() const
     { return m_positionsProperty.getNumSamples(); }
 
     //! Set a sample! Sample zero has to have non-degenerate

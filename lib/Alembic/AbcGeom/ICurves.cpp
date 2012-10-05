@@ -116,7 +116,7 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
 
 //-*****************************************************************************
 void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
-                         const Abc::ISampleSelector &iSS )
+                         const Abc::ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::get()" );
 

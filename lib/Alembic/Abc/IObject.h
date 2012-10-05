@@ -150,29 +150,29 @@ public:
 
     //! This function returns the object's archive, handily
     //! wrapped in an IArchive wrapper.
-    IArchive getArchive();
+    IArchive getArchive() const;
 
     //! This function returns the object's parent, handily
     //! wrapped in an IObject wrapper. If the object is the top
     //! level object, the IObject returned will be NULL.
-    IObject getParent();
+    IObject getParent() const;
 
     //! This function returns the number of child objects that
     //! this object has.
-    size_t getNumChildren();
+    size_t getNumChildren() const;
 
     //! This function returns the headers of each of the child
     //! objects that were written as children of this object.
-    const AbcA::ObjectHeader & getChildHeader( size_t i );
+    const AbcA::ObjectHeader & getChildHeader( size_t i ) const;
 
     //! Return the header of an object by name.
     //! This will return a NULL pointer if no header by that name is found.
     const AbcA::ObjectHeader *
-    getChildHeader( const std::string &iName );
+    getChildHeader( const std::string &iName ) const;
 
     //! This returns the single top-level CompoundPropertyReader that exists
     //! automatically as part of the object.
-    ICompoundProperty getProperties();
+    ICompoundProperty getProperties() const;
 
     //-*************************************************************************
     // ADVANCED TOOLS
@@ -183,13 +183,13 @@ public:
 
     //! This function returns an IObject constructed from the indexed
     //! object.
-    IObject getChild( size_t iChildIndex );
+    IObject getChild( size_t iChildIndex ) const;
 
     //! This function returns an IObject wrapped constructed from the
     //! header referenced by the name. If the child of the given name
     //! does not exist, this will fail in the same way as if the
     //! equivalent constructor was called.
-    IObject getChild( const std::string &iChildName );
+    IObject getChild( const std::string &iChildName ) const;
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -200,7 +200,7 @@ public:
     //! getPtr, as usual, returns a shared ptr to the
     //! underlying AbcCoreAbstract object, in this case the
     //! ObjectReaderPtr.
-    AbcA::ObjectReaderPtr getPtr() { return m_object; }
+    AbcA::ObjectReaderPtr getPtr() const { return m_object; }
 
     //! Reset returns this function set to an empty, default
     //! state.

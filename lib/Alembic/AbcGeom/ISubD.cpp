@@ -41,7 +41,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-MeshTopologyVariance ISubDSchema::getTopologyVariance()
+MeshTopologyVariance ISubDSchema::getTopologyVariance() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::getTopologyVariance()" );
 
@@ -68,7 +68,7 @@ MeshTopologyVariance ISubDSchema::getTopologyVariance()
 }
 
 //-*****************************************************************************
-size_t ISubDSchema::getNumSamples()
+size_t ISubDSchema::getNumSamples() const
 {
     size_t max = 0;
 
@@ -96,7 +96,7 @@ size_t ISubDSchema::getNumSamples()
 
 //-*****************************************************************************
 void ISubDSchema::get( ISubDSchema::Sample &oSample,
-                       const Abc::ISampleSelector &iSS )
+                       const Abc::ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::get()" );
 

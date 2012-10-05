@@ -314,7 +314,7 @@ public:
         ALEMBIC_ABC_SAFE_CALL_END();
     }
 
-    size_t getNumSamples()
+    size_t getNumSamples() const
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam::getNumSamples()" );
 
@@ -338,18 +338,18 @@ public:
         return 0;
     }
 
-    AbcA::DataType getDataType() { return TRAITS::dataType(); }
+    AbcA::DataType getDataType() const { return TRAITS::dataType(); }
 
-    bool isIndexed() { return m_isIndexed; }
+    bool isIndexed() const { return m_isIndexed; }
 
-    GeometryScope getScope() { return m_scope; }
+    GeometryScope getScope() const { return m_scope; }
 
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     {
         return m_valProp.getTimeSampling();
     }
 
-    const std::string &getName() { return m_name; }
+    const std::string &getName() const { return m_name; }
 
     bool valid() const
     {
@@ -369,9 +369,9 @@ public:
         m_isIndexed = false;
     }
 
-    prop_type getValueProperty() { return m_valProp; }
+    prop_type getValueProperty() const { return m_valProp; }
 
-    OUInt32ArrayProperty getIndexProperty() { return m_indicesProperty; }
+    OUInt32ArrayProperty getIndexProperty() const { return m_indicesProperty; }
 
 private:
     Abc::ErrorHandler &getErrorHandler() const

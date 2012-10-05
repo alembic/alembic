@@ -170,7 +170,7 @@ public:
 
 
     //! if isConstant() is true, the mesh contains no time-varying values
-    bool isConstant() { return (m_facesProperty.isConstant ()); }
+    bool isConstant() const { return (m_facesProperty.isConstant ()); }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -178,10 +178,10 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples();
+    size_t getNumSamples() const;
 
     //! Return the time sampling
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     {
         if ( m_facesProperty.valid() )
             return m_facesProperty.getTimeSampling();
@@ -189,16 +189,16 @@ public:
     }
 
     void get( Sample &iSamp,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const;
 
-    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
         Sample smp;
         get( smp, iSS );
         return smp;
     }
 
-    FaceSetExclusivity getFaceExclusivity();
+    FaceSetExclusivity getFaceExclusivity() const;
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

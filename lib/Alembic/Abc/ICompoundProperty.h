@@ -110,17 +110,17 @@ public:
     //-*************************************************************************
 
     //! Returns the number of properties contained in this ICompoundProperty
-    size_t getNumProperties();
+    size_t getNumProperties() const;
 
     //! Return the header of a child property.
     //! Property is selected by index.
     //! This will throw an exception on out-of-range access.
-    const AbcA::PropertyHeader & getPropertyHeader( size_t i );
+    const AbcA::PropertyHeader & getPropertyHeader( size_t i ) const;
 
     //! Return the header of a property name.
     //! This will return a NULL pointer if no header by that name is found.
     const AbcA::PropertyHeader *
-    getPropertyHeader( const std::string &iName );
+    getPropertyHeader( const std::string &iName ) const;
 
     //! There is no distinction between already added properties
     //! and created properties with an AbcA::CompoundPropertyReader, therefore
@@ -130,7 +130,7 @@ public:
 
     //! Return the parent compound property, handily wrapped in a
     //! ICompoundProperty wrapper.
-    ICompoundProperty getParent();
+    ICompoundProperty getParent() const;
 
 private:
     void init( AbcA::CompoundPropertyReaderPtr iParentObject,

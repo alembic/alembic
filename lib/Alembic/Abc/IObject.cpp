@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -75,7 +75,7 @@ const AbcA::ObjectHeader &IObject::getHeader() const
 };
 
 //-*****************************************************************************
-IArchive IObject::getArchive()
+IArchive IObject::getArchive() const
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getArchive()" );
@@ -94,7 +94,7 @@ IArchive IObject::getArchive()
 }
 
 //-*****************************************************************************
-IObject IObject::getParent()
+IObject IObject::getParent() const
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getParent()" );
@@ -113,7 +113,7 @@ IObject IObject::getParent()
 }
 
 //-*****************************************************************************
-size_t IObject::getNumChildren()
+size_t IObject::getNumChildren() const
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getNumChildren()" );
@@ -130,7 +130,7 @@ size_t IObject::getNumChildren()
 }
 
 //-*****************************************************************************
-const AbcA::ObjectHeader &IObject::getChildHeader( size_t iIdx )
+const AbcA::ObjectHeader &IObject::getChildHeader( size_t iIdx ) const
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChildHeader()" );
@@ -148,7 +148,8 @@ const AbcA::ObjectHeader &IObject::getChildHeader( size_t iIdx )
 }
 
 //-*****************************************************************************
-const AbcA::ObjectHeader *IObject::getChildHeader( const std::string &iName )
+const AbcA::ObjectHeader *
+IObject::getChildHeader( const std::string &iName ) const
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChildHeader( name )" );
@@ -165,7 +166,7 @@ const AbcA::ObjectHeader *IObject::getChildHeader( const std::string &iName )
 }
 
 //-*****************************************************************************
-IObject IObject::getChild( size_t iChildIndex )
+IObject IObject::getChild( size_t iChildIndex ) const
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChild()" );
@@ -184,7 +185,7 @@ IObject IObject::getChild( size_t iChildIndex )
 }
 
 //-*****************************************************************************
-IObject IObject::getChild( const std::string &iChildName )
+IObject IObject::getChild( const std::string &iChildName ) const
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChild()" );
@@ -203,7 +204,7 @@ IObject IObject::getChild( const std::string &iChildName )
 }
 
 //-*****************************************************************************
-ICompoundProperty IObject::getProperties()
+ICompoundProperty IObject::getProperties() const
 {
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getProperties()" );

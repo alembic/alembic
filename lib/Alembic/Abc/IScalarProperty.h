@@ -122,11 +122,11 @@ public:
     //! Get a sample into the address of a datum.
     //! ...
     void get( void *oSample,
-              const ISampleSelector &iSS = ISampleSelector() );
+              const ISampleSelector &iSS = ISampleSelector() ) const;
 
     //! Return the parent compound property, handily wrapped in a
     //! ICompoundProperty wrapper.
-    ICompoundProperty getParent();
+    ICompoundProperty getParent() const;
 
 private:
     void init( AbcA::CompoundPropertyReaderPtr iParentObject,

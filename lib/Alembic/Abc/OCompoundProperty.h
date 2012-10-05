@@ -108,33 +108,33 @@ public:
 
     //! Returns the number of properties that have been created thus far.
     //! May change as more are created.
-    size_t getNumProperties();
+    size_t getNumProperties() const;
 
     //! Return the header of a property that has already been added.
     //! Property is selected by index.
     //! This will throw an exception on out-of-range access.
-    const AbcA::PropertyHeader & getPropertyHeader( size_t i );
+    const AbcA::PropertyHeader & getPropertyHeader( size_t i ) const;
 
     //! Return the header of a property that has already been added.
     //! Property is selected by name.
     //! This will return NULL if no property with the given name is found.
-    const AbcA::PropertyHeader * getPropertyHeader( const std::string &iName );
+    const AbcA::PropertyHeader * getPropertyHeader( const std::string &iName ) const;
 
     //! Return a wrapped base property version of an ALREADY ADDED property.
     //! Will return an empty pointer if the writer for this property
     //! no longer exists or was never added.
     //! This would primarily be used for introspection.
-    OBaseProperty getProperty( size_t i );
+    OBaseProperty getProperty( size_t i ) const;
 
     //! Return a wrapped base property version of an ALREADY ADDED property.
     //! Will return an empty pointer if the writer for this property
     //! no longer exists or was never added.
     //! This would primarily be used for introspection.
-    OBaseProperty getProperty( const std::string &iName );
+    OBaseProperty getProperty( const std::string &iName ) const;
 
     //! Return the parent compound property, handily wrapped in a
     //! OCompoundProperty wrapper.
-    OCompoundProperty getParent();
+    OCompoundProperty getParent() const;
 
 private:
     void init( AbcA::CompoundPropertyWriterPtr iParentObject,

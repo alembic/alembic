@@ -119,23 +119,23 @@ public:
         *this = iCopy;
     }
 
-    AbcA::TimeSamplingPtr getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling() const;
 
     bool isConstant() const { return m_isConstant; }
 
     //! is this xform both constant and identity?
     bool isConstantIdentity() const { return m_isConstantIdentity; }
 
-    size_t getNumSamples();
+    size_t getNumSamples() const;
 
     //! fill the supplied sample reference with values
     void get( XformSample &oSamp,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const;
 
     XformSample getValue( const Abc::ISampleSelector &iSS =
-                          Abc::ISampleSelector() );
+                          Abc::ISampleSelector() ) const;
 
-    Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
+    Abc::IBox3dProperty getChildBoundsProperty() const { return m_childBoundsProperty; }
 
     // lightweight get to avoid constructing a sample
     // see XformSample.h for explanation of this property
@@ -166,9 +166,9 @@ public:
         return ( super_type::valid() );
     }
 
-    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+    ICompoundProperty getArbGeomParams() const { return m_arbGeomParams; }
 
-    ICompoundProperty getUserProperties() { return m_userProperties; }
+    ICompoundProperty getUserProperties() const { return m_userProperties; }
 
     //! unspecified-bool-type operator overload.
     //! ...
@@ -199,7 +199,7 @@ private:
 
     // fills m_valVec with data
     void getChannelValues( const AbcA::index_t iSampleIndex,
-                           XformSample & oSamp );
+                           XformSample & oSamp ) const;
 };
 
 //-*****************************************************************************

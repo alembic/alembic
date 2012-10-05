@@ -80,7 +80,7 @@ void ILightSchema::init( const Abc::Argument &iArg0,
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
-AbcA::TimeSamplingPtr ILightSchema::getTimeSampling()
+AbcA::TimeSamplingPtr ILightSchema::getTimeSampling() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ILightSchema::getTimeSampling" );
 

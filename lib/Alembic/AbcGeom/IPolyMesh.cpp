@@ -41,7 +41,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-MeshTopologyVariance IPolyMeshSchema::getTopologyVariance()
+MeshTopologyVariance IPolyMeshSchema::getTopologyVariance() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::getTopologyVariance()" );
 

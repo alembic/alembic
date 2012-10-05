@@ -48,7 +48,7 @@ OArrayProperty::~OArrayProperty()
 }
 
 //-*****************************************************************************
-size_t OArrayProperty::getNumSamples()
+size_t OArrayProperty::getNumSamples() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::getNumSamples()" );
 
@@ -104,7 +104,7 @@ void OArrayProperty::setTimeSampling(  AbcA::TimeSamplingPtr iTime )
 }
 
 //-*****************************************************************************
-OCompoundProperty OArrayProperty::getParent()
+OCompoundProperty OArrayProperty::getParent() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::getParent()" );
 

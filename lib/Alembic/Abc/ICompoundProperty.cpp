@@ -47,7 +47,7 @@ ICompoundProperty::~ICompoundProperty()
 }
 
 //-*****************************************************************************
-size_t ICompoundProperty::getNumProperties()
+size_t ICompoundProperty::getNumProperties() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICompoundProperty::getNumProperties()" );
 
@@ -60,7 +60,7 @@ size_t ICompoundProperty::getNumProperties()
 }
 
 //-*****************************************************************************
-const AbcA::PropertyHeader &ICompoundProperty::getPropertyHeader( size_t iIdx )
+const AbcA::PropertyHeader &ICompoundProperty::getPropertyHeader( size_t iIdx ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICompoundProperty::getPropertyHeader()" );
 
@@ -75,7 +75,7 @@ const AbcA::PropertyHeader &ICompoundProperty::getPropertyHeader( size_t iIdx )
 
 //-*****************************************************************************
 const AbcA::PropertyHeader *
-ICompoundProperty::getPropertyHeader( const std::string &iName )
+ICompoundProperty::getPropertyHeader( const std::string &iName ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICompoundProperty::getPropertyHeader()" );
 
@@ -88,7 +88,7 @@ ICompoundProperty::getPropertyHeader( const std::string &iName )
 }
 
 //-*****************************************************************************
-ICompoundProperty ICompoundProperty::getParent()
+ICompoundProperty ICompoundProperty::getParent() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICompoundProperty::getParent()" );
 

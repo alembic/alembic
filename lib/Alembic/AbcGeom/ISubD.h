@@ -241,10 +241,10 @@ public:
     //-*************************************************************************
 
 
-    MeshTopologyVariance getTopologyVariance();
+    MeshTopologyVariance getTopologyVariance() const;
 
     //! if isConstant() is true, the mesh contains no time-varying values
-    bool isConstant() { return getTopologyVariance() == kConstantTopology; }
+    bool isConstant() const { return getTopologyVariance() == kConstantTopology; }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -252,10 +252,10 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples();
+    size_t getNumSamples() const;
 
     //! Return the time sampling
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     {
         if ( m_positionsProperty.valid() )
         {
@@ -268,52 +268,53 @@ public:
     }
 
     void get( Sample &iSamp,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const;
 
-    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
         Sample smp;
         get( smp, iSS );
         return smp;
     }
 
-    Abc::IInt32ArrayProperty getFaceCountsProperty()
+    Abc::IInt32ArrayProperty getFaceCountsProperty() const
     { return m_faceCountsProperty; }
-    Abc::IInt32ArrayProperty getFaceIndicesProperty()
+    Abc::IInt32ArrayProperty getFaceIndicesProperty() const
     { return m_faceIndicesProperty; }
-    Abc::IP3fArrayProperty getPositionsProperty()
+    Abc::IP3fArrayProperty getPositionsProperty() const
     { return m_positionsProperty; }
 
-    Abc::IInt32Property getFaceVaryingInterpolateBoundaryProperty()
+    Abc::IInt32Property getFaceVaryingInterpolateBoundaryProperty() const
     { return m_faceVaryingInterpolateBoundaryProperty; }
 
-    Abc::IInt32Property getFaceVaryingPropagateCornersProperty()
+    Abc::IInt32Property getFaceVaryingPropagateCornersProperty() const
     { return m_faceVaryingPropagateCornersProperty; }
 
-    Abc::IInt32Property getInterpolateBoundaryProperty()
+    Abc::IInt32Property getInterpolateBoundaryProperty() const
     { return m_interpolateBoundaryProperty; }
 
-    Abc::IInt32ArrayProperty getCreaseIndicesProperty()
+    Abc::IInt32ArrayProperty getCreaseIndicesProperty() const
     { return m_creaseIndicesProperty; }
-    Abc::IInt32ArrayProperty getCreaseLengthsProperty()
+    Abc::IInt32ArrayProperty getCreaseLengthsProperty() const
     { return m_creaseLengthsProperty; }
-    Abc::IFloatArrayProperty getCreaseSharpnessesProperty()
+    Abc::IFloatArrayProperty getCreaseSharpnessesProperty() const
     { return m_creaseSharpnessesProperty; }
 
-    Abc::IInt32ArrayProperty getCornerIndicesProperty()
+    Abc::IInt32ArrayProperty getCornerIndicesProperty() const
     { return m_cornerIndicesProperty; }
-    Abc::IFloatArrayProperty getCornerSharpnessesProperty()
+    Abc::IFloatArrayProperty getCornerSharpnessesProperty() const
     { return m_cornerSharpnessesProperty; }
 
-    Abc::IInt32ArrayProperty getHolesProperty() { return m_holesProperty; }
+    Abc::IInt32ArrayProperty getHolesProperty() const { return m_holesProperty; }
 
-    Abc::IStringProperty getSubdivisionSchemeProperty()
+    Abc::IStringProperty getSubdivisionSchemeProperty() const
     { return m_subdSchemeProperty; }
 
     Abc::IV3fArrayProperty getVelocitiesProperty() const
     { return m_velocitiesProperty; }
 
     IV2fGeomParam &getUVsParam() { return m_uvsParam; }
+    const IV2fGeomParam &getUVsParam() const { return m_uvsParam; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

@@ -147,7 +147,7 @@ public:
 
     //! This function returns the property's object, handily
     //! wrapped in an IObject wrapper.
-    IObject getObject();
+    IObject getObject() const;
 
     //! Can't wrap
     //! OCompoundProperty getParent();
@@ -161,7 +161,7 @@ public:
     //! getPtr, as usual, returns a shared ptr to the
     //! underlying AbcCoreAbstract object, in this case the
     //! PROP_PTR.
-    PROP_PTR getPtr() { return m_property; }
+    PROP_PTR getPtr() const { return m_property; }
 
     //! Reset returns this function set to an empty, default
     //! state.
@@ -213,7 +213,7 @@ const AbcA::PropertyHeader &IBasePropertyT<PROP_PTR>::getHeader() const
 
 //-*****************************************************************************
 template <class PROP_PTR>
-IObject IBasePropertyT<PROP_PTR>::getObject()
+IObject IBasePropertyT<PROP_PTR>::getObject() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IBasePropertyT::getObject()" );
 

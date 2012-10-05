@@ -232,7 +232,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples()
+    size_t getNumSamples() const
     { return m_positionsProperty.getNumSamples(); }
 
     //! Set a sample

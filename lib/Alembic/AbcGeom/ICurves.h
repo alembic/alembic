@@ -201,10 +201,10 @@ public:
 
     //-*************************************************************************
     void get( sample_type &oSample,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const;
 
     sample_type getValue( const Abc::ISampleSelector &iSS =
-                          Abc::ISampleSelector() )
+                          Abc::ISampleSelector() ) const
     {
         sample_type smp;
         get( smp, iSS );
@@ -227,8 +227,11 @@ public:
     }
 
     IV2fGeomParam &getUVsParam() { return m_uvsParam; }
+    const IV2fGeomParam &getUVsParam() const { return m_uvsParam; }
     IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
+    const IN3fGeomParam &getNormalsParam() const { return m_normalsParam; }
     IFloatGeomParam &getWidthsParam() { return m_widthsParam; }
+    const IFloatGeomParam &getWidthsParam() const { return m_widthsParam; }
 
 
 

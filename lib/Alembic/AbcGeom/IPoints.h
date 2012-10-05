@@ -156,17 +156,17 @@ public:
     //! This can be any number, including zero.
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
-    size_t getNumSamples()
+    size_t getNumSamples() const
     { return std::max( m_positionsProperty.getNumSamples(),
                        m_idsProperty.getNumSamples() ); }
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
-    bool isConstant() { return m_positionsProperty.isConstant() && m_idsProperty.isConstant(); }
+    bool isConstant() const { return m_positionsProperty.isConstant() && m_idsProperty.isConstant(); }
 
     //! Time sampling Information.
     //!
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     {
         if ( m_positionsProperty.valid() )
         {
@@ -177,7 +177,7 @@ public:
 
     //-*************************************************************************
     void get( Sample &oSample,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPointsSchema::get()" );
 
@@ -197,29 +197,34 @@ public:
         ALEMBIC_ABC_SAFE_CALL_END();
     }
 
-    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
         Sample smp;
         get( smp, iSS );
         return smp;
     }
 
-    Abc::IP3fArrayProperty getPositionsProperty()
+    Abc::IP3fArrayProperty getPositionsProperty() const
     {
         return m_positionsProperty;
     }
 
-    Abc::IV3fArrayProperty getVelocitiesProperty()
+    Abc::IV3fArrayProperty getVelocitiesProperty() const
     {
         return m_velocitiesProperty;
     }
 
-    Abc::IUInt64ArrayProperty getIdsProperty()
+    Abc::IUInt64ArrayProperty getIdsProperty() const
     {
         return m_idsProperty;
     }
 
     IFloatGeomParam &getWidthsParam()
+    {
+        return m_widthsParam;
+    }
+
+    const IFloatGeomParam &getWidthsParam() const
     {
         return m_widthsParam;
     }

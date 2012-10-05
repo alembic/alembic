@@ -134,7 +134,7 @@ void ICameraSchema::init( const Abc::Argument &iArg0,
 }
 
 void ICameraSchema::get( CameraSample & oSample,
-    const Abc::ISampleSelector &iSS )
+    const Abc::ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICameraSchema::get()" );
 

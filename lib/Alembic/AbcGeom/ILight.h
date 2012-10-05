@@ -109,15 +109,15 @@ public:
     }
 
     //! Access to the camera schema.
-    ICameraSchema getCameraSchema() { return m_cameraSchema; }
+    ICameraSchema getCameraSchema() const { return m_cameraSchema; }
 
     //! Access to the child bounds property
-    Abc::IBox3dProperty getChildBoundsProperty()
+    Abc::IBox3dProperty getChildBoundsProperty() const
     {
         return m_childBoundsProperty;
     }
 
-    AbcA::TimeSamplingPtr getTimeSampling();
+    AbcA::TimeSamplingPtr getTimeSampling() const;
 
     bool isConstant() const;
 
@@ -125,8 +125,8 @@ public:
 
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
-    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
-    ICompoundProperty getUserProperties() { return m_userProperties; }
+    ICompoundProperty getArbGeomParams() const { return m_arbGeomParams; }
+    ICompoundProperty getUserProperties() const { return m_userProperties; }
 
     //! Reset returns this function set to an empty, default
     //! state.

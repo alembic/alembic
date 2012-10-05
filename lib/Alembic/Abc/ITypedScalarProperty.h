@@ -132,14 +132,14 @@ public:
     //! Get the typed sample.
     //! ...
     void get( value_type &iVal,
-              const ISampleSelector &iSS = ISampleSelector() )
+              const ISampleSelector &iSS = ISampleSelector() ) const
     {
         IScalarProperty::get( reinterpret_cast<void*>( &iVal ), iSS );
     }
 
     //! Return the typed sample by value.
     //! ...
-    value_type getValue( const ISampleSelector &iSS = ISampleSelector() )
+    value_type getValue( const ISampleSelector &iSS = ISampleSelector() ) const
     {
         value_type ret;
         get( ret, iSS );

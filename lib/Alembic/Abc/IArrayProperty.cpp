@@ -101,7 +101,7 @@ AbcA::TimeSamplingPtr IArrayProperty::getTimeSampling() const
 
 //-*****************************************************************************
 void IArrayProperty::get( AbcA::ArraySamplePtr& oSamp,
-                          const ISampleSelector &iSS )
+                          const ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::get()" );
 
@@ -146,7 +146,7 @@ void IArrayProperty::getAs( void * oSample,
 
 //-*****************************************************************************
 bool IArrayProperty::getKey( AbcA::ArraySampleKey& oKey,
-                             const ISampleSelector &iSS )
+                             const ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getKey()" );
 
@@ -163,7 +163,7 @@ bool IArrayProperty::getKey( AbcA::ArraySampleKey& oKey,
 
 //-*****************************************************************************
 void IArrayProperty::getDimensions( Util::Dimensions & oDim,
-                                    const ISampleSelector &iSS )
+                                    const ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getDimensions()" );
 
@@ -176,7 +176,7 @@ void IArrayProperty::getDimensions( Util::Dimensions & oDim,
 }
 
 //-*****************************************************************************
-ICompoundProperty IArrayProperty::getParent()
+ICompoundProperty IArrayProperty::getParent() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getParent()" );
 

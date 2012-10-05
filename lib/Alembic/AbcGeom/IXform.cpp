@@ -185,7 +185,7 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
 }
 
 //-*****************************************************************************
-AbcA::TimeSamplingPtr IXformSchema::getTimeSampling()
+AbcA::TimeSamplingPtr IXformSchema::getTimeSampling() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getTimeSampling()" );
 
@@ -205,7 +205,7 @@ AbcA::TimeSamplingPtr IXformSchema::getTimeSampling()
 }
 
 //-*****************************************************************************
-std::size_t IXformSchema::getNumSamples()
+std::size_t IXformSchema::getNumSamples() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getNumSamples()" );
 
@@ -222,7 +222,7 @@ std::size_t IXformSchema::getNumSamples()
 
 //-*****************************************************************************
 void IXformSchema::getChannelValues( const AbcA::index_t iSampleIndex,
-    XformSample & oSamp )
+    XformSample & oSamp ) const
 {
     std::vector<Alembic::Util::float64_t> dataVec;
 
@@ -257,7 +257,7 @@ void IXformSchema::getChannelValues( const AbcA::index_t iSampleIndex,
 }
 
 //-*****************************************************************************
-void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
+void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::get()" );
 
@@ -302,7 +302,7 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS )
 }
 
 //-*****************************************************************************
-XformSample IXformSchema::getValue( const Abc::ISampleSelector &iSS )
+XformSample IXformSchema::getValue( const Abc::ISampleSelector &iSS ) const
 {
     XformSample ret;
     this->get( ret, iSS );

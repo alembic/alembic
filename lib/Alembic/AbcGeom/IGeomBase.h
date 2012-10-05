@@ -164,23 +164,23 @@ public:
                 m_selfBoundsProperty.valid() );
     }
 
-    Abc::IBox3dProperty getSelfBoundsProperty()
+    Abc::IBox3dProperty getSelfBoundsProperty() const
     {
         return m_selfBoundsProperty;
     }
 
-    Abc::IBox3dProperty getChildBoundsProperty()
+    Abc::IBox3dProperty getChildBoundsProperty() const
     {
         return m_childBoundsProperty;
     }
 
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
-    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
+    ICompoundProperty getArbGeomParams() const { return m_arbGeomParams; }
 
     // compound property to use as parent for any user workflow specific
     // properties
-    ICompoundProperty getUserProperties() { return m_userProperties; }
+    ICompoundProperty getUserProperties() const { return m_userProperties; }
 
 protected:
     // Only selfBounds is required, all others are optional
@@ -309,7 +309,7 @@ public:
 
     //! Time sampling Information.
     //!
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     {
         if ( m_selfBoundsProperty.valid() )
         {
@@ -323,7 +323,7 @@ public:
 
     //-*************************************************************************
     void get( Sample &oSample,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IGeomBase::get()" );
 
@@ -339,7 +339,7 @@ public:
     }
 
     //-*************************************************************************
-    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+    Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
         Sample smp;
         get( smp, iSS );

@@ -127,7 +127,7 @@ public:
     //! Get a sample into the address of a datum.
     //! ...
     void get( AbcA::ArraySamplePtr& oSample,
-              const ISampleSelector &iSS = ISampleSelector() );
+              const ISampleSelector &iSS = ISampleSelector() ) const;
 
     //! Get a sample into the address of a datum as a particular POD type.
     void getAs( void *oSample, AbcA::PlainOldDataType iPod,
@@ -141,15 +141,15 @@ public:
     //! Get a key from an address of a datum.
     //! ...
     bool getKey( AbcA::ArraySampleKey& oKey,
-                 const ISampleSelector &iSS = ISampleSelector() );
+                 const ISampleSelector &iSS = ISampleSelector() ) const;
 
     //! Get the dimensions of the datum.
     void getDimensions( Util::Dimensions & oDim,
-                        const ISampleSelector &iSS = ISampleSelector() );
+                        const ISampleSelector &iSS = ISampleSelector() ) const;
 
     //! Return the parent compound property, handily wrapped in a
     //! ICompoundProperty wrapper.
-    ICompoundProperty getParent();
+    ICompoundProperty getParent() const;
 
 private:
     void init( AbcA::CompoundPropertyReaderPtr iParentObject,

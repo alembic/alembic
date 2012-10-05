@@ -47,7 +47,7 @@ OCompoundProperty::~OCompoundProperty()
 }
 
 //-*****************************************************************************
-size_t OCompoundProperty::getNumProperties()
+size_t OCompoundProperty::getNumProperties() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getNumProperties()" );
 
@@ -60,7 +60,7 @@ size_t OCompoundProperty::getNumProperties()
 }
 
 //-*****************************************************************************
-const AbcA::PropertyHeader &OCompoundProperty::getPropertyHeader( size_t iIdx )
+const AbcA::PropertyHeader &OCompoundProperty::getPropertyHeader( size_t iIdx ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getPropertyHeader()" );
 
@@ -75,7 +75,7 @@ const AbcA::PropertyHeader &OCompoundProperty::getPropertyHeader( size_t iIdx )
 
 //-*****************************************************************************
 const AbcA::PropertyHeader *
-OCompoundProperty::getPropertyHeader( const std::string &iName )
+OCompoundProperty::getPropertyHeader( const std::string &iName ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getPropertyHeader()" );
 
@@ -89,7 +89,7 @@ OCompoundProperty::getPropertyHeader( const std::string &iName )
 
 //-*****************************************************************************
 OBaseProperty
-OCompoundProperty::getProperty( size_t i )
+OCompoundProperty::getProperty( size_t i ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getProperty( i )" );
 
@@ -105,7 +105,7 @@ OCompoundProperty::getProperty( size_t i )
 
 //-*****************************************************************************
 OBaseProperty
-OCompoundProperty::getProperty( const std::string &iName )
+OCompoundProperty::getProperty( const std::string &iName ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getProperty( name )" );
 
@@ -120,7 +120,7 @@ OCompoundProperty::getProperty( const std::string &iName )
 }
 
 //-*****************************************************************************
-OCompoundProperty OCompoundProperty::getParent()
+OCompoundProperty OCompoundProperty::getParent() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getParent()" );
 

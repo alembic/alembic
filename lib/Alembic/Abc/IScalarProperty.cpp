@@ -87,7 +87,7 @@ AbcA::TimeSamplingPtr IScalarProperty::getTimeSampling() const
 }
 
 //-*****************************************************************************
-void IScalarProperty::get( void *oSamp, const ISampleSelector &iSS )
+void IScalarProperty::get( void *oSamp, const ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IScalarProperty::get()" );
 
@@ -99,7 +99,7 @@ void IScalarProperty::get( void *oSamp, const ISampleSelector &iSS )
 }
 
 //-*****************************************************************************
-ICompoundProperty IScalarProperty::getParent()
+ICompoundProperty IScalarProperty::getParent() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IScalarProperty::getParent()" );
 

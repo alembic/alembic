@@ -205,7 +205,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples()
+    size_t getNumSamples() const
     { return m_facesProperty.getNumSamples(); }
 
     //! Set a sample! First sample must have the list of faces in the faceset.

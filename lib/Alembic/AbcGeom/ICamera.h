@@ -102,7 +102,7 @@ public:
     //! Default assignment operator used.
 
     //! Return the time sampling.
-    AbcA::TimeSamplingPtr getTimeSampling()
+    AbcA::TimeSamplingPtr getTimeSampling() const
     { return m_coreProperties.getTimeSampling(); }
 
     //! Return the number of samples contained in the property.
@@ -114,13 +114,13 @@ public:
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
-    bool isConstant() { return m_coreProperties.isConstant(); }
+    bool isConstant() const { return m_coreProperties.isConstant(); }
 
     void get( CameraSample &oSample,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() );
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const;
 
     CameraSample getValue(
-        const Abc::ISampleSelector &iSS = Abc::ISampleSelector() )
+        const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
         CameraSample smp;
         get( smp, iSS );
@@ -129,10 +129,10 @@ public:
 
     // compound property to use as parent for any arbitrary GeomParams
     // underneath it
-    ICompoundProperty getArbGeomParams() { return m_arbGeomParams; }
-    ICompoundProperty getUserProperties() { return m_userProperties; }
+    ICompoundProperty getArbGeomParams() const { return m_arbGeomParams; }
+    ICompoundProperty getUserProperties() const { return m_userProperties; }
 
-    Abc::IBox3dProperty getChildBoundsProperty() { return m_childBoundsProperty; }
+    Abc::IBox3dProperty getChildBoundsProperty() const { return m_childBoundsProperty; }
 
     //! Reset returns this function set to an empty, default
     //! state.

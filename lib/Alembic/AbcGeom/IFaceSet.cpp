@@ -41,7 +41,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-size_t IFaceSetSchema::getNumSamples()
+size_t IFaceSetSchema::getNumSamples() const
 {
     size_t max = 0;
 
@@ -69,7 +69,7 @@ size_t IFaceSetSchema::getNumSamples()
 
 //-*****************************************************************************
 void IFaceSetSchema::get( IFaceSetSchema::Sample &oSample,
-                       const Abc::ISampleSelector &iSS )
+                       const Abc::ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IFaceSetSchema::get()" );
 
@@ -109,7 +109,7 @@ void IFaceSetSchema::init( const Abc::Argument &iArg0,
 }
 
 //-*****************************************************************************
-FaceSetExclusivity IFaceSetSchema::getFaceExclusivity()
+FaceSetExclusivity IFaceSetSchema::getFaceExclusivity() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IFaceSetSchema::getFaceExclusivity" );
 

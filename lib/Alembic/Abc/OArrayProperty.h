@@ -111,7 +111,7 @@ public:
 
     //! Get the number of samples written so far.
     //! May change over time as more samples are written.
-    size_t getNumSamples();
+    size_t getNumSamples() const;
 
     //! Set a sample from the address of a datum.
     //! ...
@@ -135,7 +135,7 @@ public:
 
     //! Return the parent compound property, handily wrapped in a
     //! OCompoundProperty wrapper.
-    OCompoundProperty getParent();
+    OCompoundProperty getParent() const;
 
 private:
     void init( AbcA::CompoundPropertyWriterPtr iParentObject,

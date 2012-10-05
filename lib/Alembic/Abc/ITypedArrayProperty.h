@@ -135,7 +135,7 @@ public:
     //! Get the typed sample.
     //! ...
     void get( sample_ptr_type& iVal,
-              const ISampleSelector &iSS = ISampleSelector() )
+              const ISampleSelector &iSS = ISampleSelector() ) const
     {
         AbcA::ArraySamplePtr ptr;
         IArrayProperty::get( ptr, iSS );
@@ -145,7 +145,7 @@ public:
 
     //! Return the typed sample by value.
     //! ...
-    sample_ptr_type getValue( const ISampleSelector &iSS = ISampleSelector() )
+    sample_ptr_type getValue( const ISampleSelector &iSS = ISampleSelector() ) const
     {
         sample_ptr_type ret;
         get( ret, iSS );
