@@ -83,7 +83,7 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
 {
     const std::string fullNodeName = iObjects[0].getFullName();
 
-    // gether information from the first input node in the list:
+    // gather information from the first input node in the list:
     IDataSchema iSchema0 = IData(iObjects[0], Alembic::Abc::kWrapExisting).getSchema();
 
     TimeSamplingPtr tsPtr0 = iSchema0.getTimeSampling();
@@ -99,12 +99,31 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
     ICompoundPropertyVec iArbGeomCompoundProps;
     iArbGeomCompoundProps.reserve(iObjects.size());
 
-    ICompoundPropertyVec iUserCompoundProps;
-    iUserCompoundProps.reserve(iObjects.size());
-
     ICompoundProperty arbProp = iSchema0.getArbGeomParams();
     if (arbProp)  // might be empty
         iArbGeomCompoundProps.push_back(arbProp);
+
+    ICompoundPropertyVec iUserCompoundProps;
+    iUserCompoundProps.reserve(iObjects.size());
+
+    ICompoundProperty userProp = iSchema0.getUserProperties();
+    if (userProp)  // might be empty
+        iUserCompoundProps.push_back(userProp);
+
+    ICompoundPropertyVec iSchemaProps;
+    iSchemaProps.reserve(iObjects.size());
+
+    Abc::IBox3dProperty childBounds = iSchema0.getChildBoundsProperty();
+    TimeSamplingPtr ctsPtr0;
+    TimeSamplingType ctsType0;
+    if (childBounds)
+    {
+        ctsPtr0 = childBounds.getTimeSampling();
+        ctsType0 = tsPtr0->getTimeSamplingType();
+        std::string nameAndBounds = fullNodeName + " child bounds";
+        checkAcyclic(ctsType0, nameAndBounds);
+        iSchemaProps.push_back(iSchema0);
+    }
 
     bool hasVisible = cp.getPropertyHeader("visible")?true:false;
 
@@ -147,6 +166,42 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
         ICompoundProperty userProp = iSchema.getUserProperties();
         if (userProp)  // might be empty
             iUserCompoundProps.push_back(userProp);
+
+        Abc::IBox3dProperty childBounds = iSchema.getChildBoundsProperty();
+        TimeSamplingPtr ctsPtr;
+        TimeSamplingType ctsType;
+        if (childBounds)
+        {
+            ctsPtr = childBounds.getTimeSampling();
+            ctsType = ctsPtr->getTimeSamplingType();
+            iSchemaProps.push_back(iSchema);
+        }
+
+        if (!(ctsType0 == ctsType))
+        {
+            std::cerr << 
+                "Can not stitch different sampling type for child bounds on\""
+                << fullNodeName << "\"" << std::endl;
+            // more details on this
+            if (ctsType.getNumSamplesPerCycle()
+                != ctsType0.getNumSamplesPerCycle())
+            {
+                std::cerr << "\tnumSamplesPerCycle values are different"
+                    << std::endl;
+            }
+            if (ctsType.getTimePerCycle() != ctsType0.getTimePerCycle())
+            {
+                std::cerr << "\ttimePerCycle values are different"
+                    << std::endl;
+            }
+            if (!ctsPtr0 || !ctsPtr)
+            {
+                std::cerr << "\tchild bounds are missing on some archives"
+                    << std::endl;
+            }
+            exit(1);
+        }
+
     }
 
     OData oData(oParentObj, iObjects[0].getName(), tsPtr0);
@@ -172,6 +227,18 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
     {
         OCompoundProperty oUserCompoundProp = oSchema.getUserProperties();
         stitchCompoundProp(iUserCompoundProps, oUserCompoundProp);
+    }
+
+    if (iSchemaProps.size() == iObjects.size())
+    {
+        stitchScalarProp(childBounds.getHeader(), iSchemaProps, oSchema);
+    }
+    else if (iSchemaProps.size() != 0)
+    {
+        std::cerr << "Child bounds are missing on some archives for:\""
+            << fullNodeName << "\"" << std::endl;
+
+        exit(1);
     }
 }
 
@@ -317,7 +384,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                     oSamp.setHoles(*holePtr);
 
                 oSamp.setSubdivisionScheme(iSamp.getSubdivisionScheme());
-                oSamp.setChildBounds(iSamp.getChildBounds());
 
                 // set uvs
                 IV2fGeomParam::Sample iUVSample;
@@ -398,8 +464,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                                                oNormalsSample, reqIdx);
                     oSamp.setNormals(oNormalsSample);
                 }
-
-                oSamp.setChildBounds(iSamp.getChildBounds());
 
                 oSchema.set(oSamp);
             }
@@ -503,7 +567,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                     oSamp.setNormals(oNormalsSample);
                 }
 
-                oSamp.setChildBounds(iSamp.getChildBounds());
                 oSchema.set(oSamp);
             }
         }
@@ -552,7 +615,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                     oSamp.setWidths(oWidthSample);
                 }
 
-                oSamp.setChildBounds(iSamp.getChildBounds());
                 oSchema.set(oSamp);
             }
         }
@@ -640,7 +702,6 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                                        *(iSamp.getTrimV()),
                                        *(iSamp.getTrimW()));
                 }
-                oSamp.setChildBounds(iSamp.getChildBounds());
                 oSchema.set(oSamp);
             }
         }
