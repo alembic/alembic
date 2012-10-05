@@ -37,12 +37,6 @@
 #ifndef _Alembic_AbcCoreAbstract_ArraySampleKey_h_
 #define _Alembic_AbcCoreAbstract_ArraySampleKey_h_
 
-#if !defined(_MSC_VER)
-#include <tr1/unordered_map>
-#else
-#include <unordered_map>
-#endif
-
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/DataType.h>
 
@@ -124,10 +118,10 @@ struct ArraySampleKeyStdHash :
 template <class MAPPED>
 struct UnorderedMapUtil
 {
-    typedef std::tr1::unordered_map<ArraySampleKey,
-                                    MAPPED,
-                                    ArraySampleKeyStdHash,
-                                    ArraySampleKeyEqualTo> umap_type;
+    typedef Alembic::Util::unordered_map<ArraySampleKey,
+                                         MAPPED,
+                                         ArraySampleKeyStdHash,
+                                         ArraySampleKeyEqualTo> umap_type;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

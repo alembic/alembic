@@ -38,7 +38,28 @@
 
 // tr1/memory is not avaliable in Visual Studio.
 #if !defined(_MSC_VER)
+
 #include <tr1/memory>
+#include <tr1/unordered_map>
+
+#elif _MSC_VER < 1500
+
+// no tr1 in these older versions of MS VS so fall back to boost
+#include <boost/type_traits.hpp>
+#include <boost/ref.hpp>
+#include <boost/format.hpp>
+#include <boost/smart_ptr.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/utility.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/array.hpp>
+#include <boost/operators.hpp>
+#include <boost/foreach.hpp>
+#include <boost/unordered_map.hpp>
+
+#else
+#include <unordered_map>
 #endif
 
 #include <memory>
@@ -76,11 +97,21 @@ namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
+#if defined( _MSC_VER ) && _MSC_VER < 1500
+using boost::dynamic_pointer_cast;
+using boost::enable_shared_from_this;
+using boost::shared_ptr;
+using boost::static_pointer_cast;
+using boost::weak_ptr;
+using boost::unordered_map;
+#else
 using std::tr1::dynamic_pointer_cast;
 using std::tr1::enable_shared_from_this;
 using std::tr1::shared_ptr;
 using std::tr1::static_pointer_cast;
 using std::tr1::weak_ptr;
+using std::tr1::unordered_map;
+#endif
 
 using std::auto_ptr;
 
