@@ -60,24 +60,6 @@ void OSubDSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::set()" );
 
-    // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty )
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
-            m_positionsProperty.getTimeSampling() );
-
-        Abc::Box3d emptyBox;
-        emptyBox.makeEmpty();
-
-        size_t numSamples = m_positionsProperty.getNumSamples();
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_childBoundsProperty.set( emptyBox );
-        }
-    }
-
     // do we need to create velocities prop?
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
@@ -144,9 +126,6 @@ void OSubDSchema::set( const Sample &iSamp )
         m_positionsProperty.set( iSamp.getPositions() );
         m_faceIndicesProperty.set( iSamp.getFaceIndices() );
         m_faceCountsProperty.set( iSamp.getFaceCounts() );
-
-        if ( m_childBoundsProperty )
-        { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
 
         if ( m_velocitiesProperty )
         { SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() ); }
@@ -304,11 +283,6 @@ void OSubDSchema::set( const Sample &iSamp )
 
         SetPropUsePrevIfNull( m_subdSchemeProperty, iSamp.getSubdivisionScheme() );
 
-        if ( m_childBoundsProperty )
-        {
-            SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() );
-        }
-
         if ( m_velocitiesProperty )
         {
             SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() );
@@ -371,11 +345,6 @@ void OSubDSchema::setFromPrevious()
 
     m_selfBoundsProperty.setFromPrevious();
 
-    if ( m_childBoundsProperty )
-    {
-        m_childBoundsProperty.setFromPrevious();
-    }
-
     if ( m_velocitiesProperty ) { m_velocitiesProperty.setFromPrevious(); }
 
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
@@ -426,11 +395,6 @@ void OSubDSchema::setTimeSampling( uint32_t iIndex )
     if ( m_holesProperty )
     {
         m_holesProperty.setTimeSampling( iIndex );
-    }
-
-    if ( m_childBoundsProperty )
-    {
-        m_childBoundsProperty.setTimeSampling( iIndex );
     }
 
     if ( m_velocitiesProperty )

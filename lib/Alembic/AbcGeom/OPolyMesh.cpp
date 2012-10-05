@@ -46,24 +46,6 @@ void OPolyMeshSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::set()" );
 
-    // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty )
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
-                                             m_positionsProperty.getTimeSampling() );
-
-        Abc::Box3d emptyBox;
-        emptyBox.makeEmpty();
-
-        size_t numSamples = m_positionsProperty.getNumSamples();
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_childBoundsProperty.set( emptyBox );
-        }
-    }
-
     // do we need to create velocities prop?
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
@@ -169,9 +151,6 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         m_indicesProperty.set( iSamp.getFaceIndices() );
         m_countsProperty.set( iSamp.getFaceCounts() );
 
-        if (m_childBoundsProperty)
-        { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
-
         if ( m_velocitiesProperty )
         { SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() ); }
 
@@ -199,11 +178,6 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_indicesProperty, iSamp.getFaceIndices() );
         SetPropUsePrevIfNull( m_countsProperty, iSamp.getFaceCounts() );
-
-        if ( m_childBoundsProperty )
-        {
-            SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() );
-        }
 
         if ( m_velocitiesProperty )
         {
@@ -244,7 +218,6 @@ void OPolyMeshSchema::setFromPrevious()
 
     m_selfBoundsProperty.setFromPrevious();
 
-    if ( m_childBoundsProperty ) { m_childBoundsProperty.setFromPrevious(); }
     if ( m_velocitiesProperty ) { m_velocitiesProperty.setFromPrevious(); }
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
     if ( m_normalsParam ) { m_normalsParam.setFromPrevious(); }
@@ -262,11 +235,6 @@ void OPolyMeshSchema::setTimeSampling( uint32_t iIndex )
     m_indicesProperty.setTimeSampling( iIndex );
     m_countsProperty.setTimeSampling( iIndex );
     m_selfBoundsProperty.setTimeSampling( iIndex );
-
-    if ( m_childBoundsProperty )
-    {
-        m_childBoundsProperty.setTimeSampling( iIndex );
-    }
 
     if ( m_velocitiesProperty )
     {

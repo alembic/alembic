@@ -107,7 +107,7 @@ public:
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument(),
                               const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CameraSchemaInfo>( 
+      : Abc::OSchema<CameraSchemaInfo>(
                                     GetCompoundPropertyWriterPtr( iParent ),
                                     iArg0, iArg1, iArg2 )
     {
@@ -169,6 +169,8 @@ public:
     Abc::OCompoundProperty getUserProperties();
     Abc::OCompoundProperty getArbGeomParams();
 
+    Abc::OBox3dProperty getChildBoundsProperty();
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, validity,
@@ -183,7 +185,8 @@ public:
         m_childBoundsProperty.reset();
         m_userProperties.reset();
         m_arbGeomParams.reset();
-
+        m_bigFilmBackChannelsProperty.reset();
+        m_smallFilmBackChannelsProperty.reset();
         Abc::OSchema<CameraSchemaInfo>::reset();
     }
 

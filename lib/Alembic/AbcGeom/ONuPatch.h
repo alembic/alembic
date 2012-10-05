@@ -154,10 +154,6 @@ public:
         void setSelfBounds( const Abc::Box3d &iBnds )
         { m_selfBounds = iBnds; }
 
-        const Abc::Box3d &getChildBounds() const { return m_childBounds; }
-        void setChildBounds( const Abc::Box3d &iBnds )
-        { m_childBounds = iBnds; }
-
         // velocities accessor
         const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
         void setVelocities( const Abc::V3fArraySample &iVelocities )
@@ -222,7 +218,6 @@ public:
             m_normals.reset();
             m_uvs.reset();
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
 
             // reset trim curves
             m_trimNumLoops = ABC_GEOM_NUPATCH_NULL_INT_VALUE;
@@ -270,7 +265,6 @@ public:
 
         // bounds
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
     };
 
     //-*************************************************************************

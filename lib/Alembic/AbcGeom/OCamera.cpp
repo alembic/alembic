@@ -46,23 +46,6 @@ void OCameraSchema::set( const CameraSample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCameraSchema::set()" );
 
-    // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty)
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".childBnds" );
-        Abc::Box3d emptyBox;
-        emptyBox.makeEmpty();
-
-        // -1 because we just dis an m_positions set above
-        size_t numSamples = m_coreProperties.getNumSamples() - 1;
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_childBoundsProperty.set( emptyBox );
-        }
-    }
-
     double sampleData[16];
     for ( size_t i = 0; i < 16; ++i )
         sampleData[i] = iSamp.getCoreValue( i );
@@ -82,7 +65,7 @@ void OCameraSchema::set( const CameraSample &iSamp )
         {
             const FilmBackXformOp & op = iSamp[i];
             filmBackOps[i] = op.getTypeAndHint();
-            for ( std::size_t j = 0; j < op.getNumChannels(); 
+            for ( std::size_t j = 0; j < op.getNumChannels();
                 ++j, ++curChannel )
             {
                 opChannels[curChannel] = op.getChannelValue( j );
@@ -122,11 +105,6 @@ void OCameraSchema::set( const CameraSample &iSamp )
             DoubleArraySample dsamp( &opChannels.front(), opChannels.size() );
             m_bigFilmBackChannelsProperty.set( dsamp );
         }
-
-        if ( m_childBoundsProperty )
-        {
-            m_childBoundsProperty.set( iSamp.getChildBounds() );
-        }
     }
     else
     {
@@ -163,11 +141,6 @@ void OCameraSchema::set( const CameraSample &iSamp )
             m_bigFilmBackChannelsProperty.set( dsamp );
         }
         // else no film back channels
-
-        if ( m_childBoundsProperty )
-        {
-            SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() );
-        }
     }
 
     m_coreProperties.set( sampleData );
@@ -181,9 +154,6 @@ void OCameraSchema::setFromPrevious()
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCameraSchema::setFromPrevious" );
 
     m_coreProperties.setFromPrevious();
-
-    if ( m_childBoundsProperty )
-        m_childBoundsProperty.setFromPrevious();
 
     if ( m_smallFilmBackChannelsProperty )
         m_smallFilmBackChannelsProperty.setFromPrevious();
@@ -270,6 +240,29 @@ Abc::OCompoundProperty OCameraSchema::getUserProperties()
 
     Abc::OCompoundProperty ret;
     return ret;
+}
+
+//-*****************************************************************************
+Abc::OBox3dProperty OCameraSchema::getChildBoundsProperty()
+{
+    // Accessing Child Bounds Property will create it if needed
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OCameraSchema::getChildBoundsProperty()" );
+
+    if ( ! m_childBoundsProperty )
+    {
+        AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+        // for now, use the core properties time sampling, this
+        // can and should be changed depending on how the children
+        // are sampled
+        m_childBoundsProperty = Abc::OBox3dProperty( _this,
+            ".childBnds", m_coreProperties.getTimeSampling() );
+
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+    return m_childBoundsProperty;
 }
 
 } // End namespace ALEMBIC_VERSION_NS

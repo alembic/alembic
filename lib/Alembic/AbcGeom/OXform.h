@@ -168,6 +168,7 @@ public:
 
     Abc::OCompoundProperty getArbGeomParams();
     Abc::OCompoundProperty getUserProperties();
+    Abc::OBox3dProperty getChildBoundsProperty();
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

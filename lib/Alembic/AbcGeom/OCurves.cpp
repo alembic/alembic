@@ -55,23 +55,6 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     // the version number
     basisAndType[3] = basisAndType[2];
 
-    // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty)
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( *this, ".childBnds",
-                                             m_positionsProperty.getTimeSampling() );
-        Abc::Box3d emptyBox;
-        emptyBox.makeEmpty();
-
-        size_t numSamples = m_positionsProperty.getNumSamples();
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_childBoundsProperty.set( emptyBox );
-        }
-    }
-
     // do we need to create velocities prop?
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
@@ -218,9 +201,6 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         if ( m_velocitiesProperty )
         { m_velocitiesProperty.set( iSamp.getVelocities() ); }
 
-        if ( iSamp.getChildBounds().hasVolume() )
-        { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
-
         if ( iSamp.getSelfBounds().isEmpty() )
         {
             // OTypedScalarProperty::set() is not referentially transparent,
@@ -269,9 +249,6 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
             m_basisAndTypeProperty.setFromPrevious();
         }
 
-        if ( m_childBoundsProperty )
-        { SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() ); }
-
         if ( m_velocitiesProperty )
         { SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() ); }
 
@@ -317,7 +294,6 @@ void OCurvesSchema::setFromPrevious()
 
     m_selfBoundsProperty.setFromPrevious();
 
-    if ( m_childBoundsProperty ) { m_childBoundsProperty.setFromPrevious(); }
     if ( m_velocitiesProperty ) { m_velocitiesProperty.setFromPrevious(); }
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
     if ( m_normalsParam ) { m_normalsParam.setFromPrevious(); }

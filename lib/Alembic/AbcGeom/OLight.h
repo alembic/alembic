@@ -86,7 +86,7 @@ public:
             Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
         uint32_t tsIndex =
             Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-        
+
         // if we specified a valid TimeSamplingPtr, use it to determine the
         // index otherwise we'll use the index, which defaults to the intrinsic
         // 0 index
@@ -158,7 +158,6 @@ public:
     size_t getNumSamples();
     //! Set a sample
     void setCameraSample( const CameraSample &iSamp );
-    void setChildBoundsSample( const Abc::Box3d & iBounds );
 
     //! Set from previous sample.
     void setFromPrevious();
@@ -168,6 +167,7 @@ public:
 
     Abc::OCompoundProperty getUserProperties();
     Abc::OCompoundProperty getArbGeomParams();
+    Abc::OBox3dProperty getChildBoundsProperty();
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -179,10 +179,10 @@ public:
     //! state.
     void reset()
     {
-        m_childBoundsProperty.reset();
         m_userProperties.reset();
         m_arbGeomParams.reset();
         m_cameraSchema.reset();
+        m_childBoundsProperty.reset();
         Abc::OSchema<LightSchemaInfo>::reset();
     }
 

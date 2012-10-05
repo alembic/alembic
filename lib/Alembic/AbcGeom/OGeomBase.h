@@ -164,7 +164,7 @@ public:
 
     Abc::OCompoundProperty getArbGeomParams()
     {
-        // Accessing the ArbGeomParams will create its compound 
+        // Accessing the ArbGeomParams will create its compound
         // property if needed.
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::getArbGeomParams()" );
 
@@ -184,7 +184,7 @@ public:
 
     Abc::OCompoundProperty getUserProperties()
     {
-        // Accessing UserProperties will create its compound 
+        // Accessing UserProperties will create its compound
         // property if needed.
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::getUserProperties()" );
 
@@ -200,6 +200,28 @@ public:
 
         Abc::OCompoundProperty ret;
         return ret;
+    }
+
+    Abc::OBox3dProperty getChildBoundsProperty()
+    {
+        // Accessing Child Bounds Property will create it if needed
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "OGeomBaseSchema::getChildBoundsProperty()" );
+
+        if ( ! m_childBoundsProperty )
+        {
+            AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+            // for now, use the self bounds time sampling, this
+            // can and should be changed depending on how the children
+            // are sampled
+            m_childBoundsProperty = Abc::OBox3dProperty( _this,
+                ".childBnds", m_selfBoundsProperty.getTimeSampling() );
+
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END();
+        return m_childBoundsProperty;
     }
 
 protected:

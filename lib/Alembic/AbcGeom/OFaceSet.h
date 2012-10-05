@@ -93,16 +93,11 @@ public:
         void setSelfBounds( const Abc::Box3d &iBnds )
         { m_selfBounds = iBnds; }
 
-        const Abc::Box3d &getChildBounds() const { return m_childBounds; }
-        void setChildBounds( const Abc::Box3d &iBnds )
-        { m_childBounds = iBnds; }
-
         void reset()
         {
             m_faces.reset();
 
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
         }
 
     protected:
@@ -110,7 +105,6 @@ public:
 
         // bounds
         Abc::Box3d              m_selfBounds;
-        Abc::Box3d              m_childBounds;
     }; // end OFaceSetSchema::Sample
 
 
@@ -148,7 +142,7 @@ public:
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<FaceSetSchemaInfo>( 
+      : OGeomBaseSchema<FaceSetSchemaInfo>(
                     GetCompoundPropertyWriterPtr( iParentCompound ),
                     iName, iArg0, iArg1, iArg2 )
     {
@@ -232,8 +226,6 @@ public:
     //! state.
     void reset()
     {
-        m_selfBoundsProperty.reset();
-        m_childBoundsProperty.reset();
         m_facesProperty.reset();
 
         OGeomBaseSchema<FaceSetSchemaInfo>::reset();

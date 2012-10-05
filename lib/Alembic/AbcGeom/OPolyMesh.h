@@ -105,10 +105,6 @@ public:
         void setSelfBounds( const Abc::Box3d &iBnds )
         { m_selfBounds = iBnds; }
 
-        const Abc::Box3d &getChildBounds() const { return m_childBounds; }
-        void setChildBounds( const Abc::Box3d &iBnds )
-        { m_childBounds = iBnds; }
-
         const OV2fGeomParam::Sample &getUVs() const { return m_uvs; }
         void setUVs( const OV2fGeomParam::Sample &iUVs )
         { m_uvs = iUVs; }
@@ -124,7 +120,6 @@ public:
             m_counts.reset();
 
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
 
             m_velocities.reset();
             m_uvs.reset();
@@ -137,7 +132,6 @@ public:
         Abc::Int32ArraySample m_counts;
 
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
 
         Abc::V3fArraySample m_velocities;
         OV2fGeomParam::Sample m_uvs;
@@ -174,7 +168,7 @@ public:
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PolyMeshSchemaInfo>( 
+      : OGeomBaseSchema<PolyMeshSchemaInfo>(
                                         GetCompoundPropertyWriterPtr( iParent ),
                                         iName, iArg0, iArg1, iArg2 )
     {
@@ -203,7 +197,7 @@ public:
                               const Abc::Argument &iArg0 = Abc::Argument(),
                               const Abc::Argument &iArg1 = Abc::Argument(),
                               const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PolyMeshSchemaInfo>( 
+      : OGeomBaseSchema<PolyMeshSchemaInfo>(
                                         GetCompoundPropertyWriterPtr( iParent ),
                                         iArg0, iArg1, iArg2 )
     {

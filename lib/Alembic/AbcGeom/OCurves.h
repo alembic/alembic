@@ -157,10 +157,6 @@ public:
         void setSelfBounds( const Abc::Box3d &iBnds )
         { m_selfBounds = iBnds; }
 
-        const Abc::Box3d &getChildBounds() const { return m_childBounds; }
-        void setChildBounds( const Abc::Box3d &iBnds )
-        { m_childBounds = iBnds; }
-
         // velocities accessor
         const Abc::V3fArraySample &getVelocities() const { return m_velocities; }
         void setVelocities( const Abc::V3fArraySample &iVelocities )
@@ -187,7 +183,6 @@ public:
             m_nVertices.reset();
 
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
 
             m_type = kCubic;
             m_wrap = kNonPeriodic;
@@ -212,7 +207,6 @@ public:
 
         // bounding box attributes
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
 
     };
 

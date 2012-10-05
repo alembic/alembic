@@ -138,12 +138,14 @@ void Example1_MeshOut()
     Box3d cbox;
     cbox.extendBy( V3d( 1.0, -1.0, 0.0 ) );
     cbox.extendBy( V3d( -1.0, 1.0, 3.0 ) );
-    mesh_samp.setChildBounds( cbox );
 
     // Set the sample twice
     mesh.set( mesh_samp );
     mesh.set( mesh_samp );
 
+    // do it twice to make sure getChildBoundsProperty works correctly
+    mesh.getChildBoundsProperty().set( cbox );
+    mesh.getChildBoundsProperty().set( cbox );
 
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish

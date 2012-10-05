@@ -106,25 +106,6 @@ void OXformSchema::set( XformSample &ioSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
-    // do we need to create child bounds?
-    if ( ioSamp.getChildBounds().hasVolume() && !m_childBoundsProperty )
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".childBnds",
-                                             m_inheritsProperty.getTimeSampling() );
-
-        Abc::Box3d emptyBox;
-        emptyBox.makeEmpty();
-
-        size_t numSamples = m_inheritsProperty.getNumSamples();
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_childBoundsProperty.set( emptyBox );
-        }
-    }
-
-
     if ( m_inheritsProperty.getNumSamples() == 0 )
     {
         // set this to true, so that additional calls to sample's addOp()
@@ -183,9 +164,6 @@ void OXformSchema::set( XformSample &ioSamp )
         ABCA_ASSERT( m_protoSample.isTopologyEqual(ioSamp),
                      "Invalid sample topology!" );
     }
-
-    if ( ioSamp.m_childBounds.hasVolume() )
-    { m_childBoundsProperty.set( ioSamp.getChildBounds() ); }
 
     m_inheritsProperty.set( ioSamp.getInheritsXforms() );
 
@@ -265,9 +243,6 @@ void OXformSchema::setFromPrevious()
         else
         { m_valsPWPtr->asScalarPtr()->setFromPreviousSample(); }
     }
-
-    if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
-    { m_childBoundsProperty.setFromPrevious(); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -350,6 +325,26 @@ Abc::OCompoundProperty OXformSchema::getUserProperties()
 }
 
 //-*****************************************************************************
+Abc::OBox3dProperty OXformSchema::getChildBoundsProperty()
+{
+    // Accessing Child Bounds Property will create it if needed
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OXformSchema::getChildBoundsProperty()" );
+
+    if ( ! m_childBoundsProperty )
+    {
+        AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+        m_childBoundsProperty = Abc::OBox3dProperty( _this,
+            ".childBnds", m_data->tsIdx );
+
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+    return m_childBoundsProperty;
+}
+
+//-*****************************************************************************
 void OXformSchema::setTimeSampling( uint32_t iIndex )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
@@ -363,11 +358,6 @@ void OXformSchema::setTimeSampling( uint32_t iIndex )
         { m_valsPWPtr->asArrayPtr()->setTimeSamplingIndex( iIndex ); }
         else
         { m_valsPWPtr->asScalarPtr()->setTimeSamplingIndex( iIndex ); }
-    }
-
-    if ( m_childBoundsProperty )
-    {
-        m_childBoundsProperty.setTimeSampling( iIndex );
     }
 
     if ( m_data )

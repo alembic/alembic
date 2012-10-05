@@ -109,11 +109,6 @@ public:
         void setSelfBounds( const Abc::Box3d &iBnds )
         { m_selfBounds = iBnds; }
 
-        const Abc::Box3d &getChildBounds() const { return m_childBounds; }
-        void setChildBounds( const Abc::Box3d &iBnds )
-        { m_childBounds = iBnds; }
-
-
         void reset()
         {
             m_positions.reset();
@@ -122,7 +117,6 @@ public:
             m_widths.reset();
 
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
         }
 
     protected:
@@ -132,7 +126,6 @@ public:
         OFloatGeomParam::Sample m_widths;
 
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
     };
 
     //-*************************************************************************
@@ -165,7 +158,7 @@ public:
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument(),
                    const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PointsSchemaInfo>( 
+      : OGeomBaseSchema<PointsSchemaInfo>(
                         GetCompoundPropertyWriterPtr( iParent ),
                         iName, iArg0, iArg1, iArg2 )
     {
@@ -193,7 +186,7 @@ public:
                             const Abc::Argument &iArg0 = Abc::Argument(),
                             const Abc::Argument &iArg1 = Abc::Argument(),
                             const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PointsSchemaInfo>( 
+      : OGeomBaseSchema<PointsSchemaInfo>(
                             GetCompoundPropertyWriterPtr( iParent ),
                             iArg0, iArg1, iArg2 )
     {

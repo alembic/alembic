@@ -55,7 +55,7 @@ void OFaceSetSchema::init( uint32_t iTimeSamplingID )
 
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_facesProperty = Abc::OInt32ArrayProperty( _this, ".faces", 
+    m_facesProperty = Abc::OInt32ArrayProperty( _this, ".faces",
         iTimeSamplingID );
 
     m_facesExclusive = kFaceSetNonExclusive;
@@ -71,10 +71,6 @@ void OFaceSetSchema::setTimeSampling( uint32_t iTimeSamplingID )
 
     m_facesProperty.setTimeSampling( iTimeSamplingID );
     m_selfBoundsProperty.setTimeSampling( iTimeSamplingID );
-    if (m_childBoundsProperty)
-    {
-        m_childBoundsProperty.setTimeSampling( iTimeSamplingID );
-    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -88,7 +84,7 @@ void OFaceSetSchema::setTimeSampling( AbcA::TimeSamplingPtr iTimeSampling )
     if (iTimeSampling)
     {
         uint32_t iTimeSamplingID;
-        iTimeSamplingID = getObject().getArchive().addTimeSampling( 
+        iTimeSamplingID = getObject().getArchive().addTimeSampling(
             *iTimeSampling );
         setTimeSampling( iTimeSamplingID );
     }
@@ -108,7 +104,7 @@ Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
     size_t numFaces = meshFaceCounts.size ();
     size_t numIndices = vertexIndices.size ();
     size_t numPoints = meshP.size ();
-    if ( numFaces < 1 || 
+    if ( numFaces < 1 ||
          numIndices < 1 ||
          numPoints < 1 ||
          numFaceSetFaces < 1 )
@@ -118,7 +114,7 @@ Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
     // Create ordered list of face numbers in faceset because
     // the list of face numbers in the faceset might be in any
     // order, so we build an ordered vec.
-    std::vector <int32_t> faceSetFaceNums (faces.get (), 
+    std::vector <int32_t> faceSetFaceNums (faces.get (),
         faces.get() + numFaceSetFaces);
     std::sort (faceSetFaceNums.begin (), faceSetFaceNums.end ());
     std::vector <int32_t>::iterator curFaceSetFaceIter = faceSetFaceNums.begin ();
@@ -136,7 +132,7 @@ Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
     size_t vertIndexBegin = 0;
     size_t vertIndexEnd = 0;
     V3f vertex;
-    for ( faceIndex = 0; faceIndex < numFaces && 
+    for ( faceIndex = 0; faceIndex < numFaces &&
         curFaceSetFaceIter != faceSetFaceIterEnd; faceIndex++)
     {
         vertIndexBegin = vertIndexEnd;
@@ -148,7 +144,7 @@ Abc::Box3d computeBoundsFromPositionsByFaces (const Int32ArraySample & faces,
         if (faceIndex == curFaceSetFaceNum)
         {
             // This face is in our faceset
-            for (vertIndex = vertIndexBegin; vertIndex < vertIndexEnd; 
+            for (vertIndex = vertIndexBegin; vertIndex < vertIndexEnd;
                 vertIndex++)
             {
                 vertexNum = vertexIndices[vertIndex];
@@ -173,24 +169,6 @@ void OFaceSetSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OFaceSetSchema::set()" );
 
-    Abc::Box3d emptyBox;
-    emptyBox.makeEmpty();
-    // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty)
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( this->getPtr(), 
-            ".childBnds", m_facesProperty.getTimeSampling() );
-
-        // -1 because we just dis an m_positions set above
-        size_t numSamples = m_facesProperty.getNumSamples() - 1;
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_childBoundsProperty.set( emptyBox );
-        }
-    }
-
     // We could add sample integrity checking here.
     if ( m_facesProperty.getNumSamples () == 0 )
     {
@@ -198,21 +176,10 @@ void OFaceSetSchema::set( const Sample &iSamp )
         ABCA_ASSERT( iSamp.getFaces() ,
                      "Sample 0 must provide the faces that make up the faceset." );
         m_facesProperty.set( iSamp.getFaces() );
-
-        if (m_childBoundsProperty)
-        { 
-            m_childBoundsProperty.set( iSamp.getChildBounds() ); 
-        }
     }
     else
     {
         SetPropUsePrevIfNull( m_facesProperty, iSamp.getFaces() );
-
-        if ( m_childBoundsProperty )
-        {
-            SetPropUsePrevIfNull( m_childBoundsProperty, 
-                iSamp.getChildBounds() );
-        }
     }
 
     // We've now set the sample for the m_faces property.
@@ -238,11 +205,11 @@ void OFaceSetSchema::set( const Sample &iSamp )
 
 //-*****************************************************************************
 void OFaceSetSchema::setFaceExclusivity( FaceSetExclusivity iFacesExclusive )
-{ 
-    if (m_facesExclusive != iFacesExclusive) 
+{
+    if (m_facesExclusive != iFacesExclusive)
     {
         // The user has changed the exclusivity hint.
-        m_facesExclusive = iFacesExclusive; 
+        m_facesExclusive = iFacesExclusive;
         _recordExclusivityHint();
     }
 }
@@ -257,7 +224,7 @@ void OFaceSetSchema::_recordExclusivityHint()
     // record a non-default value for faceset's.
     if (!m_facesExclusiveProperty)
     {
-        m_facesExclusiveProperty = Abc::OUInt32Property( this->getPtr(), 
+        m_facesExclusiveProperty = Abc::OUInt32Property( this->getPtr(),
             ".facesExclusive", m_facesProperty.getTimeSampling() );
     }
     m_facesExclusiveProperty.set (m_facesExclusive);

@@ -46,23 +46,6 @@ void OPointsSchema::set( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPointsSchema::set()" );
 
-    // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty)
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( *this, ".childBnds",
-                                             m_positionsProperty.getTimeSampling() );
-        Abc::Box3d emptyBox;
-        emptyBox.makeEmpty();
-
-        size_t numSamples = m_positionsProperty.getNumSamples();
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_childBoundsProperty.set( emptyBox );
-        }
-    }
-
     // do we need to create velocities prop?
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
@@ -132,9 +115,6 @@ void OPointsSchema::set( const Sample &iSamp )
         if ( m_widthsParam )
         { m_widthsParam.set( iSamp.getWidths() ); }
 
-        if ( m_childBoundsProperty )
-        { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
-
         if ( iSamp.getSelfBounds().isEmpty() )
         {
             // OTypedScalarProperty::set() is not referentially transparent,
@@ -150,11 +130,6 @@ void OPointsSchema::set( const Sample &iSamp )
         SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
         SetPropUsePrevIfNull( m_idsProperty, iSamp.getIds() );
         SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() );
-
-        if ( m_childBoundsProperty )
-        {
-            SetPropUsePrevIfNull( m_childBoundsProperty, iSamp.getChildBounds() );
-        }
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
@@ -188,11 +163,6 @@ void OPointsSchema::setFromPrevious()
 
     m_selfBoundsProperty.setFromPrevious();
 
-    if ( m_childBoundsProperty )
-    {
-        m_childBoundsProperty.setFromPrevious();
-    }
-
     if ( m_widthsParam )
     {
         m_widthsParam.setFromPrevious();
@@ -210,11 +180,6 @@ void OPointsSchema::setTimeSampling( uint32_t iIndex )
     m_positionsProperty.setTimeSampling( iIndex );
     m_idsProperty.setTimeSampling( iIndex );
     m_selfBoundsProperty.setTimeSampling( iIndex );
-
-    if ( m_childBoundsProperty )
-    {
-        m_childBoundsProperty.setTimeSampling( iIndex );
-    }
 
     if ( m_widthsParam )
     {

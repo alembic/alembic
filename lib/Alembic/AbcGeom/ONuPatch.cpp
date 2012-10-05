@@ -63,23 +63,6 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ONuPatchSchema::set()" );
 
-    // do we need to create child bounds?
-    if ( iSamp.getChildBounds().hasVolume() && !m_childBoundsProperty)
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( *this, ".childBnds",
-                                             this->getTimeSampling() );
-        Abc::Box3d emptyBox;
-        emptyBox.makeEmpty();
-
-        size_t numSamples = m_positionsProperty.getNumSamples();
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_childBoundsProperty.set( emptyBox );
-        }
-    }
-
     // do we need to create velocities prop?
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
@@ -285,10 +268,6 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
             m_normalsParam.set( iSamp.getNormals() );
         }
 
-        // set bounds
-        if ( iSamp.getChildBounds().hasVolume() )
-        { m_childBoundsProperty.set( iSamp.getChildBounds() ); }
-
         if ( iSamp.getSelfBounds().isEmpty() )
         {
             // OTypedScalarProperty::set() is not referentially transparent,
@@ -390,7 +369,6 @@ void ONuPatchSchema::setFromPrevious( )
     m_selfBoundsProperty.setFromPrevious();
 
     // handle optional properties
-    if ( m_childBoundsProperty ) { m_childBoundsProperty.setFromPrevious(); }
     if ( m_velocitiesProperty ) { m_velocitiesProperty.setFromPrevious(); }
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
     if ( m_normalsParam ) { m_normalsParam.setFromPrevious(); }

@@ -64,28 +64,9 @@ void OLightSchema::setCameraSample( const CameraSample &iSamp )
 }
 
 //-*****************************************************************************
-void OLightSchema::setChildBoundsSample( const Abc::Box3d & iBounds )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OLightSchema::setChildBoundsSample" );
-
-    if ( ! m_childBoundsProperty.valid() )
-    {
-        m_childBoundsProperty = Abc::OBox3dProperty( this->getPtr(),
-            ".childBnds", m_tsPtr );
-    }
-
-    m_childBoundsProperty.set( iBounds );
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-}
-
-//-*****************************************************************************
 void OLightSchema::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OLightSchema::setFromPrevious" );
-
-    if ( m_childBoundsProperty )
-        m_childBoundsProperty.setFromPrevious();
 
     if ( m_cameraSchema )
         m_cameraSchema.setFromPrevious();
@@ -101,9 +82,6 @@ void OLightSchema::setTimeSampling( uint32_t iIndex )
 
     if ( m_cameraSchema )
         m_cameraSchema.setTimeSampling( iIndex );
-
-    if ( m_childBoundsProperty )
-        m_childBoundsProperty.setTimeSampling( iIndex );
 
     m_tsPtr = getObject().getArchive().getTimeSampling( iIndex );
 
@@ -174,6 +152,29 @@ Abc::OCompoundProperty OLightSchema::getUserProperties()
 
     Abc::OCompoundProperty ret;
     return ret;
+}
+
+//-*****************************************************************************
+Abc::OBox3dProperty OLightSchema::getChildBoundsProperty()
+{
+    // Accessing Child Bounds Property will create it if needed
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OLightSchema::getChildBoundsProperty()" );
+
+    if ( ! m_childBoundsProperty )
+    {
+        AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+        // for now, use the core properties time sampling, this
+        // can and should be changed depending on how the children
+        // are sampled
+        m_childBoundsProperty = Abc::OBox3dProperty( _this,
+            ".childBnds", m_tsPtr );
+
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+    return m_childBoundsProperty;
 }
 
 } // End namespace ALEMBIC_VERSION_NS
