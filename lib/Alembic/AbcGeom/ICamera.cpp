@@ -77,7 +77,7 @@ void ICameraSchema::init( const Abc::Argument &iArg0,
     }
 
     // read the film back operations
-    const AbcA::PropertyHeader * header = 
+    const AbcA::PropertyHeader * header =
         this->getPropertyHeader(".filmBackOps");
 
     // read it from the scalar property
@@ -141,17 +141,7 @@ void ICameraSchema::get( CameraSample & oSample,
     double sampleData[16];
     m_coreProperties.get( sampleData, iSS );
 
-    Abc::Box3d bounds;
-    bounds.makeEmpty();
-
-    if ( m_childBoundsProperty )
-    {
-        m_childBoundsProperty.get( bounds, iSS );
-    }
-
     oSample.reset();
-
-    oSample.setChildBounds( bounds );
 
     oSample.setFocalLength( sampleData[0] );
     oSample.setHorizontalAperture( sampleData[1] );

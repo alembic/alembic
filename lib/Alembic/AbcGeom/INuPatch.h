@@ -92,7 +92,6 @@ public:
         }
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
-        Abc::Box3d getChildBounds() const { return m_childBounds; }
 
         void reset()
         {
@@ -107,7 +106,6 @@ public:
             m_positionWeights.reset();
 
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
 
             // trim curve
             m_trimNumLoops = 0;
@@ -153,7 +151,6 @@ public:
 
         // bounds
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
 
     };
 

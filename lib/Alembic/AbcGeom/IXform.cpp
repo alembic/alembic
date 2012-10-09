@@ -272,11 +272,6 @@ void IXformSchema::get( XformSample &oSamp, const Abc::ISampleSelector &iSS ) co
         oSamp.setInheritsXforms( m_inheritsProperty.getValue( iSS ) );
     }
 
-    if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
-    {
-        oSamp.setChildBounds( m_childBoundsProperty.getValue( iSS ) );
-    }
-
     if ( ! m_valsProperty ) { return; }
 
     AbcA::index_t numSamples = 0;

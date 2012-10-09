@@ -58,8 +58,6 @@ XformSample::XformSample()
     m_inherits = true;
     m_opIndex = 0;
     m_hasBeenRead = false;
-
-    m_childBounds.makeEmpty();
 }
 
 //-*****************************************************************************
@@ -298,18 +296,6 @@ void XformSample::setInheritsXforms( bool iInherits )
 bool XformSample::getInheritsXforms() const
 {
     return m_inherits;
-}
-
-//-*****************************************************************************
-void XformSample::setChildBounds( const Abc::Box3d &iBnds )
-{
-    m_childBounds = iBnds;
-}
-
-//-*****************************************************************************
-const Abc::Box3d &XformSample::getChildBounds() const
-{
-    return m_childBounds;
 }
 
 //-*****************************************************************************
@@ -699,7 +685,6 @@ void XformSample::clear()
     m_setWithOpStack = 0;
     m_opIndex = 0;
     m_inherits = true;
-    m_childBounds.makeEmpty();
 }
 
 //-*****************************************************************************

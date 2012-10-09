@@ -75,17 +75,6 @@ void IFaceSetSchema::get( IFaceSetSchema::Sample &oSample,
 
     m_facesProperty.get( oSample.m_faces, iSS );
 
-    // HERE NYI - templated getFaceIndices
-    //m_selfBoundsProperty.get( oSample.m_selfBounds, iSS );
-
-    if ( m_childBoundsProperty )
-    {
-        if ( m_childBoundsProperty.getNumSamples() > 0 )
-        {
-            m_childBoundsProperty.get( oSample.m_childBounds, iSS );
-        }
-    }
-
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -118,7 +107,7 @@ FaceSetExclusivity IFaceSetSchema::getFaceExclusivity() const
     if ( facesExclusiveProperty )
     {
         size_t numSamples = facesExclusiveProperty.getNumSamples();
-        uint32_t asInt = FaceSetExclusivity( 
+        uint32_t asInt = FaceSetExclusivity(
             facesExclusiveProperty.getValue( numSamples - 1 ) );
         FaceSetExclusivity exclusivity  = FaceSetExclusivity( asInt );
         return exclusivity;

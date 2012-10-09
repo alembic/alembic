@@ -249,7 +249,7 @@ void meshUnderXformOut( const std::string &iName )
     childBounds.extendBy( V3d( 1.0, 1.0, 1.0 ) );
     childBounds.extendBy( V3d( -1.0, -1.0, -1.0 ) );
 
-    xf_samp.setChildBounds( childBounds );
+    xfobj.getSchema().getChildBoundsProperty().set( childBounds );
 
     double rotation = 0.0;
 

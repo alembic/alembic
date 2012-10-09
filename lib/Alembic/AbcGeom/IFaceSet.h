@@ -67,7 +67,6 @@ public:
 
         // bounds
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
-        Abc::Box3d getChildBounds() const { return m_childBounds; }
 
         bool valid() const
         {
@@ -79,7 +78,6 @@ public:
             m_faces.reset();
 
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
@@ -92,7 +90,6 @@ public:
 
         // bounds
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
 
     }; // end IFaceSetSchema::Sample
 

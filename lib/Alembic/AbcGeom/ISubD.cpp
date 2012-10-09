@@ -162,9 +162,6 @@ void ISubDSchema::get( ISubDSchema::Sample &oSample,
         oSample.m_subdScheme = "catmull-clark";
     }
 
-    if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
-    { m_childBoundsProperty.get( oSample.m_childBounds, iSS ); }
-
     if ( m_velocitiesProperty && m_velocitiesProperty.getNumSamples() > 0 )
     { m_velocitiesProperty.get( oSample.m_velocities, iSS ); }
 
@@ -172,7 +169,7 @@ void ISubDSchema::get( ISubDSchema::Sample &oSample,
 }
 
 //-*****************************************************************************
-const ISubDSchema & 
+const ISubDSchema &
 ISubDSchema::operator=(const ISubDSchema & rhs)
 {
     IGeomBaseSchema<SubDSchemaInfo>::operator=(rhs);
@@ -181,9 +178,9 @@ ISubDSchema::operator=(const ISubDSchema & rhs)
     m_velocitiesProperty = rhs.m_velocitiesProperty;
     m_faceIndicesProperty = rhs.m_faceIndicesProperty;
     m_faceCountsProperty = rhs.m_faceCountsProperty;
-    m_faceVaryingInterpolateBoundaryProperty = 
+    m_faceVaryingInterpolateBoundaryProperty =
         rhs.m_faceVaryingInterpolateBoundaryProperty;
-    m_faceVaryingPropagateCornersProperty = 
+    m_faceVaryingPropagateCornersProperty =
         rhs.m_faceVaryingPropagateCornersProperty;
     m_interpolateBoundaryProperty = rhs.m_interpolateBoundaryProperty;
     m_creaseIndicesProperty = rhs.m_creaseIndicesProperty;
@@ -194,7 +191,7 @@ ISubDSchema::operator=(const ISubDSchema & rhs)
     m_holesProperty = rhs.m_holesProperty;
     m_subdSchemeProperty = rhs.m_subdSchemeProperty;
     m_uvsParam = rhs.m_uvsParam;
-    m_faceVaryingInterpolateBoundaryProperty = 
+    m_faceVaryingInterpolateBoundaryProperty =
         rhs.m_faceVaryingInterpolateBoundaryProperty;
 
     // lock, reset
@@ -335,7 +332,7 @@ void ISubDSchema::loadFaceSetNames()
 
     if (!m_faceSetsLoaded)
     {
-        // iterate over childHeaders, and if header matches 
+        // iterate over childHeaders, and if header matches
         // FaceSet add to our vec
         IObject _thisObject = getObject();
 

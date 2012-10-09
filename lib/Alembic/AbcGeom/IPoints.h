@@ -63,7 +63,6 @@ public:
         Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
-        Abc::Box3d getChildBounds() const { return m_childBounds; }
 
         bool valid() const
         {
@@ -75,9 +74,7 @@ public:
             m_positions.reset();
             m_velocities.reset();
             m_ids.reset();
-
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
@@ -89,7 +86,6 @@ public:
         Abc::V3fArraySamplePtr m_velocities;
 
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
     };
 
     //-*************************************************************************
@@ -185,9 +181,6 @@ public:
         m_idsProperty.get( oSample.m_ids, iSS );
 
         m_selfBoundsProperty.get( oSample.m_selfBounds, iSS );
-
-        if ( m_childBoundsProperty && m_childBoundsProperty.getNumSamples() > 0 )
-        { m_childBoundsProperty.get( oSample.m_childBounds, iSS ); }
 
         if ( m_velocitiesProperty && m_velocitiesProperty.getNumSamples() > 0 )
         { m_velocitiesProperty.get( oSample.m_velocities, iSS ); }

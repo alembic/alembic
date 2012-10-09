@@ -135,7 +135,10 @@ public:
     XformSample getValue( const Abc::ISampleSelector &iSS =
                           Abc::ISampleSelector() ) const;
 
-    Abc::IBox3dProperty getChildBoundsProperty() const { return m_childBoundsProperty; }
+    Abc::IBox3dProperty getChildBoundsProperty() const
+    {
+        return m_childBoundsProperty;
+    }
 
     // lightweight get to avoid constructing a sample
     // see XformSample.h for explanation of this property

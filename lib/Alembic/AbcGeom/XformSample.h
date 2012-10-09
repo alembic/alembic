@@ -85,9 +85,6 @@ public:
     void setInheritsXforms( bool iInherits );
     bool getInheritsXforms() const;
 
-    void setChildBounds( const Abc::Box3d &iBnds );
-    const Abc::Box3d &getChildBounds() const;
-
     // non-op-based methods; the getters will compute their return values
     // from the ops under the hood, hence return-by-value.
 
@@ -142,7 +139,6 @@ private:
     std::vector<XformOp> m_ops;
 
     bool m_inherits;
-    Abc::Box3d m_childBounds;
 
     //! This starts out false, but is set to true by the OXform and controls
     //! whether or not addOp() changes the topology of the Sample, in the form

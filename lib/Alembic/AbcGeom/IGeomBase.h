@@ -221,18 +221,15 @@ public:
         Sample() { reset(); }
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
-        Abc::Box3d getChildBounds() const { return m_childBounds; }
 
         void reset()
         {
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
         }
 
     protected:
         friend class IGeomBase;
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
     };
 
 public:
@@ -328,12 +325,6 @@ public:
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IGeomBase::get()" );
 
         m_selfBoundsProperty.get( oSample.m_selfBounds, iSS );
-
-        if ( m_childBoundsProperty &&
-             m_childBoundsProperty.getNumSamples() > 0 )
-        {
-            m_childBoundsProperty.get( oSample.m_childBounds, iSS );
-        }
 
         ALEMBIC_ABC_SAFE_CALL_END();
     }

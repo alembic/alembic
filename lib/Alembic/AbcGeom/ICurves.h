@@ -76,7 +76,6 @@ public:
         BasisType getBasis() const { return m_basis; }
 
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
-        Abc::Box3d getChildBounds() const { return m_childBounds; }
         Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
 
         bool valid() const
@@ -94,7 +93,6 @@ public:
             m_basis = kBezierBasis;
 
             m_selfBounds.makeEmpty();
-            m_childBounds.makeEmpty();
         }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
@@ -105,7 +103,6 @@ public:
         Abc::V3fArraySamplePtr m_velocities;
 
         Abc::Box3d m_selfBounds;
-        Abc::Box3d m_childBounds;
 
         // type, wrap, and nVertices
         Abc::Int32ArraySamplePtr m_nVertices;

@@ -115,15 +115,21 @@ void xformOut()
 
     TESTING_ASSERT( a.getSchema().getNumSamples() == 0 );
 
+    OBox3dProperty childBounds = a.getSchema().getChildBoundsProperty();
+
     XformSample asamp;
     for ( size_t i = 0; i < 20; ++i )
     {
         asamp.addOp( transop, V3d( 12.0, i + 42.0, 20.0 ) );
 
-        if ( i == 18 )
+        if ( i >= 18 )
         {
-            asamp.setChildBounds( Abc::Box3d( V3d( -1.0, -1.0, -1.0 ),
-                                              V3d( 1.0, 1.0, 1.0 ) ) );
+            childBounds.set( Abc::Box3d( V3d( -1.0, -1.0, -1.0 ),
+                                         V3d( 1.0, 1.0, 1.0 ) ) );
+        }
+        else
+        {
+            childBounds.set( Abc::Box3d() );
         }
 
         a.getSchema().set( asamp );
