@@ -212,12 +212,7 @@ public:
         return m_idsProperty;
     }
 
-    IFloatGeomParam &getWidthsParam()
-    {
-        return m_widthsParam;
-    }
-
-    const IFloatGeomParam &getWidthsParam() const
+    IFloatGeomParam getWidthsParam() const
     {
         return m_widthsParam;
     }
