@@ -62,7 +62,7 @@ void register_ipoints()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
@@ -82,8 +82,7 @@ void register_ipoints()
         .def( "getIdsProperty",
               &AbcG::IPointsSchema::getIdsProperty )
         .def( "getWidthsParam",
-              &AbcG::IPointsSchema::getWidthsParam,
-              return_internal_reference<>() )
+              &AbcG::IPointsSchema::getWidthsParam )
         .def( "getValue",
               &AbcG::IPointsSchema::getValue,
               ( arg( "iSS" ) = Abc::ISampleSelector() ) )
@@ -108,8 +107,6 @@ void register_ipoints()
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getSelfBounds",
               &AbcG::IPointsSchema::Sample::getSelfBounds )
-        .def( "getChildBounds",
-              &AbcG::IPointsSchema::Sample::getChildBounds )
         .def( "valid", &AbcG::IPointsSchema::Sample::valid )
         .def( "reset", &AbcG::IPointsSchema::Sample::reset )
         ;

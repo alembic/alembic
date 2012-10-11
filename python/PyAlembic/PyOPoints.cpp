@@ -102,7 +102,6 @@ void register_opoints()
                                               iSamp.getWidths() );
 
             samp.setSelfBounds( iSamp.getSelfBounds() );
-            samp.setChildBounds( iSamp.getChildBounds() );
 
             iSchema.set( samp );
         }
@@ -121,7 +120,7 @@ void register_opoints()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -129,7 +128,7 @@ void register_opoints()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getNumSamples",
@@ -172,32 +171,32 @@ void register_opoints()
                    [with_custodian_and_ward<1,2,
                     with_custodian_and_ward<1,3,
                     with_custodian_and_ward<1,4> > >()] )
-        .def( "getPositions", 
+        .def( "getPositions",
               &SampleDerived::getPositions,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >()
             )
-        .def( "setPositions", 
+        .def( "setPositions",
               &SampleDerived::setPositions,
               ( arg( "positions" ) ),
               with_custodian_and_ward<1,2>()
             )
-        .def( "getIds", 
+        .def( "getIds",
               &SampleDerived::getIds,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >()
             )
-        .def( "setIds", 
+        .def( "setIds",
               &SampleDerived::setIds,
               ( arg( "ids" ) ),
               with_custodian_and_ward<1,2>()
             )
-        .def( "getVelocities", 
+        .def( "getVelocities",
               &SampleDerived::getVelocities,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >()
             )
-        .def( "setVelocities", 
+        .def( "setVelocities",
               &SampleDerived::setVelocities,
               ( arg( "velocities" ) ),
               with_custodian_and_ward<1,2>()
@@ -205,23 +204,15 @@ void register_opoints()
         .def( "getWidths",
               &SampleDerived::getWidths,
               return_internal_reference<>() )
-        .def( "setWidths", 
+        .def( "setWidths",
               &SampleDerived::setWidths,
               ( arg( "width" ) )
             )
         .def( "getSelfBounds",
               &SampleDerived::getSelfBounds,
               return_internal_reference<>() )
-        .def( "setSelfBounds", 
+        .def( "setSelfBounds",
               &SampleDerived::setSelfBounds,
-              ( arg( "bounds" ) )
-            )
-        .def( "getChildBounds",
-              &SampleDerived::getChildBounds,
-              return_internal_reference<>()
-              )
-        .def( "setChildBounds", 
-              &SampleDerived::setChildBounds,
               ( arg( "bounds" ) )
             )
         .def( "reset", &SampleDerived::reset )

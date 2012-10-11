@@ -58,7 +58,7 @@ void register_ofaceset()
         = &AbcG::OFaceSetSchema::setTimeSampling;
     void ( AbcG::OFaceSetSchema::*setTimeSamplingByTimeSamplingPtr )
         ( AbcA::TimeSamplingPtr ) = &AbcG::OFaceSetSchema::setTimeSampling;
- 
+
     // OFaceSetSchema
     //
     class_<AbcG::OFaceSetSchema,
@@ -72,7 +72,7 @@ void register_ofaceset()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -80,7 +80,7 @@ void register_ofaceset()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getNumSamples",
@@ -114,7 +114,7 @@ void register_ofaceset()
               &AbcG::OFaceSetSchema::Sample::getFaces,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
-        .def( "setFaces", 
+        .def( "setFaces",
               &AbcG::OFaceSetSchema::Sample::setFaces,
               with_custodian_and_ward<1,2>() )
         .def( "getSelfBounds",
@@ -123,12 +123,6 @@ void register_ofaceset()
         .def( "setSelfBounds",
               &AbcG::OFaceSetSchema::Sample::setSelfBounds,
               ( arg( "bounds" ) ) )
-        .def( "getChildBounds",
-              &AbcG::OFaceSetSchema::Sample::getChildBounds,
-              return_value_policy<copy_const_reference>() )
-        .def( "setChildBounds",
-              &AbcG::OFaceSetSchema::Sample::setChildBounds,
-              ( arg( "bounds") ) )
         .def ("reset", &AbcG::OFaceSetSchema::Sample::reset )
         ;
 }

@@ -59,7 +59,7 @@ void register_OGeomBaseSchema( const char *iName)
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -67,20 +67,22 @@ void register_OGeomBaseSchema( const char *iName)
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "init", &OGeomBaseSchema::init )
         .def( "getArbGeomParams",
               &OGeomBaseSchema::getArbGeomParams,
               "Acccesing the ArbGeomParams will create its compound property "
-              "if needed",
-              with_custodian_and_ward_postcall<0,1>() )
+              "if needed")
         .def( "getUserProperties",
               &OGeomBaseSchema::getUserProperties,
               "Accessing UserProperties will create its compound property "
-              "if needed",
-              with_custodian_and_ward_postcall<0,1>() )
+              "if needed")
+        .def( "getChildBoundsProperty",
+              &OGeomBaseSchema::getChildBoundsProperty,
+              "Accessing ChildBoundsProperty will create its 3dBox property "
+              "if needed" )
         .def( "valid", &OGeomBaseSchema::valid )
         .def( "reset", &OGeomBaseSchema::reset )
         .def( "__nonzero__", &OGeomBaseSchema::valid )

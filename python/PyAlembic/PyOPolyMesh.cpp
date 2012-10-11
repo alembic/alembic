@@ -65,7 +65,7 @@ void register_opolymesh()
         static object getFaceSetNames( AbcG::OPolyMeshSchema& iSchema )
         {
             using PyImath::StringArray;
-            
+
             std::vector<std::string> faceSetNames;
             iSchema.getFaceSetNames( faceSetNames );
 
@@ -91,7 +91,7 @@ void register_opolymesh()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -99,7 +99,7 @@ void register_opolymesh()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getTimeSampling",
@@ -133,7 +133,7 @@ void register_opolymesh()
         .def( "hasFaceSet",
               &AbcG::OPolyMeshSchema::hasFaceSet,
               ( arg( "iFaceSetName" ) ) )
-             
+
         ;
     // OPolyMeshSchema::Sample
     //
@@ -186,11 +186,6 @@ void register_opolymesh()
               return_value_policy<copy_const_reference>() )
         .def( "setSelfBounds",
               &AbcG::OPolyMeshSchema::Sample::setSelfBounds )
-        .def( "getChildBounds",
-              &AbcG::OPolyMeshSchema::Sample::getChildBounds,
-              return_value_policy<copy_const_reference>() )
-        .def( "setChildBounds",
-              &AbcG::OPolyMeshSchema::Sample::setChildBounds )
         .def( "getUVs",
               &AbcG::OPolyMeshSchema::Sample::getUVs,
               return_internal_reference<>() )

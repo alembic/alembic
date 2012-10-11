@@ -64,14 +64,14 @@ void register_icurves()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getNumSamples",
@@ -95,14 +95,11 @@ void register_icurves()
         .def( "getNumVerticesProperty",
               &AbcG::ICurvesSchema::getNumVerticesProperty )
         .def( "getUVsParam",
-              &AbcG::ICurvesSchema::getUVsParam,
-              return_internal_reference<>() )
+              &AbcG::ICurvesSchema::getUVsParam )
         .def( "getNormalsParam",
-              &AbcG::ICurvesSchema::getNormalsParam,
-              return_internal_reference<>() )
+              &AbcG::ICurvesSchema::getNormalsParam )
         .def( "getWidthsParam",
-              &AbcG::ICurvesSchema::getWidthsParam,
-              return_internal_reference<>() )
+              &AbcG::ICurvesSchema::getWidthsParam )
         .def( "reset", &AbcG::ICurvesSchema::reset )
         .def( "valid", &AbcG::ICurvesSchema::valid )
         .def( "__nonzero__", &AbcG::ICurvesSchema::valid )
@@ -127,8 +124,6 @@ void register_icurves()
               &AbcG::ICurvesSchema::Sample::getBasis )
         .def( "getSelfBounds",
               &AbcG::ICurvesSchema::Sample::getSelfBounds )
-        .def( "getChildBounds",
-              &AbcG::ICurvesSchema::Sample::getChildBounds )
         .def( "getVelocities",
               &AbcG::ICurvesSchema::Sample::getVelocities,
               with_custodian_and_ward_postcall<0,1>() )

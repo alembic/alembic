@@ -49,12 +49,12 @@ void register_ocompoundproperty()
     // overloads
     //
     const AbcA::PropertyHeader &
-        ( Abc::OCompoundProperty::*getHeaderByIndex )( size_t ) = \
+        ( Abc::OCompoundProperty::*getHeaderByIndex )( size_t ) const = \
         &Abc::OCompoundProperty::getPropertyHeader;
     const AbcA::PropertyHeader *
-        ( Abc::OCompoundProperty::*getHeaderByName )( const std::string& ) = \
+        ( Abc::OCompoundProperty::*getHeaderByName )( const std::string& ) const = \
         &Abc::OCompoundProperty::getPropertyHeader;
-        
+
     // OCompoundProperty
     //
     class_<Abc::OCompoundProperty,
@@ -66,7 +66,7 @@ void register_ocompoundproperty()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                  ( arg( "parent"  ), arg( "name" ), arg( "argument" ), 
+                  ( arg( "parent"  ), arg( "name" ), arg( "argument" ),
                     arg( "argument" ) ),
                   "Create a new OCompoundProperty with the given parent "
                   "OObject, name and optional arguments which can be used to "

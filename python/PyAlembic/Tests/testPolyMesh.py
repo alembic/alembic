@@ -57,7 +57,8 @@ def meshOut():
     cbox = Box3d()
     cbox.extendBy( V3d( 1.0, -1.0, 0.0 ) )
     cbox.extendBy( V3d( -1.0, 1.0, 3.0 ) )
-    mesh_samp.setChildBounds( cbox )
+    mesh.getChildBoundsProperty().setValue( cbox )
+    mesh.getChildBoundsProperty().setValue( cbox )
 
     mesh.set( mesh_samp )
     mesh.set( mesh_samp )

@@ -72,7 +72,7 @@ void register_ocamera()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -80,7 +80,7 @@ void register_ocamera()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getTimeSampling",
@@ -89,6 +89,8 @@ void register_ocamera()
               &AbcG::OCameraSchema::getNumSamples )
         .def( "getUserProperties", &AbcG::OCameraSchema::getUserProperties )
         .def( "getArbGeomParams", &AbcG::OCameraSchema::getArbGeomParams )
+        .def( "getChildBoundsProperty",
+              &AbcG::OCameraSchema::getChildBoundsProperty )
         .def( "set",
               &AbcG::OCameraSchema::set,
               ( arg( "iSamp" ) ) )

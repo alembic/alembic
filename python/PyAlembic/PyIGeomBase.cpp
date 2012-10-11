@@ -78,7 +78,7 @@ void register_igeombase()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
@@ -108,11 +108,11 @@ void register_igeombase()
         .def( "__nonzero__", &AbcG::IGeomBase::valid )
         .def( "matches",
               Overloads::matchesMetaData,
-              ( arg( "metadata" ), 
+              ( arg( "metadata" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ) )
         .def( "matches",
               Overloads::matchesHeader,
-              ( arg( "header" ), 
+              ( arg( "header" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ) )
         .staticmethod( "matches" )
         ;
@@ -122,8 +122,6 @@ void register_igeombase()
     class_<AbcG::IGeomBase::Sample>( "IGeomBaseSample", init<>() )
     .def( "getSelfBounds",
           &AbcG::IGeomBase::Sample::getSelfBounds )
-    .def( "getChildBounds",
-          &AbcG::IGeomBase::Sample::getChildBounds )
     .def( "reset",
           &AbcG::IGeomBase::Sample::reset )
     ;

@@ -65,7 +65,7 @@ void register_ocurves()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -73,7 +73,7 @@ void register_ocurves()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getTimeSampling",
@@ -153,11 +153,6 @@ void register_ocurves()
               return_value_policy<copy_const_reference>() )
         .def( "setSelfBounds",
               &AbcG::OCurvesSchema::Sample::setSelfBounds )
-        .def( "getChildBounds",
-              &AbcG::OCurvesSchema::Sample::getChildBounds,
-              return_value_policy<copy_const_reference>() )
-        .def( "setChildBounds",
-              &AbcG::OCurvesSchema::Sample::setChildBounds )
         .def( "getVelocities",
               &AbcG::OCurvesSchema::Sample::getVelocities,
               return_value_policy<copy_const_reference,

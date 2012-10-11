@@ -71,7 +71,7 @@ void register_oxform()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -79,10 +79,10 @@ void register_oxform()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), 
+                   ( arg( "parent" ),
                      arg( "argument" ), arg( "argument" ), arg( "argument" ) ),
                    "doc") )
-        .def( "getTimeSampling", 
+        .def( "getTimeSampling",
               &AbcG::OXformSchema::getTimeSampling,
               "Return the TimeSampling of this object" )
         .def( "getNumSamples",
@@ -107,6 +107,8 @@ void register_oxform()
               &AbcG::OXformSchema::getArbGeomParams )
         .def( "getUserProperties",
               &AbcG::OXformSchema::getUserProperties )
+        .def( "getChildBoundsProperty",
+              &AbcG::OXformSchema::getChildBoundsProperty )
         .def( "valid", &AbcG::OXformSchema::valid )
         .def( "reset", &AbcG::OXformSchema::reset )
         .def( "__nonzero__", &AbcG::OXformSchema::valid )

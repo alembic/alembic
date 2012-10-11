@@ -64,14 +64,14 @@ void register_inupatch()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getNumSamples",
@@ -99,11 +99,9 @@ void register_inupatch()
         .def( "getPositionWeightsProperty",
               &AbcG::INuPatchSchema::getPositionWeightsProperty )
         .def( "getUVsParam",
-              &AbcG::INuPatchSchema::getUVsParam,
-              return_internal_reference<>() )
+              &AbcG::INuPatchSchema::getUVsParam )
         .def( "getNormalsParam",
-              &AbcG::INuPatchSchema::getNormalsParam,
-              return_internal_reference<>() )
+              &AbcG::INuPatchSchema::getNormalsParam )
         .def( "hasTrimCurve",
               &AbcG::INuPatchSchema::hasTrimCurve )
         .def( "trimCurveTopologyIsHomogenous",
@@ -174,8 +172,6 @@ void register_inupatch()
               &AbcG::INuPatchSchema::Sample::hasTrimCurve )
         .def( "getSelfBounds",
               &AbcG::INuPatchSchema::Sample::getSelfBounds )
-        .def( "getChildBounds",
-              &AbcG::INuPatchSchema::Sample::getChildBounds )
         .def( "valid",
               &AbcG::INuPatchSchema::Sample::valid )
         .def( "reset",

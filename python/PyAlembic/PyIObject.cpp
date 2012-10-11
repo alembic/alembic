@@ -94,17 +94,17 @@ void register_iobject()
 {
     // overloads
     //
-    Abc::IObject ( Abc::IObject::*getChildByIndex )( size_t ) = \
+    Abc::IObject ( Abc::IObject::*getChildByIndex )( size_t ) const = \
         &Abc::IObject::getChild;
-    Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) = \
+    Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) const = \
         &Abc::IObject::getChild;
 
     const AbcA::ObjectHeader&
-        ( Abc::IObject::*getChildHeaderByIndex )( size_t ) = \
+        ( Abc::IObject::*getChildHeaderByIndex )( size_t ) const = \
         &Abc::IObject::getChildHeader;
 
     const AbcA::ObjectHeader*
-        ( Abc::IObject::*getChildHeaderByName )( const std::string & ) = \
+        ( Abc::IObject::*getChildHeaderByName )( const std::string & ) const = \
         &Abc::IObject::getChildHeader;
 
     // IObject

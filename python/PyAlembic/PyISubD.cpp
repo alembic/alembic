@@ -59,7 +59,7 @@ void register_isubd()
         static object getFaceSetNames( AbcG::ISubDSchema& iSchema )
         {
             using PyImath::StringArray;
-            
+
             std::vector<std::string> faceSetNames;
             iSchema.getFaceSetNames( faceSetNames );
 
@@ -84,7 +84,7 @@ void register_isubd()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
@@ -133,8 +133,7 @@ void register_isubd()
         .def( "getVelocitiesProperty",
               &AbcG::ISubDSchema::getVelocitiesProperty )
         .def( "getUVsParam",
-              &AbcG::ISubDSchema::getUVsParam,
-              return_internal_reference<>() )
+              &AbcG::ISubDSchema::getUVsParam )
         .def( "getFaceSetNames",
               &Overloads::getFaceSetNames,
               ( arg( "faceSetNames" ) ) )
@@ -161,11 +160,11 @@ void register_isubd()
         .def( "getFaceCounts",
               &AbcG::ISubDSchema::Sample::getFaceCounts,
               with_custodian_and_ward_postcall<0,1>() )
-        .def( "getFaceVaryingInterpolateBoundary", 
+        .def( "getFaceVaryingInterpolateBoundary",
               &AbcG::ISubDSchema::Sample::getFaceVaryingInterpolateBoundary )
-        .def( "getFaceVaryingPropagateCorners", 
+        .def( "getFaceVaryingPropagateCorners",
               &AbcG::ISubDSchema::Sample::getFaceVaryingPropagateCorners )
-        .def( "getInterpolateBoundary", 
+        .def( "getInterpolateBoundary",
               &AbcG::ISubDSchema::Sample::getInterpolateBoundary )
         .def( "getCreaseIndices",
               &AbcG::ISubDSchema::Sample::getCreaseIndices,
@@ -173,25 +172,24 @@ void register_isubd()
         .def( "getCreaseLengths",
               &AbcG::ISubDSchema::Sample::getCreaseLengths,
               with_custodian_and_ward_postcall<0,1>() )
-        .def( "getCreaseSharpnesses", 
+        .def( "getCreaseSharpnesses",
               &AbcG::ISubDSchema::Sample::getCreaseSharpnesses,
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getCornerIndices",
               &AbcG::ISubDSchema::Sample::getCornerIndices,
               with_custodian_and_ward_postcall<0,1>() )
-        .def( "getCornerSharpnesses", 
+        .def( "getCornerSharpnesses",
               &AbcG::ISubDSchema::Sample::getCornerSharpnesses,
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getHoles",
               &AbcG::ISubDSchema::Sample::getHoles,
               with_custodian_and_ward_postcall<0,1>() )
-        .def( "getSubdivisionScheme", 
+        .def( "getSubdivisionScheme",
               &AbcG::ISubDSchema::Sample::getSubdivisionScheme )
         .def( "getVelocities",
               &AbcG::ISubDSchema::Sample::getVelocities,
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getSelfBounds", &AbcG::ISubDSchema::Sample::getSelfBounds )
-        .def( "getChildBounds", &AbcG::ISubDSchema::Sample::getChildBounds )
         .def( "valid", &AbcG::ISubDSchema::Sample::valid )
         .def( "reset", &AbcG::ISubDSchema::Sample::reset )
         ;

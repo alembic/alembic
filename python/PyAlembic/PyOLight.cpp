@@ -71,7 +71,7 @@ void register_olight()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -79,7 +79,7 @@ void register_olight()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getTimeSampling",
@@ -102,11 +102,11 @@ void register_olight()
               "Change the TimeSampling used by this property with the given "
               "TimeSampling" )
         .def( "getUserProperties",
-              &AbcG::OLightSchema::getUserProperties,
-              with_custodian_and_ward_postcall<0,1>() )
+              &AbcG::OLightSchema::getUserProperties )
         .def( "getArbGeomParams",
-              &AbcG::OLightSchema::getArbGeomParams,
-              with_custodian_and_ward_postcall<0,1>() )
+              &AbcG::OLightSchema::getArbGeomParams )
+        .def( "getChildBoundsProperty",
+              &AbcG::OLightSchema::getChildBoundsProperty )
         .def( "reset", &AbcG::OLightSchema::reset )
         .def( "valid", &AbcG::OLightSchema::valid )
         .def( "__nonzero__", &AbcG::OLightSchema::valid )

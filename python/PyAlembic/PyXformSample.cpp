@@ -75,8 +75,8 @@ void register_xformsample()
     class_<AbcG::XformSample>(
           "XformSample",
          init<>( "Creates an empty XformSample class object." ) )
-        .def( "__getitem__", 
-              Overloads::getOpByIndex, 
+        .def( "__getitem__",
+              Overloads::getOpByIndex,
               ( arg( "index" ) ),
               return_internal_reference<>() )
         .def( "addOp",
@@ -112,12 +112,6 @@ void register_xformsample()
               ( arg( "inherits" ) ) )
         .def( "getInheritsXforms",
               &AbcG::XformSample::getInheritsXforms )
-        .def( "setChildBounds",
-              &AbcG::XformSample::setChildBounds,
-              ( arg( "bounds" ) ) )
-        .def( "getChildBounds",
-              &AbcG::XformSample::getChildBounds,
-              return_value_policy<copy_const_reference>() )
         .def( "setTranslation",
               &AbcG::XformSample::setTranslation,
               ( arg( "trans" ) ) )
@@ -159,7 +153,7 @@ void register_xformsample()
               &AbcG::XformSample::isTopologyEqual,
               ( arg( "sample" ) ),
               "Tests whether this sample has the same topology as 'sample'" )
-        .def( "getIsTopologyFrozen", 
+        .def( "getIsTopologyFrozen",
               &AbcG::XformSample::getIsTopologyFrozen,
               "Has this Sample been used in a call to OXformSchema::set()" )
         .def( "reset", &AbcG::XformSample::reset )

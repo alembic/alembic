@@ -64,7 +64,7 @@ void register_ifaceset()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
@@ -80,7 +80,7 @@ void register_ifaceset()
         .def( "getValue",
               &AbcG::IFaceSetSchema::getValue,
               ( arg( "iSS" ) = Abc::ISampleSelector() ) )
-        .def( "getFaceExclusivity", 
+        .def( "getFaceExclusivity",
               &AbcG::IFaceSetSchema::getFaceExclusivity )
         .def( "getTimeSampling",
               &AbcG::IFaceSetSchema::getTimeSampling )
@@ -97,8 +97,6 @@ void register_ifaceset()
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getSelfBounds",
               &AbcG::IFaceSetSchema::Sample::getSelfBounds )
-        .def( "getChildBounds",
-              &AbcG::IFaceSetSchema::Sample::getChildBounds )
         .def( "valid", &AbcG::IFaceSetSchema::Sample::valid )
         .def( "reset", &AbcG::IFaceSetSchema::Sample::reset )
         .def( "__nonzero__", &AbcG::IFaceSetSchema::Sample::valid )

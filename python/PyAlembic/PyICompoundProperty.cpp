@@ -91,7 +91,7 @@ static PropertyHeaderList getPropertyHeaderList( Abc::ICompoundProperty& p)
 }
 
 //-*****************************************************************************
-static object getPropertyByName( Abc::ICompoundProperty &p, 
+static object getPropertyByName( Abc::ICompoundProperty &p,
                                  const std::string& name )
 {
     const AbcA::PropertyHeader* h = p.getPropertyHeader( name );
@@ -144,14 +144,14 @@ void register_icompoundproperty()
     //
     register_IBaseProperty<AbcA::CompoundPropertyReaderPtr>(
                                                     "IBaseProperty_Compound" );
-    
+
     // overloads
     //
     const AbcA::PropertyHeader &
-        ( Abc::ICompoundProperty::*getHeaderByIndex )( size_t ) = \
+        ( Abc::ICompoundProperty::*getHeaderByIndex )( size_t ) const = \
         &Abc::ICompoundProperty::getPropertyHeader;
     const AbcA::PropertyHeader *
-        ( Abc::ICompoundProperty::*getHeaderByName )( const std::string& ) = \
+        ( Abc::ICompoundProperty::*getHeaderByName )( const std::string& ) const = \
         &Abc::ICompoundProperty::getPropertyHeader;
 
     // ICompoundProperty

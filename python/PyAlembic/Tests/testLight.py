@@ -56,7 +56,8 @@ def lightOut():
     lightObj.getSchema().setCameraSample( samp )
 
     samp = CameraSample( -0.35, 0.75, 0.1, 0.5 )
-    samp.setChildBounds( Box3d( V3d( 0.0, 0.1, 0.2 ), V3d( 0.3, 0.4, 0.5 ) ) )
+    lightObj.getSchema().getChildBoundsProperty().setValue(
+        Box3d( V3d( 0.0, 0.1, 0.2 ), V3d( 0.3, 0.4, 0.5 ) ) )
 
     lightObj.getSchema().setCameraSample( samp )
 

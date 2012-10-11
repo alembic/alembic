@@ -60,7 +60,7 @@ void register_ipolymesh()
         static object getFaceSetNames( AbcG::IPolyMeshSchema& iSchema )
         {
             using PyImath::StringArray;
-            
+
             std::vector<std::string> faceSetNames;
             iSchema.getFaceSetNames( faceSetNames );
 
@@ -85,14 +85,14 @@ void register_ipolymesh()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), 
+                   ( arg( "parent" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getNumSamples",
@@ -107,11 +107,9 @@ void register_ipolymesh()
               &AbcG::IPolyMeshSchema::getValue,
               ( arg( "iSampSelector" ) = Abc::ISampleSelector() ) )
         .def( "getUVsParam",
-              &AbcG::IPolyMeshSchema::getUVsParam,
-              return_internal_reference<>() )
+              &AbcG::IPolyMeshSchema::getUVsParam )
         .def( "getNormalsParam",
-              &AbcG::IPolyMeshSchema::getNormalsParam,
-              return_internal_reference<>() )
+              &AbcG::IPolyMeshSchema::getNormalsParam )
         .def( "getFaceCountsProperty",
               &AbcG::IPolyMeshSchema::getFaceCountsProperty )
         .def( "getFaceIndicesProperty",
@@ -152,8 +150,6 @@ void register_ipolymesh()
               with_custodian_and_ward_postcall<0,1>() )
          .def( "getSelfBounds",
               &AbcG::IPolyMeshSchema::Sample::getSelfBounds )
-         .def( "getChildBounds",
-              &AbcG::IPolyMeshSchema::Sample::getChildBounds )
          .def( "valid",
               &AbcG::IPolyMeshSchema::Sample::valid )
          .def( "reset",

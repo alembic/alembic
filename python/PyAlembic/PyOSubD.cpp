@@ -66,7 +66,7 @@ void register_osubd()
         static object getFaceSetNames( AbcG::OSubDSchema& iSchema )
         {
             using PyImath::StringArray;
-            
+
             std::vector<std::string> faceSetNames;
             iSchema.getFaceSetNames( faceSetNames );
 
@@ -92,7 +92,7 @@ void register_osubd()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::OCompoundProperty,
@@ -100,7 +100,7 @@ void register_osubd()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getTimeSampling",
@@ -118,31 +118,31 @@ void register_osubd()
         .def( "setTimeSampling",
               setTimeSamplingByTimeSamplingPtr,
               ( arg( "timeSampling" ) ) )
-        .def( "createFaceSet", 
+        .def( "createFaceSet",
               &AbcG::OSubDSchema::createFaceSet,
               ( arg( "faceSetName" ) ),
               return_internal_reference<>() )
-        .def( "getFaceSetNames", 
+        .def( "getFaceSetNames",
               &Overloads::getFaceSetNames,
               ( arg( "faceSetNames" ) ) )
-        .def( "getFaceSet", 
+        .def( "getFaceSet",
               &AbcG::OSubDSchema::getFaceSet,
               ( arg( "faceSetName" ) ) )
-        .def( "hasFaceSet", 
+        .def( "hasFaceSet",
               &AbcG::OSubDSchema::hasFaceSet,
               ( arg( "faceSetName" ) ) )
         .def( "valid", &AbcG::OSubDSchema::valid )
         .def( "reset", &AbcG::OSubDSchema::reset )
         .def( "__nonzero__", &AbcG::OSubDSchema::valid )
         ;
-    
+
     // Overloads for OSubDSchema::Sample
     //
     void ( AbcG::OSubDSchema::Sample::*setCreasesIndicesLengths )
-        ( const Abc::Int32ArraySample&, const Abc::Int32ArraySample& ) 
+        ( const Abc::Int32ArraySample&, const Abc::Int32ArraySample& )
         = &AbcG::OSubDSchema::Sample::setCreases;
     void ( AbcG::OSubDSchema::Sample::*setCreasesIndicesLengthsSharpness )
-        ( const Abc::Int32ArraySample&, const Abc::Int32ArraySample&, 
+        ( const Abc::Int32ArraySample&, const Abc::Int32ArraySample&,
           const Abc::FloatArraySample& )
         = &AbcG::OSubDSchema::Sample::setCreases;
 
@@ -158,7 +158,7 @@ void register_osubd()
                    const Abc::Int32ArraySample,
                    const Abc::FloatArraySample,
                    const Abc::Int32ArraySample>(
-                   ( arg( "positions" ), arg( "faceIndices" ), 
+                   ( arg( "positions" ), arg( "faceIndices" ),
                      arg( "faceCounts" ),
                      arg( "creaseIndices" ) = Abc::Int32ArraySample(),
                      arg( "creaseLengths" ) = Abc::Int32ArraySample(),
@@ -175,46 +175,46 @@ void register_osubd()
                with_custodian_and_ward<1,8,
                with_custodian_and_ward<1,9,
                with_custodian_and_ward<1,10> > > > > > > > >()] )
-        .def( "getPositions", 
+        .def( "getPositions",
               &AbcG::OSubDSchema::Sample::getPositions,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
-        .def( "setPositions", 
+        .def( "setPositions",
               &AbcG::OSubDSchema::Sample::setPositions,
               ( arg( "positions" ) ),
               with_custodian_and_ward<1,2>() )
-        .def( "getFaceIndices", 
+        .def( "getFaceIndices",
               &AbcG::OSubDSchema::Sample::getFaceIndices,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
-        .def( "setFaceIndices", 
+        .def( "setFaceIndices",
               &AbcG::OSubDSchema::Sample::setFaceIndices,
               ( arg( "faceIndices" ) ),
               with_custodian_and_ward<1,2>() )
-        .def( "getFaceCounts", 
+        .def( "getFaceCounts",
               &AbcG::OSubDSchema::Sample::getFaceCounts,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
-        .def( "setFaceCounts", 
+        .def( "setFaceCounts",
               &AbcG::OSubDSchema::Sample::setFaceCounts,
               ( arg( "faceCounts" ) ),
               with_custodian_and_ward<1,2>() )
-        .def( "getFaceVaryingInterpolateBoundary", 
+        .def( "getFaceVaryingInterpolateBoundary",
               &AbcG::OSubDSchema::Sample::getFaceVaryingInterpolateBoundary )
-        .def( "setFaceVaryingInterpolateBoundary", 
+        .def( "setFaceVaryingInterpolateBoundary",
               &AbcG::OSubDSchema::Sample::setFaceVaryingInterpolateBoundary,
               ( arg( "faceVaryingPropagateCorners" ) ) )
-        .def( "getFaceVaryingPropagateCorners", 
+        .def( "getFaceVaryingPropagateCorners",
               &AbcG::OSubDSchema::Sample::getFaceVaryingPropagateCorners )
-        .def( "setFaceVaryingPropagateCorners", 
+        .def( "setFaceVaryingPropagateCorners",
               &AbcG::OSubDSchema::Sample::setFaceVaryingPropagateCorners,
               ( arg( "faceVaryingPropagateCorners" ) ) )
-        .def( "getInterpolateBoundary", 
+        .def( "getInterpolateBoundary",
               &AbcG::OSubDSchema::Sample::getInterpolateBoundary )
-        .def( "setInterpolateBoundary", 
+        .def( "setInterpolateBoundary",
               &AbcG::OSubDSchema::Sample::setInterpolateBoundary,
               ( arg( "interpolateBoundary" ) ) )
-        .def( "getCreaseIndices", 
+        .def( "getCreaseIndices",
               &AbcG::OSubDSchema::Sample::getCreaseIndices,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
@@ -222,19 +222,19 @@ void register_osubd()
               &AbcG::OSubDSchema::Sample::setCreaseIndices,
               ( arg( "creaseIndices" ) ),
               with_custodian_and_ward<1,2>() )
-        .def( "getCreaseLengths", 
+        .def( "getCreaseLengths",
               &AbcG::OSubDSchema::Sample::getCreaseLengths,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
-        .def( "setCreaseLengths", 
+        .def( "setCreaseLengths",
               &AbcG::OSubDSchema::Sample::setCreaseLengths,
               ( arg( "creaseLengths" ) ),
               with_custodian_and_ward<1,2>() )
-        .def( "getCreaseSharpnesses", 
+        .def( "getCreaseSharpnesses",
               &AbcG::OSubDSchema::Sample::getCreaseSharpnesses,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
-        .def( "setCreaseSharpnesses", 
+        .def( "setCreaseSharpnesses",
               &AbcG::OSubDSchema::Sample::setCreaseSharpnesses,
               ( arg( "creaseSharpnesses" ) ),
               with_custodian_and_ward<1,2>() )
@@ -243,23 +243,23 @@ void register_osubd()
               with_custodian_and_ward<1,2,
               with_custodian_and_ward<1,3> >() )
         .def( "setCreases", setCreasesIndicesLengthsSharpness,
-              ( arg( "creaseIndices" ), arg( "creaseLengths" ), 
+              ( arg( "creaseIndices" ), arg( "creaseLengths" ),
                 arg( "creaseSharpnesses" ) ),
               with_custodian_and_ward<1,2,
               with_custodian_and_ward<1,3,
               with_custodian_and_ward<1,4> > >() )
-        .def( "getCornerIndices", 
+        .def( "getCornerIndices",
               &AbcG::OSubDSchema::Sample::getCornerIndices,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
         .def( "setCornerIndices", &AbcG::OSubDSchema::Sample::setCornerIndices,
               ( arg( "cornerIndices" ) ),
               with_custodian_and_ward<1,2>() )
-        .def( "getCornerSharpnesses", 
+        .def( "getCornerSharpnesses",
               &AbcG::OSubDSchema::Sample::getCornerSharpnesses,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
-        .def( "setCornerSharpnesses", 
+        .def( "setCornerSharpnesses",
               &AbcG::OSubDSchema::Sample::setCornerSharpnesses,
               ( arg( "cornerSharpnesses" ) ),
               with_custodian_and_ward<1,2>() )
@@ -267,7 +267,7 @@ void register_osubd()
               ( arg( "cornerIndices" ), arg( "cornerSharpnesses" ) ),
               with_custodian_and_ward<1,2,
               with_custodian_and_ward<1,3> >() )
-        .def( "getHoles", 
+        .def( "getHoles",
               &AbcG::OSubDSchema::Sample::getHoles,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
@@ -276,9 +276,9 @@ void register_osubd()
               ( arg( "cornerSharpnesses" ) ),
               with_custodian_and_ward<1,2,
               with_custodian_and_ward<1,3> >() )
-        .def( "getSubdivisionScheme", 
+        .def( "getSubdivisionScheme",
               &AbcG::OSubDSchema::Sample::getSubdivisionScheme )
-        .def( "setSubdivisionScheme", 
+        .def( "setSubdivisionScheme",
               &AbcG::OSubDSchema::Sample::setSubdivisionScheme,
               ( arg( "subdScheme" ) ) )
         .def( "getSelfBounds",
@@ -287,12 +287,7 @@ void register_osubd()
         .def( "setSelfBounds",
               &AbcG::OSubDSchema::Sample::setSelfBounds,
               ( arg( "selfBounds" ) ) )
-        .def( "getChildBounds",
-              &AbcG::OSubDSchema::Sample::getChildBounds,
-              return_value_policy<copy_const_reference>() )
-        .def( "setChildBounds", &AbcG::OSubDSchema::Sample::setChildBounds,
-              ( arg( "childBounds" ) ) )
-        .def( "getVelocities", 
+        .def( "getVelocities",
               &AbcG::OSubDSchema::Sample::getVelocities,
               return_internal_reference<>()  )
         .def( "setVelocities", &AbcG::OSubDSchema::Sample::setVelocities,
