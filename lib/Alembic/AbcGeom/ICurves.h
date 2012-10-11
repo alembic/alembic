@@ -223,14 +223,20 @@ public:
         return m_nVerticesProperty;
     }
 
-    IV2fGeomParam &getUVsParam() { return m_uvsParam; }
-    const IV2fGeomParam &getUVsParam() const { return m_uvsParam; }
-    IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
-    const IN3fGeomParam &getNormalsParam() const { return m_normalsParam; }
-    IFloatGeomParam &getWidthsParam() { return m_widthsParam; }
-    const IFloatGeomParam &getWidthsParam() const { return m_widthsParam; }
+    IV2fGeomParam getUVsParam() const
+    {
+        return m_uvsParam;
+    }
 
+    IN3fGeomParam getNormalsParam() const
+    {
+        return m_normalsParam;
+    }
 
+    IFloatGeomParam getWidthsParam() const
+    {
+        return m_widthsParam;
+    }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

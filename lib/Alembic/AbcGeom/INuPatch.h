@@ -266,10 +266,16 @@ public:
         return m_positionWeightsProperty;
     }
 
-    IN3fGeomParam &getNormalsParam() { return m_normalsParam; }
-    const IN3fGeomParam &getNormalsParam() const { return m_normalsParam; }
-    IV2fGeomParam &getUVsParam() { return m_uvsParam; }
-    const IV2fGeomParam &getUVsParam() const { return m_uvsParam; }
+    IN3fGeomParam getNormalsParam() const
+    {
+        return m_normalsParam;
+    }
+
+    IV2fGeomParam getUVsParam() const
+    {
+        return m_uvsParam;
+    }
+
 
     bool hasTrimCurve() const { return m_hasTrimCurve; }
     bool trimCurveTopologyIsHomogenous() const;

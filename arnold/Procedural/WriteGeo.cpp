@@ -133,7 +133,7 @@ void ApplyTransformation( struct AtNode * node,
 
 template <typename geomParamT>
 void ProcessIndexedBuiltinParam(
-        geomParamT & param,
+        geomParamT param,
         const SampleTimeSet & sampleTimes,
         std::vector<float> & values,
         std::vector<AtUInt32> & idxs,

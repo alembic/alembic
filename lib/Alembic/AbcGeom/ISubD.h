@@ -309,8 +309,10 @@ public:
     Abc::IV3fArrayProperty getVelocitiesProperty() const
     { return m_velocitiesProperty; }
 
-    IV2fGeomParam &getUVsParam() { return m_uvsParam; }
-    const IV2fGeomParam &getUVsParam() const { return m_uvsParam; }
+    IV2fGeomParam getUVsParam() const
+    {
+        return m_uvsParam;
+    }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

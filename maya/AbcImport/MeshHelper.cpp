@@ -86,7 +86,7 @@ namespace
 
 
     void setUVs(double iFrame, MFnMesh & ioMesh,
-        Alembic::AbcGeom::IV2fGeomParam & iUVs)
+        Alembic::AbcGeom::IV2fGeomParam iUVs)
     {
 
         if (!iUVs.valid())
