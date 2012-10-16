@@ -93,7 +93,7 @@ void getColorSet(MFnMesh & iMesh, const MString * iColorSet, bool isRGBA,
 
 // --------------------------------------------------------------
 // getOutConnectedSG( const MObject &shape )
-// 
+//
 // Return the output connected shading groups from a shape object
 //---------------------------------------------------------------
 
@@ -105,18 +105,18 @@ getOutConnectedSG( const MDagPath &shapeDPath )
     // Array of connected Shaging Engines
     MObjectArray connSG;
 
-    // Iterator through the dependency graph to find if there are 
+    // Iterator through the dependency graph to find if there are
     // shading engines connected
     MObject obj(shapeDPath.node()); // non const MObject
-    MItDependencyGraph itDG( obj, MFn::kShadingEngine, 
-                             MItDependencyGraph::kDownstream, 
-                             MItDependencyGraph::kBreadthFirst, 
+    MItDependencyGraph itDG( obj, MFn::kShadingEngine,
+                             MItDependencyGraph::kDownstream,
+                             MItDependencyGraph::kBreadthFirst,
                              MItDependencyGraph::kNodeLevel, &status );
 
     if( status == MS::kFailure )
-        return connSG;    
+        return connSG;
 
-    // we want to prune the iteration if the node is not a shading engine 
+    // we want to prune the iteration if the node is not a shading engine
     itDG.enablePruningOnFilter();
 
     // iterate through the output connected shading engines
@@ -128,10 +128,10 @@ getOutConnectedSG( const MDagPath &shapeDPath )
 
 // -----------------------------------------------------------------------------------------------------------
 // getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmMap, MObject &compObj )
-// 
+//
 // Return the members of a shading engine for a specific dagpath.
 // GetMembersMap is a caching mechanism.
-// If it's face mapping, return the indices, otherwise it's the whole object, and so we 
+// If it's face mapping, return the indices, otherwise it's the whole object, and so we
 // return kFailure.
 //------------------------------------------------------------------------------------------------------------
 
@@ -157,7 +157,7 @@ getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmM
     MPlug iogPlug( depNode.findPlug(instObjGroupsAttrName, false, &status) );
     if( status == MS::kFailure )
         return MS::kFailure;
-    
+
     // If the first plug in the array is connected, we have a whole object mapping. Return.
     if( iogPlug.numElements()<=0 )
         return MS::kFailure;
@@ -180,7 +180,7 @@ getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmM
     {
         fnSet.getMembers(selList, false);
         gmMap[SG] = selList;
-    }  
+    }
 
     // Iteration through the list
     MStatus             retStat = MS::kFailure;
@@ -193,7 +193,7 @@ getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmM
         {
             itSelList.getDagPath( curDagPath, compObj );
 
-            // Test if component object is valid and if it's the right object 
+            // Test if component object is valid and if it's the right object
             if( (compObj.isNull()==false) && (curDagPath==dagPath) )
             {
                 return MS::kSuccess;
@@ -283,10 +283,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     std::vector<Alembic::Util::uint32_t> indices;
 
     MString name = lMesh.name();
-    if (iArgs.stripNamespace)
-    {
-        name = util::stripNamespaces(name);
-    }
+    name = util::stripNamespaces(name, iArgs.stripNamespace);
 
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
@@ -466,10 +463,8 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             faceIndices[j] = indices[j];
         }
 
-        if (iArgs.stripNamespace)
-        {
-            connSgObjName = util::stripNamespaces(connSgObjName);
-        }
+        connSgObjName = util::stripNamespaces(connSgObjName,
+                                              iArgs.stripNamespace);
 
         Alembic::AbcGeom::OFaceSet faceSet;
         std::string faceSetName(connSgObjName.asChar());

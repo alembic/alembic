@@ -54,10 +54,8 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     MObject locator = iDag.node();
 
     MString name = fnLocator.name();
-    if (iArgs.stripNamespace)
-    {
-        name = util::stripNamespaces(name);
-    }
+    name = util::stripNamespaces(name, iArgs.stripNamespace);
+
     mXform = Alembic::AbcGeom::OXform(iParent, name.asChar(), iTimeIndex);
 
     Alembic::Abc::OCompoundProperty cp = mXform.getProperties();

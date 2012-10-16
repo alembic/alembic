@@ -45,10 +45,9 @@ MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
 {
     MFnParticleSystem particle(mDagPath);
     MString name = particle.name();
-    if (iArgs.stripNamespace)
-    {
-        name = util::stripNamespaces(name);
-    }
+
+    name = util::stripNamespaces(name, iArgs.stripNamespace);
+
     Alembic::AbcGeom::OPoints obj(iParent, name.asChar(),
         iTimeIndex);
     mSchema = obj.getSchema();

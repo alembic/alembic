@@ -53,10 +53,8 @@ MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
     }
 
     MString name = cam.name();
-    if (iArgs.stripNamespace)
-    {
-        name = util::stripNamespaces(name);
-    }
+    name = util::stripNamespaces(name, iArgs.stripNamespace);
+
     Alembic::AbcGeom::OCamera obj(iParent, name.asChar(), iTimeIndex);
     mSchema = obj.getSchema();
 

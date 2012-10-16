@@ -112,10 +112,7 @@ MayaNurbsCurveWriter::MayaNurbsCurveWriter(MDagPath & iDag,
             mIsAnimated = true;
     }
 
-    if (iArgs.stripNamespace)
-    {
-        name = util::stripNamespaces(name);
-    }
+    name = util::stripNamespaces(name, iArgs.stripNamespace);
 
     Alembic::AbcGeom::OCurves obj(iParent, name.asChar(), iTimeIndex);
     mSchema = obj.getSchema();

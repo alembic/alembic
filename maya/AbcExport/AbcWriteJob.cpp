@@ -38,7 +38,7 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 namespace
 {
-    void hasDuplicates(const util::ShapeSet & dagPath, bool stripNamespace)
+    void hasDuplicates(const util::ShapeSet & dagPath, unsigned int stripDepth)
     {
         std::map<std::string, MDagPath> roots;
         const util::ShapeSet::const_iterator end = dagPath.end();
@@ -51,10 +51,10 @@ namespace
                 fullName = fullName.substr(1);
             }
 
-            if (stripNamespace)
+            if (stripDepth > 0)
             {
                 MString name = fullName.c_str();
-                fullName = util::stripNamespaces(name).asChar();
+                fullName = util::stripNamespaces(name, stripDepth).asChar();
             }
 
             std::map<std::string, MDagPath>::iterator strIt =
@@ -65,7 +65,7 @@ namespace
                 theError += it->fullPathName().asChar();
                 theError += " ";
                 theError += strIt->second.fullPathName().asChar();
-                if (stripNamespace)
+                if (stripDepth > 0)
                 {
                     theError += " with -stripNamespace specified.";
                 }

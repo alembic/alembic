@@ -53,10 +53,8 @@ MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
     }
 
     MString name = nurbs.name();
-    if (iArgs.stripNamespace)
-    {
-        name = util::stripNamespaces(name);
-    }
+    name = util::stripNamespaces(name, iArgs.stripNamespace);
+
 
     Alembic::AbcGeom::ONuPatch obj(iParent, name.asChar(), iTimeIndex);
     mSchema = obj.getSchema();

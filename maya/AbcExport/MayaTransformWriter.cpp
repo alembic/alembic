@@ -434,10 +434,8 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
     {
         MFnIkJoint joint(iDag);
         MString jointName = joint.name();
-        if (iArgs.stripNamespace)
-        {
-            jointName = util::stripNamespaces(jointName);
-        }
+
+        jointName = util::stripNamespaces(jointName, iArgs.stripNamespace);
 
         Alembic::AbcGeom::OXform obj(iParent, jointName.asChar(),
             iTimeIndex);
@@ -482,10 +480,9 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
     {
         MFnTransform trans(iDag);
         MString transName = trans.name();
-        if (iArgs.stripNamespace)
-        {
-            transName = util::stripNamespaces(transName);
-        }
+
+        transName = util::stripNamespaces(transName, iArgs.stripNamespace);
+
         Alembic::AbcGeom::OXform obj(iParent, transName.asChar(),
             iTimeIndex);
         mSchema = obj.getSchema();
@@ -612,10 +609,8 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
     {
         MFnIkJoint joint(iDag);
         MString jointName = joint.name();
-        if (iArgs.stripNamespace)
-        {
-            jointName = util::stripNamespaces(jointName);
-        }
+
+        jointName = util::stripNamespaces(jointName, iArgs.stripNamespace);
 
         Alembic::AbcGeom::OXform obj(iParent.getObject(), jointName.asChar(),
             iTimeIndex);
@@ -638,10 +633,9 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
     {
         MFnTransform trans(iDag);
         MString transName = trans.name();
-        if (iArgs.stripNamespace)
-        {
-            transName = util::stripNamespaces(transName);
-        }
+
+        transName = util::stripNamespaces(transName, iArgs.stripNamespace);
+
         Alembic::AbcGeom::OXform obj(iParent.getObject(), transName.asChar(),
             iTimeIndex);
         mSchema = obj.getSchema();

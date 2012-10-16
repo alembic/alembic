@@ -108,8 +108,9 @@ bool isIntermediate(const MObject & object);
 // returns true for visible and lod invisible and not templated objects
 bool isRenderable(const MObject & object);
 
-// strip all namespaces from the node name, go from taco:foo:bar to bar
-MString stripNamespaces(const MString & iNodeName);
+// strip iDepth namespaces from the node name, go from taco:foo:bar to bar
+// for iDepth > 1
+MString stripNamespaces(const MString & iNodeName, unsigned int iDepth);
 
 // returns the Help string for AbcExport
 MString getHelpText();
@@ -136,7 +137,7 @@ struct JobArgs
     {
         excludeInvisible = false;
         noNormals = false;
-        stripNamespace = false;
+        stripNamespace = 0;
         useSelectionList = false;
         worldSpace = false;
         writeVisibility = false;
@@ -147,7 +148,7 @@ struct JobArgs
 
     bool excludeInvisible;
     bool noNormals;
-    bool stripNamespace;
+    unsigned int stripNamespace;
     bool useSelectionList;
     bool worldSpace;
     bool writeVisibility;

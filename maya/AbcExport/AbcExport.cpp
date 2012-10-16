@@ -140,7 +140,7 @@ try
                 kDoubleQuotedString,     // parsing a double quoted string
                 kSingleQuotedString,     // parsing a single quoted string
             };
-            
+
             State state = kArgument;
             MString stringBuffer;
             for (unsigned int charIdx = 0; charIdx < jobArgsStr.numChars();
@@ -194,7 +194,7 @@ try
 
                 case kDoubleQuotedString:
                     // double quote terminates the current string
-                    if (ch == "\"") 
+                    if (ch == "\"")
                     {
                         jobArgsArray.append(stringBuffer);
                         stringBuffer.clear();
@@ -213,7 +213,7 @@ try
                         else if (nextCh == "\"") stringBuffer += "\"";
                         else                     stringBuffer += nextCh;
                     }
-                    else 
+                    else
                     {
                         stringBuffer += ch;
                     }
@@ -340,7 +340,16 @@ try
 
             else if (arg == "-sn" || arg == "-stripnamespaces")
             {
-                jobArgs.stripNamespace = true;
+                if (i+1 >= numJobArgs || !jobArgsArray[i+1].isUnsigned())
+                {
+                    // the strip all namespaces case
+                    // so we pick a very LARGE number
+                    jobArgs.stripNamespace = 0xffffffff;
+                }
+                else
+                {
+                    jobArgs.stripNamespace = jobArgsArray[++i].asUnsigned();
+                }
             }
 
             else if (arg == "-uv" || arg == "-uvwrite")
