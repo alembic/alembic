@@ -6,9 +6,11 @@ New features:
 
 Maya AbcImport:
 
-Added inclusive and exclucive filtering support.
+Added inclusive and exclusive filtering support to allow selective importing
+of cache objects via regex matches.
 
-Added file translator support.
+Added file translator support. Alembic caches can now be opened directly and
+imported as Maya references.
 
 Facesets now get imported as Maya facesets instead of an integer array
 attribute.
