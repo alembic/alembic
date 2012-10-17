@@ -508,6 +508,10 @@ try
                     jobArgs.dagPaths.insert(path);
                 }
             }
+            else if (arg == "-ef" || arg == "-eulerfilter")
+            {
+                jobArgs.filterEulerRotations = true;
+            }
             else
             {
                 MString warn = "Ignoring unsupported flag: ";

@@ -159,7 +159,8 @@ void addRotate(const MFnDependencyNode & iTrans,
     MString parentName, const MString* iNames, const unsigned int* iOrder,
     Alembic::Util::uint8_t iHint, bool forceStatic, bool forceAnimated,
     Alembic::AbcGeom::XformSample & oSample,
-    std::vector < AnimChan > & oAnimChanList)
+    std::vector < AnimChan > & oAnimChanList,
+    size_t oOpIndex[3])
 {
     // for each possible rotation axis
     static const Alembic::AbcGeom::XformOperationType rots[3] = {
@@ -222,7 +223,7 @@ void addRotate(const MFnDependencyNode & iTrans,
         else if (isXYZ && plugVal == 0.0)
             continue;
 
-        oSample.addOp(op);
+        oOpIndex[index] = oSample.addOp(op);
     }
 }
 
@@ -426,9 +427,71 @@ void addScale(const MFnDependencyNode & iTrans,
     }
 }
 
+bool getSampledRotation(const Alembic::AbcGeom::XformSample& sample,
+    const size_t opIndex[3], double& xx, double& yy, double& zz)
+{
+    bool success = false;
+
+    xx = 0.0;
+    if (opIndex[0] < sample.getNumOps())
+    {
+        double angleX = sample[opIndex[0]].getChannelValue(0);
+        xx = Alembic::AbcGeom::DegreesToRadians(angleX);
+        success = true;
+    }
+
+    yy = 0.0;
+    if (opIndex[1] < sample.getNumOps())
+    {
+        double angleY = sample[opIndex[1]].getChannelValue(0);
+        yy = Alembic::AbcGeom::DegreesToRadians(angleY);
+        success = true;
+    }
+
+    zz = 0.0;
+    if (opIndex[2] < sample.getNumOps())
+    {
+        double angleZ = sample[opIndex[2]].getChannelValue(0);
+        zz = Alembic::AbcGeom::DegreesToRadians(angleZ);
+        success = true;
+    }
+
+    return success;
+}
+
+bool setSampledRotation(Alembic::AbcGeom::XformSample& sample,
+    const size_t opIndex[3], double xx, double yy, double zz)
+{
+    bool success = false;
+
+    if (opIndex[0] < sample.getNumOps())
+    {
+        sample[opIndex[0]].setChannelValue(0, Alembic::AbcGeom::RadiansToDegrees(xx));
+        success = true;
+    }
+
+    if (opIndex[1] < sample.getNumOps())
+    {
+        sample[opIndex[1]].setChannelValue(0, Alembic::AbcGeom::RadiansToDegrees(yy));
+        success = true;
+    }
+
+    if (opIndex[2] < sample.getNumOps())
+    {
+        sample[opIndex[2]].setChannelValue(0, Alembic::AbcGeom::RadiansToDegrees(zz));
+        success = true;
+    }
+
+    return success;
+}
+
 MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
     MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs)
 {
+    mFilterEulerRotations = iArgs.filterEulerRotations;
+    mJointOrientOpIndex[0] = mJointOrientOpIndex[1] = mJointOrientOpIndex[2] =
+    mRotateOpIndex[0]      = mRotateOpIndex[1]      = mRotateOpIndex[2]      =
+    mRotateAxisOpIndex[0]  = mRotateAxisOpIndex[1]  = mRotateAxisOpIndex[2]  = ~size_t(0);
 
     if (iDag.hasFn(MFn::kJoint))
     {
@@ -605,6 +668,11 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
 MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
     MDagPath & iDag, Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs)
 {
+    mFilterEulerRotations = iArgs.filterEulerRotations;
+    mJointOrientOpIndex[0] = mJointOrientOpIndex[1] = mJointOrientOpIndex[2] =
+    mRotateOpIndex[0]      = mRotateOpIndex[1]      = mRotateOpIndex[2]      =
+    mRotateAxisOpIndex[0]  = mRotateAxisOpIndex[1]  = mRotateAxisOpIndex[2]  = ~size_t(0);
+
     if (iDag.hasFn(MFn::kJoint))
     {
         MFnIkJoint joint(iDag);
@@ -701,6 +769,41 @@ void MayaTransformWriter::write()
             mSample.setInheritsXforms(mInheritsPlug.asBool());
         }
 
+        if (mFilterEulerRotations)
+        {
+            double xx(0), yy(0), zz(0);
+
+            if (getSampledRotation(mSample, mJointOrientOpIndex, xx, yy, zz))
+            {
+                MEulerRotation euler(xx, yy, zz, mPrevJointOrientSolution.order);
+                euler.setToClosestSolution(mPrevJointOrientSolution);
+
+                // update sample with new solution
+                setSampledRotation(mSample, mJointOrientOpIndex, euler.x, euler.y, euler.z);
+                mPrevJointOrientSolution = euler;
+            }
+
+            if (getSampledRotation(mSample, mRotateOpIndex, xx, yy, zz))
+            {
+                MEulerRotation euler(xx, yy, zz, mPrevRotateSolution.order);
+                euler.setToClosestSolution(mPrevRotateSolution);
+
+                // update sample with new solution
+                setSampledRotation(mSample, mRotateOpIndex, euler.x, euler.y, euler.z);
+                mPrevRotateSolution = euler;
+            }
+
+            if (getSampledRotation(mSample, mRotateAxisOpIndex, xx, yy, zz))
+            {
+                MEulerRotation euler(xx, yy, zz, mPrevRotateAxisSolution.order);
+                euler.setToClosestSolution(mPrevRotateAxisSolution);
+
+                // update sample with new solution
+                setSampledRotation(mSample, mRotateAxisOpIndex, euler.x, euler.y, euler.z);
+                mPrevRotateAxisSolution = euler;
+            }
+        }
+
         mSchema.set(mSample);
     }
 }
@@ -740,12 +843,13 @@ void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
     unsigned int rotOrder[3];
 
     // if this returns false then the rotation order was kInvalid or kLast
-    if (util::getRotOrder(iTrans.rotationOrder(), rotOrder[0], rotOrder[1],
+    MTransformationMatrix::RotationOrder eRotOrder(iTrans.rotationOrder());
+    if (util::getRotOrder(eRotOrder, rotOrder[0], rotOrder[1],
         rotOrder[2]))
     {
         addRotate(iTrans, "rotate", rotateNames, rotOrder,
             Alembic::AbcGeom::kRotateHint, iForceStatic, false,
-            mSample, mAnimChanList);
+            mSample, mAnimChanList, mRotateOpIndex);
     }
 
     // now look at the rotation orientation, aka rotate axis
@@ -757,7 +861,7 @@ void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
     rotOrder[2] = 2;
     addRotate(iTrans, "rotateAxis", rotateNames, rotOrder,
         Alembic::AbcGeom::kRotateOrientationHint, iForceStatic, false,
-        mSample, mAnimChanList);
+        mSample, mAnimChanList, mRotateAxisOpIndex);
 
     // invert the rotate pivot if necessary
     addTranslate(iTrans, "rotatePivot", "rotatePivotX", "rotatePivotY",
@@ -786,6 +890,25 @@ void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
     addTranslate(iTrans, "scalePivot", "scalePivotX", "scalePivotY",
         "scalePivotZ", Alembic::AbcGeom::kScalePivotPointHint, true,
         iForceStatic, false, mSample, mAnimChanList);
+
+    // remember current rotation
+    if (mFilterEulerRotations)
+    {
+        double xx(0), yy(0), zz(0);
+
+        // there are 2 rotation order enum definitions:
+        //     MEulerRotation::RotationOrder = MTransformationMatrix::RotationOrder-1
+        if (getSampledRotation( mSample, mRotateOpIndex, xx, yy, zz ))
+        {
+            mPrevRotateSolution.setValue(xx, yy, zz, (MEulerRotation::RotationOrder)(eRotOrder-1));
+        }
+
+        if (getSampledRotation( mSample, mRotateAxisOpIndex, xx, yy, zz ))
+        {
+            mPrevRotateAxisSolution.setValue(xx, yy, zz, MEulerRotation::kXYZ);
+        }
+    }
+
 }
 
 void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
@@ -807,7 +930,7 @@ void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
         Alembic::AbcGeom::kTranslateHint, false, iForceStatic, forceAnimated,
         mSample, mAnimChanList);
 
-    MTransformationMatrix::RotationOrder order;
+    MTransformationMatrix::RotationOrder eJointOrientOrder, eRotOrder, eRotateAxisOrder;
     double vals[3];
 
     // for reordering rotate names
@@ -819,12 +942,12 @@ void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
     rotateNames[1] = "jointOrientY";
     rotateNames[2] = "jointOrientZ";
 
-    iJoint.getOrientation(vals, order);
-    if (util::getRotOrder(order, rotOrder[0], rotOrder[1], rotOrder[2]))
+    iJoint.getOrientation(vals, eJointOrientOrder);
+    if (util::getRotOrder(eJointOrientOrder, rotOrder[0], rotOrder[1], rotOrder[2]))
     {
         addRotate(iJoint, "jointOrient", rotateNames, rotOrder,
             Alembic::AbcGeom::kRotateHint, iForceStatic, true,
-            mSample, mAnimChanList);
+            mSample, mAnimChanList, mJointOrientOpIndex);
     }
 
     rotateNames[0] = "rotateX";
@@ -832,12 +955,13 @@ void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
     rotateNames[2] = "rotateZ";
 
     // if this returns false then the rotation order was kInvalid or kLast
-    if (util::getRotOrder(iJoint.rotationOrder(), rotOrder[0], rotOrder[1],
+    eRotOrder = iJoint.rotationOrder();
+    if (util::getRotOrder(eRotOrder, rotOrder[0], rotOrder[1],
         rotOrder[2]))
     {
         addRotate(iJoint, "rotate", rotateNames, rotOrder,
             Alembic::AbcGeom::kRotateHint, iForceStatic, true,
-            mSample, mAnimChanList);
+            mSample, mAnimChanList, mRotateOpIndex);
     }
 
     // now look at the rotation orientation, aka rotate axis
@@ -845,15 +969,38 @@ void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
     rotateNames[1] = "rotateAxisY";
     rotateNames[2] = "rotateAxisZ";
 
-    iJoint.getScaleOrientation(vals, order);
-    if (util::getRotOrder(order, rotOrder[0], rotOrder[1], rotOrder[2]))
+    iJoint.getScaleOrientation(vals, eRotateAxisOrder);
+    if (util::getRotOrder(eRotateAxisOrder, rotOrder[0], rotOrder[1], rotOrder[2]))
     {
         addRotate(iJoint, "rotateAxis", rotateNames, rotOrder,
             Alembic::AbcGeom::kRotateOrientationHint, iForceStatic, true,
-            mSample, mAnimChanList);
+            mSample, mAnimChanList, mRotateAxisOpIndex);
     }
 
     // inspect the scale
     addScale(iJoint, "scale", "scaleX", "scaleY", "scaleZ", iForceStatic,
         forceAnimated, mSample, mAnimChanList);
+
+    // remember current rotation
+    if (mFilterEulerRotations)
+    {
+        double xx(0), yy(0), zz(0);
+
+        // there are 2 rotation order enum definitions:
+        //     MEulerRotation::RotationOrder = MTransformationMatrix::RotationOrder-1
+        if (getSampledRotation( mSample, mJointOrientOpIndex, xx, yy, zz ))
+        {
+            mPrevJointOrientSolution.setValue(xx, yy, zz, (MEulerRotation::RotationOrder)(eJointOrientOrder-1));
+        }
+
+        if (getSampledRotation( mSample, mRotateOpIndex, xx, yy, zz ))
+        {
+            mPrevRotateSolution.setValue(xx, yy, zz, (MEulerRotation::RotationOrder)(eRotOrder-1));
+        }
+
+        if (getSampledRotation( mSample, mRotateAxisOpIndex, xx, yy, zz ))
+        {
+            mPrevRotateAxisSolution.setValue(xx, yy, zz, (MEulerRotation::RotationOrder)(eRotateAxisOrder-1));
+        }
+    }
 }

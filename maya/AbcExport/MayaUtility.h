@@ -136,6 +136,7 @@ struct JobArgs
     JobArgs()
     {
         excludeInvisible = false;
+        filterEulerRotations = false;
         noNormals = false;
         stripNamespace = 0;
         useSelectionList = false;
@@ -147,6 +148,7 @@ struct JobArgs
     }
 
     bool excludeInvisible;
+    bool filterEulerRotations;
     bool noNormals;
     unsigned int stripNamespace;
     bool useSelectionList;
