@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -61,6 +61,14 @@ public:
 
     virtual void v( index_t iIndex, const V3d &iVal );
 
+    virtual void vt( index_t iIndex, double iVal );
+
+    virtual void vt( index_t iIndex, const V2d &iVal );
+
+    virtual void vt( index_t iIndex, const V3d &iVal );
+
+    virtual void vn( index_t iIndex, const V3d &iVal );
+
     virtual void f( const IndexVec &iVertexIndices,
                     const IndexVec &iTextureIndices,
                     const IndexVec &iNormalIndices );
@@ -76,7 +84,11 @@ protected:
     std::string m_currentObjectName;
 
     std::vector<V3f> m_vertices;
+    std::vector<V2f> m_texVertices;
+    std::vector<N3f> m_normals;
     std::vector<int32_t> m_indices;
+    std::vector<int32_t> m_texIndices;
+    std::vector<int32_t> m_normIndices;
     std::vector<int32_t> m_counts;
 };
 

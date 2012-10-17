@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -57,17 +57,73 @@ void AbcReader::v( index_t iIndex, const V3d &iPoint )
 }
 
 //-*****************************************************************************
+void AbcReader::vt( index_t iIndex, double iVal )
+{
+    assert( ( index_t ) ( m_texVertices.size()+1 ) == iIndex );
+
+    V2f t( iVal, 0.0f );
+
+    m_texVertices.push_back( t );
+}
+
+//-*****************************************************************************
+void AbcReader::vt( index_t iIndex, const V2d& iVal )
+{
+    assert( ( index_t ) ( m_texVertices.size()+1 ) == iIndex );
+
+    V2f t( iVal.x, iVal.y );
+
+    m_texVertices.push_back( t );
+}
+
+//-*****************************************************************************
+void AbcReader::vt( index_t iIndex, const V3d& iVal )
+{
+    assert( ( index_t ) ( m_texVertices.size()+1 ) == iIndex );
+
+    V2f t( iVal.x, iVal.y );
+
+    m_texVertices.push_back( t );
+}
+
+//-*****************************************************************************
+void AbcReader::vn( index_t iIndex, const V3d& iVal )
+{
+    assert( ( index_t ) ( m_normals.size()+1 ) == iIndex );
+
+    N3f n( iVal.x, iVal.y, iVal.z );
+
+    m_normals.push_back( n );
+}
+
+//-*****************************************************************************
 void AbcReader::f( const IndexVec &vIndices,
                    const IndexVec &vtIndices,
                    const IndexVec &vnIndices )
 {
-    int count = vIndices.size();
+    size_t count = vIndices.size();
     if ( count > 2 )
     {
         m_counts.push_back( count );
-        for ( int i = 0; i < count; ++i )
+        for ( size_t i = 0; i < count; ++i )
         {
             m_indices.push_back( ( int )( vIndices[i]-1 ) );
+        }
+
+        if ( vtIndices.size() == count )
+        {
+            for ( size_t i = 0; i < count; ++i )
+            {
+                m_texIndices.push_back( ( int )( vtIndices[i]-1 ) );
+            }
+        }
+        
+        if ( vnIndices.size() == count )
+        {
+            for ( size_t i = 0; i < count; ++i )
+            {
+                m_normIndices.push_back( ( int )( vnIndices[i]-1 ) );
+            }
         }
     }
 }
@@ -95,6 +151,60 @@ void AbcReader::makeCurrentObject()
         psamp.setPositions( V3fArraySample( m_vertices ) );
         psamp.setFaceIndices( Int32ArraySample( m_indices ) );
         psamp.setFaceCounts( Int32ArraySample( m_counts ) );
+
+        // Set facevarying UVs if they exist.
+        std::vector<V2f> fvTexVerts;
+        if ( m_texIndices.size() == m_indices.size() &&
+             m_texVertices.size() > 0 )
+        {
+            V2f defunct( 0.0f, 0.0f );
+            size_t N = m_texVertices.size();
+            size_t NI = m_texIndices.size();
+
+            fvTexVerts.resize( NI );
+            for ( size_t i = 0; i < NI; ++i )
+            {
+                int tindex = m_texIndices[i];
+                if ( tindex < 0 || (size_t) tindex >= N )
+                {
+                    fvTexVerts[i] = defunct;
+                }
+                else
+                {
+                    fvTexVerts[i] = m_texVertices[tindex];
+                }
+            }
+
+            psamp.setUVs( OV2fGeomParam::Sample( fvTexVerts,
+                                                 kFacevaryingScope ) );
+        }
+        
+        // Set facevarying normals if they exist.
+        std::vector<N3f> fvNormals;
+        if ( m_normIndices.size() == m_indices.size() &&
+             m_normals.size() > 0 )
+        {
+            N3f defunct( 0.0f, 0.0f, 0.0f );
+            size_t N = m_normals.size();
+            size_t NI = m_normIndices.size();
+
+            fvNormals.resize( NI );
+            for ( size_t i = 0; i < NI; ++i )
+            {
+                int nindex = m_normIndices[i];
+                if ( nindex < 0 || (size_t) nindex >= N )
+                {
+                    fvNormals[i] = defunct;
+                }
+                else
+                {
+                    fvNormals[i] = m_normals[nindex];
+                }
+            }
+
+            psamp.setNormals( ON3fGeomParam::Sample( fvNormals,
+                                                     kFacevaryingScope ) );
+        }
 
         mesh.set( psamp );
     }

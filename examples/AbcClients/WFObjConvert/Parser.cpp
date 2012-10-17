@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2012,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -183,10 +183,14 @@ struct indexTriplet : qi::grammar<Iterator, index_triplet(),space_type >
     
     indexTriplet() : indexTriplet::base_type( start )
     {
-        start = lexeme[( ( LL >> attr( -1 ) >> attr( -1 ) ) |
-                         ( LL >> '/' >> LL >> '/' >> LL ) |
-                         ( LL >> '/' >> LL >> attr( -1 ) ) |
-                         ( LL >> '/' >> attr(-1) >> '/' >> LL ) )];
+        //start = lexeme[( ( LL >> attr( -1 ) >> attr( -1 ) ) |
+        //                 ( LL >> '/' >> LL >> '/' >> LL ) |
+        //                 ( LL >> '/' >> LL >> attr( -1 ) ) |
+        //                 ( LL >> '/' >> attr(-1) >> '/' >> LL ) )];
+        start = lexeme[( ( LL >> '/' >> LL >> '/' >> LL ) |
+                         ( LL >> '/' >> attr( -1 ) >> '/' >> LL ) |
+                         ( LL >> '/' >> LL >> '/' >> attr( -1 ) ) |
+                         ( LL >> attr( -1 ) >> attr( -1 ) ) )];
     }
 
 #undef LL
