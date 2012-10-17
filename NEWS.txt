@@ -1,3 +1,53 @@
+2012-10-17, Alembic 1.1.2
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful features and bug fixes.
+
+New features:
+
+Maya AbcImport:
+
+Added inclusive and exclucive filtering support.
+
+Added file translator support.
+
+Facesets now get imported as Maya facesets instead of an integer array
+attribute.
+
+Maya AbcExport:
+
+Write out curves with a basis of b-spline and repeat first and last
+points twice (if they aren't repeated) if we have a cubic open curve.
+
+Support exporting Maya facesets with the -wfs/-writefacets flag.
+
+Add -ef/-eulerFilter flag which euler filters samples to rotate, rotate axis,
+and joint orient.
+
+Update -sn/-stripNamespaces flag with an optional integer to only strip
+that number of namespaces.
+
+Remove boost usage.
+
+Core library:
+
+Add static emptySample() convenience function.
+
+Improve const correctness on most of the Abc and AbcGeom getter functions.
+
+Child bounds are no longer written and read via the schema's sample class,
+instead the child bounds property is directly exposed on the schema.
+
+Normals and UVs IGeomParams are no longer returned by reference.
+
+On Xforms, only write the .animChans data once if necessary.
+
+Bug fixes:
+
+Maya AbcImport:
+
+Clean up temporary trim curves when the trim operation fails for 
+MFnNurbsSurface.
+
 2012-9-20, Alembic 1.1.1
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful and important bug fixes.
