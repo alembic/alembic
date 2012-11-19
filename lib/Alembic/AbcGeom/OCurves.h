@@ -304,6 +304,9 @@ public:
     AbcA::TimeSamplingPtr getTimeSampling() const
     { return m_positionsProperty.getTimeSampling(); }
 
+    void setTimeSampling( uint32_t iIndex );
+    void setTimeSampling( AbcA::TimeSamplingPtr iTime );
+
     //-*************************************************************************
     // SAMPLE STUFF
     //-*************************************************************************

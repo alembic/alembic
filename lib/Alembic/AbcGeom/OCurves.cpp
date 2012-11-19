@@ -303,6 +303,49 @@ void OCurvesSchema::setFromPrevious()
 }
 
 //-*****************************************************************************
+void OCurvesSchema::setTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OCurvesSchema::setTimeSampling( uint32_t )" );
+
+    m_positionsProperty.setTimeSampling( iIndex );
+    m_nVerticesProperty.setTimeSampling( iIndex );
+
+    m_basisAndTypeProperty.setTimeSampling( iIndex );
+
+    m_selfBoundsProperty.setTimeSampling( iIndex );
+
+    if ( m_velocitiesProperty )
+    {
+        m_velocitiesProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_uvsParam ) { m_uvsParam.setTimeSampling( iIndex ); }
+
+    if ( m_normalsParam ) { m_normalsParam.setTimeSampling( iIndex ); }
+    if ( m_widthsParam ) { m_widthsParam.setTimeSampling( iIndex ); }
+
+    m_positionsProperty.setTimeSampling( iIndex );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OCurvesSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OCurvesSchema::setTimeSampling( TimeSamplingPtr )" );
+
+    if ( iTime )
+    {
+        uint32_t tsIndex = getObject().getArchive().addTimeSampling( *iTime );
+        setTimeSampling( tsIndex );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
 void OCurvesSchema::init( const AbcA::index_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCurvesSchema::init()" );

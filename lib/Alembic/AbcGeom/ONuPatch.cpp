@@ -396,6 +396,66 @@ void ONuPatchSchema::setFromPrevious( )
 }
 
 //-*****************************************************************************
+void ONuPatchSchema::setTimeSampling( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "ONuPatchSchema::setTimeSampling( uint32_t )" );
+
+    m_positionsProperty.setTimeSampling( iIndex );
+    m_numUProperty.setTimeSampling( iIndex );
+    m_numVProperty.setTimeSampling( iIndex );
+    m_uOrderProperty.setTimeSampling( iIndex );
+    m_vOrderProperty.setTimeSampling( iIndex );
+    m_uKnotProperty.setTimeSampling( iIndex );
+    m_vKnotProperty.setTimeSampling( iIndex );
+
+    m_selfBoundsProperty.setTimeSampling( iIndex );
+
+    if ( m_velocitiesProperty )
+    {
+        m_velocitiesProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_uvsParam ) { m_uvsParam.setTimeSampling( iIndex ); }
+    if ( m_normalsParam ) { m_normalsParam.setTimeSampling( iIndex ); }
+    if ( m_positionWeightsProperty )
+    {
+        m_positionWeightsProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_trimNumLoopsProperty )
+    {
+        m_trimNumLoopsProperty.setTimeSampling( iIndex );
+        m_trimNumCurvesProperty.setTimeSampling( iIndex );
+        m_trimNumVerticesProperty.setTimeSampling( iIndex );
+        m_trimOrderProperty.setTimeSampling( iIndex );
+        m_trimKnotProperty.setTimeSampling( iIndex );
+        m_trimMinProperty.setTimeSampling( iIndex );
+        m_trimMaxProperty.setTimeSampling( iIndex );
+        m_trimUProperty.setTimeSampling( iIndex );
+        m_trimVProperty.setTimeSampling( iIndex );
+        m_trimWProperty.setTimeSampling( iIndex );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void ONuPatchSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "ONuPatchSchema::setTimeSampling( TimeSamplingPtr )" );
+
+    if ( iTime )
+    {
+        uint32_t tsIndex = getObject().getArchive().addTimeSampling( *iTime );
+        setTimeSampling( tsIndex );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
 void ONuPatchSchema::init( const AbcA::index_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ONuPatchSchema::init()" );
