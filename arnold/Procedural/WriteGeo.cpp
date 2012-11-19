@@ -279,6 +279,7 @@ AtNode * ProcessPolyMeshBase(
         
         instanceNode = AiNode( "ginstance" );
         AiNodeSetStr( instanceNode, "name", name.c_str() );
+        args.createdNodes.push_back(instanceNode);
         
         if ( args.proceduralNode )
         {

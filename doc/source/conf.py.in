@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath("@ALEMBIC_PYILMBASE_PYIMATH_MODULE_DIRECTORY@
 sys.path.insert(1, os.path.abspath("@PROJECT_BINARY_DIR@/python/PyAlembic"))
 
 try:
+    import imath
     from alembic import AbcGeom
 except ImportError, e:
     print 'Error importing Alembic:', e

@@ -51,6 +51,7 @@ ProcArgs::ProcArgs( const char * paramStr )
   , excludeXform(false)
   , subdIterations(0)
   , proceduralNode(0)
+  , makeInstance(false)
 {
     // TODO, grab the shutter a camera attached to AiUniverse if present
     
