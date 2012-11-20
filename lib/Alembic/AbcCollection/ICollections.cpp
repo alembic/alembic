@@ -45,10 +45,6 @@ void ICollectionsSchema::init( const Abc::Argument &iArg0,
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICollectionsSchema::init()" );
 
-    Abc::Arguments args;
-    iArg0.setInto( args );
-    iArg1.setInto( args );
-
     AbcCoreAbstract::CompoundPropertyReaderPtr _this = this->getPtr();
     m_collections.clear();
 
@@ -59,7 +55,7 @@ void ICollectionsSchema::init( const Abc::Argument &iArg0,
         if ( Abc::IStringArrayProperty::matches( header ) )
         {
             m_collections.push_back( Abc::IStringArrayProperty( _this,
-                header.getName(), args.getSchemaInterpMatching() ) );
+                header.getName(), iArg0, iArg1 ) );
         }
     }
 
