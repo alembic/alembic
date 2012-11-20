@@ -80,12 +80,13 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
     // no matching so we pick up old assets written as V3f
-    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching );
+    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching,
+        args.getErrorHandlerPolicy() );
 
     m_indicesProperty = Abc::IInt32ArrayProperty( _this, ".faceIndices",
-                                        args.getSchemaInterpMatching() );
+                                                  iArg0, iArg1 );
     m_countsProperty = Abc::IInt32ArrayProperty( _this, ".faceCounts",
-                                       args.getSchemaInterpMatching() );
+                                                 iArg0, iArg1 );
 
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
@@ -101,7 +102,7 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
     if ( this->getPropertyHeader( ".velocities" ) != NULL )
     {
         m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
-                                               iArg0, iArg1 );
+                                                       iArg0, iArg1 );
     }
 
     m_faceSetsLoaded = false;
@@ -140,7 +141,7 @@ void IPolyMeshSchema::loadFaceSetNames()
 
     if (!m_faceSetsLoaded)
     {
-        // iterate over childHeaders, and if header matches 
+        // iterate over childHeaders, and if header matches
         // FaceSet add to our vec
         IObject _thisObject = getObject();
 

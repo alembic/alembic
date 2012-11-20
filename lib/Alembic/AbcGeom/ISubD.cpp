@@ -207,86 +207,84 @@ void ISubDSchema::init( const Abc::Argument &iArg0,
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISubDSchema::init()" );
 
+    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
+
     Abc::Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
 
-    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
-
     // no matching so we pick up old assets written as V3f
-    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching );
+    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching,
+        args.getErrorHandlerPolicy() );
+
     m_faceIndicesProperty = Abc::IInt32ArrayProperty( _this, ".faceIndices",
-                                            args.getSchemaInterpMatching() );
+                                                      iArg0, iArg1 );
     m_faceCountsProperty = Abc::IInt32ArrayProperty( _this, ".faceCounts",
-                                           args.getSchemaInterpMatching() );
+                                                     iArg0, iArg1 );
 
     if ( this->getPropertyHeader(".faceVaryingInterpolateBoundary") != NULL )
     {
         m_faceVaryingInterpolateBoundaryProperty =
             Abc::IInt32Property( _this, ".faceVaryingInterpolateBoundary",
-                                 args.getSchemaInterpMatching() );
+                                 iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader(".faceVaryingPropagateCorners") != NULL )
     {
         m_faceVaryingPropagateCornersProperty =
             Abc::IInt32Property( _this, ".faceVaryingPropagateCorners",
-                                 args.getSchemaInterpMatching() );
+                                 iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader(".interpolateBoundary") != NULL )
     {
         m_interpolateBoundaryProperty =
-            Abc::IInt32Property( _this, ".interpolateBoundary",
-                                 args.getSchemaInterpMatching() );
+            Abc::IInt32Property( _this, ".interpolateBoundary", iArg0, iArg1 );
     }
 
     // creases, corners, and holes optionally exist
     if ( this->getPropertyHeader(".creaseIndices") != NULL)
     {
-        m_creaseIndicesProperty = Abc::IInt32ArrayProperty( _this, ".creaseIndices",
-                                                    args.getSchemaInterpMatching() );
+        m_creaseIndicesProperty = Abc::IInt32ArrayProperty( _this,
+            ".creaseIndices", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader(".creaseLengths") != NULL)
     {
-        m_creaseLengthsProperty = Abc::IInt32ArrayProperty( _this, ".creaseLengths",
-                                                    args.getSchemaInterpMatching() );
+        m_creaseLengthsProperty = Abc::IInt32ArrayProperty( _this,
+            ".creaseLengths", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader(".creaseSharpnesses") != NULL)
     {
         m_creaseSharpnessesProperty =
              Abc::IFloatArrayProperty( _this,
-                                       ".creaseSharpnesses",
-                                       args.getSchemaInterpMatching() );
+                                       ".creaseSharpnesses", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader(".cornerIndices") != NULL)
     {
         m_cornerIndicesProperty =
-            Abc::IInt32ArrayProperty( _this, ".cornerIndices",
-                                      args.getSchemaInterpMatching() );
+            Abc::IInt32ArrayProperty( _this, ".cornerIndices", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader(".cornerSharpnesses") != NULL)
     {
         m_cornerSharpnessesProperty =
             Abc::IFloatArrayProperty( _this, ".cornerSharpnesses",
-                                      args.getSchemaInterpMatching() );
+                                      iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader(".holes") != NULL)
     {
         m_holesProperty =
-            Abc::IInt32ArrayProperty( _this, ".holes",
-                                      args.getSchemaInterpMatching() );
+            Abc::IInt32ArrayProperty( _this, ".holes", iArg0, iArg1 );
     }
 
     if ( this->getPropertyHeader(".scheme") != NULL)
     {
         m_subdSchemeProperty = Abc::IStringProperty( _this, ".scheme",
-                                             args.getSchemaInterpMatching() );
+                                                     iArg0, iArg1 );
     }
 
     // none of the things below here are guaranteed to exist
@@ -298,7 +296,7 @@ void ISubDSchema::init( const Abc::Argument &iArg0,
     if ( this->getPropertyHeader( ".velocities" ) != NULL )
     {
         m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
-                                               iArg0, iArg1 );
+                                                       iArg0, iArg1 );
     }
 
     m_faceSetsLoaded = false;

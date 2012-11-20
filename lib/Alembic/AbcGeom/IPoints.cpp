@@ -53,15 +53,16 @@ void IPointsSchema::init( const Abc::Argument &iArg0,
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
     // no matching so we pick up old assets written as V3f
-    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching );
+    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching,
+        args.getErrorHandlerPolicy() );
 
     m_idsProperty = Abc::IUInt64ArrayProperty( _this, ".pointIds",
-                                      args.getSchemaInterpMatching() );
+                                               iArg0, iArg1 );
 
     if ( _this->getPropertyHeader( ".velocities" ) != NULL )
     {
         m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
-                                               iArg0, iArg1 );
+                                                       iArg0, iArg1 );
     }
 
     if ( _this->getPropertyHeader( ".widths" ) != NULL )

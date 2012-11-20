@@ -156,8 +156,21 @@ void Example1_MeshIn()
     IGeomBaseObject geomBase( IObject( archive, kTop ), "subd" );
     TESTING_ASSERT( geomBase.getSchema().getSelfBoundsProperty().valid() );
 
-    ISubD meshyObj( IObject( archive, kTop ), "subd" );
+    ISubD meshyObj( IObject( archive, kTop ), "subd",
+        ErrorHandler::kNoisyNoopPolicy );
+
     ISubDSchema &mesh = meshyObj.getSchema();
+
+    TESTING_ASSERT( mesh.getErrorHandlerPolicy() ==
+                    ErrorHandler::kNoisyNoopPolicy );
+
+    TESTING_ASSERT(
+        mesh.getUVsParam().getValueProperty().getErrorHandlerPolicy() ==
+        ErrorHandler::kNoisyNoopPolicy );
+
+    TESTING_ASSERT(
+        mesh.getInterpolateBoundaryProperty().getErrorHandlerPolicy() ==
+        ErrorHandler::kNoisyNoopPolicy );
 
     TESTING_ASSERT( 3 == mesh.getNumSamples() );
 

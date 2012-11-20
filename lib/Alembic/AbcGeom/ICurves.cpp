@@ -81,13 +81,15 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
     // no matching so we pick up old assets written as V3f
-    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching );
+    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching,
+        args.getErrorHandlerPolicy() );
 
     m_nVerticesProperty = Abc::IInt32ArrayProperty( _this, "nVertices",
-                                            args.getSchemaInterpMatching());
+                                                    iArg0, iArg1 );
+
 
     m_basisAndTypeProperty = Abc::IScalarProperty( _this, "curveBasisAndType",
-                                          args.getSchemaInterpMatching());
+        args.getErrorHandlerPolicy());
 
     // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )

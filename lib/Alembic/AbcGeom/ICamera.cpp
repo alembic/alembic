@@ -43,18 +43,19 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void ICameraSchema::init( const Abc::Argument &iArg0,
-                            const Abc::Argument &iArg1 )
+                          const Abc::Argument &iArg1 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICameraSchema::init()" );
+
+    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
     Abc::Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
 
-    AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
     m_coreProperties = Abc::IScalarProperty( _this, ".core",
-        args.getSchemaInterpMatching() );
+        args.getErrorHandlerPolicy() );
 
     // none of the things below here are guaranteed to exist
 

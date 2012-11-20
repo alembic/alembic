@@ -42,23 +42,30 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
+void IXformSchema::init( const Abc::Argument &iArg0,
+                         const Abc::Argument &iArg1 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::init()" );
+
+    Abc::Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
 
     AbcA::CompoundPropertyReaderPtr ptr = this->getPtr();
 
     if ( ptr->getPropertyHeader( ".childBnds" ) )
     {
-        m_childBoundsProperty = Abc::IBox3dProperty( ptr, ".childBnds", iMatching );
+        m_childBoundsProperty = Abc::IBox3dProperty( ptr, ".childBnds",
+                                                     iArg0, iArg1 );
     }
 
     if ( ptr->getPropertyHeader( ".inherits" ) )
     {
-        m_inheritsProperty = Abc::IBoolProperty( ptr, ".inherits", iMatching );
+        m_inheritsProperty = Abc::IBoolProperty( ptr, ".inherits",
+                                                 iArg0, iArg1 );
     }
 
-    AbcA::ScalarPropertyReaderPtr ops = ptr->getScalarProperty(  ".ops" );
+    AbcA::ScalarPropertyReaderPtr ops = ptr->getScalarProperty( ".ops" );
 
     m_useArrayProp = false;
 
@@ -171,14 +178,14 @@ void IXformSchema::init( Abc::SchemaInterpMatching iMatching )
     if ( ptr->getPropertyHeader( ".arbGeomParams" ) != NULL )
     {
         m_arbGeomParams = Abc::ICompoundProperty( ptr, ".arbGeomParams",
-                                                  getErrorHandlerPolicy()
+                                                  args.getErrorHandlerPolicy()
                                                 );
     }
 
     if ( ptr->getPropertyHeader( ".userProperties" ) != NULL )
     {
         m_userProperties = Abc::ICompoundProperty( ptr, ".userProperties",
-                                                  getErrorHandlerPolicy()
+                                                   args.getErrorHandlerPolicy()
                                                 );
     }
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

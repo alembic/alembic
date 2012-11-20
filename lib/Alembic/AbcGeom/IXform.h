@@ -85,7 +85,7 @@ public:
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is SchemaInterpMatching.
-        init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
+        init( iArg0, iArg1 );
     }
 
     //! This constructor does the same as the above, but uses the default
@@ -97,7 +97,7 @@ public:
                            const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<XformSchemaInfo>( iParent, iArg0, iArg1 )
     {
-        init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
+        init( iArg0, iArg1 );
     }
 
     //! Wrap an existing IXform object
@@ -109,7 +109,7 @@ public:
                            const Abc::Argument &iArg1 = Abc::Argument() )
       : Abc::ISchema<XformSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
     {
-        init( Abc::GetSchemaInterpMatching( iArg0, iArg1 ) );
+        init( iArg0, iArg1 );
     }
 
     //! explicit copy constructor to work around Windows compiler bug
@@ -195,7 +195,7 @@ protected:
     XformSample m_sample;
 
 private:
-    void init( Abc::SchemaInterpMatching iMatching );
+    void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 );
 
     // is m_vals an ArrayProperty, or a ScalarProperty?
     bool m_useArrayProp;

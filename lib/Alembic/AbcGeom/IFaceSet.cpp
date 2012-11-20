@@ -85,14 +85,9 @@ void IFaceSetSchema::init( const Abc::Argument &iArg0,
     // Only callable by ctors (mt-safety)
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IFaceSetSchema::init()" );
 
-    Abc::Arguments args;
-    iArg0.setInto( args );
-    iArg1.setInto( args );
-
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    m_facesProperty = Abc::IInt32ArrayProperty( _this, ".faces",
-        args.getSchemaInterpMatching() );
+    m_facesProperty = Abc::IInt32ArrayProperty( _this, ".faces", iArg0, iArg1 );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
