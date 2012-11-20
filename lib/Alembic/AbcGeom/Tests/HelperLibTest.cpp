@@ -552,9 +552,10 @@ void readNestedCommpoundWithVis(const std::string &archiveName)
     // child of child1 (which is hidden) means that this child should be
     // hidden too
     IObject child1SubObject( child1, "nested_object");
-    ABCA_ASSERT( IsAncestorInvisible (child1SubObject) == false, "object under child1 should eval to being not visible");
-    ABCA_ASSERT( IsAncestorInvisible (child1) == false, "child1 should eval to being not visible");
-    ABCA_ASSERT( IsAncestorInvisible (otherChild) == true, "other object should eval to being visible");
+    ABCA_ASSERT( IsAncestorInvisible (archiveTop) == false, "top root should be visible");
+    ABCA_ASSERT( IsAncestorInvisible (child1SubObject) == true, "object under child1 should eval to being not visible");
+    ABCA_ASSERT( IsAncestorInvisible (child1) == true, "child1 should eval to being not visible");
+    ABCA_ASSERT( IsAncestorInvisible (otherChild) == false, "other object should eval to being visible");
 
     // Done - the archive closes itself
 }

@@ -124,7 +124,7 @@ bool IsAncestorInvisible( IObject iObject,
         currentObject = currentObject.getParent();
         if (! currentObject )
         {
-            return true;
+            return false;
         }
 
         visibilityProperty = GetVisibilityProperty ( currentObject );
@@ -142,9 +142,9 @@ bool IsAncestorInvisible( IObject iObject,
     }
 
     if ( visibilityValue == kVisibilityHidden )
-        return false;
+        return true;
 
-    return true;
+    return false;
 }
 
 } // End namespace ALEMBIC_VERSION_NS
