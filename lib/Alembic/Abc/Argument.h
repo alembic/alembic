@@ -89,7 +89,7 @@ public:
 
     SchemaInterpMatching getSchemaInterpMatching() const
     { return m_matching; }
-    
+
 private:
     ErrorHandler::Policy m_errorHandlerPolicy;
     AbcA::MetaData m_metaData;
@@ -170,6 +170,8 @@ public:
     }
 
 private:
+
+    const Argument& operator= (const Argument&);
 
     enum ArgumentWhichFlag
     {
