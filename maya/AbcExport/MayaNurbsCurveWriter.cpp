@@ -277,7 +277,8 @@ void MayaNurbsCurveWriter::write()
                     {
                         for (int k = 0; k < repeatStartAndEnd; ++k)
                         {
-                            points.push_back(doubleArrayData[i]);
+                            points.push_back(
+                                static_cast<float>(doubleArrayData[i]));
                         }
                     }
                 }

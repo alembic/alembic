@@ -344,7 +344,7 @@ double AlembicNode::getFPS()
     if (unit!=MTime::kInvalid)
     {
         MTime time(1.0, MTime::kSeconds);
-        fps = time.as(unit);
+        fps = static_cast<float>(time.as(unit));
     }
 
     if (fps <= 0.f )
@@ -411,7 +411,7 @@ double AlembicNode::computeRetime(const double inputTime,
               const double fraction = fabs(timeOffset/playTime - playOffset);
 
               // forward loop
-              if (fmodf(playOffset, 2.0)==0.0)
+              if (fmod(playOffset, 2.0)==0.0)
               {
                   retime = firstTime + playTime * fraction;
               }

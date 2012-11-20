@@ -201,7 +201,7 @@ namespace
                 const int* faceArray((int *)samp.getFaces()->getData());
                 const size_t size = samp.getFaces()->size();
 
-                MIntArray arr(faceArray, size);
+                MIntArray arr(faceArray, static_cast<unsigned int>(size));
 
                 // copy indices to the set
                 copyIndicesToNode(arr, iNode, shadingGroup);
@@ -273,7 +273,7 @@ namespace
         if (length == 0)
             return true;
 
-        for (size_t i=0; i<length; ++i)
+        for (unsigned int i=0; i<length; ++i)
         {
             // use 'match' function provided in the maya mel script.
             MString scriptStr, result;
