@@ -91,7 +91,7 @@
 #include <Windows.h>
 #endif
 
-#define ALEMBIC_VERSION_NS v4
+#define ALEMBIC_VERSION_NS v5
 
 namespace Alembic {
 namespace Util {

@@ -90,8 +90,9 @@ public:
 
         //! Optional error handling policy
         //! ...
-        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
-      : IBasePropertyT<AbcA::ScalarPropertyReaderPtr>( iPtr, iWrapFlag, iPolicy )
+        const Argument &iArg0 = Argument() )
+      : IBasePropertyT<AbcA::ScalarPropertyReaderPtr>( iPtr, iWrapFlag,
+            GetErrorHandlerPolicy( iPtr, iArg0 ) )
     {}
 
     //! Default copy constructor used

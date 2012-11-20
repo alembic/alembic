@@ -224,16 +224,11 @@ ICompoundProperty IObject::getProperties() const
 //-*****************************************************************************
 void IObject::init( AbcA::ObjectReaderPtr iParent,
                     const std::string &iName,
-                    ErrorHandler::Policy iParentPolicy,
-                    ErrorHandler::Policy iChildPolicy )
+                    ErrorHandler::Policy iPolicy )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::init()" );
 
-    Arguments args( iParentPolicy );
-    Argument cpcyArg( iChildPolicy );
-    cpcyArg.setInto( args );
-
-    getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
+    getErrorHandler().setPolicy( iPolicy );
 
     m_object = iParent->getChild( iName );
 

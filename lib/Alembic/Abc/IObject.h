@@ -75,20 +75,19 @@ public:
     template <class OBJECT_PTR>
     IObject( OBJECT_PTR iParentObject,
              const std::string &iName,
-             ErrorHandler::Policy iPcy = ErrorHandler::kThrowPolicy
-           );
+             const Argument &iArg0 = Argument() );
 
     //! This attaches an IObject wrapper around an existing
     //! ObjectReaderPtr, with an optional error handling policy.
     template <class OBJECT_PTR>
     IObject( OBJECT_PTR iPtr,
              WrapExistingFlag iFlag,
-             ErrorHandler::Policy iPcy = ErrorHandler::kThrowPolicy )
+             const Argument &iArg0 = Argument() )
       : m_object( GetObjectReaderPtr( iPtr ) )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iPtr, iPcy ) );
+            GetErrorHandlerPolicy( iPtr, iArg0 ) );
     }
 
     //! This attaches an IObject wrapper around the top
@@ -96,11 +95,11 @@ public:
     template <class ARCHIVE_PTR>
     IObject( ARCHIVE_PTR iPtr,
              TopFlag iFlag,
-             ErrorHandler::Policy iPcy = ErrorHandler::kThrowPolicy )
+             const Argument &iArg0 = Argument() )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iPtr, iPcy ) );
+            GetErrorHandlerPolicy( iPtr, iArg0 ) );
 
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::IObject( top )" );
 
@@ -220,8 +219,7 @@ public:
 private:
     void init( AbcA::ObjectReaderPtr iParentObject,
                const std::string &iName,
-               ErrorHandler::Policy iParentPolicy,
-               ErrorHandler::Policy iChildPolicy );
+               ErrorHandler::Policy iPolicy );
 
 public:
     AbcA::ObjectReaderPtr m_object;
@@ -249,13 +247,12 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy( OBJ iObj,
 template <class OBJECT_PTR>
 inline IObject::IObject( OBJECT_PTR iParentObject,
                          const std::string &iName,
-                         ErrorHandler::Policy iPcy )
+                         const Argument &iArg0 )
 {
     init( GetObjectReaderPtr( iParentObject ),
           iName,
 
-          GetErrorHandlerPolicy( iParentObject ),
-          iPcy );
+          GetErrorHandlerPolicy( iParentObject, iArg0 ) );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

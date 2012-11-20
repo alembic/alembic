@@ -236,6 +236,58 @@ void readHierarchyMulti(const std::string &archiveName)
 
 }
 
+void errorHandlerTest()
+{
+
+    {
+        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+                          "throwTest.abc", ErrorHandler::kThrowPolicy );
+        OObject archiveTop = archive.getTop();
+        ABCA_ASSERT( archiveTop.getErrorHandler().getPolicy() ==
+            ErrorHandler::kThrowPolicy, "Error: Not kThrowPolicy" );
+        OObject childQuiet(archiveTop, "childQuiet",
+            ErrorHandler::kQuietNoopPolicy );
+        OObject childNoisy(archiveTop, "childNoisy",
+            ErrorHandler::kNoisyNoopPolicy );
+
+        OObject grandchildQuiet(childQuiet, "grandchildQuiet" );
+        OObject grandchildNoisy(childNoisy, "grandchildNoisy" );
+
+        ABCA_ASSERT( childQuiet.getErrorHandler().getPolicy() ==
+            ErrorHandler::kQuietNoopPolicy, "Error: Not kQuietNoopPolicy" );
+        ABCA_ASSERT( childNoisy.getErrorHandler().getPolicy() ==
+            ErrorHandler::kNoisyNoopPolicy, "Error: Not kNoisyNoopPolicy" );
+
+        ABCA_ASSERT( grandchildQuiet.getErrorHandler().getPolicy() ==
+            ErrorHandler::kQuietNoopPolicy, "Error: Not kQuietNoopPolicy" );
+        ABCA_ASSERT( grandchildNoisy.getErrorHandler().getPolicy() ==
+            ErrorHandler::kNoisyNoopPolicy, "Error: Not kNoisyNoopPolicy" );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                          "throwTest.abc", ErrorHandler::kThrowPolicy );
+        IObject archiveTop = archive.getTop();
+        ABCA_ASSERT( archiveTop.getErrorHandler().getPolicy() ==
+            ErrorHandler::kThrowPolicy, "Error: Not kThrowPolicy" );
+        IObject childQuiet(archiveTop, "childQuiet",
+            ErrorHandler::kQuietNoopPolicy );
+        IObject childNoisy(archiveTop, "childNoisy",
+            ErrorHandler::kNoisyNoopPolicy );
+        IObject grandchildQuiet(childQuiet, "grandchildQuiet" );
+        IObject grandchildNoisy(childNoisy, "grandchildNoisy" );
+        ABCA_ASSERT( childQuiet.getErrorHandler().getPolicy() ==
+            ErrorHandler::kQuietNoopPolicy, "Error: Not kQuietNoopPolicy" );
+        ABCA_ASSERT( childNoisy.getErrorHandler().getPolicy() ==
+            ErrorHandler::kNoisyNoopPolicy, "Error: Not kNoisyNoopPolicy" );
+
+        ABCA_ASSERT( grandchildQuiet.getErrorHandler().getPolicy() ==
+            ErrorHandler::kQuietNoopPolicy, "Error: Not kQuietNoopPolicy" );
+        ABCA_ASSERT( grandchildNoisy.getErrorHandler().getPolicy() ==
+            ErrorHandler::kNoisyNoopPolicy, "Error: Not kNoisyNoopPolicy" );
+    }
+}
+
 int main( int argc, char *argv[] )
 {
     // Write and read a simple archive: ten children, with no
@@ -274,6 +326,8 @@ int main( int argc, char *argv[] )
         std::string archiveName("threeDeepHierarchy.abc");
         readHierarchyMulti(archiveName);
     }
+
+    errorHandlerTest();
 
     return 0;
 }
