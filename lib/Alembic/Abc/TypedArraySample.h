@@ -181,6 +181,11 @@ typedef TypedArraySample<P3iTPTraits> P3iArraySample;
 typedef TypedArraySample<P3fTPTraits> P3fArraySample;
 typedef TypedArraySample<P3dTPTraits> P3dArraySample;
 
+typedef TypedArraySample<Box2sTPTraits> Box2sArraySample;
+typedef TypedArraySample<Box2iTPTraits> Box2iArraySample;
+typedef TypedArraySample<Box2fTPTraits> Box2fArraySample;
+typedef TypedArraySample<Box2dTPTraits> Box2dArraySample;
+  
 typedef TypedArraySample<Box3sTPTraits> Box3sArraySample;
 typedef TypedArraySample<Box3iTPTraits> Box3iArraySample;
 typedef TypedArraySample<Box3fTPTraits> Box3fArraySample;
@@ -244,6 +249,11 @@ typedef Alembic::Util::shared_ptr<P3sArraySample> P3sArraySamplePtr;
 typedef Alembic::Util::shared_ptr<P3iArraySample> P3iArraySamplePtr;
 typedef Alembic::Util::shared_ptr<P3fArraySample> P3fArraySamplePtr;
 typedef Alembic::Util::shared_ptr<P3dArraySample> P3dArraySamplePtr;
+
+typedef Alembic::Util::shared_ptr<Box2sArraySample> Box2sArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Box2iArraySample> Box2iArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Box2fArraySample> Box2fArraySamplePtr;
+typedef Alembic::Util::shared_ptr<Box2dArraySample> Box2dArraySamplePtr;
 
 typedef Alembic::Util::shared_ptr<Box3sArraySample> Box3sArraySamplePtr;
 typedef Alembic::Util::shared_ptr<Box3iArraySample> Box3iArraySamplePtr;
