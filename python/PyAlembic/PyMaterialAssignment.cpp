@@ -147,6 +147,7 @@ void register_materialassignment()
             {
                 return oResult;
             };
+            return AbcM::IMaterialSchema();
         };
 
         static AbcM::IMaterialSchema hasMaterialOnProperty (
@@ -159,6 +160,7 @@ void register_materialassignment()
             {
                 return oResult;
             };
+            return AbcM::IMaterialSchema();
         };
 
     };
