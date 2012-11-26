@@ -51,7 +51,16 @@ public:
                     const MString& optionsString,
                     MPxFileTranslator::FileAccessMode mode);
 
+    MFileKind identifyFile(const MFileObject& filename,
+                           const char* buffer,
+                           short size) const;
+
     bool haveReadMethod() const
+    {
+        return true;
+    }
+
+    bool haveNamespaceSupport() const
     {
         return true;
     }
