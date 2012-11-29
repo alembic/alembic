@@ -227,63 +227,100 @@ AbcWriteJob::AbcWriteJob(const char * iFileName,
         mLastFrame = lastShapeFrame;
 }
 
-void AbcWriteJob::getBoundingBox(const MMatrix & eMInvMat)
+MBoundingBox AbcWriteJob::getBoundingBox(double iFrame, const MMatrix & eMInvMat)
 {
     MStatus status;
+    MBoundingBox curBBox;
 
-    // short-circuit if the selection flag is on but this node is not in the
-    // active selection
-
-    // MGlobal::isSelected(ob) doesn't work, because DG node and DAG node is
-    // not the same even if they refer to the same MObject
-    if (mArgs.useSelectionList && !mSList.hasItem(mCurDag))
-        return;
-
-    MObject ob = mCurDag.node();
-
-    // check for riCurves flag for flattening all curve object to
-    // one curve group
-    MFnDependencyNode fnDepNode(ob, &status);
-    MPlug riCurvesPlug = fnDepNode.findPlug("riCurves", &status);
-    if ( status == MS::kSuccess && riCurvesPlug.asBool() == true)
+    if (iFrame == mFirstFrame)
     {
-        MFnDagNode mFn(mCurDag, &status);
-        if (status == MS::kSuccess)
+        // Set up bbox shape map in the first frame.
+        // If we have a lot of transforms and shapes, we don't need to 
+        // iterate them for each frame.
+        MItDag dagIter;
+        for (dagIter.reset(mCurDag); !dagIter.isDone(); dagIter.next())
         {
-            MBoundingBox box = mFn.boundingBox();
-            box.transformUsing(mCurDag.exclusiveMatrix()*eMInvMat);
-            mCurBBox.expand(box);
+            MObject object = dagIter.currentItem();
+            MDagPath path;
+            dagIter.getPath(path);
+
+            // short-circuit if the selection flag is on but this node is not in the
+            // active selection
+
+            // MGlobal::isSelected(ob) doesn't work, because DG node and DAG node is
+            // not the same even if they refer to the same MObject
+            if (mArgs.useSelectionList && !mSList.hasItem(path))
+            {
+                dagIter.prune();
+                continue;
+            }
+
+            MFnDagNode dagNode(path, &status);
+            if (status == MS::kSuccess)
+            {
+                // check for riCurves flag for flattening all curve object to
+                // one curve group
+                MPlug riCurvesPlug = dagNode.findPlug("riCurves", &status);
+                if ( status == MS::kSuccess && riCurvesPlug.asBool() == true)
+                {
+                    MBoundingBox box = dagNode.boundingBox();
+                    box.transformUsing(path.exclusiveMatrix()*eMInvMat);
+                    curBBox.expand(box);
+
+                    // Prune this curve group
+                    dagIter.prune();
+
+                    // Save children paths
+                    std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter = 
+                        mBBoxShapeMap.insert(std::make_pair(mCurDag, util::ShapeSet())).first;
+                    if (iter != mBBoxShapeMap.end())
+                        (*iter).second.insert(path);
+                }
+                else if (object.hasFn(MFn::kParticle) 
+                    || object.hasFn(MFn::kMesh)
+                    || object.hasFn(MFn::kNurbsCurve)
+                    || object.hasFn(MFn::kNurbsSurface) )
+                {
+                    if (util::isIntermediate(object))
+                        continue;
+
+                    MBoundingBox box = dagNode.boundingBox();
+                    box.transformUsing(path.exclusiveMatrix()*eMInvMat);
+                    curBBox.expand(box);
+
+                    // Save children paths
+                    std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter = 
+                        mBBoxShapeMap.insert(std::make_pair(mCurDag, util::ShapeSet())).first;
+                    if (iter != mBBoxShapeMap.end())
+                        (*iter).second.insert(path);
+                }
+            }
         }
     }
-    else if (ob.hasFn(MFn::kTransform))
+    else
     {
-        MFnTransform fnTrans(ob);
-
-        // loop through the children, making sure to push and pop them
-        // from the MDagPath
-        unsigned int numChild = mCurDag.childCount();
-        for (unsigned int i = 0; i < numChild; ++i)
+        // We have already find out all the shapes for the dag path.
+        std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter = 
+            mBBoxShapeMap.find(mCurDag);
+        if (iter != mBBoxShapeMap.end())
         {
-            mCurDag.push(mCurDag.child(i));
-            getBoundingBox(eMInvMat);
-            mCurDag.pop();
+            // Iterate through the saved paths to calculate the box.
+            util::ShapeSet& paths = (*iter).second;
+            for (util::ShapeSet::iterator pathIter = paths.begin(); 
+                pathIter != paths.end(); pathIter++)
+            {
+                MFnDagNode dagNode(*pathIter, &status);
+                if (status == MS::kSuccess)
+                {
+                    MBoundingBox box = dagNode.boundingBox();
+                    box.transformUsing((*pathIter).exclusiveMatrix()*eMInvMat);
+                    curBBox.expand(box);
+                }
+            }
         }
     }
-    else if (ob.hasFn(MFn::kParticle) || ob.hasFn(MFn::kMesh)
-        || ob.hasFn(MFn::kNurbsCurve)
-        || ob.hasFn(MFn::kNurbsSurface) )
-    {
-        if (util::isIntermediate(mCurDag.node()))
-            return;
 
-        MFnDagNode mFn(mCurDag, &status);
-        if (status == MS::kSuccess)
-        {
-            MBoundingBox box = mFn.boundingBox();
-            box.transformUsing(mCurDag.exclusiveMatrix()*eMInvMat);
-            mCurBBox.expand(box);
-        }
-    }
+    return curBBox;
 }
 
 bool AbcWriteJob::checkCurveGrp()
@@ -893,7 +930,6 @@ void AbcWriteJob::perFrameCallback(double iFrame)
     {
         mCurDag = *it;
 
-        mCurBBox.clear();
         MMatrix eMInvMat;
         if (mArgs.worldSpace)
         {
@@ -904,8 +940,7 @@ void AbcWriteJob::perFrameCallback(double iFrame)
             eMInvMat = mCurDag.exclusiveMatrixInverse();
         }
 
-        getBoundingBox(eMInvMat);
-        bbox.expand(mCurBBox);
+        bbox.expand(getBoundingBox(iFrame, eMInvMat));
     }
 
     Alembic::Abc::V3d min(bbox.min().x, bbox.min().y, bbox.min().z);
@@ -1004,7 +1039,6 @@ void AbcWriteJob::postCallback(double iFrame)
         {
             mCurDag = *it;
 
-            mCurBBox.clear();
             MMatrix eMInvMat;
             if (mArgs.worldSpace)
             {
@@ -1015,8 +1049,7 @@ void AbcWriteJob::postCallback(double iFrame)
                 eMInvMat = mCurDag.exclusiveMatrixInverse();
             }
 
-            getBoundingBox(eMInvMat);
-            bbox.expand(mCurBBox);
+            bbox.expand(getBoundingBox(iFrame, eMInvMat));
         }
     }
 

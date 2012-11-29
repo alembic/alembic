@@ -170,7 +170,7 @@ class AbcWriteJob
     void perFrameCallback(double iFrame);
     void postCallback(double iFrame);
 
-    void getBoundingBox(const MMatrix & eMInvMat);
+    MBoundingBox getBoundingBox(double iFrame, const MMatrix & eMInvMat);
     void setup(double iFrame, MayaTransformWriterPtr iParent,
                GetMembersMap& gmMap);
 
@@ -191,8 +191,8 @@ class AbcWriteJob
     std::vector< MayaPointPrimitiveWriterPtr > mPointList;
     std::vector< AttributesWriterPtr > mShapeAttrList;
 
-    // helper bounding box for recursive calculation
-    MBoundingBox mCurBBox;
+    // helper dag path map for bounding box calculation
+    std::map< MDagPath, util::ShapeSet, util::cmpDag > mBBoxShapeMap;
 
     // helper dag path for recursive calculations
     MDagPath mCurDag;
