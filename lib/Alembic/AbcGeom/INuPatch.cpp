@@ -65,12 +65,18 @@ MeshTopologyVariance INuPatchSchema::getTopologyVariance() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "INuPatch::getTopologyVariance()" );
 
-    // check for constant topology.
-    // if the surface has trim curves, we must also check those of tology
-    // variance.
-    if ( m_positionsProperty.isConstant() && m_uOrderProperty.isConstant() &&
+    bool pointsConstant = m_positionsProperty.isConstant() &&
+        ( !m_positionWeightsProperty ||
+           m_positionWeightsProperty.isConstant() );
+
+    bool uvConstant = ( m_uOrderProperty.isConstant() &&
          m_vOrderProperty.isConstant() && m_uKnotProperty.isConstant() &&
-         m_vKnotProperty.isConstant() )
+         m_vKnotProperty.isConstant() );
+
+    // check for constant topology.
+    // if the surface has trim curves, we must also check those of topology
+    // variance.
+    if ( pointsConstant && uvConstant )
     {
         if ( this -> hasTrimCurve() )
         {
@@ -87,19 +93,11 @@ MeshTopologyVariance INuPatchSchema::getTopologyVariance() const
                 return kHeterogenousTopology;
             }
         }
-        else if ( m_positionWeightsProperty &&
-                 !m_positionWeightsProperty.isConstant() )
-        {
-            return kHomogenousTopology;
-        }
-        else
-        {
-            return kConstantTopology;
-        }
+
+        return kConstantTopology;
     }
-    else if ( m_numUProperty.isConstant() && m_numVProperty.isConstant() &&
-              m_uOrderProperty.isConstant() && m_vOrderProperty.isConstant() &&
-              m_uKnotProperty.isConstant() && m_vKnotProperty.isConstant() )
+    // points are animated
+    else if ( uvConstant )
     {
 
         if ( this -> hasTrimCurve() )
@@ -113,10 +111,8 @@ MeshTopologyVariance INuPatchSchema::getTopologyVariance() const
                 return kHeterogenousTopology;
             }
         }
-        else
-        {
-            return kHomogenousTopology;
-        }
+
+        return kHomogenousTopology;
     }
 
 
