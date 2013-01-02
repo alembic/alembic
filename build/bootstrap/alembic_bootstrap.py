@@ -240,36 +240,53 @@ def find_path( magic_file, default=False ):
             print "Invalid path specified. Please try again."
 
 ##-*****************************************************************************
-def configureCMakeBoost( cmake_args ):
+def configureCMakeBoost(srcdir, 
+                        boost_include_dir=None, 
+                        thread_libpath=None, 
+                        python_libpath=None, 
+                        generator=None
+                        ):
+    
+    # cmake args string
+    libdir = None
     cmake_extra_args = ''
 
-    srcdir = cmake_args[0]
-    thread_libpath = Path( cmake_args[2] )
-    python_libpath = Path( cmake_args[3] )
-    libdir, thread_lib = Path( thread_libpath ).split()
-    libdir, python_lib = Path( python_libpath ).split()
+    # boost include files
+    if boost_include_dir is not None:
+        cmake_extra_args += ' -D BOOST_INCLUDEDIR:PATH="%s"' % boost_include_dir
 
-    try:
-        cmake_extra_args += ' -D BOOST_INCLUDEDIR:PATH="%s"' % cmake_args[1]
-        cmake_extra_args += " -D BOOST_LIBRARYDIR:PATH=%s" % libdir
+    # boost thread lib path
+    if thread_libpath is not None:
+        thread_libpath = Path(thread_libpath)
+        libdir, thread_lib = thread_libpath.split()
         cmake_extra_args += " -D Boost_THREAD_LIBRARY:FILEPATH=%s" % thread_libpath
+    
+    # boost python lib path
+    if python_libpath is not None:
+        python_libpath = Path(python_libpath)
+        libdir, python_lib = python_libpath.split()
         cmake_extra_args += " -D BOOST_PYTHON_LIBRARY:FILEPATH=%s" % python_libpath
-        cmake_extra_args += ' -G "%s"' % cmake_args[4]
-    except IndexError:
-        pass
+
+    # boost library root
+    if libdir is not None:
+        cmake_extra_args += " -D BOOST_LIBRARYDIR:PATH=%s" % libdir
+    
+    if generator is not None:
+        cmake_extra_args += ' -G "%s"' % generator
 
     cmake_cmd='cmake --debug-trycompile -U BOOTSTRAP_* -D BOOTSTRAP_MODE:INTERNAL=TRUE -D BOOTSTRAP_BOOST:INTERNAL=TRUE -UBoost_* -UBOOST_* -UALEMBIC_BOOST_FOUND %s %s' %\
         (cmake_extra_args, srcdir )
 
     print "Executing CMake Boost configure command:\n%s" % cmake_cmd
 
-    cmake_status = Popen( cmake_cmd, shell=True, stdout=PIPE, stderr=PIPE )
+    # execute the cmake command
+    cmake_status = Popen(cmake_cmd, shell=True, stdout=PIPE, stderr=PIPE)
     status = cmake_status.wait()
 
     for line in cmake_status.stdout.readlines():
       print line.strip()
 
-    errors = ''.join( cmake_status.stderr.readlines() )
+    errors = ''.join(cmake_status.stderr.readlines())
     print errors
 
     return status, errors
@@ -919,50 +936,45 @@ def configure_build_root( srcDir, default = None ):
     return root
 
 ##-*****************************************************************************
-def configure_boost( options, srcdir, cmakecache ):
+def configure_boost(options, srcdir, cmakecache):
     print '''
 Alembic requires Boost 1.42 or greater to compile. You must have compiled
 Boost with STATIC, VERSIONED, and MULTITHREADED options turned on.
 '''
 
-    boost_include_dir = ""
-    boost_thread_library = ""
-    boost_python_library = ""
-
-    cmake_args = []
-    cmake_args.append( srcdir )
+    boost_include_dir = None
+    boost_thread_library = None
+    boost_python_library = None
 
     if options.boost_include_dir:
         boost_include_dir = options.boost_include_dir
     else:
-        boost_include_dir = str( find_boost_include( cmakecache ) )
+        boost_include_dir = str(find_boost_include(cmakecache))
 
     if options.boost_thread_library:
         boost_thread_library = options.boost_thread_library
     else:
-        boost_thread_library = str( find_boost_thread_lib( cmakecache ) )
+        boost_thread_library = str(find_boost_thread_lib(cmakecache))
 
     if options.boost_python_library:
         boost_python_library = options.boost_python_library
     elif options.enable_pyalembic:
-        boost_python_library = str( find_boost_python_lib( cmakecache ) )
-
-    cmake_args.append( boost_include_dir )
-    cmake_args.append( boost_thread_library )
-
-    # we only need boost::python for alembic python bindings
-    if options.enable_pyalembic and boost_python_library:
-        cmake_args.append( boost_python_library )
+        boost_python_library = str(find_boost_python_lib(cmakecache))
 
     if options.generator:
         print "Makesystem generator %s: " % (options.generator)
-        cmake_args.append(options.generator)
 
-    boost_status, errors = configureCMakeBoost( cmake_args )
+    boost_status, errors = configureCMakeBoost(
+                               srcdir=srcdir,
+                               boost_include_dir=boost_include_dir,
+                               thread_libpath=boost_thread_library,
+                               python_libpath=boost_python_library,
+                               generator=options.generator
+                            )
 
     if boost_status != 0:
         print "Could not successfully build a Boost test executable!"
-        ask_to_exit( errors )
+        ask_to_exit(errors)
 
     return boost_status, boost_include_dir, boost_thread_library, boost_python_library
 
