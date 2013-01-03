@@ -59,6 +59,7 @@ AwImpl::AwImpl( const std::string &iFileName,
     // add default time sampling
     AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling() );
     m_timeSamples.push_back(ts);
+    m_maxSamples.push_back(0);
 
     // OPEN THE FILE!
     hid_t faid = H5Pcreate( H5P_FILE_ACCESS );
@@ -89,7 +90,7 @@ AwImpl::AwImpl( const std::string &iFileName,
     // Where XX is the major version, YY is the minor version
     // and ZZ is the patch version
     int libraryVersion = ALEMBIC_LIBRARY_VERSION;
-    H5LTset_attribute_int(m_file, ".", "abc_release_version", 
+    H5LTset_attribute_int(m_file, ".", "abc_release_version",
         &libraryVersion, 1);
 
     m_metaData.set("_ai_AlembicVersion", AbcA::GetLibraryVersion());
@@ -142,6 +143,7 @@ uint32_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
     // we've got a new TimeSampling, write it and add it to our vector
     AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling(iTs) );
     m_timeSamples.push_back(ts);
+    m_maxSamples.push_back(0);
 
     index_t latestSample = m_timeSamples.size() - 1;
 
@@ -163,8 +165,29 @@ AbcA::TimeSamplingPtr AwImpl::getTimeSampling( uint32_t iIndex )
 }
 
 //-*****************************************************************************
+AbcA::index_t AwImpl::getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex )
+{
+    if ( iIndex < m_maxSamples.size() )
+    {
+        return m_maxSamples[iIndex];
+    }
+    return INDEX_UNKNOWN;
+}
+
+//-*****************************************************************************
+void AwImpl::setMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex,
+                                                   AbcA::index_t iMaxIndex )
+{
+    if ( iIndex < m_maxSamples.size() )
+    {
+        m_maxSamples[iIndex] = iMaxIndex;
+    }
+}
+
+//-*****************************************************************************
 AwImpl::~AwImpl()
 {
+
     // write the cache if necessary
     if ( m_file >= 0 && m_cacheHierarchy )
     {
@@ -177,6 +200,21 @@ AwImpl::~AwImpl()
 
     // let go of our reference to the data for the top object
     m_data.reset();
+
+    if ( m_file >= 0 && !m_maxSamples.empty() )
+    {
+        hsize_t dims[1];
+        dims[0] = m_maxSamples.size();
+        hid_t dspaceId = H5Screate_simple( 1, dims, NULL );
+        DspaceCloser dspaceCloser( dspaceId );
+
+        hid_t attrId = H5Acreate2( m_file, "abc_max_samples",
+                                   H5T_NATIVE_INT64, dspaceId,
+                                   H5P_DEFAULT, H5P_DEFAULT );
+        AttrCloser attrCloser( attrId );
+
+        H5Awrite( attrId, H5T_NATIVE_INT64, &( m_maxSamples.front() ) );
+    }
 
     if ( m_file >= 0 )
     {
@@ -197,7 +235,7 @@ AwImpl::~AwImpl()
             strm << "Open HDF5 handles detected during reading:" << std::endl
                  << "DataSets: " << dsetCount
                  << ", Groups: " << grpCount
-                 << ", DataTypes: " << dtypCount 
+                 << ", DataTypes: " << dtypCount
                  << ", Attributes: " << attrCount;
 
             m_file = -1;

@@ -88,6 +88,12 @@ public:
 
     virtual uint32_t getNumTimeSamplings() { return m_timeSamples.size(); }
 
+    virtual AbcA::index_t getMaxNumSamplesForTimeSamplingIndex(
+        uint32_t iIndex );
+
+    virtual void setMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex,
+                                                      AbcA::index_t iMaxIndex );
+
 private:
     std::string m_fileName;
     AbcA::MetaData m_metaData;
@@ -98,6 +104,8 @@ private:
     Alembic::Util::shared_ptr < OwData > m_data;
 
     std::vector < AbcA::TimeSamplingPtr > m_timeSamples;
+
+    std::vector < AbcA::index_t > m_maxSamples;
 
     WrittenArraySampleMap m_writtenArraySampleMap;
 };

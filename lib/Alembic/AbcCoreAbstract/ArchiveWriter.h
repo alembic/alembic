@@ -71,7 +71,7 @@ class ArchiveWriter
 protected:
     ArchiveWriter()
       : m_compressionHint( -1 ) {}
-    
+
 public:
     //! Virtual destructor
     //! ...
@@ -80,11 +80,11 @@ public:
     //-*************************************************************************
     // NEW FUNCTIONS
     //-*************************************************************************
-    
+
     //! Return the archive (file) name. This is the name of the file
     //! which the archive writer is associated with.
     virtual const std::string &getName() const = 0;
-    
+
     //! The meta data of the archive is the same as the meta data
     //! of the top-level object writer.
     virtual const MetaData &getMetaData() const = 0;
@@ -126,6 +126,17 @@ public:
     //! Returns the total number of TimeSamplingPtrs in the Archive
     //! TimeSampling pool.
     virtual uint32_t getNumTimeSamplings() = 0;
+
+    //! Returns the maximum number of samples written for the TimeSampling at
+    //! the given index.  If an illegal iIndex is specified, INDEX_UNKNOWN
+    //! will be returned.
+    virtual index_t getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex ) = 0;
+
+    //! Sets the maximum number of samples written for the TimeSampling at
+    //! the given index.  You normally don't need to call this as the
+    //! properties will call it at the appropriate time.
+    virtual void setMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex,
+                                                       index_t iMaxIndex ) = 0;
 
 private:
     int8_t m_compressionHint;

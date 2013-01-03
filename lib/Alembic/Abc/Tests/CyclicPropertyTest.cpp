@@ -176,6 +176,9 @@ void readProperty(const std::string &archiveName)
         double massDiff = mass.getValue( iss ) - (1.0 + 0.1*ss);
         ABCA_ASSERT( fabs(massDiff) < 1e-12, "Incorrect sample value read" );
     }
+    ABCA_ASSERT(
+        archive.getMaxNumSamplesForTimeSamplingIndex(1) == (index_t) numSamples,
+        "Incorrect number of max samples for Time Sampling ID 1.");
     std::cout << std::endl;
 
     // Done - the archive closes itself

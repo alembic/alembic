@@ -82,11 +82,11 @@ public:
     //-*************************************************************************
     // NEW FUNCTIONS
     //-*************************************************************************
-    
+
     //! Return the archive (file) name. This is the name of the file
     //! which the root reader is associated with.
     virtual const std::string &getName() const = 0;
-    
+
     //! The meta data of the archive is the same as the meta data
     //! of the top-level object reader.
     virtual const MetaData &getMetaData() const = 0;
@@ -107,6 +107,12 @@ public:
 
     //! Returns the TimeSampling at a given index.
     virtual TimeSamplingPtr getTimeSampling( uint32_t iIndex ) = 0;
+
+    //! Returns the maximum number of samples written for the TimeSampling at
+    //! the given index.  If an illegal iIndex is specified, or a max
+    //! number of samplings couldn't be found for that iIndex
+    //! (for older archives pre 1.1.3) INDEX_UNKNOWN will be returned.
+    virtual index_t getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex ) = 0;
 
     //! Returns the total number of TimeSamplingPtrs in the Archive
     //! TimeSampling pool.

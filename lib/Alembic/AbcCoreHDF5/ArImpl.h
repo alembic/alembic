@@ -87,6 +87,9 @@ public:
         m_readArraySampleCache = iPtr;
     }
 
+    virtual AbcA::index_t getMaxNumSamplesForTimeSamplingIndex(
+        uint32_t iIndex );
+
     virtual uint32_t getNumTimeSamplings()
     {
         return m_timeSamples.size();
@@ -108,6 +111,7 @@ private:
     int32_t m_archiveVersion;
 
     std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
+    std::vector <  AbcA::index_t > m_maxSamples;
 
     AbcA::ReadArraySampleCachePtr m_readArraySampleCache;
 

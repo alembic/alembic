@@ -115,6 +115,7 @@ void testReadWriteEmptyArchive()
         // the default sampling
         TESTING_ASSERT(a->getNumTimeSamplings() == 1);
         TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
+        TESTING_ASSERT(a->getMaxNumSamplesForTimeSamplingIndex(0) == 0);
 
         ABC::CompoundPropertyReaderPtr parent = archive->getProperties();
         TESTING_ASSERT(parent->getNumProperties() == 0);
@@ -142,9 +143,12 @@ void testReadWriteTimeSamplingArchive()
         // getting a time sampling that doesn't exist should throw
         TESTING_ASSERT_THROW(a->getTimeSampling(43),
             Alembic::Util::Exception);
+        TESTING_ASSERT(
+            a->getMaxNumSamplesForTimeSamplingIndex(43) == INDEX_UNKNOWN);
 
         // first one is the default time sampling
         TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
+        TESTING_ASSERT(a->getMaxNumSamplesForTimeSamplingIndex(0) == 0);
 
         std::vector< double > samps;
 
@@ -164,6 +168,10 @@ void testReadWriteTimeSamplingArchive()
         ts = ABC::TimeSampling(ABC::TimeSamplingType(3, 1.0), samps);
         index = a->addTimeSampling(ts);
         TESTING_ASSERT(index == 2);
+
+        // normally we wouldn't ever call this directly, call it here
+        // for testing purposes only
+        a->setMaxNumSamplesForTimeSamplingIndex(2, 42);
 
         // really weird acyclic example
         samps.push_back(300.0);
@@ -192,12 +200,14 @@ void testReadWriteTimeSamplingArchive()
         samps.push_back(34.0);
         ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
         TESTING_ASSERT( ts == *(a->getTimeSampling(1)) );
+        TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(1) == 0 );
 
         // cyclic sampling example
         samps.push_back(34.25);
         samps.push_back(34.5);
         ts = ABC::TimeSampling(ABC::TimeSamplingType(3, 1.0), samps);
         TESTING_ASSERT( ts == *(a->getTimeSampling(2)) );
+        TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(2) == 42 );
 
         // really weird acyclic example
         samps.push_back(300.0);
@@ -205,6 +215,7 @@ void testReadWriteTimeSamplingArchive()
         ts = ABC::TimeSampling(
             ABC::TimeSamplingType(ABC::TimeSamplingType::kAcyclic), samps);
         TESTING_ASSERT( ts == *(a->getTimeSampling(3)) );
+        TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(3) == 0 );
     }
 }
 
@@ -292,6 +303,8 @@ void readArchive( const std::string & iName, bool iCache )
         TESTING_ASSERT( 2 ==
             objs[i]->getProperties()->getArrayProperty("c")->getNumSamples() );
     }
+
+    TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(0) == 2 );
 }
 
 void writeVeryEmptyArchive( const std::string & iName, bool iCache )

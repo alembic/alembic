@@ -92,6 +92,41 @@ ArImpl::ArImpl( const std::string &iFileName,
     m_data.reset( new OrData( m_header, node, m_archiveVersion ) );
     CloseObject( abcRoot );
     ReadTimeSamples( m_file, m_timeSamples );
+
+    if ( H5Aexists( m_file, "abc_max_samples" ) )
+    {
+        hid_t aid = H5Aopen( m_file, "abc_max_samples", H5P_DEFAULT );
+
+        if ( aid < 0 )
+        {
+            return;
+        }
+
+        AttrCloser attrCloser( aid );
+
+        // figure out how big it is
+        hid_t sid = H5Aget_space( aid );
+
+        if ( sid < 0 )
+        {
+            return;
+        }
+
+        DspaceCloser dspaceCloser( sid );
+
+        hssize_t numPoints = H5Sget_simple_extent_npoints( sid );
+
+        if ( numPoints < 1 )
+        {
+            return;
+        }
+
+        m_maxSamples.resize( numPoints );
+
+        // do the read
+        H5Aread( aid, H5T_NATIVE_LLONG, &( m_maxSamples.front() ) );
+
+    }
 }
 
 //-*****************************************************************************
@@ -136,6 +171,17 @@ AbcA::ArchiveReaderPtr ArImpl::asArchivePtr()
 }
 
 //-*****************************************************************************
+AbcA::index_t ArImpl::getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex )
+{
+    if ( iIndex < m_maxSamples.size() )
+    {
+        return m_maxSamples[iIndex];
+    }
+
+    return INDEX_UNKNOWN;
+}
+
+//-*****************************************************************************
 ArImpl::~ArImpl()
 {
 
@@ -160,7 +206,7 @@ ArImpl::~ArImpl()
             strm << "Open HDF5 handles detected during reading:" << std::endl
                  << "DataSets: " << dsetCount
                  << ", Groups: " << grpCount
-                 << ", DataTypes: " << dtypCount 
+                 << ", DataTypes: " << dtypCount
                  << ", Attributes: " << attrCount;
 
             std::vector< hid_t > objList;

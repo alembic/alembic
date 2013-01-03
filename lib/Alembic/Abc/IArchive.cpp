@@ -116,6 +116,20 @@ uint32_t IArchive::getNumTimeSamplings( )
 }
 
 //-*****************************************************************************
+index_t IArchive::getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IArchive::getMaxNumSamplesForTimeSamplingIndex" );
+
+    return m_archive->getMaxNumSamplesForTimeSamplingIndex( iIndex );
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw, so here is a default behavior.
+    return INDEX_UNKNOWN;
+}
+
+//-*****************************************************************************
 int32_t IArchive::getArchiveVersion( )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive:::getArchiveVersion" );
