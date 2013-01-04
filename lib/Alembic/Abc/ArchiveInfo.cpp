@@ -75,7 +75,9 @@ GetArchiveStartAndEndTime(
 
     double startSingleTime = DBL_MAX;
     double endSingleTime = -DBL_MAX;
-    bool hasDefaultTime = false;
+
+    double startDefaultTime = DBL_MAX;
+    double endDefaultTime = -DBL_MAX;
 
     for ( uint32_t i = 0; i < iArchive.getNumTimeSamplings(); ++i )
     {
@@ -92,7 +94,7 @@ GetArchiveStartAndEndTime(
             continue;
         }
 
-        if ( idx > 1 )
+        if ( idx > 1 && i != 0 )
         {
             startTime = std::min( ts->getSampleTime( 0 ), startTime );
             endTime = std::max( ts->getSampleTime( idx - 1 ), endTime );
@@ -104,28 +106,32 @@ GetArchiveStartAndEndTime(
             endSingleTime = std::max( ts->getSampleTime( 0 ),
                                       endSingleTime );
         }
-        else if ( idx == 1 && i == 0 )
+        else if ( idx > 0 && i == 0 )
         {
-            hasDefaultTime = true;
+            startDefaultTime = ts->getSampleTime( 0 );
+            endDefaultTime = ts->getSampleTime( idx - 1 );
         }
     }
 
+    // if we had a valid animated start and end time we will use only that
     if ( startTime != DBL_MAX && endTime != -DBL_MAX )
     {
         oStartTime = startTime;
         oEndTime = endTime;
     }
-    else if ( startTime != DBL_MAX && endTime != -DBL_MAX )
+    // this is for the cases where we have custom time samplings but
+    // they only have 1 sample
+    else if ( startSingleTime != DBL_MAX && endSingleTime != -DBL_MAX )
     {
         oStartTime = startSingleTime;
         oEndTime = endSingleTime;
     }
     // no other valid time was yet to be found, but we found a valid
-    // default time, so we will use it.
-    else if ( hasDefaultTime )
+    // default time with at least one sample, so we will use it.
+    else if ( startDefaultTime != DBL_MAX && endDefaultTime != -DBL_MAX )
     {
-        oStartTime = 0;
-        oEndTime = 0;
+        oStartTime = startDefaultTime;
+        oEndTime = endDefaultTime;
     }
     else
     {
