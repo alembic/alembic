@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -73,6 +73,10 @@ void register_iarchive()
         .def( "getNumTimeSamplings",
               &Abc::IArchive::getNumTimeSamplings,
               "Return the total number of TimeSampling in the Archive" )
+        .def( "getMaxNumSamplesForTimeSamplingIndex",
+              &Abc::IArchive::getMaxNumSamplesForTimeSamplingIndex,
+              ( arg("index" ) ),
+              "Returns the max number of samples set for the TimeSampling at the given index." )
         .def( "valid", &Abc::IArchive::valid )
         .def( "__nonzero__", &Abc::IArchive::valid )
         .def( "__str__", &Abc::IArchive::getName )

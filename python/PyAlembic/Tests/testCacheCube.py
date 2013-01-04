@@ -1,6 +1,6 @@
 #-******************************************************************************
 #
-# Copyright (c) 2012,
+# Copyright (c) 2012-2013,
 #  Sony Pictures Imageworks Inc. and
 #  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 #
@@ -189,7 +189,11 @@ testList.append( ( 'testExportCubeGeom', testExportCubeGeom ) )
 
 # Test importing the exported quad mesh
 def testImportCubeGeom():
-    top = IArchive( fileName ).getTop()
+    archive = IArchive( fileName )
+    assert archive.getMaxNumSamplesForTimeSamplingIndex(0) == 3
+    assert archive.getMaxNumSamplesForTimeSamplingIndex(1) == 3
+
+    top = archive.getTop()
 
     assert top.getNumChildren() == 1
 
