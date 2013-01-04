@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -178,10 +178,17 @@ void readUInt32ArrayProperty(const std::string &archiveName)
             ABCA_ASSERT( ( unsigned int ) shortPrimes[jj] == g_primes[jj],
                          "Incorrect value via getAs(POD) from archive." );
     }
+    std::cout << std::endl;
+
     ABCA_ASSERT(
         archive.getMaxNumSamplesForTimeSamplingIndex(1) == (index_t) numSamples,
         "Incorrect number of max samples in readUInt32ArrayProperty");
-    std::cout << std::endl;
+
+    double start, end;
+    GetArchiveStartAndEndTime( archive, start, end );
+
+    TESTING_ASSERT( almostEqual(start, 123.0) );
+    TESTING_ASSERT( almostEqual(end, 123.0 + 4.0 / 24.0) );
     // Done - the archive closes itself
 }
 
@@ -331,6 +338,12 @@ void readV3fArrayProperty(const std::string &archiveName)
         "Incorrect number of max samples in readV3fArrayProperty." );
     std::cout << std::endl;
     // Done - the archive closes itself
+
+    double start, end;
+    GetArchiveStartAndEndTime( archive, start, end );
+
+    TESTING_ASSERT( almostEqual(start, 123.0) );
+    TESTING_ASSERT( almostEqual(end, 123.0 + 4.0 / 24.0) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -419,6 +432,11 @@ void readWriteColorArrayProperty(const std::string &archiveName)
                          "Color [" << i << "] is incorrect.");
         }
 
+        double start, end;
+        GetArchiveStartAndEndTime( archive, start, end );
+
+        TESTING_ASSERT( almostEqual(start, 0.0) );
+        TESTING_ASSERT( almostEqual(end, 0.0) );
     }
 }
 

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -79,6 +79,10 @@ void archiveInfoTest()
         std::cout << "Date written: " << dateWritten << std::endl;
         TESTING_ASSERT( dateWritten != "" );
         TESTING_ASSERT( abcVersionStr != "" );
+
+        double start, end;
+        GetArchiveStartAndEndTime( archive, start, end );
+        TESTING_ASSERT( start == DBL_MAX && end == -DBL_MAX );
     }
 }
 
@@ -95,7 +99,7 @@ void scopingTest()
         OObject childA( top, "a");
         OObject childB( top, "b");
         ODoubleProperty prop(top.getProperties(), "prop", 0);
-        TESTING_ASSERT(prop.getObject().getArchive().getName() == 
+        TESTING_ASSERT(prop.getObject().getArchive().getName() ==
             "archiveScopeTest.abc");
     }
 
@@ -105,6 +109,10 @@ void scopingTest()
             IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                 "archiveScopeTest.abc" );
             top = archive.getTop();
+
+            double start, end;
+            GetArchiveStartAndEndTime( archive, start, end );
+            TESTING_ASSERT( start == DBL_MAX && end == -DBL_MAX );
         }
         TESTING_ASSERT(top.getNumChildren() == 2 );
         TESTING_ASSERT(top.getChildHeader("a") != NULL);
@@ -114,7 +122,7 @@ void scopingTest()
             "archiveScopeTest.abc");
         IScalarProperty prop(top.getProperties(), "prop");
         TESTING_ASSERT(prop.valid());
-        TESTING_ASSERT(prop.getObject().getArchive().getName() == 
+        TESTING_ASSERT(prop.getObject().getArchive().getName() ==
             "archiveScopeTest.abc");
     }
 }

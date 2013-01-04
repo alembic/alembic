@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -103,6 +103,22 @@ GetArchiveInfo(
     std::string & oUserDescription );
 
 //-*****************************************************************************
+//! Convenience function which gets a start and end time for the archive using
+//! only IArchive::getMaxNumSamplesForTimeSamplingIndex.  The hierarchy is
+//! NOT walked.
+//! If the archive was written prior to 1.1.3 or no samples were written for
+//! any of the properties DBL_MAX will be set for oStartTime
+//! and -DBL_MAX will be set for oEndTime.
+void
+GetArchiveStartAndEndTime(
+    //! The Archive to be inspected
+    IArchive & iArchive,
+    //! The start time for the archive in seconds
+    double & oStartTime,
+    //! The end time for the archive in seconds
+    double & oEndTime );
+
+//-*****************************************************************************
 template <class ARCHIVE_CTOR>
 OArchive CreateArchiveWithInfo(
     ARCHIVE_CTOR iCtor,
@@ -144,7 +160,6 @@ OArchive CreateArchiveWithInfo(
     return OArchive( iCtor, iFileName, md, policy );
 
 }
-
 
 } // End namespace ALEMBIC_VERSION_NS
 
