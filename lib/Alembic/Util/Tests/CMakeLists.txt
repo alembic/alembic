@@ -44,8 +44,12 @@ TARGET_LINK_LIBRARIES( AlembicUtilTokenMap_Test AlembicUtil )
 ADD_EXECUTABLE( AlembicUtilDimensions_Test_Jeffs DimensionsTestJeffs.cpp )
 TARGET_LINK_LIBRARIES( AlembicUtilDimensions_Test_Jeffs AlembicUtil )
 
+ADD_EXECUTABLE( AlembicUtilNaming_Test NamingTest.cpp )
+TARGET_LINK_LIBRARIES( AlembicUtilNaming_Test AlembicUtil )
+
 # Make a test of it
 ADD_TEST( AlembicUtilOperatorBool_TEST AlembicUtilOperatorBool_Test )
 ADD_TEST( AlembicUtilTokenMap_TEST AlembicUtilTokenMap_Test )
 ADD_TEST( AlembicUtilDimensionsJeffs_TEST AlembicUtilDimensions_Test_Jeffs )
+ADD_TEST( AlembicUtilNaming_TEST AlembicUtilNaming_Test )
 

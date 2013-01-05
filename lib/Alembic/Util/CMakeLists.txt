@@ -36,6 +36,7 @@
 # C++ files for this project
 SET( CXX_FILES
      Murmur3.cpp
+     Naming.cpp
      TokenMap.cpp )
 
 SET( H_FILES
@@ -44,6 +45,7 @@ SET( H_FILES
      Exception.h
      Foundation.h
      Murmur3.h
+     Naming.h
      OperatorBool.h
      PlainOldDataType.h
      TokenMap.h
