@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -142,14 +142,5 @@ MACRO(ADD_ARNOLD_CXX_PLUGIN PluginName SourceFile1 )
                          COMPILE_FLAGS ${ARNOLD_COMPILE_FLAGS}
                          LINK_FLAGS ${ARNOLD_LINK_FLAGS}
                          PREFIX "" )
-
-  TARGET_LINK_LIBRARIES ( ${PluginName} ${ALEMBIC_ARNOLD_LIBARNOLD} )
-#  TARGET_LINK_LIBRARIES( ${PluginName}
-#                         AlembicTraitsGeom AlembicTraits 
-#                         AlembicAsset MD5Hash AlembicHDF5
-#                         ${ALEMBIC_HDF5_LIBS} AlembicUtil AlembicExc
-#                         ${Boost_REGEX_LIBRARY} ${Boost_FILESYSTEM_LIBRARY}
-#                        ${Boost_SYSTEM_LIBRARY}
-#                         -lpthread -lz -lm )
 
 ENDMACRO(ADD_ARNOLD_CXX_PLUGIN)

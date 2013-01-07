@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -119,9 +119,14 @@ endif ()
 #-******************************************************************************
 #-******************************************************************************
 
-SET( ORIGINAL_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
-SET( CMAKE_INSTALL_PREFIX
-     ${ORIGINAL_INSTALL_PREFIX}/alembic-${VERSION} )
+IF ( DEFINED ENV{ALEMBIC_INSTALL_PREFIX} )
+  SET( CMAKE_INSTALL_PREFIX
+    $ENV{ALEMBIC_INSTALL_PREFIX}/alembic-${VERSION} )
+ELSE ()
+  SET( ORIGINAL_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+  SET( CMAKE_INSTALL_PREFIX
+    ${ORIGINAL_INSTALL_PREFIX}/alembic-${VERSION} )
+ENDIF ()
 
 # Tell me what my install location would be
 MESSAGE(STATUS "The install dir is ${CMAKE_INSTALL_PREFIX}" )
