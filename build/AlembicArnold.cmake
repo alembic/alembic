@@ -143,4 +143,6 @@ MACRO(ADD_ARNOLD_CXX_PLUGIN PluginName SourceFile1 )
                          LINK_FLAGS ${ARNOLD_LINK_FLAGS}
                          PREFIX "" )
 
+  TARGET_LINK_LIBRARIES ( ${PluginName} ${ALEMBIC_ARNOLD_LIBARNOLD} )
+
 ENDMACRO(ADD_ARNOLD_CXX_PLUGIN)
