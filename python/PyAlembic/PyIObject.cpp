@@ -90,15 +90,42 @@ static ChildList getChildList( Abc::IObject& p)
 }
 
 //-*****************************************************************************
+static Abc::IObject getChildByIndex( Abc::IObject &o, size_t i )
+{
+    if ( i >= o.getNumChildren() )
+    {
+        std::stringstream stream;
+        stream << i;
+        throwPythonIndexException( stream.str().c_str() );
+    }
+    const Abc::IObject& c = o.getChild( i );
+    if ( !c.valid() )
+    {
+        return Abc::IObject();
+    }
+    return c;
+}
+
+//-*****************************************************************************
+static Abc::IObject getChildByName( Abc::IObject &o, const std::string& name )
+{
+    const Abc::IObject& c = o.getChild( name );
+    if ( c.valid() )
+    {
+        return c;
+    }
+
+    std::stringstream stream;
+    stream << name;
+    throwPythonKeyException( stream.str().c_str() );
+
+}
+
+//-*****************************************************************************
 void register_iobject()
 {
     // overloads
     //
-    Abc::IObject ( Abc::IObject::*getChildByIndex )( size_t ) const = \
-        &Abc::IObject::getChild;
-    Abc::IObject ( Abc::IObject::*getChildByName )( const std::string& ) const = \
-        &Abc::IObject::getChild;
-
     const AbcA::ObjectHeader&
         ( Abc::IObject::*getChildHeaderByIndex )( size_t ) const = \
         &Abc::IObject::getChildHeader;
@@ -149,12 +176,12 @@ void register_iobject()
               "Return the single top-level ICompoundProperty",
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getChild",
-              getChildByIndex,
+              &getChildByIndex,
               ( arg( "index" ) ),
               "Return a child IObject with the given index",
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getChild",
-              getChildByName,
+              &getChildByName,
               ( arg( "name" ) ),
               "Return a child IObject with the given name",
               with_custodian_and_ward_postcall<0,1>() )

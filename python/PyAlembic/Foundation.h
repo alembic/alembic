@@ -73,4 +73,16 @@ inline void throwPythonException( const char* iMessage )
     throw boost::python::error_already_set();
 }
 
+inline void throwPythonKeyException( const char* iMessage )
+{
+    PyErr_SetString( PyExc_KeyError, iMessage );
+    throw boost::python::error_already_set();
+}
+
+inline void throwPythonIndexException( const char* iMessage )
+{
+    PyErr_SetString( PyExc_IndexError, iMessage );
+    throw boost::python::error_already_set();
+}
+
 #endif

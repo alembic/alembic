@@ -40,14 +40,89 @@
 using namespace boost::python;
 
 //-*****************************************************************************
+static object getPropertyByName( Abc::OCompoundProperty &p, 
+                                 const std::string& name )
+{
+    const AbcA::PropertyHeader* h = p.getPropertyHeader( name );
+    Abc::WrapExistingFlag iWrap;
+    if ( !h )
+    {
+        std::stringstream stream;
+        stream << name;
+        throwPythonKeyException( stream.str().c_str() );
+        return object(); // Returns None object
+    }
+    else if ( h->isScalar() )
+    {
+        Abc::OBaseProperty b = p.getProperty( name );
+        return_by_value::apply<Abc::OScalarProperty>::type converter;
+        return object (handle<>(converter (Abc::OScalarProperty (
+                            b.getPtr()->asScalarPtr(), iWrap))));
+    }
+    else if ( h->isArray() )
+    {
+        Abc::OBaseProperty b = p.getProperty( name );
+        return_by_value::apply<Abc::OArrayProperty>::type converter;
+        return object (handle<>(converter (Abc::OArrayProperty (
+                            b.getPtr()->asArrayPtr(), iWrap))));
+    }
+    else if ( h->isCompound() )
+    {
+        Abc::OBaseProperty b = p.getProperty( name );
+        return_by_value::apply<Abc::OCompoundProperty>::type converter;
+        return object (handle<>(converter (Abc::OCompoundProperty (
+                            b.getPtr()->asCompoundPtr(), iWrap))));
+    }
+    throwPythonException( "Conversion error, unsupported property type" );
+}
+
+//-*****************************************************************************
+static object getPropertyByIndex( Abc::OCompoundProperty &p, size_t i )
+{
+    if ( i >= p.getNumProperties() )
+    {
+        std::stringstream stream;
+        stream << i;
+        throwPythonIndexException( stream.str().c_str() );
+        return object(); // Returns None object
+    }
+    Abc::WrapExistingFlag iWrap;
+    const AbcA::PropertyHeader& h = p.getPropertyHeader( i );
+    const std::string name( h.getName() );
+    if ( h.isScalar() )
+    {
+        Abc::OBaseProperty b = p.getProperty( name );
+        return_by_value::apply<Abc::OScalarProperty>::type converter;
+        return object (handle<>(converter (Abc::OScalarProperty (
+                            b.getPtr()->asScalarPtr(), iWrap))));
+    }
+    else if ( h.isArray() )
+    {
+        Abc::OBaseProperty b = p.getProperty( name );
+        return_by_value::apply<Abc::OArrayProperty>::type converter;
+        return object (handle<>(converter (Abc::OArrayProperty (
+                            b.getPtr()->asArrayPtr(), iWrap))));
+    }
+    else if ( h.isCompound() )
+    {
+        Abc::OBaseProperty b = p.getProperty( name );
+        return_by_value::apply<Abc::OCompoundProperty>::type converter;
+        return object (handle<>(converter (Abc::OCompoundProperty (
+                            b.getPtr()->asCompoundPtr(), iWrap))));
+    }
+    throwPythonException( "Conversion error, unsupported property type" );
+}
+
+
+//-*****************************************************************************
 void register_ocompoundproperty()
 {
     // OBaseProperty
     register_OBaseProperty<AbcA::CompoundPropertyWriterPtr>(
                                                     "OBaseProperty_Compound" );
+    register_OBaseProperty<AbcA::BasePropertyWriterPtr>(
+                                                    "OBaseProperty_Base" );
 
-    // overloads
-    //
     const AbcA::PropertyHeader &
         ( Abc::OCompoundProperty::*getHeaderByIndex )( size_t ) const = \
         &Abc::OCompoundProperty::getPropertyHeader;
@@ -85,6 +160,14 @@ void register_ocompoundproperty()
               ( arg( "name" ) ),
               "Return the header of a child property with the given name",
               return_value_policy<reference_existing_object>() )
+        .def( "getProperty",
+              &getPropertyByIndex,
+              ( arg( "index" ) ),
+              "Return a child property with the given index" )
+        .def( "getProperty",
+              &getPropertyByName,
+              ( arg( "name" ) ),
+              "Return a child property with the given name" )
         .def( "getParent",
               &Abc::OCompoundProperty::getParent,
               "Return the parent OCompoundProperty" )

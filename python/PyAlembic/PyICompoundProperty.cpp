@@ -95,7 +95,14 @@ static object getPropertyByName( Abc::ICompoundProperty &p,
                                  const std::string& name )
 {
     const AbcA::PropertyHeader* h = p.getPropertyHeader( name );
-    if ( h->isScalar() )
+    if ( !h )
+    {
+        std::stringstream stream;
+        stream << name;
+        throwPythonKeyException( stream.str().c_str() );
+        return object(); // Returns None object
+    }
+    else if ( h->isScalar() )
     {
         return_by_value::apply<Abc::IScalarProperty>::type converter;
         return object (handle<>(converter (Abc::IScalarProperty (p, name))));
@@ -110,12 +117,19 @@ static object getPropertyByName( Abc::ICompoundProperty &p,
         return_by_value::apply<Abc::ICompoundProperty>::type converter;
         return object (handle<>(converter (Abc::ICompoundProperty (p, name))));
     }
-    return object(); // Returns None object
+    throwPythonException( "Conversion error, unsupported property type" );
 }
 
 //-*****************************************************************************
 static object getPropertyByIndex( Abc::ICompoundProperty &p, size_t i )
 {
+    if ( i >= p.getNumProperties() )
+    {
+        std::stringstream stream;
+        stream << i;
+        throwPythonIndexException( stream.str().c_str() );
+        return object(); // Returns None object
+    }
     const AbcA::PropertyHeader& h = p.getPropertyHeader( i );
     const std::string name( h.getName() );
     if ( h.isScalar() )
@@ -133,7 +147,7 @@ static object getPropertyByIndex( Abc::ICompoundProperty &p, size_t i )
         return_by_value::apply<Abc::ICompoundProperty>::type converter;
         return object (handle<>(converter (Abc::ICompoundProperty (p, name))));
     }
-    return object(); // Returns None object
+    throwPythonException( "Conversion error, unsupported property type" );
 }
 
 

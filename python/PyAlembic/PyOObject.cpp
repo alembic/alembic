@@ -39,15 +39,42 @@
 using namespace boost::python;
 
 //-*****************************************************************************
+static Abc::OObject getChildByIndex( Abc::OObject &o, size_t i )
+{
+    if ( i >= o.getNumChildren() )
+    {
+        std::stringstream stream;
+        stream << i;
+        throwPythonIndexException( stream.str().c_str() );
+    }
+    const Abc::OObject& c = o.getChild( i );
+    if ( !c.valid() )
+    {
+        Abc::OObject();
+    }
+    return c;
+}
+
+//-*****************************************************************************
+static Abc::OObject getChildByName( Abc::OObject &o, const std::string& name )
+{
+    const Abc::OObject& c = o.getChild( name );
+    if ( c.valid() )
+    {
+        return c;
+    }
+
+    std::stringstream stream;
+    stream << name;
+    throwPythonKeyException( stream.str().c_str() );
+
+}
+
+//-*****************************************************************************
 void register_oobject()
 {
     // overloads
     //
-    Abc::OObject ( Abc::OObject::*getChildByIndex )( size_t ) = \
-        &Abc::OObject::getChild;
-    Abc::OObject ( Abc::OObject::*getChildByName )( const std::string& ) = \
-        &Abc::OObject::getChild;
-
     const AbcA::ObjectHeader&
         ( Abc::OObject::*getChildHeaderByIndex )( size_t ) = \
         &Abc::OObject::getChildHeader;
@@ -106,13 +133,13 @@ void register_oobject()
               "Return the single top-level OCompoundProperty",
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getChild",
-              getChildByIndex,
+              &getChildByIndex,
               ( arg( "index" ) ),
               "Return an already created child OObject with the given index\n"
               "This does not create a new OObject as a child",
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getChild",
-              getChildByName,
+              &getChildByName,
               ( arg( "name" ) ),
               "Return an already created OObject with the given name\n"
               "This does not create a new OObject as a child",
