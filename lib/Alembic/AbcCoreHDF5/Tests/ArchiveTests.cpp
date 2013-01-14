@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -219,6 +219,70 @@ void testReadWriteTimeSamplingArchive()
     }
 }
 
+void testReadWriteMaxNumSamplesArchive()
+{
+    std::string archiveName = "timeMaxNumSampsArchive.abc";
+
+    {
+        A5::WriteArchive w;
+        ABC::ArchiveWriterPtr a = w(archiveName, ABC::MetaData());
+
+        // we always have 1
+        TESTING_ASSERT(a->getNumTimeSamplings() == 1);
+
+        std::vector< double > samps;
+
+        // uniform sampling starts at second 34, 24fps
+        samps.push_back(34.0);
+        ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
+        uint32_t index = a->addTimeSampling(ts);
+        TESTING_ASSERT(index == 1);
+
+        // uniform sampling starts at second 72, 24fps
+        samps[0] = 72.0;
+        ABC::TimeSampling ts2(ABC::TimeSamplingType(1.0/24.0), samps);
+        index = a->addTimeSampling(ts2);
+        TESTING_ASSERT(index == 2);
+
+        std::string testStr = "test";
+        ABC::ScalarPropertyWriterPtr propPtr =
+            a->getTop()->getProperties()->createScalarProperty("test",
+                ABC::MetaData(),
+                ABC::DataType(Alembic::Util::kStringPOD, 1), 1);
+
+        // set the same thing 3 times
+        propPtr->setSample(&testStr);
+        propPtr->setSample(&testStr);
+        propPtr->setSample(&testStr);
+
+        propPtr =
+            a->getTop()->getProperties()->createScalarProperty("test2",
+                ABC::MetaData(),
+                ABC::DataType(Alembic::Util::kStringPOD, 1), 2);
+        propPtr->setSample(&testStr);
+        propPtr->setSample(&testStr);
+        std::string test2Str = "test2";
+        propPtr->setSample(&test2Str);
+    }
+
+    {
+        A5::ReadArchive r;
+        ABC::ArchiveReaderPtr a = r( archiveName );
+
+
+        std::vector< double > samps;
+
+        // uniform sampling starts at second 34, 24fps
+        samps.push_back(34.0);
+        ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
+        TESTING_ASSERT( ts == *(a->getTimeSampling(1)) );
+
+        TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(0) == 0 );
+        TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(1) == 1 );
+        TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(2) == 3 );
+    }
+}
+
 void writeArchive( const std::string & iName, bool iCache )
 {
     ABC::MetaData m;
@@ -341,6 +405,8 @@ int main ( int argc, char *argv[] )
     writeVeryEmptyArchive("cacheTestEmpty.abc", true);
     readVeryEmptyArchive("cacheTestEmpty.abc", false);
     readVeryEmptyArchive("cacheTestEmpty.abc", true);
+
+    testReadWriteMaxNumSamplesArchive();
 
     return 0;
 }

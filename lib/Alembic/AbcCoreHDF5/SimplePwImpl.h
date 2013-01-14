@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -405,10 +405,18 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::~SimplePwImpl()
         index_t maxSamples = archive->getMaxNumSamplesForTimeSamplingIndex(
             m_timeSamplingIndex );
 
-        if ( maxSamples < m_nextSampleIndex )
+        uint32_t numSamples = m_nextSampleIndex;
+
+        // a constant property, we wrote the same sample over and over
+        if ( m_lastChangedIndex == 0 && m_nextSampleIndex > 0 )
+        {
+            numSamples = 1;
+        }
+
+        if ( maxSamples < numSamples )
         {
             archive->setMaxNumSamplesForTimeSamplingIndex( m_timeSamplingIndex,
-                                                           m_nextSampleIndex );
+                                                           numSamples );
         }
 
     }
