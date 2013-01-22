@@ -52,14 +52,13 @@ MStatus AlembicImportFileTranslator::reader(
 }
 
 MPxFileTranslator::MFileKind
-AlembicImportFileTranslator::identifyFile(const MFileObject& fileName,
+AlembicImportFileTranslator::identifyFile(const MFileObject& file,
                                           const char* buffer,
                                           short size) const
 {
-    MString name = fileName.name();
-    int len = static_cast<int>(name.length());
-
-    if ((len > 4) && (name.substring(len-4, len-1).toLowerCase() == ".abc"))
+    MString name = file.resolvedName();
+    unsigned int len = name.numChars();
+    if (len > 4 && name.substringW(len - 4, len - 1).toLowerCase() == ".abc")
     {
         return kIsMyFileType;
     }
