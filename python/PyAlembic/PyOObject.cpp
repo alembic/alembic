@@ -67,7 +67,7 @@ static Abc::OObject getChildByName( Abc::OObject &o, const std::string& name )
     std::stringstream stream;
     stream << name;
     throwPythonKeyException( stream.str().c_str() );
-
+    return Abc::OObject();
 }
 
 //-*****************************************************************************

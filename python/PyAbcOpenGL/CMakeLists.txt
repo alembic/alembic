@@ -33,5 +33,50 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY( PyAlembic )
-#ADD_SUBDIRECTORY( PyAbcOpenGL )
+FIND_FILE( ALEMBIC_PYTHON_LIBRARY libpython2.6.a
+           PATHS /usr/lib64/python2.6/config
+                 /usr/lib64
+                 /usr/lib )
+
+IF ( BOOST_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
+
+  MESSAGE( STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}" )
+
+  SET( PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY} )
+
+  SET( CORE_LIBS
+    AlembicAbcOpenGL
+    AlembicAbcGeom
+    AlembicAbc
+    AlembicAbcCoreHDF5
+    AlembicAbcCoreAbstract
+    AlembicAbcCollection
+    AlembicAbcMaterial
+    AlembicUtil )
+
+  SET( CPP_FILES
+    PyAlembicOpenGL.cpp
+    main.cpp )
+
+  LINK_LIBRARIES( ${CORE_LIBS}
+                  ${ALEMBIC_HDF5_LIBS}
+                  ${PLIBS}
+                  ${ALEMBIC_ILMBASE_LIBS}
+                  ${ZLIB_LIBRARIES}
+                  ${EXTERNAL_MATH_LIBS} 
+                  ${ALEMBIC_PYILMBASE_PYIMATH_LIB} )
+
+  INCLUDE_DIRECTORIES( "/usr/include/python2.6" "${ALEMBIC_SOURCE_DIR}/lib"
+      "${ALEMBIC_SOURCE_DIR}/python/PyAbcOpenGL" )
+
+  ADD_LIBRARY( alembicglmodule SHARED ${CPP_FILES} )
+
+  # to get rid of the "lib" prefix from cmake
+  SET_TARGET_PROPERTIES( alembicglmodule PROPERTIES PREFIX "")
+
+  INSTALL( TARGETS alembicglmodule
+           LIBRARY DESTINATION lib )
+
+  #ADD_SUBDIRECTORY( Tests )
+
+ENDIF()

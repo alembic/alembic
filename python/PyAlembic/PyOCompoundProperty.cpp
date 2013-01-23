@@ -44,7 +44,7 @@ static object getPropertyByName( Abc::OCompoundProperty &p,
                                  const std::string& name )
 {
     const AbcA::PropertyHeader* h = p.getPropertyHeader( name );
-    Abc::WrapExistingFlag iWrap;
+    Abc::WrapExistingFlag iWrap = Abc::kWrapExisting;
     if ( !h )
     {
         std::stringstream stream;
@@ -74,6 +74,7 @@ static object getPropertyByName( Abc::OCompoundProperty &p,
                             b.getPtr()->asCompoundPtr(), iWrap))));
     }
     throwPythonException( "Conversion error, unsupported property type" );
+    return object();
 }
 
 //-*****************************************************************************
@@ -86,7 +87,7 @@ static object getPropertyByIndex( Abc::OCompoundProperty &p, size_t i )
         throwPythonIndexException( stream.str().c_str() );
         return object(); // Returns None object
     }
-    Abc::WrapExistingFlag iWrap;
+    Abc::WrapExistingFlag iWrap = Abc::kWrapExisting;
     const AbcA::PropertyHeader& h = p.getPropertyHeader( i );
     const std::string name( h.getName() );
     if ( h.isScalar() )
@@ -111,6 +112,7 @@ static object getPropertyByIndex( Abc::OCompoundProperty &p, size_t i )
                             b.getPtr()->asCompoundPtr(), iWrap))));
     }
     throwPythonException( "Conversion error, unsupported property type" );
+    return object();
 }
 
 

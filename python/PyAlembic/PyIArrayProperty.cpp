@@ -37,6 +37,7 @@
 #include <Foundation.h>
 #include <PyIBaseProperty.h>
 #include <PyIPropertyUtil.h>
+#include <PyTypeBindingUtil.h>
 
 using namespace boost::python;
 
@@ -227,6 +228,17 @@ static object getDimension( Abc::IArrayProperty& p,
 }
 
 //-*****************************************************************************
+static std::string getKey( Abc::IArrayProperty &p, 
+                           const Abc::ISampleSelector &iSS )
+{
+    AbcA::ArraySampleKey oKey;
+    if ( p.getKey( oKey, iSS ) ) {
+        return oKey.digest.str();
+    };
+    return std::string();
+}
+
+//-*****************************************************************************
 void register_iarrayproperty()
 {
     // IBaseProperty
@@ -246,6 +258,20 @@ void register_iarrayproperty()
         getAllSampleList( Abc::IArrayProperty& iProp )
         {
             return getSampleList<Abc::IArrayProperty>( iProp, kReturnAll );
+        }
+
+        static object serialize( Abc::IArrayProperty& iProp,
+                                      const Abc::ISampleSelector &iSS )
+        {
+            std::vector<std::string> valueStrings;
+
+            for( size_t i = 0; i < iProp.getNumSamples(); ++i ) {
+                std::stringstream buff;
+                buff << getValue<Abc::IArrayProperty>( iProp, iSS, kReturnAll );
+                valueStrings[i] = buff.str();
+            };
+
+            return ConvertStrings( valueStrings );
         }
 
     };
@@ -287,6 +313,11 @@ void register_iarrayproperty()
         .def( "getParent",
               &Abc::IArrayProperty::getParent,
               "Return the parent ICompoundProperty" )
+        .def( "getKey", &getKey )
+        .def( "serialize",
+              Overloads::serialize,
+              ( arg( "iSS" ) = Abc::ISampleSelector() ),
+              "Return the sample with the given ISampleSelector as a string" )
         .add_property( "samples", Overloads::getAllSampleList )
         ;
 

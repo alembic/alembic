@@ -118,6 +118,7 @@ static object getPropertyByName( Abc::ICompoundProperty &p,
         return object (handle<>(converter (Abc::ICompoundProperty (p, name))));
     }
     throwPythonException( "Conversion error, unsupported property type" );
+    return object();
 }
 
 //-*****************************************************************************
@@ -148,6 +149,7 @@ static object getPropertyByIndex( Abc::ICompoundProperty &p, size_t i )
         return object (handle<>(converter (Abc::ICompoundProperty (p, name))));
     }
     throwPythonException( "Conversion error, unsupported property type" );
+    return object();
 }
 
 

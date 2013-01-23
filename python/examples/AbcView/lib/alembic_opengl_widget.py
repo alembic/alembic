@@ -1,7 +1,6 @@
-#! /usr/bin/env python
 #-******************************************************************************
 #
-# Copyright (c) 2012,
+# Copyright (c) 2013,
 #  Sony Pictures Imageworks Inc. and
 #  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 #
@@ -54,6 +53,7 @@ from OpenGL.GLU import *
 
 import imath
 import alembic
+import alembicgl
 
 kWrapExisting = alembic.Abc.WrapExistingFlag.kWrapExisting
 
@@ -73,9 +73,6 @@ def getFinalMatrix(obj):
     return xf
 
 class AbcGLWidget(QtOpenGL.QGLWidget):
-    """
-    A simple OpenGL widget that draws Alembic scenes.
-    """
     signalSceneOpened = QtCore.pyqtSignal()
     signalSceneError = QtCore.pyqtSignal(str)
     signalSceneDrawn = QtCore.pyqtSignal()
@@ -84,8 +81,12 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         format = QtOpenGL.QGLFormat()
         format.setSampleBuffers(True)
         QtOpenGL.QGLWidget.__init__(self, format, parent)
-        self.setCursor(QtCore.Qt.OpenHandCursor)
-        self.setMouseTracking(True)
+
+        # draw toggles
+        self.__drawGrid = True
+        self.__drawNormals = False
+        self.__drawBounds = False
+        self.__drawHUD = False
 
         # various matrices and vectors
         self.__matrix = []
@@ -100,31 +101,25 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         self.__last_p3d = [1.0, 0.0, 0.0]
         self.__rotating = False
 
-        # draw toggles
-        self.__drawGrid = True
-        self.__drawNormals = False
-        self.__drawBounds = False
-        self.__drawHUD = False
-
         # alembic scene params
         self.archive = None
         self.scene = None
 
-        if filepath:
-            self.openScene(filepath)
+        self.setMouseTracking(True)
+        self.setCursor(QtCore.Qt.OpenHandCursor)
+
+        self.openScene(filepath)
 
     def openScene(self, filepath):
-        if os.path.isfile(filepath):
+        if filepath and os.path.isfile(filepath):
             try:
                 self.archive = alembic.Abc.IArchive(filepath)
-                self.scene = alembic.AbcOpenGL.SceneWrapper(filepath)
+                self.scene = alembicgl.SceneWrapper(filepath)
                 self.signalSceneOpened.emit()
             except RuntimeError, e:
                 self.signalSceneError.emit("Error drawing GL scene for %s" 
                                            % os.path.basename(filepath))
                 print e
-        else:
-            raise IOError("File does not exist: %s" % filepath)
 
     def toggleGrid(self, force=None):
         if force is not None:
@@ -160,36 +155,23 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         self.rotate([1.2, -2.8, -0.35], 50.0)
    
     def initializeGL(self):
-        mat_front_emission = (0.0, 0.0, 0.0, 1.0)
-        mat_back_emission = (0.0, 1.0, 0.0, 1.0)
-        mat_specular = (1.0, 1.0, 1.0, 1.0)
-        mat_shininess = 100.0
-        
-        glClearColor(0.0, 0.0, 0.0, 0.0)
-        glMaterialfv(GL_FRONT, GL_EMISSION, mat_front_emission)
-        glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular)
-        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess)
-        glMaterialfv(GL_BACK, GL_EMISSION, mat_back_emission)
-        glMaterialfv(GL_BACK, GL_SPECULAR, mat_specular)
-        glMaterialfv(GL_BACK, GL_SHININESS, mat_shininess)
-        glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE)
+        glPointSize(3.0)
+        glEnable(GL_BLEND)
+        glShadeModel(GL_SMOOTH)
+        glEnable(GL_AUTO_NORMAL)
         glEnable(GL_COLOR_MATERIAL)
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_NORMALIZE)
+        glDisable(GL_CULL_FACE)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        # light settings
         glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
-        glEnable(GL_DEPTH_TEST)
-        glEnable(GL_AUTO_NORMAL)
-        glEnable(GL_NORMALIZE)
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glDisable(GL_CULL_FACE)
-        glShadeModel(GL_SMOOTH)
-        glPointSize(3.0)
-
-        ambientColor = (1.0, 1.0, 1.0, 1.0)
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor)
-
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
+        
         self.resetView()
 
     def paintGL(self):
@@ -213,9 +195,6 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
             self.drawHUD()
 
     def drawNormals(self):
-        """
-        Draws point normals.
-        """
         def _draw(obj):
             md = obj.getMetaData()
             if alembic.AbcGeom.IPolyMesh.matches(md) or alembic.AbcGeom.ISubD.matches(md):
@@ -262,9 +241,6 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         _draw(self.archive.getTop())
 
     def drawBounds(self):
-        """
-        Draws a bounding box around the scene.
-        """
         bounds = self.scene.bounds()
         min_x = bounds.min()[0]
         min_y = bounds.min()[1]
@@ -315,9 +291,6 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         glEnd()
 
     def drawGrid(self):
-        """
-        Draws a grid from (-10, -10) to (10, 10).
-        """
         for x in range(-10, 11):
             if x == 0:
                 continue
@@ -340,7 +313,6 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
     def drawHUD(self):
         def _format(array):
             return " ".join(["%.2f" %f for f in array])
-
         glColor3f(1, 1, 0.5)
         self.renderText(15, 20, _format(self.__translate))
         glColor3f(0.5, 1, 0.5)
@@ -365,21 +337,7 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
     def setCenter(self, center):
         self.__center = center
         self.viewAll()
-
-    def resetView(self):
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-        self.__matrix = glGetDoublev(GL_MODELVIEW_MATRIX)
-        self.setCenter([0.0, 0.0, 0.0])
-
-    def resetRotation(self):
-        self.__matrix[0] = [1.0, 0.0, 0.0, 0.0]
-        self.__matrix[1] = [0.0, 1.0, 0.0, 0.0]
-        self.__matrix[2] = [0.0, 0.0, 1.0, 0.0]
-        glMatrixMode(GL_MODELVIEW)
-        glLoadMatrixd(self.__matrix)
-        self.updateGL()
-   
+    
     def translate(self, trans):
         self.makeCurrent()
         glMatrixMode(GL_MODELVIEW)
@@ -394,18 +352,19 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
     def rotate(self, axis, angle):
         self.makeCurrent()
         
-        t = [self.__matrix[0][0] * self.__center[0] +
-             self.__matrix[1][0] * self.__center[1] +
-             self.__matrix[2][0] * self.__center[2] +
-             self.__matrix[3][0],
-             self.__matrix[0][1] * self.__center[0] +
-             self.__matrix[1][1] * self.__center[1] +
-             self.__matrix[2][1] * self.__center[2] +
-             self.__matrix[3][1],
-             self.__matrix[0][2] * self.__center[0] +
-             self.__matrix[1][2] * self.__center[1] +
-             self.__matrix[2][2] * self.__center[2] +
-             self.__matrix[3][2]]
+        x = self.__matrix[0][0] * self.__center[0] + \
+            self.__matrix[1][0] * self.__center[1] + \
+            self.__matrix[2][0] * self.__center[2] + \
+            self.__matrix[3][0]
+        y = self.__matrix[0][1] * self.__center[0] + \
+            self.__matrix[1][1] * self.__center[1] + \
+            self.__matrix[2][1] * self.__center[2] + \
+            self.__matrix[3][1]
+        z = self.__matrix[0][2] * self.__center[0] + \
+            self.__matrix[1][2] * self.__center[1] + \
+            self.__matrix[2][2] * self.__center[2] + \
+            self.__matrix[3][2]
+        t = [x, y, z]
 
         glLoadIdentity()
         glTranslatef(t[0], t[1], t[2])
@@ -414,27 +373,19 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         glMultMatrixd(self.__matrix)
         self.__matrix = glGetDoublev(GL_MODELVIEW_MATRIX)
 
-    def mapToSphere(self, v2d):
-        v3d = [0.0, 0.0, 0.0]
-        if ((v2d.x() >= 0) and (v2d.x() <= self.width()) and
-            (v2d.y() >= 0) and (v2d.y() <= self.height())):
-            x = float(v2d.x() - 0.5 * self.width())  / self.width()
-            y = float(0.5 * self.height() - v2d.y()) / self.height()
-            v3d[0] = x
-            v3d[1] = y
-            z2 = 2.0 * 0.5 * 0.5 - x * x - y * y
-            v3d[2] = math.sqrt(max( z2, 0.0 ))
-            n = linalg.norm(v3d)
-            v3d = numpy.array(v3d) / float(n)
-            return True, v3d
-        else:
-            return False, v3d
+    def resetView(self):
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        self.__matrix = glGetDoublev(GL_MODELVIEW_MATRIX)
+        self.setCenter([0.0, 0.0, 0.0])
 
-    def wheelEvent(self, event):
-        d = float(event.delta()) / 200 * self.__radius
-        self.translate([0.0, 0.0, d])
+    def resetRotation(self):
+        self.__matrix[0] = [1.0, 0.0, 0.0, 0.0]
+        self.__matrix[1] = [0.0, 1.0, 0.0, 0.0]
+        self.__matrix[2] = [0.0, 0.0, 1.0, 0.0]
+        glMatrixMode(GL_MODELVIEW)
+        glLoadMatrixd(self.__matrix)
         self.updateGL()
-        event.accept()
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.RightButton:
@@ -522,23 +473,24 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         self.__last_pok = False
         super(AbcGLWidget, self).mouseReleaseEvent(event)
 
-def main(filepath):
-    app = QtGui.QApplication(sys.argv)
-    win = AbcGLWidget(filepath=filepath)
-    win.show()
-    return app.exec_()
-
-if __name__ == '__main__':
-    try:
-        filepath = None
-        if len(sys.argv) == 2:
-            filepath = sys.argv[1]
+    def mapToSphere(self, v2d):
+        v3d = [0.0, 0.0, 0.0]
+        if ((v2d.x() >= 0) and (v2d.x() <= self.width()) and
+            (v2d.y() >= 0) and (v2d.y() <= self.height())):
+            x = float(v2d.x() - 0.5 * self.width())  / self.width()
+            y = float(0.5 * self.height() - v2d.y()) / self.height()
+            v3d[0] = x
+            v3d[1] = y
+            z2 = 2.0 * 0.5 * 0.5 - x * x - y * y
+            v3d[2] = math.sqrt(max( z2, 0.0 ))
+            n = linalg.norm(v3d)
+            v3d = numpy.array(v3d) / float(n)
+            return True, v3d
         else:
-            print "%s <file.abc>" % sys.argv[0]
-            sys.exit(1)
-        sys.exit(main(filepath))
-    except Exception, e:
-        traceback.print_exc()
-    except KeyboardInterrupt:
-        print 'Stopping...'
-        sys.exit(1)
+            return False, v3d
+
+    def wheelEvent(self, event):
+        d = float(event.delta()) / 200 * self.__radius
+        self.translate([0.0, 0.0, d])
+        self.updateGL()
+        event.accept()
