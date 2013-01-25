@@ -42,7 +42,7 @@
 #include <tr1/memory>
 #include <tr1/unordered_map>
 
-#elif _MSC_VER < 1500
+#elif _MSC_VER <= 1600
 
 // no tr1 in these older versions of MS VS so fall back to boost
 #include <boost/type_traits.hpp>
@@ -97,7 +97,7 @@ namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-#if defined( _MSC_VER ) && _MSC_VER < 1500
+#if defined( _MSC_VER ) && _MSC_VER <= 1600
 using boost::dynamic_pointer_cast;
 using boost::enable_shared_from_this;
 using boost::shared_ptr;

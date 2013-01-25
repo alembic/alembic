@@ -48,3 +48,5 @@ SET( FULL_ABC_LIBS
 ADD_EXECUTABLE( abcstitcher AbcStitcher.cpp util.cpp)
 TARGET_LINK_LIBRARIES( abcstitcher ${FULL_ABC_LIBS} )
 
+INSTALL( TARGETS abcstitcher
+         DESTINATION bin )

@@ -75,6 +75,11 @@ IF( "${CMAKE_SYSTEM_NAME}" MATCHES "Linux" )
   SET( LINUX TRUE )
 ENDIF()
 
+# Windows support for ILMBase libraries
+IF ( WIN32 )
+  ADD_DEFINITIONS ( -DHALF_EXPORTS )
+ENDIF ()
+
 # Set some debug vs opt flags
 IF ( "${CMAKE_BUILD_TYPE}" MATCHES "Debug" )
   ADD_DEFINITIONS( -DDEBUG=1 -UNDEBUG )
@@ -231,8 +236,13 @@ INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )
 INCLUDE( "./build/AlembicIlmBase.cmake" )
 INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
 
-INCLUDE( "./build/AlembicPyIlmBase.cmake" )
-INCLUDE_DIRECTORIES( ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} )
+IF(DEFINED USE_PYILMBASE AND NOT USE_PYILMBASE)
+    MESSAGE(STATUS "Skipping Prman plugins")
+ELSE()
+    MESSAGE( STATUS "About to include AlembicPyIlmBase.cmake" )
+  INCLUDE( "./build/AlembicPyIlmBase.cmake" )
+  INCLUDE_DIRECTORIES( ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} )
+ENDIF ()
 
 # Include Python stuff
 INCLUDE("./build/AlembicPython.cmake")

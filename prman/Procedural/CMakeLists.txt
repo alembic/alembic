@@ -77,7 +77,10 @@ TARGET_LINK_LIBRARIES( AlembicRiProcedural
   ${ZLIB_LIBRARIES}
 )
 
-
-
+INSTALL ( TARGETS
+  AlembicRiProcedural
+  DESTINATION
+  prman/procedurals
+)
 
 ENDIF()

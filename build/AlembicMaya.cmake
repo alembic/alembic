@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -83,6 +83,7 @@ FIND_PATH( MAYA_INCLUDE_PATH maya/MTypes.h
   PATHS
   "${ALEMBIC_MAYA_INC_ROOT}"
   "${ALEMBIC_MAYA_ROOT}/include"
+  "${ALEMBIC_MAYA_ROOT}/devkit/include"
   DOC "The directory where MTypes.h resides" )
 
 SET( MAYA_FOUNDATION_LIBRARY MAYA_FOUNDATION_LIBRARY-NOTFOUND )
@@ -206,7 +207,8 @@ MACRO(ADD_MAYA_CXX_PLUGIN PluginName SourceFile1 )
   IF( NOT DARWIN )
     ADD_LIBRARY( ${PluginName} MODULE ${TMP_SOURCES} )
   ELSE()
-    ADD_EXECUTABLE( ${PluginName} MACOSX_BUNDLE ${TMP_SOURCES} )
+    # ADD_EXECUTABLE( ${PluginName} MACOSX_BUNDLE ${TMP_SOURCES} )
+    ADD_LIBRARY( ${PluginName} MODULE ${TMP_SOURCES} )
   ENDIF()
 
 

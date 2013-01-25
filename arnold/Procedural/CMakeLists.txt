@@ -73,7 +73,7 @@ TARGET_LINK_LIBRARIES( AlembicArnoldProcedural
 INSTALL ( TARGETS
   AlembicArnoldProcedural
   DESTINATION
-  arnold/procedural
+  arnold/procedurals
 )
 
 ENDIF()
