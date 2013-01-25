@@ -129,11 +129,7 @@ public:
     //! Using Default Copy Constructor
     //! Using Default Assignment Operator
 
-    bool operator==( const TimeSamplingType & iRhs ) const
-    {
-        return ( m_numSamplesPerCycle == iRhs.m_numSamplesPerCycle &&
-            m_timePerCycle == iRhs.m_timePerCycle );
-    }
+    bool operator==( const TimeSamplingType & iRhs ) const;
 
     //! Asks if the sampling is:
     //! Uniform (1 sample per cycle)

@@ -36,6 +36,8 @@
 
 #include <Alembic/AbcCoreAbstract/TimeSamplingType.h>
 
+#include <ImathMath.h>
+
 namespace Alembic {
 namespace AbcCoreAbstract {
 namespace ALEMBIC_VERSION_NS {
@@ -47,6 +49,10 @@ const uint32_t ACYCLIC_NUM_SAMPLES = std::numeric_limits<uint32_t>::max();
 
 // Not all the way to the max.
 const chrono_t ACYCLIC_TIME_PER_CYCLE = std::numeric_limits<chrono_t>::max() / 32.0;
+
+// Work around the imprecision of comparing floating values.
+static const chrono_t kCHRONO_EPSILON = \
+    std::numeric_limits<chrono_t>::epsilon() * 32.0;
 }
 
 //-*****************************************************************************
@@ -59,6 +65,13 @@ uint32_t TimeSamplingType::AcyclicNumSamples()
 chrono_t TimeSamplingType::AcyclicTimePerCycle()
 {
     return ACYCLIC_TIME_PER_CYCLE;
+}
+
+bool TimeSamplingType::operator==( const TimeSamplingType & iRhs ) const
+{
+    return ( m_numSamplesPerCycle == iRhs.m_numSamplesPerCycle &&
+             Imath::equalWithAbsError( m_timePerCycle, iRhs.m_timePerCycle,
+                                       kCHRONO_EPSILON ) );
 }
 
 //-*****************************************************************************
