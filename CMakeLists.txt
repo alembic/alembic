@@ -237,7 +237,7 @@ INCLUDE( "./build/AlembicIlmBase.cmake" )
 INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
 
 IF(DEFINED USE_PYILMBASE AND NOT USE_PYILMBASE)
-    MESSAGE(STATUS "Skipping PyILMBase plugins")
+    MESSAGE(STATUS "Skipping PyILMBase")
 ELSE()
     MESSAGE( STATUS "About to include AlembicPyIlmBase.cmake" )
   INCLUDE( "./build/AlembicPyIlmBase.cmake" )

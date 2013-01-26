@@ -204,13 +204,7 @@ MACRO(ADD_MAYA_CXX_PLUGIN PluginName SourceFile1 )
   INCLUDE_DIRECTORIES( ${MAYA_INCLUDE_PATH} )
 
   # Add the target
-  IF( NOT DARWIN )
-    ADD_LIBRARY( ${PluginName} MODULE ${TMP_SOURCES} )
-  ELSE()
-    # ADD_EXECUTABLE( ${PluginName} MACOSX_BUNDLE ${TMP_SOURCES} )
-    ADD_LIBRARY( ${PluginName} MODULE ${TMP_SOURCES} )
-  ENDIF()
-
+  ADD_LIBRARY( ${PluginName} MODULE ${TMP_SOURCES} )
 
   # Compile and linker flags
   SET_TARGET_PROPERTIES( ${PluginName}
