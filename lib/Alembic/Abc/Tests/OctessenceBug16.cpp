@@ -42,8 +42,6 @@ using namespace Abc;
 
 using Alembic::AbcCoreAbstract::chrono_t;
 using Alembic::AbcCoreAbstract::index_t;
-using Alembic::Util::uint32_t;
-
 
 //
 // The tests in this file are intended to demonstrate Alembic Issue 16
@@ -53,7 +51,7 @@ using Alembic::Util::uint32_t;
 
 void writeSimpleProperties(const std::string &archiveName)
 {
-    const uint32_t numSamples = 5;
+    const Alembic::Util::uint32_t numSamples = 5;
     const chrono_t dt = 1.0 / 24.0;
 
     TimeSamplingType tst( dt ); // uniform with cycle=dt
@@ -65,7 +63,7 @@ void writeSimpleProperties(const std::string &archiveName)
     OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
                       archiveName, ErrorHandler::kThrowPolicy );
 
-    uint32_t tsidx = archive.addTimeSampling(ts);
+    Alembic::Util::uint32_t tsidx = archive.addTimeSampling(ts);
     OObject archiveTop = archive.getTop();
 
     // Create a child, parented under  the archive
@@ -79,7 +77,7 @@ void writeSimpleProperties(const std::string &archiveName)
                           tsidx );
 
     // Write out the samples
-    for (uint32_t tt=0; tt<numSamples; tt++)
+    for (Alembic::Util::uint32_t tt=0; tt<numSamples; tt++)
     {
         double mm = (1.0 + 0.1*tt); // vary the mass
         // either one works. Is one the 'correct' method?

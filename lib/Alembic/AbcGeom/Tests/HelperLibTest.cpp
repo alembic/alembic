@@ -48,7 +48,6 @@ using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 
 using Alembic::AbcCoreAbstract::chrono_t;
 using Alembic::AbcCoreAbstract::index_t;
-using Alembic::Util::uint32_t;
 
 //
 // The tests in this file are intended to exercise Abc helper
@@ -71,7 +70,7 @@ void writeSimpleProperties(const std::string &archiveName)
                       archiveName, ErrorHandler::kThrowPolicy );
     OObject archiveTop = archive.getTop();
 
-    uint32_t tsidx = archive.addTimeSampling(ts);
+    Alembic::Util::uint32_t tsidx = archive.addTimeSampling(ts);
 
     OObject foochild( archiveTop, "foochild" );
 
@@ -416,7 +415,7 @@ void writeNestedCommpoundWithVis(const std::string &archiveName)
 
     const chrono_t dt = 1.0 / 24.0;
     TimeSampling ts(dt, 666.0); // uniform with cycle=dt starting at 666.0
-    uint32_t tsidx = archive.addTimeSampling(ts);
+    Alembic::Util::uint32_t tsidx = archive.addTimeSampling(ts);
 
     // Create several objects under top called "child_N"
     // child_1 will be set to have hidden visibility.

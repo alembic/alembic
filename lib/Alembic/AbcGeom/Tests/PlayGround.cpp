@@ -45,10 +45,6 @@ using namespace Alembic::AbcGeom;
 
 using Alembic::AbcCoreAbstract::chrono_t;
 using Alembic::AbcCoreAbstract::index_t;
-using Alembic::Util::uint32_t;
-using Alembic::Util::float32_t;
-using Alembic::Util::int32_t;
-
 
 //-*****************************************************************************
 Alembic::Util::shared_ptr< Alembic::Abc::OObject >
@@ -82,7 +78,7 @@ subdCube( Alembic::Abc::OObject & parent )
     Alembic::AbcGeom::OSubDSchema &schema = subdObjPtr->getSchema();
 
     std::vector<V3f> verts( 8 );
-    std::vector<int32_t> indices( 8 );
+    std::vector<Alembic::Util::int32_t> indices( 8 );
 
     Alembic::AbcGeom::OSubDSchema::Sample sample( verts, indices, indices );
 
@@ -179,9 +175,9 @@ void PolyMorphicAbstractPtrs()
         awPtr = archiveTop.getProperties().getPtr()->createArrayProperty(
             "arrayprop", AbcA::MetaData(), dt, 0 );
 
-        uint32_t sval = 2;
-        std::vector<uint32_t> aval( 5, 3 );
-        std::vector<uint32_t> saval( 254, 2 );
+        Alembic::Util::uint32_t sval = 2;
+        std::vector<Alembic::Util::uint32_t> aval( 5, 3 );
+        std::vector<Alembic::Util::uint32_t> saval( 254, 2 );
 
         // use base type as scalar prop writer
         pwPtr = swPtr;
@@ -237,9 +233,9 @@ void StupidData()
 
         OInt32ArrayProperty intArrayProp( props, "intArrayProp" );
 
-        for ( int32_t i = 0 ; i < 10 ; ++i )
+        for ( Alembic::Util::int32_t i = 0 ; i < 10 ; ++i )
         {
-            std::vector<int32_t> v( i, i );
+            std::vector<Alembic::Util::int32_t> v( i, i );
             intArrayProp.set( v );
             TESTING_ASSERT( intArrayProp.getNumSamples() ==
                             ( size_t ) ( i + 1 ) );
@@ -274,7 +270,7 @@ void StupidData()
 
         for ( size_t i = 0 ; i < 10 ; ++i )
         {
-            std::vector<int32_t> v( i, i );
+            std::vector<Alembic::Util::int32_t> v( i, i );
             Int32ArraySamplePtr samp = intArrayProp.getValue( i );
             size_t numpoints = samp->size();
 

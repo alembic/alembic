@@ -44,10 +44,6 @@ using namespace AbcG;
 
 using Alembic::AbcCoreAbstract::chrono_t;
 using Alembic::AbcCoreAbstract::index_t;
-using Alembic::Util::uint32_t;
-using Alembic::Util::float32_t;
-using Alembic::Util::int32_t;
-using Alembic::Util::uint64_t;
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -91,22 +87,23 @@ public:
     }
 
     size_t numParticles() const { return m_id.size(); }
-    const std::vector<uint64_t> &idVec() const { return m_id; }
+    const std::vector<Alembic::Util::uint64_t> &idVec() const { return m_id; }
     const std::vector<V3f> &positionVec() const { return m_position; }
     const std::vector<C3f> &colorVec() const { return m_color; }
     const std::vector<V3f> &velocityVec() const { return m_velocity; }
-    const std::vector<float32_t> &ageVec() const { return m_age; }
+    const std::vector<Alembic::Util::float32_t> &ageVec() const
+    { return m_age; }
 
 protected:
     Parameters m_params;
 
-    std::vector<uint64_t> m_id;
+    std::vector<Alembic::Util::uint64_t> m_id;
     std::vector<V3f> m_position;
     std::vector<C3f> m_color;
     std::vector<V3f> m_velocity;
-    std::vector<float32_t> m_age;
+    std::vector<Alembic::Util::float32_t> m_age;
 
-    uint64_t m_nextId;
+    Alembic::Util::uint64_t m_nextId;
     double m_emitDither;
     chrono_t m_currentTime;
 };
@@ -189,10 +186,10 @@ void ParticleSystem::emitNew( chrono_t dt )
 
     for ( size_t newPart = 0; newPart < numNewParts; ++newPart )
     {
-        uint64_t newId = m_nextId;
+        Alembic::Util::uint64_t newId = m_nextId;
         ++m_nextId;
 
-        rand48.init( ( uint64_t )newId );
+        rand48.init( ( Alembic::Util::uint64_t )newId );
 
         // Position
         V3f emitPos = Imath::gaussSphereRand<V3f>( rand48 )
@@ -243,7 +240,7 @@ void RunAndWriteParticles
 
     // Create the time sampling type.
     TimeSampling ts(iFps, 0.0);
-    uint32_t tsidx = iParent.getArchive().addTimeSampling(ts);
+    Alembic::Util::uint32_t tsidx = iParent.getArchive().addTimeSampling(ts);
 
     // Create our object.
     OPoints partsOut( iParent, "simpleParticles", tsidx );
@@ -344,8 +341,8 @@ void pointTestReadWrite()
 
         std::vector< V3f > positions;
         std::vector< V3f > velocities;
-        std::vector< uint64_t > ids;
-        std::vector< float32_t > widths;
+        std::vector< Alembic::Util::uint64_t > ids;
+        std::vector< Alembic::Util::float32_t > widths;
         for (int i = 0; i < 100; ++i)
         {
             OFloatGeomParam::Sample widthSamp;
@@ -416,7 +413,7 @@ void optPropTest()
         std::vector<float> widths( numVerts );
         std::vector<V3f> veloc( numVerts );
         std::vector<V3f> verts( numVerts );
-        std::vector< uint64_t > ids( numVerts );
+        std::vector< Alembic::Util::uint64_t > ids( numVerts );
         OFloatGeomParam::Sample widthSamp;
         widthSamp.setScope(kVertexScope);
         widthSamp.setVals(FloatArraySample(widths));

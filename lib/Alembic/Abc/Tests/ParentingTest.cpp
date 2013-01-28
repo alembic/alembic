@@ -83,7 +83,7 @@ void simpleTestOut( const std::string &iArchiveName )
     ac0V3fp0.set( scalarV3fval );
 
     TimeSampling ts(dt, startTime);
-    uint32_t tsidx = archive.addTimeSampling(ts);
+    Alembic::Util::uint32_t tsidx = archive.addTimeSampling(ts);
 
     // now some array props
     OV3fArrayProperty acc0V3fap0( acc0Props, "acc0V3fap0", tsidx );

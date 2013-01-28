@@ -78,7 +78,7 @@ void writeUInt32ArrayProperty(const std::string &archiveName)
     OUInt32ArrayProperty primes( childProps,  // owner
                                  "primes"); // uniform with cycle=dt
 
-    std::vector<uint32_t> vals;
+    std::vector<Alembic::Util::uint32_t> vals;
     for (int ss=0; ss<5; ss++)
     {
         // This vector increases in length as we go, increasing the
@@ -166,7 +166,7 @@ void readUInt32ArrayProperty(const std::string &archiveName)
             ABCA_ASSERT( (*samplePtr)[jj] == g_primes[jj],
                          "Incorrect value read from archive." );
 
-        std::vector< uint32_t > uintPrimes( numPoints );
+        std::vector< Alembic::Util::uint32_t > uintPrimes( numPoints );
         primes.getAs( &uintPrimes.front(), iss );
         for ( size_t jj=0 ; jj<numPoints ; jj++ )
             ABCA_ASSERT( uintPrimes[jj] == g_primes[jj],
@@ -215,7 +215,7 @@ void writeV3fArrayProperty(const std::string &archiveName)
     // add the time sampling the other way
     std::vector < chrono_t > timeSamps(1, startTime);
     TimeSampling ts(TimeSamplingType( dt ), timeSamps);
-    uint32_t tsid = archive.addTimeSampling(ts);
+    Alembic::Util::uint32_t tsid = archive.addTimeSampling(ts);
 
     // Create a scalar property on this child object named 'positions'
     OV3fArrayProperty positions( childProps,      // owner
