@@ -45,20 +45,20 @@ namespace Abc = Alembic::Abc;
 using namespace Abc;
 
 //-*****************************************************************************
-static std::vector<int32_t> intArraySamp;
+static std::vector<Alembic::Util::int32_t> intArraySamp;
 static std::set<std::string> PATHS;
 
-static const int32_t NUM_TOP_CHILDREN = 100;
-static const int32_t DEPTH = 499;
+static const Alembic::Util::int32_t NUM_TOP_CHILDREN = 100;
+static const Alembic::Util::int32_t DEPTH = 499;
 
-static const int32_t HIGHVAL = 200;
+static const Alembic::Util::int32_t HIGHVAL = 200;
 
 typedef std::pair< std::set<std::string>::iterator, bool > PATH_PAIR;
 
 //-*****************************************************************************
 void makeIntArraySamp()
 {
-    for ( int32_t i = 0 ; i < HIGHVAL ; i++ )
+    for ( Alembic::Util::int32_t i = 0 ; i < HIGHVAL ; i++ )
     {
         intArraySamp.push_back( i );
     }

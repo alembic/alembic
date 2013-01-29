@@ -161,7 +161,7 @@ void simpleTestOut()
         V3f v( ( float )idx );
         clanker.set( v );
 
-        clunker.set( ( int32_t )( 731 - ( int )idx ) );
+        clunker.set( ( Alembic::Util::int32_t )( 731 - ( int )idx ) );
     }
 
     std::cout << "Gonna try to close: " << archive.getName()

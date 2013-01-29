@@ -68,7 +68,7 @@ void writeSimpleProperties(const std::string &archiveName)
                       archiveName, ErrorHandler::kThrowPolicy );
     OObject archiveTop = archive.getTop();
 
-    uint32_t tsidx = archive.addTimeSampling(ts);
+    Alembic::Util::uint32_t tsidx = archive.addTimeSampling(ts);
 
     OObject foochild( archiveTop, "foochild" );
 

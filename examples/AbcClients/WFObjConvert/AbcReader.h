@@ -86,10 +86,10 @@ protected:
     std::vector<V3f> m_vertices;
     std::vector<V2f> m_texVertices;
     std::vector<N3f> m_normals;
-    std::vector<int32_t> m_indices;
-    std::vector<int32_t> m_texIndices;
-    std::vector<int32_t> m_normIndices;
-    std::vector<int32_t> m_counts;
+    std::vector<Alembic::Util::int32_t> m_indices;
+    std::vector<Alembic::Util::int32_t> m_texIndices;
+    std::vector<Alembic::Util::int32_t> m_normIndices;
+    std::vector<Alembic::Util::int32_t> m_counts;
 };
 
 } // End namespace WFObjConvert

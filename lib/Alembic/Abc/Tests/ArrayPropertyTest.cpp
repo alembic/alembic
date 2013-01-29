@@ -43,7 +43,6 @@ using namespace Abc;
 
 using Alembic::AbcCoreAbstract::chrono_t;
 using Alembic::AbcCoreAbstract::index_t;
-using Alembic::Util::uint32_t;
 
 //
 // The tests in this file are intended to exercize the Abc API;
@@ -172,7 +171,7 @@ void readUInt32ArrayProperty(const std::string &archiveName)
             ABCA_ASSERT( uintPrimes[jj] == g_primes[jj],
                          "Incorrect value via getAs from archive." );
 
-        std::vector< int16_t > shortPrimes( numPoints );
+        std::vector< Alembic::Util::int16_t > shortPrimes( numPoints );
         primes.getAs( &shortPrimes.front(), AbcA::kInt16POD, iss );
         for ( size_t jj=0 ; jj<numPoints ; jj++ )
             ABCA_ASSERT( ( unsigned int ) shortPrimes[jj] == g_primes[jj],

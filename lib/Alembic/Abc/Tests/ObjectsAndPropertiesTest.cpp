@@ -190,7 +190,7 @@ void simpleTestOut( const std::string &iArchiveName )
 
     // make some data for our array props
     std::vector<V3f> v3fpoints( numV3fPoints );
-    std::vector<int32_t> intpoints( numIntPoints );
+    std::vector<Alembic::Util::int32_t> intpoints( numIntPoints );
 
     chrono_t t = v3fStartTime;
 
@@ -444,9 +444,9 @@ void simpleTestIn( const std::string &iArchiveName )
 
         for ( size_t j = 0 ; j < numPoints ; ++j )
         {
-            int32_t val = (*ac0iap0SampPtr)[j];
+            Alembic::Util::int32_t val = (*ac0iap0SampPtr)[j];
 
-            TESTING_ASSERT( val == ( int32_t ) ( i + j ) );
+            TESTING_ASSERT( val == ( Alembic::Util::int32_t ) ( i + j ) );
 
             std::cout << val << ", ";
         }

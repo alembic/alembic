@@ -45,9 +45,9 @@
 //-*****************************************************************************
 namespace A5 = Alembic::AbcCoreHDF5;
 
-namespace ABC = Alembic::AbcCoreAbstract;
+namespace ABCA = Alembic::AbcCoreAbstract;
 
-using ABC::chrono_t;
+using ABCA::chrono_t;
 using Alembic::Util::float32_t;
 using Alembic::Util::int32_t;
 using Alembic::Util::byte_t;
@@ -56,15 +56,15 @@ using Alembic::Util::Dimensions;
 //-*****************************************************************************
 void WriteTestArchive( const std::string &iArchiveName )
 {
-    ABC::MetaData md;
+    ABCA::MetaData md;
     md.setUnique( "name", "arkive" );
-    ABC::ObjectWriterPtr finalChild;
+    ABCA::ObjectWriterPtr finalChild;
 
     A5::WriteArchive aw;
 
-    ABC::ArchiveWriterPtr archive = aw( iArchiveName, md );
+    ABCA::ArchiveWriterPtr archive = aw( iArchiveName, md );
 
-    ABC::ObjectWriterPtr topObj = archive->getTop();
+    ABCA::ObjectWriterPtr topObj = archive->getTop();
     // at this point, the archive has a single H5 Group under the root
     // group called "ABC".
 
@@ -73,18 +73,18 @@ void WriteTestArchive( const std::string &iArchiveName )
         // when the archive goes out of scope, it writes itself to disk.
 
         md.set( "name", "childObject0" );
-        ABC::ObjectWriterPtr archiveChild = topObj->createChild(
-            ABC::ObjectHeader( "archiveChild", md ) );
+        ABCA::ObjectWriterPtr archiveChild = topObj->createChild(
+            ABCA::ObjectHeader( "archiveChild", md ) );
         // the hdf5 layout of the archive is now "/ABC/archiveChild/"
 
         md.set( "name", "childObject1" );
-        ABC::ObjectWriterPtr archiveChildChild = archiveChild->createChild(
-            ABC::ObjectHeader( "archiveChildChild", md ) );
+        ABCA::ObjectWriterPtr archiveChildChild = archiveChild->createChild(
+            ABCA::ObjectHeader( "archiveChildChild", md ) );
         // "/ABC/archiveChild/archiveChildChild"
 
         md.set( "name", "childObject2" );
         finalChild = archiveChildChild->createChild(
-            ABC::ObjectHeader( "archiveChildChildChild", md ) );
+            ABCA::ObjectHeader( "archiveChildChildChild", md ) );
         // "/ABC/archiveChild/archiveChildChild/archiveChildChildChild"
     }
     // At this point, only the final child and the archive are still in scope,

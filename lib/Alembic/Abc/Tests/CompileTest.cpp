@@ -129,7 +129,7 @@ void testOTypedArrayProperty( OObject &iObject )
                                "intPropArray" );
     OInt32ArrayProperty intProp2( intProp.getPtr(), kWrapExisting );
 
-    int32_t i[] = { 1, 2, 3, 4, 5 };
+    Alembic::Util::int32_t i[] = { 1, 2, 3, 4, 5 };
     intProp.set( Int32ArraySample( i, 5 ) );
     intProp2.set( Int32ArraySample( i, 5 ) );
 

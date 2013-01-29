@@ -48,9 +48,9 @@
 //-*****************************************************************************
 namespace A5 = Alembic::AbcCoreHDF5;
 
-namespace ABC = Alembic::AbcCoreAbstract;
+namespace ABCA = Alembic::AbcCoreAbstract;
 
-using ABC::chrono_t;
+using ABCA::chrono_t;
 using Alembic::Util::float32_t;
 using Alembic::Util::int32_t;
 using Alembic::Util::byte_t;
@@ -64,14 +64,14 @@ void testReadWriteEmptyArchive()
 
     {
         A5::WriteArchive w;
-        ABC::MetaData m;
+        ABCA::MetaData m;
         m.set("Bleep", "bloop");
         m.set("eep", "");
         m.set("potato", "salad");
         m.set("geoScope", "tasty");
 
-        ABC::ArchiveWriterPtr a = w(archiveName, m);
-        ABC::ObjectWriterPtr archive = a->getTop();
+        ABCA::ArchiveWriterPtr a = w(archiveName, m);
+        ABCA::ObjectWriterPtr archive = a->getTop();
 
         TESTING_ASSERT(archive->getFullName() == "/");
 
@@ -84,7 +84,7 @@ void testReadWriteEmptyArchive()
         H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
         // can't write an already open archive
-        TESTING_ASSERT_THROW(w(archiveName, ABC::MetaData()),
+        TESTING_ASSERT_THROW(w(archiveName, ABCA::MetaData()),
             Alembic::Util::Exception);
 
         Alembic::AbcCoreHDF5::ReadArchive r;
@@ -99,9 +99,9 @@ void testReadWriteEmptyArchive()
 
     {
         A5::ReadArchive r;
-        ABC::ArchiveReaderPtr a = r( archiveName );
-        ABC::ObjectReaderPtr archive = a->getTop();
-        ABC::MetaData m = archive->getHeader().getMetaData();
+        ABCA::ArchiveReaderPtr a = r( archiveName );
+        ABCA::ObjectReaderPtr archive = a->getTop();
+        ABCA::MetaData m = archive->getHeader().getMetaData();
         TESTING_ASSERT(m.get("Bleep") == "bloop");
         TESTING_ASSERT(m.get("eep") == "");
         TESTING_ASSERT(m.get("potato") == "salad");
@@ -114,17 +114,17 @@ void testReadWriteEmptyArchive()
         // even though we didn't write anything make sure we intrincially have
         // the default sampling
         TESTING_ASSERT(a->getNumTimeSamplings() == 1);
-        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
+        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABCA::TimeSampling());
         TESTING_ASSERT(a->getMaxNumSamplesForTimeSamplingIndex(0) == 0);
 
-        ABC::CompoundPropertyReaderPtr parent = archive->getProperties();
+        ABCA::CompoundPropertyReaderPtr parent = archive->getProperties();
         TESTING_ASSERT(parent->getNumProperties() == 0);
 
         // get it again to make sure we clean ourselves up properly
         A5::ReadArchive r2;
-        ABC::ArchiveReaderPtr a2 = r2( archiveName );
-        ABC::ObjectReaderPtr archive2 = a2->getTop();
-        ABC::CompoundPropertyReaderPtr p2 = archive2->getProperties();
+        ABCA::ArchiveReaderPtr a2 = r2( archiveName );
+        ABCA::ObjectReaderPtr archive2 = a2->getTop();
+        ABCA::CompoundPropertyReaderPtr p2 = archive2->getProperties();
         TESTING_ASSERT(p2->getNumProperties() == 0);
     }
 }
@@ -135,7 +135,7 @@ void testReadWriteTimeSamplingArchive()
 
     {
         A5::WriteArchive w;
-        ABC::ArchiveWriterPtr a = w(archiveName, ABC::MetaData());
+        ABCA::ArchiveWriterPtr a = w(archiveName, ABCA::MetaData());
 
         // we always have 1
         TESTING_ASSERT(a->getNumTimeSamplings() == 1);
@@ -147,14 +147,14 @@ void testReadWriteTimeSamplingArchive()
             a->getMaxNumSamplesForTimeSamplingIndex(43) == INDEX_UNKNOWN);
 
         // first one is the default time sampling
-        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
+        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABCA::TimeSampling());
         TESTING_ASSERT(a->getMaxNumSamplesForTimeSamplingIndex(0) == 0);
 
         std::vector< double > samps;
 
         // uniform sampling starts at second 34, 24fps
         samps.push_back(34.0);
-        ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
+        ABCA::TimeSampling ts(ABCA::TimeSamplingType(1.0/24.0), samps);
         uint32_t index = a->addTimeSampling(ts);
         TESTING_ASSERT(index == 1);
 
@@ -165,7 +165,7 @@ void testReadWriteTimeSamplingArchive()
         // cyclic sampling example
         samps.push_back(34.25);
         samps.push_back(34.5);
-        ts = ABC::TimeSampling(ABC::TimeSamplingType(3, 1.0), samps);
+        ts = ABCA::TimeSampling(ABCA::TimeSamplingType(3, 1.0), samps);
         index = a->addTimeSampling(ts);
         TESTING_ASSERT(index == 2);
 
@@ -176,8 +176,8 @@ void testReadWriteTimeSamplingArchive()
         // really weird acyclic example
         samps.push_back(300.0);
         samps.push_back(500.0);
-        ts = ABC::TimeSampling(
-            ABC::TimeSamplingType(ABC::TimeSamplingType::kAcyclic), samps);
+        ts = ABCA::TimeSampling(
+            ABCA::TimeSamplingType(ABCA::TimeSamplingType::kAcyclic), samps);
         index = a->addTimeSampling(ts);
         TESTING_ASSERT(index == 3);
 
@@ -187,33 +187,33 @@ void testReadWriteTimeSamplingArchive()
 
     {
         A5::ReadArchive r;
-        ABC::ArchiveReaderPtr a = r( archiveName );
+        ABCA::ArchiveReaderPtr a = r( archiveName );
 
         TESTING_ASSERT(a->getNumTimeSamplings() == 4);
 
         // first one is the default time sampling
-        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABC::TimeSampling());
+        TESTING_ASSERT(*(a->getTimeSampling(0)) == ABCA::TimeSampling());
 
         std::vector< double > samps;
 
         // uniform sampling starts at second 34, 24fps
         samps.push_back(34.0);
-        ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
+        ABCA::TimeSampling ts(ABCA::TimeSamplingType(1.0/24.0), samps);
         TESTING_ASSERT( ts == *(a->getTimeSampling(1)) );
         TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(1) == 0 );
 
         // cyclic sampling example
         samps.push_back(34.25);
         samps.push_back(34.5);
-        ts = ABC::TimeSampling(ABC::TimeSamplingType(3, 1.0), samps);
+        ts = ABCA::TimeSampling(ABCA::TimeSamplingType(3, 1.0), samps);
         TESTING_ASSERT( ts == *(a->getTimeSampling(2)) );
         TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(2) == 42 );
 
         // really weird acyclic example
         samps.push_back(300.0);
         samps.push_back(500.0);
-        ts = ABC::TimeSampling(
-            ABC::TimeSamplingType(ABC::TimeSamplingType::kAcyclic), samps);
+        ts = ABCA::TimeSampling(
+            ABCA::TimeSamplingType(ABCA::TimeSamplingType::kAcyclic), samps);
         TESTING_ASSERT( ts == *(a->getTimeSampling(3)) );
         TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(3) == 0 );
     }
@@ -225,7 +225,7 @@ void testReadWriteMaxNumSamplesArchive()
 
     {
         A5::WriteArchive w;
-        ABC::ArchiveWriterPtr a = w(archiveName, ABC::MetaData());
+        ABCA::ArchiveWriterPtr a = w(archiveName, ABCA::MetaData());
 
         // we always have 1
         TESTING_ASSERT(a->getNumTimeSamplings() == 1);
@@ -234,21 +234,21 @@ void testReadWriteMaxNumSamplesArchive()
 
         // uniform sampling starts at second 34, 24fps
         samps.push_back(34.0);
-        ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
+        ABCA::TimeSampling ts(ABCA::TimeSamplingType(1.0/24.0), samps);
         uint32_t index = a->addTimeSampling(ts);
         TESTING_ASSERT(index == 1);
 
         // uniform sampling starts at second 72, 24fps
         samps[0] = 72.0;
-        ABC::TimeSampling ts2(ABC::TimeSamplingType(1.0/24.0), samps);
+        ABCA::TimeSampling ts2(ABCA::TimeSamplingType(1.0/24.0), samps);
         index = a->addTimeSampling(ts2);
         TESTING_ASSERT(index == 2);
 
         std::string testStr = "test";
-        ABC::ScalarPropertyWriterPtr propPtr =
+        ABCA::ScalarPropertyWriterPtr propPtr =
             a->getTop()->getProperties()->createScalarProperty("test",
-                ABC::MetaData(),
-                ABC::DataType(Alembic::Util::kStringPOD, 1), 1);
+                ABCA::MetaData(),
+                ABCA::DataType(Alembic::Util::kStringPOD, 1), 1);
 
         // set the same thing 3 times
         propPtr->setSample(&testStr);
@@ -257,8 +257,8 @@ void testReadWriteMaxNumSamplesArchive()
 
         propPtr =
             a->getTop()->getProperties()->createScalarProperty("test2",
-                ABC::MetaData(),
-                ABC::DataType(Alembic::Util::kStringPOD, 1), 2);
+                ABCA::MetaData(),
+                ABCA::DataType(Alembic::Util::kStringPOD, 1), 2);
         propPtr->setSample(&testStr);
         propPtr->setSample(&testStr);
         std::string test2Str = "test2";
@@ -267,14 +267,14 @@ void testReadWriteMaxNumSamplesArchive()
 
     {
         A5::ReadArchive r;
-        ABC::ArchiveReaderPtr a = r( archiveName );
+        ABCA::ArchiveReaderPtr a = r( archiveName );
 
 
         std::vector< double > samps;
 
         // uniform sampling starts at second 34, 24fps
         samps.push_back(34.0);
-        ABC::TimeSampling ts(ABC::TimeSamplingType(1.0/24.0), samps);
+        ABCA::TimeSampling ts(ABCA::TimeSamplingType(1.0/24.0), samps);
         TESTING_ASSERT( ts == *(a->getTimeSampling(1)) );
 
         TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(0) == 0 );
@@ -285,12 +285,12 @@ void testReadWriteMaxNumSamplesArchive()
 
 void writeArchive( const std::string & iName, bool iCache )
 {
-    ABC::MetaData m;
-    ABC::ObjectHeader header("a", m);
+    ABCA::MetaData m;
+    ABCA::ObjectHeader header("a", m);
     A5::WriteArchive w( iCache );
-    ABC::ArchiveWriterPtr a = w(iName, m );
-    ABC::ObjectWriterPtr root = a->getTop();
-    std::vector< ABC::ObjectWriterPtr > objVec;
+    ABCA::ArchiveWriterPtr a = w(iName, m );
+    ABCA::ObjectWriterPtr root = a->getTop();
+    std::vector< ABCA::ObjectWriterPtr > objVec;
 
     objVec.push_back(root);
     objVec.push_back(root->createChild(header));
@@ -309,13 +309,13 @@ void writeArchive( const std::string & iName, bool iCache )
         objVec.push_back(objVec[i]->createChild(header));
     }
 
-    ABC::DataType i32d(Alembic::Util::kInt32POD, 1);
+    ABCA::DataType i32d(Alembic::Util::kInt32POD, 1);
 
     // let's add 3 array properties to EVERY object
     for (std::size_t i = 0; i < objVec.size(); ++i)
     {
-        ABC::CompoundPropertyWriterPtr top = objVec[i]->getProperties();
-        std::vector<ABC::ArrayPropertyWriterPtr> props;
+        ABCA::CompoundPropertyWriterPtr top = objVec[i]->getProperties();
+        std::vector<ABCA::ArrayPropertyWriterPtr> props;
         props.push_back(top->createArrayProperty("a", m, i32d, 0));
         props.push_back(top->createArrayProperty("b", m, i32d, 0));
         props.push_back(top->createArrayProperty("c", m, i32d, 0));
@@ -327,7 +327,7 @@ void writeArchive( const std::string & iName, bool iCache )
             for (std::size_t j = i; j < props.size(); ++j)
             {
                 props[j]->setSample(
-                    ABC::ArraySample(&(vali.front()), i32d, dims));
+                    ABCA::ArraySample(&(vali.front()), i32d, dims));
             }
         }
     }
@@ -336,8 +336,8 @@ void writeArchive( const std::string & iName, bool iCache )
 void readArchive( const std::string & iName, bool iCache )
 {
     Alembic::AbcCoreHDF5::ReadArchive r( iCache );
-    ABC::ArchiveReaderPtr a = r( iName );
-    std::vector< ABC::ObjectReaderPtr > objs;
+    ABCA::ArchiveReaderPtr a = r( iName );
+    std::vector< ABCA::ObjectReaderPtr > objs;
     objs.push_back( a->getTop() );
     TESTING_ASSERT( objs[0]->getNumChildren() == 2 );
     objs.push_back( objs[0]->getChild(0) );
@@ -357,8 +357,8 @@ void readArchive( const std::string & iName, bool iCache )
     {
         TESTING_ASSERT( objs[i]->getProperties()->getNumProperties() == 3 );
 
-        ABC::CompoundPropertyReaderPtr cpr = objs[i]->getProperties();
-        ABC::ArrayPropertyReaderPtr apr = cpr->getArrayProperty("a");
+        ABCA::CompoundPropertyReaderPtr cpr = objs[i]->getProperties();
+        ABCA::ArrayPropertyReaderPtr apr = cpr->getArrayProperty("a");
 
         TESTING_ASSERT( 0 ==
             objs[i]->getProperties()->getArrayProperty("a")->getNumSamples() );
@@ -373,15 +373,15 @@ void readArchive( const std::string & iName, bool iCache )
 
 void writeVeryEmptyArchive( const std::string & iName, bool iCache )
 {
-    ABC::MetaData m;
+    ABCA::MetaData m;
     A5::WriteArchive w( iCache );
-    ABC::ArchiveWriterPtr a = w(iName, m);
+    ABCA::ArchiveWriterPtr a = w(iName, m);
 }
 
 void readVeryEmptyArchive( const std::string & iName, bool iCache )
 {
     Alembic::AbcCoreHDF5::ReadArchive r( iCache );
-    ABC::ArchiveReaderPtr a = r( iName );
+    ABCA::ArchiveReaderPtr a = r( iName );
     TESTING_ASSERT(a->getTop()->getNumChildren() == 0);
 }
 

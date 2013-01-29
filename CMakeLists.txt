@@ -77,7 +77,7 @@ ENDIF()
 
 # Windows support for ILMBase libraries
 IF ( WIN32 )
-  ADD_DEFINITIONS ( -DHALF_EXPORTS )
+  ADD_DEFINITIONS ( -DOPENEXR_DLL -DHALF_EXPORTS )
 ENDIF ()
 
 # Set some debug vs opt flags
