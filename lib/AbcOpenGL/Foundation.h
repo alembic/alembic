@@ -52,11 +52,6 @@
 #include <ImathFun.h>
 #include <ImathBoxAlgo.h>
 
-#include <boost/format.hpp>
-#include <boost/preprocessor/stringize.hpp>
-#include <boost/timer.hpp>
-#include <boost/program_options.hpp>
-
 #include <iostream>
 #include <algorithm>
 #include <utility>
@@ -178,12 +173,14 @@ inline void GL_CHECK( const std::string &header = "" )
 }
 
 //-*****************************************************************************
+#define make_string(x) #x
+
 #define GL_NOISY( CODE )                        \
 do                                              \
 {                                               \
     CODE ;                                      \
     std::string msg = "Code: ";                 \
-    msg += BOOST_PP_STRINGIZE( CODE );          \
+    msg += make_string( CODE );                 \
     GL_CHECK( msg );                            \
 }                                               \
 while( 0 )

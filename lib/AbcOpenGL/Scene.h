@@ -40,9 +40,25 @@
 #include "Foundation.h"
 #include "GLCamera.h"
 #include "Drawable.h"
+#include <ctime>
 
 namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
+
+//-*****************************************************************************
+class Timer
+{
+public:
+	Timer() { Init(); }
+	void Init() { m_start = clock(); }
+	clock_t elapsed() const { return (clock() - m_start); }
+    void restart() { m_start = clock(); }
+
+private:
+    Timer(const Timer& t);
+	void operator=(const Timer& t);
+	clock_t m_start;
+};
 
 //-*****************************************************************************
 struct SceneState

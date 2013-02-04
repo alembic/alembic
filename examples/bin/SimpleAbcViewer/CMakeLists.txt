@@ -35,48 +35,21 @@
 ##-*****************************************************************************
 
 SET( H_FILES
-     DrawContext.h
-     Drawable.h
-     Foundation.h
-     GLCamera.h
-     ICurvesDrw.h
-     INuPatchDrw.h
-     IObjectDrw.h
-     IPointsDrw.h
-     IPolyMeshDrw.h
-     ISubDDrw.h
-     IXformDrw.h
-     MeshDrwHelper.h
-     Scene.h
      Transport.h
      Viewer.h )
 
 SET( CXX_FILES
-     GLCamera.cpp
-     ICurvesDrw.cpp
-     INuPatchDrw.cpp
-     IObjectDrw.cpp
-     IPointsDrw.cpp
-     IPolyMeshDrw.cpp
-     ISubDDrw.cpp
-     IXformDrw.cpp
-     MeshDrwHelper.cpp
-     Scene.cpp
      Transport.cpp
      Viewer.cpp
      main.cpp )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+
 SET( THIS_LIBS
-     AlembicAbcGeom
-     AlembicAbc
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreAbstract
-     AlembicUtil
+     AlembicAbcOpenGL
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_GL_LIBS}
      ${ALEMBIC_ILMBASE_LIBS}
-     ${Boost_PROGRAM_OPTIONS_LIBRARY}
      ${CMAKE_THREAD_LIBS_INIT}
      ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
@@ -87,4 +60,3 @@ INSTALL( TARGETS SimpleAbcViewer
          DESTINATION bin )
 
 #ADD_PYTHON_SCRIPT_INST( SimpleAbcViewerRenderit )
-

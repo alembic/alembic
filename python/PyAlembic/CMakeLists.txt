@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,15 +33,50 @@
 ##
 ##-*****************************************************************************
 
-FIND_FILE( ALEMBIC_PYTHON_LIBRARY libpython2.6.a
-           PATHS /usr/lib64/python2.6/config
-                 /usr/lib64
-                 /usr/lib )
+SET( LIBPYTHON_VERSION 2.6 )
+SET( LIBPYTHON python${LIBPYTHON_VERSION} )
+OPTION( USE_LIB64 "Search for deps in lib64 vs lib" ON )
 
+# find python lib dir and include files
+IF ( ${CMAKE_HOST_UNIX} )
+    SET( LIBPYTHON_FILE "lib${LIBPYTHON}.a" )
+    IF( ${DARWIN} )
+        SET( OSX_PYTHON_ROOT 
+             "/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}" )
+        SET( PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}" )
+
+        SET( ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/Python" )
+    ELSE()
+        SET( PYTHON_INCLUDE_DIR "/usr/include/${LIBPYTHON}" )
+        IF (USE_LIB64)
+            SET( ALEMBIC_PYTHON_ROOT "/usr/lib64/${LIBPYTHON}/config" )
+        ELSE()
+            SET( ALEMBIC_PYTHON_ROOT "/usr/lib/${LIBPYTHON}/config" )
+        ENDIF()
+    ENDIF()
+ELSE()
+    SET( LIBPYTHON_FILE "${LIBPYTHON}.dll" )
+    IF ( ${WINDOWS} )
+        SET( ALEMBIC_PYTHON_ROOT "C:/Python${LIBPYTHON_VERSION}/libs" )
+    ELSE()
+        SET( ALEMBIC_PYTHON_ROOT NOTFOUND )
+    ENDIF()
+ENDIF()
+
+MESSAGE( STATUS "LIBPYTHON_FILE: ${LIBPYTHON_FILE}" )
+MESSAGE( STATUS "ALEMBIC_PYTHON_ROOT: ${ALEMBIC_PYTHON_ROOT}" )
+
+# find the python lib file
+FIND_FILE( ALEMBIC_PYTHON_LIBRARY ${LIBPYTHON_FILE}
+           PATHS ${ALEMBIC_PYTHON_ROOT}
+         )
+
+MESSAGE( STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}" )
+MESSAGE( STATUS "PYTHON_INCLUDE_DIR:" ${PYTHON_INCLUDE_DIR} )
+
+# set core libs
 IF ( BOOST_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
-
   MESSAGE( STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}" )
-
   SET( PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY} )
 
   SET( CORE_LIBS
@@ -127,7 +162,7 @@ IF ( BOOST_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
                   ${EXTERNAL_MATH_LIBS} 
                   ${ALEMBIC_PYILMBASE_PYIMATH_LIB} )
 
-  INCLUDE_DIRECTORIES( "/usr/include/python2.6" "${ALEMBIC_SOURCE_DIR}/lib"
+  INCLUDE_DIRECTORIES( "${PYTHON_INCLUDE_DIR}" "${ALEMBIC_SOURCE_DIR}/lib"
       "${ALEMBIC_SOURCE_DIR}/python/PyAlembic" )
 
   ADD_LIBRARY( alembicmodule SHARED ${CPP_FILES} )
@@ -140,4 +175,6 @@ IF ( BOOST_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
 
   ADD_SUBDIRECTORY( Tests )
 
+ELSE()
+    MESSAGE( FATAL_ERROR "Unable to find Python libs" )
 ENDIF()

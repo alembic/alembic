@@ -283,28 +283,32 @@ void GLCamera::rotate( const V2d &point,
 //-*****************************************************************************
 std::string GLCamera::RIB() const
 {
-    // Then transpose and print.
-    return ( boost::format( "Format %d %d 1\n"
-                            "Clipping %f %f\n"
-                            "Projection \"perspective\" \"fov\" [%f]\n"
-                            "Scale 1 1 -1\n"
-                            "Scale %f %f %f\n"
-                            "Rotate %f 0 0 1\n"
-                            "Rotate %f 1 0 0\n"
-                            "Rotate %f 0 1 0\n"
-                            "Translate %f %f %f\n" )
-             % ( int )m_size[0] % ( int )m_size[1]
-             % ( float )m_clip[0] % ( float )m_clip[1]
-             % ( float )m_fovy
-             % ( float )( 1.0/m_scale[0] )
-             % ( float )( 1.0/m_scale[1] )
-             % ( float )( 1.0/m_scale[2] )
-             % ( float )( -m_rotation[2] )
-             % ( float )( -m_rotation[0] )
-             % ( float )( -m_rotation[1] )
-             % ( float )( -m_translation[0] )
-             % ( float )( -m_translation[1] )
-             % ( float )( -m_translation[2] ) ).str();
+    std::ostringstream cameraStream;
+    cameraStream << "Format " 
+                 << ( int )m_size[0] 
+                 << ( int )m_size[1] << "1\n"
+                 << "Clipping " 
+                 << ( float )m_clip[0] 
+                 << ( float )m_clip[1] << "\n"
+                 << "Projection \"perspective\" \"fov\" [" 
+                 << ( float )m_fovy << "]\n"
+                 << "Scale 1 1 -1\n"
+                 << "Scale "
+                 << ( float )( 1.0/m_scale[0] ) << " "
+                 << ( float )( 1.0/m_scale[1] ) << " "
+                 << ( float )( 1.0/m_scale[2] ) << "\n"
+                 << "Rotate  " 
+                 << ( float )( -m_rotation[2] ) << "0 0 1\n"
+                 << "Rotate  " 
+                 << ( float )( -m_rotation[0] ) << "1 0 0\n"
+                 << "Rotate  " 
+                 << ( float )( -m_rotation[1] ) << "0 1 0\n"
+                 << "Translate " 
+                 << ( float )( -m_translation[0] )
+                 << ( float )( -m_translation[1] )
+                 << ( float )( -m_translation[2] )
+                 << "\n";
+    return cameraStream.str();
 }
 
 } // End namespace ABCOPENGL_VERSION_NS

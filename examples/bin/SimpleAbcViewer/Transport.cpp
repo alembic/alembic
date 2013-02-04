@@ -38,6 +38,8 @@
 
 namespace SimpleAbcViewer {
 
+using namespace AbcOpenGL;
+
 //-*****************************************************************************
 Transport::Transport( const std::string &iAbcFileName,
                       chrono_t iFramesPerSecond )

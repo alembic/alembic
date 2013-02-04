@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#include "Foundation.h"
 #include "Viewer.h"
+#include <AbcOpenGL/Foundation.h>
 
 //-*****************************************************************************
 int main( int argc, char *argv[] )

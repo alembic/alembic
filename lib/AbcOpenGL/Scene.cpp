@@ -92,7 +92,7 @@ Scene::Scene( const std::string &abcFileName )
   , m_minTime( ( chrono_t )FLT_MAX )
   , m_maxTime( ( chrono_t )-FLT_MAX )
 {
-    boost::timer Timer;
+    Timer playbackTimer;
 
     std::cout << "Beginning to open archive: " << abcFileName << std::endl;
 
@@ -150,8 +150,8 @@ Scene::Scene( const std::string &abcFileName )
     ABCA_ASSERT( m_drawable->valid(),
                  "Invalid drawable after reading start time" );
 
-    std::cout << "Done opening archive. Elapsed time: "
-              << Timer.elapsed() << " seconds." << std::endl;
+    std::cout << "Done opening archive. Elapsed CPU time: "
+              << ((float)playbackTimer.elapsed()) / CLOCKS_PER_SEC << " seconds." << std::endl;
 
     // Bounds have been formed!
     m_bounds = m_drawable->getBounds();

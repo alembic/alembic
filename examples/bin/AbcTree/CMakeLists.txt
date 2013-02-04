@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,18 +33,18 @@
 ##
 ##-*****************************************************************************
 
-IF ( GLUT_Xmu_LIBRARY OR WINDOWS)
-  IF ( Boost_PROGRAM_OPTIONS_FOUND )
-    MESSAGE( STATUS "Including SimpleAbcViewer" )
-    ADD_SUBDIRECTORY( SimpleAbcViewer )
-  ELSE()
-    MESSAGE( STATUS "Not including SimpleAbcViewer" )
-  ENDIF()
+SET( FULL_ABC_LIBS
+     AlembicAbcGeom
+     AlembicAbc
+     AlembicAbcCoreHDF5
+     AlembicAbcCoreAbstract
+     AlembicUtil
+     ${ALEMBIC_HDF5_LIBS}
+     ${ALEMBIC_ILMBASE_LIBS}
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
-ELSE()
-  MESSAGE( STATUS "Not including SimpleAbcViewer" )
-ENDIF()
+#-******************************************************************************
+ADD_EXECUTABLE( abctree AbcTree.cpp )
+TARGET_LINK_LIBRARIES( abctree ${FULL_ABC_LIBS} )
 
-ADD_SUBDIRECTORY( AbcEcho )
-ADD_SUBDIRECTORY( AbcStitcher )
-ADD_SUBDIRECTORY( AbcTree )

@@ -48,7 +48,8 @@ namespace SimpleAbcViewer {
 
 //-*****************************************************************************
 static State g_state;
-static boost::timer g_playbackTimer;
+
+static Timer g_playbackTimer;
 
 //-*****************************************************************************
 void overlay();
@@ -94,7 +95,6 @@ void init( void )
         glEnable(GL_COLOR_MATERIAL);
     }
 
-    // glLightfv( GL_LIGHT0, GL_POSITION, light_position );
     glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE );
     glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
 
@@ -123,9 +123,12 @@ void init( void )
 
     g_state.scene.cam.frame( g_transport->getBounds() );
 
-    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
-                          % g_transport->getFileName()
-                          % g_transport->getCurrentFrame() ).str().c_str() );
+    std::ostringstream titleStream;
+    titleStream << "Archive = " 
+                << g_transport->getFileName()
+                << " | Frame = "
+                << g_transport->getCurrentFrame();
+    glutSetWindowTitle( titleStream.str().c_str() );
 }
 
 //-*****************************************************************************
@@ -133,9 +136,14 @@ void init( void )
 static void TickForward()
 {
     g_transport->tickForward();
-    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
-                          % g_transport->getFileName()
-                          % g_transport->getCurrentFrame() ).str().c_str() );
+
+    std::ostringstream titleStream;
+    titleStream << "Archive = " 
+                << g_transport->getFileName()
+                << " | Frame = "
+                << g_transport->getCurrentFrame();
+    glutSetWindowTitle( titleStream.str().c_str() );
+    
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
     glutPostRedisplay();
 }
@@ -144,9 +152,14 @@ static void TickForward()
 static void TickBackward()
 {
     g_transport->tickBackward();
-    glutSetWindowTitle( ( boost::format( "Archive = %s | Frame = %d" )
-                          % g_transport->getFileName()
-                          % g_transport->getCurrentFrame() ).str().c_str() );
+    
+    std::ostringstream titleStream;
+    titleStream << "Archive = " 
+                << g_transport->getFileName()
+                << " | Frame = "
+                << g_transport->getCurrentFrame();
+    glutSetWindowTitle( titleStream.str().c_str() );
+
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
     glutPostRedisplay();
 }
@@ -191,7 +204,10 @@ void display( void )
     // glPushMatrix();
 
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
+    glDrawBuffer( GL_BACK );
+    g_state.scene.cam.apply();
     g_transport->draw( g_state.scene );
+    glutSwapBuffers();
 
     // glPopMatrix();
 
@@ -271,35 +287,30 @@ void RenderIt()
     std::string boundStr;
     if ( ! bnd.isEmpty() )
     {
-        boundStr = ( boost::format( "[%f %f %f %f %f %f]" )
-                     % bnd.min[0]
-                     % bnd.max[0]
-                     % bnd.min[1]
-                     % bnd.max[1]
-                     % bnd.min[2]
-                     % bnd.max[2] ).str();
+        std::ostringstream boundStream;
+        boundStream << "["
+                    << bnd.min[0] << " "
+                    << bnd.max[0] << " "
+                    << bnd.min[1] << " "
+                    << bnd.max[1] << " "
+                    << bnd.min[2] << " "
+                    << bnd.max[2]
+                    << "]";
+        boundStr = boundStream.str();
     }
     else { boundStr = ""; }
 
-    std::string cmdArgs =
-        ( boost::format( "--shutteropen=%f "
-                         "--shutterclose=%f "
-                         "-C %s "
-                         "-P %s "
-                         "-a %s "
-                         "--sample1=%f "
-                         "--sample2=%f "
-                         "-B \"%s\""
-                       )
-          % shutterOpenTime
-          % shutterCloseTime
-          % cameraFileName
-          % g_state.AlembicRiPluginDsoPath
-          % g_state.abcFileName
-          % openTime
-          % closeTime
-          % boundStr ).str();
-
+    std::ostringstream cmdStream;
+    cmdStream << 
+        " --shutteropen=" << shutterOpenTime <<
+        " --shutterclose=" << shutterCloseTime <<
+        " -C " << cameraFileName <<
+        " -P " << g_state.AlembicRiPluginDsoPath <<
+        " -a " << g_state.abcFileName <<
+        " --sample1=" << openTime <<
+        " --sample2=" << closeTime <<
+        " -B \"%s\"" << boundStr;
+    std::string cmdArgs = cmdStream.str();
     std::string cmd = g_state.RenderScript;
     cmd += " ";
     cmd += cmdArgs;
@@ -311,8 +322,6 @@ void RenderIt()
 //-*****************************************************************************
 void keyboard( unsigned char key, int x, int y )
 {
-    // std::cout << "Key hit: " << ( int )key << std::endl;
-
     static bool bf = true;
 
     switch ( key )
@@ -481,7 +490,20 @@ void mouseDrag( int x, int y )
 }
 
 //-*****************************************************************************
-namespace po = boost::program_options;
+char* getOption(char ** begin, char ** end, const std::string & option)
+{
+    char ** itr = std::find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+        return *itr;
+    }
+    return 0;
+}
+
+bool optionExists(char** begin, char** end, const std::string& option)
+{
+    return std::find(begin, end, option) != end;
+}
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -489,50 +511,62 @@ namespace po = boost::program_options;
 int SimpleViewScene( int argc, char *argv[] )
 {
     std::string viewerpath( argv[0] );
-    std::cout << "viewerpath: " << viewerpath << std::endl;
     std::string RenderScript( viewerpath + "Renderit" );
-    std::cout << "renderscript: " << RenderScript << std::endl;
-    std::string abcFileName = "";
+    std::string abcFileName;
+    std::string AlembicRiPluginDsoPath;
+    std::string desc( "Simple ABC Viewer:\n"
+    "  -h [ --help ]         prints this help message\n"
+    "  -f [ --file ] arg     abc file name\n"
+    "  --fps arg             frames per second for playback (default=24.0)\n"
+    "  -P [ --riPlugin ] arg full path to AlembicRiPlugin.so\n"
+    "  --rndrScript arg      full path to Render Script" );
     float fps = 24.0f;
-    std::string AlembicRiPluginDsoPath = "";
 
-    po::options_description desc( "Simple ABC Viewer" );
-    desc.add_options()
-
-        ( "help,h", "prints this help message" )
-
-        ( "file,f",
-          po::value<std::string>( &abcFileName ),
-          "abc file name" )
-
-        ( "fps",
-          po::value<float>( &fps ),
-          "frames per second for playback (default=24.0)" )
-
-        ( "riPlugin,P",
-          po::value<std::string>( &AlembicRiPluginDsoPath ),
-          "full path to AlembicRiPlugin.so" )
-
-        ( "rndrScript",
-          po::value<std::string>( &RenderScript ),
-          "full path to Render Script" )
-
-        ;
-
-    po::positional_options_description pod;
-    pod.add( "file", -1 );
-
-    po::variables_map vm;
-    po::store( po::command_line_parser( argc, argv ).
-               options( desc ).positional( pod ).run(), vm );
-    po::notify( vm );
-
-    //-*************************************************************************
-    if ( vm.count( "help" ) || argc < 2 )
-    {
+    // help
+    if ( argc < 2 ||
+         optionExists( argv, argv + argc, "-h" ) || 
+         optionExists( argv, argv + argc, "--help" )
+       ) {
         std::cout << desc << std::endl;
         return 0;
-    }
+    };
+
+    // file arg
+    for(int i = 1; i < argc; i++) {
+        if ( string(argv[i]).at(0) != '-' && string(argv[i-1]).at(0) != '-' ) {
+            abcFileName = argv[i];
+            break;
+        };
+    };
+
+    // options
+    if ( optionExists( argv, argv + argc, "-f" ) )
+        abcFileName = string( 
+                getOption( argv, argv + argc, "-f" ) 
+                );
+    else if ( optionExists( argv, argv + argc, "--file" ) )
+        abcFileName = string( 
+                getOption( argv, argv + argc, "--file" ) 
+                );
+   
+    if ( optionExists( argv, argv + argc, "-P" ) )
+        AlembicRiPluginDsoPath = string( 
+                getOption( argv, argv + argc, "-P" ) 
+                );
+    else if ( optionExists( argv, argv + argc, "--riPlugin" ) )
+        AlembicRiPluginDsoPath = string( 
+                getOption( argv, argv + argc, "--riPlugin" ) 
+                );
+
+    if ( optionExists( argv, argv + argc, "--fps" ) )
+        fps = std::atof( string( 
+                    getOption( argv, argv + argc, "--fps" ) ).c_str() 
+                );
+
+    if ( optionExists( argv, argv + argc, "--rndrScript" ) )
+        RenderScript = string( 
+                getOption( argv, argv + argc, "--rndrScript" ) 
+                );
 
 #ifndef DEBUG
     try

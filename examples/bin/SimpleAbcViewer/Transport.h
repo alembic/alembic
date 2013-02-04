@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -37,10 +37,11 @@
 #ifndef _SimpleAbcViewer_Transport_h_
 #define _SimpleAbcViewer_Transport_h_
 
-#include "Foundation.h"
-#include "Scene.h"
+#include <AbcOpenGL/All.h>
 
 namespace SimpleAbcViewer {
+
+using namespace AbcOpenGL;
 
 //-*****************************************************************************
 class Transport

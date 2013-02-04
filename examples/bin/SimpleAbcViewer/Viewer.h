@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -37,11 +37,13 @@
 #ifndef _SimpleAbcViewer_Viewer_h_
 #define _SimpleAbcViewer_Viewer_h_
 
-#include "Foundation.h"
 #include "Transport.h"
-#include "GLCamera.h"
+#include <ctime>
+#include <AbcOpenGL/All.h>
 
 namespace SimpleAbcViewer {
+
+using namespace AbcOpenGL;
 
 //-*****************************************************************************
 // Playback States

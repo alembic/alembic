@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,61 +34,80 @@
 //
 //-*****************************************************************************
 
-#ifndef _SimpleAbcViewer_Drawable_h_
-#define _SimpleAbcViewer_Drawable_h_
+#include <Alembic/AbcGeom/All.h>
+#include <Alembic/AbcCoreAbstract/All.h>
+#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/Util/All.h>
 
-#include "Foundation.h"
-#include "DrawContext.h"
-
-namespace SimpleAbcViewer {
+#include <iostream>
+#include <sstream>
 
 //-*****************************************************************************
-//! What can a drawable do?
-//! Obviously, it can draw!
-//! It can tell you a set of times that it has samples for.
-class Drawable : private Alembic::Util::noncopyable
+using namespace ::Alembic::AbcGeom;
+
+//-*****************************************************************************
+bool is_last( IObject iObj )
 {
-public:
-    Drawable() {}
+    if ( !iObj.getParent().valid() ) {
+        return true;
+    }
 
-    //! Virtual destructor for abstract base class
-    //! ...
-    virtual ~Drawable() {}
-
-    //! Get the min time.
-    //! ...
-    virtual chrono_t getMinTime() = 0;
-
-    //! Get the max time.
-    //! ...
-    virtual chrono_t getMaxTime() = 0;
-
-    //! This function returns whether or not the
-    //! drawable is in a valid state. As we read frames into
-    //! the drawables, it's possible for some drawables to become invalid.
-    virtual bool valid() = 0;
-
-    //! This functions sets the drawable and all its children
-    //! to a new time, in seconds.
-    virtual void setTime( chrono_t iSeconds ) = 0;
-
-    //! This function gets the bounding box at the
-    //! currently set time.
-    virtual Box3d getBounds() = 0;
-
-    //! This function is for getting bounds which we don't want multiplied
-    //! by the local and ancestor transforms
-    virtual Box3d getNonInheritedBounds() { return Box3d(); }
-
-    //! Draw the object (and its children) at the current frame.
-    //! ...
-    virtual void draw( const DrawContext & iCtx ) = 0;
-};
+    Abc::IObject parent = iObj.getParent();
+    int numChildren = parent.getNumChildren();
+    
+    Abc::IObject test = parent.getChild(numChildren - 1);
+    if ( test.valid() && test.getName() != iObj.getName() ) {
+        return false;
+    }
+    return true;
+}
 
 //-*****************************************************************************
-typedef boost::shared_ptr<Drawable> DrawablePtr;
-typedef std::vector<DrawablePtr> DrawablePtrVec;
+void tree( IObject iObj, std::string prefix = "" )
+{
+    std::string path = iObj.getFullName();
 
-} // End namespace SimpleAbcViewer
+    if ( path == "/" ) {
+        prefix = "";
+    } 
+    else 
+    {
+        if ( iObj.getParent().getFullName() != "/" ) {
+            prefix = prefix + "   ";
+        }
+        if ( is_last( iObj ) ) {
+            std::cout << prefix << " `--";
+            prefix = prefix + " ";
+        } else {
+            std::cout << prefix << " |--";
+            prefix = prefix + " |";
+        }
+    };
 
-#endif
+    std::cout << iObj.getName() << "\r" << std::endl;
+
+    for ( size_t i = 0 ; i < iObj.getNumChildren() ; i++ )
+    {
+        tree( IObject( iObj, iObj.getChildHeader(i).getName() ),
+              prefix );
+    }
+}
+
+//-*****************************************************************************
+int main( int argc, char *argv[] )
+{
+    if ( argc != 2 )
+    {
+        std::cerr << "USAGE: " << argv[0] << " <file.abc>"
+                  << std::endl;
+        exit( -1 );
+    }
+    {
+        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                          argv[1], ErrorHandler::kQuietNoopPolicy );
+        std::cout << argv[1] << std::endl;
+        tree( archive.getTop(), "" );
+    }
+
+    return 0;
+}
