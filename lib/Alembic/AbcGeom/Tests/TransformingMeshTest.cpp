@@ -59,7 +59,7 @@ static OPolyMeshSchema::Sample g_meshsamp(
     Int32ArraySample( g_counts, g_numCounts ) );
 
 //-*****************************************************************************
-OXform recurseCreateXform( OObject &iParent, size_t children, int32_t level,
+OXform recurseCreateXform( OObject &iParent, size_t children, Alembic::Util::int32_t level,
                            size_t numSamps )
 {
     OXform xform;

@@ -67,9 +67,9 @@ void Example1_MeshOut()
         Int32ArraySample( g_indices, g_numIndices ),
         Int32ArraySample( g_counts, g_numCounts ) );
 
-    std::vector<int32_t> creases;
-    std::vector<int32_t> corners;
-    std::vector<int32_t> creaseLengths;
+    std::vector<Alembic::Util::int32_t> creases;
+    std::vector<Alembic::Util::int32_t> corners;
+    std::vector<Alembic::Util::int32_t> creaseLengths;
     std::vector<float32_t> creaseSharpnesses;
     std::vector<float32_t> cornerSharpnesses;
 
@@ -115,7 +115,7 @@ void Example1_MeshOut()
     TESTING_ASSERT( faceSetNames.size () == 1 );
     OFaceSetSchema my_face_set = my_face_set_obj.getSchema ();
     std::cout << " - created our FaceSet called : " << my_face_set_obj.getName() << std::endl;
-    std::vector<int32_t> face_nums;
+    std::vector<Alembic::Util::int32_t> face_nums;
     // Our FaceSet is composed of faces 1-3
     face_nums.push_back (1);
     face_nums.push_back (2);

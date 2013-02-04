@@ -78,6 +78,7 @@ ENDIF()
 # Windows support for ILMBase libraries
 IF ( WIN32 )
   ADD_DEFINITIONS ( -DOPENEXR_DLL -DHALF_EXPORTS )
+  INCLUDE_DIRECTORIES ( $ENV{GLEW_ROOT}/include )
 ENDIF ()
 
 # Set some debug vs opt flags
@@ -175,9 +176,9 @@ IF(BOOTSTRAP_MODE)
 ELSE()
 
 # Set up the include directories
-IF( WINDOWS )
-  INCLUDE_DIRECTORIES( "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/include" )
-ENDIF()
+# IF( WINDOWS )
+#  INCLUDE_DIRECTORIES( "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/include" )
+# ENDIF()
 
 FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
@@ -192,7 +193,10 @@ FIND_PACKAGE( GLUT )
 
 IF ( ${WINDOWS} )
   # Do a windows OpenGL thing, whatever that may be
-  SET( ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
+  SET( ALEMBIC_GL_LIBS glew32s ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
+  INCLUDE_DIRECTORIES ( ${GLUT_INCLUDE_DIR} )
+  INCLUDE_DIRECTORIES ( $ENV{GLEW_ROOT}/include )
+  LINK_DIRECTORIES ( $ENV{GLEW_ROOT}/lib )
 ELSEIF( ${DARWIN} )
   # Do a darwin OpenGL thing.
   SET( ALEMBIC_GL_LIBS ${GLUT_LIBRARY} "-framework OpenGL" )

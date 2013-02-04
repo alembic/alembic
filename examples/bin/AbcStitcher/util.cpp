@@ -116,7 +116,7 @@ void stitchArrayProp(const PropertyHeader & propHeader,
 
 template< typename T >
 void scalarPropIO(IScalarProperty & reader,
-                  uint8_t extent,
+                  Alembic::Util::uint8_t extent,
                   OScalarProperty & writer)
 {
     T * dataPtr = new T[extent];
@@ -152,7 +152,7 @@ void stitchScalarProp(const PropertyHeader & propHeader,
     for (size_t iCpIndex = 0; iCpIndex < numInputs; iCpIndex++)
     {
         IScalarProperty reader(iCompoundProps[iCpIndex], propName);
-        uint8_t extent = dataType.getExtent();  // dimension of the data
+        Alembic::Util::uint8_t extent = dataType.getExtent();  // dimension of the data
 
         switch(dataType.getPod())
         {

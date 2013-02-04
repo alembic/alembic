@@ -789,7 +789,7 @@ int main( int argc, char *argv[] )
 
             // reorder the input files according to their mins
             chrono_t min = DBL_MAX;
-            uint32_t numSamplings = archive.getNumTimeSamplings();
+            Alembic::Util::uint32_t numSamplings = archive.getNumTimeSamplings();
             if (numSamplings > 1)
             {
                 // timesampling index 0 is special, so it will be skipped
@@ -799,7 +799,7 @@ int main( int argc, char *argv[] )
                 //
                 min = archive.getTimeSampling(1)->getSampleTime(0);
 
-                for (uint32_t s = 2; s < numSamplings; ++s)
+                for (Alembic::Util::uint32_t s = 2; s < numSamplings; ++s)
                 {
                     chrono_t thisMin =
                         archive.getTimeSampling(s)->getSampleTime(0);

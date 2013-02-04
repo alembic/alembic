@@ -67,9 +67,9 @@ void Example1_MeshOut()
         Int32ArraySample( g_indices, g_numIndices ),
         Int32ArraySample( g_counts, g_numCounts ) );
 
-    std::vector<int32_t> creases;
-    std::vector<int32_t> corners;
-    std::vector<int32_t> creaseLengths;
+    std::vector<Alembic::Util::int32_t> creases;
+    std::vector<Alembic::Util::int32_t> corners;
+    std::vector<Alembic::Util::int32_t> creaseLengths;
     std::vector<float32_t> creaseSharpnesses;
     std::vector<float32_t> cornerSharpnesses;
 

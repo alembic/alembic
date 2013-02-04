@@ -50,7 +50,7 @@ using namespace AbcA;
 //-*****************************************************************************
 void testProps()
 {
-    int32_t intVal = 15;
+    Alembic::Util::int32_t intVal = 15;
 
     float32_t f0 = 67.3f;
 

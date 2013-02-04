@@ -101,7 +101,7 @@ Scene::Scene( const std::string &abcFileName )
 
     std::string appName;
     std::string libraryVersionString;
-    uint32_t libraryVersion;
+    Alembic::Util::uint32_t libraryVersion;
     std::string whenWritten;
     std::string userDescription;
     GetArchiveInfo (m_archive,

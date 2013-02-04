@@ -36,16 +36,16 @@
 
 # Create the executable
 ADD_EXECUTABLE( AlembicUtilOperatorBool_Test OperatorBoolTest.cpp )
-TARGET_LINK_LIBRARIES( AlembicUtilOperatorBool_Test AlembicUtil )
+TARGET_LINK_LIBRARIES( AlembicUtilOperatorBool_Test AlembicUtil ${ALEMBIC_ILMBASE_HALF_LIB})
 
 ADD_EXECUTABLE( AlembicUtilTokenMap_Test TokenMapTest.cpp )
-TARGET_LINK_LIBRARIES( AlembicUtilTokenMap_Test AlembicUtil )
+TARGET_LINK_LIBRARIES( AlembicUtilTokenMap_Test AlembicUtil ${ALEMBIC_ILMBASE_HALF_LIB})
 
 ADD_EXECUTABLE( AlembicUtilDimensions_Test_Jeffs DimensionsTestJeffs.cpp )
-TARGET_LINK_LIBRARIES( AlembicUtilDimensions_Test_Jeffs AlembicUtil )
+TARGET_LINK_LIBRARIES( AlembicUtilDimensions_Test_Jeffs AlembicUtil ${ALEMBIC_ILMBASE_HALF_LIB})
 
 ADD_EXECUTABLE( AlembicUtilNaming_Test NamingTest.cpp )
-TARGET_LINK_LIBRARIES( AlembicUtilNaming_Test AlembicUtil )
+TARGET_LINK_LIBRARIES( AlembicUtilNaming_Test AlembicUtil ${ALEMBIC_ILMBASE_HALF_LIB})
 
 # Make a test of it
 ADD_TEST( AlembicUtilOperatorBool_TEST AlembicUtilOperatorBool_Test )

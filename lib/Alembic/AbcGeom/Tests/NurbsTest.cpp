@@ -106,9 +106,9 @@ void Example1_NurbsOut()
 
     // set the trim curve
     nurbsSample.setTrimCurve(   g_trim_nLoops,
-                                Int32ArraySample( (const int32_t *) &g_trim_nCurves, 1),
-                                Int32ArraySample( (const int32_t *) &g_trim_n, 1),
-                                Int32ArraySample( (const int32_t *) &g_trim_order, 1),
+                                Int32ArraySample( (const Alembic::Util::int32_t *) &g_trim_nCurves, 1),
+                                Int32ArraySample( (const Alembic::Util::int32_t *) &g_trim_n, 1),
+                                Int32ArraySample( (const Alembic::Util::int32_t *) &g_trim_order, 1),
                                 FloatArraySample( (const float32_t *) &g_trim_knot, 12),
                                 FloatArraySample( (const float32_t *) &g_trim_min, 1),
                                 FloatArraySample( (const float32_t *) &g_trim_max, 1),

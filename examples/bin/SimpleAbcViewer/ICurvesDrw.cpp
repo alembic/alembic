@@ -110,7 +110,7 @@ void ICurvesDrw::draw( const DrawContext &iCtx )
     if ( ! ( m_positions && m_nVertices ) ) { return; }
 
     const V3f *points = m_positions->get();
-    const int32_t *nVertices = m_nVertices->get();
+    const Alembic::Util::int32_t *nVertices = m_nVertices->get();
 
     glDisable( GL_LIGHTING );
 
