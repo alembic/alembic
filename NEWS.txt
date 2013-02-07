@@ -24,6 +24,10 @@ comparison. (Issue 301)
 
 Add isStandardName and makeStandardName convenience functions.
 
+    - These functions offer plugin writers an easy way to get multi-application
+      name compliance.  They help you convert any special characters your
+      application supports into a set universally accepted characters.
+
 Add AbcOpenGL library which is based on the draw code from SimpleAbcViewer.
 
 Python:
@@ -36,13 +40,36 @@ Add getProperty to OCompoundProperty
 
 Add getKey to IArrayProperty
 
+    - This is the preferred way to get the alembic hash of a property.
+      Previously you needed to build the a hash by marshalling
+      and serializing the data in python which is slooow.
+
 Add getMaxNumSamplesForTimeSamplingIndex to IArchive.
 
-Add high level Python API named cask which mixes Alembic input and output
-under the hood.
+Add high level Python API named "cask" built on top of the Alembic Python
+bindings.
 
-Add abcview which uses PyAbcOpenGL and also provides a few other convenient
-widgets.
+    - This was developed to simplify scripting of alembic files
+      in Python.
+
+    - It is designed to be easy to use and "Pythonic". For example it
+      gives you a dictionary style interface to objects and
+      properties.
+
+    - It is an abstraction on top of alembic which allows you to create mutable
+      objects. This means scripters are not forced to use the separated,
+      immutable input and output core alembic objects.
+
+    - We will host documentation on docs.alembic.io shortly but for now please
+      convert the cask.rst file in python/examples/cask/doc to read the docs
+      and see examples.
+
+Add abcview which uses PyQt and PyAbcOpenGL
+
+    - This tool is perfect for debugging alembic caches. It offers Katana-
+      style, lazy-UI hierarchy traversal and a script editor to do more 
+      in-depth object and property queries using the Python bindings.
+      SimpleAbcView is embedded into the application for easy reference.
 
 Bootstrap and CMake:
 
@@ -52,6 +79,8 @@ Eliminate many warnings when compiling with Visual Studio 10. (Issue 294)
 
 Improve many of our CMakeLists.txt so that you can use Cmake directly instead
 of having to go through the bootstrap.
+
+Better Windows compliance. (Look for further improvements over the next releases).
 
 Maya:
 

@@ -11,10 +11,10 @@ individuals for their contributions to Alembic:
 
 ©2010-2012 Christopher Horvath
 ©2011-2012 Luxology LLC
-©2011-2012 Autodesk, Inc.
+©2011-2013 Autodesk, Inc.
 ©2011-2012 Side Effects Software Inc.
-©2011 Mark Elendt, Senior Mathematician, Side Effects Software Inc.
-©2011 Nicholas Yue
+©2011-2013 Mark Elendt, Senior Mathematician, Side Effects Software Inc.
+©2011-2013 Nicholas Yue
 ©2011 Fabric Engine, Inc.
 ©2011 Luma Pictures
 ©2012 Solid Angle S.L.
@@ -52,4 +52,4 @@ Thank You
 
 
 
-Last Changed - 2012-10-17
+Last Changed - 2013-01-07
