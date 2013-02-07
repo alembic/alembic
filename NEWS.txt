@@ -1,3 +1,80 @@
+2012-02-07, Alembic 1.1.3
+Hello Alembic users, thanks to your feedback we have another collection of
+useful features and bug fixes.
+
+Alembic library:
+
+Add missing setTimeSampling member function to OCurves and ONuPatch. (Issue 295)
+
+Record the max number of samples written for various TimeSampling at the
+archive level, and provide a utility function for getting the start and end time
+of the archive using this data.  (Issue 301)
+
+Propogate the Error handling policy better.
+
+Add Box2(s,i,f,d) array properties to match scalar properties.
+
+INuPatch getTopologyVariance wasn't correctly taking into account animated
+weights.
+
+IsAncestorVisible utility function was returning the wrong value.
+
+TimeSamplingType now allows for some floating point imprecision during
+comparison. (Issue 301)
+
+Add isStandardName and makeStandardName convenience functions.
+
+Add AbcOpenGL library which is based on the draw code from SimpleAbcViewer.
+
+Python:
+
+Add PyAbcOpenGL bindings.
+
+Fix segfault with invalid getProperty index/name
+
+Add getProperty to OCompoundProperty
+
+Add getKey to IArrayProperty
+
+Add getMaxNumSamplesForTimeSamplingIndex to IArchive.
+
+Add high level Python API named cask which mixes Alembic input and output
+under the hood.
+
+Add abcview which uses PyAbcOpenGL and also provides a few other convenient
+widgets.
+
+Bootstrap and CMake:
+
+Fix boost configuration if you are not building pyalembic. (Issue 296)
+
+Eliminate many warnings when compiling with Visual Studio 10. (Issue 294)
+
+Improve many of our CMakeLists.txt so that you can use Cmake directly instead
+of having to go through the bootstrap.
+
+Maya:
+
+AbcExport bounding box calculation for the entire archive is much more efficient
+and is especially noticeable when calculating bounds on deep hierarchies.
+
+Add identifyFile and haveNamespaceSupport to AlembicImportFileTranslator.
+
+Fix bug where the AlembicImportFileTranslator could not be unloaded properly.
+
+Arnold Procedural:
+
+Fix bug with multiple samples potentially being added for uvlist.
+
+Initialize makeInstance on creation.
+
+Add instanced nodes to the list of createdNodes.
+
+Utilities:
+
+Add abctree which walks the entire hierarchy and prints out the names
+of objects.
+
 2012-10-17, Alembic 1.1.2
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful features and bug fixes.
