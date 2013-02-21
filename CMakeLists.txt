@@ -315,6 +315,6 @@ ENDIF()
 ADD_SUBDIRECTORY( examples )
 
 # docs
-ADD_SUBDIRECTORY( doc )
+#ADD_SUBDIRECTORY( doc )
 
 ENDIF()

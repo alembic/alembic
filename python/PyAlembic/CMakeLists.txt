@@ -39,7 +39,7 @@ OPTION( USE_LIB64 "Search for deps in lib64 vs lib" ON )
 
 # find python lib dir and include files
 IF ( ${CMAKE_HOST_UNIX} )
-    SET( LIBPYTHON_FILE "lib${LIBPYTHON}.a" )
+    SET( LIBPYTHON_FILE "lib${LIBPYTHON}.so" )
     IF( ${DARWIN} )
         SET( OSX_PYTHON_ROOT 
              "/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}" )

@@ -127,12 +127,6 @@ void IPolyMeshDrw::setTime( chrono_t iSeconds )
     m_drwHelper.update( P, V3fArraySamplePtr(),
                         indices, counts, bounds );
 
-    if ( !m_drwHelper.valid() )
-    {
-        m_polyMesh.reset();
-        return;
-    }
-
     // The Object update computed child bounds.
     // Extend them by this.
     if ( !m_drwHelper.getBounds().isEmpty() )

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks, Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -47,11 +47,9 @@ SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 SET( THIS_LIBS
      AlembicAbcOpenGL
-     ${ALEMBIC_HDF5_LIBS}
-     ${ALEMBIC_GL_LIBS}
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+   )
+
+INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/lib" )
 
 ADD_EXECUTABLE( SimpleAbcViewer ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( SimpleAbcViewer ${THIS_LIBS} )
