@@ -97,7 +97,7 @@ void addString(MObject & iParent, const std::string & iAttrName,
     MFnDependencyNode parentFn(iParent);
     parentFn.addAttribute(attrObj, MFnDependencyNode::kLocalDynamicAttr);
 
-    // work around bug where this string wasn't getting saved to a file when 
+    // work around bug where this string wasn't getting saved to a file when
     // it is the default value
     MPlug plug = parentFn.findPlug(attrName);
     if (!plug.isNull())
@@ -842,7 +842,16 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 }
 
                 attrObj = typedAttr.create(attrName, attrName, MFnData::kString,
-                    strAttrObject);
+                        MObject::kNullObj);
+
+                parentFn.addAttribute(attrObj,
+                    MFnDependencyNode::kLocalDynamicAttr);
+
+                plug = parentFn.findPlug(attrName);
+                if (!plug.isNull())
+                {
+                    plug.setValue(strAttrObject);
+                }
             }
         }
         break;
@@ -919,7 +928,15 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 }
 
                 attrObj = typedAttr.create(attrName, attrName, MFnData::kString,
-                    strAttrObject);
+                        MObject::kNullObj);
+
+                parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+
+                plug = parentFn.findPlug(attrName);
+                if (!plug.isNull())
+                {
+                    plug.setValue(strAttrObject);
+                }
             }
         }
         break;
@@ -942,7 +959,11 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         numAttr.setUsedAsColor(true);
     }
 
-    parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+    if ( ! parentFn.hasAttribute( attrName ) )
+    {
+        parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+    }
+
     addArbAttrAndScope(iParent, iProp.getName(),
         iProp.getMetaData().get("geoScope"), interp, extent);
 
@@ -1016,7 +1037,7 @@ addScalarExtentThreeProp(Alembic::Abc::IScalarProperty& iProp,
         {
             if (numChildren > extent)
                 numChildren = extent;
-                  
+
             for (unsigned int i = 0; i < numChildren; ++i)
                 plug.child(i).setValue(val[i]);
         }
@@ -1244,9 +1265,18 @@ bool addScalarProp(Alembic::Abc::IScalarProperty & iProp, MObject & iParent)
                   return true;
               }
           }
-          
+
           attrObj = typedAttr.create(attrName, attrName, MFnData::kString,
-                                     strAttrObject);
+                        MObject::kNullObj);
+
+          parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+
+          plug = parentFn.findPlug(attrName);
+          if (!plug.isNull())
+          {
+             plug.setValue(strAttrObject);
+          }
+
       }
       break;
 
@@ -1264,7 +1294,11 @@ bool addScalarProp(Alembic::Abc::IScalarProperty & iProp, MObject & iParent)
         numAttr.setUsedAsColor(true);
     }
 
-    parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+    if ( ! parentFn.hasAttribute( attrName ) )
+    {
+        parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+    }
+
     addArbAttrAndScope(iParent, iProp.getName(),
         iProp.getMetaData().get("geoScope"), interp, extent);
 
@@ -1313,7 +1347,7 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
                 {
                     MString warn = "Skipping property with no samples: ";
                     warn += propName.c_str();
-                    
+
                     printWarning(warn);
                 }
 
@@ -1329,7 +1363,7 @@ void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
                 {
                     MString warn = "Skipping property with no samples: ";
                     warn += propName.c_str();
-                    
+
                     printWarning(warn);
                 }
 
@@ -1386,7 +1420,7 @@ void getAnimatedArrayProp(Alembic::Abc::IArrayProperty prop,
               return;
       }
       break;
-      
+
           // MFnStringArrayData
       case Alembic::Util::kStringPOD:
       case Alembic::Util::kWstringPOD:
@@ -1436,7 +1470,7 @@ void getAnimatedScalarProp(Alembic::Abc::IScalarProperty prop,
               return;
       }
       break;
-      
+
       case Alembic::Util::kUint32POD:
       case Alembic::Util::kInt32POD:
       case Alembic::Util::kFloat32POD:
@@ -1461,7 +1495,7 @@ void getAnimatedScalarProp(Alembic::Abc::IScalarProperty prop,
               return;
       }
       break;
-      
+
       default:
       {
           // Not sure what to do with kFloat16POD, kInt64POD, kUInt64POD
