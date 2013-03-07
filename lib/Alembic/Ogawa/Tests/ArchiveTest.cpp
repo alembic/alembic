@@ -15,9 +15,10 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-// *       Neither the name of Industrial Light & Magic nor the names of
-// its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,39 +34,52 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/Ogawa/OArchive.h>
-#include <Alembic/Ogawa/OStream.h>
-#include <Alembic/Ogawa/OGroup.h>
+#include <Alembic/Ogawa/All.h>
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-namespace Alembic {
-namespace Ogawa {
-namespace ALEMBIC_VERSION_NS {
-
-OArchive::OArchive(const std::string & iFileName) :
-    mStream(new OStream(iFileName))
+void test()
 {
-    mGroup.reset(new OGroup(mStream));
+    {
+        Alembic::Ogawa::OArchive oa("archiveTest.ogawa");
+        TESTING_ASSERT(oa.isValid());
+        Alembic::Ogawa::IArchive ia("archiveTest.ogawa");
+        TESTING_ASSERT(ia.isValid());
+        TESTING_ASSERT(!ia.isFrozen());
+        TESTING_ASSERT(ia.getVersion() == 1);
+        TESTING_ASSERT(ia.getGroup()->getNumChildren() == 0);
+    }
+
+    Alembic::Ogawa::IArchive ia("archiveTest.ogawa");
+    TESTING_ASSERT(ia.isValid());
+    TESTING_ASSERT(ia.isFrozen());
+    TESTING_ASSERT(ia.getVersion() == 1);
+    TESTING_ASSERT(ia.getGroup()->getNumChildren() == 0);
+
 }
 
-OArchive::OArchive(std::ostream * iStream) :
-    mStream(new OStream(iStream)), mGroup(new OGroup(mStream))
+void stringStreamTest()
 {
+
+    std::stringstream strm;
+    strm << "potato!";
+    {
+        Alembic::Ogawa::OArchive oa(&strm);
+        TESTING_ASSERT(oa.isValid());
+    }
+
+    strm.seekg(7);
+    std::vector< std::istream * > streams;
+    streams.push_back(&strm);
+    Alembic::Ogawa::IArchive ia(streams);
+    TESTING_ASSERT(ia.isValid());
+    TESTING_ASSERT(ia.isFrozen());
+    TESTING_ASSERT(ia.getVersion() == 1);
+    TESTING_ASSERT(ia.getGroup()->getNumChildren() == 0);
 }
 
-OArchive::~OArchive()
+int main ( int argc, char *argv[] )
 {
+    test();
+    stringStreamTest();
+    return 0;
 }
-
-bool OArchive::isValid()
-{
-    return mStream->isValid();
-}
-
-OGroupPtr OArchive::getGroup()
-{
-    return mGroup;
-}
-
-} // End namespace ALEMBIC_VERSION_NS
-} // End namespace Ogawa
-} // End namespace Alembic

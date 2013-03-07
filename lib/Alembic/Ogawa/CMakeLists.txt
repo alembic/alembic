@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -15,10 +15,9 @@
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## *       Neither the name of Sony Pictures Imageworks, nor
-## Industrial Light & Magic, nor the names of their contributors may be used
-## to endorse or promote products derived from this software without specific
-## prior written permission.
+## *       Neither the name of Industrial Light & Magic nor the names of
+## its contributors may be used to endorse or promote products derived
+## from this software without specific prior written permission.
 ##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,13 +33,37 @@
 ##
 ##-*****************************************************************************
 
-# Recurse into all the subdirectories
+# C++ files for this project
+SET( CXX_FILES
+     IArchive.cpp
+     IData.cpp
+     IGroup.cpp
+     IStreams.cpp
+     OArchive.cpp
+     OData.cpp
+     OGroup.cpp
+     OStream.cpp )
 
-ADD_SUBDIRECTORY( Util )
-ADD_SUBDIRECTORY( AbcCoreAbstract )
-ADD_SUBDIRECTORY( AbcCoreHDF5 )
-ADD_SUBDIRECTORY( Abc )
-ADD_SUBDIRECTORY( AbcGeom )
-ADD_SUBDIRECTORY( AbcCollection )
-ADD_SUBDIRECTORY( AbcMaterial )
-ADD_SUBDIRECTORY( Ogawa )
+SET( H_FILES
+     Foundation.h
+     IArchive.h
+     IData.h
+     IGroup.h
+     IStreams.h
+     OArchive.h
+     OData.h
+     OGroup.h
+     OStream.h )
+SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+
+ADD_LIBRARY( AlembicOgawa ${SOURCE_FILES} )
+
+INSTALL( TARGETS AlembicOgawa
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib/static )
+
+INSTALL( FILES ${H_FILES}
+         DESTINATION include/Alembic/Ogawa
+         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
+
+ADD_SUBDIRECTORY( Tests )

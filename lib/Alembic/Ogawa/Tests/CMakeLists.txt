@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -15,10 +15,9 @@
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## *       Neither the name of Sony Pictures Imageworks, nor
-## Industrial Light & Magic, nor the names of their contributors may be used
-## to endorse or promote products derived from this software without specific
-## prior written permission.
+## *       Neither the name of Industrial Light & Magic nor the names of
+## its contributors may be used to endorse or promote products derived
+## from this software without specific prior written permission.
 ##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,13 +33,14 @@
 ##
 ##-*****************************************************************************
 
-# Recurse into all the subdirectories
 
-ADD_SUBDIRECTORY( Util )
-ADD_SUBDIRECTORY( AbcCoreAbstract )
-ADD_SUBDIRECTORY( AbcCoreHDF5 )
-ADD_SUBDIRECTORY( Abc )
-ADD_SUBDIRECTORY( AbcGeom )
-ADD_SUBDIRECTORY( AbcCollection )
-ADD_SUBDIRECTORY( AbcMaterial )
-ADD_SUBDIRECTORY( Ogawa )
+# Create the executable
+ADD_EXECUTABLE( AlembicOgawaArchive_Test ArchiveTest.cpp )
+TARGET_LINK_LIBRARIES( AlembicOgawaArchive_Test AlembicUtil AlembicOgawa ${ALEMBIC_ILMBASE_HALF_LIB})
+
+ADD_EXECUTABLE( AlembicOgawaSimple_Test SimpleTest.cpp )
+TARGET_LINK_LIBRARIES( AlembicOgawaSimple_Test AlembicUtil AlembicOgawa ${ALEMBIC_ILMBASE_HALF_LIB})
+
+# Make a test of it
+ADD_TEST( AlembicOgawaArchive_TEST AlembicOgawaArchive_Test )
+ADD_TEST( AlembicOgawaSimple_TEST AlembicOgawaSimple_Test )

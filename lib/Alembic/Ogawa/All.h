@@ -15,9 +15,10 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-// *       Neither the name of Industrial Light & Magic nor the names of
-// its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,39 +34,17 @@
 //
 //-*****************************************************************************
 
+#ifndef _Alembic_Ogawa_All_h_
+#define _Alembic_Ogawa_All_h_
+
+#include <Alembic/Ogawa/Foundation.h>
+#include <Alembic/Ogawa/IArchive.h>
+#include <Alembic/Ogawa/IData.h>
+#include <Alembic/Ogawa/IGroup.h>
+#include <Alembic/Ogawa/IStreams.h>
 #include <Alembic/Ogawa/OArchive.h>
-#include <Alembic/Ogawa/OStream.h>
+#include <Alembic/Ogawa/OData.h>
 #include <Alembic/Ogawa/OGroup.h>
+#include <Alembic/Ogawa/OStream.h>
 
-namespace Alembic {
-namespace Ogawa {
-namespace ALEMBIC_VERSION_NS {
-
-OArchive::OArchive(const std::string & iFileName) :
-    mStream(new OStream(iFileName))
-{
-    mGroup.reset(new OGroup(mStream));
-}
-
-OArchive::OArchive(std::ostream * iStream) :
-    mStream(new OStream(iStream)), mGroup(new OGroup(mStream))
-{
-}
-
-OArchive::~OArchive()
-{
-}
-
-bool OArchive::isValid()
-{
-    return mStream->isValid();
-}
-
-OGroupPtr OArchive::getGroup()
-{
-    return mGroup;
-}
-
-} // End namespace ALEMBIC_VERSION_NS
-} // End namespace Ogawa
-} // End namespace Alembic
+#endif

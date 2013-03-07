@@ -1,14 +1,46 @@
-#include <Ogawa/OGroup.h>
-#include <Ogawa/OArchive.h>
-#include <Ogawa/OData.h>
-#include <Ogawa/OStream.h>
+//-*****************************************************************************
+//
+// Copyright (c) 2013,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Industrial Light & Magic nor the names of
+// its contributors may be used to endorse or promote products derived
+// from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//-*****************************************************************************
 
-#include <Ogawa/constants.h>
-#include <stdint.h>
-#include <vector>
+#include <Alembic/Ogawa/OGroup.h>
+#include <Alembic/Ogawa/OArchive.h>
+#include <Alembic/Ogawa/OData.h>
+#include <Alembic/Ogawa/OStream.h>
 
+namespace Alembic {
 namespace Ogawa {
-namespace OGAWA_LIB_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 typedef std::pair< OGroupPtr, std::size_t > ParentPair;
 typedef std::vector< ParentPair > ParentPairVec;
@@ -25,10 +57,10 @@ public:
     ParentPairVec parents;
 
     // used before and after freeze
-    std::vector<uint64_t> childVec;
+    std::vector<Alembic::Util::uint64_t> childVec;
 
     // set after freeze
-    uint64_t pos;
+    Alembic::Util::uint64_t pos;
 };
 
 OGroup::OGroup(OGroupPtr iParent, std::size_t iIndex)
@@ -78,9 +110,9 @@ ODataPtr OGroup::createData(std::size_t iSize, const void * iData)
         return child;
     }
 
-    uint64_t pos = mData->stream->getAndSeekEndPos();
+    Alembic::Util::uint64_t pos = mData->stream->getAndSeekEndPos();
 
-    uint64_t size = iSize;
+    Alembic::Util::uint64_t size = iSize;
     mData->stream->write(&size, 8);
     mData->stream->write(iData, iSize);
 
@@ -110,7 +142,7 @@ ODataPtr OGroup::createData(std::size_t iNumData, const std::size_t * iSizes,
         return child;
     }
 
-    uint64_t totalSize = 0;
+    Alembic::Util::uint64_t totalSize = 0;
     for (std::size_t i = 0; i < iNumData; ++i)
     {
         totalSize += iSizes[i];
@@ -123,7 +155,7 @@ ODataPtr OGroup::createData(std::size_t iNumData, const std::size_t * iSizes,
         return child;
     }
 
-    uint64_t pos = mData->stream->getAndSeekEndPos();
+    Alembic::Util::uint64_t pos = mData->stream->getAndSeekEndPos();
 
     mData->stream->write(&totalSize, 8);
     for (std::size_t i = 0; i < iNumData; ++i)
@@ -212,7 +244,7 @@ void OGroup::freeze()
     else
     {
         mData->pos = mData->stream->getAndSeekEndPos();
-        uint64_t size = mData->childVec.size();
+        Alembic::Util::uint64_t size = mData->childVec.size();
         mData->stream->write(&size, 8);
         mData->stream->write(&mData->childVec.front(), size*8);
     }
@@ -281,7 +313,7 @@ void OGroup::replaceData(std::size_t iIndex, ODataPtr iData)
         return;
     }
 
-    uint64_t pos = iData->getPos();
+    Alembic::Util::uint64_t pos = iData->getPos();
     if (isFrozen())
     {
         mData->stream->seek(mData->pos + (iIndex + 1) * 8);
@@ -290,5 +322,6 @@ void OGroup::replaceData(std::size_t iIndex, ODataPtr iData)
     mData->childVec[iIndex] = pos;
 }
 
-}
-}
+} // End namespace ALEMBIC_VERSION_NS
+} // End namespace Ogawa
+} // End namespace Alembic

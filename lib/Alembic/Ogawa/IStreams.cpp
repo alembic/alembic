@@ -1,15 +1,51 @@
+//-*****************************************************************************
+//
+// Copyright (c) 2013,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Industrial Light & Magic nor the names of
+// its contributors may be used to endorse or promote products derived
+// from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//-*****************************************************************************
 
-#include <Ogawa/IStreams.h>
+#include <Alembic/Ogawa/IStreams.h>
 #include <fstream>
 
+namespace Alembic {
 namespace Ogawa {
-namespace OGAWA_LIB_VERSION_NS {
+namespace ALEMBIC_VERSION_NS {
 
 class IStreams::PrivateData
 {
 public:
     PrivateData()
     {
+        locks = NULL;
         valid = false;
         frozen = false;
         version = 0;
@@ -17,6 +53,11 @@ public:
 
     ~PrivateData()
     {
+        if (locks)
+        {
+            delete [] locks;
+        }
+
         // only cleanup if we were the ones who opened it
         if (!fileName.empty())
         {
@@ -34,11 +75,12 @@ public:
     }
 
     std::vector<std::istream *> streams;
-    std::vector<uint64_t> offsets;
+    std::vector<Alembic::Util::uint64_t> offsets;
+    Alembic::Util::mutex * locks;
     std::string fileName;
     bool valid;
     bool frozen;
-    uint16_t version;
+    Alembic::Util::uint16_t version;
 };
 
 IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
@@ -77,6 +119,7 @@ IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
             mData->streams.push_back(filestream);
         }
     }
+    mData->locks = new Alembic::Util::mutex[mData->streams.size()];
 }
 
 IStreams::IStreams(const std::vector< std::istream * > & iStreams) :
@@ -84,6 +127,7 @@ IStreams::IStreams(const std::vector< std::istream * > & iStreams) :
 {
     mData->streams = iStreams;
     init();
+    mData->locks = new Alembic::Util::mutex[mData->streams.size()];
 }
 
 void IStreams::init()
@@ -95,7 +139,7 @@ void IStreams::init()
 
     // TODO record group start pos for each stream
 
-    uint64_t firstGroupPos = 0;
+    Alembic::Util::uint64_t firstGroupPos = 0;
 
     for (std::size_t i = 0; i < mData->streams.size(); ++i)
     {
@@ -111,8 +155,10 @@ void IStreams::init()
             return;
         }
         bool frozen = (header[5] == char(0xff));
-        uint16_t version = (header[6] << 8) | header[7];
-        uint64_t groupPos = *((uint64_t *)(&(header[8])));
+        Alembic::Util::uint16_t version = (header[6] << 8) | header[7];
+        Alembic::Util::uint64_t groupPos =
+            *((Alembic::Util::uint64_t *)(&(header[8])));
+
         if (i == 0)
         {
             firstGroupPos = groupPos;
@@ -146,12 +192,12 @@ bool IStreams::isFrozen()
     return mData->frozen;
 }
 
-uint16_t IStreams::getVersion()
+Alembic::Util::uint16_t IStreams::getVersion()
 {
     return mData->version;
 }
 
-void IStreams::read(std::size_t iThreadId, uint64_t iPos,
+void IStreams::read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
                     std::size_t iSize, void * oBuf)
 {
     if (!isValid())
@@ -166,11 +212,12 @@ void IStreams::read(std::size_t iThreadId, uint64_t iPos,
     }
 
     {
-        // TODO autolock goes here
+        Alembic::Util::scoped_lock l(mData->locks[threadId]);
         mData->streams[threadId]->seekg(iPos + mData->offsets[threadId]);
         mData->streams[threadId]->read((char *)oBuf, iSize);
     }
 }
 
-}
-}
+} // End namespace ALEMBIC_VERSION_NS
+} // End namespace Ogawa
+} // End namespace Alembic

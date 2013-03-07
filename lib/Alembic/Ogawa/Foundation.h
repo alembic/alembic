@@ -33,39 +33,28 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/Ogawa/OArchive.h>
-#include <Alembic/Ogawa/OStream.h>
-#include <Alembic/Ogawa/OGroup.h>
+#ifndef _Alembic_Ogawa_Foundation_h_
+#define _Alembic_Ogawa_Foundation_h_
+
+#include <Alembic/Util/Foundation.h>
+#include <Alembic/Util/PlainOldDataType.h>
 
 namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
 
-OArchive::OArchive(const std::string & iFileName) :
-    mStream(new OStream(iFileName))
-{
-    mGroup.reset(new OGroup(mStream));
-}
-
-OArchive::OArchive(std::ostream * iStream) :
-    mStream(new OStream(iStream)), mGroup(new OGroup(mStream))
-{
-}
-
-OArchive::~OArchive()
-{
-}
-
-bool OArchive::isValid()
-{
-    return mStream->isValid();
-}
-
-OGroupPtr OArchive::getGroup()
-{
-    return mGroup;
-}
+// a few useful constant values
+const Alembic::Util::uint64_t INVALID_GROUP = 0x7fffffffffffffffULL;
+const Alembic::Util::uint64_t EMPTY_GROUP   = 0x0000000000000000ULL;
+const Alembic::Util::uint64_t INVALID_DATA  = 0xffffffffffffffffULL;
+const Alembic::Util::uint64_t EMPTY_DATA    = 0x8000000000000000ULL;
 
 } // End namespace ALEMBIC_VERSION_NS
+
+using namespace ALEMBIC_VERSION_NS;
+
 } // End namespace Ogawa
+
 } // End namespace Alembic
+
+#endif
