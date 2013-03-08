@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,14 +34,14 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_CprImpl_h_
-#define _Alembic_AbcCoreHDF5_CprImpl_h_
+#ifndef _Alembic_AbcCoreOgawa_CprImpl_h_
+#define _Alembic_AbcCoreOgawa_CprImpl_h_
 
-#include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/CprData.h>
+#include <Alembic/AbcCoreOgawa/Foundation.h>
+#include <Alembic/AbcCoreOgawa/CprData.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
@@ -53,7 +53,8 @@ public:
 
     // For construction from a compound property reader
     CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-             H5Node & iParentGroup,
+             Ogawa::IGroupPtr iParentGroup,
+             size_t iIndex,
              PropertyHeaderPtr iHeader );
 
     CprImpl( AbcA::ObjectReaderPtr iParent,
@@ -110,7 +111,7 @@ private:
 
 using namespace ALEMBIC_VERSION_NS;
 
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
 
 #endif

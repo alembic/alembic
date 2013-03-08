@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,155 +34,44 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/CprData.h>
-#include <Alembic/AbcCoreHDF5/ReadUtil.h>
-#include <Alembic/AbcCoreHDF5/HDF5Util.h>
-#include <Alembic/AbcCoreHDF5/CprImpl.h>
-#include <Alembic/AbcCoreHDF5/SprImpl.h>
-#include <Alembic/AbcCoreHDF5/AprImpl.h>
+#include <Alembic/AbcCoreOgawa/CprData.h>
+#include <Alembic/AbcCoreOgawa/ReadUtil.h>
+#include <Alembic/AbcCoreOgawa/CprImpl.h>
+#include <Alembic/AbcCoreOgawa/SprImpl.h>
+#include <Alembic/AbcCoreOgawa/AprImpl.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-struct CprAttrVisitor
-{
-    CprAttrVisitor() {}
-
-    std::vector<std::string> properties;
-
-    void operator() ( const std::string &iName )
-    {
-        properties.push_back( iName );
-    }
-};
-
-//-*****************************************************************************
-herr_t CprVisitAllAttrsCB( hid_t iGroup,
-                           const char *iAttrName,
-                           const H5A_info_t *iAinfo,
-                           void *iOpData )
-{
-    // Get the visitor class. This being NULL is a programmer error
-    CprAttrVisitor *visitor = ( CprAttrVisitor * )iOpData;
-    assert( visitor != NULL );
-
-    if ( iAttrName == NULL || iAttrName[0] == 0 )
-    {
-        return 0;
-    }
-
-    // We only care about the attr name.
-    // our names are in the form (for header info)
-    // $NAME.info       Property Type, Data Type, and possibly TimeSampling
-    //                  index, number of samples, first changed sample,
-    //                  last changed sample, and is scalar like hint.
-    // $NAME.meta       Meta Data
-    // $NAME.smp0       First sample for smaller properties.
-    //                  Larger properties store it in an HDF5 dataset.
-    // $NAME.dims       Dimension hint for strings and complex multi-dimensional
-    //                  data sets.
-    // we ignore it everything else
-    std::string attrName( iAttrName );
-    size_t attrNameLen = attrName.size();
-    if ( attrNameLen < 6 )
-    {
-        return 0;
-    }
-
-    // Last 5 characters.
-    std::string suffix( attrName, attrNameLen-5 );
-    if ( suffix == ".info" && attrNameLen > 0)
-    {
-        std::string propertyName( attrName, 0, attrNameLen-5 );
-        (*visitor)( propertyName );
-    }
-
-    return 0;
-}
-
-//-*****************************************************************************
-CprData::CprData( H5Node & iParentGroup, int32_t iArchiveVersion,
-                  const std::string &iName )
+CprData::CprData( Ogawa::IGroupPtr iGroup, int32_t iArchiveVersion,
+                  size_t iThreadId )
   : m_subPropertyMutexes( NULL )
 {
-    ABCA_ASSERT( iParentGroup.isValidObject(), "invalid parent group" );
+    ABCA_ASSERT( iGroup, "invalid compound data group" );
 
-    // If our group exists, open it. If it does not, this is not a problem!
-    // It just means we don't have any subproperties.
-    if ( !GroupExists( iParentGroup, iName ) )
+    m_group = iGroup;
+
+    std::size_t numChildren = m_group->getNumChildren();
+
+    if ( numChildren > 0 && m_group->isChildData( numChildren - 1 ) )
     {
-        // No group. It's okay!
-        // Just return - it means we have no subprops!
-        return;
-    }
+        PropertyHeaderPtrs headers;
+        ReadPropertyHeaders( m_group, numChildren - 1, iThreadId, headers );
 
-    m_group = OpenGroup( iParentGroup, iName.c_str() );
-
-    ABCA_ASSERT( m_group.isValidObject(),
-                 "Could not open compound property group named: "
-                 << iName << ", H5Gopen2 failed" );
-
-    // Do the visiting to gather property names.
-
-    CprAttrVisitor visitor;
-
-    HDF5Hierarchy* h5HPtr = iParentGroup.getH5HPtr();
-    if ( h5HPtr )
-    {
-        h5HPtr->visitAllAttributes( iParentGroup.getRef(), iName, visitor );
-    }
-    else
-    {
-        try
+        m_propertyHeaders.resize( headers.size() );
+        for ( std::size_t i = 0; i < headers.size(); ++i )
         {
-            herr_t status = H5Aiterate2( m_group.getObject(),
-                                         H5_INDEX_CRT_ORDER,
-                                         H5_ITER_INC,
-                                         NULL,
-                                         CprVisitAllAttrsCB,
-                                         ( void * )&visitor );
-
-            ABCA_ASSERT( status >= 0,
-                     "CprData::CprData(): H5Aiterate failed" );
+            m_subProperties[[headers[i]->header.getName()] = i;
+            m_propertyHeaders[i].header = headers[i];
         }
-        catch ( std::exception & exc )
-        {
-            ABCA_THROW( "Could not attr iterate property group named: "
-                        << iName << ", reason: " << exc.what() );
-        }
-        catch ( ... )
-        {
-            ABCA_THROW( "Could not attr iterate property group named: "
-                        << iName << ", unknown reason" );
-        }
-    }
-
-
-    size_t index = 0;
-    m_propertyHeaders.resize( visitor.properties.size() );
-    m_subPropertyMutexes =
-        new Alembic::Util::mutex[ visitor.properties.size() ];
-
-    // For each property name, read the various pieces of information
-    for ( std::vector<std::string>::iterator siter = visitor.properties.begin();
-          siter != visitor.properties.end(); ++siter, ++index )
-    {
-        m_subProperties[(*siter)] = index;
-        m_propertyHeaders[index].name = (*siter);
-        m_propertyHeaders[index].numSamples = 0;
-        m_propertyHeaders[index].firstChangedIndex = 0;
-        m_propertyHeaders[index].lastChangedIndex = 0;
-        m_propertyHeaders[index].isScalarLike = false;
     }
 }
 
 //-*****************************************************************************
 CprData::~CprData()
 {
-    delete[] m_subPropertyMutexes;
-    CloseObject( m_group );
 }
 
 //-*****************************************************************************
@@ -201,33 +90,6 @@ CprData::getPropertyHeader( AbcA::CompoundPropertyReaderPtr iParent, size_t i )
     {
         ABCA_THROW( "Out of range index in "
                     << "CprData::getPropertyHeader: " << i );
-    }
-    Alembic::Util::scoped_lock l( m_subPropertyMutexes[i] );
-
-    // read the property header stuff if we haven't yet
-    if ( m_propertyHeaders[i].header == NULL )
-    {
-        uint32_t tsid = 0;
-
-        PropertyHeaderPtr iPtr( new AbcA::PropertyHeader() );
-        ReadPropertyHeader( m_group, m_propertyHeaders[i].name, *iPtr,
-                            m_propertyHeaders[i].isScalarLike,
-                            m_propertyHeaders[i].numSamples,
-                            m_propertyHeaders[i].firstChangedIndex,
-                            m_propertyHeaders[i].lastChangedIndex, tsid );
-
-        if ( iPtr->isSimple() )
-        {
-            AbcA::TimeSamplingPtr tsPtr =
-                iParent->getObject()->getArchive()->getTimeSampling( tsid );
-
-            iPtr->setTimeSampling(tsPtr);
-        }
-
-        m_propertyHeaders[i].header = iPtr;
-
-        // don't need name anymore (it's in the header)
-        m_propertyHeaders[i].name = "";
     }
 
     return *(m_propertyHeaders[i].header);
@@ -254,32 +116,27 @@ AbcA::ScalarPropertyReaderPtr
 CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
                             const std::string &iName )
 {
-    // map of names to indexes filled by ctor (CprAttrVistor),
-    // so multithread safe.
     SubPropertiesMap::iterator fiter = m_subProperties.find( iName );
     if ( fiter == m_subProperties.end() )
     {
         return AbcA::ScalarPropertyReaderPtr();
     }
 
-    // make sure we've read the header
-    getPropertyHeader( iParent, fiter->second );
     SubProperty & sub = m_propertyHeaders[fiter->second];
 
-    if ( !(sub.header->isScalar()) )
+    if ( !(sub.header->header.isScalar()) )
     {
         ABCA_THROW( "Tried to read a scalar property from a non-scalar: "
                     << iName << ", type: "
-                    << sub.header->getPropertyType() );
+                    << sub.header->header.getPropertyType() );
     }
 
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
         // Make a new one.
-        bptr.reset( new SprImpl( iParent, m_group, sub.header,
-                                 sub.numSamples, sub.firstChangedIndex,
-                                 sub.lastChangedIndex ) );
+        bptr.reset( new SprImpl( iParent, m_group, fiter->second,
+                                 sub.header ) );
         sub.made = bptr;
     }
 
@@ -302,25 +159,22 @@ CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
         return AbcA::ArrayPropertyReaderPtr();
     }
 
-    // make sure we've read the header
-    getPropertyHeader( iParent, fiter->second );
     SubProperty & sub = m_propertyHeaders[fiter->second];
 
-    if ( !(sub.header->isArray()) )
+    if ( !(sub.header->header.isArray()) )
     {
         ABCA_THROW( "Tried to read an array property from a non-array: "
                     << iName << ", type: "
-                    << sub.header->getPropertyType() );
+                    << sub.header->header.getPropertyType() );
     }
 
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
         // Make a new one.
-        bptr.reset( new AprImpl( iParent, m_group, sub.header,
-                                 sub.isScalarLike, sub.numSamples,
-                                 sub.firstChangedIndex,
-                                 sub.lastChangedIndex ) );
+        bptr.reset( new AprImpl( iParent, m_group, fiter->second,
+                                 sub.header ) );
+
         sub.made = bptr;
     }
 
@@ -343,22 +197,21 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
         return AbcA::CompoundPropertyReaderPtr();
     }
 
-    // make sure we've read the header
-    getPropertyHeader( iParent, fiter->second );
     SubProperty & sub = m_propertyHeaders[fiter->second];
 
-    if ( !(sub.header->isCompound()) )
+    if ( !(sub.header->header.isCompound()) )
     {
         ABCA_THROW( "Tried to read a compound property from a non-compound: "
                     << iName << ", type: "
-                    << sub.header->getPropertyType() );
+                    << sub.header->header.getPropertyType() );
     }
 
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
         // Make a new one.
-        bptr.reset( new CprImpl( iParent, m_group, sub.header ) );
+        bptr.reset( new CprImpl( iParent, m_group, fiter->second,
+                                 sub.header ) );
         sub.made = bptr;
     }
 
@@ -369,5 +222,5 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
 }
 
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic

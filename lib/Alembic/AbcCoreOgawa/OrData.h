@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,27 +34,26 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_OrData_h_
-#define _Alembic_AbcCoreHDF5_OrData_h_
+#ifndef _Alembic_AbcCoreOgawa_OrData_h_
+#define _Alembic_AbcCoreOgawa_OrData_h_
 
-#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
-#include <Alembic/AbcCoreHDF5/Foundation.h>
-
+#include <Alembic/AbcCoreOgawa/Foundation.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 class CprData;
 
 // data class owned by OrImpl, or ArImpl if it is a "top" object.
-// it owns and makes child objects as well as the group hid_t
-// when necessary
+// it owns and makes child objects
+
 class OrData : public Alembic::Util::enable_shared_from_this<OrData>
 {
 public:
-    OrData( ObjectHeaderPtr iHeader,
-            H5Node & iParentGroup,
+    OrData( Ogawa::IGroupPtr iGroup,
+            const std::string & iParentName,
+            size_t iThreadId,
             int32_t iArchiveVersion );
 
     ~OrData();
@@ -68,7 +67,7 @@ public:
     getChildHeader( AbcA::ObjectReaderPtr iParent, size_t i );
 
     const AbcA::ObjectHeader *
-    getChildHeader( AbcA::ObjectReaderPtr, const std::string &iName );
+    getChildHeader( AbcA::ObjectReaderPtr iParent, const std::string &iName );
 
     AbcA::ObjectReaderPtr
     getChild( AbcA::ObjectReaderPtr iParent, const std::string &iName );
@@ -78,20 +77,16 @@ public:
 
 private:
 
+    Ogawa::IGroupPtr m_group;
+
     struct Child
     {
-        bool loadedMetaData;
         ObjectHeaderPtr header;
         WeakOrPtr made;
     };
 
     typedef std::map<std::string, size_t> ChildrenMap;
     typedef std::vector<Child> ChildrenVec;
-
-    H5Node m_group;
-    H5Node m_oldGroup;
-
-    Alembic::Util::mutex m_childObjectsMutex;
 
     // The children
     ChildrenVec m_children;
@@ -108,7 +103,7 @@ typedef Alembic::Util::shared_ptr<OrData> OrDataPtr;
 
 using namespace ALEMBIC_VERSION_NS;
 
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
 
 #endif

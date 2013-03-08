@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,25 +34,23 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_CprData_h_
-#define _Alembic_AbcCoreHDF5_CprData_h_
+#ifndef _Alembic_AbcCoreOgawa_CprData_h_
+#define _Alembic_AbcCoreOgawa_CprData_h_
 
-#include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
+#include <Alembic/AbcCoreOgawa/Foundation.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 // data class owned by CprImpl, or OrImpl if it is a "top" object
-// it owns and makes child properties as well as the group hid_t
-// when necessary
+// it owns and makes child properties
 class CprData : public Alembic::Util::enable_shared_from_this<CprData>
 {
 public:
 
-    CprData( H5Node & iParentGroup, int32_t iArchiveVersion,
-             const std::string &iName );
+    CprData( Ogawa::IGroupPtr iGroup, int32_t iArchiveVersion,
+             size_t iThreadId );
 
     ~CprData();
 
@@ -78,30 +76,18 @@ public:
                          const std::string &iName );
 
 private:
-    // My group.
-    H5Node m_group;
+    Ogawa::IGroupPtr m_group;
 
     // Property Headers and Made Property Pointers.
     struct SubProperty
     {
         PropertyHeaderPtr header;
-
-        // extra data that doesn't quite fit into the property header
-        // but is stuff we only want to read once
-        uint32_t numSamples;
-        uint32_t firstChangedIndex;
-        uint32_t lastChangedIndex;
-        bool isScalarLike;
-
         WeakBprPtr made;
-        std::string name;
     };
 
     typedef std::map<std::string, size_t> SubPropertiesMap;
     typedef std::vector<SubProperty> SubPropertyVec;
 
-    // Allocated mutexes, one per SubProperty
-    Alembic::Util::mutex * m_subPropertyMutexes;
     SubPropertyVec m_propertyHeaders;
     SubPropertiesMap m_subProperties;
 };
@@ -112,7 +98,7 @@ typedef Alembic::Util::shared_ptr<CprData> CprDataPtr;
 
 using namespace ALEMBIC_VERSION_NS;
 
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
 
 #endif

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,14 +34,14 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_SprImpl_h_
-#define _Alembic_AbcCoreHDF5_SprImpl_h_
+#ifndef _Alembic_AbcCoreOgawa_SprImpl_h_
+#define _Alembic_AbcCoreOgawa_SprImpl_h_
 
-#include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/SimplePrImpl.h>
+#include <Alembic/AbcCoreOgawa/Foundation.h>
+#include <Alembic/AbcCoreOgawa/SimplePrImpl.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
@@ -77,7 +77,7 @@ protected:
     friend class SimplePrImpl<AbcA::ScalarPropertyReader,
                               SprImpl,
                               void*>;
-    
+
     // This function is called by SimplePrImpl to provide the actual
     // property reading.
     // It will dispatch its work out to different read utils, based
@@ -86,7 +86,7 @@ protected:
                      const std::string &iSampleName,
                      index_t iSampleIndex,
                      void *oSampleBytes );
-    
+
     //-*************************************************************************
     // This function is called by SimplePrImpl, scalar props do not have keys.
     bool readKey( hid_t iGroup,
@@ -99,7 +99,7 @@ protected:
 
 using namespace ALEMBIC_VERSION_NS;
 
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
 
 #endif

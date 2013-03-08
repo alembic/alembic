@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,14 +34,14 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_OrImpl_h_
-#define _Alembic_AbcCoreHDF5_OrImpl_h_
+#ifndef _Alembic_AbcCoreOgawa_OrImpl_h_
+#define _Alembic_AbcCoreOgawa_OrImpl_h_
 
-#include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/OrData.h>
+#include <Alembic/AbcCoreOgawa/Foundation.h>
+#include <Alembic/AbcCoreOgawa/OrData.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
@@ -52,12 +52,12 @@ class OrImpl
 
 public:
 
-    OrImpl( AbcA::ArchiveReaderPtr iArchive,
+    OrImpl( ArImpl iArchive,
             OrDataPtr iData,
             ObjectHeaderPtr iHeader );
 
     OrImpl( AbcA::ObjectReaderPtr iParent,
-            H5Node & iParentGroup,
+            Ogawa::IGroupPtr iGroup,
             ObjectHeaderPtr iHeader );
 
     virtual ~OrImpl();
@@ -87,10 +87,13 @@ public:
     virtual AbcA::ObjectReaderPtr asObjectPtr();
 
 private:
-    // The parent object
-    AbcA::ObjectReaderPtr m_parent;
 
-    AbcA::ArchiveReaderPtr m_archive;
+    ArImplPtr getArchiveImpl() const;
+
+    // The parent object
+    Alembic::Util::shared_ptr< OrImpl > m_parent;
+
+    ArImplPtr m_archive;
 
     OrDataPtr m_data;
 

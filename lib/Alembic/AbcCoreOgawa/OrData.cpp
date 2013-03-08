@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,92 +34,52 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/OrData.h>
-#include <Alembic/AbcCoreHDF5/OrImpl.h>
-#include <Alembic/AbcCoreHDF5/CprData.h>
-#include <Alembic/AbcCoreHDF5/CprImpl.h>
-#include <Alembic/AbcCoreHDF5/ReadUtil.h>
-#include <Alembic/AbcCoreHDF5/HDF5Util.h>
+#include <Alembic/AbcCoreOgawa/OrData.h>
+#include <Alembic/AbcCoreOgawa/OrImpl.h>
+#include <Alembic/AbcCoreOgawa/CprData.h>
+#include <Alembic/AbcCoreOgawa/CprImpl.h>
+#include <Alembic/AbcCoreOgawa/ReadUtil.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-static herr_t VisitAllLinksCB( hid_t iGroup,
-                               const char *iName,
-                               const H5L_info_t *iLinfo,
-                               void *iOpData )
-{
-    std::vector<std::string> *visitor = ( std::vector<std::string> * )iOpData;
-
-    // in the old days ".prop" was the special top compound
-    std::string name = iName;
-    if ( name != ".prop" )
-    {
-        // Create a proto object.
-        visitor->push_back( name );
-    }
-
-    // Keep iterating!
-    return 0;
-}
-
-//-*****************************************************************************
-OrData::OrData( ObjectHeaderPtr iHeader,
-                H5Node & iParentGroup,
+OrData::OrData( Ogawa::IGroupPtr iGroup,
+                const std::string & iParentName,
+                std::size_t iThreadId,
                 int32_t iArchiveVersion )
 {
-    ABCA_ASSERT( iHeader, "Invalid header" );
-    ABCA_ASSERT( iParentGroup.isValidObject(), "Invalid group" );
+    ABCA_ASSERT( iGroup, "Invalid object data group" );
 
-    m_group = OpenGroup( iParentGroup, iHeader->getName().c_str() );
-    ABCA_ASSERT( m_group.isValidObject(),
-        "Could not open object group: "
-        << iHeader->getFullName() );
+    m_group = iGroup;
 
-    std::vector<std::string> objNames;
+    std::size_t numChildren = m_group->getNumChildren();
 
-    herr_t status = H5Literate( m_group.getObject(),
-                                H5_INDEX_CRT_ORDER,
-                                H5_ITER_INC,
-                                NULL,
-                                VisitAllLinksCB,
-                                ( void * )&objNames );
-
-    ABCA_ASSERT( status >= 0,
-                 "OrData::OrData: H5Literate failed" );
-
-    std::vector < std::string >::iterator namesIt;
-    uint32_t i = 0;
-    m_children.resize(objNames.size());
-
-    std::string parentFullName = iHeader->getFullName();
-    if ( parentFullName != "/" )
+    if ( numChildren > 0 && m_group->isChildData( numChildren - 1 ) )
     {
-        parentFullName += "/";
+        std::vector< ObjectHeaderPtr > headers;
+        ReadObjectHeaders( m_group, numChildren - 1, iThreadId,
+                           iParentName, headers );
+
+        m_children.resize( headers.size() );
+        for ( std::size_t i = 0; i < headers.size(); ++i )
+        {
+            m_subProperties[headers[i]->getName()] = i;
+            m_children[i].header = headers[i];
+        }
     }
 
-    for ( namesIt = objNames.begin(); namesIt != objNames.end();
-          ++namesIt, ++i )
+    if ( numChildren > 0 && m_group->isChildGroup( 0 ) )
     {
-        m_childrenMap[ *namesIt ] = i;
-
-        m_children[i].header.reset( new AbcA::ObjectHeader( *namesIt,
-            parentFullName + *namesIt, AbcA::MetaData() ) );
-        m_children[i].loadedMetaData = false;
+        Ogawa::GroupPtr group = m_group->getGroup( 0, iThreadId );
+        m_data.reset( new CprData( group, iArchiveVersion, iThreadId ) );
     }
-
-    m_oldGroup = m_group;
-
-
-    m_data.reset( new CprData( m_group, iArchiveVersion, ".prop" ) );
 }
 
 //-*****************************************************************************
 OrData::~OrData()
 {
-    CloseObject( m_oldGroup );
 }
 
 //-*****************************************************************************
@@ -149,22 +109,6 @@ OrData::getChildHeader( AbcA::ObjectReaderPtr iParent, size_t i )
 {
     ABCA_ASSERT( i < m_children.size(),
         "Out of range index in OrData::getChildHeader: " << i );
-
-    Alembic::Util::scoped_lock l( m_childObjectsMutex );
-    if ( ! m_children[i].loadedMetaData )
-    {
-        H5Node group = OpenGroup( m_group,
-            m_children[i].header->getName().c_str() );
-;
-        ABCA_ASSERT( group.isValidObject(),
-        "Could not open object group: "
-        << m_children[i].header->getFullName() );
-
-        ReadMetaData( group, ".prop.meta",
-            m_children[i].header->getMetaData() );
-
-        CloseObject( group );
-    }
 
     return *( m_children[i].header );
 }
@@ -206,19 +150,18 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
     AbcA::ObjectReaderPtr optr = m_children[i].made.lock();
     if ( ! optr )
     {
-        // we haven't fully loaded the meta data
-        if ( ! m_children[i].loadedMetaData )
-        {
-            getChildHeader( iParent, i );
-        }
-
+        // TODO get thread id from archive on parent
+        // (dynamic cast optr->getArchive() to ArImpl?)
+        // "top" compound is at the 0 position
+        Ogawa::IGroupPtr group = m_group.getGroup( i + 1, 0 );
         // Make a new one.
-        optr.reset ( new OrImpl( iParent, m_group, m_children[i].header ) );
+        optr.reset ( new OrImpl( group, iParent, group,
+                                 m_children[i].header ) );
         m_children[i].made = optr;
     }
     return optr;
 }
 
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic

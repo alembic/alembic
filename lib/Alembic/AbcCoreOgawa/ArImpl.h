@@ -55,10 +55,10 @@ private:
     friend struct ReadArchive;
 
     ArImpl( const std::string &iFileName,
-            std::size_t iNumStreams=1 );
+            size_t iNumStreams=1 );
 
     ArImpl( const std::vector< std::istream * > & iStreams );
-            std::size_t iNumStreams=1 );
+            size_t iNumStreams=1 );
 public:
     virtual ~ArImpl();
 
@@ -100,11 +100,12 @@ public:
 
 private:
     std::string m_fileName;
+    size_t m_numStreams;
+
     Ogawa::IArchive m_archive;
 
     Alembic::Util::weak_ptr< AbcA::ObjectReader > m_top;
     Alembic::Util::shared_ptr < OrData > m_data;
-    ObjectHeaderPtr m_header;
 
     int32_t m_archiveVersion;
 

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,10 +34,10 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/CprImpl.h>
+#include <Alembic/AbcCoreOgawa/CprImpl.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
@@ -48,7 +48,8 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-                  H5Node & iParentGroup,
+                  Ogawa::IGroupPtr iParentGroup,
+                  size_t iIndex,
                   PropertyHeaderPtr iHeader )
     : m_parent( iParent )
     , m_header( iHeader )
@@ -68,9 +69,13 @@ CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
     ABCA_ASSERT( optr, "Invalid object in CprImpl::CprImpl(Compound)" );
     m_object = optr;
 
-    m_data.reset( new CprData( iParentGroup,
-        m_parent->getObject()->getArchive()->getArchiveVersion(),
-        m_header->getName() ) );
+    if ( iParentGroup->isChildGroup( iIndex ) )
+    {
+        // TODO get threadid from archive
+        Ogawa::IGroupPtr group = iParentGroup->getGroup( iIndex );
+        m_data.reset( new CprData( group,
+            m_parent->getObject()->getArchive()->getArchiveVersion(), 0 ) );
+    }
 }
 
 //-*****************************************************************************
@@ -156,5 +161,5 @@ CprImpl::getCompoundProperty( const std::string &iName )
 }
 
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic

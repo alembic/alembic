@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,10 +34,10 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/OrImpl.h>
+#include <Alembic/AbcCoreOgawa/OrImpl.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
@@ -49,24 +49,27 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 // Reading as a child of a parent.
 OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
-                H5Node & iParentGroup,
-                ObjectHeaderPtr iHeader )
-    : m_parent( iParent )
-    , m_header( iHeader )
+                Ogawa::IGroupPtr iGroup,
+                AbcA::ObjectHeaderPtr iHeader )
+    : m_header( iHeader )
 {
+    m_parent = Alembic::Util::dynamic_pointer_cast< AbcA::ObjectReader,
+        OrImpl > (iParent);
+
     // Check validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent in OrImpl(Object)" );
     ABCA_ASSERT( m_header, "Invalid header in OrImpl(Object)" );
 
-    m_archive = m_parent->getArchive();
+    m_archive = m_parent->getArchiveImpl();
     ABCA_ASSERT( m_archive, "Invalid archive in OrImpl(Object)" );
 
-    m_data.reset( new OrData( iHeader, iParentGroup,
-        iParent->getArchive()->getArchiveVersion() ) );
+    // TODO get thread id from archive
+    m_data.reset( new OrData( iGroup, iParent->getName(), 0
+        m_parent->getArchive()->getArchiveVersion() ) );
 }
 
 //-*****************************************************************************
-OrImpl::OrImpl( AbcA::ArchiveReaderPtr iArchive,
+OrImpl::OrImpl( ArImpl iArchive,
                 OrDataPtr iData,
                 ObjectHeaderPtr iHeader )
     : m_archive( iArchive )
@@ -142,6 +145,11 @@ AbcA::ObjectReaderPtr OrImpl::getChild( size_t i )
 AbcA::ObjectReaderPtr OrImpl::asObjectPtr()
 {
     return shared_from_this();
+}
+
+ArImplPtr OrImpl::getArchiveImpl() const
+{
+    return m_archive;
 }
 
 } // End namespace ALEMBIC_VERSION_NS

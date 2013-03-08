@@ -41,6 +41,8 @@
 
 #include <Alembic/Util/All.h>
 
+#include <Alembic/Ogawa/All.h>
+
 #include <vector>
 #include <string>
 #include <map>
@@ -122,7 +124,7 @@ struct PropertyHeaderAndFriends
 
     // Index representing the last sample in which a change has occured
     // There is no need to repeat samples if they are the same between this
-    // index and m_nextSampleIndex
+    // index and nextSampleIndex
     uint32_t lastChangedIndex;
 
     // Index representing which TimeSampling from the ArchiveWriter to use.

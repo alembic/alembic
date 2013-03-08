@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,31 +34,48 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/AprImpl.h>
+#include <Alembic/AbcCoreOgawa/AprImpl.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 AprImpl::AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-                  H5Node & iParentGroup,
-                  PropertyHeaderPtr iHeader,
-                  bool iIsScalarLike,
-                  uint32_t iNumSamples,
-                  uint32_t iFirstChangedIndex,
-                  uint32_t iLastChangedIndex )
-  : SimplePrImpl<AbcA::ArrayPropertyReader, AprImpl, AbcA::ArraySamplePtr&>
-    ( iParent, iParentGroup, iHeader, iNumSamples, iFirstChangedIndex,
-      iLastChangedIndex )
+                  Ogawa::IGroupPtr iGroup,
+                  PropertyHeaderPtr iHeader )
+  : m_parent( iParent )
+  , m_group( iGroup )
+  , m_header( iHeader )
 {
-    if ( m_header->getPropertyType() != AbcA::kArrayProperty )
+    // Validate all inputs.
+    ABCA_ASSERT( m_parent, "Invalid parent" );
+    ABCA_ASSERT( m_group, "Invalid array property group" );
+    ABCA_ASSERT( m_header, "Invalid header" );
+
+    if ( m_header.header->getPropertyType() != AbcA::kArrayProperty )
     {
         ABCA_THROW( "Attempted to create a ArrayPropertyReader from a "
                     "non-array property type" );
     }
+}
 
-    m_isScalarLike = iIsScalarLike;
+//-*****************************************************************************
+const AprImpl::PropertyHeader & getHeader() const
+{
+    return m_header.header;
+}
+
+//-*****************************************************************************
+ObjectReaderPtr AprImpl::getObject()
+{
+    return m_parent->getObject();
+}
+
+//-*****************************************************************************
+CompoundPropertyReaderPtr AprIml::getParent()
+{
+    return m_parent;
 }
 
 //-*****************************************************************************
@@ -68,9 +85,68 @@ AbcA::ArrayPropertyReaderPtr AprImpl::asArrayPtr()
 }
 
 //-*****************************************************************************
+size_t AprImpl::getNumSamples()
+{
+    return m_header->nextSampleIndex;
+}
+
+//-*****************************************************************************
+bool AprImpl::isConstant()
+{
+    return ( m_header->firstChangedIndex == 0 );
+}
+
+//-*****************************************************************************
+void AprImpl::getSample( index_t iSampleIndex, ArraySamplePtr &oSample )
+{
+
+}
+
+//-*****************************************************************************
+std::pair<index_t, chrono_t> AprImpl::getFloorIndex( chrono_t iTime )
+{
+    return m_header->getTimeSampling()->getFloorIndex( iTime,
+        m_header->nextSampleIndex );
+}
+
+//-*****************************************************************************
+std::pair<index_t, chrono_t> AprImpl::getCeilIndex( chrono_t iTime )
+{
+    return m_header->getTimeSampling()->getCeilIndex( iTime,
+        m_header->nextSampleIndex );
+}
+
+//-*****************************************************************************
+std::pair<index_t, chrono_t> AprImpl::getNearIndex( chrono_t iTime )
+{
+    return m_header->getTimeSampling()->getNearIndex( iTime,
+        m_header->nextSampleIndex );
+}
+
+//-*****************************************************************************
+bool AprImpl::getKey( index_t iSampleIndex, ArraySampleKey & oKey )
+{
+    oKey.readPOD = m_header->header.getDataType().getPOD();
+    oKey.origPOD = oKey.readPOD;
+    oKey.numBytes = 0;
+
+    // TODO get thread index from archive
+    Ogawa::IDataPtr data = m_group->getData( iSampleIndex * 2, 0 );
+
+    if ( data )
+    {
+        oKey.numBytes = data->getSize() - 16;
+        data->read(16, oKey.digest.d);
+        return true;
+    }
+
+    return false;
+}
+
+//-*****************************************************************************
 bool AprImpl::isScalarLike()
 {
-    return m_isScalarLike;
+    return m_header->isScalarLike;
 }
 
 //-*****************************************************************************
@@ -109,7 +185,7 @@ void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
 {
     PlainOldDataType curPod = m_header->getDataType().getPod();
 
-    ABCA_ASSERT( ( iPod != kStringPOD && iPod != kWstringPOD && 
+    ABCA_ASSERT( ( iPod != kStringPOD && iPod != kWstringPOD &&
         iPod != kFloat16POD && curPod != kStringPOD && curPod != kWstringPOD &&
         curPod != kFloat16POD) || ( iPod == curPod ),
         "Cannot convert the data to or from a string, wstring or float16_t." );
@@ -147,70 +223,6 @@ void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
     }
 }
 
-//-*****************************************************************************
-void AprImpl::readSample( hid_t iGroup,
-                          const std::string &iSampleName,
-                          index_t iSampleIndex,
-                          AbcA::ArraySamplePtr& oSamplePtr )
-{
-    assert( iGroup >= 0 );
-
-    // Check index integrity.
-    assert( iSampleIndex >= 0 && iSampleIndex <= m_lastChangedIndex );
-
-    // Read the array sample, possibly from the cache.
-    const AbcA::DataType &dataType = m_header->getDataType();
-    AbcA::ReadArraySampleCachePtr cachePtr =
-        this->getObject()->getArchive()->getReadArraySampleCachePtr();
-    oSamplePtr = ReadArray( cachePtr, iGroup, iSampleName, dataType,
-                            m_fileDataType,
-                            m_nativeDataType );
-}
-
-//-*****************************************************************************
-bool AprImpl::readKey( hid_t iGroup,
-                       const std::string &iSampleName,
-                       AbcA::ArraySampleKey& oKey )
-{
-    assert( iGroup >= 0 );
-
-    // Open the data set.
-    hid_t dsetId = H5Dopen( iGroup, iSampleName.c_str(), H5P_DEFAULT );
-    ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iSampleName );
-    DsetCloser dsetCloser( dsetId );
-
-    const AbcA::DataType &dataType = m_header->getDataType();
-    if (ReadKey( dsetId, "key", oKey ))
-    {
-        hid_t dspaceId = H5Dget_space( dsetId );
-        ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
-                     << iSampleName );
-        DspaceCloser dspaceCloser( dspaceId );
-
-        oKey.readPOD = dataType.getPod();
-        oKey.origPOD = oKey.readPOD;
-
-        oKey.numBytes = H5Sget_simple_extent_npoints( dspaceId );
-        if (oKey.origPOD == kStringPOD || oKey.origPOD == kWstringPOD)
-        {
-
-            hid_t dsetFtype = H5Dget_type( dsetId );
-            DtypeCloser dtypeCloser( dsetFtype );
-
-            // string arrays get packed together
-            oKey.numBytes *= H5Tget_size( dsetFtype );
-        }
-        else
-        {
-            oKey.numBytes *= PODNumBytes(dataType.getPod());
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,61 +34,63 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_AprImpl_h_
-#define _Alembic_AbcCoreHDF5_AprImpl_h_
+#ifndef _Alembic_AbcCoreOgawa_AprImpl_h_
+#define _Alembic_AbcCoreOgawa_AprImpl_h_
 
-#include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/SimplePrImpl.h>
+#include <Alembic/AbcCoreOgawa/Foundation.h>
+#include <Alembic/AbcCoreOgawa/SimplePrImpl.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class AprImpl
-    : public SimplePrImpl<AbcA::ArrayPropertyReader,
-                          AprImpl,
-                          AbcA::ArraySamplePtr&>
-    , public Alembic::Util::enable_shared_from_this<AprImpl>
+class AprImpl :
+    public AbcA::ArrayPropertyReader,
+    public Alembic::Util::enable_shared_from_this<AprImpl>
 {
 public:
-    AprImpl( AbcA::CompoundPropertyReaderPtr iParent, H5Node & iParentGroup,
-             PropertyHeaderPtr iHeader, bool iIsScalarLike,
-             uint32_t iNumSamples, uint32_t iFirstChangedIndex,
-             uint32_t iLastChangedIndex );
+    AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
+             Ogawa::IGroupPtr iGroup,
+             PropertyHeaderPtr iHeader );
 
+    // BasePropertyReader overrides
+    virtual const PropertyHeader & getHeader() const;
+    virtual ObjectReaderPtr getObject();
+    virtual CompoundPropertyReaderPtr getParent();
     virtual AbcA::ArrayPropertyReaderPtr asArrayPtr();
+
+    // ArrayPropertyReader overrides
+    virtual size_t getNumSamples();
+    virtual bool isConstant();
+    virtual void getSample( index_t iSampleIndex,
+                            ArraySamplePtr &oSample );
+    virtual std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime );
+    virtual std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime );
+    virtual std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime );
+    virtual bool getKey( index_t iSampleIndex, ArraySampleKey & oKey );
+    virtual void getDimensions( index_t iSampleIndex, Dimensions & oDim )
     virtual bool isScalarLike();
-    virtual void getDimensions( index_t iSampleIndex, Dimensions & oDim );
     virtual void getAs( index_t iSample, void *iIntoLocation,
                         PlainOldDataType iPod );
-protected:
-    friend class SimplePrImpl<AbcA::ArrayPropertyReader, AprImpl,
-                              AbcA::ArraySamplePtr&>;
-    
-    //-*************************************************************************
-    // This function is called by SimplePrImpl to provide the actual
-    // property reading.
-    void readSample( hid_t iGroup,
-                     const std::string &iSampleName,
-                     index_t iSampleIndex,
-                     AbcA::ArraySamplePtr& oSamplePtr );
-
-    //-*************************************************************************
-    // This function is called by SimplePrImpl to provide the actual key reading
-    bool readKey( hid_t iGroup,
-                  const std::string &iSampleName,
-                  AbcA::ArraySampleKey & oSamplePtr );
 
 private:
-    bool m_isScalarLike;
+
+    // Parent compound property writer. It must exist.
+    AbcA::CompoundPropertyReaderPtr m_parent;
+
+    // group from which all samples are read
+    Ogawa::IGroupPtr m_group;
+
+    // Stores the PropertyHeader and other info
+    PropertyHeaderPtr m_header;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;
 
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
 
 #endif

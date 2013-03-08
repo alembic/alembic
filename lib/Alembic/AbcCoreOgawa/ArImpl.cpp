@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,99 +34,64 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/ArImpl.h>
-#include <Alembic/AbcCoreHDF5/OrData.h>
-#include <Alembic/AbcCoreHDF5/OrImpl.h>
-#include <Alembic/AbcCoreHDF5/ReadUtil.h>
-#include <Alembic/AbcCoreHDF5/HDF5Util.h>
-#include <Alembic/AbcCoreHDF5/HDF5Util.h>
-#include <Alembic/AbcCoreHDF5/HDF5HierarchyReader.h>
+#include <Alembic/AbcCoreOgawa/ArImpl.h>
+#include <Alembic/AbcCoreOgawa/OrData.h>
+#include <Alembic/AbcCoreOgawa/OrImpl.h>
+#include <Alembic/AbcCoreOgawa/ReadUtil.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 ArImpl::ArImpl( const std::string &iFileName,
-                AbcA::ReadArraySampleCachePtr iCache,
-                const bool iCacheHierarchy )
-  : m_fileName( iFileName )
-  , m_file( -1 )
-  , m_readArraySampleCache( iCache )
+                std::size_t iNumStreams );
+  : m_fileName( iFileName ), m_archive(iFileName, iNumStreams)
 {
-    // OPEN THE FILE!
-    htri_t exi = H5Fis_hdf5( m_fileName.c_str() );
-    ABCA_ASSERT( exi == 1, "Nonexistent or not an Alembic file: "
-        << m_fileName );
+    ABCA_ASSERT( m_archive.valid(),
+                 "Could not open as Ogawa file: " << m_fileName );
 
-    m_file = H5Fopen( m_fileName.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
-    ABCA_ASSERT( m_file >= 0,
-                 "Could not open file: " << m_fileName );
+    Ogawa::IGroupPtr group = m_archive.getGroup();
 
-    // get the version using HDF5 native calls
     int version = -INT_MAX;
-    if (H5Aexists(m_file, "abc_version"))
+    std::size_t numChildren = group->getNumChildren();
+    if ( numChildren > 0 && group->isChildData( 0 ) )
     {
-        H5LTget_attribute_int(m_file, ".", "abc_version", &version);
+        Ogawa::IDataPtr data = group->getData( 0 );
+        if ( data->getSize() == 4 )
+        {
+            data->read( 4, &version );
+        }
     }
-    ABCA_ASSERT(version >= -8 && version <= ALEMBIC_HDF5_FILE_VERSION,
-        "Unsupported file version detected: " << version);
+
+    ABCA_ASSERT( version >= 0 && version <= ALEMBIC_OGAWA_FILE_VERSION,
+        "Unsupported file version detected: " << version );
 
     // if it isn't there, it's pre 1.0
     int fileVersion = 9999;
-    if (H5Aexists( m_file, "abc_release_version" ))
+    if ( numChildren > 1 && group->isChildData( 1 ) )
     {
-        H5LTget_attribute_int( m_file, ".", "abc_release_version",
-                               &fileVersion);
+        Ogawa::IDataPtr data = group->getData( 1 );
+        if ( data->getSize() == 4 )
+        {
+            data->read( 4, &fileVersion );
+        }
     }
+
     m_archiveVersion = fileVersion;
 
-    HDF5HierarchyReader reader( m_file, m_H5H, iCacheHierarchy );
-    H5Node node = m_H5H.createNode( m_file );
-    H5Node abcRoot = OpenGroup( node, "ABC" );
-
-    AbcA::MetaData metaData;
-    ReadMetaData( abcRoot, ".prop.meta", metaData );
-    m_header.reset( new AbcA::ObjectHeader( "ABC", "/", metaData ) );
-
-    m_data.reset( new OrData( m_header, node, m_archiveVersion ) );
-    CloseObject( abcRoot );
-    ReadTimeSamples( m_file, m_timeSamples );
-
-    if ( H5Aexists( m_file, "abc_max_samples" ) )
+    if ( numChildren > 1 && group->isChildGroup( numChildren - 2 ) )
     {
-        hid_t aid = H5Aopen( m_file, "abc_max_samples", H5P_DEFAULT );
-
-        if ( aid < 0 )
-        {
-            return;
-        }
-
-        AttrCloser attrCloser( aid );
-
-        // figure out how big it is
-        hid_t sid = H5Aget_space( aid );
-
-        if ( sid < 0 )
-        {
-            return;
-        }
-
-        DspaceCloser dspaceCloser( sid );
-
-        hssize_t numPoints = H5Sget_simple_extent_npoints( sid );
-
-        if ( numPoints < 1 )
-        {
-            return;
-        }
-
-        m_maxSamples.resize( numPoints );
-
-        // do the read
-        H5Aread( aid, H5T_NATIVE_LLONG, &( m_maxSamples.front() ) );
-
+        m_data.reset( new OrData( group->getGroup( numChildren - 2 ),
+                                  m_archiveVersion ) );
     }
+
+    if ( numChildren > 0 && group->isChildData( numChildren - 1 ) )
+    {
+        ReadTimeSamplesAndMax( group->getData( numChildren - 1 ),
+                               m_timeSamples, m_maxSamples );
+    }
+
 }
 
 //-*****************************************************************************
@@ -138,7 +103,7 @@ const std::string &ArImpl::getName() const
 //-*****************************************************************************
 const AbcA::MetaData &ArImpl::getMetaData() const
 {
-    return m_header->getMetaData();
+    return m_data->getMetaData();
 }
 
 //-*****************************************************************************
@@ -148,7 +113,7 @@ AbcA::ObjectReaderPtr ArImpl::getTop()
     if ( ! ret )
     {
         // time to make a new one
-        ret.reset( new OrImpl( asArchivePtr(), m_data, m_header ) );
+        ret.reset( new OrImpl( shared_from_this(), m_data ) );
         m_top = ret;
     }
 
@@ -184,98 +149,8 @@ AbcA::index_t ArImpl::getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex )
 //-*****************************************************************************
 ArImpl::~ArImpl()
 {
-
-    m_data.reset();
-
-    if ( m_file >= 0 )
-    {
-        int dsetCount = H5Fget_obj_count( m_file,
-            H5F_OBJ_LOCAL | H5F_OBJ_DATASET);
-        int grpCount = H5Fget_obj_count( m_file,
-            H5F_OBJ_LOCAL | H5F_OBJ_GROUP );
-        int dtypCount = H5Fget_obj_count( m_file,
-            H5F_OBJ_LOCAL | H5F_OBJ_DATATYPE );
-        int attrCount = H5Fget_obj_count( m_file,
-            H5F_OBJ_LOCAL | H5F_OBJ_ATTR );
-
-        int objCount = dsetCount + grpCount + dtypCount + attrCount;
-
-        if ( objCount != 0 )
-        {
-            std::stringstream strm;
-            strm << "Open HDF5 handles detected during reading:" << std::endl
-                 << "DataSets: " << dsetCount
-                 << ", Groups: " << grpCount
-                 << ", DataTypes: " << dtypCount
-                 << ", Attributes: " << attrCount;
-
-            std::vector< hid_t > objList;
-
-            // when getting the name corresponding to a hid_t, the get_name
-            // functions always append a NULL character, which we strip off
-            // when injecting into out stream.
-            std::string name;
-
-            if ( dsetCount > 0 )
-            {
-                strm << std::endl << "DataSets: " << std::endl;
-                objList.resize( dsetCount );
-                H5Fget_obj_ids( m_file, H5F_OBJ_LOCAL | H5F_OBJ_DATASET,
-                    dsetCount, &objList.front() );
-                for ( int i = 0; i < dsetCount; ++i )
-                {
-                    int strLen = H5Iget_name( objList[i], NULL, 0 ) + 1;
-                    name.resize( strLen );
-                    H5Iget_name( objList[i], &(name[0]), strLen );
-                    strm << name.substr(0, name.size() - 1) << std::endl;
-                }
-            }
-
-            if ( grpCount > 0 )
-            {
-                strm << std::endl << std::endl << "Groups:" << std::endl;
-                objList.resize( grpCount );
-                H5Fget_obj_ids( m_file, H5F_OBJ_LOCAL | H5F_OBJ_GROUP,
-                    grpCount, &objList.front() );
-                for ( int i = 0; i < grpCount; ++i )
-                {
-                    int strLen = H5Iget_name( objList[i], NULL, 0 ) + 1;
-                    name.resize( strLen );
-                    H5Iget_name( objList[i], &(name[0]), strLen );
-                    strm << std::endl << name.substr(0, name.size() - 1);
-                }
-            }
-
-            if ( attrCount > 0 )
-            {
-                strm << std::endl << std::endl << "Attrs:" << std::endl;
-                objList.resize( attrCount );
-                H5Fget_obj_ids( m_file, H5F_OBJ_LOCAL | H5F_OBJ_ATTR,
-                    attrCount, &objList.front() );
-                for ( int i = 0; i < attrCount; ++i )
-                {
-                    int strLen = H5Aget_name( objList[i], 0, NULL ) + 1;
-                    name.resize( strLen );
-                    H5Aget_name( objList[i], strLen, &(name[0]) );
-                    strm << std::endl << name.substr(0, name.size() - 1);
-                }
-            }
-
-            // just for formatting purposes
-            if ( dtypCount > 0 )
-            {
-                strm << std::endl;
-            }
-
-            m_file = -1;
-            ABCA_THROW( strm.str() );
-        }
-
-        H5Fclose( m_file );
-        m_file = -1;
-    }
 }
 
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
