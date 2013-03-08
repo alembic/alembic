@@ -142,7 +142,7 @@ void register_xformsample()
         .def( "setScale",
               &AbcG::XformSample::setScale,
               ( arg( "scale" ) ) )
-        .def( "getZRotation",
+        .def( "getScale",
               &AbcG::XformSample::getScale )
         .def( "setMatrix",
               &AbcG::XformSample::setMatrix,
