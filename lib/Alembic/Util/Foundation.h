@@ -87,6 +87,7 @@
 #define NOMINMAX
 #endif
 
+#define _WINSOCKAPI_
 // needed for mutex stuff
 #include <Windows.h>
 #endif
