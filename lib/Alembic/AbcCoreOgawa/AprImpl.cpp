@@ -99,7 +99,11 @@ bool AprImpl::isConstant()
 //-*****************************************************************************
 void AprImpl::getSample( index_t iSampleIndex, ArraySamplePtr &oSample )
 {
+    size_t index = m_header->verifySampleIndex( iSampleIndex );
 
+    // TODO get thread index from archive
+    ReadArraySample( m_group, index * 2, index * 2 + 1, 0,
+                     m_header->getDataType(), oSample );
 }
 
 //-*****************************************************************************
@@ -130,8 +134,11 @@ bool AprImpl::getKey( index_t iSampleIndex, ArraySampleKey & oKey )
     oKey.origPOD = oKey.readPOD;
     oKey.numBytes = 0;
 
+    // * 2 + 1 for Array properties since we create a data for dimensions
+    size_t index = m_header->verifyIndex( iSampleIndex ) * 2 + 1;
+
     // TODO get thread index from archive
-    Ogawa::IDataPtr data = m_group->getData( iSampleIndex * 2, 0 );
+    Ogawa::IDataPtr data = m_group->getData( index * 2 + 1, 0 );
 
     if ( data )
     {
@@ -152,75 +159,22 @@ bool AprImpl::isScalarLike()
 //-*****************************************************************************
 void AprImpl::getDimensions( index_t iSampleIndex, Dimensions & oDim )
 {
-    iSampleIndex = verifySampleIndex( iSampleIndex );
+    size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
-    std::string sampleName = getSampleName( m_header->getName(), iSampleIndex );
-    H5Node parent;
+    // TODO get thread index from archive
+    ReadDimensions( m_group, index, 0, m_header->header.getDataType(), oDim );
 
-    if ( iSampleIndex == 0 )
-    {
-        parent = m_parentGroup;
-    }
-    else
-    {
-        checkSamplesIGroup();
-        parent = m_samplesIGroup;
-    }
-
-    std::string dimName = sampleName + ".dims";
-    if ( AttrExists( parent, dimName.c_str() ) )
-    {
-        ReadDimensions( parent.getObject(), dimName, oDim );
-    }
-    else
-    {
-        ReadDataSetDimensions( parent.getObject(), sampleName,
-                               m_header->getDataType().getExtent(), oDim );
-    }
 }
 
 //-*****************************************************************************
 void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
                      PlainOldDataType iPod )
 {
-    PlainOldDataType curPod = m_header->getDataType().getPod();
+    size_t index = m_header->verifySampleIndex( iSampleIndex ) * 2 + 1;
 
-    ABCA_ASSERT( ( iPod != kStringPOD && iPod != kWstringPOD &&
-        iPod != kFloat16POD && curPod != kStringPOD && curPod != kWstringPOD &&
-        curPod != kFloat16POD) || ( iPod == curPod ),
-        "Cannot convert the data to or from a string, wstring or float16_t." );
-
-    hid_t nativeType = -1;
-    bool clean = false;
-
-    if ( iPod != kStringPOD && iPod != kWstringPOD )
-    {
-        AbcA::DataType dtype( iPod );
-        nativeType = GetNativeH5T(dtype, clean);
-    }
-
-    iSampleIndex = verifySampleIndex( iSampleIndex );
-
-    std::string sampleName = getSampleName( m_header->getName(), iSampleIndex );
-    H5Node parent;
-
-    if ( iSampleIndex == 0 )
-    {
-        parent = m_parentGroup;
-    }
-    else
-    {
-        checkSamplesIGroup();
-        parent = m_samplesIGroup;
-    }
-
-    ReadArray( iIntoLocation, parent.getObject(),sampleName,
-               m_header->getDataType(), nativeType );
-
-    if ( clean )
-    {
-        H5Tclose( nativeType );
-    }
+    // TODO get thread index from archive
+    ReadData( iIntoLocation, m_group, index, 0,
+               m_header->getDataType(), iPod );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

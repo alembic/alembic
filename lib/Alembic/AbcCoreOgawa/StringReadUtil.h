@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,13 +34,13 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_StringReadUtil_h_
-#define _Alembic_AbcCoreHDF5_StringReadUtil_h_
+#ifndef _Alembic_AbcCoreOgawa_StringReadUtil_h_
+#define _Alembic_AbcCoreOgawa_StringReadUtil_h_
 
-#include <Alembic/AbcCoreHDF5/Foundation.h>
+#include <Alembic/AbcCoreOgawa/Foundation.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************

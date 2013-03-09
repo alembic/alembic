@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,15 +34,13 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_ReadUtil_h_
-#define _Alembic_AbcCoreHDF5_ReadUtil_h_
+#ifndef _Alembic_AbcCoreOgawa_ReadUtil_h_
+#define _Alembic_AbcCoreOgawa_ReadUtil_h_
 
-#include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
-#include <Alembic/AbcCoreHDF5/StringReadUtil.h>
+#include <Alembic/AbcCoreOgawa/Foundation.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
@@ -52,95 +50,47 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void
-ReadReferences ( hid_t iParent,
-                 const std::string& iRefName,
-                 std::vector<hobj_ref_t>& oRefs );
-
-//-*****************************************************************************
-bool
-ReadKey( hid_t iHashDset,
-         const std::string &iAttrName,
-         AbcA::ArraySample::Key &oKey );
-
-//-*****************************************************************************
-bool
-ReadMetaData( H5Node& iGroup,
-              const std::string &iMetaDataName,
-              AbcA::MetaData &oMetaData );
+ReadDimensions( Ogawa::IGroupPtr iGroup,
+                size_t iIndex,
+                size_t iThreadId,
+                const AbcA::DataType &iDataType,
+                Util::Dimensions & oDim );
 
 //-*****************************************************************************
 void
-ReadPropertyHeader( H5Node& iParent,
-                    const std::string & iPropName,
-                    AbcA::PropertyHeader & oHeader,
-                    bool & oIsScalarLike,
-                    uint32_t & oNumSamples,
-                    uint32_t & oFirstChangedIndex,
-                    uint32_t & oLastChangedIndex,
-                    uint32_t & oTimeSamplingIndex );
+ReadData( void * iIntoLocation,
+          Ogawa::IGroupPtr iGroup,
+          size_t iIndex,
+          size_t iThreadId,
+          const AbcA::DataType &iDataType,
+          Util::PlainOldDataType iAsPod );
 
 //-*****************************************************************************
 void
-ReadScalar( hid_t iGroup,
-            const std::string &iScalarName,
-            hid_t iFileType,
-            hid_t iNativeType,
-            void *oData );
+ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
+                       std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples,
+                       std::vector <  AbcA::index_t > & oMaxSamples );
 
 //-*****************************************************************************
 void
-ReadSmallArray( hid_t iGroup,
-                const std::string &iAttrName,
-                hid_t iFileType,
-                hid_t iNativeType,
-                size_t iMaxElems,
-                size_t &oReadElems,
-                void *oData );
+ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
+                   size_t iIndex,
+                   size_t iThreadId,
+                   const std::string & iParentName,
+                   std::vector< ObjectHeaderPtr > & oHeaders );
 
 //-*****************************************************************************
 void
-ReadDimensions( hid_t iParent,
-                const std::string &iName,
-                Dimensions &oDims );
-
-//-*****************************************************************************
-void
-ReadDataSetDimensions( hid_t iParent,
-                       const std::string &iName,
-                       hsize_t iExtent,
-                       Dimensions &oDims );
-
-//-*****************************************************************************
-AbcA::ArraySamplePtr 
-ReadArray( AbcA::ReadArraySampleCachePtr iCache,
-           hid_t iGroup,
-           const std::string &iArrayName,
-           const AbcA::DataType &iDataType,
-           hid_t iFileType,
-           hid_t iNativeType );
-
-//-*****************************************************************************
-void
-ReadArray( void * iIntoLocation,
-           hid_t iParent,
-           const std::string &iName,
-           const AbcA::DataType &iDataType,
-           hid_t iType );
-
-//-*****************************************************************************
-// Fills in oTimeSamples with the different TimeSampling that the archive uses
-// Intrinsically all archives have the first TimeSampling for uniform time 
-// sampling with a start time of 0 and time per cycle of 1
-// (aka identity sampling)
-void
-ReadTimeSamples( hid_t iParent,
-                 std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples );
+ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
+                     size_t iIndex,
+                     size_t iThreadId,
+                     PropertyHeaderPtrs & oHeaders );
 
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;
 
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
 
 #endif

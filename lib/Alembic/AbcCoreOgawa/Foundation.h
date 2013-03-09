@@ -109,6 +109,29 @@ struct PropertyHeaderAndFriends
         lastChangedIndex = 0;
     }
 
+    // convenience function that makes sure the incoming index is ok, and
+    // offsets it to the proper index within the Ogawa group
+    size_t verifyIndex( index_t iIndex )
+    {
+        // Verify sample index
+        ABCA_ASSERT( iIndex >= 0 &&
+                 iIndex < nextSampleIndex,
+                 "Invalid sample index: " << iIndex
+                 << ", should be between 0 and " << nextSampleIndex - 1 );
+
+        uint32_t index = ( uint32_t ) iIndex;
+        if ( index <= firstChangedIndex )
+        {
+            return 0;
+        }
+        else if ( index >= lastChangedIndex )
+        {
+            return ( size_t ) ( lastChangedIndex - firstChangedIndex );
+        }
+
+        return ( size_t ) ( index - firstChangedIndex );
+    }
+
     // The header which defines this property.
     AbcA::PropertyHeader header;
 

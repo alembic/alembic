@@ -332,16 +332,16 @@ void WriteTimeSampling( std::vector< uint8_t > & ioData,
 
     AbcA::TimeSamplingType tst = iTsmp.getTimeSamplingType();
 
-    const uint32_t spc = tst.getNumSamplesPerCycle();
-
-    ioData.insert( ioData.end(), 4, &spc );
-
-    const chrono_t tpc = tst.getTimePerCycle();
+    chrono_t tpc = tst.getTimePerCycle();
 
     ioData.insert( ioData.end(), sizeof(chrono_t), &tpc );
 
     const std::vector < chrono_t > & samps = iTsmp.getStoredTimes();
     ABCA_ASSERT( samps.size() > 0, "No TimeSamples to write!");
+
+    uint32_t spc = (uint32_t) samps.size();
+
+    ioData.insert( ioData.end(), 4, &spc );
 
     ioData.insert( ioData.end(), sizeof(chrono_t) * samps.size(),
         &( samps.front() ) );

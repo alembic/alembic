@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,13 +34,10 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/ReadUtil.h>
-#include <Alembic/AbcCoreHDF5/DataTypeRegistry.h>
-#include <Alembic/AbcCoreHDF5/ArImpl.h>
-#include <Alembic/AbcCoreHDF5/HDF5Util.h>
+#include <Alembic/AbcCoreOgawa/ReadUtil.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
@@ -53,352 +50,217 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void
-ReadReferences ( hid_t iParent,
-                 const std::string& iRefName,
-                 std::vector<hobj_ref_t>& oRefs )
+ReadDimensions( Ogawa::IGroupPtr iGroup,
+                size_t iIndex,
+                size_t iThreadId,
+                const AbcA::DataType &iDataType,
+                Util::Dimensions & oDim )
 {
-    ABCA_ASSERT( iParent >= 0, "Invalid parent" );
-
-    hid_t dsetId = H5Dopen( iParent, iRefName.c_str(), H5P_DEFAULT );
-    DsetCloser dsetCloser( dsetId );
-
-    hid_t dspaceId = H5Dget_space( dsetId );
-    DspaceCloser dspaceCloser( dspaceId );
-
-    hsize_t dim;
-    herr_t status = H5Sget_simple_extent_dims( dspaceId, &dim, NULL );
-
-    ABCA_ASSERT( dim > 0,
-                 "Degenerate dims in Dataset read" );
-
-    if ( dim > 0 )
+    // find it based on of the size of the data
+    if ( iGroup->isEmptyChildData( iIndex ) )
     {
-        oRefs.resize( dim );
-        status = H5Dread( dsetId, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL,
-                          H5P_DEFAULT, &oRefs.front() );
-        ABCA_ASSERT( status >= 0, 
-                     "H5Dread failed: " << iRefName );
-    }
-}
-
-//-*****************************************************************************
-void
-ReadScalar( hid_t iParent,
-            const std::string &iAttrName,
-            hid_t iFileType,
-            hid_t iNativeType,
-            void *oData )
-{
-    ABCA_ASSERT( iParent >= 0, "Invalid parent" );
-
-    hid_t attrId = H5Aopen( iParent, iAttrName.c_str(), H5P_DEFAULT );
-    ABCA_ASSERT( attrId >= 0,
-                 "Couldn't open attribute named: " << iAttrName );
-    AttrCloser attrCloser( attrId );
-
-    // This is all just checking code
-    {
-        hid_t attrFtype = H5Aget_type( attrId );
-        ABCA_ASSERT( attrFtype >= 0,
-                     "Couldn't get file datatype for attribute: "
-                     << iAttrName );
-        DtypeCloser dtypeCloser( attrFtype );
-
-        ABCA_ASSERT( EquivalentDatatypes( attrFtype, iFileType ),
-                     "File DataType clash for scalar attribute: "
-                     << iAttrName );
-
-        hid_t attrSpace = H5Aget_space( attrId );
-        ABCA_ASSERT( attrSpace >= 0,
-                     "Couldn't get dataspace for attribute: " << iAttrName );
-        DspaceCloser dspaceCloser( attrSpace );
-
-        H5S_class_t attrSpaceClass = H5Sget_simple_extent_type( attrSpace );
-        ABCA_ASSERT( attrSpaceClass == H5S_SCALAR,
-                     "Tried to read non-scalar attribute: " << iAttrName
-                     << " as scalar" );
-    }
-
-    herr_t status = H5Aread( attrId, iNativeType, oData );
-    ABCA_ASSERT( status >= 0, "Couldn't read from attribute: " << iAttrName );
-}
-
-//-*****************************************************************************
-void
-ReadSmallArray( hid_t iParent,
-                const std::string &iAttrName,
-                hid_t iFileType,
-                hid_t iNativeType,
-                size_t iMaxElems,
-                size_t &oNumElems,
-                void *oData )
-{
-    ABCA_ASSERT( iParent >= 0, "Invalid parent" );
-
-    hid_t attrId = H5Aopen( iParent, iAttrName.c_str(), H5P_DEFAULT );
-    ABCA_ASSERT( attrId >= 0,
-                 "Couldn't open attribute named: " << iAttrName );
-    AttrCloser attrCloser( attrId );
-
-    // This is all just checking code
-    {
-        hid_t attrFtype = H5Aget_type( attrId );
-        ABCA_ASSERT( attrFtype >= 0,
-                     "Couldn't get file datatype for attribute: "
-                     << iAttrName );
-        DtypeCloser dtypeCloser( attrFtype );
-
-        ABCA_ASSERT( EquivalentDatatypes( attrFtype, iFileType ),
-                     "File DataType clash for scalar attribute: "
-                     << iAttrName );
-
-        hid_t attrSpace = H5Aget_space( attrId );
-        ABCA_ASSERT( attrSpace >= 0,
-                     "Couldn't get dataspace for attribute: " << iAttrName );
-        DspaceCloser dspaceCloser( attrSpace );
-
-        H5S_class_t attrSpaceClass = H5Sget_simple_extent_type( attrSpace );
-        ABCA_ASSERT( attrSpaceClass == H5S_SIMPLE,
-                     "Tried to read non-simple attribute: " << iAttrName
-                     << " as scalar" );
-
-        hssize_t numPoints = H5Sget_simple_extent_npoints( attrSpace );
-        ABCA_ASSERT( numPoints <= ( hssize_t )iMaxElems && numPoints > -1,
-                     "Too many points in SmallArrayRead" );
-
-        oNumElems = ( size_t )numPoints;
-    }
-
-    herr_t status = H5Aread( attrId, iNativeType, oData );
-    ABCA_ASSERT( status >= 0, "Couldn't read from attribute: " << iAttrName );
-}
-
-//-*****************************************************************************
-// Dimensions aren't a scalar, and thus must be read carefully.
-void
-ReadDimensions( hid_t iParent,
-                const std::string &iAttrName,
-                Dimensions &oDims )
-{
-    // Assume a maximum rank of 128. This is totally reasonable.
-    static const size_t maxRank = 128;
-    static uint32_t dimVals[128];
-
-    size_t readRank;
-    ReadSmallArray( iParent, iAttrName, H5T_STD_U32LE, H5T_NATIVE_UINT32,
-                    maxRank, readRank, ( void * )dimVals );
-
-    Dimensions retDims;
-    retDims.setRank( readRank );
-    for ( size_t r = 0; r < readRank; ++r )
-    {
-        retDims[r] = ( size_t )dimVals[r];
-    }
-
-    oDims = retDims;
-}
-
-//-*****************************************************************************
-// Get the dimensions directly off of the dataspace on the dataset
-// This isn't suitable for string and wstring
-void
-ReadDataSetDimensions( hid_t iParent,
-                       const std::string &iName,
-                       hsize_t iExtent,
-                       Dimensions &oDims )
-{
-    // Open the data set.
-    hid_t dsetId = H5Dopen( iParent, iName.c_str(), H5P_DEFAULT );
-    ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
-    DsetCloser dsetCloser( dsetId );
-
-    // Read the data space.
-    hid_t dspaceId = H5Dget_space( dsetId );
-    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
-                 << iName );
-    DspaceCloser dspaceCloser( dspaceId );
-
-    H5S_class_t dspaceClass = H5Sget_simple_extent_type( dspaceId );
-    if ( dspaceClass == H5S_SIMPLE )
-    {
-        // Get the dimensions
-        int rank = H5Sget_simple_extent_ndims( dspaceId );
-        ABCA_ASSERT( rank == 1, "H5Sget_simple_extent_ndims() must be 1." );
-
-        hsize_t hdim = 0;
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
-        oDims.setRank(1);
-        oDims[0] = hdim / iExtent;
+        IGroup::IDataPtr data = iGroup->getData( iIndex + 1, iThreadId );
+        oDim = Util::Dimensions( ( data->getSize() - 16 ) /
+                                 iDataType.getNumBytes() );
     }
     else
     {
-        oDims.setRank(1);
-        oDims[0] = 0;
-    }
-}
+        // we need to read our dimensions
+        IGroup::IDataPtr data = iGroup->getData( iIndex, iThreadId );
 
-//-*****************************************************************************
-bool
-ReadKey( hid_t iParent,
-         const std::string &iAttrName,
-         AbcA::ArraySample::Key &oKey )
-{
-    ABCA_ASSERT( iParent >= 0, "Invalid parent in ReadKey" );
-    if ( H5Aexists( iParent, iAttrName.c_str() ) > 0 )
-    {
-        size_t numRead;
-        ReadSmallArray( iParent, iAttrName,
-                        H5T_STD_U8LE,
-                        H5T_NATIVE_UINT8,
-                        16,
-                        numRead,
-                        ( void * )&oKey.digest );
-        ABCA_ASSERT( numRead == 16, "Didn't read enough key bits" );
+        // we write them as uint32_t so / 4
+        std::size_t numRanks = data->getSize() / 4;
 
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+        oDim.setRank( numRanks );
 
-//-*****************************************************************************
-bool
-ReadMetaData( H5Node & iParent,
-              const std::string &iMetaDataName,
-              AbcA::MetaData &oMetaData )
-{
-    ABCA_ASSERT( iParent.isValidObject(), "Invalid parent in ReadMetaData" );
-
-    HDF5Hierarchy* H5HPtr = iParent.getH5HPtr();
-
-    if ( H5HPtr )
-    {
-        std::string str;
-        H5HPtr->readMetaDataString( iParent.getRef(), iMetaDataName, str );
-
-        if ( str.length() > 0 )
+        std::vector< uint32_t > dims( numRanks );
+        data->read( numRanks * 4, &( dims.front() ) );
+        for ( std::size_t i = 0; i < numRanks; ++i )
         {
-            oMetaData.deserialize( str );
-            return true;
+            oDim[i] = dims[i];
         }
-        else
-        {
-            oMetaData = AbcA::MetaData();
-            return false;
-        }
-    }
-    else
-    {
-        hid_t iParentObject = iParent.getObject();
-
-        if ( H5Aexists( iParentObject, iMetaDataName.c_str() ) > 0 )
-        {
-            std::string str;
-            ReadString( iParentObject, iMetaDataName, str );
-            oMetaData.deserialize( str );
-            return true;
-        }
-        else
-        {
-            oMetaData = AbcA::MetaData();
-            return false;
-        }
-    }
-}
-
-//-*****************************************************************************
-static bool
-ReadTimeSamplingType( hid_t iParent,
-                      const std::string &iPropName,
-                      AbcA::TimeSamplingType &oTimeSamplingType )
-{
-    const std::string nameSPC = iPropName + ".tspc";
-    const std::string nameTPC = iPropName + ".ttpc";
-
-    ABCA_ASSERT( iParent >= 0, "Invalid parent in ReadTimeSamplingType" );
-
-    if ( H5Aexists( iParent, nameSPC.c_str() ) > 0 )
-    {
-        // Read the samples per cycle. If it is 1, we don't need to read
-        // time per cycle because we can assume that it is 1.0.
-        // If time per cycle is other than 1.0, but the num samples is 1,
-        // Alembic writes out just the time per cycle, and not the num samples.
-        uint32_t spc = 0;
-        ReadScalar( iParent, nameSPC,
-                    H5T_STD_U32LE,
-                    H5T_NATIVE_UINT32,
-                    ( void * )&spc );
-        ABCA_ASSERT( spc > 0, "Invalid Samples Per Cycle: " << spc );
-
-        if ( spc == AbcA::TimeSamplingType::AcyclicNumSamples() )
-        {
-            // Acyclic.
-            oTimeSamplingType = AbcA::TimeSamplingType(
-                AbcA::TimeSamplingType::kAcyclic );
-            return true;
-        }
-        else if ( spc == 1 )
-        {
-            // Uniform with time per cycle == 1.0
-            oTimeSamplingType = AbcA::TimeSamplingType( 1, 1.0 );
-            return true;
-        }
-        ABCA_ASSERT( spc > 1, "Corrupt TimeSamplingType spc: " << spc );
-
-        chrono_t tpc = 1.0;
-
-        if (H5Aexists( iParent, nameTPC.c_str() ) > 0)
-        {
-            ReadScalar( iParent, nameTPC, H5T_IEEE_F64LE,
-                        H5T_NATIVE_DOUBLE, ( void * )&tpc );
-        }
-
-        ABCA_ASSERT( tpc > 0.0 && tpc <
-                     AbcA::TimeSamplingType::AcyclicTimePerCycle(),
-                     "Invalid Time Per Cycle: " << tpc );
-
-        // Cyclic with time per cycle
-        oTimeSamplingType = AbcA::TimeSamplingType( spc, tpc );
-        return true;
-    }
-    else if ( H5Aexists( iParent, nameTPC.c_str() ) > 0 )
-    {
-        // Uniform with time per cycle
-        chrono_t tpc = 1.0;
-        ReadScalar( iParent, nameTPC,
-                    H5T_IEEE_F64LE,
-                    H5T_NATIVE_DOUBLE,
-                    ( void * )&tpc );
-
-        // Uniform
-        oTimeSamplingType = AbcA::TimeSamplingType( tpc );
-        return true;
-    }
-    else
-    {
-        // Identity
-        oTimeSamplingType = AbcA::TimeSamplingType();
-        return false;
     }
 }
 
 //-*****************************************************************************
 void
-ReadPropertyHeader( H5Node & iParent,
-                    const std::string & iPropName,
-                    AbcA::PropertyHeader & oHeader,
-                    bool & oIsScalarLike,
-                    uint32_t & oNumSamples,
-                    uint32_t & oFirstChangedIndex,
-                    uint32_t & oLastChangedIndex,
-                    uint32_t & oTimeSamplingIndex )
+ReadData( void * iIntoLocation,
+          Ogawa::IGroupPtr iGroup,
+          size_t iIndex,
+          size_t iThreadId,
+          const AbcA::DataType &iDataType,
+          Util::PlainOldDataType iAsPod )
 {
-    uint32_t info[5] = {0, 0, 0, 0, 0};
-    size_t numFields = 0;
-    size_t fieldsUsed = 1;
+    PlainOldDataType curPod = iDataType.getPod();
+    ABCA_ASSERT( ( iAsPod != kStringPOD && iAsPod != kWstringPOD &&
+        curPod != kStringPOD && curPod != kWstringPOD )
+        || ( iAsPod == curPod ),
+        "Cannot convert the data to or from a string, wstring." );
 
+    Ogawa::IDataPtr data = iGroup->getData( iIndex );
+    std::size_t dataSize = data->getSize();
+    if ( dataSize <= 16 )
+    {
+        ABCA_ASSERT( dataSize == 0,
+            "Incorrect data, expected to be empty or to have a key and data");
+        return;
+    }
+
+    if ( curPod == kStringPOD )
+    {
+        std::string * strPtr =
+            reinterpret_cast< std::string * > ( iIntoLocation );
+
+        std::size_t numChars = dataSize - 16;
+        char * buf = new char[ numChars ];
+        data->read( numChars, buf, 16, iThreadId );
+
+        std::size_t startStr = 0;
+        std::size_t strPos = 0;
+
+        for ( std::size_t i = 0; i < numChars; ++i )
+        {
+            if ( buf[i] == 0 )
+            {
+                strPtr[strPos] = buf + startStr;
+                startStr = i + 1;
+                strPos ++;
+            }
+        }
+
+        delete [] buf;
+    }
+    else if ( curPod == kWStringPOD )
+    {
+        std::size_t numChars = ( dataSize - 16 ) / 4;
+        uint32_t * buf = new uint32_t[ numChars ];
+        data->read( dataSize - 16, buf, 16, iThreadId );
+
+        std::size_t startStr = 0;
+        std::size_t strPos = 0;
+
+        for ( std::size_t i = 0; i < numChars; ++i )
+        {
+            if ( buf[i] == 0 )
+            {
+                strPtr[strPos] = buf + startStr;
+                startStr = i + 1;
+                strPos ++;
+            }
+        }
+
+        delete [] buf;
+    }
+    else if ( iAsPod == curPod )
+    {
+        // don't read the key
+        data->read( dataSize - 16, iIntoLocation, 16, iThreadId );
+    }
+    else
+    {
+        // read into a temporary buffer and cast them one at a time
+        char * buf = new char[ dataSize - 16 ];
+        data->read( dataSize - 16, buf, 16, iThreadId );
+        size_t numToCast = ( dataSize - 16 ) / PODNumBytes( curPod );
+
+        PODTraitsFromEnum< curPod > FromPod;
+        PODTraitsFromEnum< iAsPod > ToPod;
+
+        FromPod::value_type * fromBuf =
+            reinterpret_cast< FromPod::value_type * > ( buf );
+
+        ToPod::value_type * toBuf =
+            reinterpret_cast< ToPod::value_type * > ( iIntoLocation );
+
+        for ( size_t i = 0; i < numToCast; ++i )
+        {
+            toBuf[i] = static_cast< ToPod::value_type > ( fromBuf[i] );
+        }
+        delete [] buf;
+    }
+
+}
+
+//-*****************************************************************************
+void
+ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
+                       std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples,
+                       std::vector <  AbcA::index_t > & oMaxSamples )
+{
+    std::vector< char > buf( iData->getSize() );
+    iData->read( iData->getSize(), &( buf.front() ) );
+    std::size_t pos = 0;
+    while ( pos < buf.size() )
+    {
+        uint32_t maxSample = *( (uint32_t *)( &buf[pos] ) );
+        pos += 4;
+
+        oMaxSamples.push_back( maxSample );
+
+        chrono_t tpc = *( ( chrono_t * )( &buf[pos] ) );
+        pos += sizeof( chrono_t );
+
+        uint32_t numSamples = *( (uint32_t *)( &buf[pos] ) );
+        pos += 4;
+
+        std::vector< chrono_t > sampleTimes( numSamples );
+        memcpy( &( sampleTimes.front() ), &buf[pos],
+                sizeof( chrono_t ) * numSamples );
+        pos += sizeof( chrono_t ) * numSamples;
+
+        TimeSamplingType tst( AbcA::kAcyclic );
+        if ( tpc != AcyclicTimePerCycle() )
+        {
+            tst = AbcA::TimeSamplingType( numSamples, tpc );
+        }
+
+        AbcA::TimeSamplingPtr tptr( new TimeSampling( tst, sampleTimes ) );
+        oTimeSamples.push_back( tptr );
+    }
+}
+
+//-*****************************************************************************
+void
+ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
+                   size_t iIndex,
+                   size_t iThreadId,
+                   const std::string & iParentName,
+                   std::vector< ObjectHeaderPtr > & oHeaders )
+{
+    std::vector< char > buf( iData->getSize() );
+    iData->read( iData->getSize(), &( buf.front() ), iThreadId );
+    std::size_t pos = 0;
+    while ( pos < buf.size() )
+    {
+        uint32_t nameSize = *( (uint32_t *)( &buf[pos] ) );
+        pos += 4;
+
+        std::string name( &buf[pos], nameSize );
+        pos += nameSize;
+
+        uint32_t metaDataSize = *( (uint32_t *)( &buf[pos] ) );
+        pos += 4;
+
+        std::string metaData( &buf[pos], metaDataSize );
+        pos += metaDataSize;
+
+        AbcA::MetaData md;
+        md.deserialize( metaData );
+        ObjectHeaderPtr objPtr( new ObjectHeader() );
+        objPtr->setName( name );
+        objPtr->setFullName( iParentName + "/" + name );
+        objPtr->getMetaData().deserialize( metaData );
+        oHeaders.push_back( objPtr );
+    }
+}
+
+//-*****************************************************************************
+void
+ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
+                     size_t iIndex,
+                     size_t iThreadId,
+                     PropertyHeaderPtrs & oHeaders )
+{
     // 0000 0000 0000 0000 0000 0000 0000 0011
     static const uint32_t ptypeMask = 0x0003;
 
@@ -414,410 +276,41 @@ ReadPropertyHeader( H5Node & iParent,
     // 0000 0000 0000 0000 1111 1111 0000 0000
     static const uint32_t extentMask = 0xff00;
 
-    ReadSmallArray(iParent.getObject(), iPropName + ".info", H5T_STD_U32LE,
-                   H5T_NATIVE_UINT32, 5, numFields, (void *) info );
+    // 0000 0000 0000 0001 0000 0000 0000 0000
+    static const uint32_t homogenousMask = 0x10000;
 
-    AbcA::MetaData metaData;
-    ReadMetaData( iParent, iPropName + ".meta", metaData );
-
-    if ( numFields == 1 && info[0] == 0 )
+    std::vector< char > buf( iData->getSize() );
+    iData->read( iData->getSize(), &( buf.front() ), iThreadId );
+    std::size_t pos = 0;
+    while ( pos < buf.size() )
     {
-        oHeader = AbcA::PropertyHeader( iPropName, metaData );
-    }
-    else
-    {
-        // low two bits are the property type
-        char ipt = info[0] & ptypeMask;
+        uint32_t info =  *( (uint32_t *)( &buf[pos] ) );
+        pos += 4;
 
-        // first bit is either scalar, or scalar like
-        oIsScalarLike = ipt & 1;
 
-        // is scalar like is set for this array attribute
-        if (ipt == 3)
-        {
-            oHeader.setPropertyType( AbcA::kArrayProperty );
-        }
-        else
-        {
-            oHeader.setPropertyType( ( AbcA::PropertyType )ipt );
-        }
 
-        // Read the pod type out of bits 2-5
-        char podt = ( char )( ( info[0] & podMask ) >> 2 );
-        if ( podt != ( char )kBooleanPOD &&
+        uint32_t nameSize = *( (uint32_t *)( &buf[pos] ) );
+        pos += 4;
 
-             podt != ( char )kUint8POD &&
-             podt != ( char )kInt8POD &&
+        std::string name( &buf[pos], nameSize );
+        pos += nameSize;
 
-             podt != ( char )kUint16POD &&
-             podt != ( char )kInt16POD &&
+        uint32_t metaDataSize = *( (uint32_t *)( &buf[pos] ) );
+        pos += 4;
 
-             podt != ( char )kUint32POD &&
-             podt != ( char )kInt32POD &&
+        std::string metaData( &buf[pos], metaDataSize );
+        pos += metaDataSize;
 
-             podt != ( char )kUint64POD &&
-             podt != ( char )kInt64POD &&
-
-             podt != ( char )kFloat16POD &&
-             podt != ( char )kFloat32POD &&
-             podt != ( char )kFloat64POD &&
-
-             podt != ( char )kStringPOD &&
-             podt != ( char )kWstringPOD )
-        {
-            ABCA_THROW( "Read invalid POD type: " << ( int )podt );
-        }
-
-        // bit 6 is the hint about whether time sampling index was written
-        // at the end
-        bool hasTsidx = ( (info[0] & hasTsidxMask ) >> 6 ) == 1;
-        oTimeSamplingIndex = 0;
-
-        if ( hasTsidx && numFields > 1 )
-        {
-            oTimeSamplingIndex = info[numFields - 1];
-            fieldsUsed ++;
-        }
-
-        // bit 7 is a hint about whether first and last changed index
-        // are intrinsically 1, and numSamples - 1
-        // (no repeated data from the start or the end)
-        bool noRepeats = ( (info[0] & noRepeatsMask ) >> 7 ) == 1;
-
-        // Time Sampling Index could be written, but the number of samples
-        // may not be.
-        if ( numFields > fieldsUsed )
-        {
-            oNumSamples = info[1];
-
-            if ( numFields >= 4 )
-            {
-                oFirstChangedIndex = info[2];
-                oLastChangedIndex = info[3];
-            }
-            else if ( noRepeats )
-            {
-                oFirstChangedIndex = 1;
-                oLastChangedIndex = oNumSamples - 1;
-            }
-            else
-            {
-                oFirstChangedIndex = 0;
-                oLastChangedIndex = 0;
-            }
-        }
-        else
-        {
-            oNumSamples = 0;
-            oFirstChangedIndex = 0;
-            oLastChangedIndex = 0;
-
-            // if smp0 exists then we have 1 sample
-            std::string smpName = iPropName + ".smp0";
-            if ( oHeader.getPropertyType() == AbcA::kArrayProperty &&
-                 ObjectExists( iParent, smpName ) )
-            {
-                oNumSamples = 1;
-            }
-            else if ( oHeader.getPropertyType() == AbcA::kScalarProperty &&
-                      AttrExists( iParent, smpName ) )
-            {
-                oNumSamples = 1;
-            }
-        }
-
-        // Read the extent out of bits 8-15
-        uint8_t extent = ( uint8_t )( ( info[0] & extentMask ) >> 8 );
-        if ( extent == 0 )
-        {
-            ABCA_THROW( "Degenerate extent 0" );
-        }
-
-        // bits 16-31 are currently not being used
-
-        // the time sampling will be set on oHeader by the calling function
-        // since we don't have access to the archive here.
-        oHeader.setName( iPropName );
-        oHeader.setMetaData( metaData );
-        oHeader.setDataType(
-            AbcA::DataType( ( Util::PlainOldDataType ) podt, extent ) );
-    }
-}
-
-//-*****************************************************************************
-AbcA::ArraySamplePtr
-ReadArray( AbcA::ReadArraySampleCachePtr iCache,
-           hid_t iParent,
-           const std::string &iName,
-           const AbcA::DataType &iDataType,
-           hid_t iFileType,
-           hid_t iNativeType )
-{
-    // Dispatch string stuff.
-    if ( iDataType.getPod() == kStringPOD )
-    {
-        return ReadStringArray( iCache, iParent, iName, iDataType );
-    }
-    else if ( iDataType.getPod() == kWstringPOD )
-    {
-        return ReadWstringArray( iCache, iParent, iName, iDataType );
-    }
-    assert( iDataType.getPod() != kStringPOD &&
-            iDataType.getPod() != kWstringPOD );
-
-    // Open the data set.
-    hid_t dsetId = H5Dopen( iParent, iName.c_str(), H5P_DEFAULT );
-    ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
-    DsetCloser dsetCloser( dsetId );
-
-    // Read the data space.
-    hid_t dspaceId = H5Dget_space( dsetId );
-    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
-                 << iName );
-    DspaceCloser dspaceCloser( dspaceId );
-
-    AbcA::ArraySample::Key key;
-    bool foundDigest = false;
-
-    // if we are caching, get the key and see if it is being used
-    if ( iCache )
-    {
-        key.origPOD = iDataType.getPod();
-        key.readPOD = key.origPOD;
-
-        key.numBytes = Util::PODNumBytes( key.readPOD ) *
-            H5Sget_simple_extent_npoints( dspaceId );
-
-        foundDigest = ReadKey( dsetId, "key", key );
-
-        AbcA::ReadArraySampleID found = iCache->find( key );
-
-        if ( found )
-        {
-            AbcA::ArraySamplePtr ret = found.getSample();
-            assert( ret );
-            if ( ret->getDataType().getPod() != iDataType.getPod() )
-            {
-                ABCA_THROW( "ERROR: Read data type for dset: " << iName
-                            << ": " << ret->getDataType()
-                            << " does not match expected data type: "
-                            << iDataType );
-            }
-
-            // Got it!
-            return ret;
-        }
-    }
-
-    // Okay, we haven't found it in a cache.
-
-    // Read the data type.
-    hid_t dtypeId = H5Dget_type( dsetId );
-    ABCA_ASSERT( dtypeId >= 0, "Could not get datatype for dataSet: "
-                 << iName );
-    DtypeCloser dtypeCloser( dtypeId );
-
-    ABCA_ASSERT( EquivalentDatatypes( iFileType, dtypeId ),
-                 "File DataType clash for array dataset: "
-                 << iName );
-
-    AbcA::ArraySamplePtr ret;
-
-    H5S_class_t dspaceClass = H5Sget_simple_extent_type( dspaceId );
-    if ( dspaceClass == H5S_SIMPLE )
-    {
-        // Get the dimensions
-        int rank = H5Sget_simple_extent_ndims( dspaceId );
-        ABCA_ASSERT( rank == 1,
-                     "H5Sget_simple_extent_ndims() must be 1." );
-
-        hsize_t hdim = 0;
-
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
-
-        Dimensions dims;
-        std::string dimName = iName + ".dims";
-        if ( H5Aexists( iParent, dimName.c_str() ) )
-        {
-            ReadDimensions( iParent, dimName, dims );
-        }
-        else
-        {
-            dims.setRank(1);
-            dims[0] = hdim / iDataType.getExtent();
-        }
-
-        ABCA_ASSERT( dims.numPoints() > 0,
-                     "Degenerate dims in Dataset read" );
-
-        // Create a buffer into which we shall read.
-        ret = AbcA::AllocateArraySample( iDataType, dims );
-        assert( ret->getData() );
-
-        // And... read into it.
-        herr_t status = H5Dread( dsetId, iNativeType,
-                                 H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                                 const_cast<void*>( ret->getData() ) );
-
-        ABCA_ASSERT( status >= 0, "H5Dread() failed." );
-    }
-    else if ( dspaceClass == H5S_NULL )
-    {
-        Dimensions dims;
-        std::string dimName = iName + ".dims";
-        if ( H5Aexists( iParent, dimName.c_str() ) )
-        {
-            ReadDimensions( iParent, dimName, dims );
-            ABCA_ASSERT( dims.rank() > 0,
-                         "Degenerate rank in Dataset read" );
-            // Num points should be zero here.
-            ABCA_ASSERT( dims.numPoints() == 0,
-                         "Expecting zero points in dimensions" );
-        }
-        else
-        {
-            dims.setRank(1);
-            dims[0] = 0;
-        }
-
-        ret = AbcA::AllocateArraySample( iDataType, dims );
-    }
-    else
-    {
-        ABCA_THROW( "Unexpected scalar dataspace encountered." );
-    }
-
-    // Store if there is a cache.
-    if ( foundDigest && iCache )
-    {
-        AbcA::ReadArraySampleID stored = iCache->store( key, ret );
-        if ( stored )
-        {
-            return stored.getSample();
-        }
-    }
-
-    // Otherwise, just leave! ArraySamplePtr returned by AllocateArraySample
-    // already has fancy-dan deleter built in.
-    // I REALLY LOVE SMART PTRS.
-    return ret;
-}
-
-//-*****************************************************************************
-void
-ReadArray( void * iIntoLocation,
-           hid_t iParent,
-           const std::string &iName,
-           const AbcA::DataType &iDataType,
-           hid_t iType )
-{
-    // Dispatch string stuff.
-    if ( iDataType.getPod() == kStringPOD )
-    {
-        return ReadStringArray( iIntoLocation, iParent, iName, iDataType );
-    }
-    else if ( iDataType.getPod() == kWstringPOD )
-    {
-        return ReadWstringArray( iIntoLocation, iParent, iName, iDataType );
-    }
-    assert( iDataType.getPod() != kStringPOD &&
-            iDataType.getPod() != kWstringPOD );
-
-    // Open the data set.
-    hid_t dsetId = H5Dopen( iParent, iName.c_str(), H5P_DEFAULT );
-    ABCA_ASSERT( dsetId >= 0, "Cannot open dataset: " << iName );
-    DsetCloser dsetCloser( dsetId );
-
-    // Read the data space.
-    hid_t dspaceId = H5Dget_space( dsetId );
-    ABCA_ASSERT( dspaceId >= 0, "Could not get dataspace for dataSet: "
-                 << iName );
-    DspaceCloser dspaceCloser( dspaceId );
-
-    // Read the data type.
-    hid_t dtypeId = H5Dget_type( dsetId );
-    ABCA_ASSERT( dtypeId >= 0, "Could not get datatype for dataSet: "
-                 << iName );
-    DtypeCloser dtypeCloser( dtypeId );
-
-    H5S_class_t dspaceClass = H5Sget_simple_extent_type( dspaceId );
-    if ( dspaceClass == H5S_SIMPLE )
-    {
-        // Get the dimensions
-        int rank = H5Sget_simple_extent_ndims( dspaceId );
-        ABCA_ASSERT( rank == 1,
-                     "H5Sget_simple_extent_ndims() must be 1." );
-
-        hsize_t hdim = 0;
-
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
-
-        ABCA_ASSERT( hdim > 0,
-                     "Degenerate dims in Dataset read" );
-
-        // And... read into it.
-        herr_t status = H5Dread( dsetId, iType,
-                                 H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                                 iIntoLocation );
-
-        ABCA_ASSERT( status >= 0, "H5Dread() failed." );
-    }
-    else if ( dspaceClass != H5S_NULL )
-    {
-        ABCA_THROW( "Unexpected scalar dataspace encountered." );
-    }
-}
-
-//-*****************************************************************************
-void
-ReadTimeSamples( hid_t iParent,
-                 std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples )
-{
-    oTimeSamples.clear();
-    // add the intrinsic default sampling
-    AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling() );
-    oTimeSamples.push_back( ts );
-
-    uint32_t i = 1;
-    AbcA::TimeSamplingType tst;
-    std::string tstname = "1";
-
-    // keep trying to read till we can't find anymore
-    while ( ReadTimeSamplingType( iParent, tstname, tst ) )
-    {
-        // try to open the time samples attribute
-        std::string timeName = tstname + ".time";
-        hid_t aid = H5Aopen( iParent, timeName.c_str(), H5P_DEFAULT );
-        ABCA_ASSERT( aid >= 0,
-                     "Couldn't open time samples named: " << timeName );
-        AttrCloser attrCloser( aid );
-
-        // figure out how big it is
-        hid_t sid = H5Aget_space( aid );
-        ABCA_ASSERT( sid >= 0,
-                     "Couldn't get dataspace for time samples: " << timeName );
-        DspaceCloser dspaceCloser( sid );
-
-        hssize_t numPoints = H5Sget_simple_extent_npoints( sid );
-        ABCA_ASSERT( numPoints > 0, "No time samples data: " << timeName );
-        std::vector < chrono_t > times(numPoints);
-
-        // do the read
-        herr_t status = H5Aread( aid, H5T_NATIVE_DOUBLE, &(times.front()) );
-        ABCA_ASSERT( status >= 0, "Can't read time samples: " << timeName );
-
-        // create the TimeSampling and add it to our vector
-        ts.reset( new AbcA::TimeSampling(tst, times) );
-        oTimeSamples.push_back( ts );
-
-        // increment to try and read the next one
-        i++;
-        std::stringstream strm;
-        strm << i;
-        tstname = strm.str();
+        AbcA::MetaData md;
+        md.deserialize( metaData );
+        ObjectHeaderPtr objPtr( new ObjectHeader() );
+        objPtr->setName( name );
+        objPtr->setFullName( iParentName + "/" + name );
+        objPtr->getMetaData().deserialize( metaData );
+        oHeaders.push_back( objPtr );
     }
 }
 
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic

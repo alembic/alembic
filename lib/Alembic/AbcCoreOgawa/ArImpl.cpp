@@ -51,6 +51,8 @@ ArImpl::ArImpl( const std::string &iFileName,
     ABCA_ASSERT( m_archive.valid(),
                  "Could not open as Ogawa file: " << m_fileName );
 
+    ABCA_ASSERT( m_archive.frozen(),
+        "Ogawa file not cleanly closed while being written: " << m_fileName );
     Ogawa::IGroupPtr group = m_archive.getGroup();
 
     int version = -INT_MAX;

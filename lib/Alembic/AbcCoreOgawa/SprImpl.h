@@ -38,7 +38,6 @@
 #define _Alembic_AbcCoreOgawa_SprImpl_h_
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
-#include <Alembic/AbcCoreOgawa/SimplePrImpl.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -48,9 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 // The Scalar Property Reader fills up bytes corresponding to memory for
 // a single scalar sample at a particular index.
 class SprImpl
-    : public SimplePrImpl<AbcA::ScalarPropertyReader,
-                          SprImpl,
-                          void*>
+    : AbcA::ScalarPropertyReader
     , public Alembic::Util::enable_shared_from_this<SprImpl>
 {
 public:
@@ -71,27 +68,31 @@ public:
         }
     }
 
+    // BasePropertyReader overrides
+    virtual const PropertyHeader & getHeader() const;
+    virtual ObjectReaderPtr getObject();
+    virtual CompoundPropertyReaderPtr getParent();
     virtual AbcA::ScalarPropertyReaderPtr asScalarPtr();
 
-protected:
-    friend class SimplePrImpl<AbcA::ScalarPropertyReader,
-                              SprImpl,
-                              void*>;
+    // ScalarPropertyReader overrides
+    virtual size_t getNumSamples();
+    virtual bool isConstant();
+    virtual void getSample( index_t iSampleIndex,
+                            void * iIntoLocation );
+    virtual std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime );
+    virtual std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime );
+    virtual std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime );
 
-    // This function is called by SimplePrImpl to provide the actual
-    // property reading.
-    // It will dispatch its work out to different read utils, based
-    // on the type of the property.
-    void readSample( hid_t iGroup,
-                     const std::string &iSampleName,
-                     index_t iSampleIndex,
-                     void *oSampleBytes );
+private:
 
-    //-*************************************************************************
-    // This function is called by SimplePrImpl, scalar props do not have keys.
-    bool readKey( hid_t iGroup,
-                  const std::string &iSampleName,
-                  AbcA::ArraySampleKey & oSamplePtr ) { return false; }
+    // Parent compound property writer. It must exist.
+    AbcA::CompoundPropertyReaderPtr m_parent;
+
+    // group from which all samples are read
+    Ogawa::IGroupPtr m_group;
+
+    // Stores the PropertyHeader and other info
+    PropertyHeaderPtr m_header;
 
 };
 

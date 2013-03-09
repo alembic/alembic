@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,85 +34,100 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/SprImpl.h>
-#include <Alembic/AbcCoreHDF5/ReadUtil.h>
-#include <Alembic/AbcCoreHDF5/StringReadUtil.h>
+#include <Alembic/AbcCoreOgawa/AprImpl.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-AbcA::ScalarPropertyReaderPtr SprImpl::asScalarPtr()
+SprImpl::SprImpl( AbcA::CompoundPropertyReaderPtr iParent,
+                  Ogawa::IGroupPtr iGroup,
+                  PropertyHeaderPtr iHeader )
+  : m_parent( iParent )
+  , m_group( iGroup )
+  , m_header( iHeader )
+{
+    // Validate all inputs.
+    ABCA_ASSERT( m_parent, "Invalid parent" );
+    ABCA_ASSERT( m_group, "Invalid scalar property group" );
+    ABCA_ASSERT( m_header, "Invalid header" );
+
+    if ( m_header.header->getPropertyType() != AbcA::kScalarProperty )
+    {
+        ABCA_THROW( "Attempted to create a ScalarPropertyReader from a "
+                    "non-array property type" );
+    }
+}
+
+//-*****************************************************************************
+const SprImpl::PropertyHeader & getHeader() const
+{
+    return m_header.header;
+}
+
+//-*****************************************************************************
+ObjectReaderPtr SprImpl::getObject()
+{
+    return m_parent->getObject();
+}
+
+//-*****************************************************************************
+CompoundPropertyReaderPtr SprIml::getParent()
+{
+    return m_parent;
+}
+
+//-*****************************************************************************
+AbcA::ScalarPropertyReaderPtr SprImpl::asArrayPtr()
 {
     return shared_from_this();
 }
 
 //-*****************************************************************************
-void SprImpl::readSample( hid_t iGroup,
-                          const std::string &iSampleName,
-                          index_t iSampleIndex,
-                          void *oSampleBytes )
+size_t SprImpl::getNumSamples()
 {
-    assert( iGroup >= 0 );
-    assert( oSampleBytes );
+    return m_header->nextSampleIndex;
+}
 
-    const AbcA::DataType &dtype = m_header->getDataType();
-    uint8_t extent = dtype.getExtent();
-    if ( dtype.getPod() == kStringPOD )
-    {
-        std::string *strings
-            = reinterpret_cast<std::string*>( oSampleBytes );
-        ABCA_ASSERT( strings != NULL,
-                     "Invalid data buffer in scalar read sample" );
-        
-        if ( extent == 1 )
-        {
-            ReadString( iGroup, iSampleName, *strings );
-        }
-        else
-        {
-            ReadStrings( iGroup, iSampleName, dtype.getExtent(), strings );
-        }
-    }
-    else if ( dtype.getPod() == kWstringPOD )
-    {
-        std::wstring *wstrings
-            = reinterpret_cast<std::wstring*>( oSampleBytes );
-        ABCA_ASSERT( wstrings != NULL,
-                     "Invalid data buffer in scalar read sample" );
-        
-        if ( extent == 1 )
-        {
-            ReadWstring( iGroup, iSampleName, *wstrings );
-        }
-        else
-        {
-            ReadWstrings( iGroup, iSampleName, dtype.getExtent(), wstrings );
-        }
-            
-        ReadWstrings( iGroup, iSampleName, dtype.getExtent(), wstrings );
-    }
-    else
-    {
-        assert( m_fileDataType >= 0 );
-        assert( m_nativeDataType >= 0 );
+//-*****************************************************************************
+bool SprImpl::isConstant()
+{
+    return ( m_header->firstChangedIndex == 0 );
+}
 
-        if ( extent == 1 )
-        {
-            ReadScalar( iGroup, iSampleName, m_fileDataType, m_nativeDataType,
-                oSampleBytes );
-        }
-        else
-        {
-            size_t readElements = 0;
-            ReadSmallArray( iGroup, iSampleName, m_fileDataType,
-                m_nativeDataType, extent, readElements, oSampleBytes );
-        }
-    }
+//-*****************************************************************************
+void SprImpl::getSample( index_t iSampleIndex, void * iIntoLocation )
+{
+    size_t index = m_header->verifySampleIndex( iSampleIndex );
+
+    // TODO get thread index from archive
+    ReadData( iIntoLocation, m_group, index,
+              m_header->header.getDataType(),
+              m_header->header.getDataType().getPod(), 0 );
+}
+
+//-*****************************************************************************
+std::pair<index_t, chrono_t> SprImpl::getFloorIndex( chrono_t iTime )
+{
+    return m_header->getTimeSampling()->getFloorIndex( iTime,
+        m_header->nextSampleIndex );
+}
+
+//-*****************************************************************************
+std::pair<index_t, chrono_t> SprImpl::getCeilIndex( chrono_t iTime )
+{
+    return m_header->getTimeSampling()->getCeilIndex( iTime,
+        m_header->nextSampleIndex );
+}
+
+//-*****************************************************************************
+std::pair<index_t, chrono_t> SprImpl::getNearIndex( chrono_t iTime )
+{
+    return m_header->getTimeSampling()->getNearIndex( iTime,
+        m_header->nextSampleIndex );
 }
 
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
-
