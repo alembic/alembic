@@ -33,66 +33,46 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
+
+SET( TEST_LIBS
+     AlembicAbcCoreAlembic
+     AlembicAbcCoreAbstract
+     AlembicUtil
+     AlembicOgawa
+     ${ALEMBIC_ILMBASE_LIBS}
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${EXTERNAL_MATH_LIBS} )
+
 SET( CXX_FILES
-  AprImpl.cpp
-  ApwImpl.cpp
-  ArImpl.cpp
-  AwImpl.cpp
-  CprData.cpp
-  CprImpl.cpp
-  CpwData.cpp
-  CpwImpl.cpp
-  OrData.cpp
-  OrImpl.cpp
-  OwData.cpp
-  OwImpl.cpp
-  ReadUtil.cpp
-  ReadWrite.cpp
-  SprImpl.cpp
-  SpwImpl.cpp
-  WriteUtil.cpp
-)
+    ArchiveTests.cpp
+    ArrayPropertyTests.cpp
+    ScalarPropertyTests.cpp
+    TimeSamplingTests.cpp )
 
-SET( H_FILES
-  All.h
-  AprImpl.h
-  ApwImpl.h
-  ArImpl.h
-  AwImpl.h
-  CprData.h
-  CprImpl.h
-  CpwData.h
-  CpwImpl.h
-  Foundation.h
-  OrData.h
-  OrImpl.h
-  OwData.h
-  OwImpl.h
-  ReadUtil.h
-  ReadWrite.h
-  SimplePrImpl.h
-  SimplePwImpl.h
-  SprImpl.h
-  SpwImpl.h
-  WriteUtil.h
-  WrittenArraySampleMap.h
-)
+#-******************************************************************************
+ADD_EXECUTABLE( AbcCoreOgawa_ArchiveTests ArchiveTests.cpp )
+TARGET_LINK_LIBRARIES( AbcCoreOgawa_ArchiveTests ${TEST_LIBS} )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+ADD_EXECUTABLE( AbcCoreOgawa_ArrayPropertyTests ArrayPropertyTests.cpp )
+TARGET_LINK_LIBRARIES( AbcCoreOgawa_ArrayPropertyTests ${TEST_LIBS} )
 
-ADD_LIBRARY( AlembicAbcCoreOgawa ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AlembicAbcCoreOgawa AlembicOgawa )
+ADD_EXECUTABLE( AbcCoreOgawa_ScalarPropertyTests ScalarPropertyTests.cpp )
+TARGET_LINK_LIBRARIES( AbcCoreOgawa_ScalarPropertyTests ${TEST_LIBS} )
 
-INSTALL( TARGETS AlembicAbcCoreOgawa
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+ADD_EXECUTABLE( AbcCoreOgawa_TimeSamplingTests TimeSamplingTests.cpp )
+TARGET_LINK_LIBRARIES( AbcCoreOgawa_TimeSamplingTests ${TEST_LIBS} )
 
-# Only install
-INSTALL( FILES
-         All.h
-         ReadWrite.h
-         DESTINATION include/Alembic/AbcCoreOgawa
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
+ADD_EXECUTABLE( AbcCoreOgawa_ObjectTests ObjectTests.cpp )
+TARGET_LINK_LIBRARIES( AbcCoreOgawa_ObjectTests ${TEST_LIBS} )
 
-ADD_SUBDIRECTORY( Tests )
+ADD_EXECUTABLE( AbcCoreOgawa_ConstantPropsTest ConstantPropsNumSampsTest.cpp )
+TARGET_LINK_LIBRARIES( AbcCoreOgawa_ConstantPropsTest ${TEST_LIBS} )
+
+
+ADD_TEST( AbcCoreOgawa_TEST1 AbcCoreOgawa_Test1 )
+ADD_TEST( AbcCoreOgawa_ArchiveTESTS AbcCoreOgawa_ArchiveTests )
+ADD_TEST( AbcCoreOgawa_ArrayPropertyTESTS AbcCoreOgawa_ArrayPropertyTests )
+ADD_TEST( AbcCoreOgawa_ScalarPropertyTESTS AbcCoreOgawa_ScalarPropertyTests )
+ADD_TEST( AbcCoreOgawa_TimeSamplingTESTS AbcCoreOgawa_TimeSamplingTests )
+ADD_TEST( AbcCoreOgawa_ObjectTESTS AbcCoreOgawa_ObjectTests )
+ADD_TEST( AbcCoreOgawa_ConstantPropsTest_TEST AbcCoreOgawa_ConstantPropsTest )
