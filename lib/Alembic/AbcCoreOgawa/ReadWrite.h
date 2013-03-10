@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,39 +34,26 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_ReadWrite_h_
-#define _Alembic_AbcCoreHDF5_ReadWrite_h_
+#ifndef _Alembic_AbcCoreOgawa_ReadWrite_h_
+#define _Alembic_AbcCoreOgawa_ReadWrite_h_
 
 #include <Alembic/AbcCoreAbstract/All.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! Will return a shared pointer to the archive writer
-//! There is only one way to create an archive writer in AbcCoreHDF5.
 class WriteArchive
 {
 public:
     WriteArchive();
-    explicit WriteArchive( bool iCacheHierarchy );
 
     ::Alembic::AbcCoreAbstract::ArchiveWriterPtr
     operator()( const std::string &iFileName,
                 const ::Alembic::AbcCoreAbstract::MetaData &iMetaData ) const;
-private:
-    bool m_cacheHierarchy;
 };
-
-//-*****************************************************************************
-//! AbcCoreHDF5 Provides a Cache implementation, that we expose here.
-//! It takes no arguments.
-//! This would only be used if you wished to create a global cache separately
-//! from an archive - this is actually fairly common, though, which is why
-//! it is exposed here.
-::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr
-CreateCache( void );
 
 //-*****************************************************************************
 //! Will return a shared pointer to the archive reader
@@ -75,26 +62,24 @@ class ReadArchive
 {
 public:
     ReadArchive();
-    explicit ReadArchive( bool iCacheHierarchy );
 
-    // Make our own cache.
+    // Open the file iNumStreams times and manage them internally
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
-    operator()( const std::string &iFileName ) const;
+    operator()( const std::string &iFileName, size_t iNumStreams=1 ) const;
 
-    // Take the given cache.
+    // Read from the provided streams, we do not own these, expect them
+    // to remain open and all have the same data in them, and do not try to
+    // delete them
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
-    operator()( const std::string &iFileName,
-                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache
-              ) const;
-private:
-    bool m_cacheHierarchy;
+    operator()( const std::vector< std::istream * > & iStreams ) const;
+
 };
 
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;
 
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic
 
 #endif

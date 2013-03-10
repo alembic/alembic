@@ -267,20 +267,14 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
             "Last Changed Index: " << iLastChangedIndex << std::endl );
 
         ioData.insert( ioData.end(), 4, &info );
+        ioData.insert( ioData.end(), 4, &iNumSamples );
 
-        // Write the num samples. Only bother writing if
-        // the num samples is greater than 1.  The reader can
-        // determine if 0 or 1 samples based on whether an empty group was set
-        if ( iNumSamples > 1 )
+        // don't bother writing out first and last change if every sample
+        // was different
+        if (iFirstChangedIndex != 1 || iLastChangedIndex != iNumSamples - 1)
         {
-            ioData.insert( ioData.end(), 4, &iNumSamples );
-
-            if ( iFirstChangedIndex > 1 || ( iLastChangedIndex != 0 &&
-                iLastChangedIndex != iNumSamples - 1 ) )
-            {
-                ioData.insert( ioData.end(), 4, &iFirstChangedIndex );
-                ioData.insert( ioData.end(), 4, &iLastChangedIndex );
-            }
+            ioData.insert( ioData.end(), 4, &iFirstChangedIndex );
+            ioData.insert( ioData.end(), 4, &iLastChangedIndex );
         }
 
         // finally set time sampling index on the end if necessary

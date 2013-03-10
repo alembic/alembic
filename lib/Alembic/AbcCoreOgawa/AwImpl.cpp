@@ -45,8 +45,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 AwImpl::AwImpl( const std::string &iFileName,
-                const AbcA::MetaData &iMetaData,
-                bool iCacheHierarchy )
+                const AbcA::MetaData &iMetaData )
   : m_fileName( iFileName )
   , m_metaData( iMetaData )
   , m_archive( iFileName )

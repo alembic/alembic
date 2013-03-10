@@ -259,6 +259,7 @@ void
 ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                      size_t iIndex,
                      size_t iThreadId,
+                     AbcA::ArchiveReaderPtr & iArchive,
                      PropertyHeaderPtrs & oHeaders )
 {
     // 0000 0000 0000 0000 0000 0000 0000 0011
@@ -284,15 +285,85 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
+        PropertyHeaderPtr header( new PropertyHeaderAndFriends() );
         uint32_t info =  *( (uint32_t *)( &buf[pos] ) );
         pos += 4;
 
+        uint32_t ptype = info & ptypeMask;
+        header->isScalarLike = ptype & 1;
+        if ( ptype == 0 )
+        {
+            header->header.setPropertyType( AbcA::kCompoundProperty );
+        }
+        else if ( ptype == 1 )
+        {
+            header->header.setPropertyType( AbcA::kScalarProperty );
+        }
+        else
+        {
+            header->header.setPropertyType( AbcA::kArrayProperty );
+        }
 
+        // if we aren't a compound we may need to do a bunch of other work
+        if ( ptype > 0 )
+        {
+            // Read the pod type out of bits 2-5
+            char podt = ( char )( ( info[0] & podMask ) >> 2 );
+            if ( podt != ( char )kBooleanPOD &&
+                 podt != ( char )kUint8POD &&
+                 podt != ( char )kInt8POD &&
+                 podt != ( char )kUint16POD &&
+                 podt != ( char )kInt16POD &&
+                 podt != ( char )kUint32POD &&
+                 podt != ( char )kInt32POD &&
+                 podt != ( char )kUint64POD &&
+                 podt != ( char )kInt64POD &&
+                 podt != ( char )kFloat16POD &&
+                 podt != ( char )kFloat32POD &&
+                 podt != ( char )kFloat64POD &&
+                 podt != ( char )kStringPOD &&
+                 podt != ( char )kWstringPOD )
+            {
+                ABCA_THROW( "Read invalid POD type: " << ( int )podt );
+            }
+
+            uint8_t extent = ( info & extentMask ) >> 8;
+            header->header.setDataType( AbcA::DataType(
+                ( Util::PlainOldDataType ) podt, extent ) );
+
+            header->isHomogenous = ( info & homogenousMask ) != 0;
+
+            header->nextSampleIndex =  *( (uint32_t *)( &buf[pos] ) );
+            pos += 4;
+
+            if ( ( info & noRepeatsMask ) == 0 )
+            {
+                header->firstChangedIndex =  *( (uint32_t *)( &buf[pos] ) );
+                pos += 4;
+
+                header->lastChangedIndex =  *( (uint32_t *)( &buf[pos] ) );
+                pos += 4;
+            }
+            else
+            {
+                header->firstChangedIndex = 1;
+                header->lastChangedIndex = header->nextSampleIndex - 1;
+            }
+
+            if ( ( info & hasTsidxMask ) != 0 )
+            {
+                header->timeSamplingIndex =  *( (uint32_t *)( &buf[pos] ) );
+                header->header.setTimeSampling(
+                    iArchive->getTimeSampling( header->timeSamplingIndex ) );
+                pos += 4;
+            }
+        }
 
         uint32_t nameSize = *( (uint32_t *)( &buf[pos] ) );
         pos += 4;
 
         std::string name( &buf[pos], nameSize );
+        header->header.setName( name );
         pos += nameSize;
 
         uint32_t metaDataSize = *( (uint32_t *)( &buf[pos] ) );
@@ -303,10 +374,6 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
 
         AbcA::MetaData md;
         md.deserialize( metaData );
-        ObjectHeaderPtr objPtr( new ObjectHeader() );
-        objPtr->setName( name );
-        objPtr->setFullName( iParentName + "/" + name );
-        objPtr->getMetaData().deserialize( metaData );
         oHeaders.push_back( objPtr );
     }
 }

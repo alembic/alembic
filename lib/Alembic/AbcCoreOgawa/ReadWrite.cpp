@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,26 +34,18 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/ReadWrite.h>
-#include <Alembic/AbcCoreHDF5/Foundation.h>
-#include <Alembic/AbcCoreHDF5/AwImpl.h>
-#include <Alembic/AbcCoreHDF5/ArImpl.h>
-#include <Alembic/AbcCoreHDF5/CacheImpl.h>
+#include <Alembic/AbcCoreOgawa/ReadWrite.h>
+#include <Alembic/AbcCoreOgawa/Foundation.h>
+#include <Alembic/AbcCoreOgawa/AwImpl.h>
+#include <Alembic/AbcCoreOgawa/ArImpl.h>
 
 namespace Alembic {
-namespace AbcCoreHDF5 {
+namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 WriteArchive::WriteArchive()
 {
-    m_cacheHierarchy = false;
-}
-
-//-*****************************************************************************
-WriteArchive::WriteArchive( bool iCacheHierarchy )
-{
-    m_cacheHierarchy = iCacheHierarchy;
 }
 
 //-*****************************************************************************
@@ -62,56 +54,36 @@ WriteArchive::operator()( const std::string &iFileName,
                           const AbcA::MetaData &iMetaData ) const
 {
     AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iFileName,
-                                                   iMetaData,
-                                                   m_cacheHierarchy ) );
+                                                   iMetaData ) );
     return archivePtr;
 }
-
-//-*****************************************************************************
-AbcA::ReadArraySampleCachePtr
-CreateCache()
-{
-    AbcA::ReadArraySampleCachePtr cachePtr( new CacheImpl() );
-    return cachePtr;
-}
-
 
 //-*****************************************************************************
 ReadArchive::ReadArchive()
 {
-    m_cacheHierarchy = false;
 }
 
 //-*****************************************************************************
-ReadArchive::ReadArchive( bool iCacheHierarchy )
-{
-    m_cacheHierarchy = iCacheHierarchy;
-}
-
-//-*****************************************************************************
-// This version creates a cache.
+// This version opens a file based on a file name.
 AbcA::ArchiveReaderPtr
-ReadArchive::operator()( const std::string &iFileName ) const
+ReadArchive::operator()
+( const std::string &iFileName, size_t iNumStreams ) const
 {
     AbcA::ReadArraySampleCachePtr cachePtr = CreateCache();
-    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName,
-                                                   cachePtr,
-                                                   m_cacheHierarchy ) );
+    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName, iNumStreams ) );
     return archivePtr;
 }
 
 //-*****************************************************************************
-// This version takes a cache from outside.
+// This version uses already open streams
 AbcA::ArchiveReaderPtr
-ReadArchive::operator()( const std::string &iFileName,
-                         AbcA::ReadArraySampleCachePtr iCachePtr ) const
+ReadArchive::operator()
+( const std::vector< std::istream * > & iStreams ) const
 {
-    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName,
-                                                   iCachePtr,
-                                                   m_cacheHierarchy ) );
+    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iStreams ) );
     return archivePtr;
 }
 
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreHDF5
+} // End namespace AbcCoreOgawa
 } // End namespace Alembic

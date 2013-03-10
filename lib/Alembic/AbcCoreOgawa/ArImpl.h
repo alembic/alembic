@@ -58,7 +58,7 @@ private:
             size_t iNumStreams=1 );
 
     ArImpl( const std::vector< std::istream * > & iStreams );
-            size_t iNumStreams=1 );
+
 public:
     virtual ~ArImpl();
 

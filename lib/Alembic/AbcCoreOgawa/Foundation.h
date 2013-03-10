@@ -79,6 +79,16 @@ typedef Alembic::Util::weak_ptr<AbcA::BasePropertyReader> WeakBprPtr;
 //-*****************************************************************************
 struct PropertyHeaderAndFriends
 {
+    PropertyHeaderAndFriends()
+    {
+        isScalarLike = true;
+        isHomogenous = true;
+        nextSampleIndex = 0;
+        firstChangedIndex = 0;
+        lastChangedIndex = 0;
+        timeSamplingIndex = 0;
+    }
+
     // for compounds
     PropertyHeaderAndFriends( const std::string &iName,
         const AbcA::MetaData &iMetaData ) :

@@ -56,8 +56,7 @@ private:
     friend struct WriteArchive;
 
     AwImpl( const std::string &iFileName,
-            const AbcA::MetaData &iMetaData,
-            bool iCacheHistory );
+            const AbcA::MetaData &iMetaData );
 
 public:
     virtual ~AwImpl();
