@@ -41,7 +41,7 @@
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 //-*****************************************************************************
-namespace AO = Alembic::AbcCoreHDF5;
+namespace AO = Alembic::AbcCoreOgawa;
 
 namespace AbcA = Alembic::AbcCoreAbstract;
 

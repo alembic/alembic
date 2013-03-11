@@ -77,7 +77,7 @@ void testReadWriteEmptyArchive()
         TESTING_ASSERT_THROW(w(archiveName, ABCA::MetaData()),
             Alembic::Util::Exception);
 
-        Alembic::AbcCoreHDF5::ReadArchive r;
+        Alembic::AbcCoreOgawa::ReadArchive r;
 
         // can't read an already open archive (for now)
         TESTING_ASSERT_THROW(r( archiveName ), Alembic::Util::Exception);
@@ -322,7 +322,7 @@ void writeArchive( const std::string & iName, bool iCache )
 
 void readArchive( const std::string & iName, bool iCache )
 {
-    Alembic::AbcCoreHDF5::ReadArchive r( iCache );
+    Alembic::AbcCoreOgawa::ReadArchive r( iCache );
     ABCA::ArchiveReaderPtr a = r( iName );
     std::vector< ABCA::ObjectReaderPtr > objs;
     objs.push_back( a->getTop() );
@@ -367,7 +367,7 @@ void writeVeryEmptyArchive( const std::string & iName, bool iCache )
 
 void readVeryEmptyArchive( const std::string & iName, bool iCache )
 {
-    Alembic::AbcCoreHDF5::ReadArchive r( iCache );
+    Alembic::AbcCoreOgawa::ReadArchive r( iCache );
     ABCA::ArchiveReaderPtr a = r( iName );
     TESTING_ASSERT(a->getTop()->getNumChildren() == 0);
 }

@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_Foundation_h_
-#define _Alembic_AbcCoreHDF5_Foundation_h_
+#ifndef _Alembic_AbcCoreOgawa_Foundation_h_
+#define _Alembic_AbcCoreOgawa_Foundation_h_
 
 #include <Alembic/AbcCoreAbstract/All.h>
 

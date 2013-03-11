@@ -52,21 +52,8 @@ class SprImpl
 {
 public:
     SprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-             H5Node & iParentGroup,
-             PropertyHeaderPtr iHeader,
-             uint32_t iNumSamples,
-             uint32_t iFirstChangedIndex,
-             uint32_t iLastChangedIndex )
-      : SimplePrImpl<AbcA::ScalarPropertyReader, SprImpl, void*>
-        ( iParent, iParentGroup, iHeader, iNumSamples, iFirstChangedIndex,
-          iLastChangedIndex )
-    {
-        if ( m_header->getPropertyType() != AbcA::kScalarProperty )
-        {
-            ABCA_THROW( "Attempted to create a ScalarPropertyReader from a "
-                        "non-scalar property type" );
-        }
-    }
+             Ogawa::IGroupPtr iGroup,
+             PropertyHeaderPtr iHeader );
 
     // BasePropertyReader overrides
     virtual const PropertyHeader & getHeader() const;
