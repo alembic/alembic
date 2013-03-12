@@ -56,7 +56,7 @@ OwImpl::OwImpl( AbcA::ArchiveWriterPtr iArchive,
 
 //-*****************************************************************************
 OwImpl::OwImpl( AbcA::ObjectWriterPtr iParent,
-                Ogawa::IGroupPtr iGroup,
+                Ogawa::OGroupPtr iGroup,
                 ObjectHeaderPtr iHeader )
   : m_parent( iParent )
   , m_header( iHeader )

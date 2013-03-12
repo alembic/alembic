@@ -54,7 +54,7 @@ public:
     OrData( Ogawa::IGroupPtr iGroup,
             const std::string & iParentName,
             size_t iThreadId,
-            int32_t iArchiveVersion );
+            AbcA::ArchiveReaderPtr iArchive );
 
     ~OrData();
 

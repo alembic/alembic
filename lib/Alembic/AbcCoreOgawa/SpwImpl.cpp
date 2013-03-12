@@ -36,7 +36,6 @@
 
 #include <Alembic/AbcCoreOgawa/SpwImpl.h>
 #include <Alembic/AbcCoreOgawa/WriteUtil.h>
-#include <Alembic/AbcCoreOgawa/StringWriteUtil.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -92,11 +91,11 @@ void SpwImpl::setSample( const void *iSamp )
     ABCA_ASSERT(
         !m_header->header.getTimeSampling()->getTimeSamplingType().isAcyclic()
         || m_header->header.getTimeSampling()->getNumStoredTimes() >
-        m_header->header.nextSampleIndex,
+        m_header->nextSampleIndex,
         "Can not write more samples than we have times for when using "
         "Acyclic sampling." );
 
-    AbcA::ArraySample samp( iSamp, m_header->getDataType(),
+    AbcA::ArraySample samp( iSamp, m_header->header.getDataType(),
                             AbcA::Dimensions(1) );
 
      // The Key helps us analyze the sample.
@@ -135,7 +134,8 @@ void SpwImpl::setSample( const void *iSamp )
         // Write the sample.
         // This distinguishes between string, wstring, and regular arrays.
         m_previousWrittenSampleID =
-            WriteData( GetWrittenSampleMap( awp ), m_group, iSamp, iKey );
+            WriteData( GetWrittenSampleMap( awp ), m_group, samp,
+                       samp.getKey() );
 
         // this index is now the last change
         m_header->lastChangedIndex = m_header->nextSampleIndex;
@@ -176,7 +176,7 @@ void SpwImpl::setTimeSamplingIndex( uint32_t iIndex )
 const AbcA::PropertyHeader & SpwImpl::getHeader() const
 {
     ABCA_ASSERT( m_header, "Invalid header" );
-    return *m_header->header;
+    return m_header->header;
 }
 
 //-*****************************************************************************

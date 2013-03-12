@@ -60,6 +60,7 @@ private:
     ArImpl( const std::vector< std::istream * > & iStreams );
 
 public:
+
     virtual ~ArImpl();
 
     //-*************************************************************************
@@ -111,6 +112,8 @@ private:
 
     std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
     std::vector <  AbcA::index_t > m_maxSamples;
+
+    ObjectHeaderPtr m_header;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

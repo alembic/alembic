@@ -63,7 +63,7 @@ public:
     virtual ~ApwImpl();
 
     // ArrayPropertyWriter overrides
-    virtual void setSample( const ArraySample & iSamp );
+    virtual void setSample( const AbcA::ArraySample & iSamp );
     virtual void setFromPreviousSample();
     virtual size_t getNumSamples();
     virtual void setTimeSamplingIndex( uint32_t iIndex );

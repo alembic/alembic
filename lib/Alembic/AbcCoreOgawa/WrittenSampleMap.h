@@ -53,15 +53,16 @@ namespace ALEMBIC_VERSION_NS {
 // This object is used to "reuse" an already written sample by linking
 // it from the previous usage.
 //-*****************************************************************************
-class WrittenArraySampleID
+class WrittenSampleID
 {
 public:
     WrittenSampleID()
-      : m_sampleKey() {}
+      : m_sampleKey() { m_numPoints = 0; }
 
     WrittenSampleID( const AbcA::ArraySample::Key &iKey,
-                     Ogawa::ODataPtr iData )
-      : m_sampleKey( iKey ), m_data(iData)
+                     Ogawa::ODataPtr iData,
+                     std::size_t iNumPoints )
+      : m_sampleKey( iKey ), m_data( iData ), m_numPoints( iNumPoints )
     {
     }
 
@@ -69,9 +70,12 @@ public:
 
     Ogawa::ODataPtr getObjectLocation() const { return m_data; }
 
+    std::size_t getNumPoints() { return m_numPoints; }
+
 private:
     AbcA::ArraySample::Key m_sampleKey;
     Ogawa::ODataPtr m_data;
+    std::size_t m_numPoints;
 };
 
 //-*****************************************************************************
@@ -111,6 +115,11 @@ public:
         }
 
         m_map[r->getKey()] = r;
+    }
+
+    void clear()
+    {
+        m_map.clear();
     }
 
 protected:

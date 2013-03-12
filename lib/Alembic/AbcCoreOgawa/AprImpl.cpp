@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreOgawa/AprImpl.h>
+#include <Alembic/AbcCoreOgawa/ReadUtil.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -53,7 +54,7 @@ AprImpl::AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
     ABCA_ASSERT( m_group, "Invalid array property group" );
     ABCA_ASSERT( m_header, "Invalid header" );
 
-    if ( m_header.header->getPropertyType() != AbcA::kArrayProperty )
+    if ( m_header->header.getPropertyType() != AbcA::kArrayProperty )
     {
         ABCA_THROW( "Attempted to create a ArrayPropertyReader from a "
                     "non-array property type" );
@@ -61,19 +62,19 @@ AprImpl::AprImpl( AbcA::CompoundPropertyReaderPtr iParent,
 }
 
 //-*****************************************************************************
-const AprImpl::PropertyHeader & getHeader() const
+const AbcA::PropertyHeader & AprImpl::getHeader() const
 {
-    return m_header.header;
+    return m_header->header;
 }
 
 //-*****************************************************************************
-ObjectReaderPtr AprImpl::getObject()
+AbcA::ObjectReaderPtr AprImpl::getObject()
 {
     return m_parent->getObject();
 }
 
 //-*****************************************************************************
-CompoundPropertyReaderPtr AprIml::getParent()
+AbcA::CompoundPropertyReaderPtr AprImpl::getParent()
 {
     return m_parent;
 }
@@ -97,40 +98,40 @@ bool AprImpl::isConstant()
 }
 
 //-*****************************************************************************
-void AprImpl::getSample( index_t iSampleIndex, ArraySamplePtr &oSample )
+void AprImpl::getSample( index_t iSampleIndex, AbcA::ArraySamplePtr &oSample )
 {
-    size_t index = m_header->verifySampleIndex( iSampleIndex );
+    size_t index = m_header->verifyIndex( iSampleIndex );
 
     // TODO get thread index from archive
     ReadArraySample( m_group, index * 2, index * 2 + 1, 0,
-                     m_header->getDataType(), oSample );
+                     m_header->header.getDataType(), oSample );
 }
 
 //-*****************************************************************************
 std::pair<index_t, chrono_t> AprImpl::getFloorIndex( chrono_t iTime )
 {
-    return m_header->getTimeSampling()->getFloorIndex( iTime,
+    return m_header->header.getTimeSampling()->getFloorIndex( iTime,
         m_header->nextSampleIndex );
 }
 
 //-*****************************************************************************
 std::pair<index_t, chrono_t> AprImpl::getCeilIndex( chrono_t iTime )
 {
-    return m_header->getTimeSampling()->getCeilIndex( iTime,
+    return m_header->header.getTimeSampling()->getCeilIndex( iTime,
         m_header->nextSampleIndex );
 }
 
 //-*****************************************************************************
 std::pair<index_t, chrono_t> AprImpl::getNearIndex( chrono_t iTime )
 {
-    return m_header->getTimeSampling()->getNearIndex( iTime,
+    return m_header->header.getTimeSampling()->getNearIndex( iTime,
         m_header->nextSampleIndex );
 }
 
 //-*****************************************************************************
-bool AprImpl::getKey( index_t iSampleIndex, ArraySampleKey & oKey )
+bool AprImpl::getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey )
 {
-    oKey.readPOD = m_header->header.getDataType().getPOD();
+    oKey.readPOD = m_header->header.getDataType().getPod();
     oKey.origPOD = oKey.readPOD;
     oKey.numBytes = 0;
 
@@ -157,7 +158,8 @@ bool AprImpl::isScalarLike()
 }
 
 //-*****************************************************************************
-void AprImpl::getDimensions( index_t iSampleIndex, Dimensions & oDim )
+void AprImpl::getDimensions( index_t iSampleIndex,
+                             Alembic::Util::Dimensions & oDim )
 {
     size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
@@ -168,13 +170,13 @@ void AprImpl::getDimensions( index_t iSampleIndex, Dimensions & oDim )
 
 //-*****************************************************************************
 void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
-                     PlainOldDataType iPod )
+                     Alembic::Util::PlainOldDataType iPod )
 {
-    size_t index = m_header->verifySampleIndex( iSampleIndex ) * 2 + 1;
+    size_t index = m_header->verifyIndex( iSampleIndex ) * 2 + 1;
 
     // TODO get thread index from archive
     ReadData( iIntoLocation, m_group, index, 0,
-               m_header->getDataType(), iPod );
+               m_header->header.getDataType(), iPod );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

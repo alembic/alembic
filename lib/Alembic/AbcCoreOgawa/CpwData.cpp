@@ -103,7 +103,7 @@ CpwData::getPropertyHeader( const std::string &iName )
     for ( PropertyHeaderPtrs::iterator piter = m_propertyHeaders.begin();
           piter != m_propertyHeaders.end(); ++piter )
     {
-        if ( (*piter)->getName() == iName )
+        if ( (*piter)->header.getName() == iName )
         {
             return &( (*piter)->header );
         }
@@ -141,7 +141,8 @@ CpwData::createScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
 
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =
-        this->getObject()->getArchive()->getTimeSampling( iTimeSamplingIndex );
+        iParent->getObject()->getArchive()->getTimeSampling(
+            iTimeSamplingIndex );
 
     PropertyHeaderPtr headerPtr( new PropertyHeaderAndFriends( iName,
         AbcA::kScalarProperty, iMetaData, iDataType, ts, iTimeSamplingIndex ) );
@@ -170,7 +171,8 @@ CpwData::createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
 
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =
-        this->getObject()->getArchive()->getTimeSampling( iTimeSamplingIndex );
+        iParent->getObject()->getArchive()->getTimeSampling(
+            iTimeSamplingIndex );
 
     PropertyHeaderPtr headerPtr( new PropertyHeaderAndFriends( iName,
         AbcA::kArrayProperty, iMetaData, iDataType, ts, iTimeSamplingIndex ) );

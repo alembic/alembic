@@ -75,15 +75,17 @@ AwImpl::AwImpl( const std::string &iFileName,
 
     m_metaData.set("_ai_AlembicVersion", AbcA::GetLibraryVersion());
 
-    m_data.reset( new OwData( m_file, "ABC", m_metaData ) );
+    m_data.reset( new OwData( m_archive.getGroup()->addGroup() ) );
 
     AbcA::ArraySampleKey emptyKey;
     emptyKey.numBytes = 0;
     emptyKey.origPOD = Alembic::Util::kInt8POD;
     emptyKey.readPOD = Alembic::Util::kInt8POD;
+    Ogawa::ODataPtr emptyData( new Ogawa::OData() );
+    WrittenSampleIDPtr wsid( new WrittenSampleID( emptyKey, emptyData, 0 ) );
 
     // seed with the common empty key
-    m_writtenArraySampleMap[emptyKey] = Ogawa::ODataPtr(new OData());
+    m_writtenSampleMap.store( wsid );
 }
 
 //-*****************************************************************************
@@ -139,7 +141,7 @@ uint32_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
     strm << latestSample;
     std::string name = strm.str();
 
-    WriteTimeSampling(m_archive->getGroup(), name, *ts);
+    WriteTimeSampling(m_archive.getGroup(), name, *ts);
 
     return latestSample;
 }
@@ -178,10 +180,14 @@ AwImpl::~AwImpl()
 {
 
     // empty out the map so any dataset IDs will be freed up
-    m_writtenArraySampleMap.m_map.clear();
+    m_writtenArraySampleMap.clear();
 
     // let go of our reference to the data for the top object
     m_data.reset();
+
+    // encode and write the Metadata for the archive
+    std::string metaData = m_metaData.serialize();
+    m_archive->getGroup()->addData( metaData.size(), metaData.c_str() );
 
     // encode and write the time samplings and max samples into data
     if ( m_archive.isValid() )

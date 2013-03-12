@@ -48,8 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-                  Ogawa::IGroupPtr iParentGroup,
-                  size_t iIndex,
+                  Ogawa::IGroupPtr iGroup,
                   PropertyHeaderPtr iHeader )
     : m_parent( iParent )
     , m_header( iHeader )
@@ -57,7 +56,7 @@ CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
     ABCA_ASSERT( m_parent, "Invalid parent in CprImpl(Compound)" );
     ABCA_ASSERT( m_header, "invalid header in CprImpl(Compound)" );
 
-    AbcA::PropertyType pType = m_header->getPropertyType();
+    AbcA::PropertyType pType = m_header->header.getPropertyType();
     if ( pType != AbcA::kCompoundProperty )
     {
         ABCA_THROW( "Tried to create compound property with the wrong "
@@ -69,13 +68,8 @@ CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
     ABCA_ASSERT( optr, "Invalid object in CprImpl::CprImpl(Compound)" );
     m_object = optr;
 
-    if ( iParentGroup->isChildGroup( iIndex ) )
-    {
-        // TODO get threadid from archive
-        Ogawa::IGroupPtr group = iParentGroup->getGroup( iIndex );
-        m_data.reset( new CprData( group,
-            m_parent->getObject()->getArchive()->getArchiveVersion(), 0 ) );
-    }
+    m_data.reset( new CprData( iGroup, m_parent->getObject()->getArchive(),
+                               0 ) );
 }
 
 //-*****************************************************************************
@@ -87,7 +81,9 @@ CprImpl::CprImpl( AbcA::ObjectReaderPtr iObject,
     ABCA_ASSERT( m_object, "Invalid object in CprImpl(Object)" );
     ABCA_ASSERT( m_data, "Invalid data in CprImpl(Object)" );
 
-    m_header.reset( new AbcA::PropertyHeader( "",  m_object->getMetaData() ) );
+    std::string emptyName;
+    m_header.reset( new PropertyHeaderAndFriends( emptyName,
+                                              m_object->getMetaData() ) );
 }
 
 //-*****************************************************************************
@@ -100,7 +96,7 @@ CprImpl::~CprImpl()
 const AbcA::PropertyHeader &CprImpl::getHeader() const
 {
     ABCA_ASSERT( m_header, "Invalid header" );
-    return *m_header;
+    return m_header->header;
 }
 
 AbcA::ObjectReaderPtr CprImpl::getObject()

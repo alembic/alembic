@@ -65,7 +65,6 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 namespace AbcA = ::Alembic::AbcCoreAbstract;
 
-using namespace ::Alembic::Util;
 using AbcA::index_t;
 using AbcA::chrono_t;
 
@@ -92,7 +91,7 @@ struct PropertyHeaderAndFriends
     // for compounds
     PropertyHeaderAndFriends( const std::string &iName,
         const AbcA::MetaData &iMetaData ) :
-        header( iName, iMetaData ),
+        header( iName, iMetaData )
     {
         isScalarLike = true;
         isHomogenous = true;
@@ -109,7 +108,7 @@ struct PropertyHeaderAndFriends
         const AbcA::DataType &iDataType,
         const AbcA::TimeSamplingPtr & iTsamp,
         uint32_t iTimeSamplingIndex ) :
-        header( iName, iPropType, iMetaData, iDataType, iTSamp ),
+        header( iName, iPropType, iMetaData, iDataType, iTsamp ),
         timeSamplingIndex( iTimeSamplingIndex )
     {
         isScalarLike = true;

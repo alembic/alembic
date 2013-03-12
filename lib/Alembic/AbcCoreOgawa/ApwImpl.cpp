@@ -36,7 +36,6 @@
 
 #include <Alembic/AbcCoreOgawa/ApwImpl.h>
 #include <Alembic/AbcCoreOgawa/WriteUtil.h>
-#include <Alembic/AbcCoreOgawa/StringWriteUtil.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -85,14 +84,14 @@ void ApwImpl::setFromPreviousSample()
 }
 
 //-*****************************************************************************
-void ApwImpl::setSample( const ArraySample & iSamp )
+void ApwImpl::setSample( const AbcA::ArraySample & iSamp )
 {
     // Make sure we aren't writing more samples than we have times for
     // This applies to acyclic sampling only
     ABCA_ASSERT(
         !m_header->header.getTimeSampling()->getTimeSamplingType().isAcyclic()
         || m_header->header.getTimeSampling()->getNumStoredTimes() >
-        m_header->header.nextSampleIndex,
+        m_header->nextSampleIndex,
         "Can not write more samples than we have times for when using "
         "Acyclic sampling." );
 
@@ -144,7 +143,7 @@ void ApwImpl::setSample( const ArraySample & iSamp )
 
         if ( m_header->isHomogenous && m_previousWrittenSampleID &&
             iSamp.getDimensions().numPoints() !=
-            m_previousWrittenSampleID->numPoints() )
+            m_previousWrittenSampleID->getNumPoints() )
         {
             m_header->isHomogenous = false;
         }
@@ -154,7 +153,7 @@ void ApwImpl::setSample( const ArraySample & iSamp )
         // Write the sample.
         // This distinguishes between string, wstring, and regular arrays.
         m_previousWrittenSampleID =
-            WriteData( GetWrittenSampleMap( awp ), m_group, iSamp, iKey );
+            WriteData( GetWrittenSampleMap( awp ), m_group, iSamp, key );
 
         // this index is now the last change
         m_header->lastChangedIndex = m_header->nextSampleIndex;
@@ -196,7 +195,7 @@ void ApwImpl::setTimeSamplingIndex( uint32_t iIndex )
 const AbcA::PropertyHeader & ApwImpl::getHeader() const
 {
     ABCA_ASSERT( m_header, "Invalid header" );
-    return *m_header->header;
+    return m_header->header;
 }
 
 //-*****************************************************************************

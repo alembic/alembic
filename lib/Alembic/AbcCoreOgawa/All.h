@@ -34,55 +34,9 @@
 //
 //-*****************************************************************************
 
+#ifndef _Alembic_AbcCoreOgawa_All_h_
+#define _Alembic_AbcCoreOgawa_All_h_
+
 #include <Alembic/AbcCoreOgawa/ReadWrite.h>
-#include <Alembic/AbcCoreOgawa/Foundation.h>
-#include <Alembic/AbcCoreOgawa/AwImpl.h>
-#include <Alembic/AbcCoreOgawa/ArImpl.h>
 
-namespace Alembic {
-namespace AbcCoreOgawa {
-namespace ALEMBIC_VERSION_NS {
-
-//-*****************************************************************************
-WriteArchive::WriteArchive()
-{
-}
-
-//-*****************************************************************************
-AbcA::ArchiveWriterPtr
-WriteArchive::operator()( const std::string &iFileName,
-                          const AbcA::MetaData &iMetaData ) const
-{
-    AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iFileName,
-                                                   iMetaData ) );
-    return archivePtr;
-}
-
-//-*****************************************************************************
-ReadArchive::ReadArchive()
-{
-}
-
-//-*****************************************************************************
-// This version opens a file based on a file name.
-AbcA::ArchiveReaderPtr
-ReadArchive::operator()
-( const std::string &iFileName, size_t iNumStreams ) const
-{
-    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName, iNumStreams ) );
-    return archivePtr;
-}
-
-//-*****************************************************************************
-// This version uses already open streams
-AbcA::ArchiveReaderPtr
-ReadArchive::operator()
-( const std::vector< std::istream * > & iStreams ) const
-{
-    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iStreams ) );
-    return archivePtr;
-}
-
-} // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreOgawa
-} // End namespace Alembic
+#endif

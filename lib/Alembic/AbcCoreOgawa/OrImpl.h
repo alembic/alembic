@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
 #include <Alembic/AbcCoreOgawa/OrData.h>
+#include <Alembic/AbcCoreOgawa/ArImpl.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -52,7 +53,7 @@ class OrImpl
 
 public:
 
-    OrImpl( ArImpl iArchive,
+    OrImpl( Alembic::Util::shared_ptr< ArImpl > iArchive,
             OrDataPtr iData,
             ObjectHeaderPtr iHeader );
 
@@ -88,12 +89,12 @@ public:
 
 private:
 
-    ArImplPtr getArchiveImpl() const;
+    Alembic::Util::shared_ptr< ArImpl > getArchiveImpl() const;
 
     // The parent object
     Alembic::Util::shared_ptr< OrImpl > m_parent;
 
-    ArImplPtr m_archive;
+    Alembic::Util::shared_ptr< ArImpl > m_archive;
 
     OrDataPtr m_data;
 

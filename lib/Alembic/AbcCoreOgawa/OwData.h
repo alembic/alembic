@@ -52,7 +52,7 @@ class CpwData;
 class OwData : public Alembic::Util::enable_shared_from_this<OwData>
 {
 public:
-    OwData( Ogawa::GroupPtr iGroup );
+    OwData( Ogawa::OGroupPtr iGroup );
 
     ~OwData();
 
@@ -72,12 +72,12 @@ public:
                                        const std::string & iFullName,
                                        const AbcA::ObjectHeader &iHeader );
 
-    Ogawa::GroupPtr getGroup();
+    Ogawa::OGroupPtr getGroup();
 
 private:
 
     // The group corresponding to the object
-    Ogawa::GroupPtr m_group;
+    Ogawa::OGroupPtr m_group;
 
     typedef std::vector<ObjectHeaderPtr> ChildHeaders;
     typedef std::map<std::string,WeakOwPtr> MadeChildren;

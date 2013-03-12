@@ -38,7 +38,6 @@
 #define _Alembic_AbcCoreOgawa_AprImpl_h_
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
-#include <Alembic/AbcCoreOgawa/SimplePrImpl.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -55,24 +54,25 @@ public:
              PropertyHeaderPtr iHeader );
 
     // BasePropertyReader overrides
-    virtual const PropertyHeader & getHeader() const;
-    virtual ObjectReaderPtr getObject();
-    virtual CompoundPropertyReaderPtr getParent();
+    virtual const AbcA::PropertyHeader & getHeader() const;
+    virtual AbcA::ObjectReaderPtr getObject();
+    virtual AbcA::CompoundPropertyReaderPtr getParent();
     virtual AbcA::ArrayPropertyReaderPtr asArrayPtr();
 
     // ArrayPropertyReader overrides
     virtual size_t getNumSamples();
     virtual bool isConstant();
     virtual void getSample( index_t iSampleIndex,
-                            ArraySamplePtr &oSample );
+                            AbcA::ArraySamplePtr &oSample );
     virtual std::pair<index_t, chrono_t> getFloorIndex( chrono_t iTime );
     virtual std::pair<index_t, chrono_t> getCeilIndex( chrono_t iTime );
     virtual std::pair<index_t, chrono_t> getNearIndex( chrono_t iTime );
-    virtual bool getKey( index_t iSampleIndex, ArraySampleKey & oKey );
-    virtual void getDimensions( index_t iSampleIndex, Dimensions & oDim )
+    virtual bool getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey );
+    virtual void getDimensions( index_t iSampleIndex,
+                                Alembic::Util::Dimensions & oDim );
     virtual bool isScalarLike();
     virtual void getAs( index_t iSample, void *iIntoLocation,
-                        PlainOldDataType iPod );
+                        Alembic::Util::PlainOldDataType iPod );
 
 private:
 

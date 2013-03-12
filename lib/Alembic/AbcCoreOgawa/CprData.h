@@ -49,7 +49,7 @@ class CprData : public Alembic::Util::enable_shared_from_this<CprData>
 {
 public:
 
-    CprData( Ogawa::IGroupPtr iGroup, int32_t iArchiveVersion,
+    CprData( Ogawa::IGroupPtr iGroup, AbcA::ArchiveReaderPtr iArchive,
              size_t iThreadId );
 
     ~CprData();

@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 // The Scalar Property Reader fills up bytes corresponding to memory for
 // a single scalar sample at a particular index.
 class SprImpl
-    : AbcA::ScalarPropertyReader
+    : public AbcA::ScalarPropertyReader
     , public Alembic::Util::enable_shared_from_this<SprImpl>
 {
 public:
@@ -56,9 +56,9 @@ public:
              PropertyHeaderPtr iHeader );
 
     // BasePropertyReader overrides
-    virtual const PropertyHeader & getHeader() const;
-    virtual ObjectReaderPtr getObject();
-    virtual CompoundPropertyReaderPtr getParent();
+    virtual const AbcA::PropertyHeader & getHeader() const;
+    virtual AbcA::ObjectReaderPtr getObject();
+    virtual AbcA::CompoundPropertyReaderPtr getParent();
     virtual AbcA::ScalarPropertyReaderPtr asScalarPtr();
 
     // ScalarPropertyReader overrides

@@ -67,6 +67,15 @@ ReadData( void * iIntoLocation,
 
 //-*****************************************************************************
 void
+ReadArraySample( Ogawa::IGroupPtr iGroup,
+                 size_t iDimIndex,
+                 size_t iDataIndex,
+                 size_t iThreadId,
+                 const AbcA::DataType &iDataType,
+                 AbcA::ArraySamplePtr &oSample );
+
+//-*****************************************************************************
+void
 ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
                        std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples,
                        std::vector <  AbcA::index_t > & oMaxSamples );
@@ -84,7 +93,7 @@ void
 ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                      size_t iIndex,
                      size_t iThreadId,
-                     AbcA::IArchivePtr & iArchive,
+                     AbcA::ArchiveReaderPtr & iArchive,
                      PropertyHeaderPtrs & oHeaders );
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -270,7 +270,7 @@ void testReadWriteMaxNumSamplesArchive()
     }
 }
 
-void writeArchive( const std::string & iName, bool iCache )
+void writeArchive( const std::string & iName )
 {
     ABCA::MetaData m;
     ABCA::ObjectHeader header("a", m);
@@ -320,9 +320,9 @@ void writeArchive( const std::string & iName, bool iCache )
     }
 }
 
-void readArchive( const std::string & iName, bool iCache )
+void readArchive( const std::string & iName )
 {
-    Alembic::AbcCoreOgawa::ReadArchive r( iCache );
+    Alembic::AbcCoreOgawa::ReadArchive r;
     ABCA::ArchiveReaderPtr a = r( iName );
     std::vector< ABCA::ObjectReaderPtr > objs;
     objs.push_back( a->getTop() );
@@ -358,16 +358,16 @@ void readArchive( const std::string & iName, bool iCache )
     TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(0) == 2 );
 }
 
-void writeVeryEmptyArchive( const std::string & iName, bool iCache )
+void writeVeryEmptyArchive( const std::string & iName )
 {
     ABCA::MetaData m;
-    AO::WriteArchive w( iCache );
+    AO::WriteArchive w;
     ABCA::ArchiveWriterPtr a = w(iName, m);
 }
 
-void readVeryEmptyArchive( const std::string & iName, bool iCache )
+void readVeryEmptyArchive( const std::string & iName )
 {
-    Alembic::AbcCoreOgawa::ReadArchive r( iCache );
+    Alembic::AbcCoreOgawa::ReadArchive r;
     ABCA::ArchiveReaderPtr a = r( iName );
     TESTING_ASSERT(a->getTop()->getNumChildren() == 0);
 }
@@ -377,21 +377,11 @@ int main ( int argc, char *argv[] )
     testReadWriteEmptyArchive();
     testReadWriteTimeSamplingArchive();
 
-    writeArchive("noCacheTest.abc", false);
-    readArchive("noCacheTest.abc", false);
-    readArchive("noCacheTest.abc", true);
+    writeArchive("test.abc");
+    readArchive("test.abc");
 
-    writeArchive("cacheTest.abc", true);
-    readArchive("cacheTest.abc", false);
-    readArchive("cacheTest.abc", true);
-
-    writeVeryEmptyArchive("noCacheTestEmpty.abc", false);
-    readVeryEmptyArchive("noCacheTestEmpty.abc", false);
-    readVeryEmptyArchive("noCacheTestEmpty.abc", true);
-
-    writeVeryEmptyArchive("cacheTestEmpty.abc", true);
-    readVeryEmptyArchive("cacheTestEmpty.abc", false);
-    readVeryEmptyArchive("cacheTestEmpty.abc", true);
+    writeVeryEmptyArchive("testEmpty.abc");
+    readVeryEmptyArchive("testEmpty.abc");
 
     testReadWriteMaxNumSamplesArchive();
 

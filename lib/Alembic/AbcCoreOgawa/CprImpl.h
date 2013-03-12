@@ -53,8 +53,7 @@ public:
 
     // For construction from a compound property reader
     CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-             Ogawa::IGroupPtr iParentGroup,
-             size_t iIndex,
+             Ogawa::IGroupPtr iGroup,
              PropertyHeaderPtr iHeader );
 
     CprImpl( AbcA::ObjectReaderPtr iParent,

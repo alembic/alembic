@@ -45,9 +45,8 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-CprData::CprData( Ogawa::IGroupPtr iGroup, int32_t iArchiveVersion,
+CprData::CprData( Ogawa::IGroupPtr iGroup, AbcA::ArchiveReaderPtr iArchive,
                   size_t iThreadId )
-  : m_subPropertyMutexes( NULL )
 {
     ABCA_ASSERT( iGroup, "invalid compound data group" );
 
@@ -58,12 +57,13 @@ CprData::CprData( Ogawa::IGroupPtr iGroup, int32_t iArchiveVersion,
     if ( numChildren > 0 && m_group->isChildData( numChildren - 1 ) )
     {
         PropertyHeaderPtrs headers;
-        ReadPropertyHeaders( m_group, numChildren - 1, iThreadId, headers );
+        ReadPropertyHeaders( m_group, numChildren - 1, iThreadId, iArchive,
+                             headers );
 
         m_propertyHeaders.resize( headers.size() );
         for ( std::size_t i = 0; i < headers.size(); ++i )
         {
-            m_subProperties[[headers[i]->header.getName()] = i;
+            m_subProperties[headers[i]->header.getName()] = i;
             m_propertyHeaders[i].header = headers[i];
         }
     }
@@ -92,7 +92,7 @@ CprData::getPropertyHeader( AbcA::CompoundPropertyReaderPtr iParent, size_t i )
                     << "CprData::getPropertyHeader: " << i );
     }
 
-    return *(m_propertyHeaders[i].header);
+    return m_propertyHeaders[i].header->header;
 }
 
 //-*****************************************************************************
@@ -134,9 +134,12 @@ CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second );
+
+        ABCA_ASSERT( group, "Scalar Property not backed by a valid group.");
+
         // Make a new one.
-        bptr.reset( new SprImpl( iParent, m_group, fiter->second,
-                                 sub.header ) );
+        bptr.reset( new SprImpl( iParent, group, sub.header ) );
         sub.made = bptr;
     }
 
@@ -171,9 +174,12 @@ CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second );
+
+        ABCA_ASSERT( group, "Array Property not backed by a valid group.");
+
         // Make a new one.
-        bptr.reset( new AprImpl( iParent, m_group, fiter->second,
-                                 sub.header ) );
+        bptr.reset( new AprImpl( iParent, group, sub.header ) );
 
         sub.made = bptr;
     }
@@ -209,9 +215,13 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second );
+
+        ABCA_ASSERT( group, "Compound Property not backed by a valid group.");
+
         // Make a new one.
-        bptr.reset( new CprImpl( iParent, m_group, fiter->second,
-                                 sub.header ) );
+        bptr.reset( new CprImpl( iParent, group, sub.header ) );
+
         sub.made = bptr;
     }
 

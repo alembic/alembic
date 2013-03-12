@@ -59,14 +59,14 @@ ReadDimensions( Ogawa::IGroupPtr iGroup,
     // find it based on of the size of the data
     if ( iGroup->isEmptyChildData( iIndex ) )
     {
-        IGroup::IDataPtr data = iGroup->getData( iIndex + 1, iThreadId );
+        Ogawa::IDataPtr data = iGroup->getData( iIndex + 1, iThreadId );
         oDim = Util::Dimensions( ( data->getSize() - 16 ) /
                                  iDataType.getNumBytes() );
     }
     else
     {
         // we need to read our dimensions
-        IGroup::IDataPtr data = iGroup->getData( iIndex, iThreadId );
+        Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
 
         // we write them as uint32_t so / 4
         std::size_t numRanks = data->getSize() / 4;
@@ -84,6 +84,32 @@ ReadDimensions( Ogawa::IGroupPtr iGroup,
 
 //-*****************************************************************************
 void
+ConvertData( Alembic::Util::PlainOldDataType fromPod,
+             Alembic::Util::PlainOldDataType toPod,
+             const char * fromBuffer,
+             void * toBuffer )
+{
+
+    // find a way to do smartly do this
+    return;
+    /*
+        size_t numToCast = ( dataSize - 16 ) / PODNumBytes( curPod );
+
+        FromPod::value_type * fromBuf =
+            reinterpret_cast< FromPod::value_type * > ( buf );
+
+        ToPod::value_type * toBuf =
+            reinterpret_cast< ToPod::value_type * > ( iIntoLocation );
+
+        for ( size_t i = 0; i < numToCast; ++i )
+        {
+            toBuf[i] = static_cast< ToPod::value_type > ( fromBuf[i] );
+        }
+    */
+}
+
+//-*****************************************************************************
+void
 ReadData( void * iIntoLocation,
           Ogawa::IGroupPtr iGroup,
           size_t iIndex,
@@ -91,9 +117,11 @@ ReadData( void * iIntoLocation,
           const AbcA::DataType &iDataType,
           Util::PlainOldDataType iAsPod )
 {
-    PlainOldDataType curPod = iDataType.getPod();
-    ABCA_ASSERT( ( iAsPod != kStringPOD && iAsPod != kWstringPOD &&
-        curPod != kStringPOD && curPod != kWstringPOD )
+    Alembic::Util::PlainOldDataType curPod = iDataType.getPod();
+    ABCA_ASSERT( ( iAsPod != Alembic::Util::kStringPOD &&
+        iAsPod != Alembic::Util::kWstringPOD &&
+        curPod != Alembic::Util::kStringPOD &&
+        curPod != Alembic::Util::kWstringPOD )
         || ( iAsPod == curPod ),
         "Cannot convert the data to or from a string, wstring." );
 
@@ -106,7 +134,7 @@ ReadData( void * iIntoLocation,
         return;
     }
 
-    if ( curPod == kStringPOD )
+    if ( curPod == Alembic::Util::kStringPOD )
     {
         std::string * strPtr =
             reinterpret_cast< std::string * > ( iIntoLocation );
@@ -130,22 +158,29 @@ ReadData( void * iIntoLocation,
 
         delete [] buf;
     }
-    else if ( curPod == kWStringPOD )
+    else if ( curPod == Alembic::Util::kWstringPOD )
     {
+        std::wstring * wstrPtr =
+            reinterpret_cast< std::wstring * > ( iIntoLocation );
+
         std::size_t numChars = ( dataSize - 16 ) / 4;
         uint32_t * buf = new uint32_t[ numChars ];
         data->read( dataSize - 16, buf, 16, iThreadId );
 
-        std::size_t startStr = 0;
         std::size_t strPos = 0;
 
+        // push these one at a time until we can figure out how to cast like
+        // strings above
         for ( std::size_t i = 0; i < numChars; ++i )
         {
+            std::wstring & wstr = wstrPtr[strPos];
             if ( buf[i] == 0 )
             {
-                strPtr[strPos] = buf + startStr;
-                startStr = i + 1;
                 strPos ++;
+            }
+            else
+            {
+                wstr.push_back( buf[i] );
             }
         }
 
@@ -161,23 +196,31 @@ ReadData( void * iIntoLocation,
         // read into a temporary buffer and cast them one at a time
         char * buf = new char[ dataSize - 16 ];
         data->read( dataSize - 16, buf, 16, iThreadId );
-        size_t numToCast = ( dataSize - 16 ) / PODNumBytes( curPod );
 
-        PODTraitsFromEnum< curPod > FromPod;
-        PODTraitsFromEnum< iAsPod > ToPod;
+        ConvertData( curPod, iAsPod, buf, iIntoLocation );
 
-        FromPod::value_type * fromBuf =
-            reinterpret_cast< FromPod::value_type * > ( buf );
-
-        ToPod::value_type * toBuf =
-            reinterpret_cast< ToPod::value_type * > ( iIntoLocation );
-
-        for ( size_t i = 0; i < numToCast; ++i )
-        {
-            toBuf[i] = static_cast< ToPod::value_type > ( fromBuf[i] );
-        }
         delete [] buf;
     }
+
+}
+
+//-*****************************************************************************
+void
+ReadArraySample( Ogawa::IGroupPtr iGroup,
+                 size_t iDimIndex,
+                 size_t iDataIndex,
+                 size_t iThreadId,
+                 const AbcA::DataType &iDataType,
+                 AbcA::ArraySamplePtr &oSample )
+{
+    // get our dimensions
+    Util::Dimensions dims;
+    ReadDimensions( iGroup, iDimIndex, iThreadId, iDataType, dims );
+
+    oSample = AbcA::AllocateArraySample( iDataType, dims );
+
+    ReadData( const_cast<void*>( oSample->getData() ), iGroup, iDataIndex,
+        iThreadId, iDataType, iDataType.getPod() );
 
 }
 
@@ -208,13 +251,16 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
                 sizeof( chrono_t ) * numSamples );
         pos += sizeof( chrono_t ) * numSamples;
 
-        TimeSamplingType tst( AbcA::kAcyclic );
-        if ( tpc != AcyclicTimePerCycle() )
+        AbcA::TimeSamplingType::AcyclicFlag acf;
+        AbcA::TimeSamplingType tst( acf );
+        if ( tpc != AbcA::TimeSamplingType::AcyclicTimePerCycle() )
         {
             tst = AbcA::TimeSamplingType( numSamples, tpc );
         }
 
-        AbcA::TimeSamplingPtr tptr( new TimeSampling( tst, sampleTimes ) );
+        AbcA::TimeSamplingPtr tptr(
+            new AbcA::TimeSampling( tst, sampleTimes ) );
+
         oTimeSamples.push_back( tptr );
     }
 }
@@ -244,8 +290,6 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
         std::string metaData( &buf[pos], metaDataSize );
         pos += metaDataSize;
 
-        AbcA::MetaData md;
-        md.deserialize( metaData );
         ObjectHeaderPtr objPtr( new ObjectHeader() );
         objPtr->setName( name );
         objPtr->setFullName( iParentName + "/" + name );
@@ -309,20 +353,20 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         {
             // Read the pod type out of bits 2-5
             char podt = ( char )( ( info[0] & podMask ) >> 2 );
-            if ( podt != ( char )kBooleanPOD &&
-                 podt != ( char )kUint8POD &&
-                 podt != ( char )kInt8POD &&
-                 podt != ( char )kUint16POD &&
-                 podt != ( char )kInt16POD &&
-                 podt != ( char )kUint32POD &&
-                 podt != ( char )kInt32POD &&
-                 podt != ( char )kUint64POD &&
-                 podt != ( char )kInt64POD &&
-                 podt != ( char )kFloat16POD &&
-                 podt != ( char )kFloat32POD &&
-                 podt != ( char )kFloat64POD &&
-                 podt != ( char )kStringPOD &&
-                 podt != ( char )kWstringPOD )
+            if ( podt != ( char )Alembic::Util::kBooleanPOD &&
+                 podt != ( char )Alembic::Util::kUint8POD &&
+                 podt != ( char )Alembic::Util::kInt8POD &&
+                 podt != ( char )Alembic::Util::kUint16POD &&
+                 podt != ( char )Alembic::Util::kInt16POD &&
+                 podt != ( char )Alembic::Util::kUint32POD &&
+                 podt != ( char )Alembic::Util::kInt32POD &&
+                 podt != ( char )Alembic::Util::kUint64POD &&
+                 podt != ( char )Alembic::Util::kInt64POD &&
+                 podt != ( char )Alembic::Util::kFloat16POD &&
+                 podt != ( char )Alembic::Util::kFloat32POD &&
+                 podt != ( char )Alembic::Util::kFloat64POD &&
+                 podt != ( char )Alembic::Util::kStringPOD &&
+                 podt != ( char )Alembic::Util::kWstringPOD )
             {
                 ABCA_THROW( "Read invalid POD type: " << ( int )podt );
             }
@@ -374,7 +418,8 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
 
         AbcA::MetaData md;
         md.deserialize( metaData );
-        oHeaders.push_back( objPtr );
+        header->header.setMetaData( md );
+        oHeaders.push_back( header );
     }
 }
 

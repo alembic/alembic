@@ -45,17 +45,19 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 ArImpl::ArImpl( const std::string &iFileName,
-                std::size_t iNumStreams );
-  : m_fileName( iFileName ), m_archive(iFileName, iNumStreams)
+                std::size_t iNumStreams )
+  : m_fileName( iFileName )
+  , m_archive(iFileName, iNumStreams)
+  , m_header( new AbcA::ObjectHeader() )
 {
-    ABCA_ASSERT( m_archive.valid(),
+    ABCA_ASSERT( m_archive.isValid(),
                  "Could not open as Ogawa file: " << m_fileName );
 
-    ABCA_ASSERT( m_archive.frozen(),
+    ABCA_ASSERT( m_archive.isFrozen(),
         "Ogawa file not cleanly closed while being written: " << m_fileName );
     Ogawa::IGroupPtr group = m_archive.getGroup();
 
-    int version = -INT_MAX;
+    int version = -1;
     std::size_t numChildren = group->getNumChildren();
     if ( numChildren > 0 && group->isChildData( 0 ) )
     {
@@ -69,8 +71,8 @@ ArImpl::ArImpl( const std::string &iFileName,
     ABCA_ASSERT( version >= 0 && version <= ALEMBIC_OGAWA_FILE_VERSION,
         "Unsupported file version detected: " << version );
 
-    // if it isn't there, it's pre 1.0
-    int fileVersion = 9999;
+    // if it isn't there, something is wrong
+    int fileVersion = 0;
     if ( numChildren > 1 && group->isChildData( 1 ) )
     {
         Ogawa::IDataPtr data = group->getData( 1 );
@@ -79,13 +81,29 @@ ArImpl::ArImpl( const std::string &iFileName,
             data->read( 4, &fileVersion );
         }
     }
+    ABCA_ASSERT( fileVersion >= 9999,
+        "Unsupported Alembic version detected: " << fileVersion );
 
     m_archiveVersion = fileVersion;
 
-    if ( numChildren > 1 && group->isChildGroup( numChildren - 2 ) )
+    if ( numChildren > 2 && group->isChildGroup( numChildren - 3 ) )
     {
-        m_data.reset( new OrData( group->getGroup( numChildren - 2 ),
-                                  m_archiveVersion ) );
+        m_data.reset( new OrData( group->getGroup( numChildren - 3 ), "", 0,
+                                  shared_from_this() ) );
+    }
+
+    // read archive metadata
+    if ( numChildren > 1 && group->isChildData( numChildren - 2 ) )
+    {
+        Ogawa::IDataPtr data = group->getData( numChildren - 2);
+        if ( data->getSize() > 0 )
+        {
+            char * buf = new char[ data->getSize() ];
+            data->read( 0, buf );
+            std::string metaData = buf;
+            m_header->getMetaData().deserialize( buf );
+            delete [] buf;
+        }
     }
 
     if ( numChildren > 0 && group->isChildData( numChildren - 1 ) )
@@ -105,7 +123,7 @@ const std::string &ArImpl::getName() const
 //-*****************************************************************************
 const AbcA::MetaData &ArImpl::getMetaData() const
 {
-    return m_data->getMetaData();
+    return m_header->getMetaData();
 }
 
 //-*****************************************************************************
@@ -115,7 +133,7 @@ AbcA::ObjectReaderPtr ArImpl::getTop()
     if ( ! ret )
     {
         // time to make a new one
-        ret.reset( new OrImpl( shared_from_this(), m_data ) );
+        ret.reset( new OrImpl( shared_from_this(), m_data, m_header ) );
         m_top = ret;
     }
 

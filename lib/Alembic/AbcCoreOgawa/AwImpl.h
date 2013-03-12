@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreOgawa_AwImpl_h_
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
-#include <Alembic/AbcCoreOgawa/WrittenArraySampleMap.h>
+#include <Alembic/AbcCoreOgawa/WrittenSampleMap.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -75,9 +75,9 @@ public:
     //-*************************************************************************
     // GLOBAL FILE CONTEXT STUFF.
     //-*************************************************************************
-    WrittenArraySampleMap &getWrittenArraySampleMap()
+    WrittenSampleMap &getWrittenSampleMap()
     {
-        return m_writtenArraySampleMap;
+        return m_writtenSampleMap;
     }
 
     virtual uint32_t addTimeSampling( const AbcA::TimeSampling & iTs );
@@ -104,7 +104,7 @@ private:
 
     std::vector < AbcA::index_t > m_maxSamples;
 
-    WrittenArraySampleMap m_writtenArraySampleMap;
+    WrittenSampleMap m_writtenSampleMap;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -34,7 +34,8 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreOgawa/AprImpl.h>
+#include <Alembic/AbcCoreOgawa/SprImpl.h>
+#include <Alembic/AbcCoreOgawa/ReadUtil.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -53,7 +54,7 @@ SprImpl::SprImpl( AbcA::CompoundPropertyReaderPtr iParent,
     ABCA_ASSERT( m_group, "Invalid scalar property group" );
     ABCA_ASSERT( m_header, "Invalid header" );
 
-    if ( m_header.header->getPropertyType() != AbcA::kScalarProperty )
+    if ( m_header->header.getPropertyType() != AbcA::kScalarProperty )
     {
         ABCA_THROW( "Attempted to create a ScalarPropertyReader from a "
                     "non-array property type" );
@@ -61,25 +62,25 @@ SprImpl::SprImpl( AbcA::CompoundPropertyReaderPtr iParent,
 }
 
 //-*****************************************************************************
-const SprImpl::PropertyHeader & getHeader() const
+const AbcA::PropertyHeader & SprImpl::getHeader() const
 {
-    return m_header.header;
+    return m_header->header;
 }
 
 //-*****************************************************************************
-ObjectReaderPtr SprImpl::getObject()
+AbcA::ObjectReaderPtr SprImpl::getObject()
 {
     return m_parent->getObject();
 }
 
 //-*****************************************************************************
-CompoundPropertyReaderPtr SprIml::getParent()
+AbcA::CompoundPropertyReaderPtr SprImpl::getParent()
 {
     return m_parent;
 }
 
 //-*****************************************************************************
-AbcA::ScalarPropertyReaderPtr SprImpl::asArrayPtr()
+AbcA::ScalarPropertyReaderPtr SprImpl::asScalarPtr()
 {
     return shared_from_this();
 }
@@ -99,32 +100,32 @@ bool SprImpl::isConstant()
 //-*****************************************************************************
 void SprImpl::getSample( index_t iSampleIndex, void * iIntoLocation )
 {
-    size_t index = m_header->verifySampleIndex( iSampleIndex );
+    size_t index = m_header->verifyIndex( iSampleIndex );
 
     // TODO get thread index from archive
-    ReadData( iIntoLocation, m_group, index,
+    ReadData( iIntoLocation, m_group, index, 0,
               m_header->header.getDataType(),
-              m_header->header.getDataType().getPod(), 0 );
+              m_header->header.getDataType().getPod() );
 }
 
 //-*****************************************************************************
 std::pair<index_t, chrono_t> SprImpl::getFloorIndex( chrono_t iTime )
 {
-    return m_header->getTimeSampling()->getFloorIndex( iTime,
+    return m_header->header.getTimeSampling()->getFloorIndex( iTime,
         m_header->nextSampleIndex );
 }
 
 //-*****************************************************************************
 std::pair<index_t, chrono_t> SprImpl::getCeilIndex( chrono_t iTime )
 {
-    return m_header->getTimeSampling()->getCeilIndex( iTime,
+    return m_header->header.getTimeSampling()->getCeilIndex( iTime,
         m_header->nextSampleIndex );
 }
 
 //-*****************************************************************************
 std::pair<index_t, chrono_t> SprImpl::getNearIndex( chrono_t iTime )
 {
-    return m_header->getTimeSampling()->getNearIndex( iTime,
+    return m_header->header.getTimeSampling()->getNearIndex( iTime,
         m_header->nextSampleIndex );
 }
 

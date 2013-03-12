@@ -48,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 OrData::OrData( Ogawa::IGroupPtr iGroup,
                 const std::string & iParentName,
                 std::size_t iThreadId,
-                int32_t iArchiveVersion )
+                AbcA::ArchiveReaderPtr iArchive )
 {
     ABCA_ASSERT( iGroup, "Invalid object data group" );
 
@@ -65,15 +65,15 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
         m_children.resize( headers.size() );
         for ( std::size_t i = 0; i < headers.size(); ++i )
         {
-            m_subProperties[headers[i]->getName()] = i;
+            m_childrenMap[headers[i]->getName()] = i;
             m_children[i].header = headers[i];
         }
     }
 
     if ( numChildren > 0 && m_group->isChildGroup( 0 ) )
     {
-        Ogawa::GroupPtr group = m_group->getGroup( 0, iThreadId );
-        m_data.reset( new CprData( group, iArchiveVersion, iThreadId ) );
+        Ogawa::IGroupPtr group = m_group->getGroup( 0, iThreadId );
+        m_data.reset( new CprData( group, iArchive, iThreadId ) );
     }
 }
 
@@ -153,9 +153,9 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
         // TODO get thread id from archive on parent
         // (dynamic cast optr->getArchive() to ArImpl?)
         // "top" compound is at the 0 position
-        Ogawa::IGroupPtr group = m_group.getGroup( i + 1, 0 );
+        Ogawa::IGroupPtr group = m_group->getGroup( i + 1, 0 );
         // Make a new one.
-        optr.reset ( new OrImpl( group, iParent, group,
+        optr.reset ( new OrImpl( iParent, group,
                                  m_children[i].header ) );
         m_children[i].made = optr;
     }

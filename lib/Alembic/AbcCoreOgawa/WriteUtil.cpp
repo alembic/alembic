@@ -46,16 +46,17 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 
 //-*****************************************************************************
-WrittenArraySampleMap &
-GetWrittenArraySampleMap( AbcA::ArchiveWriterPtr iVal )
+WrittenSampleMap &
+GetWrittenSampleMap( AbcA::ArchiveWriterPtr iVal )
 {
     AwImpl *ptr = dynamic_cast<AwImpl*>( iVal.get() );
     ABCA_ASSERT( ptr, "NULL Impl Ptr" );
-    return ptr->getWrittenArraySampleMap();
+    return ptr->getWrittenSampleMap();
 }
 
 //-*****************************************************************************
-void WriteDimensions( Ogawa::OGroupPtr iParent, const ArraySample & iSamp )
+void WriteDimensions( Ogawa::OGroupPtr iParent,
+                      const AbcA::ArraySample & iSamp )
 {
 
     Alembic::Util::PlainOldDataType pod = iSamp.getDataType().getPod();
@@ -84,8 +85,8 @@ void WriteDimensions( Ogawa::OGroupPtr iParent, const ArraySample & iSamp )
 }
 
 //-*****************************************************************************
-WrittenArraySampleIDPtr
-WriteData( WrittenArraySampleMap &iMap,
+WrittenSampleIDPtr
+WriteData( WrittenSampleMap &iMap,
            Ogawa::OGroupPtr iGroup,
            const AbcA::ArraySample &iSamp,
            const AbcA::ArraySample::Key &iKey )
@@ -98,11 +99,11 @@ WriteData( WrittenArraySampleMap &iMap,
     if ( !hasData )
     {
         iGroup.addEmptyData();
-        return WrittenArraySampleIDPtr();
+        return WrittenSampleIDPtr();
     }
 
     // See whether or not we've already stored this.
-    WrittenArraySampleIDPtr writeID = iMap.find( iKey );
+    WrittenSampleIDPtr writeID = iMap.find( iKey );
     if ( writeID )
     {
         CopyWrittenData( iGroup, iName );
@@ -175,7 +176,7 @@ WriteData( WrittenArraySampleMap &iMap,
         dataPtr = iGroup->addData( 2, sizes, datas );
     }
 
-    writeID.reset( new WrittenArraySampleID( iKey, dataPtr ) );
+    writeID.reset( new WrittenSampleID( iKey, dataPtr ) );
     iMap.store( writeID );
 
     // Return the reference.
@@ -184,7 +185,7 @@ WriteData( WrittenArraySampleMap &iMap,
 
 //-*****************************************************************************
 void CopyWrittenData( Ogawa::OGroupPtr iGroup,
-                      WrittenArraySampleIDPtr iRef )
+                      WrittenSampleIDPtr iRef )
 {
     ABCA_ASSERT( ( bool )iRef,
                   "CopyWrittenData() passed a bogus ref" );

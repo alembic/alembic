@@ -38,32 +38,30 @@
 #define _Alembic_AbcCoreOgawa_WriteUtil_h_
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
-#include <Alembic/AbcCoreOgawa/WrittenArraySampleMap.h>
-#include <Alembic/AbcCoreOgawa/StringWriteUtil.h>
+#include <Alembic/AbcCoreOgawa/WrittenSampleMap.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-WrittenArraySampleMap& GetWrittenArraySampleMap(
+WrittenSampleMap& GetWrittenSampleMap(
     AbcA::ArchiveWriterPtr iArchive );
 
 //-*****************************************************************************
 void
 WriteDimensions( Ogawa::OGroupPtr iGroup,
-                 const Dimensions &iDims );
+                 const AbcA::ArraySample & iSamp );
 
 //-*****************************************************************************
 void
 CopyWrittenData( Ogawa::OGroupPtr iParent,
-                 WrittenArraySampleIDPtr iRef );
+                 WrittenSampleIDPtr iRef );
 
 //-*****************************************************************************
-WrittenArraySampleIDPtr
-WriteData( WrittenArraySampleMap &iMap,
+WrittenSampleIDPtr
+WriteData( WrittenSampleMap &iMap,
            Ogawa::OGroupPtr iGroup,
-           const std::string &iName,
            const AbcA::ArraySample &iSamp,
            const AbcA::ArraySample::Key &iKey );
 

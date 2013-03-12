@@ -71,12 +71,10 @@ SET( H_FILES
   OwImpl.h
   ReadUtil.h
   ReadWrite.h
-  SimplePrImpl.h
-  SimplePwImpl.h
   SprImpl.h
   SpwImpl.h
   WriteUtil.h
-  WrittenArraySampleMap.h
+  WrittenSampleMap.h
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )

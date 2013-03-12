@@ -50,11 +50,11 @@ namespace ALEMBIC_VERSION_NS {
 // Reading as a child of a parent.
 OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
                 Ogawa::IGroupPtr iGroup,
-                AbcA::ObjectHeaderPtr iHeader )
+                ObjectHeaderPtr iHeader )
     : m_header( iHeader )
 {
-    m_parent = Alembic::Util::dynamic_pointer_cast< AbcA::ObjectReader,
-        OrImpl > (iParent);
+    m_parent = Alembic::Util::dynamic_pointer_cast< OrImpl,
+        AbcA::ObjectReader > (iParent);
 
     // Check validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent in OrImpl(Object)" );
@@ -64,12 +64,12 @@ OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
     ABCA_ASSERT( m_archive, "Invalid archive in OrImpl(Object)" );
 
     // TODO get thread id from archive
-    m_data.reset( new OrData( iGroup, iParent->getName(), 0
-        m_parent->getArchive()->getArchiveVersion() ) );
+    m_data.reset( new OrData( iGroup, iParent->getName(), 0,
+        m_archive ) );
 }
 
 //-*****************************************************************************
-OrImpl::OrImpl( ArImpl iArchive,
+OrImpl::OrImpl( Alembic::Util::shared_ptr< ArImpl > iArchive,
                 OrDataPtr iData,
                 ObjectHeaderPtr iHeader )
     : m_archive( iArchive )
@@ -147,7 +147,7 @@ AbcA::ObjectReaderPtr OrImpl::asObjectPtr()
     return shared_from_this();
 }
 
-ArImplPtr OrImpl::getArchiveImpl() const
+Alembic::Util::shared_ptr< ArImpl > OrImpl::getArchiveImpl() const
 {
     return m_archive;
 }
