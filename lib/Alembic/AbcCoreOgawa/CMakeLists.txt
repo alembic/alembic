@@ -80,7 +80,6 @@ SET( H_FILES
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicAbcCoreOgawa ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AlembicAbcCoreOgawa AlembicOgawa )
 
 INSTALL( TARGETS AlembicAbcCoreOgawa
          LIBRARY DESTINATION lib

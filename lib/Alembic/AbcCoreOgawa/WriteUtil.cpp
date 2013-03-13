@@ -45,6 +45,26 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 //-*****************************************************************************
 
+void pushUint32( std::vector< uint8_t > & ioData, uint32_t iVal )
+{
+    uint8_t * data = ( uint8_t * ) &iVal;
+    ioData.push_back( data[0] );
+    ioData.push_back( data[1] );
+    ioData.push_back( data[2] );
+    ioData.push_back( data[3] );
+}
+
+void pushChrono( std::vector< uint8_t > & ioData, chrono_t iVal )
+{
+    uint8_t * data = ( uint8_t * ) &iVal;
+
+    for ( std::size_t i = 0; i < sizeof( chrono_t ); ++i )
+    {
+        ioData.push_back( data[i] );
+    }
+}
+
+
 //-*****************************************************************************
 WrittenSampleMap &
 GetWrittenSampleMap( AbcA::ArchiveWriterPtr iVal )
@@ -60,7 +80,8 @@ void WriteDimensions( Ogawa::OGroupPtr iParent,
 {
 
     Alembic::Util::PlainOldDataType pod = iSamp.getDataType().getPod();
-    size_t rank = iSamp.getDimensions().rank();
+    const AbcA::Dimensions & dims = iSamp.getDimensions();
+    size_t rank = dims.rank();
 
     if ( pod != Alembic::Util::kStringPOD &&
          pod != Alembic::Util::kWstringPOD &&
@@ -68,7 +89,7 @@ void WriteDimensions( Ogawa::OGroupPtr iParent,
     {
         // we can figure out the dimensions based on the size  of the data
         // so just set empty data.
-        iParent.addEmptyData();
+        iParent->addEmptyData();
     }
 
     // Create temporary storage to write
@@ -77,10 +98,10 @@ void WriteDimensions( Ogawa::OGroupPtr iParent,
     // Copy into it.
     for ( size_t r = 0; r < rank; ++r )
     {
-        dimStorage[r] = ( uint32_t ) iDims[r];
+        dimStorage[r] = ( uint32_t ) dims[r];
     }
 
-    iParent.addData( rank * sizeof( uint32_t ),
+    iParent->addData( rank * sizeof( uint32_t ),
                      ( const void * )&dimStorage.front() );
 }
 
@@ -95,10 +116,11 @@ WriteData( WrittenSampleMap &iMap,
     // Okay, need to actually store it.
     // Write out the hash id, and the data together
 
+    const AbcA::Dimensions & dims = iSamp.getDimensions();
     bool hasData = dims.numPoints() > 0;
     if ( !hasData )
     {
-        iGroup.addEmptyData();
+        iGroup->addEmptyData();
         return WrittenSampleIDPtr();
     }
 
@@ -106,7 +128,7 @@ WriteData( WrittenSampleMap &iMap,
     WrittenSampleIDPtr writeID = iMap.find( iKey );
     if ( writeID )
     {
-        CopyWrittenData( iGroup, iName );
+        CopyWrittenData( iGroup, writeID );
         return writeID;
     }
 
@@ -114,7 +136,7 @@ WriteData( WrittenSampleMap &iMap,
 
     const AbcA::DataType &dataType = iSamp.getDataType();
 
-    if ( dataType.getPod() == kStringPOD )
+    if ( dataType.getPod() == Alembic::Util::kStringPOD )
     {
         size_t numPods = dataType.getExtent() * dims.numPoints();
         std::vector <int8_t> v;
@@ -123,9 +145,8 @@ WriteData( WrittenSampleMap &iMap,
             const std::string &str =
                 static_cast<const std::string*>( iSamp.getData() )[j];
 
-            ABCA_ASSERT( str.find( 0 ) == std::string::npos,
-                     "Illegal NULL character found in string: "
-                     << str << " of the string array." );
+            ABCA_ASSERT( str.find( '\0' ) == std::string::npos,
+                     "Illegal NULL character found in string data " );
 
             size_t strLen = str.length();
             for ( size_t k = 0; k < strLen; ++k )
@@ -137,11 +158,11 @@ WriteData( WrittenSampleMap &iMap,
             v.push_back(0);
         }
 
-        void * datas[2] = { &iKey.digest, &v.front() };
+        const void * datas[2] = { &iKey.digest, &v.front() };
         std::size_t sizes[2] = { 16, v.size() };
         dataPtr =  iGroup->addData( 2, sizes, datas );
     }
-    else if ( dataType.getPod() == kWstringPOD )
+    else if ( dataType.getPod() == Alembic::Util::kWstringPOD )
     {
         size_t numPods = dataType.getExtent() * dims.numPoints();
         std::vector <int32_t> v;
@@ -150,9 +171,9 @@ WriteData( WrittenSampleMap &iMap,
             const std::wstring &str =
                 static_cast<const std::wstring*>( iSamp.getData() )[j];
 
-            ABCA_ASSERT( str.find( 0 ) == std::wstring::npos,
-                     "Illegal NULL character found in string: "
-                     << str << " of the string array." );
+            wchar_t nullChar = 0;
+            ABCA_ASSERT( str.find( nullChar ) == std::wstring::npos,
+                     "Illegal NULL character found in wstring data" );
 
             size_t strLen = str.length();
             for ( size_t k = 0; k < strLen; ++k )
@@ -164,19 +185,20 @@ WriteData( WrittenSampleMap &iMap,
             v.push_back(0);
         }
 
-        void * datas[2] = { &iKey.digest, &v.front() };
+        const void * datas[2] = { &iKey.digest, &v.front() };
         std::size_t sizes[2] = { 16, v.size() * sizeof(int32_t) };
         dataPtr =  iGroup->addData( 2, sizes, datas );
     }
     else
     {
-        void * datas[2] = { &iKey.digest, iSamp.getData() };
+        const void * datas[2] = { &iKey.digest, iSamp.getData() };
         std::size_t sizes[2] = { 16, iKey.numBytes };
 
         dataPtr = iGroup->addData( 2, sizes, datas );
     }
 
-    writeID.reset( new WrittenSampleID( iKey, dataPtr ) );
+    writeID.reset( new WrittenSampleID( iKey, dataPtr,
+                        dataType.getExtent() * dims.numPoints() ) );
     iMap.store( writeID );
 
     // Return the reference.
@@ -267,35 +289,37 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
             "First Changed Index: " << iFirstChangedIndex << std::endl <<
             "Last Changed Index: " << iLastChangedIndex << std::endl );
 
-        ioData.insert( ioData.end(), 4, &info );
-        ioData.insert( ioData.end(), 4, &iNumSamples );
+        pushUint32( ioData, info );
+        pushUint32( ioData, iNumSamples );
 
         // don't bother writing out first and last change if every sample
         // was different
         if (iFirstChangedIndex != 1 || iLastChangedIndex != iNumSamples - 1)
         {
-            ioData.insert( ioData.end(), 4, &iFirstChangedIndex );
-            ioData.insert( ioData.end(), 4, &iLastChangedIndex );
+            pushUint32( ioData, iFirstChangedIndex );
+            pushUint32( ioData, iLastChangedIndex );
         }
 
         // finally set time sampling index on the end if necessary
         if (iTimeSamplingIndex != 0)
         {
-            ioData.insert( ioData.end(), 4, &iTimeSamplingIndex );
+            pushUint32( ioData, iTimeSamplingIndex );
         }
 
     }
 
     uint32_t nameSize = iHeader.getName().size();
-    ioData.insert( ioData.end(), 4, &nameSize );
-    ioData.insert( ioData.end(), nameSize, iHeader.getName().c_str() );
+    pushUint32( ioData, nameSize );
+
+    ioData.insert( ioData.end(), iHeader.getName().begin(),
+                   iHeader.getName().end() );
 
     std::string metaData = iHeader.getMetaData().serialize();
-    uint32_t metaDataSize = (uint32_t) metaData.size();
-    ioData.insert( ioData.end(), 4, &metaDataSize );
+    uint32_t metaDataSize = ( uint32_t ) metaData.size();
+    pushUint32( ioData, metaDataSize );
     if ( metaDataSize )
     {
-        ioData.insert( ioData.end(), metaDataSize, metaData.c_str() );
+        ioData.insert( ioData.end(), metaData.begin(), metaData.end() );
     }
 
 }
@@ -305,15 +329,16 @@ void WriteObjectHeader( std::vector< uint8_t > & ioData,
                     const AbcA::ObjectHeader &iHeader )
 {
     uint32_t nameSize = iHeader.getName().size();
-    ioData.insert( ioData.end(), 4, &nameSize );
-    ioData.insert( ioData.end(), nameSize, iHeader.getName().c_str() );
+    pushUint32( ioData, nameSize );
+    ioData.insert( ioData.end(), iHeader.getName().begin(),
+                   iHeader.getName().end() );
 
     std::string metaData = iHeader.getMetaData().serialize();
     uint32_t metaDataSize = (uint32_t) metaData.size();
-    ioData.insert( ioData.end(), 4, &metaDataSize );
+    pushUint32( ioData, metaDataSize );
     if ( metaDataSize )
     {
-        ioData.insert( ioData.end(), metaDataSize, metaData.c_str() );
+        ioData.insert( ioData.end(), metaData.begin(), metaData.end() );
     }
 }
 
@@ -323,23 +348,25 @@ void WriteTimeSampling( std::vector< uint8_t > & ioData,
                     const AbcA::TimeSampling &iTsmp )
 {
 
-    ioData.insert( ioData.end(), 4, &iMaxSample );
+    pushUint32( ioData, iMaxSample );
 
     AbcA::TimeSamplingType tst = iTsmp.getTimeSamplingType();
 
     chrono_t tpc = tst.getTimePerCycle();
 
-    ioData.insert( ioData.end(), sizeof(chrono_t), &tpc );
+    pushChrono( ioData, tpc );
 
     const std::vector < chrono_t > & samps = iTsmp.getStoredTimes();
     ABCA_ASSERT( samps.size() > 0, "No TimeSamples to write!");
 
     uint32_t spc = (uint32_t) samps.size();
 
-    ioData.insert( ioData.end(), 4, &spc );
+    pushUint32( ioData, spc );
 
-    ioData.insert( ioData.end(), sizeof(chrono_t) * samps.size(),
-        &( samps.front() ) );
+    for ( std::size_t i = 0; i < samps.size(); ++i )
+    {
+        pushChrono( ioData, samps[i] );
+    }
 
 }
 

@@ -35,7 +35,7 @@
 
 
 SET( TEST_LIBS
-     AlembicAbcCoreAlembic
+     AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
      AlembicUtil
      AlembicOgawa

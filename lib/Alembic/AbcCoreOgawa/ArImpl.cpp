@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 ArImpl::ArImpl( const std::string &iFileName,
                 std::size_t iNumStreams )
   : m_fileName( iFileName )
-  , m_archive(iFileName, iNumStreams)
+  , m_archive( iFileName, iNumStreams )
   , m_header( new AbcA::ObjectHeader() )
 {
     ABCA_ASSERT( m_archive.isValid(),
@@ -55,6 +55,27 @@ ArImpl::ArImpl( const std::string &iFileName,
 
     ABCA_ASSERT( m_archive.isFrozen(),
         "Ogawa file not cleanly closed while being written: " << m_fileName );
+
+    init();
+}
+
+//-*****************************************************************************
+ArImpl::ArImpl( const std::vector< std::istream * > & iStreams )
+  : m_archive( iStreams )
+  , m_header( new AbcA::ObjectHeader() )
+{
+    ABCA_ASSERT( m_archive.isValid(),
+                 "Could not open as Ogawa file from provided streams." );
+
+    ABCA_ASSERT( m_archive.isFrozen(),
+        "Ogawa streams not cleanly closed while being written. " );
+
+    init();
+}
+
+//-*****************************************************************************
+void ArImpl::init()
+{
     Ogawa::IGroupPtr group = m_archive.getGroup();
 
     int version = -1;

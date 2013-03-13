@@ -251,7 +251,9 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
                 sizeof( chrono_t ) * numSamples );
         pos += sizeof( chrono_t ) * numSamples;
 
-        AbcA::TimeSamplingType::AcyclicFlag acf;
+        AbcA::TimeSamplingType::AcyclicFlag acf =
+            AbcA::TimeSamplingType::kAcyclic;
+
         AbcA::TimeSamplingType tst( acf );
         if ( tpc != AbcA::TimeSamplingType::AcyclicTimePerCycle() )
         {
@@ -273,8 +275,16 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
                    const std::string & iParentName,
                    std::vector< ObjectHeaderPtr > & oHeaders )
 {
-    std::vector< char > buf( iData->getSize() );
-    iData->read( iData->getSize(), &( buf.front() ), iThreadId );
+    Ogawa::IDataPtr data = iGroup->getData( iIndex );
+    ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
+
+    if ( data->getSize() )
+    {
+        return;
+    }
+
+    std::vector< char > buf( data->getSize() );
+    data->read( data->getSize(), &( buf.front() ), iThreadId );
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
@@ -290,7 +300,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
         std::string metaData( &buf[pos], metaDataSize );
         pos += metaDataSize;
 
-        ObjectHeaderPtr objPtr( new ObjectHeader() );
+        ObjectHeaderPtr objPtr( new AbcA::ObjectHeader() );
         objPtr->setName( name );
         objPtr->setFullName( iParentName + "/" + name );
         objPtr->getMetaData().deserialize( metaData );
@@ -324,8 +334,16 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     // 0000 0000 0000 0001 0000 0000 0000 0000
     static const uint32_t homogenousMask = 0x10000;
 
-    std::vector< char > buf( iData->getSize() );
-    iData->read( iData->getSize(), &( buf.front() ), iThreadId );
+    Ogawa::IDataPtr data = iGroup->getData( iIndex );
+    ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
+
+    if ( data->getSize() )
+    {
+        return;
+    }
+
+    std::vector< char > buf( data->getSize() );
+    data->read( data->getSize(), &( buf.front() ), iThreadId );
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
@@ -352,7 +370,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         if ( ptype > 0 )
         {
             // Read the pod type out of bits 2-5
-            char podt = ( char )( ( info[0] & podMask ) >> 2 );
+            char podt = ( char )( ( info & podMask ) >> 2 );
             if ( podt != ( char )Alembic::Util::kBooleanPOD &&
                  podt != ( char )Alembic::Util::kUint8POD &&
                  podt != ( char )Alembic::Util::kInt8POD &&

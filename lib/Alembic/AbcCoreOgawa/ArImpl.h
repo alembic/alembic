@@ -100,6 +100,8 @@ public:
     }
 
 private:
+    void init();
+
     std::string m_fileName;
     size_t m_numStreams;
 

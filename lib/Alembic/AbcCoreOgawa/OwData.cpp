@@ -50,7 +50,7 @@ OwData::OwData( Ogawa::OGroupPtr iGroup ) : m_group( iGroup )
     // Check validity of all inputs.
     ABCA_ASSERT( m_group, "Invalid parent group" );
 
-    m_data.reset( new CpwData( ".prop", m_group ) );
+    m_data.reset( new CpwData( m_group->addGroup() ) );
 }
 
 //-*****************************************************************************
@@ -61,7 +61,7 @@ OwData::~OwData()
     // pack all object header into data here
     for ( size_t i = 0; i < m_childHeaders.size(); ++i )
     {
-        WriteObjectHeader( data, m_childHeaders[i] );
+        WriteObjectHeader( data, *m_childHeaders[i] );
     }
 
     if ( !data.empty() )

@@ -141,8 +141,6 @@ uint32_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
     strm << latestSample;
     std::string name = strm.str();
 
-    WriteTimeSampling(m_archive.getGroup(), name, *ts);
-
     return latestSample;
 }
 
@@ -180,14 +178,14 @@ AwImpl::~AwImpl()
 {
 
     // empty out the map so any dataset IDs will be freed up
-    m_writtenArraySampleMap.clear();
+    m_writtenSampleMap.clear();
 
     // let go of our reference to the data for the top object
     m_data.reset();
 
     // encode and write the Metadata for the archive
     std::string metaData = m_metaData.serialize();
-    m_archive->getGroup()->addData( metaData.size(), metaData.c_str() );
+    m_archive.getGroup()->addData( metaData.size(), metaData.c_str() );
 
     // encode and write the time samplings and max samples into data
     if ( m_archive.isValid() )
@@ -197,11 +195,11 @@ AwImpl::~AwImpl()
         for ( uint32_t i = 0; i < numSamplings; ++i )
         {
             uint32_t maxSample = m_maxSamples[i];
-            TimeSamplingPtr timePtr = getTimeSampling( i );
+            AbcA::TimeSamplingPtr timePtr = getTimeSampling( i );
             WriteTimeSampling( data, maxSample, *timePtr );
         }
 
-        m_archive->getGroup()->addData( data.size(), &( data.front() ) );
+        m_archive.getGroup()->addData( data.size(), &( data.front() ) );
     }
 
 }

@@ -1665,8 +1665,7 @@ void testArrayStringsRepeats()
 
     {
         AO::ReadArchive r;
-        ABCA::ArchiveReaderPtr a = r( archiveName,
-                                     ABCA::ReadArraySampleCachePtr() );
+        ABCA::ArchiveReaderPtr a = r( archiveName );
         ABCA::ObjectReaderPtr archive = a->getTop();
         ABCA::CompoundPropertyReaderPtr parent = archive->getProperties();
         TESTING_ASSERT(parent->getNumProperties() == 2);
