@@ -61,9 +61,8 @@ AbcA::ArchiveWriterPtr
 WriteArchive::operator()( const std::string &iFileName,
                           const AbcA::MetaData &iMetaData ) const
 {
-    shared_ptr<AwImpl> archivePtr( new AwImpl( iFileName,
-                                   iMetaData,
-                                   m_cacheHierarchy ) );
+    Alembic::Util::shared_ptr<AwImpl> archivePtr(
+        new AwImpl( iFileName, iMetaData, m_cacheHierarchy ) );
 
     return archivePtr;
 }
@@ -95,9 +94,9 @@ AbcA::ArchiveReaderPtr
 ReadArchive::operator()( const std::string &iFileName ) const
 {
     AbcA::ReadArraySampleCachePtr cachePtr = CreateCache();
-    shared_ptr<ArImpl> archivePtr( new ArImpl( iFileName,
-                                               cachePtr,
-                                               m_cacheHierarchy ) );
+    Alembic::Util::shared_ptr<ArImpl> archivePtr(
+        new ArImpl( iFileName, cachePtr, m_cacheHierarchy ) );
+
     return archivePtr;
 }
 
@@ -107,9 +106,8 @@ AbcA::ArchiveReaderPtr
 ReadArchive::operator()( const std::string &iFileName,
                          AbcA::ReadArraySampleCachePtr iCachePtr ) const
 {
-    shared_ptr<ArImpl> archivePtr( new ArImpl( iFileName,
-                                               iCachePtr,
-                                               m_cacheHierarchy ) );
+    Alembic::Util::shared_ptr<ArImpl> archivePtr(
+        new ArImpl( iFileName, iCachePtr, m_cacheHierarchy ) );
     return archivePtr;
 }
 

@@ -113,7 +113,8 @@ OrData::OrData( ObjectHeaderPtr iHeader,
     m_oldGroup = m_group;
 
 
-    m_data = shared_ptr<CprData>( new CprData( m_group, iArchiveVersion, ".prop" ) ); 
+    m_data = Alembic::Util::shared_ptr<CprData>(
+        new CprData( m_group, iArchiveVersion, ".prop" ) );
 }
 
 //-*****************************************************************************
@@ -130,7 +131,9 @@ OrData::getProperties( AbcA::ObjectReaderPtr iParent )
     if ( ! ret )
     {
         // time to make a new one
-        ret = shared_ptr<CprImpl>( new CprImpl( iParent, m_data ) );
+        ret = Alembic::Util::shared_ptr<CprImpl>(
+            new CprImpl( iParent, m_data ) );
+
         m_top = ret;
     }
 
@@ -213,7 +216,9 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
         }
 
         // Make a new one.
-        optr = shared_ptr<OrImpl>( new OrImpl( iParent, m_group, m_children[i].header ) ); 
+        optr = Alembic::Util::shared_ptr<OrImpl>(
+            new OrImpl( iParent, m_group, m_children[i].header ) );
+
         m_children[i].made = optr;
     }
     return optr;

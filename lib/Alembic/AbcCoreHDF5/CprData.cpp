@@ -277,9 +277,9 @@ CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
     if ( ! bptr )
     {
         // Make a new one.
-        bptr = shared_ptr<SprImpl>( new SprImpl( iParent, m_group, sub.header,
-                                    sub.numSamples, sub.firstChangedIndex,
-                                    sub.lastChangedIndex ) );
+        bptr = Alembic::Util::shared_ptr<SprImpl>(
+            new SprImpl( iParent, m_group, sub.header, sub.numSamples,
+                         sub.firstChangedIndex, sub.lastChangedIndex ) );
 
         sub.made = bptr;
     }
@@ -318,10 +318,11 @@ CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
     if ( ! bptr )
     {
         // Make a new one.
-        bptr = shared_ptr<AprImpl>( new AprImpl( iParent, m_group, sub.header,
-                                    sub.isScalarLike, sub.numSamples,
-                                    sub.firstChangedIndex,
-                                    sub.lastChangedIndex ) );
+        bptr = Alembic::Util::shared_ptr<AprImpl>(
+            new AprImpl( iParent, m_group, sub.header, sub.isScalarLike,
+                         sub.numSamples, sub.firstChangedIndex,
+                         sub.lastChangedIndex ) );
+
         sub.made = bptr;
     }
 
@@ -359,7 +360,9 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
     if ( ! bptr )
     {
         // Make a new one.
-        bptr = shared_ptr<CprImpl>( new CprImpl( iParent, m_group, sub.header ) );
+        bptr = Alembic::Util::shared_ptr<CprImpl>(
+            new CprImpl( iParent, m_group, sub.header ) );
+
         sub.made = bptr;
     }
 

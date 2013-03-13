@@ -85,7 +85,7 @@ OwData::getProperties( AbcA::ObjectWriterPtr iParent )
     if ( ! ret )
     {
         // time to make a new one
-        ret = shared_ptr<CpwImpl>( new CpwImpl( iParent, 
+        ret = Alembic::Util::shared_ptr<CpwImpl>( new CpwImpl( iParent,
             m_data, iParent->getMetaData() ) );
         m_top = ret;
     }
@@ -175,7 +175,7 @@ AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
                                 parentName + iHeader.getName(),
                                 iHeader.getMetaData() ) );
 
-    shared_ptr<OwImpl> ret( new OwImpl( iParent,
+    Alembic::Util::shared_ptr<OwImpl> ret( new OwImpl( iParent,
                             m_group,
                             header ) );
 
