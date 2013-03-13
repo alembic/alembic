@@ -53,7 +53,7 @@ class ArImpl
     , public Alembic::Util::enable_shared_from_this<ArImpl>
 {
 private:
-    friend struct ReadArchive;
+    friend class ReadArchive;
 
     ArImpl( const std::string &iFileName,
             AbcA::ReadArraySampleCachePtr iCache,

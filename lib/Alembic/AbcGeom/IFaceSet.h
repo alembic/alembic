@@ -70,7 +70,7 @@ public:
 
         bool valid() const
         {
-            return m_faces;
+            return m_faces.get() != 0;
         }
 
         void reset()

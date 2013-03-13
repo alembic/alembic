@@ -47,14 +47,13 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 class OwData;
-class OwImpl;
 
 //-*****************************************************************************
 class AwImpl : public AbcA::ArchiveWriter
              , public Alembic::Util::enable_shared_from_this<AwImpl>
 {
 private:
-    friend struct WriteArchive;
+    friend class WriteArchive;
 
     AwImpl( const std::string &iFileName,
             const AbcA::MetaData &iMetaData,

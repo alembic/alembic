@@ -85,7 +85,7 @@ OwData::getProperties( AbcA::ObjectWriterPtr iParent )
     if ( ! ret )
     {
         // time to make a new one
-        ret.reset( new CpwImpl( iParent,
+        ret = shared_ptr<CpwImpl>( new CpwImpl( iParent, 
             m_data, iParent->getMetaData() ) );
         m_top = ret;
     }
@@ -175,9 +175,9 @@ AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
                                 parentName + iHeader.getName(),
                                 iHeader.getMetaData() ) );
 
-    AbcA::ObjectWriterPtr ret( new OwImpl( iParent,
-                                           m_group,
-                                           header ) );
+    shared_ptr<OwImpl> ret( new OwImpl( iParent,
+                            m_group,
+                            header ) );
 
     m_childHeaders.push_back( header );
     m_madeChildren[iHeader.getName()] = WeakOwPtr( ret );

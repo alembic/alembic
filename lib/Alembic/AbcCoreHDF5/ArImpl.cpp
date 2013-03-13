@@ -148,7 +148,7 @@ AbcA::ObjectReaderPtr ArImpl::getTop()
     if ( ! ret )
     {
         // time to make a new one
-        ret.reset( new OrImpl( asArchivePtr(), m_data, m_header ) );
+        ret = shared_ptr<OrImpl>( new OrImpl( asArchivePtr(), m_data, m_header ) );
         m_top = ret;
     }
 

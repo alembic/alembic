@@ -165,7 +165,7 @@ CpwData::createScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
 
     hid_t myGroup = getGroup();
 
-    AbcA::ScalarPropertyWriterPtr
+    shared_ptr<SpwImpl>
         ret( new SpwImpl( iParent, myGroup, iName, iMetaData,
             iDataType, iTimeSamplingIndex ) );
 
@@ -191,7 +191,7 @@ CpwData::createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
 
     hid_t myGroup = getGroup();
 
-    AbcA::ArrayPropertyWriterPtr
+    shared_ptr<ApwImpl>
         ret( new ApwImpl( iParent, myGroup, iName, iMetaData,
             iDataType, iTimeSamplingIndex ) );
 
@@ -215,7 +215,7 @@ CpwData::createCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
 
     hid_t myGroup = getGroup();
 
-    AbcA::CompoundPropertyWriterPtr
+    shared_ptr<CpwImpl>
         ret( new CpwImpl( iParent, myGroup, iName, iMetaData ) );
 
     PropertyHeaderPtr headerPtr( new AbcA::PropertyHeader( ret->getHeader() ) );

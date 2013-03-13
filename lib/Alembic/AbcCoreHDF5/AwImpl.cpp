@@ -123,7 +123,7 @@ AbcA::ObjectWriterPtr AwImpl::getTop()
     if ( ! ret )
     {
         // time to make a new one
-        ret.reset( new OwImpl( asArchivePtr(), m_data, m_metaData ) );
+        ret = shared_ptr<OwImpl>( new OwImpl( asArchivePtr(), m_data, m_metaData ) );
         m_top = ret;
     }
 
