@@ -82,9 +82,9 @@ AwImpl::AwImpl( const std::string &iFileName,
     emptyKey.origPOD = Alembic::Util::kInt8POD;
     emptyKey.readPOD = Alembic::Util::kInt8POD;
     Ogawa::ODataPtr emptyData( new Ogawa::OData() );
-    WrittenSampleIDPtr wsid( new WrittenSampleID( emptyKey, emptyData, 0 ) );
 
     // seed with the common empty key
+    WrittenSampleIDPtr wsid( new WrittenSampleID( emptyKey, emptyData, 0 ) );
     m_writtenSampleMap.store( wsid );
 }
 

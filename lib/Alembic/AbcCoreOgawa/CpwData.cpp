@@ -139,6 +139,11 @@ CpwData::createScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
         ABCA_THROW( "Already have a property named: " << iName );
     }
 
+    ABCA_ASSERT( iDataType.getExtent() != 0 &&
+                 iDataType.getPod() != Alembic::Util::kNumPlainOldDataTypes &&
+                 iDataType.getPod() != Alembic::Util::kUnknownPOD,
+                 "createScalarProperty, illegal DataType provided.");
+
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =
         iParent->getObject()->getArchive()->getTimeSampling(
@@ -168,6 +173,11 @@ CpwData::createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
     {
         ABCA_THROW( "Already have a property named: " << iName );
     }
+
+    ABCA_ASSERT( iDataType.getExtent() != 0 &&
+                 iDataType.getPod() != Alembic::Util::kNumPlainOldDataTypes &&
+                 iDataType.getPod() != Alembic::Util::kUnknownPOD,
+                 "createArrayProperty, illegal DataType provided.");
 
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =

@@ -86,6 +86,8 @@ private:
     PropertyHeaderPtr m_header;
 
     Ogawa::OGroupPtr m_group;
+
+    AbcA::Dimensions m_dims;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

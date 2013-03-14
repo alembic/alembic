@@ -51,7 +51,8 @@ WrittenSampleMap& GetWrittenSampleMap(
 //-*****************************************************************************
 void
 WriteDimensions( Ogawa::OGroupPtr iGroup,
-                 const AbcA::ArraySample & iSamp );
+                 const AbcA::Dimensions & iDims,
+                 Alembic::Util::PlainOldDataType iPod );
 
 //-*****************************************************************************
 void

@@ -51,22 +51,30 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 void
 ReadDimensions( Ogawa::IGroupPtr iGroup,
-                size_t iIndex,
+                size_t iDimsIndex,
+                size_t iDataIndex,
                 size_t iThreadId,
                 const AbcA::DataType &iDataType,
                 Util::Dimensions & oDim )
 {
     // find it based on of the size of the data
-    if ( iGroup->isEmptyChildData( iIndex ) )
+    if ( iGroup->isEmptyChildData( iDimsIndex ) )
     {
-        Ogawa::IDataPtr data = iGroup->getData( iIndex + 1, iThreadId );
-        oDim = Util::Dimensions( ( data->getSize() - 16 ) /
-                                 iDataType.getNumBytes() );
+        if ( iGroup->isEmptyChildData( iDataIndex ) )
+        {
+            oDim = Util::Dimensions( 0 );
+        }
+        else
+        {
+            Ogawa::IDataPtr data = iGroup->getData( iDataIndex, iThreadId );
+            oDim = Util::Dimensions( ( data->getSize() - 16 ) /
+                                     iDataType.getNumBytes() );
+        }
     }
     else
     {
         // we need to read our dimensions
-        Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
+        Ogawa::IDataPtr data = iGroup->getData( iDimsIndex, iThreadId );
 
         // we write them as uint32_t so / 4
         std::size_t numRanks = data->getSize() / 4;
@@ -127,7 +135,8 @@ ReadData( void * iIntoLocation,
 
     Ogawa::IDataPtr data = iGroup->getData( iIndex );
     std::size_t dataSize = data->getSize();
-    if ( dataSize <= 16 )
+
+    if ( dataSize < 16 )
     {
         ABCA_ASSERT( dataSize == 0,
             "Incorrect data, expected to be empty or to have a key and data");
@@ -136,6 +145,12 @@ ReadData( void * iIntoLocation,
 
     if ( curPod == Alembic::Util::kStringPOD )
     {
+        // TODO don't write out key for totally empty strings
+        if ( dataSize <= 16 )
+        {
+            return;
+        }
+
         std::string * strPtr =
             reinterpret_cast< std::string * > ( iIntoLocation );
 
@@ -160,6 +175,12 @@ ReadData( void * iIntoLocation,
     }
     else if ( curPod == Alembic::Util::kWstringPOD )
     {
+        // TODO don't write out key for totally empty strings
+        if ( dataSize <= 16 )
+        {
+            return;
+        }
+
         std::wstring * wstrPtr =
             reinterpret_cast< std::wstring * > ( iIntoLocation );
 
@@ -215,7 +236,7 @@ ReadArraySample( Ogawa::IGroupPtr iGroup,
 {
     // get our dimensions
     Util::Dimensions dims;
-    ReadDimensions( iGroup, iDimIndex, iThreadId, iDataType, dims );
+    ReadDimensions( iGroup, iDimIndex, iDataIndex, iThreadId, iDataType, dims );
 
     oSample = AbcA::AllocateArraySample( iDataType, dims );
 

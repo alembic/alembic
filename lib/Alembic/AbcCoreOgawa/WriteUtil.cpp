@@ -75,21 +75,21 @@ GetWrittenSampleMap( AbcA::ArchiveWriterPtr iVal )
 }
 
 //-*****************************************************************************
-void WriteDimensions( Ogawa::OGroupPtr iParent,
-                      const AbcA::ArraySample & iSamp )
+void WriteDimensions( Ogawa::OGroupPtr iGroup,
+                      const AbcA::Dimensions & iDims,
+                      Alembic::Util::PlainOldDataType iPod )
 {
 
-    Alembic::Util::PlainOldDataType pod = iSamp.getDataType().getPod();
-    const AbcA::Dimensions & dims = iSamp.getDimensions();
-    size_t rank = dims.rank();
+    size_t rank = iDims.rank();
 
-    if ( pod != Alembic::Util::kStringPOD &&
-         pod != Alembic::Util::kWstringPOD &&
+    if ( iPod != Alembic::Util::kStringPOD &&
+         iPod != Alembic::Util::kWstringPOD &&
          rank == 1 )
     {
         // we can figure out the dimensions based on the size  of the data
         // so just set empty data.
-        iParent->addEmptyData();
+        iGroup->addEmptyData();
+        return;
     }
 
     // Create temporary storage to write
@@ -98,10 +98,10 @@ void WriteDimensions( Ogawa::OGroupPtr iParent,
     // Copy into it.
     for ( size_t r = 0; r < rank; ++r )
     {
-        dimStorage[r] = ( uint32_t ) dims[r];
+        dimStorage[r] = ( uint32_t ) iDims[r];
     }
 
-    iParent->addData( rank * sizeof( uint32_t ),
+    iGroup->addData( rank * sizeof( uint32_t ),
                      ( const void * )&dimStorage.front() );
 }
 

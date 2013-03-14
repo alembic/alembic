@@ -51,7 +51,8 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 void
 ReadDimensions( Ogawa::IGroupPtr iGroup,
-                size_t iIndex,
+                size_t iDimsIndex,
+                size_t iDataIndex,
                 size_t iThreadId,
                 const AbcA::DataType &iDataType,
                 Util::Dimensions & oDim );

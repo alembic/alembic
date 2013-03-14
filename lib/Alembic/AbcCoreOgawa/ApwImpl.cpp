@@ -45,7 +45,7 @@ namespace ALEMBIC_VERSION_NS {
 ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   Ogawa::OGroupPtr iGroup,
                   PropertyHeaderPtr iHeader ) :
-    m_parent( iParent ), m_header( iHeader ), m_group( iGroup )
+    m_parent( iParent ), m_header( iHeader ), m_group( iGroup ), m_dims( 1 )
 {
     ABCA_ASSERT( m_parent, "Invalid parent" );
     ABCA_ASSERT( m_header, "Invalid property header" );
@@ -67,19 +67,19 @@ ApwImpl::~ApwImpl()
     index_t maxSamples = archive->getMaxNumSamplesForTimeSamplingIndex(
             m_header->timeSamplingIndex );
 
-        uint32_t numSamples = m_header->nextSampleIndex;
+    uint32_t numSamples = m_header->nextSampleIndex;
 
-        // a constant property, we wrote the same sample over and over
-        if ( m_header->lastChangedIndex == 0 && m_header->nextSampleIndex > 0 )
-        {
-            numSamples = 1;
-        }
+    // a constant property, we wrote the same sample over and over
+    if ( m_header->lastChangedIndex == 0 && m_header->nextSampleIndex > 0 )
+    {
+        numSamples = 1;
+    }
 
-        if ( maxSamples < numSamples )
-        {
-            archive->setMaxNumSamplesForTimeSamplingIndex(
-                m_header->timeSamplingIndex, numSamples );
-        }
+    if ( maxSamples < numSamples )
+    {
+        archive->setMaxNumSamplesForTimeSamplingIndex(
+            m_header->timeSamplingIndex, numSamples );
+    }
 }
 
 //-*****************************************************************************
@@ -147,7 +147,8 @@ void ApwImpl::setSample( const AbcA::ArraySample & iSamp )
             {
                 assert( smpI > 0 );
                 CopyWrittenData( m_group, m_previousWrittenSampleID );
-                WriteDimensions(m_group, iSamp);
+                WriteDimensions( m_group, m_dims,
+                                 iSamp.getDataType().getPod() );
             }
         }
 
@@ -160,17 +161,18 @@ void ApwImpl::setSample( const AbcA::ArraySample & iSamp )
         m_previousWrittenSampleID =
             WriteData( GetWrittenSampleMap( awp ), m_group, iSamp, key );
 
-        WriteDimensions(m_group, iSamp);
+        m_dims = iSamp.getDimensions();
+        WriteDimensions( m_group, m_dims, iSamp.getDataType().getPod() );
 
         // if we haven't written this already, isScalarLike will be true
-        if ( m_header->isScalarLike && iSamp.getDimensions().numPoints() != 1 )
+        if ( m_header->isScalarLike && m_dims.numPoints() != 1 )
         {
             m_header->isScalarLike = false;
         }
 
         if ( m_header->isHomogenous && m_previousWrittenSampleID &&
-            iSamp.getDimensions().numPoints() !=
-            m_previousWrittenSampleID->getNumPoints() )
+             m_dims.numPoints() !=
+             m_previousWrittenSampleID->getNumPoints() )
         {
             m_header->isHomogenous = false;
         }

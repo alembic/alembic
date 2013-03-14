@@ -143,8 +143,12 @@ bool AprImpl::getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey )
 
     if ( data )
     {
-        oKey.numBytes = data->getSize() - 16;
-        data->read(16, oKey.digest.d);
+        if ( data->getSize() >= 16 )
+        {
+            oKey.numBytes = data->getSize() - 16;
+            data->read(16, oKey.digest.d);
+        }
+
         return true;
     }
 
@@ -161,10 +165,11 @@ bool AprImpl::isScalarLike()
 void AprImpl::getDimensions( index_t iSampleIndex,
                              Alembic::Util::Dimensions & oDim )
 {
-    size_t index = m_header->verifyIndex( iSampleIndex ) * 2 + 1;
+    size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
     // TODO get thread index from archive
-    ReadDimensions( m_group, index, 0, m_header->header.getDataType(), oDim );
+    ReadDimensions( m_group, index + 1, index, 0,
+                    m_header->header.getDataType(), oDim );
 
 }
 
@@ -172,7 +177,7 @@ void AprImpl::getDimensions( index_t iSampleIndex,
 void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
                      Alembic::Util::PlainOldDataType iPod )
 {
-    size_t index = m_header->verifyIndex( iSampleIndex ) * 2 + 1;
+    size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
     // TODO get thread index from archive
     ReadData( iIntoLocation, m_group, index, 0,
