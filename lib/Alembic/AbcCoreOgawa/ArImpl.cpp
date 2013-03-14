@@ -130,8 +130,8 @@ void ArImpl::init()
         {
             char * buf = new char[ data->getSize() ];
             data->read( data->getSize(), buf, 0 );
-            std::string metaData = buf;
-            m_header->getMetaData().deserialize( buf );
+            std::string metaData(buf, data->getSize() );
+            m_header->getMetaData().deserialize( metaData );
             delete [] buf;
         }
     }
