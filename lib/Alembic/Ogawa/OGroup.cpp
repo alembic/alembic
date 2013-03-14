@@ -189,7 +189,7 @@ void OGroup::addData(ODataPtr iData)
 {
     if (!isFrozen())
     {
-        mData->childVec.push_back(iData->getPos());
+        mData->childVec.push_back(iData->getPos() | 0x8000000000000000ULL);
     }
 }
 
