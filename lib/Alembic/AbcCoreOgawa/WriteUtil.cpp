@@ -117,12 +117,6 @@ WriteData( WrittenSampleMap &iMap,
     // Write out the hash id, and the data together
 
     const AbcA::Dimensions & dims = iSamp.getDimensions();
-    bool hasData = dims.numPoints() > 0;
-    if ( !hasData )
-    {
-        iGroup->addEmptyData();
-        return WrittenSampleIDPtr();
-    }
 
     // See whether or not we've already stored this.
     WrittenSampleIDPtr writeID = iMap.find( iKey );

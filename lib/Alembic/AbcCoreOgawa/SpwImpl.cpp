@@ -140,10 +140,6 @@ void SpwImpl::setSample( const void *iSamp )
                 CopyWrittenData( m_group, m_previousWrittenSampleID );
             }
         }
-        else
-        {
-            m_header->firstChangedIndex = m_header->nextSampleIndex;
-        }
 
         // Write this sample, which will update its internal
         // cache of what the previously written sample was.
@@ -154,6 +150,10 @@ void SpwImpl::setSample( const void *iSamp )
         m_previousWrittenSampleID =
             WriteData( GetWrittenSampleMap( awp ), m_group, samp, key );
 
+        if (m_header->firstChangedIndex == 0)
+        {
+            m_header->firstChangedIndex = m_header->nextSampleIndex;
+        }
         // this index is now the last change
         m_header->lastChangedIndex = m_header->nextSampleIndex;
     }

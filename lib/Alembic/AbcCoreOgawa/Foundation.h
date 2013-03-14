@@ -129,16 +129,16 @@ struct PropertyHeaderAndFriends
                  << ", should be between 0 and " << nextSampleIndex - 1 );
 
         uint32_t index = ( uint32_t ) iIndex;
-        if ( index <= firstChangedIndex )
+        if ( index < firstChangedIndex )
         {
             return 0;
         }
         else if ( index >= lastChangedIndex )
         {
-            return ( size_t ) ( lastChangedIndex - firstChangedIndex );
+            return ( size_t ) ( lastChangedIndex - firstChangedIndex + 1 );
         }
 
-        return ( size_t ) ( index - firstChangedIndex );
+        return ( size_t ) ( index - firstChangedIndex + 1 );
     }
 
     // The header which defines this property.

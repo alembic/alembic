@@ -103,7 +103,7 @@ void AprImpl::getSample( index_t iSampleIndex, AbcA::ArraySamplePtr &oSample )
     size_t index = m_header->verifyIndex( iSampleIndex );
 
     // TODO get thread index from archive
-    ReadArraySample( m_group, index * 2, index * 2 + 1, 0,
+    ReadArraySample( m_group, index * 2 + 1, index * 2, 0,
                      m_header->header.getDataType(), oSample );
 }
 
@@ -135,11 +135,11 @@ bool AprImpl::getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey )
     oKey.origPOD = oKey.readPOD;
     oKey.numBytes = 0;
 
-    // * 2 + 1 for Array properties since we create a data for dimensions
-    size_t index = m_header->verifyIndex( iSampleIndex ) * 2 + 1;
+    // * 2 for Array properties (since we also write the dimensions)
+    size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
     // TODO get thread index from archive
-    Ogawa::IDataPtr data = m_group->getData( index * 2 + 1, 0 );
+    Ogawa::IDataPtr data = m_group->getData( index, 0 );
 
     if ( data )
     {
@@ -161,7 +161,7 @@ bool AprImpl::isScalarLike()
 void AprImpl::getDimensions( index_t iSampleIndex,
                              Alembic::Util::Dimensions & oDim )
 {
-    size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
+    size_t index = m_header->verifyIndex( iSampleIndex ) * 2 + 1;
 
     // TODO get thread index from archive
     ReadDimensions( m_group, index, 0, m_header->header.getDataType(), oDim );

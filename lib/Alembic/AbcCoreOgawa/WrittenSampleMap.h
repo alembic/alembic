@@ -57,7 +57,12 @@ class WrittenSampleID
 {
 public:
     WrittenSampleID()
-      : m_sampleKey() { m_numPoints = 0; }
+    {
+        m_sampleKey.numBytes = 0;
+        m_sampleKey.origPOD = Alembic::Util::kInt8POD;
+        m_sampleKey.readPOD = Alembic::Util::kInt8POD;
+        m_numPoints = 0;
+    }
 
     WrittenSampleID( const AbcA::ArraySample::Key &iKey,
                      Ogawa::ODataPtr iData,

@@ -140,18 +140,21 @@ void ApwImpl::setSample( const AbcA::ArraySample & iSamp )
                 smpI < m_header->nextSampleIndex; ++smpI )
             {
                 assert( smpI > 0 );
-                WriteDimensions(m_group, iSamp);
                 CopyWrittenData( m_group, m_previousWrittenSampleID );
+                WriteDimensions(m_group, iSamp);
             }
-        }
-        else
-        {
-            m_header->firstChangedIndex = m_header->nextSampleIndex;
         }
 
         // Write this sample, which will update its internal
         // cache of what the previously written sample was.
         AbcA::ArchiveWriterPtr awp = this->getObject()->getArchive();
+
+        // Write the sample.
+        // This distinguishes between string, wstring, and regular arrays.
+        m_previousWrittenSampleID =
+            WriteData( GetWrittenSampleMap( awp ), m_group, iSamp, key );
+
+        WriteDimensions(m_group, iSamp);
 
         // if we haven't written this already, isScalarLike will be true
         if ( m_header->isScalarLike && iSamp.getDimensions().numPoints() != 1 )
@@ -166,12 +169,10 @@ void ApwImpl::setSample( const AbcA::ArraySample & iSamp )
             m_header->isHomogenous = false;
         }
 
-        WriteDimensions(m_group, iSamp);
-
-        // Write the sample.
-        // This distinguishes between string, wstring, and regular arrays.
-        m_previousWrittenSampleID =
-            WriteData( GetWrittenSampleMap( awp ), m_group, iSamp, key );
+        if (m_header->firstChangedIndex == 0)
+        {
+            m_header->firstChangedIndex = m_header->nextSampleIndex;
+        }
 
         // this index is now the last change
         m_header->lastChangedIndex = m_header->nextSampleIndex;
