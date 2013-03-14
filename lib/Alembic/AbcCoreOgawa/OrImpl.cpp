@@ -64,7 +64,7 @@ OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
     ABCA_ASSERT( m_archive, "Invalid archive in OrImpl(Object)" );
 
     // TODO get thread id from archive
-    m_data.reset( new OrData( iGroup, iParent->getName(), 0,
+    m_data.reset( new OrData( iGroup, iHeader->getFullName(), 0,
         *m_archive ) );
 }
 
