@@ -133,6 +133,12 @@ struct PropertyHeaderAndFriends
         {
             return 0;
         }
+        // constant case
+        else if ( firstChangedIndex == lastChangedIndex &&
+                  firstChangedIndex == 0 )
+        {
+            return 0;
+        }
         else if ( index >= lastChangedIndex )
         {
             return ( size_t ) ( lastChangedIndex - firstChangedIndex + 1 );
