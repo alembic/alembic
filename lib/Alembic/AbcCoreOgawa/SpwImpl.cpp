@@ -118,10 +118,17 @@ void SpwImpl::setSample( const void *iSamp )
 
      // The Key helps us analyze the sample.
      AbcA::ArraySample::Key key = samp.getKey();
-     // mask out the POD since Ogawa can safely share the same data even if
-     // it originated from a different POD
-     key.origPOD = Alembic::Util::kInt8POD;
-     key.readPOD = Alembic::Util::kInt8POD;
+
+     // mask out the non-string POD since Ogawa can safely share the same data
+     // even if it originated from a different POD
+     // the non-fixed sizes of our strings (plus added null characters) makes
+     // determing the sie harder so strings are handled seperately
+    if ( key.origPOD != Alembic::Util::kStringPOD &&
+         key.origPOD != Alembic::Util::kWstringPOD )
+    {
+        key.origPOD = Alembic::Util::kInt8POD;
+        key.readPOD = Alembic::Util::kInt8POD;
+    }
 
     // We need to write the sample
     if ( m_header->nextSampleIndex == 0  ||
