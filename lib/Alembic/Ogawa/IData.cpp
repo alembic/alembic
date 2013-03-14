@@ -76,8 +76,12 @@ IData::IData(IStreamsPtr iStreams,
 
     Alembic::Util::uint64_t size = 0;
 
-    mData->streams->read(iThreadId, mData->pos, 8, &size);
-    mData->size = (std::size_t)(size);
+    // not the empty group?  then figure out our size
+    if ( mData->pos != 0 )
+    {
+        mData->streams->read(iThreadId, mData->pos, 8, &size);
+        mData->size = (std::size_t)(size);
+    }
 }
 
 void IData::read(std::size_t iSize, void * iData, std::size_t iOffset,
