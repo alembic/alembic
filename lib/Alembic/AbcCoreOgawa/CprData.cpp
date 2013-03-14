@@ -45,7 +45,7 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-CprData::CprData( Ogawa::IGroupPtr iGroup, AbcA::ArchiveReaderPtr iArchive,
+CprData::CprData( Ogawa::IGroupPtr iGroup, AbcA::ArchiveReader & iArchive,
                   size_t iThreadId )
 {
     ABCA_ASSERT( iGroup, "invalid compound data group" );

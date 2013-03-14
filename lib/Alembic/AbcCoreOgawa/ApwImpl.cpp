@@ -62,6 +62,24 @@ ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
 //-*****************************************************************************
 ApwImpl::~ApwImpl()
 {
+    AbcA::ArchiveWriterPtr archive = m_parent->getObject()->getArchive();
+
+    index_t maxSamples = archive->getMaxNumSamplesForTimeSamplingIndex(
+            m_header->timeSamplingIndex );
+
+        uint32_t numSamples = m_header->nextSampleIndex;
+
+        // a constant property, we wrote the same sample over and over
+        if ( m_header->lastChangedIndex == 0 && m_header->nextSampleIndex > 0 )
+        {
+            numSamples = 1;
+        }
+
+        if ( maxSamples < numSamples )
+        {
+            archive->setMaxNumSamplesForTimeSamplingIndex(
+                m_header->timeSamplingIndex, numSamples );
+        }
 }
 
 //-*****************************************************************************

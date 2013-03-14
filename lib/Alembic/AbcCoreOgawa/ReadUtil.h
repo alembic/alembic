@@ -93,7 +93,7 @@ void
 ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                      size_t iIndex,
                      size_t iThreadId,
-                     AbcA::ArchiveReaderPtr & iArchive,
+                     AbcA::ArchiveReader & iArchive,
                      PropertyHeaderPtrs & oHeaders );
 
 } // End namespace ALEMBIC_VERSION_NS

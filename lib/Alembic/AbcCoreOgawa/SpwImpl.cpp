@@ -51,10 +51,10 @@ SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
     ABCA_ASSERT( m_header, "Invalid property header" );
     ABCA_ASSERT( m_group, "Invalid group" );
 
-    if ( m_header->header.getPropertyType() != AbcA::kArrayProperty )
+    if ( m_header->header.getPropertyType() != AbcA::kScalarProperty )
     {
-        ABCA_THROW( "Attempted to create a ArrayPropertyWriter from a "
-                    "non-array property type" );
+        ABCA_THROW( "Attempted to create a ScalarPropertyWriter from a "
+                    "non-scalar property type" );
     }
 }
 
@@ -62,6 +62,24 @@ SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
 //-*****************************************************************************
 SpwImpl::~SpwImpl()
 {
+    AbcA::ArchiveWriterPtr archive = m_parent->getObject()->getArchive();
+
+    index_t maxSamples = archive->getMaxNumSamplesForTimeSamplingIndex(
+            m_header->timeSamplingIndex );
+
+        uint32_t numSamples = m_header->nextSampleIndex;
+
+        // a constant property, we wrote the same sample over and over
+        if ( m_header->lastChangedIndex == 0 && numSamples > 0 )
+        {
+            numSamples = 1;
+        }
+
+        if ( maxSamples < numSamples )
+        {
+            archive->setMaxNumSamplesForTimeSamplingIndex(
+                m_header->timeSamplingIndex, numSamples );
+        }
 }
 
 //-*****************************************************************************
@@ -134,8 +152,7 @@ void SpwImpl::setSample( const void *iSamp )
         // Write the sample.
         // This distinguishes between string, wstring, and regular arrays.
         m_previousWrittenSampleID =
-            WriteData( GetWrittenSampleMap( awp ), m_group, samp,
-                       samp.getKey() );
+            WriteData( GetWrittenSampleMap( awp ), m_group, samp, key );
 
         // this index is now the last change
         m_header->lastChangedIndex = m_header->nextSampleIndex;

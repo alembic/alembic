@@ -278,7 +278,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
     Ogawa::IDataPtr data = iGroup->getData( iIndex );
     ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
 
-    if ( data->getSize() )
+    if ( data->getSize() == 0 )
     {
         return;
     }
@@ -313,7 +313,7 @@ void
 ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                      size_t iIndex,
                      size_t iThreadId,
-                     AbcA::ArchiveReaderPtr & iArchive,
+                     AbcA::ArchiveReader & iArchive,
                      PropertyHeaderPtrs & oHeaders )
 {
     // 0000 0000 0000 0000 0000 0000 0000 0011
@@ -337,7 +337,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     Ogawa::IDataPtr data = iGroup->getData( iIndex );
     ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
 
-    if ( data->getSize() )
+    if ( data->getSize() == 0 )
     {
         return;
     }
@@ -416,7 +416,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             {
                 header->timeSamplingIndex =  *( (uint32_t *)( &buf[pos] ) );
                 header->header.setTimeSampling(
-                    iArchive->getTimeSampling( header->timeSamplingIndex ) );
+                    iArchive.getTimeSampling( header->timeSamplingIndex ) );
                 pos += 4;
             }
         }

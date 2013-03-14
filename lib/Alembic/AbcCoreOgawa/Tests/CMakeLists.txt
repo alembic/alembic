@@ -69,7 +69,6 @@ ADD_EXECUTABLE( AbcCoreOgawa_ConstantPropsTest ConstantPropsNumSampsTest.cpp )
 TARGET_LINK_LIBRARIES( AbcCoreOgawa_ConstantPropsTest ${TEST_LIBS} )
 
 
-ADD_TEST( AbcCoreOgawa_TEST1 AbcCoreOgawa_Test1 )
 ADD_TEST( AbcCoreOgawa_ArchiveTESTS AbcCoreOgawa_ArchiveTests )
 ADD_TEST( AbcCoreOgawa_ArrayPropertyTESTS AbcCoreOgawa_ArrayPropertyTests )
 ADD_TEST( AbcCoreOgawa_ScalarPropertyTESTS AbcCoreOgawa_ScalarPropertyTests )

@@ -347,7 +347,6 @@ void WriteTimeSampling( std::vector< uint8_t > & ioData,
                     uint32_t  iMaxSample,
                     const AbcA::TimeSampling &iTsmp )
 {
-
     pushUint32( ioData, iMaxSample );
 
     AbcA::TimeSamplingType tst = iTsmp.getTimeSamplingType();

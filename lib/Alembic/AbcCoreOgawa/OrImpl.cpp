@@ -65,7 +65,7 @@ OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
 
     // TODO get thread id from archive
     m_data.reset( new OrData( iGroup, iParent->getName(), 0,
-        m_archive ) );
+        *m_archive ) );
 }
 
 //-*****************************************************************************

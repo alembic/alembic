@@ -68,7 +68,7 @@ CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
     ABCA_ASSERT( optr, "Invalid object in CprImpl::CprImpl(Compound)" );
     m_object = optr;
 
-    m_data.reset( new CprData( iGroup, m_parent->getObject()->getArchive(),
+    m_data.reset( new CprData( iGroup, *m_parent->getObject()->getArchive(),
                                0 ) );
 }
 

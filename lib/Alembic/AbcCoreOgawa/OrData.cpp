@@ -48,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 OrData::OrData( Ogawa::IGroupPtr iGroup,
                 const std::string & iParentName,
                 std::size_t iThreadId,
-                AbcA::ArchiveReaderPtr iArchive )
+                AbcA::ArchiveReader & iArchive )
 {
     ABCA_ASSERT( iGroup, "Invalid object data group" );
 

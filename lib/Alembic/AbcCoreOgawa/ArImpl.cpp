@@ -107,11 +107,20 @@ void ArImpl::init()
 
     m_archiveVersion = fileVersion;
 
+    if ( numChildren > 0 && group->isChildData( numChildren - 1 ) )
+    {
+        ReadTimeSamplesAndMax( group->getData( numChildren - 1 ),
+                               m_timeSamples, m_maxSamples );
+    }
+
     if ( numChildren > 2 && group->isChildGroup( numChildren - 3 ) )
     {
         m_data.reset( new OrData( group->getGroup( numChildren - 3 ), "", 0,
-                                  shared_from_this() ) );
+                                  *this ) );
     }
+
+    m_header->setName( "ABC" );
+    m_header->setFullName( "/" );
 
     // read archive metadata
     if ( numChildren > 1 && group->isChildData( numChildren - 2 ) )
@@ -120,17 +129,11 @@ void ArImpl::init()
         if ( data->getSize() > 0 )
         {
             char * buf = new char[ data->getSize() ];
-            data->read( 0, buf );
+            data->read( data->getSize(), buf, 0 );
             std::string metaData = buf;
             m_header->getMetaData().deserialize( buf );
             delete [] buf;
         }
-    }
-
-    if ( numChildren > 0 && group->isChildData( numChildren - 1 ) )
-    {
-        ReadTimeSamplesAndMax( group->getData( numChildren - 1 ),
-                               m_timeSamples, m_maxSamples );
     }
 
 }

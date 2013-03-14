@@ -73,10 +73,6 @@ void testReadWriteEmptyArchive()
 
         TESTING_ASSERT(archive->getFullName() == "/");
 
-        // can't write an already open archive
-        TESTING_ASSERT_THROW(w(archiveName, ABCA::MetaData()),
-            Alembic::Util::Exception);
-
         Alembic::AbcCoreOgawa::ReadArchive r;
 
         // can't read an already open archive (for now)
