@@ -43,14 +43,15 @@ OPTION( USE_LIB64 "Search for deps in lib64 vs lib" ON )
 
 # find python lib dir and include files
 IF ( ${CMAKE_HOST_UNIX} )
-    SET( LIBPYTHON_FILE "lib${LIBPYTHON}.so" )
     IF( ${DARWIN} )
+      SET( LIBPYTHON_FILE "lib${LIBPYTHON}.dylib" )
         SET( OSX_PYTHON_ROOT 
              "/System/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}" )
         SET( PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}" )
 
-        SET( ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/Python" )
+        SET( ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/lib" )
     ELSE()
+      SET( LIBPYTHON_FILE "lib${LIBPYTHON}.so" )
         SET( PYTHON_INCLUDE_DIR "/usr/include/${LIBPYTHON}" )
         IF (USE_LIB64)
             SET( ALEMBIC_PYTHON_ROOT "/usr/lib64/${LIBPYTHON}/config" )
