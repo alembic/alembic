@@ -68,6 +68,10 @@ CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
     ABCA_ASSERT( m_parent, "Invalid parent" );
     ABCA_ASSERT( m_header, "Invalid header" );
 
+    m_object = iParent->getObject();
+
+    ABCA_ASSERT( m_parent, "Invalid parent object" );
+
     ABCA_ASSERT( m_header->header.getName() != "" &&
                  m_header->header.getName().find('/') == std::string::npos,
                  "Invalid name" );
