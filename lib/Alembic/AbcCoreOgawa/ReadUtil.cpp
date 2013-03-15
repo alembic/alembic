@@ -347,7 +347,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     static const uint32_t hasTsidxMask = 0x0040;
 
     // 0000 0000 0000 0000 0000 0000 1000 0000
-    static const uint32_t noRepeatsMask = 0x0080;
+    static const uint32_t needsFirstLastMask = 0x0080;
 
     // 0000 0000 0000 0000 1111 1111 0000 0000
     static const uint32_t extentMask = 0xff00;
@@ -388,7 +388,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         }
 
         // if we aren't a compound we may need to do a bunch of other work
-        if ( ptype > 0 )
+        if ( !header->header.isCompound() )
         {
             // Read the pod type out of bits 2-5
             char podt = ( char )( ( info & podMask ) >> 2 );
@@ -419,7 +419,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             header->nextSampleIndex =  *( (uint32_t *)( &buf[pos] ) );
             pos += 4;
 
-            if ( ( info & noRepeatsMask ) == 0 )
+            if ( ( info & needsFirstLastMask ) != 0 )
             {
                 header->firstChangedIndex =  *( (uint32_t *)( &buf[pos] ) );
                 pos += 4;
@@ -442,8 +442,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             }
             else
             {
-                header->header.setTimeSampling(
-                    iArchive.getTimeSampling( 0 ) );
+                header->header.setTimeSampling( iArchive.getTimeSampling( 0 ) );
             }
         }
 

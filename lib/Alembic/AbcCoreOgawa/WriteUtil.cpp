@@ -235,7 +235,7 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
     static const uint32_t hasTsidxMask = 0x0040;
 
     // 0000 0000 0000 0000 0000 0000 1000 0000
-    static const uint32_t noRepeatsMask = 0x0080;
+    static const uint32_t needsFirstLastMask = 0x0080;
 
     // 0000 0000 0000 0000 1111 1111 0000 0000
     static const uint32_t extentMask = 0xff00;
@@ -246,7 +246,7 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
     // could put a geo scope or an interpretation mask here
 
     // compounds are treated differently
-    if ( iHeader.getPropertyType() != AbcA::kCompoundProperty )
+    if ( !iHeader.isCompound() )
     {
         // Slam the property type in there.
         info |= ptypeMask & ( uint32_t )iHeader.getPropertyType();
@@ -262,9 +262,12 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
             info |= hasTsidxMask;
         }
 
-        if (iFirstChangedIndex == 1 && iLastChangedIndex == iNumSamples - 1)
+        bool needsFirstLast = false;
+
+        if (iFirstChangedIndex != 1 || iLastChangedIndex != iNumSamples - 1)
         {
-            info |= noRepeatsMask;
+            info |= needsFirstLastMask;
+            needsFirstLast = true;
         }
 
         uint32_t extent = ( uint32_t )iHeader.getDataType().getExtent();
@@ -288,7 +291,7 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
 
         // don't bother writing out first and last change if every sample
         // was different
-        if (iFirstChangedIndex != 1 || iLastChangedIndex != iNumSamples - 1)
+        if ( needsFirstLast )
         {
             pushUint32( ioData, iFirstChangedIndex );
             pushUint32( ioData, iLastChangedIndex );
@@ -300,6 +303,11 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
             pushUint32( ioData, iTimeSamplingIndex );
         }
 
+    }
+    // compound, shove in a 0
+    else
+    {
+        pushUint32( ioData, info );
     }
 
     uint32_t nameSize = iHeader.getName().size();
