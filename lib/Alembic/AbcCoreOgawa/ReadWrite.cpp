@@ -61,25 +61,58 @@ WriteArchive::operator()( const std::string &iFileName,
 //-*****************************************************************************
 ReadArchive::ReadArchive()
 {
+    m_numStreams = 1;
 }
 
 //-*****************************************************************************
-// This version opens a file based on a file name.
-AbcA::ArchiveReaderPtr
-ReadArchive::operator()
-( const std::string &iFileName, size_t iNumStreams ) const
+ReadArchive::ReadArchive( size_t iNumStreams )
 {
-    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iFileName, iNumStreams ) );
+    m_numStreams = iNumStreams;
+}
+
+//-*****************************************************************************
+ReadArchive::ReadArchive( const std::vector< std::istream * > & iStreams )
+   : m_streams( iStreams )
+{
+}
+
+//-*****************************************************************************
+AbcA::ArchiveReaderPtr
+ReadArchive::operator()( const std::string &iFileName ) const
+{
+    AbcA::ArchiveReaderPtr archivePtr;
+
+    if ( m_streams.empty() )
+    {
+        archivePtr =
+            AbcA::ArchiveReaderPtr( new ArImpl( iFileName, m_numStreams ) );
+    }
+    else
+    {
+        archivePtr =
+            AbcA::ArchiveReaderPtr( new ArImpl( m_streams ) );
+    }
     return archivePtr;
 }
 
 //-*****************************************************************************
-// This version uses already open streams
+// The given cache is ignored.
 AbcA::ArchiveReaderPtr
-ReadArchive::operator()
-( const std::vector< std::istream * > & iStreams ) const
+ReadArchive::operator()( const std::string &iFileName,
+            AbcA::ReadArraySampleCachePtr iCache ) const
 {
-    AbcA::ArchiveReaderPtr archivePtr( new ArImpl( iStreams ) );
+    AbcA::ArchiveReaderPtr archivePtr;
+
+    if ( m_streams.empty() )
+    {
+        archivePtr =
+            AbcA::ArchiveReaderPtr( new ArImpl( iFileName, m_numStreams ) );
+    }
+    else
+    {
+        archivePtr =
+            AbcA::ArchiveReaderPtr( new ArImpl( m_streams ) );
+    }
     return archivePtr;
 }
 

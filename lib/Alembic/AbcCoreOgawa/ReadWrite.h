@@ -65,15 +65,26 @@ public:
     ReadArchive();
 
     // Open the file iNumStreams times and manage them internally
-    ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
-    operator()( const std::string &iFileName, size_t iNumStreams=1 ) const;
+    ReadArchive( size_t iNumStreams );
 
     // Read from the provided streams, we do not own these, expect them
     // to remain open and all have the same data in them, and do not try to
     // delete them
-    ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
-    operator()( const std::vector< std::istream * > & iStreams ) const;
+    ReadArchive( const std::vector< std::istream * > & iStreams );
 
+    // open the file
+    ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
+    operator()( const std::string &iFileName ) const;
+
+    // The given cache is ignored.
+    ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
+    operator()( const std::string &iFileName,
+                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache
+              ) const;
+
+private:
+    size_t m_numStreams;
+    std::vector< std::istream * > m_streams;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
