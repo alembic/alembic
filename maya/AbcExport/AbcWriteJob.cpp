@@ -36,6 +36,7 @@
 
 #include "AbcWriteJob.h"
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 namespace
 {
     void hasDuplicates(const util::ShapeSet & dagPath, unsigned int stripDepth)
@@ -776,7 +777,7 @@ bool AbcWriteJob::eval(double iFrame)
             userInfo = "";
         }
 
-        mRoot = CreateArchiveWithInfo(Alembic::AbcCoreHDF5::WriteArchive(),
+        mRoot = CreateArchiveWithInfo(Alembic::AbcCoreOgawa::WriteArchive(),
             mFileName, appWriter, userInfo,
             Alembic::Abc::ErrorHandler::kThrowPolicy);
         mShapeTimeIndex = mRoot.addTimeSampling(*mShapeTime);

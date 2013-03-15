@@ -68,6 +68,7 @@
 #include <maya/MFnEnumAttribute.h>
 
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
+#include <Alembic/AbcCoreOgawa/ReadWrite.h>
 #include <Alembic/AbcGeom/Visibility.h>
 
 MObject AlembicNode::mTimeAttr;
@@ -458,7 +459,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         MString fileName = fileObject.resolvedFullName();
 
         // no caching!
-        Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(true),
+        Alembic::Abc::IArchive archive(Alembic::AbcCoreOgawa::ReadArchive(),
             fileName.asUTF8(), Alembic::Abc::ErrorHandler::Policy(),
             Alembic::AbcCoreAbstract::ReadArraySampleCachePtr());
 

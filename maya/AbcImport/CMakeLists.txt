@@ -75,7 +75,9 @@ SET( CORE_LIBS
   AlembicAbcGeom
   AlembicAbc
   AlembicAbcCoreHDF5
+  AlembicAbcCoreOgawa
   AlembicAbcCoreAbstract
+  AlembicOgawa
   AlembicUtil )
 
 INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )

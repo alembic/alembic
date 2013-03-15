@@ -40,6 +40,7 @@
 #include "NodeIteratorVisitorHelper.h"
 
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
+#include <Alembic/AbcCoreOgawa/ReadWrite.h>
 
 #include <maya/MDoubleArray.h>
 #include <maya/MIntArray.h>
@@ -2828,7 +2829,7 @@ MString createScene(ArgData & iArgData)
     MString returnName("");
 
     // no caching!
-    Alembic::Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(true),
+    Alembic::Abc::IArchive archive(Alembic::AbcCoreOgawa::ReadArchive(),
         iArgData.mFileName.asUTF8(), Alembic::Abc::ErrorHandler::Policy(),
         Alembic::AbcCoreAbstract::ReadArraySampleCachePtr());
     if (!archive.valid())
