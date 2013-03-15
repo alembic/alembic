@@ -440,6 +440,11 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                     iArchive.getTimeSampling( header->timeSamplingIndex ) );
                 pos += 4;
             }
+            else
+            {
+                header->header.setTimeSampling(
+                    iArchive.getTimeSampling( 0 ) );
+            }
         }
 
         uint32_t nameSize = *( (uint32_t *)( &buf[pos] ) );
