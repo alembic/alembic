@@ -79,9 +79,9 @@ MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
 
             mUseRenderShutter = true;
             plug = dep.findPlug("motionBlurShutterOpen");
-            mShutterOpen = plug.asDouble() * val;
+            mShutterOpen = plug.asDouble() / val;
             plug = dep.findPlug("motionBlurShutterClose");
-            mShutterClose = plug.asDouble() * val;
+            mShutterClose = plug.asDouble() / val;
         }
     }
 
@@ -130,9 +130,9 @@ void MayaCameraWriter::write()
     {
         MTime sec(1.0, MTime::kSeconds);
         mSamp.setShutterOpen(0.0);
-        mSamp.setShutterClose(sec.as(MTime::uiUnit()) *
+        mSamp.setShutterClose(
             Alembic::AbcGeom::RadiansToDegrees(mfnCamera.shutterAngle()) /
-            360.0 );
+            ( 360.0 * sec.as(MTime::uiUnit()) ));
     }
 
     // build up the film fit and post projection matrix

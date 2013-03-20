@@ -118,7 +118,7 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             ceilSamp.getShutterOpen());
         MTime sec(1.0, MTime::kSeconds);
         oArray[11] =
-            360.0 * (shutterClose - shutterOpen) / sec.as(MTime::uiUnit());
+            360.0 * (shutterClose - shutterOpen) * sec.as(MTime::uiUnit());
 
         std::size_t numOps = samp.getNumOps();
         for (std::size_t i = 0; i < numOps; ++i)
@@ -203,7 +203,7 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
         oArray[10] = samp.getFocusDistance();
 
         MTime sec(1.0, MTime::kSeconds);
-        oArray[11] = 360.0 * (samp.getShutterClose()-samp.getShutterOpen()) /
+        oArray[11] = 360.0 * (samp.getShutterClose()-samp.getShutterOpen()) *
             sec.as(MTime::uiUnit());
 
         // prescale, film translate H, V, roll pivot H,V, film roll value
@@ -322,7 +322,7 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
 
         MTime sec(1.0, MTime::kSeconds);
         fnCamera.setShutterAngle(Alembic::AbcGeom::DegreesToRadians(
-            360.0 * (samp.getShutterClose()-samp.getShutterOpen()) /
+            360.0 * (samp.getShutterClose()-samp.getShutterOpen()) *
             sec.as(MTime::uiUnit()) ));
 
         for (std::size_t i = 0; i < numOps; ++i)
