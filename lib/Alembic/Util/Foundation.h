@@ -39,7 +39,7 @@
 // tr1/memory is not avaliable in Visual Studio.
 #if !defined(_MSC_VER)
 
-#ifdef PLATFORM_DARWIN
+#if defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
 #include <unordered_map>
 #else
 #include <tr1/memory>
@@ -109,20 +109,20 @@ using boost::shared_ptr;
 using boost::static_pointer_cast;
 using boost::weak_ptr;
 using boost::unordered_map;
-#elif !defined( PLATFORM_DARWIN )
-using std::tr1::dynamic_pointer_cast;
-using std::tr1::enable_shared_from_this;
-using std::tr1::shared_ptr;
-using std::tr1::static_pointer_cast;
-using std::tr1::weak_ptr;
-using std::tr1::unordered_map;
-#else
+#elif defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
 using std::dynamic_pointer_cast;
 using std::enable_shared_from_this;
 using std::shared_ptr;
 using std::static_pointer_cast;
 using std::weak_ptr;
 using std::unordered_map;
+#else
+using std::tr1::dynamic_pointer_cast;
+using std::tr1::enable_shared_from_this;
+using std::tr1::shared_ptr;
+using std::tr1::static_pointer_cast;
+using std::tr1::weak_ptr;
+using std::tr1::unordered_map;
 #endif
 
 using std::auto_ptr;
