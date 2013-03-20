@@ -1,4 +1,4 @@
-2012-03-13, Alembic 1.1.4
+2012-03-20, Alembic 1.1.4
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful and important bug fixes.
 
@@ -14,6 +14,11 @@ AbcImport:
 
 Directly set the string plug, as the default value is not saved to the Maya
 file and thus is not restored.
+
+AbcExport/AbcImport:
+
+Fix bug where the conversion from shutter open, shutter close to shutter angle
+was being improperly scaled.
 
 2012-02-11, Alembic 1.1.3
 Hello Alembic users, thanks to your feedback we have another collection of
