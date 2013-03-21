@@ -39,6 +39,12 @@ process of searching for depedencies go smoothly.
 Look in your Alembic source root's "doc" directory for
 instructions on building Boost and HDF5; see next step for details.
 
+Note: for building the Alembic Python bindings (aka PyAlembic), only Boost versions
+1.44 through 1.48 are known to work. For more information see this OpenEXR
+support ticket on github:
+
+https://github.com/openexr/openexr/issues/41
+
 1) Untar the Alembic source into your desired directory:
 
 $ cd ~/ ; tar xzf ALEMBIC_SOURCE_-xxxxxxxx.tgz

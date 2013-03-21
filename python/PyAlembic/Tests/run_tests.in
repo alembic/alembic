@@ -36,7 +36,7 @@
 ##-*****************************************************************************
 
 # setup some required lib paths
-setenv LD_LIBRARY_PATH "@BOOST_LIBRARY_DIR@"
+setenv LD_LIBRARY_PATH "@Boost_LIBRARY_DIRS@"
 setenv PYTHONPATH "@ALEMBIC_PYILMBASE_PYIMATH_MODULE_DIRECTORY@"
 setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_BINARY_DIR@/python/PyAlembic"
 setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_SOURCE_DIR@/python/PyAlembic/Tests"
