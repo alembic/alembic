@@ -19,6 +19,7 @@ individuals for their contributions to Alembic:
 ©2011 Luma Pictures
 ©2012 Solid Angle S.L.
 ©2012 Zhicheng YE
+©2013 Digital Domain 3.0, Inc.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -52,4 +53,4 @@ Thank You
 
 
 
-Last Changed - 2013-02-08
+Last Changed - 2013-03-25

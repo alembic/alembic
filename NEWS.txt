@@ -1,8 +1,6 @@
-2012-03-20, Alembic 1.1.4
+2012-03-25, Alembic 1.1.4
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful and important bug fixes.
-
-Fix compile issues with clang++ in c++0x mode.
 
 Fix several multi-platform issues to making compiling in Windows and OSX easier.
 
