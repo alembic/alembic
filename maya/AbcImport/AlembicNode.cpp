@@ -67,6 +67,7 @@
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MFnEnumAttribute.h>
 
+#include <Alembic/AbcCoreFactory/IFactory.h>
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
 #include <Alembic/AbcCoreOgawa/ReadWrite.h>
 #include <Alembic/AbcGeom/Visibility.h>
@@ -136,7 +137,7 @@ MStatus AlembicNode::initialize()
     status = tAttr.setUsedAsFilename(true);
     status = addAttribute(mAbcFileNameAttr);
 
-    // playback speed 
+    // playback speed
     mSpeedAttr = nAttr.create("speed", "sp",
         MFnNumericData::kDouble, 1.0, &status);
     status = nAttr.setWritable(true);
@@ -371,7 +372,7 @@ double AlembicNode::computeRetime(const double inputTime,
     const double playTime = lastTime - firstTime;
     static const double eps = 0.001;
     double retime = inputTime;
-    
+
     switch (playStyle)
     {
       case PLAYTYPE_HOLD:
@@ -458,10 +459,11 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         fileObject.setRawFullName(dataHandle.asString());
         MString fileName = fileObject.resolvedFullName();
 
-        // no caching!
-        Alembic::Abc::IArchive archive(Alembic::AbcCoreOgawa::ReadArchive(),
-            fileName.asUTF8(), Alembic::Abc::ErrorHandler::Policy(),
-            Alembic::AbcCoreAbstract::ReadArraySampleCachePtr());
+        Alembic::Abc::IArchive archive;
+        Alembic::AbcCoreFactory::IFactory factory;
+        factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
+        Alembic::AbcCoreFactory::IFactory::CoreType coreType;
+        archive = factory.getArchive(fileName.asUTF8(), coreType);
 
         if (!archive.valid())
         {
@@ -474,14 +476,14 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         mPolyInitialized = false;
 
         // When an alembic cache will be imported at the first time using
-        // AbcImport, we need to set mIncludeFilterAttr (filterHandle) to be 
-        // mIncludeFilterString for later use. When we save a maya scene(.ma) 
-        // mIncludeFilterAttr will be saved. Then when we load the saved 
+        // AbcImport, we need to set mIncludeFilterAttr (filterHandle) to be
+        // mIncludeFilterString for later use. When we save a maya scene(.ma)
+        // mIncludeFilterAttr will be saved. Then when we load the saved
         // .ma file, mIncludeFilterString will be set to be mIncludeFilterAttr.
         MDataHandle includeFilterHandle =
                         dataBlock.inputValue(mIncludeFilterAttr, &status);
         MString& includeFilterString = includeFilterHandle.asString();
-        
+
        if (mIncludeFilterString.length() > 0)
         {
             includeFilterHandle.set(mIncludeFilterString);
@@ -495,7 +497,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         MDataHandle excludeFilterHandle =
                         dataBlock.inputValue(mExcludeFilterAttr, &status);
         MString& excludeFilterString = excludeFilterHandle.asString();
-        
+
        if (mExcludeFilterString.length() > 0)
         {
             excludeFilterHandle.set(mExcludeFilterString);

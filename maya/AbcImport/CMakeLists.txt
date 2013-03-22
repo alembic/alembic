@@ -73,6 +73,7 @@ SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 SET( CORE_LIBS
   AlembicAbcGeom
+  AlembicAbcCoreFactory
   AlembicAbc
   AlembicAbcCoreHDF5
   AlembicAbcCoreOgawa

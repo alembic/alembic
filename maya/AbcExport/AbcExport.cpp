@@ -263,6 +263,7 @@ try
         std::set <double> shutterSamples;
         bool sampleGeo  = true; // whether or not to subsample geometry
         std::string fileName;
+        bool asOgawa = false;
 
         unsigned int numJobArgs = jobArgsArray.length();
         for (unsigned int i = 0; i < numJobArgs; ++i)
@@ -511,6 +512,10 @@ try
             else if (arg == "-ef" || arg == "-eulerfilter")
             {
                 jobArgs.filterEulerRotations = true;
+            }
+            else if (arg == "-ao" || arg == "-asogawa")
+            {
+                asOgawa = true;
             }
             else
             {
@@ -764,7 +769,7 @@ try
                 geoStride * util::spf()), samples));
         }
 
-        AbcWriteJobPtr job(new AbcWriteJob(fileName.c_str(),
+        AbcWriteJobPtr job(new AbcWriteJob(fileName.c_str(), asOgawa,
             transSamples, transTime, geoSamples, geoTime, jobArgs));
 
        jobList.push_front(job);
