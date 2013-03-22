@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 
 using namespace Alembic::Abc;
@@ -193,6 +194,25 @@ int main( int argc, char *argv[] )
         testITypedScalarProperty( child );
         testITypedArrayProperty( child );
     }
-
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+                          archiveName, ErrorHandler::kNoisyNoopPolicy );
+        OObject archiveTop = archive.getTop();
+        testOSchemaObject( archiveTop );
+        OObject child( archiveTop, "otherChild" );
+        testOSchema( child );
+        testOTypedScalarProperty( child );
+        testOTypedArrayProperty( child );
+    }
+    {
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), archiveName,
+            ErrorHandler::kNoisyNoopPolicy );
+        IObject archiveTop = archive.getTop();
+        testISchemaObject( archiveTop );
+        IObject child( archiveTop, "otherChild" );
+        testISchema( child );
+        testITypedScalarProperty( child );
+        testITypedArrayProperty( child );
+    }
     return 0;
 }

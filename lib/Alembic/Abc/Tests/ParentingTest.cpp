@@ -35,7 +35,9 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
+#include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #include <ImathMath.h>
@@ -44,6 +46,8 @@
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
+
+namespace AbcF = Alembic::AbcCoreFactory;
 
 using Alembic::AbcCoreAbstract::chrono_t;
 using Alembic::AbcCoreAbstract::index_t;
@@ -60,10 +64,20 @@ static const chrono_t CHRONO_EPSILON = \
     std::numeric_limits<chrono_t>::epsilon() * 32.0;
 
 //-*****************************************************************************
-void simpleTestOut( const std::string &iArchiveName )
+void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                      iArchiveName );
+
+    OArchive archive;
+    if (useOgawa)
+    {
+        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
+            iArchiveName, ErrorHandler::kThrowPolicy );
+    }
+    else
+    {
+        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+            iArchiveName, ErrorHandler::kThrowPolicy );
+    }
 
     // all child Objects in an Archive are actually children of the single
     // top Object in an Archive
@@ -137,8 +151,10 @@ void simpleTestOut( const std::string &iArchiveName )
 //-*****************************************************************************
 void simpleTestIn( const std::string &iArchiveName )
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      iArchiveName, ErrorHandler::kThrowPolicy );
+    AbcF::IFactory factory;
+    factory.setPolicy(  ErrorHandler::kThrowPolicy );
+    AbcF::IFactory::CoreType coreType;
+    IArchive archive = factory.getArchive(iArchiveName, coreType);
 
     // an archive has a single top object which contains all its children
     IObject topObject = archive.getTop();
@@ -217,15 +233,26 @@ void simpleTestIn( const std::string &iArchiveName )
     // if the program exits, it means parenting works
 }
 
-void scopingTest()
+void scopingTest(bool useOgawa)
 {
     {
         ODoubleProperty propScalar;
         ODoubleArrayProperty propArray;
         {
-            OArchive archive = CreateArchiveWithInfo(
-                Alembic::AbcCoreHDF5::WriteArchive(), "propScopeTest.abc",
-                "Alembic test", "", MetaData() );
+
+            OArchive archive;
+            if (useOgawa)
+            {
+                archive = CreateArchiveWithInfo(
+                    Alembic::AbcCoreOgawa::WriteArchive(), "propScopeTest.abc",
+                    "Alembic test", "", MetaData() );
+            }
+            else
+            {
+                archive = CreateArchiveWithInfo(
+                    Alembic::AbcCoreHDF5::WriteArchive(), "propScopeTest.abc",
+                    "Alembic test", "", MetaData() );
+            }
             OObject childA( archive.getTop(), "a" );
 
             propScalar = ODoubleProperty(childA.getProperties(), "scalar", 0);
@@ -239,10 +266,10 @@ void scopingTest()
         propScalar.set( 4.0 );
         propScalar.set( 5.0 );
         TESTING_ASSERT(
-            propArray.getParent().getObject().getArchive().getName() == 
+            propArray.getParent().getObject().getArchive().getName() ==
             "propScopeTest.abc");
         TESTING_ASSERT(
-            propScalar.getParent().getObject().getArchive().getName() == 
+            propScalar.getParent().getObject().getArchive().getName() ==
             "propScopeTest.abc");
     }
 
@@ -250,17 +277,19 @@ void scopingTest()
         IDoubleProperty propScalar;
         IDoubleArrayProperty propArray;
         {
-            IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                "propScopeTest.abc" );
+            AbcF::IFactory factory;
+            AbcF::IFactory::CoreType coreType;
+            IArchive archive = factory.getArchive("propScopeTest.abc",
+                                                  coreType);
             IObject top(archive.getTop(), "a");
             propScalar = IDoubleProperty(top.getProperties(), "scalar");
             propArray = IDoubleArrayProperty(top.getProperties(), "array");
         }
         TESTING_ASSERT(
-            propArray.getParent().getObject().getArchive().getName() == 
+            propArray.getParent().getObject().getArchive().getName() ==
             "propScopeTest.abc");
         TESTING_ASSERT(
-            propScalar.getParent().getObject().getArchive().getName() == 
+            propScalar.getParent().getObject().getArchive().getName() ==
             "propScopeTest.abc");
 
         DoubleArraySamplePtr samp;
@@ -284,9 +313,13 @@ int main( int argc, char *argv[] )
 {
     const std::string arkive( "parentstest.abc" );
 
-    simpleTestOut( arkive );
+    bool useOgawa = true;
+    simpleTestOut( arkive, useOgawa );
     simpleTestIn( arkive );
-
-    scopingTest();
+    scopingTest(useOgawa);
+    useOgawa = false;
+    simpleTestOut( arkive, useOgawa );
+    simpleTestIn( arkive );
+    scopingTest(useOgawa);
     return 0;
 }

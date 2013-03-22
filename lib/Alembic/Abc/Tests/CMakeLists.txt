@@ -35,9 +35,12 @@
 
 
 SET( TEST_LIBS
+     AlembicAbcCoreFactory
      AlembicAbc
      AlembicAbcCoreHDF5
+     AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
+     AlembicOgawa
      AlembicUtil
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_ILMBASE_LIBS}

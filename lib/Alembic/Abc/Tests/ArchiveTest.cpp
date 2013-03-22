@@ -34,14 +34,17 @@
 //
 //-*****************************************************************************
 
+#include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace Abc = Alembic::Abc;
+namespace AbcF = Alembic::AbcCoreFactory;
 using namespace Abc;
 
-void archiveInfoTest()
+void archiveInfoTest(bool useOgawa)
 {
     std::string appWriter = "Alembic unit tests";
     std::string userStr = "abcdefg";
@@ -49,16 +52,30 @@ void archiveInfoTest()
         Alembic::AbcCoreAbstract::MetaData md;
         md.set("potato", "salad");
         md.set("taco", "bar");
-        OArchive archive = CreateArchiveWithInfo(
-            Alembic::AbcCoreHDF5::WriteArchive(), "archiveInfo.abc",
-            appWriter, userStr, md );
+        OArchive archive;
+        if (useOgawa)
+        {
+            archive = CreateArchiveWithInfo(
+                Alembic::AbcCoreOgawa::WriteArchive(), "archiveInfo.abc",
+                appWriter, userStr, md );
+        }
+        else
+        {
+            archive = CreateArchiveWithInfo(
+                Alembic::AbcCoreHDF5::WriteArchive(), "archiveInfo.abc",
+                appWriter, userStr, md );
+        }
 
         TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
     }
 
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-            "archiveInfo.abc" );
+        AbcF::IFactory factory;
+        AbcF::IFactory::CoreType coreType;
+        IArchive archive = factory.getArchive("archiveInfo.abc", coreType);
+        TESTING_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
+                        (!useOgawa && coreType == AbcF::IFactory::kHDF5) );
+
         TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
         TESTING_ASSERT( archive.getPtr()->getMetaData().get("potato") ==
             "salad" );
@@ -86,14 +103,26 @@ void archiveInfoTest()
     }
 }
 
-void scopingTest()
+void scopingTest(bool useOgawa)
 {
     {
         OObject top;
         {
-            OArchive archive = CreateArchiveWithInfo(
-                Alembic::AbcCoreHDF5::WriteArchive(), "archiveScopeTest.abc",
-                "Alembic test", "", MetaData() );
+            OArchive archive;
+            if (useOgawa)
+            {
+                archive = CreateArchiveWithInfo(
+                    Alembic::AbcCoreOgawa::WriteArchive(),
+                    "archiveScopeTest.abc",
+                    "Alembic test", "", MetaData() );
+            }
+            else
+            {
+                archive = CreateArchiveWithInfo(
+                    Alembic::AbcCoreHDF5::WriteArchive(),
+                    "archiveScopeTest.abc",
+                    "Alembic test", "", MetaData() );
+            }
             top = archive.getTop();
         }
         OObject childA( top, "a");
@@ -106,8 +135,14 @@ void scopingTest()
     {
         IObject top;
         {
-            IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                "archiveScopeTest.abc" );
+            AbcF::IFactory factory;
+            AbcF::IFactory::CoreType coreType;
+            IArchive archive = factory.getArchive("archiveScopeTest.abc",
+                                                  coreType);
+
+           TESTING_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
+                           (!useOgawa && coreType == AbcF::IFactory::kHDF5) );
+
             top = archive.getTop();
 
             double start, end;
@@ -129,7 +164,9 @@ void scopingTest()
 
 int main( int argc, char *argv[] )
 {
-    archiveInfoTest();
-    scopingTest();
+    archiveInfoTest(false);
+    archiveInfoTest(true);
+    scopingTest(false);
+    scopingTest(true);
     return 0;
 }

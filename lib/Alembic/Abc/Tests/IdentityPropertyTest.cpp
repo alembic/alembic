@@ -34,11 +34,15 @@
 //
 //-*****************************************************************************
 
+#include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
+
+namespace AbcF = Alembic::AbcCoreFactory;
 
 //
 // The tests in this file are intended to exercize the Abc API;
@@ -46,14 +50,24 @@ using namespace Abc;
 //  properties
 //
 
-void writeProperty(const std::string &archiveName)
+void writeProperty(const std::string &archiveName, bool useOgawa)
 {
     const unsigned int numSamples = 5;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+    OArchive archive;
+    if (useOgawa)
+    {
+        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
+            archiveName, ErrorHandler::kThrowPolicy );
+    }
+    else
+    {
+        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+            archiveName, ErrorHandler::kThrowPolicy );
+    }
+
     OObject archiveTop = archive.getTop();
 
     // Create a child, parented under the archive
@@ -93,8 +107,10 @@ void readProperty(const std::string &archiveName)
     // Open an existing archive for reading. Indicate that we want
     //   Alembic to throw exceptions on errors.
     std::cout  << "Reading " << archiveName << std::endl;
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+    AbcF::IFactory factory;
+    factory.setPolicy(  ErrorHandler::kThrowPolicy );
+    AbcF::IFactory::CoreType coreType;
+    IArchive archive = factory.getArchive(archiveName, coreType);
     IObject archiveTop = archive.getTop();
 
     // Determine the number of (top level) children the archive has
@@ -107,21 +123,21 @@ void readProperty(const std::string &archiveName)
     // Iterate through them, print out their names
     IObject child( archiveTop, archiveTop.getChildHeader(0).getName() );
     std::cout << "  " << child.getName();
-    
+
     // Properties
     ICompoundProperty props = child.getProperties();
     size_t numProperties = props.getNumProperties(); // only top-level props
-    ABCA_ASSERT( numProperties == 1, 
+    ABCA_ASSERT( numProperties == 1,
                  "Expected 1 property, found " << numProperties);
     std::cout << " has a simple property";
-    
+
     std::vector<std::string> propNames(1);
     propNames[0] = props.getPropertyHeader(0).getName();
     std::cout << " named " << propNames[0] << std::endl;
 
 
     PropertyType pType = props.getPropertyHeader(0).getPropertyType();
-    ABCA_ASSERT( pType == kScalarProperty, 
+    ABCA_ASSERT( pType == kScalarProperty,
                  "Expected a scalar property, but didn't find one" );
 
     DataType dType = props.getPropertyHeader(0).getDataType();
@@ -135,7 +151,7 @@ void readProperty(const std::string &archiveName)
     size_t numSamples = mass.getNumSamples();
     std::cout << ".. it has " << numSamples << " samples" << std::endl;
     ABCA_ASSERT( numSamples == 5, "Expected 5 samples, found " << numSamples );
-    
+
     std::cout << "..with values: ";
     for (unsigned int ss=0; ss<numSamples; ss++)
     {
@@ -157,16 +173,29 @@ int main( int argc, char *argv[] )
 {
     // Write and read a simple archive: ten children, each with one
     //  simple property
+    bool useOgawa = true;
     try
     {
         std::string archiveName("identity_sampling_test.abc");
-        writeProperty ( archiveName );
+        useOgawa = true;
+        writeProperty ( archiveName, useOgawa );
+        readProperty  ( archiveName );
+        useOgawa = false;
+        writeProperty ( archiveName, useOgawa );
         readProperty  ( archiveName );
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
-        std::cout << " during uniform sampling test" << std::endl;
+        std::cout << " during uniform sampling test ";
+        if (useOgawa)
+        {
+            std::cout << "using Ogawa" << std::endl;
+        }
+        else
+        {
+            std::cout << "using HDF5" << std::endl;
+        }
         return 1;
     }
 

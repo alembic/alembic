@@ -37,11 +37,11 @@
 #ifndef _Alembic_AbcCoreFactory_IFactory_h_
 #define _Alembic_AbcCoreFactory_IFactory_h_
 
-#include <Alembic/AbcCoreFactory/Foundation.h>
+#include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
 #include <Alembic/Abc/IArchive.h>
 
 namespace Alembic {
-namespace Abc {
+namespace AbcCoreFactory {
 namespace ALEMBIC_VERSION_NS {
 
 class IFactory
@@ -50,38 +50,74 @@ public:
     IFactory();
     ~IFactory();
 
+    //! The type which yielded a valid IArchive (or kUnknown if invalid)
+    enum CoreType
+    {
+        kHDF5,
+        kOgawa,
+        kUnknown
+    };
+
+    //! Try to open a file and set oType to the one that yields a successful
+    //! oType, or kUnknown if the IArchive isn't valid
+    Alembic::Abc::IArchive getArchive( const std::string & iFileName,
+                                       CoreType & oType );
+
+    //! Use the streams (Alembic does not take ownership) to read the data from
+    //! This is currently only valid for Ogawa.  The streams must all reference
+    //! the same data.
+    Alembic::Abc::IArchive getArchive(
+        const std::vector< std::istream * > & iStreams, CoreType & oType );
+
     //! If opening an HDF5 file, sets whether to use the cached hierarchy
-    //! default value is false
+    //! if it exists, the default value is true
     void setHDF5CacheHierarchy( bool iCacheHierarchy )
     {
         m_cacheHierarchy = iCacheHierarchy;
     }
 
     //! Gets whether an HDF5 file will use the cached hierarchy
-    bool getHDF5CacheHierarchy() { return m_cacheHierarchy; }
+    bool getHDF5CacheHierarchy() const { return m_cacheHierarchy; }
 
+    //! Set the array sample cache, the HDF5 implementation optionally uses this
     void setSampleCache(
         Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCachePtr )
     {
         m_cachePtr = iCachePtr;
     }
 
-    Alembic::AbcCoreAbstract::ReadArraySampleCachePtr getSampleCache()
+    //! Get the array sample cache
+    Alembic::AbcCoreAbstract::ReadArraySampleCachePtr getSampleCache() const
     {
         return m_cachePtr;
     }
 
-    size_t getOgawaNumStreams() { return m_numStreams; }
+    //! Gets the number of streams that will be opened when opening an Ogawa
+    //! file
+    size_t getOgawaNumStreams() const { return m_numStreams; }
 
+    //! Sets the number of streams that will be opened when opening an Ogawa
+    //! file, the default is 1
     void setOgawaNumStreams( size_t iNumStreams )
     {
         m_numStreams = iNumStreams;
     }
 
+    //! Gets the error handler policy
+    Alembic::Abc::ErrorHandler::Policy getPolicy() { return m_policy; }
+
+    //! Sets the error handler policy, the default is kThrowPolicy
+    void setPolicy( Alembic::Abc::ErrorHandler::Policy iPolicy )
+    {
+        m_policy = iPolicy;
+    }
+
 private:
     bool m_cacheHierarchy;
-    Alembic::AbcCoreAbstract::ReadArraySampleCachePtr m_cachePtr;
     size_t m_numStreams;
+    Alembic::AbcCoreAbstract::ReadArraySampleCachePtr m_cachePtr;
+    Alembic::Abc::ErrorHandler::Policy m_policy;
+
 };
 
 } // End namespace ALEMBIC_VERSION_NS
