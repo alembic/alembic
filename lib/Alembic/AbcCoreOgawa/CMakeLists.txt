@@ -51,6 +51,7 @@ SET( CXX_FILES
   ReadWrite.cpp
   SprImpl.cpp
   SpwImpl.cpp
+  StreamManager.cpp
   WriteUtil.cpp
 )
 
@@ -73,6 +74,7 @@ SET( H_FILES
   ReadWrite.h
   SprImpl.h
   SpwImpl.h
+  StreamManager.h
   WriteUtil.h
   WrittenSampleMap.h
 )
