@@ -259,7 +259,7 @@ bool util::isAnimated(MObject & object, bool checkParent)
     MItDependencyGraph iter(object, MFn::kInvalid,
         MItDependencyGraph::kUpstream,
         MItDependencyGraph::kDepthFirst,
-        MItDependencyGraph::kPlugLevel,
+        MItDependencyGraph::kNodeLevel,
         &stat);
 
     if (stat!= MS::kSuccess)
@@ -267,10 +267,16 @@ bool util::isAnimated(MObject & object, bool checkParent)
         MGlobal::displayError("Unable to create DG iterator ");
     }
 
+    // MAnimUtil::isAnimated(node) will search the history of the node
+    // for any animation curve nodes. It will return true for those nodes
+    // that have animation curve in their history.
+    // The average time complexity is O(n^2) where n is the number of history
+    // nodes. But we can improve the best case by split the loop into two.
+    std::vector<MObject> nodesToCheckAnimCurve;
+
     for (; !iter.isDone(); iter.next())
     {
         MObject node = iter.thisNode();
-        MPlug plug = iter.thisPlug();
 
         if (node.hasFn(MFn::kPluginDependNode) ||
                 node.hasFn( MFn::kConstraint ) ||
@@ -306,7 +312,12 @@ bool util::isAnimated(MObject & object, bool checkParent)
             }
         }
 
-        if (MAnimUtil::isAnimated(node, checkParent))
+        nodesToCheckAnimCurve.push_back(node);
+    }
+
+    for (size_t i = 0; i < nodesToCheckAnimCurve.size(); i++) 
+    {
+        if (MAnimUtil::isAnimated(nodesToCheckAnimCurve[i], checkParent))
         {
             return true;
         }
