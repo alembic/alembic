@@ -323,7 +323,7 @@ void addShear(const MFnDependencyNode & iTrans, bool forceStatic,
 // this test is very similiar to addTranslate, except that it doesn't add it
 // to the stack if x,y, and z are 1.0
 void addScale(const MFnDependencyNode & iTrans,
-    MString parentName, MString xName, MString yName, MString zName,
+    MString parentName, MString xName, MString yName, MString zName, bool inverse,
     bool forceStatic, bool forceAnimated, Alembic::AbcGeom::XformSample & oSample,
     std::vector < AnimChan > & oAnimChanList)
 {
@@ -388,6 +388,12 @@ void addScale(const MFnDependencyNode & iTrans,
     if (xSamp != 0 || ySamp != 0 || zSamp != 0 || xVal != 1.0 || yVal != 1.0 ||
         zVal != 1.0)
     {
+        if (inverse)
+        {
+            xVal = util::inverseScale(xVal);
+            yVal = util::inverseScale(yVal);
+            zVal = util::inverseScale(zVal);
+        }
 
         op.setChannelValue(0, xVal);
         op.setChannelValue(1, yVal);
@@ -398,6 +404,8 @@ void addScale(const MFnDependencyNode & iTrans,
             AnimChan chan;
             chan.plug = xPlug;
             chan.scale = 1.0;
+            if (inverse)
+                chan.scale = -std::numeric_limits<double>::infinity();
             chan.opNum = oSample.getNumOps();
             chan.channelNum = 0;
             oAnimChanList.push_back(chan);
@@ -408,6 +416,8 @@ void addScale(const MFnDependencyNode & iTrans,
             AnimChan chan;
             chan.plug = yPlug;
             chan.scale = 1.0;
+            if (inverse)
+                chan.scale = -std::numeric_limits<double>::infinity();
             chan.opNum = oSample.getNumOps();
             chan.channelNum = 1;
             oAnimChanList.push_back(chan);
@@ -418,6 +428,8 @@ void addScale(const MFnDependencyNode & iTrans,
             AnimChan chan;
             chan.plug = zPlug;
             chan.scale = 1.0;
+            if (inverse)
+                chan.scale = -std::numeric_limits<double>::infinity();
             chan.opNum = oSample.getNumOps();
             chan.channelNum = 2;
             oAnimChanList.push_back(chan);
@@ -758,7 +770,9 @@ void MayaTransformWriter::write()
         {
             double val = it->plug.asDouble();
 
-            if (it->scale != 1.0)
+            if (it->scale == -std::numeric_limits<double>::infinity())
+                val = util::inverseScale(val);
+            else if (it->scale != 1.0)
                 val *= it->scale;
 
             mSample[it->opNum].setChannelValue(it->channelNum, val);
@@ -883,8 +897,8 @@ void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
     addShear(iTrans, iForceStatic, mSample, mAnimChanList);
 
     // add the scale
-    addScale(iTrans, "scale", "scaleX", "scaleY", "scaleZ", iForceStatic,
-        false, mSample, mAnimChanList);
+    addScale(iTrans, "scale", "scaleX", "scaleY", "scaleZ", false,
+        iForceStatic, false, mSample, mAnimChanList);
 
     // inverse the scale pivot point if necessary
     addTranslate(iTrans, "scalePivot", "scalePivotX", "scalePivotY",
@@ -929,6 +943,15 @@ void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
     addTranslate(iJoint, "translate", "translateX", "translateY", "translateZ",
         Alembic::AbcGeom::kTranslateHint, false, iForceStatic, forceAnimated,
         mSample, mAnimChanList);
+
+    // inspect the inverseParent scale
+    // [IS] is ignored when Segment Scale Compensate is false
+    MPlug scaleCompensatePlug = iJoint.findPlug("segmentScaleCompensate");
+    if (scaleCompensatePlug.asBool())
+    {
+        addScale(iJoint, "inverseScale", "inverseScaleX", "inverseScaleY",
+            "inverseScaleZ", true, iForceStatic, forceAnimated, mSample, mAnimChanList);
+    }
 
     MTransformationMatrix::RotationOrder eJointOrientOrder, eRotOrder, eRotateAxisOrder;
     double vals[3];
@@ -978,8 +1001,8 @@ void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
     }
 
     // inspect the scale
-    addScale(iJoint, "scale", "scaleX", "scaleY", "scaleZ", iForceStatic,
-        forceAnimated, mSample, mAnimChanList);
+    addScale(iJoint, "scale", "scaleX", "scaleY", "scaleZ", false,
+        iForceStatic, forceAnimated, mSample, mAnimChanList);
 
     // remember current rotation
     if (mFilterEulerRotations)

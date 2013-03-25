@@ -81,6 +81,19 @@ inline MStatus isUnsigned(MString str, const MString & usage)
     return status;
 }
 
+// safely inverse a scale component
+inline double inverseScale(double scale)
+{
+    const double kScaleEpsilon = 1.0e-12;
+
+    if (scale < kScaleEpsilon && scale >= 0.0)
+        return 1.0 / kScaleEpsilon;
+    else if (scale > -kScaleEpsilon && scale < 0.0)
+        return 1.0 / -kScaleEpsilon;
+    else
+        return 1.0 / scale;
+}
+
 // seconds per frame
 double spf();
 
