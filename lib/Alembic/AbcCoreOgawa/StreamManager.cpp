@@ -42,21 +42,20 @@ namespace ALEMBIC_VERSION_NS {
 
 StreamManager::StreamManager( std::size_t iNumStreams )
 {
-    m_numStreams = iNumStreams;
 
     // only do this if we have more than 1 stream
     // otherwise we don't need to lock
-    if ( m_numStreams > 1 )
+    if ( iNumStreams > 1 )
     {
-        m_streamIDs.resize( m_numStreams );
-        for ( std::size_t i = 0; i < m_numStreams; ++i )
+        m_streamIDs.resize( iNumStreams );
+        for ( std::size_t i = 0; i < iNumStreams; ++i )
         {
             m_streamIDs[i] = i;
         }
     }
 
     m_curStream = 0;
-    m_default( new StreamID(0, 0) );
+    m_default( new StreamID( NULL, 0 ) );
 }
 
 StreamManager::~StreamManager()

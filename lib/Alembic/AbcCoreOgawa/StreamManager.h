@@ -56,7 +56,7 @@ public:
     ~StreamManager();
     StreamIDPtr get();
 private:
-    friend StreamID;
+    friend class StreamID;
     void put( std::size_t iStreamID );
 
     std::vector< std::size_t > m_streamIDs;
@@ -72,7 +72,7 @@ public:
     ~StreamID();
     std::size_t getID() { return m_streamID; }
 private:
-    friend StreamManager;
+    friend class StreamManager;
 
     StreamID( StreamManager * iManager, std::size_t iStreamID );
 
