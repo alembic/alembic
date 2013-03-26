@@ -116,6 +116,7 @@ IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
             filestream = new std::ifstream;
             filestream->open(iFileName.c_str(), std::ios::binary);
             mData->streams.push_back(filestream);
+            mData->offsets.push_back(mData->streams[i]->tellg());
         }
     }
     mData->locks = new Alembic::Util::mutex[mData->streams.size()];
