@@ -33,20 +33,25 @@
 ##
 ##-*****************************************************************************
 
-SET( LIBPYTHON_VERSION 2.6 )
+IF (APPLE)
+  SET( LIBPYTHON_VERSION 2.7 )
+ELSE ()
+  SET( LIBPYTHON_VERSION 2.6 )
+ENDIF ()
 SET( LIBPYTHON python${LIBPYTHON_VERSION} )
 OPTION( USE_LIB64 "Search for deps in lib64 vs lib" ON )
 
 # find python lib dir and include files
 IF ( ${CMAKE_HOST_UNIX} )
-    SET( LIBPYTHON_FILE "lib${LIBPYTHON}.so" )
     IF( ${DARWIN} )
+      SET( LIBPYTHON_FILE "lib${LIBPYTHON}.dylib" )
         SET( OSX_PYTHON_ROOT 
-             "/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}" )
+             "/System/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}" )
         SET( PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}" )
 
-        SET( ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/Python" )
+        SET( ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/lib" )
     ELSE()
+      SET( LIBPYTHON_FILE "lib${LIBPYTHON}.so" )
         SET( PYTHON_INCLUDE_DIR "/usr/include/${LIBPYTHON}" )
         IF (USE_LIB64)
             SET( ALEMBIC_PYTHON_ROOT "/usr/lib64/${LIBPYTHON}/config" )
@@ -72,10 +77,11 @@ FIND_FILE( ALEMBIC_PYTHON_LIBRARY ${LIBPYTHON_FILE}
          )
 
 MESSAGE( STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}" )
+MESSAGE( STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}" )
 MESSAGE( STATUS "PYTHON_INCLUDE_DIR:" ${PYTHON_INCLUDE_DIR} )
 
 # set core libs
-IF ( BOOST_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
+IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
   MESSAGE( STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}" )
   SET( PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY} )
 

@@ -33,18 +33,7 @@
 ##
 ##-*****************************************************************************
 
-IF ( GLUT_Xmu_LIBRARY OR WINDOWS)
-  IF ( Boost_PROGRAM_OPTIONS_FOUND )
-    MESSAGE( STATUS "Including SimpleAbcViewer" )
-    ADD_SUBDIRECTORY( SimpleAbcViewer )
-  ELSE()
-    MESSAGE( STATUS "Not including SimpleAbcViewer" )
-  ENDIF()
-
-ELSE()
-  MESSAGE( STATUS "Not including SimpleAbcViewer" )
-ENDIF()
-
+ADD_SUBDIRECTORY( SimpleAbcViewer )
 ADD_SUBDIRECTORY( AbcEcho )
 ADD_SUBDIRECTORY( AbcStitcher )
 ADD_SUBDIRECTORY( AbcTree )

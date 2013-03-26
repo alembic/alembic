@@ -39,8 +39,12 @@
 // tr1/memory is not avaliable in Visual Studio.
 #if !defined(_MSC_VER)
 
+#if defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
+#include <unordered_map>
+#else
 #include <tr1/memory>
 #include <tr1/unordered_map>
+#endif
 
 #elif _MSC_VER <= 1600
 
@@ -87,6 +91,7 @@
 #define NOMINMAX
 #endif
 
+#define _WINSOCKAPI_
 // needed for mutex stuff
 #include <Windows.h>
 #endif
@@ -104,6 +109,13 @@ using boost::shared_ptr;
 using boost::static_pointer_cast;
 using boost::weak_ptr;
 using boost::unordered_map;
+#elif defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
+using std::dynamic_pointer_cast;
+using std::enable_shared_from_this;
+using std::shared_ptr;
+using std::static_pointer_cast;
+using std::weak_ptr;
+using std::unordered_map;
 #else
 using std::tr1::dynamic_pointer_cast;
 using std::tr1::enable_shared_from_this;

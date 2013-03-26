@@ -34,11 +34,11 @@
 ##-*****************************************************************************
 
 
-#IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
-#    SET(PYTHON_EXECUTABLE_NAMES python2.5.debug python25.debug python2.debug python.debug)
-#ELSE()
+IF (APPLE)
+    SET(PYTHON_EXECUTABLE_NAMES python2.7 python27 python2 python)
+ELSE ()
     SET(PYTHON_EXECUTABLE_NAMES python2.6 python26 python2 python)
-#ENDIF()
+ENDIF ()
 
 # First the version of python
 # FIND_PACKAGE( PythonInterp 2.5.1 EXACT REQUIRED )

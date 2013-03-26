@@ -161,7 +161,7 @@ IF ( NOT WINDOWS )
   ENDIF()
 ELSE()
   SET( MAYA_EXTENSION ".mll" )
-  SET( MAYA_COMPILE_FLAGS "/MT /D \"NT_PLUGIN\" /D \"REQUIRE_IOSTREAM\" /D \"_BOOL\"" )
+  SET( MAYA_COMPILE_FLAGS "/MD /D \"NT_PLUGIN\" /D \"REQUIRE_IOSTREAM\" /D \"_BOOL\"" )
   SET( MAYA_LINK_FLAGS " /export:initializePlugin /export:uninitializePlugin " )
 ENDIF()
 

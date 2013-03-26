@@ -1,10 +1,10 @@
-TM & © 2010-2013 Lucasfilm Entertainment Company Ltd. or Lucasfilm Ltd.
+TM & © 2009-2013 Lucasfilm Entertainment Company Ltd. or Lucasfilm Ltd.
 All rights reserved.
 
 Industrial Light & Magic, ILM and the Bulb and Gear design logo are all
 registered trademarks or service marks of Lucasfilm Ltd.
 
-© 2010-2013 Sony Pictures Imageworks Inc.  All rights reserved.
+© 2009-2013 Sony Pictures Imageworks Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
