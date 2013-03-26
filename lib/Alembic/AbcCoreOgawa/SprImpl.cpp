@@ -36,6 +36,8 @@
 
 #include <Alembic/AbcCoreOgawa/SprImpl.h>
 #include <Alembic/AbcCoreOgawa/ReadUtil.h>
+#include <Alembic/AbcCoreOgawa/StreamManager.h>
+#include <Alembic/AbcCoreOgawa/OrImpl.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -102,8 +104,10 @@ void SprImpl::getSample( index_t iSampleIndex, void * iIntoLocation )
 {
     size_t index = m_header->verifyIndex( iSampleIndex );
 
-    // TODO get thread index from archive
-    ReadData( iIntoLocation, m_group, index, 0,
+    StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
+        AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
+
+    ReadData( iIntoLocation, m_group, index, streamId->getID(),
               m_header->header.getDataType(),
               m_header->header.getDataType().getPod() );
 }

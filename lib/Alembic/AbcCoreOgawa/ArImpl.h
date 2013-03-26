@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreOgawa_ArImpl_h_
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
+#include <Alembic/AbcCoreOgawa/StreamManager.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -99,6 +100,8 @@ public:
         return m_archiveVersion;
     }
 
+    StreamIDPtr getStreamID();
+
 private:
     void init();
 
@@ -116,6 +119,9 @@ private:
     std::vector <  AbcA::index_t > m_maxSamples;
 
     ObjectHeaderPtr m_header;
+
+    StreamManager m_manager;
+
 };
 
 } // End namespace ALEMBIC_VERSION_NS

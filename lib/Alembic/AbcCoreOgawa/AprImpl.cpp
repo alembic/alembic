@@ -36,6 +36,8 @@
 
 #include <Alembic/AbcCoreOgawa/AprImpl.h>
 #include <Alembic/AbcCoreOgawa/ReadUtil.h>
+#include <Alembic/AbcCoreOgawa/StreamManager.h>
+#include <Alembic/AbcCoreOgawa/OrImpl.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -102,8 +104,10 @@ void AprImpl::getSample( index_t iSampleIndex, AbcA::ArraySamplePtr &oSample )
 {
     size_t index = m_header->verifyIndex( iSampleIndex );
 
-    // TODO get thread index from archive
-    ReadArraySample( m_group, index * 2 + 1, index * 2, 0,
+    StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
+        AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
+
+    ReadArraySample( m_group, index * 2 + 1, index * 2, streamId->getID(),
                      m_header->header.getDataType(), oSample );
 }
 
@@ -138,8 +142,10 @@ bool AprImpl::getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey )
     // * 2 for Array properties (since we also write the dimensions)
     size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
-    // TODO get thread index from archive
-    Ogawa::IDataPtr data = m_group->getData( index, 0 );
+    StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
+        AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
+
+    Ogawa::IDataPtr data = m_group->getData( index, streamId->getID() );
 
     if ( data )
     {
@@ -167,8 +173,10 @@ void AprImpl::getDimensions( index_t iSampleIndex,
 {
     size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
-    // TODO get thread index from archive
-    ReadDimensions( m_group, index + 1, index, 0,
+    StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
+        AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
+
+    ReadDimensions( m_group, index + 1, index, streamId->getID(),
                     m_header->header.getDataType(), oDim );
 
 }
@@ -179,8 +187,10 @@ void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
 {
     size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
-    // TODO get thread index from archive
-    ReadData( iIntoLocation, m_group, index, 0,
+    StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
+        AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
+
+    ReadData( iIntoLocation, m_group, index, streamId->getID(),
                m_header->header.getDataType(), iPod );
 }
 

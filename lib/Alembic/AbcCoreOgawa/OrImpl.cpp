@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreOgawa/OrImpl.h>
+#include <Alembic/AbcCoreOgawa/StreamManager.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -49,7 +50,8 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 // Reading as a child of a parent.
 OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
-                Ogawa::IGroupPtr iGroup,
+                Ogawa::IGroupPtr iParentGroup,
+                std::size_t iGroupIndex,
                 ObjectHeaderPtr iHeader )
     : m_header( iHeader )
 {
@@ -63,8 +65,10 @@ OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
     m_archive = m_parent->getArchiveImpl();
     ABCA_ASSERT( m_archive, "Invalid archive in OrImpl(Object)" );
 
-    // TODO get thread id from archive
-    m_data.reset( new OrData( iGroup, iHeader->getFullName(), 0,
+    StreamIDPtr streamId = m_archive->getStreamID();
+    std::size_t id = streamId->getID();
+    Ogawa::IGroupPtr group = iParentGroup->getGroup( iGroupIndex, id );
+    m_data.reset( new OrData( group, iHeader->getFullName(), id,
         *m_archive ) );
 }
 

@@ -58,7 +58,8 @@ public:
             ObjectHeaderPtr iHeader );
 
     OrImpl( AbcA::ObjectReaderPtr iParent,
-            Ogawa::IGroupPtr iGroup,
+            Ogawa::IGroupPtr iParentGroup,
+            std::size_t iIndex,
             ObjectHeaderPtr iHeader );
 
     virtual ~OrImpl();

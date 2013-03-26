@@ -55,7 +55,7 @@ StreamManager::StreamManager( std::size_t iNumStreams )
     }
 
     m_curStream = 0;
-    m_default( new StreamID( NULL, 0 ) );
+    m_default = StreamIDPtr( new StreamID( NULL, 0 ) );
 }
 
 StreamManager::~StreamManager()

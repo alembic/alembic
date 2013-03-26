@@ -49,6 +49,7 @@ ArImpl::ArImpl( const std::string &iFileName,
   : m_fileName( iFileName )
   , m_archive( iFileName, iNumStreams )
   , m_header( new AbcA::ObjectHeader() )
+  , m_manager( iNumStreams )
 {
     ABCA_ASSERT( m_archive.isValid(),
                  "Could not open as Ogawa file: " << m_fileName );
@@ -63,6 +64,7 @@ ArImpl::ArImpl( const std::string &iFileName,
 ArImpl::ArImpl( const std::vector< std::istream * > & iStreams )
   : m_archive( iStreams )
   , m_header( new AbcA::ObjectHeader() )
+  , m_manager( iStreams.size() )
 {
     ABCA_ASSERT( m_archive.isValid(),
                  "Could not open as Ogawa file from provided streams." );
@@ -188,6 +190,12 @@ AbcA::index_t ArImpl::getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex )
     }
 
     return INDEX_UNKNOWN;
+}
+
+//-*****************************************************************************
+StreamIDPtr ArImpl::getStreamID()
+{
+    return m_manager.get();
 }
 
 //-*****************************************************************************

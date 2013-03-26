@@ -44,7 +44,6 @@ namespace Alembic {
 namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
-//-*****************************************************************************
 class StreamID;
 typedef Alembic::Util::shared_ptr< StreamID > StreamIDPtr;
 
@@ -66,6 +65,7 @@ private:
     StreamIDPtr m_default;
 };
 
+//-*****************************************************************************
 class StreamID : Alembic::Util::noncopyable
 {
 public:
@@ -73,12 +73,11 @@ public:
     std::size_t getID() { return m_streamID; }
 private:
     friend class StreamManager;
-
     StreamID( StreamManager * iManager, std::size_t iStreamID );
-
     StreamManager * m_manager;
     std::size_t m_streamID;
 };
+
 
 } // End namespace ALEMBIC_VERSION_NS
 

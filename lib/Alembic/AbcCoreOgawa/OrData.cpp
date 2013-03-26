@@ -150,12 +150,8 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
     AbcA::ObjectReaderPtr optr = m_children[i].made.lock();
     if ( ! optr )
     {
-        // TODO get thread id from archive on parent
-        // (dynamic cast optr->getArchive() to ArImpl?)
-        // "top" compound is at the 0 position
-        Ogawa::IGroupPtr group = m_group->getGroup( i + 1, 0 );
         // Make a new one.
-        optr.reset ( new OrImpl( iParent, group,
+        optr.reset ( new OrImpl( iParent, m_group, i + 1,
                                  m_children[i].header ) );
         m_children[i].made = optr;
     }
