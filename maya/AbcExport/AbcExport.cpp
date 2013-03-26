@@ -513,9 +513,24 @@ try
             {
                 jobArgs.filterEulerRotations = true;
             }
-            else if (arg == "-ao" || arg == "-asogawa")
+            else if (arg == "-ad" || arg == "-asdata")
             {
-                asOgawa = true;
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "asData incorrectly specified.");
+                    return MS::kFailure;
+                }
+                MString asData = jobArgsArray[++i];
+                asData.toLowerCase();
+                if (asData == "hdf")
+                {
+                    asOgawa = false;
+                }
+                else if (asData == "ogawa")
+                {
+                    asOgawa = true;
+                }
             }
             else
             {
