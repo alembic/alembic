@@ -114,8 +114,7 @@ IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
         for (std::size_t i = 1; i < iNumStreams; ++i)
         {
             filestream = new std::ifstream;
-            filestream->open(iFileName.c_str(),
-                std::ios::out | std::ios::trunc | std::ios::binary);
+            filestream->open(iFileName.c_str(), std::ios::binary);
             mData->streams.push_back(filestream);
         }
     }
