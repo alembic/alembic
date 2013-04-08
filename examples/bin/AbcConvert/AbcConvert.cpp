@@ -73,8 +73,19 @@ void copyProps(Alembic::Abc::ICompoundProperty & iRead,
                 header.getTimeSampling());
 
             std::size_t numSamples = inProp.getNumSamples();
-            std::string sampStr;
-            std::wstring sampWStr;
+            std::vector<std::string> sampStrVec;
+            std::vector<std::wstring> sampWStrVec;
+            if (header.getDataType().getPod() ==
+                Alembic::AbcCoreAbstract::kStringPOD)
+            {
+                sampStrVec.resize(header.getDataType().getExtent());
+            }
+            else if (header.getDataType().getPod() ==
+                     Alembic::AbcCoreAbstract::kWstringPOD)
+            {
+                sampWStrVec.resize(header.getDataType().getExtent());
+            }
+
             char samp[4096];
 
             for (std::size_t j = 0; j < numSamples; ++j)
@@ -85,14 +96,14 @@ void copyProps(Alembic::Abc::ICompoundProperty & iRead,
                 if (header.getDataType().getPod() ==
                     Alembic::AbcCoreAbstract::kStringPOD)
                 {
-                    inProp.get(&sampStr, sel);
-                    outProp.set(&sampStr);
+                    inProp.get(&sampStrVec.front(), sel);
+                    outProp.set(&sampStrVec.front());
                 }
                 else if (header.getDataType().getPod() ==
                     Alembic::AbcCoreAbstract::kWstringPOD)
                 {
-                    inProp.get(&sampWStr, sel);
-                    outProp.set(&sampWStr);
+                    inProp.get(&sampWStrVec.front(), sel);
+                    outProp.set(&sampWStrVec.front());
                 }
                 else
                 {
