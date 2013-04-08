@@ -53,8 +53,8 @@ IFactory::~IFactory()
 {
 }
 
-Alembic::Abc::IArchive IFactory::getArchive(const std::string & iFileName,
-                                            CoreType & oType)
+Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName,
+                                            CoreType & oType )
 {
 
     // try Ogawa first, use kQuietNoop at first in case we fail
@@ -81,6 +81,12 @@ Alembic::Abc::IArchive IFactory::getArchive(const std::string & iFileName,
 
     oType = kUnknown;
     return Alembic::Abc::IArchive();
+}
+
+Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName )
+{
+    CoreType coreType;
+    return getArchive( iFileName, coreType );
 }
 
 Alembic::Abc::IArchive IFactory::getArchive(

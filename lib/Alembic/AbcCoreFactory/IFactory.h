@@ -63,6 +63,10 @@ public:
     Alembic::Abc::IArchive getArchive( const std::string & iFileName,
                                        CoreType & oType );
 
+    //! Try to open a file and return IArchive.  If the file wasn't a valid
+    //! file or known type and invalid archive is returned.
+    Alembic::Abc::IArchive getArchive( const std::string & iFileName );
+
     //! Use the streams (Alembic does not take ownership) to read the data from
     //! This is currently only valid for Ogawa.  The streams must all reference
     //! the same data.
