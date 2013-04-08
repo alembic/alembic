@@ -563,8 +563,19 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 }
                 else if (extent == 3)
                 {
-                    attrObj = numAttr.create(attrName, attrName,
-                        MFnNumericData::k3Float);
+                    if (interp == "rgb")
+                    {
+                        attrObj = numAttr.createColor(attrName, attrName);
+                    }
+                    else if (interp == "point")
+                    {
+                        attrObj = numAttr.createPoint(attrName, attrName);
+                    }
+                    else
+                    {
+                        attrObj = numAttr.create(attrName, attrName,
+                            MFnNumericData::k3Float);
+                    }
                     numAttr.setDefault(val[0], val[1], val[2]);
                 }
             }
