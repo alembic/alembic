@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -46,7 +46,7 @@ namespace util
 
 struct cmpDag
 {
-    bool operator()( const MDagPath& lhs, const MDagPath& rhs )
+    bool operator()( const MDagPath& lhs, const MDagPath& rhs ) const
     {
             std::string name1(lhs.fullPathName().asChar());
             std::string name2(rhs.fullPathName().asChar());
