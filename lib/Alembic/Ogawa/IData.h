@@ -49,8 +49,8 @@ public:
 
     ~IData();
 
-    void read(std::size_t iSize, void * iData, std::size_t iOffset=0,
-              std::size_t iThreadId=0);
+    void read(std::size_t iSize, void * iData, std::size_t iOffset,
+              std::size_t iThreadId);
 
     std::size_t getSize() const;
 

@@ -152,7 +152,7 @@ bool AprImpl::getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey )
         if ( data->getSize() >= 16 )
         {
             oKey.numBytes = data->getSize() - 16;
-            data->read(16, oKey.digest.d);
+            data->read( 16, oKey.digest.d, 0, streamId->getID() );
         }
 
         return true;

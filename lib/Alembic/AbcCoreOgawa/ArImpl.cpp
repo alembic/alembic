@@ -87,7 +87,7 @@ void ArImpl::init()
         Ogawa::IDataPtr data = group->getData( 0 );
         if ( data->getSize() == 4 )
         {
-            data->read( 4, &version );
+            data->read( 4, &version, 0, 0 );
         }
     }
 
@@ -101,7 +101,7 @@ void ArImpl::init()
         Ogawa::IDataPtr data = group->getData( 1 );
         if ( data->getSize() == 4 )
         {
-            data->read( 4, &fileVersion );
+            data->read( 4, &fileVersion, 0, 0 );
         }
     }
     ABCA_ASSERT( fileVersion >= 9999,
@@ -131,7 +131,7 @@ void ArImpl::init()
         if ( data->getSize() > 0 )
         {
             char * buf = new char[ data->getSize() ];
-            data->read( data->getSize(), buf, 0 );
+            data->read( data->getSize(), buf, 0, 0 );
             std::string metaData(buf, data->getSize() );
             m_header->getMetaData().deserialize( metaData );
             delete [] buf;

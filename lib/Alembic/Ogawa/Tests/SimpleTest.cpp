@@ -102,7 +102,7 @@ void test()
     TESTING_ASSERT(aa->getNumChildren() == 1);
     TESTING_ASSERT(aa->getData(0)->getSize() == 5);
     char data[5] = {0,0,0,0,0};
-    aa->getData(0)->read(5, data);
+    aa->getData(0)->read(5, data, 0, 0);
     TESTING_ASSERT(data[0] == 0);
     TESTING_ASSERT(data[1] == 1);
     TESTING_ASSERT(data[2] == 5);
@@ -128,7 +128,7 @@ void test()
     Alembic::Ogawa::IDataPtr bcd = bc->getData(0);
     TESTING_ASSERT(bcd->getSize() == 8);
     char data2[8] = {0,0,0,0,0,0,0,0};
-    bcd->read(8, data2);
+    bcd->read(8, data2, 0, 0);
     TESTING_ASSERT(data2[0] == 0);
     TESTING_ASSERT(data2[1] == 1);
     TESTING_ASSERT(data2[2] == 2);

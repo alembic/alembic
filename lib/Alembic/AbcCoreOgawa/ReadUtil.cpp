@@ -82,7 +82,7 @@ ReadDimensions( Ogawa::IGroupPtr iGroup,
         oDim.setRank( numRanks );
 
         std::vector< uint32_t > dims( numRanks );
-        data->read( numRanks * 4, &( dims.front() ) );
+        data->read( numRanks * 4, &( dims.front() ), 0, iThreadId );
         for ( std::size_t i = 0; i < numRanks; ++i )
         {
             oDim[i] = dims[i];
@@ -252,7 +252,7 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
                        std::vector <  AbcA::index_t > & oMaxSamples )
 {
     std::vector< char > buf( iData->getSize() );
-    iData->read( iData->getSize(), &( buf.front() ) );
+    iData->read( iData->getSize(), &( buf.front() ), 0, 0 );
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
@@ -305,7 +305,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
     }
 
     std::vector< char > buf( data->getSize() );
-    data->read( data->getSize(), &( buf.front() ), iThreadId );
+    data->read( data->getSize(), &( buf.front() ), 0, iThreadId );
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
@@ -364,7 +364,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     }
 
     std::vector< char > buf( data->getSize() );
-    data->read( data->getSize(), &( buf.front() ), iThreadId );
+    data->read( data->getSize(), &( buf.front() ), 0, iThreadId );
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
