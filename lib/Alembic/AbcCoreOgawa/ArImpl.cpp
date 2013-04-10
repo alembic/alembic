@@ -84,7 +84,7 @@ void ArImpl::init()
     std::size_t numChildren = group->getNumChildren();
     if ( numChildren > 0 && group->isChildData( 0 ) )
     {
-        Ogawa::IDataPtr data = group->getData( 0 );
+        Ogawa::IDataPtr data = group->getData( 0, 0 );
         if ( data->getSize() == 4 )
         {
             data->read( 4, &version, 0, 0 );
@@ -98,7 +98,7 @@ void ArImpl::init()
     int fileVersion = 0;
     if ( numChildren > 1 && group->isChildData( 1 ) )
     {
-        Ogawa::IDataPtr data = group->getData( 1 );
+        Ogawa::IDataPtr data = group->getData( 1, 0 );
         if ( data->getSize() == 4 )
         {
             data->read( 4, &fileVersion, 0, 0 );
@@ -111,13 +111,13 @@ void ArImpl::init()
 
     if ( numChildren > 0 && group->isChildData( numChildren - 1 ) )
     {
-        ReadTimeSamplesAndMax( group->getData( numChildren - 1 ),
+        ReadTimeSamplesAndMax( group->getData( numChildren - 1, 0 ),
                                m_timeSamples, m_maxSamples );
     }
 
     if ( numChildren > 2 && group->isChildGroup( numChildren - 3 ) )
     {
-        m_data.reset( new OrData( group->getGroup( numChildren - 3 ), "", 0,
+        m_data.reset( new OrData( group->getGroup( numChildren - 3, 0 ), "", 0,
                                   *this ) );
     }
 
@@ -127,7 +127,7 @@ void ArImpl::init()
     // read archive metadata
     if ( numChildren > 1 && group->isChildData( numChildren - 2 ) )
     {
-        Ogawa::IDataPtr data = group->getData( numChildren - 2);
+        Ogawa::IDataPtr data = group->getData( numChildren - 2, 0 );
         if ( data->getSize() > 0 )
         {
             char * buf = new char[ data->getSize() ];

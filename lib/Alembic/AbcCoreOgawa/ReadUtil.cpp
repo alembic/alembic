@@ -98,7 +98,7 @@ ConvertData( Alembic::Util::PlainOldDataType fromPod,
              void * toBuffer )
 {
 
-    // find a way to do smartly do this
+    // TODO implement this as efficiently as possible
     return;
     /*
         size_t numToCast = ( dataSize - 16 ) / PODNumBytes( curPod );
@@ -133,7 +133,7 @@ ReadData( void * iIntoLocation,
         || ( iAsPod == curPod ),
         "Cannot convert the data to or from a string, wstring." );
 
-    Ogawa::IDataPtr data = iGroup->getData( iIndex );
+    Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
     std::size_t dataSize = data->getSize();
 
     if ( dataSize < 16 )
@@ -296,7 +296,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
                    const std::string & iParentName,
                    std::vector< ObjectHeaderPtr > & oHeaders )
 {
-    Ogawa::IDataPtr data = iGroup->getData( iIndex );
+    Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
     ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
 
     if ( data->getSize() == 0 )
@@ -355,7 +355,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     // 0000 0000 0000 0001 0000 0000 0000 0000
     static const uint32_t homogenousMask = 0x10000;
 
-    Ogawa::IDataPtr data = iGroup->getData( iIndex );
+    Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
     ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
 
     if ( data->getSize() == 0 )

@@ -39,6 +39,8 @@
 #include <Alembic/AbcCoreOgawa/CprImpl.h>
 #include <Alembic/AbcCoreOgawa/SprImpl.h>
 #include <Alembic/AbcCoreOgawa/AprImpl.h>
+#include <Alembic/AbcCoreOgawa/StreamManager.h>
+#include <Alembic/AbcCoreOgawa/ArImpl.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -134,7 +136,12 @@ CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
-        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second );
+        StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
+        AbcA::ArchiveReader > (
+            iParent->getObject()->getArchive() )->getStreamID();
+
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second,
+                                                    streamId->getID() );
 
         ABCA_ASSERT( group, "Scalar Property not backed by a valid group.");
 
@@ -174,7 +181,12 @@ CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
-        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second );
+        StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
+        AbcA::ArchiveReader > (
+            iParent->getObject()->getArchive() )->getStreamID();
+
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second,
+                                                    streamId->getID() );
 
         ABCA_ASSERT( group, "Array Property not backed by a valid group.");
 
@@ -215,7 +227,12 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
-        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second );
+        StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
+        AbcA::ArchiveReader > (
+            iParent->getObject()->getArchive() )->getStreamID();
+
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second,
+                                                    streamId->getID() );
 
         ABCA_ASSERT( group, "Compound Property not backed by a valid group.");
 

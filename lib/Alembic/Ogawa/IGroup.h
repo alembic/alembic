@@ -52,8 +52,8 @@ class IGroup
 public:
     ~IGroup();
 
-    IGroupPtr getGroup(std::size_t iIndex, std::size_t iThreadIndex = 0);
-    IDataPtr getData(std::size_t iIndex, std::size_t iThreadIndex = 0);
+    IGroupPtr getGroup(std::size_t iIndex, std::size_t iThreadIndex);
+    IDataPtr getData(std::size_t iIndex, std::size_t iThreadIndex);
 
     std::size_t getNumChildren() const;
 

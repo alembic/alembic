@@ -91,41 +91,41 @@ void test()
     TESTING_ASSERT(top->isChildData(2));
     TESTING_ASSERT(top->isEmptyChildData(2));
 
-    Alembic::Ogawa::IGroupPtr a = top->getGroup(0);
-    TESTING_ASSERT(!top->getData(0));
+    Alembic::Ogawa::IGroupPtr a = top->getGroup(0, 0);
+    TESTING_ASSERT(!top->getData(0, 0));
     TESTING_ASSERT(a->getNumChildren() == 2);
-    Alembic::Ogawa::IGroupPtr aa = a->getGroup(0);
-    Alembic::Ogawa::IDataPtr ad = a->getData(1);
-    TESTING_ASSERT(!a->getGroup(1));
+    Alembic::Ogawa::IGroupPtr aa = a->getGroup(0, 0);
+    Alembic::Ogawa::IDataPtr ad = a->getData(1, 0);
+    TESTING_ASSERT(!a->getGroup(1, 0));
     TESTING_ASSERT(ad->getSize() == 1);
 
     TESTING_ASSERT(aa->getNumChildren() == 1);
-    TESTING_ASSERT(aa->getData(0)->getSize() == 5);
+    TESTING_ASSERT(aa->getData(0, 0)->getSize() == 5);
     char data[5] = {0,0,0,0,0};
-    aa->getData(0)->read(5, data, 0, 0);
+    aa->getData(0, 0)->read(5, data, 0, 0);
     TESTING_ASSERT(data[0] == 0);
     TESTING_ASSERT(data[1] == 1);
     TESTING_ASSERT(data[2] == 5);
     TESTING_ASSERT(data[3] == 6);
     TESTING_ASSERT(data[4] == 7);
 
-    Alembic::Ogawa::IGroupPtr b = top->getGroup(1);
+    Alembic::Ogawa::IGroupPtr b = top->getGroup(1, 0);
     TESTING_ASSERT(b->getNumChildren() == 3);
-    Alembic::Ogawa::IGroupPtr ba = b->getGroup(0);
-    Alembic::Ogawa::IGroupPtr bb = b->getGroup(1);
-    Alembic::Ogawa::IGroupPtr bc = b->getGroup(2);
+    Alembic::Ogawa::IGroupPtr ba = b->getGroup(0, 0);
+    Alembic::Ogawa::IGroupPtr bb = b->getGroup(1, 0);
+    Alembic::Ogawa::IGroupPtr bc = b->getGroup(2, 0);
     TESTING_ASSERT(ba->getNumChildren() == 2);
     TESTING_ASSERT(bb->getNumChildren() == 3);
     TESTING_ASSERT(bc->getNumChildren() == 1);
 
-    TESTING_ASSERT(ba->getData(0)->getSize() == 3);
-    TESTING_ASSERT(ba->getData(1)->getSize() == 4);
+    TESTING_ASSERT(ba->getData(0, 0)->getSize() == 3);
+    TESTING_ASSERT(ba->getData(1, 0)->getSize() == 4);
 
-    TESTING_ASSERT(bb->getData(0)->getSize() == 5);
-    TESTING_ASSERT(bb->getData(1)->getSize() == 6);
-    TESTING_ASSERT(bb->getData(2)->getSize() == 7);
+    TESTING_ASSERT(bb->getData(0, 0)->getSize() == 5);
+    TESTING_ASSERT(bb->getData(1, 0)->getSize() == 6);
+    TESTING_ASSERT(bb->getData(2, 0)->getSize() == 7);
 
-    Alembic::Ogawa::IDataPtr bcd = bc->getData(0);
+    Alembic::Ogawa::IDataPtr bcd = bc->getData(0, 0);
     TESTING_ASSERT(bcd->getSize() == 8);
     char data2[8] = {0,0,0,0,0,0,0,0};
     bcd->read(8, data2, 0, 0);
