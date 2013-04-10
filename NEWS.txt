@@ -1,3 +1,20 @@
+2013-4-11, Alembic 1.1.5
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes and performance enhancements for the Maya plugins.
+
+AbcExport:
+
+Improve the performance of util::isAnimated.
+
+If MFnIkJoint's Scale Compensate is off, [IS] is ignored otherwise multiply it
+after [T].  [IS] is actually the inverse of the inverseScale plug.
+
+const correctness fix which Windows was complaining about.
+
+AbcImport:
+
+Use createPoint and createColor for MFnNumericAttribute when appropriate.
+
 2013-03-25, Alembic 1.1.4
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful and important bug fixes.
