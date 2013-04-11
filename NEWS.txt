@@ -9,7 +9,7 @@ Improve the performance of util::isAnimated.
 If MFnIkJoint's Scale Compensate is off, [IS] is ignored otherwise multiply it
 after [T].  [IS] is actually the inverse of the inverseScale plug.
 
-const correctness fix which Windows was complaining about.
+Fixed const related error caught by Microsoft Visual Studio 9.0 compiler.
 
 AbcImport:
 
