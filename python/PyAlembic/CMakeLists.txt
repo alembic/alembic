@@ -86,16 +86,14 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
   SET( PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY} )
 
   SET( CORE_LIBS
-    AlembicAbcGeom
-    AlembicAbc
-    AlembicAbcCoreOgawa
-    AlembicAbcCoreHDF5
-    AlembicAbcCoreFactory
-    AlembicAbcCoreAbstract
-    AlembicAbcCollection
-    AlembicAbcMaterial
-    AlembicUtil
-    AlembicOgawa )
+       AlembicAbcGeom
+       AlembicAbcCoreFactory
+       AlembicAbc
+       AlembicAbcCoreHDF5
+       AlembicAbcCoreOgawa
+       AlembicAbcCoreAbstract
+       AlembicOgawa
+       AlembicUtil )
 
   SET( CPP_FILES
     PyAbcGeomTypes.cpp

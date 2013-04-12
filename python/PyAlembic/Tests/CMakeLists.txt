@@ -35,14 +35,13 @@
 
 SET( TEST_LIBS
      AlembicAbcGeom
-     AlembicAbcCollection
-     AlembicAbc
-     AlembicAbcCoreOgawa
-     AlembicAbcCoreHDF5
      AlembicAbcCoreFactory
+     AlembicAbc
+     AlembicAbcCoreHDF5
+     AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
-     AlembicUtil
      AlembicOgawa
+     AlembicUtil
      alembicmodule
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_ILMBASE_LIBS}
