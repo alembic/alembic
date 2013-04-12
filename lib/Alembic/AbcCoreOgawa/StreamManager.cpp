@@ -73,13 +73,12 @@ StreamIDPtr StreamManager::get()
     Alembic::Util::scoped_lock l( m_lock );
 
     // we've used up more than we have, just return the default
-    if ( m_curStream == m_streamIDs.size() )
+    if ( m_curStream >= m_streamIDs.size() )
     {
         return m_default;
     }
 
-    m_curStream ++;
-    return StreamIDPtr( new StreamID( this, m_streamIDs[ m_curStream - 1 ] ) );
+    return StreamIDPtr( new StreamID( this, m_streamIDs[ m_curStream ++ ] ) );
 }
 
 void StreamManager::put( std::size_t iStreamID )
@@ -88,8 +87,7 @@ void StreamManager::put( std::size_t iStreamID )
     assert( iStreamID < m_streamIDs.size() && m_curStream > 0 );
 
     Alembic::Util::scoped_lock l( m_lock );
-    m_curStream --;
-    m_streamIDs[ m_curStream ] = iStreamID;
+    m_streamIDs[ --m_curStream ] = iStreamID;
 }
 
 StreamID::StreamID( StreamManager * iManager, std::size_t iStreamID ) :
