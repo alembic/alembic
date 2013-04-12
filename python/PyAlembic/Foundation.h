@@ -40,6 +40,8 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
+#include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCollection/All.h>
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
@@ -61,6 +63,9 @@ inline T * get_pointer( std::tr1::shared_ptr<T> const & p )
 
 namespace Abc  = ::Alembic::Abc;
 namespace AbcA = ::Alembic::AbcCoreAbstract;
+namespace AbcF = ::Alembic::AbcCoreFactory;
+namespace AbcH = ::Alembic::AbcCoreHDF5;
+namespace AbcO = ::Alembic::AbcCoreOgawa;
 namespace AbcC = ::Alembic::AbcCollection;
 namespace AbcG = ::Alembic::AbcGeom;
 namespace AbcU = ::Alembic::Util;
