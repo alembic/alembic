@@ -43,24 +43,107 @@ namespace ALEMBIC_VERSION_NS {
 StreamManager::StreamManager( std::size_t iNumStreams )
 {
 
+    m_streams = 0;
+    m_curStream = 0;
+    m_numStreams = iNumStreams;
+
     // only do this if we have more than 1 stream
-    // otherwise we don't need to lock
+    // otherwise we can just return default
     if ( iNumStreams > 1 )
     {
-        m_streamIDs.resize( iNumStreams );
-        for ( std::size_t i = 0; i < iNumStreams; ++i )
+        m_streamIDs.resize( m_numStreams );
+        for ( std::size_t i = 0; i < m_numStreams; ++i )
         {
             m_streamIDs[i] = i;
+            if ( m_numStreams < sizeof(m_streams) * 8 )
+            {
+                m_streams |= 1 << i;
+            }
         }
     }
 
-    m_curStream = 0;
     m_default = StreamIDPtr( new StreamID( NULL, 0 ) );
 }
 
 StreamManager::~StreamManager()
 {
 }
+
+#if defined(__GNUC__) && __GNUC__ > 3
+
+StreamIDPtr StreamManager::get()
+{
+
+    if ( m_numStreams < 2 )
+    {
+        return m_default;
+    }
+
+    // we've got too many streams so use the locking version
+    if ( m_numStreams > sizeof(m_streams) * 8 )
+    {
+        Alembic::Util::scoped_lock l( m_lock );
+
+        // we've used up more than we have, just return the default
+        if ( m_curStream >= m_numStreams )
+        {
+            return m_default;
+        }
+
+        return StreamIDPtr( new StreamID( this,
+            m_streamIDs[ m_curStream ++ ] ) );
+    }
+
+    // CAS (compare and swap) non locking version
+    Alembic::Util::int64_t val = 0;
+    Alembic::Util::int64_t oldVal = 0;
+    Alembic::Util::int64_t newVal = 0;
+
+    do
+    {
+        oldVal = m_streams;
+        val = ffsll( oldVal );
+
+        if ( val == 0 )
+        {
+            return m_default;
+        }
+
+        newVal = oldVal & ~( 1 << (val - 1) );
+    }
+    while ( !__sync_bool_compare_and_swap( &m_streams, oldVal, newVal ) );
+
+    return StreamIDPtr( new StreamID( this, ( std::size_t ) val - 1 ) );
+}
+
+void StreamManager::put( std::size_t iStreamID )
+{
+
+    // we've got too many streams so use the locking version
+    if ( m_numStreams > sizeof(m_streams) * 8 )
+    {
+        // shouldn't ever hit this case, it's why we have m_default
+        assert( iStreamID < m_numStreams && m_curStream > 0 );
+
+        Alembic::Util::scoped_lock l( m_lock );
+        m_streamIDs[ --m_curStream ] = iStreamID;
+        return;
+    }
+
+    // CAS (compare and swap) non locking version
+    Alembic::Util::int64_t oldVal = 0;
+    Alembic::Util::int64_t newVal = 0;
+
+    do
+    {
+        oldVal = m_streams;
+        newVal = oldVal | ( 1 << iStreamID );
+
+    }
+    while ( !__sync_bool_compare_and_swap( &m_streams, oldVal, newVal ) );
+}
+
+#else
 
 StreamIDPtr StreamManager::get()
 {
@@ -73,7 +156,7 @@ StreamIDPtr StreamManager::get()
     Alembic::Util::scoped_lock l( m_lock );
 
     // we've used up more than we have, just return the default
-    if ( m_curStream >= m_streamIDs.size() )
+    if ( m_curStream >= m_numStreams )
     {
         return m_default;
     }
@@ -84,11 +167,13 @@ StreamIDPtr StreamManager::get()
 void StreamManager::put( std::size_t iStreamID )
 {
     // shouldn't ever hit this case, it's why we have m_default
-    assert( iStreamID < m_streamIDs.size() && m_curStream > 0 );
+    assert( iStreamID < m_numStreams && m_curStream > 0 );
 
     Alembic::Util::scoped_lock l( m_lock );
     m_streamIDs[ --m_curStream ] = iStreamID;
 }
+
+#endif
 
 StreamID::StreamID( StreamManager * iManager, std::size_t iStreamID ) :
     m_manager( iManager ), m_streamID( iStreamID )

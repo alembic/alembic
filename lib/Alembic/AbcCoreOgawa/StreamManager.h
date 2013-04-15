@@ -58,9 +58,15 @@ private:
     friend class StreamID;
     void put( std::size_t iStreamID );
 
+    std::size_t m_numStreams;
+
+    // for the locked implementation
     std::vector< std::size_t > m_streamIDs;
     std::size_t m_curStream;
     Alembic::Util::mutex m_lock;
+
+    // for the CAS impl
+    Alembic::Util::int64_t m_streams;
 
     StreamIDPtr m_default;
 };
