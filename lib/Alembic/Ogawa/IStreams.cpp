@@ -35,6 +35,7 @@
 
 #include <Alembic/Ogawa/IStreams.h>
 #include <fstream>
+#include <stdexcept>
 
 namespace Alembic {
 namespace Ogawa {
@@ -132,6 +133,20 @@ IStreams::IStreams(const std::vector< std::istream * > & iStreams) :
 
 void IStreams::init()
 {
+    // simple temporary endian check
+    union {
+        Util::uint32_t l;
+        char c[4];
+    } u;
+
+    u.l = 0x01234567;
+
+    if (u.c[3] != 0x67)
+    {
+        std::runtime_error(
+            "Ogawa currently only supports little-endian reading.");
+    }
+
     if (mData->streams.empty())
     {
         return;

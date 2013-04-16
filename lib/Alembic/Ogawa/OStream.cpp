@@ -35,6 +35,7 @@
 
 #include <Alembic/Ogawa/OStream.h>
 #include <fstream>
+#include <stdexcept>
 
 namespace Alembic {
 namespace Ogawa {
@@ -121,6 +122,20 @@ bool OStream::isValid()
 
 void OStream::init()
 {
+    // simple temporary endian check
+    union {
+        Util::uint32_t l;
+        char c[4];
+    } u;
+
+    u.l = 0x01234567;
+
+    if (u.c[3] != 0x67)
+    {
+        std::runtime_error(
+            "Ogawa currently only supports little-endian writing.");
+    }
+
     if (isValid())
     {
         const char header[] = {
