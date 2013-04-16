@@ -51,6 +51,8 @@ public:
         if (filestream->is_open())
         {
             stream = filestream;
+            stream->exceptions ( std::ofstream::failbit |
+                                 std::ofstream::badbit );
         }
         else
         {
@@ -63,6 +65,9 @@ public:
     {
         if (stream)
         {
+            stream->exceptions ( std::ostream::failbit |
+                                 std::ostream::badbit );
+
             startPos = stream->tellp();
         }
     }
