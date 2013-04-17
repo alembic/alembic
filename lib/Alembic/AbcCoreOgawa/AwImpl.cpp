@@ -183,13 +183,13 @@ AwImpl::~AwImpl()
     // let go of our reference to the data for the top object
     m_data.reset();
 
-    // encode and write the Metadata for the archive
-    std::string metaData = m_metaData.serialize();
-    m_archive.getGroup()->addData( metaData.size(), metaData.c_str() );
-
     // encode and write the time samplings and max samples into data
     if ( m_archive.isValid() )
     {
+        // encode and write the Metadata for the archive
+        std::string metaData = m_metaData.serialize();
+        m_archive.getGroup()->addData( metaData.size(), metaData.c_str() );
+
         std::vector< uint8_t > data;
         uint32_t numSamplings = getNumTimeSamplings();
         for ( uint32_t i = 0; i < numSamplings; ++i )

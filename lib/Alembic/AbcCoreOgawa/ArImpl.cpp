@@ -82,7 +82,10 @@ void ArImpl::init()
 
     int version = -1;
     std::size_t numChildren = group->getNumChildren();
-    if ( numChildren > 0 && group->isChildData( 0 ) )
+
+    if ( numChildren > 4 && group->isChildData( 0 ) &&
+         group->isChildData( 1 ) && group->isChildGroup( 2 ) &&
+         group->isChildData( 3 ) && group->isChildData( 4 ) )
     {
         Ogawa::IDataPtr data = group->getData( 0, 0 );
         if ( data->getSize() == 4 )
@@ -90,52 +93,45 @@ void ArImpl::init()
             data->read( 4, &version, 0, 0 );
         }
     }
+    else
+    {
+        ABCA_THROW( "Invalid Alembic file." );
+    }
 
     ABCA_ASSERT( version >= 0 && version <= ALEMBIC_OGAWA_FILE_VERSION,
         "Unsupported file version detected: " << version );
 
     // if it isn't there, something is wrong
     int fileVersion = 0;
-    if ( numChildren > 1 && group->isChildData( 1 ) )
+
+    Ogawa::IDataPtr data = group->getData( 1, 0 );
+    if ( data->getSize() == 4 )
     {
-        Ogawa::IDataPtr data = group->getData( 1, 0 );
-        if ( data->getSize() == 4 )
-        {
-            data->read( 4, &fileVersion, 0, 0 );
-        }
+        data->read( 4, &fileVersion, 0, 0 );
     }
+
     ABCA_ASSERT( fileVersion >= 9999,
         "Unsupported Alembic version detected: " << fileVersion );
 
     m_archiveVersion = fileVersion;
 
-    if ( numChildren > 0 && group->isChildData( numChildren - 1 ) )
-    {
-        ReadTimeSamplesAndMax( group->getData( numChildren - 1, 0 ),
-                               m_timeSamples, m_maxSamples );
-    }
+    ReadTimeSamplesAndMax( group->getData( 4, 0 ),
+                           m_timeSamples, m_maxSamples );
 
-    if ( numChildren > 2 && group->isChildGroup( numChildren - 3 ) )
-    {
-        m_data.reset( new OrData( group->getGroup( numChildren - 3, 0 ), "", 0,
-                                  *this ) );
-    }
+    m_data.reset( new OrData( group->getGroup( 2, 0 ), "", 0, *this ) );
 
     m_header->setName( "ABC" );
     m_header->setFullName( "/" );
 
     // read archive metadata
-    if ( numChildren > 1 && group->isChildData( numChildren - 2 ) )
+    data = group->getData( 3, 0 );
+    if ( data->getSize() > 0 )
     {
-        Ogawa::IDataPtr data = group->getData( numChildren - 2, 0 );
-        if ( data->getSize() > 0 )
-        {
-            char * buf = new char[ data->getSize() ];
-            data->read( data->getSize(), buf, 0, 0 );
-            std::string metaData(buf, data->getSize() );
-            m_header->getMetaData().deserialize( metaData );
-            delete [] buf;
-        }
+        char * buf = new char[ data->getSize() ];
+        data->read( data->getSize(), buf, 0, 0 );
+        std::string metaData(buf, data->getSize() );
+        m_header->getMetaData().deserialize( metaData );
+        delete [] buf;
     }
 
 }
