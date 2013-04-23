@@ -91,12 +91,12 @@ void test()
     TESTING_ASSERT(top->isChildData(2));
     TESTING_ASSERT(top->isEmptyChildData(2));
 
-    Alembic::Ogawa::IGroupPtr a = top->getGroup(0, 0);
+    Alembic::Ogawa::IGroupPtr a = top->getGroup(0, false, 0);
     TESTING_ASSERT(!top->getData(0, 0));
     TESTING_ASSERT(a->getNumChildren() == 2);
-    Alembic::Ogawa::IGroupPtr aa = a->getGroup(0, 0);
+    Alembic::Ogawa::IGroupPtr aa = a->getGroup(0, false, 0);
     Alembic::Ogawa::IDataPtr ad = a->getData(1, 0);
-    TESTING_ASSERT(!a->getGroup(1, 0));
+    TESTING_ASSERT(!a->getGroup(1, false, 0));
     TESTING_ASSERT(ad->getSize() == 1);
 
     TESTING_ASSERT(aa->getNumChildren() == 1);
@@ -109,11 +109,11 @@ void test()
     TESTING_ASSERT(data[3] == 6);
     TESTING_ASSERT(data[4] == 7);
 
-    Alembic::Ogawa::IGroupPtr b = top->getGroup(1, 0);
+    Alembic::Ogawa::IGroupPtr b = top->getGroup(1, false, 0);
     TESTING_ASSERT(b->getNumChildren() == 3);
-    Alembic::Ogawa::IGroupPtr ba = b->getGroup(0, 0);
-    Alembic::Ogawa::IGroupPtr bb = b->getGroup(1, 0);
-    Alembic::Ogawa::IGroupPtr bc = b->getGroup(2, 0);
+    Alembic::Ogawa::IGroupPtr ba = b->getGroup(0, false, 0);
+    Alembic::Ogawa::IGroupPtr bb = b->getGroup(1, false, 0);
+    Alembic::Ogawa::IGroupPtr bc = b->getGroup(2, false, 0);
     TESTING_ASSERT(ba->getNumChildren() == 2);
     TESTING_ASSERT(bb->getNumChildren() == 3);
     TESTING_ASSERT(bc->getNumChildren() == 1);
@@ -137,6 +137,53 @@ void test()
     TESTING_ASSERT(data2[5] == 5);
     TESTING_ASSERT(data2[6] == 6);
     TESTING_ASSERT(data2[7] == 7);
+
+    // now let's check it all but with the light flag set to true
+    a = top->getGroup(0, true, 0);
+    TESTING_ASSERT(a->getNumChildren() == 2);
+    aa = a->getGroup(0, true, 0);
+    ad = a->getData(1, 0);
+    TESTING_ASSERT(!a->getGroup(1, true, 0));
+    TESTING_ASSERT(ad->getSize() == 1);
+
+    TESTING_ASSERT(aa->getNumChildren() == 1);
+    TESTING_ASSERT(aa->getData(0, 0)->getSize() == 5);
+    char data3[5] = {0,0,0,0,0};
+    aa->getData(0, 0)->read(5, data3, 0, 0);
+    TESTING_ASSERT(data3[0] == 0);
+    TESTING_ASSERT(data3[1] == 1);
+    TESTING_ASSERT(data3[2] == 5);
+    TESTING_ASSERT(data3[3] == 6);
+    TESTING_ASSERT(data3[4] == 7);
+
+    b = top->getGroup(1, true, 0);
+    TESTING_ASSERT(b->getNumChildren() == 3);
+    ba = b->getGroup(0, true, 0);
+    bb = b->getGroup(1, true, 0);
+    bc = b->getGroup(2, true, 0);
+    TESTING_ASSERT(ba->getNumChildren() == 2);
+    TESTING_ASSERT(bb->getNumChildren() == 3);
+    TESTING_ASSERT(bc->getNumChildren() == 1);
+
+    TESTING_ASSERT(ba->getData(0, 0)->getSize() == 3);
+    TESTING_ASSERT(ba->getData(1, 0)->getSize() == 4);
+
+    TESTING_ASSERT(bb->getData(0, 0)->getSize() == 5);
+    TESTING_ASSERT(bb->getData(1, 0)->getSize() == 6);
+    TESTING_ASSERT(bb->getData(2, 0)->getSize() == 7);
+
+    bcd = bc->getData(0, 0);
+    TESTING_ASSERT(bcd->getSize() == 8);
+    char data4[8] = {0,0,0,0,0,0,0,0};
+    bcd->read(8, data4, 0, 0);
+    TESTING_ASSERT(data4[0] == 0);
+    TESTING_ASSERT(data4[1] == 1);
+    TESTING_ASSERT(data4[2] == 2);
+    TESTING_ASSERT(data4[3] == 3);
+    TESTING_ASSERT(data4[4] == 9);
+    TESTING_ASSERT(data4[5] == 5);
+    TESTING_ASSERT(data4[6] == 6);
+    TESTING_ASSERT(data4[7] == 7);
 
 }
 

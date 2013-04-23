@@ -118,7 +118,7 @@ void ArImpl::init()
     ReadTimeSamplesAndMax( group->getData( 4, 0 ),
                            m_timeSamples, m_maxSamples );
 
-    m_data.reset( new OrData( group->getGroup( 2, 0 ), "", 0, *this ) );
+    m_data.reset( new OrData( group->getGroup( 2, false, 0 ), "", 0, *this ) );
 
     m_header->setName( "ABC" );
     m_header->setFullName( "/" );

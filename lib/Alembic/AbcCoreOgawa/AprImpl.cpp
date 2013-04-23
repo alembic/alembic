@@ -102,13 +102,16 @@ bool AprImpl::isConstant()
 //-*****************************************************************************
 void AprImpl::getSample( index_t iSampleIndex, AbcA::ArraySamplePtr &oSample )
 {
-    size_t index = m_header->verifyIndex( iSampleIndex );
+    size_t index = m_header->verifyIndex( iSampleIndex ) * 2;
 
     StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
         AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
 
-    ReadArraySample( m_group, index * 2 + 1, index * 2, streamId->getID(),
-                     m_header->header.getDataType(), oSample );
+    std::size_t id = streamId->getID();
+    Ogawa::IDataPtr dims = m_group->getData(index + 1, id);
+    Ogawa::IDataPtr data = m_group->getData(index, id);
+
+    ReadArraySample( dims, data, id, m_header->header.getDataType(), oSample );
 }
 
 //-*****************************************************************************
@@ -145,14 +148,15 @@ bool AprImpl::getKey( index_t iSampleIndex, AbcA::ArraySampleKey & oKey )
     StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
         AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
 
-    Ogawa::IDataPtr data = m_group->getData( index, streamId->getID() );
+    std::size_t id = streamId->getID();
+    Ogawa::IDataPtr data = m_group->getData( index, id );
 
     if ( data )
     {
         if ( data->getSize() >= 16 )
         {
             oKey.numBytes = data->getSize() - 16;
-            data->read( 16, oKey.digest.d, 0, streamId->getID() );
+            data->read( 16, oKey.digest.d, 0, id );
         }
 
         return true;
@@ -176,8 +180,11 @@ void AprImpl::getDimensions( index_t iSampleIndex,
     StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
         AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
 
-    ReadDimensions( m_group, index + 1, index, streamId->getID(),
-                    m_header->header.getDataType(), oDim );
+    std::size_t id = streamId->getID();
+    Ogawa::IDataPtr dims = m_group->getData(index + 1, id);
+    Ogawa::IDataPtr data = m_group->getData(index, id);
+
+    ReadDimensions( dims, data, id, m_header->header.getDataType(), oDim );
 
 }
 
@@ -190,8 +197,9 @@ void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
     StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
         AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
 
-    ReadData( iIntoLocation, m_group, index, streamId->getID(),
-               m_header->header.getDataType(), iPod );
+    std::size_t id = streamId->getID();
+    Ogawa::IDataPtr data = m_group->getData( index, id );
+    ReadData( iIntoLocation, data, id, m_header->header.getDataType(), iPod );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

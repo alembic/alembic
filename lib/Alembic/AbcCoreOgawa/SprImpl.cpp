@@ -107,7 +107,9 @@ void SprImpl::getSample( index_t iSampleIndex, void * iIntoLocation )
     StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
         AbcA::ArchiveReader > ( getObject()->getArchive() )->getStreamID();
 
-    ReadData( iIntoLocation, m_group, index, streamId->getID(),
+    std::size_t id = streamId->getID();
+    Ogawa::IDataPtr data = m_group->getData( index, id );
+    ReadData( iIntoLocation, data, id,
               m_header->header.getDataType(),
               m_header->header.getDataType().getPod() );
 }

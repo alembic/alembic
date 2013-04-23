@@ -67,7 +67,7 @@ OrImpl::OrImpl( AbcA::ObjectReaderPtr iParent,
 
     StreamIDPtr streamId = m_archive->getStreamID();
     std::size_t id = streamId->getID();
-    Ogawa::IGroupPtr group = iParentGroup->getGroup( iGroupIndex, id );
+    Ogawa::IGroupPtr group = iParentGroup->getGroup( iGroupIndex, false, id );
     m_data.reset( new OrData( group, iHeader->getFullName(), id,
         *m_archive ) );
 }

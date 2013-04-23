@@ -72,7 +72,7 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
 
     if ( numChildren > 0 && m_group->isChildGroup( 0 ) )
     {
-        Ogawa::IGroupPtr group = m_group->getGroup( 0, iThreadId );
+        Ogawa::IGroupPtr group = m_group->getGroup( 0, false, iThreadId );
         m_data.reset( new CprData( group, iArchive, iThreadId ) );
     }
 }

@@ -46,6 +46,8 @@ class IGroup::PrivateData
 public:
     PrivateData(IStreamsPtr iStreams)
     {
+        numChildren = 0;
+        pos = 0;
         streams = iStreams;
     }
 
@@ -54,10 +56,14 @@ public:
     IStreamsPtr streams;
 
     std::vector<Alembic::Util::uint64_t> childVec;
+
+    Alembic::Util::uint64_t numChildren;
+    Alembic::Util::uint64_t pos;
 };
 
 IGroup::IGroup(IStreamsPtr iStreams,
                Alembic::Util::uint64_t iPos,
+               bool iLight,
                std::size_t iThreadIndex) :
     mData(new IGroup::PrivateData(iStreams))
 {
@@ -67,15 +73,18 @@ IGroup::IGroup(IStreamsPtr iStreams,
         return;
     }
 
-    Alembic::Util::uint64_t numChildren = 0;
-    mData->streams->read(iThreadIndex, iPos, 8, &numChildren);
+    mData->pos = iPos;
+    mData->streams->read(iThreadIndex, iPos, 8, &mData->numChildren);
 
     // 0 should NOT have been written, this groups should have been the
     // special EMPTY_GROUP instead
 
-    mData->childVec.resize(numChildren);
-    mData->streams->read(iThreadIndex, iPos + 8, numChildren * 8,
-                         &(mData->childVec.front()));
+    if (!iLight)
+    {
+        mData->childVec.resize(mData->numChildren);
+        mData->streams->read(iThreadIndex, iPos + 8, mData->numChildren * 8,
+                             &(mData->childVec.front()));
+    }
 }
 
 IGroup::~IGroup()
@@ -83,12 +92,29 @@ IGroup::~IGroup()
 
 }
 
-IGroupPtr IGroup::getGroup(std::size_t iIndex, std::size_t iThreadIndex)
+IGroupPtr IGroup::getGroup(std::size_t iIndex, bool iLight,
+                           std::size_t iThreadIndex)
 {
     IGroupPtr child;
-    if (isChildGroup(iIndex))
+    if (isLight())
     {
-        child.reset(new IGroup(mData->streams, mData->childVec[iIndex],
+        if (iIndex < mData->numChildren)
+        {
+            Alembic::Util::uint64_t childPos = 0;
+            mData->streams->read(iThreadIndex, mData->pos + 8 * iIndex + 8, 8,
+                                 &childPos);
+
+            // top bit should not be set for groups
+            if ((childPos & EMPTY_DATA) == 0)
+            {
+                child.reset(new IGroup(mData->streams, childPos, iLight,
+                                       iThreadIndex));
+            }
+        }
+    }
+    else if (isChildGroup(iIndex))
+    {
+        child.reset(new IGroup(mData->streams, mData->childVec[iIndex], iLight,
                                iThreadIndex));
     }
     return child;
@@ -97,7 +123,22 @@ IGroupPtr IGroup::getGroup(std::size_t iIndex, std::size_t iThreadIndex)
 IDataPtr IGroup::getData(std::size_t iIndex, std::size_t iThreadIndex)
 {
     IDataPtr child;
-    if (isChildData(iIndex))
+    if (isLight())
+    {
+        if (iIndex < mData->numChildren)
+        {
+            Alembic::Util::uint64_t childPos = 0;
+            mData->streams->read(iThreadIndex, mData->pos + 8 * iIndex + 8, 8,
+                                 &childPos);
+
+            // top bit should be set for data
+            if ((childPos & EMPTY_DATA) != 0)
+            {
+                child.reset(new IData(mData->streams, childPos, iThreadIndex));
+            }
+        }
+    }
+    else if (isChildData(iIndex))
     {
         child.reset(new IData(mData->streams, mData->childVec[iIndex],
                               iThreadIndex));
@@ -107,7 +148,7 @@ IDataPtr IGroup::getData(std::size_t iIndex, std::size_t iThreadIndex)
 
 std::size_t IGroup::getNumChildren() const
 {
-    return mData->childVec.size();
+    return mData->numChildren;
 }
 
 bool IGroup::isChildGroup(std::size_t iIndex) const
@@ -132,6 +173,11 @@ bool IGroup::isEmptyChildData(std::size_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
         mData->childVec[iIndex] == EMPTY_DATA);
+}
+
+bool IGroup::isLight() const
+{
+    return mData->numChildren != 0 && mData->childVec.empty();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

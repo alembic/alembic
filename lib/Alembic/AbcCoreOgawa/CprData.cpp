@@ -140,7 +140,7 @@ CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
         AbcA::ArchiveReader > (
             iParent->getObject()->getArchive() )->getStreamID();
 
-        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second,
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second, true,
                                                     streamId->getID() );
 
         ABCA_ASSERT( group, "Scalar Property not backed by a valid group.");
@@ -185,7 +185,7 @@ CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
         AbcA::ArchiveReader > (
             iParent->getObject()->getArchive() )->getStreamID();
 
-        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second,
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second, true,
                                                     streamId->getID() );
 
         ABCA_ASSERT( group, "Array Property not backed by a valid group.");
@@ -231,7 +231,7 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
         AbcA::ArchiveReader > (
             iParent->getObject()->getArchive() )->getStreamID();
 
-        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second,
+        Ogawa::IGroupPtr group = m_group->getGroup( fiter->second, false,
                                                     streamId->getID() );
 
         ABCA_ASSERT( group, "Compound Property not backed by a valid group.");

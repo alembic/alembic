@@ -51,39 +51,36 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void
-ReadDimensions( Ogawa::IGroupPtr iGroup,
-                size_t iDimsIndex,
-                size_t iDataIndex,
+ReadDimensions( Ogawa::IDataPtr iDims,
+                Ogawa::IDataPtr iData,
                 size_t iThreadId,
                 const AbcA::DataType &iDataType,
                 Util::Dimensions & oDim )
 {
     // find it based on of the size of the data
-    if ( iGroup->isEmptyChildData( iDimsIndex ) )
+    if ( iDims->getSize() == 0 )
     {
-        if ( iGroup->isEmptyChildData( iDataIndex ) )
+        if ( iData->getSize() == 0 )
         {
             oDim = Util::Dimensions( 0 );
         }
         else
         {
-            Ogawa::IDataPtr data = iGroup->getData( iDataIndex, iThreadId );
-            oDim = Util::Dimensions( ( data->getSize() - 16 ) /
+            oDim = Util::Dimensions( ( iData->getSize() - 16 ) /
                                      iDataType.getNumBytes() );
         }
     }
+    // we need to read our dimensions
     else
     {
-        // we need to read our dimensions
-        Ogawa::IDataPtr data = iGroup->getData( iDimsIndex, iThreadId );
 
         // we write them as uint32_t so / 4
-        std::size_t numRanks = data->getSize() / 4;
+        std::size_t numRanks = iDims->getSize() / 4;
 
         oDim.setRank( numRanks );
 
         std::vector< uint32_t > dims( numRanks );
-        data->read( numRanks * 4, &( dims.front() ), 0, iThreadId );
+        iDims->read( numRanks * 4, &( dims.front() ), 0, iThreadId );
         for ( std::size_t i = 0; i < numRanks; ++i )
         {
             oDim[i] = dims[i];
@@ -1306,8 +1303,7 @@ ConvertData( Alembic::Util::PlainOldDataType fromPod,
 //-*****************************************************************************
 void
 ReadData( void * iIntoLocation,
-          Ogawa::IGroupPtr iGroup,
-          size_t iIndex,
+          Ogawa::IDataPtr iData,
           size_t iThreadId,
           const AbcA::DataType &iDataType,
           Util::PlainOldDataType iAsPod )
@@ -1320,8 +1316,7 @@ ReadData( void * iIntoLocation,
         curPod != Alembic::Util::kWstringPOD ),
         "Cannot convert the data to or from a string, or wstring." );
 
-    Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
-    std::size_t dataSize = data->getSize();
+    std::size_t dataSize = iData->getSize();
 
     if ( dataSize < 16 )
     {
@@ -1343,7 +1338,7 @@ ReadData( void * iIntoLocation,
 
         std::size_t numChars = dataSize - 16;
         char * buf = new char[ numChars ];
-        data->read( numChars, buf, 16, iThreadId );
+        iData->read( numChars, buf, 16, iThreadId );
 
         std::size_t startStr = 0;
         std::size_t strPos = 0;
@@ -1373,7 +1368,7 @@ ReadData( void * iIntoLocation,
 
         std::size_t numChars = ( dataSize - 16 ) / 4;
         uint32_t * buf = new uint32_t[ numChars ];
-        data->read( dataSize - 16, buf, 16, iThreadId );
+        iData->read( dataSize - 16, buf, 16, iThreadId );
 
         std::size_t strPos = 0;
 
@@ -1397,13 +1392,13 @@ ReadData( void * iIntoLocation,
     else if ( iAsPod == curPod )
     {
         // don't read the key
-        data->read( dataSize - 16, iIntoLocation, 16, iThreadId );
+        iData->read( dataSize - 16, iIntoLocation, 16, iThreadId );
     }
     else if ( PODNumBytes( curPod ) <= PODNumBytes( iAsPod ) )
     {
         // - 16 to skip key
         std::size_t numBytes = dataSize - 16;
-        data->read( numBytes, iIntoLocation, 16, iThreadId );
+        iData->read( numBytes, iIntoLocation, 16, iThreadId );
 
         char * buf = static_cast< char * >( iIntoLocation );
         ConvertData( curPod, iAsPod, buf, iIntoLocation, numBytes );
@@ -1416,7 +1411,7 @@ ReadData( void * iIntoLocation,
 
         // read into a temporary buffer and cast them one at a time
         char * buf = new char[ numBytes ];
-        data->read( numBytes, buf, 16, iThreadId );
+        iData->read( numBytes, buf, 16, iThreadId );
 
         ConvertData( curPod, iAsPod, buf, iIntoLocation, numBytes );
 
@@ -1427,20 +1422,19 @@ ReadData( void * iIntoLocation,
 
 //-*****************************************************************************
 void
-ReadArraySample( Ogawa::IGroupPtr iGroup,
-                 size_t iDimIndex,
-                 size_t iDataIndex,
+ReadArraySample( Ogawa::IDataPtr iDims,
+                 Ogawa::IDataPtr iData,
                  size_t iThreadId,
                  const AbcA::DataType &iDataType,
                  AbcA::ArraySamplePtr &oSample )
 {
     // get our dimensions
     Util::Dimensions dims;
-    ReadDimensions( iGroup, iDimIndex, iDataIndex, iThreadId, iDataType, dims );
+    ReadDimensions( iDims, iData, iThreadId, iDataType, dims );
 
     oSample = AbcA::AllocateArraySample( iDataType, dims );
 
-    ReadData( const_cast<void*>( oSample->getData() ), iGroup, iDataIndex,
+    ReadData( const_cast<void*>( oSample->getData() ), iData,
         iThreadId, iDataType, iDataType.getPod() );
 
 }

@@ -57,7 +57,7 @@ void IArchive::init()
     {
         Alembic::Util::uint64_t pos = 0;
         mStreams->read(0, 8, 8, &pos);
-        mGroup.reset(new IGroup(mStreams, pos, 0));
+        mGroup.reset(new IGroup(mStreams, pos, false, 0));
     }
 }
 

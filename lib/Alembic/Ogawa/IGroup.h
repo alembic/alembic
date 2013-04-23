@@ -52,7 +52,9 @@ class IGroup
 public:
     ~IGroup();
 
-    IGroupPtr getGroup(std::size_t iIndex, std::size_t iThreadIndex);
+    IGroupPtr getGroup(std::size_t iIndex, bool iLight,
+                       std::size_t iThreadIndex);
+
     IDataPtr getData(std::size_t iIndex, std::size_t iThreadIndex);
 
     std::size_t getNumChildren() const;
@@ -63,9 +65,11 @@ public:
     bool isEmptyChildGroup(std::size_t iIndex) const;
     bool isEmptyChildData(std::size_t iIndex) const;
 
+    bool isLight() const;
+
 private:
     friend class IArchive;
-    IGroup(IStreamsPtr iStreams, Alembic::Util::uint64_t iPos,
+    IGroup(IStreamsPtr iStreams, Alembic::Util::uint64_t iPos, bool iLight,
            std::size_t iThreadIndex);
 
     class PrivateData;

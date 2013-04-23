@@ -50,9 +50,8 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 void
-ReadDimensions( Ogawa::IGroupPtr iGroup,
-                size_t iDimsIndex,
-                size_t iDataIndex,
+ReadDimensions( Ogawa::IDataPtr iDims,
+                Ogawa::IDataPtr iData,
                 size_t iThreadId,
                 const AbcA::DataType &iDataType,
                 Util::Dimensions & oDim );
@@ -60,17 +59,15 @@ ReadDimensions( Ogawa::IGroupPtr iGroup,
 //-*****************************************************************************
 void
 ReadData( void * iIntoLocation,
-          Ogawa::IGroupPtr iGroup,
-          size_t iIndex,
+          Ogawa::IDataPtr iData,
           size_t iThreadId,
           const AbcA::DataType &iDataType,
           Util::PlainOldDataType iAsPod );
 
 //-*****************************************************************************
 void
-ReadArraySample( Ogawa::IGroupPtr iGroup,
-                 size_t iDimIndex,
-                 size_t iDataIndex,
+ReadArraySample( Ogawa::IDataPtr iDims,
+                 Ogawa::IDataPtr iData,
                  size_t iThreadId,
                  const AbcA::DataType &iDataType,
                  AbcA::ArraySamplePtr &oSample );
