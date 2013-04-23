@@ -45,15 +45,29 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 //-*****************************************************************************
 
-void pushUint32( std::vector< uint8_t > & ioData, uint32_t iVal )
+void pushUint32WithHint( std::vector< uint8_t > & ioData,
+                         uint32_t iVal, uint32_t iHint )
 {
     uint8_t * data = ( uint8_t * ) &iVal;
-    ioData.push_back( data[0] );
-    ioData.push_back( data[1] );
-    ioData.push_back( data[2] );
-    ioData.push_back( data[3] );
+    if ( iHint == 0)
+    {
+        ioData.push_back( data[0] );
+    }
+    else if ( iHint == 1 )
+    {
+        ioData.push_back( data[0] );
+        ioData.push_back( data[1] );
+    }
+    else if ( iHint == 2 )
+    {
+        ioData.push_back( data[0] );
+        ioData.push_back( data[1] );
+        ioData.push_back( data[2] );
+        ioData.push_back( data[3] );
+    }
 }
 
+//-*****************************************************************************
 void pushChrono( std::vector< uint8_t > & ioData, chrono_t iVal )
 {
     uint8_t * data = ( uint8_t * ) &iVal;
@@ -228,22 +242,68 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
     // 0000 0000 0000 0000 0000 0000 0000 0011
     static const uint32_t ptypeMask = 0x0003;
 
-    // 0000 0000 0000 0000 0000 0000 0011 1100
-    static const uint32_t podMask = 0x003c;
+    // 0000 0000 0000 0000 0000 0000 0000 1100
+    static const uint32_t sizeHintMask = 0x000c;
 
-    // 0000 0000 0000 0000 0000 0000 0100 0000
-    static const uint32_t hasTsidxMask = 0x0040;
+    // 0000 0000 0000 0000 0000 0000 1111 0000
+    static const uint32_t podMask = 0x00f0;
 
-    // 0000 0000 0000 0000 0000 0000 1000 0000
-    static const uint32_t needsFirstLastMask = 0x0080;
+    // 0000 0000 0000 0000 0000 0001 0000 0000
+    static const uint32_t hasTsidxMask = 0x0100;
 
-    // 0000 0000 0000 0000 1111 1111 0000 0000
-    static const uint32_t extentMask = 0xff00;
+    // 0000 0000 0000 0000 0000 0010 0000 0000
+    static const uint32_t needsFirstLastMask = 0x0200;
 
-    // 0000 0000 0000 0001 0000 0000 0000 0000
-    static const uint32_t homogenousMask = 0x10000;
+    // 0000 0000 0000 0000 0000 0100 0000 0000
+    static const uint32_t homogenousMask = 0x400;
+
+    // 0000 0000 0000 0000 0000 1000 0000 0000
+    static const uint32_t constantMask = 0x800;
+
+    // 0000 0000 0000 1111 1111 0000 0000 0000
+    static const uint32_t extentMask = 0xff000;
 
     // could put a geo scope or an interpretation mask here
+
+    std::string metaData = iHeader.getMetaData().serialize();
+    uint32_t metaDataSize = metaData.size();
+
+    // keep track of the longest thing for byteSizeHint and so we don't
+    // have to use 4 byte sizes if we don't need it
+    uint32_t maxSize = metaDataSize;
+
+    uint32_t nameSize = iHeader.getName().size();
+    if ( maxSize < nameSize )
+    {
+        maxSize = nameSize;
+    }
+
+    if ( maxSize < iNumSamples )
+    {
+        maxSize = iNumSamples;
+    }
+
+    if ( maxSize < iTimeSamplingIndex )
+    {
+        maxSize = iTimeSamplingIndex;
+    }
+
+    // size hint helps determine how many bytes are enough to store the
+    // various string size, num samples and time sample indices
+    // 0 for 1 byte
+    // 1 for 2 bytes
+    // 2 for 4 bytes
+    uint32_t sizeHint = 0;
+    if ( maxSize > 255 && maxSize < 65536 )
+    {
+        sizeHint = 1;
+    }
+    else if ( maxSize >= 65536)
+    {
+        sizeHint = 2;
+    }
+
+    info |= sizeHintMask & ( sizeHint << 2 );
 
     // compounds are treated differently
     if ( !iHeader.isCompound() )
@@ -255,7 +315,7 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
         info |= ( uint32_t ) isScalarLike;
 
         uint32_t pod = ( uint32_t )iHeader.getDataType().getPod();
-        info |= podMask & ( pod << 2 );
+        info |= podMask & ( pod << 4 );
 
         if (iTimeSamplingIndex != 0)
         {
@@ -264,14 +324,19 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
 
         bool needsFirstLast = false;
 
-        if (iFirstChangedIndex != 1 || iLastChangedIndex != iNumSamples - 1)
+        if (iFirstChangedIndex == 0 && iLastChangedIndex == 0)
+        {
+            info |= constantMask;
+        }
+        else if (iFirstChangedIndex != 1 ||
+                 iLastChangedIndex != iNumSamples - 1)
         {
             info |= needsFirstLastMask;
             needsFirstLast = true;
         }
 
         uint32_t extent = ( uint32_t )iHeader.getDataType().getExtent();
-        info |= extentMask & ( extent << 8 );
+        info |= extentMask & ( extent << 12 );
 
         if ( isHomogenous )
         {
@@ -286,39 +351,39 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
             "First Changed Index: " << iFirstChangedIndex << std::endl <<
             "Last Changed Index: " << iLastChangedIndex << std::endl );
 
-        pushUint32( ioData, info );
-        pushUint32( ioData, iNumSamples );
+        // info is always 4 bytes so use hint 2
+        pushUint32WithHint( ioData, info, 2 );
+
+        pushUint32WithHint( ioData, iNumSamples, sizeHint );
 
         // don't bother writing out first and last change if every sample
         // was different
         if ( needsFirstLast )
         {
-            pushUint32( ioData, iFirstChangedIndex );
-            pushUint32( ioData, iLastChangedIndex );
+            pushUint32WithHint( ioData, iFirstChangedIndex, sizeHint );
+            pushUint32WithHint( ioData, iLastChangedIndex, sizeHint );
         }
 
         // finally set time sampling index on the end if necessary
         if (iTimeSamplingIndex != 0)
         {
-            pushUint32( ioData, iTimeSamplingIndex );
+            pushUint32WithHint( ioData, iTimeSamplingIndex, sizeHint );
         }
 
     }
-    // compound, shove in a 0
+    // compound, shove in just info (hint is 2)
     else
     {
-        pushUint32( ioData, info );
+        pushUint32WithHint( ioData, info, 2 );
     }
 
-    uint32_t nameSize = iHeader.getName().size();
-    pushUint32( ioData, nameSize );
+    pushUint32WithHint( ioData, nameSize, sizeHint );
 
     ioData.insert( ioData.end(), iHeader.getName().begin(),
                    iHeader.getName().end() );
 
-    std::string metaData = iHeader.getMetaData().serialize();
-    uint32_t metaDataSize = ( uint32_t ) metaData.size();
-    pushUint32( ioData, metaDataSize );
+    pushUint32WithHint( ioData, metaDataSize, sizeHint );
+
     if ( metaDataSize )
     {
         ioData.insert( ioData.end(), metaData.begin(), metaData.end() );
@@ -331,13 +396,13 @@ void WriteObjectHeader( std::vector< uint8_t > & ioData,
                     const AbcA::ObjectHeader &iHeader )
 {
     uint32_t nameSize = iHeader.getName().size();
-    pushUint32( ioData, nameSize );
+    pushUint32WithHint( ioData, nameSize, 2 );
     ioData.insert( ioData.end(), iHeader.getName().begin(),
                    iHeader.getName().end() );
 
     std::string metaData = iHeader.getMetaData().serialize();
     uint32_t metaDataSize = (uint32_t) metaData.size();
-    pushUint32( ioData, metaDataSize );
+    pushUint32WithHint( ioData, metaDataSize, 2 );
     if ( metaDataSize )
     {
         ioData.insert( ioData.end(), metaData.begin(), metaData.end() );
@@ -349,7 +414,7 @@ void WriteTimeSampling( std::vector< uint8_t > & ioData,
                     uint32_t  iMaxSample,
                     const AbcA::TimeSampling &iTsmp )
 {
-    pushUint32( ioData, iMaxSample );
+    pushUint32WithHint( ioData, iMaxSample, 2 );
 
     AbcA::TimeSamplingType tst = iTsmp.getTimeSamplingType();
 
@@ -362,7 +427,7 @@ void WriteTimeSampling( std::vector< uint8_t > & ioData,
 
     uint32_t spc = (uint32_t) samps.size();
 
-    pushUint32( ioData, spc );
+    pushUint32WithHint( ioData, spc, 2 );
 
     for ( std::size_t i = 0; i < samps.size(); ++i )
     {

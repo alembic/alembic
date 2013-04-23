@@ -42,14 +42,6 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-//-*****************************************************************************
-//-*****************************************************************************
-// NON-PUBLICLY VISIBLE HELPERS
-//-*****************************************************************************
-//-*****************************************************************************
-//-*****************************************************************************
-
-//-*****************************************************************************
 void
 ReadDimensions( Ogawa::IDataPtr iDims,
                 Ogawa::IDataPtr iData,
@@ -1524,6 +1516,31 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 }
 
 //-*****************************************************************************
+uint32_t GetUint32WithHint(const std::vector< char > & iBuf,
+                           uint32_t iSizeHint,
+                           std::size_t & ioPos)
+{
+    uint32_t retVal = 0;
+
+    if ( iSizeHint == 0 )
+    {
+        retVal = ( uint32_t ) iBuf[ioPos];
+        ioPos ++;
+    }
+    else if ( iSizeHint == 1 )
+    {
+        retVal = ( uint32_t )( *( (uint16_t *)( &iBuf[ioPos] ) ) );
+        ioPos += 2;
+    }
+    else if ( iSizeHint == 2 )
+    {
+        retVal = *( ( uint32_t * )( &iBuf[ioPos] ) );
+        ioPos += 4;
+    }
+    return retVal;
+}
+
+//-*****************************************************************************
 void
 ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                      size_t iIndex,
@@ -1534,20 +1551,26 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     // 0000 0000 0000 0000 0000 0000 0000 0011
     static const uint32_t ptypeMask = 0x0003;
 
-    // 0000 0000 0000 0000 0000 0000 0011 1100
-    static const uint32_t podMask = 0x003c;
+    // 0000 0000 0000 0000 0000 0000 0000 1100
+    static const uint32_t sizeHintMask = 0x000c;
 
-    // 0000 0000 0000 0000 0000 0000 0100 0000
-    static const uint32_t hasTsidxMask = 0x0040;
+    // 0000 0000 0000 0000 0000 0000 1111 0000
+    static const uint32_t podMask = 0x00f0;
 
-    // 0000 0000 0000 0000 0000 0000 1000 0000
-    static const uint32_t needsFirstLastMask = 0x0080;
+    // 0000 0000 0000 0000 0000 0001 0000 0000
+    static const uint32_t hasTsidxMask = 0x0100;
 
-    // 0000 0000 0000 0000 1111 1111 0000 0000
-    static const uint32_t extentMask = 0xff00;
+    // 0000 0000 0000 0000 0000 0010 0000 0000
+    static const uint32_t needsFirstLastMask = 0x0200;
 
-    // 0000 0000 0000 0001 0000 0000 0000 0000
-    static const uint32_t homogenousMask = 0x10000;
+    // 0000 0000 0000 0000 0000 0100 0000 0000
+    static const uint32_t homogenousMask = 0x400;
+
+    // 0000 0000 0000 0000 0000 1000 0000 0000
+    static const uint32_t constantMask = 0x800;
+
+    // 0000 0000 0000 1111 1111 0000 0000 0000
+    static const uint32_t extentMask = 0xff000;
 
     Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
     ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
@@ -1563,6 +1586,8 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     while ( pos < buf.size() )
     {
         PropertyHeaderPtr header( new PropertyHeaderAndFriends() );
+
+        // first 4 bytes is always info
         uint32_t info =  *( (uint32_t *)( &buf[pos] ) );
         pos += 4;
 
@@ -1581,11 +1606,13 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             header->header.setPropertyType( AbcA::kArrayProperty );
         }
 
+        uint32_t sizeHint = ( info & sizeHintMask ) >> 2;
+
         // if we aren't a compound we may need to do a bunch of other work
         if ( !header->header.isCompound() )
         {
-            // Read the pod type out of bits 2-5
-            char podt = ( char )( ( info & podMask ) >> 2 );
+            // Read the pod type out of bits 4-7
+            char podt = ( char )( ( info & podMask ) >> 4 );
             if ( podt != ( char )Alembic::Util::kBooleanPOD &&
                  podt != ( char )Alembic::Util::kUint8POD &&
                  podt != ( char )Alembic::Util::kInt8POD &&
@@ -1604,22 +1631,26 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                 ABCA_THROW( "Read invalid POD type: " << ( int )podt );
             }
 
-            uint8_t extent = ( info & extentMask ) >> 8;
+            uint8_t extent = ( info & extentMask ) >> 12;
             header->header.setDataType( AbcA::DataType(
                 ( Util::PlainOldDataType ) podt, extent ) );
 
             header->isHomogenous = ( info & homogenousMask ) != 0;
 
-            header->nextSampleIndex =  *( (uint32_t *)( &buf[pos] ) );
-            pos += 4;
+            header->nextSampleIndex = GetUint32WithHint( buf, sizeHint, pos );
 
             if ( ( info & needsFirstLastMask ) != 0 )
             {
-                header->firstChangedIndex =  *( (uint32_t *)( &buf[pos] ) );
-                pos += 4;
+                header->firstChangedIndex =
+                    GetUint32WithHint( buf, sizeHint, pos );
 
-                header->lastChangedIndex =  *( (uint32_t *)( &buf[pos] ) );
-                pos += 4;
+                header->lastChangedIndex =
+                    GetUint32WithHint( buf, sizeHint, pos );
+            }
+            else if ( ( info & constantMask ) != 0 )
+            {
+                header->firstChangedIndex = 0;
+                header->lastChangedIndex = 0;
             }
             else
             {
@@ -1629,10 +1660,11 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
 
             if ( ( info & hasTsidxMask ) != 0 )
             {
-                header->timeSamplingIndex =  *( (uint32_t *)( &buf[pos] ) );
+                header->timeSamplingIndex =
+                    GetUint32WithHint( buf, sizeHint, pos );
+
                 header->header.setTimeSampling(
                     iArchive.getTimeSampling( header->timeSamplingIndex ) );
-                pos += 4;
             }
             else
             {
@@ -1640,15 +1672,13 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             }
         }
 
-        uint32_t nameSize = *( (uint32_t *)( &buf[pos] ) );
-        pos += 4;
+        uint32_t nameSize = GetUint32WithHint( buf, sizeHint, pos );
 
         std::string name( &buf[pos], nameSize );
         header->header.setName( name );
         pos += nameSize;
 
-        uint32_t metaDataSize = *( (uint32_t *)( &buf[pos] ) );
-        pos += 4;
+        uint32_t metaDataSize = GetUint32WithHint( buf, sizeHint, pos );
 
         std::string metaData( &buf[pos], metaDataSize );
         pos += metaDataSize;
