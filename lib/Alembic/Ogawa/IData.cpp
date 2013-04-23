@@ -102,6 +102,11 @@ std::size_t IData::getSize() const
     return mData->size;
 }
 
+Alembic::Util::uint64_t IData::getPos() const
+{
+    return mData->pos;
+}
+
 } // End namespace ALEMBIC_VERSION_NS
 } // End namespace Ogawa
 } // End namespace Alembic

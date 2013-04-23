@@ -54,6 +54,10 @@ public:
 
     std::size_t getSize() const;
 
+    // not really necessary for most workflows, it could be used by some
+    // Ogawa utilities to detect when this IData is shared
+    Alembic::Util::uint64_t getPos() const;
+
 private:
     friend class IGroup;
     IData(IStreamsPtr iStreams, uint64_t iPos, std::size_t iThreadId);
