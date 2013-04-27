@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -221,7 +221,7 @@ void stitchCompoundProp(ICompoundPropertyVec & iCompoundProps,
         if (propHeader.isCompound())
         {
             ICompoundPropertyVec childProps(iCompoundProps.size());
-            for (size_t i = 0; i < numProps; ++i)
+            for (size_t i = 0; i < childProps.size(); ++i)
             {
                 childProps[i] = ICompoundProperty(iCompoundProps[i],
                     propHeader.getName());
