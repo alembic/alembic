@@ -49,8 +49,10 @@ class CprData : public Alembic::Util::enable_shared_from_this<CprData>
 {
 public:
 
-    CprData( Ogawa::IGroupPtr iGroup, AbcA::ArchiveReader & iArchive,
-             size_t iThreadId );
+    CprData( Ogawa::IGroupPtr iGroup,
+             std::size_t iThreadId,
+             AbcA::ArchiveReader & iArchive,
+             const std::vector< AbcA::MetaData > & iIndexedMetaData );
 
     ~CprData();
 

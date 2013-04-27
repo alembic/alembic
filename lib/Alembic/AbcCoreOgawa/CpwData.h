@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreOgawa_CpwData_h_
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
+#include <Alembic/AbcCoreOgawa/MetaDataMap.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -80,6 +81,8 @@ public:
     createCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
         const std::string & iName,
         const AbcA::MetaData & iMetaData );
+
+    void writePropertyHeaders( MetaDataMapPtr iMetaDataMap );
 
 private:
 

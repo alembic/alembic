@@ -102,6 +102,8 @@ public:
 
     StreamIDPtr getStreamID();
 
+    const std::vector< AbcA::MetaData > & getIndexedMetaData();
+
 private:
     void init();
 
@@ -122,6 +124,7 @@ private:
 
     StreamManager m_manager;
 
+    std::vector< AbcA::MetaData > m_indexMetaData;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

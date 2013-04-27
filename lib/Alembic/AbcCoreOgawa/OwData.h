@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreOgawa_OwData_h_
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
+#include <Alembic/AbcCoreOgawa/MetaDataMap.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -73,6 +74,8 @@ public:
                                        const AbcA::ObjectHeader &iHeader );
 
     Ogawa::OGroupPtr getGroup();
+
+    void writeHeaders( MetaDataMapPtr iMetaDataMap );
 
 private:
 

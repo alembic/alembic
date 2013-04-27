@@ -43,6 +43,7 @@ SET( CXX_FILES
   CprImpl.cpp
   CpwData.cpp
   CpwImpl.cpp
+  MetaDataMap.cpp
   OrData.cpp
   OrImpl.cpp
   OwData.cpp
@@ -66,6 +67,7 @@ SET( H_FILES
   CpwData.h
   CpwImpl.h
   Foundation.h
+  MetaDataMap.h
   OrData.h
   OrImpl.h
   OwData.h

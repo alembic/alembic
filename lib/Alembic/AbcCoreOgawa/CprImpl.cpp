@@ -49,7 +49,9 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
                   Ogawa::IGroupPtr iGroup,
-                  PropertyHeaderPtr iHeader )
+                  PropertyHeaderPtr iHeader,
+                  std::size_t iThreadId,
+                  const std::vector< AbcA::MetaData > & iIndexedMetaData )
     : m_parent( iParent )
     , m_header( iHeader )
 {
@@ -68,8 +70,8 @@ CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
     ABCA_ASSERT( optr, "Invalid object in CprImpl::CprImpl(Compound)" );
     m_object = optr;
 
-    m_data.reset( new CprData( iGroup, *m_parent->getObject()->getArchive(),
-                               0 ) );
+    m_data.reset( new CprData( iGroup, iThreadId, *( m_object->getArchive() ),
+                               iIndexedMetaData ) );
 }
 
 //-*****************************************************************************

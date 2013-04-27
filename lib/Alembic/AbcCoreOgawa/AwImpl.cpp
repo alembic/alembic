@@ -49,6 +49,7 @@ AwImpl::AwImpl( const std::string &iFileName,
   : m_fileName( iFileName )
   , m_metaData( iMetaData )
   , m_archive( iFileName )
+  , m_metaDataMap( new MetaDataMap() )
 {
 
     // add default time sampling
@@ -180,13 +181,21 @@ AwImpl::~AwImpl()
     // empty out the map so any dataset IDs will be freed up
     m_writtenSampleMap.clear();
 
+    // write out our child headers
+    if ( m_data )
+    {
+        m_data->writeHeaders( m_metaDataMap );
+    }
+
     // let go of our reference to the data for the top object
     m_data.reset();
 
     // encode and write the time samplings and max samples into data
     if ( m_archive.isValid() )
     {
-        // encode and write the Metadata for the archive
+        // encode and write the Metadata for the archive, since the top level
+        // meta data can be kinda big and is very specialized don't worry
+        // about putting it into the meta data map
         std::string metaData = m_metaData.serialize();
         m_archive.getGroup()->addData( metaData.size(), metaData.c_str() );
 
@@ -200,6 +209,7 @@ AwImpl::~AwImpl()
         }
 
         m_archive.getGroup()->addData( data.size(), &( data.front() ) );
+        m_metaDataMap->write( m_archive.getGroup() );
     }
 
 }

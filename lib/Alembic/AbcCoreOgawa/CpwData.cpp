@@ -39,6 +39,7 @@
 #include <Alembic/AbcCoreOgawa/SpwImpl.h>
 #include <Alembic/AbcCoreOgawa/ApwImpl.h>
 #include <Alembic/AbcCoreOgawa/CpwImpl.h>
+#include <Alembic/AbcCoreOgawa/AwImpl.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -53,25 +54,6 @@ CpwData::CpwData( Ogawa::OGroupPtr iGroup )
 //-*****************************************************************************
 CpwData::~CpwData()
 {
-    // pack in child header and other info
-    std::vector< uint8_t > data;
-    for ( size_t i = 0; i < getNumProperties(); ++i )
-    {
-        PropertyHeaderPtr prop = m_propertyHeaders[i];
-        WritePropertyInfo( data,
-                           prop->header,
-                           prop->isScalarLike,
-                           prop->isHomogenous,
-                           prop->timeSamplingIndex,
-                           prop->nextSampleIndex,
-                           prop->firstChangedIndex,
-                           prop->lastChangedIndex );
-    }
-
-    if ( !data.empty() )
-    {
-        m_group->addData( data.size(), &( data.front() ) );
-    }
 }
 
 //-*****************************************************************************
@@ -217,6 +199,31 @@ CpwData::createCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
     m_madeProperties[iName] = WeakBpwPtr( ret );
 
     return ret;
+}
+
+//-*****************************************************************************
+void CpwData::writePropertyHeaders( MetaDataMapPtr iMetaDataMap )
+{
+    // pack in child header and other info
+    std::vector< uint8_t > data;
+    for ( size_t i = 0; i < getNumProperties(); ++i )
+    {
+        PropertyHeaderPtr prop = m_propertyHeaders[i];
+        WritePropertyInfo( data,
+                           prop->header,
+                           prop->isScalarLike,
+                           prop->isHomogenous,
+                           prop->timeSamplingIndex,
+                           prop->nextSampleIndex,
+                           prop->firstChangedIndex,
+                           prop->lastChangedIndex,
+                           iMetaDataMap );
+    }
+
+    if ( !data.empty() )
+    {
+        m_group->addData( data.size(), &( data.front() ) );
+    }
 }
 
 } // End namespace ALEMBIC_VERSION_NS

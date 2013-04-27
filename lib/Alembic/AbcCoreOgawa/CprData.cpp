@@ -47,8 +47,10 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-CprData::CprData( Ogawa::IGroupPtr iGroup, AbcA::ArchiveReader & iArchive,
-                  size_t iThreadId )
+CprData::CprData( Ogawa::IGroupPtr iGroup,
+                  std::size_t iThreadId,
+                  AbcA::ArchiveReader & iArchive,
+                  const std::vector< AbcA::MetaData > & iIndexedMetaData )
 {
     ABCA_ASSERT( iGroup, "invalid compound data group" );
 
@@ -59,8 +61,8 @@ CprData::CprData( Ogawa::IGroupPtr iGroup, AbcA::ArchiveReader & iArchive,
     if ( numChildren > 0 && m_group->isChildData( numChildren - 1 ) )
     {
         PropertyHeaderPtrs headers;
-        ReadPropertyHeaders( m_group, numChildren - 1, iThreadId, iArchive,
-                             headers );
+        ReadPropertyHeaders( m_group, numChildren - 1, iThreadId,
+                             iArchive, iIndexedMetaData, headers );
 
         m_propertyHeaders.resize( headers.size() );
         for ( std::size_t i = 0; i < headers.size(); ++i )
@@ -227,9 +229,11 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
-        StreamIDPtr streamId = Alembic::Util::dynamic_pointer_cast< ArImpl,
-        AbcA::ArchiveReader > (
-            iParent->getObject()->getArchive() )->getStreamID();
+        Alembic::Util::shared_ptr<  ArImpl > implPtr =
+            Alembic::Util::dynamic_pointer_cast< ArImpl, AbcA::ArchiveReader > (
+                iParent->getObject()->getArchive() );
+
+        StreamIDPtr streamId = implPtr->getStreamID();
 
         Ogawa::IGroupPtr group = m_group->getGroup( fiter->second, false,
                                                     streamId->getID() );
@@ -237,7 +241,9 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
         ABCA_ASSERT( group, "Compound Property not backed by a valid group.");
 
         // Make a new one.
-        bptr.reset( new CprImpl( iParent, group, sub.header ) );
+        bptr.reset( new CprImpl( iParent, group, sub.header,
+                                 streamId->getID(),
+                                 implPtr->getIndexedMetaData() ) );
 
         sub.made = bptr;
     }

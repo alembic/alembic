@@ -83,9 +83,10 @@ void ArImpl::init()
     int version = -1;
     std::size_t numChildren = group->getNumChildren();
 
-    if ( numChildren > 4 && group->isChildData( 0 ) &&
+    if ( numChildren > 5 && group->isChildData( 0 ) &&
          group->isChildData( 1 ) && group->isChildGroup( 2 ) &&
-         group->isChildData( 3 ) && group->isChildData( 4 ) )
+         group->isChildData( 3 ) && group->isChildData( 4 ) &&
+         group->isChildData( 5 ) )
     {
         Ogawa::IDataPtr data = group->getData( 0, 0 );
         if ( data->getSize() == 4 )
@@ -118,7 +119,10 @@ void ArImpl::init()
     ReadTimeSamplesAndMax( group->getData( 4, 0 ),
                            m_timeSamples, m_maxSamples );
 
-    m_data.reset( new OrData( group->getGroup( 2, false, 0 ), "", 0, *this ) );
+    ReadIndexedMetaData( group->getData( 5, 0 ), m_indexMetaData );
+
+    m_data.reset( new OrData( group->getGroup( 2, false, 0 ), "", 0, *this,
+                              m_indexMetaData ) );
 
     m_header->setName( "ABC" );
     m_header->setFullName( "/" );
@@ -197,6 +201,12 @@ StreamIDPtr ArImpl::getStreamID()
 //-*****************************************************************************
 ArImpl::~ArImpl()
 {
+}
+
+//-*****************************************************************************
+const std::vector< AbcA::MetaData > & ArImpl::getIndexedMetaData()
+{
+    return m_indexMetaData;
 }
 
 } // End namespace ALEMBIC_VERSION_NS

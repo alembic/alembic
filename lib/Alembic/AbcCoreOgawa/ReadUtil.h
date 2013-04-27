@@ -84,6 +84,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
                    size_t iIndex,
                    size_t iThreadId,
                    const std::string & iParentName,
+                   const std::vector< AbcA::MetaData > & iMetaDataVec,
                    std::vector< ObjectHeaderPtr > & oHeaders );
 
 //-*****************************************************************************
@@ -92,7 +93,13 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                      size_t iIndex,
                      size_t iThreadId,
                      AbcA::ArchiveReader & iArchive,
+                     const std::vector< AbcA::MetaData > & iMetaDataVec,
                      PropertyHeaderPtrs & oHeaders );
+
+//-*****************************************************************************
+void
+ReadIndexedMetaData( Ogawa::IDataPtr iData,
+                     std::vector< AbcA::MetaData > & oMetaDataVec );
 
 } // End namespace ALEMBIC_VERSION_NS
 

@@ -42,9 +42,6 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-//-*****************************************************************************
-//-*****************************************************************************
-
 void pushUint32WithHint( std::vector< uint8_t > & ioData,
                          uint32_t iVal, uint32_t iHint )
 {
@@ -234,7 +231,8 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
                     uint32_t iTimeSamplingIndex,
                     uint32_t iNumSamples,
                     uint32_t iFirstChangedIndex,
-                    uint32_t iLastChangedIndex )
+                    uint32_t iLastChangedIndex,
+                    MetaDataMapPtr iMap )
 {
 
     uint32_t info = 0;
@@ -263,7 +261,8 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
     // 0000 0000 0000 1111 1111 0000 0000 0000
     static const uint32_t extentMask = 0xff000;
 
-    // could put a geo scope or an interpretation mask here
+    // 0000 1111 1111 0000 0000 0000 0000 0000
+    static const uint32_t metaDataIndexMask = 0xff00000;
 
     std::string metaData = iHeader.getMetaData().serialize();
     uint32_t metaDataSize = metaData.size();
@@ -304,6 +303,10 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
     }
 
     info |= sizeHintMask & ( sizeHint << 2 );
+
+    uint32_t metaDataIndex = iMap->getIndex( metaData );
+
+    info |= metaDataIndexMask & ( metaDataIndex << 20 );
 
     // compounds are treated differently
     if ( !iHeader.isCompound() )
@@ -382,18 +385,22 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
     ioData.insert( ioData.end(), iHeader.getName().begin(),
                    iHeader.getName().end() );
 
-    pushUint32WithHint( ioData, metaDataSize, sizeHint );
-
-    if ( metaDataSize )
+    if ( metaDataIndex == 0xff )
     {
-        ioData.insert( ioData.end(), metaData.begin(), metaData.end() );
+        pushUint32WithHint( ioData, metaDataSize, sizeHint );
+
+        if ( metaDataSize )
+        {
+            ioData.insert( ioData.end(), metaData.begin(), metaData.end() );
+        }
     }
 
 }
 
 //-*****************************************************************************
 void WriteObjectHeader( std::vector< uint8_t > & ioData,
-                    const AbcA::ObjectHeader &iHeader )
+                    const AbcA::ObjectHeader &iHeader,
+                    MetaDataMapPtr iMap )
 {
     uint32_t nameSize = iHeader.getName().size();
     pushUint32WithHint( ioData, nameSize, 2 );
@@ -402,10 +409,20 @@ void WriteObjectHeader( std::vector< uint8_t > & ioData,
 
     std::string metaData = iHeader.getMetaData().serialize();
     uint32_t metaDataSize = (uint32_t) metaData.size();
-    pushUint32WithHint( ioData, metaDataSize, 2 );
-    if ( metaDataSize )
+
+    uint32_t metaDataIndex = iMap->getIndex( metaData );
+
+    // write 1 byte for the meta data index
+    pushUint32WithHint( ioData, metaDataIndex, 0 );
+
+    // write the size and meta data IF necessary
+    if ( metaDataIndex == 0xff )
     {
-        ioData.insert( ioData.end(), metaData.begin(), metaData.end() );
+        pushUint32WithHint( ioData, metaDataSize, 2 );
+        if ( metaDataSize )
+        {
+            ioData.insert( ioData.end(), metaData.begin(), metaData.end() );
+        }
     }
 }
 

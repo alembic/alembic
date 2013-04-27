@@ -37,7 +37,6 @@
 #include <Alembic/AbcCoreOgawa/OwImpl.h>
 #include <Alembic/AbcCoreOgawa/AwImpl.h>
 #include <Alembic/AbcCoreOgawa/CpwImpl.h>
-#include <Alembic/AbcCoreOgawa/WriteUtil.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -74,7 +73,13 @@ OwImpl::OwImpl( AbcA::ObjectWriterPtr iParent,
 //-*****************************************************************************
 OwImpl::~OwImpl()
 {
-    // Nothing!!
+    // The archive is responsible for calling this on the OwData it owns
+    if ( m_parent )
+    {
+        MetaDataMapPtr mdMap = Alembic::Util::dynamic_pointer_cast<
+            AwImpl, AbcA::ArchiveWriter >( m_archive )->getMetaDataMap();
+        m_data->writeHeaders( mdMap );
+    }
 }
 
 //-*****************************************************************************

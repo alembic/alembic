@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreOgawa/CpwImpl.h>
-#include <Alembic/AbcCoreOgawa/WriteUtil.h>
+#include <Alembic/AbcCoreOgawa/AwImpl.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -82,6 +82,15 @@ CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
 //-*****************************************************************************
 CpwImpl::~CpwImpl()
 {
+    // objects are responsible for calling this on the CpWData they own
+    // as part of their "top" compound
+    if ( m_parent )
+    {
+        MetaDataMapPtr mdMap = Alembic::Util::dynamic_pointer_cast<
+            AwImpl, AbcA::ArchiveWriter >(
+                getObject()->getArchive() )->getMetaDataMap();
+        m_data->writePropertyHeaders( mdMap );
+    }
 }
 
 //-*****************************************************************************

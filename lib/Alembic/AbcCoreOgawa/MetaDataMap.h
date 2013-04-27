@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreOgawa_OrData_h_
-#define _Alembic_AbcCoreOgawa_OrData_h_
+#ifndef _Alembic_AbcCoreOgawa_MetaDataMap_h_
+#define _Alembic_AbcCoreOgawa_MetaDataMap_h_
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
 
@@ -43,62 +43,24 @@ namespace Alembic {
 namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
-class CprData;
-
-// data class owned by OrImpl, or ArImpl if it is a "top" object.
-// it owns and makes child objects
-
-class OrData : public Alembic::Util::enable_shared_from_this<OrData>
+//-*****************************************************************************
+// convenience class which is meant to map serialized meta data to an index
+// It will only hold 254 strings, and won't hold any that are over 256 bytes
+class MetaDataMap
 {
 public:
-    OrData( Ogawa::IGroupPtr iGroup,
-            const std::string & iParentName,
-            size_t iThreadId,
-            AbcA::ArchiveReader & iArchive,
-            const std::vector< AbcA::MetaData > & iIndexedMetaData );
+    MetaDataMap() {};
+    ~MetaDataMap() {};
 
-    ~OrData();
-
-    AbcA::CompoundPropertyReaderPtr
-    getProperties( AbcA::ObjectReaderPtr iParent );
-
-    size_t getNumChildren();
-
-    const AbcA::ObjectHeader &
-    getChildHeader( AbcA::ObjectReaderPtr iParent, size_t i );
-
-    const AbcA::ObjectHeader *
-    getChildHeader( AbcA::ObjectReaderPtr iParent, const std::string &iName );
-
-    AbcA::ObjectReaderPtr
-    getChild( AbcA::ObjectReaderPtr iParent, const std::string &iName );
-
-    AbcA::ObjectReaderPtr
-    getChild( AbcA::ObjectReaderPtr iParent, size_t i );
-
+    // will return 0xff if iStr is too long, or we've run out of indices
+    // 0 will be returned if iStr is empty
+    uint32_t getIndex( const std::string & iStr );
+    void write( Ogawa::OGroupPtr iParent );
 private:
-
-    Ogawa::IGroupPtr m_group;
-
-    struct Child
-    {
-        ObjectHeaderPtr header;
-        WeakOrPtr made;
-    };
-
-    typedef std::map<std::string, size_t> ChildrenMap;
-    typedef std::vector<Child> ChildrenVec;
-
-    // The children
-    ChildrenVec m_children;
-    ChildrenMap m_childrenMap;
-
-    // Our "top" property.
-    Alembic::Util::weak_ptr< AbcA::CompoundPropertyReader > m_top;
-    Alembic::Util::shared_ptr < CprData > m_data;
+    std::map< std::string, uint32_t > m_map;
 };
 
-typedef Alembic::Util::shared_ptr<OrData> OrDataPtr;
+typedef Alembic::Util::shared_ptr<MetaDataMap> MetaDataMapPtr;
 
 } // End namespace ALEMBIC_VERSION_NS
 

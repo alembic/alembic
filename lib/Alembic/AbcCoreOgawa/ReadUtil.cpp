@@ -1480,6 +1480,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
                    size_t iIndex,
                    size_t iThreadId,
                    const std::string & iParentName,
+                   const std::vector< AbcA::MetaData > & iMetaDataVec,
                    std::vector< ObjectHeaderPtr > & oHeaders )
 {
     Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
@@ -1501,16 +1502,27 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
         std::string name( &buf[pos], nameSize );
         pos += nameSize;
 
-        uint32_t metaDataSize = *( (uint32_t *)( &buf[pos] ) );
-        pos += 4;
-
-        std::string metaData( &buf[pos], metaDataSize );
-        pos += metaDataSize;
+        uint8_t metaDataIndex = buf[pos++];
 
         ObjectHeaderPtr objPtr( new AbcA::ObjectHeader() );
         objPtr->setName( name );
         objPtr->setFullName( iParentName + "/" + name );
-        objPtr->getMetaData().deserialize( metaData );
+
+        if ( metaDataIndex == 0xff )
+        {
+            uint32_t metaDataSize = *( (uint32_t *)( &buf[pos] ) );
+            pos += 4;
+
+            std::string metaData( &buf[pos], metaDataSize );
+            pos += metaDataSize;
+
+            objPtr->getMetaData().deserialize( metaData );
+        }
+        else
+        {
+            objPtr->getMetaData() = iMetaDataVec[metaDataIndex];
+        }
+
         oHeaders.push_back( objPtr );
     }
 }
@@ -1546,6 +1558,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                      size_t iIndex,
                      size_t iThreadId,
                      AbcA::ArchiveReader & iArchive,
+                     const std::vector< AbcA::MetaData > & iMetaDataVec,
                      PropertyHeaderPtrs & oHeaders )
 {
     // 0000 0000 0000 0000 0000 0000 0000 0011
@@ -1571,6 +1584,9 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
 
     // 0000 0000 0000 1111 1111 0000 0000 0000
     static const uint32_t extentMask = 0xff000;
+
+    // 0000 1111 1111 0000 0000 0000 0000 0000
+    static const uint32_t metaDataIndexMask = 0xff00000;
 
     Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
     ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
@@ -1678,15 +1694,50 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         header->header.setName( name );
         pos += nameSize;
 
-        uint32_t metaDataSize = GetUint32WithHint( buf, sizeHint, pos );
+        uint32_t metaDataIndex = ( info & metaDataIndexMask ) >> 20;
 
+        if ( metaDataIndex == 0xff )
+        {
+            uint32_t metaDataSize = GetUint32WithHint( buf, sizeHint, pos );
+
+            std::string metaData( &buf[pos], metaDataSize );
+            pos += metaDataSize;
+
+            AbcA::MetaData md;
+            md.deserialize( metaData );
+            header->header.setMetaData( md );
+        }
+        else
+        {
+            header->header.setMetaData( iMetaDataVec[metaDataIndex] );
+        }
+
+        oHeaders.push_back( header );
+
+    }
+}
+
+void
+ReadIndexedMetaData( Ogawa::IDataPtr iData,
+                     std::vector< AbcA::MetaData > & oMetaDataVec )
+{
+    // add the default empty meta data
+    oMetaDataVec.push_back( AbcA::MetaData() );
+
+    std::vector< char > buf( iData->getSize() );
+
+    // read as part of opening the archive so threadid 0 is ok
+    iData->read( iData->getSize(), &( buf.front() ), 0, 0 );
+    std::size_t pos = 0;
+    while ( pos < buf.size() )
+    {
+        // these are all small (less than 256 byte) meta data strings
+        uint8_t metaDataSize = buf[pos++];
         std::string metaData( &buf[pos], metaDataSize );
         pos += metaDataSize;
-
         AbcA::MetaData md;
         md.deserialize( metaData );
-        header->header.setMetaData( md );
-        oHeaders.push_back( header );
+        oMetaDataVec.push_back( md );
     }
 }
 

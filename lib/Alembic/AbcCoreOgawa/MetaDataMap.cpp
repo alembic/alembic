@@ -34,11 +34,6 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreOgawa_WriteUtil_h_
-#define _Alembic_AbcCoreOgawa_WriteUtil_h_
-
-#include <Alembic/AbcCoreOgawa/Foundation.h>
-#include <Alembic/AbcCoreOgawa/WrittenSampleMap.h>
 #include <Alembic/AbcCoreOgawa/MetaDataMap.h>
 
 namespace Alembic {
@@ -46,57 +41,71 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-WrittenSampleMap& GetWrittenSampleMap(
-    AbcA::ArchiveWriterPtr iArchive );
+uint32_t MetaDataMap::getIndex( const std::string & iStr )
+{
+    if ( iStr.empty() )
+    {
+        return 0;
+    }
+    // we only want small meta data strings in our map since they are the
+    // most likely to be repeated over and over
+    else if ( iStr.size() < 256 )
+    {
+        std::map< std::string, uint32_t >::iterator it = m_map.find( iStr );
+
+        if ( it != m_map.end() )
+        {
+            return it->second + 1;
+        }
+        // 255 is reserved for meta data which we need to
+        // explicitly write (and 0 means empty metadata)
+        else if ( it == m_map.end() && m_map.size() < 254 )
+        {
+            uint32_t index = m_map.size();
+            m_map[iStr] = index;
+            return index + 1;
+        }
+    }
+
+    // too long, or no room left for this entry
+    return 255;
+}
 
 //-*****************************************************************************
-void
-WriteDimensions( Ogawa::OGroupPtr iGroup,
-                 const AbcA::Dimensions & iDims,
-                 Alembic::Util::PlainOldDataType iPod );
+void MetaDataMap::write( Ogawa::OGroupPtr iParent )
+{
 
-//-*****************************************************************************
-void
-CopyWrittenData( Ogawa::OGroupPtr iParent,
-                 WrittenSampleIDPtr iRef );
+    if ( m_map.empty() )
+    {
+        iParent->addEmptyData();
+        return;
+    }
 
-//-*****************************************************************************
-WrittenSampleIDPtr
-WriteData( WrittenSampleMap &iMap,
-           Ogawa::OGroupPtr iGroup,
-           const AbcA::ArraySample &iSamp,
-           const AbcA::ArraySample::Key &iKey );
+    std::vector< std::string > mdVec;
+    mdVec.resize( m_map.size() );
 
-//-*****************************************************************************
-void
-WritePropertyInfo( std::vector< uint8_t > & ioData,
-                   const AbcA::PropertyHeader &iHeader,
-                   bool isScalarLike,
-                   bool isHomogenous,
-                   uint32_t iTimeSamplingIndex,
-                   uint32_t iNumSamples,
-                   uint32_t iFirstChangedIndex,
-                   uint32_t iLastChangedIndex,
-                   MetaDataMapPtr iMap );
+    // lets put each string into it's vector slot
+    std::map< std::string, uint32_t >::iterator it, itEnd;
+    for ( it = m_map.begin(), itEnd = m_map.end(); it != itEnd; ++it )
+    {
+        mdVec[ it->second ] = it->first;
+    }
 
-//-*****************************************************************************
-void
-WriteObjectHeader( std::vector< uint8_t > & ioData,
-                   const AbcA::ObjectHeader &iHeader,
-                   MetaDataMapPtr iMap );
+    // now place it all into one continuous buffer
+    std::vector< uint8_t > buf;
+    std::vector< std::string >::iterator jt, jtEnd;
+    for ( jt = mdVec.begin(), jtEnd = mdVec.end(); jt != jtEnd; ++jt )
+    {
 
-//-*****************************************************************************
-void
-WriteTimeSampling( std::vector< uint8_t > & ioData,
-                   uint32_t  iMaxSample,
-                   const AbcA::TimeSampling &iTsmp );
+        // all these strings are less than 256 chars so just push back size
+        // as 1 byte
+        buf.push_back( jt->size() );
+        buf.insert( buf.end(), jt->begin(), jt->end() );
+    }
+
+    iParent->addData( buf.size(), ( const void * )&buf.front() );
+}
 
 } // End namespace ALEMBIC_VERSION_NS
-
-using namespace ALEMBIC_VERSION_NS;
-
 } // End namespace AbcCoreOgawa
 } // End namespace Alembic
-
-#endif
-

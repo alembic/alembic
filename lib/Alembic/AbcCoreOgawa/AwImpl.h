@@ -39,6 +39,7 @@
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
 #include <Alembic/AbcCoreOgawa/WrittenSampleMap.h>
+#include <Alembic/AbcCoreOgawa/WriteUtil.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -80,6 +81,11 @@ public:
         return m_writtenSampleMap;
     }
 
+    MetaDataMapPtr getMetaDataMap()
+    {
+        return m_metaDataMap;
+    }
+
     virtual uint32_t addTimeSampling( const AbcA::TimeSampling & iTs );
 
     virtual AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
@@ -105,6 +111,7 @@ private:
     std::vector < AbcA::index_t > m_maxSamples;
 
     WrittenSampleMap m_writtenSampleMap;
+    MetaDataMapPtr m_metaDataMap;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

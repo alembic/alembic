@@ -48,7 +48,8 @@ namespace ALEMBIC_VERSION_NS {
 OrData::OrData( Ogawa::IGroupPtr iGroup,
                 const std::string & iParentName,
                 std::size_t iThreadId,
-                AbcA::ArchiveReader & iArchive )
+                AbcA::ArchiveReader & iArchive,
+                const std::vector< AbcA::MetaData > & iIndexedMetaData )
 {
     ABCA_ASSERT( iGroup, "Invalid object data group" );
 
@@ -60,7 +61,7 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
     {
         std::vector< ObjectHeaderPtr > headers;
         ReadObjectHeaders( m_group, numChildren - 1, iThreadId,
-                           iParentName, headers );
+                           iParentName, iIndexedMetaData, headers );
 
         m_children.resize( headers.size() );
         for ( std::size_t i = 0; i < headers.size(); ++i )
@@ -73,7 +74,8 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
     if ( numChildren > 0 && m_group->isChildGroup( 0 ) )
     {
         Ogawa::IGroupPtr group = m_group->getGroup( 0, false, iThreadId );
-        m_data.reset( new CprData( group, iArchive, iThreadId ) );
+        m_data.reset( new CprData( group, iThreadId, iArchive,
+                                   iIndexedMetaData ) );
     }
 }
 

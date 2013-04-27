@@ -38,6 +38,7 @@
 #include <Alembic/AbcCoreOgawa/CpwImpl.h>
 #include <Alembic/AbcCoreOgawa/OwData.h>
 #include <Alembic/AbcCoreOgawa/OwImpl.h>
+#include <Alembic/AbcCoreOgawa/AwImpl.h>
 #include <Alembic/AbcCoreOgawa/WriteUtil.h>
 
 namespace Alembic {
@@ -56,18 +57,6 @@ OwData::OwData( Ogawa::OGroupPtr iGroup ) : m_group( iGroup )
 //-*****************************************************************************
 OwData::~OwData()
 {
-    std::vector< uint8_t > data;
-
-    // pack all object header into data here
-    for ( size_t i = 0; i < m_childHeaders.size(); ++i )
-    {
-        WriteObjectHeader( data, *m_childHeaders[i] );
-    }
-
-    if ( !data.empty() )
-    {
-        m_group->addData( data.size(), &( data.front() ) );
-    }
 }
 
 //-*****************************************************************************
@@ -97,7 +86,7 @@ const AbcA::ObjectHeader & OwData::getChildHeader( size_t i )
 {
     if ( i >= m_childHeaders.size() )
     {
-        ABCA_THROW( "Out of range index in OwImpl::getChildHeader: "
+        ABCA_THROW( "Out of range index in OwData::getChildHeader: "
                      << i );
     }
 
@@ -134,6 +123,7 @@ AbcA::ObjectWriterPtr OwData::getChild( const std::string &iName )
     return wptr.lock();
 }
 
+//-*****************************************************************************
 AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
                                            const std::string & iFullName,
                                            const AbcA::ObjectHeader &iHeader )
@@ -176,6 +166,25 @@ AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
     m_madeChildren[iHeader.getName()] = WeakOwPtr( ret );
 
     return ret;
+}
+
+//-*****************************************************************************
+void OwData::writeHeaders( MetaDataMapPtr iMetaDataMap )
+{
+    std::vector< uint8_t > data;
+
+    // pack all object header into data here
+    for ( size_t i = 0; i < m_childHeaders.size(); ++i )
+    {
+        WriteObjectHeader( data, *m_childHeaders[i], iMetaDataMap );
+    }
+
+    if ( !data.empty() )
+    {
+        m_group->addData( data.size(), &( data.front() ) );
+    }
+
+    m_data->writePropertyHeaders( iMetaDataMap );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -54,7 +54,9 @@ public:
     // For construction from a compound property reader
     CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
              Ogawa::IGroupPtr iGroup,
-             PropertyHeaderPtr iHeader );
+             PropertyHeaderPtr iHeader,
+             std::size_t iThreadId,
+             const std::vector< AbcA::MetaData > & iIndexedMetaData );
 
     CprImpl( AbcA::ObjectReaderPtr iParent,
              CprDataPtr iData );
