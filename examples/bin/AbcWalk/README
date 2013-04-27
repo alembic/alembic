@@ -1,0 +1,4 @@
+This is meant to test reading speed and to compare multi-threaded HDF vs
+Ogawa reading.
+
+It's not multi-platform which is why no CMakefile is provided.
