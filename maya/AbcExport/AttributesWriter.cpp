@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -1486,7 +1486,6 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
     else if (iAttr.hasFn(MFn::kTypedAttribute))
     {
         MFnTypedAttribute typeFn(iAttr, &stat);
-
         if (!stat)
         {
             MString err = "Couldn't instantiate MFnTypedAttribute\n\tType: ";
@@ -1496,6 +1495,9 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
 
             return;
         }
+
+        Alembic::AbcCoreAbstract::MetaData md;
+        md.set("isArray", "1");
 
         switch (typeFn.attrType())
         {
@@ -1517,7 +1519,7 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::OStringGeomParam gp(iParent, plugName, false, iScope,
-                    1, iTimeIndex);
+                    1, iTimeIndex, md);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -1529,7 +1531,7 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::ODoubleGeomParam gp(iParent, plugName, false, iScope,
-                    1, iTimeIndex);
+                    1, iTimeIndex, md);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -1541,7 +1543,7 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::OInt32GeomParam gp(iParent, plugName, false, iScope,
-                    1, iTimeIndex);
+                    1, iTimeIndex, md);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
             }
@@ -1555,7 +1557,7 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
                 if (iTypeStr  == "point2")
                 {
                     AbcGeom::OP2dGeomParam gp(iParent, plugName, false, iScope,
-                        1, iTimeIndex);
+                        1, iTimeIndex, md);
                     p.prop = gp.getValueProperty();
                 }
                 else
@@ -1576,25 +1578,25 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
                 if (iTypeStr == "vector2")
                 {
                     AbcGeom::OV2dGeomParam gp(iParent, plugName, false, iScope,
-                        1, iTimeIndex);
+                        1, iTimeIndex, md);
                     p.prop = gp.getValueProperty();
                 }
                 else if (iTypeStr == "normal2")
                 {
                     AbcGeom::ON2dGeomParam gp(iParent, plugName, false, iScope,
-                        1, iTimeIndex);
+                        1, iTimeIndex, md);
                     p.prop = gp.getValueProperty();
                 }
                 else if (iTypeStr == "normal3")
                 {
                     AbcGeom::ON3dGeomParam gp(iParent, plugName, false, iScope,
-                        1, iTimeIndex);
+                        1, iTimeIndex, md);
                     p.prop = gp.getValueProperty();
                 }
                 else
                 {
                     AbcGeom::OV3dGeomParam gp(iParent, plugName, false, iScope,
-                        1, iTimeIndex);
+                        1, iTimeIndex, md);
                     p.prop = gp.getValueProperty();
                 }
                 oArrayVec.push_back(p);
@@ -1731,7 +1733,7 @@ AttributesWriter::AttributesWriter(
                 case 0:
                 {
                     //
-                    // Fills in the static plug to OScalarProperty OR 
+                    // Fills in the static plug to OScalarProperty OR
                     // OArrayProperty correspondence, used for the writing
                     // below.
                     //
@@ -1909,7 +1911,7 @@ AttributesWriter::AttributesWriter(
                 Alembic::Util::int8_t visVal =
                     Alembic::AbcGeom::kVisibilityHidden;
 
-                Abc::OCharProperty bp = 
+                Abc::OCharProperty bp =
                     Alembic::AbcGeom::CreateVisibilityProperty(
                         iParentObj, iTimeIndex);
 
@@ -1933,7 +1935,7 @@ AttributesWriter::AttributesWriter(
                 Alembic::Util::int8_t visVal =
                     Alembic::AbcGeom::kVisibilityDeferred;
 
-                Abc::OCharProperty bp = 
+                Abc::OCharProperty bp =
                     Alembic::AbcGeom::CreateVisibilityProperty(
                         iParentObj, iTimeIndex);
 
