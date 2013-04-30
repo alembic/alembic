@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -163,12 +163,15 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
     Alembic::Util::uint8_t extent = dtype.getExtent();
     std::string interp = iProp.getMetaData().get("interpretation");
 
+    bool isScalarLike = iProp.isScalarLike() &&
+        iProp.getMetaData().get("isArray") != "1";
+
     // the first sample is read only when the property is constant
     switch (dtype.getPod())
     {
         case Alembic::Util::kBooleanPOD:
         {
-            if (extent != 1 || !iProp.isScalarLike())
+            if (extent != 1 || !isScalarLike)
             {
                 return false;
             }
@@ -199,7 +202,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         case Alembic::Util::kUint8POD:
         case Alembic::Util::kInt8POD:
         {
-            if (extent != 1 || !iProp.isScalarLike())
+            if (extent != 1 || !isScalarLike)
             {
                 return false;
             }
@@ -230,7 +233,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         case Alembic::Util::kUint16POD:
         {
             // MFnNumericData::kShort or k2Short or k3Short
-            if (extent > 3 || !iProp.isScalarLike())
+            if (extent > 3 || !isScalarLike)
             {
                 return false;
             }
@@ -293,7 +296,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         case Alembic::Util::kUint32POD:
         case Alembic::Util::kInt32POD:
         {
-            if (!iProp.isScalarLike())
+            if (!isScalarLike)
             {
                 MFnIntArrayData fnData;
                 MObject arrObj;
@@ -387,7 +390,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         // look for MFnVectorArrayData?
         case Alembic::Util::kFloat32POD:
         {
-            if (!iProp.isScalarLike())
+            if (!isScalarLike)
             {
                 if ((extent == 2 || extent == 3) && (interp == "normal" ||
                     interp == "vector" || interp == "rgb"))
@@ -584,7 +587,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
         case Alembic::Util::kFloat64POD:
         {
-            if (!iProp.isScalarLike())
+            if (!isScalarLike)
             {
                 if ((extent == 2 || extent == 3) && (interp == "normal" ||
                     interp == "vector" || interp == "rgb"))
@@ -785,7 +788,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         // MFnStringArrayData
         case Alembic::Util::kStringPOD:
         {
-            if (!iProp.isScalarLike())
+            if (!isScalarLike)
             {
                 MFnStringArrayData fnData;
                 MObject arrObj;
@@ -870,7 +873,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
         // MFnStringArrayData
         case Alembic::Util::kWstringPOD:
         {
-            if (!iProp.isScalarLike())
+            if (!isScalarLike)
             {
                 MFnStringArrayData fnData;
                 MObject arrObj;
@@ -1585,11 +1588,14 @@ void readProp(double iFrame,
     double alpha = getWeightAndIndex(iFrame, iProp.getTimeSampling(),
         iProp.getNumSamples(), index, ceilIndex);
 
+    bool isScalarLike = iProp.isScalarLike() &&
+        iProp.getMetaData().get("isArray") != "1";
+
     switch (dtype.getPod())
     {
         case Alembic::Util::kBooleanPOD:
         {
-            if (!iProp.isScalarLike() || extent != 1)
+            if (!isScalarLike || extent != 1)
             {
                 return;
             }
@@ -1604,7 +1610,7 @@ void readProp(double iFrame,
         case Alembic::Util::kUint8POD:
         case Alembic::Util::kInt8POD:
         {
-            if (!iProp.isScalarLike() || extent != 1)
+            if (!isScalarLike || extent != 1)
             {
                 return;
             }
@@ -1680,7 +1686,7 @@ void readProp(double iFrame,
         case Alembic::Util::kUint32POD:
         case Alembic::Util::kInt32POD:
         {
-            if (iProp.isScalarLike() && extent < 4)
+            if (isScalarLike && extent < 4)
             {
                 Alembic::Util::int32_t val[3];
 
@@ -1766,7 +1772,7 @@ void readProp(double iFrame,
 
         case Alembic::Util::kFloat32POD:
         {
-            if (iProp.isScalarLike() && extent < 4)
+            if (isScalarLike && extent < 4)
             {
                 float val[3];
 
@@ -2002,7 +2008,7 @@ void readProp(double iFrame,
         case Alembic::Util::kFloat64POD:
         {
             // need to differentiate between vectors, points, and color array?
-            if (iProp.isScalarLike() && extent < 5)
+            if (isScalarLike && extent < 5)
             {
                 double val[4];
 
@@ -2245,7 +2251,7 @@ void readProp(double iFrame,
         // MFnStringArrayData
         case Alembic::Util::kStringPOD:
         {
-            if (iProp.isScalarLike() && extent == 1)
+            if (isScalarLike && extent == 1)
             {
                 iProp.get(samp, Alembic::Abc::ISampleSelector(index));
                 iHandle.setString(
@@ -2274,7 +2280,7 @@ void readProp(double iFrame,
         // MFnStringArrayData
         case Alembic::Util::kWstringPOD:
         {
-            if (iProp.isScalarLike() && extent == 1)
+            if (isScalarLike && extent == 1)
             {
                 iProp.get(samp, Alembic::Abc::ISampleSelector(index));
                 iHandle.setString(
