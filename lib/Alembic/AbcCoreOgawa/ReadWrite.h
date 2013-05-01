@@ -38,7 +38,6 @@
 #define _Alembic_AbcCoreOgawa_ReadWrite_h_
 
 #include <Alembic/AbcCoreAbstract/All.h>
-#include <Alembic/AbcCoreOgawa/Foundation.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
