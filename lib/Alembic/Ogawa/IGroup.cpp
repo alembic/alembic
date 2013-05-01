@@ -79,7 +79,9 @@ IGroup::IGroup(IStreamsPtr iStreams,
     // 0 should NOT have been written, this groups should have been the
     // special EMPTY_GROUP instead
 
-    if (!iLight)
+    // read all our child indices, unless we are light and have more than 8
+    // children
+    if (!iLight || mData->numChildren < 9)
     {
         mData->childVec.resize(mData->numChildren);
         mData->streams->read(iThreadIndex, iPos + 8, mData->numChildren * 8,
