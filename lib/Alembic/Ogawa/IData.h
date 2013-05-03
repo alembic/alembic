@@ -60,7 +60,8 @@ public:
 
 private:
     friend class IGroup;
-    IData(IStreamsPtr iStreams, uint64_t iPos, std::size_t iThreadId);
+    IData(IStreamsPtr iStreams, Alembic::Util::uint64_t iPos,
+          std::size_t iThreadId);
 
     class PrivateData;
     std::auto_ptr< PrivateData > mData;

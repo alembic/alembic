@@ -53,7 +53,7 @@ public:
 
     bool isValid();
 
-    uint64_t getAndSeekEndPos();
+    Alembic::Util::uint64_t getAndSeekEndPos();
     void write(const void * iBuf, std::size_t iSize);
     void seek(Alembic::Util::uint64_t iPos);
 
