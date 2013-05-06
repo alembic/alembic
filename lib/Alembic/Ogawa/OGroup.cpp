@@ -313,7 +313,7 @@ void OGroup::replaceData(std::size_t iIndex, ODataPtr iData)
         return;
     }
 
-    Alembic::Util::uint64_t pos = iData->getPos();
+    Alembic::Util::uint64_t pos = iData->getPos() | 0x8000000000000000ULL;
     if (isFrozen())
     {
         mData->stream->seek(mData->pos + (iIndex + 1) * 8);
