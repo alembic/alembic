@@ -1536,7 +1536,7 @@ uint32_t GetUint32WithHint(const std::vector< char > & iBuf,
 
     if ( iSizeHint == 0 )
     {
-        retVal = ( uint32_t ) iBuf[ioPos];
+        retVal = ( uint32_t ) ( ( uint8_t ) iBuf[ioPos] );
         ioPos ++;
     }
     else if ( iSizeHint == 1 )

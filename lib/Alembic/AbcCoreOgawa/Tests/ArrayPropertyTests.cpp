@@ -134,6 +134,10 @@ void testDuplicateArray()
         vals[5] = 0;
         cwp->setSample(ABCA::ArraySample(&(vals.front()), i8d, dims));
         cwp->setSample(ABCA::ArraySample(&(vals.front()), i8d, dims));
+        for (std::size_t i = 0; i < 128; ++i)
+        {
+            cwp->setSample(ABCA::ArraySample(&(vals.front()), i8d, dims));
+        }
     }
 
     {
@@ -148,7 +152,14 @@ void testDuplicateArray()
             ABCA::BasePropertyReaderPtr bp = parent->getProperty( i );
             TESTING_ASSERT(bp->isArray());
             ABCA::ArrayPropertyReaderPtr ap = bp->asArrayPtr();
-            TESTING_ASSERT(ap->getNumSamples() == 3);
+            if (ap->getName() == "c")
+            {
+                TESTING_ASSERT(ap->getNumSamples() == 131);
+            }
+            else
+            {
+                TESTING_ASSERT(ap->getNumSamples() == 3);
+            }
 
 
             if (ap->getName() == "a")
