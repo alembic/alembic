@@ -65,7 +65,8 @@ namespace AbcG = ::Alembic::AbcGeom;
 void printParent( Abc::ICompoundProperty iProp, 
                   bool all = false, 
                   bool long_list = false, 
-                  bool recursive = false ) {
+                  bool recursive = false,
+                  bool first = false ) {
     std::cout << CYANCOLOR
               << iProp.getObject().getFullName() << "/" 
               << iProp.getName() << ":"
@@ -76,7 +77,10 @@ void printParent( Abc::ICompoundProperty iProp,
 void printParent( AbcG::IObject iObj,
                   bool all = false, 
                   bool long_list = false, 
-                  bool recursive = false ) {
+                  bool recursive = false,
+                  bool first = false ) {
+    if ( !first && !long_list )
+        std::cout << std::endl;
     std::cout << CYANCOLOR
               << iObj.getFullName() << ":"
               << RESETCOLOR
@@ -141,11 +145,12 @@ void visit( Abc::ICompoundProperty iProp,
             bool all = false, 
             bool long_list = false, 
             bool meta = false,
-            bool recursive = false )
+            bool recursive = false,
+            bool first = false )
 {
     // header
     if ( recursive && iProp.getNumProperties() > 0 ) {
-        printParent( iProp, all, long_list, recursive);
+        printParent( iProp, all, long_list, recursive, first );
     }
 
     // children
@@ -159,7 +164,7 @@ void visit( Abc::ICompoundProperty iProp,
             Abc::PropertyHeader header = iProp.getPropertyHeader( i );
             if ( header.isCompound() )
                 visit( Abc::ICompoundProperty( iProp, header.getName() ), 
-                       all, long_list, meta, recursive );
+                       all, long_list, meta, recursive, false );
         }
     }
 }
@@ -169,7 +174,9 @@ void visit( AbcG::IObject iObj,
             bool all = false, 
             bool long_list = false, 
             bool meta = false,
-            bool recursive = false )
+            bool recursive = false,
+            bool first = false )
+
 {
     Abc::ICompoundProperty props = iObj.getProperties();
     
@@ -177,7 +184,7 @@ void visit( AbcG::IObject iObj,
     if ( recursive && 
        ( iObj.getNumChildren() > 0 || 
        ( all && props.getNumProperties() > 0 ) ) ) {
-        printParent( iObj, all, long_list, recursive );
+        printParent( iObj, all, long_list, recursive, first);
     }
 
     // children
@@ -200,17 +207,15 @@ void visit( AbcG::IObject iObj,
                 if ( !long_list )
                     std::cout << std::endl;
                 visit( Abc::ICompoundProperty( props, header.getName() ), 
-                       all, long_list, meta, recursive );
+                       all, long_list, meta, recursive, false );
             }
         }
     }
-    if ( ! long_list )
-        std::cout << std::endl;
 
     // visit object children
     if ( recursive && iObj.getNumChildren() > 0 ) {
         for( size_t i = 0; i < iObj.getNumChildren(); ++i ) {
-            visit( iObj.getChild( i ), all, long_list, meta, recursive );
+            visit( iObj.getChild( i ), all, long_list, meta, recursive, false );
         }
     }
 }
@@ -244,7 +249,7 @@ int main( int argc, char *argv[] )
     bool opt_long = false;
     bool opt_meta = false;
     bool opt_recursive = false;
-    std::string desc( "abcls [FILE].. [OPTION]..\n"
+    std::string desc( "abcls [OPTION] FILE[/NAME] \n"
     "  -a          include property listings\n"
     //"  --fps[=FPS] show values in frames per second\n"
     "  -h, --help  show this help message\n"
@@ -398,17 +403,16 @@ int main( int argc, char *argv[] )
 
         // do stuff
         if ( found && header->isCompound() ) {
-            visit( props, opt_all, opt_long, opt_meta, opt_recursive );
-            if ( !opt_long )
-                std::cout << std::endl;
+            visit( props, opt_all, opt_long, opt_meta, opt_recursive, true );
         } else if ( found && header->isSimple() ) {
             printChild( props, *header, opt_all, opt_long );
-            if ( !opt_long )
-                std::cout << std::endl;
         } else
-            visit( iObj, opt_all, opt_long, opt_meta, opt_recursive );
+            visit( iObj, opt_all, opt_long, opt_meta, opt_recursive, true );
         
         ++count;
+
+        if ( !opt_long )
+            std::cout << std::endl;
     };
     
     return 0;
