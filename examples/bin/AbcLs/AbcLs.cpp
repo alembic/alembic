@@ -115,8 +115,9 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
                 Abc::IArrayProperty iProp( iParent, header.getName() );
                 std::cout << iProp.getNumSamples();
             }
+            std::cout << "]";
         }
-        std::cout << "]" << std::endl;
+        std::cout << std::endl;
     }
     else
         std::cout << "   ";
