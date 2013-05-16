@@ -46,10 +46,17 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <sys/stat.h>
 
-namespace Abc  = ::Alembic::Abc;
+namespace Abc  = ::Alembic::Abc;;
+namespace AbcA = ::Alembic::AbcCoreAbstract;
 namespace AbcF = ::Alembic::AbcCoreFactory;
 namespace AbcG = ::Alembic::AbcGeom;
+
+#define RESETCOLOR "\033[0m"
+#define GREENCOLOR "\033[1;32m"
+#define BLUECOLOR "\033[1;34m"
+#define BOLD "\033[1m"
 
 //-*****************************************************************************
 bool is_leaf( AbcG::IObject iObj )
@@ -196,7 +203,12 @@ void tree( AbcG::IObject iObj, bool showProps = false, std::string prefix = "" )
         }
     };
 
-    std::cout << iObj.getName() << "\r" << std::endl;
+    if ( showProps )
+        std::cout << GREENCOLOR;
+    std::cout << iObj.getName();
+    if ( showProps )
+        std::cout << RESETCOLOR;
+    std::cout << "\r" << std::endl;
 
     // property tree
     if ( showProps ) {
@@ -221,34 +233,33 @@ void tree( AbcG::IObject iObj, bool showProps = false, std::string prefix = "" )
 }
 
 //-*****************************************************************************
-char* getOption(char ** begin, char ** end, const std::string & option)
+bool isFile( const std::string& filename )
 {
-    char ** itr = std::find(begin, end, option);
-    if (itr != end && ++itr != end)
-    {
-        return *itr;
+    struct stat buf;
+    if ( stat(filename.c_str(), &buf) == 0 && !S_ISDIR( buf.st_mode ) ) {
+        return true;
     }
-    return 0;
-}
-
-bool optionExists(char** begin, char** end, const std::string& option)
-{
-    return std::find(begin, end, option) != end;
+    return false;
 }
 
 //-*****************************************************************************
+bool optionExists(std::vector<std::string> options, std::string option)
+{
+    for ( int i = 0; i < options.size(); i++ ) 
+        if ( options[i].find(option) != std::string::npos )
+            return true;
+    return false;
+}
+
 //-*****************************************************************************
 int main( int argc, char *argv[] )
 {
-    std::string filepath;
-    bool metadata;
-    bool properties;
-    bool verbose;
-    std::string desc( "abctree: <file.abc>\n"
-    "  -h [ --help ]         prints this help message\n"
-    "  -m [ --metadata ]     print metadata\n"
-    "  -p [ --properties ]   include properties in tree\n"
-    //"  -v [ --verbose ]      verbose output"
+    bool opt_all = false;
+    bool opt_meta = false;
+    std::string desc( "abctree [OPTION] FILE[/NAME]\n"
+    "  -a          include properties listings\n"
+    "  -h, --help  prints this help message\n"
+    "  -m          print metadata\n"
     );
 
     // check for min args
@@ -257,40 +268,71 @@ int main( int argc, char *argv[] )
         return 0;
     };
 
+    // parse args
+    std::vector<std::string> arguments(argv, argv + argc);
+    std::vector<std::string> options;
+    std::vector<std::string> files;
+
+    // separate file args from option args 
+    for ( int i = 1; i < arguments.size(); i++ ) {
+        if ( arguments[ i ].substr( 0, 1 ) == "-" )
+            options.push_back( arguments[ i ] );
+        else
+            files.push_back( arguments[ i ] );
+    }
+
     // help
     if ( argc < 2 ||
-         optionExists( argv, argv + argc, "-h" ) ||
-         optionExists( argv, argv + argc, "--help" )
+         optionExists( options, "h" ) ||
+         optionExists( options, "help" )
        ) {
         std::cout << desc << std::endl;
         return 0;
     };
 
-    // file arg
-    for(int i = 1; i < argc; i++) {
-        if ( std::string(argv[i]).at(0) != '-' && std::string(argv[i-1]).at(0) != '-' ) {
-            filepath = argv[i];
-            break;
-        };
-    };
+    // set some flags
+    opt_all = optionExists( options, "a");
+    opt_meta = optionExists( options, "m");
 
-    // options
-    metadata = optionExists( argv, argv + argc, "-m") ||
-               optionExists( argv, argv + argc, "--metadata");
-    properties = optionExists( argv, argv + argc, "-p") ||
-                 optionExists( argv, argv + argc, "--properties");
-    verbose = optionExists( argv, argv + argc, "-v") ||
-              optionExists( argv, argv + argc, "--verbose");
+    // open each file
+    size_t count = 0;
+    for ( int i = 0; i < files.size(); i++ ) {
+        if ( files.size() > 1 )
+            std::cout << BOLD << files[i] << ':' << RESETCOLOR << std::endl;
 
-    {
+        std::stringstream ss( files[i] );
+        std::stringstream fp;
+        std::string segment;
+        std::vector<std::string> seglist;
+
+        /* 
+         * separate file and object paths, e.g.
+         *
+         *   ../dir1/foo.abc/bar/baz
+         *   \_____________/\______/
+         *        file         obj
+         */
+        int i = 0;
+        while ( std::getline( ss, segment, '/' ) ) {
+            if ( !isFile ( fp.str() ) ) {
+                if ( i != 0 )
+                    fp << "/";
+                fp << segment;
+            } else {
+                seglist.push_back( segment );
+            }
+            ++i;
+        }
+
+        // open the iarchive
         Abc::IArchive archive;
         AbcF::IFactory factory;
         factory.setPolicy(Abc::ErrorHandler::kQuietNoopPolicy);
         AbcF::IFactory::CoreType coreType;
-        archive = factory.getArchive(filepath, coreType);
+        archive = factory.getArchive(std::string( fp.str() ), coreType);
 
-        // metadata
-        if ( metadata ) {
+        // display file metadata 
+        if ( opt_meta ) {
             std::cout  << "Using "
                        << Alembic::AbcCoreAbstract::GetLibraryVersion ()
                        << std::endl;;
@@ -316,24 +358,61 @@ int main( int argc, char *argv[] )
                 coreName = "Unknown";
             };
 
-            if (appName != "")
-            {
+            if ( appName != "" ) {
                 std::cout << "  file written by: " << appName << std::endl;
                 std::cout << "  using Alembic : " << libraryVersionString << std::endl;
                 std::cout << "  written on : " << whenWritten << std::endl;
                 std::cout << "  user description : " << userDescription << std::endl;
-            }
-            else
-            {
+            } else {
                 std::cout << "  (file doesn't have any ArchiveInfo)"
                           << std::endl;
             }
             std::cout << "  core type : " << coreName << std::endl;
-            std::cout << std::endl;
         };
 
+        // walk object hierarchy and find valid objects
+        AbcG::IObject test = archive.getTop();
+        AbcG::IObject iObj = test;
+        while ( test.valid() && seglist.size() > 0 ) {
+            test = test.getChild( seglist.front() );
+            if ( test.valid() ) {
+                iObj = test;
+                seglist.erase( seglist.begin() );
+            }
+        }
+
+        // walk property hierarchy for most recent valid object
+        Abc::ICompoundProperty props = iObj.getProperties();
+        const Abc::PropertyHeader* header;
+        bool found = false;
+        for ( int i = 0; i < seglist.size(); ++i ) {
+            header = props.getPropertyHeader( seglist[i] );
+            if ( header && header->isCompound() ) {
+                Abc::ICompoundProperty ptest( props, header->getName() );
+                if ( ptest.valid() ) {
+                    props = ptest;
+                    found = true;
+                }
+            } else if ( header && header->isSimple() ) {
+                found = true;
+            } else {
+                std::cout << seglist[i] 
+                          << ": Invalid object or property" 
+                          << std::endl;
+                return 1;
+            }
+        }
+
         // walk the archive tree
-        tree( archive.getTop(), properties, "" );
+        if ( found ) 
+            if ( header->isCompound() )
+                tree( props );
+            else
+                tree( Abc::IScalarProperty( props, header->getName() ) );
+        else
+            tree( iObj, opt_all );
+
+        ++count;
     }
 
     return 0;

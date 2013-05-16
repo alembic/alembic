@@ -243,8 +243,6 @@ bool optionExists(std::vector<std::string> options, std::string option)
 //-*****************************************************************************
 int main( int argc, char *argv[] )
 {
-    std::vector<std::string> filepaths;
-    std::vector<std::string>::iterator it;
     float opt_fps = 24.0;
     bool opt_all = false;
     bool opt_long = false;
