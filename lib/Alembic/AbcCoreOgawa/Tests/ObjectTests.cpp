@@ -34,6 +34,7 @@
 //
 //-*****************************************************************************
 
+#include <sstream>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Util/All.h>
@@ -186,8 +187,124 @@ void testObjects()
     }
 }
 
+void testChildObjects()
+{
+    std::string archiveName = "objectChildrenTest.abc";
+    {
+        AO::WriteArchive w;
+        AbcA::ArchiveWriterPtr a = w(archiveName, AbcA::MetaData());
+        AbcA::ObjectWriterPtr archive = a->getTop();
+
+        AbcA::ObjectWriterPtr smallChild = archive->createChild(
+            AbcA::ObjectHeader("small", AbcA::MetaData()));
+        for (std::size_t i = 0; i < 10; ++i)
+        {
+            std::stringstream strm;
+            strm << i;
+            smallChild->createChild(AbcA::ObjectHeader(
+                strm.str(), AbcA::MetaData()));
+        }
+
+        AbcA::ObjectWriterPtr medChild = archive->createChild(
+            AbcA::ObjectHeader("md", AbcA::MetaData()));
+        for (std::size_t i = 0; i < 150; ++i)
+        {
+            std::stringstream strm;
+            strm << i;
+            medChild->createChild(AbcA::ObjectHeader(
+                strm.str(), AbcA::MetaData()));
+        }
+
+        AbcA::ObjectWriterPtr mdlgChild = archive->createChild(
+            AbcA::ObjectHeader("mdlg", AbcA::MetaData()));
+        for (std::size_t i = 0; i < 300; ++i)
+        {
+            std::stringstream strm;
+            strm << i;
+             mdlgChild->createChild(AbcA::ObjectHeader(
+                strm.str(), AbcA::MetaData()));
+        }
+
+        AbcA::ObjectWriterPtr largeChild = archive->createChild(
+            AbcA::ObjectHeader("large", AbcA::MetaData()));
+        for (std::size_t i = 0; i < 33000; ++i)
+        {
+            std::stringstream strm;
+            strm << i;
+            largeChild->createChild(AbcA::ObjectHeader(
+                strm.str(), AbcA::MetaData()));
+        }
+
+        AbcA::ObjectWriterPtr insaneChild = archive->createChild(
+            AbcA::ObjectHeader("insane", AbcA::MetaData()));
+        for (std::size_t i = 0; i < 66000; ++i)
+        {
+            std::stringstream strm;
+            strm << i;
+            insaneChild->createChild(AbcA::ObjectHeader(
+                strm.str(), AbcA::MetaData()));
+        }
+    }
+
+    {
+        AO::ReadArchive r;
+        AbcA::ArchiveReaderPtr a = r( archiveName );
+        AbcA::ObjectReaderPtr archive = a->getTop();
+        AbcA::ObjectReaderPtr smallChild = archive->getChild(0);
+        AbcA::ObjectReaderPtr mdChild = archive->getChild(1);
+        AbcA::ObjectReaderPtr mdlgChild = archive->getChild(2);
+        AbcA::ObjectReaderPtr largeChild = archive->getChild(3);
+        AbcA::ObjectReaderPtr insaneChild = archive->getChild(4);
+
+        TESTING_ASSERT(smallChild->getNumChildren() == 10);
+        TESTING_ASSERT(mdChild->getNumChildren() == 150);
+        TESTING_ASSERT(mdlgChild->getNumChildren() == 300);
+        TESTING_ASSERT(largeChild->getNumChildren() == 33000);
+        TESTING_ASSERT(insaneChild->getNumChildren() == 66000);
+    }
+}
+
+void testMetaData()
+{
+    std::string archiveName = "objectMetaDataTest.abc";
+    {
+        AO::WriteArchive w;
+        AbcA::ArchiveWriterPtr a = w(archiveName, AbcA::MetaData());
+        AbcA::ObjectWriterPtr archive = a->getTop();
+
+        AbcA::ObjectWriterPtr child = archive->createChild(
+            AbcA::ObjectHeader("tests", AbcA::MetaData()));
+        for (std::size_t i = 0; i < 300; ++i)
+        {
+            std::stringstream strm;
+            strm << i;
+            AbcA::MetaData m;
+            m.set(strm.str(), strm.str());
+            child->createChild(AbcA::ObjectHeader(strm.str(), m));
+        }
+    }
+
+    {
+        AO::ReadArchive r;
+        AbcA::ArchiveReaderPtr a = r( archiveName );
+        AbcA::ObjectReaderPtr archive = a->getTop();
+        AbcA::ObjectReaderPtr child = archive->getChild(0);
+        for (std::size_t i = 0; i < 300; ++i)
+        {
+            AbcA::ObjectReaderPtr grandChild = child->getChild(i);
+            std::stringstream strm;
+            strm << i;
+            TESTING_ASSERT(grandChild->getName() == strm.str());
+            TESTING_ASSERT(grandChild->getMetaData().get(strm.str())
+                           == strm.str());
+        }
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testObjects();
+    testChildObjects();
+    testMetaData();
     return 0;
 }

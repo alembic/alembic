@@ -728,11 +728,115 @@ void testPropScoping()
 
 }
 
+void testScalarSamples()
+{
+    std::string archiveName = "numScalarSamplesTest.abc";
+
+    AbcA::DataType dtype(Alembic::Util::kFloat32POD);
+    float samp = 0.0f;
+    {
+        AO::WriteArchive w;
+        AbcA::ArchiveWriterPtr a = w(archiveName, AbcA::MetaData());
+        AbcA::ObjectWriterPtr archive = a->getTop();
+        AbcA::ObjectWriterPtr obj = archive->createChild(
+            AbcA::ObjectHeader("test", AbcA::MetaData()));
+
+        AbcA::CompoundPropertyWriterPtr parent = obj->getProperties();
+        AbcA::ScalarPropertyWriterPtr prop;
+
+        AbcA::CompoundPropertyWriterPtr smallProp =
+            parent->createCompoundProperty("small", AbcA::MetaData());
+        smallProp->createScalarProperty("a", AbcA::MetaData(), dtype, 0);
+        prop = smallProp->createScalarProperty("b", AbcA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 10; ++i, ++samp)
+        {
+            prop->setSample(&samp);
+        }
+        smallProp->createArrayProperty("c", AbcA::MetaData(), dtype, 0);
+
+        AbcA::CompoundPropertyWriterPtr mdProp =
+            parent->createCompoundProperty("md", AbcA::MetaData());
+        mdProp->createScalarProperty("a", AbcA::MetaData(), dtype, 0);
+        prop = mdProp->createScalarProperty("b", AbcA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 150; ++i, ++samp)
+        {
+            prop->setSample(&samp);
+        }
+        mdProp->createScalarProperty("c", AbcA::MetaData(), dtype, 0);
+
+        AbcA::CompoundPropertyWriterPtr mdlgProp =
+            parent->createCompoundProperty("mdlg", AbcA::MetaData());
+        mdlgProp->createScalarProperty("a", AbcA::MetaData(), dtype, 0);
+        prop = mdlgProp->createScalarProperty("b", AbcA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 300; ++i, ++samp)
+        {
+            prop->setSample(&samp);
+        }
+        mdlgProp->createScalarProperty("c", AbcA::MetaData(), dtype, 0);
+
+        AbcA::CompoundPropertyWriterPtr lgProp =
+            parent->createCompoundProperty("lg", AbcA::MetaData());
+        lgProp->createScalarProperty("a", AbcA::MetaData(), dtype, 0);
+        prop = lgProp->createScalarProperty("b", AbcA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 33000; ++i, ++samp)
+        {
+            prop->setSample(&samp);
+        }
+        lgProp->createScalarProperty("c", AbcA::MetaData(), dtype, 0);
+
+        AbcA::CompoundPropertyWriterPtr insaneProp =
+            parent->createCompoundProperty("insane", AbcA::MetaData());
+        insaneProp->createScalarProperty("a", AbcA::MetaData(), dtype, 0);
+        prop = insaneProp->createScalarProperty("b", AbcA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 66000; ++i, ++samp)
+        {
+            prop->setSample(&samp);
+        }
+        insaneProp->createScalarProperty("c", AbcA::MetaData(), dtype, 0);
+    }
+
+    {
+        AO::ReadArchive r;
+        AbcA::ArchiveReaderPtr a = r( archiveName );
+        AbcA::ObjectReaderPtr archive = a->getTop();
+        AbcA::ObjectReaderPtr obj = archive->getChild(0);
+        AbcA::CompoundPropertyReaderPtr parent = obj->getProperties();
+
+        AbcA::CompoundPropertyReaderPtr smallProp =
+            parent->getCompoundProperty("small");
+        TESTING_ASSERT(smallProp->getNumProperties() == 3);
+        TESTING_ASSERT(smallProp->getScalarProperty("b")->getNumSamples() == 10);
+
+        AbcA::CompoundPropertyReaderPtr mdProp =
+            parent->getCompoundProperty("md");
+        TESTING_ASSERT(mdProp->getNumProperties() == 3);
+        TESTING_ASSERT(mdProp->getScalarProperty("b")->getNumSamples() == 150);
+
+        AbcA::CompoundPropertyReaderPtr mdlgProp =
+            parent->getCompoundProperty("mdlg");
+        TESTING_ASSERT(mdlgProp->getNumProperties() == 3);
+        TESTING_ASSERT(mdlgProp->getScalarProperty("b")->getNumSamples() == 300);
+
+        AbcA::CompoundPropertyReaderPtr lgProp =
+            parent->getCompoundProperty("lg");
+        TESTING_ASSERT(lgProp->getNumProperties() == 3);
+        TESTING_ASSERT(lgProp->getScalarProperty("b")->getNumSamples()
+                       == 33000);
+
+        AbcA::CompoundPropertyReaderPtr insaneProp =
+            parent->getCompoundProperty("insane");
+        TESTING_ASSERT(insaneProp->getNumProperties() == 3);
+        TESTING_ASSERT(insaneProp->getScalarProperty("b")->getNumSamples()
+                       == 66000);
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testWeirdStringScalar();
     testRepeatedScalarData();
     testReadWriteScalars();
-    // testPropScoping();
+    testPropScoping();
+    testScalarSamples();
     return 0;
 }

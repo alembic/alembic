@@ -1760,6 +1760,113 @@ void testArrayStringsRepeats()
     }
 }
 
+void testArraySamples()
+{
+    std::string archiveName = "numArraySamplesTest.abc";
+
+    ABCA::DataType dtype(Alembic::Util::kStringPOD);
+    std::vector < Alembic::Util::string > vals(1);
+    vals[0] = "yummy";
+    ABCA::ArraySample samp(&(vals.front()), dtype,
+        Alembic::Util::Dimensions(vals.size()));
+
+    {
+        AO::WriteArchive w;
+        ABCA::ArchiveWriterPtr a = w(archiveName, ABCA::MetaData());
+        ABCA::ObjectWriterPtr archive = a->getTop();
+        ABCA::ObjectWriterPtr obj = archive->createChild(
+            ABCA::ObjectHeader("test", ABCA::MetaData()));
+
+        ABCA::CompoundPropertyWriterPtr parent = obj->getProperties();
+        ABCA::ArrayPropertyWriterPtr prop;
+
+        ABCA::CompoundPropertyWriterPtr smallProp =
+            parent->createCompoundProperty("small", ABCA::MetaData());
+        smallProp->createArrayProperty("a", ABCA::MetaData(), dtype, 0);
+        prop = smallProp->createArrayProperty("b", ABCA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 10; ++i)
+        {
+            prop->setSample(samp);
+        }
+        smallProp->createArrayProperty("c", ABCA::MetaData(), dtype, 0);
+
+        ABCA::CompoundPropertyWriterPtr mdProp =
+            parent->createCompoundProperty("md", ABCA::MetaData());
+        mdProp->createArrayProperty("a", ABCA::MetaData(), dtype, 0);
+        prop = mdProp->createArrayProperty("b", ABCA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 150; ++i)
+        {
+            prop->setSample(samp);
+        }
+        mdProp->createArrayProperty("c", ABCA::MetaData(), dtype, 0);
+
+        ABCA::CompoundPropertyWriterPtr mdlgProp =
+            parent->createCompoundProperty("mdlg", ABCA::MetaData());
+        mdlgProp->createArrayProperty("a", ABCA::MetaData(), dtype, 0);
+        prop = mdlgProp->createArrayProperty("b", ABCA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 300; ++i)
+        {
+            prop->setSample(samp);
+        }
+        mdlgProp->createArrayProperty("c", ABCA::MetaData(), dtype, 0);
+
+        ABCA::CompoundPropertyWriterPtr lgProp =
+            parent->createCompoundProperty("lg", ABCA::MetaData());
+        lgProp->createArrayProperty("a", ABCA::MetaData(), dtype, 0);
+        prop = lgProp->createArrayProperty("b", ABCA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 33000; ++i)
+        {
+            prop->setSample(samp);
+        }
+        lgProp->createArrayProperty("c", ABCA::MetaData(), dtype, 0);
+
+        ABCA::CompoundPropertyWriterPtr insaneProp =
+            parent->createCompoundProperty("insane", ABCA::MetaData());
+        insaneProp->createArrayProperty("a", ABCA::MetaData(), dtype, 0);
+        prop = insaneProp->createArrayProperty("b", ABCA::MetaData(), dtype, 0);
+        for (std::size_t i = 0; i < 66000; ++i)
+        {
+            prop->setSample(samp);
+        }
+        insaneProp->createArrayProperty("c", ABCA::MetaData(), dtype, 0);
+    }
+
+    {
+        AO::ReadArchive r;
+        ABCA::ArchiveReaderPtr a = r( archiveName );
+        ABCA::ObjectReaderPtr archive = a->getTop();
+        ABCA::ObjectReaderPtr obj = archive->getChild(0);
+        ABCA::CompoundPropertyReaderPtr parent = obj->getProperties();
+
+        ABCA::CompoundPropertyReaderPtr smallProp =
+            parent->getCompoundProperty("small");
+        TESTING_ASSERT(smallProp->getNumProperties() == 3);
+        TESTING_ASSERT(smallProp->getArrayProperty("b")->getNumSamples() == 10);
+
+        ABCA::CompoundPropertyReaderPtr mdProp =
+            parent->getCompoundProperty("md");
+        TESTING_ASSERT(mdProp->getNumProperties() == 3);
+        TESTING_ASSERT(mdProp->getArrayProperty("b")->getNumSamples() == 150);
+
+        ABCA::CompoundPropertyReaderPtr mdlgProp =
+            parent->getCompoundProperty("mdlg");
+        TESTING_ASSERT(mdlgProp->getNumProperties() == 3);
+        TESTING_ASSERT(mdlgProp->getArrayProperty("b")->getNumSamples() == 300);
+
+        ABCA::CompoundPropertyReaderPtr lgProp =
+            parent->getCompoundProperty("lg");
+        TESTING_ASSERT(lgProp->getNumProperties() == 3);
+        TESTING_ASSERT(lgProp->getArrayProperty("b")->getNumSamples()
+                       == 33000);
+
+        ABCA::CompoundPropertyReaderPtr insaneProp =
+            parent->getCompoundProperty("insane");
+        TESTING_ASSERT(insaneProp->getNumProperties() == 3);
+        TESTING_ASSERT(insaneProp->getArrayProperty("b")->getNumSamples()
+                       == 66000);
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testEmptyArray();
@@ -1767,5 +1874,6 @@ int main ( int argc, char *argv[] )
     testReadWriteArrays();
     testExtentArrayStrings();
     testArrayStringsRepeats();
+    testArraySamples();
     return 0;
 }
