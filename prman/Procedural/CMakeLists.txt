@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -62,10 +62,13 @@ SET( CXX_FILES
 SET( CORE_LIBS
   AlembicAbcMaterial
   AlembicAbcGeom
+  AlembicAbcCoreFactory
   AlembicAbc
   AlembicAbcCoreHDF5
+  AlembicAbcCoreOgawa
   AlembicAbcCoreAbstract
-  AlembicUtil 
+  AlembicOgawa
+  AlembicUtil
   )
 
 ADD_PRMAN_CXX_PLUGIN( AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES} )

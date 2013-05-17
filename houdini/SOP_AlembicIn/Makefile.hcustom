@@ -4,22 +4,26 @@ ABCBUILDROOT = ../../../alembic_build/lib/Alembic
 
 
 INCLUDES = -I $(ABCROOT)
-           
+
 LINKPATHS = -L $(ABCBUILDROOT)/MD5Hash \
             -L $(ABCBUILDROOT)/Util \
             -L $(ABCBUILDROOT)/AbcCoreAbstract \
+            -L $(ABCBUILDROOT)/AbcCoreOgawa \
             -L $(ABCBUILDROOT)/AbcCoreHDF5 \
             -L $(ABCBUILDROOT)/Abc \
-            -L $(ABCBUILDROOT)/AbcGeom 
+            -L $(ABCBUILDROOT)/AbcCoreFactory \
+            -L $(ABCBUILDROOT)/AbcGeom
 
 LINKS = -l AlembicAbcGeom \
+        -l AlembicAbcCoreFactory \
         -l AlembicAbc \
         -l AlembicAbcCoreHDF5 \
+        -l AlembicAbcCoreOgawa \
         -l AlembicAbcCoreAbstract \
         -l AlembicUtil \
-        -l hdf5 -l hdf5_hl 
+        -l hdf5 -l hdf5_hl
 
-HCUSTOM_ADDITIONAL_ARGS = 
+HCUSTOM_ADDITIONAL_ARGS =
 
 debug: SOP_AlembicIn.C
 	hcustom $(HCUSTOM_ADDITIONAL_ARGS) -e SOP_AlembicIn.C $(INCLUDES) $(LINKPATHS) $(LINKS)

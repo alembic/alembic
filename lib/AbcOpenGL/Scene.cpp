@@ -96,8 +96,8 @@ Scene::Scene( const std::string &abcFileName )
 
     std::cout << "Beginning to open archive: " << abcFileName << std::endl;
 
-    m_archive = IArchive( Alembic::AbcCoreHDF5::ReadArchive(),
-                          abcFileName );
+    Alembic::AbcCoreFactory::IFactory factory;
+    m_archive = factory.getArchive( abcFileName );
 
     std::string appName;
     std::string libraryVersionString;

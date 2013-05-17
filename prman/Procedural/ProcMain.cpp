@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,6 +39,8 @@
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
+#include <Alembic/AbcCoreFactory/All.h>
 
 #include "ProcArgs.h"
 #include "PathUtil.h"
@@ -62,7 +64,7 @@ public:
         RiAttributeBegin();
         WriteIdentifier( ohead );
     }
-    
+
     ~AttributeBlockHelper()
     {
         RiAttributeEnd();
@@ -87,10 +89,10 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     {
         blockHelper.reset( new AttributeBlockHelper( ohead ) );
     }
-    
+
     //set this if we should continue traversing
     IObject nextParentObject;
-    
+
     //construct the baseObject first so that we can perform visibility
     //testing on it.
     IObject baseObject( parent, ohead.getName() );
@@ -106,8 +108,8 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
     default:
         break;
     }
-    
-    
+
+
     if ( IXform::matches( ohead ) )
     {
         if ( args.excludeXform )
@@ -118,15 +120,15 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         {
             IXform xform( baseObject, kWrapExisting );
             ProcessXform( xform, args );
-            
+
             nextParentObject = xform;
-            
+
             ApplyResources( nextParentObject, args );
 
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial(nextParentObject, args );
 #endif
-            
+
         }
     }
     else if ( ISubD::matches( ohead ) )
@@ -135,12 +137,12 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         {
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
-        
-        
+
+
         std::string faceSetName;
-        
+
         ISubD subd( baseObject, kWrapExisting );
-        
+
         //if we haven't reached the end of a specified -objectpath,
         //check to see if the next token is a faceset name.
         //If it is, send the name to ProcessSubD for addition of
@@ -152,18 +154,18 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
                 faceSetName = *I;
             }
         }
-        
+
         ApplyResources( subd, args );
-        
+
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial(subd, args );
 #endif
-        
+
         if ( visible )
         {
             ProcessSubD( subd, args, faceSetName );
         }
-        
+
         //if we found a matching faceset, don't traverse below
         if ( faceSetName.empty() )
         {
@@ -176,10 +178,10 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         {
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
-        
+
         IPolyMesh polymesh( baseObject, kWrapExisting );
         ApplyResources( polymesh, args );
-        
+
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial(polymesh, args );
 #endif
@@ -193,7 +195,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         {
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
-        
+
         INuPatch patch( baseObject, kWrapExisting );
         ApplyResources( patch, args );
 #ifdef PRMAN_USE_ABCMATERIAL
@@ -203,7 +205,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         {
             ProcessNuPatch( patch, args );
         }
-        
+
         nextParentObject = patch;
     }
     else if ( IPoints::matches( ohead ) )
@@ -212,18 +214,18 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         {
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
-        
+
         IPoints points( baseObject, kWrapExisting );
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial(points, args );
 #endif
         ApplyResources( points, args );
-        
+
         if ( visible )
         {
             ProcessPoints( points, args );
         }
-        
+
         nextParentObject = points;
     }
     else if ( ICurves::matches( ohead ) )
@@ -232,10 +234,10 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         {
             blockHelper.reset( new AttributeBlockHelper( ohead ) );
         }
-        
+
         ICurves curves( baseObject, kWrapExisting );
         ApplyResources( curves, args );
-        
+
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial( curves, args );
 #endif
@@ -243,7 +245,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
         {
             ProcessCurves( curves, args );
         }
-        
+
         nextParentObject = curves;
     }
     else if ( IFaceSet::matches( ohead ) )
@@ -278,7 +280,7 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
             }
         }
     }
-    
+
     // RiAttributeEnd will be called by blockHelper falling out of scope
     // if set.
 }
@@ -316,7 +318,7 @@ Free( RtPointer data )
 }
 
 //-*****************************************************************************
-extern "C" RIPROC_DLL_EXPORT RtVoid 
+extern "C" RIPROC_DLL_EXPORT RtVoid
 Subdivide( RtPointer data, RtFloat detail )
 {
     ProcArgs *args = reinterpret_cast<ProcArgs*>( data );
@@ -324,7 +326,7 @@ Subdivide( RtPointer data, RtFloat detail )
     {
         return;
     }
-    
+
     if ( args->filename.empty() )
     {
         return;
@@ -332,8 +334,8 @@ Subdivide( RtPointer data, RtFloat detail )
 
     try
     {
-        IArchive archive( ::Alembic::AbcCoreHDF5::ReadArchive(),
-                          args->filename );
+        ::Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( args->filename );
 
         IObject root = archive.getTop();
 

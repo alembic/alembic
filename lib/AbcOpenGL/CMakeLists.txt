@@ -68,9 +68,12 @@ SET( CXX_FILES
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 SET( THIS_LIBS
      AlembicAbcGeom
+     AlembicAbcCoreFactory
      AlembicAbc
      AlembicAbcCoreHDF5
+     AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
+     AlembicOgawa
      AlembicUtil
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_GL_LIBS}

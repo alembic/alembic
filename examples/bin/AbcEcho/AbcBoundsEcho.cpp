@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreFactory/All.h>
 
 #include <ImathBoxAlgo.h>
 
@@ -113,7 +113,7 @@ Box3d getBounds( IObject iObj )
         IFaceSet faceSet( iObj, kWrapExisting );
         IFaceSetSchema fs = faceSet.getSchema ();
         faces = fs.getValue().getFaces();
-        
+
 
         Int32ArraySamplePtr meshFaceCounts;
         Int32ArraySamplePtr vertexIndices;
@@ -158,8 +158,8 @@ void visitObject( IObject iObj )
 
     const MetaData &md = iObj.getMetaData();
 
-    if ( IPolyMeshSchema::matches( md ) || 
-        IFaceSetSchema::matches( md ) || 
+    if ( IPolyMeshSchema::matches( md ) ||
+        IFaceSetSchema::matches( md ) ||
         ISubDSchema::matches( md ) )
     {
         Box3d bnds = getBounds( iObj );
@@ -190,8 +190,9 @@ int main( int argc, char *argv[] )
     // Scoped.
     g_bounds.makeEmpty();
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                          argv[1], ErrorHandler::kQuietNoopPolicy );
+        Alembic::AbcCoreFactory::IFactory factory;
+        factory.setPolicy(ErrorHandler::kQuietNoopPolicy);
+        IArchive archive = factory.getArchive( argv[1] );
         visitObject( archive.getTop() );
     }
 
