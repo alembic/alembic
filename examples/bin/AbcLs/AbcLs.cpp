@@ -89,6 +89,34 @@ void printParent( AbcG::IObject iObj,
 }
 
 //-*****************************************************************************
+void printMetaData( AbcA::MetaData md ) 
+{
+    std::stringstream ss( md.serialize() );
+    std::string segment;
+    if ( md.size() == 1 ) {
+        std::cout << REDCOLOR << " {"
+                  << md.serialize()
+                  << "}" << RESETCOLOR;
+    } else if ( md.size() > 1 ) {
+        std::cout << REDCOLOR << " {" << std::endl;
+        while ( std::getline( ss, segment, ';' ) ) {
+            std::cout << std::string( COL_1 + COL_2 + 2, ' ' )
+                      << segment << std::endl;
+        }
+        std::cout << std::string( COL_1 + COL_2, ' ' ) 
+                  << "}" << RESETCOLOR;
+    }
+}
+
+//-*****************************************************************************
+template<class PROPERTY>
+void getMetaData( Abc::ICompoundProperty iParent, Abc::PropertyHeader header ) 
+{
+    PROPERTY iProp = PROPERTY( iParent, header.getName() );
+    printMetaData( iProp.getMetaData() );
+}
+
+//-*****************************************************************************
 void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header, 
                  bool all = false, bool long_list = false, bool meta = false ) {
    
@@ -108,27 +136,29 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
             ss << header.getDataType();
         }
         std::cout << ptype
-                  << std::string(COL_1 - ptype.length(), ' ')
+                  << std::string( COL_1 - ptype.length(), ' ' )
                   << ss.str()
-                  << std::string(COL_2 - ss.str().length(), ' ');
+                  << std::string( COL_2 - ss.str().length(), ' ' );
     }
+
     std::cout << BLUECOLOR << header.getName();
+
     if ( long_list ) {
-        if ( header.isScalar() || header.isArray() ) {
-            std::cout << "[";
-            if ( header.isScalar() ) {
-                Abc::IScalarProperty iProp( iParent, header.getName() );
-                std::cout << iProp.getNumSamples();
-                md = iProp.getMetaData();
-            } else if ( header.isArray() ) {
-                Abc::IArrayProperty iProp( iParent, header.getName() );
-                std::cout << iProp.getNumSamples();
-                md = iProp.getMetaData();
-            }
-            std::cout << "]";
+        if ( header.isScalar() ) {
+            Abc::IScalarProperty iProp( iParent, header.getName() );
+            std::cout << "[" << iProp.getNumSamples() << "]";
+        } else if ( header.isArray() ) {
+            Abc::IArrayProperty iProp( iParent, header.getName() );
+            std::cout << "[" << iProp.getNumSamples() << "]";
         }
-        if ( meta && md.size() > 0 ) 
-            std::cout << REDCOLOR << " {" << md.serialize() << "}";
+        if ( meta ) {
+            if ( header.isCompound() )
+                getMetaData<Abc::ICompoundProperty>( iParent, header );
+            else if ( header.isScalar() )
+                getMetaData<Abc::IScalarProperty>( iParent, header );
+            else if ( header.isArray() )
+                getMetaData<Abc::IArrayProperty>( iParent, header );
+        }
         std::cout << std::endl;
     }
     else
@@ -140,17 +170,27 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 //-*****************************************************************************
 void printChild( AbcG::IObject iParent, AbcG::IObject iObj, 
                  bool all = false, bool long_list = false, bool meta = false ) {
-    
+
+    AbcA::MetaData md = iObj.getMetaData();
+
     if ( long_list ) {
-        std::string schema = iObj.getMetaData().get( "schema" );
+        std::string schema = md.get( "schema" );
         int spacing = COL_1;
         if ( all )
             spacing = COL_1 + COL_2;
         std::cout << schema << std::string(spacing - schema.length(), ' ');
     }
-    std::cout << GREENCOLOR << iObj.getName() << RESETCOLOR << "   ";
+    std::cout << GREENCOLOR << iObj.getName();
+
+    if ( long_list && meta )
+         printMetaData( md );
+
+    std::cout << RESETCOLOR;
+
     if ( long_list )
         std::cout << std::endl;
+    else
+        std::cout << "   ";
 }
 
 //-*****************************************************************************
