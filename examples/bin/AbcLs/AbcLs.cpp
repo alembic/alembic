@@ -54,6 +54,7 @@ namespace AbcF = ::Alembic::AbcCoreFactory;
 namespace AbcG = ::Alembic::AbcGeom;
 
 #define RESETCOLOR "\033[0m"
+#define REDCOLOR "\033[1;35m"
 #define GREENCOLOR "\033[1;32m"
 #define BLUECOLOR "\033[1;34m"
 #define CYANCOLOR "\033[1;36m"
@@ -89,16 +90,23 @@ void printParent( AbcG::IObject iObj,
 
 //-*****************************************************************************
 void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header, 
-                 bool all = false, bool long_list = false ) {
+                 bool all = false, bool long_list = false, bool meta = false ) {
    
-    std::string ptype = "CompoundProperty"; 
+    std::string ptype; 
+    AbcA::MetaData md;
+
     if ( long_list ) {
-        if ( header.isScalar() )
-            ptype = "ScalarProperty";
-        else if (header.isArray() )
-            ptype = "ArrayProperty";
         std::stringstream ss;
-        ss << header.getDataType();
+        if ( header.isCompound() ) {
+            ptype = "CompoundProperty";
+            ss << "";
+        } else if ( header.isScalar() ) {
+            ptype = "ScalarProperty";
+            ss << header.getDataType();
+        } else if ( header.isArray() ) {
+            ptype = "ArrayProperty";
+            ss << header.getDataType();
+        }
         std::cout << ptype
                   << std::string(COL_1 - ptype.length(), ' ')
                   << ss.str()
@@ -111,12 +119,16 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
             if ( header.isScalar() ) {
                 Abc::IScalarProperty iProp( iParent, header.getName() );
                 std::cout << iProp.getNumSamples();
+                md = iProp.getMetaData();
             } else if ( header.isArray() ) {
                 Abc::IArrayProperty iProp( iParent, header.getName() );
                 std::cout << iProp.getNumSamples();
+                md = iProp.getMetaData();
             }
             std::cout << "]";
         }
+        if ( meta && md.size() > 0 ) 
+            std::cout << REDCOLOR << " {" << md.serialize() << "}";
         std::cout << std::endl;
     }
     else
@@ -127,7 +139,7 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 
 //-*****************************************************************************
 void printChild( AbcG::IObject iParent, AbcG::IObject iObj, 
-                 bool all = false, bool long_list = false ) {
+                 bool all = false, bool long_list = false, bool meta = false ) {
     
     if ( long_list ) {
         std::string schema = iObj.getMetaData().get( "schema" );
@@ -156,7 +168,7 @@ void visit( Abc::ICompoundProperty iProp,
 
     // children
     for( size_t i = 0; i < iProp.getNumProperties(); ++i ) {
-        printChild( iProp, iProp.getPropertyHeader( i ), all, long_list );
+        printChild( iProp, iProp.getPropertyHeader( i ), all, long_list, meta );
     }
 
     // visit children
@@ -190,13 +202,13 @@ void visit( AbcG::IObject iObj,
 
     // children
     for( size_t i = 0; i < iObj.getNumChildren(); ++i ) {
-        printChild( iObj, iObj.getChild( i ), all, long_list );
+        printChild( iObj, iObj.getChild( i ), all, long_list, meta );
     }
 
     // properties
     if ( all ) {
         for( size_t i = 0; i < props.getNumProperties(); ++i ) {
-            printChild( props, props.getPropertyHeader( i ), all, long_list );
+            printChild( props, props.getPropertyHeader( i ), all, long_list, meta );
         }
     }
 
@@ -286,13 +298,12 @@ int main( int argc, char *argv[] )
     };
 
     // set some flags
-    opt_all = optionExists( options, "a");
-    opt_long = optionExists( options, "l");
-    opt_meta = optionExists( options, "m");
-    opt_recursive = optionExists( options, "r");
+    opt_all = optionExists( options, "a" );
+    opt_long = optionExists( options, "l" );
+    opt_meta = optionExists( options, "m" );
+    opt_recursive = optionExists( options, "r" );
 
     // open each file
-    size_t count = 0;
     for ( std::size_t i = 0; i < files.size(); i++ ) {
         if ( files.size() > 1 )
             std::cout << BOLD << files[i] << ':' << RESETCOLOR << std::endl;
@@ -331,7 +342,7 @@ int main( int argc, char *argv[] )
         // display file metadata 
         if ( opt_meta ) {
             std::cout  << "Using "
-                       << Alembic::AbcCoreAbstract::GetLibraryVersion ()
+                       << Alembic::AbcCoreAbstract::GetLibraryVersion()
                        << std::endl;;
 
             std::string appName;
@@ -378,7 +389,7 @@ int main( int argc, char *argv[] )
             }
         }
 
-        // walk property hierarchy for most recent valid object
+        // walk property hierarchy for most recent object
         Abc::ICompoundProperty props = iObj.getProperties();
         const Abc::PropertyHeader* header;
         bool found = false;
@@ -408,8 +419,7 @@ int main( int argc, char *argv[] )
         } else
             visit( iObj, opt_all, opt_long, opt_meta, opt_recursive, true );
         
-        ++count;
-
+        std::cout << RESETCOLOR;
         if ( !opt_long )
             std::cout << std::endl;
     };
