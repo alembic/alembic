@@ -245,7 +245,7 @@ bool isFile( const std::string& filename )
 //-*****************************************************************************
 bool optionExists(std::vector<std::string> options, std::string option)
 {
-    for ( int i = 0; i < options.size(); i++ ) 
+    for ( std::size_t i = 0; i < options.size(); i++ ) 
         if ( options[i].find(option) != std::string::npos )
             return true;
     return false;
@@ -274,7 +274,7 @@ int main( int argc, char *argv[] )
     std::vector<std::string> files;
 
     // separate file args from option args 
-    for ( int i = 1; i < arguments.size(); i++ ) {
+    for ( std::size_t i = 1; i < arguments.size(); i++ ) {
         if ( arguments[ i ].substr( 0, 1 ) == "-" )
             options.push_back( arguments[ i ] );
         else
@@ -296,7 +296,7 @@ int main( int argc, char *argv[] )
 
     // open each file
     size_t count = 0;
-    for ( int i = 0; i < files.size(); i++ ) {
+    for ( std::size_t i = 0; i < files.size(); i++ ) {
         if ( files.size() > 1 )
             std::cout << BOLD << files[i] << ':' << RESETCOLOR << std::endl;
 
@@ -385,7 +385,7 @@ int main( int argc, char *argv[] )
         Abc::ICompoundProperty props = iObj.getProperties();
         const Abc::PropertyHeader* header;
         bool found = false;
-        for ( int i = 0; i < seglist.size(); ++i ) {
+        for ( std::size_t i = 0; i < seglist.size(); ++i ) {
             header = props.getPropertyHeader( seglist[i] );
             if ( header && header->isCompound() ) {
                 Abc::ICompoundProperty ptest( props, header->getName() );
