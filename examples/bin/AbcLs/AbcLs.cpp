@@ -54,7 +54,7 @@ namespace AbcF = ::Alembic::AbcCoreFactory;
 namespace AbcG = ::Alembic::AbcGeom;
 
 #define RESETCOLOR "\033[0m"
-#define REDCOLOR "\033[1;35m"
+#define GRAYCOLOR "\033[1;30m"
 #define GREENCOLOR "\033[1;32m"
 #define BLUECOLOR "\033[1;34m"
 #define CYANCOLOR "\033[1;36m"
@@ -89,31 +89,43 @@ void printParent( AbcG::IObject iObj,
 }
 
 //-*****************************************************************************
-void printMetaData( AbcA::MetaData md ) 
+void printMetaData( AbcA::MetaData md, bool all = false,
+                    bool long_list = false ) 
 {
     std::stringstream ss( md.serialize() );
     std::string segment;
-    if ( md.size() == 1 ) {
-        std::cout << REDCOLOR << " {"
-                  << md.serialize()
-                  << "}" << RESETCOLOR;
-    } else if ( md.size() > 1 ) {
-        std::cout << REDCOLOR << " {" << std::endl;
-        while ( std::getline( ss, segment, ';' ) ) {
-            std::cout << std::string( COL_1 + COL_2 + 2, ' ' )
-                      << segment << std::endl;
+    std::string spacing( COL_1 + 2, ' ' );
+
+    if ( long_list ) {
+        if ( all )
+            spacing = std::string( COL_1 + COL_2 + 2, ' ' );
+
+        if ( md.size() == 1 ) {
+            std::cout << GRAYCOLOR << " {"
+                      << md.serialize()
+                      << "}" << RESETCOLOR;
+        } else if ( md.size() > 1 ) {
+            std::cout << GRAYCOLOR << " {" << std::endl;
+            while ( std::getline( ss, segment, ';' ) ) {
+                std::cout << spacing << segment << std::endl;
+            }
+            std::cout << spacing << "}" << RESETCOLOR;
         }
-        std::cout << std::string( COL_1 + COL_2, ' ' ) 
-                  << "}" << RESETCOLOR;
+    } else {
+        std::cout << GRAYCOLOR << " {"
+                  << md.serialize()
+                  << "} "
+                  << RESETCOLOR;
     }
 }
 
 //-*****************************************************************************
 template<class PROPERTY>
-void getMetaData( Abc::ICompoundProperty iParent, Abc::PropertyHeader header ) 
+void getMetaData( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
+                  bool all = false, bool long_list = false ) 
 {
     PROPERTY iProp = PROPERTY( iParent, header.getName() );
-    printMetaData( iProp.getMetaData() );
+    printMetaData( iProp.getMetaData(), all, long_list );
 }
 
 //-*****************************************************************************
@@ -153,11 +165,16 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
         }
         if ( meta ) {
             if ( header.isCompound() )
-                getMetaData<Abc::ICompoundProperty>( iParent, header );
+                getMetaData<Abc::ICompoundProperty>( iParent, header, 
+                                          all, long_list );
             else if ( header.isScalar() )
-                getMetaData<Abc::IScalarProperty>( iParent, header );
+                getMetaData<Abc::IScalarProperty>( iParent, header,
+                                          all, long_list );
+
             else if ( header.isArray() )
-                getMetaData<Abc::IArrayProperty>( iParent, header );
+                getMetaData<Abc::IArrayProperty>( iParent, header,
+                                          all, long_list );
+
         }
         std::cout << std::endl;
     }
@@ -182,8 +199,8 @@ void printChild( AbcG::IObject iParent, AbcG::IObject iObj,
     }
     std::cout << GREENCOLOR << iObj.getName();
 
-    if ( long_list && meta )
-         printMetaData( md );
+    if ( meta )
+         printMetaData( md, all, long_list );
 
     std::cout << RESETCOLOR;
 
@@ -380,7 +397,7 @@ int main( int argc, char *argv[] )
         archive = factory.getArchive(std::string( fp.str() ), coreType);
        
         // display file metadata 
-        if ( opt_meta ) {
+        if ( opt_meta && seglist.size() == 0 ) {
             std::cout  << "Using "
                        << Alembic::AbcCoreAbstract::GetLibraryVersion()
                        << std::endl;;
