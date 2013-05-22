@@ -94,20 +94,21 @@ void printMetaData( AbcA::MetaData md, bool all = false,
 {
     std::stringstream ss( md.serialize() );
     std::string segment;
-    std::string spacing( COL_1 + 2, ' ' );
+    std::string spacing( COL_1, ' ' );
 
     if ( long_list ) {
         if ( all )
-            spacing = std::string( COL_1 + COL_2 + 2, ' ' );
+            spacing = std::string( COL_1 + COL_2, ' ' );
 
         if ( md.size() == 1 ) {
             std::cout << GRAYCOLOR << " {"
                       << md.serialize()
-                      << "}" << RESETCOLOR;
+                      << "}" 
+                      << RESETCOLOR;
         } else if ( md.size() > 1 ) {
             std::cout << GRAYCOLOR << " {" << std::endl;
             while ( std::getline( ss, segment, ';' ) ) {
-                std::cout << spacing << segment << std::endl;
+                std::cout << spacing << " " << segment << std::endl;
             }
             std::cout << spacing << "}" << RESETCOLOR;
         }
@@ -469,11 +470,11 @@ int main( int argc, char *argv[] )
         }
 
         // do stuff
-        if ( found && header->isCompound() ) {
+        if ( found && header->isCompound() )
             visit( props, opt_all, opt_long, opt_meta, opt_recursive, true );
-        } else if ( found && header->isSimple() ) {
+        else if ( found && header->isSimple() )
             printChild( props, *header, opt_all, opt_long );
-        } else
+        else
             visit( iObj, opt_all, opt_long, opt_meta, opt_recursive, true );
         
         std::cout << RESETCOLOR;
