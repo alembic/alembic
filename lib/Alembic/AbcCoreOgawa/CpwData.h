@@ -68,14 +68,14 @@ public:
         const std::string & iName,
         const AbcA::MetaData & iMetaData,
         const AbcA::DataType & iDataType,
-        uint32_t iTimeSamplingIndex );
+        Util::uint32_t iTimeSamplingIndex );
 
     AbcA::ArrayPropertyWriterPtr
     createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
         const std::string & iName,
         const AbcA::MetaData & iMetaData,
         const AbcA::DataType & iDataType,
-        uint32_t iTimeSamplingIndex );
+        Util::uint32_t iTimeSamplingIndex );
 
     AbcA::CompoundPropertyWriterPtr
     createCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,

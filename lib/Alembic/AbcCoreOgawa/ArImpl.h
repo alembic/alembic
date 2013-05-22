@@ -73,7 +73,7 @@ public:
 
     virtual AbcA::ObjectReaderPtr getTop();
 
-    virtual AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
+    virtual AbcA::TimeSamplingPtr getTimeSampling( Util::uint32_t iIndex );
 
     virtual AbcA::ArchiveReaderPtr asArchivePtr();
 
@@ -88,14 +88,14 @@ public:
     }
 
     virtual AbcA::index_t getMaxNumSamplesForTimeSamplingIndex(
-        uint32_t iIndex );
+        Util::uint32_t iIndex );
 
-    virtual uint32_t getNumTimeSamplings()
+    virtual Util::uint32_t getNumTimeSamplings()
     {
         return m_timeSamples.size();
     }
 
-    virtual int32_t getArchiveVersion()
+    virtual Util::int32_t getArchiveVersion()
     {
         return m_archiveVersion;
     }
@@ -115,7 +115,7 @@ private:
     Alembic::Util::weak_ptr< AbcA::ObjectReader > m_top;
     Alembic::Util::shared_ptr < OrData > m_data;
 
-    int32_t m_archiveVersion;
+    Util::int32_t m_archiveVersion;
 
     std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
     std::vector <  AbcA::index_t > m_maxSamples;

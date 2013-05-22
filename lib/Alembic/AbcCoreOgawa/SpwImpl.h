@@ -67,7 +67,7 @@ public:
     virtual void setSample( const void *iSamp );
     virtual void setFromPreviousSample();
     virtual size_t getNumSamples();
-    virtual void setTimeSamplingIndex( uint32_t iIndex );
+    virtual void setTimeSamplingIndex( Util::uint32_t iIndex );
 
     // BasePropertyWriter overrides
     virtual const AbcA::PropertyHeader & getHeader() const;

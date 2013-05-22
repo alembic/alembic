@@ -67,7 +67,7 @@ SpwImpl::~SpwImpl()
     index_t maxSamples = archive->getMaxNumSamplesForTimeSamplingIndex(
             m_header->timeSamplingIndex );
 
-        uint32_t numSamples = m_header->nextSampleIndex;
+        Util::uint32_t numSamples = m_header->nextSampleIndex;
 
         // a constant property, we wrote the same sample over and over
         if ( m_header->lastChangedIndex == 0 && numSamples > 0 )
@@ -181,7 +181,7 @@ size_t SpwImpl::getNumSamples()
 }
 
 //-*****************************************************************************
-void SpwImpl::setTimeSamplingIndex( uint32_t iIndex )
+void SpwImpl::setTimeSamplingIndex( Util::uint32_t iIndex )
 {
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =

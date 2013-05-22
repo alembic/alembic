@@ -114,7 +114,7 @@ CpwData::createScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
                                const std::string & iName,
                                const AbcA::MetaData & iMetaData,
                                const AbcA::DataType & iDataType,
-                               uint32_t iTimeSamplingIndex )
+                               Util::uint32_t iTimeSamplingIndex )
 {
     if ( m_madeProperties.count( iName ) )
     {
@@ -149,7 +149,7 @@ CpwData::createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
                               const std::string & iName,
                               const AbcA::MetaData & iMetaData,
                               const AbcA::DataType & iDataType,
-                              uint32_t iTimeSamplingIndex )
+                              Util::uint32_t iTimeSamplingIndex )
 {
     if ( m_madeProperties.count( iName ) )
     {
@@ -205,7 +205,7 @@ CpwData::createCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
 void CpwData::writePropertyHeaders( MetaDataMapPtr iMetaDataMap )
 {
     // pack in child header and other info
-    std::vector< uint8_t > data;
+    std::vector< Util::uint8_t > data;
     for ( size_t i = 0; i < getNumProperties(); ++i )
     {
         PropertyHeaderPtr prop = m_propertyHeaders[i];

@@ -93,13 +93,13 @@ public:
     createScalarProperty( const std::string & iName,
         const AbcA::MetaData & iMetaData,
         const AbcA::DataType & iDataType,
-        uint32_t iTimeSamplingIndex );
+        Util::uint32_t iTimeSamplingIndex );
 
     virtual AbcA::ArrayPropertyWriterPtr
     createArrayProperty( const std::string & iName,
         const AbcA::MetaData & iMetaData,
         const AbcA::DataType & iDataType,
-        uint32_t iTimeSamplingIndex );
+        Util::uint32_t iTimeSamplingIndex );
 
     virtual AbcA::CompoundPropertyWriterPtr
     createCompoundProperty( const std::string & iName,

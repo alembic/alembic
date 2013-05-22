@@ -67,7 +67,7 @@ ApwImpl::~ApwImpl()
     index_t maxSamples = archive->getMaxNumSamplesForTimeSamplingIndex(
             m_header->timeSamplingIndex );
 
-    uint32_t numSamples = m_header->nextSampleIndex;
+    Util::uint32_t numSamples = m_header->nextSampleIndex;
 
     // a constant property, we wrote the same sample over and over
     if ( m_header->lastChangedIndex == 0 && m_header->nextSampleIndex > 0 )
@@ -202,7 +202,7 @@ size_t ApwImpl::getNumSamples()
 }
 
 //-*****************************************************************************
-void ApwImpl::setTimeSamplingIndex( uint32_t iIndex )
+void ApwImpl::setTimeSamplingIndex( Util::uint32_t iIndex )
 {
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =

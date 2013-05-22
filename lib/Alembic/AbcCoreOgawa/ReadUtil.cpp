@@ -71,7 +71,7 @@ ReadDimensions( Ogawa::IDataPtr iDims,
 
         oDim.setRank( numRanks );
 
-        std::vector< uint32_t > dims( numRanks );
+        std::vector< Util::uint32_t > dims( numRanks );
         iDims->read( numRanks * 4, &( dims.front() ), 0, iThreadId );
         for ( std::size_t i = 0; i < numRanks; ++i )
         {
@@ -1359,7 +1359,7 @@ ReadData( void * iIntoLocation,
             reinterpret_cast< std::wstring * > ( iIntoLocation );
 
         std::size_t numChars = ( dataSize - 16 ) / 4;
-        uint32_t * buf = new uint32_t[ numChars ];
+        Util::uint32_t * buf = new Util::uint32_t[ numChars ];
         iData->read( dataSize - 16, buf, 16, iThreadId );
 
         std::size_t strPos = 0;
@@ -1442,7 +1442,7 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
-        uint32_t maxSample = *( (uint32_t *)( &buf[pos] ) );
+        Util::uint32_t maxSample = *( (uint32_t *)( &buf[pos] ) );
         pos += 4;
 
         oMaxSamples.push_back( maxSample );
@@ -1450,7 +1450,7 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
         chrono_t tpc = *( ( chrono_t * )( &buf[pos] ) );
         pos += sizeof( chrono_t );
 
-        uint32_t numSamples = *( (uint32_t *)( &buf[pos] ) );
+        Util::uint32_t numSamples = *( (uint32_t *)( &buf[pos] ) );
         pos += 4;
 
         std::vector< chrono_t > sampleTimes( numSamples );
@@ -1496,13 +1496,13 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
-        uint32_t nameSize = *( (uint32_t *)( &buf[pos] ) );
+        Util::uint32_t nameSize = *( (uint32_t *)( &buf[pos] ) );
         pos += 4;
 
         std::string name( &buf[pos], nameSize );
         pos += nameSize;
 
-        uint8_t metaDataIndex = buf[pos++];
+        Util::uint8_t metaDataIndex = buf[pos++];
 
         ObjectHeaderPtr objPtr( new AbcA::ObjectHeader() );
         objPtr->setName( name );
@@ -1510,7 +1510,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 
         if ( metaDataIndex == 0xff )
         {
-            uint32_t metaDataSize = *( (uint32_t *)( &buf[pos] ) );
+            Util::uint32_t metaDataSize = *( (Util::uint32_t *)( &buf[pos] ) );
             pos += 4;
 
             std::string metaData( &buf[pos], metaDataSize );
@@ -1529,24 +1529,24 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 
 //-*****************************************************************************
 uint32_t GetUint32WithHint(const std::vector< char > & iBuf,
-                           uint32_t iSizeHint,
+                           Util::uint32_t iSizeHint,
                            std::size_t & ioPos)
 {
-    uint32_t retVal = 0;
+    Util::uint32_t retVal = 0;
 
     if ( iSizeHint == 0 )
     {
-        retVal = ( uint32_t ) ( ( uint8_t ) iBuf[ioPos] );
+        retVal = ( Util::uint32_t ) ( ( Util::uint8_t ) iBuf[ioPos] );
         ioPos ++;
     }
     else if ( iSizeHint == 1 )
     {
-        retVal = ( uint32_t )( *( (uint16_t *)( &iBuf[ioPos] ) ) );
+        retVal = ( Util::uint32_t )( *( (Util::uint16_t *)( &iBuf[ioPos] ) ) );
         ioPos += 2;
     }
     else if ( iSizeHint == 2 )
     {
-        retVal = *( ( uint32_t * )( &iBuf[ioPos] ) );
+        retVal = *( ( Util::uint32_t * )( &iBuf[ioPos] ) );
         ioPos += 4;
     }
     return retVal;
@@ -1562,31 +1562,31 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                      PropertyHeaderPtrs & oHeaders )
 {
     // 0000 0000 0000 0000 0000 0000 0000 0011
-    static const uint32_t ptypeMask = 0x0003;
+    static const Util::uint32_t ptypeMask = 0x0003;
 
     // 0000 0000 0000 0000 0000 0000 0000 1100
-    static const uint32_t sizeHintMask = 0x000c;
+    static const Util::uint32_t sizeHintMask = 0x000c;
 
     // 0000 0000 0000 0000 0000 0000 1111 0000
-    static const uint32_t podMask = 0x00f0;
+    static const Util::uint32_t podMask = 0x00f0;
 
     // 0000 0000 0000 0000 0000 0001 0000 0000
-    static const uint32_t hasTsidxMask = 0x0100;
+    static const Util::uint32_t hasTsidxMask = 0x0100;
 
     // 0000 0000 0000 0000 0000 0010 0000 0000
-    static const uint32_t needsFirstLastMask = 0x0200;
+    static const Util::uint32_t needsFirstLastMask = 0x0200;
 
     // 0000 0000 0000 0000 0000 0100 0000 0000
-    static const uint32_t homogenousMask = 0x400;
+    static const Util::uint32_t homogenousMask = 0x400;
 
     // 0000 0000 0000 0000 0000 1000 0000 0000
-    static const uint32_t constantMask = 0x800;
+    static const Util::uint32_t constantMask = 0x800;
 
     // 0000 0000 0000 1111 1111 0000 0000 0000
-    static const uint32_t extentMask = 0xff000;
+    static const Util::uint32_t extentMask = 0xff000;
 
     // 0000 1111 1111 0000 0000 0000 0000 0000
-    static const uint32_t metaDataIndexMask = 0xff00000;
+    static const Util::uint32_t metaDataIndexMask = 0xff00000;
 
     Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
     ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
@@ -1604,10 +1604,10 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         PropertyHeaderPtr header( new PropertyHeaderAndFriends() );
 
         // first 4 bytes is always info
-        uint32_t info =  *( (uint32_t *)( &buf[pos] ) );
+        Util::uint32_t info =  *( (Util::uint32_t *)( &buf[pos] ) );
         pos += 4;
 
-        uint32_t ptype = info & ptypeMask;
+        Util::uint32_t ptype = info & ptypeMask;
         header->isScalarLike = ptype & 1;
         if ( ptype == 0 )
         {
@@ -1622,7 +1622,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             header->header.setPropertyType( AbcA::kArrayProperty );
         }
 
-        uint32_t sizeHint = ( info & sizeHintMask ) >> 2;
+        Util::uint32_t sizeHint = ( info & sizeHintMask ) >> 2;
 
         // if we aren't a compound we may need to do a bunch of other work
         if ( !header->header.isCompound() )
@@ -1644,10 +1644,11 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
                  podt != ( char )Alembic::Util::kStringPOD &&
                  podt != ( char )Alembic::Util::kWstringPOD )
             {
-                ABCA_THROW( "Read invalid POD type: " << ( int )podt );
+                ABCA_THROW(
+                    "Read invalid POD type: " << ( Util::int32_t )podt );
             }
 
-            uint8_t extent = ( info & extentMask ) >> 12;
+            Util::uint8_t extent = ( info & extentMask ) >> 12;
             header->header.setDataType( AbcA::DataType(
                 ( Util::PlainOldDataType ) podt, extent ) );
 
@@ -1688,17 +1689,18 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             }
         }
 
-        uint32_t nameSize = GetUint32WithHint( buf, sizeHint, pos );
+        Util::uint32_t nameSize = GetUint32WithHint( buf, sizeHint, pos );
 
         std::string name( &buf[pos], nameSize );
         header->header.setName( name );
         pos += nameSize;
 
-        uint32_t metaDataIndex = ( info & metaDataIndexMask ) >> 20;
+        Util::uint32_t metaDataIndex = ( info & metaDataIndexMask ) >> 20;
 
         if ( metaDataIndex == 0xff )
         {
-            uint32_t metaDataSize = GetUint32WithHint( buf, sizeHint, pos );
+            Util::uint32_t metaDataSize =
+                GetUint32WithHint( buf, sizeHint, pos );
 
             std::string metaData( &buf[pos], metaDataSize );
             pos += metaDataSize;
@@ -1732,7 +1734,7 @@ ReadIndexedMetaData( Ogawa::IDataPtr iData,
     while ( pos < buf.size() )
     {
         // these are all small (less than 256 byte) meta data strings
-        uint8_t metaDataSize = buf[pos++];
+        Util::uint8_t metaDataSize = buf[pos++];
         std::string metaData( &buf[pos], metaDataSize );
         pos += metaDataSize;
         AbcA::MetaData md;

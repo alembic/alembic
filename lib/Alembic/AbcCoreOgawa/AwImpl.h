@@ -86,16 +86,17 @@ public:
         return m_metaDataMap;
     }
 
-    virtual uint32_t addTimeSampling( const AbcA::TimeSampling & iTs );
+    virtual Util::uint32_t addTimeSampling( const AbcA::TimeSampling & iTs );
 
-    virtual AbcA::TimeSamplingPtr getTimeSampling( uint32_t iIndex );
+    virtual AbcA::TimeSamplingPtr getTimeSampling( Util::uint32_t iIndex );
 
-    virtual uint32_t getNumTimeSamplings() { return m_timeSamples.size(); }
+    virtual Util::uint32_t getNumTimeSamplings()
+    { return m_timeSamples.size(); }
 
     virtual AbcA::index_t getMaxNumSamplesForTimeSamplingIndex(
-        uint32_t iIndex );
+        Util::uint32_t iIndex );
 
-    virtual void setMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex,
+    virtual void setMaxNumSamplesForTimeSamplingIndex( Util::uint32_t iIndex,
                                                       AbcA::index_t iMaxIndex );
 
 private:

@@ -148,7 +148,7 @@ AbcA::ScalarPropertyWriterPtr
 CpwImpl::createScalarProperty( const std::string & iName,
                       const AbcA::MetaData & iMetaData,
                       const AbcA::DataType & iDataType,
-                      uint32_t iTimeSamplingIndex )
+                      Util::uint32_t iTimeSamplingIndex )
 {
     return m_data->createScalarProperty( asCompoundPtr(), iName, iMetaData,
                                          iDataType, iTimeSamplingIndex );
@@ -159,7 +159,7 @@ AbcA::ArrayPropertyWriterPtr
 CpwImpl::createArrayProperty( const std::string & iName,
                               const AbcA::MetaData & iMetaData,
                               const AbcA::DataType & iDataType,
-                              uint32_t iTimeSamplingIndex )
+                              Util::uint32_t iTimeSamplingIndex )
 {
     return m_data->createArrayProperty( asCompoundPtr(), iName, iMetaData,
                                         iDataType, iTimeSamplingIndex );

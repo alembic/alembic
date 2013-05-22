@@ -171,7 +171,7 @@ AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
 //-*****************************************************************************
 void OwData::writeHeaders( MetaDataMapPtr iMetaDataMap )
 {
-    std::vector< uint8_t > data;
+    std::vector< Util::uint8_t > data;
 
     // pack all object header into data here
     for ( size_t i = 0; i < m_childHeaders.size(); ++i )

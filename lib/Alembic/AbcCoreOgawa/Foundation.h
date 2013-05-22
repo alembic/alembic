@@ -107,7 +107,7 @@ struct PropertyHeaderAndFriends
         const AbcA::MetaData &iMetaData,
         const AbcA::DataType &iDataType,
         const AbcA::TimeSamplingPtr & iTsamp,
-        uint32_t iTimeSamplingIndex ) :
+        Util::uint32_t iTimeSamplingIndex ) :
         header( iName, iPropType, iMetaData, iDataType, iTsamp ),
         timeSamplingIndex( iTimeSamplingIndex )
     {
@@ -128,7 +128,7 @@ struct PropertyHeaderAndFriends
                  "Invalid sample index: " << iIndex
                  << ", should be between 0 and " << nextSampleIndex - 1 );
 
-        uint32_t index = ( uint32_t ) iIndex;
+        Util::uint32_t index = ( Util::uint32_t ) iIndex;
         if ( index < firstChangedIndex )
         {
             return 0;
@@ -155,18 +155,18 @@ struct PropertyHeaderAndFriends
     bool isHomogenous;
 
     // Index of the next sample to write
-    uint32_t nextSampleIndex;
+    Util::uint32_t nextSampleIndex;
 
     // Index representing the first sample that is different from sample 0
-    uint32_t firstChangedIndex;
+    Util::uint32_t firstChangedIndex;
 
     // Index representing the last sample in which a change has occured
     // There is no need to repeat samples if they are the same between this
     // index and nextSampleIndex
-    uint32_t lastChangedIndex;
+    Util::uint32_t lastChangedIndex;
 
     // Index representing which TimeSampling from the ArchiveWriter to use.
-    uint32_t timeSamplingIndex;
+    Util::uint32_t timeSamplingIndex;
 };
 
 typedef Alembic::Util::shared_ptr<PropertyHeaderAndFriends> PropertyHeaderPtr;

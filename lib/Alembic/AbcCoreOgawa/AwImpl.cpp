@@ -65,13 +65,13 @@ AwImpl::AwImpl( const std::string &iFileName,
     // set the version using Ogawa native calls
     // This expresses the AbcCoreOgawa version - how properties,
     // are stored within Ogawa, etc.
-    int version = ALEMBIC_OGAWA_FILE_VERSION;
+    Util::int32_t version = ALEMBIC_OGAWA_FILE_VERSION;
     m_archive.getGroup()->addData( 4, &version );
 
     // This is the Alembic library version XXYYZZ
     // Where XX is the major version, YY is the minor version
     // and ZZ is the patch version
-    int libraryVersion = ALEMBIC_LIBRARY_VERSION;
+    Util::int32_t libraryVersion = ALEMBIC_LIBRARY_VERSION;
     m_archive.getGroup()->addData( 4, &libraryVersion );
 
     m_metaData.set("_ai_AlembicVersion", AbcA::GetLibraryVersion());
@@ -122,7 +122,7 @@ AbcA::ObjectWriterPtr AwImpl::getTop()
 }
 
 //-*****************************************************************************
-uint32_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
+Util::uint32_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
 {
     index_t numTS = m_timeSamples.size();
     for (index_t i = 0; i < numTS; ++i)
@@ -146,7 +146,7 @@ uint32_t AwImpl::addTimeSampling( const AbcA::TimeSampling & iTs )
 }
 
 //-*****************************************************************************
-AbcA::TimeSamplingPtr AwImpl::getTimeSampling( uint32_t iIndex )
+AbcA::TimeSamplingPtr AwImpl::getTimeSampling( Util::uint32_t iIndex )
 {
     ABCA_ASSERT( iIndex < m_timeSamples.size(),
         "Invalid index provided to getTimeSampling." );
@@ -155,7 +155,8 @@ AbcA::TimeSamplingPtr AwImpl::getTimeSampling( uint32_t iIndex )
 }
 
 //-*****************************************************************************
-AbcA::index_t AwImpl::getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex )
+AbcA::index_t
+AwImpl::getMaxNumSamplesForTimeSamplingIndex( Util::uint32_t iIndex )
 {
     if ( iIndex < m_maxSamples.size() )
     {
@@ -165,7 +166,7 @@ AbcA::index_t AwImpl::getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex )
 }
 
 //-*****************************************************************************
-void AwImpl::setMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex,
+void AwImpl::setMaxNumSamplesForTimeSamplingIndex( Util::uint32_t iIndex,
                                                    AbcA::index_t iMaxIndex )
 {
     if ( iIndex < m_maxSamples.size() )
@@ -199,11 +200,11 @@ AwImpl::~AwImpl()
         std::string metaData = m_metaData.serialize();
         m_archive.getGroup()->addData( metaData.size(), metaData.c_str() );
 
-        std::vector< uint8_t > data;
-        uint32_t numSamplings = getNumTimeSamplings();
-        for ( uint32_t i = 0; i < numSamplings; ++i )
+        std::vector< Util::uint8_t > data;
+        Util::uint32_t numSamplings = getNumTimeSamplings();
+        for ( Util::uint32_t i = 0; i < numSamplings; ++i )
         {
-            uint32_t maxSample = m_maxSamples[i];
+            Util::uint32_t maxSample = m_maxSamples[i];
             AbcA::TimeSamplingPtr timePtr = getTimeSampling( i );
             WriteTimeSampling( data, maxSample, *timePtr );
         }

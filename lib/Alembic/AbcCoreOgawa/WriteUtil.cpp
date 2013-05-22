@@ -42,10 +42,10 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-void pushUint32WithHint( std::vector< uint8_t > & ioData,
-                         uint32_t iVal, uint32_t iHint )
+void pushUint32WithHint( std::vector< Util::uint8_t > & ioData,
+                         Util::uint32_t iVal, Util::uint32_t iHint )
 {
-    uint8_t * data = ( uint8_t * ) &iVal;
+    Util::uint8_t * data = ( Util::uint8_t * ) &iVal;
     if ( iHint == 0)
     {
         ioData.push_back( data[0] );
@@ -65,9 +65,9 @@ void pushUint32WithHint( std::vector< uint8_t > & ioData,
 }
 
 //-*****************************************************************************
-void pushChrono( std::vector< uint8_t > & ioData, chrono_t iVal )
+void pushChrono( std::vector< Util::uint8_t > & ioData, chrono_t iVal )
 {
-    uint8_t * data = ( uint8_t * ) &iVal;
+    Util::uint8_t * data = ( Util::uint8_t * ) &iVal;
 
     for ( std::size_t i = 0; i < sizeof( chrono_t ); ++i )
     {
@@ -104,15 +104,15 @@ void WriteDimensions( Ogawa::OGroupPtr iGroup,
     }
 
     // Create temporary storage to write
-    std::vector<uint32_t> dimStorage( rank );
+    std::vector<Util::uint32_t> dimStorage( rank );
 
     // Copy into it.
     for ( size_t r = 0; r < rank; ++r )
     {
-        dimStorage[r] = ( uint32_t ) iDims[r];
+        dimStorage[r] = ( Util::uint32_t ) iDims[r];
     }
 
-    iGroup->addData( rank * sizeof( uint32_t ),
+    iGroup->addData( rank * sizeof( Util::uint32_t ),
                      ( const void * )&dimStorage.front() );
 }
 
@@ -144,7 +144,7 @@ WriteData( WrittenSampleMap &iMap,
     if ( dataType.getPod() == Alembic::Util::kStringPOD )
     {
         size_t numPods = dataType.getExtent() * dims.numPoints();
-        std::vector <int8_t> v;
+        std::vector <Util::int8_t> v;
         for ( size_t j = 0; j < numPods; ++j )
         {
             const std::string &str =
@@ -170,7 +170,7 @@ WriteData( WrittenSampleMap &iMap,
     else if ( dataType.getPod() == Alembic::Util::kWstringPOD )
     {
         size_t numPods = dataType.getExtent() * dims.numPoints();
-        std::vector <int32_t> v;
+        std::vector <Util::int32_t> v;
         for ( size_t j = 0; j < numPods; ++j )
         {
             const std::wstring &str =
@@ -191,7 +191,7 @@ WriteData( WrittenSampleMap &iMap,
         }
 
         const void * datas[2] = { &iKey.digest, &v.front() };
-        std::size_t sizes[2] = { 16, v.size() * sizeof(int32_t) };
+        std::size_t sizes[2] = { 16, v.size() * sizeof(Util::int32_t) };
         dataPtr =  iGroup->addData( 2, sizes, datas );
     }
     else
@@ -224,54 +224,54 @@ void CopyWrittenData( Ogawa::OGroupPtr iGroup,
 }
 
 //-*****************************************************************************
-void WritePropertyInfo( std::vector< uint8_t > & ioData,
+void WritePropertyInfo( std::vector< Util::uint8_t > & ioData,
                     const AbcA::PropertyHeader &iHeader,
                     bool isScalarLike,
                     bool isHomogenous,
-                    uint32_t iTimeSamplingIndex,
-                    uint32_t iNumSamples,
-                    uint32_t iFirstChangedIndex,
-                    uint32_t iLastChangedIndex,
+                    Util::uint32_t iTimeSamplingIndex,
+                    Util::uint32_t iNumSamples,
+                    Util::uint32_t iFirstChangedIndex,
+                    Util::uint32_t iLastChangedIndex,
                     MetaDataMapPtr iMap )
 {
 
-    uint32_t info = 0;
+    Util::uint32_t info = 0;
 
     // 0000 0000 0000 0000 0000 0000 0000 0011
-    static const uint32_t ptypeMask = 0x0003;
+    static const Util::uint32_t ptypeMask = 0x0003;
 
     // 0000 0000 0000 0000 0000 0000 0000 1100
-    static const uint32_t sizeHintMask = 0x000c;
+    static const Util::uint32_t sizeHintMask = 0x000c;
 
     // 0000 0000 0000 0000 0000 0000 1111 0000
-    static const uint32_t podMask = 0x00f0;
+    static const Util::uint32_t podMask = 0x00f0;
 
     // 0000 0000 0000 0000 0000 0001 0000 0000
-    static const uint32_t hasTsidxMask = 0x0100;
+    static const Util::uint32_t hasTsidxMask = 0x0100;
 
     // 0000 0000 0000 0000 0000 0010 0000 0000
-    static const uint32_t needsFirstLastMask = 0x0200;
+    static const Util::uint32_t needsFirstLastMask = 0x0200;
 
     // 0000 0000 0000 0000 0000 0100 0000 0000
-    static const uint32_t homogenousMask = 0x400;
+    static const Util::uint32_t homogenousMask = 0x400;
 
     // 0000 0000 0000 0000 0000 1000 0000 0000
-    static const uint32_t constantMask = 0x800;
+    static const Util::uint32_t constantMask = 0x800;
 
     // 0000 0000 0000 1111 1111 0000 0000 0000
-    static const uint32_t extentMask = 0xff000;
+    static const Util::uint32_t extentMask = 0xff000;
 
     // 0000 1111 1111 0000 0000 0000 0000 0000
-    static const uint32_t metaDataIndexMask = 0xff00000;
+    static const Util::uint32_t metaDataIndexMask = 0xff00000;
 
     std::string metaData = iHeader.getMetaData().serialize();
-    uint32_t metaDataSize = metaData.size();
+    Util::uint32_t metaDataSize = metaData.size();
 
     // keep track of the longest thing for byteSizeHint and so we don't
     // have to use 4 byte sizes if we don't need it
-    uint32_t maxSize = metaDataSize;
+    Util::uint32_t maxSize = metaDataSize;
 
-    uint32_t nameSize = iHeader.getName().size();
+    Util::uint32_t nameSize = iHeader.getName().size();
     if ( maxSize < nameSize )
     {
         maxSize = nameSize;
@@ -292,7 +292,7 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
     // 0 for 1 byte
     // 1 for 2 bytes
     // 2 for 4 bytes
-    uint32_t sizeHint = 0;
+    Util::uint32_t sizeHint = 0;
     if ( maxSize > 255 && maxSize < 65536 )
     {
         sizeHint = 1;
@@ -304,7 +304,7 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
 
     info |= sizeHintMask & ( sizeHint << 2 );
 
-    uint32_t metaDataIndex = iMap->getIndex( metaData );
+    Util::uint32_t metaDataIndex = iMap->getIndex( metaData );
 
     info |= metaDataIndexMask & ( metaDataIndex << 20 );
 
@@ -312,12 +312,12 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
     if ( !iHeader.isCompound() )
     {
         // Slam the property type in there.
-        info |= ptypeMask & ( uint32_t )iHeader.getPropertyType();
+        info |= ptypeMask & ( Util::uint32_t )iHeader.getPropertyType();
 
         // arrays may be scalar like, scalars are already scalar like
-        info |= ( uint32_t ) isScalarLike;
+        info |= ( Util::uint32_t ) isScalarLike;
 
-        uint32_t pod = ( uint32_t )iHeader.getDataType().getPod();
+        Util::uint32_t pod = ( Util::uint32_t )iHeader.getDataType().getPod();
         info |= podMask & ( pod << 4 );
 
         if (iTimeSamplingIndex != 0)
@@ -338,7 +338,8 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
             needsFirstLast = true;
         }
 
-        uint32_t extent = ( uint32_t )iHeader.getDataType().getExtent();
+        Util::uint32_t extent =
+            ( Util::uint32_t )iHeader.getDataType().getExtent();
         info |= extentMask & ( extent << 12 );
 
         if ( isHomogenous )
@@ -398,19 +399,19 @@ void WritePropertyInfo( std::vector< uint8_t > & ioData,
 }
 
 //-*****************************************************************************
-void WriteObjectHeader( std::vector< uint8_t > & ioData,
+void WriteObjectHeader( std::vector< Util::uint8_t > & ioData,
                     const AbcA::ObjectHeader &iHeader,
                     MetaDataMapPtr iMap )
 {
-    uint32_t nameSize = iHeader.getName().size();
+    Util::uint32_t nameSize = iHeader.getName().size();
     pushUint32WithHint( ioData, nameSize, 2 );
     ioData.insert( ioData.end(), iHeader.getName().begin(),
                    iHeader.getName().end() );
 
     std::string metaData = iHeader.getMetaData().serialize();
-    uint32_t metaDataSize = (uint32_t) metaData.size();
+    Util::uint32_t metaDataSize = ( Util::uint32_t ) metaData.size();
 
-    uint32_t metaDataIndex = iMap->getIndex( metaData );
+    Util::uint32_t metaDataIndex = iMap->getIndex( metaData );
 
     // write 1 byte for the meta data index
     pushUint32WithHint( ioData, metaDataIndex, 0 );
@@ -427,8 +428,8 @@ void WriteObjectHeader( std::vector< uint8_t > & ioData,
 }
 
 //-*****************************************************************************
-void WriteTimeSampling( std::vector< uint8_t > & ioData,
-                    uint32_t  iMaxSample,
+void WriteTimeSampling( std::vector< Util::uint8_t > & ioData,
+                    Util::uint32_t  iMaxSample,
                     const AbcA::TimeSampling &iTsmp )
 {
     pushUint32WithHint( ioData, iMaxSample, 2 );
@@ -442,7 +443,7 @@ void WriteTimeSampling( std::vector< uint8_t > & ioData,
     const std::vector < chrono_t > & samps = iTsmp.getStoredTimes();
     ABCA_ASSERT( samps.size() > 0, "No TimeSamples to write!");
 
-    uint32_t spc = (uint32_t) samps.size();
+    Util::uint32_t spc = ( Util::uint32_t ) samps.size();
 
     pushUint32WithHint( ioData, spc, 2 );
 

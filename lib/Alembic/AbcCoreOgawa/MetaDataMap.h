@@ -54,10 +54,10 @@ public:
 
     // will return 0xff if iStr is too long, or we've run out of indices
     // 0 will be returned if iStr is empty
-    uint32_t getIndex( const std::string & iStr );
+    Util::uint32_t getIndex( const std::string & iStr );
     void write( Ogawa::OGroupPtr iParent );
 private:
-    std::map< std::string, uint32_t > m_map;
+    std::map< std::string, Util::uint32_t > m_map;
 };
 
 typedef Alembic::Util::shared_ptr<MetaDataMap> MetaDataMapPtr;

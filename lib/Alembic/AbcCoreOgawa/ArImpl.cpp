@@ -167,7 +167,7 @@ AbcA::ObjectReaderPtr ArImpl::getTop()
 }
 
 //-*****************************************************************************
-AbcA::TimeSamplingPtr ArImpl::getTimeSampling( uint32_t iIndex )
+AbcA::TimeSamplingPtr ArImpl::getTimeSampling( Util::uint32_t iIndex )
 {
     ABCA_ASSERT( iIndex < m_timeSamples.size(),
         "Invalid index provided to getTimeSampling." );
@@ -182,7 +182,8 @@ AbcA::ArchiveReaderPtr ArImpl::asArchivePtr()
 }
 
 //-*****************************************************************************
-AbcA::index_t ArImpl::getMaxNumSamplesForTimeSamplingIndex( uint32_t iIndex )
+AbcA::index_t
+ArImpl::getMaxNumSamplesForTimeSamplingIndex( Util::uint32_t iIndex )
 {
     if ( iIndex < m_maxSamples.size() )
     {

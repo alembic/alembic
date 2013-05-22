@@ -41,7 +41,7 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-uint32_t MetaDataMap::getIndex( const std::string & iStr )
+Util::uint32_t MetaDataMap::getIndex( const std::string & iStr )
 {
     if ( iStr.empty() )
     {
@@ -51,7 +51,8 @@ uint32_t MetaDataMap::getIndex( const std::string & iStr )
     // most likely to be repeated over and over
     else if ( iStr.size() < 256 )
     {
-        std::map< std::string, uint32_t >::iterator it = m_map.find( iStr );
+        std::map< std::string, Util::uint32_t >::iterator it =
+            m_map.find( iStr );
 
         if ( it != m_map.end() )
         {
@@ -61,7 +62,7 @@ uint32_t MetaDataMap::getIndex( const std::string & iStr )
         // explicitly write (and 0 means empty metadata)
         else if ( it == m_map.end() && m_map.size() < 254 )
         {
-            uint32_t index = m_map.size();
+            Util::uint32_t index = m_map.size();
             m_map[iStr] = index;
             return index + 1;
         }
@@ -85,14 +86,14 @@ void MetaDataMap::write( Ogawa::OGroupPtr iParent )
     mdVec.resize( m_map.size() );
 
     // lets put each string into it's vector slot
-    std::map< std::string, uint32_t >::iterator it, itEnd;
+    std::map< std::string, Util::uint32_t >::iterator it, itEnd;
     for ( it = m_map.begin(), itEnd = m_map.end(); it != itEnd; ++it )
     {
         mdVec[ it->second ] = it->first;
     }
 
     // now place it all into one continuous buffer
-    std::vector< uint8_t > buf;
+    std::vector< Util::uint8_t > buf;
     std::vector< std::string >::iterator jt, jtEnd;
     for ( jt = mdVec.begin(), jtEnd = mdVec.end(); jt != jtEnd; ++jt )
     {

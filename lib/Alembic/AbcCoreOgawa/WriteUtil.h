@@ -69,26 +69,26 @@ WriteData( WrittenSampleMap &iMap,
 
 //-*****************************************************************************
 void
-WritePropertyInfo( std::vector< uint8_t > & ioData,
+WritePropertyInfo( std::vector< Util::uint8_t > & ioData,
                    const AbcA::PropertyHeader &iHeader,
                    bool isScalarLike,
                    bool isHomogenous,
-                   uint32_t iTimeSamplingIndex,
-                   uint32_t iNumSamples,
-                   uint32_t iFirstChangedIndex,
-                   uint32_t iLastChangedIndex,
+                   Util::uint32_t iTimeSamplingIndex,
+                   Util::uint32_t iNumSamples,
+                   Util::uint32_t iFirstChangedIndex,
+                   Util::uint32_t iLastChangedIndex,
                    MetaDataMapPtr iMap );
 
 //-*****************************************************************************
 void
-WriteObjectHeader( std::vector< uint8_t > & ioData,
+WriteObjectHeader( std::vector< Util::uint8_t > & ioData,
                    const AbcA::ObjectHeader &iHeader,
                    MetaDataMapPtr iMap );
 
 //-*****************************************************************************
 void
-WriteTimeSampling( std::vector< uint8_t > & ioData,
-                   uint32_t  iMaxSample,
+WriteTimeSampling( std::vector< Util::uint8_t > & ioData,
+                   Util::uint32_t  iMaxSample,
                    const AbcA::TimeSampling &iTsmp );
 
 } // End namespace ALEMBIC_VERSION_NS
