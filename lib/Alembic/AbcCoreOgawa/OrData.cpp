@@ -160,6 +160,28 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
     return optr;
 }
 
+void OrData::getPropertiesHash( Util::Digest & oDigest, size_t iThreadId )
+{
+    std::size_t numChildren = m_group->getNumChildren();
+    Ogawa::IDataPtr data = m_group->getData( numChildren - 1, iThreadId );
+    if ( data && data->getSize() >= 32 )
+    {
+        // last 32 bytes are properties hash, followed by children hash
+        data->read( 16, oDigest.d, data->getSize() - 32, iThreadId );
+    }
+}
+
+void OrData::getChildrenHash( Util::Digest & oDigest, size_t iThreadId )
+{
+    std::size_t numChildren = m_group->getNumChildren();
+    Ogawa::IDataPtr data = m_group->getData( numChildren - 1, iThreadId );
+    if ( data && data->getSize() >= 32 )
+    {
+        // children hash is the last 16 bytes
+        data->read( 16, oDigest.d, data->getSize() - 16, iThreadId );
+    }
+}
+
 } // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreOgawa
 } // End namespace Alembic

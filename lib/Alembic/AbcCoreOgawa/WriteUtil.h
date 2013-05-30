@@ -46,6 +46,14 @@ namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+void HashPropertyHeader( const AbcA::PropertyHeader & iHeader,
+                         Util::SpookyHash & ioHash );
+
+//-*****************************************************************************
+void HashDimensions( const AbcA::Dimensions & iDims,
+                     Util::SpookyHash & ioHash );
+
+//-*****************************************************************************
 WrittenSampleMap& GetWrittenSampleMap(
     AbcA::ArchiveWriterPtr iArchive );
 

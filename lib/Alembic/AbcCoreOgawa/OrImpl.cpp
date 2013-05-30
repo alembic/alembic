@@ -151,6 +151,25 @@ AbcA::ObjectReaderPtr OrImpl::asObjectPtr()
     return shared_from_this();
 }
 
+//-*****************************************************************************
+bool OrImpl::getPropertiesHash( Util::Digest & oDigest )
+{
+    StreamIDPtr streamId = m_archive->getStreamID();
+    std::size_t id = streamId->getID();
+    m_data->getPropertiesHash( oDigest, id );
+    return true;
+}
+
+//-*****************************************************************************
+bool OrImpl::getChildrenHash( Util::Digest & oDigest )
+{
+    StreamIDPtr streamId = m_archive->getStreamID();
+    std::size_t id = streamId->getID();
+    m_data->getChildrenHash( oDigest, id );
+    return true;
+}
+
+//-*****************************************************************************
 Alembic::Util::shared_ptr< ArImpl > OrImpl::getArchiveImpl() const
 {
     return m_archive;

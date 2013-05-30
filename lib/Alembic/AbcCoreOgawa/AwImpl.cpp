@@ -185,7 +185,8 @@ AwImpl::~AwImpl()
     // write out our child headers
     if ( m_data )
     {
-        m_data->writeHeaders( m_metaDataMap );
+        Util::SpookyHash hash;
+        m_data->writeHeaders( m_metaDataMap, hash );
     }
 
     // let go of our reference to the data for the top object

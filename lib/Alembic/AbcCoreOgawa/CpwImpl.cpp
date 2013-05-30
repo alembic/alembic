@@ -50,6 +50,7 @@ CpwImpl::CpwImpl( AbcA::ObjectWriterPtr iParent,
     : m_object( iParent)
     , m_header( new PropertyHeaderAndFriends( "", iMeta ) )
     , m_data( iData )
+    , m_index( 0 )
 {
     // we don't need to write the property info, the object has done it already
 
@@ -60,9 +61,11 @@ CpwImpl::CpwImpl( AbcA::ObjectWriterPtr iParent,
 // With the compound property writer as an input.
 CpwImpl::CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   Ogawa::OGroupPtr iGroup,
-                  PropertyHeaderPtr iHeader )
+                  PropertyHeaderPtr iHeader,
+                  size_t iIndex )
   : m_parent( iParent )
   , m_header( iHeader )
+  , m_index( iIndex )
 {
     // Check the validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
@@ -90,6 +93,18 @@ CpwImpl::~CpwImpl()
             AwImpl, AbcA::ArchiveWriter >(
                 getObject()->getArchive() )->getMetaDataMap();
         m_data->writePropertyHeaders( mdMap );
+
+        Util::SpookyHash hash;
+        hash.Init( 0, 0 );
+        m_data->computeHash( hash );
+        HashPropertyHeader( m_header->header, hash );
+
+        Util::uint64_t hash0, hash1;
+        hash.Final( &hash0, &hash1 );
+        Util::shared_ptr< CpwImpl > parent =
+            Alembic::Util::dynamic_pointer_cast< CpwImpl,
+                AbcA::CompoundPropertyWriter > ( m_parent );
+        parent->fillHash( m_index, hash0, hash1 );
     }
 }
 
@@ -150,8 +165,11 @@ CpwImpl::createScalarProperty( const std::string & iName,
                       const AbcA::DataType & iDataType,
                       Util::uint32_t iTimeSamplingIndex )
 {
-    return m_data->createScalarProperty( asCompoundPtr(), iName, iMetaData,
-                                         iDataType, iTimeSamplingIndex );
+    AbcA::ScalarPropertyWriterPtr scalarProp =
+        m_data->createScalarProperty( asCompoundPtr(), iName, iMetaData,
+                                      iDataType, iTimeSamplingIndex );
+
+    return scalarProp;
 }
 
 //-*****************************************************************************
@@ -161,8 +179,11 @@ CpwImpl::createArrayProperty( const std::string & iName,
                               const AbcA::DataType & iDataType,
                               Util::uint32_t iTimeSamplingIndex )
 {
-    return m_data->createArrayProperty( asCompoundPtr(), iName, iMetaData,
-                                        iDataType, iTimeSamplingIndex );
+    AbcA::ArrayPropertyWriterPtr arrayProp =
+        m_data->createArrayProperty( asCompoundPtr(), iName, iMetaData,
+                                     iDataType, iTimeSamplingIndex );
+
+    return arrayProp;
 }
 
 //-*****************************************************************************
@@ -170,7 +191,16 @@ AbcA::CompoundPropertyWriterPtr
 CpwImpl::createCompoundProperty( const std::string & iName,
                                  const AbcA::MetaData & iMetaData )
 {
-    return m_data->createCompoundProperty( asCompoundPtr(), iName, iMetaData );
+    AbcA::CompoundPropertyWriterPtr compoundProp =
+        m_data->createCompoundProperty( asCompoundPtr(), iName, iMetaData );
+
+    return compoundProp;
+}
+
+void CpwImpl::fillHash( std::size_t iIndex, Util::uint64_t iHash0,
+                        Util::uint64_t iHash1 )
+{
+    m_data->fillHash( iIndex, iHash0, iHash1 );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

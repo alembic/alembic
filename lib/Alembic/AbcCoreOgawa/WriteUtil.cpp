@@ -75,6 +75,67 @@ void pushChrono( std::vector< Util::uint8_t > & ioData, chrono_t iVal )
     }
 }
 
+//-*****************************************************************************
+void HashPropertyHeader( const AbcA::PropertyHeader & iHeader,
+                         Util::SpookyHash & ioHash )
+{
+
+    // turn our header into something to add to our hash
+    std::vector< Util::uint8_t > data;
+
+    data.insert( data.end(), iHeader.getName().begin(),
+                 iHeader.getName().end() );
+
+    std::string metaData = iHeader.getMetaData().serialize();
+    data.insert( data.end(), metaData.begin(), metaData.end() );
+
+    if ( !iHeader.isCompound() )
+    {
+        AbcA::TimeSamplingPtr ts = iHeader.getTimeSampling();
+        AbcA::TimeSamplingType tst = ts->getTimeSamplingType();
+
+        chrono_t tpc = tst.getTimePerCycle();
+
+        pushChrono( data, tpc );
+
+        const std::vector < chrono_t > & samps = ts->getStoredTimes();
+
+        Util::uint32_t spc = ( Util::uint32_t ) samps.size();
+
+        pushUint32WithHint( data, spc, 2 );
+
+        for ( std::size_t i = 0; i < samps.size(); ++i )
+        {
+            pushChrono( data, samps[i] );
+        }
+    }
+
+    if ( !data.empty() )
+    {
+        ioHash.Update( &data.front(), data.size() );
+    }
+}
+
+//-*****************************************************************************
+void HashDimensions( const AbcA::Dimensions & iDims,
+                     Util::SpookyHash & ioHash )
+{
+    size_t rank = iDims.rank();
+
+    // Create temporary storage for hashing
+    std::vector<Util::uint32_t> data( rank );
+
+    // Copy into it.
+    for ( size_t r = 0; r < rank; ++r )
+    {
+        data[r] = ( Util::uint32_t ) iDims[r];
+    }
+
+    if ( !data.empty() )
+    {
+        ioHash.Update( &data.front(), data.size() * 4 );
+    }
+}
 
 //-*****************************************************************************
 WrittenSampleMap &

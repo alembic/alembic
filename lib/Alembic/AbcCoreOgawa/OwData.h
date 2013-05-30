@@ -75,7 +75,10 @@ public:
 
     Ogawa::OGroupPtr getGroup();
 
-    void writeHeaders( MetaDataMapPtr iMetaDataMap );
+    void writeHeaders( MetaDataMapPtr iMetaDataMap, Util::SpookyHash & ioHash );
+
+    void fillHash( std::size_t iIndex, Util::uint64_t iHash0,
+                   Util::uint64_t iHash1 );
 
 private:
 
@@ -93,6 +96,9 @@ private:
 
     // Our "top" property
     Alembic::Util::shared_ptr < CpwData > m_data;
+
+    // child hashes
+    std::vector< Util::uint64_t > m_hashes;
 };
 
 typedef Alembic::Util::shared_ptr<OwData> OwDataPtr;

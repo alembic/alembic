@@ -59,7 +59,8 @@ public:
     // child compound creation
     CpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
              Ogawa::OGroupPtr iGroup,
-             PropertyHeaderPtr iHeader );
+             PropertyHeaderPtr iHeader,
+             size_t iIndex );
 
     virtual ~CpwImpl();
 
@@ -105,6 +106,9 @@ public:
     createCompoundProperty( const std::string & iName,
         const AbcA::MetaData & iMetaData );
 
+    void fillHash( size_t iIndex, Util::uint64_t iHash0,
+                   Util::uint64_t iHash1 );
+
 private:
 
     // The object we belong to.
@@ -118,6 +122,9 @@ private:
 
     // child data, this is owned by the object for "top" compounds
     CpwDataPtr m_data;
+
+    // Index position within parent
+    size_t m_index;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
