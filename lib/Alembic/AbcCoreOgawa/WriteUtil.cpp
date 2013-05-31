@@ -91,6 +91,16 @@ void HashPropertyHeader( const AbcA::PropertyHeader & iHeader,
 
     if ( !iHeader.isCompound() )
     {
+        data.push_back( ( Util::uint8_t )iHeader.getDataType().getPod() );
+        data.push_back( iHeader.getDataType().getExtent() );
+
+        // toss this in to differentiate between array and scalar props that
+        // have no samples
+        if ( iHeader.isScalar() )
+        {
+            data.push_back( 0 );
+        }
+
         AbcA::TimeSamplingPtr ts = iHeader.getTimeSampling();
         AbcA::TimeSamplingType tst = ts->getTimeSamplingType();
 
