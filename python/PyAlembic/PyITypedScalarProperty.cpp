@@ -111,7 +111,8 @@ void register_itypedscalarproperty()
     register_<Abc::IFloatProperty>  ( "IFloatProperty" );
     register_<Abc::IDoubleProperty> ( "IDoubleProperty" );
     register_<Abc::IStringProperty> ( "IStringProperty" );
-    register_<Abc::IWstringProperty>( "IWstringProperty" );
+    register_<Abc::IWstringProperty>( "IWstringProperty" );;
+    register_<Abc::IReferenceProperty>( "IReferenceProperty" );
 
     register_<Abc::IV2sProperty>( "IV2sProperty" );
     register_<Abc::IV2iProperty>( "IV2iProperty" );

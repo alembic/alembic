@@ -115,6 +115,7 @@ void register_otypedscalarproperty()
     register_<Abc::ODoubleProperty> ( "ODoubleProperty" );
     register_<Abc::OStringProperty> ( "OStringProperty" );
     register_<Abc::OWstringProperty>( "OWstringProperty" );
+    register_<Abc::OReferenceProperty>( "OReferenceProperty" );
 
     register_<Abc::OV2sProperty>( "OV2sProperty" );
     register_<Abc::OV2iProperty>( "OV2iProperty" );
