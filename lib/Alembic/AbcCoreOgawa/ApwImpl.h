@@ -55,7 +55,8 @@ protected:
     //-*************************************************************************
     ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
              Ogawa::OGroupPtr iGroup,
-             PropertyHeaderPtr iHeader );
+             PropertyHeaderPtr iHeader,
+             size_t iIndex );
 
     virtual AbcA::ArrayPropertyWriterPtr asArrayPtr();
 
@@ -85,9 +86,14 @@ private:
     // And extra data the parent needs to eventually write out
     PropertyHeaderPtr m_header;
 
+    // for accumulating our hierarchical hash
+    Util::SpookyHash m_hash;
+
     Ogawa::OGroupPtr m_group;
 
     AbcA::Dimensions m_dims;
+
+    size_t m_index;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

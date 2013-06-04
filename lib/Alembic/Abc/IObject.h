@@ -212,6 +212,14 @@ public:
         return ( Base::valid() && m_object );
     }
 
+    //! If an aggregated properties hash exists fill oDigest with it and
+    //! return true, if it doesn't exist return false
+    bool getPropertiesHash( Util::Digest & oDigest );
+
+    //! If an aggregated child objects hash exists fill oDigest with it and
+    //! return true, if it doesn't exist return false
+    bool getChildrenHash( Util::Digest & oDigest );
+
     //! The unspecified-bool-type operator casts the object to "true"
     //! if it is valid, and "false" otherwise.
     ALEMBIC_OPERATOR_BOOL( valid() );

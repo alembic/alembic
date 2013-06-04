@@ -160,16 +160,20 @@ AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
 
     AbcA::ObjectWriterPtr ret( new OwImpl( iParent,
                                            m_group->addGroup(),
-                                           header ) );
+                                           header, m_childHeaders.size() ) );
 
     m_childHeaders.push_back( header );
     m_madeChildren[iHeader.getName()] = WeakOwPtr( ret );
+
+    m_hashes.push_back(0);
+    m_hashes.push_back(0);
 
     return ret;
 }
 
 //-*****************************************************************************
-void OwData::writeHeaders( MetaDataMapPtr iMetaDataMap )
+void OwData::writeHeaders( MetaDataMapPtr iMetaDataMap,
+                           Util::SpookyHash & ioHash )
 {
     std::vector< Util::uint8_t > data;
 
@@ -179,12 +183,49 @@ void OwData::writeHeaders( MetaDataMapPtr iMetaDataMap )
         WriteObjectHeader( data, *m_childHeaders[i], iMetaDataMap );
     }
 
+    Util::SpookyHash dataHash;
+    dataHash.Init( 0, 0 );
+    m_data->computeHash( dataHash );
+
+    Util::uint64_t hashes[4];
+    dataHash.Final( &hashes[0], &hashes[1] );
+
+    ioHash.Init( 0, 0 );
+
+    if ( !m_hashes.empty() )
+    {
+        ioHash.Update( &m_hashes.front(), m_hashes.size() * 8 );
+        ioHash.Final( &hashes[2], &hashes[3] );
+    }
+
+    // add the  data hash and child hash for writing
+    Util::uint8_t * hashData = ( Util::uint8_t * ) hashes;
+    for ( size_t i = 0; i < 32; ++i )
+    {
+        data.push_back( hashData[i] );
+    }
+
+    // now update childHash with dataHash
+    // SpookyHash has the nice property that Final doesn't invalidate the hash
+    ioHash.Update( hashes, 16 );
+
     if ( !data.empty() )
     {
         m_group->addData( data.size(), &( data.front() ) );
     }
 
     m_data->writePropertyHeaders( iMetaDataMap );
+}
+
+void OwData::fillHash( std::size_t iIndex, Util::uint64_t iHash0,
+                       Util::uint64_t iHash1 )
+{
+    ABCA_ASSERT( iIndex < m_childHeaders.size() &&
+                 iIndex * 2 < m_hashes.size(),
+                 "Invalid property index requested in OwData::fillHash" );
+
+    m_hashes[ iIndex * 2     ] = iHash0;
+    m_hashes[ iIndex * 2 + 1 ] = iHash1;
 }
 
 } // End namespace ALEMBIC_VERSION_NS

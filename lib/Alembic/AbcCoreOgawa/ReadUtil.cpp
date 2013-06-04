@@ -1486,13 +1486,14 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
     Ogawa::IDataPtr data = iGroup->getData( iIndex, iThreadId );
     ABCA_ASSERT( data, "ReadObjectHeaders Invalid data at index " << iIndex );
 
-    if ( data->getSize() == 0 )
+    if ( data->getSize() <= 32 )
     {
         return;
     }
 
-    std::vector< char > buf( data->getSize() );
-    data->read( data->getSize(), &( buf.front() ), 0, iThreadId );
+    // skip the last 32 bytes which contains the hashes
+    std::vector< char > buf( data->getSize() - 32 );
+    data->read( buf.size(), &( buf.front() ), 0, iThreadId );
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {

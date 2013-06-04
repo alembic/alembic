@@ -45,5 +45,6 @@
 #include <Alembic/Util/OperatorBool.h>
 #include <Alembic/Util/PlainOldDataType.h>
 #include <Alembic/Util/TokenMap.h>
+#include <Alembic/Util/SpookyV2.h>
 
 #endif

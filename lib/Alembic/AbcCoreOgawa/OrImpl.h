@@ -88,6 +88,10 @@ public:
 
     virtual AbcA::ObjectReaderPtr asObjectPtr();
 
+    virtual bool getPropertiesHash( Util::Digest & oDigest );
+
+    virtual bool getChildrenHash( Util::Digest & oDigest );
+
 private:
 
     Alembic::Util::shared_ptr< ArImpl > getArchiveImpl() const;

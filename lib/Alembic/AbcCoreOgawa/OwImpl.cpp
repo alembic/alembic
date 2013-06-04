@@ -48,6 +48,7 @@ OwImpl::OwImpl( AbcA::ArchiveWriterPtr iArchive,
     : m_archive( iArchive )
     , m_header( new AbcA::ObjectHeader( "ABC", "/", iMetaData ) )
     , m_data( iData )
+    , m_index( 0 )
 {
     ABCA_ASSERT( m_archive, "Invalid archive" );
     ABCA_ASSERT( m_data, "Invalid data" );
@@ -56,9 +57,11 @@ OwImpl::OwImpl( AbcA::ArchiveWriterPtr iArchive,
 //-*****************************************************************************
 OwImpl::OwImpl( AbcA::ObjectWriterPtr iParent,
                 Ogawa::OGroupPtr iGroup,
-                ObjectHeaderPtr iHeader )
+                ObjectHeaderPtr iHeader,
+                size_t iIndex )
   : m_parent( iParent )
   , m_header( iHeader )
+  , m_index( iIndex )
 {
     // Check validity of all inputs.
     ABCA_ASSERT( m_parent, "Invalid parent" );
@@ -73,12 +76,32 @@ OwImpl::OwImpl( AbcA::ObjectWriterPtr iParent,
 //-*****************************************************************************
 OwImpl::~OwImpl()
 {
-    // The archive is responsible for calling this on the OwData it owns
+    // The archive is responsible for writing the MetaData
     if ( m_parent )
     {
         MetaDataMapPtr mdMap = Alembic::Util::dynamic_pointer_cast<
             AwImpl, AbcA::ArchiveWriter >( m_archive )->getMetaDataMap();
-        m_data->writeHeaders( mdMap );
+
+        Util::SpookyHash hash;
+        hash.Init(0, 0);
+        m_data->writeHeaders( mdMap, hash );
+
+        // writeHeaders bakes in the child hashes and the data hash
+        // but we still need to bake in the name and MetaData
+        std::string metaDataStr = m_header->getMetaData().serialize();
+        if ( !metaDataStr.empty() )
+        {
+            hash.Update( &( metaDataStr[0] ), metaDataStr.size() );
+        }
+
+        hash.Update( &( m_header->getName()[0] ), m_header->getName().size() );
+        Util::uint64_t hash0, hash1;
+        hash.Final( &hash0, &hash1 );
+
+        Util::shared_ptr< OwImpl > parent =
+            Alembic::Util::dynamic_pointer_cast< OwImpl,
+                AbcA::ObjectWriter > ( m_parent );
+        parent->fillHash( m_index, hash0, hash1 );
     }
 }
 
@@ -141,6 +164,12 @@ AbcA::ObjectWriterPtr OwImpl::createChild( const AbcA::ObjectHeader &iHeader )
 AbcA::ObjectWriterPtr OwImpl::asObjectPtr()
 {
     return shared_from_this();
+}
+
+void OwImpl::fillHash( size_t iIndex, Util::uint64_t iHash0,
+                       Util::uint64_t iHash1 )
+{
+    m_data->fillHash( iIndex, iHash0, iHash1 );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

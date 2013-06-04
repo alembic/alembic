@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreOgawa/SpwImpl.h>
+#include <Alembic/AbcCoreOgawa/CpwImpl.h>
 #include <Alembic/AbcCoreOgawa/WriteUtil.h>
 
 namespace Alembic {
@@ -44,8 +45,10 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   Ogawa::OGroupPtr iGroup,
-                  PropertyHeaderPtr iHeader ) :
-    m_parent( iParent ), m_header( iHeader ), m_group( iGroup )
+                  PropertyHeaderPtr iHeader,
+                  size_t iIndex ) :
+    m_parent( iParent ), m_header( iHeader ), m_group( iGroup ),
+    m_index( iIndex )
 {
     ABCA_ASSERT( m_parent, "Invalid parent" );
     ABCA_ASSERT( m_header, "Invalid property header" );
@@ -56,6 +59,8 @@ SpwImpl::SpwImpl( AbcA::CompoundPropertyWriterPtr iParent,
         ABCA_THROW( "Attempted to create a ScalarPropertyWriter from a "
                     "non-scalar property type" );
     }
+
+    m_hash.Init(0, 0);
 }
 
 
@@ -67,19 +72,28 @@ SpwImpl::~SpwImpl()
     index_t maxSamples = archive->getMaxNumSamplesForTimeSamplingIndex(
             m_header->timeSamplingIndex );
 
-        Util::uint32_t numSamples = m_header->nextSampleIndex;
+    Util::uint32_t numSamples = m_header->nextSampleIndex;
 
-        // a constant property, we wrote the same sample over and over
-        if ( m_header->lastChangedIndex == 0 && numSamples > 0 )
-        {
-            numSamples = 1;
-        }
+    // a constant property, we wrote the same sample over and over
+    if ( m_header->lastChangedIndex == 0 && numSamples > 0 )
+    {
+        numSamples = 1;
+    }
 
-        if ( maxSamples < numSamples )
-        {
-            archive->setMaxNumSamplesForTimeSamplingIndex(
-                m_header->timeSamplingIndex, numSamples );
-        }
+    if ( maxSamples < numSamples )
+    {
+        archive->setMaxNumSamplesForTimeSamplingIndex(
+            m_header->timeSamplingIndex, numSamples );
+    }
+
+    HashPropertyHeader( m_header->header, m_hash );
+
+    Util::uint64_t hash0, hash1;
+    m_hash.Final( &hash0, &hash1 );
+    Util::shared_ptr< CpwImpl > parent =
+        Alembic::Util::dynamic_pointer_cast< CpwImpl,
+            AbcA::CompoundPropertyWriter > ( m_parent );
+    parent->fillHash( m_index, hash0, hash1 );
 }
 
 //-*****************************************************************************
@@ -98,6 +112,7 @@ void SpwImpl::setFromPreviousSample()
     ABCA_ASSERT( m_header->nextSampleIndex > 0,
         "Can't set from previous sample before any samples have been written" );
 
+    m_hash.Update( m_previousWrittenSampleID->getKey().digest.d, 16 );
     m_header->nextSampleIndex ++;
 }
 
@@ -165,6 +180,7 @@ void SpwImpl::setSample( const void *iSamp )
         m_header->lastChangedIndex = m_header->nextSampleIndex;
     }
 
+    m_hash.Update( m_previousWrittenSampleID->getKey().digest.d, 16 );
     m_header->nextSampleIndex ++;
 }
 

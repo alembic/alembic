@@ -58,7 +58,8 @@ public:
 
     OwImpl( AbcA::ObjectWriterPtr iParent,
             Ogawa::OGroupPtr iGroup,
-            ObjectHeaderPtr iHeader );
+            ObjectHeaderPtr iHeader,
+            size_t iIndex );
 
     virtual ~OwImpl();
 
@@ -88,6 +89,9 @@ public:
 
     virtual AbcA::ObjectWriterPtr asObjectPtr();
 
+    void fillHash( size_t iIndex, Util::uint64_t iHash0,
+                   Util::uint64_t iHash1 );
+
 private:
     // The parent object, NULL if it is the "top" object
     AbcA::ObjectWriterPtr m_parent;
@@ -100,6 +104,8 @@ private:
 
     // child object data, this is owned by the archive for "top" objects
     OwDataPtr m_data;
+
+    size_t m_index;
 
 };
 

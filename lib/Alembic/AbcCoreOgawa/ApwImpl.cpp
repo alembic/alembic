@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreOgawa/ApwImpl.h>
+#include <Alembic/AbcCoreOgawa/CpwImpl.h>
 #include <Alembic/AbcCoreOgawa/WriteUtil.h>
 
 namespace Alembic {
@@ -44,8 +45,10 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
                   Ogawa::OGroupPtr iGroup,
-                  PropertyHeaderPtr iHeader ) :
-    m_parent( iParent ), m_header( iHeader ), m_group( iGroup ), m_dims( 1 )
+                  PropertyHeaderPtr iHeader,
+                  size_t iIndex ) :
+    m_parent( iParent ), m_header( iHeader ), m_group( iGroup ), m_dims( 1 ),
+    m_index( iIndex )
 {
     ABCA_ASSERT( m_parent, "Invalid parent" );
     ABCA_ASSERT( m_header, "Invalid property header" );
@@ -56,6 +59,8 @@ ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
         ABCA_THROW( "Attempted to create a ArrayPropertyWriter from a "
                     "non-array property type" );
     }
+
+    m_hash.Init(0, 0);
 }
 
 
@@ -80,6 +85,15 @@ ApwImpl::~ApwImpl()
         archive->setMaxNumSamplesForTimeSamplingIndex(
             m_header->timeSamplingIndex, numSamples );
     }
+
+    HashPropertyHeader( m_header->header, m_hash );
+
+    Util::uint64_t hash0, hash1;
+    m_hash.Final( &hash0, &hash1 );
+    Util::shared_ptr< CpwImpl > parent =
+        Alembic::Util::dynamic_pointer_cast< CpwImpl,
+            AbcA::CompoundPropertyWriter > ( m_parent );
+    parent->fillHash( m_index, hash0, hash1 );
 }
 
 //-*****************************************************************************
@@ -98,6 +112,8 @@ void ApwImpl::setFromPreviousSample()
     ABCA_ASSERT( m_header->nextSampleIndex > 0,
         "Can't set from previous sample before any samples have been written" );
 
+    HashDimensions( m_dims, m_hash );
+    m_hash.Update( m_previousWrittenSampleID->getKey().digest.d, 16 );
     m_header->nextSampleIndex ++;
 }
 
@@ -186,6 +202,8 @@ void ApwImpl::setSample( const AbcA::ArraySample & iSamp )
         m_header->lastChangedIndex = m_header->nextSampleIndex;
     }
 
+    HashDimensions( m_dims, m_hash );
+    m_hash.Update( m_previousWrittenSampleID->getKey().digest.d, 16 );
     m_header->nextSampleIndex ++;
 }
 

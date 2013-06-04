@@ -220,6 +220,38 @@ ICompoundProperty IObject::getProperties() const
     return ICompoundProperty();
 }
 
+//-*****************************************************************************
+bool IObject::getPropertiesHash( Util::Digest & oDigest )
+{
+   ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getPropertiesHash()" );
+
+    if ( m_object )
+    {
+        return m_object->getPropertiesHash( oDigest );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw, have a default.
+    return false;
+}
+
+
+//-*****************************************************************************
+bool IObject::getChildrenHash( Util::Digest & oDigest )
+{
+   ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChildrenHash()" );
+
+    if ( m_object )
+    {
+        return m_object->getChildrenHash( oDigest );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw, have a default.
+    return false;
+}
 
 //-*****************************************************************************
 void IObject::init( AbcA::ObjectReaderPtr iParent,

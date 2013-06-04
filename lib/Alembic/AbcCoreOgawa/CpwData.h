@@ -84,6 +84,11 @@ public:
 
     void writePropertyHeaders( MetaDataMapPtr iMetaDataMap );
 
+    void fillHash( size_t iIndex, Util::uint64_t iHash0,
+                   Util::uint64_t iHash1 );
+
+    void computeHash( Util::SpookyHash & ioHash );
+
 private:
 
     // The group corresponding to this property.
@@ -93,6 +98,9 @@ private:
 
     PropertyHeaderPtrs m_propertyHeaders;
     MadeProperties m_madeProperties;
+
+    // child hashes
+    std::vector< Util::uint64_t > m_hashes;
 };
 
 typedef Alembic::Util::shared_ptr<CpwData> CpwDataPtr;

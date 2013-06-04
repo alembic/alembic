@@ -76,6 +76,10 @@ public:
     AbcA::ObjectReaderPtr
     getChild( AbcA::ObjectReaderPtr iParent, size_t i );
 
+    void getPropertiesHash( Util::Digest & oDigest, size_t iThreadId );
+
+    void getChildrenHash( Util::Digest & oDigest, size_t iThreadId );
+
 private:
 
     Ogawa::IGroupPtr m_group;

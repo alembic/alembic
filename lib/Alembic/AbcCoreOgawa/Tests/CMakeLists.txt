@@ -46,6 +46,7 @@ SET( TEST_LIBS
 SET( CXX_FILES
     ArchiveTests.cpp
     ArrayPropertyTests.cpp
+    HashesTests.cpp
     ScalarPropertyTests.cpp
     TimeSamplingTests.cpp )
 
@@ -55,6 +56,9 @@ TARGET_LINK_LIBRARIES( AbcCoreOgawa_ArchiveTests ${TEST_LIBS} )
 
 ADD_EXECUTABLE( AbcCoreOgawa_ArrayPropertyTests ArrayPropertyTests.cpp )
 TARGET_LINK_LIBRARIES( AbcCoreOgawa_ArrayPropertyTests ${TEST_LIBS} )
+
+ADD_EXECUTABLE( AbcCoreOgawa_HashesTests HashesTests.cpp )
+TARGET_LINK_LIBRARIES( AbcCoreOgawa_HashesTests ${TEST_LIBS} )
 
 ADD_EXECUTABLE( AbcCoreOgawa_ScalarPropertyTests ScalarPropertyTests.cpp )
 TARGET_LINK_LIBRARIES( AbcCoreOgawa_ScalarPropertyTests ${TEST_LIBS} )
@@ -71,6 +75,7 @@ TARGET_LINK_LIBRARIES( AbcCoreOgawa_ConstantPropsTest ${TEST_LIBS} )
 
 ADD_TEST( AbcCoreOgawa_ArchiveTESTS AbcCoreOgawa_ArchiveTests )
 ADD_TEST( AbcCoreOgawa_ArrayPropertyTESTS AbcCoreOgawa_ArrayPropertyTests )
+ADD_TEST( AbcCoreOgawa_HashesTESTS AbcCoreOgawa_HashesTests )
 ADD_TEST( AbcCoreOgawa_ScalarPropertyTESTS AbcCoreOgawa_ScalarPropertyTests )
 ADD_TEST( AbcCoreOgawa_TimeSamplingTESTS AbcCoreOgawa_TimeSamplingTests )
 ADD_TEST( AbcCoreOgawa_ObjectTESTS AbcCoreOgawa_ObjectTests )
