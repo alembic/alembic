@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -91,7 +91,7 @@ public:
 
         //! Wrap existing
         //! ...
-        WrapExistingFlag iWrap,
+        WrapExistingFlag /* iWrap */,
 
         //! Optional error handling policy
         //! ...

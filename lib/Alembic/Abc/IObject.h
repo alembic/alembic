@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -81,7 +81,7 @@ public:
     //! ObjectReaderPtr, with an optional error handling policy.
     template <class OBJECT_PTR>
     IObject( OBJECT_PTR iPtr,
-             WrapExistingFlag iFlag,
+             WrapExistingFlag /* iFlag */,
              const Argument &iArg0 = Argument() )
       : m_object( GetObjectReaderPtr( iPtr ) )
     {

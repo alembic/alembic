@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -127,44 +127,44 @@ private:
 
 //-*****************************************************************************
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::ArchiveWriterPtr iClass )
+GetErrorHandlerPolicy( AbcA::ArchiveWriterPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::ObjectWriterPtr iClass )
+GetErrorHandlerPolicy( AbcA::ObjectWriterPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::CompoundPropertyWriterPtr iClass )
+GetErrorHandlerPolicy( AbcA::CompoundPropertyWriterPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::ScalarPropertyWriterPtr iClass )
+GetErrorHandlerPolicy( AbcA::ScalarPropertyWriterPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::ArrayPropertyWriterPtr iClass )
+GetErrorHandlerPolicy( AbcA::ArrayPropertyWriterPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 //-*****************************************************************************
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::ArchiveReaderPtr iClass )
+GetErrorHandlerPolicy( AbcA::ArchiveReaderPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::ObjectReaderPtr iClass )
+GetErrorHandlerPolicy( AbcA::ObjectReaderPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::CompoundPropertyReaderPtr iClass )
+GetErrorHandlerPolicy( AbcA::CompoundPropertyReaderPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::ScalarPropertyReaderPtr iClass )
+GetErrorHandlerPolicy( AbcA::ScalarPropertyReaderPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 inline ErrorHandler::Policy
-GetErrorHandlerPolicy( AbcA::ArrayPropertyReaderPtr iClass )
+GetErrorHandlerPolicy( AbcA::ArrayPropertyReaderPtr /* iClass */ )
 { return ErrorHandler::kThrowPolicy; }
 
 //-*****************************************************************************

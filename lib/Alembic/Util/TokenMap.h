@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -64,16 +64,16 @@ public:
     //! The map_type is std::map<std::string,std::string>
     //! ...
     typedef std::map<std::string,std::string> map_type;
-    
+
     //! key_type promoted from map_type::key_type, which is std::string
     //! ...
     typedef map_type::key_type key_type;
-    
+
     //! data_type promoted from map_type::data_type, which is std::string
     //! ...
     // CJH: Not defined? typedef map_type::data_type data_type;
     typedef std::string data_type;
-    
+
     //! value_type promoted from map_type::value_type, which is
     //! std::pair<std::string, std::string>
     typedef map_type::value_type value_type;
@@ -81,15 +81,15 @@ public:
     //! iterator promoted from map_type::iterator
     //! ...
     typedef map_type::iterator iterator;
-    
+
     //! const_iterator promoted from map_type::iterator
     //! ...
     typedef map_type::const_iterator const_iterator;
-    
+
     //! reverse_iterator promoted from map_type::reverse_iterator
     //! ...
     typedef map_type::reverse_iterator reverse_iterator;
-    
+
     //! const_reverse_iterator promoted from map_type::const_reverse_iterator
     //! ...
     typedef map_type::const_reverse_iterator const_reverse_iterator;
@@ -100,7 +100,7 @@ public:
 
     //! const_reference promoted from map_type::const_reference
     //! ...
-    typedef map_type::const_reference const_reference; 
+    typedef map_type::const_reference const_reference;
 
     //-*************************************************************************
     // CONSTRUCTORS
@@ -197,7 +197,7 @@ public:
     //! \brief This function returns the number of pairs.
     //!        ...
     size_t size() const { return m_map.size(); }
-    
+
     //! \brief This function returns whether the map contains an entry for
     //!     a particular token.
     bool tokenExists( const std::string &token ) const
@@ -234,10 +234,10 @@ public:
     //!     this token, or it will overwrite the value for this token if
     //!     it already exists. You can use the \ref tokenExists function
     //!     to manage uniqueness guarantees.
-    void setValue( const std::string &token,
-                   const std::string &value )
+    void setValue( const std::string &keyStr,
+                   const std::string &valueStr )
     {
-        m_map[token] = value;
+        m_map[keyStr] = valueStr;
     }
 
     //-*************************************************************************

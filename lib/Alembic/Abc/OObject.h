@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -87,7 +87,7 @@ public:
     template <class OBJECT_PTR>
     OObject( OBJECT_PTR iPtr,
 
-             WrapExistingFlag iFlag,
+             WrapExistingFlag /* iFlag */,
 
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
@@ -105,7 +105,7 @@ public:
     template <class ARCHIVE_PTR>
     OObject( ARCHIVE_PTR iPtr,
 
-             TopFlag iTop,
+             TopFlag /* iTop */,
 
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
