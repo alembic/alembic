@@ -72,9 +72,9 @@ void simpleTestOut( const std::string& iArchiveName, bool useOgawa )
     }
 
     /*
-            x1
-           /  \
-         x2    x3
+               x1
+           /   |   \
+         x2    x3   x2a (x2a is a proxy targeting x2)
           |    |
          x4    x5    (x5 is a proxy targeting x4)
         / |
@@ -98,13 +98,35 @@ void simpleTestOut( const std::string& iArchiveName, bool useOgawa )
     OObject g5( g2, "g5" );
 
     // x5 is a proxy targeting x4
-    x3.addChildProxy( x4, "x5" );
+    TESTING_ASSERT( x3.addChildProxy( x4, "x5" ) );
+
+    // proxies can't point at ancestors (would create a cycle)
+    TESTING_ASSERT( !x2.addChildProxy( x2, "x" ) );
+    TESTING_ASSERT( !x2.addChildProxy( x1, "x" ) );
+
+    // x2a is a proxy targeting x2
+    TESTING_ASSERT( x1.addChildProxy( x2, "x2a" ) );
+
+    TESTING_ASSERT(!topobj.isProxy());
+    TESTING_ASSERT(!x1.isProxy());
+    TESTING_ASSERT(!x2.isProxy());
+    TESTING_ASSERT(!x3.isProxy());
+    TESTING_ASSERT(!x4.isProxy());
+    TESTING_ASSERT(!g1.isProxy());
+    TESTING_ASSERT(!g2.isProxy());
+    TESTING_ASSERT(!g5.isProxy());
 
     const Alembic::AbcCoreAbstract::ObjectHeader& x5h = x3.getChildHeader(0);
     TESTING_ASSERT( x5h.getFullName() == std::string("/x1/x3/x5") );
 
     const Alembic::AbcCoreAbstract::MetaData& md = x5h.getMetaData();
     TESTING_ASSERT( md.get("proxy") == std::string("1") );
+
+    const Alembic::AbcCoreAbstract::ObjectHeader& x2ah = x1.getChildHeader(2);
+    TESTING_ASSERT( x2ah.getFullName() == std::string("/x1/x2a") );
+
+    const Alembic::AbcCoreAbstract::MetaData& md2 = x2ah.getMetaData();
+    TESTING_ASSERT( md2.get("proxy") == std::string("1") );
 }
 
 //-*****************************************************************************
@@ -117,9 +139,9 @@ void simpleTestIn( const std::string& iArchiveName )
     IArchive archive = factory.getArchive( iArchiveName, coreType );
 
     /*
-            x1
-           /  \
-         x2    x3
+               x1
+           /   |   \
+         x2    x3   x2a (x2a is a proxy targeting x2)
           |    |
          x4    x5    (x5 is a proxy targeting x4)
         / |
@@ -137,11 +159,11 @@ void simpleTestIn( const std::string& iArchiveName )
     //
     // Verify the target path
     IObject x2( x1, "x2" );
-    TESTING_ASSERT( x2 != 0 );
+    TESTING_ASSERT( x2.valid() );
+    TESTING_ASSERT( !x2.isProxy() );
 
     IObject x4( x2, "x4" );
-    TESTING_ASSERT( x4 != 0 );
-
+    TESTING_ASSERT( x4.valid() );
     TESTING_ASSERT( !x4.isProxy() );
 
     int numChildren = x4.getNumChildren();
@@ -204,6 +226,13 @@ void simpleTestIn( const std::string& iArchiveName )
     TESTING_ASSERT( g5p.isProxy() );
     TESTING_ASSERT( g5p.getParent() != 0 );
     TESTING_ASSERT( g5p.getParent().getFullName() == g2p.getFullName() );
+
+    // test x2a
+    IObject x2a( x1, "x2a" );
+    TESTING_ASSERT( x2a.valid() );
+    TESTING_ASSERT( x2a.isProxy() );
+    TESTING_ASSERT( x2a.proxyTargetPath() == x2.getFullName() );
+    TESTING_ASSERT( x2a.getNumChildren() == 1 );
 }
 
 //-*****************************************************************************

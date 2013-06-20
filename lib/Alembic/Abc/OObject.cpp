@@ -242,11 +242,12 @@ bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
     if ( iTarget.isProxy() )
         return false;
 
-    // Check that the proxy target is not a child of this object.
+    // Check that the proxy target is not an ancestor of this object.
     std::string targetFullName = iTarget.getFullName();
     std::string childFullName  = getFullName() + "/" + iName;
 
-    if ( targetFullName.find( childFullName ) == 0 )
+    std::string targetPath = targetFullName + "/";
+    if ( childFullName.find(targetPath) == 0 )
         return false;
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::addChildProxy()" );
