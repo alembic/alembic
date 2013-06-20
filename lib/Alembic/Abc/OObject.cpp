@@ -60,7 +60,10 @@ const AbcA::ObjectHeader &OObject::getHeader() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getHeader()" );
 
-    return m_object->getHeader();
+    if ( m_object )
+    {
+        return m_object->getHeader();
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -74,9 +77,12 @@ OArchive OObject::getArchive()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getArchive()" );
 
-    return OArchive( m_object->getArchive(),
-                     kWrapExisting,
-                     getErrorHandlerPolicy() );
+    if ( m_object )
+    {
+        return OArchive( m_object->getArchive(),
+                         kWrapExisting,
+                         getErrorHandlerPolicy() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -89,9 +95,12 @@ OObject OObject::getParent()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getParent()" );
 
-    return OObject( m_object->getParent(),
-                    kWrapExisting,
-                    getErrorHandlerPolicy() );
+    if ( m_object )
+    {
+        return OObject( m_object->getParent(),
+                        kWrapExisting,
+                        getErrorHandlerPolicy() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -104,7 +113,10 @@ size_t OObject::getNumChildren()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getNumChildren()" );
 
-    return m_object->getNumChildren();
+    if ( m_object )
+    {
+        return m_object->getNumChildren();
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -117,7 +129,10 @@ const AbcA::ObjectHeader &OObject::getChildHeader( size_t iIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getChildHeader()" );
 
-    return m_object->getChildHeader( iIdx );
+    if ( m_object )
+    {
+        return m_object->getChildHeader( iIdx );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -131,7 +146,10 @@ const AbcA::ObjectHeader *OObject::getChildHeader( const std::string &iName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getChildHeader()" );
 
-    return m_object->getChildHeader( iName );
+    if ( m_object )
+    {
+        return m_object->getChildHeader( iName );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -144,9 +162,13 @@ OObject OObject::getChild( size_t iIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getChild( idx )" );
 
-    return OObject( m_object->getChild( iIdx ),
-                    kWrapExisting,
-                    getErrorHandlerPolicy() );
+    if ( m_object )
+    {
+        AbcA::ObjectWriterPtr child = m_object->getChild( iIdx );
+        return OObject( child,
+                        kWrapExisting,
+                        getErrorHandlerPolicy() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -159,9 +181,12 @@ OObject OObject::getChild( const std::string &iName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getChild( name )" );
 
-    return OObject( m_object->getChild( iName ),
-                    kWrapExisting,
-                    getErrorHandlerPolicy() );
+    if ( m_object )
+    {
+        return OObject( m_object->getChild( iName ),
+                        kWrapExisting,
+                        getErrorHandlerPolicy() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -174,7 +199,10 @@ OCompoundProperty OObject::getProperties()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getProperties()" );
 
-    return OCompoundProperty( m_object->getProperties(), kWrapExisting );
+    if ( m_object )
+    {
+        return OCompoundProperty( m_object->getProperties(), kWrapExisting );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -185,13 +213,22 @@ OCompoundProperty OObject::getProperties()
 //-*****************************************************************************
 bool OObject::isProxy()
 {
-    return ( getProperties().getPropertyHeader(".proxyTarget") != 0 );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::isProxy()" );
+
+    if ( m_object )
+    {
+        return ( m_object->getMetaData().get("proxy") == "1" );
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return false;
 }
 
 //-*****************************************************************************
 bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
 {
-    if ( !iTarget )
+    if ( !iTarget || !m_object )
         return false;
 
     if ( iName.empty() )
@@ -220,7 +257,7 @@ bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
     OObject oProxyChild = OObject( getPtr(), iName, md );
 
     OStringProperty proxyTargetProperty =
-        OStringProperty(oProxyChild.getProperties(), ".proxyTarget");
+        OStringProperty( oProxyChild.getProperties(), ".proxyTarget" );
     proxyTargetProperty.set( targetFullName );
 
     return true;
