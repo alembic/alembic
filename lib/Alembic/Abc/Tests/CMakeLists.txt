@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -94,6 +94,12 @@ ADD_TEST( Abc_Identity_Property_TEST Abc_IdentityPropertyTest )
 ADD_EXECUTABLE( Abc_ArrayPropertyTest ArrayPropertyTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_ArrayPropertyTest ${TEST_LIBS} )
 ADD_TEST( Abc_Array_Property_TEST Abc_ArrayPropertyTest )
+
+#-******************************************************************************
+
+ADD_EXECUTABLE( Abc_ProxyTest ProxyTest.cpp )
+TARGET_LINK_LIBRARIES( Abc_ProxyTest ${TEST_LIBS} )
+ADD_TEST( Abc_Proxy_TEST Abc_ProxyTest )
 
 #-******************************************************************************
 

@@ -37,6 +37,7 @@
 #include <Alembic/Abc/OObject.h>
 #include <Alembic/Abc/OArchive.h>
 #include <Alembic/Abc/OCompoundProperty.h>
+#include <Alembic/Abc/OTypedScalarProperty.h>
 
 namespace Alembic {
 namespace Abc {
@@ -179,6 +180,55 @@ OCompoundProperty OObject::getProperties()
 
     // Not all error handlers throw, have a default.
     return OCompoundProperty();
+}
+
+//-*****************************************************************************
+bool OObject::isProxy()
+{
+    return ( getProperties().getPropertyHeader(".proxyTarget") != 0 );
+}
+
+//-*****************************************************************************
+bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
+{
+    if ( !iTarget )
+        return false;
+
+    if ( iName.empty() )
+        return false;
+
+    // Proxy and target must be in the same archive.
+    if ( getArchive().getName() != iTarget.getArchive().getName() )
+        return false;
+
+    // Cannot proxy a proxy
+    if ( iTarget.isProxy() )
+        return false;
+
+    // Check that the proxy target is not a child of this object.
+    std::string targetFullName = iTarget.getFullName();
+    std::string childFullName  = getFullName() + "/" + iName;
+
+    if ( targetFullName.find( childFullName ) == 0 )
+        return false;
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::addChildProxy()" );
+
+    AbcA::MetaData md;
+    md.set("proxy", "1");
+    
+    OObject oProxyChild = OObject( getPtr(), iName, md );
+
+    OStringProperty proxyTargetProperty =
+        OStringProperty(oProxyChild.getProperties(), ".proxyTarget");
+    proxyTargetProperty.set( targetFullName );
+
+    return true;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw, have a default.
+    return false;
 }
 
 //-*****************************************************************************

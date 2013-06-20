@@ -83,8 +83,11 @@ public:
     IObject( OBJECT_PTR iPtr,
              WrapExistingFlag /* iFlag */,
              const Argument &iArg0 = Argument() )
-      : m_object( GetObjectReaderPtr( iPtr ) )
+        : m_object( GetObjectReaderPtr( iPtr ) ),
+          m_isProxy( false )
     {
+        initProxy();
+
         // Set the error handling policy
         getErrorHandler().setPolicy(
             GetErrorHandlerPolicy( iPtr, iArg0 ) );
@@ -96,6 +99,7 @@ public:
     IObject( ARCHIVE_PTR iPtr,
              TopFlag iFlag,
              const Argument &iArg0 = Argument() )
+        : m_isProxy( false )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
@@ -104,6 +108,8 @@ public:
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::IObject( top )" );
 
         m_object = GetArchiveReaderPtr( iPtr )->getTop();
+
+        initProxy();
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
@@ -128,15 +134,13 @@ public:
     //! Returned by reference, since it is guaranteed to exist and be
     //! unchanging.
     //! This is a convenience function which returns the header's name.
-    const std::string &getName() const
-    { return getHeader().getName(); }
+    const std::string &getName() const;
 
     //! The full name of an object is the complete path name all the way
     //! to the root object of the archive. It is guaranteed to be fully
     //! unique within the entire archive.
     //! This is a convenience function which returns the header's full name.
-    const std::string &getFullName() const
-    { return getHeader().getFullName(); }
+    const std::string &getFullName() const;
 
     //! All objects have metadata. This metadata is identical to the
     //! Metadata of the top level compoundProperty "properties".
@@ -190,6 +194,23 @@ public:
     //! equivalent constructor was called.
     IObject getChild( const std::string &iChildName ) const;
 
+    //!-*************************************************************************
+    // PROXY METHODS
+    // An IObject can refer to another IObject in the same cache and stand in
+    // as a proxy for that target hierarchy. On disk only the proxy object is 
+    // required. When read in however, a normal geometry hierarchy is
+    // returned. Optionally, client code could use the isProxy() and 
+    // proxyTargetPath() methods to discover that the hierarchies are
+    // duplicate and instance them appropriately in memory.
+    //!-*************************************************************************
+    bool isProxy() const        { return m_isProxy; }
+
+    std::string proxyTargetPath();
+    AbcA::ObjectReaderPtr getProxyTarget() const { return m_proxyObject; }
+
+    bool isChildAProxy(size_t iChildIndex) const;
+    bool isChildAProxy(const std::string &iChildName) const;
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -199,11 +220,11 @@ public:
     //! getPtr, as usual, returns a shared ptr to the
     //! underlying AbcCoreAbstract object, in this case the
     //! ObjectReaderPtr.
-    AbcA::ObjectReaderPtr getPtr() const { return m_object; }
+    AbcA::ObjectReaderPtr getPtr() const;
 
     //! Reset returns this function set to an empty, default
     //! state.
-    void reset() { m_object.reset(); Base::reset(); }
+    void reset();
 
     //! Valid returns whether this function set is
     //! valid.
@@ -229,8 +250,24 @@ private:
                const std::string &iName,
                ErrorHandler::Policy iPolicy );
 
+    void initProxy();
+
+    void setIsProxy(bool value) { m_isProxy = value; }
+    void setProxyFullName(const std::string& parentPath) const;
+
+    // Returns true if this is the object with the proxy property.
+    bool isProxyObject() const;
+
 public:
     AbcA::ObjectReaderPtr m_object;
+
+    //! Only set if this IObject represents a proxy reference to another
+    //! IObject. Children of a proxy reference do not get this set.
+    AbcA::ObjectReaderPtr m_proxyObject;
+
+    //! All IObject ancestors of a proxy object have these set.
+    bool                  m_isProxy;
+    mutable std::string   m_proxyFullName;
 };
 
 typedef Alembic::Util::shared_ptr< IObject > IObjectPtr;
@@ -256,11 +293,13 @@ template <class OBJECT_PTR>
 inline IObject::IObject( OBJECT_PTR iParentObject,
                          const std::string &iName,
                          const Argument &iArg0 )
+    : m_isProxy( false )
 {
     init( GetObjectReaderPtr( iParentObject ),
           iName,
-
           GetErrorHandlerPolicy( iParentObject, iArg0 ) );
+
+    initProxy();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

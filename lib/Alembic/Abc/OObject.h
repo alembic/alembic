@@ -197,6 +197,14 @@ public:
     //! exists, this function will return an empty OObject.
     OObject getChild( const std::string &iChildName );
 
+    //!-*************************************************************************
+    // PROXY METHODS
+    // An OObject can refer to another OObject. When read in, this proxy will be
+    // represented by the target hierarchy and its children.
+    //!-*************************************************************************
+    bool isProxy();
+    bool addChildProxy( OObject iTarget, const std::string& iName );
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -231,6 +239,8 @@ private:
                const Argument &iArg0,
                const Argument &iArg1,
                const Argument &iARg2 );
+
+    void setProxyMetadata();
 
 protected:
     AbcA::ObjectWriterPtr m_object;
