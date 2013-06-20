@@ -197,9 +197,9 @@ public:
     //!-*************************************************************************
     // PROXY METHODS
     // An IObject can refer to another IObject in the same cache and stand in
-    // as a proxy for that target hierarchy. On disk only the proxy object is 
-    // required. When read in however, a normal geometry hierarchy is
-    // returned. Optionally, client code could use the isProxy() and 
+    // as a proxy for that target hierarchy. On disk only the proxy object is
+    // required. When read in however, a normal hierarchy is
+    // returned. Optionally, client code could use the isProxy() and
     // proxyTargetPath() methods to discover that the hierarchies are
     // duplicate and instance them appropriately in memory.
     //!-*************************************************************************

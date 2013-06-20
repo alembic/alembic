@@ -216,7 +216,7 @@ bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
 
     AbcA::MetaData md;
     md.set("proxy", "1");
-    
+
     OObject oProxyChild = OObject( getPtr(), iName, md );
 
     OStringProperty proxyTargetProperty =

@@ -71,17 +71,17 @@ void simpleTestOut( const std::string& iArchiveName, bool useOgawa )
             iArchiveName, ErrorHandler::kThrowPolicy );
     }
 
-    //
-    //        x1
-    //       /  \
-    //     x2    x3
-    //      |    |
-    //     x4    x5    (x5 is a proxy targeting x4)
-    //    / |
-    //  g1  g2
-    //      |
-    //      g5
-    //
+    /*
+            x1
+           /  \
+         x2    x3
+          |    |
+         x4    x5    (x5 is a proxy targeting x4)
+        / |
+      g1  g2
+          |
+          g5
+    */
 
     // all child Objects in an Archive are actually children of the single
     // top Object in an Archive
@@ -112,21 +112,21 @@ void simpleTestIn( const std::string& iArchiveName )
 {
     AbcF::IFactory factory;
     factory.setPolicy( ErrorHandler::kThrowPolicy );
-    
+
     AbcF::IFactory::CoreType coreType;
     IArchive archive = factory.getArchive( iArchiveName, coreType );
 
-    //
-    //        x1
-    //       /  \
-    //     x2    x3
-    //      |    |
-    //     x4    x5    (x5 is a proxy targeting x4)
-    //    / |
-    //  g1  g2
-    //      |
-    //      g5
-    //
+    /*
+            x1
+           /  \
+         x2    x3
+          |    |
+         x4    x5    (x5 is a proxy targeting x4)
+        / |
+      g1  g2
+          |
+          g5
+    */
 
     // an archive has a single top object which contains all its children
     IObject topObject = archive.getTop();
@@ -146,7 +146,7 @@ void simpleTestIn( const std::string& iArchiveName )
 
     int numChildren = x4.getNumChildren();
     TESTING_ASSERT( numChildren == 2 );
-    TESTING_ASSERT( x4.getParent().getFullName() == x2.getFullName() ); 
+    TESTING_ASSERT( x4.getParent().getFullName() == x2.getFullName() );
 
     IObject g1( x4.getChild(0) );
     TESTING_ASSERT( g1 != 0 );
@@ -209,8 +209,8 @@ void simpleTestIn( const std::string& iArchiveName )
 //-*****************************************************************************
 int main( int argc, char* argv[] )
 {
-    const std::string oarkhive( "/home/asuter/proxytest.ogawa.abc" );
-    const std::string harkhive( "/home/asuter/proxytest.hdf5.abc" );
+    const std::string oarkhive( "proxytest.ogawa.abc" );
+    const std::string harkhive( "proxytest.hdf5.abc" );
 
     bool useOgawa = true;
     simpleTestOut( oarkhive, useOgawa );

@@ -82,7 +82,7 @@ const AbcA::ObjectHeader &IObject::getHeader() const
 //-*****************************************************************************
 const std::string &IObject::getName() const
 {
-    // Whether or not this IObject is a proxy object, we want to use the 
+    // Whether or not this IObject is a proxy object, we want to use the
     // name from the original object.
     return m_object->getHeader().getName();
 }
@@ -153,7 +153,7 @@ AbcA::ObjectReaderPtr recurse(Alembic::Abc::IObject iobject,
     if (path.size() == 0)
         return iobject.m_object;
 
-    for (int i=0; i<iobject.getNumChildren(); ++i)
+    for (std::size_t i=0; i<iobject.getNumChildren(); ++i)
     {
         Alembic::Abc::IObject ichild = iobject.getChild(i);
         if (ichild.getName() == path[0])
@@ -174,7 +174,7 @@ AbcA::ObjectReaderPtr objectReaderByName(IArchive archive, const std::string& pr
     if (path.size() == 0)
         return AbcA::ObjectReaderPtr();
 
-    for (int i=0; i<archive.getTop().getNumChildren(); ++i)
+    for (std::size_t i=0; i<archive.getTop().getNumChildren(); ++i)
     {
         Alembic::Abc::IObject iobject = archive.getTop().getChild(i);
         if (iobject.getName() == path[0])

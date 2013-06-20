@@ -240,8 +240,6 @@ private:
                const Argument &iArg1,
                const Argument &iARg2 );
 
-    void setProxyMetadata();
-
 protected:
     AbcA::ObjectWriterPtr m_object;
 };
