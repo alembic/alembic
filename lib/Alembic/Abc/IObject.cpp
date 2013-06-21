@@ -90,7 +90,7 @@ const std::string &IObject::getName() const
 //-*****************************************************************************
 const std::string &IObject::getFullName() const
 {
-    if ( m_instanceObject )
+    if ( !m_instancedFullName.empty() )
     {
         return m_instancedFullName;
     }
@@ -122,6 +122,25 @@ IArchive IObject::getArchive() const
 namespace { // anonymous
 
 static inline
+std::string readInstanceSource( AbcA::CompoundPropertyReaderPtr iProp )
+{
+    if ( !iProp || !iProp->getPropertyHeader(".instanceSource") )
+    {
+        return std::string();
+    }
+
+    IStringProperty instanceSourceProp( iProp, ".instanceSource" );
+    if ( !instanceSourceProp )
+        return std::string();
+
+    return instanceSourceProp.getValue();
+}
+
+static inline
+AbcA::ObjectReaderPtr objectReaderByName( AbcA::ObjectReaderPtr iObj,
+                                          const std::string & iInstanceSource );
+
+static inline
 AbcA::ObjectReaderPtr recurse( AbcA::ObjectReaderPtr iObj,
                                const std::string & iInstanceSource,
                                std::size_t iCurPos )
@@ -141,6 +160,14 @@ AbcA::ObjectReaderPtr recurse( AbcA::ObjectReaderPtr iObj,
 
     if ( child && nextSlash != std::string::npos )
     {
+        // we hit an instance so we have to evaluate down to the correct spot
+        if ( child->getMetaData().get("isInstance") == "1" )
+        {
+            // get and recursively walk down this other path
+            AbcA::CompoundPropertyReaderPtr prop = child->getProperties();
+            std::string instanceSource = readInstanceSource( prop );
+            child = objectReaderByName( child, instanceSource);
+        }
         return recurse( child, iInstanceSource, nextSlash + 1 );
     }
 
@@ -148,11 +175,12 @@ AbcA::ObjectReaderPtr recurse( AbcA::ObjectReaderPtr iObj,
     return child;
 }
 
+//-*****************************************************************************
 static inline
-AbcA::ObjectReaderPtr objectReaderByName( IArchive iArchive,
+AbcA::ObjectReaderPtr objectReaderByName( AbcA::ObjectReaderPtr iObj,
                                           const std::string & iInstanceSource )
 {
-    if ( iInstanceSource.empty() )
+    if ( iInstanceSource.empty() || ! iObj )
         return AbcA::ObjectReaderPtr();
 
     std::size_t curPos = 0;
@@ -161,7 +189,7 @@ AbcA::ObjectReaderPtr objectReaderByName( IArchive iArchive,
         curPos = 1;
     }
 
-    AbcA::ObjectReaderPtr obj = iArchive.getTop().getPtr();
+    AbcA::ObjectReaderPtr obj = iObj->getArchive()->getTop();
     return recurse( obj, iInstanceSource, curPos );
 }
 
@@ -189,7 +217,7 @@ IObject IObject::getParent() const
 
     if ( !m_instancedFullName.empty() )
     {
-        std::string parent = getParentFullName( m_instancedFullName );
+        std::string parentFullName = getParentFullName( m_instancedFullName );
 
         AbcA::ObjectReaderPtr parentPtr = m_object->getParent();
         bool setFullName = false;
@@ -200,9 +228,10 @@ IObject IObject::getParent() const
 
         // If the names do match, then the parent isn't a part of the instance
         // and so we don't need to set that full name
-        if ( parentPtr && parent != parentPtr->getFullName() )
+        if ( parentPtr && !parentFullName.empty() &&
+             parentFullName != parentPtr->getFullName() )
         {
-            parentPtr = objectReaderByName( getArchive(), parent );
+            parentPtr = objectReaderByName( parentPtr, parentFullName );
             setFullName = true;
         }
 
@@ -212,7 +241,7 @@ IObject IObject::getParent() const
 
         if ( setFullName )
         {
-            obj.setInstancedFullName( parent );
+            obj.setInstancedFullName( parentFullName );
         }
 
         return obj;
@@ -298,7 +327,7 @@ IObject IObject::getChild( size_t iChildIndex ) const
         if ( !m_instancedFullName.empty() )
         {
             obj.setInstancedFullName(
-                getFullName() + std::string("/") + obj.getName() );
+                m_instancedFullName + std::string("/") + obj.getName() );
         }
 
         return obj;
@@ -325,7 +354,7 @@ IObject IObject::getChild( const std::string &iChildName ) const
         if ( !m_instancedFullName.empty() )
         {
             obj.setInstancedFullName(
-                getFullName() + std::string("/") + obj.getName() );
+                m_instancedFullName + std::string("/") + obj.getName() );
         }
 
         return obj;
@@ -417,24 +446,13 @@ std::string IObject::instanceSourcePath()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::instanceSourcePath()" );
 
-    AbcA::CompoundPropertyReaderPtr propsPtr = m_object->getProperties();
-    if ( m_instanceObject )
+    if ( !m_instanceObject )
     {
-        propsPtr = m_instanceObject->getProperties();
+        return std::string();
     }
-    ICompoundProperty props = ICompoundProperty( propsPtr, kWrapExisting );
 
-    if ( props == 0 )
-        return std::string();
-
-    if ( props.getPropertyHeader(".instanceSource") == 0 )
-        return std::string();
-
-    IStringProperty instanceSourceProp( props, ".instanceSource" );
-    if ( !instanceSourceProp )
-        return std::string();
-
-    return instanceSourceProp.getValue();
+    AbcA::CompoundPropertyReaderPtr props = m_instanceObject->getProperties();
+    return readInstanceSource( props );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -507,8 +525,10 @@ void IObject::initInstance()
         return;
     }
 
+    AbcA::CompoundPropertyReaderPtr propsPtr = m_object->getProperties();
+    std::string instanceSource = readInstanceSource( propsPtr );
     AbcA::ObjectReaderPtr targetObject =
-        objectReaderByName( getArchive(), instanceSourcePath() );
+        objectReaderByName( m_object, instanceSource );
 
     m_instanceObject = m_object;
     m_object = targetObject;

@@ -231,18 +231,197 @@ void simpleTestIn( const std::string& iArchiveName )
 }
 
 //-*****************************************************************************
+void diabolicalInstance( const std::string& iArchiveName, bool useOgawa )
+{
+    /*
+               a0  b0 (points to a0)
+              /  |
+            a1   b1 (points to a1)
+           /  |
+          a2  b2 (points to b2)
+    */
+
+{
+    OArchive archive;
+    if (useOgawa)
+    {
+        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
+            iArchiveName, ErrorHandler::kThrowPolicy );
+    }
+    else
+    {
+        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+            iArchiveName, ErrorHandler::kThrowPolicy );
+    }
+
+    OObject topobj = archive.getTop();
+
+    OObject a0( topobj, "a0" );
+    TESTING_ASSERT( topobj.addChildInstance( a0, "b0" ) );
+
+    OObject a1( a0, "a1" );
+    TESTING_ASSERT( a0.addChildInstance( a1, "b1" ) );
+
+    OObject a2( a1, "a2" );
+    TESTING_ASSERT( a1.addChildInstance( a2, "b2" ) );
+}
+
+{
+    AbcF::IFactory factory;
+
+    IArchive archive = factory.getArchive( iArchiveName );
+    IObject topObject = archive.getTop();
+
+    IObject a0( topObject.getChild(0) );
+    TESTING_ASSERT( !a0.isInstance() );
+    TESTING_ASSERT( a0.getFullName() == "/a0" );
+    TESTING_ASSERT( !a0.getParent().isInstance() );
+    TESTING_ASSERT( a0.getParent().getFullName() == "/" );
+
+    IObject b0( topObject.getChild(1) );
+    TESTING_ASSERT( b0.isInstance() );
+    TESTING_ASSERT( b0.getName() == "b0" );
+    TESTING_ASSERT( b0.getFullName() == "/b0" );
+    TESTING_ASSERT( !b0.getParent().isInstance() );
+    TESTING_ASSERT( b0.getParent().getFullName() == "/" );
+
+    IObject a0a1( a0.getChild(0) );
+    TESTING_ASSERT( !a0a1.isInstance() );
+    TESTING_ASSERT( a0a1.getName() == "a1" );
+    TESTING_ASSERT( a0a1.getFullName() == "/a0/a1" );
+    TESTING_ASSERT( !a0a1.getParent().isInstance() );
+    TESTING_ASSERT( a0a1.getParent().getName() == "a0" );
+    TESTING_ASSERT( a0a1.getParent().getFullName() == "/a0" );
+
+    IObject a0b1( a0.getChild(1) );
+    TESTING_ASSERT( a0b1.isInstance() );
+    TESTING_ASSERT( a0b1.getName() == "b1" );
+    TESTING_ASSERT( a0b1.getFullName() == "/a0/b1" );
+    TESTING_ASSERT( !a0b1.getParent().isInstance() );
+    TESTING_ASSERT( a0b1.getParent().getName() == "a0" );
+    TESTING_ASSERT( a0b1.getParent().getFullName() == "/a0" );
+
+    IObject b0a1( b0.getChild(0) );
+    TESTING_ASSERT( b0a1.isInstance() );
+    TESTING_ASSERT( b0a1.getParent().isInstance() );
+
+    IObject b0b1( b0.getChild(1) );
+    TESTING_ASSERT( b0b1.isInstance() );
+    TESTING_ASSERT( b0b1.getName() == "b1" );
+    TESTING_ASSERT( b0b1.getFullName() == "/b0/b1" );
+    TESTING_ASSERT( b0b1.getParent().isInstance() );
+    TESTING_ASSERT( b0b1.getParent().getName() == "b0" );
+    TESTING_ASSERT( b0b1.getParent().getFullName() == "/b0" );
+
+    IObject a0a1a2( a0a1.getChild(0) );
+    TESTING_ASSERT( !a0a1a2.isInstance() );
+    TESTING_ASSERT( a0a1a2.getName() == "a2" );
+    TESTING_ASSERT( a0a1a2.getFullName() == "/a0/a1/a2" );
+    TESTING_ASSERT( !a0a1a2.getParent().isInstance() );
+    TESTING_ASSERT( a0a1a2.getParent().getName() == "a1" );
+    TESTING_ASSERT( a0a1a2.getParent().getFullName() == "/a0/a1" );
+    TESTING_ASSERT( !a0a1a2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( a0a1a2.getParent().getParent().getName() == "a0" );
+    TESTING_ASSERT( a0a1a2.getParent().getParent().getFullName() == "/a0" );
+
+    IObject a0a1b2( a0a1.getChild(1) );
+    TESTING_ASSERT( a0a1b2.isInstance() );
+    TESTING_ASSERT( a0a1b2.getName() == "b2" );
+    TESTING_ASSERT( a0a1b2.getFullName() == "/a0/a1/b2" );
+    TESTING_ASSERT( !a0a1b2.getParent().isInstance() );
+    TESTING_ASSERT( a0a1b2.getParent().getName() == "a1" );
+    TESTING_ASSERT( a0a1b2.getParent().getFullName() == "/a0/a1" );
+    TESTING_ASSERT( !a0a1b2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( a0a1b2.getParent().getParent().getName() == "a0" );
+    TESTING_ASSERT( a0a1b2.getParent().getParent().getFullName() == "/a0" );
+
+    IObject a0b1a2( a0b1.getChild(0) );
+    TESTING_ASSERT( a0b1a2.isInstance() );
+    TESTING_ASSERT( a0b1a2.getName() == "a2" );
+    TESTING_ASSERT( a0b1a2.getFullName() == "/a0/b1/a2" );
+    TESTING_ASSERT( a0b1a2.getParent().isInstance() );
+    TESTING_ASSERT( a0b1a2.getParent().getName() == "b1" );
+    TESTING_ASSERT( a0b1a2.getParent().getFullName() == "/a0/b1" );
+    TESTING_ASSERT( !a0b1a2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( a0b1a2.getParent().getParent().getName() == "a0" );
+    TESTING_ASSERT( a0b1a2.getParent().getParent().getFullName() == "/a0" );
+
+    IObject a0b1b2( a0b1.getChild(1) );
+    TESTING_ASSERT( a0b1b2.isInstance() );
+    TESTING_ASSERT( a0b1b2.getName() == "b2" );
+    TESTING_ASSERT( a0b1b2.getFullName() == "/a0/b1/b2" );
+    TESTING_ASSERT( a0b1b2.getParent().isInstance() );
+    TESTING_ASSERT( a0b1b2.getParent().getName() == "b1" );
+    TESTING_ASSERT( a0b1b2.getParent().getFullName() == "/a0/b1" );
+    TESTING_ASSERT( !a0b1b2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( a0b1b2.getParent().getParent().getName() == "a0" );
+    TESTING_ASSERT( a0b1b2.getParent().getParent().getFullName() == "/a0" );
+
+    IObject b0a1a2( b0a1.getChild(0) );
+    TESTING_ASSERT( b0a1a2.isInstance() );
+    TESTING_ASSERT( b0a1a2.getName() == "a2" );
+    TESTING_ASSERT( b0a1a2.getFullName() == "/b0/a1/a2" );
+    TESTING_ASSERT( b0a1a2.getParent().isInstance() );
+    TESTING_ASSERT( b0a1a2.getParent().getName() == "a1" );
+    TESTING_ASSERT( b0a1a2.getParent().getFullName() == "/b0/a1" );
+    TESTING_ASSERT( b0a1a2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( b0a1a2.getParent().getParent().getName() == "b0" );
+    TESTING_ASSERT( b0a1a2.getParent().getParent().getFullName() == "/b0" );
+
+    IObject b0a1b2( b0a1.getChild(1) );
+    TESTING_ASSERT( b0a1b2.isInstance() );
+    TESTING_ASSERT( b0a1b2.getName() == "b2" );
+    TESTING_ASSERT( b0a1b2.getFullName() == "/b0/a1/b2" );
+    TESTING_ASSERT( b0a1b2.getParent().isInstance() );
+    TESTING_ASSERT( b0a1b2.getParent().getName() == "a1" );
+    TESTING_ASSERT( b0a1b2.getParent().getFullName() == "/b0/a1" );
+    TESTING_ASSERT( b0a1b2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( b0a1b2.getParent().getParent().getName() == "b0" );
+    TESTING_ASSERT( b0a1b2.getParent().getParent().getFullName() == "/b0" );
+
+    IObject b0b1a2( b0b1.getChild(0) );
+    TESTING_ASSERT( b0b1a2.isInstance() );
+    TESTING_ASSERT( b0b1a2.getName() == "a2" );
+    TESTING_ASSERT( b0b1a2.getFullName() == "/b0/b1/a2" );
+    TESTING_ASSERT( b0b1a2.getParent().isInstance() );
+    TESTING_ASSERT( b0b1a2.getParent().getName() == "b1" );
+    TESTING_ASSERT( b0b1a2.getParent().getFullName() == "/b0/b1" );
+    TESTING_ASSERT( b0b1a2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( b0b1a2.getParent().getParent().getName() == "b0" );
+    TESTING_ASSERT( b0b1a2.getParent().getParent().getFullName() == "/b0" );
+
+    IObject b0b1b2( b0b1.getChild(1) );
+    TESTING_ASSERT( b0b1b2.isInstance() );
+    TESTING_ASSERT( b0b1b2.getName() == "b2" );
+    TESTING_ASSERT( b0b1b2.getFullName() == "/b0/b1/b2" );
+    TESTING_ASSERT( b0b1b2.getParent().isInstance() );
+    TESTING_ASSERT( b0b1b2.getParent().getName() == "b1" );
+    TESTING_ASSERT( b0b1b2.getParent().getFullName() == "/b0/b1" );
+    TESTING_ASSERT( b0b1b2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( b0b1b2.getParent().getParent().getName() == "b0" );
+    TESTING_ASSERT( b0b1b2.getParent().getParent().getFullName() == "/b0" );
+}
+
+}
+
+//-*****************************************************************************
 int main( int argc, char* argv[] )
 {
-    const std::string oarkhive( "instancetest.ogawa.abc" );
-    const std::string harkhive( "insatncetest.hdf5.abc" );
+    const std::string oarkhive( "instancetest_ogawa.abc" );
+    const std::string harkhive( "insatncetest_hdf5.abc" );
+
+    const std::string oarkhive2( "diabolical.instancet_ogawa.abc" );
+    const std::string harkhive2( "diabolical.instancet_hdf5.abc" );
 
     bool useOgawa = true;
     simpleTestOut( oarkhive, useOgawa );
     simpleTestIn( oarkhive );
+    diabolicalInstance( oarkhive2, useOgawa );
 
     useOgawa = false;
     simpleTestOut( harkhive, useOgawa );
     simpleTestIn( harkhive );
+    diabolicalInstance( harkhive2, useOgawa );
 
     return 0;
 }
