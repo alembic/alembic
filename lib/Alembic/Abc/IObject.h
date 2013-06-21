@@ -83,14 +83,13 @@ public:
     IObject( OBJECT_PTR iPtr,
              WrapExistingFlag /* iFlag */,
              const Argument &iArg0 = Argument() )
-        : m_object( GetObjectReaderPtr( iPtr ) ),
-          m_isProxy( false )
+        : m_object( GetObjectReaderPtr( iPtr ) )
     {
-        initProxy();
-
         // Set the error handling policy
         getErrorHandler().setPolicy(
             GetErrorHandlerPolicy( iPtr, iArg0 ) );
+
+        initProxy();
     }
 
     //! This attaches an IObject wrapper around the top
@@ -99,7 +98,6 @@ public:
     IObject( ARCHIVE_PTR iPtr,
              TopFlag iFlag,
              const Argument &iArg0 = Argument() )
-        : m_isProxy( false )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
@@ -108,8 +106,6 @@ public:
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::IObject( top )" );
 
         m_object = GetArchiveReaderPtr( iPtr )->getTop();
-
-        initProxy();
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
@@ -203,7 +199,7 @@ public:
     // proxyTargetPath() methods to discover that the hierarchies are
     // duplicate and instance them appropriately in memory.
     //!-*************************************************************************
-    bool isProxy() const        { return m_isProxy; }
+    bool isProxy() const;
 
     std::string proxyTargetPath();
     AbcA::ObjectReaderPtr getProxyTarget() const { return m_proxyObject; }
@@ -219,11 +215,14 @@ public:
 
     //! getPtr, as usual, returns a shared ptr to the
     //! underlying AbcCoreAbstract object, in this case the
-    //! ObjectReaderPtr.
-    AbcA::ObjectReaderPtr getPtr() const;
+    //! ObjectReaderPtr.  If this object happens to be a proxy, it points
+    //! to the resolved target ObjectReaderPtr
+    AbcA::ObjectReaderPtr getPtr() const { return m_object; }
 
-    //! Reset returns this function set to an empty, default
-    //! state.
+    //! Returns the original ObjectReaderPtr, if this object is a proxy
+    AbcA::ObjectReaderPtr getProxyPtr() const { return m_proxyObject; }
+
+    //! Reset returns this function set to an empty, default state.
     void reset();
 
     //! Valid returns whether this function set is
@@ -252,7 +251,6 @@ private:
 
     void initProxy();
 
-    void setIsProxy(bool value) { m_isProxy = value; }
     void setProxyFullName(const std::string& parentPath) const;
 
     // Returns true if this is the object with the proxy property.
@@ -261,13 +259,12 @@ private:
 public:
     AbcA::ObjectReaderPtr m_object;
 
-    //! Only set if this IObject represents a proxy reference to another
-    //! IObject. Children of a proxy reference do not get this set.
+    // This is the "original" object when it is a proxy
+    // m_object is then set to the proxy target
     AbcA::ObjectReaderPtr m_proxyObject;
 
     //! All IObject ancestors of a proxy object have these set.
-    bool                  m_isProxy;
-    mutable std::string   m_proxyFullName;
+    mutable std::string m_proxyFullName;
 };
 
 typedef Alembic::Util::shared_ptr< IObject > IObjectPtr;
@@ -293,7 +290,6 @@ template <class OBJECT_PTR>
 inline IObject::IObject( OBJECT_PTR iParentObject,
                          const std::string &iName,
                          const Argument &iArg0 )
-    : m_isProxy( false )
 {
     init( GetObjectReaderPtr( iParentObject ),
           iName,

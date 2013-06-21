@@ -63,11 +63,7 @@ const AbcA::ObjectHeader &IObject::getHeader() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getHeader()" );
 
-    if ( m_proxyObject )
-    {
-        return m_proxyObject->getHeader();
-    }
-    else if ( m_object )
+    if ( m_object )
     {
         return m_object->getHeader();
     }
@@ -82,16 +78,22 @@ const AbcA::ObjectHeader &IObject::getHeader() const
 //-*****************************************************************************
 const std::string &IObject::getName() const
 {
-    // Whether or not this IObject is a proxy object, we want to use the
-    // name from the original object.
+    // Get the name of the original object
+    if ( m_proxyObject )
+    {
+        return m_proxyObject->getHeader().getName();
+    }
+
     return m_object->getHeader().getName();
 }
 
 //-*****************************************************************************
 const std::string &IObject::getFullName() const
 {
-    if ( m_isProxy )
+    if ( m_proxyObject )
+    {
         return m_proxyFullName;
+    }
 
     return getHeader().getFullName();
 }
@@ -117,75 +119,67 @@ IArchive IObject::getArchive() const
     return IArchive();
 }
 
-//-*****************************************************************************
-static inline
-std::string getParentFullName(const std::string& childFullName)
-{
-    size_t pos = childFullName.rfind('/');
-    if (pos == std::string::npos || pos == 0)
-        return "";
-
-    return childFullName.substr(0, pos);
-}
+namespace { // anonymous
 
 static inline
-std::vector<std::string> splitPath(std::string path)
+AbcA::ObjectReaderPtr recurse( AbcA::ObjectReaderPtr iObj,
+                               const std::string & iProxyTarget,
+                               std::size_t iCurPos )
 {
-    std::vector<std::string> split;
-    std::stringstream ss(path);
-
-    std::string item;
-    while (std::getline(ss, item, '/'))
+    std::size_t nextSlash = iProxyTarget.find( '/', iCurPos );
+    std::string childName;
+    if ( nextSlash == std::string::npos )
     {
-        if (item.empty())
-            continue;
-
-        split.push_back(item);
+        childName = iProxyTarget.substr( iCurPos );
+    }
+    else
+    {
+        childName = iProxyTarget.substr( iCurPos, nextSlash - iCurPos );
     }
 
-    return split;
-}
+    AbcA::ObjectReaderPtr child = iObj->getChild( childName );
 
-static inline
-AbcA::ObjectReaderPtr recurse(Alembic::Abc::IObject iobject,
-                              std::vector<std::string> path)
-{
-    if (path.size() == 0)
-        return iobject.m_object;
-
-    for (std::size_t i=0; i<iobject.getNumChildren(); ++i)
+    if ( child && nextSlash != std::string::npos )
     {
-        Alembic::Abc::IObject ichild = iobject.getChild(i);
-        if (ichild.getName() == path[0])
-        {
-            path.erase( path.begin() );
-            return recurse(ichild, path);
-        }
+        return recurse( child, iProxyTarget, nextSlash + 1 );
     }
 
-    return AbcA::ObjectReaderPtr();
+    // child not found, or we are on our last child
+    return child;
 }
 
 static inline
-AbcA::ObjectReaderPtr objectReaderByName(IArchive archive, const std::string& proxyTarget)
+AbcA::ObjectReaderPtr objectReaderByName( IArchive iArchive,
+                                          const std::string & iProxyTarget)
 {
-    // split the path up into individual names
-    std::vector<std::string> path = splitPath(proxyTarget);
-    if (path.size() == 0)
+    if ( iProxyTarget.empty() )
         return AbcA::ObjectReaderPtr();
 
-    for (std::size_t i=0; i<archive.getTop().getNumChildren(); ++i)
+    std::size_t curPos = 0;
+    if ( iProxyTarget[0] == '/' )
     {
-        Alembic::Abc::IObject iobject = archive.getTop().getChild(i);
-        if (iobject.getName() == path[0])
-        {
-            path.erase( path.begin() );
-            return recurse(iobject, path);
-        }
+        curPos = 1;
     }
 
-    return AbcA::ObjectReaderPtr();
+    AbcA::ObjectReaderPtr obj = iArchive.getTop().getPtr();
+    return recurse( obj, iProxyTarget, curPos );
 }
+
+//-*****************************************************************************
+static inline
+std::string getParentFullName( const std::string& iChildFullName )
+{
+    size_t pos = iChildFullName.rfind('/');
+
+    if ( pos == std::string::npos || pos == 0 )
+    {
+        return std::string();
+    }
+
+    return iChildFullName.substr(0, pos);
+}
+
+}  // end anonymous namespace
 
 //-*****************************************************************************
 IObject IObject::getParent() const
@@ -193,11 +187,11 @@ IObject IObject::getParent() const
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getParent()" );
 
-    if ( m_isProxy && !isProxyObject() )
+    if ( !m_proxyFullName.empty() )
     {
         AbcA::ObjectReaderPtr parentPtr;
 
-        std::string parent = getParentFullName( getFullName() );
+        std::string parent = getParentFullName( m_proxyFullName );
 
         // true if this is the proxy object that references another hierarchy
         if ( parent.empty() )
@@ -209,33 +203,23 @@ IObject IObject::getParent() const
             parentPtr = objectReaderByName( getArchive(), parent );
         }
 
-        IObject iobj( parentPtr,
-                      kWrapExisting,
-                      getErrorHandlerPolicy() );
+        IObject obj( parentPtr,
+                     kWrapExisting,
+                     getErrorHandlerPolicy() );
 
-        //
         // If we're the proxy object, we don't pass the proxiness upward.
-        if ( iobj )
+        if ( obj )
         {
-            iobj.setIsProxy( true );
-            iobj.setProxyFullName( parent );
+            obj.setProxyFullName( parent );
         }
 
-        return iobj;
+        return obj;
     }
     else if ( m_object )
     {
-        IObject iobj( m_object->getParent(),
-                      kWrapExisting,
-                      getErrorHandlerPolicy() );
-
-        if ( m_isProxy && !isProxyObject() )
-        {
-            iobj.setIsProxy( true );
-            iobj.setProxyFullName( getParentFullName( getFullName() ) );
-        }
-
-        return iobj;
+        return IObject( m_object->getParent(),
+                        kWrapExisting,
+                        getErrorHandlerPolicy() );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -250,11 +234,7 @@ size_t IObject::getNumChildren() const
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getNumChildren()" );
 
-    if ( m_proxyObject )
-    {
-        return m_proxyObject->getNumChildren();
-    }
-    else if ( m_object )
+    if ( m_object )
     {
         return m_object->getNumChildren();
     }
@@ -271,11 +251,7 @@ const AbcA::ObjectHeader &IObject::getChildHeader( size_t iIdx ) const
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChildHeader()" );
 
-    if ( m_proxyObject )
-    {
-        return m_proxyObject->getChildHeader( iIdx );
-    }
-    else if ( m_object )
+    if ( m_object )
     {
         return m_object->getChildHeader( iIdx );
     }
@@ -294,11 +270,7 @@ IObject::getChildHeader( const std::string &iName ) const
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChildHeader( name )" );
 
-    if ( m_proxyObject )
-    {
-        return m_object->getChildHeader( iName );
-    }
-    else if ( m_object )
+    if ( m_object )
     {
         return m_object->getChildHeader( iName );
     }
@@ -315,30 +287,19 @@ IObject IObject::getChild( size_t iChildIndex ) const
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChild()" );
 
-    if ( m_proxyObject )
+    if ( m_object )
     {
-        IObject iobj( m_proxyObject->getChild( iChildIndex ),
-                      kWrapExisting,
-                      getErrorHandlerPolicy() );
+        IObject obj( m_object->getChild( iChildIndex ),
+                     kWrapExisting,
+                     getErrorHandlerPolicy() );
 
-        iobj.setIsProxy( true );
-        iobj.setProxyFullName( getFullName() + std::string("/") + iobj.getName() );
-
-        return iobj;
-    }
-    else if ( m_object )
-    {
-        IObject iobj( m_object->getChild( iChildIndex ),
-                      kWrapExisting,
-                      getErrorHandlerPolicy() );
-
-        if ( m_isProxy )
+        if ( !m_proxyFullName.empty() )
         {
-            iobj.setIsProxy( true );
-            iobj.setProxyFullName( getFullName() + std::string("/") + iobj.getName() );
+            obj.setProxyFullName(
+                getFullName() + std::string("/") + obj.getName() );
         }
 
-        return iobj;
+        return obj;
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -353,30 +314,19 @@ IObject IObject::getChild( const std::string &iChildName ) const
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getChild()" );
 
-    if ( m_proxyObject )
+    if ( m_object )
     {
-        IObject iobj( m_proxyObject->getChild( iChildName ),
-                      kWrapExisting,
-                      getErrorHandlerPolicy() );
+        IObject obj( m_object->getChild( iChildName ),
+                     kWrapExisting,
+                     getErrorHandlerPolicy() );
 
-        iobj.setIsProxy( true );
-        iobj.setProxyFullName( getFullName() + std::string("/") + iobj.getName() );
-
-        return iobj;
-    }
-    else if ( m_object )
-    {
-        IObject iobj( m_object->getChild( iChildName ),
-                      kWrapExisting,
-                      getErrorHandlerPolicy() );
-
-        if ( m_isProxy )
+        if ( !m_proxyFullName.empty() )
         {
-            iobj.setIsProxy( true );
-            iobj.setProxyFullName( getFullName() + std::string("/") + iobj.getName() );
+            obj.setProxyFullName(
+                getFullName() + std::string("/") + obj.getName() );
         }
 
-        return iobj;
+        return obj;
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -386,18 +336,8 @@ IObject IObject::getChild( const std::string &iChildName ) const
 }
 
 //-*****************************************************************************
-AbcA::ObjectReaderPtr IObject::getPtr() const
-{
-    if ( m_proxyObject )
-        return m_proxyObject;
-
-    return m_object;
-}
-
-//-*****************************************************************************
 void IObject::reset()
 {
-    m_isProxy = false;
     m_proxyObject.reset();
     m_proxyFullName.clear();
 
@@ -411,11 +351,7 @@ ICompoundProperty IObject::getProperties() const
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::getProperties()" );
 
-    if ( m_proxyObject )
-    {
-        return ICompoundProperty( m_proxyObject->getProperties(), kWrapExisting );
-    }
-    else if ( m_object )
+    if ( m_object )
     {
         return ICompoundProperty( m_object->getProperties(), kWrapExisting );
     }
@@ -460,57 +396,86 @@ bool IObject::getChildrenHash( Util::Digest & oDigest )
 }
 
 //-*****************************************************************************
-std::string IObject::proxyTargetPath()
+bool IObject::isProxy() const
 {
-    //
-    // Don't want to use getProperties(), that will just return the proxy's properties.
-    ICompoundProperty props = ICompoundProperty( m_object->getProperties(), kWrapExisting );
-    if (props == 0)
-        return "";
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::isProxy()" );
 
-    if (props.getPropertyHeader(".proxyTarget") == 0)
-        return "";
+    if ( !m_proxyFullName.empty() )
+    {
+        return true;
+    }
 
-    IStringProperty proxyTargetProperty(props, ".proxyTarget");
-    if (!proxyTargetProperty)
-        return "";
-
-    ISampleSelector iss( (index_t)0 );
-    return proxyTargetProperty.getValue(iss);
-}
-
-//-*****************************************************************************
-void IObject::setProxyFullName(const std::string& parentPath) const
-{
-    m_proxyFullName = parentPath;
-}
-
-bool IObject::isProxyObject() const
-{
-    Alembic::Abc::ICompoundProperty props = ICompoundProperty( m_object->getProperties(),
-                                                               kWrapExisting );
-    if (props == 0)
-        return false;
-
-    return ( props.getPropertyHeader(".proxyTarget") != 0 );
-}
-
-//-*****************************************************************************
-bool IObject::isChildAProxy(size_t iChildIndex) const
-{
-    IObject child = getChild(iChildIndex);
-    if (child)
-        return child.isProxy();
+    ALEMBIC_ABC_SAFE_CALL_END();
 
     return false;
 }
 
 //-*****************************************************************************
-bool IObject::isChildAProxy(const std::string &iChildName) const
+std::string IObject::proxyTargetPath()
 {
-    IObject child = getChild(iChildName);
-    if (child)
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::proxyTargetPath()" );
+
+    AbcA::CompoundPropertyReaderPtr propsPtr = m_object->getProperties();
+    if ( m_proxyObject )
+    {
+        propsPtr = m_proxyObject->getProperties();
+    }
+    ICompoundProperty props =ICompoundProperty( propsPtr, kWrapExisting );
+
+    if ( props == 0 )
+        return std::string();
+
+    if ( props.getPropertyHeader(".proxyTarget") == 0 )
+        return std::string();
+
+    IStringProperty proxyTargetProperty( props, ".proxyTarget" );
+    if ( !proxyTargetProperty )
+        return std::string();
+
+    return proxyTargetProperty.getValue();
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return std::string();
+}
+
+//-*****************************************************************************
+void IObject::setProxyFullName( const std::string& parentPath ) const
+{
+    m_proxyFullName = parentPath;
+}
+
+//-*****************************************************************************
+bool IObject::isChildAProxy( size_t iChildIndex ) const
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::isChildAProxy(size_t iChildIndex)" );
+
+    IObject child = getChild( iChildIndex );
+
+    if ( child.valid() )
+    {
         return child.isProxy();
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return false;
+}
+
+//-*****************************************************************************
+bool IObject::isChildAProxy( const std::string &iChildName ) const
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IObject::isChildAProxy(const std::string &iChildName)" );
+
+    IObject child = getChild( iChildName );
+
+    if ( child.valid() )
+    {
+        return child.isProxy();
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
 
     return false;
 }
@@ -530,24 +495,25 @@ void IObject::init( AbcA::ObjectReaderPtr iParent,
 }
 
 //-*****************************************************************************
-
 void IObject::initProxy()
 {
-    if (m_proxyObject != 0)
-        return;
 
-    m_isProxy = false;
-
-    ICompoundProperty props = getProperties();
-    if (props && props.getPropertyHeader(".proxyTarget") != 0)
-        m_proxyObject = objectReaderByName( getArchive(), proxyTargetPath() );
-
-    //
-    // An IObject with its own proxyObject is definitely a proxy.
-    if (m_proxyObject != 0)
+    // not a proxy so m_proxyObject will stay empty
+    if ( !m_object || m_object->getMetaData().get("proxy") != "1")
     {
-        m_isProxy = true;
-        m_proxyFullName = m_object->getFullName();
+        return;
+    }
+
+    AbcA::ObjectReaderPtr targetObject =
+        objectReaderByName( getArchive(), proxyTargetPath() );
+
+    m_proxyObject = m_object;
+    m_object = targetObject;
+
+    // initialize the full name to the proxy full name
+    if ( m_proxyObject != 0 )
+    {
+        m_proxyFullName = m_proxyObject->getFullName();
     }
 }
 
