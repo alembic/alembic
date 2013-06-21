@@ -74,9 +74,9 @@ void simpleTestOut( const std::string& iArchiveName, bool useOgawa )
     /*
                x1
            /   |   \
-         x2    x3   x2a (x2a is a proxy targeting x2)
+         x2    x3   x2a (x2a is an instance targeting x2)
           |    |
-         x4    x5    (x5 is a proxy targeting x4)
+         x4    x5    (x5 is an instance targeting x4)
         / |
       g1  g2
           |
@@ -97,27 +97,27 @@ void simpleTestOut( const std::string& iArchiveName, bool useOgawa )
 
     OObject g5( g2, "g5" );
 
-    // x5 is a proxy targeting x4
-    TESTING_ASSERT( x3.addChildProxy( x4, "x5" ) );
+    // x5 is an instance targeting x4
+    TESTING_ASSERT( x3.addChildInstance( x4, "x5" ) );
 
     // proxies can't point at ancestors (would create a cycle)
-    TESTING_ASSERT( !x2.addChildProxy( x2, "x" ) );
-    TESTING_ASSERT( !x2.addChildProxy( x1, "x" ) );
+    TESTING_ASSERT( !x2.addChildInstance( x2, "x" ) );
+    TESTING_ASSERT( !x2.addChildInstance( x1, "x" ) );
 
-    // x2a is a proxy targeting x2
-    TESTING_ASSERT( x1.addChildProxy( x2, "x2a" ) );
+    // x2a is an instance targeting x2
+    TESTING_ASSERT( x1.addChildInstance( x2, "x2a" ) );
 
     const Alembic::AbcCoreAbstract::ObjectHeader& x5h = x3.getChildHeader(0);
     TESTING_ASSERT( x5h.getFullName() == std::string("/x1/x3/x5") );
 
     const Alembic::AbcCoreAbstract::MetaData& md = x5h.getMetaData();
-    TESTING_ASSERT( md.get("proxy") == std::string("1") );
+    TESTING_ASSERT( md.get("isInstance") == std::string("1") );
 
     const Alembic::AbcCoreAbstract::ObjectHeader& x2ah = x1.getChildHeader(2);
     TESTING_ASSERT( x2ah.getFullName() == std::string("/x1/x2a") );
 
     const Alembic::AbcCoreAbstract::MetaData& md2 = x2ah.getMetaData();
-    TESTING_ASSERT( md2.get("proxy") == std::string("1") );
+    TESTING_ASSERT( md2.get("isInstance") == std::string("1") );
 }
 
 //-*****************************************************************************
@@ -132,9 +132,9 @@ void simpleTestIn( const std::string& iArchiveName )
     /*
                x1
            /   |   \
-         x2    x3   x2a (x2a is a proxy targeting x2)
+         x2    x3   x2a (x2a is an instance targeting x2)
           |    |
-         x4    x5    (x5 is a proxy targeting x4)
+         x4    x5    (x5 is an instance targeting x4)
         / |
       g1  g2
           |
@@ -151,11 +151,11 @@ void simpleTestIn( const std::string& iArchiveName )
     // Verify the target path
     IObject x2( x1, "x2" );
     TESTING_ASSERT( x2.valid() );
-    TESTING_ASSERT( !x2.isProxy() );
+    TESTING_ASSERT( !x2.isInstance() );
 
     IObject x4( x2, "x4" );
     TESTING_ASSERT( x4.valid() );
-    TESTING_ASSERT( !x4.isProxy() );
+    TESTING_ASSERT( !x4.isInstance() );
 
     int numChildren = x4.getNumChildren();
     TESTING_ASSERT( numChildren == 2 );
@@ -164,34 +164,34 @@ void simpleTestIn( const std::string& iArchiveName )
     IObject g1( x4.getChild(0) );
     TESTING_ASSERT( g1 != 0 );
     TESTING_ASSERT( g1.getName() == "g1" );
-    TESTING_ASSERT( !g1.isProxy() );
+    TESTING_ASSERT( !g1.isInstance() );
     TESTING_ASSERT( g1.getParent() != 0 );
     TESTING_ASSERT( g1.getParent().getFullName() == x4.getFullName() );
 
     IObject g2( x4.getChild(1) );
     TESTING_ASSERT( g2 != 0 );
     TESTING_ASSERT( g2.getName() == "g2" );
-    TESTING_ASSERT( !g2.isProxy() );
+    TESTING_ASSERT( !g2.isInstance() );
     TESTING_ASSERT( g2.getParent() != 0 );
     TESTING_ASSERT( g2.getParent().getFullName() == x4.getFullName() );
 
     IObject g5( g2.getChild(0) );
     TESTING_ASSERT( g5 != 0 );
     TESTING_ASSERT( g5.getName() == "g5" );
-    TESTING_ASSERT( !g5.isProxy() );
+    TESTING_ASSERT( !g5.isInstance() );
     TESTING_ASSERT( g5.getParent() != 0 );
     TESTING_ASSERT( g5.getParent().getFullName() == g2.getFullName() );
 
     //
-    // Verify the proxy path
+    // Verify the instance path
     IObject x3( x1, "x3" );
     TESTING_ASSERT( x3 != 0 );
 
     IObject x5( x3, "x5" );
     TESTING_ASSERT( x5 != 0 );
 
-    TESTING_ASSERT( x5.isProxy() );
-    TESTING_ASSERT( x5.proxyTargetPath() == x4.getFullName() );
+    TESTING_ASSERT( x5.isInstance() );
+    TESTING_ASSERT( x5.instanceSourcePath() == x4.getFullName() );
 
     numChildren = x5.getNumChildren();
     TESTING_ASSERT( numChildren == 2 );
@@ -200,37 +200,37 @@ void simpleTestIn( const std::string& iArchiveName )
     IObject g1p( x5.getChild(0) );
     TESTING_ASSERT( g1p != 0 );
     TESTING_ASSERT( g1p.getName() == "g1" );
-    TESTING_ASSERT( g1p.isProxy() );
+    TESTING_ASSERT( g1p.isInstance() );
     TESTING_ASSERT( g1p.getParent() != 0 );
     TESTING_ASSERT( g1p.getParent().getFullName() == x5.getFullName() );
 
     IObject g2p( x5.getChild(1) );
     TESTING_ASSERT( g2p != 0 );
     TESTING_ASSERT( g2p.getName() == "g2" );
-    TESTING_ASSERT( g2p.isProxy() );
+    TESTING_ASSERT( g2p.isInstance() );
     TESTING_ASSERT( g2p.getParent() != 0 );
     TESTING_ASSERT( g2p.getParent().getFullName() == x5.getFullName() );
 
     IObject g5p( g2p.getChild(0) );
     TESTING_ASSERT( g5p != 0 );
     TESTING_ASSERT( g5p.getName() == "g5" );
-    TESTING_ASSERT( g5p.isProxy() );
+    TESTING_ASSERT( g5p.isInstance() );
     TESTING_ASSERT( g5p.getParent() != 0 );
     TESTING_ASSERT( g5p.getParent().getFullName() == g2p.getFullName() );
 
     // test x2a
     IObject x2a( x1, "x2a" );
     TESTING_ASSERT( x2a.valid() );
-    TESTING_ASSERT( x2a.isProxy() );
-    TESTING_ASSERT( x2a.proxyTargetPath() == x2.getFullName() );
+    TESTING_ASSERT( x2a.isInstance() );
+    TESTING_ASSERT( x2a.instanceSourcePath() == x2.getFullName() );
     TESTING_ASSERT( x2a.getNumChildren() == 1 );
 }
 
 //-*****************************************************************************
 int main( int argc, char* argv[] )
 {
-    const std::string oarkhive( "proxytest.ogawa.abc" );
-    const std::string harkhive( "proxytest.hdf5.abc" );
+    const std::string oarkhive( "instancetest.ogawa.abc" );
+    const std::string harkhive( "insatncetest.hdf5.abc" );
 
     bool useOgawa = true;
     simpleTestOut( oarkhive, useOgawa );

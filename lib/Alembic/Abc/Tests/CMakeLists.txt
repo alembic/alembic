@@ -97,9 +97,9 @@ ADD_TEST( Abc_Array_Property_TEST Abc_ArrayPropertyTest )
 
 #-******************************************************************************
 
-ADD_EXECUTABLE( Abc_ProxyTest ProxyTest.cpp )
-TARGET_LINK_LIBRARIES( Abc_ProxyTest ${TEST_LIBS} )
-ADD_TEST( Abc_Proxy_TEST Abc_ProxyTest )
+ADD_EXECUTABLE( Abc_InstanceTest InstanceTest.cpp )
+TARGET_LINK_LIBRARIES( Abc_InstanceTest ${TEST_LIBS} )
+ADD_TEST( Abc_Instance_TEST Abc_InstanceTest )
 
 #-******************************************************************************
 

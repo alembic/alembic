@@ -199,10 +199,10 @@ public:
 
     //!-************************************************************************
     // PROXY METHODS
-    // An OObject can refer to another OObject. When read in, this proxy will be
-    // represented by the target hierarchy and its children.
+    // An OObject can refer to another OObject. When read in, this instance
+    // will be represented by the target source hierarchy and its children.
     //!-************************************************************************
-    bool addChildProxy( OObject iTarget, const std::string& iName );
+    bool addChildInstance( OObject iTarget, const std::string& iName );
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

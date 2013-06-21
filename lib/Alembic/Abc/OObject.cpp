@@ -211,7 +211,7 @@ OCompoundProperty OObject::getProperties()
 }
 
 //-*****************************************************************************
-bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
+bool OObject::addChildInstance( OObject iTarget, const std::string& iName )
 {
     if ( !iTarget || !m_object )
         return false;
@@ -219,16 +219,16 @@ bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
     if ( iName.empty() )
         return false;
 
-    // Proxy and target must be in the same archive.
+    // Instance and source target must be in the same archive.
     if ( getArchive().getName() != iTarget.getArchive().getName() )
         return false;
 
-    // Cannot proxy a proxy, a proxy created by normal means wouldn't
+    // Cannot instance an instance, an instance created by normal means wouldn't
     // even be gettable, so this is a check for extraordinary circumstances.
-    if ( iTarget.getMetaData().get("proxy") == "1" )
+    if ( iTarget.getMetaData().get("isInstance") == "1" )
         return false;
 
-    // Check that the proxy target is not an ancestor of this object.
+    // Check that the instance target is not an ancestor of this object.
     std::string targetFullName = iTarget.getFullName();
     std::string childFullName  = getFullName() + "/" + iName;
 
@@ -236,16 +236,16 @@ bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
     if ( childFullName.find(targetPath) == 0 )
         return false;
 
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::addChildProxy()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::addChildInstance()" );
 
     AbcA::MetaData md;
-    md.set("proxy", "1");
+    md.set("isInstance", "1");
 
-    OObject oProxyChild = OObject( getPtr(), iName, md );
+    OObject instanceChild = OObject( getPtr(), iName, md );
 
-    OStringProperty proxyTargetProperty =
-        OStringProperty( oProxyChild.getProperties(), ".proxyTarget" );
-    proxyTargetProperty.set( targetFullName );
+    OStringProperty instanceProp =
+        OStringProperty( instanceChild.getProperties(), ".instanceSource" );
+    instanceProp.set( targetFullName );
 
     return true;
 

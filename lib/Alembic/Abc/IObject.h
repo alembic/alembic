@@ -89,7 +89,7 @@ public:
         getErrorHandler().setPolicy(
             GetErrorHandlerPolicy( iPtr, iArg0 ) );
 
-        initProxy();
+        initInstance();
     }
 
     //! This attaches an IObject wrapper around the top
@@ -190,22 +190,23 @@ public:
     //! equivalent constructor was called.
     IObject getChild( const std::string &iChildName ) const;
 
-    //!-*************************************************************************
-    // PROXY METHODS
+    //!-************************************************************************
+    // INSTANCE METHODS
     // An IObject can refer to another IObject in the same cache and stand in
-    // as a proxy for that target hierarchy. On disk only the proxy object is
-    // required. When read in however, a normal hierarchy is
-    // returned. Optionally, client code could use the isProxy() and
-    // proxyTargetPath() methods to discover that the hierarchies are
+    // as an instance for that target hierarchy. On disk only the instance
+    // object is required. When read in however, a normal hierarchy is
+    // returned. Optionally, client code could use the isInstance() and
+    // instanceSourcePath() methods to discover that the hierarchies are
     // duplicate and instance them appropriately in memory.
-    //!-*************************************************************************
-    bool isProxy() const;
+    //!-************************************************************************
+    bool isInstance() const;
 
-    std::string proxyTargetPath();
-    AbcA::ObjectReaderPtr getProxyTarget() const { return m_proxyObject; }
+    std::string instanceSourcePath();
+    bool isChildInstance(size_t iChildIndex) const;
+    bool isChildInstance(const std::string &iChildName) const;
 
-    bool isChildAProxy(size_t iChildIndex) const;
-    bool isChildAProxy(const std::string &iChildName) const;
+    //! Returns the original ObjectReaderPtr, if this object is an instance
+    AbcA::ObjectReaderPtr getInstancePtr() const { return m_instanceObject; }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -215,12 +216,9 @@ public:
 
     //! getPtr, as usual, returns a shared ptr to the
     //! underlying AbcCoreAbstract object, in this case the
-    //! ObjectReaderPtr.  If this object happens to be a proxy, it points
-    //! to the resolved target ObjectReaderPtr
+    //! ObjectReaderPtr.  If this object happens to be an instance, it points
+    //! to the instance source ObjectReaderPtr
     AbcA::ObjectReaderPtr getPtr() const { return m_object; }
-
-    //! Returns the original ObjectReaderPtr, if this object is a proxy
-    AbcA::ObjectReaderPtr getProxyPtr() const { return m_proxyObject; }
 
     //! Reset returns this function set to an empty, default state.
     void reset();
@@ -244,27 +242,23 @@ public:
     //! if it is valid, and "false" otherwise.
     ALEMBIC_OPERATOR_BOOL( valid() );
 
+public:
+    AbcA::ObjectReaderPtr m_object;
+
 private:
     void init( AbcA::ObjectReaderPtr iParentObject,
                const std::string &iName,
                ErrorHandler::Policy iPolicy );
 
-    void initProxy();
+    void initInstance();
 
-    void setProxyFullName(const std::string& parentPath) const;
+    void setInstancedFullName(const std::string& parentPath) const;
 
-    // Returns true if this is the object with the proxy property.
-    bool isProxyObject() const;
+    // This is the "original" object when it is an instance (not the source)
+    AbcA::ObjectReaderPtr m_instanceObject;
 
-public:
-    AbcA::ObjectReaderPtr m_object;
-
-    // This is the "original" object when it is a proxy
-    // m_object is then set to the proxy target
-    AbcA::ObjectReaderPtr m_proxyObject;
-
-    //! All IObject ancestors of a proxy object have these set.
-    mutable std::string m_proxyFullName;
+    // All IObject ancestors of an instance object have these set.
+    mutable std::string m_instancedFullName;
 };
 
 typedef Alembic::Util::shared_ptr< IObject > IObjectPtr;
@@ -295,7 +289,7 @@ inline IObject::IObject( OBJECT_PTR iParentObject,
           iName,
           GetErrorHandlerPolicy( iParentObject, iArg0 ) );
 
-    initProxy();
+    initInstance();
 }
 
 } // End namespace ALEMBIC_VERSION_NS
