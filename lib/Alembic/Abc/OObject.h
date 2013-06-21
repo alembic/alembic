@@ -197,12 +197,11 @@ public:
     //! exists, this function will return an empty OObject.
     OObject getChild( const std::string &iChildName );
 
-    //!-*************************************************************************
+    //!-************************************************************************
     // PROXY METHODS
     // An OObject can refer to another OObject. When read in, this proxy will be
     // represented by the target hierarchy and its children.
-    //!-*************************************************************************
-    bool isProxy();
+    //!-************************************************************************
     bool addChildProxy( OObject iTarget, const std::string& iName );
 
     //-*************************************************************************

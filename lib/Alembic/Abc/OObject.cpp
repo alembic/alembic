@@ -211,21 +211,6 @@ OCompoundProperty OObject::getProperties()
 }
 
 //-*****************************************************************************
-bool OObject::isProxy()
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::isProxy()" );
-
-    if ( m_object )
-    {
-        return ( m_object->getMetaData().get("proxy") == "1" );
-    }
-
-    ALEMBIC_ABC_SAFE_CALL_END();
-
-    return false;
-}
-
-//-*****************************************************************************
 bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
 {
     if ( !iTarget || !m_object )
@@ -238,8 +223,9 @@ bool OObject::addChildProxy( OObject iTarget, const std::string& iName )
     if ( getArchive().getName() != iTarget.getArchive().getName() )
         return false;
 
-    // Cannot proxy a proxy
-    if ( iTarget.isProxy() )
+    // Cannot proxy a proxy, a proxy created by normal means wouldn't
+    // even be gettable, so this is a check for extraordinary circumstances.
+    if ( iTarget.getMetaData().get("proxy") == "1" )
         return false;
 
     // Check that the proxy target is not an ancestor of this object.

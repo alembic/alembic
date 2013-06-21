@@ -107,15 +107,6 @@ void simpleTestOut( const std::string& iArchiveName, bool useOgawa )
     // x2a is a proxy targeting x2
     TESTING_ASSERT( x1.addChildProxy( x2, "x2a" ) );
 
-    TESTING_ASSERT(!topobj.isProxy());
-    TESTING_ASSERT(!x1.isProxy());
-    TESTING_ASSERT(!x2.isProxy());
-    TESTING_ASSERT(!x3.isProxy());
-    TESTING_ASSERT(!x4.isProxy());
-    TESTING_ASSERT(!g1.isProxy());
-    TESTING_ASSERT(!g2.isProxy());
-    TESTING_ASSERT(!g5.isProxy());
-
     const Alembic::AbcCoreAbstract::ObjectHeader& x5h = x3.getChildHeader(0);
     TESTING_ASSERT( x5h.getFullName() == std::string("/x1/x3/x5") );
 
