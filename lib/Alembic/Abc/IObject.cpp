@@ -189,26 +189,28 @@ IObject IObject::getParent() const
 
     if ( !m_instancedFullName.empty() )
     {
-        AbcA::ObjectReaderPtr parentPtr;
-
         std::string parent = getParentFullName( m_instancedFullName );
 
-        // true if this is the instance object that references another hierarchy
-        if ( parent.empty() )
-        {
-            parentPtr = m_object->getParent();
-        }
-        else
+        AbcA::ObjectReaderPtr parentPtr = m_object->getParent();
+        bool setFullName = false;
+
+        // if the instanced full name doesn't match the parents full name
+        // then we have an instanced situation where we need to carefully
+        // walk the hierarchy to make sure we end up with the correct parent
+
+        // If the names do match, then the parent isn't a part of the instance
+        // and so we don't need to set that full name
+        if ( parentPtr && parent != parentPtr->getFullName() )
         {
             parentPtr = objectReaderByName( getArchive(), parent );
+            setFullName = true;
         }
 
         IObject obj( parentPtr,
                      kWrapExisting,
                      getErrorHandlerPolicy() );
 
-        // If we're the instance object, we don't pass the instance upward.
-        if ( obj )
+        if ( setFullName )
         {
             obj.setInstancedFullName( parent );
         }
@@ -420,7 +422,7 @@ std::string IObject::instanceSourcePath()
     {
         propsPtr = m_instanceObject->getProperties();
     }
-    ICompoundProperty props =ICompoundProperty( propsPtr, kWrapExisting );
+    ICompoundProperty props = ICompoundProperty( propsPtr, kWrapExisting );
 
     if ( props == 0 )
         return std::string();

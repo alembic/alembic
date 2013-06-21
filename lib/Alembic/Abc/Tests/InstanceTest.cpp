@@ -224,6 +224,10 @@ void simpleTestIn( const std::string& iArchiveName )
     TESTING_ASSERT( x2a.isInstance() );
     TESTING_ASSERT( x2a.instanceSourcePath() == x2.getFullName() );
     TESTING_ASSERT( x2a.getNumChildren() == 1 );
+
+    IObject x2aParent = x2a.getParent();
+    TESTING_ASSERT( x2aParent.getFullName() == "/x1" );
+    TESTING_ASSERT( !x2aParent.isInstance() );
 }
 
 //-*****************************************************************************
