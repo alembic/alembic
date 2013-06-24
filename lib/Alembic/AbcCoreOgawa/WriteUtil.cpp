@@ -132,18 +132,9 @@ void HashDimensions( const AbcA::Dimensions & iDims,
 {
     size_t rank = iDims.rank();
 
-    // Create temporary storage for hashing
-    std::vector<Util::uint32_t> data( rank );
-
-    // Copy into it.
-    for ( size_t r = 0; r < rank; ++r )
+    if ( rank > 0 )
     {
-        data[r] = ( Util::uint32_t ) iDims[r];
-    }
-
-    if ( !data.empty() )
-    {
-        ioHash.Update( &data.front(), data.size() * 4 );
+        ioHash.Update( iDims.rootPtr(), rank * 8 );
     }
 }
 
@@ -174,17 +165,8 @@ void WriteDimensions( Ogawa::OGroupPtr iGroup,
         return;
     }
 
-    // Create temporary storage to write
-    std::vector<Util::uint32_t> dimStorage( rank );
-
-    // Copy into it.
-    for ( size_t r = 0; r < rank; ++r )
-    {
-        dimStorage[r] = ( Util::uint32_t ) iDims[r];
-    }
-
-    iGroup->addData( rank * sizeof( Util::uint32_t ),
-                     ( const void * )&dimStorage.front() );
+    iGroup->addData( rank * sizeof( Util::uint64_t ),
+                     ( const void * )iDims.rootPtr() );
 }
 
 //-*****************************************************************************

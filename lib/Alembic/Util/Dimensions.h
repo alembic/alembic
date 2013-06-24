@@ -186,7 +186,7 @@ std::ostream &operator<<( std::ostream &ostr, const BaseDimensions<T> &a )
 }
 
 //-*****************************************************************************
-typedef BaseDimensions<size_t> Dimensions;
+typedef BaseDimensions<Alembic::Util::uint64_t> Dimensions;
 
 } // End namespace ALEMBIC_VERSION_NS
 

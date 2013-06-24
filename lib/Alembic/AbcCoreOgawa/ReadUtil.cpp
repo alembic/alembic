@@ -66,13 +66,13 @@ ReadDimensions( Ogawa::IDataPtr iDims,
     else
     {
 
-        // we write them as uint32_t so / 4
-        std::size_t numRanks = iDims->getSize() / 4;
+        // we write them as uint64_t so / 8
+        std::size_t numRanks = iDims->getSize() / 8;
 
         oDim.setRank( numRanks );
 
-        std::vector< Util::uint32_t > dims( numRanks );
-        iDims->read( numRanks * 4, &( dims.front() ), 0, iThreadId );
+        std::vector< Util::uint64_t > dims( numRanks );
+        iDims->read( numRanks * 8, &( dims.front() ), 0, iThreadId );
         for ( std::size_t i = 0; i < numRanks; ++i )
         {
             oDim[i] = dims[i];
