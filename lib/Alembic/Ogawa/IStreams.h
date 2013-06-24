@@ -57,7 +57,7 @@ public:
 
     // locks on the threadId, seeks to iPos, and reads iSize bytes into oBuf
     void read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
-              std::size_t iSize, void * oBuf);
+              Alembic::Util::uint64_t iSize, void * oBuf);
 
 private:
     // noncopyable

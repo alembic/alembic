@@ -49,10 +49,10 @@ public:
 
     ~IData();
 
-    void read(std::size_t iSize, void * iData, std::size_t iOffset,
-              std::size_t iThreadId);
+    void read(Alembic::Util::uint64_t iSize, void * iData,
+              Alembic::Util::uint64_t iOffset, std::size_t iThreadId);
 
-    std::size_t getSize() const;
+    Alembic::Util::uint64_t getSize() const;
 
     // not really necessary for most workflows, it could be used by some
     // Ogawa utilities to detect when this IData is shared

@@ -54,7 +54,7 @@ public:
 
     PrivateData(OStreamPtr iStream,
                 Alembic::Util::uint64_t iPos,
-                std::size_t iSize) :
+                Alembic::Util::uint64_t iSize) :
         stream(iStream), pos(iPos), size(iSize) {}
 
     ~PrivateData() {}
@@ -62,7 +62,7 @@ public:
     OStreamPtr stream;
 
     Alembic::Util::uint64_t pos;
-    std::size_t size;
+    Alembic::Util::uint64_t size;
 };
 
 OData::OData() : mData(new OData::PrivateData())
@@ -71,7 +71,7 @@ OData::OData() : mData(new OData::PrivateData())
 
 OData::OData(OStreamPtr iStream,
              Alembic::Util::uint64_t iPos,
-             std::size_t iSize)
+             Alembic::Util::uint64_t iSize)
     : mData(new OData::PrivateData(iStream, iPos, iSize))
 {
 }
@@ -80,7 +80,8 @@ OData::~OData()
 {
 }
 
-void OData::rewrite(std::size_t iSize, void * iData, std::size_t iOffset)
+void OData::rewrite(Alembic::Util::uint64_t iSize, void * iData,
+                    Alembic::Util::uint64_t iOffset)
 {
 
     // don't write anything if we will write beyond our buffer or the
@@ -96,7 +97,7 @@ void OData::rewrite(std::size_t iSize, void * iData, std::size_t iOffset)
     mData->stream->write(iData, iSize);
 }
 
-std::size_t OData::getSize() const
+Alembic::Util::uint64_t OData::getSize() const
 {
     return mData->size;
 }

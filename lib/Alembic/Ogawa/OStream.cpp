@@ -168,7 +168,7 @@ void OStream::seek(Alembic::Util::uint64_t iPos)
     }
 }
 
-void OStream::write(const void * iBuf, std::size_t iSize)
+void OStream::write(const void * iBuf, Alembic::Util::uint64_t iSize)
 {
     if (isValid())
     {

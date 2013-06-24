@@ -56,13 +56,16 @@ public:
     // the size of the already written data.  If what is attempting
     // to be rewritten exceeds the boundaries of what is already written,
     // the existing data will be unchanged
-    void rewrite(std::size_t iSize, void * iData, std::size_t iOffset=0);
+    void rewrite(Alembic::Util::uint64_t iSize, void * iData,
+                 Alembic::Util::uint64_t iOffset=0);
 
-    std::size_t getSize() const;
+    Alembic::Util::uint64_t getSize() const;
 
 private:
     friend class OGroup; // friend so we can call the constructor below
-    OData(OStreamPtr iStream, Alembic::Util::uint64_t iPos, std::size_t iSize);
+    OData(OStreamPtr iStream, Alembic::Util::uint64_t iPos,
+          Alembic::Util::uint64_t iSize);
+
     Alembic::Util::uint64_t getPos() const;
 
     class PrivateData;

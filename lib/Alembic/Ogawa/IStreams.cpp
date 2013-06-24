@@ -213,7 +213,7 @@ Alembic::Util::uint16_t IStreams::getVersion()
 }
 
 void IStreams::read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
-                    std::size_t iSize, void * oBuf)
+                    Alembic::Util::uint64_t iSize, void * oBuf)
 {
     if (!isValid())
     {

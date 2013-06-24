@@ -56,7 +56,7 @@ public:
 
     // set after freeze
     Alembic::Util::uint64_t pos;
-    std::size_t size;
+    Alembic::Util::uint64_t size;
 };
 
 IData::~IData()
@@ -80,12 +80,12 @@ IData::IData(IStreamsPtr iStreams,
     if ( mData->pos != 0 )
     {
         mData->streams->read(iThreadId, mData->pos, 8, &size);
-        mData->size = (std::size_t)(size);
+        mData->size = size;
     }
 }
 
-void IData::read(std::size_t iSize, void * iData, std::size_t iOffset,
-                 std::size_t iThreadId)
+void IData::read(Alembic::Util::uint64_t iSize, void * iData,
+                 Alembic::Util::uint64_t iOffset, std::size_t iThreadId)
 {
     // don't read anything if we will read beyond our buffer
     if (iSize == 0 || mData->size == 0 || iOffset + iSize > mData->size)
@@ -97,7 +97,7 @@ void IData::read(std::size_t iSize, void * iData, std::size_t iOffset,
     mData->streams->read(iThreadId, mData->pos + iOffset + 8, iSize, iData);
 }
 
-std::size_t IData::getSize() const
+Alembic::Util::uint64_t IData::getSize() const
 {
     return mData->size;
 }

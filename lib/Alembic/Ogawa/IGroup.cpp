@@ -94,7 +94,7 @@ IGroup::~IGroup()
 
 }
 
-IGroupPtr IGroup::getGroup(std::size_t iIndex, bool iLight,
+IGroupPtr IGroup::getGroup(Alembic::Util::uint64_t iIndex, bool iLight,
                            std::size_t iThreadIndex)
 {
     IGroupPtr child;
@@ -122,7 +122,8 @@ IGroupPtr IGroup::getGroup(std::size_t iIndex, bool iLight,
     return child;
 }
 
-IDataPtr IGroup::getData(std::size_t iIndex, std::size_t iThreadIndex)
+IDataPtr IGroup::getData(Alembic::Util::uint64_t iIndex,
+                         std::size_t iThreadIndex)
 {
     IDataPtr child;
     if (isLight())
@@ -148,30 +149,30 @@ IDataPtr IGroup::getData(std::size_t iIndex, std::size_t iThreadIndex)
     return child;
 }
 
-std::size_t IGroup::getNumChildren() const
+Alembic::Util::uint64_t IGroup::getNumChildren() const
 {
     return mData->numChildren;
 }
 
-bool IGroup::isChildGroup(std::size_t iIndex) const
+bool IGroup::isChildGroup(Alembic::Util::uint64_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
             (mData->childVec[iIndex] & EMPTY_DATA) == 0);
 }
 
-bool IGroup::isChildData(std::size_t iIndex) const
+bool IGroup::isChildData(Alembic::Util::uint64_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
             (mData->childVec[iIndex] & EMPTY_DATA) != 0);
 }
 
-bool IGroup::isEmptyChildGroup(std::size_t iIndex) const
+bool IGroup::isEmptyChildGroup(Alembic::Util::uint64_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
             mData->childVec[iIndex] == EMPTY_GROUP);
 }
 
-bool IGroup::isEmptyChildData(std::size_t iIndex) const
+bool IGroup::isEmptyChildData(Alembic::Util::uint64_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
         mData->childVec[iIndex] == EMPTY_DATA);

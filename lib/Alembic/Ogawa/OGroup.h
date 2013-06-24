@@ -56,24 +56,26 @@ public:
     OGroupPtr addGroup();
 
     // write the data stream and add it as a child to this group
-    ODataPtr addData(std::size_t iSize, const void * iData);
+    ODataPtr addData(Alembic::Util::uint64_t iSize, const void * iData);
 
     // write data streams from multiple sources as one continuous data stream
     // and add it as a child to this group
-    ODataPtr addData(std::size_t iNumData, const std::size_t * iSizes,
+    ODataPtr addData(Alembic::Util::uint64_t iNumData,
+                     const Alembic::Util::uint64_t * iSizes,
                      const void ** iDatas);
 
     // write a data stream but DON'T add it as a child to this group
     // If ODataPtr isn't added to this or any other group, you will
     // end up abandoning it within the file and waste disk space.
-    ODataPtr createData(std::size_t iSize, const void * iData);
+    ODataPtr createData(Alembic::Util::uint64_t iSize, const void * iData);
 
     // write data streams as one continuous data stream but DON'T add it as a
     // child to this group.
     // If ODataPtr isn't added to this or any other group, you will
     // end up abandoning it within the file and waste disk space.
-    ODataPtr createData(std::size_t iNumData, const std::size_t * iSizes,
-                     const void ** iDatas);
+    ODataPtr createData(Alembic::Util::uint64_t iNumData,
+                        const Alembic::Util::uint64_t * iSizes,
+                        const void ** iDatas);
 
     // reference existing data
     void addData(ODataPtr iData);
@@ -93,17 +95,17 @@ public:
 
     bool isFrozen();
 
-    std::size_t getNumChildren() const;
+    Alembic::Util::uint64_t getNumChildren() const;
 
-    bool isChildGroup(std::size_t iIndex) const;
+    bool isChildGroup(Alembic::Util::uint64_t iIndex) const;
 
-    bool isChildData(std::size_t iIndex) const;
+    bool isChildData(Alembic::Util::uint64_t iIndex) const;
 
-    bool isChildEmptyGroup(std::size_t iIndex) const;
+    bool isChildEmptyGroup(Alembic::Util::uint64_t iIndex) const;
 
-    bool isChildEmptyData(std::size_t iIndex) const;
+    bool isChildEmptyData(Alembic::Util::uint64_t iIndex) const;
 
-    void replaceData(std::size_t iIndex, ODataPtr iData);
+    void replaceData(Alembic::Util::uint64_t iIndex, ODataPtr iData);
 
     // currently I'm going to leave this out, because a bad implementation
     // could cause all sorts of subtle race conditions when unfrozen children
@@ -112,13 +114,13 @@ public:
     // if this is necessary, an easy compromise might be that iGroup HAS to
     // be frozen, much like how replaceData deals with something implicitly
     // frozen
-    //void replaceGroup(std::size_t iIndex, OGroupPtr iGroup);
+    //void replaceGroup(Alembic::Util::uint64_t iIndex, OGroupPtr iGroup);
 
 private:
     friend class OArchive;
     OGroup(OStreamPtr iStream);
 
-    OGroup(OGroupPtr iParent, std::size_t iIndex);
+    OGroup(OGroupPtr iParent, Alembic::Util::uint64_t iIndex);
 
     class PrivateData;
     Alembic::Util::auto_ptr< PrivateData > mData;

@@ -42,7 +42,7 @@ namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
 
-typedef std::pair< OGroupPtr, std::size_t > ParentPair;
+typedef std::pair< OGroupPtr, Alembic::Util::uint64_t > ParentPair;
 typedef std::vector< ParentPair > ParentPairVec;
 
 class OGroup::PrivateData
@@ -63,7 +63,7 @@ public:
     Alembic::Util::uint64_t pos;
 };
 
-OGroup::OGroup(OGroupPtr iParent, std::size_t iIndex)
+OGroup::OGroup(OGroupPtr iParent, Alembic::Util::uint64_t iIndex)
     : mData(new OGroup::PrivateData())
 {
     mData->stream = iParent->mData->stream;
@@ -95,7 +95,7 @@ OGroupPtr OGroup::addGroup()
     return child;
 }
 
-ODataPtr OGroup::createData(std::size_t iSize, const void * iData)
+ODataPtr OGroup::createData(Alembic::Util::uint64_t iSize, const void * iData)
 {
     ODataPtr child;
     if (isFrozen())
@@ -121,7 +121,7 @@ ODataPtr OGroup::createData(std::size_t iSize, const void * iData)
     return child;
 }
 
-ODataPtr OGroup::addData(std::size_t iSize, const void * iData)
+ODataPtr OGroup::addData(Alembic::Util::uint64_t iSize, const void * iData)
 {
     ODataPtr child = OGroup::createData(iSize, iData);
     if (child)
@@ -133,8 +133,9 @@ ODataPtr OGroup::addData(std::size_t iSize, const void * iData)
     return child;
 }
 
-ODataPtr OGroup::createData(std::size_t iNumData, const std::size_t * iSizes,
-                         const void ** iDatas)
+ODataPtr OGroup::createData(Alembic::Util::uint64_t iNumData,
+                            const Alembic::Util::uint64_t * iSizes,
+                            const void ** iDatas)
 {
     ODataPtr child;
     if (isFrozen())
@@ -143,7 +144,7 @@ ODataPtr OGroup::createData(std::size_t iNumData, const std::size_t * iSizes,
     }
 
     Alembic::Util::uint64_t totalSize = 0;
-    for (std::size_t i = 0; i < iNumData; ++i)
+    for (Alembic::Util::uint64_t i = 0; i < iNumData; ++i)
     {
         totalSize += iSizes[i];
     }
@@ -158,9 +159,9 @@ ODataPtr OGroup::createData(std::size_t iNumData, const std::size_t * iSizes,
     Alembic::Util::uint64_t pos = mData->stream->getAndSeekEndPos();
 
     mData->stream->write(&totalSize, 8);
-    for (std::size_t i = 0; i < iNumData; ++i)
+    for (Alembic::Util::uint64_t i = 0; i < iNumData; ++i)
     {
-        std::size_t size = iSizes[i];
+        Alembic::Util::uint64_t size = iSizes[i];
         if (size != 0)
         {
             mData->stream->write(iDatas[i], size);
@@ -172,8 +173,9 @@ ODataPtr OGroup::createData(std::size_t iNumData, const std::size_t * iSizes,
     return child;
 }
 
-ODataPtr OGroup::addData(std::size_t iNumData, const std::size_t * iSizes,
-                            const void ** iDatas)
+ODataPtr OGroup::addData(Alembic::Util::uint64_t iNumData,
+                         const Alembic::Util::uint64_t * iSizes,
+                         const void ** iDatas)
 {
     ODataPtr child = createData(iNumData, iSizes, iDatas);
     if (child)
@@ -277,36 +279,36 @@ bool OGroup::isFrozen()
     return mData->pos != INVALID_GROUP;
 }
 
-std::size_t OGroup::getNumChildren() const
+Alembic::Util::uint64_t OGroup::getNumChildren() const
 {
     return mData->childVec.size();
 }
 
-bool OGroup::isChildGroup(std::size_t iIndex) const
+bool OGroup::isChildGroup(Alembic::Util::uint64_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
             (mData->childVec[iIndex] & EMPTY_DATA) == 0);
 }
 
-bool OGroup::isChildData(std::size_t iIndex) const
+bool OGroup::isChildData(Alembic::Util::uint64_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
             (mData->childVec[iIndex] & EMPTY_DATA) != 0);
 }
 
-bool OGroup::isChildEmptyGroup(std::size_t iIndex) const
+bool OGroup::isChildEmptyGroup(Alembic::Util::uint64_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
             mData->childVec[iIndex] == EMPTY_GROUP);
 }
 
-bool OGroup::isChildEmptyData(std::size_t iIndex) const
+bool OGroup::isChildEmptyData(Alembic::Util::uint64_t iIndex) const
 {
     return (iIndex < mData->childVec.size() &&
         mData->childVec[iIndex] == EMPTY_DATA);
 }
 
-void OGroup::replaceData(std::size_t iIndex, ODataPtr iData)
+void OGroup::replaceData(Alembic::Util::uint64_t iIndex, ODataPtr iData)
 {
     if (!isChildData(iIndex))
     {

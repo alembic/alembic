@@ -52,18 +52,18 @@ class IGroup
 public:
     ~IGroup();
 
-    IGroupPtr getGroup(std::size_t iIndex, bool iLight,
+    IGroupPtr getGroup(Alembic::Util::uint64_t iIndex, bool iLight,
                        std::size_t iThreadIndex);
 
-    IDataPtr getData(std::size_t iIndex, std::size_t iThreadIndex);
+    IDataPtr getData(Alembic::Util::uint64_t iIndex, std::size_t iThreadIndex);
 
-    std::size_t getNumChildren() const;
+    Alembic::Util::uint64_t getNumChildren() const;
 
-    bool isChildGroup(std::size_t iIndex) const;
-    bool isChildData(std::size_t iIndex) const;
+    bool isChildGroup(Alembic::Util::uint64_t iIndex) const;
+    bool isChildData(Alembic::Util::uint64_t iIndex) const;
 
-    bool isEmptyChildGroup(std::size_t iIndex) const;
-    bool isEmptyChildData(std::size_t iIndex) const;
+    bool isEmptyChildGroup(Alembic::Util::uint64_t iIndex) const;
+    bool isEmptyChildData(Alembic::Util::uint64_t iIndex) const;
 
     bool isLight() const;
 
