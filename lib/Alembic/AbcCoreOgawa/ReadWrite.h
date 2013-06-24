@@ -53,6 +53,10 @@ public:
     ::Alembic::AbcCoreAbstract::ArchiveWriterPtr
     operator()( const std::string &iFileName,
                 const ::Alembic::AbcCoreAbstract::MetaData &iMetaData ) const;
+
+    ::Alembic::AbcCoreAbstract::ArchiveWriterPtr
+    operator()( std::ostream * iStream,
+                const ::Alembic::AbcCoreAbstract::MetaData &iMetaData ) const;
 };
 
 //-*****************************************************************************

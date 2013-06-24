@@ -59,6 +59,9 @@ private:
     AwImpl( const std::string &iFileName,
             const AbcA::MetaData &iMetaData );
 
+    AwImpl( std::ostream * iStream,
+            const AbcA::MetaData & iMetaData );
+
 public:
     virtual ~AwImpl();
 
@@ -100,6 +103,7 @@ public:
                                                       AbcA::index_t iMaxIndex );
 
 private:
+    void init();
     std::string m_fileName;
     AbcA::MetaData m_metaData;
     Alembic::Ogawa::OArchive m_archive;

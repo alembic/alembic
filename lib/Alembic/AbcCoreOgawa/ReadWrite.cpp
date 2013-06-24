@@ -53,8 +53,16 @@ AbcA::ArchiveWriterPtr
 WriteArchive::operator()( const std::string &iFileName,
                           const AbcA::MetaData &iMetaData ) const
 {
-    AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iFileName,
-                                                   iMetaData ) );
+    AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iFileName, iMetaData ) );
+    return archivePtr;
+}
+
+//-*****************************************************************************
+AbcA::ArchiveWriterPtr
+WriteArchive::operator()( std::ostream * iStream,
+                          const AbcA::MetaData &iMetaData ) const
+{
+    AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iStream, iMetaData ) );
     return archivePtr;
 }
 
@@ -72,7 +80,7 @@ ReadArchive::ReadArchive( size_t iNumStreams )
 
 //-*****************************************************************************
 ReadArchive::ReadArchive( const std::vector< std::istream * > & iStreams )
-   : m_streams( iStreams )
+    : m_numStreams( 1 ), m_streams( iStreams )
 {
 }
 

@@ -41,6 +41,7 @@
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 //-*****************************************************************************
@@ -266,12 +267,21 @@ void testReadWriteMaxNumSamplesArchive()
     }
 }
 
-void writeArchive( const std::string & iName )
+void writeArchive( const std::string & iName, std::ostream * iStream )
 {
     ABCA::MetaData m;
     ABCA::ObjectHeader header("a", m);
     AO::WriteArchive w;
-    ABCA::ArchiveWriterPtr a = w(iName, m );
+    ABCA::ArchiveWriterPtr a;
+    if (iStream)
+    {
+        a = w(iStream, m);
+    }
+    else
+    {
+        a = w(iName, m );
+    }
+
     ABCA::ObjectWriterPtr root = a->getTop();
     std::vector< ABCA::ObjectWriterPtr > objVec;
 
@@ -316,9 +326,14 @@ void writeArchive( const std::string & iName )
     }
 }
 
-void readArchive( const std::string & iName )
+void readArchive( const std::string & iName, std::istream * iStream )
 {
-    Alembic::AbcCoreOgawa::ReadArchive r;
+    std::vector< std::istream * > streamVec;
+    if (iStream)
+    {
+        streamVec.push_back(iStream);
+    }
+    Alembic::AbcCoreOgawa::ReadArchive r(streamVec);
     ABCA::ArchiveReaderPtr a = r( iName );
     std::vector< ABCA::ObjectReaderPtr > objs;
     objs.push_back( a->getTop() );
@@ -373,8 +388,13 @@ int main ( int argc, char *argv[] )
     testReadWriteEmptyArchive();
     testReadWriteTimeSamplingArchive();
 
-    writeArchive("test.abc");
-    readArchive("test.abc");
+    writeArchive("test.abc", NULL);
+    readArchive("test.abc", NULL);
+
+    std::stringstream strStream;
+    writeArchive("", &strStream);
+    strStream.seekg(0, strStream.beg);
+    readArchive("", &strStream);
 
     writeVeryEmptyArchive("testEmpty.abc");
     readVeryEmptyArchive("testEmpty.abc");

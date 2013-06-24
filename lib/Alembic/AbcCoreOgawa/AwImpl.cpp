@@ -62,6 +62,32 @@ AwImpl::AwImpl( const std::string &iFileName,
         ABCA_THROW( "Could not open file: " << m_fileName );
     }
 
+    init();
+}
+
+//-*****************************************************************************
+AwImpl::AwImpl( std::ostream * iStream,
+                const AbcA::MetaData &iMetaData )
+  : m_metaData( iMetaData )
+  , m_archive( iStream )
+  , m_metaDataMap( new MetaDataMap() )
+{
+    // add default time sampling
+    AbcA::TimeSamplingPtr ts( new AbcA::TimeSampling() );
+    m_timeSamples.push_back(ts);
+    m_maxSamples.push_back(0);
+
+    if ( !m_archive.isValid() )
+    {
+        ABCA_THROW( "Could not use the given ostream." );
+    }
+
+    init();
+}
+
+//-*****************************************************************************
+void AwImpl::init()
+{
     // set the version using Ogawa native calls
     // This expresses the AbcCoreOgawa version - how properties,
     // are stored within Ogawa, etc.
