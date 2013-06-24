@@ -41,11 +41,6 @@
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-// tmp
-#include <iostream>
-#include <fstream>
-// tmp
-
 namespace Abc = Alembic::Abc;
 using namespace Abc;
 
@@ -151,11 +146,11 @@ void simpleTestIn( const std::string& iArchiveName )
     // Verify the target path
     IObject x2( x1, "x2" );
     TESTING_ASSERT( x2.valid() );
-    TESTING_ASSERT( !x2.isInstance() );
+    TESTING_ASSERT( !x2.isInstanceDescendant() );
 
     IObject x4( x2, "x4" );
     TESTING_ASSERT( x4.valid() );
-    TESTING_ASSERT( !x4.isInstance() );
+    TESTING_ASSERT( !x4.isInstanceDescendant() );
 
     int numChildren = x4.getNumChildren();
     TESTING_ASSERT( numChildren == 2 );
@@ -164,21 +159,21 @@ void simpleTestIn( const std::string& iArchiveName )
     IObject g1( x4.getChild(0) );
     TESTING_ASSERT( g1 != 0 );
     TESTING_ASSERT( g1.getName() == "g1" );
-    TESTING_ASSERT( !g1.isInstance() );
+    TESTING_ASSERT( !g1.isInstanceDescendant() );
     TESTING_ASSERT( g1.getParent() != 0 );
     TESTING_ASSERT( g1.getParent().getFullName() == x4.getFullName() );
 
     IObject g2( x4.getChild(1) );
     TESTING_ASSERT( g2 != 0 );
     TESTING_ASSERT( g2.getName() == "g2" );
-    TESTING_ASSERT( !g2.isInstance() );
+    TESTING_ASSERT( !g2.isInstanceDescendant() );
     TESTING_ASSERT( g2.getParent() != 0 );
     TESTING_ASSERT( g2.getParent().getFullName() == x4.getFullName() );
 
     IObject g5( g2.getChild(0) );
     TESTING_ASSERT( g5 != 0 );
     TESTING_ASSERT( g5.getName() == "g5" );
-    TESTING_ASSERT( !g5.isInstance() );
+    TESTING_ASSERT( !g5.isInstanceDescendant() );
     TESTING_ASSERT( g5.getParent() != 0 );
     TESTING_ASSERT( g5.getParent().getFullName() == g2.getFullName() );
 
@@ -190,7 +185,8 @@ void simpleTestIn( const std::string& iArchiveName )
     IObject x5( x3, "x5" );
     TESTING_ASSERT( x5 != 0 );
 
-    TESTING_ASSERT( x5.isInstance() );
+    TESTING_ASSERT( x5.isInstanceDescendant() );
+    TESTING_ASSERT( x5.isInstanceRoot() );
     TESTING_ASSERT( x5.instanceSourcePath() == x4.getFullName() );
 
     numChildren = x5.getNumChildren();
@@ -200,34 +196,38 @@ void simpleTestIn( const std::string& iArchiveName )
     IObject g1p( x5.getChild(0) );
     TESTING_ASSERT( g1p != 0 );
     TESTING_ASSERT( g1p.getName() == "g1" );
-    TESTING_ASSERT( g1p.isInstance() );
+    TESTING_ASSERT( g1p.isInstanceDescendant() );
+    TESTING_ASSERT( !g1p.isInstanceRoot() );
     TESTING_ASSERT( g1p.getParent() != 0 );
     TESTING_ASSERT( g1p.getParent().getFullName() == x5.getFullName() );
 
     IObject g2p( x5.getChild(1) );
     TESTING_ASSERT( g2p != 0 );
     TESTING_ASSERT( g2p.getName() == "g2" );
-    TESTING_ASSERT( g2p.isInstance() );
+    TESTING_ASSERT( g2p.isInstanceDescendant() );
+    TESTING_ASSERT( !g2p.isInstanceRoot() );
     TESTING_ASSERT( g2p.getParent() != 0 );
     TESTING_ASSERT( g2p.getParent().getFullName() == x5.getFullName() );
 
     IObject g5p( g2p.getChild(0) );
     TESTING_ASSERT( g5p != 0 );
     TESTING_ASSERT( g5p.getName() == "g5" );
-    TESTING_ASSERT( g5p.isInstance() );
+    TESTING_ASSERT( g5p.isInstanceDescendant() );
+    TESTING_ASSERT( !g5p.isInstanceRoot() );
     TESTING_ASSERT( g5p.getParent() != 0 );
     TESTING_ASSERT( g5p.getParent().getFullName() == g2p.getFullName() );
 
     // test x2a
     IObject x2a( x1, "x2a" );
     TESTING_ASSERT( x2a.valid() );
-    TESTING_ASSERT( x2a.isInstance() );
+    TESTING_ASSERT( x2a.isInstanceDescendant() );
+    TESTING_ASSERT( x2a.isInstanceRoot() );
     TESTING_ASSERT( x2a.instanceSourcePath() == x2.getFullName() );
     TESTING_ASSERT( x2a.getNumChildren() == 1 );
 
     IObject x2aParent = x2a.getParent();
     TESTING_ASSERT( x2aParent.getFullName() == "/x1" );
-    TESTING_ASSERT( !x2aParent.isInstance() );
+    TESTING_ASSERT( !x2aParent.isInstanceDescendant() );
 }
 
 //-*****************************************************************************
@@ -273,131 +273,131 @@ void diabolicalInstance( const std::string& iArchiveName, bool useOgawa )
     IObject topObject = archive.getTop();
 
     IObject a0( topObject.getChild(0) );
-    TESTING_ASSERT( !a0.isInstance() );
+    TESTING_ASSERT( !a0.isInstanceDescendant() );
     TESTING_ASSERT( a0.getFullName() == "/a0" );
-    TESTING_ASSERT( !a0.getParent().isInstance() );
+    TESTING_ASSERT( !a0.getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0.getParent().getFullName() == "/" );
 
     IObject b0( topObject.getChild(1) );
-    TESTING_ASSERT( b0.isInstance() );
+    TESTING_ASSERT( b0.isInstanceDescendant() );
     TESTING_ASSERT( b0.getName() == "b0" );
     TESTING_ASSERT( b0.getFullName() == "/b0" );
-    TESTING_ASSERT( !b0.getParent().isInstance() );
+    TESTING_ASSERT( !b0.getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0.getParent().getFullName() == "/" );
 
     IObject a0a1( a0.getChild(0) );
-    TESTING_ASSERT( !a0a1.isInstance() );
+    TESTING_ASSERT( !a0a1.isInstanceDescendant() );
     TESTING_ASSERT( a0a1.getName() == "a1" );
     TESTING_ASSERT( a0a1.getFullName() == "/a0/a1" );
-    TESTING_ASSERT( !a0a1.getParent().isInstance() );
+    TESTING_ASSERT( !a0a1.getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0a1.getParent().getName() == "a0" );
     TESTING_ASSERT( a0a1.getParent().getFullName() == "/a0" );
 
     IObject a0b1( a0.getChild(1) );
-    TESTING_ASSERT( a0b1.isInstance() );
+    TESTING_ASSERT( a0b1.isInstanceDescendant() );
     TESTING_ASSERT( a0b1.getName() == "b1" );
     TESTING_ASSERT( a0b1.getFullName() == "/a0/b1" );
-    TESTING_ASSERT( !a0b1.getParent().isInstance() );
+    TESTING_ASSERT( !a0b1.getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0b1.getParent().getName() == "a0" );
     TESTING_ASSERT( a0b1.getParent().getFullName() == "/a0" );
 
     IObject b0a1( b0.getChild(0) );
-    TESTING_ASSERT( b0a1.isInstance() );
-    TESTING_ASSERT( b0a1.getParent().isInstance() );
+    TESTING_ASSERT( b0a1.isInstanceDescendant() );
+    TESTING_ASSERT( b0a1.getParent().isInstanceDescendant() );
 
     IObject b0b1( b0.getChild(1) );
-    TESTING_ASSERT( b0b1.isInstance() );
+    TESTING_ASSERT( b0b1.isInstanceDescendant() );
     TESTING_ASSERT( b0b1.getName() == "b1" );
     TESTING_ASSERT( b0b1.getFullName() == "/b0/b1" );
-    TESTING_ASSERT( b0b1.getParent().isInstance() );
+    TESTING_ASSERT( b0b1.getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0b1.getParent().getName() == "b0" );
     TESTING_ASSERT( b0b1.getParent().getFullName() == "/b0" );
 
     IObject a0a1a2( a0a1.getChild(0) );
-    TESTING_ASSERT( !a0a1a2.isInstance() );
+    TESTING_ASSERT( !a0a1a2.isInstanceDescendant() );
     TESTING_ASSERT( a0a1a2.getName() == "a2" );
     TESTING_ASSERT( a0a1a2.getFullName() == "/a0/a1/a2" );
-    TESTING_ASSERT( !a0a1a2.getParent().isInstance() );
+    TESTING_ASSERT( !a0a1a2.getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0a1a2.getParent().getName() == "a1" );
     TESTING_ASSERT( a0a1a2.getParent().getFullName() == "/a0/a1" );
-    TESTING_ASSERT( !a0a1a2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( !a0a1a2.getParent().getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0a1a2.getParent().getParent().getName() == "a0" );
     TESTING_ASSERT( a0a1a2.getParent().getParent().getFullName() == "/a0" );
 
     IObject a0a1b2( a0a1.getChild(1) );
-    TESTING_ASSERT( a0a1b2.isInstance() );
+    TESTING_ASSERT( a0a1b2.isInstanceDescendant() );
     TESTING_ASSERT( a0a1b2.getName() == "b2" );
     TESTING_ASSERT( a0a1b2.getFullName() == "/a0/a1/b2" );
-    TESTING_ASSERT( !a0a1b2.getParent().isInstance() );
+    TESTING_ASSERT( !a0a1b2.getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0a1b2.getParent().getName() == "a1" );
     TESTING_ASSERT( a0a1b2.getParent().getFullName() == "/a0/a1" );
-    TESTING_ASSERT( !a0a1b2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( !a0a1b2.getParent().getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0a1b2.getParent().getParent().getName() == "a0" );
     TESTING_ASSERT( a0a1b2.getParent().getParent().getFullName() == "/a0" );
 
     IObject a0b1a2( a0b1.getChild(0) );
-    TESTING_ASSERT( a0b1a2.isInstance() );
+    TESTING_ASSERT( a0b1a2.isInstanceDescendant() );
     TESTING_ASSERT( a0b1a2.getName() == "a2" );
     TESTING_ASSERT( a0b1a2.getFullName() == "/a0/b1/a2" );
-    TESTING_ASSERT( a0b1a2.getParent().isInstance() );
+    TESTING_ASSERT( a0b1a2.getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0b1a2.getParent().getName() == "b1" );
     TESTING_ASSERT( a0b1a2.getParent().getFullName() == "/a0/b1" );
-    TESTING_ASSERT( !a0b1a2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( !a0b1a2.getParent().getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0b1a2.getParent().getParent().getName() == "a0" );
     TESTING_ASSERT( a0b1a2.getParent().getParent().getFullName() == "/a0" );
 
     IObject a0b1b2( a0b1.getChild(1) );
-    TESTING_ASSERT( a0b1b2.isInstance() );
+    TESTING_ASSERT( a0b1b2.isInstanceDescendant() );
     TESTING_ASSERT( a0b1b2.getName() == "b2" );
     TESTING_ASSERT( a0b1b2.getFullName() == "/a0/b1/b2" );
-    TESTING_ASSERT( a0b1b2.getParent().isInstance() );
+    TESTING_ASSERT( a0b1b2.getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0b1b2.getParent().getName() == "b1" );
     TESTING_ASSERT( a0b1b2.getParent().getFullName() == "/a0/b1" );
-    TESTING_ASSERT( !a0b1b2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( !a0b1b2.getParent().getParent().isInstanceDescendant() );
     TESTING_ASSERT( a0b1b2.getParent().getParent().getName() == "a0" );
     TESTING_ASSERT( a0b1b2.getParent().getParent().getFullName() == "/a0" );
 
     IObject b0a1a2( b0a1.getChild(0) );
-    TESTING_ASSERT( b0a1a2.isInstance() );
+    TESTING_ASSERT( b0a1a2.isInstanceDescendant() );
     TESTING_ASSERT( b0a1a2.getName() == "a2" );
     TESTING_ASSERT( b0a1a2.getFullName() == "/b0/a1/a2" );
-    TESTING_ASSERT( b0a1a2.getParent().isInstance() );
+    TESTING_ASSERT( b0a1a2.getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0a1a2.getParent().getName() == "a1" );
     TESTING_ASSERT( b0a1a2.getParent().getFullName() == "/b0/a1" );
-    TESTING_ASSERT( b0a1a2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( b0a1a2.getParent().getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0a1a2.getParent().getParent().getName() == "b0" );
     TESTING_ASSERT( b0a1a2.getParent().getParent().getFullName() == "/b0" );
 
     IObject b0a1b2( b0a1.getChild(1) );
-    TESTING_ASSERT( b0a1b2.isInstance() );
+    TESTING_ASSERT( b0a1b2.isInstanceDescendant() );
     TESTING_ASSERT( b0a1b2.getName() == "b2" );
     TESTING_ASSERT( b0a1b2.getFullName() == "/b0/a1/b2" );
-    TESTING_ASSERT( b0a1b2.getParent().isInstance() );
+    TESTING_ASSERT( b0a1b2.getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0a1b2.getParent().getName() == "a1" );
     TESTING_ASSERT( b0a1b2.getParent().getFullName() == "/b0/a1" );
-    TESTING_ASSERT( b0a1b2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( b0a1b2.getParent().getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0a1b2.getParent().getParent().getName() == "b0" );
     TESTING_ASSERT( b0a1b2.getParent().getParent().getFullName() == "/b0" );
 
     IObject b0b1a2( b0b1.getChild(0) );
-    TESTING_ASSERT( b0b1a2.isInstance() );
+    TESTING_ASSERT( b0b1a2.isInstanceDescendant() );
     TESTING_ASSERT( b0b1a2.getName() == "a2" );
     TESTING_ASSERT( b0b1a2.getFullName() == "/b0/b1/a2" );
-    TESTING_ASSERT( b0b1a2.getParent().isInstance() );
+    TESTING_ASSERT( b0b1a2.getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0b1a2.getParent().getName() == "b1" );
     TESTING_ASSERT( b0b1a2.getParent().getFullName() == "/b0/b1" );
-    TESTING_ASSERT( b0b1a2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( b0b1a2.getParent().getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0b1a2.getParent().getParent().getName() == "b0" );
     TESTING_ASSERT( b0b1a2.getParent().getParent().getFullName() == "/b0" );
 
     IObject b0b1b2( b0b1.getChild(1) );
-    TESTING_ASSERT( b0b1b2.isInstance() );
+    TESTING_ASSERT( b0b1b2.isInstanceDescendant() );
     TESTING_ASSERT( b0b1b2.getName() == "b2" );
     TESTING_ASSERT( b0b1b2.getFullName() == "/b0/b1/b2" );
-    TESTING_ASSERT( b0b1b2.getParent().isInstance() );
+    TESTING_ASSERT( b0b1b2.getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0b1b2.getParent().getName() == "b1" );
     TESTING_ASSERT( b0b1b2.getParent().getFullName() == "/b0/b1" );
-    TESTING_ASSERT( b0b1b2.getParent().getParent().isInstance() );
+    TESTING_ASSERT( b0b1b2.getParent().getParent().isInstanceDescendant() );
     TESTING_ASSERT( b0b1b2.getParent().getParent().getName() == "b0" );
     TESTING_ASSERT( b0b1b2.getParent().getParent().getFullName() == "/b0" );
 }

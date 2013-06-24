@@ -195,13 +195,22 @@ public:
     // An IObject can refer to another IObject in the same cache and stand in
     // as an instance for that target hierarchy. On disk only the instance
     // object is required. When read in however, a normal hierarchy is
-    // returned. Optionally, client code could use the isInstance() and
+    // returned. Optionally, client code could use the isInstanceRoot() and
     // instanceSourcePath() methods to discover that the hierarchies are
     // duplicate and instance them appropriately in memory.
     //!-************************************************************************
-    bool isInstance() const;
 
+    //! Returns whether this object directly instances another object.
+    bool isInstanceRoot() const;
+
+    //! Returns whether this object has been arrived at via an instance, or if
+    //! this object is an instance itself.
+    bool isInstanceDescendant() const;
+
+    //! If this object is an instance (isInstanceRoot), returns the source path
+    //! that the instance points at.  Otherwise and empty string is returned.
     std::string instanceSourcePath();
+
     bool isChildInstance(size_t iChildIndex) const;
     bool isChildInstance(const std::string &iChildName) const;
 

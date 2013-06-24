@@ -427,9 +427,24 @@ bool IObject::getChildrenHash( Util::Digest & oDigest )
 }
 
 //-*****************************************************************************
-bool IObject::isInstance() const
+bool IObject::isInstanceRoot() const
 {
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::isInstance()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::isInstanceRoot()" );
+
+    if ( m_instanceObject )
+    {
+        return true;
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return false;
+}
+
+//-*****************************************************************************
+bool IObject::isInstanceDescendant() const
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::isInstanceDescendant()" );
 
     if ( !m_instancedFullName.empty() )
     {
@@ -475,7 +490,7 @@ bool IObject::isChildInstance( size_t iChildIndex ) const
 
     if ( child.valid() )
     {
-        return child.isInstance();
+        return child.isInstanceRoot();
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -493,7 +508,7 @@ bool IObject::isChildInstance( const std::string &iChildName ) const
 
     if ( child.valid() )
     {
-        return child.isInstance();
+        return child.isInstanceRoot();
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
