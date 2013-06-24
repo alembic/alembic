@@ -69,7 +69,7 @@ StreamManager::~StreamManager()
 {
 }
 
-#if defined(__GNUC__) && __GNUC__ > 3
+#if !defined(__APPLE__) && defined(__GNUC__) && __GNUC__ > 3
 
 StreamIDPtr StreamManager::get()
 {
