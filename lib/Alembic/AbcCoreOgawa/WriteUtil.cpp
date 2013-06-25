@@ -226,7 +226,7 @@ WriteData( WrittenSampleMap &iMap,
         }
 
         const void * datas[2] = { &iKey.digest, &v.front() };
-        std::size_t sizes[2] = { 16, v.size() };
+        Alembic::Util::uint64_t sizes[2] = { 16, v.size() };
         dataPtr =  iGroup->addData( 2, sizes, datas );
     }
     else if ( dataType.getPod() == Alembic::Util::kWstringPOD )
@@ -253,13 +253,14 @@ WriteData( WrittenSampleMap &iMap,
         }
 
         const void * datas[2] = { &iKey.digest, &v.front() };
-        std::size_t sizes[2] = { 16, v.size() * sizeof(Util::int32_t) };
+        Alembic::Util::uint64_t sizes[2] = { 16,
+            v.size() * sizeof(Util::int32_t) };
         dataPtr =  iGroup->addData( 2, sizes, datas );
     }
     else
     {
         const void * datas[2] = { &iKey.digest, iSamp.getData() };
-        std::size_t sizes[2] = { 16, iKey.numBytes };
+        Alembic::Util::uint64_t sizes[2] = { 16, iKey.numBytes };
 
         dataPtr = iGroup->addData( 2, sizes, datas );
     }
