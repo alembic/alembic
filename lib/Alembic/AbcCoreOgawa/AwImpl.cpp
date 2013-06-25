@@ -104,14 +104,24 @@ void AwImpl::init()
 
     m_data.reset( new OwData( m_archive.getGroup()->addGroup() ) );
 
+    // seed with the common empty keys
     AbcA::ArraySampleKey emptyKey;
     emptyKey.numBytes = 0;
-    emptyKey.origPOD = Alembic::Util::kInt8POD;
-    emptyKey.readPOD = Alembic::Util::kInt8POD;
     Ogawa::ODataPtr emptyData( new Ogawa::OData() );
 
-    // seed with the common empty key
+    emptyKey.origPOD = Alembic::Util::kInt8POD;
+    emptyKey.readPOD = Alembic::Util::kInt8POD;
     WrittenSampleIDPtr wsid( new WrittenSampleID( emptyKey, emptyData, 0 ) );
+    m_writtenSampleMap.store( wsid );
+
+    emptyKey.origPOD = Alembic::Util::kStringPOD;
+    emptyKey.readPOD = Alembic::Util::kStringPOD;
+    wsid.reset( new WrittenSampleID( emptyKey, emptyData, 0 ) );
+    m_writtenSampleMap.store( wsid );
+
+    emptyKey.origPOD = Alembic::Util::kWstringPOD;
+    emptyKey.readPOD = Alembic::Util::kWstringPOD;
+    wsid.reset( new WrittenSampleID( emptyKey, emptyData, 0 ) );
     m_writtenSampleMap.store( wsid );
 }
 

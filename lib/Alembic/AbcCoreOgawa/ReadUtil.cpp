@@ -1319,7 +1319,6 @@ ReadData( void * iIntoLocation,
 
     if ( curPod == Alembic::Util::kStringPOD )
     {
-        // TODO don't write out key for totally empty strings
         if ( dataSize <= 16 )
         {
             return;
@@ -1349,7 +1348,6 @@ ReadData( void * iIntoLocation,
     }
     else if ( curPod == Alembic::Util::kWstringPOD )
     {
-        // TODO don't write out key for totally empty strings
         if ( dataSize <= 16 )
         {
             return;
