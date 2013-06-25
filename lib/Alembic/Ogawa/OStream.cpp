@@ -70,6 +70,10 @@ public:
                                  std::ostream::badbit );
 
             startPos = stream->tellp();
+            if (startPos == INVALID_DATA)
+            {
+                std::runtime_error("Illegal start of Ogawa stream");
+            }
         }
     }
 
@@ -154,6 +158,13 @@ Alembic::Util::uint64_t OStream::getAndSeekEndPos()
         Alembic::Util::scoped_lock l(mData->lock);
         Alembic::Util::uint64_t lastp =
             mData->stream->seekp(0, std::ios_base::end).tellp();
+        if (lastp == INVALID_DATA || lastp < mData->startPos)
+        {
+            std::runtime_error(
+                "Illegal position returned Ogawa::OStream::getAndSeekEndPos");
+
+            return 0;
+        }
         return lastp - mData->startPos;
     }
     return 0;
