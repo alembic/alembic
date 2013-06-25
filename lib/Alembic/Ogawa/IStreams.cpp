@@ -128,6 +128,12 @@ IStreams::IStreams(const std::vector< std::istream * > & iStreams) :
 {
     mData->streams = iStreams;
     init();
+    if (!mData->valid || mData->version != 1)
+    {
+        mData->streams.clear();
+        return;
+    }
+
     mData->locks = new Alembic::Util::mutex[mData->streams.size()];
 }
 
@@ -151,8 +157,6 @@ void IStreams::init()
     {
         return;
     }
-
-    // TODO record group start pos for each stream
 
     Alembic::Util::uint64_t firstGroupPos = 0;
 
