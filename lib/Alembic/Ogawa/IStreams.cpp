@@ -147,9 +147,9 @@ void IStreams::init()
 
     u.l = 0x01234567;
 
-    if (u.c[3] != 0x67)
+    if (u.c[0] != 0x67)
     {
-        std::runtime_error(
+        throw std::runtime_error(
             "Ogawa currently only supports little-endian reading.");
     }
 

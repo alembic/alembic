@@ -72,7 +72,7 @@ public:
             startPos = stream->tellp();
             if (startPos == INVALID_DATA)
             {
-                std::runtime_error("Illegal start of Ogawa stream");
+                throw std::runtime_error("Illegal start of Ogawa stream");
             }
         }
     }
@@ -134,9 +134,9 @@ void OStream::init()
 
     u.l = 0x01234567;
 
-    if (u.c[3] != 0x67)
+    if (u.c[0] != 0x67)
     {
-        std::runtime_error(
+        throw std::runtime_error(
             "Ogawa currently only supports little-endian writing.");
     }
 
@@ -160,7 +160,7 @@ Alembic::Util::uint64_t OStream::getAndSeekEndPos()
             mData->stream->seekp(0, std::ios_base::end).tellp();
         if (lastp == INVALID_DATA || lastp < mData->startPos)
         {
-            std::runtime_error(
+            throw std::runtime_error(
                 "Illegal position returned Ogawa::OStream::getAndSeekEndPos");
 
             return 0;
