@@ -128,13 +128,22 @@ void HashPropertyHeader( const AbcA::PropertyHeader & iHeader,
 
 //-*****************************************************************************
 void HashDimensions( const AbcA::Dimensions & iDims,
-                     Util::SpookyHash & ioHash )
+                     Util::Digest & ioHash )
 {
     size_t rank = iDims.rank();
 
     if ( rank > 0 )
     {
-        ioHash.Update( iDims.rootPtr(), rank * 8 );
+        Util::SpookyHash hash;
+        hash.Init(0, 0);
+
+        hash.Update( iDims.rootPtr(), rank * 8 );
+        hash.Update( ioHash.d, 16 );
+
+        Util::uint64_t hash0, hash1;
+        hash.Final( &hash0, &hash1 );
+        ioHash.words[0] = hash0;
+        ioHash.words[1] = hash1;
     }
 }
 

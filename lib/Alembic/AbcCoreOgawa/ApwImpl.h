@@ -87,7 +87,7 @@ private:
     PropertyHeaderPtr m_header;
 
     // for accumulating our hierarchical hash
-    Util::SpookyHash m_hash;
+    Util::Digest m_hash;
 
     Ogawa::OGroupPtr m_group;
 

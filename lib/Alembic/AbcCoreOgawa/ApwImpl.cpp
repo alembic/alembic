@@ -59,8 +59,6 @@ ApwImpl::ApwImpl( AbcA::CompoundPropertyWriterPtr iParent,
         ABCA_THROW( "Attempted to create a ArrayPropertyWriter from a "
                     "non-array property type" );
     }
-
-    m_hash.Init(0, 0);
 }
 
 
@@ -86,10 +84,18 @@ ApwImpl::~ApwImpl()
             m_header->timeSamplingIndex, numSamples );
     }
 
-    HashPropertyHeader( m_header->header, m_hash );
+    Util::SpookyHash hash;
+    hash.Init(0, 0);
+    HashPropertyHeader( m_header->header, hash );
+
+    // mix in the accumulated hash if we have samples
+    if ( numSamples != 0 )
+    {
+        hash.Update( m_hash.d, 16 );
+    }
 
     Util::uint64_t hash0, hash1;
-    m_hash.Final( &hash0, &hash1 );
+    hash.Final( &hash0, &hash1 );
     Util::shared_ptr< CpwImpl > parent =
         Alembic::Util::dynamic_pointer_cast< CpwImpl,
             AbcA::CompoundPropertyWriter > ( m_parent );
@@ -112,8 +118,11 @@ void ApwImpl::setFromPreviousSample()
     ABCA_ASSERT( m_header->nextSampleIndex > 0,
         "Can't set from previous sample before any samples have been written" );
 
-    HashDimensions( m_dims, m_hash );
-    m_hash.Update( m_previousWrittenSampleID->getKey().digest.d, 16 );
+    Util::Digest digest = m_previousWrittenSampleID->getKey().digest;
+    HashDimensions( m_dims, digest );
+    Util::SpookyHash::ShortEnd(m_hash.words[0], m_hash.words[1],
+                              digest.words[0], digest.words[1]);
+
     m_header->nextSampleIndex ++;
 }
 
@@ -202,8 +211,17 @@ void ApwImpl::setSample( const AbcA::ArraySample & iSamp )
         m_header->lastChangedIndex = m_header->nextSampleIndex;
     }
 
-    HashDimensions( m_dims, m_hash );
-    m_hash.Update( m_previousWrittenSampleID->getKey().digest.d, 16 );
+    Util::Digest digest = m_previousWrittenSampleID->getKey().digest;
+    HashDimensions( m_dims, digest );
+    if ( m_header->nextSampleIndex == 0 )
+    {
+        m_hash = digest;
+    }
+    else
+    {
+        Util::SpookyHash::ShortEnd(m_hash.words[0], m_hash.words[1],
+                                   digest.words[0], digest.words[1]);
+    }
     m_header->nextSampleIndex ++;
 }
 

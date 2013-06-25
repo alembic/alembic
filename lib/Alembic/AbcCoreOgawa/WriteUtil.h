@@ -50,8 +50,10 @@ void HashPropertyHeader( const AbcA::PropertyHeader & iHeader,
                          Util::SpookyHash & ioHash );
 
 //-*****************************************************************************
+// Hashes the dimensions and the current sample hash (ioHash), and then stores
+// the result on ioHash.
 void HashDimensions( const AbcA::Dimensions & iDims,
-                     Util::SpookyHash & ioHash );
+                     Util::Digest & ioHash );
 
 //-*****************************************************************************
 WrittenSampleMap& GetWrittenSampleMap(
