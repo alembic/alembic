@@ -36,6 +36,8 @@
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
+#include <Alembic/AbcCoreFactory/All.h>
 
 #include "util.h"
 
@@ -179,7 +181,7 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
 
         if (!(ctsType0 == ctsType))
         {
-            std::cerr << 
+            std::cerr <<
                 "Can not stitch different sampling type for child bounds on\""
                 << fullNodeName << "\"" << std::endl;
             // more details on this
@@ -391,7 +393,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 if (uvs)
                 {
                     getOGeomParamSamp <IV2fGeomParam, IV2fGeomParam::Sample,
-                        OV2fGeomParam::Sample>(uvs, iUVSample, 
+                        OV2fGeomParam::Sample>(uvs, iUVSample,
                                                oUVSample, reqIdx);
                     oSamp.setUVs(oUVSample);
                 }
@@ -449,7 +451,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 if (uvs)
                 {
                     getOGeomParamSamp <IV2fGeomParam, IV2fGeomParam::Sample,
-                        OV2fGeomParam::Sample>(uvs, iUVSample, 
+                        OV2fGeomParam::Sample>(uvs, iUVSample,
                                                oUVSample, reqIdx);
                     oSamp.setUVs(oUVSample);
                 }
@@ -552,7 +554,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 if (iUVs)
                 {
                     getOGeomParamSamp <IV2fGeomParam, IV2fGeomParam::Sample,
-                        OV2fGeomParam::Sample>(iUVs, iUVSample, 
+                        OV2fGeomParam::Sample>(iUVs, iUVSample,
                                                oUVSample, reqIdx);
                     oSamp.setUVs(oUVSample);
                 }
@@ -673,7 +675,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 if (uvs)
                 {
                     getOGeomParamSamp <IV2fGeomParam, IV2fGeomParam::Sample,
-                        OV2fGeomParam::Sample>(uvs, iUVSample, 
+                        OV2fGeomParam::Sample>(uvs, iUVSample,
                                                oUVSample, reqIdx);
                     oSamp.setUVs(oUVSample);
                 }
@@ -763,10 +765,14 @@ int main( int argc, char *argv[] )
         std::map< chrono_t, size_t > minIndexMap;
         size_t rootChildren = 0;
 
+        Alembic::AbcCoreFactory::IFactory factory;
+        factory.setPolicy(ErrorHandler::kThrowPolicy);
+        Alembic::AbcCoreFactory::IFactory::CoreType coreType;
+
         for (int i = 2; i < argc; ++i)
         {
-            IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                argv[i], ErrorHandler::kThrowPolicy );
+
+            IArchive archive = factory.getArchive(argv[i], coreType);
             IObject iRoot = archive.getTop();
             size_t numChildren = iRoot.getNumChildren();
             if (!iRoot.valid() || numChildren < 1)
@@ -783,7 +789,7 @@ int main( int argc, char *argv[] )
             else if (rootChildren != numChildren)
             {
                 std::cerr << "ERROR: " << argv[i] <<
-                    " doesn't have the same number of children as: " << 
+                    " doesn't have the same number of children as: " <<
                     argv[i-1] << std::endl;
             }
 
@@ -853,9 +859,20 @@ int main( int argc, char *argv[] )
         std::string userStr;
 
         // Create an archive with the default writer
-        OArchive oArchive = CreateArchiveWithInfo(
-            Alembic::AbcCoreHDF5::WriteArchive(),
-            fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
+        OArchive oArchive;
+        if (coreType == Alembic::AbcCoreFactory::IFactory::kHDF5)
+        {
+            oArchive = CreateArchiveWithInfo(
+                Alembic::AbcCoreHDF5::WriteArchive(),
+                fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
+        }
+        else if (coreType == Alembic::AbcCoreFactory::IFactory::kOgawa)
+        {
+            oArchive = CreateArchiveWithInfo(
+                Alembic::AbcCoreHDF5::WriteArchive(),
+                fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
+        }
+
         OObject oRoot = oArchive.getTop();
         if (!oRoot.valid())
             return -1;

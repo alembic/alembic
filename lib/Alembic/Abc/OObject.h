@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -87,7 +87,7 @@ public:
     template <class OBJECT_PTR>
     OObject( OBJECT_PTR iPtr,
 
-             WrapExistingFlag iFlag,
+             WrapExistingFlag /* iFlag */,
 
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
@@ -105,7 +105,7 @@ public:
     template <class ARCHIVE_PTR>
     OObject( ARCHIVE_PTR iPtr,
 
-             TopFlag iTop,
+             TopFlag /* iTop */,
 
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
@@ -196,6 +196,13 @@ public:
     //! OObject as a child. If the writer associated with this child no longer
     //! exists, this function will return an empty OObject.
     OObject getChild( const std::string &iChildName );
+
+    //!-************************************************************************
+    // PROXY METHODS
+    // An OObject can refer to another OObject. When read in, this instance
+    // will be represented by the target source hierarchy and its children.
+    //!-************************************************************************
+    bool addChildInstance( OObject iTarget, const std::string& iName );
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

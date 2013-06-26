@@ -153,7 +153,7 @@ class AbcWriteJob
 {
   public:
 
-    AbcWriteJob(const char * iFileName,
+    AbcWriteJob(const char * iFileName, bool asOgawa,
         std::set<double> & iTransFrames,
         Alembic::AbcCoreAbstract::TimeSamplingPtr iTransTime,
         std::set<double> & iShapeFrames,
@@ -201,6 +201,7 @@ class AbcWriteJob
     Alembic::Abc::OArchive mRoot;
 
     std::string mFileName;
+    bool mAsOgawa;
 
     MSelectionList mSList;
     std::set<double> mShapeFrames;

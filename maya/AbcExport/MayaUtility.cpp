@@ -315,7 +315,7 @@ bool util::isAnimated(MObject & object, bool checkParent)
         nodesToCheckAnimCurve.push_back(node);
     }
 
-    for (size_t i = 0; i < nodesToCheckAnimCurve.size(); i++) 
+    for (size_t i = 0; i < nodesToCheckAnimCurve.size(); i++)
     {
         if (MAnimUtil::isAnimated(nodesToCheckAnimCurve[i], checkParent))
         {
@@ -444,6 +444,10 @@ MString util::getHelpText()
 "-a / -attr string\n"
 "A specific geometric attribute to write out.\n"
 "This flag may occur more than once.\n"
+"\n"
+"-df / -dataFormat string\n"
+"The data format to use to write the file.  Can be either HDF or Ogawa.\n"
+"The default is HDF.\n"
 "\n"
 "-atp / -attrPrefix string (default ABC_)\n"
 "Prefix filter for determining which geometric attributes to write out.\n"

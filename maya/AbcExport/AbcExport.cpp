@@ -263,6 +263,7 @@ try
         std::set <double> shutterSamples;
         bool sampleGeo  = true; // whether or not to subsample geometry
         std::string fileName;
+        bool asOgawa = false;
 
         unsigned int numJobArgs = jobArgsArray.length();
         for (unsigned int i = 0; i < numJobArgs; ++i)
@@ -511,6 +512,25 @@ try
             else if (arg == "-ef" || arg == "-eulerfilter")
             {
                 jobArgs.filterEulerRotations = true;
+            }
+            else if (arg == "-df" || arg == "-dataformat")
+            {
+                if (i+1 >= numJobArgs)
+                {
+                    MGlobal::displayError(
+                        "dataFormat incorrectly specified.");
+                    return MS::kFailure;
+                }
+                MString dataFormat = jobArgsArray[++i];
+                dataFormat.toLowerCase();
+                if (dataFormat == "hdf")
+                {
+                    asOgawa = false;
+                }
+                else if (dataFormat == "ogawa")
+                {
+                    asOgawa = true;
+                }
             }
             else
             {
@@ -764,7 +784,7 @@ try
                 geoStride * util::spf()), samples));
         }
 
-        AbcWriteJobPtr job(new AbcWriteJob(fileName.c_str(),
+        AbcWriteJobPtr job(new AbcWriteJob(fileName.c_str(), asOgawa,
             transSamples, transTime, geoSamples, geoTime, jobArgs));
 
        jobList.push_front(job);

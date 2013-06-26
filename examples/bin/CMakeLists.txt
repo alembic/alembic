@@ -34,6 +34,8 @@
 ##-*****************************************************************************
 
 ADD_SUBDIRECTORY( SimpleAbcViewer )
+ADD_SUBDIRECTORY( AbcConvert )
 ADD_SUBDIRECTORY( AbcEcho )
 ADD_SUBDIRECTORY( AbcStitcher )
 ADD_SUBDIRECTORY( AbcTree )
+ADD_SUBDIRECTORY( AbcLs )

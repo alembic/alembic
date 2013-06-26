@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -83,7 +83,7 @@ protected:
 
         //! The flag indicating that the intention
         //! is to wrap the existing pointer.
-        WrapExistingFlag iWrapFlag,
+        WrapExistingFlag /* iWrapFlag */,
 
         //! The error handling.
         //! ...
@@ -196,7 +196,7 @@ template <class PROP_PTR>
 inline OBasePropertyT<PROP_PTR>::OBasePropertyT
 (
     PROP_PTR iPtr,
-    WrapExistingFlag,
+    WrapExistingFlag /* iFlag */,
     ErrorHandler::Policy iPolicy )
   : m_property( iPtr )
 {

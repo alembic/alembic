@@ -35,9 +35,12 @@
 
 SET( FULL_ABC_LIBS
      AlembicAbcGeom
+     AlembicAbcCoreFactory
      AlembicAbc
      AlembicAbcCoreHDF5
+     AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
+     AlembicOgawa
      AlembicUtil
      ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_ILMBASE_LIBS}

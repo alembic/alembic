@@ -34,10 +34,14 @@
 //
 //-*****************************************************************************
 
+#include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
+
+namespace AbcF = Alembic::AbcCoreFactory;
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -53,7 +57,7 @@ using Alembic::Util::uint32_t;
 //
 
 
-void writeSimpleProperties(const std::string &archiveName)
+void writeSimpleProperties(const std::string &archiveName, bool useOgawa)
 {
     const int numChildren = 3;
 
@@ -64,8 +68,18 @@ void writeSimpleProperties(const std::string &archiveName)
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+    OArchive archive;
+    if (useOgawa)
+    {
+        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
+            archiveName, ErrorHandler::kThrowPolicy );
+    }
+    else
+    {
+        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+            archiveName, ErrorHandler::kThrowPolicy );
+    }
+
     OObject archiveTop = archive.getTop();
 
     Alembic::Util::uint32_t tsidx = archive.addTimeSampling(ts);
@@ -119,8 +133,10 @@ void readSimpleProperties(const std::string &archiveName)
 {
     // Open an existing archive for reading. Indicate that we want
     //   Alembic to throw exceptions on errors.
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+    AbcF::IFactory factory;
+    factory.setPolicy(  ErrorHandler::kThrowPolicy );
+    AbcF::IFactory::CoreType coreType;
+    IArchive archive = factory.getArchive(archiveName, coreType);
     IObject archiveTop = archive.getTop();
 
     // Determine the number of (top level) children the archive has
@@ -361,14 +377,24 @@ void readSimpleProperties(const std::string &archiveName)
 //////////////////
 
 
-void writeEmptyCompoundProperties(const std::string &archiveName)
+void writeEmptyCompoundProperties(const std::string &archiveName, bool useOgawa)
 {
     const int numChildren = 2;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+    OArchive archive;
+    if (useOgawa)
+    {
+        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
+            archiveName, ErrorHandler::kThrowPolicy );
+    }
+    else
+    {
+        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+            archiveName, ErrorHandler::kThrowPolicy );
+    }
+
     OObject archiveTop = archive.getTop();
 
     for (int ii=0; ii<numChildren; ii++)
@@ -399,8 +425,10 @@ void readEmptyCompoundProperties(const std::string &archiveName)
 {
     // Open an existing archive for reading. Indicate that we want
     //   Alembic to throw exceptions on errors.
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+    AbcF::IFactory factory;
+    factory.setPolicy(  ErrorHandler::kThrowPolicy );
+    AbcF::IFactory::CoreType coreType;
+    IArchive archive = factory.getArchive(archiveName, coreType);
     IObject archiveTop = archive.getTop();
 
     // Determine the number of (top level) children the archive has
@@ -457,19 +485,32 @@ void readEmptyCompoundProperties(const std::string &archiveName)
 
 int main( int argc, char *argv[] )
 {
+    bool useOgawa = true;
     try
     {
         std::cout << "Write and read a simple archive: ten children, ";
         std::cout << "each with one simple property" << std::endl;
 
         std::string archiveName("flatHierarchy.abc");
-        writeSimpleProperties ( archiveName );
+        useOgawa = true;
+        writeSimpleProperties ( archiveName, useOgawa );
+        readSimpleProperties  ( archiveName );
+        useOgawa = false;
+        writeSimpleProperties ( archiveName, useOgawa );
         readSimpleProperties  ( archiveName );
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
-        std::cout << " during *FlatHierarchy tests" << std::endl;
+        std::cout << " during *FlatHierarchy tests ";
+        if (useOgawa)
+        {
+            std::cout << " using Ogawa" << std::endl;
+        }
+        else
+        {
+            std::cout << " using HDF5" << std::endl;
+        }
         return 1;
     }
 
@@ -481,14 +522,26 @@ int main( int argc, char *argv[] )
         std::cout << "contains no simple properties" << std::endl;
 
         std::string archiveName("nestedCompounds.abc");
-        writeEmptyCompoundProperties ( archiveName );
+        useOgawa = true;
+        writeEmptyCompoundProperties ( archiveName, useOgawa );
+        readEmptyCompoundProperties  ( archiveName );
+        useOgawa = false;
+        writeEmptyCompoundProperties ( archiveName, useOgawa );
         readEmptyCompoundProperties  ( archiveName );
 
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
-        std::cout << " during *FlatHierarchy tests" << std::endl;
+        std::cout << " during *FlatHierarchy tests";
+        if (useOgawa)
+        {
+            std::cout << " using Ogawa" << std::endl;
+        }
+        else
+        {
+            std::cout << " using HDF5" << std::endl;
+        }
         return 1;
     }
 

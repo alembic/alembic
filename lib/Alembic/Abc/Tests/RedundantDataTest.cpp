@@ -35,7 +35,9 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
+#include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <set>
 
@@ -43,6 +45,8 @@
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
+
+namespace AbcF = Alembic::AbcCoreFactory;
 
 //-*****************************************************************************
 static std::vector<Alembic::Util::int32_t> intArraySamp;
@@ -124,10 +128,19 @@ void readDeepHierarchy( IObject parent, const int level, const IObject& orig )
 }
 
 //-*****************************************************************************
-void simpleTestOut( const std::string &iArchiveName )
+void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                      iArchiveName );
+    OArchive archive;
+    if (useOgawa)
+    {
+        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
+            iArchiveName, ErrorHandler::kThrowPolicy );
+    }
+    else
+    {
+        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+            iArchiveName, ErrorHandler::kThrowPolicy );
+    }
     OObject archiveTop( archive, kTop );
 
     // create 100 top-level children
@@ -144,8 +157,10 @@ void simpleTestOut( const std::string &iArchiveName )
 //-*****************************************************************************
 void simpleTestIn( const std::string &iArchiveName )
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      iArchiveName, ErrorHandler::kThrowPolicy );
+    AbcF::IFactory factory;
+    factory.setPolicy(  ErrorHandler::kThrowPolicy );
+    AbcF::IFactory::CoreType coreType;
+    IArchive archive = factory.getArchive(iArchiveName, coreType);
 
     IObject archiveTop = archive.getTop();
 
@@ -171,7 +186,14 @@ int main( int argc, char *argv[] )
     // make the int array sample values
     makeIntArraySamp();
 
-    simpleTestOut( arkive );
+    bool useOgawa = true;
+    simpleTestOut( arkive, useOgawa );
+    simpleTestIn( arkive );
+
+    PATHS.clear();
+
+    useOgawa = false;
+    simpleTestOut( arkive, useOgawa );
     simpleTestIn( arkive );
 
     return 0;

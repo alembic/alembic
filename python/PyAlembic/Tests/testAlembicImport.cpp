@@ -36,6 +36,7 @@
 #include <testAlembicImport.h>
 
 #include <Alembic/AbcGeom/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 
 #include <boost/assign/std/vector.hpp>

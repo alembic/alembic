@@ -37,4 +37,7 @@
 ADD_LIBRARY( TrivialBoostUsageUtil TbuUtil.cpp )
 
 # Add the tests subdirectory.
-ADD_SUBDIRECTORY( Tests )
+IF( NOT ALEMBIC_NO_TESTS )
+	ADD_SUBDIRECTORY( Tests )
+ENDIF()
+

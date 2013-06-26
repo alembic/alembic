@@ -41,7 +41,16 @@ using namespace boost::python;
 //-*****************************************************************************
 static Abc::IArchive* mkIArchive( const std::string &iName )
 {
-    return new Abc::IArchive( ::Alembic::AbcCoreHDF5::ReadArchive(), iName );
+    Abc::IArchive archive;
+    AbcF::IFactory factory;
+    factory.setPolicy(Abc::ErrorHandler::kQuietNoopPolicy);
+    AbcF::IFactory::CoreType coreType;
+    archive = factory.getArchive(iName, coreType);
+    if ( coreType == AbcF::IFactory::kUnknown ) {
+        throwPythonException( "Unknown core type" );
+    } else {
+        return new Abc::IArchive( archive );
+    }
 }
 
 //-*****************************************************************************

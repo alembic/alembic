@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -74,7 +74,7 @@ public:
     //! This is a convenience function which returns the header's name.
     const std::string &getName() const
     { return getHeader().getName(); }
-    
+
     //! The full name of an object is the complete path name all the way
     //! to the root object of the archive. It is guaranteed to be fully
     //! unique within the entire archive.
@@ -115,7 +115,7 @@ public:
     //! In order to prevent shared_ptr cycles, it is important
     //! that objects only store their children via weak ptrs.
     virtual ObjectReaderPtr getParent() = 0;
-    
+
     //! All objects have one and only one compound property which
     //! is the root for any properties which are associated with this object.
     //! If no properties were written to the object, this may return an
@@ -138,7 +138,7 @@ public:
     //! This will return a NULL pointer if no header by that name is found.
     virtual const ObjectHeader *
     getChildHeader( const std::string &iName ) = 0;
-    
+
     //! Get a child object by name.
     //! This is a convenience function that uses getChildHeader and
     //! the various named "get" functions here.
@@ -151,9 +151,21 @@ public:
     virtual ObjectReaderPtr getChild( size_t i ) = 0;
 
     //-*************************************************************************
+    // Hierarchical hash stuff
+    //-*************************************************************************
+
+    //! If an aggregated properties hash exists fill oDigest with it and
+    //! return true, if it doesn't exist return false
+    virtual bool getPropertiesHash( Util::Digest & oDigest );
+
+    //! If an aggregated child objects hash exists fill oDigest with it and
+    //! return true, if it doesn't exist return false
+    virtual bool getChildrenHash( Util::Digest & oDigest );
+
+    //-*************************************************************************
     // YUP
     //-*************************************************************************
-    
+
     //! Returns shared pointer to myself.
     //! This is non-virtual
     virtual ObjectReaderPtr asObjectPtr() = 0;

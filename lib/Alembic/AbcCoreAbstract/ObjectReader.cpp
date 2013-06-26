@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -44,6 +44,18 @@ namespace ALEMBIC_VERSION_NS {
 ObjectReader::~ObjectReader()
 {
     // Nothing
+}
+
+//-*****************************************************************************
+bool ObjectReader::getPropertiesHash( Util::Digest & oDigest )
+{
+    return false;
+}
+
+//-*****************************************************************************
+bool ObjectReader::getChildrenHash( Util::Digest & oDigest )
+{
+    return false;
 }
 
 } // End namespace ALEMBIC_VERSION_NS

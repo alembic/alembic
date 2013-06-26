@@ -45,7 +45,7 @@ OPTION( USE_LIB64 "Search for deps in lib64 vs lib" ON )
 IF ( ${CMAKE_HOST_UNIX} )
     SET( LIBPYTHON_FILE "lib${LIBPYTHON}.a" )
     IF( ${DARWIN} )
-        SET( OSX_PYTHON_ROOT 
+        SET( OSX_PYTHON_ROOT
              "/System/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}" )
         SET( PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}" )
 
@@ -88,11 +88,12 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
   SET( CORE_LIBS
     AlembicAbcOpenGL
     AlembicAbcGeom
+    AlembicAbcCoreFactory
     AlembicAbc
     AlembicAbcCoreHDF5
+    AlembicAbcCoreOgawa
     AlembicAbcCoreAbstract
-    AlembicAbcCollection
-    AlembicAbcMaterial
+    AlembicOgawa
     AlembicUtil )
 
   SET( CPP_FILES
@@ -104,7 +105,7 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
                   ${PLIBS}
                   ${ALEMBIC_ILMBASE_LIBS}
                   ${ZLIB_LIBRARIES}
-                  ${EXTERNAL_MATH_LIBS} 
+                  ${EXTERNAL_MATH_LIBS}
                   ${ALEMBIC_PYILMBASE_PYIMATH_LIB} )
 
   INCLUDE_DIRECTORIES( "/usr/include/python2.6" "${ALEMBIC_SOURCE_DIR}/lib"

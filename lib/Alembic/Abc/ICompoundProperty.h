@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -82,7 +82,7 @@ public:
     template <class CPROP_PTR>
     ICompoundProperty(
         CPROP_PTR iThisObject,
-        WrapExistingFlag iWrapFlag,
+        WrapExistingFlag /* iWrapFlag */,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
 
@@ -94,7 +94,7 @@ public:
     template <class OBJECT_PTR>
     ICompoundProperty(
         OBJECT_PTR iThisObject,
-        TopFlag iTopFlag,
+        TopFlag /* iTopFlag */,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
 
@@ -180,7 +180,7 @@ inline ICompoundProperty::ICompoundProperty( CPROP_PTR iThisObject,
 //-*****************************************************************************
 template <class OBJECT_PTR>
 inline ICompoundProperty::ICompoundProperty( OBJECT_PTR iThisObject,
-                                             TopFlag iTop,
+                                             TopFlag /* iTop */,
                                              const Argument &iArg0,
                                              const Argument &iArg1 )
 {

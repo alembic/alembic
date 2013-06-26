@@ -37,6 +37,7 @@
 #include <Alembic/Abc/OObject.h>
 #include <Alembic/Abc/OArchive.h>
 #include <Alembic/Abc/OCompoundProperty.h>
+#include <Alembic/Abc/OTypedScalarProperty.h>
 
 namespace Alembic {
 namespace Abc {
@@ -59,7 +60,10 @@ const AbcA::ObjectHeader &OObject::getHeader() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getHeader()" );
 
-    return m_object->getHeader();
+    if ( m_object )
+    {
+        return m_object->getHeader();
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -73,9 +77,12 @@ OArchive OObject::getArchive()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getArchive()" );
 
-    return OArchive( m_object->getArchive(),
-                     kWrapExisting,
-                     getErrorHandlerPolicy() );
+    if ( m_object )
+    {
+        return OArchive( m_object->getArchive(),
+                         kWrapExisting,
+                         getErrorHandlerPolicy() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -88,9 +95,12 @@ OObject OObject::getParent()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getParent()" );
 
-    return OObject( m_object->getParent(),
-                    kWrapExisting,
-                    getErrorHandlerPolicy() );
+    if ( m_object )
+    {
+        return OObject( m_object->getParent(),
+                        kWrapExisting,
+                        getErrorHandlerPolicy() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -103,7 +113,10 @@ size_t OObject::getNumChildren()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getNumChildren()" );
 
-    return m_object->getNumChildren();
+    if ( m_object )
+    {
+        return m_object->getNumChildren();
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -116,7 +129,10 @@ const AbcA::ObjectHeader &OObject::getChildHeader( size_t iIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getChildHeader()" );
 
-    return m_object->getChildHeader( iIdx );
+    if ( m_object )
+    {
+        return m_object->getChildHeader( iIdx );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -130,7 +146,10 @@ const AbcA::ObjectHeader *OObject::getChildHeader( const std::string &iName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getChildHeader()" );
 
-    return m_object->getChildHeader( iName );
+    if ( m_object )
+    {
+        return m_object->getChildHeader( iName );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -143,9 +162,13 @@ OObject OObject::getChild( size_t iIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getChild( idx )" );
 
-    return OObject( m_object->getChild( iIdx ),
-                    kWrapExisting,
-                    getErrorHandlerPolicy() );
+    if ( m_object )
+    {
+        AbcA::ObjectWriterPtr child = m_object->getChild( iIdx );
+        return OObject( child,
+                        kWrapExisting,
+                        getErrorHandlerPolicy() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -158,9 +181,12 @@ OObject OObject::getChild( const std::string &iName )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getChild( name )" );
 
-    return OObject( m_object->getChild( iName ),
-                    kWrapExisting,
-                    getErrorHandlerPolicy() );
+    if ( m_object )
+    {
+        return OObject( m_object->getChild( iName ),
+                        kWrapExisting,
+                        getErrorHandlerPolicy() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
@@ -173,12 +199,60 @@ OCompoundProperty OObject::getProperties()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::getProperties()" );
 
-    return OCompoundProperty( m_object->getProperties(), kWrapExisting );
+    if ( m_object )
+    {
+        return OCompoundProperty( m_object->getProperties(), kWrapExisting );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, have a default.
     return OCompoundProperty();
+}
+
+//-*****************************************************************************
+bool OObject::addChildInstance( OObject iTarget, const std::string& iName )
+{
+    if ( !iTarget || !m_object )
+        return false;
+
+    if ( iName.empty() )
+        return false;
+
+    // Instance and source target must be in the same archive.
+    if ( getArchive().getName() != iTarget.getArchive().getName() )
+        return false;
+
+    // Cannot instance an instance, an instance created by normal means wouldn't
+    // even be gettable, so this is a check for extraordinary circumstances.
+    if ( iTarget.getMetaData().get("isInstance") == "1" )
+        return false;
+
+    // Check that the instance target is not an ancestor of this object.
+    std::string targetFullName = iTarget.getFullName();
+    std::string childFullName  = getFullName() + "/" + iName;
+
+    std::string targetPath = targetFullName + "/";
+    if ( childFullName.find(targetPath) == 0 )
+        return false;
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::addChildInstance()" );
+
+    AbcA::MetaData md;
+    md.set("isInstance", "1");
+
+    OObject instanceChild = OObject( getPtr(), iName, md );
+
+    OStringProperty instanceProp =
+        OStringProperty( instanceChild.getProperties(), ".instanceSource" );
+    instanceProp.set( targetFullName );
+
+    return true;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    // Not all error handlers throw, have a default.
+    return false;
 }
 
 //-*****************************************************************************

@@ -39,9 +39,15 @@
 using namespace boost::python;
 
 //-*****************************************************************************
-static Abc::OArchive* mkOArchive( const std::string &iName )
+static Abc::OArchive* mkOArchive( const std::string &iName, 
+                                  bool asOgawa = false )
 {
-    return new Abc::OArchive( ::Alembic::AbcCoreHDF5::WriteArchive(), iName );
+    if ( asOgawa == true ) {
+        return new Abc::OArchive( AbcO::WriteArchive(), iName );
+    }
+    else {
+        return new Abc::OArchive( AbcH::WriteArchive(), iName );
+    };
 }
 
 //-*****************************************************************************
@@ -55,7 +61,7 @@ void register_oarchive()
               make_constructor(
                   mkOArchive,
                   default_call_policies(),
-                  ( arg( "fileName" ) ) ),
+                  ( arg( "fileName" ), arg( "asOgawa" ) = false ) ),
               "Create an OArchive with the given file name" )
         .def( "getName",
               &Abc::OArchive::getName,

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -81,13 +81,15 @@ public:
     //! ObjectReaderPtr, with an optional error handling policy.
     template <class OBJECT_PTR>
     IObject( OBJECT_PTR iPtr,
-             WrapExistingFlag iFlag,
+             WrapExistingFlag /* iFlag */,
              const Argument &iArg0 = Argument() )
-      : m_object( GetObjectReaderPtr( iPtr ) )
+        : m_object( GetObjectReaderPtr( iPtr ) )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
             GetErrorHandlerPolicy( iPtr, iArg0 ) );
+
+        initInstance();
     }
 
     //! This attaches an IObject wrapper around the top
@@ -128,15 +130,13 @@ public:
     //! Returned by reference, since it is guaranteed to exist and be
     //! unchanging.
     //! This is a convenience function which returns the header's name.
-    const std::string &getName() const
-    { return getHeader().getName(); }
+    const std::string &getName() const;
 
     //! The full name of an object is the complete path name all the way
     //! to the root object of the archive. It is guaranteed to be fully
     //! unique within the entire archive.
     //! This is a convenience function which returns the header's full name.
-    const std::string &getFullName() const
-    { return getHeader().getFullName(); }
+    const std::string &getFullName() const;
 
     //! All objects have metadata. This metadata is identical to the
     //! Metadata of the top level compoundProperty "properties".
@@ -190,6 +190,33 @@ public:
     //! equivalent constructor was called.
     IObject getChild( const std::string &iChildName ) const;
 
+    //!-************************************************************************
+    // INSTANCE METHODS
+    // An IObject can refer to another IObject in the same cache and stand in
+    // as an instance for that target hierarchy. On disk only the instance
+    // object is required. When read in however, a normal hierarchy is
+    // returned. Optionally, client code could use the isInstanceRoot() and
+    // instanceSourcePath() methods to discover that the hierarchies are
+    // duplicate and instance them appropriately in memory.
+    //!-************************************************************************
+
+    //! Returns whether this object directly instances another object.
+    bool isInstanceRoot() const;
+
+    //! Returns whether this object has been arrived at via an instance, or if
+    //! this object is an instance itself.
+    bool isInstanceDescendant() const;
+
+    //! If this object is an instance (isInstanceRoot), returns the source path
+    //! that the instance points at.  Otherwise and empty string is returned.
+    std::string instanceSourcePath();
+
+    bool isChildInstance(size_t iChildIndex) const;
+    bool isChildInstance(const std::string &iChildName) const;
+
+    //! Returns the original ObjectReaderPtr, if this object is an instance
+    AbcA::ObjectReaderPtr getInstancePtr() const { return m_instanceObject; }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -198,12 +225,12 @@ public:
 
     //! getPtr, as usual, returns a shared ptr to the
     //! underlying AbcCoreAbstract object, in this case the
-    //! ObjectReaderPtr.
+    //! ObjectReaderPtr.  If this object happens to be an instance, it points
+    //! to the instance source ObjectReaderPtr
     AbcA::ObjectReaderPtr getPtr() const { return m_object; }
 
-    //! Reset returns this function set to an empty, default
-    //! state.
-    void reset() { m_object.reset(); Base::reset(); }
+    //! Reset returns this function set to an empty, default state.
+    void reset();
 
     //! Valid returns whether this function set is
     //! valid.
@@ -212,17 +239,35 @@ public:
         return ( Base::valid() && m_object );
     }
 
+    //! If an aggregated properties hash exists fill oDigest with it and
+    //! return true, if it doesn't exist return false
+    bool getPropertiesHash( Util::Digest & oDigest );
+
+    //! If an aggregated child objects hash exists fill oDigest with it and
+    //! return true, if it doesn't exist return false
+    bool getChildrenHash( Util::Digest & oDigest );
+
     //! The unspecified-bool-type operator casts the object to "true"
     //! if it is valid, and "false" otherwise.
     ALEMBIC_OPERATOR_BOOL( valid() );
+
+public:
+    AbcA::ObjectReaderPtr m_object;
 
 private:
     void init( AbcA::ObjectReaderPtr iParentObject,
                const std::string &iName,
                ErrorHandler::Policy iPolicy );
 
-public:
-    AbcA::ObjectReaderPtr m_object;
+    void initInstance();
+
+    void setInstancedFullName(const std::string& parentPath) const;
+
+    // This is the "original" object when it is an instance (not the source)
+    AbcA::ObjectReaderPtr m_instanceObject;
+
+    // All IObject ancestors of an instance object have these set.
+    mutable std::string m_instancedFullName;
 };
 
 typedef Alembic::Util::shared_ptr< IObject > IObjectPtr;
@@ -251,8 +296,9 @@ inline IObject::IObject( OBJECT_PTR iParentObject,
 {
     init( GetObjectReaderPtr( iParentObject ),
           iName,
-
           GetErrorHandlerPolicy( iParentObject, iArg0 ) );
+
+    initInstance();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

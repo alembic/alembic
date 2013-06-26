@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -91,7 +91,7 @@ public:
     template <class OBJECT_PTR>
     OCompoundProperty(
         OBJECT_PTR iObject,
-        TopFlag iTopFlag,
+        TopFlag /* iTopFlag */,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
 

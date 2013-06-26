@@ -73,9 +73,12 @@ SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 SET( CORE_LIBS
   AlembicAbcGeom
+  AlembicAbcCoreFactory
   AlembicAbc
   AlembicAbcCoreHDF5
+  AlembicAbcCoreOgawa
   AlembicAbcCoreAbstract
+  AlembicOgawa
   AlembicUtil )
 
 INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )

@@ -34,8 +34,12 @@
 //
 //-*****************************************************************************
 
+#include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
+
+namespace AbcF = Alembic::AbcCoreFactory;
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -49,14 +53,23 @@ const chrono_t g_dt = 1.0 / 24.0;
 //  specifically writing and reading of cyclically sampled properties
 //
 
-void writeProperty(const std::string &archiveName)
+void writeProperty(const std::string &archiveName, bool useOgawa)
 {
     unsigned int numSamples = 5;
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+    OArchive archive;
+    if ( useOgawa )
+    {
+        archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
+                            archiveName, ErrorHandler::kThrowPolicy );
+    }
+    else
+    {
+        archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+                            archiveName, ErrorHandler::kThrowPolicy );
+    }
     OObject archiveTop = archive.getTop();
 
     // Create a child, parented under the archive
@@ -104,13 +117,19 @@ printSampleValue( PROPERTY_CLASS& iProp, const ISampleSelector &iSS )
 }
 
 
-void readProperty(const std::string &archiveName)
+void readProperty(const std::string &archiveName, bool useOgawa)
 {
     // Open an existing archive for reading. Indicate that we want
     //   Alembic to throw exceptions on errors.
     std::cout  << "Reading " << archiveName << std::endl;
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                      archiveName, ErrorHandler::kThrowPolicy );
+    AbcF::IFactory factory;
+    factory.setPolicy(  ErrorHandler::kThrowPolicy );
+    AbcF::IFactory::CoreType coreType;
+    IArchive archive = factory.getArchive(archiveName, coreType);
+    ABCA_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
+                    (!useOgawa && coreType == AbcF::IFactory::kHDF5),
+                  "File did not open as the expected type." );
+
     IObject archiveTop = archive.getTop();
 
     // Determine the number of (top level) children the archive has
@@ -191,16 +210,28 @@ int main( int argc, char *argv[] )
 {
     // Write and read a simple archive: ten children, each with one
     //  simple property
+    bool useOgawa = false;
     try
     {
         std::string archiveName("cyclic_sampling_test.abc");
-        writeProperty ( archiveName );
-        readProperty  ( archiveName );
+        writeProperty ( archiveName, useOgawa );
+        readProperty  ( archiveName, useOgawa );
+        useOgawa = true;
+        writeProperty ( archiveName, useOgawa );
+        readProperty  ( archiveName, useOgawa );
     }
     catch (char * str )
     {
         std::cout << "Exception raised: " << str;
-        std::cout << " during cyclic sampling test" << std::endl;
+        std::cout << " during cyclic sampling test ";
+        if ( useOgawa )
+        {
+            std::cout << "using Ogawa" << std::endl;
+        }
+        else
+        {
+            std::cout << "using HDF5" << std::endl;
+        }
         return 1;
     }
 

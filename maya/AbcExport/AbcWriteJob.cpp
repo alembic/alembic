@@ -36,6 +36,7 @@
 
 #include "AbcWriteJob.h"
 #include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 namespace
 {
     void hasDuplicates(const util::ShapeSet & dagPath, unsigned int stripDepth)
@@ -159,6 +160,7 @@ namespace
 }
 
 AbcWriteJob::AbcWriteJob(const char * iFileName,
+    bool iAsOgawa,
     std::set<double> & iTransFrames,
     Alembic::AbcCoreAbstract::TimeSamplingPtr iTransTime,
     std::set<double> & iShapeFrames,
@@ -167,6 +169,7 @@ AbcWriteJob::AbcWriteJob(const char * iFileName,
 {
     MStatus status;
     mFileName = iFileName;
+    mAsOgawa = iAsOgawa;
     mBoxIndex = 0;
     mArgs = iArgs;
     mShapeSamples = 1;
@@ -235,7 +238,7 @@ MBoundingBox AbcWriteJob::getBoundingBox(double iFrame, const MMatrix & eMInvMat
     if (iFrame == mFirstFrame)
     {
         // Set up bbox shape map in the first frame.
-        // If we have a lot of transforms and shapes, we don't need to 
+        // If we have a lot of transforms and shapes, we don't need to
         // iterate them for each frame.
         MItDag dagIter;
         for (dagIter.reset(mCurDag); !dagIter.isDone(); dagIter.next())
@@ -271,12 +274,12 @@ MBoundingBox AbcWriteJob::getBoundingBox(double iFrame, const MMatrix & eMInvMat
                     dagIter.prune();
 
                     // Save children paths
-                    std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter = 
+                    std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter =
                         mBBoxShapeMap.insert(std::make_pair(mCurDag, util::ShapeSet())).first;
                     if (iter != mBBoxShapeMap.end())
                         (*iter).second.insert(path);
                 }
-                else if (object.hasFn(MFn::kParticle) 
+                else if (object.hasFn(MFn::kParticle)
                     || object.hasFn(MFn::kMesh)
                     || object.hasFn(MFn::kNurbsCurve)
                     || object.hasFn(MFn::kNurbsSurface) )
@@ -289,7 +292,7 @@ MBoundingBox AbcWriteJob::getBoundingBox(double iFrame, const MMatrix & eMInvMat
                     curBBox.expand(box);
 
                     // Save children paths
-                    std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter = 
+                    std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter =
                         mBBoxShapeMap.insert(std::make_pair(mCurDag, util::ShapeSet())).first;
                     if (iter != mBBoxShapeMap.end())
                         (*iter).second.insert(path);
@@ -300,13 +303,13 @@ MBoundingBox AbcWriteJob::getBoundingBox(double iFrame, const MMatrix & eMInvMat
     else
     {
         // We have already find out all the shapes for the dag path.
-        std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter = 
+        std::map< MDagPath, util::ShapeSet, util::cmpDag >::iterator iter =
             mBBoxShapeMap.find(mCurDag);
         if (iter != mBBoxShapeMap.end())
         {
             // Iterate through the saved paths to calculate the box.
             util::ShapeSet& paths = (*iter).second;
-            for (util::ShapeSet::iterator pathIter = paths.begin(); 
+            for (util::ShapeSet::iterator pathIter = paths.begin();
                 pathIter != paths.end(); pathIter++)
             {
                 MFnDagNode dagNode(*pathIter, &status);
@@ -776,9 +779,18 @@ bool AbcWriteJob::eval(double iFrame)
             userInfo = "";
         }
 
-        mRoot = CreateArchiveWithInfo(Alembic::AbcCoreHDF5::WriteArchive(),
-            mFileName, appWriter, userInfo,
-            Alembic::Abc::ErrorHandler::kThrowPolicy);
+        if (mAsOgawa)
+        {
+            mRoot = CreateArchiveWithInfo(Alembic::AbcCoreOgawa::WriteArchive(),
+                mFileName, appWriter, userInfo,
+                Alembic::Abc::ErrorHandler::kThrowPolicy);
+        }
+        else
+        {
+            mRoot = CreateArchiveWithInfo(Alembic::AbcCoreHDF5::WriteArchive(),
+                mFileName, appWriter, userInfo,
+                Alembic::Abc::ErrorHandler::kThrowPolicy);
+        }
         mShapeTimeIndex = mRoot.addTimeSampling(*mShapeTime);
         mTransTimeIndex = mRoot.addTimeSampling(*mTransTime);
 
