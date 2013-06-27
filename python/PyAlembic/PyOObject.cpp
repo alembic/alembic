@@ -99,6 +99,9 @@ void register_oobject()
               "optional arguments which can be use to override the "
               "ErrorHandlerPolicy, to specify MetaData" ) )
         .def( init<>( "Create an empty OObject" ) )
+        .def( "addChildInstance",
+              &Abc::OObject::addChildInstance,
+              "Add a child to this OObject as an instance of another already created OObject" )
         .def( "getHeader",
               &Abc::OObject::getHeader,
               "Return the header of this object", 
@@ -125,8 +128,8 @@ void register_oobject()
         .def( "getChildHeader",
               getChildHeaderByName,
               ( arg("name" ) ),
-              "Return the header of a child OObect with the given name of "
-              "the OObejct - even if the OObject no longer exists",
+              "Return the header of a child OObject with the given name of "
+              "the OObject - even if the OObject no longer exists",
               return_value_policy<reference_existing_object>() )
         .def( "getProperties",
               &Abc::OObject::getProperties,

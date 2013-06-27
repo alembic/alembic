@@ -122,6 +122,59 @@ static Abc::IObject getChildByName( Abc::IObject &o, const std::string& name )
 }
 
 //-*****************************************************************************
+static bool isChildInstanceByIndex( Abc::IObject &o, size_t i )
+{
+    if ( i >= o.getNumChildren() )
+    {
+        std::stringstream stream;
+        stream << i;
+        throwPythonIndexException( stream.str().c_str() );
+    }
+    const Abc::IObject& c = o.getChild( i );
+    if ( !c.valid() )
+    {
+        return false;
+    }
+
+    return c.isInstanceDescendant();
+}
+
+//-*****************************************************************************
+static bool isChildInstanceByName( Abc::IObject &o, const std::string& name )
+{
+    const Abc::IObject& c = o.getChild( name );
+    if ( c.valid() )
+    {
+        return c.isInstanceDescendant();
+    }
+
+    std::stringstream stream;
+    stream << name;
+    throwPythonKeyException( stream.str().c_str() );
+    return false;
+}
+
+//-*****************************************************************************
+static std::string getPropertiesHash( Abc::IObject &o )
+{
+    Alembic::Util::Digest pHash;
+    if ( !o.getPropertiesHash( pHash ) )
+        return "";
+
+    return pHash.str();
+}
+
+//-*****************************************************************************
+static std::string getChildrenHash( Abc::IObject &o )
+{
+    Alembic::Util::Digest cHash;
+    if ( !o.getChildrenHash( cHash ) )
+        return "";
+
+    return cHash.str();
+}
+
+//-*****************************************************************************
 void register_iobject()
 {
     // overloads
@@ -199,6 +252,29 @@ void register_iobject()
               &Abc::IObject::getMetaData,
               "Return the MetaData of this object",
               return_internal_reference<1>() )
+        .def( "isInstanceRoot",
+              &Abc::IObject::isInstanceRoot,
+              "Return true if this IObject is an instance root" )
+        .def( "isInstanceDescendant",
+              &Abc::IObject::isInstanceDescendant,
+              "Return true if this IObject is an instanceRoot, or an ancestor of one" )
+        .def( "instanceSourcePath",
+              &Abc::IObject::instanceSourcePath,
+              "Return the instance source path that the instance points at. Empty string if not found." )
+        .def( "isChildInstance",
+              &isChildInstanceByIndex,
+              ( arg( "index" ) ),
+              "Return true if the child by index is an instance root object" )
+        .def( "isChildInstance",
+              &isChildInstanceByName,
+              ( arg( "name" ) ),
+              "Return true if the named child is an instance root object" )
+        .def( "getPropertiesHash",
+              &getPropertiesHash,
+              "Return a string representation of the properties hash for this object. Empty string if not found." )
+        .def( "getChildrenHash",
+              &getChildrenHash,
+              "Return a string representation of the children hash for this object. Empty string if not found." )
         .def( "valid", &Abc::IObject::valid )
         .def( "reset", &Abc::IObject::reset )
         .def( "__str__", &Abc::IObject::getFullName,
