@@ -53,6 +53,8 @@ namespace AbcA = ::Alembic::AbcCoreAbstract;
 namespace AbcF = ::Alembic::AbcCoreFactory;
 namespace AbcG = ::Alembic::AbcGeom;
 
+using AbcA::index_t;
+
 #define RESETCOLOR "\033[0m"
 #define GRAYCOLOR "\033[1;30m"
 #define GREENCOLOR "\033[1;32m"
@@ -63,23 +65,34 @@ namespace AbcG = ::Alembic::AbcGeom;
 #define COL_2 15
 
 //-*****************************************************************************
+bool is_digit(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
+//-*****************************************************************************
 void printParent( Abc::ICompoundProperty iProp, 
                   bool all = false, 
                   bool long_list = false, 
                   bool recursive = false,
-                  bool first = false ) {
+                  bool first = false ) 
+{
     std::cout << CYANCOLOR
               << iProp.getObject().getFullName() << "/" 
               << iProp.getName() << ":"
               << RESETCOLOR
               << std::endl;
 }
+
 //-*****************************************************************************
 void printParent( AbcG::IObject iObj,
                   bool all = false, 
                   bool long_list = false, 
                   bool recursive = false,
-                  bool first = false ) {
+                  bool first = false ) 
+{
     if ( !first && !long_list )
         std::cout << std::endl;
     std::cout << CYANCOLOR
@@ -125,13 +138,160 @@ template<class PROPERTY>
 void getMetaData( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
                   bool all = false, bool long_list = false ) 
 {
-    PROPERTY iProp = PROPERTY( iParent, header.getName() );
+    PROPERTY iProp( iParent, header.getName() );
     printMetaData( iProp.getMetaData(), all, long_list );
 }
 
 //-*****************************************************************************
+template<class PROPERTY>
+void printSampleValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
+                       const Abc::ISampleSelector &iSS )
+{
+    PROPERTY iProp( iParent, header.getName() );
+    std::cout << iProp.getValue( iSS ) << std::endl;
+}
+
+//-*****************************************************************************
+void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
+                 int index = 0 )
+{
+    Abc::ISampleSelector iss( (index_t) index );
+    Abc::DataType dType = header.getDataType();
+
+    switch ( dType.getPod() )
+    {
+        // Boolean
+        case Abc::kBooleanPOD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IBoolArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IBoolProperty>( iParent, header, iss );
+            }
+            break;
+        }
+
+        // Char/UChar
+        case Abc::kUint8POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IUcharArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IUcharProperty>( iParent, header, iss );
+            }
+            break;
+        }
+
+        case Abc::kInt8POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::ICharArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::ICharProperty>( iParent, header, iss );
+            }
+            break;
+        }
+
+        // Short/UShort
+        case Abc::kUint16POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IUInt16ArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IUInt16Property>( iParent, header, iss );
+            }
+            break;
+        }
+
+        case Abc::kInt16POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IInt16ArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IInt16Property>( iParent, header, iss );
+            }
+            break;
+        }
+
+        // Int/UInt
+        case Abc::kUint32POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IUInt32ArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IUInt32Property>( iParent, header, iss );
+            }
+            break;
+        }
+
+        case Abc::kInt32POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IInt32ArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IInt32Property>( iParent, header, iss );
+            };
+            break;
+        }
+
+        // Long/ULong
+        case Abc::kUint64POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IUInt64ArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IUInt64Property>( iParent, header, iss );
+            };
+            break;
+        }
+
+        case Abc::kInt64POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IInt64ArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IInt64Property>( iParent, header, iss );
+            };
+            break;
+        }
+
+        // Half/Float/Double
+        case Abc::kFloat16POD:
+            // iostream doesn't understand float_16's
+            //printSampleValue( IHalfProperty( iParent, header.getName() ),
+            //                  iss );
+            break;
+        
+        case Abc::kFloat32POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IFloatArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IFloatProperty>( iParent, header, iss );
+            };
+            break;
+        }
+        
+        case Abc::kFloat64POD:
+        {
+            if ( header.isArray() ) {
+                printSampleValue<Abc::IDoubleArrayProperty>( iParent, header, iss );
+            } else {
+                printSampleValue<Abc::IDoubleProperty>( iParent, header, iss );
+            };
+            break;
+        }
+
+        case Abc::kUnknownPOD:
+        default:
+            std::cout << "Unknown property type" << std::endl;
+    }
+}
+
+//-*****************************************************************************
 void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header, 
-                 bool all = false, bool long_list = false, bool meta = false ) {
+                 bool all = false, bool long_list = false, bool meta = false ) 
+{
    
     std::string ptype; 
     AbcA::MetaData md;
@@ -187,7 +347,8 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 
 //-*****************************************************************************
 void printChild( AbcG::IObject iParent, AbcG::IObject iObj, 
-                 bool all = false, bool long_list = false, bool meta = false ) {
+                 bool all = false, bool long_list = false, bool meta = false ) 
+{
 
     AbcA::MetaData md = iObj.getMetaData();
 
@@ -314,10 +475,11 @@ bool optionExists(std::vector<std::string> options, std::string option)
 int main( int argc, char *argv[] )
 {
     //float opt_fps = 24.0;
-    bool opt_all = false;
-    bool opt_long = false;
-    bool opt_meta = false;
-    bool opt_recursive = false;
+    bool opt_all = false; // show all option
+    bool opt_long = false; // long listing option
+    bool opt_meta = false; // metadata option
+    bool opt_recursive = false; // recursive option
+    int index = -1; // sample number, at tail of path
     std::string desc( "abcls [OPTION] FILE[/NAME] \n"
     "  -a          include property listings\n"
     //"  --fps[=FPS] show values in frames per second\n"
@@ -374,9 +536,9 @@ int main( int argc, char *argv[] )
         /* 
          * separate file and object paths, e.g.
          *
-         *   ../dir1/foo.abc/bar/baz
-         *   \_____________/\______/
-         *        file         obj
+         *   ../dir1/foo.abc/bar/baz/index
+         *   \_____________/\______/\____/
+         *        file         obj   sample
          */
         int i = 0;
         while ( std::getline( ss, segment, '/' ) ) {
@@ -384,6 +546,8 @@ int main( int argc, char *argv[] )
                 if ( i != 0 )
                     fp << "/";
                 fp << segment;
+            } else if ( is_digit( segment ) ) {
+                index = atoi( segment.c_str() );
             } else {
                 seglist.push_back( segment );
             }
@@ -470,17 +634,22 @@ int main( int argc, char *argv[] )
         }
 
         // do stuff
-        if ( found && header->isCompound() )
-            visit( props, opt_all, opt_long, opt_meta, opt_recursive, true );
-        else if ( found && header->isSimple() )
-            printChild( props, *header, opt_all, opt_long );
-        else
-            visit( iObj, opt_all, opt_long, opt_meta, opt_recursive, true );
-        
-        std::cout << RESETCOLOR;
-        if ( !opt_long )
-            std::cout << std::endl;
-    };
-    
+        if ( index >= 0 ) {
+            printValue( props, *header, index );
+
+        } else {
+
+            if ( found && header->isCompound() )
+                visit( props, opt_all, opt_long, opt_meta, opt_recursive, true );
+            else if ( found && header->isSimple() )
+                printChild( props, *header, opt_all, opt_long );
+            else
+                visit( iObj, opt_all, opt_long, opt_meta, opt_recursive, true );
+
+            std::cout << RESETCOLOR;
+            if ( !opt_long )
+                std::cout << std::endl;
+        }
+    }
     return 0;
 }
