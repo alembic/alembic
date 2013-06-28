@@ -151,7 +151,7 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             }
             else if (op.getHint() == "preScale")
             {
-                oArray[13] = simpleLerp<double>(alpha,
+                oArray[13] = 1.0 / simpleLerp<double>(alpha,
                     op.getChannelValue(0), ceilOp.getChannelValue(0));
             }
             else if (op.getHint() == "filmTranslate")
@@ -164,7 +164,7 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             }
             else if (op.getHint() == "postScale")
             {
-                oArray[16] = simpleLerp<double>(alpha,
+                oArray[16] = 1.0 / simpleLerp<double>(alpha,
                     op.getChannelValue(0), ceilOp.getChannelValue(0));
             }
             else if (op.getHint() == "cameraScale")
@@ -227,7 +227,7 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             }
             else if (op.getHint() == "preScale")
             {
-                oArray[13] = op.getChannelValue(0);
+                oArray[13] = 1.0 / op.getChannelValue(0);
             }
             else if (op.getHint() == "filmTranslate")
             {
@@ -237,7 +237,7 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
             }
             else if (op.getHint() == "postScale")
             {
-                oArray[16] = op.getChannelValue(0);
+                oArray[16] = 1.0 / op.getChannelValue(0);
             }
             else if (op.getHint() == "cameraScale")
             {
@@ -345,7 +345,7 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
             }
             else if (op.getHint() == "preScale")
             {
-                fnCamera.setPreScale(op.getChannelValue(0));
+                fnCamera.setPreScale(1.0/op.getChannelValue(0));
             }
             else if (op.getHint() == "filmTranslate")
             {
@@ -354,7 +354,7 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
             }
             else if (op.getHint() == "postScale")
             {
-                fnCamera.setPostScale(op.getChannelValue(0));
+                fnCamera.setPostScale(1.0/op.getChannelValue(0));
             }
             else if (op.getHint() == "cameraScale")
             {

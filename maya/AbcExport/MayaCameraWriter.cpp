@@ -293,14 +293,14 @@ void MayaCameraWriter::write()
         break;
     }
 
-    mSamp[filmBackIndex].setChannelValue(0, mfnCamera.preScale());
-    mSamp[filmBackIndex].setChannelValue(1, mfnCamera.preScale());
+    mSamp[filmBackIndex].setChannelValue(0, 1.0/mfnCamera.preScale());
+    mSamp[filmBackIndex].setChannelValue(1, 1.0/mfnCamera.preScale());
 
     mSamp[filmBackIndex+1].setChannelValue(0, mfnCamera.filmTranslateH());
     mSamp[filmBackIndex+1].setChannelValue(1, mfnCamera.filmTranslateV());
 
-    mSamp[filmBackIndex+2].setChannelValue(0, mfnCamera.postScale());
-    mSamp[filmBackIndex+2].setChannelValue(1, mfnCamera.postScale());
+    mSamp[filmBackIndex+2].setChannelValue(0, 1.0/mfnCamera.postScale());
+    mSamp[filmBackIndex+2].setChannelValue(1, 1.0/mfnCamera.postScale());
 
     mSamp[filmBackIndex+3].setChannelValue(0, mfnCamera.cameraScale());
     mSamp[filmBackIndex+3].setChannelValue(1, mfnCamera.cameraScale());

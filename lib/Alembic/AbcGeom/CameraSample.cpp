@@ -149,16 +149,16 @@ void CameraSample::getScreenWindow( double & oTop, double & oBottom,
     double offsetX = 2.0 * m_horizontalFilmOffset * m_lensSqueezeRatio /
         m_horizontalAperture;
 
-    oLeft = -( 1.0 + m_overscanLeft ) * m_lensSqueezeRatio + offsetX;
+    oLeft = -( 1.0 + m_overscanLeft ) * m_lensSqueezeRatio;
 
-    oRight = ( 1.0 + m_overscanRight ) * m_lensSqueezeRatio + offsetX;
+    oRight = ( 1.0 + m_overscanRight ) * m_lensSqueezeRatio;
 
     double aperY = m_lensSqueezeRatio * m_verticalAperture /
         m_horizontalAperture;
     double offsetY = 2.0 * m_verticalFilmOffset / m_horizontalAperture;
 
-    oBottom = -( 1.0 + m_overscanBottom ) * aperY + offsetY;
-    oTop = ( 1.0 + m_overscanTop ) * aperY + offsetY;
+    oBottom = -( 1.0 + m_overscanBottom ) * aperY;
+    oTop = ( 1.0 + m_overscanTop ) * aperY;
 
     Abc::V2d lt ( oLeft, oTop );
     Abc::V2d rb ( oRight, oBottom );
@@ -167,10 +167,10 @@ void CameraSample::getScreenWindow( double & oTop, double & oBottom,
     Abc::V2d flt, frb;
     mat.multVecMatrix( lt, flt );
     mat.multVecMatrix( rb, frb );
-    oLeft = flt.x;
-    oTop = flt.y;
-    oRight = frb.x;
-    oBottom = frb.y;
+    oLeft = flt.x + offsetX;
+    oTop = flt.y + offsetY;
+    oRight = frb.x + offsetX;
+    oBottom = frb.y + offsetY;
 }
 
 //-*****************************************************************************
