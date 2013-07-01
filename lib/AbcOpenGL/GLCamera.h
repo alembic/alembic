@@ -77,6 +77,7 @@ public:
     int height() const { return m_size.y; }
 
     void autoSetClippingPlanes( const Box3d &bounds );
+    V2d clippingPlanes() const { return m_clip; }
     void setClippingPlanes( double nearValue, double farValue )
     {
         m_clip.x = nearValue;

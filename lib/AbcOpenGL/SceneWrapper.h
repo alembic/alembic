@@ -42,17 +42,30 @@
 
 namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
-
+    
+//-*****************************************************************************
 struct double_vec {
     float xyz[3];
 };
 
+//-*****************************************************************************
 class SceneWrapper {
 public:
-    SceneWrapper(const char* abc_file_name);
+    SceneWrapper( const std::string &fileName, bool verbose = false );
 
     void draw();
+
+    void setTime(chrono_t newTime);
+    void playForward(int fps);
+    bool isConstant();
+
     Imath::Box<Imath::Vec3<double> > bounds();
+
+    void frame(const Box3d &bounds);
+
+    chrono_t getMinTime();
+    chrono_t getMaxTime();
+    chrono_t getCurrentTime();
 
     double_vec min_bounds();
     double_vec max_bounds();

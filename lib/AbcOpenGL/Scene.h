@@ -46,6 +46,9 @@ namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
+void setMaterials( float o, bool negMatrix );
+
+//-*****************************************************************************
 class Timer
 {
 public:
@@ -73,7 +76,7 @@ class Scene
 public:
     //! Load a scene from the alembic archive given by the filename.
     //! ...
-    Scene( const std::string &abcFileName );
+    Scene( const std::string &abcFileName, bool verbose = true );
 
     //! Return the filename of the archive
     //! ...

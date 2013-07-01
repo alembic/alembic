@@ -36,14 +36,19 @@
 
 #include <AbcOpenGL/SceneWrapper.h>
 #include <AbcOpenGL/Scene.h>
+#include <ctime>
 
 namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
 
+//-*****************************************************************************
+static Timer g_playbackTimer;
+
 class SceneWrapper::_scn_impl {
 public:
-    _scn_impl(const char* fname) :
-        m_scene(Scene(fname))
+    _scn_impl( const std::string &fileName, bool verbose )
+        : m_scene( Scene( fileName, verbose ) )
+        , m_currentSeconds( m_scene.getMinTime() )
     {
     }
 
@@ -51,16 +56,58 @@ public:
         m_scene.draw(m_state);
     }
 
+    void playForward(int fps) {
+        if ( g_playbackTimer.elapsed() > 1.0f / fps )
+        {
+            g_playbackTimer.restart();
+            if ( m_scene.isConstant() ) { return; }
+            m_secondsPerFrame = 1.0f / fps;
+            m_currentSeconds += m_secondsPerFrame;
+            if ( m_currentSeconds > m_scene.getMaxTime() )
+            {
+                m_currentSeconds = m_scene.getMinTime();
+            }
+            m_scene.setTime( m_currentSeconds );
+        }
+    }
+
+    chrono_t getMinTime() {
+        return m_scene.getMinTime();
+    }
+
+    chrono_t getMaxTime() {
+        return m_scene.getMaxTime();
+    }
+
+    chrono_t getCurrentTime() {
+        return m_currentSeconds;
+    }
+
+    bool isConstant() {
+        return m_scene.isConstant();
+    }
+
+    void setTime(chrono_t newTime) {
+        m_scene.setTime(newTime);
+    }
+
     Imath::Box<Imath::Vec3<double> > bounds() {
         return m_scene.getBounds();
     }
 
+    void frame(const Box3d &bounds) {
+        m_state.cam.frame(bounds);
+    }
+
     Scene m_scene;
     SceneState m_state;
+    chrono_t m_framesPerSecond;
+    chrono_t m_secondsPerFrame;
+    chrono_t m_currentSeconds;
 };
 
-SceneWrapper::SceneWrapper(const char* abc_file_name):
-    m_state(new _scn_impl(abc_file_name))
+SceneWrapper::SceneWrapper( const std::string &fileName, bool verbose ):
+    m_state(new _scn_impl( fileName, verbose ))
 {}
 
 void SceneWrapper::draw()
@@ -68,9 +115,44 @@ void SceneWrapper::draw()
     m_state->draw();
 }
 
+void SceneWrapper::setTime(chrono_t newTime)
+{
+    m_state->setTime(newTime);
+}
+
+void SceneWrapper::playForward(int fps)
+{
+    m_state->playForward( fps );
+}
+
+chrono_t SceneWrapper::getMinTime()
+{
+    return m_state->getMinTime();
+}
+
+chrono_t SceneWrapper::getMaxTime()
+{
+    return m_state->getMaxTime();
+}
+
+chrono_t SceneWrapper::getCurrentTime()
+{
+    return m_state->getCurrentTime();
+}
+
+bool SceneWrapper::isConstant()
+{
+    return m_state->isConstant();
+}
+
 Imath::Box<Imath::Vec3<double> > SceneWrapper::bounds()
 {
     return m_state->bounds();
+}
+
+void SceneWrapper::frame(const Box3d &bounds)
+{
+    m_state->frame(bounds);
 }
 
 double_vec

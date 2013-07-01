@@ -85,64 +85,43 @@ void setMaterials( float o, bool negMatrix = false )
 //-*****************************************************************************
 // SCENE CLASS
 //-*****************************************************************************
-
-//-*****************************************************************************
-Scene::Scene( const std::string &abcFileName )
-  : m_fileName( abcFileName )
+Scene::Scene( const std::string &fileName, bool verbose )
+  : m_fileName( fileName )
   , m_minTime( ( chrono_t )FLT_MAX )
   , m_maxTime( ( chrono_t )-FLT_MAX )
 {
     Timer playbackTimer;
 
-    std::cout << "Beginning to open archive: " << abcFileName << std::endl;
-
     Alembic::AbcCoreFactory::IFactory factory;
-    m_archive = factory.getArchive( abcFileName );
-
-    std::string appName;
-    std::string libraryVersionString;
-    Alembic::Util::uint32_t libraryVersion;
-    std::string whenWritten;
-    std::string userDescription;
-    GetArchiveInfo (m_archive,
-                    appName,
-                    libraryVersionString,
-                    libraryVersion,
-                    whenWritten,
-                    userDescription);
-    if (appName != "")
-    {
-        std::cout << "  file written by: " << appName << std::endl;
-        std::cout << "  using Alembic : " << libraryVersionString << std::endl;
-        std::cout << "  written on : " << whenWritten << std::endl;
-        std::cout << "  user description : " << userDescription << std::endl;
-        std::cout << std::endl;
-    }
+    m_archive = factory.getArchive( fileName );
 
     m_topObject = IObject( m_archive, kTop );
 
-    std::cout << "Opened archive and top object, creating drawables."
-              << std::endl;
+    if ( verbose )
+        std::cout << "Opened archive and top object, creating drawables."
+                  << std::endl;
 
     m_drawable.reset( new IObjectDrw( m_topObject, false ) );
     ABCA_ASSERT( m_drawable->valid(),
-                 "Invalid drawable for archive: " << abcFileName );
+                 "Invalid drawable for archive: " << fileName );
 
-    std::cout << "Created drawables, getting time range." << std::endl;
+    if ( verbose )
+        std::cout << "Created drawables, getting time range." << std::endl;
+    
     m_minTime = m_drawable->getMinTime();
     m_maxTime = m_drawable->getMaxTime();
 
-    if ( m_minTime <= m_maxTime )
-    {
-        std::cout << "\nMin Time: " << m_minTime << " seconds " << std::endl
-                  << "Max Time: " << m_maxTime << " seconds " << std::endl
-                  << "\nLoading min time." << std::endl;
+    if ( m_minTime <= m_maxTime ) {
+        if ( verbose )
+            std::cout << "\nMin Time: " << m_minTime << " seconds " << std::endl
+                      << "Max Time: " << m_maxTime << " seconds " << std::endl
+                      << "\nLoading min time." << std::endl;
         m_drawable->setTime( m_minTime );
     }
-    else
-    {
-        std::cout << "\nConstant Time." << std::endl
-                  << "\nLoading constant sample." << std::endl;
+    else {
+        if ( verbose )
+            std::cout << "\nConstant Time." << std::endl
+                      << "\nLoading constant sample." << std::endl;
         m_minTime = m_maxTime = 0.0;
         m_drawable->setTime( 0.0 );
     }
@@ -150,13 +129,16 @@ Scene::Scene( const std::string &abcFileName )
     ABCA_ASSERT( m_drawable->valid(),
                  "Invalid drawable after reading start time" );
 
-    std::cout << "Done opening archive. Elapsed CPU time: "
-              << ((float)playbackTimer.elapsed()) / CLOCKS_PER_SEC << " seconds." << std::endl;
+    if ( verbose )
+        std::cout << "Done opening archive. Elapsed CPU time: "
+                  << ((float)playbackTimer.elapsed()) / CLOCKS_PER_SEC << " seconds." << std::endl;
 
     // Bounds have been formed!
     m_bounds = m_drawable->getBounds();
-    std::cout << "Bounds at min time: " << m_bounds.min << " to "
-              << m_bounds.max << std::endl;
+    
+    if ( verbose )
+        std::cout << "Bounds at min time: " << m_bounds.min << " to "
+                  << m_bounds.max << std::endl;
 }
 
 //-*****************************************************************************
@@ -185,7 +167,7 @@ void Scene::draw( SceneState &s_state )
                  "Invalid Scene: " << m_fileName );
 
     glEnable( GL_LIGHTING );
-    setMaterials( 1.0, false );
+    //setMaterials( 1.0, false );
 
     // Get the matrix
     M44d currentMatrix;
