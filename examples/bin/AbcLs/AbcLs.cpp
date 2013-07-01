@@ -79,14 +79,14 @@ bool is_digit(const std::string& s)
 }
 
 //-*****************************************************************************
-void printParent( Abc::ICompoundProperty iProp, 
-                  bool all = false, 
-                  bool long_list = false, 
+void printParent( Abc::ICompoundProperty iProp,
+                  bool all = false,
+                  bool long_list = false,
                   bool recursive = false,
-                  bool first = false ) 
+                  bool first = false )
 {
     std::cout << CYANCOLOR
-              << iProp.getObject().getFullName() << "/" 
+              << iProp.getObject().getFullName() << "/"
               << iProp.getName() << ":"
               << RESETCOLOR
               << std::endl;
@@ -94,10 +94,10 @@ void printParent( Abc::ICompoundProperty iProp,
 
 //-*****************************************************************************
 void printParent( AbcG::IObject iObj,
-                  bool all = false, 
-                  bool long_list = false, 
+                  bool all = false,
+                  bool long_list = false,
                   bool recursive = false,
-                  bool first = false ) 
+                  bool first = false )
 {
     if ( !first && !long_list )
         std::cout << std::endl;
@@ -109,7 +109,7 @@ void printParent( AbcG::IObject iObj,
 
 //-*****************************************************************************
 void printMetaData( AbcA::MetaData md, bool all = false,
-                    bool long_list = false ) 
+                    bool long_list = false )
 {
     std::stringstream ss( md.serialize() );
     std::string segment;
@@ -122,7 +122,7 @@ void printMetaData( AbcA::MetaData md, bool all = false,
         if ( md.size() == 1 ) {
             std::cout << GRAYCOLOR << " {"
                       << md.serialize()
-                      << "}" 
+                      << "}"
                       << RESETCOLOR;
         } else if ( md.size() > 1 ) {
             std::cout << GRAYCOLOR << " {" << std::endl;
@@ -142,7 +142,7 @@ void printMetaData( AbcA::MetaData md, bool all = false,
 //-*****************************************************************************
 template<class PROPERTY>
 void getMetaData( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
-                  bool all = false, bool long_list = false ) 
+                  bool all = false, bool long_list = false )
 {
     PROPERTY iProp( iParent, header.getName() );
     printMetaData( iProp.getMetaData(), all, long_list );
@@ -173,7 +173,7 @@ void printSampleValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader heade
     } else {
         PROPERTY iProp( iParent, header.getName() );
         std::cout << iProp.getValue( iSS ) << std::endl;
-    } 
+    }
 }
 
 //-*****************************************************************************
@@ -265,11 +265,11 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 }
 
 //-*****************************************************************************
-void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header, 
-                 bool all = false, bool long_list = false, bool meta = false ) 
+void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
+                 bool all = false, bool long_list = false, bool meta = false )
 {
-   
-    std::string ptype; 
+
+    std::string ptype;
     AbcA::MetaData md;
 
     if ( long_list ) {
@@ -302,7 +302,7 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
         }
         if ( meta ) {
             if ( header.isCompound() )
-                getMetaData<Abc::ICompoundProperty>( iParent, header, 
+                getMetaData<Abc::ICompoundProperty>( iParent, header,
                                           all, long_list );
             else if ( header.isScalar() )
                 getMetaData<Abc::IScalarProperty>( iParent, header,
@@ -322,8 +322,8 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 }
 
 //-*****************************************************************************
-void printChild( AbcG::IObject iParent, AbcG::IObject iObj, 
-                 bool all = false, bool long_list = false, bool meta = false ) 
+void printChild( AbcG::IObject iParent, AbcG::IObject iObj,
+                 bool all = false, bool long_list = false, bool meta = false )
 {
 
     AbcA::MetaData md = iObj.getMetaData();
@@ -349,9 +349,9 @@ void printChild( AbcG::IObject iParent, AbcG::IObject iObj,
 }
 
 //-*****************************************************************************
-void visit( Abc::ICompoundProperty iProp, 
-            bool all = false, 
-            bool long_list = false, 
+void visit( Abc::ICompoundProperty iProp,
+            bool all = false,
+            bool long_list = false,
             bool meta = false,
             bool recursive = false,
             bool first = false )
@@ -371,26 +371,26 @@ void visit( Abc::ICompoundProperty iProp,
         for( size_t i = 0; i < iProp.getNumProperties(); ++i ) {
             Abc::PropertyHeader header = iProp.getPropertyHeader( i );
             if ( header.isCompound() )
-                visit( Abc::ICompoundProperty( iProp, header.getName() ), 
+                visit( Abc::ICompoundProperty( iProp, header.getName() ),
                        all, long_list, meta, recursive, false );
         }
     }
 }
 
 //-*****************************************************************************
-void visit( AbcG::IObject iObj, 
-            bool all = false, 
-            bool long_list = false, 
+void visit( AbcG::IObject iObj,
+            bool all = false,
+            bool long_list = false,
             bool meta = false,
             bool recursive = false,
             bool first = false )
 
 {
     Abc::ICompoundProperty props = iObj.getProperties();
-    
+
     // header
-    if ( recursive && 
-       ( iObj.getNumChildren() > 0 || 
+    if ( recursive &&
+       ( iObj.getNumChildren() > 0 ||
        ( all && props.getNumProperties() > 0 ) ) ) {
         printParent( iObj, all, long_list, recursive, first);
     }
@@ -414,7 +414,7 @@ void visit( AbcG::IObject iObj,
             if ( header.isCompound() ) {
                 if ( !long_list )
                     std::cout << std::endl;
-                visit( Abc::ICompoundProperty( props, header.getName() ), 
+                visit( Abc::ICompoundProperty( props, header.getName() ),
                        all, long_list, meta, recursive, false );
             }
         }
@@ -441,7 +441,7 @@ bool isFile( const std::string& filename )
 //-*****************************************************************************
 bool optionExists(std::vector<std::string> options, std::string option)
 {
-    for ( std::size_t i = 0; i < options.size(); i++ ) 
+    for ( std::size_t i = 0; i < options.size(); i++ )
         if ( options[i].find(option) != std::string::npos )
             return true;
     return false;
@@ -475,8 +475,8 @@ int main( int argc, char *argv[] )
     std::vector<std::string> arguments(argv, argv + argc);
     std::vector<std::string> options;
     std::vector<std::string> files;
-   
-    // separate file args from option args 
+
+    // separate file args from option args
     for ( std::size_t i = 1; i < arguments.size(); i++ ) {
         if ( arguments[ i ].substr( 0, 1 ) == "-" )
             options.push_back( arguments[ i ] );
@@ -509,17 +509,17 @@ int main( int argc, char *argv[] )
         std::string segment;
         std::vector<std::string> seglist;
 
-        /* 
+        /*
          * separate file and object paths, e.g.
          *
          *   ../dir1/foo.abc/bar/baz/index
          *   \_____________/\______/\____/
          *        file         obj   sample
          */
-        int i = 0;
+        int j = 0;
         while ( std::getline( ss, segment, '/' ) ) {
             if ( !isFile ( fp.str() ) ) {
-                if ( i != 0 )
+                if ( j != 0 )
                     fp << "/";
                 fp << segment;
             } else if ( is_digit( segment ) ) {
@@ -527,7 +527,7 @@ int main( int argc, char *argv[] )
             } else {
                 seglist.push_back( segment );
             }
-            ++i;
+            ++j;
         }
 
         // open the iarchive
@@ -536,8 +536,8 @@ int main( int argc, char *argv[] )
         factory.setPolicy(Abc::ErrorHandler::kQuietNoopPolicy);
         AbcF::IFactory::CoreType coreType;
         archive = factory.getArchive(std::string( fp.str() ), coreType);
-       
-        // display file metadata 
+
+        // display file metadata
         if ( opt_meta && seglist.size() == 0 ) {
             std::cout  << "Using "
                        << Alembic::AbcCoreAbstract::GetLibraryVersion()
@@ -602,8 +602,8 @@ int main( int argc, char *argv[] )
             } else if ( header && header->isSimple() ) {
                 found = true;
             } else {
-                std::cout << seglist[i] 
-                          << ": Invalid object or property" 
+                std::cout << seglist[i]
+                          << ": Invalid object or property"
                           << std::endl;
                 return 1;
             }
