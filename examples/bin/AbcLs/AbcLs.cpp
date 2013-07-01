@@ -52,6 +52,7 @@ namespace Abc  = ::Alembic::Abc;
 namespace AbcA = ::Alembic::AbcCoreAbstract;
 namespace AbcF = ::Alembic::AbcCoreFactory;
 namespace AbcG = ::Alembic::AbcGeom;
+namespace AbcU = ::Alembic::Util;
 
 using AbcA::index_t;
 
@@ -63,6 +64,11 @@ using AbcA::index_t;
 #define BOLD "\033[1m"
 #define COL_1 20
 #define COL_2 15
+
+//-*****************************************************************************
+#define CASE_PRINT_VALUE( TPTraits, VALUE_TYPE, PROP, PARENT, HEADER, SELECTOR ) \
+case TPTraits::pod_enum:                                         \
+    return printSampleValue<VALUE_TYPE, PROP>( PARENT, HEADER, SELECTOR );
 
 //-*****************************************************************************
 bool is_digit(const std::string& s)
@@ -143,12 +149,31 @@ void getMetaData( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 }
 
 //-*****************************************************************************
-template<class PROPERTY>
+template<class TYPE, class PROPERTY>
 void printSampleValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
                        const Abc::ISampleSelector &iSS )
 {
-    PROPERTY iProp( iParent, header.getName() );
-    std::cout << iProp.getValue( iSS ) << std::endl;
+    Abc::DataType dType = header.getDataType();
+
+    if ( header.isArray() ) {
+        Abc::IArrayProperty iProp( iParent, header.getName() );
+        Abc::ArraySamplePtr ptr;
+        iProp.get( ptr, iSS );
+        size_t numPoints = ptr->getDimensions().numPoints();
+        TYPE *vals = (TYPE*)(ptr->getData());
+        for ( size_t i=0; i<numPoints; ++i ) {
+            std::cout << vals[i];
+            if ( i > 0 && i % dType.getExtent() == 0 )
+                std::cout << std::endl;
+            else
+                std::cout << ", ";
+        }
+        std::cout << std::endl << std::endl;
+
+    } else {
+        PROPERTY iProp( iParent, header.getName() );
+        std::cout << iProp.getValue( iSS ) << std::endl;
+    } 
 }
 
 //-*****************************************************************************
@@ -156,135 +181,86 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
                  int index = 0 )
 {
     Abc::ISampleSelector iss( (index_t) index );
-    Abc::DataType dType = header.getDataType();
+    Abc::DataType dt = header.getDataType();
+    AbcU::PlainOldDataType pod = dt.getPod();
+    AbcU ::uint8_t extent = dt.getExtent();
 
-    switch ( dType.getPod() )
-    {
-        // Boolean
-        case Abc::kBooleanPOD:
+    if ( header.isArray() ) {
+        switch ( pod )
         {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IBoolArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IBoolProperty>( iParent, header, iss );
+            CASE_PRINT_VALUE(Abc::BooleanTPTraits, bool, Abc::IBoolArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Uint8TPTraits, uint8_t, Abc::IUcharArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Int8TPTraits, int8_t, Abc::ICharArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Uint16TPTraits, uint16_t, Abc::IUInt16ArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Int16TPTraits, int16_t, Abc::IInt16ArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Uint32TPTraits, uint32_t, Abc::IUInt32ArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Int32TPTraits, int32_t, Abc::IInt32ArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Uint64TPTraits, uint64_t, Abc::IUInt64ArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Int64TPTraits, int64_t, Abc::IInt64ArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Float32TPTraits, float, Abc::IFloatArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::Float64TPTraits, double, Abc::IDoubleArrayProperty, iParent, header, iss);
+            CASE_PRINT_VALUE(Abc::StringTPTraits, std::string, Abc::IStringArrayProperty, iParent, header, iss);
+            default:
+                std::cout << "Unknown property type" << std::endl;
+                break;
+        }
+    } else {
+        if ( extent == 1 ) {
+            switch ( pod )
+            {
+                CASE_PRINT_VALUE(Abc::BooleanTPTraits, bool, Abc::IBoolProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Uint8TPTraits, uint8_t, Abc::IUcharProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Int8TPTraits, int8_t, Abc::ICharProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Uint16TPTraits, uint16_t, Abc::IUInt16Property, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Int16TPTraits, int16_t, Abc::IInt16Property, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Uint32TPTraits, uint32_t, Abc::IUInt32Property, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Int32TPTraits, int32_t, Abc::IInt32Property, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Uint64TPTraits, uint64_t, Abc::IUInt64Property, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Int64TPTraits, int64_t, Abc::IInt64Property, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Float32TPTraits, float, Abc::IFloatProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Float64TPTraits, double, Abc::IDoubleProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::StringTPTraits, std::string, Abc::IStringProperty, iParent, header, iss);
+                default:
+                    std::cout << "Unknown property type" << std::endl;
+                    break;
             }
-            break;
-        }
 
-        // Char/UChar
-        case Abc::kUint8POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IUcharArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IUcharProperty>( iParent, header, iss );
+        } else if ( extent == 2 ) {
+            switch ( pod )
+            {
+                CASE_PRINT_VALUE(Abc::V2sTPTraits, Imath::V2s, Abc::IV2sProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::V2iTPTraits, Imath::V2i, Abc::IV2iProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::V2fTPTraits, Imath::V2f, Abc::IV2fProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::V2dTPTraits, Imath::V2d, Abc::IV2dProperty, iParent, header, iss);
+                default:
+                    std::cout << "Unknown property type" << std::endl;
+                    break;
             }
-            break;
-        }
-
-        case Abc::kInt8POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::ICharArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::ICharProperty>( iParent, header, iss );
+        } else if ( extent == 3 ) {
+            switch ( pod )
+            {
+                CASE_PRINT_VALUE(Abc::C3cTPTraits, Imath::C3c, Abc::IC3cProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::C3hTPTraits, Imath::C3h, Abc::IC3hProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::V3sTPTraits, Imath::V3s, Abc::IV3sProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::V3iTPTraits, Imath::V3i, Abc::IV3iProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::V3dTPTraits, Imath::V3d, Abc::IV3dProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::V3fTPTraits, Imath::V3f, Abc::IV3fProperty, iParent, header, iss);
+                default:
+                    std::cout << "Unknown property type" << std::endl;
+                    break;
             }
-            break;
-        }
-
-        // Short/UShort
-        case Abc::kUint16POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IUInt16ArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IUInt16Property>( iParent, header, iss );
+        } /*else if ( extent == 6 ) {
+            switch ( pod )
+            {
+                CASE_PRINT_VALUE(Abc::Box3sTPTraits, Imath::Box3s, Abc::IBox3sProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Box3iTPTraits, Imath::Box3i, Abc::IBox3iProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Box3fTPTraits, Imath::Box3f, Abc::IBox3fProperty, iParent, header, iss);
+                CASE_PRINT_VALUE(Abc::Box3dTPTraits, Imath::Box3d, Abc::IBox3dProperty, iParent, header, iss);
+                default:
+                    std::cout << "Unknown property type" << std::endl;
+                    break;
             }
-            break;
-        }
-
-        case Abc::kInt16POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IInt16ArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IInt16Property>( iParent, header, iss );
-            }
-            break;
-        }
-
-        // Int/UInt
-        case Abc::kUint32POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IUInt32ArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IUInt32Property>( iParent, header, iss );
-            }
-            break;
-        }
-
-        case Abc::kInt32POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IInt32ArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IInt32Property>( iParent, header, iss );
-            };
-            break;
-        }
-
-        // Long/ULong
-        case Abc::kUint64POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IUInt64ArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IUInt64Property>( iParent, header, iss );
-            };
-            break;
-        }
-
-        case Abc::kInt64POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IInt64ArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IInt64Property>( iParent, header, iss );
-            };
-            break;
-        }
-
-        // Half/Float/Double
-        case Abc::kFloat16POD:
-            // iostream doesn't understand float_16's
-            //printSampleValue( IHalfProperty( iParent, header.getName() ),
-            //                  iss );
-            break;
-        
-        case Abc::kFloat32POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IFloatArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IFloatProperty>( iParent, header, iss );
-            };
-            break;
-        }
-        
-        case Abc::kFloat64POD:
-        {
-            if ( header.isArray() ) {
-                printSampleValue<Abc::IDoubleArrayProperty>( iParent, header, iss );
-            } else {
-                printSampleValue<Abc::IDoubleProperty>( iParent, header, iss );
-            };
-            break;
-        }
-
-        case Abc::kUnknownPOD:
-        default:
-            std::cout << "Unknown property type" << std::endl;
+        }*/
     }
 }
 
