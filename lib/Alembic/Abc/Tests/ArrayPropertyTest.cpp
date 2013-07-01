@@ -523,7 +523,10 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
         OCompoundProperty root = archive.getTop().getProperties();
         OC3fArrayProperty colorProp( root, "colors" );
         OInt32ArrayProperty numProp( root, "numbers" );
-        OStringArrayProperty strProp( root, "strings" );
+        AbcA::MetaData md;
+        SetReference( md );
+        OStringArrayProperty strProp( root, "strings", md );
+        TESTING_ASSERT( isReference( strProp.getHeader() ) );
 
         colorProp.set( emptyColorSamp );
         colorProp.set( colorSamp );
@@ -557,6 +560,7 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
         IC3fArrayProperty colorProp( root, "colors" );
         IInt32ArrayProperty numProp( root, "numbers" );
         IStringArrayProperty strProp( root, "strings" );
+        TESTING_ASSERT( isReference( strProp.getHeader() ) );
 
         TESTING_ASSERT( colorProp.getNumSamples() == 4 );
         TESTING_ASSERT( strProp.getNumSamples() == 4 );

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,41 +34,23 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_All_h_
-#define _Alembic_Abc_All_h_
+#ifndef _Alembic_Abc_Reference_h_
+#define _Alembic_Abc_Reference_h_
 
-#include <Alembic/Abc/Base.h>
-#include <Alembic/Abc/ErrorHandler.h>
 #include <Alembic/Abc/Foundation.h>
 
-#include <Alembic/Abc/ArchiveInfo.h>
-#include <Alembic/Abc/Argument.h>
-#include <Alembic/Abc/IArchive.h>
-#include <Alembic/Abc/IArrayProperty.h>
-#include <Alembic/Abc/IBaseProperty.h>
-#include <Alembic/Abc/ICompoundProperty.h>
-#include <Alembic/Abc/IObject.h>
-#include <Alembic/Abc/ISampleSelector.h>
-#include <Alembic/Abc/IScalarProperty.h>
-#include <Alembic/Abc/ISchema.h>
-#include <Alembic/Abc/ISchemaObject.h>
-#include <Alembic/Abc/ITypedArrayProperty.h>
-#include <Alembic/Abc/ITypedScalarProperty.h>
+namespace Alembic {
+namespace Abc {
+namespace ALEMBIC_VERSION_NS {
 
-#include <Alembic/Abc/OArchive.h>
-#include <Alembic/Abc/OArrayProperty.h>
-#include <Alembic/Abc/OBaseProperty.h>
-#include <Alembic/Abc/OCompoundProperty.h>
-#include <Alembic/Abc/OObject.h>
-#include <Alembic/Abc/OScalarProperty.h>
-#include <Alembic/Abc/OSchema.h>
-#include <Alembic/Abc/OSchemaObject.h>
-#include <Alembic/Abc/OTypedArrayProperty.h>
-#include <Alembic/Abc/OTypedScalarProperty.h>
+void SetReference( AbcA::MetaData &ioMetaData );
+bool isReference( const AbcA::PropertyHeader &iHeader );
 
-#include <Alembic/Abc/Reference.h>
+} // End namespace ALEMBIC_VERSION_NS
 
-#include <Alembic/Abc/TypedArraySample.h>
-#include <Alembic/Abc/TypedPropertyTraits.h>
+using namespace ALEMBIC_VERSION_NS;
+
+} // End namespace Abc
+} // End namespace Alembic
 
 #endif
