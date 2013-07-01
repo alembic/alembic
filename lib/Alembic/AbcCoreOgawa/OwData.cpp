@@ -197,6 +197,11 @@ void OwData::writeHeaders( MetaDataMapPtr iMetaDataMap,
         ioHash.Update( &m_hashes.front(), m_hashes.size() * 8 );
         ioHash.Final( &hashes[2], &hashes[3] );
     }
+    else
+    {
+        hashes[2] = 0;
+        hashes[3] = 0;
+    }
 
     // add the  data hash and child hash for writing
     Util::uint8_t * hashData = ( Util::uint8_t * ) hashes;
