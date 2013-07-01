@@ -34,7 +34,9 @@
 ##-*****************************************************************************
 
 SET( TEST_LIBS
+     AlembicAbcMaterial
      AlembicAbcGeom
+     AlembicAbcCollection
      AlembicAbcCoreFactory
      AlembicAbc
      AlembicAbcCoreHDF5

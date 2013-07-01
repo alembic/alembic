@@ -86,7 +86,9 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
   SET( PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY} )
 
   SET( CORE_LIBS
+       AlembicAbcMaterial
        AlembicAbcGeom
+       AlembicAbcCollection
        AlembicAbcCoreFactory
        AlembicAbc
        AlembicAbcCoreHDF5
