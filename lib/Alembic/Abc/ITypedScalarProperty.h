@@ -246,7 +246,6 @@ typedef ITypedScalarProperty<Float32TPTraits>         IFloatProperty;
 typedef ITypedScalarProperty<Float64TPTraits>         IDoubleProperty;
 typedef ITypedScalarProperty<StringTPTraits>          IStringProperty;
 typedef ITypedScalarProperty<WstringTPTraits>         IWstringProperty;
-typedef ITypedScalarProperty<ReferenceTPTraits>       IReferenceProperty;
 
 typedef ITypedScalarProperty<V2sTPTraits>             IV2sProperty;
 typedef ITypedScalarProperty<V2iTPTraits>             IV2iProperty;

@@ -64,11 +64,11 @@ static void register_(const char* iName)
          iName,
          "This class is a typed scalar property writer",
          init<>( "Create an empty property") )
-        .def( init<Abc::OCompoundProperty, 
+        .def( init<Abc::OCompoundProperty,
                    const std::string&,
                    optional<
-                   Abc::Argument, 
-                   Abc::Argument, 
+                   Abc::Argument,
+                   Abc::Argument,
                    Abc::Argument> >(
                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                     arg( "argument" ), arg( "argument" ) ),
@@ -89,7 +89,7 @@ static void register_(const char* iName)
               "strictly matches the interpretation of this typed property" )
         .def( "matches",
               Overloads::matchesHeader,
-              ( arg( "propertyHeader" ), 
+              ( arg( "propertyHeader" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "Return True if the given entity (as represented by a property "
               "header) strictly matches the interepretation of this typed "
@@ -115,7 +115,6 @@ void register_otypedscalarproperty()
     register_<Abc::ODoubleProperty> ( "ODoubleProperty" );
     register_<Abc::OStringProperty> ( "OStringProperty" );
     register_<Abc::OWstringProperty>( "OWstringProperty" );
-    register_<Abc::OReferenceProperty>( "OReferenceProperty" );
 
     register_<Abc::OV2sProperty>( "OV2sProperty" );
     register_<Abc::OV2iProperty>( "OV2iProperty" );

@@ -158,10 +158,6 @@ ALEMBIC_ABC_DECLARE_TYPE_TRAITS( V2d, kFloat64POD, 2, "normal", N2dTPTraits );
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( N3f, kFloat32POD, 3, "normal", N3fTPTraits );
 ALEMBIC_ABC_DECLARE_TYPE_TRAITS( N3d, kFloat64POD, 3, "normal", N3dTPTraits );
 
-// references
-ALEMBIC_ABC_DECLARE_TYPE_TRAITS( string, kStringPOD, 1, "reference", ReferenceTPTraits );
-
-
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

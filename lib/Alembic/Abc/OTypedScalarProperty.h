@@ -230,7 +230,6 @@ typedef OTypedScalarProperty<Float32TPTraits>         OFloatProperty;
 typedef OTypedScalarProperty<Float64TPTraits>         ODoubleProperty;
 typedef OTypedScalarProperty<StringTPTraits>          OStringProperty;
 typedef OTypedScalarProperty<WstringTPTraits>         OWstringProperty;
-typedef OTypedScalarProperty<ReferenceTPTraits>       OReferenceProperty;
 
 typedef OTypedScalarProperty<V2sTPTraits>             OV2sProperty;
 typedef OTypedScalarProperty<V2iTPTraits>             OV2iProperty;

@@ -151,10 +151,6 @@ void simpleTestOut()
         jabber.set( emptyStanza );
     }
 
-    OReferenceProperty wildePhoto(
-            OCompoundProperty( oscar, kTop ), "wildePhoto" );
-    wildePhoto.set( "oscar_Wilde.exr" );
-
     OFloatProperty radius( clampto, "radius" );
     radius.set( 217.0f );
 
@@ -266,16 +262,6 @@ void simpleTestIn()
                 std::cout << "\tNo words in this line." << std::endl;
             }
         }
-    }
-
-    IReferenceProperty photoRef( ICompoundProperty( oscar, kTop ),
-                           "wildePhoto" );
-    size_t numPhotos = photoRef.getNumSamples();
-    std::cout << "Num wildePhoto samples: " << numPhotos << std::endl;
-    for ( size_t i = 0; i < numPhotos; ++i )
-    {
-        std::cout << "\t" << i << ": "
-                  << photoRef.getValue( i ) << std::endl;
     }
 
     IFloatProperty radius( clampto, "radius" );

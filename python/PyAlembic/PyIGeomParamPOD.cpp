@@ -53,5 +53,4 @@ void register_igeomparam_pod()
     register_<Abc::Float64TPTraits>     ( "IDoubleGeomParam" );
     register_<Abc::StringTPTraits>      ( "IStringGeomParam" );
     register_<Abc::WstringTPTraits>     ( "IWstringGeomParam" );
-    register_<Abc::ReferenceTPTraits>   ( "IReferenceGeomParam" );
 }
