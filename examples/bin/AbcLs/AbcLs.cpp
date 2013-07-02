@@ -66,12 +66,7 @@ using AbcA::index_t;
 #define COL_2 15
 
 //-*****************************************************************************
-#define CASE_PRINT_VALUE( TPTraits, VALUE_TYPE, PROP, PARENT, HEADER, SELECTOR ) \
-case TPTraits::pod_enum:                                         \
-    return printSampleValue<VALUE_TYPE, PROP>( PARENT, HEADER, SELECTOR );
-
-//-*****************************************************************************
-bool is_digit(const std::string& s)
+bool is_digit( const std::string& s )
 {
     std::string::const_iterator it = s.begin();
     while (it != s.end() && std::isdigit(*it)) ++it;
@@ -149,32 +144,125 @@ void getMetaData( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 }
 
 //-*****************************************************************************
-template<class TYPE, class PROPERTY>
-void printSampleValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
+template<class TPTraits>
+void getScalarValue( Abc::IScalarProperty &p,
+                           const Abc::ISampleSelector &iSS )
+{
+    typedef typename TPTraits::value_type U;
+    U val;
+    p.get( reinterpret_cast<void*>( &val ), iSS );
+    std::cout << val << std::endl;
+}
+
+//-*****************************************************************************
+template<class TPTraits>
+void getBoxValue( Abc::IScalarProperty &p,
+                           const Abc::ISampleSelector &iSS )
+{
+    typedef typename TPTraits::value_type U;
+    U val;
+    p.get( reinterpret_cast<void*>( &val ), iSS );
+    std::cout << "Box(" << val.min << ", "
+              << val.max << ")" << std::endl;
+}
+
+//-*****************************************************************************
+template<class TPTraits>
+void getColorValue( Abc::IScalarProperty &p,
+                           const Abc::ISampleSelector &iSS )
+{
+    typedef typename TPTraits::value_type U;
+    U val;
+    p.get( reinterpret_cast<void*>( &val ), iSS );
+    std::cout << "Color("
+              << val[0] << ", "
+              << val[1] << ", "
+              << val[2] << ", "
+              << val[3] << ", "
+              << ")" << std::endl;
+}
+
+//-*****************************************************************************
+template<class TPTraits>
+void getM33Value( Abc::IScalarProperty &p,
+                           const Abc::ISampleSelector &iSS )
+{
+    typedef typename TPTraits::value_type U;
+    U val;
+    p.get( reinterpret_cast<void*>( &val ), iSS );
+    std::cout << "M33(";
+    for (int r = 0; r < 3; ++r)
+	for (int c = 0; c < 3; ++c)
+	    std::cout << val[r][c] << ", ";
+    std::cout << ")" << std::endl;
+}
+
+//-*****************************************************************************
+template<class TPTraits>
+void getM44Value( Abc::IScalarProperty &p,
+                           const Abc::ISampleSelector &iSS )
+{
+    typedef typename TPTraits::value_type U;
+    U val;
+    p.get( reinterpret_cast<void*>( &val ), iSS );
+    std::cout << "M44(";
+    for (int r = 0; r < 4; ++r)
+	for (int c = 0; c < 4; ++c)
+	    std::cout << val[r][c] << ", ";
+    std::cout << ")" << std::endl;
+}
+
+//-*****************************************************************************
+#define CASE_RETURN_SCALAR_VALUE( TPTraits, PROP, SELECTOR ) \
+case TPTraits::pod_enum:                                  \
+    return getScalarValue<TPTraits>( PROP, SELECTOR );
+
+//-*****************************************************************************
+#define CASE_RETURN_BOX_VALUE( TPTraits, PROP, SELECTOR ) \
+case TPTraits::pod_enum:                                  \
+    return getBoxValue<TPTraits>( PROP, SELECTOR );
+
+//-*****************************************************************************
+#define CASE_RETURN_COLOR_VALUE( TPTraits, PROP, SELECTOR ) \
+case TPTraits::pod_enum:                                  \
+    return getColorValue<TPTraits>( PROP, SELECTOR );
+
+//-*****************************************************************************
+#define CASE_RETURN_M33_VALUE( TPTraits, PROP, SELECTOR ) \
+case TPTraits::pod_enum:                                  \
+    return getM33Value<TPTraits>( PROP, SELECTOR );
+
+//-*****************************************************************************
+#define CASE_RETURN_M44_VALUE( TPTraits, PROP, SELECTOR ) \
+case TPTraits::pod_enum:                                  \
+    return getM44Value<TPTraits>( PROP, SELECTOR );
+
+//-*****************************************************************************
+template<class TYPE>
+void getArrayValue( Abc::IArrayProperty &p, Abc::PropertyHeader &header,
                        const Abc::ISampleSelector &iSS )
 {
-    Abc::DataType dType = header.getDataType();
+    Abc::DataType dt = header.getDataType();
+    AbcU ::uint8_t extent = dt.getExtent();
 
-    if ( header.isArray() ) {
-        Abc::IArrayProperty iProp( iParent, header.getName() );
-        Abc::ArraySamplePtr ptr;
-        iProp.get( ptr, iSS );
-        size_t numPoints = ptr->getDimensions().numPoints();
-        TYPE *vals = (TYPE*)(ptr->getData());
-        for ( size_t i=0; i<numPoints; ++i ) {
-            std::cout << vals[i];
-            if ( i > 0 && i % dType.getExtent() == 0 )
-                std::cout << std::endl;
-            else
-                std::cout << ", ";
-        }
-        std::cout << std::endl << std::endl;
-
-    } else {
-        PROPERTY iProp( iParent, header.getName() );
-        std::cout << iProp.getValue( iSS ) << std::endl;
+    Abc::ArraySamplePtr ptr;
+    p.get( ptr, iSS );
+    size_t numPoints = ptr->getDimensions().numPoints();
+    TYPE *vals = (TYPE*)(ptr->getData());
+    for ( size_t i=0; i<numPoints; ++i ) {
+        std::cout << vals[i];
+        if ( i > 0 && i % extent == 0 )
+            std::cout << std::endl;
+        else
+            std::cout << ", ";
     }
+    std::cout << std::endl;
 }
+
+//-*****************************************************************************
+#define CASE_RETURN_ARRAY_VALUE( TPTraits, TYPE, PROP, HEADER, SELECTOR ) \
+case TPTraits::pod_enum:                                         \
+    return getArrayValue<TYPE>( PROP, HEADER, SELECTOR );
 
 //-*****************************************************************************
 void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
@@ -186,40 +274,44 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
     AbcU ::uint8_t extent = dt.getExtent();
 
     if ( header.isArray() ) {
+        Abc::IArrayProperty p( iParent, header.getName() );
+
         switch ( pod )
         {
-            CASE_PRINT_VALUE(Abc::BooleanTPTraits, bool, Abc::IBoolArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Uint8TPTraits, uint8_t, Abc::IUcharArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Int8TPTraits, int8_t, Abc::ICharArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Uint16TPTraits, uint16_t, Abc::IUInt16ArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Int16TPTraits, int16_t, Abc::IInt16ArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Uint32TPTraits, uint32_t, Abc::IUInt32ArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Int32TPTraits, int32_t, Abc::IInt32ArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Uint64TPTraits, uint64_t, Abc::IUInt64ArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Int64TPTraits, int64_t, Abc::IInt64ArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Float32TPTraits, float, Abc::IFloatArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::Float64TPTraits, double, Abc::IDoubleArrayProperty, iParent, header, iss);
-            CASE_PRINT_VALUE(Abc::StringTPTraits, std::string, Abc::IStringArrayProperty, iParent, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::BooleanTPTraits, bool, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Uint8TPTraits, uint8_t, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Int8TPTraits, int8_t, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Uint16TPTraits, uint16_t, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Int16TPTraits, int16_t, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Uint32TPTraits, uint32_t, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Int32TPTraits, int32_t, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Uint64TPTraits, uint64_t, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Int64TPTraits, int64_t, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Float32TPTraits, float, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::Float64TPTraits, double, p, header, iss);
+            CASE_RETURN_ARRAY_VALUE(Abc::StringTPTraits, std::string, p, header, iss);
             default:
                 std::cout << "Unknown property type" << std::endl;
                 break;
         }
     } else {
+        Abc::IScalarProperty p( iParent, header.getName() );
+
         if ( extent == 1 ) {
             switch ( pod )
             {
-                CASE_PRINT_VALUE(Abc::BooleanTPTraits, bool, Abc::IBoolProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Uint8TPTraits, uint8_t, Abc::IUcharProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Int8TPTraits, int8_t, Abc::ICharProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Uint16TPTraits, uint16_t, Abc::IUInt16Property, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Int16TPTraits, int16_t, Abc::IInt16Property, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Uint32TPTraits, uint32_t, Abc::IUInt32Property, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Int32TPTraits, int32_t, Abc::IInt32Property, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Uint64TPTraits, uint64_t, Abc::IUInt64Property, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Int64TPTraits, int64_t, Abc::IInt64Property, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Float32TPTraits, float, Abc::IFloatProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Float64TPTraits, double, Abc::IDoubleProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::StringTPTraits, std::string, Abc::IStringProperty, iParent, header, iss);
+                CASE_RETURN_SCALAR_VALUE( Abc::BooleanTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Uint8TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Int8TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Uint16TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Int16TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Uint32TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Int32TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Uint64TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Int64TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Float32TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::Float64TPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::StringTPTraits, p, iss );
                 default:
                     std::cout << "Unknown property type" << std::endl;
                     break;
@@ -228,10 +320,10 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
         } else if ( extent == 2 ) {
             switch ( pod )
             {
-                CASE_PRINT_VALUE(Abc::V2sTPTraits, Imath::V2s, Abc::IV2sProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::V2iTPTraits, Imath::V2i, Abc::IV2iProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::V2fTPTraits, Imath::V2f, Abc::IV2fProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::V2dTPTraits, Imath::V2d, Abc::IV2dProperty, iParent, header, iss);
+                CASE_RETURN_SCALAR_VALUE( Abc::V2sTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::V2iTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::V2fTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::V2dTPTraits, p, iss );
                 default:
                     std::cout << "Unknown property type" << std::endl;
                     break;
@@ -239,28 +331,57 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
         } else if ( extent == 3 ) {
             switch ( pod )
             {
-                CASE_PRINT_VALUE(Abc::C3cTPTraits, Imath::C3c, Abc::IC3cProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::C3hTPTraits, Imath::C3h, Abc::IC3hProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::V3sTPTraits, Imath::V3s, Abc::IV3sProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::V3iTPTraits, Imath::V3i, Abc::IV3iProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::V3dTPTraits, Imath::V3d, Abc::IV3dProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::V3fTPTraits, Imath::V3f, Abc::IV3fProperty, iParent, header, iss);
+                CASE_RETURN_SCALAR_VALUE( Abc::C3cTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::C3hTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::V3sTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::V3iTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::V3dTPTraits, p, iss );
+                CASE_RETURN_SCALAR_VALUE( Abc::V3fTPTraits, p, iss );
                 default:
                     std::cout << "Unknown property type" << std::endl;
                     break;
             }
-        } /*else if ( extent == 6 ) {
+        } else if ( extent == 4 ) {
             switch ( pod )
             {
-                CASE_PRINT_VALUE(Abc::Box3sTPTraits, Imath::Box3s, Abc::IBox3sProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Box3iTPTraits, Imath::Box3i, Abc::IBox3iProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Box3fTPTraits, Imath::Box3f, Abc::IBox3fProperty, iParent, header, iss);
-                CASE_PRINT_VALUE(Abc::Box3dTPTraits, Imath::Box3d, Abc::IBox3dProperty, iParent, header, iss);
+                CASE_RETURN_COLOR_VALUE( Abc::C4cTPTraits, p, iss );
+                CASE_RETURN_COLOR_VALUE( Abc::C4hTPTraits, p, iss );
+                CASE_RETURN_BOX_VALUE( Abc::Box2sTPTraits, p, iss );
+                CASE_RETURN_BOX_VALUE( Abc::Box2iTPTraits, p, iss );
                 default:
                     std::cout << "Unknown property type" << std::endl;
                     break;
             }
-        }*/
+        } else if ( extent == 6 ) {
+            switch ( pod )
+            {
+                CASE_RETURN_BOX_VALUE( Abc::Box3sTPTraits, p, iss );
+                CASE_RETURN_BOX_VALUE( Abc::Box3iTPTraits, p, iss );
+                CASE_RETURN_BOX_VALUE( Abc::Box3fTPTraits, p, iss );
+                CASE_RETURN_BOX_VALUE( Abc::Box3dTPTraits, p, iss );
+                default:
+                    std::cout << "Unknown property type" << std::endl;
+                    break;
+            }
+        } else if ( extent == 9 ) {
+            switch ( pod )
+            {
+                CASE_RETURN_M33_VALUE( Abc::M33fTPTraits, p, iss );
+                CASE_RETURN_M33_VALUE( Abc::M33dTPTraits, p, iss );
+                default:
+                    std::cout << "Unknown property type" << std::endl;
+                    break;
+            }
+        } else if ( extent == 16 ) {
+            switch ( pod )
+            {
+                CASE_RETURN_M44_VALUE( Abc::M44fTPTraits, p, iss );
+                CASE_RETURN_M44_VALUE( Abc::M44dTPTraits, p, iss );
+                default:
+                    std::cout << "Unknown property type" << std::endl;
+                    break;
+            }
+        }
     }
 }
 
@@ -362,14 +483,14 @@ void visit( Abc::ICompoundProperty iProp,
     }
 
     // children
-    for( size_t i = 0; i < iProp.getNumProperties(); ++i ) {
-        printChild( iProp, iProp.getPropertyHeader( i ), all, long_list, meta );
+    for( size_t c = 0; c < iProp.getNumProperties(); ++c ) {
+        printChild( iProp, iProp.getPropertyHeader( c ), all, long_list, meta );
     }
 
     // visit children
     if ( recursive && all && iProp.getNumProperties() > 0 ) {
-        for( size_t i = 0; i < iProp.getNumProperties(); ++i ) {
-            Abc::PropertyHeader header = iProp.getPropertyHeader( i );
+        for( size_t p = 0; p < iProp.getNumProperties(); ++p ) {
+            Abc::PropertyHeader header = iProp.getPropertyHeader( p );
             if ( header.isCompound() )
                 visit( Abc::ICompoundProperty( iProp, header.getName() ),
                        all, long_list, meta, recursive, false );
@@ -396,21 +517,21 @@ void visit( AbcG::IObject iObj,
     }
 
     // children
-    for( size_t i = 0; i < iObj.getNumChildren(); ++i ) {
-        printChild( iObj, iObj.getChild( i ), all, long_list, meta );
+    for( size_t c = 0; c < iObj.getNumChildren(); ++c ) {
+        printChild( iObj, iObj.getChild( c ), all, long_list, meta );
     }
 
     // properties
     if ( all ) {
-        for( size_t i = 0; i < props.getNumProperties(); ++i ) {
-            printChild( props, props.getPropertyHeader( i ), all, long_list, meta );
+        for( size_t h = 0; h < props.getNumProperties(); ++h ) {
+            printChild( props, props.getPropertyHeader( h ), all, long_list, meta );
         }
     }
 
     // visit property children
     if ( recursive && all && props.getNumProperties() > 0 ) {
-        for( size_t i = 0; i < props.getNumProperties(); ++i ) {
-            Abc::PropertyHeader header = props.getPropertyHeader( i );
+        for( size_t p = 0; p < props.getNumProperties(); ++p ) {
+            Abc::PropertyHeader header = props.getPropertyHeader( p );
             if ( header.isCompound() ) {
                 if ( !long_list )
                     std::cout << std::endl;
@@ -422,8 +543,8 @@ void visit( AbcG::IObject iObj,
 
     // visit object children
     if ( recursive && iObj.getNumChildren() > 0 ) {
-        for( size_t i = 0; i < iObj.getNumChildren(); ++i ) {
-            visit( iObj.getChild( i ), all, long_list, meta, recursive, false );
+        for( size_t c = 0; c < iObj.getNumChildren(); ++c ) {
+            visit( iObj.getChild( c ), all, long_list, meta, recursive, false );
         }
     }
 }
@@ -516,10 +637,10 @@ int main( int argc, char *argv[] )
          *   \_____________/\______/\____/
          *        file         obj   sample
          */
-        int j = 0;
+        int i = 0;
         while ( std::getline( ss, segment, '/' ) ) {
             if ( !isFile ( fp.str() ) ) {
-                if ( j != 0 )
+                if ( i != 0 )
                     fp << "/";
                 fp << segment;
             } else if ( is_digit( segment ) ) {
@@ -527,7 +648,7 @@ int main( int argc, char *argv[] )
             } else {
                 seglist.push_back( segment );
             }
-            ++j;
+            ++i;
         }
 
         // open the iarchive
