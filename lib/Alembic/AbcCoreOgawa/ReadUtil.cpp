@@ -1440,7 +1440,7 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
-        Util::uint32_t maxSample = *( (uint32_t *)( &buf[pos] ) );
+        Util::uint32_t maxSample = *( (Util::uint32_t *)( &buf[pos] ) );
         pos += 4;
 
         oMaxSamples.push_back( maxSample );
@@ -1448,7 +1448,7 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
         chrono_t tpc = *( ( chrono_t * )( &buf[pos] ) );
         pos += sizeof( chrono_t );
 
-        Util::uint32_t numSamples = *( (uint32_t *)( &buf[pos] ) );
+        Util::uint32_t numSamples = *( (Util::uint32_t *)( &buf[pos] ) );
         pos += 4;
 
         std::vector< chrono_t > sampleTimes( numSamples );
@@ -1527,7 +1527,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 }
 
 //-*****************************************************************************
-uint32_t GetUint32WithHint(const std::vector< char > & iBuf,
+Util::uint32_t GetUint32WithHint(const std::vector< char > & iBuf,
                            Util::uint32_t iSizeHint,
                            std::size_t & ioPos)
 {
