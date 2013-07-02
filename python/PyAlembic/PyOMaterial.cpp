@@ -83,6 +83,8 @@ void register_omaterial()
               &AbcM::OMaterialSchema::addNetworkNode )
         .def( "setNetworkNodeConnection",
               &AbcM::OMaterialSchema::setNetworkNodeConnection )
+        .def( "setNetworkTerminal",
+              &AbcM::OMaterialSchema::setNetworkTerminal )
         .def( "getNetworkNodeParameters",
               &AbcM::OMaterialSchema::getNetworkNodeParameters )
         .def( "setNetworkInterfaceParameterMapping",

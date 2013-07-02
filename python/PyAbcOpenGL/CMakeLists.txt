@@ -87,7 +87,9 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
 
   SET( CORE_LIBS
     AlembicAbcOpenGL
+    AlembicAbcMaterial
     AlembicAbcGeom
+    AlembicAbcCollection
     AlembicAbcCoreFactory
     AlembicAbc
     AlembicAbcCoreHDF5

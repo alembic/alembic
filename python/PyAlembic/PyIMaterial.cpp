@@ -278,6 +278,8 @@ void register_imaterial()
               &SchemaOverloads::getNetworkNodeByName )
         .def( "getNetworkNode",
               &SchemaOverloads::getNetworkNodeByIndex )
+        .def( "getNetworkTerminal",
+              &SchemaOverloads::getNetworkTerminal )
         .def( "getNetworkTerminalTargetNames",
               &SchemaOverloads::getNetworkTerminalTargetNames )
         .def( "getNetworkTerminalShaderTypesForTarget",

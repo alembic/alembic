@@ -147,9 +147,37 @@ OPROPERTIES = {
         'scalar': alembic.Abc.OStringArrayProperty,
         'array': alembic.Abc.OStringArrayProperty,
     },
+    imath.Box2s: {
+        'scalar': alembic.Abc.OBox2sProperty,
+        'array': alembic.Abc.OBox2sArrayProperty,
+    },
+    imath.Box2i: {
+        'scalar': alembic.Abc.OBox2iProperty,
+        'array': alembic.Abc.OBox2iArrayProperty,
+    },
+    imath.Box2d: {
+        'scalar': alembic.Abc.OBox2dProperty,
+        'array': alembic.Abc.OBox2dArrayProperty,
+    },
+    imath.Box2f: {
+        'scalar': alembic.Abc.OBox2fProperty,
+        'array': alembic.Abc.OBox2fArrayProperty,
+    },
+    imath.Box3s: {
+        'scalar': alembic.Abc.OBox3sProperty,
+        'array': alembic.Abc.OBox3sArrayProperty,
+    },
+    imath.Box3i: {
+        'scalar': alembic.Abc.OBox3iProperty,
+        'array': alembic.Abc.OBox3iArrayProperty,
+    },
     imath.Box3d: {
         'scalar': alembic.Abc.OBox3dProperty,
         'array': alembic.Abc.OBox3dArrayProperty,
+    },
+    imath.Box3f: {
+        'scalar': alembic.Abc.OBox3fProperty,
+        'array': alembic.Abc.OBox3fArrayProperty,
     },
     imath.Color3f: {
         'scalar': alembic.Abc.OC3fProperty,
