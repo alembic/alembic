@@ -134,6 +134,15 @@ void ICameraSchema::init( const Abc::Argument &iArg0,
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
+bool ICameraSchema::isConstant() const
+{
+    return ( m_coreProperties.isConstant() &&
+        ( !m_smallFilmBackChannels.valid() ||
+          m_smallFilmBackChannels.isConstant() ) &&
+        ( !m_largeFilmBackChannels.valid() ||
+          m_largeFilmBackChannels.isConstant() ) );
+}
+
 void ICameraSchema::get( CameraSample & oSample,
     const Abc::ISampleSelector &iSS ) const
 {

@@ -114,7 +114,7 @@ public:
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
-    bool isConstant() const { return m_coreProperties.isConstant(); }
+    bool isConstant() const;
 
     void get( CameraSample &oSample,
               const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const;
