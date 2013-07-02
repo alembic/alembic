@@ -190,7 +190,7 @@ testList.append( ( 'testExportCubeGeom', testExportCubeGeom ) )
 # Test importing the exported quad mesh
 def testImportCubeGeom():
     archive = IArchive( fileName )
-    assert archive.getMaxNumSamplesForTimeSamplingIndex(0) == 3
+    assert archive.getMaxNumSamplesForTimeSamplingIndex(0) == 1
     assert archive.getMaxNumSamplesForTimeSamplingIndex(1) == 3
 
     top = archive.getTop()
