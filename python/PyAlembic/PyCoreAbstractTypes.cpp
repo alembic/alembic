@@ -88,6 +88,9 @@ void register_coreabstracttypes()
               &AbcA::MetaData::set,
               ( arg( "key" ), arg( "data" ) ),
               "Set a key/data pair (silently ovewrite an existing value)" )
+        .def( "setReference",
+              &Alembic::Abc::SetReference,
+              "Helper function to tag this metadata as being a reference. See isReference() in PropertyHeader for the counterpart." )
         .def( "setUnique",
               &AbcA::MetaData::setUnique,
               ( arg( "key" ), arg( "data" ) ),
@@ -166,7 +169,7 @@ void register_coreabstracttypes()
         ;
 
     // PropertyHeader
-    //
+    // 
     class_<AbcA::PropertyHeader>(
         "PropertyHeader",
         "The PropertyHeader is a collection of MetaData which helps define a "
@@ -199,6 +202,9 @@ void register_coreabstracttypes()
               "Return the DataType of the property. An exception will be "
               "thrown if this is called for a CompoundProperty",
               return_value_policy<copy_const_reference>() )
+        .def( "isReference",
+              &Alembic::Abc::isReference,
+              "Return true if the property is tagged as being a reference" )
         .def( "__str__", &AbcA::PropertyHeader::getName,
               return_value_policy<copy_const_reference>() )
         ;

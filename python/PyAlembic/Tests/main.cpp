@@ -89,11 +89,12 @@ runTests (int argc, char *argv[])
         PyRun_SimpleString (code.c_str());
     }
 
-    // Test 6: Instance, Hash
+    // Test 6: Instance, Hash, Reference
     {
         std::string code =
             "import testInstance\n"
-            "import testHash\n";
+            "import testHash\n"
+            "import testReference\n";
 
         PyRun_SimpleString (code.c_str());
     }
