@@ -315,10 +315,11 @@ ELSE()
     ADD_SUBDIRECTORY( python )
 ENDIF()
 
-# example code not supported
+# Example code not supported
 ADD_SUBDIRECTORY( examples )
 
-# docs
+# Uncomment to build python docs Makefile (requires Sphinx)
+# Run `make docs` from build root
 #ADD_SUBDIRECTORY( doc )
 
 ENDIF()

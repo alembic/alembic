@@ -69,7 +69,7 @@ ELSEIF(DEFINED USE_PYALEMBIC AND USE_PYALEMBIC)
         "${BINARY_BUILD_DIR}/conf.py"
         @ONLY)
 
-    # attemp to get boost python in LD_LIBRARY_PATH
+    # attempt to get boost python in LD_LIBRARY_PATH
     # http://www.cmake.org/Bug/view.php?id=5145
     SET(ENV{LD_LIBRARY_PATH} ${Boost_LIBRARY_DIRS})
     MESSAGE(STATUS "LD_LIBRARY_PATH: " $ENV{LD_LIBRARY_PATH})

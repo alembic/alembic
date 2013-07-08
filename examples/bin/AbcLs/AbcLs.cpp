@@ -733,16 +733,13 @@ int main( int argc, char *argv[] )
         // do stuff
         if ( index >= 0 ) {
             printValue( props, *header, index );
-
         } else {
-
             if ( found && header->isCompound() )
                 visit( props, opt_all, opt_long, opt_meta, opt_recursive, true );
             else if ( found && header->isSimple() )
                 printChild( props, *header, opt_all, opt_long );
             else
                 visit( iObj, opt_all, opt_long, opt_meta, opt_recursive, true );
-
             std::cout << RESETCOLOR;
             if ( !opt_long )
                 std::cout << std::endl;
