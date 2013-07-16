@@ -33,6 +33,4 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY( PyAlembic )
-ADD_SUBDIRECTORY( PyAbcOpenGL )
-ADD_SUBDIRECTORY( examples )
+ADD_SUBDIRECTORY( AbcView )

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2011,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY( PyAlembic )
-ADD_SUBDIRECTORY( PyAbcOpenGL )
-ADD_SUBDIRECTORY( examples )
+GET_FILENAME_COMPONENT(BOOST_LIBRARY_DIR ${BOOST_PYTHON_LIBRARY} PATH)
+GET_FILENAME_COMPONENT(ILMBASE_LIBRARY_DIR ${ALEMBIC_ILMBASE_IMATH_LIB} PATH)
+
+CONFIGURE_FILE(
+    "${CMAKE_CURRENT_SOURCE_DIR}/abcview.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/abcview"
+    @ONLY )

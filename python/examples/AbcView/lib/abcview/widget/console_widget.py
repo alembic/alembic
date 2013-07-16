@@ -48,6 +48,7 @@ class AbcConsoleWidget(QtGui.QPlainTextEdit):
     """
     def __init__(self, parent=None, prompt='>>> ', startup_message=''):
         super(AbcConsoleWidget, self).__init__(parent)
+        self._parent = parent
         self.setObjectName('AbcConsoleWidget')
         self.prompt = prompt
         self.history = []
@@ -60,6 +61,12 @@ class AbcConsoleWidget(QtGui.QPlainTextEdit):
         self.document().setDefaultFont(QtGui.QFont("monospace", 10, QtGui.QFont.Normal))
         
         self.newPrompt()
+
+        self.setFocusPolicy(QtCore.Qt.ClickFocus)
+
+    def leaveEvent(self, event):
+        self._parent.setFocus()
+        super(AbcConsoleWidget, self).leaveEvent(event)
 
     def updateNamespace(self, namespace):
         self.namespace.update(namespace)
@@ -172,6 +179,24 @@ To get the selected item from the Objects Tree,
         for i in range(len(self.prompt) + position):
             self.moveCursor(QtGui.QTextCursor.Right)
 
+    def tab_complete(self):
+        try:
+            from rlcompleter import Completer
+            c = Completer(self.namespace)
+            cmd = self.getCommand()
+            if "." in cmd:
+                matches = c.attr_matches(cmd)
+            else:
+                matches = c.global_matches(cmd)
+            if len(matches) == 1:
+                cmd = matches[0]
+            else:
+                self.appendPlainText("\t".join(matches))
+            self.newPrompt()
+            self.setCommand(cmd)
+        except ImportError, e:
+            log(e)
+    
     def runCommand(self):
         command = self.getCommand()
         self.addToHistory(command)
@@ -228,5 +253,8 @@ To get the selected item from the Objects Tree,
             return
         elif event.key() == QtCore.Qt.Key_Down:
             self.setCommand(self.getNextHistoryEntry())
+            return
+        elif event.key() == QtCore.Qt.Key_Tab:
+            self.tab_complete()
             return
         super(AbcConsoleWidget, self).keyPressEvent(event)

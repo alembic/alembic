@@ -121,6 +121,8 @@ void init( void )
 
     init_surface();
 
+    setMaterials( 1.0, false );
+
     g_state.scene.cam.frame( g_transport->getBounds() );
 
     std::ostringstream titleStream;

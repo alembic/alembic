@@ -167,7 +167,6 @@ void Scene::draw( SceneState &s_state )
                  "Invalid Scene: " << m_fileName );
 
     glEnable( GL_LIGHTING );
-    //setMaterials( 1.0, false );
 
     // Get the matrix
     M44d currentMatrix;

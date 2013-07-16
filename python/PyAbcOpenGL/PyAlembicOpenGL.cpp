@@ -39,20 +39,121 @@
 
 using namespace boost::python;
 
+//-*****************************************************************************
 void register_opengl()
 {
+
+    // setMaterials
+    //
+    def("setMaterials", 
+        &AbcOpenGL::setMaterials,
+        ( arg( "o" ) = 1.0, arg( "negMatrix" ) = false ) )
+    ;
+
+    // GLCamera overloads
+    //
+    void ( AbcOpenGL::GLCamera::*setSizeWidthHeight )( int w, int h )
+        = &AbcOpenGL::GLCamera::setSize;
+
+    // GLCamera
+    //
+    class_<AbcOpenGL::GLCamera>(
+          "GLCamera",
+          "Wraps AbcOpenGL GLCamera class",
+          init<>() )
+        .def( "setSize",
+              setSizeWidthHeight,
+              ( arg( "w" ), arg( "h" ) ) )
+        .def( "apply",
+              &AbcOpenGL::GLCamera::apply )
+        .def( "frame",
+              &AbcOpenGL::GLCamera::frame,
+              ( arg( "bounds" ) ) )
+        .def( "lookAt",
+              &AbcOpenGL::GLCamera::lookAt,
+              ( arg( "eye" ), arg( "at" ) ) )
+        .def( "track",
+              &AbcOpenGL::GLCamera::track,
+              ( arg( "point" ) ) )
+        .def( "dolly",
+              &AbcOpenGL::GLCamera::dolly,
+              ( arg( "point" ), arg( "speed" ) = 5.0 ) )
+        .def( "rotate",
+              &AbcOpenGL::GLCamera::rotate,
+              ( arg( "point" ), arg( "speed" ) = 400.0 ) )
+        .def( "width",
+              &AbcOpenGL::GLCamera::width )
+        .def( "height",
+              &AbcOpenGL::GLCamera::height )
+        .def( "centerOfInterest",
+              &AbcOpenGL::GLCamera::centerOfInterest )
+        .def( "setCenterOfInterest",
+              &AbcOpenGL::GLCamera::setCenterOfInterest,
+              ( arg( "center" ) ) )
+        .def( "fovy",
+              &AbcOpenGL::GLCamera::fovy )
+        .def( "setFovy",
+              &AbcOpenGL::GLCamera::setFovy,
+              ( arg( "fvy" ) ) )
+        .def( "transform",
+              &AbcOpenGL::GLCamera::transform )
+        .def( "translation",
+              &AbcOpenGL::GLCamera::translation,
+              return_value_policy<copy_const_reference>() )
+        .def( "setTranslation",
+              &AbcOpenGL::GLCamera::setTranslation,
+              ( arg( "trans" ) ) )
+        .def( "rotation",
+              &AbcOpenGL::GLCamera::rotation,
+              return_value_policy<copy_const_reference>() )
+        .def( "setRotation",
+              &AbcOpenGL::GLCamera::setRotation,
+              ( arg( "rot" ) ) )
+        .def( "scale",
+              &AbcOpenGL::GLCamera::scale,
+              return_value_policy<copy_const_reference>() )
+        .def( "setScale",
+              &AbcOpenGL::GLCamera::setScale,
+              ( arg( "scale" ) ) )
+        .def( "autoSetClippingPlanes",
+              &AbcOpenGL::GLCamera::autoSetClippingPlanes,
+              ( arg( "bounds" ) ) )
+        .def( "clippingPlanes",
+              &AbcOpenGL::GLCamera::clippingPlanes )
+        .def( "setClippingPlanes",
+              &AbcOpenGL::GLCamera::setClippingPlanes,
+              ( arg( "near" ), arg( "far" ) ) )
+        ;
+
     // SceneWrapper
     //
     class_<AbcOpenGL::SceneWrapper>(
           "SceneWrapper",
           "Wraps AbcOpenGL Scene class",
           no_init )
-        .def( init<const char*> (
-              ( arg( "abcFileName" ) ),
+        .def( init<const std::string, bool> (
+              ( arg( "fileName" ), arg( "verbose" ) = false ),
               "doc"))
         .def( "draw",
               &AbcOpenGL::SceneWrapper::draw )
+        .def( "getMinTime",
+              &AbcOpenGL::SceneWrapper::getMinTime )
+        .def( "getMaxTime",
+              &AbcOpenGL::SceneWrapper::getMaxTime )
+        .def( "getCurrentTime",
+              &AbcOpenGL::SceneWrapper::getCurrentTime )
+        .def( "isConstant",
+              &AbcOpenGL::SceneWrapper::isConstant )
+        .def( "setTime",
+              &AbcOpenGL::SceneWrapper::setTime,
+              ( arg( "time" ) ) )
+        .def( "playForward",
+              &AbcOpenGL::SceneWrapper::playForward,
+              ( arg( "fps" ) ) )
         .def( "bounds",
               &AbcOpenGL::SceneWrapper::bounds )
+        .def( "frame",
+              &AbcOpenGL::SceneWrapper::frame,
+              ( arg( "bounds" ) ) )
         ;
 }

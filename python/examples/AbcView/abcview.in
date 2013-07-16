@@ -1,6 +1,8 @@
+#!/bin/tcsh
+
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,6 +35,17 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY( PyAlembic )
-ADD_SUBDIRECTORY( PyAbcOpenGL )
-ADD_SUBDIRECTORY( examples )
+# setup some required lib paths
+setenv LD_LIBRARY_PATH "@BOOST_LIBRARY_DIR@"
+setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:@ALEMBIC_PYILMBASE_LIBRARY_DIRECTORY@"
+setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:@ILMBASE_LIBRARY_DIR@"
+
+# setup some required python paths
+setenv PYTHONPATH "@ALEMBIC_PYILMBASE_PYIMATH_MODULE_DIRECTORY@"
+setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_BINARY_DIR@/python/PyAlembic"
+setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_BINARY_DIR@/python/PyAbcOpenGL"
+setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_SOURCE_DIR@/python/examples/AbcView/lib"
+
+# run it
+@PROJECT_SOURCE_DIR@/python/examples/AbcView/bin/abcview $*
+
