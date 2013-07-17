@@ -1,3 +1,49 @@
+2013-8-23, Alembic 1.5.0
+Hello Alembic users, we are pleased to announce the official release of Ogawa a
+new data back end for Alembic with improved write, read, and especially
+multi-threaded read performance.
+
+Here are some improvements we are seeing with Ogawa.
+
+1) File sizes are on average 5-15% smaller. Scenes with many small objects
+should see even greater reductions.
+
+2) Single-threaded reads average around 4x faster
+
+3) Multi-threaded reads can improve by 25x (relative to the same operations in
+the existing HDF5 back-end) on 8 core systems.
+
+We are maintaining backwards compatibility, and you will be able to continue to
+read and write Alembic files backed by HDF5.
+
+Other library features added:
+
+Support for explicit hierarchical deduplication. (OObject::addChildInstance)
+
+Hierarchical hash keys added to objects, making it easier to compare sub-graphs
+of various archives. (IObject::getPropertiesHash, IObject::getChildrenHash)
+
+Add AbcCoreFactory::IFactory class which is a convenience class for determining
+whether an archive is backed by HDF5 or Ogawa and returning a properly
+instantiated IArchive.  All of the readers in the repository have been updated
+to use this.
+
+Python bindings have been extended to support the new features above.
+
+New utility:
+
+abcls this utility is meant to behave like ls or h5ls and offers is an
+inexpensive way to explore your object and property hierarchies.
+
+Bug fixes:
+
+ICamera:
+Getting the film back xform channels needs to be done by index.
+Animated film back data wasn't being reflected in isConstant.
+Offset data should be applied after the filmback matrix.
+
+AbcExport: preScale, and postScale film back xform should be 1.0/scale.
+
 2013-4-11, Alembic 1.1.5
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful bug fixes and performance enhancements for the Maya plugins.
