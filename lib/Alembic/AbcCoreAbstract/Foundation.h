@@ -87,7 +87,7 @@ typedef float64_t chrono_t;
 //     to express data types and samples in Alembic
 
 //! Alembic version number Major/Minor/Patch XX.YY.ZZ
-#define ALEMBIC_LIBRARY_VERSION 10300
+#define ALEMBIC_LIBRARY_VERSION 10500
 
 //! Helper function which returns the version and date built in a string
 //! e.g. "Alembic 1.0.0 (built Jul  6 2011)"
