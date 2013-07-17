@@ -45,8 +45,8 @@ void setMaterials( float o, bool negMatrix = false )
 {
     if ( negMatrix )
     {
-        GLfloat mat_front_diffuse[] = { 0.1 * o, 0.1 * o, 0.9 * o, o };
-        GLfloat mat_back_diffuse[] = { 0.9 * o, 0.1 * o, 0.9 * o, o };
+        GLfloat mat_front_diffuse[] = { 0.1f * o, 0.1f * o, 0.9f * o, o };
+        GLfloat mat_back_diffuse[] = { 0.9f * o, 0.1f * o, 0.9f * o, o };
 
         GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
         GLfloat mat_shininess[] = { 100.0 };
