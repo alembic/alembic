@@ -1,9 +1,9 @@
 2013-8-23, Alembic 1.5.0
-Hello Alembic users, we are pleased to announce the official release of Ogawa a
-new data back end for Alembic with improved write, read, and especially
-multi-threaded read performance.
+Hello Alembic users, we are pleased to announce the official release of a new
+data back end for Alembic, codenamed Ogawa with improved write, read, and
+especially multi-threaded read performance.
 
-Here are some improvements we are seeing with Ogawa.
+Here are some improvements we are seeing with this version:
 
 1) File sizes are on average 5-15% smaller. Scenes with many small objects
 should see even greater reductions.
@@ -32,7 +32,7 @@ Python bindings have been extended to support the new features above.
 
 New utility:
 
-abcls this utility is meant to behave like ls or h5ls and offers is an
+abcls this utility is meant to behave like ls or h5ls and offers an
 inexpensive way to explore your object and property hierarchies.
 
 Bug fixes:
@@ -43,6 +43,8 @@ Animated film back data wasn't being reflected in isConstant.
 Offset data should be applied after the filmback matrix.
 
 AbcExport: preScale, and postScale film back xform should be 1.0/scale.
+
+##-*****************************************************************************
 
 2013-4-11, Alembic 1.1.5
 Hello Alembic users, thanks to your feedback we have another collection of
@@ -60,6 +62,8 @@ Fixed const related error caught by Microsoft Visual Studio 9.0 compiler.
 AbcImport:
 
 Use createPoint and createColor for MFnNumericAttribute when appropriate.
+
+##-*****************************************************************************
 
 2013-03-25, Alembic 1.1.4
 Hello Alembic users, thanks to your feedback we have another collection of
@@ -80,6 +84,8 @@ AbcExport/AbcImport:
 
 Fix bug where the conversion from shutter open, shutter close to shutter angle
 was being improperly scaled.
+
+##-*****************************************************************************
 
 2013-02-11, Alembic 1.1.3
 Hello Alembic users, thanks to your feedback we have another collection of
@@ -187,6 +193,8 @@ Utilities:
 Add abctree which walks the entire hierarchy and prints out the names
 of objects.
 
+##-*****************************************************************************
+
 2012-10-17, Alembic 1.1.2
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful features and bug fixes.
@@ -239,6 +247,8 @@ Maya AbcImport:
 Clean up temporary trim curves when the trim operation fails for 
 MFnNurbsSurface.
 
+##-*****************************************************************************
+
 2012-9-20, Alembic 1.1.1
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful and important bug fixes.
@@ -255,6 +265,7 @@ Some small CMake updates.
 
 Fixed typo in OSubD::setHoles
 
+##-*****************************************************************************
 
 2012-7-26, Alembic 1.1.0
 
@@ -332,6 +343,8 @@ Accomodate Unicode file names in AbcImport and AbcExport.
 Issue 285
 AbcGeom/Basis.h was not including Alembic/Util/Foundation.h
 
+##-*****************************************************************************
+
 2012-2-14, Alembic 1.0.5
 
 Bug fix release.
@@ -348,6 +361,8 @@ Correctness updates to "matches(..)" (data matching functions).
 Houdini plugin:
 Reverting frame - 1 change.
 Including a clear cache function.
+
+##-*****************************************************************************
 
 2012-1-12, Alembic 1.0.4
 
