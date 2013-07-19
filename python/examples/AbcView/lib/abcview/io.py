@@ -45,6 +45,11 @@ import alembic
 from abcview import config, log
 from abcview.utils import get_object
 
+__doc__ = """
+AbcView module that contains IO classes for creating and reading
+sessions, scenes and cameras.
+"""
+
 __all__ = ["Scene", "Session", "Camera", "ICamera",
            "AbcViewError", "Mode", ]
 

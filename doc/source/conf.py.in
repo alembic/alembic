@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath("@ALEMBIC_PYILMBASE_PYIMATH_MODULE_DIRECTORY@
 sys.path.insert(1, os.path.abspath("@PROJECT_BINARY_DIR@/python/PyAlembic"))
 sys.path.insert(2, os.path.abspath("@PROJECT_BINARY_DIR@/python/PyAbcOpenGL"))
 sys.path.insert(3, os.path.abspath("@PROJECT_SOURCE_DIR@/python/examples/cask"))
+sys.path.insert(4, os.path.abspath("@PROJECT_SOURCE_DIR@/python/examples/AbcView/lib"))
 
 try:
     import imath

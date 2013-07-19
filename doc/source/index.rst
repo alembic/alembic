@@ -57,19 +57,31 @@ Python bindings using the bootstrap script: `build/bootstrap/alembic_bootstrap.p
 Extras
 ======
 
-The following modules are provided as a convenience and are not necessarily officially supported
-by the Alembic development team.
+The following Python extras are provided as a convenience and are not necessarily officially supported
+by the Alembic development team. These items are located under the /python area of the Alembic source
+repository.
 
 
-AlembicGL
+AbcOpenGL
 ---------
 
-The :mod:`alembicgl` module is a set of Boost Python bindings for the AbcOpenGL lib, which allows
+The :mod:`alembicgl` Python module is a set of Boost Python bindings for the AbcOpenGL lib, which allows
 you to load an Alembic archive and draw to a GL context, e.g. ::
 
     >>> import alembicgl as abcgl
     >>> scene = abcgl.SceneWrapper("octopus.abc")
     >>> scene.draw()
+
+AbcView
+-------
+
+AbcView is a graphical PyQt-based Alembic inspection and visualization tool and offers a 
+number of widgets to help you inspect and visualize your Alembic data.
+
+.. toctree::
+   :maxdepth: 2
+
+   abcview
 
 Cask
 ----
@@ -83,7 +95,6 @@ into high level convenience methods.
    :maxdepth: 3
 
    cask
-
 
 Indices and tables
 ==================
