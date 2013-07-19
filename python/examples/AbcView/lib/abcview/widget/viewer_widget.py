@@ -258,7 +258,6 @@ class GLState(QtCore.QObject):
     cameras = property(_get_cameras, _set_cameras, doc="cameras")
 
     def _get_scenes(self):
-        #return self.__scenes.values()
         return self.__scenes
 
     def _set_scenes(self):
@@ -272,13 +271,12 @@ class GLState(QtCore.QObject):
 
         :param scene: GLScene object
         """
-        #if scene.filepath in self.scenes:
-        #    self.__scenes[scene.filepath].visible = True
-        #else:
-        #    self.__scenes[scene.filepath] = scene
-        if type(scene) == GLScene and scene not in self.__scenes:
-            self.__scenes.append(scene)
-            self.signal_state_change.emit()
+        if type(scene) == GLScene:
+            if scene not in self.__scenes:
+                self.__scenes.append(scene)
+            else:
+                scene.visible = True
+        self.signal_state_change.emit()
 
     def add_file(self, filepath):
         self.add_scene(GLScene(filepath))
@@ -363,6 +361,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         # frames per second value
         self.__time = 0
+        self.__frame = 0
         self.__fps = fps
         self.__playing = False
 
@@ -382,7 +381,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.camera = GLCamera(self)
         self.state.add_camera(self.camera)
 
-        #self.frame()
+        self.frame()
 
     def clear(self):
         self.frame()
@@ -465,7 +464,12 @@ class GLWidget(QtOpenGL.QGLWidget):
         return self.__frame
 
     def _set_frame(self, frame):
-        self.current_time = frame / float(self.fps)
+        if frame > self.frame_range()[1]:
+            frame = self.frame_range()[0]
+        elif frame < self.frame_range()[0]:
+            frame = self.frame_range()[1]
+        frame = frame / float(self.fps)
+        self.current_time = frame
 
     current_frame = property(_get_frame, _set_frame, doc="set/get current frame")
 
@@ -512,9 +516,15 @@ class GLWidget(QtOpenGL.QGLWidget):
     fps = property(_get_fps, _set_fps, doc="frames per second value")
 
     def aspect_ratio(self):
+        """
+        Returns current aspect ration of the viewer.
+        """
         return self.width() / float(self.height())
 
     def time_range(self):
+        """
+        Returns total time range in seconds.
+        """
         min = None
         max = None
         if self.state.scenes:
@@ -528,13 +538,19 @@ class GLWidget(QtOpenGL.QGLWidget):
         return (min, max)
 
     def frame_range(self):
+        """
+        Returns total frame range.
+        """
         (min, max) = self.time_range()
         return (min * self.fps, max * self.fps)
     
     def _get_bounds(self):
+        #TODO: ugly code needs refactor
         if self.state.scenes:
             bounds = None
             for scene in self.state.scenes:
+                if not scene.loaded:
+                    continue
                 if bounds is None or scene.bounds().max() > bounds.max():
                     bounds = scene.bounds()
                     min = bounds.min()
@@ -546,7 +562,9 @@ class GLWidget(QtOpenGL.QGLWidget):
                         max = max * imath.V3d(*scene.scale)
                         min = min * imath.V3d(*scene.scale)
                     bounds = imath.Box3d(min, max)
-
+            
+            if bounds is None:
+                return self.__bounds_default
             self.__bounds = bounds
             return self.__bounds
         else:
@@ -559,6 +577,12 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     @update_camera
     def frame(self, bounds=None):
+        """
+        Frames the viewer's active camera on the bounds of the currently
+        loaded and visible scenes.
+
+        :param bounds: imath.Box3d bounds object.
+        """
         if bounds is None:
             bounds = self.bounds
         self.camera.frame(bounds)
@@ -594,13 +618,19 @@ class GLWidget(QtOpenGL.QGLWidget):
         splitter.addWidget(group2)
 
     def split_vert(self):
+        """
+        Splits the viewer vertically.
+        """
         self.split(QtCore.Qt.Horizontal)
 
     def split_horz(self):
+        """
+        Splits the viewer horizontally.
+        """
         self.split(QtCore.Qt.Vertical)
 
-    def wipe_horz(self):
-        self.split(QtCore.Qt.Horizontal, wipe=True)
+    #def wipe_horz(self):
+    #    self.split(QtCore.Qt.Horizontal, wipe=True)
 
     #TODO: support viewer pop-outs
     def unsplit(self):
@@ -966,11 +996,11 @@ class GLWidget(QtOpenGL.QGLWidget):
             options_menu = QtGui.QMenu("Options", self)
 
             # bounds toggle menu item
-            self.aframeAct = QtGui.QAction("Autoframe", self)
-            self.aframeAct.setCheckable(True)
-            self.aframeAct.setChecked(self.camera.auto_frame)
-            self.connect(self.aframeAct, QtCore.SIGNAL("toggled (bool)"), self.camera._set_auto_frame)
-            options_menu.addAction(self.aframeAct)
+            #self.aframeAct = QtGui.QAction("Autoframe", self)
+            #self.aframeAct.setCheckable(True)
+            #self.aframeAct.setChecked(self.camera.auto_frame)
+            #self.connect(self.aframeAct, QtCore.SIGNAL("toggled (bool)"), self.camera._set_auto_frame)
+            #options_menu.addAction(self.aframeAct)
 
             # bounds toggle menu item
             self.boundsAct = QtGui.QAction("Bounds (Alt+B)", self)

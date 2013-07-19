@@ -289,18 +289,17 @@ class SessionTreeWidgetItem(AbcTreeWidgetItem):
                 str(self.object.name))
         self.setToolTip(self.treeWidget().colnum('name'), 
                 QtCore.QString(str(self.object.filepath)))
-        if self.object.loaded:
-            self.load()
-        else:
-            self.unload()
+        self.setCheckState(self.treeWidget().colnum(""), QtCore.Qt.Unchecked)
 
     def load(self):
         self.object.loaded = True
+        self.object.visible = True
         self.treeWidget().emit(QtCore.SIGNAL('itemLoaded (PyQt_PyObject)'), self)
         self.setCheckState(self.treeWidget().colnum(""), QtCore.Qt.Checked)
 
     def unload(self):
         self.object.loaded = False
+        self.object.visible = False
         self.treeWidget().emit(QtCore.SIGNAL('itemUnloaded (PyQt_PyObject)'), self)
         self.setCheckState(self.treeWidget().colnum(""), QtCore.Qt.Unchecked)
 
@@ -325,13 +324,11 @@ class SceneTreeWidgetItem(SessionTreeWidgetItem):
         """
         :param object: Scene
         """
-        self.scene = GLScene(object.filepath)
-        self.scene.properties = object.properties
         super(SceneTreeWidgetItem, self).__init__(parent, object)
         self.setToolTip(self.treeWidget().colnum(''), 'visible')
 
     def children(self):
-        yield ObjectTreeWidgetItem(self, self.scene.archive.getTop())
+        yield ObjectTreeWidgetItem(self, self.object.archive.getTop())
 
 ## tree Widgets ---------------------------------------------------------------
 class DeselectableTreeWidget(QtGui.QTreeWidget):
@@ -384,8 +381,6 @@ class AbcTreeWidget(DeselectableTreeWidget):
                 self.handle_item_clicked)
         self.connect(self, QtCore.SIGNAL("itemDoubleClicked (QTreeWidgetItem *, int)"), 
                 self.handle_item_double_clicked)
-        self.connect(self, QtCore.SIGNAL("itemChanged (QTreeWidgetItem *, int)"), 
-                self.handle_item_changed)
         self.connect(self, QtCore.SIGNAL("itemExpanded (QTreeWidgetItem *)"), 
                 self.handle_item_expanded)
         self.connect(self, QtCore.SIGNAL("customContextMenuRequested (const QPoint&)"),
@@ -421,17 +416,16 @@ class AbcTreeWidget(DeselectableTreeWidget):
             return
         self.handle_item_clicked(items[0])
 
-    def handle_item_changed(self, item, col=0):
+    def handle_item_clicked(self, item, col=0):
+        self.scrollToItem(item, QtGui.QAbstractItemView.EnsureVisible)
+        self.emit(QtCore.SIGNAL('itemClicked (PyQt_PyObject)'), 
+                    item)
+        
         if col == self.colnum(""):
             if item.checkState(self.colnum("")) == QtCore.Qt.Checked:
                 item.load()
             else:
                 item.unload()
-
-    def handle_item_clicked(self, item, col=0):
-        self.scrollToItem(item, QtGui.QAbstractItemView.EnsureVisible)
-        self.emit(QtCore.SIGNAL('itemClicked (PyQt_PyObject)'), 
-                    item)
 
     def handle_item_double_clicked(self, item):
         self.emit(QtCore.SIGNAL('itemDoubleClicked (PyQt_PyObject)'), 
@@ -451,7 +445,7 @@ class AbcTreeWidget(DeselectableTreeWidget):
         if type(selected) == SessionTreeWidgetItem:
             return selected.object
         elif type(selected) == SceneTreeWidgetItem:
-            return selected.scene.archive.getTop()
+            return selected.object.archive.getTop()
         else:
             return selected.object
 

@@ -147,7 +147,8 @@ class GLCamera(abcview.io.Camera, GLCameraMixin):
         self.glcamera.lookAt(eye, at)
 
     def frame(self, bounds):
-        self.glcamera.frame(bounds)
+        if bounds is not None:
+            self.glcamera.frame(bounds)
 
     def _get_translation(self):
         return self.glcamera.translation()
@@ -347,7 +348,6 @@ class GLScene(abcview.io.Scene):
         self.selected = []
         self.__archive = None
         self.__scene = None
-        self.loaded = False
 
     def draw(self):
         try:

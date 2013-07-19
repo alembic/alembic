@@ -198,7 +198,7 @@ class Scene(FileBase):
             "loaded": self.loaded,
             "name": self.name,
             "properties": self.properties,
-            "type": self.type(),
+            #"type": self.type(),
         }
 
     @classmethod
@@ -207,7 +207,7 @@ class Scene(FileBase):
         Deserializes an Alembic scene from json data.
         """
         item = cls(data.get("filepath"))
-        item.loaded = data.get("loaded", False)
+        item.loaded = data.get("loaded", True)
         item.instance = data.get("instance", 1)
         item.properties = data.get("properties", {})
         return item
@@ -540,6 +540,17 @@ class Session(FileBase):
         item.instance = len(found_instances) + 1
         self.__items.append(item)
 
+    def remove_item(self, item):
+        """
+        Removes an item from the session
+
+        :param item: Scene or Session object
+        """
+        if item in self.__items:
+            self.__items.remove(item)
+        else:
+            log.debug("Item not in session: %s" % item)
+
     def add_file(self, filepath):
         """
         Adds a filepath to the session
@@ -596,7 +607,7 @@ class Session(FileBase):
                     "name": item.name,
                     "loaded": item.loaded,
                     "properties": item.properties,
-                    "type": item.type(),
+                    #"type": item.type(),
                 }
             else:
                 return item.serialize()

@@ -74,6 +74,7 @@ import commands
 import traceback
 import simplejson as json
 from functools import wraps
+from copy import deepcopy
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -450,6 +451,9 @@ class AbcView(QtGui.QMainWindow):
     ## settings
 
     def reset_settings(self):
+        """
+        Resets the AbcView layout settings to default values.
+        """
         self.settings.clear()
         
         # default position settings
@@ -470,6 +474,9 @@ class AbcView(QtGui.QMainWindow):
         self.viewer.draw_hud = False
 
     def load_settings(self):
+        """
+        Loads AbcView layout settings from a PyQt settings file.
+        """
         geom = self.settings.value('geometry')
         if geom.isNull() or not geom.isValid():
             self.reset_settings()
@@ -513,6 +520,9 @@ class AbcView(QtGui.QMainWindow):
         self.settings.endGroup()
 
     def save_settings(self, settings=None):
+        """
+        Saves layout settings to a PyQt settings file.
+        """
         if settings is None:
             settings = self.settings
 
@@ -542,6 +552,11 @@ class AbcView(QtGui.QMainWindow):
 
     @make_dirty
     def toggle_widget(self, widget):
+        """
+        Toggles visibilty of given widget.
+
+        :param widget: AbcView widget object.
+        """
         if widget.isHidden():
             widget.show()
         else:
@@ -551,6 +566,10 @@ class AbcView(QtGui.QMainWindow):
 
     @make_clean
     def open_session(self, filepath):
+        """
+        Loads a session file and swaps out IO objects for GL objects.
+        """
+        #TODO: ugly code needs refactor
         log.debug("AbcView.open_session: %s" % filepath)
         if not filepath or not os.path.isfile(filepath):
             log.warn("invalid file: %s" % filepath)
@@ -562,17 +581,26 @@ class AbcView(QtGui.QMainWindow):
             self.import_file(filepath)
             self.viewer.frame()
 
-        # load a session file
+        # load session, transform IO scenes to GL scenes
         elif filepath.endswith(Session.EXT):
             self.session = Session(filepath)
-            for item in self.session.items:
+            for index in range(len(self.session.items)):
+                item = self.session.items[0]
                 if item.filepath.endswith(Scene.EXT):
-                    SceneTreeWidgetItem(self.objects_tree, item)
+                    _item = GLScene(item.filepath)
+                    _item.properties = deepcopy(item.properties)
+                    _item.loaded = item.loaded
+                    _item.visible = item.loaded
+                    tree_item = SceneTreeWidgetItem(self.objects_tree, _item)
+                    self.session.remove_item(item)
+                    self.session.add_item(_item)
                 else:
-                    SessionTreeWidgetItem(self.objects_tree, item)
+                    tree_item = SessionTreeWidgetItem(self.objects_tree, item)
+
+                if item.loaded:
+                    tree_item.load()
            
             # transform IO cameras into GL cameras
-            #TODO: should there be a CameraTreeWidgetItem to set properties?
             for camera in self.session.cameras:
                 self.session.remove_camera(camera)
                 if camera.type() == Camera.type():
@@ -593,6 +621,9 @@ class AbcView(QtGui.QMainWindow):
     @make_clean
     def save_session(self, filepath=None):
         """
+        Saves the current AbcView session to  a given filepath, or
+        to the current filepath if filepath is None.
+
         :param filepath: save to filepath (passing no args or None
                          overrwrites current session file.
         """
@@ -603,6 +634,11 @@ class AbcView(QtGui.QMainWindow):
             message("Error saving file:\n\n%s" % str(e))
 
     def load_script(self, script):
+        """
+        Loads and executes a python AbcView script.
+
+        :param script: code or path to file containing python code.
+        """
         log.debug("AbcView.load_script: %s" % script)
         if os.path.exists(script):
             lines = open(script, "r").readlines()
@@ -615,26 +651,44 @@ class AbcView(QtGui.QMainWindow):
 
     @make_dirty
     def import_file(self, filepath):
+        """
+        Imports a file into the current session.
+
+        :param filepath: path to scene or session file.
+        """
         if not filepath or not os.path.isfile(filepath):
             log.info("invalid file: %s" % filepath)
             return
        
         # add the item to the session
-        item = self.session.add_file(filepath)
+        item = GLScene(filepath)
+        self.session.add_item(item)
 
         if self.viewer_group.isHidden():
             item.loaded = False
+        else:
+            item.loaded = True
         if filepath.endswith(Scene.EXT):
-            SceneTreeWidgetItem(self.objects_tree, item)
+            tree_item = SceneTreeWidgetItem(self.objects_tree, item)
         elif filepath.endswith(Session.EXT):
-            SessionTreeWidgetItem(self.objects_tree, item)
+            tree_item = SessionTreeWidgetItem(self.objects_tree, item)
+
+        # load the item into the viewer
+        if item.loaded:
+            tree_item.load()
 
     ## event handlers
 
     def handle_play(self):
+        """
+        Playback handler, starts playing the viewer.
+        """
         self.viewer.play()
 
     def handle_stop(self):
+        """
+        Viewer playback stop handler, stops the viewer playback.
+        """
         self.viewer.stop()
 
     @make_dirty
@@ -735,16 +789,15 @@ class AbcView(QtGui.QMainWindow):
         """
         def load(item):
             if type(item) == SceneTreeWidgetItem:
-                if item.object.loaded:
-                    item.scene.load()
-                    self.viewer.add_scene(item.scene)
+                scene = item.object
+                self.viewer.add_scene(scene)
             elif type(item) == SessionTreeWidgetItem:
                 for child in item.children():
                     load(child)
         load(item)
 
     def handle_item_unloaded(self, item):
-        self.viewer.remove_scene(item.scene)
+        self.viewer.remove_scene(item.object)
 
     def handle_object_clicked(self, item):
         self.samples_tree.clear()
@@ -810,7 +863,6 @@ class AbcView(QtGui.QMainWindow):
             message("Object has invalid or no bounds set.")
             return
         bounds = bounds_prop.getValue(iss)
-        #self.viewer.bounds = bounds * xf
         self.viewer.frame(bounds * xf)
 
     def handle_save(self):
