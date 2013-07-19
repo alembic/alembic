@@ -313,7 +313,7 @@ namespace
 
             ioMesh.setFaceVertexNormals(normalsIn, faceList, vertexList);
         }
-        else
+        else if (sampSize != 0)
         {
             printWarning(ioMesh.fullPathName() +
                 " normal vector scope does not match size of data, " +

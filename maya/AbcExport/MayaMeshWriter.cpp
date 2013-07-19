@@ -208,7 +208,7 @@ getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmM
 
 }
 
-// assumption is we don't support multiple uv sets as well as animated uvs
+// assumption is we don't support multiple uv sets
 void MayaMeshWriter::getUVs(std::vector<float> & uvs,
     std::vector<Alembic::Util::uint32_t> & indices)
 {
