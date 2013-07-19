@@ -1,4 +1,4 @@
-2013-8-23, Alembic 1.5.0
+2013-7-22, Alembic 1.5.0
 Hello Alembic users, we are pleased to announce the official release of a new
 data back end for Alembic, codenamed Ogawa with improved write, read, and
 especially multi-threaded read performance.
