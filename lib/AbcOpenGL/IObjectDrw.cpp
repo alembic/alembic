@@ -54,18 +54,6 @@ IObjectDrw::IObjectDrw( IObject &iObj, bool iResetIfNoChildren )
     // If not valid, just bail.
     if ( !m_object ) { return; }
 
-    // Skip objects with "visible" property set to 0
-    Abc::ICompoundProperty props = m_object.getProperties();
-    const Abc::PropertyHeader* header = props.getPropertyHeader( "visible" );
-    if ( header != NULL ) {
-        Abc::IScalarProperty visible( props, "visible" );
-        Abc::ISampleSelector iss;
-        int8_t val = 1;
-        visible.get( reinterpret_cast<void*>( &val ), iss );
-        if ( val == 0 ) 
-            return;
-    }
-
     // IObject has no explicit time sampling, but its children may.
     size_t numChildren = m_object.getNumChildren();
     for ( size_t i = 0; i < numChildren; ++i )
@@ -178,6 +166,9 @@ void IObjectDrw::setTime( chrono_t iTime )
 {
     if ( !m_object ) { return; }
 
+    // store the current time on the drawable for easy access later
+    m_currentTime = iTime;
+
     // Object itself has no properties to worry about.
     m_bounds.makeEmpty();
     for ( DrawablePtrVec::iterator iter = m_children.begin();
@@ -202,6 +193,20 @@ Box3d IObjectDrw::getBounds()
 void IObjectDrw::draw( const DrawContext &iCtx )
 {
     if ( !m_object ) { return; }
+
+    // Skip objects with "visible" property set to 0
+    if ( iCtx.getVisibleOnly() ) {
+        Abc::ICompoundProperty props = m_object.getProperties();
+        const Abc::PropertyHeader* header = props.getPropertyHeader( "visible" );
+        if ( header != NULL ) {
+            Abc::IScalarProperty visible( props, "visible" );
+            Abc::ISampleSelector iss( m_currentTime );
+            int8_t val = 1;
+            visible.get( reinterpret_cast<void*>( &val ), iss );
+            if ( val == 0 ) 
+                return;
+        }
+    }
 
     for ( DrawablePtrVec::iterator iter = m_children.begin();
           iter != m_children.end(); ++iter )

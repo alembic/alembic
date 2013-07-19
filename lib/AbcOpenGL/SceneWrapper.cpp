@@ -52,8 +52,8 @@ public:
     {
     }
 
-    void draw() {
-        m_scene.draw(m_state);
+    void draw( bool visibleOnly ) {
+        m_scene.draw(m_state, visibleOnly);
     }
 
     void playForward(int fps) {
@@ -110,9 +110,9 @@ SceneWrapper::SceneWrapper( const std::string &fileName, bool verbose ):
     m_state(new _scn_impl( fileName, verbose ))
 {}
 
-void SceneWrapper::draw()
+void SceneWrapper::draw(bool visibleOnly)
 {
-    m_state->draw();
+    m_state->draw(visibleOnly);
 }
 
 void SceneWrapper::setTime(chrono_t newTime)

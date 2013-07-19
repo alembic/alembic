@@ -135,7 +135,8 @@ void register_opengl()
               ( arg( "fileName" ), arg( "verbose" ) = false ),
               "doc"))
         .def( "draw",
-              &AbcOpenGL::SceneWrapper::draw )
+              &AbcOpenGL::SceneWrapper::draw,
+              ( arg( "visibleOnly" ) = false ) )
         .def( "getMinTime",
               &AbcOpenGL::SceneWrapper::getMinTime )
         .def( "getMaxTime",

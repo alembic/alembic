@@ -50,6 +50,7 @@ public:
     {
         m_worldToCamera.makeIdentity();
         m_pointSize = 3.0f;
+        m_visibleOnly = false;
     }
 
     // Default copy & assign.
@@ -62,9 +63,14 @@ public:
     float getPointSize() const { return m_pointSize; }
     void setPointSize( float iPs ) { m_pointSize = iPs; }
 
+    // Get/Set visibility toggle
+    bool getVisibleOnly() const { return m_visibleOnly; }
+    void setVisibleOnly( bool visibleOnly ) { m_visibleOnly = visibleOnly; }
+
 protected:
     M44d m_worldToCamera;
     float m_pointSize;
+    bool m_visibleOnly;
 };
 
 } // End namespace ABCOPENGL_VERSION_NS

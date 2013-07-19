@@ -160,7 +160,7 @@ void Scene::setTime( chrono_t iSeconds )
 }
 
 //-*****************************************************************************
-void Scene::draw( SceneState &s_state )
+void Scene::draw( SceneState &s_state, bool visibleOnly )
 {
     ABCA_ASSERT( m_archive && m_topObject &&
                  m_drawable && m_drawable->valid(),
@@ -175,6 +175,7 @@ void Scene::draw( SceneState &s_state )
     DrawContext dctx;
     dctx.setWorldToCamera( currentMatrix );
     dctx.setPointSize( s_state.pointSize );
+    dctx.setVisibleOnly( visibleOnly );
 
     m_drawable->draw( dctx );
 

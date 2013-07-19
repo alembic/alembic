@@ -104,7 +104,7 @@ public:
 
     //! This draws, assuming a camera matrix has already been set.
     //! ...
-    void draw( SceneState &s_state );
+    void draw( SceneState &s_state, bool visibleOnly = false );
 
 protected:
     std::string m_fileName;

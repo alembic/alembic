@@ -69,6 +69,7 @@ public:
 protected:
     IObject m_object;
 
+    chrono_t m_currentTime;
     chrono_t m_minTime;
     chrono_t m_maxTime;
 

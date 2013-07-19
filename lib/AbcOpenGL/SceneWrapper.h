@@ -53,7 +53,7 @@ class SceneWrapper {
 public:
     SceneWrapper( const std::string &fileName, bool verbose = false );
 
-    void draw();
+    void draw(bool visibleOnly = false);
 
     void setTime(chrono_t newTime);
     void playForward(int fps);
