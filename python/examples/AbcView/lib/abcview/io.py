@@ -58,13 +58,11 @@ class Mode:
 class AbcViewError(Exception):
     pass
 
-class Base(dict):
+class Base(object):
     def __init__(self):
         self.loaded = True
+        self.instance = 1
         self.properties = {}
-
-    def __str__(self):
-        return self.name
 
     def __repr__(self):
         return "<%s \"%s\">" % (self.type(), self.name)
@@ -147,14 +145,60 @@ class Scene(FileBase):
     def __init__(self, filepath=None):
         super(Scene, self).__init__(filepath)
         self.filepath = filepath
-        
+       
+    def __repr__(self):
+        return "<%s \"%s\" #%d>" % (self.type(), self.name, self.instance)
+
+    ## some convenience properties
+
+    def _get_translate(self):
+        return self.properties.get("translate", (0, 0, 0))
+
+    def _set_translate(self, value):
+        self.properties["translate"] = value
+
+    translate = property(_get_translate, _set_translate, doc="translate property")
+
+    def _get_rotate(self):
+        return self.properties.get("rotate", (0, 0, 0, 0))
+
+    def _set_rotate(self, value):
+        self.properties["rotate"] = value
+
+    rotate = property(_get_rotate, _set_rotate, doc="rotation property")
+
+    def _get_scale(self):
+        return self.properties.get("scale", (1, 1, 1))
+
+    def _set_scale(self, value):
+        self.properties["scale"] = value
+
+    scale = property(_get_scale, _set_scale, doc="scale property")
+
+    def _get_mode(self):
+        return self.properties.get("mode", Mode.LINE)
+
+    def _set_mode(self, value):
+        self.properties["mode"] = value
+
+    mode = property(_get_mode, _set_mode, doc="GL polygon mode property")
+
+    def _get_color(self):
+        return self.properties.get("color", (1, 0, 0))
+
+    def _set_color(self, value):
+        self.properties["color"] = value
+
+    color = property(_get_color, _set_color, doc="color to display in viewer")
+
     def serialize(self):
         return {
-            'filepath': self.filepath,
-            'loaded': self.loaded,
-            'name': self.name,
+            "filepath": self.filepath,
+            "instance": self.instance,
+            "loaded": self.loaded,
+            "name": self.name,
+            "properties": self.properties,
             "type": self.type(),
-            'properties': self.properties,
         }
 
     @classmethod
@@ -163,7 +207,9 @@ class Scene(FileBase):
         Deserializes an Alembic scene from json data.
         """
         item = cls(data.get("filepath"))
-        item.loaded = data.get("loaded")
+        item.loaded = data.get("loaded", False)
+        item.instance = data.get("instance", 1)
+        item.properties = data.get("properties", {})
         return item
 
 class CameraBase(Base):
@@ -271,12 +317,12 @@ class Camera(CameraBase):
     AbcView API Camera object. Camera attributes are not
     animatable as opposed to Alembic ICamera attributes.
 
-    Acting de/serialization layer for AbcGLCamera objects.
+    Acting de/serialization layer for GLCamera objects.
     """
 
     # list of camera properties to de/serialize
     SERIALIZE = ["translation", "rotation", "scale", "aspect_ratio",
-                 "fovx", "fovy", "near", "far", "center", "fixed", 
+                 "fovx", "fovy", "near", "far", "center", "fixed", "mode",
                  "draw_hud", "draw_grid", "draw_normals", "draw_bounds"]
 
     def __init__(self, name, loaded=False):
@@ -346,6 +392,7 @@ class ICamera(CameraBase):
         self.icamera = icamera
         self.loaded = loaded
         self.__schema = None
+        super(ICamera, self).__init__(self.name)
 
     def __repr__(self):
         return "<%s \"%s\">" % (self.__class__.__name__, self.name)
@@ -484,11 +531,21 @@ class Session(FileBase):
     cameras = property(_get_cameras, _set_cameras, doc="cameras")
 
     def add_item(self, item):
-        log.debug("Session.add_item: %s" % item)
-        if item not in self:
-            self.__items.append(item)
+        """
+        Adds and item to the session
+
+        :param item: Scene or Session object
+        """
+        found_instances = [i.filepath for i in self.items if i.filepath == item.filepath]
+        item.instance = len(found_instances) + 1
+        self.__items.append(item)
 
     def add_file(self, filepath):
+        """
+        Adds a filepath to the session
+
+        :param filepath: path to file
+        """
         if filepath.endswith(self.EXT):
             item = Session(filepath)
         elif filepath.endswith(Scene.EXT):
@@ -500,7 +557,7 @@ class Session(FileBase):
 
     def add_camera(self, camera):
         """
-        :param: AbcGLCamera
+        :param: GLCamera
         """
         log.debug("Session.add_camera: %s" % camera)
         if camera.name not in self.__cameras:
@@ -508,7 +565,7 @@ class Session(FileBase):
 
     def remove_camera(self, camera):
         """
-        :param: AbcGLCamera
+        :param: GLCamera
         """
         log.debug("Session.remove_camera: %s" % camera)
         if camera.name in self.__cameras:
@@ -518,7 +575,7 @@ class Session(FileBase):
         """
         Sets the "active" camera for a given session.
 
-        :param: AbcGLCamera
+        :param: GLCamera
         """
         log.debug("Session.set_camera: %s" % camera)
         if camera.name not in self.__cameras:
@@ -535,10 +592,11 @@ class Session(FileBase):
             if item.type() == "Session":
                 return {
                     "filepath": item.filepath, 
+                    "instance": item.instance,
                     "name": item.name,
                     "loaded": item.loaded,
-                    "type": item.type(),
                     "properties": item.properties,
+                    "type": item.type(),
                 }
             else:
                 return item.serialize()
@@ -586,6 +644,7 @@ class Session(FileBase):
         self.version = state.get("app").get("version")
         self.program = state.get("app").get("program")
         self.date = state.get("date")
+        self.instance = state.get("instance", 1)
         self.properties = state.get("properties")
 
         # cameras
@@ -599,7 +658,6 @@ class Session(FileBase):
         data = state.get("data")
         for d in data.get("items"):
             fp = str(d.get("filepath"))
-            log.debug("reading: %s" % fp)
             if fp.endswith(Scene.EXT):
                 self.add_item(Scene.deserialize(d))
             elif fp.endswith(Session.EXT):

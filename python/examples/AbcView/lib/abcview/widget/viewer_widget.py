@@ -57,21 +57,18 @@ import alembic
 
 import abcview
 from abcview.io import Mode
-from abcview.gl import AbcGLCamera, AbcGLICamera, AbcGLScene
+from abcview.gl import GLCamera, GLICamera, GLScene
 from abcview import log, config
 
 kWrapExisting = alembic.Abc.WrapExistingFlag.kWrapExisting
 
 # GL drawing mode map
 GL_MODE_MAP = {
+    Mode.OFF: 0,
     Mode.FILL: GL_FILL,
     Mode.LINE: GL_LINE,
     Mode.POINT: GL_POINT
 }
-
-# scene and camera caches
-SCENES = {}
-CAMERAS = {}
 
 def accumXform(xf, obj):
     if alembic.AbcGeom.IXform.matches(obj.getHeader()):
@@ -96,9 +93,9 @@ def update_camera(func):
     def with_wrapped_func(*args, **kwargs):
         func(*args, **kwargs)
         wid = args[0]
-        if hasattr(wid, "apply") and wid.camera is not None:
-            wid.camera.apply()
+        wid.camera.apply()
         wid.updateGL()
+        wid.state.signal_state_change.emit()
     return with_wrapped_func
 
 def set_ambient_light():
@@ -197,13 +194,13 @@ def create_viewer_app(filepath=None):
     app = QtGui.QApplication(sys.argv)
 
     # create the viewer widget
-    viewer = AbcGLWidget()
+    viewer = GLWidget()
     viewer_group = QtGui.QGroupBox()
     viewer_group.setLayout(QtGui.QVBoxLayout())
     viewer_group.layout().setSpacing(0)
     viewer_group.layout().setMargin(0)
     viewer_group.layout().addWidget(viewer)
-    viewer_group.setWindowTitle("AbcGLWidget")
+    viewer_group.setWindowTitle("GLWidget")
 
     # set default size
     viewer_group.setMinimumSize(QtCore.QSize(100, 100))
@@ -237,34 +234,125 @@ class GLSplitter(QtGui.QSplitter):
         self.wipe = wipe
         #self.splitterMoved.connect(self.handle_splitter_moved)
 
-class AbcGLWidget(QtOpenGL.QGLWidget):
+class GLState(QtCore.QObject):
+    """
+    Global GL viewer state manager. Manages list of Cameras and Scenes, 
+    which can be shared between viewers.
+    """
+    signal_state_change = QtCore.pyqtSignal()
+
+    def __init__(self):
+        super(GLState, self).__init__()
+        self.clear()
+
+    def clear(self):
+        self.__scenes = []
+        self.__cameras = {}
+
+    def _get_cameras(self):
+        return self.__cameras.values()
+
+    def _set_cameras(self):
+        log.debug("use add_camera()")
+
+    cameras = property(_get_cameras, _set_cameras, doc="cameras")
+
+    def _get_scenes(self):
+        #return self.__scenes.values()
+        return self.__scenes
+
+    def _set_scenes(self):
+        log.debug("use add_scene() to add scenes")
+
+    scenes = property(_get_scenes, _set_scenes, doc="scenes")
+
+    def add_scene(self, scene):
+        """
+        Adds a scene to the viewer session. 
+
+        :param scene: GLScene object
+        """
+        #if scene.filepath in self.scenes:
+        #    self.__scenes[scene.filepath].visible = True
+        #else:
+        #    self.__scenes[scene.filepath] = scene
+        if type(scene) == GLScene and scene not in self.__scenes:
+            self.__scenes.append(scene)
+            self.signal_state_change.emit()
+
+    def add_file(self, filepath):
+        self.add_scene(GLScene(filepath))
+        self.signal_state_change.emit()
+
+    def remove_scene(self, scene):
+        """
+        Removes a given GLScene object from the master scene.
+
+        :param scene: GLScene to remove.
+        """
+        scene.visible = False
+        self.signal_state_change.emit()
+
+    def add_camera(self, camera):
+        """
+        Adds a new GLCamera to the state.
+
+        :param camera: GLCamera object
+        """
+        if name in self.__cameras.keys():
+            camera.name = camera.name + "_1"
+        self.__cameras[camera.name] = camera
+        self.signal_state_change.emit()
+
+    def remove_camera(self, camera):
+        """
+        Removes a GLCamera object from the state.
+
+        :param camera: GLCamera object
+        """
+        if type(camera) in [str, unicode]:
+            del self.__cameras[name]
+        else:
+            del self.__cameras[camera.name]
+        self.signal_state_change.emit()
+
+    def get_camera_by_name(self, name):
+        return self.__cameras.get(name)
+
+class GLWidget(QtOpenGL.QGLWidget):
     """
     AbcView OpenGL Widget.
 
     Basic usage ::
 
-        >>> viewer = AbcGLWidget()
+        >>> viewer = GLWidget()
         >>> viewer.add_file("file.abc")
     """
-    signal_scene_opened = QtCore.pyqtSignal(AbcGLScene)
+    signal_scene_opened = QtCore.pyqtSignal(GLScene)
+    signal_scene_removed = QtCore.pyqtSignal(GLScene)
     signal_scene_error = QtCore.pyqtSignal(str)
     signal_scene_drawn = QtCore.pyqtSignal()
     signal_play_fwd = QtCore.pyqtSignal()
     signal_play_stop = QtCore.pyqtSignal()
     signal_current_time = QtCore.pyqtSignal(float)
     signal_current_frame = QtCore.pyqtSignal(int)
-    signal_set_camera = QtCore.pyqtSignal(AbcGLCamera)
-    signal_new_camera = QtCore.pyqtSignal(AbcGLCamera)
+    signal_set_camera = QtCore.pyqtSignal(GLCamera)
+    signal_new_camera = QtCore.pyqtSignal(GLCamera)
+    signal_camera_updated = QtCore.pyqtSignal(GLCamera)
 
-    def __init__(self, parent=None, fps=24):
+    def __init__(self, parent=None, fps=24, state=None):
         """
         :param parent: parent Qt object
-        :param fps: frames per second (used by playback timer)
+        :param fps: frames per second (default 24)
+        :param state: GLState object (for shared states)
         """
+        self.camera = None
         format = QtOpenGL.QGLFormat()
         format.setDirectRendering(True)
         format.setSampleBuffers(True)
-        QtOpenGL.QGLWidget.__init__(self, format, parent)
+        self.state = state or GLState()
+        self.state.signal_state_change.connect(self.handle_state_change)
+        super(GLWidget, self).__init__(format, parent)
         self.setAutoBufferSwap(True)
         self.setMouseTracking(True)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -280,7 +368,7 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
 
         # various matrices and vectors
         self.__bounds_default = imath.Box3d((-5,-5,-5), (5,5,5))
-        self.__bounds = self.__bounds_default
+        self.__bounds = None
         self.__radius = 5.0
         self.__last_pok = False
         self.__last_p2d = QtCore.QPoint()
@@ -289,84 +377,72 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
 
         # for animated scenes
         self.timer = QtCore.QTimer(self)
-        
-        # camera and scenes dicts
-        self.scenes = SCENES
-        self.cameras = CAMERAS
 
-        # create default camera
-        self.camera = AbcGLCamera(self, "interactive")
-        self.camera.aspect_ratio = None
-        self.cameras["interactive"] = self.camera
-        self.set_camera("interactive")
+        # default camera
+        self.camera = GLCamera(self)
+        self.state.add_camera(self.camera)
 
-        # clear alembic scene params
-        self.clear()
+        #self.frame()
 
     def clear(self):
-        self.scenes = SCENES
-        self.cameras = CAMERAS
         self.frame()
         self.updateGL()
 
     def add_file(self, filepath):
-        self.add_scene(AbcGLScene(filepath))
+        self.add_scene(GLScene(filepath))
 
     def add_scene(self, scene):
         """
         Adds a scene to the viewer session. 
 
-        :param scene: AbcGLScene object
+        :param scene: GLScene object
         """
-        try:
-            if scene.filepath in self.scenes:
-                self.scenes[scene.filepath].visible = True
-            else:
-                self.scenes[scene.filepath] = scene
-                self.signal_scene_opened.emit(scene)
-            self.updateGL()
-        except RuntimeError, e:
-            self.signal_scene_error.emit("Error loading scene\n\n%s" 
-                                       % str(e))
-            log.error(str(e))
+        self.state.add_scene(scene)
+        self.signal_scene_opened.emit(scene)
+        self.updateGL()
 
     def remove_scene(self, scene):
         """
-        Removes a given AbcGLScene object from the master scene.
+        Removes a given GLScene object from the master scene.
 
-        :param scene: AbcGLScene to remove.
+        :param scene: GLScene to remove.
         """
-        scene.visible = False
+        self.state.remove_scene(scene)
+        self.signal_scene_removed.emit(scene)
         self.updateGL()
 
     def add_camera(self, camera):
         """
-        :param camera: AbcGLCamera object
+        :param camera: GLCamera object
         """
-        self.cameras[camera.name] = camera
+        log.debug("GLWidget.add_camera: %s" % camera)
+        self.state.add_camera(camera)
         self.signal_new_camera.emit(camera)
+
+    def remove_camera(self, camera):
+        """
+        :param camera: GLCamera object to remove
+        """
+        self.state.remove_camera(camera)
 
     @update_camera
     def set_camera(self, camera="interactive"):
         """
         Sets the scene camera from a given camera name string
 
-        :param camera: Name of camera or AbcGLCamera object
+        :param camera: Name of camera or GLCamera object
         """
         if type(camera) in [str, unicode]:
             if "/" in camera:
                 camera = os.path.split("/")[-1]
-            if camera not in self.cameras.keys():
+            if camera not in [cam.name for cam in self.state.cameras]:
                 log.warn("camera not found: %s" % camera)
                 return
-            self.camera = self.cameras[camera]
+            self.camera = self.state.get_camera_by_name(camera)
         else:
             self.camera = camera
         self.resizeGL(self.width(), self.height())
         self.signal_set_camera.emit(self.camera)
-
-    def remove_camera(self, name):
-        del self.cameras[name]
 
     def _get_time(self):
         return self.__time
@@ -374,10 +450,10 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
     def _set_time(self, new_time):
         self.__time = new_time
         self.__frame = new_time * self.fps
-        for scene in self.scenes.values():
+        for scene in self.state.scenes:
             if scene.visible:
                 scene.set_time(new_time)
-        if hasattr(self, "camear") and self.camera.auto_frame:
+        if self.camera and self.camera.auto_frame:
             self.frame()
         self.signal_current_time.emit(new_time) 
         self.signal_current_frame.emit(int(round(new_time * self.fps)))
@@ -438,12 +514,11 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
     def aspect_ratio(self):
         return self.width() / float(self.height())
 
-    # TODO: prevent scenes w/o animation from updating range
     def time_range(self):
         min = None
         max = None
-        if self.scenes:
-            for scene in self.scenes.values():
+        if self.state.scenes:
+            for scene in self.state.scenes:
                 if min is None or scene.min_time() < min:
                     min = scene.min_time()
                 if max is None or scene.max_time() > max:
@@ -457,18 +532,25 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         return (min * self.fps, max * self.fps)
     
     def _get_bounds(self):
-        if self.__bounds:
-            return self.__bounds
-        elif self.scenes:
+        if self.state.scenes:
             bounds = None
-            for scene in self.scenes.values():
+            for scene in self.state.scenes:
                 if bounds is None or scene.bounds().max() > bounds.max():
                     bounds = scene.bounds()
+                    min = bounds.min()
+                    max = bounds.max()
+                    if scene.properties.get("translate"):
+                        max = max * imath.V3d(*scene.translate)
+                        min = min * imath.V3d(*scene.translate)
+                    if scene.properties.get("scale"):
+                        max = max * imath.V3d(*scene.scale)
+                        min = min * imath.V3d(*scene.scale)
+                    bounds = imath.Box3d(min, max)
+
             self.__bounds = bounds
             return self.__bounds
         else:
             return self.__bounds_default
-        return self.__bounds
 
     def _set_bounds(self, bounds):
         self.__bounds = bounds
@@ -505,7 +587,7 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         group2.setLayout(QtGui.QVBoxLayout())
         group2.layout().setSpacing(0)
         group2.layout().setMargin(0)
-        new_viewer = AbcGLWidget(self._main)
+        new_viewer = GLWidget(self._main, state=self.state)
         group2.layout().addWidget(new_viewer)
 
         splitter.addWidget(group1)
@@ -520,26 +602,33 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
     def wipe_horz(self):
         self.split(QtCore.Qt.Horizontal, wipe=True)
 
+    #TODO: support viewer pop-outs
     def unsplit(self):
+        """
+        Unsplits and deletes current viewer
+        """
         if not self.parent():
             return
 
         splitter = self.parent().parent()
-        group = self.parent().parent().parent()
 
-        for i in range(splitter.count()):
-            widget = splitter.widget(i)
-            if splitter.indexOf(widget) == splitter.indexOf(self):
-                del widget
+        # should be exactly two groups per splitter
+        index = splitter.indexOf(self.parent())
+        index_other = 1 * (1 - index)
+        
+        group = splitter.widget(index)
+        group_other = splitter.widget(index_other)
 
-        group1 = QtGui.QGroupBox()
-        group1.setLayout(QtGui.QVBoxLayout())
-        group1.layout().setSpacing(0)
-        group1.layout().setMargin(0)
-        group1.layout().addWidget(widget)
+        # disconnect signals
+        #self.state.signal_state_change.disconnect()
+  
+        splitter.parent().layout().addWidget(group_other)
+        splitter.parent().layout().removeWidget(splitter)
 
-        #self.parent().layout().removeWidget(group)
-        #self.parent().layout().addWidget(group1)
+        # cleanup widgets
+        del splitter
+        del group
+        del self
 
     def _paint_normals(self):
         glColor3f(1, 1, 1)
@@ -586,17 +675,8 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
                 except Exception, e:
                     log.warn("unhandled exception: %s" % e)
 
-        for scene in self.scenes.values():
+        for scene in self.state.scenes:
             _draw(scene.top())
-
-    def _paint_bounds(self):
-        glColor3f(1, 1, 1)
-        set_ambient_light()
-        
-        for scene in self.scenes.values():
-            draw_bounding_box(scene.scene.bounds())
-
-        set_diffuse_light()
 
     def _paint_grid(self):
         glColor3f(1, 1, 1)
@@ -658,7 +738,6 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
                        self.camera.near, self.camera.far)
 
     def set_camera_clipping_planes(self, near=None, far=None):
-        print "AbcGLWidget.set_camera_clipping_planes"
         self.camera.set_clipping_planes(self.camera.near, self.camera.far)
 
     def map_to_sphere(self, v2d):
@@ -677,6 +756,12 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         else:
             return False, v3d
 
+    def handle_state_change(self):
+        """
+        State change signal handler.
+        """
+        self.updateGL()
+
     def handle_set_camera(self, action):
         """
         Sets camera from name derived from the text of a QAction.
@@ -687,8 +772,11 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
 
     def handle_set_mode(self, mode):
         """
-        Set camera drawing mode menu handler.
+        Set active camera drawing mode.
+
+        :param mode: abcview.io.Mode enum value
         """
+        # grabs the mode value from the calling menu item
         if self.sender():
             mode = self.sender().data().toInt()[0]
         if mode not in GL_MODE_MAP.keys():
@@ -705,12 +793,9 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
                                   "Camera Name:", QtGui.QLineEdit.Normal)
             if ok and not text.isEmpty():
                 name = str(text.toAscii())
-                if name in self.cameras.keys():
-                    message("Camera name already in use.")
-                else:
-                    camera = AbcGLCamera(self, name)
-                    self.add_camera(camera)
-                    self.set_camera(name)
+                camera = GLCamera(self, name)
+                self.add_camera(camera)
+                self.set_camera(name)
 
     ## base class overrides
 
@@ -729,30 +814,33 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         set_diffuse_light()
 
     def paintGL(self):
-        if self.isHidden():
+        if self.isHidden() or not self.state:
             return
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glDrawBuffer( GL_BACK )
 
-        # HACK: camera may not have been set at this point
-        if hasattr(self, "camera") and self.camera is not None:
-            self.camera.apply()
+        # update camera
+        self.camera.apply()
 
         # order is important here
-        if hasattr(self, "camera") and self.camera.draw_hud:
+        if self.camera.draw_hud:
             self._paint_hud()
-        if hasattr(self, "camera") and self.camera.fixed:
+        if self.camera.fixed:
             self._paint_fixed()
-        if hasattr(self, "camera") and self.camera.draw_grid:
+        if self.camera.draw_grid:
             self._paint_grid()
-        if hasattr(self, "camera") and self.camera.draw_normals:
+        if self.camera.draw_normals:
             self._paint_normals()
-        if hasattr(self, "camera") and self.camera.draw_bounds:
-            self._paint_bounds()
 
         # draw each scene
-        for scene in self.scenes.values():
+        for scene in self.state.scenes:
+           
+            # reset trs overrides
+            glScalef(1, 1, 1)
+            glRotatef(0, 0, 0, 0)
+            glTranslatef(0, 0, 0)
+
             if not scene.visible:
                 continue
 
@@ -765,14 +853,20 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
             mode = GL_MODE_MAP.get(scene.properties.get("mode"), 
                    GL_MODE_MAP.get(self.camera.mode, GL_LINE)
                    )
-            glPolygonMode(GL_FRONT_AND_BACK, mode)
+            if mode != Mode.OFF:
+                glPolygonMode(GL_FRONT_AND_BACK, mode)
 
             # trs overrides
             glTranslatef(*scene.properties.get("translate", (0, 0, 0)))
             glRotatef(*scene.properties.get("rotate", (0, 0, 0, 0)))
             glScalef(*scene.properties.get("scale", (1, 1, 1)))
-
-            scene.draw()
+            if self.camera.draw_bounds:
+                glColor3f(1, 1, 1)
+                set_ambient_light()
+                draw_bounding_box(scene.scene.bounds())
+                set_diffuse_light()
+            if mode != Mode.OFF:
+                scene.draw()
             self.signal_scene_drawn.emit()
 
     @update_camera
@@ -780,11 +874,24 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
         if hasattr(self, "camera") and self.camera is not None:
             self.camera.size = (width, height)
 
+    @update_camera
     def keyPressEvent(self, event):
         key = event.key()
         mod = event.modifiers()
 
-        if mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_F:
+        if key == QtCore.Qt.Key_Space:
+            if self.is_playing():
+                self.stop()
+            else:
+                self.play()
+
+        elif key == QtCore.Qt.Key_Right:
+            self.current_frame = self.current_frame + 1
+
+        elif key == QtCore.Qt.Key_Left:
+            self.current_frame = self.current_frame - 1
+
+        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_F:
             self.camera._set_fixed()
 
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_B:
@@ -840,10 +947,10 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
             camera_menu = QtGui.QMenu("Cameras", self)
             camera_group = QtGui.QActionGroup(camera_menu) 
 
-            for name, camera in self.cameras.items():
-                camera_action = QtGui.QAction(name, self)
+            for camera in self.state.cameras:
+                camera_action = QtGui.QAction(camera.name, self)
                 camera_action.setCheckable(True)
-                if name == self.camera.name:
+                if camera.name == self.camera.name:
                     camera_action.setChecked(True)
                 camera_action.setActionGroup(camera_group)
                 camera_menu.addAction(camera_action)
@@ -903,6 +1010,14 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
             # shading toggle menu item
             self.shading_menu = QtGui.QMenu("Shading", self)
             shading_group = QtGui.QActionGroup(self.shading_menu)
+
+            self.offAct = QtGui.QAction("Off", self)
+            self.offAct.setCheckable(True)
+            self.offAct.setActionGroup(shading_group)
+            self.offAct.setData(Mode.OFF)
+            self.offAct.setChecked(self.camera.mode == Mode.OFF)
+            self.offAct.toggled.connect(self.handle_set_mode)
+            self.shading_menu.addAction(self.offAct)
 
             self.fillAct = QtGui.QAction("Fill", self)
             self.fillAct.setCheckable(True)
@@ -974,7 +1089,7 @@ class AbcGLWidget(QtOpenGL.QGLWidget):
     def mouseReleaseEvent(self, event):
         self.__rotating = False
         self.__last_pok = False
-        super(AbcGLWidget, self).mouseReleaseEvent(event)
+        super(GLWidget, self).mouseReleaseEvent(event)
 
     @update_camera
     def wheelEvent(self, event):

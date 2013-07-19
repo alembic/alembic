@@ -81,14 +81,15 @@ from PyQt4 import uic
 
 import imath
 import alembic
+import abcview
+from abcview import style, config, log
+from abcview.io import Session, Scene, Camera, ICamera
+from abcview.gl import GLCamera, GLICamera, GLScene
 from abcview.widget.console_widget import AbcConsoleWidget
-from abcview.widget.viewer_widget import AbcGLWidget
+from abcview.widget.viewer_widget import GLWidget
 from abcview.widget.viewer_widget import get_final_matrix
 from abcview.widget.time_slider import TimeSlider
 from abcview.widget.tree_widget import *
-from abcview.io import Session, Scene, Camera, ICamera
-from abcview.gl import AbcGLCamera, AbcGLICamera, AbcGLScene
-from abcview import style, config, log
 
 kWrapExisting = alembic.Abc.WrapExistingFlag.kWrapExisting
 
@@ -181,7 +182,9 @@ class AbcMenuBar(QtGui.QMenuBar):
     def setup_file_menu(self):
         self.file_menu.addAction("New", self.main.handle_new, "Ctrl+N")
         self.file_menu.addAction("Open", self.main.handle_open, "Ctrl+O")
-        self.file_menu.addAction("Import", self.main.handle_import, "Ctrl+I") 
+        self.file_menu.addAction("Import", self.main.handle_import, "Ctrl+I")
+        self.file_menu.addAction("Reload", self.main.handle_reload, "Ctrl+R")
+
         self.file_menu.addSeparator()
         self.file_menu.addAction("Save", self.main.handle_save, "Ctrl+S")
         self.file_menu.addAction("Save As..", self.main.handle_save_as, "Ctrl+Shift+S")
@@ -311,6 +314,7 @@ class AbcView(QtGui.QMainWindow):
         self.setStyle(QtGui.QStyleFactory.create('cleanlooks'))
         self.setStyleSheet(style.MAIN_STYLE)
         self.setMinimumSize(200, 200)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         # semi/private attributes
         self.__fps = fps
@@ -350,11 +354,12 @@ class AbcView(QtGui.QMainWindow):
             'objects': self.objects_tree,
             'properties': self.properties_tree,
             'samples': self.samples_tree,
-            'alembic': alembic
+            'alembic': alembic,
+            'abcview': abcview
             })
 
         # viewer
-        self.viewer = AbcGLWidget(self)
+        self.viewer = GLWidget(self)
         self.viewer.signal_scene_error.connect(self.handle_viewer_error)
         self.viewer.signal_scene_opened.connect(self.handle_scene_opened)
         self.viewer.signal_current_frame.connect(self.handle_update_frame)
@@ -555,6 +560,7 @@ class AbcView(QtGui.QMainWindow):
         # load an alembic file
         if filepath.endswith(Scene.EXT):
             self.import_file(filepath)
+            self.viewer.frame()
 
         # load a session file
         elif filepath.endswith(Session.EXT):
@@ -570,13 +576,13 @@ class AbcView(QtGui.QMainWindow):
             for camera in self.session.cameras:
                 self.session.remove_camera(camera)
                 if camera.type() == Camera.type():
-                    _camera = AbcGLCamera(self.viewer)
+                    _camera = GLCamera(self.viewer)
                     _camera.name = camera.name
                     for attr in Camera.SERIALIZE:
                         setattr(_camera, attr, getattr(camera, attr))
                     self.viewer.add_camera(_camera)
                 elif camera.type() == ICamera.type():
-                    _camera = AbcGLICamera(self.viewer, camera.icamera)
+                    _camera = GLICamera(self.viewer, camera.icamera)
                     _camera.name = camera.name
                     self.viewer.add_camera(_camera)
                 if camera.loaded:
@@ -586,7 +592,10 @@ class AbcView(QtGui.QMainWindow):
 
     @make_clean
     def save_session(self, filepath=None):
-        # None is a valid filepath (overwrites existing file)
+        """
+        :param filepath: save to filepath (passing no args or None
+                         overrwrites current session file.
+        """
         try:
             self.session.save(filepath)
         except Exception, e:
@@ -599,16 +608,20 @@ class AbcView(QtGui.QMainWindow):
             lines = open(script, "r").readlines()
             for line in lines:
                 self.console.setCommand(line.strip())
+                self.console.runCommand()
         else:
             self.console.setCommand(script)
-        self.console.runCommand()
+            self.console.runCommand()
 
     @make_dirty
     def import_file(self, filepath):
         if not filepath or not os.path.isfile(filepath):
             log.info("invalid file: %s" % filepath)
             return
+       
+        # add the item to the session
         item = self.session.add_file(filepath)
+
         if self.viewer_group.isHidden():
             item.loaded = False
         if filepath.endswith(Scene.EXT):
@@ -629,6 +642,9 @@ class AbcView(QtGui.QMainWindow):
         log.info("remove item")
 
     def handle_scene_opened(self, scene):
+        """
+        Scene open signal handler.
+        """
         frame_range = self.viewer.frame_range()
         self.time_slider.set_minimum(frame_range[0])
         self.time_slider.set_maximum(frame_range[1])
@@ -665,7 +681,7 @@ class AbcView(QtGui.QMainWindow):
         """
         handles adding a new camera to the session
 
-        :param camera: AbcGLCamera
+        :param camera: GLCamera
         """
         log.debug("AbcView.handle_new_camera: %s" % camera)
         if camera.name != "interactive":
@@ -676,7 +692,7 @@ class AbcView(QtGui.QMainWindow):
         """
         handles setting the camera name on the session
 
-        :param camera: AbcGLCamera
+        :param camera: GLCamera
         """
         self.session.set_camera(camera)
 
@@ -688,8 +704,8 @@ class AbcView(QtGui.QMainWindow):
         :param item: CameraTreeWidgetItem
         """
         icamera = item.camera()
-        if icamera.getName() not in self.viewer.cameras.keys():
-            camera = AbcGLICamera(self.viewer, icamera)
+        if icamera.getName() not in [c.name for c in self.viewer.state.cameras]:
+            camera = GLICamera(self.viewer, icamera)
             self.viewer.add_camera(camera)
             self.viewer.set_camera(camera.name)
         else:
@@ -720,9 +736,8 @@ class AbcView(QtGui.QMainWindow):
         def load(item):
             if type(item) == SceneTreeWidgetItem:
                 if item.object.loaded:
-                    self.viewer.add_scene(item.scene)
                     item.scene.load()
-                    self.viewer.updateGL()
+                    self.viewer.add_scene(item.scene)
             elif type(item) == SessionTreeWidgetItem:
                 for child in item.children():
                     load(child)
@@ -757,11 +772,22 @@ class AbcView(QtGui.QMainWindow):
         if filepath:
             self.import_file(str(filepath.toAscii()))
 
+    def handle_reload(self):
+        self.viewer.clear()
+        self.viewer.state.clear()
+        self.open_session(self.session.filepath)
+
     def handle_frame_scene(self):
-        self.viewer.bounds = None
+        """
+        Scene level framing handler
+        """
+        #self.viewer.bounds = None
         self.viewer.frame()
 
     def handle_frame_object(self, obj=None):
+        """
+        Object level framing handler
+        """
         if obj is None:
             obj = self.objects_tree.selected()
         if obj.getFullName() == "/":
@@ -784,8 +810,8 @@ class AbcView(QtGui.QMainWindow):
             message("Object has invalid or no bounds set.")
             return
         bounds = bounds_prop.getValue(iss)
-        self.viewer.bounds = bounds * xf
-        self.viewer.frame()
+        #self.viewer.bounds = bounds * xf
+        self.viewer.frame(bounds * xf)
 
     def handle_save(self):
         if not self.session.filepath:
@@ -856,6 +882,7 @@ def main():
     elif len(args.filepath) > 1:
         for filepath in args.filepath:
             win.import_file(filepath)
+        win.viewer.frame()
     
     # current frame
     if args.frame is not None:

@@ -46,7 +46,7 @@ from PyQt4 import uic
 import imath
 import alembic
 from abcview.io import Scene, Session
-from abcview.gl import AbcGLScene
+from abcview.gl import GLScene
 from abcview.utils import find_objects, get_schema_info
 from abcview import config, log
 
@@ -325,7 +325,7 @@ class SceneTreeWidgetItem(SessionTreeWidgetItem):
         """
         :param object: Scene
         """
-        self.scene = AbcGLScene(object.filepath)
+        self.scene = GLScene(object.filepath)
         self.scene.properties = object.properties
         super(SceneTreeWidgetItem, self).__init__(parent, object)
         self.setToolTip(self.treeWidget().colnum(''), 'visible')
@@ -444,8 +444,7 @@ class AbcTreeWidget(DeselectableTreeWidget):
         """
         returns selected item's object
         """
-        if self.selectedItems():
-            selected = [item for item in self.selectedItems()]
+        selected = [item for item in self.selectedItems()]
         if not selected:
             return []
         selected = selected[0]
