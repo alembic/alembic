@@ -591,22 +591,33 @@ class GLWidget(QtOpenGL.QGLWidget):
                     wipe=False):
         """
         Splist the viewer into two separate widgets according
-        to the orientation param.
+        to the orientation param. ::
+
+            QGroupBox
+                `- QSplitter
+                        |- QGroupBox
+                        |       `- GLWidget
+                        `- QGroupBox
+                                `- GLWidget
+
         """
         if not self.parent():
             return
 
         item = self.parent().layout().itemAt(0)
 
+        # create the splitter
         splitter = GLSplitter(orientation, wipe)
         self.parent().layout().addWidget(splitter)
 
+        # left/top viewer group
         group1 = QtGui.QGroupBox()
         group1.setLayout(QtGui.QVBoxLayout())
         group1.layout().setSpacing(0)
         group1.layout().setMargin(0)
         group1.layout().addWidget(item.widget())
 
+        # right/bottom viewer group
         group2 = QtGui.QGroupBox()
         group2.setLayout(QtGui.QVBoxLayout())
         group2.layout().setSpacing(0)
@@ -614,6 +625,11 @@ class GLWidget(QtOpenGL.QGLWidget):
         new_viewer = GLWidget(self._main, state=self.state)
         group2.layout().addWidget(new_viewer)
 
+        # link the two groups for unsplitting later
+        group1.other = group2
+        group2.other = group1
+
+        # add the two groups to the splitter
         splitter.addWidget(group1)
         splitter.addWidget(group2)
 
@@ -640,24 +656,26 @@ class GLWidget(QtOpenGL.QGLWidget):
         if not self.parent():
             return
 
-        splitter = self.parent().parent()
+        # get the parent splitter object
+        splitter = self.parent()
+        while splitter and type(splitter) != GLSplitter:
+            splitter = splitter.parent()
 
-        # should be exactly two groups per splitter
-        index = splitter.indexOf(self.parent())
-        index_other = 1 * (1 - index)
-        
-        group = splitter.widget(index)
-        group_other = splitter.widget(index_other)
+        # we've reached the top splitter
+        if splitter is None:
+            return
 
         # disconnect signals
-        #self.state.signal_state_change.disconnect()
-  
-        splitter.parent().layout().addWidget(group_other)
+        try:
+            self.state.signal_state_change.disconnect()
+        except Exception:
+            log.debug("error disconnecting state signal")
+
         splitter.parent().layout().removeWidget(splitter)
+        splitter.parent().layout().addWidget(self.parent().other)
 
         # cleanup widgets
         del splitter
-        del group
         del self
 
     def _paint_normals(self):
@@ -906,6 +924,9 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     @update_camera
     def keyPressEvent(self, event):
+        """
+        key press event handler
+        """
         key = event.key()
         mod = event.modifiers()
 
@@ -949,6 +970,15 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.frame()
 
     def mousePressEvent(self, event):
+        """
+        mouse press event handler
+        """
+        
+        # make this viewer the active one
+        if self._main:
+            self._main.viewer = self
+
+        # process mouse event
         if event.button() == QtCore.Qt.RightButton and \
            event.modifiers() == QtCore.Qt.NoModifier:
             self.setCursor(QtCore.Qt.ArrowCursor)
@@ -1086,6 +1116,9 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     @update_camera
     def mouseMoveEvent(self, event):
+        """
+        mouse move event handler
+        """
         newPoint2D = event.pos()
         if ((newPoint2D.x() < 0) or (newPoint2D.x() > self.width()) or
             (newPoint2D.y() < 0) or (newPoint2D.y() > self.height())):
@@ -1117,12 +1150,18 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.__last_pok = newPoint_hitSphere
        
     def mouseReleaseEvent(self, event):
+        """
+        mouse release event handler
+        """
         self.__rotating = False
         self.__last_pok = False
         super(GLWidget, self).mouseReleaseEvent(event)
 
     @update_camera
     def wheelEvent(self, event):
+        """
+        mouse wheel event handler
+        """
         dx = float(event.delta()) / 10
         self.camera.dolly(dx, 0)
         event.accept()
