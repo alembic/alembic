@@ -637,10 +637,10 @@ int main( int argc, char *argv[] )
          *   \_____________/\______/\____/
          *        file         obj   sample
          */
-        int i = 0;
+        int j = 0;
         while ( std::getline( ss, segment, '/' ) ) {
             if ( !isFile ( fp.str() ) ) {
-                if ( i != 0 )
+                if ( j != 0 )
                     fp << "/";
                 fp << segment;
             } else if ( is_digit( segment ) ) {
@@ -648,7 +648,7 @@ int main( int argc, char *argv[] )
             } else {
                 seglist.push_back( segment );
             }
-            ++i;
+            ++j;
         }
 
         // open the iarchive
