@@ -10,6 +10,7 @@ data, including:
     * Object, property, sample and value widgets,
     * The viewer widget renders the scene using AbcOpenGL,
     * Playback or step through animation using the Timeline widget,
+    * Hierarchical scene assembly (save scenes to json),
     * And a Python console for closer inspection of Alembic objects.
 
 .. image:: abcview.png
@@ -21,12 +22,12 @@ Requirements
 
 The following libs are required to use AbcView:
 
-    * Alembic
-    * OpenGL
+    * Alembic 1.5
+    * OpenGL and PyOpenGL
     * AbcOpenGL
     * PyAlembic (Alembic Python bindings)
     * PyAbcOpenGL (AbcOpenGL Python bindings)
-    * Python 2.6+
+    * Python 2.6
     * PyQt4
 
 To build the `abcview` wrapper inside your Alembic build dir, make sure the "examples" 
@@ -58,12 +59,25 @@ and GL rendering mode ::
 
     >>> from abcview.io import Mode
     >>> item = s.items[0]
+
+GL poylgon draw mode ::
+
     >>> item.mode = Mode.FILL
+
+GL material color ::
+
     >>> item.color = (0, 255, 0)
 
-Loading ICameras into an AbcView session is easy. You can either navigate to the ICamera
-object in the objects widget and right-click->view through selected, or add it to the
-session using the API ::
+Transation, rotation and scale ::
+
+    >>> item.translate = (10, 0, 100)
+    >>> item.rotate = (0, 90, 0, 0)
+    >>> item.scale = (1, 1, 1)
+
+AbcView supports both custom (non-animated) cameras and loading ICameras from Alembic
+archives. To load an ICamera from the GUI, navigate to the ICamera in the objects 
+widget and right-click->view through selected. You can also add it to the session using 
+the IO module ::
 
     >>> s.add_camera(ICamera(get_object("shotcam.abc", 
                                         "ShotCam")
@@ -72,6 +86,8 @@ session using the API ::
 
 Module Contents
 ---------------
+
+The AbcView Python API is divided into the IO and GL modules, widgets and utils.
 
 I/O Module
 ~~~~~~~~~~
@@ -83,6 +99,15 @@ GL Module
 ~~~~~~~~~
 
 .. automodule:: abcview.gl
+   :members: 
+
+Widgets
+~~~~~~~
+
+.. automodule:: abcview.widget.tree_widget
+   :members: 
+
+.. automodule:: abcview.widget.viewer_widget
    :members: 
 
 Utils

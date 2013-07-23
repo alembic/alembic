@@ -46,8 +46,21 @@ from abcview import config, log
 from abcview.utils import get_object
 
 __doc__ = """
-AbcView module that contains IO classes for creating and reading
-sessions, scenes and cameras.
+The IO module handles serialization and deserialization of the assembled 
+scenes and sessions. The hierarchy structure basically consists of a 
+top-level Session object that contains children items which can be either
+Scenes, Sessions, Cameras or ICAmeras. Each item in the hierarchy has
+a properties attribute for storing custom attributes. Only Scenes and ICameras
+reference Alembic archives.
+
+   Session
+       |- Properties
+       |- Cameras
+       `- Items
+             `- Scene
+                  |- Properties
+                  `- file.abc
+
 """
 
 __all__ = ["Scene", "Session", "Camera", "ICamera",

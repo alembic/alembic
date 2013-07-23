@@ -52,8 +52,10 @@ import abcview
 from abcview import log
 
 __doc__ = """
-AbcView module that contains GL wrappers for the abcview IO
-objects for scenes and cameras. 
+When loading a Session object into the AbcView GUI, the IO objects are
+replaced with corresponding OpenGL objects from the GL module. The GL
+module classes provide GL-wrapped methods for viewing and manipulating
+Alembic scenes in AbcView GLViewer widgets.
 """
 
 __all__ = ["GLCamera", "GLICamera", "GLScene", ]
