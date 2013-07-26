@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 #-******************************************************************************
 #
 # Copyright (c) 2012-2013,
@@ -72,7 +72,6 @@ import logging
 import argparse
 import commands
 import traceback
-import simplejson as json
 from functools import wraps
 from copy import deepcopy
 
@@ -91,6 +90,7 @@ from abcview.widget.viewer_widget import GLWidget
 from abcview.widget.viewer_widget import get_final_matrix
 from abcview.widget.time_slider import TimeSlider
 from abcview.widget.tree_widget import *
+from abcview.utils import json
 
 kWrapExisting = alembic.Abc.WrapExistingFlag.kWrapExisting
 

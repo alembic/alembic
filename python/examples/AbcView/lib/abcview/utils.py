@@ -37,6 +37,14 @@
 import re
 import alembic
 
+# Python 2.5 backwards-compatibility import logic for json
+JSON = None
+try:
+    import json as JSON
+except ImportError:
+    import simplejson
+json = JSON or simplejson
+
 def get_schema_info(obj):
     """
     Returns a tuple of the shema, title and base strings.

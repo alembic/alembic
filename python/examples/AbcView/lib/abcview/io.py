@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 #-******************************************************************************
 #
 # Copyright (c) 2012-2013,
@@ -38,12 +38,12 @@
 import os
 import sys
 import time
-import simplejson as json
 
 import imath
 import alembic
 from abcview import config, log
 from abcview.utils import get_object
+from abcview.utils import json
 
 __doc__ = """
 The IO module handles serialization and deserialization of the assembled 
