@@ -20,7 +20,6 @@ were required to produce the final, animated vertex positions and animated trans
 This document is intended to serve as a brief introduction and  programmer's guide to
 using the Alembic Python bindings. 
 
-
 Get Alembic
 -----------
 
@@ -34,7 +33,6 @@ these docs is straight-forward. From the build root: ::
     $ make docs
 
 The source code for these docs can be found in the directory `docs/source`.
-
 
 Getting Started
 ---------------
@@ -53,7 +51,6 @@ Python bindings using the bootstrap script: `build/bootstrap/alembic_bootstrap.p
 
    examples
 
-
 Extras
 ======
 
@@ -61,22 +58,26 @@ The following Python extras are provided as a convenience and are not necessaril
 by the Alembic development team. These items are located under the /python area of the Alembic source
 repository.
 
-
 AbcOpenGL
 ---------
 
 The :mod:`alembicgl` Python module is a set of Boost Python bindings for the AbcOpenGL lib, which allows
-you to load an Alembic archive and draw to a GL context, e.g. ::
+you to load an Alembic archive and draw to a GL context, e.g. from within an existing GL context such as
+a PyQt QGLWidget ::
 
     >>> import alembicgl as abcgl
     >>> scene = abcgl.SceneWrapper("octopus.abc")
     >>> scene.draw()
 
+A good example of the use of AbcOpenGL can be found in the SimpleAbcViewer code, and a good
+example of the use of PyAbcOpenGL can be found in the GLWidget code in :doc:`AbcView </abcview>`. 
+
 AbcView
 -------
 
 AbcView is a graphical PyQt-based Alembic inspection and visualization tool and offers a 
-number of widgets to help you inspect and visualize your Alembic data.
+number of widgets to help you inspect and visualize your Alembic data. It also offers some 
+scene assembly features.
 
 .. toctree::
    :maxdepth: 2

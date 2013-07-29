@@ -5,16 +5,17 @@ AbcView
 
 AbcView is a graphical PyQt-based Alembic inspection and visualization tool.
 It offers a number of widgets to help you inspect and visualize your Alembic
-data, including:
+data, as well as assemble hierarchical scenes. 
 
-    * Object, property, sample and value widgets,
-    * The viewer widget renders the scene using AbcOpenGL,
-    * Playback or step through animation using the Timeline widget,
-    * Hierarchical scene assembly (save scenes to json),
-    * And a Python console for closer inspection of Alembic objects.
+    * Object, property, sample and value widgets
+    * Playback or step through animation using the Timeline widget
+    * Hierarchical scene assembly (with standard JSON output)
+    * A Python console for closer inspection of Alembic objects
+    * GL viewer widget using AbcOpenGL lib
+    * Varying GL modes for rendering objects (box, fill, line, point)
 
 .. image:: abcview.png
-   :width: 640
+   :width: 800
    :align: center
 
 Requirements
@@ -23,12 +24,11 @@ Requirements
 The following libs are required to use AbcView:
 
     * Alembic 1.5
-    * OpenGL and PyOpenGL
-    * AbcOpenGL
-    * PyAlembic (Alembic Python bindings)
-    * PyAbcOpenGL (AbcOpenGL Python bindings)
-    * Python 2.6
+    * PyOpenGL
+    * PyAlembic (and PyAbcOpenGL)
     * PyQt4
+    * Python 2.6+
+    * argparse if using Python 2.6
 
 To build the `abcview` wrapper inside your Alembic build dir, make sure the "examples" 
 subdirectory is active in the /python/CMakeLists.txt file ::
