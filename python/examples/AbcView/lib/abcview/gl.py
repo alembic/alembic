@@ -114,7 +114,7 @@ class GLCamera(abcview.io.Camera, GLCameraMixin):
     """
     GL wrapper for Camera objects
     """
-    def __init__(self, viewer, name="interactive"):
+    def __init__(self, viewer, name):
         """
         :param viewer: GLWidget object
         :param name: camera name

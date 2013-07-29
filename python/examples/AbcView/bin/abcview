@@ -604,8 +604,7 @@ class AbcView(QtGui.QMainWindow):
             for camera in self.session.cameras:
                 self.session.remove_camera(camera)
                 if camera.type() == Camera.type():
-                    _camera = GLCamera(self.viewer)
-                    _camera.name = camera.name
+                    _camera = GLCamera(self.viewer, camera.name)
                     for attr in Camera.SERIALIZE:
                         setattr(_camera, attr, getattr(camera, attr))
                     self.viewer.add_camera(_camera)
@@ -809,9 +808,16 @@ class AbcView(QtGui.QMainWindow):
         self.samples_tree.show_samples(item)
 
     def handle_new(self):
+        """
+        File->New menu handler
+        """
         self.clear()
+        self.setWindowTitle(self.TITLE)
 
     def handle_open(self):
+        """
+        File->Open menud handler
+        """
         filepath = QtGui.QFileDialog.getOpenFileName(self, "Open File", 
                     os.getcwd(), ("Alembic Files (*.%s *.%s)" 
                         % (Scene.EXT, Session.EXT)))
@@ -819,6 +825,9 @@ class AbcView(QtGui.QMainWindow):
             self.open_session(str(filepath.toAscii()))
 
     def handle_import(self):
+        """
+        File->Import menud handler
+        """
         filepath = QtGui.QFileDialog.getOpenFileName(self, "Open File", 
                     os.getcwd(), ("Alembic Files (*.%s *.%s)" 
                         % (Scene.EXT, Session.EXT)))
@@ -826,15 +835,15 @@ class AbcView(QtGui.QMainWindow):
             self.import_file(str(filepath.toAscii()))
 
     def handle_reload(self):
-        self.viewer.clear()
-        self.viewer.state.clear()
+        """
+        File->Reload menud handler
+        """
         self.open_session(self.session.filepath)
 
     def handle_frame_scene(self):
         """
         Scene level framing handler
         """
-        #self.viewer.bounds = None
         self.viewer.frame()
 
     def handle_frame_object(self, obj=None):

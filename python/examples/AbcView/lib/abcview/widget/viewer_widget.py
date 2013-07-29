@@ -248,6 +248,7 @@ class GLState(QtCore.QObject):
     def clear(self):
         self.__scenes = []
         self.__cameras = {}
+        self.signal_state_change.emit()
 
     def _get_cameras(self):
         return self.__cameras.values()
@@ -374,20 +375,35 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.__last_p3d = [1.0, 0.0, 0.0]
         self.__rotating = False
 
+        # local cameras
+        self.__cameras = {}
+
         # for animated scenes
         self.timer = QtCore.QTimer(self)
 
-        # default camera
-        self.camera = GLCamera(self)
-        self.state.add_camera(self.camera)
+        self.setup_default_camera()
 
+    def setup_default_camera(self):
+        """
+        Sets up a default interactive camera for this GL viewer.
+        """
+        self.default_camera = GLCamera(self, name="interactive")
+        self.camera = self.default_camera
         self.frame()
 
     def clear(self):
-        self.frame()
-        self.updateGL()
+        """
+        Resets this GL viewer widget and clears the shared state.
+        """
+        self.state.clear()
+        self.setup_default_camera()
 
     def add_file(self, filepath):
+        """
+        Loads a given filepath into the GL viewer.
+
+        :param filepath: path to Alembic file.
+        """
         self.add_scene(GLScene(filepath))
 
     def add_scene(self, scene):
@@ -415,6 +431,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         :param camera: GLCamera object
         """
         log.debug("GLWidget.add_camera: %s" % camera)
+        if name in self.__cameras.keys():
+            camera.name = camera.name + "_1"
+        self.__cameras[camera.name] = camera
         self.state.add_camera(camera)
         self.signal_new_camera.emit(camera)
 
@@ -422,22 +441,32 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         :param camera: GLCamera object to remove
         """
+        if type(camera) in [str, unicode]:
+            del self.__cameras[name]
+        else:
+            del self.__cameras[camera.name]
         self.state.remove_camera(camera)
+        self.signal_state_change.emit()
 
     @update_camera
-    def set_camera(self, camera="interactive"):
+    def set_camera(self, camera):
         """
         Sets the scene camera from a given camera name string
 
         :param camera: Name of camera or GLCamera object
         """
+        log.debug("GLWidget.set_camera %s" % camera)
         if type(camera) in [str, unicode]:
             if "/" in camera:
                 camera = os.path.split("/")[-1]
-            if camera not in [cam.name for cam in self.state.cameras]:
+            if camera == self.default_camera.name:
+                self.camera = self.default_camera
+                return
+            elif camera not in [cam.name for cam in self.state.cameras]:
                 log.warn("camera not found: %s" % camera)
                 return
-            self.camera = self.state.get_camera_by_name(camera)
+            self.camera = self.__cameras.get(camera, 
+                               self.state.get_camera_by_name(camera))
         else:
             self.camera = camera
         self.resizeGL(self.width(), self.height())
@@ -679,6 +708,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         del self
 
     def _paint_normals(self):
+        """
+        Paints normals for polys and subds.
+        """
         glColor3f(1, 1, 1)
         def _draw(obj):
             md = obj.getMetaData()
@@ -727,6 +759,9 @@ class GLWidget(QtOpenGL.QGLWidget):
             _draw(scene.top())
 
     def _paint_grid(self):
+        """
+        Paints the grid.
+        """
         glColor3f(1, 1, 1)
         set_ambient_light() 
         for x in range(-10, 11):
@@ -749,6 +784,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         set_diffuse_light()
     
     def _paint_hud(self):
+        """
+        Paints the heads-up-display information.
+        """
         glColor3f(1, 1, 1)
         def _format(array):
             return " ".join(["%.2f" %f for f in array])
@@ -824,8 +862,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         :param mode: abcview.io.Mode enum value
         """
-        # grabs the mode value from the calling menu item
-        if self.sender():
+        if self.sender(): # via menu action 
             mode = self.sender().data().toInt()[0]
         if mode not in GL_MODE_MAP.keys():
             raise Exception("Invalid drawing mode: %s" % mode)
@@ -844,6 +881,7 @@ class GLWidget(QtOpenGL.QGLWidget):
                 camera = GLCamera(self, name)
                 self.add_camera(camera)
                 self.set_camera(name)
+                self.frame()
 
     ## base class overrides
 
@@ -920,7 +958,9 @@ class GLWidget(QtOpenGL.QGLWidget):
     @update_camera
     def resizeGL(self, width, height):
         if hasattr(self, "camera") and self.camera is not None:
-            self.camera.size = (width, height)
+            self.camera.size = (self.camera.viewer.width(), 
+                                self.camera.viewer.height()
+                               )
 
     @update_camera
     def keyPressEvent(self, event):
@@ -1007,7 +1047,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             camera_menu = QtGui.QMenu("Cameras", self)
             camera_group = QtGui.QActionGroup(camera_menu) 
 
-            for camera in self.state.cameras:
+            for camera in [self.default_camera] + self.state.cameras:
                 camera_action = QtGui.QAction(camera.name, self)
                 camera_action.setCheckable(True)
                 if camera.name == self.camera.name:
