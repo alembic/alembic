@@ -95,6 +95,7 @@ def update_camera(func):
         wid = args[0]
         wid.camera.apply()
         wid.updateGL()
+        wid.signal_camera_updated.emit(wid.camera)
         wid.state.signal_state_change.emit()
     return with_wrapped_func
 
@@ -227,7 +228,6 @@ def message(info):
     dialog.setText(info)
     dialog.exec_()
 
-#TODO: support wipes between cameras
 class GLSplitter(QtGui.QSplitter):
     def __init__(self, orientation, wipe=False):
         super(GLSplitter, self).__init__(orientation)
@@ -243,6 +243,8 @@ class GLState(QtCore.QObject):
 
     def __init__(self):
         super(GLState, self).__init__()
+        self.timer = QtCore.QTimer(self)
+        self.active_viewer = None
         self.clear()
 
     def clear(self):
@@ -298,10 +300,11 @@ class GLState(QtCore.QObject):
 
         :param camera: GLCamera object
         """
-        if name in self.__cameras.keys():
-            camera.name = camera.name + "_1"
-        self.__cameras[camera.name] = camera
-        self.signal_state_change.emit()
+        log.debug("GLState.add_camera %s" % camera)
+        if camera and camera.name not in self.__cameras.keys():
+            self.__cameras[camera.name] = camera
+            return True
+        return False
 
     def remove_camera(self, camera):
         """
@@ -315,7 +318,12 @@ class GLState(QtCore.QObject):
             del self.__cameras[camera.name]
         self.signal_state_change.emit()
 
-    def get_camera_by_name(self, name):
+    def get_camera(self, name):
+        """
+        Returns a named camera for a given viewer.
+
+        :param camera: GLCamera object
+        """
         return self.__cameras.get(name)
 
 class GLWidget(QtOpenGL.QGLWidget):
@@ -323,6 +331,10 @@ class GLWidget(QtOpenGL.QGLWidget):
     AbcView OpenGL Widget.
 
     Basic usage ::
+
+        >>> create_viewer_app("file.abc")
+
+    or inside a larger Qt application ::
 
         >>> viewer = GLWidget()
         >>> viewer.add_file("file.abc")
@@ -357,7 +369,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setCursor(QtCore.Qt.OpenHandCursor)
       
-        # save the parent object
+        # embedded in larger app?
         self._main = parent
 
         # frames per second value
@@ -375,25 +387,27 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.__last_p3d = [1.0, 0.0, 0.0]
         self.__rotating = False
 
-        # local cameras
-        self.__cameras = {}
-
-        # for animated scenes
-        self.timer = QtCore.QTimer(self)
-
+        # viewers must have at least one camera
         self.setup_default_camera()
+
+    def uid(self):
+        return id(self)
+
+    def __repr__(self):
+        return "<GLWidget %s>" % self.uid()
 
     def setup_default_camera(self):
         """
-        Sets up a default interactive camera for this GL viewer.
+        Creates the default interactive camera for this view (and others if the
+        state is shared between viewers).
         """
-        self.default_camera = GLCamera(self, name="interactive")
-        self.camera = self.default_camera
-        self.frame()
+        self.add_camera(GLCamera(self, name="interactive"))
+        self.set_camera("interactive")
 
     def clear(self):
         """
-        Resets this GL viewer widget and clears the shared state.
+        Resets this GL viewer widget, clears the shared state
+        and creates a new default interactive camera.
         """
         self.state.clear()
         self.setup_default_camera()
@@ -431,20 +445,14 @@ class GLWidget(QtOpenGL.QGLWidget):
         :param camera: GLCamera object
         """
         log.debug("GLWidget.add_camera: %s" % camera)
-        if name in self.__cameras.keys():
-            camera.name = camera.name + "_1"
-        self.__cameras[camera.name] = camera
-        self.state.add_camera(camera)
-        self.signal_new_camera.emit(camera)
+        if self.state.add_camera(camera):
+            camera.add_view(self)
+            self.signal_new_camera.emit(camera)
 
     def remove_camera(self, camera):
         """
         :param camera: GLCamera object to remove
         """
-        if type(camera) in [str, unicode]:
-            del self.__cameras[name]
-        else:
-            del self.__cameras[camera.name]
         self.state.remove_camera(camera)
         self.signal_state_change.emit()
 
@@ -459,16 +467,13 @@ class GLWidget(QtOpenGL.QGLWidget):
         if type(camera) in [str, unicode]:
             if "/" in camera:
                 camera = os.path.split("/")[-1]
-            if camera == self.default_camera.name:
-                self.camera = self.default_camera
-                return
             elif camera not in [cam.name for cam in self.state.cameras]:
                 log.warn("camera not found: %s" % camera)
                 return
-            self.camera = self.__cameras.get(camera, 
-                               self.state.get_camera_by_name(camera))
+            self.camera = self.state.get_camera(camera)
         else:
             self.camera = camera
+        self.camera.add_view(self)
         self.resizeGL(self.width(), self.height())
         self.signal_set_camera.emit(self.camera)
 
@@ -509,9 +514,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         plays loaded scenes by activating timer and setting callback
         """
-        self.timer.setInterval(1.0 / (float(self.fps)))
-        self.connect(self.timer, QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
-        self.timer.start()
+        self.state.timer.setInterval(1.0 / (float(self.fps)))
+        self.connect(self.state.timer, QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
+        self.state.timer.start()
         self.signal_play_fwd.emit()
 
     def _play_fwd_cb(self):
@@ -529,8 +534,8 @@ class GLWidget(QtOpenGL.QGLWidget):
         stops scene playback
         """
         self.__playing = False
-        self.disconnect(self.timer,  QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
-        self.connect(self.timer, QtCore.SIGNAL("timeout ()"), self._play_stop_cb)
+        self.disconnect(self.state.timer,  QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
+        self.connect(self.state.timer, QtCore.SIGNAL("timeout ()"), self._play_stop_cb)
         self.updateGL()
 
     def _play_stop_cb(self):
@@ -612,9 +617,11 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         :param bounds: imath.Box3d bounds object.
         """
+        log.debug("GLWidget.frame %s" % bounds)
         if bounds is None:
             bounds = self.bounds
-        self.camera.frame(bounds)
+        if self.camera:
+            self.camera.frame(bounds)
 
     def split(self, orientation=QtCore.Qt.Vertical,
                     wipe=False):
@@ -652,11 +659,14 @@ class GLWidget(QtOpenGL.QGLWidget):
         group2.layout().setSpacing(0)
         group2.layout().setMargin(0)
         new_viewer = GLWidget(self._main, state=self.state)
+        self.camera.add_view(new_viewer)
         group2.layout().addWidget(new_viewer)
 
         # link the two groups for unsplitting later
         group1.other = group2
+        group1.viewer = self
         group2.other = group1
+        group2.viewer = new_viewer
 
         # add the two groups to the splitter
         splitter.addWidget(group1)
@@ -674,10 +684,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         self.split(QtCore.Qt.Vertical)
 
-    #def wipe_horz(self):
-    #    self.split(QtCore.Qt.Horizontal, wipe=True)
-
-    #TODO: support viewer pop-outs
+    #TODO: support viewer pop-outs, better garbage collection
     def unsplit(self):
         """
         Unsplits and deletes current viewer
@@ -690,7 +697,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         while splitter and type(splitter) != GLSplitter:
             splitter = splitter.parent()
 
-        # we've reached the top splitter
+        # we've reached the top splitter, do nothing
         if splitter is None:
             return
 
@@ -703,7 +710,15 @@ class GLWidget(QtOpenGL.QGLWidget):
         splitter.parent().layout().removeWidget(splitter)
         splitter.parent().layout().addWidget(self.parent().other)
 
-        # cleanup widgets
+        # delete this view from all cameras
+        for camera in self.state.cameras:
+            camera.remove_view(self)
+
+        # reassign the viewer attribute on main
+        if self._main:
+            self._main.viewer = self.parent().other.viewer
+
+        # cleanup
         del splitter
         del self
 
@@ -790,38 +805,57 @@ class GLWidget(QtOpenGL.QGLWidget):
         glColor3f(1, 1, 1)
         def _format(array):
             return " ".join(["%.2f" %f for f in array])
+
+        glViewport(0, 0, self.width(), self.height())
         
         glColor3f(0.5, 1, 0.5)
         self.renderText(15, 20, "%s (AR %.02f)" 
                 % (self.camera.name, self.camera.aspect_ratio))
 
         glColor3f(1, 1, 0.5)
+
         self.renderText(15, 40, _format(self.camera.translation))
         self.renderText(15, 60, _format(self.camera.rotation))
-    
+
+        glColor3f(1, 1, 1)
+
     def _paint_fixed(self):
         """
-        Changes the GL viewport according to camera's fixed aspect ratio.
+        Changes the GL viewport according to the camera's aspect ratio.
         """
-        if self.aspect_ratio() > self.camera.aspect_ratio:
-            w = int(self.width() / (self.aspect_ratio() \
-                    / self.camera.aspect_ratio))
-            h = self.camera.size[1]
-        else:
-            w = self.camera.size[0]
-            h = int(self.height() * (self.aspect_ratio() \
-                    / self.camera.aspect_ratio))
-
-        # left and bottom viewport positions
-        x = int(abs(w-self.width()) / 2.0)
-        y = int(abs(h-self.height()) / 2.0)
+        # get basic size values for this viewer
+        camera_width = self.camera.get_size(self)[0]
+        camera_height = self.camera.get_size(self)[1]
+        camera_aspect_ratio = camera_width / float(camera_height)
         
+        # if fixed, lock the aspect ratio
+        if self.camera.fixed:
+            camera_aspect_ratio = self.camera.aspect_ratio
+            if self.aspect_ratio() > self.camera.aspect_ratio:
+                w = int(self.width() / (self.aspect_ratio() \
+                        / camera_aspect_ratio))
+                h = camera_height
+            else:
+                w = camera_width
+                h = int(self.height() * (self.aspect_ratio() \
+                        / camera_aspect_ratio))
+            x = int(abs(w-self.width()) / 2.0)
+            y = int(abs(h-self.height()) / 2.0)
+
+        # camera size matches viewer
+        else:
+            x = y = 0
+            w = self.width()
+            h = self.height()
+        
+        # do some GL stuff
         glViewport(x, y, w, h)
         self.makeCurrent()
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(self.camera.fovy, self.camera.aspect_ratio,
+        gluPerspective(self.camera.fovy, camera_aspect_ratio,
                        self.camera.near, self.camera.far)
+        glMatrixMode(GL_MODELVIEW)
 
     def set_camera_clipping_planes(self, near=None, far=None):
         self.camera.set_clipping_planes(self.camera.near, self.camera.far)
@@ -881,7 +915,6 @@ class GLWidget(QtOpenGL.QGLWidget):
                 camera = GLCamera(self, name)
                 self.add_camera(camera)
                 self.set_camera(name)
-                self.frame()
 
     ## base class overrides
 
@@ -900,33 +933,46 @@ class GLWidget(QtOpenGL.QGLWidget):
         set_diffuse_light()
 
     def paintGL(self):
+        """
+        OpenGL painting override
+        """
         if self.isHidden() or not self.state:
             return
 
+        if self not in self.camera.views:
+            return
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glDrawBuffer( GL_BACK )
+        glDrawBuffer(GL_BACK)
+        glLoadIdentity()
 
         # update camera
         self.camera.apply()
 
-        # order is important here
+        # change background color to indicate which viewer is active
+        #if self.state.active_viewer == self:
+        #    glClearColor(0.15, 0.15, 0.15, 0.0)
+        #else:
+        #    glClearColor(0.2, 0.2, 0.2, 0.0) 
+
+        # draw the heads-up-display
         if self.camera.draw_hud:
             self._paint_hud()
-        if self.camera.fixed:
-            self._paint_fixed()
+
+        # adjusts the camera size
+        self._paint_fixed()
+        
+        # draw the grid lines
         if self.camera.draw_grid:
             self._paint_grid()
+        
+        # draw geom normals
         if self.camera.draw_normals:
             self._paint_normals()
 
         # draw each scene
         for scene in self.state.scenes:
            
-            # reset trs overrides
-            glScalef(1, 1, 1)
-            glRotatef(0, 0, 0, 0)
-            glTranslatef(0, 0, 0)
-
             if not scene.visible:
                 continue
 
@@ -942,25 +988,33 @@ class GLWidget(QtOpenGL.QGLWidget):
             if mode != Mode.OFF:
                 glPolygonMode(GL_FRONT_AND_BACK, mode)
 
-            # trs overrides
-            glTranslatef(*scene.properties.get("translate", (0, 0, 0)))
-            glRotatef(*scene.properties.get("rotate", (0, 0, 0, 0)))
-            glScalef(*scene.properties.get("scale", (1, 1, 1)))
+            # apply local transforms
+            glPushMatrix()
+            glTranslatef(*scene.translate)
+            glRotatef(*scene.rotate)
+            glScalef(*scene.scale)
+
+            # draw bounds
             if self.camera.draw_bounds:
                 glColor3f(1, 1, 1)
                 set_ambient_light()
                 draw_bounding_box(scene.scene.bounds())
                 set_diffuse_light()
+
+            # draw scene
             if mode != Mode.OFF:
                 scene.draw()
+            
+            glPopMatrix()
             self.signal_scene_drawn.emit()
-
-    @update_camera
+        
+    #@update_camera
     def resizeGL(self, width, height):
-        if hasattr(self, "camera") and self.camera is not None:
-            self.camera.size = (self.camera.viewer.width(), 
-                                self.camera.viewer.height()
-                               )
+        log.debug("GLWidget.resizeGL %s %s %s" % (self, width, height))
+        try:
+            self.camera.resize()
+        except AttributeError, e:
+            pass
 
     @update_camera
     def keyPressEvent(self, event):
@@ -1013,6 +1067,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         mouse press event handler
         """
+
+        # use weakref for this
+        self.state.active_viewer = self
         
         # make this viewer the active one
         if self._main:
@@ -1047,7 +1104,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             camera_menu = QtGui.QMenu("Cameras", self)
             camera_group = QtGui.QActionGroup(camera_menu) 
 
-            for camera in [self.default_camera] + self.state.cameras:
+            for camera in self.state.cameras:
                 camera_action = QtGui.QAction(camera.name, self)
                 camera_action.setCheckable(True)
                 if camera.name == self.camera.name:
@@ -1188,7 +1245,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.__last_p2d = newPoint2D
         self.__last_p3d = newPoint3D
         self.__last_pok = newPoint_hitSphere
-       
+    
     def mouseReleaseEvent(self, event):
         """
         mouse release event handler
@@ -1205,3 +1262,10 @@ class GLWidget(QtOpenGL.QGLWidget):
         dx = float(event.delta()) / 10
         self.camera.dolly(dx, 0)
         event.accept()
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        filepath = sys.argv[1]
+    else:
+        filepath = None
+    create_viewer_app(filepath)

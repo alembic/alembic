@@ -165,7 +165,7 @@ class Scene(FileBase):
         self.filepath = filepath
        
     def __repr__(self):
-        return "<%s \"%s\" #%d>" % (self.type(), self.name, self.instance)
+        return "<%s \"%s\">" % (self.type(), self.name)
 
     ## some convenience properties
 
@@ -216,7 +216,6 @@ class Scene(FileBase):
             "loaded": self.loaded,
             "name": self.name,
             "properties": self.properties,
-            #"type": self.type(),
         }
 
     @classmethod
@@ -337,11 +336,10 @@ class Camera(CameraBase):
 
     Acting de/serialization layer for GLCamera objects.
     """
-
-    # list of camera properties to de/serialize
     SERIALIZE = ["translation", "rotation", "scale", "aspect_ratio",
                  "fovx", "fovy", "near", "far", "center", "fixed", "mode",
-                 "draw_hud", "draw_grid", "draw_normals", "draw_bounds"]
+                 "draw_hud", "draw_grid", "draw_normals", "draw_bounds",
+                 "name", "loaded"]
 
     def __init__(self, name, loaded=False):
         """
@@ -356,16 +354,14 @@ class Camera(CameraBase):
 
     def serialize(self):
         d = {
-            "name": self.name,
-            "loaded": self.loaded,
             "type": self.type(),
         }
         for attr in self.SERIALIZE:
             val = getattr(self, attr, None)
             if val is not None:
-                try:
+                if attr in ["translation", "rotation", "scale"]:
                     d[attr] = [val[0], val[1], val[2]]
-                except TypeError:
+                else:
                     d[attr] = val
         return d
 
@@ -403,6 +399,9 @@ class ICamera(CameraBase):
         # save session
         >>> session.save("scene.io")
     """
+    SERIALIZE = ["fixed", "mode", "draw_hud", "draw_grid", "draw_normals", 
+                 "name", "loaded", "draw_bounds"]
+
     def __init__(self, icamera, loaded=False):
         """
         :param icamera: Alembic ICamera object
@@ -410,7 +409,7 @@ class ICamera(CameraBase):
         self.icamera = icamera
         self.loaded = loaded
         self.__schema = None
-        super(ICamera, self).__init__(self.name)
+        super(ICamera, self).__init__(self._get_name)
 
     def __repr__(self):
         return "<%s \"%s\">" % (self.__class__.__name__, self.name)
@@ -497,21 +496,28 @@ class ICamera(CameraBase):
         return win["left"], win["bottom"], win["left"], win["right"]
 
     def serialize(self):
-        return {
+        d = {
             "filepath": self.icamera.getArchive().getName(), 
             "fullname": self.icamera.getFullName(),
-            "loaded": self.loaded,
             "type": self.type(),
         }
+        for attr in self.SERIALIZE:
+            val = getattr(self, attr, None)
+            if val is not None:
+                d[attr] = val
+        return d
 
     @classmethod
     def deserialize(cls, params):
-        return cls(get_object(
+        cam = cls(get_object(
                        params.get("filepath"),
                        params.get("fullname")
                    ),
                    loaded=params.get("loaded")
                )
+        for attr in cls.SERIALIZE:
+            setattr(cam, attr, params.get(attr))
+        return cam
 
 class Session(FileBase):
     """
@@ -625,7 +631,6 @@ class Session(FileBase):
                     "name": item.name,
                     "loaded": item.loaded,
                     "properties": item.properties,
-                    #"type": item.type(),
                 }
             else:
                 return item.serialize()
@@ -718,7 +723,7 @@ class Session(FileBase):
             },
             "date": self.date,
             "properties": self.properties,
-            "cameras": [camera.serialize() for camera in self.__cameras.values() if camera.name != "interactive"],
+            "cameras": [camera.serialize() for camera in self.__cameras.values()],
             "data": self.serialize()
         }
         json.dump(state, open(filepath, "w"), sort_keys=True, indent=4)

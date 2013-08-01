@@ -49,6 +49,9 @@ What's new:
 - multiple GL modes + bounds
 - save layout and session
 - console bug fixes
+
+More information:
+http://docs.alembic.io/python/abcview.html
 """
 
 """
@@ -57,8 +60,9 @@ TODO:
 - GL picking in viewer
 - highlight object selection in viewer
 - better session cycle checking on load
-- use signal objects
-- migrate to MVC
+- more stats (frame rate, poly count, mem usage)
+- support for lights
+- draggable, pop-out widgets
 """
 
 import os
@@ -324,8 +328,6 @@ class AbcView(QtGui.QMainWindow):
         self.settings = QtCore.QSettings("Alembic", 
                            "-".join([config.__prog__, config.__version__]))
         self.session = Session(filepath)
-        if filepath and os.path.isfile(filepath):
-            self.open_session(filepath)
 
         # main menu
         self.main_menu = AbcMenuBar(self, main=self)
@@ -358,6 +360,10 @@ class AbcView(QtGui.QMainWindow):
             'alembic': alembic,
             'abcview': abcview
             })
+
+        #HACK: better way to do this? 
+        # remap some session methods for GL wrapping
+        self.session.add_file = self.import_file
 
         # viewer
         self.viewer = GLWidget(self)
@@ -419,6 +425,9 @@ class AbcView(QtGui.QMainWindow):
                 self.array_tree.show_values)
         self.connect(self.find_line_edit, QtCore.SIGNAL("returnPressed ()"), 
                 self.handle_find)
+
+        if filepath and filepath.endswith(Session.EXT):
+            self.open_session(filepath)
  
     @make_clean
     def clear(self):
@@ -457,7 +466,7 @@ class AbcView(QtGui.QMainWindow):
         self.settings.clear()
         
         # default position settings
-        self.setGeometry(400, 250, 900, 450)
+        self.setGeometry(400, 250, 550, 500)
 
         # default splitter locations
         self.objects_splitter.setSizes([200, 200, 200])
@@ -569,11 +578,12 @@ class AbcView(QtGui.QMainWindow):
         """
         Loads a session file and swaps out IO objects for GL objects.
         """
-        #TODO: ugly code needs refactor
         log.debug("AbcView.open_session: %s" % filepath)
         if not filepath or not os.path.isfile(filepath):
             log.warn("invalid file: %s" % filepath)
             return
+
+        # clear session
         self.clear()
 
         # load an alembic file
@@ -581,9 +591,11 @@ class AbcView(QtGui.QMainWindow):
             self.import_file(filepath)
             self.viewer.frame()
 
-        # load session, transform IO scenes to GL scenes
+        # load an abcview file
         elif filepath.endswith(Session.EXT):
             self.session = Session(filepath)
+            
+            #HACK: transform io.Scenes to gl.Scenes
             for index in range(len(self.session.items)):
                 item = self.session.items[0]
                 if item.filepath.endswith(Scene.EXT):
@@ -600,18 +612,16 @@ class AbcView(QtGui.QMainWindow):
                 if item.loaded:
                     tree_item.load()
            
-            # transform IO cameras into GL cameras
+            #HACK: transform io.Cameras to gl.Cameras
             for camera in self.session.cameras:
                 self.session.remove_camera(camera)
                 if camera.type() == Camera.type():
                     _camera = GLCamera(self.viewer, camera.name)
-                    for attr in Camera.SERIALIZE:
-                        setattr(_camera, attr, getattr(camera, attr))
-                    self.viewer.add_camera(_camera)
                 elif camera.type() == ICamera.type():
                     _camera = GLICamera(self.viewer, camera.icamera)
-                    _camera.name = camera.name
-                    self.viewer.add_camera(_camera)
+                for attr in _camera.SERIALIZE:
+                    setattr(_camera, attr, getattr(camera, attr))
+                self.viewer.add_camera(_camera)
                 if camera.loaded:
                     self.viewer.set_camera(_camera)
 
@@ -747,7 +757,8 @@ class AbcView(QtGui.QMainWindow):
 
         :param camera: GLCamera
         """
-        self.session.set_camera(camera)
+        if camera.name != "interactive":
+            self.session.set_camera(camera)
 
     @make_dirty
     def handle_view_camera(self, item):
@@ -938,12 +949,13 @@ def main():
     win.raise_()
 
     # load / import file(s)
-    if len(args.filepath) == 1:
+    if len(args.filepath) == 1 and args.filepath[0].endswith(Session.EXT):
         win.open_session(args.filepath[0])
-    elif len(args.filepath) > 1:
+    else:
         for filepath in args.filepath:
             win.import_file(filepath)
-        win.viewer.frame()
+        if args.filepath:
+            win.viewer.frame()
     
     # current frame
     if args.frame is not None:

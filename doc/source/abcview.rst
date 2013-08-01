@@ -8,11 +8,12 @@ It offers a number of widgets to help you inspect and visualize your Alembic
 data, as well as assemble hierarchical scenes. 
 
     * Object, property, sample and value widgets
-    * Playback or step through animation using the Timeline widget
+    * Deferred loading for all Alembic objects
+    * Built-in instancing of Alembic archives
     * Hierarchical scene assembly (with standard JSON output)
-    * A Python console for closer inspection of Alembic objects
-    * GL viewer widget using AbcOpenGL lib
-    * Varying GL modes for rendering objects (box, fill, line, point)
+    * Python console for closer inspection of Alembic objects
+    * Playback or step through animation using the Timeline widget
+    * Per-camera render modes (box, fill, line, point)
 
 .. image:: abcview.png
    :width: 800
