@@ -14,6 +14,7 @@ data, as well as assemble hierarchical scenes.
     * Python console for closer inspection of Alembic objects
     * Playback or step through animation using the Timeline widget
     * Per-camera render modes (box, fill, line, point)
+    * Widgets are embeddable in other PyQt applications
 
 .. image:: abcview.png
    :width: 800

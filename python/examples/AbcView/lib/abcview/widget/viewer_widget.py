@@ -192,7 +192,7 @@ def create_viewer_app(filepath=None):
         >>> create_viewer_app("file.abc")
 
     """
-    app = QtGui.QApplication(sys.argv)
+    app = abcview.App(sys.argv)
 
     # create the viewer widget
     viewer = GLWidget()
@@ -1062,6 +1062,22 @@ class GLWidget(QtOpenGL.QGLWidget):
                 self.state.stop()
             else:
                 self.state.play()
+        
+        # 0 - display off
+        elif key == QtCore.Qt.Key_0:
+            self.handle_set_mode(Mode.OFF)
+
+        # 1 - bounds
+        elif key == QtCore.Qt.Key_1:
+            self.handle_set_mode(Mode.FILL)
+
+        # 2 - bounds
+        elif key == QtCore.Qt.Key_2:
+            self.handle_set_mode(Mode.LINE)
+
+        # 3 - bounds
+        elif key == QtCore.Qt.Key_3:
+            self.handle_set_mode(Mode.POINT)
 
         # right arroy - increment frame
         elif key == QtCore.Qt.Key_Right:
@@ -1212,7 +1228,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.shading_menu = QtGui.QMenu("Shading", self)
             shading_group = QtGui.QActionGroup(self.shading_menu)
 
-            self.offAct = QtGui.QAction("Off", self)
+            self.offAct = QtGui.QAction("Off (0)", self)
             self.offAct.setCheckable(True)
             self.offAct.setActionGroup(shading_group)
             self.offAct.setData(Mode.OFF)
@@ -1220,7 +1236,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.offAct.toggled.connect(self.handle_set_mode)
             self.shading_menu.addAction(self.offAct)
 
-            self.fillAct = QtGui.QAction("Fill", self)
+            self.fillAct = QtGui.QAction("Fill (1)", self)
             self.fillAct.setCheckable(True)
             self.fillAct.setActionGroup(shading_group)
             self.fillAct.setData(Mode.FILL)
@@ -1228,7 +1244,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.fillAct.toggled.connect(self.handle_set_mode)
             self.shading_menu.addAction(self.fillAct)
             
-            self.lineAct = QtGui.QAction("Line", self)
+            self.lineAct = QtGui.QAction("Line (2)", self)
             self.lineAct.setCheckable(True)
             self.lineAct.setActionGroup(shading_group)
             self.lineAct.setData(Mode.LINE)
@@ -1236,7 +1252,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.lineAct.toggled.connect(self.handle_set_mode)
             self.shading_menu.addAction(self.lineAct)
 
-            self.pointAct = QtGui.QAction("Point", self)
+            self.pointAct = QtGui.QAction("Point (3)", self)
             self.pointAct.setCheckable(True)
             self.pointAct.setActionGroup(shading_group)
             self.pointAct.setData(Mode.POINT)
