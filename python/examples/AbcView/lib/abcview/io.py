@@ -656,11 +656,14 @@ class Session(FileBase):
         self.program = config.__prog__
         self.properties = {}
         self.date = time.time()
-        self.make_clean()
+        self.current_time = 0
+        self.frames_per_second = 24.0
         
         # stores objects that need special handling
         self.__cameras = {}
         self.__items = []
+        
+        self.make_clean()
 
     def load(self, filepath=None):
         """
@@ -680,6 +683,10 @@ class Session(FileBase):
         self.date = state.get("date")
         self.instance = state.get("instance", 1)
         self.properties = state.get("properties")
+        self.frames_per_second = state.get("frames_per_second", 
+                           self.frames_per_second)
+        self.current_time = state.get("current_time", 
+                           self.current_time)
 
         # cameras
         for camera in state.get("cameras"):
@@ -722,6 +729,8 @@ class Session(FileBase):
                 "platform": sys.platform,
             },
             "date": self.date,
+            "current_time": self.current_time,
+            "frames_per_second": self.frames_per_second,
             "properties": self.properties,
             "cameras": [camera.serialize() for camera in self.__cameras.values()],
             "data": self.serialize()

@@ -403,32 +403,32 @@ class GLICamera(abcview.io.ICamera, GLCameraMixin):
         log.debug("GLICamera immutable attribute")
 
     def _get_translation(self):
-        return super(GLICamera, self).translation(self.viewer.current_time)
+        return super(GLICamera, self).translation(self.viewer.state.current_time)
 
     translation = property(_get_translation, _not_settable)
 
     def _get_rotation(self):
-        return super(GLICamera, self).rotation(self.viewer.current_time)
+        return super(GLICamera, self).rotation(self.viewer.state.current_time)
 
     rotation = property(_get_rotation, _not_settable)
 
     def _get_scale(self):
-        return super(GLICamera, self).scale(self.viewer.current_time)
+        return super(GLICamera, self).scale(self.viewer.state.current_time)
 
     scale = property(_get_scale, _not_settable)
 
     def _get_near(self):
-        return super(GLICamera, self).near(self.viewer.current_time)
+        return super(GLICamera, self).near(self.viewer.state.current_time)
 
     near = property(_get_near, _not_settable)
 
     def _get_far(self):
-        return super(GLICamera, self).far(self.viewer.current_time)
+        return super(GLICamera, self).far(self.viewer.state.current_time)
   
     far = property(_get_far, _not_settable)
 
     def _get_fovx(self):
-        return super(GLICamera, self).fovx(self.viewer.current_time)
+        return super(GLICamera, self).fovx(self.viewer.state.current_time)
    
     fovx = property(_get_fovx, _not_settable)
 
@@ -438,12 +438,12 @@ class GLICamera(abcview.io.ICamera, GLCameraMixin):
     fovy = property(_get_fovy, _not_settable)
 
     def _get_aspect_ratio(self):
-        return super(GLICamera, self).aspect_ratio(self.viewer.current_time)
+        return super(GLICamera, self).aspect_ratio(self.viewer.state.current_time)
 
     aspect_ratio = property(_get_aspect_ratio, _not_settable, doc="aspect ratio")
 
     def _get_screen_window(self):
-        return super(GLICamera, self).screen_window(self.viewer.current_time)
+        return super(GLICamera, self).screen_window(self.viewer.state.current_time)
 
     screen_window = property(_get_screen_window, _not_settable, doc="screen window")
 

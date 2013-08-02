@@ -173,11 +173,13 @@ class TimeSlider(QtGui.QGroupBox):
         self.slider.setFixedHeight(20)
         self.slider.valueChanged.connect(self.handle_frame_change)
 
-        # buttons
+        # play button
         self.play_button = QtGui.QPushButton(self)
         self.play_button.setObjectName("play_button")
         self.play_button.setFixedSize(50, 20)
         self.play_button.clicked.connect(self.handle_play)
+        
+        # stop button
         self.stop_button = QtGui.QPushButton(self)
         self.stop_button.setObjectName("stop_button")
         self.stop_button.setFixedSize(50, 20)
@@ -218,20 +220,31 @@ class TimeSlider(QtGui.QGroupBox):
     def set_value(self, value):
         self.slider.setValue(value)
 
+    def _get_playing(self):
+        return self.play_button.isHidden()
+
+    def _set_playing(self, is_playing):
+        if is_playing:
+            self.play_button.hide()
+            self.stop_button.show()
+        else:
+            self.stop_button.hide()
+            self.play_button.show()
+
+    playing = property(_get_playing, _set_playing)
+
     def handle_frame_change(self, value):
         self.signal_frame_changed.emit(value)
 
     def handle_stop(self):
+        self.playing = False
         self.signal_play_stop.emit()
-        self.play_button.show()
-        self.stop_button.hide()
 
     def handle_play(self):
         if self.length() == 0:
             return
+        self.playing = True
         self.signal_play_fwd.emit()
-        self.play_button.hide()
-        self.stop_button.show()
 
     ## base class overrides
 
@@ -244,4 +257,3 @@ class TimeSlider(QtGui.QGroupBox):
             return
         event.accept()
         super(TimeSlider, self).keyPressEvent(event)
-

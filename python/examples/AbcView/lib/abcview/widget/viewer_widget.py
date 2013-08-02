@@ -239,17 +239,37 @@ class GLState(QtCore.QObject):
     Global GL viewer state manager. Manages list of Cameras and Scenes, 
     which can be shared between viewers.
     """
+    SECOND = 1000.0
     signal_state_change = QtCore.pyqtSignal()
+    signal_play_fwd = QtCore.pyqtSignal()
+    signal_play_stop = QtCore.pyqtSignal()
+    signal_current_time = QtCore.pyqtSignal(float)
+    signal_current_frame = QtCore.pyqtSignal(int)
 
-    def __init__(self):
+    def __init__(self, fps=24.0):
+        """
+        :param fps: play scene at frames per second (fps)
+        """
         super(GLState, self).__init__()
         self.timer = QtCore.QTimer(self)
         self.active_viewer = None
+        self.frames_per_second = fps
         self.clear()
+        
+        # for calculating frames per second during playback
+        self.fps = 0.0
+        self.__fps_timer = QtCore.QTimer(self)
+        self.__fps_timer.setInterval(self.SECOND)
+        self.connect(self.__fps_timer, QtCore.SIGNAL("timeout ()"), 
+                self._fps_timer_cb)
 
     def clear(self):
         self.__scenes = []
         self.__cameras = {}
+        self.__time = 0
+        self.__frame = 0
+        self.__playing = False
+        self.__fps_counter = 0
         self.signal_state_change.emit()
 
     def _get_cameras(self):
@@ -283,7 +303,6 @@ class GLState(QtCore.QObject):
 
     def add_file(self, filepath):
         self.add_scene(GLScene(filepath))
-        self.signal_state_change.emit()
 
     def remove_scene(self, scene):
         """
@@ -326,6 +345,107 @@ class GLState(QtCore.QObject):
         """
         return self.__cameras.get(name)
 
+    def _get_time(self):
+        return self.__time
+
+    def _set_time(self, new_time):
+        self.__time = new_time
+        self.__frame = new_time * self.frames_per_second
+        for scene in self.scenes:
+            if scene.visible:
+                scene.set_time(new_time)
+        self.signal_current_time.emit(new_time) 
+        self.signal_current_frame.emit(int(round(new_time * self.frames_per_second)))
+
+        # update other viewers
+        self.signal_state_change.emit()
+
+    current_time = property(_get_time, _set_time, doc="set/get current time")
+
+    def _get_frame(self):
+        return self.__frame
+
+    def _set_frame(self, frame):
+        if frame > self.frame_range()[1]:
+            frame = self.frame_range()[0]
+        elif frame < self.frame_range()[0]:
+            frame = self.frame_range()[1]
+        self.current_time = frame / float(self.frames_per_second)
+
+    current_frame = property(_get_frame, _set_frame, doc="set/get current frame")
+    
+    def time_range(self):
+        """
+        Returns total time range in seconds.
+        """
+        min = None
+        max = None
+        if self.scenes:
+            for scene in self.scenes:
+                if min is None or scene.min_time() < min:
+                    min = scene.min_time()
+                if max is None or scene.max_time() > max:
+                    max = scene.max_time()
+        else:
+            min, max = 0, 0
+        return (min, max)
+
+    def frame_range(self):
+        """
+        Returns total frame range.
+        """
+        (min, max) = self.time_range()
+        return (min * self.frames_per_second, max * self.frames_per_second)
+
+    def frame_count(self):
+        """
+        Returns total frame count.
+        """
+        return len(range(*self.frame_range())) + 1
+    
+    def is_playing(self):
+        return self.__playing
+
+    def play(self):
+        """
+        plays loaded scenes by activating timer and setting callback
+        """
+        self.timer.setInterval(self.SECOND / (float(self.frames_per_second)))
+        self.connect(self.timer, QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
+        self.timer.start()
+        self.__fps_timer.start()
+        self.signal_play_fwd.emit()
+
+    def _play_fwd_cb(self):
+        """
+        play callback, sets current time for all scenes
+        """
+        self.__playing = True
+        min_time, max_time = self.time_range()
+        self.current_time += 1.0 / float(self.frames_per_second)
+        if self.current_time > max_time:
+            self.current_time = min_time
+        self.__fps_counter += 1
+
+    def stop(self):
+        """
+        stops scene playback
+        """
+        self.__playing = False
+        self.disconnect(self.timer,  QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
+        self.timer.stop()
+        self.__fps_timer.stop()
+        self.__fps_counter = 0
+        self.signal_play_stop.emit()
+
+    def _fps_timer_cb(self):
+        """
+        frames per second timer callback
+        """
+        self.fps = (self.__fps_counter / float(self.frames_per_second)) * \
+                      self.frames_per_second
+        self.__fps_counter = 0
+
 class GLWidget(QtOpenGL.QGLWidget):
     """
     AbcView OpenGL Widget.
@@ -343,18 +463,13 @@ class GLWidget(QtOpenGL.QGLWidget):
     signal_scene_removed = QtCore.pyqtSignal(GLScene)
     signal_scene_error = QtCore.pyqtSignal(str)
     signal_scene_drawn = QtCore.pyqtSignal()
-    signal_play_fwd = QtCore.pyqtSignal()
-    signal_play_stop = QtCore.pyqtSignal()
-    signal_current_time = QtCore.pyqtSignal(float)
-    signal_current_frame = QtCore.pyqtSignal(int)
     signal_set_camera = QtCore.pyqtSignal(GLCamera)
     signal_new_camera = QtCore.pyqtSignal(GLCamera)
     signal_camera_updated = QtCore.pyqtSignal(GLCamera)
 
-    def __init__(self, parent=None, fps=24, state=None):
+    def __init__(self, parent=None, state=None):
         """
         :param parent: parent Qt object
-        :param fps: frames per second (default 24)
         :param state: GLState object (for shared states)
         """
         self.camera = None
@@ -371,12 +486,6 @@ class GLWidget(QtOpenGL.QGLWidget):
       
         # embedded in larger app?
         self._main = parent
-
-        # frames per second value
-        self.__time = 0
-        self.__frame = 0
-        self.__fps = fps
-        self.__playing = False
 
         # various matrices and vectors
         self.__bounds_default = imath.Box3d((-5,-5,-5), (5,5,5))
@@ -477,106 +586,11 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.resizeGL(self.width(), self.height())
         self.signal_set_camera.emit(self.camera)
 
-    def _get_time(self):
-        return self.__time
-
-    def _set_time(self, new_time):
-        self.__time = new_time
-        self.__frame = new_time * self.fps
-        for scene in self.state.scenes:
-            if scene.visible:
-                scene.set_time(new_time)
-        if self.camera and self.camera.auto_frame:
-            self.frame()
-        self.signal_current_time.emit(new_time) 
-        self.signal_current_frame.emit(int(round(new_time * self.fps)))
-        self.updateGL()
-
-    current_time = property(_get_time, _set_time, doc="set/get current time")
-
-    def _get_frame(self):
-        return self.__frame
-
-    def _set_frame(self, frame):
-        if frame > self.frame_range()[1]:
-            frame = self.frame_range()[0]
-        elif frame < self.frame_range()[0]:
-            frame = self.frame_range()[1]
-        frame = frame / float(self.fps)
-        self.current_time = frame
-
-    current_frame = property(_get_frame, _set_frame, doc="set/get current frame")
-
-    def is_playing(self):
-        return self.__playing
-
-    def play(self):
-        """
-        plays loaded scenes by activating timer and setting callback
-        """
-        self.state.timer.setInterval(1.0 / (float(self.fps)))
-        self.connect(self.state.timer, QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
-        self.state.timer.start()
-        self.signal_play_fwd.emit()
-
-    def _play_fwd_cb(self):
-        """
-        play callback, sets current time for all scenes
-        """
-        self.__playing = True
-        min_time, max_time = self.time_range()
-        self.current_time += 1.0 / float(self.fps)
-        if self.current_time > max_time:
-            self.current_time = min_time
-
-    def stop(self):
-        """
-        stops scene playback
-        """
-        self.__playing = False
-        self.disconnect(self.state.timer,  QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
-        self.connect(self.state.timer, QtCore.SIGNAL("timeout ()"), self._play_stop_cb)
-        self.updateGL()
-
-    def _play_stop_cb(self):
-        self.signal_play_stop.emit()
-
-    def _get_fps(self):
-        return self.__fps
-
-    def _set_fps(self, fps):
-        self.__fps = fps
-
-    fps = property(_get_fps, _set_fps, doc="frames per second value")
-
     def aspect_ratio(self):
         """
         Returns current aspect ration of the viewer.
         """
         return self.width() / float(self.height())
-
-    def time_range(self):
-        """
-        Returns total time range in seconds.
-        """
-        min = None
-        max = None
-        if self.state.scenes:
-            for scene in self.state.scenes:
-                if min is None or scene.min_time() < min:
-                    min = scene.min_time()
-                if max is None or scene.max_time() > max:
-                    max = scene.max_time()
-        else:
-            min, max = 0, 0
-        return (min, max)
-
-    def frame_range(self):
-        """
-        Returns total frame range.
-        """
-        (min, max) = self.time_range()
-        return (min * self.fps, max * self.fps)
     
     def _get_bounds(self):
         #TODO: ugly code needs refactor
@@ -804,18 +818,33 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         glColor3f(1, 1, 1)
         def _format(array):
-            return " ".join(["%.2f" %f for f in array])
+            return ", ".join(["%.2f" %f for f in array])
 
         glViewport(0, 0, self.width(), self.height())
         
+        # draw the camera name
         glColor3f(0.5, 1, 0.5)
-        self.renderText(15, 20, "%s (AR %.02f)" 
-                % (self.camera.name, self.camera.aspect_ratio))
+        if self.camera.fixed:
+            self.renderText(15, 20, "%s (%.02f)" 
+                    % (self.camera.name, self.camera.aspect_ratio))
+        else:
+            self.renderText(15, 20, "%s" % self.camera.name)
 
-        glColor3f(1, 1, 0.5)
+        # draw the camera info
+        glColor3f(0.6, 0.6, 0.6)
+        font = QtGui.QFont("Arial", 8)
+        self.renderText(15, 35, "T [%s]" 
+                % _format(self.camera.translation), font)
+        self.renderText(15, 50, "R [%s]" 
+                % _format(self.camera.rotation), font)
+        self.renderText(15, 66, "S [%s]" 
+                % _format(self.camera.scale), font)
 
-        self.renderText(15, 40, _format(self.camera.translation))
-        self.renderText(15, 60, _format(self.camera.rotation))
+        # draw the FPS info
+        glColor3f(0.7, 0.7, 0.7)
+        font = QtGui.QFont("Arial", 9)
+        self.renderText(self.width()-100, self.height()-10, "%.1f / %.1f FPS" 
+                % (self.state.fps, self.state.frames_per_second), font)
 
         glColor3f(1, 1, 1)
 
@@ -1008,7 +1037,6 @@ class GLWidget(QtOpenGL.QGLWidget):
             glPopMatrix()
             self.signal_scene_drawn.emit()
         
-    #@update_camera
     def resizeGL(self, width, height):
         log.debug("GLWidget.resizeGL %s %s %s" % (self, width, height))
         try:
@@ -1024,42 +1052,58 @@ class GLWidget(QtOpenGL.QGLWidget):
         key = event.key()
         mod = event.modifiers()
 
+        # space bar - playback control
         if key == QtCore.Qt.Key_Space:
-            if self.is_playing():
-                self.stop()
+            if len(self.state.scenes) == 0 or \
+                   self.state.frame_count <= 1:
+                return
+
+            if self.state.is_playing():
+                self.state.stop()
             else:
-                self.play()
+                self.state.play()
 
+        # right arroy - increment frame
         elif key == QtCore.Qt.Key_Right:
-            self.current_frame = self.current_frame + 1
+            self.state.current_frame = self.state.current_frame + 1
 
+        # left arrow - decrement frame
         elif key == QtCore.Qt.Key_Left:
-            self.current_frame = self.current_frame - 1
+            self.state.current_frame = self.state.current_frame - 1
 
+        # alt+f - toggle fixed aspect ratio
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_F:
             self.camera._set_fixed()
-
+    
+        # alt+b - toggle bounding boxes
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_B:
             self.camera._set_draw_bounds()
 
+        # alt+n - toggle draw normals
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_N:
             self.camera._set_draw_normals()
 
+        # alt+g - toggle grid
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_G:
             self.camera._set_draw_grid()
 
+        # alt+h - toggle hud
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_H:
             self.camera._set_draw_hud()
 
+        # shift+| - split vertically
         elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_Bar:
             self.split_vert()
 
+        # shift+| - split horizontally
         elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_Underscore:
             self.split_horz()
-            
+        
+        # alt+- - unsplit
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_Minus:
             self.unsplit()
 
+        # "f" - frame scene
         elif key == QtCore.Qt.Key_F:
             self.frame()
 

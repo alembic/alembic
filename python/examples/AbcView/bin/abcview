@@ -61,8 +61,12 @@ TODO:
 - highlight object selection in viewer
 - better session cycle checking on load
 - more stats (frame rate, poly count, mem usage)
-- support for lights
+- support for lights and materials
 - draggable, pop-out widgets
+- share state between processes / remote viewing
+- save split window layouts
+- support object paths in args, auto-frame on object
+- unit tests
 """
 
 import os
@@ -128,8 +132,6 @@ def create_parser():
             help='Verbose output.')
     parser.add_argument('--script', 
             help='Load and execute Python script.')
-    parser.add_argument('--fps', default=24, type=int,
-            help='Global scene frames per second.')
     return parser
 
 def message(info):
@@ -311,7 +313,7 @@ class FindLineEdit(QtGui.QLineEdit):
 ## MAIN -----------------------------------------------------------------------
 class AbcView(QtGui.QMainWindow):
     TITLE = " ".join([config.__prog__, config.__version__])
-    def __init__(self, filepath=None, fps=24):
+    def __init__(self, filepath=None):
         QtGui.QMainWindow.__init__(self)
         self.setWindowState(QtCore.Qt.WindowActive)
         self.setWindowFlags(QtCore.Qt.Window)
@@ -320,9 +322,6 @@ class AbcView(QtGui.QMainWindow):
         self.setStyleSheet(style.MAIN_STYLE)
         self.setMinimumSize(200, 200)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-
-        # semi/private attributes
-        self.__fps = fps
 
         # session data
         self.settings = QtCore.QSettings("Alembic", 
@@ -367,16 +366,20 @@ class AbcView(QtGui.QMainWindow):
 
         # viewer
         self.viewer = GLWidget(self)
-        self.viewer.signal_scene_error.connect(self.handle_viewer_error)
-        self.viewer.signal_scene_opened.connect(self.handle_scene_opened)
-        self.viewer.signal_current_frame.connect(self.handle_update_frame)
-        self.viewer.signal_set_camera.connect(self.handle_set_camera)
-        self.viewer.signal_new_camera.connect(self.handle_new_camera)
         self.viewer_group = QtGui.QGroupBox(self)
         self.viewer_group.setLayout(QtGui.QVBoxLayout())
         self.viewer_group.layout().setSpacing(0)
         self.viewer_group.layout().setMargin(0)
         self.viewer_group.layout().addWidget(self.viewer)
+        
+        # viewer/state connections
+        self.viewer.signal_scene_error.connect(self.handle_viewer_error)
+        self.viewer.signal_scene_opened.connect(self.handle_scene_opened)
+        self.viewer.signal_set_camera.connect(self.handle_set_camera)
+        self.viewer.signal_new_camera.connect(self.handle_new_camera)
+        self.viewer.state.signal_current_frame.connect(self.handle_update_frame)
+        self.viewer.state.signal_play_fwd.connect(self.handle_state_play_fwd)
+        self.viewer.state.signal_play_stop.connect(self.handle_state_play_stop)
         
         # time slider
         self.time_slider = TimeSlider(self)
@@ -446,17 +449,6 @@ class AbcView(QtGui.QMainWindow):
         msg.setDefaultButton(QtGui.QMessageBox.Save);
         return msg.exec_()
 
-    ## special properties
-
-    def _get_fps(self):
-        return self.__fps
-
-    def _set_fps(self, fps):
-        self.__fps = fps
-        self.viewer.fps = fps
-
-    fps = property(_get_fps, _set_fps, doc="global scene frames per second value")
-    
     ## settings
 
     def reset_settings(self):
@@ -580,8 +572,8 @@ class AbcView(QtGui.QMainWindow):
         """
         log.debug("AbcView.open_session: %s" % filepath)
         if not filepath or not os.path.isfile(filepath):
-            log.warn("invalid file: %s" % filepath)
-            return
+            message("invalid file: %s" % filepath)
+            raise
 
         # clear session
         self.clear()
@@ -624,7 +616,16 @@ class AbcView(QtGui.QMainWindow):
                 self.viewer.add_camera(_camera)
                 if camera.loaded:
                     self.viewer.set_camera(_camera)
+            else:
+                if len(self.session.cameras) == 0:
+                    self.viewer.frame()
 
+        # restore current frame / fps
+        self.viewer.state.frames_per_second = self.session.frames_per_second
+        self.viewer.state.current_frame = self.session.current_time * \
+                                     self.session.frames_per_second
+
+        # update window title
         self.setWindowTitle(" - ".join([self.TITLE, filepath]))
 
     @make_clean
@@ -637,6 +638,8 @@ class AbcView(QtGui.QMainWindow):
                          overrwrites current session file.
         """
         try:
+            self.session.current_time = self.viewer.state.current_time
+            self.session.frames_per_second = self.viewer.state.frames_per_second
             self.session.save(filepath)
         except Exception, e:
             traceback.print_exc()
@@ -666,8 +669,8 @@ class AbcView(QtGui.QMainWindow):
         :param filepath: path to scene or session file.
         """
         if not filepath or not os.path.isfile(filepath):
-            log.info("invalid file: %s" % filepath)
-            return
+            message("invalid file: %s" % filepath)
+            raise
        
         # add the item to the session
         item = GLScene(filepath)
@@ -692,13 +695,13 @@ class AbcView(QtGui.QMainWindow):
         """
         Playback handler, starts playing the viewer.
         """
-        self.viewer.play()
+        self.viewer.state.play()
 
     def handle_stop(self):
         """
         Viewer playback stop handler, stops the viewer playback.
         """
-        self.viewer.stop()
+        self.viewer.state.stop()
 
     @make_dirty
     def handle_delete(self):
@@ -708,7 +711,7 @@ class AbcView(QtGui.QMainWindow):
         """
         Scene open signal handler.
         """
-        frame_range = self.viewer.frame_range()
+        frame_range = self.viewer.state.frame_range()
         self.time_slider.set_minimum(frame_range[0])
         self.time_slider.set_maximum(frame_range[1])
 
@@ -719,7 +722,19 @@ class AbcView(QtGui.QMainWindow):
         """
         handles frame changes coming from time slider
         """
-        self.viewer.current_frame = value
+        self.viewer.state.current_frame = value
+
+    def handle_state_play_fwd(self):
+        """
+        viewer state play foward signal handler
+        """
+        self.time_slider.playing = True
+
+    def handle_state_play_stop(self):
+        """
+        viewer state play stop signal handler
+        """
+        self.time_slider.playing = False
 
     def handle_update_frame(self, frame):
         """
@@ -732,7 +747,8 @@ class AbcView(QtGui.QMainWindow):
             self.samples_tree.topLevelItemCount() > 0:
             p = self.properties_tree.selected()
             ts = p.getTimeSampling()
-            t = self.time_slider.value() / float(self.fps)
+            t = self.time_slider.value() \
+                    / float(self.state.frames_per_second)
             index = ts.getNearIndex(t, len(p.samples))    
             item = self.samples_tree.topLevelItem(index)
             self.samples_tree.clearSelection()
@@ -927,6 +943,9 @@ class AbcView(QtGui.QMainWindow):
         super(AbcView, self).closeEvent(event)
 
 def main():
+    """
+    Arg parser and application launcher.
+    """
     parser = create_parser()
     args = parser.parse_args()
     app = QtGui.QApplication(sys.argv)
@@ -942,26 +961,34 @@ def main():
     else:
         win.load_settings()
    
-    # fps value
-    win.fps = args.fps
-
     win.show()
     win.raise_()
 
-    # load / import file(s)
+    # load session files
     if len(args.filepath) == 1 and args.filepath[0].endswith(Session.EXT):
-        win.open_session(args.filepath[0])
-    else:
-        for filepath in args.filepath:
-            win.import_file(filepath)
-        if args.filepath:
-            win.viewer.frame()
-    
-    # current frame
-    if args.frame is not None:
-        win.viewer.current_frame = args.frame
+        try:
+            win.open_session(args.filepath[0])
+        except Exception, e:
+            log.error("Error loading %s" % args.filepath[0])
 
-    # execute a python script
+    # load scene files
+    else:
+        try:
+            for filepath in args.filepath:
+                win.import_file(filepath)
+
+            # only frame if actually importing files
+            if args.filepath:
+                win.viewer.frame()
+
+        except Exception, e:
+            log.error("Error loading %s" % filepath)
+    
+    # set current frame
+    if args.frame is not None:
+        win.viewer.state.current_frame = args.frame
+
+    # execute some python
     if args.script:
         win.load_script(args.script)
 
