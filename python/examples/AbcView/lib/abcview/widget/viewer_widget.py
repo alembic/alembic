@@ -97,6 +97,7 @@ def update_camera(func):
         wid.updateGL()
         wid.signal_camera_updated.emit(wid.camera)
         wid.state.signal_state_change.emit()
+        # signal gets disconnected on unsplit
     return with_wrapped_func
 
 def set_ambient_light():
@@ -672,7 +673,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         group2.setLayout(QtGui.QVBoxLayout())
         group2.layout().setSpacing(0)
         group2.layout().setMargin(0)
+
         new_viewer = GLWidget(self._main, state=self.state)
+
         self.camera.add_view(new_viewer)
         group2.layout().addWidget(new_viewer)
 
@@ -714,12 +717,6 @@ class GLWidget(QtOpenGL.QGLWidget):
         # we've reached the top splitter, do nothing
         if splitter is None:
             return
-
-        # disconnect signals
-        try:
-            self.state.signal_state_change.disconnect()
-        except Exception:
-            log.debug("error disconnecting state signal")
 
         splitter.parent().layout().removeWidget(splitter)
         splitter.parent().layout().addWidget(self.parent().other)

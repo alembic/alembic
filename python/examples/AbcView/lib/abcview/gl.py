@@ -197,6 +197,18 @@ class GLCameraMixin(object):
         log.debug("GLCameraMixin.remove_view: %s %s" % (self.name, viewer))
         if viewer in self.views:
             del self.views[viewer]
+        # switch the default viewer for this camera
+        for viewer in self.views:
+            if viewer != self.viewer:
+                self.viewer = viewer
+
+    def _get_viewer(self):
+        return self.__viewer
+
+    def _set_viewer(self, viewer):
+        self.__viewer = viewer
+
+    viewer = property(_get_viewer, _set_viewer)
 
     def get_size(self, viewer):
         """
