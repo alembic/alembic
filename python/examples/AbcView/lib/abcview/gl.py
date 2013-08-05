@@ -509,9 +509,9 @@ class GLScene(abcview.io.Scene):
         self.__archive = None
         self.__scene = None
 
-    def draw(self):
+    def draw(self, visible_only=True):
         try:
-            self.scene.draw()
+            self.scene.draw(visible_only)
         except RuntimeError, e:
             log.error(str(e))
    

@@ -42,7 +42,23 @@ d = {
     "icons": config.ICON_DIR,
 }
 
-MAIN_STYLE = """
+DIALOG = """
+QMessageBox {
+    background: #222;
+}
+QMessageBox * {
+    background: #222;
+    color: #cccdcc;
+}
+QMessageBox QPushButton {
+    width: 50px;
+    height: 20px;
+    background: #444;
+    color: #aaa;
+}
+"""
+
+MAIN = """
 QGroupBox {
     border: 0px;
     margin: 0px;
@@ -140,6 +156,8 @@ QMenuBar::item:selected {
 }
 QMenu {
     background-color: #111;
+    border: 1px solid #454545;
+    border-top: 0px;
     margin: 1px;
 }
 QMenu::item {
@@ -274,19 +292,19 @@ QSlider::handle:horizontal {
     height: 15px;
 }
 QMenu QPushButton {
-    background: #373737;
-    color: #aaa;
+    background: #222;
+    color: #acadac;
     text-align: left;
     border: 0px;
     margin: 0px;
     padding: 4 6 4 20;
 }
 #edit_button {
-    background: #444;
+    background: #222;
     padding: 0px;
 }
 QMenu QPushButton:hover {
-    background: #555;
+    background: #323332;
 }
 """ % d
 

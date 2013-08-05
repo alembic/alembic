@@ -246,6 +246,9 @@ class CameraBase(Base):
 
         # fixed aspect ratio toggle
         self.__fixed = False
+        
+        # draw visible objects only
+        self.__visible = True
 
     def _get_name(self):
         return self.__name
@@ -329,6 +332,17 @@ class CameraBase(Base):
 
     fixed = property(_get_fixed, _set_fixed, doc="draw fixed aspect ratio")
 
+    def _get_visible(self):
+        return self.__visible
+    
+    def _set_visible(self, force=None):
+        if force is not None:
+            self.__visible = force
+        else:
+            self.__visible = not self.__visible
+
+    visible = property(_get_visible, _set_visible, doc="draw visible objects only")
+
 class Camera(CameraBase):
     """
     AbcView API Camera object. Camera attributes are not
@@ -339,7 +353,7 @@ class Camera(CameraBase):
     SERIALIZE = ["translation", "rotation", "scale", "aspect_ratio",
                  "fovx", "fovy", "near", "far", "center", "fixed", "mode",
                  "draw_hud", "draw_grid", "draw_normals", "draw_bounds",
-                 "name", "loaded"]
+                 "name", "loaded", "visible"]
 
     def __init__(self, name, loaded=False):
         """
@@ -400,7 +414,7 @@ class ICamera(CameraBase):
         >>> session.save("scene.io")
     """
     SERIALIZE = ["fixed", "mode", "draw_hud", "draw_grid", "draw_normals", 
-                 "name", "loaded", "draw_bounds"]
+                 "name", "loaded", "draw_bounds", "visible"]
 
     def __init__(self, icamera, loaded=False):
         """

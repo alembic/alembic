@@ -70,6 +70,36 @@ from abcview.widget.time_slider import TimeSlider
 from abcview.widget.tree_widget import *
 from abcview.utils import json
 
+__doc__ = """
+What's new:
+
+- OpenGL viewer
+- Camera support
+- Frame selected object 
+- Toggle visible items
+- Explicit save layout
+- Session management
+- Python API
+
+More information:
+http://docs.alembic.io/python/abcview.html
+"""
+
+"""
+TODO:
+
+- GL picking in viewer
+- highlight object selection in viewer
+- better session cycle checking on load
+- more stats (frame rate, poly count, mem usage)
+- support for lights and materials
+- draggable, pop-out widgets
+- share state between processes / remote viewing
+- save split window layouts
+- support object paths in args, auto-frame on object
+- unit tests
+"""
+
 def make_dirty(func):
     # make abcview session dirty decorator
     @wraps(func)
@@ -90,6 +120,7 @@ def make_clean(func):
 
 def message(info):
     dialog = QtGui.QMessageBox()
+    dialog.setStyleSheet(style.DIALOG)
     dialog.setText(info)
     dialog.exec_()
 
@@ -130,10 +161,10 @@ class AbcMenuBar(QtGui.QMenuBar):
         self.script_menu = QtGui.QMenu("Scripts")
         self.help_menu = QtGui.QMenu("Help")
         
-        self.file_menu.setStyleSheet(style.MAIN_STYLE)
-        self.widget_menu.setStyleSheet(style.MAIN_STYLE)
-        self.script_menu.setStyleSheet(style.MAIN_STYLE)
-        self.help_menu.setStyleSheet(style.MAIN_STYLE)
+        self.file_menu.setStyleSheet(style.MAIN)
+        self.widget_menu.setStyleSheet(style.MAIN)
+        self.script_menu.setStyleSheet(style.MAIN)
+        self.help_menu.setStyleSheet(style.MAIN)
         
         self.setup_file_menu()
         self.setup_wid_menu()
@@ -210,6 +241,7 @@ class AbcMenuBar(QtGui.QMenuBar):
         self.script_menu.addSeparator()
 
         def find_scripts(path):
+            #HACK: need script registration
             if not path:
                 return
             for f in glob(os.path.join(path, "*.py")):
@@ -249,7 +281,8 @@ class AbcMenuBar(QtGui.QMenuBar):
         message("Using Alembic %s" % alembic.Abc.GetLibraryVersionShort())
 
     def handle_about_abcview(self):
-        message("\n".join([(config.__prog__ + " " + config.__version__), __doc__]))
+        _v = " ".join([config.__prog__, config.__version__])
+        message("\n".join([_v, __doc__]))
 
 class FindLineEdit(QtGui.QLineEdit):
     # auto-unfocus line editor
@@ -273,7 +306,7 @@ class AbcView(QtGui.QMainWindow):
         self.setWindowFlags(QtCore.Qt.Window)
         self.setWindowTitle(self.TITLE)
         self.setStyle(QtGui.QStyleFactory.create('cleanlooks'))
-        self.setStyleSheet(style.MAIN_STYLE)
+        self.setStyleSheet(style.MAIN)
         self.setMinimumSize(200, 200)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
@@ -385,7 +418,8 @@ class AbcView(QtGui.QMainWindow):
                 self.array_tree.show_values)
         self.connect(self.find_line_edit, QtCore.SIGNAL("returnPressed ()"), 
                 self.handle_find)
-    
+   
+        # wait for main event loop to start
         QtGui.QApplication.instance().signal_starting_up.connect(self._start)
 
         if filepath and filepath.endswith(Session.EXT):
@@ -397,7 +431,7 @@ class AbcView(QtGui.QMainWindow):
     def _start(self):
         """
         This is the startup callback function for when the QApplication starts its
-        event loop. Mostly, this handles deferred file loading.
+        event loop. This handles deferred file loading.
         """
         # load session files
         if len(self._load_list) == 1 and self._load_list[0].endswith(Session.EXT):
@@ -421,6 +455,9 @@ class AbcView(QtGui.QMainWindow):
 
     @make_clean
     def clear(self):
+        """
+        Clears session and viewer.
+        """
         self.session.clear()
         self.viewer.clear()
         self.objects_tree.clear()
@@ -429,7 +466,13 @@ class AbcView(QtGui.QMainWindow):
         self.array_tree.clear()
 
     def confirm_close(self, message):
+        """
+        Window close confirmation.
+
+        :param message: text to display
+        """
         msg = QtGui.QMessageBox()
+        msg.setStyleSheet(style.DIALOG)
         msg.setText(message);
         msg.setInformativeText("Do you want to save your changes?");
         msg.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel);
@@ -623,9 +666,9 @@ class AbcView(QtGui.QMainWindow):
                 self.viewer.add_camera(_camera)
                 if camera.loaded:
                     self.viewer.set_camera(_camera)
-            else:
-                if len(self.session.cameras) == 0:
-                    self.viewer.frame()
+            #else:
+            #    if len(self.session.cameras) == 0:
+            #        self.viewer.frame()
 
         # restore current frame / fps
         self.viewer.state.frames_per_second = self.session.frames_per_second
@@ -833,14 +876,29 @@ class AbcView(QtGui.QMainWindow):
         load(item)
 
     def handle_item_unloaded(self, item):
+        """
+        Item unloaded handler.
+
+        :param item: ObjectTreeWidgetItem
+        """
         self.viewer.remove_scene(item.object)
 
     def handle_object_clicked(self, item):
+        """
+        Object tree item clicked handler.
+
+        :param item: ObjectTreeWidgetItem
+        """
         self.samples_tree.clear()
         self.array_tree.clear()
         self.properties_tree.show_properties(item)
         
     def handle_property_clicked(self, item):
+        """
+        Property tree item clicked handler.
+
+        :param item: PropertyTreeWidgetItem
+        """
         self.array_tree.clear()
         self.samples_tree.show_samples(item)
 

@@ -36,10 +36,24 @@
 #-******************************************************************************
 
 import os
+from distutils.core import setup
 
-__prog__ = "AbcView"
-__version__ = "1.0.1"
+def get_packages(path):
+    packages = []
+    for (path, dirs, files) in os.walk(path):
+        packages.append(path)
+    return packages
 
-ICON_DIR = os.path.join(os.path.dirname(__file__), "icon")
-SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "script")
-USER_SCRIPT_DIR = os.getenv("ABCVIEW_SCRIPT_PATH")
+setup(
+    name='abcview',
+    version='1.0.1',
+    description='AbcView - A graphical Alembic inspection and visualization tool',
+    author='Ryan Galloway',
+    author_email='ryang@ilm.com',
+    url='http://docs.alembic.io/python/abcview.html',
+    packages=get_packages('lib/abcview'),
+    scripts=['bin/abcview'],
+    package_data = {
+        '': ['*.py', '*.ui', '*.ini', '*.html', '*.css', '*.js', '*.png', '*.gif', '*.ico'],
+    }
+)

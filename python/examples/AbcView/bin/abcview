@@ -40,33 +40,12 @@ abcview [file1 .. fileN] [OPTIONS]
 """
 
 __doc__ = """
-What's new:
+AbcView is a graphical PyQt-based Alembic inspection and visualization 
+tool. It offers a number of widgets to help you inspect and visualize 
+your Alembic data, as well as assemble hierarchical scenes.
 
-- built-in GL viewer
-- support for cameras
-- frame selected object 
-- playback with time slider
-- multiple GL modes + bounds
-- save layout and session
-- console bug fixes
-
-More information:
+More information-
 http://docs.alembic.io/python/abcview.html
-"""
-
-"""
-TODO:
-
-- GL picking in viewer
-- highlight object selection in viewer
-- better session cycle checking on load
-- more stats (frame rate, poly count, mem usage)
-- support for lights and materials
-- draggable, pop-out widgets
-- share state between processes / remote viewing
-- save split window layouts
-- support object paths in args, auto-frame on object
-- unit tests
 """
 
 import os

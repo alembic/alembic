@@ -1029,7 +1029,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # draw scene
             if mode != Mode.OFF:
-                scene.draw()
+                scene.draw(self.camera.visible)
             
             glPopMatrix()
             self.signal_scene_drawn.emit()
@@ -1104,6 +1104,10 @@ class GLWidget(QtOpenGL.QGLWidget):
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_H:
             self.camera._set_draw_hud()
 
+        # alt+v - toggle visibility
+        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_V:
+            self.camera._set_visible()
+
         # shift+| - split vertically
         elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_Bar:
             self.split_vert()
@@ -1142,16 +1146,19 @@ class GLWidget(QtOpenGL.QGLWidget):
             # splits
             layout_menu = QtGui.QMenu("Layout", self)
             self.splitHAct = QtGui.QAction(QtGui.QIcon("%s/split_vert.png" % config.ICON_DIR),
-                                          "Split Vertical (Shift+|)", self)
+                                          "Split Vertical ", self)
+            self.splitHAct.setShortcut("Shift+|")
             self.connect(self.splitHAct, QtCore.SIGNAL("triggered (bool)"), self.split_vert)
             layout_menu.addAction(self.splitHAct)
 
             self.splitVAct = QtGui.QAction(QtGui.QIcon("%s/split_horz.png" % config.ICON_DIR),
-                                          "Split Horizontal (Shift+_)", self)
+                                          "Split Horizontal ", self)
+            self.splitVAct.setShortcut("Shift+_")
             self.connect(self.splitVAct, QtCore.SIGNAL("triggered (bool)"), self.split_horz)
             layout_menu.addAction(self.splitVAct)
             
-            self.closeAct = QtGui.QAction("Close (Alt+-)", self)
+            self.closeAct = QtGui.QAction("Close ", self)
+            self.closeAct.setShortcut("Alt+-")
             self.connect(self.closeAct, QtCore.SIGNAL("triggered (bool)"), self.unsplit)
             layout_menu.addAction(self.closeAct)
             
@@ -1183,49 +1190,70 @@ class GLWidget(QtOpenGL.QGLWidget):
             #self.aframeAct = QtGui.QAction("Autoframe", self)
             #self.aframeAct.setCheckable(True)
             #self.aframeAct.setChecked(self.camera.auto_frame)
-            #self.connect(self.aframeAct, QtCore.SIGNAL("toggled (bool)"), self.camera._set_auto_frame)
+            #self.connect(self.aframeAct, QtCore.SIGNAL("toggled (bool)"), 
+            #        self.camera._set_auto_frame)
             #options_menu.addAction(self.aframeAct)
 
             # bounds toggle menu item
-            self.boundsAct = QtGui.QAction("Bounds (Alt+B)", self)
+            self.boundsAct = QtGui.QAction("Bounds ", self)
+            self.boundsAct.setShortcut("Alt+B")
             self.boundsAct.setCheckable(True)
             self.boundsAct.setChecked(self.camera.draw_bounds)
-            self.connect(self.boundsAct, QtCore.SIGNAL("toggled (bool)"), self.camera._set_draw_bounds)
+            self.connect(self.boundsAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_draw_bounds)
             options_menu.addAction(self.boundsAct)
  
             # fixed aspect ratio toggle menu item
-            self.fixedAct = QtGui.QAction("Fixed Aspect Ratio (Alt+F)", self)
+            self.fixedAct = QtGui.QAction("Fixed Aspect Ratio ", self)
+            self.fixedAct.setShortcut("Alt+F")
             self.fixedAct.setCheckable(True)
             self.fixedAct.setChecked(self.camera.fixed)
-            self.connect(self.fixedAct, QtCore.SIGNAL("toggled (bool)"), self.camera._set_fixed)
+            self.connect(self.fixedAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_fixed)
             options_menu.addAction(self.fixedAct)
 
-            # heads-up-display menu item
-            self.hudAct = QtGui.QAction("HUD (Alt+H)", self)
-            self.hudAct.setCheckable(True)
-            self.hudAct.setChecked(self.camera.draw_hud)
-            self.connect(self.hudAct, QtCore.SIGNAL("toggled (bool)"), self.camera._set_draw_hud)
-            options_menu.addAction(self.hudAct)
-
             # grid toggle menu item
-            self.gridAct = QtGui.QAction("Grid (Alt+G)", self)
+            self.gridAct = QtGui.QAction("Grid ", self)
+            self.gridAct.setShortcut("Alt+G")
             self.gridAct.setCheckable(True)
             self.gridAct.setChecked(self.camera.draw_grid)
-            self.connect(self.gridAct, QtCore.SIGNAL("toggled (bool)"), self.camera._set_draw_grid)
+            self.connect(self.gridAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_draw_grid)
             options_menu.addAction(self.gridAct)
-          
+
+            # heads-up-display menu item
+            self.hudAct = QtGui.QAction("Heads-Up-Display ", self)
+            self.hudAct.setShortcut("Alt+H")
+            self.hudAct.setCheckable(True)
+            self.hudAct.setChecked(self.camera.draw_hud)
+            self.connect(self.hudAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_draw_hud)
+            options_menu.addAction(self.hudAct)
+
             # normals toggle menu item
-            self.normalsAct = QtGui.QAction("Normals (Alt+N)", self)
+            self.normalsAct = QtGui.QAction("Normals ", self)
+            self.normalsAct.setShortcut("Alt+N")
             self.normalsAct.setCheckable(True)
             self.normalsAct.setChecked(self.camera.draw_normals)
-            self.connect(self.normalsAct, QtCore.SIGNAL("toggled (bool)"), self.camera._set_draw_normals)
+            self.connect(self.normalsAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_draw_normals)
             options_menu.addAction(self.normalsAct)
+
+            # visibility toggle menu item
+            self.visibleAct = QtGui.QAction("Visible Only ", self)
+            self.visibleAct.setShortcut("Alt+V")
+            self.visibleAct.setCheckable(True)
+            self.visibleAct.setChecked(self.camera.visible)
+            self.connect(self.visibleAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_visible)
+            options_menu.addAction(self.visibleAct)
 
             # shading toggle menu item
             self.shading_menu = QtGui.QMenu("Shading", self)
             shading_group = QtGui.QActionGroup(self.shading_menu)
 
-            self.offAct = QtGui.QAction("Off (0)", self)
+            self.offAct = QtGui.QAction("Off", self)
+            self.offAct.setShortcut("0")
             self.offAct.setCheckable(True)
             self.offAct.setActionGroup(shading_group)
             self.offAct.setData(Mode.OFF)
@@ -1233,7 +1261,8 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.offAct.toggled.connect(self.handle_set_mode)
             self.shading_menu.addAction(self.offAct)
 
-            self.fillAct = QtGui.QAction("Fill (1)", self)
+            self.fillAct = QtGui.QAction("Fill", self)
+            self.fillAct.setShortcut("1")
             self.fillAct.setCheckable(True)
             self.fillAct.setActionGroup(shading_group)
             self.fillAct.setData(Mode.FILL)
@@ -1241,7 +1270,8 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.fillAct.toggled.connect(self.handle_set_mode)
             self.shading_menu.addAction(self.fillAct)
             
-            self.lineAct = QtGui.QAction("Line (2)", self)
+            self.lineAct = QtGui.QAction("Line", self)
+            self.lineAct.setShortcut("2")
             self.lineAct.setCheckable(True)
             self.lineAct.setActionGroup(shading_group)
             self.lineAct.setData(Mode.LINE)
@@ -1249,7 +1279,8 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.lineAct.toggled.connect(self.handle_set_mode)
             self.shading_menu.addAction(self.lineAct)
 
-            self.pointAct = QtGui.QAction("Point (3)", self)
+            self.pointAct = QtGui.QAction("Point ", self)
+            self.pointAct.setShortcut("3")
             self.pointAct.setCheckable(True)
             self.pointAct.setActionGroup(shading_group)
             self.pointAct.setData(Mode.POINT)
