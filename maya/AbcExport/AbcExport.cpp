@@ -263,7 +263,7 @@ try
         std::set <double> shutterSamples;
         bool sampleGeo  = true; // whether or not to subsample geometry
         std::string fileName;
-        bool asOgawa = false;
+        bool asOgawa = true;
 
         unsigned int numJobArgs = jobArgsArray.length();
         for (unsigned int i = 0; i < numJobArgs; ++i)
