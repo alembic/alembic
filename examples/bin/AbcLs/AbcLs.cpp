@@ -74,6 +74,48 @@ bool is_digit( const std::string& s )
 }
 
 //-*****************************************************************************
+void  printTimeSampling( AbcA::TimeSamplingPtr iTime, index_t iMaxSample,
+                         double fps )
+{
+    AbcA::TimeSamplingType timeType = iTime->getTimeSamplingType();
+    if ( timeType.isUniform() ) {
+        std::cout  << "Uniform Sampling. Start time: " <<
+            iTime->getStoredTimes()[0] * fps << " Time per cycle: " <<
+            timeType.getTimePerCycle() * fps << std::endl;
+    }
+    else if ( timeType.isCyclic() ) {
+        std::cout << "Cyclic Sampling. Time per cycle:" <<
+            timeType.getTimePerCycle() * fps << std::endl;
+
+        const std::vector < double > & storedTimes = iTime->getStoredTimes();
+        std::size_t numTimes = iTime->getNumStoredTimes();
+        std::cout << "Start cycle times: ";
+        for (std::size_t i = 0; i < numTimes; ++i ) {
+            if (i != 0) {
+                std::cout << ", ";
+            }
+            std::cout << storedTimes[i] * fps;
+        }
+        std:: cout << std::endl;
+    }
+    else {
+        std::cout << "Acyclic Sampling." << std::endl;
+        const std::vector < double > & storedTimes = iTime->getStoredTimes();
+        std::size_t numTimes = iTime->getNumStoredTimes();
+
+        for (std::size_t i = 0; i < numTimes; ++i ) {
+            if (i != 0) {
+                std::cout << ", ";
+            }
+            std::cout << storedTimes[i] * fps;
+        }
+        std:: cout << std::endl;
+    }
+
+    std::cout << "Max Num Samples: " << iMaxSample << std::endl;
+}
+
+//-*****************************************************************************
 void printParent( Abc::ICompoundProperty iProp,
                   bool all = false,
                   bool long_list = false,
@@ -247,11 +289,11 @@ void getArrayValue( Abc::IArrayProperty &p, Abc::PropertyHeader &header,
 
     Abc::ArraySamplePtr ptr;
     p.get( ptr, iSS );
-    size_t numPoints = ptr->getDimensions().numPoints();
+    size_t totalValues = ptr->getDimensions().numPoints() * extent;
     TYPE *vals = (TYPE*)(ptr->getData());
-    for ( size_t i=0; i<numPoints; ++i ) {
+    for ( size_t i=0; i<totalValues; ++i ) {
         std::cout << vals[i];
-        if ( i > 0 && i % extent == 0 )
+        if ( i > 0 && (i + 1) % extent == 0 )
             std::cout << std::endl;
         else
             std::cout << ", ";
@@ -266,7 +308,7 @@ case TPTraits::pod_enum:                                         \
 
 //-*****************************************************************************
 void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
-                 int index = 0 )
+                 int index, bool justSize, bool printTime, double fps )
 {
     Abc::ISampleSelector iss( (index_t) index );
     Abc::DataType dt = header.getDataType();
@@ -275,6 +317,19 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 
     if ( header.isArray() ) {
         Abc::IArrayProperty p( iParent, header.getName() );
+
+        if ( printTime ) {
+            std::cout << "Time: " <<
+                p.getTimeSampling()->getSampleTime( index ) * fps << std::endl;
+        }
+
+        if ( justSize ) {
+            AbcU::Dimensions dims;
+            p.getDimensions( dims, iss );
+            std::cout << "Extent: " << (int) extent << " Num points: " <<
+                dims.numPoints() << std::endl;
+            return;
+        }
 
         switch ( pod )
         {
@@ -294,8 +349,18 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
                 std::cout << "Unknown property type" << std::endl;
                 break;
         }
-    } else {
+    } else if ( header.isScalar() ) {
         Abc::IScalarProperty p( iParent, header.getName() );
+
+        if ( printTime ) {
+            std::cout << "Time: " <<
+                p.getTimeSampling()->getSampleTime( index ) * fps << std::endl;
+        }
+
+        if ( justSize ) {
+            std::cout << "Extent: " << (int) extent << std::endl;
+            return;
+        }
 
         if ( extent == 1 ) {
             switch ( pod )
@@ -576,14 +641,18 @@ int main( int argc, char *argv[] )
     bool opt_long = false; // long listing option
     bool opt_meta = false; // metadata option
     bool opt_recursive = false; // recursive option
+    bool opt_size = false; // array sample size option
+    bool opt_time = false; // time info option
     int index = -1; // sample number, at tail of path
     std::string desc( "abcls [OPTION] FILE[/NAME] \n"
     "  -a          include property listings\n"
-    //"  --fps[=FPS] show values in frames per second\n"
+    "  -f          show time sampling as 24 fps\n"
     "  -h, --help  show this help message\n"
     "  -l          long listing format\n"
     "  -m          show archive metadata\n"
     "  -r          list entries recursively\n"
+    "  -s          show the size of a data property sample\n"
+    "  -t          show time sampling information\n"
     );
 
     // check for min args
@@ -615,10 +684,17 @@ int main( int argc, char *argv[] )
     };
 
     // set some flags
+    double fps = 1.0;
     opt_all = optionExists( options, "a" );
     opt_long = optionExists( options, "l" );
     opt_meta = optionExists( options, "m" );
     opt_recursive = optionExists( options, "r" );
+    opt_size = optionExists( options, "s" );
+    opt_time = optionExists( options, "t" );
+    if ( optionExists( options, "f" ) ) {
+        fps = 24.0;
+        opt_time = true;
+    }
 
     // open each file
     for ( std::size_t i = 0; i < files.size(); i++ ) {
@@ -697,6 +773,20 @@ int main( int argc, char *argv[] )
             std::cout << "  core type : " << coreName << std::endl;
         };
 
+        if ( opt_time && seglist.size() == 0 ) {
+            uint32_t numTimes = archive.getNumTimeSamplings();
+            std::cout << std::endl << "Time Samplings: " << std::endl;
+            for ( uint32_t k = 0; k < numTimes; ++k ) {
+                AbcA::TimeSamplingPtr ts = archive.getTimeSampling( k );
+                index_t maxSample =
+                    archive.getMaxNumSamplesForTimeSamplingIndex( k );
+                std::cout << k << " ";
+                printTimeSampling( ts, maxSample, fps );
+            }
+            std::cout << std::endl;
+
+        }
+
         // walk object hierarchy and find valid objects
         AbcG::IObject test = archive.getTop();
         AbcG::IObject iObj = test;
@@ -732,7 +822,7 @@ int main( int argc, char *argv[] )
 
         // do stuff
         if ( index >= 0 ) {
-            printValue( props, *header, index );
+            printValue( props, *header, index, opt_size, opt_time, fps );
         } else {
             if ( found && header->isCompound() )
                 visit( props, opt_all, opt_long, opt_meta, opt_recursive, true );
