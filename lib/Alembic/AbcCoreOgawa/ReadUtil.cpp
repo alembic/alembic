@@ -1495,7 +1495,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
     std::size_t pos = 0;
     while ( pos < buf.size() )
     {
-        Util::uint32_t nameSize = *( (uint32_t *)( &buf[pos] ) );
+        Util::uint32_t nameSize = *( (Util::uint32_t *)( &buf[pos] ) );
         pos += 4;
 
         std::string name( &buf[pos], nameSize );
