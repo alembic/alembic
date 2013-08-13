@@ -54,7 +54,7 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 
 //-*****************************************************************************
-//! From Prman Application Note #22
+//! From Prman Application Note #22 (and Prman Application Note #19)
 //! For every geometric prim, there is 1 value for "constant" geometry scope.
 //! To save space in my little table here, I'll leave out the "constant" column
 //! but just imagine it with a big happy column of '1's.
@@ -85,9 +85,8 @@ namespace ALEMBIC_VERSION_NS {
 //!                    |                 |  (vsegs+vnowrap) |                  |
 //! NuPatch            | (nu-uorder+1)*  | (nu-uorder+2)*   | nu*nv            |
 //!                    |   (nv-vorder+1) |  (nv-vorder+2)   |                  |
-//! Curves linear      | sum(nsegs_i     | sum(nvertices_i) | sum(nvertices_i) |
-//!                    |     -nowrap)    |                  |                  |
-//! Curves cubic       | sum(nsegs_i)    | sum(nsegs_i      | sum(nvertices_i) |
+//! Curves linear      | ncurves         | sum(nvertices_i) | sum(nvertices_i) |
+//! Curves cubic       | ncurves         | sum(nsegs_i      | sum(nvertices_i) |
 //!                    |                 |     +nowrap)     |                  |
 //! Blobby             |  1              | nleaf            | nleaf            |
 //!-----------------------------------------------------------------------------
