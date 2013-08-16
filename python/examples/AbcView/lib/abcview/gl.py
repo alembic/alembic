@@ -36,6 +36,7 @@
 
 import os
 import sys
+from functools import wraps
 
 import imath
 import alembic
@@ -55,6 +56,7 @@ except ImportError:
 
 import abcview
 from abcview import log
+from abcview.io import Mode
 
 __doc__ = """
 When loading a Session object into the AbcView GUI, the IO objects are
@@ -69,6 +71,17 @@ __all__ = ["GLCamera", "GLICamera", "GLScene", ]
 ARCHIVES = {}
 SCENES = {}
 
+def require_loaded(func):
+    """
+    Load decorator
+    """
+    @wraps(func)
+    def with_wrapped_func(*args, **kwargs):
+        klass = args[0]
+        klass.load(func.__name__)
+        return func(*args, **kwargs)
+    return with_wrapped_func
+
 class IArchive(alembic.Abc.IArchive):
     """
     Alembic::IArchive wrapper class that sets some default values.
@@ -82,18 +95,70 @@ class IArchive(alembic.Abc.IArchive):
     def __repr__(self):
         return "<IArchive %s>" % self.uid()
 
+    def bounds(self, index=0):
+        limit = 2
+        
+        def walk(obj, l=0):
+            if l > limit:
+                return
+            if alembic.AbcGeom.IXform.matches(obj.getMetaData()):
+                x = alembic.AbcGeom.IXform(obj.getParent(), obj.getName())
+                xs = x.getSchema()
+                cp = xs.getChildBoundsProperty()
+                if cp.valid():
+                    return cp.getValue(index)
+
+            for i in range(obj.getNumChildren()):
+                return walk(obj.getChild(i), l+1)
+            return None
+        return walk(self.getTop())
+
 class SceneWrapper(alembicgl.SceneWrapper):
     """
     AbcOpenGL::SceneWrapper wrapper class that sets some default values.
     """
     def __init__(self, filepath):
-        super(SceneWrapper, self).__init__(str(filepath))
+        self.filepath = str(filepath)
+        self.loaded = False
+
+    def load(self, func_name="load"):
+        """
+        Defers actually loading the scene until necessary.
+        """
+        if not self.loaded:
+            log.debug("[%s] reading %s" % (func_name, self.filepath))
+            super(SceneWrapper, self).__init__(self.filepath)
+            self.loaded = True
 
     def uid(self):
         return id(self)
 
     def __repr__(self):
         return "<SceneWrapper %s>" % self.uid()
+
+    @require_loaded
+    def draw(self, visible_only=True, bounds_only=False):
+        super(SceneWrapper, self).draw(visible_only, bounds_only)
+
+    @require_loaded
+    def draw_bounds(self):
+        super(SceneWrapper, self).drawBounds()
+
+    @require_loaded
+    def get_time(self):
+        return self.scene.getCurrentTime()
+
+    @require_loaded
+    def set_time(self, value):
+        self.setTime(value)
+
+    @require_loaded
+    def min_time(self):
+        return self.getMinTime()
+
+    @require_loaded
+    def max_time(self):
+        return self.getMaxTime()
 
 class AbcGLCamera(alembicgl.GLCamera):
     """
@@ -115,6 +180,7 @@ def get_archive(filepath):
     caches alembic archives
     """
     if filepath not in ARCHIVES:
+        log.debug("[get_archive] %s" % filepath)
         ARCHIVES[filepath] = IArchive(str(filepath))
     return ARCHIVES[filepath]
 
@@ -174,15 +240,13 @@ class GLCameraMixin(object):
 
     def resize(self):
         for view, camera in self.views.items():
-            log.debug("GLCameraMixin.resize: %s %s %d %d" 
-                    % (view, camera, view.width(), view.height()))
             camera.setSize(view.width(), view.height())
 
     def add_view(self, viewer):
         """
         Adds a new view for this camera.
         """
-        log.debug("GLCameraMixin.add_view: %s %s" % (self.name, viewer))
+        log.debug("[GLCameraMixin.add_view] %s %s" % (self.name, viewer))
         self.views[viewer] = AbcGLCamera(self)
         self.views[viewer].setTranslation(self._translation)
         self.views[viewer].setRotation(self._rotation)
@@ -194,7 +258,7 @@ class GLCameraMixin(object):
         """
         Removes a view (glcamera) from this camera.
         """
-        log.debug("GLCameraMixin.remove_view: %s %s" % (self.name, viewer))
+        log.debug("[GLCameraMixin.remove_view] %s %s" % (self.name, viewer))
         if viewer in self.views:
             del self.views[viewer]
         # switch the default viewer for this camera
@@ -286,7 +350,6 @@ class GLCamera(abcview.io.Camera, GLCameraMixin):
         return self.views[self.viewer].translation()
 
     def _set_translation(self, value):
-        log.debug("GLCamera._set_translation %s %s" % (self, value))
         if type(value) in (list, tuple):
             value = imath.V3d(*value)
         self._translation = value
@@ -300,7 +363,6 @@ class GLCamera(abcview.io.Camera, GLCameraMixin):
         return self.views[self.viewer].rotation()
 
     def _set_rotation(self, value):
-        log.debug("GLCamera._set_rotation %s %s" % (self, value))
         if type(value) in (list, tuple):
             value = imath.V3d(*value)
         self._rotation = value
@@ -314,7 +376,6 @@ class GLCamera(abcview.io.Camera, GLCameraMixin):
         return self.views[self.viewer].scale()
 
     def _set_scale(self, value):
-        log.debug("GLCamera._set_scale %s %s" % (self, value))
         if type(value) in (list, tuple):
             value = imath.V3d(*value)
         self._scale = value
@@ -497,10 +558,10 @@ class GLScene(abcview.io.Scene):
         return self.width() / float(self.height())
 
     def load(self):
+        # by accessing the archive/min/max time we load the scene
         name = self.archive.getName()
         min = self.min_time()
         max = self.max_time()
-        log.debug("GLScene.load: %s (min: %s, max %s)" % (name, min, max))
         self.loaded = True
         self.visible = True
 
@@ -509,26 +570,48 @@ class GLScene(abcview.io.Scene):
         self.__archive = None
         self.__scene = None
 
-    def draw(self, visible_only=True):
+    def draw(self, visible_only=True, bounds_only=False):
         try:
-            self.scene.draw(visible_only)
+            self.scene.draw(visible_only, bounds_only)
         except RuntimeError, e:
             log.error(str(e))
-   
-    def set_time(self, new_time):
-        self.scene.setTime(new_time)
+    
+    def draw_bounds(self):
+        """
+        Draw scene bounding boxes.
+        """
+        # try to get bounds from archive first
+        bounds = self.archive.bounds()
+        
+        if bounds is not None:
+            glPushName(0)
+            alembicgl.drawBounds(bounds)
+            glPopName()
+        else:
+            try:
+                self.scene.draw_bounds()
+            except RuntimeError, e:
+                log.error(str(e))
+
+    def selection(self, x, y, camera):
+        return self.scene.selection(x, y, camera)
+
+    def set_time(self, value):
+        if self.visible and self.mode != Mode.OFF:
+            self.scene.set_time(value)
    
     def get_time(self):
-        return self.scene.getCurrentTime()
+        return self.scene.get_time()
    
     def play_forward(self, fps=24):
-        self.scene.playForward(fps)
+        if self.visible:
+            self.scene.playForward(fps)
    
     def min_time(self):
-        return self.scene.getMinTime()
+        return self.scene.min_time()
    
     def max_time(self):
-        return self.scene.getMaxTime()
+        return self.scene.max_time()
    
     def bounds(self):
         return self.scene.bounds()

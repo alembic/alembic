@@ -159,6 +159,8 @@ class TimeSlider(QtGui.QGroupBox):
     signal_play_fwd = QtCore.pyqtSignal()
     signal_play_stop = QtCore.pyqtSignal()
     signal_frame_changed = QtCore.pyqtSignal(int)
+    signal_first_frame_changed = QtCore.pyqtSignal(int)
+    signal_last_frame_changed = QtCore.pyqtSignal(int)
 
     def __init__(self, parent):
         super(TimeSlider, self).__init__(parent)
@@ -187,12 +189,20 @@ class TimeSlider(QtGui.QGroupBox):
         self.stop_button.hide()
 
         # labels
-        self.first_frame_label = QtGui.QLabel()
+        validator = QtGui.QIntValidator(self)
+        self.first_frame_label = QtGui.QLineEdit()
         self.first_frame_label.setFixedSize(40, 20)
+        self.first_frame_label.setMaxLength(4)
+        self.first_frame_label.setValidator(validator)
         self.first_frame_label.setAlignment(QtCore.Qt.AlignHCenter)
-        self.last_frame_label = QtGui.QLabel()
+        self.last_frame_label = QtGui.QLineEdit()
         self.last_frame_label.setFixedSize(40, 20)
+        self.last_frame_label.setMaxLength(4)
+        self.last_frame_label.setValidator(validator)
         self.last_frame_label.setAlignment(QtCore.Qt.AlignHCenter)
+
+        self.first_frame_label.editingFinished.connect(self.handle_first_frame_changed)
+        self.last_frame_label.editingFinished.connect(self.handle_last_frame_changed)
 
         self.layout().addWidget(self.first_frame_label)
         self.layout().addWidget(self.slider)
@@ -204,10 +214,18 @@ class TimeSlider(QtGui.QGroupBox):
         self.set_maximum(0)
 
     def set_minimum(self, value):
+        """
+        Sets the minimum frame value.
+        """
+        self.__minimum = value
         self.slider.setMinimum(value)
         self.first_frame_label.setText(str(int(value)))
 
     def set_maximum(self, value):
+        """
+        Sets the maximum frame value.
+        """
+        self.__maximum = value
         self.slider.setMaximum(value)
         self.last_frame_label.setText(str(int(value)))
 
@@ -235,6 +253,22 @@ class TimeSlider(QtGui.QGroupBox):
 
     def handle_frame_change(self, value):
         self.signal_frame_changed.emit(value)
+
+    def handle_first_frame_changed(self):
+        value, ok = self.first_frame_label.text().toInt()
+        if value <= self.__maximum:
+            self.set_minimum(value)
+            self.signal_first_frame_changed.emit(int(value))
+        else:
+            self.set_minimum(self.__maximum)
+
+    def handle_last_frame_changed(self):
+        value, ok = self.last_frame_label.text().toInt()
+        if value >= self.__minimum:
+            self.set_maximum(int(value))
+            self.signal_last_frame_changed.emit(int(value))
+        else:
+            self.set_maximum(self.__minimum)
 
     def handle_stop(self):
         self.playing = False

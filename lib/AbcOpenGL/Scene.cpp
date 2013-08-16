@@ -35,10 +35,15 @@
 //-*****************************************************************************
 
 #include "Scene.h"
+#include "GLCamera.h"
 #include "IObjectDrw.h"
+#include "MeshDrwHelper.h"
 
 namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
+    
+// global object index for GL picking
+std::vector<std::string> OBJECT_MAP;
 
 //-*****************************************************************************
 void setMaterials( float o, bool negMatrix = false )
@@ -160,13 +165,96 @@ void Scene::setTime( chrono_t iSeconds )
 }
 
 //-*****************************************************************************
-void Scene::draw( SceneState &s_state, bool visibleOnly )
+int Scene::processHits( GLint hits, GLuint buffer[] )
+{
+    unsigned int i, j;
+    GLuint names, *ptr, minZ, *ptrNames, index;
+
+    ptr = (GLuint *) buffer;
+    minZ = 0xffffffff;
+    for ( i=0; i<hits; i++ ) {
+        names = *ptr;
+        ptr++;
+        if ( *ptr < minZ ) {
+            index = names;
+            minZ = *ptr;
+            ptrNames = ptr+2;
+        }
+        ptr += names+2;
+    }
+
+    std::cout << "names " << names << std::endl;
+
+    ptr = ptrNames;
+    for (j = 0; j < index; j++,ptr++) {
+        std::cout << *ptr ;
+    }
+
+    return index;
+}
+
+//-*****************************************************************************
+std::string Scene::selection( int x, int y, GLCamera &camera, SceneState &s_state )
+{
+    const int MaxSize = 512;
+    GLuint buffer[MaxSize];
+    GLint viewport[4];
+
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    glSelectBuffer(MaxSize, buffer);
+
+    // enter select mode
+    glRenderMode(GL_SELECT);
+    glInitNames();
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluPickMatrix((GLdouble)x,
+                  (GLdouble)(viewport[3] - y),
+                  5.0, 5.0, viewport);
+
+    GLfloat ratio = (GLfloat)camera.width() / camera.height();
+    gluPerspective(camera.fovy(), ratio, 0.1f, 1000);
+
+    // draw the scene
+    draw(s_state, true);
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    // finally release the rendering context again
+    int hits = glRenderMode(GL_RENDER);
+
+    //std::cout << "hits " << hits
+    //          << " buffer[3] " << buffer[3]
+    //          << " processHits " << processHits( hits, buffer )
+    //          << std::endl;
+
+    if ( hits == 0 ) {
+        return "";
+    } else {
+        return OBJECT_MAP[ buffer[3]-1 ];
+    }
+
+}
+
+//-*****************************************************************************
+void Scene::drawBounds( SceneState &s_state )
+{
+    drawBoundingBox( m_drawable->getBounds() );
+}
+
+//-*****************************************************************************
+void Scene::draw( SceneState &s_state, bool visibleOnly, bool boundsOnly )
 {
     ABCA_ASSERT( m_archive && m_topObject &&
                  m_drawable && m_drawable->valid(),
                  "Invalid Scene: " << m_fileName );
 
     glEnable( GL_LIGHTING );
+    
+    // clear the object index for GL picking
+    OBJECT_MAP.clear();
 
     // Get the matrix
     M44d currentMatrix;
@@ -176,6 +264,7 @@ void Scene::draw( SceneState &s_state, bool visibleOnly )
     dctx.setWorldToCamera( currentMatrix );
     dctx.setPointSize( s_state.pointSize );
     dctx.setVisibleOnly( visibleOnly );
+    dctx.setBoundsOnly( boundsOnly );
 
     m_drawable->draw( dctx );
 

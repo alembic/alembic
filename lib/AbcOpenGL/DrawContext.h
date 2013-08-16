@@ -51,6 +51,7 @@ public:
         m_worldToCamera.makeIdentity();
         m_pointSize = 3.0f;
         m_visibleOnly = false;
+        m_boundsOnly = false;
     }
 
     // Default copy & assign.
@@ -63,14 +64,19 @@ public:
     float getPointSize() const { return m_pointSize; }
     void setPointSize( float iPs ) { m_pointSize = iPs; }
 
-    // Get/Set visibility toggle
-    bool getVisibleOnly() const { return m_visibleOnly; }
+    // Get/Set visibility toggle - don't draw objs w/ visible=0
+    bool visibleOnly() const { return m_visibleOnly; }
     void setVisibleOnly( bool visibleOnly ) { m_visibleOnly = visibleOnly; }
+
+    // Get/Set draw bounds toggle - draw object bounds only
+    bool boundsOnly() const { return m_boundsOnly; }
+    void setBoundsOnly( bool boundsOnly ) { m_boundsOnly = boundsOnly; }
 
 protected:
     M44d m_worldToCamera;
     float m_pointSize;
     bool m_visibleOnly;
+    bool m_boundsOnly;
 };
 
 } // End namespace ABCOPENGL_VERSION_NS

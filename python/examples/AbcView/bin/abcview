@@ -100,6 +100,10 @@ def create_parser():
             help='File to open.')
     parser.add_argument('-f', '--frame', default=None, type=int,
             help='Frame to load in viewer.')
+    parser.add_argument('--first', default=None, type=int,
+            help='Set viewer first frame value.')
+    parser.add_argument('--last', default=None, type=int,
+            help='Set viewer last frame value.')
     parser.add_argument('--reset', action='store_true',
             help='Reset settings.')
     parser.add_argument('--verbose', action='store_true',
@@ -118,7 +122,7 @@ def main():
 
     # create application and widget
     app = App(sys.argv)
-    win = AbcView()
+    win = AbcView(first_frame=args.first, last_frame=args.last)
     
     # verbosity
     if args.verbose:
@@ -137,7 +141,7 @@ def main():
     # defer file loading until event loop starts
     win.set_load_list(args.filepath)
 
-    # set current frame
+    # set frame range
     if args.frame is not None:
         win.viewer.state.current_frame = args.frame
 

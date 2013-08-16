@@ -147,7 +147,10 @@ void ISubDDrw::draw( const DrawContext &iCtx )
         return;
     }
 
-    m_drwHelper.draw( iCtx );
+    if ( iCtx.boundsOnly() )
+        m_drwHelper.drawBounds( iCtx );
+    else
+        m_drwHelper.draw( iCtx );
 
     IObjectDrw::draw( iCtx );
 }

@@ -162,7 +162,7 @@ class Scene(FileBase):
     EXT = "abc"
     def __init__(self, filepath=None):
         super(Scene, self).__init__(filepath)
-        self.filepath = filepath
+        self.filepath = os.path.abspath(filepath)
        
     def __repr__(self):
         return "<%s \"%s\">" % (self.type(), self.name)
@@ -194,7 +194,7 @@ class Scene(FileBase):
     scale = property(_get_scale, _set_scale, doc="scale property")
 
     def _get_mode(self):
-        return self.properties.get("mode", Mode.LINE)
+        return self.properties.get("mode", -1)
 
     def _set_mode(self, value):
         self.properties["mode"] = value
@@ -202,7 +202,7 @@ class Scene(FileBase):
     mode = property(_get_mode, _set_mode, doc="GL polygon mode property")
 
     def _get_color(self):
-        return self.properties.get("color", (1, 0, 0))
+        return self.properties.get("color", (0.5, 0.5, 0.5))
 
     def _set_color(self, value):
         self.properties["color"] = value
@@ -608,7 +608,7 @@ class Session(FileBase):
         """
         :param: GLCamera
         """
-        log.debug("Session.add_camera: %s" % camera)
+        log.debug("[%s.add_camera] %s" % (self, camera))
         if camera.name not in self.__cameras:
             self.__cameras[camera.name] = camera
 
@@ -616,7 +616,7 @@ class Session(FileBase):
         """
         :param: GLCamera
         """
-        log.debug("Session.remove_camera: %s" % camera)
+        log.debug("[%s.remove_camera] %s" % (self, camera))
         if camera.name in self.__cameras:
             del self.__cameras[camera.name]
 
@@ -626,7 +626,7 @@ class Session(FileBase):
 
         :param: GLCamera
         """
-        log.debug("Session.set_camera: %s" % camera)
+        log.debug("[%s.set_camera] %s" % (self, camera))
         if camera.name not in self.__cameras:
             self.__cameras[camera.name] = camera
         for name, cam in self.__cameras.items():
@@ -670,6 +670,8 @@ class Session(FileBase):
         self.program = config.__prog__
         self.properties = {}
         self.date = time.time()
+        self.min_time = 0
+        self.max_time = 0
         self.current_time = 0
         self.frames_per_second = 24.0
         
@@ -699,8 +701,9 @@ class Session(FileBase):
         self.properties = state.get("properties")
         self.frames_per_second = state.get("frames_per_second", 
                            self.frames_per_second)
-        self.current_time = state.get("current_time", 
-                           self.current_time)
+        self.min_time = state.get("min_time", self.min_time)
+        self.max_time = state.get("max_time", self.max_time)
+        self.current_time = state.get("current_time", self.current_time)
 
         # cameras
         for camera in state.get("cameras"):
@@ -730,7 +733,7 @@ class Session(FileBase):
         elif not filepath.endswith(self.EXT):
             filepath += self.EXT
         self.date = time.time()
-        log.debug("saving: %s" % filepath)
+        log.debug("[%s.save] %s" % (self, filepath))
         state = {
             "app": {
                 "program": self.program,
@@ -743,6 +746,8 @@ class Session(FileBase):
                 "platform": sys.platform,
             },
             "date": self.date,
+            "min_time": self.min_time,
+            "max_time": self.max_time,
             "current_time": self.current_time,
             "frames_per_second": self.frames_per_second,
             "properties": self.properties,

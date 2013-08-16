@@ -58,6 +58,21 @@ QMessageBox QPushButton {
 }
 """
 
+SPLASH = """
+* {
+    background: #000;
+    color: #05CCB8;
+}
+QProgressBar {
+    border: 1px solid #222;
+    border-radius: 0px;
+}
+QProgressBar::chunk {
+    background-color: #05CCB8;
+    width: 25px;
+}
+"""
+
 MAIN = """
 QGroupBox {
     border: 0px;
@@ -280,6 +295,14 @@ QSlider::handle:horizontal {
 #time_slider QLabel {
     margin-top: 2px;
     color: #888;
+}
+#time_slider QLineEdit {
+    border: 0px;
+    background: #373737;
+    color: #3e6;
+}
+#time_slider QLineEdit:hover {
+    background: #665537;
 }
 #time_slider #play_button {
     background: url(%(icons)s/play.png) center no-repeat;

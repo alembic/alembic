@@ -56,8 +56,9 @@ import alembic
 from abcview import style, config
 
 # logging handler, imported by most other modules
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT)
 log = logging.getLogger(config.__prog__)
-log.addHandler(logging.StreamHandler())
 log.setLevel(int(os.environ.get('ABCVIEW_LOG_LEVEL', logging.WARN)))
 
 import abcview
@@ -297,10 +298,57 @@ class FindLineEdit(QtGui.QLineEdit):
         self._parent.setFocus()
         super(FindLineEdit, self).leaveEvent(event)
 
+class Splash(QtGui.QSplashScreen):
+    """
+    AbcView splash screen.
+    """
+    def __init__(self, parent):
+        super(Splash, self).__init__(parent)
+        self._parent = parent
+        self.setStyleSheet(style.SPLASH)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+
+        # logo
+        self.logo = QtGui.QLabel()
+        self.logo.setPixmap(QtGui.QPixmap("%s/logo.png" % config.ICON_DIR))
+       
+        self.resize(600, 350)
+        self.move(0, 0) 
+
+        # layout
+        layout = QtGui.QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setMargin(0)
+        layout.addWidget(self.logo)
+        self.text = QtGui.QLineEdit()
+        self.progress = QtGui.QProgressBar()
+        self.progress.setMaximum(100)
+        self.progress.setMinimum(0)
+        self.progress.setValue(0)
+        self.progress.setTextVisible(False)
+        layout.addWidget(self.progress)
+        layout.addWidget(self.text)
+        self.setLayout(layout)
+
+    def updateProgress(self, value):
+        self.progress.setValue(value)
+
+    def setMessage(self, message):
+        self.text.setText(message)
+
 ## MAIN -----------------------------------------------------------------------
 class AbcView(QtGui.QMainWindow):
     TITLE = " ".join([config.__prog__, config.__version__])
-    def __init__(self, filepath=None):
+    def __init__(self, filepath=None, first_frame=None, last_frame=None):
+        """
+        Creates an instance of the AbcView Main Window.
+
+        :param filepath: file to load (.io or .abc)
+        :param first_frame: set default first frame value, if None then
+               derive the first frame from filepath
+        :param last_frame: set default last frame value, if None then
+               derive the first frame from filepath
+        """
         QtGui.QMainWindow.__init__(self)
         self.setWindowState(QtCore.Qt.WindowActive)
         self.setWindowFlags(QtCore.Qt.Window)
@@ -312,6 +360,10 @@ class AbcView(QtGui.QMainWindow):
 
         # deferred load list
         self._load_list = []
+
+        # setting these should trigger updates
+        self.first_frame = first_frame
+        self.last_frame = last_frame
 
         # session data
         self.settings = QtCore.QSettings("Alembic", 
@@ -370,6 +422,7 @@ class AbcView(QtGui.QMainWindow):
         self.viewer.state.signal_current_frame.connect(self.handle_update_frame)
         self.viewer.state.signal_play_fwd.connect(self.handle_state_play_fwd)
         self.viewer.state.signal_play_stop.connect(self.handle_state_play_stop)
+        self.viewer.signal_object_selected.connect(self.handle_object_selected)
         
         # time slider
         self.time_slider = TimeSlider(self)
@@ -377,6 +430,8 @@ class AbcView(QtGui.QMainWindow):
         self.time_slider.signal_play_fwd.connect(self.handle_play)
         self.time_slider.signal_play_stop.connect(self.handle_stop)
         self.time_slider.signal_frame_changed.connect(self.handle_time_slider_change)
+        self.time_slider.signal_first_frame_changed.connect(self.handle_first_frame_change)
+        self.time_slider.signal_last_frame_changed.connect(self.handle_last_frame_change)
         self.time_slider_toolbar = QtGui.QToolBar(self)
         self.time_slider_toolbar.setObjectName("time_slider_toolbar")
         self.time_slider_toolbar.addWidget(self.time_slider)
@@ -421,37 +476,48 @@ class AbcView(QtGui.QMainWindow):
    
         # wait for main event loop to start
         QtGui.QApplication.instance().signal_starting_up.connect(self._start)
+       
+        # create the splash screen
+        self.splash = Splash(self)
 
+        # open a session
         if filepath and filepath.endswith(Session.EXT):
             self.open_session(filepath)
 
     def set_load_list(self, filepaths):
         self._load_list = deepcopy(filepaths)
+        self.splash.progress.setMaximum(len(filepaths))
 
     def _start(self):
         """
         This is the startup callback function for when the QApplication starts its
         event loop. This handles deferred file loading.
         """
+        start = time.time()
+        self.splash.show()
+
         # load session files
         if len(self._load_list) == 1 and self._load_list[0].endswith(Session.EXT):
             try:
-                self.open_session(self._load_list[0])
+                self._open_session(self._load_list[0])
             except Exception, e:
                 log.error("Error loading %s" % self._load_list[0])
+                traceback.print_exc()
 
         # load scene files
         else:
             try:
                 for filepath in self._load_list:
                     self.import_file(filepath)
-
-                # only frame if actually importing files
-                #if self._load_list:
-                #    self.viewer.frame()
+                if len(self._load_list) > 0:
+                    self.viewer.frame()
 
             except Exception, e:
                 log.error("Error loading %s" % filepath)
+                traceback.print_exc()
+
+        log.debug("session loaded in %.2fs"  % (time.time() - start))
+        self.splash.close()
 
     @make_clean
     def clear(self):
@@ -600,23 +666,25 @@ class AbcView(QtGui.QMainWindow):
         Waits for the window to be drawn before proceeding.
         """
         return
-        log.debug("AbcView._wait")
         app = QtGui.QApplication.instance()
         while not app.ok:
             pass
         while QtGui.QApplication.instance().startingUp():
-            log.debug("... waiting for app")
             pass
         while not self.isVisible():
-            log.debug("... waiting for window")
             pass
 
-    @make_clean
     def open_session(self, filepath):
+        self.set_load_list([filepath])
+        self._start()
+
+    @make_clean
+    def _open_session(self, filepath):
         """
         Loads a session file and swaps out IO objects for GL objects.
         """
-        log.debug("AbcView.open_session: %s" % filepath)
+        log.debug("[AbcView._open_session] %s" % filepath)
+        self.splash.setMessage("loading")
 
         # validate window state
         self._wait()
@@ -635,8 +703,35 @@ class AbcView(QtGui.QMainWindow):
 
         # load an abcview file
         elif filepath.endswith(Session.EXT):
-            self.session = Session(filepath)
+            self.splash.setMessage("loading %s" % filepath)
             
+            self.session = Session(filepath)
+
+            # set frame range
+            if self.first_frame is not None:
+                self.viewer.state.min_frame = self.first_frame
+            else:
+                self.viewer.state.min_time = self.session.min_time
+            if self.last_frame is not None:
+                self.viewer.state.max_frame = self.last_frame
+            else:
+                self.viewer.state.max_time = self.session.max_time
+
+            #HACK: transform io.Cameras to gl.Cameras
+            for camera in self.session.cameras:
+                self.session.remove_camera(camera)
+                if camera.type() == Camera.type():
+                    _camera = GLCamera(self.viewer, camera.name)
+                elif camera.type() == ICamera.type():
+                    _camera = GLICamera(self.viewer, camera.icamera)
+                for attr in _camera.SERIALIZE:
+                    setattr(_camera, attr, getattr(camera, attr))
+                self.viewer.add_camera(_camera)
+                if camera.loaded:
+                    self.viewer.set_camera(_camera)
+
+            self.splash.progress.setMaximum(len(self.session.items))
+
             #HACK: transform io.Scenes to gl.Scenes
             for index in range(len(self.session.items)):
                 item = self.session.items[0]
@@ -653,24 +748,11 @@ class AbcView(QtGui.QMainWindow):
 
                 if item.loaded:
                     tree_item.load()
-           
-            #HACK: transform io.Cameras to gl.Cameras
-            for camera in self.session.cameras:
-                self.session.remove_camera(camera)
-                if camera.type() == Camera.type():
-                    _camera = GLCamera(self.viewer, camera.name)
-                elif camera.type() == ICamera.type():
-                    _camera = GLICamera(self.viewer, camera.icamera)
-                for attr in _camera.SERIALIZE:
-                    setattr(_camera, attr, getattr(camera, attr))
-                self.viewer.add_camera(_camera)
-                if camera.loaded:
-                    self.viewer.set_camera(_camera)
-            #else:
-            #    if len(self.session.cameras) == 0:
-            #        self.viewer.frame()
 
-        # restore current frame / fps
+                self.splash.setMessage("loading %s" % item.name)
+                self.splash.updateProgress(self.splash.progress.value()+1)
+           
+        # restore current frame after loading everything
         self.viewer.state.frames_per_second = self.session.frames_per_second
         self.viewer.state.current_frame = self.session.current_time * \
                                      self.session.frames_per_second
@@ -688,6 +770,8 @@ class AbcView(QtGui.QMainWindow):
                          overrwrites current session file.
         """
         try:
+            self.session.min_time = self.viewer.state.min_time
+            self.session.max_time = self.viewer.state.max_time
             self.session.current_time = self.viewer.state.current_time
             self.session.frames_per_second = self.viewer.state.frames_per_second
             self.session.save(filepath)
@@ -701,7 +785,7 @@ class AbcView(QtGui.QMainWindow):
 
         :param script: code or path to file containing python code.
         """
-        log.debug("AbcView.load_script: %s" % script)
+        log.debug("[AbcView.load_script] %s" % script)
         if os.path.exists(script):
             lines = open(script, "r").readlines()
             for line in lines:
@@ -724,6 +808,8 @@ class AbcView(QtGui.QMainWindow):
         if not filepath or not os.path.isfile(filepath):
             message("invalid file: %s" % filepath)
             raise
+        
+        self.splash.setMessage("loading %s" % filepath)
     
         # add the item to the session
         item = GLScene(filepath)
@@ -771,11 +857,33 @@ class AbcView(QtGui.QMainWindow):
     def handle_viewer_error(self, msg):
         message(msg)
 
-    def handle_time_slider_change(self, value):
+    def handle_time_slider_change(self, frame):
         """
         handles frame changes coming from time slider
+
+        :param frame: frame number
         """
-        self.viewer.state.current_frame = value
+        self.viewer.state.current_frame = frame
+
+    def handle_first_frame_change(self, frame):
+        """
+        handles first frame change from time slider
+
+        :param frame: frame number
+        """
+        self.viewer.state.min_frame = frame
+        if self.session.frames_per_second > 0:
+            self.session.min_time = frame / self.session.frames_per_second
+
+    def handle_last_frame_change(self, frame):
+        """
+        handles last frame change from time slider
+
+        :param frame: frame number
+        """
+        self.viewer.state.max_frame = frame
+        if self.session.frames_per_second > 0:
+            self.session.max_time = frame / self.session.frames_per_second
 
     def handle_state_play_fwd(self):
         """
@@ -801,7 +909,7 @@ class AbcView(QtGui.QMainWindow):
             p = self.properties_tree.selected()
             ts = p.getTimeSampling()
             t = self.time_slider.value() \
-                    / float(self.state.frames_per_second)
+                    / float(self.viewer.state.frames_per_second)
             index = ts.getNearIndex(t, len(p.samples))    
             item = self.samples_tree.topLevelItem(index)
             self.samples_tree.clearSelection()
@@ -815,7 +923,7 @@ class AbcView(QtGui.QMainWindow):
 
         :param camera: GLCamera
         """
-        log.debug("AbcView.handle_new_camera: %s" % camera)
+        log.debug("[AbcView.handle_new_camera] %s" % camera)
         if camera.name != "interactive":
             self.session.add_camera(camera)
 
@@ -844,6 +952,9 @@ class AbcView(QtGui.QMainWindow):
         else:
             self.viewer.set_camera(icamera.getName())
 
+    def handle_object_selected(self, name):
+        self.objects_tree.find(str(name.toAscii()))
+
     def find(self, name):
         """
         searches for objects in the tree matching name
@@ -868,11 +979,11 @@ class AbcView(QtGui.QMainWindow):
         """
         def load(item):
             if type(item) == SceneTreeWidgetItem:
-                scene = item.object
-                self.viewer.add_scene(scene)
+                self.viewer.add_scene(item.object)
             elif type(item) == SessionTreeWidgetItem:
                 for child in item.children():
                     load(child)
+        log.debug("[AbcView.handle_item_loaded] %s" % item.object)
         load(item)
 
     def handle_item_unloaded(self, item):
@@ -966,7 +1077,23 @@ class AbcView(QtGui.QMainWindow):
         if not bounds_prop.valid():
             message("Object has invalid or no bounds set.")
             return
+
         bounds = bounds_prop.getValue(iss)
+  
+        # apply local transforms
+        if 0:
+            min = bounds.min()
+            max = bounds.max()
+            item = self.objects_tree.selectedItems()[0]
+            scene = item.scene().object
+            if scene.properties.get("translate"):
+                max = max * imath.V3d(*scene.translate)
+                min = min * imath.V3d(*scene.translate)
+            if scene.properties.get("scale"):
+                max = max * imath.V3d(*scene.scale)
+                min = min * imath.V3d(*scene.scale)
+            bounds = imath.Box3d(min, max)
+
         self.viewer.frame(bounds * xf)
 
     def handle_save(self):
@@ -982,6 +1109,11 @@ class AbcView(QtGui.QMainWindow):
             self.save_session(str(filepath.toAscii()))
 
     ## base class overrides
+
+    def resizeEvent(self, event):
+        self.splash.move((event.size().width() / 2.0) - (self.splash.width() / 2.0), 
+                         (event.size().height() / 2.0) - (self.splash.height() / 2.0))
+        super(AbcView, self).resizeEvent(event)
 
     def keyPressEvent(self, event):
         """

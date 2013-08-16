@@ -65,6 +65,7 @@ kWrapExisting = alembic.Abc.WrapExistingFlag.kWrapExisting
 # GL drawing mode map
 GL_MODE_MAP = {
     Mode.OFF: 0,
+    Mode.BOUNDS: 1,
     Mode.FILL: GL_FILL,
     Mode.LINE: GL_LINE,
     Mode.POINT: GL_POINT
@@ -97,24 +98,70 @@ def update_camera(func):
         wid.updateGL()
         wid.signal_camera_updated.emit(wid.camera)
         wid.state.signal_state_change.emit()
-        # signal gets disconnected on unsplit
     return with_wrapped_func
 
 def set_ambient_light():
+    """
+    Ambient light is used for AbcView objects (e.g. grid, HUD, etc)
+    """
     glDisable(GL_LIGHT0)
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0.4, 0.4, 0.4, 1.0))
 
 def set_diffuse_light():
-    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
-    glEnable(GL_LIGHTING)
-    glEnable(GL_LIGHT0)
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
+    """
+    Sets up the GL calls for the light that illuminates objects.
+    """
+
+    ambient = (0.1, 0.1, 0.1, 1.0)
+    diffuse = (0.5, 1.0, 1.0, 1.0)
+    position = (90.0, 90.0, 150.0, 0.0)
+
+    front_mat_shininess = (60.0)
+    front_mat_specular = (0.0, 0.0, 0.0, 1.0)
+    front_mat_diffuse = (0.0, 0.0, 0.0, 1.0)
+    back_mat_shininess = (60.0)
+    back_mat_specular = (0.0, 0.0, 0.0, 1.0)
+    back_mat_diffuse = (0.0, 0.0, 0.0, 1.0)
+
+    lmodel_ambient = (1.0, 1.0, 1.0, 1.0)
+
+    if 1:
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+
+        #glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+        #glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+        #glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+        glMaterialfv(GL_FRONT, GL_SHININESS, front_mat_shininess);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, front_mat_specular);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, front_mat_diffuse);
+        glMaterialfv(GL_BACK, GL_SHININESS, back_mat_shininess);
+        glMaterialfv(GL_BACK, GL_SPECULAR, back_mat_specular);
+        glMaterialfv(GL_BACK, GL_DIFFUSE, back_mat_diffuse);
+
+        #glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+        #glLightModelfv(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+
+        #glEnable(GL_LIGHTING);
+        #glEnable(GL_LIGHT0);
+        #glShadeModel(GL_SMOOTH);
+
+    #else:
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0.0, 0.0, 0.0, 0.0))
+        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
+        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.2, 0.2, 0.2, 1.0))
+        glLightfv(GL_LIGHT0, GL_SPECULAR, (0.0, 0.0, 0.0, 1.0))
+        glLightfv(GL_LIGHT0, GL_AMBIENT, (0.0, 0.0, 0.0, 1.0))
 
 def set_default_materials():
     """
     Hardcoded GL material shaders.
     """
+    print "set_default_materials"
     mat_specular = (1.0, 1.0, 1.0, 1.0)
     mat_shininess = 100.0
     mat_front_emission = (0.0, 0.0, 0.0, 0.0)
@@ -132,58 +179,21 @@ def set_default_materials():
     glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE)
     glEnable(GL_COLOR_MATERIAL)
 
-def draw_bounding_box(bounds):
-    """
-    Draws a bounding box given a box3d object.
+def foo():
+    print "foo"
+    mat_specular = ( 0.1, 0.1, 0.1, 1.0 )
+    mat_shininess = ( 10.0 )
+    light_position = ( 25.0, -10000.0, 0.0, 0.0 )
+    glClearColor(0.0, 0.0, 0.0, 0.0)
+    glShadeModel(GL_SMOOTH)
 
-    :param bounds: Imath.box3d
-    """
-    min_x = bounds.min()[0]
-    min_y = bounds.min()[1]
-    min_z = bounds.min()[2]
-    max_x = bounds.max()[0]
-    max_y = bounds.max()[1]
-    max_z = bounds.max()[2]
-    
-    w = max_x - min_x
-    h = max_y - min_y
-    d = max_z - min_z
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular)
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess)
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position)
 
-    glBegin(GL_LINES)
-    glVertex3f(min_x, min_y, min_z)
-    glVertex3f(min_x+w, min_y, min_z)
-    glVertex3f(min_x, min_y, min_z)
-    glVertex3f(min_x, min_y+h, min_z)
-    glVertex3f(min_x, min_y, min_z)
-    glVertex3f(min_x, min_y, min_z+d)
-    glVertex3f(min_x+w, min_y, min_z)
-    glVertex3f(min_x+w, min_y+h, min_z)
-    glVertex3f(min_x+w, min_y+h, min_z)
-    glVertex3f(min_x, min_y+h, min_z)
-    glVertex3f(min_x, min_y, min_z+d)
-    glVertex3f(min_x+w, min_y, min_z+d)
-    glVertex3f(min_x+w, min_y, min_z+d)
-    glVertex3f(min_x+w, min_y, min_z)
-    glVertex3f(min_x, min_y, min_z+d)
-    glVertex3f(min_x, min_y+h, min_z+d)
-    glVertex3f(min_x, min_y+h, min_z+d)
-    glVertex3f(min_x, min_y+h, min_z)
-    glVertex3f(min_x+w, min_y+h, min_z)
-    glVertex3f(min_x+w, min_y+h, min_z+d)
-    glVertex3f(min_x+w, min_y, min_z+d)
-    glVertex3f(min_x+w, min_y+h, min_z+d)
-    glVertex3f(min_x, min_y+h, min_z+d)
-    glVertex3f(min_x+w, min_y+h, min_z+d)
-
-    cx, cy, cz = bounds.center()
-    glVertex3f(cx-1, cy, cz)
-    glVertex3f(cx+1, cy, cz)
-    glVertex3f(cx, cy-1, cz)
-    glVertex3f(cx, cy+1, cz)
-    glVertex3f(cx, cy, cz-1)
-    glVertex3f(cx, cy, cz+1)
-
-    glEnd()
+    glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)
+    glEnable(GL_DEPTH_TEST)
 
 def create_viewer_app(filepath=None):
     """
@@ -264,13 +274,39 @@ class GLState(QtCore.QObject):
         self.connect(self.__fps_timer, QtCore.SIGNAL("timeout ()"), 
                 self._fps_timer_cb)
 
+    def uid(self):
+        return id(self)
+
+    def __repr__(self):
+        return "<GLState %s>" % self.uid()
+
     def clear(self):
+        """
+        Clears the current state.
+        """
+        log.debug("[%s.clear]" % self)
+
+        # stores all the GLScene objects
         self.__scenes = []
+
+        # stores all the GLCamera objects
         self.__cameras = {}
+
+        # min/max/current time information
+        self.__min = None
+        self.__max = None
         self.__time = 0
+
+        # current frame
         self.__frame = 0
+
+        # "is playing" bool toggle
         self.__playing = False
+
+        # frames per second tracker
         self.__fps_counter = 0
+
+        # update all the viewers
         self.signal_state_change.emit()
 
     def _get_cameras(self):
@@ -320,7 +356,7 @@ class GLState(QtCore.QObject):
 
         :param camera: GLCamera object
         """
-        log.debug("GLState.add_camera %s" % camera)
+        log.debug("[%s.add_camera] %s" % (self, camera))
         if camera and camera.name not in self.__cameras.keys():
             self.__cameras[camera.name] = camera
             return True
@@ -374,26 +410,66 @@ class GLState(QtCore.QObject):
         self.current_time = frame / float(self.frames_per_second)
 
     current_frame = property(_get_frame, _set_frame, doc="set/get current frame")
-    
+   
+    def _get_min_time(self):
+        return self.__min
+
+    def _set_min_time(self, value):
+        self.__min = value
+        log.debug("[%s._set_min_time] %s" % (self, self.__min))
+
+    min_time = property(_get_min_time, _set_min_time, doc="set/get minimum time")
+
+    def _get_max_time(self):
+        return self.__max
+
+    def _set_max_time(self, value):
+        self.__max = value
+        log.debug("[%s._set_min_time] %s" % (self, self.__max))
+
+    max_time = property(_get_max_time, _set_max_time, doc="set/get maximum time")
+
     def time_range(self):
         """
-        Returns total time range in seconds.
+        Returns min/max time range in seconds as a tuple.
         """
-        min = None
-        max = None
-        if self.scenes:
-            for scene in self.scenes:
-                if min is None or scene.min_time() < min:
-                    min = scene.min_time()
-                if max is None or scene.max_time() > max:
-                    max = scene.max_time()
-        else:
-            min, max = 0, 0
-        return (min, max)
+        log.debug("[%s.time_range] %s, %s" % (self, self.__min, self.__max))
+        if self.__min == None or self.__max == None:
+            if self.scenes:
+                for scene in self.scenes:
+                    if self.__min is None or scene.min_time() < min:
+                        self.__min = scene.min_time()
+                    if self.__max is None or scene.max_time() > max:
+                        self.__max = scene.max_time()
+            else:
+                self.__min, self.__max = 0, 0
+        return (self.__min, self.__max)
+
+    def _get_min_frame(self):
+        return self.frame_range()[0]
+
+    def _set_min_frame(self, value):
+        if value is None:
+            self.min_time = None
+        elif self.frames_per_second > 0:
+            self.min_time = value / float(self.frames_per_second)
+
+    min_frame = property(_get_min_frame, _set_min_frame, doc="set/get minimum frame")
+
+    def _get_max_frame(self):
+        return self.frame_range()[1]
+
+    def _set_max_frame(self, value):
+        if value is None:
+            self.max_time = None
+        elif self.frames_per_second > 0:
+            self.max_time = value / float(self.frames_per_second)
+
+    max_frame = property(_get_max_frame, _set_max_frame, doc="set/get maximum frame")
 
     def frame_range(self):
         """
-        Returns total frame range.
+        Returns min/max frame range as a tuple.
         """
         (min, max) = self.time_range()
         return (min * self.frames_per_second, max * self.frames_per_second)
@@ -405,11 +481,14 @@ class GLState(QtCore.QObject):
         return len(range(*self.frame_range())) + 1
     
     def is_playing(self):
+        """
+        Returns True if the playback timer is running.
+        """
         return self.__playing
 
     def play(self):
         """
-        plays loaded scenes by activating timer and setting callback
+        Plays loaded scenes by activating timer and setting callback
         """
         self.timer.setInterval(self.SECOND / (float(self.frames_per_second)))
         self.connect(self.timer, QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
@@ -419,7 +498,7 @@ class GLState(QtCore.QObject):
 
     def _play_fwd_cb(self):
         """
-        play callback, sets current time for all scenes
+        Play callback, sets current time for all scenes
         """
         self.__playing = True
         min_time, max_time = self.time_range()
@@ -430,7 +509,7 @@ class GLState(QtCore.QObject):
 
     def stop(self):
         """
-        stops scene playback
+        Stops scene playback
         """
         self.__playing = False
         self.disconnect(self.timer,  QtCore.SIGNAL("timeout ()"), self._play_fwd_cb)
@@ -441,7 +520,7 @@ class GLState(QtCore.QObject):
 
     def _fps_timer_cb(self):
         """
-        frames per second timer callback
+        Frames per second timer callback
         """
         self.fps = (self.__fps_counter / float(self.frames_per_second)) * \
                       self.frames_per_second
@@ -467,6 +546,7 @@ class GLWidget(QtOpenGL.QGLWidget):
     signal_set_camera = QtCore.pyqtSignal(GLCamera)
     signal_new_camera = QtCore.pyqtSignal(GLCamera)
     signal_camera_updated = QtCore.pyqtSignal(GLCamera)
+    signal_object_selected = QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None, state=None):
         """
@@ -496,6 +576,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.__last_p2d = QtCore.QPoint()
         self.__last_p3d = [1.0, 0.0, 0.0]
         self.__rotating = False
+        self.__mode = GL_RENDER
 
         # viewers must have at least one camera
         self.setup_default_camera()
@@ -554,7 +635,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         :param camera: GLCamera object
         """
-        log.debug("GLWidget.add_camera: %s" % camera)
+        log.debug("[%s.add_camera] %s" % (self, camera))
         if self.state.add_camera(camera):
             camera.add_view(self)
             self.signal_new_camera.emit(camera)
@@ -573,7 +654,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         :param camera: Name of camera or GLCamera object
         """
-        log.debug("GLWidget.set_camera %s" % camera)
+        log.debug("[%s.set_camera] %s" % (self, camera))
         if type(camera) in [str, unicode]:
             if "/" in camera:
                 camera = os.path.split("/")[-1]
@@ -632,7 +713,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         :param bounds: imath.Box3d bounds object.
         """
-        log.debug("GLWidget.frame %s" % bounds)
+        log.debug("[%s.frame] %s" % (self, bounds))
         if bounds is None:
             bounds = self.bounds
         if self.camera:
@@ -822,7 +903,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         # draw the camera name
         glColor3f(0.5, 1, 0.5)
         if self.camera.fixed:
-            self.renderText(15, 20, "%s (%.02f)" 
+            self.renderText(15, 20, "%s [%.02f]" 
                     % (self.camera.name, self.camera.aspect_ratio))
         else:
             self.renderText(15, 20, "%s" % self.camera.name)
@@ -975,6 +1056,13 @@ class GLWidget(QtOpenGL.QGLWidget):
         # update camera
         self.camera.apply()
 
+        # light0 tracks with camera
+        glMatrixMode( GL_MODELVIEW )
+        glPushMatrix()
+        glLoadIdentity()
+        glLightfv( GL_LIGHT0, GL_POSITION, ( 0.0, 0.0, -1.0, 1.0 ) )
+        glPopMatrix()
+
         # change background color to indicate which viewer is active
         #if self.state.active_viewer == self:
         #    glClearColor(0.15, 0.15, 0.15, 0.0)
@@ -1004,38 +1092,36 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # color override
             glEnable(GL_COLOR_MATERIAL)
-            glMaterialfv(GL_BACK, GL_EMISSION, scene.properties.get("color", 
-                         (1, 0, 0)))
+            glMaterialfv(GL_BACK, GL_EMISSION, scene.color) 
 
             # draw mode override
             mode = GL_MODE_MAP.get(scene.properties.get("mode"), 
                    GL_MODE_MAP.get(self.camera.mode, GL_LINE)
                    )
-            if mode != Mode.OFF:
+            if mode > 1:
                 glPolygonMode(GL_FRONT_AND_BACK, mode)
-
+           
             # apply local transforms
             glPushMatrix()
             glTranslatef(*scene.translate)
             glRotatef(*scene.rotate)
             glScalef(*scene.scale)
+            glColor3f(*scene.color)
 
             # draw bounds
             if self.camera.draw_bounds:
-                glColor3f(1, 1, 1)
-                set_ambient_light()
-                draw_bounding_box(scene.scene.bounds())
-                set_diffuse_light()
+                scene.draw_bounds()
+            
+            set_diffuse_light()
 
             # draw scene
             if mode != Mode.OFF:
-                scene.draw(self.camera.visible)
+                scene.draw(self.camera.visible, mode == Mode.BOUNDS)
             
             glPopMatrix()
             self.signal_scene_drawn.emit()
         
     def resizeGL(self, width, height):
-        log.debug("GLWidget.resizeGL %s %s %s" % (self, width, height))
         try:
             self.camera.resize()
         except AttributeError, e:
@@ -1048,6 +1134,10 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         key = event.key()
         mod = event.modifiers()
+
+        # select render mode
+        #if mod == QtCore.Qt.AltModifier:
+        #    self.__mode = GL_SELECT
 
         # space bar - playback control
         if key == QtCore.Qt.Key_Space:
@@ -1064,17 +1154,21 @@ class GLWidget(QtOpenGL.QGLWidget):
         elif key == QtCore.Qt.Key_0:
             self.handle_set_mode(Mode.OFF)
 
-        # 1 - bounds
+        # 1 - smooth
         elif key == QtCore.Qt.Key_1:
             self.handle_set_mode(Mode.FILL)
 
-        # 2 - bounds
+        # 2 - lines
         elif key == QtCore.Qt.Key_2:
             self.handle_set_mode(Mode.LINE)
 
-        # 3 - bounds
+        # 3 - points
         elif key == QtCore.Qt.Key_3:
             self.handle_set_mode(Mode.POINT)
+
+        # 4 - bounds
+        elif key == QtCore.Qt.Key_4:
+            self.handle_set_mode(Mode.BOUNDS)
 
         # right arroy - increment frame
         elif key == QtCore.Qt.Key_Right:
@@ -1124,12 +1218,28 @@ class GLWidget(QtOpenGL.QGLWidget):
         elif key == QtCore.Qt.Key_F:
             self.frame()
 
+    def keyReleaseEvent(self, event):
+        self.__mode = GL_RENDER
+
+    def mouseDoubleClickEvent(self, event):
+        """
+        mouse double-click event handler
+        """
+        hit = None
+        for scene in self.state.scenes:
+            hit = scene.selection(event.pos().x(), 
+                                  event.pos().y(),
+                                  self.camera.views[self]
+                                  )
+        #HACK: need a better/faster way to find the object
+        if hit:
+            self.signal_object_selected.emit(".*%s" % hit.split("/")[-1])
+
     def mousePressEvent(self, event):
         """
         mouse press event handler
         """
-
-        # use weakref for this
+        #TODO: use weakref for this instead? 
         self.state.active_viewer = self
         
         # make this viewer the active one
@@ -1194,15 +1304,6 @@ class GLWidget(QtOpenGL.QGLWidget):
             #        self.camera._set_auto_frame)
             #options_menu.addAction(self.aframeAct)
 
-            # bounds toggle menu item
-            self.boundsAct = QtGui.QAction("Bounds ", self)
-            self.boundsAct.setShortcut("Alt+B")
-            self.boundsAct.setCheckable(True)
-            self.boundsAct.setChecked(self.camera.draw_bounds)
-            self.connect(self.boundsAct, QtCore.SIGNAL("toggled (bool)"), 
-                    self.camera._set_draw_bounds)
-            options_menu.addAction(self.boundsAct)
- 
             # fixed aspect ratio toggle menu item
             self.fixedAct = QtGui.QAction("Fixed Aspect Ratio ", self)
             self.fixedAct.setShortcut("Alt+F")
@@ -1211,15 +1312,6 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.connect(self.fixedAct, QtCore.SIGNAL("toggled (bool)"), 
                     self.camera._set_fixed)
             options_menu.addAction(self.fixedAct)
-
-            # grid toggle menu item
-            self.gridAct = QtGui.QAction("Grid ", self)
-            self.gridAct.setShortcut("Alt+G")
-            self.gridAct.setCheckable(True)
-            self.gridAct.setChecked(self.camera.draw_grid)
-            self.connect(self.gridAct, QtCore.SIGNAL("toggled (bool)"), 
-                    self.camera._set_draw_grid)
-            options_menu.addAction(self.gridAct)
 
             # heads-up-display menu item
             self.hudAct = QtGui.QAction("Heads-Up-Display ", self)
@@ -1238,6 +1330,24 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.connect(self.normalsAct, QtCore.SIGNAL("toggled (bool)"), 
                     self.camera._set_draw_normals)
             options_menu.addAction(self.normalsAct)
+
+            # bounds toggle menu item
+            self.boundsAct = QtGui.QAction("Scene Bounds ", self)
+            self.boundsAct.setShortcut("Alt+B")
+            self.boundsAct.setCheckable(True)
+            self.boundsAct.setChecked(self.camera.draw_bounds)
+            self.connect(self.boundsAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_draw_bounds)
+            options_menu.addAction(self.boundsAct)
+
+            # grid toggle menu item
+            self.gridAct = QtGui.QAction("Show Grid ", self)
+            self.gridAct.setShortcut("Alt+G")
+            self.gridAct.setCheckable(True)
+            self.gridAct.setChecked(self.camera.draw_grid)
+            self.connect(self.gridAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_draw_grid)
+            options_menu.addAction(self.gridAct)
 
             # visibility toggle menu item
             self.visibleAct = QtGui.QAction("Visible Only ", self)
@@ -1288,6 +1398,15 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.pointAct.toggled.connect(self.handle_set_mode)
             self.shading_menu.addAction(self.pointAct)
             
+            self.bboxAct = QtGui.QAction("Bounds ", self)
+            self.bboxAct.setShortcut("4")
+            self.bboxAct.setCheckable(True)
+            self.bboxAct.setActionGroup(shading_group)
+            self.bboxAct.setData(Mode.BOUNDS)
+            self.bboxAct.setChecked(self.camera.mode == Mode.BOUNDS)
+            self.bboxAct.toggled.connect(self.handle_set_mode)
+            self.shading_menu.addAction(self.bboxAct)
+
             options_menu.addMenu(self.shading_menu)
 
             menu.addMenu(options_menu)

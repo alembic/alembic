@@ -284,6 +284,74 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
 }
 
 //-*****************************************************************************
+void MeshDrwHelper::drawBounds( const DrawContext & iCtx ) const
+{
+    drawBoundingBox( m_bounds );
+}
+
+//-*****************************************************************************
+void drawBoundingBox( const Box3d bounds )
+{
+    float min_x = bounds.min[0];
+    float min_y = bounds.min[1];
+    float min_z = bounds.min[2];
+    float max_x = bounds.max[0];
+    float max_y = bounds.max[1];
+    float max_z = bounds.max[2];
+    
+    float w = max_x - min_x;
+    float h = max_y - min_y;
+    float d = max_z - min_z;
+
+    glDisable( GL_LIGHTING );
+    
+    glEnable( GL_POINT_SMOOTH );
+    glPointSize( 1.0 );
+    glLineWidth( 1.0 );
+    
+    glBegin( GL_LINES );
+
+    glVertex3f(min_x, min_y, min_z);
+    glVertex3f(min_x+w, min_y, min_z);
+    glVertex3f(min_x, min_y, min_z);
+    glVertex3f(min_x, min_y+h, min_z);
+    glVertex3f(min_x, min_y, min_z);
+    glVertex3f(min_x, min_y, min_z+d);
+    glVertex3f(min_x+w, min_y, min_z);
+    glVertex3f(min_x+w, min_y+h, min_z);
+    glVertex3f(min_x+w, min_y+h, min_z);
+    glVertex3f(min_x, min_y+h, min_z);
+    glVertex3f(min_x, min_y, min_z+d);
+    glVertex3f(min_x+w, min_y, min_z+d);
+    glVertex3f(min_x+w, min_y, min_z+d);
+    glVertex3f(min_x+w, min_y, min_z);
+    glVertex3f(min_x, min_y, min_z+d);
+    glVertex3f(min_x, min_y+h, min_z+d);
+    glVertex3f(min_x, min_y+h, min_z+d);
+    glVertex3f(min_x, min_y+h, min_z);
+    glVertex3f(min_x+w, min_y+h, min_z);
+    glVertex3f(min_x+w, min_y+h, min_z+d);
+    glVertex3f(min_x+w, min_y, min_z+d);
+    glVertex3f(min_x+w, min_y+h, min_z+d);
+    glVertex3f(min_x, min_y+h, min_z+d);
+    glVertex3f(min_x+w, min_y+h, min_z+d);
+
+    float cx = bounds.center()[0];
+    float cy = bounds.center()[1];
+    float cz = bounds.center()[2];
+
+    glVertex3f(cx-0.1, cy, cz);
+    glVertex3f(cx+0.1, cy, cz);
+    glVertex3f(cx, cy-0.1, cz);
+    glVertex3f(cx, cy+0.1, cz);
+    glVertex3f(cx, cy, cz-0.1);
+    glVertex3f(cx, cy, cz+0.1);
+
+    glEnd();
+    glEnable( GL_LIGHTING );
+}
+
+//-*****************************************************************************
 void MeshDrwHelper::draw( const DrawContext & iCtx ) const
 {
     // Bail if invalid.
