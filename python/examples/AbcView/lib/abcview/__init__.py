@@ -89,10 +89,9 @@ http://docs.alembic.io/python/abcview.html
 """
 TODO:
 
-- GL picking in viewer
 - highlight object selection in viewer
 - better session cycle checking on load
-- more stats (frame rate, poly count, mem usage)
+- more stats (poly count, mem usage)
 - support for lights and materials
 - draggable, pop-out widgets
 - share state between processes / remote viewing
@@ -105,7 +104,7 @@ def make_dirty(func):
     # make abcview session dirty decorator
     @wraps(func)
     def with_wrapped_func(*args, **kwargs):
-        func(*args, **kwargs)
+        return func(*args, **kwargs)
         if args[0].session:
             args[0].session.make_dirty()
     return with_wrapped_func
@@ -114,7 +113,7 @@ def make_clean(func):
     # make abcview session clean decorator
     @wraps(func)
     def with_wrapped_func(*args, **kwargs):
-        func(*args, **kwargs)
+        return func(*args, **kwargs)
         if args[0].session:
             args[0].session.make_clean()
     return with_wrapped_func
@@ -286,7 +285,9 @@ class AbcMenuBar(QtGui.QMenuBar):
         message("\n".join([_v, __doc__]))
 
 class FindLineEdit(QtGui.QLineEdit):
-    # auto-unfocus line editor
+    """
+    Auto-unfocus line editor used for search bar.
+    """
     def __init__(self, parent):
         super(FindLineEdit, self).__init__(parent)
         self._parent = parent
@@ -331,9 +332,19 @@ class Splash(QtGui.QSplashScreen):
         self.setLayout(layout)
 
     def updateProgress(self, value):
+        """
+        Updates the splash screen progress bar.
+
+        :param value: new value (must be b/w min and max values)
+        """
         self.progress.setValue(value)
 
     def setMessage(self, message):
+        """
+        Sets the message to be displayed in the splash screen.
+
+        :param message: message as string
+        """
         self.text.setText(message)
 
 ## MAIN -----------------------------------------------------------------------
@@ -360,6 +371,9 @@ class AbcView(QtGui.QMainWindow):
 
         # deferred load list
         self._load_list = []
+
+        # override default/stored display mode
+        self._override_mode = None
 
         # setting these should trigger updates
         self.first_frame = first_frame
@@ -484,8 +498,16 @@ class AbcView(QtGui.QMainWindow):
         if filepath and filepath.endswith(Session.EXT):
             self.open_session(filepath)
 
-    def set_load_list(self, filepaths):
+    def set_load_list(self, filepaths, mode=None):
+        """
+        Sets the deferred load list. Loads files after the main window and
+        event loop is up and running. 
+
+        :param filepath: list of files to load
+        :param mode: Override display mode (abcview.io.Mode)
+        """
         self._load_list = deepcopy(filepaths)
+        self._override_mode = mode
         self.splash.progress.setMaximum(len(filepaths))
 
     def _start(self):
@@ -508,8 +530,8 @@ class AbcView(QtGui.QMainWindow):
         else:
             try:
                 for filepath in self._load_list:
-                    self.import_file(filepath)
-                if len(self._load_list) > 0:
+                    ok = self.import_file(filepath)
+                if ok and len(self._load_list) > 0:
                     self.viewer.frame()
 
             except Exception, e:
@@ -675,16 +697,19 @@ class AbcView(QtGui.QMainWindow):
             pass
 
     def open_session(self, filepath):
+        """
+        Loads a session file and swaps out IO objects for GL objects.
+        """
         self.set_load_list([filepath])
         self._start()
 
     @make_clean
     def _open_session(self, filepath):
         """
-        Loads a session file and swaps out IO objects for GL objects.
+        Work function for open_session().
         """
         log.debug("[AbcView._open_session] %s" % filepath)
-        self.splash.setMessage("loading")
+        self.splash.setMessage("starting up")
 
         # validate window state
         self._wait()
@@ -705,13 +730,16 @@ class AbcView(QtGui.QMainWindow):
         elif filepath.endswith(Session.EXT):
             self.splash.setMessage("loading %s" % filepath)
             
+            # create the session
             self.session = Session(filepath)
 
-            # set frame range
+            # set first frame
             if self.first_frame is not None:
                 self.viewer.state.min_frame = self.first_frame
             else:
                 self.viewer.state.min_time = self.session.min_time
+
+            # set last frame
             if self.last_frame is not None:
                 self.viewer.state.max_frame = self.last_frame
             else:
@@ -735,11 +763,18 @@ class AbcView(QtGui.QMainWindow):
             #HACK: transform io.Scenes to gl.Scenes
             for index in range(len(self.session.items)):
                 item = self.session.items[0]
+                self.splash.setMessage("loading %s" % item.name)
+                
                 if item.filepath.endswith(Scene.EXT):
                     _item = GLScene(item.filepath)
                     _item.properties = deepcopy(item.properties)
                     _item.loaded = item.loaded
                     _item.visible = item.loaded
+
+                    # override default display mode
+                    if self._override_mode is not None:
+                        _item.mode = self._override_mode
+
                     tree_item = SceneTreeWidgetItem(self.objects_tree, _item)
                     self.session.remove_item(item)
                     self.session.add_item(_item)
@@ -749,7 +784,6 @@ class AbcView(QtGui.QMainWindow):
                 if item.loaded:
                     tree_item.load()
 
-                self.splash.setMessage("loading %s" % item.name)
                 self.splash.updateProgress(self.splash.progress.value()+1)
            
         # restore current frame after loading everything
@@ -806,19 +840,25 @@ class AbcView(QtGui.QMainWindow):
         self._wait()
 
         if not filepath or not os.path.isfile(filepath):
-            message("invalid file: %s" % filepath)
-            raise
-        
+            message("Invalid file: %s" % filepath)
+            return 0
+
         self.splash.setMessage("loading %s" % filepath)
     
         # add the item to the session
         item = GLScene(filepath)
         self.session.add_item(item)
+        
+        # override default display mode
+        if self._override_mode is not None:
+            item.mode = self._override_mode
 
+        # don't load if the viewer is hidden
         if self.viewer_group.isHidden():
             item.loaded = False
         else:
             item.loaded = True
+
         if filepath.endswith(Scene.EXT):
             tree_item = SceneTreeWidgetItem(self.objects_tree, item)
         elif filepath.endswith(Session.EXT):
@@ -827,6 +867,8 @@ class AbcView(QtGui.QMainWindow):
         # load the item into the viewer
         if item.loaded:
             tree_item.load()
+
+        return 1
 
     ## event handlers
 
@@ -977,13 +1019,21 @@ class AbcView(QtGui.QMainWindow):
 
         :param item: SceneTreeWidgetItem, SessionTreeWidgetItem
         """
+        colors = style.gen_colors(self.objects_tree.topLevelItemCount()+1)
         def load(item):
             if type(item) == SceneTreeWidgetItem:
                 self.viewer.add_scene(item.object)
+                index = self.viewer.state.scenes.index(item.object)
+                if item.object.properties.get("color", None):
+                    color = [c * style.CCLAMP for c in item.object.color]
+                    item.set_color(QtGui.QColor(*color))
+                else:
+                    item.set_color(QtGui.QColor(*colors[index]))
             elif type(item) == SessionTreeWidgetItem:
                 for child in item.children():
                     load(child)
         log.debug("[AbcView.handle_item_loaded] %s" % item.object)
+        self.splash.setMessage("loading %s" % item.object.name)
         load(item)
 
     def handle_item_unloaded(self, item):

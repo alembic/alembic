@@ -38,10 +38,30 @@
 import os
 from abcview import config
 
+# path dict
 d = {
     "icons": config.ICON_DIR,
 }
 
+# normalizes color values (0 to 1)
+CCLAMP = 500.0
+
+def gen_colors(N=1):
+    """
+    Returns a color range as a list of rgb tuples.
+
+    :param N: number of colors to generate. 
+    """
+    import colorsys
+    HSV_tuples = [(x*1.0/N, 0.5, 0.5) for x in range(N)]
+    HSV_tuples.reverse()
+    RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
+    RGB_tuples = map(lambda x: tuple(map(lambda y: int(y * CCLAMP),x)),RGB_tuples)
+    #HEX_tuples = map(lambda x: tuple(map(lambda y: chr(y).encode('hex'),x)), RGB_tuples)
+    #HEX_tuples = map(lambda x: "".join(x), HEX_tuples)
+    return RGB_tuples
+
+# Qt dialog css
 DIALOG = """
 QMessageBox {
     background: #222;
@@ -58,6 +78,7 @@ QMessageBox QPushButton {
 }
 """
 
+# Qt splash screen css
 SPLASH = """
 * {
     background: #000;
@@ -73,6 +94,7 @@ QProgressBar::chunk {
 }
 """
 
+# Qt main window css
 MAIN = """
 QGroupBox {
     border: 0px;
@@ -330,4 +352,3 @@ QMenu QPushButton:hover {
     background: #323332;
 }
 """ % d
-

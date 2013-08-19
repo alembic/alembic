@@ -100,18 +100,10 @@ def update_camera(func):
         wid.state.signal_state_change.emit()
     return with_wrapped_func
 
-def set_ambient_light():
-    """
-    Ambient light is used for AbcView objects (e.g. grid, HUD, etc)
-    """
-    glDisable(GL_LIGHT0)
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0.4, 0.4, 0.4, 1.0))
-
 def set_diffuse_light():
     """
     Sets up the GL calls for the light that illuminates objects.
     """
-
     ambient = (0.1, 0.1, 0.1, 1.0)
     diffuse = (0.5, 1.0, 1.0, 1.0)
     position = (90.0, 90.0, 150.0, 0.0)
@@ -123,78 +115,31 @@ def set_diffuse_light():
     back_mat_specular = (0.0, 0.0, 0.0, 1.0)
     back_mat_diffuse = (0.0, 0.0, 0.0, 1.0)
 
-    lmodel_ambient = (1.0, 1.0, 1.0, 1.0)
-
-    if 1:
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-
-        #glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-        #glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-        #glLightfv(GL_LIGHT0, GL_POSITION, position);
-
-        glMaterialfv(GL_FRONT, GL_SHININESS, front_mat_shininess);
-        glMaterialfv(GL_FRONT, GL_SPECULAR, front_mat_specular);
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, front_mat_diffuse);
-        glMaterialfv(GL_BACK, GL_SHININESS, back_mat_shininess);
-        glMaterialfv(GL_BACK, GL_SPECULAR, back_mat_specular);
-        glMaterialfv(GL_BACK, GL_DIFFUSE, back_mat_diffuse);
-
-        #glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-        #glLightModelfv(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-
-        #glEnable(GL_LIGHTING);
-        #glEnable(GL_LIGHT0);
-        #glShadeModel(GL_SMOOTH);
-
-    #else:
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0.0, 0.0, 0.0, 0.0))
-        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
-        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
-        glEnable(GL_LIGHTING)
-        glEnable(GL_LIGHT0)
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.2, 0.2, 0.2, 1.0))
-        glLightfv(GL_LIGHT0, GL_SPECULAR, (0.0, 0.0, 0.0, 1.0))
-        glLightfv(GL_LIGHT0, GL_AMBIENT, (0.0, 0.0, 0.0, 1.0))
-
-def set_default_materials():
-    """
-    Hardcoded GL material shaders.
-    """
-    print "set_default_materials"
-    mat_specular = (1.0, 1.0, 1.0, 1.0)
-    mat_shininess = 100.0
-    mat_front_emission = (0.0, 0.0, 0.0, 0.0)
-    mat_back_emission = (1.0, 0.0, 0.0, 1.0)
-
-    glClearColor(0.12, 0.12, 0.12, 0.0)
-    glMaterialfv(GL_FRONT, GL_EMISSION, mat_front_emission)
-    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular)
-    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess)
-
-    glMaterialfv(GL_BACK, GL_EMISSION, mat_back_emission)
-    glMaterialfv(GL_BACK, GL_SPECULAR, mat_specular)
-    glMaterialfv(GL_BACK, GL_SHININESS, mat_shininess)
-
-    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE)
-    glEnable(GL_COLOR_MATERIAL)
-
-def foo():
-    print "foo"
-    mat_specular = ( 0.1, 0.1, 0.1, 1.0 )
-    mat_shininess = ( 10.0 )
-    light_position = ( 25.0, -10000.0, 0.0, 0.0 )
-    glClearColor(0.0, 0.0, 0.0, 0.0)
-    glShadeModel(GL_SMOOTH)
-
-    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular)
-    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess)
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position)
+    lmodel_ambient = (0.0, 0.0, 0.0, 1.0)
 
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
-    glEnable(GL_DEPTH_TEST)
+    glShadeModel(GL_SMOOTH)
 
+    glEnable(GL_DEPTH_TEST)
+    glDepthFunc(GL_LEQUAL)
+    
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
+    #glLightfv(GL_LIGHT0, GL_POSITION, position)
+
+    glMaterialfv(GL_FRONT, GL_SHININESS, front_mat_shininess)
+    glMaterialfv(GL_FRONT, GL_SPECULAR, front_mat_specular)
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, front_mat_diffuse)
+    glMaterialfv(GL_BACK, GL_SHININESS, back_mat_shininess)
+    glMaterialfv(GL_BACK, GL_SPECULAR, back_mat_specular)
+    glMaterialfv(GL_BACK, GL_DIFFUSE, back_mat_diffuse)
+
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient)
+    glLightModelfv(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
+    #glFrontFace(GL_CCW)
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
+    
 def create_viewer_app(filepath=None):
     """
     Creates a standalone viewer app. ::
@@ -869,8 +814,8 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         Paints the grid.
         """
-        glColor3f(1, 1, 1)
-        set_ambient_light() 
+        glDisable(GL_LIGHTING)
+        glColor3f(0.5, 0.5, 0.5)
         for x in range(-10, 11):
             if x == 0:
                 continue
@@ -888,8 +833,6 @@ class GLWidget(QtOpenGL.QGLWidget):
         glVertex3f(10, 0, 0)
         glEnd()
 
-        set_diffuse_light()
-    
     def _paint_hud(self):
         """
         Paints the heads-up-display information.
@@ -1057,10 +1000,10 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.camera.apply()
 
         # light0 tracks with camera
-        glMatrixMode( GL_MODELVIEW )
+        glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glLoadIdentity()
-        glLightfv( GL_LIGHT0, GL_POSITION, ( 0.0, 0.0, -1.0, 1.0 ) )
+        glLightfv(GL_LIGHT0, GL_POSITION, ( 0.0, 0.0, 1.0, 1.0 ))
         glPopMatrix()
 
         # change background color to indicate which viewer is active

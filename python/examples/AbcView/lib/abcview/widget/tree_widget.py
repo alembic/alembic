@@ -332,19 +332,22 @@ class SceneTreeWidgetItem(SessionTreeWidgetItem):
         self.treeWidget().setItemWidget(self, 
                 self.treeWidget().colnum('color'), self.g)
 
-        # restore color indicator (unclamped)
-        c = self.object.color
-        self.setColor("rgb(%.2f, %.2f, %.2f)" 
-                % (c[0] * 500.0, c[1] * 500.0, c[2] * 500.0))
-
-    def setColor(self, color="rgb(0.5, 0.5, 0.5)"):
+    def set_color(self, color):
         """
-        Sets the color indicator delegate
+        Sets the color indicator delegate in the tree widget item.
 
-        :param color: css string, e.g. rgb(255, 0, 0)
+        :param color: QColor object
         """
-        log.debug("[%s.setColor] %s" % (self, color))
-        self.g.setStyleSheet("background: %s;" % color)
+        log.debug("[%s.set_color] %s" % (self, color))
+        
+        # normalize color values
+        self.object.color = (color.red() / 500.0, 
+                   color.green() / 500.0, 
+                   color.blue() / 500.0)
+
+        # update delegate widget stylesheet
+        self.g.setStyleSheet("background: rgb(%.2f, %.2f, %.2f);" 
+                % (color.red(), color.green(), color.blue()))
 
     def children(self):
         yield ObjectTreeWidgetItem(self, self.object.archive.getTop())
@@ -559,15 +562,9 @@ class ObjectTreeWidget(AbcTreeWidget):
         color = QtGui.QColorDialog(self).getColor()
         item = self.selectedItems()[0]
 
-        #HACK: color values need to be clamped
-        item.object.color = (color.red() / 500.0, 
-                             color.green() / 500.0, 
-                             color.blue() / 500.0)
-
         # set the scene color indicator column
         if type(item) == SceneTreeWidgetItem:
-            item.setColor("rgb(%.2f, %.2f, %.2f)" 
-                    % (color.red(), color.green(), color.blue()))
+            item.set_color(color) 
 
     def handle_set_mode(self, mode):
         """

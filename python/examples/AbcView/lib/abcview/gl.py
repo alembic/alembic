@@ -584,9 +584,10 @@ class GLScene(abcview.io.Scene):
         bounds = self.archive.bounds()
         
         if bounds is not None:
-            glPushName(0)
+            #TODO: gl picking in scene bounds mode
+            #glPushName(0)
             alembicgl.drawBounds(bounds)
-            glPopName()
+            #glPopName()
         else:
             try:
                 self.scene.draw_bounds()
