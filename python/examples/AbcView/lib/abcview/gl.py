@@ -636,7 +636,6 @@ class GLScene(abcview.io.Scene):
 
     def selection(self, x, y, camera):
         log.debug("[%s.selection] %s %s %s" % (self, x, y, camera))
-        print "state:", self.state, "visible:", self.visible, "loaded:", self.loaded
         return self.scene.selection(x, y, camera)
 
     def set_time(self, value):
