@@ -284,7 +284,7 @@ class SessionTreeWidgetItem(AbcTreeWidgetItem):
         """
         super(SessionTreeWidgetItem, self).__init__(parent, object)
         self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
-        self.setExpanded(False)
+        self.setExpanded(True)
         self.setText(self.treeWidget().colnum('name'), 
                 str(self.object.name))
         self.setToolTip(self.treeWidget().colnum('name'), 
@@ -326,11 +326,13 @@ class SceneTreeWidgetItem(SessionTreeWidgetItem):
         """
         super(SceneTreeWidgetItem, self).__init__(parent, object)
         self.setToolTip(self.treeWidget().colnum(''), 'visible')
+        self.setExpanded(False)
 
         # color indicator delegate
         self.g = QtGui.QGroupBox()
         self.treeWidget().setItemWidget(self, 
                 self.treeWidget().colnum('color'), self.g)
+        self.set_color(QtGui.QColor(*[x*500.0 for x in self.object.color]))
 
     def set_color(self, color):
         """
@@ -338,8 +340,6 @@ class SceneTreeWidgetItem(SessionTreeWidgetItem):
 
         :param color: QColor object
         """
-        log.debug("[%s.set_color] %s" % (self, color))
-        
         # normalize color values
         self.object.color = (color.red() / 500.0, 
                    color.green() / 500.0, 
@@ -529,7 +529,7 @@ class ObjectTreeWidget(AbcTreeWidget):
         self.header().setResizeMode(self.colnum(''), QtGui.QHeaderView.Fixed)
         self.header().resizeSection(self.colnum(''), 25)
         self.header().setResizeMode(self.colnum('color'), QtGui.QHeaderView.Fixed)
-        self.header().resizeSection(self.colnum('color'), 5)
+        self.header().resizeSection(self.colnum('color'), 3)
         self.header().setResizeMode(self.colnum('hidden'), QtGui.QHeaderView.Fixed)
         self.header().resizeSection(self.colnum('hidden'), 5)
         self.header().setSectionHidden(self.colnum('hidden'), True)
@@ -559,12 +559,11 @@ class ObjectTreeWidget(AbcTreeWidget):
 
         :param item: SceneTreeWidgetItem
         """
-        color = QtGui.QColorDialog(self).getColor()
         item = self.selectedItems()[0]
-
-        # set the scene color indicator column
-        if type(item) == SceneTreeWidgetItem:
-            item.set_color(color) 
+        dialog = QtGui.QColorDialog(QtGui.QColor(*item.object.color), self)
+        rgba, ok = dialog.getRgba()
+        if ok and type(item) == SceneTreeWidgetItem:
+            item.set_color(QtGui.QColor(rgba))
 
     def handle_set_mode(self, mode):
         """

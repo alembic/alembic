@@ -56,7 +56,7 @@ def gen_colors(N=1):
     HSV_tuples = [(x*1.0/N, 0.5, 0.5) for x in range(N)]
     HSV_tuples.reverse()
     RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
-    RGB_tuples = map(lambda x: tuple(map(lambda y: int(y * CCLAMP),x)),RGB_tuples)
+    #RGB_tuples = map(lambda x: tuple(map(lambda y: int(y * CCLAMP),x)),RGB_tuples)
     #HEX_tuples = map(lambda x: tuple(map(lambda y: chr(y).encode('hex'),x)), RGB_tuples)
     #HEX_tuples = map(lambda x: "".join(x), HEX_tuples)
     return RGB_tuples
@@ -201,6 +201,12 @@ QMenu::item {
     padding: 2px 25px 2px 20px;
     color: #aaa;
     border: 0px;
+}
+QMenu::item:non-exclusive {
+    text-decoration: none;
+}
+QMenu::item:exclusive {
+    font: italic;
 }
 QMenu::item:selected {
     background: #323332;

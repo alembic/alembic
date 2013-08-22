@@ -278,6 +278,7 @@ class GLState(QtCore.QObject):
         """
         if type(scene) == GLScene:
             if scene not in self.__scenes:
+                scene.state = self
                 self.__scenes.append(scene)
             else:
                 scene.visible = True
@@ -336,12 +337,13 @@ class GLState(QtCore.QObject):
         for scene in self.scenes:
             if scene.visible:
                 scene.set_time(new_time)
+        log.debug("[%s._set_time] %s" % (self, self.__time))
         self.signal_current_time.emit(new_time) 
         self.signal_current_frame.emit(int(round(new_time * self.frames_per_second)))
 
         # update other viewers
         self.signal_state_change.emit()
-
+        
     current_time = property(_get_time, _set_time, doc="set/get current time")
 
     def _get_frame(self):
@@ -626,8 +628,10 @@ class GLWidget(QtOpenGL.QGLWidget):
             for scene in self.state.scenes:
                 if not scene.loaded:
                     continue
-                if bounds is None or scene.bounds().max() > bounds.max():
-                    bounds = scene.bounds()
+                if bounds is None or \
+                        scene.bounds(self.state.current_time).max() > \
+                        bounds.max():
+                    bounds = scene.bounds(self.state.current_time)
                     min = bounds.min()
                     max = bounds.max()
                     if scene.properties.get("translate"):
@@ -986,6 +990,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         OpenGL painting override
         """
+        if not self.isEnabled():
+            return
+
         if self.isHidden() or not self.state:
             return
 
@@ -1051,13 +1058,18 @@ class GLWidget(QtOpenGL.QGLWidget):
             glScalef(*scene.scale)
             glColor3f(*scene.color)
 
-            # draw bounds
+            # draw scene bounds
             if self.camera.draw_bounds:
-                scene.draw_bounds()
+                scene.draw_bounds(self.state.current_time)
             
             set_diffuse_light()
+           
+            # draw scene labels
+            if self.camera.draw_labels:
+                c = scene.bounds().center()
+                self.renderText(c[0], c[1], c[2], scene.name)
 
-            # draw scene
+            # draw scene geom
             if mode != Mode.OFF:
                 scene.draw(self.camera.visible, mode == Mode.BOUNDS)
             
@@ -1141,6 +1153,10 @@ class GLWidget(QtOpenGL.QGLWidget):
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_H:
             self.camera._set_draw_hud()
 
+        # alt+l - toggle labels
+        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_L:
+            self.camera._set_draw_labels()
+
         # alt+v - toggle visibility
         elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_V:
             self.camera._set_visible()
@@ -1219,16 +1235,25 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # cameras
             camera_menu = QtGui.QMenu("Cameras", self)
-            camera_group = QtGui.QActionGroup(camera_menu) 
+            camera_group = QtGui.QActionGroup(camera_menu)
+            camera_group_unsaved = QtGui.QActionGroup(camera_menu)
+            camera_group.setExclusive(False)
+            camera_group_unsaved.setExclusive(True)
 
             for camera in self.state.cameras:
                 camera_action = QtGui.QAction(camera.name, self)
                 camera_action.setCheckable(True)
                 if camera.name == self.camera.name:
                     camera_action.setChecked(True)
-                camera_action.setActionGroup(camera_group)
+                if camera.name == "interactive":
+                    camera_action.setActionGroup(camera_group_unsaved)
+                    camera_action.setToolTip("This camera cannot be saved.")
+                else:
+                    camera_action.setActionGroup(camera_group)
                 camera_menu.addAction(camera_action)
             self.connect(camera_group, QtCore.SIGNAL("triggered (QAction *)"), 
+                        self.handle_set_camera)
+            self.connect(camera_group_unsaved, QtCore.SIGNAL("triggered (QAction *)"), 
                         self.handle_set_camera)
             self.connect(camera_menu, QtCore.SIGNAL("triggered (QAction *)"), 
                         self.handle_camera_action)
@@ -1264,6 +1289,15 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.connect(self.hudAct, QtCore.SIGNAL("toggled (bool)"), 
                     self.camera._set_draw_hud)
             options_menu.addAction(self.hudAct)
+
+            # labels toggle menu item
+            self.labelsAct = QtGui.QAction("Labels ", self)
+            self.labelsAct.setShortcut("Alt+L")
+            self.labelsAct.setCheckable(True)
+            self.labelsAct.setChecked(self.camera.draw_labels)
+            self.connect(self.labelsAct, QtCore.SIGNAL("toggled (bool)"), 
+                    self.camera._set_draw_labels)
+            options_menu.addAction(self.labelsAct)
 
             # normals toggle menu item
             self.normalsAct = QtGui.QAction("Normals ", self)

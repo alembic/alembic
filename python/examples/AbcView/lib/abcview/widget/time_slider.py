@@ -236,6 +236,10 @@ class TimeSlider(QtGui.QGroupBox):
         return self.slider.value()
 
     def set_value(self, value):
+        if value > self.__maximum:
+            self.set_maximum(value)
+        elif value < self.__minimum:
+            self.set_minimum(value)
         self.slider.setValue(value)
 
     def _get_playing(self):

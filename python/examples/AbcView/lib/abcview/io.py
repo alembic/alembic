@@ -105,11 +105,12 @@ class Base(object):
         raise NotImplementedError("must be implemented in a subclass")
 
 class FileBase(Base):
+    SERIALIZE = []
     EXT = None
     def __init__(self, filepath, parent=None):
         super(FileBase, self).__init__()
         self.__filepath = filepath
-        self.__name = None
+        self.__name = "Unnamed"
         self.parent = parent
 
     def is_archive(self):
@@ -240,6 +241,7 @@ class CameraBase(Base):
         self.__auto_frame = False
         self.__draw_bounds = False
         self.__draw_hud = False
+        self.__draw_labels = False
         self.__draw_grid = True
         self.__draw_normals = False
         self.__draw_mode = Mode.LINE
@@ -290,6 +292,17 @@ class CameraBase(Base):
             self.__draw_bounds = not self.__draw_bounds
 
     draw_bounds = property(_get_draw_bounds, _set_draw_bounds, doc="draw bounding boxes")
+
+    def _get_draw_labels(self):
+        return self.__draw_labels
+    
+    def _set_draw_labels(self, force=None):
+        if force is not None:
+            self.__draw_labels = force
+        else:
+            self.__draw_labels = not self.__draw_labels
+
+    draw_labels = property(_get_draw_labels, _set_draw_labels, doc="draw scene labels")
 
     def _get_draw_hud(self):
         return self.__draw_hud
@@ -595,6 +608,7 @@ class Session(FileBase):
 
         :param filepath: path to file
         """
+        log.debug("[%s.add_file] %s" % (self, filepath))
         if filepath.endswith(self.EXT):
             item = Session(filepath)
         elif filepath.endswith(Scene.EXT):
@@ -680,6 +694,24 @@ class Session(FileBase):
         self.__items = []
         
         self.make_clean()
+
+    def walk(self):
+        """
+        Recursive generator that yields Session, Scene and Camera objects.
+        Adds a .session attribute to each item.
+
+        :yield: Session, Scene or Camera objects
+        """
+        for item in self.items + self.cameras:
+            if item.type() == Session.type():
+                item.session = self
+                yield item
+                for child in item.walk():
+                    child.session = item
+                    yield child
+            else:
+                item.session = self
+                yield item
 
     def load(self, filepath=None):
         """

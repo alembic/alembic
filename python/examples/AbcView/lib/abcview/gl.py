@@ -57,6 +57,7 @@ except ImportError:
 import abcview
 from abcview import log
 from abcview.io import Mode
+from abcview.utils import memoized
 
 __doc__ = """
 When loading a Session object into the AbcView GUI, the IO objects are
@@ -88,6 +89,9 @@ class IArchive(alembic.Abc.IArchive):
     """
     def __init__(self, filepath):
         super(IArchive, self).__init__(str(filepath))
+        
+        # placeholder for top-most xform schema
+        self._bounds_cp = None
 
     def uid(self):
         return id(self)
@@ -95,9 +99,22 @@ class IArchive(alembic.Abc.IArchive):
     def __repr__(self):
         return "<IArchive %s>" % self.uid()
 
-    def bounds(self, index=0):
-        limit = 2
+    def bounds(self, seconds=0):
+        """
+        Attempts to get the top-most childBnds property value for
+        a given time in seconds. 
+
+        :param seconds: time in seconds
+        :return: Box3d bounds value, or None
+        """
+        #log.debug("[%s.bounds] %s" % (repr(self), seconds))
         
+        if seconds is None:
+            seconds = 0
+
+        # limit the levels to walk
+        limit = 2
+
         def walk(obj, l=0):
             if l > limit:
                 return
@@ -106,6 +123,9 @@ class IArchive(alembic.Abc.IArchive):
                 xs = x.getSchema()
                 cp = xs.getChildBoundsProperty()
                 if cp.valid():
+                    ts = cp.getTimeSampling()
+                    index = ts.getNearIndex(seconds, 
+                                    cp.getNumSamples())
                     return cp.getValue(index)
 
             for i in range(obj.getNumChildren()):
@@ -143,6 +163,11 @@ class SceneWrapper(alembicgl.SceneWrapper):
     @require_loaded
     def draw_bounds(self):
         super(SceneWrapper, self).drawBounds()
+
+    @require_loaded
+    def bounds(self):
+        #log.debug("[%s.bounds]" % (self))
+        return super(SceneWrapper, self).bounds()
 
     @require_loaded
     def get_time(self):
@@ -216,7 +241,10 @@ class GLCameraMixin(object):
         self._fovx = 45.0
         self._fovy = 45.0
         self._aspect_ratio = 1.85
-        self._size = (viewer.width(), viewer.height())
+
+        # set default size from viewer
+        if viewer is not None:
+            self._size = (viewer.width(), viewer.height())
 
     def dolly(self, dx, dy):
         # implement in subclass
@@ -307,6 +335,9 @@ class GLCamera(abcview.io.Camera, GLCameraMixin):
         :param name: camera name
         """
         super(GLCamera, self).__init__(name)
+        self.init(viewer)
+
+    def init(self, viewer):
         GLCameraMixin.__init__(self, viewer)
         self.apply()
 
@@ -467,6 +498,9 @@ class GLICamera(abcview.io.ICamera, GLCameraMixin):
         :param camera: Alembic ICamera object
         """
         super(GLICamera, self).__init__(camera)
+        self.init(viewer)
+
+    def init(self, viewer):
         GLCameraMixin.__init__(self, viewer)
 
     def __repr__(self):
@@ -539,9 +573,12 @@ class GLScene(abcview.io.Scene):
     """
     def __init__(self, filepath):
         super(GLScene, self).__init__(filepath)
+        self.init()
+  
+    def init(self):
         self.visible = True
         self.clear()
-   
+
     @property
     def archive(self):
         if self.__archive is None and self.filepath:
@@ -576,25 +613,30 @@ class GLScene(abcview.io.Scene):
         except RuntimeError, e:
             log.error(str(e))
     
-    def draw_bounds(self):
+    def draw_bounds(self, seconds=0):
         """
         Draw scene bounding boxes.
         """
-        # try to get bounds from archive first
-        bounds = self.archive.bounds()
+        glPushName(0)
         
+        # try to get top-most bounds from archive first...
+        bounds = self.archive.bounds(seconds)
+
         if bounds is not None:
-            #TODO: gl picking in scene bounds mode
-            #glPushName(0)
             alembicgl.drawBounds(bounds)
-            #glPopName()
+        
+        # because instantiating the SceneWrapper is slow
         else:
             try:
                 self.scene.draw_bounds()
             except RuntimeError, e:
                 log.error(str(e))
+        
+        glPopName()
 
     def selection(self, x, y, camera):
+        log.debug("[%s.selection] %s %s %s" % (self, x, y, camera))
+        print "state:", self.state, "visible:", self.visible, "loaded:", self.loaded
         return self.scene.selection(x, y, camera)
 
     def set_time(self, value):
@@ -613,9 +655,14 @@ class GLScene(abcview.io.Scene):
    
     def max_time(self):
         return self.scene.max_time()
-   
-    def bounds(self):
-        return self.scene.bounds()
+ 
+    @memoized
+    def bounds(self, seconds=0):
+        #log.debug("[%s.bounds] %s" % (self, seconds))
+        bounds = self.archive.bounds(seconds)
+        if bounds is None:
+            bounds = self.scene.bounds()
+        return bounds
 
     def top(self):
         return self.archive.getTop()

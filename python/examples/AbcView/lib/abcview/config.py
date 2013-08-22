@@ -38,7 +38,7 @@
 import os
 
 __prog__ = "AbcView"
-__version__ = "1.0.1"
+__version__ = "1.0.5"
 
 ICON_DIR = os.path.join(os.path.dirname(__file__), "icon")
 SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "script")

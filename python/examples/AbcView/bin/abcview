@@ -106,7 +106,6 @@ def create_parser():
             help='Set viewer first frame value.')
     parser.add_argument('--last', default=None, type=int,
             help='Set viewer last frame value.')
-
     parser.add_argument('--mode', default=None, type=int,
             help="""Default display mode:
                    (0: OFF,
@@ -117,12 +116,12 @@ def create_parser():
             """)
     parser.add_argument('--bounds', action='store_true',
             help='Force scene bounds display mode.')
-
+    parser.add_argument('--cinema', action='store_true',
+            help='Cinema display settings.')
     parser.add_argument('--reset', action='store_true',
             help='Reset settings.')
     parser.add_argument('--verbose', action='store_true',
             help='Verbose output.')
-
     parser.add_argument('--script', 
             help='Load and execute Python script.')
     return parser
@@ -137,7 +136,7 @@ def main():
 
     # create application and widget
     app = App(sys.argv)
-    win = AbcView(first_frame=args.first, last_frame=args.last)
+    win = AbcView()
     
     # verbosity
     if args.verbose:
@@ -146,6 +145,8 @@ def main():
     # settings
     if args.reset:
         win.reset_settings()
+    elif args.cinema:
+        win.cinema_settings()
     else:
         win.load_settings()
  
@@ -155,16 +156,20 @@ def main():
 
     # force scene bounds
     if args.bounds:
-        args.mode = Mode.OFF
+        win.set_default_mode(Mode.OFF)
         win.viewer.camera.mode = Mode.OFF
         win.viewer.camera.draw_bounds = 1
 
     # defer file loading until event loop starts
-    win.set_load_list(args.filepath, args.mode)
+    win.set_load_list(args.filepath)
 
-    # set frame range
+    # set frame range overrides
     if args.frame is not None:
-        win.viewer.state.current_frame = args.frame
+        win.set_current_frame(args.frame)
+    if args.first is not None:
+        win.set_first_frame(args.first)
+    if args.last is not None:
+        win.set_last_frame(args.last)
 
     # execute some python
     if args.script:
