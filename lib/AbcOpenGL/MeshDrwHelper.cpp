@@ -290,7 +290,7 @@ void MeshDrwHelper::drawBounds( const DrawContext & iCtx ) const
 }
 
 //-*****************************************************************************
-void drawBoundingBox( const Box3d bounds )
+void drawBoundingBox( const Box3d bounds, const int mode )
 {
     float min_x = bounds.min[0];
     float min_y = bounds.min[1];
@@ -309,7 +309,7 @@ void drawBoundingBox( const Box3d bounds )
     glPointSize( 1.0 );
     glLineWidth( 1.0 );
     
-    glBegin( GL_LINES );
+    glBegin( mode );
 
     glVertex3f(min_x, min_y, min_z);
     glVertex3f(min_x+w, min_y, min_z);

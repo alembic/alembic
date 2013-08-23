@@ -57,8 +57,8 @@ public:
         return m_scene.selection(x, y, camera, m_state);
     }
 
-    void drawBounds() {
-        m_scene.drawBounds(m_state);
+    void drawBounds( const int mode ) {
+        m_scene.drawBounds(m_state, mode);
     }
 
     void draw( bool visibleOnly, bool boundsOnly ) {
@@ -124,9 +124,9 @@ std::string SceneWrapper::selection(int x, int y, GLCamera &camera)
     return m_state->selection(x, y, camera);
 }
 
-void SceneWrapper::drawBounds()
+void SceneWrapper::drawBounds(const int mode)
 {
-    m_state->drawBounds();
+    m_state->drawBounds(mode);
 }
 
 void SceneWrapper::draw(bool visibleOnly, bool boundsOnly)

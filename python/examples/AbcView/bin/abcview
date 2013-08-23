@@ -116,8 +116,8 @@ def create_parser():
             """)
     parser.add_argument('--bounds', action='store_true',
             help='Force scene bounds display mode.')
-    parser.add_argument('--cinema', action='store_true',
-            help='Cinema display settings.')
+    parser.add_argument('--review', action='store_true',
+            help='Use review display settings.')
     parser.add_argument('--reset', action='store_true',
             help='Reset settings.')
     parser.add_argument('--verbose', action='store_true',
@@ -145,8 +145,8 @@ def main():
     # settings
     if args.reset:
         win.reset_settings()
-    elif args.cinema:
-        win.cinema_settings()
+    elif args.review:
+        win.review_settings()
     else:
         win.load_settings()
  

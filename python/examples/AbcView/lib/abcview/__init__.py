@@ -145,8 +145,23 @@ def io2gl(item, viewer=None):
         item.init()
 
     elif item.type() == Camera.type():
+        _translation = item.translation
+        _rotation = item.rotation
+        _scale = item.scale
+        _center = item.center
+        _near = item.near
+        _far = item.far
+        _ratio = item.aspect_ratio
         item.__class__ = GLCamera
-        item.init(viewer)
+        item.init(viewer, 
+                  translation=_translation,
+                  rotation=_rotation,
+                  scale=_scale,
+                  center=_center,
+                  near=_near,
+                  far=_far,
+                  aspect_ratio=_ratio,
+                 )
     
     elif item.type() == ICamera.type():
         item.__class__ = GLICamera
@@ -419,6 +434,8 @@ class AbcView(QtGui.QMainWindow):
         self.objects_group.setLayout(QtGui.QVBoxLayout())
         self.objects_tree = ObjectTreeWidget(self, main=self)
         self.objects_tree.signal_view_camera.connect(self.handle_view_camera)
+        self.objects_tree.itemSelectionChanged.connect(self.handle_object_selection)
+        self.objects_tree.itemClicked.connect(self.handle_item_selected)
         self.find_line_edit = FindLineEdit(self)
         self.objects_group.layout().setSpacing(0)
         self.objects_group.layout().setMargin(0)
@@ -459,7 +476,9 @@ class AbcView(QtGui.QMainWindow):
         self.viewer.state.signal_current_frame.connect(self.handle_update_frame)
         self.viewer.state.signal_play_fwd.connect(self.handle_state_play_fwd)
         self.viewer.state.signal_play_stop.connect(self.handle_state_play_stop)
+        self.viewer.signal_scene_selected.connect(self.handle_scene_selected)
         self.viewer.signal_object_selected.connect(self.handle_object_selected)
+        self.viewer.signal_clear_selection.connect(self.objects_tree.clearSelection)
         
         # time slider
         self.time_slider = TimeSlider(self)
@@ -574,11 +593,16 @@ class AbcView(QtGui.QMainWindow):
         self.settings.clear()
         self._settings(width, height)
 
-    def cinema_settings(self):
+    def review_settings(self):
         """
-        Loads "cinema" display settings. Does not affect saved settings.
+        Loads "review" display settings. Does not affect saved settings.
         """
         self._settings(1200, 600)
+        self.viewer.camera.draw_grid = False
+        self.viewer.camera.draw_hud = False
+        self.viewer.camera.draw_normals = False
+        self.viewer.camera.fixed = True
+        self.viewer.camera.visible = True
 
     def load_settings(self):
         """
@@ -795,11 +819,12 @@ class AbcView(QtGui.QMainWindow):
         # create trees for top-level session items
         for item in self.session.items:
             if item.type() == Session.type():
-                item = SessionTreeWidgetItem(self.objects_tree, item)
+                tree = SessionTreeWidgetItem(self.objects_tree, item)
             elif item.type() == GLScene.type():
-                item = SceneTreeWidgetItem(self.objects_tree, item)
-            if item.object.loaded:
-                item.load()
+                tree = SceneTreeWidgetItem(self.objects_tree, item)
+            if item.loaded:
+                tree.load()
+            item.tree = tree
         
         # frame the viewer
         if len(self._load_list) == 1 and self._load_list[0].endswith(Scene.EXT):
@@ -822,10 +847,43 @@ class AbcView(QtGui.QMainWindow):
 
     def open_file(self, filepath):
         """
-        File loader.
+        File loader
+
+        :param filepath: file path to load, replaces session
         """
         self.set_load_list([filepath])
         self._start()
+
+    def import_file(self, filepath):
+        """
+        File importer
+
+        :param filepath: file path to import, adds to session
+        """
+        self.viewer.setDisabled(True)
+
+        if filepath.endswith(Session.EXT):
+            item = Session(filepath)
+        elif filepath.endswith(Scene.EXT):
+            item = GLScene(filepath)
+        
+        self.session.add_item(item)
+        COLORS = style.gen_colors(len(self.session.items) or 1)
+
+        if self._overrides.get("mode") is not None:
+            item.mode = self._overrides.get("mode")
+
+        if not item.properties.get("color", None):
+            item.color = COLORS[0]
+
+        if item.type() == Session.type():
+            item = SessionTreeWidgetItem(self.objects_tree, item)
+        elif item.type() == GLScene.type():
+            item = SceneTreeWidgetItem(self.objects_tree, item)
+        if item.object.loaded:
+            item.load()
+
+        self.viewer.setDisabled(False)
 
     @make_clean
     def save_session(self, filepath=None):
@@ -986,7 +1044,25 @@ class AbcView(QtGui.QMainWindow):
         else:
             self.viewer.set_camera(icamera.getName())
 
+    def handle_scene_selected(self, scene):
+        """
+        GLWidget scene selected handler.
+
+        :param scene: GLScene
+        """
+        log.debug("[%s.handle_scene_selected] %s" % (self, scene))
+        self.objects_tree.clearSelection()
+        if scene:
+            scene.tree.treeWidget().scrollToItem(scene.tree, 
+                             QtGui.QAbstractItemView.PositionAtCenter)
+            scene.tree.treeWidget().setItemSelected(scene.tree, True)
+
     def handle_object_selected(self, name):
+        """
+        GLWidget object selected handler.
+
+        :param name: name of object
+        """
         self.objects_tree.find(str(name.toAscii()))
 
     def find(self, name):
@@ -1004,6 +1080,21 @@ class AbcView(QtGui.QMainWindow):
             text = self.find_line_edit.text()
         if text:
             self.find(str(text.toAscii()))
+
+    def handle_object_selection(self):
+        for scene in self.viewer.state.scenes:
+            scene.selected = False
+        self.viewer.updateGL()
+
+    def handle_item_selected(self, item):
+        """
+        item click handler
+
+        :param item: SceneTreeWidgetItem, SessionTreeWidgetItem
+        """
+        if type(item) == SceneTreeWidgetItem:
+            item.object.selected = True
+        self.viewer.updateGL()
 
     def handle_item_loaded(self, item):
         """
@@ -1078,15 +1169,15 @@ class AbcView(QtGui.QMainWindow):
                     os.getcwd(), ("Alembic Files (*.%s *.%s)" 
                         % (Scene.EXT, Session.EXT)))
         if filepath:
-            self.set_load_list([str(filepath.toAscii())])
-            self._load()
+            self.import_file(str(filepath.toAscii()))
 
     @make_clean
     def handle_reload(self):
         """
-        File->Reload menud handler
+        File->Reload menu handler, reloads session
         """
-        self.open_file(self.session.filepath)
+        self.clear()
+        self._load()
 
     def handle_frame_scene(self):
         """

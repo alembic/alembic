@@ -44,7 +44,7 @@ namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
-void drawBoundingBox( const Box3d bounds );
+void drawBoundingBox( const Box3d bounds, const int mode = GL_LINES );
 
 //-*****************************************************************************
 //! \brief Both the SubD and PolyMesh classes draw in the same way, so we

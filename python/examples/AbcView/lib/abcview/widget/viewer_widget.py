@@ -493,7 +493,9 @@ class GLWidget(QtOpenGL.QGLWidget):
     signal_set_camera = QtCore.pyqtSignal(GLCamera)
     signal_new_camera = QtCore.pyqtSignal(GLCamera)
     signal_camera_updated = QtCore.pyqtSignal(GLCamera)
+    signal_scene_selected = QtCore.pyqtSignal(GLScene)
     signal_object_selected = QtCore.pyqtSignal(str)
+    signal_clear_selection = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, state=None):
         """
@@ -510,7 +512,6 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.setAutoBufferSwap(True)
         self.setMouseTracking(True)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.setCursor(QtCore.Qt.OpenHandCursor)
       
         # embedded in larger app?
         self._main = parent
@@ -523,7 +524,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.__last_p2d = QtCore.QPoint()
         self.__last_p3d = [1.0, 0.0, 0.0]
         self.__rotating = False
-        self.__mode = GL_RENDER
+        self.__mode = GL_SELECT
 
         # viewers must have at least one camera
         self.setup_default_camera()
@@ -970,6 +971,100 @@ class GLWidget(QtOpenGL.QGLWidget):
                 self.add_camera(camera)
                 self.set_camera(name)
 
+    def selection(self, x, y):
+        """
+        Bounding box selection handler.
+
+        :param x: mouse x position
+        :param y: mouse y position
+        :return: selected GLScene
+        """
+        log.debug("[%s.selection] %s %s %s" % (self, x, y, self.camera))
+
+        self.setDisabled(True)
+
+        #--- FIXED AR STUFF
+
+        # get basic size values for this viewer
+        camera_width = self.camera.get_size(self)[0]
+        camera_height = self.camera.get_size(self)[1]
+        camera_aspect_ratio = camera_width / float(camera_height)
+        
+        #TODO: consolidate this code and same from _paint_fixed()
+        # if fixed, lock the aspect ratio
+        if self.camera.fixed:
+            camera_aspect_ratio = self.camera.aspect_ratio
+            if self.aspect_ratio() > self.camera.aspect_ratio:
+                w = int(self.width() / (self.aspect_ratio() \
+                        / camera_aspect_ratio))
+                h = camera_height
+            else:
+                w = camera_width
+                h = int(self.height() * (self.aspect_ratio() \
+                        / camera_aspect_ratio))
+            _x = int(abs(w-self.width()) / 2.0)
+            _y = int(abs(h-self.height()) / 2.0)
+
+        # camera size matches viewer
+        else:
+            _x = _y = 0
+            w = self.width()
+            h = self.height()
+        
+        #--- /FIXED AR STUFF
+
+        MaxSize = 512
+
+        #viewport = glGetIntegerv(GL_VIEWPORT)
+        viewport = [_x, _y, w, h]
+        buffer = glSelectBuffer(MaxSize)
+
+        glRenderMode(GL_SELECT)
+        glInitNames()
+
+        # adjust mouse y value
+        if self.camera.fixed:
+            y = y - (_y * 2)
+
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity()
+        gluPickMatrix(x, (viewport[3] - y), 5.0, 5.0, viewport)
+
+        if self.camera.fixed:
+            ratio = self.camera.aspect_ratio
+        else:
+            ratio = self.aspect_ratio()
+
+        gluPerspective(self.camera.fovy, camera_aspect_ratio, 
+                       self.camera.near, self.camera.far)
+
+        # draw the scenes
+        for scene in self.state.scenes:
+            if not scene.visible:
+                continue
+
+            #TODO: uncomment for translated objects
+            # apply local transforms
+            #glPushMatrix()
+            #glTranslatef(*scene.translate)
+            #glRotatef(*scene.rotate)
+            #glScalef(*scene.scale)
+
+            # draw scene bounds
+            scene.draw_bounds(self.state.current_time) #, GL_POLYGON)
+
+            # pop translation matrix
+            #glPopMatrix()
+
+        #glMatrixMode(GL_PROJECTION)
+        glPopMatrix()
+
+        hits = glRenderMode(GL_RENDER)
+
+        self.setDisabled(False)
+        return self.state.scenes[hits[-1].names[-1]] if hits else None
+
     ## base class overrides
 
     def initializeGL(self):
@@ -998,7 +1093,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         if self not in self.camera.views:
             return
-
+        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glDrawBuffer(GL_BACK)
         glLoadIdentity()
@@ -1006,18 +1101,12 @@ class GLWidget(QtOpenGL.QGLWidget):
         # update camera
         self.camera.apply()
 
-        # light0 tracks with camera
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glLoadIdentity()
+        # light0 tracks with camera
         glLightfv(GL_LIGHT0, GL_POSITION, ( 0.0, 0.0, 1.0, 1.0 ))
         glPopMatrix()
-
-        # change background color to indicate which viewer is active
-        #if self.state.active_viewer == self:
-        #    glClearColor(0.15, 0.15, 0.15, 0.0)
-        #else:
-        #    glClearColor(0.2, 0.2, 0.2, 0.0) 
 
         # draw the heads-up-display
         if self.camera.draw_hud:
@@ -1056,7 +1145,11 @@ class GLWidget(QtOpenGL.QGLWidget):
             glTranslatef(*scene.translate)
             glRotatef(*scene.rotate)
             glScalef(*scene.scale)
-            glColor3f(*scene.color)
+            
+            if scene.selected:
+                glColor3d(1, 1, 0)
+            else:
+                glColor3f(*scene.color)
 
             # draw scene bounds
             if self.camera.draw_bounds:
@@ -1064,15 +1157,15 @@ class GLWidget(QtOpenGL.QGLWidget):
             
             set_diffuse_light()
            
+            # draw scene geom
+            if mode != Mode.OFF:
+                scene.draw(self.camera.visible, mode == Mode.BOUNDS)
+            
             # draw scene labels
             if self.camera.draw_labels:
                 c = scene.bounds().center()
                 self.renderText(c[0], c[1], c[2], scene.name)
 
-            # draw scene geom
-            if mode != Mode.OFF:
-                scene.draw(self.camera.visible, mode == Mode.BOUNDS)
-            
             glPopMatrix()
             self.signal_scene_drawn.emit()
         
@@ -1090,16 +1183,29 @@ class GLWidget(QtOpenGL.QGLWidget):
         key = event.key()
         mod = event.modifiers()
 
-        # select render mode
-        #if mod == QtCore.Qt.AltModifier:
-        #    self.__mode = GL_SELECT
+        def _set_selected_scene_mode(mode):
+            # applies display mode to objects/scenes
+            self.setCursor(QtCore.Qt.WaitCursor)
+            found = False
+            for scene in self.state.scenes:
+                if scene.selected:
+                    scene.mode = mode
+                    found = True
+            if not found:
+                self.handle_set_mode(mode)
+            self.updateGL()
+            self.setCursor(QtCore.Qt.ArrowCursor)
+
+        # alt key - camera tumble/track
+        if key == QtCore.Qt.Key_Alt:
+            self.__mode = GL_RENDER
+            return
 
         # space bar - playback control
         if key == QtCore.Qt.Key_Space:
             if len(self.state.scenes) == 0 or \
                    self.state.frame_count <= 1:
                 return
-
             if self.state.is_playing():
                 self.state.stop()
             else:
@@ -1107,23 +1213,28 @@ class GLWidget(QtOpenGL.QGLWidget):
         
         # 0 - display off
         elif key == QtCore.Qt.Key_0:
-            self.handle_set_mode(Mode.OFF)
+            #self.handle_set_mode(Mode.OFF)
+            _set_selected_scene_mode(Mode.OFF)
 
         # 1 - smooth
         elif key == QtCore.Qt.Key_1:
-            self.handle_set_mode(Mode.FILL)
+            #self.handle_set_mode(Mode.FILL)
+            _set_selected_scene_mode(Mode.FILL)
 
         # 2 - lines
         elif key == QtCore.Qt.Key_2:
-            self.handle_set_mode(Mode.LINE)
+            #self.handle_set_mode(Mode.LINE)
+            _set_selected_scene_mode(Mode.LINE)
 
         # 3 - points
         elif key == QtCore.Qt.Key_3:
-            self.handle_set_mode(Mode.POINT)
+            #self.handle_set_mode(Mode.POINT)
+            _set_selected_scene_mode(Mode.POINT)
 
         # 4 - bounds
         elif key == QtCore.Qt.Key_4:
-            self.handle_set_mode(Mode.BOUNDS)
+            #self.handle_set_mode(Mode.BOUNDS)
+            _set_selected_scene_mode(Mode.BOUNDS)
 
         # right arroy - increment frame
         elif key == QtCore.Qt.Key_Right:
@@ -1133,32 +1244,32 @@ class GLWidget(QtOpenGL.QGLWidget):
         elif key == QtCore.Qt.Key_Left:
             self.state.current_frame = self.state.current_frame - 1
 
-        # alt+f - toggle fixed aspect ratio
-        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_F:
+        # shift+f - toggle fixed aspect ratio
+        elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_A:
             self.camera._set_fixed()
     
-        # alt+b - toggle bounding boxes
-        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_B:
+        # shift+b - toggle bounding boxes
+        elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_B:
             self.camera._set_draw_bounds()
 
-        # alt+n - toggle draw normals
-        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_N:
+        # shift+n - toggle draw normals
+        elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_N:
             self.camera._set_draw_normals()
 
-        # alt+g - toggle grid
-        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_G:
+        # shift+g - toggle grid
+        elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_G:
             self.camera._set_draw_grid()
 
-        # alt+h - toggle hud
-        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_H:
+        # shift+h - toggle hud
+        elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_H:
             self.camera._set_draw_hud()
 
-        # alt+l - toggle labels
-        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_L:
+        # shift+l - toggle labels
+        elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_L:
             self.camera._set_draw_labels()
 
-        # alt+v - toggle visibility
-        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_V:
+        # shift+v - toggle visibility
+        elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_V:
             self.camera._set_visible()
 
         # shift+| - split vertically
@@ -1169,8 +1280,8 @@ class GLWidget(QtOpenGL.QGLWidget):
         elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_Underscore:
             self.split_horz()
         
-        # alt+- - unsplit
-        elif mod == QtCore.Qt.AltModifier and key == QtCore.Qt.Key_Minus:
+        # shift+- - unsplit
+        elif mod == QtCore.Qt.ShiftModifier and key == QtCore.Qt.Key_Minus:
             self.unsplit()
 
         # "f" - frame scene
@@ -1178,21 +1289,29 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.frame()
 
     def keyReleaseEvent(self, event):
-        self.__mode = GL_RENDER
+        """
+        key press release event handler
+        """
+        self.setCursor(QtCore.Qt.ArrowCursor)
+        self.__mode = GL_SELECT
 
     def mouseDoubleClickEvent(self, event):
         """
         mouse double-click event handler
         """
-        hit = None
+        if self.camera.mode == Mode.OFF:
+            return
+
+        # get scene selection hits
         for scene in self.state.scenes:
-            hit = scene.selection(event.pos().x(), 
-                                  event.pos().y(),
-                                  self.camera.views[self]
-                                  )
+            x, y = event.pos().x(), event.pos().y()
+            camera = self.camera.views[self]
+            hit = scene.selection(x, y, camera)
+
         #HACK: need a better/faster way to find the object
         if hit:
-            self.signal_object_selected.emit(".*%s" % hit.split("/")[-1])
+            name = hit.split("/")[-1]
+            self.signal_object_selected.emit(".*%s" % name)
 
     def mousePressEvent(self, event):
         """
@@ -1200,13 +1319,29 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         #TODO: use weakref for this instead? 
         self.state.active_viewer = self
-        
+
         # make this viewer the active one
         if self._main:
             self._main.viewer = self
 
         # process mouse event
-        if event.button() == QtCore.Qt.RightButton and \
+        if event.button() == QtCore.Qt.LeftButton and \
+           event.modifiers() == QtCore.Qt.NoModifier:
+            self.setCursor(QtCore.Qt.ArrowCursor)
+
+            if self.__mode == GL_SELECT:
+                for scene in self.state.scenes:
+                    scene.selected = False
+                self.signal_clear_selection.emit()
+                hit = self.selection(event.pos().x(), event.pos().y())
+                if hit:
+                    self.signal_scene_selected.emit(hit)
+                    hit.selected = True
+                self.updateGL()
+                return
+
+        # process mouse event
+        elif event.button() == QtCore.Qt.RightButton and \
            event.modifiers() == QtCore.Qt.NoModifier:
             self.setCursor(QtCore.Qt.ArrowCursor)
             
@@ -1227,7 +1362,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             layout_menu.addAction(self.splitVAct)
             
             self.closeAct = QtGui.QAction("Close ", self)
-            self.closeAct.setShortcut("Alt+-")
+            self.closeAct.setShortcut("Shift+-")
             self.connect(self.closeAct, QtCore.SIGNAL("triggered (bool)"), self.unsplit)
             layout_menu.addAction(self.closeAct)
             
@@ -1274,7 +1409,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # fixed aspect ratio toggle menu item
             self.fixedAct = QtGui.QAction("Fixed Aspect Ratio ", self)
-            self.fixedAct.setShortcut("Alt+F")
+            self.fixedAct.setShortcut("Shift+A")
             self.fixedAct.setCheckable(True)
             self.fixedAct.setChecked(self.camera.fixed)
             self.connect(self.fixedAct, QtCore.SIGNAL("toggled (bool)"), 
@@ -1283,7 +1418,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # heads-up-display menu item
             self.hudAct = QtGui.QAction("Heads-Up-Display ", self)
-            self.hudAct.setShortcut("Alt+H")
+            self.hudAct.setShortcut("Shift+H")
             self.hudAct.setCheckable(True)
             self.hudAct.setChecked(self.camera.draw_hud)
             self.connect(self.hudAct, QtCore.SIGNAL("toggled (bool)"), 
@@ -1292,7 +1427,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # labels toggle menu item
             self.labelsAct = QtGui.QAction("Labels ", self)
-            self.labelsAct.setShortcut("Alt+L")
+            self.labelsAct.setShortcut("Shift+L")
             self.labelsAct.setCheckable(True)
             self.labelsAct.setChecked(self.camera.draw_labels)
             self.connect(self.labelsAct, QtCore.SIGNAL("toggled (bool)"), 
@@ -1301,7 +1436,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # normals toggle menu item
             self.normalsAct = QtGui.QAction("Normals ", self)
-            self.normalsAct.setShortcut("Alt+N")
+            self.normalsAct.setShortcut("Shift+N")
             self.normalsAct.setCheckable(True)
             self.normalsAct.setChecked(self.camera.draw_normals)
             self.connect(self.normalsAct, QtCore.SIGNAL("toggled (bool)"), 
@@ -1310,7 +1445,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # bounds toggle menu item
             self.boundsAct = QtGui.QAction("Scene Bounds ", self)
-            self.boundsAct.setShortcut("Alt+B")
+            self.boundsAct.setShortcut("Shift+B")
             self.boundsAct.setCheckable(True)
             self.boundsAct.setChecked(self.camera.draw_bounds)
             self.connect(self.boundsAct, QtCore.SIGNAL("toggled (bool)"), 
@@ -1319,7 +1454,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # grid toggle menu item
             self.gridAct = QtGui.QAction("Show Grid ", self)
-            self.gridAct.setShortcut("Alt+G")
+            self.gridAct.setShortcut("Shift+G")
             self.gridAct.setCheckable(True)
             self.gridAct.setChecked(self.camera.draw_grid)
             self.connect(self.gridAct, QtCore.SIGNAL("toggled (bool)"), 
@@ -1328,7 +1463,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             # visibility toggle menu item
             self.visibleAct = QtGui.QAction("Visible Only ", self)
-            self.visibleAct.setShortcut("Alt+V")
+            self.visibleAct.setShortcut("Shift+V")
             self.visibleAct.setCheckable(True)
             self.visibleAct.setChecked(self.camera.visible)
             self.connect(self.visibleAct, QtCore.SIGNAL("toggled (bool)"), 
@@ -1393,13 +1528,13 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.__last_p2d = event.pos()
             self.__last_pok, self.__last_p3d = self.map_to_sphere(self.__last_p2d)
         
-        self.setCursor(QtCore.Qt.OpenHandCursor)
-
     @update_camera
     def mouseMoveEvent(self, event):
         """
         mouse move event handler
         """
+        if self.__mode != GL_RENDER:
+            return
         newPoint2D = event.pos()
         if ((newPoint2D.x() < 0) or (newPoint2D.x() > self.width()) or
             (newPoint2D.y() < 0) or (newPoint2D.y() > self.height())):

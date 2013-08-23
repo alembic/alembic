@@ -112,7 +112,7 @@ public:
 
     //! This draws, assuming a camera matrix has already been set.
     //! ...
-    void drawBounds( SceneState &s_state );
+    void drawBounds( SceneState &s_state, const int mode = GL_LINES );
     void draw( SceneState &s_state, bool visibleOnly = false, 
                                     bool boundsOnly = false);
 

@@ -52,7 +52,7 @@ void register_opengl()
 
     def("drawBounds", 
         &AbcOpenGL::drawBoundingBox,
-        ( arg( "bounds" ) ) )
+        ( arg( "bounds" ), arg( "mode" ) = 1 ) )
     ;
 
     // GLCamera overloads
@@ -146,7 +146,8 @@ void register_opengl()
               &AbcOpenGL::SceneWrapper::draw,
               ( arg( "visibleOnly" ) = false , arg( "boundsOnly" ) = false ) )
         .def( "drawBounds",
-              &AbcOpenGL::SceneWrapper::drawBounds )
+              &AbcOpenGL::SceneWrapper::drawBounds,
+              ( arg( "mode" ) ) )
         .def( "getMinTime",
               &AbcOpenGL::SceneWrapper::getMinTime )
         .def( "getMaxTime",

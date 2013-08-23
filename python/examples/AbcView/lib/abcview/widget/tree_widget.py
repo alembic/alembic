@@ -442,7 +442,6 @@ class AbcTreeWidget(DeselectableTreeWidget):
         self.scrollToItem(item, QtGui.QAbstractItemView.EnsureVisible)
         self.emit(QtCore.SIGNAL('itemClicked (PyQt_PyObject)'), 
                     item)
-        
         if col == self.colnum("") and type(item) == SceneTreeWidgetItem:
             if item.checkState(self.colnum("")) == QtCore.Qt.Checked:
                 item.load()

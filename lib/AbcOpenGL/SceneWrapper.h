@@ -55,7 +55,7 @@ public:
     SceneWrapper( const std::string &fileName, bool verbose = false );
 
     std::string selection(int x, int y, GLCamera &camera);
-    void drawBounds();
+    void drawBounds( const int mode = GL_LINES );
     void draw(bool visibleOnly = false, bool boundsOnly = false);
 
     void setTime(chrono_t newTime);

@@ -366,7 +366,7 @@ class Camera(CameraBase):
     SERIALIZE = ["translation", "rotation", "scale", "aspect_ratio",
                  "fovx", "fovy", "near", "far", "center", "fixed", "mode",
                  "draw_hud", "draw_grid", "draw_normals", "draw_bounds",
-                 "name", "loaded", "visible"]
+                 "draw_labels", "name", "loaded", "visible"]
 
     def __init__(self, name, loaded=False):
         """
@@ -427,7 +427,7 @@ class ICamera(CameraBase):
         >>> session.save("scene.io")
     """
     SERIALIZE = ["fixed", "mode", "draw_hud", "draw_grid", "draw_normals", 
-                 "name", "loaded", "draw_bounds", "visible"]
+                 "draw_labels", "name", "loaded", "draw_bounds", "visible"]
 
     def __init__(self, icamera, loaded=False):
         """
@@ -764,6 +764,7 @@ class Session(FileBase):
             raise AbcViewError("File path not set")
         elif not filepath.endswith(self.EXT):
             filepath += self.EXT
+        self.filepath = filepath
         self.date = time.time()
         log.debug("[%s.save] %s" % (self, filepath))
         state = {

@@ -239,9 +239,9 @@ std::string Scene::selection( int x, int y, GLCamera &camera, SceneState &s_stat
 }
 
 //-*****************************************************************************
-void Scene::drawBounds( SceneState &s_state )
+void Scene::drawBounds( SceneState &s_state, const int mode )
 {
-    drawBoundingBox( m_drawable->getBounds() );
+    drawBoundingBox( m_drawable->getBounds(), mode );
 }
 
 //-*****************************************************************************

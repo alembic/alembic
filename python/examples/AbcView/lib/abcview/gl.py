@@ -158,11 +158,18 @@ class SceneWrapper(alembicgl.SceneWrapper):
 
     @require_loaded
     def draw(self, visible_only=True, bounds_only=False):
+        """
+        draws the scene
+        
+        :param visible_only: drawing depends on visible property being set
+        :param bounds_only: draw object level bounding boxes only
+        """
         super(SceneWrapper, self).draw(visible_only, bounds_only)
 
     @require_loaded
-    def draw_bounds(self):
-        super(SceneWrapper, self).drawBounds()
+    def draw_bounds(self, mode=GL_LINES):
+        """draws scene level bounding box"""
+        super(SceneWrapper, self).drawBounds(mode)
 
     @require_loaded
     def bounds(self):
@@ -221,10 +228,30 @@ class GLCameraMixin(object):
     """
     GL wrapper for Camera objects
     """
-    def __init__(self, viewer):
+    def __init__(self, 
+                 viewer = None,
+                 translation = imath.V3d(6.85, 1.80, 6.85),
+                 rotation = imath.V3d(-10.5, 45, 0),
+                 scale = imath.V3d(1, 1, 1),
+                 center = 9.85,
+                 near = 0.1,
+                 far = 10000.0,
+                 fovx = 45.0,
+                 fovy = 45.0,
+                 aspect_ratio = 1.85
+                ):
         """
         :param viewer: GLWidget object
         :param name: camera name
+        :param translation:
+        :param rotation:
+        :param scale:
+        :param center:
+        :param near:
+        :param far:
+        :param fovx:
+        :param fovy:
+        :param aspect_ratio: 
         """
         self.viewer = viewer
 
@@ -232,15 +259,15 @@ class GLCameraMixin(object):
         self.views = {}
 
         # defaults (must be inheritable by subclasses)
-        self._translation = imath.V3d(6.85, 1.80, 6.85)
-        self._rotation = imath.V3d(-10.5, 45, 0)
-        self._scale = imath.V3d(1, 1, 1)
-        self._center = 9.85
-        self._near = 0.1
-        self._far = 10000.0
-        self._fovx = 45.0
-        self._fovy = 45.0
-        self._aspect_ratio = 1.85
+        self._translation = translation
+        self._rotation = rotation
+        self._scale = scale
+        self._center = center
+        self._near = near
+        self._far = far
+        self._fovx = fovx
+        self._fovy = fovy
+        self._aspect_ratio = aspect_ratio
 
         # set default size from viewer
         if viewer is not None:
@@ -337,8 +364,8 @@ class GLCamera(abcview.io.Camera, GLCameraMixin):
         super(GLCamera, self).__init__(name)
         self.init(viewer)
 
-    def init(self, viewer):
-        GLCameraMixin.__init__(self, viewer)
+    def init(self, viewer, **kwargs):
+        GLCameraMixin.__init__(self, viewer, **kwargs)
         self.apply()
 
     def __repr__(self):
@@ -577,6 +604,7 @@ class GLScene(abcview.io.Scene):
   
     def init(self):
         self.visible = True
+        self.selected = False
         self.clear()
 
     @property
@@ -608,27 +636,33 @@ class GLScene(abcview.io.Scene):
         self.__scene = None
 
     def draw(self, visible_only=True, bounds_only=False):
+        """
+        draws the scene
+        
+        :param visible_only: drawing depends on visible property being set
+        :param bounds_only: draw object level bounding boxes only
+        """
         try:
             self.scene.draw(visible_only, bounds_only)
         except RuntimeError, e:
             log.error(str(e))
     
-    def draw_bounds(self, seconds=0):
+    def draw_bounds(self, seconds=0, mode=GL_LINES):
         """
-        Draw scene bounding boxes.
+        Draw scene-level bounding box for a given time in secs.
         """
-        glPushName(0)
+        glPushName(self.state.scenes.index(self))
         
         # try to get top-most bounds from archive first...
         bounds = self.archive.bounds(seconds)
 
         if bounds is not None:
-            alembicgl.drawBounds(bounds)
+            alembicgl.drawBounds(bounds, mode)
         
         # because instantiating the SceneWrapper is slow
         else:
             try:
-                self.scene.draw_bounds()
+                self.scene.draw_bounds(mode)
             except RuntimeError, e:
                 log.error(str(e))
         
@@ -637,7 +671,7 @@ class GLScene(abcview.io.Scene):
     def selection(self, x, y, camera):
         log.debug("[%s.selection] %s %s %s" % (self, x, y, camera))
         return self.scene.selection(x, y, camera)
-
+    
     def set_time(self, value):
         if self.visible and self.mode != Mode.OFF:
             self.scene.set_time(value)
