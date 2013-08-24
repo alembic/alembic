@@ -45,6 +45,7 @@ from PyQt4 import uic
 class Slider(QtGui.QSlider):
     def __init__(self, parent):
         super(Slider, self).__init__(QtCore.Qt.Horizontal, parent)
+        self._parent = parent
         self.setMouseTracking(True)
         self.mouse_pos_x = 0
         self.__paint_mouse_frame = False
@@ -155,6 +156,12 @@ class Slider(QtGui.QSlider):
 
         qp.end()
 
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Space:
+            self._parent.keyPressEvent(event)
+        else:
+            super(Slider, self).keyPressEvent(event)
+
 class TimeSlider(QtGui.QGroupBox):
     signal_play_fwd = QtCore.pyqtSignal()
     signal_play_stop = QtCore.pyqtSignal()
@@ -164,6 +171,7 @@ class TimeSlider(QtGui.QGroupBox):
 
     def __init__(self, parent):
         super(TimeSlider, self).__init__(parent)
+        self._parent = parent
         self.setObjectName("time_slider")
         self.setLayout(QtGui.QHBoxLayout())
         self.setFixedHeight(20)
@@ -212,6 +220,12 @@ class TimeSlider(QtGui.QGroupBox):
 
         self.set_minimum(0)
         self.set_maximum(0)
+
+        self.setFocusPolicy(QtCore.Qt.ClickFocus)
+
+    def leaveEvent(self, event):
+        self._parent.setFocus()
+        super(TimeSlider, self).leaveEvent(event)
 
     def set_minimum(self, value):
         """

@@ -225,6 +225,7 @@ class Scene(FileBase):
         Deserializes an Alembic scene from json data.
         """
         item = cls(data.get("filepath"))
+        item.name = data.get("name", "Unnamed")
         item.loaded = data.get("loaded", True)
         item.instance = data.get("instance", 1)
         item.properties = data.get("properties", {})

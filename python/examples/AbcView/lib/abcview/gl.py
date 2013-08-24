@@ -670,7 +670,9 @@ class GLScene(abcview.io.Scene):
 
     def selection(self, x, y, camera):
         log.debug("[%s.selection] %s %s %s" % (self, x, y, camera))
-        return self.scene.selection(x, y, camera)
+        if camera:
+            return self.scene.selection(int(x), int(y), camera)
+        return None
     
     def set_time(self, value):
         if self.visible and self.mode != Mode.OFF:

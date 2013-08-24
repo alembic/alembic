@@ -951,11 +951,13 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         :param mode: abcview.io.Mode enum value
         """
+        self.setCursor(QtCore.Qt.WaitCursor)
         if self.sender(): # via menu action 
             mode = self.sender().data().toInt()[0]
         if mode not in GL_MODE_MAP.keys():
             raise Exception("Invalid drawing mode: %s" % mode)
         self.camera.mode = mode
+        self.setCursor(QtCore.Qt.ArrowCursor)
 
     def handle_camera_action(self, action):
         """
@@ -1191,15 +1193,13 @@ class GLWidget(QtOpenGL.QGLWidget):
                 if scene.selected:
                     scene.mode = mode
                     found = True
+                    if mode != Mode.OFF:
+                        scene.load()
             if not found:
                 self.handle_set_mode(mode)
             self.updateGL()
+            self.state.current_frame = self.state.current_frame
             self.setCursor(QtCore.Qt.ArrowCursor)
-
-        # alt key - camera tumble/track
-        if key == QtCore.Qt.Key_Alt:
-            self.__mode = GL_RENDER
-            return
 
         # space bar - playback control
         if key == QtCore.Qt.Key_Space:
@@ -1288,13 +1288,6 @@ class GLWidget(QtOpenGL.QGLWidget):
         elif key == QtCore.Qt.Key_F:
             self.frame()
 
-    def keyReleaseEvent(self, event):
-        """
-        key press release event handler
-        """
-        self.setCursor(QtCore.Qt.ArrowCursor)
-        self.__mode = GL_SELECT
-
     def mouseDoubleClickEvent(self, event):
         """
         mouse double-click event handler
@@ -1303,7 +1296,10 @@ class GLWidget(QtOpenGL.QGLWidget):
             return
 
         # get scene selection hits
+        hit = None
         for scene in self.state.scenes:
+            if scene.mode == Mode.OFF or not scene.visible:
+                continue
             x, y = event.pos().x(), event.pos().y()
             camera = self.camera.views[self]
             hit = scene.selection(x, y, camera)
@@ -1337,7 +1333,7 @@ class GLWidget(QtOpenGL.QGLWidget):
                 if hit:
                     self.signal_scene_selected.emit(hit)
                     hit.selected = True
-                self.updateGL()
+                self.paintGL()
                 return
 
         # process mouse event
@@ -1533,7 +1529,8 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         mouse move event handler
         """
-        if self.__mode != GL_RENDER:
+        # alt key is required to move the camera
+        if not event.modifiers() & QtCore.Qt.AltModifier:
             return
         newPoint2D = event.pos()
         if ((newPoint2D.x() < 0) or (newPoint2D.x() > self.width()) or

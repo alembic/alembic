@@ -95,6 +95,7 @@ class AbcTreeWidgetItem(QtGui.QTreeWidgetItem):
     """
     def __init__(self, parent, object=None):
         super(QtGui.QTreeWidgetItem, self).__init__(parent)
+        self._parent = parent
         self.seen = False
         self.valid = True
         self.object = object
@@ -126,6 +127,9 @@ class AbcTreeWidgetItem(QtGui.QTreeWidgetItem):
         while parent:
             parent = parent.parent()
         return parent
+
+    def keyPressEvent(self, event):
+        self._parent.keyPressEvent(event)
 
 class ObjectTreeWidgetItem(AbcTreeWidgetItem):
     def __init__(self, parent, object=None):
@@ -170,6 +174,9 @@ class ObjectTreeWidgetItem(AbcTreeWidgetItem):
 
     def bounds(self, sample_index=0):
         return self.object.getProperties().getProperty(".geom").getProperty(".selfBnds").getValue(sample_index)
+
+    def keyPressEvent(self, event):
+        self.treeWidget().keyPressEvent(event)
 
 class CameraTreeWidgetItem(ObjectTreeWidgetItem):
     def __init__(self, parent, object):
@@ -573,8 +580,10 @@ class ObjectTreeWidget(AbcTreeWidget):
         if self.sender(): # via menu action 
             mode = self.sender().data().toInt()[0]
         
+        self.setCursor(QtCore.Qt.WaitCursor) 
         item = self.selectedItems()[0]
         item.object.mode = mode
+        self.setCursor(QtCore.Qt.ArrowCursor)
 
     def handle_duplicate_item(self):
         raise NotImplementedError

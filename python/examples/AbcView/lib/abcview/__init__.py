@@ -201,6 +201,7 @@ class AbcMenuBar(QtGui.QMenuBar):
     def __init__(self, parent, main):
         super(AbcMenuBar, self).__init__(parent)
         self.main = main
+        self.setFocusPolicy(QtCore.Qt.ClickFocus)
 
         self.file_menu = QtGui.QMenu("File")
         self.widget_menu = QtGui.QMenu("Widgets")
@@ -467,6 +468,7 @@ class AbcView(QtGui.QMainWindow):
         self.viewer_group.layout().setSpacing(0)
         self.viewer_group.layout().setMargin(0)
         self.viewer_group.layout().addWidget(self.viewer)
+        self.main_menu.setFocusProxy(self.viewer)
         
         # viewer/state connections
         self.viewer.signal_scene_error.connect(self.handle_viewer_error)
@@ -598,6 +600,7 @@ class AbcView(QtGui.QMainWindow):
         Loads "review" display settings. Does not affect saved settings.
         """
         self._settings(1200, 600)
+        self.objects_splitter.setSizes([40, 200, 200])
         self.viewer.camera.draw_grid = False
         self.viewer.camera.draw_hud = False
         self.viewer.camera.draw_normals = False
@@ -1063,6 +1066,7 @@ class AbcView(QtGui.QMainWindow):
 
         :param name: name of object
         """
+        log.debug("[%s.handle_object_selected] %s" %(self, name))
         self.objects_tree.find(str(name.toAscii()))
 
     def find(self, name):
@@ -1259,7 +1263,10 @@ class AbcView(QtGui.QMainWindow):
             else:
                 self.handle_frame_object()
         elif event.key() == QtCore.Qt.Key_Space:
-            self.handle_play()
+            if self.time_slider.playing:
+                self.handle_stop()
+            else:
+                self.handle_play()
         elif event.key() == QtCore.Qt.Key_Backspace:
             self.handle_delete()
         else:
