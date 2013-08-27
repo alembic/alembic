@@ -167,8 +167,8 @@ void Scene::setTime( chrono_t iSeconds )
 //-*****************************************************************************
 int Scene::processHits( GLint hits, GLuint buffer[] )
 {
-    unsigned int i, j;
-    GLuint names, *ptr, minZ, *ptrNames, index;
+    GLint i;
+    GLuint j, names, *ptr, minZ, *ptrNames, index;
 
     ptr = (GLuint *) buffer;
     minZ = 0xffffffff;
