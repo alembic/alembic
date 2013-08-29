@@ -90,14 +90,17 @@ class Slider(QtGui.QSlider):
         self.repaint()
         super(Slider, self).leaveEvent(event)
 
+    def setValue(self, value):
+        super(Slider, self).setValue(value)
+
     def mousePressEvent(self, event):
-        self.setSliderPosition(self.value(event.pos().x()))
-        self.__paint_mouse_frame = False
+        self._parent.handle_stop()
         self.__mouse_down = True
-        super(Slider, self).mousePressEvent(event)
+        self.__paint_mouse_frame = True
 
     def mouseMoveEvent(self, event):
         if self.__mouse_down:
+            self._parent.set_value(self.value(event.pos().x()))
             self.__paint_mouse_frame = False
         else:
             self.__paint_mouse_frame = True
@@ -106,8 +109,9 @@ class Slider(QtGui.QSlider):
         super(Slider, self).mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
+        self.setSliderPosition(self.value(event.pos().x()))
         self.__mouse_down = False
-        self.__paint_mouse_frame = True
+        self.__paint_mouse_frame = False
         super(Slider, self).mouseReleaseEvent(event)
 
     def paintEvent(self, event):
@@ -123,16 +127,6 @@ class Slider(QtGui.QSlider):
         rect_s.setY(2)
         sr = rect_s.getRect()
 
-        # start position
-        if 0:
-            self.draw_text(rect_s, qp, self.minimum())
-        
-        # end position
-        if 0:
-            rect_e = QtCore.QRect(sr[0], sr[1], sr[2], sr[3])
-            rect_e.setX(self.width() - 25)
-            self.draw_text(rect_e, qp, self.maximum())
-        
         opt = QtGui.QStyleOptionSlider()
         self.initStyleOption(opt)
         style = self.style()
@@ -259,8 +253,8 @@ class TimeSlider(QtGui.QGroupBox):
     def _get_playing(self):
         return self.play_button.isHidden()
 
-    def _set_playing(self, is_playing):
-        if is_playing:
+    def _set_playing(self, play):
+        if play:
             self.play_button.hide()
             self.stop_button.show()
         else:

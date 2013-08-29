@@ -124,11 +124,8 @@ QTreeView {
     outline: 0;
     show-decoration-selected: 1;
 }
-TreeView::branch {
-    width: 0px;
-}
 QTreeView::item {
-    color: #aaa;
+    color: #cccdce;
     border-bottom: 1px solid #333;
     border-right-color: transparent;
     border-top-color: transparent;
@@ -155,6 +152,7 @@ QTreeView::indicator:unchecked {
     image: url("%(icons)s/eye-off.png");
 }
 QTreeView::branch {
+    width: 0px;
     background-color: #373737;
 }
 QTreeView::branch:selected {

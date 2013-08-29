@@ -40,6 +40,7 @@ from functools import wraps
 
 import imath
 import alembic
+kWrapExisting = alembic.Abc.WrapExistingFlag.kWrapExisting
 
 import OpenGL
 OpenGL.ERROR_CHECKING = True
@@ -71,6 +72,31 @@ __all__ = ["GLCamera", "GLICamera", "GLScene", ]
 # alembic cache index
 ARCHIVES = {}
 SCENES = {}
+
+def accumXform(xf, obj):
+    if alembic.AbcGeom.IXform.matches(obj.getHeader()):
+        x = alembic.AbcGeom.IXform(obj, kWrapExisting)
+        xs = x.getSchema().getValue()
+        xf *= xs.getMatrix()
+
+def get_final_matrix(obj):
+    xf = imath.M44d()
+    xf.makeIdentity()
+    parent = obj.getParent()
+    while parent:
+        accumXform(xf, parent)
+        parent = parent.getParent()
+    return xf
+
+def draw_bounding_box(bounds, mode=GL_LINES):
+    """
+    Draws a simple bounding bex defined by the "bounds" arg,
+    using the OpenGL mode defined by "mode".
+
+    :param bounds: imath.Box3d object that defines bounds
+    :param mode: display mode, e.g. GL_POLYGON, GL_LINES
+    """
+    alembicgl.drawBounds(bounds, mode)
 
 def require_loaded(func):
     """
@@ -140,15 +166,20 @@ class SceneWrapper(alembicgl.SceneWrapper):
     def __init__(self, filepath):
         self.filepath = str(filepath)
         self.loaded = False
+        self.bad = False
 
     def load(self, func_name="load"):
         """
         Defers actually loading the scene until necessary.
         """
-        if not self.loaded:
+        if not self.loaded and not self.bad:
             log.debug("[%s] reading %s" % (func_name, self.filepath))
-            super(SceneWrapper, self).__init__(self.filepath)
-            self.loaded = True
+            try:
+                super(SceneWrapper, self).__init__(self.filepath)
+                self.loaded = True
+            except Exception, e:
+                log.warn("BAD ARCHIVE: %s\n%s" % (self.filepath, str(e)))
+                self.bad = True
 
     def uid(self):
         return id(self)
@@ -164,32 +195,43 @@ class SceneWrapper(alembicgl.SceneWrapper):
         :param visible_only: drawing depends on visible property being set
         :param bounds_only: draw object level bounding boxes only
         """
-        super(SceneWrapper, self).draw(visible_only, bounds_only)
+        if not self.bad:
+            super(SceneWrapper, self).draw(visible_only, bounds_only)
 
     @require_loaded
     def draw_bounds(self, mode=GL_LINES):
         """draws scene level bounding box"""
-        super(SceneWrapper, self).drawBounds(mode)
+        if not self.bad:
+            super(SceneWrapper, self).drawBounds(mode)
 
     @require_loaded
     def bounds(self):
-        #log.debug("[%s.bounds]" % (self))
+        if self.bad:
+            return imath.Box3d(imath.V3d(1, 1, 1), 
+                               imath.V3d(1, 1, 1))
         return super(SceneWrapper, self).bounds()
 
     @require_loaded
     def get_time(self):
+        if self.bad:
+            return 0
         return self.scene.getCurrentTime()
 
     @require_loaded
     def set_time(self, value):
-        self.setTime(value)
+        if not self.bad:
+            self.setTime(value)
 
     @require_loaded
     def min_time(self):
+        if self.bad:
+            return 0
         return self.getMinTime()
 
     @require_loaded
     def max_time(self):
+        if self.bad:
+            return 0
         return self.getMaxTime()
 
 class AbcGLCamera(alembicgl.GLCamera):
@@ -238,7 +280,7 @@ class GLCameraMixin(object):
                  far = 10000.0,
                  fovx = 45.0,
                  fovy = 45.0,
-                 aspect_ratio = 1.85
+                 aspect_ratio = 1.85,
                 ):
         """
         :param viewer: GLWidget object
@@ -623,12 +665,15 @@ class GLScene(abcview.io.Scene):
         return self.width() / float(self.height())
 
     def load(self):
-        # by accessing the archive/min/max time we load the scene
         name = self.archive.getName()
         min = self.min_time()
         max = self.max_time()
         self.loaded = True
         self.visible = True
+
+        if not self.drawable():
+            self.loaded = False
+            self.visible = False
 
     def clear(self):
         self.selected = []
@@ -657,7 +702,7 @@ class GLScene(abcview.io.Scene):
         bounds = self.archive.bounds(seconds)
 
         if bounds is not None:
-            alembicgl.drawBounds(bounds, mode)
+            draw_bounding_box(bounds, mode)
         
         # because instantiating the SceneWrapper is slow
         else:
@@ -667,6 +712,12 @@ class GLScene(abcview.io.Scene):
                 log.error(str(e))
         
         glPopName()
+
+    def drawable(self):
+        """
+        Returns True if this scene is drawable.
+        """
+        return not self.scene.bad
 
     def selection(self, x, y, camera):
         log.debug("[%s.selection] %s %s %s" % (self, x, y, camera))
@@ -682,7 +733,7 @@ class GLScene(abcview.io.Scene):
         return self.scene.get_time()
    
     def play_forward(self, fps=24):
-        if self.visible:
+        if self.visible and self.drawable():
             self.scene.playForward(fps)
    
     def min_time(self):
@@ -693,7 +744,6 @@ class GLScene(abcview.io.Scene):
  
     @memoized
     def bounds(self, seconds=0):
-        #log.debug("[%s.bounds] %s" % (self, seconds))
         bounds = self.archive.bounds(seconds)
         if bounds is None:
             bounds = self.scene.bounds()

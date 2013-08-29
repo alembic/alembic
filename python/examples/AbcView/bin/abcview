@@ -50,50 +50,10 @@ http://docs.alembic.io/python/abcview.html
 
 import os
 import sys
-import glob
-import logging
 import argparse
 import traceback
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-
-from abcview import App, AbcView, log
-from abcview.io import Mode
-
-__usage__ = """
-abcview [file1 .. fileN] [OPTIONS]
-"""
-
-__doc__ = """
-What's new:
-
-- built-in GL viewer
-- support for cameras
-- frame selected object 
-- playback with time slider
-- multiple GL modes + bounds
-- save layout and session
-- console bug fixes
-
-More information:
-http://docs.alembic.io/python/abcview.html
-"""
-
-"""
-TODO:
-
-- GL picking in viewer
-- highlight object selection in viewer
-- better session cycle checking on load
-- more stats (poly count, mem usage)
-- support for lights and materials
-- draggable, pop-out widgets
-- share state between processes / remote viewing
-- save split window layouts
-- support object paths in args, auto-frame on object
-- unit tests
-"""
+from abcview import config, create_app
 
 def create_parser():
     parser = argparse.ArgumentParser(description=__usage__)
@@ -106,14 +66,6 @@ def create_parser():
             help='Set viewer first frame value.')
     parser.add_argument('--last', default=None, type=int,
             help='Set viewer last frame value.')
-    parser.add_argument('--mode', default=None, type=int,
-            help="""Default display mode:
-                   (0: OFF,
-                    1: BOUNDS,
-                    2: POINTS,
-                    3: LINES,
-                    4: SMOOTH)
-            """)
     parser.add_argument('--bounds', action='store_true',
             help='Force scene bounds display mode.')
     parser.add_argument('--review', action='store_true',
@@ -126,61 +78,39 @@ def create_parser():
             help='Load and execute Python script.')
     return parser
 
-def main():
+def version_check():
     """
-    Main.
+    Validates that alembic and alembicgl can be imported and
+    that they meet the minimum requires versions.
     """
-    # get arguments
+    try:
+        import imath
+        import alembic
+        import alembicgl
+    except ImportError, e:
+        print str(e)
+        return 0
+    version = alembic.Abc.GetLibraryVersionShort()
+    major, minor, maint = version.split('.')
+    if int(major) >= 1 and int(minor) >= 3:
+        return 1
+    else:
+        return 0
+
+if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
 
-    # create application and widget
-    app = App(sys.argv)
-    win = AbcView()
-    
-    # verbosity
-    if args.verbose:
-        log.setLevel(logging.DEBUG)
+    if not version_check():
+        print "%s %s requires Alembic 1.3.0 or greater" \
+                % (config.__prog__, config.__version__)
+        sys.exit(1)
 
-    # settings
-    if args.reset:
-        win.reset_settings()
-    elif args.review:
-        win.review_settings()
-    else:
-        win.load_settings()
- 
-    # show widgets (Qt oddity this is done before event loop)
-    win.show()
-    win.raise_()
-
-    # force scene bounds
-    if args.bounds:
-        win.set_default_mode(Mode.OFF)
-        win.viewer.camera.mode = Mode.OFF
-        win.viewer.camera.draw_bounds = 1
-
-    # defer file loading until event loop starts
-    win.set_load_list(args.filepath)
-
-    # set frame range overrides
-    if args.frame is not None:
-        win.set_current_frame(args.frame)
-    if args.first is not None:
-        win.set_first_frame(args.first)
-    if args.last is not None:
-        win.set_last_frame(args.last)
-
-    # execute some python
-    if args.script:
-        win.load_script(args.script)
-
-    # start event loop
-    return app.exec_()
-
-if __name__ == "__main__":
     try:
-        sys.exit(main())
+        sys.exit(create_app(args.filepath,
+            args.first, args.last, args.frame,
+            args.script, args.bounds, args.review, 
+            args.reset, args.verbose))
     except Exception, e:
         traceback.print_exc()
     except KeyboardInterrupt:

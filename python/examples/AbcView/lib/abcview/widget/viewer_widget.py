@@ -58,9 +58,8 @@ import alembic
 import abcview
 from abcview.io import Mode
 from abcview.gl import GLCamera, GLICamera, GLScene
-from abcview import log, config
-
-kWrapExisting = alembic.Abc.WrapExistingFlag.kWrapExisting
+from abcview.gl import get_final_matrix
+from abcview import log, style, config
 
 # GL drawing mode map
 GL_MODE_MAP = {
@@ -70,21 +69,6 @@ GL_MODE_MAP = {
     Mode.LINE: GL_LINE,
     Mode.POINT: GL_POINT
 }
-
-def accumXform(xf, obj):
-    if alembic.AbcGeom.IXform.matches(obj.getHeader()):
-        x = alembic.AbcGeom.IXform(obj, kWrapExisting)
-        xs = x.getSchema().getValue()
-        xf *= xs.getMatrix()
-
-def get_final_matrix(obj):
-    xf = imath.M44d()
-    xf.makeIdentity()
-    parent = obj.getParent()
-    while parent:
-        accumXform(xf, parent)
-        parent = parent.getParent()
-    return xf
 
 def update_camera(func):
     """
@@ -181,6 +165,7 @@ def create_viewer_app(filepath=None):
 
 def message(info):
     dialog = QtGui.QMessageBox()
+    dialog.setStyleSheet(style.DIALOG)
     dialog.setText(info)
     dialog.exec_()
 
@@ -188,7 +173,6 @@ class GLSplitter(QtGui.QSplitter):
     def __init__(self, orientation, wipe=False):
         super(GLSplitter, self).__init__(orientation)
         self.wipe = wipe
-        #self.splitterMoved.connect(self.handle_splitter_moved)
 
 class GLState(QtCore.QObject):
     """
@@ -285,6 +269,11 @@ class GLState(QtCore.QObject):
         self.signal_state_change.emit()
 
     def add_file(self, filepath):
+        """
+        Generic add file method.
+
+        :param filepath: path to file to add
+        """
         self.add_scene(GLScene(filepath))
 
     def remove_scene(self, scene):
@@ -463,6 +452,7 @@ class GLState(QtCore.QObject):
         self.timer.stop()
         self.__fps_timer.stop()
         self.__fps_counter = 0
+        self.fps = 0.0
         self.signal_play_stop.emit()
 
     def _fps_timer_cb(self):
@@ -496,6 +486,7 @@ class GLWidget(QtOpenGL.QGLWidget):
     signal_scene_selected = QtCore.pyqtSignal(GLScene)
     signal_object_selected = QtCore.pyqtSignal(str)
     signal_clear_selection = QtCore.pyqtSignal()
+    signal_undrawable_scene = QtCore.pyqtSignal(GLScene, float)
 
     def __init__(self, parent=None, state=None):
         """
@@ -627,7 +618,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         if self.state.scenes:
             bounds = None
             for scene in self.state.scenes:
-                if not scene.loaded:
+                if not scene.loaded or not scene.drawable():
                     continue
                 if bounds is None or \
                         scene.bounds(self.state.current_time).max() > \
@@ -664,6 +655,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         :param bounds: imath.Box3d bounds object.
         """
         log.debug("[%s.frame] %s" % (self, bounds))
+        if self.camera.type() == GLICamera.type():
+            message("""Can't frame when viewing through ICameras.\nSelect or create a new camera.""")
+            return
         if bounds is None:
             bounds = self.bounds
         if self.camera:
@@ -962,6 +956,8 @@ class GLWidget(QtOpenGL.QGLWidget):
     def handle_camera_action(self, action):
         """
         New camera menu handler.
+
+        :param action: QAction object
         """
         action_name = str(action.text().toAscii())
         if action_name == "New":
@@ -975,24 +971,26 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def selection(self, x, y):
         """
-        Bounding box selection handler.
+        Bounding box selection handler. This handles selecting at the 
+        scene level, e.g. GLScenes. Object-level selection is handled
+        in the AbcOpenGL lib. 
 
         :param x: mouse x position
         :param y: mouse y position
-        :return: selected GLScene
+        :return: list of GLScene objects
         """
         log.debug("[%s.selection] %s %s %s" % (self, x, y, self.camera))
 
         self.setDisabled(True)
 
-        #--- FIXED AR STUFF
+        #--- begin adjustments for fixed aspect ratio cameras
+        #TODO: consolidate this code and same from _paint_fixed()
 
         # get basic size values for this viewer
         camera_width = self.camera.get_size(self)[0]
         camera_height = self.camera.get_size(self)[1]
         camera_aspect_ratio = camera_width / float(camera_height)
         
-        #TODO: consolidate this code and same from _paint_fixed()
         # if fixed, lock the aspect ratio
         if self.camera.fixed:
             camera_aspect_ratio = self.camera.aspect_ratio
@@ -1013,7 +1011,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             w = self.width()
             h = self.height()
         
-        #--- /FIXED AR STUFF
+        #--- end fixed ratio adjustments
 
         MaxSize = 512
 
@@ -1033,6 +1031,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         glLoadIdentity()
         gluPickMatrix(x, (viewport[3] - y), 5.0, 5.0, viewport)
 
+        # adjust ratio for fixed cameras
         if self.camera.fixed:
             ratio = self.camera.aspect_ratio
         else:
@@ -1043,35 +1042,48 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         # draw the scenes
         for scene in self.state.scenes:
+
+            # skip non-visible scenes
             if not scene.visible:
                 continue
 
-            #TODO: uncomment for translated objects
-            # apply local transforms
+            #TODO: pick on translated scenes
+            # push local transforms
             #glPushMatrix()
             #glTranslatef(*scene.translate)
             #glRotatef(*scene.rotate)
             #glScalef(*scene.scale)
 
-            # draw scene bounds
-            scene.draw_bounds(self.state.current_time) #, GL_POLYGON)
+            # pick anywhere within the scene bounds
+            if scene.mode != Mode.OFF:
+                mode = GL_POLYGON
 
-            # pop translation matrix
+            # pick just on the bounding box edges
+            else:
+                mode = GL_LINES
+            
+            # draw scene bounds
+            scene.draw_bounds(self.state.current_time, mode)
+
+            # pop local transforms
             #glPopMatrix()
 
         #glMatrixMode(GL_PROJECTION)
         glPopMatrix()
 
+        # get the list of gl picks
         hits = glRenderMode(GL_RENDER)
 
         self.setDisabled(False)
+
+        # return list of picked scenes
         return self.state.scenes[hits[-1].names[-1]] if hits else None
 
     ## base class overrides
 
     def initializeGL(self):
         self.makeCurrent()
-        glPointSize(3.0)
+        glPointSize(1.0)
         glEnable(GL_BLEND)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_AUTO_NORMAL)
@@ -1129,6 +1141,12 @@ class GLWidget(QtOpenGL.QGLWidget):
         for scene in self.state.scenes:
            
             if not scene.visible:
+                continue
+
+            if not scene.drawable():
+                #self.signal_undrawable_scene.emit(scene, self.state.current_frame)
+                glColor3d(1, 1, 0)
+                self.renderText(0, 0, 0, "[Error drawing %s]" % scene.name)
                 continue
 
             # color override
@@ -1197,8 +1215,8 @@ class GLWidget(QtOpenGL.QGLWidget):
                         scene.load()
             if not found:
                 self.handle_set_mode(mode)
-            self.updateGL()
             self.state.current_frame = self.state.current_frame
+            self.updateGL()
             self.setCursor(QtCore.Qt.ArrowCursor)
 
         # space bar - playback control
@@ -1213,27 +1231,22 @@ class GLWidget(QtOpenGL.QGLWidget):
         
         # 0 - display off
         elif key == QtCore.Qt.Key_0:
-            #self.handle_set_mode(Mode.OFF)
             _set_selected_scene_mode(Mode.OFF)
 
         # 1 - smooth
         elif key == QtCore.Qt.Key_1:
-            #self.handle_set_mode(Mode.FILL)
             _set_selected_scene_mode(Mode.FILL)
 
         # 2 - lines
         elif key == QtCore.Qt.Key_2:
-            #self.handle_set_mode(Mode.LINE)
             _set_selected_scene_mode(Mode.LINE)
 
         # 3 - points
         elif key == QtCore.Qt.Key_3:
-            #self.handle_set_mode(Mode.POINT)
             _set_selected_scene_mode(Mode.POINT)
 
         # 4 - bounds
         elif key == QtCore.Qt.Key_4:
-            #self.handle_set_mode(Mode.BOUNDS)
             _set_selected_scene_mode(Mode.BOUNDS)
 
         # right arroy - increment frame

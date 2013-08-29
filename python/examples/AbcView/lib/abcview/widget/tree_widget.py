@@ -88,6 +88,18 @@ class ArrayThread(QtCore.QThread):
         except TypeError, e:
             self.emit(QtCore.SIGNAL('arrayValue (PyQt_PyObject)'), (0, str(self.array)))
 
+class SceneLineEditor(QtGui.QLineEdit):
+    """
+    Top-level delegate for SceneTreeWidgetItems, used on the name column to 
+    facilitate scene renaming.
+    """
+    def __init__(self, parent, name):
+        super(SceneLineEditor, self).__init__()
+        self._parent = parent
+        self.setObjectName("SceneLineEditor")
+        self.setText(name)
+        self.setFocusPolicy(QtCore.Qt.ClickFocus)
+
 ## alembic tree items ---------------------------------------------------------
 class AbcTreeWidgetItem(QtGui.QTreeWidgetItem):
     """
@@ -99,7 +111,7 @@ class AbcTreeWidgetItem(QtGui.QTreeWidgetItem):
         self.seen = False
         self.valid = True
         self.object = object
-
+    
     def __repr__(self):
         return '<%s "%s">' % (self.__class__.__name__, self.object)
 
@@ -128,6 +140,20 @@ class AbcTreeWidgetItem(QtGui.QTreeWidgetItem):
             parent = parent.parent()
         return parent
 
+    def scene(self):
+        parent = self
+        while parent:
+            if type(parent) == SceneTreeWidgetItem:
+                return parent
+            parent = parent.parent()
+
+    def set_bad(self, bad):
+        """
+        Set this tree widget item as being "bad" for some reason, e.g. an 
+        undrawable scene, with a visual indicator.
+        """
+        log.debug("[%s.set_bad] %s" % (self, bad))
+
     def keyPressEvent(self, event):
         self._parent.keyPressEvent(event)
 
@@ -141,6 +167,7 @@ class ObjectTreeWidgetItem(AbcTreeWidgetItem):
         super(ObjectTreeWidgetItem, self).__init__(parent, object)
         self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.DontShowIndicator)
         self.setIcon(0, QtGui.QIcon("%s/object.png" % config.ICON_DIR))
+
         self.object = object
         if object:
             if self.object.getNumChildren() > 0:
@@ -150,14 +177,11 @@ class ObjectTreeWidgetItem(AbcTreeWidgetItem):
             self.setToolTip(self.treeWidget().colnum('name'), 
                     QtCore.QString(object.getFullName()))
 
-    def scene(self):
-        parent = self.parent()
-        while parent:
-            if type(parent) == SceneTreeWidgetItem:
-                return parent
-            parent = parent.parent()
-
     def children(self):
+        """
+        Generator that yields ObjectTreeWidgetItem objects.
+        """
+        self.treeWidget().setCursor(QtCore.Qt.WaitCursor)
         for child in self.object.children:
             if self.seen:
                 continue
@@ -166,6 +190,7 @@ class ObjectTreeWidgetItem(AbcTreeWidgetItem):
                 yield CameraTreeWidgetItem(self, child)
             else:
                 yield ObjectTreeWidgetItem(self, child)
+        self.treeWidget().setCursor(QtCore.Qt.ArrowCursor)
 
     def properties(self):
         props = self.object.getProperties()
@@ -390,6 +415,9 @@ class AbcTreeWidget(DeselectableTreeWidget):
         self.main = main
         self.__row_height = 24
 
+        # reserved for editable item
+        self._item = None
+
         # set some default QtTreeWidget values
         self.setIconSize(QtCore.QSize(20, 20))
         self.setAllColumnsShowFocus(True)
@@ -440,12 +468,18 @@ class AbcTreeWidget(DeselectableTreeWidget):
         pass
 
     def handle_item_selected(self):
+        """
+        Item selected handler (select can happen with click or arrow keys).
+        """
         items = self.selectedItems()
         if not items:
             return
         self.handle_item_clicked(items[0])
 
     def handle_item_clicked(self, item, col=0):
+        """
+        Item click handler.
+        """
         self.scrollToItem(item, QtGui.QAbstractItemView.EnsureVisible)
         self.emit(QtCore.SIGNAL('itemClicked (PyQt_PyObject)'), 
                     item)
@@ -456,15 +490,43 @@ class AbcTreeWidget(DeselectableTreeWidget):
                 item.unload()
 
     def handle_item_double_clicked(self, item):
+        """
+        Item double-click handler.
+        """
+        if type(item) != SceneTreeWidgetItem:
+            return
+        self._item = item
+        editor = SceneLineEditor(item, item.object.name)
+        #validator = QtGui.QValidator(QtCore.QRegExp(""))
+        #editor.setValidator(validator)
+        self.setItemWidget(item, self.colnum('name'), editor)
         self.emit(QtCore.SIGNAL('itemDoubleClicked (PyQt_PyObject)'), 
                 item)
+        editor.textEdited.connect(self.handle_name_change)
+        editor.editingFinished.connect(self.handle_done_editing)
+
+    def handle_name_change(self, value):
+        """
+        Handles text change for item delegate line edits.
+        """
+        name = str(value.toAscii())
+        if self._item and name:
+            self._item.object.name = name
+            self._item.setText(self.colnum('name'), name)
+
+    def handle_done_editing(self):
+        """
+        Line edit delegate done editing handler.
+        """
+        if self._item:
+            self.removeItemWidget(self._item, self.colnum('name'))
 
     def handle_item_expanded(self, item):
         raise NotImplementedError("implement in subclass")
 
     def selected(self):
         """
-        returns selected item's object
+        Returns selected item's object
         """
         selected = [item for item in self.selectedItems()]
         if not selected:
