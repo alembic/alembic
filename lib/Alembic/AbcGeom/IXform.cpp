@@ -316,7 +316,10 @@ bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getInheritsXforms()" );
 
-    if ( ! m_inheritsProperty ) { return true; }
+    if ( ! m_inheritsProperty || m_inheritsProperty.getNumSamples() == 0 )
+    {
+        return true;
+    }
 
     AbcA::index_t sampIdx = iSS.getIndex( m_inheritsProperty.getTimeSampling(),
                                           m_inheritsProperty.getNumSamples() );
