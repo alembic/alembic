@@ -266,6 +266,7 @@ class GLState(QtCore.QObject):
                 self.__scenes.append(scene)
             else:
                 scene.visible = True
+            scene.set_time(self.current_time)
         self.signal_state_change.emit()
 
     def add_file(self, filepath):
@@ -321,6 +322,9 @@ class GLState(QtCore.QObject):
         return self.__time
 
     def _set_time(self, new_time):
+        if new_time is None:
+            log.warn("time is None")
+            return
         self.__time = new_time
         self.__frame = new_time * self.frames_per_second
         for scene in self.scenes:

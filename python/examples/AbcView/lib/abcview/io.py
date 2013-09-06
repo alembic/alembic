@@ -51,7 +51,9 @@ scenes and sessions. The hierarchy structure basically consists of a
 top-level Session object that contains children items which can be either
 Scenes, Sessions, Cameras or ICAmeras. Each item in the hierarchy has
 a properties attribute for storing custom attributes. Only Scenes and ICameras
-reference Alembic archives.
+reference Alembic archives. 
+
+Session hierarchy: ::
 
    Session
        |- Properties
@@ -61,6 +63,7 @@ reference Alembic archives.
                   |- Properties
                   `- file.abc
 
+Sessions can also reference other session files.
 """
 
 __all__ = ["Scene", "Session", "Camera", "ICamera",
@@ -75,6 +78,12 @@ class Mode:
 
 class AbcViewError(Exception):
     pass
+
+def DictListUpdate( lis1, lis2):
+    for aLis1 in lis1:
+        if aLis1 not in lis2:
+            lis2.append(aLis1)
+    return lis2
 
 class Base(object):
     def __init__(self):
@@ -696,6 +705,25 @@ class Session(FileBase):
         
         self.make_clean()
 
+    def merge(self, session):
+        """
+        Merges a given session into this session. 
+
+        :param session: Session object to merge in
+        """
+        self.min_time = session.min_time
+        self.max_time = session.max_time
+        self.current_time = session.current_time
+       
+        # merge items
+        self.__items = DictListUpdate(self.items, session.items)
+
+        # merge cameras
+        self.__cameras.update(session.cameras)
+
+        # merge properties
+        self.properties.update(session.properties)
+
     def walk(self):
         """
         Recursive generator that yields Session, Scene and Camera objects.
@@ -775,8 +803,8 @@ class Session(FileBase):
                 "module": os.path.dirname(__file__),
             },
             "env": {
-                "user": os.environ.get("USERNAME"),
-                "host": os.environ.get("HOSTNAME"),
+                "user": os.environ.get("USER", os.environ.get("USERNAME")),
+                "host": os.environ.get("HOST", os.environ.get("HOSTNAME")),
                 "platform": sys.platform,
             },
             "date": self.date,

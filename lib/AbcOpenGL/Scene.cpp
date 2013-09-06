@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -224,11 +224,6 @@ std::string Scene::selection( int x, int y, GLCamera &camera, SceneState &s_stat
 
     // finally release the rendering context again
     int hits = glRenderMode(GL_RENDER);
-
-    //std::cout << "hits " << hits
-    //          << " buffer[3] " << buffer[3]
-    //          << " processHits " << processHits( hits, buffer )
-    //          << std::endl;
 
     if ( hits == 0 ) {
         return "";

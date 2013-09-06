@@ -416,13 +416,13 @@ class AbcView(QtGui.QMainWindow):
         self.setMinimumSize(200, 200)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
-        # deferred load list
-        self._load_list = []
+        # deferred load list, files loaded after event loop starts
+        self._load_files = []
 
-        # override storage
+        # overrides are used for deferring frame range overrides
         self._overrides = {}
 
-        # session data
+        # for storing session data
         self.settings = QtCore.QSettings("Alembic", 
                            "-".join([config.__prog__, config.__version__]))
         self.session = Session(filepath)
@@ -443,7 +443,7 @@ class AbcView(QtGui.QMainWindow):
         self.objects_group.layout().addWidget(self.find_line_edit)
         self.objects_group.layout().addWidget(self.objects_tree)
 
-        # some tree widgets
+        # tree widgets
         self.properties_tree = PropertyTreeWidget(self, main=self)
         self.samples_tree = SampleTreeWidget(self, main=self)
         self.array_tree = ArrayTreeWidget(self, main=self)
@@ -722,16 +722,22 @@ class AbcView(QtGui.QMainWindow):
     def set_first_frame(self, frame):
         log.debug("[%s.set_first_frame] %s" % (self, frame))
         self._overrides["first_frame"] = frame
+        self.viewer.state.min_time = frame / self.viewer.state.frames_per_second
+        self.time_slider.set_minimum(frame)
 
     def set_last_frame(self, frame):
         log.debug("[%s.set_last_frame] %s" % (self, frame))
         self._overrides["last_frame"] = frame
+        self.viewer.state.max_time = frame / self.viewer.state.frames_per_second
+        self.time_slider.set_maximum(frame)
 
     def set_current_frame(self, frame):
         log.debug("[%s.set_current_frame] %s" % (self, frame))
         self._overrides["current_frame"] = frame
+        self.viewer.state.current_frame = frame
+        self.time_slider.set_value(frame)
 
-    def set_load_list(self, filepaths):
+    def set_load_files(self, filepaths):
         """
         Sets the deferred load list. Loads files after the main window and
         event loop is up and running. 
@@ -739,7 +745,7 @@ class AbcView(QtGui.QMainWindow):
         :param filepath: list of files to load
         :param mode: Override display mode (abcview.io.Mode)
         """
-        self._load_list = deepcopy(filepaths)
+        self._load_files = deepcopy(filepaths)
         self.splash.progress.setMaximum(len(filepaths))
 
     def set_frames_from_session(self, session):
@@ -775,7 +781,6 @@ class AbcView(QtGui.QMainWindow):
         This is the startup callback function for when the QApplication starts 
         its event loop. This handles deferred file loading.
         """
-        #import pycallgraph; pycallgraph.start_trace()
         self.splash.setMessage("starting up")
         self._wait()
         start = time.time()
@@ -785,12 +790,12 @@ class AbcView(QtGui.QMainWindow):
         try:
             self._load()
         except Exception, e:
-            log.warn(e)
+            traceback.print_exc()
+            log.error(e)
 
         log.debug("session loaded in %.2fs"  % (time.time() - start))
         self.splash.close()
         self.time_slider.signal_frame_changed.connect(self.handle_time_slider_change)
-        #pycallgraph.make_dot_graph('pycg_abcview.png')
 
     def _load(self):
         """
@@ -803,12 +808,12 @@ class AbcView(QtGui.QMainWindow):
         _bad_files = []
 
         # if just one session file, replace current session
-        if len(self._load_list) == 1 and self._load_list[0].endswith(Session.EXT):
-            self.session = Session(self._load_list[0])
+        if len(self._load_files) == 1 and self._load_files[0].endswith(Session.EXT):
+            self.session = Session(self._load_files[0])
 
         # otherwise, add each file to current session
         else:
-            for filepath in self._load_list:
+            for filepath in self._load_files:
                 try:
                     self.session.add_file(filepath)
                 except abcview.io.AbcViewError, e:
@@ -844,7 +849,41 @@ class AbcView(QtGui.QMainWindow):
                 if not item.properties.get("color", None):
                     item.color = COLORS[index]
 
-        # create trees for top-level session items
+        # default frame range
+        self.viewer.state.min_frame = 0
+        self.viewer.state.max_frame = 100
+        self.time_slider.set_minimum(0)
+        self.time_slider.set_maximum(100)
+
+        # set the frame range from loaded files
+        if len(self._load_files) == 1:
+            if self._load_files[0].endswith(Session.EXT):
+                self.set_frames_from_session(self.session)
+            elif self._load_files[0].endswith(Scene.EXT) and \
+                 self._overrides.get("mode") != Mode.OFF:
+                self.set_frames_from_scene(self.session.items[0])
+        
+        # frame range overrides
+        if self._overrides.get("first_frame"):
+            first_frame = self._overrides.get("first_frame")
+            self.viewer.state.min_frame = first_frame
+            self.time_slider.set_minimum(first_frame)
+        if self._overrides.get("last_frame"):
+            last_frame = self._overrides.get("last_frame")
+            self.viewer.state.max_frame = last_frame
+            self.time_slider.set_maximum(last_frame)
+        if self._overrides.get("current_frame"):
+            curr_frame = int(self._overrides.get("current_frame"))
+            self.viewer.state.current_frame = curr_frame
+            self.time_slider.set_value(curr_frame)
+
+        # frame boundary adjustments
+        if self.viewer.state.current_time < self.viewer.state.min_time:
+            self.viewer.state.current_time = self.viewer.state.min_time
+        elif self.viewer.state.current_time > self.viewer.state.max_time:
+            self.viewer.state.current_time = self.viewer.state.max_time
+
+        # create trees for top-level session items, load items last
         for item in self.session.items:
             if item.type() == Session.type():
                 tree = SessionTreeWidgetItem(self.objects_tree, item)
@@ -853,38 +892,9 @@ class AbcView(QtGui.QMainWindow):
             if item.loaded:
                 tree.load()
             item.tree = tree
-        
-        # set the frame range
-        if len(self._load_list) == 1:
-            if self._load_list[0].endswith(Session.EXT):
-                self.set_frames_from_session(self.session)
-            elif self._load_list[0].endswith(Scene.EXT) and \
-                 self._overrides.get("mode") != Mode.OFF:
-                self.set_frames_from_scene(self.session.items[0])
-        else:
-            self.viewer.state.min_frame = 0
-            self.viewer.state.max_frame = 100
-            self.time_slider.set_minimum(0)
-            self.time_slider.set_maximum(100)
-
-        # frame range overrides
-        if self._overrides.get("current_frame"):
-            curr_frame = int(self._overrides.get("current_frame"))
-            self.viewer.state.current_frame = curr_frame
-            self.time_slider.set_value(curr_frame)
-
-        if self._overrides.get("first_frame"):
-            first_frame = self._overrides.get("first_frame")
-            self.viewer.state.min_frame = first_frame
-            self.time_slider.set_minimum(first_frame)
-
-        if self._overrides.get("last_frame"):
-            last_frame = self._overrides.get("last_frame")
-            self.viewer.state.max_frame = last_frame
-            self.time_slider.set_maximum(last_frame)
 
         # frame the viewer if we're just loading one abc file
-        if len(self._load_list) == 1 and self._load_list[0].endswith(Scene.EXT):
+        if len(self._load_files) == 1 and self._load_files[0].endswith(Scene.EXT):
             self.viewer.frame()
             
         self.viewer.setDisabled(False)
@@ -908,7 +918,7 @@ class AbcView(QtGui.QMainWindow):
 
         :param filepath: file path to load, replaces session
         """
-        self.set_load_list([filepath])
+        self.set_load_files([filepath])
         self._start()
 
     def import_file(self, filepath):
@@ -1223,7 +1233,7 @@ class AbcView(QtGui.QMainWindow):
                         % (Scene.EXT, Session.EXT)))
         if filepath:
             self.clear()
-            self.set_load_list([str(filepath.toAscii())])
+            self.set_load_files([str(filepath.toAscii())])
             self._load()
 
     @make_dirty
@@ -1303,7 +1313,7 @@ class AbcView(QtGui.QMainWindow):
         bounds = bounds_prop.getValue(index) #iss)
         log.debug("bounds at index %s: %s" % (index, bounds))
   
-        # apply local transforms
+        #TODO: apply local transforms when framing
         if 0:
             min = bounds.min()
             max = bounds.max()
@@ -1397,6 +1407,7 @@ def create_app(files = None,
            first_frame = None,
            last_frame = None,
            current_frame = None,
+           fps = 24.0,
            script = None,
            bounds = False,
            review = False,
@@ -1410,6 +1421,7 @@ def create_app(files = None,
     :param first_frame: set first frame
     :param last_frame: set last frame
     :param current_frame: set current frame
+    :param fps: frames per second (default 24)
     :param script: python script to load
     :param bounds: force bounding box mode
     :param review: use review settings
@@ -1417,6 +1429,7 @@ def create_app(files = None,
     :param verbose: verbose standard out
     :return: exit code
     """
+    assert fps > 0.0, "fps must be greater than 0"
 
     # create application and widget
     app = App(sys.argv)
@@ -1445,15 +1458,15 @@ def create_app(files = None,
         win.viewer.camera.draw_bounds = 1
 
     # defer file loading until event loop starts
-    win.set_load_list(files)
+    win.set_load_files(files)
 
     # set frame range overrides
-    if current_frame is not None:
-        win.set_current_frame(current_frame)
     if first_frame is not None:
         win.set_first_frame(first_frame)
     if last_frame is not None:
         win.set_last_frame(last_frame)
+    if current_frame is not None:
+        win.set_current_frame(current_frame)
 
     # execute some python
     if script:

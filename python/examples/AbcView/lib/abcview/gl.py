@@ -719,6 +719,7 @@ class GLScene(abcview.io.Scene):
         """
         return not self.scene.bad
 
+    @memoized
     def selection(self, x, y, camera):
         log.debug("[%s.selection] %s %s %s" % (self, x, y, camera))
         if camera:
@@ -726,9 +727,10 @@ class GLScene(abcview.io.Scene):
         return None
     
     def set_time(self, value):
-        if self.visible and self.mode != Mode.OFF:
+        if self.drawable() and self.visible and self.mode != Mode.OFF:
             self.scene.set_time(value)
    
+    @memoized
     def get_time(self):
         return self.scene.get_time()
    
@@ -736,9 +738,11 @@ class GLScene(abcview.io.Scene):
         if self.visible and self.drawable():
             self.scene.playForward(fps)
    
+    @memoized
     def min_time(self):
         return self.scene.min_time()
    
+    @memoized
     def max_time(self):
         return self.scene.max_time()
  

@@ -72,7 +72,7 @@ def create_parser():
             help='Use review display settings.')
     parser.add_argument('--reset', action='store_true',
             help='Reset settings.')
-    parser.add_argument('--verbose', action='store_true',
+    parser.add_argument('-v', '--verbose', action='store_true',
             help='Verbose output.')
     parser.add_argument('--script', 
             help='Load and execute Python script.')
@@ -107,10 +107,17 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        sys.exit(create_app(args.filepath,
-            args.first, args.last, args.frame,
-            args.script, args.bounds, args.review, 
-            args.reset, args.verbose))
+        sys.exit(create_app(files=args.filepath,
+                            first_frame=args.first, 
+                            last_frame=args.last, 
+                            current_frame=args.frame,
+                            script=args.script, 
+                            bounds=args.bounds, 
+                            review=args.review, 
+                            reset=args.reset, 
+                            verbose=args.verbose
+                           )
+                )
     except Exception, e:
         traceback.print_exc()
     except KeyboardInterrupt:
