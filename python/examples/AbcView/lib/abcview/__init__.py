@@ -41,6 +41,11 @@ import logging
 from abcview import config
 
 __doc__ = """
+AbcView is a graphical PyQt-based Alembic inspection 
+and visualization tool. It offers a number of widgets 
+to inspect and visualize Alembic data, as well as 
+assemble hierarchical scenes.
+
 What's new:
 
 - Dedicated OpenGL viewer

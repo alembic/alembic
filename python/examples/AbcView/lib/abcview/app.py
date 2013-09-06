@@ -87,6 +87,7 @@ def message(info):
     dialog.setText(info)
     dialog.exec_()
 
+# global file load counter (for default scene colors)
 global COUNT; COUNT = 0
 
 def io2gl(item, viewer=None):
@@ -1366,6 +1367,29 @@ class App(QtGui.QApplication):
         """
         self.signal_starting_up.emit()
 
+def version_check():
+    """
+    Validates that alembic and alembicgl can be imported and
+    that they meet the minimum requires versions.
+
+    :return: 1 or 0
+    """
+    # Alembic minimum version requirement
+    MAJOR = 1
+    MINOR = 5
+    MAINT = 0
+
+    # validate the Alembic version
+    version = alembic.Abc.GetLibraryVersionShort()
+    major, minor, maint = version.split('.')
+    if int(major) >= MAJOR and int(minor) >= MINOR:
+        return 1
+    else:
+        print "%s %s requires Alembic %s.%s.%s or greater" \
+                % (config.__prog__, config.__version__, \
+                   MAJOR, MINOR, MAINT)
+        return 0
+
 def create_app(files = None,
            first_frame = None,
            last_frame = None,
@@ -1392,6 +1416,7 @@ def create_app(files = None,
     :param verbose: verbose standard out
     :return: exit code
     """
+    assert version_check()
     assert fps > 0.0, "fps must be greater than 0"
 
     # create application and widget

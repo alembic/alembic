@@ -35,36 +35,19 @@
 #
 #-******************************************************************************
 
-__usage__ = """
-abcview [file1 .. fileN] [OPTIONS]
-"""
-
-__doc__ = """
-AbcView is a graphical PyQt-based Alembic inspection and visualization 
-tool. It offers a number of widgets to help you inspect and visualize 
-your Alembic data, as well as assemble hierarchical scenes.
-
-More information-
-http://docs.alembic.io/python/abcview.html
-"""
-
 import os
 import sys
 import argparse
 import traceback
-
 import abcview
-
-# Alembic minimum version requirement
-MAJOR = 1
-MINOR = 3
-MAINT = 0
 
 def create_parser():
     """
     Creates and returns the option parser.
     """
-    parser = argparse.ArgumentParser(description=__usage__)
+    parser = argparse.ArgumentParser(description=abcview.__doc__,
+                   formatter_class=argparse.RawTextHelpFormatter
+                  )
     parser.add_argument('filepath', type=str, nargs='*',
             help='File to open.')
 
@@ -77,47 +60,19 @@ def create_parser():
     parser.add_argument('--bounds', action='store_true',
             help='Force scene bounds display mode.')
     parser.add_argument('--review', action='store_true',
-            help='Use review display settings.')
+            help='Use review mode layout settings.')
     parser.add_argument('--reset', action='store_true',
-            help='Reset settings.')
+            help='Restore default layout settings.')
     parser.add_argument('-v', '--verbose', action='store_true',
-            help='Verbose output.')
+            help='Verbose standard output.')
     parser.add_argument('--script', 
             help='Load and execute Python script.')
     return parser
 
-def version_check():
-    """
-    Validates that alembic and alembicgl can be imported and
-    that they meet the minimum requires versions.
-    """
-    try:
-        import imath
-        import alembic
-        import alembicgl
-    except ImportError, e:
-        print str(e)
-        return 0
-    version = alembic.Abc.GetLibraryVersionShort()
-    major, minor, maint = version.split('.')
-    if int(major) >= MAJOR and int(minor) >= MINOR:
-        return 1
-    else:
-        return 0
-
 if __name__ == "__main__":
-    parser = create_parser()
-    args = parser.parse_args()
-
-    if not version_check():
-        print "%s %s requires Alembic %s.%s.%s or greater" \
-                % (abcview.config.__prog__, \
-                   abcview.config.__version__,
-                   MAJOR, MINOR, MAINT)
-        sys.exit(1)
-
     try:
         from abcview.app import create_app
+        args = create_parser().parse_args()
         sys.exit(create_app(files=args.filepath,
                             first_frame=args.first, 
                             last_frame=args.last, 
@@ -129,8 +84,10 @@ if __name__ == "__main__":
                             verbose=args.verbose
                            )
                 )
+    except ImportError, e:
+        print "abcview import error", e
+    except KeyboardInterrupt:
+        print "stopping..."
     except Exception, e:
         traceback.print_exc()
-    except KeyboardInterrupt:
-        log.info('stopping...')
-        sys.exit(1)
+    sys.exit(1)
