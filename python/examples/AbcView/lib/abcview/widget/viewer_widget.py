@@ -480,16 +480,23 @@ class GLWidget(QtOpenGL.QGLWidget):
         >>> viewer = GLWidget()
         >>> viewer.add_file("file.abc")
     """
+    # scene signals
     signal_scene_opened = QtCore.pyqtSignal(GLScene)
     signal_scene_removed = QtCore.pyqtSignal(GLScene)
     signal_scene_error = QtCore.pyqtSignal(str)
     signal_scene_drawn = QtCore.pyqtSignal()
-    signal_set_camera = QtCore.pyqtSignal(GLCamera)
-    signal_new_camera = QtCore.pyqtSignal(GLCamera)
-    signal_camera_updated = QtCore.pyqtSignal(GLCamera)
+
+    # camera signals (pass 'object' to support both camera classes)
+    signal_set_camera = QtCore.pyqtSignal(object)
+    signal_new_camera = QtCore.pyqtSignal(object)
+    signal_camera_updated = QtCore.pyqtSignal(object)
+
+    # selection signals
     signal_scene_selected = QtCore.pyqtSignal(GLScene)
     signal_object_selected = QtCore.pyqtSignal(str)
     signal_clear_selection = QtCore.pyqtSignal()
+
+    # error signals
     signal_undrawable_scene = QtCore.pyqtSignal(GLScene, float)
 
     def __init__(self, parent=None, state=None):

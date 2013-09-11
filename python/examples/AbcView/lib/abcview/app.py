@@ -105,6 +105,9 @@ def io2gl(item, viewer=None):
         return
     
     elif item.type() == Scene.type():
+        if not os.path.isfile(item.filepath):
+            log.warn("file not found %s" % item.filepath)
+            return
         item.__class__ = GLScene
         item.init()
 
@@ -746,7 +749,7 @@ class AbcView(QtGui.QMainWindow):
         its event loop. This handles deferred file loading.
         """
         self.splash.setMessage("starting up")
-        self._wait()
+        #self._wait()
         start = time.time()
         self.splash.show()
 
@@ -778,16 +781,23 @@ class AbcView(QtGui.QMainWindow):
         # otherwise, add each file to current session
         else:
             for filepath in self._load_files:
+                if not os.path.isfile(filepath):
+                    _bad_files.append(filepath)
+                    continue
                 try:
                     self.session.add_file(filepath)
                 except abcview.io.AbcViewError, e:
                     log.debug(str(e))
                     _bad_files.append(filepath)
 
-        # display a warning for bad files
+        # display a warning for bad files, bail if all are bad
         if len(_bad_files) > 0:
             message("The follow files could not be loaded:\n%s" \
                     %("\n".join(_bad_files)))
+
+            if len(_bad_files) == len(self._load_files):
+                self.viewer.setDisabled(False)
+                return
 
         # convert the session items to gl objects
         io2gl(self.session, self.viewer)
@@ -849,11 +859,12 @@ class AbcView(QtGui.QMainWindow):
 
         # create trees for top-level session items, load items last
         for item in self.session.items:
+            tree = None
             if item.type() == Session.type():
                 tree = SessionTreeWidgetItem(self.objects_tree, item)
             elif item.type() == GLScene.type():
                 tree = SceneTreeWidgetItem(self.objects_tree, item)
-            if item.loaded:
+            if item.loaded and tree is not None:
                 tree.load()
             item.tree = tree
 
@@ -867,7 +878,6 @@ class AbcView(QtGui.QMainWindow):
         """
         Waits for the window to be drawn before proceeding.
         """
-        return
         app = QtGui.QApplication.instance()
         while not app.ok:
             pass
