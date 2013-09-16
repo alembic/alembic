@@ -187,4 +187,23 @@ struct JobArgs
     util::ShapeSet dagPaths;
 };
 
+struct FrameRangeArgs
+{
+    FrameRangeArgs()
+    {
+        startTime = 0.0;
+        endTime = 0.0;
+        strideTime = 1.0;
+        preRoll = false;
+    }
+
+    double startTime;
+    double endTime;
+    double strideTime;
+
+    std::set< double > shutterSamples;
+
+    bool preRoll;
+};
+
 #endif  // _AlembicExport_MayaUtility_h_

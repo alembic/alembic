@@ -255,12 +255,14 @@ try
             }
         }
 
-        double startTime = oldCurTime.value();
-        double endTime = oldCurTime.value();
-        double strideTime = 1.0;
+        // the frame range within this job
+        std::vector< FrameRangeArgs > frameRanges(1);
+        frameRanges.back().startTime = oldCurTime.value();
+        frameRanges.back().endTime = oldCurTime.value();
+        frameRanges.back().strideTime = 1.0;
+
         bool hasRange = false;
         bool hasRoot = false;
-        std::set <double> shutterSamples;
         bool sampleGeo  = true; // whether or not to subsample geometry
         std::string fileName;
         bool asOgawa = true;
@@ -290,16 +292,22 @@ try
                     return MS::kFailure;
                 }
 
+                // this is not the first -frameRange argument, we are going
+                // to add one more frame range to the frame range array.
+                if (hasRange)
+                {
+                    frameRanges.push_back(FrameRangeArgs());
+                }
+
                 hasRange = true;
-                startTime = jobArgsArray[++i].asDouble();
-                endTime = jobArgsArray[++i].asDouble();
+                frameRanges.back().startTime = jobArgsArray[++i].asDouble();
+                frameRanges.back().endTime = jobArgsArray[++i].asDouble();
 
                 // make sure start frame is smaller or equal to endTime
-                if (startTime > endTime)
+                if (frameRanges.back().startTime > frameRanges.back().endTime)
                 {
-                    double temp = startTime;
-                    startTime = endTime;
-                    endTime = temp;
+                    std::swap(frameRanges.back().startTime,
+                        frameRanges.back().endTime);
                 }
             }
 
@@ -311,12 +319,18 @@ try
                         "Frame Relative Sample incorrectly specified.");
                     return MS::kFailure;
                 }
-                shutterSamples.insert(jobArgsArray[++i].asDouble());
+                frameRanges.back().shutterSamples.insert(
+                    jobArgsArray[++i].asDouble());
             }
 
             else if (arg == "-nn" || arg == "-nonormals")
             {
                 jobArgs.noNormals = true;
+            }
+
+            else if (arg == "-pr" || arg == "-preroll")
+            {
+                frameRanges.back().preRoll = true;
             }
 
             else if (arg == "-ro" || arg == "-renderableonly")
@@ -331,7 +345,7 @@ try
                     MGlobal::displayError("Step incorrectly specified.");
                     return MS::kFailure;
                 }
-                strideTime = jobArgsArray[++i].asDouble();
+                frameRanges.back().strideTime = jobArgsArray[++i].asDouble();
             }
 
             else if (arg == "-sl" || arg == "-selection")
@@ -634,9 +648,13 @@ try
             }
         }
 
-        if (shutterSamples.empty())
+        // if -frameRelativeSample argument is not specified for a frame range,
+        // we are assuming a -frameRelativeSample 0.0
+        for (std::vector<FrameRangeArgs>::iterator range =
+            frameRanges.begin(); range != frameRanges.end(); ++range)
         {
-            shutterSamples.insert(0.0);
+            if (range->shutterSamples.empty())
+                range->shutterSamples.insert(0.0);
         }
 
         if (jobArgs.prefixFilters.empty())
@@ -644,44 +662,126 @@ try
             jobArgs.prefixFilters.push_back("ABC_");
         }
 
+        // the list of frame ranges for sampling
+        std::vector<FrameRangeArgs> sampleRanges;
+        std::vector<FrameRangeArgs> preRollRanges;
+        for (std::vector<FrameRangeArgs>::const_iterator range =
+            frameRanges.begin(); range != frameRanges.end(); ++range)
+        {
+            if (range->preRoll)
+                preRollRanges.push_back(*range);
+            else
+                sampleRanges.push_back(*range);
+        }
+
         // the list of frames written into the abc file
         std::set<double> geoSamples;
         std::set<double> transSamples;
-        std::set <double>::const_iterator shutter;
-        std::set <double>::const_iterator shutterStart = shutterSamples.begin();
-        std::set <double>::const_iterator shutterEnd = shutterSamples.end();
-        for (double frame = startTime; frame <= endTime; frame += strideTime)
+        for (std::vector<FrameRangeArgs>::const_iterator range =
+            sampleRanges.begin(); range != sampleRanges.end(); ++range)
         {
-            for (shutter = shutterStart; shutter != shutterEnd; ++shutter)
+            for (double frame = range->startTime;
+                frame <= range->endTime;
+                frame += range->strideTime)
             {
-                double curFrame = *shutter + frame;
-                if (!sampleGeo)
+                for (std::set<double>::const_iterator shutter =
+                    range->shutterSamples.begin();
+                    shutter != range->shutterSamples.end(); ++shutter)
                 {
-                    double intFrame = (double)(int)(
-                        curFrame >= 0 ? curFrame + .5 : curFrame - .5);
+                    double curFrame = *shutter + frame;
+                    if (!sampleGeo)
+                    {
+                        double intFrame = (double)(int)(
+                            curFrame >= 0 ? curFrame + .5 : curFrame - .5);
 
-                    // only insert samples that are close to being an integer
-                    if (fabs(curFrame - intFrame) < 1e-4)
+                        // only insert samples that are close to being an integer
+                        if (fabs(curFrame - intFrame) < 1e-4)
+                        {
+                            geoSamples.insert(curFrame);
+                        }
+                    }
+                    else
                     {
                         geoSamples.insert(curFrame);
                     }
+                    transSamples.insert(curFrame);
                 }
-                else
-                {
-                    geoSamples.insert(curFrame);
-                }
-                transSamples.insert(curFrame);
+            }
+
+            if (geoSamples.empty())
+            {
+                geoSamples.insert(range->startTime);
+            }
+
+            if (transSamples.empty())
+            {
+                transSamples.insert(range->startTime);
             }
         }
 
-        if (geoSamples.empty())
+        bool isAcyclic = false;
+        if (sampleRanges.empty())
         {
-            geoSamples.insert(startTime);
+            // no frame ranges or all frame ranges are pre-roll ranges
+            hasRange = false;
+            geoSamples.insert(frameRanges.back().startTime);
+            transSamples.insert(frameRanges.back().startTime);
+        }
+        else
+        {
+            // check if the time range is even (cyclic)
+            // otherwise, we will use acyclic
+            // sub frames pattern
+            std::vector<double> pattern(
+                sampleRanges.begin()->shutterSamples.begin(),
+                sampleRanges.begin()->shutterSamples.end());
+            std::transform(pattern.begin(), pattern.end(), pattern.begin(),
+                std::bind2nd(std::plus<double>(),
+                    sampleRanges.begin()->startTime));
+
+            // check the frames against the pattern
+            std::vector<double> timeSamples(
+                transSamples.begin(), transSamples.end());
+            for (size_t i = 0; i < timeSamples.size(); i++)
+            {
+                // next pattern
+                if (i % pattern.size() == 0 && i / pattern.size() > 0)
+                {
+                    std::transform(pattern.begin(), pattern.end(),
+                        pattern.begin(), std::bind2nd(std::plus<double>(),
+                            sampleRanges.begin()->strideTime));
+                }
+
+                // pattern mismatch, we use acyclic time sampling type
+                if (timeSamples[i] != pattern[i % pattern.size()])
+                {
+                    isAcyclic = true;
+                }
+            }
         }
 
-        if (transSamples.empty())
+        // the list of frames to pre-roll
+        std::set<double> preRollSamples;
+        for (std::vector<FrameRangeArgs>::const_iterator range =
+            preRollRanges.begin(); range != preRollRanges.end(); ++range)
         {
-            transSamples.insert(startTime);
+            for (double frame = range->startTime;
+                frame <= range->endTime;
+                frame += range->strideTime)
+            {
+                for (std::set<double>::const_iterator shutter =
+                    range->shutterSamples.begin();
+                    shutter != range->shutterSamples.end(); ++shutter)
+                {
+                    double curFrame = *shutter + frame;
+                    preRollSamples.insert(curFrame);
+                }
+            }
+
+            if (preRollSamples.empty())
+            {
+                preRollSamples.insert(range->startTime);
+            }
         }
 
         if (jobArgs.dagPaths.size() > 1)
@@ -751,20 +851,42 @@ try
 
         AbcA::TimeSamplingPtr transTime, geoTime;
 
-        std::vector<double> samples;
-        for (shutter = shutterStart; shutter != shutterEnd; ++shutter)
-        {
-            samples.push_back((startTime + *shutter) * util::spf());
-        }
-
         if (hasRange)
         {
-            transTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
-                static_cast<Alembic::Util::uint32_t>(samples.size()),
-                strideTime * util::spf()), samples));
+            if (isAcyclic)
+            {
+                // acyclic, uneven time sampling
+                // e.g. [0.8, 1, 1.2], [2.8, 3, 3.2], .. not continuous
+                //      [0.8, 1, 1.2], [1.7, 2, 2.3], .. shutter different
+                std::vector<double> samples(
+                    transSamples.begin(), transSamples.end());
+                std::transform(samples.begin(), samples.end(), samples.begin(),
+                    std::bind2nd(std::multiplies<double>(), util::spf()));
+                transTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                    AbcA::TimeSamplingType::kAcyclic), samples));
+            }
+            else
+            {
+                // cyclic, even time sampling between time periods
+                // e.g. [0.8, 1, 1.2], [1.8, 2, 2.2], ...
+                std::vector<double> samples;
+                double startTime = sampleRanges.back().startTime;
+                double strideTime = sampleRanges.back().strideTime;
+                for (std::set<double>::const_iterator shutter =
+                    sampleRanges.back().shutterSamples.begin();
+                    shutter != sampleRanges.back().shutterSamples.end();
+                    ++shutter)
+                {
+                    samples.push_back((startTime + *shutter) * util::spf());
+                }
+                transTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                    static_cast<Alembic::Util::uint32_t>(samples.size()),
+                    strideTime * util::spf()), samples));
+            }
         }
         else
         {
+            // time ranges are not specified
             transTime.reset(new AbcA::TimeSampling());
         }
 
@@ -774,14 +896,31 @@ try
         }
         else
         {
-            double geoStride = strideTime;
-            if (geoStride < 1.0)
-                geoStride = 1.0;
+            // sampling geo on whole frames
+            if (isAcyclic)
+            {
+                // acyclic, uneven time sampling
+                std::vector<double> samples(
+                    geoSamples.begin(), geoSamples.end());
+                // one more sample for setup()
+                if (*transSamples.begin() != *geoSamples.begin())
+                    samples.insert(samples.begin(), *transSamples.begin());
+                std::transform(samples.begin(), samples.end(), samples.begin(),
+                    std::bind2nd(std::multiplies<double>(), util::spf()));
+                geoTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                    AbcA::TimeSamplingType::kAcyclic), samples));
+            }
+            else
+            {
+                double geoStride = sampleRanges.back().strideTime;
+                if (geoStride < 1.0)
+                    geoStride = 1.0;
 
-            samples.clear();
-            samples.push_back(*geoSamples.begin() * util::spf());
-            geoTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
-                geoStride * util::spf()), samples));
+                std::vector<double> samples;
+                samples.push_back(*geoSamples.begin() * util::spf());
+                geoTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                    geoStride * util::spf()), samples));
+            }
         }
 
         AbcWriteJobPtr job(new AbcWriteJob(fileName.c_str(), asOgawa,
@@ -827,6 +966,9 @@ try
         // right now we just copy over the translation samples since
         // they are guaranteed to contain all the geometry samples
         allFrameRange.insert(transSamples.begin(), transSamples.end());
+
+        // copy over the pre-roll samples
+        allFrameRange.insert(preRollSamples.begin(), preRollSamples.end());
     }
 
     // add extra evaluation run up, if necessary
