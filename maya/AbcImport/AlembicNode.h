@@ -118,6 +118,12 @@ public:
     // initialize all the attributes to default values
     static MStatus initialize();
 
+    // override virtual methods from MPxNode, returns the list of
+    // files to archive.
+    virtual MStringArray getFilesToArchive(bool shortName,
+                                           bool unresolvedName,
+                                           bool markCouldBeImageSequence) const;
+
     void   setDebugMode(bool iDebugOn){ mDebugOn = iDebugOn; }
     void   setIncludeFilterString(const MString & iIncludeFilterString)
     {

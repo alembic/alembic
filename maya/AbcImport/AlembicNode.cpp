@@ -1050,3 +1050,33 @@ bool AlembicNode::isPassiveOutput(const MPlug & plug) const
 
     return MPxNode::isPassiveOutput( plug );
 }
+
+// returns the list of files to archive.
+MStringArray AlembicNode::getFilesToArchive(
+    bool /* shortName */,
+    bool unresolvedName,
+    bool /* markCouldBeImageSequence */) const
+{
+    MStringArray files;
+    MStatus status = MS::kSuccess;
+
+    MPlug fileNamePlug(thisMObject(), mAbcFileNameAttr);
+    MString fileName = fileNamePlug.asString(MDGContext::fsNormal, &status);
+    
+    if (status == MS::kSuccess && fileName.length() > 0) {
+        if(unresolvedName)
+        {
+            files.append(fileName);
+        }
+        else
+        {
+            //unresolvedName is false, resolve the path via MFileObject.
+            MFileObject fileObject;
+            fileObject.setRawFullName(fileName);
+            files.append(fileObject.resolvedFullName());
+        }
+    }
+    
+    return files;
+}
+
