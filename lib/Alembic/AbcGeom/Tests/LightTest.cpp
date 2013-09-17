@@ -75,6 +75,7 @@ void lightTest()
 
         TESTING_ASSERT( ! emptyLightObj.getSchema().getArbGeomParams() );
         TESTING_ASSERT( ! emptyLightObj.getSchema().getUserProperties() );
+        TESTING_ASSERT( ! emptyLightObj.getSchema().getCameraSchema().valid() );
         TESTING_ASSERT(
             lightObj.getSchema().getArbGeomParams().getNumProperties() == 1 );
         TESTING_ASSERT(
