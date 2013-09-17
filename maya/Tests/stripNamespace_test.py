@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks, Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -80,18 +80,37 @@ class StripNamespaceTest(unittest.TestCase):
         MayaCmds.AbcExport(j='-sn 3 -root delicious:crispy:duck:skin:yum -file ' + self.__files[-1])
 
         # no strip
-        self.failIf(subprocess.call(['h5ls', self.__files[0] + '/ABC/delicious:crispy:duck:skin:yum']) != 0)
+        MayaCmds.file(force=True, new=True)
+        MayaCmds.namespace(addNamespace='delicious')
+        MayaCmds.namespace(addNamespace='crispy', parent='delicious')
+        MayaCmds.namespace(addNamespace='duck', parent='delicious:crispy')
+        MayaCmds.namespace(addNamespace='skin', parent='delicious:crispy:duck')
+        MayaCmds.AbcImport(self.__files[0], mode='import')
+        self.failIf(len(MayaCmds.ls('delicious:crispy:duck:skin:yum')) != 1)
 
         # all stripped
-        self.failIf(subprocess.call(['h5ls', self.__files[1] + '/ABC/yum']) != 0)
-        self.failIf(subprocess.call(['h5ls', self.__files[2] + '/ABC/yum']) != 0)
-        self.failIf(subprocess.call(['h5ls', self.__files[3] + '/ABC/yum']) != 0)
+        MayaCmds.AbcImport(self.__files[1], mode='import')
+        MayaCmds.AbcImport(self.__files[2], mode='import')
+        MayaCmds.AbcImport(self.__files[3], mode='import')
+        self.failIf(len(MayaCmds.ls('yum*')) != 3)
 
         # strip one
-        self.failIf(subprocess.call(['h5ls', self.__files[4] + '/ABC/crispy:duck:skin:yum']) != 0)
+        MayaCmds.file(force=True, new=True)
+        MayaCmds.namespace(addNamespace='crispy')
+        MayaCmds.namespace(addNamespace='duck', parent='crispy')
+        MayaCmds.namespace(addNamespace='skin', parent='crispy:duck')
+        MayaCmds.AbcImport(self.__files[4], mode='import')
+        self.failIf(len(MayaCmds.ls('crispy:duck:skin:yum')) != 1)
 
         # strip two
-        self.failIf(subprocess.call(['h5ls', self.__files[5] + '/ABC/duck:skin:yum']) != 0)
+        MayaCmds.file(force=True, new=True)
+        MayaCmds.namespace(addNamespace='duck')
+        MayaCmds.namespace(addNamespace='skin', parent='duck')
+        MayaCmds.AbcImport(self.__files[5], mode='import')
+        self.failIf(len(MayaCmds.ls('duck:skin:yum')) != 1)
 
         # strip three
-        self.failIf(subprocess.call(['h5ls', self.__files[6] + '/ABC/skin:yum']) != 0)
+        MayaCmds.file(force=True, new=True)
+        MayaCmds.namespace(addNamespace='skin')
+        MayaCmds.AbcImport(self.__files[6], mode='import')
+        self.failIf(len(MayaCmds.ls('skin:yum')) != 1)
