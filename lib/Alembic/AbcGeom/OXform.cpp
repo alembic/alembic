@@ -106,8 +106,11 @@ void OXformSchema::set( XformSample &ioSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::set()" );
 
-    if ( m_inheritsProperty.getNumSamples() == 0 )
+    if ( ! m_inheritsProperty.valid() )
     {
+        m_inheritsProperty = Abc::OBoolProperty( this->getPtr(), ".inherits",
+                                                 m_data->tsIdx );
+
         // set this to true, so that additional calls to sample's addOp()
         // won't change the topology of the sample, but instead will merely
         // update values.
@@ -125,14 +128,11 @@ void OXformSchema::set( XformSample &ioSamp )
         {
             m_opsPWPtr = this->getPtr()->createScalarProperty(
                 ".ops", AbcA::MetaData(),
-                AbcA::DataType( Alembic::Util::kUint8POD, m_numOps ), 0
-                                                        );
+                AbcA::DataType( Alembic::Util::kUint8POD, m_numOps ), 0 );
         }
 
         if ( m_numChannels > 0 )
         {
-            uint32_t tsIndex = getObject().getArchive().addTimeSampling(
-                                       *(m_inheritsProperty.getTimeSampling()) );
             if ( m_numChannels <= MAX_SCALAR_CHANS )
             {
                 m_useArrayProp = false;
@@ -140,8 +140,7 @@ void OXformSchema::set( XformSample &ioSamp )
                 m_valsPWPtr = this->getPtr()->createScalarProperty(
                     ".vals", AbcA::MetaData(),
                     AbcA::DataType( Alembic::Util::kFloat64POD, m_numChannels ),
-                    tsIndex
-                                                             );
+                    m_data->tsIdx );
             }
             else
             {
@@ -153,8 +152,8 @@ void OXformSchema::set( XformSample &ioSamp )
                     // each Sample is, but how many values constitute a single
                     // "element". What is here is the same as creating an
                     // Abc::ODoubleArrayProperty.
-                    AbcA::DataType( Alembic::Util::kFloat64POD, 1 ), tsIndex
-                                                            );
+                    AbcA::DataType( Alembic::Util::kFloat64POD, 1 ),
+                    m_data->tsIdx );
             }
         }
 
@@ -247,6 +246,17 @@ void OXformSchema::setFromPrevious()
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+AbcA::TimeSamplingPtr OXformSchema::getTimeSampling() const
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::getTimeSampling()" );
+
+    return getObject().getArchive().getTimeSampling(m_data->tsIdx);
+
+    ALEMBIC_ABC_SAFE_CALL_END();
+
+    return AbcA::TimeSamplingPtr();
+}
+
 //-*****************************************************************************
 size_t OXformSchema::getNumSamples() const
 {
@@ -270,9 +280,6 @@ size_t OXformSchema::getNumSamples() const
 void OXformSchema::init( const AbcA::index_t iTsIdx )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OXformSchema::init()" );
-
-    m_inheritsProperty = Abc::OBoolProperty( this->getPtr(), ".inherits",
-                                     iTsIdx );
 
     m_data = Alembic::Util::shared_ptr< Data >( new Data() );
     m_data->parent = this->getPtr();
@@ -350,7 +357,10 @@ void OXformSchema::setTimeSampling( uint32_t iIndex )
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "OXformSchema::setTimeSampling( uint32_t )" );
 
-    m_inheritsProperty.setTimeSampling( iIndex );
+    if ( m_inheritsProperty.valid() )
+    {
+        m_inheritsProperty.setTimeSampling( iIndex );
+    }
 
     if ( m_valsPWPtr )
     {

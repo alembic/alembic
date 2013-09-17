@@ -143,10 +143,7 @@ public:
     // SCHEMA STUFF
     //-*************************************************************************
 
-    AbcA::TimeSamplingPtr getTimeSampling() const
-    {
-        return m_inheritsProperty.getTimeSampling();
-    }
+    AbcA::TimeSamplingPtr getTimeSampling() const;
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -207,6 +204,7 @@ public:
 private:
     void init( const AbcA::index_t iTSIndex );
 
+    // not technically needed as the m_protoSample can return this info
     std::size_t m_numChannels;
     std::size_t m_numOps;
 
