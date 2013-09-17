@@ -756,6 +756,7 @@ try
                 if (timeSamples[i] != pattern[i % pattern.size()])
                 {
                     isAcyclic = true;
+                    break;
                 }
             }
         }
@@ -870,18 +871,30 @@ try
                 // cyclic, even time sampling between time periods
                 // e.g. [0.8, 1, 1.2], [1.8, 2, 2.2], ...
                 std::vector<double> samples;
-                double startTime = sampleRanges.back().startTime;
-                double strideTime = sampleRanges.back().strideTime;
+                double startTime = sampleRanges[0].startTime;
+                double strideTime = sampleRanges[0].strideTime;
                 for (std::set<double>::const_iterator shutter =
-                    sampleRanges.back().shutterSamples.begin();
-                    shutter != sampleRanges.back().shutterSamples.end();
+                    sampleRanges[0].shutterSamples.begin();
+                    shutter != sampleRanges[0].shutterSamples.end();
                     ++shutter)
                 {
                     samples.push_back((startTime + *shutter) * util::spf());
                 }
-                transTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
-                    static_cast<Alembic::Util::uint32_t>(samples.size()),
-                    strideTime * util::spf()), samples));
+
+                if (samples.size() > 1)
+                {
+                    Alembic::Util::uint32_t numSamples =
+                        static_cast<Alembic::Util::uint32_t>(samples.size());
+                    transTime.reset(
+                        new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                            numSamples, strideTime * util::spf()), samples));
+                }
+                // uniform sampling
+                else
+                {
+                    transTime.reset(new AbcA::TimeSampling(
+                        strideTime * util::spf(), samples[0]));
+                }
             }
         }
         else
@@ -912,14 +925,13 @@ try
             }
             else
             {
-                double geoStride = sampleRanges.back().strideTime;
+                double geoStride = sampleRanges[0].strideTime;
                 if (geoStride < 1.0)
                     geoStride = 1.0;
 
-                std::vector<double> samples;
-                samples.push_back(*geoSamples.begin() * util::spf());
-                geoTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
-                    geoStride * util::spf()), samples));
+                double geoStart = *geoSamples.begin() * util::spf();
+                geoTime.reset(new AbcA::TimeSampling(
+                    geoStride * util::spf(), geoStart));
             }
         }
 
