@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -77,7 +77,7 @@ namespace
 {
     void copyIndicesToNode(MIntArray& iIndices, const MObject& iNode,
                            MObject& iSet)
-    {   
+    {
         MStatus status;
 
         MFnDagNode mFnNode(iNode);
@@ -86,9 +86,9 @@ namespace
         status = mFnNode.getPath(dpShape);
 
         // Empty the set
-        MFnSet         fnSet( iSet );    
+        MFnSet         fnSet( iSet );
         MSelectionList selList;
-        fnSet.getMembers   ( selList, false );    
+        fnSet.getMembers   ( selList, false );
         MItSelectionList iterSelList( selList );
         for( ; iterSelList.isDone()!=true; iterSelList.next() )
         {
@@ -100,7 +100,7 @@ namespace
                 fnSet.removeMember(curDag, curCompObj);
         }
 
-        // Feed the indexed component 
+        // Feed the indexed component
         MFnSingleIndexedComponent fnSComp;
         MObject comp = fnSComp.create( MFn::kMeshPolygonComponent );
         fnSComp.addElements( iIndices );
@@ -122,7 +122,7 @@ namespace
                 otherSetList.clear();
                 fnOtherSet.setObject( connSGObj );
                 fnOtherSet.getMembers( otherSetList, false );
-            
+
                 // test if it's a full partition
                 if (otherSetList.length()>=1)
                 {
@@ -132,33 +132,33 @@ namespace
                         MDagPath dp;
                         MObject  compObj;
                         itSelList.getDagPath(dp, compObj);
-               
+
                         if (!(dp==dpShape) || !compObj.isNull())
                             continue;
 
                         fnOtherSet.removeMember( dp, compObj );
-                        
+
                         // create a component with the full list
                         MFnMesh fnMesh(dpShape);
-                        MFnSingleIndexedComponent fnFullSComp;                    
+                        MFnSingleIndexedComponent fnFullSComp;
                         compObj = fnFullSComp.create(
-                                        MFn::kMeshPolygonComponent ); 
+                                        MFn::kMeshPolygonComponent );
                         fnFullSComp.setCompleteData(fnMesh.numPolygons());
-                        
+
                         // fill the sel list
                         otherSetList.clear();
                         otherSetList.add( dpShape, compObj );
                         break;
                     }
-                }            
-            
+                }
+
                 xorList = otherSetList;
                 xorList.merge( setList, MSelectionList::kXORWithList );
                 otherSetList.merge( xorList, MSelectionList::kRemoveFromList);
                 if( !otherSetList.isEmpty() )
                     fnOtherSet.removeMembers( otherSetList );
             }
-        }    
+        }
 
         // Feed the set
         fnSet.addMember(dpShape, comp);
@@ -484,11 +484,11 @@ void CreateSceneVisitor::visit(AlembicObjectPtr iObject)
 AlembicObjectPtr CreateSceneVisitor::previsit(AlembicObjectPtr iParentObject)
 {
     Alembic::Abc::IObject parent = iParentObject->object();
-    const MString name = parent.getName().c_str();
+    const MString name = parent.getFullName().c_str();
     const size_t numChildren = parent.getNumChildren();
 
     // Apply exclude filters first as a preorder traversal.
-    if (mExceptPatterns.length() > 0 && 
+    if (mExceptPatterns.length() > 0 &&
         matchesNameWithRegex(name, mExceptPatterns))
     {
         return AlembicObjectPtr();
@@ -507,7 +507,7 @@ AlembicObjectPtr CreateSceneVisitor::previsit(AlembicObjectPtr iParentObject)
     }
 
     // We traverse a tree in postorder. The invarient is that iParentObject
-    // will have no child unless any descendent of it has the matching name. 
+    // will have no child unless any descendent of it has the matching name.
     if (iParentObject->getNumChildren() == 0)
     {
         if (!matchesNameWithRegex(name, mOnlyPatterns))
