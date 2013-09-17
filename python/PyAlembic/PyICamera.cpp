@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -84,8 +84,8 @@ void register_icamera()
         .def( "getValue", 
               &AbcG::ICameraSchema::getValue,
               ( arg( "iSS" ) = Abc::ISampleSelector() ) )
-        .def( "valid", &AbcG::IPointsSchema::valid )
-        .def( "reset", &AbcG::IPointsSchema::reset )
-        .def( "__nonzero__", &AbcG::IPointsSchema::valid )
+        .def( "valid", &AbcG::ICameraSchema::valid )
+        .def( "reset", &AbcG::ICameraSchema::reset )
+        .def( "__nonzero__", &AbcG::ICameraSchema::valid )
         ;
 }

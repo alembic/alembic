@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -143,9 +143,9 @@ void register_isubd()
         .def( "hasFaceSet",
               &AbcG::ISubDSchema::hasFaceSet,
               ( arg( "faceSetName" ) ) )
-        .def( "valid", &AbcG::IPointsSchema::valid )
-        .def( "reset", &AbcG::IPointsSchema::reset )
-        .def( "__nonzero__", &AbcG::IPointsSchema::valid )
+        .def( "valid", &AbcG::ISubDSchema::valid )
+        .def( "reset", &AbcG::ISubDSchema::reset )
+        .def( "__nonzero__", &AbcG::ISubDSchema::valid )
         ;
 
     // ISubD::Sample

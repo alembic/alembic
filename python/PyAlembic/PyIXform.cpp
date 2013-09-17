@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -95,8 +95,8 @@ void register_ixform()
               &AbcG::IXformSchema::getArbGeomParams )
         .def( "getUserProperties",
               &AbcG::IXformSchema::getUserProperties )
-        .def( "valid", &AbcG::IFaceSetSchema::valid )
-        .def( "reset", &AbcG::IFaceSetSchema::reset )
-        .def( "__nonzero__", &AbcG::IFaceSetSchema::valid )
+        .def( "valid", &AbcG::IXformSchema::valid )
+        .def( "reset", &AbcG::IXformSchema::reset )
+        .def( "__nonzero__", &AbcG::IXformSchema::valid )
         ;
 }
