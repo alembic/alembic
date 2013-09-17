@@ -275,7 +275,7 @@ namespace
             }
         }
 
-        if ((iNormals.getScope() == Alembic::AbcGeom::kVertexScope || 
+        if ((iNormals.getScope() == Alembic::AbcGeom::kVertexScope ||
             iNormals.getScope() == Alembic::AbcGeom::kVaryingScope) &&
             sampSize == ( std::size_t ) ioMesh.numVertices())
         {
@@ -452,7 +452,7 @@ namespace
 
         if (status != MStatus::kSuccess)
         {
-            MGlobal::displayWarning("Couldnt assign colors for " + iColorSet + 
+            MGlobal::displayWarning("Couldnt assign colors for " + iColorSet +
                 status.errorString());
         }
     }
@@ -663,6 +663,141 @@ namespace
             }
         }
     }
+
+    void fillCreases(MFnMesh & ioMesh, SubDAndColors & iNode,
+                     Alembic::AbcGeom::ISubDSchema::Sample &samp)
+    {
+        Alembic::Abc::FloatArraySamplePtr creases = samp.getCreaseSharpnesses();
+        if (!creases || creases->size() == 0)
+        {
+            return;
+        }
+
+        // based on logic from the gpuCache, create edge map for edgeId lookup
+        // unordered_map might be a better choice for this, but it isn't quite
+        // portable yet.  Hopefully when everyone is mostly on good C++11
+        // compliant compilers and beyond we can switch it.
+        typedef std::map<std::pair<int, int>, int> EdgeMap;
+        EdgeMap edgeMap;
+        int numEdges = ioMesh.numEdges();
+        for (int i = 0; i < numEdges; i++)
+        {
+            int vertexList[2];
+            ioMesh.getEdgeVertices(i, vertexList);
+
+            if (vertexList[0] > vertexList[1])
+            {
+                std::swap(vertexList[0], vertexList[1]);
+            }
+            edgeMap.insert(std::make_pair(
+                std::make_pair(vertexList[0], vertexList[1]), i));
+        }
+
+        Alembic::Abc::Int32ArraySamplePtr indices = samp.getCreaseIndices();
+        Alembic::Abc::Int32ArraySamplePtr lengths = samp.getCreaseLengths();
+        std::size_t numLengths = lengths->size();
+
+        MUintArray edgeIds;
+        MDoubleArray creaseData;
+
+        std::size_t curIndex = 0;
+
+        // curIndex incremented here to move on to the next crease length
+        for (std::size_t i = 0; i < numLengths; ++i, ++curIndex)
+        {
+            std::size_t len = (*lengths)[i] - 1;
+            float creaseSharpness = (*creases)[i];
+
+            // curIndex incremented here to go between all the edges that make
+            // up a given length
+            for (std::size_t j = 0; j < len; ++j, ++curIndex)
+            {
+                Alembic::Util::int32_t vertA = (*indices)[curIndex];
+                Alembic::Util::int32_t vertB = (*indices)[curIndex+1];
+                std::pair<int, int> edge = std::make_pair(vertA, vertB);
+                if (edge.first > edge.second)
+                {
+                    std::swap(edge.first, edge.second);
+                }
+                EdgeMap::iterator iter = edgeMap.find(edge);
+                if (iter != edgeMap.end() && iter->second < numEdges)
+                {
+                    creaseData.append(creaseSharpness);
+                    edgeIds.append(iter->second);
+                }
+            }
+        }
+
+        if (ioMesh.setCreaseEdges(edgeIds, creaseData) != MS::kSuccess)
+        {
+            MString warn = "Failed to set creases on: ";
+            warn += iNode.mMesh.getName().c_str();
+            printWarning(warn);
+        }
+    }
+
+    void fillCorners(MFnMesh & ioMesh, SubDAndColors & iNode,
+                     Alembic::AbcGeom::ISubDSchema::Sample &samp)
+    {
+        Alembic::Abc::FloatArraySamplePtr corners = samp.getCornerSharpnesses();
+        if (!corners || corners->size() == 0)
+        {
+            return;
+        }
+
+        Alembic::Abc::Int32ArraySamplePtr cornerVerts = samp.getCornerIndices();
+        unsigned int numCorners = static_cast<unsigned int>(corners->size());
+        MUintArray vertIds(numCorners);
+        MDoubleArray cornerData(numCorners);
+
+        for (unsigned int i = 0; i < numCorners; ++i)
+        {
+            cornerData[i] = (*corners)[i];
+            vertIds[i] = (*cornerVerts)[i];
+        }
+
+        if (ioMesh.setCreaseVertices(vertIds, cornerData) != MS::kSuccess)
+        {
+            MString warn = "Failed to set corners on: ";
+            warn += iNode.mMesh.getName().c_str();
+            printWarning(warn);
+        }
+    }
+
+    void fillHoles(MFnMesh & ioMesh, SubDAndColors & iNode,
+                     Alembic::AbcGeom::ISubDSchema::Sample &samp)
+    {
+    #if MAYA_API_VERSION >= 201100
+        Alembic::Abc::Int32ArraySamplePtr holes = samp.getHoles();
+        if (!holes || holes->size() == 0)
+        {
+            return;
+        }
+
+        unsigned int numHoles = (unsigned int)holes->size();
+        MUintArray holeData(numHoles);
+        for (unsigned int i = 0; i < numHoles; ++i)
+        {
+            holeData[i] = (*holes)[i];
+        }
+
+        if (ioMesh.setInvisibleFaces(holeData) != MS::kSuccess)
+        {
+            MString warn = "Failed to set holes on: ";
+            warn += iNode.mMesh.getName().c_str();
+            printWarning(warn);
+        }
+    #endif
+    }
+
+    void fillCreasesCornersAndHoles(MFnMesh & ioMesh, SubDAndColors & iNode,
+        Alembic::AbcGeom::ISubDSchema::Sample &samp)
+    {
+        fillCreases(ioMesh, iNode, samp);
+        fillCorners(ioMesh, iNode, samp);
+        fillHoles(ioMesh, iNode, samp);
+    }
+
 }  // namespace
 
 void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
@@ -783,6 +918,7 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
     setUVs(iFrame, ioMesh, schema.getUVsParam());
     setColors(iFrame, ioMesh, iNode.mC3s, iNode.mC4s, !iInitialized);
+    fillCreasesCornersAndHoles(ioMesh, iNode, samp);
 }
 
 void disconnectMesh(MObject & iMeshObject,
@@ -947,98 +1083,7 @@ MObject createSubD(double iFrame, SubDAndColors & iNode,
         fnMesh.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
     }
 
-#if MAYA_API_VERSION >= 201100
-    Alembic::Abc::Int32ArraySamplePtr holes = samp.getHoles();
-    if (holes && !holes->size() == 0)
-    {
-        unsigned int numHoles = (unsigned int)holes->size();
-        MUintArray holeData(numHoles);
-        for (unsigned int i = 0; i < numHoles; ++i)
-        {
-            holeData[i] = (*holes)[i];
-        }
-
-        if (fnMesh.setInvisibleFaces(holeData) != MS::kSuccess)
-        {
-            MString warn = "Failed to set holes on: ";
-            warn += iNode.mMesh.getName().c_str();
-            printWarning(warn);
-        }
-    }
-#endif
-
-    Alembic::Abc::FloatArraySamplePtr creases = samp.getCreaseSharpnesses();
-    if (creases && !creases->size() == 0)
-    {
-        Alembic::Abc::Int32ArraySamplePtr indices = samp.getCreaseIndices();
-        Alembic::Abc::Int32ArraySamplePtr lengths = samp.getCreaseLengths();
-        std::size_t numLengths = lengths->size();
-
-        MUintArray edgeIds;
-        MDoubleArray creaseData;
-
-        std::size_t curIndex = 0;
-        // curIndex incremented here to move on to the next crease length
-        for (std::size_t i = 0; i < numLengths; ++i, ++curIndex)
-        {
-            std::size_t len = (*lengths)[i] - 1;
-            float creaseSharpness = (*creases)[i];
-
-            // curIndex incremented here to go between all the edges that make
-            // up a given length
-            for (std::size_t j = 0; j < len; ++j, ++curIndex)
-            {
-                Alembic::Util::int32_t vertA = (*indices)[curIndex];
-                Alembic::Util::int32_t vertB = (*indices)[curIndex+1];
-                MItMeshVertex itv(obj);
-
-                int prev;
-                itv.setIndex(vertA, prev);
-
-                MIntArray edges;
-                itv.getConnectedEdges(edges);
-                std::size_t numEdges = edges.length();
-                for (unsigned int k = 0; k < numEdges; ++k)
-                {
-                    int oppVert = -1;
-                    itv.getOppositeVertex(oppVert, edges[k]);
-                    if (oppVert == vertB)
-                    {
-                        creaseData.append(creaseSharpness);
-                        edgeIds.append(edges[k]);
-                        break;
-                    }
-                }
-            }
-        }
-        if (fnMesh.setCreaseEdges(edgeIds, creaseData) != MS::kSuccess)
-        {
-            MString warn = "Failed to set creases on: ";
-            warn += iNode.mMesh.getName().c_str();
-            printWarning(warn);
-        }
-    }
-
-    Alembic::Abc::FloatArraySamplePtr corners = samp.getCornerSharpnesses();
-    if (corners && !corners->size() == 0)
-    {
-        Alembic::Abc::Int32ArraySamplePtr cornerVerts = samp.getCornerIndices();
-        unsigned int numCorners = static_cast<unsigned int>(corners->size());
-        MUintArray vertIds(numCorners);
-        MDoubleArray cornerData(numCorners);
-
-        for (unsigned int i = 0; i < numCorners; ++i)
-        {
-            cornerData[i] = (*corners)[i];
-            vertIds[i] = (*cornerVerts)[i];
-        }
-        if (fnMesh.setCreaseVertices(vertIds, cornerData) != MS::kSuccess)
-        {
-            MString warn = "Failed to set corners on: ";
-            warn += iNode.mMesh.getName().c_str();
-            printWarning(warn);
-        }
-    }
+    fillCreasesCornersAndHoles(fnMesh, iNode, samp);
 
     return obj;
 }
