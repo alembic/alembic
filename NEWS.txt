@@ -1,3 +1,45 @@
+2013-9-18, Alembic 1.5.1
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes and enhancements to the API, some of the example
+tools, and the Maya plugins.
+
+API:
+
+IXform/OXform:
+Make default identity xforms use even less disk space.
+Fix for Issue 313: IXformSchema::getInheritsXforms() crash with no samples
+
+Python bindings:
+Fix for Issue 308: ILightSchema.getCameraSchema() segfaults when no cameras
+are available
+
+Maya:
+
+AbcImport:
+Fix for Issue 311: properly set SubD creases, corners, and holes when the
+geometry is animated
+
+Fix for Issue 312: AbcImport doesn't accept long names when filtering
+
+AbcExport:
+Ogawa is now written out by default. (when the -dataformat flag isn't specified)
+
+Multiple frame ranges can be specified for more control over the samples
+exported.
+
+-preRoll flag was added for specified frame ranges that you want evaluated but
+not exported.
+
+Misc Tools:
+
+AbcLs - fix bugs, added new flag -s to view the size of a scalar or array
+property, -t for printing time info of the archive and the time a sample
+index of a property corresponds to.  -f prints out the frame assuming 24fps.
+
+AbcView - tweaked docs, lots of bug fixes, better camera support
+
+##-*****************************************************************************
+
 2013-7-22, Alembic 1.5.0
 Hello Alembic users, we are pleased to announce the official release of a new
 data back end for Alembic, codenamed Ogawa with improved write, read, and
