@@ -879,8 +879,6 @@ class AbcView(QtGui.QMainWindow):
         Waits for the window to be drawn before proceeding.
         """
         app = QtGui.QApplication.instance()
-        while not app.ok:
-            pass
         while QtGui.QApplication.instance().startingUp():
             pass
         while not self.isVisible():

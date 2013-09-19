@@ -1110,13 +1110,11 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         OpenGL painting override
         """
-        if not self.isEnabled():
-            return
-
-        if self.isHidden() or not self.state:
-            return
-
-        if self not in self.camera.views:
+        if (self.isHidden() or \
+           not self.isEnabled() or \
+           not self.isVisible()) or \
+           not self.state or \
+           self not in self.camera.views:
             return
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -1132,10 +1130,6 @@ class GLWidget(QtOpenGL.QGLWidget):
         # light0 tracks with camera
         glLightfv(GL_LIGHT0, GL_POSITION, ( 0.0, 0.0, 1.0, 1.0 ))
         glPopMatrix()
-
-        # draw the heads-up-display
-        if self.camera.draw_hud:
-            self._paint_hud()
 
         # adjusts the camera size
         self._paint_fixed()
@@ -1200,6 +1194,10 @@ class GLWidget(QtOpenGL.QGLWidget):
             glPopMatrix()
             self.signal_scene_drawn.emit()
         
+        # draw the heads-up-display
+        if self.camera.draw_hud:
+            self._paint_hud()
+            
     def resizeGL(self, width, height):
         try:
             self.camera.resize()
