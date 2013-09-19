@@ -66,6 +66,20 @@ using AbcA::index_t;
 #define COL_2 15
 
 //-*****************************************************************************
+// overload to print as a number instead of a character
+std::ostream & operator<<(std::ostream & os, Alembic::Util::uint8_t val)
+{
+    return os << static_cast<int>(val);
+}
+
+//-*****************************************************************************
+// overload to print as a number instead of a character
+std::ostream & operator<<(std::ostream & os, Alembic::Util::int8_t val)
+{
+    return os << static_cast<int>(val);
+}
+
+//-*****************************************************************************
 bool is_digit( const std::string& s )
 {
     std::string::const_iterator it = s.begin();
@@ -233,9 +247,11 @@ void getM33Value( Abc::IScalarProperty &p,
     U val;
     p.get( reinterpret_cast<void*>( &val ), iSS );
     std::cout << "M33(";
-    for (int r = 0; r < 3; ++r)
-	for (int c = 0; c < 3; ++c)
-	    std::cout << val[r][c] << ", ";
+    for (int r = 0; r < 3; ++r) {
+        for (int c = 0; c < 3; ++c) {
+            std::cout << val[r][c] << ", ";
+        }
+    }
     std::cout << ")" << std::endl;
 }
 
@@ -248,9 +264,11 @@ void getM44Value( Abc::IScalarProperty &p,
     U val;
     p.get( reinterpret_cast<void*>( &val ), iSS );
     std::cout << "M44(";
-    for (int r = 0; r < 4; ++r)
-	for (int c = 0; c < 4; ++c)
-	    std::cout << val[r][c] << ", ";
+    for (int r = 0; r < 4; ++r) {
+        for (int c = 0; c < 4; ++c) {
+            std::cout << val[r][c] << ", ";
+        }
+    }
     std::cout << ")" << std::endl;
 }
 
@@ -293,10 +311,14 @@ void getArrayValue( Abc::IArrayProperty &p, Abc::PropertyHeader &header,
     TYPE *vals = (TYPE*)(ptr->getData());
     for ( size_t i=0; i<totalValues; ++i ) {
         std::cout << vals[i];
-        if ( i > 0 && (i + 1) % extent == 0 )
+        if ( (i + 1) % extent == 0 )
+        {
             std::cout << std::endl;
-        else
+        }
+        else if (totalValues != 1)
+        {
             std::cout << ", ";
+        }
     }
     std::cout << std::endl;
 }
