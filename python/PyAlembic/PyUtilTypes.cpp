@@ -47,8 +47,8 @@ void register_utiltypes()
     //
     struct DimensionsOverloads
     {
-        static const size_t getItemConst( AbcU::Dimensions &iDim,
-                                          Py_ssize_t index ) 
+        static const AbcU::uint64_t getItemConst(AbcU::Dimensions &iDim,
+                                                 Py_ssize_t index ) 
         {
             return iDim[index];
         }
@@ -56,8 +56,8 @@ void register_utiltypes()
         static void setItemScalar( AbcU::Dimensions &iDim,
                                    PyObject *index, const size_t &data)
         {
-            PyImath::FixedArray<size_t> fixedArray( iDim.rootPtr(),
-                                                    iDim.rank() );
+            PyImath::FixedArray<AbcU::uint64_t> fixedArray( iDim.rootPtr(),
+                                                            iDim.rank() );
             fixedArray.setitem_scalar( index, data );
         }
     };
