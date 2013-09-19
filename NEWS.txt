@@ -38,6 +38,8 @@ index of a property corresponds to.  -f prints out the frame assuming 24fps.
 
 AbcView - tweaked docs, lots of bug fixes, better camera support
 
+prman Procedural - Fix for Issue 314: subdiv tags could become corrupted.
+
 ##-*****************************************************************************
 
 2013-7-22, Alembic 1.5.0
