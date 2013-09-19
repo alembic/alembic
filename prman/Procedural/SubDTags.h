@@ -36,6 +36,7 @@
 #ifndef _Alembic_Prman_SubDTags_h_
 #define _Alembic_Prman_SubDTags_h_
 
+#include <list>
 #include <ri.h>
 
 #include <Alembic/AbcGeom/All.h>
@@ -59,7 +60,7 @@ public:
     RtToken* stringargs();
 
 private:
-    std::vector<std::string> m_tags;
+    std::list<std::string> m_tags;
     std::vector<RtToken> m_outputTags;
 
     std::vector<RtInt> m_argCounts;
@@ -67,7 +68,7 @@ private:
 
     std::vector<RtInt> m_intArgs;
     std::vector<RtFloat> m_floatArgs;
-    std::vector<std::string> m_stringArgs;
+    std::list<std::string> m_stringArgs;
     std::vector<RtToken> m_outputStringArgs;
 };
 
