@@ -330,7 +330,7 @@ class GLState(QtCore.QObject):
         for scene in self.scenes:
             if scene.visible:
                 scene.set_time(new_time)
-        log.debug("[%s._set_time] %s" % (self, self.__time))
+        #log.debug("[%s._set_time] %s" % (self, self.__time))
         self.signal_current_time.emit(new_time) 
         self.signal_current_frame.emit(int(round(new_time * self.frames_per_second)))
 
@@ -373,7 +373,7 @@ class GLState(QtCore.QObject):
         """
         Returns min/max time range in seconds as a tuple.
         """
-        log.debug("[%s.time_range] %s, %s" % (self, self.__min, self.__max))
+        #log.debug("[%s.time_range] %s, %s" % (self, self.__min, self.__max))
         if self.__min == None or self.__max == None:
             if self.scenes:
                 for scene in self.scenes:

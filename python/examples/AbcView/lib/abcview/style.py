@@ -63,18 +63,27 @@ def gen_colors(N=1):
 
 # Qt dialog css
 DIALOG = """
-QMessageBox {
-    background: #222;
-}
-QMessageBox * {
+* {
     background: #222;
     color: #cccdcc;
 }
-QMessageBox QPushButton {
+QLabel {
+    margin-top: 2px;
+    color: #888;
+}
+QLineEdit {
+    border: 0px;
+    background: #666;
+    color: #3e6;
+}
+QPushButton {
     width: 50px;
     height: 20px;
     background: #444;
+    background: #222;
     color: #aaa;
+    border: 0;
+    outline: 0;
 }
 """
 

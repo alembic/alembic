@@ -42,6 +42,8 @@ import traceback
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
+from abcview import log, style, config
+
 class AbcConsoleWidget(QtGui.QPlainTextEdit):
     """
     Simple PyQt-based Python interpreter widget with predefined alembic contexts. 
@@ -179,7 +181,7 @@ To get the selected item from the Objects Tree,
         for i in range(len(self.prompt) + position):
             self.moveCursor(QtGui.QTextCursor.Right)
 
-    def tab_complete(self):
+    def tabComplete(self):
         try:
             from rlcompleter import Completer
             c = Completer(self.namespace)
@@ -195,8 +197,17 @@ To get the selected item from the Objects Tree,
             self.newPrompt()
             self.setCommand(cmd)
         except ImportError, e:
-            log(e)
+            log.error(e)
     
+    def runScript(self, script_path):
+        if not os.path.isfile(script_path):
+            return
+        try:
+            log.info("executing: %s" % script_path)
+            execfile(script_path, self.namespace, self.namespace)
+        except Exception, e:
+            log.error("%s: %s" % (os.path.basename(script_path), e))
+
     def runCommand(self):
         command = self.getCommand()
         self.addToHistory(command)
@@ -255,6 +266,6 @@ To get the selected item from the Objects Tree,
             self.setCommand(self.getNextHistoryEntry())
             return
         elif event.key() == QtCore.Qt.Key_Tab:
-            self.tab_complete()
+            self.tabComplete()
             return
         super(AbcConsoleWidget, self).keyPressEvent(event)

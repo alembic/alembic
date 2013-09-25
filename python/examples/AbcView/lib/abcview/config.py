@@ -36,10 +36,24 @@
 #-******************************************************************************
 
 import os
+import sys
 
 __prog__ = "AbcView"
 __version__ = "1.0.5"
 
+if sys.platform == "win32":
+	pathsep = ";"
+else:
+	pathsep = ":"
+
+# icon directory
 ICON_DIR = os.path.join(os.path.dirname(__file__), "icon")
+
+# built-in scripts directory
 SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "script")
-USER_SCRIPT_DIR = os.getenv("ABCVIEW_SCRIPT_PATH")
+
+# user scripts search paths, separated by a colon (or semicolon on win32)
+USER_SCRIPT_DIR = os.getenv("ABCVIEW_SCRIPT_PATH", "").split(pathsep)
+
+# script editor
+SCRIPT_EDITOR = os.getenv("ABCVIEW_SCRIPT_EDITOR", "gvim")

@@ -138,13 +138,20 @@ def io2gl(item, viewer=None):
         return
 
 class QScriptAction(QtGui.QGroupBox):
-    def __init__(self, filepath, action):
+    def __init__(self, name, action, doc="", version="", author=""):
+        """
+        :param name: name of the script
+        :param action: QWidgetAction object
+        :param doc: doc string
+        :param version: version string
+        :param author: author string
+        """
         super(QScriptAction, self).__init__()
         self.action = action
         self.layout = QtGui.QHBoxLayout()
         self.layout.setMargin(0)
         self.layout.setSpacing(0)
-        self.label = QtGui.QPushButton(os.path.basename(filepath))
+        self.label = QtGui.QPushButton(os.path.basename(name))
         self.button = QtGui.QPushButton()
         self.button.setFixedSize(12, 12)
         self.button.setObjectName("edit_button")
@@ -153,16 +160,20 @@ class QScriptAction(QtGui.QGroupBox):
         self.button.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.button)
-        self.filepath = filepath
+        self.name = name
+        self.filepath = self.action.data().toString()
         self.setLayout(self.layout)
         self.label.pressed.connect(self.handle_clicked)
         self.button.pressed.connect(self.handle_edit)
+        self.setToolTip("%s %s\n(author: %s)\n\n%s" %(name, version, author, doc))
 
     def handle_clicked(self):
+        """script click handler"""
         self.action.trigger()
 
     def handle_edit(self):
-        os.system("gvim %s" % self.filepath)
+        """script edit button handler"""
+        os.system("%s %s" % (config.SCRIPT_EDITOR, self.filepath))
 
 class AbcMenuBar(QtGui.QMenuBar):
     def __init__(self, parent, main):
@@ -254,23 +265,85 @@ class AbcMenuBar(QtGui.QMenuBar):
         self.script_menu.addAction("Refresh", self.handle_refresh_scripts)
         self.script_menu.addSeparator()
 
+        def get_docs(script):
+            """
+            parses a python file looking for docstring, __name__ and __author__.
+
+            :param script: filepath to .py file
+            """
+            import ast
+            doc = ""
+            version = ""
+            author = ""
+            m = ast.parse(''.join(open(script)))
+             
+            doc = ast.get_docstring(m)
+            assigns = [node for node in m.body if type(node) == ast.Assign]
+            names = [a.value.s for a in assigns if a.targets[0].id == '__name__']
+            authors = [a.value.s for a in assigns if a.targets[0].id == '__author__']
+            versions = [a.value.s for a in assigns if a.targets[0].id == '__version__']
+
+            if names:
+                name = names[0]
+            else:
+                name = os.path.basename(script)
+            if authors:
+                author = authors[0]
+            if versions:
+                version = versions[0]
+
+            return doc, name, version, author
+
         def find_scripts(path):
-            #HACK: need script registration
-            if not path:
+            """
+            walks scripts dir looking for .py files
+
+            :param path: directory containing scripts
+            """
+            _scripts = {}
+            if not path or not os.path.isdir(path):
                 return
-            for f in glob(os.path.join(path, "*.py")):
-                name = os.path.basename(f)
-                if name == "__init__.py":
-                    continue
-                
+            for r, d, f in os.walk(path):
+                for files in f:
+                    name = os.path.basename(files)
+                    if name == "__init__.py":
+                        continue
+                    if files.endswith(".py"):
+                        script = os.path.join(r, files)
+                        doc, name, version, author = get_docs(script)
+                        _scripts[name] = {
+                            "name": name,
+                            "filepath": script,
+                            "doc": doc,
+                            "version": version,
+                            "author": author
+                        }
+            return _scripts
+
+        def build_scripts(scripts):
+            """
+            builds up the script menu from a dict of found scripts
+            """
+            for name, meta in scripts.items():
+                doc = meta.get("doc")
+                version = meta.get("version")
+                author = meta.get("author")
+                filepath = meta.get("filepath")
                 script_act = QtGui.QWidgetAction(self.script_menu)
-                script_act.setDefaultWidget(QScriptAction(f, script_act))
-                script_act.setData(f)
+                script_act.setDefaultWidget(QScriptAction(name, script_act, doc, version, author))
+                script_act.setData(filepath)
                 script_act.triggered.connect(self.handle_run_script)
                 self.script_menu.addAction(script_act)
 
-        find_scripts(config.SCRIPT_DIR)
-        find_scripts(config.USER_SCRIPT_DIR)
+        # built-in scripts that ship with abcview
+        scripts = find_scripts(config.SCRIPT_DIR)
+
+        # user-defined script paths
+        for path in config.USER_SCRIPT_DIR:
+            scripts.update(find_scripts(path))
+
+        # build the scripts menu
+        build_scripts(scripts)
 
     def handle_run_script(self):
         script_path = str(self.sender().data().toString())
@@ -951,10 +1024,7 @@ class AbcView(QtGui.QMainWindow):
         """
         log.debug("[%s.load_script] %s" % (self, script))
         if os.path.exists(script):
-            lines = open(script, "r").readlines()
-            for line in lines:
-                self.console.setCommand(line.strip())
-                self.console.runCommand()
+            self.console.runScript(script)
         else:
             self.console.setCommand(script)
             self.console.runCommand()
