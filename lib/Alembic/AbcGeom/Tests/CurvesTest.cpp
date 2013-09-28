@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -45,16 +45,6 @@
 
 using namespace std;
 using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
-
-//-*****************************************************************************
-//-*****************************************************************************
-// WRITING OUT AN ANIMATED MESH
-//
-// Here we'll create an "Archive", which is Alembic's term for the actual
-// file on disk containing all of the scene geometry. The Archive will contain
-// a single animated Transform with a single static PolyMesh as its child.
-//-*****************************************************************************
-//-*****************************************************************************
 
 void doSample( OCurves &iCurves )
 {
@@ -142,7 +132,72 @@ void Example1_CurvesIn()
 
 }
 
+void Example2_CurvesOut()
+{
+    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+                      "curves2.abc" );
 
+    OCurves myCurves( OObject( archive, kTop ), "nurbsCurve" );
+
+    OCurvesSchema &curves = myCurves.getSchema();
+
+    OFloatGeomParam::Sample widthSample(
+        FloatArraySample( (const float *)g_widths, g_numWidths ),
+        kVertexScope );
+
+    OV2fGeomParam::Sample uvSample(
+        V2fArraySample( (const V2f *)g_uvs, g_totalVerts ),
+        kVertexScope );
+
+    OCurvesSchema::Sample curves_sample(
+        V3fArraySample( ( const V3f * ) g_verts, g_totalVerts ),
+        Int32ArraySample( g_numVerts, g_numCurves),
+        kVariableOrder,
+        kNonPeriodic,
+        widthSample,
+        uvSample,
+        ON3fGeomParam::Sample(),
+        kBezierBasis,
+        FloatArraySample( g_weights, g_totalVerts ),
+        UcharArraySample( g_orders, g_numCurves ),
+        FloatArraySample( g_knots, 20 )
+                                       );
+    // Set the sample.
+    curves.set( curves_sample );
+}
+
+void Example2_CurvesIn()
+{
+    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "curves2.abc" );
+
+    ICurves myCurves( IObject( archive, kTop) , "nurbsCurve");
+    ICurvesSchema &curves = myCurves.getSchema();
+
+    // get the samples from the curves
+    ICurvesSchema::Sample curvesSample;
+    curves.get( curvesSample );
+
+    // test the bounding box
+    TESTING_ASSERT( curvesSample.getSelfBounds().min == V3d( -1.0, -1.0, -1.0 ) );
+    TESTING_ASSERT( curvesSample.getSelfBounds().max == V3d( 1.0, 1.0, 1.0 ) );
+
+    // test other attributes
+    TESTING_ASSERT( curvesSample.getPositions() -> size() == 12);
+
+    TESTING_ASSERT( curvesSample.getType() == kVariableOrder );
+    TESTING_ASSERT( curvesSample.getWrap() == kNonPeriodic );
+    TESTING_ASSERT( curvesSample.getBasis() == kBezierBasis );
+    TESTING_ASSERT( ( *curvesSample.getOrders() )[0] == 4 );
+    TESTING_ASSERT( ( *curvesSample.getOrders() )[1] == 2 );
+    TESTING_ASSERT( curvesSample.getPositionWeights()->size() == 12 );
+    TESTING_ASSERT( curvesSample.getKnots()->size() == 20 );
+
+    IFloatGeomParam::Sample widthSample;
+    curves.getWidthsParam().getExpanded( widthSample );
+    TESTING_ASSERT( widthSample.getVals()->size() == 12);
+    TESTING_ASSERT( curves.getWidthsParam().valid() );
+    TESTING_ASSERT( widthSample.getScope() == kVertexScope );
+}
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -165,6 +220,9 @@ int main( int argc, char *argv[] )
     std::cout << "wrote curves" << std::endl;
 
     Example1_CurvesIn();
+
+    Example2_CurvesOut();
+    Example2_CurvesIn();
 
     return 0;
 }

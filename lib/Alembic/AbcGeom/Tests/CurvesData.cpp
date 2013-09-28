@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -59,6 +59,50 @@ const float32_t g_verts[] = {      // first curve
     1.0f, 1.0f, 1.0f
 };
 
+const float32_t g_weights[] = {
+  // first curve
+  1.0f,
+  0.8f,
+  0.6f,
+  0.4f,
+  0.4f,
+  0.6f,
+  0.8f,
+  1.0f,
+
+  // second curve
+  1.0f,
+  1.0f,
+  1.0f,
+  1.0f
+};
+
+const float32_t g_knots[] = {
+  // first curve
+  1.0f,
+  2.0f,
+  3.0f,
+  4.0f,
+  5.0f,
+  6.0f,
+  7.0f,
+  8.0f,
+  9.0f,
+ 10.0f,
+ 11.0f,
+ 12.0f,
+ 13.0f,
+ 14.0f,
+
+  // second curve
+  0.1f,
+  0.1f,
+  0.2f,
+  0.4f,
+  0.6f,
+  0.6f
+};
+
 const float32_t g_uvs[] = {    0.0, 0.0,
                                0.1, 0.0,
                                0.2, 0.0,
@@ -79,5 +123,7 @@ const float32_t g_widths[] = {    // first curve
     // second curve
     0.25, 0.5, 0.75, 1.0
 };
+
+const uint8_t g_orders[] = { 4, 2 };
 
 const size_t g_numWidths = 12;  // vertex varying

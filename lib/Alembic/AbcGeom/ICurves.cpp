@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -45,7 +45,11 @@ MeshTopologyVariance ICurvesSchema::getTopologyVariance() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "ICurvesSchema::getTopologyVariance()" );
 
-    if ( m_positionsProperty.isConstant() && m_nVerticesProperty.isConstant() &&
+    bool pointsConstant = m_positionsProperty.isConstant() &&
+        ( !m_positionWeightsProperty ||
+           m_positionWeightsProperty.isConstant() );
+
+    if ( pointsConstant && m_nVerticesProperty.isConstant() &&
          m_basisAndTypeProperty.isConstant() )
     {
         return kConstantTopology;
@@ -92,6 +96,12 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
         args.getErrorHandlerPolicy());
 
     // none of the things below here are guaranteed to exist
+    if ( this->getPropertyHeader( "w" ) != NULL )
+    {
+        m_positionWeightsProperty = Abc::IFloatArrayProperty( _this, "w",
+            iArg0, iArg1 );
+    }
+
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
         m_uvsParam = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
@@ -112,6 +122,19 @@ void ICurvesSchema::init( const Abc::Argument &iArg0,
         m_velocitiesProperty = Abc::IV3fArrayProperty( _this, ".velocities",
                                                iArg0, iArg1 );
     }
+
+    if ( this->getPropertyHeader( ".orders" ) != NULL )
+    {
+        m_ordersProperty = Abc::IUcharArrayProperty( _this, ".orders",
+            iArg0, iArg1 );
+    }
+
+    if ( this->getPropertyHeader( ".knots" ) != NULL )
+    {
+        m_knotsProperty = Abc::IFloatArrayProperty( _this, ".knots",
+            iArg0, iArg1 );
+    }
+
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
@@ -134,6 +157,21 @@ void ICurvesSchema::get( ICurvesSchema::Sample &oSample,
     oSample.m_wrap = static_cast<CurvePeriodicity>( basisAndType[1] );
     oSample.m_basis = static_cast<BasisType>( basisAndType[2] );
     // we ignore basisAndType[3] since it is the same as basisAndType[2]
+
+    if ( m_positionWeightsProperty )
+    {
+        m_positionWeightsProperty.get( oSample.m_positionWeights, iSS );
+    }
+
+    if ( m_ordersProperty )
+    {
+        m_ordersProperty.get( oSample.m_orders, iSS );
+    }
+
+    if ( m_knotsProperty )
+    {
+        m_knotsProperty.get( oSample.m_knots, iSS );
+    }
 
     if ( m_selfBoundsProperty )
     {

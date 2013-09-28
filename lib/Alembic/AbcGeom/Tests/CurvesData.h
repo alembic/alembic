@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -48,12 +48,15 @@ extern const size_t g_numCurves;
 extern const size_t g_totalVerts;
 extern const int32_t g_numVerts[];
 extern const float32_t g_verts[];
+extern const float32_t g_weights[];
 
 extern const size_t g_numWidths;
 extern const float32_t g_widths[];
 
 extern const float32_t g_uvs[];
 
+extern const float32_t g_knots[];
+extern const uint8_t g_orders[];
 
 //-*******************************
 

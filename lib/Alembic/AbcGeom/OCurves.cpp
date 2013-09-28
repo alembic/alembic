@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -58,8 +58,8 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
     // do we need to create velocities prop?
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
-        m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(), ".velocities",
-                                               m_positionsProperty.getTimeSampling() );
+        m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(),
+            ".velocities", m_positionsProperty.getTimeSampling() );
 
         std::vector<V3f> emptyVec;
         const V3fArraySample empty(emptyVec);
@@ -186,6 +186,57 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
         }
     }
 
+    if ( iSamp.getPositionWeights() && !m_positionWeightsProperty)
+    {
+        m_positionWeightsProperty = Abc::OFloatArrayProperty( *this, "w",
+            this->getTimeSampling() );
+
+        std::vector<float> emptyVec;
+        Alembic::Abc::FloatArraySample emptySamp( emptyVec );
+
+        size_t numSamples = m_positionsProperty.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_positionWeightsProperty.set( emptySamp );
+        }
+    }
+
+    if ( iSamp.getOrders() && !m_ordersProperty)
+    {
+        m_ordersProperty = Abc::OUcharArrayProperty( *this, ".orders",
+                                                     this->getTimeSampling() );
+
+        std::vector<uint8_t> emptyVec;
+        Alembic::Abc::UcharArraySample emptySamp( emptyVec );
+
+        size_t numSamples = m_positionsProperty.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_ordersProperty.set( emptySamp );
+        }
+    }
+
+    if ( iSamp.getKnots() && !m_knotsProperty)
+    {
+        m_knotsProperty = Abc::OFloatArrayProperty( *this, ".knots",
+            this->getTimeSampling() );
+
+        std::vector<float> emptyVec;
+        Alembic::Abc::FloatArraySample emptySamp( emptyVec );
+
+        size_t numSamples = m_positionsProperty.getNumSamples();
+
+        // set all the missing samples
+        for ( size_t i = 0; i < numSamples; ++i )
+        {
+            m_knotsProperty.set( emptySamp );
+        }
+    }
+
     // We could add sample integrity checking here.
     if ( m_positionsProperty.getNumSamples() == 0 )
     {
@@ -232,6 +283,23 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
             m_widthsParam.set( iSamp.getWidths() );
         }
 
+        // process position weights
+        if ( iSamp.getPositionWeights() )
+        {
+            m_positionWeightsProperty.set( iSamp.getPositionWeights() );
+        }
+
+        // process orders
+        if ( iSamp.getOrders() )
+        {
+            m_ordersProperty.set( iSamp.getOrders() );
+        }
+
+        // process knots
+        if ( iSamp.getKnots() )
+        {
+            m_knotsProperty.set( iSamp.getKnots() );
+        }
     }
     else
     {
@@ -260,6 +328,21 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
 
         if ( m_widthsParam )
         { m_widthsParam.set( iSamp.getWidths() ); }
+
+        if ( m_positionWeightsProperty )
+        {
+            m_positionWeightsProperty.set( iSamp.getPositionWeights() );
+        }
+
+        if ( m_ordersProperty )
+        {
+            m_ordersProperty.set( iSamp.getOrders() );
+        }
+
+        if ( m_knotsProperty )
+        {
+            m_knotsProperty.set( iSamp.getKnots() );
+        }
 
         // update bounds
         if ( iSamp.getSelfBounds().hasVolume() )
@@ -298,6 +381,12 @@ void OCurvesSchema::setFromPrevious()
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
     if ( m_normalsParam ) { m_normalsParam.setFromPrevious(); }
     if ( m_widthsParam ) { m_widthsParam.setFromPrevious(); }
+    if ( m_positionWeightsProperty )
+    {
+        m_positionWeightsProperty.setFromPrevious();
+    }
+    if ( m_ordersProperty ) { m_ordersProperty.setFromPrevious(); }
+    if ( m_knotsProperty ) { m_knotsProperty.setFromPrevious(); }
 
     ALEMBIC_ABC_SAFE_CALL_END();
 }
@@ -324,6 +413,21 @@ void OCurvesSchema::setTimeSampling( uint32_t iIndex )
 
     if ( m_normalsParam ) { m_normalsParam.setTimeSampling( iIndex ); }
     if ( m_widthsParam ) { m_widthsParam.setTimeSampling( iIndex ); }
+
+    if ( m_positionWeightsProperty )
+    {
+        m_positionWeightsProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_ordersProperty )
+    {
+        m_ordersProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_knotsProperty )
+    {
+        m_knotsProperty.setTimeSampling( iIndex );
+    }
 
     m_positionsProperty.setTimeSampling( iIndex );
 

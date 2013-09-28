@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -50,7 +50,8 @@ enum CurvePeriodicity {
 
 enum CurveType {
   kCubic = 0,
-  kLinear = 1
+  kLinear = 1,
+  kVariableOrder = 2
 };
 
 } // End namespace ALEMBIC_VERSION_NS

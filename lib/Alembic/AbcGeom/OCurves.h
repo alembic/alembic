@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -108,15 +108,22 @@ public:
                 OFloatGeomParam::Sample(),
                 const OV2fGeomParam::Sample &iUVs = OV2fGeomParam::Sample(),
                 const ON3fGeomParam::Sample &iNormals = ON3fGeomParam::Sample(),
-                const BasisType &iBasis = kBezierBasis )
-          : m_positions( iPos ),
+                const BasisType &iBasis = kBezierBasis,
+                const Abc::FloatArraySample &iPosWeight = \
+                Abc::FloatArraySample(),
+                const Abc::UcharArraySample &iOrders = Abc::UcharArraySample(),
+                const Abc::FloatArraySample &iKnots = Abc::FloatArraySample()
+        ): m_positions( iPos ),
             m_nVertices( iNVertices ),
             m_type( iType ),
             m_wrap( iWrap ),
             m_widths( iWidths ),
             m_uvs( iUVs ),
             m_normals( iNormals ),
-            m_basis( iBasis ) {}
+            m_basis( iBasis ),
+            m_positionWeights( iPosWeight ),
+            m_orders( iOrders ),
+            m_knots( iKnots ) {}
 
         // widths accessor
         const OFloatGeomParam::Sample &getWidths() const { return m_widths; }
@@ -127,6 +134,10 @@ public:
         const Abc::P3fArraySample &getPositions() const { return m_positions; }
         void setPositions( const Abc::P3fArraySample &iSmp )
         { m_positions = iSmp; }
+
+        // position weights, if it isn't set, it's 1 for every point
+        const Abc::FloatArraySample &getPositionWeights() const
+        { return m_positionWeights; }
 
         // type accessors
         void setType( const CurveType &iType )
@@ -172,15 +183,25 @@ public:
         void setBasis( const BasisType &iBasis )
         { m_basis = iBasis; }
 
+        // orders accessors
+        const Abc::UcharArraySample &getOrders() const { return m_orders; }
+
+        // knot accessors
+        const Abc::FloatArraySample &getKnots() const { return m_knots; }
+
         void reset()
         {
             m_positions.reset();
+            m_positionWeights.reset();
             m_velocities.reset();
             m_uvs.reset();
             m_normals.reset();
             m_widths.reset();
 
             m_nVertices.reset();
+
+            m_orders.reset();
+            m_knots.reset();
 
             m_selfBounds.makeEmpty();
 
@@ -204,6 +225,11 @@ public:
         ON3fGeomParam::Sample m_normals;
 
         BasisType m_basis;
+
+        // optional properties
+        Abc::FloatArraySample m_positionWeights;
+        Abc::UcharArraySample m_orders;
+        Abc::FloatArraySample m_knots;
 
         // bounding box attributes
         Abc::Box3d m_selfBounds;
@@ -335,10 +361,13 @@ public:
     void reset()
     {
         m_positionsProperty.reset();
+        m_positionWeightsProperty.reset();
         m_uvsParam.reset();
         m_normalsParam.reset();
         m_widthsParam.reset();
         m_nVerticesProperty.reset();
+        m_ordersProperty.reset();
+        m_knotsProperty.reset();
 
         m_basisAndTypeProperty.reset();
 
@@ -369,6 +398,9 @@ protected:
     ON3fGeomParam m_normalsParam;
     OFloatGeomParam m_widthsParam;
     Abc::OV3fArrayProperty m_velocitiesProperty;
+    Abc::OFloatArrayProperty m_positionWeightsProperty;
+    Abc::OUcharArrayProperty m_ordersProperty;
+    Abc::OFloatArrayProperty m_knotsProperty;
 
     Abc::OScalarProperty m_basisAndTypeProperty;
 };

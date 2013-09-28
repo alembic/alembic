@@ -75,22 +75,36 @@ public:
         CurvePeriodicity getWrap() const { return m_wrap; }
         BasisType getBasis() const { return m_basis; }
 
+        // the should not be null if the curve type is kVariableOrder
+        Abc::UcharArraySamplePtr getOrders() { return m_orders; }
+        Abc::FloatArraySamplePtr getKnots() { return m_knots; }
+
+        // if this is NULL then the weight value of the position for each
+        // point is 1
+        Abc::FloatArraySamplePtr getPositionWeights() const
+        { return m_positionWeights; }
+
         Abc::Box3d getSelfBounds() const { return m_selfBounds; }
         Abc::V3fArraySamplePtr getVelocities() const { return m_velocities; }
 
         bool valid() const
         {
-            return m_positions.get() != 0;
+            return m_positions.get() != 0 &&
+                (m_type != kVariableOrder || m_orders);
         }
 
         void reset()
         {
             m_positions.reset();
             m_nVertices.reset();
+            m_positionWeights.reset();
 
             m_type = kCubic;
             m_wrap = kNonPeriodic;
             m_basis = kBezierBasis;
+
+            m_orders.reset();
+            m_knots.reset();
 
             m_selfBounds.makeEmpty();
         }
@@ -101,11 +115,14 @@ public:
         friend class ICurvesSchema;
         Abc::P3fArraySamplePtr m_positions;
         Abc::V3fArraySamplePtr m_velocities;
+        Abc::FloatArraySamplePtr m_positionWeights;
 
         Abc::Box3d m_selfBounds;
 
         // type, wrap, and nVertices
         Abc::Int32ArraySamplePtr m_nVertices;
+        Abc::UcharArraySamplePtr m_orders;
+        Abc::FloatArraySamplePtr m_knots;
 
         CurveType m_type;
         BasisType m_basis;
@@ -223,6 +240,12 @@ public:
         return m_nVerticesProperty;
     }
 
+    // if this property is invalid then the weight for every point is 1
+    Abc::IFloatArrayProperty getPositionWeightsProperty() const
+    {
+        return m_positionWeightsProperty;
+    }
+
     IV2fGeomParam getUVsParam() const
     {
         return m_uvsParam;
@@ -238,6 +261,16 @@ public:
         return m_widthsParam;
     }
 
+    Abc::IUcharArrayProperty getOrdersProperty() const
+    {
+        return m_ordersProperty;
+    }
+
+    Abc::IFloatArrayProperty getKnotsProperty() const
+    {
+        return m_knotsProperty;
+    }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
@@ -251,6 +284,10 @@ public:
         m_positionsProperty.reset();
         m_velocitiesProperty.reset();
         m_nVerticesProperty.reset();
+
+        m_positionWeightsProperty.reset();
+        m_ordersProperty.reset();
+        m_knotsProperty.reset();
 
         m_uvsParam.reset();
         m_normalsParam.reset();
@@ -286,6 +323,11 @@ protected:
     IFloatGeomParam m_widthsParam;
     IV2fGeomParam m_uvsParam;
     IN3fGeomParam m_normalsParam;
+
+    // optional
+    Abc::IFloatArrayProperty m_positionWeightsProperty;
+    Abc::IUcharArrayProperty m_ordersProperty;
+    Abc::IFloatArrayProperty m_knotsProperty;
 };
 
 //-*****************************************************************************
