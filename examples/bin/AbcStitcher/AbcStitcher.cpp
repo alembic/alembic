@@ -710,7 +710,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
     }
     else
     {
-        outObj = OObject(oParentObj, outObj.getName(), outObj.getMetaData());
+        outObj = OObject(oParentObj, header.getName(), header.getMetaData());
 
         // collect the top level compound property
         ICompoundPropertyVec iCompoundProps(iObjects.size());
