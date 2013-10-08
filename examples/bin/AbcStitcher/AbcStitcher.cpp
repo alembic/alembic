@@ -869,7 +869,7 @@ int main( int argc, char *argv[] )
         else if (coreType == Alembic::AbcCoreFactory::IFactory::kOgawa)
         {
             oArchive = CreateArchiveWithInfo(
-                Alembic::AbcCoreHDF5::WriteArchive(),
+                Alembic::AbcCoreOgawa::WriteArchive(),
                 fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
         }
 
