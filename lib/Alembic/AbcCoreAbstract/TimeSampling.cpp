@@ -77,10 +77,10 @@ TimeSampling::TimeSampling( chrono_t iTimePerCycle,
 void TimeSampling::init()
 {
     size_t numSamples = m_sampleTimes.size();
-    ABCA_ASSERT ( m_timeSamplingType.isAcyclic() || numSamples == 
+    ABCA_ASSERT ( m_timeSamplingType.isAcyclic() || numSamples ==
         m_timeSamplingType.getNumSamplesPerCycle(),
-        "Incorrect number of time samples specified, expected " << 
-        m_timeSamplingType.getNumSamplesPerCycle() << ", got: " << 
+        "Incorrect number of time samples specified, expected " <<
+        m_timeSamplingType.getNumSamplesPerCycle() << ", got: " <<
         numSamples );
 
     // we need to check to make sure we are strictly increasing
@@ -91,7 +91,7 @@ void TimeSampling::init()
         {
             chrono_t newVal = m_sampleTimes[i];
             ABCA_ASSERT( curVal < newVal, "Sample " << i << " value: " <<
-                newVal << " is not greater than the previous sample: " << 
+                newVal << " is not greater than the previous sample: " <<
                 curVal );
             curVal = newVal;
         }
@@ -216,7 +216,7 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
                                           m_timeSamplingType.getTimePerCycle() );
 
         // Clamp it.
-        sampIdx = ( ( index_t )(sampIdx) >= iNumSamples ) ? 
+        sampIdx = ( ( index_t )(sampIdx) >= iNumSamples ) ?
                     iNumSamples-1 : sampIdx;
 
         // Get the samp time again.
@@ -372,6 +372,11 @@ TimeSampling::getNearIndex( chrono_t iTime, index_t iNumSamples ) const
         this->getFloorIndex( iTime, iNumSamples );
     std::pair<index_t, chrono_t> ceilPair =
         this->getCeilIndex( iTime, iNumSamples );
+
+    if ( floorPair.first == ceilPair.first )
+    {
+        return floorPair;
+    }
 
     assert( ( floorPair.second <= iTime ||
               Imath::equalWithAbsError( iTime, floorPair.second,
