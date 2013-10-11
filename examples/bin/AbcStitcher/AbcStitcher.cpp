@@ -773,14 +773,15 @@ int main( int argc, char *argv[] )
         {
 
             IArchive archive = factory.getArchive(argv[i], coreType);
-            IObject iRoot = archive.getTop();
-            size_t numChildren = iRoot.getNumChildren();
-            if (!iRoot.valid() || numChildren < 1)
+            if (!archive.valid() || archive.getTop().getNumChildren() < 1)
             {
                 std::cerr << "ERROR: " << argv[i] <<
                     " not a valid Alembic file" << std::endl;
                 return 1;
             }
+
+            IObject iRoot = archive.getTop();
+            size_t numChildren = iRoot.getNumChildren();
 
             if (i == 2)
             {
