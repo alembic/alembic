@@ -312,16 +312,16 @@ int main( int argc, char *argv[] )
          *   \_____________/\______/
          *        file         obj
          */
-        int i = 0;
+        int j = 0;
         while ( std::getline( ss, segment, '/' ) ) {
             if ( !isFile ( fp.str() ) ) {
-                if ( i != 0 )
+                if ( j != 0 )
                     fp << "/";
                 fp << segment;
             } else {
                 seglist.push_back( segment );
             }
-            ++i;
+            ++j;
         }
 
         // open the iarchive
