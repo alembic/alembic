@@ -53,7 +53,8 @@ AbcA::ArchiveWriterPtr
 WriteArchive::operator()( const std::string &iFileName,
                           const AbcA::MetaData &iMetaData ) const
 {
-    AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iFileName, iMetaData ) );
+    Alembic::Util::shared_ptr<AwImpl> archivePtr(
+        new AwImpl( iFileName, iMetaData ) );
     return archivePtr;
 }
 
@@ -62,7 +63,8 @@ AbcA::ArchiveWriterPtr
 WriteArchive::operator()( std::ostream * iStream,
                           const AbcA::MetaData &iMetaData ) const
 {
-    AbcA::ArchiveWriterPtr archivePtr( new AwImpl( iStream, iMetaData ) );
+    Alembic::Util::shared_ptr<AwImpl> archivePtr(
+        new AwImpl( iStream, iMetaData ) );
     return archivePtr;
 }
 
@@ -92,13 +94,13 @@ ReadArchive::operator()( const std::string &iFileName ) const
 
     if ( m_streams.empty() )
     {
-        archivePtr =
-            AbcA::ArchiveReaderPtr( new ArImpl( iFileName, m_numStreams ) );
+        archivePtr = Alembic::Util::shared_ptr<ArImpl>(
+            new ArImpl( iFileName, m_numStreams ) );
     }
     else
     {
-        archivePtr =
-            AbcA::ArchiveReaderPtr( new ArImpl( m_streams ) );
+        archivePtr = Alembic::Util::shared_ptr<ArImpl>(
+            new ArImpl( m_streams ) );
     }
     return archivePtr;
 }
@@ -113,13 +115,13 @@ ReadArchive::operator()( const std::string &iFileName,
 
     if ( m_streams.empty() )
     {
-        archivePtr =
-            AbcA::ArchiveReaderPtr( new ArImpl( iFileName, m_numStreams ) );
+        archivePtr = Alembic::Util::shared_ptr<ArImpl> (
+            new ArImpl( iFileName, m_numStreams ) );
     }
     else
     {
-        archivePtr =
-            AbcA::ArchiveReaderPtr( new ArImpl( m_streams ) );
+        archivePtr = Alembic::Util::shared_ptr<ArImpl> (
+            new ArImpl( m_streams ) );
     }
     return archivePtr;
 }

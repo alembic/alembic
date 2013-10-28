@@ -61,7 +61,8 @@ OwData::OwData( hid_t iParentGroup,
     ABCA_ASSERT( m_group >= 0,
                  "Could not create group for object: " << iName );
 
-    m_data.reset( new CpwData( ".prop", m_group ) );
+    m_data = Alembic::Util::shared_ptr<CpwData>(
+        new CpwData( ".prop", m_group ) );
 
     AbcA::PropertyHeader topHeader( ".prop", iMetaData );
     WritePropertyInfo( m_group, topHeader, false, 0, 0, 0, 0 );

@@ -134,7 +134,7 @@ CpwData::createScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
     PropertyHeaderPtr headerPtr( new PropertyHeaderAndFriends( iName,
         AbcA::kScalarProperty, iMetaData, iDataType, ts, iTimeSamplingIndex ) );
 
-    AbcA::ScalarPropertyWriterPtr
+    Alembic::Util::shared_ptr<SpwImpl>
         ret( new SpwImpl( iParent, m_group->addGroup(), headerPtr,
                           m_propertyHeaders.size() ) );
 
@@ -173,7 +173,7 @@ CpwData::createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
     PropertyHeaderPtr headerPtr( new PropertyHeaderAndFriends( iName,
         AbcA::kArrayProperty, iMetaData, iDataType, ts, iTimeSamplingIndex ) );
 
-    AbcA::ArrayPropertyWriterPtr
+    Alembic::Util::shared_ptr<ApwImpl>
         ret( new ApwImpl( iParent, m_group->addGroup(), headerPtr,
                           m_propertyHeaders.size() ) );
 
@@ -200,7 +200,7 @@ CpwData::createCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
    PropertyHeaderPtr headerPtr( new PropertyHeaderAndFriends( iName,
                                 iMetaData ) );
 
-    AbcA::CompoundPropertyWriterPtr
+    Alembic::Util::shared_ptr<CpwImpl>
         ret( new CpwImpl( iParent, m_group->addGroup(), headerPtr,
                           m_propertyHeaders.size() ) );
 

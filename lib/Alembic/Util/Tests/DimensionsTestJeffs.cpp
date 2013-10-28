@@ -43,18 +43,14 @@ int main( int, char** )
     // Test fundamental BaseDimensions class
     //
     {
-        // Test constructors. None of these should fail.
-        // but they currently do
-        #if 1
         typedef  BaseDimensions<int>   IntScalarDimension;
 
-        IntScalarDimension rank0();
+        IntScalarDimension rank0;
 
         IntScalarDimension rank0_val1( (int) 1);
 
         IntScalarDimension rank1;
         rank1.setRank( 1 );
-        #endif
     }
 
     //
@@ -62,7 +58,7 @@ int main( int, char** )
     //
     {
         Dimensions rank00;
-        Dimensions rank0();
+        Dimensions rank0;
 
         Dimensions rank1( 1 );
         assert(rank1.rank() == 1);
@@ -73,7 +69,7 @@ int main( int, char** )
         rank2.setRank(2);
         assert(rank2.rank() == 2);
 
-        size_t *ptr = rank2.rootPtr();
+        Alembic::Util::uint64_t *ptr = rank2.rootPtr();
         ptr[0] = 11;
         ptr[1] = 12;
         assert( rank2[0] == 11 );

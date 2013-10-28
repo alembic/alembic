@@ -51,7 +51,8 @@ OwData::OwData( Ogawa::OGroupPtr iGroup ) : m_group( iGroup )
     // Check validity of all inputs.
     ABCA_ASSERT( m_group, "Invalid parent group" );
 
-    m_data.reset( new CpwData( m_group->addGroup() ) );
+    m_data = Alembic::Util::shared_ptr<CpwData>(
+        new CpwData( m_group->addGroup() ) );
 }
 
 //-*****************************************************************************
@@ -67,7 +68,7 @@ OwData::getProperties( AbcA::ObjectWriterPtr iParent )
     if ( ! ret )
     {
         // time to make a new one
-        ret.reset( new CpwImpl( iParent,
+        ret = Alembic::Util::shared_ptr<CpwImpl>( new CpwImpl( iParent,
             m_data, iParent->getMetaData() ) );
         m_top = ret;
     }
@@ -158,7 +159,7 @@ AbcA::ObjectWriterPtr OwData::createChild( AbcA::ObjectWriterPtr iParent,
                                 parentName + iHeader.getName(),
                                 iHeader.getMetaData() ) );
 
-    AbcA::ObjectWriterPtr ret( new OwImpl( iParent,
+    Alembic::Util::shared_ptr<OwImpl> ret( new OwImpl( iParent,
                                            m_group->addGroup(),
                                            header, m_childHeaders.size() ) );
 

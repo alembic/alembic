@@ -107,7 +107,7 @@ bool IsAncestorInvisible( IObject iObject,
     ABCA_ASSERT ( iObject,
                  "IsAncestorInvisible (): object passed in isn't valid.");
 
-    IVisibilityProperty visibilityProperty = 
+    IVisibilityProperty visibilityProperty =
         GetVisibilityProperty ( iObject );
     ObjectVisibility visibilityValue = kVisibilityDeferred;
     if ( visibilityProperty )
@@ -118,7 +118,7 @@ bool IsAncestorInvisible( IObject iObject,
     }
 
     IObject currentObject = iObject;
-    while ( (visibilityValue == kVisibilityDeferred) )
+    while ( visibilityValue == kVisibilityDeferred )
     {
         // go up a level
         currentObject = currentObject.getParent();
@@ -136,7 +136,7 @@ bool IsAncestorInvisible( IObject iObject,
         }
 
         // At this point if we didn't find the visiblilty
-        // property OR if the value was deferred we'll 
+        // property OR if the value was deferred we'll
         // continue up a level (so only if this object
         // says hidden OR explicitly says visible do we stop.
     }

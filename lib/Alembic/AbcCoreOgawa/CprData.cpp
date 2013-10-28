@@ -148,7 +148,8 @@ CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
         ABCA_ASSERT( group, "Scalar Property not backed by a valid group.");
 
         // Make a new one.
-        bptr.reset( new SprImpl( iParent, group, sub.header ) );
+        bptr = Alembic::Util::shared_ptr<SprImpl>(
+            new SprImpl( iParent, group, sub.header ) );
         sub.made = bptr;
     }
 
@@ -193,7 +194,8 @@ CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
         ABCA_ASSERT( group, "Array Property not backed by a valid group.");
 
         // Make a new one.
-        bptr.reset( new AprImpl( iParent, group, sub.header ) );
+        bptr = Alembic::Util::shared_ptr<AprImpl>(
+            new AprImpl( iParent, group, sub.header ) );
 
         sub.made = bptr;
     }
@@ -241,9 +243,9 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
         ABCA_ASSERT( group, "Compound Property not backed by a valid group.");
 
         // Make a new one.
-        bptr.reset( new CprImpl( iParent, group, sub.header,
-                                 streamId->getID(),
-                                 implPtr->getIndexedMetaData() ) );
+        bptr = Alembic::Util::shared_ptr<CprImpl>(
+            new CprImpl( iParent, group, sub.header, streamId->getID(),
+                         implPtr->getIndexedMetaData() ) );
 
         sub.made = bptr;
     }

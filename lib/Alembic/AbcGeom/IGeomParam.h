@@ -75,7 +75,7 @@ public:
         }
 
         bool valid() const
-        { return m_vals; }
+        { return m_vals.valid(); }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
 
@@ -363,11 +363,19 @@ ITypedGeomParam<TRAITS>::getExpanded( typename ITypedGeomParam<TRAITS>::Sample &
     }
     else
     {
-        Alembic::Util::shared_ptr< Abc::TypedArraySample<TRAITS> > valPtr = \
-            m_valProp.getValue( iSS );
         Abc::UInt32ArraySamplePtr idxPtr = m_indicesProperty.getValue( iSS );
 
         size_t size = idxPtr->size();
+
+        // no indices?  just return what we have in our values
+        if (size == 0)
+        {
+            m_valProp.get( oSamp.m_vals, iSS );
+            return;
+        }
+
+        Alembic::Util::shared_ptr< Abc::TypedArraySample<TRAITS> > valPtr = \
+            m_valProp.getValue( iSS );
 
         typename TRAITS::value_type *v = new typename TRAITS::value_type[size];
 

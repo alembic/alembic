@@ -74,8 +74,8 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
     if ( numChildren > 0 && m_group->isChildGroup( 0 ) )
     {
         Ogawa::IGroupPtr group = m_group->getGroup( 0, false, iThreadId );
-        m_data.reset( new CprData( group, iThreadId, iArchive,
-                                   iIndexedMetaData ) );
+        m_data = Alembic::Util::shared_ptr<CprData>(
+            new CprData( group, iThreadId, iArchive, iIndexedMetaData ) );
     }
 }
 
@@ -92,7 +92,8 @@ OrData::getProperties( AbcA::ObjectReaderPtr iParent )
     if ( ! ret )
     {
         // time to make a new one
-        ret.reset( new CprImpl( iParent, m_data ) );
+        ret = Alembic::Util::shared_ptr<CprImpl>(
+            new CprImpl( iParent, m_data ) );
         m_top = ret;
     }
 
@@ -153,8 +154,8 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
     if ( ! optr )
     {
         // Make a new one.
-        optr.reset ( new OrImpl( iParent, m_group, i + 1,
-                                 m_children[i].header ) );
+        optr = Alembic::Util::shared_ptr<OrImpl>(
+            new OrImpl( iParent, m_group, i + 1, m_children[i].header ) );
         m_children[i].made = optr;
     }
     return optr;

@@ -56,7 +56,7 @@ void test()
         a->addData(1, data);
 
         const void * datas[] = {data, &(data[5])};
-        std::size_t sizes[] = {2, 3};
+        Alembic::Util::uint64_t sizes[] = {2, 3};
 
         aa->addData(2, sizes, datas); // 0, 1, 5, 6, 7
     }
