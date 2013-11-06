@@ -230,7 +230,7 @@ void IObjectDrw::draw( const DrawContext &iCtx )
         if ( header != NULL ) {
             Abc::IScalarProperty visible( props, "visible" );
             Abc::ISampleSelector iss( m_currentTime );
-            int8_t val = 1;
+            Alembic::Util::int8_t val = 1;
             visible.get( reinterpret_cast<void*>( &val ), iss );
             if ( val == 0 ) 
                 return;

@@ -48,6 +48,17 @@
 #include <sstream>
 #include <sys/stat.h>
 
+#ifdef _MSC_VER
+#include <locale>         // std::locale, std::isdigit
+// set up _S_ISDIR()
+#if !defined(S_ISDIR)
+#  if defined( _S_IFDIR) && !defined( __S_IFDIR)
+#    define __S_IFDIR _S_IFDIR
+#  endif
+#  define S_ISDIR(mode)    (mode&__S_IFDIR)
+#endif
+#endif // _MSC_VER
+
 namespace Abc  = ::Alembic::Abc;
 namespace AbcA = ::Alembic::AbcCoreAbstract;
 namespace AbcF = ::Alembic::AbcCoreFactory;
@@ -82,8 +93,9 @@ std::ostream & operator<<(std::ostream & os, Alembic::Util::int8_t val)
 //-*****************************************************************************
 bool is_digit( const std::string& s )
 {
+    std::locale loc;
     std::string::const_iterator it = s.begin();
-    while (it != s.end() && std::isdigit(*it)) ++it;
+    while (it != s.end() && std::isdigit(*it,loc)) ++it;
     return !s.empty() && it == s.end();
 }
 

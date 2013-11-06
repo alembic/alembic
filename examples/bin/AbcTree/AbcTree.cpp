@@ -48,6 +48,16 @@
 #include <sstream>
 #include <sys/stat.h>
 
+#ifdef _MSC_VER
+// set up _S_ISDIR()
+#if !defined(S_ISDIR)
+#  if defined( _S_IFDIR) && !defined( __S_IFDIR)
+#    define __S_IFDIR _S_IFDIR
+#  endif
+#  define S_ISDIR(mode)    (mode&__S_IFDIR)
+#endif
+#endif // _MSC_VER
+
 namespace Abc  = ::Alembic::Abc;;
 namespace AbcA = ::Alembic::AbcCoreAbstract;
 namespace AbcF = ::Alembic::AbcCoreFactory;
