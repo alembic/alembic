@@ -447,7 +447,7 @@ MString util::getHelpText()
 "\n"
 "-df / -dataFormat string\n"
 "The data format to use to write the file.  Can be either HDF or Ogawa.\n"
-"The default is HDF.\n"
+"The default is Ogawa.\n"
 "\n"
 "-atp / -attrPrefix string (default ABC_)\n"
 "Prefix filter for determining which geometric attributes to write out.\n"
