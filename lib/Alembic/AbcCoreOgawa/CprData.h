@@ -85,12 +85,12 @@ private:
     {
         PropertyHeaderPtr header;
         WeakBprPtr made;
+        Alembic::Util::mutex lock;
     };
 
     typedef std::map<std::string, size_t> SubPropertiesMap;
-    typedef std::vector<SubProperty> SubPropertyVec;
 
-    SubPropertyVec m_propertyHeaders;
+    SubProperty * m_propertyHeaders;
     SubPropertiesMap m_subProperties;
 };
 

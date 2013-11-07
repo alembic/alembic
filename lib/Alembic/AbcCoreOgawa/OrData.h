@@ -88,18 +88,19 @@ private:
     {
         ObjectHeaderPtr header;
         WeakOrPtr made;
+        Alembic::Util::mutex lock;
     };
 
     typedef std::map<std::string, size_t> ChildrenMap;
-    typedef std::vector<Child> ChildrenVec;
 
     // The children
-    ChildrenVec m_children;
+    Child * m_children;
     ChildrenMap m_childrenMap;
 
     // Our "top" property.
     Alembic::Util::weak_ptr< AbcA::CompoundPropertyReader > m_top;
     Alembic::Util::shared_ptr < CprData > m_data;
+    Alembic::Util::mutex m_cprlock;
 };
 
 typedef Alembic::Util::shared_ptr<OrData> OrDataPtr;
