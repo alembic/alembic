@@ -727,6 +727,22 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
     // go deeper.
     // Otherwise we are done here
     size_t numChildren =  iObjects[0].getNumChildren();
+
+    // check to make sure all of our iObjects have the same number of children
+    for (size_t j = 1; j < iObjects.size(); j++)
+    {
+        if (numChildren != iObjects[j].getNumChildren())
+        {
+            std::cerr << "ERROR: " << iObjects[j].getFullName() << " in " <<
+                iObjects[j].getArchive().getName() <<
+                " has a different number of children than " <<
+                iObjects[0].getFullName() << " in " <<
+                iObjects[0].getArchive().getName() << std::endl;
+
+            exit(1);
+        }
+    }
+
     for (size_t i = 0 ; i < numChildren; i++ )
     {
         std::vector< IObject > iChildObjects;
