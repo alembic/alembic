@@ -93,20 +93,15 @@ OrData::~OrData()
 AbcA::CompoundPropertyReaderPtr
 OrData::getProperties( AbcA::ObjectReaderPtr iParent )
 {
-    //Alembic::Util::scoped_lock l( m_cprlock );
+    Alembic::Util::scoped_lock l( m_cprlock );
     AbcA::CompoundPropertyReaderPtr ret = m_top.lock();
+
     if ( ! ret )
     {
-        Alembic::Util::scoped_lock l( m_cprlock );
-        ret = m_top.lock();
-        if ( ! ret )
-        {
-            // time to make a new one
-            ret = Alembic::Util::shared_ptr<CprImpl>(
-                new CprImpl( iParent, m_data ) );
-            m_top = ret;
-        }
-
+        // time to make a new one
+        ret = Alembic::Util::shared_ptr<CprImpl>(
+            new CprImpl( iParent, m_data ) );
+        m_top = ret;
     }
 
     return ret;
@@ -162,19 +157,17 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
     ABCA_ASSERT( i < m_childrenMap.size(),
         "Out of range index in OrData::getChild: " << i );
 
+    Alembic::Util::scoped_lock l( m_children[i].lock );
     AbcA::ObjectReaderPtr optr = m_children[i].made.lock();
+
     if ( ! optr )
     {
-        Alembic::Util::scoped_lock l( m_children[i].lock );
-        optr = m_children[i].made.lock();
-        if ( ! optr )
-        {
-            // Make a new one.
-            optr = Alembic::Util::shared_ptr<OrImpl>(
-                new OrImpl( iParent, m_group, i + 1, m_children[i].header ) );
-            m_children[i].made = optr;
-        }
+        // Make a new one.
+        optr = Alembic::Util::shared_ptr<OrImpl>(
+            new OrImpl( iParent, m_group, i + 1, m_children[i].header ) );
+        m_children[i].made = optr;
     }
+
     return optr;
 }
 

@@ -155,6 +155,8 @@ const AbcA::MetaData &ArImpl::getMetaData() const
 //-*****************************************************************************
 AbcA::ObjectReaderPtr ArImpl::getTop()
 {
+    Alembic::Util::scoped_lock l( m_orlock );
+
     AbcA::ObjectReaderPtr ret = m_top.lock();
     if ( ! ret )
     {

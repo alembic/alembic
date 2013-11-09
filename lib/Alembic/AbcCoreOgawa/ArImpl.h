@@ -114,6 +114,7 @@ private:
 
     Alembic::Util::weak_ptr< AbcA::ObjectReader > m_top;
     Alembic::Util::shared_ptr < OrData > m_data;
+    Alembic::Util::mutex m_orlock;
 
     Util::int32_t m_archiveVersion;
 
