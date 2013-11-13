@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -107,6 +107,7 @@ private:
     Alembic::Util::weak_ptr< AbcA::ObjectReader > m_top;
     Alembic::Util::shared_ptr < OrData > m_data;
     ObjectHeaderPtr m_header;
+    Alembic::Util::mutex m_orlock;
 
     int32_t m_archiveVersion;
 

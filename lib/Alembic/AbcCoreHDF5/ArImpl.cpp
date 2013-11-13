@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -144,6 +144,7 @@ const AbcA::MetaData &ArImpl::getMetaData() const
 //-*****************************************************************************
 AbcA::ObjectReaderPtr ArImpl::getTop()
 {
+    Alembic::Util::scoped_lock l( m_orlock );
     AbcA::ObjectReaderPtr ret = m_top.lock();
     if ( ! ret )
     {

@@ -64,7 +64,11 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
         ReadObjectHeaders( m_group, numChildren - 1, iThreadId,
                            iParentName, iIndexedMetaData, headers );
 
-        m_children = new Child[ headers.size() ];
+        if ( !headers.empty() )
+        {
+            m_children = new Child[ headers.size() ];
+        }
+
         for ( std::size_t i = 0; i < headers.size(); ++i )
         {
             m_childrenMap[headers[i]->getName()] = i;

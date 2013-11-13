@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -273,6 +273,7 @@ CprData::getScalarProperty( AbcA::CompoundPropertyReaderPtr iParent,
                     << sub.header->getPropertyType() );
     }
 
+    Alembic::Util::scoped_lock l( m_subPropertyMutexes[fiter->second] );
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
@@ -314,6 +315,7 @@ CprData::getArrayProperty( AbcA::CompoundPropertyReaderPtr iParent,
                     << sub.header->getPropertyType() );
     }
 
+    Alembic::Util::scoped_lock l( m_subPropertyMutexes[fiter->second] );
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {
@@ -356,6 +358,7 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
                     << sub.header->getPropertyType() );
     }
 
+    Alembic::Util::scoped_lock l( m_subPropertyMutexes[fiter->second] );
     AbcA::BasePropertyReaderPtr bptr = sub.made.lock();
     if ( ! bptr )
     {

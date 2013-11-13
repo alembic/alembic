@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -69,6 +69,7 @@ static herr_t VisitAllLinksCB( hid_t iGroup,
 OrData::OrData( ObjectHeaderPtr iHeader,
                 H5Node & iParentGroup,
                 int32_t iArchiveVersion )
+    : m_children( NULL )
 {
     ABCA_ASSERT( iHeader, "Invalid header" );
     ABCA_ASSERT( iParentGroup.isValidObject(), "Invalid group" );
@@ -92,7 +93,10 @@ OrData::OrData( ObjectHeaderPtr iHeader,
 
     std::vector < std::string >::iterator namesIt;
     uint32_t i = 0;
-    m_children.resize(objNames.size());
+    if ( !objNames.empty() )
+    {
+        m_children = new Child[ objNames.size() ];
+    }
 
     std::string parentFullName = iHeader->getFullName();
     if ( parentFullName != "/" )
@@ -121,12 +125,17 @@ OrData::OrData( ObjectHeaderPtr iHeader,
 OrData::~OrData()
 {
     CloseObject( m_oldGroup );
+    if ( m_children )
+    {
+        delete [] m_children;
+    }
 }
 
 //-*****************************************************************************
 AbcA::CompoundPropertyReaderPtr
 OrData::getProperties( AbcA::ObjectReaderPtr iParent )
 {
+    Alembic::Util::scoped_lock l( m_childObjectsMutex );
     AbcA::CompoundPropertyReaderPtr ret = m_top.lock();
     if ( ! ret )
     {
@@ -143,14 +152,14 @@ OrData::getProperties( AbcA::ObjectReaderPtr iParent )
 //-*****************************************************************************
 size_t OrData::getNumChildren()
 {
-    return m_children.size();
+    return m_childrenMap.size();
 }
 
 //-*****************************************************************************
 const AbcA::ObjectHeader &
 OrData::getChildHeader( AbcA::ObjectReaderPtr iParent, size_t i )
 {
-    ABCA_ASSERT( i < m_children.size(),
+    ABCA_ASSERT( i < m_childrenMap.size(),
         "Out of range index in OrData::getChildHeader: " << i );
 
     Alembic::Util::scoped_lock l( m_childObjectsMutex );
@@ -203,9 +212,10 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, const std::string &iName )
 AbcA::ObjectReaderPtr
 OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
 {
-    ABCA_ASSERT( i < m_children.size(),
+    ABCA_ASSERT( i < m_childrenMap.size(),
         "Out of range index in OrData::getChild: " << i );
 
+    Alembic::Util::scoped_lock l( m_children[i].lock );
     AbcA::ObjectReaderPtr optr = m_children[i].made.lock();
     if ( ! optr )
     {

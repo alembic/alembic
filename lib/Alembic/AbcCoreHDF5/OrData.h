@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -83,10 +83,10 @@ private:
         bool loadedMetaData;
         ObjectHeaderPtr header;
         WeakOrPtr made;
+        Alembic::Util::mutex lock;
     };
 
     typedef std::map<std::string, size_t> ChildrenMap;
-    typedef std::vector<Child> ChildrenVec;
 
     H5Node m_group;
     H5Node m_oldGroup;
@@ -94,7 +94,7 @@ private:
     Alembic::Util::mutex m_childObjectsMutex;
 
     // The children
-    ChildrenVec m_children;
+    Child * m_children;
     ChildrenMap m_childrenMap;
 
     // Our "top" property.
