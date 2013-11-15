@@ -34,7 +34,7 @@
 ##-*****************************************************************************
 
 # C++ files for this project
-SET( CXX_FILES 
+SET( CXX_FILES
   ArchiveInfo.cpp
   ErrorHandler.cpp
 
@@ -52,9 +52,10 @@ SET( CXX_FILES
   OScalarProperty.cpp
 
   Reference.cpp
+  SourceName.cpp
 )
 
-SET( H_FILES 
+SET( H_FILES
   All.h
   Base.h
   ErrorHandler.h
@@ -86,6 +87,7 @@ SET( H_FILES
   OTypedScalarProperty.h
 
   Reference.h
+  SourceName.h
 
   TypedArraySample.h
   TypedPropertyTraits.h

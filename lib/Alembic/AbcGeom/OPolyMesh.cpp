@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -49,8 +49,8 @@ void OPolyMeshSchema::set( const Sample &iSamp )
     // do we need to create velocities prop?
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
-        m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(), ".velocities",
-                                               m_positionsProperty.getTimeSampling() );
+        m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(),
+            ".velocities", m_positionsProperty.getTimeSampling() );
 
         std::vector<V3f> emptyVec;
         const V3fArraySample empty( emptyVec );
@@ -68,6 +68,8 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         std::vector<Util::uint32_t> emptyIndices;
 
         OV2fGeomParam::Sample empty;
+        AbcA::MetaData mdata;
+        SetSourceName( mdata, m_uvSourceName );
 
         if ( iSamp.getUVs().getIndices() )
         {
@@ -78,7 +80,7 @@ void OPolyMeshSchema::set( const Sample &iSamp )
             // UVs are indexed
             m_uvsParam = OV2fGeomParam( this->getPtr(), "uv", true,
                                    empty.getScope(), 1,
-                                   this->getTimeSampling() );
+                                   this->getTimeSampling(), mdata );
         }
         else
         {
@@ -88,7 +90,7 @@ void OPolyMeshSchema::set( const Sample &iSamp )
             // UVs are not indexed
             m_uvsParam = OV2fGeomParam( this->getPtr(), "uv", false,
                                    empty.getScope(), 1,
-                                   this->getTimeSampling() );
+                                   this->getTimeSampling() , mdata );
         }
 
         size_t numSamples = m_positionsProperty.getNumSamples();
@@ -349,6 +351,12 @@ OPolyMeshSchema::getFaceSet( const std::string &iFaceSetName )
 
     OFaceSet empty;
     return empty;
+}
+
+//-*****************************************************************************
+void OPolyMeshSchema::setUVSourceName(const std::string & iName)
+{
+    m_uvSourceName = iName;
 }
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -126,6 +126,7 @@ public:
             m_normals.reset();
         }
 
+
     protected:
         Abc::P3fArraySample m_positions;
         Abc::Int32ArraySample m_indices;
@@ -136,6 +137,7 @@ public:
         Abc::V3fArraySample m_velocities;
         OV2fGeomParam::Sample m_uvs;
         ON3fGeomParam::Sample m_normals;
+
     };
 
     //-*************************************************************************
@@ -298,6 +300,10 @@ public:
     OFaceSet getFaceSet( const std::string &iFaceSetName );
     bool hasFaceSet( const std::string &iFaceSetName );
 
+    //! Optional source name for the UV param.
+    //! Must be set before the first UV sample is set.
+    void setUVSourceName(const std::string & iName);
+
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OPolyMeshSchema::valid() );
@@ -315,6 +321,9 @@ protected:
 
     OV2fGeomParam m_uvsParam;
     ON3fGeomParam m_normalsParam;
+
+    // optional source name for the UVs
+    std::string m_uvSourceName;
 
     // self and child bounds and ArbGeomParams and UserProperties
     // all come from OGeomBaseSchema

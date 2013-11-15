@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -114,6 +114,11 @@ void Example1_MeshOut()
     OPolyMesh meshyObj( OObject( archive, kTop ), "meshy" );
     OPolyMeshSchema &mesh = meshyObj.getSchema();
 
+    // some apps can arbitrarily name their primary UVs, this function allows
+    // you to do that, and must be done before the first time you set UVs
+    // on the schema
+    mesh.setUVSourceName("test");
+
     // UVs and Normals use GeomParams, which can be written or read
     // as indexed or not, as you'd like.
     OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
@@ -197,6 +202,9 @@ void Example1_MeshIn()
     TESTING_ASSERT( uv.isConstant() );
 
     TESTING_ASSERT( IsGeomParam( N.getHeader() ) );
+
+    TESTING_ASSERT( GetSourceName( uv.getMetaData() ) == "test" );
+    TESTING_ASSERT( isUV( uv.getHeader() ) );
 
     N3f n0 = (*nsp)[0];
 
@@ -338,6 +346,9 @@ void optPropTest()
         TESTING_ASSERT( 7 == mesh.getVelocitiesProperty().getNumSamples() );
         TESTING_ASSERT( 7 == mesh.getUVsParam().getNumSamples() );
         TESTING_ASSERT( 7 == mesh.getNormalsParam().getNumSamples() );
+        TESTING_ASSERT(
+            GetSourceName( mesh.getUVsParam().getMetaData() ) == "" );
+        TESTING_ASSERT( isUV( mesh.getUVsParam().getHeader() ) );
     }
 }
 

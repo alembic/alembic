@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -99,6 +99,7 @@ void Example1_MeshOut()
 
     mesh_samp.setUVs( uvsamp );
 
+    mesh.setUVSourceName("cool");
 
     // Set the sample.
     mesh.set( mesh_samp );
@@ -177,6 +178,8 @@ void Example1_MeshIn()
     // UVs
     IV2fGeomParam uv = mesh.getUVsParam();
     TESTING_ASSERT( ! uv.isIndexed() );
+    TESTING_ASSERT( GetSourceName( uv.getMetaData() ) == "cool" );
+    TESTING_ASSERT( isUV( uv.getHeader() ) );
 
     // we can fake like the UVs are indexed
     IV2fGeomParam::Sample uvsamp = uv.getIndexedValue();
@@ -375,6 +378,9 @@ void optPropTest()
         TESTING_ASSERT( 7 == mesh.getNumSamples() );
         TESTING_ASSERT( 7 == mesh.getVelocitiesProperty().getNumSamples() );
         TESTING_ASSERT( 7 == mesh.getUVsParam().getNumSamples() );
+        TESTING_ASSERT(
+            GetSourceName( mesh.getUVsParam().getMetaData() ) == "" );
+        TESTING_ASSERT( isUV( mesh.getUVsParam().getHeader() ) );
     }
 }
 

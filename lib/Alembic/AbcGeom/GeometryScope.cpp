@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/GeometryScope.h>
+#include <Alembic/AbcGeom/IGeomParam.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -69,7 +70,7 @@ size_t GeometryScopeNumValuesPolygon( GeometryScope iScope,
     default: return 0;
     };
 }
-        
+
 //-*****************************************************************************
 size_t GeometryScopeNumValuesPointsPolygons( GeometryScope iScope,
                                              size_t iNumPolys,
@@ -127,7 +128,7 @@ size_t GeometryScopeNumValuesBilinearPatch( GeometryScope iScope )
     case kConstantScope:
     case kUniformScope: return 1;
     case kVaryingScope:
-    case kFacevaryingScope: 
+    case kFacevaryingScope:
     case kVertexScope: return 4;
     default: return 0;
     };
@@ -172,7 +173,7 @@ size_t GeometryScopeNumValuesBicubicPatchMesh( GeometryScope iScope,
     assert( iNu >= 4 && iNv >= 4 );
     size_t usegs = iNu-3;
     size_t vsegs = iNv-3;
-    
+
     switch ( iScope )
     {
     case kConstantScope: return 1;
@@ -212,7 +213,7 @@ size_t GeometryScopeNumValuesLinearCurves( GeometryScope iScope,
     case kUniformScope: return iSumOfCounts -
             (iNumCurves * ( 1 + (size_t)iNoWrap));
     case kVaryingScope:
-    case kFacevaryingScope: 
+    case kFacevaryingScope:
     case kVertexScope: return iSumOfCounts;
     default: return 0;
     };
@@ -222,7 +223,7 @@ size_t GeometryScopeNumValuesLinearCurves( GeometryScope iScope,
 size_t GeometryScopeNumValuesCubicCurves( GeometryScope iScope,
                                           size_t iNumCurves, bool iNoWrap,
                                           size_t iSumOfCounts )
-    
+
 {
     switch ( iScope )
     {
@@ -234,6 +235,30 @@ size_t GeometryScopeNumValuesCubicCurves( GeometryScope iScope,
     case kVertexScope: return iSumOfCounts;
     default: return 0;
     };
+}
+
+//-*****************************************************************************
+void SetIsUV( AbcA::MetaData &ioMetaData, bool isUV )
+{
+    if ( !isUV )
+    {
+        ioMetaData.set("notUV", "1");
+    }
+}
+
+//-*****************************************************************************
+bool isUV( const AbcA::PropertyHeader & iHeader )
+{
+    GeometryScope scope = GetGeometryScope( iHeader.getMetaData() );
+    if ( IV2fGeomParam::matches( iHeader ) &&
+         iHeader.getMetaData().get("notUV") != "1" &&
+         ( scope == kVaryingScope || scope == kVertexScope ||
+           scope == kFacevaryingScope ) )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 } // End namespace ALEMBIC_VERSION_NS

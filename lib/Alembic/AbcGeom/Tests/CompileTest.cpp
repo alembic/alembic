@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -37,6 +37,8 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcGeom/All.h>
 
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
+
 using namespace Alembic::Abc;
 using namespace Alembic::AbcGeom;
 
@@ -47,6 +49,11 @@ void testOGeomParam( Abc::OCompoundProperty &iParent )
 {
     OV2fGeomParam uvs( iParent, "uv", false, kVertexScope, 1 );
 
+    AbcA::MetaData md;
+    SetIsUV( md, false );
+    OV2fGeomParam notuvs( iParent, "notuv", false, kVertexScope, 1, md);
+    OV2fGeomParam fakeuvs( iParent, "fakeuv", false, kConstantScope, 1);
+
     std::vector<V2f> vec;
 
     vec.push_back( V2f( 1.0f, 2.0f ) );
@@ -56,11 +63,25 @@ void testOGeomParam( Abc::OCompoundProperty &iParent )
     OV2fGeomParam::Sample samp( val, kUnknownScope );
 
     uvs.set( samp );
+    notuvs.set( samp );
+    fakeuvs.set( samp );
 }
 
 void testIGeomParam( Abc::ICompoundProperty &iParent )
 {
     IV2fGeomParam uvs( iParent, "uv" );
+    IV2fGeomParam notuvs( iParent, "notuv" );
+    IV2fGeomParam fakeuvs( iParent, "fakeuv" );
+
+    // not really UVs since it's not of the correct scope
+    TESTING_ASSERT( isUV( uvs.getHeader() ) );
+
+    // not UVs since we specifically said it wasn't, even though it has the
+    // correct scope
+    TESTING_ASSERT( !isUV( notuvs.getHeader() ) );
+
+    // not UVs because it is the incorrect scope
+    TESTING_ASSERT( !isUV( fakeuvs.getHeader() ) );
 
     const AbcA::DataType &dt = uvs.getDataType();
     dt.getExtent();

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -453,6 +453,10 @@ public:
     bool hasFaceSet( const std::string &iFaceSetName );
 
 
+    //! Optional source name for the UV param.
+    //! Must be set before the first UV sample is set.
+    void setUVSourceName(const std::string & iName);
+
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OSubDSchema::valid() );
@@ -488,6 +492,10 @@ protected:
 
     // UVs
     OV2fGeomParam m_uvsParam;
+
+
+    // optional source name for the UVs
+    std::string m_uvSourceName;
 
 private:
     void initCreases(uint32_t iNumSamples);

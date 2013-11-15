@@ -206,7 +206,14 @@ size_t GeometryScopeNumValuesCubicCurves( GeometryScope iScope,
                                           size_t iNumCurves, bool iNoWrap,
                                           size_t iSumOfCounts );
 
+//-*****************************************************************************
+//! These functions below are convenience functions for identifying UVs.
+//! ...
+//-*****************************************************************************
 
+void SetIsUV( AbcA::MetaData &ioMetaData, bool isUV );
+
+bool isUV( const AbcA::PropertyHeader & iHeader );
 
 } // End namespace ALEMBIC_VERSION_NS
 

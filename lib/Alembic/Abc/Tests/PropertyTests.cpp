@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -86,7 +86,9 @@ void writeSimpleProperties(const std::string &archiveName, bool useOgawa)
 
     OObject foochild( archiveTop, "foochild" );
 
-    ODoubleProperty foodub( foochild.getProperties(), "foodub", 0 );
+    Alembic::AbcCoreAbstract::MetaData md;
+    SetSourceName(md, "potato");
+    ODoubleProperty foodub( foochild.getProperties(), "foodub", 0, md);
 
     for ( size_t i = 0 ; i < 10 ; i++ )
     {
@@ -163,7 +165,15 @@ void readSimpleProperties(const std::string &archiveName)
 
         std::vector<std::string> propNames;
         for (int pp=0; pp<numProperties; pp++)
+        {
             propNames.push_back( props.getPropertyHeader(pp).getName() );
+            std::string sourceName =
+                GetSourceName(props.getPropertyHeader(pp).getMetaData());
+
+            TESTING_ASSERT(
+                ( propNames.back() == "foodub" && sourceName == "potato" ) ||
+                ( propNames.back() != "foodub" && sourceName != "potato" ) );
+        }
 
         for (int jj=0; jj<numProperties; jj++)
         {
