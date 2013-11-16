@@ -185,9 +185,13 @@ public:
 
         // orders accessors
         const Abc::UcharArraySample &getOrders() const { return m_orders; }
+        void setOrders( const Abc::UcharArraySample &iOrders)
+        { m_orders = iOrders; }
 
         // knot accessors
         const Abc::FloatArraySample &getKnots() const { return m_knots; }
+        void setKnots( const Abc::FloatArraySample &iKnots)
+        { m_knots = iKnots; }
 
         void reset()
         {

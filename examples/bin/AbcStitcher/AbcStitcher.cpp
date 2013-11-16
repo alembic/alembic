@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -514,6 +514,9 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IV2fGeomParam iUVs = iSchema.getUVsParam();
             IN3fGeomParam iNormals = iSchema.getNormalsParam();
             IFloatGeomParam iWidths = iSchema.getWidthsParam();
+            IFloatArrayProperty iKnots = iSchema.getKnotsProperty();
+            IUcharArrayProperty iOrders = iSchema.getOrdersProperty();
+
             index_t numSamples = iSchema.getNumSamples();
 
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
@@ -538,6 +541,18 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                     oSamp.setCurvesNumVertices(*curvsNumPtr);
                 oSamp.setWrap(iSamp.getWrap());
                 oSamp.setBasis(iSamp.getBasis());
+
+                Abc::FloatArraySamplePtr knotsPtr = iSamp.getKnots();
+                if (knotsPtr)
+                {
+                    oSamp.setKnots(*knotsPtr);
+                }
+
+                Abc::UcharArraySamplePtr ordersPtr = iSamp.getOrders();
+                if (ordersPtr)
+                {
+                    oSamp.setOrders(*ordersPtr);
+                }
 
                 IFloatGeomParam::Sample iWidthSample;
                 OFloatGeomParam::Sample oWidthSample;
