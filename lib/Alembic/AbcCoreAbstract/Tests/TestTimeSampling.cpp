@@ -48,7 +48,7 @@
 #include <iostream>
 
 //-*****************************************************************************
-namespace AbcA = Alembic::AbcCoreAbstract::v6;
+namespace AbcA = Alembic::AbcCoreAbstract::v7;
 using AbcA::chrono_t;
 using AbcA::index_t;
 

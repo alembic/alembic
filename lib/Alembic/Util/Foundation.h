@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -96,7 +96,7 @@
 #endif
 
 #ifndef ALEMBIC_VERSION_NS
-#define ALEMBIC_VERSION_NS v6
+#define ALEMBIC_VERSION_NS v7
 #endif
 
 namespace Alembic {
