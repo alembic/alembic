@@ -217,97 +217,75 @@ void getScalarValue( Abc::IScalarProperty &p,
                            const Abc::ISampleSelector &iSS )
 {
     typedef typename TPTraits::value_type U;
-    U val;
-    p.get( reinterpret_cast<void*>( &val ), iSS );
-    std::cout << val << std::endl;
-}
+    std::size_t extent = p.getDataType().getExtent();
+    std::vector< U > val( extent );
+    p.get( reinterpret_cast<void*>( &val.front() ), iSS );
 
-//-*****************************************************************************
-template<class TPTraits>
-void getBoxValue( Abc::IScalarProperty &p,
-                           const Abc::ISampleSelector &iSS )
-{
-    typedef typename TPTraits::value_type U;
-    U val;
-    p.get( reinterpret_cast<void*>( &val ), iSS );
-    std::cout << "Box(" << val.min << ", "
-              << val.max << ")" << std::endl;
-}
-
-//-*****************************************************************************
-template<class TPTraits>
-void getColorValue( Abc::IScalarProperty &p,
-                           const Abc::ISampleSelector &iSS )
-{
-    typedef typename TPTraits::value_type U;
-    U val;
-    p.get( reinterpret_cast<void*>( &val ), iSS );
-    std::cout << "Color("
-              << val[0] << ", "
-              << val[1] << ", "
-              << val[2] << ", "
-              << val[3] << ", "
-              << ")" << std::endl;
-}
-
-//-*****************************************************************************
-template<class TPTraits>
-void getM33Value( Abc::IScalarProperty &p,
-                           const Abc::ISampleSelector &iSS )
-{
-    typedef typename TPTraits::value_type U;
-    U val;
-    p.get( reinterpret_cast<void*>( &val ), iSS );
-    std::cout << "M33(";
-    for (int r = 0; r < 3; ++r) {
-        for (int c = 0; c < 3; ++c) {
-            std::cout << val[r][c] << ", ";
+    std::string interp = p.getHeader().getMetaData().get("interpretation");
+    bool needsClose = false;
+    std::size_t subExtent = 0;
+    if (interp == "box")
+    {
+        std::cout << "Box(";
+        needsClose = true;
+        if (extent == 6)
+        {
+            subExtent = 3;
+        }
+        else if (extent == 4)
+        {
+            subExtent = 2;
         }
     }
-    std::cout << ")" << std::endl;
-}
-
-//-*****************************************************************************
-template<class TPTraits>
-void getM44Value( Abc::IScalarProperty &p,
-                           const Abc::ISampleSelector &iSS )
-{
-    typedef typename TPTraits::value_type U;
-    U val;
-    p.get( reinterpret_cast<void*>( &val ), iSS );
-    std::cout << "M44(";
-    for (int r = 0; r < 4; ++r) {
-        for (int c = 0; c < 4; ++c) {
-            std::cout << val[r][c] << ", ";
-        }
+    else if (interp == "rgb" || interp == "rbga")
+    {
+        std::cout << "Color(";
+        needsClose = true;
     }
-    std::cout << ")" << std::endl;
+    else if (interp == "matrix" && extent == 9)
+    {
+        std::cout << "M33(";
+        needsClose =true;
+        subExtent = 3;
+    }
+    else if (interp == "matrix" && extent == 16)
+    {
+        std::cout << "M44(";
+        needsClose =true;
+        subExtent = 4;
+    }
+
+    for ( std::size_t i = 0; i < extent; ++i )
+    {
+
+        if ( i != 0 ) {
+            std::cout << ", ";
+        }
+
+        if ( subExtent != 0 && ( i % subExtent ) == 0) {
+            std::cout << "(";
+        }
+
+        std::cout << val[i];
+
+        if ( subExtent != 0 && ( i % subExtent ) == subExtent - 1 ) {
+            std::cout << ")";
+        }
+
+    }
+
+    if ( needsClose )
+    {
+        std::cout << ")";
+    }
+
+    std::cout << std::endl;
 }
 
 //-*****************************************************************************
-#define CASE_RETURN_SCALAR_VALUE( TPTraits, PROP, SELECTOR ) \
-case TPTraits::pod_enum:                                  \
+#define CASE_RETURN_SCALAR_VALUE( TPTraits, PROP, SELECTOR )    \
+case TPTraits::pod_enum:                                        \
     return getScalarValue<TPTraits>( PROP, SELECTOR );
-
-//-*****************************************************************************
-#define CASE_RETURN_BOX_VALUE( TPTraits, PROP, SELECTOR ) \
-case TPTraits::pod_enum:                                  \
-    return getBoxValue<TPTraits>( PROP, SELECTOR );
-
-//-*****************************************************************************
-#define CASE_RETURN_COLOR_VALUE( TPTraits, PROP, SELECTOR ) \
-case TPTraits::pod_enum:                                  \
-    return getColorValue<TPTraits>( PROP, SELECTOR );
-
-//-*****************************************************************************
-#define CASE_RETURN_M33_VALUE( TPTraits, PROP, SELECTOR ) \
-case TPTraits::pod_enum:                                  \
-    return getM33Value<TPTraits>( PROP, SELECTOR );
-
-//-*****************************************************************************
-#define CASE_RETURN_M44_VALUE( TPTraits, PROP, SELECTOR ) \
-case TPTraits::pod_enum:                                  \
-    return getM44Value<TPTraits>( PROP, SELECTOR );
 
 //-*****************************************************************************
 template<class TYPE>
@@ -396,91 +374,25 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
             return;
         }
 
-        if ( extent == 1 ) {
-            switch ( pod )
-            {
-                CASE_RETURN_SCALAR_VALUE( Abc::BooleanTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Uint8TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Int8TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Uint16TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Int16TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Uint32TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Int32TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Uint64TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Int64TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Float32TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::Float64TPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::StringTPTraits, p, iss );
-                default:
-                    std::cout << "Unknown property type" << std::endl;
-                    break;
-            }
-
-        } else if ( extent == 2 ) {
-            switch ( pod )
-            {
-                CASE_RETURN_SCALAR_VALUE( Abc::V2sTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::V2iTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::V2fTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::V2dTPTraits, p, iss );
-                default:
-                    std::cout << "Unknown property type" << std::endl;
-                    break;
-            }
-        } else if ( extent == 3 ) {
-            switch ( pod )
-            {
-                CASE_RETURN_SCALAR_VALUE( Abc::C3cTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::C3hTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::V3sTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::V3iTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::V3dTPTraits, p, iss );
-                CASE_RETURN_SCALAR_VALUE( Abc::V3fTPTraits, p, iss );
-                default:
-                    std::cout << "Unknown property type" << std::endl;
-                    break;
-            }
-        } else if ( extent == 4 ) {
-            switch ( pod )
-            {
-                CASE_RETURN_COLOR_VALUE( Abc::C4cTPTraits, p, iss );
-                CASE_RETURN_COLOR_VALUE( Abc::C4hTPTraits, p, iss );
-                CASE_RETURN_BOX_VALUE( Abc::Box2sTPTraits, p, iss );
-                CASE_RETURN_BOX_VALUE( Abc::Box2iTPTraits, p, iss );
-                default:
-                    std::cout << "Unknown property type" << std::endl;
-                    break;
-            }
-        } else if ( extent == 6 ) {
-            switch ( pod )
-            {
-                CASE_RETURN_BOX_VALUE( Abc::Box3sTPTraits, p, iss );
-                CASE_RETURN_BOX_VALUE( Abc::Box3iTPTraits, p, iss );
-                CASE_RETURN_BOX_VALUE( Abc::Box3fTPTraits, p, iss );
-                CASE_RETURN_BOX_VALUE( Abc::Box3dTPTraits, p, iss );
-                default:
-                    std::cout << "Unknown property type" << std::endl;
-                    break;
-            }
-        } else if ( extent == 9 ) {
-            switch ( pod )
-            {
-                CASE_RETURN_M33_VALUE( Abc::M33fTPTraits, p, iss );
-                CASE_RETURN_M33_VALUE( Abc::M33dTPTraits, p, iss );
-                default:
-                    std::cout << "Unknown property type" << std::endl;
-                    break;
-            }
-        } else if ( extent == 16 ) {
-            switch ( pod )
-            {
-                CASE_RETURN_M44_VALUE( Abc::M44fTPTraits, p, iss );
-                CASE_RETURN_M44_VALUE( Abc::M44dTPTraits, p, iss );
-                default:
-                    std::cout << "Unknown property type" << std::endl;
-                    break;
-            }
+        switch ( pod )
+        {
+            CASE_RETURN_SCALAR_VALUE( Abc::BooleanTPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Uint8TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Int8TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Uint16TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Int16TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Uint32TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Int32TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Uint64TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Int64TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Float32TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::Float64TPTraits, p, iss );
+            CASE_RETURN_SCALAR_VALUE( Abc::StringTPTraits, p, iss );
+            default:
+                std::cout << "Unknown property type" << std::endl;
+                break;
         }
+
     }
 }
 
@@ -753,12 +665,16 @@ int main( int argc, char *argv[] )
                 if ( j != 0 )
                     fp << "/";
                 fp << segment;
-            } else if ( is_digit( segment ) ) {
-                index = atoi( segment.c_str() );
             } else {
                 seglist.push_back( segment );
             }
             ++j;
+        }
+
+        bool lastIsIndex = false;
+        if (!seglist.empty() && is_digit( seglist.back() ) ) {
+            index = atoi( seglist.back().c_str() );
+            lastIsIndex = true;
         }
 
         // open the iarchive
@@ -836,6 +752,7 @@ int main( int argc, char *argv[] )
         Abc::ICompoundProperty props = iObj.getProperties();
         const Abc::PropertyHeader* header;
         bool found = false;
+        bool shouldPrintValue = false;
         for ( std::size_t i = 0; i < seglist.size(); ++i ) {
             header = props.getPropertyHeader( seglist[i] );
             if ( header && header->isCompound() ) {
@@ -846,6 +763,14 @@ int main( int argc, char *argv[] )
                 }
             } else if ( header && header->isSimple() ) {
                 found = true;
+
+                // if the last value happens to be an index, and we are a
+                // property  then dont bother checking the last item in seglist
+                if (lastIsIndex && i == seglist.size() - 2)
+                {
+                    shouldPrintValue = true;
+                    break;
+                }
             } else {
                 std::cout << seglist[i]
                           << ": Invalid object or property"
@@ -855,7 +780,7 @@ int main( int argc, char *argv[] )
         }
 
         // do stuff
-        if ( index >= 0 ) {
+        if ( shouldPrintValue ) {
             printValue( props, *header, index, opt_size, opt_time, fps );
         } else {
             if ( found && header->isCompound() )
