@@ -48,9 +48,10 @@ static Abc::IArchive* mkIArchive( const std::string &iName )
     archive = factory.getArchive(iName, coreType);
     if ( coreType == AbcF::IFactory::kUnknown ) {
         throwPythonException( "Unknown core type" );
-    } else {
-        return new Abc::IArchive( archive );
     }
+
+    return new Abc::IArchive( archive );
+
 }
 
 //-*****************************************************************************
