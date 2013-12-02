@@ -216,7 +216,10 @@ void Example1_MeshIn()
     TESTING_ASSERT( n0 == N3f( -1.0f, 0.0f, 0.0f ) );
     std::cout << "0th normal: " << n0 << std::endl;
 
-    IV2fGeomParam::Sample uvsamp = uv.getIndexedValue();
+    IV2fGeomParam::Sample uvsamp;
+    TESTING_ASSERT( !uvsamp.valid() );
+    uvsamp = uv.getIndexedValue();
+    TESTING_ASSERT( uvsamp.valid() );
 
     TESTING_ASSERT( (*(uvsamp.getIndices()))[1] == 1 );
     V2f uv2 = (*(uvsamp.getVals()))[2];

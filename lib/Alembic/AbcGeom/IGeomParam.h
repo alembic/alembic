@@ -74,8 +74,7 @@ public:
             m_isIndexed = false;
         }
 
-        bool valid() const
-        { return m_vals.valid(); }
+        bool valid() const { return m_vals; }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
 
