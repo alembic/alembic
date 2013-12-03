@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,13 +39,13 @@
 
 void register_igeomparam_box()
 {
-    register_<Abc::Box2sTPTraits>       ( "IBox2sGeomParam" );
-    register_<Abc::Box2iTPTraits>       ( "IBox2iGeomParam" );
-    register_<Abc::Box2fTPTraits>       ( "IBox2fGeomParam" );
-    register_<Abc::Box2dTPTraits>       ( "IBox2dGeomParam" );
+    register_<AbcG::IBox2sGeomParam>  ( "IBox2sGeomParam" );
+    register_<AbcG::IBox2iGeomParam>  ( "IBox2iGeomParam" );
+    register_<AbcG::IBox2fGeomParam>  ( "IBox2fGeomParam" );
+    register_<AbcG::IBox2dGeomParam>  ( "IBox2dGeomParam" );
 
-    register_<Abc::Box3sTPTraits>       ( "IBox3sGeomParam" );
-    register_<Abc::Box3iTPTraits>       ( "IBox3iGeomParam" );
-    register_<Abc::Box3fTPTraits>       ( "IBox3fGeomParam" );
-    register_<Abc::Box3dTPTraits>       ( "IBox3dGeomParam" );
+    register_<AbcG::IBox3sGeomParam>  ( "IBox3sGeomParam" );
+    register_<AbcG::IBox3iGeomParam>  ( "IBox3iGeomParam" );
+    register_<AbcG::IBox3fGeomParam>  ( "IBox3fGeomParam" );
+    register_<AbcG::IBox3dGeomParam>  ( "IBox3dGeomParam" );
 }

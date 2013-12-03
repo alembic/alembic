@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,25 +39,25 @@
 
 void register_igeomparam_matrix_quad_color_normal()
 {
-    register_<Abc::M33fTPTraits>        ( "IM33fGeomParam" );
-    register_<Abc::M33dTPTraits>        ( "IM33dGeomParam" );
-    register_<Abc::M44fTPTraits>        ( "IM44fGeomParam" );
-    register_<Abc::M44dTPTraits>        ( "IM44dGeomParam" );
+    register_<AbcG::IM33fGeomParam>        ( "IM33fGeomParam" );
+    register_<AbcG::IM33dGeomParam>        ( "IM33dGeomParam" );
+    register_<AbcG::IM44fGeomParam>        ( "IM44fGeomParam" );
+    register_<AbcG::IM44dGeomParam>        ( "IM44dGeomParam" );
 
-    register_<Abc::QuatfTPTraits>       ( "IQuatfGeomParam" );
-    register_<Abc::QuatdTPTraits>       ( "IQuatdGeomParam" );
+    register_<AbcG::IQuatfGeomParam>       ( "IQuatfGeomParam" );
+    register_<AbcG::IQuatdGeomParam>       ( "IQuatdGeomParam" );
 
-    register_<Abc::C3hTPTraits>         ( "IC3hGeomParam" );
-    register_<Abc::C3fTPTraits>         ( "IC3fGeomParam" );
-    register_<Abc::C3cTPTraits>         ( "IC3cGeomParam" );
+    register_<AbcG::IC3hGeomParam>         ( "IC3hGeomParam" );
+    register_<AbcG::IC3fGeomParam>         ( "IC3fGeomParam" );
+    register_<AbcG::IC3cGeomParam>         ( "IC3cGeomParam" );
 
-    register_<Abc::C4hTPTraits>         ( "IC4hGeomParam" );
-    register_<Abc::C4fTPTraits>         ( "IC4fGeomParam" );
-    register_<Abc::C4cTPTraits>         ( "IC4cGeomParam" );
+    register_<AbcG::IC4hGeomParam>         ( "IC4hGeomParam" );
+    register_<AbcG::IC4fGeomParam>         ( "IC4fGeomParam" );
+    register_<AbcG::IC4cGeomParam>         ( "IC4cGeomParam" );
 
-    register_<Abc::N2fTPTraits>         ( "IN2fGeomParam" );
-    register_<Abc::N2dTPTraits>         ( "IN2dGeomParam" );
+    register_<AbcG::IN2fGeomParam>         ( "IN2fGeomParam" );
+    register_<AbcG::IN2dGeomParam>         ( "IN2dGeomParam" );
 
-    register_<Abc::N3fTPTraits>         ( "IN3fGeomParam" );
-    register_<Abc::N3dTPTraits>         ( "IN3dGeomParam" );
+    register_<AbcG::IN3fGeomParam>         ( "IN3fGeomParam" );
+    register_<AbcG::IN3dGeomParam>         ( "IN3dGeomParam" );
 }

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,26 +39,24 @@
 
 #include <Foundation.h>
 
-template <class TRAITS>
+template <class IGEOMPARAM>
 static void register_( const char* iName )
 {
     using namespace boost::python;
 
-    typedef AbcG::ITypedGeomParam<TRAITS>       IGeomParam;
-   
     // ITypedGeomParam
     //
-    class_<IGeomParam>(
+    class_<IGEOMPARAM>(
            iName,
            "This class is a typed geom param reader.",
            init<>() )
         .def( "getInterpretation",
-              &IGeomParam::getInterpretation,
+              &IGEOMPARAM::getInterpretation,
               return_value_policy<copy_const_reference>() )
         .staticmethod( "getInterpretation" )
         .def( "matches",
-              &IGeomParam::matches,
-              ( arg( "header" ), 
+              &IGEOMPARAM::matches,
+              ( arg( "header" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ) )
         .staticmethod( "matches" )
         .def( init<Abc::ICompoundProperty,
@@ -66,70 +64,70 @@ static void register_( const char* iName )
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getIndexedValue",
-              &IGeomParam::getIndexedValue,
+              &IGEOMPARAM::getIndexedValue,
               ( arg( "iSampleSelector" ) = Abc::ISampleSelector() ) )
         .def( "getExpandedValue",
-              &IGeomParam::getExpandedValue,
+              &IGEOMPARAM::getExpandedValue,
               ( arg( "iSampleSelector" ) = Abc::ISampleSelector() ) )
         .def( "getNumSamples",
-              &IGeomParam::getNumSamples )
+              &IGEOMPARAM::getNumSamples )
         .def( "getDataType",
-              &IGeomParam::getDataType )
+              &IGEOMPARAM::getDataType )
         .def( "getArrayExtent",
-              &IGeomParam::getArrayExtent )
+              &IGEOMPARAM::getArrayExtent )
         .def( "isIndexed",
-              &IGeomParam::isIndexed )
+              &IGEOMPARAM::isIndexed )
         .def( "getScope",
-              &IGeomParam::getScope )
+              &IGEOMPARAM::getScope )
         .def( "getTimeSampling",
-              &IGeomParam::getTimeSampling )
+              &IGEOMPARAM::getTimeSampling )
         .def( "getName",
-              &IGeomParam::getName,
+              &IGEOMPARAM::getName,
               return_value_policy<copy_const_reference>() )
         .def( "getParent",
-              &IGeomParam::getParent,
+              &IGEOMPARAM::getParent,
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getHeader",
-              &IGeomParam::getHeader,
+              &IGEOMPARAM::getHeader,
               return_internal_reference<>() )
         .def( "getMetaData",
-              &IGeomParam::getMetaData,
+              &IGEOMPARAM::getMetaData,
               return_internal_reference<>() )
         .def( "isConstant",
-              &IGeomParam::isConstant )
+              &IGEOMPARAM::isConstant )
         .def( "reset",
-              &IGeomParam::reset )
+              &IGEOMPARAM::reset )
         .def( "valid",
-              &IGeomParam::valid )
+              &IGEOMPARAM::valid )
         .def( "getValueProperty",
-              &IGeomParam::getValueProperty,
+              &IGEOMPARAM::getValueProperty,
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getIndexProperty",
-              &IGeomParam::getIndexProperty,
+              &IGEOMPARAM::getIndexProperty,
               with_custodian_and_ward_postcall<0,1>() )
-        .def( "__nonzero__", &IGeomParam::valid )
+        .def( "__nonzero__", &IGEOMPARAM::valid )
        ;
 
-    // IGeomParam::Sample
+    // IGEOMPARAM::Sample
     //
     std::string sampleName = std::string( iName ) + "Sample";
-    class_<typename IGeomParam::Sample>( sampleName.c_str(), init<>() )
+    class_<typename IGEOMPARAM::Sample>( sampleName.c_str(), init<>() )
         .def( "getIndices",
-              &IGeomParam::Sample::getIndices,
+              &IGEOMPARAM::Sample::getIndices,
               with_custodian_and_ward_postcall<0,1>() )
         .def( "getVals",
-              &IGeomParam::Sample::getVals,
+              &IGEOMPARAM::Sample::getVals,
               with_custodian_and_ward_postcall<0,1>() )
-        .def( "getScope", 
-              &IGeomParam::Sample::getScope )
+        .def( "getScope",
+              &IGEOMPARAM::Sample::getScope )
         .def( "isIndexed",
-              &IGeomParam::Sample::isIndexed )
-        .def( "reset", &IGeomParam::Sample::reset )
-        .def( "valid", &IGeomParam::Sample::valid )
+              &IGEOMPARAM::Sample::isIndexed )
+        .def( "reset", &IGEOMPARAM::Sample::reset )
+        .def( "valid", &IGEOMPARAM::Sample::valid )
         ;
 }
 

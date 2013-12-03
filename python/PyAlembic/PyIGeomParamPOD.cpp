@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,18 +39,18 @@
 
 void register_igeomparam_pod()
 {
-    register_<Abc::BooleanTPTraits>     ( "IBooleanGeomParam" );
-    register_<Abc::Uint8TPTraits>       ( "IUcharGeomParam" );
-    register_<Abc::Int8TPTraits>        ( "ICharGeomParam" );
-    register_<Abc::Uint16TPTraits>      ( "IUInt16GeomParam" );
-    register_<Abc::Int16TPTraits>       ( "IInt16GeomParam" );
-    register_<Abc::Uint32TPTraits>      ( "IUInt32GeomParam" );
-    register_<Abc::Int32TPTraits>       ( "IInt32GeomParam" );
-    register_<Abc::Uint64TPTraits>      ( "IUInt64GeomParam" );
-    register_<Abc::Int64TPTraits>       ( "IInt64GeomParam" );
-    register_<Abc::Float16TPTraits>     ( "IHalfGeomParam" );
-    register_<Abc::Float32TPTraits>     ( "IFloatGeomParam" );
-    register_<Abc::Float64TPTraits>     ( "IDoubleGeomParam" );
-    register_<Abc::StringTPTraits>      ( "IStringGeomParam" );
-    register_<Abc::WstringTPTraits>     ( "IWstringGeomParam" );
+    register_<AbcG::IBoolGeomParam>        ( "IBooleanGeomParam" );
+    register_<AbcG::IUcharGeomParam>       ( "IUcharGeomParam" );
+    register_<AbcG::ICharGeomParam>        ( "ICharGeomParam" );
+    register_<AbcG::IUInt16GeomParam>      ( "IUInt16GeomParam" );
+    register_<AbcG::IInt16GeomParam>       ( "IInt16GeomParam" );
+    register_<AbcG::IUInt32GeomParam>      ( "IUInt32GeomParam" );
+    register_<AbcG::IInt32GeomParam>       ( "IInt32GeomParam" );
+    register_<AbcG::IUInt64GeomParam>      ( "IUInt64GeomParam" );
+    register_<AbcG::IInt64GeomParam>       ( "IInt64GeomParam" );
+    register_<AbcG::IHalfGeomParam>        ( "IHalfGeomParam" );
+    register_<AbcG::IFloatGeomParam>       ( "IFloatGeomParam" );
+    register_<AbcG::IDoubleGeomParam>      ( "IDoubleGeomParam" );
+    register_<AbcG::IStringGeomParam>      ( "IStringGeomParam" );
+    register_<AbcG::IWstringGeomParam>     ( "IWstringGeomParam" );
 }

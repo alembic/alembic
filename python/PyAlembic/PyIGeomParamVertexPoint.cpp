@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,23 +39,23 @@
 
 void register_igeomparam_vertex_point()
 {
-    register_<Abc::V2sTPTraits>         ( "IV2sGeomParam" );
-    register_<Abc::V2iTPTraits>         ( "IV2iGeomParam" );
-    register_<Abc::V2fTPTraits>         ( "IV2fGeomParam" );
-    register_<Abc::V2dTPTraits>         ( "IV2dGeomParam" );
+    register_<AbcG::IV2sGeomParam>        ( "IV2sGeomParam" );
+    register_<AbcG::IV2iGeomParam>        ( "IV2iGeomParam" );
+    register_<AbcG::IV2fGeomParam>        ( "IV2fGeomParam" );
+    register_<AbcG::IV2dGeomParam>        ( "IV2dGeomParam" );
 
-    register_<Abc::V3sTPTraits>         ( "IV3sGeomParam" );
-    register_<Abc::V3iTPTraits>         ( "IV3iGeomParam" );
-    register_<Abc::V3fTPTraits>         ( "IV3fGeomParam" );
-    register_<Abc::V3dTPTraits>         ( "IV3dGeomParam" );
+    register_<AbcG::IV3sGeomParam>        ( "IV3sGeomParam" );
+    register_<AbcG::IV3iGeomParam>        ( "IV3iGeomParam" );
+    register_<AbcG::IV3fGeomParam>        ( "IV3fGeomParam" );
+    register_<AbcG::IV3dGeomParam>        ( "IV3dGeomParam" );
 
-    register_<Abc::P2sTPTraits>         ( "IP2sGeomParam" );
-    register_<Abc::P2iTPTraits>         ( "IP2iGeomParam" );
-    register_<Abc::P2fTPTraits>         ( "IP2fGeomParam" );
-    register_<Abc::P2dTPTraits>         ( "IP2dGeomParam" );
+    register_<AbcG::IP2sGeomParam>        ( "IP2sGeomParam" );
+    register_<AbcG::IP2iGeomParam>        ( "IP2iGeomParam" );
+    register_<AbcG::IP2fGeomParam>        ( "IP2fGeomParam" );
+    register_<AbcG::IP2dGeomParam>        ( "IP2dGeomParam" );
 
-    register_<Abc::P3sTPTraits>         ( "IP3sGeomParam" );
-    register_<Abc::P3iTPTraits>         ( "IP3iGeomParam" );
-    register_<Abc::P3fTPTraits>         ( "IP3fGeomParam" );
-    register_<Abc::P3dTPTraits>         ( "IP3dGeomParam" );
+    register_<AbcG::IP3sGeomParam>        ( "IP3sGeomParam" );
+    register_<AbcG::IP3iGeomParam>        ( "IP3iGeomParam" );
+    register_<AbcG::IP3fGeomParam>        ( "IP3fGeomParam" );
+    register_<AbcG::IP3dGeomParam>        ( "IP3dGeomParam" );
 }
