@@ -121,7 +121,10 @@ void GLCamera::autoSetClippingPlanes( const Box3d &bounds )
     clipNear = clamp( clipNear, 0.1, 100000.0 );
     clipFar = clamp( clipFar, 0.1, 100000.0 );
 
-    assert( clipFar > clipNear );
+    if ( clipFar <= clipNear )
+    {
+        clipFar = clipNear + 0.1;
+    }
 
     m_clip[0] = clipNear;
     m_clip[1] = clipFar;
@@ -239,7 +242,15 @@ void GLCamera::dolly( const V2d &point,
     // Magic dolly function
     double dollyBy = 1.0 - expf( -dollySpeed * t );
 
-    assert( fabsf( dollyBy ) < 1.0 );
+    if (dollyBy > 1.0)
+    {
+        dollyBy = 1.0;
+    }
+    else if (dollyBy < -1.0)
+    {
+        dollyBy = -1.0;
+    }
+
     dollyBy *= m_centerOfInterest;
     const V3d newEye = eye + ( dollyBy * v );
 
@@ -284,26 +295,26 @@ void GLCamera::rotate( const V2d &point,
 std::string GLCamera::RIB() const
 {
     std::ostringstream cameraStream;
-    cameraStream << "Format " 
-                 << ( int )m_size[0] 
+    cameraStream << "Format "
+                 << ( int )m_size[0]
                  << ( int )m_size[1] << "1\n"
-                 << "Clipping " 
-                 << ( float )m_clip[0] 
+                 << "Clipping "
+                 << ( float )m_clip[0]
                  << ( float )m_clip[1] << "\n"
-                 << "Projection \"perspective\" \"fov\" [" 
+                 << "Projection \"perspective\" \"fov\" ["
                  << ( float )m_fovy << "]\n"
                  << "Scale 1 1 -1\n"
                  << "Scale "
                  << ( float )( 1.0/m_scale[0] ) << " "
                  << ( float )( 1.0/m_scale[1] ) << " "
                  << ( float )( 1.0/m_scale[2] ) << "\n"
-                 << "Rotate  " 
+                 << "Rotate  "
                  << ( float )( -m_rotation[2] ) << "0 0 1\n"
-                 << "Rotate  " 
+                 << "Rotate  "
                  << ( float )( -m_rotation[0] ) << "1 0 0\n"
-                 << "Rotate  " 
+                 << "Rotate  "
                  << ( float )( -m_rotation[1] ) << "0 1 0\n"
-                 << "Translate " 
+                 << "Translate "
                  << ( float )( -m_translation[0] )
                  << ( float )( -m_translation[1] )
                  << ( float )( -m_translation[2] )
