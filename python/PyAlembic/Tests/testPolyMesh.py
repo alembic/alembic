@@ -1,6 +1,6 @@
 #-******************************************************************************
 #
-# Copyright (c) 2012,
+# Copyright (c) 2012-2013,
 #  Sony Pictures Imageworks Inc. and
 #  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 #
@@ -50,9 +50,11 @@ def meshOut():
     meshyObj = OPolyMesh( OArchive( 'polyMesh1.abc' ).getTop() , 'meshy' )
     mesh = meshyObj.getSchema()
 
-    uvsamp = OV2fGeomParamSample( uvs, kFacevaryingScope ) 
+    uvsamp = OV2fGeomParamSample( uvs, kFacevaryingScope )
     nsamp  = ON3fGeomParamSample( normals, kFacevaryingScope )
     mesh_samp = OPolyMeshSchemaSample( verts, indices, counts, uvsamp, nsamp )
+
+    mesh.setUVSourceName("NienNunb")
 
     cbox = Box3d()
     cbox.extendBy( V3d( 1.0, -1.0, 0.0 ) )
@@ -74,6 +76,7 @@ def meshIn():
     N = mesh.getNormalsParam()
     uv = mesh.getUVsParam()
 
+    assert uv.getMetaData().getSourceName() == "NienNunb"
     assert not N.isIndexed()
     assert not uv.isIndexed()
 

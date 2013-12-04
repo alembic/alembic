@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -81,7 +81,7 @@ void register_coreabstracttypes()
         "The MetaData class is an unordered, unique dictionary of strings for "
         "describing Protocol for Objects and Interpretation for Properties",
         init<>( "Create a MetaData with an empty dictionary" ) )
-        .def( init<AbcA::MetaData&>( 
+        .def( init<AbcA::MetaData&>(
                   ( arg( "metaData" ) ),
                   "Create a MetaData as a copy of the given MetaData" ) )
         .def( "set",
@@ -123,7 +123,7 @@ void register_coreabstracttypes()
               ( arg( "metaData" ) ),
               "Return True if each of the fields in the given MetaData are "
               "found in this MetaData and have the same values" )
-        .def( "matchesOverlap", 
+        .def( "matchesOverlap",
               &AbcA::MetaData::matchesOverlap,
               ( arg( "metaData" ) ),
               "Return True if, for each of the fields in the given MetaData "
@@ -137,6 +137,15 @@ void register_coreabstracttypes()
               &AbcA::MetaData::serialize,
               "Convert the contents of this MetaData into a single formatted "
               "string" )
+        .def( "setIsUV",
+              &AbcG::SetIsUV,
+              "Set whether or not this metadata stores UVs." )
+        .def( "setSourceName",
+              &Alembic::Abc::SetSourceName,
+              "Set a source name, for later retrieval via getSourceName()" )
+        .def( "getSourceName",
+              &Alembic::Abc::GetSourceName,
+              "Get the stored source name from the metadata, if any." )
         .def( "__str__", &AbcA::MetaData::serialize )
         ;
 
@@ -169,7 +178,7 @@ void register_coreabstracttypes()
         ;
 
     // PropertyHeader
-    // 
+    //
     class_<AbcA::PropertyHeader>(
         "PropertyHeader",
         "The PropertyHeader is a collection of MetaData which helps define a "
@@ -205,6 +214,9 @@ void register_coreabstracttypes()
         .def( "isReference",
               &Alembic::Abc::isReference,
               "Return true if the property is tagged as being a reference" )
+        .def( "isUV",
+              &Alembic::AbcGeom::isUV,
+              "Return true if the property is tagged as being UVs" )
         .def( "__str__", &AbcA::PropertyHeader::getName,
               return_value_policy<copy_const_reference>() )
         ;
@@ -287,7 +299,7 @@ void register_coreabstracttypes()
         }
     };
 
-    class_<AbcA::TimeSampling, AbcA::TimeSamplingPtr>( 
+    class_<AbcA::TimeSampling, AbcA::TimeSamplingPtr>(
            "TimeSampling",
            "The TimeSampling class reports information about the time values "
            " that are associated with the samples written to a Property",
@@ -303,7 +315,7 @@ void register_coreabstracttypes()
         .def( "getNumStoredTimes",
               &AbcA::TimeSampling::getNumStoredTimes,
               "Return the number of stored times samples" )
-        .def( "getTimeSamplingType", 
+        .def( "getTimeSamplingType",
               &AbcA::TimeSampling::getTimeSamplingType,
               "Return the TimeSamplingType of this class" )
         .def( "getSampleTime",

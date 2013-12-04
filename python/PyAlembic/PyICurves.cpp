@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -94,12 +94,18 @@ void register_icurves()
               &AbcG::ICurvesSchema::getPositionsProperty )
         .def( "getNumVerticesProperty",
               &AbcG::ICurvesSchema::getNumVerticesProperty )
+        .def( "getPositionWeightsProperty",
+              &AbcG::ICurvesSchema::getPositionWeightsProperty )
         .def( "getUVsParam",
               &AbcG::ICurvesSchema::getUVsParam )
         .def( "getNormalsParam",
               &AbcG::ICurvesSchema::getNormalsParam )
         .def( "getWidthsParam",
               &AbcG::ICurvesSchema::getWidthsParam )
+        .def( "getOrdersProperty",
+              &AbcG::ICurvesSchema::getOrdersProperty )
+        .def( "getKnotsProperty",
+              &AbcG::ICurvesSchema::getKnotsProperty )
         .def( "reset", &AbcG::ICurvesSchema::reset )
         .def( "valid", &AbcG::ICurvesSchema::valid )
         .def( "__nonzero__", &AbcG::ICurvesSchema::valid )
@@ -122,6 +128,15 @@ void register_icurves()
               &AbcG::ICurvesSchema::Sample::getWrap )
         .def( "getBasis",
               &AbcG::ICurvesSchema::Sample::getBasis )
+        .def( "getOrders",
+              &AbcG::ICurvesSchema::Sample::getOrders,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getKnots",
+              &AbcG::ICurvesSchema::Sample::getKnots,
+              with_custodian_and_ward_postcall<0,1>() )
+        .def( "getPositionWeights",
+              &AbcG::ICurvesSchema::Sample::getPositionWeights,
+              with_custodian_and_ward_postcall<0,1>() )
         .def( "getSelfBounds",
               &AbcG::ICurvesSchema::Sample::getSelfBounds )
         .def( "getVelocities",

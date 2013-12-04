@@ -78,7 +78,7 @@ const float32_t g_weights[] = {
 };
 
 const float32_t g_knots[] = {
-  // first curve
+  // first curve 8 vertices 4 order so 12 knots
   1.0f,
   2.0f,
   3.0f,
@@ -91,10 +91,8 @@ const float32_t g_knots[] = {
  10.0f,
  11.0f,
  12.0f,
- 13.0f,
- 14.0f,
 
-  // second curve
+  // second curve 4 vertices 2 order so 6 knots
   0.1f,
   0.1f,
   0.2f,

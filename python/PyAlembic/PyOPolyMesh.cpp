@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -117,6 +117,8 @@ void register_opolymesh()
         .def( "setTimeSampling",
               setTimeSamplingByTimeSamplingPtr,
               ( arg( "TimeSampling" ) ) )
+        .def( "setUVSourceName",
+              &AbcG::OPolyMeshSchema::setUVSourceName )
         .def( "reset", &AbcG::OPolyMeshSchema::reset )
         .def( "valid", &AbcG::OPolyMeshSchema::valid )
         .def( "__nonzero__", &AbcG::OPolyMeshSchema::valid )

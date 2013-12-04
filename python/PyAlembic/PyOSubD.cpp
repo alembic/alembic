@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2013,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -131,6 +131,8 @@ void register_osubd()
         .def( "hasFaceSet",
               &AbcG::OSubDSchema::hasFaceSet,
               ( arg( "faceSetName" ) ) )
+        .def( "setUVSourceName",
+              &AbcG::OSubDSchema::setUVSourceName )
         .def( "valid", &AbcG::OSubDSchema::valid )
         .def( "reset", &AbcG::OSubDSchema::reset )
         .def( "__nonzero__", &AbcG::OSubDSchema::valid )

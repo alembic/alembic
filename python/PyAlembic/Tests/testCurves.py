@@ -56,6 +56,30 @@ def doSample( iCurves ):
     curvesSamp = OCurvesSchemaSample( verts, numVerts, kCubic, kNonPeriodic,
                                        widthSamp, uvSamp )
 
+    knots = curvesSamp.getKnots()
+    assert len(knots) == 0
+
+    newKnots = FloatArray(4)
+    for ii in range(4):
+        newKnots[ii] = ii
+    curvesSamp.setKnots(newKnots)
+
+    knots = curvesSamp.getKnots()
+    for ii in range(4):
+        assert knots[ii] == ii
+
+    orders = curvesSamp.getOrders()
+    assert len(orders) == 0
+
+    newOrder = UnsignedCharArray(3)
+    for ii in range(3):
+        newOrder[ii] = ii
+    curvesSamp.setOrders(newOrder)
+
+    orders = curvesSamp.getOrders()
+    for ii in range(3):
+        assert newOrder[ii] == ii
+
     curves.set( curvesSamp )
 
 def curvesOut():
@@ -78,6 +102,14 @@ def curvesIn():
 
     assert curvesSamp.getSelfBounds().min() == V3d( -1.0, -1.0, -1.0 )
     assert curvesSamp.getSelfBounds().max() == V3d(  1.0,  1.0,  1.0 )
+
+    knots = curvesSamp.getKnots()
+    for ii in range(4):
+        assert knots[ii] == ii
+
+    orders = curvesSamp.getOrders()
+    for ii in range(3):
+        assert orders[ii] == ii
 
     positions = curvesSamp.getPositions()
 

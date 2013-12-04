@@ -160,7 +160,7 @@ void Example2_CurvesOut()
         kBezierBasis,
         FloatArraySample( g_weights, g_totalVerts ),
         UcharArraySample( g_orders, g_numCurves ),
-        FloatArraySample( g_knots, 20 )
+        FloatArraySample( g_knots, 18 )
                                        );
     // Set the sample.
     curves.set( curves_sample );
@@ -190,7 +190,7 @@ void Example2_CurvesIn()
     TESTING_ASSERT( ( *curvesSample.getOrders() )[0] == 4 );
     TESTING_ASSERT( ( *curvesSample.getOrders() )[1] == 2 );
     TESTING_ASSERT( curvesSample.getPositionWeights()->size() == 12 );
-    TESTING_ASSERT( curvesSample.getKnots()->size() == 20 );
+    TESTING_ASSERT( curvesSample.getKnots()->size() == 18 );
 
     IFloatGeomParam::Sample widthSample;
     curves.getWidthsParam().getExpanded( widthSample );

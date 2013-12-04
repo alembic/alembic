@@ -125,6 +125,10 @@ void register_ocurves()
         .def( "setPositions",
               &AbcG::OCurvesSchema::Sample::setPositions,
               with_custodian_and_ward<1,2>() )
+        .def( "getPositionWeights",
+              &AbcG::OCurvesSchema::Sample::getPositionWeights,
+              return_value_policy<copy_const_reference,
+                                  with_custodian_and_ward_postcall<0,1> >() )
         .def( "getType",
               &AbcG::OCurvesSchema::Sample::getType )
         .def( "setType",
@@ -170,6 +174,20 @@ void register_ocurves()
               &AbcG::OCurvesSchema::Sample::getBasis )
         .def( "setBasis",
               &AbcG::OCurvesSchema::Sample::setBasis )
+        .def( "setOrders",
+              &AbcG::OCurvesSchema::Sample::setOrders,
+              with_custodian_and_ward<1,2>() )
+        .def( "getOrders",
+              &AbcG::OCurvesSchema::Sample::getOrders,
+              return_value_policy<copy_const_reference,
+                                  with_custodian_and_ward_postcall<0,1> >() )
+        .def( "setKnots",
+              &AbcG::OCurvesSchema::Sample::setKnots,
+              with_custodian_and_ward<1,2>() )
+        .def( "getKnots",
+              &AbcG::OCurvesSchema::Sample::getKnots,
+              return_value_policy<copy_const_reference,
+                                  with_custodian_and_ward_postcall<0,1> >() )
         .def( "reset",
               &AbcG::OCurvesSchema::Sample::reset )
         ;

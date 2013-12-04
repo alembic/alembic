@@ -1,6 +1,6 @@
 #-******************************************************************************
 #
-# Copyright (c) 2012,
+# Copyright (c) 2012-2013,
 #  Sony Pictures Imageworks Inc. and
 #  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 #
@@ -36,6 +36,7 @@
 
 from imath import *
 from alembic.Abc import *
+from alembic.AbcCoreAbstract import MetaData
 from alembic.AbcGeom import *
 from meshData import *
 
@@ -45,14 +46,16 @@ kFaceSetExclusive = FaceSetExclusivity.kFaceSetExclusive
 
 def subDFaceSetOut():
     """Tests OSubD and OFaceSet"""
-    
+
     archive = OArchive("facesetSubD1.abc")
 
     meshyObj = OSubD(archive.getTop(), "subd")
     mesh = meshyObj.getSchema()
 
+    mesh.setUVSourceName("Chewbacca")
+
     mesh_samp = OSubDSchemaSample( verts, indices, counts )
-    
+
     creases = IntArray(24)
     corners = IntArray(24)
     creaseLengths = IntArray(24)
@@ -76,9 +79,28 @@ def subDFaceSetOut():
             GeometryScope.kFacevaryingScope)
     mesh_samp.setUVs(uvsamp)
 
+    # setIsUV / isUV / getSourceName / setSourceName metadata test.
+    meta = MetaData()
+    meta.setIsUV(True)
+
+    meta.setSourceName("Illum")
+    assert meta.getSourceName() == "Illum"
+
+    arb = mesh.getArbGeomParams()
+
+    uv2 = None
+
+    if True:
+        # scoped so it gets added before we check it
+        uv2 = OV2fGeomParam( arb, "uv2", True, GeometryScope.kFacevaryingScope, 1, meta )
+
+    assert uv2
+    header = arb.getPropertyHeader("uv2")
+    assert header.isUV()
+
     # set the sample
     mesh.set(mesh_samp)
-    
+
     # change one of the schema's parameters
     mesh_samp.setInterpolateBoundary(1)
     mesh.set(mesh_samp)
@@ -118,15 +140,15 @@ def subDFaceSetIn():
     archive = IArchive("facesetSubD1.abc")
     meshyObj = ISubD(archive.getTop(), "subd")
     mesh = meshyObj.getSchema()
-    
+
     assert mesh.getNumSamples() == 3
 
     # faceset testing
     assert mesh.hasFaceSet("testing_faceset")
-    
+
     faceSetNames = mesh.getFaceSetNames()
     assert len(faceSetNames) == 1
-    
+
     #for name in faceSetNames:
     #    print "meshyObj has faceSet", name
     assert faceSetNames[0] == "testing_faceset"
@@ -141,7 +163,15 @@ def subDFaceSetIn():
 
     # UVs
     uv = mesh.getUVsParam()
+    assert uv.getMetaData().getSourceName() == "Chewbacca"
     assert not uv.isIndexed()
+
+    arb = mesh.getArbGeomParams()
+    header = arb.getPropertyHeader("uv2")
+    assert header.isUV()
+
+    meta = header.getMetaData()
+    assert meta.getSourceName() == "Illum"
 
     # we can fake like the UVs are indexed
     uvsamp = uv.getIndexedValue()
