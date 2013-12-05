@@ -333,6 +333,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 ISubD(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
             IV2fGeomParam uvs = iSchema.getUVsParam();
+            if (i == 0 && uvs)
+            {
+                oSchema.setUVSourceName(GetSourceName(uvs.getMetaData()));
+            }
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling());
@@ -421,6 +425,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
 
             IN3fGeomParam normals = iSchema.getNormalsParam();
             IV2fGeomParam uvs = iSchema.getUVsParam();
+            if (i == 0 && uvs)
+            {
+                oSchema.setUVSourceName(GetSourceName(uvs.getMetaData()));
+            }
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling());
