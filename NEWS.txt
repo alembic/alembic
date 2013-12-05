@@ -1,3 +1,56 @@
+2013-12-6, Alembic 1.5.2
+Hello Alembic users, thanks to your feedback and contributions we have another
+collection of bug fixes and enhancements to the API.
+
+API:
+
+Add Nurbs Curves support to I/OCurves, also addresses Issue 249.
+Most reference implementations have not yet been updated to support it.
+
+Add SetSourceName, GetSourceName, SetIsUV, isUV utility functions and
+setUVSourceName member function on OPolyMeshSchema and OSubDSchema.
+
+Don't assert in TimeSampling::getNearIndex if the floor index and the ceil index
+are the same.
+
+Address several clang compile warnings.  Part of Issue 322.
+
+AbcCoreHDF5 and AbcCoreOgawa:
+Fix reported thread-safety issues.
+
+Python bindings:
+
+Fix for issue 326.
+"error: control reaches end of non-void function" in PyIArchive
+
+Add Nurbs Curves support to I/OCurves.
+
+Add SetSourceName, GetSourceName, SetIsUV, isUV utility functions and
+setUVSourceName member function on OPolyMeshSchema and OSubDSchema.
+
+AbcOpenGL:
+Fix for issue 324, clamp values instead of asserting.
+
+Misc Tools:
+
+AbcStitcher:
+Support stitching Nurbs curves.
+Fix bug where the output file would only be HDF5.
+Fix bug where invalid metadata and name were used for leftover objects.
+Fix bug where top object was gotten before checking for archive validity.
+Add additional check and error message if the number of children nodes aren't
+the same between the IObjects from different archives.
+
+AbcTree:
+Rename variable to fix shadow warning on some compilers.  Issue 320.
+Windows compatibility fix, S_ISDIR doesn't exist.
+
+AbcLs:
+Windows compatibility fix, S_ISDIR doesn't exist.
+Fix the way certain scalar properties print.
+
+##-*****************************************************************************
+
 2013-9-18, Alembic 1.5.1
 Hello Alembic users, thanks to your feedback we have another collection of
 small but useful bug fixes and enhancements to the API, some of the example
