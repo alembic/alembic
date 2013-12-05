@@ -24,6 +24,8 @@ Fix for issue 326.
 "error: control reaches end of non-void function" in PyIArchive
 
 Add Nurbs Curves support to I/OCurves.
+Note: The expected number of knots per curve is the number of vertices in the
+curve plus the order of the curve.
 
 Add SetSourceName, GetSourceName, SetIsUV, isUV utility functions and
 setUVSourceName member function on OPolyMeshSchema and OSubDSchema.
