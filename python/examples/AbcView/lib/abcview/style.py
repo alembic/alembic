@@ -66,6 +66,7 @@ DIALOG = """
 * {
     background: #222;
     color: #cccdcc;
+    border: 0px;
 }
 QLabel {
     margin-top: 2px;
@@ -80,12 +81,126 @@ QPushButton {
     width: 50px;
     height: 20px;
     background: #444;
-    background: #222;
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0.0 #444, stop: 1.0 #555);
     color: #aaa;
+    border: 1px solid #666769;
+    outline: 0;
+    border-radius: 2px;
+}
+QPushButton:disabled, QComboBox:disabled {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #666;
+}
+QMenu, QComboBox {
+    background-color: #111;
+    border: 1px solid #454545;
+    margin: 1px;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 15px;
+    border: 0px;
+}
+QComboBox::down-arrow {
+    image: url(%(icons)s/branch-open.png);
+}
+QHeaderView::section {
+    background-image: none;
+    background: #444;
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0.0 #4a4a4b, stop: 1.0 #444);
+    color: #777;
+    font-weight: bold;
+    font-size: 11px;
+    font-family: Arial;
+    padding-left: 5px;
+    height: 15px;
+    border: 0px;
+    border-top: 1px solid #666;
+    margin: 0px;
+}
+QHeaderView::section:checked{
+    background-color: red;
+}
+QRadioButton::indicator::checked {
+    image: url("%(icons)s/checked-radio.png");
+}
+QRadioButton::indicator::unchecked {
+    image: url("%(icons)s/unchecked-radio.png");
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+}
+QCheckBox::indicator:checked {
+    image: url("%(icons)s/checked.png");
+}
+QCheckBox::indicator:unchecked {
+    image: url("%(icons)s/unchecked.png");
+}
+QTreeView {
+    background-color: #17171a;
+    border: 0;
+    outline: 0;
+    show-decoration-selected: 1;
+}
+QTreeView::item {
+    color: #cccddf;
+    border-bottom: 1px solid #333;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    outline: 0;
+    height: 20px;
+}
+QTreeView::item:selected {
+    background: #56575b;
+    color: #afa;
+    border: 0;
+}
+QTreeView::item:selected:active {
+    background: #468a4b;
     border: 0;
     outline: 0;
 }
-"""
+QTreeView::indicator {
+    padding-left: -9px;
+}
+QTreeView::indicator:checked {
+    image: url("%(icons)s/checked.png");
+}
+QTreeView::indicator:unchecked {
+    image: url("%(icons)s/unchecked.png");
+}
+QTreeView::branch {
+    width: 0px;
+    background-color: #373737;
+}
+QTreeView::branch:selected {
+    background-color: #56575b;
+}
+QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(%(icons)s/vline.png) 0;
+}
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(%(icons)s/branch-more.png) 0;
+}
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(%(icons)s/branch-end.png) 0;
+}
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+     border-image: none;
+     image: url(%(icons)s/branch-closed.png);
+}
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+     border-image: none;
+     image: url(%(icons)s/branch-open.png);
+}
+""" % d
 
 # Qt splash screen css
 SPLASH = """

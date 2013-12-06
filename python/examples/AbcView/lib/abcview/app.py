@@ -138,7 +138,7 @@ def io2gl(item, viewer=None):
         return
 
 class QScriptAction(QtGui.QGroupBox):
-    def __init__(self, name, action, doc="", version="", author=""):
+    def __init__(self, name, filepath, action, doc="", version="", author=""):
         """
         :param name: name of the script
         :param action: QWidgetAction object
@@ -161,7 +161,7 @@ class QScriptAction(QtGui.QGroupBox):
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.button)
         self.name = name
-        self.filepath = self.action.data().toString()
+        self.filepath = filepath
         self.setLayout(self.layout)
         self.label.pressed.connect(self.handle_clicked)
         self.button.pressed.connect(self.handle_edit)
@@ -173,7 +173,9 @@ class QScriptAction(QtGui.QGroupBox):
 
     def handle_edit(self):
         """script edit button handler"""
-        os.system("%s %s" % (config.SCRIPT_EDITOR, self.filepath))
+        cmd = " ".join([config.SCRIPT_EDITOR, self.filepath])
+        log.debug(cmd)
+        os.system(cmd)
 
 class AbcMenuBar(QtGui.QMenuBar):
     def __init__(self, parent, main):
@@ -260,7 +262,6 @@ class AbcMenuBar(QtGui.QMenuBar):
         self.addMenu(self.help_menu)
 
     def handle_refresh_scripts(self):
-        from glob import glob
         self.script_menu.clear()
         self.script_menu.addAction("Refresh", self.handle_refresh_scripts)
         self.script_menu.addSeparator()
@@ -272,25 +273,31 @@ class AbcMenuBar(QtGui.QMenuBar):
             :param script: filepath to .py file
             """
             import ast
+
             doc = ""
+            name = os.path.basename(script)
             version = ""
             author = ""
-            m = ast.parse(''.join(open(script)))
-             
-            doc = ast.get_docstring(m)
-            assigns = [node for node in m.body if type(node) == ast.Assign]
-            names = [a.value.s for a in assigns if a.targets[0].id == '__name__']
-            authors = [a.value.s for a in assigns if a.targets[0].id == '__author__']
-            versions = [a.value.s for a in assigns if a.targets[0].id == '__version__']
+            
+            try:
+                m = ast.parse(''.join(open(script)))
+                doc = ast.get_docstring(m)
+                assigns = [node for node in m.body if type(node) == ast.Assign]
+                names = [a.value.s for a in assigns if getattr(a.targets[0], 'id', None) == '__name__']
+                authors = [a.value.s for a in assigns if getattr(a.targets[0],'id', None) == '__author__']
+                versions = [a.value.s for a in assigns if getattr(a.targets[0], 'id', None) == '__version__']
 
-            if names:
-                name = names[0]
-            else:
-                name = os.path.basename(script)
-            if authors:
-                author = authors[0]
-            if versions:
-                version = versions[0]
+                if names:
+                    name = names[0]
+                else:
+                    name = os.path.basename(script)
+                if authors:
+                    author = authors[0]
+                if versions:
+                    version = versions[0]
+
+            except Exception, e:
+                log.error(e)
 
             return doc, name, version, author
 
@@ -330,7 +337,7 @@ class AbcMenuBar(QtGui.QMenuBar):
                 author = meta.get("author")
                 filepath = meta.get("filepath")
                 script_act = QtGui.QWidgetAction(self.script_menu)
-                script_act.setDefaultWidget(QScriptAction(name, script_act, doc, version, author))
+                script_act.setDefaultWidget(QScriptAction(name, filepath, script_act, doc, version, author))
                 script_act.setData(filepath)
                 script_act.triggered.connect(self.handle_run_script)
                 self.script_menu.addAction(script_act)
@@ -340,7 +347,7 @@ class AbcMenuBar(QtGui.QMenuBar):
 
         # user-defined script paths
         for path in config.USER_SCRIPT_DIR:
-            scripts.update(find_scripts(path))
+            scripts.update(find_scripts(path) or {})
 
         # build the scripts menu
         build_scripts(scripts)
@@ -493,7 +500,8 @@ class AbcView(QtGui.QMainWindow):
         self.console.updateNamespace({
             'exit': self.console.exit,
             'find': self.find,
-            'self': self,
+            'self': self, # legacy, don't use
+            'app': self,
             'objects': self.objects_tree,
             'properties': self.properties_tree,
             'samples': self.samples_tree,
@@ -757,6 +765,7 @@ class AbcView(QtGui.QMainWindow):
 
         :param mode: alembic.io.Mode value, or None
         """
+        log.debug("[%s].set_default_mode: %s" % (self, mode))
         self._overrides["mode"] = mode
 
     def set_first_frame(self, frame):
@@ -821,8 +830,11 @@ class AbcView(QtGui.QMainWindow):
         This is the startup callback function for when the QApplication starts 
         its event loop. This handles deferred file loading.
         """
+        log.debug("[%s]._start" % self)
+        self.viewer.setDisabled(True)
+
         self.splash.setMessage("starting up")
-        #self._wait()
+        self._wait()
         start = time.time()
         self.splash.show()
 
@@ -836,6 +848,8 @@ class AbcView(QtGui.QMainWindow):
         log.debug("session loaded in %.2fs"  % (time.time() - start))
         self.splash.close()
         self.time_slider.signal_frame_changed.connect(self.handle_time_slider_change)
+
+        self.viewer.setEnabled(True)
 
     def _load(self):
         """
@@ -1437,7 +1451,7 @@ class App(QtGui.QApplication):
     def __init__(self, args):
         super(App, self).__init__(args)
         # trigger the callback after the main event loop starts
-        QtCore.QTimer.singleShot(0, self.starting)
+        QtCore.QTimer.singleShot(1, self.starting)
 
     def starting(self):
         """
@@ -1475,6 +1489,7 @@ def create_app(files = None,
            fps = 24.0,
            script = None,
            bounds = False,
+           mode = None,
            review = False,
            reset = False,
            verbose = False
@@ -1488,7 +1503,8 @@ def create_app(files = None,
     :param current_frame: set current frame
     :param fps: frames per second (default 24)
     :param script: python script to load
-    :param bounds: force bounding box mode
+    :param bounds: force scene bounding box mode
+    :param mode: default object draw mode
     :param review: use review settings
     :param reset: reset layout settings
     :param verbose: verbose standard out
@@ -1522,6 +1538,8 @@ def create_app(files = None,
         win.set_default_mode(Mode.OFF)
         win.viewer.camera.mode = Mode.OFF
         win.viewer.camera.draw_bounds = 1
+    elif mode is not None:
+        win.set_default_mode(mode)
 
     # defer file loading until event loop starts
     win.set_load_files(files)

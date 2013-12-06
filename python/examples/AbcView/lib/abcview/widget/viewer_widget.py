@@ -132,7 +132,8 @@ def create_viewer_app(filepath=None):
         >>> create_viewer_app("file.abc")
 
     """
-    app = abcview.App(sys.argv)
+    from abcview.app import App
+    app = App(sys.argv)
 
     # create the viewer widget
     viewer = GLWidget()
@@ -154,13 +155,11 @@ def create_viewer_app(filepath=None):
     # override key press event handler
     viewer_group.keyPressEvent = viewer.keyPressEvent
 
-    # open a file
-    if filepath:
-        if os.path.exists(filepath):
+    def load():
+        if filepath and os.path.exists(filepath):
             viewer.add_file(filepath)
-        else:
-            log.warn("file not found: %s" % filepath)
-
+    
+    app.signal_starting_up.connect(load)
     return app.exec_()
 
 def message(info):
@@ -1090,6 +1089,22 @@ class GLWidget(QtOpenGL.QGLWidget):
         # return list of picked scenes
         return self.state.scenes[hits[-1].names[-1]] if hits else None
 
+    def isReady(self):
+        if not self.isVisible():
+            return False
+        elif not self.isEnabled():
+            return False
+        elif not self.isValid():
+            return False
+        elif self not in self.camera.views:
+            return False
+        elif not self.state:
+            return False
+        elif self.isHidden():
+            return False
+        else:
+            return True
+        
     ## base class overrides
 
     def initializeGL(self):
@@ -1110,11 +1125,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         OpenGL painting override
         """
-        if (self.isHidden() or \
-           not self.isEnabled() or \
-           not self.isVisible()) or \
-           not self.state or \
-           self not in self.camera.views:
+        if not self.isReady():
             return
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

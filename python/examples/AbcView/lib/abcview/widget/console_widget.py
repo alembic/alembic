@@ -206,7 +206,8 @@ To get the selected item from the Objects Tree,
             log.info("executing: %s" % script_path)
             execfile(script_path, self.namespace, self.namespace)
         except Exception, e:
-            log.error("%s: %s" % (os.path.basename(script_path), e))
+            err = traceback.format_exc()
+            log.error("%s: %s" % (os.path.basename(script_path), err))
 
     def runCommand(self):
         command = self.getCommand()
