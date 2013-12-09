@@ -35,6 +35,7 @@
 #-******************************************************************************
 
 import os
+import sys
 import string
 import unittest
 import tempfile
@@ -108,13 +109,13 @@ def lights_out():
 
     return filename
 
-def mesh_out():
-    filename = os.path.join(TEMPDIR, "cask_test_mesh.abc")
-    if os.path.exists(filename) and cask.is_valid(filename):
+def mesh_out(name="cask_test_mesh.abc", force=False):
+    filename = os.path.join(TEMPDIR, name)
+    if not force and (os.path.exists(filename) and cask.is_valid(filename)):
         return filename
 
-    meshyObj = alembic.AbcGeom.OPolyMesh(alembic.Abc.OArchive(filename).getTop(), 
-                                         'meshy')
+    oarch = alembic.Abc.OArchive(filename)
+    meshyObj = alembic.AbcGeom.OPolyMesh(oarch.getTop(), 'meshy')
     mesh = meshyObj.getSchema()
 
     uvsamp = alembic.AbcGeom.OV2fGeomParamSample(meshData.uvs, kFacevaryingScope) 
@@ -130,6 +131,7 @@ def mesh_out():
         mesh.getChildBoundsProperty().setValue(cbox)
         mesh.set(mesh_samp)
     
+    del oarch
     return filename
 
 def deep_out():
@@ -380,6 +382,18 @@ class Test1_Write(unittest.TestCase):
 
         # write to a file
         a.write_to_file(filename)
+
+    def test_equivalency(self):
+        # test empty archive equivalency
+        a = cask.Archive()
+        b = a
+        self.assertEqual(a, b)
+        self.assertEqual(a.top.parent, a)
+        self.assertEqual(a.top.archive(), a)
+        
+        # reassign 'b' to a new empty archive
+        b = cask.Archive()
+        self.assertNotEqual(a, b)
 
     def test_deep_dict(self):
         filename = os.path.join(TEMPDIR, "cask_deep_dict.abc")
@@ -663,6 +677,26 @@ class Test2_Read(unittest.TestCase):
         self.assertTrue("nurby" in d.children.keys())
         self.assertEqual(type(d.children["meshy"]), cask.Xform)
         self.assertEqual(type(d.children["nurby"]), cask.NuPatch)
+
+class Test3_Issues(unittest.TestCase):
+    def test_issue_318(self):
+        filename = "cask_test_issue_318.abc"
+        
+        # create a test file
+        test_file_1 = mesh_out(filename)
+
+        # access an object in the file, then close it
+        a = cask.Archive(test_file_1)
+        self.assertEqual(a.top.children.keys(), ['meshy'])
+        a.close()
+       
+        # try to write to the same file path
+        #  the error that's being tested for is this:
+        #   hdf5-1.8.9/src/H5F.c line 1255 in H5F_open(): 
+        #   unable to truncate a file which is already open
+        test_file_2 = mesh_out(filename, force=True)
+
+        self.assertEqual(test_file_1, test_file_2)
 
 if __name__ == '__main__':
     unittest.main()

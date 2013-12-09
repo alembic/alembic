@@ -37,6 +37,7 @@
 import os
 import re
 import imath
+import weakref
 import alembic
 from functools import wraps
 
@@ -227,19 +228,6 @@ def _delist(val):
     """returns single value if list len is 1"""
     return val[0] if type(val) in [list, set] and len(val) == 1 else val
 
-def memoize(func):
-    """
-    Simple memoization decorator function.
-    """
-    cache = {}
-    @wraps(func)
-    def _wrap(*args):
-        """cache args"""
-        if args not in cache:
-            cache[args] = func(*args)
-        return cache[args]
-    return _wrap
-
 def wrapped(func):
     """
     This decorator function decorates Object methods that require
@@ -375,12 +363,16 @@ class Archive(object):
         self._top = None
         self.fps = fps
         self.time_sampling_id = 0
+        self.id = id(self)
 
         # read in the archive
         self.__read_from_file(filepath)
 
     def __repr__(self):
         return '<%s "%s">' % (self.__class__.__name__, self.filepath)
+
+    def __eq__(self, other):
+        return self.id == other.id
 
     def __get_iobject(self):
         """gets iobject"""
@@ -542,10 +534,20 @@ class Archive(object):
             obj.close()
             for child in obj.children.values():
                 close_tree(child)
+                del child
+            del obj
         for child in self.top.children.values():
             close_tree(child)
-        self.oobject = None
-        self.top.oobject = None
+            del child
+        
+        del self._iobject
+        del self._oobject
+        del self._top._iobject
+        del self._top._oobject
+        del self._top._parent
+        self._top._child_dict.clear()
+        self._top._prop_dict.clear()
+        del self._top
 
     def __write(self):
         """
@@ -587,7 +589,8 @@ class Property(object):
         :param time_sampling_id: TimeSampling object ID (inherits down).
         """
         super(Property, self).__init__()
-        
+        self.id = id(self)
+
         # init some private variables
         self._parent = None
         self._name = name
@@ -873,7 +876,10 @@ class Property(object):
         """
         Closes this property by removing references to internal OProperty.
         """
-        self.oobject = None
+        self._iobject = None
+        self._oobject = None
+        self._klass = None
+        self._parent = None
         for prop in self.properties.values():
             prop.close()
 
@@ -904,6 +910,7 @@ class Object(object):
         :param time_sampling_id: The ID of the TimeSampling object
         """
         super(Object, self).__init__()
+        self.id = id(self)
 
         # init some private variables
         self._name = name
@@ -921,9 +928,7 @@ class Object(object):
         self._child_dict = DeepDict(self)
 
         # init some stuff
-        self.clear_properties()
-        self.clear_samples()
-        self.clear_children()
+        self.clear_all()
         self.__read_object()
 
     def __repr__(self):
@@ -1240,11 +1245,21 @@ class Object(object):
         """Clears the internal children container."""
         self._child_dict = DeepDict(self)
 
+    def clear_all(self):
+        self.clear_properties()
+        self.clear_samples()
+        self.clear_children()
+
     def close(self):
         """
         Closes this object by removing references to internal OObject.
         """
-        self.oobject = None
+        self._iobject = None
+        self._oobject = None
+        self._klass = None
+        self._parent = None
+        self._schema = None
+
         for prop in self.properties.values():
             prop.close()
 
@@ -1262,8 +1277,8 @@ class Top(Object):
     """Alembic Top Object."""
     def __init__(self, archive, iobject=None):
         super(Top, self).__init__(iobject)
-        self.parent = archive
-        self.parent.top = self
+        self._parent = weakref.proxy(archive)
+        self._parent._top = self
         self.oobject = None
 
     @classmethod
