@@ -111,14 +111,9 @@ IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
     }
     else
     {
-        // we are valid, so we'll open up any others
-        for (std::size_t i = 1; i < iNumStreams; ++i)
-        {
-            filestream = new std::ifstream;
-            filestream->open(iFileName.c_str(), std::ios::binary);
-            mData->streams.push_back(filestream);
-            mData->offsets.push_back(mData->streams[i]->tellg());
-        }
+        // we are valid, so we'll allocate (but not open) the others
+        mData->streams.resize(iNumStreams, NULL);
+        mData->offsets.resize(iNumStreams, 0);
     }
     mData->locks = new Alembic::Util::mutex[mData->streams.size()];
 }
@@ -232,8 +227,35 @@ void IStreams::read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
 
     {
         Alembic::Util::scoped_lock l(mData->locks[threadId]);
-        mData->streams[threadId]->seekg(iPos + mData->offsets[threadId]);
-        mData->streams[threadId]->read((char *)oBuf, iSize);
+        std::istream * stream = mData->streams[threadId];
+
+        // the file hasn't been opened for this id yet
+        if (stream == NULL && !mData->fileName.empty())
+        {
+            std::ifstream * filestream = new std::ifstream;
+            filestream->open(mData->fileName.c_str(), std::ios::binary);
+
+            if (filestream->is_open())
+            {
+                stream = filestream;
+                mData->streams[threadId] = filestream;
+                mData->offsets[threadId] = filestream->tellg();
+            }
+            // couldnt open the file, do cleanup
+            else
+            {
+                delete filestream;
+
+                // read from thread 0 instead until it can be opened
+                if (threadId != 0)
+                {
+                    read(0, iPos, iSize, oBuf);
+                }
+                return;
+            }
+        }
+        stream->seekg(iPos + mData->offsets[threadId]);
+        stream->read((char *)oBuf, iSize);
     }
 }
 
