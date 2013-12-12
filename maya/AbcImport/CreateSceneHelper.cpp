@@ -316,10 +316,16 @@ CreateSceneVisitor::CreateSceneVisitor(double iFrame,
                 if ( getDagPathByName( name, dagPath ) == MS::kSuccess )
                 {
                     name = dagPath.partialPathName();
+                    mRootNodes.insert(name.asChar());
+                    mAnyRoots = true;
                 }
-
-                mRootNodes.insert(name.asChar());
-                mAnyRoots = true;
+                else
+                {
+                    MString theWarning("Could not find root: ");
+                    theWarning += name;
+                    theWarning += " in the scene.";
+                    printWarning(theWarning);
+                }
             }
         }
     }
@@ -519,6 +525,42 @@ AlembicObjectPtr CreateSceneVisitor::previsit(AlembicObjectPtr iParentObject)
     return iParentObject;
 }
 
+std::string CreateSceneVisitor::searchRootNames(const std::string & iName)
+{
+    // we can bail early
+    if (mRootNodes.empty())
+    {
+        return iName;
+    }
+
+    // we can't do find because there could be a namespace mismatch
+    // if things match exactly however, bail early
+
+    std::string strippedName = stripPathAndNamespace(iName);
+    std::set<std::string>::iterator it = mRootNodes.begin();
+    std::set<std::string>::iterator itEnd = mRootNodes.end();
+    std::string closeMatch;
+    for (; it != itEnd; ++it)
+    {
+        if (*it == iName)
+        {
+            return iName;
+        }
+
+        if (*it == strippedName)
+        {
+            return strippedName;
+        }
+
+        std::string strippedRoot = stripPathAndNamespace(*it);
+        if (strippedName == strippedRoot)
+        {
+            closeMatch = *it;
+        }
+    }
+    return closeMatch;
+}
+
  // root of file, no creation of DG node
 MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
 {
@@ -548,6 +590,51 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
         return status;
     }
 
+    std::string rootName;
+
+    // one root node? see if it matches any of the children
+    if (mRootNodes.size() == 1)
+    {
+        rootName = *mRootNodes.begin();
+        std::string rootBase = stripPathAndNamespace(rootName);
+        bool foundRoot = false;
+        for (size_t i = 0; i < numChildren; ++i)
+        {
+            std::string childName =
+                topObject->object().getChildHeader(i).getName();
+
+            if (rootBase == stripPathAndNamespace(childName))
+            {
+                foundRoot = true;
+                break;
+            }
+        }
+
+        // none of the direct children of the archive matches, so we'll inject
+        // the children of the specified root
+        if (!foundRoot)
+        {
+            MDagPath dagPath;
+            if (getDagPathByName(MString(rootName.c_str()), dagPath)
+                == MS::kSuccess)
+            {
+                unsigned int numChildDags = dagPath.childCount();
+                if (numChildDags > 0)
+                {
+                    mRootNodes.clear();
+                }
+
+                for (unsigned int j = 0; j < numChildDags; ++j)
+                {
+                    MObject child = dagPath.child(j);
+                    dagPath.push(child);
+                    mRootNodes.insert(dagPath.partialPathName().asChar());
+                    dagPath.pop();
+                }
+            }
+        }
+    }
+
     // doing connections
     std::set<std::string> connectUpdateNodes;
     std::set<std::string> connectCurNodesInFile;
@@ -560,15 +647,16 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
         std::string name = object->object().getName();
         connectCurNodesInFile.insert(name);
 
+        std::string rootPath = searchRootNames(name);
+
         // see if this name is part of the input to AlembicNode
-        if (!mAnyRoots || ( mAnyRoots && (mRootNodes.empty() ||
-          (mRootNodes.find(name) != mRootNodes.end())) ))
+        if (!rootPath.empty())
         {
             // Find out if this node exists in the current scene
             MDagPath dagPath;
 
             if (mAnyRoots &&
-                getDagPathByName(MString(name.c_str()), dagPath) ==
+                getDagPathByName(MString(rootPath.c_str()), dagPath) ==
                 MS::kSuccess)
             {
                 connectUpdateNodes.insert(name);
@@ -591,8 +679,22 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
                 connectUpdateNodes.insert(name);
                 this->visit(object);
                 mParent = saveParent;
-
             }
+        }
+        else
+        {
+            MString theWarning("Could not find a match for: ");
+            theWarning += name.c_str();
+            if (rootName.empty())
+            {
+                theWarning += " in the scene.";
+            }
+            else
+            {
+                theWarning += " beneath parent: ";
+                theWarning += rootName.c_str();
+            }
+            printWarning(theWarning);
         }
     }  // for-loop
 

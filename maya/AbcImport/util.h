@@ -84,6 +84,9 @@ MStatus getDagPathByName(const MString & name, MDagPath & dagPath);
 bool getDagPathByChildName(MDagPath & ioDagPath,
     const std::string & iChildName);
 
+// returns the Maya style leaf name minus the namespace
+std::string stripPathAndNamespace(const std::string & iPath);
+
 MStatus getPlugByName(const MString & objName,
     const MString & attrName, MPlug & plug);
 

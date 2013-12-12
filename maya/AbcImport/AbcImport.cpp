@@ -81,6 +81,9 @@ current Maya scene, data for the whole hierarchy from the nodes down        \n\
 nodes from the input file will be used for updating the current Maya scene. \n\
                     Again if certain node doesn't exist in the current scene, \
 a warning will be given and nothing will be done.                           \n\
+                    If a single node is specified and it exists in the Maya \
+scene but doesn't exist in the archive, children of that node will be connected\
+ to the children of the archive.                                            \n\
 -crt/ createIfNotFound                                                      \n\
                     Used only when -connect flag is set.                    \n\
 -rm / removeIfNoUpdate                                                      \n\
@@ -278,7 +281,7 @@ MStatus AbcImport::doIt(const MArgList & args)
             MFileObject absoluteFile;
             absoluteFile.setRawFullName(filename);
 #if MAYA_API_VERSION < 201300
-            if (absoluteFile.resolvedFullName() != 
+            if (absoluteFile.resolvedFullName() !=
                 absoluteFile.expandedFullName())
             {
 #else

@@ -81,11 +81,11 @@ public:
 
     const   Alembic::Abc::IObject&  object() const { return mObject; }
             Alembic::Abc::IObject&  object()       { return mObject; }
-            
+
     void    addChild(AlembicObjectPtr iChild)   { mChildren.push_back(iChild); }
     size_t  getNumChildren()                    { return mChildren.size(); }
 
-    AlembicObjectPtr      getChild(size_t index){ return mChildren[index]; } 
+    AlembicObjectPtr      getChild(size_t index){ return mChildren[index]; }
 private:
     Alembic::Abc::IObject       mObject;
     std::vector<AlembicObjectPtr> mChildren;
@@ -149,6 +149,10 @@ private:
     void checkShaderSelection(MFnMesh & iMesh, unsigned int iInst);
 
     void addToPropList(std::size_t iFirst, MObject & iParent);
+
+    // given one of the children of the root of the Alembic asset, find the
+    // closest match to mRootNodes when appropriate
+    std::string searchRootNames(const std::string & iName);
 
     double mFrame;
     MObject mParent;

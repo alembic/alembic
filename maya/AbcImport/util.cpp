@@ -81,18 +81,18 @@ MObjectArray getOutConnectedSG( const MDagPath &shapeDPath )
     // Array of connected Shaging Engines
     MObjectArray connSG;
 
-    // Iterator through the dependency graph to find if there are 
+    // Iterator through the dependency graph to find if there are
     // shading engines connected
     MObject obj(shapeDPath.node()); // non const MObject
-    MItDependencyGraph itDG( obj, MFn::kShadingEngine, 
-                             MItDependencyGraph::kDownstream, 
-                             MItDependencyGraph::kBreadthFirst, 
+    MItDependencyGraph itDG( obj, MFn::kShadingEngine,
+                             MItDependencyGraph::kDownstream,
+                             MItDependencyGraph::kBreadthFirst,
                              MItDependencyGraph::kNodeLevel, &status );
 
     if( status == MS::kFailure )
-        return connSG;    
+        return connSG;
 
-    // we want to prune the iteration if the node is not a shading engine 
+    // we want to prune the iteration if the node is not a shading engine
     itDG.enablePruningOnFilter();
 
     // iterate through the output connected shading engines
@@ -279,9 +279,33 @@ MStatus getDagPathByName(const MString & name, MDagPath & dagPath)
     return status;
 }
 
+std::string stripPathAndNamespace(const std::string & iPath)
+{
+    std::string childName;
+    std::size_t lastPath = iPath.rfind('|');
+    if (lastPath != std::string::npos)
+    {
+        childName =  iPath.substr(lastPath + 1);
+    }
+    else
+    {
+        childName = iPath;
+    }
+
+    std::size_t lastNamespace = childName.rfind(':');
+    if (lastNamespace != std::string::npos)
+    {
+        childName = childName.substr(lastNamespace+1);
+    }
+    return childName;
+}
+
 bool getDagPathByChildName(MDagPath & ioDagPath, const std::string & iChildName)
 {
     unsigned int numChildren = ioDagPath.childCount();
+    std::string strippedName = stripPathAndNamespace(iChildName);
+    MObject closeMatch;
+
     for (unsigned int i = 0; i < numChildren; ++i)
     {
         MObject child = ioDagPath.child(i);
@@ -293,15 +317,19 @@ bool getDagPathByChildName(MDagPath & ioDagPath, const std::string & iChildName)
             return true;
         }
 
-        unsigned int endLength = (unsigned int)(name.length() - 
-            iChildName.length());
-        if ((name.length() > iChildName.length() + 1) && 
-            (name[endLength - 1] == '|' || name[endLength - 1] == ':') &&
-            (name.substr(endLength) == iChildName))
+        if (closeMatch.isNull())
         {
-            ioDagPath.push(child);
-            return true;
+            if (strippedName == stripPathAndNamespace(name))
+            {
+                closeMatch = child;
+            }
         }
+    }
+
+    if (!closeMatch.isNull())
+    {
+        ioDagPath.push(closeMatch);
+        return true;
     }
 
     return false;
@@ -437,7 +465,7 @@ bool isColorSet(const Alembic::AbcCoreAbstract::PropertyHeader & iHeader,
     bool iUnmarkedFaceVaryingColors)
 {
     return (Alembic::AbcGeom::IC3fGeomParam::matches(iHeader) ||
-            Alembic::AbcGeom::IC4fGeomParam::matches(iHeader)) && 
+            Alembic::AbcGeom::IC4fGeomParam::matches(iHeader)) &&
             Alembic::AbcGeom::GetGeometryScope(iHeader.getMetaData()) ==
                 Alembic::AbcGeom::kFacevaryingScope &&
             (iUnmarkedFaceVaryingColors ||
