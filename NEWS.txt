@@ -1,3 +1,27 @@
+2013-12-13, Alembic 1.5.3
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API, Ogawa:
+
+Don't open extra filestreams until they are needed.
+
+Maya, AbcImport:
+Fix for issue 251, if connections to the immediate children of the archive fail
+warn about it.
+
+Relax naming constraints on connection so that if the namespace is different
+between the Maya scene and the Alembic archive, they can still connect.
+
+Specifying a Maya node to -connect which doesn't match any of the children of
+the immediate root of the archive, try and connect below that specified Maya
+node.
+
+Python, cask:
+Fix for issue 318, make sure the archive gets released properly.
+
+##-*****************************************************************************
+
 2013-12-6, Alembic 1.5.2
 Hello Alembic users, thanks to your feedback and contributions we have another
 collection of bug fixes and enhancements to the API.
