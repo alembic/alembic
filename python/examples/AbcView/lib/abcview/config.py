@@ -39,7 +39,7 @@ import os
 import sys
 
 __prog__ = "AbcView"
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 
 if sys.platform == "win32":
 	pathsep = ";"

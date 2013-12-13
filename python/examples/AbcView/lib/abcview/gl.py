@@ -73,18 +73,20 @@ __all__ = ["GLCamera", "GLICamera", "GLScene", ]
 ARCHIVES = {}
 SCENES = {}
 
-def accumXform(xf, obj):
+def accumXform(xf, obj, sec=0):
     if alembic.AbcGeom.IXform.matches(obj.getHeader()):
         x = alembic.AbcGeom.IXform(obj, kWrapExisting)
-        xs = x.getSchema().getValue()
-        xf *= xs.getMatrix()
+        xs = x.getSchema()
+        ts = xs.getTimeSampling()
+        index = ts.getNearIndex(sec, xs.getNumSamples())
+        xf *= xs.getValue(index).getMatrix()
 
-def get_final_matrix(obj):
+def get_final_matrix(obj, sec=0):
     xf = imath.M44d()
     xf.makeIdentity()
     parent = obj.getParent()
     while parent:
-        accumXform(xf, parent)
+        accumXform(xf, parent, sec)
         parent = parent.getParent()
     return xf
 

@@ -779,26 +779,20 @@ class GLWidget(QtOpenGL.QGLWidget):
                 meshObj = alembic.AbcGeom.IPolyMesh(obj.getParent(), obj.getName())
                 mesh = meshObj.getSchema()
                 
-                xf = get_final_matrix(meshObj)
-                iss = alembic.Abc.ISampleSelector(0)
-
+                ts = mesh.getTimeSampling()
+                index = ts.getNearIndex(self.state.current_time, mesh.getNumSamples())
                 facesProp = mesh.getFaceIndicesProperty()
-                if not facesProp.valid():
-                    return
                 pointsProp = mesh.getPositionsProperty()
-                if not pointsProp.valid():
-                    return
                 normalsProp = mesh.getNormalsParam().getValueProperty()
-                if not normalsProp.valid():
-                    return
-                boundsProp = mesh.getSelfBoundsProperty()
-                if not boundsProp.valid():
-                    return
-                
-                faces = facesProp.getValue(iss)
-                points = pointsProp.getValue(iss)
-                normals = normalsProp.getValue(iss)
-                bounds = boundsProp.getValue(iss)
+
+                for p in [facesProp, pointsProp, normalsProp]:
+                    if not p.valid():
+                        return
+
+                faces = facesProp.getValue(index)
+                points = pointsProp.getValue(index)
+                normals = normalsProp.getValue(index)
+                xf = get_final_matrix(meshObj, self.state.current_time)
 
                 for i, fi in enumerate(faces):
                     p = points[fi] * xf
