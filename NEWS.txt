@@ -1,4 +1,4 @@
-2013-12-13, Alembic 1.5.3
+2013-12-17, Alembic 1.5.3
 Hello Alembic users, thanks to your feedback and reports we have a few bug
 fixes and enhancements.
 
@@ -17,8 +17,13 @@ Specifying a Maya node to -connect which doesn't match any of the children of
 the immediate root of the archive, try and connect below that specified Maya
 node.
 
-Python, cask:
+Python:
+
+cask:
 Fix for issue 318, make sure the archive gets released properly.
+
+abcview:
+Fix bug where animated normals weren't being updated for display.
 
 ##-*****************************************************************************
 
