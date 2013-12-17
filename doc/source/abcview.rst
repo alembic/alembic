@@ -1,4 +1,4 @@
-AbcView 1.0.5
+AbcView 1.0.6
 =============
 
 .. moduleauthor:: Ryan Galloway <ryang@ilm.com>
@@ -25,11 +25,12 @@ Requirements
 The following libs are required to use AbcView:
 
     * Alembic 1.5
-    * PyOpenGL
-    * PyAlembic (and PyAbcOpenGL)
-    * PyQt4
     * Python 2.6+
-    * argparse if using Python 2.6
+    * PyAlembic
+    * PyAbcOpenGL
+    * PyOpenGL
+    * PyQt4
+    * argparse
 
 For your convenience, AbcView comes with a csh wrapper that sets up your environment for running
 AbcView from your Alembic build directory. To build the wrapper inside your Alembic build dir, make 
@@ -69,11 +70,10 @@ same as loading an Alembic scene ::
 
     $ abcview file.io
 
-
 Python API
 ----------
 
-You can also inspect and manipulate session data using the AbcView Python API, for example ::
+You can inspect and manipulate session data using the AbcView Python API, for example ::
 
     >>> from abcview.io import Session
     >>> s = Session()
@@ -109,6 +109,51 @@ the IO module ::
                                         "ShotCam")
                              loaded=True))
     >>> s.save()
+
+Writing Scripts
+---------------
+
+Writing scripts for AbcView is straight-forward.
+
+Script Configuration
+~~~~~~~~~~~~~~~~~~~~
+
+The `scripts` menu of AbcView is populated by looking for .py files along the
+paths defined by the `ABCVIEW_SCRIPT_PATH` environment variable, or by placing
+files in the `scripts` subdir of the `abcview` Python package. Scripts directory
+definitions can also be configured in the lib/abcview/config.py file. 
+
+Script Content
+~~~~~~~~~~~~~~
+
+There are few restrictions on what you can write in an AbcView script.
+Scripts are executed by AbcView's console widget, which simply makes a call to
+`execfile` in the current process with a pre-configured namespace. ::
+
+    'abcview' Pre-loaded AbcView Python library
+    'alembic': Pre-loaded Alembic Python library
+    'app': Main application accessor
+    'objects': Objects tree widget accessor
+    'properties': Properties tree widget accessor
+    'samples': Aamples tree widget accessor
+
+Accessing the current session in your script is therefore ::
+
+    >> app.session
+
+Defining a Python docstring at the top of your script will populate the menu tooltip
+as you mouseover scripts in AbcView. For example ::
+
+    """
+    My Tool for AbcView
+    """
+
+The name of the script, version and author are similary defined using private
+attributes, for example ::
+
+    __name__ = "My Tool"
+    __version__ = "1.0"
+    __author__ = "John Doe"
 
 Module Contents
 ---------------
