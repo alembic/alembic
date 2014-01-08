@@ -266,7 +266,7 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
             V3f AB = B - A;
             V3f AC = C - A;
 
-            V3f wN = AC.cross( AB );
+            V3f wN = AB.cross( AC );
             m_customN[tri[0]] += wN;
             m_customN[tri[1]] += wN;
             m_customN[tri[2]] += wN;
