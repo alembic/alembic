@@ -77,6 +77,10 @@ public:
     // This returns validity.
     bool valid() const { return m_valid; }
 
+    // This returns constancy.
+    bool isConstant() const { return m_isConstant; }
+    void setConstant( bool isConstant = true ) { m_isConstant = isConstant; }
+
     // Return the bounds.
     Box3d getBounds() const { return m_bounds; }
 
@@ -103,6 +107,7 @@ protected:
     std::vector<V3f> m_customN;
 
     bool m_valid;
+    bool m_isConstant;
 
     Box3d m_bounds;
 

@@ -50,6 +50,9 @@ IPolyMeshDrw::IPolyMeshDrw( IPolyMesh &iPmesh )
         return;
     }
 
+    // set constancy on the mesh draw helper
+    m_drwHelper.setConstant( m_polyMesh.getSchema().isConstant() );
+
     if ( m_polyMesh.getSchema().getNumSamples() > 0 )
     {
         m_polyMesh.getSchema().get( m_samp );

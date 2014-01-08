@@ -110,7 +110,6 @@ def set_diffuse_light():
     
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
-    #glLightfv(GL_LIGHT0, GL_POSITION, position)
 
     glMaterialfv(GL_FRONT, GL_SHININESS, front_mat_shininess)
     glMaterialfv(GL_FRONT, GL_SPECULAR, front_mat_specular)
@@ -120,8 +119,6 @@ def set_diffuse_light():
     glMaterialfv(GL_BACK, GL_DIFFUSE, back_mat_diffuse)
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient)
-    glLightModelfv(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
-    #glFrontFace(GL_CCW)
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
     
 def create_viewer_app(filepath=None):

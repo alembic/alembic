@@ -50,6 +50,9 @@ ISubDDrw::ISubDDrw( ISubD &iPmesh )
         return;
     }
 
+    // set constancy on the mesh draw helper
+    m_drwHelper.setConstant( m_subD.getSchema().isConstant() );
+
     if ( m_subD.getSchema().getNumSamples() > 0 )
     {
         m_subD.getSchema().get( m_samp );

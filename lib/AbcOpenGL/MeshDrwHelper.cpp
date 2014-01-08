@@ -237,7 +237,7 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
 
     // Now see if we need to calculate normals.
     if ( ( m_meshN && iN == m_meshN ) ||
-         ( !iN && m_customN.size() > 0 ) )
+         ( isConstant() && m_customN.size() > 0 ) )
     {
         return;
     }
@@ -255,9 +255,6 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
         m_customN.resize( numPoints );
         std::fill( m_customN.begin(), m_customN.end(), V3f( 0.0f ) );
 
-        //std::cout << "Recalcing normals for object: "
-        //          << m_host.name() << std::endl;
-
         for ( size_t tidx = 0; tidx < m_triangles.size(); ++tidx )
         {
             const Tri &tri = m_triangles[tidx];
@@ -269,7 +266,7 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
             V3f AB = B - A;
             V3f AC = C - A;
 
-            V3f wN = AB.cross( AC );
+            V3f wN = AC.cross( AB );
             m_customN[tri[0]] += wN;
             m_customN[tri[1]] += wN;
             m_customN[tri[2]] += wN;
