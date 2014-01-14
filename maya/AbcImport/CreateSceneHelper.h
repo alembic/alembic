@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -57,12 +57,6 @@
 #include <map>
 #include <vector>
 
-#ifndef _MSC_VER
-#include <tr1/memory>
-#endif
-
-#include <memory>
-
 struct ltMObj
 {
   bool operator()(const MObject & s1, const MObject & s2) const
@@ -72,7 +66,7 @@ struct ltMObj
 };
 
 class AlembicObject;
-typedef std::tr1::shared_ptr<AlembicObject> AlembicObjectPtr;
+typedef Alembic::Util::shared_ptr<AlembicObject> AlembicObjectPtr;
 
 class AlembicObject
 {
