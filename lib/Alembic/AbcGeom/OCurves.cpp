@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -331,17 +331,18 @@ void OCurvesSchema::set( const OCurvesSchema::Sample &iSamp )
 
         if ( m_positionWeightsProperty )
         {
-            m_positionWeightsProperty.set( iSamp.getPositionWeights() );
+            SetPropUsePrevIfNull( m_positionWeightsProperty,
+                                  iSamp.getPositionWeights() );
         }
 
         if ( m_ordersProperty )
         {
-            m_ordersProperty.set( iSamp.getOrders() );
+            SetPropUsePrevIfNull( m_ordersProperty, iSamp.getOrders() );
         }
 
         if ( m_knotsProperty )
         {
-            m_knotsProperty.set( iSamp.getKnots() );
+            SetPropUsePrevIfNull( m_knotsProperty, iSamp.getKnots() );
         }
 
         // update bounds

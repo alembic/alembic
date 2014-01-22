@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -164,6 +164,17 @@ void Example2_CurvesOut()
                                        );
     // Set the sample.
     curves.set( curves_sample );
+
+    OCurvesSchema::Sample curves_sample2(
+        V3fArraySample( ( const V3f * ) g_verts, g_totalVerts ),
+        Int32ArraySample( g_numVerts, g_numCurves),
+        kVariableOrder,
+        kNonPeriodic,
+        widthSample,
+        uvSample,
+        ON3fGeomParam::Sample(),
+        kBezierBasis);
+    curves.set( curves_sample2 );
 }
 
 void Example2_CurvesIn()
@@ -197,6 +208,13 @@ void Example2_CurvesIn()
     TESTING_ASSERT( widthSample.getVals()->size() == 12);
     TESTING_ASSERT( curves.getWidthsParam().valid() );
     TESTING_ASSERT( widthSample.getScope() == kVertexScope );
+
+    IFloatArrayProperty knotsProp = curves.getKnotsProperty();
+    TESTING_ASSERT( knotsProp.getNumSamples() == 2 );
+    ArraySampleKey keyA, keyB;
+    knotsProp.getKey( keyA, 0 );
+    knotsProp.getKey( keyB, 1 );
+    TESTING_ASSERT( keyA == keyB );
 }
 
 //-*****************************************************************************
