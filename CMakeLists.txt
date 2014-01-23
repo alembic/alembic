@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013,
+## Copyright (c) 2009-2014,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -72,6 +72,9 @@ ENDIF()
 SET( DARWIN FALSE )
 IF( "${CMAKE_SYSTEM_NAME}" MATCHES "Darwin" )
   SET( DARWIN TRUE )
+  IF( ${CMAKE_SYSTEM_VERSION} MATCHES "13." )
+       ADD_DEFINITIONS( "-std=c++11" )
+  ENDIF()
 ENDIF()
 
 SET( LINUX FALSE )

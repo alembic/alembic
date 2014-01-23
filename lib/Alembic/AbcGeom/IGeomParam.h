@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -74,7 +74,7 @@ public:
             m_isIndexed = false;
         }
 
-        bool valid() const { return m_vals; }
+        bool valid() const { return m_vals.get() != NULL; }
 
         ALEMBIC_OPERATOR_BOOL( valid() );
 
