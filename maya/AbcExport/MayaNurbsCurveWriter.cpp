@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -169,6 +169,8 @@ void MayaNurbsCurveWriter::write()
     std::vector<Alembic::Util::int32_t> nVertices(numCurves);
     std::vector<float> points;
     std::vector<float> width;
+    std::vector<float> knots;
+    std::vector<Alembic::Util::uint8_t> orders(numCurves);
 
     MMatrix transformMatrix;
     bool useConstWidth = false;
@@ -192,7 +194,9 @@ void MayaNurbsCurveWriter::write()
             transformMatrix = inclusiveMatrix*exclusiveMatrixInv;
         }
         else
+        {
             curve.setObject(mRootDagPath.node());
+        }
 
         if (i == 0)
         {
@@ -209,52 +213,90 @@ void MayaNurbsCurveWriter::write()
             {
                 samp.setType(Alembic::AbcGeom::kCubic);
             }
-            else
+            else if (curve.degree() == 1)
             {
                 samp.setType(Alembic::AbcGeom::kLinear);
             }
+            else
+            {
+                samp.setType(Alembic::AbcGeom::kVariableOrder);
+            }
         }
+        else
+        {
+            if (curve.form() == MFnNurbsCurve::kOpen)
+            {
+                samp.setWrap(Alembic::AbcGeom::kNonPeriodic);
+            }
+
+            if ((samp.getType() == Alembic::AbcGeom::kCubic &&
+                curve.degree() != 3) ||
+                (samp.getType() == Alembic::AbcGeom::kLinear &&
+                curve.degree() != 1))
+            {
+                samp.setType(Alembic::AbcGeom::kVariableOrder);
+            }
+        }
+
+        orders[i] = static_cast<Alembic::Util::uint8_t>(curve.degree() + 1);
 
         Alembic::Util::int32_t numCVs = curve.numCVs(&stat);
 
         MPointArray cvArray;
         stat = curve.getCVs(cvArray, MSpace::kObject);
 
-        int repeatStartAndEnd = 0;
-        if (numCVs > 5 && curve.degree() == 3 &&
-            curve.form() == MFnNurbsCurve::kOpen)
-        {
-            repeatStartAndEnd = 2;
-            if (cvArray[0] == cvArray[1] && cvArray[0] == cvArray[2] &&
-                cvArray[numCVs - 1] == cvArray[numCVs - 2] &&
-                cvArray[numCVs - 1] == cvArray[numCVs - 3])
-            {
-                repeatStartAndEnd = 0;
-            }
-        }
-
-        mCVCount += numCVs + (2 * repeatStartAndEnd);
-        nVertices[i] = numCVs + (2 * repeatStartAndEnd);
+        mCVCount += numCVs;
+        nVertices[i] = numCVs;
 
         for (Alembic::Util::int32_t j = 0; j < numCVs; j++)
         {
             MPoint transformdPt;
             if (mIsCurveGrp)
+            {
                 transformdPt = cvArray[j]*transformMatrix;
+            }
             else
+            {
                 transformdPt = cvArray[j];
+            }
 
             points.push_back(static_cast<float>(transformdPt.x));
             points.push_back(static_cast<float>(transformdPt.y));
             points.push_back(static_cast<float>(transformdPt.z));
-            if (repeatStartAndEnd > 0 && (j == 0 || j == numCVs - 1))
+        }
+
+        MDoubleArray knotsArray;
+        curve.getKnots(knotsArray);
+        knots.reserve(knotsArray.length() + 2);
+
+        // need to add a knot to the start and end (M + 2N + 1)
+        if (knotsArray.length() > 1)
+        {
+            unsigned int knotsLength = knotsArray.length();
+            if (knotsArray[0] == knotsArray[knotsLength - 1] ||
+                knotsArray[0] == knotsArray[1])
             {
-                for (int k = 0; k < repeatStartAndEnd; ++k)
-                {
-                    points.push_back(static_cast<float>(transformdPt.x));
-                    points.push_back(static_cast<float>(transformdPt.y));
-                    points.push_back(static_cast<float>(transformdPt.z));
-                }
+                knots.push_back(knotsArray[0]);
+            }
+            else
+            {
+                knots.push_back(2 * knotsArray[0] - knotsArray[1]);
+            }
+
+            for (unsigned int j = 0; j < knotsLength; ++j)
+            {
+                knots.push_back(knotsArray[j]);
+            }
+
+            if (knotsArray[0] == knotsArray[knotsLength - 1] ||
+                knotsArray[knotsLength - 1] == knotsArray[knotsLength - 2])
+            {
+                knots.push_back(knotsArray[knotsLength - 1]);
+            }
+            else
+            {
+                knots.push_back(2 * knotsArray[knotsLength - 1] -
+                                knotsArray[knotsLength - 2]);
             }
         }
 
@@ -273,14 +315,6 @@ void MayaNurbsCurveWriter::write()
                 for (Alembic::Util::int32_t i = 0; i < arraySum; i++)
                 {
                     width.push_back(static_cast<float>(doubleArrayData[i]));
-                    if (repeatStartAndEnd > 0 && (i == 0 || i == arraySum - 1))
-                    {
-                        for (int k = 0; k < repeatStartAndEnd; ++k)
-                        {
-                            points.push_back(
-                                static_cast<float>(doubleArrayData[i]));
-                        }
-                    }
                 }
             }
             else if (status == MS::kSuccess)
@@ -319,5 +353,16 @@ void MayaNurbsCurveWriter::write()
         (const Imath::V3f *)&points.front(), points.size() / 3 ));
     samp.setWidths(Alembic::AbcGeom::OFloatGeomParam::Sample(
         Alembic::Abc::FloatArraySample(width), scope) );
+
+    if (samp.getType() == Alembic::AbcGeom::kVariableOrder)
+    {
+        samp.setOrders(Alembic::Abc::UcharArraySample(orders));
+    }
+
+    if (!knots.empty())
+    {
+        samp.setKnots(Alembic::Abc::FloatArraySample(knots));
+    }
+
     mSchema.set(samp);
 }
