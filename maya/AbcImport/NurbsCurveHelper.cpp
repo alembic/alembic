@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -78,6 +78,9 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
 
     Alembic::Abc::P3fArraySamplePtr sampPoints = samp.getPositions();
     Alembic::Abc::P3fArraySamplePtr ceilPoints = ceilSamp.getPositions();
+    Alembic::Abc::FloatArraySamplePtr sampKnots = samp.getKnots();
+    Alembic::Abc::FloatArraySamplePtr ceilKnots = ceilSamp.getKnots();
+    Alembic::Abc::UcharArraySamplePtr orders = samp.getOrders();
 
     Alembic::Abc::Int32ArraySamplePtr numVertices =
         samp.getCurvesNumVertices();
@@ -89,15 +92,21 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
         interp = false;
     }
 
-    unsigned int degree = 1;
-    if (samp.getType() == Alembic::AbcGeom::kCubic)
-    {
-        degree = 3;
-    }
-
     std::size_t curVert = 0;
+    std::size_t curKnot = 0;
     for (std::size_t i = 0; i < iExpectedCurves && i < numCurves; ++i)
     {
+        unsigned int degree = 1;
+        if (samp.getType() == Alembic::AbcGeom::kCubic)
+        {
+            degree = 3;
+        }
+        else if (samp.getType() == Alembic::AbcGeom::kVariableOrder &&
+                 orders->size() > i)
+        {
+            degree = (unsigned int)((*orders)[i] - 1);
+        }
+
         MPointArray cvs;
 
         int numVerts = (*numVertices)[i];
@@ -125,33 +134,71 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
         // line up
         if (samp.getWrap() == Alembic::AbcGeom::kPeriodic)
         {
-            if (degree == 3 && numVerts > 2 && cvs[0] == cvs[numVerts-3] && 
-                cvs[1] == cvs[numVerts-2] && cvs[2] == cvs[numVerts-1])
+            form = MFnNurbsCurve::kPeriodic;
+
+            if (degree > 1 && numVerts > (int)(degree * 2))
             {
-                form = MFnNurbsCurve::kPeriodic;
+                for (unsigned int j = 0; j < degree; ++j)
+                {
+                    if (cvs[j] != cvs[numVerts-degree-j])
+                    {
+                        form = MFnNurbsCurve::kOpen;
+                        break;
+                    }
+                }
             }
-            else if (numVerts > 2 && cvs[0] == cvs[numVerts-1])
+            else
+            {
+                form = MFnNurbsCurve::kOpen;
+            }
+
+            if (form == MFnNurbsCurve::kOpen && numVerts > 2 &&
+                cvs[0] == cvs[numVerts-1])
             {
                 form = MFnNurbsCurve::kClosed;
             }
         }
 
-        // for now evenly distribute the knots
         MDoubleArray knots;
-        int numKnots = numVerts + degree - 1;
 
-        for (j = 0; j < numKnots; ++j)
+        if (!sampKnots)
         {
-            knots.append(j/(double)(numKnots-1));
+            // for now evenly distribute the knots for non NURBS curves
+            int numKnots = numVerts + degree - 1;
+
+            for (j = 0; j < numKnots; ++j)
+            {
+                knots.append(j/(double)(numKnots-1));
+            }
+
+            // we need to make sure the first 3 and last 3 knots repeat
+            if (form != MFnNurbsCurve::kPeriodic && degree == 3 && numKnots > 2)
+            {
+                knots[1] = knots[0];
+                knots[2] = knots[0];
+                knots[numKnots-2] = knots[numKnots-1];
+                knots[numKnots-3] = knots[numKnots-1];
+            }
         }
-
-        // we need to make sure the first 3 and last 3 knots repeat
-        if (form != MFnNurbsCurve::kPeriodic && degree == 3 && numKnots > 2)
+        else if (numVerts > 0)
         {
-            knots[1] = knots[0];
-            knots[2] = knots[0];
-            knots[numKnots-2] = knots[numKnots-1];
-            knots[numKnots-3] = knots[numKnots-1];
+            int numKnots = numVerts + degree + 1;
+
+            // skip the first and last knot
+            for (j = 1; j < numKnots - 1; ++j)
+            {
+                float knot = (*sampKnots)[curKnot + j];
+
+                if (interp)
+                {
+                    float ceilKnot = (*ceilKnots)[curKnot + j];
+                    knots.append(simpleLerp<float>(alpha, knot, ceilKnot));
+                }
+                else
+                {
+                    knots.append(knot);
+                }
+            }
         }
 
         MFnNurbsCurveData curveData;
@@ -187,6 +234,8 @@ MObject createCurves(const std::string & iName,
     Alembic::Abc::Int32ArraySamplePtr curvesNumVertices =
         iSample.getCurvesNumVertices();
     Alembic::Abc::P3fArraySamplePtr positions = iSample.getPositions();
+    Alembic::Abc::FloatArraySamplePtr knotsSamp = iSample.getKnots();
+    Alembic::Abc::UcharArraySamplePtr ordersSamp = iSample.getOrders();
 
     MString name(iName.c_str());
 
@@ -225,15 +274,21 @@ MObject createCurves(const std::string & iName,
         }
     }
 
-    unsigned int degree = 1;
-    if (iSample.getType() == Alembic::AbcGeom::kCubic)
-    {
-        degree = 3;
-    }
-
     std::size_t curVert = 0;
+    std::size_t curKnot = 0;
     for (std::size_t i = 0; i < numCurves; ++i)
     {
+        unsigned int degree = 1;
+        if (iSample.getType() == Alembic::AbcGeom::kCubic)
+        {
+            degree = 3;
+        }
+        else if (iSample.getType() == Alembic::AbcGeom::kVariableOrder &&
+                 ordersSamp->size() > i)
+        {
+            degree = (unsigned int)((*ordersSamp)[i] - 1);
+        }
+
         MPointArray cvs;
 
         int numVerts = (*curvesNumVertices)[i];
@@ -251,32 +306,62 @@ MObject createCurves(const std::string & iName,
         // line up
         if (iSample.getWrap() == Alembic::AbcGeom::kPeriodic)
         {
-            if (degree == 3 && numVerts > 2 && cvs[0] == cvs[numVerts-3] && 
-                cvs[1] == cvs[numVerts-2] && cvs[2] == cvs[numVerts-1])
+            form = MFnNurbsCurve::kPeriodic;
+
+            if (degree > 1 && numVerts > (int)(degree * 2))
             {
-                form = MFnNurbsCurve::kPeriodic;
+                for (unsigned int j = 0; j < degree; ++j)
+                {
+                    if (cvs[j] != cvs[numVerts-degree-j])
+                    {
+                        form = MFnNurbsCurve::kOpen;
+                        break;
+                    }
+                }
             }
-            else if (numVerts > 2 && cvs[0] == cvs[numVerts-1])
+            else
+            {
+                form = MFnNurbsCurve::kOpen;
+            }
+
+            if (form == MFnNurbsCurve::kOpen && numVerts > 2 &&
+                cvs[0] == cvs[numVerts-1])
             {
                 form = MFnNurbsCurve::kClosed;
             }
         }
 
-        // for now evenly distribute the knots
         MDoubleArray knots;
-        int numKnots = numVerts + degree - 1;
-        for (j = 0; j < numKnots; ++j)
-        {
-            knots.append(j/(double)(numKnots-1));
-        }
 
-        // we need to make sure the first 3 and last 3 knots repeat
-        if (form != MFnNurbsCurve::kPeriodic && degree == 3 && numKnots > 2)
+        if (!knotsSamp)
         {
-            knots[1] = knots[0];
-            knots[2] = knots[0];
-            knots[numKnots-2] = knots[numKnots-1];
-            knots[numKnots-3] = knots[numKnots-1];
+            // for now evenly distribute the knots for non NURBS curves
+            int numKnots = numVerts + degree - 1;
+
+            for (j = 0; j < numKnots; ++j)
+            {
+                knots.append(j/(double)(numKnots-1));
+            }
+
+            // we need to make sure the first 3 and last 3 knots repeat
+            if (form != MFnNurbsCurve::kPeriodic && degree == 3 && numKnots > 2)
+            {
+                knots[1] = knots[0];
+                knots[2] = knots[0];
+                knots[numKnots-2] = knots[numKnots-1];
+                knots[numKnots-3] = knots[numKnots-1];
+            }
+        }
+        else if (numVerts > 0)
+        {
+            int numKnots = numVerts + degree + 1;
+
+            // skip the first and last knot
+            for (j = 1; j < numKnots - 1; ++j)
+            {
+                float knot = (*knotsSamp)[curKnot + j];
+                knots.append(knot);
+            }
         }
 
         MFnNurbsCurve curve;
@@ -296,7 +381,7 @@ MObject createCurves(const std::string & iName,
         }
 
         // constant width, 1 curve just put it on the curve shape
-        if (numCurves == 1 && widths && widths->size() == 1 && 
+        if (numCurves == 1 && widths && widths->size() == 1 &&
             iWidths.getScope() ==  Alembic::AbcGeom::kConstantScope)
         {
             MFnNumericAttribute widthAttr;
