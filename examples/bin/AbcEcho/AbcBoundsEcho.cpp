@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -47,19 +47,20 @@ using namespace ::Alembic::AbcGeom;
 static Box3d g_bounds;
 
 //-*****************************************************************************
-void accumXform( M44d &xf, IObject obj )
+void accumXform( M44d &xf, IObject obj, chrono_t seconds )
 {
     if ( IXform::matches( obj.getHeader() ) )
     {
         IXform x( obj, kWrapExisting );
         XformSample xs;
-        x.getSchema().get( xs );
+        ISampleSelector sel( seconds );
+        x.getSchema().get( xs, sel );
         xf *= xs.getMatrix();
     }
 }
 
 //-*****************************************************************************
-M44d getFinalMatrix( IObject &iObj )
+M44d getFinalMatrix( IObject &iObj, chrono_t seconds )
 {
     M44d xf;
     xf.makeIdentity();
@@ -68,7 +69,7 @@ M44d getFinalMatrix( IObject &iObj )
 
     while ( parent )
     {
-        accumXform( xf, parent );
+        accumXform( xf, parent, seconds );
         parent = parent.getParent();
     }
 
@@ -76,75 +77,52 @@ M44d getFinalMatrix( IObject &iObj )
 }
 
 //-*****************************************************************************
-Box3d getBounds( IObject iObj )
+Box3d getBounds( IObject iObj, chrono_t seconds )
 {
     Box3d bnds;
     bnds.makeEmpty();
 
-    M44d xf = getFinalMatrix( iObj );
+    M44d xf = getFinalMatrix( iObj, seconds );
+    IBox3dProperty boxProp;
 
-    if ( IPolyMesh::matches( iObj.getMetaData() ) )
+    if ( ICurves::matches( iObj.getMetaData() ) )
+    {
+        ICurves curves( iObj, kWrapExisting );
+        ICurvesSchema cs = curves.getSchema();
+        boxProp = cs.getSelfBoundsProperty();
+    }
+    else if ( INuPatch::matches( iObj.getMetaData() ) )
+    {
+        INuPatch patch( iObj, kWrapExisting );
+        INuPatchSchema ps = patch.getSchema();
+        boxProp = ps.getSelfBoundsProperty();
+    }
+    else if ( IPolyMesh::matches( iObj.getMetaData() ) )
     {
         IPolyMesh mesh( iObj, kWrapExisting );
         IPolyMeshSchema ms = mesh.getSchema();
-        P3fArraySamplePtr positions = ms.getValue().getPositions();
-        size_t numPoints = positions->size();
-
-        for ( size_t i = 0 ; i < numPoints ; ++i )
-        {
-            bnds.extendBy( (*positions)[i] );
-        }
+        boxProp = ms.getSelfBoundsProperty();
+    }
+    else if ( IPoints::matches( iObj.getMetaData() ) )
+    {
+        IPoints pts( iObj, kWrapExisting );
+        IPointsSchema ps = pts.getSchema();
+        boxProp = ps.getSelfBoundsProperty();
     }
     else if ( ISubD::matches( iObj.getMetaData() ) )
     {
         ISubD mesh( iObj, kWrapExisting );
         ISubDSchema ms = mesh.getSchema();
-        P3fArraySamplePtr positions = ms.getValue().getPositions();
-        size_t numPoints = positions->size();
-
-        for ( size_t i = 0 ; i < numPoints ; ++i )
-        {
-            bnds.extendBy( (*positions)[i] );
-        }
+        boxProp = ms.getSelfBoundsProperty();
     }
-    else if ( IFaceSet::matches( iObj.getMetaData() ) )
+
+    if ( boxProp.valid() )
     {
-        Int32ArraySamplePtr faces;
-        IFaceSet faceSet( iObj, kWrapExisting );
-        IFaceSetSchema fs = faceSet.getSchema ();
-        faces = fs.getValue().getFaces();
-
-
-        Int32ArraySamplePtr meshFaceCounts;
-        Int32ArraySamplePtr vertexIndices;
-        P3fArraySamplePtr  meshP;
-
-        IObject parentMesh = iObj.getParent ();
-        if (ISubD::matches (parentMesh.getMetaData ()))
-        {
-            ISubD mesh( parentMesh, kWrapExisting );
-            ISubDSchema ms = mesh.getSchema();
-            ISubDSchema::Sample meshSample = ms.getValue();
-            meshP = meshSample.getPositions();
-            meshFaceCounts = meshSample.getFaceCounts();
-            vertexIndices = meshSample.getFaceIndices();
-        }
-        else if (IPolyMesh::matches (parentMesh.getMetaData ()))
-        {
-            IPolyMesh mesh( parentMesh, kWrapExisting );
-            IPolyMeshSchema ms = mesh.getSchema();
-            IPolyMeshSchema::Sample meshSample = ms.getValue();
-            meshP = meshSample.getPositions();
-            meshFaceCounts = meshSample.getFaceCounts();
-            vertexIndices = meshSample.getFaceIndices();
-        }
-
-        bnds.extendBy (computeBoundsFromPositionsByFaces (*faces,
-            *meshFaceCounts, *vertexIndices, *meshP));
-
+        ISampleSelector sel( seconds );
+        bnds = boxProp.getValue( sel );
+        bnds = Imath::transform( bnds, xf );
+        g_bounds.extendBy( bnds );
     }
-
-    bnds.extendBy( Imath::transform( bnds, xf ) );
 
     g_bounds.extendBy( bnds );
 
@@ -152,24 +130,27 @@ Box3d getBounds( IObject iObj )
 }
 
 //-*****************************************************************************
-void visitObject( IObject iObj )
+void visitObject( IObject iObj, chrono_t seconds )
 {
     std::string path = iObj.getFullName();
 
     const MetaData &md = iObj.getMetaData();
 
-    if ( IPolyMeshSchema::matches( md ) ||
-        IFaceSetSchema::matches( md ) ||
+    if ( ICurves::matches( md ) ||
+        INuPatch::matches( md ) ||
+        IPoints::matches( md ) ||
+        IPolyMesh::matches( md ) ||
         ISubDSchema::matches( md ) )
     {
-        Box3d bnds = getBounds( iObj );
+        Box3d bnds = getBounds( iObj, seconds );
         std::cout << path << " " << bnds.min << " " << bnds.max << std::endl;
     }
 
     // now the child objects
     for ( size_t i = 0 ; i < iObj.getNumChildren() ; i++ )
     {
-        visitObject( IObject( iObj, iObj.getChildHeader( i ).getName() ) );
+        visitObject( IObject( iObj, iObj.getChildHeader( i ).getName() ),
+                     seconds );
     }
 }
 
@@ -180,11 +161,17 @@ void visitObject( IObject iObj )
 //-*****************************************************************************
 int main( int argc, char *argv[] )
 {
-    if ( argc != 2 )
+    if ( argc != 2 && argc != 3 )
     {
-        std::cerr << "USAGE: " << argv[0] << " <AlembicArchive.abc>"
+        std::cerr << "USAGE: " << argv[0] << " <AlembicArchive.abc> <seconds>"
                   << std::endl;
         exit( -1 );
+    }
+
+    chrono_t seconds = 0.0;
+    if ( argc == 3 )
+    {
+        seconds = atof(argv[2]);
     }
 
     // Scoped.
@@ -193,7 +180,7 @@ int main( int argc, char *argv[] )
         Alembic::AbcCoreFactory::IFactory factory;
         factory.setPolicy(ErrorHandler::kQuietNoopPolicy);
         IArchive archive = factory.getArchive( argv[1] );
-        visitObject( archive.getTop() );
+        visitObject( archive.getTop(), seconds );
     }
 
     std::cout << "/" << " " << g_bounds.min << " " << g_bounds.max << std::endl;
