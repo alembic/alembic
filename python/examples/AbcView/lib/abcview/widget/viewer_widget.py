@@ -259,6 +259,7 @@ class GLState(QtCore.QObject):
 
         :param scene: GLScene object
         """
+        log.debug("[%s.add_scene] %s" % (self, scene))
         if type(scene) == GLScene:
             if scene not in self.__scenes:
                 scene.state = self
@@ -274,6 +275,7 @@ class GLState(QtCore.QObject):
 
         :param filepath: path to file to add
         """
+        log.debug("[%s.add_file] %s" % (self, filepath))
         self.add_scene(GLScene(filepath))
 
     def remove_scene(self, scene):
@@ -282,7 +284,10 @@ class GLState(QtCore.QObject):
 
         :param scene: GLScene to remove.
         """
+        log.debug("[%s.remove_scene] %s" % (self, scene))
         scene.visible = False
+        if scene in self.__scenes:
+            self.__scenes.remove(scene)
         self.signal_state_change.emit()
 
     def add_camera(self, camera):
@@ -566,6 +571,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         :param scene: GLScene object
         """
+        log.debug("[%s.add_scene] %s" % (self, scene))
         self.state.add_scene(scene)
         self.signal_scene_opened.emit(scene)
         self.updateGL()
@@ -576,6 +582,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         :param scene: GLScene to remove.
         """
+        log.debug("[%s.remove_scene] %s" % (self, scene))
         self.state.remove_scene(scene)
         self.signal_scene_removed.emit(scene)
         self.updateGL()
@@ -593,6 +600,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         """
         :param camera: GLCamera object to remove
         """
+        log.debug("[%s.remove_camera] %s" % (self, camera))
         self.state.remove_camera(camera)
         self.signal_state_change.emit()
 

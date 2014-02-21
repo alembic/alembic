@@ -137,7 +137,7 @@ chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
     {
         ABCA_ASSERT( ( size_t )iIndex < m_sampleTimes.size(),
             "Out-of-range acyclic index: " << iIndex
-            << ", range [0-" <<  m_sampleTimes.size() << "]" );
+            << ", range [0-" <<  m_sampleTimes.size()-1 << "]" );
         return m_sampleTimes[iIndex];
     }
     else

@@ -46,6 +46,7 @@ d = {
 # normalizes color values (0 to 1)
 CCLAMP = 500.0
 
+#TODO turn this into a generator to handle open ended item count
 def gen_colors(N=1):
     """
     Returns a color range as a list of rgb tuples.
@@ -65,7 +66,7 @@ def gen_colors(N=1):
 DIALOG = """
 * {
     background: #222;
-    color: #cccdcc;
+    color: #ddcedd;
     border: 0px;
 }
 QLabel {

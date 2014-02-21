@@ -597,6 +597,7 @@ class Session(FileBase):
 
         :param item: Scene or Session object
         """
+        log.debug("[%s.add_item] %s" % (self, item))
         found_instances = [i.filepath for i in self.items if i.filepath == item.filepath]
         item.instance = len(found_instances) + 1
         self.__items.append(item)
@@ -607,6 +608,7 @@ class Session(FileBase):
 
         :param item: Scene or Session object
         """
+        log.debug("[%s.remove_item] %s" % (self, item))
         if item in self.__items:
             self.__items.remove(item)
         else:

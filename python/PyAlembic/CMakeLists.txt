@@ -182,8 +182,8 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
   INSTALL( TARGETS alembicmodule
            LIBRARY DESTINATION lib )
 
-  # Commentiong out for now per Issue 319
-  # ADD_SUBDIRECTORY( Tests )
+  # commenting out for now per Issue 319
+  #ADD_SUBDIRECTORY( Tests )
 
 ELSE()
     MESSAGE( FATAL_ERROR "Unable to find Python libs" )

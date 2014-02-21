@@ -48,7 +48,13 @@ import alembic
 from abcview.io import Scene, Session, Mode
 from abcview.gl import GLScene
 from abcview.utils import find_objects, get_schema_info
-from abcview import config, log
+from abcview import log, style, config
+
+def message(info):
+    dialog = QtGui.QMessageBox()
+    dialog.setStyleSheet(style.DIALOG)
+    dialog.setText(info)
+    dialog.exec_()
 
 class ArrayThread(QtCore.QThread):
     """
@@ -146,6 +152,9 @@ class AbcTreeWidgetItem(QtGui.QTreeWidgetItem):
             if type(parent) == SceneTreeWidgetItem:
                 return parent
             parent = parent.parent()
+
+    def is_removable(self):
+        return False
 
     def set_bad(self, bad):
         """
@@ -339,6 +348,9 @@ class SessionTreeWidgetItem(AbcTreeWidgetItem):
     def properties(self):
         return []
 
+    def is_removable(self):
+        return True
+
     def children(self):
         if self.seen:
             for index in range(self.childCount()):
@@ -360,6 +372,9 @@ class SceneTreeWidgetItem(SessionTreeWidgetItem):
         self.setToolTip(self.treeWidget().colnum(''), 'visible')
         self.setExpanded(False)
 
+        # for GL selection
+        self.object.tree = self
+
         # color indicator delegate
         self.g = QtGui.QGroupBox()
         self.treeWidget().setItemWidget(self, 
@@ -380,6 +395,9 @@ class SceneTreeWidgetItem(SessionTreeWidgetItem):
         # update delegate widget stylesheet
         self.g.setStyleSheet("background: rgb(%.2f, %.2f, %.2f);" 
                 % (color.red(), color.green(), color.blue()))
+
+    def is_removable(self):
+        return True
 
     def children(self):
         yield ObjectTreeWidgetItem(self, self.object.archive.getTop())
@@ -603,23 +621,36 @@ class ObjectTreeWidget(AbcTreeWidget):
         self.header().setSectionHidden(self.colnum('hidden'), True)
         self.header().setStretchLastSection(False)
 
+    def add_item(self):
+        self.main.handle_import()
+
+    def remove_item(self, item=None):
+        '''
+        removes an item from the tree and session.
+
+        :param: objecttreewidgetitem or subclass.
+        '''
+        if item is None:
+            if self.selectedItems():
+                item = self.selectedItems()[0]
+        if item is None or item.parent() is not None or not item.is_removable():
+            message("Item is not removable")
+            return
+        self.takeTopLevelItem(self.indexOfTopLevelItem(item))
+        self.signal_item_removed.emit(item)
+
+    def handle_remove_item(self, triggered):
+        '''
+        remove item action handler, calls remove_item().
+        '''
+        if self.selectedItems():
+            self.remove_item(self.selectedItems()[0])
+
     def handle_item_expanded(self, item):
         if not item.seen:
             for child in item.children():
                 item.addChild(child)
             item.seen = True
-
-    def add_item(self):
-        self.main.handle_import()
-
-    def remove_item(self):
-        for item in self.selectedItems():
-            if item == item.root() or item.object in item.root().object.items:
-                self.removeItemWidget(item, 0)
-                self.signal_item_removed.emit(item)
-                del item
-            else:
-                log.warn("can not remove item")
 
     def handle_set_color(self, ok):
         """
@@ -759,7 +790,7 @@ class ObjectTreeWidget(AbcTreeWidget):
             # remove scene
             self.remove_action = QtGui.QAction("Remove", self)
             self.connect(self.remove_action, QtCore.SIGNAL("triggered (bool)"), 
-                        self.remove_item)
+                        self.handle_remove_item)
             menu.addAction(self.remove_action)
 
         else:

@@ -48,13 +48,12 @@ assemble hierarchical scenes.
 
 What's new:
 
-- Dedicated OpenGL viewer
-- Scene bounds and framing
-- Supports "visible" property
-- Explicit layout saving
-- Camera support
-- Session management
-- Python API
+- fixes issue #324
+- fixes static normals on animated archives
+- fixes remove item bug
+- fixes import session file bug
+- adds Review Mode to File menu
+- better support for custom scripts
 
 More information:
 http://docs.alembic.io/python/abcview.html
@@ -65,8 +64,10 @@ TODO:
 
 - better object-level selection/framing
 - better session cycle checking on load
+- contextual session editing
 - more stats (poly count, mem usage)
 - support for lights and materials
+- edit/remove cameras from viewer
 - draggable, pop-out widgets
 - support object paths in args
 - save split window layouts
@@ -80,3 +81,7 @@ FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
 log = logging.getLogger(config.__prog__)
 log.setLevel(int(os.environ.get('ABCVIEW_LOG_LEVEL', logging.WARN)))
+
+# abcview version info
+version_string = config.__version__
+version_tuple = tuple(int(v) for v in version_string.split('.'))
