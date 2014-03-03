@@ -110,6 +110,7 @@ using boost::shared_ptr;
 using boost::static_pointer_cast;
 using boost::weak_ptr;
 using boost::unordered_map;
+#define ALEMBIC_LIB_USES_BOOST
 #elif defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
 using std::dynamic_pointer_cast;
 using std::enable_shared_from_this;
