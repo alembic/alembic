@@ -33,11 +33,14 @@
 ##
 ##-*****************************************************************************
 
-IF (APPLE)
-  SET( LIBPYTHON_VERSION 2.7 )
-ELSE ()
-  SET( LIBPYTHON_VERSION 2.6 )
+IF (NOT DEFINED LIBPYTHON_VERSION)
+  IF (APPLE)
+    SET( LIBPYTHON_VERSION 2.7 )
+  ELSE ()
+    SET( LIBPYTHON_VERSION 2.6 )
+  ENDIF ()
 ENDIF ()
+
 SET( LIBPYTHON python${LIBPYTHON_VERSION} )
 OPTION( USE_LIB64 "Search for deps in lib64 vs lib" ON )
 

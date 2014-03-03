@@ -33,11 +33,14 @@
 ##
 ##-*****************************************************************************
 
-
-IF (APPLE)
-    SET(PYTHON_EXECUTABLE_NAMES python2.7 python27 python2 python)
+IF (DEFINED LIBPYTHON_VERSION)
+    SET(PYTHON_EXECUTABLE_NAMES python${LIBPYTHON_VERSION})
 ELSE ()
-    SET(PYTHON_EXECUTABLE_NAMES python2.6 python26 python2 python)
+    IF (APPLE)
+        SET(PYTHON_EXECUTABLE_NAMES python2.7 python27 python2 python)
+    ELSE ()
+        SET(PYTHON_EXECUTABLE_NAMES python2.6 python26 python2 python)
+    ENDIF ()
 ENDIF ()
 
 # First the version of python

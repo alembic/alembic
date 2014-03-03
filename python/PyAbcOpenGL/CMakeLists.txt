@@ -33,11 +33,14 @@
 ##
 ##-*****************************************************************************
 
-IF (APPLE)
-  SET( LIBPYTHON_VERSION 2.7 )
-ELSE ()
-  SET( LIBPYTHON_VERSION 2.6 )
+IF (NOT DEFINED LIBPYTHON_VERSION)
+  IF (APPLE)
+    SET( LIBPYTHON_VERSION 2.7 )
+  ELSE ()
+    SET( LIBPYTHON_VERSION 2.6 )
+  ENDIF ()
 ENDIF ()
+
 SET( LIBPYTHON python${LIBPYTHON_VERSION} )
 OPTION( USE_LIB64 "Search for deps in lib64 vs lib" ON )
 
@@ -110,7 +113,7 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
                   ${EXTERNAL_MATH_LIBS}
                   ${ALEMBIC_PYILMBASE_PYIMATH_LIB} )
 
-  INCLUDE_DIRECTORIES( "/usr/include/python2.6" "${ALEMBIC_SOURCE_DIR}/lib"
+  INCLUDE_DIRECTORIES( "/usr/include/python${LIBPYTHON_VERSION}" "${ALEMBIC_SOURCE_DIR}/lib"
       "${ALEMBIC_SOURCE_DIR}/python/PyAbcOpenGL" )
 
   ADD_LIBRARY( alembicglmodule SHARED ${CPP_FILES} )
