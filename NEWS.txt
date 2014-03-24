@@ -1,3 +1,53 @@
+20014-03-28, Alembic 1.5.4
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+AbcGeom:
+Fix for Issue 333,  optional property samples not being filled in correctly
+after being defined previously but not set on the current sample.
+
+AbcOpenGL:
+
+Fix for Issue 324, adjust dolly and clipping plane values when they get
+a bit extreme.
+
+Python:
+Updates for sphix docs
+
+AbcView:
+Fix static normals on animated archives.
+Fix remove item bug.
+Fix import session fle bug.
+Add Review mode.
+Support custom scripts.
+
+Maya:
+
+AbcExport:
+Write out NURBS curves as actual NURBS curves.
+
+AbcImport:
+
+Support reading NURBS curves.
+Use Alembic::Util::shared_ptr instead of std::tr1::shared_ptr in one spot.
+
+Util:
+
+AbcEcho:
+
+Fix bounds calculation on AbcBoundsEcho.
+Add an optional seconds argument for time sampling support.
+
+Build:
+
+Use C++11 for OSX Mavericks.
+Define ALEMBIC_LIB_USES_BOOST to accomodate python bindings.
+Use LIBPYTHON_VERSION to determine which python to use.
+
+##-*****************************************************************************
+
 2013-12-17, Alembic 1.5.3
 Hello Alembic users, thanks to your feedback and reports we have a few bug
 fixes and enhancements.
