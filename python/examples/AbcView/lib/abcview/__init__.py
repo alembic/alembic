@@ -39,6 +39,7 @@ import os
 import logging
 
 from abcview import config
+from abcview import style
 
 __doc__ = """
 AbcView is a graphical PyQt-based Alembic inspection 
@@ -51,6 +52,7 @@ What's new:
 - fixes issue #324
 - fixes static normals on animated archives
 - fixes remove item bug
+- archive metadata in properties widget
 - fixes import session file bug
 - adds Review Mode to File menu
 - better support for custom scripts

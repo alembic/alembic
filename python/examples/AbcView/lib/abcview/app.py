@@ -83,6 +83,16 @@ def make_clean(func):
             args[0].session.make_clean()
     return with_wrapped_func
 
+def wait(func):
+    """wait/arrow mouse cursor decorator"""
+    @wraps(func)
+    def with_wrapped_func(*args, **kwargs):
+        args[0].setCursor(QtCore.Qt.WaitCursor)
+        ret = func(*args, **kwargs)
+        args[0].setCursor(QtCore.Qt.ArrowCursor)
+        return ret
+    return with_wrapped_func
+
 def message(info):
     dialog = QtGui.QMessageBox()
     dialog.setStyleSheet(style.DIALOG)
@@ -1000,11 +1010,12 @@ class AbcView(QtGui.QMainWindow):
         self.set_load_files([filepath])
         self._start()
 
-    def import_file(self, filepath):
+    def import_file(self, filepath, overrides=None):
         """
         File importer
 
         :param filepath: file path to import, adds to session
+        :param overrides: parameter overrides dict
         """
         self.viewer.setDisabled(True)
 
@@ -1016,14 +1027,18 @@ class AbcView(QtGui.QMainWindow):
             item = GLScene(filepath)
             num_items = 1
         
+        # update item from params override
+        if overrides:
+            item.name = overrides.get("name", item.name)
+            item.loaded = overrides.get("loaded", item.loaded)
+            item.color = overrides.get("color", item.color)
+            item.properties.update(overrides.get("properties"))
+
         self.session.add_item(item)
         COLORS = style.gen_colors(num_items)
 
         if self._overrides.get("mode") is not None:
             item.mode = self._overrides.get("mode")
-
-        #if not item.properties.get("color", None):
-        #    item.color = COLORS[0]
 
         if item.type() == Session.type():
             item = SessionTreeWidgetItem(self.objects_tree, item)
@@ -1215,7 +1230,9 @@ class AbcView(QtGui.QMainWindow):
             scene.tree.treeWidget().scrollToItem(scene.tree, 
                              QtGui.QAbstractItemView.PositionAtCenter)
             scene.tree.treeWidget().setItemSelected(scene.tree, True)
+            self.handle_object_clicked(scene.tree)
 
+    @wait
     def handle_object_selected(self, name):
         """
         GLWidget object selected handler.
@@ -1225,6 +1242,7 @@ class AbcView(QtGui.QMainWindow):
         log.debug("[%s.handle_object_selected] %s" %(self, name))
         self.objects_tree.find(str(name.toAscii()))
 
+    @wait
     def find(self, name):
         """
         searches for objects in the tree matching name
@@ -1232,6 +1250,7 @@ class AbcView(QtGui.QMainWindow):
         self.setFocus()
         self.objects_tree.find(name)
 
+    @wait
     def handle_find(self, text=None):
         """
         handles input from the search box
@@ -1256,6 +1275,7 @@ class AbcView(QtGui.QMainWindow):
             item.object.selected = True
         self.viewer.updateGL()
 
+    @wait
     def handle_item_loaded(self, item):
         """
         load checkbox click handler
@@ -1273,6 +1293,7 @@ class AbcView(QtGui.QMainWindow):
         self.splash.updateProgress(self.splash.progress.value() + 1)
         load(item)
 
+    @wait
     def handle_item_unloaded(self, item):
         """
         Item unloaded handler.
@@ -1290,7 +1311,8 @@ class AbcView(QtGui.QMainWindow):
         self.samples_tree.clear()
         self.array_tree.clear()
         self.properties_tree.show_properties(item)
-        
+
+    @wait
     def handle_property_clicked(self, item):
         """
         Property tree item clicked handler.
@@ -1300,6 +1322,7 @@ class AbcView(QtGui.QMainWindow):
         self.array_tree.clear()
         self.samples_tree.show_samples(item)
 
+    @wait
     def handle_new(self):
         """
         File->New menu handler

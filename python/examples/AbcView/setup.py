@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #-******************************************************************************
 #
-# Copyright (c) 2012-2013,
+# Copyright (c) 2012-2014,
 #  Sony Pictures Imageworks Inc. and
 #  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 #
@@ -46,7 +46,7 @@ def get_packages(path):
 
 setup(
     name='abcview',
-    version='1.0.1',
+    version='1.0.7',
     description='AbcView - A graphical Alembic inspection and visualization tool',
     author='Ryan Galloway',
     author_email='ryang@ilm.com',

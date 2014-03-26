@@ -57,9 +57,6 @@ def gen_colors(N=1):
     HSV_tuples = [(x*1.0/N, 0.5, 0.5) for x in range(N)]
     HSV_tuples.reverse()
     RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
-    #RGB_tuples = map(lambda x: tuple(map(lambda y: int(y * CCLAMP),x)),RGB_tuples)
-    #HEX_tuples = map(lambda x: tuple(map(lambda y: chr(y).encode('hex'),x)), RGB_tuples)
-    #HEX_tuples = map(lambda x: "".join(x), HEX_tuples)
     return RGB_tuples
 
 # Qt dialog css

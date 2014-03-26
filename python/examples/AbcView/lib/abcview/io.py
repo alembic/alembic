@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #-******************************************************************************
 #
-# Copyright (c) 2012-2013,
+# Copyright (c) 2012-2014,
 #  Sony Pictures Imageworks Inc. and
 #  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 #
@@ -38,6 +38,7 @@
 import os
 import sys
 import time
+import copy
 
 import imath
 import alembic
@@ -85,11 +86,73 @@ def DictListUpdate( lis1, lis2):
             lis2.append(aLis1)
     return lis2
 
+class idict(object):
+    """
+    Dict-like class that supports the notion of local vs. inherited Key values.
+    Values are first looked for in local, then inherited.
+    """
+    def __init__(self, *args, **kwargs):
+        super(idict, self).__init__()
+ 
+        self.local = dict(**kwargs)
+        self.inherited = dict()
+        
+        if args:
+            self.local = copy.deepcopy(args[0])
+
+    def __repr__(self):
+        return repr(self.properties)
+
+    def __contains__(self, key):
+        return key in self.properties
+
+    def __eq__(self, other):
+        return self.properties == other
+
+    def __len__(self):
+        return len(self.properties)
+
+    def __getattr__(self, key):
+        return super(idict, self).__getattr__(key)
+
+    def __setitem__(self, key, value):
+        self.set(key, value)
+
+    def __getitem__(self, key):
+        return self.get(key)
+
+    def _get_properties(self):
+        return dict(self.items())
+
+    def _set_properties(self, value):
+        if type(value) in (dict, ):
+            self.local = value
+
+    properties = property(_get_properties, _set_properties, doc="properties")
+
+    def clear(self):
+        self.local.clear()
+
+    def update(self, *args, **kwargs):
+        self.local.update(*args, **kwargs)
+
+    def get(self, key, default=None):
+        return self.local.get(key, self.inherited.get(key, default))
+
+    def set(self, key, value):
+        self.local[key] = value
+
+    def has_key(self, key):
+        return key in self.local or key in self.inherited
+
+    def items(self):
+        return dict(self.inherited.items() + self.local.items()).items()
+
 class Base(object):
     def __init__(self):
         self.loaded = True
         self.instance = 1
-        self.properties = {}
+        self.properties = idict()
 
     def __repr__(self):
         return "<%s \"%s\">" % (self.type(), self.name)
@@ -225,7 +288,7 @@ class Scene(FileBase):
             "instance": self.instance,
             "loaded": self.loaded,
             "name": self.name,
-            "properties": self.properties,
+            "properties": self.properties.local,
         }
 
     @classmethod
@@ -237,7 +300,7 @@ class Scene(FileBase):
         item.name = data.get("name", "Unnamed")
         item.loaded = data.get("loaded", True)
         item.instance = data.get("instance", 1)
-        item.properties = data.get("properties", {})
+        item.properties = idict(data.get("properties", {}))
         return item
 
 class CameraBase(Base):
@@ -600,6 +663,13 @@ class Session(FileBase):
         log.debug("[%s.add_item] %s" % (self, item))
         found_instances = [i.filepath for i in self.items if i.filepath == item.filepath]
         item.instance = len(found_instances) + 1
+
+        # TODO: replace with session deserialization
+        if type(item) == Session:
+            temp = copy.deepcopy(item.properties.local)
+            item.properties = idict()
+            item.properties.inherited.update(temp)
+
         self.__items.append(item)
 
     def remove_item(self, item):
@@ -670,7 +740,7 @@ class Session(FileBase):
                     "instance": item.instance,
                     "name": item.name,
                     "loaded": item.loaded,
-                    "properties": item.properties,
+                    "properties": item.properties.local,
                 }
             else:
                 return item.serialize()
@@ -694,7 +764,7 @@ class Session(FileBase):
     def clear(self):
         self.version = config.__version__
         self.program = config.__prog__
-        self.properties = {}
+        self.properties = idict()
         self.date = time.time()
         self.min_time = 0
         self.max_time = 0
@@ -757,11 +827,12 @@ class Session(FileBase):
 
         # metadata and properties
         state = json.load(open(filepath, "r"))
+        self.name = state.get("name", os.path.basename(filepath))
         self.version = state.get("app").get("version")
         self.program = state.get("app").get("program")
         self.date = state.get("date")
         self.instance = state.get("instance", 1)
-        self.properties = state.get("properties")
+        self.properties = idict(state.get("properties"))
         self.frames_per_second = state.get("frames_per_second", 
                            self.frames_per_second)
         self.min_time = state.get("min_time", self.min_time)
@@ -782,7 +853,11 @@ class Session(FileBase):
             if fp.endswith(Scene.EXT):
                 self.add_item(Scene.deserialize(d))
             elif fp.endswith(Session.EXT):
+                # TODO: replace with deserialization for sessions
                 item = Session(fp)
+                item.name = d.get("name", item.name)
+                item.loaded = d.get("loaded", item.loaded)
+                item.properties.update(d.get("properties", {}))
                 self.add_item(item)
 
     def save(self, filepath=None):
@@ -814,7 +889,7 @@ class Session(FileBase):
             "max_time": self.max_time,
             "current_time": self.current_time,
             "frames_per_second": self.frames_per_second,
-            "properties": self.properties,
+            "properties": self.properties.local,
             "cameras": [camera.serialize() for camera in self.__cameras.values()],
             "data": self.serialize()
         }
