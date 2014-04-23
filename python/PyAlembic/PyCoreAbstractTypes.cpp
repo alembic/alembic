@@ -297,6 +297,12 @@ void register_coreabstracttypes()
         {
             return tSamp.getNearIndex( iTime, iNumSamples ).first;
         }
+
+        static std::vector<AbcA::chrono_t> getStoredTimes( AbcA::TimeSampling& tSamp )
+        {
+            return tSamp.getStoredTimes();
+        }
+
     };
 
     class_<AbcA::TimeSampling, AbcA::TimeSamplingPtr>(
@@ -315,6 +321,9 @@ void register_coreabstracttypes()
         .def( "getNumStoredTimes",
               &AbcA::TimeSampling::getNumStoredTimes,
               "Return the number of stored times samples" )
+        .def( "getStoredTimes",
+              TimeSamplingOverloads::getStoredTimes,
+              "Return the stored times" )
         .def( "getTimeSamplingType",
               &AbcA::TimeSampling::getTimeSamplingType,
               "Return the TimeSamplingType of this class" )
