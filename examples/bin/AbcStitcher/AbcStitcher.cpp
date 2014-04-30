@@ -121,7 +121,7 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
     if (childBounds)
     {
         ctsPtr0 = childBounds.getTimeSampling();
-        ctsType0 = tsPtr0->getTimeSamplingType();
+        ctsType0 = ctsPtr0->getTimeSamplingType();
         std::string nameAndBounds = fullNodeName + " child bounds";
         checkAcyclic(ctsType0, nameAndBounds);
         iSchemaProps.push_back(iSchema0);
