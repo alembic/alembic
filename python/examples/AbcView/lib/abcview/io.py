@@ -540,6 +540,7 @@ class ICamera(CameraBase):
 
         :param seconds: time in secs (derives index)
         """
+        #TODO: (mem)cache sample lookups
         cp = self.icamera.getParent()
         xform = alembic.AbcGeom.IXform(cp.getParent(), 
                                        cp.getName())
@@ -570,6 +571,9 @@ class ICamera(CameraBase):
 
     def scale(self, seconds=0):
         return self._ixform_sample(seconds).getScale()
+
+    def matrix(self, seconds=0):
+        return self._ixform_sample(seconds).getMatrix()
 
     def near(self, seconds=0):
         return self._icamera_sample(seconds).getNearClippingPlane()

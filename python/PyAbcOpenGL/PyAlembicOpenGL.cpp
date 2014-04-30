@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2013,
+// Copyright (c) 2013-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //

@@ -630,6 +630,11 @@ class GLICamera(abcview.io.ICamera, GLCameraMixin):
 
     center = property(_get_center, _not_settable, doc="center of interest")
 
+    def _get_matrix(self):
+        return  super(GLICamera, self).matrix(self.viewer.state.current_time)
+
+    matrix = property(_get_matrix, _not_settable, doc="M44d transformation matrix")
+
     def apply(self):
         for view, camera in self.views.items():
             camera.setTranslation(self.translation)
