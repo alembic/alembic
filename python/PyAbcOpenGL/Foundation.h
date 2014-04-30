@@ -43,6 +43,9 @@
 namespace boost
 {
 
+// if Alembic::Util::shared_ptr resolves to boost::shared_ptr then we
+// don't need this since it's defined elsewhere
+#ifndef ALEMBIC_LIB_USES_BOOST
 template<class T>
 inline T * get_pointer( Alembic::Util::shared_ptr<T> const & p )
 {
@@ -50,6 +53,7 @@ inline T * get_pointer( Alembic::Util::shared_ptr<T> const & p )
 }
 
 } // namespace boost
+#endif
 
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
