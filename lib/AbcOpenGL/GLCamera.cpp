@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -163,9 +163,14 @@ void GLCamera::apply() const
     glLoadIdentity();
 
     ::glScaled( 1.0 / m_scale[0], 1.0 / m_scale[1], 1.0 / m_scale[2] );
-    ::glRotated( -m_rotation[2], 0.0, 0.0, 1.0 );
+
+    // Apply rotation in XYZ order. XformSample::getXRotation etc extract
+    // the rotation values out of the xform matrix using XYZ rotation.
+    // TODO: revisit using a xform matrix here instead.
     ::glRotated( -m_rotation[0], 1.0, 0.0, 0.0 );
     ::glRotated( -m_rotation[1], 0.0, 1.0, 0.0 );
+    ::glRotated( -m_rotation[2], 0.0, 0.0, 1.0 );
+
     ::glTranslated( -m_translation[0], -m_translation[1], -m_translation[2] );
 }
 
@@ -181,11 +186,11 @@ M44d GLCamera::transform() const
                        1.0 / m_scale[2] )  );
     m = m * tmp;
 
-    tmp.setAxisAngle( V3d( 0.0, 0.0, 1.0 ), radians( -m_rotation[2] ) );
-    m = m * tmp;
     tmp.setAxisAngle( V3d( 1.0, 0.0, 0.0 ), radians( -m_rotation[0] ) );
     m = m * tmp;
     tmp.setAxisAngle( V3d( 0.0, 1.0, 0.0 ), radians( -m_rotation[1] ) );
+    m = m * tmp;
+    tmp.setAxisAngle( V3d( 0.0, 0.0, 1.0 ), radians( -m_rotation[2] ) );
     m = m * tmp;
 
     tmp.setTranslation( V3d( -m_translation[0],
@@ -309,11 +314,11 @@ std::string GLCamera::RIB() const
                  << ( float )( 1.0/m_scale[1] ) << " "
                  << ( float )( 1.0/m_scale[2] ) << "\n"
                  << "Rotate  "
-                 << ( float )( -m_rotation[2] ) << "0 0 1\n"
-                 << "Rotate  "
                  << ( float )( -m_rotation[0] ) << "1 0 0\n"
                  << "Rotate  "
                  << ( float )( -m_rotation[1] ) << "0 1 0\n"
+                 << "Rotate  "
+                 << ( float )( -m_rotation[2] ) << "0 0 1\n"
                  << "Translate "
                  << ( float )( -m_translation[0] )
                  << ( float )( -m_translation[1] )
