@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -192,6 +192,26 @@ namespace
                 {
                     shadingGroup = createShadingGroup(faceSetName);
                 }
+
+                // set (and create if needed) 'AbcFacesetName' string 
+                // attribute on the shadingGroup
+                MFnDependencyNode fnDepNode(shadingGroup);
+                MPlug abcFacesetNamePlug = fnDepNode.findPlug("AbcFacesetName",
+                                                               true);
+                if (abcFacesetNamePlug.isNull())
+                {
+                    MFnStringData fnStringData;
+                    MString attrName("AbcFacesetName");
+                    MObject strAttrObject = fnStringData.create("");
+
+                    MFnTypedAttribute attr;
+                    MObject attrObj = attr.create(attrName, attrName, 
+                                              MFnData::kString, strAttrObject);
+                    fnDepNode.addAttribute(attrObj, 
+                                         MFnDependencyNode::kLocalDynamicAttr);
+                    abcFacesetNamePlug = fnDepNode.findPlug(attrObj, true);
+                }
+                abcFacesetNamePlug.setValue(faceSetName);
 
                 // retrive face indices.
                 Alembic::AbcGeom::IFaceSetSchema::Sample samp;

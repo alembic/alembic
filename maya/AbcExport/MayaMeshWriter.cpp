@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -468,6 +468,12 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
         Alembic::AbcGeom::OFaceSet faceSet;
         std::string faceSetName(connSgObjName.asChar());
+
+        MPlug abcFacesetNamePlug = fnDepNode.findPlug("AbcFacesetName", true);
+        if (!abcFacesetNamePlug.isNull())
+        {
+            faceSetName = abcFacesetNamePlug.asString().asChar();
+        }
 
         if (mPolySchema)
         {
