@@ -131,7 +131,6 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
                        const AbcA::TimeSamplingType &timeSamplingType,
                        index_t numSamples )
 {
-    const index_t lastIndex = numSamples - 1;
 
     const TIME timePerCycle = timeSamplingType.getTimePerCycle();
     const index_t numSamplesPerCycle = timeSamplingType.getNumSamplesPerCycle();
@@ -184,75 +183,74 @@ void testTimeSampling( const AbcA::TimeSampling &timeSampling,
             ". It should be " << i;
         TESTING_MESSAGE_ASSERT( nearIndex == i, nearMsg.str() );
 
+
+        chrono_t smidgeOver = 0.01;
+        chrono_t smidgeUnder = 0.01;
+        index_t loi = i;
+        index_t hii = i;
+
+        // base smidge off of the previous time
         if ( i > 0 )
         {
             TIME timeIm1 = timeSampling.getSampleTime( i - 1 );
             TESTING_MESSAGE_ASSERT( timeIm1 < timeI,
                          "Times should be monotonically increasing." );
-
-            if ( i < lastIndex )
-            {
-                chrono_t timeIp1 = timeSampling.getSampleTime( i + 1 );
-                chrono_t smidgeOver = ( timeIp1 - timeI ) / 4.0;
-                chrono_t smidgeUnder = ( timeI - timeIm1 ) / 4.0;
-                chrono_t smidgeOverTimeI = timeI + smidgeOver;
-                chrono_t smidgeUnderTimeI = timeI - smidgeUnder;
-
-                // floor index
-                TESTING_MESSAGE_ASSERT(
-                    timeSampling.getFloorIndex( smidgeOverTimeI,
-                        numSamples ).first == i,
-                    "Time a smidge over time sampled at 'i' should have a floor "
-                    "index of 'i'."
-                           );
-
-                TESTING_MESSAGE_ASSERT(
-                    timeSampling.getFloorIndex( smidgeUnderTimeI,
-                        numSamples ).first == i - 1,
-                    "Time a smidge under time sampled at 'i' should have a "
-                    "floor index of 'i - 1'."
-                           );
-
-                // ceiling index
-                TESTING_MESSAGE_ASSERT(
-                    timeSampling.getCeilIndex( smidgeOverTimeI,
-                        numSamples ).first == i + 1,
-                    "Time a smidge over time sampled at 'i' should have a "
-                    "ceiling index of 'i + 1'."
-                           );
-
-                TESTING_MESSAGE_ASSERT(
-                    timeSampling.getCeilIndex( smidgeUnderTimeI,
-                        numSamples ).first == i,
-                    "Time a smidge under time sampled at 'i' should have a "
-                    "ceiling index of 'i'."
-                           );
-
-                // near index
-                TESTING_MESSAGE_ASSERT(
-                    timeSampling.getNearIndex( smidgeOverTimeI,
-                        numSamples ).first == i,
-                    "Time a smidge over time sampled at 'i' should have a "
-                    "nearest index of 'i'."
-                           );
-
-                TESTING_MESSAGE_ASSERT(
-                    timeSampling.getCeilIndex( smidgeUnderTimeI,
-                        numSamples ).first == i,
-                    "Time a smidge under time sampled at 'i' should have a "
-                    "nearest index of 'i'."
-                           );
-            }
+            smidgeUnder = ( timeI - timeIm1 ) / 4.0;
+            loi = i - 1;
         }
+
+        // base smidge over on a future time
+        if ( i < numSamples - 1 )
+        {
+            chrono_t timeIp1 = timeSampling.getSampleTime( i + 1 );
+            smidgeOver = ( timeIp1 - timeI ) / 4.0;
+            hii = i + 1;
+        }
+
+        chrono_t smidgeOverTimeI = timeI + smidgeOver;
+        chrono_t smidgeUnderTimeI = timeI - smidgeUnder;
+
+        // floor index
+        TESTING_MESSAGE_ASSERT( timeSampling.getFloorIndex(
+            smidgeOverTimeI, numSamples ).first == i,
+            "Time a smidge over time sampled at 'i' should have a floor index "
+            "of 'i'." );
+
+        TESTING_MESSAGE_ASSERT( timeSampling.getFloorIndex(
+            smidgeUnderTimeI, numSamples ).first == loi,
+            "Time a smidge under time sampled at 'i' should have a floor "
+            "index of 'i - 1'." );
+
+        // ceiling index
+        TESTING_MESSAGE_ASSERT( timeSampling.getCeilIndex(
+            smidgeOverTimeI, numSamples ).first == hii,
+            "Time a smidge over time sampled at 'i' should have a ceiling "
+            "index of 'i + 1'." );
+
+        TESTING_MESSAGE_ASSERT( timeSampling.getCeilIndex(
+            smidgeUnderTimeI, numSamples ).first == i,
+            "Time a smidge under time sampled at 'i' should have a ceiling "
+            "index of 'i'." );
+
+        // near index
+        TESTING_MESSAGE_ASSERT( timeSampling.getNearIndex(
+            smidgeOverTimeI, numSamples ).first == i,
+            "Time a smidge over time sampled at 'i' should have a nearest "
+            "index of 'i'." );
+
+        TESTING_MESSAGE_ASSERT( timeSampling.getCeilIndex(
+            smidgeUnderTimeI, numSamples ).first == i,
+            "Time a smidge under time sampled at 'i' should have a nearest "
+            "index of 'i'." );
 
         if ( ( timeSamplingType.isCyclic() || timeSamplingType.isUniform() )
              && i > numSamplesPerCycle )
         {
             TIME cur = timeSampling.getSampleTime( i );
             TIME prev = timeSampling.getSampleTime( i - numSamplesPerCycle );
-            TESTING_MESSAGE_ASSERT( Imath::equalWithAbsError( (double)( cur - prev ), 
-                                         (double)timePerCycle, 0.00001 ),
-                         "Calculated time per cycle is different than given." );
+            TESTING_MESSAGE_ASSERT( Imath::equalWithAbsError(
+                (double)( cur - prev ), (double)timePerCycle, 0.00001 ),
+            "Calculated time per cycle is different than given." );
         }
     }
 
@@ -614,7 +612,7 @@ int main( int, char** )
     testAcyclicTime1<chrono_t>();
     testAcyclicTime2<chrono_t>();
     testAcyclicTime3<chrono_t>();
-    
+
     // test with doubles
     testCyclicTime1<double>();
     testUniformTime1<double>();
