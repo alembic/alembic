@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -190,7 +190,7 @@ public:
         const Abc::Int32ArraySample &getHoles() const
         { return m_holes; }
         void setHoles( const Abc::Int32ArraySample &iHoles )
-        { m_cornerIndices = iHoles; }
+        { m_holes = iHoles; }
 
         // subdivision scheme
         std::string getSubdivisionScheme() const

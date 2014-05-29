@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -72,6 +72,9 @@ void Example1_MeshOut()
     std::vector<Alembic::Util::int32_t> creaseLengths;
     std::vector<float32_t> creaseSharpnesses;
     std::vector<float32_t> cornerSharpnesses;
+    std::vector<Alembic::Util::int32_t> holes;
+    holes.push_back(0);
+    holes.push_back(5);
 
     for ( size_t i = 0 ; i < 24 ; i++ )
     {
@@ -88,6 +91,7 @@ void Example1_MeshOut()
 
     mesh_samp.setCreases( creases, creaseLengths, creaseSharpnesses );
     mesh_samp.setCorners( corners, cornerSharpnesses );
+    mesh_samp.setHoles( holes );
 
     // velocities
     mesh_samp.setVelocities( V3fArraySample( ( const V3f * )g_veloc,
@@ -225,6 +229,10 @@ void Example1_MeshIn()
         << (*(samp1.getVelocities()))[i] << std::endl;
         TESTING_ASSERT( veloc == (*(samp1.getVelocities()))[i] );
     }
+
+    TESTING_ASSERT( samp1.getHoles()->size() == 2 );
+    TESTING_ASSERT( (*(samp1.getHoles()))[0] == 0 );
+    TESTING_ASSERT( (*(samp1.getHoles()))[1] == 5 );
 
     // test the second sample has '1' as the interpolate boundary value
     TESTING_ASSERT( 1 == samp1.getInterpolateBoundary() );
