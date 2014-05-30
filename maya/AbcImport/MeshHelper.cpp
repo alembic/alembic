@@ -898,44 +898,6 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
         setColors(iFrame, ioMesh, iNode.mC3s, iNode.mC4s, !iInitialized);
 
-        // Creases
-        if (schema.getCreaseSharpnessesProperty().valid())
-        {
-            Alembic::Abc::FloatArraySamplePtr creases =
-                schema.getCreaseSharpnessesProperty().getValue(sampSel);
-
-            Alembic::Abc::Int32ArraySamplePtr creaseLengths =
-                schema.getCreaseLengthsProperty().getValue(sampSel);
-
-            Alembic::Abc::Int32ArraySamplePtr creaseIndices =
-                schema.getCreaseIndicesProperty().getValue(sampSel);
-
-            fillCreases(ioMesh, iNode, creases, creaseIndices, creaseLengths);
-        }
-
-        // Corners
-        if (schema.getCornerSharpnessesProperty().valid())
-        {
-            Alembic::Abc::FloatArraySamplePtr corners =
-                schema.getCornerSharpnessesProperty().getValue(sampSel);
-
-            Alembic::Abc::Int32ArraySamplePtr cornerIndices =
-                schema.getCornerIndicesProperty().getValue(sampSel);
-
-            fillCorners(ioMesh, iNode, corners, cornerIndices);
-        }
-
-
-        // Holes
-        if (schema.getHolesProperty().valid())
-        {
-            Alembic::Abc::Int32ArraySamplePtr holes =
-                schema.getHolesProperty().getValue(sampSel);
-
-            fillHoles(ioMesh, iNode, holes);
-        }
-
-
         return;
     }
 
