@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -665,9 +665,10 @@ namespace
     }
 
     void fillCreases(MFnMesh & ioMesh, SubDAndColors & iNode,
-                     Alembic::AbcGeom::ISubDSchema::Sample &samp)
+                     Alembic::Abc::FloatArraySamplePtr creases,
+                     Alembic::Abc::Int32ArraySamplePtr indices,
+                     Alembic::Abc::Int32ArraySamplePtr lengths)
     {
-        Alembic::Abc::FloatArraySamplePtr creases = samp.getCreaseSharpnesses();
         if (!creases || creases->size() == 0)
         {
             return;
@@ -693,8 +694,6 @@ namespace
                 std::make_pair(vertexList[0], vertexList[1]), i));
         }
 
-        Alembic::Abc::Int32ArraySamplePtr indices = samp.getCreaseIndices();
-        Alembic::Abc::Int32ArraySamplePtr lengths = samp.getCreaseLengths();
         std::size_t numLengths = lengths->size();
 
         MUintArray edgeIds;
@@ -737,15 +736,14 @@ namespace
     }
 
     void fillCorners(MFnMesh & ioMesh, SubDAndColors & iNode,
-                     Alembic::AbcGeom::ISubDSchema::Sample &samp)
+                     Alembic::Abc::FloatArraySamplePtr corners,
+                     Alembic::Abc::Int32ArraySamplePtr cornerVerts)
     {
-        Alembic::Abc::FloatArraySamplePtr corners = samp.getCornerSharpnesses();
         if (!corners || corners->size() == 0)
         {
             return;
         }
 
-        Alembic::Abc::Int32ArraySamplePtr cornerVerts = samp.getCornerIndices();
         unsigned int numCorners = static_cast<unsigned int>(corners->size());
         MUintArray vertIds(numCorners);
         MDoubleArray cornerData(numCorners);
@@ -765,10 +763,9 @@ namespace
     }
 
     void fillHoles(MFnMesh & ioMesh, SubDAndColors & iNode,
-                     Alembic::AbcGeom::ISubDSchema::Sample &samp)
+                   Alembic::Abc::Int32ArraySamplePtr holes)
     {
     #if MAYA_API_VERSION >= 201100
-        Alembic::Abc::Int32ArraySamplePtr holes = samp.getHoles();
         if (!holes || holes->size() == 0)
         {
             return;
@@ -793,9 +790,11 @@ namespace
     void fillCreasesCornersAndHoles(MFnMesh & ioMesh, SubDAndColors & iNode,
         Alembic::AbcGeom::ISubDSchema::Sample &samp)
     {
-        fillCreases(ioMesh, iNode, samp);
-        fillCorners(ioMesh, iNode, samp);
-        fillHoles(ioMesh, iNode, samp);
+        fillCreases(ioMesh, iNode, samp.getCreaseSharpnesses(),
+                    samp.getCreaseIndices(), samp.getCreaseLengths());
+        fillCorners(ioMesh, iNode, samp.getCornerSharpnesses(),
+                    samp.getCornerIndices());
+        fillHoles(ioMesh, iNode, samp.getHoles());
     }
 
 }  // namespace
@@ -879,9 +878,9 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
     // we can just read the points
     if (ttype != Alembic::AbcGeom::kHeterogenousTopology && iInitialized)
     {
-
-        Alembic::Abc::P3fArraySamplePtr points = schema.getPositionsProperty(
-            ).getValue(Alembic::Abc::ISampleSelector(index));
+        Alembic::Abc::ISampleSelector sampSel(index);
+        Alembic::Abc::P3fArraySamplePtr points =
+            schema.getPositionsProperty().getValue(sampSel);
 
         if (alpha != 0.0)
         {
@@ -898,6 +897,45 @@ void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
         }
 
         setColors(iFrame, ioMesh, iNode.mC3s, iNode.mC4s, !iInitialized);
+
+        // Creases
+        if (schema.getCreaseSharpnessesProperty().valid())
+        {
+            Alembic::Abc::FloatArraySamplePtr creases =
+                schema.getCreaseSharpnessesProperty().getValue(sampSel);
+
+            Alembic::Abc::Int32ArraySamplePtr creaseLengths =
+                schema.getCreaseLengthsProperty().getValue(sampSel);
+
+            Alembic::Abc::Int32ArraySamplePtr creaseIndices =
+                schema.getCreaseIndicesProperty().getValue(sampSel);
+
+            fillCreases(ioMesh, iNode, creases, creaseIndices, creaseLengths);
+        }
+
+        // Corners
+        if (schema.getCornerSharpnessesProperty().valid())
+        {
+            Alembic::Abc::FloatArraySamplePtr corners =
+                schema.getCornerSharpnessesProperty().getValue(sampSel);
+
+            Alembic::Abc::Int32ArraySamplePtr cornerIndices =
+                schema.getCornerIndicesProperty().getValue(sampSel);
+
+            fillCorners(ioMesh, iNode, corners, cornerIndices);
+        }
+
+
+        // Holes
+        if (schema.getHolesProperty().valid())
+        {
+            Alembic::Abc::Int32ArraySamplePtr holes =
+                schema.getHolesProperty().getValue(sampSel);
+
+            fillHoles(ioMesh, iNode, holes);
+        }
+
+
         return;
     }
 
