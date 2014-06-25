@@ -312,7 +312,16 @@ bool util::isAnimated(MObject & object, bool checkParent)
             }
         }
 
-        nodesToCheckAnimCurve.push_back(node);
+        // skip shading nodes
+        if (!node.hasFn(MFn::kShadingEngine))
+        {
+            nodesToCheckAnimCurve.push_back(node);
+        }
+        else
+        {
+            // and don't traverse the rest of their subgraph
+            iter.prune();
+        }
     }
 
     for (size_t i = 0; i < nodesToCheckAnimCurve.size(); i++)
