@@ -49,13 +49,8 @@ assemble hierarchical scenes.
 
 What's new:
 
-- fixes issue #324
-- fixes static normals on animated archives
-- fixes remove item bug
-- archive metadata in properties widget
-- fixes import session file bug
-- adds Review Mode to File menu
-- better support for custom scripts
+- fixes performance issue on GeForce cards
+- fixes recursion bug when iterating properties
 
 More information:
 http://docs.alembic.io/python/abcview.html

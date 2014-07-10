@@ -80,6 +80,8 @@ public:
     //! Load a scene from the alembic archive given by the filename.
     //! ...
     Scene( const std::string &abcFileName, bool verbose = true );
+    IArchive getArchive() { return m_archive; }
+    IObject getTop() { return m_topObject; }
 
     //! Return the filename of the archive
     //! ...

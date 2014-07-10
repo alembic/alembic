@@ -80,6 +80,14 @@ public:
         }
     }
 
+    IArchive getArchive() {
+        return m_scene.getArchive();
+    }
+
+    IObject getTop() {
+        return m_scene.getTop();
+    }
+
     chrono_t getMinTime() {
         return m_scene.getMinTime();
     }
@@ -142,6 +150,16 @@ void SceneWrapper::setTime(chrono_t newTime)
 void SceneWrapper::playForward(int fps)
 {
     m_state->playForward( fps );
+}
+
+IArchive SceneWrapper::getArchive()
+{
+    return m_state->getArchive();
+}
+
+IObject SceneWrapper::getTop()
+{
+    return m_state->getTop();
 }
 
 chrono_t SceneWrapper::getMinTime()

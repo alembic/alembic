@@ -52,6 +52,10 @@ OpenGL.ERROR_CHECKING = True
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+# flag opengl errors
+from OpenGL.arrays import numpymodule
+numpymodule.NumpyHandler.ERROR_ON_COPY = True
+
 import imath
 import alembic
 
@@ -88,7 +92,7 @@ def set_diffuse_light():
     """
     Sets up the GL calls for the light that illuminates objects.
     """
-    ambient = (0.1, 0.1, 0.1, 1.0)
+    ambient = (1.0, 1.0, 1.0, 1.0)
     diffuse = (0.5, 1.0, 1.0, 1.0)
     position = (90.0, 90.0, 150.0, 0.0)
 
@@ -106,11 +110,9 @@ def set_diffuse_light():
     glShadeModel(GL_SMOOTH)
 
     glEnable(GL_DEPTH_TEST)
-    glDepthFunc(GL_LEQUAL)
     
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
-    #glLightfv(GL_LIGHT0, GL_POSITION, position)
 
     glMaterialfv(GL_FRONT, GL_SHININESS, front_mat_shininess)
     glMaterialfv(GL_FRONT, GL_SPECULAR, front_mat_specular)
@@ -120,9 +122,6 @@ def set_diffuse_light():
     glMaterialfv(GL_BACK, GL_DIFFUSE, back_mat_diffuse)
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient)
-    glLightModelfv(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
-    #glFrontFace(GL_CCW)
-    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
     
 def create_viewer_app(filepath=None):
     """
@@ -1112,12 +1111,9 @@ class GLWidget(QtOpenGL.QGLWidget):
     def initializeGL(self):
         self.makeCurrent()
         glPointSize(1.0)
-        glEnable(GL_BLEND)
-        glEnable(GL_DEPTH_TEST)
         glEnable(GL_AUTO_NORMAL)
         glEnable(GL_COLOR_MATERIAL)
         glEnable(GL_NORMALIZE)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glDisable(GL_CULL_FACE)
         glShadeModel(GL_SMOOTH)
         glClearColor(0.15, 0.15, 0.15, 0.0)
@@ -1131,18 +1127,9 @@ class GLWidget(QtOpenGL.QGLWidget):
             return
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glDrawBuffer(GL_BACK)
-        glLoadIdentity()
 
         # update camera
         self.camera.apply()
-
-        glMatrixMode(GL_MODELVIEW)
-        glPushMatrix()
-        glLoadIdentity()
-        # light0 tracks with camera
-        glLightfv(GL_LIGHT0, GL_POSITION, ( 0.0, 0.0, 1.0, 1.0 ))
-        glPopMatrix()
 
         # adjusts the camera size
         self._paint_fixed()
@@ -1167,10 +1154,6 @@ class GLWidget(QtOpenGL.QGLWidget):
                 self.renderText(0, 0, 0, "[Error drawing %s]" % scene.name)
                 continue
 
-            # color override
-            glEnable(GL_COLOR_MATERIAL)
-            glMaterialfv(GL_BACK, GL_EMISSION, scene.color) 
-
             # draw mode override
             mode = GL_MODE_MAP.get(scene.properties.get("mode"), 
                    GL_MODE_MAP.get(self.camera.mode, GL_LINE)
@@ -1179,13 +1162,14 @@ class GLWidget(QtOpenGL.QGLWidget):
                 glPolygonMode(GL_FRONT_AND_BACK, mode)
            
             # apply local transforms
-            glPushMatrix()
-            glTranslatef(*scene.translate)
-            glRotatef(*scene.rotate)
-            glScalef(*scene.scale)
+            if scene.has_xform_overrides():
+                glPushMatrix()
+                glTranslatef(*scene.translate)
+                glRotatef(*scene.rotate)
+                glScalef(*scene.scale)
             
             if scene.selected:
-                glColor3d(1, 1, 0)
+                glColor3d(0.5, 0.5, 0)
             else:
                 glColor3f(*scene.color)
 
@@ -1193,8 +1177,6 @@ class GLWidget(QtOpenGL.QGLWidget):
             if self.camera.draw_bounds:
                 scene.draw_bounds(self.state.current_time)
             
-            set_diffuse_light()
-           
             # draw scene geom
             if mode != Mode.OFF:
                 scene.draw(self.camera.visible, mode == Mode.BOUNDS)
@@ -1204,8 +1186,8 @@ class GLWidget(QtOpenGL.QGLWidget):
                 c = scene.bounds().center()
                 self.renderText(c[0], c[1], c[2], scene.name)
 
-            glPopMatrix()
-            self.signal_scene_drawn.emit()
+            if scene.has_xform_overrides():
+                glPopMatrix()
         
         # draw the heads-up-display
         if self.camera.draw_hud:

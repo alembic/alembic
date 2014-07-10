@@ -88,8 +88,8 @@ def DictListUpdate( lis1, lis2):
 
 class idict(object):
     """
-    Dict-like class that supports the notion of local vs. inherited Key values.
-    Values are first looked for in local, then inherited.
+    Dict-like class that supports the notion of local vs. inherited properties.
+    Property values are first looked for in local, then inherited.
     """
     def __init__(self, *args, **kwargs):
         super(idict, self).__init__()
@@ -111,6 +111,9 @@ class idict(object):
 
     def __len__(self):
         return len(self.properties)
+
+    def __iter__(self):
+        return iter(self.keys())
 
     def __getattr__(self, key):
         return super(idict, self).__getattr__(key)
@@ -144,6 +147,12 @@ class idict(object):
 
     def has_key(self, key):
         return key in self.local or key in self.inherited
+
+    def keys(self):
+        return dict(self.inherited.items() + self.local.items()).keys()
+
+    def values(self):
+        return dict(self.inherited.items() + self.local.items()).values()
 
     def items(self):
         return dict(self.inherited.items() + self.local.items()).items()
@@ -282,6 +291,9 @@ class Scene(FileBase):
 
     color = property(_get_color, _set_color, doc="color to display in viewer")
 
+    def has_xform_overrides(self):
+        return any(k in self.properties for k in ('translate', 'rotate', 'scale'))
+
     def serialize(self):
         return {
             "filepath": self.filepath,
@@ -312,12 +324,12 @@ class CameraBase(Base):
         
         # draw toggles
         self.__auto_frame = False
-        self.__draw_bounds = False
+        self.__draw_bounds = True
         self.__draw_hud = False
         self.__draw_labels = False
         self.__draw_grid = True
         self.__draw_normals = False
-        self.__draw_mode = Mode.LINE
+        self.__draw_mode = Mode.FILL
 
         # fixed aspect ratio toggle
         self.__fixed = False

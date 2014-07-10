@@ -69,6 +69,8 @@ public:
     chrono_t getMinTime();
     chrono_t getMaxTime();
     chrono_t getCurrentTime();
+    IArchive getArchive();
+    IObject getTop();
 
     double_vec min_bounds();
     double_vec max_bounds();

@@ -266,7 +266,7 @@ void MeshDrwHelper::updateNormals( V3fArraySamplePtr iN )
             V3f AB = B - A;
             V3f AC = C - A;
 
-            V3f wN = AB.cross( AC );
+            V3f wN = AC.cross( AB );
             m_customN[tri[0]] += wN;
             m_customN[tri[1]] += wN;
             m_customN[tri[2]] += wN;
@@ -421,7 +421,7 @@ void MeshDrwHelper::draw( const DrawContext & iCtx ) const
         {
             V3f AB = vertB - vertA;
             V3f AC = vertC - vertA;
-            V3f N = AB.cross( AC );
+            V3f N = AC.cross( AB );
             if ( N.length() > 1.0e-4f )
             {
                 N.normalize();

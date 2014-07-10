@@ -79,8 +79,8 @@ void init( void )
     {
         GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
         GLfloat mat_shininess[] = { 100.0 };
-        GLfloat mat_front_emission[] = {0.0, 0.0, 0.0, 0.0 };
-        GLfloat mat_back_emission[] = {1.0f, 0.0, 0.0, 1.0f };
+        GLfloat mat_back_emission[] = {0.0, 0.0, 0.0, 0.0 };
+        GLfloat mat_front_emission[] = {1.0f, 0.0, 0.0, 1.0f };
 
         glClearColor( 0.0, 0.0, 0.0, 0.0 );
         glMaterialfv( GL_FRONT, GL_EMISSION, mat_front_emission );
@@ -91,12 +91,12 @@ void init( void )
         glMaterialfv( GL_BACK, GL_SPECULAR, mat_specular );
         glMaterialfv( GL_BACK, GL_SHININESS, mat_shininess );
 
-        glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+        glColorMaterial(GL_FRONT, GL_DIFFUSE);
         glEnable(GL_COLOR_MATERIAL);
     }
 
     glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE );
-    glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
+    glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE );
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -120,8 +120,6 @@ void init( void )
     glPointSize( 3.0f );
 
     init_surface();
-
-    setMaterials( 1.0, false );
 
     g_state.scene.cam.frame( g_transport->getBounds() );
 
@@ -401,7 +399,7 @@ void keyboard( unsigned char key, int x, int y )
     case 'b':
     case 'B':
         bf = !bf;
-        glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, bf ? GL_TRUE : GL_FALSE );
+        glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, bf ? GL_FALSE : GL_TRUE );
         glutPostRedisplay();
         break;
         break;
