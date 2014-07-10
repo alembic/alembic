@@ -43,6 +43,7 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
 
+#include <signal.h>
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -72,9 +73,19 @@ using AbcA::index_t;
 #define GREENCOLOR "\033[1;32m"
 #define BLUECOLOR "\033[1;34m"
 #define CYANCOLOR "\033[1;36m"
+#define REDCOLOR "\033[1;31m"
 #define BOLD "\033[1m"
 #define COL_1 20
 #define COL_2 15
+
+void segfault_sigaction(int signal)
+{
+    std::cout << REDCOLOR 
+              << "Unrecoverable error: signal " << signal
+              << RESETCOLOR 
+              << std::endl;
+    exit(0);
+}
 
 //-*****************************************************************************
 // overload to print as a number instead of a character
@@ -398,7 +409,8 @@ void printValue( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
 
 //-*****************************************************************************
 void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
-                 bool all = false, bool long_list = false, bool meta = false )
+                 bool all = false, bool long_list = false, bool meta = false,
+                 bool values = false )
 {
 
     std::string ptype;
@@ -449,13 +461,24 @@ void printChild( Abc::ICompoundProperty iParent, Abc::PropertyHeader header,
     }
     else
         std::cout << "   ";
-
+   
+    // try to access and print the 0th sample value 
+    if ( values && !header.isCompound() ) {
+        try {
+            printValue( iParent, header, 0, false, false, 24.0 );
+        } catch ( std::exception& e ) {
+            std::cerr << "Exception : " << e.what() << std::endl;
+        }
+    }
+    
     std::cout << RESETCOLOR;
+
 }
 
 //-*****************************************************************************
 void printChild( AbcG::IObject iParent, AbcG::IObject iObj,
-                 bool all = false, bool long_list = false, bool meta = false )
+                 bool all = false, bool long_list = false, bool meta = false,
+                 bool values = false )
 {
 
     AbcA::MetaData md = iObj.getMetaData();
@@ -486,7 +509,8 @@ void visit( Abc::ICompoundProperty iProp,
             bool long_list = false,
             bool meta = false,
             bool recursive = false,
-            bool first = false )
+            bool first = false,
+            bool values = false )
 {
     // header
     if ( recursive && iProp.getNumProperties() > 0 ) {
@@ -495,7 +519,8 @@ void visit( Abc::ICompoundProperty iProp,
 
     // children
     for( size_t c = 0; c < iProp.getNumProperties(); ++c ) {
-        printChild( iProp, iProp.getPropertyHeader( c ), all, long_list, meta );
+        printChild( iProp, iProp.getPropertyHeader( c ), all, long_list, meta,
+                    values );
     }
 
     // visit children
@@ -504,7 +529,7 @@ void visit( Abc::ICompoundProperty iProp,
             Abc::PropertyHeader header = iProp.getPropertyHeader( p );
             if ( header.isCompound() )
                 visit( Abc::ICompoundProperty( iProp, header.getName() ),
-                       all, long_list, meta, recursive, false );
+                       all, long_list, meta, recursive, false, values );
         }
     }
 }
@@ -515,7 +540,8 @@ void visit( AbcG::IObject iObj,
             bool long_list = false,
             bool meta = false,
             bool recursive = false,
-            bool first = false )
+            bool first = false,
+            bool values = false )
 
 {
     Abc::ICompoundProperty props = iObj.getProperties();
@@ -524,18 +550,18 @@ void visit( AbcG::IObject iObj,
     if ( recursive &&
        ( iObj.getNumChildren() > 0 ||
        ( all && props.getNumProperties() > 0 ) ) ) {
-        printParent( iObj, all, long_list, recursive, first);
+        printParent( iObj, all, long_list, recursive, first );
     }
 
     // children
     for( size_t c = 0; c < iObj.getNumChildren(); ++c ) {
-        printChild( iObj, iObj.getChild( c ), all, long_list, meta );
+        printChild( iObj, iObj.getChild( c ), all, long_list, meta, values );
     }
 
     // properties
     if ( all ) {
         for( size_t h = 0; h < props.getNumProperties(); ++h ) {
-            printChild( props, props.getPropertyHeader( h ), all, long_list, meta );
+            printChild( props, props.getPropertyHeader( h ), all, long_list, meta, values );
         }
     }
 
@@ -547,7 +573,7 @@ void visit( AbcG::IObject iObj,
                 if ( !long_list )
                     std::cout << std::endl;
                 visit( Abc::ICompoundProperty( props, header.getName() ),
-                       all, long_list, meta, recursive, false );
+                       all, long_list, meta, recursive, false, values );
             }
         }
     }
@@ -555,7 +581,7 @@ void visit( AbcG::IObject iObj,
     // visit object children
     if ( recursive && iObj.getNumChildren() > 0 ) {
         for( size_t c = 0; c < iObj.getNumChildren(); ++c ) {
-            visit( iObj.getChild( c ), all, long_list, meta, recursive, false );
+            visit( iObj.getChild( c ), all, long_list, meta, recursive, false, values );
         }
     }
 }
@@ -589,6 +615,7 @@ int main( int argc, char *argv[] )
     bool opt_recursive = false; // recursive option
     bool opt_size = false; // array sample size option
     bool opt_time = false; // time info option
+    bool opt_values = false; // show all 0th values
     int index = -1; // sample number, at tail of path
     std::string desc( "abcls [OPTION] FILE[/NAME] \n"
     "  -a          include property listings\n"
@@ -599,7 +626,15 @@ int main( int argc, char *argv[] )
     "  -r          list entries recursively\n"
     "  -s          show the size of a data property sample\n"
     "  -t          show time sampling information\n"
+    "  -v          show 0th value for all properties\n"
     );
+
+    // seg fault handler
+    struct sigaction act;
+    sigemptyset(&act.sa_mask);
+    act.sa_handler = segfault_sigaction;
+    act.sa_flags = SA_SIGINFO;
+    sigaction(SIGSEGV, &act, NULL);
 
     // check for min args
     if ( argc < 2 ) {
@@ -637,6 +672,7 @@ int main( int argc, char *argv[] )
     opt_recursive = optionExists( options, "r" );
     opt_size = optionExists( options, "s" );
     opt_time = optionExists( options, "t" );
+    opt_values = optionExists( options, "v" );
     if ( optionExists( options, "f" ) ) {
         fps = 24.0;
         opt_time = true;
@@ -784,11 +820,11 @@ int main( int argc, char *argv[] )
             printValue( props, *header, index, opt_size, opt_time, fps );
         } else {
             if ( found && header->isCompound() )
-                visit( props, opt_all, opt_long, opt_meta, opt_recursive, true );
+                visit( props, opt_all, opt_long, opt_meta, opt_recursive, true, opt_values );
             else if ( found && header->isSimple() )
-                printChild( props, *header, opt_all, opt_long );
+                printChild( props, *header, opt_all, opt_long, opt_values );
             else
-                visit( iObj, opt_all, opt_long, opt_meta, opt_recursive, true );
+                visit( iObj, opt_all, opt_long, opt_meta, opt_recursive, true, opt_values );
             std::cout << RESETCOLOR;
             if ( !opt_long )
                 std::cout << std::endl;
