@@ -34,6 +34,16 @@
 #
 #-******************************************************************************
 
+__doc__ = """
+Cask is a high level convenience wrapper for the Alembic Python API. It blurs
+the lines between Alembic "I" and "O" objects and properties, abstracting both
+into a single class object. It also wraps up a number of lower-level functions
+into high level convenience methods.
+
+More information can be found at http://docs.alembic.io/python/cask.html
+"""
+__version__ = "0.9"
+
 import os
 import re
 import imath
@@ -128,6 +138,10 @@ OPROPERTIES = {
         'scalar': alembic.Abc.OV3dArrayProperty,
         'array': alembic.Abc.OV3dArrayProperty,
     },
+    imath.V3d: {
+        'scalar': alembic.Abc.OV3dProperty,
+        'array': alembic.Abc.OV3dProperty,
+    },
     imath.UnsignedCharArray: {
         'scalar': alembic.Abc.OUcharArrayProperty,
         'array': alembic.Abc.OUcharArrayProperty,
@@ -143,6 +157,10 @@ OPROPERTIES = {
     imath.FloatArray: {
         'scalar': alembic.Abc.OFloatArrayProperty,
         'array': alembic.Abc.OFloatArrayProperty,
+    },
+    imath.DoubleArray: {
+        'scalar': alembic.Abc.ODoubleArrayProperty,
+        'array': alembic.Abc.ODoubleArrayProperty,
     },
     imath.StringArray: {
         'scalar': alembic.Abc.OStringArrayProperty,
@@ -566,7 +584,7 @@ class Archive(object):
             save_tree(child)
         self.top.close()
 
-    def write_to_file(self, filepath=None):
+    def write_to_file(self, filepath=None, asOgawa=True):
         """
         Writes this archive to a file on disk and closes the Archive.
         """
@@ -574,7 +592,7 @@ class Archive(object):
         if self.iobject and not self.oobject:
             smps = [(i, ts) for i, ts in enumerate(self.timesamplings) if i > 0]
         if not self.oobject:
-            self.oobject = alembic.Abc.OArchive(filepath)
+            self.oobject = alembic.Abc.OArchive(filepath, asOgawa)
             self.top.oobject = self.oobject.getTop()
         for i, time_sample in smps:
             self.oobject.addTimeSampling(time_sample)
