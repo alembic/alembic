@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -476,9 +476,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
         unsigned int numChild = mCurDag.childCount();
         for (unsigned int i = 0; i < numChild; ++i)
         {
-            mCurDag.push(mCurDag.child(i));
-            setup(iFrame, trans, gmMap);
-            mCurDag.pop();
+            if (mCurDag.push(mCurDag.child(i)) == MS::kSuccess)
+            {
+                setup(iFrame, trans, gmMap);
+                mCurDag.pop();
+            }
         }
     }
     else if (ob.hasFn(MFn::kLocator))
