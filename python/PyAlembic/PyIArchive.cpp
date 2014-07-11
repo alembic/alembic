@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -38,6 +38,10 @@
 
 using namespace boost::python;
 
+const std::string kHDF5 = "HDF5";
+const std::string kOgawa = "Ogawa";
+const std::string kUnknown = "Unknown";
+
 //-*****************************************************************************
 static Abc::IArchive* mkIArchive( const std::string &iName )
 {
@@ -46,17 +50,40 @@ static Abc::IArchive* mkIArchive( const std::string &iName )
     factory.setPolicy(Abc::ErrorHandler::kQuietNoopPolicy);
     AbcF::IFactory::CoreType coreType;
     archive = factory.getArchive(iName, coreType);
+
     if ( coreType == AbcF::IFactory::kUnknown ) {
         throwPythonException( "Unknown core type" );
     }
-
     return new Abc::IArchive( archive );
+}
 
+//-*****************************************************************************
+static std::string getCoreType( Abc::IArchive& archive )
+{
+    AbcF::IFactory factory;
+    factory.setPolicy(Abc::ErrorHandler::kQuietNoopPolicy);
+    AbcF::IFactory::CoreType coreType;
+    archive = factory.getArchive(archive.getName(), coreType);
+
+    if ( coreType == AbcF::IFactory::kOgawa ) {
+        return kOgawa;
+    } else if ( coreType == AbcF::IFactory::kHDF5 ) {
+        return kHDF5;
+    } else {
+        return kUnknown;
+    };
 }
 
 //-*****************************************************************************
 void register_iarchive()
 {
+    
+    // export the CoreType constants
+    //
+    scope().attr("kHDF5") = kHDF5;
+    scope().attr("kOgawa") = kOgawa;
+    scope().attr("kUnknown") = kUnknown;
+    
     // IArchive
     //
     class_< Abc::IArchive >(
@@ -76,6 +103,9 @@ void register_iarchive()
               &Abc::IArchive::getTop,
               "Return the single top-level IObject",
               with_custodian_and_ward_postcall<0,1>() )
+        .def( "getCoreType",
+              &getCoreType,
+              "Return the archive CoreType" )
         .def( "getTimeSampling",
               &Abc::IArchive::getTimeSampling,
               ( arg( "index" ) ),
