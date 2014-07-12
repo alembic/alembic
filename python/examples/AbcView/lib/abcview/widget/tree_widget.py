@@ -86,11 +86,14 @@ class ArrayThread(QtCore.QThread):
 
     def run(self):
         try:
-            for index, value in enumerate(self.array[self.first:]):
-                index = index + self.first
-                self.emit(QtCore.SIGNAL('arrayValue (PyQt_PyObject)'), (index, value))
-                if index >= self.last:
-                    break
+            if type(self.array) in (str, unicode, int, float, bool):
+                self.emit(QtCore.SIGNAL('arrayValue (PyQt_PyObject)'), (0, str(self.array)))
+            else:
+                for index, value in enumerate(self.array[self.first:]):
+                    index = index + self.first
+                    self.emit(QtCore.SIGNAL('arrayValue (PyQt_PyObject)'), (index, value))
+                    if index >= self.last:
+                        break
         except TypeError, e:
             self.emit(QtCore.SIGNAL('arrayValue (PyQt_PyObject)'), (0, str(self.array)))
 
@@ -329,7 +332,9 @@ class SampleTreeWidgetItem(AbcTreeWidgetItem):
         return self.sample
 
     def value(self):
-        return str(self.sample)
+        if self.property and self.property.object.isArray():
+            return type(self.sample).__name__
+        return self.sample
 
     def length(self):
         if not self.valid:
@@ -718,6 +723,14 @@ class ObjectTreeWidget(AbcTreeWidget):
         camera = self.selectedItems()[0]
         self.signal_view_camera.emit(camera)
 
+    def copy_name(self):
+        """
+        copy item name to clipboard
+        """
+        item = self.selectedItems()[0]
+        clipboard = QtGui.QApplication.clipboard()
+        clipboard.setText(item.object.getFullName())
+
     def handle_context_menu(self, pos):
         """
         tree widget context menu handler
@@ -831,6 +844,12 @@ class ObjectTreeWidget(AbcTreeWidget):
                         self.view_camera)
                 menu.addAction(self.view_action)
 
+            else:
+                self.copy_name_action = QtGui.QAction("Copy name", self)
+                self.connect(self.copy_name_action, QtCore.SIGNAL("triggered (bool)"), 
+                        self.copy_name)
+                menu.addAction(self.copy_name_action)
+
         menu.popup(self.mapToGlobal(pos))
 
 class PropertyTreeWidget(AbcTreeWidget):
@@ -915,7 +934,7 @@ class ArrayTreeWidget(AbcTreeWidget):
     def show_values(self, array):
         self.clear()
         self.item = array
-        if array.length() > 1:
+        if array.length() > 0:
             self.get_rows(0, self.row_count())
 
     def handle_add_value(self, indexValue):
