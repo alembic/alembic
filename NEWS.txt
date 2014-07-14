@@ -1,4 +1,55 @@
-20014-03-28, Alembic 1.5.4
+2014-07-15, Alembic 1.5.5
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+AbcGeom:
+Fix bug in OSubD::setHoles where corner indices were being set instead.
+
+AbcCoreAbstract:
+Improve lookup times and numerical stability of TimeSampling.
+
+Python API:
+
+PyAlembic:
+Address Issue 347, expose the CoreType in python.
+
+PyAbcOpenGL:
+Wrap ALEMBIC_LIB_USES_BOOST around get_pointer.
+
+Maya:
+
+AbcExport:
+If a shading group has an attribute named AbcFaceSetName, use that attribute
+instead of the shading groups name for the face set name.
+
+Fix for Issue 339, some dag nodes can't be pushed onto MDagPath, so make sure
+the push was successful to avoid infinite recursion.
+
+Fix for Issue 342, for improved performance skip over shadingEngines and
+subgraphs in util::isAnimated.
+
+
+AbcImport:
+Set AbcFacesetName attribute on newly created shadingGroups.
+
+Tools:
+
+AbcView:
+Fix for Issue 344, show array property values of length 1.
+
+abcls
+Add -v option to automatically display the first sample of all properties.
+Print an error message when seg fault is detected.
+
+cask:
+Fix for Issue 345, handle V3d and double array on write.
+Default to Ogawa on write.
+
+##-*****************************************************************************
+
+2014-03-28, Alembic 1.5.4
 Hello Alembic users, thanks to your feedback and reports we have a few bug
 fixes and enhancements.
 
