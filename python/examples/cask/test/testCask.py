@@ -1,6 +1,6 @@
 #-******************************************************************************
 #
-# Copyright (c) 2012-2013,
+# Copyright (c) 2012-2014,
 #  Sony Pictures Imageworks Inc. and
 #  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 #
@@ -132,6 +132,39 @@ def mesh_out(name="cask_test_mesh.abc", force=False):
         mesh.set(mesh_samp)
     
     del oarch
+    return filename
+
+def cube_out(name="cask_test_cube.abc", force=False):
+    filename = os.path.join(TEMPDIR, name)
+    if not force and (os.path.exists(filename) and cask.is_valid(filename)):
+        return filename
+
+    tvec = alembic.AbcCoreAbstract.TimeVector()
+    tvec[:] = [1, 2, 3]
+
+    timePerCycle = 3.0
+    numSamplesPerCycle = len(tvec)
+
+    tst = alembic.AbcCoreAbstract.TimeSamplingType(numSamplesPerCycle, timePerCycle)
+    ts = alembic.AbcCoreAbstract.TimeSampling(tst, tvec)
+   
+    top = alembic.Abc.OArchive(filename).getTop()
+    tsidx = top.getArchive().addTimeSampling(ts)
+
+    # create the top xform
+    xform = alembic.AbcGeom.OXform(top, 'cube1', tsidx)
+    xsamp = alembic.AbcGeom.XformSample()
+    xform.getSchema().set(xsamp)
+
+    # the mesh shape
+    meshObj = alembic.AbcGeom.OPolyMesh(xform, 'cube1Shape')
+    mesh = meshObj.getSchema()
+    mesh_samp = alembic.AbcGeom.OPolyMeshSchemaSample(
+        meshData.points, meshData.faceIndices, meshData.faceCounts
+    )
+    mesh_samp.setSelfBounds(meshData.selfBnds)
+    mesh.set(mesh_samp)
+
     return filename
 
 def deep_out():
@@ -697,6 +730,43 @@ class Test3_Issues(unittest.TestCase):
         test_file_2 = mesh_out(filename, force=True)
 
         self.assertEqual(test_file_1, test_file_2)
+
+    def test_issue_346(self):
+        filename_1 = "cask_test_issue_346_1.abc"
+        filename_2 = "cask_test_issue_346_2.abc"
+
+        # create a test file with 1 time sampling object
+        test_file_1 = mesh_out(filename_1)
+        test_file_2 = os.path.join(TEMPDIR, filename_2)
+
+        a = cask.Archive(test_file_1)
+        a.write_to_file(test_file_2)
+        b = cask.Archive(test_file_2)
+
+        # compare test1 and test2
+        self.assertEqual(len(a.timesamplings), len(b.timesamplings))
+        self.assertEqual(a.time_range(), b.time_range())
+        tst_1 = a.timesamplings[0].getTimeSamplingType()
+        tst_2 = b.timesamplings[0].getTimeSamplingType()
+        self.assertEqual(str(tst_1), str(tst_2))
+
+        filename_3 = "cask_test_issue_346_3.abc"
+        filename_4 = "cask_test_issue_346_4.abc"
+
+        # create another test with 2 time sampling objects
+        test_file_3 = cube_out(filename_3)
+        test_file_4 = os.path.join(TEMPDIR, filename_4)
+
+        c = cask.Archive(test_file_3)
+        c.write_to_file(test_file_4)
+        d = cask.Archive(test_file_4)
+
+        # compare test3 and test4
+        self.assertEqual(len(c.timesamplings), len(d.timesamplings))
+        self.assertEqual(c.time_range(), d.time_range())
+        tst_3 = c.timesamplings[0].getTimeSamplingType()
+        tst_4 = d.timesamplings[0].getTimeSamplingType()
+        self.assertEqual(str(tst_3), str(tst_4))
 
 if __name__ == '__main__':
     unittest.main()

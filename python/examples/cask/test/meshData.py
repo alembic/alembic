@@ -1,6 +1,6 @@
 #-******************************************************************************
 #
-# Copyright (c) 2012,
+# Copyright (c) 2012-2014
 #  Sony Pictures Imageworks Inc. and
 #  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 #
@@ -139,6 +139,30 @@ uvs = setArray(
     V2f( 0.0, 1.0 )
 )
 
+# Cube mesh data
 
+xformvec = [M44d(), M44d() * 2, M44d() * 4]
 
+faceCounts = setArray( Int32TPTraits, 4, 4, 4, 4, 4, 4 ) 
+
+faceIndices = setArray(
+    Int32TPTraits,
+    
+    1, 0, 2, 3, 3, 2, 6, 7, 7, 6, 4, 5, 5, 4, 0, 1, 5, 1, 3, 7, 0, 4, 6, 2
+) 
+
+points = setArray(
+    P3fTPTraits,
+
+    V3f(-1, -1, 1 ),
+    V3f(1, -1, 1),
+    V3f(-1, 1, 1),
+    V3f(1, 1, 1),
+    V3f(-1, -1, -1),
+    V3f(1, -1, -1),
+    V3f(-1, 1, -1),
+    V3f(1, 1, -1)
+)
+
+selfBnds = Box3d( V3d(-1, -1, -1), V3d( 1, 1, 1) ) 
 
