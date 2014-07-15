@@ -10,6 +10,10 @@ Fix bug in OSubD::setHoles where corner indices were being set instead.
 AbcCoreAbstract:
 Improve lookup times and numerical stability of TimeSampling.
 
+AbcOpenGL:
+
+Camera rotations are now done in X,Y,Z order instead of Z,X,Y
+
 Python API:
 
 PyAlembic:
@@ -43,6 +47,9 @@ Tools:
 AbcView:
 Fix for Issue 344, show array property values of length 1.
 
+Improve performance for some graphics cards by adjusting some drawing options.
+(also done in SimpleAbcViewer)
+
 abcls
 Add -v option to automatically display the first sample of all properties.
 Print an error message when seg fault is detected.
@@ -50,6 +57,9 @@ Print an error message when seg fault is detected.
 cask:
 Fix for Issue 345, handle V3d and double array on write.
 Default to Ogawa on write.
+
+Fix for Issue 346, TimeSampling is now preserved for properties that are
+copies on write.
 
 ##-*****************************************************************************
 
