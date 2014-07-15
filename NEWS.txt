@@ -34,6 +34,10 @@ subgraphs in util::isAnimated.
 AbcImport:
 Set AbcFacesetName attribute on newly created shadingGroups.
 
+Fix bug with open form check on curves.
+
+Fix bug with restoring knots from a curve group with more than one curve.
+
 Tools:
 
 AbcView:

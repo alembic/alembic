@@ -199,6 +199,7 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
                     knots.append(knot);
                 }
             }
+            curKnot += numKnots;
         }
 
         MFnNurbsCurveData curveData;
@@ -362,6 +363,7 @@ MObject createCurves(const std::string & iName,
                 float knot = (*knotsSamp)[curKnot + j];
                 knots.append(knot);
             }
+            curKnot += numKnots;
         }
 
         MFnNurbsCurve curve;
