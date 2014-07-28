@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2013,
+// Copyright (c) 2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -40,12 +40,12 @@
 #include <AbcOpenGL/All.h>
 #include <string>
 
-namespace boost
-{
-
 // if Alembic::Util::shared_ptr resolves to boost::shared_ptr then we
 // don't need this since it's defined elsewhere
 #ifndef ALEMBIC_LIB_USES_BOOST
+namespace boost
+{
+
 template<class T>
 inline T * get_pointer( Alembic::Util::shared_ptr<T> const & p )
 {
