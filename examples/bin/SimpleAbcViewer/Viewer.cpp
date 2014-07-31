@@ -54,6 +54,13 @@ static Timer g_playbackTimer;
 //-*****************************************************************************
 void overlay();
 
+GLFWwindow*
+glfw_window(
+        GLFWwindow* current_window,
+        int width,
+        int height,
+        bool on_primary_monitor=false);
+
 //-*****************************************************************************
 //-*****************************************************************************
 // GLUT STUFF
@@ -74,7 +81,7 @@ void init_surface( void )
 }
 
 //-*****************************************************************************
-void init( void )
+void init(GLFWwindow* window)
 {
     {
         GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -111,7 +118,11 @@ void init( void )
 
     glShadeModel( GL_SMOOTH );
 
-    g_state.scene.cam.setSize( 800, 600 );
+    // get the window dimensions
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+
+    g_state.scene.cam.setSize(width, height);
     g_state.scene.cam.lookAt( V3d( 24, 18, 24 ), V3d( 0.0 ) );
     g_state.bMask = 0;
     g_state.showHelp = false;
@@ -119,16 +130,46 @@ void init( void )
     g_state.scene.pointSize = 3.0f;
     glPointSize( 3.0f );
 
-    init_surface();
 
     g_state.scene.cam.frame( g_transport->getBounds() );
 
     std::ostringstream titleStream;
-    titleStream << "Archive = " 
+    titleStream << "Archive = "
                 << g_transport->getFileName()
                 << " | Frame = "
                 << g_transport->getCurrentFrame();
-    glutSetWindowTitle( titleStream.str().c_str() );
+
+    glfwSetWindowTitle(window, titleStream.c_str());
+}
+
+static void
+_error_callback(int error, const char* description)
+{
+    fputs(description, stderr);
+}
+
+static double start_time = glfwGetTime();
+static int frame_count = 0;
+static double fps = 0;
+static const float TIME_INTERVAL = 1.0f;
+
+void
+current_fps()
+{
+    double current_time = glfwGetTime();
+
+
+    double duration = current_time - start_time;
+
+    if (duration < TIME_INTERVAL)
+    {
+        frame_count++;
+        return;
+    }
+
+    fps = frame_count / duration;
+    frame_count = 0;
+    start_time = glfwGetTime();
 }
 
 //-*****************************************************************************
@@ -138,30 +179,28 @@ static void TickForward()
     g_transport->tickForward();
 
     std::ostringstream titleStream;
-    titleStream << "Archive = " 
+    titleStream << "Archive = "
                 << g_transport->getFileName()
                 << " | Frame = "
                 << g_transport->getCurrentFrame();
-    glutSetWindowTitle( titleStream.str().c_str() );
-    
+    glfwSetWindowTitle( g_state.scene.win, titleStream.str().c_str());
+
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
-    glutPostRedisplay();
 }
 
 //-*****************************************************************************
 static void TickBackward()
 {
     g_transport->tickBackward();
-    
+
     std::ostringstream titleStream;
-    titleStream << "Archive = " 
+    titleStream << "Archive = "
                 << g_transport->getFileName()
                 << " | Frame = "
                 << g_transport->getCurrentFrame();
-    glutSetWindowTitle( titleStream.str().c_str() );
+    glfwSetWindowTitle(g_state.scene.win, titleStream.str().c_str());
 
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
-    glutPostRedisplay();
 }
 
 //-*****************************************************************************
@@ -172,7 +211,6 @@ void turntableIdle()
         g_playbackTimer.restart();
         g_state.scene.cam.rotate( V2d( 1, 0 ) );
         g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
-        glutPostRedisplay();
     }
 }
 
@@ -207,7 +245,6 @@ void display( void )
     glDrawBuffer( GL_BACK );
     g_state.scene.cam.apply();
     g_transport->draw( g_state.scene );
-    glutSwapBuffers();
 
     // glPopMatrix();
 
@@ -215,8 +252,9 @@ void display( void )
 }
 
 //-*****************************************************************************
-void reshape( int w, int h )
+void reshape(GLFWwindow* win, int w, int h )
 {
+    glfwGetFramebufferSize(win, &w, &h);
     g_state.scene.cam.setSize( w, h );
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
 
@@ -229,7 +267,9 @@ void glPrint( GLfloat x, GLfloat y, const std::string &text )
     glRasterPos2f( x, y );
     for ( size_t p = 0; p < text.size(); ++p )
     {
-        glutBitmapCharacter( GLUT_BITMAP_HELVETICA_18, text[p] );
+        // @TODO: This is disabled for now.  GLFW doesn't provide an easy text
+        // rendering thingy like GLUT did.
+        // glutBitmapCharacter( GLUT_BITMAP_HELVETICA_18, text[p] );
     }
 }
 
@@ -301,7 +341,7 @@ void RenderIt()
     else { boundStr = ""; }
 
     std::ostringstream cmdStream;
-    cmdStream << 
+    cmdStream <<
         " --shutteropen=" << shutterOpenTime <<
         " --shutterclose=" << shutterCloseTime <<
         " -C " << cameraFileName <<
@@ -319,8 +359,82 @@ void RenderIt()
     delete[] buffer;
 }
 
+
+// start windowed
+bool am_fullscreen = false;
+
+
+void
+toggle_fullscreen()
+{
+    if (!am_fullscreen)
+    {
+        // get the current Desktop screen resolution and colour depth
+        const GLFWvidmode *desktop = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+        int width = desktop->width;
+        int height = desktop->height;
+        g_state.scene.win = glfw_window(g_state.scene.win, width, height, true);
+    }
+    else
+    {
+        g_state.scene.win = glfw_window(g_state.scene.win, 800, 600);
+    }
+
+    am_fullscreen = !am_fullscreen;
+    std::cerr << "toggling. now fullscreen: " << am_fullscreen << std::endl;
+
+    if (!g_state.scene.win)
+    {
+        std::cerr << "glfw window is not valid" << std::endl;
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+enum _idle_function {
+    IDLE_NO_OP,
+    IDLE_PLAY_FWD_IDLE,
+    IDLE_PLAY_BWD_IDLE,
+    IDLE_TURNTABLE
+};
+_idle_function CURRENT_IDLE = IDLE_NO_OP;
+
+void
+idle_function()
+{
+    if (IDLE_NO_OP == CURRENT_IDLE)
+    {
+        return;
+    }
+
+    switch (CURRENT_IDLE)
+    {
+        case IDLE_NO_OP:
+            break;
+        case IDLE_PLAY_FWD_IDLE:
+            {
+                playFwdIdle();
+                break;
+            };
+        case IDLE_PLAY_BWD_IDLE:
+            {
+                playBwdIdle();
+                break;
+            };
+        case IDLE_TURNTABLE:
+            {
+                turntableIdle();
+                break;
+            };
+    };
+}
+// @TODO: don't use g_state.scene.win - use the window pointers.
+
 //-*****************************************************************************
-void keyboard( unsigned char key, int x, int y )
+void
+keyboard(GLFWwindow* win, int key, int scancode, int action, int mods )
 {
     static bool bf = true;
 
@@ -328,13 +442,12 @@ void keyboard( unsigned char key, int x, int y )
     {
     case '`':
     case '~':
-        glutFullScreen();
+        toggle_fullscreen();
         break;
     case 'f':
     case 'F':
         g_state.scene.cam.frame( g_transport->getBounds() );
         g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
-        glutPostRedisplay();
         break;
     case 'c':
         TickBackward();
@@ -348,12 +461,12 @@ void keyboard( unsigned char key, int x, int y )
         if ( g_state.playback == kForward )
         {
             g_state.playback = kStopped;
-            glutIdleFunc( NULL );
+            CURRENT_IDLE = IDLE_NO_OP;
         }
         else
         {
             g_state.playback = kForward;
-            glutIdleFunc( playFwdIdle );
+            CURRENT_IDLE = IDLE_PLAY_FWD_IDLE;
         }
         break;
     case '<':
@@ -361,12 +474,12 @@ void keyboard( unsigned char key, int x, int y )
         if ( g_state.playback == kBackward )
         {
             g_state.playback = kStopped;
-            glutIdleFunc( NULL );
+            CURRENT_IDLE = IDLE_NO_OP;
         }
         else
         {
             g_state.playback = kBackward;
-            glutIdleFunc( playBwdIdle );
+            CURRENT_IDLE = IDLE_PLAY_BWD_IDLE;
         }
         break;
     case 't':
@@ -374,12 +487,12 @@ void keyboard( unsigned char key, int x, int y )
         if ( g_state.playback == kTurntable )
         {
             g_state.playback = kStopped;
-            glutIdleFunc( NULL );
+            CURRENT_IDLE = IDLE_NO_OP;
         }
         else
         {
             g_state.playback = kTurntable;
-            glutIdleFunc( turntableIdle );
+            CURRENT_IDLE = IDLE_TURNTABLE;
         }
         break;
     case 'r':
@@ -389,23 +502,19 @@ void keyboard( unsigned char key, int x, int y )
     case 'p':
         g_state.scene.pointSize =
             std::max( g_state.scene.pointSize-0.5f, 1.0f );
-        glutPostRedisplay();
         break;
     case 'P':
         g_state.scene.pointSize =
             std::min( g_state.scene.pointSize+0.5f, 10.0f );
-        glutPostRedisplay();
         break;
     case 'b':
     case 'B':
         bf = !bf;
         glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, bf ? GL_FALSE : GL_TRUE );
-        glutPostRedisplay();
         break;
         break;
     case '\t': // tab
         g_state.showHelp = !g_state.showHelp;
-        glutPostRedisplay();
         break;
     case 27:
         exit(0);
@@ -416,21 +525,25 @@ void keyboard( unsigned char key, int x, int y )
 }
 
 //-*****************************************************************************
-void mouse( int button, int state, int x, int y )
+void mouse(GLFWwindow* win, int button, int action, int mods)
 {
-    g_state.last_x = x;
-    g_state.last_y = y;
-    if ( state == GLUT_DOWN )
+    double x, y;
+    glfwGetCursorPos(win, &x, &y);
+
+    g_state.last_x = floor(x);
+    g_state.last_y = floor(y);
+
+    if ( action == GLFW_PRESS )
     {
         switch( button )
         {
-        case GLUT_LEFT_BUTTON:
+        case GLFW_MOUSE_BUTTON_LEFT:
             g_state.bMask += BMASK_LEFT;
             break;
-        case GLUT_MIDDLE_BUTTON:
+        case GLFW_MOUSE_BUTTON_MIDDLE:
             g_state.bMask += BMASK_MIDDLE;
             break;
-        case GLUT_RIGHT_BUTTON:
+        case GLFW_MOUSE_BUTTON_RIGHT:
             g_state.bMask += BMASK_RIGHT;
             break;
         }
@@ -439,51 +552,48 @@ void mouse( int button, int state, int x, int y )
     {
         switch( button )
         {
-        case GLUT_LEFT_BUTTON:
+        case GLFW_MOUSE_BUTTON_LEFT:
             g_state.bMask -= BMASK_LEFT;
             break;
-        case GLUT_MIDDLE_BUTTON:
+        case GLFW_MOUSE_BUTTON_MIDDLE:
             g_state.bMask -= BMASK_MIDDLE;
             break;
-        case GLUT_RIGHT_BUTTON:
+        case GLFW_MOUSE_BUTTON_RIGHT:
             g_state.bMask -= BMASK_RIGHT;
             break;
         }
     }
-    g_state.mods = glutGetModifiers();
+    g_state.mods = mods;
 }
 
 //-*****************************************************************************
-void mouseDrag( int x, int y )
+void mouseDrag(GLFWwindow* window, double x, double y )
 {
-    int dx = x - g_state.last_x;
-    int dy = y - g_state.last_y;
+    int dx = floor(x) - g_state.last_x;
+    int dy = floor(y) - g_state.last_y;
 
     g_state.last_x = x;
     g_state.last_y = y;
 
-    if ( g_state.mods && GLUT_ACTIVE_ALT )
+    if ( g_state.mods & GLFW_MOD_ALT )
     {
         if ( g_state.bMask == BMASK_LEFT + BMASK_MIDDLE ||
              g_state.bMask == BMASK_RIGHT )
         {
             g_state.scene.cam.dolly( V2d( dx, dy ) );
             g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
-            glutPostRedisplay();
             return;
         }
         if ( g_state.bMask ==  BMASK_LEFT )
         {
             g_state.scene.cam.rotate( V2d( dx, dy ) );
             g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
-            glutPostRedisplay();
             return;
         }
         if ( g_state.bMask ==  BMASK_MIDDLE )
         {
             g_state.scene.cam.track( V2d( dx, dy ) );
             g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
-            glutPostRedisplay();
             return;
         }
     }
@@ -524,7 +634,7 @@ int SimpleViewScene( int argc, char *argv[] )
 
     // help
     if ( argc < 2 ||
-         optionExists( argv, argv + argc, "-h" ) || 
+         optionExists( argv, argv + argc, "-h" ) ||
          optionExists( argv, argv + argc, "--help" )
        ) {
         std::cout << desc << std::endl;
@@ -541,31 +651,31 @@ int SimpleViewScene( int argc, char *argv[] )
 
     // options
     if ( optionExists( argv, argv + argc, "-f" ) )
-        abcFileName = string( 
-                getOption( argv, argv + argc, "-f" ) 
+        abcFileName = string(
+                getOption( argv, argv + argc, "-f" )
                 );
     else if ( optionExists( argv, argv + argc, "--file" ) )
-        abcFileName = string( 
-                getOption( argv, argv + argc, "--file" ) 
+        abcFileName = string(
+                getOption( argv, argv + argc, "--file" )
                 );
-   
+
     if ( optionExists( argv, argv + argc, "-P" ) )
-        AlembicRiPluginDsoPath = string( 
-                getOption( argv, argv + argc, "-P" ) 
+        AlembicRiPluginDsoPath = string(
+                getOption( argv, argv + argc, "-P" )
                 );
     else if ( optionExists( argv, argv + argc, "--riPlugin" ) )
-        AlembicRiPluginDsoPath = string( 
-                getOption( argv, argv + argc, "--riPlugin" ) 
+        AlembicRiPluginDsoPath = string(
+                getOption( argv, argv + argc, "--riPlugin" )
                 );
 
     if ( optionExists( argv, argv + argc, "--fps" ) )
-        fps = std::atof( string( 
-                    getOption( argv, argv + argc, "--fps" ) ).c_str() 
+        fps = std::atof( string(
+                    getOption( argv, argv + argc, "--fps" ) ).c_str()
                 );
 
     if ( optionExists( argv, argv + argc, "--rndrScript" ) )
-        RenderScript = string( 
-                getOption( argv, argv + argc, "--rndrScript" ) 
+        RenderScript = string(
+                getOption( argv, argv + argc, "--rndrScript" )
                 );
 
 #ifndef DEBUG
@@ -579,24 +689,25 @@ int SimpleViewScene( int argc, char *argv[] )
         g_state.AlembicRiPluginDsoPath = AlembicRiPluginDsoPath;
         g_state.RenderScript = RenderScript;
 
-        glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
-        glutInitWindowSize( 800, 600 );
-        glutInitWindowPosition( 100, 100 );
+        glfwSetErrorCallback(_error_callback);
 
-        glutInit( &argc, argv );
-        glutCreateWindow( abcFileName.c_str() );
+        if (!glfwInit())
+        {
+            exit(EXIT_FAILURE);
+        }
 
-        // Init local GL stuff
-        init();
+        init_surface();
+        g_state.scene.win = glfw_window(nullptr, 800, 600);
 
-        // Setup Callbacks
-        glutDisplayFunc( display );
-        glutKeyboardFunc( keyboard );
-        glutReshapeFunc( reshape );
-        glutMouseFunc( mouse );
-        glutMotionFunc( mouseDrag );
+        while (!glfwWindowShouldClose(g_state.scene.win))
+        {
+            idle_function();
+            display();
+            glfwSwapBuffers(g_state.scene.win);
+            glfwPollEvents();
+            current_fps();
+        }
 
-        glutMainLoop();
         return 0;
     }
 #ifndef DEBUG
@@ -613,6 +724,42 @@ int SimpleViewScene( int argc, char *argv[] )
 #endif
 
     return 0;
+}
+
+GLFWwindow*
+glfw_window(
+        GLFWwindow* current_window,
+        int width,
+        int height,
+        bool on_primary_monitor)
+{
+    if (current_window)
+    {
+        glfwDestroyWindow(current_window);
+    }
+
+    GLFWwindow* new_window = glfwCreateWindow(
+            width,
+            height,
+            "abcviewer",
+            on_primary_monitor ? glfwGetPrimaryMonitor() : NULL,
+            NULL);
+
+    g_state.scene.cam.setSize(width, height);
+    glfwMakeContextCurrent(new_window);
+
+    // Setup Callbacks
+    glfwSetKeyCallback(new_window, keyboard);
+    glfwSetWindowSizeCallback(new_window, reshape);
+    glfwSetMouseButtonCallback(new_window, mouse);
+    glfwSetCursorPosCallback(new_window, mouseDrag);
+
+
+    // Init local GL stuff
+
+    init(new_window);
+
+    return new_window;
 }
 
 } // End namespace SimpleAbcViewer
