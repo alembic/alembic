@@ -1,0 +1,9 @@
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+*.cmake
+*.a
+SimpleAbcViewer
+abcview
