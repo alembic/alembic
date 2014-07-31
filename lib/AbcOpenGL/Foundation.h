@@ -79,12 +79,6 @@
 //-*****************************************************************************
 #ifdef PLATFORM_DARWIN
 
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <OpenGL/glext.h>
-#include <OpenGL/OpenGL.h>
-#include <GLUT/glut.h>
-
 //-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
@@ -107,21 +101,15 @@ extern "C" GLEWContext *glewGetContext();
 
 #endif // ifdef ALEMBIC_GLEW_MX
 
-#include <GL/gl.h>
-
 #ifdef PLATFORM_WINDOWS
 #include <GL/wglew.h>
-#include <GL/glut.h>
-#else
-#include <GL/glxew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#include <GL/glut.h>
 
 #endif // ifdef WIN64
 
 #endif // ifdef PLATFORM_DARWIN
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
@@ -159,18 +147,18 @@ inline const T &clamp( const T &x, const T &lo, const T &hi )
 //-*****************************************************************************
 inline void GL_CHECK( const std::string &header = "" )
 {
-    GLenum errCode = glGetError();
-    if ( errCode != GL_NO_ERROR )
-    {
-        std::cerr << "GL ERROR in " << header << ": "
-                  << ( const char * )gluErrorString( errCode )
-                  << std::endl;
-
-        GLint matrixStackDepth = 0;
-        glGetIntegerv( GL_MODELVIEW_STACK_DEPTH, &matrixStackDepth );
-        std::cout << "Stack depth: " << ( int )matrixStackDepth
-                  << std::endl;
-    }
+    // GLenum errCode = glGetError();
+    // if ( errCode != GL_NO_ERROR )
+    // {
+    //     std::cerr << "GL ERROR in " << header << ": "
+    //               << ( const char * )gluErrorString( errCode )
+    //               << std::endl;
+    //
+    //     GLint matrixStackDepth = 0;
+    //     glGetIntegerv( GL_MODELVIEW_STACK_DEPTH, &matrixStackDepth );
+    //     std::cout << "Stack depth: " << ( int )matrixStackDepth
+    //               << std::endl;
+    // }
 }
 
 //-*****************************************************************************

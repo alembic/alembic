@@ -139,7 +139,7 @@ void init(GLFWwindow* window)
                 << " | Frame = "
                 << g_transport->getCurrentFrame();
 
-    glfwSetWindowTitle(window, titleStream.c_str());
+    glfwSetWindowTitle(window, titleStream.str().c_str());
 }
 
 static void
@@ -436,6 +436,12 @@ idle_function()
 void
 keyboard(GLFWwindow* win, int key, int scancode, int action, int mods )
 {
+    // all our actions are on key presses
+    if (action != GLFW_PRESS)
+    {
+        return;
+    }
+
     static bool bf = true;
 
     switch ( key )
