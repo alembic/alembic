@@ -168,8 +168,7 @@ applied_perspective_matrix(
     glFrustum( -fW, fW, -fH, fH, zNear, zFar );
 }
 
-//-*****************************************************************************
-void GLCamera::apply() const
+void GLCamera::applyViewport() const
 {
     glViewport( 0, 0, ( GLsizei )m_size[0], ( GLsizei )m_size[1] );
     glMatrixMode( GL_PROJECTION );
@@ -182,6 +181,11 @@ void GLCamera::apply() const
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
+}
+
+//-*****************************************************************************
+void GLCamera::apply() const
+{
 
     ::glScaled( 1.0 / m_scale[0], 1.0 / m_scale[1], 1.0 / m_scale[2] );
 

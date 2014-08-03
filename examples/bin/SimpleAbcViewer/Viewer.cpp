@@ -59,7 +59,7 @@ glfw_window(
         GLFWwindow* current_window,
         int width,
         int height,
-        bool on_primary_monitor=false);
+        bool fullscreen=false);
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -142,8 +142,7 @@ void init(GLFWwindow* window)
     glfwSetWindowTitle(window, titleStream.str().c_str());
 }
 
-static void
-_error_callback(int error, const char* description)
+static void _error_callback(int error, const char* description)
 {
     fputs(description, stderr);
 }
@@ -153,8 +152,7 @@ static int frame_count = 0;
 static double fps = 0;
 static const float TIME_INTERVAL = 1.0f;
 
-void
-current_fps()
+void current_fps()
 {
     double current_time = glfwGetTime();
 
@@ -243,6 +241,7 @@ void display( void )
 
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
     glDrawBuffer( GL_BACK );
+    g_state.scene.cam.applyViewport();
     g_state.scene.cam.apply();
     g_transport->draw( g_state.scene );
 
@@ -359,13 +358,10 @@ void RenderIt()
     delete[] buffer;
 }
 
-
 // start windowed
 bool am_fullscreen = false;
 
-
-void
-toggle_fullscreen()
+void toggle_fullscreen()
 {
     if (!am_fullscreen)
     {
@@ -393,7 +389,8 @@ toggle_fullscreen()
 }
 
 
-enum _idle_function {
+enum _idle_function
+{
     IDLE_NO_OP,
     IDLE_PLAY_FWD_IDLE,
     IDLE_PLAY_BWD_IDLE,
@@ -401,8 +398,7 @@ enum _idle_function {
 };
 _idle_function CURRENT_IDLE = IDLE_NO_OP;
 
-void
-idle_function()
+void idle_function()
 {
     if (IDLE_NO_OP == CURRENT_IDLE)
     {
@@ -433,8 +429,7 @@ idle_function()
 // @TODO: don't use g_state.scene.win - use the window pointers.
 
 //-*****************************************************************************
-void
-keyboard(GLFWwindow* win, int key, int scancode, int action, int mods )
+void keyboard(GLFWwindow* win, int key, int scancode, int action, int mods )
 {
     // all our actions are on key presses
     if (action != GLFW_PRESS)
@@ -732,12 +727,8 @@ int SimpleViewScene( int argc, char *argv[] )
     return 0;
 }
 
-GLFWwindow*
-glfw_window(
-        GLFWwindow* current_window,
-        int width,
-        int height,
-        bool on_primary_monitor)
+GLFWwindow* glfw_window(
+        GLFWwindow* current_window, int width, int height, bool fullscreen)
 {
     if (current_window)
     {
@@ -745,10 +736,9 @@ glfw_window(
     }
 
     GLFWwindow* new_window = glfwCreateWindow(
-            width,
-            height,
+            width, height,
             "abcviewer",
-            on_primary_monitor ? glfwGetPrimaryMonitor() : NULL,
+            fullscreen ? glfwGetPrimaryMonitor() : NULL,
             NULL);
 
     g_state.scene.cam.setSize(width, height);
@@ -762,7 +752,6 @@ glfw_window(
 
 
     // Init local GL stuff
-
     init(new_window);
 
     return new_window;
