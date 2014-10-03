@@ -44,25 +44,46 @@
 
 typedef std::vector< Alembic::Abc::ICompoundProperty > ICompoundPropertyVec;
 
+class TimeAndSamplesMap
+{
+public:
+    TimeAndSamplesMap() {};
+
+    void add(Alembic::AbcCoreAbstract::TimeSamplingPtr iTime,
+             std::size_t iNumSamples);
+
+    Alembic::AbcCoreAbstract::TimeSamplingPtr get(
+        Alembic::AbcCoreAbstract::TimeSamplingPtr iTime,
+        std::size_t & oNumSamples) const;
+
+private:
+    std::vector< Alembic::AbcCoreAbstract::TimeSamplingPtr > mTimeSampling;
+    std::vector< std::size_t > mExpectedSamples;
+};
+
 Alembic::AbcCoreAbstract::index_t
 getIndexSample(Alembic::AbcCoreAbstract::index_t iCurOutIndex,
     Alembic::AbcCoreAbstract::TimeSamplingPtr iOutTime,
     Alembic::AbcCoreAbstract::index_t iInNumSamples,
-    Alembic::AbcCoreAbstract::TimeSamplingPtr iInTime);
+    Alembic::AbcCoreAbstract::TimeSamplingPtr iInTime,
+    Alembic::AbcCoreAbstract::index_t & oNumEmpty);
 
 void checkAcyclic(const Alembic::AbcCoreAbstract::TimeSamplingType & tsType,
                   const std::string & fullNodeName);
 
 void stitchArrayProp(const Alembic::AbcCoreAbstract::PropertyHeader & propHeader,
                      const ICompoundPropertyVec & iCompoundProps,
-                     Alembic::Abc::OCompoundProperty & oCompoundProp);
+                     Alembic::Abc::OCompoundProperty & oCompoundProp,
+                     const TimeAndSamplesMap & iTimeMap);
 
 void stitchScalarProp(const Alembic::AbcCoreAbstract::PropertyHeader & propHeader,
                       const ICompoundPropertyVec & iCompoundProps,
-                      Alembic::Abc::OCompoundProperty & oCompoundProp);
+                      Alembic::Abc::OCompoundProperty & oCompoundProp,
+                      const TimeAndSamplesMap & iTimeMap);
 
 void stitchCompoundProp(ICompoundPropertyVec & iCompoundProps,
-                        Alembic::Abc::OCompoundProperty & oCompoundProp);
+                        Alembic::Abc::OCompoundProperty & oCompoundProp,
+                        const TimeAndSamplesMap & iTimeMap);
 
 
 #endif // _ABC_STITCHER_UTIL_H_
