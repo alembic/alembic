@@ -35,9 +35,10 @@
 //-*****************************************************************************
 
 #include "Viewer.h"
+#include "ovr_integration.h"
 
 //-*****************************************************************************
-namespace SimpleAbcViewer {
+namespace OculusAbcViewer {
 
 //-*****************************************************************************
 //-*****************************************************************************
@@ -53,6 +54,8 @@ static Timer g_playbackTimer;
 
 //-*****************************************************************************
 void overlay();
+
+static ovr_integration::OVRManager ovr_container;
 
 GLFWwindow*
 glfw_window(
@@ -89,7 +92,7 @@ void init(GLFWwindow* window)
         GLfloat mat_back_emission[] = {0.0, 0.0, 0.0, 0.0 };
         GLfloat mat_front_emission[] = {1.0f, 0.0, 0.0, 1.0f };
 
-        glClearColor( 0.0, 0.0, 0.0, 0.0 );
+        glClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
         glMaterialfv( GL_FRONT, GL_EMISSION, mat_front_emission );
         glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular );
         glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess );
@@ -155,7 +158,6 @@ static const float TIME_INTERVAL = 1.0f;
 void current_fps()
 {
     double current_time = glfwGetTime();
-
 
     double duration = current_time - start_time;
 
@@ -235,19 +237,11 @@ void playBwdIdle()
 //-*****************************************************************************
 void display( void )
 {
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    // glPushMatrix();
 
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
-    glDrawBuffer( GL_BACK );
-    g_state.scene.cam.applyViewport();
-    g_state.scene.cam.apply();
     g_transport->draw( g_state.scene );
 
-    // glPopMatrix();
-
-    glFlush();
 }
 
 //-*****************************************************************************
@@ -258,6 +252,7 @@ void reshape(GLFWwindow* win, int w, int h )
     g_state.scene.cam.autoSetClippingPlanes( g_transport->getBounds() );
 
     glMatrixMode( GL_MODELVIEW );
+    ovr_container.reshape(win, w, h);
 }
 
 //-*****************************************************************************
@@ -302,7 +297,7 @@ void overlay()
 //-*****************************************************************************
 void RenderIt()
 {
-    const char *templ = "/var/tmp/SimpleAbcViewer_camera.XXXXXX";
+    const char *templ = "/var/tmp/OculusAbcViewer_camera.XXXXXX";
     char *buffer = new char[strlen( templ ) + 1];
     strcpy( buffer, templ );
 #ifndef PLATFORM_WINDOWS
@@ -310,7 +305,7 @@ void RenderIt()
 #endif
     std::string cameraFileName = buffer;
 #ifdef PLATFORM_WINDOWS
-    cameraFileName = "SimpleAbcViewer_camera.XXXXXX";
+    cameraFileName = "OculusAbcViewer_camera.XXXXXX";
 #endif
 
     float shutterOpenTime = -0.25f; // + ( float )g_transport->getCurrentFrame();
@@ -358,8 +353,10 @@ void RenderIt()
     delete[] buffer;
 }
 
+
 // start windowed
 bool am_fullscreen = false;
+
 
 void toggle_fullscreen()
 {
@@ -389,8 +386,7 @@ void toggle_fullscreen()
 }
 
 
-enum _idle_function
-{
+enum _idle_function {
     IDLE_NO_OP,
     IDLE_PLAY_FWD_IDLE,
     IDLE_PLAY_BWD_IDLE,
@@ -426,7 +422,6 @@ void idle_function()
             };
     };
 }
-// @TODO: don't use g_state.scene.win - use the window pointers.
 
 //-*****************************************************************************
 void keyboard(GLFWwindow* win, int key, int scancode, int action, int mods )
@@ -600,6 +595,13 @@ void mouseDrag(GLFWwindow* window, double x, double y )
     }
 }
 
+void apply_camera()
+{
+    g_state.scene.cam.apply();
+}
+
+
+
 //-*****************************************************************************
 char* getOption(char ** begin, char ** end, const std::string & option)
 {
@@ -629,9 +631,11 @@ int SimpleViewScene( int argc, char *argv[] )
     "  -h [ --help ]         prints this help message\n"
     "  -f [ --file ] arg     abc file name\n"
     "  --fps arg             frames per second for playback (default=24.0)\n"
+    "  --scale arg           Scene units per meter.  If 1 unit is 1cm, this should be 10.0.\n"
     "  -P [ --riPlugin ] arg full path to AlembicRiPlugin.so\n"
     "  --rndrScript arg      full path to Render Script" );
     float fps = 24.0f;
+    float scene_scale=1.0f;
 
     // help
     if ( argc < 2 ||
@@ -674,6 +678,11 @@ int SimpleViewScene( int argc, char *argv[] )
                     getOption( argv, argv + argc, "--fps" ) ).c_str()
                 );
 
+    if ( optionExists( argv, argv + argc, "--scale" ) )
+        scene_scale = std::atof( string(
+                    getOption( argv, argv + argc, "--scale" ) ).c_str()
+                );
+
     if ( optionExists( argv, argv + argc, "--rndrScript" ) )
         RenderScript = string(
                 getOption( argv, argv + argc, "--rndrScript" )
@@ -689,11 +698,13 @@ int SimpleViewScene( int argc, char *argv[] )
         g_state.playback = kStopped;
         g_state.AlembicRiPluginDsoPath = AlembicRiPluginDsoPath;
         g_state.RenderScript = RenderScript;
+        g_state.scene_scale = scene_scale;
 
         glfwSetErrorCallback(_error_callback);
 
         if (!glfwInit())
         {
+            std::cerr << "glfw init failed." << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -703,8 +714,14 @@ int SimpleViewScene( int argc, char *argv[] )
         while (!glfwWindowShouldClose(g_state.scene.win))
         {
             idle_function();
-            display();
-            glfwSwapBuffers(g_state.scene.win);
+
+            V2d clipping_planes = g_state.scene.cam.clippingPlanes();
+            double near_plane = clipping_planes.x;
+            double far_plane = clipping_planes.y;
+
+            ovr_container.draw_gl(
+                    apply_camera, display, g_state.scene_scale, near_plane, far_plane);
+
             glfwPollEvents();
             current_fps();
         }
@@ -727,6 +744,9 @@ int SimpleViewScene( int argc, char *argv[] )
     return 0;
 }
 
+static bool glew_initialized = false;
+
+/// Generate a new glfw_window.
 GLFWwindow* glfw_window(
         GLFWwindow* current_window, int width, int height, bool fullscreen)
 {
@@ -735,15 +755,42 @@ GLFWwindow* glfw_window(
         glfwDestroyWindow(current_window);
     }
 
-    GLFWwindow* new_window = glfwCreateWindow(
-            width, height,
-            "abcviewer",
-            fullscreen ? glfwGetPrimaryMonitor() : NULL,
-            NULL);
+    GLFWwindow* new_window;
 
-    g_state.scene.cam.setSize(width, height);
+    // I'm scoping this block to destroy the monitor after we create new_window.
+    {
+
+
+        auto monitor = glfwGetPrimaryMonitor();
+        if (not fullscreen)
+        {
+            monitor = nullptr;
+        }
+
+        new_window = glfwCreateWindow(
+                width,
+                height,
+                "abcviewer",
+                monitor,
+                NULL);
+    }
+
     glfwMakeContextCurrent(new_window);
 
+    if (not glew_initialized)
+    {
+        glewExperimental = GL_TRUE;
+
+        GLenum glewStatus = glewInit();
+        if (glewStatus != GLEW_OK)
+        {
+            std::cerr << "Glew init failed." << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        glew_initialized = true;
+
+    }
     // Setup Callbacks
     glfwSetKeyCallback(new_window, keyboard);
     glfwSetWindowSizeCallback(new_window, reshape);
@@ -753,8 +800,11 @@ GLFWwindow* glfw_window(
 
     // Init local GL stuff
     init(new_window);
+    ovr_container.initialize_opengl();
+
+    reshape(new_window, width, height);
 
     return new_window;
 }
 
-} // End namespace SimpleAbcViewer
+} // End namespace OculusAbcViewer

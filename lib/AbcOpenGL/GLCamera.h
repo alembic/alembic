@@ -50,6 +50,8 @@ public:
 
     // Executes OpenGL commands to show the current camera
     void apply() const;
+    // Executes OpenGL commands to configure the Modelview matrix and viewport.
+    void applyViewport() const;
 
     //-*************************************************************************
     // LOCAL TRANSFORM: Get, Set

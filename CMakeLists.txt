@@ -191,19 +191,19 @@ FIND_PACKAGE(ZLIB REQUIRED)
 #-******************************************************************************
 #-******************************************************************************
 FIND_PACKAGE( OpenGL )
-FIND_PACKAGE( GLUT )
+FIND_PACKAGE( GLFW )
 
 IF ( ${WINDOWS} )
   # Do a windows OpenGL thing, whatever that may be
-  SET( ALEMBIC_GL_LIBS glew32s ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
-  INCLUDE_DIRECTORIES ( ${GLUT_INCLUDE_DIR} )
+  SET( ALEMBIC_GL_LIBS glew32s ${GLFW_LIBRARY} ${OPENGL_LIBRARIES} )
+  INCLUDE_DIRECTORIES ( ${GLFW_INCLUDE_DIR} )
   INCLUDE_DIRECTORIES ( ${Glew_INCLUDE_DIR} )
   LINK_DIRECTORIES ( ${Glew_LIBRARY_DIR} )
 ELSEIF( ${DARWIN} )
   # Do a darwin OpenGL thing.
-  SET( ALEMBIC_GL_LIBS ${GLUT_LIBRARY} "-framework OpenGL" )
+  SET( ALEMBIC_GL_LIBS ${GLFW_LIBRARY} "-framework OpenGL" )
 ELSE()
-  SET( ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
+    SET( ALEMBIC_GL_LIBS GLEW ${GLFW_LIBRARY} ${OPENGL_LIBRARIES} )
 ENDIF()
 
 MESSAGE( STATUS "OpenGL Libraries: ${ALEMBIC_GL_LIBS}" )

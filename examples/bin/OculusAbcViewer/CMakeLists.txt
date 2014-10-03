@@ -1,7 +1,7 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
-##  Sony Pictures Imageworks Inc. and
+## Copyright (c) 2009-2013,
+##  Sony Pictures Imageworks, Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
@@ -15,9 +15,10 @@
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## *       Neither the name of Industrial Light & Magic nor the names of
-## its contributors may be used to endorse or promote products derived
-## from this software without specific prior written permission.
+## *       Neither the name of Sony Pictures Imageworks, nor
+## Industrial Light & Magic nor the names of their contributors may be used
+## to endorse or promote products derived from this software without specific
+## prior written permission.
 ##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,10 +34,55 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY( SimpleAbcViewer )
-ADD_SUBDIRECTORY( OculusAbcViewer )
-ADD_SUBDIRECTORY( AbcConvert )
-ADD_SUBDIRECTORY( AbcEcho )
-ADD_SUBDIRECTORY( AbcStitcher )
-ADD_SUBDIRECTORY( AbcTree )
-ADD_SUBDIRECTORY( AbcLs )
+SET( H_FILES
+     Transport.h
+     Viewer.h )
+
+SET( CXX_FILES
+     Transport.cpp
+     Viewer.cpp
+     ovr_integration.cpp
+     main.cpp )
+
+SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+
+SET( THIS_LIBS
+     AlembicAbcOpenGL
+    ${ALEMBIC_ILMBASE_LIBS}
+    GLEW
+    GLFW3
+   )
+
+# OVR SDK stuff
+IF (NOT OVR_SDK_ROOT)
+    FIND_PATH(OVR_SDK_ROOT
+        PATHS "${OVR_SDK_ROOT}"
+        PATH_SUFFIXES Include
+        OVR.h)
+ENDIF()
+
+IF (NOT OVR_SDK_LIB_DIR)
+    FIND_PATH(OVR_SDK_LIB_DIR
+        PATHS "${OVR_SDK_LIB_DIR}"
+        PATH_SUFFIXES Lib
+        libOVR.so)
+ENDIF()
+
+INCLUDE_DIRECTORIES("${OVR_SDK_ROOT}/Include")
+INCLUDE_DIRECTORIES("${OVR_SDK_ROOT}/Src")
+LINK_DIRECTORIES   ("${OVR_SDK_LIB_DIR}")
+
+IF(APPLE)
+    FIND_LIBRARY(COCOA_LIBRARY Cocoa)
+    FIND_LIBRARY(IOKIT_LIBRARY IOKit)
+
+    SET(PLATFORM_LIBS libovr.a ${COCOA_LIBRARY} ${IOKIT_LIBRARY})     
+ENDIF()
+
+ADD_EXECUTABLE( OculusAbcViewer ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( OculusAbcViewer ${THIS_LIBS} ${PLATFORM_LIBS} )
+
+INSTALL( TARGETS OculusAbcViewer
+         DESTINATION bin )
+
+#ADD_PYTHON_SCRIPT_INST( OculusAbcViewerRenderit )
