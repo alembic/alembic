@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -53,11 +53,12 @@ using namespace Alembic::AbcCoreAbstract;
 namespace{
 
 inline void stitchVisible(ICompoundPropertyVec & iCompoundProps,
-                          OCompoundProperty & oCompoundProp)
+                          OCompoundProperty & oCompoundProp,
+                          const TimeAndSamplesMap & iTimeMap)
 {
     const PropertyHeader * propHeaderPtr =
             iCompoundProps[0].getPropertyHeader("visible");
-    stitchScalarProp(*propHeaderPtr, iCompoundProps, oCompoundProp);
+    stitchScalarProp(*propHeaderPtr, iCompoundProps, oCompoundProp, iTimeMap);
 }
 
 template< class IPARAM, class IPARAMSAMP, class OPARAMSAMP >
@@ -81,36 +82,40 @@ void getOGeomParamSamp(IPARAM & iGeomParam, IPARAMSAMP & iGeomSamp,
 
 template< class IData, class IDataSchema, class OData, class ODataSchema >
 void init(std::vector< IObject > & iObjects, OObject & oParentObj,
-          ODataSchema & oSchema)
+          ODataSchema & oSchema, const TimeAndSamplesMap & iTimeMap,
+          std::size_t & oTotalSamples)
 {
-    const std::string fullNodeName = iObjects[0].getFullName();
+
+    // find the first valid IObject
+    IObject inObj;
+    for (std::size_t i = 0; i < iObjects.size(); ++i)
+    {
+        if (iObjects[i].valid())
+        {
+            inObj = iObjects[i];
+            break;
+        }
+    }
+
+    const std::string fullNodeName = inObj.getFullName();
 
     // gather information from the first input node in the list:
-    IDataSchema iSchema0 = IData(iObjects[0], Alembic::Abc::kWrapExisting).getSchema();
+    IDataSchema iSchema0 = IData(inObj, Alembic::Abc::kWrapExisting).getSchema();
 
-    TimeSamplingPtr tsPtr0 = iSchema0.getTimeSampling();
+    TimeSamplingPtr tsPtr0 = iTimeMap.get(iSchema0.getTimeSampling(),
+                                          oTotalSamples);
+
     TimeSamplingType tsType0 = tsPtr0->getTimeSamplingType();
     checkAcyclic(tsType0, fullNodeName);
 
     ICompoundPropertyVec iCompoundProps;
     iCompoundProps.reserve(iObjects.size());
 
-    ICompoundProperty cp = iObjects[0].getProperties();
-    iCompoundProps.push_back(cp);
-
     ICompoundPropertyVec iArbGeomCompoundProps;
     iArbGeomCompoundProps.reserve(iObjects.size());
 
-    ICompoundProperty arbProp = iSchema0.getArbGeomParams();
-    if (arbProp)  // might be empty
-        iArbGeomCompoundProps.push_back(arbProp);
-
     ICompoundPropertyVec iUserCompoundProps;
     iUserCompoundProps.reserve(iObjects.size());
-
-    ICompoundProperty userProp = iSchema0.getUserProperties();
-    if (userProp)  // might be empty
-        iUserCompoundProps.push_back(userProp);
 
     ICompoundPropertyVec iSchemaProps;
     iSchemaProps.reserve(iObjects.size());
@@ -124,15 +129,19 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
         ctsType0 = ctsPtr0->getTimeSamplingType();
         std::string nameAndBounds = fullNodeName + " child bounds";
         checkAcyclic(ctsType0, nameAndBounds);
-        iSchemaProps.push_back(iSchema0);
     }
 
-    bool hasVisible = cp.getPropertyHeader("visible")?true:false;
+    bool hasVisible = inObj.getProperties().getPropertyHeader("visible") != NULL;
 
     // sanity check (no frame range checking here)
     //      - timesamplying type has to be the same and can't be acyclic
-    for (size_t i = 1; i < iObjects.size(); i++)
+    for (size_t i = 0; i < iObjects.size(); i++)
     {
+        if (!iObjects[i].valid())
+        {
+            continue;
+        }
+
         IDataSchema iSchema =
             IData(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
 
@@ -206,7 +215,7 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
 
     }
 
-    OData oData(oParentObj, iObjects[0].getName(), tsPtr0);
+    OData oData(oParentObj, inObj.getName(), tsPtr0);
     oSchema = oData.getSchema();
 
     // stitch "visible" if it's points
@@ -214,7 +223,7 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
     if (hasVisible)
     {
         OCompoundProperty oCompoundProp = oData.getProperties();
-        stitchVisible(iCompoundProps, oCompoundProp);
+        stitchVisible(iCompoundProps, oCompoundProp, iTimeMap);
     }
 
     // stitch ArbGeomParams and User Properties
@@ -222,25 +231,18 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
     if (iArbGeomCompoundProps.size() == iObjects.size())
     {
         OCompoundProperty oArbGeomCompoundProp = oSchema.getArbGeomParams();
-        stitchCompoundProp(iArbGeomCompoundProps, oArbGeomCompoundProp);
+        stitchCompoundProp(iArbGeomCompoundProps, oArbGeomCompoundProp, iTimeMap);
     }
 
     if (iUserCompoundProps.size() == iObjects.size())
     {
         OCompoundProperty oUserCompoundProp = oSchema.getUserProperties();
-        stitchCompoundProp(iUserCompoundProps, oUserCompoundProp);
+        stitchCompoundProp(iUserCompoundProps, oUserCompoundProp, iTimeMap);
     }
 
-    if (iSchemaProps.size() == iObjects.size())
+    if (!iSchemaProps.empty())
     {
-        stitchScalarProp(childBounds.getHeader(), iSchemaProps, oSchema);
-    }
-    else if (iSchemaProps.size() != 0)
-    {
-        std::cerr << "Child bounds are missing on some archives for:\""
-            << fullNodeName << "\"" << std::endl;
-
-        exit(1);
+        stitchScalarProp(childBounds.getHeader(), iSchemaProps, oSchema, iTimeMap);
     }
 }
 
@@ -250,11 +252,26 @@ void init(std::vector< IObject > & iObjects, OObject & oParentObj,
 // a recursive function that reads all inputs and write to the given oObject
 // node if there's no gap in the frame range for animated nodes
 //
-void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
+void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
+                  const TimeAndSamplesMap & iTimeMap)
 {
     OObject outObj;
 
-    const AbcA::ObjectHeader & header = iObjects[0].getHeader();
+    IObject inObj;
+    std::vector< IObject >::iterator it;
+    for (it = iObjects.begin(); it != iObjects.end(); ++it)
+    {
+        if (it->valid())
+        {
+            inObj = *it;
+            break;
+        }
+    }
+
+    assert(inObj.valid());
+
+    const AbcA::ObjectHeader & header = inObj.getHeader();
+    std::size_t totalSamples = 0;
 
     // there are a number of things that needs to be checked for each node
     // to make sure they can be properly stitched together
@@ -269,35 +286,61 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
     if (IXform::matches(header))
     {
         OXformSchema oSchema;
-        init< IXform,
-              IXformSchema,
-              OXform,
-              OXformSchema >(iObjects, oParentObj, oSchema);
+        init< IXform, IXformSchema, OXform, OXformSchema >(
+            iObjects, oParentObj, oSchema, iTimeMap, totalSamples);
+
         outObj = oSchema.getObject();
 
         ICompoundPropertyVec iCompoundProps;
         iCompoundProps.reserve(iObjects.size());
-        ICompoundProperty cp = iObjects[0].getProperties();
-        iCompoundProps.push_back(cp);
 
-        bool isLocator = cp.getPropertyHeader("locator")?true:false;
-
-        for (size_t i = 1; i < iObjects.size(); i++)
-        {
-            ICompoundProperty cp = iObjects[i].getProperties();
-            iCompoundProps.push_back(cp);
-        }
-
-        // stitch the operations if this is an xform node
+        const PropertyHeader * locHeader = NULL;
 
         for (size_t i = 0; i < iObjects.size(); i++)
         {
+            if (!iObjects[i].valid())
+            {
+                iCompoundProps.push_back(ICompoundProperty());
+                continue;
+            }
+
+            ICompoundProperty cp = iObjects[i].getProperties();
+            iCompoundProps.push_back(cp);
+
+            const PropertyHeader * childLocHeader =
+                cp.getPropertyHeader("locator");
+            if (!locHeader && childLocHeader)
+            {
+                locHeader = childLocHeader;
+            }
+        }
+
+        // stitch the operations if this is an xform node
+        size_t i = 0;
+        for (i = 0; i < iObjects.size(); i++)
+        {
+            if (!iObjects[i].valid())
+            {
+                continue;
+            }
+
             IXformSchema iSchema =
                 IXform(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
+            index_t numEmpties = 0;
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
-                iSchema.getTimeSampling());
+                iSchema.getTimeSampling(), numEmpties);
+
+            // write empties only if we are also writing a sample, as the
+            // first sample will be repeated over and over again
+            for (index_t emptyIdx = 0;
+                 reqIdx < numSamples && emptyIdx < numEmpties; ++emptyIdx)
+            {
+                XformSample samp = iSchema.getValue(reqIdx);
+                oSchema.set(samp);
+            }
+
             for (; reqIdx < numSamples; reqIdx++)
             {
                 XformSample samp = iSchema.getValue(reqIdx);
@@ -305,41 +348,57 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             }
         }
 
+        // make sure we've set a sample, if we are going to extend them
+        for (i = oSchema.getNumSamples(); i != 0 && i < totalSamples; ++i)
+        {
+            oSchema.setFromPrevious();
+        }
+
         // stitch "locator" if it's a locator
         OCompoundProperty oCompoundProp = outObj.getProperties();
-        if (isLocator)
+        if (locHeader)
         {
-            const PropertyHeader * propHeaderPtr =
-                iCompoundProps[0].getPropertyHeader("locator");
-            stitchScalarProp(*propHeaderPtr,
-                             iCompoundProps,
-                             oCompoundProp);
+            stitchScalarProp(*locHeader, iCompoundProps, oCompoundProp,
+                             iTimeMap);
         }
     }
     else if (ISubD::matches(header))
     {
         OSubDSchema oSchema;
-        init< ISubD,
-              ISubDSchema,
-              OSubD,
-              OSubDSchema >(iObjects, oParentObj, oSchema);
+        init< ISubD, ISubDSchema, OSubD, OSubDSchema >(
+            iObjects, oParentObj, oSchema, iTimeMap, totalSamples);
         outObj = oSchema.getObject();
+
+        OSubDSchema::Sample emptySample(P3fArraySample::emptySample(),
+            Int32ArraySample::emptySample(), Int32ArraySample::emptySample());
 
         // stitch the SubDSchema
         //
         for (size_t i = 0; i < iObjects.size(); i++)
         {
+            if (!iObjects[i].valid())
+            {
+                continue;
+            }
+
             ISubDSchema iSchema =
                 ISubD(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
             IV2fGeomParam uvs = iSchema.getUVsParam();
-            if (i == 0 && uvs)
+            if (oSchema.getNumSamples() == 0 && uvs)
             {
                 oSchema.setUVSourceName(GetSourceName(uvs.getMetaData()));
             }
+            index_t numEmpties = 0;
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
-                iSchema.getTimeSampling());
+                iSchema.getTimeSampling(), numEmpties);
+
+            for (index_t emptyIdx = 0; emptyIdx < numEmpties; ++emptyIdx)
+            {
+                oSchema.set(emptySample);
+            }
+
             for (; reqIdx < numSamples; reqIdx++)
             {
                 ISubDSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -405,33 +464,54 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 oSchema.set(oSamp);
             }
         }
+
+        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        {
+            oSchema.set(emptySample);
+        }
     }
     else if (IPolyMesh::matches(header))
     {
+
         OPolyMeshSchema oSchema;
-        init< IPolyMesh,
-              IPolyMeshSchema,
-              OPolyMesh,
-              OPolyMeshSchema >(iObjects, oParentObj, oSchema);
+        init< IPolyMesh, IPolyMeshSchema, OPolyMesh, OPolyMeshSchema >(
+            iObjects, oParentObj, oSchema, iTimeMap, totalSamples);
         outObj = oSchema.getObject();
+
+        OPolyMeshSchema::Sample emptySample(P3fArraySample::emptySample(),
+            Int32ArraySample::emptySample(), Int32ArraySample::emptySample());
 
         // stitch the PolySchema
         //
         for (size_t i = 0; i < iObjects.size(); i++)
         {
+
+            if (!iObjects[i].valid())
+            {
+                continue;
+            }
+
             IPolyMeshSchema iSchema =
                 IPolyMesh(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
 
             IN3fGeomParam normals = iSchema.getNormalsParam();
             IV2fGeomParam uvs = iSchema.getUVsParam();
-            if (i == 0 && uvs)
+            if (oSchema.getNumSamples() == 0 && uvs)
             {
                 oSchema.setUVSourceName(GetSourceName(uvs.getMetaData()));
             }
+
+            index_t numEmpties = 0;
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
-                iSchema.getTimeSampling());
+                iSchema.getTimeSampling(), numEmpties);
+
+            for (index_t emptyIdx = 0; emptyIdx < numEmpties; ++emptyIdx)
+            {
+                oSchema.set(emptySample);
+            }
+
             for (; reqIdx < numSamples; reqIdx++)
             {
                 IPolyMeshSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -478,45 +558,75 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 oSchema.set(oSamp);
             }
         }
+
+        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        {
+            oSchema.set(emptySample);
+        }
     }
     else if (ICamera::matches(header))
     {
         OCameraSchema oSchema;
-        init< ICamera,
-              ICameraSchema,
-              OCamera,
-              OCameraSchema >(iObjects, oParentObj, oSchema);
+        init< ICamera, ICameraSchema, OCamera, OCameraSchema >(
+            iObjects, oParentObj, oSchema, iTimeMap, totalSamples);
+
         outObj = oSchema.getObject();
 
         // stitch the CameraSchemas
         //
         for (size_t i = 0; i < iObjects.size(); i++)
         {
+            if (!iObjects[i].valid())
+            {
+                continue;
+            }
+
             ICameraSchema iSchema =
                 ICamera(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
+            index_t numEmpties = 0;
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
-                iSchema.getTimeSampling());
+                iSchema.getTimeSampling(), numEmpties);
+
+            // write empties only if we are also writing a sample, as the
+            // first sample will be repeated over and over again
+            for (index_t emptyIdx = 0;
+                 reqIdx < numSamples && emptyIdx < numEmpties; ++emptyIdx)
+            {
+                oSchema.set(iSchema.getValue(reqIdx));
+            }
+
             for (; reqIdx < numSamples; reqIdx++)
             {
                 oSchema.set(iSchema.getValue(reqIdx));
             }
         }
+
+        // for the rest of the samples just set the last one as long as
+        // a sample has been already set
+        for (size_t i = oSchema.getNumSamples(); i != 0 && i < totalSamples;++i)
+        {
+            oSchema.setFromPrevious();
+        }
     }
     else if (ICurves::matches(header))
     {
         OCurvesSchema oSchema;
-        init< ICurves,
-              ICurvesSchema,
-              OCurves,
-              OCurvesSchema >(iObjects, oParentObj, oSchema);
+        init< ICurves, ICurvesSchema, OCurves, OCurvesSchema >(
+            iObjects, oParentObj, oSchema, iTimeMap, totalSamples);
         outObj = oSchema.getObject();
+        OCurvesSchema::Sample emptySample(P3fArraySample::emptySample(),
+            Int32ArraySample::emptySample());
 
         // stitch the CurvesSchemas
         //
         for (size_t i = 0; i < iObjects.size(); i++)
         {
+            if (!iObjects[i].valid())
+            {
+                continue;
+            }
             ICurvesSchema iSchema =
                 ICurves(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             IV2fGeomParam iUVs = iSchema.getUVsParam();
@@ -527,9 +637,15 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
 
             index_t numSamples = iSchema.getNumSamples();
 
+            index_t numEmpty = 0;
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
-                iSchema.getTimeSampling());
+                iSchema.getTimeSampling(), numEmpty);
+            for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
+            {
+                oSchema.set(emptySample);
+            }
+
             for (; reqIdx < numSamples; reqIdx++)
             {
                 ICurvesSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -595,27 +711,43 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 oSchema.set(oSamp);
             }
         }
+
+        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        {
+            oSchema.set(emptySample);
+        }
     }
     else if (IPoints::matches(header))
     {
         OPointsSchema oSchema;
-        init< IPoints,
-              IPointsSchema,
-              OPoints,
-              OPointsSchema >(iObjects, oParentObj, oSchema);
+        init< IPoints, IPointsSchema, OPoints, OPointsSchema >(
+            iObjects, oParentObj, oSchema, iTimeMap, totalSamples);
         outObj = oSchema.getObject();
+        OPointsSchema::Sample emptySample(P3fArraySample::emptySample(),
+            UInt64ArraySample::emptySample());
 
         // stitch the PointsSchemas
         //
         for (size_t i = 0; i < iObjects.size(); i++)
         {
+            if (!iObjects[i].valid())
+            {
+                continue;
+            }
+
             IPointsSchema iSchema =
                 IPoints(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             IFloatGeomParam iWidths = iSchema.getWidthsParam();
             index_t numSamples = iSchema.getNumSamples();
+            index_t numEmpty = 0;
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
-                iSchema.getTimeSampling());
+                iSchema.getTimeSampling(), numEmpty);
+            for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
+            {
+                oSchema.set(emptySample);
+            }
+
             for (; reqIdx < numSamples; reqIdx++)
             {
                 IPointsSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -643,20 +775,33 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 oSchema.set(oSamp);
             }
         }
+
+        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        {
+            oSchema.set(emptySample);
+        }
     }
     else if (INuPatch::matches(header))
     {
         ONuPatchSchema oSchema;
-        init< INuPatch,
-              INuPatchSchema,
-              ONuPatch,
-              ONuPatchSchema >(iObjects, oParentObj, oSchema);
+        init< INuPatch, INuPatchSchema, ONuPatch, ONuPatchSchema >(
+            iObjects, oParentObj, oSchema, iTimeMap, totalSamples);
         outObj = oSchema.getObject();
+
+        Alembic::Util::int32_t zeroVal = 0;
+        ONuPatchSchema::Sample emptySample(P3fArraySample::emptySample(),
+            zeroVal, zeroVal, zeroVal, zeroVal,
+            FloatArraySample::emptySample(), FloatArraySample::emptySample());
 
         // stitch the NuPatchSchemas
         //
         for (size_t i = 0; i < iObjects.size(); i++)
         {
+            if (!iObjects[i].valid())
+            {
+                continue;
+            }
+
             INuPatchSchema iSchema =
                 INuPatch(iObjects[i], Alembic::Abc::kWrapExisting).getSchema();
             index_t numSamples = iSchema.getNumSamples();
@@ -664,9 +809,15 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
             IN3fGeomParam normals = iSchema.getNormalsParam();
             IV2fGeomParam uvs = iSchema.getUVsParam();
 
+            index_t numEmpty = 0;
             index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
                 oSchema.getTimeSampling(), numSamples,
-                iSchema.getTimeSampling());
+                iSchema.getTimeSampling(), numEmpty);
+            for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
+            {
+                oSchema.set(emptySample);
+            }
+
             for (; reqIdx < numSamples; reqIdx++)
             {
                 INuPatchSchema::Sample iSamp = iSchema.getValue(reqIdx);
@@ -730,50 +881,66 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj)
                 oSchema.set(oSamp);
             }
         }
+
+        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        {
+            oSchema.set(emptySample);
+        }
     }
     else
     {
-        outObj = OObject(oParentObj, header.getName(), header.getMetaData());
+        if (oParentObj.getParent().valid())
+        {
+            outObj = OObject(oParentObj, header.getName(), header.getMetaData());
+        }
+        else
+        {
+            // for stitching properties of the top level objects
+            outObj = oParentObj;
+        }
 
         // collect the top level compound property
         ICompoundPropertyVec iCompoundProps(iObjects.size());
-        for (size_t i = 0; i < iObjects.size(); i++)
+        for (size_t i = 0; i < iObjects.size(); ++i)
         {
+            if (!iObjects[i].valid())
+            {
+                continue;
+            }
+
             iCompoundProps[i] = iObjects[i].getProperties();
         }
 
         OCompoundProperty oCompoundProperty = outObj.getProperties();
-        stitchCompoundProp(iCompoundProps, oCompoundProperty);
+        stitchCompoundProp(iCompoundProps, oCompoundProperty, iTimeMap);
     }
 
     // After done writing THIS OObject node, if input nodes have children,
-    // go deeper.
-    // Otherwise we are done here
-    size_t numChildren =  iObjects[0].getNumChildren();
-
-    // check to make sure all of our iObjects have the same number of children
-    for (size_t j = 1; j < iObjects.size(); j++)
+    // go deeper, otherwise we are done here
+    for (size_t i = 0 ; i < iObjects.size(); i++ )
     {
-        if (numChildren != iObjects[j].getNumChildren())
+        if (!iObjects[i].valid())
         {
-            std::cerr << "ERROR: " << iObjects[j].getFullName() << " in " <<
-                iObjects[j].getArchive().getName() <<
-                " has a different number of children than " <<
-                iObjects[0].getFullName() << " in " <<
-                iObjects[0].getArchive().getName() << std::endl;
-
-            exit(1);
+            continue;
         }
-    }
 
-    for (size_t i = 0 ; i < numChildren; i++ )
-    {
-        std::vector< IObject > iChildObjects;
-        for (size_t f = 0; f < iObjects.size(); f++)
+        for (size_t j = 0; j < iObjects[i].getNumChildren(); ++j)
         {
-            iChildObjects.push_back(iObjects[f].getChild(i));
+            std::vector< IObject > childObjects;
+            std::string childName = iObjects[i].getChildHeader(j).getName();
+            // skip names that we've already written out
+            if (outObj.getChildHeader(childName) != NULL)
+            {
+                continue;
+            }
+
+            for (size_t k =i; k < iObjects.size(); ++k)
+            {
+                childObjects.push_back(iObjects[k].getChild(childName));
+            }
+
+            visitObjects(childObjects, outObj, iTimeMap);
         }
-        visitObjects(iChildObjects, outObj);
     }
 
 }
@@ -802,40 +969,29 @@ int main( int argc, char *argv[] )
         iArchives.reserve(numInputs);
 
         std::map< chrono_t, size_t > minIndexMap;
-        size_t rootChildren = 0;
 
         Alembic::AbcCoreFactory::IFactory factory;
         factory.setPolicy(ErrorHandler::kThrowPolicy);
         Alembic::AbcCoreFactory::IFactory::CoreType coreType;
+        TimeAndSamplesMap timeMap;
 
         for (int i = 2; i < argc; ++i)
         {
 
             IArchive archive = factory.getArchive(argv[i], coreType);
-            if (!archive.valid() || archive.getTop().getNumChildren() < 1)
+            if (!archive.valid())
             {
                 std::cerr << "ERROR: " << argv[i] <<
                     " not a valid Alembic file" << std::endl;
                 return 1;
             }
 
-            IObject iRoot = archive.getTop();
-            size_t numChildren = iRoot.getNumChildren();
-
-            if (i == 2)
-            {
-                rootChildren = numChildren;
-            }
-            else if (rootChildren != numChildren)
-            {
-                std::cerr << "ERROR: " << argv[i] <<
-                    " doesn't have the same number of children as: " <<
-                    argv[i-1] << std::endl;
-            }
-
             // reorder the input files according to their mins
             chrono_t min = DBL_MAX;
             Alembic::Util::uint32_t numSamplings = archive.getNumTimeSamplings();
+            timeMap.add(archive.getTimeSampling(0),
+                        archive.getMaxNumSamplesForTimeSamplingIndex(0));
+
             if (numSamplings > 1)
             {
                 // timesampling index 0 is special, so it will be skipped
@@ -845,8 +1001,14 @@ int main( int argc, char *argv[] )
                 //
                 min = archive.getTimeSampling(1)->getSampleTime(0);
 
+                timeMap.add(archive.getTimeSampling(1),
+                    archive.getMaxNumSamplesForTimeSamplingIndex(1));
+
                 for (Alembic::Util::uint32_t s = 2; s < numSamplings; ++s)
                 {
+                    timeMap.add(archive.getTimeSampling(s),
+                        archive.getMaxNumSamplesForTimeSamplingIndex(s));
+
                     chrono_t thisMin =
                         archive.getTimeSampling(s)->getSampleTime(0);
 
@@ -871,12 +1033,6 @@ int main( int argc, char *argv[] )
                         << argv[2] << " and " << argv[i] << std::endl;
                     return 1;
                 }
-            }
-            else
-            {
-                std::cerr << "ERROR: " << archive.getName() <<
-                    " only has default (static) TimeSampling." << std::endl;
-                return 1;
             }
 
             iArchives.push_back(archive);
@@ -915,31 +1071,18 @@ int main( int argc, char *argv[] )
 
         OObject oRoot = oArchive.getTop();
         if (!oRoot.valid())
+        {
             return -1;
-
-        std::vector<IObject> iRoots;
-        iRoots.resize(numInputs);
-        for (size_t f = 0; f < rootChildren; ++f)
-        {
-            for (size_t g = 0; g < numInputs; ++g)
-            {
-                iRoots[g] = iOrderedArchives[g].getTop().getChild(f);
-            }
-
-            visitObjects(iRoots, oRoot);
         }
 
-        // collect the top level compound property
-        ICompoundPropertyVec iCompoundProps;
-        iCompoundProps.reserve(numInputs);
-        for (size_t f = 0; f < numInputs; ++f)
+        std::vector<IObject> iRoots(numInputs);
+
+        for (size_t e = 0; e < numInputs; ++e)
         {
-            iCompoundProps.push_back(iRoots[f].getParent().getProperties());
+            iRoots[e] = iOrderedArchives[e].getTop();
         }
 
-        OCompoundProperty oCompoundProperty = oRoot.getProperties();
-        stitchCompoundProp(iCompoundProps, oCompoundProperty);
-
+        visitObjects(iRoots, oRoot, timeMap);
     }
 
     return 0;
