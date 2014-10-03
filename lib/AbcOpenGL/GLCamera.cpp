@@ -148,19 +148,44 @@ void GLCamera::lookAt( const V3d &eye, const V3d &at )
 }
 
 //-*****************************************************************************
-void GLCamera::apply() const
+// @TODO: check to see if there is already a constant for this.
+static const GLdouble PI = 3.1415926535897932384626433832795;
+
+/// replacement for gluPerspective
+void
+applied_perspective_matrix(
+        GLdouble fovY,
+        GLdouble aspect,
+        GLdouble zNear,
+        GLdouble zFar)
+{
+    GLdouble fW, fH;
+
+    //fH = tan( (fovY / 2) / 180 * pi ) * zNear;
+    fH = tan(radians(fovY) / 2.0f) * zNear;
+    fW = fH * aspect;
+
+    glFrustum( -fW, fW, -fH, fH, zNear, zFar );
+}
+
+void GLCamera::applyViewport() const
 {
     glViewport( 0, 0, ( GLsizei )m_size[0], ( GLsizei )m_size[1] );
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    gluPerspective( m_fovy,
-                    ( ( GLdouble )m_size[0] ) /
-                    ( ( GLdouble )m_size[1] ),
-                    m_clip[0],
+    applied_perspective_matrix( m_fovy,
+            ( ( GLdouble )m_size[0] ) /
+            ( ( GLdouble )m_size[1] ),
+            m_clip[0],
                     m_clip[1] );
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
+}
+
+//-*****************************************************************************
+void GLCamera::apply() const
+{
 
     ::glScaled( 1.0 / m_scale[0], 1.0 / m_scale[1], 1.0 / m_scale[2] );
 
