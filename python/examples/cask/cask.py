@@ -213,6 +213,7 @@ OPROPERTIES = {
     ".shaderNames": alembic.Abc.OStringArrayProperty,
     'slideMap': alembic.Abc.OStringProperty,
     ".ops": alembic.Abc.OUcharProperty,
+    "visible": alembic.Abc.OCharProperty
 }
 
 _COMPOUND_PROPERTY_VALUE_ERROR_ = "Compound properties cannot have values"
