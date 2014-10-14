@@ -527,19 +527,21 @@ class Archive(object):
                     / float(self.fps))
             elif tst.isAcyclic():
                 num_times = ts.getNumStoredTimes()
-                if num_times > num_stored_times:
-                    num_stored_times = num_times
-                    self.__start_time = ts.getSampleTime(0)
-                    self.__end_time = ts.getSampleTime(num_times-1)
-            else:
-                self.__start_time = 0
-                self.__end_time = 0
+                num_stored_times = num_times
+                self.__start_time = ts.getSampleTime(0)
+                self.__end_time = ts.getSampleTime(num_times-1)
+ 
+        if self.__start_time is None:
+            self.__start_time = 0.0
+
+        if self.__end_time is None:
+            self.__end_time = 0.0
 
         return (self.__start_time, self.__end_time)
 
     def start_time(self):
         """Returns the global start time in seconds."""
-        return self.time_range()[0] or 0.0
+        return self.time_range()[0]
 
     def set_start_time(self, start):
         """Sets the start time in seconds."""
@@ -557,7 +559,7 @@ class Archive(object):
 
     def end_time(self):
         """Returns the global end time in seconds."""
-        return self.time_range()[1] or 0.0
+        return self.time_range()[1]
 
     def end_frame(self):
         """Returns the last frame."""
