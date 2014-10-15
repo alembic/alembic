@@ -537,17 +537,26 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
             if (!inheritPlug.isNull())
             {
                 if (util::getSampledType(inheritPlug) != 0)
+                {
                     mInheritsPlug = inheritPlug;
-
+                }
                 mSample.setInheritsXforms(inheritPlug.asBool());
+            }
+
+            // no animated inherits plug and no animated samples?
+            // then use the default time sampling
+            if (mAnimChanList.empty() && mInheritsPlug.isNull())
+            {
+                mSchema.setTimeSampling(0);
             }
 
             // everything is default, don't write anything
             if (mSample.getNumOps() == 0 && mSample.getInheritsXforms())
+            {
                 return;
+            }
 
             mSchema.set(mSample);
-
             return;
         }
     }
@@ -583,15 +592,24 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
             if (!inheritPlug.isNull())
             {
                 if (util::getSampledType(inheritPlug) != 0)
+                {
                     mInheritsPlug = inheritPlug;
-
+                }
                 mSample.setInheritsXforms(inheritPlug.asBool());
             }
 
+            // no animated inherits plug and no animated samples?
+            // then use the default time sampling
+            if (mAnimChanList.empty() && mInheritsPlug.isNull())
+            {
+                mSchema.setTimeSampling(0);
+            }
 
             // everything is default, don't write anything
             if (mSample.getNumOps() == 0 && mSample.getInheritsXforms())
+            {
                 return;
+            }
 
             mSchema.set(mSample);
             return;
@@ -663,15 +681,25 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
     if (!inheritPlug.isNull())
     {
         if (util::getSampledType(inheritPlug) != 0)
+        {
             mInheritsPlug = inheritPlug;
-
+        }
         mSample.setInheritsXforms(inheritPlug.asBool());
     }
 
+    // no animated inherits plug and no animated samples?
+    // then use the default time sampling
+    if (mAnimChanList.empty() && mInheritsPlug.isNull())
+    {
+        mSchema.setTimeSampling(0);
+    }
 
-    // everything is default, don't write anything
+    // everything is default, don't write anything and use the default
+    // time sampling
     if (mSample.getNumOps() == 0 && mSample.getInheritsXforms())
+    {
         return;
+    }
 
     mSchema.set(mSample);
 

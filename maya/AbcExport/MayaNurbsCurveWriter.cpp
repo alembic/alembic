@@ -109,7 +109,13 @@ MayaNurbsCurveWriter::MayaNurbsCurveWriter(MDagPath & iDag,
         MObject curve = iDag.node();
 
         if (iTimeIndex != 0 && util::isAnimated(curve))
+        {
             mIsAnimated = true;
+        }
+        else
+        {
+            iTimeIndex = 0;
+        }
     }
 
     name = util::stripNamespaces(name, iArgs.stripNamespace);

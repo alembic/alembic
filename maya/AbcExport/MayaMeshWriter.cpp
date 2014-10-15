@@ -277,7 +277,13 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     MObject surface = iDag.node();
 
     if (iTimeIndex != 0 && util::isAnimated(surface))
+    {
         mIsGeometryAnimated = true;
+    }
+    else
+    {
+        iTimeIndex = 0;
+    }
 
     std::vector<float> uvs;
     std::vector<Alembic::Util::uint32_t> indices;
@@ -790,15 +796,7 @@ void MayaMeshWriter::writePoly(
         Alembic::Abc::Int32ArraySample(facePoints),
         Alembic::Abc::Int32ArraySample(pointCounts), iUVs, normalsSamp);
 
-    // if this mesh is animated, write out the animated geometry
-    if (mIsGeometryAnimated)
-    {
-        mPolySchema.set(samp);
-    }
-    else
-    {
-        mPolySchema.set(samp);
-    }
+    mPolySchema.set(samp);
     writeColor();
 }
 
