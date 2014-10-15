@@ -42,7 +42,7 @@ into high level convenience methods.
 
 More information can be found at http://docs.alembic.io/python/cask.html
 """
-__version__ = "0.9"
+__version__ = "0.9.1"
 
 import os
 import re
@@ -213,6 +213,7 @@ OPROPERTIES = {
     ".shaderNames": alembic.Abc.OStringArrayProperty,
     'slideMap': alembic.Abc.OStringProperty,
     ".ops": alembic.Abc.OUcharProperty,
+    "visible": alembic.Abc.OCharProperty
 }
 
 _COMPOUND_PROPERTY_VALUE_ERROR_ = "Compound properties cannot have values"
@@ -374,14 +375,19 @@ class Archive(object):
         if filepath and not os.path.isfile(filepath):
             raise RuntimeError("Nonexistent file: %s" % filepath)
 
-        # set some default values
         self.filepath = None
+        self.id = id(self)
+        
+        # internal object attributes
         self._iobject = None
         self._oobject = None
         self._top = None
-        self.fps = fps
+
+        # time sampling attributes
         self.time_sampling_id = 0
-        self.id = id(self)
+        self.fps = fps
+        self.__start_time = None
+        self.__end_time = None
 
         # read in the archive
         self.__read_from_file(filepath)
@@ -505,45 +511,63 @@ class Archive(object):
         """
         top_props = self.top.properties
         g_start_frame, g_end_time = (None, None)
-        start_time, end_time = (0, 0)
-        for index, tsamp in enumerate(self.timesamplings):
-            prop_name = "%s.samples" % index
-            if prop_name not in top_props:
-                continue
-            num_samples = top_props[prop_name].get_value()
-            start_time = tsamp.getSampleTime(0)
-            end_time = tsamp.getSampleTime(num_samples - 1)
-            if g_start_frame is None:
-                g_start_frame = start_time
-            else:
-                min(start_time, g_start_frame)
-            if g_end_time is None:
-                g_end_time = end_time
-            else:
-                max(end_time, g_end_time)
-        return (start_time, end_time)
+
+        if self.__start_time is not None and self.__end_time is not None:
+            return (self.__start_time, self.__end_time)
+
+        num_stored_times = 1
+
+        for index, ts in enumerate(self.timesamplings):
+            tst = ts.getTimeSamplingType()
+            if tst.isCyclic() or tst.isUniform():
+                tpc = tst.getNumSamplesPerCycle()
+                self.__start_time = ts.getStoredTimes()[0]
+                self.__end_time = self.__start_time +\
+                    (((self.iobject.getMaxNumSamplesForTimeSamplingIndex(index) / tpc) - 1)\
+                    / float(self.fps))
+            elif tst.isAcyclic():
+                num_times = ts.getNumStoredTimes()
+                num_stored_times = num_times
+                self.__start_time = ts.getSampleTime(0)
+                self.__end_time = ts.getSampleTime(num_times-1)
+ 
+        if self.__start_time is None:
+            self.__start_time = 0.0
+
+        if self.__end_time is None:
+            self.__end_time = 0.0
+
+        return (self.__start_time, self.__end_time)
 
     def start_time(self):
         """Returns the global start time in seconds."""
         return self.time_range()[0]
 
+    def set_start_time(self, start):
+        """Sets the start time in seconds."""
+        self.__start_time = start
+        if start > self.__end_time:
+            self.__end_time = start
+
     def start_frame(self):
-        """
-        :param fps: Frames per second used to calculate the start frame
-        :return: Start frame as int
-        """
+        """Returns the start frame."""
         return round(self.start_time() * self.fps)
+
+    def set_start_frame(self, frame):
+        """Sets the start frame."""
+        self.__start_time = frame / float(self.fps)
 
     def end_time(self):
         """Returns the global end time in seconds."""
         return self.time_range()[1]
 
     def end_frame(self):
-        """
-        :param fps: Frames per second used to calculate the end frame
-        :return: Last frame as int
-        """
+        """Returns the last frame."""
         return round(self.end_time() * self.fps)
+
+    def frame_range(self):
+        """Returns a tuple of the global start and end times in frames."""
+        return (self.start_frame(), self.end_frame())
 
     def close(self):
         """Closes this archive and makes it immutable."""
@@ -590,11 +614,19 @@ class Archive(object):
         Writes this archive to a file on disk and closes the Archive.
         """
         smps = []
+        # look for timesampling data on the iarchive first
         if self.iobject and not self.oobject:
             smps = [(i, ts) for i, ts in enumerate(self.timesamplings)]
+        # is none exist, create a new one
+        if not smps:
+            smps.append((1, alembic.AbcCoreAbstract.TimeSampling(
+                         1 / float(self.fps), self.start_time())))
+            self.time_sampling_id = 1
+        # create the oarchive
         if not self.oobject:
             self.oobject = alembic.Abc.OArchive(filepath, asOgawa)
             self.top.oobject = self.oobject.getTop()
+        # set timesampling objects on the oarchive
         for i, time_sample in smps:
             self.oobject.addTimeSampling(time_sample)
         self.__write()
@@ -1186,6 +1218,9 @@ class Object(object):
             index = len(self._osamples)
         self._osamples.insert(index, sample)
 
+    def _set_default_sample(self):
+        pass
+
     def is_leaf(self):
         """
         Returns True if this object is a leaf node, i.e. it has no children.
@@ -1299,6 +1334,8 @@ class Object(object):
         obj = self.oobject
         for prop in self.properties.values():
             prop.save()
+        if not self._osamples:
+            self._set_default_sample()
         for sample in self._osamples:
             obj.getSchema().set(sample)
 
@@ -1386,6 +1423,9 @@ class Camera(Object):
     """Camera I/O Object subclass."""
     def __init__(self, *args, **kwargs):
         super(Camera, self).__init__(*args, **kwargs)
+
+    def _set_default_sample(self):
+        self.set_sample(alembic.AbcGeom.CameraSample(), 0)
 
 class NuPatch(Object):
     """NuPath I/O Object subclass."""

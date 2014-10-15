@@ -428,6 +428,28 @@ class Test1_Write(unittest.TestCase):
         b = cask.Archive()
         self.assertNotEqual(a, b)
 
+    def test_frame_range(self):
+        filename = os.path.join(TEMPDIR, "cask_frame_range.abc")
+
+        # create a new archive and some objects
+        a = cask.Archive()
+        xf = a.top.children["renderCamXform"] = cask.Xform()
+        
+        # set the start frame to 1001
+        a.set_start_frame(1001)
+
+        self.assertEqual(a.start_frame(), 1001)
+        self.assertEqual(a.start_time(), 1001 / float(a.fps))
+
+        # add some sample data
+        for i in range(24):
+            samp = alembic.AbcGeom.XformSample()
+            samp.setTranslation(imath.V3d(i, 2.0, 3.0))
+            xf.set_sample(samp)
+
+        # export it
+        a.write_to_file(filename)
+
     def test_deep_dict(self):
         filename = os.path.join(TEMPDIR, "cask_deep_dict.abc")
 
@@ -696,6 +718,17 @@ class Test2_Read(unittest.TestCase):
         self.assertEqual(type(m), cask.PolyMesh)
         self.assertEqual(len(m.properties[".geom"].properties), 7)
 
+    def test_verify_frame_range(self):
+        filename = os.path.join(TEMPDIR, "cask_frame_range.abc")
+        self.assertTrue(cask.is_valid(filename))
+
+        a = cask.Archive(filename)
+        
+        # verify the frame range
+        self.assertEqual(a.start_time(), 1001 / float(a.fps))
+        self.assertEqual(a.start_frame(), 1001)
+        self.assertEqual(a.end_frame(), 1024)
+
     def test_verify_deep_dict(self):
         filename = os.path.join(TEMPDIR, "cask_deep_dict.abc")
         self.assertTrue(cask.is_valid(filename))
@@ -767,6 +800,33 @@ class Test3_Issues(unittest.TestCase):
         tst_3 = c.timesamplings[0].getTimeSamplingType()
         tst_4 = d.timesamplings[0].getTimeSamplingType()
         self.assertEqual(str(tst_3), str(tst_4))
+
+    def test_issue_349(self):
+        test_file = os.path.join(TEMPDIR, "cask_test_issue_349.abc")
+
+        # create a new archive and some objects
+        a = cask.Archive()
+        xf = a.top.children["renderCamXform"] = cask.Xform()
+        cam = xf.children["renderCamShape"] = cask.Camera()
+
+        # add some sample data
+        for i in range(24):
+            samp = alembic.AbcGeom.XformSample()
+            samp.setTranslation(imath.V3d(i, 2.0, 3.0))
+            xf.set_sample(samp)
+
+        # export it
+        a.write_to_file(test_file)
+        a.close()
+
+        # read the test archive back in and verify results
+        a = cask.Archive(test_file)
+        xform = a.top.children["renderCamXform"]
+        self.assertEqual(len(a.timesamplings), 2)
+        self.assertEqual(xform.time_sampling_id, 1)
+        self.assertEqual(len(xform.samples), 24)
+        self.assertEqual(a.start_frame(), 0)
+        self.assertEqual(a.end_frame(), 23)
 
 if __name__ == '__main__':
     unittest.main()
