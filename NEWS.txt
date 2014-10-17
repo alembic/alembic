@@ -1,3 +1,57 @@
+2015-10-17, Alembic 1.5.6
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+AbcCoreAbstract:
+Improve stability of TimeSamplingType equality comparison. (pull request 11)
+
+Maya:
+
+AbcExport:
+
+Recognize "faceVaryingInterpolateBoundary" not "facVaryingInterpolateBoundary"
+plug when writing out an MFnMesh as a SubD. (pull request 6)
+
+Don't produce an error for meshes without valid per-face mapping, e.g. whole
+object mappings. (pull request 6)
+
+Only create face sets for shading groups applied with with per-face mappings.
+(pull request 6)
+
+Make sure a schema that is detected to be static is written out with the
+default time sampling. (pull request 7)
+
+AbcImport:
+
+Don't warnt about UVs or normals size being mismatched if the mesh has no
+points.  (pull request 8)
+
+Connections to custom VectorArray and PointArray properties will no longer fail.
+(pull request 8)
+
+Support varying or vertex color properties and unpacking them into facevarying
+as Maya requires. (pull request 8)
+
+Only call setUsedAsColor for attributes that are constant scoped.
+(pull request 8)
+
+
+Utilities:
+
+AbcStitcher:
+Revamp AbcStitcher to better handle cases where certain shapes or properties
+may not exist in some of the files. (pull request 7)
+
+Build system:
+
+Boost_PYTHON_LIBRARY is case sensitive. (pull request 8)
+
+
+
+##-*****************************************************************************
+
 2014-07-15, Alembic 1.5.5
 Hello Alembic users, thanks to your feedback and reports we have a few bug
 fixes and enhancements.
