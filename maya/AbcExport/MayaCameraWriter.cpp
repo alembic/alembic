@@ -61,7 +61,13 @@ MayaCameraWriter::MayaCameraWriter(MDagPath & iDag,
 
     MObject cameraObj = iDag.node();
     if (iTimeIndex != 0 && util::isAnimated(cameraObj))
+    {
         mIsAnimated = true;
+    }
+    else
+    {
+        iTimeIndex = 0;
+    }
 
     MObject renderObj;
     MSelectionList sel;
