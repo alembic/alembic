@@ -112,7 +112,7 @@ namespace
         Alembic::AbcGeom::V2fArraySamplePtr uvPtr = samp.getVals();
         Alembic::Abc::UInt32ArraySamplePtr indexPtr = samp.getIndices();
 
-        if (numFaceVertices != indexPtr->size() &&
+        if (numVertices != 0 && numFaceVertices != indexPtr->size() &&
             numVertices != indexPtr->size())
         {
             printWarning(
@@ -313,7 +313,7 @@ namespace
 
             ioMesh.setFaceVertexNormals(normalsIn, faceList, vertexList);
         }
-        else if (sampSize != 0)
+        else if (sampSize != 0 && ioMesh.numVertices() != 0)
         {
             printWarning(ioMesh.fullPathName() +
                 " normal vector scope does not match size of data, " +
@@ -427,14 +427,35 @@ namespace
         // per vertex per-polygon color
         int numFaces = ioMesh.numPolygons();
         int nIndex = 0;
-        MIntArray assignmentList((unsigned int)iSampIndices->size());
-        for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
+
+        bool isFacevarying =
+            ioMesh.numFaceVertices() == (int) iSampIndices->size();
+
+        MIntArray assignmentList(ioMesh.numFaceVertices());
+        if (isFacevarying)
         {
-            int numVertices = ioMesh.polygonVertexCount(faceIndex);
-            int curIndex = nIndex;
-            for (int v = numVertices - 1; v >= 0; v--, ++nIndex)
+            for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
             {
-                assignmentList[nIndex] = (int) (*iSampIndices)[curIndex + v];
+                int numVertices = ioMesh.polygonVertexCount(faceIndex);
+                int curIndex = nIndex;
+                for (int v = numVertices - 1; v >= 0; v--, ++nIndex)
+                {
+                    assignmentList[nIndex] = (int)(*iSampIndices)[curIndex + v];
+                }
+            }
+        }
+        else
+        {
+            for (int faceIndex = 0; faceIndex < numFaces; faceIndex++)
+            {
+                int numVertices = ioMesh.polygonVertexCount(faceIndex);
+                MIntArray vertexList;
+                ioMesh.getPolygonVertices (faceIndex, vertexList);
+                for (int v = numVertices - 1; v >= 0; v--, ++nIndex)
+                {
+                    assignmentList[nIndex] =
+                        (int)(*iSampIndices)[vertexList[v]];
+                }
             }
         }
 
@@ -470,10 +491,21 @@ namespace
         Alembic::Abc::C3fArraySamplePtr sampVal = samp.getVals();
         size_t sampSize = sampVal->size();
 
-        if (ioMesh.numFaceVertices() != (int) samp.getIndices()->size())
+        if (ioMesh.numVertices() != 0 &&
+            ioMesh.numFaceVertices() != (int) samp.getIndices()->size() &&
+            ioMesh.numVertices() != (int) samp.getIndices()->size())
         {
-            MGlobal::displayWarning(
-                "Color sample size != num face vertices");
+            MString msg = "Color sample size is: ";
+            msg += (int) samp.getIndices()->size();
+            msg += " expecting: ";
+            msg += ioMesh.numVertices();
+            msg += " or ";
+            msg += ioMesh.numFaceVertices();
+            MGlobal::displayWarning(msg);
+            return;
+        }
+        else if (ioMesh.numVertices() == 0)
+        {
             return;
         }
 
@@ -539,7 +571,8 @@ namespace
         Alembic::Abc::C4fArraySamplePtr sampVal = samp.getVals();
         size_t sampSize = sampVal->size();
 
-        if (ioMesh.numFaceVertices() != (int)samp.getIndices()->size())
+        if (ioMesh.numFaceVertices() != (int)samp.getIndices()->size() &&
+            ioMesh.numVertices() != (int) samp.getIndices()->size())
         {
             MGlobal::displayWarning(
                 "Color sample size != num face vertices");
