@@ -464,10 +464,16 @@ double getWeightAndIndex(double iFrame,
 bool isColorSet(const Alembic::AbcCoreAbstract::PropertyHeader & iHeader,
     bool iUnmarkedFaceVaryingColors)
 {
-    return (Alembic::AbcGeom::IC3fGeomParam::matches(iHeader) ||
-            Alembic::AbcGeom::IC4fGeomParam::matches(iHeader)) &&
-            Alembic::AbcGeom::GetGeometryScope(iHeader.getMetaData()) ==
-                Alembic::AbcGeom::kFacevaryingScope &&
+    bool isColor = Alembic::AbcGeom::IC3fGeomParam::matches(iHeader) ||
+            Alembic::AbcGeom::IC4fGeomParam::matches(iHeader);
+
+    Alembic::AbcGeom::GeometryScope scope =
+        Alembic::AbcGeom::GetGeometryScope(iHeader.getMetaData());
+
+    bool isScoped = (scope == Alembic::AbcGeom::kFacevaryingScope ||
+                     scope == Alembic::AbcGeom::kVaryingScope ||
+                     scope == Alembic::AbcGeom::kVertexScope);
+    return (isColor && isScoped &&
             (iUnmarkedFaceVaryingColors ||
-            iHeader.getMetaData().get("mayaColorSet") != "");
+            iHeader.getMetaData().get("mayaColorSet") != ""));
 }
