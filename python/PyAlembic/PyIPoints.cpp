@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -88,6 +88,12 @@ void register_ipoints()
               ( arg( "iSS" ) = Abc::ISampleSelector() ) )
         .def( "getTimeSampling",
               &AbcG::IPointsSchema::getTimeSampling )
+        .def( "getChildBoundsProperty",
+              &AbcG::IPointsSchema::getChildBoundsProperty )
+        .def( "getArbGeomParams",
+              &AbcG::IPointsSchema::getArbGeomParams )
+        .def( "getUserProperties",
+              &AbcG::IPointsSchema::getUserProperties )
         .def( "valid", &AbcG::IPointsSchema::valid )
         .def( "reset", &AbcG::IPointsSchema::reset )
         .def( "__nonzero__", &AbcG::IPointsSchema::valid )

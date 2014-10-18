@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 - Alembic
 -
-- Copyright 2009-2013 Sony Pictures Imageworks, Inc. and
+- Copyright 2009-2014 Sony Pictures Imageworks, Inc. and
 - Industrial Light and Magic, a division of Lucasfilm Entertainment Company Ltd.
 -------------------------------------------------------------------------------
 

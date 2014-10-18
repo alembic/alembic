@@ -144,6 +144,12 @@ void register_opoints()
         .def( "setTimeSampling",
               setTimeSamplingByTimeSamplingPtr,
               ( arg( "TimeSampling" ) ) )
+        .def( "getChildBoundsProperty",
+              &AbcG::OPointsSchema::getChildBoundsProperty )
+        .def( "getArbGeomParams",
+              &AbcG::OPointsSchema::getArbGeomParams )
+        .def( "getUserProperties",
+              &AbcG::OPointsSchema::getUserProperties )
         .def( "valid", &AbcG::OPointsSchema::valid )
         .def( "reset", &AbcG::OPointsSchema::reset )
         .def( "__nonzero__", &AbcG::OPointsSchema::valid )
