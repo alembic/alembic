@@ -118,7 +118,7 @@ def mesh_out(name="cask_test_mesh.abc", force=False):
     meshyObj = alembic.AbcGeom.OPolyMesh(oarch.getTop(), 'meshy')
     mesh = meshyObj.getSchema()
 
-    uvsamp = alembic.AbcGeom.OV2fGeomParamSample(meshData.uvs, kFacevaryingScope) 
+    uvsamp = alembic.AbcGeom.OV2fGeomParamSample(meshData.uvs, kFacevaryingScope)
     nsamp  = alembic.AbcGeom.ON3fGeomParamSample(meshData.normals, kFacevaryingScope)
     mesh_samp = alembic.AbcGeom.OPolyMeshSchemaSample(
             meshData.verts, meshData.indices, meshData.counts, uvsamp, nsamp)
@@ -126,11 +126,11 @@ def mesh_out(name="cask_test_mesh.abc", force=False):
     cbox = imath.Box3d()
     cbox.extendBy(imath.V3d(1.0, -1.0, 0.0))
     cbox.extendBy(imath.V3d(-1.0, 1.0, 3.0))
-   
+
     for i in range(10):
         mesh.getChildBoundsProperty().setValue(cbox)
         mesh.set(mesh_samp)
-    
+
     del oarch
     return filename
 
@@ -147,7 +147,7 @@ def cube_out(name="cask_test_cube.abc", force=False):
 
     tst = alembic.AbcCoreAbstract.TimeSamplingType(numSamplesPerCycle, timePerCycle)
     ts = alembic.AbcCoreAbstract.TimeSampling(tst, tvec)
-   
+
     top = alembic.Abc.OArchive(filename).getTop()
     tsidx = top.getArchive().addTimeSampling(ts)
 
@@ -190,7 +190,7 @@ class Test1_Write(unittest.TestCase):
         # create empty archive
         a = cask.Archive()
         self.assertEqual(len(a.top.children), 0)
-        
+
         # create xform object named foo and make it a child of top
         f = a.top.children["foo"] = cask.Xform()
         self.assertEqual(len(a.top.children), 1)
@@ -241,9 +241,31 @@ class Test1_Write(unittest.TestCase):
         a.write_to_file(filename)
         self.assertTrue(os.path.isfile(filename))
 
+    def test_write_geom(self):
+        filename = os.path.join(TEMPDIR, "cask_write_geom.abc")
+
+        # create empty archive and put some objects in it
+        a = cask.Archive()
+
+        # create one of each geom class
+        a.top.children["xform"] = cask.Xform()
+        a.top.children["polymesh"] = cask.PolyMesh()
+        a.top.children["subd"] = cask.SubD()
+        a.top.children["faceset"] = cask.FaceSet()
+        a.top.children["curve"] = cask.Curve()
+        a.top.children["camera"] = cask.Camera()
+        a.top.children["nupatch"] = cask.NuPatch()
+        a.top.children["material"] = cask.Material()
+        a.top.children["light"] = cask.Light()
+        a.top.children["points"] = cask.Points()
+
+        # export the archive
+        a.write_to_file(filename)
+        self.assertTrue(os.path.isfile(filename))
+
     def test_write_mesh(self):
         filename = os.path.join(TEMPDIR, "cask_write_mesh.abc")
-        
+
         # create empty archive, xform and polymesh
         a = cask.Archive()
         x = cask.Xform()
@@ -257,9 +279,9 @@ class Test1_Write(unittest.TestCase):
         x.set_scale(imath.V3d(1, 2, 3))
 
         # create alembic polymesh sample and set it on our polymesh
-        uvsamp = alembic.AbcGeom.OV2fGeomParamSample(meshData.uvs, kFacevaryingScope) 
+        uvsamp = alembic.AbcGeom.OV2fGeomParamSample(meshData.uvs, kFacevaryingScope)
         nsamp = alembic.AbcGeom.ON3fGeomParamSample(meshData.normals, kFacevaryingScope)
-        s = alembic.AbcGeom.OPolyMeshSchemaSample(meshData.verts, meshData.indices, 
+        s = alembic.AbcGeom.OPolyMeshSchemaSample(meshData.verts, meshData.indices,
                 meshData.counts, uvsamp, nsamp)
         p.set_sample(s)
 
@@ -319,7 +341,7 @@ class Test1_Write(unittest.TestCase):
 
         # test inerting a node into the hierarchy at the top
         a = cask.Archive(mesh_out())
-        
+
         # insert a new xform between two nodes
         r = cask.Xform()
         m = a.top.children["meshy"]
@@ -423,7 +445,7 @@ class Test1_Write(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertEqual(a.top.parent, a)
         self.assertEqual(a.top.archive(), a)
-        
+
         # reassign 'b' to a new empty archive
         b = cask.Archive()
         self.assertNotEqual(a, b)
@@ -434,7 +456,7 @@ class Test1_Write(unittest.TestCase):
         # create a new archive and some objects
         a = cask.Archive()
         xf = a.top.children["renderCamXform"] = cask.Xform()
-        
+
         # set the start frame to 1001
         a.set_start_frame(1001)
 
@@ -514,7 +536,7 @@ class Test2_Read(unittest.TestCase):
     def test_verify_write_basic(self):
         filename = os.path.join(TEMPDIR, "cask_write_basic.abc")
         self.assertTrue(cask.is_valid(filename))
-        
+
         a = cask.Archive(filename)
         self.assertEqual(len(a.top.children), 1)
         self.assertEqual(a.top.children.values()[0].name, "foo")
@@ -576,11 +598,11 @@ class Test2_Read(unittest.TestCase):
         filepath = lights_out()
         a = cask.Archive(filepath)
         t = a.top
-    
+
         # get some objects to test
         lightA = t.children["lightA"]
         lightB = t.children["lightB"]
-        
+
         # test paths on objects
         self.assertEqual(a.path(), filepath)
         self.assertEqual(t.path(), "/")
@@ -589,7 +611,7 @@ class Test2_Read(unittest.TestCase):
         self.assertEqual(t.children[lightA.path()], lightA)
 
         # test paths on properties
-        self.assertEqual(lightB.properties[".geom/.camera/.core"].path(), 
+        self.assertEqual(lightB.properties[".geom/.camera/.core"].path(),
                             "/lightB/.geom/.camera/.core")
 
         # test paths on empty archive
@@ -669,6 +691,25 @@ class Test2_Read(unittest.TestCase):
         self.assertEqual(geom.properties["P"].values[0][0], imath.V3f(-1, -1, -1))
         self.assertEqual(geom.properties["N"].values[0][0], imath.V3f(-1, 0, 0))
 
+    def test_verify_write_geom(self):
+        filename = os.path.join(TEMPDIR, "cask_write_geom.abc")
+        self.assertTrue(os.path.isfile(filename))
+
+        # open the test archive
+        a = cask.Archive(filename)
+
+        # verify the object names and geom classes are correct
+        self.assertEqual(type(a.top.children["xform"]), cask.Xform)
+        self.assertEqual(type(a.top.children["polymesh"]), cask.PolyMesh)
+        self.assertEqual(type(a.top.children["subd"]), cask.SubD)
+        self.assertEqual(type(a.top.children["faceset"]), cask.FaceSet)
+        self.assertEqual(type(a.top.children["curve"]), cask.Curve)
+        self.assertEqual(type(a.top.children["camera"]), cask.Camera)
+        self.assertEqual(type(a.top.children["nupatch"]), cask.NuPatch)
+        self.assertEqual(type(a.top.children["material"]), cask.Material)
+        self.assertEqual(type(a.top.children["light"]), cask.Light)
+        self.assertEqual(type(a.top.children["points"]), cask.Points)
+
     def test_verify_write_mesh(self):
         filename = os.path.join(TEMPDIR, "cask_write_mesh.abc")
         self.assertTrue(cask.is_valid(filename))
@@ -710,7 +751,7 @@ class Test2_Read(unittest.TestCase):
         a = cask.Archive(filename)
         r = a.top.children.values()[0]
         m = r.children.values()[0]
-        
+
         # verify re-parenting
         self.assertEqual(r.name, "root")
         self.assertEqual(type(r), cask.Xform)
@@ -723,7 +764,7 @@ class Test2_Read(unittest.TestCase):
         self.assertTrue(cask.is_valid(filename))
 
         a = cask.Archive(filename)
-        
+
         # verify the frame range
         self.assertEqual(a.start_time(), 1001 / float(a.fps))
         self.assertEqual(a.start_frame(), 1001)
@@ -747,7 +788,7 @@ class Test2_Read(unittest.TestCase):
 class Test3_Issues(unittest.TestCase):
     def test_issue_318(self):
         filename = "cask_test_issue_318.abc"
-        
+
         # create a test file
         test_file_1 = mesh_out(filename)
 
@@ -755,10 +796,10 @@ class Test3_Issues(unittest.TestCase):
         a = cask.Archive(test_file_1)
         self.assertEqual(a.top.children.keys(), ['meshy'])
         a.close()
-       
+
         # try to write to the same file path
         #  the error that's being tested for is this:
-        #   hdf5-1.8.9/src/H5F.c line 1255 in H5F_open(): 
+        #   hdf5-1.8.9/src/H5F.c line 1255 in H5F_open():
         #   unable to truncate a file which is already open
         test_file_2 = mesh_out(filename, force=True)
 
