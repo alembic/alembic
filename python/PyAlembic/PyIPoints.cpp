@@ -53,7 +53,8 @@ void register_ipoints()
 
     // IPointsSchema
     //
-    class_<AbcG::IPointsSchema> (
+    class_<AbcG::IPointsSchema,
+           bases<AbcG::IGeomBaseSchema<AbcG::PointsSchemaInfo> > >(
           "IPointsSchema",
           "The IPointsSchema class is a points schema reader.",
           init<>() )
@@ -88,12 +89,6 @@ void register_ipoints()
               ( arg( "iSS" ) = Abc::ISampleSelector() ) )
         .def( "getTimeSampling",
               &AbcG::IPointsSchema::getTimeSampling )
-        .def( "getChildBoundsProperty",
-              &AbcG::IPointsSchema::getChildBoundsProperty )
-        .def( "getArbGeomParams",
-              &AbcG::IPointsSchema::getArbGeomParams )
-        .def( "getUserProperties",
-              &AbcG::IPointsSchema::getUserProperties )
         .def( "valid", &AbcG::IPointsSchema::valid )
         .def( "reset", &AbcG::IPointsSchema::reset )
         .def( "__nonzero__", &AbcG::IPointsSchema::valid )
