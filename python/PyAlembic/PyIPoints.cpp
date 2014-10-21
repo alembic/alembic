@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -53,7 +53,8 @@ void register_ipoints()
 
     // IPointsSchema
     //
-    class_<AbcG::IPointsSchema> (
+    class_<AbcG::IPointsSchema,
+           bases<AbcG::IGeomBaseSchema<AbcG::PointsSchemaInfo> > >(
           "IPointsSchema",
           "The IPointsSchema class is a points schema reader.",
           init<>() )

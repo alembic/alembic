@@ -42,7 +42,7 @@ into high level convenience methods.
 
 More information can be found at http://docs.alembic.io/python/cask.html
 """
-__version__ = "0.9.1"
+__version__ = "0.9.2"
 
 import os
 import re
@@ -59,7 +59,7 @@ IOBJECTS = {
     "FaceSet": alembic.AbcGeom.IFaceSet,
     "Light": alembic.AbcGeom.ILight,
     "Material": alembic.AbcMaterial.IMaterial,
-    "NuPatch": alembic.AbcGeom.INuPatch, 
+    "NuPatch": alembic.AbcGeom.INuPatch,
     "Points": alembic.AbcGeom.IPoints,
     "PolyMesh": alembic.AbcGeom.IPolyMesh,
     "SubD": alembic.AbcGeom.ISubD,
@@ -74,7 +74,7 @@ OOBJECTS = {
     "FaceSet": alembic.AbcGeom.OFaceSet,
     "Light": alembic.AbcGeom.OLight,
     "Material": alembic.AbcMaterial.OMaterial,
-    "NuPatch": alembic.AbcGeom.ONuPatch, 
+    "NuPatch": alembic.AbcGeom.ONuPatch,
     "Points": alembic.AbcGeom.OPoints,
     "PolyMesh": alembic.AbcGeom.OPolyMesh,
     "SubD": alembic.AbcGeom.OSubD,
@@ -89,7 +89,7 @@ ISCHEMAS = {
     "FaceSet": alembic.AbcGeom.IFaceSetSchema,
     "Light": alembic.AbcGeom.ILightSchema,
     "Material": alembic.AbcMaterial.IMaterialSchema,
-    "NuPatch": alembic.AbcGeom.INuPatchSchema, 
+    "NuPatch": alembic.AbcGeom.INuPatchSchema,
     "Points": alembic.AbcGeom.IPointsSchema,
     "PolyMesh": alembic.AbcGeom.IPolyMeshSchema,
     "SubD": alembic.AbcGeom.ISubDSchema,
@@ -234,7 +234,7 @@ def get_simple_oprop_class(name, value):
         return OPROPERTIES.get(str(name).lower(),
                OPROPERTIES.get(type(_value)).get(
                        {
-                        True:'array', 
+                        True:'array',
                         False:'scalar'
                        }.get((type(value) in [set, list] and len(value) > 1))
                    )
@@ -271,7 +271,7 @@ def wrap(iobject, time_sampling_id=None):
     for cls in Object.__subclasses__():
         if cls.matches(iobject):
             return cls(iobject, time_sampling_id=time_sampling_id)
-    return iobject
+    return Object(iobject)
 
 def is_valid(archive):
     """
@@ -338,7 +338,7 @@ class DeepDict(dict):
             if "/" in item:
                 return _deep_getitem(self.__getitem__, item)
             return super(DeepDict, self).__getitem__(item)
-        
+
     def __setitem__(self, name, item):
         obj = self.parent
         new = False
@@ -377,7 +377,7 @@ class Archive(object):
 
         self.filepath = None
         self.id = id(self)
-        
+
         # internal object attributes
         self._iobject = None
         self._oobject = None
@@ -409,7 +409,7 @@ class Archive(object):
         """sets iobject"""
         self._iobject = iobject
 
-    iobject = property(__get_iobject, __set_iobject, 
+    iobject = property(__get_iobject, __set_iobject,
                        doc="Internal Alembic IArchive object.")
 
     def __get_oobject(self):
@@ -424,7 +424,7 @@ class Archive(object):
         """sets oobject"""
         self._oobject = oobject
 
-    oobject = property(__get_oobject, __set_oobject, 
+    oobject = property(__get_oobject, __set_oobject,
                        doc="Internal Alembic OArchive object.")
 
     def __get_top(self):
@@ -443,7 +443,7 @@ class Archive(object):
         """sets the top object"""
         self._top = top
 
-    top = property(__get_top, __set_top, 
+    top = property(__get_top, __set_top,
                    doc="Hierarchy root, cask.Top object.")
 
     def __read_from_file(self, filepath):
@@ -530,7 +530,7 @@ class Archive(object):
                 num_stored_times = num_times
                 self.__start_time = ts.getSampleTime(0)
                 self.__end_time = ts.getSampleTime(num_times-1)
- 
+
         if self.__start_time is None:
             self.__start_time = 0.0
 
@@ -582,7 +582,7 @@ class Archive(object):
         for child in self.top.children.values():
             close_tree(child)
             del child
-        
+
         self._iobject = None
         self._oobject = None
         self._top._iobject = None
@@ -655,14 +655,14 @@ class Property(object):
         # if we have an iproperty, get some values from it
         if iproperty:
             self.__read_property(iproperty)
-        
+
     def __repr__(self):
         return '<Property "%s">' % self.name
 
     def get_item(self, item):
         """used for deep dict access"""
         return self.properties[item]
-   
+
     def set_item(self, name, item):
         """used for deep dict access"""
         self.properties[name] = item
@@ -675,7 +675,7 @@ class Property(object):
         """sets iproperty"""
         self._iobject = iobject
 
-    iobject = property(__get_iobject, __set_iobject, 
+    iobject = property(__get_iobject, __set_iobject,
                        doc="Internal Alembic IProperty object.")
 
     def __get_oobject(self):
@@ -698,9 +698,9 @@ class Property(object):
                 # pre-existing property exists, see Property.__get_oobject
                 pass
             elif _parent and self._klass:
-                self._oobject = self._klass(_parent, 
-                                            self.name, 
-                                            meta, 
+                self._oobject = self._klass(_parent,
+                                            self.name,
+                                            meta,
                                             self.time_sampling_id)
         return self._oobject
 
@@ -708,7 +708,7 @@ class Property(object):
         """sets oproperty"""
         self._oobject = oobject
 
-    oobject = property(__get_oobject, __set_oobject, 
+    oobject = property(__get_oobject, __set_oobject,
                        doc="Internal Alembic OProperty object.")
 
     def __get_parent(self):
@@ -721,7 +721,7 @@ class Property(object):
         """sets parent"""
         self._parent = parent
 
-    parent = property(__get_parent, __set_parent, 
+    parent = property(__get_parent, __set_parent,
                       doc="Parent object or property.")
 
     def __get_name(self):
@@ -742,7 +742,7 @@ class Property(object):
                 self._parent.properties.remove(old)
                 self._parent.properties[name] = self
 
-    name = property(__get_name, __set_name, 
+    name = property(__get_name, __set_name,
                     doc="Gets and sets the property name.")
 
     def type(self):
@@ -957,7 +957,7 @@ class Property(object):
 class Object(object):
     """Base I/O Object class."""
     __sample_class = None
-    def __init__(self, iobject=None, schema=None, 
+    def __init__(self, iobject=None, schema=None,
                  time_sampling_id=None, name=None):
         """
         :param iobject: Any alembic.Abc.IObject subclass object
@@ -992,11 +992,11 @@ class Object(object):
     def get_item(self, item):
         """used for deep dict access"""
         return self.children[item]
-    
+
     def set_item(self, name, item):
         """used for deep dict access"""
         self.children[name] = item
-    
+
     @property
     def __sample_methods(self):
         """gets this object's sample methods"""
@@ -1010,7 +1010,7 @@ class Object(object):
         """sets iobject"""
         self._iobject = iobject
 
-    iobject = property(__get_iobject, __set_iobject, 
+    iobject = property(__get_iobject, __set_iobject,
                        doc="Internal Alembic IObject object.")
 
     def __get_oobject(self):
@@ -1020,19 +1020,19 @@ class Object(object):
             # Using OObject subclasses (like OXform) automatically
             # creates hidden Compound Properties (like .xform) which
             # results in name collisions when saving properties in cask.
-            # Using OObjects avoids this problem, but we have to set 
+            # Using OObjects avoids this problem, but we have to set
             # the metadata manually.
             if self.iobject:
                 self._klass = alembic.Abc.OObject
                 meta.set('schema', self.iobject.getMetaData().get('schema'))
-                meta.set('schemaObjTitle', 
+                meta.set('schemaObjTitle',
                          self.iobject.getMetaData().get('schemaObjTitle'))
-                meta.set('schemaBaseType', 
+                meta.set('schemaBaseType',
                          self.iobject.getMetaData().get('schemaBaseType'))
             else:
                 self._klass = OOBJECTS.get(self.type())
             if self._klass:
-                self._oobject = self._klass(self.parent.oobject, self.name, 
+                self._oobject = self._klass(self.parent.oobject, self.name,
                                             meta, self.time_sampling_id)
         return self._oobject
 
@@ -1040,7 +1040,7 @@ class Object(object):
         """sets oobject"""
         self._oobject = oobject
 
-    oobject = property(__get_oobject, __set_oobject, 
+    oobject = property(__get_oobject, __set_oobject,
                        doc="Internal Alembic OObject object.")
 
     @wrapped
@@ -1054,13 +1054,13 @@ class Object(object):
         """sets schema"""
         self._schema = schema
 
-    schema = property(__get_schema, __set_schema, 
+    schema = property(__get_schema, __set_schema,
                       doc="Returns the Alembic schema object.")
 
     @classmethod
     def matches(cls, iobject):
         """
-        Returns True if a given iobject type matches this type. 
+        Returns True if a given iobject type matches this type.
         """
         return IOBJECTS.get(cls.__name__).matches(iobject.getMetaData())
 
@@ -1081,7 +1081,7 @@ class Object(object):
         if parent and type(self) != Top:
             parent.add_child(self)
 
-    parent = property(__get_parent, __set_parent, 
+    parent = property(__get_parent, __set_parent,
                       doc="Parent object accessor.")
 
     def __get_name(self):
@@ -1102,7 +1102,7 @@ class Object(object):
                 self._parent._child_dict.remove(old)
                 self._parent._child_dict[name] = self
 
-    name = property(__get_name, __set_name, 
+    name = property(__get_name, __set_name,
                     doc="Set and get the name of the object.")
 
     def __get_tsid(self):
@@ -1115,7 +1115,7 @@ class Object(object):
         """sets time sampling id"""
         self._tsid = tsid
 
-    time_sampling_id = property(__get_tsid, __set_tsid, 
+    time_sampling_id = property(__get_tsid, __set_tsid,
                                 doc="Time sampling ID.")
 
     def __get_metadata(self):
@@ -1133,7 +1133,7 @@ class Object(object):
         """sets metadata dict"""
         self._metadata = metadata
 
-    metadata = property(__get_metadata, __set_metadata, 
+    metadata = property(__get_metadata, __set_metadata,
                         doc="Metadata as a dict.")
 
     def archive(self):
@@ -1209,7 +1209,7 @@ class Object(object):
 
         *Do we want to expose samples at all? Should all data
         be set via seting values on properties, directly or with
-        high level methods? 
+        high level methods?
 
         :param sample: Alembic sample object.
         :param index: Index of the sample to set, or None.
@@ -1253,7 +1253,7 @@ class Object(object):
 
     def start_frame(self):
         """
-        :param fps: Frames per second used to calculate the start frame 
+        :param fps: Frames per second used to calculate the start frame
         (default 24.0)
 
         :return: Start frame as float
@@ -1267,7 +1267,7 @@ class Object(object):
 
     def end_frame(self, fps=24):
         """
-        :param fps: Frames per second used to calculate the end frame 
+        :param fps: Frames per second used to calculate the end frame
         (default 24.0)
 
         :return: Last frame as float
@@ -1366,7 +1366,7 @@ class Top(Object):
     def __set_name(self, name):
         raise TypeError("Can not set name on Top object.")
 
-    name = property(__get_name, __set_name, 
+    name = property(__get_name, __set_name,
                     doc="Returns the object name, which for Top is always ABC")
 
 class Xform(Object):
@@ -1442,3 +1442,8 @@ class Light(Object):
     """Light I/O Object subclass."""
     def __init__(self, *args, **kwargs):
         super(Light, self).__init__(*args, **kwargs)
+
+class Points(Object):
+    """Points I/O Object subclass."""
+    def __init__(self, *args, **kwargs):
+        super(Points, self).__init__(*args, **kwargs)

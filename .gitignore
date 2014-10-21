@@ -6,5 +6,6 @@ install_manifest.txt
 *.cmake
 *.a
 *.pyc
+*.swp
 SimpleAbcViewer
 abcview
