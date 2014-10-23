@@ -210,7 +210,8 @@ getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmM
 
 // assumption is we don't support multiple uv sets
 void MayaMeshWriter::getUVs(std::vector<float> & uvs,
-    std::vector<Alembic::Util::uint32_t> & indices)
+    std::vector<Alembic::Util::uint32_t> & indices,
+    std::string & name)
 {
     MStatus status = MS::kSuccess;
     MFnMesh lMesh( mDagPath, &status );
@@ -232,6 +233,8 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
             MGlobal::displayError(msg);
             return;
         }
+
+        name = uvSetName.asChar();
 
         unsigned int len = uArray.length();
         uvs.clear();
@@ -287,6 +290,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
     std::vector<float> uvs;
     std::vector<Alembic::Util::uint32_t> indices;
+    std::string uvSetName;
 
     MString name = lMesh.name();
     name = util::stripNamespaces(name, iArgs.stripNamespace);
@@ -301,10 +305,11 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
         if ( mWriteUVs )
         {
-            getUVs(uvs, indices);
+            getUVs(uvs, indices, uvSetName);
 
             if (!uvs.empty())
             {
+                mSubDSchema.setUVSourceName(uvSetName);
                 uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
                 uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
                     (const Imath::V2f *) &uvs.front(), uvs.size() / 2));
@@ -337,11 +342,11 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
         if ( mWriteUVs )
         {
-            getUVs(uvs, indices);
+            getUVs(uvs, indices, uvSetName);
 
             if (!uvs.empty())
             {
-
+                mPolySchema.setUVSourceName(uvSetName);
                 uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
                 uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
                     (const Imath::V2f *) &uvs.front(), uvs.size() / 2));
@@ -724,13 +729,22 @@ void MayaMeshWriter::write()
     Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
     std::vector<float> uvs;
     std::vector<Alembic::Util::uint32_t> indices;
+    std::string uvSetName;
 
     if ( mWriteUVs )
     {
-        getUVs(uvs, indices);
+        getUVs(uvs, indices, uvSetName);
 
         if (!uvs.empty())
         {
+            if (mPolySchema.valid())
+            {
+                mPolySchema.setUVSourceName(uvSetName);
+            }
+            else if (mSubDSchema.valid())
+            {
+                mSubDSchema.setUVSourceName(uvSetName);
+            }
             uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
             uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
                 (const Imath::V2f *) &uvs.front(), uvs.size() / 2));

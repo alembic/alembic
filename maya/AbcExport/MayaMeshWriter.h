@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2011,
+// Copyright (c) 2009-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -48,9 +48,9 @@
 struct mObjectCmp
 {
     bool operator()(const MObject& o1, const MObject& o2) const
-        {
-            return strcmp(MFnDependencyNode(o1).name().asChar(), MFnDependencyNode(o2).name().asChar()) < 0;
-        }
+    {
+        return strcmp(MFnDependencyNode(o1).name().asChar(), MFnDependencyNode(o2).name().asChar()) < 0;
+    }
 };
 
 typedef std::map <MObject, MSelectionList, mObjectCmp> GetMembersMap;
@@ -82,19 +82,20 @@ class MayaMeshWriter
     void writeSubD(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
 
     void getUVs(std::vector<float> & uvs,
-        std::vector<Alembic::Util::uint32_t> & indices);
+        std::vector<Alembic::Util::uint32_t> & indices,
+        std::string & name);
 
     void getPolyNormals(std::vector<float> & oNormals);
     bool mNoNormals;
     bool mWriteUVs;
     bool mWriteColorSets;
 
-    bool    mIsGeometryAnimated;
+    bool     mIsGeometryAnimated;
     MDagPath mDagPath;
 
     AttributesWriterPtr mAttrs;
-    Alembic::AbcGeom::OPolyMeshSchema   mPolySchema;
-    Alembic::AbcGeom::OSubDSchema       mSubDSchema;
+    Alembic::AbcGeom::OPolyMeshSchema mPolySchema;
+    Alembic::AbcGeom::OSubDSchema     mSubDSchema;
 
     void writeColor();
     std::vector<Alembic::AbcGeom::OC3fGeomParam> mRGBParams;
