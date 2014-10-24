@@ -61,7 +61,8 @@ namespace
 
     MStatus setMeshUVs(MFnMesh & ioMesh,
         const MFloatArray & uArray, const MFloatArray & vArray,
-        const MIntArray & uvCounts, const MIntArray & uvIds)
+        const MIntArray & uvCounts, const MIntArray & uvIds,
+        const MString & uvName)
     {
         MStatus status = MS::kSuccess;
 
@@ -70,9 +71,31 @@ namespace
         status = ioMesh.getCurrentUVSetName(uvSetName);
         if ( status != MS::kSuccess )
         {
-            uvSetName = MString("uvset1");
+            if (uvName.length() > 0)
+                uvSetName = uvName;
+            else
+                uvSetName = MString("uvset1");
+
             status = ioMesh.createUVSet(uvSetName);
             status = ioMesh.setCurrentUVSetName(uvSetName);
+        }
+        else if (uvName.length() > 0 && uvName != uvSetName)
+        {
+            MStringArray uvSetNames;
+            ioMesh.getUVSetNames(uvSetNames);
+            const unsigned int numUVsets = uvSetNames.length();
+            unsigned int i = 0;
+            for (; i < numUVsets; ++i)
+            {
+                if (uvSetNames[i] == uvName)
+                    break;
+            }
+            if (i == numUVsets &&
+                ioMesh.renameUVSet(uvSetName, uvName) == MS::kSuccess)
+            {
+                ioMesh.setCurrentUVSetName(uvName);
+                uvSetName = uvName;
+            }
         }
         status = ioMesh.clearUVs();
         status = ioMesh.setUVs(uArray, vArray, &uvSetName);
@@ -178,7 +201,8 @@ namespace
             }
         }
 
-        setMeshUVs(ioMesh, uArray, vArray, uvCounts, uvIds);
+        setMeshUVs(ioMesh, uArray, vArray, uvCounts, uvIds,
+            Alembic::Abc::GetSourceName(iUVs.getMetaData()).c_str());
     }  // setUVs
 
     // utility to clear pt when doing a swap otherwise
