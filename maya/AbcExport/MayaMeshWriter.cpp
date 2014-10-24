@@ -234,7 +234,8 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
             return;
         }
 
-        name = uvSetName.asChar();
+        if (uvSetName != "map1")
+            name = uvSetName.asChar();
 
         unsigned int len = uArray.length();
         uvs.clear();
@@ -309,7 +310,8 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
             if (!uvs.empty())
             {
-                mSubDSchema.setUVSourceName(uvSetName);
+                if (!uvSetName.empty())
+                    mSubDSchema.setUVSourceName(uvSetName);
                 uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
                 uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
                     (const Imath::V2f *) &uvs.front(), uvs.size() / 2));
@@ -346,7 +348,8 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
             if (!uvs.empty())
             {
-                mPolySchema.setUVSourceName(uvSetName);
+                if (!uvSetName.empty())
+                    mPolySchema.setUVSourceName(uvSetName);
                 uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
                 uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
                     (const Imath::V2f *) &uvs.front(), uvs.size() / 2));
@@ -737,13 +740,12 @@ void MayaMeshWriter::write()
 
         if (!uvs.empty())
         {
-            if (mPolySchema.valid())
+            if (!uvSetName.empty())
             {
-                mPolySchema.setUVSourceName(uvSetName);
-            }
-            else if (mSubDSchema.valid())
-            {
-                mSubDSchema.setUVSourceName(uvSetName);
+                if (mPolySchema.valid())
+                    mPolySchema.setUVSourceName(uvSetName);
+                else if (mSubDSchema.valid())
+                    mSubDSchema.setUVSourceName(uvSetName);
             }
             uvSamp.setScope( Alembic::AbcGeom::kFacevaryingScope );
             uvSamp.setVals(Alembic::AbcGeom::V2fArraySample(
