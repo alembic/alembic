@@ -89,6 +89,7 @@ class MayaMeshWriter
     bool mNoNormals;
     bool mWriteUVs;
     bool mWriteColorSets;
+    bool mWriteUVsets;
 
     bool     mIsGeometryAnimated;
     MDagPath mDagPath;
@@ -101,6 +102,9 @@ class MayaMeshWriter
     std::vector<Alembic::AbcGeom::OC3fGeomParam> mRGBParams;
     std::vector<Alembic::AbcGeom::OC4fGeomParam> mRGBAParams;
 
+    void writeUV();
+    typedef std::vector<Alembic::AbcGeom::OV2fGeomParam> uvParamsType;
+    uvParamsType mUVparams;
 };
 
 #endif  // _AbcExport_MayaMeshWriter_h_

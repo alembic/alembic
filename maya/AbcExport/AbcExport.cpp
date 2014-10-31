@@ -397,6 +397,11 @@ try
                 jobArgs.writeVisibility = true;
             }
 
+            else if (arg == "-wuvs" || arg == "-writeuvsets")
+            {
+                jobArgs.writeUVsets = true;
+            }
+
             else if (arg == "-mfc" || arg == "-melperframecallback")
             {
                 if (i+1 >= numJobArgs)
