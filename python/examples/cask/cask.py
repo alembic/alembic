@@ -1246,10 +1246,13 @@ class Object(object):
         """
         Returns True if the object has changing P values.
         """
-        prop = self.properties.get("P")
-        if prop:
-            return prop.isConstant()
-        return False
+        try:
+            prop = self.properties[".geom/P"]
+            if prop:
+                return not prop.iobject.isConstant()
+            return False
+        except KeyError:
+            return False
 
     def start_frame(self):
         """
