@@ -50,15 +50,15 @@
 #include "NodeIteratorVisitorHelper.h"
 
 void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
-    PolyMeshAndColors & iNode, bool iInitialized);
+    PolyMeshColorsAndUVs & iNode, bool iInitialized);
 
 void readSubD(double iFrame, MFnMesh & ioMesh, MObject & iParent,
-    SubDAndColors & iNode, bool iInitialized);
+    SubDcolorsAndUVs & iNode, bool iInitialized);
 
-MObject createPoly(double iFrame, PolyMeshAndColors & iNode,
+MObject createPoly(double iFrame, PolyMeshColorsAndUVs & iNode,
     MObject & iParent);
 
-MObject createSubD(double iFrame, SubDAndColors & iNode,
+MObject createSubD(double iFrame, SubDcolorsAndUVs & iNode,
     MObject & iParent);
 
 void disconnectMesh(MObject & iMeshObject,

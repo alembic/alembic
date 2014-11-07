@@ -2677,6 +2677,16 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
         oMin = std::min(ts->getSampleTime(0), oMin);
         oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
 
+        std::vector< Alembic::AbcGeom::IV2fGeomParam >::iterator v2s, v2sEnd;
+        v2sEnd = mPolyMeshList[i].mV2s.end();
+        for (v2s = mPolyMeshList[i].mV2s.begin(); v2s != v2sEnd; ++v2s)
+        {
+            ts = v2s->getTimeSampling();
+            numSamples = v2s->getNumSamples();
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
+
         std::vector< Alembic::AbcGeom::IC3fGeomParam >::iterator c3s, c3sEnd;
         c3sEnd = mPolyMeshList[i].mC3s.end();
         for (c3s = mPolyMeshList[i].mC3s.begin(); c3s != c3sEnd; ++c3s)
@@ -3252,7 +3262,8 @@ MString connectAttr(ArgData & iArgData)
     return alembicNodeFn.name();
 }
 
-bool getColorAttrs(Alembic::Abc::ICompoundProperty & iParent,
+bool getUVandColorAttrs(Alembic::Abc::ICompoundProperty & iParent,
+    std::vector< Alembic::AbcGeom::IV2fGeomParam > & ioV2s,
     std::vector< Alembic::AbcGeom::IC3fGeomParam > & ioC3s,
     std::vector< Alembic::AbcGeom::IC4fGeomParam > & ioC4s,
     bool iUnmarkedFaceVaryingColors)
@@ -3268,6 +3279,19 @@ bool getColorAttrs(Alembic::Abc::ICompoundProperty & iParent,
     {
         const Alembic::Abc::PropertyHeader & propHeader =
             iParent.getPropertyHeader(i);
+
+        if (Alembic::AbcGeom::IV2fGeomParam::matches(propHeader) &&
+            Alembic::AbcGeom::isUV(propHeader))
+        {
+            Alembic::AbcGeom::IV2fGeomParam uvGeomParam(iParent,
+                propHeader.getName());
+            if (!anyAnimated)
+            {
+                anyAnimated = !uvGeomParam.isConstant();
+            }
+            ioV2s.push_back(uvGeomParam);
+            continue;
+        }
 
         if (!isColorSet(propHeader, iUnmarkedFaceVaryingColors))
         {
