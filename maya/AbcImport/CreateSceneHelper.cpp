@@ -1031,8 +1031,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     MStatus status = MS::kSuccess;
     MObject subDObj = MObject::kNullObj;
 
-    SubDAndColors subdColors;
-    subdColors.mMesh = iNode;
+    SubDcolorsAndUVs subDcolorsAndUVs;
+    subDcolorsAndUVs.mMesh = iNode;
 
     Alembic::Abc::ICompoundProperty arbProp =
         iNode.getSchema().getArbGeomParams();
@@ -1040,15 +1040,16 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     Alembic::Abc::ICompoundProperty userProp =
         iNode.getSchema().getUserProperties();
 
-    bool colorAnim = getColorAttrs(arbProp, subdColors.mC3s,
-        subdColors.mC4s, mUnmarkedFaceVaryingColors);
+    bool colorAnim = getUVandColorAttrs(arbProp, subDcolorsAndUVs.mV2s,
+        subDcolorsAndUVs.mC3s, subDcolorsAndUVs.mC4s,
+        mUnmarkedFaceVaryingColors);
 
     bool isConstant = iNode.getSchema().isConstant();
 
     // add animated SubDs to the list
     if (!isConstant || colorAnim)
     {
-        mData.mSubDList.push_back(subdColors);
+        mData.mSubDList.push_back(subDcolorsAndUVs);
     }
 
     std::size_t firstProp = mData.mPropList.size();
@@ -1074,7 +1075,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
 
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
-        subDObj = createSubD(mFrame, subdColors, mParent);
+        subDObj = createSubD(mFrame, subDcolorsAndUVs, mParent);
         if (!isConstant || colorAnim)
         {
             mData.mSubDObjList.push_back(subDObj);
@@ -1114,7 +1115,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
         disconnectMesh(subDObj, mData.mPropList, firstProp);
         if (isConstant && CONNECT == mAction)
         {
-            readSubD(mFrame, fn, subDObj, subdColors, false);
+            readSubD(mFrame, fn, subDObj, subDcolorsAndUVs, false);
         }
         addToPropList(firstProp, subDObj);
     }
@@ -1132,8 +1133,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     MStatus status = MS::kSuccess;
     MObject polyObj = MObject::kNullObj;
 
-    PolyMeshAndColors meshColors;
-    meshColors.mMesh = iNode;
+    PolyMeshColorsAndUVs meshColorsAndUVs;
+    meshColorsAndUVs.mMesh = iNode;
 
     bool isConstant = iNode.getSchema().isConstant();
 
@@ -1143,12 +1144,13 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     Alembic::Abc::ICompoundProperty userProp =
         iNode.getSchema().getUserProperties();
 
-    bool colorAnim = getColorAttrs(arbProp, meshColors.mC3s,
-        meshColors.mC4s, mUnmarkedFaceVaryingColors);
+    bool colorAnim = getUVandColorAttrs(arbProp, meshColorsAndUVs.mV2s,
+        meshColorsAndUVs.mC3s, meshColorsAndUVs.mC4s,
+        mUnmarkedFaceVaryingColors);
 
     // add animated poly mesh to the list
     if (!isConstant || colorAnim)
-        mData.mPolyMeshList.push_back(meshColors);
+        mData.mPolyMeshList.push_back(meshColorsAndUVs);
 
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList, mUnmarkedFaceVaryingColors);
@@ -1172,7 +1174,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
 
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
-        polyObj = createPoly(mFrame, meshColors, mParent);
+        polyObj = createPoly(mFrame, meshColorsAndUVs, mParent);
         if (!isConstant || colorAnim)
         {
             mData.mPolyMeshObjList.push_back(polyObj);
@@ -1210,7 +1212,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
         disconnectMesh(polyObj, mData.mPropList, firstProp);
         if (isConstant && CONNECT == mAction)
         {
-            readPoly(mFrame, fn, polyObj, meshColors, false);
+            readPoly(mFrame, fn, polyObj, meshColorsAndUVs, false);
         }
         addToPropList(firstProp, polyObj);
     }

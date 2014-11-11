@@ -158,6 +158,7 @@ struct JobArgs
         writeUVs = false;
         writeColorSets = false;
         writeFaceSets = false;
+        writeUVsets = false;
     }
 
     bool excludeInvisible;
@@ -170,7 +171,7 @@ struct JobArgs
     bool writeUVs;
     bool writeColorSets;
     bool writeFaceSets;
-
+    bool writeUVsets;
     std::string melPerFrameCallback;
     std::string melPostCallback;
     std::string pythonPerFrameCallback;

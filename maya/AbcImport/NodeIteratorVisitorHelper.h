@@ -179,18 +179,20 @@ private:
     std::vector<std::string> sampleNameList;
 };  // SampledPair
 
-class PolyMeshAndColors
+class PolyMeshColorsAndUVs
 {
 public:
     Alembic::AbcGeom::IPolyMesh mMesh;
+    std::vector< Alembic::AbcGeom::IV2fGeomParam > mV2s;
     std::vector< Alembic::AbcGeom::IC3fGeomParam > mC3s;
     std::vector< Alembic::AbcGeom::IC4fGeomParam > mC4s;
 };
 
-class SubDAndColors
+class SubDcolorsAndUVs
 {
 public:
     Alembic::AbcGeom::ISubD mMesh;
+    std::vector< Alembic::AbcGeom::IV2fGeomParam > mV2s;
     std::vector< Alembic::AbcGeom::IC3fGeomParam > mC3s;
     std::vector< Alembic::AbcGeom::IC4fGeomParam > mC4s;
 };
@@ -218,9 +220,9 @@ public:
     std::vector<Alembic::AbcGeom::ICurves>    mCurvesList;
     std::vector<Alembic::AbcGeom::IXform>     mLocList;
     std::vector<Alembic::AbcGeom::INuPatch>   mNurbsList;
-    std::vector< PolyMeshAndColors >          mPolyMeshList;
+    std::vector< PolyMeshColorsAndUVs >       mPolyMeshList;
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
-    std::vector< SubDAndColors >              mSubDList;
+    std::vector< SubDcolorsAndUVs >           mSubDList;
     std::vector<Alembic::AbcGeom::IXform>     mXformList;
 
     // objects that aren't animated but have animated visibility need to be
@@ -280,9 +282,10 @@ MString createScene(ArgData & iArgData);
 // This function sets up the connections to AlembicNode
 MString connectAttr(ArgData & iArgData);
 
-// check the properties in iParent and grab the ones that are colors
-// returns whether or not any of these color properties are animated
-bool getColorAttrs( Alembic::Abc::ICompoundProperty & iParent,
+// check the properties in iParent and grab the ones that are colors or UVs
+// returns whether or not any of these properties are animated
+bool getUVandColorAttrs( Alembic::Abc::ICompoundProperty & iParent,
+    std::vector< Alembic::AbcGeom::IV2fGeomParam > & ioV2s,
     std::vector< Alembic::AbcGeom::IC3fGeomParam > & ioC3s,
     std::vector< Alembic::AbcGeom::IC4fGeomParam > & ioC4s,
     bool iUnmarkedFaceVaryingColors);
