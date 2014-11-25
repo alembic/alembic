@@ -37,6 +37,7 @@
 #ifndef _AbcClients_WFObjConvert_Reader_h_
 #define _AbcClients_WFObjConvert_Reader_h_
 
+#include <AbcClients/WFObjConvert/Export.h>
 #include <AbcClients/WFObjConvert/Foundation.h>
 
 namespace AbcClients {
@@ -55,7 +56,7 @@ namespace WFObjConvert {
 //! Because the files being read are ascii, they can actually represent
 //! arbitrary precision. Therefore, the Reader is implemented in double
 //! precision for maximum accuracy.
-class Reader
+class ABC_WFOBJ_CONVERT_EXPORT Reader
 {
 public:
     typedef std::vector<index_t> IndexVec;

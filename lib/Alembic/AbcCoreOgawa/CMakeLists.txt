@@ -33,10 +33,6 @@
 ##
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DABC_CORE_OGAWA_EXPORTS)
-ENDIF()
-
 # C++ files for this project
 SET( CXX_FILES
   AprImpl.cpp
@@ -90,6 +86,12 @@ SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicAbcCoreOgawa ${LIB_TYPE} ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( AlembicAbcCoreOgawa AlembicAbcCoreAbstract AlembicOgawa )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcCoreOgawa 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_CORE_OGAWA_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcCoreOgawa
          LIBRARY DESTINATION lib

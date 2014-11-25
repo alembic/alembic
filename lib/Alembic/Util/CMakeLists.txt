@@ -33,10 +33,6 @@
 ##
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DALEMBIC_UTIL_EXPORTS)
-ENDIF()
-
 # C++ files for this project
 SET( CXX_FILES
      Murmur3.cpp
@@ -62,6 +58,12 @@ SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicUtil ${LIB_TYPE} ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( AlembicUtil )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicUtil 
+                         PROPERTIES DEFINE_SYMBOL
+                         ALEMBIC_UTIL_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicUtil
          LIBRARY DESTINATION lib

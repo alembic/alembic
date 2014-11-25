@@ -37,6 +37,7 @@
 #ifndef _AbcOpenGL_IXformDrw_h_
 #define _AbcOpenGL_IXformDrw_h_
 
+#include "Export.h"
 #include "Foundation.h"
 #include "IObjectDrw.h"
 
@@ -48,7 +49,7 @@ namespace ABCOPENGL_VERSION_NS {
 //! objects. Because we have deep, deep hierarchies, the transformation
 //! is applied via an internally managed transform stack, rather than
 //! through OpenGL's.
-class IXformDrw : public IObjectDrw
+class ABC_OPENGL_EXPORT IXformDrw : public IObjectDrw
 {
 public:
     IXformDrw( IXform &iXform );

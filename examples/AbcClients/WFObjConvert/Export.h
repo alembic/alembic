@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2013,
+// Copyright (c) 2009-2013,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,10 +34,20 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreFactory_All_h_
-#define _Alembic_AbcCoreFactory_All_h_
+#ifndef _AbcClients_WFObjConvert_Export_h_
+#define _AbcClients_WFObjConvert_Export_h_
 
-#include <Alembic/AbcCoreFactory/Export.h>
-#include <Alembic/AbcCoreFactory/IFactory.h>
-
+#if defined(ALEMBIC_DLL)
+    #if defined(ABC_WFOBJ_CONVERT_EXPORTS)
+    #define ABC_WFOBJ_CONVERT_EXPORT __declspec(dllexport)
+    #else
+    #define ABC_WFOBJ_CONVERT_EXPORT __declspec(dllimport)
+    #endif
+    #define ABC_WFOBJ_CONVERT_EXPORT_CONST
+#else
+    #define ABC_WFOBJ_CONVERT_EXPORT
+    #define ABC_WFOBJ_CONVERT_EXPORT_CONST const
 #endif
+
+#endif /* _AbcClients_WFObjConvert_Export_h_ */
+

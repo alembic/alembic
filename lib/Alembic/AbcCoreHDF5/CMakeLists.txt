@@ -33,10 +33,6 @@
 ##
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DABC_CORE_HDF5_EXPORTS)
-ENDIF()
-
 # C++ files for this project
 SET( CXX_FILES
   AprImpl.cpp
@@ -104,6 +100,12 @@ SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicAbcCoreHDF5 ${LIB_TYPE} ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( AlembicAbcCoreHDF5 AlembicAbcCoreAbstract ${ALEMBIC_HDF5_LIBS} )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcCoreHDF5 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_CORE_HDF5_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcCoreHDF5
          LIBRARY DESTINATION lib

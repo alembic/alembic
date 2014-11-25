@@ -42,10 +42,12 @@
 #include <string.h>
 #include <assert.h>
 
+#include "TbuUtilExport.h"
+
 namespace TrivialBoostUsageUtil {
 
 //-*****************************************************************************
-class TbuUtil
+class TRIVIAL_BOOST_USAGE_EXPORT TbuUtil
 {
 public:
     TbuUtil();

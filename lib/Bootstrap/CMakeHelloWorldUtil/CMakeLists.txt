@@ -33,13 +33,15 @@
 ##
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DCMAKE_HELLO_WORLD_UTIL_EXPORTS)
-ENDIF()
-
 # Create a library called "CMakeHelloWorldUtil" which includes the source
 # files "HelloUtil.h", "HelloUtil.cpp"
 ADD_LIBRARY( CMakeHelloWorldUtil HelloUtil.h HelloUtilExport.h HelloUtil.cpp )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( CMakeHelloWorldUtil 
+                         PROPERTIES DEFINE_SYMBOL
+                         CMAKE_HELLO_WORLD_UTIL_EXPORTS )
+ENDIF()
 
 # Add the tests subdirectory.
 IF( NOT ALEMBIC_NO_TESTS )

@@ -145,8 +145,9 @@ typedef Alembic::Util::shared_ptr<ArraySample> ArraySamplePtr;
 //! Dimensions tells us how many instances of the DataType to create
 //! DataType tells us what the instance is - and this works for
 //! pretty much every case, including std::string and std::wstring.
-ArraySamplePtr AllocateArraySample( const DataType &iDtype,
-                                    const Dimensions &iDims );
+ABC_CORE_ABSTRACT_EXPORT ArraySamplePtr 
+AllocateArraySample( const DataType &iDtype,
+                     const Dimensions &iDims );
 
 //-*****************************************************************************
 //-*****************************************************************************

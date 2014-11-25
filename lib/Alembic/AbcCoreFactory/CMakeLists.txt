@@ -33,10 +33,6 @@
 ##
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DABC_CORE_FACTORY_EXPORTS)
-ENDIF()
-
 # C++ files for this project
 SET( CXX_FILES
   IFactory.cpp
@@ -51,7 +47,13 @@ SET( H_FILES
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicAbcCoreFactory ${LIB_TYPE} ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AlembicAbcCoreFactory AlembicAbcCoreHDF5 AlembicAbcCoreOgawa )
+TARGET_LINK_LIBRARIES( AlembicAbcCoreFactory AlembicAbcCoreHDF5 AlembicAbcCoreOgawa AlembicAbc )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcCoreFactory 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_CORE_FACTORY_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcCoreFactory
          LIBRARY DESTINATION lib

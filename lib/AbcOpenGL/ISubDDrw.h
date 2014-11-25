@@ -37,6 +37,7 @@
 #ifndef _AbcOpenGL_ISubDDrw_h_
 #define _AbcOpenGL_ISubDDrw_h_
 
+#include "Export.h"
 #include "Foundation.h"
 #include "IObjectDrw.h"
 #include "MeshDrwHelper.h"
@@ -46,7 +47,7 @@ namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
 //! Draw a poly mesh!
-class ISubDDrw : public IObjectDrw
+class ABC_OPENGL_EXPORT ISubDDrw : public IObjectDrw
 {
 public:
     ISubDDrw( ISubD &iPmesh );

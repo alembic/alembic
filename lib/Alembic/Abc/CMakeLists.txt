@@ -33,10 +33,6 @@
 ##
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DABC_EXPORTS)
-ENDIF()
-
 # C++ files for this project
 SET( CXX_FILES
   ArchiveInfo.cpp
@@ -101,7 +97,13 @@ SET( H_FILES
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicAbc ${LIB_TYPE} ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AlembicAbc AlembicAbcCoreAbstact )
+TARGET_LINK_LIBRARIES( AlembicAbc AlembicAbcCoreAbstract )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbc 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbc
          LIBRARY DESTINATION lib

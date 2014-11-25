@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_CameraSample_h_
 #define _Alembic_AbcGeom_CameraSample_h_
 
+#include <Alembic/AbcGeom/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/FilmBackXformOp.h>
 
@@ -45,7 +46,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class CameraSample
+class ABC_GEOM_EXPORT CameraSample
 {
 public:
 

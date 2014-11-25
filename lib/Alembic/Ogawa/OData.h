@@ -36,6 +36,7 @@
 #ifndef _Alembic_Ogawa_OData_h_
 #define _Alembic_Ogawa_OData_h_
 
+#include <Alembic/Ogawa/Export.h>
 #include <Alembic/Ogawa/Foundation.h>
 #include <Alembic/Ogawa/OStream.h>
 
@@ -43,7 +44,7 @@ namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
 
-class OData
+class OGAWA_EXPORT OData
 {
 public:
 

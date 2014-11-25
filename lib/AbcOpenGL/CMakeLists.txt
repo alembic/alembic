@@ -34,10 +34,6 @@
 ##
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DABC_OPENGL_EXPORTS)
-ENDIF()
-
 SET( H_FILES
      DrawContext.h
      Drawable.h
@@ -88,6 +84,12 @@ SET( THIS_LIBS
 
 ADD_LIBRARY( AlembicAbcOpenGL ${LIB_TYPE} ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( AlembicAbcOpenGL ${THIS_LIBS} )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcOpenGL 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_OPENGL_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcOpenGL
          LIBRARY DESTINATION lib

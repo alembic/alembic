@@ -154,8 +154,8 @@ private:
     chrono_t m_timePerCycle;
 
 public:
-    friend std::ostream &operator<<( std::ostream &ostr,
-                                     const TimeSamplingType &tst );
+    ABC_CORE_ABSTRACT_EXPORT friend std::ostream 
+        &operator<<( std::ostream &ostr, const TimeSamplingType &tst );
 };
 
 } // End namespace ALEMBIC_VERSION_NS

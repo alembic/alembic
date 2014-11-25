@@ -33,10 +33,6 @@
 ##
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DOGAWA_EXPORTS)
-ENDIF()
-
 # C++ files for this project
 SET( CXX_FILES
      IArchive.cpp
@@ -63,6 +59,12 @@ SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 ADD_LIBRARY( AlembicOgawa ${LIB_TYPE} ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( AlembicOgawa AlembicUtil )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicOgawa 
+                         PROPERTIES DEFINE_SYMBOL
+                         OGAWA_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicOgawa
          LIBRARY DESTINATION lib

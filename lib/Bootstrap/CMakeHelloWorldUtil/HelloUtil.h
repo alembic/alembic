@@ -42,10 +42,12 @@
 #include <string.h>
 #include <assert.h>
 
+#include "HelloUtilExport.h"
+
 namespace CMakeHelloWorldUtil {
 
 //-*****************************************************************************
-class HelloUtil
+class CMAKE_HELLO_WORLD_UTIL_EXPORT HelloUtil
 {
 public:
     HelloUtil();

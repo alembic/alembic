@@ -45,6 +45,7 @@ SET( CXX_FILES
 SET( PUBLIC_H_FILES 
      AbcReader.h
      All.h
+	 Export.h
      Foundation.h
      Parser.h
      Reader.h )
@@ -56,7 +57,14 @@ SET( H_FILES ${PUBLIC_H_FILES} ${PRIVATE_H_FILES} )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AbcWFObjConvert ${SOURCE_FILES} )
+ADD_LIBRARY( AbcWFObjConvert ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AbcWFObjConvert AlembicAbcGeom )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AbcWFObjConvert 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_WFOBJ_CONVERT_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AbcWFObjConvert
          LIBRARY DESTINATION lib

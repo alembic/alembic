@@ -31,13 +31,15 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##-*****************************************************************************
 
-IF(ALEMBIC_SHARED_LIBS)
-    ADD_DEFINITIONS(-DTRIVIAL_BOOST_USAGE_EXPORTS)
-ENDIF()
-
 # Create a library called "TrivialBoostUsageUtil" which includes the source
 # files "TbuUtil.h", "TbuUtil.cpp"
 ADD_LIBRARY( TrivialBoostUsageUtil TbuUtil.h TbuUtilExport.h TbuUtil.cpp )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( TrivialBoostUsageUtil 
+                         PROPERTIES DEFINE_SYMBOL
+                         TRIVIAL_BOOST_USAGE_EXPORTS )
+ENDIF()
 
 # Add the tests subdirectory.
 IF( NOT ALEMBIC_NO_TESTS )
