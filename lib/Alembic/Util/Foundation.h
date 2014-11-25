@@ -93,9 +93,17 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+// avoid windows min/max predefined macro conflicts
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 // needed for mutex stuff
 #include <Windows.h>
 #endif
+
+// needed for std min/max
+#include <algorithm>
 
 #ifndef ALEMBIC_VERSION_NS
 #define ALEMBIC_VERSION_NS v7

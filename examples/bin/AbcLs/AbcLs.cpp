@@ -629,12 +629,20 @@ int main( int argc, char *argv[] )
     "  -v          show 0th value for all properties\n"
     );
 
+    /* sigaction if available */
+#if defined(_POSIX_VERSION) && (_POSIX_VERSION >= 199506L) 
     // seg fault handler
     struct sigaction act;
     sigemptyset(&act.sa_mask);
     act.sa_handler = segfault_sigaction;
     act.sa_flags = SA_SIGINFO;
     sigaction(SIGSEGV, &act, NULL);
+    /* signal if available */
+#elif defined(_POSIX_VERSION) || defined(_WIN32)
+    signal(SIGSEGV, segfault_sigaction);
+#else 
+#error No signal interface available
+#endif //_POSIX_VERSION
 
     // check for min args
     if ( argc < 2 ) {
