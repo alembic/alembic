@@ -64,13 +64,14 @@
 #ifndef _Alembic_Util_SpookyV2_h_
 #define _Alembic_Util_SpookyV2_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Util/PlainOldDataType.h>
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-class SpookyHash
+class ALEMBIC_UTIL_EXPORT SpookyHash
 {
 public:
     //

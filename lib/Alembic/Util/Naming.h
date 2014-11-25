@@ -43,14 +43,17 @@
 #define _Alembic_Util_Naming_h_
 
 #include <string>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Util/Foundation.h>
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-bool isStandardName( const std::string& name );
-void makeStandardName( std::string& name, const char fixChar = '_' );
+ALEMBIC_UTIL_EXPORT bool 
+isStandardName( const std::string& name );
+ALEMBIC_UTIL_EXPORT void 
+makeStandardName( std::string& name, const char fixChar = '_' );
 
 } // End namespace ALEMBIC_VERSION_NS
 

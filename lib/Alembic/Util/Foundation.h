@@ -85,6 +85,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include <Alembic/Util/Export.h>
+
 #ifdef _MSC_VER
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -131,7 +133,7 @@ using std::auto_ptr;
 
 // similiar to boost::noncopyable
 // explicitly hides copy construction and copy assignment
-class noncopyable
+class ALEMBIC_UTIL_EXPORT noncopyable
 {
 protected:
     noncopyable() {}

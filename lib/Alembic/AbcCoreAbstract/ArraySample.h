@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ArraySample_h_
 #define _Alembic_AbcCoreAbstract_ArraySample_h_
 
+#include <Alembic/AbcCoreAbstract/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ArraySampleKey.h>
 #include <Alembic/AbcCoreAbstract/DataType.h>
@@ -55,7 +56,7 @@ namespace ALEMBIC_VERSION_NS {
 //! The ArraySample itself does not pretend to own the data referred to
 //! memory address "data". It is just a reference. For data retention mgmt,
 //! see the note on \ref ArraySamplePtr below.
-class ArraySample
+class ABC_CORE_ABSTRACT_EXPORT ArraySample
 {
 public:
     typedef ArraySample this_type;
