@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DABC_CORE_OGAWA_EXPORTS)
+ENDIF()
+
 # C++ files for this project
 SET( CXX_FILES
   AprImpl.cpp
@@ -66,6 +70,7 @@ SET( H_FILES
   CprImpl.h
   CpwData.h
   CpwImpl.h
+  Export.h
   Foundation.h
   MetaDataMap.h
   OrData.h
@@ -83,7 +88,8 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcCoreOgawa ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcCoreOgawa ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcCoreOgawa AlembicAbcCoreAbstract AlembicOgawa )
 
 INSTALL( TARGETS AlembicAbcCoreOgawa
          LIBRARY DESTINATION lib
@@ -92,6 +98,7 @@ INSTALL( TARGETS AlembicAbcCoreOgawa
 # Only install
 INSTALL( FILES
          All.h
+         Export.h
          ReadWrite.h
          DESTINATION include/Alembic/AbcCoreOgawa
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )

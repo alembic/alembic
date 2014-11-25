@@ -61,6 +61,18 @@ SET( ALEMBIC_NO_TESTS FALSE )
 SET( ALEMBIC_NO_BOOTSTRAP FALSE )
 SET( ALEMBIC_NO_OPENGL FALSE )
 
+# Select static/dynamic libraries build
+OPTION( ALEMBIC_SHARED_LIBS "Build Shared Libraries" ON )
+
+SET (LIB_TYPE STATIC)
+IF (ALEMBIC_SHARED_LIBS)
+  # User wants to build Dynamic Libraries, so change the LIB_TYPE variable to CMake keyword 'SHARED'
+  SET (LIB_TYPE SHARED)
+  IF (WIN32)
+    ADD_DEFINITIONS(-DALEMBIC_DLL)
+  ENDIF ()
+ENDIF (ALEMBIC_SHARED_LIBS)
+
 MESSAGE(STATUS "CMAKE SYSTEM NAME = ${CMAKE_SYSTEM_NAME}" )
 
 # Windows flag
@@ -102,7 +114,6 @@ ELSE()
 ENDIF()
 
 IF( ${WINDOWS} )
-  ADD_DEFINITIONS ( -DOPENEXR_DLL -DHALF_EXPORTS )
   ADD_DEFINITIONS( -DPLATFORM_WINDOWS -DPLATFORM=WINDOWS )
 ELSEIF( ${DARWIN} )
   #ADD_DEFINITIONS( -DPLATFORM_DARWIN -DPLATFORM=DARWIN "-arch x86_64" )
@@ -110,16 +121,6 @@ ELSEIF( ${DARWIN} )
 ELSE()
   ADD_DEFINITIONS( -DPLATFORM_LINUX -DPLATFORM=LINUX )
 ENDIF()
-
-if (MSVC AND DEFINED BUILD_STATIC_LIBS AND BUILD_STATIC_LIBS)
-	MESSAGE(STATUS "Replacing /MD with /MT for compiles" )
-	foreach (MODE "_DEBUG" "_MINSIZEREL" "_RELEASE" "_RELWITHDEBINFO")
-		string(REPLACE "/MD" "/MT" TMP "${CMAKE_C_FLAGS${MODE}}")
-		set(CMAKE_C_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
-		string(REPLACE "/MD" "/MT" TMP "${CMAKE_CXX_FLAGS${MODE}}")
-		set(CMAKE_CXX_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
-	endforeach (MODE)
-endif ()
 
 #-******************************************************************************
 #-******************************************************************************
@@ -190,20 +191,29 @@ FIND_PACKAGE(ZLIB REQUIRED)
 # OPEN GL STUFF
 #-******************************************************************************
 #-******************************************************************************
-FIND_PACKAGE( OpenGL )
-FIND_PACKAGE( GLUT )
+FIND_PACKAGE( OpenGL REQUIRED )
+FIND_PACKAGE( GLUT REQUIRED )
+FIND_PACKAGE( GLEW REQUIRED )
+
+
+OPTION( ALEMBIC_GLEW_LINK_STATIC "Is GLEW a static library?" OFF )
 
 IF ( ${WINDOWS} )
   # Do a windows OpenGL thing, whatever that may be
-  SET( ALEMBIC_GL_LIBS glew32s ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
+  SET( ALEMBIC_GL_LIBS 
+    ${GLEW_LIBRARY} 
+	${GLUT_LIBRARY} 
+	${OPENGL_LIBRARIES} )
   INCLUDE_DIRECTORIES ( ${GLUT_INCLUDE_DIR} )
-  INCLUDE_DIRECTORIES ( ${Glew_INCLUDE_DIR} )
-  LINK_DIRECTORIES ( ${Glew_LIBRARY_DIR} )
+  INCLUDE_DIRECTORIES ( ${GLEW_INCLUDE_DIR} )
 ELSEIF( ${DARWIN} )
   # Do a darwin OpenGL thing.
-  SET( ALEMBIC_GL_LIBS ${GLUT_LIBRARY} "-framework OpenGL" )
+  SET( ALEMBIC_GL_LIBS ${GLEW_LIBRARY} ${GLUT_LIBRARY} "-framework OpenGL" )
 ELSE()
-  SET( ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
+  SET( ALEMBIC_GL_LIBS 
+	${GLEW_LIBRARY} 
+	${GLUT_LIBRARY} 
+	${OPENGL_LIBRARIES} )
 ENDIF()
 
 MESSAGE( STATUS "OpenGL Libraries: ${ALEMBIC_GL_LIBS}" )
@@ -249,6 +259,15 @@ ELSE()
   INCLUDE( "./build/AlembicPyIlmBase.cmake" )
   INCLUDE_DIRECTORIES( ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} )
 ENDIF ()
+
+IF ( ${WINDOWS} )
+  IF(ALEMBIC_GLEW_LINK_STATIC)
+    ADD_DEFINITIONS ( -DGLEW_STATIC )
+  ENDIF()
+  IF(ALEMBIC_ILMBASE_LINK_STATIC)
+    ADD_DEFINITIONS ( -DOPENEXR_DLL )
+  ENDIF()
+ENDIF()
 
 # Include Python stuff
 INCLUDE("./build/AlembicPython.cmake")

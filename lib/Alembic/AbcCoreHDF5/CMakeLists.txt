@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DABC_CORE_HDF5_EXPORTS)
+ENDIF()
+
 # C++ files for this project
 SET( CXX_FILES
   AprImpl.cpp
@@ -74,6 +78,7 @@ SET( H_FILES
   CpwData.h
   CpwImpl.h
   DataTypeRegistry.h
+  Export.h
   HDF5Hierarchy.h
   HDF5HierarchyReader.h
   HDF5HierarchyWriter.h
@@ -97,8 +102,8 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcCoreHDF5 ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AlembicAbcCoreHDF5 ${ALEMBIC_HDF5_LIBS} )
+ADD_LIBRARY( AlembicAbcCoreHDF5 ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcCoreHDF5 AlembicAbcCoreAbstract ${ALEMBIC_HDF5_LIBS} )
 
 INSTALL( TARGETS AlembicAbcCoreHDF5
          LIBRARY DESTINATION lib
@@ -108,6 +113,7 @@ INSTALL( TARGETS AlembicAbcCoreHDF5
 INSTALL( FILES
          All.h
          ReadWrite.h
+		 Export.h
          DESTINATION include/Alembic/AbcCoreHDF5
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
 

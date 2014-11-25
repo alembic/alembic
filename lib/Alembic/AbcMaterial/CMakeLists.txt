@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DABC_MATERIAL_EXPORTS)
+ENDIF()
+
 # C++ files for this project
 SET( CXX_FILES
   OMaterial.cpp
@@ -43,16 +47,18 @@ SET( CXX_FILES
 )
 
 SET( H_FILES
-  SchemaInfoDeclarations.h
+  Export.h
   OMaterial.h
   IMaterial.h
   MaterialFlatten.h
   MaterialAssignment.h
+  SchemaInfoDeclarations.h
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcMaterial ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcMaterial ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcMaterial AlembicAbc )
 
 INSTALL( TARGETS AlembicAbcMaterial
          LIBRARY DESTINATION lib

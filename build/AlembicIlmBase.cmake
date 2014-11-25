@@ -34,12 +34,13 @@
 ##-*****************************************************************************
 
 
-FIND_PACKAGE( IlmBase )
+FIND_PACKAGE( IlmBase REQUIRED )
 
 IF( ILMBASE_FOUND )
   SET( ALEMBIC_ILMBASE_INCLUDE_DIRECTORY ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
   SET( ALEMBIC_ILMBASE_LIBRARIES ${ALEMBIC_ILMBASE_LIBS} )
   SET( ALEMBIC_ILMBASE_FOUND 1 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise" )
+  OPTION( ALEMBIC_ILMBASE_LINK_STATIC "Is IlmBase a static library?" OFF )
 ELSE()
   SET( ALEMBIC_ILMBASE_FOUND 0 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise" )
 ENDIF()

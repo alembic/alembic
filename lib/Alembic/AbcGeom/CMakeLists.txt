@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DABC_GEOM_EXPORTS)
+ENDIF()
+
 # C++ files for this project
 SET( CXX_FILES
 
@@ -78,7 +82,7 @@ SET( CXX_FILES
 SET( H_FILES
 
   All.h
-
+  Export.h
   Foundation.h
 
   ArchiveBounds.h
@@ -132,7 +136,8 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcGeom ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcGeom ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcGeom AlembicAbc )
 
 INSTALL( TARGETS AlembicAbcGeom
          LIBRARY DESTINATION lib

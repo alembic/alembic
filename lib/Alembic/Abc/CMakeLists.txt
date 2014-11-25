@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DABC_EXPORTS)
+ENDIF()
+
 # C++ files for this project
 SET( CXX_FILES
   ArchiveInfo.cpp
@@ -59,6 +63,7 @@ SET( H_FILES
   All.h
   Base.h
   ErrorHandler.h
+  Export.h
   Foundation.h
   Argument.h
   ArchiveInfo.h
@@ -95,7 +100,8 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbc ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbc ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbc AlembicAbcCoreAbstact )
 
 INSTALL( TARGETS AlembicAbc
          LIBRARY DESTINATION lib

@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DABC_CORE_ABSTRACT_EXPORTS)
+ENDIF()
+
 # C++ files for this project
 SET( CXX_FILES 
      Foundation.cpp
@@ -60,6 +64,7 @@ SET( CXX_FILES
 
 SET( H_FILES 
      All.h
+     Export.h
      ForwardDeclarations.h
 
      ArraySample.h
@@ -92,7 +97,8 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcCoreAbstract ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcCoreAbstract ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcCoreAbstract AlembicUtil ${ALEMBIC_ILMBASE_LIBRARIES} )
 
 INSTALL( TARGETS AlembicAbcCoreAbstract
          LIBRARY DESTINATION lib

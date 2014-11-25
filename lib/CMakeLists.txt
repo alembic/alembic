@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+cmake_policy(SET CMP0048 OLD)
+
 # Create a container project for all the libraries.
 PROJECT( ALEMBIC_LIBS )
 

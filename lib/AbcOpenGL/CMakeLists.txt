@@ -34,9 +34,14 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DABC_OPENGL_EXPORTS)
+ENDIF()
+
 SET( H_FILES
      DrawContext.h
      Drawable.h
+	 Export.h
      Foundation.h
      GLCamera.h
      ICurvesDrw.h
@@ -81,7 +86,7 @@ SET( THIS_LIBS
      ${CMAKE_THREAD_LIBS_INIT}
      ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
-ADD_LIBRARY( AlembicAbcOpenGL ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcOpenGL ${LIB_TYPE} ${SOURCE_FILES} )
 TARGET_LINK_LIBRARIES( AlembicAbcOpenGL ${THIS_LIBS} )
 
 INSTALL( TARGETS AlembicAbcOpenGL

@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DOGAWA_EXPORTS)
+ENDIF()
+
 # C++ files for this project
 SET( CXX_FILES
      IArchive.cpp
@@ -45,6 +49,7 @@ SET( CXX_FILES
      OStream.cpp )
 
 SET( H_FILES
+     Export.h
      Foundation.h
      IArchive.h
      IData.h
@@ -56,7 +61,8 @@ SET( H_FILES
      OStream.h )
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicOgawa ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicOgawa ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicOgawa AlembicUtil )
 
 INSTALL( TARGETS AlembicOgawa
          LIBRARY DESTINATION lib

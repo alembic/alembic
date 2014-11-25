@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(ALEMBIC_SHARED_LIBS)
+    ADD_DEFINITIONS(-DABC_COLLECTION_EXPORTS)
+ENDIF()
+
 # C++ files for this project
 SET( CXX_FILES
   OCollections.cpp
@@ -41,6 +45,7 @@ SET( CXX_FILES
 
 SET( H_FILES
  All.h
+ Export.h
  SchemaInfoDeclarations.h
  OCollections.h
  ICollections.h
@@ -48,7 +53,8 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcCollection ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcCollection ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcCollection AlembicAbc )
 
 INSTALL( TARGETS AlembicAbcCollection
          LIBRARY DESTINATION lib
