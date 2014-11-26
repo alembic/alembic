@@ -34,7 +34,10 @@
 ##-*****************************************************************************
 
 # Avoid warning for this unversioned project
-cmake_policy(SET CMP0048 OLD)
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 OLD)
+endif()
+
 
 PROJECT( ALEMBIC_EXAMPLE_CODE )
 

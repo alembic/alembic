@@ -57,8 +57,8 @@ protected:
     // Deliberately obfuscated
     void print( std::ostream &ostr ) const;
 
-    friend std::ostream &operator<<( std::ostream &ostr,
-                                     const TbuUtil &tbu );
+    TRIVIAL_BOOST_USAGE_EXPORT friend std::ostream &
+        operator<<( std::ostream &ostr, const TbuUtil &tbu );
 
     int m_miscData;
 };

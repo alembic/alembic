@@ -49,6 +49,11 @@
 #include <sstream>
 #include <sys/stat.h>
 
+// no unistd under visual studio
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
+
 #ifdef _MSC_VER
 #include <locale>         // std::locale, std::isdigit
 // set up _S_ISDIR()
@@ -638,7 +643,7 @@ int main( int argc, char *argv[] )
     act.sa_flags = SA_SIGINFO;
     sigaction(SIGSEGV, &act, NULL);
     /* signal if available */
-#elif defined(_POSIX_VERSION) || defined(_WIN32)
+#elif defined(_POSIX_VERSION) || defined(_MSC_VER)
     signal(SIGSEGV, segfault_sigaction);
 #else 
 #error No signal interface available

@@ -57,8 +57,8 @@ protected:
     // I am deliberately making this obfuscated, just to flex the compiler.
     void print( std::ostream &ostr ) const;
     
-    friend std::ostream &operator<<( std::ostream &ostr,
-                                     const HelloUtil &hu );
+    CMAKE_HELLO_WORLD_UTIL_EXPORT friend std::ostream &
+        operator<<( std::ostream &ostr, const HelloUtil &hu );
     
     int m_miscData;
 };

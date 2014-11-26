@@ -37,7 +37,7 @@
 SET( H_FILES
      DrawContext.h
      Drawable.h
-	 Export.h
+     Export.h
      Foundation.h
      GLCamera.h
      ICurvesDrw.h
@@ -93,7 +93,7 @@ ENDIF()
 
 INSTALL( TARGETS AlembicAbcOpenGL
          LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
-		 RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+         RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
          ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR} )
 
 INSTALL( FILES ${H_FILES}

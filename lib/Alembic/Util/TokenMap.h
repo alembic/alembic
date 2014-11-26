@@ -57,9 +57,6 @@ namespace ALEMBIC_VERSION_NS {
 //!        token=value;token=value;token=value;
 //-*****************************************************************************
 
-/* avoid STL export warning on visual studio */
-template class ALEMBIC_UTIL_EXPORT std::map<std::string,std::string>;
-
 class ALEMBIC_UTIL_EXPORT TokenMap
 {
 public:
