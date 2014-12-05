@@ -42,7 +42,7 @@ into high level convenience methods.
 
 More information can be found at http://docs.alembic.io/python/cask.html
 """
-__version__ = "0.9.2"
+__version__ = "0.9.3"
 
 import os
 import re
@@ -51,7 +51,7 @@ import weakref
 import alembic
 from functools import wraps
 
-# maps cask objects to alembic "I" objects
+# maps cask objects to Alembic IObjects
 IOBJECTS = {
     "Camera": alembic.AbcGeom.ICamera,
     "Collections": alembic.AbcCollection.ICollections,
@@ -66,7 +66,7 @@ IOBJECTS = {
     "Xform": alembic.AbcGeom.IXform,
 }
 
-# maps cask objects to alembic "O" objects
+# maps cask objects to Alembic OObjects
 OOBJECTS = {
     "Camera": alembic.AbcGeom.OCamera,
     "Collections": alembic.AbcCollection.OCollections,
@@ -81,7 +81,7 @@ OOBJECTS = {
     "Xform": alembic.AbcGeom.OXform,
 }
 
-# maps cask objects to alembic "I" schemas
+# maps cask objects to Alembic IObject schemas
 ISCHEMAS = {
     "Camera": alembic.AbcGeom.ICameraSchema,
     "Collections": alembic.AbcCollection.ICollectionsSchema,
@@ -96,8 +96,17 @@ ISCHEMAS = {
     "Xform": alembic.AbcGeom.IXformSchema,
 }
 
-# "O" property class index
-OPROPERTIES = {
+def uint16(n):
+    return n & 0xffff
+
+def uint32(n):
+    return n & 0xffffffff
+
+def uint64(n):
+    return n & 0xffffffffffffffff
+
+# index of property class by value or name
+OPROPERTIES_BY_VALUE = {
     bool: {
         'scalar': alembic.Abc.OBoolProperty,
         'array': alembic.Abc.OBoolArrayProperty,
@@ -114,13 +123,33 @@ OPROPERTIES = {
         'scalar': alembic.Abc.OStringProperty,
         'array': alembic.Abc.OStringArrayProperty,
     },
+    uint16: {
+        'scalar': alembic.Abc.OUInt16Property,
+        'array': alembic.Abc.OUInt16ArrayProperty,
+    },
+    uint32: {
+        'scalar': alembic.Abc.OUInt32Property,
+        'array': alembic.Abc.OUInt32ArrayProperty,
+    },
+    uint64: {
+        'scalar': alembic.Abc.OUInt64Property,
+        'array': alembic.Abc.OUInt64ArrayProperty,
+    },
     imath.BoolArray: {
         'scalar': alembic.Abc.OBoolArrayProperty,
         'array': alembic.Abc.OBoolArrayProperty,
     },
+    imath.M33f: {
+        'scalar': alembic.Abc.OM33fProperty,
+        'array': alembic.Abc.OM33fArrayProperty,
+    },
     imath.M33d: {
         'scalar': alembic.Abc.OM33dProperty,
         'array': alembic.Abc.OM33dArrayProperty,
+    },
+    imath.M44f: {
+        'scalar': alembic.Abc.OM44fProperty,
+        'array': alembic.Abc.OM44fArrayProperty,
     },
     imath.M44d: {
         'scalar': alembic.Abc.OM44dProperty,
@@ -140,7 +169,15 @@ OPROPERTIES = {
     },
     imath.V3d: {
         'scalar': alembic.Abc.OV3dProperty,
-        'array': alembic.Abc.OV3dProperty,
+        'array': alembic.Abc.OV3dArrayProperty,
+    },
+    imath.V3i: {
+        'scalar': alembic.Abc.OV3iProperty,
+        'array': alembic.Abc.OV3iArrayProperty,
+    },
+    imath.V3f: {
+        'scalar': alembic.Abc.OV3fProperty,
+        'array': alembic.Abc.OV3fArrayProperty,
     },
     imath.UnsignedCharArray: {
         'scalar': alembic.Abc.OUcharArrayProperty,
@@ -198,6 +235,10 @@ OPROPERTIES = {
         'scalar': alembic.Abc.OBox3fProperty,
         'array': alembic.Abc.OBox3fArrayProperty,
     },
+    imath.Color4c: {
+        'scalar': alembic.Abc.OC4cProperty,
+        'array': alembic.Abc.OC4cArrayProperty,
+    },
     imath.Color3f: {
         'scalar': alembic.Abc.OC3fProperty,
         'array': alembic.Abc.OC3fArrayProperty,
@@ -205,43 +246,68 @@ OPROPERTIES = {
     imath.C3fArray: {
         'scalar': alembic.Abc.OC3fArrayProperty,
         'array': alembic.Abc.OC3fArrayProperty,
-    },
-    'color': alembic.Abc.OC3fProperty,
-    'colour': alembic.Abc.OC3fProperty,
-    'shadow_color': alembic.Abc.OC3fProperty,
-    'shadow_colour': alembic.Abc.OC3fProperty,
-    ".shaderNames": alembic.Abc.OStringArrayProperty,
-    'slideMap': alembic.Abc.OStringProperty,
-    ".ops": alembic.Abc.OUcharProperty,
-    "visible": alembic.Abc.OCharProperty
+    }
+}
+
+# index of property class by POD, extent
+OPROPERTIES_BY_POD = {
+    (alembic.Util.POD.kBooleanPOD, 1): OPROPERTIES_BY_VALUE.get(bool),
+    (alembic.Util.POD.kStringPOD, 1): OPROPERTIES_BY_VALUE.get(str),
+    (alembic.Util.POD.kInt32POD, 1): OPROPERTIES_BY_VALUE.get(int),
+    (alembic.Util.POD.kUint64POD, 1): OPROPERTIES_BY_VALUE.get(uint64),
+    (alembic.Util.POD.kFloat32POD, 1): OPROPERTIES_BY_VALUE.get(float),
+    (alembic.Util.POD.kFloat32POD, 3): OPROPERTIES_BY_VALUE.get(imath.V3f),
+    (alembic.Util.POD.kUint8POD, 4): OPROPERTIES_BY_VALUE.get(imath.Color4c),
+    (alembic.Util.POD.kFloat32POD, 6): OPROPERTIES_BY_VALUE.get(imath.Box3f),
+    (alembic.Util.POD.kFloat64POD, 6): OPROPERTIES_BY_VALUE.get(imath.Box3d),
+    (alembic.Util.POD.kFloat32POD, 9): OPROPERTIES_BY_VALUE.get(imath.M33f),
+    (alembic.Util.POD.kFloat64POD, 9): OPROPERTIES_BY_VALUE.get(imath.M33d),
+    (alembic.Util.POD.kFloat32POD, 16): OPROPERTIES_BY_VALUE.get(imath.M44f),
+    (alembic.Util.POD.kFloat64POD, 16): OPROPERTIES_BY_VALUE.get(imath.M44d),
 }
 
 _COMPOUND_PROPERTY_VALUE_ERROR_ = "Compound properties cannot have values"
 
-def get_simple_oprop_class(name, value):
+class UnknownPropertyType(Exception):
+    """Exception class for unhandled property classes"""
+
+def get_simple_oprop_class(prop, klass=None):
     """
     Returns the alembic simple property class based on a given name and value.
 
-    :param name: name of the property
-    :param value: property value
-    :return: alembic "O" property class
+    :param prop: Property class object
+    :return: Alembic property class
     """
-    if type(value) in [list, set]:
-        _value = value[0]
-    else:
-        _value = value
-    try:
-        return OPROPERTIES.get(str(name).lower(),
-               OPROPERTIES.get(type(_value)).get(
-                       {
-                        True:'array',
-                        False:'scalar'
-                       }.get((type(value) in [set, list] and len(value) > 1))
-                   )
-               )
-    except AttributeError:
-        print "Error finding property class for", name, "with value", value
+
+    if prop.is_compound():
+        return alembic.Abc.OCompoundProperty
+
+    # we can't create the property if there are no values
+    if len(prop.values) == 0 and not prop.iobject:
         return None
+    
+    # get a handle on the lowest level value
+    value = prop.values[0] if len(prop.values) > 0 else []
+    value0 = value[0] if type(value) in (set, list) and len(value) > 0 else value
+
+    # look for property class by POD, extent
+    if prop.iobject:
+        klass = OPROPERTIES_BY_POD.get((
+            prop.iobject.getDataType().getPod(),
+            prop.iobject.getDataType().getExtent()
+        ))
+        is_array = prop.iobject.isArray()
+
+    # else, look for property class by value type
+    if not klass:
+        klass = OPROPERTIES_BY_VALUE.get(type(value0))
+        is_array = (type(value) in [set, list] and len(value) > 1)
+
+    if klass: 
+        return klass.get({True:'array', False:'scalar'}.get(is_array))
+    
+    else:
+        raise UnknownPropertyType("Unknown property class for %s" % prop.name)
 
 def _delist(val):
     """returns single value if list len is 1"""
@@ -342,6 +408,7 @@ class DeepDict(dict):
     def __setitem__(self, name, item):
         obj = self.parent
         new = False
+        
         if "/" in name:
             names = name.split("/")
             for name in names:
@@ -354,6 +421,7 @@ class DeepDict(dict):
             if new is False:
                 obj = obj.parent
             return obj.set_item(name, item)
+
         item._name = name
         item._parent = obj
         return super(DeepDict, self).__setitem__(name, item)
@@ -455,6 +523,7 @@ class Archive(object):
         self.oobject = None
         self.top = None
         self.__get_iobject()
+        self.__time_sampling_objects = []
         self.time_sampling_id = max(len(self.timesamplings) - 1, 0)
 
     def info(self):
@@ -496,11 +565,11 @@ class Archive(object):
         """
         Generator that yields tuples of (index, TimeSampling) objects.
         """
-        if self.iobject:
+        if not self.__time_sampling_objects and self.iobject:
             iarch = self.iobject
             num_samples = iarch.getNumTimeSamplings()
             return [iarch.getTimeSampling(i) for i in range(num_samples)]
-        return []
+        return self.__time_sampling_objects
 
     def time_range(self):
         """
@@ -645,6 +714,7 @@ class Property(object):
         # init some private variables
         self._parent = None
         self._name = name
+        self._metadata = {}
         self._iobject = iproperty
         self._oobject = None
         self._klass = None
@@ -680,25 +750,25 @@ class Property(object):
 
     def __get_oobject(self):
         """sets oproperty"""
-        _parent = None
+        parent = None
         if not self._oobject and self.parent:
-            meta = alembic.AbcCoreAbstract.MetaData()
-            if self.is_compound() and not self._klass:
-                self._klass = alembic.Abc.OCompoundProperty
-            elif self._klass is None and len(self.values) > 0:
-                self._klass = get_simple_oprop_class(self.name, self.values[0])
+            if self.iobject:
+                meta = self.iobject.getMetaData()
+            else:
+                meta = alembic.AbcCoreAbstract.MetaData()
+            self._klass = get_simple_oprop_class(self)
             if self.is_compound() and self.iobject:
                 meta.set('schema', self.iobject.getMetaData().get('schema'))
             if type(self.parent) == Property and self.parent.is_compound():
-                _parent = self.parent.oobject
+                parent = self.parent.oobject
             else:
                 if hasattr(self.parent.oobject, 'getProperties'):
-                    _parent = self.parent.oobject.getProperties()
-            if _parent and _parent.getPropertyHeader(self.name):
+                    parent = self.parent.oobject.getProperties()
+            if parent and parent.getPropertyHeader(self.name):
                 # pre-existing property exists, see Property.__get_oobject
                 pass
-            elif _parent and self._klass:
-                self._oobject = self._klass(_parent,
+            elif parent and self._klass:
+                self._oobject = self._klass(parent,
                                             self.name,
                                             meta,
                                             self.time_sampling_id)
@@ -745,11 +815,34 @@ class Property(object):
     name = property(__get_name, __set_name,
                     doc="Gets and sets the property name.")
 
+    def __get_metadata(self):
+        """returns metadata dict"""
+        if not self._metadata and self.iobject:
+            meta = self.iobject.getMetaData()
+            for field in meta.serialize().split(';'):
+                splits = field.split('=')
+                key = splits[0].replace('_ai_','')
+                value = '='.join(splits[1:])
+                self._metadata[key] = value
+        return self._metadata
+
+    def __set_metadata(self, metadata):
+        """sets metadata dict"""
+        self._metadata = metadata
+
+    metadata = property(__get_metadata, __set_metadata,
+                        doc="Metadata as a dict.")
+
     def type(self):
         """Returns the name of the class."""
         if self.is_compound():
             return "Compound Property"
         return self.__class__.__name__
+
+    def pod(self):
+        if self.iobject:
+            return self.iobject.getDataType().getPod()
+        return None
 
     def archive(self):
         """Returns the Archive for this property."""
@@ -900,7 +993,7 @@ class Property(object):
         elif index is None:
             index = self.__get_sample_index(time, frame)
         if self._klass is None:
-            self._klass = get_simple_oprop_class(self.name, value)
+            self._klass = get_simple_oprop_class(self)
         if self._klass == alembic.Abc.OFloatArrayProperty:
             farray = imath.FloatArray(len(value))
             for i, val in enumerate(value):
@@ -947,8 +1040,9 @@ class Property(object):
             for value in self.values:
                 try:
                     self.oobject.setValue(value)
-                except TypeError, err:
-                    print "Error setting", value, "on", self.name, "\n", err
+                except Exception, err:
+                    print "Error setting value on %s: %s\n%s" \
+                        % (self.name, value, err)
         else:
             for prop in self.properties.values():
                 prop.parent = self
@@ -1022,18 +1116,17 @@ class Object(object):
             # results in name collisions when saving properties in cask.
             # Using OObjects avoids this problem, but we have to set
             # the metadata manually.
-            if self.iobject:
+            if self.iobject and type(self) not in (Camera, ):
                 self._klass = alembic.Abc.OObject
-                meta.set('schema', self.iobject.getMetaData().get('schema'))
-                meta.set('schemaObjTitle',
-                         self.iobject.getMetaData().get('schemaObjTitle'))
-                meta.set('schemaBaseType',
-                         self.iobject.getMetaData().get('schemaBaseType'))
+                meta = self.iobject.getMetaData()
             else:
                 self._klass = OOBJECTS.get(self.type())
             if self._klass:
                 self._oobject = self._klass(self.parent.oobject, self.name,
                                             meta, self.time_sampling_id)
+            else:
+                print "OObject class not found for: %s" % (self.name)
+
         return self._oobject
 
     def __set_oobject(self, oobject):
@@ -1246,10 +1339,13 @@ class Object(object):
         """
         Returns True if the object has changing P values.
         """
-        prop = self.properties.get("P")
-        if prop:
-            return prop.isConstant()
-        return False
+        try:
+            prop = self.properties[".geom/P"]
+            if prop:
+                return not prop.iobject.isConstant()
+            return False
+        except KeyError:
+            return False
 
     def start_frame(self):
         """
@@ -1337,7 +1433,11 @@ class Object(object):
         if not self._osamples:
             self._set_default_sample()
         for sample in self._osamples:
-            obj.getSchema().set(sample)
+            try:
+                obj.getSchema().set(sample)
+            except AttributeError, err:
+                print "Error setting sample on %s: %s\n%s" \
+                    %(self.name, sample, err)
 
 class Top(Object):
     """Alembic Top Object."""

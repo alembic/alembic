@@ -54,8 +54,6 @@ TEMPDIR = tempfile.mkdtemp()
 """
 TODO
  - add new TimeSampling objects to archives (empty and from disk)
- - reading and writing metadata
- - tests for converting Python data types to Alembic data types
  - more tests for getting and setting values/samples
  - test creating prototype schema objects
  - test name collisions when creating new objects and properties
@@ -804,6 +802,58 @@ class Test3_Issues(unittest.TestCase):
         test_file_2 = mesh_out(filename, force=True)
 
         self.assertEqual(test_file_1, test_file_2)
+
+    def test_issue_345(self):
+        filename_1 = "cask_test_issue_345_1.abc"
+        filename_2 = "cask_test_issue_345_2.abc"
+        filename_3 = "cask_test_issue_345_3.abc"
+
+        test_file_1 = mesh_out(filename_1)
+        test_file_2 = os.path.join(TEMPDIR, filename_2)
+        test_file_3 = os.path.join(TEMPDIR, filename_3)
+        test_file_geom = os.path.join(TEMPDIR, "cask_write_geom.abc")
+
+        # round trip test some metadata
+        a = cask.Archive(test_file_1)
+        childBnds = a.top.children["meshy"].properties[".geom/.childBnds"]
+        uvs = a.top.children["meshy"].properties[".geom/uv"]
+        self.assertEqual(uvs.metadata.get("geoScope"), "fvr")
+        self.assertEqual(childBnds.metadata.get("interpretation"), "box")
+        a.write_to_file(test_file_2)
+        a.close()
+        
+        a = cask.Archive(test_file_2)
+        childBnds = a.top.children["meshy"].properties[".geom/.childBnds"]
+        uvs = a.top.children["meshy"].properties[".geom/uv"]
+        self.assertEqual(uvs.metadata.get("geoScope"), "fvr")
+        self.assertEqual(childBnds.metadata.get("interpretation"), "box")
+        a.close()
+
+        # round trip test some pod values
+        a = cask.Archive(test_file_geom)
+        points = a.top.children.get("points")
+        curve = a.top.children.get("curve")
+        faceset = a.top.children.get("faceset")
+        polymesh = a.top.children.get("polymesh")
+        pod1 = points.properties[".geom/P"].pod()
+        pod2 = points.properties[".geom/.pointIds"].pod()
+        pod3 = curve.properties[".geom/curveBasisAndType"].pod()
+        pod4 = faceset.properties[".faceset"].pod()
+        pod5 = polymesh.properties[".geom/.selfBnds"].pod()
+        a.write_to_file(test_file_3)
+        a.close()
+
+        a = cask.Archive(test_file_3)
+        points = a.top.children.get("points")
+        curve = a.top.children.get("curve")
+        faceset = a.top.children.get("faceset")
+        polymesh = a.top.children.get("polymesh")
+        self.assertEqual(points.properties[".geom/P"].pod(), pod1)
+        self.assertEqual(points.properties[".geom/.pointIds"].pod(), pod2)
+        self.assertEqual(curve.properties[".geom/curveBasisAndType"].pod(), pod3)
+        self.assertEqual(faceset.properties[".faceset"].pod(), pod4)
+        self.assertEqual(polymesh.properties[".geom/.selfBnds"].pod(), pod5)
+        a.close()
 
     def test_issue_346(self):
         filename_1 = "cask_test_issue_346_1.abc"
