@@ -1,3 +1,30 @@
+2015-12-09, Alembic 1.5.7
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+Python:
+
+Add missing methods to IPoints.
+Add Points schema to cask.
+(pull request 12)
+
+Cask:
+Add oproperty mapping for additional imath classes.
+Add iproperty to oproperty class mapping using pod, extent values.
+Remove named oproperty override mapping (replaced by above methods).
+Add metadata accessor to property class.
+Fix is_deforming method on objects.
+(pull request 15)
+
+Maya:
+
+AbcExport:
+Add support for writing out all UV sets on an MFnMesh with the
+-wuvs/-writeUVSets flag. (pull request 13)
+
+AbcImport:
+Support loaidng multiple UV sets on an MFnMesh when present. (pull request 13)
+
 2015-10-17, Alembic 1.5.6
 Hello Alembic users, thanks to your feedback and reports we have a few bug
 fixes and enhancements.
@@ -25,7 +52,7 @@ default time sampling. (pull request 7)
 
 AbcImport:
 
-Don't warnt about UVs or normals size being mismatched if the mesh has no
+Don't warn about UVs or normals size being mismatched if the mesh has no
 points.  (pull request 8)
 
 Connections to custom VectorArray and PointArray properties will no longer fail.
