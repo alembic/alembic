@@ -45,7 +45,7 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
     const std::string &iUserDescription,
     const Abc::Argument &iArg0,
     const Abc::Argument &iArg1,
-    bool asOgawa = false )
+    bool asOgawa = true )
 {
     if ( asOgawa == true )
     {
@@ -101,7 +101,7 @@ void register_archiveinfo()
          CreateArchiveWithInfoWrapper,
          ( arg( "fileName" ), arg( "ApplicationWriter" ),
            arg( "UserDescription" ), arg( "argument" ) = Abc::Argument(), 
-           arg( "argument" ) = Abc::Argument(), arg( "asOgawa" ) = false ),
+           arg( "argument" ) = Abc::Argument(), arg( "asOgawa" ) = true ),
          "Create an OArchive with the passed arguments" );
     def( "GetArchiveInfo",
          GetArchiveInfoWrapper,
