@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2012-2014,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -44,15 +44,29 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
     const std::string &iApplicationWriter,
     const std::string &iUserDescription,
     const Abc::Argument &iArg0,
-    const Abc::Argument &iArg1 )
+    const Abc::Argument &iArg1,
+    bool asOgawa = true )
 {
-    return Abc::CreateArchiveWithInfo( 
-        ::Alembic::AbcCoreHDF5::WriteArchive(),
-        iFileName,
-        iApplicationWriter,
-        iUserDescription,
-        iArg0,
-        iArg1 );
+    if ( asOgawa == true )
+    {
+        return Abc::CreateArchiveWithInfo( 
+            ::Alembic::AbcCoreOgawa::WriteArchive(),
+            iFileName,
+            iApplicationWriter,
+            iUserDescription,
+            iArg0,
+            iArg1 );
+    }
+    else
+    {       
+        return Abc::CreateArchiveWithInfo( 
+            ::Alembic::AbcCoreHDF5::WriteArchive(),
+            iFileName,
+            iApplicationWriter,
+            iUserDescription,
+            iArg0,
+            iArg1 );
+    }
 }
 
 //-*****************************************************************************
@@ -86,7 +100,8 @@ void register_archiveinfo()
     def( "CreateArchiveWithInfo",
          CreateArchiveWithInfoWrapper,
          ( arg( "fileName" ), arg( "ApplicationWriter" ),
-           arg( "UserDescription" ), arg( "argument" ), arg( "argument" ) ),
+           arg( "UserDescription" ), arg( "argument" ) = Abc::Argument(), 
+           arg( "argument" ) = Abc::Argument(), arg( "asOgawa" ) = true ),
          "Create an OArchive with the passed arguments" );
     def( "GetArchiveInfo",
          GetArchiveInfoWrapper,
