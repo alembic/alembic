@@ -52,3 +52,5 @@ SET( FULL_ABC_LIBS
 ADD_EXECUTABLE( abctree AbcTree.cpp )
 TARGET_LINK_LIBRARIES( abctree ${FULL_ABC_LIBS} )
 
+INSTALL( TARGETS abctree
+         DESTINATION bin )
