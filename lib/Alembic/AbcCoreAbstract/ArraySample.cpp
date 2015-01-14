@@ -109,11 +109,10 @@ ArraySample::Key ArraySample::getKey() const
             const std::wstring &wstr =
                 static_cast<const std::wstring*>( m_data )[j];
 
-            std::vector <int32_t> v(wstr.length());
             size_t wlen = wstr.length();
             for (size_t k = 0; k < wlen; ++k)
             {
-                v[k] = wstr[k];
+                v.push_back(wstr[k]);
             }
 
             // append a 0 for the NULL seperator character
