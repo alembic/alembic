@@ -1,3 +1,24 @@
+2015-1-15, Alembic 1.5.8
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+AbcCoreAbstract:
+Fix wstring array hash calculation. (pull request 17)
+
+Build system:
+Make the OS X version check more robust to determine if C++11 flag is required.
+(pull request 18)
+
+Python:
+
+PyAlembic:
+Add asOgawa option for PyOArchive and make Ogawa the default for
+CreateArchiveWithInfo. (pull request 16)
+
+##-*****************************************************************************
+
 2015-12-09, Alembic 1.5.7
 Hello Alembic users, thanks to your feedback and reports we have a few bug
 fixes and enhancements.
@@ -24,6 +45,8 @@ Add support for writing out all UV sets on an MFnMesh with the
 
 AbcImport:
 Support loaidng multiple UV sets on an MFnMesh when present. (pull request 13)
+
+##-*****************************************************************************
 
 2015-10-17, Alembic 1.5.6
 Hello Alembic users, thanks to your feedback and reports we have a few bug
