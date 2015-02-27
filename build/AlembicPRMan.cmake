@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -32,7 +32,6 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##-*****************************************************************************
-
 
 # We shall worry about windowsification later.
 
@@ -120,35 +119,35 @@ ENDIF()
 # Macro for making prman plugins
 ##-*****************************************************************************
 ##-*****************************************************************************
-MACRO(ADD_PRMAN_CXX_PLUGIN PluginName SourceFile1 )
+MACRO(ADD_PRMAN_CXX_PLUGIN PluginName SourceFile1)
 
-  IF( NOT ${ALEMBIC_PRMAN_FOUND} )
-    MESSAGE( FATAL_ERROR "PRMan is not found. :(" )
+  IF (NOT ${ALEMBIC_PRMAN_FOUND})
+    MESSAGE(FATAL_ERROR "PRMan not found." )
   ENDIF()
 
-  GET_FILENAME_COMPONENT( PluginNameNoDirectory ${PluginName} NAME )
-  GET_FILENAME_COMPONENT( PluginNameFullPath ${PluginName} ABSOLUTE )
+  GET_FILENAME_COMPONENT(PluginNameNoDirectory ${PluginName} NAME)
+  GET_FILENAME_COMPONENT(PluginNameFullPath ${PluginName} ABSOLUTE)
 
-  SET( TMP_SOURCES ${SourceFile1} ${ARGN} )
-  SET( ${PluginName}_SOURCES ${TMP_SOURCES} )
+  SET(TMP_SOURCES ${SourceFile1} ${ARGN})
+  SET(${PluginName}_SOURCES ${TMP_SOURCES})
 
-  INCLUDE_DIRECTORIES( ${ALEMBIC_PRMAN_INCLUDE_PATH} )
+  INCLUDE_DIRECTORIES(${ALEMBIC_PRMAN_INCLUDE_PATH})
 
-  ADD_LIBRARY( ${PluginName} MODULE ${TMP_SOURCES} )
+  ADD_LIBRARY(${PluginName} MODULE ${TMP_SOURCES})
 
-  SET_TARGET_PROPERTIES( ${PluginName}
+  SET_TARGET_PROPERTIES(${PluginName}
                          PROPERTIES
                          COMPILE_FLAGS ${PRMAN_COMPILE_FLAGS}
                          LINK_FLAGS ${PRMAN_LINK_FLAGS}
-                         PREFIX "" )
+                         PREFIX "")
 
-  TARGET_LINK_LIBRARIES ( ${PluginName} ${ALEMBIC_PRMAN_LIBPRMAN} )
+  TARGET_LINK_LIBRARIES (${PluginName} ${ALEMBIC_PRMAN_LIBPRMAN})
 #  TARGET_LINK_LIBRARIES( ${PluginName}
 #                         AlembicTraitsGeom AlembicTraits 
 #                         AlembicAsset MD5Hash AlembicHDF5
-#                         ${ALEMBIC_HDF5_LIBS} AlembicUtil AlembicExc
+#                         ${HDF5_LIBRARIES} AlembicUtil AlembicExc
 #                         ${Boost_REGEX_LIBRARY} ${Boost_FILESYSTEM_LIBRARY}
 #                        ${Boost_SYSTEM_LIBRARY}
-#                         -lpthread -lz -lm )
+#                         -lpthread -lz -lm)
 
 ENDMACRO(ADD_PRMAN_CXX_PLUGIN)

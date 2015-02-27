@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,9 +34,9 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ABC_IMPORT_MAYA_MODULE )
+PROJECT(ABC_IMPORT_MAYA_MODULE)
 
-SET( H_FILES
+SET(H_FILES
   AbcImport.h
   AlembicImportFileTranslator.h
   AlembicNode.h
@@ -52,7 +52,7 @@ SET( H_FILES
   XformHelper.h
 )
 
-SET( CXX_FILES
+SET(CXX_FILES
   AbcImport.cpp
   AlembicImportFileTranslator.cpp
   AlembicNode.cpp
@@ -69,9 +69,9 @@ SET( CXX_FILES
   XformHelper.cpp
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-SET( CORE_LIBS
+SET(CORE_LIBS
   AlembicAbcGeom
   AlembicAbcCoreFactory
   AlembicAbc
@@ -79,19 +79,19 @@ SET( CORE_LIBS
   AlembicAbcCoreOgawa
   AlembicAbcCoreAbstract
   AlembicOgawa
-  AlembicUtil )
+  AlembicUtil)
 
-INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )
-INCLUDE_DIRECTORIES( ".." )
+INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES("..")
 
-ADD_MAYA_CXX_PLUGIN( AbcImport ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AbcImport
+ADD_MAYA_CXX_PLUGIN(AbcImport ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(AbcImport
   ${MAYA_LIBRARIES}
   ${CORE_LIBS}
-  ${ALEMBIC_HDF5_LIBS}
+  ${HDF5_LIBRARIES}
   ${ALEMBIC_ILMBASE_LIBS}
   ${CMAKE_THREAD_LIBS_INIT}
-  ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+  ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS})
 
-INSTALL( TARGETS AbcImport
-         DESTINATION maya/plug-ins )
+INSTALL(TARGETS AbcImport
+        DESTINATION maya/plug-ins)

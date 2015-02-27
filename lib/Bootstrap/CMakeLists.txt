@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,12 +34,12 @@
 ##-*****************************************************************************
 
 # Recurse into all the subdirectories
-PROJECT( ALEMBIC_BOOTSTRAP_LIBS )
+PROJECT(ALEMBIC_BOOTSTRAP_LIBS)
 
 # Include the source dirs
-INCLUDE_DIRECTORIES( ${ALEMBIC_BOOTSTRAP_LIBS_SOURCE_DIR} )
+INCLUDE_DIRECTORIES(${ALEMBIC_BOOTSTRAP_LIBS_SOURCE_DIR})
 
 # Recurse into subdirectories
-ADD_SUBDIRECTORY( CMakeHelloWorldUtil )
-ADD_SUBDIRECTORY( TrivialBoostUsageUtil )
+ADD_SUBDIRECTORY(CMakeHelloWorldUtil)
+ADD_SUBDIRECTORY(TrivialBoostUsageUtil)
 

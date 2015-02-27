@@ -42,7 +42,7 @@ SET( FULL_ABC_LIBS
      AlembicAbcCoreAbstract
      AlembicOgawa
      AlembicUtil
-     ${ALEMBIC_HDF5_LIBS}
+     ${HDF5_LIBRARIES}
      ${ALEMBIC_ILMBASE_LIBS}
      ${CMAKE_THREAD_LIBS_INIT}
      ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )

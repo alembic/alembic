@@ -1,5 +1,5 @@
 ##-*****************************************************************************
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ## 
@@ -31,13 +31,8 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##-*****************************************************************************
 
+ADD_LIBRARY(TrivialBoostUsageUtil TbuUtil.cpp)
 
-# Create a library called "TrivialBoostUsageUtil" which includes the source
-# files "TbuUtil.h", "TbuUtil.cpp"
-ADD_LIBRARY( TrivialBoostUsageUtil TbuUtil.cpp )
-
-# Add the tests subdirectory.
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
 ENDIF()
-

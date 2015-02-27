@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013, Industrial Light & Magic,
+## Copyright (c) 2009-2015, Industrial Light & Magic,
 ##   a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
@@ -32,48 +32,48 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ALEMBIC_ARNOLD_PROCEDURAL_MODULE )
+PROJECT(ALEMBIC_ARNOLD_PROCEDURAL_MODULE)
 
+IF (${ALEMBIC_ARNOLD_FOUND})
 
-IF( ${ALEMBIC_ARNOLD_FOUND} )
+    SET(H_FILES
+        ArbGeomParams.h
+        PathUtil.h
+        ProcArgs.h
+        SampleUtil.h
+        WriteGeo.h
+    )
 
-SET( H_FILES
-  ArbGeomParams.h
-  PathUtil.h
-  ProcArgs.h
-  SampleUtil.h
-  WriteGeo.h
-  )
+    SET(CXX_FILES
+        ArbGeomParams.cpp
+        PathUtil.cpp
+        ProcArgs.cpp
+        ProcMain.cpp
+        SampleUtil.cpp
+        WriteGeo.cpp
+    )
 
-SET( CXX_FILES
-  ArbGeomParams.cpp
-  PathUtil.cpp
-  ProcArgs.cpp
-  ProcMain.cpp
-  SampleUtil.cpp
-  WriteGeo.cpp
-)
+    SET(CORE_LIBS
+        AlembicAbcGeom
+        AlembicAbc
+        AlembicAbcCoreHDF5
+        AlembicAbcCoreAbstract
+        AlembicUtil
+    )
 
-SET( CORE_LIBS
-  AlembicAbcGeom
-  AlembicAbc
-  AlembicAbcCoreHDF5
-  AlembicAbcCoreAbstract
-  AlembicUtil )
+    ADD_ARNOLD_CXX_PLUGIN(AlembicArnoldProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES})
+    TARGET_LINK_LIBRARIES(AlembicArnoldProcedural
+        ${CORE_LIBS}
+        ${HDF5_LIBRARIES}
+        ${ALEMBIC_ILMBASE_LIBS}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${ZLIB_LIBRARIES}
+    )
 
-ADD_ARNOLD_CXX_PLUGIN( AlembicArnoldProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES} )
-TARGET_LINK_LIBRARIES( AlembicArnoldProcedural
-  ${CORE_LIBS}
-  ${ALEMBIC_HDF5_LIBS}
-  ${ALEMBIC_ILMBASE_LIBS}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${ZLIB_LIBRARIES}
-)
-
-INSTALL ( TARGETS
-  AlembicArnoldProcedural
-  DESTINATION
-  arnold/procedurals
-)
+    INSTALL(TARGETS
+        AlembicArnoldProcedural
+        DESTINATION
+        arnold/procedurals
+    )
 
 ENDIF()

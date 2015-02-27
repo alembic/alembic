@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,11 +33,8 @@
 ##
 ##-*****************************************************************************
 
-# Create a library called "CMakeHelloWorldUtil" which includes the source
-# files "HelloUtil.h", "HelloUtil.cpp"
-ADD_LIBRARY( CMakeHelloWorldUtil HelloUtil.cpp )
+ADD_LIBRARY(CMakeHelloWorldUtil HelloUtil.cpp)
 
-# Add the tests subdirectory.
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
 ENDIF()

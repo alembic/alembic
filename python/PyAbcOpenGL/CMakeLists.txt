@@ -106,7 +106,7 @@ IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
     main.cpp )
 
   LINK_LIBRARIES( ${CORE_LIBS}
-                  ${ALEMBIC_HDF5_LIBS}
+                  ${HDF5_LIBRARIES}
                   ${PLIBS}
                   ${ALEMBIC_ILMBASE_LIBS}
                   ${ZLIB_LIBRARIES}

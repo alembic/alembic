@@ -33,45 +33,45 @@
 ##
 ##-*****************************************************************************
 
-# Declare the Alembic Project
 PROJECT(ALEMBIC)
 
-# This is the top level of the Alembic project. Bins and then libs!
-# Also, this top level should include any "global" build configurations
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-MESSAGE(STATUS "CMAKE SYSTEM NAME: ${CMAKE_SYSTEM_NAME}" )
+MESSAGE(STATUS "CMAKE SYSTEM NAME: ${CMAKE_SYSTEM_NAME}")
 
 IF (RUN_FROM_MK)
-    SET ( CMAKE_FIRST_RUN CACHE STRING "CMake initialised from mk script" )
-    MARK_AS_ADVANCED ( CMAKE_FIRST_RUN )
+    SET(CMAKE_FIRST_RUN CACHE STRING "CMake initialised from mk script")
+    MARK_AS_ADVANCED (CMAKE_FIRST_RUN)
 ENDIF()
 
 IF (NOT DEFINED QUIET)
     SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 ENDIF()
 
-# Declare the version
+# Declare the project version
 SET(PROJECT_VERSION_MAJOR "1")
 SET(PROJECT_VERSION_MINOR "5")
 SET(PROJECT_VERSION_PATCH "8")
 SET(PROJECT_VERSION
-     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
+     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 SET(VERSION ${PROJECT_VERSION})
 
-# Define some build options (set with -D<variable-name>=<value>)
-OPTION(USE_HDF5 "Include HDF5 stuff" ON)
-OPTION(USE_PRMAN "Include Prman stuff" OFF)
+#-******************************************************************************
+# OPTIONS (set with -D<variable>=<value>)
+#-******************************************************************************
+
 OPTION(USE_ARNOLD "Include Arnold stuff" OFF)
-OPTION(USE_MAYA "Include Maya stuff" OFF)
-OPTION(USE_PYALEMBIC "Include PyAlembic stuff" OFF)
-OPTION(USE_EXAMPLES "Include examples" OFF)
-OPTION(USE_OPENGL "Include AbcOpenGL lib" OFF)
+OPTION(USE_BOOTSTRAP "Include build system tests" ON)
 OPTION(USE_DOCS "Include docs" OFF)
+OPTION(USE_EXAMPLES "Include examples" OFF)
+OPTION(USE_HDF5 "Include HDF5 stuff" ON)
+OPTION(USE_MAYA "Include Maya stuff" OFF)
+OPTION(USE_OPENGL "Include AbcOpenGL lib" OFF)
+OPTION(USE_PRMAN "Include Prman stuff" OFF)
+OPTION(USE_PYALEMBIC "Include PyAlembic stuff" OFF)
 OPTION(USE_STATIC_BOOST "Build with static Boost libs" ON)
 OPTION(USE_STATIC_HDF5 "Build with static HDF5 libs" OFF)
-OPTION(ALEMBIC_NO_TESTS "Skip Alembic tests" OFF)
-OPTION(ALEMBIC_NO_BOOTSTRAP "" OFF) # can we lose this one?
+OPTION(USE_TESTS "Include Alembic tests" ON)
 
 # Cmake system specific flags
 SET(WINDOWS FALSE)
@@ -83,7 +83,7 @@ SET(DARWIN FALSE)
 IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
     SET(DARWIN TRUE)
     IF (NOT ${CMAKE_SYSTEM_VERSION} VERSION_LESS "13.0.0")
-        ADD_DEFINITIONS( "-std=c++11" )
+        ADD_DEFINITIONS("-std=c++11")
     ENDIF()
 ENDIF()
 
@@ -112,7 +112,7 @@ ELSE()
 ENDIF()
 
 IF (WINDOWS)
-    ADD_DEFINITIONS (-DOPENEXR_DLL -DHALF_EXPORTS)
+    ADD_DEFINITIONS(-DOPENEXR_DLL -DHALF_EXPORTS)
     ADD_DEFINITIONS(-DPLATFORM_WINDOWS -DPLATFORM=WINDOWS)
 ELSEIF (DARWIN)
     #ADD_DEFINITIONS(-DPLATFORM_DARWIN -DPLATFORM=DARWIN "-arch x86_64")
@@ -132,7 +132,7 @@ IF (MSVC AND DEFINED BUILD_STATIC_LIBS AND BUILD_STATIC_LIBS)
 ENDIF()
 
 #-******************************************************************************
-# INSTALLATION STUFF
+# INSTALLATION
 #-******************************************************************************
 
 IF (DEFINED ENV{ALEMBIC_INSTALL_PREFIX})
@@ -175,13 +175,13 @@ IF(UNIX AND NOT WINDOWS)
 ENDIF(UNIX AND NOT WINDOWS)
 
 IF (DARWIN)
-  ADD_DEFINITIONS(-fPIC)
+    ADD_DEFINITIONS(-fPIC)
 ENDIF()
 
 # Set up the include directories
-# IF( WINDOWS )
-#  INCLUDE_DIRECTORIES( "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/include" )
-# ENDIF()
+#IF (WINDOWS)
+#   INCLUDE_DIRECTORIES("C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/include")
+#ENDIF()
 
 #-******************************************************************************
 # DEPENDENCIES
@@ -190,8 +190,6 @@ ENDIF()
 # TODO: 
 # - add build/bootstrap try_compile stuff for each option
 # - add HDF5 switch in lib/Alembic cmakelist.txt file
-# - replace all ALEMBIC_HDF5_INCLUDE_PATH with HDF5_INCLUDE_DIRS
-# - replace all ALEMBIC_HDF5_LIBS with HDF5_LIBRARIES
 
 FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
@@ -209,13 +207,11 @@ IF (USE_OPENGL)
     FIND_PACKAGE(OpenGL)
     FIND_PACKAGE(GLUT)
     IF (WINDOWS)
-        # Do a windows OpenGL thing, whatever that may be
-        SET( ALEMBIC_GL_LIBS glew32s ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )
-        INCLUDE_DIRECTORIES ( ${GLUT_INCLUDE_DIR} )
-        INCLUDE_DIRECTORIES ( ${Glew_INCLUDE_DIR} )
-        LINK_DIRECTORIES ( ${Glew_LIBRARY_DIR} )
+        SET(ALEMBIC_GL_LIBS glew32s ${GLUT_LIBRARY} ${OPENGL_LIBRARIES})
+        INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR})
+        INCLUDE_DIRECTORIES(${Glew_INCLUDE_DIR})
+        LINK_DIRECTORIES(${Glew_LIBRARY_DIR})
     ELSEIF(DARWIN)
-        # Do a darwin OpenGL thing.
         SET(ALEMBIC_GL_LIBS ${GLUT_LIBRARY} "-framework OpenGL")
     ELSE()
         SET(ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES})
@@ -228,7 +224,7 @@ ENDIF()
 # HDF5
 IF (USE_HDF5)
     INCLUDE("./build/AlembicHDF5.cmake")
-    INCLUDE_DIRECTORIES(${ALEMBIC_HDF5_INCLUDE_PATH})
+    INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 ELSE()
     MESSAGE(STATUS "Skipping HDF5 stuff")
 ENDIF()
