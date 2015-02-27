@@ -1,11 +1,25 @@
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
-install_manifest.txt
-*.cmake
-*.a
+# external files
+.DS_Store
 *.pyc
 *.swp
+*~
+*.vcxproj*
+
+# cmake files
+CMakeCache.txt
+CMakeFiles
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+cmake_uninstall.cmake
+install_manifest.txt
+
+# build files
+*.a
+*.so
+*.dll
+*.dylib
+*_Test
+*_Test_Jeffs
 SimpleAbcViewer
 abcview

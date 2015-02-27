@@ -81,6 +81,11 @@ ELSE()
         /usr/freeware/lib64
     )
 
+    SET(MODULE_PATHS
+        ${ALEMBIC_PYILMBASE_ROOT}/lib/python2.6/site-packages
+        ${ALEMBIC_PYILMBASE_ROOT}/lib64/python2.6/site-packages
+    )
+
     IF( DEFINED PYILMBASE_LIBRARY_DIR )
       SET( LIBRARY_PATHS ${PYILMBASE_LIBRARY_DIR} ${LIBRARY_PATHS} )
     ENDIF()
@@ -123,9 +128,14 @@ ELSE()
     ENDIF()
 
     IF( NOT DEFINED ALEMBIC_PYILMBASE_PYIMATH_MODULE )
-      FIND_LIBRARY( ALEMBIC_PYILMBASE_PYIMATH_MODULE imathmodule.so
+      FIND_PATH( ALEMBIC_PYILMBASE_PYIMATH_MODULE 
+                    NAMES
+                    imathmodule.a
+                    imathmodule.so
+                    imathmodule.dylib
+                    imathmodule.dll
                     PATHS
-                    ${LIBRARY_PATHS}
+                    ${MODULE_PATHS}
                     NO_DEFAULT_PATH
                     NO_CMAKE_ENVIRONMENT_PATH
                     NO_CMAKE_PATH

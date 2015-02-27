@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,86 +33,42 @@
 ##
 ##-*****************************************************************************
 
+# If you know the HDF5 root and there aren't any default versions of HDF5 in
+# the default system paths use:
+# cmake '-UHDF5_*' -DHDF5_ROOT:STRING=<path/to/hdf5> .
+#
+# For more info:
+# cmake --help-module FindHDF5
 
-# If HDF5_ROOT not set, use predefined paths
-IF(NOT DEFINED HDF5_ROOT)
-    IF ( ${CMAKE_HOST_UNIX} )
-        IF( ${DARWIN} )
-          # TODO: set to default install path when shipping out
-          SET( HDF5_ROOT "/usr/local/hdf5-1.8.5-patch1" )
-        ELSE()
-          # TODO: set to default install path when shipping out
-          SET( HDF5_ROOT "/usr/local/hdf5-1.8.5-patch1" )
-        ENDIF()
-    ELSE()
-        IF ( ${WINDOWS} )
-          # TODO: set to 32-bit or 64-bit path
-          SET( HDF5_ROOT "C:/Program Files (x86)/hdf5-1.8.5-patch1" )
-        ELSE()
-          SET( HDF5_ROOT NOTFOUND )
-        ENDIF()
-    ENDIF()
+#-******************************************************************************
+# FindHDF5 uses these as hints about search locations
+#-******************************************************************************
+
+IF (DEFINED HDF5_ROOT)
+    MESSAGE(STATUS "Using HDF5_ROOT: ${HDF5_ROOT}")
+    # set HDF5_ROOT in the env so FindHDF5.cmake can find it
+    SET(ENV{HDF5_ROOT} ${HDF5_ROOT})
 ENDIF()
 
-#IF( NOT DEFINED HDF5_USE_STATIC_LIBRARIES )
-#  SET( HDF5_USE_STATIC_LIBRARIES TRUE )
-#ENDIF()
+#-******************************************************************************
+# Find HDF5
+#-******************************************************************************
 
+SET(HDF5_USE_STATIC_LIBRARIES ${USE_STATIC_HDF5})
 
+FIND_PACKAGE(HDF5 COMPONENTS C HL)
 
-# Prefer HDF5_ROOT set from the environment over the CMakeCache'd variable
-IF(NOT $ENV{HDF5_ROOT}x STREQUAL "x")
-  SET( HDF5_ROOT $ENV{HDF5_ROOT})
+#-******************************************************************************
+# Wrap it all up
+#-******************************************************************************
+
+IF (HDF5_FOUND)
+    SET(ALEMBIC_HDF5_INCLUDE_PATH ${HDF5_INCLUDE_DIRS})
+    SET(ALEMBIC_HDF5_LIB ${HDF5_C_LIBRARIES})
+    SET(ALEMBIC_HDF5_HL_LIB ${HDF5_CXX_LIBRARIES})
+    SET(ALEMBIC_HDF5_LIBS ${HDF5_LIBRARIES})
+    MESSAGE(STATUS "HDF5 INCLUDE PATH: ${ALEMBIC_HDF5_INCLUDE_PATH}")
+    MESSAGE(STATUS "HDF5 LIBRARIES: ${ALEMBIC_HDF5_LIBS}")
 ELSE()
-  SET( ENV{HDF5_ROOT} ${HDF5_ROOT} )
+    MESSAGE(STATUS "HDF5 not found.")
 ENDIF()
-
-IF( DEFINED ENV{HDF5_INCLUDE_DIR} )
-  SET( HDF5_INCLUDE_DIR $ENV{HDF5_INCLUDE_DIR} )
-  SET( ALEMBIC_HDF5_INCLUDE_PATH ${HDF5_INCLUDE_DIR} )
-  MESSAGE( STATUS "I AM TOTALLY SETTING HDF5 INCLUDE DIR FROM ENVIRONMENT: ${HDF5_INCLUDE_DIR}" )
-ELSE()
-  MESSAGE( STATUS "NOT SETTING HDF5_INCLUDE_DIR FROM ENVIRONMENT" )
-ENDIF()
-
-IF( CMAKE_MINOR_VERSION GREATER 7 AND CMAKE_PATCH_VERSION GREATER 4 OR CMAKE_MAJOR_VERSION GREATER 2 )
-  FIND_PACKAGE( HDF5 COMPONENTS C HL REQUIRED )
-ELSE()
-  FIND_PACKAGE( HDF5 )
-ENDIF()
-
-IF( HDF5_FOUND )
-  IF ( NOT DEFINED ${ALEMBIC_HDF5_INCLUDE_PATH} )
-    SET( ALEMBIC_HDF5_INCLUDE_PATH ${HDF5_INCLUDE_DIR} )
-  ENDIF()
-  SET( ALEMBIC_HDF5_LIB ${HDF5_C_LIBRARIES} )
-  SET( ALEMBIC_HDF5_HL_LIB ${HDF5_CXX_LIBRARIES} )
-  SET( ALEMBIC_HDF5_LIBS ${HDF5_LIBRARIES} )
-  SET( ALEMBIC_HDF5_FOUND TRUE )
-
-  MESSAGE(STATUS "HDF5 INCLUDE PATH: ${ALEMBIC_HDF5_INCLUDE_PATH}" )
-  MESSAGE(STATUS "HDF5 LIBRARIES: ${ALEMBIC_HDF5_LIBS}" )
-
-  MESSAGE(STATUS "Found HDF5 Library!" )
-
-ELSE()
-  IF( DEFINED ALEMBIC_HDF5_CONFIGURED )
-    MESSAGE(STATUS "" )
-    MESSAGE(STATUS "CMake could not find HDF5; using values from the bootstrap script")
-    MESSAGE(STATUS "")
-    SET( ALEMBIC_HDF5_INCLUDE_PATH ${HDF5_C_INCLUDE_DIR} )
-    SET( ALEMBIC_HDF5_LIB ${HDF5_hdf5_LIBRARY} )
-    SET( ALEMBIC_HDF5_HL_LIB ${HDF5_hdf5_hl_LIBRARY} )
-    SET( ALEMBIC_HDF5_LIBS ${ALEMBIC_HDF5_HL_LIB} ${ALEMBIC_HDF5_LIB} pthread z m )
-    SET( HDF5_FOUND TRUE )
-    SET( ALEMBIC_HDF5_FOUND TRUE )
-    MESSAGE(STATUS "HDF5 INCLUDE PATH: ${ALEMBIC_HDF5_INCLUDE_PATH}" )
-    MESSAGE(STATUS "HDF5 LIBRARIES: ${ALEMBIC_HDF5_LIBS}" )
-    MESSAGE(STATUS "Found HDF5 Library!" )
-  ELSE()
-    SET( ALEMBIC_HDF5_FOUND FALSE )
-    SET( ALEMBIC_HDF5_LIBS NOTFOUND )
-    MESSAGE(STATUS "Disabling HDF5 Library!" )
-  ENDIF()
-ENDIF( )
-

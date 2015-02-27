@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,9 +33,13 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY( SimpleAbcViewer )
-ADD_SUBDIRECTORY( AbcConvert )
-ADD_SUBDIRECTORY( AbcEcho )
-ADD_SUBDIRECTORY( AbcStitcher )
-ADD_SUBDIRECTORY( AbcTree )
-ADD_SUBDIRECTORY( AbcLs )
+ADD_SUBDIRECTORY(AbcConvert)
+ADD_SUBDIRECTORY(AbcEcho)
+ADD_SUBDIRECTORY(AbcStitcher)
+ADD_SUBDIRECTORY(AbcTree)
+ADD_SUBDIRECTORY(AbcLs)
+
+# requires AbcOpenGL
+IF (USE_OPENGL)
+    ADD_SUBDIRECTORY(SimpleAbcViewer)
+ENDIF()
