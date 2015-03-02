@@ -42,8 +42,7 @@
 #include "WriteGeo.h"
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
-
+#include <Alembic/AbcCoreFactory/All.h>
 
 namespace
 {
@@ -272,8 +271,9 @@ int ProcInit( struct AtNode *node, void **user_ptr )
         return 1;
     }
 
-    IArchive archive( ::Alembic::AbcCoreHDF5::ReadArchive(),
-                      args->filename );
+    Alembic::AbcCoreFactory::IFactory factory;
+    factory.setPolicy(ErrorHandler::kQuietNoopPolicy);
+    IArchive archive = factory.getArchive( args->filename );
 
     IObject root = archive.getTop();
 
