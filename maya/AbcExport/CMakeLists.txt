@@ -37,56 +37,45 @@
 PROJECT(ABC_EXPORT_MAYA_MODULE)
 
 SET(H_FILES
-  AbcExport.h
-  AbcWriteJob.h
-  AttributesWriter.h
-  Foundation.h
-  MayaCameraWriter.h
-  MayaMeshWriter.h
-  MayaLocatorWriter.h
-  MayaNurbsCurveWriter.h
-  MayaNurbsSurfaceWriter.h
-  MayaPointPrimitiveWriter.h
-  MayaTransformWriter.h
-  MayaUtility.h
+    AbcExport.h
+    AbcWriteJob.h
+    AttributesWriter.h
+    Foundation.h
+    MayaCameraWriter.h
+    MayaMeshWriter.h
+    MayaLocatorWriter.h
+    MayaNurbsCurveWriter.h
+    MayaNurbsSurfaceWriter.h
+    MayaPointPrimitiveWriter.h
+    MayaTransformWriter.h
+    MayaUtility.h
 )
 
 SET(CXX_FILES
-  AbcExport.cpp
-  AbcWriteJob.cpp
-  AttributesWriter.cpp
-  MayaCameraWriter.cpp
-  MayaMeshWriter.cpp
-  MayaLocatorWriter.cpp
-  MayaNurbsCurveWriter.cpp
-  MayaNurbsSurfaceWriter.cpp
-  MayaPointPrimitiveWriter.cpp
-  MayaTransformWriter.cpp
-  MayaUtility.cpp
+    AbcExport.cpp
+    AbcWriteJob.cpp
+    AttributesWriter.cpp
+    MayaCameraWriter.cpp
+    MayaMeshWriter.cpp
+    MayaLocatorWriter.cpp
+    MayaNurbsCurveWriter.cpp
+    MayaNurbsSurfaceWriter.cpp
+    MayaPointPrimitiveWriter.cpp
+    MayaTransformWriter.cpp
+    MayaUtility.cpp
 )
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-SET(CORE_LIBS
-  AlembicAbcGeom
-  AlembicAbc
-  AlembicAbcCoreHDF5
-  AlembicAbcCoreOgawa
-  AlembicAbcCoreAbstract
-  AlembicOgawa
-  AlembicUtil)
-
-INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+#INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES("..")
 
 ADD_MAYA_CXX_PLUGIN(AbcExport ${SOURCE_FILES})
+
 TARGET_LINK_LIBRARIES(AbcExport
-  ${MAYA_LIBRARIES}
-  ${CORE_LIBS}
-  ${HDF5_LIBRARIES}
-  ${ALEMBIC_ILMBASE_LIBS}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS})
+    ${MAYA_LIBRARIES}
+    ${CORE_LIBS}
+)
 
 INSTALL(TARGETS AbcExport
         DESTINATION maya/plug-ins)

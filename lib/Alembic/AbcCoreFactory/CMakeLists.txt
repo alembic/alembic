@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,24 +33,33 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  IFactory.cpp
+SET(CXX_FILES
+    IFactory.cpp
 )
 
-SET( H_FILES
-  All.h
-  IFactory.h
+SET(H_FILES
+    All.h
+    IFactory.h
+    IFactoryConfig.h
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+# used in lib/Alembic/AbcCoreFactory/IFactoryConfig.h.in
+IF (USE_HDF5)
+    SET(INCLUDE_HDF5 "true")
+ELSE()
+    SET(INCLUDE_HDF5 "false")
+ENDIF()
 
-ADD_LIBRARY( AlembicAbcCoreFactory ${SOURCE_FILES} )
+CONFIGURE_FILE("IFactoryConfig.h.in" "IFactoryConfig.h")
 
-INSTALL( TARGETS AlembicAbcCoreFactory
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcCoreFactory
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
+ADD_LIBRARY(AlembicAbcCoreFactory ${SOURCE_FILES})
+
+INSTALL(TARGETS AlembicAbcCoreFactory
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib/static)
+
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/Alembic/AbcCoreFactory
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)

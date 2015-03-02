@@ -37,6 +37,7 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreFactory/IFactory.h>
+#include <Alembic/AbcCoreFactory/IFactoryConfig.h>
 
 namespace Alembic {
 namespace AbcCoreFactory {
@@ -68,15 +69,18 @@ Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName,
         archive.getErrorHandler().setPolicy( m_policy );
         return archive;
     }
-
-    Alembic::AbcCoreHDF5::ReadArchive hdf( m_cacheHierarchy );
-    archive = Alembic::Abc::IArchive( hdf, iFileName,
-        Alembic::Abc::ErrorHandler::kQuietNoopPolicy, m_cachePtr );
-    if ( archive.valid() )
+    
+    if ( INCLUDE_HDF5 )
     {
-        oType = kHDF5;
-        archive.getErrorHandler().setPolicy( m_policy );
-        return archive;
+        Alembic::AbcCoreHDF5::ReadArchive hdf( m_cacheHierarchy );
+        archive = Alembic::Abc::IArchive( hdf, iFileName,
+            Alembic::Abc::ErrorHandler::kQuietNoopPolicy, m_cachePtr );
+        if ( archive.valid() )
+        {
+            oType = kHDF5;
+            archive.getErrorHandler().setPolicy( m_policy );
+            return archive;
+        }
     }
 
     oType = kUnknown;

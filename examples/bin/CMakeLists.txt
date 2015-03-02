@@ -33,13 +33,18 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY(AbcConvert)
 ADD_SUBDIRECTORY(AbcEcho)
-ADD_SUBDIRECTORY(AbcStitcher)
-ADD_SUBDIRECTORY(AbcTree)
 ADD_SUBDIRECTORY(AbcLs)
-
-# requires AbcOpenGL
+ADD_SUBDIRECTORY(AbcTree)
+IF (USE_HDF5)
+    ADD_SUBDIRECTORY(AbcConvert)
+    ADD_SUBDIRECTORY(AbcStitcher)
+ELSE()
+    MESSAGE(STATUS "Skipping AbcConvert: requires USE_HDF5")
+    MESSAGE(STATUS "Skipping AbcStitcher: requires USE_HDF5")
+ENDIF()
 IF (USE_OPENGL)
     ADD_SUBDIRECTORY(SimpleAbcViewer)
+ELSE()
+    MESSAGE(STATUS "Skipping SimpleAbcViewer: requires USE_OPENGL")
 ENDIF()

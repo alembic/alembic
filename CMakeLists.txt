@@ -67,7 +67,7 @@ OPTION(USE_EXAMPLES "Include examples" OFF)
 OPTION(USE_HDF5 "Include HDF5 stuff" ON)
 OPTION(USE_MAYA "Include Maya stuff" OFF)
 OPTION(USE_OPENGL "Include AbcOpenGL lib" OFF)
-OPTION(USE_PRMAN "Include Prman stuff" OFF)
+OPTION(USE_PRMAN "Include PRMan stuff" OFF)
 OPTION(USE_PYALEMBIC "Include PyAlembic stuff" OFF)
 OPTION(USE_STATIC_BOOST "Build with static Boost libs" ON)
 OPTION(USE_STATIC_HDF5 "Build with static HDF5 libs" OFF)
@@ -189,7 +189,6 @@ ENDIF()
 
 # TODO: 
 # - add build/bootstrap try_compile stuff for each option
-# - add HDF5 switch in lib/Alembic cmakelist.txt file
 
 FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
@@ -227,11 +226,49 @@ IF (USE_HDF5)
     INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 ELSE()
     MESSAGE(STATUS "Skipping HDF5 stuff")
+    MESSAGE(STATUS "Turning off tests: requires USE_HDF5")
+    SET(USE_TESTS OFF)
 ENDIF()
 
 #-******************************************************************************
 # BUILD LIBRARIES
 #-******************************************************************************
+
+IF (USE_HDF5)
+    SET(CORE_LIBS
+        AlembicAbcMaterial
+        AlembicAbcGeom
+        AlembicAbcCollection
+        AlembicAbcCoreFactory
+        AlembicAbc
+        AlembicAbcCoreHDF5
+        AlembicAbcCoreOgawa
+        AlembicAbcCoreAbstract
+        AlembicOgawa
+        AlembicUtil
+        ${HDF5_LIBRARIES}
+        ${ALEMBIC_ILMBASE_LIBS}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${ZLIB_LIBRARIES}
+        ${EXTERNAL_MATH_LIBS}
+    )
+ELSE()
+    SET(CORE_LIBS
+        AlembicAbcMaterial
+        AlembicAbcGeom
+        AlembicAbcCollection
+        AlembicAbcCoreFactory
+        AlembicAbc
+        AlembicAbcCoreOgawa
+        AlembicAbcCoreAbstract
+        AlembicOgawa
+        AlembicUtil
+        ${ALEMBIC_ILMBASE_LIBS}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${ZLIB_LIBRARIES}
+        ${EXTERNAL_MATH_LIBS}
+    )
+ENDIF()
 
 # Alembic, AbcOpenGL
 ADD_SUBDIRECTORY(lib)
@@ -251,27 +288,27 @@ ENDIF()
 # BUILD BINARIES
 #-******************************************************************************
 
-# Prman
+# PRMan
 IF (USE_PRMAN)
     INCLUDE("./build/AlembicPRMan.cmake")
-    IF (ALEMBIC_PRMAN_FOUND)
+    IF (${ALEMBIC_PRMAN_FOUND})
         MESSAGE(STATUS "Building PRMan plugins")
         ADD_SUBDIRECTORY(prman)
     ELSE()
-        MESSAGE(STATUS "For some reason, ALEMBIC_PRMAN_FOUND is False?")
+        MESSAGE(STATUS "PRMan not found")
     ENDIF()
 ELSE()
-    MESSAGE(STATUS "Skipping Prman plugins")
+    MESSAGE(STATUS "Skipping PRMan plugins")
 ENDIF()
 
 # Arnold
 IF (USE_ARNOLD)
     INCLUDE("./build/AlembicArnold.cmake")
-    IF (ALEMBIC_ARNOLD_FOUND)
+    IF (${ALEMBIC_ARNOLD_FOUND})
         MESSAGE(STATUS "Building Arnold plugins")
         ADD_SUBDIRECTORY( arnold )
     ELSE()
-        MESSAGE(STATUS "For some reason, ALEMBIC_ARNOLD_FOUND is False?")
+        MESSAGE(STATUS "Arnold not found")
     ENDIF()
 ELSE()
     MESSAGE(STATUS "Skipping Arnold plugins")
@@ -284,13 +321,13 @@ IF (USE_MAYA)
         MESSAGE(STATUS "Building Maya plugins")
         ADD_SUBDIRECTORY(maya)
     ELSE()
-        MESSAGE(STATUS "For some reason, MAYA_FOUND is False?")
+        MESSAGE(STATUS "Maya not found")
     ENDIF()
 ELSE()
     MESSAGE(STATUS "Skipping Maya plugins")
 ENDIF()
 
-# Examples (unsupported)
+# Examples
 IF (USE_EXAMPLES)
     ADD_SUBDIRECTORY(examples)
 ELSE()

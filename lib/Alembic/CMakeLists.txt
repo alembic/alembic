@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,15 +34,15 @@
 ##
 ##-*****************************************************************************
 
-# Recurse into all the subdirectories
-
-ADD_SUBDIRECTORY( Util )
-ADD_SUBDIRECTORY( AbcCoreAbstract )
-ADD_SUBDIRECTORY( AbcCoreOgawa )
-ADD_SUBDIRECTORY( AbcCoreHDF5 )
-ADD_SUBDIRECTORY( Abc )
-ADD_SUBDIRECTORY( AbcCoreFactory )
-ADD_SUBDIRECTORY( AbcGeom )
-ADD_SUBDIRECTORY( AbcCollection )
-ADD_SUBDIRECTORY( AbcMaterial )
-ADD_SUBDIRECTORY( Ogawa )
+ADD_SUBDIRECTORY(Util)
+ADD_SUBDIRECTORY(AbcCoreAbstract)
+ADD_SUBDIRECTORY(AbcCoreOgawa)
+IF (USE_HDF5)
+    ADD_SUBDIRECTORY(AbcCoreHDF5)
+ENDIF()
+ADD_SUBDIRECTORY(Abc)
+ADD_SUBDIRECTORY(AbcCoreFactory)
+ADD_SUBDIRECTORY(AbcGeom)
+ADD_SUBDIRECTORY(AbcCollection)
+ADD_SUBDIRECTORY(AbcMaterial)
+ADD_SUBDIRECTORY(Ogawa)

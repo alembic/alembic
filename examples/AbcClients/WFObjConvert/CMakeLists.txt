@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks, Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,37 +34,39 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
+SET(CXX_FILES 
+    AbcReader.cpp
+    ParseReader.cpp
+    Parser.cpp
+    Reader.cpp)
 
-SET( CXX_FILES 
-     AbcReader.cpp
-     ParseReader.cpp
-     Parser.cpp
-     Reader.cpp )
+SET(PUBLIC_H_FILES 
+    AbcReader.h
+    All.h
+    Foundation.h
+    Parser.h
+    Reader.h)
 
-SET( PUBLIC_H_FILES 
-     AbcReader.h
-     All.h
-     Foundation.h
-     Parser.h
-     Reader.h )
+SET(PRIVATE_H_FILES
+    ParseReader.h)
 
-SET( PRIVATE_H_FILES
-     ParseReader.h )
+SET(H_FILES ${PUBLIC_H_FILES} ${PRIVATE_H_FILES})
 
-SET( H_FILES ${PUBLIC_H_FILES} ${PRIVATE_H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+ADD_LIBRARY(AbcWFObjConvert ${SOURCE_FILES})
 
-ADD_LIBRARY( AbcWFObjConvert ${SOURCE_FILES} )
+INSTALL(TARGETS AbcWFObjConvert
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib/static)
 
-INSTALL( TARGETS AbcWFObjConvert
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+INSTALL(FILES ${PUBLIC_H_FILES}
+        DESTINATION include/AbcClients/WFObjConvert
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
-INSTALL( FILES ${PUBLIC_H_FILES}
-         DESTINATION include/AbcClients/WFObjConvert
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-ADD_SUBDIRECTORY( Tests )
-
+IF (USE_TESTS AND USE_HDF5)
+    ADD_SUBDIRECTORY(Tests)
+ELSE()
+    MESSAGE(STATUS 
+        "Skipping WFObjConvert tests: requires USE_TESTS and USE_HDF5")
+ENDIF()

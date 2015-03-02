@@ -88,19 +88,6 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
   MESSAGE( STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}")
   SET(PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY})
 
-  SET(CORE_LIBS
-      AlembicAbcMaterial
-      AlembicAbcGeom
-      AlembicAbcCollection
-      AlembicAbcCoreFactory
-      AlembicAbc
-      AlembicAbcCoreHDF5
-      AlembicAbcCoreOgawa
-      AlembicAbcCoreAbstract
-      AlembicOgawa
-      AlembicUtil
-  )
-
   SET(CPP_FILES
       PyAbcGeomTypes.cpp
       PyAbcTypes.cpp
@@ -169,12 +156,9 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
   )
 
   LINK_LIBRARIES(${CORE_LIBS}
-                 ${HDF5_LIBRARIES}
                  ${PLIBS}
-                 ${ALEMBIC_ILMBASE_LIBS}
-                 ${ZLIB_LIBRARIES}
-                 ${EXTERNAL_MATH_LIBS} 
-                 ${ALEMBIC_PYILMBASE_PYIMATH_LIB})
+                 ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
+  )
 
   INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${ALEMBIC_SOURCE_DIR}/lib"
       "${ALEMBIC_SOURCE_DIR}/python/PyAlembic")
@@ -188,8 +172,8 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
           LIBRARY DESTINATION lib)
 
   # commenting out for now per Issue 319
-  #ADD_SUBDIRECTORY( Tests )
+  #ADD_SUBDIRECTORY(Tests)
 
 ELSE()
-    MESSAGE( FATAL_ERROR "Unable to find Python libs" )
+    MESSAGE(FATAL_ERROR "Unable to find Python libs")
 ENDIF()

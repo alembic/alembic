@@ -35,54 +35,33 @@
 
 PROJECT(ALEMBIC_PRMAN_PROCEDURAL_MODULE)
 
-IF (${ALEMBIC_PRMAN_FOUND})
+SET(H_FILES
+    ArbAttrUtil.h
+    PathUtil.h
+    ProcArgs.h
+    SampleUtil.h
+    SubDTags.h
+    WriteGeo.h
+    WriteMaterial.h
+)
 
-    SET(H_FILES
-        ArbAttrUtil.h
-        PathUtil.h
-        ProcArgs.h
-        SampleUtil.h
-        SubDTags.h
-        WriteGeo.h
-        WriteMaterial.h
-    )
+SET(CXX_FILES
+    ArbAttrUtil.cpp
+    PathUtil.cpp
+    ProcArgs.cpp
+    ProcMain.cpp
+    SampleUtil.cpp
+    SubDTags.cpp
+    WriteGeo.cpp
+    WriteMaterial.cpp
+)
 
-    SET(CXX_FILES
-        ArbAttrUtil.cpp
-        PathUtil.cpp
-        ProcArgs.cpp
-        ProcMain.cpp
-        SampleUtil.cpp
-        SubDTags.cpp
-        WriteGeo.cpp
-        WriteMaterial.cpp
-    )
+ADD_PRMAN_CXX_PLUGIN(AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES})
 
-    SET(CORE_LIBS
-        AlembicAbcMaterial
-        AlembicAbcGeom
-        AlembicAbcCoreFactory
-        AlembicAbc
-        AlembicAbcCoreHDF5
-        AlembicAbcCoreOgawa
-        AlembicAbcCoreAbstract
-        AlembicOgawa
-        AlembicUtil
-    )
+TARGET_LINK_LIBRARIES(AlembicRiProcedural ${CORE_LIBS})
 
-    ADD_PRMAN_CXX_PLUGIN(AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES})
-    TARGET_LINK_LIBRARIES(AlembicRiProcedural
-        ${CORE_LIBS}
-        ${HDF5_LIBRARIES}
-        ${ALEMBIC_ILMBASE_LIBS}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${ZLIB_LIBRARIES}
-    )
-
-    INSTALL(TARGETS
-        AlembicRiProcedural
-        DESTINATION
-        prman/procedurals
-    )
-
-ENDIF()
+INSTALL(TARGETS
+    AlembicRiProcedural
+    DESTINATION
+    prman/procedurals
+)

@@ -34,46 +34,29 @@
 
 PROJECT(ALEMBIC_ARNOLD_PROCEDURAL_MODULE)
 
-IF (${ALEMBIC_ARNOLD_FOUND})
+SET(H_FILES
+    ArbGeomParams.h
+    PathUtil.h
+    ProcArgs.h
+    SampleUtil.h
+    WriteGeo.h
+)
 
-    SET(H_FILES
-        ArbGeomParams.h
-        PathUtil.h
-        ProcArgs.h
-        SampleUtil.h
-        WriteGeo.h
-    )
+SET(CXX_FILES
+    ArbGeomParams.cpp
+    PathUtil.cpp
+    ProcArgs.cpp
+    ProcMain.cpp
+    SampleUtil.cpp
+    WriteGeo.cpp
+)
 
-    SET(CXX_FILES
-        ArbGeomParams.cpp
-        PathUtil.cpp
-        ProcArgs.cpp
-        ProcMain.cpp
-        SampleUtil.cpp
-        WriteGeo.cpp
-    )
+ADD_ARNOLD_CXX_PLUGIN(AlembicArnoldProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES})
 
-    SET(CORE_LIBS
-        AlembicAbcGeom
-        AlembicAbc
-        AlembicAbcCoreHDF5
-        AlembicAbcCoreAbstract
-        AlembicUtil
-    )
+TARGET_LINK_LIBRARIES(AlembicArnoldProcedural ${CORE_LIBS})
 
-    ADD_ARNOLD_CXX_PLUGIN(AlembicArnoldProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES})
-    TARGET_LINK_LIBRARIES(AlembicArnoldProcedural
-        ${CORE_LIBS}
-        ${HDF5_LIBRARIES}
-        ${ALEMBIC_ILMBASE_LIBS}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${ZLIB_LIBRARIES}
-    )
-
-    INSTALL(TARGETS
+INSTALL(TARGETS
         AlembicArnoldProcedural
         DESTINATION
         arnold/procedurals
-    )
-
-ENDIF()
+)

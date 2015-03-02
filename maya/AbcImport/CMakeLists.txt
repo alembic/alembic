@@ -37,61 +37,49 @@
 PROJECT(ABC_IMPORT_MAYA_MODULE)
 
 SET(H_FILES
-  AbcImport.h
-  AlembicImportFileTranslator.h
-  AlembicNode.h
-  CameraHelper.h
-  CreateSceneHelper.h
-  LocatorHelper.h
-  MeshHelper.h
-  NodeIteratorVisitorHelper.h
-  NurbsCurveHelper.h
-  NurbsSurfaceHelper.h
-  PointHelper.h
-  util.h
-  XformHelper.h
+    AbcImport.h
+    AlembicImportFileTranslator.h
+    AlembicNode.h
+    CameraHelper.h
+    CreateSceneHelper.h
+    LocatorHelper.h
+    MeshHelper.h
+    NodeIteratorVisitorHelper.h
+    NurbsCurveHelper.h
+    NurbsSurfaceHelper.h
+    PointHelper.h
+    util.h
+    XformHelper.h
 )
 
 SET(CXX_FILES
-  AbcImport.cpp
-  AlembicImportFileTranslator.cpp
-  AlembicNode.cpp
-  CameraHelper.cpp
-  CreateSceneHelper.cpp
-  main.cpp
-  LocatorHelper.cpp
-  MeshHelper.cpp
-  NurbsCurveHelper.cpp
-  NurbsSurfaceHelper.cpp
-  NodeIteratorVisitorHelper.cpp
-  PointHelper.cpp
-  util.cpp
-  XformHelper.cpp
+    AbcImport.cpp
+    AlembicImportFileTranslator.cpp
+    AlembicNode.cpp
+    CameraHelper.cpp
+    CreateSceneHelper.cpp
+    main.cpp
+    LocatorHelper.cpp
+    MeshHelper.cpp
+    NurbsCurveHelper.cpp
+    NurbsSurfaceHelper.cpp
+    NodeIteratorVisitorHelper.cpp
+    PointHelper.cpp
+    util.cpp
+    XformHelper.cpp
 )
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-SET(CORE_LIBS
-  AlembicAbcGeom
-  AlembicAbcCoreFactory
-  AlembicAbc
-  AlembicAbcCoreHDF5
-  AlembicAbcCoreOgawa
-  AlembicAbcCoreAbstract
-  AlembicOgawa
-  AlembicUtil)
-
-INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+#INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES("..")
 
 ADD_MAYA_CXX_PLUGIN(AbcImport ${SOURCE_FILES})
+
 TARGET_LINK_LIBRARIES(AbcImport
-  ${MAYA_LIBRARIES}
-  ${CORE_LIBS}
-  ${HDF5_LIBRARIES}
-  ${ALEMBIC_ILMBASE_LIBS}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS})
+    ${MAYA_LIBRARIES}
+    ${CORE_LIBS}
+)
 
 INSTALL(TARGETS AbcImport
         DESTINATION maya/plug-ins)
