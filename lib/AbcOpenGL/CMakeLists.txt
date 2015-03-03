@@ -72,7 +72,7 @@ SET( THIS_LIBS
      AlembicAbcGeom
      AlembicAbcCoreFactory
      AlembicAbc
-	 #AlembicAbcCoreHDF5
+     AlembicAbcCoreHDF5
      AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
      AlembicOgawa
