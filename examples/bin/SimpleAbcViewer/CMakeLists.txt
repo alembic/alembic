@@ -33,7 +33,7 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##-*****************************************************************************
-
+IF(WITH_HDF5)
 SET( H_FILES
      Transport.h
      Viewer.h )
@@ -59,3 +59,4 @@ INSTALL( TARGETS SimpleAbcViewer
          DESTINATION bin )
 
 #ADD_PYTHON_SCRIPT_INST( SimpleAbcViewerRenderit )
+ENDIF()

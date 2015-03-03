@@ -34,6 +34,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES( "${CMAKE_SOURCE_DIR}/lib/")
+
 SET( H_FILES
      DrawContext.h
      Drawable.h
@@ -70,7 +72,7 @@ SET( THIS_LIBS
      AlembicAbcGeom
      AlembicAbcCoreFactory
      AlembicAbc
-     AlembicAbcCoreHDF5
+	 #AlembicAbcCoreHDF5
      AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
      AlembicOgawa

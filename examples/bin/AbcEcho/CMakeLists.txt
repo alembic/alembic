@@ -32,7 +32,7 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##-*****************************************************************************
-
+IF(WITH_HDF5)
 SET( FULL_ABC_LIBS
      AlembicAbcGeom
      AlembicAbcCoreFactory
@@ -56,3 +56,4 @@ TARGET_LINK_LIBRARIES( abcechobounds ${FULL_ABC_LIBS} )
 
 INSTALL( TARGETS abcecho abcechobounds
          DESTINATION bin )
+ENDIF()

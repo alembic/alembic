@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-
+IF(WITH_HDF5)
 SET( TEST_LIBS
      AlembicAbcCoreFactory
      AlembicAbc
@@ -142,3 +142,4 @@ ADD_TEST( Abc_CacheControl_TEST Abc_CacheControlTest )
 ADD_EXECUTABLE( Abc_RedundantDataPathsTest RedundantDataTest.cpp )
 TARGET_LINK_LIBRARIES( Abc_RedundantDataPathsTest ${TEST_LIBS} )
 ADD_TEST( Abc_RedundantDataPaths_TEST Abc_RedundantDataPathsTest )
+ENDIF()

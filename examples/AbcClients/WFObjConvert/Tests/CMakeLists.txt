@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-
+IF(WITH_HDF5)
 SET( TEST_LIBS
      AbcWFObjConvert
      AlembicAbcGeom
@@ -60,3 +60,4 @@ TARGET_LINK_LIBRARIES( WFObjConvert_obj2abc ${TEST_LIBS} )
 
 #ADD_TEST( AbcClients_WFObjConvert_Parser_TEST WFObjConvert_ParserTest )
 #ADD_TEST( AbcClients_WFObjConvert_obj2abc_TEST WFObjConvert_obj2abc )
+ENDIF()

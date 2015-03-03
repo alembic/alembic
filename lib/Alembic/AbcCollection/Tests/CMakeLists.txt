@@ -33,6 +33,7 @@
 ##
 ##-*****************************************************************************
 
+IF(WITH_HDF5)
 SET( TEST_LIBS
      AlembicAbcCollection
      AlembicAbc
@@ -49,4 +50,4 @@ ADD_EXECUTABLE( AbcCollection_CollectionTest
                 )
 TARGET_LINK_LIBRARIES( AbcCollection_CollectionTest ${TEST_LIBS} )
 ADD_TEST( AbcCollection_Collection_TEST AbcCollection_CollectionTest )
-
+ENDIF()

@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES( "${CMAKE_SOURCE_DIR}/lib/")
+
 # C++ files for this project
 SET( CXX_FILES
   AprImpl.cpp

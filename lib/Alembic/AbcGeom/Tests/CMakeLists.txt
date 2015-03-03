@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-
+IF(WITH_HDF5)
 SET( TEST_LIBS
      AlembicAbcGeom
      AlembicAbc
@@ -148,4 +148,4 @@ ADD_TEST( AbcGeom_LightTest_TEST AbcGeom_LightTest )
 # with stuff without having to edit the build setup to build it. --JDA
 ADD_EXECUTABLE( playground PlayGround.cpp )
 TARGET_LINK_LIBRARIES( playground ${TEST_LIBS} )
-
+ENDIF()
