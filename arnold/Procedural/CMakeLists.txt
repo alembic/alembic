@@ -32,9 +32,6 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ALEMBIC_ARNOLD_PROCEDURAL_MODULE )
-
-
 IF( ${ALEMBIC_ARNOLD_FOUND} )
 
 SET( H_FILES

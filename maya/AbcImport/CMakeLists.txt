@@ -34,8 +34,6 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ABC_IMPORT_MAYA_MODULE )
-
 SET( H_FILES
   AbcImport.h
   AlembicImportFileTranslator.h

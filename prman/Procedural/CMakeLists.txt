@@ -33,9 +33,6 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ALEMBIC_PRMAN_PROCEDURAL_MODULE )
-
-
 IF( ${ALEMBIC_PRMAN_FOUND} )
 
 SET( H_FILES

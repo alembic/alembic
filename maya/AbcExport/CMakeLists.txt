@@ -34,8 +34,6 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ABC_EXPORT_MAYA_MODULE )
-
 SET( H_FILES
   AbcExport.h
   AbcWriteJob.h
