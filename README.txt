@@ -63,7 +63,7 @@ not required.
 
 3) Run the Alembic bootstrap script. The following should work:
 
-$ python ~/ALEMBIC_SOURCE/build/bootstrap/alembic_bootstrap.py [build_dir]
+$ python ~/ALEMBIC_SOURCE/cmake/bootstrap/alembic_bootstrap.py [build_dir]
 
 You can give it several options and flags; '-h' for a list of them.  If you
 don't specify a complete set of options when you run it, it will prompt you

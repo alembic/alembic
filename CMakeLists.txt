@@ -140,7 +140,7 @@ ENDIF ()
 MESSAGE(STATUS "The install dir is ${CMAKE_INSTALL_PREFIX}" )
 
 # check in the source directory
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/build )
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake )
 
 #-******************************************************************************
 #-******************************************************************************
@@ -173,7 +173,7 @@ ENDIF()
 
 IF(BOOTSTRAP_MODE)
 
-  ADD_SUBDIRECTORY(build/bootstrap)
+  ADD_SUBDIRECTORY(cmake/bootstrap)
 
 ELSE()
 
@@ -215,7 +215,7 @@ MESSAGE( STATUS "OpenGL Libraries: ${ALEMBIC_GL_LIBS}" )
 #-******************************************************************************
 
 # Include boost
-INCLUDE( "./build/AlembicBoost.cmake" )
+INCLUDE( "./cmake/AlembicBoost.cmake" )
 IF ( NOT ALEMBIC_BOOST_FOUND )
   IF( Boost_FOUND AND (DEFINED Boost_VERSION) AND (NOT ${Boost_VERSION} LESS 104200 ) )
     SET( ALEMBIC_BOOST_FOUND 1 )
@@ -228,7 +228,7 @@ IF ( NOT ALEMBIC_BOOST_FOUND )
   ELSE()
     MESSAGE( ERROR "Boost not found." )
   ENDIF()
-  MESSAGE( FALTAL_ERROR "Please see comments in ${ALEMBIC_SOURCE_DIR}/build/AlembicBoost.cmake for possible solutions.")
+  MESSAGE( FALTAL_ERROR "Please see comments in ${ALEMBIC_SOURCE_DIR}/cmake/AlembicBoost.cmake for possible solutions.")
 ENDIF()
 
 INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )
@@ -239,22 +239,22 @@ INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )
 #-******************************************************************************
 #-******************************************************************************
 
-INCLUDE( "./build/AlembicIlmBase.cmake" )
+INCLUDE( "./cmake/AlembicIlmBase.cmake" )
 INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
 
 IF(DEFINED USE_PYILMBASE AND NOT USE_PYILMBASE)
     MESSAGE(STATUS "Skipping PyILMBase")
 ELSE()
     MESSAGE( STATUS "About to include AlembicPyIlmBase.cmake" )
-  INCLUDE( "./build/AlembicPyIlmBase.cmake" )
+  INCLUDE( "./cmake/AlembicPyIlmBase.cmake" )
   INCLUDE_DIRECTORIES( ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} )
 ENDIF ()
 
 # Include Python stuff
-INCLUDE("./build/AlembicPython.cmake")
+INCLUDE("./cmake/AlembicPython.cmake")
 
 # Include HDF5 stuff
-INCLUDE("./build/AlembicHDF5.cmake")
+INCLUDE("./cmake/AlembicHDF5.cmake")
 if ( ALEMBIC_HDF5_FOUND )
   INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )
 ENDIF()
@@ -268,7 +268,7 @@ IF(DEFINED USE_PRMAN AND NOT USE_PRMAN)
     MESSAGE(STATUS "Skipping Prman plugins")
 ELSE()
     MESSAGE( STATUS "About to include AlembicPRMan.cmake" )
-    INCLUDE( "./build/AlembicPRMan.cmake" )
+    INCLUDE( "./cmake/AlembicPRMan.cmake" )
     IF( ALEMBIC_PRMAN_FOUND )
         MESSAGE(STATUS "Building PRMan plugins" )
         ADD_SUBDIRECTORY( prman )
@@ -282,7 +282,7 @@ IF(DEFINED USE_ARNOLD AND NOT USE_ARNOLD)
     MESSAGE(STATUS "Skipping Arnold plugins")
 ELSE()
     MESSAGE( STATUS "About to include AlembicArnold.cmake" )
-    INCLUDE( "./build/AlembicArnold.cmake" )
+    INCLUDE( "./cmake/AlembicArnold.cmake" )
     IF( ALEMBIC_ARNOLD_FOUND )
         MESSAGE(STATUS "Building Arnold plugins" )
         ADD_SUBDIRECTORY( arnold )
@@ -296,7 +296,7 @@ IF(DEFINED USE_MAYA AND NOT USE_MAYA)
     MESSAGE(STATUS "Skipping Maya plugins")
 ELSE()
     MESSAGE( STATUS "About to include AlembicMaya.cmake" )
-    INCLUDE( "./build/AlembicMaya.cmake" )
+    INCLUDE( "./cmake/AlembicMaya.cmake" )
     IF( MAYA_FOUND )
         MESSAGE(STATUS "Building Maya plugins" )
         ADD_SUBDIRECTORY( maya )

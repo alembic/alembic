@@ -61,7 +61,7 @@ ELSE()
   MESSAGE( STATUS "Found Python 2.6: ${ALEMBIC_PYTHON_EXECUTABLE}" )
 ENDIF()
 
-SET( CopyScriptFile ${ALEMBIC_SOURCE_DIR}/build/CopyScriptFile.py )
+SET( CopyScriptFile ${ALEMBIC_SOURCE_DIR}/cmake/CopyScriptFile.py )
 
 #-******************************************************************************
 # A Python Script just needs to be copied to the same directory in the
@@ -125,7 +125,7 @@ MACRO(ADD_PYTHON_MODULE ModuleFile ParentModuleName )
                       DEPENDS ${ModuleFileFullPath} )
 
   # Get the RunPythonTest script
-  SET( RunPythonTest ${ALEMBIC_SOURCE_DIR}/build/RunPythonTest )
+  SET( RunPythonTest ${ALEMBIC_SOURCE_DIR}/cmake/RunPythonTest )
 
   # Create a test name.
   SET( TestName ${ParentModuleName}/${ModuleFileNoDirectory}_TEST )
@@ -163,7 +163,7 @@ MACRO(ADD_PYTHON_EXIT0_SCRIPT_TEST PythonScript)
   GET_FILENAME_COMPONENT( PythonScriptFullPath ${PythonScript} ABSOLUTE )
 
   # Get the RunPythonTest script
-  SET( RunPythonTest ${ALEMBIC_SOURCE_DIR}/build/RunPythonTest )
+  SET( RunPythonTest ${ALEMBIC_SOURCE_DIR}/cmake/RunPythonTest )
 
   # Fiddle with the Test Name. We expect exit0 scripts to end with
   STRING( REGEX MATCH "_Test$" RegexOutput ${PythonScriptNoDirectory} )
