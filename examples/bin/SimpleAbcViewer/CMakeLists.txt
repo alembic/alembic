@@ -47,6 +47,8 @@ SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
 SET( THIS_LIBS
      AlembicAbcOpenGL
+     AlembicAbcCoreFactory
+     AlembicAbcCoreHDF5
     ${ALEMBIC_ILMBASE_LIBS}
    )
 
