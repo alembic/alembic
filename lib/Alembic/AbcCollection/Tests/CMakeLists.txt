@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-IF(WITH_HDF5)
+IF(ALEMBIC_WITH_HDF5)
 SET( TEST_LIBS
      AlembicAbcCollection
      AlembicAbc

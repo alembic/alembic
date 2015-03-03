@@ -33,7 +33,7 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##-*****************************************************************************
-IF(WITH_HDF5)
+IF(ALEMBIC_WITH_HDF5)
 SET( H_FILES
      Transport.h
      Viewer.h )
