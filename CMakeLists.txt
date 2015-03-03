@@ -241,11 +241,10 @@ INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )
 # ILM BASE
 #-******************************************************************************
 #-******************************************************************************
+INCLUDE( "./cmake/AlembicIlmBase.cmake" )
+INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
 
 IF(WITH_PYTHON)
-  INCLUDE( "./cmake/AlembicIlmBase.cmake" )
-  INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
-
   IF(DEFINED USE_PYILMBASE AND NOT USE_PYILMBASE)
     MESSAGE(STATUS "Skipping PyILMBase")
   ELSE()

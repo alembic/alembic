@@ -99,6 +99,7 @@ FIND_PATH(ILMBASE_INCLUDE_DIR
 
 # If the headers were found, get the version from config file, if not already set.
 IF(ILMBASE_INCLUDE_DIR)
+  SET(ALEMBIC_ILMBASE_INCLUDE_DIRECTORY ${ILMBASE_INCLUDE_DIR})
   IF(NOT ILMBASE_VERSION)
 
     FIND_FILE(_ilmbase_CONFIG
