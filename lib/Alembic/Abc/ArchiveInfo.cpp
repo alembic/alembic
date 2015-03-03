@@ -36,6 +36,10 @@
 
 #include <Alembic/Abc/ArchiveInfo.h>
 
+#if defined(_MSC_VER)
+#include <algorithm>
+#endif
+
 namespace Alembic {
 namespace Abc {
 namespace ALEMBIC_VERSION_NS {
