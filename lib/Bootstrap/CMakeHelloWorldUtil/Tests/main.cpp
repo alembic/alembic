@@ -33,7 +33,7 @@
 //
 //-*****************************************************************************
 
-#include <CMakeHelloWorldUtil/HelloUtil.h>
+#include "../HelloUtil.h"
 #include <sstream>
 #include <iostream>
 

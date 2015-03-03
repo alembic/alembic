@@ -36,6 +36,7 @@
 # Create a binary called "TrivialBoostUsageUtil_Test" which includes the source
 # main.cpp
 
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_PATH} )
 # Add the executable
 add_executable( TrivialBoostUsageUtil_Test main.cpp )
 

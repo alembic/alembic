@@ -37,7 +37,7 @@
 //
 //-*****************************************************************************
 
-#include <TrivialBoostUsageUtil/TbuUtil.h>
+#include "../TbuUtil.h"
 #include <sstream>
 #include <iostream>
 

@@ -31,7 +31,7 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##-*****************************************************************************
 
-
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_PATH} )
 # Create a library called "TrivialBoostUsageUtil" which includes the source
 # files "TbuUtil.h", "TbuUtil.cpp"
 ADD_LIBRARY( TrivialBoostUsageUtil TbuUtil.cpp )

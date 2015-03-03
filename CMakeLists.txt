@@ -63,6 +63,9 @@ SET( ALEMBIC_NO_OPENGL FALSE )
 
 MESSAGE(STATUS "CMAKE SYSTEM NAME = ${CMAKE_SYSTEM_NAME}" )
 
+OPTION(WITH_PYTHON "Build Python support" ON)
+OPTION(WITH_HDF5 "Build HDF5 backend" ON)
+
 # Windows flag
 SET( WINDOWS FALSE )
 IF( "${CMAKE_SYSTEM_NAME}" MATCHES "Windows" )
@@ -239,24 +242,28 @@ INCLUDE_DIRECTORIES( ${ALEMBIC_BOOST_INCLUDE_PATH} )
 #-******************************************************************************
 #-******************************************************************************
 
-INCLUDE( "./cmake/AlembicIlmBase.cmake" )
-INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
+IF(WITH_PYTHON)
+  INCLUDE( "./cmake/AlembicIlmBase.cmake" )
+  INCLUDE_DIRECTORIES( ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY} )
 
-IF(DEFINED USE_PYILMBASE AND NOT USE_PYILMBASE)
+  IF(DEFINED USE_PYILMBASE AND NOT USE_PYILMBASE)
     MESSAGE(STATUS "Skipping PyILMBase")
-ELSE()
+  ELSE()
     MESSAGE( STATUS "About to include AlembicPyIlmBase.cmake" )
-  INCLUDE( "./cmake/AlembicPyIlmBase.cmake" )
-  INCLUDE_DIRECTORIES( ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} )
-ENDIF ()
+    INCLUDE( "./cmake/AlembicPyIlmBase.cmake" )
+    INCLUDE_DIRECTORIES( ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} )
+  ENDIF ()
 
-# Include Python stuff
-INCLUDE("./cmake/AlembicPython.cmake")
+  # Include Python stuff
+  INCLUDE("./cmake/AlembicPython.cmake")
+ENDIF()
 
-# Include HDF5 stuff
-INCLUDE("./cmake/AlembicHDF5.cmake")
-if ( ALEMBIC_HDF5_FOUND )
-  INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )
+IF(WITH_HDF5)
+  # Include HDF5 stuff
+  INCLUDE("./cmake/AlembicHDF5.cmake")
+  if ( ALEMBIC_HDF5_FOUND )
+    INCLUDE_DIRECTORIES( ${ALEMBIC_HDF5_INCLUDE_PATH} )
+  ENDIF()
 ENDIF()
 
 # Recurse into libs, then bins.
@@ -305,12 +312,14 @@ ELSE()
     ENDIF()
 ENDIF()
 
-# Include PyAlembic stuff
-IF(DEFINED USE_PYALEMBIC AND NOT USE_PYALEMBIC)
+IF(WITH_PYTHON)
+  # Include PyAlembic stuff
+  IF(DEFINED USE_PYALEMBIC AND NOT USE_PYALEMBIC)
     MESSAGE(STATUS "Skipping Alembic Python bindings")
-ELSE()
+  ELSE()
     MESSAGE(STATUS "About to include Python cmake files")
     ADD_SUBDIRECTORY( python )
+  ENDIF()
 ENDIF()
 
 # Example code not supported

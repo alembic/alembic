@@ -33,7 +33,7 @@
 //
 //-*****************************************************************************
 
-#include <TrivialBoostUsageUtil/TbuUtil.h>
+#include "TbuUtil.h"
 #include <boost/format.hpp>
 #include <iostream>
 #include <string>

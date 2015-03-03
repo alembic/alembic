@@ -36,6 +36,7 @@
 
 # Link directories
 # link_directories( ${CMAKE_BINARY_DIR}/Hello )
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_PATH} )
 
 # Add the executable
 add_executable( CMakeHelloWorldUtil_Test main.cpp )

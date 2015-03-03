@@ -35,6 +35,7 @@
 
 # Create a library called "CMakeHelloWorldUtil" which includes the source
 # files "HelloUtil.h", "HelloUtil.cpp"
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_PATH} )
 ADD_LIBRARY( CMakeHelloWorldUtil HelloUtil.cpp )
 
 # Add the tests subdirectory.
