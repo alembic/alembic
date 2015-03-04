@@ -33,6 +33,10 @@
 ##
 ##-*****************************************************************************
 
+IF(USE_HDF5)
+add_definitions(-DALEMBIC_WITH_HD5)
+ENDIF()
+
 SET(CXX_FILES
     IFactory.cpp
 )

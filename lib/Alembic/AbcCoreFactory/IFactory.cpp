@@ -34,10 +34,11 @@
 //
 //-*****************************************************************************
 
+#ifdef ALEMBIC_WITH_HD5
 #include <Alembic/AbcCoreHDF5/All.h>
+#endif
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreFactory/IFactory.h>
-#include <Alembic/AbcCoreFactory/IFactoryConfig.h>
 
 namespace Alembic {
 namespace AbcCoreFactory {
@@ -70,8 +71,7 @@ Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName,
         return archive;
     }
     
-    if ( INCLUDE_HDF5 )
-    {
+#ifdef ALEMBIC_WITH_HD5
         Alembic::AbcCoreHDF5::ReadArchive hdf( m_cacheHierarchy );
         archive = Alembic::Abc::IArchive( hdf, iFileName,
             Alembic::Abc::ErrorHandler::kQuietNoopPolicy, m_cachePtr );
@@ -81,10 +81,11 @@ Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName,
             archive.getErrorHandler().setPolicy( m_policy );
             return archive;
         }
-    }
+#endif
 
     oType = kUnknown;
     return Alembic::Abc::IArchive();
+
 }
 
 Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName )
