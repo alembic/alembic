@@ -32,8 +32,6 @@
 ##
 ##-*****************************************************************************
 
-PROJECT(ALEMBIC_ARNOLD_PROCEDURAL_MODULE)
-
 SET(H_FILES
     ArbGeomParams.h
     PathUtil.h
