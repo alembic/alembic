@@ -148,7 +148,7 @@ ENDIF()
 MESSAGE(STATUS "The install dir is ${CMAKE_INSTALL_PREFIX}")
 
 # check in the source directory
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/build)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 #-******************************************************************************
 # TESTS
@@ -194,11 +194,11 @@ FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
 
 # Boost
-INCLUDE("./build/AlembicBoost.cmake")
+INCLUDE("./cmake/AlembicBoost.cmake")
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 # IlmBase
-INCLUDE("./build/AlembicIlmBase.cmake")
+INCLUDE("./cmake/AlembicIlmBase.cmake")
 INCLUDE_DIRECTORIES(${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY})
 
 # OpenGL
@@ -222,7 +222,7 @@ ENDIF()
 
 # HDF5
 IF (USE_HDF5)
-    INCLUDE("./build/AlembicHDF5.cmake")
+    INCLUDE("./cmake/AlembicHDF5.cmake")
     INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 ELSE()
     MESSAGE(STATUS "Skipping HDF5 stuff")
@@ -276,8 +276,8 @@ INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/lib")
 
 # PyAlembic, PyAbcOpenGL
 IF (USE_PYALEMBIC)
-    INCLUDE("./build/AlembicPyIlmBase.cmake")
-    INCLUDE("./build/AlembicPython.cmake")
+    INCLUDE("./cmake/AlembicPyIlmBase.cmake")
+    INCLUDE("./cmake/AlembicPython.cmake")
     INCLUDE_DIRECTORIES(${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
     ADD_SUBDIRECTORY(python)
 ELSE()
@@ -290,7 +290,7 @@ ENDIF()
 
 # PRMan
 IF (USE_PRMAN)
-    INCLUDE("./build/AlembicPRMan.cmake")
+    INCLUDE("./cmake/AlembicPRMan.cmake")
     IF (${ALEMBIC_PRMAN_FOUND})
         MESSAGE(STATUS "Building PRMan plugins")
         ADD_SUBDIRECTORY(prman)
@@ -303,7 +303,7 @@ ENDIF()
 
 # Arnold
 IF (USE_ARNOLD)
-    INCLUDE("./build/AlembicArnold.cmake")
+    INCLUDE("./cmake/AlembicArnold.cmake")
     IF (${ALEMBIC_ARNOLD_FOUND})
         MESSAGE(STATUS "Building Arnold plugins")
         ADD_SUBDIRECTORY( arnold )
@@ -316,7 +316,7 @@ ENDIF()
 
 # Maya
 IF (USE_MAYA)
-    INCLUDE("./build/AlembicMaya.cmake")
+    INCLUDE("./cmake/AlembicMaya.cmake")
     IF (MAYA_FOUND)
         MESSAGE(STATUS "Building Maya plugins")
         ADD_SUBDIRECTORY(maya)
