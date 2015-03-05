@@ -35,11 +35,11 @@
 
 
 SET( TEST_LIBS
-     AlembicAbcCoreHDF5
+     AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
+     AlembicOgawa
      AlembicUtil
      ${ALEMBIC_ILMBASE_LIBS}
-     ${ALEMBIC_HDF5_LIBS}
      ${CMAKE_THREAD_LIBS_INIT} ${Boost_THREAD_LIBRARY}
      ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 

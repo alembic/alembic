@@ -37,7 +37,7 @@
 
 // Alembic Includes
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 // Other includes
 #include <math.h>
@@ -101,7 +101,7 @@ OXform recurseCreateXform( OObject &iParent, size_t children, Alembic::Util::int
 //-*****************************************************************************
 void Example1_MeshOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       "transformingMesh1.abc" );
 
     OObject top = archive.getTop();

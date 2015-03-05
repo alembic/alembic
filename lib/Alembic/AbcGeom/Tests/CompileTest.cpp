@@ -34,7 +34,7 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcGeom/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
@@ -92,7 +92,7 @@ int main( int argc, char *argv[] )
 
     std::string archiveName = "compile_test.abc";
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                           archiveName, ErrorHandler::kNoisyNoopPolicy );
         OObject archiveTop = archive.getTop();
         OObject child( archiveTop, "otherChild" );
@@ -100,7 +100,7 @@ int main( int argc, char *argv[] )
         testOGeomParam( topProp );
     }
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), archiveName,
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), archiveName,
             ErrorHandler::kNoisyNoopPolicy );
         IObject archiveTop = archive.getTop();
         IObject child( archiveTop, "otherChild" );

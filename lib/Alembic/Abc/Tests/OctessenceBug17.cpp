@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <stdlib.h>
 
@@ -72,7 +72,7 @@ void scramble_heap()
 //-*****************************************************************************
 void simpleTestOut( const std::string &iArchiveName )
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       iArchiveName );
     OObject archiveTop = archive.getTop();
 
@@ -113,7 +113,7 @@ void simpleTestOut( const std::string &iArchiveName )
 //-*****************************************************************************
 void simpleTestIn( const std::string &iArchiveName )
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                       iArchiveName, ErrorHandler::kThrowPolicy );
 
     IObject archiveTop = archive.getTop();

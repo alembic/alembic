@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreAbstract/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Util/All.h>
 
 #include "Assert.h"
@@ -54,7 +54,7 @@ void WriteTestArchive( const std::string &iArchiveName )
     AbcA::MetaData md;
     md.setUnique( "name", "arkive" );
 
-    Alembic::AbcCoreHDF5::WriteArchive aw;
+    Alembic::AbcCoreOgawa::WriteArchive aw;
 
     AbcA::ArchiveWriterPtr archive = aw( iArchiveName, md );
     // at this point, the archive has a single H5 Group under the root
@@ -215,7 +215,7 @@ void ReadTestArchive( const std::string &iArchiveName )
     // an AbcA::ReadArraySampleCache, but if you don't, it will construct one
     // for you by default.  If you don't want to cache, just pass in NULL
     // as the second argument.
-    Alembic::AbcCoreHDF5::ReadArchive ar;
+    Alembic::AbcCoreOgawa::ReadArchive ar;
     AbcA::ArchiveReaderPtr arkive = ar( iArchiveName );
 
     // Just stashing away a compound property reader pointer; we know the last

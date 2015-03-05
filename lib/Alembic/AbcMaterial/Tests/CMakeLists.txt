@@ -2,10 +2,10 @@ SET( TEST_LIBS
      AlembicAbcMaterial
      AlembicAbcGeom #used by tests but not a dependency of AlembicAbcMaterial
      AlembicAbc
-     AlembicAbcCoreHDF5
+     AlembicAbcCoreOgawa
      AlembicAbcCoreAbstract
+     AlembicOgawa
      AlembicUtil
-     ${ALEMBIC_HDF5_LIBS}
      ${ALEMBIC_ILMBASE_LIBS}
      ${CMAKE_THREAD_LIBS_INIT} ${Boost_THREAD_LIBRARY}
      ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
@@ -51,7 +51,7 @@ ADD_TEST( AbcMaterial_NetworkNodeTest AbcMaterial_NetworkNodeTest )
 
 
 ADD_EXECUTABLE( AbcMaterial_WriteGeometryWithMaterials
-                WriteGeometryWithMaterials.cpp 
+                WriteGeometryWithMaterials.cpp
                 )
 TARGET_LINK_LIBRARIES( AbcMaterial_WriteGeometryWithMaterials ${TEST_LIBS} )
 ADD_TEST( AbcMaterial_WriteGeometryWithMaterials AbcMaterial_WriteGeometryWithMaterials )

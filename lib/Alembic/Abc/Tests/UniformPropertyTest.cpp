@@ -34,7 +34,7 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 
 namespace Abc = Alembic::Abc;
@@ -53,7 +53,7 @@ void writeProperty(const std::string &archiveName)
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       archiveName, ErrorHandler::kThrowPolicy );
     OObject archiveTop = archive.getTop();
 
@@ -96,7 +96,7 @@ void readProperty(const std::string &archiveName)
     // Open an existing archive for reading. Indicate that we want
     //   Alembic to throw exceptions on errors.
     std::cout  << "Reading " << archiveName << std::endl;
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                       archiveName, ErrorHandler::kThrowPolicy );
     IObject archiveTop = archive.getTop();
 

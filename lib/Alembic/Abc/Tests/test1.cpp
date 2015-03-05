@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -48,7 +48,7 @@ using Alembic::Util::float32_t;
 //-*****************************************************************************
 void simpleTestOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       "slappyJim.abc", ErrorHandler::kThrowPolicy );
 
     OObject slim( OObject( archive, kTop ), "slim" );
@@ -170,7 +170,7 @@ void simpleTestOut()
 //-*****************************************************************************
 void simpleTestIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                       "slappyJim.abc", ErrorHandler::kThrowPolicy );
 
     IObject slim( IObject( archive, kTop ), "slim" );
