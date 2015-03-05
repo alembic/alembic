@@ -148,7 +148,7 @@ ENDIF()
 MESSAGE(STATUS "The install dir is ${CMAKE_INSTALL_PREFIX}")
 
 # check in the source directory
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
 #-******************************************************************************
 # TESTS
@@ -216,8 +216,6 @@ IF (USE_OPENGL)
         SET(ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES})
     ENDIF()
     MESSAGE(STATUS "OpenGL Libraries: ${ALEMBIC_GL_LIBS}")
-ELSE()
-    MESSAGE(STATUS "Skipping OpenGL stuff")
 ENDIF()
 
 # HDF5
@@ -280,8 +278,6 @@ IF (USE_PYALEMBIC)
     INCLUDE("./cmake/AlembicPython.cmake")
     INCLUDE_DIRECTORIES(${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
     ADD_SUBDIRECTORY(python)
-ELSE()
-    MESSAGE(STATUS "Skipping PyAlembic")
 ENDIF()
 
 #-******************************************************************************
@@ -297,8 +293,6 @@ IF (USE_PRMAN)
     ELSE()
         MESSAGE(STATUS "PRMan not found")
     ENDIF()
-ELSE()
-    MESSAGE(STATUS "Skipping PRMan plugins")
 ENDIF()
 
 # Arnold
@@ -310,8 +304,6 @@ IF (USE_ARNOLD)
     ELSE()
         MESSAGE(STATUS "Arnold not found")
     ENDIF()
-ELSE()
-    MESSAGE(STATUS "Skipping Arnold plugins")
 ENDIF()
 
 # Maya
@@ -323,20 +315,42 @@ IF (USE_MAYA)
     ELSE()
         MESSAGE(STATUS "Maya not found")
     ENDIF()
-ELSE()
-    MESSAGE(STATUS "Skipping Maya plugins")
 ENDIF()
 
 # Examples
 IF (USE_EXAMPLES)
     ADD_SUBDIRECTORY(examples)
-ELSE()
-    MESSAGE(STATUS "Skipping Alembic examples")
 ENDIF()
 
 # Python docs (run `make docs` from build root)
 IF (USE_PYALEMBIC AND USE_DOCS)
     ADD_SUBDIRECTORY(doc)
-ELSE()
-    MESSAGE(STATUS "Skipping PyAlembic docs")
 ENDIF()
+
+set(_config_msg "\n   * Alembic Configuration      ===")
+macro(info_cfg_option
+    _setting)
+    set(_msg "   * ${_setting}")
+    string(LENGTH "${_msg}" _len)
+    while("32" GREATER "${_len}")
+        set(_msg "${_msg} ")
+         math(EXPR _len "${_len} + 1")
+    endwhile()
+
+    set(_config_msg "${_config_msg}\n${_msg}${${_setting}}")
+endmacro()
+
+info_cfg_option(USE_ARNOLD)
+info_cfg_option(USE_BOOTSTRAP)
+info_cfg_option(USE_DOCS)
+info_cfg_option(USE_EXAMPLES)
+info_cfg_option(USE_HDF5)
+info_cfg_option(USE_MAYA)
+info_cfg_option(USE_OPENGL)
+info_cfg_option(USE_PRMAN)
+info_cfg_option(USE_PYALEMBIC)
+info_cfg_option(USE_STATIC_BOOST)
+info_cfg_option(USE_STATIC_HDF5)
+info_cfg_option(USE_TESTS)
+
+message("${_config_msg}")
