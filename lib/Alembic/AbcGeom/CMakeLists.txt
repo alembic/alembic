@@ -78,7 +78,7 @@ SET( CXX_FILES
 SET( H_FILES
 
   All.h
-
+  Export.h
   Foundation.h
 
   ArchiveBounds.h
@@ -132,11 +132,19 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcGeom ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcGeom ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcGeom AlembicAbc )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcGeom 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_GEOM_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcGeom
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+         LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+         RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+         ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR} )
 
 INSTALL( FILES ${H_FILES}
          DESTINATION include/Alembic/AbcGeom

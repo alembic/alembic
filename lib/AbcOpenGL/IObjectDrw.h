@@ -37,6 +37,7 @@
 #ifndef _AbcOpenGL_IObjectDrw_h_
 #define _AbcOpenGL_IObjectDrw_h_
 
+#include "Export.h"
 #include "Foundation.h"
 #include "Drawable.h"
 
@@ -48,7 +49,7 @@ namespace ABCOPENGL_VERSION_NS {
 //! This is for an object that doesn't have any particular interpretation
 //! and therefore applies no transform to its children, nor
 //! does it have any particular graphic presence
-class IObjectDrw : public Drawable
+class ABC_OPENGL_EXPORT IObjectDrw : public Drawable
 {
 public:
     IObjectDrw( IObject &iObj, bool iResetIfNoChildren );

@@ -38,13 +38,15 @@
 #define _Alembic_AbcCollection_OCollections_h_
 
 #include <Alembic/Abc/All.h>
+#include <Alembic/AbcCollection/Export.h>
 #include <Alembic/AbcCollection/SchemaInfoDeclarations.h>
 
 namespace Alembic {
 namespace AbcCollection {
 namespace ALEMBIC_VERSION_NS {
 
-class OCollectionsSchema : public Abc::OSchema<CollectionsSchemaInfo>
+class ABC_COLLECTION_EXPORT OCollectionsSchema 
+    : public Abc::OSchema<CollectionsSchemaInfo>
 {
 public:
 

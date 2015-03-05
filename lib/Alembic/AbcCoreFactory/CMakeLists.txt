@@ -40,16 +40,25 @@ SET( CXX_FILES
 
 SET( H_FILES
   All.h
+  Export.h
   IFactory.h
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcCoreFactory ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcCoreFactory ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcCoreFactory AlembicAbcCoreHDF5 AlembicAbcCoreOgawa AlembicAbc )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcCoreFactory 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_CORE_FACTORY_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcCoreFactory
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+         LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+         RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+         ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR} )
 
 INSTALL( FILES ${H_FILES}
          DESTINATION include/Alembic/AbcCoreFactory

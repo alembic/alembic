@@ -33,6 +33,12 @@
 ##
 ##-*****************************************************************************
 
+# Avoid warning for this unversioned project
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 OLD)
+endif()
+
+
 PROJECT( ALEMBIC_EXAMPLE_CODE )
 
 # Recurse into libs, then bins.

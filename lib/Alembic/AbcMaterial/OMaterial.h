@@ -39,6 +39,7 @@
 
 #include <Alembic/Abc/All.h>
 
+#include <Alembic/AbcMaterial/Export.h>
 #include <Alembic/AbcMaterial/SchemaInfoDeclarations.h>
 
 namespace Alembic {
@@ -49,7 +50,8 @@ namespace ALEMBIC_VERSION_NS {
 //! a compound property.
 //! Only "monolithic" shader definitions (i.e. non network) are presently
 //! supported in this implementation.
-class OMaterialSchema : public Abc::OSchema<MaterialSchemaInfo>
+class ABC_MATERIAL_EXPORT OMaterialSchema 
+    : public Abc::OSchema<MaterialSchemaInfo>
 {
 public:
 

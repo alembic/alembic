@@ -39,6 +39,7 @@
 
 #include <string>
 #include <Alembic/Util/Foundation.h>
+#include <Alembic/AbcGeom/Export.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -53,9 +54,11 @@ enum BasisType {
   kPowerBasis = 5
 };
 
-std::string GetBasisNameFromBasisType( const BasisType basis );
+ABC_GEOM_EXPORT std::string 
+GetBasisNameFromBasisType( const BasisType basis );
 
-int GetStepFromBasisType(const BasisType basis );
+ABC_GEOM_EXPORT int 
+GetStepFromBasisType(const BasisType basis );
 
 } // End namespace ALEMBIC_VERSION_NS
 

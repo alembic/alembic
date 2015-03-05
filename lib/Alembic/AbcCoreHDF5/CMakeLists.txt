@@ -74,6 +74,7 @@ SET( H_FILES
   CpwData.h
   CpwImpl.h
   DataTypeRegistry.h
+  Export.h
   HDF5Hierarchy.h
   HDF5HierarchyReader.h
   HDF5HierarchyWriter.h
@@ -97,17 +98,25 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcCoreHDF5 ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AlembicAbcCoreHDF5 ${ALEMBIC_HDF5_LIBS} )
+ADD_LIBRARY( AlembicAbcCoreHDF5 ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcCoreHDF5 AlembicAbcCoreAbstract ${ALEMBIC_HDF5_LIBS} )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcCoreHDF5 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_CORE_HDF5_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcCoreHDF5
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+         LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+         RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+         ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR} )
 
 # Only install AbcCoreHDF5.h and ReadArraySampleCache
 INSTALL( FILES
          All.h
          ReadWrite.h
+		 Export.h
          DESTINATION include/Alembic/AbcCoreHDF5
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
 

@@ -37,14 +37,15 @@
 #ifndef _Alembic_Abc_SourceName_h_
 #define _Alembic_Abc_SourceName_h_
 
+#include <Alembic/Abc/Export.h>
 #include <Alembic/Abc/Foundation.h>
 
 namespace Alembic {
 namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
-void SetSourceName( AbcA::MetaData &ioMetaData, const std::string & iName );
-std::string GetSourceName( const AbcA::MetaData &iMetaData );
+ABC_EXPORT void SetSourceName( AbcA::MetaData &ioMetaData, const std::string & iName );
+ABC_EXPORT std::string GetSourceName( const AbcA::MetaData &iMetaData );
 
 } // End namespace ALEMBIC_VERSION_NS
 

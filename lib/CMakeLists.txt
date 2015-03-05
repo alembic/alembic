@@ -33,6 +33,11 @@
 ##
 ##-*****************************************************************************
 
+# Avoid warning for this unversioned project
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 OLD)
+endif()
+
 # Create a container project for all the libraries.
 PROJECT( ALEMBIC_LIBS )
 

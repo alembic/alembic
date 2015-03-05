@@ -66,6 +66,7 @@ SET( H_FILES
   CprImpl.h
   CpwData.h
   CpwImpl.h
+  Export.h
   Foundation.h
   MetaDataMap.h
   OrData.h
@@ -83,15 +84,24 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcCoreOgawa ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcCoreOgawa ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcCoreOgawa AlembicAbcCoreAbstract AlembicOgawa )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcCoreOgawa 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_CORE_OGAWA_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcCoreOgawa
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+         LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+         RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+         ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR} )
 
 # Only install
 INSTALL( FILES
          All.h
+         Export.h
          ReadWrite.h
          DESTINATION include/Alembic/AbcCoreOgawa
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )

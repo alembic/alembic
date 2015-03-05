@@ -37,6 +37,7 @@
 #ifndef _AbcOpenGL_ICurvesDrw_h_
 #define _AbcOpenGL_ICurvesDrw_h_
 
+#include "Export.h"
 #include "Foundation.h"
 #include "IObjectDrw.h"
 
@@ -45,7 +46,7 @@ namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
 //! Draw a curve
-class ICurvesDrw : public IObjectDrw
+class ABC_OPENGL_EXPORT ICurvesDrw : public IObjectDrw
 {
 public:
     ICurvesDrw( ICurves &iCurves );

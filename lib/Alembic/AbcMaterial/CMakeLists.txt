@@ -43,20 +43,29 @@ SET( CXX_FILES
 )
 
 SET( H_FILES
-  SchemaInfoDeclarations.h
+  Export.h
   OMaterial.h
   IMaterial.h
   MaterialFlatten.h
   MaterialAssignment.h
+  SchemaInfoDeclarations.h
 )
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicAbcMaterial ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicAbcMaterial ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicAbcMaterial AlembicAbc )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicAbcMaterial 
+                         PROPERTIES DEFINE_SYMBOL
+                         ABC_MATERIAL_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicAbcMaterial
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+         LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+         RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+         ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR} )
 
 INSTALL( FILES ${H_FILES}
          DESTINATION include/Alembic/AbcMaterial

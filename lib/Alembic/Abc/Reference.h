@@ -37,14 +37,15 @@
 #ifndef _Alembic_Abc_Reference_h_
 #define _Alembic_Abc_Reference_h_
 
+#include <Alembic/Abc/Export.h>
 #include <Alembic/Abc/Foundation.h>
 
 namespace Alembic {
 namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
-void SetReference( AbcA::MetaData &ioMetaData );
-bool isReference( const AbcA::PropertyHeader &iHeader );
+ABC_EXPORT void SetReference( AbcA::MetaData &ioMetaData );
+ABC_EXPORT bool isReference( const AbcA::PropertyHeader &iHeader );
 
 } // End namespace ALEMBIC_VERSION_NS
 

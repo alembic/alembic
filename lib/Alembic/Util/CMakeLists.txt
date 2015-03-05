@@ -44,6 +44,7 @@ SET( H_FILES
      Digest.h
      Dimensions.h
      Exception.h
+	 Export.h
      Foundation.h
      Murmur3.h
      Naming.h
@@ -55,11 +56,19 @@ SET( H_FILES
 
 SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
 
-ADD_LIBRARY( AlembicUtil ${SOURCE_FILES} )
+ADD_LIBRARY( AlembicUtil ${LIB_TYPE} ${SOURCE_FILES} )
+TARGET_LINK_LIBRARIES( AlembicUtil )
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES( AlembicUtil 
+                         PROPERTIES DEFINE_SYMBOL
+                         ALEMBIC_UTIL_EXPORTS )
+ENDIF()
 
 INSTALL( TARGETS AlembicUtil
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+         LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+         RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+         ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR} )
 
 INSTALL( FILES ${H_FILES}
          DESTINATION include/Alembic/Util
