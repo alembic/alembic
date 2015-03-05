@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+
 IF(USE_HDF5)
 add_definitions(-DALEMBIC_WITH_HD5)
 ENDIF()

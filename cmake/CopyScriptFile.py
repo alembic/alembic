@@ -1,23 +1,26 @@
+#!/usr/bin/env python2.5
+#-*- mode: python -*-
 ##-*****************************************************************************
-## Copyright (c) 2009-2015,
+##
+## Copyright (c) 2009-2011,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
-## 
+##
 ## All rights reserved.
-## 
+##
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions are
 ## met:
-## * Redistributions of source code must retain the above copyright
+## *       Redistributions of source code must retain the above copyright
 ## notice, this list of conditions and the following disclaimer.
-## * Redistributions in binary form must reproduce the above
+## *       Redistributions in binary form must reproduce the above
 ## copyright notice, this list of conditions and the following disclaimer
 ## in the documentation and/or other materials provided with the
 ## distribution.
-## * Neither the name of Industrial Light & Magic nor the names of
+## *       Neither the name of Industrial Light & Magic nor the names of
 ## its contributors may be used to endorse or promote products derived
 ## from this software without specific prior written permission.
-## 
+##
 ## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 ## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 ## LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,12 +32,29 @@
 ## THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 ## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib/Bootstrap )
+import os, shutil, sys
 
-ADD_LIBRARY(TrivialBoostUsageUtil TbuUtil.cpp)
+# USAGE:
+# CopyScriptFile <SRC> <DST>
+if len( sys.argv ) != 3:
+    print ( "USAGE: %s <SRC_SCRIPT> <DST_SCRIPT>" % sys.argv[0] )
+    sys.exit( -1 )
 
-IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
-ENDIF()
+srcScript = sys.argv[1]
+dstScript = sys.argv[2]
+
+if os.name == "nt":
+    if not dstScript.endswith( ".py" ):
+        dstScript = "%s.py" % dstScript
+
+retcode = 0
+# Copy the files
+try:
+    shutil.copy( srcScript, dstScript )
+except IOError:
+    retcode = -1
+
+sys.exit( retcode )

@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib/Bootstrap )
+
 ADD_LIBRARY(CMakeHelloWorldUtil HelloUtil.cpp)
 
 IF (USE_TESTS)
