@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -91,7 +91,7 @@ subdCube( Alembic::Abc::OObject & parent )
 void OWrapExisting()
 {
     Alembic::Abc::OArchive archive(
-        Alembic::AbcCoreHDF5::WriteArchive(),
+        Alembic::AbcCoreOgawa::WriteArchive(),
         "playground_owrap.abc"
                                   );
 
@@ -150,7 +150,7 @@ void PolyMorphicAbstractPtrs()
     std::string name( "playground_pmap.abc" );
     {
         Alembic::Abc::OArchive archive(
-            Alembic::AbcCoreHDF5::WriteArchive(),
+            Alembic::AbcCoreOgawa::WriteArchive(),
             name
                                       );
 
@@ -200,7 +200,7 @@ void PolyMorphicAbstractPtrs()
         if ( cachePtr ) { std::cout << "cachePtr is valid" << std::endl; }
         if ( cachePtr != NULL ) { std::cout << "cachePtr is not NULL" << std::endl; }
         else { std::cout << "cachePtr IS NULL" << std::endl; }
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name,
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name,
                           ErrorHandler::kThrowPolicy,
                           cachePtr );
 
@@ -223,7 +223,7 @@ void StupidData()
 
     // out
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                           archiveName );
 
         OObject myobject( archive.getTop(), "myobject" );
@@ -247,7 +247,7 @@ void StupidData()
     {
         std::cout << std::endl << "Reading " << archiveName << std::endl;
 
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                           archiveName );
 
         IObject myobject( archive.getTop(), "myobject" );

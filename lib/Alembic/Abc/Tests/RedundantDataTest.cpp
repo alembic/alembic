@@ -36,12 +36,15 @@
 
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreFactory/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 
 #include <set>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -136,11 +139,14 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             iArchiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             iArchiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
+
     OObject archiveTop( archive, kTop );
 
     // create 100 top-level children
@@ -192,9 +198,11 @@ int main( int argc, char *argv[] )
 
     PATHS.clear();
 
+#ifdef ALEMBIC_WITH_HDF5
     useOgawa = false;
     simpleTestOut( arkive, useOgawa );
     simpleTestIn( arkive );
+#endif
 
     return 0;
 }

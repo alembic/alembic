@@ -34,9 +34,12 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 using namespace Alembic::Abc;
 
@@ -174,6 +177,7 @@ int main( int argc, char *argv[] )
 {
 
     std::string archiveName = "compile_test.abc";
+#ifdef ALEMBIC_WITH_HDF5
     {
         OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
                           archiveName, ErrorHandler::kNoisyNoopPolicy );
@@ -194,6 +198,8 @@ int main( int argc, char *argv[] )
         testITypedScalarProperty( child );
         testITypedArrayProperty( child );
     }
+#endif
+
     {
         OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                           archiveName, ErrorHandler::kNoisyNoopPolicy );

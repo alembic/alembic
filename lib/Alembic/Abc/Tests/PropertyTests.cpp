@@ -35,11 +35,14 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreFactory/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 namespace AbcF = Alembic::AbcCoreFactory;
 
@@ -74,11 +77,13 @@ void writeSimpleProperties(const std::string &archiveName, bool useOgawa)
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
 
     OObject archiveTop = archive.getTop();
 
@@ -399,11 +404,13 @@ void writeEmptyCompoundProperties(const std::string &archiveName, bool useOgawa)
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
 
     OObject archiveTop = archive.getTop();
 
@@ -505,9 +512,11 @@ int main( int argc, char *argv[] )
         useOgawa = true;
         writeSimpleProperties ( archiveName, useOgawa );
         readSimpleProperties  ( archiveName );
+#ifdef ALEMBIC_WITH_HDF5
         useOgawa = false;
         writeSimpleProperties ( archiveName, useOgawa );
         readSimpleProperties  ( archiveName );
+#endif
     }
     catch (char * str )
     {
@@ -535,9 +544,11 @@ int main( int argc, char *argv[] )
         useOgawa = true;
         writeEmptyCompoundProperties ( archiveName, useOgawa );
         readEmptyCompoundProperties  ( archiveName );
+#ifdef ALEMBIC_WITH_HDF5
         useOgawa = false;
         writeEmptyCompoundProperties ( archiveName, useOgawa );
         readEmptyCompoundProperties  ( archiveName );
+#endif
 
     }
     catch (char * str )

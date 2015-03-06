@@ -35,8 +35,11 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <iostream>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -44,8 +47,11 @@ using namespace Abc;
 //-*****************************************************************************
 // This test is mostly a compile test at this time - I want to demonstrate
 // the different ways of expressing the cache to the IArchives
-void cacheControlTest( const std::string &iArchiveBaseName )
+int main( int argc, char *argv[] )
 {
+#ifdef ALEMBIC_WITH_HDF5
+    std::string iArchiveBaseName =  "oooooooh_ca-aache_controoo-ool_oooh_oh";
+
     for ( size_t i = 0 ; i < 3 ; i++ )
     {
         std::string iArchiveName = iArchiveBaseName;
@@ -101,11 +107,7 @@ void cacheControlTest( const std::string &iArchiveBaseName )
                                externalCache );
         }
     }
-}
+#endif
 
-//-*****************************************************************************
-int main( int argc, char *argv[] )
-{
-    cacheControlTest( "oooooooh_ca-aache_controoo-ool_oooh_oh" );
     return 0;
 }

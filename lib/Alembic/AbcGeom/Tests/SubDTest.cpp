@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -52,7 +52,7 @@ using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 
 void Example1_MeshOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "subD1.abc" );
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), "subD1.abc" );
 
     // Create a SubD class.
     OSubD meshyObj( OObject( archive, kTop ), "subd" );
@@ -154,7 +154,7 @@ void Example1_MeshOut()
 //-*****************************************************************************
 void Example1_MeshIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "subD1.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "subD1.abc" );
     std::cout << "Reading: " << archive.getName() << std::endl;
 
 
@@ -321,7 +321,7 @@ void optPropTest()
 {
     std::string name = "subdVelocTest.abc";
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
         OSubD meshyObj( OObject( archive, kTop ), "subd" );
         OSubDSchema &mesh = meshyObj.getSchema();
 
@@ -379,7 +379,7 @@ void optPropTest()
     }
 
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
 
         ISubD meshyObj( IObject( archive, kTop ), "subd" );
         ISubDSchema &mesh = meshyObj.getSchema();

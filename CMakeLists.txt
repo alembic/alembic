@@ -222,10 +222,6 @@ ENDIF()
 IF (USE_HDF5)
     INCLUDE("./cmake/AlembicHDF5.cmake")
     INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
-ELSE()
-    MESSAGE(STATUS "Skipping HDF5 stuff")
-    MESSAGE(STATUS "Turning off tests: requires USE_HDF5")
-    SET(USE_TESTS OFF)
 ENDIF()
 
 #-******************************************************************************

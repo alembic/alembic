@@ -35,9 +35,12 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreFactory/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -62,11 +65,13 @@ void writeProperty(const std::string &archiveName, bool useOgawa)
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
 
     OObject archiveTop = archive.getTop();
 
@@ -180,9 +185,11 @@ int main( int argc, char *argv[] )
         useOgawa = true;
         writeProperty ( archiveName, useOgawa );
         readProperty  ( archiveName );
+#ifdef ALEMBIC_WITH_HDF5
         useOgawa = false;
         writeProperty ( archiveName, useOgawa );
         readProperty  ( archiveName );
+#endif
     }
     catch (char * str )
     {

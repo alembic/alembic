@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 // We include some global mesh data to test with from an external source
 // to keep this example code clean.
@@ -82,7 +82,7 @@ void doSample( OCurves &iCurves )
 
 void Example1_CurvesOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       "curves1.abc" );
 
     OCurves myCurves( OObject( archive, kTop ),
@@ -102,7 +102,7 @@ void Example1_CurvesOut()
 
 void Example1_CurvesIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "curves1.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "curves1.abc" );
     std::cout << "Reading: " << archive.getName() << std::endl;
 
     std::cout <<"constructing curves" << std::endl;
@@ -134,7 +134,7 @@ void Example1_CurvesIn()
 
 void Example2_CurvesOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       "curves2.abc" );
 
     OCurves myCurves( OObject( archive, kTop ), "nurbsCurve" );
@@ -179,7 +179,7 @@ void Example2_CurvesOut()
 
 void Example2_CurvesIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "curves2.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "curves2.abc" );
 
     ICurves myCurves( IObject( archive, kTop) , "nurbsCurve");
     ICurvesSchema &curves = myCurves.getSchema();

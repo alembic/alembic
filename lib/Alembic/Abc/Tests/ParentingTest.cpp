@@ -36,9 +36,12 @@
 
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreFactory/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 #include <ImathMath.h>
 
@@ -73,11 +76,13 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             iArchiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             iArchiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
 
     // all child Objects in an Archive are actually children of the single
     // top Object in an Archive
@@ -247,12 +252,15 @@ void scopingTest(bool useOgawa)
                     Alembic::AbcCoreOgawa::WriteArchive(), "propScopeTest.abc",
                     "Alembic test", "", MetaData() );
             }
+#ifdef ALEMBIC_WITH_HDF5
             else
             {
                 archive = CreateArchiveWithInfo(
                     Alembic::AbcCoreHDF5::WriteArchive(), "propScopeTest.abc",
                     "Alembic test", "", MetaData() );
             }
+#endif
+
             OObject childA( archive.getTop(), "a" );
 
             propScalar = ODoubleProperty(childA.getProperties(), "scalar", 0);
@@ -317,9 +325,11 @@ int main( int argc, char *argv[] )
     simpleTestOut( arkive, useOgawa );
     simpleTestIn( arkive );
     scopingTest(useOgawa);
+#ifdef ALEMBIC_WITH_HDF5
     useOgawa = false;
     simpleTestOut( arkive, useOgawa );
     simpleTestIn( arkive );
     scopingTest(useOgawa);
+#endif
     return 0;
 }
