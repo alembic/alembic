@@ -33,9 +33,6 @@
 ##
 ##-*****************************************************************************
 
-# Recurse into all the subdirectories
-PROJECT(ALEMBIC_BOOTSTRAP_LIBS)
-
 # Include the source dirs
 INCLUDE_DIRECTORIES(${ALEMBIC_BOOTSTRAP_LIBS_SOURCE_DIR})
 

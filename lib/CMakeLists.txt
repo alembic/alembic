@@ -33,9 +33,6 @@
 ##
 ##-*****************************************************************************
 
-# Create a container project for all the libraries.
-PROJECT(ALEMBIC_LIBS)
-
 # Include the source dirs to make the library root dir an include
 INCLUDE_DIRECTORIES(${ALEMBIC_LIBS_SOURCE_DIR})
 
@@ -47,6 +44,6 @@ ENDIF()
 ADD_SUBDIRECTORY(Alembic)
 
 # Include the AbcOpenGL lib
-IF (USE_OPENGL OR USE_EXAMPLES)
+IF (USE_OPENGL)
 	ADD_SUBDIRECTORY(AbcOpenGL)
 ENDIF()

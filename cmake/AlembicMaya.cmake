@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,24 +33,49 @@
 ##
 ##-*****************************************************************************
 
-IF (DEFINED MAYA_ROOT)
-    MESSAGE(STATUS "Using MAYA_ROOT ${MAYA_ROOT}")
-    SET(ALEMBIC_MAYA_ROOT ${MAYA_ROOT})
-
-    IF (NOT DEFINED ALEMBIC_MAYA_INC_ROOT)
-        SET(ALEMBIC_MAYA_INC_ROOT "${ALEMBIC_MAYA_ROOT}/include")
+# If MAYA_ROOT not set, use predefined paths
+IF(NOT DEFINED MAYA_ROOT)
+  IF ( ${CMAKE_HOST_UNIX} )
+    IF( ${DARWIN} )
+      # TODO: set to default install path when shipping out
+      # SET( ALEMBIC_MAYA_ROOT NOTFOUND )
+      SET( ALEMBIC_MAYA_ROOT "/Applications/Autodesk/maya2012" )
+      SET( ALEMBIC_MAYA_INC_ROOT "/Applications/Autodesk/maya2012/include" )
+      SET( ALEMBIC_MAYA_LIB_ROOT "/Applications/Autodesk/maya2012/Maya.app/Contents/MacOS" )
+    ELSE()
+      SET( ALEMBIC_MAYA_ROOT "/usr/autodesk/maya2012-x64" )
     ENDIF()
-    MESSAGE(STATUS "ALEMBIC_MAYA_INC_ROOT: ${ALEMBIC_MAYA_INC_ROOT}")
-
-    IF (NOT DEFINED ALEMBIC_MAYA_LIB_ROOT)
-        IF (DARWIN)
-            SET(ALEMBIC_MAYA_LIB_ROOT "${ALEMBIC_MAYA_ROOT}/Maya.app/Contents/MacOS")
-        ELSE()
-            SET(ALEMBIC_MAYA_LIB_ROOT "${ALEMBIC_MAYA_ROOT}/lib")
-        ENDIF()
+  ELSE()
+    IF ( ${WINDOWS} )
+      SET( ALEMBIC_MAYA_ROOT "C:/Program Files/Autodesk/Maya2012" )
+    ELSE()
+      SET( ALEMBIC_MAYA_ROOT NOTFOUND )
     ENDIF()
-    MESSAGE(STATUS "ALEMBIC_MAYA_LIB_ROOT: ${ALEMBIC_MAYA_LIB_ROOT}")
+  ENDIF()
+ELSE()
+  # Prefer MAYA_ROOT set from the CMakeCache'd variable than default paths
+  MESSAGE( STATUS "Using MAYA_ROOT ${MAYA_ROOT}" )
+  SET( ALEMBIC_MAYA_ROOT ${MAYA_ROOT})
 ENDIF()
+
+# Prefer MAYA_ROOT set from the environment over the CMakeCache'd variable
+IF(NOT $ENV{MAYA_ROOT}x STREQUAL "x")
+  SET( ALEMBIC_MAYA_ROOT $ENV{MAYA_ROOT})
+ENDIF()
+
+IF( NOT DEFINED ALEMBIC_MAYA_INC_ROOT )
+  SET( ALEMBIC_MAYA_INC_ROOT "${ALEMBIC_MAYA_ROOT}/include" )
+ENDIF()
+
+IF( NOT DEFINED ALEMBIC_MAYA_LIB_ROOT )
+  IF ( ${DARWIN} )
+    SET( ALEMBIC_MAYA_LIB_ROOT "${ALEMBIC_MAYA_ROOT}/Maya.app/Contents/MacOS" )
+  ELSE()
+    SET( ALEMBIC_MAYA_LIB_ROOT "${ALEMBIC_MAYA_ROOT}/lib" )
+  ENDIF()
+ENDIF()
+
+MESSAGE( STATUS "Maya lib root: ${ALEMBIC_MAYA_LIB_ROOT}" )
 
 # Just start with forcing it to ILM's location
 SET( MAYA_INCLUDE_PATH MAYA_INCLUDE_PATH-NOTFOUND )
@@ -141,9 +166,10 @@ ELSE()
 ENDIF()
 
 #-******************************************************************************
-# Wrap it all up
 #-******************************************************************************
-
+# Wrap it all ups
+#-******************************************************************************
+#-******************************************************************************
 IF( MAYA_INCLUDE_PATH )
   #  SET( MAYA_FOUND 1 CACHE STRING "Set to 1 if Maya is found, 0 otherwise" )
   SET( MAYA_FOUND 1 )
@@ -156,9 +182,10 @@ ENDIF( MAYA_INCLUDE_PATH )
 #MARK_AS_ADVANCED( MAYA_FOUND )
 
 #-******************************************************************************
+#-******************************************************************************
 # Macros for making maya plugins
 #-******************************************************************************
-
+#-******************************************************************************
 MACRO(ADD_MAYA_CXX_PLUGIN PluginName SourceFile1 )
 
   IF( NOT ${MAYA_FOUND} )
@@ -191,3 +218,4 @@ MACRO(ADD_MAYA_CXX_PLUGIN PluginName SourceFile1 )
   TARGET_LINK_LIBRARIES( ${PluginName} ${MAYA_LIBRARIES} )
 
 ENDMACRO(ADD_MAYA_CXX_PLUGIN)
+

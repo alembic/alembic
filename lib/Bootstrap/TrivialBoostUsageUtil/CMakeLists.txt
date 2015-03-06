@@ -31,6 +31,8 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib/Bootstrap )
+
 ADD_LIBRARY(TrivialBoostUsageUtil TbuUtil.cpp)
 
 IF (USE_TESTS)

@@ -33,6 +33,12 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+
+IF(USE_HDF5)
+add_definitions(-DALEMBIC_WITH_HD5)
+ENDIF()
+
 SET(CXX_FILES
     IFactory.cpp
 )
@@ -40,17 +46,7 @@ SET(CXX_FILES
 SET(H_FILES
     All.h
     IFactory.h
-    IFactoryConfig.h
 )
-
-# used in lib/Alembic/AbcCoreFactory/IFactoryConfig.h.in
-IF (USE_HDF5)
-    SET(INCLUDE_HDF5 "true")
-ELSE()
-    SET(INCLUDE_HDF5 "false")
-ENDIF()
-
-CONFIGURE_FILE("IFactoryConfig.h.in" "IFactoryConfig.h")
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 

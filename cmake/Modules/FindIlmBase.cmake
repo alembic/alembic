@@ -33,15 +33,16 @@
 ##
 ##-*****************************************************************************
 
-
-# We shall worry about windowsification later.
-
 #-******************************************************************************
 #-******************************************************************************
 # FIRST, ILMBASE STUFF
 #-******************************************************************************
 #-******************************************************************************
 
+# If ILMBASE_ROOT was defined in the environment, use it.
+IF(NOT ILMBASE_ROOT AND NOT $ENV{ILMBASE_ROOT} STREQUAL "")
+  SET(ILMBASE_ROOT $ENV{ILMBASE_ROOT})
+ENDIF()
 
 IF(NOT DEFINED ILMBASE_ROOT)
     MESSAGE( "ILMBASE_ROOT is undefined" )
@@ -65,110 +66,93 @@ ELSE()
   SET( ALEMBIC_ILMBASE_ROOT ${ILMBASE_ROOT} )
 ENDIF()
 
-SET(LIBRARY_PATHS
-    ${ALEMBIC_ILMBASE_ROOT}/lib
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local/lib
-    /usr/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
-    /usr/freeware/lib64
+SET(_ilmbase_FIND_COMPONENTS
+    Half
+    Iex
+    IexMath
+    IlmThread
+    Imath
 )
 
-IF( DEFINED ILMBASE_LIBRARY_DIR )
-  SET( LIBRARY_PATHS ${ILMBASE_LIBRARY_DIR} ${LIBRARY_PATHS} )
-ENDIF()
-
-SET(INCLUDE_PATHS
-    ${ALEMBIC_ILMBASE_ROOT}/include/OpenEXR/
+SET(_ilmbase_SEARCH_DIRS
+    ${ALEMBIC_ILMBASE_ROOT}
     ~/Library/Frameworks
     /Library/Frameworks
-    /usr/local/include/OpenEXR/
-    /usr/local/include
-    /usr/include
-    /usr/include/OpenEXR
-    /sw/include # Fink
-    /opt/local/include # DarwinPorts
-    /opt/csw/include # Blastwave
-    /opt/include
-    /usr/freeware/include
+    /usr/local
+    /usr
+    /sw
+    /opt/local
+    /opt/csw
+    /opt
+    /usr/freeware
 )
 
-FIND_PATH( ALEMBIC_ILMBASE_INCLUDE_DIRECTORY ImathMath.h
-           PATHS
-           ${INCLUDE_PATHS}
-           NO_DEFAULT_PATH
-           NO_CMAKE_ENVIRONMENT_PATH
-           NO_CMAKE_PATH
-           NO_SYSTEM_ENVIRONMENT_PATH
-           NO_CMAKE_SYSTEM_PATH
-           DOC "The directory where ImathMath.h resides" )
+FIND_PATH(ILMBASE_INCLUDE_DIR
+  NAMES
+    IlmBaseConfig.h
+  HINTS
+    ${_ilmbase_SEARCH_DIRS}
+  PATH_SUFFIXES
+    include
+    include/OpenEXR
+)
 
-IF( NOT DEFINED ALEMBIC_ILMBASE_HALF_LIB )
-  FIND_LIBRARY( ALEMBIC_ILMBASE_HALF_LIB Half
-                PATHS
-                ${LIBRARY_PATHS}
-                NO_DEFAULT_PATH
-                NO_CMAKE_ENVIRONMENT_PATH
-                NO_CMAKE_PATH
-                NO_SYSTEM_ENVIRONMENT_PATH
-                NO_CMAKE_SYSTEM_PATH
-                DOC "The Half library" )
-ENDIF()
+# If the headers were found, get the version from config file, if not already set.
+IF(ILMBASE_INCLUDE_DIR)
+  SET(ALEMBIC_ILMBASE_INCLUDE_DIRECTORY ${ILMBASE_INCLUDE_DIR})
+  IF(NOT ILMBASE_VERSION)
 
-IF( NOT DEFINED ALEMBIC_ILMBASE_IEX_LIB )
-  FIND_LIBRARY( ALEMBIC_ILMBASE_IEX_LIB Iex
-                PATHS
-                ${LIBRARY_PATHS}
-                NO_DEFAULT_PATH
-                NO_CMAKE_ENVIRONMENT_PATH
-                NO_CMAKE_PATH
-                NO_SYSTEM_ENVIRONMENT_PATH
-                NO_CMAKE_SYSTEM_PATH
-                DOC "The Iex library" )
-ENDIF()
-
-IF ( DEFINED USE_IEXMATH AND USE_IEXMATH )
-  IF( NOT DEFINED ALEMBIC_ILMBASE_IEXMATH_LIB )
-	FIND_LIBRARY( ALEMBIC_ILMBASE_IEXMATH_LIB IexMath
+    FIND_FILE(_ilmbase_CONFIG
+      NAMES
+        IlmBaseConfig.h
       PATHS
-      ${LIBRARY_PATHS}
+        "${ILMBASE_INCLUDE_DIR}"
+        "${ILMBASE_INCLUDE_DIR}/OpenEXR"
       NO_DEFAULT_PATH
-      NO_CMAKE_ENVIRONMENT_PATH
-      NO_CMAKE_PATH
-      NO_SYSTEM_ENVIRONMENT_PATH
-      NO_CMAKE_SYSTEM_PATH
-      DOC "The IexMath library" )
+    )
+
+    IF(_ilmbase_CONFIG)
+      FILE(STRINGS "${_ilmbase_CONFIG}" ILMBASE_BUILD_SPECIFICATION
+           REGEX "^[ \t]*#define[ \t]+ILMBASE_VERSION_STRING[ \t]+\"[.0-9]+\".*$")
+    ELSE()
+      MESSAGE(WARNING "Could not find \"OpenEXRConfig.h\" in \"${ILMBASE_INCLUDE_DIR}\"")
+    ENDIF()
+
+    IF(ILMBASE_BUILD_SPECIFICATION)
+      MESSAGE(STATUS "${ILMBASE_BUILD_SPECIFICATION}")
+      STRING(REGEX REPLACE ".*#define[ \t]+ILMBASE_VERSION_STRING[ \t]+\"([.0-9]+)\".*"
+             "\\1" _ilmbase_libs_ver_init ${ILMBASE_BUILD_SPECIFICATION})
+    ELSE()
+      MESSAGE(WARNING "Could not determine ILMBase library version, assuming ${_ilmbase_libs_ver_init}.")
+    ENDIF()
+
+    UNSET(_ilmbase_CONFIG CACHE)
+
   ENDIF()
+
+  SET("ILMBASE_VERSION" ${_ilmbase_libs_ver_init} CACHE STRING "Version of OpenEXR lib")
+  UNSET(_ilmbase_libs_ver_init)
+
+  STRING(REGEX REPLACE "([0-9]+)[.]([0-9]+).*" "\\1_\\2" _ilmbase_libs_ver ${ILMBASE_VERSION})
 ENDIF()
 
-IF( NOT DEFINED ALEMBIC_ILMBASE_ILMTHREAD_LIB )
-  FIND_LIBRARY( ALEMBIC_ILMBASE_ILMTHREAD_LIB IlmThread
-                 PATHS
-                 ${LIBRARY_PATHS}
-                 NO_DEFAULT_PATH
-                 NO_CMAKE_ENVIRONMENT_PATH
-                 NO_CMAKE_PATH
-                 NO_SYSTEM_ENVIRONMENT_PATH
-                 NO_CMAKE_SYSTEM_PATH
-                 DOC "The IlmThread library" )
-ENDIF()
 
-IF( NOT DEFINED ALEMBIC_ILMBASE_IMATH_LIB )
-  FIND_LIBRARY( ALEMBIC_ILMBASE_IMATH_LIB Imath
-                PATHS
-                ${LIBRARY_PATHS}
-                NO_DEFAULT_PATH
-                NO_CMAKE_ENVIRONMENT_PATH
-                NO_CMAKE_PATH
-                NO_SYSTEM_ENVIRONMENT_PATH
-                NO_CMAKE_SYSTEM_PATH
-                DOC "The Imath library" )
-ENDIF()
+SET(_ilmbase_LIBRARIES)
+FOREACH(COMPONENT ${_ilmbase_FIND_COMPONENTS})
+  STRING(TOUPPER ${COMPONENT} UPPERCOMPONENT)
 
+  FIND_LIBRARY(ALEMBIC_ILMBASE_${UPPERCOMPONENT}_LIB
+    NAMES
+      ${COMPONENT}-${_ilmbase_libs_ver} ${COMPONENT} 
+    HINTS
+      ${_ilmbase_SEARCH_DIRS}
+    PATH_SUFFIXES
+      lib64 lib
+    )
+  LIST(APPEND _ilmbase_LIBRARIES "${ILMBASE_${UPPERCOMPONENT}_LIBRARY}")
+ENDFOREACH()
+
+UNSET(_ilmbase_libs_ver)
 
 IF ( ${ALEMBIC_ILMBASE_HALF_LIB} STREQUAL "ALEMBIC_ILMBASE_HALF_LIB-NOTFOUND" )
   MESSAGE( FATAL_ERROR "ilmbase libraries (Half, Iex, IlmThread, Imath) not found, required" )

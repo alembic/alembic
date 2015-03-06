@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2011,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,12 +33,17 @@
 ##
 ##-*****************************************************************************
 
-FIND_PACKAGE(PyIlmBase)
 
-IF (PYILMBASE_FOUND)
-    SET(ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
-    SET(ALEMBIC_PYILMBASE_LIBRARIES ${ALEMBIC_PYILMBASE_LIBS})
-    SET(ALEMBIC_PYILMBASE_FOUND 1 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
+# FIND_PACKAGE( OpenEXR REQUIRED )
+FIND_PACKAGE( OpenEXR )
+
+IF( OPENEXR_FOUND )
+  SET( ALEMBIC_OPENEXR_INCLUDE_PATH ${OPENEXR_INCLUDE_PATHS} )
+  SET( ALEMBIC_OPENEXR_LIBRARIES ${OPENEXR_LIBRARIES} )
+  # SET( ALEMBIC_OPENEXR_DEFINITIONS ${OPENEXR_DEFINITIONS} )
+
+  SET( ALEMBIC_OPENEXR_FOUND 1 CACHE STRING "Set to 1 if OpenEXR is found, 0 otherwise" )
 ELSE()
-    SET(ALEMBIC_PYILMBASE_FOUND 0 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
+  SET( ALEMBIC_OPENEXR_FOUND 0 CACHE STRING "Set to 1 if OpenEXR is found, 0 otherwise" )
 ENDIF()
+

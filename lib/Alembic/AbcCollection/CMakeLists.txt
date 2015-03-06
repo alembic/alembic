@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+
 SET(CXX_FILES
     OCollections.cpp
     ICollections.cpp

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2011,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,40 +33,14 @@
 ##
 ##-*****************************************************************************
 
-# If you know the HDF5 root and there aren't any default versions of HDF5 in
-# the default system paths use:
-# cmake '-UHDF5_*' -DHDF5_ROOT:STRING=<path/to/hdf5> .
-#
-# For more info:
-# cmake --help-module FindHDF5
 
-#-******************************************************************************
-# FindHDF5 uses these as hints about search locations
-#-******************************************************************************
+FIND_PACKAGE( PyIlmBase )
 
-IF (DEFINED HDF5_ROOT)
-    MESSAGE(STATUS "Using HDF5_ROOT: ${HDF5_ROOT}")
-    # set HDF5_ROOT in the env so FindHDF5.cmake can find it
-    SET(ENV{HDF5_ROOT} ${HDF5_ROOT})
-ENDIF()
-
-#-******************************************************************************
-# Find HDF5
-#-******************************************************************************
-
-SET(HDF5_USE_STATIC_LIBRARIES ${USE_STATIC_HDF5})
-
-FIND_PACKAGE(HDF5 COMPONENTS C HL)
-
-#-******************************************************************************
-# Wrap it all up
-#-******************************************************************************
-
-IF (HDF5_FOUND)
-    SET(ALEMBIC_HDF5_LIB ${HDF5_C_LIBRARIES})
-    SET(ALEMBIC_HDF5_HL_LIB ${HDF5_CXX_LIBRARIES})
-    MESSAGE(STATUS "HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")
-    MESSAGE(STATUS "HDF5_LIBRARIES: ${HDF5_LIBRARIES}")
+IF( PYILMBASE_FOUND )
+  SET( ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} )
+  SET( ALEMBIC_PYILMBASE_LIBRARIES ${ALEMBIC_PYILMBASE_LIBS} )
+  SET( ALEMBIC_PYILMBASE_FOUND 1 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise" )
 ELSE()
-    MESSAGE(STATUS "HDF5 not found.")
+  SET( ALEMBIC_PYILMBASE_FOUND 0 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise" )
 ENDIF()
+

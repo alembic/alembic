@@ -148,7 +148,7 @@ ENDIF()
 MESSAGE(STATUS "The install dir is ${CMAKE_INSTALL_PREFIX}")
 
 # check in the source directory
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/build)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
 #-******************************************************************************
 # TESTS
@@ -194,11 +194,11 @@ FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
 
 # Boost
-INCLUDE("./build/AlembicBoost.cmake")
+INCLUDE("./cmake/AlembicBoost.cmake")
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 # IlmBase
-INCLUDE("./build/AlembicIlmBase.cmake")
+INCLUDE("./cmake/AlembicIlmBase.cmake")
 INCLUDE_DIRECTORIES(${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY})
 
 # OpenGL
@@ -216,13 +216,11 @@ IF (USE_OPENGL)
         SET(ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES})
     ENDIF()
     MESSAGE(STATUS "OpenGL Libraries: ${ALEMBIC_GL_LIBS}")
-ELSE()
-    MESSAGE(STATUS "Skipping OpenGL stuff")
 ENDIF()
 
 # HDF5
 IF (USE_HDF5)
-    INCLUDE("./build/AlembicHDF5.cmake")
+    INCLUDE("./cmake/AlembicHDF5.cmake")
     INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 ELSE()
     MESSAGE(STATUS "Skipping HDF5 stuff")
@@ -276,12 +274,10 @@ INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/lib")
 
 # PyAlembic, PyAbcOpenGL
 IF (USE_PYALEMBIC)
-    INCLUDE("./build/AlembicPyIlmBase.cmake")
-    INCLUDE("./build/AlembicPython.cmake")
+    INCLUDE("./cmake/AlembicPyIlmBase.cmake")
+    INCLUDE("./cmake/AlembicPython.cmake")
     INCLUDE_DIRECTORIES(${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
     ADD_SUBDIRECTORY(python)
-ELSE()
-    MESSAGE(STATUS "Skipping PyAlembic")
 ENDIF()
 
 #-******************************************************************************
@@ -290,53 +286,71 @@ ENDIF()
 
 # PRMan
 IF (USE_PRMAN)
-    INCLUDE("./build/AlembicPRMan.cmake")
+    INCLUDE("./cmake/AlembicPRMan.cmake")
     IF (${ALEMBIC_PRMAN_FOUND})
         MESSAGE(STATUS "Building PRMan plugins")
         ADD_SUBDIRECTORY(prman)
     ELSE()
         MESSAGE(STATUS "PRMan not found")
     ENDIF()
-ELSE()
-    MESSAGE(STATUS "Skipping PRMan plugins")
 ENDIF()
 
 # Arnold
 IF (USE_ARNOLD)
-    INCLUDE("./build/AlembicArnold.cmake")
+    INCLUDE("./cmake/AlembicArnold.cmake")
     IF (${ALEMBIC_ARNOLD_FOUND})
         MESSAGE(STATUS "Building Arnold plugins")
         ADD_SUBDIRECTORY( arnold )
     ELSE()
         MESSAGE(STATUS "Arnold not found")
     ENDIF()
-ELSE()
-    MESSAGE(STATUS "Skipping Arnold plugins")
 ENDIF()
 
 # Maya
 IF (USE_MAYA)
-    INCLUDE("./build/AlembicMaya.cmake")
+    INCLUDE("./cmake/AlembicMaya.cmake")
     IF (MAYA_FOUND)
         MESSAGE(STATUS "Building Maya plugins")
         ADD_SUBDIRECTORY(maya)
     ELSE()
         MESSAGE(STATUS "Maya not found")
     ENDIF()
-ELSE()
-    MESSAGE(STATUS "Skipping Maya plugins")
 ENDIF()
 
 # Examples
 IF (USE_EXAMPLES)
     ADD_SUBDIRECTORY(examples)
-ELSE()
-    MESSAGE(STATUS "Skipping Alembic examples")
 ENDIF()
 
 # Python docs (run `make docs` from build root)
 IF (USE_PYALEMBIC AND USE_DOCS)
     ADD_SUBDIRECTORY(doc)
-ELSE()
-    MESSAGE(STATUS "Skipping PyAlembic docs")
 ENDIF()
+
+set(_config_msg "\n   * Alembic Configuration      ===")
+macro(info_cfg_option
+    _setting)
+    set(_msg "   * ${_setting}")
+    string(LENGTH "${_msg}" _len)
+    while("32" GREATER "${_len}")
+        set(_msg "${_msg} ")
+         math(EXPR _len "${_len} + 1")
+    endwhile()
+
+    set(_config_msg "${_config_msg}\n${_msg}${${_setting}}")
+endmacro()
+
+info_cfg_option(USE_ARNOLD)
+info_cfg_option(USE_BOOTSTRAP)
+info_cfg_option(USE_DOCS)
+info_cfg_option(USE_EXAMPLES)
+info_cfg_option(USE_HDF5)
+info_cfg_option(USE_MAYA)
+info_cfg_option(USE_OPENGL)
+info_cfg_option(USE_PRMAN)
+info_cfg_option(USE_PYALEMBIC)
+info_cfg_option(USE_STATIC_BOOST)
+info_cfg_option(USE_STATIC_HDF5)
+info_cfg_option(USE_TESTS)
+
+message("${_config_msg}")

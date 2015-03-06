@@ -81,11 +81,6 @@ ELSE()
         /usr/freeware/lib64
     )
 
-    SET(MODULE_PATHS
-        ${ALEMBIC_PYILMBASE_ROOT}/lib/python2.6/site-packages
-        ${ALEMBIC_PYILMBASE_ROOT}/lib64/python2.6/site-packages
-    )
-
     IF( DEFINED PYILMBASE_LIBRARY_DIR )
       SET( LIBRARY_PATHS ${PYILMBASE_LIBRARY_DIR} ${LIBRARY_PATHS} )
     ENDIF()
@@ -128,14 +123,9 @@ ELSE()
     ENDIF()
 
     IF( NOT DEFINED ALEMBIC_PYILMBASE_PYIMATH_MODULE )
-      FIND_PATH( ALEMBIC_PYILMBASE_PYIMATH_MODULE 
-                    NAMES
-                    imathmodule.a
-                    imathmodule.so
-                    imathmodule.dylib
-                    imathmodule.dll
+      FIND_LIBRARY( ALEMBIC_PYILMBASE_PYIMATH_MODULE imathmodule.so
                     PATHS
-                    ${MODULE_PATHS}
+                    ${LIBRARY_PATHS}
                     NO_DEFAULT_PATH
                     NO_CMAKE_ENVIRONMENT_PATH
                     NO_CMAKE_PATH
@@ -144,19 +134,22 @@ ELSE()
                     DOC "The PyImath library" )
     ENDIF()
 
+    SET( PYILMBASE_FOUND TRUE )
+
     IF ( ${ALEMBIC_PYILMBASE_PYIMATH_LIB} STREQUAL "ALEMBIC_PYILMBASE_PYIMATH_LIB-NOTFOUND" )
-      MESSAGE( FATAL_ERROR "pyilmbase libraries (PyImath) not found, required" )
+      MESSAGE( STATUS "pyilmbase libraries (PyImath) not found, required for python support" )
+      SET( PYILMBASE_FOUND FALSE )
     ENDIF()
 
     IF ( ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} STREQUAL "ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY-NOTFOUND" )
-      MESSAGE( FATAL_ERROR "pyilmbase header files not found, required: ALEMBIC_PYILMBASE_ROOT: ${ALEMBIC_PYILMBASE_ROOT}" )
+      MESSAGE( STATUS "pyilmbase header files not found, required for python support" )
+      SET( PYILMBASE_FOUND FALSE )
     ENDIF()
 
     MESSAGE( STATUS "PYILMBASE INCLUDE PATH: ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY}" )
     MESSAGE( STATUS "PYIMATH LIB: ${ALEMBIC_PYILMBASE_PYIMATH_LIB}" )
     MESSAGE( STATUS "PYIMATH MODULE: ${ALEMBIC_PYILMBASE_PYIMATH_MODULE}" )
 
-    SET( PYILMBASE_FOUND TRUE )
     SET( ALEMBIC_PYILMBASE_LIBS
            ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
        )

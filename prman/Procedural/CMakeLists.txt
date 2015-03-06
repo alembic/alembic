@@ -33,8 +33,6 @@
 ##
 ##-*****************************************************************************
 
-PROJECT(ALEMBIC_PRMAN_PROCEDURAL_MODULE)
-
 SET(H_FILES
     ArbAttrUtil.h
     PathUtil.h

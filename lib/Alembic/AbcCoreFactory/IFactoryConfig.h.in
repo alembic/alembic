@@ -1,4 +1,0 @@
-// the configured options and settings for AbcCoreFactory
-
-#define INCLUDE_HDF5 ${INCLUDE_HDF5}
-
