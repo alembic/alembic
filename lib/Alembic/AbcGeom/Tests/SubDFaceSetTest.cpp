@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -52,7 +52,7 @@ using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 
 void Example1_MeshOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "facesetSubD1.abc" );
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), "facesetSubD1.abc" );
 
     // Create a SubD class.
     OSubD meshyObj( OObject( archive, kTop ), "subd" );
@@ -147,7 +147,7 @@ void Example1_MeshOut()
 //-*****************************************************************************
 void Example1_MeshIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "facesetSubD1.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "facesetSubD1.abc" );
     std::cout << "Reading: " << archive.getName() << std::endl;
 
     ISubD meshyObj( IObject( archive, kTop ), "subd" );

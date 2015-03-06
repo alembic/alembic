@@ -33,10 +33,10 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
-IF(USE_HDF5)
-add_definitions(-DALEMBIC_WITH_HD5)
+IF (USE_HDF5)
+    ADD_DEFINITIONS(-DALEMBIC_WITH_HDF5)
 ENDIF()
 
 SET(CXX_FILES

@@ -58,7 +58,7 @@
 
 // Alembic Includes
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 // Other includes
 #include <iostream>
@@ -103,7 +103,7 @@ void Example1_MeshOut()
     OArchive archive(
 
         // The hard link to the implementation.
-        Alembic::AbcCoreHDF5::WriteArchive(),
+        Alembic::AbcCoreOgawa::WriteArchive(),
 
         // The file name.
         // Because we're an OArchive, this is creating (or clobbering)
@@ -161,7 +161,7 @@ void Example1_MeshOut()
 //-*****************************************************************************
 void Example1_MeshIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "polyMesh1.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "polyMesh1.abc" );
     std::cout << "Reading: " << archive.getName() << std::endl;
 
     IGeomBaseObject geomBase( IObject( archive, kTop ), "meshy" );
@@ -239,7 +239,7 @@ void Example1_MeshIn()
 //-*****************************************************************************
 void meshUnderXformOut( const std::string &iName )
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), iName );
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), iName );
 
     TimeSamplingPtr ts( new TimeSampling( 1.0 / 24.0, 0.0 ) );
 
@@ -278,7 +278,7 @@ void optPropTest()
 {
     std::string name = "meshOptPropTest.abc";
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
         OPolyMesh meshyObj( OObject( archive, kTop ), "mesh" );
         OPolyMeshSchema &mesh = meshyObj.getSchema();
 
@@ -341,7 +341,7 @@ void optPropTest()
     }
 
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
 
         IPolyMesh meshyObj( IObject( archive, kTop ), "mesh" );
         IPolyMeshSchema &mesh = meshyObj.getSchema();

@@ -33,29 +33,15 @@
 ##
 ##-*****************************************************************************
 
-IF (USE_HDF5)
-    SET(TEST_LIBS
-        AlembicAbcCoreHDF5
-        AlembicAbcCoreAbstract
-        AlembicUtil
-        ${ALEMBIC_ILMBASE_LIBS}
-        ${HDF5_LIBRARIES}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${Boost_THREAD_LIBRARY}
-        ${ZLIB_LIBRARIES}
-        ${EXTERNAL_MATH_LIBS}
-    )
-ELSE()
-    SET(TEST_LIBS
-        AlembicAbcCoreAbstract
-        AlembicUtil
-        ${ALEMBIC_ILMBASE_LIBS}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${Boost_THREAD_LIBRARY}
-        ${ZLIB_LIBRARIES}
-        ${EXTERNAL_MATH_LIBS}
-    )
-ENDIF()
+SET(TEST_LIBS
+    AlembicAbcCoreOgawa
+    AlembicAbcCoreAbstract
+    AlembicOgawa
+    AlembicUtil
+    ${ALEMBIC_ILMBASE_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT} ${Boost_THREAD_LIBRARY}
+    ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS}
+)
 
 ADD_EXECUTABLE(AbcCoreAbstractTimeSamplingTest TestTimeSampling.cpp)
 TARGET_LINK_LIBRARIES(AbcCoreAbstractTimeSamplingTest ${TEST_LIBS})

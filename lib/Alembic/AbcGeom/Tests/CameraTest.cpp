@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -46,7 +46,7 @@ void cameraTest()
 {
     std::string fileName = "camera1.abc";
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), fileName );
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName );
         CameraSample samp;
         OCamera simpleCamObj( OObject( archive, kTop ), "simpleCam" );
         simpleCamObj.getSchema().set( samp );
@@ -72,7 +72,7 @@ void cameraTest()
 
         CameraSample samp;
 
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), fileName );
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), fileName );
         ICamera simpleCam( IObject( archive, kTop ), "simpleCam" );
         ICamera cam( IObject( archive, kTop ), "cam" );
 
@@ -180,7 +180,7 @@ void corePropertiesTest()
 {
     std::string fileName = "camera2.abc";
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), fileName );
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName );
         CameraSample samp;
 
         OCamera camObj( OObject( archive, kTop ), "cam" );
@@ -215,7 +215,7 @@ void corePropertiesTest()
 
         CameraSample samp;
 
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), fileName );
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), fileName );
         ICamera cam( IObject( archive, kTop ), "cam" );
 
         TESTING_ASSERT( cam.getSchema().getNumSamples() == 10 );

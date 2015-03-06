@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 // We include some global mesh data to test with from an external source
 // to keep this example code clean.
@@ -92,7 +92,7 @@ void doSample( OCurves &iCurves )
 
 void Example1_CurvesOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       "curves1.abc" );
 
     OCurves myCurves( OObject( archive, kTop ),
@@ -112,7 +112,7 @@ void Example1_CurvesOut()
 
 void Example1_GeomBaseIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "curves1.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "curves1.abc" );
     std::cout << "\nReading: " << archive.getName() << std::endl;
 
     std::cout <<"constructing curves" << std::endl;
@@ -159,7 +159,7 @@ void IndexexedGeomParamTest()
         OStringGeomParam::Sample samp( valsSamp, indicesSamp,
                                        Alembic::AbcGeom::kConstantScope );
 
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                           "indexedGeomParam.abc" );
         OCompoundProperty prop = archive.getTop().getProperties();
         TimeSamplingPtr ts( new TimeSampling( 1.0 / 24.0, 0.0 ) );
@@ -197,7 +197,7 @@ void IndexexedGeomParamTest()
     }
 
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                           "indexedGeomParam.abc" );
         ICompoundProperty prop = archive.getTop().getProperties();
         IStringGeomParam::Sample samp;

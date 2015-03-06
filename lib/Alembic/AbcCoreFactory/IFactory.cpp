@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2013,
+// Copyright (c) 2013-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,7 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifdef ALEMBIC_WITH_HD5
+#include <fstream>
+#ifdef ALEMBIC_WITH_HDF5
 #include <Alembic/AbcCoreHDF5/All.h>
 #endif
 #include <Alembic/AbcCoreOgawa/All.h>
@@ -70,22 +71,40 @@ Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName,
         archive.getErrorHandler().setPolicy( m_policy );
         return archive;
     }
-    
-#ifdef ALEMBIC_WITH_HD5
-        Alembic::AbcCoreHDF5::ReadArchive hdf( m_cacheHierarchy );
-        archive = Alembic::Abc::IArchive( hdf, iFileName,
-            Alembic::Abc::ErrorHandler::kQuietNoopPolicy, m_cachePtr );
-        if ( archive.valid() )
+
+#ifdef ALEMBIC_WITH_HDF5
+    Alembic::AbcCoreHDF5::ReadArchive hdf( m_cacheHierarchy );
+    archive = Alembic::Abc::IArchive( hdf, iFileName,
+        Alembic::Abc::ErrorHandler::kQuietNoopPolicy, m_cachePtr );
+    if ( archive.valid() )
+    {
+        oType = kHDF5;
+        archive.getErrorHandler().setPolicy( m_policy );
+        return archive;
+    }
+#else
+    // check the first 8 bytes to see if this is an HDF5 file according to
+    // www.hdfgroup.org/HDF5/doc/H5.format.html#Superblock
+    std::ifstream filestream;
+    filestream.open(iFileName.c_str(), std::ios::binary);
+
+    if (filestream.is_open())
+    {
+        char bf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+        filestream.read(bf, 8);
+        filestream.close();
+
+        if (bf[0] == '\211' && bf[1] == 'H' && bf[2] == 'D' && bf[3] == 'F' &&
+            bf[4] == '\r' && bf[5] == '\n' && bf[6] == '\032' && bf[7] == '\n')
         {
             oType = kHDF5;
-            archive.getErrorHandler().setPolicy( m_policy );
-            return archive;
+            return Alembic::Abc::IArchive();
         }
+    }
 #endif
 
     oType = kUnknown;
     return Alembic::Abc::IArchive();
-
 }
 
 Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName )

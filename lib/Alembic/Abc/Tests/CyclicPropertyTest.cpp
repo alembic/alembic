@@ -35,9 +35,12 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreFactory/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 namespace AbcF = Alembic::AbcCoreFactory;
 
@@ -65,11 +68,14 @@ void writeProperty(const std::string &archiveName, bool useOgawa)
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
                             archiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
                             archiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
+
     OObject archiveTop = archive.getTop();
 
     // Create a child, parented under the archive
@@ -214,8 +220,10 @@ int main( int argc, char *argv[] )
     try
     {
         std::string archiveName("cyclic_sampling_test.abc");
+#ifdef ALEMBIC_WITH_HDF5
         writeProperty ( archiveName, useOgawa );
         readProperty  ( archiveName, useOgawa );
+#endif
         useOgawa = true;
         writeProperty ( archiveName, useOgawa );
         readProperty  ( archiveName, useOgawa );

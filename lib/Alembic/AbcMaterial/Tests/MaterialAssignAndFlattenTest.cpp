@@ -1,5 +1,5 @@
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcMaterial/MaterialAssignment.h>
 #include "PrintMaterial.h"
@@ -25,38 +25,38 @@ void setFloatParameter(
 void write()
 {
     Abc::OArchive archive(
-            Alembic::AbcCoreHDF5::WriteArchive(), "MaterialAssignment.abc" );
-    
-    
+            Alembic::AbcCoreOgawa::WriteArchive(), "MaterialAssignment.abc" );
+
+
     Abc::OObject root(archive, Abc::kTop);
     Abc::OObject materials(root, "materials");
     Abc::OObject geometry(root, "geometry");
-    
-    
+
+
     //parent material
     Mat::OMaterial materialA(materials, "materialA");
-    
+
     materialA.getSchema().setShader("prman", "surface", "paintedplastic");
-    
+
     setFloatParameter(materialA.getSchema(),
             "prman", "surface", "Kd", 0.5);
     setFloatParameter(materialA.getSchema(),
             "prman", "surface", "roughness", 0.1);
-    
+
     //child material
     Mat::OMaterial materialB(materialA, "materialB");
     materialB.getSchema().setShader("prman", "displacement", "knobby");
     setFloatParameter(materialB.getSchema(),
             "prman", "surface", "roughness", 0.2);
-    
-    
+
+
     Abc::OObject geoA(geometry, "geoA");
     Mat::addMaterialAssignment(geoA, "/materials/materialA");
-    
+
     Abc::OObject geoB(geometry, "geoB");
     Mat::addMaterialAssignment(geoB, "/materials/materialA/materialB");
-    
-    
+
+
     Abc::OObject geoC(geometry, "geoC");
     Mat::addMaterialAssignment(geoC, "/materials/materialA/materialB");
     Mat::OMaterialSchema geoCMat = Mat::addMaterial(geoC);
@@ -71,10 +71,10 @@ void traverse(Abc::IObject object, bool includeSelf)
     {
         std::cout << "---------------------------------" << std::endl;
         std::cout << object.getFullName() << std::endl;
-        
-        
-        
-        
+
+
+
+
         if (Mat::IMaterial::matches(object.getHeader()))
         {
             std::cout << "(is material, local data shown)\n";
@@ -105,29 +105,29 @@ void traverse(Abc::IObject object, bool includeSelf)
                 std::cout << "(neither is, has or is assigned)\n";
             }
         }
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
     }
-    
+
     for (size_t i = 0; i < object.getNumChildren(); ++i)
     {
         traverse(object.getChild(i), true);
     }
-    
+
 }
 
 
 void read()
 {
-    Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
+    Abc::IArchive archive(Alembic::AbcCoreOgawa::ReadArchive(),
             "MaterialAssignment.abc");
-    
+
     traverse(archive.getTop(), false);
 
 }

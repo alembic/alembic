@@ -35,10 +35,13 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreFactory/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 namespace Abc = Alembic::Abc;
 namespace AbcF = Alembic::AbcCoreFactory;
@@ -74,11 +77,13 @@ void writeUInt32ArrayProperty(const std::string &archiveName, bool useOgawa)
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
 
     OObject archiveTop = archive.getTop();
 
@@ -227,11 +232,14 @@ void writeV3fArrayProperty(const std::string &archiveName, bool useOgawa)
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
+
     OObject archiveTop = archive.getTop();
 
     // Create a child, parented under the archive
@@ -390,11 +398,13 @@ void readWriteColorArrayProperty(const std::string &archiveName, bool useOgawa)
             archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
                 archiveName, ErrorHandler::kThrowPolicy );
         }
+#ifdef ALEMBIC_WITH_HDF5
         else
         {
             archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
                 archiveName, ErrorHandler::kThrowPolicy );
         }
+#endif
 
         OObject archiveTop = archive.getTop();
 
@@ -514,11 +524,13 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
             archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
                 archiveName );
         }
+#ifdef ALEMBIC_WITH_HDF5
         else
         {
             archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
                 archiveName );
         }
+#endif
 
         OCompoundProperty root = archive.getTop().getProperties();
         OC3fArrayProperty colorProp( root, "colors" );
@@ -616,9 +628,11 @@ int main( int argc, char *argv[] )
         useOgawa = true;
         writeV3fArrayProperty ( archiveName, useOgawa );
         readV3fArrayProperty  ( archiveName, useOgawa );
+#ifdef ALEMBIC_WITH_HDF5
         useOgawa = false;
         writeV3fArrayProperty ( archiveName, useOgawa );
         readV3fArrayProperty  ( archiveName, useOgawa );
+#endif
     }
     catch (char * str )
     {
@@ -636,9 +650,12 @@ int main( int argc, char *argv[] )
     }
 
     readWriteColorArrayProperty( "c3_2_array_test.abc", true );
-    readWriteColorArrayProperty( "c3_2_array_test.abc", false );
     emptyAndValueTest( "empty_and_value_prop_test.abc", true );
+
+#ifdef ALEMBIC_WITH_HDF5
+    readWriteColorArrayProperty( "c3_2_array_test.abc", false );
     emptyAndValueTest( "empty_and_value_prop_test.abc", false );
+#endif
 
     try
     {
@@ -647,9 +664,11 @@ int main( int argc, char *argv[] )
         useOgawa = true;
         writeUInt32ArrayProperty ( archiveName, useOgawa );
         readUInt32ArrayProperty  ( archiveName, useOgawa);
+#ifdef ALEMBIC_WITH_HDF5
         useOgawa = false;
         writeUInt32ArrayProperty ( archiveName, useOgawa );
         readUInt32ArrayProperty  ( archiveName, useOgawa);
+#endif
     }
     catch (char * str )
     {

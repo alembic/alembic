@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 using namespace Alembic::AbcGeom;
@@ -43,7 +43,7 @@ using namespace Alembic::AbcGeom;
 //-*****************************************************************************
 void xformOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "matrixXform.abc" );
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), "matrixXform.abc" );
     OXform a( OObject( archive, kTop ), "a" );
 
 
@@ -68,7 +68,7 @@ void xformOut()
 //-*****************************************************************************
 void xformIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "matrixXform.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "matrixXform.abc" );
 
     M44d mat;
 
@@ -97,7 +97,7 @@ void rotateTest()
 {
     std::string fileName = "rotateXformOp.h";
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), fileName );
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName );
         OXform a( OObject( archive, kTop ), "a" );
         OXform b( OObject( archive, kTop ), "b" );
 
@@ -115,7 +115,7 @@ void rotateTest()
     }
 
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), fileName );
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), fileName );
         IXform a( IObject( archive, kTop ), "a" );
         IXform b( IObject( archive, kTop ), "b" );
 

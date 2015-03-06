@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #include <ImathMath.h>
@@ -49,7 +49,7 @@ using namespace Abc;
 //-*****************************************************************************
 void simpleTestOut( const std::string &iArchiveName )
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       iArchiveName );
     OObject archiveTop( archive, kTop );
 
@@ -69,7 +69,7 @@ void simpleTestOut( const std::string &iArchiveName )
 //-*****************************************************************************
 void simpleTestIn( const std::string &iArchiveName )
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                       iArchiveName, ErrorHandler::kThrowPolicy );
 
     IObject archiveTop = archive.getTop();
