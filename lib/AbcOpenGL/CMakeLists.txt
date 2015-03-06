@@ -34,6 +34,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+
 SET(H_FILES
     DrawContext.h
     Drawable.h
