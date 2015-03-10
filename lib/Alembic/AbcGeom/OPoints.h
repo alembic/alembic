@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_OPoints_h_
 #define _Alembic_AbcGeom_OPoints_h_
 
+#include <Alembic/AbcGeom/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
@@ -47,7 +48,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class OPointsSchema : public OGeomBaseSchema<PointsSchemaInfo>
+class ABC_GEOM_EXPORT OPointsSchema : public OGeomBaseSchema<PointsSchemaInfo>
 {
 public:
     //-*************************************************************************

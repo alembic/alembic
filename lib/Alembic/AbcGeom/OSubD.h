@@ -38,6 +38,7 @@
 #define _Alembic_AbcGeom_OSubD_h_
 
 #include <map>
+#include <Alembic/AbcGeom/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/OFaceSet.h>
@@ -50,10 +51,11 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // for default values for int scalar properties here
-static const int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( INT_MIN / 2 );
+static ABC_GEOM_EXPORT_CONST 
+int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( INT_MIN / 2 );
 
 //-*****************************************************************************
-class OSubDSchema : public OGeomBaseSchema<SubDSchemaInfo>
+class ABC_GEOM_EXPORT OSubDSchema : public OGeomBaseSchema<SubDSchemaInfo>
 {
 public:
     //-*************************************************************************

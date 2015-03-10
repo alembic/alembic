@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
 SET(CXX_FILES
     OMaterial.cpp
@@ -44,6 +44,7 @@ SET(CXX_FILES
 )
 
 SET(H_FILES
+    Export.h
     SchemaInfoDeclarations.h
     OMaterial.h
     IMaterial.h
@@ -53,11 +54,19 @@ SET(H_FILES
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY(AlembicAbcMaterial ${SOURCE_FILES})
+ADD_LIBRARY(AlembicAbcMaterial ${LIB_TYPE} ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(AlembicAbcMaterial AlembicAbc)
+
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcMaterial 
+                        PROPERTIES DEFINE_SYMBOL
+                        ABC_MATERIAL_EXPORTS)
+ENDIF()
 
 INSTALL(TARGETS AlembicAbcMaterial
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
+        LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+        RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR})
 
 INSTALL(FILES ${H_FILES}
         DESTINATION include/Alembic/AbcMaterial

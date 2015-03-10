@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_XformSample_h_
 #define _Alembic_AbcGeom_XformSample_h_
 
+#include <Alembic/AbcGeom/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 
 #include <Alembic/AbcGeom/XformOp.h>
@@ -46,7 +47,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class XformSample
+class ABC_GEOM_EXPORT XformSample
 {
 public:
     XformSample();

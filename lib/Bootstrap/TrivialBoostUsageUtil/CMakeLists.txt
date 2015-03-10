@@ -33,7 +33,13 @@
 
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib/Bootstrap )
 
-ADD_LIBRARY(TrivialBoostUsageUtil TbuUtil.cpp)
+ADD_LIBRARY(TrivialBoostUsageUtil TbuUtil.h TbuUtilExport.h TbuUtil.cpp)
+
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(TrivialBoostUsageUtil 
+                        PROPERTIES DEFINE_SYMBOL
+                        TRIVIAL_BOOST_USAGE_EXPORTS)
+ENDIF()
 
 IF (USE_TESTS)
 	ADD_SUBDIRECTORY(Tests)

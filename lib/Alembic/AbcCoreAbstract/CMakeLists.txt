@@ -58,6 +58,7 @@ SET(CXX_FILES
 
 SET(H_FILES 
     All.h
+    Export.h
     ForwardDeclarations.h
     ArraySample.h
     ArraySampleKey.h
@@ -86,11 +87,19 @@ SET(H_FILES
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY(AlembicAbcCoreAbstract ${SOURCE_FILES})
+ADD_LIBRARY(AlembicAbcCoreAbstract ${LIB_TYPE} ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(AlembicAbcCoreAbstract AlembicUtil ${ALEMBIC_ILMBASE_LIBRARIES})
+
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcCoreAbstract 
+                        PROPERTIES DEFINE_SYMBOL
+                        ABC_CORE_ABSTRACT_EXPORTS)
+ENDIF()
 
 INSTALL(TARGETS AlembicAbcCoreAbstract
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
+        LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+        RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR})
 
 INSTALL(FILES ${H_FILES}
         DESTINATION include/Alembic/AbcCoreAbstract

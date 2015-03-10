@@ -34,11 +34,12 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
 SET(H_FILES
     DrawContext.h
     Drawable.h
+    Export.h
     Foundation.h
     GLCamera.h
     ICurvesDrw.h
@@ -103,12 +104,19 @@ ELSE()
     )
 ENDIF()
 
-ADD_LIBRARY(AlembicAbcOpenGL ${SOURCE_FILES})
+ADD_LIBRARY(AlembicAbcOpenGL ${LIB_TYPE} ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES(AlembicAbcOpenGL ${THIS_LIBS})
 
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcOpenGL 
+                        PROPERTIES DEFINE_SYMBOL
+                        ABC_OPENGL_EXPORTS)
+ENDIF()
+
 INSTALL(TARGETS AlembicAbcOpenGL
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
+        LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+        RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR})
 
 INSTALL(FILES ${H_FILES}
         DESTINATION include/AbcOpenGL

@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
 SET(CXX_FILES
     ArchiveInfo.cpp
@@ -57,6 +57,7 @@ SET(H_FILES
     All.h
     Base.h
     ErrorHandler.h
+    Export.h
     Foundation.h
     Argument.h
     ArchiveInfo.h
@@ -89,11 +90,20 @@ SET(H_FILES
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY(AlembicAbc ${SOURCE_FILES})
+ADD_LIBRARY(AlembicAbc ${LIB_TYPE} ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(AlembicAbc AlembicAbcCoreAbstract)
+
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbc 
+                        PROPERTIES DEFINE_SYMBOL
+                        ABC_EXPORTS)
+ENDIF()
 
 INSTALL(TARGETS AlembicAbc
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
+        LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+        RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR})
+
 
 INSTALL(FILES ${H_FILES}
         DESTINATION include/Alembic/Abc
@@ -102,4 +112,3 @@ INSTALL(FILES ${H_FILES}
 IF (USE_TESTS)
 	ADD_SUBDIRECTORY(Tests)
 ENDIF()
-

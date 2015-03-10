@@ -38,6 +38,7 @@
 #ifndef _Alembic_AbcMaterial_MaterialAssignment_h_
 #define _Alembic_AbcMaterial_MaterialAssignment_h_
 
+#include <Alembic/AbcMaterial/Export.h>
 #include <Alembic/AbcMaterial/IMaterial.h>
 #include <Alembic/AbcMaterial/OMaterial.h>
 
@@ -56,7 +57,7 @@ namespace ALEMBIC_VERSION_NS {
 //! The default value for "propName" is officially supported convention
 //! of the library. You may provide an alternative value for custom
 //! solutions that want to make use of this convenience.
-void addMaterialAssignment(
+ABC_MATERIAL_EXPORT void addMaterialAssignment(
         Abc::OObject iObject,
         const std::string & iValue,
         const std::string & iPropName = MATERIALASSIGN_PROPNAME );
@@ -65,7 +66,7 @@ void addMaterialAssignment(
 //! and concerns are identical as with applying to an object. This exists
 //! primarily for custom solutions which want to make use of the convenience
 //! within nested compounds.
-void addMaterialAssignment(
+ABC_MATERIAL_EXPORT void addMaterialAssignment(
         Abc::OCompoundProperty iProp,
         const std::string & iValue,
         const std::string & iPropName = MATERIALASSIGN_PROPNAME );
@@ -76,13 +77,13 @@ void addMaterialAssignment(
 //! The default value for "propName" is officially supported convention
 //! of the library. You may provide an alternative value for custom
 //! solutions that want to make use of this convenience.
-OMaterialSchema addMaterial(
+ABC_MATERIAL_EXPORT OMaterialSchema addMaterial(
     Abc::OObject iObject,
     const std::string & iPropName = MATERIAL_PROPNAME );
 
 //! Adds a local material schema within any compound. This is intended
 //! for the "has-a" cases for nested compound properties.
-OMaterialSchema addMaterial(
+ABC_MATERIAL_EXPORT OMaterialSchema addMaterial(
     Abc::OCompoundProperty iProp,
     const std::string & iPropName = MATERIAL_PROPNAME );
 
@@ -94,7 +95,7 @@ OMaterialSchema addMaterial(
 //! The default value for "propName" is officially supported convention
 //! of the library. You may provide an alternative value for custom
 //! solutions that want to make use of this convenience.
-bool getMaterialAssignmentPath(
+ABC_MATERIAL_EXPORT bool getMaterialAssignmentPath(
     Abc::IObject iObject,
     std::string & oResult,
     const std::string & iPropName = MATERIALASSIGN_PROPNAME );
@@ -104,7 +105,7 @@ bool getMaterialAssignmentPath(
 //!
 //! The common case is at the object level but this is here as a convenince
 //! for custom solutions
-bool getMaterialAssignmentPath(
+ABC_MATERIAL_EXPORT bool getMaterialAssignmentPath(
     Abc::ICompoundProperty iProp,
     std::string & oResult,
     const std::string & iPropName = MATERIALASSIGN_PROPNAME );
@@ -115,7 +116,7 @@ bool getMaterialAssignmentPath(
 //! The default value for "propName" is officially supported convention
 //! of the library. You may provide an alternative value for custom
 //! solutions that want to make use of this convenience.
-bool hasMaterial(
+ABC_MATERIAL_EXPORT bool hasMaterial(
         Abc::IObject iObject, 
         IMaterialSchema & oResult,
         const std::string & iPropName = MATERIAL_PROPNAME );
@@ -124,7 +125,7 @@ bool hasMaterial(
 //! within the given compound property. This is useful for solutions
 //! in which another schema wants to contain a material definition
 //! but not advertise it as such at the object level
-bool hasMaterial(
+ABC_MATERIAL_EXPORT bool hasMaterial(
         Abc::ICompoundProperty iCompound,
         IMaterialSchema & oResult,
         const std::string & iPropName = MATERIAL_PROPNAME );

@@ -35,7 +35,13 @@
 
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib/Bootstrap )
 
-ADD_LIBRARY(CMakeHelloWorldUtil HelloUtil.cpp)
+ADD_LIBRARY(CMakeHelloWorldUtil HelloUtil.h HelloUtilExport.h HelloUtil.cpp)
+
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(CMakeHelloWorldUtil 
+                        PROPERTIES DEFINE_SYMBOL
+                        CMAKE_HELLO_WORLD_UTIL_EXPORTS)
+ENDIF()
 
 IF (USE_TESTS)
 	ADD_SUBDIRECTORY(Tests)

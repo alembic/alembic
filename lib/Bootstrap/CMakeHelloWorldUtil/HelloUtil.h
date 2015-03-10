@@ -42,10 +42,12 @@
 #include <string.h>
 #include <assert.h>
 
+#include "HelloUtilExport.h"
+
 namespace CMakeHelloWorldUtil {
 
 //-*****************************************************************************
-class HelloUtil
+class CMAKE_HELLO_WORLD_UTIL_EXPORT HelloUtil
 {
 public:
     HelloUtil();
@@ -55,8 +57,8 @@ protected:
     // I am deliberately making this obfuscated, just to flex the compiler.
     void print( std::ostream &ostr ) const;
     
-    friend std::ostream &operator<<( std::ostream &ostr,
-                                     const HelloUtil &hu );
+    CMAKE_HELLO_WORLD_UTIL_EXPORT friend std::ostream &
+        operator<<( std::ostream &ostr, const HelloUtil &hu );
     
     int m_miscData;
 };

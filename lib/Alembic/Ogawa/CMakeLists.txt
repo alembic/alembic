@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
 SET(CXX_FILES
     IArchive.cpp
@@ -47,6 +47,7 @@ SET(CXX_FILES
 )
 
 SET(H_FILES
+    Export.h
     Foundation.h
     IArchive.h
     IData.h
@@ -60,11 +61,19 @@ SET(H_FILES
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY(AlembicOgawa ${SOURCE_FILES})
+ADD_LIBRARY(AlembicOgawa ${LIB_TYPE} ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(AlembicOgawa AlembicUtil)
+
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicOgawa 
+                        PROPERTIES DEFINE_SYMBOL
+                        OGAWA_EXPORTS)
+ENDIF()
 
 INSTALL(TARGETS AlembicOgawa
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
+        LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+        RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR})
 
 INSTALL(FILES ${H_FILES}
         DESTINATION include/Alembic/Ogawa
@@ -73,4 +82,3 @@ INSTALL(FILES ${H_FILES}
 IF (USE_TESTS)
 	ADD_SUBDIRECTORY(Tests)
 ENDIF()
-
