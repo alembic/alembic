@@ -45,7 +45,7 @@
     #endif
     #define ALEMBIC_EXPORT_CONST
 #else
-    #define ALEMBIC_EXPORT
+    #define ALEMBIC_EXPORT __attribute__ ((visibility ("default")))
     #define ALEMBIC_EXPORT_CONST const
 #endif
 
