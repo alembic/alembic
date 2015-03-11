@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ArchiveReader_h_
 #define _Alembic_AbcCoreAbstract_ArchiveReader_h_
 
-#include <Alembic/AbcCoreAbstract/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
 #include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
@@ -57,7 +57,7 @@ namespace ALEMBIC_VERSION_NS {
 //! This is provided here as an illustration. It does not need to be
 //! derived from explicitly.
 namespace IllustrationOnly {
-struct ABC_CORE_ABSTRACT_EXPORT ArchiveReaderConstructor
+struct ALEMBIC_EXPORT ArchiveReaderConstructor
 {
     // Create whatever cache is the default caching mechanism associated
     // with the archive reader implementation
@@ -72,7 +72,7 @@ struct ABC_CORE_ABSTRACT_EXPORT ArchiveReaderConstructor
 //-*****************************************************************************
 //! The Archive is "the file". It has a single object, it's top object.
 //! It has no properties, but does have metadata.
-class ABC_CORE_ABSTRACT_EXPORT ArchiveReader
+class ALEMBIC_EXPORT ArchiveReader
     : private Alembic::Util::noncopyable
 {
 public:

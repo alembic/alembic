@@ -75,7 +75,6 @@ SET(H_FILES
     CpwData.h
     CpwImpl.h
     DataTypeRegistry.h
-    Export.h
     HDF5Hierarchy.h
     HDF5HierarchyReader.h
     HDF5HierarchyWriter.h
@@ -105,7 +104,7 @@ TARGET_LINK_LIBRARIES(AlembicAbcCoreHDF5 AlembicAbcCoreAbstract ${ALEMBIC_HDF5_L
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicAbcCoreHDF5 
                         PROPERTIES DEFINE_SYMBOL
-                        ABC_CORE_HDF5_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicAbcCoreHDF5
@@ -117,7 +116,6 @@ INSTALL(TARGETS AlembicAbcCoreHDF5
 INSTALL(FILES
         All.h
         ReadWrite.h
-		Export.h
         DESTINATION include/Alembic/AbcCoreHDF5
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 

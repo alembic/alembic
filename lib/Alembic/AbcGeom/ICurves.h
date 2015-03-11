@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcGeom_ICurves_h_
 #define _Alembic_AbcGeom_ICurves_h_
 
-#include <Alembic/AbcGeom/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/Basis.h>
 #include <Alembic/AbcGeom/CurveType.h>
@@ -50,7 +50,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ABC_GEOM_EXPORT ICurvesSchema : public IGeomBaseSchema<CurvesSchemaInfo>
+class ALEMBIC_EXPORT ICurvesSchema : public IGeomBaseSchema<CurvesSchemaInfo>
 {
 public:
     class Sample

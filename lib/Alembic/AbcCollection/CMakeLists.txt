@@ -42,7 +42,6 @@ SET(CXX_FILES
 
 SET(H_FILES
     All.h
-    Export.h
     SchemaInfoDeclarations.h
     OCollections.h
     ICollections.h
@@ -56,7 +55,7 @@ TARGET_LINK_LIBRARIES(AlembicAbcCollection AlembicAbc)
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicAbcCollection 
                         PROPERTIES DEFINE_SYMBOL
-                        ABC_COLLECTION_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicAbcCollection

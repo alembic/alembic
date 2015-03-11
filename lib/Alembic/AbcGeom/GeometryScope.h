@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcGeom_GeometryScope_h_
 #define _Alembic_AbcGeom_GeometryScope_h_
 
-#include <Alembic/AbcGeom/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 
 namespace Alembic {
@@ -143,17 +143,17 @@ inline GeometryScope GetGeometryScope( const AbcA::MetaData &iMetaData )
 
 //! Works for any quadric.
 //! ....
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesQuadrics( GeometryScope iScope );
 
 //! Works for GeneralPolygon & Polygon
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesPolygon( GeometryScope iScope, size_t iNumVerts );
 
 //! Works for PointsPolygons & PointsGeneralPolygons
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesPointsPolygons( GeometryScope iScope,
                                       size_t iNumPolys,
                                       size_t iNumVerts,
@@ -161,13 +161,13 @@ GeometryScopeNumValuesPointsPolygons( GeometryScope iScope,
 
 //! Works for Points
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesPoints( GeometryScope iScope,
                               size_t iNumPoints );
 
 //! Works for Subds, but not hierarchical.
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesSubdivisionMesh( GeometryScope iScope,
                                        size_t iNumFaces,
                                        size_t iNumVerts,
@@ -175,17 +175,17 @@ GeometryScopeNumValuesSubdivisionMesh( GeometryScope iScope,
 
 //! Works for Bilinear Patch
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesBilinearPatch( GeometryScope iScope );
 
 //! Works for Bicubic Patch
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesBicubicPatch( GeometryScope iScope );
 
 //! Works for BilinearPatchMesh
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesBilinearPatchMesh( GeometryScope iScope,
                                          size_t iNu, bool iUNoWrap,
                                          size_t iNv, bool iVNoWrap );
@@ -193,27 +193,27 @@ GeometryScopeNumValuesBilinearPatchMesh( GeometryScope iScope,
 //! Works for BicubicPatchMesh
 //! Usegs = Nu-3.
 //! Vsegs = Nv-3.
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesBicubicPatchMesh( GeometryScope iScope,
                                         size_t iNu, bool iUNoWrap,
                                         size_t iNv, bool iVNoWrap );
 
 //! Works for Nurbs patch
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesNuPatch( GeometryScope iScope,
                                size_t iNu, size_t iUorder,
                                size_t iNv, size_t iVorder );
 
 //! Works for Linear Curves
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesLinearCurves( GeometryScope iScope,
                                     size_t iNumCurves, bool iNoWrap,
                                     size_t iSumOfCounts );
 //! Works for Bicubic Curves
 //! ...
-ABC_GEOM_EXPORT size_t 
+ALEMBIC_EXPORT size_t 
 GeometryScopeNumValuesCubicCurves( GeometryScope iScope,
                                    size_t iNumCurves, bool iNoWrap,
                                    size_t iSumOfCounts );
@@ -223,9 +223,9 @@ GeometryScopeNumValuesCubicCurves( GeometryScope iScope,
 //! ...
 //-*****************************************************************************
 
-ABC_GEOM_EXPORT void SetIsUV( AbcA::MetaData &ioMetaData, bool isUV );
+ALEMBIC_EXPORT void SetIsUV( AbcA::MetaData &ioMetaData, bool isUV );
 
-ABC_GEOM_EXPORT bool isUV( const AbcA::PropertyHeader & iHeader );
+ALEMBIC_EXPORT bool isUV( const AbcA::PropertyHeader & iHeader );
 
 } // End namespace ALEMBIC_VERSION_NS
 

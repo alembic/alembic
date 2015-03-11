@@ -67,7 +67,6 @@ SET(H_FILES
     CprImpl.h
     CpwData.h
     CpwImpl.h
-    Export.h
     Foundation.h
     MetaDataMap.h
     OrData.h
@@ -91,7 +90,7 @@ TARGET_LINK_LIBRARIES(AlembicAbcCoreOgawa AlembicAbcCoreAbstract AlembicOgawa)
 IF(ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicAbcCoreOgawa 
                         PROPERTIES DEFINE_SYMBOL
-                        ABC_CORE_OGAWA_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicAbcCoreOgawa
@@ -101,7 +100,6 @@ INSTALL(TARGETS AlembicAbcCoreOgawa
 
 INSTALL(FILES
         All.h
-        Export.h
         ReadWrite.h
         DESTINATION include/Alembic/AbcCoreOgawa
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)

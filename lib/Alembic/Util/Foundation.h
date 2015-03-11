@@ -141,7 +141,7 @@ using std::auto_ptr;
 
 // similiar to boost::noncopyable
 // explicitly hides copy construction and copy assignment
-class ALEMBIC_UTIL_EXPORT noncopyable
+class ALEMBIC_EXPORT noncopyable
 {
 protected:
     noncopyable() {}

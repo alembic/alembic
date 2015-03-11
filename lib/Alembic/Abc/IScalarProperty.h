@@ -36,7 +36,7 @@
 #ifndef _Alembic_Abc_IScalarProperty_h_
 #define _Alembic_Abc_IScalarProperty_h_
 
-#include <Alembic/Abc/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/Argument.h>
@@ -49,7 +49,7 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ABC_EXPORT IScalarProperty
+class ALEMBIC_EXPORT IScalarProperty
     : public IBasePropertyT<AbcA::ScalarPropertyReaderPtr>
 {
 public:

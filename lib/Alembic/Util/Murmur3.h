@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -46,7 +46,7 @@ namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-ALEMBIC_UTIL_EXPORT void 
+ALEMBIC_EXPORT void 
 MurmurHash3_x64_128 ( const void * key, const size_t len,
                       const size_t podSize, void * out );
 

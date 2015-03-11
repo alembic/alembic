@@ -36,7 +36,7 @@
 #ifndef _Alembic_Ogawa_IData_h_
 #define _Alembic_Ogawa_IData_h_
 
-#include <Alembic/Ogawa/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Ogawa/Foundation.h>
 #include <Alembic/Ogawa/IStreams.h>
 
@@ -44,7 +44,7 @@ namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
 
-class OGAWA_EXPORT IData
+class ALEMBIC_EXPORT IData
 {
 public:
 

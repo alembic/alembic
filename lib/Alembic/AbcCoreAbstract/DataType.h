@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 //! The DataType class is a description of how an element of a sample in a
 //! Scalar or an Array property is stored. It does not contain an interpretation
 //! this is left to the metadata of the properties themselves.
-class ABC_CORE_ABSTRACT_EXPORT DataType 
+class ALEMBIC_EXPORT DataType 
     : Alembic::Util::totally_ordered<DataType>
 {
 public:

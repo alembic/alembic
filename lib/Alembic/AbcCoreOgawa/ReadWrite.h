@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreOgawa_ReadWrite_h_
 
 #include <Alembic/AbcCoreAbstract/All.h>
-#include <Alembic/AbcCoreOgawa/Export.h>
+#include <Alembic/Util/Export.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -46,7 +46,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! Will return a shared pointer to the archive writer
-class ABC_CORE_OGAWA_EXPORT WriteArchive
+class ALEMBIC_EXPORT WriteArchive
 {
 public:
     WriteArchive();
@@ -63,7 +63,7 @@ public:
 //-*****************************************************************************
 //! Will return a shared pointer to the archive reader
 //! This version creates a cache associated with the archive.
-class ABC_CORE_OGAWA_EXPORT ReadArchive
+class ALEMBIC_EXPORT ReadArchive
 {
 public:
     ReadArchive();

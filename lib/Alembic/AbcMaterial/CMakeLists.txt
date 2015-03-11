@@ -44,7 +44,6 @@ SET(CXX_FILES
 )
 
 SET(H_FILES
-    Export.h
     SchemaInfoDeclarations.h
     OMaterial.h
     IMaterial.h
@@ -60,7 +59,7 @@ TARGET_LINK_LIBRARIES(AlembicAbcMaterial AlembicAbc)
 IF(ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicAbcMaterial 
                         PROPERTIES DEFINE_SYMBOL
-                        ABC_MATERIAL_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicAbcMaterial

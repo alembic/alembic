@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -57,7 +57,7 @@ namespace ALEMBIC_VERSION_NS {
 //!        token=value;token=value;token=value;
 //-*****************************************************************************
 
-class ALEMBIC_UTIL_EXPORT TokenMap
+class ALEMBIC_EXPORT TokenMap
 {
 public:
     //-*************************************************************************

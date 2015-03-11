@@ -37,7 +37,7 @@
 #ifndef _Alembic_Abc_IObject_h_
 #define _Alembic_Abc_IObject_h_
 
-#include <Alembic/Abc/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/Argument.h>
@@ -50,7 +50,7 @@ class IArchive;
 class ICompoundProperty;
 
 //-*****************************************************************************
-class ABC_EXPORT IObject : public Base
+class ALEMBIC_EXPORT IObject : public Base
 {
 public:
     //! By convention, we always define "this_type" in every Abc

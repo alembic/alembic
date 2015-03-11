@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -50,9 +50,9 @@ namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-ALEMBIC_UTIL_EXPORT bool 
+ALEMBIC_EXPORT bool 
 isStandardName( const std::string& name );
-ALEMBIC_UTIL_EXPORT void 
+ALEMBIC_EXPORT void 
 makeStandardName( std::string& name, const char fixChar = '_' );
 
 } // End namespace ALEMBIC_VERSION_NS

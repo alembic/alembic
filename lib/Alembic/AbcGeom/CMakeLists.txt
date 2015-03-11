@@ -66,7 +66,6 @@ SET(CXX_FILES
 
 SET(H_FILES
     All.h
-    Export.h
     Foundation.h
     ArchiveBounds.h
     IGeomBase.h
@@ -111,7 +110,7 @@ TARGET_LINK_LIBRARIES(AlembicAbcGeom AlembicAbc)
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicAbcGeom 
                         PROPERTIES DEFINE_SYMBOL
-                        ABC_GEOM_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicAbcGeom

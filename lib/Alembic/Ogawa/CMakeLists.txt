@@ -47,7 +47,6 @@ SET(CXX_FILES
 )
 
 SET(H_FILES
-    Export.h
     Foundation.h
     IArchive.h
     IData.h
@@ -67,7 +66,7 @@ TARGET_LINK_LIBRARIES(AlembicOgawa AlembicUtil)
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicOgawa 
                         PROPERTIES DEFINE_SYMBOL
-                        OGAWA_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicOgawa

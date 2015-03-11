@@ -57,7 +57,6 @@ SET(H_FILES
     All.h
     Base.h
     ErrorHandler.h
-    Export.h
     Foundation.h
     Argument.h
     ArchiveInfo.h
@@ -96,7 +95,7 @@ TARGET_LINK_LIBRARIES(AlembicAbc AlembicAbcCoreAbstract)
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicAbc 
                         PROPERTIES DEFINE_SYMBOL
-                        ABC_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicAbc

@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ArraySample_h_
 #define _Alembic_AbcCoreAbstract_ArraySample_h_
 
-#include <Alembic/AbcCoreAbstract/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ArraySampleKey.h>
 #include <Alembic/AbcCoreAbstract/DataType.h>
@@ -56,7 +56,7 @@ namespace ALEMBIC_VERSION_NS {
 //! The ArraySample itself does not pretend to own the data referred to
 //! memory address "data". It is just a reference. For data retention mgmt,
 //! see the note on \ref ArraySamplePtr below.
-class ABC_CORE_ABSTRACT_EXPORT ArraySample
+class ALEMBIC_EXPORT ArraySample
 {
 public:
     typedef ArraySample this_type;
@@ -145,7 +145,7 @@ typedef Alembic::Util::shared_ptr<ArraySample> ArraySamplePtr;
 //! Dimensions tells us how many instances of the DataType to create
 //! DataType tells us what the instance is - and this works for
 //! pretty much every case, including std::string and std::wstring.
-ABC_CORE_ABSTRACT_EXPORT ArraySamplePtr 
+ALEMBIC_EXPORT ArraySamplePtr 
 AllocateArraySample( const DataType &iDtype,
                      const Dimensions &iDims );
 

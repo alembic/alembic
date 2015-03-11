@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -38,16 +38,15 @@
 #define _Alembic_Util_Export_h_
 
 #if defined(ALEMBIC_DLL)
-    #if defined(ALEMBIC_UTIL_EXPORTS)
-    #define ALEMBIC_UTIL_EXPORT __declspec(dllexport)
+    #if defined(ALEMBIC_EXPORTS)
+    #define ALEMBIC_EXPORT __declspec(dllexport)
     #else
-    #define ALEMBIC_UTIL_EXPORT __declspec(dllimport)
+    #define ALEMBIC_EXPORT __declspec(dllimport)
     #endif
-    #define ALEMBIC_UTIL_EXPORT_CONST
+    #define ALEMBIC_EXPORT_CONST
 #else
-    #define ALEMBIC_UTIL_EXPORT
-    #define ALEMBIC_UTIL_EXPORT_CONST const
+    #define ALEMBIC_EXPORT
+    #define ALEMBIC_EXPORT_CONST const
 #endif
 
 #endif /* _Alembic_Util_Export_h_ */
-

@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_BasePropertyReader_h_
 #define _Alembic_AbcCoreAbstract_BasePropertyReader_h_
 
-#include <Alembic/AbcCoreAbstract/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
 #include <Alembic/AbcCoreAbstract/PropertyHeader.h>
@@ -48,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! Base Property Reader.
-class ABC_CORE_ABSTRACT_EXPORT BasePropertyReader
+class ALEMBIC_EXPORT BasePropertyReader
     : private Alembic::Util::noncopyable
 {
 public:

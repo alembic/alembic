@@ -37,7 +37,7 @@
 #ifndef _Alembic_Abc_ArchiveInfo_h_
 #define _Alembic_Abc_ArchiveInfo_h_
 
-#include <Alembic/Abc/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/IArchive.h>
 #include <Alembic/Abc/OArchive.h>
@@ -54,9 +54,9 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // Some MetaData key constants
-static ABC_EXPORT_CONST char * kApplicationNameKey = "_ai_Application";
-static ABC_EXPORT_CONST char * kDateWrittenKey = "_ai_DateWritten";
-static ABC_EXPORT_CONST char * kUserDescriptionKey = "_ai_Description";
+static ALEMBIC_EXPORT_CONST char * kApplicationNameKey = "_ai_Application";
+static ALEMBIC_EXPORT_CONST char * kDateWrittenKey = "_ai_DateWritten";
+static ALEMBIC_EXPORT_CONST char * kUserDescriptionKey = "_ai_Description";
 
 //-*****************************************************************************
 template <class ARCHIVE_CTOR>
@@ -83,7 +83,7 @@ OArchive CreateArchiveWithInfo(
     const Argument &iArg1 = Argument() );
 
 //-*****************************************************************************
-ABC_EXPORT void
+ALEMBIC_EXPORT void
 GetArchiveInfo(
     //! The Archive whose meta data will be inspected
     IArchive & iArchive,
@@ -110,7 +110,7 @@ GetArchiveInfo(
 //! If the archive was written prior to 1.1.3 or no samples were written for
 //! any of the properties DBL_MAX will be set for oStartTime
 //! and -DBL_MAX will be set for oEndTime.
-ABC_EXPORT void
+ALEMBIC_EXPORT void
 GetArchiveStartAndEndTime(
     //! The Archive to be inspected
     IArchive & iArchive,

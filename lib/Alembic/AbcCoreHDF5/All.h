@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcCoreHDF5_All_h_
 #define _Alembic_AbcCoreHDF5_All_h_
 
-#include <Alembic/AbcCoreHDF5/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
 
 namespace Alembic {
@@ -46,7 +46,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // Forward declare this function, which can be used to create a cache.
-ABC_CORE_HDF5_EXPORT ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr 
+ALEMBIC_EXPORT ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr 
 MakeCacheImplPtr();
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -45,7 +45,6 @@ SET(CXX_FILES
 
 SET(H_FILES
     All.h
-    Export.h
     IFactory.h
 )
 
@@ -57,7 +56,7 @@ TARGET_LINK_LIBRARIES(AlembicAbcCoreFactory AlembicAbc)
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicAbcCoreFactory 
                         PROPERTIES DEFINE_SYMBOL
-                        ABC_CORE_FACTORY_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicAbcCoreFactory

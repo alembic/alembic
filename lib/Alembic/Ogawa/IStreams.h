@@ -36,7 +36,7 @@
 #ifndef _Alembic_Ogawa_IStreams_h_
 #define _Alembic_Ogawa_IStreams_h_
 
-#include <Alembic/Ogawa/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Ogawa/Foundation.h>
 
 #include <istream>
@@ -45,7 +45,7 @@ namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
 
-class OGAWA_EXPORT IStreams
+class ALEMBIC_EXPORT IStreams
 {
 public:
     IStreams(const std::string & iFileName, std::size_t iNumStreams=1);

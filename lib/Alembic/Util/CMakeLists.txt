@@ -63,7 +63,7 @@ TARGET_LINK_LIBRARIES(AlembicUtil)
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicUtil 
                         PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_UTIL_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicUtil

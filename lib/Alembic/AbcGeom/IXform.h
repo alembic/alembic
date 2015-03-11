@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcGeom_IXform_h_
 #define _Alembic_AbcGeom_IXform_h_
 
-#include <Alembic/AbcGeom/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 
@@ -48,7 +48,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ABC_GEOM_EXPORT IXformSchema : public Abc::ISchema<XformSchemaInfo>
+class ALEMBIC_EXPORT IXformSchema : public Abc::ISchema<XformSchemaInfo>
 {
     //-*************************************************************************
     // XFORM SCHEMA

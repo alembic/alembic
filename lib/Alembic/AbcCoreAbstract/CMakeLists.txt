@@ -58,7 +58,6 @@ SET(CXX_FILES
 
 SET(H_FILES 
     All.h
-    Export.h
     ForwardDeclarations.h
     ArraySample.h
     ArraySampleKey.h
@@ -93,7 +92,7 @@ TARGET_LINK_LIBRARIES(AlembicAbcCoreAbstract AlembicUtil ${ALEMBIC_ILMBASE_LIBRA
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(AlembicAbcCoreAbstract 
                         PROPERTIES DEFINE_SYMBOL
-                        ABC_CORE_ABSTRACT_EXPORTS)
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
 INSTALL(TARGETS AlembicAbcCoreAbstract

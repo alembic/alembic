@@ -36,7 +36,7 @@
 #ifndef _Alembic_Ogawa_OGroup_h_
 #define _Alembic_Ogawa_OGroup_h_
 
-#include <Alembic/Ogawa/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Ogawa/Foundation.h>
 #include <Alembic/Ogawa/OStream.h>
 #include <Alembic/Ogawa/OData.h>
@@ -48,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 class OGroup;
 typedef Alembic::Util::shared_ptr< OGroup > OGroupPtr;
 
-class OGAWA_EXPORT OGroup 
+class ALEMBIC_EXPORT OGroup 
     : public Alembic::Util::enable_shared_from_this< OGroup >
 {
 public:

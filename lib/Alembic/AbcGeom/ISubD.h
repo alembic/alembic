@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcGeom_ISubD_h_
 #define _Alembic_AbcGeom_ISubD_h_
 
-#include <Alembic/AbcGeom/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
@@ -49,7 +49,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ABC_GEOM_EXPORT ISubDSchema : public IGeomBaseSchema<SubDSchemaInfo>
+class ALEMBIC_EXPORT ISubDSchema : public IGeomBaseSchema<SubDSchemaInfo>
 {
 public:
     //-*************************************************************************

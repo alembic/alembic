@@ -38,7 +38,7 @@
 #define _Alembic_AbcCoreAbstract_Foundation_h_
 
 #include <Alembic/Util/All.h>
-#include <Alembic/AbcCoreAbstract/Export.h>
+#include <Alembic/Util/Export.h>
 
 #include <limits>
 #include <utility>
@@ -92,10 +92,10 @@ typedef float64_t chrono_t;
 
 //! Helper function which returns the version and date built in a string
 //! e.g. "Alembic 1.0.0 (built Jul  6 2011)"
-ABC_CORE_ABSTRACT_EXPORT std::string GetLibraryVersion();
+ALEMBIC_EXPORT std::string GetLibraryVersion();
 //! Returns just the version number, as a string, of the Alembic library.
 //! e.g. "1.0.0"
-ABC_CORE_ABSTRACT_EXPORT std::string GetLibraryVersionShort();
+ALEMBIC_EXPORT std::string GetLibraryVersionShort();
 
 //-*****************************************************************************
 //! Exception types borrowed from Alembic::Util. We should probably eventually

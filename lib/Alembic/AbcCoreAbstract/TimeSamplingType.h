@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_TimeSamplingType_h_
 #define _Alembic_AbcCoreAbstract_TimeSamplingType_h_
 
-#include <Alembic/AbcCoreAbstract/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 
 namespace Alembic {
@@ -65,7 +65,7 @@ namespace ALEMBIC_VERSION_NS {
 //! the lower or upper bounds when searching for floor, ceiling, or nearest
 //! samples by comparing time.  This is called "Acyclic" time sampling.
 
-class ABC_CORE_ABSTRACT_EXPORT TimeSamplingType
+class ALEMBIC_EXPORT TimeSamplingType
 {
 public:
     static uint32_t AcyclicNumSamples();
@@ -154,7 +154,7 @@ private:
     chrono_t m_timePerCycle;
 
 public:
-    ABC_CORE_ABSTRACT_EXPORT friend std::ostream 
+    ALEMBIC_EXPORT friend std::ostream 
         &operator<<( std::ostream &ostr, const TimeSamplingType &tst );
 };
 

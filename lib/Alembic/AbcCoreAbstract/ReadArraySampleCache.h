@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ReadArraySampleCache_h_
 #define _Alembic_AbcCoreAbstract_ReadArraySampleCache_h_
 
-#include <Alembic/AbcCoreAbstract/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ArraySample.h>
 
@@ -107,7 +107,7 @@ private:
 //! Alembic caches array samples based on a Murmur3 128bit checksum key.
 //! This is an abstract interface to these caches, which can be implemented
 //! in any number of ways.
-class ABC_CORE_ABSTRACT_EXPORT ReadArraySampleCache
+class ALEMBIC_EXPORT ReadArraySampleCache
     : private Alembic::Util::noncopyable
     , public Alembic::Util::enable_shared_from_this<ReadArraySampleCache>
 {

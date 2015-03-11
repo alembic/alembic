@@ -39,13 +39,13 @@
 
 #include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
 #include <Alembic/Abc/IArchive.h>
-#include <Alembic/AbcCoreFactory/Export.h>
+#include <Alembic/Util/Export.h>
 
 namespace Alembic {
 namespace AbcCoreFactory {
 namespace ALEMBIC_VERSION_NS {
 
-class ABC_CORE_FACTORY_EXPORT IFactory
+class ALEMBIC_EXPORT IFactory
 {
 public:
     IFactory();

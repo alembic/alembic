@@ -38,7 +38,7 @@
 #define _Alembic_AbcGeom_Visibility_h_
 
 #include <string.h>
-#include <Alembic/AbcGeom/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/Abc/OSchemaObject.h>
 
@@ -75,7 +75,7 @@ enum ObjectVisibility
 
 //! The name used for the CharProperty (Int8) that we use to 
 //! store visibility.
-static ABC_GEOM_EXPORT_CONST std::string kVisibilityPropertyName = "visible";
+static ALEMBIC_EXPORT_CONST std::string kVisibilityPropertyName = "visible";
 
 typedef Abc::ICharProperty IVisibilityProperty;
 typedef Abc::OCharProperty OVisibilityProperty;
@@ -86,14 +86,14 @@ typedef Abc::OCharProperty OVisibilityProperty;
 //! Creates the visibility property for the indicated object. As a convention,
 //! if the visibility of your object is animated, for frames that
 //! the object is visible you can write kVisibilityDeferred.
-ABC_GEOM_EXPORT OVisibilityProperty 
+ALEMBIC_EXPORT OVisibilityProperty 
 CreateVisibilityProperty( OObject & iObject, 
                           uint32_t iTimeSamplingID );
 
 //! Creates the visibility property for the indicated object. As a convention,
 //! if the visibility of your object is animated, for frames that
 //! the object is visible you can write kVisibilityDeferred.
-ABC_GEOM_EXPORT OVisibilityProperty 
+ALEMBIC_EXPORT OVisibilityProperty 
 CreateVisibilityProperty( OObject & iObject, 
                           AbcA::TimeSamplingPtr iTimeSampling );
 
@@ -101,7 +101,7 @@ CreateVisibilityProperty( OObject & iObject,
 
 //! If the object doesn't have a visibility property this will 
 //! return a property that evaluates to false (aka a reset property)
-ABC_GEOM_EXPORT IVisibilityProperty 
+ALEMBIC_EXPORT IVisibilityProperty 
 GetVisibilityProperty( IObject & schemaObject );
 
 //! If the object doesn't have a visibility property this will 
@@ -109,7 +109,7 @@ GetVisibilityProperty( IObject & schemaObject );
 //! a convenience. It's equally valid for you to call 
 //! GetVisibilityProperty () and access the property's values
 //! directly.
-ABC_GEOM_EXPORT ObjectVisibility 
+ALEMBIC_EXPORT ObjectVisibility 
 GetVisibility( IObject & schemaObject,
                const Abc::ISampleSelector &iSS =
                Abc::ISampleSelector () );
@@ -120,7 +120,7 @@ GetVisibility( IObject & schemaObject,
 //! function will traverse upward through the object hierarchy
 //! until finding a object that does. If the top is reached, true
 //! will be returned.
-ABC_GEOM_EXPORT bool 
+ALEMBIC_EXPORT bool 
 IsAncestorInvisible( IObject schemaObject, 
                      const Abc::ISampleSelector &iSS =
                      Abc::ISampleSelector () );

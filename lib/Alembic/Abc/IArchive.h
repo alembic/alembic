@@ -37,7 +37,7 @@
 #ifndef _Alembic_Abc_IArchive_h_
 #define _Alembic_Abc_IArchive_h_
 
-#include <Alembic/Abc/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/Argument.h>
@@ -49,7 +49,7 @@ namespace ALEMBIC_VERSION_NS {
 class IObject;
 
 //-*****************************************************************************
-class ABC_EXPORT IArchive : public Base
+class ALEMBIC_EXPORT IArchive : public Base
 {
 public:
     //! By convention, we always define "this_type" in every Abc

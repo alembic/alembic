@@ -37,7 +37,7 @@
 #ifndef _Alembic_AbcGeom_ArchiveBounds_h_
 #define _Alembic_AbcGeom_ArchiveBounds_h_
 
-#include <Alembic/AbcGeom/Export.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 
 namespace Alembic {
@@ -47,14 +47,14 @@ namespace ALEMBIC_VERSION_NS {
 //! Helper function that gets the bounds property off of the top object if
 //! it exists, if it doesn't exist an invalid IBox3dProperty is returned.
 //! Arguments can specify error handling policy or protocol matching policy.
-ABC_GEOM_EXPORT Abc::IBox3dProperty 
+ALEMBIC_EXPORT Abc::IBox3dProperty 
 GetIArchiveBounds( IArchive & iArchive,
                    const Argument &iArg0 = Argument(),
                    const Argument &iArg1 = Argument() );
 
 //! Helper function that creates the bounds property off of the top object
 //! Arguments can specify metadata, timesampling, and error handling.
-ABC_GEOM_EXPORT Abc::OBox3dProperty 
+ALEMBIC_EXPORT Abc::OBox3dProperty 
 CreateOArchiveBounds( OArchive & iArchive,
                       const Argument &iArg0 = Argument(),
                       const Argument &iArg1 = Argument(),
