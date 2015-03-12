@@ -98,9 +98,6 @@ ENDIF()
 SET(DARWIN FALSE)
 IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
     SET(DARWIN TRUE)
-    #IF (NOT ${CMAKE_SYSTEM_VERSION} VERSION_LESS "13.0.0")
-    #    ADD_DEFINITIONS("-std=c++11")
-    #ENDIF()
 ENDIF()
 
 SET(LINUX FALSE)
@@ -108,8 +105,9 @@ IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
     SET(LINUX TRUE)
 ENDIF()
 
-# Check for c++11 support for GNU compilers
+# Set visibility and check for c++11 support for GNU compilers
 IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
     IF (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS "4.8.0")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
     ELSE()
