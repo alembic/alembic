@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -45,7 +45,7 @@
     #endif
     #define ABC_OPENGL_EXPORT_CONST
 #else
-    #define ABC_OPENGL_EXPORT
+    #define ABC_OPENGL_EXPORT __attribute__ ((visibility ("default")))
     #define ABC_OPENGL_EXPORT_CONST const
 #endif
 

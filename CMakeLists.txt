@@ -61,8 +61,6 @@ SET(VERSION ${PROJECT_VERSION})
 #-******************************************************************************
 
 OPTION(USE_ARNOLD "Include Arnold stuff" OFF)
-OPTION(USE_BOOTSTRAP "Include build system tests" ON)
-OPTION(USE_DOCS "Include docs" OFF)
 OPTION(USE_EXAMPLES "Include examples" OFF)
 OPTION(USE_HDF5 "Include HDF5 stuff" ON)
 OPTION(USE_MAYA "Include Maya stuff" OFF)
@@ -179,8 +177,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/Modules)
 # TESTS
 #-******************************************************************************
 
-# Globally enable testing.
-#INCLUDE(CTest)
+# Globally enable testing
 ENABLE_TESTING()
 IF (BUILD_TESTING)
     SET(BUILDNAME "${BUILDNAME}" CACHE STRING "Name of build on the dashboard")
@@ -202,11 +199,6 @@ ENDIF(UNIX AND NOT WINDOWS)
 IF (DARWIN)
     ADD_DEFINITIONS(-fPIC)
 ENDIF()
-
-# Set up the include directories
-#IF (WINDOWS)
-#   INCLUDE_DIRECTORIES("C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/include")
-#ENDIF()
 
 #-******************************************************************************
 # DEPENDENCIES
@@ -352,27 +344,21 @@ IF (USE_EXAMPLES)
     ADD_SUBDIRECTORY(examples)
 ENDIF()
 
-# Python docs (run `make docs` from build root)
-IF (USE_PYALEMBIC AND USE_DOCS)
-    ADD_SUBDIRECTORY(doc)
-ENDIF()
+#-******************************************************************************
 
-set(_config_msg "\n   * Alembic Configuration      ===")
-macro(info_cfg_option
+SET(_config_msg "\n   * Alembic Configuration          ===")
+MACRO(info_cfg_option
     _setting)
-    set(_msg "   * ${_setting}")
-    string(LENGTH "${_msg}" _len)
-    while("32" GREATER "${_len}")
-        set(_msg "${_msg} ")
-         math(EXPR _len "${_len} + 1")
-    endwhile()
-
-    set(_config_msg "${_config_msg}\n${_msg}${${_setting}}")
-endmacro()
+    SET(_msg "   * ${_setting}")
+    STRING(LENGTH "${_msg}" _len)
+    WHILE("36" GREATER "${_len}")
+        SET(_msg "${_msg} ")
+        MATH(EXPR _len "${_len} + 1")
+    ENDWHILE()
+    SET(_config_msg "${_config_msg}\n${_msg}${${_setting}}")
+ENDMACRO()
 
 info_cfg_option(USE_ARNOLD)
-info_cfg_option(USE_BOOTSTRAP)
-info_cfg_option(USE_DOCS)
 info_cfg_option(USE_EXAMPLES)
 info_cfg_option(USE_HDF5)
 info_cfg_option(USE_MAYA)
@@ -382,5 +368,8 @@ info_cfg_option(USE_PYALEMBIC)
 info_cfg_option(USE_STATIC_BOOST)
 info_cfg_option(USE_STATIC_HDF5)
 info_cfg_option(USE_TESTS)
+info_cfg_option(ALEMBIC_GLEW_LINK_STATIC)
+info_cfg_option(ALEMBIC_ILMBASE_LINK_STATIC)
+info_cfg_option(ALEMBIC_SHARED_LIBS)
 
-message("${_config_msg}")
+MESSAGE("${_config_msg}")

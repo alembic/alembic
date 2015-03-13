@@ -79,9 +79,8 @@ each of which does what you'd expect.  Running
     $ make help
 
 will give you a list of possible targets.  If you want to make a debug build,
-you can either run the bootstrap script again with the option '--debug', or
 run ccmake or cmake-gui (depending on what you installed when you installed
-cmake, as described in 4a), and change the build type to "Debug".
+cmake), and change the build type to "Debug".
 
 
 4) To build the API documentation via Doxygen:

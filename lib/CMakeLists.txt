@@ -36,11 +36,6 @@
 # Include the source dirs to make the library root dir an include
 INCLUDE_DIRECTORIES(${ALEMBIC_LIBS_SOURCE_DIR})
 
-# Recurse into all the subdirectories
-IF (USE_BOOTSTRAP)
-	ADD_SUBDIRECTORY(Bootstrap)
-ENDIF()
-
 ADD_SUBDIRECTORY(Alembic)
 
 # Include the AbcOpenGL lib

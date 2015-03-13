@@ -45,7 +45,7 @@
     #endif
     #define ABC_WFOBJ_CONVERT_EXPORT_CONST
 #else
-    #define ABC_WFOBJ_CONVERT_EXPORT
+    #define ABC_WFOBJ_CONVERT_EXPORT __attribute__ ((visibility ("default")))
     #define ABC_WFOBJ_CONVERT_EXPORT_CONST const
 #endif
 
