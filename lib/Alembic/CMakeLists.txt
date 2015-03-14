@@ -75,3 +75,8 @@ ELSE()
     )
 ENDIF()
 ADD_LIBRARY(Alembic ${LIB_TYPE} ${TARGET_OBJECTS})
+
+# fixes undefined symbols for x86_64
+IF (ALEMBIC_SHARED_LIBS AND DARWIN)
+    TARGET_LINK_LIBRARIES(${CORE_LIBS})
+ENDIF()
