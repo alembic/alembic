@@ -34,22 +34,14 @@
 ##-*****************************************************************************
 
 SET(TEST_LIBS
-    AlembicAbcMaterial
-    AlembicAbcGeom
-    AlembicAbcCollection
-    AlembicAbcCoreFactory
-    AlembicAbc
-    AlembicAbcCoreHDF5
-    AlembicAbcCoreOgawa
-    AlembicAbcCoreAbstract
-    AlembicOgawa
-    AlembicUtil
-    alembicmodule
+    Alembic
     ${HDF5_LIBRARIES}
     ${ALEMBIC_ILMBASE_LIBS}
     ${ALEMBIC_PYILMBASE_LIBS}
-    ${CMAKE_THREAD_LIBS_INIT} ${Boost_THREAD_LIBRARY}
-    ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_THREAD_LIBRARY}
+    ${ZLIB_LIBRARIES}
+    ${EXTERNAL_MATH_LIBS}
 )
 
 INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/python/PyAlembic/Tests")
@@ -61,7 +53,7 @@ ADD_EXECUTABLE(PyAlembic_Test
 
 ADD_DEPENDENCIES(PyAlembic_Test alembicmodule)
 
-TARGET_LINK_LIBRARIES(PyAlembic_Test ${TEST_LIBS})
+TARGET_LINK_LIBRARIES(PyAlembic_Test ${CORE_LIBS} ${ALEMBIC_PYILMBASE_LIBS})
 
 ADD_TEST(PyAlembic_Python_TEST PyAlembic_Test)
 

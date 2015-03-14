@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,38 +33,29 @@
 ##
 ##-*****************************************************************************
 
-
-# We shall worry about windowsification later.
-
-#-******************************************************************************
-#-******************************************************************************
-# FIRST, PYILMBASE STUFF
-#-******************************************************************************
-#-******************************************************************************
-
 IF(DEFINED USE_PYALEMBIC AND NOT USE_PYALEMBIC)
     MESSAGE(STATUS "Skipping finding PyIlmBase and PyImath")
 ELSE()
     MESSAGE(STATUS "About to start finding PyIlmBase and PyImath")
     IF(NOT DEFINED PYILMBASE_ROOT)
-        IF ( ${CMAKE_HOST_UNIX} )
-            IF( ${DARWIN} )
+        IF (${CMAKE_HOST_UNIX})
+            IF(${DARWIN})
               # TODO: set to default install path when shipping out
-              SET( ALEMBIC_PYILMBASE_ROOT NOTFOUND )
+              SET(ALEMBIC_PYILMBASE_ROOT NOTFOUND)
             ELSE()
               # TODO: set to default install path when shipping out
-              SET( ALEMBIC_PYILMBASE_ROOT "/usr/local/pyilmbase/" )
+              SET(ALEMBIC_PYILMBASE_ROOT "/usr/local/pyilmbase/")
             ENDIF()
         ELSE()
-            IF ( ${WINDOWS} )
+            IF (${WINDOWS})
               # TODO: set to 32-bit or 64-bit path
-              SET( ALEMBIC_PYILMBASE_ROOT "C:/Program Files (x86)/pyilmbase/" )
+              SET(ALEMBIC_PYILMBASE_ROOT "C:/Program Files (x86)/pyilmbase/")
             ELSE()
-              SET( ALEMBIC_PYILMBASE_ROOT NOTFOUND )
+              SET(ALEMBIC_PYILMBASE_ROOT NOTFOUND)
             ENDIF()
         ENDIF()
     ELSE()
-      SET( ALEMBIC_PYILMBASE_ROOT ${PYILMBASE_ROOT} )
+      SET(ALEMBIC_PYILMBASE_ROOT ${PYILMBASE_ROOT})
     ENDIF()
 
     SET(LIBRARY_PATHS
@@ -79,10 +70,10 @@ ELSE()
         /opt/csw/lib
         /opt/lib
         /usr/freeware/lib64
-    )
+   )
 
-    IF( DEFINED PYILMBASE_LIBRARY_DIR )
-      SET( LIBRARY_PATHS ${PYILMBASE_LIBRARY_DIR} ${LIBRARY_PATHS} )
+    IF(DEFINED PYILMBASE_LIBRARY_DIR)
+        SET(LIBRARY_PATHS ${PYILMBASE_LIBRARY_DIR} ${LIBRARY_PATHS})
     ENDIF()
 
     SET(INCLUDE_PATHS
@@ -98,60 +89,60 @@ ELSE()
         /opt/csw/include # Blastwave
         /opt/include
         /usr/freeware/include
+   )
+
+    FIND_PATH(ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY PyImath.h
+              PATHS
+              ${INCLUDE_PATHS}
+              NO_DEFAULT_PATH
+              NO_CMAKE_ENVIRONMENT_PATH
+              NO_CMAKE_PATH
+              NO_SYSTEM_ENVIRONMENT_PATH
+              NO_CMAKE_SYSTEM_PATH
+              DOC "The directory where PyImath.h resides")
+
+    IF(NOT DEFINED ALEMBIC_PYILMBASE_PYIMATH_LIB)
+        FIND_LIBRARY(ALEMBIC_PYILMBASE_PYIMATH_LIB PyImath
+                     PATHS
+                     ${LIBRARY_PATHS}
+                     NO_DEFAULT_PATH
+                     NO_CMAKE_ENVIRONMENT_PATH
+                     NO_CMAKE_PATH
+                     NO_SYSTEM_ENVIRONMENT_PATH
+                     NO_CMAKE_SYSTEM_PATH
+                     DOC "The PyImath library")
+    ENDIF()
+
+    IF(NOT DEFINED ALEMBIC_PYILMBASE_PYIMATH_MODULE)
+        FIND_LIBRARY(ALEMBIC_PYILMBASE_PYIMATH_MODULE imathmodule.so
+                     PATHS
+                     ${LIBRARY_PATHS}
+                     NO_DEFAULT_PATH
+                     NO_CMAKE_ENVIRONMENT_PATH
+                     NO_CMAKE_PATH
+                     NO_SYSTEM_ENVIRONMENT_PATH
+                     NO_CMAKE_SYSTEM_PATH
+                     DOC "The PyImath library")
+    ENDIF()
+
+    SET(PYILMBASE_FOUND TRUE)
+
+    IF (${ALEMBIC_PYILMBASE_PYIMATH_LIB} STREQUAL "ALEMBIC_PYILMBASE_PYIMATH_LIB-NOTFOUND")
+        MESSAGE(STATUS "pyilmbase libraries (PyImath) not found, required for python support")
+        SET(PYILMBASE_FOUND FALSE)
+    ENDIF()
+
+    IF (${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} STREQUAL "ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY-NOTFOUND")
+        MESSAGE(STATUS "pyilmbase header files not found, required for python support")
+        SET(PYILMBASE_FOUND FALSE)
+    ENDIF()
+
+    MESSAGE(STATUS "PYILMBASE INCLUDE PATH: ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY}")
+    MESSAGE(STATUS "PYIMATH LIB: ${ALEMBIC_PYILMBASE_PYIMATH_LIB}")
+    MESSAGE(STATUS "PYIMATH MODULE: ${ALEMBIC_PYILMBASE_PYIMATH_MODULE}")
+
+    SET(ALEMBIC_PYILMBASE_LIBS
+        ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
     )
-
-    FIND_PATH( ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY PyImath.h
-               PATHS
-               ${INCLUDE_PATHS}
-               NO_DEFAULT_PATH
-               NO_CMAKE_ENVIRONMENT_PATH
-               NO_CMAKE_PATH
-               NO_SYSTEM_ENVIRONMENT_PATH
-               NO_CMAKE_SYSTEM_PATH
-               DOC "The directory where PyImath.h resides" )
-
-    IF( NOT DEFINED ALEMBIC_PYILMBASE_PYIMATH_LIB )
-      FIND_LIBRARY( ALEMBIC_PYILMBASE_PYIMATH_LIB PyImath
-                    PATHS
-                    ${LIBRARY_PATHS}
-                    NO_DEFAULT_PATH
-                    NO_CMAKE_ENVIRONMENT_PATH
-                    NO_CMAKE_PATH
-                    NO_SYSTEM_ENVIRONMENT_PATH
-                    NO_CMAKE_SYSTEM_PATH
-                    DOC "The PyImath library" )
-    ENDIF()
-
-    IF( NOT DEFINED ALEMBIC_PYILMBASE_PYIMATH_MODULE )
-      FIND_LIBRARY( ALEMBIC_PYILMBASE_PYIMATH_MODULE imathmodule.so
-                    PATHS
-                    ${LIBRARY_PATHS}
-                    NO_DEFAULT_PATH
-                    NO_CMAKE_ENVIRONMENT_PATH
-                    NO_CMAKE_PATH
-                    NO_SYSTEM_ENVIRONMENT_PATH
-                    NO_CMAKE_SYSTEM_PATH
-                    DOC "The PyImath library" )
-    ENDIF()
-
-    SET( PYILMBASE_FOUND TRUE )
-
-    IF ( ${ALEMBIC_PYILMBASE_PYIMATH_LIB} STREQUAL "ALEMBIC_PYILMBASE_PYIMATH_LIB-NOTFOUND" )
-      MESSAGE( STATUS "pyilmbase libraries (PyImath) not found, required for python support" )
-      SET( PYILMBASE_FOUND FALSE )
-    ENDIF()
-
-    IF ( ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY} STREQUAL "ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY-NOTFOUND" )
-      MESSAGE( STATUS "pyilmbase header files not found, required for python support" )
-      SET( PYILMBASE_FOUND FALSE )
-    ENDIF()
-
-    MESSAGE( STATUS "PYILMBASE INCLUDE PATH: ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY}" )
-    MESSAGE( STATUS "PYIMATH LIB: ${ALEMBIC_PYILMBASE_PYIMATH_LIB}" )
-    MESSAGE( STATUS "PYIMATH MODULE: ${ALEMBIC_PYILMBASE_PYIMATH_MODULE}" )
-
-    SET( ALEMBIC_PYILMBASE_LIBS
-           ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
-       )
 
 ENDIF()

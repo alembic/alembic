@@ -46,3 +46,32 @@ ADD_SUBDIRECTORY(AbcGeom)
 ADD_SUBDIRECTORY(AbcCollection)
 ADD_SUBDIRECTORY(AbcMaterial)
 ADD_SUBDIRECTORY(Ogawa)
+
+# http://www.cmake.org/Wiki/CMake/Tutorials/Object_Library
+IF (USE_HDF5)
+    SET(TARGET_OBJECTS
+        $<TARGET_OBJECTS:AlembicAbcMaterial>
+        $<TARGET_OBJECTS:AlembicAbcGeom>
+        $<TARGET_OBJECTS:AlembicAbcCollection>
+        $<TARGET_OBJECTS:AlembicAbcCoreFactory>
+        $<TARGET_OBJECTS:AlembicAbc>
+        $<TARGET_OBJECTS:AlembicAbcCoreHDF5>
+        $<TARGET_OBJECTS:AlembicAbcCoreOgawa>
+        $<TARGET_OBJECTS:AlembicAbcCoreAbstract>
+        $<TARGET_OBJECTS:AlembicOgawa>
+        $<TARGET_OBJECTS:AlembicUtil>
+    )
+ELSE()
+    SET(TARGET_OBJECTS
+        $<TARGET_OBJECTS:AlembicAbcMaterial>
+        $<TARGET_OBJECTS:AlembicAbcGeom>
+        $<TARGET_OBJECTS:AlembicAbcCollection>
+        $<TARGET_OBJECTS:AlembicAbcCoreFactory>
+        $<TARGET_OBJECTS:AlembicAbc>
+        $<TARGET_OBJECTS:AlembicAbcCoreOgawa>
+        $<TARGET_OBJECTS:AlembicAbcCoreAbstract>
+        $<TARGET_OBJECTS:AlembicOgawa>
+        $<TARGET_OBJECTS:AlembicUtil>
+    )
+ENDIF()
+ADD_LIBRARY(Alembic ${LIB_TYPE} ${TARGET_OBJECTS})

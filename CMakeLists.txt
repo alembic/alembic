@@ -57,7 +57,7 @@ SET(PROJECT_VERSION
 SET(VERSION ${PROJECT_VERSION})
 
 #-******************************************************************************
-# OPTIONS (set with -D<variable>=<value>)
+# OPTIONS (set with -D<option>=<value>)
 #-******************************************************************************
 
 OPTION(USE_ARNOLD "Include Arnold stuff" OFF)
@@ -256,16 +256,7 @@ ENDIF()
 
 IF (USE_HDF5)
     SET(CORE_LIBS
-        AlembicAbcMaterial
-        AlembicAbcGeom
-        AlembicAbcCollection
-        AlembicAbcCoreFactory
-        AlembicAbc
-        AlembicAbcCoreHDF5
-        AlembicAbcCoreOgawa
-        AlembicAbcCoreAbstract
-        AlembicOgawa
-        AlembicUtil
+        Alembic
         ${HDF5_LIBRARIES}
         ${ALEMBIC_ILMBASE_LIBS}
         ${CMAKE_THREAD_LIBS_INIT}
@@ -274,15 +265,7 @@ IF (USE_HDF5)
     )
 ELSE()
     SET(CORE_LIBS
-        AlembicAbcMaterial
-        AlembicAbcGeom
-        AlembicAbcCollection
-        AlembicAbcCoreFactory
-        AlembicAbc
-        AlembicAbcCoreOgawa
-        AlembicAbcCoreAbstract
-        AlembicOgawa
-        AlembicUtil
+        Alembic
         ${ALEMBIC_ILMBASE_LIBS}
         ${CMAKE_THREAD_LIBS_INIT}
         ${ZLIB_LIBRARIES}

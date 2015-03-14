@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,50 +33,39 @@
 ##
 ##-*****************************************************************************
 
-
-SET( TEST_LIBS
-     AlembicAbcCoreOgawa
-     AlembicAbcCoreAbstract
-     AlembicUtil
-     AlembicOgawa
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT}
-     ${EXTERNAL_MATH_LIBS} )
-
-SET( CXX_FILES
+SET(CXX_FILES
     ArchiveTests.cpp
     ArrayPropertyTests.cpp
     HashesTests.cpp
     ScalarPropertyTests.cpp
-    TimeSamplingTests.cpp )
+    TimeSamplingTests.cpp
+)
 
-#-******************************************************************************
-ADD_EXECUTABLE( AbcCoreOgawa_ArchiveTests ArchiveTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreOgawa_ArchiveTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreOgawa_ArchiveTests ArchiveTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ArchiveTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreOgawa_ArrayPropertyTests ArrayPropertyTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreOgawa_ArrayPropertyTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreOgawa_ArrayPropertyTests ArrayPropertyTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ArrayPropertyTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreOgawa_HashesTests HashesTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreOgawa_HashesTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreOgawa_HashesTests HashesTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_HashesTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreOgawa_ScalarPropertyTests ScalarPropertyTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreOgawa_ScalarPropertyTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreOgawa_ScalarPropertyTests ScalarPropertyTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ScalarPropertyTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreOgawa_TimeSamplingTests TimeSamplingTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreOgawa_TimeSamplingTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreOgawa_TimeSamplingTests TimeSamplingTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_TimeSamplingTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreOgawa_ObjectTests ObjectTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreOgawa_ObjectTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreOgawa_ObjectTests ObjectTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ObjectTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreOgawa_ConstantPropsTest ConstantPropsNumSampsTest.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreOgawa_ConstantPropsTest ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreOgawa_ConstantPropsTest ConstantPropsNumSampsTest.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ConstantPropsTest ${CORE_LIBS})
 
-
-ADD_TEST( AbcCoreOgawa_ArchiveTESTS AbcCoreOgawa_ArchiveTests )
-ADD_TEST( AbcCoreOgawa_ArrayPropertyTESTS AbcCoreOgawa_ArrayPropertyTests )
-ADD_TEST( AbcCoreOgawa_HashesTESTS AbcCoreOgawa_HashesTests )
-ADD_TEST( AbcCoreOgawa_ScalarPropertyTESTS AbcCoreOgawa_ScalarPropertyTests )
-ADD_TEST( AbcCoreOgawa_TimeSamplingTESTS AbcCoreOgawa_TimeSamplingTests )
-ADD_TEST( AbcCoreOgawa_ObjectTESTS AbcCoreOgawa_ObjectTests )
-ADD_TEST( AbcCoreOgawa_ConstantPropsTest_TEST AbcCoreOgawa_ConstantPropsTest )
+ADD_TEST(AbcCoreOgawa_ArchiveTESTS AbcCoreOgawa_ArchiveTests)
+ADD_TEST(AbcCoreOgawa_ArrayPropertyTESTS AbcCoreOgawa_ArrayPropertyTests)
+ADD_TEST(AbcCoreOgawa_HashesTESTS AbcCoreOgawa_HashesTests)
+ADD_TEST(AbcCoreOgawa_ScalarPropertyTESTS AbcCoreOgawa_ScalarPropertyTests)
+ADD_TEST(AbcCoreOgawa_TimeSamplingTESTS AbcCoreOgawa_TimeSamplingTests)
+ADD_TEST(AbcCoreOgawa_ObjectTESTS AbcCoreOgawa_ObjectTests)
+ADD_TEST(AbcCoreOgawa_ConstantPropsTest_TEST AbcCoreOgawa_ConstantPropsTest)

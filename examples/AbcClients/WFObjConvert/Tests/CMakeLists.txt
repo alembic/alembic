@@ -35,14 +35,7 @@
 
 SET(TEST_LIBS
     AbcWFObjConvert
-    AlembicAbcGeom
-    AlembicAbcCoreFactory
-    AlembicAbc
-    AlembicAbcCoreHDF5
-    AlembicAbcCoreOgawa
-    AlembicAbcCoreAbstract
-    AlembicOgawa
-    AlembicUtil
+    Alembic
     ${HDF5_LIBRARIES}
     ${ALEMBIC_ILMBASE_LIBS}
     ${CMAKE_THREAD_LIBS_INIT}

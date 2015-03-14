@@ -70,39 +70,7 @@ SET(CXX_FILES
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-IF (USE_HDF5)
-    SET(THIS_LIBS
-        AlembicAbcGeom
-        AlembicAbcCoreFactory
-        AlembicAbc
-        AlembicAbcCoreHDF5
-        AlembicAbcCoreOgawa
-        AlembicAbcCoreAbstract
-        AlembicOgawa
-        AlembicUtil
-        ${HDF5_LIBRARIES}
-        ${ALEMBIC_GL_LIBS}
-        ${ALEMBIC_ILMBASE_LIBS}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${ZLIB_LIBRARIES}
-        ${EXTERNAL_MATH_LIBS}
-    )
-ELSE()
-    SET(THIS_LIBS
-        AlembicAbcGeom
-        AlembicAbcCoreFactory
-        AlembicAbc
-        AlembicAbcCoreOgawa
-        AlembicAbcCoreAbstract
-        AlembicOgawa
-        AlembicUtil
-        ${ALEMBIC_GL_LIBS}
-        ${ALEMBIC_ILMBASE_LIBS}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${ZLIB_LIBRARIES}
-        ${EXTERNAL_MATH_LIBS}
-    )
-ENDIF()
+SET(THIS_LIBS ${CORE_LIBS} ${ALEMBIC_GL_LIBS})
 
 ADD_LIBRARY(AlembicAbcOpenGL ${LIB_TYPE} ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES(AlembicAbcOpenGL ${THIS_LIBS})
