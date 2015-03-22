@@ -92,6 +92,9 @@ IF(ALEMBIC_SHARED_LIBS)
                         ALEMBIC_EXPORTS)
 ENDIF()
 
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/Alembic/AbcCoreOgawa)
+
 IF (USE_TESTS)
 	ADD_SUBDIRECTORY(Tests)
 ENDIF()
