@@ -39,5 +39,8 @@ TARGET_LINK_LIBRARIES(abcecho ${CORE_LIBS})
 ADD_EXECUTABLE(abcechobounds AbcBoundsEcho.cpp)
 TARGET_LINK_LIBRARIES(abcechobounds ${CORE_LIBS})
 
-INSTALL(TARGETS abcecho abcechobounds
-        DESTINATION bin)
+set_target_properties(abcecho abcechobounds PROPERTIES
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
+INSTALL(TARGETS abcecho abcechobounds DESTINATION bin)
