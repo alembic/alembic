@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks, Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,28 +34,29 @@
 ##
 ##-*****************************************************************************
 
-SET( H_FILES
-     Transport.h
-     Viewer.h )
+SET(H_FILES
+    Transport.h
+    Viewer.h
+)
 
-SET( CXX_FILES
-     Transport.cpp
-     Viewer.cpp
-     main.cpp )
+SET(CXX_FILES
+    Transport.cpp
+    Viewer.cpp
+    main.cpp
+)
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-SET( THIS_LIBS
-     AlembicAbcOpenGL
+SET(THIS_LIBS
+    AlembicAbcOpenGL
     ${ALEMBIC_ILMBASE_LIBS}
-   )
+)
 
-INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/lib" )
+INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/lib")
 
-ADD_EXECUTABLE( SimpleAbcViewer ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( SimpleAbcViewer ${THIS_LIBS} )
+ADD_EXECUTABLE(SimpleAbcViewer ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(SimpleAbcViewer ${THIS_LIBS})
 
-INSTALL( TARGETS SimpleAbcViewer
-         DESTINATION bin )
-
+INSTALL(TARGETS SimpleAbcViewer
+        DESTINATION bin)
 #ADD_PYTHON_SCRIPT_INST( SimpleAbcViewerRenderit )

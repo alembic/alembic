@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,33 +33,33 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  OCollections.cpp
-  ICollections.cpp
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+
+SET(CXX_FILES
+    OCollections.cpp
+    ICollections.cpp
 )
 
-SET( H_FILES
- All.h
- SchemaInfoDeclarations.h
- OCollections.h
- ICollections.h
+SET(H_FILES
+    All.h
+    SchemaInfoDeclarations.h
+    OCollections.h
+    ICollections.h
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY( AlembicAbcCollection ${SOURCE_FILES} )
+ADD_LIBRARY(AlembicAbcCollection OBJECT ${SOURCE_FILES})
 
-INSTALL( TARGETS AlembicAbcCollection
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcCollection
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcCollection 
+                        PROPERTIES DEFINE_SYMBOL
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/Alembic/AbcCollection)
 
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
+ENDIF()

@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcMaterial_MaterialFlatten_h_
 #define _Alembic_AbcMaterial_MaterialFlatten_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcMaterial/IMaterial.h>
 
 namespace Alembic {
@@ -45,7 +46,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //! Utility class for querying against flattened inheritance hierarchies
 //! or definitions.
-class MaterialFlatten
+class ALEMBIC_EXPORT MaterialFlatten
 {
 public:
 
@@ -154,7 +155,7 @@ public:
     typedef Alembic::Util::shared_ptr<StringMap> StringMapPtr;
     typedef std::vector<IMaterialSchema> SchemaVector;
 
-    class NetworkNode
+    class ALEMBIC_EXPORT NetworkNode
     {
     public:
 

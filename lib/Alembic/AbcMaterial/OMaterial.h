@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,6 +39,7 @@
 
 #include <Alembic/Abc/All.h>
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcMaterial/SchemaInfoDeclarations.h>
 
 namespace Alembic {
@@ -49,7 +50,8 @@ namespace ALEMBIC_VERSION_NS {
 //! a compound property.
 //! Only "monolithic" shader definitions (i.e. non network) are presently
 //! supported in this implementation.
-class OMaterialSchema : public Abc::OSchema<MaterialSchemaInfo>
+class ALEMBIC_EXPORT OMaterialSchema 
+    : public Abc::OSchema<MaterialSchemaInfo>
 {
 public:
 

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,7 +34,5 @@
 ##
 ##-*****************************************************************************
 
-IF( ${ALEMBIC_PRMAN_FOUND} )
-ADD_SUBDIRECTORY( Tests )
-ADD_SUBDIRECTORY( Procedural )
-ENDIF()
+ADD_SUBDIRECTORY(Tests)
+ADD_SUBDIRECTORY(Procedural)

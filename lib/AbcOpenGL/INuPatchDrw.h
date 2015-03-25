@@ -37,6 +37,7 @@
 #ifndef _AbcOpenGL_INuPatchDrw_h_
 #define _AbcOpenGL_INuPatchDrw_h_
 
+#include "Export.h"
 #include "Foundation.h"
 #include "IObjectDrw.h"
 
@@ -45,7 +46,7 @@ namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
 //! Draw a nurbs surface
-class INuPatchDrw : public IObjectDrw
+class ABC_OPENGL_EXPORT INuPatchDrw : public IObjectDrw
 {
 public:
     INuPatchDrw( INuPatch &iNuPatch );

@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_ILight_h_
 #define _Alembic_AbcGeom_ILight_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/ICamera.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
@@ -46,7 +47,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ILightSchema : public Abc::ISchema<LightSchemaInfo>
+class ALEMBIC_EXPORT ILightSchema : public Abc::ISchema<LightSchemaInfo>
 {
     //-*************************************************************************
     // LIGHT SCHEMA (container schema which has a camera schema)

@@ -38,6 +38,7 @@
 #define _Alembic_AbcGeom_OLight_h_
 
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/OCamera.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
@@ -47,7 +48,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class OLightSchema : public Abc::OSchema<LightSchemaInfo>
+class ALEMBIC_EXPORT OLightSchema : public Abc::OSchema<LightSchemaInfo>
 {
     //-*************************************************************************
     // LIGHT SCHEMA (just a container schema which has a camera schema)

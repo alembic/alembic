@@ -85,15 +85,25 @@
 #include <string.h>
 #include <assert.h>
 
+#include <Alembic/Util/Export.h>
+
 #ifdef _MSC_VER
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+// avoid windows min/max predefined macro conflicts
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 // needed for mutex stuff
 #include <Windows.h>
 #endif
+
+// needed for std min/max
+#include <algorithm>
 
 #ifndef ALEMBIC_VERSION_NS
 #define ALEMBIC_VERSION_NS v7
@@ -131,7 +141,7 @@ using std::auto_ptr;
 
 // similiar to boost::noncopyable
 // explicitly hides copy construction and copy assignment
-class noncopyable
+class ALEMBIC_EXPORT noncopyable
 {
 protected:
     noncopyable() {}

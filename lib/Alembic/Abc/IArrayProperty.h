@@ -36,6 +36,7 @@
 #ifndef _Alembic_Abc_IArrayProperty_h_
 #define _Alembic_Abc_IArrayProperty_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/Argument.h>
@@ -48,7 +49,7 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class IArrayProperty
+class ALEMBIC_EXPORT IArrayProperty
     : public IBasePropertyT<AbcA::ArrayPropertyReaderPtr>
 {
 public:

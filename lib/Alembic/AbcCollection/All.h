@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCollection_All_h_
 #define _Alembic_AbcCollection_All_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCollection/ICollections.h>
 #include <Alembic/AbcCollection/OCollections.h>
 

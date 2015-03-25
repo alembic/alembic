@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ArrayPropertyReader_h_
 #define _Alembic_AbcCoreAbstract_ArrayPropertyReader_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyReader.h>
 #include <Alembic/AbcCoreAbstract/ArraySample.h>
@@ -51,7 +52,8 @@ namespace ALEMBIC_VERSION_NS {
 //! sample. This is distinguished from a Simple Property, which has a
 //! single element per sample, and requires less sophisticated
 //! resource management.
-class ArrayPropertyReader : public BasePropertyReader
+class ALEMBIC_EXPORT ArrayPropertyReader 
+    : public BasePropertyReader
 {
 public:
     //! Virtual destructor

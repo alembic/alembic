@@ -58,7 +58,7 @@
 
 // Alembic Includes
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcGeom/Tests/NurbsData.h>
 
@@ -78,7 +78,7 @@ void Example1_NurbsOut()
     OArchive archive(
 
         // The hard link to the implementation.
-        Alembic::AbcCoreHDF5::WriteArchive(),
+        Alembic::AbcCoreOgawa::WriteArchive(),
 
         // The file name.
         // Because we're an OArchive, this is creating (or clobbering)
@@ -129,7 +129,7 @@ void Example2_NurbsOut()
 {
     // same as example 1 but without the trim curves
     OArchive archive(
-        Alembic::AbcCoreHDF5::WriteArchive(),
+        Alembic::AbcCoreOgawa::WriteArchive(),
         "nurbs2.abc" );
 
     ONuPatch myNurbs(   OObject( archive, kTop ),
@@ -159,7 +159,7 @@ void Example3_NurbsOut()
 {
     // same as example 1 but without the trim curves
     OArchive archive(
-        Alembic::AbcCoreHDF5::WriteArchive(),
+        Alembic::AbcCoreOgawa::WriteArchive(),
         "nurbs3.abc" );
 
     ONuPatch myNurbs(   OObject( archive, kTop ),
@@ -191,7 +191,7 @@ void Example3_NurbsOut()
 void Example1_NurbsIn()
 {
     std::cout << "loading archive" << std::endl;
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "nurbs1.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "nurbs1.abc" );
 
     std::cout << "making INuPatch object" << std::endl;
     INuPatch myNurbs( IObject( archive, kTop) , "nurbs_surface");
@@ -221,7 +221,7 @@ void Example1_NurbsIn()
 void Example2_NurbsIn()
 {
     std::cout << "loading archive" << std::endl;
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "nurbs2.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "nurbs2.abc" );
 
     std::cout << "making INuPatch object" << std::endl;
     INuPatch myNurbs( IObject( archive, kTop) , "nurbs_surface_noTrim");
@@ -252,7 +252,7 @@ void Example2_NurbsIn()
 void Example3_NurbsIn()
 {
     std::cout << "loading archive" << std::endl;
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "nurbs3.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "nurbs3.abc" );
 
     std::cout << "making INuPatch object" << std::endl;
     INuPatch myNurbs( IObject( archive, kTop) , "nurbs_surface_withW");

@@ -37,6 +37,7 @@
 #ifndef _AbcOpenGL_MeshDrwHelper_h_
 #define _AbcOpenGL_MeshDrwHelper_h_
 
+#include "Export.h"
 #include "Foundation.h"
 #include "DrawContext.h"
 
@@ -44,12 +45,13 @@ namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
-void drawBoundingBox( const Box3d bounds, const int mode = GL_LINES );
+ABC_OPENGL_EXPORT void 
+drawBoundingBox( const Box3d bounds, const int mode = GL_LINES );
 
 //-*****************************************************************************
 //! \brief Both the SubD and PolyMesh classes draw in the same way, so we
 //! create this helper class to do the common work.
-class MeshDrwHelper : private Alembic::Util::noncopyable
+class ABC_OPENGL_EXPORT MeshDrwHelper : private Alembic::Util::noncopyable
 {
 public:
     // Default constructor

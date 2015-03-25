@@ -1,6 +1,6 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcMaterial/MaterialAssignment.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -85,54 +85,54 @@ void setStringParameter(
 void write()
 {
     Abc::OArchive archive(
-            Alembic::AbcCoreHDF5::WriteArchive(), "MeshesWithMaterials.abc" );
-    
+            Alembic::AbcCoreOgawa::WriteArchive(), "MeshesWithMaterials.abc" );
+
     Geom::OObject root(archive, Abc::kTop);
     Geom::OXform geometry(root, "geometry");
     Abc::OObject materials(root, "materials");
-    
+
     Mat::OMaterial materialA(materials, "materialA");
     materialA.getSchema().setShader("prman", "surface", "paintedplastic");
-    
+
     setFloatParameter(materialA.getSchema(),
             "prman", "surface", "Kd", 0.5);
     setStringParameter(materialA.getSchema(),
             "prman", "surface", "texturename", "/tmp/mytexture.tx");
-    
-    
+
+
     Mat::OMaterial materialB(materialA, "materialB");
     setStringParameter(materialB.getSchema(),
             "prman", "surface", "texturename", "/tmp/myothertexture.tx");
-    
-    
+
+
     {
         const Abc::float32_t colorArrayData[] = { 1.0f, 0.0f, 0.0f,
                                                   0.5f, 0.5f, 0.5f,
                                                   0.25f, 0.25f, 1.0f};
-        
+
         Abc::OC3fArrayProperty prop(
                 materialB.getSchema().getShaderParameters("prman", "surface"),
                         "mycolorarray");
-        
+
         prop.set(Abc::C3fArraySample( ( const Abc::C3f * )colorArrayData, 3));
     }
-    
-    
-    
+
+
+
     Geom::OPolyMesh mesh1(geometry, "mesh1");
-    
-    
+
+
     Geom::OPolyMeshSchema::Sample mesh_samp(
             Abc::V3fArraySample( ( const Abc::V3f * )g_verts, g_numVerts ),
             Abc::Int32ArraySample( g_indices, g_numIndices ),
             Abc::Int32ArraySample( g_counts, g_numCounts ));
-    
+
     mesh1.getSchema().set( mesh_samp );
-    
-    
+
+
     Mat::addMaterialAssignment(mesh1, "/materials/materialA");
-    
-    
+
+
     Geom::OSubD subd1(geometry, "subd1");
     Geom::OSubDSchema::Sample subd_mesh_samp(
             Abc::V3fArraySample( ( const Abc::V3f * )g_verts, g_numVerts ),
@@ -140,8 +140,8 @@ void write()
             Abc::Int32ArraySample( g_counts, g_numCounts ));
     subd1.getSchema().set( subd_mesh_samp );
     Mat::addMaterialAssignment(subd1, "/materials/materialA");
-    
-    
+
+
     Geom::OFaceSet faceset1 = subd1.getSchema().createFaceSet("faceset1");
     std::vector<Abc::int32_t> face_nums;
     face_nums.push_back(0);
@@ -149,11 +149,11 @@ void write()
     face_nums.push_back(5);
     Geom::OFaceSetSchema::Sample my_face_set_samp(face_nums);
     faceset1.getSchema().set(my_face_set_samp);
-    
+
     Mat::addMaterialAssignment(faceset1, "/materials/materialA/materialB");
-    
-    
-    
+
+
+
 }
 
 

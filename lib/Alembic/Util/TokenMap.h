@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -41,8 +41,9 @@
 #ifndef _Alembic_Util_TokenMap_h_
 #define _Alembic_Util_TokenMap_h_
 
-#include <Alembic/Util/Foundation.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Util/Exception.h>
+#include <Alembic/Util/Foundation.h>
 
 namespace Alembic {
 namespace Util {
@@ -55,7 +56,8 @@ namespace ALEMBIC_VERSION_NS {
 //!        into a doubly-tokenized string, usually of the form
 //!        token=value;token=value;token=value;
 //-*****************************************************************************
-class TokenMap
+
+class ALEMBIC_EXPORT TokenMap
 {
 public:
     //-*************************************************************************

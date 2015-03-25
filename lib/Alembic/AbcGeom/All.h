@@ -42,6 +42,7 @@
 #include <Alembic/AbcGeom/GeometryScope.h>
 
 #include <Alembic/AbcGeom/Basis.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/OCurves.h>
 #include <Alembic/AbcGeom/ICurves.h>
 

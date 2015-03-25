@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,30 +33,22 @@
 ##
 ##-*****************************************************************************
 
+SET(TEST_LIBS
+    AbcWFObjConvert
+    Alembic
+    ${HDF5_LIBRARIES}
+    ${ALEMBIC_ILMBASE_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${ZLIB_LIBRARIES} 
+    ${EXTERNAL_MATH_LIBS}
+)
 
-SET( TEST_LIBS
-     AbcWFObjConvert
-     AlembicAbcGeom
-     AlembicAbcCoreFactory
-     AlembicAbc
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreOgawa
-     AlembicAbcCoreAbstract
-     AlembicOgawa
-     AlembicUtil
-     ${ALEMBIC_HDF5_LIBS}
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+#ADD_EXECUTABLE(WFObjConvert_ParserTest parserTest.cpp)
+ADD_EXECUTABLE(WFObjConvert_ParserTest test1.cpp)
+TARGET_LINK_LIBRARIES(WFObjConvert_ParserTest ${TEST_LIBS})
 
+ADD_EXECUTABLE(WFObjConvert_obj2abc test2.cpp)
+TARGET_LINK_LIBRARIES( WFObjConvert_obj2abc ${TEST_LIBS})
 
-#-******************************************************************************
-#ADD_EXECUTABLE( WFObjConvert_ParserTest parserTest.cpp )
-ADD_EXECUTABLE( WFObjConvert_ParserTest test1.cpp )
-TARGET_LINK_LIBRARIES( WFObjConvert_ParserTest ${TEST_LIBS} )
-
-ADD_EXECUTABLE( WFObjConvert_obj2abc test2.cpp )
-TARGET_LINK_LIBRARIES( WFObjConvert_obj2abc ${TEST_LIBS} )
-
-#ADD_TEST( AbcClients_WFObjConvert_Parser_TEST WFObjConvert_ParserTest )
-#ADD_TEST( AbcClients_WFObjConvert_obj2abc_TEST WFObjConvert_obj2abc )
+#ADD_TEST(AbcClients_WFObjConvert_Parser_TEST WFObjConvert_ParserTest)
+#ADD_TEST(AbcClients_WFObjConvert_obj2abc_TEST WFObjConvert_obj2abc)

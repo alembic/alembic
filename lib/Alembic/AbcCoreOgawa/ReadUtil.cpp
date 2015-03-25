@@ -35,6 +35,16 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreOgawa/ReadUtil.h>
+
+#if defined(_MSC_VER)
+#  if defined(max)
+#    undef max
+#  endif
+#  if defined(min)
+#    undef min
+#  endif
+#endif
+
 #include <halfLimits.h>
 
 namespace Alembic {

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,70 +33,68 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  AprImpl.cpp
-  ApwImpl.cpp
-  ArImpl.cpp
-  AwImpl.cpp
-  CprData.cpp
-  CprImpl.cpp
-  CpwData.cpp
-  CpwImpl.cpp
-  MetaDataMap.cpp
-  OrData.cpp
-  OrImpl.cpp
-  OwData.cpp
-  OwImpl.cpp
-  ReadUtil.cpp
-  ReadWrite.cpp
-  SprImpl.cpp
-  SpwImpl.cpp
-  StreamManager.cpp
-  WriteUtil.cpp
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
+
+SET(CXX_FILES
+    AprImpl.cpp
+    ApwImpl.cpp
+    ArImpl.cpp
+    AwImpl.cpp
+    CprData.cpp
+    CprImpl.cpp
+    CpwData.cpp
+    CpwImpl.cpp
+    MetaDataMap.cpp
+    OrData.cpp
+    OrImpl.cpp
+    OwData.cpp
+    OwImpl.cpp
+    ReadUtil.cpp
+    ReadWrite.cpp
+    SprImpl.cpp
+    SpwImpl.cpp
+    StreamManager.cpp
+    WriteUtil.cpp
 )
 
-SET( H_FILES
-  All.h
-  AprImpl.h
-  ApwImpl.h
-  ArImpl.h
-  AwImpl.h
-  CprData.h
-  CprImpl.h
-  CpwData.h
-  CpwImpl.h
-  Foundation.h
-  MetaDataMap.h
-  OrData.h
-  OrImpl.h
-  OwData.h
-  OwImpl.h
-  ReadUtil.h
-  ReadWrite.h
-  SprImpl.h
-  SpwImpl.h
-  StreamManager.h
-  WriteUtil.h
-  WrittenSampleMap.h
+SET(H_FILES
+    All.h
+    AprImpl.h
+    ApwImpl.h
+    ArImpl.h
+    AwImpl.h
+    CprData.h
+    CprImpl.h
+    CpwData.h
+    CpwImpl.h
+    Foundation.h
+    MetaDataMap.h
+    OrData.h
+    OrImpl.h
+    OwData.h
+    OwImpl.h
+    ReadUtil.h
+    ReadWrite.h
+    SprImpl.h
+    SpwImpl.h
+    StreamManager.h
+    WriteUtil.h
+    WrittenSampleMap.h
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY( AlembicAbcCoreOgawa ${SOURCE_FILES} )
+ADD_LIBRARY(AlembicAbcCoreOgawa OBJECT ${SOURCE_FILES})
 
-INSTALL( TARGETS AlembicAbcCoreOgawa
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-# Only install
-INSTALL( FILES
-         All.h
-         ReadWrite.h
-         DESTINATION include/Alembic/AbcCoreOgawa
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcCoreOgawa 
+                        PROPERTIES DEFINE_SYMBOL
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/Alembic/AbcCoreOgawa)
+
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
+ENDIF()

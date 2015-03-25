@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,40 +33,41 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-     IArchive.cpp
-     IData.cpp
-     IGroup.cpp
-     IStreams.cpp
-     OArchive.cpp
-     OData.cpp
-     OGroup.cpp
-     OStream.cpp )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
-SET( H_FILES
-     Foundation.h
-     IArchive.h
-     IData.h
-     IGroup.h
-     IStreams.h
-     OArchive.h
-     OData.h
-     OGroup.h
-     OStream.h )
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(CXX_FILES
+    IArchive.cpp
+    IData.cpp
+    IGroup.cpp
+    IStreams.cpp
+    OArchive.cpp
+    OData.cpp
+    OGroup.cpp
+    OStream.cpp
+)
 
-ADD_LIBRARY( AlembicOgawa ${SOURCE_FILES} )
+SET(H_FILES
+    Foundation.h
+    IArchive.h
+    IData.h
+    IGroup.h
+    IStreams.h
+    OArchive.h
+    OData.h
+    OGroup.h
+    OStream.h
+)
 
-INSTALL( TARGETS AlembicOgawa
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/Ogawa
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
+ADD_LIBRARY(AlembicOgawa OBJECT ${SOURCE_FILES})
 
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicOgawa 
+                        PROPERTIES DEFINE_SYMBOL
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
+ENDIF()

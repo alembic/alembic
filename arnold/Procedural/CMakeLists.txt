@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013, Industrial Light & Magic,
+## Copyright (c) 2009-2015, Industrial Light & Magic,
 ##   a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.

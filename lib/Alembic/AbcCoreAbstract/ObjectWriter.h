@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ObjectWriter_h_
 #define _Alembic_AbcCoreAbstract_ObjectWriter_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
 #include <Alembic/AbcCoreAbstract/ObjectHeader.h>
@@ -51,7 +52,7 @@ namespace ALEMBIC_VERSION_NS {
 //! which the object may contain.
 //! Objects have MetaData, which is identical to the MetaData of the root
 //! Compound Property.
-class ObjectWriter
+class ALEMBIC_EXPORT ObjectWriter
     : private Alembic::Util::noncopyable
 {
 public:

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,14 +33,11 @@
 ##
 ##-*****************************************************************************
 
+ADD_EXECUTABLE(AlembicOgawaArchive_Test ArchiveTest.cpp)
+TARGET_LINK_LIBRARIES(AlembicOgawaArchive_Test Alembic ${CORE_LIBS})
 
-# Create the executable
-ADD_EXECUTABLE( AlembicOgawaArchive_Test ArchiveTest.cpp )
-TARGET_LINK_LIBRARIES( AlembicOgawaArchive_Test AlembicUtil AlembicOgawa ${ALEMBIC_ILMBASE_HALF_LIB})
+ADD_EXECUTABLE(AlembicOgawaSimple_Test SimpleTest.cpp)
+TARGET_LINK_LIBRARIES(AlembicOgawaSimple_Test Alembic ${CORE_LIBS})
 
-ADD_EXECUTABLE( AlembicOgawaSimple_Test SimpleTest.cpp )
-TARGET_LINK_LIBRARIES( AlembicOgawaSimple_Test AlembicUtil AlembicOgawa ${ALEMBIC_ILMBASE_HALF_LIB})
-
-# Make a test of it
-ADD_TEST( AlembicOgawaArchive_TEST AlembicOgawaArchive_Test )
-ADD_TEST( AlembicOgawaSimple_TEST AlembicOgawaSimple_Test )
+ADD_TEST(AlembicOgawaArchive_TEST AlembicOgawaArchive_Test)
+ADD_TEST(AlembicOgawaSimple_TEST AlembicOgawaSimple_Test)

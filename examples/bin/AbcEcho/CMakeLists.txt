@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,26 +33,11 @@
 ##
 ##-*****************************************************************************
 
-SET( FULL_ABC_LIBS
-     AlembicAbcGeom
-     AlembicAbcCoreFactory
-     AlembicAbc
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreOgawa
-     AlembicAbcCoreAbstract
-     AlembicOgawa
-     AlembicUtil
-     ${ALEMBIC_HDF5_LIBS}
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+ADD_EXECUTABLE(abcecho AbcEcho.cpp)
+TARGET_LINK_LIBRARIES(abcecho ${CORE_LIBS})
 
-#-******************************************************************************
-ADD_EXECUTABLE( abcecho AbcEcho.cpp )
-TARGET_LINK_LIBRARIES( abcecho ${FULL_ABC_LIBS} )
+ADD_EXECUTABLE(abcechobounds AbcBoundsEcho.cpp)
+TARGET_LINK_LIBRARIES(abcechobounds ${CORE_LIBS})
 
-ADD_EXECUTABLE( abcechobounds AbcBoundsEcho.cpp )
-TARGET_LINK_LIBRARIES( abcechobounds ${FULL_ABC_LIBS} )
-
-INSTALL( TARGETS abcecho abcechobounds
-         DESTINATION bin )
+INSTALL(TARGETS abcecho abcechobounds
+        DESTINATION bin)

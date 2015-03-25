@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_TimeSampling_h_
 #define _Alembic_AbcCoreAbstract_TimeSampling_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/TimeSamplingType.h>
 #include <Alembic/AbcCoreAbstract/ArraySample.h>
@@ -53,7 +54,7 @@ namespace ALEMBIC_VERSION_NS {
 //! cyclic, in which case this is mostly an algorithmic interface to
 //! the small sample times buffer. In the case where the sampling is
 //! truly acyclic, this class acts as an accessor to that array of times.
-class TimeSampling
+class ALEMBIC_EXPORT TimeSampling
 {
 public:
     //! The TimeSampling class is really a portable interface, usable

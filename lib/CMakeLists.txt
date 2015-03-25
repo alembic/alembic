@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,19 +33,12 @@
 ##
 ##-*****************************************************************************
 
-# Create a container project for all the libraries.
-PROJECT( ALEMBIC_LIBS )
-
 # Include the source dirs to make the library root dir an include
-INCLUDE_DIRECTORIES( ${ALEMBIC_LIBS_SOURCE_DIR} )
+INCLUDE_DIRECTORIES(${ALEMBIC_LIBS_SOURCE_DIR})
 
-# Recurse into all the subdirectories
-IF( NOT ALEMBIC_NO_BOOTSTRAP )
-	ADD_SUBDIRECTORY( Bootstrap )
-ENDIF()
+ADD_SUBDIRECTORY(Alembic)
 
-ADD_SUBDIRECTORY( Alembic )
-
-IF( NOT ALEMBIC_NO_OPENGL )
-	ADD_SUBDIRECTORY( AbcOpenGL )
+# Include the AbcOpenGL lib
+IF (USE_OPENGL)
+	ADD_SUBDIRECTORY(AbcOpenGL)
 ENDIF()

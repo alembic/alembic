@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks, Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,6 +34,6 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/examples" )
+INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/examples")
 
-ADD_SUBDIRECTORY( WFObjConvert )
+ADD_SUBDIRECTORY(WFObjConvert)

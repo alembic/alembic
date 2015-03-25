@@ -39,6 +39,7 @@
 
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/ErrorHandler.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>
 
 #include <Alembic/Abc/ArchiveInfo.h>

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,79 +33,73 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  ArchiveInfo.cpp
-  ErrorHandler.cpp
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
-  IArchive.cpp
-  IArrayProperty.cpp
-  ICompoundProperty.cpp
-  IObject.cpp
-  ISampleSelector.cpp
-  IScalarProperty.cpp
-
-  OArchive.cpp
-  OArrayProperty.cpp
-  OCompoundProperty.cpp
-  OObject.cpp
-  OScalarProperty.cpp
-
-  Reference.cpp
-  SourceName.cpp
+SET(CXX_FILES
+    ArchiveInfo.cpp
+    ErrorHandler.cpp
+    IArchive.cpp
+    IArrayProperty.cpp
+    ICompoundProperty.cpp
+    IObject.cpp
+    ISampleSelector.cpp
+    IScalarProperty.cpp
+    OArchive.cpp
+    OArrayProperty.cpp
+    OCompoundProperty.cpp
+    OObject.cpp
+    OScalarProperty.cpp
+    Reference.cpp
+    SourceName.cpp
 )
 
-SET( H_FILES
-  All.h
-  Base.h
-  ErrorHandler.h
-  Foundation.h
-  Argument.h
-  ArchiveInfo.h
-
-  IArchive.h
-  IArrayProperty.h
-  IBaseProperty.h
-  ICompoundProperty.h
-  IObject.h
-  ISampleSelector.h
-  IScalarProperty.h
-  ISchema.h
-  ISchemaObject.h
-  ITypedArrayProperty.h
-  ITypedScalarProperty.h
-
-  OArchive.h
-  OArrayProperty.h
-  OBaseProperty.h
-  OCompoundProperty.h
-  OObject.h
-  OScalarProperty.h
-  OSchema.h
-  OSchemaObject.h
-  OTypedArrayProperty.h
-  OTypedScalarProperty.h
-
-  Reference.h
-  SourceName.h
-
-  TypedArraySample.h
-  TypedPropertyTraits.h
+SET(H_FILES
+    All.h
+    Base.h
+    ErrorHandler.h
+    Foundation.h
+    Argument.h
+    ArchiveInfo.h
+    IArchive.h
+    IArrayProperty.h
+    IBaseProperty.h
+    ICompoundProperty.h
+    IObject.h
+    ISampleSelector.h
+    IScalarProperty.h
+    ISchema.h
+    ISchemaObject.h
+    ITypedArrayProperty.h
+    ITypedScalarProperty.h
+    OArchive.h
+    OArrayProperty.h
+    OBaseProperty.h
+    OCompoundProperty.h
+    OObject.h
+    OScalarProperty.h
+    OSchema.h
+    OSchemaObject.h
+    OTypedArrayProperty.h
+    OTypedScalarProperty.h
+    Reference.h
+    SourceName.h
+    TypedArraySample.h
+    TypedPropertyTraits.h
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY( AlembicAbc ${SOURCE_FILES} )
+ADD_LIBRARY(AlembicAbc OBJECT ${SOURCE_FILES})
 
-INSTALL( TARGETS AlembicAbc
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/Abc
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbc 
+                        PROPERTIES DEFINE_SYMBOL
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/Alembic/Abc)
+
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
+ENDIF()

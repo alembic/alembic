@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_ONuPatch_h_
 #define _Alembic_AbcGeom_ONuPatch_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/Basis.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
@@ -49,10 +50,11 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // for default "null" values for the int scalar properties
-static const int32_t ABC_GEOM_NUPATCH_NULL_INT_VALUE( INT_MIN / 4 );
+static ALEMBIC_EXPORT_CONST 
+int32_t ABC_GEOM_NUPATCH_NULL_INT_VALUE( INT_MIN / 4 );
 
 //-*****************************************************************************
-class ONuPatchSchema : public OGeomBaseSchema<NuPatchSchemaInfo>
+class ALEMBIC_EXPORT ONuPatchSchema : public OGeomBaseSchema<NuPatchSchemaInfo>
 {
 public:
     //-*************************************************************************

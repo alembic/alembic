@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks, Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,61 +34,58 @@
 ##
 ##-*****************************************************************************
 
-SET( H_FILES
-     DrawContext.h
-     Drawable.h
-     Foundation.h
-     GLCamera.h
-     ICurvesDrw.h
-     INuPatchDrw.h
-     IObjectDrw.h
-     IPointsDrw.h
-     IPolyMeshDrw.h
-     ISubDDrw.h
-     IXformDrw.h
-     MeshDrwHelper.h
-     Scene.h
-     SceneWrapper.h
-     )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
-SET( CXX_FILES
-     GLCamera.cpp
-     ICurvesDrw.cpp
-     INuPatchDrw.cpp
-     IObjectDrw.cpp
-     IPointsDrw.cpp
-     IPolyMeshDrw.cpp
-     ISubDDrw.cpp
-     IXformDrw.cpp
-     MeshDrwHelper.cpp
-     Scene.cpp
-     SceneWrapper.cpp
-     )
+SET(H_FILES
+    DrawContext.h
+    Drawable.h
+    Export.h
+    Foundation.h
+    GLCamera.h
+    ICurvesDrw.h
+    INuPatchDrw.h
+    IObjectDrw.h
+    IPointsDrw.h
+    IPolyMeshDrw.h
+    ISubDDrw.h
+    IXformDrw.h
+    MeshDrwHelper.h
+    Scene.h
+    SceneWrapper.h
+)
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
-SET( THIS_LIBS
-     AlembicAbcGeom
-     AlembicAbcCoreFactory
-     AlembicAbc
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreOgawa
-     AlembicAbcCoreAbstract
-     AlembicOgawa
-     AlembicUtil
-     ${ALEMBIC_HDF5_LIBS}
-     ${ALEMBIC_GL_LIBS}
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+SET(CXX_FILES
+    GLCamera.cpp
+    ICurvesDrw.cpp
+    INuPatchDrw.cpp
+    IObjectDrw.cpp
+    IPointsDrw.cpp
+    IPolyMeshDrw.cpp
+    ISubDDrw.cpp
+    IXformDrw.cpp
+    MeshDrwHelper.cpp
+    Scene.cpp
+    SceneWrapper.cpp
+)
 
-ADD_LIBRARY( AlembicAbcOpenGL ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AlembicAbcOpenGL ${THIS_LIBS} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-INSTALL( TARGETS AlembicAbcOpenGL
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
+SET(THIS_LIBS ${CORE_LIBS} ${ALEMBIC_GL_LIBS})
 
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/AbcOpenGL
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
+ADD_LIBRARY(AlembicAbcOpenGL ${LIB_TYPE} ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(AlembicAbcOpenGL ${THIS_LIBS})
 
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcOpenGL 
+                        PROPERTIES DEFINE_SYMBOL
+                        ABC_OPENGL_EXPORTS)
+ENDIF()
+
+INSTALL(TARGETS AlembicAbcOpenGL
+        LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+        RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR})
+
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/AbcOpenGL
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)

@@ -35,9 +35,13 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreFactory/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 namespace Abc = Alembic::Abc;
 using namespace Abc;
@@ -62,11 +66,14 @@ void writeFlatHierarchy(const std::string &archiveName, bool useOgawa)
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
+
     OObject archiveTop = archive.getTop();
 
     for (int ii=0; ii<numChildren; ii++)
@@ -162,11 +169,14 @@ void writeThreeDeepHierarchy(const std::string &archiveName, bool useOgawa)
         archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#ifdef ALEMBIC_WITH_HDF5
     else
     {
         archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
             archiveName, ErrorHandler::kThrowPolicy );
     }
+#endif
+
     OObject archiveTop = archive.getTop();
 
     // Add children to the top ('archive') level, and then recurse
@@ -254,12 +264,12 @@ void readDeepHierarchy(const std::string &archiveName)
 
 void readHierarchyMulti(const std::string &archiveName)
 {
-
+#ifdef ALEMBIC_WITH_HDF5
     Abc::IArchive a1(Alembic::AbcCoreHDF5::ReadArchive(), archiveName);
     {
         Abc::IArchive a2(Alembic::AbcCoreHDF5::ReadArchive(), archiveName);
     }
-
+#endif
 }
 
 void errorHandlerTest(bool useOgawa)
@@ -272,11 +282,13 @@ void errorHandlerTest(bool useOgawa)
             archive = OArchive( Alembic::AbcCoreOgawa::WriteArchive(),
                 "throwTest.abc", ErrorHandler::kThrowPolicy );
         }
+#ifdef ALEMBIC_WITH_HDF5
         else
         {
             archive = OArchive( Alembic::AbcCoreHDF5::WriteArchive(),
                 "throwTest.abc", ErrorHandler::kThrowPolicy );
         }
+#endif
 
         OObject archiveTop = archive.getTop();
         ABCA_ASSERT( archiveTop.getErrorHandler().getPolicy() ==
@@ -338,9 +350,11 @@ int main( int argc, char *argv[] )
         useOgawa = true;
         writeFlatHierarchy ( archiveName, useOgawa );
         readFlatHierarchy  ( archiveName );
+#ifdef ALEMBIC_WITH_HDF5
         useOgawa = false;
         writeFlatHierarchy ( archiveName, useOgawa );
         readFlatHierarchy  ( archiveName );
+#endif
     }
     catch (char * str )
     {
@@ -368,9 +382,11 @@ int main( int argc, char *argv[] )
         writeThreeDeepHierarchy ( archiveName, useOgawa );
         readDeepHierarchy  ( archiveName );
 
+#ifdef ALEMBIC_WITH_HDF5
         useOgawa = false;
         writeThreeDeepHierarchy ( archiveName, useOgawa );
         readDeepHierarchy  ( archiveName );
+#endif
     }
     catch (char * str )
     {
@@ -384,7 +400,10 @@ int main( int argc, char *argv[] )
         readHierarchyMulti(archiveName);
     }
 
+#ifdef ALEMBIC_WITH_HDF5
     errorHandlerTest(false);
+#endif
+
     errorHandlerTest(true);
 
     return 0;

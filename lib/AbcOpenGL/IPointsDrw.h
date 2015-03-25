@@ -37,6 +37,7 @@
 #ifndef _AbcOpenGL_IPointsDrw_h_
 #define _AbcOpenGL_IPointsDrw_h_
 
+#include "Export.h"
 #include "Foundation.h"
 #include "IObjectDrw.h"
 #include "MeshDrwHelper.h"
@@ -46,7 +47,7 @@ namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
 //! Draw a poly mesh!
-class IPointsDrw : public IObjectDrw
+class ABC_OPENGL_EXPORT IPointsDrw : public IObjectDrw
 {
 public:
     IPointsDrw( IPoints &iPmesh );

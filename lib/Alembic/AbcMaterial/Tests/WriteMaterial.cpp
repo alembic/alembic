@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcMaterial/OMaterial.h>
 #include <Alembic/AbcMaterial/IMaterial.h>
@@ -49,28 +49,28 @@ namespace Mat = Alembic::AbcMaterial;
 void write()
 {
     Abc::OArchive archive(
-            Alembic::AbcCoreHDF5::WriteArchive(), "Material.abc" );
-    
+            Alembic::AbcCoreOgawa::WriteArchive(), "Material.abc" );
+
     Abc::OObject root(archive, Abc::kTop);
-    
+
     //make a dummy enclosing object
     Abc::OObject materials(root, "materials");
-    
+
     Mat::OMaterial matObj(materials, "material1");
-    
+
     matObj.getSchema().setShader("prman", "surface", "paintedplastic");
     matObj.getSchema().setShader("prman", "displacement", "knobby");
-    
+
     matObj.getSchema().setShader("arnold", "surface", "paintedplastic");
-    
-    
+
+
     {
         Abc::OFloatProperty prop(
                 matObj.getSchema().getShaderParameters("prman", "surface"),
                         "Kd");
         prop.set(0.5);
     }
-    
+
     {
         Abc::OStringProperty prop(
                 matObj.getSchema().getShaderParameters("prman", "surface"),
@@ -81,17 +81,17 @@ void write()
 
 void read()
 {
-    Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(), "Material.abc");
-    
-    
+    Abc::IArchive archive(Alembic::AbcCoreOgawa::ReadArchive(), "Material.abc");
+
+
     Abc::IObject materialsObject(archive.getTop(), "materials");
-    
-    
+
+
     Mat::IMaterial matObj(materialsObject, "material1");
-    
+
     std::vector<std::string> targetNames;
     std::vector<std::string> shaderTypeNames;
-    
+
     matObj.getSchema().getTargetNames(targetNames);
     TESTING_ASSERT( targetNames.size() == 2 );
     TESTING_ASSERT((targetNames[0] == "arnold" && targetNames[1] == "prman")
@@ -102,23 +102,23 @@ void read()
             I != targetNames.end(); ++I)
     {
         const std::string & targetName = (*I);
-        
+
         std::cout << "  " << targetName << std::endl;
-        
+
         matObj.getSchema().getShaderTypesForTarget(
                 targetName, shaderTypeNames);
 
         if (targetName == "prman")
         {
             TESTING_ASSERT(shaderTypeNames.size() == 2 &&
-                ((shaderTypeNames[0] == "surface" && 
+                ((shaderTypeNames[0] == "surface" &&
                   shaderTypeNames[1] == "displacement") ||
-                 (shaderTypeNames[1] == "surface" && 
+                 (shaderTypeNames[1] == "surface" &&
                   shaderTypeNames[0] == "displacement")));
         }
         else
         {
-            TESTING_ASSERT(targetName == "arnold" && 
+            TESTING_ASSERT(targetName == "arnold" &&
                 shaderTypeNames.size() == 1 && shaderTypeNames[0] == "surface");
         }
 
@@ -126,12 +126,12 @@ void read()
                 I != shaderTypeNames.end(); ++I)
         {
             const std::string & shaderTypeName = (*I);
-            
+
             std::string shaderName("<undefined>");
-            
+
             matObj.getSchema().getShader(targetName, shaderTypeName,
                     shaderName);
-            
+
             if (targetName == "prman" && shaderTypeName == "surface")
             {
                 TESTING_ASSERT(shaderName == "paintedplastic");
@@ -147,11 +147,11 @@ void read()
 
             std::cout << "    " << shaderTypeName << ": ";
             std::cout << shaderName << std::endl;
-            
+
             Abc::ICompoundProperty params =
                     matObj.getSchema().getShaderParameters(
                             targetName, shaderTypeName);
-            
+
             if (params.valid())
             {
                 TESTING_ASSERT(targetName == "prman" &&
@@ -161,7 +161,7 @@ void read()
                 {
                     const Abc::PropertyHeader &propHeader =
                             params.getPropertyHeader(i);
-                    
+
                     std::cout << "      " << propHeader.getName();
                     std::cout << std::endl;
                     //NOTE: only supporting expected types here
@@ -178,12 +178,12 @@ void read()
                             TESTING_ASSERT(propHeader.getName() == "texname" &&
                                 prop.getValue() == "taco");
                         }
-                        
+
                         else if (Abc::IFloatProperty::matches(propHeader))
                         {
                             Abc::IFloatProperty prop(params,
                                     propHeader.getName());
-                            
+
                             std::cout << "        " << prop.getValue();
                             std::cout << std::endl;
                             TESTING_ASSERT(propHeader.getName() == "Kd" &&
@@ -201,7 +201,7 @@ int main( int argc, char *argv[] )
 {
     write();
     read();
-    
-    
+
+
     return 0;
 }

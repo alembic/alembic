@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -32,8 +32,6 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##-*****************************************************************************
-
-PROJECT( ALEMBIC_EXAMPLE_CODE )
 
 # Recurse into libs, then bins.
 INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/lib" )

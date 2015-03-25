@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,36 +33,37 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  OMaterial.cpp
-  IMaterial.cpp
-  MaterialFlatten.cpp
-  MaterialAssignment.cpp
-  InternalUtil.cpp
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
+
+SET(CXX_FILES
+    OMaterial.cpp
+    IMaterial.cpp
+    MaterialFlatten.cpp
+    MaterialAssignment.cpp
+    InternalUtil.cpp
 )
 
-SET( H_FILES
-  SchemaInfoDeclarations.h
-  OMaterial.h
-  IMaterial.h
-  MaterialFlatten.h
-  MaterialAssignment.h
+SET(H_FILES
+    SchemaInfoDeclarations.h
+    OMaterial.h
+    IMaterial.h
+    MaterialFlatten.h
+    MaterialAssignment.h
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY( AlembicAbcMaterial ${SOURCE_FILES} )
+ADD_LIBRARY(AlembicAbcMaterial OBJECT ${SOURCE_FILES})
 
-INSTALL( TARGETS AlembicAbcMaterial
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcMaterial
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF(ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcMaterial 
+                        PROPERTIES DEFINE_SYMBOL
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/Alembic/AbcMaterial)
+
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
+ENDIF()

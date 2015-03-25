@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,85 +33,82 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  AprImpl.cpp
-  ApwImpl.cpp
-  ArImpl.cpp
-  AwImpl.cpp
-  CacheImpl.cpp
-  CprData.cpp
-  CprImpl.cpp
-  CpwData.cpp
-  CpwImpl.cpp
-  DataTypeRegistry.cpp
-  HDF5Hierarchy.cpp
-  HDF5HierarchyReader.cpp
-  HDF5HierarchyWriter.cpp
-  HDF5Util.cpp
-  OrData.cpp
-  OrImpl.cpp
-  OwData.cpp
-  OwImpl.cpp
-  ReadUtil.cpp
-  ReadWrite.cpp
-  SprImpl.cpp
-  SpwImpl.cpp
-  StringReadUtil.cpp
-  StringWriteUtil.cpp
-  WriteUtil.cpp
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
+
+SET(CXX_FILES
+    AprImpl.cpp
+    ApwImpl.cpp
+    ArImpl.cpp
+    AwImpl.cpp
+    CacheImpl.cpp
+    CprData.cpp
+    CprImpl.cpp
+    CpwData.cpp
+    CpwImpl.cpp
+    DataTypeRegistry.cpp
+    HDF5Hierarchy.cpp
+    HDF5HierarchyReader.cpp
+    HDF5HierarchyWriter.cpp
+    HDF5Util.cpp
+    OrData.cpp
+    OrImpl.cpp
+    OwData.cpp
+    OwImpl.cpp
+    ReadUtil.cpp
+    ReadWrite.cpp
+    SprImpl.cpp
+    SpwImpl.cpp
+    StringReadUtil.cpp
+    StringWriteUtil.cpp
+    WriteUtil.cpp
 )
 
-SET( H_FILES
-  All.h
-  AprImpl.h
-  ApwImpl.h
-  ArImpl.h
-  AwImpl.h
-  CacheImpl.h
-  CprData.h
-  CprImpl.h
-  CpwData.h
-  CpwImpl.h
-  DataTypeRegistry.h
-  HDF5Hierarchy.h
-  HDF5HierarchyReader.h
-  HDF5HierarchyWriter.h
-  HDF5Util.h
-  Foundation.h
-  OrData.h
-  OrImpl.h
-  OwData.h
-  OwImpl.h
-  ReadUtil.h
-  ReadWrite.h
-  SimplePrImpl.h
-  SimplePwImpl.h
-  SprImpl.h
-  SpwImpl.h
-  StringReadUtil.h
-  StringWriteUtil.h
-  WriteUtil.h
-  WrittenArraySampleMap.h
+SET(H_FILES
+    All.h
+    AprImpl.h
+    ApwImpl.h
+    ArImpl.h
+    AwImpl.h
+    CacheImpl.h
+    CprData.h
+    CprImpl.h
+    CpwData.h
+    CpwImpl.h
+    DataTypeRegistry.h
+    HDF5Hierarchy.h
+    HDF5HierarchyReader.h
+    HDF5HierarchyWriter.h
+    HDF5Util.h
+    Foundation.h
+    OrData.h
+    OrImpl.h
+    OwData.h
+    OwImpl.h
+    ReadUtil.h
+    ReadWrite.h
+    SimplePrImpl.h
+    SimplePwImpl.h
+    SprImpl.h
+    SpwImpl.h
+    StringReadUtil.h
+    StringWriteUtil.h
+    WriteUtil.h
+    WrittenArraySampleMap.h
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY( AlembicAbcCoreHDF5 ${SOURCE_FILES} )
-TARGET_LINK_LIBRARIES( AlembicAbcCoreHDF5 ${ALEMBIC_HDF5_LIBS} )
+ADD_LIBRARY(AlembicAbcCoreHDF5 OBJECT ${SOURCE_FILES})
 
-INSTALL( TARGETS AlembicAbcCoreHDF5
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-# Only install AbcCoreHDF5.h and ReadArraySampleCache
-INSTALL( FILES
-         All.h
-         ReadWrite.h
-         DESTINATION include/Alembic/AbcCoreHDF5
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcCoreHDF5 
+                        PROPERTIES DEFINE_SYMBOL
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/Alembic/AbcCoreHDF5)
+
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
+ENDIF()

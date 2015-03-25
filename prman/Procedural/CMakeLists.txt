@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,57 +33,33 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ALEMBIC_PRMAN_PROCEDURAL_MODULE )
-
-
-IF( ${ALEMBIC_PRMAN_FOUND} )
-
-SET( H_FILES
-  ArbAttrUtil.h
-  PathUtil.h
-  ProcArgs.h
-  SampleUtil.h
-  SubDTags.h
-  WriteGeo.h
-  WriteMaterial.h
-  )
-
-SET( CXX_FILES
-  ArbAttrUtil.cpp
-  PathUtil.cpp
-  ProcArgs.cpp
-  ProcMain.cpp
-  SampleUtil.cpp
-  SubDTags.cpp
-  WriteGeo.cpp
-  WriteMaterial.cpp
+SET(H_FILES
+    ArbAttrUtil.h
+    PathUtil.h
+    ProcArgs.h
+    SampleUtil.h
+    SubDTags.h
+    WriteGeo.h
+    WriteMaterial.h
 )
 
-SET( CORE_LIBS
-  AlembicAbcMaterial
-  AlembicAbcGeom
-  AlembicAbcCoreFactory
-  AlembicAbc
-  AlembicAbcCoreHDF5
-  AlembicAbcCoreOgawa
-  AlembicAbcCoreAbstract
-  AlembicOgawa
-  AlembicUtil
-  )
-
-ADD_PRMAN_CXX_PLUGIN( AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES} )
-TARGET_LINK_LIBRARIES( AlembicRiProcedural
-  ${CORE_LIBS}
-  ${ALEMBIC_HDF5_LIBS}
-  ${ALEMBIC_ILMBASE_LIBS}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${ZLIB_LIBRARIES}
+SET(CXX_FILES
+    ArbAttrUtil.cpp
+    PathUtil.cpp
+    ProcArgs.cpp
+    ProcMain.cpp
+    SampleUtil.cpp
+    SubDTags.cpp
+    WriteGeo.cpp
+    WriteMaterial.cpp
 )
 
-INSTALL ( TARGETS
-  AlembicRiProcedural
-  DESTINATION
-  prman/procedurals
-)
+ADD_PRMAN_CXX_PLUGIN(AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES})
 
-ENDIF()
+TARGET_LINK_LIBRARIES(AlembicRiProcedural ${CORE_LIBS})
+
+INSTALL(TARGETS
+    AlembicRiProcedural
+    DESTINATION
+    prman/procedurals
+)

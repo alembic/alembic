@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_ICamera_h_
 #define _Alembic_AbcGeom_ICamera_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/CameraSample.h>
@@ -46,7 +47,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ICameraSchema : public Abc::ISchema<CameraSchemaInfo>
+class ALEMBIC_EXPORT ICameraSchema : public Abc::ISchema<CameraSchemaInfo>
 {
     //-*************************************************************************
     // CAMERA SCHEMA

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,49 +33,38 @@
 ##
 ##-*****************************************************************************
 
-
-SET( TEST_LIBS
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreAbstract
-     AlembicUtil
-     ${ALEMBIC_HDF5_LIBS}
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT} ${Boost_THREAD_LIBRARY}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
-
-SET( CXX_FILES
+SET(CXX_FILES
     ArchiveTests.cpp
     ArrayPropertyTests.cpp
     ScalarPropertyTests.cpp
-    TimeSamplingTests.cpp )
+    TimeSamplingTests.cpp
+)
 
-#-******************************************************************************
-ADD_EXECUTABLE( AbcCoreHDF5_Test1 test1.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreHDF5_Test1 ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreHDF5_Test1 test1.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreHDF5_Test1 ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreHDF5_ArchiveTests ArchiveTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreHDF5_ArchiveTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreHDF5_ArchiveTests ArchiveTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreHDF5_ArchiveTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreHDF5_ArrayPropertyTests ArrayPropertyTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreHDF5_ArrayPropertyTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreHDF5_ArrayPropertyTests ArrayPropertyTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreHDF5_ArrayPropertyTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreHDF5_ScalarPropertyTests ScalarPropertyTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreHDF5_ScalarPropertyTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreHDF5_ScalarPropertyTests ScalarPropertyTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreHDF5_ScalarPropertyTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreHDF5_TimeSamplingTests TimeSamplingTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreHDF5_TimeSamplingTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreHDF5_TimeSamplingTests TimeSamplingTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreHDF5_TimeSamplingTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreHDF5_ObjectTests ObjectTests.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreHDF5_ObjectTests ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreHDF5_ObjectTests ObjectTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreHDF5_ObjectTests ${CORE_LIBS})
 
-ADD_EXECUTABLE( AbcCoreHDF5_ConstantPropsTest ConstantPropsNumSampsTest.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreHDF5_ConstantPropsTest ${TEST_LIBS} )
+ADD_EXECUTABLE(AbcCoreHDF5_ConstantPropsTest ConstantPropsNumSampsTest.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreHDF5_ConstantPropsTest ${CORE_LIBS})
 
-
-ADD_TEST( AbcCoreHDF5_TEST1 AbcCoreHDF5_Test1 )
-ADD_TEST( AbcCoreHDF5_ArchiveTESTS AbcCoreHDF5_ArchiveTests )
-ADD_TEST( AbcCoreHDF5_ArrayPropertyTESTS AbcCoreHDF5_ArrayPropertyTests )
-ADD_TEST( AbcCoreHDF5_ScalarPropertyTESTS AbcCoreHDF5_ScalarPropertyTests )
-ADD_TEST( AbcCoreHDF5_TimeSamplingTESTS AbcCoreHDF5_TimeSamplingTests )
-ADD_TEST( AbcCoreHDF5_ObjectTESTS AbcCoreHDF5_ObjectTests )
-ADD_TEST( AbcCoreHDF5_ConstantPropsTest_TEST AbcCoreHDF5_ConstantPropsTest )
+ADD_TEST(AbcCoreHDF5_TEST1 AbcCoreHDF5_Test1)
+ADD_TEST(AbcCoreHDF5_ArchiveTESTS AbcCoreHDF5_ArchiveTests)
+ADD_TEST(AbcCoreHDF5_ArrayPropertyTESTS AbcCoreHDF5_ArrayPropertyTests)
+ADD_TEST(AbcCoreHDF5_ScalarPropertyTESTS AbcCoreHDF5_ScalarPropertyTests)
+ADD_TEST(AbcCoreHDF5_TimeSamplingTESTS AbcCoreHDF5_TimeSamplingTests)
+ADD_TEST(AbcCoreHDF5_ObjectTESTS AbcCoreHDF5_ObjectTests)
+ADD_TEST(AbcCoreHDF5_ConstantPropsTest_TEST AbcCoreHDF5_ConstantPropsTest)

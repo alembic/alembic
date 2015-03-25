@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcMaterial/OMaterial.h>
 #include <Alembic/AbcMaterial/IMaterial.h>
@@ -50,18 +50,18 @@ namespace Mat = Alembic::AbcMaterial;
 void write()
 {
     Abc::OArchive archive(
-            Alembic::AbcCoreHDF5::WriteArchive(), "FlattenMaterial.abc" );
-    
+            Alembic::AbcCoreOgawa::WriteArchive(), "FlattenMaterial.abc" );
+
     Abc::OObject root(archive, Abc::kTop);
-    
+
     //make a dummy enclosing object
     Abc::OObject materials(root, "materials");
-    
+
     Mat::OMaterial parentMaterial(materials, "parentMaterial");
-    
+
     parentMaterial.getSchema().setShader("prman", "surface", "paintedplastic");
     parentMaterial.getSchema().setShader("prman", "displacement", "knobby");
-    
+
     {
         Abc::OFloatProperty prop(
                 parentMaterial.getSchema().getShaderParameters(
@@ -69,14 +69,14 @@ void write()
                         "Kd");
         prop.set(0.5);
     }
-    
+
     {
         Abc::OStringProperty prop(
                 parentMaterial.getSchema().getShaderParameters(
                         "prman", "surface"), "texname");
         prop.set("taco");
     }
-    
+
     {
         Abc::OFloatProperty prop(
                 parentMaterial.getSchema().getShaderParameters(
@@ -84,55 +84,55 @@ void write()
                         "height");
         prop.set(0.75);
     }
-    
+
     Mat::OMaterial childMaterial(parentMaterial, "childMaterial");
-    
+
     childMaterial.getSchema().setShader("prman", "surface",
             "betterpaintedplastic");
-    
+
     {
         Abc::OStringProperty prop(
                 childMaterial.getSchema().getShaderParameters(
                         "prman", "surface"), "texname");
         prop.set("cheese");
     }
-    
+
 }
 
 
-    
+
 void read()
 {
-    Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(),
+    Abc::IArchive archive(Alembic::AbcCoreOgawa::ReadArchive(),
             "FlattenMaterial.abc");
-    
-    
+
+
     Abc::IObject materialsObject(archive.getTop(), "materials");
     Mat::IMaterial parentMaterial(materialsObject, "parentMaterial");
     Mat::IMaterial childMaterial(parentMaterial, "childMaterial");
-    
+
     std::cout << "----------------------------------------\n";
     std::cout << "LOCAL\n";
-    
-    
+
+
     std::cout << "---------------------------\n";
     std::cout << "Local parent material\n";
     std::cout << "---------------------------\n";
-    
+
     printMaterialSchema(parentMaterial.getSchema());
-    
+
     std::cout << "---------------------------\n";
     std::cout << "Local child material\n";
     std::cout << "---------------------------\n";
-    
+
     printMaterialSchema(childMaterial.getSchema());
-    
+
     std::cout << "----------------------------------------\n";
     std::cout << "FLATTENED\n";
-    
+
     printFlattenedMaterial(parentMaterial);
     printFlattenedMaterial(childMaterial);
-    
+
 }
 
 
@@ -142,7 +142,7 @@ int main( int argc, char *argv[] )
 {
     write();
     read();
-    
-    
+
+
     return 0;
 }

@@ -34,7 +34,7 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
 
 namespace Abc = Alembic::Abc;
@@ -44,9 +44,9 @@ using Alembic::AbcCoreAbstract::chrono_t;
 using Alembic::AbcCoreAbstract::index_t;
 
 //
-// The tests in this file are intended to demonstrate Alembic Issue 16
-//  "memcpy error in Alembic::HDF5::Attribute::writeAll" revealed
-//  by valgrind testing
+// The tests in this file were originally intended to demonstrate
+// Alembic Issue 16  "memcpy error in Alembic::HDF5::Attribute::writeAll"
+// revealed by valgrind testing.  We'll test this with Ogawa instead
 //
 
 void writeSimpleProperties(const std::string &archiveName)
@@ -60,7 +60,7 @@ void writeSimpleProperties(const std::string &archiveName)
 
     // Create an archive for writing. Indicate that we want Alembic to
     //   throw exceptions on errors.
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       archiveName, ErrorHandler::kThrowPolicy );
 
     Alembic::Util::uint32_t tsidx = archive.addTimeSampling(ts);
@@ -100,7 +100,7 @@ void readSimpleProperties(const std::string &archiveName)
 {
     // Open an existing archive for reading. Indicate that we want
     //   Alembic to throw exceptions on errors.
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                       archiveName, ErrorHandler::kThrowPolicy );
     IObject archiveTop = archive.getTop();
 

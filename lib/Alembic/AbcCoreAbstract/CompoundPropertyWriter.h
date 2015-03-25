@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_CompoundPropertyWriter_h_
 #define _Alembic_AbcCoreAbstract_CompoundPropertyWriter_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyWriter.h>
 
@@ -47,7 +48,8 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 //! A CompoundProperty is a group of other properties, possibly Simple
 //! or possibly Compound. Every object has at one of these.
-class CompoundPropertyWriter : public BasePropertyWriter
+class ALEMBIC_EXPORT CompoundPropertyWriter 
+    : public BasePropertyWriter
 {
 public:
     //! Virtual destructor

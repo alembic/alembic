@@ -37,6 +37,7 @@
 #ifndef _AbcClients_WFObjConvert_AbcReader_h_
 #define _AbcClients_WFObjConvert_AbcReader_h_
 
+#include <AbcClients/WFObjConvert/Export.h>
 #include <AbcClients/WFObjConvert/Foundation.h>
 #include <AbcClients/WFObjConvert/Reader.h>
 
@@ -46,7 +47,7 @@ namespace WFObjConvert {
 //-*****************************************************************************
 // For now, just going to create vertices, indices, and counts. will
 // worry about the rest later.
-class AbcReader : public Reader
+class ABC_WFOBJ_CONVERT_EXPORT AbcReader : public Reader
 {
 public:
     AbcReader( OObject &iParentObject,

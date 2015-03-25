@@ -37,6 +37,7 @@
 #ifndef _AbcOpenGL_Scene_h_
 #define _AbcOpenGL_Scene_h_
 
+#include "Export.h"
 #include "Foundation.h"
 #include "GLCamera.h"
 #include "Drawable.h"
@@ -46,13 +47,13 @@ namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
-void setMaterials( float o, bool negMatrix );
+ABC_OPENGL_EXPORT void setMaterials( float o, bool negMatrix );
 
 // global object index for GL picking
-extern std::vector<std::string> OBJECT_MAP;
+extern ABC_OPENGL_EXPORT std::vector<std::string> OBJECT_MAP;
 
 //-*****************************************************************************
-class Timer
+class ABC_OPENGL_EXPORT Timer
 {
 public:
 	Timer() { Init(); }
@@ -74,7 +75,7 @@ struct SceneState
 };
 
 //-*****************************************************************************
-class Scene
+class ABC_OPENGL_EXPORT Scene
 {
 public:
     //! Load a scene from the alembic archive given by the filename.

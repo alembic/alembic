@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -39,14 +39,16 @@
 #ifndef _Alembic_Util_Murmur3_h_
 #define _Alembic_Util_Murmur3_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Util/Foundation.h>
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-void MurmurHash3_x64_128 ( const void * key, const size_t len,
-    const size_t podSize, void * out );
+ALEMBIC_EXPORT void 
+MurmurHash3_x64_128 ( const void * key, const size_t len,
+                      const size_t podSize, void * out );
 
 } // End namespace ALEMBIC_VERSION_NS
 

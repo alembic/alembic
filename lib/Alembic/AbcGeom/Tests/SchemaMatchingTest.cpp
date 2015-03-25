@@ -37,7 +37,7 @@
 
 // Alembic Includes
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 // Other includes
 #include <iostream>
@@ -51,7 +51,7 @@ using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 //-*****************************************************************************
 void Example1_MeshOut( const std::string &arkiveFile )
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), arkiveFile );
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), arkiveFile );
 
     // Create a PolyMesh class.
     OPolyMesh pmeshyObj( OObject( archive, kTop ), "polymeshy" );
@@ -65,7 +65,7 @@ void Example1_MeshOut( const std::string &arkiveFile )
 //-*****************************************************************************
 void Example1_MeshIn( const std::string &arkiveFile )
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), arkiveFile  );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), arkiveFile  );
 
     IPolyMesh pmeshyObj( IObject( archive, kTop ), "polymeshy" );
 

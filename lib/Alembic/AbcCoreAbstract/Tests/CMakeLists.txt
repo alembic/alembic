@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,27 +33,15 @@
 ##
 ##-*****************************************************************************
 
+ADD_EXECUTABLE(AbcCoreAbstractTimeSamplingTest TestTimeSampling.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreAbstractTimeSamplingTest ${CORE_LIBS})
 
-SET( TEST_LIBS
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreAbstract
-     AlembicUtil
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${ALEMBIC_HDF5_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT} ${Boost_THREAD_LIBRARY}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+ADD_EXECUTABLE(AbcCoreAbstractCompoundPropsTest1 CompoundPropertyTest1.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreAbstractCompoundPropsTest1 ${CORE_LIBS})
 
+ADD_EXECUTABLE(OctessenceBug58 OctessenceBug58.cpp)
+TARGET_LINK_LIBRARIES(OctessenceBug58 ${CORE_LIBS})
 
-#-******************************************************************************
-ADD_EXECUTABLE( AbcCoreAbstractTimeSamplingTest TestTimeSampling.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreAbstractTimeSamplingTest ${TEST_LIBS} )
-
-ADD_EXECUTABLE( AbcCoreAbstractCompoundPropsTest1 CompoundPropertyTest1.cpp )
-TARGET_LINK_LIBRARIES( AbcCoreAbstractCompoundPropsTest1 ${TEST_LIBS} )
-
-ADD_EXECUTABLE( OctessenceBug58 OctessenceBug58.cpp )
-TARGET_LINK_LIBRARIES( OctessenceBug58 ${TEST_LIBS} )
-
-ADD_TEST( AbcCoreAbstract_TimeSampling_TEST AbcCoreAbstractTimeSamplingTest )
-ADD_TEST( AbcCoreAbstract_CompoundProps_TEST1 AbcCoreAbstractCompoundPropsTest1 )
-ADD_TEST( AbcCoreAbstract_OctessenceBug58_TEST OctessenceBug58 )
+ADD_TEST(AbcCoreAbstract_TimeSampling_TEST AbcCoreAbstractTimeSamplingTest)
+ADD_TEST(AbcCoreAbstract_CompoundProps_TEST1 AbcCoreAbstractCompoundPropsTest1)
+ADD_TEST(AbcCoreAbstract_OctessenceBug58_TEST OctessenceBug58)

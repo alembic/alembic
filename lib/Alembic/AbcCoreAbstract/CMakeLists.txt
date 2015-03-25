@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,76 +33,70 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES 
-     Foundation.cpp
-     TimeSampling.cpp
-     TimeSamplingType.cpp
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
 
-     ArraySample.cpp
-     ReadArraySampleCache.cpp
-     ScalarSample.cpp
-
-     BasePropertyWriter.cpp
-     ScalarPropertyWriter.cpp
-     ArrayPropertyWriter.cpp
-     CompoundPropertyWriter.cpp
-     ObjectWriter.cpp 
-     ArchiveWriter.cpp 
-
-     BasePropertyReader.cpp
-     ScalarPropertyReader.cpp
-     ArrayPropertyReader.cpp
-     CompoundPropertyReader.cpp
-     ObjectReader.cpp 
-     ArchiveReader.cpp 
+SET(CXX_FILES 
+    Foundation.cpp
+    TimeSampling.cpp
+    TimeSamplingType.cpp
+    ArraySample.cpp
+    ReadArraySampleCache.cpp
+    ScalarSample.cpp
+    BasePropertyWriter.cpp
+    ScalarPropertyWriter.cpp
+    ArrayPropertyWriter.cpp
+    CompoundPropertyWriter.cpp
+    ObjectWriter.cpp 
+    ArchiveWriter.cpp 
+    BasePropertyReader.cpp
+    ScalarPropertyReader.cpp
+    ArrayPropertyReader.cpp
+    CompoundPropertyReader.cpp
+    ObjectReader.cpp 
+    ArchiveReader.cpp 
 )
 
-SET( H_FILES 
-     All.h
-     ForwardDeclarations.h
-
-     ArraySample.h
-     ArraySampleKey.h
-     ReadArraySampleCache.h
-     ScalarSample.h
-
-     DataType.h
-     Foundation.h
-     MetaData.h
-     ObjectHeader.h
-     PropertyHeader.h
-     TimeSampling.h
-     TimeSamplingType.h 
-
-     BasePropertyWriter.h
-     ScalarPropertyWriter.h
-     ArrayPropertyWriter.h
-     CompoundPropertyWriter.h
-     ObjectWriter.h 
-     ArchiveWriter.h 
-
-     BasePropertyReader.h
-     ScalarPropertyReader.h
-     ArrayPropertyReader.h
-     CompoundPropertyReader.h
-     ObjectReader.h 
-     ArchiveReader.h 
+SET(H_FILES 
+    All.h
+    ForwardDeclarations.h
+    ArraySample.h
+    ArraySampleKey.h
+    ReadArraySampleCache.h
+    ScalarSample.h
+    DataType.h
+    Foundation.h
+    MetaData.h
+    ObjectHeader.h
+    PropertyHeader.h
+    TimeSampling.h
+    TimeSamplingType.h 
+    BasePropertyWriter.h
+    ScalarPropertyWriter.h
+    ArrayPropertyWriter.h
+    CompoundPropertyWriter.h
+    ObjectWriter.h 
+    ArchiveWriter.h 
+    BasePropertyReader.h
+    ScalarPropertyReader.h
+    ArrayPropertyReader.h
+    CompoundPropertyReader.h
+    ObjectReader.h 
+    ArchiveReader.h 
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 
-ADD_LIBRARY( AlembicAbcCoreAbstract ${SOURCE_FILES} )
+ADD_LIBRARY(AlembicAbcCoreAbstract OBJECT ${SOURCE_FILES})
 
-INSTALL( TARGETS AlembicAbcCoreAbstract
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcCoreAbstract
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(AlembicAbcCoreAbstract 
+                        PROPERTIES DEFINE_SYMBOL
+                        ALEMBIC_EXPORTS)
 ENDIF()
 
+INSTALL(FILES ${H_FILES}
+        DESTINATION include/Alembic/AbcCoreAbstract)
+
+IF (USE_TESTS)
+	ADD_SUBDIRECTORY(Tests)
+ENDIF()

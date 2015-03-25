@@ -38,6 +38,7 @@
 #define _AbcOpenGL_SceneWrapper_h_
 
 #include <sstream>
+#include "Export.h"
 #include "Foundation.h"
 #include <AbcOpenGL/GLCamera.h>
 
@@ -50,7 +51,7 @@ struct double_vec {
 };
 
 //-*****************************************************************************
-class SceneWrapper {
+class ABC_OPENGL_EXPORT SceneWrapper {
 public:
     SceneWrapper( const std::string &fileName, bool verbose = false );
 

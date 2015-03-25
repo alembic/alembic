@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,23 +33,8 @@
 ##
 ##-*****************************************************************************
 
-SET( FULL_ABC_LIBS
-     AlembicAbcGeom
-     AlembicAbcCoreFactory
-     AlembicAbc
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreOgawa
-     AlembicAbcCoreAbstract
-     AlembicOgawa
-     AlembicUtil
-     ${ALEMBIC_HDF5_LIBS}
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+ADD_EXECUTABLE(abcstitcher AbcStitcher.cpp util.cpp)
+TARGET_LINK_LIBRARIES(abcstitcher ${CORE_LIBS})
 
-#-******************************************************************************
-ADD_EXECUTABLE( abcstitcher AbcStitcher.cpp util.cpp)
-TARGET_LINK_LIBRARIES( abcstitcher ${FULL_ABC_LIBS} )
-
-INSTALL( TARGETS abcstitcher
-         DESTINATION bin )
+INSTALL(TARGETS abcstitcher
+        DESTINATION bin)

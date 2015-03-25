@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ScalarPropertyWriter_h_
 #define _Alembic_AbcCoreAbstract_ScalarPropertyWriter_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyWriter.h>
 
@@ -49,7 +50,8 @@ namespace ALEMBIC_VERSION_NS {
 //! sample. This is distinguished from an Array Property, which has a
 //! variable number of elements per sample, and requires more sophisticated
 //! resource management.
-class ScalarPropertyWriter : public BasePropertyWriter
+class ALEMBIC_EXPORT ScalarPropertyWriter 
+    : public BasePropertyWriter
 {
 public:
     //! Virtual destructor

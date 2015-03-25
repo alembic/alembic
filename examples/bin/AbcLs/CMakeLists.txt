@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,22 +33,6 @@
 ##
 ##-*****************************************************************************
 
-SET( FULL_ABC_LIBS
-     AlembicAbcGeom
-     AlembicAbcCoreFactory
-     AlembicAbcCollection
-     AlembicAbc
-     AlembicAbcCoreOgawa
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreAbstract
-     AlembicOgawa
-     AlembicUtil
-     ${ALEMBIC_HDF5_LIBS}
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+ADD_EXECUTABLE(abcls AbcLs.cpp)
 
-#-******************************************************************************
-ADD_EXECUTABLE( abcls AbcLs.cpp )
-TARGET_LINK_LIBRARIES( abcls ${FULL_ABC_LIBS} )
-
+TARGET_LINK_LIBRARIES(abcls ${CORE_LIBS})

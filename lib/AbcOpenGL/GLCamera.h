@@ -36,13 +36,14 @@
 #ifndef _AbcOpenGL_GLCamera_h_
 #define _AbcOpenGL_GLCamera_h_
 
+#include "Export.h"
 #include "Foundation.h"
 
 namespace AbcOpenGL {
 namespace ABCOPENGL_VERSION_NS {
 
 //-*****************************************************************************
-class GLCamera
+class ABC_OPENGL_EXPORT GLCamera
 {
 public:
     GLCamera();
