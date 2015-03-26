@@ -46,7 +46,7 @@
 // Interesting trivia: 0x2697 is the unicode character for Alembic
 const MTypeId AlembicNode::mMayaNodeId(0x00082697);
 
-MStatus initializePlugin(MObject obj)
+ALEMBIC_EXPORT MStatus initializePlugin(MObject obj)
 {
     const char * pluginVersion = "1.0";
     MFnPlugin plugin(obj, "Alembic", pluginVersion, "Any");
@@ -90,7 +90,7 @@ MStatus initializePlugin(MObject obj)
     return status;
 }
 
-MStatus uninitializePlugin(MObject obj)
+ALEMBIC_EXPORT  MStatus uninitializePlugin(MObject obj)
 {
     MFnPlugin plugin(obj);
 

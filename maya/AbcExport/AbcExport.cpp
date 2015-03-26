@@ -1063,7 +1063,7 @@ catch (std::exception & e)
 
 
 
-MStatus initializePlugin(MObject obj)
+ALEMBIC_EXPORT  MStatus initializePlugin(MObject obj)
 {
     MStatus status;
     MFnPlugin plugin(obj, "Alembic", ABCEXPORT_VERSION, "Any");
@@ -1086,7 +1086,7 @@ MStatus initializePlugin(MObject obj)
     return status;
 }
 
-MStatus uninitializePlugin(MObject obj)
+ALEMBIC_EXPORT MStatus uninitializePlugin(MObject obj)
 {
     MStatus status;
     MFnPlugin plugin(obj);
