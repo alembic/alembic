@@ -78,7 +78,7 @@ OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
 SET(LIB_TYPE STATIC)
 SET(RUNTIME_INSTALL_DIR lib)
 SET(LIBRARY_INSTALL_DIR lib)
-SET(ARCHIVE_INSTALL_DIR lib/static)
+SET(ARCHIVE_INSTALL_DIR lib)
 IF (ALEMBIC_SHARED_LIBS)
     SET(LIB_TYPE SHARED)
     SET(ARCHIVE_INSTALL_DIR lib)
@@ -225,23 +225,23 @@ IF (USE_OPENGL)
     FIND_PACKAGE(GLUT REQUIRED)
     FIND_PACKAGE(GLEW REQUIRED)
     IF (${WINDOWS})
-        SET(ALEMBIC_GL_LIBS 
-            ${GLEW_LIBRARY} 
-            ${GLUT_LIBRARY} 
+        SET(ALEMBIC_GL_LIBS
+            ${GLEW_LIBRARY}
+            ${GLUT_LIBRARY}
             ${OPENGL_LIBRARIES}
         )
         INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR})
         INCLUDE_DIRECTORIES(${GLEW_INCLUDE_DIR})
     ELSEIF (${DARWIN})
-        SET(ALEMBIC_GL_LIBS 
-            ${GLEW_LIBRARY} 
-            ${GLUT_LIBRARY} 
+        SET(ALEMBIC_GL_LIBS
+            ${GLEW_LIBRARY}
+            ${GLUT_LIBRARY}
             "-framework OpenGL"
         )
     ELSE()
-        SET(ALEMBIC_GL_LIBS 
-            ${GLEW_LIBRARY} 
-            ${GLUT_LIBRARY} 
+        SET(ALEMBIC_GL_LIBS
+            ${GLEW_LIBRARY}
+            ${GLUT_LIBRARY}
             ${OPENGL_LIBRARIES}
         )
     ENDIF()
