@@ -286,15 +286,8 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
 }
 
 
-#ifdef _MSC_VER
-#define RIPROC_DLL_EXPORT __declspec(dllexport)
-#else
-#define RIPROC_DLL_EXPORT
-#endif
-
-
 //-*****************************************************************************
-extern "C" RIPROC_DLL_EXPORT RtPointer
+extern "C" ALEMBIC_EXPORT RtPointer
 ConvertParameters( RtString paramstr )
 {
     try
@@ -311,14 +304,14 @@ ConvertParameters( RtString paramstr )
 }
 
 //-*****************************************************************************
-extern "C" RIPROC_DLL_EXPORT RtVoid
+extern "C" ALEMBIC_EXPORT RtVoid
 Free( RtPointer data )
 {
     delete reinterpret_cast<ProcArgs*>( data );
 }
 
 //-*****************************************************************************
-extern "C" RIPROC_DLL_EXPORT RtVoid
+extern "C" ALEMBIC_EXPORT RtVoid
 Subdivide( RtPointer data, RtFloat detail )
 {
     ProcArgs *args = reinterpret_cast<ProcArgs*>( data );
