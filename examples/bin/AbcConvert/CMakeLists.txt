@@ -36,5 +36,8 @@
 ADD_EXECUTABLE(abcconvert AbcConvert.cpp)
 TARGET_LINK_LIBRARIES(abcconvert ${CORE_LIBS})
 
-INSTALL(TARGETS abcconvert
-         DESTINATION bin)
+set_target_properties(abcconvert PROPERTIES
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
+INSTALL(TARGETS abcconvert DESTINATION bin)

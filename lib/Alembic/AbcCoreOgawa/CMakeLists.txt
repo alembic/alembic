@@ -87,12 +87,12 @@ SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 ADD_LIBRARY(AlembicAbcCoreOgawa OBJECT ${SOURCE_FILES})
 
 IF(ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcCoreOgawa 
+  SET_TARGET_PROPERTIES(AlembicAbcCoreOgawa
                         PROPERTIES DEFINE_SYMBOL
                         ALEMBIC_EXPORTS)
 ENDIF()
 
-INSTALL(FILES ${H_FILES}
+INSTALL(FILES All.h ReadWrite.h
         DESTINATION include/Alembic/AbcCoreOgawa)
 
 IF (USE_TESTS)

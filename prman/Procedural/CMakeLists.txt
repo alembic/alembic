@@ -58,6 +58,10 @@ ADD_PRMAN_CXX_PLUGIN(AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES})
 
 TARGET_LINK_LIBRARIES(AlembicRiProcedural ${CORE_LIBS})
 
+set_target_properties(AlembicRiProcedural PROPERTIES
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
 INSTALL(TARGETS
     AlembicRiProcedural
     DESTINATION

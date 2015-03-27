@@ -35,7 +35,11 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
+
+#ifdef ALEMBIC_WITH_HDF5
 #include <Alembic/AbcCoreHDF5/All.h>
+#endif
+
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreFactory/All.h>
 
@@ -1056,18 +1060,20 @@ int main( int argc, char *argv[] )
 
         // Create an archive with the default writer
         OArchive oArchive;
-        if (coreType == Alembic::AbcCoreFactory::IFactory::kHDF5)
-        {
-            oArchive = CreateArchiveWithInfo(
-                Alembic::AbcCoreHDF5::WriteArchive(),
-                fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
-        }
-        else if (coreType == Alembic::AbcCoreFactory::IFactory::kOgawa)
+        if (coreType == Alembic::AbcCoreFactory::IFactory::kOgawa)
         {
             oArchive = CreateArchiveWithInfo(
                 Alembic::AbcCoreOgawa::WriteArchive(),
                 fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
         }
+#ifdef ALEMBIC_WITH_HDF5
+        else if (coreType == Alembic::AbcCoreFactory::IFactory::kHDF5)
+        {
+            oArchive = CreateArchiveWithInfo(
+                Alembic::AbcCoreHDF5::WriteArchive(),
+                fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
+        }
+#endif
 
         OObject oRoot = oArchive.getTop();
         if (!oRoot.valid())
