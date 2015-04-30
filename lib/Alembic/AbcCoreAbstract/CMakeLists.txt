@@ -33,9 +33,9 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib )
 
-SET(CXX_FILES 
+SET(CXX_FILES
     Foundation.cpp
     TimeSampling.cpp
     TimeSamplingType.cpp
@@ -46,17 +46,17 @@ SET(CXX_FILES
     ScalarPropertyWriter.cpp
     ArrayPropertyWriter.cpp
     CompoundPropertyWriter.cpp
-    ObjectWriter.cpp 
-    ArchiveWriter.cpp 
+    ObjectWriter.cpp
+    ArchiveWriter.cpp
     BasePropertyReader.cpp
     ScalarPropertyReader.cpp
     ArrayPropertyReader.cpp
     CompoundPropertyReader.cpp
-    ObjectReader.cpp 
-    ArchiveReader.cpp 
+    ObjectReader.cpp
+    ArchiveReader.cpp
 )
 
-SET(H_FILES 
+SET(H_FILES
     All.h
     ForwardDeclarations.h
     ArraySample.h
@@ -69,19 +69,19 @@ SET(H_FILES
     ObjectHeader.h
     PropertyHeader.h
     TimeSampling.h
-    TimeSamplingType.h 
+    TimeSamplingType.h
     BasePropertyWriter.h
     ScalarPropertyWriter.h
     ArrayPropertyWriter.h
     CompoundPropertyWriter.h
-    ObjectWriter.h 
-    ArchiveWriter.h 
+    ObjectWriter.h
+    ArchiveWriter.h
     BasePropertyReader.h
     ScalarPropertyReader.h
     ArrayPropertyReader.h
     CompoundPropertyReader.h
-    ObjectReader.h 
-    ArchiveReader.h 
+    ObjectReader.h
+    ArchiveReader.h
 )
 
 SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
@@ -89,7 +89,7 @@ SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 ADD_LIBRARY(AlembicAbcCoreAbstract OBJECT ${SOURCE_FILES})
 
 IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcCoreAbstract 
+  SET_TARGET_PROPERTIES(AlembicAbcCoreAbstract
                         PROPERTIES DEFINE_SYMBOL
                         ALEMBIC_EXPORTS)
 ENDIF()

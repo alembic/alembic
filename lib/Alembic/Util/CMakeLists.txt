@@ -33,7 +33,9 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
+CONFIGURE_FILE(Config.h.in Config.h)
 
 SET(CXX_FILES
     Murmur3.cpp
@@ -42,10 +44,11 @@ SET(CXX_FILES
     TokenMap.cpp)
 
 SET(H_FILES
+    ${PROJECT_BINARY_DIR}/lib/Alembic/Util/Config.h
     Digest.h
     Dimensions.h
     Exception.h
-	Export.h
+    Export.h
     Foundation.h
     Murmur3.h
     Naming.h
@@ -69,5 +72,5 @@ INSTALL(FILES ${H_FILES}
         DESTINATION include/Alembic/Util)
 
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()

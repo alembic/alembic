@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib )
 
 SET(CXX_FILES
     ArchiveBounds.cpp
@@ -107,14 +107,11 @@ SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 ADD_LIBRARY(AlembicAbcGeom OBJECT ${SOURCE_FILES})
 
 IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcGeom 
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
+  SET_TARGET_PROPERTIES(AlembicAbcGeom PROPERTIES DEFINE_SYMBOL ALEMBIC_EXPORTS)
 ENDIF()
 
-INSTALL(FILES ${H_FILES}
-        DESTINATION include/Alembic/AbcGeom)
+INSTALL(FILES ${H_FILES} DESTINATION include/Alembic/AbcGeom)
 
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()

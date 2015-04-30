@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 SET(CXX_FILES
     ArchiveInfo.cpp
@@ -92,7 +92,7 @@ SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
 ADD_LIBRARY(AlembicAbc OBJECT ${SOURCE_FILES})
 
 IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbc 
+  SET_TARGET_PROPERTIES(AlembicAbc
                         PROPERTIES DEFINE_SYMBOL
                         ALEMBIC_EXPORTS)
 ENDIF()

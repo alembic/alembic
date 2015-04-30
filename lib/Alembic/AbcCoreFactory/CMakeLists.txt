@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 IF (USE_HDF5)
     ADD_DEFINITIONS(-DALEMBIC_WITH_HDF5)
@@ -56,7 +56,7 @@ INSTALL(FILES ${H_FILES}
         DESTINATION include/Alembic/AbcCoreFactory)
 
 IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcCoreFactory 
+  SET_TARGET_PROPERTIES(AlembicAbcCoreFactory
                         PROPERTIES DEFINE_SYMBOL
                         ALEMBIC_EXPORTS)
 ENDIF()
