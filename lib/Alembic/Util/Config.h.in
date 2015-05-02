@@ -41,11 +41,7 @@
 // for the major.
 #define ALEMBIC_LIBRARY_VERSION ${PROJECT_VERSION_MAJOR} * 10000 + ${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}
 
-#cmakedefine USE_HDF
-
-#ifdef USE_HDF
-#define ALEMBIC_WITH_HDF5
-#endif
+#cmakedefine ALEMBIC_WITH_HDF5
 
 #cmakedefine ALEMBIC_LIB_USES_BOOST
 

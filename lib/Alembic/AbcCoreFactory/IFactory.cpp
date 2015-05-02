@@ -35,11 +35,12 @@
 //-*****************************************************************************
 
 #include <fstream>
+#include <Alembic/AbcCoreOgawa/All.h>
+#include <Alembic/AbcCoreFactory/IFactory.h>
+
 #ifdef ALEMBIC_WITH_HDF5
 #include <Alembic/AbcCoreHDF5/All.h>
 #endif
-#include <Alembic/AbcCoreOgawa/All.h>
-#include <Alembic/AbcCoreFactory/IFactory.h>
 
 namespace Alembic {
 namespace AbcCoreFactory {
