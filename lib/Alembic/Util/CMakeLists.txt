@@ -33,17 +33,16 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
-
 CONFIGURE_FILE(Config.h.in Config.h)
 
-SET(CXX_FILES
-    Murmur3.cpp
-    Naming.cpp
-    SpookyV2.cpp
-    TokenMap.cpp)
+LIST(APPEND CXX_FILES
+    Util/Murmur3.cpp
+    Util/Naming.cpp
+    Util/SpookyV2.cpp
+    Util/TokenMap.cpp)
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET(H_FILES
+INSTALL(FILES
     ${PROJECT_BINARY_DIR}/lib/Alembic/Util/Config.h
     Digest.h
     Dimensions.h
@@ -56,20 +55,8 @@ SET(H_FILES
     PlainOldDataType.h
     SpookyV2.h
     TokenMap.h
-    All.h)
-
-SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
-
-ADD_LIBRARY(AlembicUtil OBJECT ${SOURCE_FILES})
-
-IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicUtil
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
-ENDIF()
-
-INSTALL(FILES ${H_FILES}
-        DESTINATION include/Alembic/Util)
+    All.h
+    DESTINATION include/Alembic/Util)
 
 IF (USE_TESTS)
     ADD_SUBDIRECTORY(Tests)

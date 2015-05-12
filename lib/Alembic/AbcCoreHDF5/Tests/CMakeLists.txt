@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
 SET(CXX_FILES
     ArchiveTests.cpp
     ArrayPropertyTests.cpp

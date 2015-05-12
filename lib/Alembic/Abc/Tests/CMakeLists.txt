@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
 ADD_EXECUTABLE(Abc_Test1 test1.cpp)
 TARGET_LINK_LIBRARIES(Abc_Test1 ${CORE_LIBS})
 

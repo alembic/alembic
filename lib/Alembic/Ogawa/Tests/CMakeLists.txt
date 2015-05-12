@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
 ADD_EXECUTABLE(AlembicOgawaArchive_Test ArchiveTest.cpp)
 TARGET_LINK_LIBRARIES(AlembicOgawaArchive_Test Alembic ${CORE_LIBS})
 
