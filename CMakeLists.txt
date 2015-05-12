@@ -209,7 +209,6 @@ ENDIF()
 #-******************************************************************************
 
 FIND_PACKAGE(Threads REQUIRED)
-FIND_PACKAGE(ZLIB REQUIRED)
 
 # Boost
 INCLUDE("./cmake/AlembicBoost.cmake")
@@ -250,6 +249,7 @@ ENDIF()
 
 # HDF5
 IF (USE_HDF5)
+    FIND_PACKAGE(ZLIB REQUIRED)
     SET(ALEMBIC_WITH_HDF5 "1")
     INCLUDE("./cmake/AlembicHDF5.cmake")
     INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
@@ -273,7 +273,6 @@ ELSE()
         Alembic
         ${ALEMBIC_ILMBASE_LIBS}
         ${CMAKE_THREAD_LIBS_INIT}
-        ${ZLIB_LIBRARIES}
         ${EXTERNAL_MATH_LIBS}
     )
 ENDIF()
