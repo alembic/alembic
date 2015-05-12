@@ -73,6 +73,10 @@ OPTION(USE_TESTS "Include Alembic tests" ON)
 OPTION(ALEMBIC_GLEW_LINK_STATIC "GLEW is a static library" OFF)
 OPTION(ALEMBIC_ILMBASE_LINK_STATIC "IlmBase is a static library" OFF)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
+OPTION(ALEMBIC_LIB_USES_BOOST
+    "Main Alembic library uses boost for things like shared_ptr" OFF)
+OPTION(ALEMBIC_LIB_USES_TR1
+    "Main Alembic library uses std::tr1 for things like shared_ptr" OFF)
 
 # Set static/dynamic build options
 SET(LIB_TYPE STATIC)
@@ -107,21 +111,21 @@ IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
     SET(LINUX TRUE)
 ENDIF()
 
-# Set visibility and check for c++11 support for GNU compilers
+IF (NOT ${ALEMBIC_LIB_USES_TR1} AND NOT ${ALEMBIC_LIB_USES_BOOST})
+    # TODO figure out how to do this for Windows
+    INCLUDE(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    IF (COMPILER_SUPPORTS_CXX1X)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    ELSEIF (COMPILER_SUPPORTS_CXX0X)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    ENDIF()
+ENDIF()
+
+# Set visibility for GNU compilers
 IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-    IF (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS "4.8.0")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-    ELSE()
-        INCLUDE(CheckCXXCompilerFlag)
-        CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-        CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-        IF (COMPILER_SUPPORTS_CXX11)
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-        ELSEIF(COMPILER_SUPPORTS_CXX0X)
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-        ENDIF()
-    ENDIF()
 ENDIF()
 
 # Set some debug vs opt flags
@@ -210,9 +214,11 @@ ENDIF()
 
 FIND_PACKAGE(Threads REQUIRED)
 
-# Boost
-INCLUDE("./cmake/AlembicBoost.cmake")
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+# We only need boost if including PyAlembic, or using it in the lib
+IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
+    INCLUDE("./cmake/AlembicBoost.cmake")
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+ENDIF()
 
 # IlmBase
 INCLUDE("./cmake/AlembicIlmBase.cmake")
@@ -358,5 +364,6 @@ info_cfg_option(USE_TESTS)
 info_cfg_option(ALEMBIC_GLEW_LINK_STATIC)
 info_cfg_option(ALEMBIC_ILMBASE_LINK_STATIC)
 info_cfg_option(ALEMBIC_SHARED_LIBS)
-
+info_cfg_option(ALEMBIC_LIB_USES_BOOST)
+info_cfg_option(ALEMBIC_LIB_USES_TR1)
 MESSAGE("${_config_msg}")

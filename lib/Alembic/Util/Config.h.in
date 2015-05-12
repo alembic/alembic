@@ -45,6 +45,6 @@
 
 #cmakedefine ALEMBIC_LIB_USES_BOOST
 
-#cmakedefine ALEMBIC_LIB_USES_CPP11
+#cmakedefine ALEMBIC_LIB_USES_TR1
 
 #endif

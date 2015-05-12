@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -52,14 +52,14 @@
 #include <boost/foreach.hpp>
 #include <boost/unordered_map.hpp>
 
-#elif ALEMBIC_LIB_USES_CPP11
-#include <unordered_map>
-
-// fall back on tr1, which is not available in older versions of Visual Studio
-// i.e. _MSC_VER <= 1600
-#else
+// tr1 is not available in older versions of Visual Studio i.e. _MSC_VER <= 1600
+#elif defined(ALEMBIC_LIB_USES_TR1)
 #include <tr1/memory>
 #include <tr1/unordered_map>
+
+// default to C++11
+#else
+#include <unordered_map>
 #endif
 
 #include <memory>
@@ -118,21 +118,21 @@ using boost::static_pointer_cast;
 using boost::weak_ptr;
 using boost::unordered_map;
 
-#elif ALEMBIC_LIB_USES_CPP11
-using std::dynamic_pointer_cast;
-using std::enable_shared_from_this;
-using std::shared_ptr;
-using std::static_pointer_cast;
-using std::weak_ptr;
-using std::unordered_map;
-
-#else
+#elif defined(ALEMBIC_LIB_USES_TR1)
 using std::tr1::dynamic_pointer_cast;
 using std::tr1::enable_shared_from_this;
 using std::tr1::shared_ptr;
 using std::tr1::static_pointer_cast;
 using std::tr1::weak_ptr;
 using std::tr1::unordered_map;
+
+#else
+using std::dynamic_pointer_cast;
+using std::enable_shared_from_this;
+using std::shared_ptr;
+using std::static_pointer_cast;
+using std::weak_ptr;
+using std::unordered_map;
 #endif
 
 using std::auto_ptr;
