@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -138,6 +138,7 @@ void simpleTestIn( const std::string &iArchiveName )
     //const TimeSamplingType &utst = uts.getTimeSamplingType();
     const TimeSamplingType utst = c0Props.getPtr()->getScalarProperty(
         "uniformdoubleprop" )->getTimeSampling()->getTimeSamplingType();
+    TESTING_ASSERT(utst.isUniform());
 
     for ( size_t j = 0 ; j < g_numDoubleSamps ; j++ )
     {
