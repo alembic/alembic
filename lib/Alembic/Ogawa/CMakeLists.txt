@@ -33,41 +33,18 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
-
-SET(CXX_FILES
-    IArchive.cpp
-    IData.cpp
-    IGroup.cpp
-    IStreams.cpp
-    OArchive.cpp
-    OData.cpp
-    OGroup.cpp
-    OStream.cpp
+LIST(APPEND CXX_FILES
+    Ogawa/IArchive.cpp
+    Ogawa/IData.cpp
+    Ogawa/IGroup.cpp
+    Ogawa/IStreams.cpp
+    Ogawa/OArchive.cpp
+    Ogawa/OData.cpp
+    Ogawa/OGroup.cpp
+    Ogawa/OStream.cpp
 )
-
-SET(H_FILES
-    Foundation.h
-    IArchive.h
-    IData.h
-    IGroup.h
-    IStreams.h
-    OArchive.h
-    OData.h
-    OGroup.h
-    OStream.h
-)
-
-SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
-
-ADD_LIBRARY(AlembicOgawa OBJECT ${SOURCE_FILES})
-
-IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicOgawa 
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
-ENDIF()
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()

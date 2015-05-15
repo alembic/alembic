@@ -47,34 +47,14 @@ ADD_SUBDIRECTORY(AbcCollection)
 ADD_SUBDIRECTORY(AbcMaterial)
 ADD_SUBDIRECTORY(Ogawa)
 
-# http://www.cmake.org/Wiki/CMake/Tutorials/Object_Library
-IF (USE_HDF5)
-    SET(TARGET_OBJECTS
-        $<TARGET_OBJECTS:AlembicAbcMaterial>
-        $<TARGET_OBJECTS:AlembicAbcGeom>
-        $<TARGET_OBJECTS:AlembicAbcCollection>
-        $<TARGET_OBJECTS:AlembicAbcCoreFactory>
-        $<TARGET_OBJECTS:AlembicAbc>
-        $<TARGET_OBJECTS:AlembicAbcCoreHDF5>
-        $<TARGET_OBJECTS:AlembicAbcCoreOgawa>
-        $<TARGET_OBJECTS:AlembicAbcCoreAbstract>
-        $<TARGET_OBJECTS:AlembicOgawa>
-        $<TARGET_OBJECTS:AlembicUtil>
-    )
-ELSE()
-    SET(TARGET_OBJECTS
-        $<TARGET_OBJECTS:AlembicAbcMaterial>
-        $<TARGET_OBJECTS:AlembicAbcGeom>
-        $<TARGET_OBJECTS:AlembicAbcCollection>
-        $<TARGET_OBJECTS:AlembicAbcCoreFactory>
-        $<TARGET_OBJECTS:AlembicAbc>
-        $<TARGET_OBJECTS:AlembicAbcCoreOgawa>
-        $<TARGET_OBJECTS:AlembicAbcCoreAbstract>
-        $<TARGET_OBJECTS:AlembicOgawa>
-        $<TARGET_OBJECTS:AlembicUtil>
-    )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
+ADD_LIBRARY(Alembic ${LIB_TYPE} ${CXX_FILES})
+
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(Alembic PROPERTIES DEFINE_SYMBOL ALEMBIC_EXPORTS)
 ENDIF()
-ADD_LIBRARY(Alembic ${LIB_TYPE} ${TARGET_OBJECTS})
+
 
 # fixes undefined symbols for x86_64
 IF (ALEMBIC_SHARED_LIBS AND DARWIN)

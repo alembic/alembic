@@ -33,27 +33,26 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
-
-SET(CXX_FILES
-    ArchiveInfo.cpp
-    ErrorHandler.cpp
-    IArchive.cpp
-    IArrayProperty.cpp
-    ICompoundProperty.cpp
-    IObject.cpp
-    ISampleSelector.cpp
-    IScalarProperty.cpp
-    OArchive.cpp
-    OArrayProperty.cpp
-    OCompoundProperty.cpp
-    OObject.cpp
-    OScalarProperty.cpp
-    Reference.cpp
-    SourceName.cpp
+LIST(APPEND CXX_FILES
+    Abc/ArchiveInfo.cpp
+    Abc/ErrorHandler.cpp
+    Abc/IArchive.cpp
+    Abc/IArrayProperty.cpp
+    Abc/ICompoundProperty.cpp
+    Abc/IObject.cpp
+    Abc/ISampleSelector.cpp
+    Abc/IScalarProperty.cpp
+    Abc/OArchive.cpp
+    Abc/OArrayProperty.cpp
+    Abc/OCompoundProperty.cpp
+    Abc/OObject.cpp
+    Abc/OScalarProperty.cpp
+    Abc/Reference.cpp
+    Abc/SourceName.cpp
 )
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET(H_FILES
+INSTALL(FILES
     All.h
     Base.h
     ErrorHandler.h
@@ -85,21 +84,9 @@ SET(H_FILES
     SourceName.h
     TypedArraySample.h
     TypedPropertyTraits.h
+    DESTINATION include/Alembic/Abc
 )
 
-SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
-
-ADD_LIBRARY(AlembicAbc OBJECT ${SOURCE_FILES})
-
-IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbc 
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
-ENDIF()
-
-INSTALL(FILES ${H_FILES}
-        DESTINATION include/Alembic/Abc)
-
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()

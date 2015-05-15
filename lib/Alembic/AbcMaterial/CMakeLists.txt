@@ -33,37 +33,24 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
-
-SET(CXX_FILES
-    OMaterial.cpp
-    IMaterial.cpp
-    MaterialFlatten.cpp
-    MaterialAssignment.cpp
-    InternalUtil.cpp
+LIST(APPEND CXX_FILES
+    AbcMaterial/OMaterial.cpp
+    AbcMaterial/IMaterial.cpp
+    AbcMaterial/MaterialFlatten.cpp
+    AbcMaterial/MaterialAssignment.cpp
+    AbcMaterial/InternalUtil.cpp
 )
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET(H_FILES
+INSTALL(FILES
     SchemaInfoDeclarations.h
     OMaterial.h
     IMaterial.h
     MaterialFlatten.h
     MaterialAssignment.h
+    DESTINATION include/Alembic/AbcMaterial
 )
 
-SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
-
-ADD_LIBRARY(AlembicAbcMaterial OBJECT ${SOURCE_FILES})
-
-IF(ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcMaterial 
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
-ENDIF()
-
-INSTALL(FILES ${H_FILES}
-        DESTINATION include/Alembic/AbcMaterial)
-
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()

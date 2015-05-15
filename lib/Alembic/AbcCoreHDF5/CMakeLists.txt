@@ -33,82 +33,38 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
-
-SET(CXX_FILES
-    AprImpl.cpp
-    ApwImpl.cpp
-    ArImpl.cpp
-    AwImpl.cpp
-    CacheImpl.cpp
-    CprData.cpp
-    CprImpl.cpp
-    CpwData.cpp
-    CpwImpl.cpp
-    DataTypeRegistry.cpp
-    HDF5Hierarchy.cpp
-    HDF5HierarchyReader.cpp
-    HDF5HierarchyWriter.cpp
-    HDF5Util.cpp
-    OrData.cpp
-    OrImpl.cpp
-    OwData.cpp
-    OwImpl.cpp
-    ReadUtil.cpp
-    ReadWrite.cpp
-    SprImpl.cpp
-    SpwImpl.cpp
-    StringReadUtil.cpp
-    StringWriteUtil.cpp
-    WriteUtil.cpp
+LIST(APPEND CXX_FILES
+    AbcCoreHDF5/AprImpl.cpp
+    AbcCoreHDF5/ApwImpl.cpp
+    AbcCoreHDF5/ArImpl.cpp
+    AbcCoreHDF5/AwImpl.cpp
+    AbcCoreHDF5/CacheImpl.cpp
+    AbcCoreHDF5/CprData.cpp
+    AbcCoreHDF5/CprImpl.cpp
+    AbcCoreHDF5/CpwData.cpp
+    AbcCoreHDF5/CpwImpl.cpp
+    AbcCoreHDF5/DataTypeRegistry.cpp
+    AbcCoreHDF5/HDF5Hierarchy.cpp
+    AbcCoreHDF5/HDF5HierarchyReader.cpp
+    AbcCoreHDF5/HDF5HierarchyWriter.cpp
+    AbcCoreHDF5/HDF5Util.cpp
+    AbcCoreHDF5/OrData.cpp
+    AbcCoreHDF5/OrImpl.cpp
+    AbcCoreHDF5/OwData.cpp
+    AbcCoreHDF5/OwImpl.cpp
+    AbcCoreHDF5/ReadUtil.cpp
+    AbcCoreHDF5/ReadWrite.cpp
+    AbcCoreHDF5/SprImpl.cpp
+    AbcCoreHDF5/SpwImpl.cpp
+    AbcCoreHDF5/StringReadUtil.cpp
+    AbcCoreHDF5/StringWriteUtil.cpp
+    AbcCoreHDF5/WriteUtil.cpp
 )
-
-SET(H_FILES
-    All.h
-    AprImpl.h
-    ApwImpl.h
-    ArImpl.h
-    AwImpl.h
-    CacheImpl.h
-    CprData.h
-    CprImpl.h
-    CpwData.h
-    CpwImpl.h
-    DataTypeRegistry.h
-    HDF5Hierarchy.h
-    HDF5HierarchyReader.h
-    HDF5HierarchyWriter.h
-    HDF5Util.h
-    Foundation.h
-    OrData.h
-    OrImpl.h
-    OwData.h
-    OwImpl.h
-    ReadUtil.h
-    ReadWrite.h
-    SimplePrImpl.h
-    SimplePwImpl.h
-    SprImpl.h
-    SpwImpl.h
-    StringReadUtil.h
-    StringWriteUtil.h
-    WriteUtil.h
-    WrittenArraySampleMap.h
-)
-
-SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
-
-ADD_LIBRARY(AlembicAbcCoreHDF5 OBJECT ${SOURCE_FILES})
-
-IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcCoreHDF5
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
-ENDIF()
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
 INSTALL(FILES All.h ReadWrite.h
         DESTINATION include/Alembic/AbcCoreHDF5)
 
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()

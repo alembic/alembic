@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
 ADD_EXECUTABLE(AlembicUtilOperatorBool_Test OperatorBoolTest.cpp)
 TARGET_LINK_LIBRARIES(AlembicUtilOperatorBool_Test ${CORE_LIBS})
 

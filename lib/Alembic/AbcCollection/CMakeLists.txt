@@ -33,33 +33,20 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
-
-SET(CXX_FILES
-    OCollections.cpp
-    ICollections.cpp
+LIST(APPEND CXX_FILES
+    AbcCollection/OCollections.cpp
+    AbcCollection/ICollections.cpp
 )
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET(H_FILES
+INSTALL(FILES
     All.h
     SchemaInfoDeclarations.h
     OCollections.h
     ICollections.h
+    DESTINATION include/Alembic/AbcCollection
 )
 
-SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
-
-ADD_LIBRARY(AlembicAbcCollection OBJECT ${SOURCE_FILES})
-
-IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcCollection 
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
-ENDIF()
-
-INSTALL(FILES ${H_FILES}
-        DESTINATION include/Alembic/AbcCollection)
-
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()

@@ -33,9 +33,7 @@
 ##
 ##-*****************************************************************************
 
-IF (USE_HDF5)
-    ADD_DEFINITIONS(-DALEMBIC_WITH_HDF5)
-ENDIF()
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 ADD_EXECUTABLE(Abc_Test1 test1.cpp)
 TARGET_LINK_LIBRARIES(Abc_Test1 ${CORE_LIBS})

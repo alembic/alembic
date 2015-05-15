@@ -33,68 +33,32 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
-
-SET(CXX_FILES
-    AprImpl.cpp
-    ApwImpl.cpp
-    ArImpl.cpp
-    AwImpl.cpp
-    CprData.cpp
-    CprImpl.cpp
-    CpwData.cpp
-    CpwImpl.cpp
-    MetaDataMap.cpp
-    OrData.cpp
-    OrImpl.cpp
-    OwData.cpp
-    OwImpl.cpp
-    ReadUtil.cpp
-    ReadWrite.cpp
-    SprImpl.cpp
-    SpwImpl.cpp
-    StreamManager.cpp
-    WriteUtil.cpp
+LIST(APPEND CXX_FILES
+    AbcCoreOgawa/AprImpl.cpp
+    AbcCoreOgawa/ApwImpl.cpp
+    AbcCoreOgawa/ArImpl.cpp
+    AbcCoreOgawa/AwImpl.cpp
+    AbcCoreOgawa/CprData.cpp
+    AbcCoreOgawa/CprImpl.cpp
+    AbcCoreOgawa/CpwData.cpp
+    AbcCoreOgawa/CpwImpl.cpp
+    AbcCoreOgawa/MetaDataMap.cpp
+    AbcCoreOgawa/OrData.cpp
+    AbcCoreOgawa/OrImpl.cpp
+    AbcCoreOgawa/OwData.cpp
+    AbcCoreOgawa/OwImpl.cpp
+    AbcCoreOgawa/ReadUtil.cpp
+    AbcCoreOgawa/ReadWrite.cpp
+    AbcCoreOgawa/SprImpl.cpp
+    AbcCoreOgawa/SpwImpl.cpp
+    AbcCoreOgawa/StreamManager.cpp
+    AbcCoreOgawa/WriteUtil.cpp
 )
-
-SET(H_FILES
-    All.h
-    AprImpl.h
-    ApwImpl.h
-    ArImpl.h
-    AwImpl.h
-    CprData.h
-    CprImpl.h
-    CpwData.h
-    CpwImpl.h
-    Foundation.h
-    MetaDataMap.h
-    OrData.h
-    OrImpl.h
-    OwData.h
-    OwImpl.h
-    ReadUtil.h
-    ReadWrite.h
-    SprImpl.h
-    SpwImpl.h
-    StreamManager.h
-    WriteUtil.h
-    WrittenSampleMap.h
-)
-
-SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
-
-ADD_LIBRARY(AlembicAbcCoreOgawa OBJECT ${SOURCE_FILES})
-
-IF(ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcCoreOgawa
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
-ENDIF()
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
 INSTALL(FILES All.h ReadWrite.h
         DESTINATION include/Alembic/AbcCoreOgawa)
 
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()

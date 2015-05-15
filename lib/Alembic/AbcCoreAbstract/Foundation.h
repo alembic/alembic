@@ -78,17 +78,10 @@ typedef float64_t chrono_t;
 // Version information is expressed in these locations:
 // - CMakeLists.txt as PROJECT_VERSION
 //   . Names used in messages and for install directory
-// - lib/Alembic/AbcCoreAbstract/Foundation.h as ALEMBIC_LIBRARY_VERSION
+// - lib/Alembic/Util/Config.h as ALEMBIC_LIBRARY_VERSION
 //   . An easy to compare numeric value.
 // - lib/Alembic/AbcCoreAbstract/Foundation.cpp
 //   . Implementation of handy functions for reporting version info.
-//
-// - lib/Alembic/AbcCoreHDF5/Foundation.h as ALEMBIC_HDF5_FILE_VERSION
-//   . The version number identifying the low level HDF5 structures used
-//     to express data types and samples in Alembic
-
-//! Alembic version number Major/Minor/Patch XX.YY.ZZ
-#define ALEMBIC_LIBRARY_VERSION 10508
 
 //! Helper function which returns the version and date built in a string
 //! e.g. "Alembic 1.0.0 (built Jul  6 2011)"

@@ -33,6 +33,8 @@
 ##
 ##-*****************************************************************************
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
 ADD_EXECUTABLE(AbcCollection_CollectionTest
                CollectionTest.cpp
                )

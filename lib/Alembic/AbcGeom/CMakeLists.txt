@@ -33,38 +33,37 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
-
-SET(CXX_FILES
-    ArchiveBounds.cpp
-    GeometryScope.cpp
-    FilmBackXformOp.cpp
-    CameraSample.cpp
-    ICamera.cpp
-    OCamera.cpp
-    Basis.cpp
-    ICurves.cpp
-    OCurves.cpp
-    OFaceSet.cpp
-    IFaceSet.cpp
-    OLight.cpp
-    ILight.cpp
-    ONuPatch.cpp
-    INuPatch.cpp
-    OPoints.cpp
-    IPoints.cpp
-    OPolyMesh.cpp
-    IPolyMesh.cpp
-    OSubD.cpp
-    ISubD.cpp
-    Visibility.cpp
-    XformOp.cpp
-    XformSample.cpp
-    IXform.cpp
-    OXform.cpp
+LIST(APPEND CXX_FILES
+    AbcGeom/ArchiveBounds.cpp
+    AbcGeom/GeometryScope.cpp
+    AbcGeom/FilmBackXformOp.cpp
+    AbcGeom/CameraSample.cpp
+    AbcGeom/ICamera.cpp
+    AbcGeom/OCamera.cpp
+    AbcGeom/Basis.cpp
+    AbcGeom/ICurves.cpp
+    AbcGeom/OCurves.cpp
+    AbcGeom/OFaceSet.cpp
+    AbcGeom/IFaceSet.cpp
+    AbcGeom/OLight.cpp
+    AbcGeom/ILight.cpp
+    AbcGeom/ONuPatch.cpp
+    AbcGeom/INuPatch.cpp
+    AbcGeom/OPoints.cpp
+    AbcGeom/IPoints.cpp
+    AbcGeom/OPolyMesh.cpp
+    AbcGeom/IPolyMesh.cpp
+    AbcGeom/OSubD.cpp
+    AbcGeom/ISubD.cpp
+    AbcGeom/Visibility.cpp
+    AbcGeom/XformOp.cpp
+    AbcGeom/XformSample.cpp
+    AbcGeom/IXform.cpp
+    AbcGeom/OXform.cpp
 )
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET(H_FILES
+INSTALL(FILES
     All.h
     Foundation.h
     ArchiveBounds.h
@@ -100,21 +99,9 @@ SET(H_FILES
     XformSample.h
     IXform.h
     OXform.h
+    DESTINATION include/Alembic/AbcGeom
 )
 
-SET(SOURCE_FILES ${CXX_FILES} ${H_FILES})
-
-ADD_LIBRARY(AlembicAbcGeom OBJECT ${SOURCE_FILES})
-
-IF (ALEMBIC_SHARED_LIBS)
-  SET_TARGET_PROPERTIES(AlembicAbcGeom 
-                        PROPERTIES DEFINE_SYMBOL
-                        ALEMBIC_EXPORTS)
-ENDIF()
-
-INSTALL(FILES ${H_FILES}
-        DESTINATION include/Alembic/AbcGeom)
-
 IF (USE_TESTS)
-	ADD_SUBDIRECTORY(Tests)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()
