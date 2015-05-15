@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -47,9 +47,10 @@
 #include <Alembic/AbcMaterial/All.h>
 #include <string>
 
-// if Alembic::Util::shared_ptr resolves to boost::shared_ptr then we
-// don't need this since it's defined elsewhere
-#ifndef ALEMBIC_LIB_USES_BOOST
+// if Alembic uses shared_ptr from boost, then we don't need this function because boost provides it
+// if Alembic uses shared_ptr from std, then we don't need this function because boost provides it since 1.53
+// if Alembic uses shared_ptr from tr1, then we do need this function
+#if defined(ALEMBIC_LIB_USES_TR1)
 namespace boost
 {
 

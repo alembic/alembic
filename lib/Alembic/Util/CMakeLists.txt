@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-CONFIGURE_FILE(Config.h.in Config.h)
+CONFIGURE_FILE(Config.h.in ${PROJECT_SOURCE_DIR}/lib/Alembic/Util/Config.h)
 
 LIST(APPEND CXX_FILES
     Util/Murmur3.cpp
