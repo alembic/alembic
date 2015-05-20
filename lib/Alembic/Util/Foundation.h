@@ -133,7 +133,6 @@ using std::shared_ptr;
 using std::static_pointer_cast;
 using std::weak_ptr;
 using std::unordered_map;
-#define ALEMBIC_LIB_USES_TR1
 #endif
 
 using std::auto_ptr;
