@@ -33,9 +33,6 @@
 ##
 ##-*****************************************************************************
 
-# Include the source dirs to make the library root dir an include
-INCLUDE_DIRECTORIES(${ALEMBIC_LIBS_SOURCE_DIR} ${PROJECT_BINARY_DIR}/lib)
-
 ADD_SUBDIRECTORY(Alembic)
 
 # Include the AbcOpenGL lib
