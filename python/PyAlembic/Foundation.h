@@ -50,7 +50,7 @@
 // if Alembic uses shared_ptr from boost, then we don't need this function because boost provides it
 // if Alembic uses shared_ptr from std, then we don't need this function because boost provides it since 1.53
 // if Alembic uses shared_ptr from tr1, then we do need this function
-#if defined(ALEMBIC_LIB_USES_TR1)
+#if defined(ALEMBIC_LIB_USES_TR1) || BOOST_VERSION < 105300
 namespace boost
 {
 
