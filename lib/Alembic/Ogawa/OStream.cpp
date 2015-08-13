@@ -52,7 +52,7 @@ public:
         if (filestream->is_open())
         {
             stream = filestream;
-#if defined _WIN32 || define _WIN64
+#if defined _WIN32 || defined _WIN64
 			filestream->rdbuf()->pubsetbuf(buffer, sizeof(buffer)); 
 #endif
             stream->exceptions ( std::ofstream::failbit |
@@ -94,7 +94,7 @@ public:
         }
     }
 
-#if defined _WIN32 || define _WIN64
+#if defined _WIN32 || defined _WIN64
 	char buffer [STREAM_BUF_SIZE];
 #endif
     std::ostream * stream;
