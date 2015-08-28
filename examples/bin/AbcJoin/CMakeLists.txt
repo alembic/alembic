@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2013,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,20 +33,29 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY(AbcEcho)
-ADD_SUBDIRECTORY(AbcLs)
-ADD_SUBDIRECTORY(AbcTree)
-ADD_SUBDIRECTORY(AbcStitcher)
+INCLUDE_DIRECTORIES( . )
 
-ADD_SUBDIRECTORY(AbcJoin)
+SET( FULL_ABC_LIBS
+     AlembicAbcGeom
+     AlembicAbc
+     AlembicAbcMaterial
+     AlembicAbcCoreHDF5
+     AlembicAbcCoreOgawa
+     AlembicAbcCoreAbstract
+     AlembicOgawa
+     AlembicUtil
+     ${ALEMBIC_HDF5_LIBS}
+     ${ALEMBIC_ILMBASE_LIBS}
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
 
-IF (USE_HDF5)
-    ADD_SUBDIRECTORY(AbcConvert)
-ELSE()
-    MESSAGE(STATUS "Skipping AbcConvert: requires USE_HDF5")
-ENDIF()
-IF (USE_OPENGL)
-    ADD_SUBDIRECTORY(SimpleAbcViewer)
-ELSE()
-    MESSAGE(STATUS "Skipping SimpleAbcViewer: requires USE_OPENGL")
-ENDIF()
+ADD_DEFINITIONS( "-pedantic" )
+ADD_DEFINITIONS( "-Wall" )
+ADD_DEFINITIONS( "-Wextra" )
+
+#-******************************************************************************
+ADD_EXECUTABLE( abcjoin AbcJoin.cpp modGather.cpp animGather.cpp animTran.cpp animOut.cpp levCheck1.cpp levCheck2.cpp levOpt4.cpp levOpt3.cpp levOpt2.cpp levOpt1.cpp libmv/multiview/euclidean.cc libmv/multiview/affine.cc )
+TARGET_LINK_LIBRARIES( abcjoin ${FULL_ABC_LIBS} )
+
+INSTALL( TARGETS abcjoin
+         DESTINATION bin )
