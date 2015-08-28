@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCollection/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
@@ -47,7 +47,7 @@ namespace AbcA = Alembic::AbcCoreAbstract;
 
 void write()
 {
-    Abc::OArchive archive(Alembic::AbcCoreHDF5::WriteArchive(), "Collection.abc" );
+    Abc::OArchive archive(Alembic::AbcCoreOgawa::WriteArchive(), "Collection.abc" );
 
     Abc::OObject root(archive, Abc::kTop);
     Abc::OObject test(root, "test");
@@ -65,12 +65,6 @@ void write()
     strVec.push_back("/a/b/c/3");
 
     Abc::OStringArrayProperty prop;
-
-    // this should throw because the name of the collection is bad
-    TESTING_ASSERT_THROW(prop = group2.getSchema().createCollection("/slashy"),
-        Alembic::Util::Exception);
-
-    TESTING_ASSERT(!prop.valid());
 
     prop = group.getSchema().createCollection("prop");
     prop.set(Abc::StringArraySample(strVec));
@@ -97,7 +91,7 @@ void write()
 
 void read()
 {
-    Abc::IArchive archive(Alembic::AbcCoreHDF5::ReadArchive(), "Collection.abc");
+    Abc::IArchive archive(Alembic::AbcCoreOgawa::ReadArchive(), "Collection.abc");
     Abc::IObject test(archive.getTop(), "test");
     AbcCol::ICollections group(test, "Group1");
     AbcCol::ICollections group2(test, "Group2");

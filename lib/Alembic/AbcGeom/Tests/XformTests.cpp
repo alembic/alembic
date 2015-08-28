@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -72,7 +72,7 @@ void recurseCreateXform(OObject & iParent, int children, int level,
 //-*****************************************************************************
 void xformTreeCreate()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform_tree.abc" );
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), "Xform_tree.abc" );
     std::vector<OXform> xforms;
     OObject root( archive, kTop);
     recurseCreateXform( root, 4, 4, xforms );
@@ -99,7 +99,7 @@ void xformTreeCreate()
 //-*****************************************************************************
 void xformOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "Xform1.abc" );
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), "Xform1.abc" );
 
     OXform a( OObject( archive, kTop ), "a" );
     OXform b( a, "b" );
@@ -178,7 +178,7 @@ void xformOut()
 //-*****************************************************************************
 void xformIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "Xform1.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "Xform1.abc" );
 
     Abc::M44d identity;
     XformSample xs;
@@ -273,7 +273,7 @@ void someOpsXform()
 {
     std::string name = "someOpsXform.abc";
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
 
         OXform a( OObject( archive, kTop ), "a" );
 
@@ -342,7 +342,7 @@ void someOpsXform()
     }
 
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
 
         IXform a( IObject( archive, kTop ), "a" );
         IBox3dProperty bnds = GetIArchiveBounds( archive );

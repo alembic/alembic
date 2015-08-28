@@ -37,6 +37,7 @@
 #ifndef _Alembic_Abc_ICompoundProperty_h_
 #define _Alembic_Abc_ICompoundProperty_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/Base.h>
@@ -47,7 +48,7 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ICompoundProperty
+class ALEMBIC_EXPORT ICompoundProperty
     : public IBasePropertyT<AbcA::CompoundPropertyReaderPtr>
 {
 public:

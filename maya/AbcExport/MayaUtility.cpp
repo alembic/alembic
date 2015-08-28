@@ -540,7 +540,7 @@ MString util::getHelpText()
 "If this flag is present, visibility state will be stored in the Alembic\n"
 "file.  Otherwise everything written out is treated as visible.\n"
 "\n"
-"-wuvs / -writeUVsets\n"
+"-wuvs / -writeUVSets\n"
 "Write all uv sets on MFnMeshes as vector 2 indexed geometry \n"
 "parameters with face varying scope.\n"
 "\n"

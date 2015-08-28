@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -47,7 +47,7 @@ void lightTest()
     std::string fileName = "light1.abc";
 
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), fileName );
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName );
         OLight emptyLightObj( OObject( archive, kTop ), "emptyLight" );
         OLight lightObj( OObject( archive, kTop ), "myLight" );
 
@@ -69,7 +69,7 @@ void lightTest()
         CameraSample samp;
         double top, bottom, left, right;
 
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), fileName );
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), fileName );
         ILight emptyLightObj( IObject( archive, kTop ), "emptyLight" );
         ILight lightObj( IObject( archive, kTop ), "myLight" );
 

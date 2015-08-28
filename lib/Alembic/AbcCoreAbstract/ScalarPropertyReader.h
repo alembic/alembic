@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ScalarPropertyReader_h_
 #define _Alembic_AbcCoreAbstract_ScalarPropertyReader_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyReader.h>
 
@@ -49,7 +50,8 @@ namespace ALEMBIC_VERSION_NS {
 //! sample. This is distinguished from an Array Property, which has a
 //! variable number of elements per sample, and requires more sophisticated
 //! resource management.
-class ScalarPropertyReader : public BasePropertyReader
+class ALEMBIC_EXPORT ScalarPropertyReader 
+    : public BasePropertyReader
 {
 public:
     //! Virtual destructor

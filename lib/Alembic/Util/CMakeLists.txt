@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,39 +33,31 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-     Murmur3.cpp
-     Naming.cpp
-     SpookyV2.cpp
-     TokenMap.cpp )
+CONFIGURE_FILE(Config.h.in Config.h)
 
-SET( H_FILES
-     Digest.h
-     Dimensions.h
-     Exception.h
-     Foundation.h
-     Murmur3.h
-     Naming.h
-     OperatorBool.h
-     PlainOldDataType.h
-     SpookyV2.h
-     TokenMap.h
-     All.h )
+LIST(APPEND CXX_FILES
+    Util/Murmur3.cpp
+    Util/Naming.cpp
+    Util/SpookyV2.cpp
+    Util/TokenMap.cpp)
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
+INSTALL(FILES
+    ${PROJECT_BINARY_DIR}/lib/Alembic/Util/Config.h
+    Digest.h
+    Dimensions.h
+    Exception.h
+    Export.h
+    Foundation.h
+    Murmur3.h
+    Naming.h
+    OperatorBool.h
+    PlainOldDataType.h
+    SpookyV2.h
+    TokenMap.h
+    All.h
+    DESTINATION include/Alembic/Util)
 
-ADD_LIBRARY( AlembicUtil ${SOURCE_FILES} )
-
-INSTALL( TARGETS AlembicUtil
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/Util
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (USE_TESTS)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()
-

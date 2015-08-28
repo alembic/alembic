@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_INuPatch_h_
 #define _Alembic_AbcGeom_INuPatch_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IGeomParam.h>
@@ -47,7 +48,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class INuPatchSchema : public IGeomBaseSchema<NuPatchSchemaInfo>
+class ALEMBIC_EXPORT INuPatchSchema : public IGeomBaseSchema<NuPatchSchemaInfo>
 {
 public:
     class Sample

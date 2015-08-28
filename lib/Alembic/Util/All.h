@@ -36,6 +36,7 @@
 #ifndef _Alembic_Util_All_h_
 #define _Alembic_Util_All_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Util/Foundation.h>
 #include <Alembic/Util/Digest.h>
 #include <Alembic/Util/Dimensions.h>

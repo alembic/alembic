@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_OXform_h_
 #define _Alembic_AbcGeom_OXform_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 
@@ -48,10 +49,10 @@ namespace ALEMBIC_VERSION_NS {
 
 //! The default value for determining whether a property is actually
 //! different from the default.
-static const double kXFORM_DELTA_TOLERANCE = 1.0e-12;
+static ALEMBIC_EXPORT_CONST double kXFORM_DELTA_TOLERANCE = 1.0e-12;
 
 //-*****************************************************************************
-class OXformSchema : public Abc::OSchema<XformSchemaInfo>
+class ALEMBIC_EXPORT OXformSchema : public Abc::OSchema<XformSchemaInfo>
 {
     //-*************************************************************************
     // XFORM SCHEMA

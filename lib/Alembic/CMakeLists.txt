@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,15 +34,33 @@
 ##
 ##-*****************************************************************************
 
-# Recurse into all the subdirectories
+ADD_SUBDIRECTORY(Util)
+ADD_SUBDIRECTORY(AbcCoreAbstract)
+ADD_SUBDIRECTORY(AbcCoreOgawa)
+IF (USE_HDF5)
+    ADD_SUBDIRECTORY(AbcCoreHDF5)
+ENDIF()
+ADD_SUBDIRECTORY(Abc)
+ADD_SUBDIRECTORY(AbcCoreFactory)
+ADD_SUBDIRECTORY(AbcGeom)
+ADD_SUBDIRECTORY(AbcCollection)
+ADD_SUBDIRECTORY(AbcMaterial)
+ADD_SUBDIRECTORY(Ogawa)
 
-ADD_SUBDIRECTORY( Util )
-ADD_SUBDIRECTORY( AbcCoreAbstract )
-ADD_SUBDIRECTORY( AbcCoreOgawa )
-ADD_SUBDIRECTORY( AbcCoreHDF5 )
-ADD_SUBDIRECTORY( Abc )
-ADD_SUBDIRECTORY( AbcCoreFactory )
-ADD_SUBDIRECTORY( AbcGeom )
-ADD_SUBDIRECTORY( AbcCollection )
-ADD_SUBDIRECTORY( AbcMaterial )
-ADD_SUBDIRECTORY( Ogawa )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
+ADD_LIBRARY(Alembic ${LIB_TYPE} ${CXX_FILES})
+
+IF (ALEMBIC_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(Alembic PROPERTIES DEFINE_SYMBOL ALEMBIC_EXPORTS)
+ENDIF()
+
+
+# fixes undefined symbols for x86_64
+IF (ALEMBIC_SHARED_LIBS AND DARWIN)
+    TARGET_LINK_LIBRARIES(${CORE_LIBS})
+ENDIF()
+
+INSTALL(TARGETS Alembic
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)

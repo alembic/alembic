@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2013,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,11 +34,14 @@
 //
 //-*****************************************************************************
 
-#include <Alembic/AbcCoreFactory/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
+#include <Alembic/AbcCoreFactory/All.h>
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
+
+#ifdef ALEMBIC_WITH_HDF5
+#include <Alembic/AbcCoreHDF5/All.h>
+#endif
 
 namespace Abc = Alembic::Abc;
 namespace AbcF = Alembic::AbcCoreFactory;
@@ -59,12 +62,14 @@ void archiveInfoTest(bool useOgawa)
                 Alembic::AbcCoreOgawa::WriteArchive(), "archiveInfo.abc",
                 appWriter, userStr, md );
         }
+#ifdef ALEMBIC_WITH_HDF5
         else
         {
             archive = CreateArchiveWithInfo(
                 Alembic::AbcCoreHDF5::WriteArchive(), "archiveInfo.abc",
                 appWriter, userStr, md );
         }
+#endif
 
         TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
     }
@@ -116,6 +121,7 @@ void scopingTest(bool useOgawa)
                     "archiveScopeTest.abc",
                     "Alembic test", "", MetaData() );
             }
+#ifdef ALEMBIC_WITH_HDF5
             else
             {
                 archive = CreateArchiveWithInfo(
@@ -123,6 +129,8 @@ void scopingTest(bool useOgawa)
                     "archiveScopeTest.abc",
                     "Alembic test", "", MetaData() );
             }
+#endif
+
             top = archive.getTop();
         }
         OObject childA( top, "a");
@@ -164,9 +172,13 @@ void scopingTest(bool useOgawa)
 
 int main( int argc, char *argv[] )
 {
-    archiveInfoTest(false);
     archiveInfoTest(true);
-    scopingTest(false);
     scopingTest(true);
+
+#ifdef ALEMBIC_WITH_HDF5
+    archiveInfoTest(false);
+    scopingTest(false);
+#endif
+
     return 0;
 }

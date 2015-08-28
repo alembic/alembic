@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,10 +33,12 @@
 ##
 ##-*****************************************************************************
 
-PROJECT( ALEMBIC_EXAMPLE_CODE )
-
 # Recurse into libs, then bins.
 INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/lib" )
-ADD_SUBDIRECTORY( AbcClients )
+
 ADD_SUBDIRECTORY( bin )
 
+# No boost dependency was needed so dont include AbcClients
+IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
+    ADD_SUBDIRECTORY( AbcClients )
+ENDIF()

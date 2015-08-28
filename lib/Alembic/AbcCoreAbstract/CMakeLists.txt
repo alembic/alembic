@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,76 +33,58 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES 
-     Foundation.cpp
-     TimeSampling.cpp
-     TimeSamplingType.cpp
-
-     ArraySample.cpp
-     ReadArraySampleCache.cpp
-     ScalarSample.cpp
-
-     BasePropertyWriter.cpp
-     ScalarPropertyWriter.cpp
-     ArrayPropertyWriter.cpp
-     CompoundPropertyWriter.cpp
-     ObjectWriter.cpp 
-     ArchiveWriter.cpp 
-
-     BasePropertyReader.cpp
-     ScalarPropertyReader.cpp
-     ArrayPropertyReader.cpp
-     CompoundPropertyReader.cpp
-     ObjectReader.cpp 
-     ArchiveReader.cpp 
+LIST(APPEND CXX_FILES
+    AbcCoreAbstract/Foundation.cpp
+    AbcCoreAbstract/TimeSampling.cpp
+    AbcCoreAbstract/TimeSamplingType.cpp
+    AbcCoreAbstract/ArraySample.cpp
+    AbcCoreAbstract/ReadArraySampleCache.cpp
+    AbcCoreAbstract/ScalarSample.cpp
+    AbcCoreAbstract/BasePropertyWriter.cpp
+    AbcCoreAbstract/ScalarPropertyWriter.cpp
+    AbcCoreAbstract/ArrayPropertyWriter.cpp
+    AbcCoreAbstract/CompoundPropertyWriter.cpp
+    AbcCoreAbstract/ObjectWriter.cpp
+    AbcCoreAbstract/ArchiveWriter.cpp
+    AbcCoreAbstract/BasePropertyReader.cpp
+    AbcCoreAbstract/ScalarPropertyReader.cpp
+    AbcCoreAbstract/ArrayPropertyReader.cpp
+    AbcCoreAbstract/CompoundPropertyReader.cpp
+    AbcCoreAbstract/ObjectReader.cpp
+    AbcCoreAbstract/ArchiveReader.cpp
 )
 
-SET( H_FILES 
-     All.h
-     ForwardDeclarations.h
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-     ArraySample.h
-     ArraySampleKey.h
-     ReadArraySampleCache.h
-     ScalarSample.h
-
-     DataType.h
-     Foundation.h
-     MetaData.h
-     ObjectHeader.h
-     PropertyHeader.h
-     TimeSampling.h
-     TimeSamplingType.h 
-
-     BasePropertyWriter.h
-     ScalarPropertyWriter.h
-     ArrayPropertyWriter.h
-     CompoundPropertyWriter.h
-     ObjectWriter.h 
-     ArchiveWriter.h 
-
-     BasePropertyReader.h
-     ScalarPropertyReader.h
-     ArrayPropertyReader.h
-     CompoundPropertyReader.h
-     ObjectReader.h 
-     ArchiveReader.h 
+INSTALL(FILES
+    All.h
+    ForwardDeclarations.h
+    ArraySample.h
+    ArraySampleKey.h
+    ReadArraySampleCache.h
+    ScalarSample.h
+    DataType.h
+    Foundation.h
+    MetaData.h
+    ObjectHeader.h
+    PropertyHeader.h
+    TimeSampling.h
+    TimeSamplingType.h
+    BasePropertyWriter.h
+    ScalarPropertyWriter.h
+    ArrayPropertyWriter.h
+    CompoundPropertyWriter.h
+    ObjectWriter.h
+    ArchiveWriter.h
+    BasePropertyReader.h
+    ScalarPropertyReader.h
+    ArrayPropertyReader.h
+    CompoundPropertyReader.h
+    ObjectReader.h
+    ArchiveReader.h
+    DESTINATION include/Alembic/AbcCoreAbstract
 )
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
-
-ADD_LIBRARY( AlembicAbcCoreAbstract ${SOURCE_FILES} )
-
-INSTALL( TARGETS AlembicAbcCoreAbstract
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcCoreAbstract
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (USE_TESTS)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()
-

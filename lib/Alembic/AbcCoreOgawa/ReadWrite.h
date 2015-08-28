@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2013,
+// Copyright (c) 2013-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -38,6 +38,7 @@
 #define _Alembic_AbcCoreOgawa_ReadWrite_h_
 
 #include <Alembic/AbcCoreAbstract/All.h>
+#include <Alembic/Util/Export.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -45,7 +46,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 //! Will return a shared pointer to the archive writer
-class WriteArchive
+class ALEMBIC_EXPORT WriteArchive
 {
 public:
     WriteArchive();
@@ -62,7 +63,7 @@ public:
 //-*****************************************************************************
 //! Will return a shared pointer to the archive reader
 //! This version creates a cache associated with the archive.
-class ReadArchive
+class ALEMBIC_EXPORT ReadArchive
 {
 public:
     ReadArchive();

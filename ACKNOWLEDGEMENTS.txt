@@ -2,7 +2,7 @@ ALEMBIC
 SONY PICTURES IMAGEWORKS AND INDUSTRIAL LIGHT & MAGIC
 OPEN SOURCE SOFTWARE CONTRIBUTORS
 
-http://code.google.com/p/alembic
+http://github.com/alembic
 
 On the behalf of Sony Pictures Imageworks Inc. ("SPI") and
 Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.

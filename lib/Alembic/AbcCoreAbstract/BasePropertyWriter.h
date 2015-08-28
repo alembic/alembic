@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_BasePropertyWriter_h_
 #define _Alembic_AbcCoreAbstract_BasePropertyWriter_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
 #include <Alembic/AbcCoreAbstract/PropertyHeader.h>
@@ -52,7 +53,7 @@ namespace ALEMBIC_VERSION_NS {
 //! have in common - name, metaData, propertyType, as well as
 //! upcasting capabilities. We don't want to rely on dynamic_cast - it's
 //! slow and potentially has problems across DSO interfaces.
-class BasePropertyWriter
+class ALEMBIC_EXPORT BasePropertyWriter
     : private Alembic::Util::noncopyable
 {
 public:

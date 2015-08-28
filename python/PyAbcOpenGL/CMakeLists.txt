@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -34,95 +34,78 @@
 ##-*****************************************************************************
 
 IF (NOT DEFINED LIBPYTHON_VERSION)
-  IF (APPLE)
-    SET( LIBPYTHON_VERSION 2.7 )
-  ELSE ()
-    SET( LIBPYTHON_VERSION 2.6 )
-  ENDIF ()
-ENDIF ()
-
-SET( LIBPYTHON python${LIBPYTHON_VERSION} )
-OPTION( USE_LIB64 "Search for deps in lib64 vs lib" ON )
-
-# find python lib dir and include files
-IF ( ${CMAKE_HOST_UNIX} )
-    SET( LIBPYTHON_FILE "lib${LIBPYTHON}.a" )
-    IF( ${DARWIN} )
-        SET( OSX_PYTHON_ROOT
-             "/System/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}" )
-        SET( PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}" )
-
-        SET( ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/Python" )
+    IF (APPLE)
+        SET(LIBPYTHON_VERSION 2.7)
     ELSE()
-        SET( PYTHON_INCLUDE_DIR "/usr/include/${LIBPYTHON}" )
-        IF (USE_LIB64)
-            SET( ALEMBIC_PYTHON_ROOT "/usr/lib64/${LIBPYTHON}/config" )
-        ELSE()
-            SET( ALEMBIC_PYTHON_ROOT "/usr/lib/${LIBPYTHON}/config" )
-        ENDIF()
-    ENDIF()
-ELSE()
-    SET( LIBPYTHON_FILE "${LIBPYTHON}.dll" )
-    IF ( ${WINDOWS} )
-        SET( ALEMBIC_PYTHON_ROOT "C:/Python${LIBPYTHON_VERSION}/libs" )
-    ELSE()
-        SET( ALEMBIC_PYTHON_ROOT NOTFOUND )
+        SET(LIBPYTHON_VERSION 2.6)
     ENDIF()
 ENDIF()
 
-MESSAGE( STATUS "LIBPYTHON_FILE: ${LIBPYTHON_FILE}" )
-MESSAGE( STATUS "ALEMBIC_PYTHON_ROOT: ${ALEMBIC_PYTHON_ROOT}" )
+SET(LIBPYTHON python${LIBPYTHON_VERSION})
+OPTION(USE_LIB64 "Search for deps in lib64 vs lib" ON)
+
+# find python lib dir and include files
+IF (${CMAKE_HOST_UNIX})
+    SET(LIBPYTHON_FILE "lib${LIBPYTHON}.a")
+    IF(${DARWIN})
+        SET(OSX_PYTHON_ROOT
+            "/System/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}")
+        SET(PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}" )
+        SET(ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/Python")
+    ELSE()
+        SET(PYTHON_INCLUDE_DIR "/usr/include/${LIBPYTHON}")
+        IF (USE_LIB64)
+            SET(ALEMBIC_PYTHON_ROOT "/usr/lib64/${LIBPYTHON}/config")
+        ELSE()
+            SET(ALEMBIC_PYTHON_ROOT "/usr/lib/${LIBPYTHON}/config")
+        ENDIF()
+    ENDIF()
+ELSE()
+    SET(LIBPYTHON_FILE "${LIBPYTHON}.dll")
+    IF (${WINDOWS})
+        SET(ALEMBIC_PYTHON_ROOT "C:/Python${LIBPYTHON_VERSION}/libs")
+    ELSE()
+        SET(ALEMBIC_PYTHON_ROOT NOTFOUND)
+    ENDIF()
+ENDIF()
+
+MESSAGE(STATUS "LIBPYTHON_FILE: ${LIBPYTHON_FILE}")
+MESSAGE(STATUS "ALEMBIC_PYTHON_ROOT: ${ALEMBIC_PYTHON_ROOT}")
 
 # find the python lib file
-FIND_FILE( ALEMBIC_PYTHON_LIBRARY ${LIBPYTHON_FILE}
-           PATHS ${ALEMBIC_PYTHON_ROOT}
-         )
+FIND_FILE(ALEMBIC_PYTHON_LIBRARY ${LIBPYTHON_FILE}
+          PATHS ${ALEMBIC_PYTHON_ROOT}
+)
 
-MESSAGE( STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}" )
-MESSAGE( STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}" )
-MESSAGE( STATUS "PYTHON_INCLUDE_DIR:" ${PYTHON_INCLUDE_DIR} )
+MESSAGE(STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}")
+MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
+MESSAGE(STATUS "PYTHON_INCLUDE_DIR:" ${PYTHON_INCLUDE_DIR})
 
-IF ( Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY )
+IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
 
-  MESSAGE( STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}" )
+  MESSAGE(STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}")
+  SET(PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY})
 
-  SET( PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY} )
+  SET(CPP_FILES
+      PyAlembicOpenGL.cpp
+      main.cpp
+  )
 
-  SET( CORE_LIBS
-    AlembicAbcOpenGL
-    AlembicAbcMaterial
-    AlembicAbcGeom
-    AlembicAbcCollection
-    AlembicAbcCoreFactory
-    AlembicAbc
-    AlembicAbcCoreHDF5
-    AlembicAbcCoreOgawa
-    AlembicAbcCoreAbstract
-    AlembicOgawa
-    AlembicUtil )
+  LINK_LIBRARIES(${CORE_LIBS}
+                 ${PLIBS}
+                 ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
+  )
 
-  SET( CPP_FILES
-    PyAlembicOpenGL.cpp
-    main.cpp )
+  INCLUDE_DIRECTORIES("/usr/include/python${LIBPYTHON_VERSION}" "${ALEMBIC_SOURCE_DIR}/lib"
+      "${ALEMBIC_SOURCE_DIR}/python/PyAbcOpenGL")
 
-  LINK_LIBRARIES( ${CORE_LIBS}
-                  ${ALEMBIC_HDF5_LIBS}
-                  ${PLIBS}
-                  ${ALEMBIC_ILMBASE_LIBS}
-                  ${ZLIB_LIBRARIES}
-                  ${EXTERNAL_MATH_LIBS}
-                  ${ALEMBIC_PYILMBASE_PYIMATH_LIB} )
-
-  INCLUDE_DIRECTORIES( "/usr/include/python${LIBPYTHON_VERSION}" "${ALEMBIC_SOURCE_DIR}/lib"
-      "${ALEMBIC_SOURCE_DIR}/python/PyAbcOpenGL" )
-
-  ADD_LIBRARY( alembicglmodule SHARED ${CPP_FILES} )
+  ADD_LIBRARY(alembicglmodule SHARED ${CPP_FILES})
 
   # to get rid of the "lib" prefix from cmake
-  SET_TARGET_PROPERTIES( alembicglmodule PROPERTIES PREFIX "")
+  SET_TARGET_PROPERTIES(alembicglmodule PROPERTIES PREFIX "")
 
-  INSTALL( TARGETS alembicglmodule
-           LIBRARY DESTINATION lib )
+  INSTALL(TARGETS alembicglmodule
+          LIBRARY DESTINATION lib)
 
 ELSE()
     MESSAGE( FATAL_ERROR "Unable to find Python libs" )

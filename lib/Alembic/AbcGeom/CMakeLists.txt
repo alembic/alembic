@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,116 +33,75 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
+LIST(APPEND CXX_FILES
+    AbcGeom/ArchiveBounds.cpp
+    AbcGeom/GeometryScope.cpp
+    AbcGeom/FilmBackXformOp.cpp
+    AbcGeom/CameraSample.cpp
+    AbcGeom/ICamera.cpp
+    AbcGeom/OCamera.cpp
+    AbcGeom/Basis.cpp
+    AbcGeom/ICurves.cpp
+    AbcGeom/OCurves.cpp
+    AbcGeom/OFaceSet.cpp
+    AbcGeom/IFaceSet.cpp
+    AbcGeom/OLight.cpp
+    AbcGeom/ILight.cpp
+    AbcGeom/ONuPatch.cpp
+    AbcGeom/INuPatch.cpp
+    AbcGeom/OPoints.cpp
+    AbcGeom/IPoints.cpp
+    AbcGeom/OPolyMesh.cpp
+    AbcGeom/IPolyMesh.cpp
+    AbcGeom/OSubD.cpp
+    AbcGeom/ISubD.cpp
+    AbcGeom/Visibility.cpp
+    AbcGeom/XformOp.cpp
+    AbcGeom/XformSample.cpp
+    AbcGeom/IXform.cpp
+    AbcGeom/OXform.cpp
+)
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-  ArchiveBounds.cpp
-
-  GeometryScope.cpp
-
-  FilmBackXformOp.cpp
-  CameraSample.cpp
-  ICamera.cpp
-  OCamera.cpp
-
-  Basis.cpp
-  ICurves.cpp
-  OCurves.cpp
-
-  OFaceSet.cpp
-  IFaceSet.cpp
-
-  OLight.cpp
-  ILight.cpp
-
-  ONuPatch.cpp
-  INuPatch.cpp
-
-  OPoints.cpp
-  IPoints.cpp
-
-  OPolyMesh.cpp
-  IPolyMesh.cpp
-
-  OSubD.cpp
-  ISubD.cpp
-
-  Visibility.cpp
-
-  XformOp.cpp
-  XformSample.cpp
-  IXform.cpp
-  OXform.cpp
+INSTALL(FILES
+    All.h
+    Foundation.h
+    ArchiveBounds.h
+    IGeomBase.h
+    OGeomBase.h
+    GeometryScope.h
+    SchemaInfoDeclarations.h
+    OLight.h
+    ILight.h
+    FilmBackXformOp.h
+    CameraSample.h
+    ICamera.h
+    OCamera.h
+    Basis.h
+    CurveType.h
+    ICurves.h
+    OCurves.h
+    FaceSetExclusivity.h
+    OFaceSet.h
+    IFaceSet.h
+    ONuPatch.h
+    INuPatch.h
+    OGeomParam.h
+    IGeomParam.h
+    OPoints.h
+    IPoints.h
+    OPolyMesh.h
+    IPolyMesh.h
+    OSubD.h
+    ISubD.h
+    Visibility.h
+    XformOp.h
+    XformSample.h
+    IXform.h
+    OXform.h
+    DESTINATION include/Alembic/AbcGeom
 )
 
-SET( H_FILES
-
-  All.h
-
-  Foundation.h
-
-  ArchiveBounds.h
-
-  IGeomBase.h
-  OGeomBase.h
-
-  GeometryScope.h
-
-  SchemaInfoDeclarations.h
-
-  OLight.h
-  ILight.h
-
-  FilmBackXformOp.h
-  CameraSample.h
-  ICamera.h
-  OCamera.h
-
-  Basis.h
-  CurveType.h
-  ICurves.h
-  OCurves.h
-
-  FaceSetExclusivity.h
-  OFaceSet.h
-  IFaceSet.h
-
-  ONuPatch.h
-  INuPatch.h
-
-  OGeomParam.h
-  IGeomParam.h
-
-  OPoints.h
-  IPoints.h
-
-  OPolyMesh.h
-  IPolyMesh.h
-
-  OSubD.h
-  ISubD.h
-
-  Visibility.h
-
-  XformOp.h
-  XformSample.h
-  IXform.h
-  OXform.h
-)
-
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
-
-ADD_LIBRARY( AlembicAbcGeom ${SOURCE_FILES} )
-
-INSTALL( TARGETS AlembicAbcGeom
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcGeom
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (USE_TESTS)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()
-

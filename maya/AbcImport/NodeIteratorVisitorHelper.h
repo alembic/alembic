@@ -179,7 +179,7 @@ private:
     std::vector<std::string> sampleNameList;
 };  // SampledPair
 
-class PolyMeshColorsAndUVs
+class PolyMeshAndFriends
 {
 public:
     Alembic::AbcGeom::IPolyMesh mMesh;
@@ -188,7 +188,7 @@ public:
     std::vector< Alembic::AbcGeom::IC4fGeomParam > mC4s;
 };
 
-class SubDcolorsAndUVs
+class SubDAndFriends
 {
 public:
     Alembic::AbcGeom::ISubD mMesh;
@@ -220,9 +220,9 @@ public:
     std::vector<Alembic::AbcGeom::ICurves>    mCurvesList;
     std::vector<Alembic::AbcGeom::IXform>     mLocList;
     std::vector<Alembic::AbcGeom::INuPatch>   mNurbsList;
-    std::vector< PolyMeshColorsAndUVs >       mPolyMeshList;
+    std::vector< PolyMeshAndFriends >       mPolyMeshList;
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
-    std::vector< SubDcolorsAndUVs >           mSubDList;
+    std::vector< SubDAndFriends >           mSubDList;
     std::vector<Alembic::AbcGeom::IXform>     mXformList;
 
     // objects that aren't animated but have animated visibility need to be

@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_OCurves_h_
 #define _Alembic_AbcGeom_OCurves_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/Basis.h>
 #include <Alembic/AbcGeom/CurveType.h>
@@ -58,7 +59,7 @@ namespace ALEMBIC_VERSION_NS {
 // "width"  - can be constant or can vary
 // "N"      - (just like PolyMesh, via a geom parameter) Normals
 // "uv"     - (just like PolyMesh, via a geom parameter) u-v coordinates
-class OCurvesSchema : public OGeomBaseSchema<CurvesSchemaInfo>
+class ALEMBIC_EXPORT OCurvesSchema : public OGeomBaseSchema<CurvesSchemaInfo>
 {
 public:
     //-*************************************************************************

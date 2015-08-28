@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -52,7 +52,7 @@ using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
 
 void Example1_MeshOut()
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), "facesetSubD1.abc" );
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), "facesetSubD1.abc" );
 
     // Create a SubD class.
     OSubD meshyObj( OObject( archive, kTop ), "subd" );
@@ -125,9 +125,10 @@ void Example1_MeshOut()
     my_face_set.set ( my_face_set_samp );
     my_face_set.setFaceExclusivity ( kFaceSetExclusive );
     TESTING_ASSERT (my_face_set.getFaceExclusivity () == kFaceSetExclusive );
-    // Test that we've computed selfBounds correctly.
+
+    // No bounds were ever provided
     Box3d  face_set_bounds = my_face_set_samp.getSelfBounds ();
-    // std::cout << " -                 has bounds : " << face_set_bounds << std::endl;
+    TESTING_ASSERT(!face_set_bounds.hasVolume());
 
     OObject parentOfFaceSet = my_face_set_obj.getParent ();
     OObject grandParent = parentOfFaceSet.getParent ();
@@ -147,7 +148,7 @@ void Example1_MeshOut()
 //-*****************************************************************************
 void Example1_MeshIn()
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), "facesetSubD1.abc" );
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "facesetSubD1.abc" );
     std::cout << "Reading: " << archive.getName() << std::endl;
 
     ISubD meshyObj( IObject( archive, kTop ), "subd" );

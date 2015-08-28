@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,40 +33,18 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-     IArchive.cpp
-     IData.cpp
-     IGroup.cpp
-     IStreams.cpp
-     OArchive.cpp
-     OData.cpp
-     OGroup.cpp
-     OStream.cpp )
+LIST(APPEND CXX_FILES
+    Ogawa/IArchive.cpp
+    Ogawa/IData.cpp
+    Ogawa/IGroup.cpp
+    Ogawa/IStreams.cpp
+    Ogawa/OArchive.cpp
+    Ogawa/OData.cpp
+    Ogawa/OGroup.cpp
+    Ogawa/OStream.cpp
+)
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET( H_FILES
-     Foundation.h
-     IArchive.h
-     IData.h
-     IGroup.h
-     IStreams.h
-     OArchive.h
-     OData.h
-     OGroup.h
-     OStream.h )
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
-
-ADD_LIBRARY( AlembicOgawa ${SOURCE_FILES} )
-
-INSTALL( TARGETS AlembicOgawa
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/Ogawa
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (USE_TESTS)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()
-

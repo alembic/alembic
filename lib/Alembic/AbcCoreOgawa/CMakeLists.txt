@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,70 +33,32 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  AprImpl.cpp
-  ApwImpl.cpp
-  ArImpl.cpp
-  AwImpl.cpp
-  CprData.cpp
-  CprImpl.cpp
-  CpwData.cpp
-  CpwImpl.cpp
-  MetaDataMap.cpp
-  OrData.cpp
-  OrImpl.cpp
-  OwData.cpp
-  OwImpl.cpp
-  ReadUtil.cpp
-  ReadWrite.cpp
-  SprImpl.cpp
-  SpwImpl.cpp
-  StreamManager.cpp
-  WriteUtil.cpp
+LIST(APPEND CXX_FILES
+    AbcCoreOgawa/AprImpl.cpp
+    AbcCoreOgawa/ApwImpl.cpp
+    AbcCoreOgawa/ArImpl.cpp
+    AbcCoreOgawa/AwImpl.cpp
+    AbcCoreOgawa/CprData.cpp
+    AbcCoreOgawa/CprImpl.cpp
+    AbcCoreOgawa/CpwData.cpp
+    AbcCoreOgawa/CpwImpl.cpp
+    AbcCoreOgawa/MetaDataMap.cpp
+    AbcCoreOgawa/OrData.cpp
+    AbcCoreOgawa/OrImpl.cpp
+    AbcCoreOgawa/OwData.cpp
+    AbcCoreOgawa/OwImpl.cpp
+    AbcCoreOgawa/ReadUtil.cpp
+    AbcCoreOgawa/ReadWrite.cpp
+    AbcCoreOgawa/SprImpl.cpp
+    AbcCoreOgawa/SpwImpl.cpp
+    AbcCoreOgawa/StreamManager.cpp
+    AbcCoreOgawa/WriteUtil.cpp
 )
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET( H_FILES
-  All.h
-  AprImpl.h
-  ApwImpl.h
-  ArImpl.h
-  AwImpl.h
-  CprData.h
-  CprImpl.h
-  CpwData.h
-  CpwImpl.h
-  Foundation.h
-  MetaDataMap.h
-  OrData.h
-  OrImpl.h
-  OwData.h
-  OwImpl.h
-  ReadUtil.h
-  ReadWrite.h
-  SprImpl.h
-  SpwImpl.h
-  StreamManager.h
-  WriteUtil.h
-  WrittenSampleMap.h
-)
+INSTALL(FILES All.h ReadWrite.h
+        DESTINATION include/Alembic/AbcCoreOgawa)
 
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
-
-ADD_LIBRARY( AlembicAbcCoreOgawa ${SOURCE_FILES} )
-
-INSTALL( TARGETS AlembicAbcCoreOgawa
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-# Only install
-INSTALL( FILES
-         All.h
-         ReadWrite.h
-         DESTINATION include/Alembic/AbcCoreOgawa
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (USE_TESTS)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()
-

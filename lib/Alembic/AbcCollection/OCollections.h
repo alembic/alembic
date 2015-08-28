@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -38,13 +38,15 @@
 #define _Alembic_AbcCollection_OCollections_h_
 
 #include <Alembic/Abc/All.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCollection/SchemaInfoDeclarations.h>
 
 namespace Alembic {
 namespace AbcCollection {
 namespace ALEMBIC_VERSION_NS {
 
-class OCollectionsSchema : public Abc::OSchema<CollectionsSchemaInfo>
+class ALEMBIC_EXPORT OCollectionsSchema 
+    : public Abc::OSchema<CollectionsSchemaInfo>
 {
 public:
 

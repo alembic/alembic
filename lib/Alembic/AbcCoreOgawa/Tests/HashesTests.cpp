@@ -725,11 +725,93 @@ void testObjectHashes()
     }
 }
 
+void testStringHashes()
+{
+    std::string archiveName = "stringsHashTest.abc";
+    {
+        AO::WriteArchive w;
+        ABCA::ArchiveWriterPtr a = w(archiveName, ABCA::MetaData());
+        ABCA::ObjectWriterPtr archive = a->getTop();
+        ABCA::CompoundPropertyWriterPtr props = archive->getProperties();
+
+        ABCA::DataType wdtype(Alembic::Util::kWstringPOD, 1);
+        ABCA::ArrayPropertyWriterPtr wstrWrtPtr =
+            props->createArrayProperty("wstr", ABCA::MetaData(), wdtype, 0);
+
+        std::vector < Alembic::Util::wstring > wvals(4);
+        wvals[0] = L"Mash potatoes ";
+        wvals[1] = L"with some delicious gravy.";
+        wvals[2] = L"";
+        wvals[3] = L"\uf8e4 \uf8e2 \uf8d3";
+
+        for (size_t i = 0; i < wvals.size(); ++i)
+        {
+            Alembic::Util::Dimensions wdims(i);
+            wstrWrtPtr->setSample(
+                ABCA::ArraySample(&(wvals.front()), wdtype, wdims));
+        }
+
+        ABCA::DataType sdtype(Alembic::Util::kStringPOD, 1);
+        ABCA::ArrayPropertyWriterPtr strWrtPtr =
+            props->createArrayProperty("str", ABCA::MetaData(), sdtype, 0);
+
+        std::vector < Alembic::Util::string > svals(4);
+        svals[0] = "Sunday, Monday";
+        svals[1] = "Tuesday, Wednesday, Thursday";
+        svals[2] = "";
+        svals[3] = "Some other days";
+
+        for (size_t i = 0; i < svals.size(); ++i)
+        {
+            Alembic::Util::Dimensions sdims(i);
+            strWrtPtr->setSample(
+                ABCA::ArraySample(&(svals.front()), sdtype, sdims));
+        }
+    }
+
+    {
+        AO::ReadArchive r;
+        ABCA::ArchiveReaderPtr a = r( archiveName );
+        ABCA::ObjectReaderPtr archive = a->getTop();
+        ABCA::CompoundPropertyReaderPtr parent = archive->getProperties();
+        ABCA::ArrayPropertyReaderPtr wap = parent->getArrayProperty("wstr");
+        std::vector< ABCA::ArraySampleKey > keys(wap->getNumSamples());
+        for (size_t i = 0; i < wap->getNumSamples(); ++i)
+        {
+            wap->getKey( (ABCA::index_t) i, keys[i] );
+        }
+
+        for (size_t i = 0; i < keys.size(); ++i)
+        {
+            for (size_t j = i+1; j < keys.size(); ++j)
+            {
+                TESTING_ASSERT( keys[i] != keys[j] );
+            }
+        }
+
+        ABCA::ArrayPropertyReaderPtr sap = parent->getArrayProperty("str");
+        keys.resize(sap->getNumSamples());
+        for (size_t i = 0; i < sap->getNumSamples(); ++i)
+        {
+            sap->getKey( (ABCA::index_t) i, keys[i] );
+        }
+
+        for (size_t i = 0; i < keys.size(); ++i)
+        {
+            for (size_t j = i+1; j < keys.size(); ++j)
+            {
+                TESTING_ASSERT( keys[i] != keys[j] );
+            }
+        }
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testArrayPropHashes();
     testScalarPropHashes();
     testCompoundPropHashes();
     testObjectHashes();
+    testStringHashes();
     return 0;
 }

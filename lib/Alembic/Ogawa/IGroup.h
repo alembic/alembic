@@ -36,6 +36,7 @@
 #ifndef _Alembic_Ogawa_IGroup_h_
 #define _Alembic_Ogawa_IGroup_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Ogawa/Foundation.h>
 #include <Alembic/Ogawa/IStreams.h>
 #include <Alembic/Ogawa/IData.h>
@@ -47,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 class IGroup;
 typedef Alembic::Util::shared_ptr< IGroup > IGroupPtr;
 
-class IGroup
+class ALEMBIC_EXPORT IGroup
 {
 public:
     ~IGroup();

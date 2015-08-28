@@ -36,6 +36,7 @@
 #ifndef _Alembic_Ogawa_IArchive_h_
 #define _Alembic_Ogawa_IArchive_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Ogawa/Foundation.h>
 #include <Alembic/Ogawa/IStreams.h>
 #include <Alembic/Ogawa/IGroup.h>
@@ -46,7 +47,7 @@ namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
 
-class IArchive
+class ALEMBIC_EXPORT IArchive
 {
 public:
     IArchive(const std::string & iFileName, std::size_t iNumStreams=1);

@@ -37,6 +37,7 @@
 #ifndef _Alembic_Abc_ISampleSelector_h_
 #define _Alembic_Abc_ISampleSelector_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>
 
 namespace Alembic {
@@ -44,7 +45,7 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ISampleSelector
+class ALEMBIC_EXPORT ISampleSelector
 {
 public:
     enum TimeIndexType

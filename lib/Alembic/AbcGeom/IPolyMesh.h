@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_IPolyMesh_h_
 #define _Alembic_AbcGeom_IPolyMesh_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
 #include <Alembic/AbcGeom/IFaceSet.h>
@@ -48,7 +49,8 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class IPolyMeshSchema : public IGeomBaseSchema<PolyMeshSchemaInfo>
+class ALEMBIC_EXPORT IPolyMeshSchema 
+    : public IGeomBaseSchema<PolyMeshSchemaInfo>
 {
 public:
     class Sample

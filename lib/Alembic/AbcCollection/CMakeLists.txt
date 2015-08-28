@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,33 +33,20 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  OCollections.cpp
-  ICollections.cpp
+LIST(APPEND CXX_FILES
+    AbcCollection/OCollections.cpp
+    AbcCollection/ICollections.cpp
+)
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
+
+INSTALL(FILES
+    All.h
+    SchemaInfoDeclarations.h
+    OCollections.h
+    ICollections.h
+    DESTINATION include/Alembic/AbcCollection
 )
 
-SET( H_FILES
- All.h
- SchemaInfoDeclarations.h
- OCollections.h
- ICollections.h
-)
-
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
-
-ADD_LIBRARY( AlembicAbcCollection ${SOURCE_FILES} )
-
-INSTALL( TARGETS AlembicAbcCollection
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcCollection
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-IF( NOT ALEMBIC_NO_TESTS )
-	ADD_SUBDIRECTORY( Tests )
+IF (USE_TESTS)
+    ADD_SUBDIRECTORY(Tests)
 ENDIF()
-
-

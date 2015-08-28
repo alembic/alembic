@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,35 +33,29 @@
 ##
 ##-*****************************************************************************
 
-SET( TEST_LIBS
-     AlembicAbcMaterial
-     AlembicAbcGeom
-     AlembicAbcCollection
-     AlembicAbcCoreFactory
-     AlembicAbc
-     AlembicAbcCoreHDF5
-     AlembicAbcCoreOgawa
-     AlembicAbcCoreAbstract
-     AlembicOgawa
-     AlembicUtil
-     alembicmodule
-     ${ALEMBIC_HDF5_LIBS}
-     ${ALEMBIC_ILMBASE_LIBS}
-     ${ALEMBIC_PYILMBASE_LIBS}
-     ${CMAKE_THREAD_LIBS_INIT} ${Boost_THREAD_LIBRARY}
-     ${ZLIB_LIBRARIES} ${EXTERNAL_MATH_LIBS} )
+SET(TEST_LIBS
+    Alembic
+    ${HDF5_LIBRARIES}
+    ${ALEMBIC_ILMBASE_LIBS}
+    ${ALEMBIC_PYILMBASE_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_THREAD_LIBRARY}
+    ${ZLIB_LIBRARIES}
+    ${EXTERNAL_MATH_LIBS}
+)
 
-INCLUDE_DIRECTORIES( "${ALEMBIC_SOURCE_DIR}/python/PyAlembic/Tests" )
+INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/python/PyAlembic/Tests")
 
-ADD_EXECUTABLE( PyAlembic_Test
-                testAlembicImport.cpp
-                main.cpp )
+ADD_EXECUTABLE(PyAlembic_Test
+               testAlembicImport.cpp
+               main.cpp
+)
 
-ADD_DEPENDENCIES( PyAlembic_Test alembicmodule )
+ADD_DEPENDENCIES(PyAlembic_Test alembicmodule)
 
-TARGET_LINK_LIBRARIES( PyAlembic_Test ${TEST_LIBS} )
+TARGET_LINK_LIBRARIES(PyAlembic_Test ${CORE_LIBS} ${ALEMBIC_PYILMBASE_LIBS})
 
-ADD_TEST( PyAlembic_Python_TEST PyAlembic_Test )
+ADD_TEST(PyAlembic_Python_TEST PyAlembic_Test)
 
 GET_FILENAME_COMPONENT(BOOST_LIBRARY_DIR ${Boost_PYTHON_LIBRARY} PATH)
 GET_FILENAME_COMPONENT(ILMBASE_LIBRARY_DIR ${ALEMBIC_ILMBASE_IMATH_LIB} PATH)
@@ -69,5 +63,5 @@ GET_FILENAME_COMPONENT(ILMBASE_LIBRARY_DIR ${ALEMBIC_ILMBASE_IMATH_LIB} PATH)
 CONFIGURE_FILE(
     "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.in"
     "${CMAKE_CURRENT_BINARY_DIR}/run_tests"
-    @ONLY)
-
+    @ONLY
+)

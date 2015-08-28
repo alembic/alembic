@@ -35,13 +35,13 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreAbstract/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Util/All.h>
 
 #include <iostream>
 
 //-*****************************************************************************
-namespace A5 = Alembic::AbcCoreHDF5;
+namespace AO = Alembic::AbcCoreOgawa;
 
 namespace AA = Alembic::AbcCoreAbstract;
 
@@ -52,7 +52,7 @@ void WriteTestArchive( const std::string &iArchiveName )
 
     AA::MetaData md;
 
-    A5::WriteArchive aw;
+    AO::WriteArchive aw;
 
     // declaring the object writer prior to opening the archive causes it to
     // stay open when the archive goes out of scope, throwing an exception.
@@ -75,7 +75,7 @@ void ReadTestArchive( const std::string &iArchiveName )
 {
     std::cout << "Entered ReadTestArchive()" << std::endl;
 
-    A5::ReadArchive ar;
+    AO::ReadArchive ar;
 
     // declaring the object reader before opening the archive causes it to stay
     // open when the archive tries to close.

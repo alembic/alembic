@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2013, Industrial Light & Magic,
+## Copyright (c) 2009-2015, Industrial Light & Magic,
 ##   a division of Lucasfilm Entertainment Company Ltd.
 ##
 ## All rights reserved.
@@ -54,21 +54,13 @@ SET( CXX_FILES
   WriteGeo.cpp
 )
 
-SET( CORE_LIBS
-  AlembicAbcGeom
-  AlembicAbc
-  AlembicAbcCoreHDF5
-  AlembicAbcCoreAbstract
-  AlembicUtil )
 
 ADD_ARNOLD_CXX_PLUGIN( AlembicArnoldProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES} )
-TARGET_LINK_LIBRARIES( AlembicArnoldProcedural
-  ${CORE_LIBS}
-  ${ALEMBIC_HDF5_LIBS}
-  ${ALEMBIC_ILMBASE_LIBS}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${ZLIB_LIBRARIES}
-)
+TARGET_LINK_LIBRARIES( AlembicArnoldProcedural ${CORE_LIBS})
+
+set_target_properties(AlembicArnoldProcedural PROPERTIES
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 INSTALL ( TARGETS
   AlembicArnoldProcedural

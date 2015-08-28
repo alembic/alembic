@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_CompoundPropertyReader_h_
 #define _Alembic_AbcCoreAbstract_CompoundPropertyReader_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/BasePropertyReader.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
@@ -49,7 +50,8 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 //! A CompoundProperty is a group of other properties, possibly Simple
 //! or possibly Compound. Every object has at one of these.
-class CompoundPropertyReader : public BasePropertyReader
+class ALEMBIC_EXPORT CompoundPropertyReader 
+    : public BasePropertyReader
 {
 public:
     //! Virtual destructor

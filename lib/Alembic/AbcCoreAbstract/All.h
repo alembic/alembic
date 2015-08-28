@@ -48,6 +48,7 @@
 #include <Alembic/AbcCoreAbstract/CompoundPropertyReader.h>
 #include <Alembic/AbcCoreAbstract/CompoundPropertyWriter.h>
 #include <Alembic/AbcCoreAbstract/DataType.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/MetaData.h>

@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcGeom/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 #include <ImathRandom.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
@@ -298,7 +298,7 @@ void RunAndWriteParticles
 //-*****************************************************************************
 void ReadParticles( const std::string &iFileName )
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                       iFileName );
     IObject topObj( archive, kTop );
 
@@ -334,7 +334,7 @@ void ReadParticles( const std::string &iFileName )
 void pointTestReadWrite()
 {
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
             "particlesOut2.abc" );
         OObject topObj( archive, kTop );
         OPoints ptsObj(topObj, "somePoints");
@@ -363,7 +363,7 @@ void pointTestReadWrite()
     }
 
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                           "particlesOut2.abc" );
 
         IObject topObj = archive.getTop();
@@ -404,7 +404,7 @@ void optPropTest()
 {
     std::string name = "pointsOptPropTest.abc";
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(), name );
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
         OPoints ptObj( OObject( archive, kTop ), "pts" );
         OPointsSchema &pt= ptObj.getSchema();
 
@@ -466,7 +466,7 @@ void optPropTest()
     }
 
     {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(), name );
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
 
         IPoints ptsObj( IObject( archive, kTop ), "pts" );
         IPointsSchema &pts = ptsObj.getSchema();
@@ -496,7 +496,7 @@ int main( int argc, char *argv[] )
     params.emitColor = C3f( 0.85f, 0.9f, 0.1f );
 
     {
-        OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                           "particlesOut1.abc" );
         OObject topObj( archive, kTop );
 

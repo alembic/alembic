@@ -1031,8 +1031,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     MStatus status = MS::kSuccess;
     MObject subDObj = MObject::kNullObj;
 
-    SubDcolorsAndUVs subDcolorsAndUVs;
-    subDcolorsAndUVs.mMesh = iNode;
+    SubDAndFriends subdAndFriends;
+    subdAndFriends.mMesh = iNode;
 
     Alembic::Abc::ICompoundProperty arbProp =
         iNode.getSchema().getArbGeomParams();
@@ -1040,8 +1040,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     Alembic::Abc::ICompoundProperty userProp =
         iNode.getSchema().getUserProperties();
 
-    bool colorAnim = getUVandColorAttrs(arbProp, subDcolorsAndUVs.mV2s,
-        subDcolorsAndUVs.mC3s, subDcolorsAndUVs.mC4s,
+    bool colorAnim = getUVandColorAttrs(arbProp, subdAndFriends.mV2s,
+        subdAndFriends.mC3s, subdAndFriends.mC4s,
         mUnmarkedFaceVaryingColors);
 
     bool isConstant = iNode.getSchema().isConstant();
@@ -1049,7 +1049,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
     // add animated SubDs to the list
     if (!isConstant || colorAnim)
     {
-        mData.mSubDList.push_back(subDcolorsAndUVs);
+        mData.mSubDList.push_back(subdAndFriends);
     }
 
     std::size_t firstProp = mData.mPropList.size();
@@ -1075,7 +1075,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
 
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
-        subDObj = createSubD(mFrame, subDcolorsAndUVs, mParent);
+        subDObj = createSubD(mFrame, subdAndFriends, mParent);
         if (!isConstant || colorAnim)
         {
             mData.mSubDObjList.push_back(subDObj);
@@ -1115,7 +1115,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
         disconnectMesh(subDObj, mData.mPropList, firstProp);
         if (isConstant && CONNECT == mAction)
         {
-            readSubD(mFrame, fn, subDObj, subDcolorsAndUVs, false);
+            readSubD(mFrame, fn, subDObj, subdAndFriends, false);
         }
         addToPropList(firstProp, subDObj);
     }
@@ -1133,8 +1133,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     MStatus status = MS::kSuccess;
     MObject polyObj = MObject::kNullObj;
 
-    PolyMeshColorsAndUVs meshColorsAndUVs;
-    meshColorsAndUVs.mMesh = iNode;
+    PolyMeshAndFriends meshAndFriends;
+    meshAndFriends.mMesh = iNode;
 
     bool isConstant = iNode.getSchema().isConstant();
 
@@ -1144,13 +1144,13 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
     Alembic::Abc::ICompoundProperty userProp =
         iNode.getSchema().getUserProperties();
 
-    bool colorAnim = getUVandColorAttrs(arbProp, meshColorsAndUVs.mV2s,
-        meshColorsAndUVs.mC3s, meshColorsAndUVs.mC4s,
+    bool colorAnim = getUVandColorAttrs(arbProp, meshAndFriends.mV2s,
+        meshAndFriends.mC3s, meshAndFriends.mC4s,
         mUnmarkedFaceVaryingColors);
 
     // add animated poly mesh to the list
     if (!isConstant || colorAnim)
-        mData.mPolyMeshList.push_back(meshColorsAndUVs);
+        mData.mPolyMeshList.push_back(meshAndFriends);
 
     std::size_t firstProp = mData.mPropList.size();
     getAnimatedProps(arbProp, mData.mPropList, mUnmarkedFaceVaryingColors);
@@ -1174,7 +1174,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
 
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
-        polyObj = createPoly(mFrame, meshColorsAndUVs, mParent);
+        polyObj = createPoly(mFrame, meshAndFriends, mParent);
         if (!isConstant || colorAnim)
         {
             mData.mPolyMeshObjList.push_back(polyObj);
@@ -1212,7 +1212,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
         disconnectMesh(polyObj, mData.mPropList, firstProp);
         if (isConstant && CONNECT == mAction)
         {
-            readPoly(mFrame, fn, polyObj, meshColorsAndUVs, false);
+            readPoly(mFrame, fn, polyObj, meshAndFriends, false);
         }
         addToPropList(firstProp, polyObj);
     }

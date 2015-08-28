@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcCoreAbstract_ArchiveWriter_h_
 #define _Alembic_AbcCoreAbstract_ArchiveWriter_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/MetaData.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
@@ -54,7 +55,7 @@ namespace ALEMBIC_VERSION_NS {
 //! constructors in C++, and to avoid creating another class (such as
 //! "Implementation" or something similar)
 namespace IllustrationOnly {
-struct ArchiveWriterConstructor
+struct ALEMBIC_EXPORT ArchiveWriterConstructor
 {
     // Create an archive writer with the given file name and meta data.
     ArchiveWriterPtr operator()( const std::string &iFileName,
@@ -65,7 +66,7 @@ struct ArchiveWriterConstructor
 //-*****************************************************************************
 //! The Archive is "the file". It has a single object, it's top object.
 //! It has no properties, but does have metadata.
-class ArchiveWriter
+class ALEMBIC_EXPORT ArchiveWriter
     : private Alembic::Util::noncopyable
 {
 protected:

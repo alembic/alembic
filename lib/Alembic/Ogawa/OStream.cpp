@@ -52,6 +52,9 @@ public:
         if (filestream->is_open())
         {
             stream = filestream;
+#if defined _WIN32 || defined _WIN64
+			filestream->rdbuf()->pubsetbuf(buffer, sizeof(buffer)); 
+#endif
             stream->exceptions ( std::ofstream::failbit |
                                  std::ofstream::badbit );
         }
@@ -91,6 +94,9 @@ public:
         }
     }
 
+#if defined _WIN32 || defined _WIN64
+	char buffer [STREAM_BUF_SIZE];
+#endif
     std::ostream * stream;
     std::string fileName;
     Alembic::Util::uint64_t startPos;

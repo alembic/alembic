@@ -35,6 +35,7 @@
 //-*****************************************************************************
 
 #include <AbcClients/WFObjConvert/ParseReader.h>
+#include <AbcClients/WFObjConvert/Parser.h>
 
 //-*****************************************************************************
 // I'm breaking with the Alembic "Foundation" and "FoundationPrivate"

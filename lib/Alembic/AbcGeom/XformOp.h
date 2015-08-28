@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_XformOp_h_
 #define _Alembic_AbcGeom_XformOp_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 
 #include <set>
@@ -116,7 +117,7 @@ enum TranslateHint
 //! operation (Translate, Rotate, Scale, Matrix), a hint about the type which
 //! can be interpreted by packages like Maya, and what particular parts of the
 //! operations can change over time.
-class XformOp
+class ALEMBIC_EXPORT XformOp
 {
 public:
     XformOp();

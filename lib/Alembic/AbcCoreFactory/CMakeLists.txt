@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2013-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,24 +33,10 @@
 ##
 ##-*****************************************************************************
 
-# C++ files for this project
-SET( CXX_FILES
-  IFactory.cpp
+LIST(APPEND CXX_FILES
+    AbcCoreFactory/IFactory.cpp
 )
+SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-SET( H_FILES
-  All.h
-  IFactory.h
-)
-
-SET( SOURCE_FILES ${CXX_FILES} ${H_FILES} )
-
-ADD_LIBRARY( AlembicAbcCoreFactory ${SOURCE_FILES} )
-
-INSTALL( TARGETS AlembicAbcCoreFactory
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib/static )
-
-INSTALL( FILES ${H_FILES}
-         DESTINATION include/Alembic/AbcCoreFactory
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
+INSTALL(FILES All.h IFactory.h
+        DESTINATION include/Alembic/AbcCoreFactory)

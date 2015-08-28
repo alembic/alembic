@@ -36,15 +36,20 @@
 #ifndef _Alembic_Ogawa_OStream_h_
 #define _Alembic_Ogawa_OStream_h_
 
+#include <Alembic/Util/Export.h>
 #include <Alembic/Ogawa/Foundation.h>
 
 #include <ostream>
+
+#if defined _WIN32 || defined _WIN64
+	#define STREAM_BUF_SIZE 1024*1024*2
+#endif
 
 namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
 
-class OStream
+class ALEMBIC_EXPORT OStream
 {
 public:
     OStream(const std::string & iFileName);

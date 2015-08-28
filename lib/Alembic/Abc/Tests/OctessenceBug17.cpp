@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2015,
 //  Sony Pictures Imageworks, Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -35,7 +35,7 @@
 //-*****************************************************************************
 
 #include <Alembic/Abc/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcCoreOgawa/All.h>
 
 #include <stdlib.h>
 
@@ -72,7 +72,7 @@ void scramble_heap()
 //-*****************************************************************************
 void simpleTestOut( const std::string &iArchiveName )
 {
-    OArchive archive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
                       iArchiveName );
     OObject archiveTop = archive.getTop();
 
@@ -113,7 +113,7 @@ void simpleTestOut( const std::string &iArchiveName )
 //-*****************************************************************************
 void simpleTestIn( const std::string &iArchiveName )
 {
-    IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
                       iArchiveName, ErrorHandler::kThrowPolicy );
 
     IObject archiveTop = archive.getTop();
@@ -138,6 +138,7 @@ void simpleTestIn( const std::string &iArchiveName )
     //const TimeSamplingType &utst = uts.getTimeSamplingType();
     const TimeSamplingType utst = c0Props.getPtr()->getScalarProperty(
         "uniformdoubleprop" )->getTimeSampling()->getTimeSamplingType();
+    TESTING_ASSERT(utst.isUniform());
 
     for ( size_t j = 0 ; j < g_numDoubleSamps ; j++ )
     {
