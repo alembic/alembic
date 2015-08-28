@@ -41,6 +41,10 @@
 
 #include <ostream>
 
+#if defined _WIN32 || defined _WIN64
+	#define STREAM_BUF_SIZE 1024*1024*2
+#endif
+
 namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {

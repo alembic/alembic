@@ -45,8 +45,12 @@
     #endif
     #define ALEMBIC_EXPORT_CONST
 #else
-    #define ALEMBIC_EXPORT __attribute__ ((visibility ("default")))
-    #define ALEMBIC_EXPORT_CONST const
+	#if defined _WIN32 || defined _WIN64
+		#define ALEMBIC_EXPORT
+	#else
+		#define ALEMBIC_EXPORT __attribute__ ((visibility ("default")))
+	#endif
+	#define ALEMBIC_EXPORT_CONST const
 #endif
 
 #endif /* _Alembic_Util_Export_h_ */
