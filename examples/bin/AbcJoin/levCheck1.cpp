@@ -11,17 +11,20 @@ AnimObj::AnimData::element_type const* findMatchAnim(
 
 namespace levCheck1
 {
-static inline bool equal(AnimObj::TpV const& a, AnimObj::TpV const& b)
+static inline bool equal(
+        AnimObj::Geom::Topo::TpV const& a,
+        AnimObj::Geom::Topo::TpV const& b)
 {
     std::size_t const s = a.size();
     if (b.size() != s)
     {
         return false;
     }
-    return 0 == memcmp(a.data(), b.data(), sizeof(AnimObj::TpV::value_type) * s);
+    return 0 == memcmp(a.data(), b.data(),
+            sizeof(AnimObj::Geom::Topo::TpV::value_type) * s);
 }
 
-bool equal(AnimObj::Topo const& a, AnimObj::Topo const& b)
+bool equal(AnimObj::Geom::Topo const& a, AnimObj::Geom::Topo const& b)
 {
     return equal(*a.cs_, *b.cs_) && equal(*a.ds_, *b.ds_);
 }
@@ -58,7 +61,7 @@ static void recurse(
             return;
         }
         AnimObj::Geom const& geom = *geomPtr;
-        AnimObj::Points const& points = *geom.points_;
+        AnimObj::Geom::Points const& points = *geom.points_;
         std::size_t const psz = points.size();
         if (1 == psz)
         {

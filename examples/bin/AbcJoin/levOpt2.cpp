@@ -54,9 +54,10 @@ static inline bool equalApply(TV const& vs, TX const& rx, TV const& vn)
     return true;
 }
 
-static tuple<unique_ptr<AnimObj::NormalData::NxV>,
-        unique_ptr<AnimObj::NormalData::NsV>,
-        unique_ptr<AnimObj::NormalData::NxV>> extract(AnimObj::NormalData::NsV const& ons)
+static tuple<
+        unique_ptr<AnimObj::Geom::nds_vt>,
+        unique_ptr<AnimObj::Geom::NormalData::NsV>,
+        unique_ptr<AnimObj::Geom::nds_vt>> extract(AnimObj::Geom::NormalData::NsV const& ons)
 {
     std::vector<std::array<float, 3>> nrmf;
     Alembic::AbcGeom::N3fArraySample::value_vector::size_type const nsz = ons.size();
@@ -95,38 +96,40 @@ static tuple<unique_ptr<AnimObj::NormalData::NxV>,
         ndrxv[std::distance(nrmNB, found)] = m;
         ndxv[m] = found->second;
     }
-    return std::make_tuple(std::make_unique<AnimObj::NormalData::NxV>(ndxv),
-            std::make_unique<AnimObj::NormalData::NsV>(nsv),
-            std::make_unique<AnimObj::NormalData::NxV>(ndrxv));
+    return std::make_tuple(
+            std::make_unique<AnimObj::Geom::nds_vt>(ndxv),
+            std::make_unique<AnimObj::Geom::NormalData::NsV>(nsv),
+            std::make_unique<AnimObj::Geom::nds_vt>(ndrxv));
 }
 
-using NormGen = optional<tuple<unique_ptr<AnimObj::NormalData::Normals>,
-        unique_ptr<AnimObj::NormalData::Indices>,
-        unique_ptr<AnimObj::NormalData::NxV>>>;
+using NormGen = optional<tuple<
+        unique_ptr<AnimObj::Geom::NormalData::Normals>,
+        unique_ptr<AnimObj::Geom::NormalData::Indices>,
+        unique_ptr<AnimObj::Geom::nds_vt>>>;
 
-static NormGen generate(AnimObj::NormalData::Normals const& oldNormals)
+static NormGen generate(AnimObj::Geom::NormalData::Normals const& oldNormals)
 {
-    unique_ptr<AnimObj::NormalData::Normals> newNormals =
-            std::make_unique<AnimObj::NormalData::Normals>();
-    AnimObj::NormalData::Normals::const_iterator const& one = oldNormals.cend();
-    AnimObj::NormalData::Normals::const_iterator nit = oldNormals.cbegin();
-    AnimObj::NormalData::NsV const* cn = &**nit;
+    unique_ptr<AnimObj::Geom::NormalData::Normals> newNormals =
+            std::make_unique<AnimObj::Geom::NormalData::Normals>();
+    AnimObj::Geom::NormalData::Normals::const_iterator const& one = oldNormals.cend();
+    AnimObj::Geom::NormalData::Normals::const_iterator nit = oldNormals.cbegin();
+    AnimObj::Geom::NormalData::NsV const* cn = &**nit;
     std::size_t const nsz = cn->size();
-    AnimObj::NormalData::Indices::value_type nrmNdx;
-    AnimObj::NormalData::Normals::value_type nrmVls;
-    AnimObj::NormalData::Indices::value_type nrmRdx;
+    AnimObj::Geom::NormalData::Indices::value_type nrmNdx;
+    AnimObj::Geom::NormalData::Normals::value_type nrmVls;
+    AnimObj::Geom::NormalData::Indices::value_type nrmRdx;
     std::tie(nrmNdx, nrmVls, nrmRdx) = extract(*cn);
     Alembic::AbcGeom::N3fArraySample::value_vector nrmls(nrmVls->size());
     newNormals->emplace_back(std::move(nrmVls));
     ++nit;
-    AnimObj::NormalData::Indices::value_type index = std::make_unique<AnimObj::NormalData::NxV>();
-    AnimObj::NormalData::NxV::value_type topIndex = 0;
+    AnimObj::Geom::NormalData::Indices::value_type index = std::make_unique<AnimObj::Geom::nds_vt>();
+    AnimObj::Geom::nds_vt::value_type topIndex = 0;
     index->emplace_back(topIndex);
-    unique_ptr<AnimObj::NormalData::Indices> indices =
-            std::make_unique<AnimObj::NormalData::Indices>();
-    AnimObj::NormalData::Indices& inds = *indices;
+    unique_ptr<AnimObj::Geom::NormalData::Indices> indices =
+            std::make_unique<AnimObj::Geom::NormalData::Indices>();
+    AnimObj::Geom::NormalData::Indices& inds = *indices;
     inds.emplace_back(std::move(nrmNdx));
-    AnimObj::NormalData::Indices rinds;
+    AnimObj::Geom::NormalData::Indices rinds;
     rinds.emplace_back(std::move(nrmRdx));
     for (; nit != one; ++nit)
     {
@@ -151,7 +154,7 @@ static NormGen generate(AnimObj::NormalData::Normals const& oldNormals)
         }
         if (i < rsz)
         {
-            newNormals->emplace_back(std::make_unique<AnimObj::NormalData::NsV>(nrmls));
+            newNormals->emplace_back(std::make_unique<AnimObj::Geom::NormalData::NsV>(nrmls));
             index->emplace_back(i);
             continue;
         }
@@ -165,7 +168,7 @@ static NormGen generate(AnimObj::NormalData::Normals const& oldNormals)
     return std::make_tuple(std::move(newNormals), std::move(indices), std::move(index));
 }
 
-static void optimize(AnimObj::NormalData& normalData)
+static void optimize(AnimObj::Geom::NormalData& normalData)
 {
     NormGen normGen = generate(*normalData.normals_);
     if (normGen)
@@ -179,7 +182,7 @@ static void recurse(AnimObj const& animObj, std::vector<std::future<void>>& futu
     std::unique_ptr<AnimObj::Geom> const& geomPtr = animObj.geom_;
     if (geomPtr)
     {
-        std::unique_ptr<AnimObj::NormalData>& normalDataPtr = geomPtr->normalData_;
+        std::unique_ptr<AnimObj::Geom::NormalData>& normalDataPtr = geomPtr->normalData_;
         if (normalDataPtr && normalDataPtr->normals_)
         {
             futures.emplace_back(std::async(std::launch::async, optimize, std::ref(*normalDataPtr)));

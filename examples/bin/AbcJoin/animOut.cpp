@@ -17,7 +17,7 @@ typename Vec::const_iterator findMatch(
 
 namespace levCheck1
 {
-bool equal(AnimObj::Topo const& a, AnimObj::Topo const& b);
+bool equal(AnimObj::Geom::Topo const& a, AnimObj::Geom::Topo const& b);
 }
 
 namespace modGather
@@ -42,7 +42,7 @@ bool isSubDShape(string_view const n)
 }
 
 template <typename OGeoSample>
-void putGeoTopo(AnimObj::Topo const& topo, OGeoSample& oGeoSample)
+void putGeoTopo(AnimObj::Geom::Topo const& topo, OGeoSample& oGeoSample)
 {
     oGeoSample.setFaceIndices(*topo.ds_);
     oGeoSample.setFaceCounts(*topo.cs_);
@@ -172,7 +172,7 @@ namespace geo
 {
 template <typename OGeometrySample>
 static inline void spec(
-        AnimObj::Topo const&,
+        AnimObj::Geom::Topo const&,
         AnimObj::Geom const&,
         OGeometrySample&,
         size_t const = 0)
@@ -180,39 +180,39 @@ static inline void spec(
 
 template <>
 inline void spec(
-        AnimObj::Topo const& modelTopo,
+        AnimObj::Geom::Topo const& modelTopo,
         AnimObj::Geom const& geom,
         Alembic::AbcGeom::OPolyMeshSchema::Sample& oPolyMeshSample,
         size_t const ndx)
 {
-    std::unique_ptr<AnimObj::NormalData> const& normalDataPtr = geom.normalData_;
+    std::unique_ptr<AnimObj::Geom::NormalData> const& normalDataPtr = geom.normalData_;
     if (!normalDataPtr)
     {
         return;
     }
-    AnimObj::NormalData const& normalData = *normalDataPtr;
-    std::unique_ptr<AnimObj::NormalData::Normals> const& nsPtr = normalData.normals_;
+    AnimObj::Geom::NormalData const& normalData = *normalDataPtr;
+    std::unique_ptr<AnimObj::Geom::NormalData::Normals> const& nsPtr = normalData.normals_;
     if (!nsPtr)
     {
         return;
     }
-    AnimObj::NormalData::Normals const& normals = *nsPtr;
+    AnimObj::Geom::NormalData::Normals const& normals = *nsPtr;
     if (!levCheck1::equal(geom.topo_, modelTopo))
     {
         return;
     }
-    std::unique_ptr<AnimObj::NormalData::Indices> const& nxsPtr = normalData.indices_;
-    std::unique_ptr<AnimObj::NormalData::NxV> const& nxPtr = normalData.index_;
+    std::unique_ptr<AnimObj::Geom::NormalData::Indices> const& nxsPtr = normalData.indices_;
+    std::unique_ptr<AnimObj::Geom::nds_vt> const& nxPtr = normalData.index_;
     if (nxPtr)
     {
-        AnimObj::NormalData::Indices const& indices = *nxsPtr;
-        AnimObj::NormalData::NxV const& index = *nxPtr;
+        AnimObj::Geom::NormalData::Indices const& indices = *nxsPtr;
+        AnimObj::Geom::nds_vt const& index = *nxPtr;
         oPolyMeshSample.setNormals({*normals[ndx], *indices[index[ndx]],
                 Alembic::AbcGeom::kFacevaryingScope});
     }
     else if (nxsPtr)
     {
-        AnimObj::NormalData::Indices const& indices = *nxsPtr;
+        AnimObj::Geom::NormalData::Indices const& indices = *nxsPtr;
         oPolyMeshSample.setNormals({*normals[ndx], *indices[ndx],
                 Alembic::AbcGeom::kFacevaryingScope});
     }
@@ -220,6 +220,34 @@ inline void spec(
     {
         oPolyMeshSample.setNormals({*normals[ndx], Alembic::AbcGeom::kFacevaryingScope});
     }
+}
+
+template <typename OGeoSchema>
+static inline void putDefUVset(
+        std::unique_ptr<AnimObj::Geom::UVset> const& defUVsetPtr,
+        OGeoSchema& oGeoSchema,
+        typename OGeoSchema::Sample& oGeoSample)
+{
+    if (!defUVsetPtr)
+    {
+        return;
+    }
+    AnimObj::Geom::UVset const& defUVset = *defUVsetPtr;
+    std::string const& defUVname = std::get<std::string>(defUVset);
+    if (!defUVname.empty())
+    {
+        oGeoSchema.setUVSourceName(defUVname);
+    }
+    AnimObj::Geom::uvs_vt const& uvs =
+            *std::get<std::unique_ptr<AnimObj::Geom::uvs_vt>>(defUVset);
+    std::unique_ptr<AnimObj::Geom::nds_vt> const& ndsPtr =
+            std::get<std::unique_ptr<AnimObj::Geom::nds_vt>>(defUVset);
+    if (nullptr == ndsPtr)
+    {
+        oGeoSample.setUVs({uvs, Alembic::AbcGeom::kFacevaryingScope});
+        return;
+    }
+    oGeoSample.setUVs({uvs, *ndsPtr, Alembic::AbcGeom::kFacevaryingScope});
 }
 
 template <typename OGeometry>
@@ -242,10 +270,11 @@ static inline void out(
     putSampling(animObj.sampling_, archOut, oGeoSchema, offset);
     typename OGeometry::schema_type::Sample oGeoSample;
     AnimObj::Geom const& geom = *animObj.geom_;
-    AnimObj::Points const& points = *geom.points_;
+    AnimObj::Geom::Points const& points = *geom.points_;
     oGeoSample.setPositions(*points.front());
-    AnimObj::Topo const& topo = geom.topo_;
+    AnimObj::Geom::Topo const& topo = geom.topo_;
     putGeoTopo(topo, oGeoSample);
+    putDefUVset(geom.uvSet_, oGeoSchema, oGeoSample);
     spec(topo, geom, oGeoSample);
     oGeoSchema.set(oGeoSample);
     size_t const sz = points.size();
@@ -267,11 +296,11 @@ static inline void out(
         double const offset)
 {
     AnimObj::Geom const& geom = *animObj.geom_;
-    AnimObj::Points const& points = *geom.points_;
+    AnimObj::Geom::Points const& points = *geom.points_;
     size_t const sz = points.size();
     bool const replace = sz == 1 && !animConfig.noReplace;
-    AnimObj::PsV const& lps = modGather::getPs(modelData);
-    AnimObj::PsV const* psPtr = &lps;
+    AnimObj::Geom::PsV const& lps = modGather::getPs(modelData);
+    AnimObj::Geom::PsV const* psPtr = &lps;
     if (!replace)
     {
         std::size_t const lpsz = lps.size();
@@ -306,7 +335,7 @@ static inline void out(
     putSampling(animObj.sampling_, archOut, oGeoSchema, offset);
     typename OGeometry::schema_type::Sample oGeoSample;
     oGeoSample.setPositions(*psPtr);
-    AnimObj::Topo const& topo = modGather::topoExtract(modelData);
+    AnimObj::Geom::Topo const& topo = modGather::topoExtract(modelData);
     putGeoTopo(topo, oGeoSample);
     modGather::putDefUVset(modelData, oGeoSchema, oGeoSample);
     modGather::putUVsets(modelData, arbGeoParams);
@@ -507,8 +536,7 @@ class Closure
             {
                 return;
             }
-            std::string const& childName = namespace_ +
-                    withoutMayaNamespace(animObj.name_).to_string();
+            std::string const& childName = namespace_ + wons(animObj.name_);
             if (parentOut.getChildHeader(childName))
             {
                 return;
@@ -543,6 +571,14 @@ class Closure
                 recurse(*animObjPtr, oXform, mdPtr);
             }
         }
+    }
+    std::string wons(std::string n) const
+    {
+        if (animConfig.lookDev || animConfig.formNamespaces)
+        {
+            return withoutMayaNamespace(n).to_string();
+        }
+        return n;
     }
     string_view modName_;
     Alembic::Abc::OArchive& archOut_;

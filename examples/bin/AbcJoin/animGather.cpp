@@ -13,21 +13,37 @@ std::string const materialParamName("ABC_shop_materialpath");
 namespace animGather
 {
 template <typename IGeoSample>
-AnimObj::Topo get(IGeoSample const& iGeoSample)
+AnimObj::Geom::Topo get(IGeoSample const& iGeoSample)
 {
-    AnimObj::Topo topo;
+    AnimObj::Geom::Topo topo;
     Alembic::AbcGeom::Int32ArraySamplePtr const faceIndicesPtr = iGeoSample.getFaceIndices();
-    std::unique_ptr<AnimObj::TpV> dsPtr = std::make_unique<AnimObj::TpV>();
+    std::unique_ptr<AnimObj::Geom::Topo::TpV> dsPtr = std::make_unique<AnimObj::Geom::Topo::TpV>();
     putValues(faceIndicesPtr->get(), faceIndicesPtr->size(), *dsPtr);
     topo.ds_ = std::move(dsPtr);
     Alembic::AbcGeom::Int32ArraySamplePtr const faceCountsPtr = iGeoSample.getFaceCounts();
-    std::unique_ptr<AnimObj::TpV> csPtr = std::make_unique<AnimObj::TpV>();
+    std::unique_ptr<AnimObj::Geom::Topo::TpV> csPtr = std::make_unique<AnimObj::Geom::Topo::TpV>();
     putValues(faceCountsPtr->get(), faceCountsPtr->size(), *csPtr);
     topo.cs_ = std::move(csPtr);
     return topo;
 }
 
-template AnimObj::Topo get(Alembic::AbcGeom::ISubDSchema::Sample const&);
+AnimObj::Geom::UVset defUVset(Alembic::AbcGeom::IV2fGeomParam& uvParam)
+{
+    std::string const& defUVsetName = Alembic::Abc::GetSourceName(uvParam.getMetaData());
+    Alembic::AbcGeom::V2fArraySamplePtr const uvPtr = uvParam.getValueProperty().getValue();
+    std::unique_ptr<AnimObj::Geom::uvs_vt> uvsPtr = std::make_unique<AnimObj::Geom::uvs_vt>();
+    putValues(uvPtr->get(), uvPtr->size(), *uvsPtr);
+    if (!uvParam.isIndexed())
+    {
+        return std::make_tuple(std::move(uvsPtr), nullptr, defUVsetName);
+    }
+    Alembic::AbcGeom::UInt32ArraySamplePtr const uvNdxPtr = uvParam.getIndexProperty().getValue();
+    std::unique_ptr<AnimObj::Geom::nds_vt> ndsPtr = std::make_unique<AnimObj::Geom::nds_vt>();
+    putValues(uvNdxPtr->get(), uvNdxPtr->size(), *ndsPtr);
+    return std::make_tuple(std::move(uvsPtr), std::move(ndsPtr), defUVsetName);
+}
+
+template AnimObj::Geom::Topo get(Alembic::AbcGeom::ISubDSchema::Sample const&);
 
 template <typename IGeometry>
 static inline std::unique_ptr<AnimObj> common(Alembic::Abc::IObject const& child);
@@ -94,17 +110,17 @@ inline void specific(
     {
         return;
     }
-    animObj.geom_->normalData_ = std::make_unique<AnimObj::NormalData>();
-    AnimObj::NormalData& normalData = *animObj.geom_->normalData_;
-    normalData.normals_ = std::make_unique<AnimObj::NormalData::Normals>();
-    AnimObj::NormalData::Normals& normals = *normalData.normals_;
+    animObj.geom_->normalData_ = std::make_unique<AnimObj::Geom::NormalData>();
+    AnimObj::Geom::NormalData& normalData = *animObj.geom_->normalData_;
+    normalData.normals_ = std::make_unique<AnimObj::Geom::NormalData::Normals>();
+    AnimObj::Geom::NormalData::Normals& normals = *normalData.normals_;
     normals.reserve(numSamples);
     Alembic::Abc::IN3fArrayProperty const& iNormalsProperty = normalParam.getValueProperty();
     for (size_t j = 0; j < numSamples; ++j)
     {
         Alembic::AbcGeom::N3fArraySamplePtr const nsPtr = iNormalsProperty.getValue(
                 Alembic::Abc::ISampleSelector(static_cast<Alembic::Abc::index_t>(j)));
-        std::unique_ptr<AnimObj::NormalData::NsV> smpPtr = std::make_unique<AnimObj::NormalData::NsV>();
+        std::unique_ptr<AnimObj::Geom::NormalData::NsV> smpPtr = std::make_unique<AnimObj::Geom::NormalData::NsV>();
         putValues(nsPtr->get(), nsPtr->size(), *smpPtr);
         normals.emplace_back(std::move(smpPtr));
     }
@@ -119,17 +135,22 @@ static inline void specific(
 {
     animObj.geom_ = std::make_unique<AnimObj::Geom>();
     AnimObj::Geom& geom = *animObj.geom_;
-    geom.points_ = std::make_unique<AnimObj::Points>();
-    AnimObj::Points& points = *geom.points_;
+    geom.points_ = std::make_unique<AnimObj::Geom::Points>();
+    AnimObj::Geom::Points& points = *geom.points_;
     points.reserve(numSamples);
     Alembic::Abc::IP3fArrayProperty const& iPositionsProperty = iGeoSchema.getPositionsProperty();
     for (size_t j = 0; j < numSamples; ++j)
     {
         Alembic::AbcGeom::P3fArraySamplePtr const ptnPtr = iPositionsProperty.getValue(
                 Alembic::Abc::ISampleSelector(static_cast<Alembic::Abc::index_t>(j)));
-        std::unique_ptr<AnimObj::PsV> smpPtr = std::make_unique<AnimObj::PsV>();
+        std::unique_ptr<AnimObj::Geom::PsV> smpPtr = std::make_unique<AnimObj::Geom::PsV>();
         putValues(ptnPtr->get(), ptnPtr->size(), *smpPtr);
         points.emplace_back(std::move(smpPtr));
+    }
+    Alembic::AbcGeom::IV2fGeomParam uvParam = iGeoSchema.getUVsParam();
+    if (uvParam.valid())
+    {
+        geom.uvSet_ = std::make_unique<AnimObj::Geom::UVset>(defUVset(uvParam));
     }
     geom.topo_ = get(iGeoSchema.getValue());
     geo::specific(numSamples, iGeoSchema, animObj);

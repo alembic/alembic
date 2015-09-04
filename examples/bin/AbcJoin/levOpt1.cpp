@@ -4,10 +4,11 @@
 
 namespace levOpt1
 {
-using IndexNormal = std::tuple<std::unique_ptr<AnimObj::NormalData::NxV>,
-        std::unique_ptr<AnimObj::NormalData::NsV>>;
+using IndexNormal = std::tuple<
+        std::unique_ptr<AnimObj::Geom::nds_vt>,
+        std::unique_ptr<AnimObj::Geom::NormalData::NsV>>;
 
-static IndexNormal optimize(AnimObj::NormalData::NsV const& ons)
+static IndexNormal optimize(AnimObj::Geom::NormalData::NsV const& ons)
 {
     std::vector<std::array<float, 3>> nrmf;
     Alembic::AbcGeom::N3fArraySample::value_vector::size_type const nsz = ons.size();
@@ -39,8 +40,9 @@ static IndexNormal optimize(AnimObj::NormalData::NsV const& ons)
                 { return a.first < b; } );
         ndxv[m] = nrmNE == found ? 0 : found->second;
     }
-    return std::make_tuple(std::make_unique<AnimObj::NormalData::NxV>(ndxv),
-            std::make_unique<AnimObj::NormalData::NsV>(nsv));
+    return std::make_tuple(
+            std::make_unique<AnimObj::Geom::nds_vt>(ndxv),
+            std::make_unique<AnimObj::Geom::NormalData::NsV>(nsv));
 }
 
 static void recurse(AnimObj const& animObj)
@@ -48,28 +50,28 @@ static void recurse(AnimObj const& animObj)
     std::unique_ptr<AnimObj::Geom> const& geomPtr = animObj.geom_;
     if (geomPtr)
     {
-        std::unique_ptr<AnimObj::NormalData>& normalDataPtr = geomPtr->normalData_;
+        std::unique_ptr<AnimObj::Geom::NormalData>& normalDataPtr = geomPtr->normalData_;
         if (!normalDataPtr)
         {
             return;
         }
-        AnimObj::NormalData& normalData = *normalDataPtr;
+        AnimObj::Geom::NormalData& normalData = *normalDataPtr;
         if (normalData.normals_ && !normalData.index_)
         {
-            normalData.indices_ = std::make_unique<AnimObj::NormalData::Indices>();
-            AnimObj::NormalData::Indices& indices = *normalData.indices_;
+            normalData.indices_ = std::make_unique<AnimObj::Geom::NormalData::Indices>();
+            AnimObj::Geom::NormalData::Indices& indices = *normalData.indices_;
             std::vector<std::future<IndexNormal>> futures;
-            for (std::unique_ptr<AnimObj::NormalData::NsV> const& normals : *normalData.normals_)
+            for (std::unique_ptr<AnimObj::Geom::NormalData::NsV> const& normals : *normalData.normals_)
             {
                 futures.emplace_back(std::async(std::launch::async, optimize, std::cref(*normals)));
             }
             decltype(futures)::iterator fit = futures.begin();
-            for (std::unique_ptr<AnimObj::NormalData::NsV>& normals : *normalData.normals_)
+            for (std::unique_ptr<AnimObj::Geom::NormalData::NsV>& normals : *normalData.normals_)
             {
                 IndexNormal t = fit->get();
                 ++fit;
-                normals = std::move(std::get<AnimObj::NormalData::Normals::value_type>(t));
-                indices.emplace_back(std::move(std::get<AnimObj::NormalData::Indices::value_type>(t)));
+                normals = std::move(std::get<AnimObj::Geom::NormalData::Normals::value_type>(t));
+                indices.emplace_back(std::move(std::get<AnimObj::Geom::NormalData::Indices::value_type>(t)));
             }
         }
     }

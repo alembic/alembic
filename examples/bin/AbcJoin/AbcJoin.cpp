@@ -599,11 +599,11 @@ class Main
             printHelp();
             return EXIT_FAILURE;
         }
-        bool const lookDev =
+        bool const restData =
                 modConfig.outPositions ||
                 modConfig.outNormals ||
                 modConfig.genNormals;
-        if (animFileNames.empty() && !lookDev)
+        if (animFileNames.empty() && !restData)
         {
             std::cerr << "no animation\n";
             printHelp();
@@ -624,9 +624,10 @@ class Main
                 return EXIT_FAILURE;
             }
         }
-        if (animFileNames.empty() && lookDev)
+        if (animFileNames.empty() && restData)
         {
             animFileNames.emplace_back(nubModFileNames.front());
+            animConfig.lookDev = true;
         }
         nubAnimFileNames = unique(animFileNames);
         for (std::string const& nubAnimFileName : nubAnimFileNames)

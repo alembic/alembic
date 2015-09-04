@@ -8,21 +8,21 @@ using std::experimental::optional;
 
 namespace levOpt3
 {
-static optional<vector<AnimObj::TpV>> extract(
+static optional<vector<AnimObj::Geom::Topo::TpV>> extract(
         std::size_t const rsz,
-        AnimObj::Topo const& tp)
+        AnimObj::Geom::Topo const& tp)
 {
-    vector<AnimObj::TpV> rx(rsz);
-    AnimObj::TpV::value_type k = 0;
-    AnimObj::TpV const& ds = *tp.ds_;
-    AnimObj::TpV const& cs = *tp.cs_;
+    vector<AnimObj::Geom::Topo::TpV> rx(rsz);
+    AnimObj::Geom::Topo::TpV::value_type k = 0;
+    AnimObj::Geom::Topo::TpV const& ds = *tp.ds_;
+    AnimObj::Geom::Topo::TpV const& cs = *tp.cs_;
     size_t const csz = cs.size();
     for (size_t i = 0; i < csz; ++i)
     {
         size_t const msz = cs[i];
         for (size_t m = 0; m < msz; ++m)
         {
-            AnimObj::TpV::value_type const n = ds[k];
+            AnimObj::Geom::Topo::TpV::value_type const n = ds[k];
             if (static_cast<std::size_t>(n) >= rsz)
             {
                 return {};
@@ -31,7 +31,7 @@ static optional<vector<AnimObj::TpV>> extract(
             ++k;
         }
     }
-    for (AnimObj::TpV const& rv : rx)
+    for (AnimObj::Geom::Topo::TpV const& rv : rx)
     {
         if (rv.empty())
         {
@@ -41,13 +41,13 @@ static optional<vector<AnimObj::TpV>> extract(
     return rx;
 }
 
-AnimObj::NormalData::NsV normGen(
-        AnimObj::PsV const& ps,
-        AnimObj::Topo const& tp)
+AnimObj::Geom::NormalData::NsV normGen(
+        AnimObj::Geom::PsV const& ps,
+        AnimObj::Geom::Topo const& tp)
 {
-    AnimObj::NormalData::NsV ns(ps.size(), Alembic::Abc::N3f(0));
-    AnimObj::TpV::const_iterator f = tp.ds_->begin();
-    for (AnimObj::TpV::value_type const c : *tp.cs_)
+    AnimObj::Geom::NormalData::NsV ns(ps.size(), Alembic::Abc::N3f(0));
+    AnimObj::Geom::Topo::TpV::const_iterator f = tp.ds_->begin();
+    for (AnimObj::Geom::Topo::TpV::value_type const c : *tp.cs_)
     {
         Alembic::AbcGeom::P3fArraySample::value_type const& a = ps[*f];
         Alembic::Abc::N3f const n = (a - ps[f[2]]) % (a - ps[f[1]]);
@@ -63,14 +63,14 @@ AnimObj::NormalData::NsV normGen(
 namespace test
 {
 static bool sample(
-        std::vector<AnimObj::TpV> const& rx,
-        AnimObj::NormalData::NsV const& ns)
+        std::vector<AnimObj::Geom::Topo::TpV> const& rx,
+        AnimObj::Geom::NormalData::NsV const& ns)
 {
     size_t const rsz = rx.size();
     for (size_t i = 0; i < rsz; ++i)
     {
-        AnimObj::TpV const& x = rx[i];
-        AnimObj::NormalData::NsV::value_type const& n0 = ns[x[0]];
+        AnimObj::Geom::Topo::TpV const& x = rx[i];
+        AnimObj::Geom::NormalData::NsV::value_type const& n0 = ns[x[0]];
         size_t const xsz = x.size();
         for (size_t j = 1; j < xsz; ++j)
         {
@@ -84,9 +84,9 @@ static bool sample(
 }
 
 static bool sample(
-        AnimObj::NormalData::NsV const& nd,
-        std::vector<AnimObj::TpV> const& rx,
-        AnimObj::NormalData::NsV const& ns)
+        AnimObj::Geom::NormalData::NsV const& nd,
+        std::vector<AnimObj::Geom::Topo::TpV> const& rx,
+        AnimObj::Geom::NormalData::NsV const& ns)
 {
     std::size_t const sz = nd.size();
     if (rx.size() != sz)
@@ -110,25 +110,25 @@ static bool sample(
 }
 
 static bool all(
-        AnimObj::Points const& ps,
-        AnimObj::Topo const& tp,
-        AnimObj::NormalData::Normals const& ns)
+        AnimObj::Geom::Points const& ps,
+        AnimObj::Geom::Topo const& tp,
+        AnimObj::Geom::NormalData::Normals const& ns)
 {
     std::size_t const sz = ps.size();
     if (ns.size() != sz)
     {
         return false;
     }
-    optional<vector<AnimObj::TpV>> const& prx =
+    optional<vector<AnimObj::Geom::Topo::TpV>> const& prx =
             extract(ps.front()->size(), tp);
     if (!prx)
     {
         return false;
     }
-    vector<AnimObj::TpV> const& rx = *prx;
+    vector<AnimObj::Geom::Topo::TpV> const& rx = *prx;
     for (std::size_t i = 0; i < sz; ++i)
     {
-        AnimObj::NormalData::NsV const& nv = *ns[i];
+        AnimObj::Geom::NormalData::NsV const& nv = *ns[i];
         if (!sample(rx, nv))
         {
             return false;
@@ -143,11 +143,11 @@ static bool all(
 }
 
 static void optimize(
-        AnimObj::Points const& points,
-        AnimObj::Topo const& topo,
-        std::unique_ptr<AnimObj::NormalData>& normalDataPtr)
+        AnimObj::Geom::Points const& points,
+        AnimObj::Geom::Topo const& topo,
+        std::unique_ptr<AnimObj::Geom::NormalData>& normalDataPtr)
 {
-    std::unique_ptr<AnimObj::NormalData::Normals> const& nsPtr = normalDataPtr->normals_;
+    std::unique_ptr<AnimObj::Geom::NormalData::Normals> const& nsPtr = normalDataPtr->normals_;
     if (!nsPtr)
     {
         return;
@@ -164,7 +164,7 @@ static void recurse(AnimObj& animObj, std::vector<std::future<void>>& futures)
     if (geomPtr)
     {
         AnimObj::Geom& geom = *geomPtr;
-        std::unique_ptr<AnimObj::NormalData>& normalDataPtr = geom.normalData_;
+        std::unique_ptr<AnimObj::Geom::NormalData>& normalDataPtr = geom.normalData_;
         if (!normalDataPtr)
         {
             return;

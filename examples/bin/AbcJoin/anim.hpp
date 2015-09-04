@@ -42,34 +42,40 @@ struct AnimObj
         AttributeContainer<std::string> strings_;
         AttributeContainer<Alembic::AbcGeom::OBoolGeomParam::value_type> bools_;
     };
-    struct NormalData
-    {
-        using NsV = Alembic::AbcGeom::N3fArraySample::value_vector;
-        using Normals = std::vector<std::unique_ptr<NsV>>;
-        std::unique_ptr<Normals> normals_;
-        using NxV = Alembic::AbcGeom::UInt32ArraySample::value_vector;
-        using Indices = std::vector<std::unique_ptr<NxV>>;
-        std::unique_ptr<Indices> indices_;
-        std::unique_ptr<NxV> index_;
-    };
     std::string name_;
     Sampling sampling_;
     std::unique_ptr<Visible> visible_;
     std::unique_ptr<Attributes> attributes_;
     using Xforms = std::vector<Alembic::Abc::M44d>;
     std::unique_ptr<Xforms> xForms_;
-    using PsV = Alembic::AbcGeom::P3fArraySample::value_vector;
-    using Points = std::vector<std::unique_ptr<PsV>>;
-    using TpV = Alembic::AbcGeom::Int32ArraySample::value_vector;
-    struct Topo
-    {
-        std::unique_ptr<TpV> ds_;
-        std::unique_ptr<TpV> cs_;
-    };
     struct Geom
     {
+        struct Topo
+        {
+            using TpV = Alembic::AbcGeom::Int32ArraySample::value_vector;
+            std::unique_ptr<TpV> ds_;
+            std::unique_ptr<TpV> cs_;
+        };
+        using PsV = Alembic::AbcGeom::P3fArraySample::value_vector;
+        using Points = std::vector<std::unique_ptr<PsV>>;
         std::unique_ptr<Points> points_;
+        using nds_vt = Alembic::AbcGeom::UInt32ArraySample::value_vector;
+        struct NormalData
+        {
+            using NsV = Alembic::AbcGeom::N3fArraySample::value_vector;
+            using Normals = std::vector<std::unique_ptr<NsV>>;
+            std::unique_ptr<Normals> normals_;
+            using Indices = std::vector<std::unique_ptr<nds_vt>>;
+            std::unique_ptr<Indices> indices_;
+            std::unique_ptr<nds_vt> index_;
+        };
         std::unique_ptr<NormalData> normalData_;
+        using uvs_vt = Alembic::AbcGeom::V2fArraySample::value_vector;
+        using UVset = std::tuple<
+                std::unique_ptr<uvs_vt>,
+                std::unique_ptr<nds_vt>,
+                std::string>;
+        std::unique_ptr<UVset> uvSet_;
         Topo topo_;
     };
     std::unique_ptr<Geom> geom_;
@@ -84,6 +90,7 @@ struct AnimConfig
     bool forceNoMatch = false;
     bool passNoMatch = false;
     bool noReplace = false;
+    bool lookDev = false;
 };
 
 struct ModConfig

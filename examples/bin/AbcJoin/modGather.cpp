@@ -16,14 +16,15 @@ string_view withoutMayaNamespace(string_view const s);
 namespace animGather
 {
 Alembic::Abc::IArchive getArchive(std::string const&);
-template <typename IGeoSample> AnimObj::Topo get(IGeoSample const&);
+template <typename IGeoSample> AnimObj::Geom::Topo get(IGeoSample const&);
+AnimObj::Geom::UVset defUVset(Alembic::AbcGeom::IV2fGeomParam& uvParam);
 }
 
 namespace levOpt3
 {
-AnimObj::NormalData::NsV normGen(
-        AnimObj::PsV const& ps,
-        AnimObj::Topo const& tp);
+AnimObj::Geom::NormalData::NsV normGen(
+        AnimObj::Geom::PsV const& ps,
+        AnimObj::Geom::Topo const& tp);
 }
 
 namespace
@@ -49,24 +50,48 @@ class UVset
     UVset() = delete;
     UVset(UVset const&) = delete;
     UVset& operator=(UVset const&) = delete;
-    UVset(Alembic::Abc::V2f const* const uvs,
+    UVset(AnimObj::Geom::uvs_vt::value_type const* const uvs,
           std::size_t const uvLen,
           std::string const& nm,
-          Alembic::Abc::uint32_t const* const nds = 0,
+          AnimObj::Geom::nds_vt::value_type const* const nds = nullptr,
           std::size_t const ndLen = 0)
-        : nm_(nm)
     {
-        if (ndLen)
+        std::unique_ptr<AnimObj::Geom::uvs_vt> uvsPtr =
+                std::make_unique<AnimObj::Geom::uvs_vt>();
+        putValues(uvs, uvLen, *uvsPtr);
+        if (0 == ndLen)
         {
-            nds_.resize(ndLen);
-            memcpy(nds_.data(), nds, sizeof(Alembic::Abc::uint32_t) * ndLen);
+            uvSet_ = std::make_tuple(std::move(uvsPtr), nullptr, nm);
+            return;
         }
-        uvs_.resize(uvLen);
-        memcpy(uvs_.data(), uvs, sizeof(Alembic::Abc::V2f) * uvLen);
+        std::unique_ptr<AnimObj::Geom::nds_vt> ndsPtr =
+                std::make_unique<AnimObj::Geom::nds_vt>();
+        putValues(nds, ndLen, *ndsPtr);
+        uvSet_ = std::make_tuple(std::move(uvsPtr), std::move(ndsPtr), nm);
     }
-    std::string nm_;
-    std::vector<Alembic::Abc::V2f> uvs_;
-    std::vector<Alembic::Abc::uint32_t> nds_;
+    UVset(AnimObj::Geom::UVset uvSet) : uvSet_(std::move(uvSet)) {}
+    bool ndx() const
+    {
+        return ndsPtr() ? false : true;
+    }
+    AnimObj::Geom::nds_vt const& nds() const
+    {
+        return *ndsPtr();
+    }
+    std::string const& nm() const
+    {
+        return std::get<std::string>(uvSet_);
+    }
+    AnimObj::Geom::uvs_vt const& uvs() const
+    {
+        return *std::get<std::unique_ptr<AnimObj::Geom::uvs_vt>>(uvSet_);
+    }
+   private:
+    std::unique_ptr<AnimObj::Geom::nds_vt> const& ndsPtr() const
+    {
+        return std::get<std::unique_ptr<AnimObj::Geom::nds_vt>>(uvSet_);
+    }
+    AnimObj::Geom::UVset uvSet_;
 };
 
 class Positions
@@ -147,7 +172,7 @@ class Normals
         l2w(mx);
     }
     Normals(Positions::ps_vt const& ps,
-            AnimObj::Topo const& tp,
+            AnimObj::Geom::Topo const& tp,
             Alembic::Abc::M44d const& mx)
         : sc_(Alembic::AbcGeom::kVertexScope), lns_(levOpt3::normGen(ps, tp))
     {
@@ -178,8 +203,8 @@ class Creases
         cp(ss, ss_);
     }
     using sharp_vt = Alembic::AbcGeom::FloatArraySample::value_vector;
-    AnimObj::TpV ds_;
-    AnimObj::TpV ls_;
+    AnimObj::Geom::Topo::TpV ds_;
+    AnimObj::Geom::Topo::TpV ls_;
     sharp_vt ss_;
 
    private:
@@ -261,18 +286,17 @@ class UVsets
                 continue;
             }
             UVset const& uvSet = *uvSetPtr;
-            std::vector<Alembic::Abc::uint32_t> const& nds = uvSet.nds_;
-            if (nds.empty())
+            if (uvSet.ndx())
             {
-                Alembic::AbcGeom::OV2fGeomParam(arbGeoParams, uvSet.nm_, false,
-                        Alembic::AbcGeom::kFacevaryingScope, 1).set({uvSet.uvs_,
+                Alembic::AbcGeom::OV2fGeomParam(arbGeoParams, uvSet.nm(), false,
+                        Alembic::AbcGeom::kFacevaryingScope, 1).set({uvSet.uvs(),
                                 Alembic::AbcGeom::kFacevaryingScope});
             }
             else
             {
-                Alembic::AbcGeom::OV2fGeomParam(arbGeoParams, uvSet.nm_, true,
-                        Alembic::AbcGeom::kFacevaryingScope, 1).set({uvSet.uvs_,
-                                nds, Alembic::AbcGeom::kFacevaryingScope});
+                Alembic::AbcGeom::OV2fGeomParam(arbGeoParams, uvSet.nm(), true,
+                        Alembic::AbcGeom::kFacevaryingScope, 1).set({uvSet.uvs(),
+                                uvSet.nds(), Alembic::AbcGeom::kFacevaryingScope});
             }
         }
     }
@@ -378,7 +402,7 @@ struct ModelData
     ModAttrs as_;
     UVsetPtr defUVset_;
     UVsets uvSets_;
-    AnimObj::Topo tp_;
+    AnimObj::Geom::Topo tp_;
     std::unique_ptr<Positions> ps_;
     std::unique_ptr<Normals> ns_;
     std::unique_ptr<Creases> cs_;
@@ -737,18 +761,7 @@ static inline void gatherModelGeometry(
         Alembic::AbcGeom::IV2fGeomParam uvParam = iGeoSchema.getUVsParam();
         if (uvParam.valid())
         {
-            std::string const& defUVsetName = Alembic::Abc::GetSourceName(uvParam.getMetaData());
-            Alembic::AbcGeom::V2fArraySamplePtr const uvPtr = uvParam.getValueProperty().getValue();
-            if (uvParam.isIndexed())
-            {
-                Alembic::AbcGeom::UInt32ArraySamplePtr const uvNdxPtr = uvParam.getIndexProperty().getValue();
-                modelData.defUVset_ = std::make_unique<UVset>(uvPtr->get(), uvPtr->size(), defUVsetName,
-                        uvNdxPtr->get(), uvNdxPtr->size());
-            }
-            else
-            {
-                modelData.defUVset_ = std::make_unique<UVset>(uvPtr->get(), uvPtr->size(), defUVsetName);
-            }
+            modelData.defUVset_ = std::make_unique<UVset>(animGather::defUVset(uvParam));
         }
     }
     Alembic::Abc::ICompoundProperty const& arbGeoParams = iGeoSchema.getArbGeomParams();
@@ -943,12 +956,12 @@ void putAnimGeometrySpec(
         return;
     }
     Creases const& cs = *csPtr;
-    AnimObj::TpV const& ds = cs.ds_;
+    AnimObj::Geom::Topo::TpV const& ds = cs.ds_;
     if (ds.empty())
     {
         return;
     }
-    AnimObj::TpV const& ls = cs.ls_;
+    AnimObj::Geom::Topo::TpV const& ls = cs.ls_;
     if (ls.empty())
     {
         return;
@@ -1023,18 +1036,18 @@ void putDefUVset(
         return;
     }
     UVset const& defUVset = *defUVsetPtr;
-    std::string const& defUVname = defUVset.nm_;
+    std::string const& defUVname = defUVset.nm();
     if (!defUVname.empty())
     {
         oGeoSchema.setUVSourceName(defUVname);
     }
-    std::vector<Alembic::Abc::uint32_t> const& nds = defUVset.nds_;
-    if (nds.empty())
+    if (defUVset.ndx())
     {
-        oGeoSample.setUVs({defUVset.uvs_, Alembic::AbcGeom::kFacevaryingScope});
+        oGeoSample.setUVs({defUVset.uvs(), Alembic::AbcGeom::kFacevaryingScope});
         return;
     }
-    oGeoSample.setUVs({defUVset.uvs_, nds, Alembic::AbcGeom::kFacevaryingScope});
+    oGeoSample.setUVs({defUVset.uvs(), defUVset.nds(),
+            Alembic::AbcGeom::kFacevaryingScope});
 }
 
 template void putDefUVset(
@@ -1134,12 +1147,12 @@ ModelData const* findMatch(
     return findMatch(withoutMayaNamespaces(fullName), modName);
 }
 
-AnimObj::PsV const& getPs(ModelData const& modelData)
+AnimObj::Geom::PsV const& getPs(ModelData const& modelData)
 {
     return modelData.ps_->localSpace();
 }
 
-AnimObj::Topo const& topoExtract(ModelData const& modelData)
+AnimObj::Geom::Topo const& topoExtract(ModelData const& modelData)
 {
     return modelData.tp_;
 }

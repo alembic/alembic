@@ -17,9 +17,9 @@ ModelData const* findMatch(
         string_view const fullName,
         string_view const modName);
 
-AnimObj::PsV const& getPs(ModelData const&);
+AnimObj::Geom::PsV const& getPs(ModelData const&);
 
-AnimObj::Topo const& topoExtract(ModelData const&);
+AnimObj::Geom::Topo const& topoExtract(ModelData const&);
 
 ModAttrs const& getModAttrs(ModelData const& modelData);
 

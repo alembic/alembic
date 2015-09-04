@@ -26,7 +26,7 @@ namespace levOpt4
 {
 static inline void prpMx(
         std::size_t const n,
-        AnimObj::PsV const& v,
+        AnimObj::Geom::PsV const& v,
         libmv::Mat& m,
         std::size_t const s)
 {
@@ -42,8 +42,8 @@ static inline void prpMx(
 namespace xForm
 {
 static inline bool estimate(
-        AnimObj::PsV const& va,
-        AnimObj::PsV const& vb,
+        AnimObj::Geom::PsV const& va,
+        AnimObj::Geom::PsV const& vb,
         std::size_t const vs,
         libmv::Mat4& mc)
 {
@@ -62,9 +62,9 @@ static inline bool estimate(
 }
 
 static inline optional<Alembic::Abc::M44d> generate(
-        AnimObj::PsV const& va,
+        AnimObj::Geom::PsV const& va,
         Alembic::Abc::M44d const& mx,
-        AnimObj::PsV const& vb)
+        AnimObj::Geom::PsV const& vb)
 {
     std::size_t const vs = va.size();
     if (vb.size() != vs)
@@ -120,12 +120,12 @@ static inline bool find(
 }
 
 static std::unique_ptr<AnimObj::Xforms> iterate(
-        AnimObj::PsV const& ps,
+        AnimObj::Geom::PsV const& ps,
         Alembic::Abc::M44d const& xForm,
-        AnimObj::Points const& points)
+        AnimObj::Geom::Points const& points)
 {
     std::unique_ptr<AnimObj::Xforms> mvp = std::make_unique<AnimObj::Xforms>();
-    for (AnimObj::Points::value_type const& point : points)
+    for (AnimObj::Geom::Points::value_type const& point : points)
     {
         optional<Alembic::Abc::M44d> const& m = xForm::generate(ps, xForm, *point);
         if (m)
@@ -138,17 +138,17 @@ static std::unique_ptr<AnimObj::Xforms> iterate(
     return mvp;
 }
 
-static inline void copy(AnimObj::PsV const& ps, std::unique_ptr<AnimObj::Points>& psPtr)
+static inline void copy(AnimObj::Geom::PsV const& ps, std::unique_ptr<AnimObj::Geom::Points>& psPtr)
 {
-    psPtr = std::make_unique<AnimObj::Points>();
-    AnimObj::Points& points = *psPtr;
+    psPtr = std::make_unique<AnimObj::Geom::Points>();
+    AnimObj::Geom::Points& points = *psPtr;
     points.reserve(1);
-    points.emplace_back(std::make_unique<AnimObj::PsV>(ps));
+    points.emplace_back(std::make_unique<AnimObj::Geom::PsV>(ps));
 }
 
 static void optimize(
-        AnimObj::PsV const& ps,
-        AnimObj::Points const& points,
+        AnimObj::Geom::PsV const& ps,
+        AnimObj::Geom::Points const& points,
         AnimObj& anim,
         AnimObj& parent)
 {
@@ -180,7 +180,7 @@ static void recurse(
     std::unique_ptr<AnimObj::Geom> const& geomPtr = animObj.geom_;
     if (geomPtr)
     {
-        AnimObj::Points const& points = *geomPtr->points_;
+        AnimObj::Geom::Points const& points = *geomPtr->points_;
         if (points.size() < 2)
         {
             return;

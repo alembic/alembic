@@ -7,7 +7,7 @@ extern unsigned char levOpt;
 namespace animOut
 {
 template <typename OGeoSample>
-void putGeoTopo(AnimObj::Topo const& topo, OGeoSample& oGeoSample);
+void putGeoTopo(AnimObj::Geom::Topo const& topo, OGeoSample& oGeoSample);
 
 bool isSubDShape(string_view const n);
 
@@ -431,7 +431,7 @@ static inline void transferAnimGeometryOut(
         oGeoSchema.setTimeSampling(iGeoSchema.getTimeSampling());
     }
     typename OGeometry::schema_type::Sample oGeoSample;
-    AnimObj::PsV const& lps = modGather::getPs(modelData);
+    AnimObj::Geom::PsV const& lps = modGather::getPs(modelData);
     if (1 == numSamples)
     {
         oGeoSample.setPositions(lps);
