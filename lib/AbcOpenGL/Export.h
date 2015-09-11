@@ -45,7 +45,11 @@
     #endif
     #define ABC_OPENGL_EXPORT_CONST
 #else
-    #define ABC_OPENGL_EXPORT __attribute__ ((visibility ("default")))
+	#if defined _WIN32 || defined _WIN64
+		#define ABC_OPENGL_EXPORT
+	#else
+        #define ABC_OPENGL_EXPORT __attribute__ ((visibility ("default")))
+	#endif
     #define ABC_OPENGL_EXPORT_CONST const
 #endif
 
