@@ -74,22 +74,12 @@ ENDIF()
 FIND_PATH( ALEMBIC_PRMAN_INCLUDE_PATH ri.h
            PATHS
            "${ALEMBIC_PRMAN_ROOT}/include"
-           NO_DEFAULT_PATH
-           NO_CMAKE_ENVIRONMENT_PATH
-           NO_CMAKE_PATH
-           NO_SYSTEM_ENVIRONMENT_PATH
-           NO_CMAKE_SYSTEM_PATH
            DOC "The directory where ri.h resides" )
 
 SET( ALEMBIC_PRMAN_LIBPRMAN ALEMBIC_PRMAN_LIBPRMAN-NOTFOUND )
 FIND_LIBRARY( ALEMBIC_PRMAN_LIBPRMAN prman
               PATHS
               "${ALEMBIC_PRMAN_ROOT}/lib/"
-              NO_DEFAULT_PATH
-              NO_CMAKE_ENVIRONMENT_PATH
-              NO_CMAKE_PATH
-              NO_SYSTEM_ENVIRONMENT_PATH
-              NO_CMAKE_SYSTEM_PATH
               DOC "The prman library" )
 
 

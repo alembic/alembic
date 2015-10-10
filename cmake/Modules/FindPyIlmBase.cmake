@@ -94,22 +94,12 @@ ELSE()
     FIND_PATH(ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY PyImath.h
               PATHS
               ${INCLUDE_PATHS}
-              NO_DEFAULT_PATH
-              NO_CMAKE_ENVIRONMENT_PATH
-              NO_CMAKE_PATH
-              NO_SYSTEM_ENVIRONMENT_PATH
-              NO_CMAKE_SYSTEM_PATH
               DOC "The directory where PyImath.h resides")
 
     IF(NOT DEFINED ALEMBIC_PYILMBASE_PYIMATH_LIB)
         FIND_LIBRARY(ALEMBIC_PYILMBASE_PYIMATH_LIB PyImath
                      PATHS
                      ${LIBRARY_PATHS}
-                     NO_DEFAULT_PATH
-                     NO_CMAKE_ENVIRONMENT_PATH
-                     NO_CMAKE_PATH
-                     NO_SYSTEM_ENVIRONMENT_PATH
-                     NO_CMAKE_SYSTEM_PATH
                      DOC "The PyImath library")
     ENDIF()
 
@@ -117,11 +107,6 @@ ELSE()
         FIND_LIBRARY(ALEMBIC_PYILMBASE_PYIMATH_MODULE imathmodule.so
                      PATHS
                      ${LIBRARY_PATHS}
-                     NO_DEFAULT_PATH
-                     NO_CMAKE_ENVIRONMENT_PATH
-                     NO_CMAKE_PATH
-                     NO_SYSTEM_ENVIRONMENT_PATH
-                     NO_CMAKE_SYSTEM_PATH
                      DOC "The PyImath library")
     ENDIF()
 

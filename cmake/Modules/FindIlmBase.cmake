@@ -108,7 +108,6 @@ IF(ILMBASE_INCLUDE_DIR)
       PATHS
         "${ILMBASE_INCLUDE_DIR}"
         "${ILMBASE_INCLUDE_DIR}/OpenEXR"
-      NO_DEFAULT_PATH
     )
 
     IF(_ilmbase_CONFIG)
