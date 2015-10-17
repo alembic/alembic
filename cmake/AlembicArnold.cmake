@@ -74,7 +74,7 @@ ENDIF()
 FIND_PATH( ALEMBIC_ARNOLD_INCLUDE_PATH ai.h
            PATHS
            "${ALEMBIC_ARNOLD_ROOT}/include"
-           DOC "The directory where ri.h resides" )
+           DOC "The directory where ai.h resides" )
 
 SET( ALEMBIC_ARNOLD_LIBARNOLD ALEMBIC_ARNOLD_LIBARNOLD-NOTFOUND )
 FIND_LIBRARY( ALEMBIC_ARNOLD_LIBARNOLD ai
