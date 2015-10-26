@@ -1129,6 +1129,22 @@ bool MFnTypedDataToSample(MFnData::Type iType,
         }
         break;
 
+        case MFnData::kFloatArray:
+        {
+            MFnFloatArrayData arr(iPlug.asMObject());
+
+            unsigned int length = arr.length();
+            std::vector< float > val(length);
+            for (unsigned int i = 0; i < length; i++)
+            {
+                val[i] = arr[i];
+            }
+            AbcA::ArraySample samp(&(val.front()), oProp.getDataType(),
+                Alembic::Util::Dimensions(length));
+            oProp.set(samp);
+        }
+        break;
+
         case MFnData::kIntArray:
         {
             MFnIntArrayData arr(iPlug.asMObject());
@@ -1362,6 +1378,16 @@ void createUserPropertyFromMFnAttr(const MObject& iAttr,
             }
             break;
 
+            case MFnData::kFloatArray:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                p.prop = Abc::OFloatArrayProperty(iParent, plugName, iTimeIndex);
+                oArrays.push_back(p);
+            }
+            break;
+
             case MFnData::kIntArray:
             {
                 PlugAndObjArray p;
@@ -1531,6 +1557,18 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
                 p.plug = iPlug;
                 p.obj = iAttr;
                 AbcGeom::ODoubleGeomParam gp(iParent, plugName, false, iScope,
+                    1, iTimeIndex, md);
+                p.prop = gp.getValueProperty();
+                oArrayVec.push_back(p);
+            }
+            break;
+
+            case MFnData::kFloatArray:
+            {
+                PlugAndObjArray p;
+                p.plug = iPlug;
+                p.obj = iAttr;
+                AbcGeom::OFloatGeomParam gp(iParent, plugName, false, iScope,
                     1, iTimeIndex, md);
                 p.prop = gp.getValueProperty();
                 oArrayVec.push_back(p);
