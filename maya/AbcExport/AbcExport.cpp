@@ -42,6 +42,7 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MFileObject.h>
 #include <maya/MItDependencyNodes.h>
+#include <fstream>
 
 namespace AbcA = Alembic::AbcCoreAbstract;
 
@@ -652,6 +653,40 @@ try
                 MGlobal::displayError(error);
                 return MS::kFailure;
             }
+
+            // check the file is used by any AlembicNode in the scene
+            MItDependencyNodes dgIter(MFn::kPluginDependNode);
+            for (; !dgIter.isDone(); dgIter.next()) {
+                MFnDependencyNode alembicNode(dgIter.thisNode());
+                if (alembicNode.typeName() != "AlembicNode") {
+                    continue;
+                }
+
+                MPlug abcFilePlug = alembicNode.findPlug("abc_File");
+                if (abcFilePlug.isNull()) {
+                    continue;
+                }
+
+                MFileObject alembicFile;
+                alembicFile.setRawFullName(abcFilePlug.asString());
+                if (!alembicFile.exists()) {
+                    continue;
+                }
+
+                if (alembicFile.resolvedFullName() == absoluteFile.resolvedFullName()) {
+                    MString error = "Can't export to an Alembic file which is in use.";
+                    MGlobal::displayError(error);
+                    return MS::kFailure;
+                }
+            }
+
+            std::ofstream ofs(fileName.c_str());
+            if (!ofs.is_open()) {
+                MString error = MString("Can't write to file: ") + fileName.c_str();
+                MGlobal::displayError(error);
+                return MS::kFailure;
+            }
+            ofs.close();
         }
 
         // if -frameRelativeSample argument is not specified for a frame range,
