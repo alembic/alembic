@@ -2863,7 +2863,7 @@ MString createScene(ArgData & iArgData)
     Alembic::Abc::IArchive archive;
     Alembic::AbcCoreFactory::IFactory factory;
     factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
-    archive = factory.getArchive(iArgData.mFileName.asUTF8());
+    archive = factory.getArchive(iArgData.mFileName.asChar());
     if (!archive.valid())
     {
         MString theError = iArgData.mFileName;
