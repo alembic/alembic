@@ -409,6 +409,22 @@ void CreateSceneVisitor::applyShaderSelection()
     mShaderMeshMap.clear();
 }
 
+// add face sets after connections are made
+void CreateSceneVisitor::addFaceSetsAfterConnection()
+{
+    std::map < MObject, Alembic::Abc::IObject, ltMObj >::iterator i =
+        mAddFaceSetsMap.begin();
+
+    std::map < MObject, Alembic::Abc::IObject, ltMObj >::iterator end =
+        mAddFaceSetsMap.end();
+
+    for (; i != end; ++i)
+    {
+        MObject dagNode = i->first;
+        addFaceSets(dagNode, i->second);
+    }
+}
+
 void CreateSceneVisitor::addToPropList(std::size_t iFirst, MObject & iObject)
 {
     std::size_t last = mData.mPropList.size();
@@ -1079,6 +1095,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ISubD& iNode)
         if (!isConstant || colorAnim)
         {
             mData.mSubDObjList.push_back(subDObj);
+            mAddFaceSetsMap[subDObj] = iNode;
         }
     }
 
@@ -1178,6 +1195,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPolyMesh& iNode)
         if (!isConstant || colorAnim)
         {
             mData.mPolyMeshObjList.push_back(polyObj);
+            mAddFaceSetsMap[polyObj] = iNode;
         }
     }
 
