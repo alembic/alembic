@@ -113,6 +113,7 @@ public:
     static void* creator() { return (new AlembicNode()); }
 
     // override virtual methods from MPxNode
+	virtual MStatus setDependentsDirty(const MPlug& plug, MPlugArray& plugArray);
     virtual bool isPassiveOutput(const MPlug & plug) const;
 
     // initialize all the attributes to default values

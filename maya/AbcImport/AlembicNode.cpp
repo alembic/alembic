@@ -431,6 +431,26 @@ double AlembicNode::computeRetime(const double inputTime,
     return retime;
 }
 
+MStatus AlembicNode::setDependentsDirty(const MPlug& plug, MPlugArray& plugArray)
+{
+	if (plug == mAbcFileNameAttr)
+	{
+/* 	This code was to force refresh of the AlembicNode when there is a file name change
+	But since it was only working in particular very simple case, we decided to not enable it
+	and only display a warning.
+	In all other cases it could result in undesired behavior even scene corruption.
+	See issue MAYA-47471
+		mFileInitialized = false;
+        mCurTime = DBL_MAX;	// to force update
+*/
+		if(mFileInitialized)
+		{
+			MGlobal::displayWarning("Repathing Alembic Nodes is not supported");
+		}
+	}
+	return MPxNode::setDependentsDirty(plug, plugArray);
+}
+
 MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 {
     MStatus status;
