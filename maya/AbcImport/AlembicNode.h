@@ -114,6 +114,7 @@ public:
 
     // override virtual methods from MPxNode
     virtual bool isPassiveOutput(const MPlug & plug) const;
+    virtual SchedulingType schedulingType()const;
 
     // initialize all the attributes to default values
     static MStatus initialize();

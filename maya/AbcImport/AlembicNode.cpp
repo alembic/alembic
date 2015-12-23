@@ -1053,6 +1053,13 @@ bool AlembicNode::isPassiveOutput(const MPlug & plug) const
     return MPxNode::isPassiveOutput( plug );
 }
 
+AlembicNode::SchedulingType AlembicNode::schedulingType()const
+{
+	// Globally serialize this node because the compute method is not thread safe
+    return kGloballySerialize;
+}
+
+
 // returns the list of files to archive.
 MStringArray AlembicNode::getFilesToArchive(
     bool /* shortName */,
