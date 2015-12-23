@@ -403,6 +403,11 @@ try
                 jobArgs.writeVisibility = true;
             }
 
+            else if (arg == "-wc" || arg == "-writecreases")
+            {
+                jobArgs.writeCreases = true;
+            }
+
             else if (arg == "-mfc" || arg == "-melperframecallback")
             {
                 if (i+1 >= numJobArgs)
