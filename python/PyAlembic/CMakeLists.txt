@@ -33,8 +33,6 @@
 ##
 ##-*****************************************************************************
 
-
-MESSAGE(STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}")
 MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
 
 # set core libs
