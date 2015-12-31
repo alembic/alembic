@@ -33,55 +33,9 @@
 ##
 ##-*****************************************************************************
 
-IF (NOT DEFINED LIBPYTHON_VERSION)
-    IF (APPLE)
-        SET(LIBPYTHON_VERSION 2.7)
-    ELSE()
-        SET(LIBPYTHON_VERSION 2.6)
-    ENDIF()
-ENDIF()
-
-SET(LIBPYTHON python${LIBPYTHON_VERSION})
-OPTION(USE_LIB64 "Search for deps in lib64 vs lib" ON)
-
-# find python lib dir and include files
-IF (${CMAKE_HOST_UNIX})
-    IF (${DARWIN})
-      SET(LIBPYTHON_FILE "lib${LIBPYTHON}.dylib")
-        SET(OSX_PYTHON_ROOT 
-            "/System/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}")
-        SET(PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}")
-
-        SET(ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/lib")
-    ELSE()
-      SET(LIBPYTHON_FILE "lib${LIBPYTHON}.so")
-        SET(PYTHON_INCLUDE_DIR "/usr/include/${LIBPYTHON}")
-        IF (USE_LIB64)
-            SET(ALEMBIC_PYTHON_ROOT "/usr/lib64/${LIBPYTHON}/config")
-        ELSE()
-            SET(ALEMBIC_PYTHON_ROOT "/usr/lib/${LIBPYTHON}/config")
-        ENDIF()
-    ENDIF()
-ELSE()
-    SET(LIBPYTHON_FILE "${LIBPYTHON}.dll")
-    IF (${WINDOWS})
-        SET(ALEMBIC_PYTHON_ROOT "C:/Python${LIBPYTHON_VERSION}/libs")
-    ELSE()
-        SET(ALEMBIC_PYTHON_ROOT NOTFOUND)
-    ENDIF()
-ENDIF()
-
-MESSAGE(STATUS "LIBPYTHON_FILE: ${LIBPYTHON_FILE}")
-MESSAGE(STATUS "ALEMBIC_PYTHON_ROOT: ${ALEMBIC_PYTHON_ROOT}")
-
-# find the python lib file
-FIND_FILE(ALEMBIC_PYTHON_LIBRARY ${LIBPYTHON_FILE}
-          PATHS ${ALEMBIC_PYTHON_ROOT}
-)
 
 MESSAGE(STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}")
 MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
-MESSAGE(STATUS "PYTHON_INCLUDE_DIR:" ${PYTHON_INCLUDE_DIR})
 
 # set core libs
 IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
@@ -130,9 +84,9 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
         PyOCompoundProperty.cpp
         PyOCurves.cpp
         PyOFaceSet.cpp
-        PyOGeomParam.cpp 
+        PyOGeomParam.cpp
         PyOGeomParamPOD.cpp
-        PyOGeomParamVertexPoint.cpp 
+        PyOGeomParamVertexPoint.cpp
         PyOGeomParamBox.cpp
         PyOGeomParamMatrixQuadColorNormal.cpp
         PyOLight.cpp
@@ -160,7 +114,7 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
                    ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
     )
 
-    INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${ALEMBIC_SOURCE_DIR}/lib"
+    INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/lib"
           "${ALEMBIC_SOURCE_DIR}/python/PyAlembic")
 
     ADD_LIBRARY(alembicmodule SHARED ${CPP_FILES})
