@@ -33,33 +33,12 @@
 ##
 ##-*****************************************************************************
 
-IF (DEFINED LIBPYTHON_VERSION)
-    SET(PYTHON_EXECUTABLE_NAMES python${LIBPYTHON_VERSION})
-ELSE ()
-    IF (APPLE)
-        SET(PYTHON_EXECUTABLE_NAMES python2.7 python27 python2 python)
-    ELSE ()
-        SET(PYTHON_EXECUTABLE_NAMES python2.6 python26 python2 python)
-    ENDIF ()
-ENDIF ()
-
-# First the version of python
-# FIND_PACKAGE( PythonInterp 2.5.1 EXACT REQUIRED )
-# The default FindPythonInterp.cmake module is flaky, doesn't listen
-# to required or version
-FIND_PROGRAM(ALEMBIC_PYTHON_EXECUTABLE
-  NAMES ${PYTHON_EXECUTABLE_NAMES}
-  PATHS
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]
-  ${PYTHON_ROOT}
-  /usr/bin
-  /usr/lib/debug/usr/bin 
-  )
-IF( ${ALEMBIC_PYTHON_EXECUTABLE} STREQUAL ALEMBIC_PYTHON_EXECUTABLE-NOTFOUND )
-  MESSAGE( FATAL_ERROR "Could not find python 2.6" )
-ELSE()
-  MESSAGE( STATUS "Found Python 2.6: ${ALEMBIC_PYTHON_EXECUTABLE}" )
+find_package(PythonLibs REQUIRED)
+IF(PYTHONLIBS_FOUND)
+  set(ALEMBIC_PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
+  set(ALEMBIC_PYTHON_LIBRARY ${PYTHON_LIBRARIES})
 ENDIF()
+
 
 SET( CopyScriptFile ${ALEMBIC_SOURCE_DIR}/cmake/CopyScriptFile.py )
 
@@ -132,7 +111,7 @@ MACRO(ADD_PYTHON_MODULE ModuleFile ParentModuleName )
 
   # The build root is ${ALEMBIC_BINARY_DIR}
   ADD_TEST( NAME ${TestName}
-            COMMAND ${ALEMBIC_PYTHON_EXECUTABLE}
+            COMMAND ${PYTHON_EXECUTABLE}
                     ${OutputFile} ${ARGN} )
   # These tests don't always return something other than zero when they
   # fail. They do print:
