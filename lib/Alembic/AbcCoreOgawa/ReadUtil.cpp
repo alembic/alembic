@@ -82,6 +82,11 @@ ReadDimensions( Ogawa::IDataPtr iDims,
         oDim.setRank( numRanks );
 
         std::vector< Util::uint64_t > dims( numRanks );
+        if ( dims.empty() )
+        {
+            return;
+        }
+
         iDims->read( numRanks * 8, &( dims.front() ), 0, iThreadId );
         for ( std::size_t i = 0; i < numRanks; ++i )
         {
@@ -1446,6 +1451,11 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
                        std::vector <  AbcA::index_t > & oMaxSamples )
 {
     std::vector< char > buf( iData->getSize() );
+    if ( buf.empty() )
+    {
+        return;
+    }
+
     iData->read( iData->getSize(), &( buf.front() ), 0, 0 );
     std::size_t pos = 0;
     while ( pos < buf.size() )
@@ -1501,6 +1511,11 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 
     // skip the last 32 bytes which contains the hashes
     std::vector< char > buf( data->getSize() - 32 );
+    if ( buf.empty() )
+    {
+        return;
+    }
+
     data->read( buf.size(), &( buf.front() ), 0, iThreadId );
     std::size_t pos = 0;
     while ( pos < buf.size() )
@@ -1736,6 +1751,11 @@ ReadIndexedMetaData( Ogawa::IDataPtr iData,
     oMetaDataVec.push_back( AbcA::MetaData() );
 
     std::vector< char > buf( iData->getSize() );
+
+    if ( buf.empty() )
+    {
+        return;
+    }
 
     // read as part of opening the archive so threadid 0 is ok
     iData->read( iData->getSize(), &( buf.front() ), 0, 0 );
