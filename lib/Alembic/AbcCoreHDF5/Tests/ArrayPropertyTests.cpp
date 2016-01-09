@@ -332,6 +332,12 @@ void testReadWriteArrays()
         ABCA::CompoundPropertyWriterPtr props = archive->getProperties();
 
         {
+            ABCA::DataType dtype(Alembic::Util::kUint8POD, 1);
+            TESTING_ASSERT_THROW(props->createArrayProperty("/slashy",
+                ABCA::MetaData(), dtype, 0 ), Alembic::Util::Exception);
+        }
+
+        {
             ABCA::DataType dtype(Alembic::Util::kBooleanPOD, 1);
             ABCA::ArrayPropertyWriterPtr boolWrtPtr =
                 props->createArrayProperty("bool", ABCA::MetaData(), dtype, 0 );

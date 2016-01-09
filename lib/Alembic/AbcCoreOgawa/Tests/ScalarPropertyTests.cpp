@@ -191,6 +191,12 @@ void testReadWriteScalars()
         const AbcA::TimeSamplingType staticSampling;
 
         {
+            AbcA::DataType dtype(Alembic::Util::kUint8POD, 1);
+            TESTING_ASSERT_THROW(props->createScalarProperty("/slashy",
+                AbcA::MetaData(), dtype, 0 ), Alembic::Util::Exception);
+        }
+
+        {
             AbcA::ScalarPropertyWriterPtr boolWrtPtr =
                 props->createScalarProperty("bool",  AbcA::MetaData(),
                     AbcA::DataType(Alembic::Util::kBooleanPOD, 1), 0);
