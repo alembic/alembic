@@ -43,6 +43,7 @@ LIST(APPEND CXX_FILES
 SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
 INSTALL(FILES
+    All.h
     SchemaInfoDeclarations.h
     OMaterial.h
     IMaterial.h
