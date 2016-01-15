@@ -95,6 +95,14 @@ class staticPropTest(unittest.TestCase):
         MayaCmds.setAttr(nodeName+'.SPT_double_array_AbcGeomScope', "vtx",
             type="string")
 
+        MayaCmds.addAttr(longName='SPT_float_array', dataType='floatArray')
+        MayaCmds.addAttr(longName='SPT_float_array_AbcGeomScope',
+            dataType="string")
+        MayaCmds.setAttr(nodeName+'.SPT_float_array',
+            [5.0, 4.75, 3.5, 2.25, 1.0], type='floatArray')
+        MayaCmds.setAttr(nodeName+'.SPT_float_array_AbcGeomScope', "vtx",
+            type="string")
+
         MayaCmds.addAttr(longName='SPT_string_array', dataType='stringArray')
         MayaCmds.setAttr(nodeName+'.SPT_string_array', 3, "string1", "string2", "string3",
             type='stringArray')
@@ -119,6 +127,8 @@ class staticPropTest(unittest.TestCase):
             MayaCmds.getAttr(nodeName+'.SPT_string_array'))
         self.failUnlessEqual([1.1, 2.2, 3.3, 4.4, 5.5],
             MayaCmds.getAttr(nodeName+'.SPT_double_array'))
+        self.failUnlessEqual([5.0, 4.75, 3.5, 2.25, 1.0],
+            MayaCmds.getAttr(nodeName+'.SPT_float_array'))
         self.failUnlessEqual([(1.0, 1.0, 0.0), (2.0, 2.0, 0.0), (3.0, 3.0, 0.0)],
             MayaCmds.getAttr(nodeName+'.SPT_vector_array'))
         self.failUnlessEqual('normal2',

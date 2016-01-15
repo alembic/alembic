@@ -64,6 +64,7 @@
 #include <maya/MFnDirectionalLight.h>
 #include <maya/MFnDoubleArrayData.h>
 #include <maya/MFnExpression.h>
+#include <maya/MFnFloatArrayData.h>
 #include <maya/MFnIkJoint.h>
 #include <maya/MFnIntArrayData.h>
 #include <maya/MFnLight.h>
