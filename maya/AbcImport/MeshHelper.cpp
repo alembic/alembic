@@ -326,10 +326,9 @@ namespace
                 uvCounts[uvCountsIndex++] = numVertices;
                 MIntArray vertexList;
                 ioMesh.getPolygonVertices (faceIndex, vertexList);
-                for (int v = numVertices - 1; v >= 0; v--, ++nIndex)
+                for (int v = 0; v < numVertices; ++v, ++nIndex)
                 {
-                    uvIds[nIndex] =
-                        (int)(*iSampIndices)[vertexList[v]];
+                    uvIds[nIndex] = (int)(*iSampIndices)[vertexList[v]];
                 }
             }
         }

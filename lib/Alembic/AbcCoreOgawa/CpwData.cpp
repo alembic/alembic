@@ -126,6 +126,9 @@ CpwData::createScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
                  iDataType.getPod() != Alembic::Util::kUnknownPOD,
                  "createScalarProperty, illegal DataType provided.");
 
+    ABCA_ASSERT( iName != "" && iName.find('/') == std::string::npos,
+                 "Invalid name" );
+
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =
         iParent->getObject()->getArchive()->getTimeSampling(
@@ -164,6 +167,9 @@ CpwData::createArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
                  iDataType.getPod() != Alembic::Util::kNumPlainOldDataTypes &&
                  iDataType.getPod() != Alembic::Util::kUnknownPOD,
                  "createArrayProperty, illegal DataType provided.");
+
+    ABCA_ASSERT( iName != "" && iName.find('/') == std::string::npos,
+                 "Invalid name" );
 
     // will assert if TimeSamplingPtr not found
     AbcA::TimeSamplingPtr ts =
