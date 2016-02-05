@@ -128,6 +128,7 @@ void readComplex(double iFrame, Alembic::AbcGeom::IXform & iNode,
     oSampleList.push_back(Alembic::AbcGeom::RadiansToDegrees(vec.z));
 
     pt = mmat.scalePivotTranslation(tSpace);
+    /// should not pt be used instead of vec ?
     oSampleList.push_back(vec.x);
     oSampleList.push_back(vec.y);
     oSampleList.push_back(vec.z);
@@ -520,6 +521,17 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
     // disconnect connections to animated props
     disconnectProps(trans, iSampledPropList, iFirstProp);
 
+    /// --------------- ///
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    MDistance::Unit uiUnit = MDistance::uiUnit();
+    float scaleUnit = 1.0;
+
+    if(uiUnit == MDistance::kMillimeters)
+        scaleUnit = 0.1;
+    else if(uiUnit == MDistance::kMeters)
+        scaleUnit = 100.0;
+    /// --------------- ///
+
     if (isComplex(iSamp))
     {
         if (!isConstant)
@@ -560,8 +572,10 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
         // when we pass in the matrix for some reason
         MSpace::Space tSpace = MSpace::kTransform;
 
-        trans.setTranslation(mmat.getTranslation(tSpace), tSpace);
+        //trans.setTranslation(mmat.getTranslation(tSpace), tSpace);
+        trans.setTranslation(mmat.getTranslation(tSpace) * scaleUnit, tSpace);
 
+        /// need scale here ?
         trans.setRotatePivotTranslation(
             mmat.rotatePivotTranslation(tSpace), tSpace);
 
@@ -573,6 +587,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
         trans.setRotateOrientation(
             mmat.rotationOrientation(), tSpace, gBalance);
 
+        /// need scale here ?
         trans.setScalePivotTranslation(
             mmat.scalePivotTranslation(tSpace), tSpace);
 
@@ -839,7 +854,8 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
                         }
                         vec.z = op.getChannelValue(2);
 
-                        trans.setTranslation(vec, gSpace);
+                        //trans.setTranslation(vec, gSpace);
+                        trans.setTranslation(vec * scaleUnit, gSpace);
                     }
                     break;
 
@@ -911,6 +927,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
                     {
                         MVector vec;
 
+                        /// need scale here ?
                         if (op.isXAnimated())
                         {
                             oSampledTransOpNameList.push_back(
@@ -1002,6 +1019,7 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
                     {
                         MVector vec;
 
+                        /// need scale here ?
                         if (op.isXAnimated())
                         {
                             oSampledTransOpNameList.push_back(

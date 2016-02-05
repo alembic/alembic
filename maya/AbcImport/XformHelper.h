@@ -39,6 +39,7 @@
 #define ABCIMPORT_TRANSFORMHELPER_H_
 
 #include <maya/MObject.h>
+#include <maya/MDistance.h>
 
 #include <vector>
 #include <string>

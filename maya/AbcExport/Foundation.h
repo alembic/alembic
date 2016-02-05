@@ -49,6 +49,7 @@
 #include <maya/MDagModifier.h>
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>
+#include <maya/MDistance.h>
 #include <maya/MDoubleArray.h>
 #include <maya/MEulerRotation.h>
 #include <maya/MFileIO.h>

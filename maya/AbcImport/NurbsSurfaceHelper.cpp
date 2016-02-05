@@ -102,6 +102,7 @@ namespace
                 cvs.setLength(numVerts);
                 for (Alembic::Util::int32_t k=0 ; k<numVerts; ++k, ++curPos)
                 {
+                    /// need scale here ? x, y, w
                     double x = (*uVert)[curPos];
                     double y = (*vVert)[curPos];
                     double w = (*wVert)[curPos];
@@ -166,6 +167,7 @@ namespace
                 {
                     double param = loop.findParamFromLength(length * j / segment);
                     loop.getPointAtParam(param, curvePoints[j]);
+                    /// need scale here ? curvePoints[j]
                 }
 
                 // Find the right most curve point
@@ -295,12 +297,25 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
     MPointArray controlVertices;
     controlVertices.setLength(numCV);
 
+    /// --------------- ///
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    MDistance::Unit uiUnit = MDistance::uiUnit();
+    float scaleUnit = 1.0;
+
+    if(uiUnit == MDistance::kMillimeters)
+        scaleUnit = 0.1;
+    else if(uiUnit == MDistance::kMeters)
+        scaleUnit = 100.0;
+    /// --------------- ///
+
     for (unsigned int v = 0; v < numCVInV; ++v)
     {
         for (unsigned int u = 0; u < numCVInU; ++u, ++curPos)
         {
             unsigned int mayaIndex = u * numCVInV + (numCVInV - v - 1);
             MPoint pt((*pos)[curPos].x, (*pos)[curPos].y, (*pos)[curPos].z);
+
+            pt = pt * scaleUnit;
 
             if (weights)
             {

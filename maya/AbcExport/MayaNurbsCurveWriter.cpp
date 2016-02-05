@@ -190,6 +190,17 @@ void MayaNurbsCurveWriter::write()
         width.push_back(constWidthPlug.asFloat());
     }
 
+    /// --------------- ///
+    // counter scale to match unit system selected in maya since maya will output centimeters anyway
+    MDistance::Unit uiUnit = MDistance::uiUnit();
+    float scaleUnit = 1.0;
+
+    if(uiUnit == MDistance::kMillimeters)
+        scaleUnit = 10;
+    else if(uiUnit == MDistance::kMeters)
+        scaleUnit = 0.01;
+    /// --------------- ///
+
     for (unsigned int i = 0; i < numCurves; i++)
     {
         MFnNurbsCurve curve;
@@ -257,6 +268,11 @@ void MayaNurbsCurveWriter::write()
         for (Alembic::Util::int32_t j = 0; j < numCVs; j++)
         {
             MPoint transformdPt;
+
+            //
+            cvArray[j] = cvArray[j] * scaleUnit;
+            //
+
             if (mIsCurveGrp)
             {
                 transformdPt = cvArray[j]*transformMatrix;

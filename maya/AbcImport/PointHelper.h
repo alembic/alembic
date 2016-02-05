@@ -38,6 +38,7 @@
 #define ABCIMPORT_POINTHELPER_H_
 
 #include <maya/MObject.h>
+#include <maya/MDistance.h>
 
 #include <vector>
 #include <string>

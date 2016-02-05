@@ -94,11 +94,27 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     Alembic::Abc::P3fArraySamplePtr v3ptr = samp.getPositions();
     MVectorArray vArray;
 
+    /// --------------- ///
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    MDistance::Unit uiUnit = MDistance::uiUnit();
+    float scaleUnit = 1.0;
+
+    if(uiUnit == MDistance::kMillimeters)
+        scaleUnit = 0.1;
+    else if(uiUnit == MDistance::kMeters)
+        scaleUnit = 100.0;
+    /// --------------- ///
+
     for (unsigned int pId = 0; pId < pSize; pId++)
     {
-        pArray.append((*v3ptr)[pId].x,
-                      (*v3ptr)[pId].y,
-                      (*v3ptr)[pId].z);
+        //pArray.append((*v3ptr)[pId].x,
+        //              (*v3ptr)[pId].y,
+        //              (*v3ptr)[pId].z);
+
+        pArray.append((*v3ptr)[pId].x * scaleUnit,
+                      (*v3ptr)[pId].y * scaleUnit,
+                      (*v3ptr)[pId].z * scaleUnit);
+        //std::cout << "particle points[" << pId << "] " << (*v3ptr)[pId].x << " " << (*v3ptr)[pId].y << " " << (*v3ptr)[pId].z << std::endl;
     }
 
     status = fnParticle.emit(pArray);
