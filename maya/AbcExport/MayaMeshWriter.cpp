@@ -1080,16 +1080,8 @@ void MayaMeshWriter::fillTopology(
         return;
     }
 
-    /// --------------- ///
     // counter scale to match unit system selected in maya since maya will output centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
-    float scaleUnit = 1.0;
-
-    if(uiUnit == MDistance::kMillimeters)
-        scaleUnit = 10;
-    else if(uiUnit == MDistance::kMeters)
-        scaleUnit = 0.01;
-    /// --------------- ///
+    float scaleUnit = util::getScaleUnitExport();
 
     unsigned int i;
     int j;
@@ -1100,9 +1092,6 @@ void MayaMeshWriter::fillTopology(
     for (i = 0; i < pts.length(); i++)
     {
         size_t local = i * 3;
-        /*oPoints[local] = pts[i].x;
-        oPoints[local+1] = pts[i].y;
-        oPoints[local+2] = pts[i].z;*/
 
         oPoints[local] = pts[i].x * scaleUnit;
         oPoints[local+1] = pts[i].y * scaleUnit;

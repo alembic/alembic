@@ -40,7 +40,6 @@
 
 #include <maya/MFnMesh.h>
 #include <maya/MObject.h>
-#include <maya/MDistance.h>
 
 #include <vector>
 #include <string>

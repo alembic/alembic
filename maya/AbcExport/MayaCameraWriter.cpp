@@ -109,16 +109,8 @@ void MayaCameraWriter::write()
 {
     MFnCamera mfnCamera(mDagPath);
 
-    /// --------------- ///
     // counter scale to match unit system selected in maya since maya will output centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
-    float scaleUnit = 1.0;
-
-    if(uiUnit == MDistance::kMillimeters)
-        scaleUnit = 10;
-    else if(uiUnit == MDistance::kMeters)
-        scaleUnit = 0.01;
-    /// --------------- ///
+    float scaleUnit = util::getScaleUnitExport();
 
     mSamp.setFocalLength(mfnCamera.focalLength());
     mSamp.setLensSqueezeRatio(mfnCamera.lensSqueezeRatio());

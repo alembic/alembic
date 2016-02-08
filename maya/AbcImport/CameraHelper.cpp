@@ -260,16 +260,8 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
     Alembic::AbcGeom::CameraSample samp;
     iNode.getSchema().get(samp);
 
-    /// --------------- ///
     // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
-    float scaleUnit = 1.0;
-
-    if(uiUnit == MDistance::kMillimeters)
-        scaleUnit = 0.1;
-    else if(uiUnit == MDistance::kMeters)
-        scaleUnit = 100.0;
-    /// --------------- ///
+    float scaleUnit = getScaleUnitImport();
 
     std::size_t numOps = samp.getNumOps();
     if (numOps > 0)
@@ -323,8 +315,6 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
             MGlobal::displayWarning(warn);
         }
 
-        //fnCamera.setNearClippingPlane(samp.getNearClippingPlane());
-        //fnCamera.setFarClippingPlane(samp.getFarClippingPlane());
         fnCamera.setNearClippingPlane(samp.getNearClippingPlane() * scaleUnit);
         fnCamera.setFarClippingPlane(samp.getFarClippingPlane() * scaleUnit);
 
@@ -332,7 +322,6 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
         // post scale might be in the 3x3
 
         fnCamera.setFStop(samp.getFStop());
-        //fnCamera.setFocusDistance(samp.getFocusDistance());
         fnCamera.setFocusDistance(samp.getFocusDistance() * scaleUnit);
 
         MTime sec(1.0, MTime::kSeconds);

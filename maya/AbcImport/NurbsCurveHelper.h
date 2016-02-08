@@ -38,7 +38,6 @@
 #define ABCIMPORT_NURBSCURVEHELPER_H_
 
 #include <maya/MObject.h>
-#include <maya/MDistance.h>
 
 #include <vector>
 #include <string>

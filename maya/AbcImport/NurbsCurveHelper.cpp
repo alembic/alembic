@@ -92,16 +92,8 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
         interp = false;
     }
 
-    /// --------------- ///
     // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
-    float scaleUnit = 1.0;
-
-    if(uiUnit == MDistance::kMillimeters)
-        scaleUnit = 0.1;
-    else if(uiUnit == MDistance::kMeters)
-        scaleUnit = 100.0;
-    /// --------------- ///
+    float scaleUnit = getScaleUnitImport();
 
     std::size_t curVert = 0;
     std::size_t curKnot = 0;
@@ -124,12 +116,10 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
         int j;
         for (j = 0; j < numVerts; ++j, ++curVert)
         {
-            //Alembic::Abc::V3f pos = (*sampPoints)[curVert];
             Alembic::Abc::V3f pos = (*sampPoints)[curVert] * scaleUnit;
 
             if (interp)
             {
-                //Alembic::Abc::V3f ceilPos = (*ceilPoints)[curVert];
                 Alembic::Abc::V3f ceilPos = (*ceilPoints)[curVert] * scaleUnit;
 
                 cvs.append(simpleLerp<float>(alpha, pos.x, ceilPos.x),
@@ -289,16 +279,8 @@ MObject createCurves(const std::string & iName,
         }
     }
 
-    /// --------------- ///
     // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
-    float scaleUnit = 1.0;
-
-    if(uiUnit == MDistance::kMillimeters)
-        scaleUnit = 0.1;
-    else if(uiUnit == MDistance::kMeters)
-        scaleUnit = 100.0;
-    /// --------------- ///
+    float scaleUnit = getScaleUnitImport();
 
     std::size_t curVert = 0;
     std::size_t curKnot = 0;
@@ -322,7 +304,6 @@ MObject createCurves(const std::string & iName,
         int j;
         for (j = 0; j < numVerts; ++j, ++curVert)
         {
-            //Alembic::Abc::V3f pos = (*positions)[curVert];
             Alembic::Abc::V3f pos = (*positions)[curVert] * scaleUnit;
             cvs.append(pos.x, pos.y, pos.z);
         }

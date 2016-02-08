@@ -80,25 +80,19 @@ void addTranslate(const MFnDependencyNode & iTrans,
     }
     double zVal = zPlug.asDouble();
 
-    /// --------------- ///
     // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
     float scaleUnit = 1.0;
 
     /// need also for rotatePivotTranslate and scalePivotTranslate ?
     if(parentName == "translate")
     {
-        if(uiUnit == MDistance::kMillimeters)
-            scaleUnit = 10;
-        else if(uiUnit == MDistance::kMeters)
-            scaleUnit = 0.01;
+        scaleUnit = util::getScaleUnitExport();
 
         xVal *= scaleUnit;
         yVal *= scaleUnit;
         zVal *= scaleUnit;
         scale *= scaleUnit;
     }
-    /// --------------- ///
 
     // this is to handle the case where there is a connection to the parent
     // plug but not to the child plugs, if the connection is there then all
@@ -139,9 +133,6 @@ void addTranslate(const MFnDependencyNode & iTrans,
         {
             AnimChan chan;
             chan.plug = xPlug;
-            /*chan.scale = 1.0;
-            if (inverse)
-                chan.scale = -1.0;*/
             chan.scale = scale;
             chan.opNum = oSample.getNumOps();
             chan.channelNum = 0;
@@ -152,9 +143,6 @@ void addTranslate(const MFnDependencyNode & iTrans,
         {
             AnimChan chan;
             chan.plug = yPlug;
-            /*chan.scale = 1.0;
-            if (inverse)
-                chan.scale = -1.0;*/
             chan.scale = scale;
             chan.opNum = oSample.getNumOps();
             chan.channelNum = 1;
@@ -165,9 +153,6 @@ void addTranslate(const MFnDependencyNode & iTrans,
         {
             AnimChan chan;
             chan.plug = zPlug;
-            /*chan.scale = 1.0;
-            if (inverse)
-                chan.scale = -1.0;*/
             chan.scale = scale;
             chan.opNum = oSample.getNumOps();
             chan.channelNum = 2;

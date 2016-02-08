@@ -508,6 +508,5 @@ float getScaleUnitImport()
             scaleUnit = 91.44;
             break;
     }
-
     return scaleUnit;
 }

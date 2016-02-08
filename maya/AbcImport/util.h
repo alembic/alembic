@@ -111,6 +111,9 @@ double getWeightAndIndex(double iFrame,
 bool isColorSet(const Alembic::AbcCoreAbstract::PropertyHeader & iHeader,
     bool iUnmarkedFaceVaryingColors);
 
+// returns a scale factor to match unit system selected in maya since maya will take it as centimeters anyway
+float getScaleUnitImport();
+
 template<typename T>
 void clamp(T & min, T & max, T & cur)
 {

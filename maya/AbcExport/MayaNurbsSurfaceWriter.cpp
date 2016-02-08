@@ -184,16 +184,8 @@ void MayaNurbsSurfaceWriter::write()
     sampPosWeights.reserve(numCVs);
     bool weightsOne = true;
 
-    /// --------------- ///
     // counter scale to match unit system selected in maya since maya will output centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
-    float scaleUnit = 1.0;
-
-    if(uiUnit == MDistance::kMillimeters)
-        scaleUnit = 10;
-    else if(uiUnit == MDistance::kMeters)
-        scaleUnit = 0.01;
-    /// --------------- ///
+    float scaleUnit = util::getScaleUnitExport();
 
     // Maya stores the data where v varies the fastest (v,u order)
     // so we need to pack the data differently u,v order
@@ -208,7 +200,6 @@ void MayaNurbsSurfaceWriter::write()
                                 static_cast<float>(cvArray[index].z));
 
             sampPos.push_back(p * scaleUnit);
-            //sampPos.push_back(p);
 
             if (cvArray[index].w != 1.0)
             {

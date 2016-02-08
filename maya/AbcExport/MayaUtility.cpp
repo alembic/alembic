@@ -604,3 +604,36 @@ MString util::getHelpText()
 
     return ret;
 }
+
+float util::getScaleUnitExport()
+{
+    // counter scale to match unit system selected in maya since maya will output centimeters anyway
+    MDistance::Unit uiUnit = MDistance::uiUnit();
+
+    float scaleUnit = 1.0;
+
+    switch(uiUnit)
+    {
+        case MDistance::kMillimeters:
+            scaleUnit = 10;
+            break;
+
+        case MDistance::kMeters:
+            scaleUnit = 0.01;
+            break;
+
+        case MDistance::kInches:
+            scaleUnit = 0.393701;
+            break;
+
+        case MDistance::kFeet:
+            scaleUnit = 0.0328084;
+            break;
+
+        case MDistance::kYards:
+            scaleUnit = 0.0109361;
+            break;
+    }
+
+    return scaleUnit;
+}

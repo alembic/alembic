@@ -297,16 +297,8 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
     MPointArray controlVertices;
     controlVertices.setLength(numCV);
 
-    /// --------------- ///
     // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
-    float scaleUnit = 1.0;
-
-    if(uiUnit == MDistance::kMillimeters)
-        scaleUnit = 0.1;
-    else if(uiUnit == MDistance::kMeters)
-        scaleUnit = 100.0;
-    /// --------------- ///
+    float scaleUnit = getScaleUnitImport();
 
     for (unsigned int v = 0; v < numCVInV; ++v)
     {

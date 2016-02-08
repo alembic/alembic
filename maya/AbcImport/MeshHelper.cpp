@@ -219,16 +219,8 @@ namespace
         unsigned int numPoints = static_cast<unsigned int>(iPoints->size());
         oPointArray.setLength(numPoints);
 
-        /// --------------- ///
         // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
-        MDistance::Unit uiUnit = MDistance::uiUnit();
-        float scaleUnit = 1.0;
-
-        if(uiUnit == MDistance::kMillimeters)
-            scaleUnit = 0.1;
-        else if(uiUnit == MDistance::kMeters)
-            scaleUnit = 100.0;
-        /// --------------- ///
+        float scaleUnit = getScaleUnitImport();
 
         if (alpha == 0 || iCeilPoints == NULL)
         {
@@ -236,23 +228,12 @@ namespace
             {
                 oPointArray.set(i,
                     (*iPoints)[i].x * scaleUnit, (*iPoints)[i].y * scaleUnit, (*iPoints)[i].z * scaleUnit);
-
-                //oPointArray.set(i,
-                //    (*iPoints)[i].x, (*iPoints)[i].y, (*iPoints)[i].z);
             }
         }
         else
         {
             for (unsigned int i = 0; i < numPoints; ++i)
             {
-                /*oPointArray.set(i,
-                    simpleLerp<float>(alpha,
-                        (*iPoints)[i].x, (*iCeilPoints)[i].x),
-                    simpleLerp<float>(alpha,
-                        (*iPoints)[i].y, (*iCeilPoints)[i].y),
-                    simpleLerp<float>(alpha,
-                        (*iPoints)[i].z, (*iCeilPoints)[i].z));*/
-
                 oPointArray.set(i,
                     simpleLerp<float>(alpha,
                         (*iPoints)[i].x, (*iCeilPoints)[i].x) * scaleUnit,

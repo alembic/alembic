@@ -128,6 +128,9 @@ MString stripNamespaces(const MString & iNodeName, unsigned int iDepth);
 // returns the Help string for AbcExport
 MString getHelpText();
 
+// returns a scale factor to match unit system selected in maya since maya will output centimeters anyway
+float getScaleUnitExport();
+
 } // namespace util
 
 struct PlugAndObjScalar
