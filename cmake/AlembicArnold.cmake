@@ -74,23 +74,13 @@ ENDIF()
 FIND_PATH( ALEMBIC_ARNOLD_INCLUDE_PATH ai.h
            PATHS
            "${ALEMBIC_ARNOLD_ROOT}/include"
-           NO_DEFAULT_PATH
-           NO_CMAKE_ENVIRONMENT_PATH
-           NO_CMAKE_PATH
-           NO_SYSTEM_ENVIRONMENT_PATH
-           NO_CMAKE_SYSTEM_PATH
-           DOC "The directory where ri.h resides" )
+           DOC "The directory where ai.h resides" )
 
 SET( ALEMBIC_ARNOLD_LIBARNOLD ALEMBIC_ARNOLD_LIBARNOLD-NOTFOUND )
 FIND_LIBRARY( ALEMBIC_ARNOLD_LIBARNOLD ai
               PATHS
               "${ALEMBIC_ARNOLD_ROOT}/lib/"
               "${ALEMBIC_ARNOLD_ROOT}/bin/"
-              NO_DEFAULT_PATH
-              NO_CMAKE_ENVIRONMENT_PATH
-              NO_CMAKE_PATH
-              NO_SYSTEM_ENVIRONMENT_PATH
-              NO_CMAKE_SYSTEM_PATH
               DOC "The ai library" )
 
 

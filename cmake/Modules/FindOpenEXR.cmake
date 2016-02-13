@@ -100,21 +100,11 @@ SET(INCLUDE_PATHS
 FIND_PATH( ALEMBIC_OPENEXR_INCLUDE_PATH ImfRgba.h
            PATHS
            ${INCLUDE_PATHS}
-           NO_DEFAULT_PATH
-           NO_CMAKE_ENVIRONMENT_PATH
-           NO_CMAKE_PATH
-           NO_SYSTEM_ENVIRONMENT_PATH
-           NO_CMAKE_SYSTEM_PATH
            DOC "The directory where ImfRgba.h resides" )
 
 FIND_LIBRARY( ALEMBIC_OPENEXR_ILMIMF_LIB IlmImf
               PATHS 
               ${LIBRARY_PATHS}
-              NO_DEFAULT_PATH
-              NO_CMAKE_ENVIRONMENT_PATH
-              NO_CMAKE_PATH
-              NO_SYSTEM_ENVIRONMENT_PATH
-              NO_CMAKE_SYSTEM_PATH
               DOC "The IlmImf library" )
 
 
