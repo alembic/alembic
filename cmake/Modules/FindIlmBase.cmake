@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2011,
+## Copyright (c) 2009-2016,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -112,15 +112,15 @@ IF(ILMBASE_INCLUDE_DIR)
 
     IF(_ilmbase_CONFIG)
       FILE(STRINGS "${_ilmbase_CONFIG}" ILMBASE_BUILD_SPECIFICATION
-           REGEX "^[ \t]*#define[ \t]+(ILMBASE_VERSION_STRING|PACKAGE_VERSION)[ \t]+\"[.0-9]+\".*$")
+           REGEX "^[ \t]*#define[ \t]+ILMBASE_VERSION_STRING[ \t]+\"[.0-9]+\".*$")
     ELSE()
       MESSAGE(WARNING "Could not find \"OpenEXRConfig.h\" in \"${ILMBASE_INCLUDE_DIR}\"")
     ENDIF()
 
     IF(ILMBASE_BUILD_SPECIFICATION)
       MESSAGE(STATUS "${ILMBASE_BUILD_SPECIFICATION}")
-      STRING(REGEX REPLACE ".*#define[ \t]+(ILMBASE_VERSION_STRING|PACKAGE_VERSION)[ \t]+\"([.0-9]+)\".*"
-             "\\2" _ilmbase_libs_ver_init ${ILMBASE_BUILD_SPECIFICATION})
+      STRING(REGEX REPLACE ".*#define[ \t]+ILMBASE_VERSION_STRING[ \t]+\"([.0-9]+)\".*"
+             "\\1" _ilmbase_libs_ver_init ${ILMBASE_BUILD_SPECIFICATION})
     ELSE()
       MESSAGE(WARNING "Could not determine ILMBase library version, assuming ${_ilmbase_libs_ver_init}.")
     ENDIF()
