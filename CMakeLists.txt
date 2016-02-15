@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-PROJECT(ALEMBIC)
+PROJECT(Alembic)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
