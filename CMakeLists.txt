@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-PROJECT(ALEMBIC)
+PROJECT(Alembic)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
@@ -281,7 +281,7 @@ ENDIF()
 
 # Alembic, AbcOpenGL
 ADD_SUBDIRECTORY(lib)
-INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")
 
 # PyAlembic, PyAbcOpenGL
 IF (USE_PYALEMBIC)

@@ -44,7 +44,7 @@ SET(TEST_LIBS
     ${EXTERNAL_MATH_LIBS}
 )
 
-INCLUDE_DIRECTORIES("${ALEMBIC_SOURCE_DIR}/python/PyAlembic/Tests")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/python/PyAlembic/Tests")
 
 ADD_EXECUTABLE(PyAlembic_Test
                testAlembicImport.cpp

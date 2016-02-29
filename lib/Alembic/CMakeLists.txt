@@ -47,9 +47,17 @@ ADD_SUBDIRECTORY(AbcCollection)
 ADD_SUBDIRECTORY(AbcMaterial)
 ADD_SUBDIRECTORY(Ogawa)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
-
 ADD_LIBRARY(Alembic ${LIB_TYPE} ${CXX_FILES})
+
+TARGET_INCLUDE_DIRECTORIES(Alembic
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/lib>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/lib>
+    $<INSTALL_INTERFACE:include>
+    ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY}
+    ${Boost_INCLUDE_DIRS}
+    ${HDF5_INCLUDE_DIRS}
+    )
 
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(Alembic PROPERTIES DEFINE_SYMBOL ALEMBIC_EXPORTS)
@@ -58,11 +66,56 @@ ENDIF()
 TARGET_LINK_LIBRARIES(Alembic ${ALEMBIC_ILMBASE_LIBRARIES})
 
 # fixes undefined symbols for x86_64
-IF (ALEMBIC_SHARED_LIBS)
+IF (ALEMBIC_SHARED_LIBS AND DARWIN)
     TARGET_LINK_LIBRARIES(${CORE_LIBS})
 ENDIF()
 
 INSTALL(TARGETS Alembic
+        EXPORT AlembicTargets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION lib)
+
+#-******************************************************************************
+# PACKAGE EXPORTS
+#-******************************************************************************
+
+CONFIGURE_FILE(AlembicConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
+    @ONLY
+    )
+
+INCLUDE(CMakePackageConfigHelpers)
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"
+    VERSION
+    ${PROJECT_VERSION}
+    COMPATIBILITY
+    AnyNewerVersion
+    )
+
+EXPORT(EXPORT
+    AlembicTargets
+    FILE
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicTargets.cmake"
+    NAMESPACE
+    Alembic::
+    )
+
+SET(ConfigPackageLocation lib/cmake/Alembic)
+INSTALL(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"
+    DESTINATION
+    ${ConfigPackageLocation}
+    )
+
+INSTALL(EXPORT
+    AlembicTargets
+    FILE
+    AlembicTargets.cmake
+    NAMESPACE
+    Alembic::
+    DESTINATION
+    ${ConfigPackageLocation}
+    )
