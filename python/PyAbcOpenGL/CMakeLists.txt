@@ -96,8 +96,8 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
                  ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
   )
 
-  INCLUDE_DIRECTORIES("/usr/include/python${LIBPYTHON_VERSION}" "${ALEMBIC_SOURCE_DIR}/lib"
-      "${ALEMBIC_SOURCE_DIR}/python/PyAbcOpenGL")
+  INCLUDE_DIRECTORIES("/usr/include/python${LIBPYTHON_VERSION}" "${CMAKE_SOURCE_DIR}/lib"
+      "${CMAKE_SOURCE_DIR}/python/PyAbcOpenGL")
 
   ADD_LIBRARY(alembicglmodule SHARED ${CPP_FILES})
 
