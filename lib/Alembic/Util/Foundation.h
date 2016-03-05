@@ -102,7 +102,7 @@
 #include <algorithm>
 
 #ifndef ALEMBIC_VERSION_NS
-#define ALEMBIC_VERSION_NS v7
+#define ALEMBIC_VERSION_NS v8
 #endif
 
 namespace Alembic {
