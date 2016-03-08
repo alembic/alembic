@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2016,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -35,7 +35,7 @@
 
 PROJECT(Alembic)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
 
 MESSAGE(STATUS "CMAKE SYSTEM NAME: ${CMAKE_SYSTEM_NAME}")
 
@@ -50,8 +50,8 @@ ENDIF()
 
 # Declare the project version
 SET(PROJECT_VERSION_MAJOR "1")
-SET(PROJECT_VERSION_MINOR "5")
-SET(PROJECT_VERSION_PATCH "8")
+SET(PROJECT_VERSION_MINOR "6")
+SET(PROJECT_VERSION_PATCH "0")
 SET(PROJECT_VERSION
      ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 SET(VERSION ${PROJECT_VERSION})
@@ -61,16 +61,15 @@ SET(VERSION ${PROJECT_VERSION})
 #-******************************************************************************
 
 OPTION(USE_ARNOLD "Include Arnold stuff" OFF)
+OPTION(USE_BINARIES "Include binaries" ON)
 OPTION(USE_EXAMPLES "Include examples" OFF)
 OPTION(USE_HDF5 "Include HDF5 stuff" ON)
 OPTION(USE_MAYA "Include Maya stuff" OFF)
-OPTION(USE_OPENGL "Include AbcOpenGL lib" OFF)
 OPTION(USE_PRMAN "Include PRMan stuff" OFF)
 OPTION(USE_PYALEMBIC "Include PyAlembic stuff" OFF)
 OPTION(USE_STATIC_BOOST "Build with static Boost libs" ON)
 OPTION(USE_STATIC_HDF5 "Build with static HDF5 libs" OFF)
 OPTION(USE_TESTS "Include Alembic tests" ON)
-OPTION(ALEMBIC_GLEW_LINK_STATIC "GLEW is a static library" OFF)
 OPTION(ALEMBIC_ILMBASE_LINK_STATIC "IlmBase is a static library" OFF)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
 OPTION(ALEMBIC_LIB_USES_BOOST
@@ -152,9 +151,6 @@ IF (${WINDOWS})
     IF (NOT ALEMBIC_ILMBASE_LINK_STATIC)
         ADD_DEFINITIONS(-DOPENEXR_DLL)
     ENDIF()
-    IF (USE_OPENGL AND ALEMBIC_GLEW_LINK_STATIC)
-        ADD_DEFINITIONS(-DGLEW_STATIC)
-    ENDIF()
 ELSEIF (${DARWIN})
     #ADD_DEFINITIONS(-DPLATFORM_DARWIN -DPLATFORM=DARWIN "-arch x86_64")
     ADD_DEFINITIONS(-DPLATFORM_DARWIN -DPLATFORM=DARWIN)
@@ -220,35 +216,6 @@ ENDIF()
 INCLUDE("./cmake/AlembicIlmBase.cmake")
 INCLUDE_DIRECTORIES(${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY})
 
-# OpenGL
-IF (USE_OPENGL)
-    FIND_PACKAGE(OpenGL REQUIRED)
-    FIND_PACKAGE(GLUT REQUIRED)
-    FIND_PACKAGE(GLEW REQUIRED)
-    IF (${WINDOWS})
-        SET(ALEMBIC_GL_LIBS
-            ${GLEW_LIBRARY}
-            ${GLUT_LIBRARY}
-            ${OPENGL_LIBRARIES}
-        )
-        INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR})
-        INCLUDE_DIRECTORIES(${GLEW_INCLUDE_DIR})
-    ELSEIF (${DARWIN})
-        SET(ALEMBIC_GL_LIBS
-            ${GLEW_LIBRARY}
-            ${GLUT_LIBRARY}
-            "-framework OpenGL"
-        )
-    ELSE()
-        SET(ALEMBIC_GL_LIBS
-            ${GLEW_LIBRARY}
-            ${GLUT_LIBRARY}
-            ${OPENGL_LIBRARIES}
-        )
-    ENDIF()
-    MESSAGE(STATUS "OpenGL Libraries: ${ALEMBIC_GL_LIBS}")
-ENDIF()
-
 # HDF5
 IF (USE_HDF5)
     FIND_PACKAGE(ZLIB REQUIRED)
@@ -279,11 +246,11 @@ ELSE()
     )
 ENDIF()
 
-# Alembic, AbcOpenGL
+# Alembic
 ADD_SUBDIRECTORY(lib)
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")
 
-# PyAlembic, PyAbcOpenGL
+# PyAlembic
 IF (USE_PYALEMBIC)
     INCLUDE("./cmake/AlembicPyIlmBase.cmake")
     INCLUDE("./cmake/AlembicPython.cmake")
@@ -328,6 +295,11 @@ IF (USE_MAYA)
     ENDIF()
 ENDIF()
 
+# Binaries (abcls, abctree, etc)
+IF (USE_BINARIES)
+    ADD_SUBDIRECTORY(bin)
+ENDIF()
+
 # Examples
 IF (USE_EXAMPLES)
     ADD_SUBDIRECTORY(examples)
@@ -348,16 +320,15 @@ MACRO(info_cfg_option
 ENDMACRO()
 
 info_cfg_option(USE_ARNOLD)
+info_cfg_option(USE_BINARIES)
 info_cfg_option(USE_EXAMPLES)
 info_cfg_option(USE_HDF5)
 info_cfg_option(USE_MAYA)
-info_cfg_option(USE_OPENGL)
 info_cfg_option(USE_PRMAN)
 info_cfg_option(USE_PYALEMBIC)
 info_cfg_option(USE_STATIC_BOOST)
 info_cfg_option(USE_STATIC_HDF5)
 info_cfg_option(USE_TESTS)
-info_cfg_option(ALEMBIC_GLEW_LINK_STATIC)
 info_cfg_option(ALEMBIC_ILMBASE_LINK_STATIC)
 info_cfg_option(ALEMBIC_SHARED_LIBS)
 info_cfg_option(ALEMBIC_LIB_USES_BOOST)
