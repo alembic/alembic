@@ -1,0 +1,201 @@
+// ****************************************************************************
+//
+// Copyright 2013 Autodesk, Inc. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ****************************************************************************
+
+//
+//  Description:
+//      Create UI components for Alembic plugin
+//
+
+global proc AlembicCreateUI()
+{
+    global string $gMainWindow;  // defined by Maya
+
+    // load AbcImport and AbcExport plugins
+    source performAlembicExport;
+    if (!`pluginInfo -q -loaded AbcImport`) {
+        loadPlugin -quiet AbcImport;
+    }
+
+    source performAlembicImport;
+    if (!`pluginInfo -q -loaded AbcExport`) {
+        loadPlugin -quiet AbcExport;
+    }
+
+    // register runtime command
+    if (!`runTimeCommand -exists AlembicOpen`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicOpenAnnot"))
+                -category "File"
+                -command  "performAlembicImport 0 1"
+                AlembicOpen;
+    }
+
+    if (!`runTimeCommand -exists AlembicImport`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicImportAnnot"))
+                -category "File"
+                -command  "performAlembicImport 0 2"
+                AlembicImport;
+    }
+
+    if (!`runTimeCommand -exists AlembicImportOptions`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicImportOptionsAnnot"))
+                -category "File"
+                -command  "performAlembicImport 1 2"
+                AlembicImportOptions;
+    }
+
+    if (!`runTimeCommand -exists AlembicReplace`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicReplaceAnnot"))
+                -category "File"
+                -command  "performAlembicImport 0 3"
+                AlembicReplace;
+    }
+
+    if (!`runTimeCommand -exists AlembicExportAll`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicExportAllAnnot"))
+                -category "File"
+                -command  "performAlembicExport 0 1"
+                AlembicExportAll;
+    }
+
+    if (!`runTimeCommand -exists AlembicExportAllOptions`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicExportAllOptionsAnnot"))
+                -category "File"
+                -command  "performAlembicExport 1 1"
+                AlembicExportAllOptions;
+    }
+
+    if (!`runTimeCommand -exists AlembicExportSelection`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicExportSelectionAnnot"))
+                -category "File"
+                -command  "performAlembicExport 0 0"
+                AlembicExportSelection;
+    }
+
+    if (!`runTimeCommand -exists AlembicExportSelectionOptions`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicExportSelectionOptionsAnnot"))
+                -category "File"
+                -command  "performAlembicExport 1 0"
+                AlembicExportSelectionOptions;
+    }
+
+    if (!`runTimeCommand -exists AlembicHelp`) {
+        runTimeCommand -default true
+                -annotation (uiRes("m_AlembicCreateUI.kAlembicHelp"))
+                -category "Help"
+                -command  "performAlembicHelp"
+                AlembicHelp;
+    }
+
+    // Insert Alembic Cache menu
+    insertPipelineSubMenu "alembicCacheMenu" (uiRes("m_AlembicCreateUI.kAlembicCache")) "buildAlembicCacheMenu";
+}
+
+global proc buildAlembicCacheMenu(string $parent)
+{
+    setParent -menu $parent;
+
+    if (`menu -q -numberOfItems $parent` != 0) {
+        //
+        // Menu is built already - just return
+        //
+        return;
+    }
+
+    // Create menu items
+    //
+    menuItem -label (uiRes("m_AlembicCreateUI.kOpenAlembic"))
+             -annotation (getRunTimeCommandAnnotation("AlembicOpen"))
+             -dragMenuCommand "performAlembicImport 2 1"
+             -command "AlembicOpen";
+
+    menuItem -label (uiRes("m_AlembicCreateUI.kImportAlembic")) 
+             -annotation (getRunTimeCommandAnnotation("AlembicImport"))
+             -dragMenuCommand "performAlembicImport 2 2"
+             -dragDoubleClickCommand "AlembicImportOptions"
+             -command "AlembicImport";
+
+    menuItem -optionBox true
+             -annotation (getRunTimeCommandAnnotation("AlembicImportOptions"))
+             -command "AlembicImportOptions";
+
+    menuItem -label (uiRes("m_AlembicCreateUI.kReplaceAlembic"))
+             -annotation (getRunTimeCommandAnnotation("AlembicReplace"))
+             -dragMenuCommand "performAlembicImport 2 3"
+             -command "AlembicReplace";
+
+    menuItem -label (uiRes("m_AlembicCreateUI.kExportAllToAlembic"))
+             -annotation (getRunTimeCommandAnnotation("AlembicExportAll"))
+             -dragMenuCommand "performAlembicExport 2 1"
+             -dragDoubleClickCommand "AlembicExportAllOptions"
+             -command "AlembicExportAll";
+
+    menuItem -optionBox true
+             -annotation (getRunTimeCommandAnnotation("AlembicExportAllOptions"))
+             -command "AlembicExportAllOptions";
+
+    menuItem -label (uiRes("m_AlembicCreateUI.kExportSelectionToAlembic"))
+             -annotation (getRunTimeCommandAnnotation("AlembicExportSelection"))
+             -dragMenuCommand "performAlembicExport 2 0"
+             -dragDoubleClickCommand "AlembicExportSelectionOptions"
+             -command "AlembicExportSelection";
+
+    menuItem -optionBox true
+             -annotation (getRunTimeCommandAnnotation("AlembicExportSelectionOptions"))
+             -command "AlembicExportSelectionOptions";
+
+    menuItem -label (uiRes("m_AlembicCreateUI.kAboutAlembic"))
+             -annotation (getRunTimeCommandAnnotation("AlembicHelp"))
+             -command "AlembicHelp";
+   //
+}
+
+global proc performAlembicHelp()
+{
+    showHelp -absolute "http://code.google.com/p/alembic/";
+}
+
+global proc AlembicDeleteUI()
+{
+    // Delete Alembic Cache menu
+    if (!`pluginInfo -q -loaded AbcImport` &&
+            !`pluginInfo -q -loaded AbcExport`) {
+        deletePipelineSubMenu "alembicCacheMenu";
+    }
+}

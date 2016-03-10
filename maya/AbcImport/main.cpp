@@ -82,6 +82,8 @@ ALEMBIC_MAYA_PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
         status.perror("registerFileTranslator");
     }
 
+    MGlobal::executeCommandOnIdle("AlembicCreateUI");
+
     MString info = "AbcImport v";
     info += pluginVersion;
     info += " using ";

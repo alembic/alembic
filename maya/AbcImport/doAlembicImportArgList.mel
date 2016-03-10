@@ -1,0 +1,279 @@
+// ****************************************************************************
+//
+// Copyright 2013 Autodesk, Inc. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ****************************************************************************
+
+//
+//  Description:
+//      This script imports an Alembic file to the current scene by
+//      AbcImport command.
+//
+
+// Global Variables
+string $gAlembicImportLastDirectory;
+string $gAlembicImportLastWorkspace;
+
+//
+//  Procedure Name:
+//      syncOptionVars
+//
+//  Description:
+//      Synchronize option values with the argument list.
+//
+//  Input Arguments:
+//      version - The version of the argument list.
+//
+//      args    - A list of arguments to invoke doAlembicImportArgList.
+//
+//  Return Value:
+//      None.
+//
+proc syncOptionVars(string $version, string $args[])
+{
+    int $versionNum                  = $version;
+    int $fitTimeRange                = $args[1];
+    int $setCurrentTimeToStartFrame  = $args[2];
+    int $insertUnderCurrentSelection = $args[3];
+    int $debug                       = $args[4];
+
+    optionVar -intValue Alembic_importFitTimeRange                $fitTimeRange;
+    optionVar -intValue Alembic_importSetCurrentTimeToStartFrame  $setCurrentTimeToStartFrame;
+    optionVar -intValue Alembic_importInsertUnderCurrentSelection $insertUnderCurrentSelection;
+    optionVar -intValue Alembic_importDebug                       $debug;
+
+    if ($versionNum >= 2) {
+        int $connectOrReparent = $args[5];
+        int $createIfNotFound  = $args[6];
+        int $removeIfNoUpdate  = $args[7];
+
+        optionVar -intValue Alembic_importConnectOrReparent $connectOrReparent;
+        optionVar -intValue Alembic_importCreateIfNotFound  $createIfNotFound;
+        optionVar -intValue Alembic_importRemoveIfNoUpdate  $removeIfNoUpdate;
+    }
+
+    if ($versionNum >= 3) {
+        int $fileContent       = $args[8];
+        int $addMergeSelection = $args[9];
+
+        optionVar -intValue Alembic_importFileContent       $fileContent;
+        optionVar -intValue Alembic_importAddMergeSelection $addMergeSelection;
+    }
+}
+
+//
+//  Procedure Name:
+//      doAlembicImportArgList
+//
+//  Description:
+//      Execute AbcImport command based on the argument list.
+//
+//  Input Arguments:
+//      version - The version of the argument list.
+//
+//      args    - A list of arguments to invoke AbcImport.
+//
+//  Return Value:
+//      None.
+//
+global proc doAlembicImportArgList(string $version, string $args[])
+{
+    if (!`exists captureAlembicImportOptionVars`) {
+        eval("source \"performAlembicImport.mel\"");
+    }
+
+    // back up the current option values so that we can restore
+    // them later if the dialog is cancelled
+    int $mode = $args[0];
+    string $optionVarsBackup[] = captureAlembicImportOptionVars($version, $mode);
+
+    // synchronize the option values with the argument list
+    syncOptionVars($version, $args);
+
+    // prepare filter and starting dir for file dialog
+    string $filter = (uiRes("m_doAlembicImportArgList.kAlembic")) + " (*.abc);;"
+                        + (uiRes("m_doAlembicImportArgList.kAllFiles")) + " (*.*)";
+    if (size(`workspace -fileRuleEntry alembicCache`) == 0) {
+        workspace -fileRule "alembicCache" "cache/alembic";
+        workspace -saveWorkspace;
+    }
+    string $workspace = `workspace -fileRuleEntry alembicCache`;
+    $workspace = `workspace -expandName $workspace`;
+    sysFile -makeDir $workspace;
+
+    global string $gAlembicImportLastDirectory;
+    global string $gAlembicImportLastWorkspace;
+    string $startingDir = $gAlembicImportLastDirectory;
+    if (size($startingDir) == 0 || $gAlembicImportLastWorkspace != `workspace -q -rootDirectory`) {
+        $startingDir = $workspace;
+    }
+
+    // choose a file to import
+    string $result[];
+    string $caption   = (uiRes("m_doAlembicImportArgList.kImportAlembic"));
+    string $okCaption = (uiRes("m_doAlembicImportArgList.kImport3"));
+    if ($mode == 2) {
+        // Import mode, show options
+        $result = `fileDialog2
+               -returnFilter 1 
+               -fileFilter $filter 
+               -caption $caption
+               -startingDirectory $startingDir
+               -fileMode 1
+               -okCaption $okCaption
+               -optionsUICreate "Alembic_importFileOptionsUICreate"
+               -optionsUIInit "Alembic_importFileOptionsUIInit"
+               -optionsUICommit "Alembic_importFileOptionsUICommit"
+               `;
+    }
+    else {
+        // Open & Replace mode, no options
+        $result = `fileDialog2
+               -returnFilter 1 
+               -fileFilter $filter 
+               -caption $caption
+               -startingDirectory $startingDir
+               -fileMode 1
+               -okCaption $okCaption
+               `;
+    }
+    if (size($result) == 0 || size($result[0]) == 0) {
+        // cancelled
+        // Restore optionVars to the state before this procedure is called
+        //
+        syncOptionVars($version, $optionVarsBackup);
+        return;
+    }
+
+    // Prompt the user to save scene if mode is Open
+    if ($mode == 1) {
+        if (`file -q -anyModified`) {
+            NewScene;
+        }
+        if (`file -q -anyModified`) {
+            // The user click Cancel.
+            // Restore optionVars to the state before this procedure is called
+            syncOptionVars($version, $optionVarsBackup);
+            return;
+        }
+    }
+
+    // Save the last directory
+    $gAlembicImportLastDirectory = dirname($result[0]);
+    $gAlembicImportLastWorkspace = `workspace -q -rootDirectory`;
+
+    // parameters
+    int $fileContent                 = `optionVar -q Alembic_importFileContent`;
+    int $addMergeSelection           = `optionVar -q Alembic_importAddMergeSelection`;
+    int $createIfNotFound            = `optionVar -q Alembic_importCreateIfNotFound`;
+    int $removeIfNoUpdate            = `optionVar -q Alembic_importRemoveIfNoUpdate`;
+    int $fitTimeRange                = `optionVar -q Alembic_importFitTimeRange`;
+    int $setCurrentTimeToStartFrame  = `optionVar -q Alembic_importSetCurrentTimeToStartFrame`;
+    int $debug                       = `optionVar -q Alembic_importDebug`;
+
+    // build AbcImport command
+    string $command = "AbcImport ";
+
+    if ($mode == 1) {
+        $command += "-mode open ";
+    }
+    else if ($mode == 2) {
+        $command += "-mode import ";
+    }
+    else if ($mode == 3) {
+        $command += "-mode replace ";
+    }
+
+    if ($mode == 1) {
+        // Open mode always Fit Time Range
+        $command += "-fitTimeRange ";
+    }
+    else if ($mode == 2) {
+        // Import mode has options
+        if ($fitTimeRange) {
+            $command += "-fitTimeRange ";
+        }
+
+        if ($setCurrentTimeToStartFrame) {
+            $command += "-setToStartFrame ";
+        }
+
+        if ($debug) {
+            $command += "-debug ";
+        }
+    }
+
+    if ($mode == 2 && $fileContent == 2) {
+        if ($addMergeSelection == 2) {
+            // Import under current selection / Merge
+            string $selection[] = `ls -selection -transforms`;
+            if (size($selection) > 0) {
+                $command += "-connect \"";
+                int $i;
+                for ($i = 0; $i < size($selection); $i++) {
+                    if ($i > 0) $command += " ";
+                    $command += $selection[$i];
+                }
+                $command += "\" ";
+            }
+            else {
+                $command += "-connect \"/\" ";
+            }
+
+            if ($createIfNotFound) {
+                $command += "-createIfNotFound ";
+            }
+            if ($removeIfNoUpdate) {
+                $command += "-removeIfNoUpdate ";
+            }
+        }
+        else if ($addMergeSelection == 1) {
+            // Import under current selection / Add
+            string $selection[] = `ls -selection -transforms -long -head 2`;
+            if (size($selection) == 1) {
+                $command += "-reparent \"" + $selection[0] + "\" ";
+            }
+            else {
+                error (uiRes("m_doAlembicImportArgList.kReparentMultiSelection"));
+                return;
+            }
+        }
+    }
+
+
+    $command += ("\"" + $result[0] + "\"");
+
+    // execute command
+    if (!`pluginInfo -q -loaded AbcImport`) {
+        error (uiRes("m_doAlembicImportArgList.kAbcImportNotLoaded"));
+        return;
+    }
+    evalEcho($command);
+}
+

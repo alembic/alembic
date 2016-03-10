@@ -1,0 +1,658 @@
+// ****************************************************************************
+//
+// Copyright 2013 Autodesk, Inc. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ****************************************************************************
+
+//
+//  Description:
+//      This script performs the AlembicImport command.
+//
+
+//
+//  Procedure Name:
+//      setOptionVars
+//
+//  Description:
+//      Initialize the option values.
+//
+//  Input Arguments:
+//      Whether to set the options to default values.
+//
+//  Return Value:
+//      None.
+proc setOptionVars(int $forceFactorySettings)
+{
+    // version 1
+    //
+    // deprecated: Alembic_importMode
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importMode`) {
+        optionVar -intValue Alembic_importMode 2;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importFitTimeRange`) {
+        optionVar -intValue Alembic_importFitTimeRange 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importSetCurrentTimeToStartFrame`) {
+        optionVar -intValue Alembic_importSetCurrentTimeToStartFrame 0;
+    }
+
+    // deprecated: Alembic_importInsertUnderCurrentSelection
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importInsertUnderCurrentSelection`) {
+        optionVar -intValue Alembic_importInsertUnderCurrentSelection 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importDebug`) {
+        optionVar -intValue Alembic_importDebug 0;
+    }
+
+    // version 2
+    //
+    // deprecated: Alembic_importConnectOrReparent
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importConnectOrReparent`) {
+        optionVar -intValue Alembic_importConnectOrReparent 1;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importCreateIfNotFound`) {
+        optionVar -intValue Alembic_importCreateIfNotFound 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importRemoveIfNoUpdate`) {
+        optionVar -intValue Alembic_importRemoveIfNoUpdate 0;
+    }
+
+    // version 3
+    //
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importFileContent`) {
+        optionVar -intValue Alembic_importFileContent 1;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_importAddMergeSelection`) {
+        optionVar -intValue Alembic_importAddMergeSelection 1;
+    }
+}
+
+//
+//  Procedure Name:
+//      Alembic_importSetup
+//
+//  Description:
+//      Update the state of the option box UI to reflect the option values.
+//
+//  Input Arguments:
+//      parent               - Top level parent layout of the option box UI.
+//                             Required so that UI object names can be
+//                             successfully resolved.
+//
+//      forceFactorySettings - Whether the option values should be set to
+//                             default values.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_importSetup(string $parent, int $forceFactorySettings)
+{
+    //  Retrieve the option settings
+    //
+    setOptionVars($forceFactorySettings);
+
+    setParent $parent;
+
+    //  Query the optionVar's and set the values into the controls.
+    //
+    int $fileContent = `optionVar -q Alembic_importFileContent`;
+    if ($fileContent == 1) {
+        radioButtonGrp -e -select 1 fileContentRoot;
+    }
+    else if ($fileContent == 2) {
+        radioButtonGrp -e -select 1 fileContentSelection;
+    }
+    Alembic_importFileContentChanged($parent);
+
+    int $addMergeSelection = `optionVar -q Alembic_importAddMergeSelection`;
+    if ($addMergeSelection == 1) {
+        radioButtonGrp -e -select 1 addSelection;
+    }
+    else if ($addMergeSelection == 2) {
+        radioButtonGrp -e -select 1 mergeSelection;
+    }
+    Alembic_importAddMergeSelectionChanged($parent);
+
+    checkBoxGrp -e -value1 `optionVar -q Alembic_importCreateIfNotFound` createIfNotFound;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_importRemoveIfNoUpdate` removeIfNoUpdate;
+
+    checkBoxGrp -e -value1 `optionVar -q Alembic_importFitTimeRange`               fitTimeRange;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_importSetCurrentTimeToStartFrame` setCurrentTimeToStartFrame;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_importDebug`                      debug;
+}
+
+//
+//  Procedure Name:
+//      Alembic_importCallback
+//
+//  Description:
+//      Update the option values with the current state of the option box UI.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the option box UI. Required so
+//                  that UI object names can be successfully resolved.
+//
+//      doIt      - Whether the command should execute.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_importCallback(string $parent, int $doIt)
+{
+    setParent $parent;
+
+    //  Set the optionVar's from the control values, and then
+    //  perform the command.
+    int $fileContent = 1;
+    if (`radioButtonGrp -q -select fileContentRoot`) {
+        $fileContent = 1;
+    }
+    else if (`radioButtonGrp -q -select fileContentSelection`) {
+        $fileContent = 2;
+    }
+    optionVar -intValue Alembic_importFileContent $fileContent;
+
+    int $addMergeSelection = 1;
+    if (`radioButtonGrp -q -select addSelection`) {
+        $addMergeSelection = 1;
+    }
+    else if (`radioButtonGrp -q -select mergeSelection`) {
+        $addMergeSelection = 2;
+    }
+    optionVar -intValue Alembic_importAddMergeSelection $addMergeSelection;
+
+    optionVar -intValue Alembic_importCreateIfNotFound            `checkBoxGrp -q -value1 createIfNotFound`;
+    optionVar -intValue Alembic_importRemoveIfNoUpdate            `checkBoxGrp -q -value1 removeIfNoUpdate`;
+
+    optionVar -intValue Alembic_importFitTimeRange                `checkBoxGrp -q -value1 fitTimeRange`;
+    optionVar -intValue Alembic_importSetCurrentTimeToStartFrame  `checkBoxGrp -q -value1 setCurrentTimeToStartFrame`;
+    optionVar -intValue Alembic_importDebug                       `checkBoxGrp -q -value1 debug`;
+
+    if ($doIt) {
+        performAlembicImport 0 2;
+    }
+}
+
+//
+//  Procedure Name:
+//      importOptionsUI
+//
+//  Description:
+//      Construct the UI for option box or file options.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      Top level layout of the options UI.
+//
+proc string importOptionsUI(string $parent)
+{
+    //  The argument is used as the parent for the options UI
+    //
+    setParent $parent;
+
+    //  Activate the default UI template so that the layout of this
+    //  option box is consistent with the layout of the rest of the
+    //  application.
+    //
+    setUITemplate -pushTemplate DefaultTemplate;
+
+    //  Turn on the wait cursor.
+    //
+    waitCursor -state 1;
+
+    // Create option box or file options contents.
+    //
+    string $optionLayout = `scrollLayout`;
+        columnLayout -adjustableColumn true;
+
+            radioButtonGrp
+                    -numberOfRadioButtons 1
+                    -label  (uiRes("m_performAlembicImport.kFileContent"))
+                    -label1 (uiRes("m_performAlembicImport.kImportToSceneRoot"))
+                    fileContentRoot;
+            radioButtonGrp
+                    -numberOfRadioButtons 1
+                    -label1 (uiRes("m_performAlembicImport.kImportUnderCurrentSelection"))
+                    -shareCollection fileContentRoot
+                    -changeCommand ("Alembic_importFileContentChanged " + $optionLayout)
+                    fileContentSelection;
+
+            radioButtonGrp
+                    -numberOfRadioButtons 1
+                    -label1 (uiRes("m_performAlembicImport.kAdd"))
+                    -columnAttach2 "left" "left"
+                    -columnOffset2 0 25
+                    addSelection;
+            radioButtonGrp
+                    -numberOfRadioButtons 1
+                    -label1 (uiRes("m_performAlembicImport.kMerge"))
+                    -columnAttach2 "left" "left"
+                    -columnOffset2 0 25
+                    -shareCollection addSelection
+                    -changeCommand ("Alembic_importAddMergeSelectionChanged " + $optionLayout)
+                    mergeSelection;
+
+            checkBoxGrp
+                    -numberOfCheckBoxes 1
+                    -label1 (uiRes("m_performAlembicImport.kAddNonMatchingContentFromFile"))
+                    -columnAttach2 "left" "left"
+                    -columnOffset2 0 50
+                    createIfNotFound;
+            checkBoxGrp
+                    -numberOfCheckBoxes 1
+                    -label1 (uiRes("m_performAlembicImport.kRemoveNonMatchingContentFromScene"))
+                    -columnAttach2 "left" "left"
+                    -columnOffset2 0 50
+                    removeIfNoUpdate;
+
+            checkBoxGrp
+                    -numberOfCheckBoxes 1
+                    -label1 (uiRes("m_performAlembicImport.kFitTimeRange")) 
+                    fitTimeRange;
+            checkBoxGrp
+                    -numberOfCheckBoxes 1
+                    -label1 (uiRes("m_performAlembicImport.kSetCurrentTimeToStartFrame")) 
+                    setCurrentTimeToStartFrame;
+
+            checkBoxGrp
+                    -numberOfCheckBoxes 1
+                    -label1 (uiRes("m_performAlembicImport.kDebug")) 
+                    debug;
+        setParent ..;
+    setParent ..;
+
+    //  Turn off the wait cursor.
+    //
+    waitCursor -state 0;
+
+    // Deactivate the default UI template
+    //
+    setUITemplate -popTemplate;
+
+    return $optionLayout;
+}
+
+//
+//  Procedure Name:
+//      Alembic_importFileContentChanged
+//
+//  Description:
+//      Callback procedure when the state of File Content radio button group has been changed.
+//
+//  Input Arguments:
+//      parent      - Top level parent layout of the option box or file options UI.
+//                    Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_importFileContentChanged(string $parent)
+{
+    setParent $parent;
+
+    // enable/disable Add/Merge radio buttons
+    //
+    int $fileContentSelection = (`radioButtonGrp -q -select fileContentSelection` == 1);
+    radioButtonGrp -e -enable ($fileContentSelection) addSelection;
+    radioButtonGrp -e -enable ($fileContentSelection) mergeSelection;
+
+    Alembic_importAddMergeSelectionChanged $parent;
+}
+
+//
+//  Procedure Name:
+//      Alembic_importAddMergeSelectionChanged
+//
+//  Description:
+//      Callback procedure when the state of Add/Merge radio button group has been changed.
+//
+//  Input Arguments:
+//      parent      - Top level parent layout of the option box or file options UI.
+//                    Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_importAddMergeSelectionChanged(string $parent)
+{
+    setParent $parent;
+
+    // enable/disable Create if Not Found/Remove if No Update check boxes
+    //
+    int $mergeSelection = (`radioButtonGrp -q -select fileContentSelection` == 1 &&
+                           `radioButtonGrp -q -select mergeSelection` == 1);
+    checkBoxGrp -e -enable ($mergeSelection) createIfNotFound;
+    checkBoxGrp -e -enable ($mergeSelection) removeIfNoUpdate;
+}
+
+//
+//  Procedure Name:
+//      importOptions
+//
+//  Description:
+//      Construct the option box UI. Involves accessing the standard option
+//      box and customizing the UI accordingly.
+//
+//  Input Arguments:
+//      None.
+//
+//  Return Value:
+//      None.
+//
+proc importOptions()
+{
+    //  Name of the command for this option box.
+    //
+    string $commandName = "AlembicImport";
+    string $label       = (uiRes("m_performAlembicImport.kImport"));
+
+    //  Build the option box actions.
+    //
+    string $callback = "Alembic_importCallback";
+    string $setup    = "Alembic_importSetup";
+
+    //  STEP 1:  Get the option box.
+    //  ============================
+    //
+    //  The value returned is the name of the layout to be used as
+    //  the parent for the option box UI.
+    //
+    string $layout = getOptionBox();
+
+    //  STEP 2:  Pass the command name to the option box.
+    //  =================================================
+    //
+    //  Any default option box behaviour based on the command name is set
+    //  up with this call. For example, updating the 'Help' menu item with
+    //  the name of the command.
+    //
+    setOptionBoxCommandName($commandName);
+
+    //  STEP 3:  Create option box contents.
+    //  ====================================
+    //
+    string $parent = importOptionsUI($layout);
+
+    //  STEP 4:  Customize the buttons.
+    //  ===============================
+    //
+    //  Provide more descriptive labels for the buttons.
+    //  Disable those buttons that are not applicable to the option box.
+    //  Attach actions to those buttons that are applicable to the option box.
+
+    // 'Import' button
+    //
+    string $importBtn = getOptionBoxApplyBtn();
+    button -e -label $label
+           -command ($callback + " " + $parent + " 1")
+           $importBtn;
+
+    // 'Save' button
+    //
+    string $saveBtn = getOptionBoxSaveBtn();
+    button -e
+           -command ($callback + " " + $parent + " 0; hideOptionBox")
+           $saveBtn;
+
+    // 'Reset' button
+    //
+    string $resetBtn = getOptionBoxResetBtn();
+    button -e
+           -command ($setup + " " + $parent + " 1")
+           $resetBtn;
+
+    //  STEP 5:  Set the option box title.
+    //  ==================================
+    //
+    setOptionBoxTitle((uiRes("m_performAlembicImport.kAlembicImport")));
+
+    //  STEP 6:  Customize the 'Help' menu item text.
+    //  =============================================
+    //
+    setOptionBoxHelpTag($commandName);
+
+    //  Set the current values of the option box.
+    //  =========================================
+    //
+    eval ($setup + " " + $parent + " 0");
+
+    //  Show the option box.
+    //  ====================
+    //
+    showOptionBox();
+}
+
+//
+//  Procedure Name:
+//      captureAlembicImportOptionVars
+//
+//  Description:
+//      Capture the current state of option values to an argument list.
+//
+//  Input Arguments:
+//      version - The version of the argument list.
+//
+//  Return Value:
+//      A list of arguments to invoke AbcImport;
+//
+global proc string[] captureAlembicImportOptionVars(int $version, int $mode)
+{
+    setOptionVars(0);
+    int $fitTimeRange                = `optionVar -q Alembic_importFitTimeRange`;
+    int $setCurrentTimeToStartFrame  = `optionVar -q Alembic_importSetCurrentTimeToStartFrame`;
+    int $insertUnderCurrentSelection = `optionVar -q Alembic_importInsertUnderCurrentSelection`;
+    int $debug                       = `optionVar -q Alembic_importDebug`;
+
+    string $args[] = {
+        "" + $mode,
+        $fitTimeRange,
+        $setCurrentTimeToStartFrame,
+        $insertUnderCurrentSelection,
+        $debug
+    };
+
+    if ($version >= 2) {
+        int $connectOrReparent           = `optionVar -q Alembic_importConnectOrReparent`;
+        int $createIfNotFound            = `optionVar -q Alembic_importCreateIfNotFound`;
+        int $removeIfNoUpdate            = `optionVar -q Alembic_importRemoveIfNoUpdate`;
+
+        string $argsVer2[] = {
+            "" + $connectOrReparent,
+            $createIfNotFound,
+            $removeIfNoUpdate
+        };
+
+        appendStringArray($args, $argsVer2, 3);
+    }
+
+    if ($version >= 3) {
+        int $fileContent       = `optionVar -q Alembic_importFileContent`;
+        int $addMergeSelection = `optionVar -q Alembic_importAddMergeSelection`;
+
+        string $argsVer3[] = {
+            "" + $fileContent,
+            $addMergeSelection
+        };
+
+        appendStringArray($args, $argsVer3, 2);
+    }
+
+    return $args;
+}
+
+//
+//  Procedure Name:
+//      assembleCmd
+//
+//  Description:
+//      Construct the command that will apply the option box values.
+//
+//  Input Arguments:
+//      None.
+//
+proc string assembleCmd(int $mode)
+{
+    int $version = 3;
+    string $args[] = captureAlembicImportOptionVars($version, $mode);
+    string $cmd = "doAlembicImportArgList " + $version + " {";
+    int $i;
+    for ($i = 0; $i < size($args); $i++) {
+        if ($i > 0) $cmd += ",";
+        $cmd += ("\"" + encodeString($args[$i]) + "\"");
+    }
+    $cmd += "};";
+    return $cmd;
+}
+
+//
+//  Procedure Name:
+//      Alembic_importFileOptionsUICreate
+//
+//  Description:
+//      Construct the file options UI.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_importFileOptionsUICreate(string $parent)
+{
+    importOptionsUI($parent);
+}
+
+//
+//  Procedure Name:
+//      Alembic_importFileOptionsUIInit
+//
+//  Description:
+//      Update the state of the file options UI to reflect the option values.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//      filter    - The file type filter.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_importFileOptionsUIInit(string $parent, string $filter)
+{
+    Alembic_importSetup $parent 0;
+}
+
+//
+//  Procedure Name:
+//      Alembic_importFileOptionsUICommit
+//
+//  Description:
+//      Update the option values with the current state of the file options UI.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_importFileOptionsUICommit(string $parent)
+{
+    Alembic_importCallback $parent 0;
+}
+
+//
+//  Procedure Name:
+//      performAlembicImport
+//
+//  Description:
+//      Perform the AlembicImport command using the corresponding
+//      option values. This procedure will also show the option box
+//      window if necessary as well as construct the command string
+//      that will invoke the sphere command with the current
+//      option box values.   
+//
+//  Input Arguments:
+//      0 - Execute the command.
+//      1 - Show the option box dialog.
+//      2 - Return the command.
+//
+//  Return Value:
+//      None.
+//
+global proc string performAlembicImport(int $action, int $mode)
+{
+    string $cmd;
+
+    switch ($action)
+    {
+    //  Execute the command.
+    //
+    case 0:
+        //  Get the command.
+        //
+        $cmd = assembleCmd($mode);
+
+        //  Execute the command with the option settings.
+        //
+        eval($cmd);
+
+        break;
+
+    //  Show the option box.
+    //
+    case 1:
+        //  Show the option box.
+        //
+        importOptions();
+        break;
+
+    //  Return the command string.
+    //
+    case 2:
+        //  Get the command.
+        //
+        $cmd = assembleCmd($mode);
+        break;
+    }
+
+    return $cmd;
+}
+

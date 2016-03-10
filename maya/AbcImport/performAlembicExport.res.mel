@@ -1,0 +1,78 @@
+// ****************************************************************************
+//
+// Copyright 2013 Autodesk, Inc. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ****************************************************************************
+
+displayString -replace -value "Add" m_performAlembicExport.kAddAttr;
+displayString -replace -value "Add" m_performAlembicExport.kAddAttrPrefix;
+displayString -replace -value "Advanced Options" m_performAlembicExport.kAdvancedOptions;
+displayString -replace -value "Alembic Export" m_performAlembicExport.kAlembicExport;
+displayString -replace -value "Attribute:" m_performAlembicExport.kAttribute;
+displayString -replace -value "Attributes" m_performAlembicExport.kAttributeFrame;
+displayString -replace -value "Attribute Prefix:" m_performAlembicExport.kAttributePrefix;
+displayString -replace -value "Attribute Prefix" m_performAlembicExport.kAttributePrefixFrame;
+displayString -replace -value "Cache time range:" m_performAlembicExport.kCacheTimeRange;
+displayString -replace -value "Callbacks" m_performAlembicExport.kCallbacks;
+displayString -replace -value "Creates an Alembic file in a Legacy format readable by any Maya version using the Almebic." m_performAlembicExport.kDataFormatHDF5Annot;
+displayString -replace -value "HDF5 - Maya 2014 Extension 1 and Legacy" m_performAlembicExport.kDataFormatHDF5Label;
+displayString -replace -value "Creates an Alembic 1.5 file usable only by Maya 2014 Extension 1 and future versions of Maya." m_performAlembicExport.kDataFormatOgawaAnnot;
+displayString -replace -value "Ogawa - Maya 2014 Extension 1" m_performAlembicExport.kDataFormatOgawaLabel;
+displayString -replace -value "Evaluate every" m_performAlembicExport.kEvaluateEvery;
+displayString -replace -value "Export All" m_performAlembicExport.kExportAll;
+displayString -replace -value "Export Selection" m_performAlembicExport.kExportSelection;
+displayString -replace -value "File Format:" m_performAlembicExport.kFileFormat;
+displayString -replace -value "Filter Euler Rotations" m_performAlembicExport.kFilterEulerRotations;
+displayString -replace -value "Frame relative sample:" m_performAlembicExport.kFrameRelativeSample;
+displayString -replace -value "From Channel Box" m_performAlembicExport.kFromChannelBox;
+displayString -replace -value "General Options" m_performAlembicExport.kGeneralOptions;
+displayString -replace -value "Low/High" m_performAlembicExport.kLowHighFrameRelativeSample;
+displayString -replace -value "No Normals" m_performAlembicExport.kNoNormals;
+displayString -replace -value "Per Frame Callback MEL:" m_performAlembicExport.kPerFrameCallbackMel;
+displayString -replace -value "Per Frame Callback Python:" m_performAlembicExport.kPerFrameCallbackPython;
+displayString -replace -value "Post Job Callback MEL:" m_performAlembicExport.kPostJobCallbackMel;
+displayString -replace -value "Post Job Callback Python:" m_performAlembicExport.kPostJobCallbackPython;
+displayString -replace -value "Pre Roll Start Frame:" m_performAlembicExport.kPreRollStartFrame;
+displayString -replace -value "Remove All" m_performAlembicExport.kRemoveAllAttr;
+displayString -replace -value "Remove All" m_performAlembicExport.kRemoveAllAttrPrefix;
+displayString -replace -value "Remove" m_performAlembicExport.kRemoveAttr;
+displayString -replace -value "Remove" m_performAlembicExport.kRemoveAttrPrefix;
+displayString -replace -value "Remove Selected" m_performAlembicExport.kRemoveSelectedAttr;
+displayString -replace -value "Remove Selected" m_performAlembicExport.kRemoveSelectedAttrPrefix;
+displayString -replace -value "Render settings" m_performAlembicExport.kRenderSettings;
+displayString -replace -value "Renderable Only" m_performAlembicExport.kRenerableOnly;
+displayString -replace -value "Start/End" m_performAlembicExport.kStartEnd;
+displayString -replace -value "Start/End" m_performAlembicExport.kStartEnd2;
+displayString -replace -value "Strip Namespaces" m_performAlembicExport.kStripNamespaces;
+displayString -replace -value "Time Slider" m_performAlembicExport.kTimeSlider;
+displayString -replace -value "UV Write" m_performAlembicExport.kUVWrite;
+displayString -replace -value "Verbose" m_performAlembicExport.kVerbose;
+displayString -replace -value "Whole Frame Geo" m_performAlembicExport.kWholeFrameGeo;
+displayString -replace -value "World Space" m_performAlembicExport.kWorldSpace;
+displayString -replace -value "Write Visibility" m_performAlembicExport.kWriteVisibility;
