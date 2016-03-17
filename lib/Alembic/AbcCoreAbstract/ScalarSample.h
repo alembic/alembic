@@ -79,7 +79,7 @@ public:
         virtual bool lessThan( const void *iData ) const = 0;
         virtual const void *getData() const = 0;
     };
-    
+
     //! Construct from given data type and data. Data will be
     //! copied. If given data is NULL, internal data will be
     //! set to default value.
@@ -109,7 +109,7 @@ public:
     //-*************************************************************************
     // Comparison and Equality
     //-*************************************************************************
-    
+
     //! Assuming the passed memory address points to data of the
     //! same type as us, are they equal? An element-by-element
     //! comparison is done.
@@ -182,7 +182,7 @@ public:
 
 private:
     DataType m_dataType;
-    Alembic::Util::auto_ptr<Data> m_data;
+    Alembic::Util::unique_ptr<Data> m_data;
 };
 
 } // End namespace ALEMBIC_VERSION_NS
