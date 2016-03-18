@@ -198,6 +198,11 @@ public:
 
     FaceSetExclusivity getFaceExclusivity() const;
 
+    Abc::IInt32ArrayProperty getFacesProperty() const
+    {
+        return m_facesProperty;
+    }
+
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,
