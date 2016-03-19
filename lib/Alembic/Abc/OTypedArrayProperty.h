@@ -60,10 +60,9 @@ public:
 
     //! Return the interpretation expected of this
     //! property. An empty interpretation matches everything
-    static const std::string &getInterpretation()
+    static const char * getInterpretation()
     {
-        static std::string sInterpretation = TRAITS::interpretation();
-        return sInterpretation;
+        return TRAITS::interpretation();
     }
 
     //! This will check whether or not a given entity (as represented by
@@ -86,7 +85,7 @@ public:
                  TRAITS::dataType().getPod() &&
                  ( iHeader.getDataType().getExtent() ==
                    TRAITS::dataType().getExtent() ||
-                   getInterpretation() == "" ) ) &&
+                   std::string() == getInterpretation() ) ) &&
                iHeader.isArray() &&
                matches( iHeader.getMetaData(), iMatching );
     }
@@ -163,7 +162,7 @@ OTypedArrayProperty<TRAITS>::OTypedArrayProperty
 
     // Put interpretation into metadata.
     AbcA::MetaData mdata = args.getMetaData();
-    if ( getInterpretation() != "" )
+    if ( std::string() != getInterpretation() )
     {
         mdata.set( "interpretation", getInterpretation() );
     }
@@ -179,7 +178,7 @@ OTypedArrayProperty<TRAITS>::OTypedArrayProperty
         tsIndex = parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
     }
 
-    m_property = parent->createArrayProperty( iName, mdata, 
+    m_property = parent->createArrayProperty( iName, mdata,
         TRAITS::dataType(), tsIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

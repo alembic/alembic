@@ -135,12 +135,12 @@ public:
 
     static TypedArraySample<TRAITS> emptySample()
     {
-        static std::vector<value_type> emptyVec;
-        return TypedArraySample<TRAITS>( emptyVec );
+        return TypedArraySample<TRAITS>( NULL, 0 );
     }
 
     //-*************************************************************************
     ALEMBIC_OPERATOR_BOOL( ArraySample::valid() );
+
 };
 
 //-*****************************************************************************
@@ -185,7 +185,7 @@ typedef TypedArraySample<Box2sTPTraits> Box2sArraySample;
 typedef TypedArraySample<Box2iTPTraits> Box2iArraySample;
 typedef TypedArraySample<Box2fTPTraits> Box2fArraySample;
 typedef TypedArraySample<Box2dTPTraits> Box2dArraySample;
-  
+
 typedef TypedArraySample<Box3sTPTraits> Box3sArraySample;
 typedef TypedArraySample<Box3iTPTraits> Box3iArraySample;
 typedef TypedArraySample<Box3fTPTraits> Box3fArraySample;

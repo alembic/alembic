@@ -305,6 +305,9 @@ OPolyMeshSchema::hasFaceSet( const std::string &iFaceSetName )
     return false;
 }
 
+namespace {
+    OFaceSet g_emptyFaceSet;
+}
 
 //-*****************************************************************************
 OFaceSet &
@@ -321,8 +324,7 @@ OPolyMeshSchema::createFaceSet( const std::string &iFaceSetName )
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static OFaceSet emptyFaceSet;
-    return emptyFaceSet;
+    return g_emptyFaceSet;
 }
 
 //-*****************************************************************************

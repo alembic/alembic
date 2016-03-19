@@ -427,6 +427,9 @@ void OSubDSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+namespace {
+    OFaceSet g_empty;
+}
 //-*****************************************************************************
 OFaceSet &
 OSubDSchema::createFaceSet( const std::string &iFaceSetName )
@@ -442,8 +445,7 @@ OSubDSchema::createFaceSet( const std::string &iFaceSetName )
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static OFaceSet empty;
-    return empty;
+    return g_empty;
 }
 
 //-*****************************************************************************
