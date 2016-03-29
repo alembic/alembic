@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2016,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -49,19 +49,14 @@ ADD_SUBDIRECTORY(Ogawa)
 
 ADD_LIBRARY(Alembic ${LIB_TYPE} ${CXX_FILES})
 
-IF (CMAKE_VERSION VERSION_GREATER 3.0.0)
-    TARGET_INCLUDE_DIRECTORIES(Alembic
-        PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/lib>
-        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/lib>
-        $<INSTALL_INTERFACE:include>
-        ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY}
-        ${Boost_INCLUDE_DIRS}
-        ${HDF5_INCLUDE_DIRS}
-        )
-ELSE()
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
-ENDIF()
+TARGET_INCLUDE_DIRECTORIES(Alembic
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/lib>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/lib>
+    ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY}
+    ${Boost_INCLUDE_DIRS}
+    ${HDF5_INCLUDE_DIRS}
+    )
 
 IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(Alembic PROPERTIES DEFINE_SYMBOL ALEMBIC_EXPORTS)
@@ -74,61 +69,52 @@ IF (ALEMBIC_SHARED_LIBS AND DARWIN)
     TARGET_LINK_LIBRARIES(${CORE_LIBS})
 ENDIF()
 
-IF (CMAKE_VERSION VERSION_GREATER 3.0.0)
+INSTALL(TARGETS Alembic
+        EXPORT AlembicTargets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION lib)
 
-    INSTALL(TARGETS Alembic
-            EXPORT AlembicTargets
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib
-            RUNTIME DESTINATION lib)
+#-******************************************************************************
+# PACKAGE EXPORTS
+#-******************************************************************************
 
-    #-******************************************************************************
-    # PACKAGE EXPORTS
-    #-******************************************************************************
+CONFIGURE_FILE(AlembicConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
+    @ONLY
+    )
 
-    CONFIGURE_FILE(AlembicConfig.cmake.in
-        "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
-        @ONLY
-        )
+INCLUDE(CMakePackageConfigHelpers)
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"
+    VERSION
+    ${PROJECT_VERSION}
+    COMPATIBILITY
+    AnyNewerVersion
+    )
 
-    INCLUDE(CMakePackageConfigHelpers)
-    WRITE_BASIC_PACKAGE_VERSION_FILE(
-        "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"
-        VERSION
-        ${PROJECT_VERSION}
-        COMPATIBILITY
-        AnyNewerVersion
-        )
+EXPORT(TARGETS
+    Alembic
+    FILE
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicTargets.cmake"
+    NAMESPACE
+    Alembic::
+    )
 
-    EXPORT(EXPORT
-        AlembicTargets
-        FILE
-        "${CMAKE_CURRENT_BINARY_DIR}/AlembicTargets.cmake"
-        NAMESPACE
-        Alembic::
-        )
+SET(ConfigPackageLocation lib/cmake/Alembic)
+INSTALL(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"
+    DESTINATION
+    ${ConfigPackageLocation}
+    )
 
-    SET(ConfigPackageLocation lib/cmake/Alembic)
-    INSTALL(FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"
-        DESTINATION
-        ${ConfigPackageLocation}
-        )
-
-    INSTALL(EXPORT
-        AlembicTargets
-        FILE
-        AlembicTargets.cmake
-        NAMESPACE
-        Alembic::
-        DESTINATION
-        ${ConfigPackageLocation}
-        )
-
-ELSE()
-    INSTALL(TARGETS Alembic
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib
-            RUNTIME DESTINATION lib)
-ENDIF()
+INSTALL(EXPORT
+    AlembicTargets
+    FILE
+    AlembicTargets.cmake
+    NAMESPACE
+    Alembic::
+    DESTINATION
+    ${ConfigPackageLocation}
+    )
