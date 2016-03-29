@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 - Alembic
 -
-- Copyright 2009-2015 Sony Pictures Imageworks, Inc. and
+- Copyright 2009-2016 Sony Pictures Imageworks, Inc. and
 - Industrial Light and Magic, a division of Lucasfilm Entertainment Company Ltd.
 -------------------------------------------------------------------------------
 
@@ -14,8 +14,8 @@ dependencies:
 Required:
 
     A unix-like OS (Linux, Mac OS X); Windows support is experimental
-    CMake (2.8.0) www.cmake.org
-    Boost (1.44) www.boost.org
+    CMake (2.8.11+) www.cmake.org
+    Boost (1.44+) www.boost.org
     ilmbase (1.0.3) www.openexr.com
     zlib
 
@@ -27,8 +27,6 @@ Optional:
     Pixar PRMan (15.x)
     Autodesk Maya (2012)
     OpenEXR (1.7.1) www.openexr.com
-    OpenGL www.opengl.org # to build AbcOpenGL
-    Sphinx (1.1.3) # to build the python documentation
 
 Note that the versions given parenthetically above are minimum-tested
 versions.  You may have good luck with later or earlier versions, but this is
@@ -54,7 +52,7 @@ code.
 2) Run the cmake command. You can either run this in your source root, or
 create a separate build root and pass the source root to cmake:
 
-    $ cd <source root>
+    $ cd <build root>
     $ cmake <source root> [OPTIONS]
 
 
