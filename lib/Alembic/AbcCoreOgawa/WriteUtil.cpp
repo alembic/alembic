@@ -166,7 +166,7 @@ void WriteDimensions( Ogawa::OGroupPtr iGroup,
 
     if ( iPod != Alembic::Util::kStringPOD &&
          iPod != Alembic::Util::kWstringPOD &&
-         rank == 1 )
+         rank <= 1 )
     {
         // we can figure out the dimensions based on the size  of the data
         // so just set empty data.
