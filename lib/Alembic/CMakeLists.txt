@@ -65,6 +65,13 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(Alembic ${ALEMBIC_ILMBASE_LIBRARIES})
 
+# link in atomic if we are using tr1 and the compiler is new enough
+# to want  __atomic_compare_exchange_n
+IF ( ${ALEMBIC_LIB_USES_TR1} AND CMAKE_COMPILER_IS_GNUCXX AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8 )
+    TARGET_LINK_LIBRARIES( Alembic atomic )
+ENDIF()
+
 # fixes undefined symbols for x86_64
 IF (ALEMBIC_SHARED_LIBS AND DARWIN)
     TARGET_LINK_LIBRARIES(${CORE_LIBS})
