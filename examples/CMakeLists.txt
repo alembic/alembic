@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2016,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,12 +33,10 @@
 ##
 ##-*****************************************************************************
 
-# Recurse into libs, then bins.
-INCLUDE_DIRECTORIES( "${CMAKE_SOURCE_DIR}/lib" )
-
-ADD_SUBDIRECTORY( bin )
+# Recurse into libs
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib")
 
 # No boost dependency was needed so dont include AbcClients
 IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
-    ADD_SUBDIRECTORY( AbcClients )
+    ADD_SUBDIRECTORY(AbcClients)
 ENDIF()
