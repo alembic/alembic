@@ -65,17 +65,15 @@ public:
     //! data in ".geom", so, "AbcGeom_PolyMesh_v1:.geom"
     //! Sometimes schema titles from underlying schemas are "", but
     //! ours never are.
-    static const std::string &getSchemaObjTitle()
+    static std::string getSchemaObjTitle()
     {
-        static std::string soSchemaTitle =
-            SCHEMA::getSchemaTitle() + ":" + SCHEMA::getDefaultSchemaName();
-        return soSchemaTitle;
+        return SCHEMA::getSchemaTitle() + std::string( ":" ) +
+            SCHEMA::getDefaultSchemaName();
     }
 
-    static const std::string &getSchemaTitle()
+    static const char * getSchemaTitle()
     {
-        static std::string sSchemaTitle = SCHEMA::getSchemaTitle();
-        return sSchemaTitle;
+        return SCHEMA::getSchemaTitle();
     }
 
     //! This will check whether or not a given entity (as represented by
@@ -84,7 +82,7 @@ public:
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        if ( getSchemaTitle() == "" || iMatching == kNoMatching )
+        if ( std::string() == getSchemaTitle() || iMatching == kNoMatching )
         { return true; }
 
         if ( iMatching == kStrictMatching )
@@ -195,7 +193,7 @@ OSchemaObject<SCHEMA>::OSchemaObject
     AbcA::MetaData metaData = args.getMetaData();
     metaData.set( "schema", SCHEMA::getSchemaTitle() );
     metaData.set( "schemaObjTitle", getSchemaObjTitle() );
-    if (SCHEMA::getSchemaBaseType() != "" )
+    if ( std::string() != SCHEMA::getSchemaBaseType() )
     {
         metaData.set( "schemaBaseType", SCHEMA::getSchemaBaseType() );
     }

@@ -102,40 +102,12 @@
 #include <algorithm>
 
 #ifndef ALEMBIC_VERSION_NS
-#define ALEMBIC_VERSION_NS v7
+#define ALEMBIC_VERSION_NS v8
 #endif
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
-
-
-#ifdef ALEMBIC_LIB_USES_BOOST
-using boost::dynamic_pointer_cast;
-using boost::enable_shared_from_this;
-using boost::shared_ptr;
-using boost::static_pointer_cast;
-using boost::weak_ptr;
-using boost::unordered_map;
-
-#elif defined(ALEMBIC_LIB_USES_TR1)
-using std::tr1::dynamic_pointer_cast;
-using std::tr1::enable_shared_from_this;
-using std::tr1::shared_ptr;
-using std::tr1::static_pointer_cast;
-using std::tr1::weak_ptr;
-using std::tr1::unordered_map;
-
-#else
-using std::dynamic_pointer_cast;
-using std::enable_shared_from_this;
-using std::shared_ptr;
-using std::static_pointer_cast;
-using std::weak_ptr;
-using std::unordered_map;
-#endif
-
-using std::auto_ptr;
 
 // similiar to boost::noncopyable
 // explicitly hides copy construction and copy assignment
@@ -149,6 +121,71 @@ private:
     noncopyable( const noncopyable& );
     const noncopyable& operator=( const noncopyable& );
 };
+
+#ifdef ALEMBIC_LIB_USES_BOOST
+using boost::dynamic_pointer_cast;
+using boost::enable_shared_from_this;
+using boost::shared_ptr;
+using boost::static_pointer_cast;
+using boost::weak_ptr;
+using boost::unordered_map;
+using boost::unique_ptr;
+
+#elif defined(ALEMBIC_LIB_USES_TR1)
+using std::tr1::dynamic_pointer_cast;
+using std::tr1::enable_shared_from_this;
+using std::tr1::shared_ptr;
+using std::tr1::static_pointer_cast;
+using std::tr1::weak_ptr;
+using std::tr1::unordered_map;
+
+template<typename T>
+class unique_ptr : noncopyable
+{
+public:
+    unique_ptr()
+    {
+        p = NULL;
+    }
+
+    unique_ptr( T* val ) : p(val)
+    {
+    }
+
+    ~unique_ptr()
+    {
+        if ( p )
+        {
+            delete p;
+        }
+    }
+
+    void reset( T* val )
+    {
+        if ( p )
+        {
+            delete p;
+        }
+        p = val;
+    }
+
+    T* operator->() const
+    {
+        return p;
+    }
+private:
+    T* p;
+};
+
+#else
+using std::dynamic_pointer_cast;
+using std::enable_shared_from_this;
+using std::shared_ptr;
+using std::static_pointer_cast;
+using std::weak_ptr;
+using std::unordered_map;
+using std::unique_ptr;
+#endif
 
 // similiar to boost::totally_ordered
 // only need < and == operators and this fills in the rest

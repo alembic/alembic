@@ -70,7 +70,7 @@ private:
     Alembic::Util::uint64_t getPos() const;
 
     class PrivateData;
-    Alembic::Util::auto_ptr< PrivateData > mData;
+    Alembic::Util::unique_ptr< PrivateData > mData;
 };
 
 typedef Alembic::Util::shared_ptr< OData > ODataPtr;

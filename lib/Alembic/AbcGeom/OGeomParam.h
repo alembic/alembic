@@ -114,10 +114,9 @@ public:
     typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename this_type::Sample sample_type;
 
-    static const std::string &getInterpretation()
+    static const char * getInterpretation()
     {
-        static std::string sInterpretation = TRAITS::interpretation();
-        return sInterpretation;
+        return TRAITS::interpretation();
     }
 
     static bool matches( const AbcA::PropertyHeader &iHeader,
@@ -127,7 +126,7 @@ public:
         {
             return ( iHeader.getMetaData().get( "podName" ) ==
                     Alembic::Util::PODName( TRAITS::dataType().getPod() ) &&
-                    ( getInterpretation() == "" ||
+                    ( std::string() == getInterpretation() ||
                       atoi(
                         iHeader.getMetaData().get( "podExtent" ).c_str() ) ==
                      TRAITS::dataType().getExtent() ) ) &&

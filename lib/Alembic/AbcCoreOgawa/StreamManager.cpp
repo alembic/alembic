@@ -40,6 +40,24 @@ namespace Alembic {
 namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
+// Lets define a compare exchange macro for use below
+
+// C++11 std::atomics version
+#if !defined( ALEMBIC_LIB_USES_TR1 )
+#define COMPARE_EXCHANGE( V, COMP, EXCH ) V.compare_exchange_weak( COMP, EXCH, std::memory_order_seq_cst, std::memory_order_seq_cst )
+// Windows
+#elif defined( _MSC_VER )
+#define COMPARE_EXCHANGE( V, COMP, EXCH ) InterlockedCompareExhange64( &V, EXCH, COMP ) == COMP
+// gcc 4.8 and above not using C++11
+#elif defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 8
+#define COMPARE_EXCHANGE( V, COMP, EXCH ) __atomic_compare_exchange_n( &V, &COMP, EXCH, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST )
+// gcc 4.1 and above not using C++11
+#elif defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1
+#define COMPARE_EXCHANGE( V, COMP, EXCH ) __sync_bool_compare_and_swap( &V, COMP, EXCH )
+#else
+#error Please contact alembic-discuss@googlegroups.com for support.
+#endif
+
 StreamManager::StreamManager( std::size_t iNumStreams )
 {
 
@@ -68,8 +86,6 @@ StreamManager::StreamManager( std::size_t iNumStreams )
 StreamManager::~StreamManager()
 {
 }
-
-#if !defined(__APPLE__) && defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
 
 StreamIDPtr StreamManager::get()
 {
@@ -111,7 +127,7 @@ StreamIDPtr StreamManager::get()
 
         newVal = oldVal & ~( 1 << (val - 1) );
     }
-    while ( !__sync_bool_compare_and_swap( &m_streams, oldVal, newVal ) );
+    while ( ! COMPARE_EXCHANGE( m_streams, oldVal, newVal ) );
 
     return StreamIDPtr( new StreamID( this, ( std::size_t ) val - 1 ) );
 }
@@ -138,42 +154,9 @@ void StreamManager::put( std::size_t iStreamID )
     {
         oldVal = m_streams;
         newVal = oldVal | ( 1 << iStreamID );
-
     }
-    while ( !__sync_bool_compare_and_swap( &m_streams, oldVal, newVal ) );
+    while ( ! COMPARE_EXCHANGE( m_streams, oldVal, newVal ) );
 }
-
-#else
-
-StreamIDPtr StreamManager::get()
-{
-    // no need to lock
-    if ( m_streamIDs.empty() )
-    {
-        return m_default;
-    }
-
-    Alembic::Util::scoped_lock l( m_lock );
-
-    // we've used up more than we have, just return the default
-    if ( m_curStream >= m_numStreams )
-    {
-        return m_default;
-    }
-
-    return StreamIDPtr( new StreamID( this, m_streamIDs[ m_curStream ++ ] ) );
-}
-
-void StreamManager::put( std::size_t iStreamID )
-{
-    // shouldn't ever hit this case, it's why we have m_default
-    assert( iStreamID < m_numStreams && m_curStream > 0 );
-
-    Alembic::Util::scoped_lock l( m_lock );
-    m_streamIDs[ --m_curStream ] = iStreamID;
-}
-
-#endif
 
 StreamID::StreamID( StreamManager * iManager, std::size_t iStreamID ) :
     m_manager( iManager ), m_streamID( iStreamID )

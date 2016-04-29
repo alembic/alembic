@@ -90,10 +90,9 @@ public:
     typedef ITypedGeomParam<TRAITS> this_type;
     typedef typename this_type::Sample sample_type;
 
-    static const std::string &getInterpretation()
+    static const char * getInterpretation()
     {
-        static std::string sInterpretation = TRAITS::interpretation();
-        return sInterpretation;
+        return TRAITS::interpretation();
     }
 
     static bool matches( const AbcA::PropertyHeader &iHeader,
@@ -103,7 +102,7 @@ public:
         {
             return ( iHeader.getMetaData().get( "podName" ) ==
                     Alembic::Util::PODName( TRAITS::dataType().getPod() ) &&
-                    ( getInterpretation() == "" ||
+                    ( std::string() == getInterpretation() ||
                       atoi(
                         iHeader.getMetaData().get( "podExtent" ).c_str() ) ==
                      TRAITS::dataType().getExtent() ) ) &&
@@ -440,6 +439,9 @@ bool ITypedGeomParam<TRAITS>::isConstant() const
     return false;
 }
 
+namespace {
+    const std::string g_emptyStr;
+}
 //-*****************************************************************************
 template <class TRAITS>
 const std::string &ITypedGeomParam<TRAITS>::getName() const
@@ -451,8 +453,7 @@ const std::string &ITypedGeomParam<TRAITS>::getName() const
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static const std::string ret( "" );
-    return ret;
+    return g_emptyStr;
 }
 
 //-*****************************************************************************

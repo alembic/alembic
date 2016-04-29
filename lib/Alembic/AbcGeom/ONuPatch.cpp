@@ -307,12 +307,14 @@ void ONuPatchSchema::set( const ONuPatchSchema::Sample &iSamp  )
 
         if ( m_positionWeightsProperty )
         {
-            m_positionWeightsProperty.set( iSamp.getPositionWeights() );
+            SetPropUsePrevIfNull( m_positionWeightsProperty,
+                                  iSamp.getPositionWeights() );
         }
 
         if ( m_velocitiesProperty )
         {
-            m_velocitiesProperty.set( iSamp.getVelocities() );
+            SetPropUsePrevIfNull( m_velocitiesProperty,
+                                  iSamp.getVelocities() );
         }
 
         // handle trim curves

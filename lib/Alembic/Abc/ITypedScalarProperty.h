@@ -58,10 +58,9 @@ public:
 
     //! Return the interpretation expected of this
     //! property. An empty interpretation matches everything
-    static const std::string &getInterpretation()
+    static const char * getInterpretation()
     {
-        static std::string sInterpretation = TRAITS::interpretation();
-        return sInterpretation;
+        return TRAITS::interpretation();
     }
 
     //! This will check whether or not a given entity (as represented by
@@ -88,7 +87,7 @@ public:
                  TRAITS::dataType().getPod() &&
                  ( iHeader.getDataType().getExtent() ==
                    TRAITS::dataType().getExtent() ||
-                   getInterpretation() == "" ) ) &&
+                   std::string() == getInterpretation() ) ) &&
                iHeader.isScalar() &&
                matches( iHeader.getMetaData(), iMatching );
     }
