@@ -389,6 +389,19 @@ void optPropTest()
         TESTING_ASSERT(
             GetSourceName( mesh.getUVsParam().getMetaData() ) == "" );
         TESTING_ASSERT( isUV( mesh.getUVsParam().getHeader() ) );
+
+        TESTING_ASSERT( !mesh.getCreaseIndicesProperty() );
+        TESTING_ASSERT( !mesh.getCreaseLengthsProperty() );
+        TESTING_ASSERT( !mesh.getCreaseSharpnessesProperty() );
+        TESTING_ASSERT( !mesh.getCornerIndicesProperty() );
+        TESTING_ASSERT( !mesh.getCornerSharpnessesProperty() );
+        TESTING_ASSERT( !mesh.getHolesProperty() );
+
+        TESTING_ASSERT( !mesh.getFaceVaryingInterpolateBoundaryProperty() );
+        TESTING_ASSERT( !mesh.getFaceVaryingPropagateCornersProperty() );
+        TESTING_ASSERT( !mesh.getInterpolateBoundaryProperty() );
+        TESTING_ASSERT( !mesh.getSubdivisionSchemeProperty() );
+
     }
 }
 
