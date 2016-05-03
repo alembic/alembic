@@ -44,7 +44,6 @@
 #include <boost/format.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/array.hpp>
@@ -129,7 +128,6 @@ using boost::shared_ptr;
 using boost::static_pointer_cast;
 using boost::weak_ptr;
 using boost::unordered_map;
-using boost::unique_ptr;
 
 #elif defined(ALEMBIC_LIB_USES_TR1)
 using std::tr1::dynamic_pointer_cast;
@@ -139,6 +137,21 @@ using std::tr1::static_pointer_cast;
 using std::tr1::weak_ptr;
 using std::tr1::unordered_map;
 
+#else
+using std::dynamic_pointer_cast;
+using std::enable_shared_from_this;
+using std::shared_ptr;
+using std::static_pointer_cast;
+using std::weak_ptr;
+using std::unordered_map;
+using std::unique_ptr;
+#endif
+
+#if defined(ALEMBIC_LIB_USES_BOOST) || defined(ALEMBIC_LIB_USES_TR1)
+
+// define a very simple scoped ptr since unique_ptr isn't consistently
+// available on boost versions.  Otherwise we could use boost::scoped_ptr
+// or the deprecated std::auto_ptr for tr1.
 template<typename T>
 class unique_ptr : noncopyable
 {
@@ -177,14 +190,6 @@ private:
     T* p;
 };
 
-#else
-using std::dynamic_pointer_cast;
-using std::enable_shared_from_this;
-using std::shared_ptr;
-using std::static_pointer_cast;
-using std::weak_ptr;
-using std::unordered_map;
-using std::unique_ptr;
 #endif
 
 // similiar to boost::totally_ordered

@@ -43,7 +43,7 @@ namespace ALEMBIC_VERSION_NS {
 // Lets define a compare exchange macro for use below
 
 // C++11 std::atomics version
-#if !defined( ALEMBIC_LIB_USES_TR1 )
+#if !defined( ALEMBIC_LIB_USES_TR1 ) && __cplusplus >= 201103L
 #define COMPARE_EXCHANGE( V, COMP, EXCH ) V.compare_exchange_weak( COMP, EXCH, std::memory_order_seq_cst, std::memory_order_seq_cst )
 // Windows
 #elif defined( _MSC_VER )
