@@ -222,6 +222,7 @@ IF (USE_HDF5)
     SET(ALEMBIC_WITH_HDF5 "1")
     INCLUDE("./cmake/AlembicHDF5.cmake")
     INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5_USE_18_API")
 ENDIF()
 
 #-******************************************************************************

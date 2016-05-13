@@ -67,7 +67,23 @@ AwImpl::AwImpl( const std::string &iFileName,
     {
         ABCA_THROW( "Could not create property access for fopen" );
     }
-    H5Pset_libver_bounds( faid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST );
+
+    unsigned int majorVer = 1;
+    unsigned int minorVer = 10;
+    unsigned int releaseVer = 0;
+    H5get_libversion( &majorVer, &minorVer, &releaseVer );
+
+    if ( majorVer == 1 && minorVer == 8 )
+    {
+        H5Pset_libver_bounds( faid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST );
+    }
+    else
+    {
+        // not sure about the performance characteristics, about this, but
+        // at least we will write something older versions of the libraries
+        // can read
+        H5Pset_libver_bounds( faid, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST );
+    }
 
     m_file = H5Fcreate( m_fileName.c_str(),
                         H5F_ACC_TRUNC, H5P_DEFAULT,
