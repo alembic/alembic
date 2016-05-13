@@ -84,14 +84,15 @@ AwImpl::AwImpl( const std::string &iFileName,
     // This expresses the AbcCoreHDF5 version - how properties,
     // are stored within HDF5, etc.
     int version = ALEMBIC_HDF5_FILE_VERSION;
-    H5LTset_attribute_int(m_file, ".", "abc_version", &version, 1);
+    WriteScalar( m_file, "abc_version", H5T_STD_I32LE, H5T_NATIVE_INT32,
+                 &version );
 
     // This is the Alembic library version XXYYZZ
     // Where XX is the major version, YY is the minor version
     // and ZZ is the patch version
     int libraryVersion = ALEMBIC_LIBRARY_VERSION;
-    H5LTset_attribute_int(m_file, ".", "abc_release_version",
-        &libraryVersion, 1);
+    WriteScalar( m_file, "abc_release_version", H5T_STD_I32LE, H5T_NATIVE_INT32,
+                 &libraryVersion );
 
     m_metaData.set("_ai_AlembicVersion", AbcA::GetLibraryVersion());
 

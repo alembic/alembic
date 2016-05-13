@@ -503,8 +503,8 @@ void WriteTimeSampling( hid_t iGroup,
 
     const std::vector < chrono_t > & samps = iTsmp.getStoredTimes();
     ABCA_ASSERT( samps.size() > 0, "No TimeSamples to write!");
-    H5LTset_attribute_double ( iGroup, ".", timeSampsName.c_str(),
-        &samps.front(), samps.size() );
+    WriteSmallArray( iGroup, timeSampsName.c_str(), H5T_IEEE_F64LE,
+                     H5T_NATIVE_DOUBLE, samps.size(), &samps.front() );
 }
 
 } // End namespace ALEMBIC_VERSION_NS
