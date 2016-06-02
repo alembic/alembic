@@ -128,6 +128,16 @@ void ICompoundProperty::init( AbcA::CompoundPropertyReaderPtr iParent,
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
+//-*****************************************************************************
+void ICompoundProperty::layerProperties( ICompoundProperty &layerProps )
+{
+   CompoundPropertyReaderPtr baseCpr = this->getPtr();
+   CompoundPropertyReaderPtr layerCpr= layerProps.getPtr();
+
+   baseCpr->layerProperties( layerCpr );
+}
+
+
 } // End namespace ALEMBIC_VERSION_NS
 } // End namespace Abc
 } // End namespace Alembic

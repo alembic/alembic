@@ -107,6 +107,8 @@ public:
     //! ...
     ~IArchive();
 
+    void layerArchive( IArchive &iArchive );
+
     //! Default copy constructor
     //! Default assignment operator
 

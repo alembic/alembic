@@ -40,6 +40,7 @@
 #include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
 #include <Alembic/Abc/IArchive.h>
 #include <Alembic/Util/Export.h>
+#include <list>
 
 namespace Alembic {
 namespace AbcCoreFactory {
@@ -67,6 +68,10 @@ public:
     //! Try to open a file and return IArchive.  If the file wasn't a valid
     //! file or known type and invalid archive is returned.
     Alembic::Abc::IArchive getArchive( const std::string & iFileName );
+
+    //! Open a series of alembic files, layering each file on top of the next
+    //! to present a single IArchive
+    Alembic::Abc::IArchive getArchive( const std::list<std::string> & iFileNames );
 
     //! Use the streams (Alembic does not take ownership) to read the data from
     //! This is currently only valid for Ogawa.  The streams must all reference

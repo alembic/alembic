@@ -59,6 +59,7 @@
 
 #include <vector>
 #include <string>
+#include <list>
 
 // mArray or mScalar will be valid, mObj will be valid for those situations
 // where the property can't be validly read, unless the object stays in scope.
@@ -242,7 +243,7 @@ public:
 class ArgData
 {
 public:
-    ArgData(MString iFileName = "",
+    ArgData(std::list<std::string>& iFileNames,
         bool    iDebugOn = false,
         MObject iReparentObj = MObject::kNullObj,
         bool    iConnect = false,
@@ -255,24 +256,24 @@ public:
     ArgData(const ArgData & rhs);
     ArgData & operator=(const ArgData & rhs);
 
-    MString     mFileName;
-    double      mSequenceStartTime;
-    double      mSequenceEndTime;
-    bool        mDebugOn;
+    std::list<std::string>     mFileNames;
+    double                     mSequenceStartTime;
+    double                     mSequenceEndTime;
+    bool                       mDebugOn;
 
-    MObject     mReparentObj;
+    MObject                    mReparentObj;
 
-    bool        mRecreateColorSets;
+    bool                       mRecreateColorSets;
 
     // optional information for the "connect" flag
-    bool        mConnect;
-    MString     mConnectRootNodes;
-    bool        mCreateIfNotFound;
-    bool        mRemoveIfNoUpdate;
-    MString     mIncludeFilterString;
-    MString     mExcludeFilterString;
+    bool                       mConnect;
+    MString                    mConnectRootNodes;
+    bool                       mCreateIfNotFound;
+    bool                       mRemoveIfNoUpdate;
+    MString                    mIncludeFilterString;
+    MString                    mExcludeFilterString;
 
-    WriterData  mData;
+    WriterData                 mData;
 };  // ArgData
 
 // traverse and create the corresponding maya hierarchy

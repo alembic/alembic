@@ -126,8 +126,12 @@ public:
 
         AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-        m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds",
-            iArg0, iArg1 );
+        if ( this->getPropertyHeader( ".selfBnds" ) != NULL )
+       {
+           m_selfBoundsProperty = Abc::IBox3dProperty( _this, ".selfBnds",
+               iArg0, iArg1 );
+       }
+
         if ( this->getPropertyHeader( ".childBnds" ) != NULL )
         {
             m_childBoundsProperty = Abc::IBox3dProperty( _this,
@@ -160,13 +164,19 @@ public:
     virtual bool valid() const
     {
         // Only selfBounds is required, all others are optional
-        return ( Abc::ISchema<info_type>::valid() &&
-                m_selfBoundsProperty.valid() );
+        return ( Abc::ISchema<info_type>::valid() );
     }
 
     Abc::IBox3dProperty getSelfBoundsProperty() const
     {
-        return m_selfBoundsProperty;
+       if(m_selfBoundsProperty && m_selfBoundsProperty.valid())
+       {
+           return m_selfBoundsProperty;
+       }
+       else
+       {
+           Abc::IBox3dProperty();
+       }
     }
 
     Abc::IBox3dProperty getChildBoundsProperty() const

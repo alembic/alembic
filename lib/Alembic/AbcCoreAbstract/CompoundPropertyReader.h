@@ -42,10 +42,14 @@
 #include <Alembic/AbcCoreAbstract/BasePropertyReader.h>
 #include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
 #include <Alembic/AbcCoreAbstract/PropertyHeader.h>
+#include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
+#include <map>
 
 namespace Alembic {
 namespace AbcCoreAbstract {
 namespace ALEMBIC_VERSION_NS {
+
+typedef std::map<std::string, CompoundPropertyReaderPtr> CompoundPropertyReaderMap;
 
 //-*****************************************************************************
 //! A CompoundProperty is a group of other properties, possibly Simple
@@ -64,34 +68,34 @@ public:
 
     //! Returns the number of properties read from the file
     //! ...
-    virtual size_t getNumProperties() = 0;
+    virtual size_t getNumProperties();
 
     //! Return the header of a property by index.
     //! This will throw an exception on out-of-range access.
-    virtual const PropertyHeader & getPropertyHeader( size_t i ) = 0;
+    virtual const PropertyHeader & getPropertyHeader( size_t i );
 
     //! Return the header of a property name.
     //! This will return a NULL pointer if no header by that name is found.
     virtual const PropertyHeader *
-    getPropertyHeader( const std::string &iName ) = 0;
+    getPropertyHeader( const std::string &iName );
 
     //! Get a Scalar Property by name..
     //! It will return an empty pointer if the property is not scalar or
     //! is not found.
     virtual ScalarPropertyReaderPtr
-    getScalarProperty( const std::string &iName ) = 0;
+    getScalarProperty( const std::string &iName );
     
     //! Get a Array Property by name..
     //! It will return an empty pointer if the property is not array or
     //! is not found.
     virtual ArrayPropertyReaderPtr
-    getArrayProperty( const std::string &iName ) = 0;
+    getArrayProperty( const std::string &iName );
     
     //! Get a Compound Property by name..
     //! It will return an empty pointer if the property is not compound or
     //! is not found.
     virtual CompoundPropertyReaderPtr
-    getCompoundProperty( const std::string &iName ) = 0;
+    getCompoundProperty( const std::string &iName );
     
     //! Get a base property by name.
     //! That property can be safely upcast.
@@ -128,6 +132,37 @@ public:
     //! This is a convenience function that uses getPropertyHeader and
     //! the various named "get" functions here.
     BasePropertyReaderPtr getProperty( size_t i );
+
+	void	initializePropertyMaps(CompoundPropertyReaderPtr _this);
+
+	void	setPropertyReader(const std::string &iName, CompoundPropertyReaderPtr iReader);
+
+	void	layerProperties( CompoundPropertyReaderPtr layer );
+
+protected:
+
+	//! CompoundPropertyReaderPtr acts as a wrapper, using a map to
+	//! choose the layer instance of CompoundPropertyReaderPtr that
+	//! corresponds to the requested name
+	virtual size_t getNumPropertiesImpl() = 0;
+
+    virtual const PropertyHeader & getPropertyHeaderImpl( size_t i ) = 0;
+
+    virtual const PropertyHeader *
+    getPropertyHeaderImpl( const std::string &iName ) = 0;
+
+    virtual ScalarPropertyReaderPtr
+    getScalarPropertyImpl( const std::string &iName ) = 0;
+
+    virtual ArrayPropertyReaderPtr
+    getArrayPropertyImpl( const std::string &iName ) = 0;
+
+    virtual CompoundPropertyReaderPtr
+    getCompoundPropertyImpl( const std::string &iName ) = 0;
+
+private:
+
+	CompoundPropertyReaderMap 	m_propertyReaders;
 
 };
 

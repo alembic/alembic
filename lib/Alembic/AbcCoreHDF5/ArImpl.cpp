@@ -149,8 +149,13 @@ AbcA::ObjectReaderPtr ArImpl::getTop()
     if ( ! ret )
     {
         // time to make a new one
-        ret = Alembic::Util::shared_ptr<OrImpl>(
+       Alembic::Util::shared_ptr<OrImpl> retShared = Alembic::Util::shared_ptr<OrImpl>(
             new OrImpl( asArchivePtr(), m_data, m_header ) );
+
+       retShared->initChildMap();
+
+       ret = retShared;
+
         m_top = ret;
     }
 

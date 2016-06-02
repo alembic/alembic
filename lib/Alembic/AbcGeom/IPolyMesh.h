@@ -159,13 +159,12 @@ public:
     }
     const IPolyMeshSchema & operator=(const IPolyMeshSchema & rhs);
 
-
     //! Return the number of samples contained in the property.
     //! This can be any number, including zero.
     //! This returns the number of samples that were written, independently
     //! of whether or not they were constant.
-    size_t getNumSamples() const
-    { return  m_positionsProperty.getNumSamples(); }
+    size_t getNumSamples() const;
+
 
     //! Return the topological variance.
     //! This indicates how the mesh may change.
@@ -173,44 +172,16 @@ public:
 
     //! Ask if we're constant - no change in value amongst samples,
     //! regardless of the time sampling.
-    bool isConstant() const { return getTopologyVariance() == kConstantTopology; }
+    bool isConstant() const;
 
     //! Time information.
     //! Any of the properties could be the bearer of the time
     //! sampling information, which otherwise defaults to Identity.
-    AbcA::TimeSamplingPtr getTimeSampling() const
-    {
-        if ( m_positionsProperty.valid() )
-        {
-            return m_positionsProperty.getTimeSampling();
-        }
-        else
-        {
-            return getObject().getArchive().getTimeSampling( 0 );
-        }
-    }
+    AbcA::TimeSamplingPtr getTimeSampling() const;
 
     //-*************************************************************************
     void get( Sample &oSample,
-              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
-    {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::get()" );
-
-        m_positionsProperty.get( oSample.m_positions, iSS );
-        m_indicesProperty.get( oSample.m_indices, iSS );
-        m_countsProperty.get( oSample.m_counts, iSS );
-
-        m_selfBoundsProperty.get( oSample.m_selfBounds, iSS );
-
-        if ( m_velocitiesProperty && m_velocitiesProperty.getNumSamples() > 0 )
-        {
-            m_velocitiesProperty.get( oSample.m_velocities, iSS );
-        }
-
-        // Could error check here.
-
-        ALEMBIC_ABC_SAFE_CALL_END();
-    }
+              const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const;
 
     Sample getValue( const Abc::ISampleSelector &iSS = Abc::ISampleSelector() ) const
     {
@@ -263,7 +234,6 @@ public:
         m_velocitiesProperty.reset();
         m_indicesProperty.reset();
         m_countsProperty.reset();
-
         m_uvsParam.reset();
         m_normalsParam.reset();
 
@@ -275,9 +245,10 @@ public:
     bool valid() const
     {
         return ( IGeomBaseSchema<PolyMeshSchemaInfo>::valid() &&
-                 m_positionsProperty.valid() &&
-                 m_indicesProperty.valid() &&
-                 m_countsProperty.valid() );
+                 ((m_positionsProperty.valid() &&
+                  m_indicesProperty.valid() &&
+                  m_countsProperty.valid() ) ||
+                  m_velocitiesProperty.valid() || m_uvsParam.valid() || m_normalsParam.valid() ));
     }
 
     // FaceSet related

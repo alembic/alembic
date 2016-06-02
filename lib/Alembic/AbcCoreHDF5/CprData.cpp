@@ -363,10 +363,15 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
     if ( ! bptr )
     {
         // Make a new one.
-        bptr = Alembic::Util::shared_ptr<CprImpl>(
-            new CprImpl( iParent, m_group, sub.header ) );
+        CprImpl *cprPtr = new CprImpl( iParent, m_group, sub.header );
 
-        sub.made = bptr;
+       Alembic::Util::shared_ptr<CprImpl> cprShared = Alembic::Util::shared_ptr<CprImpl>( cprPtr );
+
+       cprPtr->initializePropertyMaps(cprShared);
+
+        bptr = cprShared;
+
+        sub.made = cprShared;
     }
 
     AbcA::CompoundPropertyReaderPtr ret =

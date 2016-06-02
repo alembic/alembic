@@ -174,7 +174,7 @@ public:
                      const Abc::Argument &iArg2 = Abc::Argument() )
       : OGeomBaseSchema<PolyMeshSchemaInfo>(
                                         GetCompoundPropertyWriterPtr( iParent ),
-                                        iName, iArg0, iArg1, iArg2 )
+                                        iName, iArg0, iArg1, iArg2, false )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -203,7 +203,7 @@ public:
                               const Abc::Argument &iArg2 = Abc::Argument() )
       : OGeomBaseSchema<PolyMeshSchemaInfo>(
                                         GetCompoundPropertyWriterPtr( iParent ),
-                                        iArg0, iArg1, iArg2 )
+                                        iArg0, iArg1, iArg2, false )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
@@ -240,8 +240,7 @@ public:
 
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
-    AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positionsProperty.getTimeSampling(); }
+    AbcA::TimeSamplingPtr getTimeSampling() const;
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -249,8 +248,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples() const
-    { return m_positionsProperty.getNumSamples(); }
+    size_t getNumSamples() const;
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
@@ -290,9 +288,13 @@ public:
     bool valid() const
     {
         return ( OGeomBaseSchema<PolyMeshSchemaInfo>::valid() &&
-                 m_positionsProperty.valid() &&
-                 m_indicesProperty.valid() &&
-                 m_countsProperty.valid() );
+                 ( (m_positionsProperty.valid() &&
+                   m_indicesProperty.valid() &&
+                   m_countsProperty.valid()) ) ||
+                   m_velocitiesProperty.valid() ||
+                   m_uvsParam.valid() ||
+                   m_normalsParam.valid()
+                 );
     }
 
     // FaceSet stuff
@@ -313,10 +315,12 @@ public:
 protected:
     void init( uint32_t iTsIdx );
 
+    void setPositionSample(const OPolyMeshSchema::Sample &iSamp);
+
     Abc::OP3fArrayProperty m_positionsProperty;
-    Abc::OV3fArrayProperty m_velocitiesProperty;
     Abc::OInt32ArrayProperty m_indicesProperty;
     Abc::OInt32ArrayProperty m_countsProperty;
+    Abc::OV3fArrayProperty m_velocitiesProperty;
 
     // FaceSets created on this PolyMesh
     std::map <std::string, OFaceSet>  m_faceSets;
@@ -326,6 +330,11 @@ protected:
 
     // optional source name for the UVs
     std::string m_uvSourceName;
+
+    AbcA::MetaData m_metaData;
+
+    // track time sampling index from ::init()
+    uint32_t m_tsIndex;
 
     // self and child bounds and ArbGeomParams and UserProperties
     // all come from OGeomBaseSchema

@@ -114,6 +114,24 @@ Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName )
     return getArchive( iFileName, coreType );
 }
 
+Alembic::Abc::IArchive IFactory::getArchive( const std::list<std::string> & iFileNames )
+{
+    CoreType coreType;
+
+    std::list<std::string>::const_iterator itr = iFileNames.begin();
+
+    Alembic::Abc::IArchive baseArchive = getArchive( *itr, coreType );
+
+    for( ++itr; itr != iFileNames.end(); ++itr )
+    {
+        Alembic::Abc::IArchive nextArchive = getArchive( *itr, coreType );
+
+        baseArchive.layerArchive( nextArchive );
+    }
+
+    return baseArchive;
+}
+
 Alembic::Abc::IArchive IFactory::getArchive(
     const std::vector< std::istream * > & iStreams, CoreType & oType)
 {

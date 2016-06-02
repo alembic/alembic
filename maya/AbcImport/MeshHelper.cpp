@@ -216,7 +216,14 @@ namespace
         Alembic::Abc::P3fArraySamplePtr iPoints,
         Alembic::Abc::P3fArraySamplePtr iCeilPoints, double alpha)
     {
+       if(!iPoints)
+           return;
+
         unsigned int numPoints = static_cast<unsigned int>(iPoints->size());
+
+        if(!numPoints)
+           return;
+
         oPointArray.setLength(numPoints);
 
         if (alpha == 0 || iCeilPoints == NULL)
@@ -251,7 +258,7 @@ namespace
         // since we are changing the topology we will be creating a new mesh
 
         // Get face count info
-        unsigned int numPolys = static_cast<unsigned int>(iCounts->size());
+        unsigned int numPolys = iCounts ? static_cast<unsigned int>(iCounts->size()) : 0;
         MIntArray polyCounts;
         polyCounts.setLength(numPolys);
 
@@ -260,7 +267,7 @@ namespace
             polyCounts[i] = (*iCounts)[i];
         }
 
-        unsigned int numConnects = static_cast<unsigned int>(iIndices->size());
+        unsigned int numConnects = iIndices ? static_cast<unsigned int>(iIndices->size()) : 0;
 
         MIntArray polyConnects;
         polyConnects.setLength(numConnects);
@@ -924,8 +931,11 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
                 Alembic::Abc::ISampleSelector(ceilIndex) );
         }
 
-        fillPoints(pointArray, points, ceilPoints, alpha);
-        ioMesh.setPoints(pointArray, MSpace::kObject);
+       fillPoints(pointArray, points, ceilPoints, alpha);
+       if(pointArray.length() > 0)
+       {
+           ioMesh.setPoints(pointArray, MSpace::kObject);
+       }
 
         setColorsAndUVs(iFrame, ioMesh, schema.getUVsParam(),
             iNode.mV2s, iNode.mC3s, iNode.mC4s, !iInitialized);
@@ -950,8 +960,8 @@ void readPoly(double iFrame, MFnMesh & ioMesh, MObject & iParent,
 
     fillPoints(pointArray, samp.getPositions(), ceilPoints, alpha);
 
-    fillTopology(ioMesh, iParent, pointArray, samp.getFaceIndices(),
-        samp.getFaceCounts());
+   fillTopology(ioMesh, iParent, pointArray, samp.getFaceIndices(),
+       samp.getFaceCounts());
 
     setPolyNormals(iFrame, ioMesh, schema.getNormalsParam());
     setColorsAndUVs(iFrame, ioMesh, schema.getUVsParam(),
@@ -1035,7 +1045,7 @@ void disconnectMesh(MObject & iMeshObject,
 
 MObject createPoly(double iFrame, PolyMeshAndFriends & iNode, MObject & iParent)
 {
-    Alembic::AbcGeom::IPolyMeshSchema schema = iNode.mMesh.getSchema();
+    Alembic::AbcGeom::IPolyMeshSchema &schema = iNode.mMesh.getSchema();
     MString name(iNode.mMesh.getName().c_str());
 
     MObject obj;

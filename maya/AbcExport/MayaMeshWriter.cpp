@@ -304,6 +304,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
     const JobArgs & iArgs, GetMembersMap& gmMap)
   : mNoNormals(iArgs.noNormals),
+    mWriteGeometry(iArgs.writeGeometry),
     mWriteUVs(iArgs.writeUVs),
     mWriteColorSets(iArgs.writeColorSets),
     mWriteUVSets(iArgs.writeUVSets),
@@ -918,7 +919,10 @@ void MayaMeshWriter::writePoly(
     std::vector<Alembic::Util::int32_t> facePoints;
     std::vector<Alembic::Util::int32_t> pointCounts;
 
-    fillTopology(points, facePoints, pointCounts);
+    if( mWriteGeometry )
+    {
+       fillTopology(points, facePoints, pointCounts);
+    }
 
     Alembic::AbcGeom::ON3fGeomParam::Sample normalsSamp;
     std::vector<float> normals;

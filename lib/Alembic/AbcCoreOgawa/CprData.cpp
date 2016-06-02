@@ -251,11 +251,16 @@ CprData::getCompoundProperty( AbcA::CompoundPropertyReaderPtr iParent,
         ABCA_ASSERT( group, "Compound Property not backed by a valid group.");
 
         // Make a new one.
-        bptr = Alembic::Util::shared_ptr<CprImpl>(
-            new CprImpl( iParent, group, sub.header, streamId->getID(),
-                         implPtr->getIndexedMetaData() ) );
+        CprImpl *cprPtr = new CprImpl( iParent, group, sub.header, streamId->getID(),
+                implPtr->getIndexedMetaData() );
 
-        sub.made = bptr;
+        Alembic::Util::shared_ptr<CprImpl> cprShared = Alembic::Util::shared_ptr<CprImpl>( cprPtr );
+
+        cprShared->initializePropertyMaps(cprShared);
+
+        bptr = cprShared;
+
+        sub.made = cprShared;
     }
 
     AbcA::CompoundPropertyReaderPtr ret =

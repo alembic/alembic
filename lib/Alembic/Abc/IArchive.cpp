@@ -36,6 +36,7 @@
 
 #include <Alembic/Abc/IArchive.h>
 #include <Alembic/Abc/IObject.h>
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 namespace Alembic {
 namespace Abc {
@@ -45,6 +46,14 @@ namespace ALEMBIC_VERSION_NS {
 IArchive::~IArchive()
 {
     // Nothing - just here as a support entry point for debugging
+}
+
+//-*****************************************************************************
+void IArchive::layerArchive( IArchive &iArchive )
+{
+   IObject top = this->getTop();
+   IObject archiveTop = iArchive.getTop();
+   top.layerObject( archiveTop );
 }
 
 //-*****************************************************************************

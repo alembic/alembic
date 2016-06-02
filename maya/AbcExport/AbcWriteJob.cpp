@@ -404,6 +404,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     if ( status == MS::kSuccess && riCurvesVal && writeOutAsGroup)
     {
+       if( !mArgs.writeCurvesGroup )
+       {
+           return;
+       }
+
         MayaNurbsCurveWriterPtr nurbsCurve;
         if (iParent == NULL)
         {
@@ -438,42 +443,45 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kTransform))
     {
-        MFnTransform fnTrans(ob, &status);
-        if (status != MS::kSuccess)
-        {
-            MString msg = "Initialize transform node ";
-            msg += mCurDag.fullPathName();
-            msg += " failed, skipping.";
-            MGlobal::displayWarning(msg);
-            return;
-        }
+       MayaTransformWriterPtr trans;
 
-        MayaTransformWriterPtr trans;
+       if( mArgs.writeTransforms )
+       {
+           MFnTransform fnTrans(ob, &status);
+           if (status != MS::kSuccess)
+           {
+               MString msg = "Initialize transform node ";
+               msg += mCurDag.fullPathName();
+               msg += " failed, skipping.";
+               MGlobal::displayWarning(msg);
+               return;
+           }
 
-        // parented to the root case
-        if (iParent == NULL)
-        {
-            Alembic::Abc::OObject obj = mRoot.getTop();
-            trans = MayaTransformWriterPtr(new MayaTransformWriter(
-                obj, mCurDag, mTransTimeIndex, mArgs));
-        }
-        else
-        {
-            trans = MayaTransformWriterPtr(new MayaTransformWriter(
-                *iParent, mCurDag, mTransTimeIndex, mArgs));
-        }
+           // parented to the root case
+           if (iParent == NULL)
+           {
+               Alembic::Abc::OObject obj = mRoot.getTop();
+               trans = MayaTransformWriterPtr(new MayaTransformWriter(
+                   obj, mCurDag, mTransTimeIndex, mArgs));
+           }
+           else
+           {
+               trans = MayaTransformWriterPtr(new MayaTransformWriter(
+                   *iParent, mCurDag, mTransTimeIndex, mArgs));
+           }
 
-        if (trans->isAnimated() && mTransTimeIndex != 0)
-        {
-            mTransList.push_back(trans);
-            mStats.mTransAnimNum++;
-        }
-        else
-            mStats.mTransStaticNum++;
+           if (trans->isAnimated() && mTransTimeIndex != 0)
+           {
+               mTransList.push_back(trans);
+               mStats.mTransAnimNum++;
+           }
+           else
+               mStats.mTransStaticNum++;
 
-        AttributesWriterPtr attrs = trans->getAttrs();
-        if (mTransTimeIndex != 0 && attrs->isAnimated())
-            mTransAttrList.push_back(attrs);
+           AttributesWriterPtr attrs = trans->getAttrs();
+           if (mTransTimeIndex != 0 && attrs->isAnimated())
+               mTransAttrList.push_back(attrs);
+       }
 
         // loop through the children, making sure to push and pop them
         // from the MDagPath
@@ -489,6 +497,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kLocator))
     {
+       if( !mArgs.writeLocators )
+       {
+           return;
+       }
+
         MFnDependencyNode fnLocator(ob, & status);
         if (status != MS::kSuccess)
         {
@@ -528,6 +541,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kParticle))
     {
+       if( !mArgs.writeParticles )
+       {
+           return;
+       }
+
         MFnParticleSystem mFnParticle(ob, &status);
         if (status != MS::kSuccess)
         {
@@ -569,6 +587,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kMesh))
     {
+       if( !mArgs.writeMeshes)
+       {
+           return;
+       }
+
         MFnMesh fnMesh(ob, &status);
         if (status != MS::kSuccess)
         {
@@ -630,6 +653,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kCamera))
     {
+       if( !mArgs.writeCameras )
+       {
+           return;
+       }
+
         MFnCamera fnCamera(ob, &status);
         if (status != MS::kSuccess)
         {
@@ -667,6 +695,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kNurbsSurface))
     {
+       if( !mArgs.writeNurbsSurfaces )
+       {
+           return;
+       }
+
         MFnNurbsSurface fnNurbsSurface(ob, &status);
         if (status != MS::kSuccess)
         {
@@ -708,6 +741,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kNurbsCurve))
     {
+       if( !mArgs.writeNurbsCurves )
+       {
+           return;
+       }
+
         MFnNurbsCurve fnNurbsCurve(ob, &status);
         if (status != MS::kSuccess)
         {

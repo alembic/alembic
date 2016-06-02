@@ -58,6 +58,91 @@ bool ObjectReader::getChildrenHash( Util::Digest & oDigest )
     return false;
 }
 
+//-*****************************************************************************
+void ObjectReader::initChildMap()
+{
+    const size_t numChildren = this->getNumChildrenImpl();
+
+    for( size_t i = 0; i < numChildren; i++ )
+    {
+        ObjectReaderPtr child = this->getChildImpl( i );
+        const std::string name = child->getName();
+        m_children[name] = m_objectReaderPtrs.size();
+        m_objectReaderPtrs.push_back( child );
+
+        ObjectHeaderPtr headerPtr = ObjectHeaderPtr( new ObjectHeader( this->getChildHeaderImpl( i ) ) );
+        m_objectHeaderPtrs.push_back( headerPtr );
+    }
+}
+
+//-*****************************************************************************
+size_t ObjectReader::getNumChildren()
+{
+   return m_children.size();
+}
+
+//-*****************************************************************************
+const ObjectHeader & ObjectReader::getChildHeader( size_t i )
+{
+    return *(m_objectHeaderPtrs[ i ]);
+}
+
+//-*****************************************************************************
+const ObjectHeader * ObjectReader::getChildHeader( const std::string &iName )
+{
+    IObjectChildMap::iterator findChild = m_children.find( iName );
+   if( findChild != m_children.end() )
+   {
+       return m_objectHeaderPtrs[ findChild->second ].get();
+   }
+
+   return 0;
+}
+
+//-*****************************************************************************
+ObjectReaderPtr ObjectReader::getChild( const std::string &iName )
+{
+    IObjectChildMap::iterator findChild = m_children.find( iName );
+    if( findChild != m_children.end() )
+    {
+        return m_objectReaderPtrs[ findChild->second ];
+    }
+
+    return ObjectReaderPtr();
+}
+
+//-*****************************************************************************
+ObjectReaderPtr ObjectReader::getChild( size_t i )
+{
+    return m_objectReaderPtrs[ i ];
+}
+
+//-*****************************************************************************
+void ObjectReader::addChild( const ObjectHeader& iHeader, ObjectReaderPtr iReader )
+{
+   if( iReader )
+   {
+       if(iReader->getNumChildren() == 0)
+           return;
+
+       const std::string name = iReader->getName();
+       ObjectHeaderPtr headerPtr = ObjectHeaderPtr( new ObjectHeader( iHeader ) );
+
+       IObjectChildMap::iterator findChild = m_children.find( name );
+       if( findChild == m_children.end() )
+       {
+           m_children[name] = m_objectReaderPtrs.size();
+           m_objectReaderPtrs.push_back( iReader );
+           m_objectHeaderPtrs.push_back( headerPtr );
+       }
+       else
+       {
+           m_objectReaderPtrs[findChild->second] = iReader;
+           m_objectHeaderPtrs[findChild->second] = headerPtr;
+       }
+   }
+}
+
 } // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic

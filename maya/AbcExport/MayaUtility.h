@@ -159,6 +159,15 @@ struct JobArgs
         writeColorSets = false;
         writeFaceSets = false;
         writeUVSets = false;
+        writeGeometry = true;
+        writeCurvesGroup = true;
+        writeTransforms = true;
+        writeLocators = true;
+        writeParticles = true;
+        writeMeshes = true;
+        writeCameras = true;
+        writeNurbsSurfaces = true;
+        writeNurbsCurves = true;
     }
 
     bool excludeInvisible;
@@ -166,12 +175,21 @@ struct JobArgs
     bool noNormals;
     unsigned int stripNamespace;
     bool useSelectionList;
-    bool worldSpace;
+    bool writeGeometry;
+   bool worldSpace;
     bool writeVisibility;
     bool writeUVs;
     bool writeColorSets;
     bool writeFaceSets;
     bool writeUVSets;
+    bool writeCurvesGroup;
+    bool writeTransforms;
+   bool writeLocators;
+   bool writeParticles;
+   bool writeMeshes;
+   bool writeCameras;
+   bool writeNurbsSurfaces;
+   bool writeNurbsCurves;
     std::string melPerFrameCallback;
     std::string melPostCallback;
     std::string pythonPerFrameCallback;

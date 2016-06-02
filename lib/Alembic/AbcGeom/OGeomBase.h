@@ -80,7 +80,8 @@ public:
              const std::string &iName,
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
-             const Argument &iArg2 = Argument() )
+             const Argument &iArg2 = Argument(),
+             const bool createSelfBounds = true )
        : Abc::OSchema<info_type>( iParentCompound, iName, iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
@@ -97,14 +98,15 @@ public:
         }
 
         // Create our always present property
-        init( tsIndex );
+        init( tsIndex, createSelfBounds );
     }
 
     template <class CPROP_PTR>
     explicit OGeomBaseSchema( CPROP_PTR iParentCompound,
                       const Argument &iArg0 = Argument(),
                       const Argument &iArg1 = Argument(),
-                      const Argument &iArg2 = Argument() )
+                      const Argument &iArg2 = Argument(),
+                      const bool createSelfBounds = true )
       : Abc::OSchema<info_type>( iParentCompound, iArg0, iArg1, iArg2 )
     {
         AbcA::TimeSamplingPtr tsPtr =
@@ -122,7 +124,7 @@ public:
         }
 
         // Create our always present property
-        init( tsIndex );
+        init( tsIndex, createSelfBounds );
     }
 
     //! Copy constructor
@@ -132,18 +134,22 @@ public:
         *this = iCopy;
     }
 
-    void init( uint32_t iTsHandle)
+    void init( uint32_t iTsIndex, bool createSelfBounds)
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::init()" );
 
-        AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
-
-        // Create our always present property. All other
-        // properties are optional.
-        m_selfBoundsProperty = Abc::OBox3dProperty( _this,
-                                                    ".selfBnds", iTsHandle );
+        if( createSelfBounds )
+        {
+           createSelfBoundsProperty(iTsIndex);
+        }
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    void createSelfBoundsProperty(uint32_t iTsIndex)
+    {
+       m_selfBoundsProperty = Abc::OBox3dProperty( this->getPtr(),
+                                                               ".selfBnds", iTsIndex );
     }
 
     virtual void reset ()
@@ -157,9 +163,7 @@ public:
 
     virtual bool valid() const
     {
-        // Only selfBounds is required, all others are optional
-        return ( Abc::OSchema<info_type>::valid() &&
-                m_selfBoundsProperty.valid() );
+        return ( Abc::OSchema<info_type>::valid() );
     }
 
     Abc::OCompoundProperty getArbGeomParams()

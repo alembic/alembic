@@ -248,6 +248,18 @@ public:
     //! return true, if it doesn't exist return false
     bool getChildrenHash( Util::Digest & oDigest );
 
+    //! Overlay the properties and children of iLayerObj onto our own data
+    void layerObject( IObject &iObject );
+
+    //! Look for a child named iName
+    bool hasChild( const std::string &iName ) const;
+
+    //! Add the properties of another object to ourself
+    void layerProperties( IObject &iObject );
+
+    //! Add a child to our list of children
+    void addChild( IObject &iObject );
+
     //! The unspecified-bool-type operator casts the object to "true"
     //! if it is valid, and "false" otherwise.
     ALEMBIC_OPERATOR_BOOL( valid() );

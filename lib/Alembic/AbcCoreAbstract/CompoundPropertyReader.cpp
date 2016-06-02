@@ -49,6 +49,74 @@ CompoundPropertyReader::~CompoundPropertyReader()
 }
 
 //-*****************************************************************************
+size_t
+CompoundPropertyReader::getNumProperties()
+{
+   return m_propertyReaders.size();
+}
+
+//-*****************************************************************************
+const PropertyHeader &
+CompoundPropertyReader::getPropertyHeader( size_t i )
+{
+   CompoundPropertyReaderMap::const_iterator propertyHeadersItr = m_propertyReaders.begin();
+   std::advance(propertyHeadersItr, i);
+   return (*propertyHeadersItr).second->getPropertyHeaderImpl( i );
+}
+
+//-*****************************************************************************
+const PropertyHeader *
+CompoundPropertyReader::getPropertyHeader( const std::string &iName )
+{
+   CompoundPropertyReaderMap::const_iterator findResult = m_propertyReaders.find(iName);
+   if( findResult != m_propertyReaders.end() )
+   {
+       return (*findResult).second->getPropertyHeaderImpl( iName );
+   }
+
+   return 0;
+}
+
+//-*****************************************************************************
+ScalarPropertyReaderPtr
+CompoundPropertyReader::getScalarProperty( const std::string &iName )
+{
+   CompoundPropertyReaderMap::const_iterator findResult = m_propertyReaders.find(iName);
+   if( findResult != m_propertyReaders.end() )
+   {
+       return (*findResult).second->getScalarPropertyImpl( iName );
+   }
+
+   return ScalarPropertyReaderPtr();
+}
+
+//-*****************************************************************************
+ArrayPropertyReaderPtr
+CompoundPropertyReader::getArrayProperty( const std::string &iName )
+{
+   CompoundPropertyReaderMap::const_iterator findResult = m_propertyReaders.find(iName);
+   if( findResult != m_propertyReaders.end() )
+   {
+       return (*findResult).second->getArrayPropertyImpl( iName );
+   }
+
+   return ArrayPropertyReaderPtr();
+}
+
+//-*****************************************************************************
+CompoundPropertyReaderPtr
+CompoundPropertyReader::getCompoundProperty( const std::string &iName )
+{
+   CompoundPropertyReaderMap::const_iterator findResult = m_propertyReaders.find(iName);
+   if( findResult != m_propertyReaders.end() )
+   {
+       return (*findResult).second->getCompoundPropertyImpl( iName );
+   }
+
+   return CompoundPropertyReaderPtr();
+}
+
+//-*****************************************************************************
 BasePropertyReaderPtr
 CompoundPropertyReader::getProperty( const std::string &iName )
 {
@@ -140,6 +208,60 @@ CompoundPropertyReader::getProperty( size_t i )
     case kCompoundProperty:
         return getCompoundProperty( header.getName() );
     }
+}
+
+//-*****************************************************************************
+void CompoundPropertyReader::initializePropertyMaps(CompoundPropertyReaderPtr _sharedthis)
+{
+   const size_t numProperties = _sharedthis->getNumPropertiesImpl();
+
+   for( size_t i = 0; i< numProperties; i++ )
+   {
+       const PropertyHeader &propertyHeader = _sharedthis->getPropertyHeaderImpl( i );
+       m_propertyReaders[propertyHeader.getName()] = _sharedthis;
+   }
+}
+
+//-*****************************************************************************
+void CompoundPropertyReader::setPropertyReader(const std::string &iName, CompoundPropertyReaderPtr iReader)
+{
+   m_propertyReaders[iName] = iReader;
+}
+
+//-*****************************************************************************
+void CompoundPropertyReader::layerProperties( CompoundPropertyReaderPtr layer )
+{
+   const size_t numLayerProperties = layer->getNumProperties();
+
+   for( size_t i = 0; i< numLayerProperties; i++ )
+   {
+       const PropertyHeader &header = layer->getPropertyHeader( i );
+       const std::string &name = header.getName();
+
+       switch ( header.getPropertyType() )
+       {
+       case kCompoundProperty:
+           {
+               // Add in sub-properties of this compound property
+               CompoundPropertyReaderMap::iterator itr = m_propertyReaders.find( name );
+               if( itr != m_propertyReaders.end())
+               {
+                   CompoundPropertyReaderPtr baseSubCpr = (*itr).second->getCompoundProperty( name );
+                   CompoundPropertyReaderPtr layerSubCpr =layer->getCompoundProperty( name );
+                   baseSubCpr->layerProperties( layerSubCpr );
+                   return;
+               }
+
+               //If this compound property doesn't exist in the base, just fall through and grab everything
+               //from the layer's compound property
+           }
+       default:
+           {
+               this->setPropertyReader( header.getName(), layer );
+           }
+       }
+   }
+
 }
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -133,6 +133,9 @@ public:
     //! ICompoundProperty wrapper.
     ICompoundProperty getParent() const;
 
+
+    void layerProperties( ICompoundProperty &layerProps );
+
 private:
     void init( AbcA::CompoundPropertyReaderPtr iParentObject,
                const std::string &iName,
@@ -175,7 +178,7 @@ inline ICompoundProperty::ICompoundProperty( CPROP_PTR iThisObject,
       iWrap,
       GetErrorHandlerPolicy( iThisObject, iArg0, iArg1 ) )
 {
-    // Nothing!
+
 }
 
 //-*****************************************************************************

@@ -87,6 +87,7 @@ class MayaMeshWriter
 
     void getPolyNormals(std::vector<float> & oNormals);
     bool mNoNormals;
+    bool mWriteGeometry;
     bool mWriteUVs;
     bool mWriteColorSets;
     bool mWriteUVSets;

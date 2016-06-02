@@ -72,24 +72,26 @@ public:
 
     virtual AbcA::CompoundPropertyReaderPtr asCompoundPtr();
 
+protected:
+
     //-*************************************************************************
     // FROM ABSTRACT CompoundPropertyReader
     //-*************************************************************************
-    virtual size_t getNumProperties();
+    virtual size_t getNumPropertiesImpl();
 
-    virtual const AbcA::PropertyHeader & getPropertyHeader( size_t i );
+    virtual const AbcA::PropertyHeader & getPropertyHeaderImpl( size_t i );
 
     virtual const AbcA::PropertyHeader *
-    getPropertyHeader( const std::string &iName );
+    getPropertyHeaderImpl( const std::string &iName );
 
     virtual AbcA::ScalarPropertyReaderPtr
-    getScalarProperty( const std::string &iName );
+    getScalarPropertyImpl( const std::string &iName );
 
     virtual AbcA::ArrayPropertyReaderPtr
-    getArrayProperty( const std::string &iName );
+    getArrayPropertyImpl( const std::string &iName );
 
     virtual AbcA::CompoundPropertyReaderPtr
-    getCompoundProperty( const std::string &iName );
+    getCompoundPropertyImpl( const std::string &iName );
 
 
 private:
