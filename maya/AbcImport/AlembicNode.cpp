@@ -471,7 +471,9 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
         if (!archive.valid())
         {
-            MString theError = "Cannot read file " + fileName;
+            //The resolved full name will be empty if the resolution fails.
+            //Print the raw full name in case of this situation.
+            MString theError = "Cannot read file " + fileObject.rawFullName();
             printError(theError);
         }
 
