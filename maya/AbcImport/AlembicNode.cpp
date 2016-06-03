@@ -464,7 +464,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         Alembic::Abc::IArchive archive;
         Alembic::AbcCoreFactory::IFactory factory;
         factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
-        archive = factory.getArchive(fileName.asUTF8());
+        archive = factory.getArchive(fileName.asChar());
 
         if (!archive.valid())
         {
