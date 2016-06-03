@@ -52,7 +52,7 @@ class AttributesWriter
                      Alembic::Abc::OObject & iParentObj,
                      const MFnDependencyNode & iNode,
                      Alembic::Util::uint32_t iTimeIndex,
-                     const JobArgs & iArgs);
+                     const JobArgs & iArgs, bool isShape);
 
     ~AttributesWriter();
 

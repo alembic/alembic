@@ -374,9 +374,12 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             up = mSubDSchema.getUserProperties();
         }
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, lMesh,
-            iTimeIndex, iArgs));
+            iTimeIndex, iArgs, true));
 
-        writeSubD(uvSamp);
+        if (!mIsGeometryAnimated || iArgs.setFirstAnimShape)
+        {
+            writeSubD(uvSamp);
+        }
     }
     else
     {
@@ -416,9 +419,12 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
         // set the rest of the props and write to the writer node
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, lMesh,
-            iTimeIndex, iArgs));
+            iTimeIndex, iArgs, true));
 
-        writePoly(uvSamp);
+        if (!mIsGeometryAnimated || iArgs.setFirstAnimShape)
+        {
+            writePoly(uvSamp);
+        }
     }
 
     if (mWriteColorSets)
@@ -472,7 +478,11 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
                     mRGBAParams.push_back(colorProp);
                 }
             }
-            writeColor();
+
+            if (!mIsGeometryAnimated || iArgs.setFirstAnimShape)
+            {
+                writeColor();
+            }
         }
     }
 
@@ -516,7 +526,11 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
                         Alembic::AbcGeom::kFacevaryingScope, 1, iTimeIndex));
                 }
             }
-            writeUVSets();
+
+            if (!mIsGeometryAnimated || iArgs.setFirstAnimShape)
+            {
+                writeUVSets();
+            }
         }
     }
 
@@ -615,8 +629,10 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             up = faceSetSchema.getUserProperties();
         }
 
-        AttributesWriter attrWriter(cp, up, faceSet, iNode, iTimeIndex, iArgs);
-        attrWriter.write();
+        // last argument false so we set the animated attrs at least once
+        // because we don't appear to support animated facesets yet
+        AttributesWriter attrWriter(cp, up, faceSet, iNode, iTimeIndex,
+                                    iArgs, false);
     }
 }
 
