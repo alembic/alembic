@@ -123,6 +123,10 @@ public:
     virtual MStringArray getFilesToArchive(bool shortName,
                                            bool unresolvedName,
                                            bool markCouldBeImageSequence) const;
+#if defined(MAYA_WANT_EXTERNALCONTENTTABLE)                                           
+    virtual	void getExternalContent(MExternalContentInfoTable& table) const;
+	virtual	void setExternalContent(const MExternalContentLocationTable& table);
+#endif
 
     void   setDebugMode(bool iDebugOn){ mDebugOn = iDebugOn; }
     void   setIncludeFilterString(const MString & iIncludeFilterString)

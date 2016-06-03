@@ -66,6 +66,9 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MFnEnumAttribute.h>
+#if defined(MAYA_WANT_EXTERNALCONTENTTABLE)
+#include <maya/MExternalContentInfoTable.h>
+#endif
 
 #include <Alembic/AbcCoreFactory/IFactory.h>
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
@@ -1081,4 +1084,18 @@ MStringArray AlembicNode::getFilesToArchive(
 
     return files;
 }
+
+#if defined(MAYA_WANT_EXTERNALCONTENTTABLE)
+void AlembicNode::getExternalContent(MExternalContentInfoTable& table) const
+{
+   addExternalContentForFileAttr(table, mAbcFileNameAttr);
+   MPxNode::getExternalContent(table);
+}
+
+void AlembicNode::setExternalContent(const MExternalContentLocationTable& table)
+{
+   setExternalContentForFileAttr(mAbcFileNameAttr, table);
+   MPxNode::setExternalContent(table);
+}
+#endif
 
