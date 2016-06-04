@@ -36,6 +36,13 @@
 
 #include "MayaUtility.h"
 
+// this struct is used in function "bool util::isAnimated(MObject & object, bool checkParent)"
+struct NodesToCheckStruct
+{
+    MObject node;
+    bool    checkParent;
+};
+
 // return seconds per frame
 double util::spf()
 {
@@ -259,7 +266,7 @@ bool util::isAnimated(MObject & object, bool checkParent)
     MItDependencyGraph iter(object, MFn::kInvalid,
         MItDependencyGraph::kUpstream,
         MItDependencyGraph::kDepthFirst,
-        MItDependencyGraph::kNodeLevel,
+        MItDependencyGraph::kPlugLevel,
         &stat);
 
     if (stat!= MS::kSuccess)
@@ -272,8 +279,9 @@ bool util::isAnimated(MObject & object, bool checkParent)
     // that have animation curve in their history.
     // The average time complexity is O(n^2) where n is the number of history
     // nodes. But we can improve the best case by split the loop into two.
-    std::vector<MObject> nodesToCheckAnimCurve;
+    std::vector<NodesToCheckStruct> nodesToCheckAnimCurve;
 
+    NodesToCheckStruct nodeStruct;
     for (; !iter.isDone(); iter.next())
     {
         MObject node = iter.thisNode();
@@ -315,7 +323,17 @@ bool util::isAnimated(MObject & object, bool checkParent)
         // skip shading nodes
         if (!node.hasFn(MFn::kShadingEngine))
         {
-            nodesToCheckAnimCurve.push_back(node);
+            MPlug plug = iter.thisPlug();
+            MFnAttribute attr(plug.attribute(), &stat);
+            bool checkNodeParent = false;
+            if (stat == MS::kSuccess && attr.isWorldSpace())
+            {
+                checkNodeParent = true;
+            }
+
+            nodeStruct.node = node;
+            nodeStruct.checkParent = checkParent || checkNodeParent;
+            nodesToCheckAnimCurve.push_back(nodeStruct);
         }
         else
         {
@@ -326,7 +344,7 @@ bool util::isAnimated(MObject & object, bool checkParent)
 
     for (size_t i = 0; i < nodesToCheckAnimCurve.size(); i++)
     {
-        if (MAnimUtil::isAnimated(nodesToCheckAnimCurve[i], checkParent))
+        if (MAnimUtil::isAnimated(nodesToCheckAnimCurve[i].node, nodesToCheckAnimCurve[i].checkParent))
         {
             return true;
         }
