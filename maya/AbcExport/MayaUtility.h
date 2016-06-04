@@ -159,6 +159,7 @@ struct JobArgs
         excludeInvisible = false;
         filterEulerRotations = false;
         noNormals = false;
+        setFirstAnimShape = false;
         stripNamespace = 0;
         useSelectionList = false;
         worldSpace = false;
@@ -172,6 +173,7 @@ struct JobArgs
     bool excludeInvisible;
     bool filterEulerRotations;
     bool noNormals;
+    bool setFirstAnimShape;
     unsigned int stripNamespace;
     bool useSelectionList;
     bool worldSpace;

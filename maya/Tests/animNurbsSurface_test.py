@@ -51,7 +51,10 @@ class AnimNurbsSurfaceTest(unittest.TestCase):
         for f in self.__files:
             os.remove(f)
 
-    def testAnimNurbsPlaneWrite(self):
+    def testAnimWFGNurbsPlaneWrite(self):
+        self.testAnimNurbsPlaneWrite(True)
+
+    def testAnimNurbsPlaneWrite(self, wfg=False):
 
         ret = MayaCmds.nurbsPlane(p=(0, 0, 0), ax=(0, 1, 0), w=1, lr=1, d=3,
             u=5, v=5, ch=0)
@@ -108,18 +111,26 @@ class AnimNurbsSurfaceTest(unittest.TestCase):
         knotsU2 = MayaCmds.getAttr('surfaceInfo1.knotsU[*]')
         knotsV2 = MayaCmds.getAttr('surfaceInfo1.knotsV[*]')
 
-        self.__files.append(util.expandFileName('testAnimNurbsPlane.abc'))
-        self.__files.append(util.expandFileName('testAnimNurbsPlane01_14.abc'))
-        self.__files.append(util.expandFileName('testAnimNurbsPlane15_24.abc'))
+        if wfg:
+            self.__files.append(util.expandFileName('testAnimNurbsPlane.abc'))
 
-        MayaCmds.AbcExport(j='-fr 1 14 -root %s -file %s' % (name, self.__files[-2]))
-        MayaCmds.AbcExport(j='-fr 15 24 -root %s -file %s' % (name, self.__files[-1]))
+            MayaCmds.AbcExport(j='-fr 1 24 -frs -0.25 -frs 0.0 -frs 0.25 -wfg -root %s -file %s' % (name, self.__files[-1]))
 
-        # use AbcStitcher to combine two files into one
-        subprocess.call(self.__abcStitcher + self.__files[-3:])
+            # reading test
+            MayaCmds.AbcImport(self.__files[-1], mode='open')
+        else:
+            self.__files.append(util.expandFileName('testAnimNurbsPlane.abc'))
+            self.__files.append(util.expandFileName('testAnimNurbsPlane01_14.abc'))
+            self.__files.append(util.expandFileName('testAnimNurbsPlane15_24.abc'))
 
-        # reading test
-        MayaCmds.AbcImport(self.__files[-3], mode='open')
+            MayaCmds.AbcExport(j='-fr 1 14 -root %s -file %s' % (name, self.__files[-2]))
+            MayaCmds.AbcExport(j='-fr 15 24 -root %s -file %s' % (name, self.__files[-1]))
+
+            # use AbcStitcher to combine two files into one
+            subprocess.call(self.__abcStitcher + self.__files[-3:])
+
+            # reading test
+            MayaCmds.AbcImport(self.__files[-3], mode='open')
 
         self.failUnlessEqual(degreeU, MayaCmds.getAttr(name+'.degreeU'))
         self.failUnlessEqual(degreeV, MayaCmds.getAttr(name+'.degreeV'))

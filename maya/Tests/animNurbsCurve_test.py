@@ -90,6 +90,39 @@ class AnimNurbsCurveTest(unittest.TestCase):
         MayaCmds.currentTime(24, update=True)
         self.failUnless(util.compareNurbsCurve(shapeNames[0], shapeNames[1]))
 
+    # a test for animated non-curve group Nurbs Curve
+    def testAnimWFGSimpleNurbsCurveRW(self):
+
+        # create the Nurbs Curve
+        name = MayaCmds.curve( d=3, p=[(0, 0, 0), (3, 5, 6), (5, 6, 7),
+            (9, 9, 9), (12, 10, 2)], k=[0,0,0,1,2,2,2] )
+
+        MayaCmds.select(name+'.cv[0:4]')
+        # frame 1
+        MayaCmds.currentTime(1, update=True)
+        MayaCmds.setKeyframe()
+        # frame 24
+        MayaCmds.currentTime(24, update=True)
+        MayaCmds.setKeyframe()
+        # frame 12
+        MayaCmds.currentTime(12, update=True)
+        MayaCmds.move(3, 0, 0, r=True)
+        MayaCmds.setKeyframe()
+
+        self.__files.append(util.expandFileName('testAnimWFGNurbsSingleCurve.abc'))
+
+        MayaCmds.AbcExport(j='-fr 1 24 -wfg -frs -0.25 -frs 0.0 -frs 0.25 -root %s -file %s' % (name, self.__files[-1]))
+
+        MayaCmds.AbcImport(self.__files[-1], mode='import')
+        shapeNames = MayaCmds.ls(exactType='nurbsCurve')
+
+        MayaCmds.currentTime(1, update=True)
+        self.failUnless(util.compareNurbsCurve(shapeNames[0], shapeNames[1]))
+        MayaCmds.currentTime(12, update=True)
+        self.failUnless(util.compareNurbsCurve(shapeNames[0], shapeNames[1]))
+        MayaCmds.currentTime(24, update=True)
+        self.failUnless(util.compareNurbsCurve(shapeNames[0], shapeNames[1]))
+
     def testAnimNurbsCurveGrpRW(self):
 
         # create Nurbs Curve group

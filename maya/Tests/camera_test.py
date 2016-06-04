@@ -125,3 +125,33 @@ class cameraTest(unittest.TestCase):
             if not util.compareCamera(camList[0], camList[1]):
                 self.fail('%s and %s are not the same at frame %d' %
                     (camList[0], camList[1], t))
+
+    def testAnimWholeFrameGeoCameraReadWrite(self):
+
+        name = createCamera()
+        MayaCmds.currentTime(1, update=True)
+        MayaCmds.setKeyframe(name[1], attribute='horizontalFilmAperture')
+        MayaCmds.setKeyframe(name[1], attribute='focalLength')
+        MayaCmds.setKeyframe(name[1], attribute='focusDistance')
+        MayaCmds.setKeyframe(name[1], attribute='shutterAngle')
+        MayaCmds.currentTime(24, update=True)
+        MayaCmds.setKeyframe(name[1], attribute='horizontalFilmAperture',
+            value=0.95)
+        MayaCmds.setKeyframe(name[1], attribute='focalLength', value=40)
+        MayaCmds.setKeyframe(name[1], attribute='focusDistance', value=5.4)
+        MayaCmds.setKeyframe(name[1], attribute='shutterAngle', value=174.94)
+
+        self.__files.append(util.expandFileName('testAnimWFGCameraReadWrite.abc'))
+
+        # write to files
+        MayaCmds.AbcExport(j='-fr 1 24 -frs -0.25 -frs 0.0 -frs 0.25 -wfg -root %s -file %s' % (name[0], self.__files[-1]))
+
+        # read from file
+        MayaCmds.AbcImport(self.__files[-1], mode='import')
+        camList = MayaCmds.ls(type='camera')
+
+        for t in range(1, 25):
+            MayaCmds.currentTime(t, update=True)
+            if not util.compareCamera(camList[0], camList[1]):
+                self.fail('%s and %s are not the same at frame %d' %
+                    (camList[0], camList[1], t))

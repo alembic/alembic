@@ -68,7 +68,7 @@ MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
     }
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, nurbs,
-        iTimeIndex, iArgs));
+        iTimeIndex, iArgs, true));
 
     // for now if it a trim surface, treat it like it's animated
     if ( iTimeIndex != 0 && (nurbs.isTrimmedSurface() ||
@@ -81,7 +81,10 @@ MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
         iTimeIndex = 0;
     }
 
-    write();
+    if (!mIsSurfaceAnimated || iArgs.setFirstAnimShape)
+    {
+        write();
+    }
 }
 
 bool MayaNurbsSurfaceWriter::isAnimated() const
