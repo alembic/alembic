@@ -115,6 +115,14 @@ bool getRotOrder(MTransformationMatrix::RotationOrder iOrder,
 // copy from mayapit code (MayaPit.h .cpp)
 bool isAnimated(MObject & object, bool checkParent = false);
 
+// determine if a joint is driven by FBIK.
+// The joint is animated but has no input connections.
+bool isDrivenByFBIK(const MFnIkJoint & iJoint);
+
+// determine if a joint is driven by a spline ik.
+// The joint's is animated but has no input connections.
+bool isDrivenBySplineIK(const MFnIkJoint & iJoint);
+
 // determine if a Maya Object is intermediate
 bool isIntermediate(const MObject & object);
 

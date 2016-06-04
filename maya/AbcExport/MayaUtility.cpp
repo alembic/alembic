@@ -353,6 +353,49 @@ bool util::isAnimated(MObject & object, bool checkParent)
     return false;
 }
 
+bool util::isDrivenByFBIK(const MFnIkJoint & iJoint)
+{
+    // check joints that are driven by Maya FBIK
+    // Maya FBIK has no connection to joints' TRS plugs
+    // but TRS of joints are driven by FBIK, they are not static
+    // Maya 2012's new HumanIK has connections to joints.
+    // FBIK is a special case.
+    MStatus status = MS::kSuccess;
+    if (iJoint.hikJointName(&status).length() > 0 && status) {
+        return true;
+    }
+    return false;
+}
+
+bool util::isDrivenBySplineIK(const MFnIkJoint & iJoint)
+{
+    // spline IK can drive the starting joint's translate channel but
+    // it has no connection to the translate plug.
+    // we treat the joint as animated in this case.
+    // find the ikHandle node.
+    MPlug msgPlug = iJoint.findPlug("message", false);
+    MPlugArray msgPlugDst;
+    msgPlug.connectedTo(msgPlugDst, false, true);
+    for (unsigned int i = 0; i < msgPlugDst.length(); i++) {
+        MFnDependencyNode ikHandle(msgPlugDst[i].node());
+        if (!ikHandle.object().hasFn(MFn::kIkHandle)) continue;
+
+        // find the ikSolver node.
+        MPlug ikSolverPlug = ikHandle.findPlug("ikSolver");
+        MPlugArray ikSolverDst;
+        ikSolverPlug.connectedTo(ikSolverDst, true, false);
+        for (unsigned int j = 0; j < ikSolverDst.length(); j++) {
+
+            // return true if the ikSolver is a spline solver.
+            if (ikSolverDst[j].node().hasFn(MFn::kSplineSolver)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
 bool util::isIntermediate(const MObject & object)
 {
     MStatus stat;
