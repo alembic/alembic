@@ -1053,11 +1053,13 @@ bool AlembicNode::isPassiveOutput(const MPlug & plug) const
     return MPxNode::isPassiveOutput( plug );
 }
 
+#if MAYA_API_VERSION >= 201600
 AlembicNode::SchedulingType AlembicNode::schedulingType()const
 {
 	// Globally serialize this node because the compute method is not thread safe
     return kGloballySerialize;
 }
+#endif
 
 
 // returns the list of files to archive.
