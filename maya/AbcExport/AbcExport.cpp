@@ -403,9 +403,9 @@ try
                 jobArgs.writeVisibility = true;
             }
 
-            else if (arg == "-wc" || arg == "-writecreases")
+            else if (arg == "-as" || arg == "-autosubd")
             {
-                jobArgs.writeCreases = true;
+                jobArgs.autoSubd = true;
             }
 
             else if (arg == "-mfc" || arg == "-melperframecallback")
