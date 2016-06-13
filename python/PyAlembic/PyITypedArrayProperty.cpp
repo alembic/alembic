@@ -69,7 +69,7 @@ static void register_(const char* iName)
                    optional<
                    Abc::Argument,
                    Abc::Argument> >(
-                  ( arg( "parent" ), arg( "name" ), 
+                  ( arg( "parent" ), arg( "name" ),
                     arg( "argument" ), arg( "argument" ) ),
                     "Create a new typed property with the given parent "
                     "OCompoundProperty, name and optional arguments which can "
@@ -77,8 +77,7 @@ static void register_(const char* iName)
                     "MetaData" ) )
         .def( "getInterpretation",
               &T::getInterpretation,
-              "Return the interpretation string expected of this property",
-              return_value_policy<copy_const_reference>() )
+              "Return the interpretation string expected of this property" )
         .staticmethod( "getInterpretation" )
         .def( "matches",
               Overloads::matchesMetaData,
@@ -88,7 +87,7 @@ static void register_(const char* iName)
               "strictly matches the interpretation of this typed property" )
         .def( "matches",
               Overloads::matchesHeader,
-              ( arg( "propertyHeader" ), 
+              ( arg( "propertyHeader" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "Return True if the given entity (as represented by a property "
               "header) strictly matches the interepretation of this typed "

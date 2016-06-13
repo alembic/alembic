@@ -59,7 +59,7 @@ struct ISchemaObjectOverloads
         return ISCHEMAOBJECT::matches( iHeader, iMatching );
     }
 };
- 
+
 //-*****************************************************************************
 template<class ISCHEMAOBJECT>
 void register_ISchemaObject( const char *iName )
@@ -82,13 +82,11 @@ void register_ISchemaObject( const char *iName )
                         const Abc::Argument&> >() )
         .def( "getSchemaObjTitle",
               &ISCHEMAOBJECT::getSchemaObjTitle,
-              "doc",
-              return_value_policy<copy_const_reference>() )
+              "doc"  )
         .staticmethod( "getSchemaObjTitle" )
         .def( "getSchemaTitle",
               &ISCHEMAOBJECT::getSchemaTitle,
-              "doc",
-              return_value_policy<copy_const_reference>() )
+              "doc"  )
         .staticmethod( "getSchemaTitle" )
         .def( "getSchema",
               ISchemaObjectOverloads<ISCHEMAOBJECT>::getSchema,
