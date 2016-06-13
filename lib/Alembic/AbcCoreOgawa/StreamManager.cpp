@@ -47,7 +47,27 @@ namespace ALEMBIC_VERSION_NS {
 #define COMPARE_EXCHANGE( V, COMP, EXCH ) V.compare_exchange_weak( COMP, EXCH, std::memory_order_seq_cst, std::memory_order_seq_cst )
 // Windows
 #elif defined( _MSC_VER )
-#define COMPARE_EXCHANGE( V, COMP, EXCH ) InterlockedCompareExhange64( &V, EXCH, COMP ) == COMP
+#define COMPARE_EXCHANGE( V, COMP, EXCH ) InterlockedCompareExchange64( &V, EXCH, COMP ) == COMP
+
+Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
+{
+    if ( !iValue )
+    {
+        return 0;
+    }
+
+    for ( Alembic::Util::int64_t bit = 0; bit < 64; ++bit )
+    {
+        if ( iValue & ( 1 << bit ) )
+        {
+            return bit + 1;
+        }
+    }
+
+    return 0;
+}
+
+
 // gcc 4.8 and above not using C++11
 #elif defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 8
 #define COMPARE_EXCHANGE( V, COMP, EXCH ) __atomic_compare_exchange_n( &V, &COMP, EXCH, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST )
