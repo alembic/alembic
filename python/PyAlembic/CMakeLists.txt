@@ -46,9 +46,10 @@ OPTION(USE_LIB64 "Search for deps in lib64 vs lib" ON)
 
 # find python lib dir and include files
 IF (${CMAKE_HOST_UNIX})
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Wno-return-type")
     IF (${DARWIN})
       SET(LIBPYTHON_FILE "lib${LIBPYTHON}.dylib")
-        SET(OSX_PYTHON_ROOT 
+        SET(OSX_PYTHON_ROOT
             "/System/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}")
         SET(PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}")
 
@@ -130,9 +131,9 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
         PyOCompoundProperty.cpp
         PyOCurves.cpp
         PyOFaceSet.cpp
-        PyOGeomParam.cpp 
+        PyOGeomParam.cpp
         PyOGeomParamPOD.cpp
-        PyOGeomParamVertexPoint.cpp 
+        PyOGeomParamVertexPoint.cpp
         PyOGeomParamBox.cpp
         PyOGeomParamMatrixQuadColorNormal.cpp
         PyOLight.cpp
