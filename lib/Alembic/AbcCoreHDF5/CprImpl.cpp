@@ -116,41 +116,41 @@ AbcA::CompoundPropertyReaderPtr CprImpl::asCompoundPtr()
 }
 
 //-*****************************************************************************
-size_t CprImpl::getNumPropertiesImpl()
+size_t CprImpl::getNumProperties()
 {
     return m_data->getNumProperties();
 }
 
 //-*****************************************************************************
-const AbcA::PropertyHeader & CprImpl::getPropertyHeaderImpl( size_t i )
+const AbcA::PropertyHeader & CprImpl::getPropertyHeader( size_t i )
 {
     return m_data->getPropertyHeader( asCompoundPtr(), i );
 }
 
 //-*****************************************************************************
 const AbcA::PropertyHeader *
-CprImpl::getPropertyHeaderImpl( const std::string &iName )
+CprImpl::getPropertyHeader( const std::string &iName )
 {
     return m_data->getPropertyHeader( asCompoundPtr(), iName );
 }
 
 //-*****************************************************************************
 AbcA::ScalarPropertyReaderPtr
-CprImpl::getScalarPropertyImpl( const std::string &iName )
+CprImpl::getScalarProperty( const std::string &iName )
 {
     return m_data->getScalarProperty( asCompoundPtr(), iName );
 }
 
 //-*****************************************************************************
 AbcA::ArrayPropertyReaderPtr
-CprImpl::getArrayPropertyImpl( const std::string &iName )
+CprImpl::getArrayProperty( const std::string &iName )
 {
     return m_data->getArrayProperty( asCompoundPtr(), iName );
 }
 
 //-*****************************************************************************
 AbcA::CompoundPropertyReaderPtr
-CprImpl::getCompoundPropertyImpl( const std::string &iName )
+CprImpl::getCompoundProperty( const std::string &iName )
 {
     return m_data->getCompoundProperty( asCompoundPtr(), iName );
 }

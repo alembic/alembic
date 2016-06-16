@@ -45,9 +45,6 @@ namespace Alembic {
 namespace AbcCoreOgawa {
 namespace ALEMBIC_VERSION_NS {
 
-typedef std::map<std::string, size_t> IObjectChildMap;
-typedef Alembic::Util::shared_ptr<AbcA::ObjectHeader> ObjectHeaderPtr;
-
 //-*****************************************************************************
 class OrImpl
     : public AbcA::ObjectReader
@@ -78,18 +75,18 @@ public:
 
     virtual AbcA::CompoundPropertyReaderPtr getProperties();
 
+    virtual size_t getNumChildren();
+
+    virtual const AbcA::ObjectHeader & getChildHeader( size_t i );
+
+    virtual const AbcA::ObjectHeader * getChildHeader
+    ( const std::string &iName );
+
+    virtual AbcA::ObjectReaderPtr getChild( const std::string &iName );
+
+    virtual AbcA::ObjectReaderPtr getChild( size_t i );
+
     virtual AbcA::ObjectReaderPtr asObjectPtr();
-
-    virtual size_t getNumChildrenImpl();
-
-   virtual const AbcA::ObjectHeader & getChildHeaderImpl( size_t i );
-
-   virtual const AbcA::ObjectHeader * getChildHeaderImpl
-   ( const std::string &iName );
-
-   virtual AbcA::ObjectReaderPtr getChildImpl( const std::string &iName );
-
-   virtual AbcA::ObjectReaderPtr getChildImpl( size_t i );
 
     virtual bool getPropertiesHash( Util::Digest & oDigest );
 
@@ -108,11 +105,6 @@ private:
 
     ObjectHeaderPtr m_header;
 
-    // Mapping between child object name and it's OrData parent (we may reference
-    // layered child objects from a different IArchive)
-    IObjectChildMap m_children;
-    std::vector<AbcA::ObjectReaderPtr> m_objectReaderPtrs;
-    std::vector<ObjectHeaderPtr> m_objectHeaderPtrs;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

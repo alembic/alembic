@@ -36,6 +36,7 @@
 
 #include <fstream>
 #include <Alembic/AbcCoreOgawa/All.h>
+#include <Alembic/AbcCoreLayer/Foundation.h>
 #include <Alembic/AbcCoreFactory/IFactory.h>
 
 #ifdef ALEMBIC_WITH_HDF5
@@ -114,22 +115,28 @@ Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName )
     return getArchive( iFileName, coreType );
 }
 
-Alembic::Abc::IArchive IFactory::getArchive( const std::list<std::string> & iFileNames )
+Alembic::Abc::IArchive IFactory::getArchive( const std::list<std::string> & iFileNames)
 {
-    CoreType coreType;
+	CoreType coreType;
+	return getArchive(iFileNames, coreType);
+}
 
-    std::list<std::string>::const_iterator itr = iFileNames.begin();
+Alembic::Abc::IArchive IFactory::getArchive( const std::list<std::string> & iFileNames, CoreType & oType )
+{
+	Alembic::AbcCoreLayer::ReadArchive layer( m_numStreams );
 
-    Alembic::Abc::IArchive baseArchive = getArchive( *itr, coreType );
+	Alembic::Abc::IArchive archive( layer, iFileNames,
+        Alembic::Abc::ErrorHandler::kQuietNoopPolicy, m_cachePtr );
 
-    for( ++itr; itr != iFileNames.end(); ++itr )
+    if ( archive.valid() )
     {
-        Alembic::Abc::IArchive nextArchive = getArchive( *itr, coreType );
-
-        baseArchive.layerArchive( nextArchive );
+        oType = kLayer;
+        archive.getErrorHandler().setPolicy( m_policy );
+        return archive;
     }
 
-    return baseArchive;
+    oType = kUnknown;
+    return Alembic::Abc::IArchive();
 }
 
 Alembic::Abc::IArchive IFactory::getArchive(

@@ -143,8 +143,6 @@ OrData::getProperties( AbcA::ObjectReaderPtr iParent )
         ret = Alembic::Util::shared_ptr<CprImpl>(
             new CprImpl( iParent, m_data ) );
 
-        ret->initializePropertyMaps( ret );
-
         m_top = ret;
     }
 
@@ -228,12 +226,8 @@ OrData::getChild( AbcA::ObjectReaderPtr iParent, size_t i )
         }
 
         // Make a new one.
-        Alembic::Util::shared_ptr<OrImpl> oPtrShared = Alembic::Util::shared_ptr<OrImpl>(
+        optr = Alembic::Util::shared_ptr<OrImpl>(
             new OrImpl( iParent, m_group, m_children[i].header ) );
-
-        oPtrShared->initChildMap();
-
-        optr = oPtrShared;
 
         m_children[i].made = optr;
     }

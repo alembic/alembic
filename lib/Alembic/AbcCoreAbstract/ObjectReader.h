@@ -46,9 +46,6 @@ namespace Alembic {
 namespace AbcCoreAbstract {
 namespace ALEMBIC_VERSION_NS {
 
-typedef std::map<std::string, size_t> IObjectChildMap;
-typedef Alembic::Util::shared_ptr<ObjectHeader> ObjectHeaderPtr;
-
 //-*****************************************************************************
 //! An Object consists of a list of children objects, which may be empty,
 //! and a single compound property which is the root of any properties
@@ -126,17 +123,45 @@ public:
     //! empty pointer.
     virtual CompoundPropertyReaderPtr getProperties() = 0;
 
-   //-*************************************************************************
-   // Hierarchical hash stuff
-   //-*************************************************************************
+    //-*************************************************************************
+    // Children!
+    //-*************************************************************************
 
-   //! If an aggregated properties hash exists fill oDigest with it and
-   //! return true, if it doesn't exist return false
-   virtual bool getPropertiesHash( Util::Digest & oDigest );
+    //! Returns the number of objects that are contained as children.
+    //! Objects do not have to have children, this may return zero.
+    virtual size_t getNumChildren() = 0;
 
-   //! If an aggregated child objects hash exists fill oDigest with it and
-   //! return true, if it doesn't exist return false
-   virtual bool getChildrenHash( Util::Digest & oDigest );
+    //! Return the header of an object by index.
+    //! This will throw an exception on out-of-range access.
+    virtual const ObjectHeader & getChildHeader( size_t i ) = 0;
+
+    //! Return the header of an object by name.
+    //! This will return a NULL pointer if no header by that name is found.
+    virtual const ObjectHeader *
+    getChildHeader( const std::string &iName ) = 0;
+
+    //! Get a child object by name.
+    //! This is a convenience function that uses getChildHeader and
+    //! the various named "get" functions here.
+    virtual ObjectReaderPtr getChild( const std::string &iName ) = 0;
+
+    //! Get a child object by index.
+    //! It is an error to call with out-of-range indices.
+    //! This is a convenience function that uses getChildHeader and
+    //! the various named "get" functions here.
+    virtual ObjectReaderPtr getChild( size_t i ) = 0;
+
+    //-*************************************************************************
+    // Hierarchical hash stuff
+    //-*************************************************************************
+
+    //! If an aggregated properties hash exists fill oDigest with it and
+    //! return true, if it doesn't exist return false
+    virtual bool getPropertiesHash( Util::Digest & oDigest );
+
+    //! If an aggregated child objects hash exists fill oDigest with it and
+    //! return true, if it doesn't exist return false
+    virtual bool getChildrenHash( Util::Digest & oDigest );
 
     //-*************************************************************************
     // YUP
@@ -145,60 +170,6 @@ public:
     //! Returns shared pointer to myself.
     //! This is non-virtual
     virtual ObjectReaderPtr asObjectPtr() = 0;
-
-    //-*************************************************************************
-    // Children!
-    //-*************************************************************************
-
-    //! Initialize the mapping between our child objects and the ObjectReaders
-    //! that house them, as the child objects may actually be layered in from
-    //! other alembic files
-    void initChildMap();
-
-    //! Returns the number of objects that are contained as children.
-   //! Objects do not have to have children, this may return zero.
-   virtual size_t getNumChildren();
-
-   //! Return the header of an object by index.
-   //! This will throw an exception on out-of-range access.
-   virtual const ObjectHeader & getChildHeader( size_t i );
-
-   //! Return the header of an object by name.
-   //! This will return a NULL pointer if no header by that name is found.
-   virtual const ObjectHeader *
-   getChildHeader( const std::string &iName );
-
-   //! Get a child object by name.
-   //! This is a convenience function that uses getChildHeader and
-   //! the various named "get" functions here.
-   virtual ObjectReaderPtr getChild( const std::string &iName );
-
-   //! Get a child object by index.
-   //! It is an error to call with out-of-range indices.
-   //! This is a convenience function that uses getChildHeader and
-   //! the various named "get" functions here.
-   virtual ObjectReaderPtr getChild( size_t i );
-
-   //! Dynamically add a child to this object. This is used to layer in objects
-   //! from other alembic files
-   void addChild( const ObjectHeader& iHeader, ObjectReaderPtr iReader );
-
-protected:
-
-   //! Implementation functions to retrieve information about the direct children
-   //! of this object that have NOT been layered in from another file
-
-   virtual size_t getNumChildrenImpl() = 0;
-    virtual const ObjectHeader & getChildHeaderImpl( size_t i ) = 0;
-    virtual const ObjectHeader * getChildHeaderImpl( const std::string &iName ) = 0;
-    virtual ObjectReaderPtr getChildImpl( const std::string &iName ) = 0;
-    virtual ObjectReaderPtr getChildImpl( size_t i ) = 0;
-
-private:
-    IObjectChildMap m_children;
-    std::vector<ObjectReaderPtr> m_objectReaderPtrs;
-    std::vector<ObjectHeaderPtr> m_objectHeaderPtrs;
-
 };
 
 } // End namespace ALEMBIC_VERSION_NS

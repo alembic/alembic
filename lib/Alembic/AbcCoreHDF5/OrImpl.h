@@ -73,18 +73,18 @@ public:
 
     virtual AbcA::CompoundPropertyReaderPtr getProperties();
 
-    virtual AbcA::ObjectReaderPtr asObjectPtr();
+    virtual size_t getNumChildren();
 
-    virtual size_t getNumChildrenImpl();
+    virtual const AbcA::ObjectHeader & getChildHeader( size_t i );
 
-    virtual const AbcA::ObjectHeader & getChildHeaderImpl( size_t i );
-
-    virtual const AbcA::ObjectHeader * getChildHeaderImpl
+    virtual const AbcA::ObjectHeader * getChildHeader
     ( const std::string &iName );
 
-    virtual AbcA::ObjectReaderPtr getChildImpl( const std::string &iName );
+    virtual AbcA::ObjectReaderPtr getChild( const std::string &iName );
 
-    virtual AbcA::ObjectReaderPtr getChildImpl( size_t i );
+    virtual AbcA::ObjectReaderPtr getChild( size_t i );
+
+    virtual AbcA::ObjectReaderPtr asObjectPtr();
 
 private:
     // The parent object

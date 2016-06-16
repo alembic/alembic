@@ -110,30 +110,30 @@ AbcA::CompoundPropertyReaderPtr OrImpl::getProperties()
 }
 
 //-*****************************************************************************
-size_t OrImpl::getNumChildrenImpl()
+size_t OrImpl::getNumChildren()
 {
     return m_data->getNumChildren();
 }
 
 //-*****************************************************************************
-const AbcA::ObjectHeader & OrImpl::getChildHeaderImpl( size_t i )
+const AbcA::ObjectHeader & OrImpl::getChildHeader( size_t i )
 {
     return m_data->getChildHeader( asObjectPtr(), i );
 }
 
 //-*****************************************************************************
-const AbcA::ObjectHeader * OrImpl::getChildHeaderImpl( const std::string &iName )
+const AbcA::ObjectHeader * OrImpl::getChildHeader( const std::string &iName )
 {
     return m_data->getChildHeader( asObjectPtr(), iName );
 }
 
 //-*****************************************************************************
-AbcA::ObjectReaderPtr OrImpl::getChildImpl( const std::string &iName )
+AbcA::ObjectReaderPtr OrImpl::getChild( const std::string &iName )
 {
     return m_data->getChild( asObjectPtr(), iName );
 }
 
-AbcA::ObjectReaderPtr OrImpl::getChildImpl( size_t i )
+AbcA::ObjectReaderPtr OrImpl::getChild( size_t i )
 {
     return m_data->getChild( asObjectPtr(), i );
 }

@@ -57,6 +57,7 @@ public:
     {
         kHDF5,
         kOgawa,
+        kLayer,
         kUnknown
     };
 
@@ -72,6 +73,9 @@ public:
     //! Open a series of alembic files, layering each file on top of the next
     //! to present a single IArchive
     Alembic::Abc::IArchive getArchive( const std::list<std::string> & iFileNames );
+
+    Alembic::Abc::IArchive getArchive( const std::list<std::string> & iFileNames,
+                                       CoreType & oType );
 
     //! Use the streams (Alembic does not take ownership) to read the data from
     //! This is currently only valid for Ogawa.  The streams must all reference
