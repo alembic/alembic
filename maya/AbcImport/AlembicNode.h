@@ -115,6 +115,9 @@ public:
     // override virtual methods from MPxNode
 	virtual MStatus setDependentsDirty(const MPlug& plug, MPlugArray& plugArray);
     virtual bool isPassiveOutput(const MPlug & plug) const;
+#if MAYA_API_VERSION >= 201600
+    virtual SchedulingType schedulingType()const;
+#endif
 
     // initialize all the attributes to default values
     static MStatus initialize();
