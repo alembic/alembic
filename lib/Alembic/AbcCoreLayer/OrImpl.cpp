@@ -1,6 +1,5 @@
 #include <Alembic/AbcCoreLayer/OrImpl.h>
 #include <Alembic/AbcCoreLayer/CprImpl.h>
-//#include <Alembic/AbcCoreOgawa/StreamManager.h>
 #include <Alembic/Abc/ICompoundProperty.h>
 
 namespace Alembic {
@@ -26,8 +25,6 @@ OrImpl::OrImpl( Alembic::Util::shared_ptr< ArImpl > iArchive,
     ABCA_ASSERT( m_archive, "Invalid archive in OrImpl(Archive)" );
 
     m_header = m_originalObjectReader->getHeader();
-
-    m_originalCompoundPropertyReader = m_originalObjectReader->getProperties();
 }
 
 //-*****************************************************************************
@@ -60,7 +57,6 @@ AbcA::CompoundPropertyReaderPtr OrImpl::getProperties()
 	initializeMaps();
 
     return m_compoundPropertyReader;
-	//return m_originalCompoundPropertyReader;
 }
 
 //-*****************************************************************************
@@ -150,7 +146,7 @@ void OrImpl::initializeMaps( )
 		recordChildren();
 
 		m_compoundPropertyReader =
-		Alembic::Util::shared_ptr< CprImpl >( new CprImpl( shared_from_this(), m_originalCompoundPropertyReader ) );
+		Alembic::Util::shared_ptr< CprImpl >( new CprImpl( shared_from_this(), m_originalObjectReader->getProperties() ) );
 	}
 }
 
@@ -205,8 +201,6 @@ void OrImpl::layerInObjectHierarchy( AbcA::ObjectReaderPtr iObject )
 			}
 			else
 			{
-				// We already have an object for this name, so fall through and layer in
-				// the properties
 				childLayeredObjReader = m_childObjects[ findChild->second ];
 			}
 

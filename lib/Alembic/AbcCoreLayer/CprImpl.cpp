@@ -12,57 +12,16 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 
 //-*****************************************************************************
-//CprImpl::CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-//                  Ogawa::IGroupPtr iGroup,
-//                  PropertyHeaderPtr iHeader,
-//                  std::size_t iThreadId,
-//                  const std::vector< AbcA::MetaData > & iIndexedMetaData )
-//    : m_parent( iParent )
-//    , m_header( iHeader )
-//{
-//    ABCA_ASSERT( m_parent, "Invalid parent in CprImpl(Compound)" );
-//    ABCA_ASSERT( m_header, "invalid header in CprImpl(Compound)" );
-//
-//    AbcA::PropertyType pType = m_header->header.getPropertyType();
-//    if ( pType != AbcA::kCompoundProperty )
-//    {
-//        ABCA_THROW( "Tried to create compound property with the wrong "
-//                    "property type: " << pType );
-//    }
-//
-//    // Set object.
-//    AbcA::ObjectReaderPtr optr = m_parent->getObject();
-//    ABCA_ASSERT( optr, "Invalid object in CprImpl::CprImpl(Compound)" );
-//    m_object = optr;
-//
-//    m_data.reset( new CprData( iGroup, iThreadId, *( m_object->getArchive() ),
-//                               iIndexedMetaData ) );
-//}
-
-//-*****************************************************************************
-CprImpl::CprImpl( OrImplPtr iObject,
-                  AbcA::CompoundPropertyReaderPtr iOriginalCpr,
-                  CprImplPtr iParentCpr)
-    : m_object( iObject )
-    , m_originalCpr( iOriginalCpr )
-	, m_parent( iParentCpr )
-    , m_mapsInitialized( false )
-{
-    ABCA_ASSERT( m_object, "Invalid object in CprImpl(Object)" );
-    ABCA_ASSERT( m_originalCpr, "Invalid data in CprImpl(Object)" );
-}
-
-//-*****************************************************************************
 CprImpl::CprImpl( OrImplPtr iObject,
                   AbcA::BasePropertyReaderPtr iOriginalCpr,
                   CprImplPtr iParentCpr)
 	: m_object( iObject )
-	, m_originalCpr( iOriginalCpr )
+	, m_originalPropertyReader( iOriginalCpr )
 	, m_parent( iParentCpr )
 	, m_mapsInitialized( false )
 {
     ABCA_ASSERT( m_object, "Invalid object in CprImpl(Object)" );
-    ABCA_ASSERT( m_originalCpr, "Invalid data in CprImpl(Object)" );
+    ABCA_ASSERT( m_originalPropertyReader, "Invalid data in CprImpl(Object)" );
 }
 
 //-*****************************************************************************
@@ -82,7 +41,7 @@ void CprImpl::layerInProperties( AbcA::CompoundPropertyReaderPtr iProps )
 	{
 		AbcA::BasePropertyReaderPtr propertyReader = iProps->getProperty( i );
 
-		std::string name = propertyReader->getName();
+		const std::string &name = propertyReader->getName();
 
 		ChildNameMap::iterator matchingEntry = m_childNameMap.find( name );
 
@@ -93,7 +52,7 @@ void CprImpl::layerInProperties( AbcA::CompoundPropertyReaderPtr iProps )
 		else
 		{
 			CprImplPtr ourCpr = m_childCprs[ matchingEntry->second ];
-			if( ourCpr->m_originalCpr->isCompound() && iProps->isCompound() )
+			if( ourCpr->m_originalPropertyReader->isCompound() && iProps->isCompound() )
 			{
 				ourCpr->layerInProperties( propertyReader->asCompoundPtr() );
 			}
@@ -108,7 +67,7 @@ void CprImpl::layerInProperties( AbcA::CompoundPropertyReaderPtr iProps )
 //-*****************************************************************************
 const AbcA::PropertyHeader &CprImpl::getHeader() const
 {
-    return m_originalCpr->getHeader();
+    return m_originalPropertyReader->getHeader();
 }
 
 AbcA::ObjectReaderPtr CprImpl::getObject()
@@ -173,7 +132,7 @@ CprImpl::getScalarProperty( const std::string &iName )
 
 	if( itr != m_childNameMap.end() )
 	{
-		return m_childCprs[ itr->second ]->m_originalCpr->asScalarPtr();
+		return m_childCprs[ itr->second ]->m_originalPropertyReader->asScalarPtr();
 	}
 
 	return AbcA::ScalarPropertyReaderPtr();
@@ -192,7 +151,7 @@ CprImpl::getArrayProperty( const std::string &iName )
 
 		if( itr != m_childNameMap.end() )
 	{
-		return m_childCprs[ itr->second ]->m_originalCpr->asArrayPtr();
+		return m_childCprs[ itr->second ]->m_originalPropertyReader->asArrayPtr();
 	}
 
 	return AbcA::ArrayPropertyReaderPtr();
@@ -231,9 +190,9 @@ void CprImpl::initializeMaps( )
 //-*****************************************************************************
 void CprImpl::recordProperties()
 {
-	if( m_originalCpr->isCompound() )
+	if( m_originalPropertyReader->isCompound() )
 	{
-		AbcA::CompoundPropertyReaderPtr originalCpr = m_originalCpr->asCompoundPtr();
+		AbcA::CompoundPropertyReaderPtr originalCpr = m_originalPropertyReader->asCompoundPtr();
 
 		size_t numProperties = originalCpr->getNumProperties();
 
@@ -255,17 +214,7 @@ void CprImpl::addChildReader( AbcA::BasePropertyReaderPtr propertyReader )
 
 	CprImplPtr newChild;
 
-	if( propertyReader->isCompound() )
-	{
-//		propertyReader
-//			= CprImplPtr( new CprImpl( m_object, propertyReader->asCompoundPtr(), shared_from_this()));
-		newChild = CprImplPtr( new CprImpl( m_object, propertyReader->asCompoundPtr(), shared_from_this()));
-
-	}
-	else
-	{
-		newChild = CprImplPtr( new CprImpl( m_object, propertyReader, shared_from_this()));
-	}
+	newChild = CprImplPtr( new CprImpl( m_object, propertyReader, shared_from_this()));
 
 	m_childCprs.push_back( newChild );
 }

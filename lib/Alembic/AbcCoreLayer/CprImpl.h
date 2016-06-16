@@ -8,25 +8,12 @@ namespace Alembic {
 namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
 
-class OrImpl;
-
 //-*****************************************************************************
 class CprImpl
     : public AbcA::CompoundPropertyReader
     , public Alembic::Util::enable_shared_from_this<CprImpl>
 {
 public:
-
-    // For construction from a compound property reader
-//    CprImpl( AbcA::CompoundPropertyReaderPtr iParent,
-//             Ogawa::IGroupPtr iGroup,
-//             PropertyHeaderPtr iHeader,
-//             std::size_t iThreadId,
-//             const std::vector< AbcA::MetaData > & iIndexedMetaData );
-
-    CprImpl( Alembic::Util::shared_ptr< OrImpl > iObject,
-    		 AbcA::CompoundPropertyReaderPtr iOriginalCpr,
-    		 CprImplPtr iParentCpr = CprImplPtr());
 
     CprImpl( Alembic::Util::shared_ptr< OrImpl > iObject,
 			 AbcA::BasePropertyReaderPtr iOriginalCpr,
@@ -65,31 +52,12 @@ public:
     getCompoundProperty( const std::string &iName );
 
     //-*************************************************************************
-	// Native to this CprImpl implemlentation
+	// Native to this CprImpl implementation
 	//-*************************************************************************
 
     void layerInProperties( AbcA::CompoundPropertyReaderPtr iProps );
 
     void addChildReader( AbcA::BasePropertyReaderPtr propertyReader );
-
-    //TODO: Remove this stuff after we put all the layering in AbcCorelayer
-protected:
-
-	virtual size_t getNumPropertiesImpl() { return 0; }
-
-    virtual const AbcA::PropertyHeader & getPropertyHeaderImpl( size_t i ) { static AbcA::PropertyHeader sHeader; return sHeader; }
-
-    virtual const AbcA::PropertyHeader *
-    getPropertyHeaderImpl( const std::string &iName ) { return 0; }
-
-    virtual AbcA::ScalarPropertyReaderPtr
-    getScalarPropertyImpl( const std::string &iName ) { return AbcA::ScalarPropertyReaderPtr(); }
-
-    virtual AbcA::ArrayPropertyReaderPtr
-    getArrayPropertyImpl( const std::string &iName ) { return AbcA::ArrayPropertyReaderPtr(); }
-
-    virtual AbcA::CompoundPropertyReaderPtr
-    getCompoundPropertyImpl( const std::string &iName ) { AbcA::CompoundPropertyReaderPtr(); }
 
 private:
 
@@ -102,15 +70,10 @@ private:
     // Pointer to parent.
     CprImplPtr m_parent;
 
-    // My header
-    //PropertyHeaderPtr m_header;
-
     // My Object
     OrImplPtr m_object;
 
-    //CprDataPtr m_data;
-
-    AbcA::BasePropertyReaderPtr m_originalCpr;
+    AbcA::BasePropertyReaderPtr m_originalPropertyReader;
 
     std::vector< CprImplPtr > m_childCprs;
 

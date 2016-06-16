@@ -2,20 +2,13 @@
 #define _Alembic_AbcCoreLayer_OrImpl_h_
 
 #include <Alembic/AbcCoreLayer/Foundation.h>
-//#include <Alembic/AbcCoreOgawa/OrData.h>
 #include <Alembic/AbcCoreLayer/ArImpl.h>
-//#include <Alembic/Abc/IObject.h>
 
 namespace Alembic {
 namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
 
 typedef Alembic::Util::shared_ptr<AbcA::ObjectHeader> ObjectHeaderPtr;
-
-class CprImpl;
-
-class OrImpl;
-typedef Alembic::Util::shared_ptr< OrImpl > OrImplPtr;
 
 //-*****************************************************************************
 class OrImpl
@@ -28,14 +21,6 @@ public:
     OrImpl( Alembic::Util::shared_ptr< ArImpl > iArchive,
             AbcA::ObjectReaderPtr iThisObject,
             Alembic::Util::shared_ptr< OrImpl > iParent);
-
-
-//    OrImpl( AbcA::ObjectReaderPtr iParent,
-//            Ogawa::IGroupPtr iParentGroup,
-//            std::size_t iIndex,
-//            ObjectHeaderPtr iHeader );
-
-    OrImpl(){};
 
     virtual ~OrImpl();
 
@@ -67,13 +52,6 @@ public:
 
     virtual bool getChildrenHash( Util::Digest & oDigest );
 
-    //TODO REMOVE THIS ONCE THIS LAYER IS FUNCTIONAL
-    virtual size_t getNumChildrenImpl(){};
-    virtual const AbcA::ObjectHeader & getChildHeaderImpl( size_t i) {};
-    virtual const AbcA::ObjectHeader * getChildHeaderImpl( const std::string &iName ){};
-    virtual AbcA::ObjectReaderPtr getChildImpl( const std::string &iName ){};
-    virtual AbcA::ObjectReaderPtr getChildImpl( size_t i ){};
-
     void layerInObjectHierarchy( AbcA::ObjectReaderPtr iObject );
 
 protected:
@@ -89,17 +67,11 @@ private:
     // The ObjectReader from the object's original, non-layered archive
     AbcA::ObjectReaderPtr m_originalObjectReader;
 
-    //TODO TEMP TEMP TEMP REMOVE
-    AbcA::CompoundPropertyReaderPtr m_originalCompoundPropertyReader;
-
     // The parent object
     Alembic::Util::shared_ptr< OrImpl > m_parent;
 
     Alembic::Util::shared_ptr< ArImpl > m_archive;
 
-
-//    OrDataPtr m_data;
-//
     AbcA::ObjectHeader m_header;
 
     Alembic::Util::shared_ptr< CprImpl > m_compoundPropertyReader;
