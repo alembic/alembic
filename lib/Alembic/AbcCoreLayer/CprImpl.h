@@ -16,7 +16,7 @@ class CprImpl
 public:
 
     CprImpl( Alembic::Util::shared_ptr< OrImpl > iObject,
-			 AbcA::BasePropertyReaderPtr iOriginalCpr,
+			 AbcA::BasePropertyReaderPtr iOriginalReader,
 			 CprImplPtr iParentCpr = CprImplPtr());
 
     virtual ~CprImpl();

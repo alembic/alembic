@@ -13,10 +13,10 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 CprImpl::CprImpl( OrImplPtr iObject,
-                  AbcA::BasePropertyReaderPtr iOriginalCpr,
+                  AbcA::BasePropertyReaderPtr iOriginalReader,
                   CprImplPtr iParentCpr)
 	: m_object( iObject )
-	, m_originalPropertyReader( iOriginalCpr )
+	, m_originalPropertyReader( iOriginalReader )
 	, m_parent( iParentCpr )
 	, m_mapsInitialized( false )
 {

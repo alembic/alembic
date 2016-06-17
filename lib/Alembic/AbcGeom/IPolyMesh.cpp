@@ -45,9 +45,9 @@ MeshTopologyVariance IPolyMeshSchema::getTopologyVariance() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::getTopologyVariance()" );
 
-    if ( m_indicesProperty && m_countsProperty && m_indicesProperty.isConstant() && m_countsProperty.isConstant() )
+    if ( m_indicesProperty.isConstant() && m_countsProperty.isConstant() )
     {
-        if ( m_positionsProperty && m_positionsProperty.isConstant() )
+        if ( m_positionsProperty.isConstant() )
         {
             return kConstantTopology;
         }
@@ -56,7 +56,7 @@ MeshTopologyVariance IPolyMeshSchema::getTopologyVariance() const
             return kHomogenousTopology;
         }
     }
-   else
+    else
     {
         return kHeterogenousTopology;
     }
@@ -65,60 +65,6 @@ MeshTopologyVariance IPolyMeshSchema::getTopologyVariance() const
 
     // Not all error handlers throw
     return kConstantTopology;
-}
-
-//-*****************************************************************************
-bool IPolyMeshSchema::isConstant() const
-{
-   if ( m_positionsProperty.valid() )
-   {
-       return getTopologyVariance() == kConstantTopology;
-   }
-
-   if ( m_velocitiesProperty.valid() )
-   {
-       return m_velocitiesProperty.isConstant();
-   }
-
-   if ( m_uvsParam.valid() )
-   {
-       return m_uvsParam.isConstant();
-   }
-
-   if ( m_normalsParam.valid() )
-   {
-       return m_normalsParam.isConstant();
-   }
-
-   return true;
-}
-
-//-*****************************************************************************
-void IPolyMeshSchema::get( Sample &oSample,
-        const Abc::ISampleSelector &iSS) const
-{
-   ALEMBIC_ABC_SAFE_CALL_BEGIN( "IPolyMeshSchema::get()" );
-
-   if(m_positionsProperty && m_positionsProperty.valid() && m_positionsProperty.getNumSamples() > 0)
-   {
-       m_positionsProperty.get( oSample.m_positions, iSS );
-       m_indicesProperty.get( oSample.m_indices, iSS );
-       m_countsProperty.get( oSample.m_counts, iSS );
-   }
-
-   if(m_selfBoundsProperty && m_selfBoundsProperty.valid() && m_selfBoundsProperty.getNumSamples() > 0)
-   {
-       m_selfBoundsProperty.get( oSample.m_selfBounds, iSS );
-   }
-
-   if ( m_velocitiesProperty && m_velocitiesProperty.getNumSamples() > 0 )
-   {
-       m_velocitiesProperty.get( oSample.m_velocities, iSS );
-   }
-
-   // Could error check here.
-
-   ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 //-*****************************************************************************
@@ -133,28 +79,16 @@ void IPolyMeshSchema::init( const Abc::Argument &iArg0,
 
     AbcA::CompoundPropertyReaderPtr _this = this->getPtr();
 
-    // Nothing is guaranteed to exist;
-    // some data may be layered in later from additional files
-
     // no matching so we pick up old assets written as V3f
-    if ( this->getPropertyHeader( "P" ) != NULL )
-   {
-       m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching,
+    m_positionsProperty = Abc::IP3fArrayProperty( _this, "P", kNoMatching,
         args.getErrorHandlerPolicy() );
-   }
 
-    if ( this->getPropertyHeader( ".faceIndices" ) != NULL )
-    {
-       m_indicesProperty = Abc::IInt32ArrayProperty( _this, ".faceIndices",
-                                                     iArg0, iArg1 );
-    }
+    m_indicesProperty = Abc::IInt32ArrayProperty( _this, ".faceIndices",
+                                                  iArg0, iArg1 );
+    m_countsProperty = Abc::IInt32ArrayProperty( _this, ".faceCounts",
+                                                 iArg0, iArg1 );
 
-    if ( this->getPropertyHeader( ".faceCounts" ) != NULL )
-    {
-       m_countsProperty = Abc::IInt32ArrayProperty( _this, ".faceCounts",
-                                                    iArg0, iArg1 );
-    }
-
+    // none of the things below here are guaranteed to exist
     if ( this->getPropertyHeader( "uv" ) != NULL )
     {
         m_uvsParam = IV2fGeomParam( _this, "uv", iArg0, iArg1 );
@@ -291,62 +225,6 @@ IPolyMeshSchema::getFaceSet ( const std::string &iFaceSetName )
 
     IFaceSet emptyFaceSet;
     return emptyFaceSet;
-}
-
-//-*****************************************************************************
-size_t
-IPolyMeshSchema::getNumSamples() const
-{
-   if ( m_positionsProperty.valid() )
-   {
-       return m_positionsProperty.getNumSamples();
-   }
-
-   if ( m_velocitiesProperty.valid() )
-   {
-       return m_velocitiesProperty.getNumSamples();
-   }
-
-   if ( m_uvsParam.valid() )
-   {
-       return m_uvsParam.getNumSamples();
-   }
-
-   if ( m_normalsParam.valid() )
-   {
-       return m_normalsParam.getNumSamples();
-   }
-
-   return 0;
-}
-
-//-*****************************************************************************
-AbcA::TimeSamplingPtr
-IPolyMeshSchema::getTimeSampling() const
-{
-
-    if ( m_positionsProperty.valid() )
-    {
-        return m_positionsProperty.getTimeSampling();
-    }
-    else if ( m_velocitiesProperty.valid() )
-   {
-       return m_velocitiesProperty.getTimeSampling();
-   }
-
-    else if ( m_uvsParam.valid() )
-   {
-       return m_uvsParam.getTimeSampling();
-   }
-
-    else if ( m_normalsParam.valid() )
-   {
-       return m_normalsParam.getTimeSampling();
-   }
-    else
-    {
-        return getObject().getArchive().getTimeSampling( 0 );
-    }
 }
 
 
