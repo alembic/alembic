@@ -404,6 +404,11 @@ try
                 jobArgs.writeVisibility = true;
             }
 
+            else if (arg == "-as" || arg == "-autosubd")
+            {
+                jobArgs.autoSubd = true;
+            }
+
             else if (arg == "-mfc" || arg == "-melperframecallback")
             {
                 if (i+1 >= numJobArgs)

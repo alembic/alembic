@@ -338,7 +338,28 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
-    if ( !plug.isNull() && plug.asBool() )
+    
+    // if there is flag "autoSubd", and NO "SubDivisionMesh" was defined, 
+    // let's check whether the mesh has crease edge, crease vertex or holes
+    // then the mesh will be treated as SubD
+    bool hasToWriteSubd = false;
+    if( plug.isNull() && iArgs.autoSubd )
+    {
+        MUintArray edgeIds, vertexIds;
+        MDoubleArray edgeCreaseData, vertexCreaseData;
+        lMesh.getCreaseEdges(edgeIds, edgeCreaseData);
+        lMesh.getCreaseVertices(vertexIds, vertexCreaseData);
+        hasToWriteSubd = ( (edgeIds.length() > 0) || (vertexIds.length() > 0) );
+#if MAYA_API_VERSION >= 201100
+        if (!hasToWriteSubd)
+        {
+            MUintArray invisibleFaceIds = lMesh.getInvisibleFaces();
+            hasToWriteSubd = ( hasToWriteSubd || (invisibleFaceIds.length() > 0) );
+        }
+#endif
+    }
+
+    if ( (!plug.isNull() && plug.asBool()) || hasToWriteSubd )
     {
         Alembic::AbcGeom::OSubD obj(iParent, name.asChar(), iTimeIndex);
         mSubDSchema = obj.getSchema();
