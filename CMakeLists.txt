@@ -208,7 +208,9 @@ ENDIF()
 # DEPENDENCIES
 #-******************************************************************************
 
-FIND_PACKAGE(Threads REQUIRED)
+IF ( NOT WINDOWS )
+  FIND_PACKAGE(Threads REQUIRED)
+ENDIF ()
 
 # We only need boost if including PyAlembic, or using it in the lib
 IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
