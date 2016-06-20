@@ -54,7 +54,7 @@ AbcA::ObjectReaderPtr OrImpl::getParent()
 //-*****************************************************************************
 AbcA::CompoundPropertyReaderPtr OrImpl::getProperties()
 {
-	initializeMaps();
+    initializeMaps();
 
     return m_compoundPropertyReader;
 }
@@ -62,7 +62,7 @@ AbcA::CompoundPropertyReaderPtr OrImpl::getProperties()
 //-*****************************************************************************
 size_t OrImpl::getNumChildren()
 {
-	initializeMaps();
+    initializeMaps();
 
     return m_childObjects.size();
 }
@@ -70,7 +70,7 @@ size_t OrImpl::getNumChildren()
 //-*****************************************************************************
 const AbcA::ObjectHeader & OrImpl::getChildHeader( size_t i )
 {
-	initializeMaps();
+    initializeMaps();
 
     return m_childObjects[ i ]->m_header;
 }
@@ -78,38 +78,38 @@ const AbcA::ObjectHeader & OrImpl::getChildHeader( size_t i )
 //-*****************************************************************************
 const AbcA::ObjectHeader * OrImpl::getChildHeader( const std::string &iName )
 {
-	initializeMaps();
+    initializeMaps();
 
-	ChildNameMap::iterator findChildItr = m_childNameMap.find( iName );
+    ChildNameMap::iterator findChildItr = m_childNameMap.find( iName );
 
-	if( findChildItr != m_childNameMap.end() )
-	{
-		return &m_childObjects[ findChildItr->second ]->m_header;
-	}
+    if( findChildItr != m_childNameMap.end() )
+    {
+        return &m_childObjects[ findChildItr->second ]->m_header;
+    }
 
-	return 0;
+    return 0;
 }
 
 //-*****************************************************************************
 AbcA::ObjectReaderPtr OrImpl::getChild( const std::string &iName )
 {
-	initializeMaps();
+    initializeMaps();
 
-	ChildNameMap::iterator findChildItr = m_childNameMap.find( iName );
+    ChildNameMap::iterator findChildItr = m_childNameMap.find( iName );
 
-	if( findChildItr != m_childNameMap.end() )
-	{
-		return m_childObjects[ findChildItr->second ];
-	}
+    if( findChildItr != m_childNameMap.end() )
+    {
+        return m_childObjects[ findChildItr->second ];
+    }
 
-	return AbcA::ObjectReaderPtr();
+    return AbcA::ObjectReaderPtr();
 }
 
 AbcA::ObjectReaderPtr OrImpl::getChild( size_t i )
 {
-	initializeMaps();
+    initializeMaps();
 
-	return m_childObjects[ i ];
+    return m_childObjects[ i ];
 }
 
 //-*****************************************************************************
@@ -139,24 +139,24 @@ Alembic::Util::shared_ptr< ArImpl > OrImpl::getArchiveImpl() const
 //-*****************************************************************************
 void OrImpl::initializeMaps( )
 {
-	if( !m_mapsInitialized )
-	{
-		m_mapsInitialized = true;
+    if( !m_mapsInitialized )
+    {
+        m_mapsInitialized = true;
 
-		recordChildren();
+        recordChildren();
 
-		m_compoundPropertyReader =
-		Alembic::Util::shared_ptr< CprImpl >( new CprImpl( shared_from_this(), m_originalObjectReader->getProperties() ) );
-	}
+        m_compoundPropertyReader =
+        Alembic::Util::shared_ptr< CprImpl >( new CprImpl( shared_from_this(), m_originalObjectReader->getProperties() ) );
+    }
 }
 
 //-*****************************************************************************
 void OrImpl::recordChildren(  )
 {
-	size_t numChildren = m_originalObjectReader->getNumChildren();
+    size_t numChildren = m_originalObjectReader->getNumChildren();
 
-	for( int i = 0; i< numChildren; i++ )
-	{
+    for( int i = 0; i< numChildren; i++ )
+    {
        AbcA::ObjectReaderPtr origChildPtr = m_originalObjectReader->getChild( i );
 
        OrImplPtr childPtr = OrImplPtr( new OrImpl( this->m_archive,
@@ -166,47 +166,47 @@ void OrImpl::recordChildren(  )
        m_childNameMap[ childPtr->m_header.getName() ] = m_childObjects.size();
 
        m_childObjects.push_back( childPtr );
-	}
+    }
 }
 
 //-*****************************************************************************
 void OrImpl::layerInObjectHierarchy( AbcA::ObjectReaderPtr iObject )
 {
-	initializeMaps();
+    initializeMaps();
 
-	if( m_header.getName() == iObject->getHeader().getName() )
-	{
-		m_compoundPropertyReader->layerInProperties( iObject->getProperties() );
+    if( m_header.getName() == iObject->getHeader().getName() )
+    {
+        m_compoundPropertyReader->layerInProperties( iObject->getProperties() );
 
-		size_t numChildren = iObject->getNumChildren();
+        size_t numChildren = iObject->getNumChildren();
 
-		for( size_t i = 0; i < numChildren; i++ )
-		{
-			AbcA::ObjectReaderPtr child = iObject->getChild( i );
+        for( size_t i = 0; i < numChildren; i++ )
+        {
+            AbcA::ObjectReaderPtr child = iObject->getChild( i );
 
-			const std::string &childName = child->getHeader().getName();
+            const std::string &childName = child->getHeader().getName();
 
-			ChildNameMap::iterator findChild = m_childNameMap.find( childName );
+            ChildNameMap::iterator findChild = m_childNameMap.find( childName );
 
-			OrImplPtr childLayeredObjReader;
+            OrImplPtr childLayeredObjReader;
 
-			if( findChild == m_childNameMap.end() )
-			{
-				childLayeredObjReader =
-						OrImplPtr( new OrImpl(this->m_archive, child, shared_from_this()) );
+            if( findChild == m_childNameMap.end() )
+            {
+                childLayeredObjReader =
+                        OrImplPtr( new OrImpl(this->m_archive, child, shared_from_this()) );
 
-				m_childNameMap[ childName ] = m_childObjects.size();
+                m_childNameMap[ childName ] = m_childObjects.size();
 
-				m_childObjects.push_back( childLayeredObjReader );
-			}
-			else
-			{
-				childLayeredObjReader = m_childObjects[ findChild->second ];
-			}
+                m_childObjects.push_back( childLayeredObjReader );
+            }
+            else
+            {
+                childLayeredObjReader = m_childObjects[ findChild->second ];
+            }
 
-			childLayeredObjReader->layerInObjectHierarchy( child );
-		}
-	}
+            childLayeredObjReader->layerInObjectHierarchy( child );
+        }
+    }
 }
 
 } // End namespace ALEMBIC_VERSION_NS

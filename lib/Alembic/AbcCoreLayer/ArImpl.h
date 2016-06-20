@@ -20,11 +20,9 @@ class ArImpl
 private:
     friend class ReadArchive;
 
-    ArImpl( const std::list<std::string>& iFileNames,
-            size_t iNumStreams=1 );
+    ArImpl( const std::list<std::string>& iFileNames, size_t iNumStreams = 1 );
 
-    ArImpl( const std::string& iFileName,
-                size_t iNumStreams=1 );
+    ArImpl( const std::string& iFileName, size_t iNumStreams = 1 );
 
     ArImpl( const std::list< std::vector< std::istream * > >& iStreams );
 

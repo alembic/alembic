@@ -25,13 +25,13 @@ public:
     ReadArchive( const std::list< std::vector< std::istream * > >& iStreams );
 
     // open the file
-    ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
+    Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::list< std::string > &iFileName ) const;
 
     // The given cache is ignored.
-    ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
+    Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::list< std::string > &iFileName,
-                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache
+                Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache
               ) const;
 
 private:

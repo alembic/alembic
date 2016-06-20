@@ -30,7 +30,7 @@ ReadArchive::ReadArchive( const std::list< std::vector< std::istream * > >& iStr
 }
 
 //-*****************************************************************************
-::Alembic::AbcCoreAbstract::ArchiveReaderPtr
+Alembic::AbcCoreAbstract::ArchiveReaderPtr
 ReadArchive::operator()( const std::list< std::string > &iFileNames ) const
 {
     AbcA::ArchiveReaderPtr archivePtr;
@@ -50,9 +50,9 @@ ReadArchive::operator()( const std::list< std::string > &iFileNames ) const
 
 //-*****************************************************************************
 // The given cache is ignored.
-::Alembic::AbcCoreAbstract::ArchiveReaderPtr
+Alembic::AbcCoreAbstract::ArchiveReaderPtr
 ReadArchive::operator()( const std::list< std::string > &iFileNames,
-		::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache ) const
+        ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache ) const
 {
     AbcA::ArchiveReaderPtr archivePtr;
 

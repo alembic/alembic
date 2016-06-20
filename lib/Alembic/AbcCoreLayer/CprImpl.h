@@ -16,8 +16,8 @@ class CprImpl
 public:
 
     CprImpl( Alembic::Util::shared_ptr< OrImpl > iObject,
-			 AbcA::BasePropertyReaderPtr iOriginalReader,
-			 CprImplPtr iParentCpr = CprImplPtr());
+             AbcA::BasePropertyReaderPtr iOriginalReader,
+             CprImplPtr iParentCpr = CprImplPtr());
 
     virtual ~CprImpl();
 
@@ -52,8 +52,8 @@ public:
     getCompoundProperty( const std::string &iName );
 
     //-*************************************************************************
-	// Native to this CprImpl implementation
-	//-*************************************************************************
+    // Native to this CprImpl implementation
+    //-*************************************************************************
 
     void layerInProperties( AbcA::CompoundPropertyReaderPtr iProps );
 
