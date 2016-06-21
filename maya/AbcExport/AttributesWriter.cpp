@@ -1702,7 +1702,8 @@ AttributesWriter::AttributesWriter(
     Alembic::Abc::OObject & iParentObj,
     const MFnDependencyNode & iNode,
     Alembic::Util::uint32_t iTimeIndex,
-    const JobArgs & iArgs)
+    const JobArgs & iArgs,
+    bool isShape)
 {
     PlugAndObjScalar visPlug;
 
@@ -1833,94 +1834,7 @@ AttributesWriter::AttributesWriter(
         }
     }
 
-    // write the static scalar props
-    std::vector< PlugAndObjScalar >::iterator k =
-        staticPlugObjScalarVec.begin();
-    std::vector< PlugAndObjScalar >::iterator kend =
-        staticPlugObjScalarVec.end();
-
-    for (; k != kend; k++)
-    {
-        MString propName = k->plug.partialName(0, 0, 0, 0, 0, 1);
-
-        //
-        // attributeTo[Scalar|Array]PropertyPair does the writing.
-        bool filledProp = attributeToScalarPropertyPair(k->obj, k->plug,
-            k->prop);
-
-        if (!filledProp)
-        {
-            MString msg = "WARNING: Couldn't get static scalar property ";
-            msg += k->plug.partialName(1, 0, 0, 0, 1, 1);
-            msg += ", so skipping.";
-            MGlobal::displayWarning(msg);
-            continue;
-        }
-    }
-
-    // write the static array props
-    std::vector< PlugAndObjArray >::iterator j =
-        staticPlugObjArrayVec.begin();
-    std::vector< PlugAndObjArray >::iterator jend =
-        staticPlugObjArrayVec.end();
-
-    for (; j != jend; j++)
-    {
-        MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
-        bool filledProp = attributeToArrayPropertyPair(j->obj, j->plug,
-            j->prop);
-
-        if (!filledProp)
-        {
-            MString msg = "WARNING: Couldn't get static array property ";
-            msg += j->plug.partialName(1, 0, 0, 0, 1, 1);
-            msg += ", so skipping.";
-            MGlobal::displayWarning(msg);
-            continue;
-        }
-    }
-
-    // write the animated userProperties
-    k = mPlugObjScalarVec.begin();
-    kend = mPlugObjScalarVec.end();
-
-    for (; k != kend; ++k)
-    {
-        MString propName = k->plug.partialName(0, 0, 0, 0, 0, 1);
-
-        bool filledProp = attributeToScalarPropertyPair(k->obj, k->plug,
-            k->prop);
-
-        if (!filledProp)
-        {
-            MString msg = "WARNING: Couldn't get scalar property ";
-            msg += k->plug.partialName(1, 0, 0, 0, 1, 1);
-            msg += ", so skipping.";
-            MGlobal::displayWarning(msg);
-            continue;
-        }
-    }
-
-    // write the animated arbGeomProps
-    j = mPlugObjArrayVec.begin();
-    jend = mPlugObjArrayVec.end();
-    for (; j != jend; j++)
-    {
-        MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
-        bool filledProp = attributeToArrayPropertyPair(j->obj, j->plug,j->prop);
-
-        if (!filledProp)
-        {
-            MString msg = "WARNING: Couldn't get array property ";
-            msg += j->plug.partialName(1, 0, 0, 0, 1, 1);
-            msg += ", so skipping.";
-            MGlobal::displayWarning(msg);
-            continue;
-        }
-    }
-
-    //
-    // Rest of this is specific to visibility
+    // handle visibility
     if (!visPlug.plug.isNull())
     {
         int retVis = util::getVisibilityType(visPlug.plug);
@@ -1989,6 +1903,100 @@ AttributesWriter::AttributesWriter(
             break;
         }
     }
+
+    // write the static scalar props
+    std::vector< PlugAndObjScalar >::iterator k =
+        staticPlugObjScalarVec.begin();
+    std::vector< PlugAndObjScalar >::iterator kend =
+        staticPlugObjScalarVec.end();
+
+    for (; k != kend; k++)
+    {
+        MString propName = k->plug.partialName(0, 0, 0, 0, 0, 1);
+
+        //
+        // attributeTo[Scalar|Array]PropertyPair does the writing.
+        bool filledProp = attributeToScalarPropertyPair(k->obj, k->plug,
+            k->prop);
+
+        if (!filledProp)
+        {
+            MString msg = "WARNING: Couldn't get static scalar property ";
+            msg += k->plug.partialName(1, 0, 0, 0, 1, 1);
+            msg += ", so skipping.";
+            MGlobal::displayWarning(msg);
+            continue;
+        }
+    }
+
+    // write the static array props
+    std::vector< PlugAndObjArray >::iterator j =
+        staticPlugObjArrayVec.begin();
+    std::vector< PlugAndObjArray >::iterator jend =
+        staticPlugObjArrayVec.end();
+
+    for (; j != jend; j++)
+    {
+        MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
+        bool filledProp = attributeToArrayPropertyPair(j->obj, j->plug,
+            j->prop);
+
+        if (!filledProp)
+        {
+            MString msg = "WARNING: Couldn't get static array property ";
+            msg += j->plug.partialName(1, 0, 0, 0, 1, 1);
+            msg += ", so skipping.";
+            MGlobal::displayWarning(msg);
+            continue;
+        }
+    }
+
+    // we shouldn't set the animated channels so bail
+    if (isShape && !iArgs.setFirstAnimShape)
+    {
+        return;
+    }
+
+    // write the animated userProperties
+    k = mPlugObjScalarVec.begin();
+    kend = mPlugObjScalarVec.end();
+
+    for (; k != kend; ++k)
+    {
+        MString propName = k->plug.partialName(0, 0, 0, 0, 0, 1);
+
+        bool filledProp = attributeToScalarPropertyPair(k->obj, k->plug,
+            k->prop);
+
+        if (!filledProp)
+        {
+            MString msg = "WARNING: Couldn't get scalar property ";
+            msg += k->plug.partialName(1, 0, 0, 0, 1, 1);
+            msg += ", so skipping.";
+            MGlobal::displayWarning(msg);
+            continue;
+        }
+    }
+
+    // write the animated arbGeomProps if appropriate
+    j = mPlugObjArrayVec.begin();
+    jend = mPlugObjArrayVec.end();
+
+    for (; j != jend; j++)
+    {
+        MString propName = j->plug.partialName(0, 0, 0, 0, 0, 1);
+        bool filledProp = attributeToArrayPropertyPair(j->obj, j->plug,j->prop);
+
+        if (!filledProp)
+        {
+            MString msg = "WARNING: Couldn't get array property ";
+            msg += j->plug.partialName(1, 0, 0, 0, 1, 1);
+            msg += ", so skipping.";
+            MGlobal::displayWarning(msg);
+            continue;
+        }
+    }
+
 }
 
 //

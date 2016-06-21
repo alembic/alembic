@@ -132,9 +132,12 @@ MayaNurbsCurveWriter::MayaNurbsCurveWriter(MDagPath & iDag,
     }
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, fnDepNode,
-        iTimeIndex, iArgs));
+        iTimeIndex, iArgs, true));
 
-    write();
+    if (!mIsAnimated || iArgs.setFirstAnimShape)
+    {
+        write();
+    }
 }
 
 unsigned int MayaNurbsCurveWriter::getNumCVs()

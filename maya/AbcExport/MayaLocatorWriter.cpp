@@ -99,7 +99,11 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
     val[3] = scaleX.asDouble();
     val[4] = scaleY.asDouble();
     val[5] = scaleZ.asDouble();
-    mSp.set(val);
+
+    if (!mIsAnimated || iArgs.setFirstAnimShape)
+    {
+        mSp.set(val);
+    }
 
     Alembic::Abc::OCompoundProperty arbGeom;
     Alembic::Abc::OCompoundProperty userProps;
@@ -111,7 +115,7 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
 
     mAttrs = AttributesWriterPtr(new AttributesWriter(arbGeom, userProps,
                                                       mXform, fnLocator,
-                                                      iTimeIndex, iArgs));
+                                                      iTimeIndex, iArgs, true));
 }
 
 

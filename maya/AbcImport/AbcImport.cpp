@@ -280,6 +280,7 @@ MStatus AbcImport::doIt(const MArgList & args)
             // resolve the relative path
             MFileObject absoluteFile;
             absoluteFile.setRawFullName(filename);
+			absoluteFile.setResolveMethod(MFileObject::kInputFile);
 #if MAYA_API_VERSION < 201300
             if (absoluteFile.resolvedFullName() !=
                 absoluteFile.expandedFullName())

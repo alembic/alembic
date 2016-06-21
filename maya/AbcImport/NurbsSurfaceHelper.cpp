@@ -44,6 +44,7 @@
 #include <maya/MPointArray.h>
 #include <maya/MFnNurbsSurface.h>
 #include <maya/MFnNurbsCurve.h>
+#include <maya/MFnNurbsCurveData.h>
 #include <maya/MGlobal.h>
 #include <maya/MObjectArray.h>
 #include <maya/MTrimBoundaryArray.h>
@@ -64,7 +65,6 @@ namespace
             return;
 
         MTrimBoundaryArray trimBoundaryArray;
-        MObjectArray deleteAfterTrim;
 
         // this is for getting V back into Maya's coordinate system
         double startU, endU, startV, endV;
@@ -125,17 +125,16 @@ namespace
                 // The transform node as well as the curve node need to be
                 // deleted once the trim is done, because after all this is not
                 // the equivalent of "curveOnSurface" command
+				MFnNurbsCurveData data;
+				MObject curveData = data.create();
                 MObject curve2D = fnCurve.create(cvs, dknots, degree,
                     MFnNurbsCurve::kOpen, true, true,
-                    MObject::kNullObj, &status);
+                    curveData, &status);
 
                 if (status == MS::kSuccess)
                 {
-                    MFnTransform trans(curve2D, &status);
-                    if (status == MS::kSuccess)
                     {
-                        trimLoop.append(trans.child(0));
-                        deleteAfterTrim.append(curve2D);
+                        trimLoop.append(curveData);
                     }
                 }
             }
@@ -252,12 +251,6 @@ namespace
         if (status != MS::kSuccess)
         {
             MGlobal::displayError("Trimming Nurbs Surface failed.");
-        }
-
-        unsigned int length = deleteAfterTrim.length();
-        for (unsigned int l=0; l<length; l++)
-        {
-            MGlobal::deleteNode(deleteAfterTrim[l]);
         }
     }
 }

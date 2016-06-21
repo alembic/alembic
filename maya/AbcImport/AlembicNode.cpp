@@ -66,6 +66,9 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MFnEnumAttribute.h>
+#if defined(MAYA_WANT_EXTERNALCONTENTTABLE)
+#include <maya/MExternalContentInfoTable.h>
+#endif
 
 #include <Alembic/AbcCoreFactory/IFactory.h>
 #include <Alembic/AbcCoreHDF5/ReadWrite.h>
@@ -431,6 +434,26 @@ double AlembicNode::computeRetime(const double inputTime,
     return retime;
 }
 
+MStatus AlembicNode::setDependentsDirty(const MPlug& plug, MPlugArray& plugArray)
+{
+	if (plug == mAbcFileNameAttr)
+	{
+/* 	This code was to force refresh of the AlembicNode when there is a file name change
+	But since it was only working in particular very simple case, we decided to not enable it
+	and only display a warning.
+	In all other cases it could result in undesired behavior even scene corruption.
+	See issue MAYA-47471
+		mFileInitialized = false;
+        mCurTime = DBL_MAX;	// to force update
+*/
+		if(mFileInitialized)
+		{
+			MGlobal::displayWarning("Repathing Alembic Nodes is not supported");
+		}
+	}
+	return MPxNode::setDependentsDirty(plug, plugArray);
+}
+
 MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 {
     MStatus status;
@@ -464,11 +487,13 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         Alembic::Abc::IArchive archive;
         Alembic::AbcCoreFactory::IFactory factory;
         factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
-        archive = factory.getArchive(fileName.asUTF8());
+        archive = factory.getArchive(fileName.asChar());
 
         if (!archive.valid())
         {
-            MString theError = "Cannot read file " + fileName;
+            //The resolved full name will be empty if the resolution fails.
+            //Print the raw full name in case of this situation.
+            MString theError = "Cannot read file " + fileObject.rawFullName();
             printError(theError);
         }
 
@@ -723,7 +748,18 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     {
         if (mOutRead[2])
         {
-            dataBlock.setClean(plug);
+            // Reference the output to let EM know we are the writer
+            // of the data. EM sets the output to holder and causes
+            // race condition when evaluating fan-out destinations.
+            MArrayDataHandle outArrayHandle =
+                dataBlock.outputValue(mOutSubDArrayAttr, &status);
+            const unsigned int elementCount = outArrayHandle.elementCount();
+            for (unsigned int j = 0; j < elementCount; j++)
+            {
+                outArrayHandle.outputValue().data();
+                outArrayHandle.next();
+            }
+            outArrayHandle.setAllClean();
             return MS::kSuccess;
         }
 
@@ -798,7 +834,18 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     {
         if (mOutRead[3])
         {
-            dataBlock.setClean(plug);
+            // Reference the output to let EM know we are the writer
+            // of the data. EM sets the output to holder and causes
+            // race condition when evaluating fan-out destinations.
+            MArrayDataHandle outArrayHandle =
+                dataBlock.outputValue(mOutPolyArrayAttr, &status);
+            const unsigned int elementCount = outArrayHandle.elementCount();
+            for (unsigned int j = 0; j < elementCount; j++)
+            {
+                outArrayHandle.outputValue().data();
+                outArrayHandle.next();
+            }
+            outArrayHandle.setAllClean();
             return MS::kSuccess;
         }
 
@@ -946,7 +993,18 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     {
         if (mOutRead[5])
         {
-            dataBlock.setClean(plug);
+            // Reference the output to let EM know we are the writer
+            // of the data. EM sets the output to holder and causes
+            // race condition when evaluating fan-out destinations.
+            MArrayDataHandle outArrayHandle =
+                dataBlock.outputValue(mOutNurbsSurfaceArrayAttr, &status);
+            const unsigned int elementCount = outArrayHandle.elementCount();
+            for (unsigned int j = 0; j < elementCount; j++)
+            {
+                outArrayHandle.outputValue().data();
+                outArrayHandle.next();
+            }
+            outArrayHandle.setAllClean();
             return MS::kSuccess;
         }
 
@@ -985,7 +1043,18 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     {
         if (mOutRead[6])
         {
-            dataBlock.setClean(plug);
+            // Reference the output to let EM know we are the writer
+            // of the data. EM sets the output to holder and causes
+            // race condition when evaluating fan-out destinations.
+            MArrayDataHandle outArrayHandle =
+                dataBlock.outputValue(mOutNurbsCurveGrpArrayAttr, &status);
+            const unsigned int elementCount = outArrayHandle.elementCount();
+            for (unsigned int j = 0; j < elementCount; j++)
+            {
+                outArrayHandle.outputValue().data();
+                outArrayHandle.next();
+            }
+            outArrayHandle.setAllClean();
             return MS::kSuccess;
         }
 
@@ -1053,6 +1122,15 @@ bool AlembicNode::isPassiveOutput(const MPlug & plug) const
     return MPxNode::isPassiveOutput( plug );
 }
 
+#if MAYA_API_VERSION >= 201600
+AlembicNode::SchedulingType AlembicNode::schedulingType()const
+{
+	// Globally serialize this node because the compute method is not thread safe
+    return kGloballySerialize;
+}
+#endif
+
+
 // returns the list of files to archive.
 MStringArray AlembicNode::getFilesToArchive(
     bool /* shortName */,
@@ -1081,4 +1159,18 @@ MStringArray AlembicNode::getFilesToArchive(
 
     return files;
 }
+
+#if defined(MAYA_WANT_EXTERNALCONTENTTABLE)
+void AlembicNode::getExternalContent(MExternalContentInfoTable& table) const
+{
+   addExternalContentForFileAttr(table, mAbcFileNameAttr);
+   MPxNode::getExternalContent(table);
+}
+
+void AlembicNode::setExternalContent(const MExternalContentLocationTable& table)
+{
+   setExternalContentForFileAttr(mAbcFileNameAttr, table);
+   MPxNode::setExternalContent(table);
+}
+#endif
 

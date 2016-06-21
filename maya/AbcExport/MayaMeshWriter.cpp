@@ -338,7 +338,28 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
-    if ( !plug.isNull() && plug.asBool() )
+    
+    // if there is flag "autoSubd", and NO "SubDivisionMesh" was defined, 
+    // let's check whether the mesh has crease edge, crease vertex or holes
+    // then the mesh will be treated as SubD
+    bool hasToWriteSubd = false;
+    if( plug.isNull() && iArgs.autoSubd )
+    {
+        MUintArray edgeIds, vertexIds;
+        MDoubleArray edgeCreaseData, vertexCreaseData;
+        lMesh.getCreaseEdges(edgeIds, edgeCreaseData);
+        lMesh.getCreaseVertices(vertexIds, vertexCreaseData);
+        hasToWriteSubd = ( (edgeIds.length() > 0) || (vertexIds.length() > 0) );
+#if MAYA_API_VERSION >= 201100
+        if (!hasToWriteSubd)
+        {
+            MUintArray invisibleFaceIds = lMesh.getInvisibleFaces();
+            hasToWriteSubd = ( hasToWriteSubd || (invisibleFaceIds.length() > 0) );
+        }
+#endif
+    }
+
+    if ( (!plug.isNull() && plug.asBool()) || hasToWriteSubd )
     {
         Alembic::AbcGeom::OSubD obj(iParent, name.asChar(), iTimeIndex);
         mSubDSchema = obj.getSchema();
@@ -374,9 +395,12 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             up = mSubDSchema.getUserProperties();
         }
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, lMesh,
-            iTimeIndex, iArgs));
+            iTimeIndex, iArgs, true));
 
-        writeSubD(uvSamp);
+        if (!mIsGeometryAnimated || iArgs.setFirstAnimShape)
+        {
+            writeSubD(uvSamp);
+        }
     }
     else
     {
@@ -416,9 +440,12 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
         // set the rest of the props and write to the writer node
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, lMesh,
-            iTimeIndex, iArgs));
+            iTimeIndex, iArgs, true));
 
-        writePoly(uvSamp);
+        if (!mIsGeometryAnimated || iArgs.setFirstAnimShape)
+        {
+            writePoly(uvSamp);
+        }
     }
 
     if (mWriteColorSets)
@@ -472,7 +499,11 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
                     mRGBAParams.push_back(colorProp);
                 }
             }
-            writeColor();
+
+            if (!mIsGeometryAnimated || iArgs.setFirstAnimShape)
+            {
+                writeColor();
+            }
         }
     }
 
@@ -516,7 +547,11 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
                         Alembic::AbcGeom::kFacevaryingScope, 1, iTimeIndex));
                 }
             }
-            writeUVSets();
+
+            if (!mIsGeometryAnimated || iArgs.setFirstAnimShape)
+            {
+                writeUVSets();
+            }
         }
     }
 
@@ -615,8 +650,10 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
             up = faceSetSchema.getUserProperties();
         }
 
-        AttributesWriter attrWriter(cp, up, faceSet, iNode, iTimeIndex, iArgs);
-        attrWriter.write();
+        // last argument false so we set the animated attrs at least once
+        // because we don't appear to support animated facesets yet
+        AttributesWriter attrWriter(cp, up, faceSet, iNode, iTimeIndex,
+                                    iArgs, false);
     }
 }
 

@@ -785,7 +785,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 {
                     attrObj = numAttr.create(attrName, attrName,
                         MFnNumericData::k4Double);
-                    numAttr.setDefault(val[0], val[1], val[2], val[4]);
+                    numAttr.setDefault(val[0], val[1], val[2], val[3]);
                 }
             }
         }
@@ -1144,7 +1144,7 @@ addScalarExtentFourProp(Alembic::Abc::IScalarProperty& iProp,
     else if (extent == 4)
     {
         attrObj = numAttr.create(attrName, attrName, type4);
-        numAttr.setDefault(val[0], val[1], val[2], val[4]);
+        numAttr.setDefault(val[0], val[1], val[2], val[3]);
     }
 
     return VALID_NOTDONE;
@@ -2863,7 +2863,7 @@ MString createScene(ArgData & iArgData)
     Alembic::Abc::IArchive archive;
     Alembic::AbcCoreFactory::IFactory factory;
     factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
-    archive = factory.getArchive(iArgData.mFileName.asUTF8());
+    archive = factory.getArchive(iArgData.mFileName.asChar());
     if (!archive.valid())
     {
         MString theError = iArgData.mFileName;
@@ -2904,6 +2904,8 @@ MString createScene(ArgData & iArgData)
     {
         visitor.applyShaderSelection();
     }
+
+    visitor.addFaceSetsAfterConnection();
 
     return returnName;
 }
