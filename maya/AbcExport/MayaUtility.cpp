@@ -608,7 +608,29 @@ MString util::getHelpText()
 float util::getScaleUnitExport()
 {
     // counter scale to match unit system selected in maya since maya will output centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
+    MDistance::Unit uiUnit;
+    std::string alembicExportUnit;
+    char const* env = std::getenv("ALEMBIC_EXPORT_UNIT");
+    if(env != NULL)
+        alembicExportUnit = env;
+
+    if(alembicExportUnit.length() > 0)
+    {
+        if(alembicExportUnit == "Millimeters")
+            uiUnit = MDistance::kMillimeters;
+        else if(alembicExportUnit == "Meters")
+            uiUnit = MDistance::kMeters;
+        else if(alembicExportUnit == "Inches")
+            uiUnit = MDistance::kInches;
+        else if(alembicExportUnit == "Feet")
+            uiUnit = MDistance::kFeet;
+        else if(alembicExportUnit == "Yards")
+            uiUnit = MDistance::kYards;
+        else
+            uiUnit = MDistance::uiUnit();
+    }
+    else
+        uiUnit = MDistance::uiUnit();
 
     float scaleUnit = 1.0;
 

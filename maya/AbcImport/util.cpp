@@ -482,7 +482,29 @@ bool isColorSet(const Alembic::AbcCoreAbstract::PropertyHeader & iHeader,
 float getScaleUnitImport()
 {
     // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
-    MDistance::Unit uiUnit = MDistance::uiUnit();
+    MDistance::Unit uiUnit;
+    std::string alembicImportUnit;
+    char const* env = std::getenv("ALEMBIC_IMPORT_UNIT");
+    if(env != NULL)
+        alembicImportUnit = env;
+
+    if(alembicImportUnit.length() > 0)
+    {
+        if(alembicImportUnit == "Millimeters")
+            uiUnit = MDistance::kMillimeters;
+        else if(alembicImportUnit == "Meters")
+            uiUnit = MDistance::kMeters;
+        else if(alembicImportUnit == "Inches")
+            uiUnit = MDistance::kInches;
+        else if(alembicImportUnit == "Feet")
+            uiUnit = MDistance::kFeet;
+        else if(alembicImportUnit == "Yards")
+            uiUnit = MDistance::kYards;
+        else
+            uiUnit = MDistance::uiUnit();
+    }
+    else
+        uiUnit = MDistance::uiUnit();
 
     float scaleUnit = 1.0;
 
