@@ -12,16 +12,44 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 
 //-*****************************************************************************
-CprImpl::CprImpl( OrImplPtr iObject,
-                  AbcA::BasePropertyReaderPtr iOriginalReader,
-                  CprImplPtr iParentCpr)
+CprImpl::CprImpl( OrImplPtr iObject, CompoundReaderPtrs & iCompounds )
     : m_object( iObject )
-    , m_originalPropertyReader( iOriginalReader )
-    , m_parent( iParentCpr )
-    , m_mapsInitialized( false )
+    , m_parent( NULL )
+    , m_index( 0 )
 {
     ABCA_ASSERT( m_object, "Invalid object in CprImpl(Object)" );
-    ABCA_ASSERT( m_originalPropertyReader, "Invalid data in CprImpl(Object)" );
+    std::string empty;
+
+    // top level compounds have the same metadata as the parent object
+    m_header.reset( new AbcA::PropertyHeader( empty,
+        m_object->getHeader().getMetaData() ) );
+
+    init( iCompounds );
+}
+
+CprImpl::CprImpl( CprImplPtr iParent, size_t iIndex )
+    : m_parent( iParent )
+    , m_index( iIndex )
+{
+    ABCA_ASSERT( m_parent, "Invalid compound in CprImpl(CprImplPtr, size_t)" );
+    m_object = m_parent->m_object;
+
+    m_header = m_parent->m_propertyHeaders[m_index];
+
+    // get our compounds for the init
+    CompoundReaderPtrs  & childVec = m_parent->m_children[m_index];
+
+    CompoundReaderPtrs cmpndVec;
+    cmpndVec.reserve( childVec.size() );
+
+    std::string name = m_header->getName();
+
+    CompoundReaderPtrs::iterator it = childVec.begin();
+    for ( ; it != childVec.end(); ++it )
+    {
+        cmpndVec.push_back( (*it)->getCompoundProperty( name ) );
+    }
+    init( cmpndVec );
 }
 
 //-*****************************************************************************
@@ -31,43 +59,9 @@ CprImpl::~CprImpl()
 }
 
 //-*****************************************************************************
-void CprImpl::layerInProperties( AbcA::CompoundPropertyReaderPtr iProps )
-{
-    initializeMaps();
-
-    size_t numProps = iProps->getNumProperties();
-
-    for( size_t i = 0; i < numProps; i++ )
-    {
-        AbcA::BasePropertyReaderPtr propertyReader = iProps->getProperty( i );
-
-        const std::string &name = propertyReader->getName();
-
-        ChildNameMap::iterator matchingEntry = m_childNameMap.find( name );
-
-        if( matchingEntry == m_childNameMap.end() )
-        {
-            addChildReader( propertyReader );
-        }
-        else
-        {
-            CprImplPtr ourCpr = m_childCprs[ matchingEntry->second ];
-            if( ourCpr->m_originalPropertyReader->isCompound() && iProps->isCompound() )
-            {
-                ourCpr->layerInProperties( propertyReader->asCompoundPtr() );
-            }
-            else
-            {
-                m_childCprs[ matchingEntry->second ] = CprImplPtr( new CprImpl( m_object, propertyReader, shared_from_this()));
-            }
-        }
-    }
-}
-
-//-*****************************************************************************
 const AbcA::PropertyHeader &CprImpl::getHeader() const
 {
-    return m_originalPropertyReader->getHeader();
+    return *( m_header );
 }
 
 AbcA::ObjectReaderPtr CprImpl::getObject()
@@ -90,30 +84,28 @@ AbcA::CompoundPropertyReaderPtr CprImpl::asCompoundPtr()
 //-*****************************************************************************
 size_t CprImpl::getNumProperties()
 {
-    initializeMaps();
-
-    return m_childCprs.size();
+    return m_propertyHeaders.size();
 }
 
 //-*****************************************************************************
 const AbcA::PropertyHeader & CprImpl::getPropertyHeader( size_t i )
 {
-    initializeMaps();
+    ABCA_ASSERT( i < m_propertyHeaders.size(),
+        "Out of range index in CprImpl::getPropertyHeader: " << i );
 
-    return m_childCprs[i]->getHeader();
+    return *( m_propertyHeaders[i] );
 }
 
 //-*****************************************************************************
 const AbcA::PropertyHeader *
 CprImpl::getPropertyHeader( const std::string &iName )
 {
-    initializeMaps();
 
     ChildNameMap::iterator itr = m_childNameMap.find( iName );
 
     if( itr !=  m_childNameMap.end() )
     {
-        return &m_childCprs[ itr->second ]->getHeader();
+        return m_propertyHeaders[ itr->second ].get();
     }
 
     return 0;
@@ -123,16 +115,14 @@ CprImpl::getPropertyHeader( const std::string &iName )
 AbcA::ScalarPropertyReaderPtr
 CprImpl::getScalarProperty( const std::string &iName )
 {
-    initializeMaps();
-
     ChildNameMap::iterator itr = m_childNameMap.find( iName );
 
     ABCA_ASSERT( ( itr != m_childNameMap.end() ),
-                "There is no child property with that name");
+        "There is no child scalar property with that name");
 
     if( itr != m_childNameMap.end() )
     {
-        return m_childCprs[ itr->second ]->m_originalPropertyReader->asScalarPtr();
+        return m_children[ itr->second ][0]->getScalarProperty( itr->first );
     }
 
     return AbcA::ScalarPropertyReaderPtr();
@@ -142,16 +132,14 @@ CprImpl::getScalarProperty( const std::string &iName )
 AbcA::ArrayPropertyReaderPtr
 CprImpl::getArrayProperty( const std::string &iName )
 {
-    initializeMaps();
-
     ChildNameMap::iterator itr = m_childNameMap.find( iName );
 
     ABCA_ASSERT( ( itr != m_childNameMap.end() ),
-                    "There is no child property with that name");
+                    "There is no child array property with that name");
 
-        if( itr != m_childNameMap.end() )
+    if( itr != m_childNameMap.end() )
     {
-        return m_childCprs[ itr->second ]->m_originalPropertyReader->asArrayPtr();
+        return m_children[ itr->second ][0]->getArrayProperty( itr->first );
     }
 
     return AbcA::ArrayPropertyReaderPtr();
@@ -161,62 +149,65 @@ CprImpl::getArrayProperty( const std::string &iName )
 AbcA::CompoundPropertyReaderPtr
 CprImpl::getCompoundProperty( const std::string &iName )
 {
-    const size_t &childIndex = m_childNameMap[ iName ];
-
     ChildNameMap::iterator itr = m_childNameMap.find( iName );
 
     ABCA_ASSERT( ( itr != m_childNameMap.end() ),
-                    "There is no child property with that name");
+                    "There is no child compound property with that name");
 
     if( itr != m_childNameMap.end() )
     {
-        return m_childCprs[ itr->second ];
+        return CprImplPtr( new CprImpl( shared_from_this(), itr->second ) );
     }
 
     return AbcA::CompoundPropertyReaderPtr();
 }
 
 //-*****************************************************************************
-void CprImpl::initializeMaps( )
+void CprImpl::init( CompoundReaderPtrs & iCompounds )
 {
-    if( !m_mapsInitialized )
+    CompoundReaderPtrs::iterator it = iCompounds.begin();
+
+    // TODO support pruning here, probably with some custom MetaData?
+    // propHeader.getMetaData()["prune"] == "1"
+    for ( ; it != iCompounds.end(); ++it )
     {
-        m_mapsInitialized = true;
-
-        recordProperties();
-    }
-}
-
-//-*****************************************************************************
-void CprImpl::recordProperties()
-{
-    if( m_originalPropertyReader->isCompound() )
-    {
-        AbcA::CompoundPropertyReaderPtr originalCpr = m_originalPropertyReader->asCompoundPtr();
-
-        size_t numProperties = originalCpr->getNumProperties();
-
-        for( size_t i = 0; i < numProperties; i++ )
+        for ( size_t i = 0; i < (*it)->getNumProperties(); ++i )
         {
-            AbcA::BasePropertyReaderPtr propertyReader = originalCpr->getProperty( i );
+            AbcA::PropertyHeader propHeader = (*it)->getPropertyHeader( i );
+            ChildNameMap::iterator nameIt = m_childNameMap.find(
+                propHeader.getName() );
 
-            addChildReader( propertyReader );
+            // brand new child, add it and continue
+            if ( nameIt == m_childNameMap.end() )
+            {
+                size_t index = m_childNameMap.size();
+                m_childNameMap[ propHeader.getName() ] = index;
+
+                // TODO? We may not need the whole property header, we may only
+                // need the name especially if Compound MetaData doesn't need to
+                // be combined
+                PropertyHeaderPtr propPtr(
+                    new AbcA::PropertyHeader( propHeader ) );
+                m_propertyHeaders.push_back( propPtr );
+                m_children.resize( index + 1 );
+                m_children[ index ].push_back( *it );
+                continue;
+            }
+            // only add this onto an existing one IF its a compound and the
+            // prop added previously is a compound
+            else if ( propHeader.isCompound() &&
+                      m_propertyHeaders[ nameIt->second ]->isCompound() )
+            {
+                // add parent and index to the existing child element, and then
+                // update the MetaData
+                size_t index = nameIt->second;
+                m_children[ index ].push_back( *it );
+
+                // TODO, are there cases where the MetaData should be combined
+                // for Compound properties?
+            }
         }
     }
-}
-
-//-*****************************************************************************
-void CprImpl::addChildReader( AbcA::BasePropertyReaderPtr propertyReader )
-{
-    const std::string &propName = propertyReader->getName();
-
-    m_childNameMap[propName] = m_childCprs.size();
-
-    CprImplPtr newChild;
-
-    newChild = CprImplPtr( new CprImpl( m_object, propertyReader, shared_from_this()));
-
-    m_childCprs.push_back( newChild );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

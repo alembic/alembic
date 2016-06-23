@@ -82,23 +82,6 @@ public:
         ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
         AbcA::ReadArraySampleCachePtr iCachePtr = AbcA::ReadArraySampleCachePtr());
 
-    //! The explicit constructor opens existing archives with a list of
-    //! given file names. Additional arguments that may be passed are the
-    //! error handler policy and a pointer to a cache instance. By
-    //! default, an archive-local cache will be created.
-    template <class ARCHIVE_CTOR>
-    IArchive(
-        //! We need to pass in a constructor which provides
-        //! an explicit link to the concrete implementation of
-        //! AbcCoreAbstract that we're using.
-        ARCHIVE_CTOR iCtor,
-
-        //! The file name.
-        const std::list< std::string > &iFileName,
-
-        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
-        AbcA::ReadArraySampleCachePtr iCachePtr = AbcA::ReadArraySampleCachePtr());
-
     //! This attaches an IArchive wrapper around an existing
     //! ArchiveReaderPtr, with an optional error handling policy.
     IArchive(
@@ -123,8 +106,6 @@ public:
     //! Destructor
     //! ...
     ~IArchive();
-
-    void layerArchive( IArchive &iArchive );
 
     //! Default copy constructor
     //! Default assignment operator
@@ -218,24 +199,6 @@ IArchive::IArchive( ARCHIVE_CTOR iCtor,
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
 
     m_archive = iCtor( iFileName, iCachePtr );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-
-}
-
-//-*****************************************************************************
-template <class ARCHIVE_CTOR>
-IArchive::IArchive( ARCHIVE_CTOR iCtor,
-                     const std::list< std::string > &iFileNames,
-                     ErrorHandler::Policy iPolicy,
-                     AbcA::ReadArraySampleCachePtr iCachePtr )
-{
-    // Set the error handling policy.
-    getErrorHandler().setPolicy( iPolicy );
-
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileNames )" );
-
-    m_archive = iCtor( iFileNames, iCachePtr );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 

@@ -13,18 +13,40 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 
 //-*****************************************************************************
-OrImpl::OrImpl( Alembic::Util::shared_ptr< ArImpl > iArchive,
-                AbcA::ObjectReaderPtr iThisObject,
-                Alembic::Util::shared_ptr< OrImpl > iParent
-                )
-                : m_archive( iArchive )
-                , m_originalObjectReader( iThisObject )
-                , m_parent( iParent )
-                , m_mapsInitialized( false )
+OrImpl::OrImpl( ArImplPtr iArchive,
+                std::vector< AbcA::ObjectReaderPtr > & iTops,
+                ObjectHeaderPtr iHeader )
+              : m_parent( NULL )
+              , m_index( 0 )
+              , m_archive( iArchive )
+              , m_header( iHeader )
 {
     ABCA_ASSERT( m_archive, "Invalid archive in OrImpl(Archive)" );
+    init( iTops );
+}
 
-    m_header = m_originalObjectReader->getHeader();
+OrImpl::OrImpl( OrImplPtr iParent, size_t iIndex )
+              : m_parent( iParent )
+              , m_index( iIndex )
+{
+    ABCA_ASSERT( m_parent, "Invalid object in OrImpl(OrImplPtr, size_t)" );
+
+    m_archive = m_parent->m_archive;
+    m_header = m_parent->m_childHeaders[m_index];
+
+    // get our objects for the init
+    std::vector< ObjectAndIndex >  & childVec =
+        m_parent->m_children[m_index];
+
+    std::vector< AbcA::ObjectReaderPtr > objVec;
+    objVec.reserve( childVec.size() );
+
+    std::vector< ObjectAndIndex >::iterator it = childVec.begin();
+    for ( ; it != childVec.end(); ++it )
+    {
+        objVec.push_back( it->first->getChild( it->second ) );
+    }
+    init( objVec );
 }
 
 //-*****************************************************************************
@@ -36,7 +58,7 @@ OrImpl::~OrImpl()
 //-*****************************************************************************
 const AbcA::ObjectHeader & OrImpl::getHeader() const
 {
-    m_originalObjectReader->getHeader();
+    return *m_header;
 }
 
 //-*****************************************************************************
@@ -54,37 +76,32 @@ AbcA::ObjectReaderPtr OrImpl::getParent()
 //-*****************************************************************************
 AbcA::CompoundPropertyReaderPtr OrImpl::getProperties()
 {
-    initializeMaps();
-
-    return m_compoundPropertyReader;
+    return CprImplPtr( new CprImpl( shared_from_this(), m_properties ) );
 }
 
 //-*****************************************************************************
 size_t OrImpl::getNumChildren()
 {
-    initializeMaps();
-
-    return m_childObjects.size();
+    return m_childHeaders.size();
 }
 
 //-*****************************************************************************
 const AbcA::ObjectHeader & OrImpl::getChildHeader( size_t i )
 {
-    initializeMaps();
+    ABCA_ASSERT( i < m_childHeaders.size(),
+        "Out of range index in OrData::getChildHeader: " << i );
 
-    return m_childObjects[ i ]->m_header;
+    return *( m_childHeaders[i] );
 }
 
 //-*****************************************************************************
 const AbcA::ObjectHeader * OrImpl::getChildHeader( const std::string &iName )
 {
-    initializeMaps();
-
     ChildNameMap::iterator findChildItr = m_childNameMap.find( iName );
 
     if( findChildItr != m_childNameMap.end() )
     {
-        return &m_childObjects[ findChildItr->second ]->m_header;
+        return m_childHeaders[ findChildItr->second ].get();
     }
 
     return 0;
@@ -93,13 +110,12 @@ const AbcA::ObjectHeader * OrImpl::getChildHeader( const std::string &iName )
 //-*****************************************************************************
 AbcA::ObjectReaderPtr OrImpl::getChild( const std::string &iName )
 {
-    initializeMaps();
-
     ChildNameMap::iterator findChildItr = m_childNameMap.find( iName );
 
     if( findChildItr != m_childNameMap.end() )
     {
-        return m_childObjects[ findChildItr->second ];
+        return OrImplPtr( new OrImpl( shared_from_this(),
+                                      findChildItr->second ) );
     }
 
     return AbcA::ObjectReaderPtr();
@@ -107,9 +123,12 @@ AbcA::ObjectReaderPtr OrImpl::getChild( const std::string &iName )
 
 AbcA::ObjectReaderPtr OrImpl::getChild( size_t i )
 {
-    initializeMaps();
+    if ( i < m_childHeaders.size() )
+    {
+        return OrImplPtr( new OrImpl( shared_from_this(), i ) );
+    }
 
-    return m_childObjects[ i ];
+    return AbcA::ObjectReaderPtr();
 }
 
 //-*****************************************************************************
@@ -121,93 +140,92 @@ AbcA::ObjectReaderPtr OrImpl::asObjectPtr()
 //-*****************************************************************************
 bool OrImpl::getPropertiesHash( Util::Digest & oDigest )
 {
-    return m_originalObjectReader->getPropertiesHash( oDigest );
+    if ( ! m_parent )
+    {
+        return false;
+    }
+
+    const std::vector< ObjectAndIndex >  & childVec =
+        m_parent->m_children[m_index];
+
+    if ( childVec.size() == 1 )
+    {
+        return childVec[0].first->getPropertiesHash( oDigest );
+    }
+
+    return false;
 }
 
 //-*****************************************************************************
 bool OrImpl::getChildrenHash( Util::Digest & oDigest )
 {
-    return m_originalObjectReader->getChildrenHash( oDigest );
-}
 
-//-*****************************************************************************
-Alembic::Util::shared_ptr< ArImpl > OrImpl::getArchiveImpl() const
-{
-    return m_archive;
-}
-
-//-*****************************************************************************
-void OrImpl::initializeMaps( )
-{
-    if( !m_mapsInitialized )
+    if ( ! m_parent )
     {
-        m_mapsInitialized = true;
-
-        recordChildren();
-
-        m_compoundPropertyReader =
-        Alembic::Util::shared_ptr< CprImpl >( new CprImpl( shared_from_this(), m_originalObjectReader->getProperties() ) );
+        return false;
     }
-}
 
-//-*****************************************************************************
-void OrImpl::recordChildren(  )
-{
-    size_t numChildren = m_originalObjectReader->getNumChildren();
+    const std::vector< ObjectAndIndex >  & childVec =
+        m_parent->m_children[m_index];
 
-    for( int i = 0; i< numChildren; i++ )
+    // TODO, it wouldn't be too expensive to check that only one of these
+    // has any children
+    if ( childVec.size() == 1 )
     {
-       AbcA::ObjectReaderPtr origChildPtr = m_originalObjectReader->getChild( i );
-
-       OrImplPtr childPtr = OrImplPtr( new OrImpl( this->m_archive,
-                                       origChildPtr,
-                                       shared_from_this() ) );
-
-       m_childNameMap[ childPtr->m_header.getName() ] = m_childObjects.size();
-
-       m_childObjects.push_back( childPtr );
+        return childVec[0].first->getChildrenHash( oDigest );
     }
+
+    return false;
 }
 
 //-*****************************************************************************
-void OrImpl::layerInObjectHierarchy( AbcA::ObjectReaderPtr iObject )
+// This layers the children together, and creates
+void OrImpl::init( std::vector< AbcA::ObjectReaderPtr > & iObjects )
 {
-    initializeMaps();
 
-    if( m_header.getName() == iObject->getHeader().getName() )
+    std::vector< AbcA::ObjectReaderPtr >::iterator it =
+        iObjects.begin();
+
+    m_properties.reserve( iObjects.size() );
+
+    // TODO support pruning here, probably with some custom MetaData?
+    // objHeader.getMetaData()["prune"] == "1"
+    for ( ; it != iObjects.end(); ++it )
     {
-        m_compoundPropertyReader->layerInProperties( iObject->getProperties() );
-
-        size_t numChildren = iObject->getNumChildren();
-
-        for( size_t i = 0; i < numChildren; i++ )
+        m_properties.push_back( (*it)->getProperties() );
+        for ( size_t i = 0; i < (*it)->getNumChildren(); ++i )
         {
-            AbcA::ObjectReaderPtr child = iObject->getChild( i );
+            AbcA::ObjectHeader objHeader = (*it)->getChildHeader( i );
+            ChildNameMap::iterator nameIt = m_childNameMap.find(
+                objHeader.getName() );
 
-            const std::string &childName = child->getHeader().getName();
+            size_t index = 0;
 
-            ChildNameMap::iterator findChild = m_childNameMap.find( childName );
-
-            OrImplPtr childLayeredObjReader;
-
-            if( findChild == m_childNameMap.end() )
+            // brand new child, add it and continue
+            if ( nameIt == m_childNameMap.end() )
             {
-                childLayeredObjReader =
-                        OrImplPtr( new OrImpl(this->m_archive, child, shared_from_this()) );
-
-                m_childNameMap[ childName ] = m_childObjects.size();
-
-                m_childObjects.push_back( childLayeredObjReader );
-            }
-            else
-            {
-                childLayeredObjReader = m_childObjects[ findChild->second ];
+                index = m_childNameMap.size();
+                m_childNameMap[ objHeader.getName() ] = index;
+                ObjectHeaderPtr headerPtr(
+                    new AbcA::ObjectHeader( objHeader ) );
+                m_childHeaders.push_back( headerPtr );
+                m_children.resize( index + 1 );
+                m_children[ index ].push_back( ObjectAndIndex( *it, i ) );
+                continue;
             }
 
-            childLayeredObjReader->layerInObjectHierarchy( child );
+            // add parent and index to the existing child element, and then
+            // update the MetaData
+            index = nameIt->second;
+            m_children[ index ].push_back( ObjectAndIndex( *it, i ) );
+
+            // update the found childs meta data
+            m_childHeaders[ index ]->getMetaData().appendOnlyUnique(
+                objHeader.getMetaData() );
         }
     }
 }
+
 
 } // End namespace ALEMBIC_VERSION_NS
 } // End namespace AbcCoreLayer

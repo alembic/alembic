@@ -36,7 +36,7 @@
 
 #include <fstream>
 #include <Alembic/AbcCoreOgawa/All.h>
-#include <Alembic/AbcCoreLayer/Foundation.h>
+#include <Alembic/AbcCoreLayer/Read.h>
 #include <Alembic/AbcCoreFactory/IFactory.h>
 
 #ifdef ALEMBIC_WITH_HDF5
@@ -115,26 +115,41 @@ Alembic::Abc::IArchive IFactory::getArchive( const std::string & iFileName )
     return getArchive( iFileName, coreType );
 }
 
-Alembic::Abc::IArchive IFactory::getArchive( const std::list<std::string> & iFileNames)
+Alembic::Abc::IArchive IFactory::getArchive(
+    const std::vector< std::string > & iFileNames)
 {
-	CoreType coreType;
-	return getArchive(iFileNames, coreType);
+    CoreType coreType;
+    return getArchive(iFileNames, coreType);
 }
 
-Alembic::Abc::IArchive IFactory::getArchive( const std::list<std::string> & iFileNames, CoreType & oType )
+Alembic::Abc::IArchive IFactory::getArchive(
+    const std::vector< std::string > & iFileNames, CoreType & oType )
 {
-	Alembic::AbcCoreLayer::ReadArchive layer( m_numStreams );
+    Alembic::AbcCoreLayer::ReadArchive layer;
 
-	Alembic::Abc::IArchive archive( layer, iFileNames,
-        Alembic::Abc::ErrorHandler::kQuietNoopPolicy, m_cachePtr );
+    Alembic::AbcCoreLayer::ArchiveReaderPtrs archives;
 
-    if ( archive.valid() )
+    // first read our archives, skipping over bad ones
+    std::vector< std::string >::const_iterator it = iFileNames.begin();
+    for ( ; it != iFileNames.end(); ++it )
     {
-        oType = kLayer;
-        archive.getErrorHandler().setPolicy( m_policy );
-        return archive;
+        Alembic::Abc::IArchive archive = getArchive( *it );
+        if ( archive.getPtr() )
+        {
+            archives.push_back( archive.getPtr() );
+        }
     }
 
+
+    if ( ! archives.empty() )
+    {
+        Alembic::AbcCoreAbstract::ArchiveReaderPtr arPtr = layer( archives );
+        oType = kLayer;
+        return Alembic::Abc::IArchive( arPtr, Alembic::Abc::kWrapExisting,
+                                       m_policy );
+    }
+
+    // no valid archives pushed, so invalid
     oType = kUnknown;
     return Alembic::Abc::IArchive();
 }

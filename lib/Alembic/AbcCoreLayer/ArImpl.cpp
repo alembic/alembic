@@ -7,104 +7,74 @@ namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-ArImpl::ArImpl( const std::list<std::string>& iFileNames,
-                std::size_t iNumStreams )
+ArImpl::ArImpl( ArchiveReaderPtrs & iArchives )
 {
-    Alembic::AbcCoreFactory::IFactory factory;
-    std::list<std::string>::const_iterator itr = iFileNames.begin();
+    m_archiveVersion = -1;
+    m_header.reset( new AbcA::ObjectHeader() );
+    m_archives.reserve( iArchives.size() );
+    ArchiveReaderPtrs::iterator it = iArchives.begin();
 
-    while( itr != iFileNames.end() )
+    for ( ; it != iArchives.end(); ++it )
     {
-        const std::string &filename = *itr;
-        Alembic::Abc::IArchive archive = factory.getArchive( filename );
-
-        ABCA_ASSERT( archive.valid(), "The specified archive is invalid" );
-
-        if( archive.valid() )
+        // bad archive ptr?  skip to the next one
+        if ( !( *it ) )
         {
-            m_archives.push_back( archive );
-
-            if( itr != iFileNames.begin() )
-            {
-                m_fileName += ",";
-            }
-
-            m_fileName += filename;
+            continue;
         }
 
-        itr++;
-    }
+        m_archives.push_back( *it );
 
-    updateBaseArchiveReaderPtr();
-}
-
-//-*****************************************************************************
-ArImpl::ArImpl( const std::string& iFileName,
-                std::size_t iNumStreams )
-{
-    Alembic::AbcCoreFactory::IFactory factory;
-    Alembic::Abc::IArchive archive = factory.getArchive( iFileName );
-
-    ABCA_ASSERT( archive.valid(),
-                     "The specified archive is invalid" );
-
-    if( archive.valid() )
-    {
-        m_archives.push_back( archive );
-
-        if( m_fileName.length() > 0)
+        if ( !m_fileName.empty() )
         {
             m_fileName += ",";
         }
+        m_fileName += (*it)->getName();
 
-        m_fileName += iFileName;
-    }
-
-    updateBaseArchiveReaderPtr();
-}
-
-//-*****************************************************************************
-ArImpl::ArImpl( const std::list< std::vector< std::istream * > >& iStreams )
-{
-    Alembic::AbcCoreFactory::IFactory factory;
-    Alembic::AbcCoreFactory::IFactory::CoreType coreType;
-    std::list< std::vector< std::istream * > >::const_iterator itr = iStreams.begin();
-
-    while( itr != iStreams.end() )
-    {
-        const std::vector< std::istream * > &stream = *itr;
-        Alembic::Abc::IArchive archive = factory.getArchive( stream, coreType );
-
-        ABCA_ASSERT( archive.valid(),
-                         "The specified archive stream is invalid" );
-
-        if( archive.valid() )
+        // go over this archives time samplings and add them to our list
+        Util::uint32_t numSamplings = (*it)->getNumTimeSamplings();
+        for ( Util::uint32_t i = 0; i < numSamplings; ++i )
         {
-            m_archives.push_back( archive );
+            Util::uint32_t j = 0;
+            for ( j = 0; j < m_timeSamples.size(); ++j )
+            {
+                if ( m_timeSamples[j] == (*it)->getTimeSampling( i ) )
+                {
+                    break;
+                }
+            }
+
+            // it wasn't found, add it and the max samples
+            if ( j == m_timeSamples.size() )
+            {
+                m_timeSamples.push_back( (*it)->getTimeSampling( i ) );
+                m_maxSamples.push_back(
+                    (*it)->getMaxNumSamplesForTimeSamplingIndex( i ) );
+            }
+            else
+            {
+                m_maxSamples[j] = std::max( m_maxSamples[j],
+                    (*it)->getMaxNumSamplesForTimeSamplingIndex( i ) );
+            }
         }
 
-        itr++;
+        // the data stored in the top level meta data is special
+        // lets combine them all together
+        const AbcA::MetaData & md = (*it)->getMetaData();
+        AbcA::MetaData::const_iterator mit;
+        for ( mit = md.begin(); mit != md.end(); ++mit )
+        {
+            std::string val = m_header->getMetaData().get( mit->first );
+            if ( !val.empty() )
+            {
+                val += " , ";
+            }
+            val += mit->second;
+            m_header->getMetaData().set( mit->first, val );
+        }
+
+        m_archiveVersion = std::max( m_archiveVersion,
+                                     (*it)->getArchiveVersion() );
     }
-
-    updateBaseArchiveReaderPtr();
-}
-
-//-*****************************************************************************
-ArImpl::ArImpl( const std::vector< std::istream * > & iStreams )
-{
-    Alembic::AbcCoreFactory::IFactory factory;
-    Alembic::AbcCoreFactory::IFactory::CoreType coreType;
-    Alembic::Abc::IArchive archive = factory.getArchive( iStreams, coreType );
-
-    ABCA_ASSERT( archive.valid(),
-                     "The specified archive stream is invalid" );
-
-    if( archive.valid() )
-    {
-        m_archives.push_back( archive );
-    }
-
-    updateBaseArchiveReaderPtr();
 }
 
 //-*****************************************************************************
@@ -114,81 +84,38 @@ ArImpl::~ArImpl()
 }
 
 //-*****************************************************************************
-void ArImpl::updateBaseArchiveReaderPtr()
-{
-    if( m_archives.size() )
-    {
-        m_baseArchiveReader = m_archives.begin()->getPtr();
-    }
-}
-
-//-*****************************************************************************
 const std::string &ArImpl::getName() const
 {
     return m_fileName;
 }
 
 //-*****************************************************************************
-const AbcA::MetaData &ArImpl::getMetaData() const
+const AbcA::MetaData & ArImpl::getMetaData() const
 {
-    if( m_archives.size() )
-    {
-        return m_baseArchiveReader->getMetaData();
-    }
-
-    static AbcA::MetaData defaultMetaData;
-    return defaultMetaData;
+    return m_header->getMetaData();
 }
 
 //-*****************************************************************************
 AbcA::ObjectReaderPtr ArImpl::getTop()
 {
-    Alembic::Util::scoped_lock l( m_orlock );
 
-    if( m_archives.size() )
+    std::vector< AbcA::ObjectReaderPtr > tops;
+    tops.reserve( m_archives.size() );
+    ArchiveReaderPtrs::iterator arItr = m_archives.begin();
+    for ( ; arItr != m_archives.end(); ++arItr )
     {
-        AbcA::ObjectReaderPtr ret = m_top.lock();
-        if ( ! ret )
-        {
-            std::list< Alembic::Abc::IArchive >::iterator archiveItr = m_archives.begin();
-
-            //Initialize the base ObjectReader with the first archive in our list
-            AbcA::ObjectReaderPtr top = archiveItr->getPtr()->getTop();
-
-            Alembic::Util::shared_ptr<OrImpl> baseObjectReader = Alembic::Util::shared_ptr<OrImpl>(
-                    new OrImpl( shared_from_this() ,
-                    top,
-                    Alembic::Util::shared_ptr< OrImpl >() ) );
-
-            m_top = ret = baseObjectReader;
-
-            //Layer in the remaining archives
-            archiveItr++;
-
-            while( archiveItr != m_archives.end() )
-            {
-                top = archiveItr->getPtr()->getTop();
-
-                baseObjectReader->layerInObjectHierarchy( top );
-
-                archiveItr++;
-            }
-        }
-
-        return ret;
+        tops.push_back( (*arItr)->getTop() );
     }
-    else
-    {
-        return AbcA::ObjectReaderPtr();
-    }
+
+    return OrImplPtr( new OrImpl( shared_from_this(), tops, m_header ) );
 }
 
 //-*****************************************************************************
 AbcA::TimeSamplingPtr ArImpl::getTimeSampling( Util::uint32_t iIndex )
 {
-    if( m_archives.size() )
+    if( iIndex < m_timeSamples.size() )
     {
-        return m_baseArchiveReader->getTimeSampling( iIndex );
+        return m_timeSamples[ iIndex ];
     }
 
     return AbcA::TimeSamplingPtr();
@@ -197,21 +124,16 @@ AbcA::TimeSamplingPtr ArImpl::getTimeSampling( Util::uint32_t iIndex )
 //-*****************************************************************************
 AbcA::ArchiveReaderPtr ArImpl::asArchivePtr()
 {
-    if( m_archives.size() )
-    {
-        return m_baseArchiveReader->asArchivePtr();
-    }
-
-    return AbcA::ArchiveReaderPtr();
+    return shared_from_this();
 }
 
 //-*****************************************************************************
 AbcA::index_t
 ArImpl::getMaxNumSamplesForTimeSamplingIndex( Util::uint32_t iIndex )
 {
-    if( m_archives.size() )
+    if( iIndex < m_maxSamples.size() )
     {
-        return m_archives.begin()->getMaxNumSamplesForTimeSamplingIndex( iIndex );
+        return m_maxSamples[iIndex];
     }
 
     return 0;
@@ -220,43 +142,25 @@ ArImpl::getMaxNumSamplesForTimeSamplingIndex( Util::uint32_t iIndex )
 //-*****************************************************************************
 AbcA::ReadArraySampleCachePtr ArImpl::getReadArraySampleCachePtr()
 {
-    if( m_archives.size() )
-    {
-        return m_archives.begin()->getReadArraySampleCachePtr();
-    }
-
     return AbcA::ReadArraySampleCachePtr();
 }
 
 //-*****************************************************************************
 void ArImpl::setReadArraySampleCachePtr( AbcA::ReadArraySampleCachePtr iPtr )
 {
-    if( m_archives.size() )
-    {
-        return m_baseArchiveReader->setReadArraySampleCachePtr( iPtr );
-    }
+    // don't even bother
 }
 
 //-*****************************************************************************
 Util::uint32_t ArImpl::getNumTimeSamplings()
 {
-    if( m_archives.size() )
-    {
-        return m_baseArchiveReader->getNumTimeSamplings();
-    }
-
-    return 0;
+    return m_timeSamples.size();
 }
 
 //-*****************************************************************************
 Util::int32_t ArImpl::getArchiveVersion()
 {
-    if( m_archives.size() )
-    {
-        return m_baseArchiveReader->getArchiveVersion();
-    }
-
-    return -1;
+    return m_archiveVersion;
 }
 
 } // End namespace ALEMBIC_VERSION_NS
