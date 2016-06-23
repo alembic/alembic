@@ -40,7 +40,6 @@
 #include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
 #include <Alembic/Abc/IArchive.h>
 #include <Alembic/Util/Export.h>
-#include <list>
 
 namespace Alembic {
 namespace AbcCoreFactory {
