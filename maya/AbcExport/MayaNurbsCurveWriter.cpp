@@ -74,11 +74,22 @@ namespace
                         continue;
                     }
 
-                    // with the flag set to true, check the DagPath and it's
-                    // parent
-                    if (util::isAnimated(curve, true))
+                    // with the flag set to true, check the DagPath and its
+                    // parent.  
+                    // Note since we're collecting a group of curves, and
+                    // if  even one is animated, the whole group will be,
+                    // so don't bother checking additional curves.
+                    if (!oIsAnimated)
                     {
-                        oIsAnimated = true;
+                        if (util::isAnimated(curve, true))
+                        {
+                            oIsAnimated = true;
+                        }
+                        MObject curveXform(curvePath.transform());
+                        if (util::isAnimated(curveXform), true)
+                        {
+                            oIsAnimated = true;
+                        }
                     }
                 }
             }
