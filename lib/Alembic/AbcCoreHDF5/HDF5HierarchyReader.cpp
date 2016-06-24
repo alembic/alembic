@@ -50,8 +50,9 @@ HDF5HierarchyReader::HDF5HierarchyReader( hid_t iFile,
     int enabled( 0 );
     if (iCacheHierarchy && H5Aexists( iFile, "abc_ref_hierarchy" ))
     {
-        ReadScalar( iFile, "abc_ref_hierarchy", H5T_STD_I32LE, H5T_NATIVE_INT32,
-                    &enabled );
+        size_t numRead = 0;
+        ReadSmallArray( iFile, "abc_ref_hierarchy", H5T_STD_I32LE,
+            H5T_NATIVE_INT32, 1, numRead, &enabled );
     }
 
     m_H5H.clear();

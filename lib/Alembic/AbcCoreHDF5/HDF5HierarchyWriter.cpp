@@ -55,8 +55,8 @@ HDF5HierarchyWriter::HDF5HierarchyWriter( hid_t iFile, HDF5Hierarchy& iH5H )
     //
     int enabled = 1;
 
-    WriteScalar( iFile, "abc_ref_hierarchy", H5T_STD_I32LE, H5T_NATIVE_INT32,
-                 &enabled );
+    WriteSmallArray( iFile, "abc_ref_hierarchy", H5T_STD_I32LE,
+      H5T_NATIVE_INT32, 1, &enabled );
 }
 
 //-*****************************************************************************
