@@ -40,7 +40,6 @@
 #include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
 #include <Alembic/Abc/IArchive.h>
 #include <Alembic/Util/Export.h>
-#include <list>
 
 namespace Alembic {
 namespace AbcCoreFactory {
@@ -72,16 +71,23 @@ public:
 
     //! Open a series of alembic files, layering each file on top of the next
     //! to present a single IArchive
-    Alembic::Abc::IArchive getArchive( const std::list<std::string> & iFileNames );
+    Alembic::Abc::IArchive getArchive(
+        const std::vector< std::string > & iFileNames );
 
-    Alembic::Abc::IArchive getArchive( const std::list<std::string> & iFileNames,
-                                       CoreType & oType );
+    //! Try to open and layer a series of files file and return IArchive.
+    //! If all of the files are invalid, an invalid archive is returned.
+    //! If only some of the archives are invalid, only the good ones are
+    //! opened and layered, while invalid ones are ignored.
+    Alembic::Abc::IArchive getArchive(
+        const std::vector< std::string > & iFileNames, CoreType & oType );
 
     //! Use the streams (Alembic does not take ownership) to read the data from
     //! This is currently only valid for Ogawa.  The streams must all reference
     //! the same data.
     Alembic::Abc::IArchive getArchive(
         const std::vector< std::istream * > & iStreams, CoreType & oType );
+
+    // TODO, how do we best layer streams, and strings
 
     //! If opening an HDF5 file, sets whether to use the cached hierarchy
     //! if it exists, the default value is true

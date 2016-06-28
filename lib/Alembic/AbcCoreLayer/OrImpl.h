@@ -8,7 +8,7 @@ namespace Alembic {
 namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
 
-typedef Alembic::Util::shared_ptr<AbcA::ObjectHeader> ObjectHeaderPtr;
+typedef std::pair < AbcA::ObjectReaderPtr, size_t > ObjectAndIndex;
 
 //-*****************************************************************************
 class OrImpl
@@ -18,9 +18,11 @@ class OrImpl
 
 public:
 
-    OrImpl( Alembic::Util::shared_ptr< ArImpl > iArchive,
-            AbcA::ObjectReaderPtr iThisObject,
-            Alembic::Util::shared_ptr< OrImpl > iParent);
+    OrImpl( ArImplPtr iArchive,
+            std::vector< AbcA::ObjectReaderPtr > & iTops,
+            ObjectHeaderPtr iHeader);
+
+    OrImpl( OrImplPtr iParent, size_t iIndex );
 
     virtual ~OrImpl();
 
@@ -52,36 +54,34 @@ public:
 
     virtual bool getChildrenHash( Util::Digest & oDigest );
 
-    void layerInObjectHierarchy( AbcA::ObjectReaderPtr iObject );
-
-protected:
-
-    void initializeMaps( );
-
-    void recordChildren( );
-
 private:
 
-    Alembic::Util::shared_ptr< ArImpl > getArchiveImpl() const;
-
-    // The ObjectReader from the object's original, non-layered archive
-    AbcA::ObjectReaderPtr m_originalObjectReader;
+    // builds up our data
+    void init( std::vector< AbcA::ObjectReaderPtr > & iObjects );
 
     // The parent object
-    Alembic::Util::shared_ptr< OrImpl > m_parent;
+    OrImplPtr m_parent;
 
-    Alembic::Util::shared_ptr< ArImpl > m_archive;
+    // The index within the parent object where we can get our data
+    size_t m_index;
 
-    AbcA::ObjectHeader m_header;
+    ArImplPtr m_archive;
 
-    Alembic::Util::shared_ptr< CprImpl > m_compoundPropertyReader;
+    // this objects header
+    ObjectHeaderPtr m_header;
 
-    bool m_mapsInitialized;
+    // all of our compounded child headers
+    std::vector< ObjectHeaderPtr > m_childHeaders;
 
-    std::vector< OrImplPtr > m_childObjects;
+    // each child is made up of the original parent objects and the index
+    // in each of them where that child lives
+    std::vector< std::vector< ObjectAndIndex > > m_children;
+
+    // all of our top properties
+    // TODO should we replace this with the top compound CprImpl in a weak_ptr?
+    std::vector< AbcA::CompoundPropertyReaderPtr > m_properties;
 
     ChildNameMap m_childNameMap;
-
 };
 
 } // End namespace ALEMBIC_VERSION_NS

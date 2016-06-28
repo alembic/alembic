@@ -57,12 +57,12 @@ namespace ALEMBIC_VERSION_NS {
 //! implementation, we present this class here as a MOSTLY-WRITE-ONCE interface,
 //! with selective exception throwing behavior for failed writes.
 class MetaData
-{   
+{
 public:
     //-*************************************************************************
     // TYPEDEFS
     //-*************************************************************************
-    
+
     //! Our internals are handled by a TokenMap, which we expose
     //! through these typedefs.
     typedef Alembic::Util::TokenMap token_map_type;
@@ -138,7 +138,7 @@ public:
     // SIZE
     //-*************************************************************************
     size_t size() const { return m_tokenMap.size(); }
-    
+
     //-*************************************************************************
     // ITERATION
     //-*************************************************************************
@@ -217,6 +217,20 @@ public:
         }
     }
 
+    //! append appends the given MetaData to this class. Duplicate keys
+    //! are ignored, and the original value remains untouched
+    void appendOnlyUnique( const MetaData &iMetaData )
+    {
+        for ( const_iterator iter = iMetaData.begin();
+              iter != iMetaData.end(); ++iter )
+        {
+            if ( !m_tokenMap.tokenExists( (*iter).first ) )
+            {
+                set( (*iter).first, (*iter).second );
+            }
+        }
+    }
+
     //! append appends the given MetaData to this class. Duplicate values
     //! will cause an exception to be thrown.
     void appendUnique( const MetaData &iMetaData )
@@ -275,7 +289,7 @@ public:
     {
         return m_tokenMap.exactMatch( iMetaData.m_tokenMap );
     }
-    
+
 private:
     Alembic::Util::TokenMap m_tokenMap;
 };
@@ -286,5 +300,5 @@ using namespace ALEMBIC_VERSION_NS;
 
 } // End namespace AbcCoreAbstract
 } // End namespace Alembic
- 
+
 #endif

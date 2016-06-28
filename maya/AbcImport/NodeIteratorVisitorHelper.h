@@ -59,7 +59,6 @@
 
 #include <vector>
 #include <string>
-#include <list>
 
 // mArray or mScalar will be valid, mObj will be valid for those situations
 // where the property can't be validly read, unless the object stays in scope.
@@ -243,7 +242,7 @@ public:
 class ArgData
 {
 public:
-    ArgData(std::list<std::string>& iFileNames,
+    ArgData(std::vector<std::string>& iFileNames,
         bool    iDebugOn = false,
         MObject iReparentObj = MObject::kNullObj,
         bool    iConnect = false,
@@ -256,7 +255,7 @@ public:
     ArgData(const ArgData & rhs);
     ArgData & operator=(const ArgData & rhs);
 
-    std::list<std::string>     mFileNames;
+    std::vector<std::string>     mFileNames;
     double                     mSequenceStartTime;
     double                     mSequenceEndTime;
     bool                       mDebugOn;

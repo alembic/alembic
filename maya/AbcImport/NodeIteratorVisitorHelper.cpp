@@ -2808,7 +2808,7 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     }
 }
 
-ArgData::ArgData(std::list<std::string>& iFileNames,
+ArgData::ArgData(std::vector<std::string>& iFileNames,
     bool iDebugOn, MObject iReparentObj, bool iConnect,
     MString iConnectRootNodes, bool iCreateIfNotFound, bool iRemoveIfNoUpdate,
     bool iRecreateColorSets, MString iFilterString,

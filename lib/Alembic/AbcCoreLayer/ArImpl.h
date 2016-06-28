@@ -3,8 +3,6 @@
 
 #include <Alembic/AbcCoreLayer/Foundation.h>
 
-#include <Alembic/Abc/IArchive.h>
-
 namespace Alembic {
 namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
@@ -20,15 +18,8 @@ class ArImpl
 private:
     friend class ReadArchive;
 
-    ArImpl( const std::list<std::string>& iFileNames,
-            size_t iNumStreams=1 );
+    ArImpl( ArchiveReaderPtrs & iArchives );
 
-    ArImpl( const std::string& iFileName,
-                size_t iNumStreams=1 );
-
-    ArImpl( const std::list< std::vector< std::istream * > >& iStreams );
-
-    ArImpl( const std::vector< std::istream * >& iStreams );
 
 public:
 
@@ -59,14 +50,18 @@ public:
     virtual Util::int32_t getArchiveVersion();
 
 private:
-    void updateBaseArchiveReaderPtr();
-
     std::string m_fileName;
-    std::list< Alembic::Abc::IArchive > m_archives;
-    AbcA::ArchiveReaderPtr m_baseArchiveReader;
 
-    Alembic::Util::weak_ptr< AbcA::ObjectReader > m_top;
-    Alembic::Util::mutex m_orlock;
+    ArchiveReaderPtrs m_archives;
+
+    std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
+    std::vector <  AbcA::index_t > m_maxSamples;
+    ObjectHeaderPtr m_header;
+
+    Util::int32_t m_archiveVersion;
+
+    // TODO, should we keep the top object (OrImplPtr) in a weak ptr
+    // or can we just rebuild it everytime getTop is called?
 };
 
 } // End namespace ALEMBIC_VERSION_NS

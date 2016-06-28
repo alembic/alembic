@@ -2,22 +2,24 @@
 #define _Alembic_AbcCoreLayer_CprImpl_h_
 
 #include <Alembic/AbcCoreLayer/Foundation.h>
-#include <Alembic/AbcCoreAbstract/ForwardDeclarations.h>
 
 namespace Alembic {
 namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
 
+typedef Alembic::Util::shared_ptr< AbcA::PropertyHeader > PropertyHeaderPtr;
+
 //-*****************************************************************************
 class CprImpl
     : public AbcA::CompoundPropertyReader
-    , public Alembic::Util::enable_shared_from_this<CprImpl>
+    , public Alembic::Util::enable_shared_from_this< CprImpl >
 {
 public:
 
-    CprImpl( Alembic::Util::shared_ptr< OrImpl > iObject,
-			 AbcA::BasePropertyReaderPtr iOriginalReader,
-			 CprImplPtr iParentCpr = CprImplPtr());
+    CprImpl( OrImplPtr iObject,
+             CompoundReaderPtrs & iCompounds );
+
+    CprImpl( CprImplPtr iParent, size_t iIndex );
 
     virtual ~CprImpl();
 
@@ -51,33 +53,25 @@ public:
     virtual AbcA::CompoundPropertyReaderPtr
     getCompoundProperty( const std::string &iName );
 
-    //-*************************************************************************
-	// Native to this CprImpl implementation
-	//-*************************************************************************
-
-    void layerInProperties( AbcA::CompoundPropertyReaderPtr iProps );
-
-    void addChildReader( AbcA::BasePropertyReaderPtr propertyReader );
-
 private:
+    void init( CompoundReaderPtrs & iCompounds );
 
-    void initializeMaps();
-
-    void recordProperties();
-
-    bool m_mapsInitialized;
+    // The parent Object
+    OrImplPtr m_object;
 
     // Pointer to parent.
     CprImplPtr m_parent;
 
-    // My Object
-    OrImplPtr m_object;
+    size_t m_index;
 
-    AbcA::BasePropertyReaderPtr m_originalPropertyReader;
+    // this compounds header
+    PropertyHeaderPtr m_header;
 
-    std::vector< CprImplPtr > m_childCprs;
+    // each child is made up of the original parent compound, array and scalar
+    // properties will only have 1 entry, compounds could have more
+    std::vector< CompoundReaderPtrs > m_children;
 
-    std::vector< AbcA::PropertyHeader > m_propertyHeaders;
+    std::vector< PropertyHeaderPtr > m_propertyHeaders;
 
     ChildNameMap m_childNameMap;
 };

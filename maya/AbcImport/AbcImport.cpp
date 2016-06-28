@@ -151,7 +151,7 @@ void* AbcImport::creator()
     return new AbcImport();
 }
 
-void parseInputFilenames(MString &filenameArg, std::list<std::string> &filenameList)
+void parseInputFilenames(MString &filenameArg, std::vector<std::string> &filenameList)
 {
    std::istringstream filenameBuffer(filenameArg.asChar());
    std::string thisFilename;
@@ -254,7 +254,7 @@ MStatus AbcImport::doIt(const MArgList & args)
     MString abcNodeName;
     if (status == MS::kSuccess)
     {
-       std::list<std::string> filenameList;
+       std::vector<std::string> filenameList;
        parseInputFilenames(filename, filenameList);
        filename = (*filenameList.begin()).c_str();
 
