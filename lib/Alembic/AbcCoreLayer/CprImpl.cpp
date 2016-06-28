@@ -14,7 +14,7 @@ namespace ALEMBIC_VERSION_NS {
 //-*****************************************************************************
 CprImpl::CprImpl( OrImplPtr iObject, CompoundReaderPtrs & iCompounds )
     : m_object( iObject )
-    , m_parent( NULL )
+    , m_parent( CprImplPtr() )
     , m_index( 0 )
 {
     ABCA_ASSERT( m_object, "Invalid object in CprImpl(Object)" );

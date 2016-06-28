@@ -16,7 +16,7 @@ namespace ALEMBIC_VERSION_NS {
 OrImpl::OrImpl( ArImplPtr iArchive,
                 std::vector< AbcA::ObjectReaderPtr > & iTops,
                 ObjectHeaderPtr iHeader )
-              : m_parent( NULL )
+              : m_parent( OrImplPtr() )
               , m_index( 0 )
               , m_archive( iArchive )
               , m_header( iHeader )
