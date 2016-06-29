@@ -118,6 +118,7 @@ ELSE()
     FIND_PATH(ALEMBIC_PYIMATH_MODULE_DIRECTORY imathmodule.so
         PATHS
         ${LIBRARY_PATHS}
+        /usr/local/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
         ${ALEMBIC_PYILMBASE_ROOT}/lib64/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
         DOC "The imathmodule.so module directory"
     )
