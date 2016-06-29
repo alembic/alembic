@@ -62,7 +62,7 @@ IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(Alembic PROPERTIES DEFINE_SYMBOL ALEMBIC_EXPORTS)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(Alembic ${ALEMBIC_ILMBASE_LIBRARIES})
+TARGET_LINK_LIBRARIES(Alembic ${ALEMBIC_ILMBASE_LIBS})
 
 # link in atomic if we are using tr1 and the compiler is new enough
 # to want  __atomic_compare_exchange_n

@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2016,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -36,9 +36,16 @@
 FIND_PACKAGE(IlmBase)
 
 IF (ILMBASE_FOUND)
-  SET(ALEMBIC_ILMBASE_INCLUDE_DIRECTORY ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY})
-  SET(ALEMBIC_ILMBASE_LIBRARIES ${ALEMBIC_ILMBASE_LIBS})
-  SET(ALEMBIC_ILMBASE_FOUND 1 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
+    SET(ALEMBIC_ILMBASE_FOUND 1 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
+
+    SET(ALEMBIC_ILMBASE_LIBS
+        ${ALEMBIC_ILMBASE_IMATH_LIB}
+        ${ALEMBIC_ILMBASE_ILMTHREAD_LIB}
+        ${ALEMBIC_ILMBASE_IEX_LIB}
+        ${ALEMBIC_ILMBASE_IEXMATH_LIB}
+        ${ALEMBIC_ILMBASE_HALF_LIB}
+    )
+
 ELSE()
-  SET(ALEMBIC_ILMBASE_FOUND 0 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
+    SET(ALEMBIC_ILMBASE_FOUND 0 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
 ENDIF()
