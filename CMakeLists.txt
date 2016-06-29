@@ -254,10 +254,16 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")
 
 # PyAlembic
 IF (USE_PYALEMBIC)
-    INCLUDE("./cmake/AlembicPyIlmBase.cmake")
     INCLUDE("./cmake/AlembicPython.cmake")
-    INCLUDE_DIRECTORIES(${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
-    ADD_SUBDIRECTORY(python)
+    INCLUDE("./cmake/AlembicPyIlmBase.cmake")
+    IF (PYTHONLIBS_FOUND)
+        MESSAGE(STATUS "ALEMBIC_PYTHON_INCLUDE_DIRS: ${ALEMBIC_PYTHON_INCLUDE_DIRS}")
+        MESSAGE(STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}")
+        INCLUDE_DIRECTORIES(${ALEMBIC_PYTHON_INCLUDE_DIRS} ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
+        ADD_SUBDIRECTORY(python)
+    ELSE()
+        MESSAGE(WARNING "Python not found! Skipping PyAlembic")
+    ENDIF()
 ENDIF()
 
 #-******************************************************************************
