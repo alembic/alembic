@@ -1,3 +1,57 @@
+2016-6-30, Alembic 1.6.0
+Thanks to your generous feedback and code contributions we are happy to announce
+the 1.6.0 release of Alembic.
+
+We've overhauled our build system, gotten rid of alembic_bootstrap.py in favor
+of going native CMake. We now better support Windows and also now require at
+least version 2.8.11 of CMake.
+
+For the latest build instructions please see:
+https://github.com/alembic/alembic/blob/master/README.txt
+
+Other changes include:
+
+Moved several core utilities out of examples and into bin.
+
+Make HDF5 an optional dependency.
+
+Allow install directory prefix to be explicitly set.
+(pull request 46)
+
+Add CMake generated configure file, so that the version of the project only
+needs to be set in one place, users know if Alembic was built without HDF5
+support, and whether it is using tr1, boost, or neither. (C++11) as a
+dependency.
+
+API:
+Add ability to create a Windows dll, and add symbol visibility flags for other
+compilers. (pull request 14)
+
+Improve Ogawa write speeds on Windows by adding a larger buffer.
+(pull request 38)
+
+Make the 3 int values on OSubD optional.
+(faceVaryingInterpolateBoundary, faceVaryingPropagateCorners, and
+interpolateBoundary issue 34)
+
+
+Remove unnecessary scoped static initialization of some variables. (issue 27)
+
+Arnold Procedural:
+Add Ogawa support. (pull request 20)
+
+Maya:
+Support exporting MFnFloatArray. (pull request 45)
+
+Fix bug when Nurbs curves group are only animated via the transforms and speed
+up the isAnimated check. (pull request 82)
+
+Many AbcImport/AbcExport changes based on feedback and contributions from
+Autodesk, and to bring the plugins more into line with what is in the devkit.
+(pull request 51 and 62 through 79)
+
+##-*****************************************************************************
+
 2015-1-15, Alembic 1.5.8
 Hello Alembic users, thanks to your feedback and reports we have a few bug
 fixes and enhancements.
@@ -503,7 +557,7 @@ bindings.
 Add abcview which uses PyQt and PyAbcOpenGL
 
     - This tool is perfect for debugging alembic caches. It offers Katana-
-      style, lazy-UI hierarchy traversal and a script editor to do more 
+      style, lazy-UI hierarchy traversal and a script editor to do more
       in-depth object and property queries using the Python bindings.
       SimpleAbcView is embedded into the application for easy reference.
 
@@ -591,7 +645,7 @@ Bug fixes:
 
 Maya AbcImport:
 
-Clean up temporary trim curves when the trim operation fails for 
+Clean up temporary trim curves when the trim operation fails for
 MFnNurbsSurface.
 
 ##-*****************************************************************************
@@ -627,7 +681,7 @@ people refer to collections as "groups" or "object sets" (as in Maya).
 - AbcMaterial.  Alembic now supports the concept of a material. This is done by
 defining a schema for a material definition which can act as a standalone object
 or as supplemental data attached to another object. AbcMaterial also defines
-conventions and utilities for binding and resolving marterial assignments 
+conventions and utilities for binding and resolving marterial assignments
 and overrides. We have not gone as far as defining what a material schema should
 actually contain (as we did with cameras); instead we allow you to define your
 own material "target" to allow all the many variations in material standards
@@ -635,16 +689,16 @@ that exist today. However we have reserved the name "abc" for a target
 we will define at a later time; the hope is that this material target would
 become the standard for material interchange.
 
-- AbcLight. Alembic now supports the concept of a light. Light objects are 
+- AbcLight. Alembic now supports the concept of a light. Light objects are
 distinct objects that contain both a camera and a material schema.  The material
 on the light controls the shader parameters associated with the light and the
 camera can contain all relevant camera-like light information.
 
 - Python bindings.  At long last the Alembic team has finally completed the
 python bindings to allow scripters to access the full power of the alembic
-c++ api. All the new features listed above as well as the layers Abc though 
-AbcGeom are bound. The base bindings of typed data (including typed arrays) 
-are pyimath types so if your program can natively create imath data types 
+c++ api. All the new features listed above as well as the layers Abc though
+AbcGeom are bound. The base bindings of typed data (including typed arrays)
+are pyimath types so if your program can natively create imath data types
 there is no performance penalty to convert to and from alembic types.
 
 - Performance optimization. When we profiled Alembic we found that, for some
@@ -655,13 +709,13 @@ references which results in lookups that are  much faster. You pay the price
 of a slight disk size increase and memory footprint.
 
 - Maya plugin updates. The ".userProperties" compound property that is available
-on most Alembic objects is now supported for both read and write with full 
-support for animated values. Additional parameters have also been added to the 
+on most Alembic objects is now supported for both read and write with full
+support for animated values. Additional parameters have also been added to the
 AlembicNode to allow cache retiming along with support for loop, reverse and
 bounce.
 
 - Boost removal from the core. We are no longer dependent on boost to give us
-an implementation of a shared pointer (for example) so we were able to remove 
+an implementation of a shared pointer (for example) so we were able to remove
 the dependency on boost while building the core library.
 
 Bug Fixes:
@@ -848,7 +902,7 @@ Some highlights:
  - The renderman procedural has some small bug fixes, e.g. fixes related
    to arbitrary geometric parameters
 
-As always, any files generated by either Alembic 1.0.0 or 
+As always, any files generated by either Alembic 1.0.0 or
 Alembic 1.0.1 will interoperate. If you are working in Maya
 we encourage you to look at this update.
 
@@ -1237,7 +1291,7 @@ Some highlights:
  - The renderman procedural has some small bug fixes, e.g. fixes related
    to arbitrary geometric parameters
 
-As always, any files generated by either Alembic 1.0.0 or 
+As always, any files generated by either Alembic 1.0.0 or
 Alembic 1.0.1 will interoperate. If you are working in Maya
 we encourage you to look at this update.
 
