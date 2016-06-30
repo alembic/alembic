@@ -281,6 +281,100 @@ void Example3_NurbsIn()
     TESTING_ASSERT( nurbsSchema.isConstant() == true );
 }
 
+void Example4_NurbsOut()
+{
+    // same as example 3 but with optional weights only on some samples
+    OArchive archive(
+        Alembic::AbcCoreOgawa::WriteArchive(),
+        "nurbs4.abc" );
+
+    ONuPatch myNurbs(   OObject( archive, kTop ),
+                        "nurbs_surface_withWeirdW");
+
+    ONuPatchSchema &myNurbsSchema = myNurbs.getSchema();
+
+    V3fArraySample pSample( (const V3f *)g_P, g_nP );
+    FloatArraySample uKnotSample( (const float32_t *)g_uKnot, 8 );
+    FloatArraySample vKnotSample( (const float32_t *)g_vKnot, 8 );
+    FloatArraySample pwSample( (const float32_t *)g_Pw, g_nP );
+
+    ONuPatchSchema::Sample nurbsSample(
+        pSample,
+        g_nu,
+        g_nv,
+        g_uOrder,
+        g_vOrder,
+        uKnotSample,
+        vKnotSample
+        );
+
+    nurbsSample.setPositionWeights(pwSample);
+
+    ONuPatchSchema::Sample nurbsSampleNoWeights(
+        pSample,
+        g_nu,
+        g_nv,
+        g_uOrder,
+        g_vOrder,
+        uKnotSample,
+        vKnotSample
+        );
+
+    // Set the sample.
+    myNurbsSchema.set( nurbsSampleNoWeights );
+    myNurbsSchema.set( nurbsSampleNoWeights );
+    myNurbsSchema.set( nurbsSampleNoWeights );
+    myNurbsSchema.set( nurbsSample );
+    myNurbsSchema.set( nurbsSample );
+
+    // since weights was never defined here, it will use data from the previous
+    // sample
+    myNurbsSchema.set( nurbsSampleNoWeights );
+
+    myNurbsSchema.set( nurbsSample );
+
+}
+
+void Example4_NurbsIn()
+{
+    std::cout << "loading archive" << std::endl;
+    IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), "nurbs4.abc" );
+
+    std::cout << "making INuPatch object" << std::endl;
+    INuPatch myNurbs( IObject( archive, kTop) , "nurbs_surface_withWeirdW");
+
+    std::cout << "getting INuPatch schema" << std::endl;
+    INuPatchSchema &nurbsSchema = myNurbs.getSchema();
+
+    // get the samples from the curves
+    std::cout << "getting INuPatch sample" << std::endl;
+    INuPatchSchema::Sample nurbsSample;
+    nurbsSchema.get( nurbsSample );
+
+    // test the bounding box
+
+    std::cout << nurbsSample.getSelfBounds().min << std::endl;
+    std::cout << nurbsSample.getSelfBounds().max << std::endl;
+
+    TESTING_ASSERT( nurbsSample.getSelfBounds().min == V3d( 0.0, 0.0, -3.0 ) );
+    TESTING_ASSERT( nurbsSample.getSelfBounds().max == V3d( 3.0, 3.0, 3.0 ) );
+
+    std::cout << "Number of trim curves: " << nurbsSample.getTrimNumLoops() << std::endl;
+    TESTING_ASSERT( nurbsSample.getTrimNumLoops() == 0 );
+    TESTING_ASSERT( nurbsSample.hasTrimCurve() == false );
+    TESTING_ASSERT( nurbsSchema.isConstant() == false );
+
+    IFloatArrayProperty weightsProp = nurbsSchema.getPositionWeightsProperty();
+    TESTING_ASSERT( 7 == weightsProp.getNumSamples() );
+    TESTING_ASSERT( 0 == weightsProp.getValue( 0 )->size() );
+    TESTING_ASSERT( 0 == weightsProp.getValue( 1 )->size() );
+    TESTING_ASSERT( 0 == weightsProp.getValue( 2 )->size() );
+    TESTING_ASSERT( ( size_t ) g_nP == weightsProp.getValue( 3 )->size() );
+    TESTING_ASSERT( ( size_t ) g_nP == weightsProp.getValue( 4 )->size() );
+    TESTING_ASSERT( ( size_t ) g_nP == weightsProp.getValue( 5 )->size() );
+    TESTING_ASSERT( ( size_t ) g_nP == weightsProp.getValue( 6 )->size() );
+}
+
 //-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
@@ -317,6 +411,13 @@ int main( int argc, char *argv[] )
     std::cout << "reading nurbs 3" << std::endl;
     Example3_NurbsIn();
     std::cout << "done reading nurbs 3" << std::endl;
+
+    Example4_NurbsOut();
+    std::cout << "done writing nurbs 4" << std::endl;
+
+    std::cout << "reading nurbs 4" << std::endl;
+    Example4_NurbsIn();
+    std::cout << "done reading nurbs 4" << std::endl;
 
     return 0;
 }

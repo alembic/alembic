@@ -51,8 +51,7 @@ static void register_( const char* iName )
            "This class is a typed geom param reader.",
            init<>() )
         .def( "getInterpretation",
-              &IGEOMPARAM::getInterpretation,
-              return_value_policy<copy_const_reference>() )
+              &IGEOMPARAM::getInterpretation )
         .staticmethod( "getInterpretation" )
         .def( "matches",
               &IGEOMPARAM::matches,

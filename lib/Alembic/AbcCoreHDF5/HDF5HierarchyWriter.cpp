@@ -36,6 +36,7 @@
 #include <Alembic/AbcCoreHDF5/HDF5HierarchyWriter.h>
 #include <Alembic/AbcCoreHDF5/WriteUtil.h>
 #include <Alembic/AbcCoreHDF5/HDF5Hierarchy.h>
+#include <Alembic/AbcCoreHDF5/WriteUtil.h>
 
 namespace Alembic {
 namespace AbcCoreHDF5 {
@@ -53,7 +54,9 @@ HDF5HierarchyWriter::HDF5HierarchyWriter( hid_t iFile, HDF5Hierarchy& iH5H )
     // Let's set a flag.
     //
     int enabled = 1;
-    H5LTset_attribute_int( iFile, ".", "abc_ref_hierarchy", &enabled, 1 );
+
+    WriteSmallArray( iFile, "abc_ref_hierarchy", H5T_STD_I32LE,
+      H5T_NATIVE_INT32, 1, &enabled );
 }
 
 //-*****************************************************************************
@@ -71,7 +74,7 @@ void HDF5HierarchyWriter::writeHierarchy(hid_t iFile )
     std::vector<uint32_t>       maskBits;
     std::vector<char>           hasMeta;
     std::vector<std::string>    metaStrs;
- 
+
     m_H5H.makeCompactObjectHierarchy( objectRefs,
                                       childrenSizes, childrenNames,
                                       childrenRefs,
@@ -83,8 +86,8 @@ void HDF5HierarchyWriter::writeHierarchy(hid_t iFile )
                      objectRefs.size(), &objectRefs.front() );
 
     // Children
-    H5LTset_attribute_uint( iFile, ".", "children_sizes",
-                            &childrenSizes.front(), childrenSizes.size() );
+    WriteSmallArray( iFile, "children_sizes", H5T_STD_U32LE, H5T_NATIVE_UINT32,
+                     childrenSizes.size(), &childrenSizes.front() );
 
     WriteStrings( iFile, "children_names",
                   childrenNames.size(), &childrenNames.front() );
@@ -93,21 +96,21 @@ void HDF5HierarchyWriter::writeHierarchy(hid_t iFile )
                      childrenRefs.size(), &childrenRefs.front() );
 
     // Attributes
-    H5LTset_attribute_uint( iFile , ".", "attr_sizes",
-                            &attrSizes.front(), attrSizes.size() );
+    WriteSmallArray( iFile, "attr_sizes", H5T_STD_U32LE, H5T_NATIVE_UINT32,
+                     attrSizes.size(), &attrSizes.front() );
 
     WriteStrings( iFile, "attr_names",
                   attrNames.size(), &attrNames.front() );
 
     // Masks
-    H5LTset_attribute_char( iFile, ".", "mask_on",
-                            &hasMask.front(), hasMask.size() );
-    H5LTset_attribute_uint( iFile, ".", "mask_bits",
-                            &maskBits.front(), maskBits.size() );
+    WriteSmallArray( iFile, "mask_on", H5T_STD_I8LE, H5T_NATIVE_INT8,
+                     hasMask.size(), &hasMask.front() );
+    WriteSmallArray( iFile, "mask_bits", H5T_STD_U32LE, H5T_NATIVE_UINT32,
+                     maskBits.size(), &maskBits.front() );
 
     // Metadata
-    H5LTset_attribute_char( iFile, ".", "meta_on",
-                            &hasMeta.front(), hasMeta.size() );
+    WriteSmallArray( iFile, "meta_on", H5T_STD_I8LE, H5T_NATIVE_INT8,
+                     hasMeta.size(), &hasMeta.front() );
     WriteStrings( iFile, "meta_strs",
                   metaStrs.size(), &metaStrs.front() );
 }

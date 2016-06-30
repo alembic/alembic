@@ -203,6 +203,12 @@ inline OBasePropertyT<PROP_PTR>::OBasePropertyT
     getErrorHandler().setPolicy( iPolicy );
 }
 
+namespace {
+
+const AbcA::PropertyHeader g_phd;
+
+}
+
 //-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
@@ -216,8 +222,7 @@ const AbcA::PropertyHeader &OBasePropertyT<PROP_PTR>::getHeader() const
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, so have a default behavior.
-    static const AbcA::PropertyHeader phd;
-    return phd;
+    return g_phd;
 };
 
 //-*****************************************************************************

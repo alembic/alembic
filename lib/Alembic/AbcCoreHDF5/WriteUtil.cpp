@@ -405,45 +405,47 @@ void WritePropertyInfo( hid_t iGroup,
     uint32_t info[5] = {0, 0, 0, 0, 0};
     uint32_t numFields = 1;
 
+    // Our bitmasks look like this:
+    //
+    // Property Type mask (Scalar, Array, or Compound) 0x0003
     // 0000 0000 0000 0000 0000 0000 0000 0011
-    static const uint32_t ptypeMask = 0x0003;
-
+    //
+    // Our Pod type mask 0x003c
     // 0000 0000 0000 0000 0000 0000 0011 1100
-    static const uint32_t podMask = 0x003c;
-
+    //
+    // Has a time sampling index mask 0x0040
     // 0000 0000 0000 0000 0000 0000 0100 0000
-    static const uint32_t hasTsidxMask = 0x0040;
-
+    //
+    // no repeats mask 0x0080
     // 0000 0000 0000 0000 0000 0000 1000 0000
-    static const uint32_t noRepeatsMask = 0x0080;
-
+    //
+    // Extent value mask 0xff00
     // 0000 0000 0000 0000 1111 1111 0000 0000
-    static const uint32_t extentMask = 0xff00;
 
     // compounds are treated differently
     if ( iHeader.getPropertyType() != AbcA::kCompoundProperty )
     {
         // Slam the property type in there.
-        info[0] |= ptypeMask & ( uint32_t )iHeader.getPropertyType();
+        info[0] |= 0x0003 & ( uint32_t )iHeader.getPropertyType();
 
         // arrays may be scalar like, scalars are already scalar like
         info[0] |= ( uint32_t ) isScalarLike;
 
         uint32_t pod = ( uint32_t )iHeader.getDataType().getPod();
-        info[0] |= podMask & ( pod << 2 );
+        info[0] |= 0x003c & ( pod << 2 );
 
         if (iTimeSamplingIndex != 0)
         {
-            info[0] |= hasTsidxMask;
+            info[0] |=  0x0040;
         }
 
         if (iFirstChangedIndex == 1 && iLastChangedIndex == iNumSamples - 1)
         {
-            info[0] |= noRepeatsMask;
+            info[0] |= 0x0080;
         }
 
         uint32_t extent = ( uint32_t )iHeader.getDataType().getExtent();
-        info[0] |= extentMask & ( extent << 8 );
+        info[0] |= 0xff00 & ( extent << 8 );
 
         ABCA_ASSERT( iFirstChangedIndex <= iNumSamples &&
             iLastChangedIndex <= iNumSamples &&
@@ -501,8 +503,8 @@ void WriteTimeSampling( hid_t iGroup,
 
     const std::vector < chrono_t > & samps = iTsmp.getStoredTimes();
     ABCA_ASSERT( samps.size() > 0, "No TimeSamples to write!");
-    H5LTset_attribute_double ( iGroup, ".", timeSampsName.c_str(),
-        &samps.front(), samps.size() );
+    WriteSmallArray( iGroup, timeSampsName.c_str(), H5T_IEEE_F64LE,
+                     H5T_NATIVE_DOUBLE, samps.size(), &samps.front() );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

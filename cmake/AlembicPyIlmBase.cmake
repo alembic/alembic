@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2016,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -36,9 +36,17 @@
 FIND_PACKAGE(PyIlmBase)
 
 IF (PYILMBASE_FOUND)
-    SET(ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
-    SET(ALEMBIC_PYILMBASE_LIBRARIES ${ALEMBIC_PYILMBASE_LIBS})
     SET(ALEMBIC_PYILMBASE_FOUND 1 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
+
+    SET(ALEMBIC_PYILMBASE_LIBS
+        ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
+    )
+
+    GET_FILENAME_COMPONENT(ALEMBIC_PYILMBASE_LIB_DIRECTORY
+        ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
+        PATH
+    )
+
 ELSE()
     SET(ALEMBIC_PYILMBASE_FOUND 0 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
 ENDIF()

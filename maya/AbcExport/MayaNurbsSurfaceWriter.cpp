@@ -200,7 +200,7 @@ void MayaNurbsSurfaceWriter::write()
                 static_cast<float>(cvArray[index].y),
                 static_cast<float>(cvArray[index].z) ));
 
-            if (cvArray[index].w != 1.0)
+            if (fabs(cvArray[index].w - 1.0) > 1e-12)
             {
                 weightsOne = false;
             }

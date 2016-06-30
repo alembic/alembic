@@ -55,6 +55,12 @@ OObject::~OObject()
     //          << m_object.use_count() << std::endl;
 }
 
+namespace {
+
+const AbcA::ObjectHeader g_ohd;
+
+}
+
 //-*****************************************************************************
 const AbcA::ObjectHeader &OObject::getHeader() const
 {
@@ -68,8 +74,7 @@ const AbcA::ObjectHeader &OObject::getHeader() const
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, so have a default behavior.
-    static const AbcA::ObjectHeader ohd;
-    return ohd;
+    return g_ohd;
 };
 
 //-*****************************************************************************
@@ -137,8 +142,7 @@ const AbcA::ObjectHeader &OObject::getChildHeader( size_t iIdx )
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, have a default.
-    static const AbcA::ObjectHeader hd;
-    return hd;
+    return g_ohd;
 }
 
 //-*****************************************************************************

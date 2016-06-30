@@ -48,7 +48,7 @@ namespace ALEMBIC_VERSION_NS {
 class OGroup;
 typedef Alembic::Util::shared_ptr< OGroup > OGroupPtr;
 
-class ALEMBIC_EXPORT OGroup 
+class ALEMBIC_EXPORT OGroup
     : public Alembic::Util::enable_shared_from_this< OGroup >
 {
 public:
@@ -125,7 +125,7 @@ private:
     OGroup(OGroupPtr iParent, Alembic::Util::uint64_t iIndex);
 
     class PrivateData;
-    Alembic::Util::auto_ptr< PrivateData > mData;
+    Alembic::Util::unique_ptr< PrivateData > mData;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

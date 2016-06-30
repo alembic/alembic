@@ -2,7 +2,7 @@
 
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2012,
+## Copyright (c) 2009-2016,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -37,11 +37,11 @@
 
 # setup some required lib paths
 setenv LD_LIBRARY_PATH "@BOOST_LIBRARY_DIR@"
-setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:@ALEMBIC_PYILMBASE_LIBRARY_DIRECTORY@"
+setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:@ALEMBIC_PYILMBASE_LIB_DIRECTORY@"
 setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:@ILMBASE_LIBRARY_DIR@"
 
 # setup some required python paths
-setenv PYTHONPATH "@ALEMBIC_PYILMBASE_PYIMATH_MODULE_DIRECTORY@"
+setenv PYTHONPATH "@ALEMBIC_PYIMATH_MODULE_DIRECTORY@"
 setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_BINARY_DIR@/python/PyAlembic"
 setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_SOURCE_DIR@/python/PyAlembic/Tests"
 

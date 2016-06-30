@@ -102,10 +102,10 @@ struct registerMemCopyableSample
         .def( "getIndices",
               &OGeomParam::Sample::getIndices,
               return_value_policy<copy_const_reference>() )
-        .def( "setScope", 
+        .def( "setScope",
               &OGeomParam::Sample::setScope,
               ( arg( "scope" ) ) )
-        .def( "getScope", 
+        .def( "getScope",
               &OGeomParam::Sample::getScope )
         .def( "reset", &OGeomParam::Sample::reset )
         .def( "valid", &OGeomParam::Sample::valid )
@@ -142,10 +142,10 @@ struct registerNonMemCopyableSample
         .def( "getIndices",
               &SampleDerived<TRAITS>::getIndices,
               return_value_policy<copy_const_reference>() )
-        .def( "setScope", 
+        .def( "setScope",
               &SampleDerived<TRAITS>::setScope,
               ( arg( "scope" ) ) )
-        .def( "getScope", 
+        .def( "getScope",
               &SampleDerived<TRAITS>::getScope )
         .def( "reset", &SampleDerived<TRAITS>::reset )
         .def( "valid", &SampleDerived<TRAITS>::valid )
@@ -185,7 +185,7 @@ static void register_( const char* iName )
     using namespace boost::python;
 
     typedef typename AbcG::OTypedGeomParam<TRAITS>               OGeomParam;
-    
+
     // Overloads
     //
     void ( OGeomParam::*setTimeSamplingByIndex )( AbcU ::uint32_t )
@@ -200,12 +200,11 @@ static void register_( const char* iName )
            "This class is a typed geom param writer.",
            init<>() )
         .def( "getInterpretation",
-              &OGeomParam::getInterpretation,
-              return_value_policy<copy_const_reference>() )
+              &OGeomParam::getInterpretation )
         .staticmethod( "getInterpretation" )
         .def( "matches",
               &OGeomParam::matches,
-              ( arg( "header" ), 
+              ( arg( "header" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ) )
         .staticmethod( "matches" )
         .def( init<Abc::OCompoundProperty,
@@ -217,7 +216,7 @@ static void register_( const char* iName )
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "isIndexed" ), arg( "scope" ), arg( "extent" ),
                      arg( "argument" ), arg( "argument" ), arg( "argument" ) ),
                    "doc") )
