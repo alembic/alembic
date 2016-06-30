@@ -115,6 +115,14 @@ bool getRotOrder(MTransformationMatrix::RotationOrder iOrder,
 // copy from mayapit code (MayaPit.h .cpp)
 bool isAnimated(MObject & object, bool checkParent = false);
 
+// determine if a joint is driven by FBIK.
+// The joint is animated but has no input connections.
+bool isDrivenByFBIK(const MFnIkJoint & iJoint);
+
+// determine if a joint is driven by a spline ik.
+// The joint's is animated but has no input connections.
+bool isDrivenBySplineIK(const MFnIkJoint & iJoint);
+
 // determine if a Maya Object is intermediate
 bool isIntermediate(const MObject & object);
 
@@ -151,6 +159,7 @@ struct JobArgs
         excludeInvisible = false;
         filterEulerRotations = false;
         noNormals = false;
+        setFirstAnimShape = false;
         stripNamespace = 0;
         useSelectionList = false;
         worldSpace = false;
@@ -168,15 +177,17 @@ struct JobArgs
         writeCameras = true;
         writeNurbsSurfaces = true;
         writeNurbsCurves = true;
+        autoSubd = false;
     }
 
     bool excludeInvisible;
     bool filterEulerRotations;
     bool noNormals;
+    bool setFirstAnimShape;
     unsigned int stripNamespace;
     bool useSelectionList;
     bool writeGeometry;
-   bool worldSpace;
+    bool worldSpace;
     bool writeVisibility;
     bool writeUVs;
     bool writeColorSets;
@@ -184,12 +195,14 @@ struct JobArgs
     bool writeUVSets;
     bool writeCurvesGroup;
     bool writeTransforms;
-   bool writeLocators;
-   bool writeParticles;
-   bool writeMeshes;
-   bool writeCameras;
-   bool writeNurbsSurfaces;
-   bool writeNurbsCurves;
+    bool writeLocators;
+    bool writeParticles;
+    bool writeMeshes;
+    bool writeCameras;
+    bool writeNurbsSurfaces;
+    bool writeNurbsCurves;
+    bool autoSubd;
+
     std::string melPerFrameCallback;
     std::string melPostCallback;
     std::string pythonPerFrameCallback;

@@ -56,7 +56,7 @@ ENDIF()
 
 SET(HDF5_USE_STATIC_LIBRARIES ${USE_STATIC_HDF5})
 
-FIND_PACKAGE(HDF5 COMPONENTS C HL)
+FIND_PACKAGE(HDF5 COMPONENTS C)
 
 #-******************************************************************************
 # Wrap it all up

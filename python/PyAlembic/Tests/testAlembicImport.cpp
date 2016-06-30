@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2009-2016,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -37,7 +37,6 @@
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
-#include <Alembic/AbcCoreHDF5/All.h>
 
 #include <boost/assign/std/vector.hpp>
 
@@ -130,7 +129,7 @@ WriteArrayProp (OCompoundProperty &oCompoundProp,
 void
 testImportingScalarProperties()
 {
-    OArchive oArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive oArchive( Alembic::AbcCoreOgawa::WriteArchive(),
                        "testImportScalarProperties.abc");
 
     OObject oRoot = oArchive.getTop();
@@ -251,7 +250,7 @@ void
 testImportingSmallArrayProperties()
 {
     // Small sized arrays of POD types
-    OArchive oArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive oArchive( Alembic::AbcCoreOgawa::WriteArchive(),
                        "testImportSmallArrayProperties.abc");
 
     OObject oRoot = oArchive.getTop();
@@ -284,7 +283,7 @@ testImportingSmallArrayProperties()
 void
 testImportingArrayProperties()
 {
-    OArchive oArchive( Alembic::AbcCoreHDF5::WriteArchive(),
+    OArchive oArchive( Alembic::AbcCoreOgawa::WriteArchive(),
                        "testImportArrayProperties.abc");
 
     OObject oRoot = oArchive.getTop();

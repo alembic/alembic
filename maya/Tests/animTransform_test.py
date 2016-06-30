@@ -51,7 +51,10 @@ class AnimTransformTest(unittest.TestCase):
         for f in self.__files:
             os.remove(f)
 
-    def testAnimTransformReadWrite(self):
+    def testAnimWFGTransformReadWrite(self):
+        self.testAnimTransformReadWrite(True)
+
+    def testAnimTransformReadWrite(self, wfg=False):
         nodeName = MayaCmds.createNode('transform', n='test')
 
         # shear
@@ -111,15 +114,21 @@ class AnimTransformTest(unittest.TestCase):
         MayaCmds.setKeyframe('test', value=1.5, attribute='scalePivotY', t=12)
         MayaCmds.setKeyframe('test', value=1.5, attribute='scalePivotZ', t=12)
 
-        self.__files.append(util.expandFileName('testAnimTransformReadWrite.abc'))
-        self.__files.append(util.expandFileName('testAnimTransformReadWrite01_14.abc'))
-        self.__files.append(util.expandFileName('testAnimTransformReadWrite15_24.abc'))
+        if wfg:
+            self.__files.append(util.expandFileName('testAnimWFGTransformReadWrite.abc'))
 
-        MayaCmds.AbcExport(j='-fr 1 14 -root test -file ' + self.__files[-2])
-        MayaCmds.AbcExport(j='-fr 15 24 -root test -file ' + self.__files[-1])
+            MayaCmds.AbcExport(j='-fr 1 24 -wfg -frs -0.25 -frs 0.0 -frs 0.25 -root test -file ' + self.__files[-1])
+            MayaCmds.AbcImport(self.__files[-1], mode='open')
+        else:
+            self.__files.append(util.expandFileName('testAnimTransformReadWrite.abc'))
+            self.__files.append(util.expandFileName('testAnimTransformReadWrite01_14.abc'))
+            self.__files.append(util.expandFileName('testAnimTransformReadWrite15_24.abc'))
 
-        subprocess.call(self.__abcStitcher + self.__files[-3:])
-        MayaCmds.AbcImport(self.__files[-3], mode='open')
+            MayaCmds.AbcExport(j='-fr 1 14 -root test -file ' + self.__files[-2])
+            MayaCmds.AbcExport(j='-fr 15 24 -root test -file ' + self.__files[-1])
+
+            subprocess.call(self.__abcStitcher + self.__files[-3:])
+            MayaCmds.AbcImport(self.__files[-3], mode='open')
 
         # frame 1
         MayaCmds.currentTime(1, update=True)

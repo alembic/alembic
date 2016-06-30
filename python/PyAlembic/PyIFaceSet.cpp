@@ -84,6 +84,8 @@ void register_ifaceset()
               &AbcG::IFaceSetSchema::getFaceExclusivity )
         .def( "getTimeSampling",
               &AbcG::IFaceSetSchema::getTimeSampling )
+        .def( "getFacesProperty",
+              &AbcG::IFaceSetSchema::getFacesProperty )
         .def( "valid", &AbcG::IFaceSetSchema::valid )
         .def( "reset", &AbcG::IFaceSetSchema::reset )
         .def( "__nonzero__", &AbcG::IFaceSetSchema::valid )

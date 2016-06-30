@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012-2014,
+// Copyright (c) 2012-2016,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -58,7 +58,8 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
             iArg1 );
     }
     else
-    {       
+    {
+#ifdef ALEMBIC_WITH_HDF5 
         return Abc::CreateArchiveWithInfo( 
             ::Alembic::AbcCoreHDF5::WriteArchive(),
             iFileName,
@@ -66,6 +67,9 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
             iUserDescription,
             iArg0,
             iArg1 );
+#else
+        throwPythonException( "Unsupported core type: HDF5" );
+#endif
     }
 }
 

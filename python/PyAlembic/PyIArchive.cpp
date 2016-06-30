@@ -54,6 +54,11 @@ static Abc::IArchive* mkIArchive( const std::string &iName )
     if ( coreType == AbcF::IFactory::kUnknown ) {
         throwPythonException( "Unknown core type" );
     }
+#ifndef ALEMBIC_WITH_HDF5
+    else if ( coreType == AbcF::IFactory::kHDF5 ) {
+        throwPythonException( "Unsupported core type: HDF5" );
+    }
+#endif
     return new Abc::IArchive( archive );
 }
 

@@ -133,6 +133,9 @@ public:
     // re-add the shader selection back to the sets for meshes
     void applyShaderSelection();
 
+    // add face sets after the connections are made
+    void addFaceSetsAfterConnection();
+
 private:
 
     // helper function for building mShaderMeshMap
@@ -176,6 +179,10 @@ private:
     // of parts of meshes.  They are to get around a problem where a shape
     // wont shade correctly after a swap if it is shaded per face
     std::map < MObject, MSelectionList, ltMObj > mShaderMeshMap;
+
+    // adding face sets after the connections are made. The order is
+    // important to deal with construction history.
+    std::map < MObject, Alembic::Abc::IObject, ltMObj > mAddFaceSetsMap;
 };  // class CreateSceneVisitor
 
 

@@ -107,26 +107,23 @@ public:
 
     //! Return the schema title expected of this
     //! property. An empty title matches everything
-    static const std::string &getSchemaTitle()
+    static const char * getSchemaTitle()
     {
-        static std::string sTitle = INFO::title();
-        return sTitle;
+        return INFO::title();
     }
 
     //! Return the schema base type expected of this
     //! property. An empty base type means it's the root type.
-    static const std::string &getSchemaBaseType()
+    static const char * getSchemaBaseType()
     {
-        static std::string sBaseType = INFO::schemaBaseType();
-        return sBaseType;
+        return INFO::schemaBaseType();
     }
 
     //! Return the default name for instances of this schema. Often
     //! something like ".geom"
-    static const std::string &getDefaultSchemaName()
+    static const char * getDefaultSchemaName()
     {
-        static std::string sName = INFO::defaultName();
-        return sName;
+        return INFO::defaultName();
     }
 
     //! This will check whether or not a given entity (as represented by
@@ -135,7 +132,7 @@ public:
     static bool matches( const AbcA::MetaData &iMetaData,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        if ( getSchemaTitle() == "" || iMatching == kNoMatching )
+        if ( std::string() == getSchemaTitle() || iMatching == kNoMatching )
         { return true; }
 
         if ( iMatching == kStrictMatching || iMatching == kSchemaTitleMatching )
@@ -234,11 +231,12 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
 
     // Put schema title into metadata.
     AbcA::MetaData mdata = args.getMetaData();
-    if ( getSchemaTitle() != "" )
+    std::string emptyStr;
+    if ( emptyStr != getSchemaTitle() )
     {
         mdata.set( "schema", getSchemaTitle() );
     }
-    if ( getSchemaBaseType() != "" )
+    if ( emptyStr != getSchemaBaseType() )
     {
         mdata.set( "schemaBaseType", getSchemaBaseType() );
     }

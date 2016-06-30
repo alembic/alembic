@@ -36,6 +36,13 @@
 
 #include "MayaUtility.h"
 
+// this struct is used in function "bool util::isAnimated(MObject & object, bool checkParent)"
+struct NodesToCheckStruct
+{
+    MObject node;
+    bool    checkParent;
+};
+
 // return seconds per frame
 double util::spf()
 {
@@ -259,7 +266,7 @@ bool util::isAnimated(MObject & object, bool checkParent)
     MItDependencyGraph iter(object, MFn::kInvalid,
         MItDependencyGraph::kUpstream,
         MItDependencyGraph::kDepthFirst,
-        MItDependencyGraph::kNodeLevel,
+        MItDependencyGraph::kPlugLevel,
         &stat);
 
     if (stat!= MS::kSuccess)
@@ -272,8 +279,9 @@ bool util::isAnimated(MObject & object, bool checkParent)
     // that have animation curve in their history.
     // The average time complexity is O(n^2) where n is the number of history
     // nodes. But we can improve the best case by split the loop into two.
-    std::vector<MObject> nodesToCheckAnimCurve;
+    std::vector<NodesToCheckStruct> nodesToCheckAnimCurve;
 
+    NodesToCheckStruct nodeStruct;
     for (; !iter.isDone(); iter.next())
     {
         MObject node = iter.thisNode();
@@ -315,7 +323,17 @@ bool util::isAnimated(MObject & object, bool checkParent)
         // skip shading nodes
         if (!node.hasFn(MFn::kShadingEngine))
         {
-            nodesToCheckAnimCurve.push_back(node);
+            MPlug plug = iter.thisPlug();
+            MFnAttribute attr(plug.attribute(), &stat);
+            bool checkNodeParent = false;
+            if (stat == MS::kSuccess && attr.isWorldSpace())
+            {
+                checkNodeParent = true;
+            }
+
+            nodeStruct.node = node;
+            nodeStruct.checkParent = checkParent || checkNodeParent;
+            nodesToCheckAnimCurve.push_back(nodeStruct);
         }
         else
         {
@@ -326,12 +344,55 @@ bool util::isAnimated(MObject & object, bool checkParent)
 
     for (size_t i = 0; i < nodesToCheckAnimCurve.size(); i++)
     {
-        if (MAnimUtil::isAnimated(nodesToCheckAnimCurve[i], checkParent))
+        if (MAnimUtil::isAnimated(nodesToCheckAnimCurve[i].node, nodesToCheckAnimCurve[i].checkParent))
         {
             return true;
         }
     }
 
+    return false;
+}
+
+bool util::isDrivenByFBIK(const MFnIkJoint & iJoint)
+{
+    // check joints that are driven by Maya FBIK
+    // Maya FBIK has no connection to joints' TRS plugs
+    // but TRS of joints are driven by FBIK, they are not static
+    // Maya 2012's new HumanIK has connections to joints.
+    // FBIK is a special case.
+    MStatus status = MS::kSuccess;
+    if (iJoint.hikJointName(&status).length() > 0 && status) {
+        return true;
+    }
+    return false;
+}
+
+bool util::isDrivenBySplineIK(const MFnIkJoint & iJoint)
+{
+    // spline IK can drive the starting joint's translate channel but
+    // it has no connection to the translate plug.
+    // we treat the joint as animated in this case.
+    // find the ikHandle node.
+    MPlug msgPlug = iJoint.findPlug("message", false);
+    MPlugArray msgPlugDst;
+    msgPlug.connectedTo(msgPlugDst, false, true);
+    for (unsigned int i = 0; i < msgPlugDst.length(); i++) {
+        MFnDependencyNode ikHandle(msgPlugDst[i].node());
+        if (!ikHandle.object().hasFn(MFn::kIkHandle)) continue;
+
+        // find the ikSolver node.
+        MPlug ikSolverPlug = ikHandle.findPlug("ikSolver");
+        MPlugArray ikSolverDst;
+        ikSolverPlug.connectedTo(ikSolverDst, true, false);
+        for (unsigned int j = 0; j < ikSolverDst.length(); j++) {
+
+            // return true if the ikSolver is a spline solver.
+            if (ikSolverDst[j].node().hasFn(MFn::kSplineSolver)) {
+                return true;
+            }
+        }
+    }
+    
     return false;
 }
 
@@ -547,6 +608,11 @@ MString util::getHelpText()
 "-wuvs / -writeUVSets\n"
 "Write all uv sets on MFnMeshes as vector 2 indexed geometry \n"
 "parameters with face varying scope.\n"
+"-as / -autoSubd\n"
+"If this flag is present and the mesh has crease edges, crease vertices or holes, \n"
+"the mesh (OPolyMesh) would now be written out as an OSubD and crease info will be stored in the Alembic \n"
+"file. Otherwise, creases info won't be preserved in Alembic file \n"
+"unless a custom Boolean attribute SubDivisionMesh has been added to mesh node and its value is true. \n"
 "\n"
 "-mfc / -melPerFrameCallback string\n"
 "When each frame (and the static frame) is evaluated the string specified is\n"

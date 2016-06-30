@@ -47,8 +47,8 @@ void register_utiltypes()
     //
     struct DimensionsOverloads
     {
-        static const AbcU::uint64_t getItemConst(AbcU::Dimensions &iDim,
-                                                 Py_ssize_t index ) 
+        static AbcU::uint64_t getItemConst(AbcU::Dimensions &iDim,
+                                                 Py_ssize_t index )
         {
             return iDim[index];
         }
@@ -61,7 +61,7 @@ void register_utiltypes()
             fixedArray.setitem_scalar( index, data );
         }
     };
-    
+
     class_<AbcU::Dimensions>(
          "Dimensions",
          "The Dimensions class describes the dimensional layout of an array "
@@ -84,7 +84,7 @@ void register_utiltypes()
               &AbcU::Dimensions::numPoints,
               "Return the number of total points in a dimensional container "
               "described by this Dimensions" )
-        .def( "__getitem__", 
+        .def( "__getitem__",
               DimensionsOverloads::getItemConst,
               "Return the dimension size of the given rank" )
         .def( "__setitem__",

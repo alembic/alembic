@@ -79,8 +79,7 @@ static void register_(const char* iName)
                     "index") )
         .def( "getInterpretation",
               &T::getInterpretation,
-              "Return the interpretation string expected of this property",
-              return_value_policy<copy_const_reference>() )
+              "Return the interpretation string expected of this property" )
         .def( "matches",
               Overloads::matchesMetaData,
               ( arg( "metaData" ),
