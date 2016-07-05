@@ -65,7 +65,7 @@ private:
           std::size_t iThreadId);
 
     class PrivateData;
-    std::auto_ptr< PrivateData > mData;
+    Alembic::Util::unique_ptr< PrivateData > mData;
 };
 
 typedef Alembic::Util::shared_ptr< IData > IDataPtr;

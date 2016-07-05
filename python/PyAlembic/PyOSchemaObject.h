@@ -59,11 +59,11 @@ struct OSchemaObjectOverloads
         return OSCHEMAOBJECT::matches( iHeader, iMatching );
     }
 };
- 
+
 //-*****************************************************************************
 template<class OSCHEMAOBJECT>
 void register_OSchemaObject( const char *iName )
-{   
+{
     // OSCHEMAOBJECT
     //
     class_<OSCHEMAOBJECT, bases<Abc::OObject> >(
@@ -78,13 +78,11 @@ void register_OSchemaObject( const char *iName )
                         const Abc::Argument&> >() )
         .def( "getSchemaObjTitle",
               &OSCHEMAOBJECT::getSchemaObjTitle,
-              "doc",
-              return_value_policy<copy_const_reference>() )
+              "doc" )
         .staticmethod( "getSchemaObjTitle" )
         .def( "getSchemaTitle",
               &OSCHEMAOBJECT::getSchemaTitle,
-              "doc",
-              return_value_policy<copy_const_reference>() )
+              "doc" )
         .staticmethod( "getSchemaTitle" )
         .def( "getSchema",
               OSchemaObjectOverloads<OSCHEMAOBJECT>::getSchema,

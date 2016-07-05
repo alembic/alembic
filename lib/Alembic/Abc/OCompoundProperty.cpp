@@ -59,6 +59,12 @@ size_t OCompoundProperty::getNumProperties() const
     return 0;
 }
 
+namespace {
+
+const AbcA::PropertyHeader g_hd;
+
+}
+
 //-*****************************************************************************
 const AbcA::PropertyHeader &OCompoundProperty::getPropertyHeader( size_t iIdx ) const
 {
@@ -69,8 +75,7 @@ const AbcA::PropertyHeader &OCompoundProperty::getPropertyHeader( size_t iIdx ) 
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, have a default.
-    static const AbcA::PropertyHeader hd;
-    return hd;
+    return g_hd;
 }
 
 //-*****************************************************************************

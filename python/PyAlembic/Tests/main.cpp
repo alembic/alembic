@@ -1,3 +1,4 @@
+#include <Python.h>
 #include <testAlembicImport.h>
 #include <string.h>
 #include <boost/python.hpp>
@@ -16,12 +17,12 @@ runTests (int argc, char *argv[])
 
     // Test 1: Alembic CoreAbstract Type binding
     {
-        std::string code = 
+        std::string code =
             "import testTypes\n";
 
         PyRun_SimpleString (code.c_str());
     }
- 
+
     // Test 2: Python import binding.
     // We export an alembic cache file with c++ api.
     TEST(testAlembicImport);
@@ -29,7 +30,7 @@ runTests (int argc, char *argv[])
     // We then import the cache using python api
     // and check the values read are the same.
     {
-        std::string code = 
+        std::string code =
             "from testAlembicImport import*\n"
             "print 'Testing Python import binding for scalar data types'\n"
             "importCache( 'testImportScalarProperties.abc' )\n"
@@ -48,7 +49,7 @@ runTests (int argc, char *argv[])
     // We export an alembic cache file using python api
     // and read it again using python api
     {
-        std::string code = 
+        std::string code =
             "from testAlembicImport import*\n"
             "from testAlembicExport import*\n"
             "print 'Testing Python export binding for scalar data types'\n"
@@ -70,16 +71,16 @@ runTests (int argc, char *argv[])
     // Test 4: Export/Import a polygon cube
     // An animated cube is exported and imported
     {
-        std::string code = 
+        std::string code =
             "import testCacheCube\n"
             "import testCacheCube2\n";
 
         PyRun_SimpleString (code.c_str());
     }
 
-    // Test 5: Geom, Material and Collection bindings, iterators 
+    // Test 5: Geom, Material and Collection bindings, iterators
     {
-        std::string code = 
+        std::string code =
             "import testIterators\n"
             "import testWrap\n"
             "import testAbcGeomBinding\n"
@@ -98,14 +99,14 @@ runTests (int argc, char *argv[])
 
         PyRun_SimpleString (code.c_str());
     }
-  
+
     Py_Finalize();
 }
 
 std::string
 stripLastPath (std::string path)
 {
-    int lastSlash = path.find_last_of('\\');
+    std::size_t lastSlash = path.find_last_of('\\');
     if (lastSlash != std::string::npos)
         return path.substr (0, lastSlash);
     return "";

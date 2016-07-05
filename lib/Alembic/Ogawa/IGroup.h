@@ -74,7 +74,7 @@ private:
            std::size_t iThreadIndex);
 
     class PrivateData;
-    Alembic::Util::auto_ptr< PrivateData > mData;
+    Alembic::Util::unique_ptr< PrivateData > mData;
 };
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -176,7 +176,11 @@ void Example1_MeshIn()
     Int32ArraySample faces = *(faceSetSamp0.getFaces ());
     TESTING_ASSERT( faces [0] == 1 &&
                     faces [1] == 2 &&
-                    faces [2] == 3);
+                    faces [2] == 3 );
+
+    IInt32ArrayProperty facesProp = faceSet.getFacesProperty();
+    TESTING_ASSERT ( facesProp.getNumSamples() == 1 );
+
     // end of FaceSet testing
 
     // UVs

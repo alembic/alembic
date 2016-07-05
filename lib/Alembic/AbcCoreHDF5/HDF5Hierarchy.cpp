@@ -91,9 +91,9 @@ static herr_t VisitAllGroupsCB( hid_t iGroup,
     if ( Oinfo.type == H5O_TYPE_GROUP )
     {
         H5Literate_by_name( iGroup, iName,
-                            H5_INDEX_NAME, 
+                            H5_INDEX_NAME,
                             H5_ITER_INC,
-                            NULL, 
+                            NULL,
                             VisitAllGroupsCB,
                             iOpData,
                             H5P_DEFAULT );
@@ -152,7 +152,7 @@ void HDF5Hierarchy::build( hid_t iFile )
 //-*****************************************************************************
 void HDF5Hierarchy::clear()
 {
-    for( ObjectMap::iterator it = m_objectMap.begin(); 
+    for( ObjectMap::iterator it = m_objectMap.begin();
          it != m_objectMap.end(); ++it )
     {
         it->second.m_attrs.clear();
@@ -168,8 +168,13 @@ void HDF5Hierarchy::addObject( hid_t iParent, const char *iName )
     H5Rcreate( &parentRef, iParent, ".", H5R_OBJECT, -1 );
     H5Rcreate( &childRef, iParent, iName, H5R_OBJECT, -1 );
 
-    m_objectMap[parentRef].m_children.push_back( 
+    m_objectMap[parentRef].m_children.push_back(
                                             ChildInfo( iName, childRef ) );
+}
+
+namespace {
+    const std::string g_strInfo( ".info" );
+    const std::string g_strMeta( ".meta" );
 }
 
 //-*****************************************************************************
@@ -188,8 +193,7 @@ void HDF5Hierarchy::addAttr( hid_t iParent, const char *iName )
     if ( len < 6 ) return;
 
     // property header mask
-    static const std::string strInfo( ".info" );
-    if ( strName.compare( len-5, 5, strInfo ) == 0 )
+    if ( strName.compare( len-5, 5, g_strInfo ) == 0 )
     {
         ABCA_ASSERT( !info.m_mask,
                      "A property header mask alreasy exists." );
@@ -198,14 +202,13 @@ void HDF5Hierarchy::addAttr( hid_t iParent, const char *iName )
         info.m_mask->m_numFields = 0;
 
         ReadSmallArray( iParent, iName, H5T_STD_U32LE,
-                        H5T_NATIVE_UINT32, 5, 
+                        H5T_NATIVE_UINT32, 5,
                         info.m_mask->m_numFields,
                         ( void * ) info.m_mask->m_data );
     }
 
     // meta data string
-    static const std::string strMeta( ".meta" );
-    if ( strName.compare( len-5, 5, strMeta ) == 0 )
+    if ( strName.compare( len-5, 5, g_strMeta ) == 0 )
     {
         ReadString( iParent, strName, info.m_meta );
     }
@@ -309,7 +312,7 @@ void HDF5Hierarchy::makeCompactObjectHierarchy(
     std::vector<uint32_t>       &oMaskBits,
     std::vector<char>           &oHasMeta,
     std::vector<std::string>    &oMetaStrs
-    ) 
+    )
 {
     oObjectRefs.clear();
 
@@ -336,10 +339,10 @@ void HDF5Hierarchy::makeCompactObjectHierarchy(
         // children
         {
             ChildInfoArray& array = info.m_children;
-        
+
             oChildrenSizes.push_back( array.size() );
 
-            for( ChildInfoArray::iterator itc = array.begin(); 
+            for( ChildInfoArray::iterator itc = array.begin();
                  itc != array.end(); ++itc )
             {
                 oChildrenNames.push_back( itc->m_name );
@@ -350,10 +353,10 @@ void HDF5Hierarchy::makeCompactObjectHierarchy(
         // attributes, property header masks and meta data string
         {
             AttrInfoArray& array = info.m_attrs;
-        
+
             oAttrSizes.push_back( array.size() );
 
-            for( AttrInfoArray::iterator itc = array.begin(); 
+            for( AttrInfoArray::iterator itc = array.begin();
                  itc != array.end(); ++itc )
             {
                 // attribute

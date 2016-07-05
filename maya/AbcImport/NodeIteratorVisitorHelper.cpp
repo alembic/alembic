@@ -42,6 +42,7 @@
 #include <Alembic/AbcCoreFactory/IFactory.h>
 
 #include <maya/MDoubleArray.h>
+#include <maya/MFloatArray.h>
 #include <maya/MIntArray.h>
 #include <maya/MFnIntArrayData.h>
 #include <maya/MPlug.h>
@@ -50,6 +51,7 @@
 #include <maya/MStringArray.h>
 #include <maya/MFnData.h>
 #include <maya/MFnDoubleArrayData.h>
+#include <maya/MFnFloatArrayData.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnNumericData.h>
@@ -490,7 +492,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 }
                 else
                 {
-                    MFnDoubleArrayData fnData;
+                    MFnFloatArrayData fnData;
                     MObject arrObj;
 
                     if (iProp.isConstant())
@@ -498,7 +500,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                         Alembic::AbcCoreAbstract::ArraySamplePtr samp;
                         iProp.get(samp);
 
-                        MDoubleArray arr((float *) samp->getData(),
+                        MFloatArray arr((float *) samp->getData(),
                             static_cast<unsigned int>(samp->size()));
                         arrObj = fnData.create(arr);
                         if (!plug.isNull())
@@ -509,12 +511,12 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                     }
                     else
                     {
-                        MDoubleArray arr;
+                        MFloatArray arr;
                         arrObj = fnData.create(arr);
                     }
 
                     attrObj = typedAttr.create(attrName, attrName,
-                        MFnData::kDoubleArray, arrObj);
+                        MFnData::kFloatArray, arrObj);
                 }
 
             }
@@ -785,7 +787,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 {
                     attrObj = numAttr.create(attrName, attrName,
                         MFnNumericData::k4Double);
-                    numAttr.setDefault(val[0], val[1], val[2], val[4]);
+                    numAttr.setDefault(val[0], val[1], val[2], val[3]);
                 }
             }
         }
@@ -1144,7 +1146,7 @@ addScalarExtentFourProp(Alembic::Abc::IScalarProperty& iProp,
     else if (extent == 4)
     {
         attrObj = numAttr.create(attrName, attrName, type4);
-        numAttr.setDefault(val[0], val[1], val[2], val[4]);
+        numAttr.setDefault(val[0], val[1], val[2], val[3]);
     }
 
     return VALID_NOTDONE;
@@ -2864,6 +2866,7 @@ MString createScene(ArgData & iArgData)
     Alembic::AbcCoreFactory::IFactory factory;
     factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
     archive = factory.getArchive(iArgData.mFileNames);
+
     if (!archive.valid())
     {
         MString theError = (*iArgData.mFileNames.begin()).c_str();
@@ -2904,6 +2907,8 @@ MString createScene(ArgData & iArgData)
     {
         visitor.applyShaderSelection();
     }
+
+    visitor.addFaceSetsAfterConnection();
 
     return returnName;
 }

@@ -525,7 +525,7 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, joint,
-            iTimeIndex, iArgs));
+            iTimeIndex, iArgs, false));
 
         if (!iArgs.worldSpace)
         {
@@ -580,7 +580,7 @@ MayaTransformWriter::MayaTransformWriter(Alembic::AbcGeom::OObject & iParent,
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, trans,
-            iTimeIndex, iArgs));
+            iTimeIndex, iArgs, false));
 
         if (!iArgs.worldSpace)
         {
@@ -733,7 +733,7 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, joint,
-            iTimeIndex, iArgs));
+            iTimeIndex, iArgs, false));
 
         pushTransformStack(joint, iTimeIndex == 0);
     }
@@ -757,7 +757,7 @@ MayaTransformWriter::MayaTransformWriter(MayaTransformWriter & iParent,
         }
 
         mAttrs = AttributesWriterPtr(new AttributesWriter(cp, up, obj, trans,
-            iTimeIndex, iArgs));
+            iTimeIndex, iArgs, false));
 
         pushTransformStack(trans, iTimeIndex == 0);
     }
@@ -956,16 +956,8 @@ void MayaTransformWriter::pushTransformStack(const MFnTransform & iTrans,
 void MayaTransformWriter::pushTransformStack(const MFnIkJoint & iJoint,
     bool iForceStatic)
 {
-    // check joints that are driven by Maya FBIK
-    // Maya FBIK has no connection to joints' TRS plugs
-    // but TRS of joints are driven by FBIK, they are not static
-    // Maya 2012's new HumanIK has connections to joints.
-    // FBIK is a special case.
-    bool forceAnimated = false;
-    MStatus status = MS::kSuccess;
-    if (iJoint.hikJointName(&status).length() > 0 && status) {
-        forceAnimated = true;
-    }
+    // Some special cases that the joint is animated but has no input connections.
+    bool forceAnimated = util::isDrivenByFBIK(iJoint) || util::isDrivenBySplineIK(iJoint);
 
     // inspect the translate
     addTranslate(iJoint, "translate", "translateX", "translateY", "translateZ",

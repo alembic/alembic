@@ -1,8 +1,6 @@
-#!/bin/tcsh
-
 ##-*****************************************************************************
 ##
-## Copyright (c) 2013,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -35,17 +33,13 @@
 ##
 ##-*****************************************************************************
 
-# setup some required lib paths
-setenv LD_LIBRARY_PATH "@BOOST_LIBRARY_DIR@"
-setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:@ALEMBIC_PYILMBASE_LIBRARY_DIRECTORY@"
-setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:@ILMBASE_LIBRARY_DIR@"
+ADD_SUBDIRECTORY(AbcEcho)
+ADD_SUBDIRECTORY(AbcLs)
+ADD_SUBDIRECTORY(AbcTree)
+ADD_SUBDIRECTORY(AbcStitcher)
 
-# setup some required python paths
-setenv PYTHONPATH "@ALEMBIC_PYILMBASE_PYIMATH_MODULE_DIRECTORY@"
-setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_BINARY_DIR@/python/PyAlembic"
-setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_BINARY_DIR@/python/PyAbcOpenGL"
-setenv PYTHONPATH "${PYTHONPATH}:@PROJECT_SOURCE_DIR@/python/examples/AbcView/lib"
-
-# run it
-@PROJECT_SOURCE_DIR@/python/examples/AbcView/bin/abcview $*
-
+IF (USE_HDF5)
+    ADD_SUBDIRECTORY(AbcConvert)
+ELSE()
+    MESSAGE(STATUS "Skipping AbcConvert: requires USE_HDF5")
+ENDIF()

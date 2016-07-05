@@ -166,7 +166,7 @@ void WriteDimensions( Ogawa::OGroupPtr iGroup,
 
     if ( iPod != Alembic::Util::kStringPOD &&
          iPod != Alembic::Util::kWstringPOD &&
-         rank == 1 )
+         rank <= 1 )
     {
         // we can figure out the dimensions based on the size  of the data
         // so just set empty data.
@@ -300,32 +300,51 @@ void WritePropertyInfo( std::vector< Util::uint8_t > & ioData,
 
     Util::uint32_t info = 0;
 
+    // Our bitmasks look like this:
+    //
+    // Property Type mask (Scalar, Array, or Compound) 0x0003
     // 0000 0000 0000 0000 0000 0000 0000 0011
-    static const Util::uint32_t ptypeMask = 0x0003;
-
+    //
+    // Our Pod type mask 0x003c
+    // 0000 0000 0000 0000 0000 0000 0011 1100
+    //
+    // Has a time sampling index mask 0x0040
+    // 0000 0000 0000 0000 0000 0000 0100 0000
+    //
+    // no repeats mask 0x0080
+    // 0000 0000 0000 0000 0000 0000 1000 0000
+    //
+    // Extent value mask 0xff00
+    // 0000 0000 0000 0000 1111 1111 0000 0000
+    //
+    // Our bitmasks look like this:
+    //
+    // Property Type mask (Scalar, Array, or Compound) 0x0003
+    // 0000 0000 0000 0000 0000 0000 0000 0011
+    //
+    // Byte size hint for first/last non repeated sample 0x000c
     // 0000 0000 0000 0000 0000 0000 0000 1100
-    static const Util::uint32_t sizeHintMask = 0x000c;
-
+    //
+    // Our Pod type mask 0x00f0
     // 0000 0000 0000 0000 0000 0000 1111 0000
-    static const Util::uint32_t podMask = 0x00f0;
-
+    //
+    // Has a time sampling index mask 0x0100
     // 0000 0000 0000 0000 0000 0001 0000 0000
-    static const Util::uint32_t hasTsidxMask = 0x0100;
-
+    //
+    // Whether the first/last index exists mask 0x200
     // 0000 0000 0000 0000 0000 0010 0000 0000
-    static const Util::uint32_t needsFirstLastMask = 0x0200;
-
+    //
+    // Whether the size of the data changes from sample to sample mask 0x400
     // 0000 0000 0000 0000 0000 0100 0000 0000
-    static const Util::uint32_t homogenousMask = 0x400;
-
+    //
+    // Mask for whether the data is the same over all samples 0x800
     // 0000 0000 0000 0000 0000 1000 0000 0000
-    static const Util::uint32_t constantMask = 0x800;
-
+    //
+    // Extent value mask 0xff000
     // 0000 0000 0000 1111 1111 0000 0000 0000
-    static const Util::uint32_t extentMask = 0xff000;
-
+    //
+    // Meta data index mask 0xff00000
     // 0000 1111 1111 0000 0000 0000 0000 0000
-    static const Util::uint32_t metaDataIndexMask = 0xff00000;
 
     std::string metaData = iHeader.getMetaData().serialize();
     Util::uint32_t metaDataSize = metaData.size();
@@ -365,49 +384,49 @@ void WritePropertyInfo( std::vector< Util::uint8_t > & ioData,
         sizeHint = 2;
     }
 
-    info |= sizeHintMask & ( sizeHint << 2 );
+    info |= 0x000c & ( sizeHint << 2 );
 
     Util::uint32_t metaDataIndex = iMap->getIndex( metaData );
 
-    info |= metaDataIndexMask & ( metaDataIndex << 20 );
+    info |= 0xff00000 & ( metaDataIndex << 20 );
 
     // compounds are treated differently
     if ( !iHeader.isCompound() )
     {
         // Slam the property type in there.
-        info |= ptypeMask & ( Util::uint32_t )iHeader.getPropertyType();
+        info |= 0x0003 & ( Util::uint32_t )iHeader.getPropertyType();
 
         // arrays may be scalar like, scalars are already scalar like
         info |= ( Util::uint32_t ) isScalarLike;
 
         Util::uint32_t pod = ( Util::uint32_t )iHeader.getDataType().getPod();
-        info |= podMask & ( pod << 4 );
+        info |= 0x00f0 & ( pod << 4 );
 
         if (iTimeSamplingIndex != 0)
         {
-            info |= hasTsidxMask;
+            info |= 0x0100;
         }
 
         bool needsFirstLast = false;
 
         if (iFirstChangedIndex == 0 && iLastChangedIndex == 0)
         {
-            info |= constantMask;
+            info |= 0x800;
         }
         else if (iFirstChangedIndex != 1 ||
                  iLastChangedIndex != iNumSamples - 1)
         {
-            info |= needsFirstLastMask;
+            info |= 0x0200;
             needsFirstLast = true;
         }
 
         Util::uint32_t extent =
             ( Util::uint32_t )iHeader.getDataType().getExtent();
-        info |= extentMask & ( extent << 12 );
+        info |= 0xff000 & ( extent << 12 );
 
         if ( isHomogenous )
         {
-            info |= homogenousMask;
+            info |= 0x400;
         }
 
         ABCA_ASSERT( iFirstChangedIndex <= iNumSamples &&

@@ -87,13 +87,18 @@ class animPropTest(unittest.TestCase):
         MayaCmds.setKeyframe(nodeName, value=3.141592654,
             attribute='SPT_double', t=12)
 
-    def verifyProps( self, root, nodeName ):
+    def verifyProps( self, root, nodeName, wfgAndMoblur ):
 
         # write to files
-        MayaCmds.AbcExport(j='-atp SPT_ -fr 1 14 -root %s -file %s' % (root, self.__files[1]))
-        MayaCmds.AbcExport(j='-atp SPT_ -fr 15 24 -root %s -file %s' % (root, self.__files[2]))
+        if wfgAndMoblur:
+            # reset __files so we wont try to tear down files that dont exist
+            self.__files = [self.__files[0]]
+            MayaCmds.AbcExport(j='-atp SPT_ -fr 1 24 -wfg -frs -0.25 -frs 0.0 -frs 0.25 -root %s -file %s' % (root, self.__files[0]))
+        else:
+            MayaCmds.AbcExport(j='-atp SPT_ -fr 1 14 -root %s -file %s' % (root, self.__files[1]))
+            MayaCmds.AbcExport(j='-atp SPT_ -fr 15 24 -root %s -file %s' % (root, self.__files[2]))
 
-        subprocess.call(self.__abcStitcher + self.__files)
+            subprocess.call(self.__abcStitcher + self.__files)
 
         # read file and verify data
         MayaCmds.AbcImport(self.__files[0], mode='open')
@@ -146,32 +151,65 @@ class animPropTest(unittest.TestCase):
     def testAnimTransformProp(self):
         nodeName = MayaCmds.createNode('transform')
         self.setAndKeyProps(nodeName)
-        self.verifyProps(nodeName, nodeName)
+        self.verifyProps(nodeName, nodeName, False)
 
     def testAnimCameraProp(self):
         root = MayaCmds.camera()
         nodeName = root[0]
         shapeName = root[1]
         self.setAndKeyProps(shapeName)
-        self.verifyProps(nodeName, shapeName)
+        self.verifyProps(nodeName, shapeName, False)
 
     def testAnimMeshProp(self):
         nodeName = 'polyCube'
         shapeName = 'polyCubeShape'
         MayaCmds.polyCube(name=nodeName, ch=False)
         self.setAndKeyProps(shapeName)
-        self.verifyProps(nodeName, shapeName)
+        self.verifyProps(nodeName, shapeName, False)
 
     def testAnimNurbsCurvePropReadWrite(self):
         nodeName = 'nCurve'
         shapeName = 'curveShape1'
         MayaCmds.curve(p=[(0, 0, 0), (3, 5, 6), (5, 6, 7), (9, 9, 9)], name=nodeName)
         self.setAndKeyProps(shapeName)
-        self.verifyProps(nodeName, shapeName)
+        self.verifyProps(nodeName, shapeName, False)
 
     def testAnimNurbsSurfaceProp(self):
         nodeName = MayaCmds.sphere(ch=False)[0]
         nodeNameList = MayaCmds.pickWalk(d='down')
         shapeName = nodeNameList[0]
         self.setAndKeyProps(shapeName)
-        self.verifyProps(nodeName, shapeName)
+        self.verifyProps(nodeName, shapeName, False)
+
+    def testWFGAnimTransformProp(self):
+        nodeName = MayaCmds.createNode('transform')
+        self.setAndKeyProps(nodeName)
+        self.verifyProps(nodeName, nodeName, True)
+
+    def testWFGAnimCameraProp(self):
+        root = MayaCmds.camera()
+        nodeName = root[0]
+        shapeName = root[1]
+        self.setAndKeyProps(shapeName)
+        self.verifyProps(nodeName, shapeName, True)
+
+    def testWFGAnimMeshProp(self):
+        nodeName = 'polyCube'
+        shapeName = 'polyCubeShape'
+        MayaCmds.polyCube(name=nodeName, ch=False)
+        self.setAndKeyProps(shapeName)
+        self.verifyProps(nodeName, shapeName, True)
+
+    def testWFGAnimNurbsCurvePropReadWrite(self):
+        nodeName = 'nCurve'
+        shapeName = 'curveShape1'
+        MayaCmds.curve(p=[(0, 0, 0), (3, 5, 6), (5, 6, 7), (9, 9, 9)], name=nodeName)
+        self.setAndKeyProps(shapeName)
+        self.verifyProps(nodeName, shapeName, True)
+
+    def testWFGAnimNurbsSurfaceProp(self):
+        nodeName = MayaCmds.sphere(ch=False)[0]
+        nodeNameList = MayaCmds.pickWalk(d='down')
+        shapeName = nodeNameList[0]
+        self.setAndKeyProps(shapeName)
+        self.verifyProps(nodeName, shapeName, True)

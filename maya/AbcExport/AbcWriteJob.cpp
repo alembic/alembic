@@ -855,6 +855,8 @@ bool AbcWriteJob::eval(double iFrame)
             throw std::runtime_error(theError);
         }
 
+        mArgs.setFirstAnimShape = (iFrame == *mShapeFrames.begin());
+
         util::ShapeSet::const_iterator end = mArgs.dagPaths.end();
         GetMembersMap gmMap;
         for (util::ShapeSet::const_iterator it = mArgs.dagPaths.begin();
