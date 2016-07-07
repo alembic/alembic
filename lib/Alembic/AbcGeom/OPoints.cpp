@@ -163,6 +163,11 @@ void OPointsSchema::setFromPrevious()
 
     m_selfBoundsProperty.setFromPrevious();
 
+    if ( m_velocitiesProperty )
+    {
+        m_velocitiesProperty.setFromPrevious();
+    }
+
     if ( m_widthsParam )
     {
         m_widthsParam.setFromPrevious();
@@ -184,6 +189,11 @@ void OPointsSchema::setTimeSampling( uint32_t iIndex )
     if ( m_widthsParam )
     {
         m_widthsParam.setTimeSampling( iIndex );
+    }
+
+    if ( m_velocitiesProperty )
+    {
+        m_velocitiesProperty.setTimeSampling( iIndex );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();
