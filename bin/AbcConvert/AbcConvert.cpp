@@ -39,6 +39,31 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 
+typedef Alembic::AbcCoreFactory::IFactory IFactoryNS;
+
+enum ArgMode
+{
+    kOptions,
+    kInFiles,
+    kOutFile,
+};
+
+class ConversionOptions
+{
+public:
+
+    ConversionOptions()
+    {
+        toType = IFactoryNS::kUnknown;
+        force = false;
+    }
+
+    std::vector<std::string>    inFiles;
+    std::string                 outFile;
+    IFactoryNS::CoreType        toType;
+    bool                        force;
+};
+
 void copyProps(Alembic::Abc::ICompoundProperty & iRead,
     Alembic::Abc::OCompoundProperty & iWrite)
 {
@@ -140,79 +165,191 @@ void copyObject(Alembic::Abc::IObject & iIn,
     }
 }
 
-int main(int argc, char *argv[])
+void displayHelp()
 {
+    printf ("Usage (single file conversion):\n");
+    printf ("abcconvert [-force] OPTION inFile outFile\n");
+    printf ("Usage (convert multiple, layered files to single file):\n");
+    printf ("abcconvert OPTION -in inFile1 inFile2 ... -out outFile\n");
+    printf ("Used to convert an Alembic file from one type to another.\n\n");
+    printf ("If -force is not provided and inFile happens to be the same\n");
+    printf ("type as OPTION no conversion will be done and a message will\n");
+    printf ("be printed out.\n");
+    printf ("OPTION has to be one of these:\n\n");
+    printf ("  -toHDF   Convert to HDF.\n");
+    printf ("  -toOgawa Convert to Ogawa.\n");
+}
 
-    std::string toType;
-    std::string inFile;
-    std::string outFile;
-    std::string forceStr;
+bool parseArgs( int iArgc, char *iArgv[], ConversionOptions &oOptions, bool &oDoConversion )
+{
+    oDoConversion = true;
+    ArgMode argMode = kOptions;
 
-    if (argc == 4)
+    for( int i = 1; i < iArgc; i++ )
     {
-        toType = argv[1];
-        inFile = argv[2];
-        outFile = argv[3];
-    }
-    else if (argc == 5)
-    {
-        forceStr = argv[1];
-        toType = argv[2];
-        inFile = argv[3];
-        outFile = argv[4];
-    }
+        bool argHandled = true;
+        std::string arg = iArgv[i];
 
-    if ((argc == 4 || argc == 5) && (forceStr.empty() || forceStr == "-force"))
-    {
-        if (inFile == outFile)
+        switch( argMode )
         {
-            printf("Error: inFile and outFile must not be the same!\n");
-            return 1;
+            case kOptions:
+            {
+                if(arg == "-toHDF")
+                {
+                    oOptions.toType = IFactoryNS::kHDF5;
+                }
+                else if(arg == "-toOgawa")
+                {
+                    oOptions.toType = IFactoryNS::kOgawa;
+                }
+                else if(arg == "-force")
+                {
+                    oOptions.force = true;
+                }
+                else if(arg == "-in" )
+                {
+                    argMode = kInFiles;
+                }
+                else if( (arg == "-help") || (arg == "--help") )
+                {
+                    displayHelp();
+                    oDoConversion = false;
+                    return true;
+                }
+                else if(arg.c_str()[0] == '-')
+                {
+                    argHandled = false;
+                }
+                else
+                {
+                    argMode = kInFiles;
+                    i--;
+                }
+            }
+            break;
+
+            case kInFiles:
+            {
+                if(arg == "-out")
+                {
+                    argMode = kOutFile;
+                }
+                else if( i == (iArgc - 1) )
+                {
+                    argMode = kOutFile;
+                    i--;
+                }
+                else
+                {
+                    oOptions.inFiles.push_back( arg );
+                }
+            }
+            break;
+
+            case kOutFile:
+            {
+                if(oOptions.outFile == "")
+                {
+                    oOptions.outFile = arg;
+                }
+                else
+                {
+                    argHandled = false;
+                }
+            }
+            break;
         }
 
-        if (toType != "-toHDF" && toType != "-toOgawa")
+        if( !argHandled )
         {
-            printf("Error: Unknown conversion type specified %s\n",
-                   toType.c_str());
+            displayHelp();
+            oDoConversion = false;
+            return false;
+        }
+    }
+
+    if( (oOptions.inFiles.size() == 0) ||
+        (oOptions.outFile.length() == 0) ||
+        (oOptions.toType == IFactoryNS::kUnknown) )
+    {
+        printf( "Bad syntax!\n\n");
+        displayHelp();
+        oDoConversion = false;
+        return false;
+    }
+
+    return true;
+}
+
+int main(int argc, char *argv[])
+{
+    ConversionOptions options;
+    bool doConversion = false;
+
+    if (parseArgs( argc, argv, options, doConversion ) == false)
+        return 1;
+
+    if (doConversion)
+    {
+        for( std::vector<std::string>::const_iterator inFile = options.inFiles.begin(); inFile != options.inFiles.end(); inFile++ )
+        {
+            if (*inFile == options.outFile)
+            {
+                printf("Error: inFile and outFile must not be the same!\n");
+                return 1;
+            }
+        }
+
+        if (options.toType != IFactoryNS::kHDF5 && options.toType != IFactoryNS::kOgawa)
+        {
             printf("Currently only -toHDF and -toOgawa are supported.\n");
             return 1;
         }
 
         Alembic::AbcCoreFactory::IFactory factory;
         Alembic::AbcCoreFactory::IFactory::CoreType coreType;
-        Alembic::Abc::IArchive archive = factory.getArchive(inFile, coreType);
-        if (!archive.valid())
+
+        Alembic::Abc::IArchive archive;
+        if(options.inFiles.size() == 1)
         {
-            printf("Error: Invalid Alembic file specified: %s\n",
-                   inFile.c_str());
-            return 1;
+            archive = factory.getArchive(*options.inFiles.begin(), coreType);
+            if (!archive.valid())
+            {
+                printf("Error: Invalid Alembic file specified: %s\n",
+                       options.inFiles.begin()->c_str());
+                return 1;
+            }
+            else if ( !options.force && (
+                (coreType == IFactoryNS::kHDF5 &&
+                 options.toType == IFactoryNS::kHDF5) ||
+                (coreType == IFactoryNS::kOgawa &&
+                 options.toType == IFactoryNS::kOgawa)) )
+            {
+                printf("Warning: Alembic file specified: %s\n", options.inFiles.begin()->c_str());
+                printf("is already of the type you want to convert to.\n");
+                printf("Please specify -force if you want to do this anyway.\n");
+                return 1;
+            }
         }
-        else if ( forceStr != "-force" && (
-            (coreType == Alembic::AbcCoreFactory::IFactory::kHDF5 &&
-             toType == "-toHDF") ||
-            (coreType == Alembic::AbcCoreFactory::IFactory::kOgawa &&
-             toType == "-toOgawa")) )
+        else
         {
-            printf("Warning: Alembic file specified: %s\n",inFile.c_str());
-            printf("is already of the type you want to convert to.\n");
-            printf("Please specify -force if you want to do this anyway.\n");
-            return 1;
+            archive = factory.getArchive(options.inFiles, coreType);
         }
 
         Alembic::Abc::IObject inTop = archive.getTop();
         Alembic::Abc::OArchive outArchive;
-        if (toType == "-toHDF")
+        if (options.toType == IFactoryNS::kHDF5)
         {
             outArchive = Alembic::Abc::OArchive(
                 Alembic::AbcCoreHDF5::WriteArchive(),
-                outFile, inTop.getMetaData(),
+                options.outFile, inTop.getMetaData(),
                 Alembic::Abc::ErrorHandler::kThrowPolicy);
         }
-        else if (toType == "-toOgawa")
+        else if (options.toType == IFactoryNS::kOgawa)
         {
             outArchive = Alembic::Abc::OArchive(
                 Alembic::AbcCoreOgawa::WriteArchive(),
-                outFile, inTop.getMetaData(),
+                options.outFile, inTop.getMetaData(),
                 Alembic::Abc::ErrorHandler::kThrowPolicy);
         }
 
@@ -225,17 +362,7 @@ int main(int argc, char *argv[])
 
         Alembic::Abc::OObject outTop = outArchive.getTop();
         copyObject(inTop, outTop);
-        return 0;
     }
 
-    printf ("Usage: abcconvert [-force] OPTION inFile outFile\n");
-    printf ("Used to convert an Alembic file from one type to another.\n\n");
-    printf ("If -force is not provided and inFile happens to be the same\n");
-    printf ("type as OPTION no conversion will be done and a message will\n");
-    printf ("be printed out.\n");
-    printf ("OPTION has to be one of these:\n\n");
-    printf ("  -toHDF   Convert to HDF.\n");
-    printf ("  -toOgawa Convert to Ogawa.\n");
-
-    return 1;
+    return 0;
 }
