@@ -81,10 +81,6 @@ protected:
         //! ...
         PROP_PTR iPtr,
 
-        //! The flag indicating that the intention
-        //! is to wrap the existing pointer.
-        WrapExistingFlag /* iWrapFlag */,
-
         //! The error handling.
         //! ...
         ErrorHandler::Policy iPolicy );
@@ -196,7 +192,6 @@ template <class PROP_PTR>
 inline OBasePropertyT<PROP_PTR>::OBasePropertyT
 (
     PROP_PTR iPtr,
-    WrapExistingFlag /* iFlag */,
     ErrorHandler::Policy iPolicy )
   : m_property( iPtr )
 {

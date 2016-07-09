@@ -53,12 +53,14 @@ public:
                 AbcA::TimeSamplingPtr iTimeSampling =
                 AbcA::TimeSamplingPtr(),
                 uint32_t iTimeIndex = 0,
-                SchemaInterpMatching iMatch = kNoMatching )
+                SchemaInterpMatching iMatch = kNoMatching,
+                SparseFlag iSparse = kFull )
       : m_errorHandlerPolicy( iPolicy ),
         m_metaData( iMetaData ),
         m_timeSampling( iTimeSampling ),
         m_timeSamplingIndex( iTimeIndex ),
-        m_matching( iMatch ){}
+        m_matching( iMatch ),
+        m_sparse( iSparse ) {}
 
     void operator()( const uint32_t & iTimeSamplingIndex)
     { m_timeSamplingIndex = iTimeSamplingIndex; }
@@ -75,6 +77,9 @@ public:
     void operator()( const SchemaInterpMatching &iMatching )
     { m_matching = iMatching; }
 
+    void operator()( const SparseFlag &iSparse )
+    { m_sparse = iSparse; }
+
     ErrorHandler::Policy getErrorHandlerPolicy() const
     { return m_errorHandlerPolicy; }
 
@@ -90,12 +95,16 @@ public:
     SchemaInterpMatching getSchemaInterpMatching() const
     { return m_matching; }
 
+    bool isSparse() const
+    { return m_sparse == kSparse; }
+
 private:
     ErrorHandler::Policy m_errorHandlerPolicy;
     AbcA::MetaData m_metaData;
     AbcA::TimeSamplingPtr m_timeSampling;
     uint32_t m_timeSamplingIndex;
     SchemaInterpMatching m_matching;
+    SparseFlag m_sparse;
 };
 
 //-*****************************************************************************
@@ -132,6 +141,10 @@ public:
         m_whichVariant( kArgumentSchemaInterpMatching ),
         m_variant( iMatch ) {}
 
+    Argument( SparseFlag iSparse ) :
+        m_whichVariant( kArgumentSparse ),
+        m_variant( iSparse ) {}
+
     void setInto( Arguments &iArgs ) const
     {
         switch ( m_whichVariant )
@@ -154,6 +167,10 @@ public:
 
             case kArgumentSchemaInterpMatching:
                 iArgs( m_variant.schemaInterpMatching );
+            break;
+
+            case kArgumentSparse:
+                iArgs( m_variant.sparseFlag );
             break;
 
             // no-op
@@ -180,7 +197,8 @@ private:
         kArgumentTimeSamplingIndex,
         kArgumentMetaData,
         kArgumentTimeSamplingPtr,
-        kArgumentSchemaInterpMatching
+        kArgumentSchemaInterpMatching,
+        kArgumentSparse
     } const m_whichVariant;
 
     union ArgumentVariant
@@ -202,11 +220,15 @@ private:
         explicit ArgumentVariant( SchemaInterpMatching iMatch ) :
             schemaInterpMatching( iMatch ) {}
 
+        explicit ArgumentVariant( SparseFlag iSparse ) :
+            sparseFlag( iSparse ) {}
+
         ErrorHandler::Policy policy;
         Alembic::Util::uint32_t timeSamplingIndex;
         const AbcA::MetaData * metaData;
         const AbcA::TimeSamplingPtr * timeSamplingPtr;
         SchemaInterpMatching schemaInterpMatching;
+        SparseFlag sparseFlag;
     } const m_variant;
 };
 
@@ -291,6 +313,19 @@ inline SchemaInterpMatching GetSchemaInterpMatching
     iArg1.setInto( args );
     iArg2.setInto( args );
     return args.getSchemaInterpMatching();
+}
+
+//-*****************************************************************************
+inline bool IsSparse
+( const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument() )
+{
+    Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    iArg2.setInto( args );
+    return args.isSparse();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

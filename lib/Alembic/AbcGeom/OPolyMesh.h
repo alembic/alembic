@@ -49,7 +49,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ALEMBIC_EXPORT OPolyMeshSchema 
+class ALEMBIC_EXPORT OPolyMeshSchema
     : public OGeomBaseSchema<PolyMeshSchemaInfo>
 {
 public:
@@ -130,15 +130,15 @@ public:
 
         bool isPartialSample() const
         {
-        	if( !m_positions.getData() && !m_indices.getData() && !m_counts.getData() )
-        	{
-        		if( m_uvs.getVals() || m_normals.getVals() || m_velocities.getData() )
-        		{
-        			return true;
-        		}
-        	}
+            if( !m_positions.getData() && !m_indices.getData() && !m_counts.getData() )
+            {
+                if( m_uvs.getVals() || m_normals.getVals() || m_velocities.getData() )
+                {
+                    return true;
+                }
+            }
 
-        	return false;
+            return false;
         }
 
     protected:
@@ -254,14 +254,14 @@ public:
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling() const
     {
-    	if( m_positionsProperty.valid() )
-    	{
-    		return m_positionsProperty.getTimeSampling();
-    	}
-    	else
-		{
-			return getObject().getArchive().getTimeSampling( 0 );
-		}
+        if( m_positionsProperty.valid() )
+        {
+            return m_positionsProperty.getTimeSampling();
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
     }
 
     //-*************************************************************************

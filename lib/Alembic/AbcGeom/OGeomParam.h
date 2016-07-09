@@ -143,8 +143,19 @@ public:
 
     OTypedGeomParam() {}
 
-    template <class CPROP>
-    OTypedGeomParam( CPROP iParent,
+    OTypedGeomParam( OCompoundProperty iParent,
+                     const std::string &iName,
+                     bool iIsIndexed,
+                     GeometryScope iScope,
+                     size_t iArrayExtent,
+                     const Argument &iArg0 = Argument(),
+                     const Argument &iArg1 = Argument(),
+                     const Argument &iArg2 = Argument()
+                 )
+    : OTypedGeomParam( iParent.getPtr(), iName, iIsIndexed, iScope,
+                       iArrayExtent, iArg0, iArg1, iArg2 ) {}
+
+    OTypedGeomParam( AbcA::CompoundPropertyWriterPtr iParent,
                      const std::string &iName,
                      bool iIsIndexed,
                      GeometryScope iScope,
@@ -198,7 +209,7 @@ public:
         if (tsPtr)
         {
             AbcA::CompoundPropertyWriterPtr parent =
-                GetCompoundPropertyWriterPtr(iParent);
+                GetCompoundPropertyWriterPtr( iParent );
             tsIndex =
                 parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
         }
@@ -218,13 +229,11 @@ public:
         }
     }
 
-    template <class PROP>
-    OTypedGeomParam( PROP iThis,
-                     WrapExistingFlag iWrapFlag,
+    OTypedGeomParam( OCompoundProperty iThis,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
     {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam( wrap )" );
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam( OCompound )" );
 
         const AbcA::PropertyHeader &ph = iThis.getHeader();
 
@@ -233,22 +242,30 @@ public:
                      "Property " << ph.getName() << " is not an "
                      << "OTypedGeomParam" );
 
-        ABCA_ASSERT( ! ph.isScalar(), "Property " << ph.getName()
-                     << " cannot be an OTypedGeomParam" );
+        m_cprop = Abc::OCompoundProperty( iThis, iArg0, iArg1 );
+        m_valProp = prop_type( m_cprop, ".vals" );
+        m_indicesProperty = Abc::OUInt32ArrayProperty( m_cprop, ".indices" );
 
-        if ( ph.isCompound() )
-        {
-            m_cprop = Abc::OCompoundProperty( iThis, iWrapFlag, iArg0, iArg1 );
-            m_valProp = prop_type( m_cprop, ".vals" );
-            m_indicesProperty = Abc::OUInt32ArrayProperty( m_cprop, ".indices" );
+        m_isIndexed = true;
 
-            m_isIndexed = true;
-        }
-        else
-        {
-            m_valProp = prop_type( iThis, iWrapFlag, iArg0, iArg1 );
-            m_isIndexed = false;
-        }
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    OTypedGeomParam( OArrayProperty iThis,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument() )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam( OArray )" );
+
+        const AbcA::PropertyHeader &ph = iThis.getHeader();
+
+        ABCA_ASSERT( matches( ph,
+                              Abc::GetSchemaInterpMatching( iArg0, iArg1 ) ),
+                     "Property " << ph.getName() << " is not an "
+                     << "OTypedGeomParam" );
+
+        m_valProp = prop_type( iThis, iArg0, iArg1 );
+        m_isIndexed = false;
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
