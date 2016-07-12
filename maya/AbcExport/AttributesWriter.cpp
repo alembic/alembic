@@ -1014,13 +1014,6 @@ bool MFnTypedDataToSample(MFnData::Type iType,
                           const MPlug& iPlug,
                           Abc::OScalarProperty & oProp)
 {
-    size_t numElements =  iPlug.numElements();
-    bool isArray = iPlug.isArray();
-
-    size_t dimSize = numElements;
-    if (!isArray)
-        dimSize = 1;
-
     switch (iType)
     {
         case MFnData::kNumeric:
@@ -1070,13 +1063,6 @@ bool MFnTypedDataToSample(MFnData::Type iType,
                           const MPlug& iPlug,
                           Abc::OArrayProperty & oProp)
 {
-    size_t numElements =  iPlug.numElements();
-    bool isArray = iPlug.isArray();
-
-    size_t dimSize = numElements;
-    if (!isArray)
-        dimSize = 1;
-
     switch (iType)
     {
         case MFnData::kNumeric:

@@ -220,7 +220,6 @@ getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmM
     }
 
     // Iteration through the list
-    MStatus             retStat = MS::kFailure;
     MDagPath            curDagPath;
     MItSelectionList    itSelList( selList );
     for( ; itSelList.isDone()!=true; itSelList.next() )
@@ -338,8 +337,8 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
-    
-    // if there is flag "autoSubd", and NO "SubDivisionMesh" was defined, 
+
+    // if there is flag "autoSubd", and NO "SubDivisionMesh" was defined,
     // let's check whether the mesh has crease edge, crease vertex or holes
     // then the mesh will be treated as SubD
     bool hasToWriteSubd = false;
