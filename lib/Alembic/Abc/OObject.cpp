@@ -44,6 +44,19 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+OObject::OObject( OObject iParent,
+                  const std::string &iName,
+                  const Argument &iArg0,
+                  const Argument &iArg1,
+                  const Argument &iArg2 )
+{
+    init( iParent.getPtr(),
+          iName,
+          GetErrorHandlerPolicy( iParent ),
+          iArg0, iArg1, iArg2 );
+}
+
+//-*****************************************************************************
 OObject::~OObject()
 {
     // Nothing for now.
@@ -245,7 +258,7 @@ bool OObject::addChildInstance( OObject iTarget, const std::string& iName )
     AbcA::MetaData md;
     md.set("isInstance", "1");
 
-    OObject instanceChild = OObject( getPtr(), iName, md );
+    OObject instanceChild = OObject( *this, iName, md );
 
     OStringProperty instanceProp =
         OStringProperty( instanceChild.getProperties(), ".instanceSource" );
