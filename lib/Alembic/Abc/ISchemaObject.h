@@ -147,6 +147,7 @@ public:
 
         // Make the schema.
         m_schema = SCHEMA( m_object->getProperties(),
+                           SCHEMA::getDefaultSchemaName(),
                            this->getErrorHandlerPolicy(),
                            args.getSchemaInterpMatching() );
 
@@ -173,6 +174,7 @@ public:
                      << getSchemaObjTitle() );
 
         m_schema = SCHEMA( this->getProperties(),
+                           SCHEMA::getDefaultSchemaName(),
                            this->getErrorHandlerPolicy(),
                            GetSchemaInterpMatching( iArg0, iArg1 ) );
 

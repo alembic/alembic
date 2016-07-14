@@ -79,11 +79,6 @@ protected:
         //! ...
         PROP_PTR iPtr,
 
-        //! The flag indicating that wrapping is intended.
-        //! Even though it's nonambiguous here, we use it anyway
-        //! for readability
-        WrapExistingFlag iWrapFlag,
-
         //! Optional error handling policy
         //! ...
         ErrorHandler::Policy iPolicy );
@@ -189,7 +184,6 @@ template <class PROP_PTR>
 inline IBasePropertyT<PROP_PTR>::IBasePropertyT
 (
     PROP_PTR iPtr,
-    WrapExistingFlag,
     ErrorHandler::Policy iPolicy )
   : m_property( iPtr )
 {

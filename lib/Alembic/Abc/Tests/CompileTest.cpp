@@ -98,7 +98,9 @@ void testISchemaObject( IObject & iParent )
 void testISchema( IObject &iParent )
 {
     ITestSchema tst( ICompoundProperty( iParent, kTop ) );
+    std::cout << "isNull? " << int( tst.getPtr() == NULL ) << std::endl;
     ITestSchema tst2( tst.getPtr(), ErrorHandler::kQuietNoopPolicy );
+    std::cout << "isNull? " << int( tst2.getPtr() == NULL ) << std::endl;
     ITestSchema tst3( tst2.getPtr(), kNoMatching );
     ITestSchema tst4( tst3,
                       ErrorHandler::kNoisyNoopPolicy,

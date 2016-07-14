@@ -41,6 +41,16 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+IArrayProperty::IArrayProperty( const ICompoundProperty & iParent,
+                                const std::string &iName,
+                                const Argument &iArg0,
+                                const Argument &iArg1 )
+{
+    init( iParent.getPtr(), iName,
+          GetErrorHandlerPolicy( iParent ), iArg0, iArg1 );
+}
+
+//-*****************************************************************************
 IArrayProperty::~IArrayProperty()
 {
     // Nothing for now.
