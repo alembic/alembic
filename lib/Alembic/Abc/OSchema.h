@@ -162,30 +162,27 @@ public:
 
     //! Creates a new Compound Property Writer with the schema
     //! information added to the metadata.
-    template <class CPROP_PTR>
-    OSchema( CPROP_PTR iParentObject,
+    OSchema( AbcA::CompoundPropertyWriterPtr iParent,
+             const std::string &iName,
+
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument(),
+             const Argument &iArg3 = Argument() )
+    {
+        this_type::init( iParent, iName, iArg0, iArg1, iArg2, iArg3 );
+    }
+
+    //! Creates a new Compound Property Writer with the schema
+    //! information added to the metadata.
+    OSchema( OCompoundProperty iParent,
              const std::string &iName,
 
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
-    {
-        this_type::init( iParentObject, iName, iArg0, iArg1, iArg2 );
-    }
-
-    //! Creates a new Compound Property Writer with the schema
-    //! information and also the default name.
-    template <class CPROP_PTR>
-    explicit OSchema( CPROP_PTR iParentObject,
-
-                      const Argument &iArg0 = Argument(),
-                      const Argument &iArg1 = Argument(),
-                      const Argument &iArg2 = Argument() )
-    {
-        this_type::init( iParentObject,
-                         INFO::defaultName(),
-                         iArg0, iArg1, iArg2 );
-    }
+    : OSchema( iParent.getPtr(), iName, GetErrorHandlerPolicy( iParent ),
+               iArg0, iArg1, iArg2) {}
 
     virtual ~OSchema() {}
 
@@ -193,29 +190,30 @@ public:
     //! Default assignment operator used.
 
 private:
-    template <class CPROP_PTR>
-    void init( CPROP_PTR iParentObject,
+    void init( AbcA::CompoundPropertyWriterPtr iParent,
                const std::string &iName,
                const Argument &iArg0,
                const Argument &iArg1,
-               const Argument &iArg2 );
+               const Argument &iArg2,
+               const Argument &iArg3 );
 };
 
 //-*****************************************************************************
 // TEMPLATE AND INLINE FUNCTIONS
 //-*****************************************************************************
 template <class INFO>
-template <class CPROP_PTR>
-void OSchema<INFO>::init( CPROP_PTR iParent,
-                            const std::string &iName,
-                            const Argument &iArg0,
-                            const Argument &iArg1,
-                            const Argument &iArg2 )
+void OSchema<INFO>::init( AbcA::CompoundPropertyWriterPtr iParent,
+                          const std::string &iName,
+                          const Argument &iArg0,
+                          const Argument &iArg1,
+                          const Argument &iArg2,
+                          const Argument &iArg3 )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
 
@@ -225,9 +223,6 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
     // Get actual writer for parent.
     ABCA_ASSERT( iParent,
                  "NULL parent passed into OSchema ctor" );
-    AbcA::CompoundPropertyWriterPtr parent =
-        GetCompoundPropertyWriterPtr( iParent );
-    ABCA_ASSERT( parent, "NULL CompoundPropertyWriterPtr" );
 
     // Put schema title into metadata.
     AbcA::MetaData mdata = args.getMetaData();
@@ -242,7 +237,7 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
     }
 
     // Create property.
-    m_property = parent->createCompoundProperty( iName, mdata );
+    m_property = iParent->createCompoundProperty( iName, mdata );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

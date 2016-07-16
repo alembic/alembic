@@ -76,31 +76,20 @@ public:
                     const Argument &iArg1 = Argument(),
                     const Argument &iArg2 = Argument() );
 
-    //! Create a new OArrayProperty named iName as a child of compound iParent,
-    //! of data type iDataType.  The remaining optional arguments can be used
-    //! to override the ErrorHandlerPolicy, specify MetaData,
-    //! and to specify time sampling or time sampling index.
-    OArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
-                    const std::string &iName,
-                    const AbcA::DataType &iDataType,
-
-                    const Argument &iArg0 = Argument(),
-                    const Argument &iArg1 = Argument(),
-                    const Argument &iArg2 = Argument() );
-
     //! This attaches an OArrayProperty wrapper around an existing
     //! ArrayPropertyWriterPtr, with an optional error handling policy.
     OArrayProperty(
         AbcA::ArrayPropertyWriterPtr iPtr,
-        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
-      : OBasePropertyT<AbcA::ArrayPropertyWriterPtr>( iPtr, iPolicy ) {}
+        const Argument &iArg0 = Argument() )
+      : OBasePropertyT<AbcA::ArrayPropertyWriterPtr>( iPtr,
+            GetErrorHandlerPolicy( iPtr, iArg0 ) ) {}
 
     // Deprecated in favor of the constructor above
     OArrayProperty(
         AbcA::ArrayPropertyWriterPtr iPtr,
         WrapExistingFlag iWrapFlag,
-        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
-      : OBasePropertyT<AbcA::ArrayPropertyWriterPtr>( iPtr, iPolicy ) {}
+        const Argument &iArg0 = Argument() )
+      : OArrayProperty( iPtr, iArg0 ) {}
 
     //! Default copy constructor used
     //! Default assignment operator used.

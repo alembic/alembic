@@ -82,8 +82,6 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         AbcA::MetaData mdata;
         SetGeometryScope( mdata, kVertexScope );
 
-        createSelfBoundsProperty( m_timeSamplingIndex );
-
         AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
         m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, m_timeSamplingIndex );

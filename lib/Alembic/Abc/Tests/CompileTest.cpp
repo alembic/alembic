@@ -74,7 +74,8 @@ void testOSchemaObject( OObject &iParent )
 
 void testOSchema( OObject & iParent )
 {
-    OTestSchema tst( OCompoundProperty( iParent, kTop ) );
+    OTestSchema tst( OCompoundProperty( iParent, kTop ),
+                     OTestSchema::getDefaultSchemaName() );
     OTestSchema tst2( tst, "foo", ErrorHandler::kQuietNoopPolicy );
     OTestSchema tst3( tst2, "bar", kNoMatching );
     OTestSchema tst4( tst3, "baz",

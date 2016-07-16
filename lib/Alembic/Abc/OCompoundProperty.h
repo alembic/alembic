@@ -64,13 +64,6 @@ public:
     //! ...
     OCompoundProperty() : OBasePropertyT<AbcA::CompoundPropertyWriterPtr>() {}
 
-    //! Create a new OCompoundProperty named iName as a child of iParent.
-    //! The remaining optional arguments can be used to override the
-    //! ErrorHandlerPolicy, or to specify MetaData.
-    OCompoundProperty( OCompoundProperty iParent,
-                       const std::string &iName,
-                       const Argument &iArg0 = Argument(),
-                       const Argument &iArg1 = Argument() );
 
     //! Create a new OCompoundProperty named iName as a child of iParent.
     //! The remaining optional arguments can be used to override the
@@ -80,12 +73,13 @@ public:
                        const Argument &iArg0 = Argument(),
                        const Argument &iArg1 = Argument() );
 
-    // Deprecated in favor of the constructor below
-    OCompoundProperty(
-        AbcA::CompoundPropertyWriterPtr iProp,
-        WrapExistingFlag iWrapFlag = kWrapExisting,
-        const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() );
+    //! Create a new OCompoundProperty named iName as a child of iParent.
+    //! The remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy, or to specify MetaData.
+    OCompoundProperty( OCompoundProperty iParent,
+                       const std::string &iName,
+                       const Argument &iArg0 = Argument(),
+                       const Argument &iArg1 = Argument() );
 
     //! This attaches an OCompoundProperty wrapper around an existing
     //! CompoundPropertyWriterPtr, with an optional error handling policy.
@@ -94,12 +88,13 @@ public:
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
 
-    // Deprecated in favor of the constructor below
+    // Deprecated in favor of the constructor above
     OCompoundProperty(
-        OObject iObject,
-        TopFlag iTopFlag = kTop,
+        AbcA::CompoundPropertyWriterPtr iProp,
+        WrapExistingFlag iWrapFlag = kWrapExisting,
         const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() );
+        const Argument &iArg1 = Argument() )
+    : OCompoundProperty( iProp, iArg0, iArg1 ) {};
 
     //! This attaches an OCompoundProperty wrapper around the top
     //! properties of an OObject.
@@ -107,6 +102,14 @@ public:
         OObject iObject,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
+
+    // Deprecated in favor of the constructor above
+    OCompoundProperty(
+        OObject iObject,
+        TopFlag iTopFlag = kTop,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() )
+    : OCompoundProperty( iObject, iArg0, iArg1 ) {};
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -152,11 +155,9 @@ public:
 private:
     void init( AbcA::CompoundPropertyWriterPtr iParentObject,
                const std::string &iName,
-
-               ErrorHandler::Policy iParentPolicy,
-
                const Argument &iArg0,
-               const Argument &iArg1 );
+               const Argument &iArg1,
+               const Argument &iArg2 = Argument() );
 };
 
 //-*****************************************************************************

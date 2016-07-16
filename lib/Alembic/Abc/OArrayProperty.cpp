@@ -44,16 +44,8 @@ namespace ALEMBIC_VERSION_NS {
 OArrayProperty::OArrayProperty( OCompoundProperty iParent,
     const std::string &iName, const AbcA::DataType &iDataType,
     const Argument &iArg0, const Argument &iArg1, const Argument &iArg2 )
-    : OArrayProperty( iParent.getPtr(), iName, iDataType, iArg0, iArg1, iArg2 )
 {
-}
-
-//-*****************************************************************************
-OArrayProperty::OArrayProperty( AbcA::CompoundPropertyWriterPtr iParent,
-    const std::string &iName, const AbcA::DataType &iDataType,
-    const Argument &iArg0, const Argument &iArg1, const Argument &iArg2 )
-{
-    init( iParent, iName, iDataType, GetErrorHandlerPolicy( iParent ),
+    init( iParent.getPtr(), iName, iDataType, GetErrorHandlerPolicy( iParent ),
           iArg0, iArg1, iArg2 );
 }
 

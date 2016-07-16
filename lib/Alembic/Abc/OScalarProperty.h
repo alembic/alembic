@@ -66,6 +66,19 @@ public:
 
     //! Create a new OScalarProperty named iName as a child of compound iParent,
     //! of data type iDataType.  The remaining optional arguments can be used
+    //! the inherited parent ErrorHandlerPolicy, an override to that policy,
+    //! specify MetaData, and to specify time sampling or time sampling index.
+    OScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                     const std::string &iName,
+                     const AbcA::DataType &iDataType,
+
+                     const Argument &iArg0 = Argument(),
+                     const Argument &iArg1 = Argument(),
+                     const Argument &iArg2 = Argument(),
+                     const Argument &iArg3 = Argument() );
+
+    //! Create a new OScalarProperty named iName as a child of compound iParent,
+    //! of data type iDataType.  The remaining optional arguments can be used
     //! to override the ErrorHandlerPolicy, specify MetaData,
     //! and to specify time sampling or time sampling index.
     OScalarProperty( OCompoundProperty iParent,
@@ -76,17 +89,6 @@ public:
                      const Argument &iArg1 = Argument(),
                      const Argument &iArg2 = Argument() );
 
-    //! Create a new OScalarProperty named iName as a child of compound iParent,
-    //! of data type iDataType.  The remaining optional arguments can be used
-    //! to override the ErrorHandlerPolicy, specify MetaData,
-    //! and to specify time sampling or time sampling index.
-    OScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
-                     const std::string &iName,
-                     const AbcA::DataType &iDataType,
-
-                     const Argument &iArg0 = Argument(),
-                     const Argument &iArg1 = Argument(),
-                     const Argument &iArg2 = Argument() );
 
     //! This attaches an OScalarProperty wrapper around an existing
     //! ScalarPropertyWriterPtr, arguments are there to specify
@@ -150,11 +152,10 @@ private:
                const std::string &iName,
                const AbcA::DataType &iDataType,
 
-               ErrorHandler::Policy iParentPolicy,
-
                const Argument &iArg0,
                const Argument &iArg1,
-               const Argument &iArg2 );
+               const Argument &iArg2,
+               const Argument &iArg3 );
 };
 
 } // End namespace ALEMBIC_VERSION_NS

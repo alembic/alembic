@@ -190,12 +190,16 @@ OSchemaObject<SCHEMA>::OSchemaObject
     // It is never empty.
     AbcA::MetaData metaData = args.getMetaData();
 
-    // TODO don't set this if we are sparse
-    metaData.set( "schema", SCHEMA::getSchemaTitle() );
-    metaData.set( "schemaObjTitle", getSchemaObjTitle() );
-    if ( std::string() != SCHEMA::getSchemaBaseType() )
+    SparseFlag sparseFlag = kSparse;
+    if ( !args.isSparse() )
     {
-        metaData.set( "schemaBaseType", SCHEMA::getSchemaBaseType() );
+        sparseFlag = kFull;
+        metaData.set( "schema", SCHEMA::getSchemaTitle() );
+        metaData.set( "schemaObjTitle", getSchemaObjTitle() );
+        if ( std::string() != SCHEMA::getSchemaBaseType() )
+        {
+            metaData.set( "schemaBaseType", SCHEMA::getSchemaBaseType() );
+        }
     }
 
     // Make the object.
@@ -214,8 +218,10 @@ OSchemaObject<SCHEMA>::OSchemaObject
 
     // Make the schema.
     m_schema = SCHEMA( m_object->getProperties(),
+                       SCHEMA::getDefaultSchemaName(),
                        this->getErrorHandlerPolicy(),
-                       tsIndex );
+                       tsIndex,
+                       sparseFlag );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

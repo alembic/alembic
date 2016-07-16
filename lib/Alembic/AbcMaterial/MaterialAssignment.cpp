@@ -101,7 +101,7 @@ bool hasMaterial( Abc::ICompoundProperty iCompound,
     {
         return false;
     }
-    
+
     if ( const AbcCoreAbstract::PropertyHeader * header =
             iCompound.getPropertyHeader( iPropName ) )
     {
@@ -139,7 +139,7 @@ OMaterialSchema addMaterial( Abc::OObject iObject,
 OMaterialSchema addMaterial( Abc::OCompoundProperty iProp,
                              const std::string & iPropName )
 {
-    return OMaterialSchema( iProp, iPropName );
+    return OMaterialSchema( iProp.getPtr(), iPropName );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

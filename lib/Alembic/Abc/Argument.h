@@ -49,12 +49,12 @@ class Arguments
 {
 public:
     Arguments( ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
-                const AbcA::MetaData &iMetaData = AbcA::MetaData(),
-                AbcA::TimeSamplingPtr iTimeSampling =
-                AbcA::TimeSamplingPtr(),
-                uint32_t iTimeIndex = 0,
-                SchemaInterpMatching iMatch = kNoMatching,
-                SparseFlag iSparse = kFull )
+               const AbcA::MetaData &iMetaData = AbcA::MetaData(),
+               AbcA::TimeSamplingPtr iTimeSampling =
+               AbcA::TimeSamplingPtr(),
+               uint32_t iTimeIndex = 0,
+               SchemaInterpMatching iMatch = kNoMatching,
+               SparseFlag iSparse = kFull )
       : m_errorHandlerPolicy( iPolicy ),
         m_metaData( iMetaData ),
         m_timeSampling( iTimeSampling ),
@@ -108,13 +108,14 @@ private:
 };
 
 //-*****************************************************************************
-// Right now there are 4 types of arguments that you'd pass into
+// Right now there are 6 types of arguments that you'd pass into
 // our various classes for construction.
 // ErrorHandlerPolicy - always defaults to QuietNoop
 // MetaData - always defaults to ""
 // matching - schema interpretation matching
 // TimeSampling - always defaults to default uniform
 // TimeSamplingIndex - always defaults to 0
+// Sparse - always defaults to kFull
 class Argument
 {
 public:
@@ -241,12 +242,14 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy
 ( SOMETHING iSomething,
   const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args( GetErrorHandlerPolicy( iSomething ) );
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getErrorHandlerPolicy();
 }
 
@@ -254,12 +257,14 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy
 inline ErrorHandler::Policy GetErrorHandlerPolicyFromArgs
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getErrorHandlerPolicy();
 }
 
@@ -267,12 +272,14 @@ inline ErrorHandler::Policy GetErrorHandlerPolicyFromArgs
 inline AbcA::MetaData GetMetaData
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getMetaData();
 }
 
@@ -280,12 +287,14 @@ inline AbcA::MetaData GetMetaData
 inline AbcA::TimeSamplingPtr GetTimeSampling
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getTimeSampling();
 }
 
@@ -293,12 +302,14 @@ inline AbcA::TimeSamplingPtr GetTimeSampling
 inline uint32_t GetTimeSamplingIndex
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getTimeSamplingIndex();
 }
 
@@ -306,12 +317,14 @@ inline uint32_t GetTimeSamplingIndex
 inline SchemaInterpMatching GetSchemaInterpMatching
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getSchemaInterpMatching();
 }
 
@@ -319,12 +332,14 @@ inline SchemaInterpMatching GetSchemaInterpMatching
 inline bool IsSparse
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.isSparse();
 }
 
