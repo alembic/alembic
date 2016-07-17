@@ -144,9 +144,6 @@ public:
     //! wrapped in an IObject wrapper.
     IObject getObject() const;
 
-    //! Can't wrap
-    //! OCompoundProperty getParent();
-
     //-*************************************************************************
     // ABC BASE MECHANISMS
     // These functions are used by Abc to deal with errors, rewrapping,

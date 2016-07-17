@@ -69,46 +69,31 @@ public:
     //! ...
     IXformSchema() {}
 
-    //! This templated, primary constructor creates a new xform writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
-    template <class CPROP_PTR>
-    IXformSchema( CPROP_PTR iParent,
+    //! This constructor creates a new xform reader.
+    //! The first argument is the parent ICompoundProperty, from which the
+    //! error handler policy for is derived.  The second argument is the name
+    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    IXformSchema( const ICompoundProperty &iParent,
                   const std::string &iName,
                   const Abc::Argument &iArg0 = Abc::Argument(),
                   const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<XformSchemaInfo>( iParent, iName,
-                                       iArg0, iArg1 )
+      : Abc::ISchema<XformSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is SchemaInterpMatching.
         init( iArg0, iArg1 );
     }
 
-    //! This constructor does the same as the above, but uses the default
-    //! name from the XformSchemaInfo struct.
-    template <class CPROP_PTR>
-    explicit IXformSchema( CPROP_PTR iParent,
-
-                           const Abc::Argument &iArg0 = Abc::Argument(),
-                           const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<XformSchemaInfo>( iParent, iArg0, iArg1 )
-    {
-        init( iArg0, iArg1 );
-    }
-
-    //! Wrap an existing IXform object
-    template <class CPROP_PTR>
-    explicit IXformSchema( CPROP_PTR iThis,
-                           Abc::WrapExistingFlag iFlag,
-
-                           const Abc::Argument &iArg0 = Abc::Argument(),
-                           const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<XformSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+    //! This constructor wraps an existing ICompoundProperty as the xform
+    //! reader, and the error handler policy is derived from it.
+    //! The  remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    IXformSchema( const ICompoundProperty &iProp,
+                  const Abc::Argument &iArg0 = Abc::Argument(),
+                  const Abc::Argument &iArg1 = Abc::Argument() )
+      : Abc::ISchema<XformSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
