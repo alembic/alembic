@@ -212,6 +212,178 @@ void stitchArrayProp(const PropertyHeader & propHeader,
     }
 }
 
+// return true if we needed to stitch the geom param
+bool stitchArbGeomParam(const PropertyHeader & propHeader,
+                        const ICompoundPropertyVec & iCompoundProps,
+                        OCompoundProperty & oCompoundProp,
+                        const TimeAndSamplesMap & iTimeMap)
+{
+    // go through all the inputs to see if all the property types are the same
+    size_t numInputs = iCompoundProps.size();
+    const std::string & propName = propHeader.getName();
+    PropertyType ptype = propHeader.getPropertyType();
+    bool diffProp = false;
+
+    for (size_t iCpIndex = 1; iCpIndex < numInputs && diffProp == false;
+         iCpIndex++)
+    {
+        if (!iCompoundProps[iCpIndex].valid())
+        {
+            continue;
+        }
+
+        const PropertyHeader * childHeader =
+            iCompoundProps[iCpIndex].getPropertyHeader(propName);
+
+        if (childHeader && childHeader->getPropertyType() != ptype)
+        {
+            diffProp = true;
+        }
+    }
+
+    // all of the props are the same, lets stitch them like normal
+    if (!diffProp)
+    {
+        return false;
+    }
+
+
+    // we have a mismatch of indexed and non-index geom params, lets stitch them
+    // together AS indexed
+    std::vector< IArrayProperty > valsProp(numInputs);
+    std::vector< IArrayProperty > indicesProp(numInputs);
+
+    bool firstVals = true;
+
+    DataType dataType;
+    MetaData metaData;
+    TimeSamplingPtr timePtr;
+
+    // first we need to get our attrs
+    for (size_t iCpIndex = 0; iCpIndex < numInputs; iCpIndex++)
+    {
+        if (!iCompoundProps[iCpIndex].valid())
+        {
+            continue;
+        }
+
+        const PropertyHeader * childHeader =
+            iCompoundProps[iCpIndex].getPropertyHeader(propName);
+
+        if (childHeader && childHeader->isArray())
+        {
+            valsProp[iCpIndex] = IArrayProperty(iCompoundProps[iCpIndex],
+                                                propName);
+
+            if (firstVals)
+            {
+                firstVals = false;
+                dataType = valsProp[iCpIndex].getDataType();
+                metaData = valsProp[iCpIndex].getMetaData();
+                timePtr = valsProp[iCpIndex].getTimeSampling();
+            }
+        }
+        else if (childHeader && childHeader->isCompound())
+        {
+            ICompoundProperty cprop(iCompoundProps[iCpIndex], propName);
+            if (cprop.getPropertyHeader(".vals") != NULL &&
+                cprop.getPropertyHeader(".indices") != NULL)
+            {
+                valsProp[iCpIndex] = IArrayProperty(cprop, ".vals");
+                indicesProp[iCpIndex] = IArrayProperty(cprop, ".indices");
+
+                if (firstVals)
+                {
+                    firstVals = false;
+                    dataType = valsProp[iCpIndex].getDataType();
+                    metaData = valsProp[iCpIndex].getMetaData();
+                    timePtr = valsProp[iCpIndex].getTimeSampling();
+                }
+            }
+        }
+    }
+
+
+    size_t totalSamples = 0;
+    timePtr = iTimeMap.get(timePtr, totalSamples);
+
+    DataType indicesType(Alembic::Util::kUint32POD);
+    Dimensions emptyDims(0);
+    ArraySample emptySample(NULL, dataType, emptyDims);
+    ArraySample emptyIndicesSample(NULL, indicesType, emptyDims);
+
+    // we write indices and vals together
+    OCompoundProperty ocProp(oCompoundProp, propName, metaData);
+    OArrayProperty valsWriter(ocProp, ".vals", dataType, metaData, timePtr);
+    OArrayProperty indicesWriter(ocProp, ".indices", indicesType, timePtr);
+
+    for (size_t index = 0; index < numInputs; index++)
+    {
+
+        if (!valsProp[index].valid())
+        {
+            continue;
+        }
+
+        index_t numSamples = valsProp[index].getNumSamples();
+
+        ArraySamplePtr dataPtr;
+        index_t numEmpty;
+        index_t k = getIndexSample(valsWriter.getNumSamples(),
+            valsWriter.getTimeSampling(), numSamples,
+            valsProp[index].getTimeSampling(), numEmpty);
+
+        for (index_t j = 0; j < numEmpty; ++j)
+        {
+            valsWriter.set(emptySample);
+            indicesWriter.set(emptyIndicesSample);
+        }
+
+        for (; k < numSamples; k++)
+        {
+            valsProp[index].get(dataPtr, k);
+            valsWriter.set(*dataPtr);
+
+            if (indicesProp[index].valid())
+            {
+                indicesProp[index].get(dataPtr, k);
+                indicesWriter.set(*dataPtr);
+            }
+            else
+            {
+                // we need to construct our indices manually
+                Dimensions dataDims = dataPtr->getDimensions();
+                std::vector<Alembic::Util::uint32_t> indicesVec(
+                    dataDims.numPoints());
+                for (size_t dataIdx = 0; dataIdx < indicesVec.size(); ++dataIdx)
+                {
+                    indicesVec[dataIdx] = (Alembic::Util::uint32_t) dataIdx;
+                }
+
+                // set the empty sample
+                if (indicesVec.empty())
+                {
+                    indicesWriter.set(emptyIndicesSample);
+                }
+                else
+                {
+                    ArraySample indicesSamp(&indicesVec.front(), indicesType,
+                                            dataDims);
+                    indicesWriter.set(indicesSamp);
+                }
+            }
+        }
+    }
+
+    // fill in any other empties
+    for (size_t i = valsWriter.getNumSamples(); i < totalSamples; ++i)
+    {
+        valsWriter.set(emptySample);
+        indicesWriter.set(emptyIndicesSample);
+    }
+    return true;
+}
+
 template< typename T >
 void scalarPropIO(IScalarProperty & reader,
                   Alembic::Util::uint8_t extent,
@@ -370,7 +542,13 @@ void stitchCompoundProp(ICompoundPropertyVec & iCompoundProps,
                 continue;
             }
 
-            if (propHeader.isCompound())
+            if (propHeader.getMetaData().get("isGeomParam") == "true" &&
+                stitchArbGeomParam(propHeader, iCompoundProps, oCompoundProp,
+                                   iTimeMap))
+            {
+                continue;
+            }
+            else if (propHeader.isCompound())
             {
                 ICompoundPropertyVec childProps;
                 for (size_t j = i; j < numCompounds; ++j)

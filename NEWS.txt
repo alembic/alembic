@@ -1,3 +1,25 @@
+2016-7-12, Alembic 1.6.1
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+OPoints::setFromPrevious was not setting the previous velocity sample.
+(pull request 85)
+
+Fix small bug with AbcCoreOgawa::StreamManager COMPARE_EXCHANGE macro on Windows
+(pull request 86)
+
+Maya:
+
+Fix some unused variable warnings in AbcImport, AbcExport.
+
+Utils:
+
+AbcStitcher: Support stitching mixed indexed and non-indexed GeomParams.
+
+##-*****************************************************************************
+
 2016-6-30, Alembic 1.6.0
 Thanks to your generous feedback and code contributions we are happy to announce
 the 1.6.0 release of Alembic.
