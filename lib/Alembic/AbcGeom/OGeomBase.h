@@ -107,24 +107,6 @@ public:
         *this = iCopy;
     }
 
-    void init( uint32_t iTsIndex, bool isSparse)
-    {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::init()" );
-
-        if( !isSparse )
-        {
-           createSelfBoundsProperty(iTsIndex);
-        }
-
-        ALEMBIC_ABC_SAFE_CALL_END_RESET();
-    }
-
-    void createSelfBoundsProperty(uint32_t iTsIndex)
-    {
-       m_selfBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".selfBnds",
-                                                   iTsIndex );
-    }
-
     virtual void reset ()
     {
         m_selfBoundsProperty.reset();
@@ -202,6 +184,40 @@ public:
     }
 
 protected:
+
+    void init( uint32_t iTsIndex, bool isSparse)
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::init()" );
+
+        if( !isSparse )
+        {
+           createSelfBoundsProperty(iTsIndex, 0);
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    //! Creates the self bounds
+    void createSelfBoundsProperty(uint32_t iTsIndex, size_t iNumSamples)
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::createSelfBoundsProperty()" );
+
+        if ( m_selfBoundsProperty.valid() )
+        {
+            return;
+        }
+
+        m_selfBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".selfBnds",
+                                                    iTsIndex );
+
+        Abc::Box3d bnds;
+        for ( size_t i = 0; i < iNumSamples; ++i )
+        {
+            m_selfBoundsProperty.set( bnds );
+        }
+        ALEMBIC_ABC_SAFE_CALL_END();
+    }
+
     // Only selfBounds is required, all others are optional
     Abc::OBox3dProperty m_selfBoundsProperty;
     Abc::OBox3dProperty m_childBoundsProperty;

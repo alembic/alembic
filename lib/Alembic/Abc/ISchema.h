@@ -119,7 +119,7 @@ public:
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument() )
     {
-        this_type::init( iParent, iName, iArg0, iArg1 );
+        init( iParent, iName, iArg0, iArg1 );
     }
 
     //! Wrap an existing compound property, checking that it matches
@@ -141,6 +141,13 @@ public:
             << pheader.getMetaData().get( "schema" )
             << " to expected: "
             << INFO::title() );
+
+        // not wrapped, we want to use the default name
+        if ( !iProperty.getParent().valid() )
+        {
+            init( iProperty, getDefaultSchemaName(),
+                  iArg0, iArg1 );
+        }
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }

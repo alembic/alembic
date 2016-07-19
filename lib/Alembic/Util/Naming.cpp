@@ -90,7 +90,7 @@ void makeStandardName( std::string& name, const char fixChar )
         name[0] = fixChar;
     }
 
-    for ( int ii=1; ii<length; ++ii )
+    for ( size_t ii=1; ii<length; ++ii )
     {
         if ( !isStandardChar( name[ii] ) )
         {

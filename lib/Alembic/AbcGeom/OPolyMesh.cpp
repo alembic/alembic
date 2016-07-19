@@ -79,17 +79,6 @@ void OPolyMeshSchema::set( const Sample &iSamp )
                      iSamp.getFaceCounts(),
                      "Sample 0 must have valid data for all mesh components" );
 
-        AbcA::MetaData mdata;
-        SetGeometryScope( mdata, kVertexScope );
-
-        AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
-
-        m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, m_timeSamplingIndex );
-
-        m_indicesProperty = Abc::OInt32ArrayProperty( _this, ".faceIndices", m_timeSamplingIndex );
-
-        m_countsProperty = Abc::OInt32ArrayProperty( _this, ".faceCounts", m_timeSamplingIndex );
-
         m_positionsProperty.set( iSamp.getPositions() );
         m_indicesProperty.set( iSamp.getFaceIndices() );
         m_countsProperty.set( iSamp.getFaceCounts() );
@@ -97,7 +86,7 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         if ( m_velocitiesProperty )
         { SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() ); }
 
-        if ( iSamp.getSelfBounds().isEmpty() )
+        if ( m_selfBoundsProperty && iSamp.getSelfBounds().isEmpty() )
         {
             // OTypedScalarProperty::set() is not referentially transparent,
             // so we need a a placeholder variable.
@@ -105,7 +94,10 @@ void OPolyMeshSchema::set( const Sample &iSamp )
                 ComputeBoundsFromPositions( iSamp.getPositions() ) );
             m_selfBoundsProperty.set( bnds );
         }
-        else { m_selfBoundsProperty.set( iSamp.getSelfBounds() ); }
+        else if ( m_selfBoundsProperty )
+        {
+            m_selfBoundsProperty.set( iSamp.getSelfBounds() );
+        }
 
         if ( iSamp.getUVs().getVals() )
         {
@@ -150,6 +142,26 @@ void OPolyMeshSchema::set( const Sample &iSamp )
     m_numSamples++;
 
     ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OPolyMeshSchema::createPositionsProperty()
+{
+    AbcA::MetaData mdata;
+    SetGeometryScope( mdata, kVertexScope );
+
+    m_positionsProperty = Abc::OP3fArrayProperty( this->getPtr(), "P", mdata,
+                                                  m_timeSamplingIndex );
+
+    std::vector<V3f> emptyVec;
+    const V3fArraySample empty( emptyVec );
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_positionsProperty.set( empty );
+    }
+
+    createSelfBoundsProperty( m_timeSamplingIndex, m_numSamples );
+
 }
 
 //-*****************************************************************************
@@ -321,15 +333,30 @@ void OPolyMeshSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
 }
 
 //-*****************************************************************************
-void OPolyMeshSchema::init( uint32_t iTsIdx )
+void OPolyMeshSchema::init( uint32_t iTsIdx, bool isSparse )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::init()" );
 
-    m_selectiveExport = false;
+    m_selectiveExport = isSparse;
 
     m_numSamples = 0;
 
     m_timeSamplingIndex = iTsIdx;
+
+    if ( m_selectiveExport )
+    {
+        return;
+    }
+
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+    createPositionsProperty();
+
+    m_indicesProperty = Abc::OInt32ArrayProperty( _this, ".faceIndices",
+                                                  m_timeSamplingIndex );
+
+    m_countsProperty = Abc::OInt32ArrayProperty( _this, ".faceCounts",
+                                                 m_timeSamplingIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
@@ -409,12 +436,16 @@ void OPolyMeshSchema::selectiveSet( const Sample &iSamp )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::selectiveSet()" );
 
-    if( !m_selectiveExport )
-    {
-        m_selectiveExport = true;
+    // TODO spare create indices and counts?
 
-        //Delete bounds property since we won't have position samples
-        m_selfBoundsProperty = Abc::OBox3dProperty();
+    if ( iSamp.getPositions() && !m_positionsProperty )
+    {
+        createPositionsProperty();
+    }
+
+    if ( m_positionsProperty )
+    {
+        SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
     }
 
     //! Velocities
