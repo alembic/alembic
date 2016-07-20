@@ -86,7 +86,7 @@ void OPolyMeshSchema::set( const Sample &iSamp )
         if ( m_velocitiesProperty )
         { SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() ); }
 
-        if ( m_selfBoundsProperty && iSamp.getSelfBounds().isEmpty() )
+        if ( iSamp.getSelfBounds().isEmpty() )
         {
             // OTypedScalarProperty::set() is not referentially transparent,
             // so we need a a placeholder variable.
@@ -94,7 +94,7 @@ void OPolyMeshSchema::set( const Sample &iSamp )
                 ComputeBoundsFromPositions( iSamp.getPositions() ) );
             m_selfBoundsProperty.set( bnds );
         }
-        else if ( m_selfBoundsProperty )
+        else
         {
             m_selfBoundsProperty.set( iSamp.getSelfBounds() );
         }
@@ -446,6 +446,16 @@ void OPolyMeshSchema::selectiveSet( const Sample &iSamp )
     if ( m_positionsProperty )
     {
         SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
+        if ( iSamp.getSelfBounds().hasVolume() )
+        {
+            m_selfBoundsProperty.set( iSamp.getSelfBounds() );
+        }
+        else if ( iSamp.getPositions() )
+        {
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() ) );
+            m_selfBoundsProperty.set( bnds );
+        }
     }
 
     //! Velocities

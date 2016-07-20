@@ -227,11 +227,11 @@ void OSchema<INFO>::init( AbcA::CompoundPropertyWriterPtr iParent,
     // Put schema title into metadata.
     AbcA::MetaData mdata = args.getMetaData();
     std::string emptyStr;
-    if ( emptyStr != getSchemaTitle() )
+    if ( emptyStr != getSchemaTitle() && !args.isSparse() )
     {
         mdata.set( "schema", getSchemaTitle() );
     }
-    if ( emptyStr != getSchemaBaseType() )
+    if ( emptyStr != getSchemaBaseType() && !args.isSparse() )
     {
         mdata.set( "schemaBaseType", getSchemaBaseType() );
     }

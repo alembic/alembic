@@ -404,7 +404,12 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     }
     else
     {
-        Alembic::AbcGeom::OPolyMesh obj(iParent, name.asChar(), iTimeIndex);
+        Alembic::Abc::SparseFlag sf = Alembic::Abc::kFull;
+        if ( !mWriteGeometry )
+        {
+            sf = Alembic::Abc::kSparse;
+        }
+        Alembic::AbcGeom::OPolyMesh obj(iParent, name.asChar(), sf, iTimeIndex);
         mPolySchema = obj.getSchema();
 
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
