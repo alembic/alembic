@@ -975,11 +975,18 @@ void MayaMeshWriter::writePoly(
             (const Imath::V3f *) &normals.front(), normals.size() / 3));
     }
 
-    Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
-        Alembic::Abc::V3fArraySample((const Imath::V3f *)&points.front(),
-            points.size() / 3),
-        Alembic::Abc::Int32ArraySample(facePoints),
-        Alembic::Abc::Int32ArraySample(pointCounts), iUVs, normalsSamp);
+    Alembic::AbcGeom::OPolyMeshSchema::Sample samp;
+
+    if ( mWriteGeometry )
+    {
+        samp.setPositions(Alembic::Abc::V3fArraySample(
+            (const Imath::V3f *)&points.front(), points.size() / 3) );
+        samp.setFaceIndices(Alembic::Abc::Int32ArraySample(facePoints));
+        samp.setFaceCounts(Alembic::Abc::Int32ArraySample(pointCounts));
+    }
+
+    samp.setUVs( iUVs );
+    samp.setNormals( normalsSamp );
 
     mPolySchema.set(samp);
     writeColor();
