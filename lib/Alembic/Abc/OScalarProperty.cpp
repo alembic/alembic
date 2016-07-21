@@ -41,6 +41,52 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+OScalarProperty::OScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                                  const std::string &iName,
+                                  const AbcA::DataType &iDataType,
+                                  const Argument &iArg0,
+                                  const Argument &iArg1,
+                                  const Argument &iArg2,
+                                  const Argument &iArg3 )
+{
+    Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    iArg2.setInto( args );
+    iArg3.setInto( args );
+
+    getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::OScalarProperty(p, n)" );
+
+    AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
+    uint32_t tsIndex = args.getTimeSamplingIndex();
+
+    // if we specified a valid TimeSamplingPtr, use it to determine the index
+    // otherwise we'll use the index, which defaults to the intrinsic 0 index
+    if (tsPtr)
+    {
+        tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
+    }
+
+    m_property = iParent->createScalarProperty( iName, args.getMetaData(),
+        iDataType, tsIndex );
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+OScalarProperty::OScalarProperty( OCompoundProperty iParent,
+                                  const std::string &iName,
+                                  const AbcA::DataType &iDataType,
+                                  const Argument &iArg0,
+                                  const Argument &iArg1,
+                                  const Argument &iArg2 )
+: OScalarProperty( iParent.getPtr(), iName, iDataType,
+                   GetErrorHandlerPolicy( iParent ), iArg0, iArg1, iArg2 )
+{}
+
+//-*****************************************************************************
 OScalarProperty::~OScalarProperty()
 {
     // Nothing for now.
@@ -109,48 +155,12 @@ OCompoundProperty OScalarProperty::getParent() const
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::getParent()" );
 
     return OCompoundProperty( m_property->getParent(),
-                              kWrapExisting,
                               getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw. Have a default.
     return OCompoundProperty();
-}
-
-//-*****************************************************************************
-void OScalarProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
-                            const std::string &iName,
-                            const AbcA::DataType &iDataType,
-
-                            ErrorHandler::Policy iParentPolicy,
-                            const Argument &iArg0,
-                            const Argument &iArg1,
-                            const Argument &iArg2 )
-{
-    Arguments args( iParentPolicy );
-    iArg0.setInto( args );
-    iArg1.setInto( args );
-    iArg2.setInto( args );
-
-    getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
-
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::init()" );
-
-    AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
-    uint32_t tsIndex = args.getTimeSamplingIndex();
-
-    // if we specified a valid TimeSamplingPtr, use it to determine the index
-    // otherwise we'll use the index, which defaults to the intrinsic 0 index
-    if (tsPtr)
-    {
-        tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
-    }
-
-    m_property = iParent->createScalarProperty( iName, args.getMetaData(), 
-        iDataType, tsIndex );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

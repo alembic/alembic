@@ -41,12 +41,12 @@
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/Argument.h>
+#include <Alembic/Abc/IArchive.h>
 
 namespace Alembic {
 namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
-class IArchive;
 class ICompoundProperty;
 
 //-*****************************************************************************
@@ -67,22 +67,24 @@ public:
     //! ...
     IObject() {}
 
-    //! This templated, explicit function creates a new object reader.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an AbcA::ObjectReaderPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy.
-    template <class OBJECT_PTR>
-    IObject( OBJECT_PTR iParentObject,
+    //! This function creates a new object reader.
+    //! The first argument is the Abc IObject parent from which the error
+    //! handler policy for inheritance is also derived.  The remaining optional
+    //! arguments can be used to override the ErrorHandlerPolicy.
+    IObject( const IObject & iParent,
              const std::string &iName,
-             const Argument &iArg0 = Argument() );
+             const Argument &iArg0 = Argument() )
+    {
+        init( iParent.getPtr(),
+              iName,
+              GetErrorHandlerPolicy( iParent, iArg0 ) );
+
+        initInstance();
+    }
 
     //! This attaches an IObject wrapper around an existing
     //! ObjectReaderPtr, with an optional error handling policy.
-    template <class OBJECT_PTR>
-    IObject( OBJECT_PTR iPtr,
-             WrapExistingFlag /* iFlag */,
+    IObject( AbcA::ObjectReaderPtr iPtr,
              const Argument &iArg0 = Argument() )
         : m_object( GetObjectReaderPtr( iPtr ) )
     {
@@ -93,22 +95,34 @@ public:
         initInstance();
     }
 
+    // Deprecated in favor of the constructor above
+    IObject( AbcA::ObjectReaderPtr iPtr,
+             WrapExistingFlag /* iFlag */,
+             const Argument &iArg0 = Argument() )
+        : IObject( iPtr, iArg0 ) {}
+
     //! This attaches an IObject wrapper around the top
     //! object of an archive.
-    template <class ARCHIVE_PTR>
-    IObject( ARCHIVE_PTR iPtr,
-             TopFlag iFlag,
+    IObject( IArchive & iArchive,
              const Argument &iArg0 = Argument() )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iPtr, iArg0 ) );
+            GetErrorHandlerPolicy( iArchive, iArg0 ) );
 
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::IObject( top )" );
 
-        m_object = GetArchiveReaderPtr( iPtr )->getTop();
+        m_object = iArchive.getTop().getPtr();
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    // Deprecated in favor of the constructor above
+    IObject( IArchive & iArchive,
+             TopFlag iFlag,
+             const Argument &iArg0 = Argument() )
+        : IObject( iArchive, iArg0 )
+    {
     }
 
     //! Default copy constructor used
@@ -287,19 +301,6 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy( OBJ iObj,
 {
     Argument arg( iPcy );
     return GetErrorHandlerPolicy( iObj, arg );
-}
-
-//-*****************************************************************************
-template <class OBJECT_PTR>
-inline IObject::IObject( OBJECT_PTR iParentObject,
-                         const std::string &iName,
-                         const Argument &iArg0 )
-{
-    init( GetObjectReaderPtr( iParentObject ),
-          iName,
-          GetErrorHandlerPolicy( iParentObject, iArg0 ) );
-
-    initInstance();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

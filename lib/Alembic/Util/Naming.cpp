@@ -53,14 +53,14 @@ bool isStandardChar( const char c )
 
 bool isStandardName( const std::string & name )
 {
-    int length = name.size();
+    size_t length = name.size();
 
     if ( length == 0 || !isStandardStartChar( name[0] ) )
     {
         return false;
     }
 
-    for ( int i=1; i<length; ++i )
+    for ( size_t i=1; i<length; ++i )
     {
         if ( !isStandardChar( name[i] ) )
         {
@@ -78,7 +78,7 @@ void makeStandardName( std::string& name, const char fixChar )
         ALEMBIC_THROW( "Cannot fix bad name (bad fix character)." );
     }
 
-    int length = name.size();
+    size_t length = name.size();
     if ( length == 0 || name[0] == 0 )
     {
         name = fixChar;
@@ -90,7 +90,7 @@ void makeStandardName( std::string& name, const char fixChar )
         name[0] = fixChar;
     }
 
-    for ( int ii=1; ii<length; ++ii )
+    for ( size_t ii=1; ii<length; ++ii )
     {
         if ( !isStandardChar( name[ii] ) )
         {

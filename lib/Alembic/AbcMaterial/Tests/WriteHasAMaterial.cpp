@@ -25,7 +25,7 @@ void write()
     //BEGIN Manually create and test schemas and compounds {
     Abc::OObject obj(root, "an_object");
 
-    Mat::OMaterialSchema mat(Mat::OMaterialSchema(obj.getProperties(), ".byanyothername"));
+    Mat::OMaterialSchema mat(Mat::OMaterialSchema(obj.getProperties().getPtr(), ".byanyothername"));
     mat.setShader("prman", "surface", "ambocc");
 
     {

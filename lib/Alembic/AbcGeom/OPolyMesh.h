@@ -49,7 +49,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ALEMBIC_EXPORT OPolyMeshSchema 
+class ALEMBIC_EXPORT OPolyMeshSchema
     : public OGeomBaseSchema<PolyMeshSchemaInfo>
 {
 public:
@@ -130,15 +130,15 @@ public:
 
         bool isPartialSample() const
         {
-        	if( !m_positions.getData() && !m_indices.getData() && !m_counts.getData() )
-        	{
-        		if( m_uvs.getVals() || m_normals.getVals() || m_velocities.getData() )
-        		{
-        			return true;
-        		}
-        	}
+            if( !m_positions.getData() && !m_indices.getData() && !m_counts.getData() )
+            {
+                if( m_uvs.getVals() || m_normals.getVals() || m_velocities.getData() )
+                {
+                    return true;
+                }
+            }
 
-        	return false;
+            return false;
         }
 
     protected:
@@ -205,7 +205,7 @@ public:
 
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( tsIndex );
+        init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2 ) );
     }
 
     template <class CPROP_PTR>
@@ -234,7 +234,7 @@ public:
 
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
-        init( tsIndex );
+        init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2 ) );
     }
 
     //! Copy constructor.
@@ -254,14 +254,14 @@ public:
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling() const
     {
-    	if( m_positionsProperty.valid() )
-    	{
-    		return m_positionsProperty.getTimeSampling();
-    	}
-    	else
-		{
-			return getObject().getArchive().getTimeSampling( 0 );
-		}
+        if( m_positionsProperty.valid() )
+        {
+            return m_positionsProperty.getTimeSampling();
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
     }
 
     //-*************************************************************************
@@ -333,7 +333,7 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OPolyMeshSchema::valid() );
 
 protected:
-    void init( uint32_t iTsIdx );
+    void init( uint32_t iTsIdx, bool isSparse );
 
     //! Set only some property data. Does not need to be a valid schema sample
     //! This is to be used when created a file which will be layered in to
@@ -362,6 +362,8 @@ protected:
     size_t m_numSamples;
 
     uint32_t m_timeSamplingIndex;
+
+    void createPositionsProperty();
 
     void createVelocitiesProperty();
 

@@ -74,11 +74,10 @@ void testOSchemaObject( OObject &iParent )
 
 void testOSchema( OObject & iParent )
 {
-    OTestSchema tst( OCompoundProperty( iParent, kTop ) );
-    OTestSchema tst2( tst.getPtr(), "foo",
-                      ErrorHandler::kQuietNoopPolicy );
-    OTestSchema tst3( tst2.getPtr(), "bar",
-                      kNoMatching );
+    OTestSchema tst( OCompoundProperty( iParent, kTop ),
+                     OTestSchema::getDefaultSchemaName() );
+    OTestSchema tst2( tst, "foo", ErrorHandler::kQuietNoopPolicy );
+    OTestSchema tst3( tst2, "bar", kNoMatching );
     OTestSchema tst4( tst3, "baz",
                       ErrorHandler::kNoisyNoopPolicy,
                       kStrictMatching );
@@ -87,10 +86,8 @@ void testOSchema( OObject & iParent )
 void testISchemaObject( IObject & iParent )
 {
     ITest tst( iParent, "childTestObject" );
-    ITest tst2( tst.getPtr(), kWrapExisting,
-                ErrorHandler::kQuietNoopPolicy );
-    ITest tst3( tst2.getPtr(), kWrapExisting,
-                      kNoMatching );
+    ITest tst2( tst, ErrorHandler::kQuietNoopPolicy );
+    ITest tst3( tst2, kNoMatching );
     ITest tst4( tst3, kWrapExisting,
                 ErrorHandler::kNoisyNoopPolicy,
                 kStrictMatching );
@@ -102,11 +99,11 @@ void testISchemaObject( IObject & iParent )
 void testISchema( IObject &iParent )
 {
     ITestSchema tst( ICompoundProperty( iParent, kTop ) );
-    ITestSchema tst2( tst.getPtr(), kWrapExisting,
-                      ErrorHandler::kQuietNoopPolicy );
-    ITestSchema tst3( tst2.getPtr(), kWrapExisting,
-                      kNoMatching );
-    ITestSchema tst4( tst3, kWrapExisting,
+    std::cout << "isNull? " << int( tst.getPtr() == NULL ) << std::endl;
+    ITestSchema tst2( tst.getPtr(), ErrorHandler::kQuietNoopPolicy );
+    std::cout << "isNull? " << int( tst2.getPtr() == NULL ) << std::endl;
+    ITestSchema tst3( tst2.getPtr(), kNoMatching );
+    ITestSchema tst4( tst3,
                       ErrorHandler::kNoisyNoopPolicy,
                       kStrictMatching );
 }

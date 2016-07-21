@@ -47,7 +47,7 @@ namespace ALEMBIC_VERSION_NS {
 #define COMPARE_EXCHANGE( V, COMP, EXCH ) V.compare_exchange_weak( COMP, EXCH, std::memory_order_seq_cst, std::memory_order_seq_cst )
 // Windows
 #elif defined( _MSC_VER )
-#define COMPARE_EXCHANGE( V, COMP, EXCH ) InterlockedCompareExchange64( &V, EXCH, COMP ) == COMP
+#define COMPARE_EXCHANGE( V, COMP, EXCH ) (InterlockedCompareExchange64( &V, EXCH, COMP ) == COMP)
 
 Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
 {

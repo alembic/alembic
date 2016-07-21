@@ -90,10 +90,6 @@ public:
         //! ...
         AbcA::ArchiveReaderPtr iPtr,
 
-        //! Wrap existing
-        //! ...
-        WrapExistingFlag /* iWrap */,
-
         //! Optional error handling policy
         //! ...
         ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
@@ -102,6 +98,13 @@ public:
         // Set the error handling policy.
         getErrorHandler().setPolicy( iPolicy );
     }
+
+    // Deprecated in favor of the constructor above
+    IArchive(
+        AbcA::ArchiveReaderPtr iPtr,
+        WrapExistingFlag /* iWrap */,
+        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
+      : IArchive( iPtr, iPolicy ) {}
 
     //! Destructor
     //! ...
@@ -120,7 +123,7 @@ public:
 
     //! This returns the single top-level IObject that exists
     //! automatically as part of the archive.
-    IObject getTop();
+    IObject getTop() const;
 
     //! Get the read array sample cache. It may be a NULL pointer.
     //! Caches can be shared amongst separate archives, and caching

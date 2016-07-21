@@ -260,54 +260,27 @@ public:
     //! ...
     OCurvesSchema() {}
 
-    //! This templated, primary constructor creates a new poly mesh writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
-    template <class CPROP_PTR>
-    OCurvesSchema( CPROP_PTR iParent,
+
+    //! This constructor creates a new curves writer.
+    //! The first argument is the compound property to use as a parent
+    //! The remaining optional arguments are the parents ErrorHandlerPolicy,
+    //! an override to the ErrorHandlerPolicy, MetaData, and TimeSampling info.
+    OCurvesSchema( AbcA::CompoundPropertyWriterPtr iParent,
                    const std::string &iName,
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument(),
-                   const Abc::Argument &iArg2 = Abc::Argument() )
+                   const Abc::Argument &iArg2 = Abc::Argument(),
+                   const Abc::Argument &iArg3 = Abc::Argument() )
       : OGeomBaseSchema<CurvesSchemaInfo>( iParent, iName,
-                                        iArg0, iArg1, iArg2 )
+                                           iArg0, iArg1, iArg2, iArg3)
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
         AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2, iArg3 );
 
         AbcA::index_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        if ( tsPtr )
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
-                )->getArchive()->addTimeSampling( *tsPtr );
-        }
-
-        init( tsIndex );
-    }
-
-    template <class CPROP_PTR>
-    explicit OCurvesSchema( CPROP_PTR iParent,
-                            const Abc::Argument &iArg0 = Abc::Argument(),
-                            const Abc::Argument &iArg1 = Abc::Argument(),
-                            const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<CurvesSchemaInfo>( iParent,
-                                        iArg0, iArg1, iArg2 )
-    {
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-
-        AbcA::index_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2, iArg3 );
 
         if ( tsPtr )
         {

@@ -56,7 +56,7 @@ static std::vector<Alembic::Util::int32_t> intArraySamp;
 static std::set<std::string> PATHS;
 
 static const Alembic::Util::int32_t NUM_TOP_CHILDREN = 100;
-static const Alembic::Util::int32_t DEPTH = 499;
+static const Alembic::Util::int32_t DEPTH = 210;
 
 static const Alembic::Util::int32_t HIGHVAL = 200;
 

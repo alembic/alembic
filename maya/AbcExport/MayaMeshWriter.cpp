@@ -220,7 +220,6 @@ getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmM
     }
 
     // Iteration through the list
-    MStatus             retStat = MS::kFailure;
     MDagPath            curDagPath;
     MItSelectionList    itSelList( selList );
     for( ; itSelList.isDone()!=true; itSelList.next() )
@@ -339,8 +338,8 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
 
     // check to see if this poly has been tagged as a SubD
     MPlug plug = lMesh.findPlug("SubDivisionMesh");
-    
-    // if there is flag "autoSubd", and NO "SubDivisionMesh" was defined, 
+
+    // if there is flag "autoSubd", and NO "SubDivisionMesh" was defined,
     // let's check whether the mesh has crease edge, crease vertex or holes
     // then the mesh will be treated as SubD
     bool hasToWriteSubd = false;
@@ -405,7 +404,12 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     }
     else
     {
-        Alembic::AbcGeom::OPolyMesh obj(iParent, name.asChar(), iTimeIndex);
+        Alembic::Abc::SparseFlag sf = Alembic::Abc::kFull;
+        if ( !mWriteGeometry )
+        {
+            sf = Alembic::Abc::kSparse;
+        }
+        Alembic::AbcGeom::OPolyMesh obj(iParent, name.asChar(), sf, iTimeIndex);
         mPolySchema = obj.getSchema();
 
         Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
@@ -971,11 +975,18 @@ void MayaMeshWriter::writePoly(
             (const Imath::V3f *) &normals.front(), normals.size() / 3));
     }
 
-    Alembic::AbcGeom::OPolyMeshSchema::Sample samp(
-        Alembic::Abc::V3fArraySample((const Imath::V3f *)&points.front(),
-            points.size() / 3),
-        Alembic::Abc::Int32ArraySample(facePoints),
-        Alembic::Abc::Int32ArraySample(pointCounts), iUVs, normalsSamp);
+    Alembic::AbcGeom::OPolyMeshSchema::Sample samp;
+
+    if ( mWriteGeometry )
+    {
+        samp.setPositions(Alembic::Abc::V3fArraySample(
+            (const Imath::V3f *)&points.front(), points.size() / 3) );
+        samp.setFaceIndices(Alembic::Abc::Int32ArraySample(facePoints));
+        samp.setFaceCounts(Alembic::Abc::Int32ArraySample(pointCounts));
+    }
+
+    samp.setUVs( iUVs );
+    samp.setNormals( normalsSamp );
 
     mPolySchema.set(samp);
     writeColor();

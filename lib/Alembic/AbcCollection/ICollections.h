@@ -55,8 +55,13 @@ public:
     // default constructor creates an empty ICollectionSchema
     ICollectionsSchema() {}
 
-    template <class CPROP_PTR>
-    ICollectionsSchema( CPROP_PTR iParent,
+    //! This constructor creates a new collections reader.
+    //! The first argument is the parent ICompoundProperty, from which the
+    //! error handler policy for is derived.  The second argument is the name
+    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    ICollectionsSchema( const ICompoundProperty &iParent,
                         const std::string &iName,
                         const Abc::Argument &iArg0 = Abc::Argument(),
                         const Abc::Argument &iArg1 = Abc::Argument())
@@ -65,24 +70,14 @@ public:
         init( iArg0, iArg1 );
     }
     
-    //! This constructor is the same as above, but with default
-    //! schema name used.
-    template <class CPROP_PTR>
-    explicit ICollectionsSchema( CPROP_PTR iParent,
-                              const Abc::Argument &iArg0 = Abc::Argument(),
-                              const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CollectionsSchemaInfo>( iParent, iArg0, iArg1 )
-    {
-        init( iArg0, iArg1 );
-    }
-    
-    //! Wrap an existing schema object
-    template <class CPROP_PTR>
-    ICollectionsSchema( CPROP_PTR iThis,
-                     Abc::WrapExistingFlag iFlag,
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<CollectionsSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+    //! This constructor wraps an existing ICompoundProperty as the collection
+    //! reader, and the error handler policy is derived from it.
+    //! The  remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    ICollectionsSchema( const ICompoundProperty &iProp,
+                        const Abc::Argument &iArg0 = Abc::Argument(),
+                        const Abc::Argument &iArg1 = Abc::Argument() )
+      : Abc::ISchema<CollectionsSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
