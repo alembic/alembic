@@ -33,17 +33,14 @@
 ##
 ##-*****************************************************************************
 
-LIST(APPEND CXX_FILES
-    AbcCoreLayer/ArImpl.cpp
-    AbcCoreLayer/CprImpl.cpp
-    AbcCoreLayer/OrImpl.cpp
-    AbcCoreLayer/Read.cpp
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+
+SET(CXX_FILES
+    ObjectTests.cpp
 )
-SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-INSTALL(FILES All.h Read.h
-        DESTINATION include/Alembic/AbcCoreLayer)
+ADD_EXECUTABLE(AbcCoreLayer_ObjectTests ObjectTests.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreLayer_ObjectTests ${CORE_LIBS})
 
-IF (USE_TESTS)
-    ADD_SUBDIRECTORY(Tests)
-ENDIF()
+ADD_TEST(AbcCoreLayer_ObjectTESTS AbcCoreLayer_ObjectTests)
+
