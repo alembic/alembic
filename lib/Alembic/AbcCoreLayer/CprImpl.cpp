@@ -167,19 +167,27 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
 {
     CompoundReaderPtrs::iterator it = iCompounds.begin();
 
-    // TODO support pruning here, probably with some custom MetaData?
-    // propHeader.getMetaData()["prune"] == "1"
     for ( ; it != iCompounds.end(); ++it )
     {
         for ( size_t i = 0; i < (*it)->getNumProperties(); ++i )
         {
             AbcA::PropertyHeader propHeader = (*it)->getPropertyHeader( i );
+
+            bool shouldPrune =
+                ( propHeader.getMetaData().get( "prune" ) == "1" );
+
             ChildNameMap::iterator nameIt = m_childNameMap.find(
                 propHeader.getName() );
 
-            // brand new child, add it and continue
+            // brand new child, add it (if not a prune) and continue
             if ( nameIt == m_childNameMap.end() )
             {
+                // new prop that was marked for pruning, so skip
+                if ( shouldPrune )
+                {
+                    continue;
+                }
+
                 size_t index = m_childNameMap.size();
                 m_childNameMap[ propHeader.getName() ] = index;
 
@@ -192,6 +200,26 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
                 m_children.resize( index + 1 );
                 m_children[ index ].push_back( *it );
                 continue;
+            }
+            // prune
+            else if ( shouldPrune )
+            {
+                size_t index = nameIt->second;
+
+                // prune, time to clear out existing data
+                m_children.erase( m_children.begin() + index );
+                m_childNameMap.erase( nameIt );
+
+                // since we removed an element, update the indices in our map
+                for ( nameIt = m_childNameMap.begin();
+                      nameIt != m_childNameMap.end(); ++nameIt )
+                {
+                    if ( nameIt->second > index )
+                    {
+                        nameIt->second --;
+                    }
+                }
+
             }
             // only add this onto an existing one IF its a compound and the
             // prop added previously is a compound
