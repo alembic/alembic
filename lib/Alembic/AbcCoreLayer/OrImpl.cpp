@@ -188,8 +188,6 @@ void OrImpl::init( std::vector< AbcA::ObjectReaderPtr > & iObjects )
 
     m_properties.reserve( iObjects.size() );
 
-    // TODO support pruning here, probably with some custom MetaData?
-    // objHeader.getMetaData()["prune"] == "1"
     for ( ; it != iObjects.end(); ++it )
     {
         m_properties.push_back( (*it)->getProperties() );
