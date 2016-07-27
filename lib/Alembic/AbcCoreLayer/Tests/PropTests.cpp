@@ -151,7 +151,6 @@ void pruneTest()
         ICompoundProperty root = archive.getTop().getProperties();
 
         // child, childA, childB
-        std::cout << root.getNumProperties() << std::endl;
         TESTING_ASSERT( root.getNumProperties() == 2 );
 
         ICompoundProperty child( root, "child" );

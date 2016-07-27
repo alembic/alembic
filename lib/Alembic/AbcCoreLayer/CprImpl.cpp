@@ -208,6 +208,7 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
 
                 // prune, time to clear out existing data
                 m_children.erase( m_children.begin() + index );
+                m_propertyHeaders.erase( m_propertyHeaders.begin() + index );
                 m_childNameMap.erase( nameIt );
 
                 // since we removed an element, update the indices in our map
