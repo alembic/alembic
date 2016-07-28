@@ -254,7 +254,7 @@ MObject create(Alembic::AbcGeom::ICamera & iNode, MObject & iParent)
 
     MFnCamera fnCamera;
     MObject obj = fnCamera.create(iParent);
-    fnCamera.setName(name);
+    fnCamera.setName(name, true);
 
     // we need to read this to determine the film fit
     Alembic::AbcGeom::CameraSample samp;

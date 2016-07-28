@@ -1586,7 +1586,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode,
                 return status;
             }
 
-            trans.setName(name);
+            trans.setName(name, true);
         }
 
         if (xformObj != MObject::kNullObj)
@@ -1626,8 +1626,40 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IXform & iNode,
         for (size_t i = 0; i < numChildren; ++i)
         {
             mParent = saveParent;
+            bool isInstanced = iNodeObject->object().isChildInstance(i);
+            if (isInstanced && mAction == CREATE)
+            {
+                MFnDagNode fnParentDag;
+                fnParentDag.setObject(mParent);
+                MString rootPath = fnParentDag.fullPathName();
+                MStringArray rootPathParts, instancePathParts;
+                rootPath.split('|', rootPathParts);
 
-            this->visit(iNodeObject->getChild(i));
+                MString instanceSourcePath = iNodeObject->getChild(i)->object().instanceSourcePath().c_str();
+                instanceSourcePath.split('/', instancePathParts);
+
+                // the root must match the maya root which will be incremented
+                // when an abc file is imported more than once
+                instancePathParts[0] = rootPathParts[0];
+                instanceSourcePath.clear();
+                for (unsigned j(0); j < instancePathParts.length(); j++)
+                    instanceSourcePath += "|" + instancePathParts[j];
+
+                MObject instanceSourceObj;
+                status = getObjectByName(instanceSourcePath, instanceSourceObj);
+                if (status == MS::kSuccess)
+                    fnParentDag.addChild(instanceSourceObj, MFnDagNode::kNextPos, true);
+                else
+                {
+                    MString theWarning("Instance: ");
+                    theWarning += iNodeObject->getChild(i)->object().getFullName().c_str();
+                    theWarning += " with invalid source path: ";
+                    theWarning += instanceSourcePath;
+                    printWarning(theWarning);
+                }
+            }
+            if (!isInstanced)
+                this->visit(iNodeObject->getChild(i));
         }
 
         if (hasDag)
@@ -1725,7 +1757,7 @@ MStatus CreateSceneVisitor::createEmptyObject(AlembicObjectPtr iNodeObject)
             return status;
         }
 
-        trans.setName(name);
+        trans.setName(name, true);
     }
 
     MObject saveParent = xformObj;

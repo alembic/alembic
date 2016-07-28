@@ -246,7 +246,7 @@ MObject createCurves(const std::string & iName,
         MFnTransform fnTrans;
 
         parent = fnTrans.create(iParent);
-        fnTrans.setName(name);
+        fnTrans.setName(name, true);
         returnObj = parent;
 
         if (parent.isNull())
@@ -370,7 +370,7 @@ MObject createCurves(const std::string & iName,
         MObject curveObj = curve.create(cvs, knots, degree, form, false, true,
             parent);
 
-        curve.setName(name);
+        curve.setName(name, true);
 
         if (isAnimated)
         {

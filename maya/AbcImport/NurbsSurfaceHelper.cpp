@@ -396,7 +396,7 @@ MObject readNurbs(double iFrame, Alembic::AbcGeom::INuPatch & iNode,
 
     if (status == MS::kSuccess)
     {
-        mFn.setName(surfaceName);
+        mFn.setName(surfaceName, true);
     }
     else
     {

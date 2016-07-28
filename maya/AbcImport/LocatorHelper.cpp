@@ -67,7 +67,7 @@ MObject create(Alembic::AbcGeom::IXform & iLocator,
     }
 
     MFnDagNode fnLocator(locatorObj);
-    fnLocator.setName(name);
+    fnLocator.setName(name, true);
 
     if (iLocProp.isConstant())
     {

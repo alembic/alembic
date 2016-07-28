@@ -1045,7 +1045,7 @@ MObject createPoly(double iFrame, PolyMeshAndFriends & iNode, MObject & iParent)
         MIntArray emptyInt;
         MFnMesh fnMesh;
         obj = fnMesh.create(0, 0, emptyPt, emptyInt, emptyInt, iParent);
-        fnMesh.setName(name);
+        fnMesh.setName(name, true);
     }
     else
     {
@@ -1070,7 +1070,7 @@ MObject createPoly(double iFrame, PolyMeshAndFriends & iNode, MObject & iParent)
         MFnMesh fnMesh;
         fillTopology(fnMesh, iParent, ptArray, samp.getFaceIndices(),
             samp.getFaceCounts());
-        fnMesh.setName(iNode.mMesh.getName().c_str());
+        fnMesh.setName(iNode.mMesh.getName().c_str(), true);
         setPolyNormals(iFrame, fnMesh, schema.getNormalsParam());
         obj = fnMesh.object();
     }
@@ -1119,7 +1119,7 @@ MObject createSubD(double iFrame, SubDAndFriends & iNode, MObject & iParent)
 
     fillTopology(fnMesh, iParent, pointArray, samp.getFaceIndices(),
         samp.getFaceCounts());
-    fnMesh.setName(iNode.mMesh.getName().c_str());
+    fnMesh.setName(iNode.mMesh.getName().c_str(), true);
 
     setInitialShadingGroup(fnMesh.partialPathName());
 
