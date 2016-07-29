@@ -48,7 +48,7 @@ OPolyMeshSchema::OPolyMeshSchema( AbcA::CompoundPropertyWriterPtr iParent,
                                   const Abc::Argument &iArg1,
                                   const Abc::Argument &iArg2,
                                   const Abc::Argument &iArg3 )
-    : OGeomBaseSchema<PolyMeshSchemaInfo>( iParent, iName, 
+    : OGeomBaseSchema<PolyMeshSchemaInfo>( iParent, iName,
                                            iArg0, iArg1, iArg2, iArg3 )
 {
 
@@ -76,7 +76,7 @@ OPolyMeshSchema::OPolyMeshSchema( Abc::OCompoundProperty iParent,
                                   const Abc::Argument &iArg0,
                                   const Abc::Argument &iArg1,
                                   const Abc::Argument &iArg2 )
-    : OPolyMeshSchema( iParent->getPtr(), iName,
+    : OPolyMeshSchema( iParent.getPtr(), iName,
         GetErrorHandlerPolicy( iParent ), iArg0, iArg1, iArg2 ) {}
 
 //-*****************************************************************************
