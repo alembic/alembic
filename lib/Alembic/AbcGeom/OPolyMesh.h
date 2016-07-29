@@ -153,7 +153,6 @@ public:
         ON3fGeomParam::Sample m_normals;
 
     };
-
     //-*************************************************************************
     // POLY MESH SCHEMA
     //-*************************************************************************
@@ -170,72 +169,30 @@ public:
     //! ...
     OPolyMeshSchema() {}
 
-    //! This templated, primary constructor creates a new poly mesh writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
+    //! This constructor creates a new poly mesh writer.
+    //! The first argument is an CompoundPropertyWriterPtr to use as a parent.
+    //! The next is the name to give the schema which is usually the default
+    //! name given by OFaceSet (.geom)   The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
-    template <class CPROP_PTR>
-    OPolyMeshSchema( CPROP_PTR iParent,
+    //! MetaData, specify sparse sampling and to set TimeSampling.
+    OPolyMeshSchema( AbcA::CompoundPropertyWriterPtr iParent,
                      const std::string &iName,
-
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
-                     const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PolyMeshSchemaInfo>(
-                                        GetCompoundPropertyWriterPtr( iParent ),
-                                        iName, iArg0, iArg1, iArg2, false )
-    {
+                     const Abc::Argument &iArg2 = Abc::Argument(),
+                     const Abc::Argument &iArg3 = Abc::Argument() );
 
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr(iParent)->getObject(
-                        )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2 ) );
-    }
-
-    template <class CPROP_PTR>
-    explicit OPolyMeshSchema( CPROP_PTR iParent,
-                              const Abc::Argument &iArg0 = Abc::Argument(),
-                              const Abc::Argument &iArg1 = Abc::Argument(),
-                              const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PolyMeshSchemaInfo>(
-                                        GetCompoundPropertyWriterPtr( iParent ),
-                                        iArg0, iArg1, iArg2, false )
-    {
-
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent  )->getObject(
-                        )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2 ) );
-    }
+    //! This constructor creates a new poly mesh writer.
+    //! The first argument is an OCompundProperty to use as a parent, and from
+    //! which the ErrorHandlerPolicy is derived.  The next is the name to give
+    //! the schema which is usually the default name given by OFaceSet (.geom)
+    //! The remaining optional arguments can be used to specify MetaData,
+    //! specify sparse sampling and to set TimeSampling.
+    OPolyMeshSchema( Abc::OCompoundProperty iParent,
+                     const std::string &iName,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument(),
+                     const Abc::Argument &iArg2 = Abc::Argument() );
 
     //! Copy constructor.
     OPolyMeshSchema( const OPolyMeshSchema& iCopy )
@@ -332,7 +289,7 @@ public:
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OPolyMeshSchema::valid() );
 
-protected:
+private:
     void init( uint32_t iTsIdx, bool isSparse );
 
     //! Set only some property data. Does not need to be a valid schema sample
