@@ -197,6 +197,9 @@ void OrImpl::init( std::vector< AbcA::ObjectReaderPtr > & iObjects )
             bool shouldPrune =
                 ( objHeader.getMetaData().get( "prune" ) == "1" );
 
+            bool shouldReplace =
+                ( objHeader.getMetaData().get( "replace" ) == "1" );
+
             ChildNameMap::iterator nameIt = m_childNameMap.find(
                 objHeader.getName() );
 
@@ -224,6 +227,12 @@ void OrImpl::init( std::vector< AbcA::ObjectReaderPtr > & iObjects )
             // no prune, so add to existing data
             if ( !shouldPrune )
             {
+                if ( shouldReplace )
+                {
+                    m_children[ index ].clear();
+                    m_childHeaders[ index ]->getMetaData() = AbcA::MetaData();
+                }
+
                 // add parent and index to the existing child element, and then
                 // update the MetaData
                 m_children[ index ].push_back( ObjectAndIndex( *it, i ) );

@@ -155,9 +155,94 @@ void pruneTest()
 }
 
 //-*****************************************************************************
+void replaceTest()
+{
+    std::string fileName = "objectReplace1.abc";
+    std::string fileName2 = "objectReplace2.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName );
+        OObject child( archive.getTop(), "child" );
+
+        OObject childCool( child, "cool" );
+        OObject childCooler( childCool, "cooler" );
+
+        OObject childGuy( child, "guy" );
+        OObject childGuyA( childGuy, "A" );
+
+        OObject childA( archive.getTop(), "childA" );
+        OObject childAA( childA, "A" );
+
+        OObject childB( archive.getTop(), "childB" );
+        OObject childBB( childB, "B" );
+    }
+
+    {
+        MetaData md;
+        md.set("replace", "1");
+
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName2 );
+        OObject child( archive.getTop(), "child" );
+        OObject childGuy( child, "guy", md );
+
+        OObject childCool( child, "cool", md );
+        OObject childCoolA( childCool, "A" );
+        OObject childCoolB( childCool, "B", md );
+
+        OObject childA( archive.getTop(), "childA", md );
+
+        OObject childB( archive.getTop(), "childB", md );
+        OObject childBA( childB, "A", md );
+        OObject childBC( childB, "C", md );
+        OObject childBCA( childBC, "A", md );
+    }
+
+    {
+        std::vector< std::string > files;
+        files.push_back( fileName );
+        files.push_back( fileName2 );
+
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( files );
+
+        IObject root = archive.getTop();
+
+        // child, childA, childB
+        TESTING_ASSERT( root.getNumChildren() == 3 );
+
+        IObject child( root, "child" );
+        TESTING_ASSERT( child.getNumChildren() == 2 );
+        TESTING_ASSERT( IObject( child, "cool" ).valid() );
+        TESTING_ASSERT( IObject( child, "guy" ).valid() );
+        TESTING_ASSERT( IObject( child, "cool" ).getNumChildren() == 2 );
+        TESTING_ASSERT( IObject( child, "guy" ).getNumChildren() == 0 );
+
+        IObject childCool( child, "cool" );
+        TESTING_ASSERT( IObject( childCool, "A" ).valid() );
+        TESTING_ASSERT( IObject( childCool, "A" ).getNumChildren() == 0 );
+        TESTING_ASSERT( IObject( childCool, "B" ).valid() );
+        TESTING_ASSERT( IObject( childCool, "B" ).getNumChildren() == 0 );
+
+        IObject childA( root, "childA" );
+        TESTING_ASSERT( childA.getNumChildren() == 0 );
+
+        IObject childB( root, "childB" );
+        TESTING_ASSERT( childB.getNumChildren() == 2 );
+        TESTING_ASSERT( IObject( childB, "A" ).valid() );
+        TESTING_ASSERT( IObject( childB, "C" ).valid() );
+        TESTING_ASSERT( IObject( childB, "A" ).getNumChildren() == 0 );
+        TESTING_ASSERT( IObject( childB, "C" ).getNumChildren() == 1 );
+
+        IObject childBC( childB, "C" );
+        TESTING_ASSERT( IObject( childBC, "A" ).valid() );
+        TESTING_ASSERT( IObject( childBC, "A" ).getNumChildren() == 0 );
+    }
+}
+
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     layerTest();
     pruneTest();
+    replaceTest();
     return 0;
 }
