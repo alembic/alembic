@@ -151,7 +151,6 @@ void pruneTest()
         ICompoundProperty root = archive.getTop().getProperties();
 
         // child, childA, childB
-        std::cout << root.getNumProperties() << std::endl;
         TESTING_ASSERT( root.getNumProperties() == 2 );
 
         ICompoundProperty child( root, "child" );
@@ -166,9 +165,103 @@ void pruneTest()
 }
 
 //-*****************************************************************************
+void replaceTest()
+{
+    std::string fileName = "propReplace1.abc";
+    std::string fileName2 = "propReplace2.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName );
+        OCompoundProperty child( archive.getTop().getProperties(), "child" );
+
+        OCompoundProperty childCool( child, "cool" );
+        OCompoundProperty childCooler( childCool, "cooler" );
+
+        OCompoundProperty childGuy( child, "guy" );
+        OCompoundProperty childGuyA( childGuy, "A" );
+
+        OCompoundProperty childA( archive.getTop().getProperties(), "childA" );
+        OCompoundProperty childAA( childA, "A" );
+
+        OCompoundProperty childB( archive.getTop().getProperties(), "childB" );
+        OCompoundProperty childBB( childB, "B" );
+    }
+
+    {
+        MetaData md;
+        md.set("replace", "1");
+
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName2 );
+        OCompoundProperty child( archive.getTop().getProperties(), "child" );
+        OCompoundProperty childGuy( child, "guy", md );
+
+        OCompoundProperty childCool( child, "cool", md );
+        OCompoundProperty childCoolA( childCool, "A" );
+        OCompoundProperty childCoolB( childCool, "B", md );
+
+        OCompoundProperty childA( archive.getTop().getProperties(), "childA",
+                                  md );
+
+        OCompoundProperty childB( archive.getTop().getProperties(),
+                                  "childB", md );
+        OCompoundProperty childBA( childB, "A", md );
+        OCompoundProperty childBC( childB, "C", md );
+        OCompoundProperty childBCA( childBC, "A", md );
+    }
+
+    {
+        std::vector< std::string > files;
+        files.push_back( fileName );
+        files.push_back( fileName2 );
+
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( files );
+
+        ICompoundProperty root = archive.getTop().getProperties();
+
+        // child, childA, childB
+        TESTING_ASSERT( root.getNumProperties() == 3 );
+
+        ICompoundProperty child( root, "child" );
+        TESTING_ASSERT( child.getNumProperties() == 2 );
+        TESTING_ASSERT( ICompoundProperty( child, "cool" ).valid() );
+        TESTING_ASSERT( ICompoundProperty( child, "guy" ).valid() );
+        TESTING_ASSERT(
+            ICompoundProperty( child, "cool" ).getNumProperties() == 2 );
+        TESTING_ASSERT(
+            ICompoundProperty( child, "guy" ).getNumProperties() == 0 );
+
+        ICompoundProperty childCool( child, "cool" );
+        TESTING_ASSERT( ICompoundProperty( childCool, "A" ).valid() );
+        TESTING_ASSERT(
+            ICompoundProperty( childCool, "A" ).getNumProperties() == 0 );
+        TESTING_ASSERT( ICompoundProperty( childCool, "B" ).valid() );
+        TESTING_ASSERT(
+            ICompoundProperty( childCool, "B" ).getNumProperties() == 0 );
+
+        ICompoundProperty childA( root, "childA" );
+        TESTING_ASSERT( childA.getNumProperties() == 0 );
+
+        ICompoundProperty childB( root, "childB" );
+        TESTING_ASSERT( childB.getNumProperties() == 2 );
+        TESTING_ASSERT( ICompoundProperty( childB, "A" ).valid() );
+        TESTING_ASSERT( ICompoundProperty( childB, "C" ).valid() );
+        TESTING_ASSERT(
+            ICompoundProperty( childB, "A" ).getNumProperties() == 0 );
+        TESTING_ASSERT(
+            ICompoundProperty( childB, "C" ).getNumProperties() == 1 );
+
+        ICompoundProperty childBC( childB, "C" );
+        TESTING_ASSERT( ICompoundProperty( childBC, "A" ).valid() );
+        TESTING_ASSERT(
+            ICompoundProperty( childBC, "A" ).getNumProperties() == 0 );
+    }
+}
+
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     layerTest();
     pruneTest();
+    replaceTest();
     return 0;
 }

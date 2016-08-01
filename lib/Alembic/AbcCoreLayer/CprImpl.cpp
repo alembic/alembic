@@ -173,8 +173,13 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
         {
             AbcA::PropertyHeader propHeader = (*it)->getPropertyHeader( i );
 
+            // TODO, pruning and replacing are mutually exclusive, should
+            // we combine into 1 key with different values?
             bool shouldPrune =
                 ( propHeader.getMetaData().get( "prune" ) == "1" );
+
+            bool shouldReplace =
+                ( propHeader.getMetaData().get( "replace" ) == "1" );
 
             ChildNameMap::iterator nameIt = m_childNameMap.find(
                 propHeader.getName() );
@@ -208,6 +213,7 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
 
                 // prune, time to clear out existing data
                 m_children.erase( m_children.begin() + index );
+                m_propertyHeaders.erase( m_propertyHeaders.begin() + index );
                 m_childNameMap.erase( nameIt );
 
                 // since we removed an element, update the indices in our map
@@ -229,6 +235,12 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
                 // add parent and index to the existing child element, and then
                 // update the MetaData
                 size_t index = nameIt->second;
+
+                if ( shouldReplace )
+                {
+                    m_children[ index ].clear();
+                }
+
                 m_children[ index ].push_back( *it );
 
                 // TODO, are there cases where the MetaData should be combined

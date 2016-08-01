@@ -42,6 +42,44 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+OPolyMeshSchema::OPolyMeshSchema( AbcA::CompoundPropertyWriterPtr iParent,
+                                  const std::string &iName,
+                                  const Abc::Argument &iArg0,
+                                  const Abc::Argument &iArg1,
+                                  const Abc::Argument &iArg2,
+                                  const Abc::Argument &iArg3 )
+    : OGeomBaseSchema<PolyMeshSchemaInfo>( iParent, iName,
+                                           iArg0, iArg1, iArg2, iArg3 )
+{
+
+    AbcA::TimeSamplingPtr tsPtr =
+        Abc::GetTimeSampling( iArg0, iArg1, iArg2, iArg3 );
+    uint32_t tsIndex =
+        Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2, iArg3 );
+
+    // if we specified a valid TimeSamplingPtr, use it to determine the
+    // index otherwise we'll use the index, which defaults to the intrinsic
+    // 0 index
+    if ( tsPtr )
+    {
+        tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
+    }
+
+    // Meta data and error handling are eaten up by
+    // the super type, so all that's left is time sampling.
+    init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2, iArg3 ) );
+}
+
+//-*****************************************************************************
+OPolyMeshSchema::OPolyMeshSchema( Abc::OCompoundProperty iParent,
+                                  const std::string &iName,
+                                  const Abc::Argument &iArg0,
+                                  const Abc::Argument &iArg1,
+                                  const Abc::Argument &iArg2 )
+    : OPolyMeshSchema( iParent.getPtr(), iName,
+        GetErrorHandlerPolicy( iParent ), iArg0, iArg1, iArg2 ) {}
+
+//-*****************************************************************************
 void OPolyMeshSchema::set( const Sample &iSamp )
 {
     if( m_selectiveExport || iSamp.isPartialSample() )
