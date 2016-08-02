@@ -71,39 +71,46 @@ public:
 class AbcDiffProperty
 {
 public:
-    AbcDiffProperty() {}
-    AbcDiffProperty(std::string iName) : m_name(iName) {}
+    AbcDiffProperty() : m_prune(false) {}
+    AbcDiffProperty(std::string iName) : m_name(iName), m_prune(false) {}
 
     const std::string&              getName() const { return m_name; }
     size_t                          getNumChildren() const { return m_children.size(); }
     std::vector<AbcDiffProperty>&   getChildren() { return m_children; }
     AbcDiffProperty&                getChild( size_t i ) { return m_children[i]; }
     AbcDiffProperty&                addChild(const std::string &iChildName )
-                                    {
+                                    { 
                                         m_children.push_back( AbcDiffProperty(iChildName) );
                                         return m_children.back();
                                     }
     AbcDiffProperty&                addChild( const AbcDiffProperty &iProp )
-                                    {
+                                    { 
                                         m_children.push_back( iProp );
                                         return m_children.back();
                                     }
-
+    void                            setPrune( const bool iPrune ) { m_prune = iPrune; }
+    bool                            shouldPrune() const { return m_prune; }
+    
 private:
     std::string                 m_name;
     std::vector<AbcDiffProperty>m_children;
+    bool                        m_prune;
 };
 
 class AbcDiffObject
 {
 public:
-    AbcDiffObject() : m_useMetaData(true) { }
+    AbcDiffObject() 
+        : m_useMetaData(true),
+        m_prune(false)
+    { }
 
     AbcDiffObject(  const std::string &iName)
         : m_name(iName),
-        m_useMetaData(true)
+        m_useMetaData(true),
+        m_prune(false)
     {
-
+        
     }
 
     const std::string&              getName() const { return m_name; }
@@ -111,8 +118,8 @@ public:
     size_t                          getNumProperties() const { return m_properties.getNumChildren(); }
     AbcDiffProperty&                getProperty( size_t i ) { return m_properties.getChild( i ); }
     AbcDiffProperty&                getProperties() { return m_properties; }
-    AbcDiffProperty&                addProperty( const std::string &iPropName )
-                                    {
+    AbcDiffProperty&                addProperty( const std::string &iPropName ) 
+                                    { 
                                         m_properties.addChild( iPropName  );
                                         return m_properties.getChildren().back();
                                     }
@@ -122,12 +129,15 @@ public:
     void                            addChild( AbcDiffObject &child ) { m_children.push_back( child ); }
     void                            setIsUsingMetaData( bool iUseMetaData ) { m_useMetaData = iUseMetaData; }
     bool                            useMetaData() const { return m_useMetaData; }
+    void                            setPrune( const bool iPrune ) { m_prune = iPrune; }
+    bool                            shouldPrune() const { return m_prune; }
 
 private:
     AbcDiffProperty                 m_properties;
     std::vector<AbcDiffObject>      m_children;
     std::string                     m_name;
     bool                            m_useMetaData;
+    bool                            m_prune;
 };
 
 //Display output beautification
@@ -176,7 +186,7 @@ void addCompoundPropertyHierarchy(Alembic::Abc::ICompoundProperty iParentCompoun
     const std::string &propName = baseProp->getName();
     AbcDiffProperty diffProperty( propName );
 
-     const Alembic::Abc::PropertyHeader *childPropHeader =
+     const Alembic::Abc::PropertyHeader *childPropHeader = 
             iParentCompoundProp.getPtr()->getPropertyHeader( propName );
 
      if ( childPropHeader->isCompound() )
@@ -187,7 +197,7 @@ void addCompoundPropertyHierarchy(Alembic::Abc::ICompoundProperty iParentCompoun
 
          for( size_t i = 0; i < numProps; i++ )
          {
-             const Alembic::Abc::PropertyHeader& childPropHeader =
+             const Alembic::Abc::PropertyHeader& childPropHeader = 
                  compoundProp.getPtr()->getPropertyHeader(i);
 
              const std::string childPropName = childPropHeader.getName();
@@ -200,9 +210,30 @@ void addCompoundPropertyHierarchy(Alembic::Abc::ICompoundProperty iParentCompoun
 
 bool diffProperties( Alembic::Abc::ICompoundProperty iCompoundProp1, Alembic::Abc::ICompoundProperty iCompoundProp2, AbcDiffObject &iDiffObj, AbcDiffProperty &iDiffProperty, const std::string &iObjName )
 {
+    size_t numObj1Props = iCompoundProp1.getNumProperties();
     size_t numObj2Props = iCompoundProp2.getNumProperties();
     bool foundDifferences = false;
+    
+    //Is iCompoundProp2 missing any properties that iCompoundProp1 had?
+    for( size_t i = 0; i < numObj1Props; i++ )
+    {
+        const Alembic::Abc::PropertyHeader &childProp1Header = iCompoundProp1.getPropertyHeader( i );
+        const std::string &childProp1Name = childProp1Header.getName();
 
+        const Alembic::Abc::PropertyHeader *childProp2Header = 
+            iCompoundProp2.getPtr()->getPropertyHeader( childProp1Name );
+
+        if( !childProp2Header )
+        {
+            AbcDiffProperty childDiffProperty( childProp1Name );
+            childDiffProperty.setPrune(true);
+            iDiffProperty.addChild( childDiffProperty);
+
+            foundDifferences = true;
+        }
+    }
+
+    //Are there any differences in the properties that exist in both iCompoundProp1 and iCompoundProp2?
     for( size_t i = 0; i < numObj2Props; i++ )
     {
         std::vector<std::string> compoundPropsToAdd;
@@ -210,10 +241,10 @@ bool diffProperties( Alembic::Abc::ICompoundProperty iCompoundProp1, Alembic::Ab
         const std::string &childPropName = childProp2->getName();
         AbcDiffProperty childDiffProperty( childPropName );
 
-        const Alembic::Abc::PropertyHeader *childProp1Header =
+        const Alembic::Abc::PropertyHeader *childProp1Header = 
             iCompoundProp1.getPtr()->getPropertyHeader( childPropName );
 
-         const Alembic::Abc::PropertyHeader *childProp2Header =
+        const Alembic::Abc::PropertyHeader *childProp2Header = 
             iCompoundProp2.getPtr()->getPropertyHeader( childPropName );
 
         bool propertiesDiffer = false;
@@ -249,7 +280,7 @@ bool diffProperties( Alembic::Abc::ICompoundProperty iCompoundProp1, Alembic::Ab
                             Alembic::AbcCoreAbstract::ArraySamplePtr samp1, samp2;
                             Alembic::Abc::ISampleSelector sel(
                                 (Alembic::Abc::index_t) j);
-
+                            
                             arrayProp1.get(samp1, sel);
                             arrayProp2.get(samp2, sel);
 
@@ -265,10 +296,10 @@ bool diffProperties( Alembic::Abc::ICompoundProperty iCompoundProp1, Alembic::Ab
                 {
                     Alembic::Abc::IScalarProperty scalarProp1(iCompoundProp1, childPropName);
                     Alembic::Abc::IScalarProperty scalarProp2(iCompoundProp2, childPropName);
-
+                   
                     if( (scalarProp1.getNumSamples() != scalarProp2.getNumSamples()) ||
                         (childProp1Header->getDataType() != childProp2Header->getDataType()) ||
-                        (childProp1Header->getDataType().getPod() != childProp2Header->getDataType().getPod()) )
+                        (childProp1Header->getDataType().getPod() != childProp2Header->getDataType().getPod()) ) 
                     {
                         propertiesDiffer = true;
                     }
@@ -320,11 +351,11 @@ bool diffProperties( Alembic::Abc::ICompoundProperty iCompoundProp1, Alembic::Ab
                             {
                                 scalarProp1.get(samp1, sel);
                                 scalarProp2.get(samp2, sel);
-                                Alembic::Abc::ArraySample arraySample1( samp1,
-                                                                        childProp1Header->getDataType(),
+                                Alembic::Abc::ArraySample arraySample1( samp1, 
+                                                                        childProp1Header->getDataType(), 
                                                                         Alembic::Abc::Dimensions(1));
-                                Alembic::Abc::ArraySample arraySample2( samp2,
-                                                                        childProp2Header->getDataType(),
+                                Alembic::Abc::ArraySample arraySample2( samp2, 
+                                                                        childProp2Header->getDataType(), 
                                                                         Alembic::Abc::Dimensions(1));
                                 Alembic::Abc::ArraySample::Key key1 = arraySample1.getKey();
                                 Alembic::Abc::ArraySample::Key key2 = arraySample2.getKey();
@@ -403,7 +434,7 @@ void copyPropertiesToDiff( Alembic::Abc::IObject &iObj, AbcDiffObject &iDiffObj 
     for( size_t i = 0; i < numProps; i++ )
     {
         const Alembic::Abc::PropertyHeader& propHeader = objProps.getPropertyHeader( i );
-
+        
         AbcDiffProperty diffProperty( propHeader.getName() );
 
         //Get the child properties if this is a compound property
@@ -450,7 +481,7 @@ bool diffObjects( Alembic::Abc::IObject &iObj1, Alembic::Abc::IObject &iObj2, Ab
     {
         if( s_verbose )
         {
-            printf( "Internal error: Unexpected object diff. Tried to diff \"%s\" and \"%s\"'. Aborting diff.\n",
+            printf( "Internal error: Unexpected object diff. Tried to diff \"%s\" and \"%s\"'. Aborting diff.\n", 
                 iObj1.getFullName().c_str(), iObj2.getFullName().c_str());
 
             return false;
@@ -470,7 +501,26 @@ bool diffObjects( Alembic::Abc::IObject &iObj1, Alembic::Abc::IObject &iObj2, Ab
         foundDifferences = diffProperties( iObj1.getProperties(), iObj2.getProperties(), iDiffObj, iDiffObj.getProperties(), iObj2.getName() );
     }
 
-    size_t numChildren = iObj2.getNumChildren();
+    //Is iObj2 missing any children that iObj1 had?
+    size_t numChildren = iObj1.getNumChildren();
+
+    for( size_t i = 0; i < numChildren; i++ )
+    {
+         Alembic::Abc::IObject obj1Child = iObj1.getChild( i );
+        const Alembic::Abc::ObjectHeader *childHeader = iObj2.getChildHeader( obj1Child.getName() );
+
+        if( !childHeader )
+        {
+            AbcDiffObject childDiff( obj1Child.getName() );
+            childDiff.setPrune( true );
+            iDiffObj.addChild( childDiff );
+            foundDifferences = true;
+        }
+    }
+
+
+    //Are there differences between matching iObj1 and iOb2 children?
+    numChildren = iObj2.getNumChildren();
 
     for( size_t i = 0; i < numChildren; i++ )
     {
@@ -483,7 +533,7 @@ bool diffObjects( Alembic::Abc::IObject &iObj1, Alembic::Abc::IObject &iObj2, Ab
 
         if( childHeader )
         {
-            //Both hierarchies have this object so continue
+            //Both hierarchies have this object so continue 
             //down the hierarchy to look for differences
             Alembic::Abc::IObject obj1Child = iObj1.getChild( obj2Child.getName() );
             foundChildDifferences = diffObjects( obj1Child, obj2Child, childDiff, true );
@@ -511,8 +561,32 @@ void writeProperty(Alembic::Abc::ICompoundProperty & iRead,
 {
     increaseOutputIndent();
 
+    if( iDiffProperty.shouldPrune() )
+    {
+        if(s_verbose)
+        {
+            printf("%sProperty \"%s\" was pruned\n", getIndentBuffer(), iDiffProperty.getName().c_str());
+        }
+
+        Alembic::Abc::MetaData metaData;
+        metaData.set("prune", "1");
+
+        Alembic::Abc::DataType dataType;
+        dataType.setExtent( 1 );
+        dataType.setPod(Alembic::Util::kBooleanPOD);
+
+        //TODO: Just writing out a dummy scalar value here. 
+        //Do we need to write an accurate array/scalar/compound type to 
+        //more accurately reflect what is being pruned?
+        Alembic::Abc::OScalarProperty outProp(iWrite, iDiffProperty.getName(),
+            dataType, metaData, Alembic::Abc::TimeSamplingPtr());
+
+        return;
+    }
+
     const Alembic::AbcCoreAbstract::PropertyHeader* header =
         iRead.getPropertyHeader( iDiffProperty.getName() );
+
     if (header->isArray())
     {
         if(s_verbose)
@@ -598,7 +672,7 @@ void writeProperty(Alembic::Abc::ICompoundProperty & iRead,
         Alembic::Abc::OCompoundProperty outProp(iWrite,
                 header->getName(), header->getMetaData());
         Alembic::Abc::ICompoundProperty inProp(iRead, header->getName());
-
+            
         size_t numChildProps = iDiffProperty.getNumChildren();
 
         for( size_t c = 0; c < numChildProps; c++ )
@@ -616,7 +690,7 @@ bool writeProperties(Alembic::Abc::IObject iObjectRead, Alembic::Abc::OObject iO
     Alembic::Abc::OCompoundProperty propsWrite = iObjectWrite.getProperties();
     AbcDiffProperty& diffObjProperties = iDiffObject.getProperties();
     size_t numProperties = diffObjProperties.getNumChildren();
-
+    
     for( size_t i = 0; i < numProperties; i++ )
     {
         writeProperty( propsRead, propsWrite, diffObjProperties.getChild(i) );
@@ -631,9 +705,10 @@ bool writeObjectToFile(Alembic::Abc::IObject iObjectIn, Alembic::Abc::OObject iO
 
     if(s_verbose)
     {
-        printf("%sObject \"%s\"\n", getIndentBuffer(), iDiffObject.getName().c_str());
+        printf("%sObject \"%s\"%s\n", 
+            getIndentBuffer(), iDiffObject.getName().c_str(), (iDiffObject.shouldPrune() ? " (pruned)" : ""));
     }
-
+    
     writeProperties(iObjectIn, iObjectOut, iDiffObject);
 
     size_t numChildren = iDiffObject.getNumChildren();
@@ -642,9 +717,23 @@ bool writeObjectToFile(Alembic::Abc::IObject iObjectIn, Alembic::Abc::OObject iO
         AbcDiffObject &diffChild = iDiffObject.getChild( i );
 
         Alembic::Abc::IObject childSource(iObjectIn.getChild( diffChild.getName() ));
-        if( diffChild.useMetaData() )
+        bool prune = diffChild.shouldPrune();
+
+        if( diffChild.useMetaData() || prune)
         {
-            Alembic::Abc::OObject childDest(iObjectOut, diffChild.getName(), childSource.getMetaData());
+            Alembic::Abc::MetaData metaData;
+
+            if( diffChild.useMetaData() )
+            {
+                metaData = childSource.getMetaData();
+            }
+                
+            if( prune )
+            {
+                metaData.set("prune", "1");
+            }
+
+            Alembic::Abc::OObject childDest(iObjectOut, diffChild.getName(), metaData);
             writeObjectToFile(childSource, childDest, diffChild);
         }
         else
