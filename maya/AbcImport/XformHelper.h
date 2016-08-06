@@ -47,7 +47,6 @@
 #include "NodeIteratorVisitorHelper.h"
 
 MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
-    bool isConstant,
     MObject & iObject,
     std::vector<std::string> & oSampledTransOpNameList,
     std::vector<Prop> & iSampledPropList,

@@ -214,6 +214,7 @@ public:
     std::vector<MObject>        mPointsObjList;
     std::vector<MObject>        mPolyMeshObjList;
     std::vector<MObject>        mSubDObjList;
+    std::vector<MObject>        mXformObjList;
 
     std::vector<Prop> mPropList;
     std::vector<Alembic::AbcGeom::ICamera>    mCameraList;
