@@ -302,43 +302,6 @@ MStatus AlembicNode::initialize()
     status = gAttr.setUsesArrayDataBuilder(true);
     status = addAttribute(mOutPropArrayAttr);
 
-    // set up affection relationships
-    status = attributeAffects(mTimeAttr, mOutSubDArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutPolyArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutNurbsSurfaceArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutNurbsCurveGrpArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutTransOpArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutCameraArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutPropArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutLocatorPosScaleArrayAttr);
-
-    status = attributeAffects(mSpeedAttr, mOutSubDArrayAttr);
-    status = attributeAffects(mSpeedAttr, mOutPolyArrayAttr);
-    status = attributeAffects(mSpeedAttr, mOutNurbsSurfaceArrayAttr);
-    status = attributeAffects(mSpeedAttr, mOutNurbsCurveGrpArrayAttr);
-    status = attributeAffects(mSpeedAttr, mOutTransOpArrayAttr);
-    status = attributeAffects(mSpeedAttr, mOutCameraArrayAttr);
-    status = attributeAffects(mSpeedAttr, mOutPropArrayAttr);
-    status = attributeAffects(mSpeedAttr, mOutLocatorPosScaleArrayAttr);
-
-    status = attributeAffects(mOffsetAttr, mOutSubDArrayAttr);
-    status = attributeAffects(mOffsetAttr, mOutPolyArrayAttr);
-    status = attributeAffects(mOffsetAttr, mOutNurbsSurfaceArrayAttr);
-    status = attributeAffects(mOffsetAttr, mOutNurbsCurveGrpArrayAttr);
-    status = attributeAffects(mOffsetAttr, mOutTransOpArrayAttr);
-    status = attributeAffects(mOffsetAttr, mOutCameraArrayAttr);
-    status = attributeAffects(mOffsetAttr, mOutPropArrayAttr);
-    status = attributeAffects(mOffsetAttr, mOutLocatorPosScaleArrayAttr);
-
-    status = attributeAffects(mCycleTypeAttr, mOutSubDArrayAttr);
-    status = attributeAffects(mCycleTypeAttr, mOutPolyArrayAttr);
-    status = attributeAffects(mCycleTypeAttr, mOutNurbsSurfaceArrayAttr);
-    status = attributeAffects(mCycleTypeAttr, mOutNurbsCurveGrpArrayAttr);
-    status = attributeAffects(mCycleTypeAttr, mOutTransOpArrayAttr);
-    status = attributeAffects(mCycleTypeAttr, mOutCameraArrayAttr);
-    status = attributeAffects(mCycleTypeAttr, mOutPropArrayAttr);
-    status = attributeAffects(mCycleTypeAttr, mOutLocatorPosScaleArrayAttr);
-
     MGlobal::executeCommand( UITemplateMELScriptStr );
 
     return status;
@@ -451,7 +414,38 @@ MStatus AlembicNode::setDependentsDirty(const MPlug& plug, MPlugArray& plugArray
 			MGlobal::displayWarning("Repathing Alembic Nodes is not supported");
 		}
 	}
-	return MPxNode::setDependentsDirty(plug, plugArray);
+
+    if (mStaticGeo )
+    	return MPxNode::setDependentsDirty(plug, plugArray);
+
+    if (plug != mTimeAttr && plug !=mSpeedAttr && plug != mOffsetAttr & plug != mCycleTypeAttr)
+        return MPxNode::setDependentsDirty(plug, plugArray);
+
+    MObjectArray objArray;
+    objArray.append(mOutSubDArrayAttr);
+    objArray.append(mOutPolyArrayAttr);
+    objArray.append(mOutCameraArrayAttr);
+    objArray.append(mOutNurbsCurveGrpArrayAttr);
+    objArray.append(mOutNurbsSurfaceArrayAttr);
+    objArray.append(mOutTransOpArrayAttr);
+    objArray.append(mOutPropArrayAttr);
+    objArray.append(mOutLocatorPosScaleArrayAttr);
+
+    for (unsigned i(0), numObjects = objArray.length(); i < numObjects; i++)
+    {
+        MPlug plug(thisMObject(), objArray[i]);
+        plugArray.append(plug);
+        if (plug.isArray())
+        {
+            for (unsigned j(0), numElements = plug.numElements(); j < numElements; j++)
+            {
+                MPlug elemPlug = plug.elementByPhysicalIndex(j);
+                if (!elemPlug.isNull())
+                    plugArray.append(elemPlug);
+            }
+        }
+    }
+    return MPxNode::setDependentsDirty(plug, plugArray);
 }
 
 MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
@@ -572,6 +566,9 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         mOutRead = std::vector<bool>(mOutRead.size(), false);
         mCurTime = inputTime;
     }
+
+    // used by setDependentsDirty
+    mStaticGeo = (mSequenceStartTime == mSequenceEndTime);
 
     if (plug == mOutPropArrayAttr)
     {
