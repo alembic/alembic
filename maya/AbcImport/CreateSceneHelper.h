@@ -151,6 +151,9 @@ private:
     // closest match to mRootNodes when appropriate
     std::string searchRootNames(const std::string & iName);
 
+    // get the MObject corresponding to the instance source
+    void getInstanceSourceMObject(AlembicObjectPtr childObj, MObject & instanceSourceObj);
+
     double mFrame;
     MObject mParent;
 

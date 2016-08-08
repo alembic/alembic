@@ -412,7 +412,6 @@ bool isComplex(const Alembic::AbcGeom::XformSample & iSamp)
 }
 
 MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
-    bool isConstant,
     MObject & iObject,
     std::vector<std::string> & oSampledTransOpNameList,
     std::vector<Prop> & iSampledPropList,
@@ -522,36 +521,33 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
 
     if (isComplex(iSamp))
     {
-        if (!isConstant)
-        {
-            oSampledTransOpNameList.push_back("translateX");
-            oSampledTransOpNameList.push_back("translateY");
-            oSampledTransOpNameList.push_back("translateZ");
-            oSampledTransOpNameList.push_back("rotatePivotTranslateX");
-            oSampledTransOpNameList.push_back("rotatePivotTranslateY");
-            oSampledTransOpNameList.push_back("rotatePivotTranslateZ");
-            oSampledTransOpNameList.push_back("rotatePivotX");
-            oSampledTransOpNameList.push_back("rotatePivotY");
-            oSampledTransOpNameList.push_back("rotatePivotZ");
-            oSampledTransOpNameList.push_back("rotateX");
-            oSampledTransOpNameList.push_back("rotateY");
-            oSampledTransOpNameList.push_back("rotateZ");
-            oSampledTransOpNameList.push_back("rotateAxisX");
-            oSampledTransOpNameList.push_back("rotateAxisY");
-            oSampledTransOpNameList.push_back("rotateAxisZ");
-            oSampledTransOpNameList.push_back("scalePivotTranslateX");
-            oSampledTransOpNameList.push_back("scalePivotTranslateY");
-            oSampledTransOpNameList.push_back("scalePivotTranslateZ");
-            oSampledTransOpNameList.push_back("scalePivotX");
-            oSampledTransOpNameList.push_back("scalePivotY");
-            oSampledTransOpNameList.push_back("scalePivotZ");
-            oSampledTransOpNameList.push_back("shearXY");
-            oSampledTransOpNameList.push_back("shearXZ");
-            oSampledTransOpNameList.push_back("shearYZ");
-            oSampledTransOpNameList.push_back("scaleX");
-            oSampledTransOpNameList.push_back("scaleY");
-            oSampledTransOpNameList.push_back("scaleZ");
-        }
+        oSampledTransOpNameList.push_back("translateX");
+        oSampledTransOpNameList.push_back("translateY");
+        oSampledTransOpNameList.push_back("translateZ");
+        oSampledTransOpNameList.push_back("rotatePivotTranslateX");
+        oSampledTransOpNameList.push_back("rotatePivotTranslateY");
+        oSampledTransOpNameList.push_back("rotatePivotTranslateZ");
+        oSampledTransOpNameList.push_back("rotatePivotX");
+        oSampledTransOpNameList.push_back("rotatePivotY");
+        oSampledTransOpNameList.push_back("rotatePivotZ");
+        oSampledTransOpNameList.push_back("rotateX");
+        oSampledTransOpNameList.push_back("rotateY");
+        oSampledTransOpNameList.push_back("rotateZ");
+        oSampledTransOpNameList.push_back("rotateAxisX");
+        oSampledTransOpNameList.push_back("rotateAxisY");
+        oSampledTransOpNameList.push_back("rotateAxisZ");
+        oSampledTransOpNameList.push_back("scalePivotTranslateX");
+        oSampledTransOpNameList.push_back("scalePivotTranslateY");
+        oSampledTransOpNameList.push_back("scalePivotTranslateZ");
+        oSampledTransOpNameList.push_back("scalePivotX");
+        oSampledTransOpNameList.push_back("scalePivotY");
+        oSampledTransOpNameList.push_back("scalePivotZ");
+        oSampledTransOpNameList.push_back("shearXY");
+        oSampledTransOpNameList.push_back("shearXZ");
+        oSampledTransOpNameList.push_back("shearYZ");
+        oSampledTransOpNameList.push_back("scaleX");
+        oSampledTransOpNameList.push_back("scaleY");
+        oSampledTransOpNameList.push_back("scaleZ");
 
         Alembic::Abc::M44d m = iSamp.getMatrix();
         MTransformationMatrix mmat(MMatrix(m.x));

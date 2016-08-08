@@ -173,6 +173,7 @@ private:
     double   mSequenceStartTime;
     double   mSequenceEndTime;
     double   mCurTime;
+    bool     mStaticGeo;
 
     bool    mDebugOn;
 

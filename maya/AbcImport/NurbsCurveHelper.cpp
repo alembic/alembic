@@ -226,7 +226,7 @@ MStatus readCurves(double iFrame, const Alembic::AbcGeom::ICurves & iNode,
 MObject createCurves(const std::string & iName,
     Alembic::AbcGeom::ICurvesSchema::Sample & iSample,
     Alembic::AbcGeom::IFloatGeomParam::Sample & iWidths,
-    MObject & iParent, std::vector< MObject > & ioCurves, bool isAnimated)
+    MObject & iParent, std::vector< MObject > & ioCurves)
 {
     MObject returnObj;
 
@@ -246,7 +246,7 @@ MObject createCurves(const std::string & iName,
         MFnTransform fnTrans;
 
         parent = fnTrans.create(iParent);
-        fnTrans.setName(name);
+        fnTrans.setName(name, true);
         returnObj = parent;
 
         if (parent.isNull())
@@ -370,12 +370,8 @@ MObject createCurves(const std::string & iName,
         MObject curveObj = curve.create(cvs, knots, degree, form, false, true,
             parent);
 
-        curve.setName(name);
-
-        if (isAnimated)
-        {
-            ioCurves.push_back(curveObj);
-        }
+        curve.setName(name, true);
+        ioCurves.push_back(curveObj);
 
         if (numCurves == 1)
         {

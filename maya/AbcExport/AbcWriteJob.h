@@ -179,6 +179,7 @@ class AbcWriteJob
     // return true if the degree and close state of each curve
     // in the group is the same
     bool checkCurveGrp();
+    bool checkInstance(MDagPath dag, MayaTransformWriterPtr iParent);
 
     std::vector< MayaTransformWriterPtr > mTransList;
     std::vector< AttributesWriterPtr > mTransAttrList;
