@@ -47,6 +47,7 @@ namespace AbcA = Alembic::AbcCoreAbstract;
 
 AbcExport::AbcExport()
 {
+    std::cout << "Using custom alembic exporter" << std::endl;
 }
 
 AbcExport::~AbcExport()

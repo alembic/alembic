@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# cd build
+# ../build.sh INSTALL_DIR_NAME
+
 PREFIX=$1
 
 ####	MAYA 2014    ####

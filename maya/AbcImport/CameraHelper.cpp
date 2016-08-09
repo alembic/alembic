@@ -50,6 +50,9 @@
 void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
     std::vector<double> & oArray)
 {
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    float scaleUnit = getScaleUnitImport();
+
     oArray.resize(18);
 
     // set some optional scale values
@@ -102,15 +105,18 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
 
         oArray[7] = simpleLerp<double>(alpha, samp.getNearClippingPlane(),
             ceilSamp.getNearClippingPlane());
+        oArray[7] *= scaleUnit;
 
         oArray[8] = simpleLerp<double>(alpha, samp.getFarClippingPlane(),
             ceilSamp.getFarClippingPlane());
+        oArray[8] *= scaleUnit;
 
         oArray[9] = simpleLerp<double>(alpha, samp.getFStop(),
             ceilSamp.getFStop());
 
         oArray[10] = simpleLerp<double>(alpha, samp.getFocusDistance(),
             ceilSamp.getFocusDistance());
+        oArray[10] *= scaleUnit;
 
         double shutterClose = simpleLerp<double>(alpha, samp.getShutterClose(),
             ceilSamp.getShutterClose());
@@ -197,10 +203,13 @@ void read(double iFrame, Alembic::AbcGeom::ICamera & iCamera,
         }
 
         oArray[7] = samp.getNearClippingPlane();
+        oArray[7] *= scaleUnit;
         oArray[8] = samp.getFarClippingPlane();
+        oArray[8] *= scaleUnit;
 
         oArray[9] = samp.getFStop();
         oArray[10] = samp.getFocusDistance();
+        oArray[10] *= scaleUnit;
 
         MTime sec(1.0, MTime::kSeconds);
         oArray[11] = 360.0 * (samp.getShutterClose()-samp.getShutterOpen()) *

@@ -488,17 +488,19 @@ float getScaleUnitImport()
     if(env != NULL)
         alembicImportUnit = env;
 
+    std::transform(alembicImportUnit.begin(), alembicImportUnit.end(), alembicImportUnit.begin(), ::tolower);
+
     if(alembicImportUnit.length() > 0)
     {
-        if(alembicImportUnit == "Millimeters")
+        if(alembicImportUnit == "millimeters")
             uiUnit = MDistance::kMillimeters;
-        else if(alembicImportUnit == "Meters")
+        else if(alembicImportUnit == "meters")
             uiUnit = MDistance::kMeters;
-        else if(alembicImportUnit == "Inches")
+        else if(alembicImportUnit == "inches")
             uiUnit = MDistance::kInches;
-        else if(alembicImportUnit == "Feet")
+        else if(alembicImportUnit == "feet")
             uiUnit = MDistance::kFeet;
-        else if(alembicImportUnit == "Yards")
+        else if(alembicImportUnit == "yards")
             uiUnit = MDistance::kYards;
         else
             uiUnit = MDistance::uiUnit();

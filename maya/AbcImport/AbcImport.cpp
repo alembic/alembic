@@ -111,6 +111,7 @@ AbcImport -ct \"root1 root2 root3 ...\" \"/mcp/test.abc\";                  \n"
 
 AbcImport::AbcImport()
 {
+    std::cout << "Using custom alembic importer" << std::endl;
 }
 
 AbcImport::~AbcImport()
