@@ -182,11 +182,31 @@ public:
     }
 
     // Deprecated in favor of the constructor above
-    ISchemaObject( const IObject & iThisObject,
+    ISchemaObject( const IObject & iObject,
                    WrapExistingFlag iFlag,
                    const Argument &iArg0 = Argument(),
                    const Argument &iArg1 = Argument() )
-    : ISchemaObject( iThisObject, iArg0, iArg1 ) {}
+    : IObject( iObject.getPtr(), GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "ISchemaObject::ISchemaObject( wrapflag )" );
+
+        const AbcA::ObjectHeader &oheader = this->getHeader();
+
+        ABCA_ASSERT( matches( oheader.getMetaData(),
+                     GetSchemaInterpMatching( iArg0, iArg1 ) ),
+                     "Incorrect match of schema: "
+                     << oheader.getMetaData().get( "schemaObjTitle" )
+                     << " to expected: "
+                     << getSchemaObjTitle() );
+
+        m_schema = SCHEMA( this->getProperties(),
+                           SCHEMA::getDefaultSchemaName(),
+                           this->getErrorHandlerPolicy(),
+                           GetSchemaInterpMatching( iArg0, iArg1 ) );
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS

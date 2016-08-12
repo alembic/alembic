@@ -148,7 +148,7 @@ public:
     OCompoundProperty getParent() const;
 
 private:
-    void init( AbcA::CompoundPropertyWriterPtr iParentObject,
+    void init( AbcA::CompoundPropertyWriterPtr iParent,
                const std::string &iName,
                const AbcA::DataType &iDataType,
 

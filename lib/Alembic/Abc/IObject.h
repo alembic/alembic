@@ -99,30 +99,29 @@ public:
     IObject( AbcA::ObjectReaderPtr iPtr,
              WrapExistingFlag /* iFlag */,
              const Argument &iArg0 = Argument() )
-        : IObject( iPtr, iArg0 ) {}
+        : m_object( GetObjectReaderPtr( iPtr ) )
+    {
+        // Set the error handling policy
+        getErrorHandler().setPolicy(
+            GetErrorHandlerPolicy( iPtr, iArg0 ) );
+
+        initInstance();
+    }
 
     //! This attaches an IObject wrapper around the top
     //! object of an archive.
     IObject( IArchive & iArchive,
              const Argument &iArg0 = Argument() )
     {
-        // Set the error handling policy
-        getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iArchive, iArg0 ) );
-
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::IObject( top )" );
-
-        m_object = iArchive.getTop().getPtr();
-
-        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+        init( iArchive, iArg0 );
     }
 
     // Deprecated in favor of the constructor above
     IObject( IArchive & iArchive,
              TopFlag iFlag,
              const Argument &iArg0 = Argument() )
-        : IObject( iArchive, iArg0 )
     {
+        init( iArchive, iArg0 );
     }
 
     //! Default copy constructor used
@@ -270,6 +269,9 @@ public:
     AbcA::ObjectReaderPtr m_object;
 
 private:
+
+    void init( IArchive & iArchive, const Argument &iArg0 );
+
     void init( AbcA::ObjectReaderPtr iParentObject,
                const std::string &iName,
                ErrorHandler::Policy iPolicy );

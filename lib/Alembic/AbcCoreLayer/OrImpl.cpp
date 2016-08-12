@@ -188,40 +188,75 @@ void OrImpl::init( std::vector< AbcA::ObjectReaderPtr > & iObjects )
 
     m_properties.reserve( iObjects.size() );
 
-    // TODO support pruning here, probably with some custom MetaData?
-    // objHeader.getMetaData()["prune"] == "1"
     for ( ; it != iObjects.end(); ++it )
     {
         m_properties.push_back( (*it)->getProperties() );
         for ( size_t i = 0; i < (*it)->getNumChildren(); ++i )
         {
             AbcA::ObjectHeader objHeader = (*it)->getChildHeader( i );
+            bool shouldPrune =
+                ( objHeader.getMetaData().get( "prune" ) == "1" );
+
+            bool shouldReplace =
+                ( objHeader.getMetaData().get( "replace" ) == "1" );
+
             ChildNameMap::iterator nameIt = m_childNameMap.find(
                 objHeader.getName() );
 
             size_t index = 0;
 
-            // brand new child, add it and continue
+            // brand new child, add it (if not pruning) and continue
             if ( nameIt == m_childNameMap.end() )
             {
-                index = m_childNameMap.size();
-                m_childNameMap[ objHeader.getName() ] = index;
-                ObjectHeaderPtr headerPtr(
-                    new AbcA::ObjectHeader( objHeader ) );
-                m_childHeaders.push_back( headerPtr );
-                m_children.resize( index + 1 );
-                m_children[ index ].push_back( ObjectAndIndex( *it, i ) );
+                if ( !shouldPrune )
+                {
+                    index = m_childNameMap.size();
+                    m_childNameMap[ objHeader.getName() ] = index;
+                    ObjectHeaderPtr headerPtr(
+                        new AbcA::ObjectHeader( objHeader ) );
+                    m_childHeaders.push_back( headerPtr );
+                    m_children.resize( index + 1 );
+                    m_children[ index ].push_back( ObjectAndIndex( *it, i ) );
+                }
+
                 continue;
             }
 
-            // add parent and index to the existing child element, and then
-            // update the MetaData
             index = nameIt->second;
-            m_children[ index ].push_back( ObjectAndIndex( *it, i ) );
 
-            // update the found childs meta data
-            m_childHeaders[ index ]->getMetaData().appendOnlyUnique(
-                objHeader.getMetaData() );
+            // no prune, so add to existing data
+            if ( !shouldPrune )
+            {
+                if ( shouldReplace )
+                {
+                    m_children[ index ].clear();
+                    m_childHeaders[ index ]->getMetaData() = AbcA::MetaData();
+                }
+
+                // add parent and index to the existing child element, and then
+                // update the MetaData
+                m_children[ index ].push_back( ObjectAndIndex( *it, i ) );
+
+                // update the found childs meta data
+                m_childHeaders[ index ]->getMetaData().appendOnlyUnique(
+                    objHeader.getMetaData() );
+                continue;
+            }
+
+            // prune, time to clear out existing data
+            m_children.erase( m_children.begin() + index );
+            m_childHeaders.erase( m_childHeaders.begin() + index );
+            m_childNameMap.erase( nameIt );
+
+            // since we removed an element, update the indices in our name map
+            for ( nameIt = m_childNameMap.begin();
+                  nameIt != m_childNameMap.end(); ++nameIt )
+            {
+                if ( nameIt->second > index )
+                {
+                    nameIt->second --;
+                }
+            }
         }
     }
 }

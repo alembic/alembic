@@ -93,8 +93,7 @@ public:
         AbcA::CompoundPropertyWriterPtr iProp,
         WrapExistingFlag iWrapFlag = kWrapExisting,
         const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() )
-    : OCompoundProperty( iProp, iArg0, iArg1 ) {};
+        const Argument &iArg1 = Argument() );
 
     //! This attaches an OCompoundProperty wrapper around the top
     //! properties of an OObject.
@@ -108,8 +107,7 @@ public:
         OObject iObject,
         TopFlag iTopFlag = kTop,
         const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() )
-    : OCompoundProperty( iObject, iArg0, iArg1 ) {};
+        const Argument &iArg1 = Argument() );
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -153,6 +151,9 @@ public:
     OCompoundProperty getParent() const;
 
 private:
+
+    void init( OObject iObject, const Argument &iArg0, const Argument &iArg1 );
+
     void init( AbcA::CompoundPropertyWriterPtr iParentObject,
                const std::string &iName,
                const Argument &iArg0,

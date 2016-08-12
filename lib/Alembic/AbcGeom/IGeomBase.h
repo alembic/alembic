@@ -265,7 +265,10 @@ public:
                Abc::WrapExistingFlag iFlag,
                const Abc::Argument &iArg0 = Abc::Argument(),
                const Abc::Argument &iArg1 = Abc::Argument() )
-    : IGeomBase( iThis, iArg0, iArg1 ) {}
+    : IGeomBaseSchema<GeomBaseSchemaInfo>( iThis, kNoMatching )
+    {
+        init( iArg0, iArg1 );
+    }
 
     //! Copy constructor.
     IGeomBase(const IGeomBase & iCopy)

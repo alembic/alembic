@@ -521,6 +521,20 @@ bool IObject::isChildInstance( const std::string &iChildName ) const
 }
 
 //-*****************************************************************************
+void IObject::init( IArchive & iArchive, const Argument &iArg0 )
+{
+    // Set the error handling policy
+    getErrorHandler().setPolicy(
+        GetErrorHandlerPolicy( iArchive, iArg0 ) );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::init( IArchive )" );
+
+    m_object = iArchive.getTop().getPtr();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
 void IObject::init( AbcA::ObjectReaderPtr iParent,
                     const std::string &iName,
                     ErrorHandler::Policy iPolicy )
