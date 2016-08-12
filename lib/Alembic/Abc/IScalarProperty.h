@@ -93,7 +93,8 @@ public:
         AbcA::ScalarPropertyReaderPtr iPtr,
         WrapExistingFlag iWrapFlag,
         const Argument &iArg0 = Argument() )
-      : IScalarProperty( iPtr, iArg0 )
+      : IBasePropertyT<AbcA::ScalarPropertyReaderPtr>( iPtr,
+            GetErrorHandlerPolicy( iPtr, iArg0 ) )
     {}
 
     //! Default copy constructor used

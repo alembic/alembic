@@ -111,6 +111,70 @@ public:
         const Argument &iArg2 = Argument(),
         const Argument &iArg3 = Argument() )
     {
+        init( iParent, iName, iArg0, iArg1, iArg2, iArg3 );
+    }
+
+    //! Create a new TypedArrayProperty
+    //! as a child of the passed iParent
+    //! Arguments can specify metadata, timesampling, and error handling.
+    OTypedArrayProperty(
+        OCompoundProperty iParent,
+        const std::string &iName,
+
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument(),
+        const Argument &iArg2 = Argument() )
+    {
+        init( iParent.getPtr(), iName, GetErrorHandlerPolicy( iParent ),
+              iArg0, iArg1, iArg2 );
+    }
+
+    //! Wrap an existing property. This will check to make sure
+    //! it can wrap.
+    OTypedArrayProperty(
+        AbcA::ArrayPropertyWriterPtr iProp,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() )
+    : OArrayProperty( iProp,
+                      GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+    {
+        init( iProp, iArg0, iArg1 );
+    }
+
+
+    // Deprecated in favor of constructor above
+    OTypedArrayProperty(
+        AbcA::ArrayPropertyWriterPtr iProp,
+        WrapExistingFlag iWrapFlag,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() )
+    : OArrayProperty( iProp,
+                      GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+    {
+        init( iProp, iArg0, iArg1 );
+    }
+
+    //-*************************************************************************
+    // ARRAY PROPERTY FEATURES
+    //-*************************************************************************
+
+    //! Set a sample using a reference to a typed array sample-type,
+    //! instead of a void* ArraySample
+    void set( const sample_type &iVal )
+    {
+        OArrayProperty::set( iVal );
+    }
+
+private:
+
+    void init( AbcA::CompoundPropertyWriterPtr iParent,
+               const std::string &iName,
+
+               const Argument &iArg0,
+               const Argument &iArg1,
+               const Argument &iArg2,
+               const Argument &iArg3 )
+    {
         Arguments args;
         iArg0.setInto( args );
         iArg1.setInto( args );
@@ -150,31 +214,11 @@ public:
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
 
-    //! Create a new TypedArrayProperty
-    //! as a child of the passed iParent
-    //! Arguments can specify metadata, timesampling, and error handling.
-    OTypedArrayProperty(
-        OCompoundProperty iParent,
-        const std::string &iName,
-
-        const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument(),
-        const Argument &iArg2 = Argument() )
-    : OTypedArrayProperty( iParent.getPtr(), iName,
-                          GetErrorHandlerPolicy( iParent ),
-                          iArg0, iArg1, iArg2 ) {}
-
-    //! Wrap an existing property. This will check to make sure
-    //! it can wrap.
-    OTypedArrayProperty(
-        AbcA::ArrayPropertyWriterPtr iProp,
-        const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() )
-    : OArrayProperty( iProp,
-                      GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+    void init( AbcA::ArrayPropertyWriterPtr iProp,
+               const Argument &iArg0, const Argument &iArg1 )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN(
-            "OTypedArrayProperty::OTypedArrayProperty()" );
+            "OTypedArrayProperty::init( ArrayPtr )" );
 
         const AbcA::PropertyHeader &pheader = iProp->getHeader();
 
@@ -189,26 +233,6 @@ public:
                      << TRAITS::interpretation() );
 
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
-    }
-
-
-    // Deprecated in favor of constructor above
-    OTypedArrayProperty(
-        AbcA::ArrayPropertyWriterPtr iProp,
-        WrapExistingFlag iWrapFlag,
-        const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() )
-    : OTypedArrayProperty( iProp, iArg0, iArg1 ) {};
-
-    //-*************************************************************************
-    // ARRAY PROPERTY FEATURES
-    //-*************************************************************************
-
-    //! Set a sample using a reference to a typed array sample-type,
-    //! instead of a void* ArraySample
-    void set( const sample_type &iVal )
-    {
-        OArrayProperty::set( iVal );
     }
 };
 

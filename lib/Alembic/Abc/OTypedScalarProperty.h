@@ -108,6 +108,80 @@ public:
         const Argument &iArg2 = Argument(),
         const Argument &iArg3 = Argument() )
     {
+        init( iParent, iName, iArg0, iArg1, iArg2, iArg3 );
+    }
+
+    //! Create a new TypedScalarProperty
+    //! as a child of the passed iParent
+    //! Arguments can specify metadata, timesampling, and error handling.
+    OTypedScalarProperty(
+        OCompoundProperty iParent,
+        const std::string &iName,
+
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument(),
+        const Argument &iArg2 = Argument() )
+    {
+        init( iParent.getPtr(), iName, GetErrorHandlerPolicy( iParent ),
+              iArg0, iArg1, iArg2 );
+    }
+
+    //! Wrap an existing scalar property,
+    //! checking to make sure it matches data type and also
+    //! (if requested) interpretation.
+    OTypedScalarProperty(
+        AbcA::ScalarPropertyWriterPtr iProp,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() )
+    : OScalarProperty( iProp, GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "OTypedScalarProperty::OTypedScalarProperty()" );
+
+        const AbcA::PropertyHeader &pheader = iProp->getHeader();
+
+        ABCA_ASSERT( matches( pheader, GetSchemaInterpMatching( iArg0,iArg1 ) ),
+
+                     "Incorrect match of header datatype: "
+                     << pheader.getDataType()
+                     << " to expected: "
+                     << TRAITS::dataType()
+                     << ",\n...or incorrect match of interpretation: "
+                     << pheader.getMetaData().get( "interpretation" )
+                     << " to expected: "
+                     << TRAITS::interpretation() );
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    // Deprecated in favor of the constructor above
+    OTypedScalarProperty(
+        AbcA::ScalarPropertyWriterPtr iProp,
+        WrapExistingFlag iWrapFlag,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() )
+    : OTypedScalarProperty( iProp, iArg0, iArg1 ) {};
+
+    //-*************************************************************************
+    // SCALAR PROPERTY FEATURES
+    //-*************************************************************************
+
+    //! Set a sample using a reference to a value-type,
+    //! instead of a void*
+    void set( const value_type &iVal )
+    {
+        OScalarProperty::set( reinterpret_cast<const void *>( &iVal ) );
+    }
+
+private:
+
+    void init( AbcA::CompoundPropertyWriterPtr iParent,
+               const std::string &iName,
+               const Argument &iArg0,
+               const Argument &iArg1,
+               const Argument &iArg2,
+               const Argument &iArg3 )
+    {
         Arguments args;
         iArg0.setInto( args );
         iArg1.setInto( args );
@@ -145,66 +219,6 @@ public:
         ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
 
-    //! Create a new TypedScalarProperty
-    //! as a child of the passed iParent
-    //! Arguments can specify metadata, timesampling, and error handling.
-    OTypedScalarProperty(
-        OCompoundProperty iParent,
-        const std::string &iName,
-
-        const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument(),
-        const Argument &iArg2 = Argument() )
-    : OTypedScalarProperty( iParent.getPtr(), iName,
-                            GetErrorHandlerPolicy( iParent ),
-                            iArg0, iArg1, iArg2 ) {}
-
-    //! Wrap an existing scalar property,
-    //! checking to make sure it matches data type and also
-    //! (if requested) interpretation.
-    OTypedScalarProperty(
-        AbcA::ScalarPropertyWriterPtr iProp,
-        const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() )
-    : OScalarProperty( iProp, GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
-    {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN(
-            "ITypedScalarProperty::ITypedScalarProperty()" );
-
-        const AbcA::PropertyHeader &pheader = iProp->getHeader();
-
-        ABCA_ASSERT( matches( pheader, GetSchemaInterpMatching( iArg0,iArg1 ) ),
-
-                     "Incorrect match of header datatype: "
-                     << pheader.getDataType()
-                     << " to expected: "
-                     << TRAITS::dataType()
-                     << ",\n...or incorrect match of interpretation: "
-                     << pheader.getMetaData().get( "interpretation" )
-                     << " to expected: "
-                     << TRAITS::interpretation() );
-
-        ALEMBIC_ABC_SAFE_CALL_END_RESET();
-    }
-
-    // Deprecated in favor of the constructor above
-    OTypedScalarProperty(
-        AbcA::ScalarPropertyWriterPtr iProp,
-        WrapExistingFlag iWrapFlag,
-        const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() )
-    : OTypedScalarProperty( iProp, iArg0, iArg1 ) {};
-
-    //-*************************************************************************
-    // SCALAR PROPERTY FEATURES
-    //-*************************************************************************
-
-    //! Set a sample using a reference to a value-type,
-    //! instead of a void*
-    void set( const value_type &iVal )
-    {
-        OScalarProperty::set( reinterpret_cast<const void *>( &iVal ) );
-    }
 };
 
 //-*****************************************************************************

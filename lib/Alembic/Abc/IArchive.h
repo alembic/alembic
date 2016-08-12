@@ -104,7 +104,11 @@ public:
         AbcA::ArchiveReaderPtr iPtr,
         WrapExistingFlag /* iWrap */,
         ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
-      : IArchive( iPtr, iPolicy ) {}
+      : m_archive( iPtr )
+    {
+        // Set the error handling policy.
+        getErrorHandler().setPolicy( iPolicy );
+    }
 
     //! Destructor
     //! ...
