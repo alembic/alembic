@@ -215,6 +215,19 @@ public:
             m_basis = kBezierBasis;
         }
 
+        bool isPartialSample() const
+        {
+            if( !m_positions.getData() )
+            {
+                if( m_uvs.getVals() || m_normals.getVals() || m_velocities.getData() )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     protected:
 
         // properties
@@ -288,7 +301,7 @@ public:
                 )->getArchive()->addTimeSampling( *tsPtr );
         }
 
-        init( tsIndex );
+        init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2, iArg3 ) );
     }
 
     OCurvesSchema( const OCurvesSchema& iCopy )
@@ -306,7 +319,16 @@ public:
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positionsProperty.getTimeSampling(); }
+    {
+        if( m_positionsProperty.valid() )
+        {
+            return m_positionsProperty.getTimeSampling();
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
+    }
 
     void setTimeSampling( uint32_t iIndex );
     void setTimeSampling( AbcA::TimeSamplingPtr iTime );
@@ -317,8 +339,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples() const
-    { return m_positionsProperty.getNumSamples(); }
+    size_t getNumSamples() const { return m_numSamples; }
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
@@ -356,20 +377,45 @@ public:
     //! valid.
     bool valid() const
     {
-        return ( OGeomBaseSchema<CurvesSchemaInfo>::valid() &&
-                 m_positionsProperty.valid() );
+        return ( ( OGeomBaseSchema<CurvesSchemaInfo>::valid() &&
+                     m_positionsProperty.valid() )
+                 || m_selectiveExport );
     }
 
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
 
-protected:
-    void init( const AbcA::index_t iTsIdx );
+private:
+    void init( const AbcA::index_t iTsIdx, bool isSparse );
+
+    //! Set only some property data. Does not need to be a valid schema sample
+    //! This is to be used when created a file which will be layered in to
+    //! another file.
+    void selectiveSet( const Sample &iSamp );
 
     // point data
     Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OInt32ArrayProperty m_nVerticesProperty;
+
+    // Write out only some properties (UVs, normals).
+    // This is to export data to layer into another file later.
+    bool m_selectiveExport;
+
+    // Number of times OPolyMeshSchema::set() has been called
+    size_t m_numSamples;
+
+    uint32_t m_timeSamplingIndex;
+
+    void createPositionProperties();
+    void createVelocityProperty();
+    void createUVsProperty( const Sample &iSamp );
+    void createNormalsProperty( const Sample &iSamp );
+    void createWidthProperty( const Sample &iSamp );
+    void createPositionWeightsProperty();
+    void createOrdersProperty();
+    void createKnotsProperty();
+    void calcBasisAndType(Alembic::Util::uint8_t (&basisAndType)[4], const Sample &iSamp);
 
     // optional data
     OV2fGeomParam m_uvsParam;
