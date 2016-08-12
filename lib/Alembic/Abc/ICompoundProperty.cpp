@@ -60,19 +60,32 @@ ICompoundProperty::ICompoundProperty( AbcA::CompoundPropertyReaderPtr iPtr,
 }
 
 //-*****************************************************************************
+ICompoundProperty::ICompoundProperty( AbcA::CompoundPropertyReaderPtr iPtr,
+                                      WrapExistingFlag /* iWrapFlag */,
+                                      const Argument &iArg0,
+                                      const Argument &iArg1 )
+  : IBasePropertyT<AbcA::CompoundPropertyReaderPtr>(
+      iPtr,
+      GetErrorHandlerPolicy( iPtr, iArg0, iArg1 ) )
+{
+    // Nothing!
+}
+
+//-*****************************************************************************
 ICompoundProperty::ICompoundProperty( const IObject & iObject,
                                       const Argument &iArg0,
                                       const Argument &iArg1 )
 {
-    getErrorHandler().setPolicy(
-        GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) );
+    init( iObject, iArg0, iArg1 );
+}
 
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ICompoundProperty::ICompoundProperty( top )" );
-
-    m_property = iObject.getProperties().getPtr();
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+//-*****************************************************************************
+ICompoundProperty::ICompoundProperty( const IObject & iObject,
+                                      TopFlag /* iTopFlag */,
+                                      const Argument &iArg0,
+                                      const Argument &iArg1 )
+{
+    init( iObject, iArg0, iArg1 );
 }
 
 //-*****************************************************************************
@@ -135,6 +148,22 @@ ICompoundProperty ICompoundProperty::getParent() const
 
     // Not all error handlers throw. Have a default.
     return ICompoundProperty();
+}
+
+//-*****************************************************************************
+void ICompoundProperty::init ( const IObject & iObject,
+                               const Argument &iArg0,
+                               const Argument &iArg1 )
+{
+    getErrorHandler().setPolicy(
+        GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "ICompoundProperty::init( IObject )" );
+
+    m_property = iObject.getProperties().getPtr();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************

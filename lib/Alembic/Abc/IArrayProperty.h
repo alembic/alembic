@@ -93,7 +93,8 @@ public:
         AbcA::ArrayPropertyReaderPtr iPtr,
         WrapExistingFlag iWrapFlag,
         const Argument &iArg0 = Argument() )
-      : IArrayProperty( iPtr, iArg0 ) {};
+      : IBasePropertyT<AbcA::ArrayPropertyReaderPtr>( iPtr,
+            GetErrorHandlerPolicy( iPtr, iArg0 ) ) {};
 
     //! Default copy constructor used
     //! Default assignment operator used.

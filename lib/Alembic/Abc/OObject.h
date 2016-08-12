@@ -98,7 +98,12 @@ public:
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
-      : OObject( iPtr, iArg0, iArg1, iArg2 ) {}
+      : m_object( iPtr )
+    {
+        // Set the error handling policy
+        getErrorHandler().setPolicy(
+            GetErrorHandlerPolicy( iPtr, iArg0, iArg1, iArg2 ) );
+    }
 
     //! This attaches an OObject wrapper around the top
     //! object in an archive.
@@ -108,15 +113,7 @@ public:
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
     {
-        // Set the error handling policy
-        getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iArchive.getPtr(), iArg0, iArg1, iArg2 ) );
-
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::OObject( OArchive )" );
-
-        m_object = iArchive.getPtr()->getTop();
-
-        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+        init( iArchive, iArg0, iArg1, iArg2 );
     }
 
     // deprecated in favor of the constructor above
@@ -125,7 +122,9 @@ public:
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
-    : OObject( iArchive, iArg0, iArg1, iArg2 ) {}
+    {
+        init( iArchive, iArg0, iArg1, iArg2 );
+    }
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -236,6 +235,12 @@ public:
     ALEMBIC_OPERATOR_BOOL( valid() );
 
 private:
+
+    void init( OArchive & iArchive,
+               const Argument &iArg0,
+               const Argument &iArg1,
+               const Argument &iArg2 );
+
     void init( AbcA::ObjectWriterPtr iParentObject,
                const std::string &iName,
                ErrorHandler::Policy iParentPolicy,

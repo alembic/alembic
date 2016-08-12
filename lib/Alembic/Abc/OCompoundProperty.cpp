@@ -50,8 +50,8 @@ OCompoundProperty::OCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
 //-*****************************************************************************
 OCompoundProperty::OCompoundProperty( OCompoundProperty iParent,
     const std::string &iName, const Argument &iArg0, const Argument &iArg1 )
-    : OCompoundProperty( iParent.getPtr(), iName, iArg0, iArg1 )
 {
+    init( iParent.getPtr(), iName, iArg0, iArg1 );
 }
 
 //-*****************************************************************************
@@ -63,18 +63,25 @@ OCompoundProperty::OCompoundProperty( AbcA::CompoundPropertyWriterPtr iProp,
 }
 
 //-*****************************************************************************
+OCompoundProperty::OCompoundProperty( AbcA::CompoundPropertyWriterPtr iProp,
+    WrapExistingFlag iWrapFlag, const Argument &iArg0, const Argument &iArg1 )
+    : OBasePropertyT<AbcA::CompoundPropertyWriterPtr>( iProp,
+      GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+{
+}
+
+//-*****************************************************************************
 OCompoundProperty::OCompoundProperty( OObject iObject,
     const Argument &iArg0, const Argument &iArg1 )
 {
-    getErrorHandler().setPolicy(
-        GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) );
+    init( iObject, iArg0, iArg1 );
+}
 
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "OCompoundProperty::OCompoundProperty( top )" );
-
-    m_property = iObject.getProperties().getPtr();
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+//-*****************************************************************************
+OCompoundProperty::OCompoundProperty( OObject iObject, TopFlag iTopFlag,
+    const Argument &iArg0, const Argument &iArg1 )
+{
+    init( iObject, iArg0, iArg1 );
 }
 
 //-*****************************************************************************
@@ -171,6 +178,22 @@ OCompoundProperty OCompoundProperty::getParent() const
 
     // Not all error handlers throw. Have a default.
     return OCompoundProperty();
+}
+
+//-*****************************************************************************
+void OCompoundProperty::init( OObject iObject,
+                              const Argument &iArg0,
+                              const Argument &iArg1 )
+{
+    getErrorHandler().setPolicy(
+        GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OCompoundProperty::init( OObject )" );
+
+    m_property = iObject.getProperties().getPtr();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************

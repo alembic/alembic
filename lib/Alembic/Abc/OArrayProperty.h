@@ -89,7 +89,8 @@ public:
         AbcA::ArrayPropertyWriterPtr iPtr,
         WrapExistingFlag iWrapFlag,
         const Argument &iArg0 = Argument() )
-      : OArrayProperty( iPtr, iArg0 ) {}
+      : OBasePropertyT<AbcA::ArrayPropertyWriterPtr>( iPtr,
+            GetErrorHandlerPolicy( iPtr, iArg0 ) ) {}
 
     //! Default copy constructor used
     //! Default assignment operator used.

@@ -272,6 +272,22 @@ bool OObject::addChildInstance( OObject iTarget, const std::string& iName )
     return false;
 }
 
+void OObject::init( OArchive & iArchive,
+                    const Argument &iArg0,
+                    const Argument &iArg1,
+                    const Argument &iArg2 )
+{
+    // Set the error handling policy
+    getErrorHandler().setPolicy(
+        GetErrorHandlerPolicy( iArchive.getPtr(), iArg0, iArg1, iArg2 ) );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::init( OArchive )" );
+
+    m_object = iArchive.getPtr()->getTop();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
 //-*****************************************************************************
 void OObject::init( AbcA::ObjectWriterPtr iParent,
                     const std::string &iName,

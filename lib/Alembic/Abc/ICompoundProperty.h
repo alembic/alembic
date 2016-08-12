@@ -87,8 +87,7 @@ public:
         AbcA::CompoundPropertyReaderPtr iPtr,
         WrapExistingFlag /* iWrapFlag */,
         const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() )
-    : ICompoundProperty( iPtr, iArg0, iArg1 ) {};
+        const Argument &iArg1 = Argument() );
 
     //! This attaches an ICompoundProperty wrapper around the top
     //! properties of any object, with an optional error handling policy.
@@ -105,8 +104,7 @@ public:
         const IObject & iObject,
         TopFlag /* iTopFlag */,
         const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() )
-    : ICompoundProperty( iObject, iArg0, iArg1 ) {};
+        const Argument &iArg1 = Argument() );
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -143,6 +141,11 @@ public:
     ICompoundProperty getParent() const;
 
 private:
+
+    void init ( const IObject & iObject,
+                const Argument &iArg0,
+                const Argument &iArg1 );
+
     void init( AbcA::CompoundPropertyReaderPtr iParentObject,
                const std::string &iName,
 
