@@ -172,7 +172,7 @@ public:
     //! This constructor creates a new poly mesh writer.
     //! The first argument is an CompoundPropertyWriterPtr to use as a parent.
     //! The next is the name to give the schema which is usually the default
-    //! name given by OFaceSet (.geom)   The remaining optional arguments
+    //! name given by OPolyMesh (.geom)   The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, specify sparse sampling and to set TimeSampling.
     OPolyMeshSchema( AbcA::CompoundPropertyWriterPtr iParent,
@@ -185,7 +185,7 @@ public:
     //! This constructor creates a new poly mesh writer.
     //! The first argument is an OCompundProperty to use as a parent, and from
     //! which the ErrorHandlerPolicy is derived.  The next is the name to give
-    //! the schema which is usually the default name given by OFaceSet (.geom)
+    //! the schema which is usually the default name given by OPolyMesh (.geom)
     //! The remaining optional arguments can be used to specify MetaData,
     //! specify sparse sampling and to set TimeSampling.
     OPolyMeshSchema( Abc::OCompoundProperty iParent,

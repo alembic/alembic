@@ -41,9 +41,9 @@
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OGeomBase.h>
 #include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
-#include <Alembic/AbcGeom/OGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -51,7 +51,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // for default values for int scalar properties here
-static ALEMBIC_EXPORT_CONST 
+static ALEMBIC_EXPORT_CONST
 int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( INT_MIN / 2 );
 
 //-*****************************************************************************
@@ -313,10 +313,10 @@ public:
     //! ...
     OSubDSchema() {}
 
-    //! This constructor creates a new poly mesh writer.
+    //! This constructor creates a new subd writer.
     //! The first argument is an CompoundPropertyWriterPtr to use as a parent.
     //! The next is the name to give the schema which is usually the default
-    //! name given by OFaceSet (.geom)   The remaining optional arguments
+    //! name given by OSubD (.geom)   The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
     //! MetaData, specify sparse sampling and to set TimeSampling.
     OSubDSchema( AbcA::CompoundPropertyWriterPtr iParent,
@@ -326,10 +326,10 @@ public:
                      const Abc::Argument &iArg2 = Abc::Argument(),
                      const Abc::Argument &iArg3 = Abc::Argument() );
 
-    //! This constructor creates a new poly mesh writer.
+    //! This constructor creates a new subd writer.
     //! The first argument is an OCompundProperty to use as a parent, and from
     //! which the ErrorHandlerPolicy is derived.  The next is the name to give
-    //! the schema which is usually the default name given by OFaceSet (.geom)
+    //! the schema which is usually the default name given by OSubD (.geom)
     //! The remaining optional arguments can be used to specify MetaData,
     //! specify sparse sampling and to set TimeSampling.
     OSubDSchema( Abc::OCompoundProperty iParent,
