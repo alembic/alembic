@@ -46,7 +46,7 @@ using namespace Alembic::Abc;
 // A bunch of minimal compile tests to make sure the templates compile
 
 // Declare a test schema.
-ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "TestSchema_v1", "", ".test",
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "TestSchema_v1", "", ".test", false,
                                    TestSchemaInfo );
 
 typedef OSchema<TestSchemaInfo> OTestSchema;

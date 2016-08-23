@@ -37,6 +37,7 @@
 #ifndef _Alembic_AbcGeom_SchemaInfoDeclarations_h_
 #define _Alembic_AbcGeom_SchemaInfoDeclarations_h_
 
+#include <Alembic/Abc/OSchema.h>
 #include <Alembic/Util/Foundation.h>
 
 namespace Alembic {
@@ -44,134 +45,106 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-//! With properties, specific flavors of properties are expressed via the
-//! TypedScalarProperty and the TypedArrayProperty. Compound Properties
-//! are more complex, and the specific flavors require a more complex
-//! treatment - That's what Schemas are. The CompoundProperty equivalent
-//! of a TypedArrayProperty or a TypedScalarProperty.
-//!
-//! A Schema is a collection of grouped properties which implement some
-//! complex object, such as a poly mesh. In the simpelest, standard case,
-//! there will be a compound property at the top with a certain name, and
-//! inside the compound property will be some number of additional properties
-//! that implement the object. In the case of a poly mesh, these properties
-//! would include a list of vertices (a V3fArray), a list of indices
-//! (an Int32Array), and a list of "per-face counts" (also an Int32Array).
-
-
-//-*****************************************************************************
-//! Here is a macro for declaring SCHEMA_INFO
-//! It takes three arguments
-//! - the SchemaTitle( a string ),
-//! - the SchemaBaseType( a string ),
-//! - the DefaultSchemaName( a string )
-//! - the name of the SchemaInfo Type to be declared.
-//! - for example:
-//! ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
-//!                                      "AbcGeom_GeomBase_v1",
-//!                                      ".geom",
-//!                                      PolyMeshSchemaInfo );
-#define ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( STITLE, SBTYP, SDFLT, STDEF ) \
-struct STDEF                                                            \
-{                                                                       \
-    static const char * title() { return ( STITLE ) ; }                 \
-    static const char * defaultName() { return ( SDFLT ); }             \
-    static const char * schemaBaseType() { return ( SBTYP ); }          \
-}
-
-//-*****************************************************************************
-//! Now to declare schema traits using the above macro.  The SCHEMA_INFO are
-//! basically a collection of information about the scheme, acting as an
-//! elaborate typeid
+//! Declare our schema info for AbcGeom
 
 //-*****************************************************************************
 // PolyMesh
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
-                                     "AbcGeom_GeomBase_v1",
-                                     ".geom",
-                                     PolyMeshSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
+                                 "AbcGeom_GeomBase_v1",
+                                 ".geom",
+                                 false,
+                                 PolyMeshSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_POLYMESH_SCHEMA (PolyMeshSchemaInfo::title())
 
 //-*****************************************************************************
 // NuPatch
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_NuPatch_v2",
-                                     "AbcGeom_GeomBase_v1",
-                                     ".geom",
-                                     NuPatchSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_NuPatch_v2",
+                                 "AbcGeom_GeomBase_v1",
+                                 ".geom",
+                                 false,
+                                 NuPatchSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_NUPATCH_SCHEMA (NuPatchSchemaInfo::title())
 
 //-*****************************************************************************
 // Subdivision surface
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_SubD_v1",
-                                     "AbcGeom_GeomBase_v1",
-                                     ".geom",
-                                     SubDSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_SubD_v1",
+                                 "AbcGeom_GeomBase_v1",
+                                 ".geom",
+                                 false,
+                                 SubDSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_SUBD_SCHEMA (SubDSchemaInfo::title())
 
 //-*****************************************************************************
 // SubD and PolyMesh FaceSet
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_FaceSet_v1",
-                                     "AbcGeom_GeomBase_v1",
-                                     ".faceset",
-                                     FaceSetSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_FaceSet_v1",
+                                 "AbcGeom_GeomBase_v1",
+                                 ".faceset",
+                                 false,
+                                 FaceSetSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_PARITION_SCHEMA (FaceSetSchemaInfo::title())
 
 
 //-*****************************************************************************
 // Points
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Points_v1",
-                                     "AbcGeom_GeomBase_v1",
-                                     ".geom",
-                                     PointsSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_Points_v1",
+                                 "AbcGeom_GeomBase_v1",
+                                 ".geom",
+                                 false,
+                                 PointsSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_POINTS_SCHEMA (PointsSchemaInfo::title())
 
 //-*****************************************************************************
 // Xform
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v3",
-                                     "",
-                                     ".xform",
-                                     XformSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_Xform_v3",
+                                 "",
+                                 ".xform",
+                                 true,
+                                 XformSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_XFORM_SCHEMA (XformSchemaInfo::title())
 
 //-*****************************************************************************
 // Camera
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Camera_v1",
-                                     "",
-                                     ".geom",
-                                     CameraSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_Camera_v1",
+                                 "",
+                                 ".geom",
+                                 true,
+                                 CameraSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_CAMERA_SCHEMA (CameraSchemaInfo::title())
 
 //-*****************************************************************************
 // Curves
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Curve_v2",
-                                     "AbcGeom_GeomBase_v1",
-                                     ".geom",
-                                     CurvesSchemaInfo );
-
-//-*****************************************************************************
-// GeomBase
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_GeomBase_v1",
-                                     "",
-                                     ".geom",
-                                     GeomBaseSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_Curve_v2",
+                                 "AbcGeom_GeomBase_v1",
+                                 ".geom",
+                                 false,
+                                 CurvesSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_CURVE_SCHEMA (CurvesSchemaInfo::title())
 
 //-*****************************************************************************
 // Light
-ALEMBIC_ABCGEOM_DECLARE_SCHEMA_INFO( "AbcGeom_Light_v1",
-                                     "",
-                                     ".geom",
-                                     LightSchemaInfo );
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_Light_v1",
+                                 "",
+                                 ".geom",
+                                 true,
+                                 LightSchemaInfo );
 
 #define ALEMBIC_ABCGEOM_LIGHT_SCHEMA (LightSchemaInfo::title())
+
+//-*****************************************************************************
+// GeomBase, meant for convenience IGeomBase only
+ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_GeomBase_v1",
+                                 "",
+                                 ".geom",
+                                 false,
+                                 GeomBaseSchemaInfo );
 
 } // End namespace ALEMBIC_VERSION_NS
 

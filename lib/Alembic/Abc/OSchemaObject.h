@@ -200,6 +200,11 @@ OSchemaObject<SCHEMA>::OSchemaObject
         {
             metaData.set( "schemaBaseType", SCHEMA::getSchemaBaseType() );
         }
+
+        if ( SCHEMA::replaceOnSparse() )
+        {
+            metaData.set( "replace", "1" );
+        }
     }
 
     // Make the object.
