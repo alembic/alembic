@@ -73,22 +73,42 @@ namespace ALEMBIC_VERSION_NS {
 
 
 //-*****************************************************************************
+//! With properties, specific flavors of properties are expressed via the
+//! TypedScalarProperty and the TypedArrayProperty. Compound Properties
+//! are more complex, and the specific flavors require a more complex
+//! treatment - That's what Schemas are. The CompoundProperty equivalent
+//! of a TypedArrayProperty or a TypedScalarProperty.
+//!
+//! A Schema is a collection of grouped properties which implement some
+//! complex object, such as a poly mesh. In the simpelest, standard case,
+//! there will be a compound property at the top with a certain name, and
+//! inside the compound property will be some number of additional properties
+//! that implement the object. In the case of a poly mesh, these properties
+//! would include a list of vertices (a V3fArray), a list of indices
+//! (an Int32Array), and a list of "per-face counts" (also an Int32Array).
+
+
+//-*****************************************************************************
 //! Here is a macro for declaring SCHEMA_INFO
-//! It takes three arguments
+//! It takes these arguments
 //! - the SchemaTitle( a string ),
 //! - the SchemaBaseType( a string ),
-//! - the DefaultSchemaName( a string )
-//! - the name of the SchemaTrait Type to be declared.
+//! - the DefaultSchemaName( a string ),
+//! - whether to set replace when the sparse argument is provided( bool ),
+//! - the name of the SchemaInfo Type to be declared.
 //! - for example:
 //! ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
+//!                                  "AbcGeom_GeomBase_v1",
 //!                                  ".geom",
+//!                                  false,
 //!                                  PolyMeshSchemaInfo );
-#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, SBTYP, SDFLT, STDEF )  \
+#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, SBTYP, SDFLT, SPREP, STDEF ) \
 struct STDEF                                                            \
 {                                                                       \
     static const char * title() { return ( STITLE ) ; }                 \
     static const char * defaultName() { return ( SDFLT ); }             \
     static const char * schemaBaseType() { return ( SBTYP ); }          \
+    static bool         replaceOnSparse() { return SPREP; }             \
 }
 
 //-*****************************************************************************
@@ -124,6 +144,16 @@ public:
     static const char * getDefaultSchemaName()
     {
         return INFO::defaultName();
+    }
+
+    //! Returns whether this schema also sets replace in the MetaData if
+    //! kSparse is passed into the args.  For some schemas like xforms it
+    //! doesn't make sense to sparsely override the properties, instead
+    //! you want to replace everything on the schema with a whole set of new
+    //! properties, or even NO properties.
+    static bool replaceOnSparse()
+    {
+        return INFO::replaceOnSparse();
     }
 
     //! This will check whether or not a given entity (as represented by

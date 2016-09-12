@@ -119,5 +119,10 @@ ADD_EXECUTABLE(AbcGeom_LightTest
 TARGET_LINK_LIBRARIES(AbcGeom_LightTest ${CORE_LIBS})
 ADD_TEST(AbcGeom_LightTest_TEST AbcGeom_LightTest)
 
+ADD_EXECUTABLE(AbcGeom_CameraTest
+               CameraTest.cpp)
+TARGET_LINK_LIBRARIES(AbcGeom_CameraTest ${CORE_LIBS})
+ADD_TEST(AbcGeom_Points_TEST AbcGeom_CameraTest)
+
 ADD_EXECUTABLE(playground PlayGround.cpp)
 TARGET_LINK_LIBRARIES(playground ${CORE_LIBS})

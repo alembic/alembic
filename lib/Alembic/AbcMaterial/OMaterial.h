@@ -62,15 +62,19 @@ public:
 
     OMaterialSchema() {}
 
-    OMaterialSchema( Alembic::AbcCoreAbstract::CompoundPropertyWriterPtr iParent,
+    OMaterialSchema(
+        Alembic::AbcCoreAbstract::CompoundPropertyWriterPtr iParent,
+        const std::string &iName,
+        const Abc::Argument &iArg0 = Abc::Argument(),
+        const Abc::Argument &iArg1 = Abc::Argument(),
+        const Abc::Argument &iArg2 = Abc::Argument(),
+        const Abc::Argument &iArg3 = Abc::Argument() );
+
+    OMaterialSchema( Abc::OCompoundProperty iParent,
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
-                     const Abc::Argument &iArg2 = Abc::Argument() )
-    : Abc::OSchema<MaterialSchemaInfo>( iParent, iName, iArg0, iArg1, iArg2 )
-    {
-        init();
-    }
+                     const Abc::Argument &iArg2 = Abc::Argument() );
 
     //! Copy constructor.
     OMaterialSchema( const OMaterialSchema& iCopy )

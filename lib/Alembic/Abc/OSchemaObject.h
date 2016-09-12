@@ -187,7 +187,7 @@ OSchemaObject<SCHEMA>::OSchemaObject
                  "NULL Parent ObjectWriter in OSchemaObject ctor" );
 
     // The object schema title is derived from the schema's title.
-    // It is never empty.
+    // It is never empty (unless sparse)
     AbcA::MetaData metaData = args.getMetaData();
 
     SparseFlag sparseFlag = kSparse;
@@ -216,11 +216,18 @@ OSchemaObject<SCHEMA>::OSchemaObject
         tsIndex = parent->getArchive()->addTimeSampling(*tsPtr);
     }
 
+    AbcA::MetaData schemaMetaData;
+    if ( args.isSparse() && SCHEMA::replaceOnSparse() )
+    {
+        schemaMetaData.set( "replace", "1" );
+    }
+
     // Make the schema.
     m_schema = SCHEMA( m_object->getProperties(),
                        SCHEMA::getDefaultSchemaName(),
                        this->getErrorHandlerPolicy(),
                        tsIndex,
+                       schemaMetaData,
                        sparseFlag );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

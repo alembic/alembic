@@ -966,9 +966,10 @@ void OSubDSchema::selectiveSet( const Sample &iSamp )
         m_subdSchemeProperty.set( iSamp.getSubdivisionScheme() );
     }
 
-    if (( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
-        iSamp.getCreaseSharpnesses() )
-        && (!m_creaseIndicesProperty && !m_creaseLengthsProperty && !m_creaseSharpnessesProperty) )
+    if ( ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
+           iSamp.getCreaseSharpnesses() ) &&
+        ( !m_creaseIndicesProperty && !m_creaseLengthsProperty &&
+          !m_creaseSharpnessesProperty ) )
     {
         initCreases(0);
     }
@@ -988,8 +989,8 @@ void OSubDSchema::selectiveSet( const Sample &iSamp )
         m_creaseSharpnessesProperty.set( iSamp.getCreaseSharpnesses() );
     }
 
-    if ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses()
-            && (!m_cornerIndicesProperty && ! m_cornerSharpnessesProperty))
+    if ( ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() ) &&
+         ( !m_cornerIndicesProperty && !m_cornerSharpnessesProperty ) )
     {
         initCorners(0);
     }
