@@ -231,24 +231,12 @@ void OCurvesSchema::selectiveSet( const OCurvesSchema::Sample &iSamp )
 
     if ( iSamp.getPositions() && !m_positionsProperty )
     {
-        createPositionProperties();
+        createPositionProperty();
     }
 
     if ( m_positionsProperty )
     {
         SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
-        SetPropUsePrevIfNull( m_nVerticesProperty, iSamp.getCurvesNumVertices() );
-
-        // if number of vertices were specified, then the basis and type
-                // was specified
-        if ( m_nVerticesProperty )
-        {
-            m_basisAndTypeProperty.set( basisAndType );
-        }
-        else
-        {
-            m_basisAndTypeProperty.setFromPrevious();
-        }
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
@@ -264,6 +252,17 @@ void OCurvesSchema::selectiveSet( const OCurvesSchema::Sample &iSamp )
         {
             m_selfBoundsProperty.setFromPrevious();
         }
+    }
+
+    if( iSamp.getCurvesNumVertices() && !m_nVerticesProperty )
+    {
+        createVertexProperties();
+    }
+
+    if( m_nVerticesProperty )
+    {
+        SetPropUsePrevIfNull( m_nVerticesProperty, iSamp.getCurvesNumVertices() );
+        m_basisAndTypeProperty.set( basisAndType );
     }
 
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
@@ -363,7 +362,7 @@ void OCurvesSchema::setFromPrevious()
 }
 
 //-*****************************************************************************
-void OCurvesSchema::createPositionProperties()
+void OCurvesSchema::createPositionProperty()
 {
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVertexScope );
@@ -372,11 +371,38 @@ void OCurvesSchema::createPositionProperties()
 
     m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, m_timeSamplingIndex );
 
+    std::vector<V3f> emptyVec;
+    const V3fArraySample empty( emptyVec );
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_positionsProperty.set( empty );
+    }
+
+    createSelfBoundsProperty( m_timeSamplingIndex, m_numSamples );
+}
+
+//-*****************************************************************************
+void OCurvesSchema::createVertexProperties()
+{
+    AbcA::MetaData mdata;
+    SetGeometryScope( mdata, kVertexScope );
+
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
     m_nVerticesProperty = Abc::OInt32ArrayProperty( _this, "nVertices", m_timeSamplingIndex );
 
     m_basisAndTypeProperty = Abc::OScalarProperty(
         _this, "curveBasisAndType",
         AbcA::DataType( Alembic::Util::kUint8POD, 4 ), m_timeSamplingIndex );
+
+    const Alembic::Util::uint8_t basisAndType[4] = { 0, 0, 0, 0 };
+    std::vector<int32_t> emptyVec;
+    const Int32ArraySample emptyPosSamp( emptyVec );
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_nVerticesProperty.set( emptyPosSamp );
+        m_basisAndTypeProperty.set( basisAndType );
+    }
 }
 
 //-*****************************************************************************
@@ -637,7 +663,8 @@ void OCurvesSchema::init( const AbcA::index_t iTsIdx, bool isSparse )
         return;
     }
 
-    createPositionProperties();
+    createPositionProperty();
+    createVertexProperties();
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

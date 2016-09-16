@@ -66,6 +66,30 @@ const float32_t g_P[] = {   0.0f, 0.0f, -3.0f,
 const float32_t g_Pw[] = { 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f,
                            1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f };
 
+const int32_t g_numNormals = 16;
+const float32_t g_normals[] = {
+                                    -1.0f, 0.0f, 0.0f,
+                                    1.0f, 0.0f, 0.0f,
+                                    0.0f, -1.0f, 0.0f,
+                                    0.0f, 1.0f, 0.0f,
+                                    0.0f, 0.0f, -1.0f,
+                                    0.0f, 0.0f, 1.0f,
+                                    -1.0f, 0.0f, 0.0f,
+                                    1.0f, 0.0f, 0.0f,
+                                    0.0f, -1.0f, 0.0f,
+                                    0.0f, 1.0f, 0.0f,
+                                    0.0f, 0.0f, -1.0f,
+                                    0.0f, 0.0f, 1.0f,
+                                    -1.0f, 0.0f, 0.0f,
+                                    1.0f, 0.0f, 0.0f,
+                                    0.0f, -1.0f, 0.0f,
+                                    0.0f, 1.0f, 0.0f
+                                   };
+
+const int32_t g_numVelocities = 16;
+const float32_t g_velocities[] = { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f,
+                                   9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f};
+
 // trim curve
 const int32_t g_trim_nLoops = 1;
 const int32_t g_trim_nCurves[] = { 1 };
@@ -78,3 +102,5 @@ const int32_t g_trim_n[] = { 9 };
 const float32_t g_trim_u[] = { 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 const float32_t g_trim_v[] = { 0.5f, 1.0f, 2.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f };
 const float32_t g_trim_w[] = { 1.0f, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 2.0f, 1.0f, 1.0f };
+
+

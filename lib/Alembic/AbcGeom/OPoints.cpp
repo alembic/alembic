@@ -185,13 +185,12 @@ void OPointsSchema::selectiveSet( const Sample &iSamp )
 
     if ( iSamp.getPositions() && !m_positionsProperty )
     {
-        createVelocityProperty();
+        createPositionProperty();
     }
 
     if( m_positionsProperty )
     {
         SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
-        SetPropUsePrevIfNull( m_idsProperty, iSamp.getIds() );
 
         if ( iSamp.getSelfBounds().hasVolume() )
         {
@@ -207,6 +206,16 @@ void OPointsSchema::selectiveSet( const Sample &iSamp )
         {
             m_selfBoundsProperty.setFromPrevious();
         }
+    }
+
+    if ( iSamp.getIds() && !m_idsProperty)
+    {
+        createIdProperty();
+    }
+
+    if( m_idsProperty )
+    {
+        SetPropUsePrevIfNull( m_idsProperty, iSamp.getIds() );
     }
 
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
@@ -296,22 +305,45 @@ void OPointsSchema::init( uint32_t iTsIdx, bool isSparse )
         return;
     }
 
-    createPositionProperties();
+    createPositionProperty();
+    createIdProperty();
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************
-void OPointsSchema::createPositionProperties()
+void OPointsSchema::createPositionProperty()
 {
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVaryingScope );
-    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+    
+    m_positionsProperty = Abc::OP3fArrayProperty( this->getPtr(), "P", mdata, m_timeSamplingIndex );
 
-    m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, m_timeSamplingIndex );
+    std::vector<V3f> emptyV3Vec;
+    const V3fArraySample emptyV3ArraySamp( emptyV3Vec );
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_positionsProperty.set( emptyV3ArraySamp );
+    }
 
-    m_idsProperty = Abc::OUInt64ArrayProperty( _this, ".pointIds", mdata,
-                                                m_timeSamplingIndex );
+    createSelfBoundsProperty( m_timeSamplingIndex, m_numSamples );
+}
+
+//-*****************************************************************************
+void OPointsSchema::createIdProperty()
+{
+    AbcA::MetaData mdata;
+    SetGeometryScope( mdata, kVaryingScope );
+
+    m_idsProperty = Abc::OUInt64ArrayProperty( this->getPtr(), ".pointIds", mdata,
+        m_timeSamplingIndex );
+
+    std::vector<int64_t> emptyInt64Vec;
+    const Int64ArraySample emptyInt64ArraySamp( emptyInt64Vec );
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_idsProperty.set( emptyInt64ArraySamp );
+    }
 }
 
 //-*****************************************************************************
