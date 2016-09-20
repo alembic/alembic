@@ -151,9 +151,14 @@ public:
                      const Argument &iArg0 = Argument(),
                      const Argument &iArg1 = Argument(),
                      const Argument &iArg2 = Argument()
-                 )
-    : OTypedGeomParam( iParent.getPtr(), iName, iIsIndexed, iScope,
-                       iArrayExtent, iArg0, iArg1, iArg2 ) {}
+                     ) 
+        : m_name( iName )
+        , m_isIndexed( iIsIndexed )
+        , m_scope( iScope )
+    {
+        *this = OTypedGeomParam( iParent.getPtr(), iName, iIsIndexed, iScope,
+            iArrayExtent, iArg0, iArg1, iArg2 );
+    }
 
     OTypedGeomParam( AbcA::CompoundPropertyWriterPtr iParent,
                      const std::string &iName,
@@ -229,6 +234,7 @@ public:
         }
     }
 
+public:
     OTypedGeomParam( OCompoundProperty iThis,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )

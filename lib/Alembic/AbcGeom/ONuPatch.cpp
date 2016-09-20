@@ -305,17 +305,16 @@ void ONuPatchSchema::selectiveSet( const Sample &iSamp )
         createPositionProperties();
     }
 
+    // Assuming all knot properties get created in ::createKnotProperties()
+    if( iSamp.hasKnotSampleData() && !m_numUProperty )
+    {
+        createKnotProperties();
+    }
+
     if( m_positionsProperty )
     {
         SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
-        SetPropUsePrevIfNull( m_numUProperty, iSamp.getNu() );
-        SetPropUsePrevIfNull( m_numVProperty, iSamp.getNv() );
-        SetPropUsePrevIfNull( m_uOrderProperty, iSamp.getUOrder() );
-        SetPropUsePrevIfNull( m_vOrderProperty, iSamp.getVOrder() );
-        SetPropUsePrevIfNull( m_uKnotProperty, iSamp.getUKnot() );
-        SetPropUsePrevIfNull( m_vKnotProperty, iSamp.getVKnot() );
 
-        SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
         if ( iSamp.getSelfBounds().hasVolume() )
         {
             m_selfBoundsProperty.set( iSamp.getSelfBounds() );
@@ -326,6 +325,17 @@ void ONuPatchSchema::selectiveSet( const Sample &iSamp )
                 ComputeBoundsFromPositions( iSamp.getPositions() ) );
             m_selfBoundsProperty.set( bnds );
         }
+    }
+
+    // Assuming all knot properties get created in ::createKnotProperties()
+    if( m_numUProperty )
+    {
+        SetPropUsePrevIfNull( m_numUProperty, iSamp.getNu() );
+        SetPropUsePrevIfNull( m_numVProperty, iSamp.getNv() );
+        SetPropUsePrevIfNull( m_uOrderProperty, iSamp.getUOrder() );
+        SetPropUsePrevIfNull( m_vOrderProperty, iSamp.getVOrder() );
+        SetPropUsePrevIfNull( m_uKnotProperty, iSamp.getUKnot() );
+        SetPropUsePrevIfNull( m_vKnotProperty, iSamp.getVKnot() );
     }
 
     // do we need to create velocities prop?
@@ -414,12 +424,44 @@ void ONuPatchSchema::createPositionProperties()
 
     // initialize any required properties
     m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, m_timeSamplingIndex );
+    
+    std::vector<V3f> emptyVec;
+    const V3fArraySample empty( emptyVec );
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_positionsProperty.set( empty );
+    }
+
+    createSelfBoundsProperty( m_timeSamplingIndex, m_numSamples );
+}
+
+//-*****************************************************************************
+void ONuPatchSchema::createKnotProperties()
+{
+    AbcA::MetaData mdata;
+    SetGeometryScope( mdata, kVertexScope );
+
+    AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
+
+    // initialize any required properties
     m_numUProperty = Abc::OInt32Property( _this, "nu", m_timeSamplingIndex );
     m_numVProperty = Abc::OInt32Property( _this, "nv", m_timeSamplingIndex );
     m_uOrderProperty = Abc::OInt32Property( _this, "uOrder", m_timeSamplingIndex );
     m_vOrderProperty = Abc::OInt32Property( _this, "vOrder", m_timeSamplingIndex );
     m_uKnotProperty = Abc::OFloatArrayProperty( _this, "uKnot", m_timeSamplingIndex );
     m_vKnotProperty = Abc::OFloatArrayProperty( _this, "vKnot", m_timeSamplingIndex );
+
+    const FloatArraySample emptyFloatSample;
+    const float floatSample = 0.0f;
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_numUProperty.set( floatSample );
+        m_numVProperty.set( floatSample );
+        m_uOrderProperty.set( floatSample );
+        m_vOrderProperty.set( floatSample );
+        m_uKnotProperty.set( emptyFloatSample );
+        m_vKnotProperty.set( emptyFloatSample );
+    }
 }
 
 //-*****************************************************************************
@@ -695,6 +737,7 @@ void ONuPatchSchema::init( const AbcA::index_t iTsIdx, bool isSparse )
     }
 
     createPositionProperties();
+    createKnotProperties();
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

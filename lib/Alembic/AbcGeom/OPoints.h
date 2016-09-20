@@ -264,7 +264,8 @@ private:
     //! another file.
     void selectiveSet( const Sample &iSamp );
 
-    void createPositionProperties();
+    void createPositionProperty();
+    void createIdProperty();
     void createVelocityProperty();
     void createWidthsProperty( const Sample &iSamp );
 

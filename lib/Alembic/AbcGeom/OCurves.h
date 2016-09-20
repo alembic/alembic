@@ -407,7 +407,8 @@ private:
 
     uint32_t m_timeSamplingIndex;
 
-    void createPositionProperties();
+    void createPositionProperty();
+    void createVertexProperties();
     void createVelocityProperty();
     void createUVsProperty( const Sample &iSamp );
     void createNormalsProperty( const Sample &iSamp );

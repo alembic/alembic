@@ -248,6 +248,18 @@ public:
             return false;
         }
 
+        bool hasKnotSampleData() const
+        {
+            if( (m_numU != ABC_GEOM_NUPATCH_NULL_INT_VALUE) ||
+                (m_numV != ABC_GEOM_NUPATCH_NULL_INT_VALUE) ||
+                (m_uOrder != ABC_GEOM_NUPATCH_NULL_INT_VALUE) ||
+                (m_vOrder != ABC_GEOM_NUPATCH_NULL_INT_VALUE) ||
+                 m_uKnot || m_uKnot)
+                 return true;
+            else
+                return false;
+        }
+
     protected:
 
         // required properties
@@ -440,6 +452,7 @@ protected:
     AbcA::index_t m_timeSamplingIndex;
 
     void createPositionProperties();
+    void createKnotProperties();
     void createVelocityProperty();
     void createUVsProperty( const Sample &iSamp );
     void createNormalsProperty( const Sample &iSamp );
