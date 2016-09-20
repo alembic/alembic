@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreLayer_Read_h_
-#define _Alembic_AbcCoreLayer_Read_h_
+#ifndef _Alembic_AbcCoreLayer_Util_h_
+#define _Alembic_AbcCoreLayer_Util_h_
 
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreLayer/Foundation.h>
@@ -45,18 +45,21 @@ namespace Alembic {
 namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
 
-//-*****************************************************************************
-//! Will return a shared pointer to the archive reader
-//! This version creates a cache associated with the archive.
-class ALEMBIC_EXPORT ReadArchive
-{
-public:
-    ReadArchive();
+// Convience functions for marking prune and replace on MetaData to be used
+// with layering.
 
-    // open the file
-    Alembic::AbcCoreAbstract::ArchiveReaderPtr
-    operator()(ArchiveReaderPtrs & ) const;
-};
+//! Used to mark that an Alembic object or property is meant to be pruned
+//! when read via AbcCoreLayer.  Pruning an object or compound property will
+//! also removes all of their children.
+ALEMBIC_EXPORT void setPrune(
+    Alembic::AbcCoreAbstract::MetaData & oMetaData, bool shouldPrune );
+
+//! Used to mark that an Alembic object or property is meant to be replaced
+//! when read via AbcCoreLayer.  Replacing an object or compound property will
+//! also replace all of the children encountered so far.  Since pruning is more
+//! destructive it trumps replace.
+ALEMBIC_EXPORT void setReplace(
+    Alembic::AbcCoreAbstract::MetaData & oMetaData, bool shouldReplace );
 
 } // End namespace ALEMBIC_VERSION_NS
 
@@ -65,4 +68,4 @@ using namespace ALEMBIC_VERSION_NS;
 } // End namespace AbcCoreLayer
 } // End namespace Alembic
 
-#endif //_Alembic_AbcCoreLayer_Read_h_
+#endif //_Alembic_AbcCoreLayer_Util_h_
