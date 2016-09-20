@@ -36,6 +36,7 @@
 
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreLayer/Read.h>
+#include <Alembic/AbcCoreLayer/Util.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreFactory/All.h>
 
@@ -120,7 +121,7 @@ void pruneTest()
 
     {
         MetaData md;
-        md.set("prune", "1");
+        Alembic::AbcCoreLayer::setPrune( md, true );
 
         OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName2 );
         OObject child( archive.getTop(), "child" );
@@ -178,7 +179,7 @@ void replaceTest()
 
     {
         MetaData md;
-        md.set("replace", "1");
+        Alembic::AbcCoreLayer::setReplace( md, true );
 
         OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName2 );
         OObject child( archive.getTop(), "child" );
