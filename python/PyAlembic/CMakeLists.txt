@@ -46,6 +46,7 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
     ENDIF()
 
     SET(CPP_FILES
+        PyAbcCoreLayer.cpp
         PyAbcGeomTypes.cpp
         PyAbcTypes.cpp
         PyArchiveBounds.cpp

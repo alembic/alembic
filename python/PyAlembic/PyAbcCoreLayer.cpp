@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2012,
+// Copyright (c) 2016,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -35,48 +35,18 @@
 //-*****************************************************************************
 
 #include <Foundation.h>
-
-#include <boost/python/implicit.hpp>
+#include <Alembic/AbcCoreLayer/Util.h>
 
 using namespace boost::python;
 
 //-*****************************************************************************
-void register_abctypes()
+void register_abccorelayer()
 {
-    // Argument
-    //
-    class_<Abc::Argument>( "Argument", no_init )
-        .def( init<AbcU::uint32_t>() )
-        .def( init<const AbcA::MetaData&>() )
-        .def( init<const AbcA::TimeSamplingPtr&>() )
-        .def( init<Abc::SchemaInterpMatching>() )
-        .def( init<Abc::SparseFlag>() )
-        ;
+    def( "SetPrune",
+         Alembic::AbcCoreLayer::SetPrune,
+         ( arg( "metaData" ), arg( "shouldPrune" ) ) );
 
-    // Implicit conversions for Argument
-    //
-    implicitly_convertible<Abc::SparseFlag, Abc::Argument>();
-    implicitly_convertible<Abc::SchemaInterpMatching, Abc::Argument>();
-    implicitly_convertible<AbcU::uint32_t, Abc::Argument>();
-    implicitly_convertible<const AbcA::MetaData&, Abc::Argument>();
-    implicitly_convertible<const AbcA::TimeSamplingPtr&, Abc::Argument>();
-
-    // SchemaInterpMatching Enum
-    //
-    enum_<Abc::SchemaInterpMatching>( "SchemaInterpMatching" )
-        .value( "kStrictMatching", Abc::kStrictMatching )
-        .value( "kNoMatching", Abc::kNoMatching )
-        .value( "kSchemaTitleMatching", Abc::kSchemaTitleMatching )
-        ;
-
-    // WrapExistingFlag Enum
-    enum_<Abc::WrapExistingFlag>( "WrapExistingFlag" )
-        .value( "kWrapExisting", Abc::kWrapExisting )
-        ;
-
-    // SparseFlag Enum
-    enum_<Abc::SparseFlag>( "SparseFlag" )
-        .value( "kFull", Abc::kFull )
-        .value( "kSparse", Abc::kSparse )
-        ;
+    def( "SetReplace",
+         Alembic::AbcCoreLayer::SetReplace,
+         ( arg( "metaData" ), arg( "shouldPrune" ) ) );
 }
