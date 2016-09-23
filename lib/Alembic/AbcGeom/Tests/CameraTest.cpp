@@ -223,7 +223,7 @@ void corePropertiesTest()
 
         TESTING_ASSERT( cam.getSchema().getNumSamples() == 10 );
 
-        for ( std::size_t i; i < 10; ++i )
+        for ( std::size_t i = 0; i < 10; ++i )
         {
             cam.getSchema().get( samp, i );
             TESTING_ASSERT( almostEqual( samp.getFocalLength(),
