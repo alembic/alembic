@@ -51,14 +51,14 @@ namespace ALEMBIC_VERSION_NS {
 //! Used to mark that an Alembic object or property is meant to be pruned
 //! when read via AbcCoreLayer.  Pruning an object or compound property will
 //! also removes all of their children.
-ALEMBIC_EXPORT void setPrune(
+ALEMBIC_EXPORT void SetPrune(
     Alembic::AbcCoreAbstract::MetaData & oMetaData, bool shouldPrune );
 
 //! Used to mark that an Alembic object or property is meant to be replaced
 //! when read via AbcCoreLayer.  Replacing an object or compound property will
 //! also replace all of the children encountered so far.  Since pruning is more
 //! destructive it trumps replace.
-ALEMBIC_EXPORT void setReplace(
+ALEMBIC_EXPORT void SetReplace(
     Alembic::AbcCoreAbstract::MetaData & oMetaData, bool shouldReplace );
 
 } // End namespace ALEMBIC_VERSION_NS

@@ -40,7 +40,7 @@ namespace Alembic {
 namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
 
-void setPrune( Alembic::AbcCoreAbstract::MetaData & oMetaData,
+void SetPrune( Alembic::AbcCoreAbstract::MetaData & oMetaData,
                bool shouldPrune )
 {
     if ( shouldPrune )
@@ -57,7 +57,7 @@ void setPrune( Alembic::AbcCoreAbstract::MetaData & oMetaData,
 //! when read via AbcCoreLayer.  Replacing an object or compound property will
 //! also replace all of the children encountered so far.  Since pruning is more
 //! destructive it trumps replace.
-void setReplace( Alembic::AbcCoreAbstract::MetaData & oMetaData,
+void SetReplace( Alembic::AbcCoreAbstract::MetaData & oMetaData,
                  bool shouldReplace )
 {
     if ( shouldReplace )

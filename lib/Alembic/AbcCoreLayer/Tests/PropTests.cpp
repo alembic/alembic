@@ -127,7 +127,7 @@ void pruneTest()
 
     {
         MetaData md;
-        Alembic::AbcCoreLayer::setPrune( md, true );
+        Alembic::AbcCoreLayer::SetPrune( md, true );
 
         OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName2 );
         OCompoundProperty child( archive.getTop().getProperties(), "child" );
@@ -189,7 +189,7 @@ void replaceTest()
 
     {
         MetaData md;
-        Alembic::AbcCoreLayer::setReplace( md, true );
+        Alembic::AbcCoreLayer::SetReplace( md, true );
 
         OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName2 );
         OCompoundProperty child( archive.getTop().getProperties(), "child" );
