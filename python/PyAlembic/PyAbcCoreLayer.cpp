@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2012,
+// Copyright (c) 2016,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,41 +34,19 @@
 //
 //-*****************************************************************************
 
-#ifndef _PyAlembic_PyOGeomBaseSchema_h_
-#define _PyAlembic_PyOGeomBaseSchema_h_
-
 #include <Foundation.h>
+#include <Alembic/AbcCoreLayer/Util.h>
 
 using namespace boost::python;
 
 //-*****************************************************************************
-template<class INFO>
-void register_OGeomBaseSchema( const char *iName)
+void register_abccorelayer()
 {
-    typedef AbcG::OGeomBaseSchema<INFO> OGeomBaseSchema;
+    def( "SetPrune",
+         Alembic::AbcCoreLayer::SetPrune,
+         ( arg( "metaData" ), arg( "shouldPrune" ) ) );
 
-    // OGeomBaseSchema
-    //
-    class_<OGeomBaseSchema>(
-          iName,
-          "doc",
-          init<>() )
-        .def( "getArbGeomParams",
-              &OGeomBaseSchema::getArbGeomParams,
-              "Acccesing the ArbGeomParams will create its compound property "
-              "if needed")
-        .def( "getUserProperties",
-              &OGeomBaseSchema::getUserProperties,
-              "Accessing UserProperties will create its compound property "
-              "if needed")
-        .def( "getChildBoundsProperty",
-              &OGeomBaseSchema::getChildBoundsProperty,
-              "Accessing ChildBoundsProperty will create its 3dBox property "
-              "if needed" )
-        .def( "valid", &OGeomBaseSchema::valid )
-        .def( "reset", &OGeomBaseSchema::reset )
-        .def( "__nonzero__", &OGeomBaseSchema::valid )
-        ;
+    def( "SetReplace",
+         Alembic::AbcCoreLayer::SetReplace,
+         ( arg( "metaData" ), arg( "shouldPrune" ) ) );
 }
-
-#endif

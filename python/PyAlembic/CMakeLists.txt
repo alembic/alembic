@@ -40,7 +40,13 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
     MESSAGE(STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}")
     SET(PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY})
 
+    # lots of warnings coming from unused local typedefs inside boost python
+    IF (NOT WINDOWS)
+        ADD_DEFINITIONS(-Wno-unused-local-typedefs)
+    ENDIF()
+
     SET(CPP_FILES
+        PyAbcCoreLayer.cpp
         PyAbcGeomTypes.cpp
         PyAbcTypes.cpp
         PyArchiveBounds.cpp
@@ -115,13 +121,13 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
     INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
           "${CMAKE_SOURCE_DIR}/python/PyAlembic")
 
-    ADD_LIBRARY(alembicmodule SHARED ${CPP_FILES})
+    ADD_LIBRARY(alembic SHARED ${CPP_FILES})
 
-    SET_TARGET_PROPERTIES(alembicmodule
+    SET_TARGET_PROPERTIES(alembic
         PROPERTIES PREFIX "" SUFFIX ".so"
     )
 
-    INSTALL (TARGETS alembicmodule
+    INSTALL (TARGETS alembic
         DESTINATION lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
     )
 
@@ -129,6 +135,9 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
         ADD_SUBDIRECTORY(Tests)
     ENDIF()
 
+    set_target_properties(alembic PROPERTIES
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 ELSE()
     MESSAGE(FATAL_ERROR "Unable to find Python libs")
 ENDIF()

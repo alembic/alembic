@@ -50,14 +50,16 @@ void register_abctypes()
         .def( init<const AbcA::MetaData&>() )
         .def( init<const AbcA::TimeSamplingPtr&>() )
         .def( init<Abc::SchemaInterpMatching>() )
+        .def( init<Abc::SparseFlag>() )
         ;
 
     // Implicit conversions for Argument
     //
+    implicitly_convertible<Abc::SparseFlag, Abc::Argument>();
+    implicitly_convertible<Abc::SchemaInterpMatching, Abc::Argument>();
     implicitly_convertible<AbcU::uint32_t, Abc::Argument>();
     implicitly_convertible<const AbcA::MetaData&, Abc::Argument>();
     implicitly_convertible<const AbcA::TimeSamplingPtr&, Abc::Argument>();
-    implicitly_convertible<Abc::SchemaInterpMatching, Abc::Argument>();
 
     // SchemaInterpMatching Enum
     //
@@ -70,5 +72,11 @@ void register_abctypes()
     // WrapExistingFlag Enum
     enum_<Abc::WrapExistingFlag>( "WrapExistingFlag" )
         .value( "kWrapExisting", Abc::kWrapExisting )
+        ;
+
+    // SparseFlag Enum
+    enum_<Abc::SparseFlag>( "SparseFlag" )
+        .value( "kFull", Abc::kFull )
+        .value( "kSparse", Abc::kSparse )
         ;
 }

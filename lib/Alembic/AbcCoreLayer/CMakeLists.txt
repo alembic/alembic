@@ -38,10 +38,11 @@ LIST(APPEND CXX_FILES
     AbcCoreLayer/CprImpl.cpp
     AbcCoreLayer/OrImpl.cpp
     AbcCoreLayer/Read.cpp
+    AbcCoreLayer/Util.cpp
 )
 SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-INSTALL(FILES All.h Read.h
+INSTALL(FILES Read.h Util.h
         DESTINATION include/Alembic/AbcCoreLayer)
 
 IF (USE_TESTS)
