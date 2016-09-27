@@ -179,7 +179,9 @@ public:
                          WrapExistingFlag iWrapFlag,
                          const Argument &iArg0 = Argument(),
                          const Argument &iArg1 = Argument() )
-    : ITypedArrayProperty( iProp, iArg0, iArg1 ) {};
+    {
+        *this = ITypedArrayProperty( iProp, iArg0, iArg1 );
+    }
 
     //-*************************************************************************
     // ARRAY PROPERTY FEATURES

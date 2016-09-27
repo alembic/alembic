@@ -160,7 +160,9 @@ public:
         WrapExistingFlag iWrapFlag,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() )
-    : OTypedScalarProperty( iProp, iArg0, iArg1 ) {};
+    {
+        *this = OTypedScalarProperty( iProp, iArg0, iArg1 );
+    }
 
     //-*************************************************************************
     // SCALAR PROPERTY FEATURES
