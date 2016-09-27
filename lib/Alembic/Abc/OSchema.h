@@ -211,8 +211,10 @@ public:
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
-    : OSchema( iParent.getPtr(), iName, GetErrorHandlerPolicy( iParent ),
-               iArg0, iArg1, iArg2) {}
+    {
+        *this = OSchema( iParent.getPtr(), iName,
+                         GetErrorHandlerPolicy( iParent ), iArg0, iArg1, iArg2);
+    }
 
     virtual ~OSchema() {}
 
