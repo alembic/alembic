@@ -157,7 +157,9 @@ public:
              WrapExistingFlag iFlag,
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument() )
-    : ISchema( iProperty, iArg0, iArg1 ) {}
+    {
+      *this = ISchema( iProperty, iArg0, iArg1 );
+    }
 
     //! Default copy constructor used
     //! Default assignment operator used.
