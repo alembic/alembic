@@ -44,6 +44,19 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+OObject::OObject( OObject iParent,
+                  const std::string &iName,
+                  const Argument &iArg0,
+                  const Argument &iArg1,
+                  const Argument &iArg2 )
+{
+    init( iParent.getPtr(),
+          iName,
+          GetErrorHandlerPolicy( iParent ),
+          iArg0, iArg1, iArg2 );
+}
+
+//-*****************************************************************************
 OObject::~OObject()
 {
     // Nothing for now.
@@ -245,7 +258,7 @@ bool OObject::addChildInstance( OObject iTarget, const std::string& iName )
     AbcA::MetaData md;
     md.set("isInstance", "1");
 
-    OObject instanceChild = OObject( getPtr(), iName, md );
+    OObject instanceChild = OObject( *this, iName, md );
 
     OStringProperty instanceProp =
         OStringProperty( instanceChild.getProperties(), ".instanceSource" );
@@ -257,6 +270,22 @@ bool OObject::addChildInstance( OObject iTarget, const std::string& iName )
 
     // Not all error handlers throw, have a default.
     return false;
+}
+
+void OObject::init( OArchive & iArchive,
+                    const Argument &iArg0,
+                    const Argument &iArg1,
+                    const Argument &iArg2 )
+{
+    // Set the error handling policy
+    getErrorHandler().setPolicy(
+        GetErrorHandlerPolicy( iArchive.getPtr(), iArg0, iArg1, iArg2 ) );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::init( OArchive )" );
+
+    m_object = iArchive.getPtr()->getTop();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************

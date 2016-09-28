@@ -49,16 +49,18 @@ class Arguments
 {
 public:
     Arguments( ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
-                const AbcA::MetaData &iMetaData = AbcA::MetaData(),
-                AbcA::TimeSamplingPtr iTimeSampling =
-                AbcA::TimeSamplingPtr(),
-                uint32_t iTimeIndex = 0,
-                SchemaInterpMatching iMatch = kNoMatching )
+               const AbcA::MetaData &iMetaData = AbcA::MetaData(),
+               AbcA::TimeSamplingPtr iTimeSampling =
+               AbcA::TimeSamplingPtr(),
+               uint32_t iTimeIndex = 0,
+               SchemaInterpMatching iMatch = kNoMatching,
+               SparseFlag iSparse = kFull )
       : m_errorHandlerPolicy( iPolicy ),
         m_metaData( iMetaData ),
         m_timeSampling( iTimeSampling ),
         m_timeSamplingIndex( iTimeIndex ),
-        m_matching( iMatch ){}
+        m_matching( iMatch ),
+        m_sparse( iSparse ) {}
 
     void operator()( const uint32_t & iTimeSamplingIndex)
     { m_timeSamplingIndex = iTimeSamplingIndex; }
@@ -75,6 +77,9 @@ public:
     void operator()( const SchemaInterpMatching &iMatching )
     { m_matching = iMatching; }
 
+    void operator()( const SparseFlag &iSparse )
+    { m_sparse = iSparse; }
+
     ErrorHandler::Policy getErrorHandlerPolicy() const
     { return m_errorHandlerPolicy; }
 
@@ -90,22 +95,27 @@ public:
     SchemaInterpMatching getSchemaInterpMatching() const
     { return m_matching; }
 
+    bool isSparse() const
+    { return m_sparse == kSparse; }
+
 private:
     ErrorHandler::Policy m_errorHandlerPolicy;
     AbcA::MetaData m_metaData;
     AbcA::TimeSamplingPtr m_timeSampling;
     uint32_t m_timeSamplingIndex;
     SchemaInterpMatching m_matching;
+    SparseFlag m_sparse;
 };
 
 //-*****************************************************************************
-// Right now there are 4 types of arguments that you'd pass into
+// Right now there are 6 types of arguments that you'd pass into
 // our various classes for construction.
 // ErrorHandlerPolicy - always defaults to QuietNoop
 // MetaData - always defaults to ""
 // matching - schema interpretation matching
 // TimeSampling - always defaults to default uniform
 // TimeSamplingIndex - always defaults to 0
+// Sparse - always defaults to kFull
 class Argument
 {
 public:
@@ -132,6 +142,10 @@ public:
         m_whichVariant( kArgumentSchemaInterpMatching ),
         m_variant( iMatch ) {}
 
+    Argument( SparseFlag iSparse ) :
+        m_whichVariant( kArgumentSparse ),
+        m_variant( iSparse ) {}
+
     void setInto( Arguments &iArgs ) const
     {
         switch ( m_whichVariant )
@@ -154,6 +168,10 @@ public:
 
             case kArgumentSchemaInterpMatching:
                 iArgs( m_variant.schemaInterpMatching );
+            break;
+
+            case kArgumentSparse:
+                iArgs( m_variant.sparseFlag );
             break;
 
             // no-op
@@ -180,7 +198,8 @@ private:
         kArgumentTimeSamplingIndex,
         kArgumentMetaData,
         kArgumentTimeSamplingPtr,
-        kArgumentSchemaInterpMatching
+        kArgumentSchemaInterpMatching,
+        kArgumentSparse
     } const m_whichVariant;
 
     union ArgumentVariant
@@ -202,11 +221,15 @@ private:
         explicit ArgumentVariant( SchemaInterpMatching iMatch ) :
             schemaInterpMatching( iMatch ) {}
 
+        explicit ArgumentVariant( SparseFlag iSparse ) :
+            sparseFlag( iSparse ) {}
+
         ErrorHandler::Policy policy;
         Alembic::Util::uint32_t timeSamplingIndex;
         const AbcA::MetaData * metaData;
         const AbcA::TimeSamplingPtr * timeSamplingPtr;
         SchemaInterpMatching schemaInterpMatching;
+        SparseFlag sparseFlag;
     } const m_variant;
 };
 
@@ -219,12 +242,14 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy
 ( SOMETHING iSomething,
   const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args( GetErrorHandlerPolicy( iSomething ) );
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getErrorHandlerPolicy();
 }
 
@@ -232,12 +257,14 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy
 inline ErrorHandler::Policy GetErrorHandlerPolicyFromArgs
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getErrorHandlerPolicy();
 }
 
@@ -245,12 +272,14 @@ inline ErrorHandler::Policy GetErrorHandlerPolicyFromArgs
 inline AbcA::MetaData GetMetaData
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getMetaData();
 }
 
@@ -258,12 +287,14 @@ inline AbcA::MetaData GetMetaData
 inline AbcA::TimeSamplingPtr GetTimeSampling
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getTimeSampling();
 }
 
@@ -271,12 +302,14 @@ inline AbcA::TimeSamplingPtr GetTimeSampling
 inline uint32_t GetTimeSamplingIndex
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getTimeSamplingIndex();
 }
 
@@ -284,13 +317,30 @@ inline uint32_t GetTimeSamplingIndex
 inline SchemaInterpMatching GetSchemaInterpMatching
 ( const Argument &iArg0,
   const Argument &iArg1 = Argument(),
-  const Argument &iArg2 = Argument() )
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
     return args.getSchemaInterpMatching();
+}
+
+//-*****************************************************************************
+inline bool IsSparse
+( const Argument &iArg0,
+  const Argument &iArg1 = Argument(),
+  const Argument &iArg2 = Argument(),
+  const Argument &iArg3 = Argument() )
+{
+    Arguments args;
+    iArg0.setInto( args );
+    iArg1.setInto( args );
+    iArg2.setInto( args );
+    iArg3.setInto( args );
+    return args.isSparse();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

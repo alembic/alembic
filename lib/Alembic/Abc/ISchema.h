@@ -114,37 +114,52 @@ public:
     //! Creates a new Compound Property Reader with the schema
     //! information added to the metadata.
     //! arguments count include error handling, strictness matching.
-    template <class CPROP_PTR>
-    ISchema( CPROP_PTR iParentObject,
+    ISchema( const ICompoundProperty &iParent,
              const std::string &iName,
-
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument() )
     {
-        this_type::init( iParentObject, iName, iArg0, iArg1 );
-    }
-
-    //! Creates a new Compound Property Reader with the schema
-    //! information and also the default name.
-    template <class CPROP_PTR>
-    explicit ISchema( CPROP_PTR iParentObject,
-
-                      const Argument &iArg0 = Argument(),
-                      const Argument &iArg1 = Argument() )
-    {
-        this_type::init( iParentObject,
-                         INFO::defaultName(),
-                         iArg0, iArg1 );
+        init( iParent, iName, iArg0, iArg1 );
     }
 
     //! Wrap an existing compound property, checking that it matches
     //! the schema title info, if strict matching has been selected.
     //! Arguments allow selection of error handling and matching strictness
-    template<class CPROP_PTR>
-    ISchema( CPROP_PTR iProperty,
+    ISchema( const ICompoundProperty &iProperty,
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument() )
+    : ICompoundProperty( iProperty.getPtr(),
+                         GetErrorHandlerPolicy( iProperty, iArg0, iArg1 ) )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "ISchema::ISchema( wrap )" );
+
+        const AbcA::PropertyHeader &pheader = this->getHeader();
+
+        ABCA_ASSERT( matches( pheader,
+            GetSchemaInterpMatching( iArg0, iArg1 ) ),
+            "Incorrect match of schema: "
+            << pheader.getMetaData().get( "schema" )
+            << " to expected: "
+            << INFO::title() );
+
+        // not wrapped, we want to use the default name
+        if ( !iProperty.getParent().valid() )
+        {
+            init( iProperty, getDefaultSchemaName(),
+                  iArg0, iArg1 );
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    // Deprecated in favor of the constructor above
+    ISchema( const ICompoundProperty &iProperty,
              WrapExistingFlag iFlag,
              const Argument &iArg0 = Argument(),
-             const Argument &iArg1 = Argument() );
+             const Argument &iArg1 = Argument() )
+    {
+      *this = ISchema( iProperty, iArg0, iArg1 );
+    }
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -152,8 +167,7 @@ public:
     virtual ~ISchema() {}
 
 private:
-    template <class CPROP_PTR>
-    void init( CPROP_PTR iParentObject,
+    void init( const ICompoundProperty & iParentObject,
                const std::string &iName,
                const Argument &iArg0,
                const Argument &iArg1 );
@@ -163,11 +177,10 @@ private:
 // TEMPLATE AND INLINE FUNCTIONS
 //-*****************************************************************************
 template <class INFO>
-template <class CPROP_PTR>
-void ISchema<INFO>::init( CPROP_PTR iParent,
-                            const std::string &iName,
-                            const Argument &iArg0,
-                            const Argument &iArg1 )
+void ISchema<INFO>::init( const ICompoundProperty & iParent,
+                          const std::string &iName,
+                          const Argument &iArg0,
+                          const Argument &iArg1 )
 {
     Arguments args;
     iArg0.setInto( args );
@@ -180,8 +193,7 @@ void ISchema<INFO>::init( CPROP_PTR iParent,
     // Get actual reader for parent.
     ABCA_ASSERT( iParent,
                  "NULL parent passed into ISchema ctor" );
-    AbcA::CompoundPropertyReaderPtr parent =
-        GetCompoundPropertyReaderPtr( iParent );
+    AbcA::CompoundPropertyReaderPtr parent = iParent.getPtr();
     ABCA_ASSERT( parent, "NULL CompoundPropertyReaderPtr" );
 
     const AbcA::PropertyHeader *pheader = parent->getPropertyHeader( iName );
@@ -199,35 +211,6 @@ void ISchema<INFO>::init( CPROP_PTR iParent,
 
     // Get property.
     m_property = parent->getCompoundProperty( iName );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-template<class INFO>
-template<class COMPOUND_PTR>
-inline ISchema<INFO>::ISchema(
-    COMPOUND_PTR iProperty,
-    WrapExistingFlag iFlag,
-    const Argument &iArg0,
-    const Argument &iArg1 )
-  : ICompoundProperty( iProperty,
-                       iFlag,
-                       GetErrorHandlerPolicy( iProperty,
-                                              iArg0, iArg1 ) )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ISchema::ISchema( wrap )" );
-
-    const AbcA::PropertyHeader &pheader = this->getHeader();
-
-    ABCA_ASSERT( matches( pheader,
-                          GetSchemaInterpMatching( iArg0, iArg1 ) ),
-
-                 "Incorrect match of schema: "
-                 << pheader.getMetaData().get( "schema" )
-                 << " to expected: "
-                 << INFO::title() );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

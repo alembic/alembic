@@ -356,6 +356,66 @@ void optPropTest()
 }
 
 //-*****************************************************************************
+void sparseTest()
+{
+    std::string name = "sparseMeshTest.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
+        OPolyMesh meshUVsObj( OObject( archive, kTop ), "meshUVs", kSparse );
+
+        // only set UVs
+        OPolyMeshSchema::Sample mesh_samp;
+        OV2fGeomParam::Sample uvsamp( V2fArraySample( (const V2f *)g_uvs,
+                                      g_numUVs ), kFacevaryingScope );
+        mesh_samp.setUVs( uvsamp );
+        meshUVsObj.getSchema().set( mesh_samp );
+
+        // only set pts
+        OPolyMesh meshPtsObj( OObject( archive, kTop ), "meshPts", kSparse );
+        OPolyMeshSchema::Sample mesh_samp2;
+        mesh_samp2.setPositions(
+            V3fArraySample( ( const V3f * )g_verts, g_numVerts ) );
+        meshPtsObj.getSchema().set( mesh_samp2 );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
+
+        IObject meshUVsObj( IObject( archive, kTop ), "meshUVs" );
+
+        // This should NOT match
+        TESTING_ASSERT( !IPolyMeshSchema::matches( meshUVsObj.getMetaData() ) );
+        ICompoundProperty geomProp( meshUVsObj.getProperties(), ".geom" );
+
+        // This shouldn't match either
+        TESTING_ASSERT( !IPolyMeshSchema::matches( geomProp.getMetaData() ) );
+
+        // and we should ONLY have UVs
+        TESTING_ASSERT( geomProp.getNumProperties() == 1 &&
+                        geomProp.getPropertyHeader("uv") != NULL );
+
+        IArrayProperty uvsProp( geomProp, "uv" );
+        TESTING_ASSERT( uvsProp.getNumSamples() == 1 );
+
+        IObject meshPtsObj( IObject( archive, kTop ), "meshPts" );
+
+        // This should NOT match
+        TESTING_ASSERT( !IPolyMeshSchema::matches( meshPtsObj.getMetaData() ) );
+        geomProp = ICompoundProperty( meshPtsObj.getProperties(), ".geom" );
+
+        // This shouldn't match either
+        TESTING_ASSERT( !IPolyMeshSchema::matches( geomProp.getMetaData() ) );
+        TESTING_ASSERT( geomProp.getNumProperties() == 2 &&
+                        geomProp.getPropertyHeader("P") != NULL &&
+                        geomProp.getPropertyHeader(".selfBnds") != NULL );
+        IArrayProperty ptsProp( geomProp, "P" );
+        TESTING_ASSERT( ptsProp.getNumSamples() == 1 );
+        IScalarProperty selfBndsProp( geomProp, ".selfBnds" );
+        TESTING_ASSERT( selfBndsProp.getNumSamples() == 1 );
+    }
+}
+
+//-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
 // MAIN FUNCTION!
@@ -374,5 +434,8 @@ int main( int argc, char *argv[] )
     meshUnderXformOut( "animatedXformedMesh.abc" );
 
     optPropTest();
+
+    sparseTest();
+
     return 0;
 }

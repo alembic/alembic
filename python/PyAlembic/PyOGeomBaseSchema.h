@@ -53,24 +53,6 @@ void register_OGeomBaseSchema( const char *iName)
           iName,
           "doc",
           init<>() )
-        .def( init<Abc::OCompoundProperty,
-                   const std::string&,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
-                     arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
-        .def( init<Abc::OCompoundProperty,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ),
-                     arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
-        .def( "init", &OGeomBaseSchema::init )
         .def( "getArbGeomParams",
               &OGeomBaseSchema::getArbGeomParams,
               "Acccesing the ArbGeomParams will create its compound property "

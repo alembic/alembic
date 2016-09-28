@@ -39,7 +39,7 @@
 using namespace boost::python;
 
 //-*****************************************************************************
-static Abc::OArchive CreateArchiveWithInfoWrapper( 
+static Abc::OArchive CreateArchiveWithInfoWrapper(
     const std::string &iFileName,
     const std::string &iApplicationWriter,
     const std::string &iUserDescription,
@@ -49,7 +49,7 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
 {
     if ( asOgawa == true )
     {
-        return Abc::CreateArchiveWithInfo( 
+        return Abc::CreateArchiveWithInfo(
             ::Alembic::AbcCoreOgawa::WriteArchive(),
             iFileName,
             iApplicationWriter,
@@ -59,8 +59,8 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
     }
     else
     {
-#ifdef ALEMBIC_WITH_HDF5 
-        return Abc::CreateArchiveWithInfo( 
+#ifdef ALEMBIC_WITH_HDF5
+        return Abc::CreateArchiveWithInfo(
             ::Alembic::AbcCoreHDF5::WriteArchive(),
             iFileName,
             iApplicationWriter,
@@ -71,6 +71,8 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
         throwPythonException( "Unsupported core type: HDF5" );
 #endif
     }
+
+    return Abc::OArchive();
 }
 
 //-*****************************************************************************
@@ -104,7 +106,7 @@ void register_archiveinfo()
     def( "CreateArchiveWithInfo",
          CreateArchiveWithInfoWrapper,
          ( arg( "fileName" ), arg( "ApplicationWriter" ),
-           arg( "UserDescription" ), arg( "argument" ) = Abc::Argument(), 
+           arg( "UserDescription" ), arg( "argument" ) = Abc::Argument(),
            arg( "argument" ) = Abc::Argument(), arg( "asOgawa" ) = true ),
          "Create an OArchive with the passed arguments" );
     def( "GetArchiveInfo",

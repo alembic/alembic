@@ -65,66 +65,33 @@ public:
     //! ...
     OCameraSchema() {}
 
-    //! This templated, primary constructor creates a new camera writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSampling.
-    template <class CPROP_PTR>
-    OCameraSchema( CPROP_PTR iParent,
-                     const std::string &iName,
+    //! This constructor creates a new camera writer.
+    //! The first argument is the compound property to use as a parent
+    //! The remaining optional arguments are the parents ErrorHandlerPolicy,
+    //! an override to the ErrorHandlerPolicy, MetaData, and TimeSampling info.
+    OCameraSchema( AbcA::CompoundPropertyWriterPtr iParent,
+                   const std::string &iName,
 
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument(),
-                     const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CameraSchemaInfo>(
-                            GetCompoundPropertyWriterPtr( iParent ),
-                            iName, iArg0, iArg1, iArg2 )
+                   const Abc::Argument &iArg0 = Abc::Argument(),
+                   const Abc::Argument &iArg1 = Abc::Argument(),
+                   const Abc::Argument &iArg2 = Abc::Argument(),
+                   const Abc::Argument &iArg3 = Abc::Argument() )
+      : Abc::OSchema<CameraSchemaInfo>( iParent, iName,
+                                        iArg0, iArg1, iArg2, iArg3 )
     {
 
         AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2, iArg3 );
         uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2, iArg3 );
 
         // if we specified a valid TimeSamplingPtr, use it to determine the
         // index otherwise we'll use the index, which defaults to the intrinsic
         // 0 index
         if (tsPtr)
         {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
-                )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex );
-    }
-
-    template <class CPROP_PTR>
-    explicit OCameraSchema( CPROP_PTR iParent,
-                              const Abc::Argument &iArg0 = Abc::Argument(),
-                              const Abc::Argument &iArg1 = Abc::Argument(),
-                              const Abc::Argument &iArg2 = Abc::Argument() )
-      : Abc::OSchema<CameraSchemaInfo>(
-                                    GetCompoundPropertyWriterPtr( iParent ),
-                                    iArg0, iArg1, iArg2 )
-    {
-
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
-                )->getArchive()->addTimeSampling(*tsPtr);
+            tsIndex = iParent->getObject()->getArchive()->addTimeSampling(
+                *tsPtr);
         }
 
         // Meta data and error handling are eaten up by

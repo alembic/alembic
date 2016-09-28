@@ -151,6 +151,14 @@ void* AbcImport::creator()
     return new AbcImport();
 }
 
+void parseInputFilenames(MString &filenameArg, std::vector<std::string> &filenameList)
+{
+   std::istringstream filenameBuffer(filenameArg.asChar());
+   std::string thisFilename;
+   while (getline(filenameBuffer, thisFilename, ',')) {
+       filenameList.push_back(thisFilename);
+   }
+}
 
 MStatus AbcImport::doIt(const MArgList & args)
 {
@@ -246,6 +254,10 @@ MStatus AbcImport::doIt(const MArgList & args)
     MString abcNodeName;
     if (status == MS::kSuccess)
     {
+       std::vector<std::string> filenameList;
+       parseInputFilenames(filename, filenameList);
+       filename = (*filenameList.begin()).c_str();
+
         {
             MString fileRule, expandName;
             MString alembicFileRule = "alembicCache";
@@ -303,7 +315,7 @@ MStatus AbcImport::doIt(const MArgList & args)
         status = fileObj.setRawFullName(filename);
         if (status == MS::kSuccess && fileObj.exists())
         {
-            ArgData inputData(filename, debugOn, reparentObj,
+            ArgData inputData(filenameList, debugOn, reparentObj,
                 swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
                 recreateColorSets, filterString, excludeFilterString);
             abcNodeName = createScene(inputData);

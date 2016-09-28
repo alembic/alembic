@@ -71,6 +71,7 @@
 #include <exception>
 #include <limits>
 
+#include <list>
 #include <map>
 #include <string>
 #include <vector>
@@ -101,7 +102,7 @@
 #include <algorithm>
 
 #ifndef ALEMBIC_VERSION_NS
-#define ALEMBIC_VERSION_NS v8
+#define ALEMBIC_VERSION_NS v9
 #endif
 
 namespace Alembic {

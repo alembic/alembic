@@ -46,6 +46,7 @@ namespace ALEMBIC_VERSION_NS {
 ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcCollection_Collections_v1",
                                  "",
                                  ".collection",
+                                 false,
                                  CollectionsSchemaInfo );
 
 }

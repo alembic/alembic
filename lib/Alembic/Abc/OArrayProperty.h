@@ -64,15 +64,11 @@ public:
     //! ...
     OArrayProperty() : OBasePropertyT<AbcA::ArrayPropertyWriterPtr>() {}
 
-    //! This templated, explicit function creates a new scalar property writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to a CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to specify time sampling or time sampling index.
-    template <class OBJECT_PTR>
-    OArrayProperty( OBJECT_PTR iParentObject,
+    //! Create a new OArrayProperty named iName as a child of compound iParent,
+    //! of data type iDataType.  The remaining optional arguments can be used
+    //! to override the ErrorHandlerPolicy, specify MetaData,
+    //! and to specify time sampling or time sampling index.
+    OArrayProperty( OCompoundProperty iParent,
                     const std::string &iName,
                     const AbcA::DataType &iDataType,
 
@@ -83,21 +79,18 @@ public:
     //! This attaches an OArrayProperty wrapper around an existing
     //! ArrayPropertyWriterPtr, with an optional error handling policy.
     OArrayProperty(
-        //! The pointer
-        //! ...
         AbcA::ArrayPropertyWriterPtr iPtr,
-
-        //! The flag indicating that wrapping is intended.
-        //! Even though it's nonambiguous here, we use it anyway
-        //! for readability
-        WrapExistingFlag iWrapFlag,
-
-        //! Optional error handling policy
-        //! ...
-        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
+        const Argument &iArg0 = Argument() )
       : OBasePropertyT<AbcA::ArrayPropertyWriterPtr>( iPtr,
-                                                      iWrapFlag,
-                                                      iPolicy ) {}
+            GetErrorHandlerPolicy( iPtr, iArg0 ) ) {}
+
+    // Deprecated in favor of the constructor above
+    OArrayProperty(
+        AbcA::ArrayPropertyWriterPtr iPtr,
+        WrapExistingFlag iWrapFlag,
+        const Argument &iArg0 = Argument() )
+      : OBasePropertyT<AbcA::ArrayPropertyWriterPtr>( iPtr,
+            GetErrorHandlerPolicy( iPtr, iArg0 ) ) {}
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -149,26 +142,6 @@ private:
                const Argument &iArg1,
                const Argument &iArg2 );
 };
-
-//-*****************************************************************************
-// TEMPLATE AND INLINE FUNCTIONS
-//-*****************************************************************************
-
-//-*****************************************************************************
-template <class CPROP_PTR>
-inline OArrayProperty::OArrayProperty( CPROP_PTR iParentProp,
-                                       const std::string &iName,
-                                       const AbcA::DataType &iDataType,
-                                       const Argument &iArg0,
-                                       const Argument &iArg1,
-                                       const Argument &iArg2 )
-{
-    init( GetCompoundPropertyWriterPtr( iParentProp ),
-          iName, iDataType,
-
-          GetErrorHandlerPolicy( iParentProp ),
-          iArg0, iArg1, iArg2 );
-}
 
 } // End namespace ALEMBIC_VERSION_NS
 

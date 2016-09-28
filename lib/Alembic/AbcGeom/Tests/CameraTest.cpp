@@ -36,7 +36,7 @@
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
-
+#include <Alembic/AbcCoreFactory/IFactory.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 using namespace Alembic::AbcGeom; // Contains Abc, AbcCoreAbstract
@@ -92,7 +92,8 @@ void cameraTest()
         TESTING_ASSERT( almostEqual( samp.getFStop(), 5.6 ) );
         TESTING_ASSERT( almostEqual( samp.getFocusDistance(), 5.0 ) );
         TESTING_ASSERT( almostEqual( samp.getShutterOpen(), 0.0 ) );
-        TESTING_ASSERT( almostEqual( samp.getShutterClose(), 1.0 ) );
+        TESTING_ASSERT( almostEqual( samp.getShutterClose(),
+                        0.020833333333333332 ) );
         TESTING_ASSERT( almostEqual( samp.getNearClippingPlane(), 0.1 ) );
         TESTING_ASSERT( almostEqual( samp.getFarClippingPlane(), 100000.0 ) );
         TESTING_ASSERT( samp.getNumOps() == 0 );
@@ -115,7 +116,8 @@ void cameraTest()
         TESTING_ASSERT( almostEqual( samp.getFStop(), 5.6 ) );
         TESTING_ASSERT( almostEqual( samp.getFocusDistance(), 5.0 ) );
         TESTING_ASSERT( almostEqual( samp.getShutterOpen(), 0.0 ) );
-        TESTING_ASSERT( almostEqual( samp.getShutterClose(), 1.0 ) );
+        TESTING_ASSERT( almostEqual( samp.getShutterClose(),
+                        0.020833333333333332 ) );
         TESTING_ASSERT( almostEqual( samp.getNearClippingPlane(), 0.1 ) );
         TESTING_ASSERT( almostEqual( samp.getFarClippingPlane(), 100000.0 ) );
         TESTING_ASSERT( samp.getNumOps() == 2 );
@@ -146,7 +148,8 @@ void cameraTest()
         TESTING_ASSERT( almostEqual( samp.getFStop(), 5.6 ) );
         TESTING_ASSERT( almostEqual( samp.getFocusDistance(), 5.0 ) );
         TESTING_ASSERT( almostEqual( samp.getShutterOpen(), 0.0 ) );
-        TESTING_ASSERT( almostEqual( samp.getShutterClose(), 1.0 ) );
+        TESTING_ASSERT( almostEqual( samp.getShutterClose(),
+                        0.020833333333333332) );
         TESTING_ASSERT( almostEqual( samp.getNearClippingPlane(), 0.1 ) );
         TESTING_ASSERT( almostEqual( samp.getFarClippingPlane(), 100000.0 ) );
         TESTING_ASSERT( samp.getNumOps() == 2 );
@@ -220,9 +223,9 @@ void corePropertiesTest()
 
         TESTING_ASSERT( cam.getSchema().getNumSamples() == 10 );
 
-        for ( std::size_t i; i < 10; ++i )
+        for ( std::size_t i = 0; i < 10; ++i )
         {
-            cam.getSchema().get( samp );
+            cam.getSchema().get( samp, i );
             TESTING_ASSERT( almostEqual( samp.getFocalLength(),
                 1000.0 * i + 1.0 ) );
             TESTING_ASSERT( almostEqual( samp.getHorizontalAperture(),
@@ -262,9 +265,109 @@ void corePropertiesTest()
 }
 
 //-*****************************************************************************
+void sparseTest()
+{
+    std::string fileA = "sparseCameraA.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileA );
+        CameraSample samp;
+        OCamera simpleCamObj( OObject( archive, kTop ), "simpleCam" );
+        simpleCamObj.getSchema().set( samp );
+
+        OCamera camObj( OObject( archive, kTop ), "staticCam" );
+        OCameraSchema camSchema = camObj.getSchema();
+        samp.addOp( FilmBackXformOp( kScaleFilmBackOperation, "scale" ) );
+        samp.addOp( FilmBackXformOp( kTranslateFilmBackOperation, "offset" ) );
+        camSchema.set( samp );
+
+        OCamera animCamObj( OObject( archive, kTop ), "animCam" );
+        OCameraSchema animCamSchema = animCamObj.getSchema();
+        animCamSchema.set( samp );
+
+        samp[0].setScale( V2d( 2.0, 3.0 ) );
+        samp[1].setChannelValue( 0, 4.0 );
+        samp[1].setChannelValue( 1, 5.0 );
+        samp.setLensSqueezeRatio( 2.0 );
+        samp.setHorizontalAperture( 4.8 );
+        samp.setVerticalFilmOffset( 3.0 );
+        animCamSchema.set( samp );
+    }
+
+    std::string fileB = "sparseCameraB.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileB );
+
+        CameraSample samp;
+        samp.addOp( FilmBackXformOp( kTranslateFilmBackOperation, "test" ) );
+        samp.setLensSqueezeRatio( 5.0 );
+        samp.setHorizontalAperture( 4.0 );
+        samp.setVerticalFilmOffset( 3.0 );
+        samp[0].setChannelValue( 0, 2.0 );
+        samp[0].setChannelValue( 1, 1.0 );
+
+        OCamera simpleCamObj( OObject( archive ), "simpleCam", kSparse );
+        simpleCamObj.getSchema().set( samp );
+
+        OCamera camObj( OObject( archive  ), "staticCam", kSparse );
+        OCameraSchema camSchema = camObj.getSchema();
+        camSchema.set( samp );
+        samp.setLensSqueezeRatio( 10.0 );
+        samp.setHorizontalAperture( 9.0 );
+        samp.setVerticalFilmOffset( 8.0 );
+        samp[0].setChannelValue( 0, 7.0 );
+        samp[0].setChannelValue( 1, 6.0 );
+        camSchema.set( samp );
+
+        OCamera animCamObj( OObject( archive ), "animCam", kSparse );
+        OCameraSchema animCamSchema = animCamObj.getSchema();
+        CameraSample simpleSamp;
+        animCamSchema.set( simpleSamp );
+    }
+
+    {
+        std::vector< std::string > names;
+        names.push_back( fileA );
+        names.push_back( fileB );
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( names );
+
+        ICamera simpleCamObj( IObject( archive ), "simpleCam" );
+        CameraSample samp;
+        ICameraSchema schema = simpleCamObj.getSchema();
+        TESTING_ASSERT( schema.getNumSamples() == 1 );
+        schema.get( samp );
+        TESTING_ASSERT( samp.getNumOps() == 1 &&
+                        samp.getOp(0).getHint() == "test" );
+
+        ICamera staticCamObj( IObject( archive ), "staticCam" );
+        schema = staticCamObj.getSchema();
+        TESTING_ASSERT( schema.getNumSamples() == 2 );
+        schema.get( samp );
+        TESTING_ASSERT( samp.getLensSqueezeRatio() == 5.0 &&
+                        samp.getHorizontalAperture() == 4.0 &&
+                        samp.getVerticalFilmOffset() == 3.0 &&
+                        samp[0].getChannelValue( 0 ) == 2.0 &&
+                        samp[0].getChannelValue( 1 ) == 1.0 );
+
+        schema.get( samp, 1 );
+        TESTING_ASSERT( samp.getLensSqueezeRatio() == 10.0 &&
+                        samp.getHorizontalAperture() == 9.0 &&
+                        samp.getVerticalFilmOffset() == 8.0 &&
+                        samp[0].getChannelValue( 0 ) == 7.0 &&
+                        samp[0].getChannelValue( 1 ) == 6.0 );
+
+        ICamera animCamObj( IObject( archive ), "animCam" );
+        schema = animCamObj.getSchema();
+        schema.get( samp );
+        TESTING_ASSERT( schema.getNumSamples() == 1 && samp.getNumOps() == 0 );
+    }
+}
+
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     cameraTest();
     corePropertiesTest();
+    sparseTest();
     return 0;
 }

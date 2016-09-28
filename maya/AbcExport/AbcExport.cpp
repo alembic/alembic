@@ -330,6 +330,26 @@ try
                 jobArgs.noNormals = true;
             }
 
+            else if (arg == "-ng" || arg == "-nogeom")
+           {
+               jobArgs.writeGeometry = false;
+           }
+
+            else if (arg == "-uvo" || arg == "-uvsonly")
+           {
+               jobArgs.writeMeshes = true;
+               jobArgs.writeUVs= true;
+               jobArgs.writeGeometry = false;
+               jobArgs.noNormals = true;
+               jobArgs.writeCurvesGroup = false;
+               jobArgs.writeTransforms = true;
+               jobArgs.writeLocators = false;
+               jobArgs.writeParticles = false;
+               jobArgs.writeCameras = false;
+               jobArgs.writeNurbsSurfaces = false;
+               jobArgs.writeNurbsCurves = false;
+           }
+
             else if (arg == "-pr" || arg == "-preroll")
             {
                 frameRanges.back().preRoll = true;

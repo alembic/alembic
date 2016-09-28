@@ -63,11 +63,11 @@ std::string IArchive::getName() const
 }
 
 //-*****************************************************************************
-IObject IArchive::getTop()
+IObject IArchive::getTop() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::getTop()" );
 
-    return IObject( m_archive->getTop(), kWrapExisting );
+    return IObject( m_archive->getTop() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 

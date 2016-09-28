@@ -40,6 +40,32 @@ namespace Alembic {
 namespace AbcCollection {
 namespace ALEMBIC_VERSION_NS {
 
+//-*****************************************************************************
+OCollectionsSchema::OCollectionsSchema(
+    Alembic::AbcCoreAbstract::CompoundPropertyWriterPtr iParent,
+    const std::string &iName,
+    const Abc::Argument &iArg0,
+    const Abc::Argument &iArg1,
+    const Abc::Argument &iArg2,
+    const Abc::Argument &iArg3 )
+: Abc::OSchema<CollectionsSchemaInfo>( iParent, iName, iArg0, iArg1,
+                                       iArg2, iArg3 )
+{
+}
+
+//-*****************************************************************************
+OCollectionsSchema::OCollectionsSchema( Abc::OCompoundProperty iParent,
+                                        const std::string &iName,
+                                        const Abc::Argument &iArg0,
+                                        const Abc::Argument &iArg1,
+                                        const Abc::Argument &iArg2)
+: Abc::OSchema<CollectionsSchemaInfo>( iParent.getPtr(), iName,
+                                       GetErrorHandlerPolicy( iParent ),
+                                       iArg0, iArg1, iArg2 )
+{
+}
+
+//-*****************************************************************************
 Abc::OStringArrayProperty
 OCollectionsSchema::createCollection( const std::string &iName,
     const Abc::Argument &iArg0,
@@ -68,6 +94,7 @@ OCollectionsSchema::createCollection( const std::string &iName,
     return Abc::OStringArrayProperty();
 }
 
+//-*****************************************************************************
 Abc::OStringArrayProperty
 OCollectionsSchema::getCollection( size_t i )
 {
@@ -83,7 +110,7 @@ OCollectionsSchema::getCollection( size_t i )
     return Abc::OStringArrayProperty();
 }
 
-
+//-*****************************************************************************
 Abc::OStringArrayProperty
 OCollectionsSchema::getCollection( const std::string & iName )
 {

@@ -41,6 +41,15 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+OArrayProperty::OArrayProperty( OCompoundProperty iParent,
+    const std::string &iName, const AbcA::DataType &iDataType,
+    const Argument &iArg0, const Argument &iArg1, const Argument &iArg2 )
+{
+    init( iParent.getPtr(), iName, iDataType, GetErrorHandlerPolicy( iParent ),
+          iArg0, iArg1, iArg2 );
+}
+
+//-*****************************************************************************
 OArrayProperty::~OArrayProperty()
 {
     // Nothing for now.
@@ -109,7 +118,6 @@ OCompoundProperty OArrayProperty::getParent() const
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArrayProperty::getParent()" );
 
     return OCompoundProperty( m_property->getParent(),
-                              kWrapExisting,
                               getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -147,7 +155,7 @@ void OArrayProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
         tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
     }
 
-    m_property = iParent->createArrayProperty( iName, args.getMetaData(), 
+    m_property = iParent->createArrayProperty( iName, args.getMetaData(),
         iDataType, tsIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
