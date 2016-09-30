@@ -300,11 +300,15 @@ std::string stripPathAndNamespace(const std::string & iPath)
     return childName;
 }
 
-bool getDagPathByChildName(MDagPath & ioDagPath, const std::string & iChildName)
+bool getDagPathByChildName(
+    MDagPath & ioDagPath,
+    const std::string & iChildName,
+    bool iUseFirstAvailableShape)
 {
     unsigned int numChildren = ioDagPath.childCount();
     std::string strippedName = stripPathAndNamespace(iChildName);
     MObject closeMatch;
+    MObject firstAvailable;
 
     for (unsigned int i = 0; i < numChildren; ++i)
     {
@@ -324,11 +328,22 @@ bool getDagPathByChildName(MDagPath & ioDagPath, const std::string & iChildName)
                 closeMatch = child;
             }
         }
+
+        if (firstAvailable.isNull())
+        {
+            firstAvailable = child;
+        }
     }
 
     if (!closeMatch.isNull())
     {
         ioDagPath.push(closeMatch);
+        return true;
+    }
+
+    if (iUseFirstAvailableShape && !firstAvailable.isNull())
+    {
+        ioDagPath.push(firstAvailable);
         return true;
     }
 

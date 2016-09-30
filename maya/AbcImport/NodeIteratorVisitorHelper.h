@@ -251,7 +251,8 @@ public:
         bool    iRemoveIfNoUpdate = false,
         bool    iRecreateColorSets = false,
         MString iIncludeFilterString = MString(""),
-        MString iExcludeFilterString = MString(""));
+        MString iExcludeFilterString = MString(""),
+        bool    useFirstAvailableShape = false);
     ArgData(const ArgData & rhs);
     ArgData & operator=(const ArgData & rhs);
 
@@ -271,6 +272,7 @@ public:
     bool                       mRemoveIfNoUpdate;
     MString                    mIncludeFilterString;
     MString                    mExcludeFilterString;
+    bool                       mUseFirstAvailableShape;
 
     WriterData                 mData;
 };  // ArgData
