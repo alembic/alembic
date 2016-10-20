@@ -41,6 +41,54 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+ICompoundProperty::ICompoundProperty( const ICompoundProperty & iParent,
+                                      const std::string &iName,
+                                      const Argument &iArg0 )
+{
+    init( iParent.getPtr(), iName, GetErrorHandlerPolicy( iParent ), iArg0 );
+}
+
+//-*****************************************************************************
+ICompoundProperty::ICompoundProperty( AbcA::CompoundPropertyReaderPtr iPtr,
+                                      const Argument &iArg0,
+                                      const Argument &iArg1 )
+  : IBasePropertyT<AbcA::CompoundPropertyReaderPtr>(
+      iPtr,
+      GetErrorHandlerPolicy( iPtr, iArg0, iArg1 ) )
+{
+    // Nothing!
+}
+
+//-*****************************************************************************
+ICompoundProperty::ICompoundProperty( AbcA::CompoundPropertyReaderPtr iPtr,
+                                      WrapExistingFlag /* iWrapFlag */,
+                                      const Argument &iArg0,
+                                      const Argument &iArg1 )
+  : IBasePropertyT<AbcA::CompoundPropertyReaderPtr>(
+      iPtr,
+      GetErrorHandlerPolicy( iPtr, iArg0, iArg1 ) )
+{
+    // Nothing!
+}
+
+//-*****************************************************************************
+ICompoundProperty::ICompoundProperty( const IObject & iObject,
+                                      const Argument &iArg0,
+                                      const Argument &iArg1 )
+{
+    init( iObject, iArg0, iArg1 );
+}
+
+//-*****************************************************************************
+ICompoundProperty::ICompoundProperty( const IObject & iObject,
+                                      TopFlag /* iTopFlag */,
+                                      const Argument &iArg0,
+                                      const Argument &iArg1 )
+{
+    init( iObject, iArg0, iArg1 );
+}
+
+//-*****************************************************************************
 ICompoundProperty::~ICompoundProperty()
 {
     // Here for debug support
@@ -100,6 +148,22 @@ ICompoundProperty ICompoundProperty::getParent() const
 
     // Not all error handlers throw. Have a default.
     return ICompoundProperty();
+}
+
+//-*****************************************************************************
+void ICompoundProperty::init ( const IObject & iObject,
+                               const Argument &iArg0,
+                               const Argument &iArg1 )
+{
+    getErrorHandler().setPolicy(
+        GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "ICompoundProperty::init( IObject )" );
+
+    m_property = iObject.getProperties().getPtr();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************

@@ -64,15 +64,24 @@ public:
     //! ...
     OScalarProperty() : OBasePropertyT<AbcA::ScalarPropertyWriterPtr>() {}
 
-    //! This templated, explicit function creates a new scalar property writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to a CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to specify time sampling or time sampling index.
-    template <class OBJECT_PTR>
-    OScalarProperty( OBJECT_PTR iParentObject,
+    //! Create a new OScalarProperty named iName as a child of compound iParent,
+    //! of data type iDataType.  The remaining optional arguments can be used
+    //! the inherited parent ErrorHandlerPolicy, an override to that policy,
+    //! specify MetaData, and to specify time sampling or time sampling index.
+    OScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                     const std::string &iName,
+                     const AbcA::DataType &iDataType,
+
+                     const Argument &iArg0 = Argument(),
+                     const Argument &iArg1 = Argument(),
+                     const Argument &iArg2 = Argument(),
+                     const Argument &iArg3 = Argument() );
+
+    //! Create a new OScalarProperty named iName as a child of compound iParent,
+    //! of data type iDataType.  The remaining optional arguments can be used
+    //! to override the ErrorHandlerPolicy, specify MetaData,
+    //! and to specify time sampling or time sampling index.
+    OScalarProperty( OCompoundProperty iParent,
                      const std::string &iName,
                      const AbcA::DataType &iDataType,
 
@@ -80,26 +89,21 @@ public:
                      const Argument &iArg1 = Argument(),
                      const Argument &iArg2 = Argument() );
 
+
     //! This attaches an OScalarProperty wrapper around an existing
     //! ScalarPropertyWriterPtr, arguments are there to specify
     //! ErrorHandling policy,
     OScalarProperty(
-
-        //! The pointer
-        //! ...
         AbcA::ScalarPropertyWriterPtr iPtr,
-
-        //! The flag indicating that wrapping is intended.
-        //! Even though it's nonambiguous here, we use it anyway
-        //! for readability
-        WrapExistingFlag iWrapFlag,
-
-        //! Error Handling Policy
-        //! ..
         ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
-      : OBasePropertyT<AbcA::ScalarPropertyWriterPtr>( iPtr,
-                                                       iWrapFlag,
-                                                       iPolicy ) {}
+      : OBasePropertyT<AbcA::ScalarPropertyWriterPtr>( iPtr, iPolicy ) {}
+
+    // Deprecated in favor of the constructor above
+    OScalarProperty(
+        AbcA::ScalarPropertyWriterPtr iPtr,
+        WrapExistingFlag iWrapFlag,
+        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
+      : OBasePropertyT<AbcA::ScalarPropertyWriterPtr>( iPtr, iPolicy ) {}
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -144,36 +148,15 @@ public:
     OCompoundProperty getParent() const;
 
 private:
-    void init( AbcA::CompoundPropertyWriterPtr iParentObject,
+    void init( AbcA::CompoundPropertyWriterPtr iParent,
                const std::string &iName,
                const AbcA::DataType &iDataType,
 
-               ErrorHandler::Policy iParentPolicy,
-
                const Argument &iArg0,
                const Argument &iArg1,
-               const Argument &iArg2 );
+               const Argument &iArg2,
+               const Argument &iArg3 );
 };
-
-//-*****************************************************************************
-// TEMPLATE AND INLINE FUNCTIONS
-//-*****************************************************************************
-
-//-*****************************************************************************
-template <class CPROP_PTR>
-inline OScalarProperty::OScalarProperty( CPROP_PTR iParentProp,
-                                         const std::string &iName,
-                                         const AbcA::DataType &iDataType,
-                                         const Argument &iArg0,
-                                         const Argument &iArg1,
-                                         const Argument &iArg2 )
-{
-    init( GetCompoundPropertyWriterPtr( iParentProp ),
-          iName, iDataType,
-
-          GetErrorHandlerPolicy( iParentProp ),
-          iArg0, iArg1, iArg2 );
-}
 
 } // End namespace ALEMBIC_VERSION_NS
 

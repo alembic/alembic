@@ -41,12 +41,12 @@
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>
 #include <Alembic/Abc/Argument.h>
+#include <Alembic/Abc/OArchive.h>
 
 namespace Alembic {
 namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
-class OArchive;
 class OCompoundProperty;
 
 //-*****************************************************************************
@@ -67,15 +67,11 @@ public:
     //! ...
     OObject() {}
 
-    //! This templated, explicit function creates a new object writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an ObjectWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and that's it.
-    template <class OBJECT_PTR>
-    OObject( OBJECT_PTR iParentObject,
+    //! This creates a new object writer.
+    //! The first argument is the parent OObject from which the error handler
+    //! policy for inheritance is derived.  The remaining optional arguments
+    //! can be used to override the ErrorHandlerPolicy, and MetaData
+    OObject( OObject iParentObject,
              const std::string &iName,
 
              const Argument &iArg0 = Argument(),
@@ -85,15 +81,24 @@ public:
     //! This attaches an OObject wrapper around an existing
     //! ObjectWriterPtr, with an optional error handling policy.
     //! Arguments can be used to set error handling policy.
-    template <class OBJECT_PTR>
-    OObject( OBJECT_PTR iPtr,
-
-             WrapExistingFlag /* iFlag */,
-
+    OObject( AbcA::ObjectWriterPtr iPtr,
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
-      : m_object( GetObjectWriterPtr( iPtr ) )
+      : m_object( iPtr )
+    {
+        // Set the error handling policy
+        getErrorHandler().setPolicy(
+            GetErrorHandlerPolicy( iPtr, iArg0, iArg1, iArg2 ) );
+    }
+
+    // Deprecated in favor of the constructor above
+    OObject( AbcA::ObjectWriterPtr iPtr,
+             WrapExistingFlag /* iFlag */,
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument() )
+      : m_object( iPtr )
     {
         // Set the error handling policy
         getErrorHandler().setPolicy(
@@ -103,24 +108,22 @@ public:
     //! This attaches an OObject wrapper around the top
     //! object in an archive.
     //! Arguments can be used to set error handling policy.
-    template <class ARCHIVE_PTR>
-    OObject( ARCHIVE_PTR iPtr,
-
-             TopFlag /* iTop */,
-
+    OObject( OArchive & iArchive,
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
     {
-        // Set the error handling policy
-        getErrorHandler().setPolicy(
-            GetErrorHandlerPolicy( iPtr, iArg0, iArg1, iArg2 ) );
+        init( iArchive, iArg0, iArg1, iArg2 );
+    }
 
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OObject::OObject( top )" );
-
-        m_object = GetArchiveWriterPtr( iPtr )->getTop();
-
-        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    // deprecated in favor of the constructor above
+    OObject( OArchive & iArchive,
+             TopFlag /* iTop */,
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument() )
+    {
+        init( iArchive, iArg0, iArg1, iArg2 );
     }
 
     //! Default copy constructor used
@@ -232,6 +235,12 @@ public:
     ALEMBIC_OPERATOR_BOOL( valid() );
 
 private:
+
+    void init( OArchive & iArchive,
+               const Argument &iArg0,
+               const Argument &iArg1,
+               const Argument &iArg2 );
+
     void init( AbcA::ObjectWriterPtr iParentObject,
                const std::string &iName,
                ErrorHandler::Policy iParentPolicy,
@@ -243,32 +252,6 @@ private:
 protected:
     AbcA::ObjectWriterPtr m_object;
 };
-
-//-*****************************************************************************
-//-*****************************************************************************
-// TEMPLATE AND INLINE FUNCTIONS
-//-*****************************************************************************
-//-*****************************************************************************
-
-//-*****************************************************************************
-inline AbcA::ObjectWriterPtr
-GetObjectWriterPtr( OObject& iPrp )
-{ return iPrp.getPtr(); }
-
-//-*****************************************************************************
-template <class OBJECT_PTR>
-inline OObject::OObject( OBJECT_PTR iParentObject,
-                         const std::string &iName,
-                         const Argument &iArg0,
-                         const Argument &iArg1,
-                         const Argument &iArg2 )
-{
-    init( GetObjectWriterPtr( iParentObject ),
-          iName,
-
-          GetErrorHandlerPolicy( iParentObject ),
-          iArg0, iArg1, iArg2 );
-}
 
 } // End namespace ALEMBIC_VERSION_NS
 

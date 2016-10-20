@@ -42,6 +42,7 @@ namespace Alembic {
 namespace AbcMaterial {
 namespace ALEMBIC_VERSION_NS {
 
+//-*****************************************************************************
 class OMaterialSchema::Data
 {
 public:
@@ -130,12 +131,40 @@ public:
     std::vector<std::string> interfaceStrVec;
 };
 
+//-*****************************************************************************
+OMaterialSchema::OMaterialSchema(
+    Alembic::AbcCoreAbstract::CompoundPropertyWriterPtr iParent,
+    const std::string &iName,
+    const Abc::Argument &iArg0,
+    const Abc::Argument &iArg1,
+    const Abc::Argument &iArg2,
+    const Abc::Argument &iArg3 )
+: Abc::OSchema<MaterialSchemaInfo>( iParent, iName, iArg0, iArg1, iArg2, iArg3 )
+{
+    init();
+}
+
+//-*****************************************************************************
+OMaterialSchema::OMaterialSchema( Abc::OCompoundProperty iParent,
+                                  const std::string &iName,
+                                  const Abc::Argument &iArg0,
+                                  const Abc::Argument &iArg1,
+                                  const Abc::Argument &iArg2 )
+: Abc::OSchema<MaterialSchemaInfo>( iParent.getPtr(), iName,
+                                    GetErrorHandlerPolicy( iParent ),
+                                    iArg0, iArg1, iArg2 )
+{
+    init();
+}
+
+//-*****************************************************************************
 void OMaterialSchema::init()
 {
     m_data = Alembic::Util::shared_ptr< Data >( new Data() );
     m_data->parent = this->getPtr();
 }
 
+//-*****************************************************************************
 void OMaterialSchema::setShader(
         const std::string & iTarget,
         const std::string & iShaderType,
@@ -153,6 +182,7 @@ void OMaterialSchema::setShader(
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+//-*****************************************************************************
 Abc::OCompoundProperty OMaterialSchema::getShaderParameters(
         const std::string & iTarget,
         const std::string & iShaderType )
@@ -183,6 +213,7 @@ Abc::OCompoundProperty OMaterialSchema::getShaderParameters(
     return Abc::OCompoundProperty();
 }
 
+//-*****************************************************************************
 void OMaterialSchema::createNodeCompound()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OMaterialSchema::createNodeCompound" );
@@ -195,7 +226,7 @@ void OMaterialSchema::createNodeCompound()
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
-
+//-*****************************************************************************
 void OMaterialSchema::addNetworkNode(
         const std::string & iNodeName,
         const std::string & iTarget,
@@ -222,8 +253,7 @@ void OMaterialSchema::addNetworkNode(
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
-
-
+//-*****************************************************************************
 void OMaterialSchema::setNetworkNodeConnection(
         const std::string & iNodeName,
         const std::string & iInputName,
@@ -254,8 +284,7 @@ void OMaterialSchema::setNetworkNodeConnection(
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
-
-
+//-*****************************************************************************
 Abc::OCompoundProperty OMaterialSchema::getNetworkNodeParameters(
         const std::string & iNodeName )
 {
@@ -289,7 +318,7 @@ Abc::OCompoundProperty OMaterialSchema::getNetworkNodeParameters(
 }
 
 
-
+//-*****************************************************************************
 void OMaterialSchema::setNetworkTerminal(
         const std::string & iTarget,
         const std::string & iShaderType,
@@ -315,6 +344,7 @@ void OMaterialSchema::setNetworkTerminal(
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+//-*****************************************************************************
 void OMaterialSchema::setNetworkInterfaceParameterMapping(
         const std::string & iInterfaceParamName,
         const std::string & iMapToNodeName,
@@ -333,6 +363,7 @@ void OMaterialSchema::setNetworkInterfaceParameterMapping(
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+//-*****************************************************************************
 Abc::OCompoundProperty OMaterialSchema::getNetworkInterfaceParameters()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN(

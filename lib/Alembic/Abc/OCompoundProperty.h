@@ -64,35 +64,48 @@ public:
     //! ...
     OCompoundProperty() : OBasePropertyT<AbcA::CompoundPropertyWriterPtr>() {}
 
-    //! This templated, explicit function creates a new scalar property writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to a CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData.
-    template <class CPROP_PTR>
-    OCompoundProperty( CPROP_PTR iParentObject,
-                       const std::string &iName,
 
+    //! Create a new OCompoundProperty named iName as a child of iParent.
+    //! The remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy, or to specify MetaData.
+    OCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                       const std::string &iName,
+                       const Argument &iArg0 = Argument(),
+                       const Argument &iArg1 = Argument() );
+
+    //! Create a new OCompoundProperty named iName as a child of iParent.
+    //! The remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy, or to specify MetaData.
+    OCompoundProperty( OCompoundProperty iParent,
+                       const std::string &iName,
                        const Argument &iArg0 = Argument(),
                        const Argument &iArg1 = Argument() );
 
     //! This attaches an OCompoundProperty wrapper around an existing
     //! CompoundPropertyWriterPtr, with an optional error handling policy.
-    template <class CPROP_PTR>
     OCompoundProperty(
-        CPROP_PTR iThisObject,
-        WrapExistingFlag iWrapFlag,
+        AbcA::CompoundPropertyWriterPtr iProp,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
+
+    // Deprecated in favor of the constructor above
+    OCompoundProperty(
+        AbcA::CompoundPropertyWriterPtr iProp,
+        WrapExistingFlag iWrapFlag = kWrapExisting,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
 
     //! This attaches an OCompoundProperty wrapper around the top
     //! properties of an OObject.
-    template <class OBJECT_PTR>
     OCompoundProperty(
-        OBJECT_PTR iObject,
-        TopFlag /* iTopFlag */,
+        OObject iObject,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
+
+    // Deprecated in favor of the constructor above
+    OCompoundProperty(
+        OObject iObject,
+        TopFlag iTopFlag = kTop,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
 
@@ -138,69 +151,20 @@ public:
     OCompoundProperty getParent() const;
 
 private:
+
+    void init( OObject iObject, const Argument &iArg0, const Argument &iArg1 );
+
     void init( AbcA::CompoundPropertyWriterPtr iParentObject,
                const std::string &iName,
-
-               ErrorHandler::Policy iParentPolicy,
-
                const Argument &iArg0,
-               const Argument &iArg1 );
+               const Argument &iArg1,
+               const Argument &iArg2 = Argument() );
 };
 
 //-*****************************************************************************
 inline AbcA::CompoundPropertyWriterPtr
 GetCompoundPropertyWriterPtr
 ( OCompoundProperty iPrp ) { return iPrp.getPtr(); }
-
-//-*****************************************************************************
-// TEMPLATE AND INLINE FUNCTIONS
-//-*****************************************************************************
-
-//-*****************************************************************************
-template <class CPROP_PTR>
-inline OCompoundProperty::OCompoundProperty( CPROP_PTR iParentProp,
-                                             const std::string &iName,
-                                             const Argument &iArg0,
-                                             const Argument &iArg1 )
-{
-    init( GetCompoundPropertyWriterPtr( iParentProp ),
-          iName,
-
-          GetErrorHandlerPolicy( iParentProp ),
-          iArg0, iArg1 );
-}
-
-//-*****************************************************************************
-template <class CPROP_PTR>
-inline OCompoundProperty::OCompoundProperty( CPROP_PTR iThisObject,
-                                             WrapExistingFlag iWrap,
-                                             const Argument &iArg0,
-                                             const Argument &iArg1 )
-  : OBasePropertyT<AbcA::CompoundPropertyWriterPtr>(
-      GetCompoundPropertyWriterPtr( iThisObject ),
-      iWrap,
-      GetErrorHandlerPolicy( iThisObject, iArg0, iArg1 ) )
-{
-    // Nothing!
-}
-
-//-*****************************************************************************
-template <class OBJECT_PTR>
-inline OCompoundProperty::OCompoundProperty( OBJECT_PTR iThisObject,
-                                             TopFlag iTop,
-                                             const Argument &iArg0,
-                                             const Argument &iArg1 )
-{
-    getErrorHandler().setPolicy(
-        GetErrorHandlerPolicy( iThisObject, iArg0, iArg1 ) );
-
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "OCompoundProperty::OCompoundProperty( top )" );
-
-    m_property = GetObjectWriterPtr( iThisObject )->getProperties();
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
 
 } // End namespace ALEMBIC_VERSION_NS
 

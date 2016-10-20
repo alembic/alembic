@@ -2810,12 +2810,12 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
     }
 }
 
-ArgData::ArgData(MString iFileName,
+ArgData::ArgData(std::vector<std::string>& iFileNames,
     bool iDebugOn, MObject iReparentObj, bool iConnect,
     MString iConnectRootNodes, bool iCreateIfNotFound, bool iRemoveIfNoUpdate,
     bool iRecreateColorSets, MString iFilterString,
     MString iExcludeFilterString) :
-        mFileName(iFileName),
+        mFileNames(iFileNames),
         mDebugOn(iDebugOn), mReparentObj(iReparentObj),
         mRecreateColorSets(iRecreateColorSets),
         mConnect(iConnect),
@@ -2836,7 +2836,7 @@ ArgData::ArgData(const ArgData & rhs)
 
 ArgData & ArgData::operator=(const ArgData & rhs)
 {
-    mFileName = rhs.mFileName;
+    mFileNames = rhs.mFileNames;
     mSequenceStartTime = rhs.mSequenceStartTime;
     mSequenceEndTime = rhs.mSequenceEndTime;
 
@@ -2865,10 +2865,11 @@ MString createScene(ArgData & iArgData)
     Alembic::Abc::IArchive archive;
     Alembic::AbcCoreFactory::IFactory factory;
     factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
-    archive = factory.getArchive(iArgData.mFileName.asChar());
+    archive = factory.getArchive(iArgData.mFileNames);
+
     if (!archive.valid())
     {
-        MString theError = iArgData.mFileName;
+        MString theError = (*iArgData.mFileNames.begin()).c_str();
         theError += MString(" not a valid Alembic file.");
         printError(theError);
         return returnName;
@@ -2944,13 +2945,13 @@ MString connectAttr(ArgData & iArgData)
 
     // set AlembicNode name
     MString fileName;
-    stripFileName(iArgData.mFileName, fileName);
+    stripFileName((*iArgData.mFileNames.begin()).c_str(), fileName);
     MString alembicNodeName = fileName +"_AlembicNode";
     alembicNodeFn.setName(alembicNodeName, &status);
 
     // set input file name
     MPlug plug = alembicNodeFn.findPlug("abc_File", true, &status);
-    plug.setValue(iArgData.mFileName);
+    plug.setValue((*iArgData.mFileNames.begin()).c_str());
 
     // set sequence start and end in frames
     MTime sec(1.0, MTime::kSeconds);

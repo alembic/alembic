@@ -138,7 +138,7 @@ MaterialFlatten::MaterialFlatten( Abc::IObject iObject,
 
         if ( parent.valid() && IMaterial::matches( parent.getHeader() ) )
         {
-            append( IMaterial( parent, Abc::kWrapExisting ) );
+            append( IMaterial( parent ) );
         }
     }
 }

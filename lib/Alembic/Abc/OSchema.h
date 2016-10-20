@@ -73,22 +73,42 @@ namespace ALEMBIC_VERSION_NS {
 
 
 //-*****************************************************************************
+//! With properties, specific flavors of properties are expressed via the
+//! TypedScalarProperty and the TypedArrayProperty. Compound Properties
+//! are more complex, and the specific flavors require a more complex
+//! treatment - That's what Schemas are. The CompoundProperty equivalent
+//! of a TypedArrayProperty or a TypedScalarProperty.
+//!
+//! A Schema is a collection of grouped properties which implement some
+//! complex object, such as a poly mesh. In the simpelest, standard case,
+//! there will be a compound property at the top with a certain name, and
+//! inside the compound property will be some number of additional properties
+//! that implement the object. In the case of a poly mesh, these properties
+//! would include a list of vertices (a V3fArray), a list of indices
+//! (an Int32Array), and a list of "per-face counts" (also an Int32Array).
+
+
+//-*****************************************************************************
 //! Here is a macro for declaring SCHEMA_INFO
-//! It takes three arguments
+//! It takes these arguments
 //! - the SchemaTitle( a string ),
 //! - the SchemaBaseType( a string ),
-//! - the DefaultSchemaName( a string )
-//! - the name of the SchemaTrait Type to be declared.
+//! - the DefaultSchemaName( a string ),
+//! - whether to set replace when the sparse argument is provided( bool ),
+//! - the name of the SchemaInfo Type to be declared.
 //! - for example:
 //! ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_PolyMesh_v1",
+//!                                  "AbcGeom_GeomBase_v1",
 //!                                  ".geom",
+//!                                  false,
 //!                                  PolyMeshSchemaInfo );
-#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, SBTYP, SDFLT, STDEF )  \
+#define ALEMBIC_ABC_DECLARE_SCHEMA_INFO( STITLE, SBTYP, SDFLT, SPREP, STDEF ) \
 struct STDEF                                                            \
 {                                                                       \
     static const char * title() { return ( STITLE ) ; }                 \
     static const char * defaultName() { return ( SDFLT ); }             \
     static const char * schemaBaseType() { return ( SBTYP ); }          \
+    static bool         replaceOnSparse() { return SPREP; }             \
 }
 
 //-*****************************************************************************
@@ -124,6 +144,16 @@ public:
     static const char * getDefaultSchemaName()
     {
         return INFO::defaultName();
+    }
+
+    //! Returns whether this schema also sets replace in the MetaData if
+    //! kSparse is passed into the args.  For some schemas like xforms it
+    //! doesn't make sense to sparsely override the properties, instead
+    //! you want to replace everything on the schema with a whole set of new
+    //! properties, or even NO properties.
+    static bool replaceOnSparse()
+    {
+        return INFO::replaceOnSparse();
     }
 
     //! This will check whether or not a given entity (as represented by
@@ -162,29 +192,28 @@ public:
 
     //! Creates a new Compound Property Writer with the schema
     //! information added to the metadata.
-    template <class CPROP_PTR>
-    OSchema( CPROP_PTR iParentObject,
+    OSchema( AbcA::CompoundPropertyWriterPtr iParent,
+             const std::string &iName,
+
+             const Argument &iArg0 = Argument(),
+             const Argument &iArg1 = Argument(),
+             const Argument &iArg2 = Argument(),
+             const Argument &iArg3 = Argument() )
+    {
+        this_type::init( iParent, iName, iArg0, iArg1, iArg2, iArg3 );
+    }
+
+    //! Creates a new Compound Property Writer with the schema
+    //! information added to the metadata.
+    OSchema( OCompoundProperty iParent,
              const std::string &iName,
 
              const Argument &iArg0 = Argument(),
              const Argument &iArg1 = Argument(),
              const Argument &iArg2 = Argument() )
     {
-        this_type::init( iParentObject, iName, iArg0, iArg1, iArg2 );
-    }
-
-    //! Creates a new Compound Property Writer with the schema
-    //! information and also the default name.
-    template <class CPROP_PTR>
-    explicit OSchema( CPROP_PTR iParentObject,
-
-                      const Argument &iArg0 = Argument(),
-                      const Argument &iArg1 = Argument(),
-                      const Argument &iArg2 = Argument() )
-    {
-        this_type::init( iParentObject,
-                         INFO::defaultName(),
-                         iArg0, iArg1, iArg2 );
+        *this = OSchema( iParent.getPtr(), iName,
+                         GetErrorHandlerPolicy( iParent ), iArg0, iArg1, iArg2);
     }
 
     virtual ~OSchema() {}
@@ -193,29 +222,30 @@ public:
     //! Default assignment operator used.
 
 private:
-    template <class CPROP_PTR>
-    void init( CPROP_PTR iParentObject,
+    void init( AbcA::CompoundPropertyWriterPtr iParent,
                const std::string &iName,
                const Argument &iArg0,
                const Argument &iArg1,
-               const Argument &iArg2 );
+               const Argument &iArg2,
+               const Argument &iArg3 );
 };
 
 //-*****************************************************************************
 // TEMPLATE AND INLINE FUNCTIONS
 //-*****************************************************************************
 template <class INFO>
-template <class CPROP_PTR>
-void OSchema<INFO>::init( CPROP_PTR iParent,
-                            const std::string &iName,
-                            const Argument &iArg0,
-                            const Argument &iArg1,
-                            const Argument &iArg2 )
+void OSchema<INFO>::init( AbcA::CompoundPropertyWriterPtr iParent,
+                          const std::string &iName,
+                          const Argument &iArg0,
+                          const Argument &iArg1,
+                          const Argument &iArg2,
+                          const Argument &iArg3 )
 {
     Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
 
@@ -225,24 +255,21 @@ void OSchema<INFO>::init( CPROP_PTR iParent,
     // Get actual writer for parent.
     ABCA_ASSERT( iParent,
                  "NULL parent passed into OSchema ctor" );
-    AbcA::CompoundPropertyWriterPtr parent =
-        GetCompoundPropertyWriterPtr( iParent );
-    ABCA_ASSERT( parent, "NULL CompoundPropertyWriterPtr" );
 
     // Put schema title into metadata.
     AbcA::MetaData mdata = args.getMetaData();
     std::string emptyStr;
-    if ( emptyStr != getSchemaTitle() )
+    if ( emptyStr != getSchemaTitle() && !args.isSparse() )
     {
         mdata.set( "schema", getSchemaTitle() );
     }
-    if ( emptyStr != getSchemaBaseType() )
+    if ( emptyStr != getSchemaBaseType() && !args.isSparse() )
     {
         mdata.set( "schemaBaseType", getSchemaBaseType() );
     }
 
     // Create property.
-    m_property = parent->createCompoundProperty( iName, mdata );
+    m_property = iParent->createCompoundProperty( iName, mdata );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

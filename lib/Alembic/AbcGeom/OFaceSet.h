@@ -49,12 +49,6 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-
-// Forward declarations of our friend classes
-class OSubDSchema;
-class OPolyMeshSchema;
-
-//-*****************************************************************************
 class ALEMBIC_EXPORT OFaceSetSchema : public OGeomBaseSchema<FaceSetSchemaInfo>
 {
 public:
@@ -124,68 +118,30 @@ public:
     //! OFaceSetSchema instances created this evaluate to a boolean value of false.
     OFaceSetSchema() {}
 
-    //! This templated, primary constructor creates a new faceset writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
+    //! This constructor creates a new faceset writer.
+    //! The first argument is an CompoundPropertyWriterPtr to use as a parent.
+    //! The next is the name to give the schema which is usually the default
+    //! name given by OFaceSet (.faceset)   The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
-    //! Most typically you won't need to use this ctor because the
-    //! name argument here is only needed if you need to specially
-    //! override the name of the compound property used internally
-    //! by Alembic (for example if you needed to created your
-    //! own dervied class from OFaceSet that needed to hold multiple
-    //! faceset schema compound properties)
-    template <class CPROP_PTR>
-    OFaceSetSchema( CPROP_PTR iParentCompound,
-                     const std::string &iName,
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument(),
-                     const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<FaceSetSchemaInfo>(
-                    GetCompoundPropertyWriterPtr( iParentCompound ),
-                    iName, iArg0, iArg1, iArg2 )
-    {
-        _initTimeSampling ( GetCompoundPropertyWriterPtr( iParentCompound ),
-                            iArg0, iArg1, iArg2 );
-    }
+    //! MetaData, specify sparse sampling and to set TimeSampling.
+    OFaceSetSchema( AbcA::CompoundPropertyWriterPtr iParent,
+                    const std::string &iName,
+                    const Abc::Argument &iArg0 = Abc::Argument(),
+                    const Abc::Argument &iArg1 = Abc::Argument(),
+                    const Abc::Argument &iArg2 = Abc::Argument(),
+                    const Abc::Argument &iArg3 = Abc::Argument() );
 
-    template <class CPROP_PTR>
-    void _initTimeSampling ( CPROP_PTR iParentCompound,
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument(),
-                     const Abc::Argument &iArg2 = Abc::Argument() )
-    {
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t timeSamplingID =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // Add or find the timeSamplingID to use for our properties.
-        if (tsPtr)
-        {
-            timeSamplingID = iParentCompound->getObject()->getArchive(
-                )->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( timeSamplingID );
-    }
-
-    template <class CPROP_PTR>
-    explicit OFaceSetSchema( CPROP_PTR iParentCompound,
-                              const Abc::Argument &iArg0 = Abc::Argument(),
-                              const Abc::Argument &iArg1 = Abc::Argument(),
-                              const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<FaceSetSchemaInfo>(
-                            GetCompoundPropertyWriterPtr( iParentCompound ),
-                            iArg0, iArg1, iArg2 )
-    {
-        _initTimeSampling ( GetCompoundPropertyWriterPtr( iParentCompound ),
-                            iArg0, iArg1, iArg2 );
-    }
+    //! This constructor creates a new faceset writer.
+    //! The first argument is an OCompundProperty to use as a parent, and from
+    //! which the ErrorHandlerPolicy is derived.  The next is the name to give
+    //! the schema which is usually the default name given by OFaceSet
+    //! (.faceset) The remaining optional arguments can be used to specify
+    //! MetaData, specify sparse sampling and to set TimeSampling.
+    OFaceSetSchema( Abc::OCompoundProperty iParent,
+                    const std::string &iName,
+                    const Abc::Argument &iArg0 = Abc::Argument(),
+                    const Abc::Argument &iArg1 = Abc::Argument(),
+                    const Abc::Argument &iArg2 = Abc::Argument() );
 
     //! Copy constructor.
     OFaceSetSchema(const OFaceSetSchema& iCopy)
@@ -247,15 +203,14 @@ public:
 protected:
     void _recordExclusivityHint();
 
-    void init( uint32_t iTimeSamplingID );
+    void init( AbcA::CompoundPropertyWriterPtr iParent,
+               const Abc::Argument &iArg0, const Abc::Argument &iArg1,
+               const Abc::Argument &iArg2, const Abc::Argument &iArg3 );
 
     Abc::OInt32ArrayProperty    m_facesProperty;
 
     Abc::OUInt32Property        m_facesExclusiveProperty;
     FaceSetExclusivity          m_facesExclusive;
-
-    friend class OSubDSchema;
-    friend class OPolyMeshSchema;
 };
 
 

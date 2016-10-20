@@ -51,7 +51,7 @@ ADD_EXECUTABLE(PyAlembic_Test
                main.cpp
 )
 
-ADD_DEPENDENCIES(PyAlembic_Test alembicmodule)
+ADD_DEPENDENCIES(PyAlembic_Test alembic)
 
 TARGET_LINK_LIBRARIES(PyAlembic_Test ${CORE_LIBS} ${ALEMBIC_PYILMBASE_LIBS})
 

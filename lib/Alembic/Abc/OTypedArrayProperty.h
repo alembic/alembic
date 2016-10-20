@@ -98,25 +98,61 @@ public:
     //! ...
     OTypedArrayProperty() {}
 
+
     //! Create a new TypedArrayProperty
-    //! as a child of the passed COMPOUND_PTR
+    //! as a child of the passed iParent
     //! Arguments can specify metadata, timesampling, and error handling.
-    template <class COMPOUND_PTR>
     OTypedArrayProperty(
-        COMPOUND_PTR iParent,
+        AbcA::CompoundPropertyWriterPtr iParent,
         const std::string &iName,
 
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument(),
-        const Argument &iArg2 = Argument() );
+        const Argument &iArg2 = Argument(),
+        const Argument &iArg3 = Argument() )
+    {
+        init( iParent, iName, iArg0, iArg1, iArg2, iArg3 );
+    }
+
+    //! Create a new TypedArrayProperty
+    //! as a child of the passed iParent
+    //! Arguments can specify metadata, timesampling, and error handling.
+    OTypedArrayProperty(
+        OCompoundProperty iParent,
+        const std::string &iName,
+
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument(),
+        const Argument &iArg2 = Argument() )
+    {
+        init( iParent.getPtr(), iName, GetErrorHandlerPolicy( iParent ),
+              iArg0, iArg1, iArg2 );
+    }
 
     //! Wrap an existing property. This will check to make sure
     //! it can wrap.
     OTypedArrayProperty(
         AbcA::ArrayPropertyWriterPtr iProp,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() )
+    : OArrayProperty( iProp,
+                      GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+    {
+        init( iProp, iArg0, iArg1 );
+    }
+
+
+    // Deprecated in favor of constructor above
+    OTypedArrayProperty(
+        AbcA::ArrayPropertyWriterPtr iProp,
         WrapExistingFlag iWrapFlag,
         const Argument &iArg0 = Argument(),
-        const Argument &iArg1 = Argument() );
+        const Argument &iArg1 = Argument() )
+    : OArrayProperty( iProp,
+                      GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+    {
+        init( iProp, iArg0, iArg1 );
+    }
 
     //-*************************************************************************
     // ARRAY PROPERTY FEATURES
@@ -128,91 +164,77 @@ public:
     {
         OArrayProperty::set( iVal );
     }
+
+private:
+
+    void init( AbcA::CompoundPropertyWriterPtr iParent,
+               const std::string &iName,
+
+               const Argument &iArg0,
+               const Argument &iArg1,
+               const Argument &iArg2,
+               const Argument &iArg3 )
+    {
+        Arguments args;
+        iArg0.setInto( args );
+        iArg1.setInto( args );
+        iArg2.setInto( args );
+        iArg3.setInto( args );
+
+        getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
+
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArrayProperty::init()" );
+
+        // Get actual writer for parent.
+        ABCA_ASSERT( iParent, "NULL CompoundPropertyWriterPtr" );
+
+        // Put interpretation into metadata.
+        AbcA::MetaData mdata = args.getMetaData();
+        if ( std::string() != getInterpretation() )
+        {
+            mdata.set( "interpretation", getInterpretation() );
+        }
+
+        // Create property.
+        AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
+        uint32_t tsIndex = args.getTimeSamplingIndex();
+
+        // if we specified a valid TimeSamplingPtr, use it to determine the
+        // index otherwise we'll use the index, which defaults to the intrinsic
+        // 0 index
+        if (tsPtr)
+        {
+            tsIndex = iParent->getObject()->getArchive()->addTimeSampling(
+                *tsPtr);
+        }
+
+        m_property = iParent->createArrayProperty( iName, mdata,
+            TRAITS::dataType(), tsIndex );
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    void init( AbcA::ArrayPropertyWriterPtr iProp,
+               const Argument &iArg0, const Argument &iArg1 )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "OTypedArrayProperty::init( ArrayPtr )" );
+
+        const AbcA::PropertyHeader &pheader = iProp->getHeader();
+
+        ABCA_ASSERT( matches( pheader, GetSchemaInterpMatching( iArg0,iArg1 ) ),
+                     "Incorrect match of header datatype: "
+                     << pheader.getDataType()
+                     << " to expected: "
+                     << TRAITS::dataType()
+                     << ",\n...or incorrect match of interpretation: "
+                     << pheader.getMetaData().get( "interpretation" )
+                     << " to expected: "
+                     << TRAITS::interpretation() );
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
 };
-
-//-*****************************************************************************
-// TEMPLATE AND INLINE FUNCTIONS
-//-*****************************************************************************
-
-//-*****************************************************************************
-template <class TRAITS>
-template <class COMPOUND_PTR>
-OTypedArrayProperty<TRAITS>::OTypedArrayProperty
-(
-    COMPOUND_PTR iParent,
-    const std::string &iName,
-
-    const Argument &iArg0,
-    const Argument &iArg1,
-    const Argument &iArg2 )
-{
-    Arguments args( GetErrorHandlerPolicy( iParent ) );
-    iArg0.setInto( args );
-    iArg1.setInto( args );
-    iArg2.setInto( args );
-
-    getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
-
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedArrayProperty::init()" );
-
-    // Get actual writer for parent.
-    AbcA::CompoundPropertyWriterPtr parent =
-        GetCompoundPropertyWriterPtr( iParent );
-    ABCA_ASSERT( parent, "NULL CompoundPropertyWriterPtr" );
-
-    // Put interpretation into metadata.
-    AbcA::MetaData mdata = args.getMetaData();
-    if ( std::string() != getInterpretation() )
-    {
-        mdata.set( "interpretation", getInterpretation() );
-    }
-
-    // Create property.
-    AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
-    uint32_t tsIndex = args.getTimeSamplingIndex();
-
-    // if we specified a valid TimeSamplingPtr, use it to determine the index
-    // otherwise we'll use the index, which defaults to the intrinsic 0 index
-    if (tsPtr)
-    {
-        tsIndex = parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
-    }
-
-    m_property = parent->createArrayProperty( iName, mdata,
-        TRAITS::dataType(), tsIndex );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-template<class TRAITS>
-inline OTypedArrayProperty<TRAITS>::OTypedArrayProperty(
-    AbcA::ArrayPropertyWriterPtr iProperty,
-    WrapExistingFlag iFlag,
-    const Argument &iArg0,
-    const Argument &iArg1 )
-  : OArrayProperty( iProperty,
-                    iFlag,
-                    GetErrorHandlerPolicy( iProperty, iArg0, iArg1 ) )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "OTypedArrayProperty::OTypedArrayProperty()" );
-
-    const AbcA::PropertyHeader &pheader = iProperty->getHeader();
-
-    ABCA_ASSERT( matches( pheader, GetSchemaInterpMatching( iArg0, iArg1 ) ),
-
-                 "Incorrect match of header datatype: "
-                 << pheader.getDataType()
-                 << " to expected: "
-                 << TRAITS::dataType()
-                 << ",\n...or incorrect match of interpretation: "
-                 << pheader.getMetaData().get( "interpretation" )
-                 << " to expected: "
-                 << TRAITS::interpretation() );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
 
 //-*****************************************************************************
 //-*****************************************************************************

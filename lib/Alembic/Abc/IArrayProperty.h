@@ -65,15 +65,11 @@ public:
     //! ...
     IArrayProperty() : IBasePropertyT<AbcA::ArrayPropertyReaderPtr>() {}
 
-    //! This templated, explicit function creates a new array property reader.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to a CompoundPropertyReaderPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! protocol matching policy, and that's it.
-    template <class OBJECT_PTR>
-    IArrayProperty( OBJECT_PTR iParentObject,
+   //! This constructor creates a new array property reader.
+    //! The first argument is the parent ICompundProperty, from which the error
+    //! handler policy for inheritance is also derived.  The remaining optional
+    //! arguments can be used to override the ErrorHandlerPolicy, and that's it.
+    IArrayProperty( const ICompoundProperty & iParent,
                     const std::string &iName,
 
                     const Argument &iArg0 = Argument(),
@@ -86,17 +82,19 @@ public:
         //! ...
         AbcA::ArrayPropertyReaderPtr iPtr,
 
-        //! The flag indicating that wrapping is intended.
-        //! Even though it's nonambiguous here, we use it anyway
-        //! for readability
-        WrapExistingFlag iWrapFlag,
-
         //! Optional error handling policy
         //! ...
-        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
+        const Argument &iArg0 = Argument() )
       : IBasePropertyT<AbcA::ArrayPropertyReaderPtr>( iPtr,
-                                                      iWrapFlag,
-                                                      iPolicy ) {}
+            GetErrorHandlerPolicy( iPtr, iArg0 ) ) {};
+
+    // Deprecated in favor of the constructor above
+    IArrayProperty(
+        AbcA::ArrayPropertyReaderPtr iPtr,
+        WrapExistingFlag iWrapFlag,
+        const Argument &iArg0 = Argument() )
+      : IBasePropertyT<AbcA::ArrayPropertyReaderPtr>( iPtr,
+            GetErrorHandlerPolicy( iPtr, iArg0 ) ) {};
 
     //! Default copy constructor used
     //! Default assignment operator used.
@@ -161,24 +159,6 @@ private:
                const Argument &iArg0,
                const Argument &iArg1 );
 };
-
-//-*****************************************************************************
-// TEMPLATE AND INLINE FUNCTIONS
-//-*****************************************************************************
-
-//-*****************************************************************************
-template <class CPROP_PTR>
-inline IArrayProperty::IArrayProperty( CPROP_PTR iParentProp,
-                                       const std::string &iName,
-                                       const Argument &iArg0,
-                                       const Argument &iArg1 )
-{
-    init( GetCompoundPropertyReaderPtr( iParentProp ),
-          iName,
-
-          GetErrorHandlerPolicy( iParentProp ),
-          iArg0, iArg1 );
-}
 
 } // End namespace ALEMBIC_VERSION_NS
 

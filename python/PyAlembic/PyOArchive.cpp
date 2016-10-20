@@ -39,19 +39,19 @@
 using namespace boost::python;
 
 //-*****************************************************************************
-static Abc::OArchive* mkOArchive( const std::string &iName, 
+static Abc::OArchive* mkOArchive( const std::string &iName,
                                   bool asOgawa = true )
 {
-    if ( asOgawa == true ) {
-        return new Abc::OArchive( AbcO::WriteArchive(), iName );
-    }
-    else {
+    if ( !asOgawa )
+    {
 #ifdef ALEMBIC_WITH_HDF5
         return new Abc::OArchive( AbcH::WriteArchive(), iName );
 #else
         throwPythonException( "Unsupported core type: HDF5" );
 #endif
-    };
+    }
+
+    return new Abc::OArchive( AbcO::WriteArchive(), iName );
 }
 
 //-*****************************************************************************

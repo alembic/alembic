@@ -100,29 +100,91 @@ public:
     //! ...
     ITypedScalarProperty() {}
 
-    //! This templated, explicit function creates a new
-    //! typed scalar property reader.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to a CompoundPropertyReaderPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! schema matching policy, and that's it.
-    template <class COMPOUND_PTR>
-    ITypedScalarProperty( COMPOUND_PTR iParent,
+    //! This constructor creates a new typed scalar property reader.
+    //! The first argument is the ICompoundProperty parent,  from which the
+    //! error handler policy for inheritance is also derived.  The remaining
+    //! optional arguments can be used to override the ErrorHandlerPolicy,
+    //! to specify schema matching policy, and that's it.
+    ITypedScalarProperty( const ICompoundProperty & iParent,
                           const std::string &iName,
 
                           const Argument &iArg0 = Argument(),
-                          const Argument &iArg1 = Argument() );
+                          const Argument &iArg1 = Argument() )
+    {
+        Arguments args( GetErrorHandlerPolicy( iParent ) );
+        iArg0.setInto( args );
+        iArg1.setInto( args );
+
+        getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
+
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "ITypedScalarProperty::ITypedScalarProperty()" );
+
+        AbcA::CompoundPropertyReaderPtr parent = iParent.getPtr();
+
+        ABCA_ASSERT( parent != NULL,
+                     "NULL CompoundPropertyReader passed into "
+                    << "ITypedScalarProperty ctor" );
+
+        const AbcA::PropertyHeader *pheader =
+            parent->getPropertyHeader( iName );
+        ABCA_ASSERT( pheader != NULL,
+                     "Nonexistent scalar property: " << iName );
+
+        ABCA_ASSERT( matches( *pheader, args.getSchemaInterpMatching() ),
+            "Incorrect match of header datatype: "
+            << pheader->getDataType()
+            << " to expected: "
+            << TRAITS::dataType()
+            << ",\n...or incorrect match of interpretation: "
+            << pheader->getMetaData().get( "interpretation" )
+            << " to expected: "
+            << TRAITS::interpretation() );
+
+        m_property = parent->getScalarProperty( iName );
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
 
     //! Explicitly wrap an existing property
     //! It will check the data type and also verify the schema,
     //! if requested.
+    ITypedScalarProperty( AbcA::ScalarPropertyReaderPtr iProperty,
+                          const Argument &iArg0 = Argument(),
+                          const Argument &iArg1 = Argument() )
+    {
+
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "ITypedScalarProperty::ITypedScalarProperty()" );
+
+        const AbcA::PropertyHeader &pheader = iProperty->getHeader();
+
+        ABCA_ASSERT( matches( pheader,
+            GetSchemaInterpMatching( iArg0, iArg1 ) ),
+            "Incorrect match of header datatype: "
+            << pheader.getDataType()
+            << " to expected: "
+            << TRAITS::dataType()
+            << ",\n...or incorrect match of interpretation: "
+            << pheader.getMetaData().get( "interpretation" )
+            << " to expected: "
+            << TRAITS::interpretation() );
+
+        m_property = iProperty;
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+
+    //! Deprecated in favor of the constructor above
     ITypedScalarProperty( AbcA::ScalarPropertyReaderPtr iProp,
                           WrapExistingFlag iWrapFlag,
                           const Argument &iArg0 = Argument(),
-                          const Argument &iArg1 = Argument() );
-
+                          const Argument &iArg1 = Argument() )
+    {
+        *this = ITypedScalarProperty( iProp, iArg0, iArg1 );
+    }
 
     //-*************************************************************************
     // SCALAR PROPERTY FEATURES
@@ -145,87 +207,6 @@ public:
         return ret;
     }
 };
-
-//-*****************************************************************************
-// TEMPLATE AND INLINE FUNCTIONS
-//-*****************************************************************************
-
-//-*****************************************************************************
-template <class TRAITS>
-template <class COMPOUND_PTR>
-ITypedScalarProperty<TRAITS>::ITypedScalarProperty
-(
-    COMPOUND_PTR iParent,
-    const std::string &iName,
-    const Argument &iArg0,
-    const Argument &iArg1 )
-{
-    Arguments args( GetErrorHandlerPolicy( iParent ) );
-    iArg0.setInto( args );
-    iArg1.setInto( args );
-
-    getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
-
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ITypedScalarProperty::ITypedScalarProperty()" );
-
-    AbcA::CompoundPropertyReaderPtr parent =
-        GetCompoundPropertyReaderPtr( iParent );
-    ABCA_ASSERT( parent != NULL,
-                 "NULL CompoundPropertyReader passed into "
-                 << "ITypedScalarProperty ctor" );
-
-    const AbcA::PropertyHeader *pheader =
-        parent->getPropertyHeader( iName );
-    ABCA_ASSERT( pheader != NULL,
-                 "Nonexistent scalar property: " << iName );
-
-    ABCA_ASSERT( matches( *pheader, args.getSchemaInterpMatching() ),
-
-                 "Incorrect match of header datatype: "
-                 << pheader->getDataType()
-                 << " to expected: "
-                 << TRAITS::dataType()
-                 << ",\n...or incorrect match of interpretation: "
-                 << pheader->getMetaData().get( "interpretation" )
-                 << " to expected: "
-                 << TRAITS::interpretation() );
-
-    m_property = parent->getScalarProperty( iName );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-template <class TRAITS>
-ITypedScalarProperty<TRAITS>::ITypedScalarProperty(
-    AbcA::ScalarPropertyReaderPtr iProperty,
-    WrapExistingFlag iFlag,
-    const Argument &iArg0,
-    const Argument &iArg1 )
-  : IScalarProperty( iProperty,
-                     iFlag,
-                     GetErrorHandlerPolicy( iProperty, iArg0, iArg1 ) )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ITypedScalarProperty::ITypedScalarProperty()" );
-
-    const AbcA::PropertyHeader &pheader = iProperty->getHeader();
-
-    ABCA_ASSERT( matches( pheader, GetSchemaInterpMatching( iArg0, iArg1 ) ),
-
-                 "Incorrect match of header datatype: "
-                 << pheader.getDataType()
-                 << " to expected: "
-                 << TRAITS::dataType()
-                 << ",\n...or incorrect match of interpretation: "
-                 << pheader.getMetaData().get( "interpretation" )
-                 << " to expected: "
-                 << TRAITS::interpretation() );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
 
 //-*****************************************************************************
 //-*****************************************************************************

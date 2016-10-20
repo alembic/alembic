@@ -82,6 +82,62 @@ public:
 };
 
 //-*****************************************************************************
+OXformSchema::OXformSchema( AbcA::CompoundPropertyWriterPtr  iParent,
+                            const std::string &iName,
+                            const Abc::Argument &iArg0,
+                            const Abc::Argument &iArg1,
+                            const Abc::Argument &iArg2,
+                            const Abc::Argument &iArg3 )
+    : Abc::OSchema<XformSchemaInfo>( iParent, iName,
+                                     iArg0, iArg1, iArg2, iArg3 )
+{
+
+    // Meta data and error handling are eaten up by
+    // the super type, so all that's left is time sampling.
+    AbcA::TimeSamplingPtr tsPtr =
+        Abc::GetTimeSampling( iArg0, iArg1, iArg2, iArg3 );
+
+    AbcA::index_t tsIndex =
+        Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2, iArg3 );
+
+    if ( tsPtr )
+    {
+        tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                        )->getArchive()->addTimeSampling( *tsPtr );
+    }
+
+    init( tsIndex );
+}
+
+//-*****************************************************************************
+OXformSchema::OXformSchema( Abc::OCompoundProperty iParent,
+                            const std::string &iName,
+                            const Abc::Argument &iArg0,
+                            const Abc::Argument &iArg1,
+                            const Abc::Argument &iArg2 )
+    : Abc::OSchema<XformSchemaInfo>( iParent.getPtr(), iName,
+                                     GetErrorHandlerPolicy( iParent ),
+                                     iArg0, iArg1, iArg2 )
+{
+
+    // Meta data and error handling are eaten up by
+    // the super type, so all that's left is time sampling.
+    AbcA::TimeSamplingPtr tsPtr =
+        Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+
+    AbcA::index_t tsIndex =
+        Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+    if ( tsPtr )
+    {
+        tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
+                        )->getArchive()->addTimeSampling( *tsPtr );
+    }
+
+    init( tsIndex );
+}
+
+//-*****************************************************************************
 void OXformSchema::setChannelValues( const std::vector<double> &iVals )
 {
     if ( ! m_valsPWPtr ) { return; }

@@ -64,25 +64,27 @@ public:
     //! ...
     ICompoundProperty() : IBasePropertyT<AbcA::CompoundPropertyReaderPtr>() {}
 
-    //! This templated, explicit function creates a new compound property
-    //! reader. The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyReaderPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy
-    template <class CPROP_PTR>
-    ICompoundProperty( CPROP_PTR iParentProp,
-                       const std::string &iName,
-                       const Argument &iArg0 = Argument() );
+    //! This constructor creates a new compound property reader.
+    //! The first argument is the parent ICompundProperty, from which the error
+    //! handler policy for inheritance is also derived.  The remaining optional
+    //! arguments can be used to override the ErrorHandlerPolicy, and that's it.
+    ICompoundProperty( const ICompoundProperty & iParent,
+                       const std::string & iName,
+                       const Argument & iArg0 = Argument() );
 
     //! This attaches an ICompoundProperty wrapper around an existing
     //! CompoundPropertyReaderPtr, with an optional error handling policy.
     //!
     //! The extra argument is to support ISchema, which is publicly derived
     //! from ICompoundProperty (see ISchema.h).
-    template <class CPROP_PTR>
     ICompoundProperty(
-        CPROP_PTR iThisObject,
+        AbcA::CompoundPropertyReaderPtr iPtr,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
+
+    // Deprecated in favor of the constructor above
+    ICompoundProperty(
+        AbcA::CompoundPropertyReaderPtr iPtr,
         WrapExistingFlag /* iWrapFlag */,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
@@ -92,9 +94,14 @@ public:
     //!
     //! The extra argument is to support ISchema, which is publicly derived
     //! from ICompoundProperty (see ISchema.h).
-    template <class OBJECT_PTR>
     ICompoundProperty(
-        OBJECT_PTR iThisObject,
+        const IObject & iObject,
+        const Argument &iArg0 = Argument(),
+        const Argument &iArg1 = Argument() );
+
+    // Deprecated in favor of the constructor above
+    ICompoundProperty(
+        const IObject & iObject,
         TopFlag /* iTopFlag */,
         const Argument &iArg0 = Argument(),
         const Argument &iArg1 = Argument() );
@@ -134,6 +141,11 @@ public:
     ICompoundProperty getParent() const;
 
 private:
+
+    void init ( const IObject & iObject,
+                const Argument &iArg0,
+                const Argument &iArg1 );
+
     void init( AbcA::CompoundPropertyReaderPtr iParentObject,
                const std::string &iName,
 
@@ -146,56 +158,6 @@ private:
 inline AbcA::CompoundPropertyReaderPtr
 GetCompoundPropertyReaderPtr
 ( ICompoundProperty &iPrp ) { return iPrp.getPtr(); }
-
-//-*****************************************************************************
-// TEMPLATE AND INLINE FUNCTIONS
-//-*****************************************************************************
-
-//-*****************************************************************************
-template <class CPROP_PTR>
-inline ICompoundProperty::ICompoundProperty( CPROP_PTR iParentProp,
-                                             const std::string &iName,
-                                             const Argument &iArg0 )
-{
-    init( GetCompoundPropertyReaderPtr( iParentProp ),
-          iName,
-
-          GetErrorHandlerPolicy( iParentProp ),
-          iArg0 );
-}
-
-//-*****************************************************************************
-template <class CPROP_PTR>
-inline ICompoundProperty::ICompoundProperty( CPROP_PTR iThisObject,
-                                             WrapExistingFlag iWrap,
-                                             const Argument &iArg0,
-                                             const Argument &iArg1 )
-  : IBasePropertyT<AbcA::CompoundPropertyReaderPtr>(
-      GetCompoundPropertyReaderPtr( iThisObject ),
-      iWrap,
-      GetErrorHandlerPolicy( iThisObject, iArg0, iArg1 ) )
-{
-    // Nothing!
-}
-
-//-*****************************************************************************
-template <class OBJECT_PTR>
-inline ICompoundProperty::ICompoundProperty( OBJECT_PTR iThisObject,
-                                             TopFlag /* iTop */,
-                                             const Argument &iArg0,
-                                             const Argument &iArg1 )
-{
-    getErrorHandler().setPolicy(
-        GetErrorHandlerPolicy( iThisObject, iArg0, iArg1 ) );
-
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ICompoundProperty::ICompoundProperty( top )" );
-
-    m_property = GetObjectReaderPtr( iThisObject )->getProperties();
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
 
 } // End namespace ALEMBIC_VERSION_NS
 

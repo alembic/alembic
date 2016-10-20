@@ -484,18 +484,8 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
         fileObject.setRawFullName(dataHandle.asString());
         MString fileName = fileObject.resolvedFullName();
 
-        Alembic::Abc::IArchive archive;
-        Alembic::AbcCoreFactory::IFactory factory;
-        factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
-        archive = factory.getArchive(fileName.asChar());
-
-        if (!archive.valid())
-        {
-            //The resolved full name will be empty if the resolution fails.
-            //Print the raw full name in case of this situation.
-            MString theError = "Cannot read file " + fileObject.rawFullName();
-            printError(theError);
-        }
+        // TODO, make sure the file name, or list of files create a valid
+        // Alembic IArchive
 
         // initialize some flags for plug update
         mSubDInitialized = false;
@@ -541,14 +531,8 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             MObject::kNullObj, CreateSceneVisitor::NONE, "",
             mIncludeFilterString, mExcludeFilterString);
 
-        visitor.walk(archive);
-
-        if (visitor.hasSampledData())
         {
-            // information retrieved from the hierarchy traversal
-            // and given to AlembicNode to provide update
-            visitor.getData(mData);
-            mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
+           mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
             MDataHandle startFrameHandle = dataBlock.inputValue(mStartFrameAttr,
                                                                 &status);
             startFrameHandle.set(mSequenceStartTime*fps);

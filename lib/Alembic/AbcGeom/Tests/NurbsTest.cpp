@@ -376,6 +376,66 @@ void Example4_NurbsIn()
 }
 
 //-*****************************************************************************
+void SparseTest()
+{
+    std::string name = "sparseNurbsTest.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
+        
+        // only set normals
+        ONuPatch nurbsNormalsObj( OObject( archive, kTop ), "nurbsNormals", kSparse );
+        ONuPatchSchema::Sample nurbsSamp;
+        ON3fGeomParam::Sample normalSamp( N3fArraySample( (const V3f *)g_normals,
+            g_numNormals), kFacevaryingScope );
+        nurbsSamp.setNormals( normalSamp );
+        nurbsNormalsObj.getSchema().set( nurbsSamp );
+
+        // only set pts
+        ONuPatch nurbsPointsObj( OObject( archive, kTop ), "nurbsPoints", kSparse );
+        ONuPatchSchema::Sample nurbsSamp2;
+        nurbsSamp2.setPositions(
+            V3fArraySample( ( const V3f * )g_P, g_nP ) );
+        nurbsPointsObj.getSchema().set( nurbsSamp2 );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
+
+        IObject nurbsNormalsObj( IObject( archive, kTop ), "nurbsNormals" );
+
+        // This should NOT match
+        TESTING_ASSERT( !INuPatchSchema::matches( nurbsNormalsObj.getMetaData() ) );
+        ICompoundProperty geomProp( nurbsNormalsObj.getProperties(), ".geom" );
+
+        // This shouldn't match either
+        TESTING_ASSERT( !INuPatchSchema::matches( geomProp.getMetaData() ) );
+
+        // and we should ONLY have UVs
+        TESTING_ASSERT( geomProp.getNumProperties() == 1 &&
+            geomProp.getPropertyHeader("N") != NULL );
+
+        IArrayProperty normalsProp( geomProp, "N" );
+        TESTING_ASSERT( normalsProp.getNumSamples() == 1 );
+
+        IObject nurbsPointsObj( IObject( archive, kTop ), "nurbsPoints" );
+
+        // This should NOT match
+        TESTING_ASSERT( !INuPatchSchema::matches( nurbsPointsObj.getMetaData() ) );
+        geomProp = ICompoundProperty( nurbsPointsObj.getProperties(), ".geom" );
+
+        // This shouldn't match either
+        TESTING_ASSERT( !INuPatchSchema::matches( geomProp.getMetaData() ) );
+        TESTING_ASSERT( geomProp.getNumProperties() == 2 &&
+            geomProp.getPropertyHeader("P") != NULL &&
+            geomProp.getPropertyHeader(".selfBnds") != NULL );
+        IArrayProperty ptsProp( geomProp, "P" );
+        TESTING_ASSERT( ptsProp.getNumSamples() == 1 );
+        IScalarProperty selfBndsProp( geomProp, ".selfBnds" );
+        TESTING_ASSERT( selfBndsProp.getNumSamples() == 1 );
+    }
+}
+
+//-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
 // MAIN FUNCTION!
@@ -418,6 +478,10 @@ int main( int argc, char *argv[] )
     std::cout << "reading nurbs 4" << std::endl;
     Example4_NurbsIn();
     std::cout << "done reading nurbs 4" << std::endl;
+
+    std::cout << "sparse test" << std::endl;
+    SparseTest();
+    std::cout << "done sparse test" << std::endl;
 
     return 0;
 }

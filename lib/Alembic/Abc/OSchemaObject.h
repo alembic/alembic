@@ -120,8 +120,7 @@ public:
     //! The primary constructor creates an OSchemaObject as a child of the
     //! first argument, which is any Abc or AbcCoreAbstract (or other)
     //! object which can be intrusively cast to an ObjectWriterPtr.
-    template <class OBJECT_PTR>
-    OSchemaObject( OBJECT_PTR iParentObject,
+    OSchemaObject( OObject iParent,
                    const std::string &iName,
 
                    const Argument &iArg0 = Argument(),
@@ -164,16 +163,15 @@ protected:
 
 //-*****************************************************************************
 template <class SCHEMA>
-template <class OBJECT_PTR>
 OSchemaObject<SCHEMA>::OSchemaObject
 (
-    OBJECT_PTR iParentObject,
+    OObject iParent,
     const std::string &iName,
     const Argument &iArg0,
     const Argument &iArg1,
     const Argument &iArg2 )
 {
-    Arguments args( GetErrorHandlerPolicy( iParentObject ) );
+    Arguments args( GetErrorHandlerPolicy( iParent ) );
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
@@ -184,18 +182,24 @@ OSchemaObject<SCHEMA>::OSchemaObject
         "OSchemaObject::OSchemaObject( OObject )" );
 
     // Extract the parent.
-    AbcA::ObjectWriterPtr parent = GetObjectWriterPtr( iParentObject );
+    AbcA::ObjectWriterPtr parent = iParent.getPtr();
     ABCA_ASSERT( parent,
                  "NULL Parent ObjectWriter in OSchemaObject ctor" );
 
     // The object schema title is derived from the schema's title.
-    // It is never empty.
+    // It is never empty (unless sparse)
     AbcA::MetaData metaData = args.getMetaData();
-    metaData.set( "schema", SCHEMA::getSchemaTitle() );
-    metaData.set( "schemaObjTitle", getSchemaObjTitle() );
-    if ( std::string() != SCHEMA::getSchemaBaseType() )
+
+    SparseFlag sparseFlag = kSparse;
+    if ( !args.isSparse() )
     {
-        metaData.set( "schemaBaseType", SCHEMA::getSchemaBaseType() );
+        sparseFlag = kFull;
+        metaData.set( "schema", SCHEMA::getSchemaTitle() );
+        metaData.set( "schemaObjTitle", getSchemaObjTitle() );
+        if ( std::string() != SCHEMA::getSchemaBaseType() )
+        {
+            metaData.set( "schemaBaseType", SCHEMA::getSchemaBaseType() );
+        }
     }
 
     // Make the object.
@@ -212,10 +216,19 @@ OSchemaObject<SCHEMA>::OSchemaObject
         tsIndex = parent->getArchive()->addTimeSampling(*tsPtr);
     }
 
+    AbcA::MetaData schemaMetaData;
+    if ( args.isSparse() && SCHEMA::replaceOnSparse() )
+    {
+        schemaMetaData.set( "replace", "1" );
+    }
+
     // Make the schema.
     m_schema = SCHEMA( m_object->getProperties(),
+                       SCHEMA::getDefaultSchemaName(),
                        this->getErrorHandlerPolicy(),
-                       tsIndex );
+                       tsIndex,
+                       schemaMetaData,
+                       sparseFlag );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }

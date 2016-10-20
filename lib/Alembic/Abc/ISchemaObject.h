@@ -40,6 +40,7 @@
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/IObject.h>
 #include <Alembic/Abc/ISchema.h>
+#include <Alembic/Abc/Argument.h>
 #include <Alembic/Abc/Base.h>
 
 namespace Alembic {
@@ -122,23 +123,90 @@ public:
     //! ...
     ISchemaObject() {}
 
-    //! The primary constructor creates an ISchemaObject as a child of the
-    //! first argument, which is any Abc or AbcCoreAbstract (or other)
-    //! object which can be intrusively cast to an ObjectReaderPtr.
-    template <class OBJECT_PTR>
-    ISchemaObject( OBJECT_PTR iParentObject,
+    //! The primary constructor creates an ISchemaObject as a child of iParent
+    ISchemaObject( const IObject & iParent,
                    const std::string &iName,
-
                    const Argument &iArg0 = Argument(),
-                   const Argument &iArg1 = Argument() );
+                   const Argument &iArg1 = Argument() )
+    : IObject( iParent, iName, GetErrorHandlerPolicyFromArgs( iArg0, iArg1 ) )
+    {
+        Arguments args;
+        iArg0.setInto( args );
+        iArg1.setInto( args );
+
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "ISchemaObject::ISchemaObject( IObject )" );
+
+        const AbcA::ObjectHeader &oheader = this->getHeader();
+
+        ABCA_ASSERT( matches( oheader, args.getSchemaInterpMatching() ),
+            "Incorrect match of schema: "
+            << oheader.getMetaData().get( "schema" )
+            << " to expected: "
+            << getSchemaTitle() );
+
+        // Make the schema.
+        m_schema = SCHEMA( m_object->getProperties(),
+                           SCHEMA::getDefaultSchemaName(),
+                           this->getErrorHandlerPolicy(),
+                           args.getSchemaInterpMatching() );
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
 
     //! Wrap an existing schema object.
     //! ...
-    template <class OBJECT_PTR>
-    ISchemaObject( OBJECT_PTR iThisObject,
+    ISchemaObject( const IObject & iObject,
+                   const Argument &iArg0 = Argument(),
+                   const Argument &iArg1 = Argument() )
+    : IObject( iObject.getPtr(), GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "ISchemaObject::ISchemaObject( wrap )" );
+
+        const AbcA::ObjectHeader &oheader = this->getHeader();
+
+        ABCA_ASSERT( matches( oheader.getMetaData(),
+                     GetSchemaInterpMatching( iArg0, iArg1 ) ),
+                     "Incorrect match of schema: "
+                     << oheader.getMetaData().get( "schemaObjTitle" )
+                     << " to expected: "
+                     << getSchemaObjTitle() );
+
+        m_schema = SCHEMA( this->getProperties(),
+                           SCHEMA::getDefaultSchemaName(),
+                           this->getErrorHandlerPolicy(),
+                           GetSchemaInterpMatching( iArg0, iArg1 ) );
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    // Deprecated in favor of the constructor above
+    ISchemaObject( const IObject & iObject,
                    WrapExistingFlag iFlag,
                    const Argument &iArg0 = Argument(),
-                   const Argument &iArg1 = Argument() );
+                   const Argument &iArg1 = Argument() )
+    : IObject( iObject.getPtr(), GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) )
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN(
+            "ISchemaObject::ISchemaObject( wrapflag )" );
+
+        const AbcA::ObjectHeader &oheader = this->getHeader();
+
+        ABCA_ASSERT( matches( oheader.getMetaData(),
+                     GetSchemaInterpMatching( iArg0, iArg1 ) ),
+                     "Incorrect match of schema: "
+                     << oheader.getMetaData().get( "schemaObjTitle" )
+                     << " to expected: "
+                     << getSchemaObjTitle() );
+
+        m_schema = SCHEMA( this->getProperties(),
+                           SCHEMA::getDefaultSchemaName(),
+                           this->getErrorHandlerPolicy(),
+                           GetSchemaInterpMatching( iArg0, iArg1 ) );
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
 
     //-*************************************************************************
     // ABC BASE MECHANISMS
@@ -182,76 +250,6 @@ inline ErrorHandler::Policy GetErrorHandlerPolicy( const Argument &iArg0,
     iArg1.setInto( args );
     return args.getErrorHandlerPolicy();
 }
-
-//-*****************************************************************************
-template <class SCHEMA>
-template <class OBJECT_PTR>
-ISchemaObject<SCHEMA>::ISchemaObject
-(
-    OBJECT_PTR iParentObject,
-    const std::string &iName,
-    const Argument &iArg0,
-    const Argument &iArg1 )
-  : IObject( iParentObject, iName, GetErrorHandlerPolicy( iArg0, iArg1 ) )
-{
-    Arguments args;
-    iArg0.setInto( args );
-    iArg1.setInto( args );
-
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ISchemaObject::ISchemaObject( IObject )" );
-
-    const AbcA::ObjectHeader &oheader = this->getHeader();
-
-    ABCA_ASSERT( matches( oheader,
-                          args.getSchemaInterpMatching() ),
-
-                 "Incorrect match of schema: "
-                 << oheader.getMetaData().get( "schema" )
-                 << " to expected: "
-                 << getSchemaTitle() );
-
-    // Make the schema.
-    m_schema = SCHEMA( m_object->getProperties(),
-                       this->getErrorHandlerPolicy(),
-                       args.getSchemaInterpMatching() );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
-//-*****************************************************************************
-template<class SCHEMA>
-template<class OBJECT_PTR>
-inline ISchemaObject<SCHEMA>::ISchemaObject(
-    OBJECT_PTR iObject,
-    WrapExistingFlag iFlag,
-    const Argument &iArg0,
-    const Argument &iArg1 )
-  : IObject( iObject,
-             iFlag,
-             GetErrorHandlerPolicy( iObject,
-                                    iArg0, iArg1 ) )
-{
-    ALEMBIC_ABC_SAFE_CALL_BEGIN(
-        "ISchemaObject::ISchemaObject( wrap )" );
-
-    const AbcA::ObjectHeader &oheader = this->getHeader();
-
-    ABCA_ASSERT( matches( oheader.getMetaData(),
-                          GetSchemaInterpMatching( iArg0, iArg1 ) ),
-
-                 "Incorrect match of schema: "
-                 << oheader.getMetaData().get( "schemaObjTitle" )
-                 << " to expected: "
-                 << getSchemaObjTitle() );
-
-    m_schema = SCHEMA( this->getProperties(),
-                       this->getErrorHandlerPolicy(),
-                       GetSchemaInterpMatching( iArg0, iArg1 ) );
-
-    ALEMBIC_ABC_SAFE_CALL_END_RESET();
-}
-
 
 } // End namespace ALEMBIC_VERSION_NS
 

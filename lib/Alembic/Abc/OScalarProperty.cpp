@@ -41,6 +41,30 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+OScalarProperty::OScalarProperty( AbcA::CompoundPropertyWriterPtr iParent,
+                                  const std::string &iName,
+                                  const AbcA::DataType &iDataType,
+                                  const Argument &iArg0,
+                                  const Argument &iArg1,
+                                  const Argument &iArg2,
+                                  const Argument &iArg3 )
+{
+    init( iParent, iName, iDataType, iArg0, iArg1, iArg2, iArg3 );
+}
+
+//-*****************************************************************************
+OScalarProperty::OScalarProperty( OCompoundProperty iParent,
+                                  const std::string &iName,
+                                  const AbcA::DataType &iDataType,
+                                  const Argument &iArg0,
+                                  const Argument &iArg1,
+                                  const Argument &iArg2 )
+{
+    init( iParent.getPtr(), iName, iDataType, GetErrorHandlerPolicy( iParent ),
+          iArg0, iArg1, iArg2 );
+}
+
+//-*****************************************************************************
 OScalarProperty::~OScalarProperty()
 {
     // Nothing for now.
@@ -109,7 +133,6 @@ OCompoundProperty OScalarProperty::getParent() const
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::getParent()" );
 
     return OCompoundProperty( m_property->getParent(),
-                              kWrapExisting,
                               getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -122,20 +145,20 @@ OCompoundProperty OScalarProperty::getParent() const
 void OScalarProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
                             const std::string &iName,
                             const AbcA::DataType &iDataType,
-
-                            ErrorHandler::Policy iParentPolicy,
                             const Argument &iArg0,
                             const Argument &iArg1,
-                            const Argument &iArg2 )
+                            const Argument &iArg2,
+                            const Argument &iArg3 )
 {
-    Arguments args( iParentPolicy );
+    Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
     iArg2.setInto( args );
+    iArg3.setInto( args );
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
 
-    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::init()" );
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OScalarProperty::init(p, n)" );
 
     AbcA::TimeSamplingPtr tsPtr = args.getTimeSampling();
     uint32_t tsIndex = args.getTimeSamplingIndex();
@@ -147,7 +170,7 @@ void OScalarProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
         tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
     }
 
-    m_property = iParent->createScalarProperty( iName, args.getMetaData(), 
+    m_property = iParent->createScalarProperty( iName, args.getMetaData(),
         iDataType, tsIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();

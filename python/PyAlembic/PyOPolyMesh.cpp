@@ -85,23 +85,6 @@ void register_opolymesh()
           "OPolyMeshSchema",
           "The OPolyMeshSchema class is a faceset schema writer",
           init<>() )
-        .def( init<Abc::OCompoundProperty,
-                   const std::string&,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
-                     arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
-        .def( init<Abc::OCompoundProperty,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ),
-                     arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
         .def( "getTimeSampling",
               &AbcG::OPolyMeshSchema::getTimeSampling )
         .def( "getNumSamples",
