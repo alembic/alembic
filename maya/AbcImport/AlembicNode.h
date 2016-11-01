@@ -85,6 +85,7 @@ public:
     // input attributes
     static MObject mTimeAttr;
     static MObject mAbcFileNameAttr;
+    static MObject mAbcLayerFileNamesAttr;
     static MObject mSpeedAttr;
     static MObject mOffsetAttr;
     static MObject mCycleTypeAttr;

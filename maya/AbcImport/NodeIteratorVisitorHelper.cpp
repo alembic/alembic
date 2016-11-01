@@ -2949,9 +2949,31 @@ MString connectAttr(ArgData & iArgData)
     MString alembicNodeName = fileName +"_AlembicNode";
     alembicNodeFn.setName(alembicNodeName, &status);
 
-    // set input file name
+    // set input file name (Deprecated but leaving here for legacy support)
     MPlug plug = alembicNodeFn.findPlug("abc_File", true, &status);
     plug.setValue((*iArgData.mFileNames.begin()).c_str());
+
+    // set input layer filename(s)
+    MPlug layerFilesPlug = alembicNodeFn.findPlug("abc_layerFiles", true, &status);
+
+    if( status == MStatus::kSuccess )
+	{
+    	MStringArray filenameStorage;
+		std::vector< std::string > &argFilenames = iArgData.mFileNames;
+		const size_t numFilenames = argFilenames.size();
+
+		for( size_t i = 0; i < argFilenames.size(); i++ )
+		{
+			filenameStorage.append( argFilenames[i].c_str() );
+		}
+
+		MObject updatedFilenameData = MFnStringArrayData().create( filenameStorage, &status );
+
+		if( status = MStatus::kSuccess )
+		{
+			layerFilesPlug.setValue( updatedFilenameData );
+		}
+	}
 
     // set sequence start and end in frames
     MTime sec(1.0, MTime::kSeconds);
