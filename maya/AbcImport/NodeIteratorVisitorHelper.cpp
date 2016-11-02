@@ -2957,23 +2957,22 @@ MString connectAttr(ArgData & iArgData)
     MPlug layerFilesPlug = alembicNodeFn.findPlug("abc_layerFiles", true, &status);
 
     if( status == MStatus::kSuccess )
-	{
-    	MStringArray filenameStorage;
-		std::vector< std::string > &argFilenames = iArgData.mFileNames;
-		const size_t numFilenames = argFilenames.size();
+    {
+        MStringArray filenameStorage;
+        std::vector< std::string > &argFilenames = iArgData.mFileNames;
 
-		for( size_t i = 0; i < argFilenames.size(); i++ )
-		{
-			filenameStorage.append( argFilenames[i].c_str() );
-		}
+        for( size_t i = 0; i < argFilenames.size(); i++ )
+        {
+            filenameStorage.append( argFilenames[i].c_str() );
+        }
 
-		MObject updatedFilenameData = MFnStringArrayData().create( filenameStorage, &status );
+        MObject updatedFilenameData = MFnStringArrayData().create( filenameStorage, &status );
 
-		if( status = MStatus::kSuccess )
-		{
-			layerFilesPlug.setValue( updatedFilenameData );
-		}
-	}
+        if( status = MStatus::kSuccess )
+        {
+            layerFilesPlug.setValue( updatedFilenameData );
+        }
+    }
 
     // set sequence start and end in frames
     MTime sec(1.0, MTime::kSeconds);
