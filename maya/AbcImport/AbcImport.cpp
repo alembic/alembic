@@ -137,7 +137,7 @@ MSyntax AbcImport::createSyntax()
     syntax.addFlag("-ft",   "-filterObjects",    MSyntax::kString);
     syntax.addFlag("-eft",  "-excludeFilterObjects",    MSyntax::kString);
 
-    syntax.addArg(MSyntax::kString);
+    syntax.setObjectType( MSyntax::kStringObjects, 1, 1024 );
 
     syntax.enableQuery(true);
     syntax.enableEdit(false);
@@ -149,15 +149,6 @@ MSyntax AbcImport::createSyntax()
 void* AbcImport::creator()
 {
     return new AbcImport();
-}
-
-void parseInputFilenames(MString &filenameArg, std::vector<std::string> &filenameList)
-{
-   std::istringstream filenameBuffer(filenameArg.asChar());
-   std::string thisFilename;
-   while (getline(filenameBuffer, thisFilename, ',')) {
-       filenameList.push_back(thisFilename);
-   }
 }
 
 MStatus AbcImport::doIt(const MArgList & args)
@@ -250,15 +241,20 @@ MStatus AbcImport::doIt(const MArgList & args)
         recreateColorSets = true;
     }
 
-    status = argData.getCommandArgument(0, filename);
     MString abcNodeName;
-    if (status == MS::kSuccess)
-    {
-       std::vector<std::string> filenameList;
-       parseInputFilenames(filename, filenameList);
-       filename = (*filenameList.begin()).c_str();
 
+    MStringArray filenameArray;
+    status = argData.getObjects( filenameArray );
+
+    if( ( status == MStatus::kSuccess ) &&
+    	( filenameArray.length() > 0 ) )
+    {
+    	std::vector< std::string > filenameList;
+
+    	for(unsigned int fileNum = 0; fileNum < filenameArray.length(); fileNum++)
         {
+    		filename = filenameArray[ fileNum ];
+
             MString fileRule, expandName;
             MString alembicFileRule = "alembicCache";
             MString alembicFilePath = "cache/alembic";
@@ -309,43 +305,48 @@ MStatus AbcImport::doIt(const MArgList & args)
             {
                 filename = absoluteFile.resolvedFullName();
             }
+
+            MFileObject fileObj;
+			status = fileObj.setRawFullName(filename);
+			if (status == MS::kSuccess && fileObj.exists())
+			{
+				filenameList.push_back( filename.asUTF8() );
+			}
+			else
+			{
+				MString theError("In AbcImport::doIt(), ");
+				theError += filename;
+				theError += MString(" doesn't exist");
+				printError(theError);
+			}
         }
 
-        MFileObject fileObj;
-        status = fileObj.setRawFullName(filename);
-        if (status == MS::kSuccess && fileObj.exists())
+        if( filenameList.size() > 0 )
         {
-            ArgData inputData(filenameList, debugOn, reparentObj,
-                swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
-                recreateColorSets, filterString, excludeFilterString);
-            abcNodeName = createScene(inputData);
+			ArgData inputData(filenameList, debugOn, reparentObj,
+				swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
+				recreateColorSets, filterString, excludeFilterString);
+			abcNodeName = createScene(inputData);
 
-            if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&
-                inputData.mSequenceStartTime != -DBL_MAX &&
-                inputData.mSequenceEndTime != DBL_MAX)
-            {
-                if (argData.isFlagSet("fitTimeRange"))
-                {
-                    MTime sec(1.0, MTime::kSeconds);
-                    setPlayback(
-                        inputData.mSequenceStartTime * sec.as(MTime::uiUnit()),
-                        inputData.mSequenceEndTime * sec.as(MTime::uiUnit()) );
-                }
+			if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&
+				inputData.mSequenceStartTime != -DBL_MAX &&
+				inputData.mSequenceEndTime != DBL_MAX)
+			{
+				if (argData.isFlagSet("fitTimeRange"))
+				{
+					MTime sec(1.0, MTime::kSeconds);
+					setPlayback(
+						inputData.mSequenceStartTime * sec.as(MTime::uiUnit()),
+						inputData.mSequenceEndTime * sec.as(MTime::uiUnit()) );
+				}
 
-                if (argData.isFlagSet("setToStartFrame"))
-                {
-                    MTime sec(1.0, MTime::kSeconds);
-                    MGlobal::viewFrame( inputData.mSequenceStartTime *
-                        sec.as(MTime::uiUnit()) );
-                }
-            }
-        }
-        else
-        {
-            MString theError("In AbcImport::doIt(), ");
-            theError += filename;
-            theError += MString(" doesn't exist");
-            printError(theError);
+				if (argData.isFlagSet("setToStartFrame"))
+				{
+					MTime sec(1.0, MTime::kSeconds);
+					MGlobal::viewFrame( inputData.mSequenceStartTime *
+						sec.as(MTime::uiUnit()) );
+				}
+			}
         }
     }
 
