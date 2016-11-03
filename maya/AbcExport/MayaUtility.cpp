@@ -392,7 +392,7 @@ bool util::isDrivenBySplineIK(const MFnIkJoint & iJoint)
             }
         }
     }
-    
+
     return false;
 }
 
@@ -544,8 +544,8 @@ MString util::getHelpText()
 "written.\n"
 "\n"
 "-ng / -noGeom\n"
-"If this flag is present geometry data for Alembic poly meshes will not be\n"
-"written.\n"
+"If this flag is present geometry data for Alembic poly meshes and subds will\n"
+"not be written.\n"
 "\n"
 "-pr / -preRoll\n"
 "If this flag is present, this frame range will not be sampled.\n"
@@ -586,6 +586,9 @@ MString util::getHelpText()
 "-uv / -uvWrite\n"
 "If this flag is present, uv data for PolyMesh and SubD shapes will be written to\n"
 "the Alembic file.  Only the current uv map is used.\n"
+"-uvo / -uvsOnly\n"
+"If this flag is present, only uv data for PolyMesh and SubD shapes will be written\n"
+"to the Alembic file.  Only the current uv map is used.\n"
 "\n"
 "-wcs / -writeColorSets\n"
 "Write all color sets on MFnMeshes as color 3 or color 4 indexed geometry \n"

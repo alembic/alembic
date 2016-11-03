@@ -342,7 +342,7 @@ try
                jobArgs.writeGeometry = false;
                jobArgs.noNormals = true;
                jobArgs.writeCurvesGroup = false;
-               jobArgs.writeTransforms = true;
+               jobArgs.writeTransforms = false;
                jobArgs.writeLocators = false;
                jobArgs.writeParticles = false;
                jobArgs.writeCameras = false;
