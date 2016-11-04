@@ -271,7 +271,12 @@ public:
 
     //! The default constructor creates an empty OCurvesSchema
     //! ...
-    OCurvesSchema() {}
+    OCurvesSchema()
+    {
+        m_selectiveExport = false;
+        m_numSamples = 0;
+        m_timeSamplingIndex = 0;
+    }
 
 
     //! This constructor creates a new curves writer.

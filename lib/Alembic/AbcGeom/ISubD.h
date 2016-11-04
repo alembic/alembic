@@ -185,7 +185,10 @@ public:
 
     //! The default constructor creates an empty ISubDSchema
     //! ...
-    ISubDSchema() {}
+    ISubDSchema()
+    {
+        m_faceSetsLoaded = false;
+    }
 
     //! This constructor creates a new subd reader.
     //! The first argument is the parent ICompoundProperty, from which the

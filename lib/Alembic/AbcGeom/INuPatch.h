@@ -169,7 +169,10 @@ public:
     //-*************************************************************************
 
     //! The default constructor
-    INuPatchSchema() {}
+    INuPatchSchema()
+    {
+        m_hasTrimCurve = false;
+    }
 
     //! copy constructor
     INuPatchSchema(const INuPatchSchema& iCopy)
