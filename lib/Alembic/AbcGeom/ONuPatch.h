@@ -50,7 +50,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // for default "null" values for the int scalar properties
-static ALEMBIC_EXPORT_CONST 
+static ALEMBIC_EXPORT_CONST
 int32_t ABC_GEOM_NUPATCH_NULL_INT_VALUE( INT_MIN / 4 );
 
 //-*****************************************************************************
@@ -311,7 +311,12 @@ public:
 
     //! The default constructor creates an empty ONuPatchSchema
     //! ...
-    ONuPatchSchema() {}
+    ONuPatchSchema()
+    {
+        m_selectiveExport = false;
+        m_numSamples = 0;
+        m_timeSamplingIndex = 0;
+    }
 
     //! This constructor creates a new poly mesh writer.
     //! The first argument is an CompoundPropertyWriterPtr to use as a parent.

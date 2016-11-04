@@ -71,7 +71,13 @@ public:
 
     //! The default constructor creates an empty OPolyMeshSchema
     //! ...
-    OXformSchema() {}
+    OXformSchema()
+    {
+        m_numChannels = 0;
+        m_numOps = 0;
+        m_useArrayProp = false;
+        m_isIdentity = true;
+    }
 
     //! This constructor creates a new xform writer.
     //! The first argument is an CompoundPropertyWriterPtr to use as a parent.

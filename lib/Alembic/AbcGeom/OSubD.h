@@ -311,7 +311,12 @@ public:
 
     //! The default constructor creates an empty OSubDSchema
     //! ...
-    OSubDSchema() {}
+    OSubDSchema()
+    {
+        m_selectiveExport = false;
+        m_numSamples = 0;
+        m_timeSamplingIndex = 0;
+    }
 
     //! This constructor creates a new subd writer.
     //! The first argument is an CompoundPropertyWriterPtr to use as a parent.
