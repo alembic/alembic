@@ -1,3 +1,61 @@
+2016-11-7, Alembic 1.7.0
+Hello Alembic users,
+
+Thanks to your feedback we are introducing the new layering functionality to Alembic, as discussed here:
+
+https://groups.google.com/forum/#!topic/alembic-discussion/s0zm8VEBMOk
+
+AbcCoreLayer was developed collaboratively between Blizzard Entertainment and Sony Pictures Imageworks and is a way for you make sparse changes to an Alembic file by writing those changes into any number of other Alembic files, and combining them on read via AbcCoreLayer.
+
+Here are some examples of what you can do via layering:
+
+You can add additional properties to a shape.
+Example: Adding UVs to a polymesh that currently lack them
+
+You can override properties.
+Example: Override static points on a polymesh with animated points.
+
+You can add new objects.
+Example: Add a shape to an existing hierarchy.
+
+You can prune objects.
+Example: Remove shapes you don't like, or entire branches of the hierarchy.
+
+You can prune properties.
+Example: Removing incorrect normals.
+
+You can replace an object hierarchy with a different one.
+Example:  You can replace separate curves groups with one big one.
+
+You can replace property hierarchy.
+Example:  Don't like a bunch of properties in user properties?  It can be replaced with a bunch of other properties, without needing to prune individual properties.
+
+AbcCoreLayer provides a SetPrune and SetReplace convenience function in Util.h, for setting up the MetaData appropriately.
+
+Maya:
+
+AbcImport: Support AbcCoreLayer by specifying more than one file to the AbcImport command.
+
+AbcExport:
+Support writing only UVs via -uvsonly or -uvo flag.
+ 
+Utilities:
+AbcDiff: Given 2 Alembic files, create a sparse diff between them.
+
+Other changes:
+
+API:
+
+Internally keep track of how many bytes we've written to reduce the number of potentially expensive calls on write.
+
+https://github.com/alembic/alembic/pull/90
+
+Harden some unnecessary templated constructors in Abc and AbcGeom.
+
+Deprecate (but do not remove) constructors that take the kWrapExisting and kTop flag and provide reasonable constructors that don't use these flags in Abc and AbcGeom.
+
+##-*****************************************************************************
+
 2016-7-12, Alembic 1.6.1
 Hello Alembic users, thanks to your feedback and reports we have a few bug
 fixes and enhancements.
