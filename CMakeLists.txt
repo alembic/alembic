@@ -90,6 +90,11 @@ IF (ALEMBIC_SHARED_LIBS)
     ENDIF()
 ENDIF(ALEMBIC_SHARED_LIBS)
 
+# Need to test this on multiple platforms, it is an easy way to enable
+# memory checks like valgrind by doing:
+# ctest -D ExperimentalMemCheck
+# include (CTest)
+
 # Cmake system specific flags
 SET(WINDOWS FALSE)
 IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")

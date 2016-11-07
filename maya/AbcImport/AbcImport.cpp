@@ -55,7 +55,7 @@ namespace
 {
     MString usage(
 "                                                                           \n\
-AbcImport  [options] File                                                 \n\n\
+AbcImport  [options] File [File2 File3 ... ]                              \n\n\
 Options:                                                                    \n\
 -rpr/ reparent      DagPath                                                 \n\
                     reparent the whole hierarchy under a node in the        \n\
@@ -99,11 +99,13 @@ scene but doesn't exist in the archive, children of that node will be connected\
 the input regular expressions.                                              \n\
 -h  / help          Print this message                                      \n\
 -d  / debug         Turn on debug message printout                        \n\n\
+Specifying more than one file will layer those files together.            \n\n\
 Example:                                                                    \n\
 AbcImport -h;                                                               \n\
 AbcImport -d -m open \"/tmp/test.abc\";                                     \n\
-AbcImport -ftr -ct \"/\" -crt -rm \"/mcp/test.abc\";                        \n\
-AbcImport -ct \"root1 root2 root3 ...\" \"/mcp/test.abc\";                  \n"
+AbcImport -ftr -ct \"/\" -crt -rm \"/tmp/test.abc\";                        \n\
+AbcImport -ct \"root1 root2 root3 ...\" \"/tmp/test.abc\";                  \n\
+AbcImport \"/tmp/test.abc\" \"/tmp/justUVs.abc\" \"/tmp/other.abc\"         \n"
 );  // usage
 
 };

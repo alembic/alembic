@@ -153,7 +153,12 @@ public:
 
     //! The default constructor creates an empty OPointsSchema
     //! ...
-    OPointsSchema() {}
+    OPointsSchema()
+    {
+        m_selectiveExport = false;
+        m_numSamples = 0;
+        m_timeSamplingIndex = 0;
+    }
 
     //! This constructor creates a new poly mesh writer.
     //! The first argument is an CompoundPropertyWriterPtr to use as a parent.

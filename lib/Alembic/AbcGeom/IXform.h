@@ -67,7 +67,12 @@ public:
 
     //! The default constructor creates an empty OPolyMeshSchema
     //! ...
-    IXformSchema() {}
+    IXformSchema()
+    {
+        m_useArrayProp = false;
+        m_isConstant = true;
+        m_isConstantIdentity = true;
+    }
 
     //! This constructor creates a new xform reader.
     //! The first argument is the parent ICompoundProperty, from which the
