@@ -114,7 +114,7 @@ public:
     static void* creator() { return (new AlembicNode()); }
 
     // override virtual methods from MPxNode
-	virtual MStatus setDependentsDirty(const MPlug& plug, MPlugArray& plugArray);
+    virtual MStatus setDependentsDirty(const MPlug& plug, MPlugArray& plugArray);
     virtual bool isPassiveOutput(const MPlug & plug) const;
 #if MAYA_API_VERSION >= 201600
     virtual SchedulingType schedulingType()const;
@@ -128,9 +128,9 @@ public:
     virtual MStringArray getFilesToArchive(bool shortName,
                                            bool unresolvedName,
                                            bool markCouldBeImageSequence) const;
-#if defined(MAYA_WANT_EXTERNALCONTENTTABLE)                                           
-    virtual	void getExternalContent(MExternalContentInfoTable& table) const;
-	virtual	void setExternalContent(const MExternalContentLocationTable& table);
+#if defined(MAYA_WANT_EXTERNALCONTENTTABLE)
+    virtual void getExternalContent(MExternalContentInfoTable& table) const;
+    virtual void setExternalContent(const MExternalContentLocationTable& table);
 #endif
 
     void   setDebugMode(bool iDebugOn){ mDebugOn = iDebugOn; }

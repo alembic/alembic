@@ -166,8 +166,8 @@ class EulerFilterTest(unittest.TestCase):
 
         # Check file without euler filter
         # Maya uses quaternion to represent Rotate Axis and Joint Orient internally.
-		# The number from rotateAxis and jointOrient attribute might not be the same
-		# as the values from their anim curves.
+        # The number from rotateAxis and jointOrient attribute might not be the same
+        # as the values from their anim curves.
         MayaCmds.AbcImport(self.__files[-2], mode='open')
         MayaCmds.currentTime(3, update = True)  # refresh
 
@@ -228,4 +228,4 @@ class EulerFilterTest(unittest.TestCase):
         self.failUnlessAlmostEqual(110, MayaCmds.getAttr('test.rotateAxisX'))
         self.failUnlessAlmostEqual(-70, MayaCmds.getAttr('test.rotateAxisY'))
         self.failUnlessAlmostEqual(90, MayaCmds.getAttr('test.rotateAxisZ'))
-        
+

@@ -144,16 +144,16 @@ MStatus AlembicNode::initialize()
     status = addAttribute(mAbcFileNameAttr);
 
     // input layer file names
-	MFnStringArrayData fileFnStringArrayData;
-	MStringArray dummyStringArray;
-	MObject layerFileNamesDefaultObject = fileFnStringArrayData.create(dummyStringArray);
-	mAbcLayerFileNamesAttr = tAttr2.create("abc_layerFiles", "fns",
-		MFnData::kStringArray, layerFileNamesDefaultObject);
-	status = tAttr2.setStorable(true);
-	status = tAttr2.setUsedAsFilename(true);
-	status = tAttr2.setKeyable(false);
-	status = tAttr2.setWritable(true);
-	status = addAttribute(mAbcLayerFileNamesAttr);
+    MFnStringArrayData fileFnStringArrayData;
+    MStringArray dummyStringArray;
+    MObject layerFileNamesDefaultObject = fileFnStringArrayData.create(dummyStringArray);
+    mAbcLayerFileNamesAttr = tAttr2.create("abc_layerFiles", "fns",
+        MFnData::kStringArray, layerFileNamesDefaultObject);
+    status = tAttr2.setStorable(true);
+    status = tAttr2.setUsedAsFilename(true);
+    status = tAttr2.setKeyable(false);
+    status = tAttr2.setWritable(true);
+    status = addAttribute(mAbcLayerFileNamesAttr);
 
     // playback speed
     mSpeedAttr = nAttr.create("speed", "sp",
@@ -451,22 +451,22 @@ double AlembicNode::computeRetime(const double inputTime,
 
 MStatus AlembicNode::setDependentsDirty(const MPlug& plug, MPlugArray& plugArray)
 {
-	if (plug == mAbcFileNameAttr)
-	{
-/* 	This code was to force refresh of the AlembicNode when there is a file name change
-	But since it was only working in particular very simple case, we decided to not enable it
-	and only display a warning.
-	In all other cases it could result in undesired behavior even scene corruption.
-	See issue MAYA-47471
-		mFileInitialized = false;
-        mCurTime = DBL_MAX;	// to force update
+    if (plug == mAbcFileNameAttr)
+    {
+/*  This code was to force refresh of the AlembicNode when there is a file name change
+    But since it was only working in particular very simple case, we decided to not enable it
+    and only display a warning.
+    In all other cases it could result in undesired behavior even scene corruption.
+    See issue MAYA-47471
+        mFileInitialized = false;
+        mCurTime = DBL_MAX; // to force update
 */
-		if(mFileInitialized)
-		{
-			MGlobal::displayWarning("Repathing Alembic Nodes is not supported");
-		}
-	}
-	return MPxNode::setDependentsDirty(plug, plugArray);
+        if(mFileInitialized)
+        {
+            MGlobal::displayWarning("Repathing Alembic Nodes is not supported");
+        }
+    }
+    return MPxNode::setDependentsDirty(plug, plugArray);
 }
 
 MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
@@ -490,112 +490,116 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     inputTime = computeAdjustedTime(inputTime, speed, offset/fps);
 
     // this should be done only once per file
-	if (mFileInitialized == false)
-	{
-		mFileInitialized = true;
+    if (mFileInitialized == false)
+    {
+        mFileInitialized = true;
 
-		//Get list of input filenames
-		MFnDependencyNode depNode(thisMObject());
-		MPlug layerFilesPlug = depNode.findPlug("abc_layerFiles");
-		MFnStringArrayData fnSAD( layerFilesPlug.asMObject() );
-		MStringArray storedFilenames = fnSAD.array();
+        //Get list of input filenames
+        MFnDependencyNode depNode(thisMObject());
+        MPlug layerFilesPlug = depNode.findPlug("abc_layerFiles");
+        MFnStringArrayData fnSAD( layerFilesPlug.asMObject() );
+        MStringArray storedFilenames = fnSAD.array();
 
-		//Legacy support for single-filename input
-		if( storedFilenames.length() == 0 )
-		{
-			MFileObject fileObject;
-			MDataHandle dataHandle = dataBlock.inputValue(mAbcFileNameAttr);
-			fileObject.setRawFullName(dataHandle.asString());
-			MString fileName = fileObject.resolvedFullName();
-			storedFilenames.append( fileName );
-		}
+        //Legacy support for single-filename input
+        if( storedFilenames.length() == 0 )
+        {
+            MFileObject fileObject;
+            MDataHandle dataHandle = dataBlock.inputValue(mAbcFileNameAttr);
+            fileObject.setRawFullName(dataHandle.asString());
+            MString fileName = fileObject.resolvedFullName();
+            storedFilenames.append( fileName );
+        }
 
-		std::vector<std::string> abcFilenames;
-		for(unsigned int i = 0; i < storedFilenames.length(); i++)
-			abcFilenames.push_back( storedFilenames[i].asChar() );
+        std::vector<std::string> abcFilenames;
+        for(unsigned int i = 0; i < storedFilenames.length(); i++)
+        {
+            abcFilenames.push_back( storedFilenames[i].asChar() );
+        }
 
-		Alembic::Abc::IArchive archive;
-		Alembic::AbcCoreFactory::IFactory factory;
-		factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
+        Alembic::Abc::IArchive archive;
+        Alembic::AbcCoreFactory::IFactory factory;
+        factory.setPolicy(Alembic::Abc::ErrorHandler::kQuietNoopPolicy);
 
-		archive = factory.getArchive( abcFilenames );
+        archive = factory.getArchive( abcFilenames );
 
-		if (!archive.valid())
-		{
-			MString theError = "Error opening these alembic files: ";
+        if (!archive.valid())
+        {
+            MString theError = "Error opening these alembic files: ";
 
-			const unsigned int numFilenames = storedFilenames.length();
-			for( unsigned int i = 0; i < numFilenames; i++ )
-			{
-				theError += storedFilenames[ i ];
+            const unsigned int numFilenames = storedFilenames.length();
+            for( unsigned int i = 0; i < numFilenames; i++ )
+            {
+                theError += storedFilenames[ i ];
 
-				if( i != (numFilenames - 1) )
-					theError += ", ";
-			}
+                if( i != (numFilenames - 1) )
+                {
+                    theError += ", ";
+                }
+            }
 
-			printError(theError);
-		}
+            printError(theError);
+        }
 
-		// initialize some flags for plug update
-		mSubDInitialized = false;
-		mPolyInitialized = false;
+        // initialize some flags for plug update
+        mSubDInitialized = false;
+        mPolyInitialized = false;
 
-		// When an alembic cache will be imported at the first time using
-		// AbcImport, we need to set mIncludeFilterAttr (filterHandle) to be
-		// mIncludeFilterString for later use. When we save a maya scene(.ma)
-		// mIncludeFilterAttr will be saved. Then when we load the saved
-		// .ma file, mIncludeFilterString will be set to be mIncludeFilterAttr.
-		MDataHandle includeFilterHandle =
-						dataBlock.inputValue(mIncludeFilterAttr, &status);
-		MString& includeFilterString = includeFilterHandle.asString();
+        // When an alembic cache will be imported at the first time using
+        // AbcImport, we need to set mIncludeFilterAttr (filterHandle) to be
+        // mIncludeFilterString for later use. When we save a maya scene(.ma)
+        // mIncludeFilterAttr will be saved. Then when we load the saved
+        // .ma file, mIncludeFilterString will be set to be mIncludeFilterAttr.
+        MDataHandle includeFilterHandle =
+            dataBlock.inputValue(mIncludeFilterAttr, &status);
+        MString& includeFilterString = includeFilterHandle.asString();
 
-	   if (mIncludeFilterString.length() > 0)
-		{
-			includeFilterHandle.set(mIncludeFilterString);
-			dataBlock.setClean(mIncludeFilterAttr);
-		}
-		else if (includeFilterString.length() > 0)
-		{
-			mIncludeFilterString = includeFilterString;
-		}
+        if (mIncludeFilterString.length() > 0)
+        {
+            includeFilterHandle.set(mIncludeFilterString);
+            dataBlock.setClean(mIncludeFilterAttr);
+        }
+        else if (includeFilterString.length() > 0)
+        {
+            mIncludeFilterString = includeFilterString;
+        }
 
-		MDataHandle excludeFilterHandle =
-						dataBlock.inputValue(mExcludeFilterAttr, &status);
-		MString& excludeFilterString = excludeFilterHandle.asString();
+        MDataHandle excludeFilterHandle =
+            dataBlock.inputValue(mExcludeFilterAttr, &status);
+        MString& excludeFilterString = excludeFilterHandle.asString();
 
-	   if (mExcludeFilterString.length() > 0)
-		{
-			excludeFilterHandle.set(mExcludeFilterString);
-			dataBlock.setClean(mExcludeFilterAttr);
-		}
-		else if (excludeFilterString.length() > 0)
-		{
-			mExcludeFilterString = excludeFilterString;
-		}
+        if (mExcludeFilterString.length() > 0)
+        {
+            excludeFilterHandle.set(mExcludeFilterString);
+            dataBlock.setClean(mExcludeFilterAttr);
+        }
+        else if (excludeFilterString.length() > 0)
+        {
+            mExcludeFilterString = excludeFilterString;
+        }
 
 
-		MFnDependencyNode dep(thisMObject());
-		MPlug allSetsPlug = dep.findPlug("allColorSets");
-		CreateSceneVisitor visitor(inputTime, !allSetsPlug.isNull(),
-			MObject::kNullObj, CreateSceneVisitor::NONE, "",
-			mIncludeFilterString, mExcludeFilterString);
+        MFnDependencyNode dep(thisMObject());
+        MPlug allSetsPlug = dep.findPlug("allColorSets");
+        CreateSceneVisitor visitor(inputTime, !allSetsPlug.isNull(),
+            MObject::kNullObj, CreateSceneVisitor::NONE, "",
+            mIncludeFilterString, mExcludeFilterString);
 
-		visitor.walk(archive);
+        visitor.walk(archive);
 
-		if (visitor.hasSampledData())
-		{
-			// information retrieved from the hierarchy traversal
-			// and given to AlembicNode to provide update
-			visitor.getData(mData);
-			mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
-			MDataHandle startFrameHandle = dataBlock.inputValue(mStartFrameAttr,
-																&status);
-			startFrameHandle.set(mSequenceStartTime*fps);
-			MDataHandle endFrameHandle = dataBlock.inputValue(mEndFrameAttr,
-																&status);
-			endFrameHandle.set(mSequenceEndTime*fps);
-		}
-	}
+        if (visitor.hasSampledData())
+        {
+            // information retrieved from the hierarchy traversal
+            // and given to AlembicNode to provide update
+            visitor.getData(mData);
+            mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
+            MDataHandle startFrameHandle = dataBlock.inputValue(
+                mStartFrameAttr, &status);
+            startFrameHandle.set(mSequenceStartTime*fps);
+            MDataHandle endFrameHandle = dataBlock.inputValue(
+                mEndFrameAttr, &status);
+            endFrameHandle.set(mSequenceEndTime*fps);
+        }
+    }
 
     // Retime
     MDataHandle cycleHandle = dataBlock.inputValue(mCycleTypeAttr, &status);
@@ -1164,7 +1168,7 @@ bool AlembicNode::isPassiveOutput(const MPlug & plug) const
 #if MAYA_API_VERSION >= 201600
 AlembicNode::SchedulingType AlembicNode::schedulingType()const
 {
-	// Globally serialize this node because the compute method is not thread safe
+    // Globally serialize this node because the compute method is not thread safe
     return kGloballySerialize;
 }
 #endif
@@ -1182,26 +1186,27 @@ MStringArray AlembicNode::getFilesToArchive(
     MPlug layerFilenamesPlug(thisMObject(), mAbcLayerFileNamesAttr);
 
     MFnStringArrayData fnSAD( layerFilenamesPlug.asMObject() );
-	MStringArray layerFilenames = fnSAD.array();
+    MStringArray layerFilenames = fnSAD.array();
 
-	for( unsigned int i = 0; i < layerFilenames.length(); i++ )
-	{
-		MString fileName = layerFilenames[i];
+    for( unsigned int i = 0; i < layerFilenames.length(); i++ )
+    {
+        MString fileName = layerFilenames[i];
 
-		if (status == MS::kSuccess && fileName.length() > 0) {
-			if(unresolvedName)
-			{
-				files.append(fileName);
-			}
-			else
-			{
-				//unresolvedName is false, resolve the path via MFileObject.
-				MFileObject fileObject;
-				fileObject.setRawFullName(fileName);
-				files.append(fileObject.resolvedFullName());
-			}
-		}
-	}
+        if (status == MS::kSuccess && fileName.length() > 0)
+        {
+            if(unresolvedName)
+            {
+                files.append(fileName);
+            }
+            else
+            {
+                //unresolvedName is false, resolve the path via MFileObject.
+                MFileObject fileObject;
+                fileObject.setRawFullName(fileName);
+                files.append(fileObject.resolvedFullName());
+            }
+        }
+    }
 
     return files;
 }

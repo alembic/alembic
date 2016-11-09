@@ -142,7 +142,7 @@ FOREACH(COMPONENT ${_ilmbase_FIND_COMPONENTS})
 
   FIND_LIBRARY(ALEMBIC_ILMBASE_${UPPERCOMPONENT}_LIB
     NAMES
-      ${COMPONENT}-${_ilmbase_libs_ver} ${COMPONENT} 
+      ${COMPONENT}-${_ilmbase_libs_ver} ${COMPONENT}
     HINTS
       ${_ilmbase_SEARCH_DIRS}
     PATH_SUFFIXES
@@ -163,8 +163,8 @@ ENDIF()
 
 IF ( DEFINED USE_IEXMATH AND USE_IEXMATH )
   IF ( ${ALEMBIC_ILMBASE_IEXMATH_LIB} STREQUAL
-	  "ALEMBIC_ILMBASE_IEXMATH_LIB-NOTFOUND" )
-	MESSAGE( FATAL_ERROR "ilmbase libraries (Half, Iex, IexMath, IlmThread, Imath) not found, required" )
+    "ALEMBIC_ILMBASE_IEXMATH_LIB-NOTFOUND" )
+  MESSAGE( FATAL_ERROR "ilmbase libraries (Half, Iex, IexMath, IlmThread, Imath) not found, required" )
   ENDIF()
 ENDIF()
 

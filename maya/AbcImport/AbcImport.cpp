@@ -248,14 +248,13 @@ MStatus AbcImport::doIt(const MArgList & args)
     MStringArray filenameArray;
     status = argData.getObjects( filenameArray );
 
-    if( ( status == MStatus::kSuccess ) &&
-    	( filenameArray.length() > 0 ) )
+    if( ( status == MStatus::kSuccess ) && ( filenameArray.length() > 0 ) )
     {
-    	std::vector< std::string > filenameList;
+        std::vector< std::string > filenameList;
 
-    	for(unsigned int fileNum = 0; fileNum < filenameArray.length(); fileNum++)
+        for(unsigned int fileNum = 0; fileNum < filenameArray.length(); fileNum++)
         {
-    		filename = filenameArray[ fileNum ];
+            filename = filenameArray[ fileNum ];
 
             MString fileRule, expandName;
             MString alembicFileRule = "alembicCache";
@@ -290,7 +289,7 @@ MStatus AbcImport::doIt(const MArgList & args)
             // resolve the relative path
             MFileObject absoluteFile;
             absoluteFile.setRawFullName(filename);
-			absoluteFile.setResolveMethod(MFileObject::kInputFile);
+            absoluteFile.setResolveMethod(MFileObject::kInputFile);
 #if MAYA_API_VERSION < 201300
             if (absoluteFile.resolvedFullName() !=
                 absoluteFile.expandedFullName())
@@ -309,46 +308,46 @@ MStatus AbcImport::doIt(const MArgList & args)
             }
 
             MFileObject fileObj;
-			status = fileObj.setRawFullName(filename);
-			if (status == MS::kSuccess && fileObj.exists())
-			{
-				filenameList.push_back( filename.asUTF8() );
-			}
-			else
-			{
-				MString theError("In AbcImport::doIt(), ");
-				theError += filename;
-				theError += MString(" doesn't exist");
-				printError(theError);
-			}
+            status = fileObj.setRawFullName(filename);
+            if (status == MS::kSuccess && fileObj.exists())
+            {
+                filenameList.push_back( filename.asUTF8() );
+            }
+            else
+            {
+                MString theError("In AbcImport::doIt(), ");
+                theError += filename;
+                theError += MString(" doesn't exist");
+                printError(theError);
+            }
         }
 
         if( filenameList.size() > 0 )
         {
-			ArgData inputData(filenameList, debugOn, reparentObj,
-				swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
-				recreateColorSets, filterString, excludeFilterString);
-			abcNodeName = createScene(inputData);
+            ArgData inputData(filenameList, debugOn, reparentObj,
+                swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
+                recreateColorSets, filterString, excludeFilterString);
+            abcNodeName = createScene(inputData);
 
-			if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&
-				inputData.mSequenceStartTime != -DBL_MAX &&
-				inputData.mSequenceEndTime != DBL_MAX)
-			{
-				if (argData.isFlagSet("fitTimeRange"))
-				{
-					MTime sec(1.0, MTime::kSeconds);
-					setPlayback(
-						inputData.mSequenceStartTime * sec.as(MTime::uiUnit()),
-						inputData.mSequenceEndTime * sec.as(MTime::uiUnit()) );
-				}
+            if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&
+                inputData.mSequenceStartTime != -DBL_MAX &&
+                inputData.mSequenceEndTime != DBL_MAX)
+            {
+                if (argData.isFlagSet("fitTimeRange"))
+                {
+                    MTime sec(1.0, MTime::kSeconds);
+                    setPlayback(
+                        inputData.mSequenceStartTime * sec.as(MTime::uiUnit()),
+                        inputData.mSequenceEndTime * sec.as(MTime::uiUnit()) );
+                }
 
-				if (argData.isFlagSet("setToStartFrame"))
-				{
-					MTime sec(1.0, MTime::kSeconds);
-					MGlobal::viewFrame( inputData.mSequenceStartTime *
-						sec.as(MTime::uiUnit()) );
-				}
-			}
+                if (argData.isFlagSet("setToStartFrame"))
+                {
+                    MTime sec(1.0, MTime::kSeconds);
+                    MGlobal::viewFrame( inputData.mSequenceStartTime *
+                        sec.as(MTime::uiUnit()) );
+                }
+            }
         }
     }
 
