@@ -150,6 +150,7 @@ class StaticNurbsCurveTest(unittest.TestCase):
         # test if some curves have different degree or close states information
         MayaCmds.file(new=True, force=True)
         name = MayaCmds.textCurves(font='Courier', text='Maya')
+        MayaCmds.closeCurve( name[0], replaceOriginal=True )
         MayaCmds.addAttr(name[0], longName='riCurves', at='bool', dv=True)
         self.__files.append(util.expandFileName('testStaticNurbsCurveGrp2.abc'))
         MayaCmds.AbcExport(j='-root %s -f %s' % (name[0], self.__files[-1]))
@@ -245,7 +246,7 @@ class StaticNurbsCurveTest(unittest.TestCase):
 
         widthVecs = [[0.11, 0.12, 0.13, 0.14, 0.15], [0.1, 0.3, 0.5, 0.7, 0.9],
             [0.2, 0.3, 0.4, 0.5, 0.6]]
-        MayaCmds.curve(d=3, p=[(0, 0, 0), (3, 5, 0), (5, 6, 0), (9, 9, 0), 
+        MayaCmds.curve(d=3, p=[(0, 0, 0), (3, 5, 0), (5, 6, 0), (9, 9, 0),
             (12, 10, 0)], k=[0,0,0,1,2,2,2], name='curve1')
         MayaCmds.select('curveShape1')
         MayaCmds.addAttr(longName='width', dataType='doubleArray')
