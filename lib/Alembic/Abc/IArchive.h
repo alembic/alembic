@@ -131,7 +131,7 @@ public:
 
     //! Get the read array sample cache. It may be a NULL pointer.
     //! Caches can be shared amongst separate archives, and caching
-    //! will is disabled if a NULL cache is returned here.
+    //! will be disabled if a NULL cache is returned here.
     AbcA::ReadArraySampleCachePtr getReadArraySampleCachePtr();
 
     //! Set the read array sample cache. It may also be a NULL pointer.
