@@ -97,6 +97,13 @@ scene but doesn't exist in the archive, children of that node will be connected\
 -eft / excludeFilterObjects \"regex1 regex2 ...\"                          \n\
                     Selective exclude cache objects whose name matches with \n\
 the input regular expressions.                                              \n\
+-fas / useFirstAvailableShape                                               \n\
+                    Determines if it's necessary to use the first available \n\
+                    DAG node of the current parent node when it's not       \n\
+                    possible to find the DAG node to connect it to the      \n\
+                    AlembicNode. It can be useful when the Alembic file was \n\
+                    exported after Maya renamed the shapes nodes of an      \n\
+                    object (it happens when deforming reference objects).   \n\
 -h  / help          Print this message                                      \n\
 -d  / debug         Turn on debug message printout                        \n\n\
 Example:                                                                    \n\
@@ -126,6 +133,7 @@ MSyntax AbcImport::createSyntax()
     syntax.addFlag("-h",    "-help",         MSyntax::kNoArg);
     syntax.addFlag("-m",    "-mode",         MSyntax::kString);
     syntax.addFlag("-rcs",  "-recreateAllColorSets", MSyntax::kNoArg);
+    syntax.addFlag("-fas",  "-useFirstAvailableShape",  MSyntax::kNoArg);
 
     syntax.addFlag("-ct",   "-connect",          MSyntax::kString);
     syntax.addFlag("-crt",  "-createIfNotFound", MSyntax::kNoArg);
@@ -176,6 +184,7 @@ MStatus AbcImport::doIt(const MArgList & args)
     bool    swap = false;
     bool    createIfNotFound = false;
     bool    removeIfNoUpdate = false;
+    bool    useFirstAvailableShape = false;
 
     bool    debugOn = false;
 
@@ -187,6 +196,9 @@ MStatus AbcImport::doIt(const MArgList & args)
 
     if (argData.isFlagSet("debug"))
         debugOn = true;
+
+    if (argData.isFlagSet("useFirstAvailableShape"))
+        useFirstAvailableShape = true;
 
     if (argData.isFlagSet("reparent"))
     {
@@ -317,7 +329,8 @@ MStatus AbcImport::doIt(const MArgList & args)
         {
             ArgData inputData(filenameList, debugOn, reparentObj,
                 swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
-                recreateColorSets, filterString, excludeFilterString);
+                recreateColorSets, filterString, excludeFilterString,
+                useFirstAvailableShape);
             abcNodeName = createScene(inputData);
 
             if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&

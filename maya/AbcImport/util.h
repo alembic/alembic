@@ -82,7 +82,8 @@ MStatus getObjectByName(const MString & name, MObject & object);
 MStatus getDagPathByName(const MString & name, MDagPath & dagPath);
 
 bool getDagPathByChildName(MDagPath & ioDagPath,
-    const std::string & iChildName);
+    const std::string & iChildName,
+    bool mUseFirstAvailableShape);
 
 // returns the Maya style leaf name minus the namespace
 std::string stripPathAndNamespace(const std::string & iPath);

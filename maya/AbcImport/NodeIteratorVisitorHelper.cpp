@@ -2814,7 +2814,8 @@ ArgData::ArgData(std::vector<std::string>& iFileNames,
     bool iDebugOn, MObject iReparentObj, bool iConnect,
     MString iConnectRootNodes, bool iCreateIfNotFound, bool iRemoveIfNoUpdate,
     bool iRecreateColorSets, MString iFilterString,
-    MString iExcludeFilterString) :
+    MString iExcludeFilterString,
+    bool useFirstAvailableShape) :
         mFileNames(iFileNames),
         mDebugOn(iDebugOn), mReparentObj(iReparentObj),
         mRecreateColorSets(iRecreateColorSets),
@@ -2823,7 +2824,8 @@ ArgData::ArgData(std::vector<std::string>& iFileNames,
         mCreateIfNotFound(iCreateIfNotFound),
         mRemoveIfNoUpdate(iRemoveIfNoUpdate),
         mIncludeFilterString(iFilterString),
-        mExcludeFilterString(iExcludeFilterString)
+        mExcludeFilterString(iExcludeFilterString),
+        mUseFirstAvailableShape(useFirstAvailableShape)
 {
     mSequenceStartTime = -DBL_MAX;
     mSequenceEndTime = DBL_MAX;
@@ -2889,7 +2891,8 @@ MString createScene(ArgData & iArgData)
     CreateSceneVisitor visitor(iArgData.mSequenceStartTime,
         iArgData.mRecreateColorSets, iArgData.mReparentObj, action,
         iArgData.mConnectRootNodes, iArgData.mIncludeFilterString,
-        iArgData.mExcludeFilterString);
+        iArgData.mExcludeFilterString,
+        iArgData.mUseFirstAvailableShape);
 
     visitor.walk(archive);
 
