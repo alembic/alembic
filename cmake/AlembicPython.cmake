@@ -33,8 +33,8 @@
 ##
 ##-*****************************************************************************
 
-FIND_PACKAGE ( PythonLibs REQUIRED )
 FIND_PACKAGE ( PythonInterp REQUIRED )
+FIND_PACKAGE ( PythonLibs REQUIRED )
 IF(PYTHONLIBS_FOUND)
     SET(ALEMBIC_PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
     SET(ALEMBIC_PYTHON_LIBRARY ${PYTHON_LIBRARIES})
