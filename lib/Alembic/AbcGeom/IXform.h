@@ -134,7 +134,7 @@ public:
     // lightweight get to avoid constructing a sample
     // see XformSample.h for explanation of this property
     bool getInheritsXforms( const Abc::ISampleSelector &iSS =
-                            Abc::ISampleSelector() );
+                            Abc::ISampleSelector() ) const;
 
     size_t getNumOps() const { return m_sample.getNumOps(); }
 
