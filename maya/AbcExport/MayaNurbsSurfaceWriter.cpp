@@ -76,10 +76,6 @@ MayaNurbsSurfaceWriter::MayaNurbsSurfaceWriter(MDagPath & iDag,
     {
         mIsSurfaceAnimated = true;
     }
-    else
-    {
-        iTimeIndex = 0;
-    }
 
     if (!mIsSurfaceAnimated || iArgs.setFirstAnimShape)
     {

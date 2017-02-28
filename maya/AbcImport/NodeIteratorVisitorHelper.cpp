@@ -1060,6 +1060,9 @@ addScalarExtentThreeProp(Alembic::Abc::IScalarProperty& iProp,
             if (numChildren > extent)
                 numChildren = extent;
 
+            if (numChildren > 3)
+                numChildren = 3;
+
             for (unsigned int i = 0; i < numChildren; ++i)
                 plug.child(i).setValue(val[i]);
         }

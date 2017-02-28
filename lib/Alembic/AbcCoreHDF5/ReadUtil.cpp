@@ -66,7 +66,7 @@ ReadReferences ( hid_t iParent,
     DspaceCloser dspaceCloser( dspaceId );
 
     hsize_t dim;
-    herr_t status = H5Sget_simple_extent_dims( dspaceId, &dim, NULL );
+    H5Sget_simple_extent_dims( dspaceId, &dim, NULL );
 
     ABCA_ASSERT( dim > 0,
                  "Degenerate dims in Dataset read" );
@@ -74,7 +74,7 @@ ReadReferences ( hid_t iParent,
     if ( dim > 0 )
     {
         oRefs.resize( dim );
-        status = H5Dread( dsetId, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL,
+        herr_t status = H5Dread( dsetId, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL,
                           H5P_DEFAULT, &oRefs.front() );
         ABCA_ASSERT( status >= 0,
                      "H5Dread failed: " << iRefName );
@@ -225,7 +225,7 @@ ReadDataSetDimensions( hid_t iParent,
         ABCA_ASSERT( rank == 1, "H5Sget_simple_extent_ndims() must be 1." );
 
         hsize_t hdim = 0;
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
+        H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
         oDims.setRank(1);
         oDims[0] = hdim / iExtent;
     }
@@ -634,7 +634,7 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
 
         hsize_t hdim = 0;
 
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
+        H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
 
         Dimensions dims;
         std::string dimName = iName + ".dims";
@@ -751,7 +751,7 @@ ReadArray( void * iIntoLocation,
 
         hsize_t hdim = 0;
 
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
+        H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
 
         ABCA_ASSERT( hdim > 0,
                      "Degenerate dims in Dataset read" );

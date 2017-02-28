@@ -58,7 +58,7 @@ Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
 
     for ( Alembic::Util::int64_t bit = 0; bit < 64; ++bit )
     {
-        if ( iValue & ( 1 << bit ) )
+        if ( iValue & ( Alembic::Util::int64_t( 1 ) << bit ) )
         {
             return bit + 1;
         }
@@ -95,7 +95,7 @@ StreamManager::StreamManager( std::size_t iNumStreams )
             m_streamIDs[i] = i;
             if ( m_numStreams < sizeof(m_streams) * 8 )
             {
-                m_streams |= 1 << i;
+                m_streams |= Alembic::Util::int64_t( 1 ) << i;
             }
         }
     }
@@ -145,7 +145,7 @@ StreamIDPtr StreamManager::get()
             return m_default;
         }
 
-        newVal = oldVal & ~( 1 << (val - 1) );
+        newVal = oldVal & ~( Alembic::Util::int64_t( 1 ) << (val - 1) );
     }
     while ( ! COMPARE_EXCHANGE( m_streams, oldVal, newVal ) );
 
@@ -173,7 +173,7 @@ void StreamManager::put( std::size_t iStreamID )
     do
     {
         oldVal = m_streams;
-        newVal = oldVal | ( 1 << iStreamID );
+        newVal = oldVal | ( Alembic::Util::int64_t( 1 ) << iStreamID );
     }
     while ( ! COMPARE_EXCHANGE( m_streams, oldVal, newVal ) );
 }

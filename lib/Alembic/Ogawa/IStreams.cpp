@@ -230,8 +230,14 @@ void IStreams::read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
         std::istream * stream = mData->streams[threadId];
 
         // the file hasn't been opened for this id yet
-        if (stream == NULL && !mData->fileName.empty())
+        if (stream == NULL)
         {
+            // if no file is specified then we have nothing to open so bail
+            if (mData->fileName.empty())
+            {
+                return;
+            }
+
             std::ifstream * filestream = new std::ifstream;
             filestream->open(mData->fileName.c_str(), std::ios::binary);
 

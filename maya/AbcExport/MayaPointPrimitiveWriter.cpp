@@ -68,10 +68,6 @@ MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
     {
         mIsAnimated = true;
     }
-    else
-    {
-        iTimeIndex = 0;
-    }
 
     if (!mIsAnimated || iArgs.setFirstAnimShape)
     {
