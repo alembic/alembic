@@ -461,7 +461,7 @@ bool IObject::isInstanceDescendant() const
 }
 
 //-*****************************************************************************
-std::string IObject::instanceSourcePath()
+std::string IObject::instanceSourcePath() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::instanceSourcePath()" );
 

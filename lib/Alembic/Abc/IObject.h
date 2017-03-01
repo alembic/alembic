@@ -223,7 +223,7 @@ public:
 
     //! If this object is an instance (isInstanceRoot), returns the source path
     //! that the instance points at.  Otherwise and empty string is returned.
-    std::string instanceSourcePath();
+    std::string instanceSourcePath() const;
 
     bool isChildInstance(size_t iChildIndex) const;
     bool isChildInstance(const std::string &iChildName) const;
