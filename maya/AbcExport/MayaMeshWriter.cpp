@@ -1105,6 +1105,7 @@ void MayaMeshWriter::writeSubD(
     }
 #endif
 
+    samp.setUVs( iUVs );
     mSubDSchema.set(samp);
     writeColor();
     writeUVSets();
