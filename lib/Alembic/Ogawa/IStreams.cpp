@@ -260,8 +260,20 @@ void IStreams::read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
                 return;
             }
         }
-        stream->seekg(iPos + mData->offsets[threadId]);
-        stream->read((char *)oBuf, iSize);
+
+        // make sure our seek was good and not at the end of the file before
+        // trying to do the read
+        if (stream->seekg(iPos + mData->offsets[threadId]).good())
+        {
+            stream->read((char *)oBuf, iSize);
+        }
+
+        // if the seekg or read failed throw an exception
+        if (stream->fail())
+        {
+            throw std::runtime_error(
+                "Ogawa IStreams::read failed.");
+        }
     }
 }
 
