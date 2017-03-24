@@ -264,10 +264,6 @@ TimeSampling::getFloorIndex( chrono_t iTime, index_t iNumSamples ) const
                                        kCHRONO_EPSILON ) )
         {
             rawNumCyclesIntregal += 1;
-
-            // resetting for clarity, even though this variable is never
-            // used again
-            rawNumCyclesFractional = 0.0;
         }
 
         const index_t numCycles = ( index_t )rawNumCyclesIntregal;

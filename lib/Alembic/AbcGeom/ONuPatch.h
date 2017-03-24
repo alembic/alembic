@@ -254,7 +254,7 @@ public:
                 (m_numV != ABC_GEOM_NUPATCH_NULL_INT_VALUE) ||
                 (m_uOrder != ABC_GEOM_NUPATCH_NULL_INT_VALUE) ||
                 (m_vOrder != ABC_GEOM_NUPATCH_NULL_INT_VALUE) ||
-                 m_uKnot || m_uKnot)
+                 m_uKnot || m_vKnot)
                  return true;
             else
                 return false;

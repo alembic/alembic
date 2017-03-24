@@ -84,7 +84,7 @@ void OLightSchema::init( AbcA::CompoundPropertyWriterPtr iParent,
     // otherwise we'll use the index, which defaults to the intrinsic 0 index
     if (tsPtr)
     {
-        tsIndex = iParent->getObject()->getArchive()->addTimeSampling( *tsPtr );
+        iParent->getObject()->getArchive()->addTimeSampling( *tsPtr );
         m_tsPtr = tsPtr;
     }
     else
