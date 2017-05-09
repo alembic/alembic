@@ -42,7 +42,7 @@ LIST(APPEND CXX_FILES
 )
 SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-INSTALL(FILES Read.h Util.h
+INSTALL(FILES Read.h Util.h Foundation.h
         DESTINATION include/Alembic/AbcCoreLayer)
 
 IF (USE_TESTS)
