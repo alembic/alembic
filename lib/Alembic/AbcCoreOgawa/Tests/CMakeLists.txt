@@ -44,25 +44,25 @@ SET(CXX_FILES
 )
 
 ADD_EXECUTABLE(AbcCoreOgawa_ArchiveTests ArchiveTests.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreOgawa_ArchiveTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ArchiveTests Alembic)
 
 ADD_EXECUTABLE(AbcCoreOgawa_ArrayPropertyTests ArrayPropertyTests.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreOgawa_ArrayPropertyTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ArrayPropertyTests Alembic)
 
 ADD_EXECUTABLE(AbcCoreOgawa_HashesTests HashesTests.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreOgawa_HashesTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_HashesTests Alembic)
 
 ADD_EXECUTABLE(AbcCoreOgawa_ScalarPropertyTests ScalarPropertyTests.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreOgawa_ScalarPropertyTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ScalarPropertyTests Alembic)
 
 ADD_EXECUTABLE(AbcCoreOgawa_TimeSamplingTests TimeSamplingTests.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreOgawa_TimeSamplingTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_TimeSamplingTests Alembic)
 
 ADD_EXECUTABLE(AbcCoreOgawa_ObjectTests ObjectTests.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreOgawa_ObjectTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ObjectTests Alembic)
 
 ADD_EXECUTABLE(AbcCoreOgawa_ConstantPropsTest ConstantPropsNumSampsTest.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreOgawa_ConstantPropsTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_ConstantPropsTest Alembic)
 
 ADD_TEST(AbcCoreOgawa_ArchiveTESTS AbcCoreOgawa_ArchiveTests)
 ADD_TEST(AbcCoreOgawa_ArrayPropertyTESTS AbcCoreOgawa_ArrayPropertyTests)

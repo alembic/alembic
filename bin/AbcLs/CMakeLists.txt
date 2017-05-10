@@ -35,7 +35,7 @@
 
 ADD_EXECUTABLE(abcls AbcLs.cpp)
 
-TARGET_LINK_LIBRARIES(abcls ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(abcls Alembic)
 
 set_target_properties(abcls PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE

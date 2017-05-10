@@ -235,24 +235,6 @@ ENDIF()
 # BUILD LIBRARIES
 #-******************************************************************************
 
-IF (USE_HDF5)
-    SET(CORE_LIBS
-        Alembic
-        ${HDF5_LIBRARIES}
-        ${ALEMBIC_ILMBASE_LIBS}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${ZLIB_LIBRARIES}
-        ${EXTERNAL_MATH_LIBS}
-    )
-ELSE()
-    SET(CORE_LIBS
-        Alembic
-        ${ALEMBIC_ILMBASE_LIBS}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${EXTERNAL_MATH_LIBS}
-    )
-ENDIF()
-
 # Alembic
 ADD_SUBDIRECTORY(lib)
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")

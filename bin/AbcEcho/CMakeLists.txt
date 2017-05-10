@@ -34,10 +34,10 @@
 ##-*****************************************************************************
 
 ADD_EXECUTABLE(abcecho AbcEcho.cpp)
-TARGET_LINK_LIBRARIES(abcecho ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(abcecho Alembic)
 
 ADD_EXECUTABLE(abcechobounds AbcBoundsEcho.cpp)
-TARGET_LINK_LIBRARIES(abcechobounds ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(abcechobounds Alembic)
 
 set_target_properties(abcecho abcechobounds PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE

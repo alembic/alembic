@@ -41,10 +41,10 @@ SET(CXX_FILES
 )
 
 ADD_EXECUTABLE(AbcCoreLayer_ObjectTests ObjectTests.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreLayer_ObjectTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreLayer_ObjectTests Alembic)
 
 ADD_EXECUTABLE(AbcCoreLayer_PropTests PropTests.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreLayer_PropTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreLayer_PropTests Alembic)
 
 ADD_TEST(AbcCoreLayer_ObjectTESTS AbcCoreLayer_ObjectTests)
 ADD_TEST(AbcCoreLayer_PropTESTS AbcCoreLayer_PropTests)
