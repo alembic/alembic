@@ -36,13 +36,13 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 ADD_EXECUTABLE(AbcCoreAbstractTimeSamplingTest TestTimeSampling.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreAbstractTimeSamplingTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreAbstractTimeSamplingTest Alembic)
 
 ADD_EXECUTABLE(AbcCoreAbstractCompoundPropsTest1 CompoundPropertyTest1.cpp)
-TARGET_LINK_LIBRARIES(AbcCoreAbstractCompoundPropsTest1 ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcCoreAbstractCompoundPropsTest1 Alembic)
 
 ADD_EXECUTABLE(OctessenceBug58 OctessenceBug58.cpp)
-TARGET_LINK_LIBRARIES(OctessenceBug58 ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(OctessenceBug58 Alembic)
 
 ADD_TEST(AbcCoreAbstract_TimeSampling_TEST AbcCoreAbstractTimeSamplingTest)
 ADD_TEST(AbcCoreAbstract_CompoundProps_TEST1 AbcCoreAbstractCompoundPropsTest1)

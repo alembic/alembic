@@ -76,7 +76,7 @@ ADD_MAYA_CXX_PLUGIN(AbcImport ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(AbcImport
     ${MAYA_LIBRARIES}
-    ${CORE_LIBS}
+    Alembic
 )
 
 set_target_properties(AbcImport PROPERTIES

@@ -34,7 +34,7 @@
 ##-*****************************************************************************
 
 ADD_EXECUTABLE(abcconvert AbcConvert.cpp)
-TARGET_LINK_LIBRARIES(abcconvert ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(abcconvert Alembic)
 
 set_target_properties(abcconvert PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE

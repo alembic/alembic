@@ -36,66 +36,66 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 ADD_EXECUTABLE(Abc_Test1 test1.cpp)
-TARGET_LINK_LIBRARIES(Abc_Test1 ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_Test1 Alembic)
 
 ADD_EXECUTABLE(Abc_ObjectsAndProperties_Test2 ObjectsAndPropertiesTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_ObjectsAndProperties_Test2 ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_ObjectsAndProperties_Test2 Alembic)
 
 ADD_TEST(Abc_TEST1 Abc_Test1)
 ADD_TEST(Abc_Objects_and_Properties_TEST2 Abc_ObjectsAndProperties_Test2)
 
 ADD_EXECUTABLE(Abc_CompileTests CompileTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_CompileTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_CompileTests Alembic)
 ADD_TEST(Abc_Compile_TEST Abc_CompileTests)
 
 ADD_EXECUTABLE(Abc_ObjectTests ObjectTests.cpp)
-TARGET_LINK_LIBRARIES(Abc_ObjectTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_ObjectTests Alembic)
 ADD_TEST(Abc_Object_TEST Abc_ObjectTests)
 
 ADD_EXECUTABLE(Abc_PropertyTests PropertyTests.cpp)
-TARGET_LINK_LIBRARIES(Abc_PropertyTests ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_PropertyTests Alembic)
 ADD_TEST(Abc_Property_TEST Abc_PropertyTests)
 
 ADD_EXECUTABLE(Abc_UniformPropertyTest UniformPropertyTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_UniformPropertyTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_UniformPropertyTest Alembic)
 ADD_TEST(Abc_Uniform_Property_TEST Abc_UniformPropertyTest)
 
 ADD_EXECUTABLE(Abc_IdentityPropertyTest IdentityPropertyTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_IdentityPropertyTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_IdentityPropertyTest Alembic)
 ADD_TEST(Abc_Identity_Property_TEST Abc_IdentityPropertyTest)
 
 ADD_EXECUTABLE(Abc_ArrayPropertyTest ArrayPropertyTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_ArrayPropertyTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_ArrayPropertyTest Alembic)
 ADD_TEST(Abc_Array_Property_TEST Abc_ArrayPropertyTest)
 
 ADD_EXECUTABLE(Abc_InstanceTest InstanceTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_InstanceTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_InstanceTest Alembic)
 ADD_TEST(Abc_Instance_TEST Abc_InstanceTest)
 
 ADD_EXECUTABLE(Abc_ArchiveTest ArchiveTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_ArchiveTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_ArchiveTest Alembic)
 ADD_TEST(Abc_Archive_TEST Abc_ArchiveTest)
 
 ADD_EXECUTABLE(Abc_CyclicPropertyTest CyclicPropertyTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_CyclicPropertyTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_CyclicPropertyTest Alembic)
 ADD_TEST(Abc_Cyclic_Property_TEST Abc_CyclicPropertyTest)
 
 ADD_EXECUTABLE(Abc_ParentingTest ParentingTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_ParentingTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_ParentingTest Alembic)
 ADD_TEST(Abc_Parenting_TEST Abc_ParentingTest)
 
 ADD_EXECUTABLE(Abc_OctessenceBug17 OctessenceBug17.cpp)
-TARGET_LINK_LIBRARIES(Abc_OctessenceBug17 ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_OctessenceBug17 Alembic)
 ADD_TEST(Abc_OctessenceBug17_TEST Abc_OctessenceBug17)
 
 ADD_EXECUTABLE(Abc_OctessenceBug16 OctessenceBug16.cpp)
-TARGET_LINK_LIBRARIES(Abc_OctessenceBug16 ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_OctessenceBug16 Alembic)
 ADD_TEST(Abc_OctessenceBug16_TEST Abc_OctessenceBug16)
 
 ADD_EXECUTABLE(Abc_CacheControlTest CacheControlTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_CacheControlTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_CacheControlTest Alembic)
 ADD_TEST(Abc_CacheControl_TEST Abc_CacheControlTest)
 
 ADD_EXECUTABLE(Abc_RedundantDataPathsTest RedundantDataTest.cpp)
-TARGET_LINK_LIBRARIES(Abc_RedundantDataPathsTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(Abc_RedundantDataPathsTest Alembic)
 ADD_TEST(Abc_RedundantDataPaths_TEST Abc_RedundantDataPathsTest)

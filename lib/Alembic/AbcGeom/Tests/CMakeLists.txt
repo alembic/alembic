@@ -39,90 +39,90 @@ ADD_EXECUTABLE(AbcGeom_PolyMeshTest
                MeshData.h
                MeshData.cpp
                PolyMeshTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_PolyMeshTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_PolyMeshTest Alembic)
 ADD_TEST(AbcGeom_PolyMesh_TEST AbcGeom_PolyMeshTest)
 
 ADD_EXECUTABLE(AbcGeom_HelperLibTest
                 HelperLibTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_HelperLibTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_HelperLibTest Alembic)
 ADD_TEST(AbcGeom_HelperLib_TEST AbcGeom_HelperLibTest)
 
 ADD_EXECUTABLE(AbcGeom_PointsTest
                PointsTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_PointsTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_PointsTest Alembic)
 ADD_TEST(AbcGeom_Points_TEST AbcGeom_PointsTest)
 
 ADD_EXECUTABLE(AbcGeom_NurbsTest
                NurbsData.h
                NurbsData.cpp
                NurbsTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_NurbsTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_NurbsTest Alembic)
 ADD_TEST(AbcGeom_Nurbs_TEST AbcGeom_NurbsTest)
 
 ADD_EXECUTABLE(AbcGeom_SubDTest
                MeshData.h
                MeshData.cpp
                SubDTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_SubDTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_SubDTest Alembic)
 ADD_TEST(AbcGeom_SubD_TEST AbcGeom_SubDTest)
 
 ADD_EXECUTABLE(AbcGeom_SubDFaceSetTest
                MeshData.h
                MeshData.cpp
                SubDFaceSetTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_SubDFaceSetTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_SubDFaceSetTest Alembic)
 ADD_TEST(AbcGeom_SubDFaceSet_TEST AbcGeom_SubDFaceSetTest)
 
 ADD_EXECUTABLE(AbcGeom_SchemaMatchingTest
                SchemaMatchingTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_SchemaMatchingTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_SchemaMatchingTest Alembic)
 ADD_TEST(AbcGeom_SchemaMatching_TEST AbcGeom_SchemaMatchingTest)
 
 ADD_EXECUTABLE(AbcGeom_XformTest
                XformTests.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_XformTest  ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_XformTest  Alembic)
 ADD_TEST(AbcGeom_Xform_TEST  AbcGeom_XformTest)
 
 ADD_EXECUTABLE(AbcGeom_XformTest2
                XformTests2.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_XformTest2  ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_XformTest2  Alembic)
 ADD_TEST(AbcGeom_Xform2_TEST  AbcGeom_XformTest2)
 
 ADD_EXECUTABLE(AbcGeom_CurvesTest
                CurvesData.h
                CurvesData.cpp
                CurvesTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_CurvesTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_CurvesTest Alembic)
 ADD_TEST(AbcGeom_Curves_TEST AbcGeom_CurvesTest)
 
 ADD_EXECUTABLE(AbcGeom_GeomBaseTest
                CurvesData.h
                CurvesData.cpp
                GeomBaseTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_GeomBaseTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_GeomBaseTest Alembic)
 ADD_TEST(AbcGeom_GeomBase_TEST AbcGeom_GeomBaseTest)
 
 ADD_EXECUTABLE(AbcGeom_TransformingMeshTest
                MeshData.h
                MeshData.cpp
                TransformingMeshTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_TransformingMeshTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_TransformingMeshTest Alembic)
 ADD_TEST(AbcGeom_TransformingMesh_TEST AbcGeom_TransformingMeshTest)
 
 ADD_EXECUTABLE(AbcGeom_CompileTest
                CompileTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_CompileTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_CompileTest Alembic)
 ADD_TEST(AbcGeom_CompileTest_TEST AbcGeom_CompileTest)
 
 ADD_EXECUTABLE(AbcGeom_LightTest
                LightTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_LightTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_LightTest Alembic)
 ADD_TEST(AbcGeom_LightTest_TEST AbcGeom_LightTest)
 
 ADD_EXECUTABLE(AbcGeom_CameraTest
                CameraTest.cpp)
-TARGET_LINK_LIBRARIES(AbcGeom_CameraTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcGeom_CameraTest Alembic)
 ADD_TEST(AbcGeom_Points_TEST AbcGeom_CameraTest)
 
 ADD_EXECUTABLE(playground PlayGround.cpp)
-TARGET_LINK_LIBRARIES(playground ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(playground Alembic)

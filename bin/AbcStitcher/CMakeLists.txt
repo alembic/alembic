@@ -34,7 +34,7 @@
 ##-*****************************************************************************
 
 ADD_EXECUTABLE(abcstitcher AbcStitcher.cpp util.cpp)
-TARGET_LINK_LIBRARIES(abcstitcher ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(abcstitcher Alembic)
 
 set_target_properties(abcstitcher PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE

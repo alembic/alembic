@@ -36,16 +36,16 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 ADD_EXECUTABLE(AlembicUtilOperatorBool_Test OperatorBoolTest.cpp)
-TARGET_LINK_LIBRARIES(AlembicUtilOperatorBool_Test ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AlembicUtilOperatorBool_Test Alembic)
 
 ADD_EXECUTABLE(AlembicUtilTokenMap_Test TokenMapTest.cpp)
-TARGET_LINK_LIBRARIES(AlembicUtilTokenMap_Test ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AlembicUtilTokenMap_Test Alembic)
 
 ADD_EXECUTABLE(AlembicUtilDimensions_Test_Jeffs DimensionsTestJeffs.cpp)
-TARGET_LINK_LIBRARIES(AlembicUtilDimensions_Test_Jeffs ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AlembicUtilDimensions_Test_Jeffs Alembic)
 
 ADD_EXECUTABLE(AlembicUtilNaming_Test NamingTest.cpp)
-TARGET_LINK_LIBRARIES(AlembicUtilNaming_Test ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AlembicUtilNaming_Test Alembic)
 
 ADD_TEST(AlembicUtilOperatorBool_TEST AlembicUtilOperatorBool_Test)
 ADD_TEST(AlembicUtilTokenMap_TEST AlembicUtilTokenMap_Test)
