@@ -97,6 +97,11 @@ FaceSetExclusivity IFaceSetSchema::getFaceExclusivity() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IFaceSetSchema::getFaceExclusivity" );
 
+    if ( !this->getPropertyHeader( ".facesExclusive" ) )
+    {
+        return kFaceSetNonExclusive;
+    }
+
     Abc::IUInt32Property facesExclusiveProperty( this->getPtr(),
         ".facesExclusive");
     if ( facesExclusiveProperty )
