@@ -92,14 +92,16 @@ public:
 
         Alembic::Util::uint64_t totalRead = 0;
         ssize_t numRead = 0;
+        void * buf = oBuf;
 
         do
         {
-            numRead = pread(fd, oBuf, iSize - totalRead, offset);
+            numRead = pread(fd, buf, iSize - totalRead, offset);
             if (numRead > 0)
             {
                 totalRead += numRead;
                 offset += numRead;
+                buf = static_cast< char * >( buf ) + numRead;
             }
         }
         while(numRead > 0 && totalRead < iSize);
