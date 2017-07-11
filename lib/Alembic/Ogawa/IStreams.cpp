@@ -38,8 +38,35 @@
 #include <stdexcept>
 
 #include <fcntl.h>
-#include <unistd.h>
 
+#ifdef _MSC_VER
+
+#include <io.h>
+
+Alembic::Util::int32_t OPENFILE(const char * iFileName, Alembic::Util::int32_t iFlag)
+{
+    Alembic::Util::int32_t fid = -1;
+
+    // One way to prevent writing over a file opened for reading would be to pass in
+    // _SH_DENYWR instead of _SH_DENYNO.  If we can find a posix equivalent we may
+    // have an interesting solution for that problem.
+    _sopen_s(&fid, iFileName, iFlag | _O_RANDOM, _SH_DENYNO, _S_IREAD);
+    return fid;
+}
+
+void CLOSEFILE(Alembic::Util::int32_t iFid)
+{
+    if (iFid > -1)
+    {
+        _close(iFid);
+    }
+}
+
+#else
+#include <unistd.h>
+#define OPENFILE open
+#define CLOSEFILE close
+#endif
 
 namespace Alembic {
 namespace Ogawa {
@@ -91,18 +118,53 @@ public:
         }
 
         Alembic::Util::uint64_t totalRead = 0;
-        ssize_t numRead = 0;
+        void * buf = oBuf;
 
+#ifdef _MSC_VER
+        HANDLE hFile = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
+
+        DWORD numRead = 0;
         do
         {
-            numRead = pread(fd, oBuf, iSize - totalRead, offset);
+            DWORD numToRead = 0;
+            if ((iSize - totalRead) > MAXDWORD)
+            {
+                numToRead = MAXDWORD;
+            }
+            else
+            {
+                numToRead = static_cast<DWORD>(iSize - totalRead);
+            }
+
+            OVERLAPPED overlapped;
+            memset( &overlapped, 0, sizeof(overlapped));
+            overlapped.Offset = static_cast<DWORD>(offset);
+            overlapped.OffsetHigh = static_cast<DWORD>(offset >> 32);
+
+            if (!ReadFile(hFile, buf, numToRead, &numRead, &overlapped))
+            {
+                isGood = false;
+                return;
+            }
+            totalRead += numRead;
+            offset += numRead;
+            buf = static_cast< char * >( buf ) + numRead;
+        }
+        while(numRead > 0 && totalRead < iSize);
+#else
+        ssize_t numRead = 0;
+        do
+        {
+            numRead = pread(fd, buf, iSize - totalRead, offset);
             if (numRead > 0)
             {
                 totalRead += numRead;
                 offset += numRead;
+                buf = static_cast< char * >( buf ) + numRead;
             }
         }
         while(numRead > 0 && totalRead < iSize);
+#endif
 
         // if we couldn't read what we needed to then something went wrong
         if (totalRead < iSize)
@@ -160,7 +222,7 @@ public:
 
         if (fid != -1)
         {
-            close(fid);
+            CLOSEFILE(fid);
         }
     }
 
@@ -178,7 +240,7 @@ IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
     mData(new IStreams::PrivateData())
 {
 
-    mData->fid = open(iFileName.c_str(), O_RDONLY);
+    mData->fid = OPENFILE(iFileName.c_str(), O_RDONLY);
 
     if (mData->fid > -1)
     {
@@ -189,7 +251,7 @@ IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
     if (!mData->valid || mData->version != 1)
     {
         mData->streams.clear();
-        close(mData->fid);
+        CLOSEFILE(mData->fid);
     }
     else
     {
