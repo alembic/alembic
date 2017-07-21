@@ -126,6 +126,11 @@ void Example1_MeshOut()
     my_face_set.setFaceExclusivity ( kFaceSetExclusive );
     TESTING_ASSERT (my_face_set.getFaceExclusivity () == kFaceSetExclusive );
 
+    OFaceSet empty_faceset = mesh.createFaceSet ("totally_empty");
+    faceSetNames.clear();
+    mesh.getFaceSetNames (faceSetNames);
+    TESTING_ASSERT( faceSetNames.size () == 2 );
+
     // No bounds were ever provided
     Box3d  face_set_bounds = my_face_set_samp.getSelfBounds ();
     TESTING_ASSERT(!face_set_bounds.hasVolume());
@@ -157,10 +162,11 @@ void Example1_MeshIn()
     TESTING_ASSERT( 3 == mesh.getNumSamples() );
 
     // ***** FaceSet testing
-    TESTING_ASSERT( mesh.hasFaceSet ("testing_faceset" ) );
+    TESTING_ASSERT( mesh.hasFaceSet ( "testing_faceset" ) );
+    TESTING_ASSERT( mesh.hasFaceSet ( "totally_empty" ) );
     std::vector <std::string> faceSetNames;
     mesh.getFaceSetNames (faceSetNames);
-    TESTING_ASSERT( faceSetNames.size () == 1 );
+    TESTING_ASSERT( faceSetNames.size () == 2 );
     std::vector <std::string>::iterator nameIter;
     for (nameIter = faceSetNames.begin (); nameIter != faceSetNames.end ();
         ++nameIter)
@@ -168,9 +174,10 @@ void Example1_MeshIn()
        std::cout << " obj subd has FaceSet - " << *nameIter << std::endl;
     }
     TESTING_ASSERT( faceSetNames [0] == "testing_faceset" );
+    TESTING_ASSERT( faceSetNames [1] == "totally_empty" );
     IFaceSet faceSetObj = mesh.getFaceSet( "testing_faceset" );
     IFaceSetSchema faceSet = faceSetObj.getSchema();
-    TESTING_ASSERT (faceSet.getFaceExclusivity () == kFaceSetExclusive );
+    TESTING_ASSERT ( faceSet.getFaceExclusivity () == kFaceSetExclusive );
     IFaceSetSchema::Sample faceSetSamp0;
     faceSet.get( faceSetSamp0 );
     Int32ArraySample faces = *(faceSetSamp0.getFaces ());
@@ -180,6 +187,10 @@ void Example1_MeshIn()
 
     IInt32ArrayProperty facesProp = faceSet.getFacesProperty();
     TESTING_ASSERT ( facesProp.getNumSamples() == 1 );
+
+    faceSetObj = mesh.getFaceSet( "totally_empty" );
+    faceSet = faceSetObj.getSchema();
+    TESTING_ASSERT ( faceSet.getFaceExclusivity() == kFaceSetNonExclusive );
 
     // end of FaceSet testing
 
