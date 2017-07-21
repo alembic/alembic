@@ -1,3 +1,62 @@
+2017-7-21, Alembic 1.7.2
+
+Thanks to your feedback and pull requests we have a few bug fixes and
+enhancements.
+
+API:
+
+Fix bug with IFaceSet::getFaceExclusivity (Issue 129)
+
+When reading directly from a file with Ogawa use pread/ReadFile so we don't have to use a file descriptor per stream.  (Issue 124)
+
+Misc:
+
+Propagate HDF5 dependency when doing a static build mentioned in Issue 126. (pull request 128)
+
+Fix up several other minor CMake issues mentioned in Issue 127. (also pull request 128)
+
+Make sure the shared library is given a major/minor version. (based on pull request 125)
+
+##-*****************************************************************************
+
+2017-3-24, Alembic 1.7.1
+
+Thanks to your feedback and pull requests we have a few bug fixes and
+enhancements.
+
+API:
+
+Address Issues 110 and 114 make a few member functions const.
+
+Maya AbcExport:
+
+Fix call to isAnimated when writing Nurbs curves.
+
+Tools:
+
+Fix issue 101 which was a crash in abcls by being careful when
+printing certain strings.
+
+Rework AbcDiff so it better handles completely different hiearchies,
+and only attempts to do diffs on Ogawa files so we can take advantages
+of the computed hashes.
+
+Misc:
+
+Add continuous integration to the project via Travis. (pull request 98)
+
+Issue 104 turned up a problem with one of the tests when using newer
+versions of HDF5. This test can be removed.
+
+Fix small typo in code comments. (pull request 105)
+
+Make sure to use python 2, even if 3 can be found since some of the
+dependent binaries don't support it. (pull request 108)
+
+Fix typo in CMake Cxx11 variable name mentioned in Issue 115.
+
+##-*****************************************************************************
+
 2016-11-7, Alembic 1.7.0
 Hello Alembic users,
 
