@@ -252,6 +252,7 @@ IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
     {
         mData->streams.clear();
         CLOSEFILE(mData->fid);
+        mData->fid = -1;
     }
     else
     {
