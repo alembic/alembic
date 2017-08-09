@@ -1,3 +1,14 @@
+2017-8-9, Alembic 1.7.3
+
+Thanks to your feedback we have a bug fix introduced in the previous release.
+
+API:
+
+Fix a bug where a file opened as Ogawa but not Ogawa would be closed twice
+causing issues on Windows. (Issue 135)
+
+##-*****************************************************************************
+
 2017-7-21, Alembic 1.7.2
 
 Thanks to your feedback and pull requests we have a few bug fixes and
