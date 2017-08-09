@@ -41,6 +41,7 @@
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <vector>
 
@@ -383,6 +384,16 @@ void readVeryEmptyArchive( const std::string & iName )
     TESTING_ASSERT(a->getTop()->getNumChildren() == 0);
 }
 
+void testGarbageArchive()
+{
+    std::ofstream strm("garbage", std::ios_base::trunc | std::ios_base::binary);
+    strm << "garbage" << std::endl;
+    strm.close();
+
+    AO::ReadArchive r;
+    TESTING_ASSERT_THROW(r( "garbage" ), Alembic::Util::Exception);
+}
+
 int main ( int argc, char *argv[] )
 {
     testReadWriteEmptyArchive();
@@ -400,6 +411,8 @@ int main ( int argc, char *argv[] )
     readVeryEmptyArchive("testEmpty.abc");
 
     testReadWriteMaxNumSamplesArchive();
+
+    testGarbageArchive();
 
     return 0;
 }
