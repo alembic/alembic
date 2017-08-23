@@ -83,13 +83,12 @@ public:
     static bool matches( const AbcA::PropertyHeader &iHeader,
                          SchemaInterpMatching iMatching = kStrictMatching )
     {
-        return ( iHeader.getDataType().getPod() ==
-                 TRAITS::dataType().getPod() &&
-                 ( iHeader.getDataType().getExtent() ==
-                   TRAITS::dataType().getExtent() ||
-                   std::string() == getInterpretation() ) ) &&
-               iHeader.isScalar() &&
-               matches( iHeader.getMetaData(), iMatching );
+        return ( 
+            iHeader.getDataType().getPod() == TRAITS::dataType().getPod() &&
+            iHeader.getDataType().getExtent() ==
+                TRAITS::dataType().getExtent() &&
+            iHeader.isScalar() &&
+            matches( iHeader.getMetaData(), iMatching ) );
     }
 
     //-*************************************************************************
