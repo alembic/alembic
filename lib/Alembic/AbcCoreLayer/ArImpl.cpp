@@ -35,7 +35,9 @@
 //-*****************************************************************************
 
 #include <Alembic/AbcCoreLayer/ArImpl.h>
-#include <Alembic/AbcCoreFactory/IFactory.h>
+#include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
+#include <Alembic/Abc/IArchive.h>
+#include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreLayer/OrImpl.h>
 
 namespace Alembic {
