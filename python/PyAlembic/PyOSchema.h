@@ -66,50 +66,30 @@ void register_OSchema( const char* iName )
           "Usually used as a base class, but could also theoretically be used "
           "as a standalone.",
           init<>() )
-        .def( init<Abc::OCompoundProperty,
-                   const std::string&,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
-                     arg( "argument" ), arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
-        .def( init<Abc::OCompoundProperty,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), 
-                     arg( "argument" ), arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
         .def( "getSchemaTitle",
               OSchema::getSchemaTitle,
               "Return the schema title expected of this property."
-              "An empty title matches everything.",
-              return_value_policy<copy_const_reference>() )
+              "An empty title matches everything." )
         .def( "getSchemaBaseType",
               OSchema::getSchemaBaseType,
               "Return the schema base type expected of this property."
-              "An empty base type means it's the root type.", 
-              return_value_policy<copy_const_reference>() )
+              "An empty base type means it's the root type." )
         .staticmethod( "getSchemaTitle" )
         .def( "getDefaultSchemaName",
               OSchema::getDefaultSchemaName,
               "Return the default name for instances of this schema. "
-              "Often something like '.geom'.",
-              return_value_policy<copy_const_reference>() )
+              "Often something like '.geom'." )
         .staticmethod( "getDefaultSchemaName" )
         .def( "matches",
               OSchemaOverloads::matchesMetaData,
-              ( arg( "metadata" ), 
+              ( arg( "metadata" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "This will check whether or not a given entity (as represented "
               "by a metadata) strictly matches the interpretation of this "
               "schema object." )
         .def( "matches",
               OSchemaOverloads::matchesHeader,
-              ( arg( "header" ), 
+              ( arg( "header" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "This will check whether or not a given entity (as represented "
               "by an object header) strictly matches the interpretation of this"

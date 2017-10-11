@@ -40,6 +40,13 @@ namespace Alembic {
 namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
+IScalarProperty::IScalarProperty( const ICompoundProperty & iParent,
+                                  const std::string &iName,
+                                  const Argument &iArg0 )
+{
+    init( iParent.getPtr(), iName, GetErrorHandlerPolicy( iParent ), iArg0 );
+}
+
 //-*****************************************************************************
 IScalarProperty::~IScalarProperty()
 {

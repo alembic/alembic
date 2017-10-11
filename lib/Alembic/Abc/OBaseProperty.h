@@ -81,10 +81,6 @@ protected:
         //! ...
         PROP_PTR iPtr,
 
-        //! The flag indicating that the intention
-        //! is to wrap the existing pointer.
-        WrapExistingFlag /* iWrapFlag */,
-
         //! The error handling.
         //! ...
         ErrorHandler::Policy iPolicy );
@@ -196,11 +192,16 @@ template <class PROP_PTR>
 inline OBasePropertyT<PROP_PTR>::OBasePropertyT
 (
     PROP_PTR iPtr,
-    WrapExistingFlag /* iFlag */,
     ErrorHandler::Policy iPolicy )
   : m_property( iPtr )
 {
     getErrorHandler().setPolicy( iPolicy );
+}
+
+namespace {
+
+const AbcA::PropertyHeader g_phd;
+
 }
 
 //-*****************************************************************************
@@ -216,8 +217,7 @@ const AbcA::PropertyHeader &OBasePropertyT<PROP_PTR>::getHeader() const
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, so have a default behavior.
-    static const AbcA::PropertyHeader phd;
-    return phd;
+    return g_phd;
 };
 
 //-*****************************************************************************

@@ -44,7 +44,6 @@
 #include <boost/format.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/array.hpp>
@@ -72,6 +71,7 @@
 #include <exception>
 #include <limits>
 
+#include <list>
 #include <map>
 #include <string>
 #include <vector>
@@ -102,13 +102,25 @@
 #include <algorithm>
 
 #ifndef ALEMBIC_VERSION_NS
-#define ALEMBIC_VERSION_NS v7
+#define ALEMBIC_VERSION_NS v10
 #endif
 
 namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
+// similiar to boost::noncopyable
+// explicitly hides copy construction and copy assignment
+class ALEMBIC_EXPORT noncopyable
+{
+protected:
+    noncopyable() {}
+    ~noncopyable() {}
+
+private:
+    noncopyable( const noncopyable& );
+    const noncopyable& operator=( const noncopyable& );
+};
 
 #ifdef ALEMBIC_LIB_USES_BOOST
 using boost::dynamic_pointer_cast;
@@ -133,22 +145,53 @@ using std::shared_ptr;
 using std::static_pointer_cast;
 using std::weak_ptr;
 using std::unordered_map;
+using std::unique_ptr;
 #endif
 
-using std::auto_ptr;
+#if defined(ALEMBIC_LIB_USES_BOOST) || defined(ALEMBIC_LIB_USES_TR1)
 
-// similiar to boost::noncopyable
-// explicitly hides copy construction and copy assignment
-class ALEMBIC_EXPORT noncopyable
+// define a very simple scoped ptr since unique_ptr isn't consistently
+// available on boost versions.  Otherwise we could use boost::scoped_ptr
+// or the deprecated std::auto_ptr for tr1.
+template<typename T>
+class unique_ptr : noncopyable
 {
-protected:
-    noncopyable() {}
-    ~noncopyable() {}
+public:
+    unique_ptr()
+    {
+        p = NULL;
+    }
 
+    unique_ptr( T* val ) : p(val)
+    {
+    }
+
+    ~unique_ptr()
+    {
+        if ( p )
+        {
+            delete p;
+        }
+    }
+
+    void reset( T* val )
+    {
+        if ( p )
+        {
+            delete p;
+        }
+        p = val;
+    }
+
+    T* operator->() const
+    {
+        return p;
+    }
 private:
-    noncopyable( const noncopyable& );
-    const noncopyable& operator=( const noncopyable& );
+    T* p;
 };
+
+#endif
 
 // similiar to boost::totally_ordered
 // only need < and == operators and this fills in the rest

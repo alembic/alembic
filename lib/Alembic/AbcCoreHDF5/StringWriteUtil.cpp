@@ -83,7 +83,7 @@ WriteStringT( hid_t iParent,
               const StringT &iString )
 {
     // Verify that no NULL characters have been hidden in the string.
-    static const CharT NullChar = ( CharT )0;
+    CharT NullChar = ( CharT )0;
     ABCA_ASSERT( iString.find( NullChar ) == StringT::npos,
                  "Illegal NULL character found in string in WriteStringT" );
 
@@ -99,11 +99,10 @@ WriteStringT( hid_t iParent,
     DspaceCloser dspaceCloser( dspaceId );
 
     // Get the data.
-    static CharT emptyString = NullChar;
     const CharT *data;
     if ( len == 0 )
     {
-        data = &emptyString;
+        data = &NullChar;
     }
     else
     {
@@ -124,10 +123,10 @@ WriteStringT<std::string,char>( hid_t iParent,
                                 const std::string &iString )
 {
     // Verify that no NULL characters have been hidden in the string.
-    static const char NullChar = ( char )0;
+    const char NullChar = ( char )0;
     ABCA_ASSERT( iString.find( NullChar ) == std::string::npos,
                  "Illegal NULL character found in string in WriteStringT" );
-    
+
     size_t len = iString.length();
     if ( len < 1 ) { len = 1; }
 
@@ -178,14 +177,14 @@ static void CompactStrings( const StringT *iStrings,
 
     // We first loop over the strings and figure out how many
     // total characters we'd need.
-    static const CharT NullChar = ( CharT )0;
+    CharT NullChar = ( CharT )0;
     size_t totalNumChars = 0;
     for ( size_t iStr = 0; iStr < iNumStrings; ++iStr )
     {
         ABCA_ASSERT( iStrings[iStr].find( NullChar ) == StringT::npos,
                      "Illegal NULL character found in string: "
                      << iStr << " of the string array." );
-        
+
         totalNumChars += iStrings[iStr].length() + 1;
     }
     assert( totalNumChars >= iNumStrings );

@@ -74,27 +74,6 @@ void testReadWriteEmptyArchive()
         ABCA::ObjectWriterPtr archive = a->getTop();
 
         TESTING_ASSERT(archive->getFullName() == "/");
-
-        // use this to get current reporting mechanism, then supress it
-        // since we expect to see H5F errors because we will be trying to open
-        // a file that is already open for writing.
-        H5E_auto_t func;
-        void * client_data;
-        H5Eget_auto2(H5E_DEFAULT, &func, &client_data);
-        H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-        // can't write an already open archive
-        TESTING_ASSERT_THROW(w(archiveName, ABCA::MetaData()),
-            Alembic::Util::Exception);
-
-        Alembic::AbcCoreHDF5::ReadArchive r;
-
-        // can't read an already open archive
-        TESTING_ASSERT_THROW(r( archiveName ), Alembic::Util::Exception);
-
-        // turn the error reporting back on for later tests
-        H5Eset_auto2(H5E_DEFAULT, func, client_data);
-
     }
 
     {

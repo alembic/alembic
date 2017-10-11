@@ -65,23 +65,6 @@ void register_olight()
           "OLightSchema",
           "The OLightSchema class is a light schema writer",
           init<>() )
-        .def( init<Abc::OCompoundProperty,
-                   const std::string&,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
-                     arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
-        .def( init<Abc::OCompoundProperty,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ),
-                     arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
         .def( "getTimeSampling",
               &AbcG::OLightSchema::getTimeSampling )
         .def( "getNumSamples",

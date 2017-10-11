@@ -46,6 +46,7 @@ namespace ALEMBIC_VERSION_NS {
 ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcMaterial_Material_v1",
                                  "",
                                  ".material",
+                                 false,
                                  MaterialSchemaInfo );
 
 }

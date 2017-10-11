@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2016,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,62 +33,20 @@
 ##
 ##-*****************************************************************************
 
-IF (NOT DEFINED LIBPYTHON_VERSION)
-    IF (APPLE)
-        SET(LIBPYTHON_VERSION 2.7)
-    ELSE()
-        SET(LIBPYTHON_VERSION 2.6)
-    ENDIF()
-ENDIF()
-
-SET(LIBPYTHON python${LIBPYTHON_VERSION})
-OPTION(USE_LIB64 "Search for deps in lib64 vs lib" ON)
-
-# find python lib dir and include files
-IF (${CMAKE_HOST_UNIX})
-    IF (${DARWIN})
-      SET(LIBPYTHON_FILE "lib${LIBPYTHON}.dylib")
-        SET(OSX_PYTHON_ROOT 
-            "/System/Library/Frameworks/Python.framework/Versions/${LIBPYTHON_VERSION}")
-        SET(PYTHON_INCLUDE_DIR "${OSX_PYTHON_ROOT}/include/${LIBPYTHON}")
-
-        SET(ALEMBIC_PYTHON_ROOT "${OSX_PYTHON_ROOT}/lib")
-    ELSE()
-      SET(LIBPYTHON_FILE "lib${LIBPYTHON}.so")
-        SET(PYTHON_INCLUDE_DIR "/usr/include/${LIBPYTHON}")
-        IF (USE_LIB64)
-            SET(ALEMBIC_PYTHON_ROOT "/usr/lib64/${LIBPYTHON}/config")
-        ELSE()
-            SET(ALEMBIC_PYTHON_ROOT "/usr/lib/${LIBPYTHON}/config")
-        ENDIF()
-    ENDIF()
-ELSE()
-    SET(LIBPYTHON_FILE "${LIBPYTHON}.dll")
-    IF (${WINDOWS})
-        SET(ALEMBIC_PYTHON_ROOT "C:/Python${LIBPYTHON_VERSION}/libs")
-    ELSE()
-        SET(ALEMBIC_PYTHON_ROOT NOTFOUND)
-    ENDIF()
-ENDIF()
-
-MESSAGE(STATUS "LIBPYTHON_FILE: ${LIBPYTHON_FILE}")
-MESSAGE(STATUS "ALEMBIC_PYTHON_ROOT: ${ALEMBIC_PYTHON_ROOT}")
-
-# find the python lib file
-FIND_FILE(ALEMBIC_PYTHON_LIBRARY ${LIBPYTHON_FILE}
-          PATHS ${ALEMBIC_PYTHON_ROOT}
-)
-
-MESSAGE(STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}")
 MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
-MESSAGE(STATUS "PYTHON_INCLUDE_DIR:" ${PYTHON_INCLUDE_DIR})
 
 # set core libs
 IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
     MESSAGE(STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}")
     SET(PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY})
 
+    # lots of warnings coming from unused local typedefs inside boost python
+    IF (NOT WINDOWS)
+        ADD_DEFINITIONS(-Wno-unused-local-typedefs)
+    ENDIF()
+
     SET(CPP_FILES
+        PyAbcCoreLayer.cpp
         PyAbcGeomTypes.cpp
         PyAbcTypes.cpp
         PyArchiveBounds.cpp
@@ -130,9 +88,9 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
         PyOCompoundProperty.cpp
         PyOCurves.cpp
         PyOFaceSet.cpp
-        PyOGeomParam.cpp 
+        PyOGeomParam.cpp
         PyOGeomParamPOD.cpp
-        PyOGeomParamVertexPoint.cpp 
+        PyOGeomParamVertexPoint.cpp
         PyOGeomParamBox.cpp
         PyOGeomParamMatrixQuadColorNormal.cpp
         PyOLight.cpp
@@ -155,7 +113,7 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
         main.cpp
     )
 
-    LINK_LIBRARIES(${CORE_LIBS}
+    LINK_LIBRARIES(Alembic
                    ${PLIBS}
                    ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
     )
@@ -163,18 +121,23 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
     INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
           "${CMAKE_SOURCE_DIR}/python/PyAlembic")
 
-    ADD_LIBRARY(alembicmodule SHARED ${CPP_FILES})
+    ADD_LIBRARY(alembic SHARED ${CPP_FILES})
 
-    # to get rid of the "lib" prefix from cmake
-    SET_TARGET_PROPERTIES(alembicmodule PROPERTIES PREFIX "")
+    SET_TARGET_PROPERTIES(alembic
+        PROPERTIES PREFIX "" SUFFIX ".so"
+    )
 
-    INSTALL(TARGETS alembicmodule
-            LIBRARY DESTINATION lib)
+    INSTALL (TARGETS alembic
+        DESTINATION lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
+    )
 
     IF (USE_TESTS)
         ADD_SUBDIRECTORY(Tests)
     ENDIF()
 
+    set_target_properties(alembic PROPERTIES
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 ELSE()
     MESSAGE(FATAL_ERROR "Unable to find Python libs")
 ENDIF()

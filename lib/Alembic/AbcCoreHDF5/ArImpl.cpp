@@ -67,7 +67,9 @@ ArImpl::ArImpl( const std::string &iFileName,
     int version = -INT_MAX;
     if (H5Aexists(m_file, "abc_version"))
     {
-        H5LTget_attribute_int(m_file, ".", "abc_version", &version);
+        size_t numRead = 0;
+        ReadSmallArray(m_file, "abc_version",  H5T_STD_I32LE, H5T_NATIVE_INT32,
+            1, numRead, &version);
     }
     ABCA_ASSERT(version >= -8 && version <= ALEMBIC_HDF5_FILE_VERSION,
         "Unsupported file version detected: " << version);
@@ -76,8 +78,9 @@ ArImpl::ArImpl( const std::string &iFileName,
     int fileVersion = 9999;
     if (H5Aexists( m_file, "abc_release_version" ))
     {
-        H5LTget_attribute_int( m_file, ".", "abc_release_version",
-                               &fileVersion);
+        size_t numRead = 0;
+        ReadSmallArray( m_file, "abc_release_version", H5T_STD_I32LE,
+            H5T_NATIVE_INT32, 1, numRead, &fileVersion );
     }
     m_archiveVersion = fileVersion;
 

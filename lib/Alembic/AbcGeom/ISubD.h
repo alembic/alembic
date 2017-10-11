@@ -185,51 +185,38 @@ public:
 
     //! The default constructor creates an empty ISubDSchema
     //! ...
-    ISubDSchema() {}
+    ISubDSchema()
+    {
+        m_faceSetsLoaded = false;
+    }
 
-    //! This templated, primary constructor creates a new subd reader.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy and to specify
-    //! schema interpretation matching.
-    template <class CPROP_PTR>
-    ISubDSchema( CPROP_PTR iParent,
+    //! This constructor creates a new subd reader.
+    //! The first argument is the parent ICompoundProperty, from which the
+    //! error handler policy for is derived.  The second argument is the name
+    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    ISubDSchema( const ICompoundProperty &iParent,
                  const std::string &iName,
 
                  const Abc::Argument &iArg0 = Abc::Argument(),
                  const Abc::Argument &iArg1 = Abc::Argument() )
-      : IGeomBaseSchema<SubDSchemaInfo>( iParent, iName,
-                                      iArg0, iArg1 )
+      : IGeomBaseSchema<SubDSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         init(  iArg0, iArg1 );
     }
 
-    //! Same constructor as above, but use the default schema name, ie,
-    //! ".geom".
-    template <class CPROP_PTR>
-    explicit ISubDSchema( CPROP_PTR iParent,
-                          const Abc::Argument &iArg0 = Abc::Argument(),
-                          const Abc::Argument &iArg1 = Abc::Argument() )
-      : IGeomBaseSchema<SubDSchemaInfo>( iParent,
-                                      iArg0, iArg1 )
-    {
-        init( iArg0, iArg1 );
-    }
-
-    //! wrap an existing schema object
-    template <class CPROP_PTR>
-    ISubDSchema( CPROP_PTR iThis,
-                 Abc::WrapExistingFlag iFlag,
-
+    //! This constructor wraps an existing ICompoundProperty as the subd
+    //! reader, and the error handler policy is derived from it.
+    //! The  remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    ISubDSchema( const ICompoundProperty &iProp,
                  const Abc::Argument &iArg0 = Abc::Argument(),
                  const Abc::Argument &iArg1 = Abc::Argument() )
-      : IGeomBaseSchema<SubDSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : IGeomBaseSchema<SubDSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
-
 
     //! Default assignment operator used.
 

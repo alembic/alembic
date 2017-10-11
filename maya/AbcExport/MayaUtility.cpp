@@ -392,7 +392,7 @@ bool util::isDrivenBySplineIK(const MFnIkJoint & iJoint)
             }
         }
     }
-    
+
     return false;
 }
 
@@ -515,13 +515,19 @@ MString util::getHelpText()
 "A specific geometric attribute to write out.\n"
 "This flag may occur more than once.\n"
 "\n"
-"-df / -dataFormat string\n"
-"The data format to use to write the file.  Can be either HDF or Ogawa.\n"
-"The default is Ogawa.\n"
+"-as / -autoSubd\n"
+"If this flag is present and the mesh has crease edges, crease vertices or holes, \n"
+"the mesh (OPolyMesh) would now be written out as an OSubD and crease info will be stored in the Alembic \n"
+"file. Otherwise, creases info won't be preserved in Alembic file \n"
+"unless a custom Boolean attribute SubDivisionMesh has been added to mesh node and its value is true. \n"
 "\n"
 "-atp / -attrPrefix string (default ABC_)\n"
 "Prefix filter for determining which geometric attributes to write out.\n"
 "This flag may occur more than once.\n"
+"\n"
+"-df / -dataFormat string\n"
+"The data format to use to write the file.  Can be either HDF or Ogawa.\n"
+"The default is Ogawa.\n"
 "\n"
 "-ef / -eulerFilter\n"
 "If this flag is present, apply Euler filter while sampling rotations.\n"
@@ -583,6 +589,10 @@ MString util::getHelpText()
 "If this flag is present, uv data for PolyMesh and SubD shapes will be written to\n"
 "the Alembic file.  Only the current uv map is used.\n"
 "\n"
+"-uvo / -uvsOnly\n"
+"If this flag is present, only uv data for PolyMesh and SubD shapes will be written\n"
+"to the Alembic file.  Only the current uv map is used.\n"
+"\n"
 "-wcs / -writeColorSets\n"
 "Write all color sets on MFnMeshes as color 3 or color 4 indexed geometry \n"
 "parameters with face varying scope.\n"
@@ -604,11 +614,6 @@ MString util::getHelpText()
 "-wuvs / -writeUVSets\n"
 "Write all uv sets on MFnMeshes as vector 2 indexed geometry \n"
 "parameters with face varying scope.\n"
-"-as / -autoSubd\n"
-"If this flag is present and the mesh has crease edges, crease vertices or holes, \n"
-"the mesh (OPolyMesh) would now be written out as an OSubD and crease info will be stored in the Alembic \n"
-"file. Otherwise, creases info won't be preserved in Alembic file \n"
-"unless a custom Boolean attribute SubDivisionMesh has been added to mesh node and its value is true. \n"
 "\n"
 "-mfc / -melPerFrameCallback string\n"
 "When each frame (and the static frame) is evaluated the string specified is\n"

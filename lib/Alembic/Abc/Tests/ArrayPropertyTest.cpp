@@ -535,6 +535,9 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
         OCompoundProperty root = archive.getTop().getProperties();
         OC3fArrayProperty colorProp( root, "colors" );
         OInt32ArrayProperty numProp( root, "numbers" );
+        OInt32ArrayProperty numProp2( root, "numbers2" );
+        OInt32ArrayProperty numProp3( root, "numbers3" );
+        OInt32ArrayProperty numProp4( root, "numbers4" );
         AbcA::MetaData md;
         SetReference( md );
         OStringArrayProperty strProp( root, "strings", md );
@@ -554,6 +557,32 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
         strProp.set( strSamp );
         strProp.set( emptyStrSamp );
         strProp.set( strSamp );
+
+        // repeat samples at start
+        numProp2.set( emptyIntSamp );
+        numProp2.set( emptyIntSamp );
+        numProp2.set( emptyIntSamp );
+        numProp2.set( intSamp );
+        numProp2.set( intSamp );
+        numProp2.set( emptyIntSamp );
+        numProp2.set( intSamp );
+
+        // repeat samples at end
+        numProp3.set( intSamp );
+        numProp3.set( emptyIntSamp );
+        numProp3.set( intSamp );
+        numProp3.set( intSamp );
+        numProp3.set( emptyIntSamp );
+        numProp3.set( emptyIntSamp );
+        numProp3.set( emptyIntSamp );
+
+        // repeat at start and end
+        numProp4.set( emptyIntSamp );
+        numProp4.set( emptyIntSamp );
+        numProp4.set( intSamp );
+        numProp4.set( intSamp );
+        numProp4.set( emptyIntSamp );
+        numProp4.set( emptyIntSamp );
     }
 
     {
@@ -572,6 +601,9 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
         IC3fArrayProperty colorProp( root, "colors" );
         IInt32ArrayProperty numProp( root, "numbers" );
         IStringArrayProperty strProp( root, "strings" );
+        IInt32ArrayProperty numProp2( root, "numbers2" );
+        IInt32ArrayProperty numProp3( root, "numbers3" );
+        IInt32ArrayProperty numProp4( root, "numbers4" );
         TESTING_ASSERT( isReference( strProp.getHeader() ) );
 
         TESTING_ASSERT( colorProp.getNumSamples() == 4 );
@@ -611,8 +643,52 @@ void emptyAndValueTest(const std::string &archiveName, bool useOgawa)
             strSamp[0] == ( *strSampPtr )[0] );
         TESTING_ASSERT( intSampPtr->size() == 1 &&
             intSamp[0] == ( *intSampPtr )[0] );
+
+        numProp2.get( intSampPtr, 0 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp2.get( intSampPtr, 1 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp2.get( intSampPtr, 2 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp2.get( intSampPtr, 3 );
+        TESTING_ASSERT( intSampPtr->size() == 1 );
+        numProp2.get( intSampPtr, 4 );
+        TESTING_ASSERT( intSampPtr->size() == 1 );
+        numProp2.get( intSampPtr, 5 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp2.get( intSampPtr, 6 );
+        TESTING_ASSERT( intSampPtr->size() == 1 );
+
+        numProp3.get( intSampPtr, 0 );
+        TESTING_ASSERT( intSampPtr->size() == 1 );
+        numProp3.get( intSampPtr, 1 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp3.get( intSampPtr, 2 );
+        TESTING_ASSERT( intSampPtr->size() == 1 );
+        numProp3.get( intSampPtr, 3 );
+        TESTING_ASSERT( intSampPtr->size() == 1 );
+        numProp3.get( intSampPtr, 4 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp3.get( intSampPtr, 5 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp3.get( intSampPtr, 6 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+
+        numProp4.get( intSampPtr, 0 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp4.get( intSampPtr, 1 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp4.get( intSampPtr, 2 );
+        TESTING_ASSERT( intSampPtr->size() == 1 );
+        numProp4.get( intSampPtr, 3 );
+        TESTING_ASSERT( intSampPtr->size() == 1 );
+        numProp4.get( intSampPtr, 4 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
+        numProp4.get( intSampPtr, 5 );
+        TESTING_ASSERT( intSampPtr->size() == 0 );
     }
 }
+
 
 int main( int argc, char *argv[] )
 {

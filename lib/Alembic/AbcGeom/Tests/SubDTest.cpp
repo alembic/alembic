@@ -389,6 +389,79 @@ void optPropTest()
         TESTING_ASSERT(
             GetSourceName( mesh.getUVsParam().getMetaData() ) == "" );
         TESTING_ASSERT( isUV( mesh.getUVsParam().getHeader() ) );
+
+        TESTING_ASSERT( !mesh.getCreaseIndicesProperty() );
+        TESTING_ASSERT( !mesh.getCreaseLengthsProperty() );
+        TESTING_ASSERT( !mesh.getCreaseSharpnessesProperty() );
+        TESTING_ASSERT( !mesh.getCornerIndicesProperty() );
+        TESTING_ASSERT( !mesh.getCornerSharpnessesProperty() );
+        TESTING_ASSERT( !mesh.getHolesProperty() );
+
+        TESTING_ASSERT( !mesh.getFaceVaryingInterpolateBoundaryProperty() );
+        TESTING_ASSERT( !mesh.getFaceVaryingPropagateCornersProperty() );
+        TESTING_ASSERT( !mesh.getInterpolateBoundaryProperty() );
+        TESTING_ASSERT( !mesh.getSubdivisionSchemeProperty() );
+
+    }
+}
+
+//-*****************************************************************************
+void sparseTest()
+{
+    std::string name = "sparseSubDTest.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
+        OSubD meshUVsObj( OObject( archive, kTop ), "meshUVs", kSparse );
+
+        // only set UVs
+        OSubDSchema::Sample meshSamp;
+        OV2fGeomParam::Sample uvSample( V2fArraySample( (const V2f *)g_uvs,
+            g_numUVs ), kFacevaryingScope );
+        meshSamp.setUVs( uvSample );
+        meshUVsObj.getSchema().set( meshSamp );
+
+        // only set pts
+        OSubD meshPosObj( OObject( archive, kTop ), "meshPositions", kSparse );
+        OSubDSchema::Sample meshSamp2;
+        meshSamp2.setPositions(
+            V3fArraySample( ( const V3f * )g_verts, g_numVerts ) );
+        meshPosObj.getSchema().set( meshSamp2 );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(), name );
+
+        IObject meshUVsObj( IObject( archive, kTop ), "meshUVs" );
+
+        // This should NOT match
+        TESTING_ASSERT( !ISubDSchema::matches( meshUVsObj.getMetaData() ) );
+        ICompoundProperty geomProp( meshUVsObj.getProperties(), ".geom" );
+
+        // This shouldn't match either
+        TESTING_ASSERT( !ISubDSchema::matches( geomProp.getMetaData() ) );
+
+        // and we should ONLY have UVs
+        TESTING_ASSERT( geomProp.getNumProperties() == 1 &&
+            geomProp.getPropertyHeader("uv") != NULL );
+
+        IArrayProperty uvsProp( geomProp, "uv" );
+        TESTING_ASSERT( uvsProp.getNumSamples() == 1 );
+
+        IObject meshPtsObj( IObject( archive, kTop ), "meshPositions" );
+
+        // This should NOT match
+        TESTING_ASSERT( !ISubDSchema::matches( meshPtsObj.getMetaData() ) );
+        geomProp = ICompoundProperty( meshPtsObj.getProperties(), ".geom" );
+
+        // This shouldn't match either
+        TESTING_ASSERT( !ISubDSchema::matches( geomProp.getMetaData() ) );
+        TESTING_ASSERT( geomProp.getNumProperties() == 2 &&
+            geomProp.getPropertyHeader("P") != NULL &&
+            geomProp.getPropertyHeader(".selfBnds") != NULL );
+        IArrayProperty ptsProp( geomProp, "P" );
+        TESTING_ASSERT( ptsProp.getNumSamples() == 1 );
+        IScalarProperty selfBndsProp( geomProp, ".selfBnds" );
+        TESTING_ASSERT( selfBndsProp.getNumSamples() == 1 );
     }
 }
 
@@ -399,5 +472,8 @@ int main( int argc, char *argv[] )
     Example1_MeshIn();
 
     optPropTest();
+
+    sparseTest();
+
     return 0;
 }

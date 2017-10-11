@@ -44,19 +44,57 @@ namespace Alembic {
 namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
+//-*****************************************************************************
+OFaceSetSchema::OFaceSetSchema( AbcA::CompoundPropertyWriterPtr iParent,
+                                const std::string &iName,
+                                const Abc::Argument &iArg0,
+                                const Abc::Argument &iArg1,
+                                const Abc::Argument &iArg2,
+                                const Abc::Argument &iArg3 )
+      : OGeomBaseSchema<FaceSetSchemaInfo>( iParent, iName,
+                                            iArg0, iArg1, iArg2, iArg3 )
+{
+    init( iParent, iArg0, iArg1, iArg2, iArg3 );
+}
 
 //-*****************************************************************************
-void OFaceSetSchema::init( uint32_t iTimeSamplingID )
+OFaceSetSchema::OFaceSetSchema( Abc::OCompoundProperty iParent,
+                                const std::string &iName,
+                                const Abc::Argument &iArg0,
+                                const Abc::Argument &iArg1,
+                                const Abc::Argument &iArg2 )
+      : OGeomBaseSchema<FaceSetSchemaInfo>( iParent.getPtr(), iName,
+                                            GetErrorHandlerPolicy( iParent ),
+                                            iArg0, iArg1, iArg2 )
+{
+    init( iParent.getPtr(), iArg0, iArg1, iArg2, Abc::Argument() );
+}
+
+//-*****************************************************************************
+void OFaceSetSchema::init( AbcA::CompoundPropertyWriterPtr iParent,
+                           const Abc::Argument &iArg0,
+                           const Abc::Argument &iArg1,
+                           const Abc::Argument &iArg2,
+                           const Abc::Argument &iArg3 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OFaceSetSchema::init()" );
 
-    AbcA::MetaData mdata;
-    SetGeometryScope( mdata, kVertexScope );
+    AbcA::TimeSamplingPtr tsPtr =
+        Abc::GetTimeSampling( iArg0, iArg1, iArg2, iArg3 );
+    uint32_t timeSamplingID =
+        Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2, iArg3 );
+
+    // Add or find the timeSamplingID to use for our properties.
+    if (tsPtr)
+    {
+        timeSamplingID = iParent->getObject()->getArchive()->addTimeSampling(
+            *tsPtr);
+    }
 
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
     m_facesProperty = Abc::OInt32ArrayProperty( _this, ".faces",
-        iTimeSamplingID );
+                                                timeSamplingID );
 
     m_facesExclusive = kFaceSetNonExclusive;
 
@@ -182,17 +220,7 @@ void OFaceSetSchema::set( const Sample &iSamp )
         SetPropUsePrevIfNull( m_facesProperty, iSamp.getFaces() );
     }
 
-    // We've now set the sample for the m_faces property.
-    if ( iSamp.getSelfBounds().hasVolume() )
-    {
-        // Caller explicity set bounds for this sample of the faceset.
-        m_selfBoundsProperty.set( iSamp.getSelfBounds() );
-    }
-    else
-    {
-        m_selfBoundsProperty.set( iSamp.getSelfBounds() );
-        // NYI compute self bounds via parent mesh's faces
-    }
+    m_selfBoundsProperty.set( iSamp.getSelfBounds() );
 
     if (m_facesExclusive != kFaceSetNonExclusive)
     {

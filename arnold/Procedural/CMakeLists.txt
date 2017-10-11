@@ -56,7 +56,7 @@ SET( CXX_FILES
 
 
 ADD_ARNOLD_CXX_PLUGIN( AlembicArnoldProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES} )
-TARGET_LINK_LIBRARIES( AlembicArnoldProcedural ${CORE_LIBS})
+TARGET_LINK_LIBRARIES( AlembicArnoldProcedural Alembic)
 
 set_target_properties(AlembicArnoldProcedural PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE

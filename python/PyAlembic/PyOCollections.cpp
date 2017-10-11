@@ -53,10 +53,10 @@ void register_ocollections()
 
     // Overloads for ICollections
     //
-    Abc::OStringArrayProperty 
+    Abc::OStringArrayProperty
         ( AbcC::OCollectionsSchema::*getCollectionByIndex )( size_t i )
         = &AbcC::OCollectionsSchema::getCollection;
-    Abc::OStringArrayProperty 
+    Abc::OStringArrayProperty
         ( AbcC::OCollectionsSchema::*getCollectionByName )
         ( const std::string & iName) = &AbcC::OCollectionsSchema::getCollection;
 
@@ -67,28 +67,11 @@ void register_ocollections()
           "OCollectionsSchema",
           "The OCollectionsSchema class is a collections schema writer.",
           init<>() )
-        .def( init<Abc::OCompoundProperty,
-                   const std::string&,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), arg( "argument" ), 
-                     arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
-        .def( init<Abc::OCompoundProperty,
-                   optional<
-                   const Abc::Argument&,
-                   const Abc::Argument&,
-                   const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
-                     arg( "argument" ), arg( "argument" ) ),
-                   "doc") )
         .def( "createCollection",
               &AbcC::OCollectionsSchema::createCollection,
-              ( arg( "name" ), 
-                arg( "argument" ) = Abc::Argument(), 
-                arg( "argument" ) = Abc::Argument(), 
+              ( arg( "name" ),
+                arg( "argument" ) = Abc::Argument(),
+                arg( "argument" ) = Abc::Argument(),
                 arg( "argument" ) = Abc::Argument() ) )
         .def( "getNumCollections", &AbcC::OCollectionsSchema::getNumCollections )
         .def( "getCollection", getCollectionByIndex,

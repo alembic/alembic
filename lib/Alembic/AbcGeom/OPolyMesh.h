@@ -49,7 +49,7 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
-class ALEMBIC_EXPORT OPolyMeshSchema 
+class ALEMBIC_EXPORT OPolyMeshSchema
     : public OGeomBaseSchema<PolyMeshSchemaInfo>
 {
 public:
@@ -128,6 +128,18 @@ public:
             m_normals.reset();
         }
 
+        bool isPartialSample() const
+        {
+            if( !m_positions.getData() && !m_indices.getData() && !m_counts.getData() )
+            {
+                if( m_uvs.getVals() || m_normals.getVals() || m_velocities.getData() )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
     protected:
         Abc::P3fArraySample m_positions;
@@ -141,7 +153,6 @@ public:
         ON3fGeomParam::Sample m_normals;
 
     };
-
     //-*************************************************************************
     // POLY MESH SCHEMA
     //-*************************************************************************
@@ -156,74 +167,37 @@ public:
 
     //! The default constructor creates an empty OPolyMeshSchema
     //! ...
-    OPolyMeshSchema() {}
+    OPolyMeshSchema()
+    {
+        m_selectiveExport = false;
+        m_numSamples = 0;
+        m_timeSamplingIndex = 0;
+    }
 
-    //! This templated, primary constructor creates a new poly mesh writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
+    //! This constructor creates a new poly mesh writer.
+    //! The first argument is an CompoundPropertyWriterPtr to use as a parent.
+    //! The next is the name to give the schema which is usually the default
+    //! name given by OPolyMesh (.geom)   The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
-    template <class CPROP_PTR>
-    OPolyMeshSchema( CPROP_PTR iParent,
+    //! MetaData, specify sparse sampling and to set TimeSampling.
+    OPolyMeshSchema( AbcA::CompoundPropertyWriterPtr iParent,
                      const std::string &iName,
-
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
-                     const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PolyMeshSchemaInfo>(
-                                        GetCompoundPropertyWriterPtr( iParent ),
-                                        iName, iArg0, iArg1, iArg2 )
-    {
+                     const Abc::Argument &iArg2 = Abc::Argument(),
+                     const Abc::Argument &iArg3 = Abc::Argument() );
 
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr(iParent)->getObject(
-                        )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex );
-    }
-
-    template <class CPROP_PTR>
-    explicit OPolyMeshSchema( CPROP_PTR iParent,
-                              const Abc::Argument &iArg0 = Abc::Argument(),
-                              const Abc::Argument &iArg1 = Abc::Argument(),
-                              const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PolyMeshSchemaInfo>(
-                                        GetCompoundPropertyWriterPtr( iParent ),
-                                        iArg0, iArg1, iArg2 )
-    {
-
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent  )->getObject(
-                        )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex );
-    }
+    //! This constructor creates a new poly mesh writer.
+    //! The first argument is an OCompundProperty to use as a parent, and from
+    //! which the ErrorHandlerPolicy is derived.  The next is the name to give
+    //! the schema which is usually the default name given by OPolyMesh (.geom)
+    //! The remaining optional arguments can be used to specify MetaData,
+    //! specify sparse sampling and to set TimeSampling.
+    OPolyMeshSchema( Abc::OCompoundProperty iParent,
+                     const std::string &iName,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument(),
+                     const Abc::Argument &iArg2 = Abc::Argument() );
 
     //! Copy constructor.
     OPolyMeshSchema( const OPolyMeshSchema& iCopy )
@@ -241,7 +215,16 @@ public:
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positionsProperty.getTimeSampling(); }
+    {
+        if( m_positionsProperty.valid() )
+        {
+            return m_positionsProperty.getTimeSampling();
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
+    }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -250,7 +233,7 @@ public:
     //! Get number of samples written so far.
     //! ...
     size_t getNumSamples() const
-    { return m_positionsProperty.getNumSamples(); }
+    { return m_numSamples; }
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
@@ -289,10 +272,11 @@ public:
     //! valid.
     bool valid() const
     {
-        return ( OGeomBaseSchema<PolyMeshSchemaInfo>::valid() &&
-                 m_positionsProperty.valid() &&
-                 m_indicesProperty.valid() &&
-                 m_countsProperty.valid() );
+        return ( ( OGeomBaseSchema<PolyMeshSchemaInfo>::valid() &&
+                   m_positionsProperty.valid() &&
+                   m_indicesProperty.valid() &&
+                   m_countsProperty.valid() ) ) ||
+                   m_selectiveExport;
     }
 
     // FaceSet stuff
@@ -310,8 +294,13 @@ public:
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OPolyMeshSchema::valid() );
 
-protected:
-    void init( uint32_t iTsIdx );
+private:
+    void init( uint32_t iTsIdx, bool isSparse );
+
+    //! Set only some property data. Does not need to be a valid schema sample
+    //! This is to be used when created a file which will be layered in to
+    //! another file.
+    void selectiveSet( const Sample &iSamp );
 
     Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OV3fArrayProperty m_velocitiesProperty;
@@ -326,6 +315,23 @@ protected:
 
     // optional source name for the UVs
     std::string m_uvSourceName;
+
+    // Write out only some properties (UVs, normals).
+    // This is to export data to layer into another file later.
+    bool m_selectiveExport;
+
+    // Number of times OPolyMeshSchema::set() has been called
+    size_t m_numSamples;
+
+    uint32_t m_timeSamplingIndex;
+
+    void createPositionsProperty();
+
+    void createVelocitiesProperty();
+
+    void createUVsProperty( const Sample &iSamp );
+
+    void createNormalsProperty( const Sample &iSamp );
 
     // self and child bounds and ArbGeomParams and UserProperties
     // all come from OGeomBaseSchema

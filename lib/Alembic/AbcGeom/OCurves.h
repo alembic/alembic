@@ -215,6 +215,19 @@ public:
             m_basis = kBezierBasis;
         }
 
+        bool isPartialSample() const
+        {
+            if( !m_positions.getData() )
+            {
+                if( m_uvs.getVals() || m_normals.getVals() || m_velocities.getData() )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     protected:
 
         // properties
@@ -258,31 +271,34 @@ public:
 
     //! The default constructor creates an empty OCurvesSchema
     //! ...
-    OCurvesSchema() {}
+    OCurvesSchema()
+    {
+        m_selectiveExport = false;
+        m_numSamples = 0;
+        m_timeSamplingIndex = 0;
+    }
 
-    //! This templated, primary constructor creates a new poly mesh writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
-    template <class CPROP_PTR>
-    OCurvesSchema( CPROP_PTR iParent,
+
+    //! This constructor creates a new curves writer.
+    //! The first argument is the compound property to use as a parent
+    //! The remaining optional arguments are the parents ErrorHandlerPolicy,
+    //! an override to the ErrorHandlerPolicy, MetaData, and TimeSampling info.
+    OCurvesSchema( AbcA::CompoundPropertyWriterPtr iParent,
                    const std::string &iName,
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument(),
-                   const Abc::Argument &iArg2 = Abc::Argument() )
+                   const Abc::Argument &iArg2 = Abc::Argument(),
+                   const Abc::Argument &iArg3 = Abc::Argument() )
       : OGeomBaseSchema<CurvesSchemaInfo>( iParent, iName,
-                                        iArg0, iArg1, iArg2 )
+                                           iArg0, iArg1, iArg2, iArg3)
     {
         // Meta data and error handling are eaten up by
         // the super type, so all that's left is time sampling.
         AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2, iArg3 );
 
         AbcA::index_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2, iArg3 );
 
         if ( tsPtr )
         {
@@ -290,32 +306,7 @@ public:
                 )->getArchive()->addTimeSampling( *tsPtr );
         }
 
-        init( tsIndex );
-    }
-
-    template <class CPROP_PTR>
-    explicit OCurvesSchema( CPROP_PTR iParent,
-                            const Abc::Argument &iArg0 = Abc::Argument(),
-                            const Abc::Argument &iArg1 = Abc::Argument(),
-                            const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<CurvesSchemaInfo>( iParent,
-                                        iArg0, iArg1, iArg2 )
-    {
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-
-        AbcA::index_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        if ( tsPtr )
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
-                )->getArchive()->addTimeSampling( *tsPtr );
-        }
-
-        init( tsIndex );
+        init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2, iArg3 ) );
     }
 
     OCurvesSchema( const OCurvesSchema& iCopy )
@@ -333,7 +324,16 @@ public:
     //! Return the time sampling type, which is stored on each of the
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positionsProperty.getTimeSampling(); }
+    {
+        if( m_positionsProperty.valid() )
+        {
+            return m_positionsProperty.getTimeSampling();
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
+    }
 
     void setTimeSampling( uint32_t iIndex );
     void setTimeSampling( AbcA::TimeSamplingPtr iTime );
@@ -344,8 +344,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples() const
-    { return m_positionsProperty.getNumSamples(); }
+    size_t getNumSamples() const { return m_numSamples; }
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
@@ -383,20 +382,46 @@ public:
     //! valid.
     bool valid() const
     {
-        return ( OGeomBaseSchema<CurvesSchemaInfo>::valid() &&
-                 m_positionsProperty.valid() );
+        return ( ( OGeomBaseSchema<CurvesSchemaInfo>::valid() &&
+                     m_positionsProperty.valid() )
+                 || m_selectiveExport );
     }
 
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( this_type::valid() );
 
-protected:
-    void init( const AbcA::index_t iTsIdx );
+private:
+    void init( const AbcA::index_t iTsIdx, bool isSparse );
+
+    //! Set only some property data. Does not need to be a valid schema sample
+    //! This is to be used when created a file which will be layered in to
+    //! another file.
+    void selectiveSet( const Sample &iSamp );
 
     // point data
     Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OInt32ArrayProperty m_nVerticesProperty;
+
+    // Write out only some properties (UVs, normals).
+    // This is to export data to layer into another file later.
+    bool m_selectiveExport;
+
+    // Number of times OPolyMeshSchema::set() has been called
+    size_t m_numSamples;
+
+    uint32_t m_timeSamplingIndex;
+
+    void createPositionProperty();
+    void createVertexProperties();
+    void createVelocityProperty();
+    void createUVsProperty( const Sample &iSamp );
+    void createNormalsProperty( const Sample &iSamp );
+    void createWidthProperty( const Sample &iSamp );
+    void createPositionWeightsProperty();
+    void createOrdersProperty();
+    void createKnotsProperty();
+    void calcBasisAndType(Alembic::Util::uint8_t (&basisAndType)[4], const Sample &iSamp);
 
     // optional data
     OV2fGeomParam m_uvsParam;

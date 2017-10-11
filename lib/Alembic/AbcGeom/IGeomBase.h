@@ -77,34 +77,30 @@ public:
 
     //! Delegates to Abc/ISchema, and then creates
     //! properties that are present.
-    template <class CPROP_PTR>
-    IGeomBaseSchema( CPROP_PTR iParentCompound,
-             const std::string &iName,
-
-             const Argument &iArg0 = Argument(),
-             const Argument &iArg1 = Argument() )
-       : Abc::ISchema<info_type>( iParentCompound, iName, iArg0, iArg1 )
-    {
-        init( iArg0, iArg1 );
-    }
-
-    template <class CPROP_PTR>
-    explicit IGeomBaseSchema( CPROP_PTR iParentCompound,
-
-                      const Argument &iArg0 = Argument(),
-                      const Argument &iArg1 = Argument() )
-      : Abc::ISchema<info_type>( iParentCompound, iArg0, iArg1 )
+    IGeomBaseSchema( const ICompoundProperty & iParent,
+                     const std::string &iName,
+                     const Argument &iArg0 = Argument(),
+                     const Argument &iArg1 = Argument() )
+    : Abc::ISchema<info_type>( iParent, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
     //! Wrap an existing schema object
-    template <class CPROP_PTR>
-    IGeomBaseSchema( CPROP_PTR iThis,
-                   Abc::WrapExistingFlag iFlag,
-                   const Abc::Argument &iArg0 = Abc::Argument(),
-                   const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<info_type>( iThis, iFlag, iArg0, iArg1 )
+    IGeomBaseSchema( const ICompoundProperty & iProp,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument() )
+      : Abc::ISchema<info_type>( iProp, iArg0, iArg1 )
+    {
+        init( iArg0, iArg1 );
+    }
+
+    // Deprecated in favor of the constructor above
+    IGeomBaseSchema( const ICompoundProperty & iProp,
+                     Abc::WrapExistingFlag iFlag,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument() )
+      : Abc::ISchema<info_type>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
@@ -243,8 +239,7 @@ public:
     //! The default constructor creates an empty GeomBase
     IGeomBase() {}
 
-    template <class CPROP_PTR>
-    IGeomBase( CPROP_PTR iParent,
+    IGeomBase( const ICompoundProperty &iParent,
                const std::string &iName,
                const Abc::Argument &iArg0 = Abc::Argument(),
                const Abc::Argument &iArg1 = Abc::Argument() )
@@ -256,25 +251,21 @@ public:
         init( iArg0, iArg1 );
     }
 
-    template <class CPROP_PTR>
-    explicit IGeomBase( CPROP_PTR iThis,
-                        const Abc::Argument &iArg0 = Abc::Argument(),
-                        const Abc::Argument &iArg1 = Abc::Argument() )
+    IGeomBase( const ICompoundProperty & iThis,
+               const Abc::Argument &iArg0 = Abc::Argument(),
+               const Abc::Argument &iArg1 = Abc::Argument() )
         // We don't want strict matching of the title because the real schema
         // is going to be something like "AbcGeom_<type>_vX"
-      : IGeomBaseSchema<GeomBaseSchemaInfo>( iThis, kNoMatching )
+    : IGeomBaseSchema<GeomBaseSchemaInfo>( iThis, kNoMatching )
     {
         init( iArg0, iArg1 );
     }
 
-    template <class CPROP_PTR>
-    explicit IGeomBase( CPROP_PTR iThis,
-                        Abc::WrapExistingFlag iFlag,
-                        const Abc::Argument &iArg0 = Abc::Argument(),
-                        const Abc::Argument &iArg1 = Abc::Argument() )
-        // We don't want strict matching of the title because the real schema
-        // is going to be something like "AbcGeom_<type>_vX"
-      : IGeomBaseSchema<GeomBaseSchemaInfo>( iThis, iFlag, kNoMatching )
+    IGeomBase( const ICompoundProperty & iThis,
+               Abc::WrapExistingFlag iFlag,
+               const Abc::Argument &iArg0 = Abc::Argument(),
+               const Abc::Argument &iArg1 = Abc::Argument() )
+    : IGeomBaseSchema<GeomBaseSchemaInfo>( iThis, kNoMatching )
     {
         init( iArg0, iArg1 );
     }

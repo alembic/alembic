@@ -65,8 +65,6 @@ void IXformSchema::init( const Abc::Argument &iArg0,
                                                  iArg0, iArg1 );
     }
 
-    AbcA::ScalarPropertyReaderPtr ops = ptr->getScalarProperty( ".ops" );
-
     m_useArrayProp = false;
 
     const AbcA::PropertyHeader *valsPH = ptr->getPropertyHeader( ".vals" );
@@ -119,6 +117,12 @@ void IXformSchema::init( const Abc::Argument &iArg0,
                 animChannels.insert( (*animSamp)[i] );
             }
         }
+    }
+
+    AbcA::ScalarPropertyReaderPtr ops;
+    if ( ptr->getPropertyHeader( ".ops" ) != NULL )
+    {
+        ops = ptr->getScalarProperty( ".ops" );
     }
 
     if ( ops && ops->getNumSamples() > 0 )
@@ -312,7 +316,7 @@ XformSample IXformSchema::getValue( const Abc::ISampleSelector &iSS ) const
 }
 
 //-*****************************************************************************
-bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS )
+bool IXformSchema::getInheritsXforms( const Abc::ISampleSelector &iSS ) const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IXformSchema::getInheritsXforms()" );
 

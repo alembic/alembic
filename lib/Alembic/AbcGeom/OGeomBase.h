@@ -75,54 +75,29 @@ public:
 
     //! Delegates to Abc/OSchema, and then creates always-present
     //! properties
-    template <class CPROP_PTR>
-    OGeomBaseSchema( CPROP_PTR iParentCompound,
-             const std::string &iName,
-             const Argument &iArg0 = Argument(),
-             const Argument &iArg1 = Argument(),
-             const Argument &iArg2 = Argument() )
-       : Abc::OSchema<info_type>( iParentCompound, iName, iArg0, iArg1, iArg2 )
+    OGeomBaseSchema( AbcA::CompoundPropertyWriterPtr iParent,
+                     const std::string &iName,
+                     const Argument &iArg0 = Argument(),
+                     const Argument &iArg1 = Argument(),
+                     const Argument &iArg2 = Argument(),
+                     const Argument &iArg3 = Argument() )
+       : Abc::OSchema<info_type>( iParent, iName, iArg0, iArg1, iArg2, iArg3 )
     {
         AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+            Abc::GetTimeSampling( iArg0, iArg1, iArg2, iArg3 );
         uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2, iArg3 );
 
         // if we specified a valid TimeSamplingPtr, use it to determine the
         // index otherwise use the default index of 0 - uniform.
         if ( tsPtr )
         {
-            tsIndex = GetCompoundPropertyWriterPtr(iParentCompound)->getObject(
-                        )->getArchive()->addTimeSampling(*tsPtr);
+            tsIndex = iParent->getObject()->getArchive()->addTimeSampling(
+                *tsPtr );
         }
 
         // Create our always present property
-        init( tsIndex );
-    }
-
-    template <class CPROP_PTR>
-    explicit OGeomBaseSchema( CPROP_PTR iParentCompound,
-                      const Argument &iArg0 = Argument(),
-                      const Argument &iArg1 = Argument(),
-                      const Argument &iArg2 = Argument() )
-      : Abc::OSchema<info_type>( iParentCompound, iArg0, iArg1, iArg2 )
-    {
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if ( tsPtr )
-        {
-            tsIndex = GetCompoundPropertyWriterPtr(iParentCompound)->getObject(
-                        )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Create our always present property
-        init( tsIndex );
+        init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2, iArg3 ) );
     }
 
     //! Copy constructor
@@ -130,20 +105,6 @@ public:
       : Abc::OSchema<info_type>()
     {
         *this = iCopy;
-    }
-
-    void init( uint32_t iTsHandle)
-    {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::init()" );
-
-        AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
-
-        // Create our always present property. All other
-        // properties are optional.
-        m_selfBoundsProperty = Abc::OBox3dProperty( _this,
-                                                    ".selfBnds", iTsHandle );
-
-        ALEMBIC_ABC_SAFE_CALL_END_RESET();
     }
 
     virtual void reset ()
@@ -157,9 +118,7 @@ public:
 
     virtual bool valid() const
     {
-        // Only selfBounds is required, all others are optional
-        return ( Abc::OSchema<info_type>::valid() &&
-                m_selfBoundsProperty.valid() );
+        return ( Abc::OSchema<info_type>::valid() );
     }
 
     Abc::OCompoundProperty getArbGeomParams()
@@ -225,6 +184,40 @@ public:
     }
 
 protected:
+
+    void init( uint32_t iTsIndex, bool isSparse)
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::init()" );
+
+        if( !isSparse )
+        {
+           createSelfBoundsProperty(iTsIndex, 0);
+        }
+
+        ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    }
+
+    //! Creates the self bounds
+    void createSelfBoundsProperty(uint32_t iTsIndex, size_t iNumSamples)
+    {
+        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OGeomBaseSchema::createSelfBoundsProperty()" );
+
+        if ( m_selfBoundsProperty.valid() )
+        {
+            return;
+        }
+
+        m_selfBoundsProperty = Abc::OBox3dProperty( this->getPtr(), ".selfBnds",
+                                                    iTsIndex );
+
+        Abc::Box3d bnds;
+        for ( size_t i = 0; i < iNumSamples; ++i )
+        {
+            m_selfBoundsProperty.set( bnds );
+        }
+        ALEMBIC_ABC_SAFE_CALL_END();
+    }
+
     // Only selfBounds is required, all others are optional
     Abc::OBox3dProperty m_selfBoundsProperty;
     Abc::OBox3dProperty m_childBoundsProperty;

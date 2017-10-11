@@ -90,12 +90,19 @@ public:
         //! ...
         AbcA::ArchiveReaderPtr iPtr,
 
-        //! Wrap existing
-        //! ...
-        WrapExistingFlag /* iWrap */,
-
         //! Optional error handling policy
         //! ...
+        ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
+      : m_archive( iPtr )
+    {
+        // Set the error handling policy.
+        getErrorHandler().setPolicy( iPolicy );
+    }
+
+    // Deprecated in favor of the constructor above
+    IArchive(
+        AbcA::ArchiveReaderPtr iPtr,
+        WrapExistingFlag /* iWrap */,
         ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy )
       : m_archive( iPtr )
     {
@@ -120,11 +127,11 @@ public:
 
     //! This returns the single top-level IObject that exists
     //! automatically as part of the archive.
-    IObject getTop();
+    IObject getTop() const;
 
     //! Get the read array sample cache. It may be a NULL pointer.
     //! Caches can be shared amongst separate archives, and caching
-    //! will is disabled if a NULL cache is returned here.
+    //! will be disabled if a NULL cache is returned here.
     AbcA::ReadArraySampleCachePtr getReadArraySampleCachePtr();
 
     //! Set the read array sample cache. It may also be a NULL pointer.

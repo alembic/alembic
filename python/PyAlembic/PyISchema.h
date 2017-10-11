@@ -37,7 +37,7 @@
 #include <Foundation.h>
 
 using namespace boost::python;
- 
+
 template<class INFO>
 void register_ISchema( const char *iName )
 {
@@ -71,7 +71,7 @@ void register_ISchema( const char *iName )
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
@@ -85,31 +85,29 @@ void register_ISchema( const char *iName )
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getSchemaTitle",
               ISchema::getSchemaTitle,
               "Return the schema title expected of this property."
-              "An empty title matches everything.",
-              return_value_policy<copy_const_reference>() )
+              "An empty title matches everything." )
         .staticmethod( "getSchemaTitle" )
         .def( "getDefaultSchemaName",
               ISchema::getDefaultSchemaName,
               "Return the default name for instances of this schema. "
-              "Often something like '.geom'.",
-              return_value_policy<copy_const_reference>() )
+              "Often something like '.geom'." )
         .staticmethod( "getDefaultSchemaName" )
         .def( "matches",
               ISchemaOverloads::matchesMetaData,
-              ( arg( "metadata" ), 
+              ( arg( "metadata" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "This will check whether or not a given entity (as represented "
               "by a metadata) strictly matches the interpretation of this "
               "schema object." )
         .def( "matches",
               ISchemaOverloads::matchesHeader,
-              ( arg( "header" ), 
+              ( arg( "header" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "This will check whether or not a given entity (as represented "
               "by an object header) strictly matches the interpretation of this"

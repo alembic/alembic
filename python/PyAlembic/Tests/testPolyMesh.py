@@ -110,11 +110,57 @@ def meshIn():
     for i in range( len( positions ) ):
         assert positions[i] == verts[i]
 
+def meshLayerOut():
+    """write a boring oarchive with a mesh and an oarchive with just uvs"""
+
+    # the boring one
+    meshyObj = OPolyMesh( OArchive( 'polyMeshLayerA.abc' ).getTop() , 'meshy' )
+    mesh = meshyObj.getSchema()
+
+    mesh_samp = OPolyMeshSchemaSample( verts, indices, counts )
+    mesh.set( mesh_samp )
+
+    # now just the UVs
+    rootB = OArchive( 'polyMeshLayerB.abc' ).getTop()
+    meshyObjB = OPolyMesh( rootB, 'meshy', SparseFlag.kSparse )
+    mesh = meshyObjB.getSchema()
+
+    mesh_samp = OPolyMeshSchemaSample()
+    uvsamp = OV2fGeomParamSample( uvs, kFacevaryingScope )
+    mesh_samp.setUVs( uvsamp )
+    mesh.set( mesh_samp )
+
+def meshLayerIn():
+    """read the mesh layering the uvs on top"""
+
+    layers = ['polyMeshLayerA.abc', 'polyMeshLayerB.abc']
+    meshyObj = IPolyMesh( IArchive( layers ).getTop(), 'meshy' )
+    mesh = meshyObj.getSchema()
+
+    uv = mesh.getUVsParam()
+    assert uv.valid()
+
+    uvsamp = uv.getIndexedValue()
+
+    assert uvsamp.getIndices()[1] == 1
+
+    meshSamp = mesh.getValue()
+
+    positions = meshSamp.getPositions()
+    for i in range( len( positions ) ):
+        assert positions[i] == verts[i]
+
 def testPolyMeshBinding():
     meshOut()
     meshIn()
 
 testList.append( ( 'testPolyMeshBinding', testPolyMeshBinding ) )
+
+def testPolyMeshLayering():
+    meshLayerOut()
+    meshLayerIn()
+
+testList.append( ( 'testPolyMeshLayering', testPolyMeshLayering ) )
 
 # -------------------------------------------------------------------------
 # Main loop

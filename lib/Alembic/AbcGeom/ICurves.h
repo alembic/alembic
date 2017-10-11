@@ -148,41 +148,29 @@ public:
     //! ...
     ICurvesSchema() {}
 
-    //! This templated, explicit function creates a new scalar property reader.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyReaderPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy and to specify
-    //! schema interpretation matching.
-    template <class CPROP_PTR>
-    ICurvesSchema( CPROP_PTR iParent,
-                     const std::string &iName,
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument() )
+    //! This constructor creates a new camera reader.
+    //! The first argument is the parent ICompoundProperty, from which the
+    //! error handler policy for is derived.  The second argument is the name
+    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    ICurvesSchema( const ICompoundProperty & iParent,
+                   const std::string &iName,
+                   const Abc::Argument &iArg0 = Abc::Argument(),
+                   const Abc::Argument &iArg1 = Abc::Argument() )
       : IGeomBaseSchema<CurvesSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
-    //! This constructor is the same as above, but with default
-    //! schema name used.
-    template <class CPROP_PTR>
-    explicit ICurvesSchema( CPROP_PTR iParent,
-                            const Abc::Argument &iArg0 = Abc::Argument(),
-                            const Abc::Argument &iArg1 = Abc::Argument() )
-      : IGeomBaseSchema<CurvesSchemaInfo>( iParent, iArg0, iArg1 )
-    {
-        init( iArg0, iArg1 );
-    }
-
-    //! Wrap an existing schema object
-    template <class CPROP_PTR>
-    ICurvesSchema( CPROP_PTR iThis,
-                   Abc::WrapExistingFlag iFlag,
+    //! This constructor wraps an existing ICompoundProperty as the curves
+    //! reader, and the error handler policy is derived from it.
+    //! The  remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    ICurvesSchema( const ICompoundProperty & iProp,
                    const Abc::Argument &iArg0 = Abc::Argument(),
                    const Abc::Argument &iArg1 = Abc::Argument() )
-      : IGeomBaseSchema<CurvesSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : IGeomBaseSchema<CurvesSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }

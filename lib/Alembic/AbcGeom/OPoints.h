@@ -120,6 +120,16 @@ public:
             m_selfBounds.makeEmpty();
         }
 
+        bool isPartialSample() const
+        {
+            if( !m_positions.getData() )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
     protected:
         Abc::P3fArraySample m_positions;
         Abc::V3fArraySample m_velocities;
@@ -143,72 +153,37 @@ public:
 
     //! The default constructor creates an empty OPointsSchema
     //! ...
-    OPointsSchema() {}
+    OPointsSchema()
+    {
+        m_selectiveExport = false;
+        m_numSamples = 0;
+        m_timeSamplingIndex = 0;
+    }
 
-    //! This templated, primary constructor creates a new poly mesh writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
+    //! This constructor creates a new poly mesh writer.
+    //! The first argument is an CompoundPropertyWriterPtr to use as a parent.
+    //! The next is the name to give the schema which is usually the default
+    //! name given by OFaceSet (.geom)   The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
-    template <class CPROP_PTR>
-    OPointsSchema( CPROP_PTR iParent,
-                   const std::string &iName,
+    //! MetaData, specify sparse sampling and to set TimeSampling.
+    OPointsSchema( AbcA::CompoundPropertyWriterPtr iParent,
+                     const std::string &iName,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument(),
+                     const Abc::Argument &iArg2 = Abc::Argument(),
+                     const Abc::Argument &iArg3 = Abc::Argument() );
 
-                   const Abc::Argument &iArg0 = Abc::Argument(),
-                   const Abc::Argument &iArg1 = Abc::Argument(),
-                   const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PointsSchemaInfo>(
-                        GetCompoundPropertyWriterPtr( iParent ),
-                        iName, iArg0, iArg1, iArg2 )
-    {
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
-                )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex );
-    }
-
-    template <class CPROP_PTR>
-    explicit OPointsSchema( CPROP_PTR iParent,
-                            const Abc::Argument &iArg0 = Abc::Argument(),
-                            const Abc::Argument &iArg1 = Abc::Argument(),
-                            const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<PointsSchemaInfo>(
-                            GetCompoundPropertyWriterPtr( iParent ),
-                            iArg0, iArg1, iArg2 )
-    {
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
-                    )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex );
-    }
+    //! This constructor creates a new poly mesh writer.
+    //! The first argument is an OCompundProperty to use as a parent, and from
+    //! which the ErrorHandlerPolicy is derived.  The next is the name to give
+    //! the schema which is usually the default name given by OFaceSet (.geom)
+    //! The remaining optional arguments can be used to specify MetaData,
+    //! specify sparse sampling and to set TimeSampling.
+    OPointsSchema( Abc::OCompoundProperty iParent,
+                     const std::string &iName,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument(),
+                     const Abc::Argument &iArg2 = Abc::Argument() );
 
     //! Copy constructor.
     OPointsSchema(const OPointsSchema& iCopy)
@@ -225,7 +200,16 @@ public:
 
     //! Return the time sampling
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positionsProperty.getTimeSampling(); }
+    {
+        if( m_positionsProperty.valid() )
+        {
+            return m_positionsProperty.getTimeSampling();
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
+    }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -233,8 +217,7 @@ public:
 
     //! Get number of samples written so far.
     //! ...
-    size_t getNumSamples() const
-    { return m_positionsProperty.getNumSamples(); }
+    size_t getNumSamples() const { return m_numSamples; }
 
     //! Set a sample
     void set( const Sample &iSamp );
@@ -268,22 +251,42 @@ public:
     //! valid.
     bool valid() const
     {
-        return ( OGeomBaseSchema<PointsSchemaInfo>::valid() &&
+        return ( ( OGeomBaseSchema<PointsSchemaInfo>::valid() &&
                  m_positionsProperty.valid() &&
-                 m_idsProperty.valid() );
+                 m_idsProperty.valid() )
+                 || m_selectiveExport );
     }
 
     //! unspecified-bool-type operator overload.
     //! ...
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OPointsSchema::valid() );
 
-protected:
-    void init( uint32_t iTsIdx );
+private:
+    void init( uint32_t iTsIdx, bool isSparse );
+
+    //! Set only some property data. Does not need to be a valid schema sample
+    //! This is to be used when created a file which will be layered in to
+    //! another file.
+    void selectiveSet( const Sample &iSamp );
+
+    void createPositionProperty();
+    void createIdProperty();
+    void createVelocityProperty();
+    void createWidthsProperty( const Sample &iSamp );
 
     Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OUInt64ArrayProperty m_idsProperty;
     Abc::OV3fArrayProperty m_velocitiesProperty;
     OFloatGeomParam m_widthsParam;
+
+    // Write out only some properties (UVs, normals).
+    // This is to export data to layer into another file later.
+    bool m_selectiveExport;
+
+    // Number of times OPolyMeshSchema::set() has been called
+    size_t m_numSamples;
+
+    uint32_t m_timeSamplingIndex;
 
 };
 

@@ -57,6 +57,11 @@ IObject::~IObject()
     //          << m_object.use_count() << std::endl;
 }
 
+namespace {
+
+const AbcA::ObjectHeader g_ohd;
+
+}
 
 //-*****************************************************************************
 const AbcA::ObjectHeader &IObject::getHeader() const
@@ -71,8 +76,7 @@ const AbcA::ObjectHeader &IObject::getHeader() const
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, so have a default behavior.
-    static const AbcA::ObjectHeader ohd;
-    return ohd;
+    return g_ohd;
 };
 
 //-*****************************************************************************
@@ -457,7 +461,7 @@ bool IObject::isInstanceDescendant() const
 }
 
 //-*****************************************************************************
-std::string IObject::instanceSourcePath()
+std::string IObject::instanceSourcePath() const
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::instanceSourcePath()" );
 
@@ -514,6 +518,20 @@ bool IObject::isChildInstance( const std::string &iChildName ) const
     ALEMBIC_ABC_SAFE_CALL_END();
 
     return false;
+}
+
+//-*****************************************************************************
+void IObject::init( IArchive & iArchive, const Argument &iArg0 )
+{
+    // Set the error handling policy
+    getErrorHandler().setPolicy(
+        GetErrorHandlerPolicy( iArchive, iArg0 ) );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IObject::init( IArchive )" );
+
+    m_object = iArchive.getTop().getPtr();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
 
 //-*****************************************************************************

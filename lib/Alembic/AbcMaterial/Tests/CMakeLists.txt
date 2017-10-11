@@ -38,35 +38,35 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 ADD_EXECUTABLE(AbcMaterial_WriteMaterialTest
                WriteMaterial.cpp
                )
-TARGET_LINK_LIBRARIES(AbcMaterial_WriteMaterialTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcMaterial_WriteMaterialTest Alembic)
 ADD_TEST(AbcMaterial_WriteMaterial_TEST AbcMaterial_WriteMaterialTest)
 
 ADD_EXECUTABLE(AbcMaterial_MaterialFlattenTest
                MaterialFlattenTest.cpp PrintMaterial.cpp
                )
-TARGET_LINK_LIBRARIES(AbcMaterial_MaterialFlattenTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcMaterial_MaterialFlattenTest Alembic)
 ADD_TEST(AbcMaterial_MaterialFlatten_TEST AbcMaterial_MaterialFlattenTest)
 
 ADD_EXECUTABLE(AbcMaterial_MaterialHasATest
                WriteHasAMaterial.cpp PrintMaterial.cpp
                )
-TARGET_LINK_LIBRARIES(AbcMaterial_MaterialHasATest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcMaterial_MaterialHasATest Alembic)
 ADD_TEST( AbcMaterial_Material_TEST_HasA AbcMaterial_MaterialHasATest)
 
 ADD_EXECUTABLE(AbcMaterial_MaterialAssignAndFlattenTest
                MaterialAssignAndFlattenTest.cpp PrintMaterial.cpp
                )
-TARGET_LINK_LIBRARIES(AbcMaterial_MaterialAssignAndFlattenTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcMaterial_MaterialAssignAndFlattenTest Alembic)
 ADD_TEST(AbcMaterial_TEST_MaterialAssignAndFlatten AbcMaterial_MaterialAssignAndFlattenTest)
 
 ADD_EXECUTABLE(AbcMaterial_NetworkNodeTest
                NetworkNodeTest.cpp PrintMaterial.cpp
                )
-TARGET_LINK_LIBRARIES(AbcMaterial_NetworkNodeTest ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcMaterial_NetworkNodeTest Alembic)
 ADD_TEST(AbcMaterial_NetworkNodeTest AbcMaterial_NetworkNodeTest)
 
 ADD_EXECUTABLE(AbcMaterial_WriteGeometryWithMaterials
                WriteGeometryWithMaterials.cpp
                )
-TARGET_LINK_LIBRARIES(AbcMaterial_WriteGeometryWithMaterials ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AbcMaterial_WriteGeometryWithMaterials Alembic)
 ADD_TEST(AbcMaterial_WriteGeometryWithMaterials AbcMaterial_WriteGeometryWithMaterials)

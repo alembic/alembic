@@ -56,7 +56,7 @@ SET(CXX_FILES
 
 ADD_PRMAN_CXX_PLUGIN(AlembicRiProcedural ProcMain.cpp ${H_FILES} ${CXX_FILES})
 
-TARGET_LINK_LIBRARIES(AlembicRiProcedural ${CORE_LIBS})
+TARGET_LINK_LIBRARIES(AlembicRiProcedural Alembic)
 
 set_target_properties(AlembicRiProcedural PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE

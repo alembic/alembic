@@ -158,7 +158,7 @@ class staticPropTest(unittest.TestCase):
         shapeName = root[1]
         self.setProps(shapeName)
         self.__files.append(util.expandFileName('staticPropParticles.abc'))
-        MayaCmds.AbcExport(j='-atp -root %s -f %s' % (nodeName, self.__files[-1]))
+        MayaCmds.AbcExport(j='-atp SPT_ -root %s -f %s' % (nodeName, self.__files[-1]))
         self.verifyProps(shapeName, self.__files[-1])
 
     def testStaticMeshPropReadWrite(self):

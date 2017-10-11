@@ -404,6 +404,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     if ( status == MS::kSuccess && riCurvesVal && writeOutAsGroup)
     {
+       if( !mArgs.writeCurvesGroup )
+       {
+           return;
+       }
+
         MayaNurbsCurveWriterPtr nurbsCurve;
         if (iParent == NULL)
         {
@@ -438,17 +443,17 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kTransform))
     {
+       MayaTransformWriterPtr trans;
+
         MFnTransform fnTrans(ob, &status);
         if (status != MS::kSuccess)
         {
             MString msg = "Initialize transform node ";
-            msg += mCurDag.fullPathName();
-            msg += " failed, skipping.";
-            MGlobal::displayWarning(msg);
+           msg += mCurDag.fullPathName();
+           msg += " failed, skipping.";
+           MGlobal::displayWarning(msg);
             return;
         }
-
-        MayaTransformWriterPtr trans;
 
         // parented to the root case
         if (iParent == NULL)
@@ -465,11 +470,13 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
 
         if (trans->isAnimated() && mTransTimeIndex != 0)
         {
-            mTransList.push_back(trans);
+           mTransList.push_back(trans);
             mStats.mTransAnimNum++;
         }
         else
+        {
             mStats.mTransStaticNum++;
+        }
 
         AttributesWriterPtr attrs = trans->getAttrs();
         if (mTransTimeIndex != 0 && attrs->isAnimated())
@@ -489,6 +496,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kLocator))
     {
+       if( !mArgs.writeLocators )
+       {
+           return;
+       }
+
         MFnDependencyNode fnLocator(ob, & status);
         if (status != MS::kSuccess)
         {
@@ -528,6 +540,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kParticle))
     {
+       if( !mArgs.writeParticles )
+       {
+           return;
+       }
+
         MFnParticleSystem mFnParticle(ob, &status);
         if (status != MS::kSuccess)
         {
@@ -569,6 +586,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kMesh))
     {
+       if( !mArgs.writeMeshes)
+       {
+           return;
+       }
+
         MFnMesh fnMesh(ob, &status);
         if (status != MS::kSuccess)
         {
@@ -630,6 +652,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kCamera))
     {
+       if( !mArgs.writeCameras )
+       {
+           return;
+       }
+
         MFnCamera fnCamera(ob, &status);
         if (status != MS::kSuccess)
         {
@@ -667,6 +694,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kNurbsSurface))
     {
+       if( !mArgs.writeNurbsSurfaces )
+       {
+           return;
+       }
+
         MFnNurbsSurface fnNurbsSurface(ob, &status);
         if (status != MS::kSuccess)
         {
@@ -708,6 +740,11 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
     }
     else if (ob.hasFn(MFn::kNurbsCurve))
     {
+       if( !mArgs.writeNurbsCurves )
+       {
+           return;
+       }
+
         MFnNurbsCurve fnNurbsCurve(ob, &status);
         if (status != MS::kSuccess)
         {

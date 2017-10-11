@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2015,
+## Copyright (c) 2009-2016,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -71,13 +71,17 @@ ENDIF()
 #-******************************************************************************
 
 SET(Boost_USE_STATIC_LIBS ${USE_STATIC_BOOST})
-SET(Boost_USE_MULTITHREADED ON)
 SET(Boost_NO_BOOST_CMAKE ON) 
 
+# disables linking to -mt variants on osx
+IF (USE_PYALEMBIC AND APPLE)
+    SET(Boost_USE_MULTITHREADED OFF)
+ENDIF()
+
 IF (USE_PYALEMBIC)
-    FIND_PACKAGE(Boost 1.42.0 COMPONENTS program_options python REQUIRED thread)
+    FIND_PACKAGE(Boost 1.42.0 COMPONENTS program_options python)
 ELSE()
-    FIND_PACKAGE(Boost 1.42.0 COMPONENTS program_options REQUIRED thread)
+    FIND_PACKAGE(Boost 1.42.0 COMPONENTS program_options)
 ENDIF()
 
 #-******************************************************************************

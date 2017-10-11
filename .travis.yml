@@ -1,0 +1,103 @@
+language: cpp
+
+cache:
+  apt: true
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+            - zlib1g-dev
+      env: COMPILER=g++-4.8
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+            - zlib1g-dev
+      env: COMPILER=clang-3.7
+
+env:
+  global:
+    - NUM_CPU="`grep processor /proc/cpuinfo | wc -l`"; echo $NUM_CPU
+    - BUILD_TYPE="RELEASE"
+    - ALEMBIC_SOURCE=${TRAVIS_BUILD_DIR}
+    - ALEMBIC_BUILD=${TRAVIS_BUILD_DIR}/build
+    - ALEMBIC_INSTALL=${ALEMBIC_BUILD}/install
+    # OPENEXR
+    - OPENEXR_ROOT=${HOME}/openexr
+    - OPENEXR_SOURCE=${OPENEXR_ROOT}/source
+    - ILMBASE_BUILD=${OPENEXR_ROOT}/IlmBasebuild
+    - OPENEXR_INSTALL=${OPENEXR_ROOT}/install
+    # CMAKE
+    - CMAKE_URL="https://cmake.org/files/v3.4/cmake-3.4.1-Linux-x86_64.tar.gz"
+    - CMAKE_ROOT=${HOME}/cmake
+    - CMAKE_SOURCE=${CMAKE_ROOT}/source
+    - CMAKE_INSTALL=${CMAKE_ROOT}/install
+
+before_install:
+ # CMAKE download and install
+ - >
+    if [ "$(ls -A ${CMAKE_INSTALL})" ]; then
+      echo "CMake found in cache.";
+    else
+      mkdir --parent ${CMAKE_SOURCE}
+      mkdir --parent ${CMAKE_INSTALL}
+      travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C ${CMAKE_INSTALL}
+    fi
+ - export PATH=${CMAKE_INSTALL}/bin:${PATH};
+ - cmake --version
+ # OPENEXR
+ - >
+    if [ "$(ls -A $OPENEXR_INSTALL)" ]; then
+      echo "OpenEXR found in cache.";
+    else
+      mkdir --parent $OPENEXR_SOURCE
+      mkdir --parent $ILMBASE_BUILD
+      mkdir --parent $OPENEXR_INSTALL
+      travis_retry wget https://github.com/openexr/openexr/archive/v2.2.0.tar.gz;
+      tar -xf v2.2.0.tar.gz;
+      mv openexr-2.2.0/* $OPENEXR_SOURCE;
+    fi
+
+install:
+  # OPENEXR only IlmBase is required
+  - >
+     if [ ! "$(ls -A $OPENEXR_INSTALL)" ]; then
+       cd $ILMBASE_BUILD
+       cmake \
+         -DCMAKE_INSTALL_PREFIX=$OPENEXR_INSTALL \
+         $OPENEXR_SOURCE/IlmBase;
+       make -j 2 > null;
+       make install;
+     fi
+
+before_script:
+  # Create build folder
+  - mkdir --parent $ALEMBIC_BUILD
+  - cd $ALEMBIC_BUILD
+  # Classic release build
+  - >
+     cmake $ALEMBIC_SOURCE \
+        -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+        -DCMAKE_INSTALL_PREFIX=$ALEMBIC_INSTALL \
+        -DILMBASE_ROOT=$OPENEXR_INSTALL;
+script:
+# limit GCC builds to a reduced number of thread for the virtual machine
+  - make install -j 2 VERBOSE=1
+# Perform unit tests
+  - make test
+
+
+cache:
+  directories:
+    - $OPENEXR_INSTALL
+    - $CMAKE_INSTALL

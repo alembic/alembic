@@ -61,8 +61,13 @@ public:
 
     IMaterialSchema() {}
 
-    template <class CPROP_PTR>
-    IMaterialSchema( CPROP_PTR iParent,
+    //! This constructor creates a new material reader.
+    //! The first argument is the parent ICompoundProperty, from which the
+    //! error handler policy for is derived.  The second argument is the name
+    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    IMaterialSchema( const ICompoundProperty &iParent,
                      const std::string &iName,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
@@ -72,24 +77,14 @@ public:
         init();
     }
 
-    //! This constructor is the same as above, but with default
-    //! schema name used.
-    template <class CPROP_PTR>
-    explicit IMaterialSchema( CPROP_PTR iParent,
-                              const Abc::Argument &iArg0 = Abc::Argument(),
-                              const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<MaterialSchemaInfo>( iParent, iArg0, iArg1 )
-    {
-        init();
-    }
-
-    //! Wrap an existing schema object
-    template <class CPROP_PTR>
-    IMaterialSchema( CPROP_PTR iThis,
-                     Abc::WrapExistingFlag iFlag,
+    //! This constructor wraps an existing ICompoundProperty as the material
+    //! reader, and the error handler policy is derived from it.
+    //! The  remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    IMaterialSchema( const ICompoundProperty &iProp,
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument() )
-      : Abc::ISchema<MaterialSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : Abc::ISchema<MaterialSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init();
     }

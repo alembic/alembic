@@ -114,10 +114,9 @@ public:
     typedef OTypedGeomParam<TRAITS> this_type;
     typedef typename this_type::Sample sample_type;
 
-    static const std::string &getInterpretation()
+    static const char * getInterpretation()
     {
-        static std::string sInterpretation = TRAITS::interpretation();
-        return sInterpretation;
+        return TRAITS::interpretation();
     }
 
     static bool matches( const AbcA::PropertyHeader &iHeader,
@@ -127,7 +126,7 @@ public:
         {
             return ( iHeader.getMetaData().get( "podName" ) ==
                     Alembic::Util::PODName( TRAITS::dataType().getPod() ) &&
-                    ( getInterpretation() == "" ||
+                    ( std::string() == getInterpretation() ||
                       atoi(
                         iHeader.getMetaData().get( "podExtent" ).c_str() ) ==
                      TRAITS::dataType().getExtent() ) ) &&
@@ -144,8 +143,24 @@ public:
 
     OTypedGeomParam() {}
 
-    template <class CPROP>
-    OTypedGeomParam( CPROP iParent,
+    OTypedGeomParam( OCompoundProperty iParent,
+                     const std::string &iName,
+                     bool iIsIndexed,
+                     GeometryScope iScope,
+                     size_t iArrayExtent,
+                     const Argument &iArg0 = Argument(),
+                     const Argument &iArg1 = Argument(),
+                     const Argument &iArg2 = Argument()
+                     )
+        : m_name( iName )
+        , m_isIndexed( iIsIndexed )
+        , m_scope( iScope )
+    {
+        *this = OTypedGeomParam( iParent.getPtr(), iName, iIsIndexed, iScope,
+            iArrayExtent, iArg0, iArg1, iArg2 );
+    }
+
+    OTypedGeomParam( AbcA::CompoundPropertyWriterPtr iParent,
                      const std::string &iName,
                      bool iIsIndexed,
                      GeometryScope iScope,
@@ -199,7 +214,7 @@ public:
         if (tsPtr)
         {
             AbcA::CompoundPropertyWriterPtr parent =
-                GetCompoundPropertyWriterPtr(iParent);
+                GetCompoundPropertyWriterPtr( iParent );
             tsIndex =
                 parent->getObject()->getArchive()->addTimeSampling(*tsPtr);
         }
@@ -219,40 +234,7 @@ public:
         }
     }
 
-    template <class PROP>
-    OTypedGeomParam( PROP iThis,
-                     WrapExistingFlag iWrapFlag,
-                     const Abc::Argument &iArg0 = Abc::Argument(),
-                     const Abc::Argument &iArg1 = Abc::Argument() )
-    {
-        ALEMBIC_ABC_SAFE_CALL_BEGIN( "OTypedGeomParam( wrap )" );
-
-        const AbcA::PropertyHeader &ph = iThis.getHeader();
-
-        ABCA_ASSERT( matches( ph,
-                              Abc::GetSchemaInterpMatching( iArg0, iArg1 ) ),
-                     "Property " << ph.getName() << " is not an "
-                     << "OTypedGeomParam" );
-
-        ABCA_ASSERT( ! ph.isScalar(), "Property " << ph.getName()
-                     << " cannot be an OTypedGeomParam" );
-
-        if ( ph.isCompound() )
-        {
-            m_cprop = Abc::OCompoundProperty( iThis, iWrapFlag, iArg0, iArg1 );
-            m_valProp = prop_type( m_cprop, ".vals" );
-            m_indicesProperty = Abc::OUInt32ArrayProperty( m_cprop, ".indices" );
-
-            m_isIndexed = true;
-        }
-        else
-        {
-            m_valProp = prop_type( iThis, iWrapFlag, iArg0, iArg1 );
-            m_isIndexed = false;
-        }
-
-        ALEMBIC_ABC_SAFE_CALL_END_RESET();
-    }
+public:
 
     void set( const sample_type &iSamp )
     {

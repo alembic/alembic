@@ -66,7 +66,7 @@ ReadReferences ( hid_t iParent,
     DspaceCloser dspaceCloser( dspaceId );
 
     hsize_t dim;
-    herr_t status = H5Sget_simple_extent_dims( dspaceId, &dim, NULL );
+    H5Sget_simple_extent_dims( dspaceId, &dim, NULL );
 
     ABCA_ASSERT( dim > 0,
                  "Degenerate dims in Dataset read" );
@@ -74,9 +74,9 @@ ReadReferences ( hid_t iParent,
     if ( dim > 0 )
     {
         oRefs.resize( dim );
-        status = H5Dread( dsetId, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL,
+        herr_t status = H5Dread( dsetId, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL,
                           H5P_DEFAULT, &oRefs.front() );
-        ABCA_ASSERT( status >= 0, 
+        ABCA_ASSERT( status >= 0,
                      "H5Dread failed: " << iRefName );
     }
 }
@@ -181,12 +181,11 @@ ReadDimensions( hid_t iParent,
                 Dimensions &oDims )
 {
     // Assume a maximum rank of 128. This is totally reasonable.
-    static const size_t maxRank = 128;
-    static uint32_t dimVals[128];
+    uint32_t dimVals[128];
 
     size_t readRank;
     ReadSmallArray( iParent, iAttrName, H5T_STD_U32LE, H5T_NATIVE_UINT32,
-                    maxRank, readRank, ( void * )dimVals );
+                    128, readRank, ( void * )dimVals );
 
     Dimensions retDims;
     retDims.setRank( readRank );
@@ -226,7 +225,7 @@ ReadDataSetDimensions( hid_t iParent,
         ABCA_ASSERT( rank == 1, "H5Sget_simple_extent_ndims() must be 1." );
 
         hsize_t hdim = 0;
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
+        H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
         oDims.setRank(1);
         oDims[0] = hdim / iExtent;
     }
@@ -399,20 +398,22 @@ ReadPropertyHeader( H5Node & iParent,
     size_t numFields = 0;
     size_t fieldsUsed = 1;
 
+    // Our bitmasks look like this:
+    //
+    // Property Type mask (Scalar, Array, or Compound) 0x0003
     // 0000 0000 0000 0000 0000 0000 0000 0011
-    static const uint32_t ptypeMask = 0x0003;
-
+    //
+    // Our Pod type mask 0x003c
     // 0000 0000 0000 0000 0000 0000 0011 1100
-    static const uint32_t podMask = 0x003c;
-
+    //
+    // Has a time sampling index mask 0x0040
     // 0000 0000 0000 0000 0000 0000 0100 0000
-    static const uint32_t hasTsidxMask = 0x0040;
-
+    //
+    // no repeats mask 0x0080
     // 0000 0000 0000 0000 0000 0000 1000 0000
-    static const uint32_t noRepeatsMask = 0x0080;
-
+    //
+    // Extent value mask 0xff00
     // 0000 0000 0000 0000 1111 1111 0000 0000
-    static const uint32_t extentMask = 0xff00;
 
     ReadSmallArray(iParent.getObject(), iPropName + ".info", H5T_STD_U32LE,
                    H5T_NATIVE_UINT32, 5, numFields, (void *) info );
@@ -427,7 +428,7 @@ ReadPropertyHeader( H5Node & iParent,
     else
     {
         // low two bits are the property type
-        char ipt = info[0] & ptypeMask;
+        char ipt = info[0] & 0x0003;
 
         // first bit is either scalar, or scalar like
         oIsScalarLike = ipt & 1;
@@ -443,7 +444,7 @@ ReadPropertyHeader( H5Node & iParent,
         }
 
         // Read the pod type out of bits 2-5
-        char podt = ( char )( ( info[0] & podMask ) >> 2 );
+        char podt = ( char )( ( info[0] & 0x003c ) >> 2 );
         if ( podt != ( char )kBooleanPOD &&
 
              podt != ( char )kUint8POD &&
@@ -470,7 +471,7 @@ ReadPropertyHeader( H5Node & iParent,
 
         // bit 6 is the hint about whether time sampling index was written
         // at the end
-        bool hasTsidx = ( (info[0] & hasTsidxMask ) >> 6 ) == 1;
+        bool hasTsidx = ( (info[0] & 0x0040 ) >> 6 ) == 1;
         oTimeSamplingIndex = 0;
 
         if ( hasTsidx && numFields > 1 )
@@ -482,7 +483,7 @@ ReadPropertyHeader( H5Node & iParent,
         // bit 7 is a hint about whether first and last changed index
         // are intrinsically 1, and numSamples - 1
         // (no repeated data from the start or the end)
-        bool noRepeats = ( (info[0] & noRepeatsMask ) >> 7 ) == 1;
+        bool noRepeats = ( (info[0] & 0x0080 ) >> 7 ) == 1;
 
         // Time Sampling Index could be written, but the number of samples
         // may not be.
@@ -527,7 +528,7 @@ ReadPropertyHeader( H5Node & iParent,
         }
 
         // Read the extent out of bits 8-15
-        uint8_t extent = ( uint8_t )( ( info[0] & extentMask ) >> 8 );
+        uint8_t extent = ( uint8_t )( ( info[0] & 0xff00 ) >> 8 );
         if ( extent == 0 )
         {
             ABCA_THROW( "Degenerate extent 0" );
@@ -633,7 +634,7 @@ ReadArray( AbcA::ReadArraySampleCachePtr iCache,
 
         hsize_t hdim = 0;
 
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
+        H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
 
         Dimensions dims;
         std::string dimName = iName + ".dims";
@@ -750,7 +751,7 @@ ReadArray( void * iIntoLocation,
 
         hsize_t hdim = 0;
 
-        rank = H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
+        H5Sget_simple_extent_dims( dspaceId, &hdim, NULL );
 
         ABCA_ASSERT( hdim > 0,
                      "Degenerate dims in Dataset read" );

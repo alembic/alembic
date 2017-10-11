@@ -95,6 +95,49 @@ void Example1_MeshIn( const std::string &arkiveFile )
 }
 
 //-*****************************************************************************
+void SchemaValid()
+{
+    ICameraSchema ics;
+    OCameraSchema ocs;
+    TESTING_ASSERT( ! ics.valid() );
+    TESTING_ASSERT( ! ocs.valid() );
+
+    ICurvesSchema icus;
+    OCurvesSchema ocus;
+    TESTING_ASSERT( ! icus.valid() );
+    TESTING_ASSERT( ! ocus.valid() );
+
+    IFaceSetSchema ifs;
+    OFaceSetSchema ofs;
+    TESTING_ASSERT( ! ifs.valid() );
+    TESTING_ASSERT( ! ofs.valid() );
+
+    ILightSchema ils;
+    OLightSchema ols;
+    TESTING_ASSERT( ! ils.valid() );
+    TESTING_ASSERT( ! ols.valid() );
+
+    INuPatchSchema inps;
+    ONuPatchSchema onps;
+    TESTING_ASSERT( ! inps.valid() );
+    TESTING_ASSERT( ! onps.valid() );
+
+    IPointsSchema ips;
+    OPointsSchema ops;
+    TESTING_ASSERT( ! ips.valid() );
+    TESTING_ASSERT( ! ops.valid() );
+
+    IPolyMeshSchema ipms;    
+    OPolyMeshSchema opms;
+    TESTING_ASSERT( ! ipms.valid() );
+    TESTING_ASSERT( ! opms.valid() );
+
+    ISubDSchema iss;
+    OSubDSchema oss;
+    TESTING_ASSERT( ! iss.valid() );
+    TESTING_ASSERT( ! oss.valid() );
+}
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     std::string arkive( "schemaMatchingTest1.abc" );
@@ -102,6 +145,8 @@ int main( int argc, char *argv[] )
     Example1_MeshOut( arkive );
 
     Example1_MeshIn( arkive );
+
+    SchemaValid();
 
     return 0;
 }

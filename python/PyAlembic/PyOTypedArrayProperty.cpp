@@ -64,11 +64,11 @@ static void register_( const char* iName )
         iName,
         "This class is a typed array property writer",
         init<>( "Create an empty property" ) )
-        .def( init<Abc::OCompoundProperty, 
+        .def( init<Abc::OCompoundProperty,
                    const std::string&,
                    optional<
-                   Abc::Argument, 
-                   Abc::Argument, 
+                   Abc::Argument,
+                   Abc::Argument,
                    Abc::Argument> >(
                   ( arg ( "parent" ), arg( "name" ), arg( "argument" ),
                     arg ( "argument" ), arg( "argument" ) ),
@@ -79,17 +79,16 @@ static void register_( const char* iName )
                     "index" ) )
         .def( "getInterpretation",
               &T::getInterpretation,
-              "Return the interpretation string expected of this property",
-              return_value_policy<copy_const_reference>() )
+              "Return the interpretation string expected of this property" )
         .def( "matches",
               Overloads::matchesMetaData,
-              ( arg( "metaData" ), 
+              ( arg( "metaData" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "Return True if the given entity (as represented by a metadata) "
               "strictly matches the interpretation of this typed property" )
         .def( "matches",
               Overloads::matchesHeader,
-              ( arg( "propertyHeader" ), 
+              ( arg( "propertyHeader" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "Return True if the given entity (as represented by a property "
               "header) strictly matches the interepretation of this typed "

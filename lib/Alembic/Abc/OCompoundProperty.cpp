@@ -41,6 +41,50 @@ namespace Abc {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+OCompoundProperty::OCompoundProperty( AbcA::CompoundPropertyWriterPtr iParent,
+    const std::string &iName, const Argument &iArg0, const Argument &iArg1 )
+{
+    init( iParent, iName, iArg0, iArg1 );
+}
+
+//-*****************************************************************************
+OCompoundProperty::OCompoundProperty( OCompoundProperty iParent,
+    const std::string &iName, const Argument &iArg0, const Argument &iArg1 )
+{
+    init( iParent.getPtr(), iName, iArg0, iArg1 );
+}
+
+//-*****************************************************************************
+OCompoundProperty::OCompoundProperty( AbcA::CompoundPropertyWriterPtr iProp,
+    const Argument &iArg0, const Argument &iArg1 )
+    : OBasePropertyT<AbcA::CompoundPropertyWriterPtr>( iProp,
+      GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+{
+}
+
+//-*****************************************************************************
+OCompoundProperty::OCompoundProperty( AbcA::CompoundPropertyWriterPtr iProp,
+    WrapExistingFlag iWrapFlag, const Argument &iArg0, const Argument &iArg1 )
+    : OBasePropertyT<AbcA::CompoundPropertyWriterPtr>( iProp,
+      GetErrorHandlerPolicy( iProp, iArg0, iArg1 ) )
+{
+}
+
+//-*****************************************************************************
+OCompoundProperty::OCompoundProperty( OObject iObject,
+    const Argument &iArg0, const Argument &iArg1 )
+{
+    init( iObject, iArg0, iArg1 );
+}
+
+//-*****************************************************************************
+OCompoundProperty::OCompoundProperty( OObject iObject, TopFlag iTopFlag,
+    const Argument &iArg0, const Argument &iArg1 )
+{
+    init( iObject, iArg0, iArg1 );
+}
+
+//-*****************************************************************************
 OCompoundProperty::~OCompoundProperty()
 {
     // Here for debug support
@@ -59,6 +103,12 @@ size_t OCompoundProperty::getNumProperties() const
     return 0;
 }
 
+namespace {
+
+const AbcA::PropertyHeader g_hd;
+
+}
+
 //-*****************************************************************************
 const AbcA::PropertyHeader &OCompoundProperty::getPropertyHeader( size_t iIdx ) const
 {
@@ -69,8 +119,7 @@ const AbcA::PropertyHeader &OCompoundProperty::getPropertyHeader( size_t iIdx ) 
     ALEMBIC_ABC_SAFE_CALL_END();
 
     // Not all error handlers throw, have a default.
-    static const AbcA::PropertyHeader hd;
-    return hd;
+    return g_hd;
 }
 
 //-*****************************************************************************
@@ -94,7 +143,6 @@ OCompoundProperty::getProperty( size_t i ) const
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getProperty( i )" );
 
     return OBaseProperty( m_property->getProperty( i ),
-                          kWrapExisting,
                           getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -110,7 +158,6 @@ OCompoundProperty::getProperty( const std::string &iName ) const
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getProperty( name )" );
 
     return OBaseProperty( m_property->getProperty( iName ),
-                          kWrapExisting,
                           getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -125,7 +172,6 @@ OCompoundProperty OCompoundProperty::getParent() const
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::getParent()" );
 
     return OCompoundProperty( m_property->getParent(),
-                              kWrapExisting,
                               getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
@@ -135,19 +181,36 @@ OCompoundProperty OCompoundProperty::getParent() const
 }
 
 //-*****************************************************************************
-void OCompoundProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
-                              const std::string &iName,
-                              ErrorHandler::Policy iParentPolicy,
+void OCompoundProperty::init( OObject iObject,
                               const Argument &iArg0,
                               const Argument &iArg1 )
+{
+    getErrorHandler().setPolicy(
+        GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) );
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "OCompoundProperty::init( OObject )" );
+
+    m_property = iObject.getProperties().getPtr();
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+//-*****************************************************************************
+void OCompoundProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
+                              const std::string &iName,
+                              const Argument &iArg0,
+                              const Argument &iArg1,
+                              const Argument &iArg2 )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OCompoundProperty::init()" );
 
     ABCA_ASSERT( iParent, "invalid parent" );
 
-    Arguments args( iParentPolicy );
+    Arguments args;
     iArg0.setInto( args );
     iArg1.setInto( args );
+    iArg2.setInto( args );
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
 

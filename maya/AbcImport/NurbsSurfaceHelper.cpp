@@ -125,17 +125,14 @@ namespace
                 // The transform node as well as the curve node need to be
                 // deleted once the trim is done, because after all this is not
                 // the equivalent of "curveOnSurface" command
-				MFnNurbsCurveData data;
-				MObject curveData = data.create();
+                MFnNurbsCurveData data;
+                MObject curveData = data.create();
                 MObject curve2D = fnCurve.create(cvs, dknots, degree,
-                    MFnNurbsCurve::kOpen, true, true,
-                    curveData, &status);
+                    MFnNurbsCurve::kOpen, true, true, curveData, &status);
 
                 if (status == MS::kSuccess)
                 {
-                    {
-                        trimLoop.append(curveData);
-                    }
+                    trimLoop.append(curveData);
                 }
             }
             trimBoundaryArray.append(trimLoop);

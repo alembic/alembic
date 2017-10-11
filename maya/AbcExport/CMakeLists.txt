@@ -72,7 +72,7 @@ ADD_MAYA_CXX_PLUGIN(AbcExport ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(AbcExport
     ${MAYA_LIBRARIES}
-    ${CORE_LIBS}
+    Alembic
 )
 
 set_target_properties(AbcExport PROPERTIES

@@ -43,6 +43,64 @@ namespace AbcGeom {
 namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
+OSubDSchema::OSubDSchema( AbcA::CompoundPropertyWriterPtr iParent,
+                                  const std::string &iName,
+                                  const Abc::Argument &iArg0,
+                                  const Abc::Argument &iArg1,
+                                  const Abc::Argument &iArg2,
+                                  const Abc::Argument &iArg3 )
+    : OGeomBaseSchema<SubDSchemaInfo>( iParent, iName,
+                                           iArg0, iArg1, iArg2, iArg3 )
+{
+
+    AbcA::TimeSamplingPtr tsPtr =
+        Abc::GetTimeSampling( iArg0, iArg1, iArg2, iArg3 );
+    uint32_t tsIndex =
+        Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2, iArg3 );
+
+    // if we specified a valid TimeSamplingPtr, use it to determine the
+    // index otherwise we'll use the index, which defaults to the intrinsic
+    // 0 index
+    if ( tsPtr )
+    {
+        tsIndex = iParent->getObject()->getArchive()->addTimeSampling(*tsPtr);
+    }
+
+    // Meta data and error handling are eaten up by
+    // the super type, so all that's left is time sampling.
+    init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2, iArg3 ) );
+}
+
+//-*****************************************************************************
+OSubDSchema::OSubDSchema( Abc::OCompoundProperty iParent,
+                                  const std::string &iName,
+                                  const Abc::Argument &iArg0,
+                                  const Abc::Argument &iArg1,
+                                  const Abc::Argument &iArg2 )
+    : OGeomBaseSchema<SubDSchemaInfo>( iParent.getPtr(), iName,
+                                           GetErrorHandlerPolicy( iParent ),
+                                           iArg0, iArg1, iArg2 )
+{
+    AbcA::TimeSamplingPtr tsPtr =
+        Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
+    uint32_t tsIndex =
+        Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
+
+    // if we specified a valid TimeSamplingPtr, use it to determine the
+    // index otherwise we'll use the index, which defaults to the intrinsic
+    // 0 index
+    if ( tsPtr )
+    {
+        tsIndex = iParent.getPtr()->getObject()->getArchive()->addTimeSampling(
+            *tsPtr);
+    }
+
+    // Meta data and error handling are eaten up by
+    // the super type, so all that's left is time sampling.
+    init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2 ) );
+}
+
+//-*****************************************************************************
 inline void SetPropUsePrevIfNull( Abc::OInt32Property iProp, int32_t iVal )
 {
     if ( iVal != ABC_GEOM_SUBD_NULL_INT_VALUE )
@@ -58,66 +116,58 @@ inline void SetPropUsePrevIfNull( Abc::OInt32Property iProp, int32_t iVal )
 //-*****************************************************************************
 void OSubDSchema::set( const Sample &iSamp )
 {
+    if( m_selectiveExport || iSamp.isPartialSample() )
+    {
+        selectiveSet( iSamp );
+        return;
+    }
+
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::set()" );
+
+    // do we need to create subd scheme?
+    if ( iSamp.getSubdivisionScheme() != "catmull-clark" &&
+         !m_subdSchemeProperty )
+    {
+        createSubDSchemeProperty();
+    }
+
+    // do we need to create the faceVaryingInterpolateBoundary prop?
+    if ( !m_faceVaryingInterpolateBoundaryProperty &&
+         iSamp.getFaceVaryingInterpolateBoundary() !=
+         ABC_GEOM_SUBD_NULL_INT_VALUE )
+    {
+        createFaceVaryingInterpolateBoundaryProperty();
+    }
+
+    // do we need to create the faceVaryingPropagateCorners prop?
+    if ( !m_faceVaryingPropagateCornersProperty &&
+         iSamp.getFaceVaryingPropagateCorners() !=
+         ABC_GEOM_SUBD_NULL_INT_VALUE )
+    {
+        createFaceVaryingPropagateCornersProperty();
+    }
+
+    // do we need to create the interpolateBoundary prop?
+    if ( !m_interpolateBoundaryProperty &&
+         iSamp.getInterpolateBoundary() != ABC_GEOM_SUBD_NULL_INT_VALUE )
+    {
+        createInterpolateBoundaryProperty();
+    }
 
     // do we need to create velocities prop?
     if ( iSamp.getVelocities() && !m_velocitiesProperty )
     {
-        m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(),
-            ".velocities", m_positionsProperty.getTimeSampling() );
-
-        std::vector< V3f > emptyVec;
-        const V3fArraySample empty( emptyVec );
-        const size_t numSamps = m_positionsProperty.getNumSamples();
-        for ( size_t i = 0 ; i < numSamps ; ++i )
-        {
-            m_velocitiesProperty.set( empty );
-        }
+        createVelocitiesProperty();
     }
 
     // do we need to create uvs?
     if ( iSamp.getUVs() && !m_uvsParam )
     {
-        std::vector<V2f> emptyVals;
-        std::vector<Util::uint32_t> emptyIndices;
-
-        OV2fGeomParam::Sample empty;
-        AbcA::MetaData mdata;
-        SetSourceName( mdata, m_uvSourceName );
-
-        if ( iSamp.getUVs().getIndices() )
-        {
-            empty = OV2fGeomParam::Sample( Abc::V2fArraySample( emptyVals ),
-                Abc::UInt32ArraySample( emptyIndices ),
-                iSamp.getUVs().getScope() );
-
-            // UVs are indexed
-            m_uvsParam = OV2fGeomParam( this->getPtr(), "uv", true,
-                                        empty.getScope(), 1,
-                                        this->getTimeSampling(), mdata );
-        }
-        else
-        {
-            empty = OV2fGeomParam::Sample( Abc::V2fArraySample( emptyVals ),
-                                           iSamp.getUVs().getScope() );
-
-            // UVs are not indexed
-            m_uvsParam = OV2fGeomParam( this->getPtr(), "uv", false,
-                                        empty.getScope(), 1,
-                                        this->getTimeSampling(), mdata );
-        }
-
-        size_t numSamples = m_positionsProperty.getNumSamples();
-
-        // set all the missing samples
-        for ( size_t i = 0; i < numSamples; ++i )
-        {
-            m_uvsParam.set( empty );
-        }
+        createUVsProperty( iSamp );
     }
 
     // We could add sample integrity checking here.
-    if ( m_positionsProperty.getNumSamples() == 0 )
+    if ( m_numSamples == 0 )
     {
         // First sample must be valid on all points.
         ABCA_ASSERT( iSamp.getPositions() &&
@@ -130,7 +180,9 @@ void OSubDSchema::set( const Sample &iSamp )
         m_faceCountsProperty.set( iSamp.getFaceCounts() );
 
         if ( m_velocitiesProperty )
-        { SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() ); }
+        {
+            SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() );
+        }
 
         if ( iSamp.getSelfBounds().isEmpty() )
         {
@@ -151,37 +203,40 @@ void OSubDSchema::set( const Sample &iSamp )
             m_uvsParam.set( iSamp.getUVs() );
         }
 
-        if ( iSamp.getFaceVaryingInterpolateBoundary() ==
-             ABC_GEOM_SUBD_NULL_INT_VALUE )
+        if ( m_faceVaryingInterpolateBoundaryProperty )
         {
-            m_faceVaryingInterpolateBoundaryProperty.set( 0 );
-        }
-        else
-        {
-            m_faceVaryingInterpolateBoundaryProperty.set(
-                iSamp.getFaceVaryingInterpolateBoundary() );
-        }
-        if ( iSamp.getFaceVaryingPropagateCorners() ==
-             ABC_GEOM_SUBD_NULL_INT_VALUE )
-        {
-            m_faceVaryingPropagateCornersProperty.set( 0 );
-        }
-        else
-        {
-            m_faceVaryingPropagateCornersProperty.set(
-                iSamp.getFaceVaryingPropagateCorners() );
-        }
-        if ( iSamp.getInterpolateBoundary() ==
-             ABC_GEOM_SUBD_NULL_INT_VALUE )
-        {
-            m_interpolateBoundaryProperty.set( 0 );
-        }
-        else
-        {
-            m_interpolateBoundaryProperty.set( iSamp.getInterpolateBoundary() );
+            int32_t value = iSamp.getFaceVaryingInterpolateBoundary();
+            if ( value == ABC_GEOM_SUBD_NULL_INT_VALUE )
+            {
+                value = 0;
+            }
+            m_faceVaryingInterpolateBoundaryProperty.set( value );
         }
 
-        m_subdSchemeProperty.set( iSamp.getSubdivisionScheme() );
+        if ( m_faceVaryingPropagateCornersProperty )
+        {
+            int32_t value = iSamp.getFaceVaryingPropagateCorners();
+            if ( value == ABC_GEOM_SUBD_NULL_INT_VALUE )
+            {
+                value = 0;
+            }
+            m_faceVaryingPropagateCornersProperty.set( value );
+        }
+
+        if ( m_interpolateBoundaryProperty )
+        {
+            int32_t value = iSamp.getInterpolateBoundary();
+            if ( value == ABC_GEOM_SUBD_NULL_INT_VALUE )
+            {
+                value = 0;
+            }
+            m_interpolateBoundaryProperty.set( value );
+        }
+
+        if ( m_subdSchemeProperty )
+        {
+            m_subdSchemeProperty.set( iSamp.getSubdivisionScheme() );
+        }
 
         if ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
             iSamp.getCreaseSharpnesses() )
@@ -236,17 +291,28 @@ void OSubDSchema::set( const Sample &iSamp )
         SetPropUsePrevIfNull( m_faceIndicesProperty, iSamp.getFaceIndices() );
         SetPropUsePrevIfNull( m_faceCountsProperty, iSamp.getFaceCounts() );
 
-        SetPropUsePrevIfNull( m_faceVaryingInterpolateBoundaryProperty,
-                              iSamp.getFaceVaryingInterpolateBoundary() );
-        SetPropUsePrevIfNull( m_faceVaryingPropagateCornersProperty,
-                              iSamp.getFaceVaryingPropagateCorners() );
-        SetPropUsePrevIfNull( m_interpolateBoundaryProperty,
-                              iSamp.getInterpolateBoundary() );
+        if ( m_faceVaryingInterpolateBoundaryProperty )
+        {
+            SetPropUsePrevIfNull( m_faceVaryingInterpolateBoundaryProperty,
+                                  iSamp.getFaceVaryingInterpolateBoundary() );
+        }
+
+        if ( m_faceVaryingPropagateCornersProperty )
+        {
+            SetPropUsePrevIfNull( m_faceVaryingPropagateCornersProperty,
+                                  iSamp.getFaceVaryingPropagateCorners() );
+        }
+
+        if ( m_interpolateBoundaryProperty )
+        {
+            SetPropUsePrevIfNull( m_interpolateBoundaryProperty,
+                                  iSamp.getInterpolateBoundary() );
+        }
 
         if ( ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
                iSamp.getCreaseSharpnesses() ) && !m_creaseIndicesProperty )
         {
-            initCreases(m_positionsProperty.getNumSamples() - 1);
+            initCreases( m_numSamples - 1 );
         }
 
         if ( m_creaseIndicesProperty )
@@ -262,7 +328,7 @@ void OSubDSchema::set( const Sample &iSamp )
         if ( ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() ) &&
              !m_cornerIndicesProperty )
         {
-            initCorners(m_positionsProperty.getNumSamples() - 1);
+            initCorners( m_numSamples - 1 );
         }
 
         if ( m_cornerIndicesProperty )
@@ -275,7 +341,7 @@ void OSubDSchema::set( const Sample &iSamp )
 
         if ( iSamp.getHoles() && !m_holesProperty )
         {
-            initHoles(m_positionsProperty.getNumSamples() - 1);
+            initHoles( m_numSamples - 1);
         }
 
         if ( m_holesProperty )
@@ -283,7 +349,11 @@ void OSubDSchema::set( const Sample &iSamp )
             SetPropUsePrevIfNull( m_holesProperty, iSamp.getHoles() );
         }
 
-        SetPropUsePrevIfNull( m_subdSchemeProperty, iSamp.getSubdivisionScheme() );
+        if ( m_subdSchemeProperty )
+        {
+            SetPropUsePrevIfNull( m_subdSchemeProperty,
+                                  iSamp.getSubdivisionScheme() );
+        }
 
         if ( m_velocitiesProperty )
         {
@@ -306,10 +376,138 @@ void OSubDSchema::set( const Sample &iSamp )
             m_selfBoundsProperty.setFromPrevious();
         }
 
-        if ( m_uvsParam ) { m_uvsParam.set( iSamp.getUVs() ); }
+        if ( m_uvsParam )
+        {
+            m_uvsParam.set( iSamp.getUVs() );
+        }
     }
 
+    m_numSamples++;
+
     ALEMBIC_ABC_SAFE_CALL_END();
+}
+
+//-*****************************************************************************
+void OSubDSchema::createSubDSchemeProperty()
+{
+    m_subdSchemeProperty = Abc::OStringProperty( this->getPtr(),
+        ".scheme", m_timeSamplingIndex );
+
+    std::string scheme = "catmull-clark";
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_subdSchemeProperty.set( scheme );
+    }
+}
+
+//-*****************************************************************************
+void OSubDSchema::createFaceVaryingInterpolateBoundaryProperty()
+{
+    m_faceVaryingInterpolateBoundaryProperty = Abc::OInt32Property(
+        this->getPtr(), ".faceVaryingInterpolateBoundary",
+        m_timeSamplingIndex );
+
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_faceVaryingInterpolateBoundaryProperty.set( 0 );
+    }
+}
+
+//-*****************************************************************************
+void OSubDSchema::createFaceVaryingPropagateCornersProperty()
+{
+    m_faceVaryingPropagateCornersProperty = Abc::OInt32Property(
+        this->getPtr(), ".faceVaryingPropagateCorners",
+        m_timeSamplingIndex);
+
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_faceVaryingPropagateCornersProperty.set( 0 );
+    }
+}
+
+//-*****************************************************************************
+void OSubDSchema::createInterpolateBoundaryProperty()
+{
+    m_interpolateBoundaryProperty = Abc::OInt32Property( this->getPtr(),
+        ".interpolateBoundary", m_timeSamplingIndex );
+
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_interpolateBoundaryProperty.set( 0 );
+    }
+}
+
+//-*****************************************************************************
+void OSubDSchema::createVelocitiesProperty()
+{
+    m_velocitiesProperty = Abc::OV3fArrayProperty( this->getPtr(),
+        ".velocities", m_timeSamplingIndex );
+
+    std::vector< V3f > emptyVec;
+    const V3fArraySample empty( emptyVec );
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_velocitiesProperty.set( empty );
+    }
+}
+
+//-*****************************************************************************
+void OSubDSchema::createUVsProperty( const Sample &iSamp )
+{
+    std::vector<V2f> emptyVals;
+    std::vector<Util::uint32_t> emptyIndices;
+
+    OV2fGeomParam::Sample empty;
+    AbcA::MetaData mdata;
+    SetSourceName( mdata, m_uvSourceName );
+
+    if ( iSamp.getUVs().getIndices() )
+    {
+        empty = OV2fGeomParam::Sample( Abc::V2fArraySample( emptyVals ),
+            Abc::UInt32ArraySample( emptyIndices ),
+            iSamp.getUVs().getScope() );
+
+        // UVs are indexed
+        m_uvsParam = OV2fGeomParam( this->getPtr(), "uv", true,
+                                    empty.getScope(), 1,
+                                    this->getTimeSampling(), mdata );
+    }
+    else
+    {
+        empty = OV2fGeomParam::Sample( Abc::V2fArraySample( emptyVals ),
+                                       iSamp.getUVs().getScope() );
+
+        // UVs are not indexed
+        m_uvsParam = OV2fGeomParam( this->getPtr(), "uv", false,
+                                    empty.getScope(), 1,
+                                    this->getTimeSampling(), mdata );
+    }
+
+    // set all the missing samples
+    for ( size_t i = 0; i < m_numSamples; ++i )
+    {
+        m_uvsParam.set( empty );
+    }
+}
+
+//-*****************************************************************************
+void OSubDSchema::createPositionsProperty()
+{
+    AbcA::MetaData mdata;
+    SetGeometryScope( mdata, kVertexScope );
+
+    m_positionsProperty = Abc::OP3fArrayProperty( this->getPtr(), "P", mdata,
+                                                  m_timeSamplingIndex );
+
+    std::vector<V3f> emptyVec;
+    const V3fArraySample empty( emptyVec );
+    for ( size_t i = 0 ; i < m_numSamples ; ++i )
+    {
+        m_positionsProperty.set( empty );
+    }
+
+    createSelfBoundsProperty( m_timeSamplingIndex, m_numSamples );
 }
 
 //-*****************************************************************************
@@ -317,13 +515,36 @@ void OSubDSchema::setFromPrevious()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::setFromPrevious" );
 
-    m_positionsProperty.setFromPrevious();
-    m_faceIndicesProperty.setFromPrevious();
-    m_faceCountsProperty.setFromPrevious();
+    if( m_positionsProperty )
+    {
+        m_positionsProperty.setFromPrevious();
+    }
 
-    m_faceVaryingInterpolateBoundaryProperty.setFromPrevious();
-    m_faceVaryingPropagateCornersProperty.setFromPrevious();
-    m_interpolateBoundaryProperty.setFromPrevious();
+    if( m_faceIndicesProperty )
+    {
+        m_faceIndicesProperty.setFromPrevious();
+    }
+
+    if( m_faceCountsProperty )
+    {
+        m_faceCountsProperty.setFromPrevious();
+    }
+
+    if ( m_faceVaryingInterpolateBoundaryProperty )
+    {
+        m_faceVaryingInterpolateBoundaryProperty.setFromPrevious();
+    }
+
+    if ( m_faceVaryingPropagateCornersProperty )
+    {
+        m_faceVaryingPropagateCornersProperty.setFromPrevious();
+    }
+
+
+    if ( m_interpolateBoundaryProperty )
+    {
+        m_interpolateBoundaryProperty.setFromPrevious();
+    }
 
     if ( m_creaseIndicesProperty )
     {
@@ -343,7 +564,10 @@ void OSubDSchema::setFromPrevious()
         m_holesProperty.setFromPrevious();
     }
 
-    m_subdSchemeProperty.setFromPrevious();
+    if ( m_subdSchemeProperty )
+    {
+        m_subdSchemeProperty.setFromPrevious();
+    }
 
     m_selfBoundsProperty.setFromPrevious();
 
@@ -360,14 +584,47 @@ void OSubDSchema::setTimeSampling( uint32_t iIndex )
     ALEMBIC_ABC_SAFE_CALL_BEGIN(
         "OSubDSchema::setTimeSampling( uint32_t )" );
 
-    m_positionsProperty.setTimeSampling( iIndex );
-    m_faceIndicesProperty.setTimeSampling( iIndex );
-    m_faceCountsProperty.setTimeSampling( iIndex );
-    m_faceVaryingInterpolateBoundaryProperty.setTimeSampling( iIndex );
-    m_faceVaryingPropagateCornersProperty.setTimeSampling( iIndex );
-    m_interpolateBoundaryProperty.setTimeSampling( iIndex );
-    m_subdSchemeProperty.setTimeSampling( iIndex );
-    m_selfBoundsProperty.setTimeSampling( iIndex );
+    m_timeSamplingIndex = iIndex;
+
+    if( m_positionsProperty )
+    {
+        m_positionsProperty.setTimeSampling( iIndex );
+    }
+
+    if( m_faceIndicesProperty )
+    {
+        m_faceIndicesProperty.setTimeSampling( iIndex );
+    }
+
+    if( m_faceCountsProperty )
+    {
+        m_faceCountsProperty.setTimeSampling( iIndex );
+    }
+
+    if( m_selfBoundsProperty )
+    {
+        m_selfBoundsProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_faceVaryingInterpolateBoundaryProperty )
+    {
+        m_faceVaryingInterpolateBoundaryProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_faceVaryingPropagateCornersProperty )
+    {
+        m_faceVaryingPropagateCornersProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_interpolateBoundaryProperty )
+    {
+        m_interpolateBoundaryProperty.setTimeSampling( iIndex );
+    }
+
+    if ( m_subdSchemeProperty )
+    {
+        m_subdSchemeProperty.setTimeSampling( iIndex );
+    }
 
     if ( m_creaseIndicesProperty )
     {
@@ -427,6 +684,9 @@ void OSubDSchema::setTimeSampling( AbcA::TimeSamplingPtr iTime )
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
+namespace {
+    OFaceSet g_empty;
+}
 //-*****************************************************************************
 OFaceSet &
 OSubDSchema::createFaceSet( const std::string &iFaceSetName )
@@ -436,42 +696,41 @@ OSubDSchema::createFaceSet( const std::string &iFaceSetName )
     ABCA_ASSERT( m_faceSets.find (iFaceSetName) == m_faceSets.end (),
                  "faceSet has already been created in SubD." );
 
-    m_faceSets [iFaceSetName] = OFaceSet (getObject (), iFaceSetName);
+    OObject thisObj( getObject() );
+    m_faceSets [iFaceSetName] = OFaceSet (thisObj, iFaceSetName);
 
     return m_faceSets [iFaceSetName];
 
     ALEMBIC_ABC_SAFE_CALL_END();
 
-    static OFaceSet empty;
-    return empty;
+    return g_empty;
 }
 
 //-*****************************************************************************
-void OSubDSchema::init( uint32_t iTsIdx )
+void OSubDSchema::init( uint32_t iTsIdx, bool isSparse )
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OSubDSchema::init()" );
 
-    AbcA::MetaData mdata;
-    SetGeometryScope( mdata, kVertexScope );
+    m_selectiveExport = isSparse;
+
+    m_numSamples = 0;
+
+    m_timeSamplingIndex = iTsIdx;
+
+    if ( m_selectiveExport )
+    {
+        return;
+    }
 
     AbcA::CompoundPropertyWriterPtr _this = this->getPtr();
 
-    m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, iTsIdx );
+    createPositionsProperty();
 
-    m_faceIndicesProperty = Abc::OInt32ArrayProperty( _this, ".faceIndices", iTsIdx );
+    m_faceIndicesProperty = Abc::OInt32ArrayProperty( _this, ".faceIndices",
+                                                      m_timeSamplingIndex );
 
-    m_faceCountsProperty = Abc::OInt32ArrayProperty( _this, ".faceCounts", iTsIdx );
-
-    m_faceVaryingInterpolateBoundaryProperty =
-        Abc::OInt32Property( _this, ".faceVaryingInterpolateBoundary", iTsIdx );
-
-    m_faceVaryingPropagateCornersProperty =
-        Abc::OInt32Property( _this, ".faceVaryingPropagateCorners", iTsIdx );
-
-    m_interpolateBoundaryProperty =
-        Abc::OInt32Property( _this, ".interpolateBoundary", iTsIdx );
-
-    m_subdSchemeProperty = Abc::OStringProperty( _this, ".scheme", iTsIdx );
+    m_faceCountsProperty = Abc::OInt32ArrayProperty( _this, ".faceCounts",
+                                                     m_timeSamplingIndex );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
@@ -594,6 +853,171 @@ OSubDSchema::getFaceSet( const std::string &iFaceSetName )
 void OSubDSchema::setUVSourceName(const std::string & iName)
 {
     m_uvSourceName = iName;
+}
+
+//-*****************************************************************************
+void OSubDSchema::selectiveSet( const Sample &iSamp )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "OPolyMeshSchema::selectiveSet()" );
+
+    // TODO spare create indices and counts?
+
+    if ( iSamp.getPositions() && !m_positionsProperty )
+    {
+        createPositionsProperty();
+    }
+
+    if ( m_positionsProperty )
+    {
+        SetPropUsePrevIfNull( m_positionsProperty, iSamp.getPositions() );
+        if ( iSamp.getSelfBounds().hasVolume() )
+        {
+            m_selfBoundsProperty.set( iSamp.getSelfBounds() );
+        }
+        else if ( iSamp.getPositions() )
+        {
+            Abc::Box3d bnds(
+                ComputeBoundsFromPositions( iSamp.getPositions() ) );
+            m_selfBoundsProperty.set( bnds );
+        }
+    }
+
+    //! Velocities
+    if ( iSamp.getVelocities() && !m_velocitiesProperty )
+    {
+        createVelocitiesProperty();
+    }
+
+    if ( m_velocitiesProperty )
+    {
+        SetPropUsePrevIfNull( m_velocitiesProperty, iSamp.getVelocities() );
+    }
+
+    //! UVs
+    if ( iSamp.getUVs().getVals() )
+    {
+        if( !m_uvsParam )
+        {
+            createUVsProperty( iSamp );
+        }
+
+        // OGeomParam will automatically use SetPropUsePrevIfNull internally
+        m_uvsParam.set( iSamp.getUVs() );
+    }
+
+    if ( !m_faceVaryingInterpolateBoundaryProperty &&
+            iSamp.getFaceVaryingInterpolateBoundary() !=
+            ABC_GEOM_SUBD_NULL_INT_VALUE )
+    {
+       createFaceVaryingInterpolateBoundaryProperty();
+    }
+
+    if ( m_faceVaryingInterpolateBoundaryProperty )
+    {
+        int32_t value = iSamp.getFaceVaryingInterpolateBoundary();
+        if ( value == ABC_GEOM_SUBD_NULL_INT_VALUE )
+        {
+            value = 0;
+        }
+        m_faceVaryingInterpolateBoundaryProperty.set( value );
+    }
+
+    if ( !m_faceVaryingPropagateCornersProperty &&
+             iSamp.getFaceVaryingPropagateCorners() !=
+             ABC_GEOM_SUBD_NULL_INT_VALUE )
+    {
+        createFaceVaryingPropagateCornersProperty();
+    }
+
+    if ( m_faceVaryingPropagateCornersProperty )
+    {
+        int32_t value = iSamp.getFaceVaryingPropagateCorners();
+        if ( value == ABC_GEOM_SUBD_NULL_INT_VALUE )
+        {
+            value = 0;
+        }
+        m_faceVaryingPropagateCornersProperty.set( value );
+    }
+
+    if ( !m_interpolateBoundaryProperty &&
+             iSamp.getInterpolateBoundary() != ABC_GEOM_SUBD_NULL_INT_VALUE )
+    {
+        createInterpolateBoundaryProperty();
+    }
+
+    if ( m_interpolateBoundaryProperty )
+    {
+        int32_t value = iSamp.getInterpolateBoundary();
+        if ( value == ABC_GEOM_SUBD_NULL_INT_VALUE )
+        {
+            value = 0;
+        }
+        m_interpolateBoundaryProperty.set( value );
+    }
+
+    if ( iSamp.getSubdivisionScheme() != "catmull-clark" &&
+             !m_subdSchemeProperty )
+    {
+        createSubDSchemeProperty();
+    }
+
+    if ( m_subdSchemeProperty )
+    {
+        m_subdSchemeProperty.set( iSamp.getSubdivisionScheme() );
+    }
+
+    if ( ( iSamp.getCreaseIndices() || iSamp.getCreaseLengths() ||
+           iSamp.getCreaseSharpnesses() ) &&
+        ( !m_creaseIndicesProperty && !m_creaseLengthsProperty &&
+          !m_creaseSharpnessesProperty ) )
+    {
+        initCreases(0);
+    }
+
+    if ( iSamp.getCreaseIndices() )
+    {
+        m_creaseIndicesProperty.set( iSamp.getCreaseIndices() );
+    }
+
+    if ( iSamp.getCreaseLengths() )
+    {
+        m_creaseLengthsProperty.set( iSamp.getCreaseLengths() );
+    }
+
+    if ( iSamp.getCreaseSharpnesses() )
+    {
+        m_creaseSharpnessesProperty.set( iSamp.getCreaseSharpnesses() );
+    }
+
+    if ( ( iSamp.getCornerIndices() || iSamp.getCornerSharpnesses() ) &&
+         ( !m_cornerIndicesProperty && !m_cornerSharpnessesProperty ) )
+    {
+        initCorners(0);
+    }
+
+    if ( iSamp.getCornerIndices() )
+    {
+        m_cornerIndicesProperty.set( iSamp.getCornerIndices() );
+    }
+
+    if ( iSamp.getCornerSharpnesses() )
+    {
+        m_cornerSharpnessesProperty.set( iSamp.getCornerSharpnesses() );
+    }
+
+    if ( iSamp.getHoles() && !m_holesProperty)
+    {
+        initHoles(0);
+    }
+
+    if ( iSamp.getHoles() )
+    {
+        m_holesProperty.set( iSamp.getHoles() );
+    }
+
+    m_numSamples++;
+
+    ALEMBIC_ABC_SAFE_CALL_END();
 }
 
 } // End namespace ALEMBIC_VERSION_NS

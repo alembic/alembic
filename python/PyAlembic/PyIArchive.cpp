@@ -40,6 +40,7 @@ using namespace boost::python;
 
 const std::string kHDF5 = "HDF5";
 const std::string kOgawa = "Ogawa";
+const std::string kLayer = "Layer";
 const std::string kUnknown = "Unknown";
 
 //-*****************************************************************************
@@ -54,6 +55,37 @@ static Abc::IArchive* mkIArchive( const std::string &iName )
     if ( coreType == AbcF::IFactory::kUnknown ) {
         throwPythonException( "Unknown core type" );
     }
+#ifndef ALEMBIC_WITH_HDF5
+    else if ( coreType == AbcF::IFactory::kHDF5 ) {
+        throwPythonException( "Unsupported core type: HDF5" );
+    }
+#endif
+    return new Abc::IArchive( archive );
+}
+
+//-*****************************************************************************
+static Abc::IArchive* mkLayeredIArchive( boost::python::list &iNames )
+{
+    std::vector< std::string > files;
+    for ( int i = 0; i < len(iNames); ++i )
+    {
+        files.push_back( boost::python::extract<std::string>( iNames[i] ) );
+    }
+
+    Abc::IArchive archive;
+    AbcF::IFactory factory;
+    factory.setPolicy(Abc::ErrorHandler::kQuietNoopPolicy);
+    AbcF::IFactory::CoreType coreType;
+    archive = factory.getArchive( files, coreType );
+
+    if ( coreType == AbcF::IFactory::kUnknown ) {
+        throwPythonException( "Unknown core type" );
+    }
+#ifndef ALEMBIC_WITH_HDF5
+    else if ( coreType == AbcF::IFactory::kHDF5 ) {
+        throwPythonException( "Unsupported core type: HDF5" );
+    }
+#endif
     return new Abc::IArchive( archive );
 }
 
@@ -77,18 +109,19 @@ static std::string getCoreType( Abc::IArchive& archive )
 //-*****************************************************************************
 void register_iarchive()
 {
-    
+
     // export the CoreType constants
     //
     scope().attr("kHDF5") = kHDF5;
     scope().attr("kOgawa") = kOgawa;
+    scope().attr("kLayer") = kLayer;
     scope().attr("kUnknown") = kUnknown;
-    
+
     // IArchive
     //
     class_< Abc::IArchive >(
         "IArchive",
-        "The IArchive class opens an existing Alembic archive for read acess",
+        "The IArchive class opens an existing Alembic archive for read access",
         no_init )
         .def( "__init__",
               make_constructor(
@@ -96,6 +129,12 @@ void register_iarchive()
                   default_call_policies(),
                   ( arg( "fileName" ) ) ),
              "Create an IArchive with the given file name" )
+        .def( "__init__",
+              make_constructor(
+                  mkLayeredIArchive,
+                  default_call_policies(),
+                  ( arg( "fileList" ) ) ),
+             "Create a layered IArchive with the given file name list" )
         .def( "getName",
               &Abc::IArchive::getName,
               "Return the file name" )

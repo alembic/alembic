@@ -169,7 +169,10 @@ public:
     //-*************************************************************************
 
     //! The default constructor
-    INuPatchSchema() {}
+    INuPatchSchema()
+    {
+        m_hasTrimCurve = false;
+    }
 
     //! copy constructor
     INuPatchSchema(const INuPatchSchema& iCopy)
@@ -178,45 +181,30 @@ public:
         *this = iCopy;
     }
 
-    //! This templated, explicit function creates a new scalar property reader.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyReaderPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
-    //! can be used to override the ErrorHandlerPolicy and to specify
-    //! schema interpretation matching.
-    template <class CPROP_PTR>
-    INuPatchSchema( CPROP_PTR iParent,
+    //! This constructor creates a new nurbs patch reader.
+    //! The first argument is the parent ICompoundProperty, from which the
+    //! error handler policy for is derived.  The second argument is the name
+    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    INuPatchSchema( const ICompoundProperty &iParent,
                     const std::string &iName,
                     const Abc::Argument &iArg0 = Abc::Argument(),
                     const Abc::Argument &iArg1 = Abc::Argument() )
-      : IGeomBaseSchema<NuPatchSchemaInfo>( iParent, iName,
-                                         iArg0, iArg1 )
+      : IGeomBaseSchema<NuPatchSchemaInfo>( iParent, iName, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }
 
-    //! This constructor is the same as above, but with default
-    //! schema name used.
-    template <class CPROP_PTR>
-    explicit INuPatchSchema( CPROP_PTR iParent,
+    //! This constructor wraps an existing ICompoundProperty as the nurbs
+    //! reader, and the error handler policy is derived from it.
+    //! The  remaining optional arguments can be used to override the
+    //! ErrorHandlerPolicy and to specify schema interpretation matching.
+    explicit INuPatchSchema( const ICompoundProperty &iProp,
                              const Abc::Argument &iArg0 = Abc::Argument(),
                              const Abc::Argument &iArg1 = Abc::Argument() )
 
-      : IGeomBaseSchema<NuPatchSchemaInfo>( iParent,
-                                         iArg0, iArg1 )
-    {
-        init( iArg0, iArg1 );
-    }
-
-    //! Wrap an existing schema object
-    template <class CPROP_PTR>
-    INuPatchSchema( CPROP_PTR iThis,
-                    Abc::WrapExistingFlag iFlag,
-                    const Abc::Argument &iArg0 = Abc::Argument(),
-                    const Abc::Argument &iArg1 = Abc::Argument() )
-
-      : IGeomBaseSchema<NuPatchSchemaInfo>( iThis, iFlag, iArg0, iArg1 )
+      : IGeomBaseSchema<NuPatchSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
     }

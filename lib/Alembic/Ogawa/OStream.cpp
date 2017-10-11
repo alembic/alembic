@@ -45,7 +45,7 @@ class OStream::PrivateData
 {
 public:
     PrivateData(const std::string & iFileName) :
-        stream(NULL), fileName(iFileName), startPos(0)
+        stream(NULL), fileName(iFileName), startPos(0), curPos(0), maxPos(0)
     {
         std::ofstream * filestream = new std::ofstream(fileName.c_str(),
             std::ios_base::trunc | std::ios_base::binary);
@@ -53,7 +53,7 @@ public:
         {
             stream = filestream;
 #if defined _WIN32 || defined _WIN64
-			filestream->rdbuf()->pubsetbuf(buffer, sizeof(buffer)); 
+            filestream->rdbuf()->pubsetbuf(buffer, sizeof(buffer));
 #endif
             stream->exceptions ( std::ofstream::failbit |
                                  std::ofstream::badbit );
@@ -65,7 +65,8 @@ public:
         }
     }
 
-    PrivateData(std::ostream * iStream) : stream(iStream), startPos(0)
+    PrivateData(std::ostream * iStream) :
+        stream(iStream), startPos(0), curPos(0), maxPos(0)
     {
         if (stream)
         {
@@ -95,11 +96,13 @@ public:
     }
 
 #if defined _WIN32 || defined _WIN64
-	char buffer [STREAM_BUF_SIZE];
+    char buffer [STREAM_BUF_SIZE];
 #endif
     std::ostream * stream;
     std::string fileName;
     Alembic::Util::uint64_t startPos;
+    Alembic::Util::uint64_t curPos;
+    Alembic::Util::uint64_t maxPos;
     Alembic::Util::mutex lock;
 };
 
@@ -154,6 +157,11 @@ void OStream::init()
             0, 1,    // 16 bit format version number
             0, 0, 0, 0, 0, 0, 0, 0}; // position of the first group
         mData->stream->write(header, sizeof(header)).flush();
+        mData->curPos += sizeof(header);
+        if( mData->curPos > mData->maxPos )
+        {
+            mData->maxPos = mData->curPos;
+        }
     }
 }
 
@@ -162,16 +170,10 @@ Alembic::Util::uint64_t OStream::getAndSeekEndPos()
     if (isValid())
     {
         Alembic::Util::scoped_lock l(mData->lock);
-        Alembic::Util::uint64_t lastp =
-            mData->stream->seekp(0, std::ios_base::end).tellp();
-        if (lastp == INVALID_DATA || lastp < mData->startPos)
-        {
-            throw std::runtime_error(
-                "Illegal position returned Ogawa::OStream::getAndSeekEndPos");
 
-            return 0;
-        }
-        return lastp - mData->startPos;
+        mData->curPos = mData->maxPos;
+        mData->stream->seekp(mData->curPos + mData->startPos);
+        return mData->curPos;
     }
     return 0;
 }
@@ -182,6 +184,7 @@ void OStream::seek(Alembic::Util::uint64_t iPos)
     {
         Alembic::Util::scoped_lock l(mData->lock);
         mData->stream->seekp(iPos + mData->startPos);
+        mData->curPos = iPos;
     }
 }
 
@@ -191,6 +194,11 @@ void OStream::write(const void * iBuf, Alembic::Util::uint64_t iSize)
     {
         Alembic::Util::scoped_lock l(mData->lock);
         mData->stream->write((const char *)iBuf, iSize).flush();
+        mData->curPos += iSize;
+        if(mData->curPos > mData->maxPos)
+        {
+            mData->maxPos = mData->curPos;
+        }
     }
 }
 

@@ -52,6 +52,10 @@ extern const float32_t g_vKnot[];
 extern const int32_t g_nP;
 extern const float32_t g_P[];
 extern const float32_t g_Pw[];
+extern const int32_t g_numNormals;
+extern const float32_t g_normals[];
+extern const int32_t g_numVelocities;
+extern const float32_t g_velocities[];
 
 // trim curve
 extern const int32_t g_trim_nLoops;

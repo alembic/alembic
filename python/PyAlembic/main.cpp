@@ -46,6 +46,8 @@ void register_utiltypes();
 
 void register_archiveinfo();
 
+void register_abccorelayer();
+
 void register_iarchive();
 void register_oarchive();
 void register_iobject();
@@ -113,7 +115,7 @@ void register_ocollections();
 BOOST_PYTHON_MODULE( alembic )
 {
     docstring_options doc_options( true, true, false );
-    
+
     handle<> imath( PyImport_ImportModule( "imath" ) );
     if( PyErr_Occurred() ) throw_error_already_set();
 
@@ -154,6 +156,11 @@ BOOST_PYTHON_MODULE( alembic )
         scope within( module );
 
         register_abctypes();
+
+        // registered here because the utils within are only really needed when
+        // creating object and properties
+        register_abccorelayer();
+
         register_archiveinfo();
         register_iarchive();
         register_oarchive();
@@ -189,7 +196,7 @@ BOOST_PYTHON_MODULE( alembic )
         register_ofaceset();
         register_ifaceset();
 
-        register_igeomparam();        
+        register_igeomparam();
         register_ogeomparam();
 
         register_igeombase();

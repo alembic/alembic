@@ -50,7 +50,9 @@ HDF5HierarchyReader::HDF5HierarchyReader( hid_t iFile,
     int enabled( 0 );
     if (iCacheHierarchy && H5Aexists( iFile, "abc_ref_hierarchy" ))
     {
-        H5LTget_attribute_int( iFile, ".", "abc_ref_hierarchy", &enabled );
+        size_t numRead = 0;
+        ReadSmallArray( iFile, "abc_ref_hierarchy", H5T_STD_I32LE,
+            H5T_NATIVE_INT32, 1, numRead, &enabled );
     }
 
     m_H5H.clear();
@@ -81,10 +83,12 @@ void HDF5HierarchyReader::readHierarchy( hid_t iFile )
 
     ReadReferences( iFile, "object_references", objectRefs );
 
+    size_t readValues = 0;
+
     // Children
     childrenSizes.resize( objectRefs.size() );
-    H5LTget_attribute_uint( iFile, ".", "children_sizes",
-                            &childrenSizes.front() );
+    ReadSmallArray( iFile, "children_sizes", H5T_STD_U32LE, H5T_NATIVE_UINT32,
+                    childrenSizes.size(), readValues, &childrenSizes.front() );
 
     ReadReferences( iFile, "children_references", childrenRefs );
 
@@ -94,7 +98,8 @@ void HDF5HierarchyReader::readHierarchy( hid_t iFile )
 
     // Attributes
     attrSizes.resize( objectRefs.size() );
-    H5LTget_attribute_uint( iFile, ".", "attr_sizes", &attrSizes.front() );
+    ReadSmallArray( iFile, "attr_sizes", H5T_STD_U32LE, H5T_NATIVE_UINT32,
+                    attrSizes.size(), readValues, &attrSizes.front() );
 
     size_t totalA(0);
     for( size_t i=0; i < attrSizes.size(); ++i )
@@ -105,17 +110,21 @@ void HDF5HierarchyReader::readHierarchy( hid_t iFile )
 
     // Masks
     hasMask.resize( totalA );
-    H5LTget_attribute_char( iFile, ".", "mask_on", &hasMask.front() );
+    ReadSmallArray( iFile, "mask_on", H5T_STD_I8LE, H5T_NATIVE_INT8,
+                     hasMask.size(), readValues, &hasMask.front() );
+
     size_t totalMask(0);
     for( size_t i = 0; i < hasMask.size(); ++i )
         totalMask += hasMask[i];
 
     maskBits.resize( totalMask * 6 );
-    H5LTget_attribute_uint( iFile, ".", "mask_bits", &maskBits.front() );
+    ReadSmallArray( iFile, "mask_bits", H5T_STD_U32LE, H5T_NATIVE_UINT32,
+                    maskBits.size(), readValues, &maskBits.front() );
 
     // MetaData
     hasMeta.resize( totalA );
-    H5LTget_attribute_char( iFile, ".", "meta_on", &hasMeta.front() );
+    ReadSmallArray( iFile, "meta_on", H5T_STD_I8LE, H5T_NATIVE_INT8,
+                     hasMeta.size(), readValues, &hasMeta.front() );
     size_t totalMeta(0);
     for( size_t i = 0; i < hasMeta.size(); ++i )
         totalMeta += hasMeta[i];

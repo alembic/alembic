@@ -37,9 +37,169 @@
 #include <fstream>
 #include <stdexcept>
 
+#include <fcntl.h>
+
+#ifdef _MSC_VER
+
+#include <io.h>
+
+Alembic::Util::int32_t OPENFILE(const char * iFileName, Alembic::Util::int32_t iFlag)
+{
+    Alembic::Util::int32_t fid = -1;
+
+    // One way to prevent writing over a file opened for reading would be to pass in
+    // _SH_DENYWR instead of _SH_DENYNO.  If we can find a posix equivalent we may
+    // have an interesting solution for that problem.
+    _sopen_s(&fid, iFileName, iFlag | _O_RANDOM, _SH_DENYNO, _S_IREAD);
+    return fid;
+}
+
+void CLOSEFILE(Alembic::Util::int32_t iFid)
+{
+    if (iFid > -1)
+    {
+        _close(iFid);
+    }
+}
+
+#else
+#include <unistd.h>
+#define OPENFILE open
+#define CLOSEFILE close
+#endif
+
 namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
+
+class IStream
+{
+public:
+    IStream(std::istream * iStream)
+    {
+        stream = iStream;
+        offset = 0;
+
+        if (stream != NULL)
+        {
+            offset = stream->tellg();
+        }
+
+        fd = -1;
+        isGood = true;
+    }
+
+    IStream(Alembic::Util::int32_t iFileDescriptor)
+    {
+        stream = NULL;
+        offset = 0;
+
+        fd = iFileDescriptor;
+        isGood = true;
+    }
+
+    void seekg(Alembic::Util::uint64_t iOffset)
+    {
+        if (stream)
+        {
+            stream->seekg(iOffset + offset);
+            return;
+        }
+
+        offset = iOffset;
+    }
+
+    void read(void * oBuf, Alembic::Util::uint64_t iSize)
+    {
+        if (stream)
+        {
+            stream->read((char*)oBuf, iSize);
+            return;
+        }
+
+        Alembic::Util::uint64_t totalRead = 0;
+        void * buf = oBuf;
+
+#ifdef _MSC_VER
+        HANDLE hFile = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
+
+        DWORD numRead = 0;
+        do
+        {
+            DWORD numToRead = 0;
+            if ((iSize - totalRead) > MAXDWORD)
+            {
+                numToRead = MAXDWORD;
+            }
+            else
+            {
+                numToRead = static_cast<DWORD>(iSize - totalRead);
+            }
+
+            OVERLAPPED overlapped;
+            memset( &overlapped, 0, sizeof(overlapped));
+            overlapped.Offset = static_cast<DWORD>(offset);
+            overlapped.OffsetHigh = static_cast<DWORD>(offset >> 32);
+
+            if (!ReadFile(hFile, buf, numToRead, &numRead, &overlapped))
+            {
+                isGood = false;
+                return;
+            }
+            totalRead += numRead;
+            offset += numRead;
+            buf = static_cast< char * >( buf ) + numRead;
+        }
+        while(numRead > 0 && totalRead < iSize);
+#else
+        ssize_t numRead = 0;
+        do
+        {
+            numRead = pread(fd, buf, iSize - totalRead, offset);
+            if (numRead > 0)
+            {
+                totalRead += numRead;
+                offset += numRead;
+                buf = static_cast< char * >( buf ) + numRead;
+            }
+        }
+        while(numRead > 0 && totalRead < iSize);
+#endif
+
+        // if we couldn't read what we needed to then something went wrong
+        if (totalRead < iSize)
+        {
+            isGood = false;
+        }
+    }
+
+    bool good()
+    {
+        if (stream)
+        {
+            return stream->good();
+        }
+
+        return isGood;
+    }
+
+    bool fail()
+    {
+        if (stream)
+        {
+            return stream->fail();
+        }
+
+        return !isGood;
+    }
+
+private:
+    std::istream * stream;
+
+    Alembic::Util::int32_t fd;
+    Alembic::Util::uint64_t offset;
+    bool isGood;
+};
 
 class IStreams::PrivateData
 {
@@ -50,6 +210,7 @@ public:
         valid = false;
         frozen = false;
         version = 0;
+        fid = -1;
     }
 
     ~PrivateData()
@@ -59,69 +220,62 @@ public:
             delete [] locks;
         }
 
-        // only cleanup if we were the ones who opened it
-        if (!fileName.empty())
+        if (fid != -1)
         {
-            std::vector<std::istream *>::iterator it;
-            for (it = streams.begin(); it != streams.end(); ++it)
-            {
-                std::ifstream * filestream = dynamic_cast<std::ifstream *>(*it);
-                if (filestream)
-                {
-                    filestream->close();
-                    delete filestream;
-                }
-            }
+            CLOSEFILE(fid);
         }
     }
 
-    std::vector<std::istream *> streams;
+    std::vector<IStream> streams;
     std::vector<Alembic::Util::uint64_t> offsets;
     Alembic::Util::mutex * locks;
-    std::string fileName;
     bool valid;
     bool frozen;
     Alembic::Util::uint16_t version;
+
+    Alembic::Util::int32_t fid;
 };
 
 IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
     mData(new IStreams::PrivateData())
 {
 
-    std::ifstream * filestream = new std::ifstream;
-    filestream->open(iFileName.c_str(), std::ios::binary);
+    mData->fid = OPENFILE(iFileName.c_str(), O_RDONLY);
 
-    if (filestream->is_open())
+    if (mData->fid > -1)
     {
-        mData->fileName = iFileName;
-    }
-    else
-    {
-        delete filestream;
-        return;
+        mData->streams.push_back(IStream(mData->fid));
     }
 
-    mData->streams.push_back(filestream);
     init();
     if (!mData->valid || mData->version != 1)
     {
         mData->streams.clear();
-        filestream->close();
-        delete filestream;
+        CLOSEFILE(mData->fid);
+        mData->fid = -1;
     }
     else
     {
-        // we are valid, so we'll allocate (but not open) the others
-        mData->streams.resize(iNumStreams, NULL);
-        mData->offsets.resize(iNumStreams, 0);
+        // we are valid, so fill in the rest
+        mData->streams.reserve(iNumStreams);
+        for (std::size_t i = 1; i < iNumStreams; ++i)
+        {
+            mData->streams.push_back(IStream(mData->fid));
+        }
     }
+
     mData->locks = new Alembic::Util::mutex[mData->streams.size()];
 }
 
 IStreams::IStreams(const std::vector< std::istream * > & iStreams) :
     mData(new IStreams::PrivateData())
 {
-    mData->streams = iStreams;
+    mData->streams.reserve(iStreams.size());
+    for (std::vector< std::istream * >::const_iterator it = iStreams.begin();
+         it != iStreams.end(); ++it)
+    {
+        mData->streams.push_back(*it);
+    }
     init();
     if (!mData->valid || mData->version != 1)
     {
@@ -158,8 +312,7 @@ void IStreams::init()
     for (std::size_t i = 0; i < mData->streams.size(); ++i)
     {
         char header[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        mData->offsets.push_back(mData->streams[i]->tellg());
-        mData->streams[i]->read(header, 16);
+        mData->streams[i].read(header, 16);
         std::string magicStr(header, 5);
         if (magicStr != "Ogawa")
         {
@@ -227,35 +380,22 @@ void IStreams::read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
 
     {
         Alembic::Util::scoped_lock l(mData->locks[threadId]);
-        std::istream * stream = mData->streams[threadId];
+        IStream & stream = mData->streams[threadId];
+        stream.seekg(iPos);
 
-        // the file hasn't been opened for this id yet
-        if (stream == NULL && !mData->fileName.empty())
+        // make sure our seek was good and not at the end of the file before
+        // trying to do the read
+        if (stream.good())
         {
-            std::ifstream * filestream = new std::ifstream;
-            filestream->open(mData->fileName.c_str(), std::ios::binary);
-
-            if (filestream->is_open())
-            {
-                stream = filestream;
-                mData->streams[threadId] = filestream;
-                mData->offsets[threadId] = filestream->tellg();
-            }
-            // couldnt open the file, do cleanup
-            else
-            {
-                delete filestream;
-
-                // read from thread 0 instead until it can be opened
-                if (threadId != 0)
-                {
-                    read(0, iPos, iSize, oBuf);
-                }
-                return;
-            }
+            stream.read(oBuf, iSize);
         }
-        stream->seekg(iPos + mData->offsets[threadId]);
-        stream->read((char *)oBuf, iSize);
+
+        // if the seekg or read failed throw an exception
+        if (stream.fail())
+        {
+            throw std::runtime_error(
+                "Ogawa IStreams::read failed.");
+        }
     }
 }
 

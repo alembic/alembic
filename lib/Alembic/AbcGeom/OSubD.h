@@ -41,9 +41,9 @@
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/SchemaInfoDeclarations.h>
+#include <Alembic/AbcGeom/OGeomBase.h>
 #include <Alembic/AbcGeom/OFaceSet.h>
 #include <Alembic/AbcGeom/OGeomParam.h>
-#include <Alembic/AbcGeom/OGeomBase.h>
 
 namespace Alembic {
 namespace AbcGeom {
@@ -51,7 +51,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // for default values for int scalar properties here
-static ALEMBIC_EXPORT_CONST 
+static ALEMBIC_EXPORT_CONST
 int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( INT_MIN / 2 );
 
 //-*****************************************************************************
@@ -221,9 +221,9 @@ public:
             m_faceIndices.reset();
             m_faceCounts.reset();
 
-            m_faceVaryingInterpolateBoundary = 0;
-            m_faceVaryingPropagateCorners = 0;
-            m_interpolateBoundary = 0;
+            m_faceVaryingInterpolateBoundary = ABC_GEOM_SUBD_NULL_INT_VALUE;
+            m_faceVaryingPropagateCorners = ABC_GEOM_SUBD_NULL_INT_VALUE;
+            m_interpolateBoundary = ABC_GEOM_SUBD_NULL_INT_VALUE;
 
             m_creaseIndices.reset();
             m_creaseLengths.reset();
@@ -241,6 +241,24 @@ public:
             m_selfBounds.makeEmpty();
 
             m_uvs.reset();
+        }
+
+        bool isPartialSample() const
+        {
+            if( !m_positions.getData() && !m_faceIndices.getData() && !m_faceCounts.getData() )
+            {
+                if( m_uvs.getVals() || m_velocities.getData() ||
+                    (m_faceVaryingInterpolateBoundary != 0) || (m_faceVaryingPropagateCorners != 0) ||
+                    (m_interpolateBoundary != 0) || m_creaseIndices.getData() ||
+                    m_creaseLengths.getData() || m_creaseSharpnesses.getData() ||
+                    m_cornerIndices.getData() || m_cornerSharpnesses.getData() ||
+                    m_holes.getData() )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     protected:
@@ -293,73 +311,37 @@ public:
 
     //! The default constructor creates an empty OSubDSchema
     //! ...
-    OSubDSchema() {}
+    OSubDSchema()
+    {
+        m_selectiveExport = false;
+        m_numSamples = 0;
+        m_timeSamplingIndex = 0;
+    }
 
-    //! This templated, primary constructor creates a new poly mesh writer.
-    //! The first argument is any Abc (or AbcCoreAbstract) object
-    //! which can intrusively be converted to an CompoundPropertyWriterPtr
-    //! to use as a parent, from which the error handler policy for
-    //! inheritance is also derived.  The remaining optional arguments
+    //! This constructor creates a new subd writer.
+    //! The first argument is an CompoundPropertyWriterPtr to use as a parent.
+    //! The next is the name to give the schema which is usually the default
+    //! name given by OSubD (.geom)   The remaining optional arguments
     //! can be used to override the ErrorHandlerPolicy, to specify
-    //! MetaData, and to set TimeSamplingType.
-    template <class CPROP_PTR>
-    OSubDSchema( CPROP_PTR iParent,
+    //! MetaData, specify sparse sampling and to set TimeSampling.
+    OSubDSchema( AbcA::CompoundPropertyWriterPtr iParent,
                      const std::string &iName,
-
                      const Abc::Argument &iArg0 = Abc::Argument(),
                      const Abc::Argument &iArg1 = Abc::Argument(),
-                     const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<SubDSchemaInfo>(
-                        GetCompoundPropertyWriterPtr( iParent ),
-                        iName, iArg0, iArg1, iArg2 )
-    {
+                     const Abc::Argument &iArg2 = Abc::Argument(),
+                     const Abc::Argument &iArg3 = Abc::Argument() );
 
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent )
-                        ->getObject()->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex );
-    }
-
-    template <class CPROP_PTR>
-    explicit OSubDSchema( CPROP_PTR iParent,
-                          const Abc::Argument &iArg0 = Abc::Argument(),
-                          const Abc::Argument &iArg1 = Abc::Argument(),
-                          const Abc::Argument &iArg2 = Abc::Argument() )
-      : OGeomBaseSchema<SubDSchemaInfo>(
-                            GetCompoundPropertyWriterPtr( iParent ),
-                            iArg0, iArg1, iArg2 )
-    {
-        AbcA::TimeSamplingPtr tsPtr =
-            Abc::GetTimeSampling( iArg0, iArg1, iArg2 );
-        uint32_t tsIndex =
-            Abc::GetTimeSamplingIndex( iArg0, iArg1, iArg2 );
-
-        // if we specified a valid TimeSamplingPtr, use it to determine the
-        // index otherwise we'll use the index, which defaults to the intrinsic
-        // 0 index
-        if (tsPtr)
-        {
-            tsIndex = GetCompoundPropertyWriterPtr( iParent )->getObject(
-            )->getArchive()->addTimeSampling(*tsPtr);
-        }
-
-        // Meta data and error handling are eaten up by
-        // the super type, so all that's left is time sampling.
-        init( tsIndex );
-    }
+    //! This constructor creates a new subd writer.
+    //! The first argument is an OCompundProperty to use as a parent, and from
+    //! which the ErrorHandlerPolicy is derived.  The next is the name to give
+    //! the schema which is usually the default name given by OSubD (.geom)
+    //! The remaining optional arguments can be used to specify MetaData,
+    //! specify sparse sampling and to set TimeSampling.
+    OSubDSchema( Abc::OCompoundProperty iParent,
+                     const std::string &iName,
+                     const Abc::Argument &iArg0 = Abc::Argument(),
+                     const Abc::Argument &iArg1 = Abc::Argument(),
+                     const Abc::Argument &iArg2 = Abc::Argument() );
 
     //! Copy constructor.
     OSubDSchema(const OSubDSchema& iCopy)
@@ -377,7 +359,16 @@ public:
     //! Return the time sampling, which is stored on each of the
     //! sub properties.
     AbcA::TimeSamplingPtr getTimeSampling() const
-    { return m_positionsProperty.getTimeSampling(); }
+    {
+        if( m_positionsProperty.valid() )
+        {
+            return m_positionsProperty.getTimeSampling();
+        }
+        else
+        {
+            return getObject().getArchive().getTimeSampling( 0 );
+        }
+    }
 
     //-*************************************************************************
     // SAMPLE STUFF
@@ -386,7 +377,7 @@ public:
     //! Get number of samples written so far.
     //! ...
     size_t getNumSamples() const
-    { return m_positionsProperty.getNumSamples(); }
+    { return m_numSamples; }
 
     //! Set a sample! Sample zero has to have non-degenerate
     //! positions, indices and counts.
@@ -444,7 +435,8 @@ public:
         return ( OGeomBaseSchema<SubDSchemaInfo>::valid() &&
                  m_positionsProperty.valid() &&
                  m_faceIndicesProperty.valid() &&
-                 m_faceCountsProperty.valid() );
+                 m_faceCountsProperty.valid() ) ||
+                 m_selectiveExport;
     }
 
     // FaceSet stuff
@@ -464,7 +456,12 @@ public:
     ALEMBIC_OVERRIDE_OPERATOR_BOOL( OSubDSchema::valid() );
 
 protected:
-    void init( uint32_t iTsIdx );
+    void init( uint32_t iTsIdx, bool isSparse );
+
+    //! Set only some property data. Does not need to be a valid schema sample
+    //! This is to be used when created a file which will be layered in to
+    //! another file.
+    void selectiveSet( const Sample &iSamp );
 
     Abc::OP3fArrayProperty m_positionsProperty;
     Abc::OInt32ArrayProperty m_faceIndicesProperty;
@@ -506,6 +503,29 @@ private:
 
     // FaceSets created on this SubD
     std::map <std::string, OFaceSet>  m_faceSets;
+
+    // Write out only some properties (UVs, normals).
+    // This is to export data to layer into another file later.
+    bool m_selectiveExport;
+
+    // Number of times OSubDSchema::set() has been called
+    size_t m_numSamples;
+
+    uint32_t m_timeSamplingIndex;
+
+    void createSubDSchemeProperty();
+
+    void createFaceVaryingInterpolateBoundaryProperty();
+
+    void createFaceVaryingPropagateCornersProperty();
+
+    void createInterpolateBoundaryProperty();
+
+    void createVelocitiesProperty();
+
+    void createUVsProperty( const Sample &iSamp );
+
+    void createPositionsProperty();
 
     friend class OFaceSetSchema;;
 };

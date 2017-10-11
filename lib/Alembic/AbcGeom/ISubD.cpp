@@ -386,8 +386,9 @@ ISubDSchema::getFaceSet( const std::string &iFaceSetName )
 
     if (!m_faceSets [iFaceSetName])
     {
+        IObject thisObj = getObject();
         // We haven't yet loaded the faceSet, so create/load it
-        m_faceSets [iFaceSetName] = IFaceSet ( getObject(), iFaceSetName );
+        m_faceSets [iFaceSetName] = IFaceSet ( thisObj, iFaceSetName );
     }
 
     return m_faceSets [iFaceSetName];
