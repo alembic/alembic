@@ -116,14 +116,23 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
     TESTING_ASSERT( OV3fProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( IV3fProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! OFloatProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IFloatProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! ON3fProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IN3fProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! OV3dProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IV3dProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! OV2fProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IV2fProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! OV2dProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IV2dProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! OInt32Property::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IInt32Property::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! ODoubleProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IDoubleProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! OV3fArrayProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IV3fArrayProperty::matches( *ac0V3fp0Header ) );
     TESTING_ASSERT( ! OFloatArrayProperty::matches( *ac0V3fp0Header ) );
+    TESTING_ASSERT( ! IFloatArrayProperty::matches( *ac0V3fp0Header ) );
     ac0V3fp0.set( scalarV3fval );
 
     ON3fProperty ac0N3fp0( ac0Props, "ac0N3fp0" );
@@ -131,6 +140,7 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
         ac0Props.getPropertyHeader( "ac0N3fp0" );
     TESTING_ASSERT( ON3fProperty::matches( *ac0N3fp0Header ) );
     TESTING_ASSERT( IN3fProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! OFloatProperty::matches( *ac0N3fp0Header ) );
     TESTING_ASSERT( ! OFloatProperty::matches( *ac0N3fp0Header ) );
     TESTING_ASSERT( ! OV3fProperty::matches( *ac0N3fp0Header ) );
     TESTING_ASSERT( ! ON3dProperty::matches( *ac0N3fp0Header ) );
@@ -140,6 +150,16 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
     TESTING_ASSERT( ! ODoubleProperty::matches( *ac0N3fp0Header ) );
     TESTING_ASSERT( ! ON3fArrayProperty::matches( *ac0N3fp0Header ) );
     TESTING_ASSERT( ! OFloatArrayProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IFloatProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IFloatProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IV3fProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IN3dProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IN2fProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IN2dProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IInt32Property::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IDoubleProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IN3fArrayProperty::matches( *ac0N3fp0Header ) );
+    TESTING_ASSERT( ! IFloatArrayProperty::matches( *ac0N3fp0Header ) );
     ac0N3fp0.set( scalarV3fval );
 
     OP3fProperty ac0P3fp0( ac0Props, "ac0P3fp0" );
@@ -156,6 +176,15 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
     TESTING_ASSERT( ! ODoubleProperty::matches( *ac0P3fp0Header ) );
     TESTING_ASSERT( ! OP3fArrayProperty::matches( *ac0P3fp0Header ) );
     TESTING_ASSERT( ! OFloatArrayProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IFloatProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IV3fProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IP3dProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IP2fProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IP2dProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IInt32Property::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IDoubleProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IP3fArrayProperty::matches( *ac0P3fp0Header ) );
+    TESTING_ASSERT( ! IFloatArrayProperty::matches( *ac0P3fp0Header ) );
     ac0P3fp0.set( scalarV3fval );
 
     OInt32Property acc0ip0( acc0Props, "acc0ip0" );
@@ -165,6 +194,9 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
     TESTING_ASSERT( IInt32Property::matches( *acc0ip0Header ) );
     TESTING_ASSERT( ! OFloatProperty::matches( *acc0ip0Header ) );
     TESTING_ASSERT( ! OInt32ArrayProperty::matches( *acc0ip0Header ) );
+    TESTING_ASSERT( ! IFloatProperty::matches( *acc0ip0Header ) );
+    TESTING_ASSERT( ! IInt32ArrayProperty::matches( *acc0ip0Header ) );
+    TESTING_ASSERT( ! IBox2iProperty::matches( *acc0ip0Header ) );
     acc0ip0.set( 99 );
 
     OBoolProperty acc0bp0( acc0Props, "acc0bp0" );
@@ -173,7 +205,10 @@ void simpleTestOut( const std::string &iArchiveName, bool useOgawa )
     TESTING_ASSERT( OBoolProperty::matches( *acc0bp0Header ) );
     TESTING_ASSERT( IBoolProperty::matches( *acc0bp0Header ) );
     TESTING_ASSERT( ! OInt32Property::matches( *acc0bp0Header ) );
+    TESTING_ASSERT( ! IInt32Property::matches( *acc0bp0Header ) );
     TESTING_ASSERT( ! OBoolArrayProperty::matches( *acc0bp0Header ) );
+    TESTING_ASSERT( ! IBoolArrayProperty::matches( *acc0bp0Header ) );
+
     acc0bp0.set( false );
 
     TimeSamplingPtr ts( new TimeSampling(1.0/24.0, v3fStartTime) );
