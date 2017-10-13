@@ -1,3 +1,18 @@
+2017-10-12, Alembic 1.7.4
+Thanks to your feedback and pull requests we have a few bug fixes and an
+enhancement.
+
+API:
+
+Do not allow scalar properties to match when they have the same data type
+but different extents.  This is to avoid a segfault on getValue. (Issue 138)
+
+Add: const AbcA::ObjectWriterPtr getPtr() to OObject.h (PR 141)
+
+Remove an accidental circular include dependency in AbcCoreLayer. (PR 141)
+
+##-*****************************************************************************
+
 2017-8-9, Alembic 1.7.3
 
 Thanks to your feedback we have a bug fix introduced in the previous release.
