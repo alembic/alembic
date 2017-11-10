@@ -240,10 +240,50 @@ void replaceTest()
 }
 
 //-*****************************************************************************
+void hashTest()
+{
+    std::string fileName = "hashTest.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName );
+        OObject child( archive.getTop(), "child" );
+        OObject childCool( child, "cool" );
+        OObject childGuy( child, "guy" );
+
+        OCompoundProperty wowProp( child.getProperties(), "wow" );
+        OCompoundProperty amazingProp( wowProp, "amazing" );
+    }
+
+    {
+        std::vector< std::string > files;
+        files.push_back( fileName );
+
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archiveLayer = factory.getArchive( files );
+        IArchive archive = factory.getArchive( fileName );
+
+        Alembic::Util::Digest childHash;
+        IObject child( archive.getTop(), "child" );
+        child.getPropertiesHash( childHash );
+
+        Alembic::Util::Digest childLayerHash;
+        IObject childLayer( archiveLayer.getTop(), "child" );
+        childLayer.getPropertiesHash( childLayerHash );
+
+        TESTING_ASSERT( childHash == childLayerHash );
+
+        child.getChildrenHash( childHash );
+        childLayer.getChildrenHash( childLayerHash );
+
+        TESTING_ASSERT( childHash == childLayerHash );
+    }
+}
+
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     layerTest();
     pruneTest();
     replaceTest();
+    hashTest();
     return 0;
 }
