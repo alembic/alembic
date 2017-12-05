@@ -185,7 +185,10 @@ void WalkObject( IObject parent, const ObjectHeader &ohead, ProcArgs &args,
 #ifdef PRMAN_USE_ABCMATERIAL
             ApplyObjectMaterial(polymesh, args );
 #endif
-        ProcessPolyMesh( polymesh, args );
+        if ( visible )
+        {
+            ProcessPolyMesh( polymesh, args );
+        }
 
         nextParentObject = polymesh;
     }
