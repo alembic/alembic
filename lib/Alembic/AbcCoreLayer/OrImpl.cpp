@@ -186,7 +186,8 @@ bool OrImpl::getPropertiesHash( Util::Digest & oDigest )
 
     if ( childVec.size() == 1 )
     {
-        return childVec[0].first->getPropertiesHash( oDigest );
+        const ObjectAndIndex & oi = childVec[0];
+        return oi.first->getChild( oi.second )->getPropertiesHash( oDigest );
     }
 
     return false;
@@ -208,7 +209,8 @@ bool OrImpl::getChildrenHash( Util::Digest & oDigest )
     // has any children
     if ( childVec.size() == 1 )
     {
-        return childVec[0].first->getChildrenHash( oDigest );
+        const ObjectAndIndex & oi = childVec[0];
+        return oi.first->getChild( oi.second )->getChildrenHash( oDigest );
     }
 
     return false;
