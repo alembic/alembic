@@ -1,3 +1,13 @@
+2017-12-20, Alembic 1.7.5
+Thanks to your feedback we have a bug fix:
+
+API:
+
+Fixed bug where getPropertiesHash and getChildrenHash were returning the wrong
+value for AbcCoreLayer archives that are made up of only on file. (PR 143)
+
+##-*****************************************************************************
+
 2017-10-12, Alembic 1.7.4
 Thanks to your feedback and pull requests we have a few bug fixes and an
 enhancement.
