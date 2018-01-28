@@ -125,6 +125,12 @@ Alembic::Abc::IArchive IFactory::getArchive(
 Alembic::Abc::IArchive IFactory::getArchive(
     const std::vector< std::string > & iFileNames, CoreType & oType )
 {
+    // Skip layering in case of a single input file
+    if(iFileNames.size() == 1)
+    {
+        return getArchive(iFileNames[0], oType);
+    }
+
     Alembic::AbcCoreLayer::ReadArchive layer;
 
     Alembic::AbcCoreLayer::ArchiveReaderPtrs archives;
