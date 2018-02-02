@@ -62,15 +62,8 @@ void WriteMotionBegin( ProcArgs &args, const SampleTimeSet &sampleTimes )
         remap = false;
     }
 
-    std::cout << "shutterLen " << shutterLen << std::endl;
-    std::cout << "motionBlockLen " << motionBlockLen << std::endl;
-    std::cout << "wut " << args.userMotionBlockDefined() << std::endl;
-
     chrono_t frameTime = args.frame / args.fps;
 
-	std::cout << "WriteMotionBegin:" << std::endl;
-	std::cout << "  Frame: " << args.frame << std::endl;
-	std::cout << "  FPS: " << args.fps << std::endl;
     for ( SampleTimeSet::const_iterator iter = sampleTimes.begin();
           iter != sampleTimes.end() ; ++iter )
     {
@@ -87,9 +80,7 @@ void WriteMotionBegin( ProcArgs &args, const SampleTimeSet &sampleTimes )
             value = 0.0f;
         }
 
-		std::cout << "  Frame: " << value << "  ( " << *iter << " )"<< std::endl;
-        
-		outputTimes.push_back( value );
+        outputTimes.push_back( value );
     }
 
     RiMotionBeginV( outputTimes.size(), &outputTimes[0] );
@@ -136,14 +127,6 @@ void GetRelevantSampleTimes( ProcArgs &args, TimeSamplingPtr timeSampling,
     //TODO, what's a reasonable episilon?
     static const chrono_t epsilon = 1.0 / 10000.0;
 
-	std::cout << "GetRelavantSampleTimes:" << std::endl;
-	std::cout << "  shutterOpenTime: " << shutterOpenTime << std::endl;
-	std::cout << "  shutterCloseTime: " << shutterCloseTime << std::endl;
-	std::cout << "  sample shutterOpenFloor Index: " << shutterOpenFloor.first << std::endl;
-	std::cout << "  sample shutterOpenFloor Time: " << shutterOpenFloor.second << std::endl;
-	std::cout << "  sample shutterCloseCeil Index: " << shutterCloseCeil.first << std::endl;
-	std::cout << "  sample shutterCloseCeil Time: " << shutterCloseCeil.second << std::endl;
-
     //check to see if our second sample is really the
     //floor that we want due to floating point slop
     //first make sure that we have at least two samples to work with
@@ -163,10 +146,7 @@ void GetRelevantSampleTimes( ProcArgs &args, TimeSamplingPtr timeSampling,
             }
         }
     }
-	
-	std::cout << "  *shutterOpenFloor Index: " << shutterOpenFloor.first << std::endl;
-	std::cout << "  *shutterOpenFloor Time: " << shutterOpenFloor.second << std::endl;
-
+    
 
     for ( index_t i = shutterOpenFloor.first; i < shutterCloseCeil.first; ++i )
     {

@@ -192,13 +192,9 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 
     if ( multiSample ) { WriteMotionBegin( args, sampleTimes ); }
 
-	std::cout << "ProcessPolyMesh:" << std::endl;
-
     for ( SampleTimeSet::iterator iter = sampleTimes.begin();
           iter != sampleTimes.end(); ++ iter )
     {
-
-		std::cout << "  geo sample " << *iter << std::endl;
 
         ISampleSelector sampleSelector( *iter );
 

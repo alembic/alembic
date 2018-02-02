@@ -94,7 +94,7 @@ struct ProcArgs
     bool flipv;
     
     std::string getResource( const std::string & name );
-	bool userMotionBlockDefined();
+    bool userMotionBlockDefined();
     
 private:
     
