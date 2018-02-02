@@ -105,6 +105,8 @@ ProcArgs::ProcArgs( RtString paramStr, bool fromReference )
   , shutterClose(0)
   , excludeXform(false)
   , flipv(false)
+  , motionBegin(0)
+  , motionEnd(0)
 {
     typedef boost::char_separator<char> Separator;
     typedef boost::tokenizer<Separator> Tokenizer;
@@ -165,6 +167,24 @@ ProcArgs::ProcArgs( RtString paramStr, bool fromReference )
             {
                 shutterClose = atof( tokens[i].c_str() );
                 shutterClose_defined = true;
+            }
+        }
+        else if ( token == "-motionbegin" )
+        {
+            ++i;
+            if ( i < tokens.size() )
+            {
+                motionBegin = atof( tokens[i].c_str() );
+                motionBegin_defined = true;
+            }
+        }
+        else if ( token == "-motionend" )
+        {
+            ++i;
+            if ( i < tokens.size() )
+            {
+                motionEnd = atof( tokens[i].c_str() );
+                motionEnd_defined = true;
             }
         }
         else if ( token == "-filename" )
@@ -286,6 +306,18 @@ void ProcArgs::applyArgs(ProcArgs & args)
         shutterClose_defined = true;
     }
     
+    if ( args.motionBegin_defined )
+    {
+        motionBegin = args.motionBegin;
+        motionBegin_defined = true;
+    }
+    
+    if ( args.motionEnd_defined )
+    {
+        motionEnd = args.motionEnd;
+        motionEnd_defined = true;
+    }
+    
     if ( args.excludeXform_defined )
     {
         excludeXform = args.excludeXform;
@@ -307,6 +339,10 @@ void ProcArgs::applyArgs(ProcArgs & args)
                 args.resourceSearchPath.begin(), args.resourceSearchPath.end() );
     }
     
+}
+    
+bool ProcArgs::userMotionBlockDefined() {
+    return motionBegin_defined || motionEnd_defined;
 }
 
 std::string ProcArgs::getResource( const std::string & name )
@@ -413,6 +449,28 @@ void ProcArgs::usage()
     std::cerr << std::endl;
     std::cerr << std::endl;
     
+    
+    std::cerr << "-motionbegin 0.0" << std::endl;
+    std::cerr << "-motionend 0.0" << std::endl;
+    std::cerr << std::endl;
+    
+    std::cerr << "Use motionbegin and/or motionend to specify the MotionBlock "
+                 "window to map the Alembic samples to. This allows for RIBs "
+                 "that use Shutter ranges other than frame-relative values. "
+                 "The Alembic sample times are remapped using a standard fit ";
+    std::cerr << std::endl;
+    std::cerr << "motion_time = (x-a)*(d-c)/(b-a) + c " << std::endl;
+    std::cerr << "Where - x = alembic sample time "  << std::endl;
+    std::cerr << "        a = requested shutter open time (frame+shutteropen)*fps " << std::endl;
+    std::cerr << "        b = requested shutter close time " << std::endl;
+    std::cerr << "        c = motionbegin " << std::endl;
+    std::cerr << "        d = motionend " << std::endl;
+    std::cerr << "motionbegin must be less than motionend or the motionbegin/end "
+                 "functionality will be ignored.";
+    std::cerr << std::endl;
+    std::cerr << std::endl;
+    
+   
     std::cerr << "-resource nameOrPath resourceName" << std::endl;
     std::cerr << std::endl;
     
