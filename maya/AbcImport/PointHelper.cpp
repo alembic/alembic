@@ -351,7 +351,7 @@ MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index, Alembic::AbcC
 */
 
 MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
-	MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData)
+	MFnArrayAttrsData & dynDataFn) //, PointSampleDataList & iData)
 {
 	DISPLAY_INFO( "Reading Abc Data for frame: " << iFrame );
 
@@ -416,7 +416,7 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 }
 
 MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
-    MObject & iParent, MObject & iObject, PointSampleDataList & iData)
+    MObject & iParent, MObject & iObject) //, PointSampleDataList & iData)
 {
     MStatus status = MS::kSuccess;
     Alembic::AbcGeom::IPointsSchema schema = iNode.getSchema();
@@ -438,6 +438,8 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     DISPLAY_INFO( " rename to " << iNode.getName().c_str() );
 
     status = modifier.doIt();
+
+    /*
 
 	// We need to create a custom attribute for each abcGeomParam found under the PointSchema
     // nParticle object can only deal with doubleArray or vectorArray, so the only thing we need to know is the extent
@@ -523,6 +525,8 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 	}
 
     status = modifier.doIt();
+
+    */
 
     return status;
 }

@@ -71,25 +71,25 @@
 #include <maya/MFnCamera.h>
 #include <maya/MTime.h>
 
-void printPointSampleData(std::vector< PointSampleDataList > & iPointsDataList, const char * str)
-{
-    std::cout  << "###### PointSampleDataList: " << str << std::endl;
-    if (iPointsDataList.size() == 0)
-    	std::cout << "\t nPointSampleDataList IS EMPTY" << std::endl;
-    for (unsigned int i = 0; i < iPointsDataList.size(); ++i )
-    {
-    	PointSampleDataList::iterator iter;
-//    	std::cout << "\t[" << i << "]:" << std::endl;;
-    	for ( iter = iPointsDataList[i].begin(); iter != iPointsDataList[i].end(); ++iter)
-    	{
-    		std::cout  << "\t" << iter->first << ": " << iter->second.extent << std::endl;
-//    		std::cout  << "\t\t\t" << "name: " << iter->second.name  << std::endl;
-//    		std::cout  << "\t\t\t" << "extent: " << iter->second.extent  << std::endl;
-//    		std::cout  << "\t\t\t" << "isAnimated: " << iter->second.isAnimated  << std::endl;
-//    		std::cout  << "\t\t\t" << "isValidSample: " << iter->second.isValidSample  << std::endl;
-    	}
-    }
-}
+//void printPointSampleData(std::vector< PointSampleDataList > & iPointsDataList, const char * str)
+//{
+//    std::cout  << "###### PointSampleDataList: " << str << std::endl;
+//    if (iPointsDataList.size() == 0)
+//    	std::cout << "\t nPointSampleDataList IS EMPTY" << std::endl;
+//    for (unsigned int i = 0; i < iPointsDataList.size(); ++i )
+//    {
+//    	PointSampleDataList::iterator iter;
+////    	std::cout << "\t[" << i << "]:" << std::endl;;
+//    	for ( iter = iPointsDataList[i].begin(); iter != iPointsDataList[i].end(); ++iter)
+//    	{
+//    		std::cout  << "\t" << iter->first << ": " << iter->second.extent << std::endl;
+////    		std::cout  << "\t\t\t" << "name: " << iter->second.name  << std::endl;
+////    		std::cout  << "\t\t\t" << "extent: " << iter->second.extent  << std::endl;
+////    		std::cout  << "\t\t\t" << "isAnimated: " << iter->second.isAnimated  << std::endl;
+////    		std::cout  << "\t\t\t" << "isValidSample: " << iter->second.isValidSample  << std::endl;
+//    	}
+//    }
+//}
 
 template <class T>
 void unsupportedWarning(T & iProp)
@@ -2620,23 +2620,23 @@ void readProp(double iFrame,
         iHandle.set(attrObj);
 }
 
-PointsSampleData::PointsSampleData()
-{
-	name = "default";
-	extent = 0;
-	isValidSample = false;
-	isAnimated = false;
-}
-
-PointsSampleData & PointsSampleData::operator=(const PointsSampleData & other)
-{
-	name = other.name;
-	extent = other.extent;
-	isValidSample = other.isValidSample;
-	isAnimated = other.isAnimated;
-
-	return *this;
-}
+//PointsSampleData::PointsSampleData()
+//{
+//	name = "default";
+//	extent = 0;
+//	isValidSample = false;
+//	isAnimated = false;
+//}
+//
+//PointsSampleData & PointsSampleData::operator=(const PointsSampleData & other)
+//{
+//	name = other.name;
+//	extent = other.extent;
+//	isValidSample = other.isValidSample;
+//	isAnimated = other.isAnimated;
+//
+//	return *this;
+//}
 
 WriterData::WriterData()
 {
@@ -2683,10 +2683,10 @@ WriterData & WriterData::operator=(const WriterData & rhs)
 
     mNumCurves = rhs.mNumCurves;
 
-	std::vector< PointSampleDataList > tmp( rhs.mPointsDataList );
-	printPointSampleData( tmp, "input" );
-    mPointsDataList = rhs.mPointsDataList;
-	printPointSampleData( mPointsDataList, "Output" );
+//	std::vector< PointSampleDataList > tmp( rhs.mPointsDataList );
+//	printPointSampleData( tmp, "input" );
+//    mPointsDataList = rhs.mPointsDataList;
+//	printPointSampleData( mPointsDataList, "Output" );
 
     return *this;
 }
@@ -2923,7 +2923,7 @@ MString createScene(ArgData & iArgData)
     MString returnName("");
 
     DISPLAY_INFO("#####\nBegin of create Scene");
-    DISPLAY_INFO("iargsData.mData.mPointData: " << iArgData.mData.mPointsDataList.size());
+//    DISPLAY_INFO("iargsData.mData.mPointData: " << iArgData.mData.mPointsDataList.size());
 
     Alembic::Abc::IArchive archive;
     Alembic::AbcCoreFactory::IFactory factory;
@@ -2954,23 +2954,23 @@ MString createScene(ArgData & iArgData)
         iArgData.mConnectRootNodes, iArgData.mIncludeFilterString,
         iArgData.mExcludeFilterString);
 
-    DISPLAY_INFO("before walk iArgData.mData.mPointsDataList: " << iArgData.mData.mPointsDataList.size());
+//    DISPLAY_INFO("before walk iArgData.mData.mPointsDataList: " << iArgData.mData.mPointsDataList.size());
     visitor.walk(archive);
-    DISPLAY_INFO("after walk iArgData.mData.mPointsDataList: " << iArgData.mData.mPointsDataList.size());
+//    DISPLAY_INFO("after walk iArgData.mData.mPointsDataList: " << iArgData.mData.mPointsDataList.size());
 
     if (visitor.hasSampledData())
     {
-		DISPLAY_INFO("before getData ArgData.mData.mPointsDataList: " << iArgData.mData.mPointsDataList.size());
+//		DISPLAY_INFO("before getData ArgData.mData.mPointsDataList: " << iArgData.mData.mPointsDataList.size());
 		DISPLAY_INFO("### SETTING visitor.mData to ArgData.mData")
         visitor.getData(iArgData.mData);
-		DISPLAY_INFO("after getData ArgData.mData.mPointsDataList: " << iArgData.mData.mPointsDataList.size());
+//		DISPLAY_INFO("after getData ArgData.mData.mPointsDataList: " << iArgData.mData.mPointsDataList.size());
 
         iArgData.mData.getFrameRange(iArgData.mSequenceStartTime,
             iArgData.mSequenceEndTime);
 
-		DISPLAY_INFO("before connectAttr mPointData: " << iArgData.mData.mPointsDataList.size());
+//		DISPLAY_INFO("before connectAttr mPointData: " << iArgData.mData.mPointsDataList.size());
         returnName = connectAttr(iArgData);
-		DISPLAY_INFO("after getData mPointData: " << iArgData.mData.mPointsDataList.size());
+//		DISPLAY_INFO("after getData mPointData: " << iArgData.mData.mPointsDataList.size());
     }
 
     if (iArgData.mConnect)
@@ -3324,7 +3324,7 @@ MString connectAttr(ArgData & iArgData)
     	DISPLAY_INFO("Connecting nParticles nodes" );
 
 		DISPLAY_INFO("mPointsObjList : " << iArgData.mData.mPointsObjList.size() );
-		DISPLAY_INFO("mPointsData : " << iArgData.mData.mPointsDataList.size() );
+//		DISPLAY_INFO("mPointsData : " << iArgData.mData.mPointsDataList.size() );
         MPlug compoundArrayPlug = alembicNodeFn.findPlug( "outPoints", true, &status);
 		MCHECKERROR_NO_RET(status);
 

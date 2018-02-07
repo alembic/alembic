@@ -654,7 +654,7 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
     MStatus status = MS::kSuccess;
 
     DISPLAY_INFO("Begin of CreateSceneVisitor.walk: ");
-    printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
+//    printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
 
     MObject saveParent = mParent;
 
@@ -679,7 +679,7 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
             mParent = saveParent;
         }
 		DISPLAY_INFO("End of CreateSceneVisitor.walk, visitor.mData: ")
-		printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
+//		printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
         return status;
     }
 
@@ -822,7 +822,7 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
     }
 
     DISPLAY_INFO("End of CreateSceneVisitor.walk, visitor.mData: ")
-    printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
+//    printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
     return status;
 }
 

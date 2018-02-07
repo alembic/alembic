@@ -691,9 +691,9 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             mIncludeFilterString, mExcludeFilterString);
 
 		DISPLAY_INFO("Before walk:");
-		printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList" );
+//		printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList" );
         visitor.walk(archive);
-		printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList" );
+//		printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList" );
 		DISPLAY_INFO("Walk End");
 
         if (visitor.hasSampledData())
@@ -701,9 +701,9 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             // information retrieved from the hierarchy traversal
             // and given to AlembicNode to provide update
         	DISPLAY_INFO("Before visitor getData:");
-			printPointSampleData(mData.mPointsDataList , "AlembicNode.mData.mPointsDataList");
+//			printPointSampleData(mData.mPointsDataList , "AlembicNode.mData.mPointsDataList");
             visitor.getData(mData);
-			printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList");
+//			printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList");
         	DISPLAY_INFO("Visitor getData end")
 
             mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
@@ -1280,8 +1280,8 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     	            static_cast<unsigned int>(mData.mPointsList.size());
 
     	DISPLAY_INFO( "PointSize: " << pointSize );
-    	DISPLAY_INFO( "mPointsDataList Size: " << mData.mPointsDataList.size() );
-    	printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList");
+//    	DISPLAY_INFO( "mPointsDataList Size: " << mData.mPointsDataList.size() );
+//    	printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList");
     	if (pointSize > 0)
 		{
             MArrayDataHandle outArrayHandle =
