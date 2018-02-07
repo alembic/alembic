@@ -52,6 +52,33 @@
 #include <maya/MString.h>
 #include <maya/MFnDependencyNode.h>
 
+#define DISPLAY_INFO( msg )					\
+	std::cout << msg <<  "\t\t" << __FILE__ << "  "  << __LINE__ << std::endl;
+
+#define MCHECKERROR(_status)		\
+{ 														\
+	MStatus _maya_status = (_status);					\
+	if ( MStatus::kSuccess != _maya_status ) 			\
+	{													\
+		std::cout << "\nAPI error detected in " << __FILE__ 	\
+			 <<	" at line "	<< __LINE__ << std::endl;		\
+		_maya_status.perror ( "" );						\
+		return (_status);								\
+	}													\
+}
+
+#define MCHECKERROR_NO_RET(_status)		\
+{ 														\
+	MStatus _maya_status = (_status);					\
+	if ( MStatus::kSuccess != _maya_status ) 			\
+	{													\
+		std::cout << "\nAPI error detected in " << __FILE__ 	\
+			 <<	" at line "	<< __LINE__ << std::endl;		\
+		_maya_status.perror ( "" );						\
+	}													\
+}
+
+
 // Return the output connected shading groups from a shape object
 MObjectArray getOutConnectedSG( const MDagPath &shapeDPath );
 

@@ -50,7 +50,7 @@ const MTypeId AlembicNode::mMayaNodeId(0x00082697);
 ALEMBIC_MAYA_PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 {
     const char * pluginVersion = "1.0";
-    MFnPlugin plugin(obj, "Alembic", pluginVersion, "Any");
+    MFnPlugin plugin(obj, "AlembicHB", pluginVersion, "Any");
 
     MStatus status;
 

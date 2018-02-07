@@ -44,6 +44,8 @@
 #include <maya/MItDependencyNodes.h>
 #include <fstream>
 
+#include <cstdlib>
+
 namespace AbcA = Alembic::AbcCoreAbstract;
 
 AbcExport::AbcExport()

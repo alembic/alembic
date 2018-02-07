@@ -59,6 +59,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 // mArray or mScalar will be valid, mObj will be valid for those situations
 // where the property can't be validly read, unless the object stays in scope.
@@ -67,6 +68,22 @@ struct Prop
     Alembic::Abc::IArrayProperty mArray;
     Alembic::Abc::IScalarProperty mScalar;
 };
+
+struct PointsSampleData
+{
+	PointsSampleData();
+
+	PointsSampleData & operator=(const PointsSampleData & other);
+
+	std::string name;
+	int extent;
+	bool isValidSample;
+	bool isAnimated;
+};
+
+typedef std::map<const char*, PointsSampleData> PointSampleDataList;
+
+void printPointSampleData(std::vector< PointSampleDataList > & iPointsDataList, const char * str );
 
 void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
               bool iUnmarkedFaceVaryingColors);
@@ -224,6 +241,10 @@ public:
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
     std::vector< SubDAndFriends >           mSubDList;
     std::vector<Alembic::AbcGeom::IXform>     mXformList;
+
+    // Particle data needs special parsing to match maya attributes types
+    // We will store convertion data here at alembicNode initialisation
+    std::vector< PointSampleDataList > mPointsDataList;
 
     // objects that aren't animated but have animated visibility need to be
     // kept alive so the visibility can be read

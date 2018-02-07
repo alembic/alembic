@@ -68,6 +68,7 @@ public:
         // 6 mOutNurbsCurveGrpArrayAttr
         // 7 mOutParticlePosArrayAttr, mOutParticleIdArrayAttr
         // 8 mOutLocatorPosScaleArrayAttr
+        // 9 mOutPointArrayAttr
         mOutRead = std::vector<bool>(9, false);
     }
 
@@ -101,6 +102,15 @@ public:
     static MObject mOutNurbsSurfaceArrayAttr;
     static MObject mOutTransOpArrayAttr;
     static MObject mOutLocatorPosScaleArrayAttr;
+
+    // output particles attributes
+    static MObject mOutPointArrayAttr;
+    static MObject mOutPointCacheArrayAttr;
+    static MObject mOutPointPositionArrayAttr;
+    static MObject mInPointCurrentStateAttr;
+    static MObject mOutPointNextStateAttr;
+    static MObject mInPointStartStateAttr;
+    static MObject mOutPointPlayFromCache;
 
     // output informational attrs
     static MObject mStartFrameAttr;
