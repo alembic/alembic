@@ -136,16 +136,26 @@ const AbcA::MetaData & ArImpl::getMetaData() const
 //-*****************************************************************************
 AbcA::ObjectReaderPtr ArImpl::getTop()
 {
+    Alembic::Util::scoped_lock l( m_lock );
 
-    std::vector< AbcA::ObjectReaderPtr > tops;
-    tops.reserve( m_archives.size() );
-    ArchiveReaderPtrs::iterator arItr = m_archives.begin();
-    for ( ; arItr != m_archives.end(); ++arItr )
+    AbcA::ObjectReaderPtr ret = m_top.lock();
+    if ( ! ret )
     {
-        tops.push_back( (*arItr)->getTop() );
+        // time to make a new one
+        std::vector< AbcA::ObjectReaderPtr > tops;
+        tops.reserve( m_archives.size() );
+        ArchiveReaderPtrs::iterator arItr = m_archives.begin();
+        for ( ; arItr != m_archives.end(); ++arItr )
+        {
+            tops.push_back( (*arItr)->getTop() );
+        }
+
+        ret = Alembic::Util::shared_ptr<OrImpl>(
+        new OrImpl( shared_from_this(), tops, m_header ) );
+        m_top = ret;
     }
 
-    return OrImplPtr( new OrImpl( shared_from_this(), tops, m_header ) );
+    return ret;
 }
 
 //-*****************************************************************************
