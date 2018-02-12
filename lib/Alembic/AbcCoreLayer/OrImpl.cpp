@@ -112,7 +112,16 @@ AbcA::ObjectReaderPtr OrImpl::getParent()
 //-*****************************************************************************
 AbcA::CompoundPropertyReaderPtr OrImpl::getProperties()
 {
-    return CprImplPtr( new CprImpl( shared_from_this(), m_properties ) );
+    Alembic::Util::scoped_lock l( m_lock );
+    AbcA::CompoundPropertyReaderPtr ret = m_top.lock();
+    if ( ! ret )
+    {
+        ret = Alembic::Util::shared_ptr<CprImpl>(
+            new CprImpl( shared_from_this(), m_properties ) );
+        m_top = ret;
+    }
+
+    return ret;
 }
 
 //-*****************************************************************************
