@@ -150,6 +150,17 @@ AbcA::ObjectReaderPtr OrImpl::getChild( const std::string &iName )
 
     if( findChildItr != m_childNameMap.end() )
     {
+        // if the child comes from a single layer just return
+        // it from the impl
+        const std::vector< ObjectAndIndex >& childVec =
+            m_children[findChildItr->second];
+
+        if ( childVec.size() == 1 )
+        {
+            const ObjectAndIndex& oi = childVec[0];
+            return oi.first->getChild( oi.second );
+        }
+
         return OrImplPtr( new OrImpl( shared_from_this(),
                                       findChildItr->second ) );
     }
@@ -161,7 +172,26 @@ AbcA::ObjectReaderPtr OrImpl::getChild( size_t i )
 {
     if ( i < m_childHeaders.size() )
     {
-        return OrImplPtr( new OrImpl( shared_from_this(), i ) );
+        ObjectHeaderPtr headerPtr = m_childHeaders[i];
+        ChildNameMap::iterator findChildItr =
+            m_childNameMap.find(headerPtr->getName());
+
+        if ( findChildItr != m_childNameMap.end() )
+        {
+            // if the child comes from a single layer just return
+            // it from the impl
+            const std::vector< ObjectAndIndex >& childVec =
+                m_children[findChildItr->second];
+
+            if ( childVec.size() == 1 )
+            {
+                const ObjectAndIndex& oi = childVec[0];
+                return oi.first->getChild( oi.second );
+            }
+        }
+
+        return OrImplPtr( new OrImpl( shared_from_this(), i ));
+
     }
 
     return AbcA::ObjectReaderPtr();

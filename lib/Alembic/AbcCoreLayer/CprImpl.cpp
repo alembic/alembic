@@ -183,6 +183,12 @@ CprImpl::getCompoundProperty( const std::string &iName )
 
     if( itr != m_childNameMap.end() )
     {
+        CompoundReaderPtrs childVec = m_children[ itr->second ];
+        if ( childVec.size() == 1 )
+        {
+            return childVec[0]->getCompoundProperty( itr->first );
+        }
+
         return CprImplPtr( new CprImpl( shared_from_this(), itr->second ) );
     }
 
