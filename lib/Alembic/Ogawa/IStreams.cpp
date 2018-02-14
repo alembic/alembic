@@ -176,7 +176,7 @@ public:
         for (size_t i = 0; i < numChunk; ++ i)
         {
             size_t chunkSize = chunkSizes[i];
-            size_t numRead = pread(fd, buf, chunkSize, offset);
+            ssize_t numRead = pread(fd, buf, chunkSize, offset);
             if (numRead > 0)
             {
                 totalRead += numRead;
