@@ -159,10 +159,16 @@ void MayaPointPrimitiveWriter::write(double iFrame)
         float radius = static_cast<float>(radiusArray[i]);
         width.push_back(radius);
     }
+    if (!width.empty())
+    {
+		Alembic::AbcGeom::OFloatGeomParam::Sample widthSamp;
+		widthSamp.setVals(width);
+		samp.setWidths( widthSamp );
+    }
 
-    // ignoring width and the velocity vectors for now
     mSchema.set(samp);
 }
+
 
 unsigned int MayaPointPrimitiveWriter::getNumCVs()
 {

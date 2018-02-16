@@ -1680,6 +1680,79 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
     }
 }
 
+MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MString> &outAttrNames )
+{
+	DISPLAY_INFO("getPerParticleAttributes:")
+	MStatus status(MS::kSuccess);
+
+	if ( !iNode.hasObj(MFn::kParticle))
+		return status;
+
+	MFnParticleSystem particle(iNode.object(&status));
+	uint count(0);
+
+	MDoubleArray doubleArray;
+	MVectorArray vectorArray;
+	for (unsigned int i = 0; i < particle.attributeCount(); ++i)
+	{
+		MObject attrObj = particle.attribute(i);
+
+		if ( !attrObj.hasFn(MFn::kTypedAttribute))
+			continue;
+
+		MFnTypedAttribute attr( particle.attribute(i) );
+		MString attrName = attr.name();
+
+		if (attrName == "radiusPP")
+		{
+			// radiusPP was handled as IPointGeom Width
+			continue;
+		}
+
+		if ( attr.isHidden() ||
+			 !attr.isReadable() ||
+			 attr.isArray() ||
+			 attr.internal() )
+		{
+			continue;
+		}
+		if ( attr.attrType() != MFnData::kDoubleArray && attr.attrType() != MFnData::kVectorArray )
+		{
+			continue;
+		}
+
+		// Perform a few name filtering to avoid useless attribute
+		// we only filter non user created attribute
+		if ( !attr.isDynamic() )
+		{
+			// remove attribute starting with "internal"
+			if ( 	attrName.substring(0, 7) == "internal" ||
+					attrName.toLowerCase().substring(attrName.length() - 5, attrName.length()) == "cache" ||
+					attrName.substring( attrName.length() - 1, attrName.length()) == "0" )
+			{
+				continue;
+			}
+
+		}
+
+		if ( particle.isPerParticleDoubleAttribute(attrName, &status) ||
+		     particle.isPerParticleVectorAttribute(attrName, &status)
+		)
+		{
+			outAttrNames.push_back(attrName);
+			count++;
+		}
+		else
+		{
+			continue;
+		}
+
+	}
+	DISPLAY_INFO("total Attributes: " << count );
+
+	return status;
+}
+
 }
 
 AttributesWriter::AttributesWriter(
@@ -1699,6 +1772,14 @@ AttributesWriter::AttributesWriter(
     std::vector< PlugAndObjArray > staticPlugObjArrayVec;
     std::vector< PlugAndObjScalar > staticPlugObjScalarVec;
 
+    std::vector< MString > perParticlesAttributes;
+    if (iNode.hasObj(MFn::kParticle))
+    {
+    	getPerParticleAttributes( iNode, perParticlesAttributes );
+    }
+
+
+    DISPLAY_INFO("AttributesWriter Creator, looping on attributes")
     for (i = 0; i < attrCount; i++)
     {
         MObject attr = iNode.attribute(i);
@@ -1710,6 +1791,8 @@ AttributesWriter::AttributesWriter(
             continue;
 
         MString propName = plug.partialName(0, 0, 0, 0, 0, 1);
+
+        DISPLAY_INFO( "\t" << propName << ":" )
 
         std::string propStr = propName.asChar();
 
@@ -1725,7 +1808,19 @@ AttributesWriter::AttributesWriter(
         }
 
         bool userAttr = false;
-        if (!matchFilterOrAttribs(plug, iArgs, userAttr))
+
+        bool isPerParticle(false);
+        for ( std::vector<MString>::iterator it = perParticlesAttributes.begin(); it != perParticlesAttributes.end(); ++it)
+        {
+        	if ( *it == propName )
+        	{
+        		isPerParticle = true;
+        		DISPLAY_INFO("\t" << "found a per particle Attribute !")
+        		break;
+        	}
+        }
+
+        if (!matchFilterOrAttribs(plug, iArgs, userAttr) && !isPerParticle)
             continue;
 
         if (userAttr && !iUserProps.valid())
@@ -2068,6 +2163,12 @@ bool AttributesWriter::hasAnyAttr(const MFnDependencyNode & iNode,
     unsigned int i;
 
     std::vector< PlugAndObjArray > staticPlugObjArrayVec;
+
+    if (iNode.hasObj(MFn::kParticle))
+    {
+    	// Particles always have extra attributes
+    	return true;
+    }
 
     bool userAttr;
     for (i = 0; i < attrCount; i++)

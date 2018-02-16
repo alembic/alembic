@@ -55,6 +55,10 @@ struct cmpDag
 };
 typedef std::set< MDagPath, cmpDag > ShapeSet;
 
+#define DISPLAY_INFO( msg )					\
+	std::cout << msg <<  "\t\t" << __FILE__ << "  "  << __LINE__ << std::endl;
+
+
 inline MStatus isFloat(MString str, const MString & usage)
 {
     MStatus status = MS::kSuccess;
@@ -137,6 +141,30 @@ MString stripNamespaces(const MString & iNodeName, unsigned int iDepth);
 MString getHelpText();
 
 } // namespace util
+
+
+#define MCHECKERROR(_status)		\
+{ 														\
+	MStatus _maya_status = (_status);					\
+	if ( MStatus::kSuccess != _maya_status ) 			\
+	{													\
+		std::cout << "\nAPI error detected in " << __FILE__ 	\
+			 <<	" at line "	<< __LINE__ << std::endl;		\
+		_maya_status.perror ( "" );						\
+		return (_status);								\
+	}													\
+}
+
+#define MCHECKERROR_NO_RET(_status)		\
+{ 														\
+	MStatus _maya_status = (_status);					\
+	if ( MStatus::kSuccess != _maya_status ) 			\
+	{													\
+		std::cout << "\nAPI error detected in " << __FILE__ 	\
+			 <<	" at line "	<< __LINE__ << std::endl;		\
+		_maya_status.perror ( "" );						\
+	}													\
+}
 
 struct PlugAndObjScalar
 {

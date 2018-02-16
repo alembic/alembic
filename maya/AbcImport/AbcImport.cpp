@@ -328,7 +328,6 @@ MStatus AbcImport::doIt(const MArgList & args)
                 swap, connectRootNodes, createIfNotFound, removeIfNoUpdate,
                 recreateColorSets, filterString, excludeFilterString);
             abcNodeName = createScene(inputData);
-//            DISPLAY_INFO("after Create Scene mPointsData: " << inputData.mData.mPointsDataList.size())
 
             if (inputData.mSequenceStartTime != inputData.mSequenceEndTime &&
                 inputData.mSequenceStartTime != -DBL_MAX &&
@@ -349,7 +348,6 @@ MStatus AbcImport::doIt(const MArgList & args)
                         sec.as(MTime::uiUnit()) );
                 }
             }
-//			DISPLAY_INFO("END OF DOIT(): mPointsData: " << inputData.mData.mPointsDataList.size() << "\n#####")
         }
     }
 

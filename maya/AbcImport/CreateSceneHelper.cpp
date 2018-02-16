@@ -555,10 +555,8 @@ void CreateSceneVisitor::visit(AlembicObjectPtr iObject)
     }
     else if ( Alembic::AbcGeom::IPoints::matches(iObj.getHeader()) )
     {
-    	DISPLAY_INFO("### IPoint Schema found");
         Alembic::AbcGeom::IPoints pts(iObj, Alembic::Abc::kWrapExisting);
         (*this)(pts);
-    	DISPLAY_INFO("### IPoint Schema Done");
     }
     else if ( iObj.getHeader().getMetaData().get("schema") == "" )
     {
@@ -647,14 +645,10 @@ std::string CreateSceneVisitor::searchRootNames(const std::string & iName)
     return closeMatch;
 }
 
-
  // root of file, no creation of DG node
 MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
 {
     MStatus status = MS::kSuccess;
-
-    DISPLAY_INFO("Begin of CreateSceneVisitor.walk: ");
-//    printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
 
     MObject saveParent = mParent;
 
@@ -672,14 +666,11 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
 
     if (mAction == NONE)  // simple scene creation mode
     {
-    	DISPLAY_INFO("\tmAction == NONE");
         for (size_t i = 0; i < numChildren; i++)
         {
             this->visit(topObject->getChild(i));
             mParent = saveParent;
         }
-		DISPLAY_INFO("End of CreateSceneVisitor.walk, visitor.mData: ")
-//		printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
         return status;
     }
 
@@ -821,8 +812,6 @@ MStatus CreateSceneVisitor::walk(Alembic::Abc::IArchive & iRoot)
         }
     }
 
-    DISPLAY_INFO("End of CreateSceneVisitor.walk, visitor.mData: ")
-//    printPointSampleData( mData.mPointsDataList, "visitor.mData.mPointsDataList" );
     return status;
 }
 
@@ -1043,19 +1032,12 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
 
 MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
 {
-	DISPLAY_INFO("CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)");
     MStatus status = MS::kSuccess;
     MObject particleObj = MObject::kNullObj;
 
     bool isConstant = iNode.getSchema().isConstant();
     if (!isConstant)
-    {
-    	DISPLAY_INFO("Adding iNode: " << iNode.getName() << " to Visitor.mData.MPointList");
         mData.mPointsList.push_back(iNode);
-    }
-    else
-		DISPLAY_INFO("Inode: " << iNode.getName() << " is constant");
-
 
     // since we don't really support animated points, don't bother
     // with the animated properties on it
@@ -1063,17 +1045,13 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     bool hasDag = false;
     if (mAction != NONE && mConnectDagNode.isValid())
     {
-    	DISPLAY_INFO("mAction != NONE and mConnectDagNode.isValid()");
-    	DISPLAY_INFO("\t mConnectDagNode: " << mConnectDagNode.fullPathName());
         hasDag = getDagPathByChildName(mConnectDagNode, iNode.getName());
         if (hasDag)
         {
-        	DISPLAY_INFO("\t dagNode has dag");
             particleObj = mConnectDagNode.node();
             if (!isConstant)
             {
-				DISPLAY_INFO("\t iNode is not constant");
-            	// TODO: create all attributes
+            	// TODO: create all attributes when connecting
 				mData.mPointsObjList.push_back(particleObj);
             }
         }
@@ -1081,16 +1059,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
 
     if (!hasDag && (mAction == CREATE || mAction == CREATE_REMOVE))
     {
-//    	PointSampleDataList PointSampleVec;
+
         status = create(mFrame, iNode, mParent, particleObj);
-//        DISPLAY_INFO("creation End: PointSampleVec.size(): " << PointSampleVec.size())
-//        DISPLAY_INFO("####");
         if (!isConstant)
         {
-//			DISPLAY_INFO( "Adding new PointsSampleData vector with size: " << PointSampleVec.size());
-//			mData.mPointsDataList.push_back(PointSampleVec);
-//			DISPLAY_INFO( "\tNew mPointsData Size: " << mData.mPointsDataList.size() );
-
         	DISPLAY_INFO( "Adding new created object to mPointsObjList: " << iNode.getName() );
             mData.mPointsObjList.push_back(particleObj);
 			DISPLAY_INFO( "\tNew mPointsObjList Size: " << mData.mPointsObjList.size() );
@@ -1102,11 +1074,11 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     	// We are reading the iPoint Schema, all previous step were skipped,
     	// we need to find the data necessary for feeding custom particle attributes (stored in arbGeomParam)
     	DISPLAY_INFO("Reading alembic node to find arbGeom");
-//    	PointSampleDataList PointSampleVec;
-//    	status = getPointArbGeomParamsInfos(iNode, particleObj, PointSampleVec);
+    	PointSampleDataList PointSampleVec;
+    	status = getPointArbGeomParamsInfos(iNode, particleObj, PointSampleVec);
 
-//		DISPLAY_INFO( "Adding new PointsSampleData vector with size: " << PointSampleVec.size());
-//		mData.mPointsDataList.push_back(PointSampleVec);
+		DISPLAY_INFO( "Adding new PointsSampleData vector with size: " << PointSampleVec.size());
+		mData.mPointsDataList.push_back(PointSampleVec);
     }
 
     if ( mAction >= CONNECT )
@@ -1114,17 +1086,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     	DISPLAY_INFO("We should do something here, I guess ...");
     }
 
-//	DISPLAY_INFO("Do we reach dere ?");
-//	switch (mAction)
-//	{
-//		case NONE: DISPLAY_INFO("mAction is NONE"); break;
-//		case CONNECT: DISPLAY_INFO("mAction is CONNECT"); break;
-//		case CREATE: DISPLAY_INFO("mAction is CREATE"); break;
-//		case REMOVE: DISPLAY_INFO("mAction is REMOVE"); break;
-//		case CREATE_REMOVE: DISPLAY_INFO("mAction is CREATE_REMOVE"); break;
-//	}
-
-    /*
+/* original code, should be safely removed after checking
     // don't currently care about anything animated on a particleObj
     std::vector<Prop> fakePropList;
     std::vector<Alembic::AbcGeom::IObject> fakeObjList;

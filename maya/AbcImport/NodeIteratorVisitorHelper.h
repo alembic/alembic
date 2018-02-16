@@ -69,21 +69,19 @@ struct Prop
     Alembic::Abc::IScalarProperty mScalar;
 };
 
-//struct PointsSampleData
-//{
-//	PointsSampleData();
-//
-//	PointsSampleData & operator=(const PointsSampleData & other);
-//
-//	std::string name;
-//	int extent;
-//	bool isValidSample;
-//	bool isAnimated;
-//};
+struct PointsSampleData
+{
+	PointsSampleData();
 
-//typedef std::map<const char*, PointsSampleData> PointSampleDataList;
+	PointsSampleData & operator=(const PointsSampleData & other);
 
-//void printPointSampleData(std::vector< PointSampleDataList > & iPointsDataList, const char * str );
+	std::string name;
+	int extent;
+	bool isValidSample;
+	bool isAnimated;
+};
+
+typedef std::map < const char*, PointsSampleData > PointSampleDataList;
 
 void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
               bool iUnmarkedFaceVaryingColors);
@@ -244,7 +242,7 @@ public:
 
     // Particle data needs special parsing to match maya attributes types
     // We will store convertion data here at alembicNode initialisation
-//    std::vector< PointSampleDataList > mPointsDataList;
+    std::vector< PointSampleDataList > mPointsDataList;
 
     // objects that aren't animated but have animated visibility need to be
     // kept alive so the visibility can be read

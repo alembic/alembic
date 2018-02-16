@@ -51,7 +51,6 @@
 #include <maya/MFileObject.h>
 
 #include <maya/MArrayDataHandle.h>
-#include <maya/MArrayDataBuilder.h>
 #include <maya/MFloatPointArray.h>
 #include <maya/MFnDoubleArrayData.h>
 #include <maya/MFnIntArrayData.h>
@@ -129,7 +128,6 @@ namespace
 "editorTemplate -endScrollLayout;\n}"
     );
 };
-
 
 MStatus AlembicNode::initialize()
 {
@@ -684,28 +682,20 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             mExcludeFilterString = excludeFilterString;
         }
 
+
         MFnDependencyNode dep(thisMObject());
         MPlug allSetsPlug = dep.findPlug("allColorSets");
         CreateSceneVisitor visitor(inputTime, !allSetsPlug.isNull(),
             MObject::kNullObj, CreateSceneVisitor::NONE, "",
             mIncludeFilterString, mExcludeFilterString);
 
-		DISPLAY_INFO("Before walk:");
-//		printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList" );
         visitor.walk(archive);
-//		printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList" );
-		DISPLAY_INFO("Walk End");
 
         if (visitor.hasSampledData())
         {
             // information retrieved from the hierarchy traversal
             // and given to AlembicNode to provide update
-        	DISPLAY_INFO("Before visitor getData:");
-//			printPointSampleData(mData.mPointsDataList , "AlembicNode.mData.mPointsDataList");
             visitor.getData(mData);
-//			printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList");
-        	DISPLAY_INFO("Visitor getData end")
-
             mData.getFrameRange(mSequenceStartTime, mSequenceEndTime);
             MDataHandle startFrameHandle = dataBlock.inputValue(
                 mStartFrameAttr, &status);
@@ -1280,8 +1270,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     	            static_cast<unsigned int>(mData.mPointsList.size());
 
     	DISPLAY_INFO( "PointSize: " << pointSize );
-//    	DISPLAY_INFO( "mPointsDataList Size: " << mData.mPointsDataList.size() );
-//    	printPointSampleData(mData.mPointsDataList, "AlembicNode.mData.mPointsDataList");
+    	DISPLAY_INFO( "mPointsDataList Size: " << mData.mPointsDataList.size() );
     	if (pointSize > 0)
 		{
             MArrayDataHandle outArrayHandle =
@@ -1299,7 +1288,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 			MObject obj = dynDataFn.create(&status);
 			MCHECKERROR(status);
 
-			status = read(mCurTime, mData.mPointsList[currentPointIndex], dynDataFn ); //, mData.mPointsDataList[currentPointIndex] );
+			status = read(mCurTime, mData.mPointsList[currentPointIndex], dynDataFn, mData.mPointsDataList[currentPointIndex] );
 
 
 			MCHECKERROR(status);
