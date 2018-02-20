@@ -152,18 +152,42 @@ public:
         }
         while(numRead > 0 && totalRead < iSize);
 #else
-        ssize_t numRead = 0;
-        do
+        // 256M bytes as a safe chunk.
+        // The pread() could not read 2G+ data at once on OSX.
+        static const size_t kChunkSize = 256 * 1024 * 1024;
+
+        // Count how many huge chunks do we have.
+        size_t numChunk = iSize / kChunkSize;
+        size_t *chunkSizes = static_cast<size_t *>(alloca((numChunk + 1) * sizeof(size_t)));
+        for (size_t i = 0; i < numChunk; ++ i)
         {
-            numRead = pread(fd, buf, iSize - totalRead, offset);
+            chunkSizes[i] = kChunkSize;
+        }
+
+        // Append the size of last chunk.
+        size_t lastChunkSize = iSize % kChunkSize;
+        if (lastChunkSize)
+        {
+            numChunk += 1;
+            chunkSizes[numChunk - 1] = lastChunkSize;
+        }
+
+        // Read each chunk.
+        for (size_t i = 0; i < numChunk; ++ i)
+        {
+            size_t chunkSize = chunkSizes[i];
+            ssize_t numRead = pread(fd, buf, chunkSize, offset);
             if (numRead > 0)
             {
                 totalRead += numRead;
                 offset += numRead;
                 buf = static_cast< char * >( buf ) + numRead;
             }
+            else
+            {
+                break;
+            }
         }
-        while(numRead > 0 && totalRead < iSize);
 #endif
 
         // if we couldn't read what we needed to then something went wrong
