@@ -2025,7 +2025,7 @@ int main ( int argc, char *argv[] )
     testArraySamples();
     testWriteWhileRead();
 
-    // we may need to disable this if our CI can't handle it
-    testBigData();
+    //keep this disabled until we know our CI can handle it
+    //testBigData();
     return 0;
 }
