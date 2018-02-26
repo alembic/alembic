@@ -1966,6 +1966,55 @@ void testWriteWhileRead()
     }
 }
 
+void testBigData()
+{
+    std::string archiveName = "bigData.abc";
+    ABCA::DataType dtype(Alembic::Util::kUint64POD);
+    std::vector < Alembic::Util::uint64_t > vals(536870915);
+    for (Alembic::Util::uint64_t i = 0; i < vals.size(); ++i)
+    {
+        vals[i] = i;
+    }
+
+    {
+        ABCA::ArraySample samp(&(vals.front()), dtype,
+            Alembic::Util::Dimensions(vals.size()));
+
+        AO::WriteArchive w;
+        ABCA::ArchiveWriterPtr a = w(archiveName, ABCA::MetaData());
+        ABCA::ObjectWriterPtr archive = a->getTop();
+        ABCA::ObjectWriterPtr obj = archive->createChild(
+            ABCA::ObjectHeader("test", ABCA::MetaData()));
+
+        ABCA::CompoundPropertyWriterPtr parent = obj->getProperties();
+        ABCA::ArrayPropertyWriterPtr prop = parent->createArrayProperty(
+            "biggy", ABCA::MetaData(), dtype, 0);
+        prop->setSample(samp);
+    }
+
+    {
+        AO::ReadArchive r;
+        ABCA::ArchiveReaderPtr a = r( archiveName );
+        ABCA::ObjectReaderPtr archive = a->getTop();
+        ABCA::ObjectReaderPtr obj = archive->getChild(0);
+        ABCA::CompoundPropertyReaderPtr parent = obj->getProperties();
+
+        ABCA::ArrayPropertyReaderPtr prop = parent->getArrayProperty("biggy");
+
+        ABCA::ArraySamplePtr samp;
+        prop->getSample(0, samp);
+
+        TESTING_ASSERT(samp != NULL);
+        TESTING_ASSERT(samp->size() == vals.size());
+        Alembic::Util::uint64_t * data =
+            (Alembic::Util::uint64_t *)(samp->getData());
+        for (std::size_t i = 0; i < vals.size(); ++i)
+        {
+            TESTING_ASSERT(vals[i] == data[i]);
+        }
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testEmptyArray();
@@ -1975,5 +2024,8 @@ int main ( int argc, char *argv[] )
     testArrayStringsRepeats();
     testArraySamples();
     testWriteWhileRead();
+
+    //keep this disabled until we know our CI can handle it
+    //testBigData();
     return 0;
 }
