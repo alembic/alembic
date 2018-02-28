@@ -105,7 +105,7 @@ AbcImport -h;                                                               \n\
 AbcImport -d -m open \"/tmp/test.abc\";                                     \n\
 AbcImport -ftr -ct \"/\" -crt -rm \"/tmp/test.abc\";                        \n\
 AbcImport -ct \"root1 root2 root3 ...\" \"/tmp/test.abc\";                  \n\
-AbcImport \"/tmp/test.abc\" \"/tmp/justUVs.abc\" \"/tmp/other.abc\"         \n"
+AbcImport \"/tmp/sparseAnimPts.abc\" \"/tmp/justUVs.abc\" \"/tmp/base.abc\" \n"
 );  // usage
 
 };
