@@ -122,7 +122,7 @@ ADD_TEST(AbcGeom_LightTest_TEST AbcGeom_LightTest)
 ADD_EXECUTABLE(AbcGeom_CameraTest
                CameraTest.cpp)
 TARGET_LINK_LIBRARIES(AbcGeom_CameraTest Alembic)
-ADD_TEST(AbcGeom_Points_TEST AbcGeom_CameraTest)
+ADD_TEST(AbcGeom_Camera_TEST AbcGeom_CameraTest)
 
 ADD_EXECUTABLE(playground PlayGround.cpp)
 TARGET_LINK_LIBRARIES(playground Alembic)

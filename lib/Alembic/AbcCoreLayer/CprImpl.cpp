@@ -269,8 +269,22 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
 
                 m_children[ index ].push_back( *it );
 
+                m_propertyHeaders[ index ] = PropertyHeaderPtr(
+                    new AbcA::PropertyHeader( propHeader ) );
+
                 // TODO, are there cases where the MetaData should be combined
                 // for Compound properties?
+            }
+
+            // for cases where we have a simple property type, or the property
+            // type is different
+            else
+            {
+                size_t index = nameIt->second;
+                m_children[ index ].clear();
+                m_children[ index ].push_back( *it );
+                m_propertyHeaders[ index ] = PropertyHeaderPtr(
+                    new AbcA::PropertyHeader( propHeader ) );
             }
         }
     }

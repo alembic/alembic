@@ -71,8 +71,8 @@ void layerTest()
 
     {
         std::vector< std::string > files;
-        files.push_back( fileName );
         files.push_back( fileName2 );
+        files.push_back( fileName );
 
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( files );
@@ -136,8 +136,8 @@ void pruneTest()
 
     {
         std::vector< std::string > files;
-        files.push_back( fileName );
         files.push_back( fileName2 );
+        files.push_back( fileName );
 
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( files );
@@ -199,8 +199,8 @@ void replaceTest()
 
     {
         std::vector< std::string > files;
-        files.push_back( fileName );
         files.push_back( fileName2 );
+        files.push_back( fileName );
 
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( files );
@@ -310,8 +310,8 @@ void pruneAndAddTest()
 
     {
         std::vector< std::string > files;
-        files.push_back( fileName );
         files.push_back( fileName2 );
+        files.push_back( fileName );
 
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( files );
