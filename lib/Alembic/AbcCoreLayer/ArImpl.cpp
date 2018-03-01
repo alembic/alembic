@@ -50,9 +50,10 @@ ArImpl::ArImpl( ArchiveReaderPtrs & iArchives )
     m_archiveVersion = -1;
     m_header.reset( new AbcA::ObjectHeader() );
     m_archives.reserve( iArchives.size() );
-    ArchiveReaderPtrs::iterator it = iArchives.begin();
+    ArchiveReaderPtrs::reverse_iterator it = iArchives.rbegin();
 
-    for ( ; it != iArchives.end(); ++it )
+    // reverse them here so OrImpl goes fwds
+    for ( ; it != iArchives.rend(); ++it )
     {
         // bad archive ptr?  skip to the next one
         if ( !( *it ) )

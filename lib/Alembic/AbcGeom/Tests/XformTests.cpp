@@ -541,8 +541,8 @@ void sparseTest()
 
     {
         std::vector< std::string > names;
-        names.push_back( nameA );
         names.push_back( nameB );
+        names.push_back( nameA );
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( names );
 
