@@ -247,11 +247,11 @@ void sparseTest()
         IObject curveUVsObj( IObject( archive, kTop ), "curveUVs" );
 
         // This should NOT match
-        TESTING_ASSERT( !IPolyMeshSchema::matches( curveUVsObj.getMetaData() ) );
+        TESTING_ASSERT( !ICurvesSchema::matches( curveUVsObj.getMetaData() ) );
         ICompoundProperty geomProp( curveUVsObj.getProperties(), ".geom" );
 
         // This shouldn't match either
-        TESTING_ASSERT( !IPolyMeshSchema::matches( geomProp.getMetaData() ) );
+        TESTING_ASSERT( !ICurvesSchema::matches( geomProp.getMetaData() ) );
 
         // and we should ONLY have UVs
         TESTING_ASSERT( geomProp.getNumProperties() == 1 &&
@@ -263,11 +263,11 @@ void sparseTest()
         IObject curvePosObj( IObject( archive, kTop ), "curvePositions" );
 
         // This should NOT match
-        TESTING_ASSERT( !IPolyMeshSchema::matches( curvePosObj.getMetaData() ) );
+        TESTING_ASSERT( !ICurvesSchema::matches( curvePosObj.getMetaData() ) );
         geomProp = ICompoundProperty( curvePosObj.getProperties(), ".geom" );
 
         // This shouldn't match either
-        TESTING_ASSERT( !IPolyMeshSchema::matches( geomProp.getMetaData() ) );
+        TESTING_ASSERT( !ICurvesSchema::matches( geomProp.getMetaData() ) );
         TESTING_ASSERT( geomProp.getNumProperties() == 2 &&
             geomProp.getPropertyHeader("P") != NULL &&
             geomProp.getPropertyHeader(".selfBnds") != NULL );

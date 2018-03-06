@@ -134,7 +134,8 @@ const AbcA::PropertyHeader & CprImpl::getPropertyHeader( size_t i )
     ABCA_ASSERT( i < m_children.size(),
         "Out of range index in CprImpl::getPropertyHeader: " << i );
 
-    return m_children[ i ].back()->getPropertyHeader( m_childHeaderIndex[ i ] );
+    return m_children[ i ][ m_childHeaderIndex[ i ].first ]->getPropertyHeader(
+        m_childHeaderIndex[ i ].second );
 }
 
 //-*****************************************************************************
@@ -146,8 +147,9 @@ CprImpl::getPropertyHeader( const std::string &iName )
 
     if( itr !=  m_childNameMap.end() )
     {
-        return &( m_children[ itr->second ].back()->getPropertyHeader(
-                  m_childHeaderIndex[ itr->second ] ) );
+        return &( m_children[ itr->second ][
+            m_childHeaderIndex[ itr->second ].first ]->getPropertyHeader(
+                m_childHeaderIndex[ itr->second ].second ) );
     }
 
     return 0;
@@ -232,7 +234,7 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
 
                 m_children.resize( index + 1 );
                 m_children[ index ].push_back( *it );
-                m_childHeaderIndex.push_back( i );
+                m_childHeaderIndex.push_back( HeaderIndexPair( 0, i ) );
                 continue;
             }
             // prune
@@ -259,8 +261,10 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
             // only add this onto an existing one IF its a compound and the
             // prop added previously is a compound
             else if ( propHeader.isCompound() &&
-                      m_children[ nameIt->second ].back()->getPropertyHeader(
-                        m_childHeaderIndex[ nameIt->second ] ).isCompound() )
+                      m_children[ nameIt->second ][ m_childHeaderIndex[
+                            nameIt->second ].first ]->getPropertyHeader(
+                                m_childHeaderIndex[ nameIt->second ].second
+                            ).isCompound() )
             {
                 // add parent and index to the existing child element, and then
                 // update the MetaData
@@ -272,8 +276,15 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
                 }
 
                 m_children[ index ].push_back( *it );
-                m_childHeaderIndex[ index ] = i;
 
+                // for special case sparse hiearchies we don't want empty meta data
+                // on a compound to override existing non empty metadata
+                if ( propHeader.getMetaData().size() != 0 )
+                {
+                    m_childHeaderIndex[ index ].first =
+                        m_children[ index ].size() - 1;
+                    m_childHeaderIndex[ index ].second = i;
+                }
             }
 
             // for cases where we have a simple property type, or the property
@@ -283,7 +294,8 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
                 size_t index = nameIt->second;
                 m_children[ index ].clear();
                 m_children[ index ].push_back( *it );
-                m_childHeaderIndex[ index ] = i;
+                m_childHeaderIndex[ index ].first = 0;
+                m_childHeaderIndex[ index ].second = i;
             }
         }
     }

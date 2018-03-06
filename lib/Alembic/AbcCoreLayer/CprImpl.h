@@ -111,7 +111,8 @@ private:
 
     // so we don't have to copy property headers over, keep track of what
     // index to use for the header from the appropriate parent in m_children
-    std::vector< size_t > m_childHeaderIndex;
+    typedef std::pair< size_t, size_t > HeaderIndexPair;
+    std::vector< HeaderIndexPair > m_childHeaderIndex;
 
     ChildNameMap m_childNameMap;
 };
