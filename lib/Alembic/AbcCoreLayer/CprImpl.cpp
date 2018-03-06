@@ -261,9 +261,10 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
             // only add this onto an existing one IF its a compound and the
             // prop added previously is a compound
             else if ( propHeader.isCompound() &&
-                      m_children[ nameIt->second ][
-                        m_childHeaderIndex[ nameIt->second ].first ]->getPropertyHeader(
-                        m_childHeaderIndex[ nameIt->second ].second ).isCompound() )
+                      m_children[ nameIt->second ][ m_childHeaderIndex[
+                            nameIt->second ].first ]->getPropertyHeader(
+                                m_childHeaderIndex[ nameIt->second ].second
+                            ).isCompound() )
             {
                 // add parent and index to the existing child element, and then
                 // update the MetaData
@@ -280,7 +281,8 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
                 // on a compound to override existing non empty metadata
                 if ( propHeader.getMetaData().size() != 0 )
                 {
-                    m_childHeaderIndex[ index ].first = m_children[ index ].size() - 1;
+                    m_childHeaderIndex[ index ].first =
+                        m_children[ index ].size() - 1;
                     m_childHeaderIndex[ index ].second = i;
                 }
             }

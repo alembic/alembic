@@ -609,7 +609,7 @@ void sparseTest2()
 
         IObject bobj( aobj, "b" );
         TESTING_ASSERT( IXform::matches( bobj.getHeader() ) );
-        IXform bxform( aobj, "a" );
+        IXform bxform( aobj, "b" );
         TESTING_ASSERT( bxform.getSchema().isConstantIdentity() );
 
         IObject cobj( bobj, "c" );
