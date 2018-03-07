@@ -6,8 +6,6 @@ API:
 Fix memory issue when traversing an AbcCoreLayer hierarchy that also happens to
 use heavy instancing. (PR 151)
 
-Work around compiler bug in MSVC14 Update 3 involving boost::python. (PR 154)
-
 Work around a pread OSX issue when trying to read data samples over 2 GB, by
 reading it in smaller chunks.  (PR 153 and PR 155)
 
@@ -21,6 +19,8 @@ Here is the canonical example order:
 sparseAnimatedPoints.abc sparseUVs.abc base.abc
 
 Python:
+
+Work around compiler bug in MSVC14 Update 3 involving boost::python. (PR 154)
 
 prman Procedural:
 
