@@ -1,3 +1,35 @@
+2017-3-7, Alembic 1.7.6
+Thanks to your feedback and pull requests we have a few bug fixes.
+
+API:
+
+Fix memory issue when traversing an AbcCoreLayer hierarchy that also happens to
+use heavy instancing. (PR 151)
+
+Work around a pread OSX issue when trying to read data samples over 2 GB, by
+reading it in smaller chunks.  (PR 153 and PR 155)
+
+Fix bug in AbcCoreLayer where the replace/prune logic was occurring in the
+opposite order of the data layering.  We've adopted the data layering order
+style.  (data in the first file specified overrides later files)
+(PR 156 and PR 157)
+
+Here is the canonical example order:
+
+sparseAnimatedPoints.abc sparseUVs.abc base.abc
+
+Python:
+
+Work around compiler bug in MSVC14 Update 3 involving boost::python. (PR 154)
+
+prman Procedural:
+
+Support widths on IPoints. (PR 147)
+
+Support visibility on IPolyMesh. (PR 148)
+
+##-*****************************************************************************
+
 2017-12-20, Alembic 1.7.5
 Thanks to your feedback we have a bug fix:
 

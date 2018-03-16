@@ -90,14 +90,15 @@ private:
 
     ArchiveReaderPtrs m_archives;
 
+    Alembic::Util::weak_ptr< AbcA::ObjectReader > m_top;
+    Alembic::Util::mutex m_lock;
+
     std::vector <  AbcA::TimeSamplingPtr > m_timeSamples;
     std::vector <  AbcA::index_t > m_maxSamples;
     ObjectHeaderPtr m_header;
 
     Util::int32_t m_archiveVersion;
 
-    // TODO, should we keep the top object (OrImplPtr) in a weak ptr
-    // or can we just rebuild it everytime getTop is called?
 };
 
 } // End namespace ALEMBIC_VERSION_NS

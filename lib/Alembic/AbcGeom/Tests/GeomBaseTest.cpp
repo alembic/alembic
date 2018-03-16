@@ -36,6 +36,7 @@
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
+#include <Alembic/AbcCoreFactory/IFactory.h>
 
 // We include some global mesh data to test with from an external source
 // to keep this example code clean.
@@ -352,6 +353,190 @@ void IndexexedGeomParamTest()
     }
 }
 
+void LayeredIndexedGeomParamTest()
+{
+
+    OFloatGeomParam::Sample widthSample(
+        FloatArraySample( (const float *)g_widths, g_numWidths ),
+        kVertexScope );
+
+    std::vector< float > vals( 9 );
+    vals[0] = 1.0; vals[1] = 0.5; vals[2] = 0.0;
+    vals[3] = 0.2; vals[4] = 0.3; vals[5] = 0.4;
+    vals[6] = 0.0; vals[7] = 0.0; vals[8] = 0.0;
+
+
+    std::vector< Alembic::Util::uint32_t > indices( 4 );
+    indices[0] = 2;
+    indices[1] = 1;
+    indices[2] = 0;
+    indices[3] = 2;
+
+    UInt32ArraySample indicesSamp( indices );
+
+    std::string fileNameA = "layeredGeomParamA.abc";
+    std::string fileNameB = "layeredGeomParamB.abc";
+    std::string fileNameC = "layeredGeomParamC.abc";
+
+    // indexed vec
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileNameA );
+
+        OCompoundProperty prop = archive.getTop().getProperties();
+
+        OV3fGeomParam vecParam( prop, "data", true,
+                                Alembic::AbcGeom::kVertexScope, 1 );
+
+        V3fArraySample valsSamp( ( V3f * )vals.data(), vals.size() / 3 );
+        OV3fGeomParam::Sample samp( valsSamp, indicesSamp,
+            Alembic::AbcGeom::kVertexScope );
+        vecParam.set( samp );
+
+    }
+
+    // indexed float
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileNameB );
+
+        OCompoundProperty prop = archive.getTop().getProperties();
+
+        OFloatGeomParam floatParam( prop, "data", true,
+            Alembic::AbcGeom::kUniformScope, 1 );
+
+        // only write the first 3 values
+        FloatArraySample floatSamp( vals.data(), 3 );
+        OFloatGeomParam::Sample samp( floatSamp, indicesSamp,
+            Alembic::AbcGeom::kUniformScope );
+        floatParam.set( samp );
+    }
+
+    // non-indexed
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileNameC );
+
+        OCompoundProperty prop = archive.getTop().getProperties();
+
+        OFloatGeomParam floatParam( prop, "data", false,
+            Alembic::AbcGeom::kConstantScope, 1 );
+
+        // only write the first value
+        FloatArraySample valsSamp( vals.data(), 1 );
+        OFloatGeomParam::Sample samp( valsSamp,
+                                      Alembic::AbcGeom::kConstantScope );
+        floatParam.set( samp );
+    }
+
+    // indexed vertex V3f layered over with indexed uniform float
+    {
+        std::vector< std::string > names;
+        names.push_back( fileNameB );
+        names.push_back( fileNameA );
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( names );
+
+        IFloatGeomParam::Sample samp;
+
+        IFloatGeomParam floatParam( archive.getTop().getProperties(), "data" );
+        std::cout << floatParam.getHeader().getMetaData().serialize() << std::endl;
+        TESTING_ASSERT( !IV3fGeomParam::matches( floatParam.getHeader() ) );
+        TESTING_ASSERT( floatParam.getScope() ==
+                        Alembic::AbcGeom::kUniformScope );
+
+        floatParam.getIndexed( samp );
+        TESTING_ASSERT(
+            samp.getVals()->size() == 3 &&
+            samp.getVals()->get()[0] == 1.0 &&
+            samp.getVals()->get()[1] == 0.5 &&
+            samp.getVals()->get()[2] == 0.0 );
+
+        TESTING_ASSERT(
+            samp.getIndices()->size() == 4 &&
+            samp.getIndices()->get()[0] == 2 &&
+            samp.getIndices()->get()[1] == 1 &&
+            samp.getIndices()->get()[2] == 0 &&
+            samp.getIndices()->get()[3] == 2 );
+    }
+
+    // indexed vertex V3f layered over with flat constant float
+    {
+        std::vector< std::string > names;
+        names.push_back( fileNameC );
+        names.push_back( fileNameA );
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( names );
+
+        IFloatGeomParam::Sample samp;
+
+        IFloatGeomParam floatParam( archive.getTop().getProperties(), "data" );
+        TESTING_ASSERT( !IV3fGeomParam::matches( floatParam.getHeader() ) );
+        TESTING_ASSERT( !floatParam.isIndexed() );
+        TESTING_ASSERT( floatParam.getScope() ==
+                        Alembic::AbcGeom::kConstantScope );
+
+        floatParam.getExpanded( samp );
+        TESTING_ASSERT(
+            samp.getVals()->size() == 1 &&
+            samp.getVals()->get()[0] == 1.0 );
+    }
+
+    // indexed uniform float layered over with indexed vertex V3f
+    {
+        std::vector< std::string > names;
+        names.push_back( fileNameA );
+        names.push_back( fileNameB );
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( names );
+
+        IV3fGeomParam vecParam( archive.getTop().getProperties(), "data" );
+        TESTING_ASSERT( IV3fGeomParam::matches( vecParam.getHeader() ) );
+        TESTING_ASSERT( vecParam.getScope() ==
+                        Alembic::AbcGeom::kVertexScope );
+
+        IV3fGeomParam::Sample samp;
+        vecParam.getIndexed( samp );
+        TESTING_ASSERT(
+            samp.getVals()->size() == 3 &&
+            samp.getVals()->get()[0] == V3f(1.0, 0.5, 0.0) &&
+            samp.getVals()->get()[1] == V3f(0.2, 0.3, 0.4) &&
+            samp.getVals()->get()[2] == V3f(0.0, 0.0, 0.0) );
+
+        TESTING_ASSERT(
+            samp.getIndices()->size() == 4 &&
+            samp.getIndices()->get()[0] == 2 &&
+            samp.getIndices()->get()[1] == 1 &&
+            samp.getIndices()->get()[2] == 0 &&
+            samp.getIndices()->get()[3] == 2 );
+    }
+
+    // flat constant float layered over with indexed vertex V3f
+    {
+        std::vector< std::string > names;
+        names.push_back( fileNameA );
+        names.push_back( fileNameC );
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( names );
+
+        IV3fGeomParam vecParam( archive.getTop().getProperties(), "data" );
+        TESTING_ASSERT( IV3fGeomParam::matches( vecParam.getHeader() ) );
+        TESTING_ASSERT( vecParam.getScope() ==
+                        Alembic::AbcGeom::kVertexScope );
+
+        IV3fGeomParam::Sample samp;
+        vecParam.getIndexed( samp );
+        TESTING_ASSERT(
+            samp.getVals()->size() == 3 &&
+            samp.getVals()->get()[0] == V3f(1.0, 0.5, 0.0) &&
+            samp.getVals()->get()[1] == V3f(0.2, 0.3, 0.4) &&
+            samp.getVals()->get()[2] == V3f(0.0, 0.0, 0.0) );
+
+        TESTING_ASSERT(
+            samp.getIndices()->size() == 4 &&
+            samp.getIndices()->get()[0] == 2 &&
+            samp.getIndices()->get()[1] == 1 &&
+            samp.getIndices()->get()[2] == 0 &&
+            samp.getIndices()->get()[3] == 2 );
+    }
+}
 //-*****************************************************************************
 //-*****************************************************************************
 //-*****************************************************************************
@@ -375,5 +560,7 @@ int main( int argc, char *argv[] )
     Example1_GeomBaseIn();
 
     IndexexedGeomParamTest();
+
+    LayeredIndexedGeomParamTest();
     return 0;
 }

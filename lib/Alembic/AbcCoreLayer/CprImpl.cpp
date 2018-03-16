@@ -57,7 +57,7 @@ CprImpl::CprImpl( OrImplPtr iObject, CompoundReaderPtrs & iCompounds )
     std::string empty;
 
     // top level compounds have the same metadata as the parent object
-    m_header.reset( new AbcA::PropertyHeader( empty,
+    m_topHeader.reset( new AbcA::PropertyHeader( empty,
         m_object->getHeader().getMetaData() ) );
 
     init( iCompounds );
@@ -70,15 +70,13 @@ CprImpl::CprImpl( CprImplPtr iParent, size_t iIndex )
     ABCA_ASSERT( m_parent, "Invalid compound in CprImpl(CprImplPtr, size_t)" );
     m_object = m_parent->m_object;
 
-    m_header = m_parent->m_propertyHeaders[m_index];
-
     // get our compounds for the init
     CompoundReaderPtrs  & childVec = m_parent->m_children[m_index];
 
     CompoundReaderPtrs cmpndVec;
     cmpndVec.reserve( childVec.size() );
 
-    std::string name = m_header->getName();
+    std::string name = m_parent->getPropertyHeader( m_index ).getName();
 
     CompoundReaderPtrs::iterator it = childVec.begin();
     for ( ; it != childVec.end(); ++it )
@@ -97,7 +95,14 @@ CprImpl::~CprImpl()
 //-*****************************************************************************
 const AbcA::PropertyHeader &CprImpl::getHeader() const
 {
-    return *( m_header );
+    if ( m_topHeader )
+    {
+        return *( m_topHeader );
+    }
+    else
+    {
+        return m_parent->getPropertyHeader( m_index );
+    }
 }
 
 AbcA::ObjectReaderPtr CprImpl::getObject()
@@ -120,16 +125,17 @@ AbcA::CompoundPropertyReaderPtr CprImpl::asCompoundPtr()
 //-*****************************************************************************
 size_t CprImpl::getNumProperties()
 {
-    return m_propertyHeaders.size();
+    return m_children.size();
 }
 
 //-*****************************************************************************
 const AbcA::PropertyHeader & CprImpl::getPropertyHeader( size_t i )
 {
-    ABCA_ASSERT( i < m_propertyHeaders.size(),
+    ABCA_ASSERT( i < m_children.size(),
         "Out of range index in CprImpl::getPropertyHeader: " << i );
 
-    return *( m_propertyHeaders[i] );
+    return m_children[ i ][ m_childHeaderIndex[ i ].first ]->getPropertyHeader(
+        m_childHeaderIndex[ i ].second );
 }
 
 //-*****************************************************************************
@@ -141,7 +147,9 @@ CprImpl::getPropertyHeader( const std::string &iName )
 
     if( itr !=  m_childNameMap.end() )
     {
-        return m_propertyHeaders[ itr->second ].get();
+        return &( m_children[ itr->second ][
+            m_childHeaderIndex[ itr->second ].first ]->getPropertyHeader(
+                m_childHeaderIndex[ itr->second ].second ) );
     }
 
     return 0;
@@ -155,7 +163,8 @@ CprImpl::getScalarProperty( const std::string &iName )
 
     if( itr != m_childNameMap.end() )
     {
-        return m_children[ itr->second ][0]->getScalarProperty( itr->first );
+        return m_children[ itr->second ].back()->getScalarProperty(
+            itr->first );
     }
 
     return AbcA::ScalarPropertyReaderPtr();
@@ -169,7 +178,7 @@ CprImpl::getArrayProperty( const std::string &iName )
 
     if( itr != m_childNameMap.end() )
     {
-        return m_children[ itr->second ][0]->getArrayProperty( itr->first );
+        return m_children[ itr->second ].back()->getArrayProperty( itr->first );
     }
 
     return AbcA::ArrayPropertyReaderPtr();
@@ -198,7 +207,8 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
     {
         for ( size_t i = 0; i < (*it)->getNumProperties(); ++i )
         {
-            AbcA::PropertyHeader propHeader = (*it)->getPropertyHeader( i );
+            const AbcA::PropertyHeader & propHeader =
+                (*it)->getPropertyHeader( i );
 
             // since pruning is more destructive, it trumps replace
             bool shouldPrune =
@@ -222,14 +232,9 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
                 size_t index = m_childNameMap.size();
                 m_childNameMap[ propHeader.getName() ] = index;
 
-                // TODO? We may not need the whole property header, we may only
-                // need the name especially if Compound MetaData doesn't need to
-                // be combined
-                PropertyHeaderPtr propPtr(
-                    new AbcA::PropertyHeader( propHeader ) );
-                m_propertyHeaders.push_back( propPtr );
                 m_children.resize( index + 1 );
                 m_children[ index ].push_back( *it );
+                m_childHeaderIndex.push_back( HeaderIndexPair( 0, i ) );
                 continue;
             }
             // prune
@@ -239,7 +244,7 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
 
                 // prune, time to clear out existing data
                 m_children.erase( m_children.begin() + index );
-                m_propertyHeaders.erase( m_propertyHeaders.begin() + index );
+                m_childHeaderIndex.erase( m_childHeaderIndex.begin() + index );
                 m_childNameMap.erase( nameIt );
 
                 // since we removed an element, update the indices in our map
@@ -256,7 +261,10 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
             // only add this onto an existing one IF its a compound and the
             // prop added previously is a compound
             else if ( propHeader.isCompound() &&
-                      m_propertyHeaders[ nameIt->second ]->isCompound() )
+                      m_children[ nameIt->second ][ m_childHeaderIndex[
+                            nameIt->second ].first ]->getPropertyHeader(
+                                m_childHeaderIndex[ nameIt->second ].second
+                            ).isCompound() )
             {
                 // add parent and index to the existing child element, and then
                 // update the MetaData
@@ -269,8 +277,25 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
 
                 m_children[ index ].push_back( *it );
 
-                // TODO, are there cases where the MetaData should be combined
-                // for Compound properties?
+                // for special case sparse hiearchies we don't want empty meta data
+                // on a compound to override existing non empty metadata
+                if ( propHeader.getMetaData().size() != 0 )
+                {
+                    m_childHeaderIndex[ index ].first =
+                        m_children[ index ].size() - 1;
+                    m_childHeaderIndex[ index ].second = i;
+                }
+            }
+
+            // for cases where we have a simple property type, or the property
+            // type is different
+            else
+            {
+                size_t index = nameIt->second;
+                m_children[ index ].clear();
+                m_children[ index ].push_back( *it );
+                m_childHeaderIndex[ index ].first = 0;
+                m_childHeaderIndex[ index ].second = i;
             }
         }
     }

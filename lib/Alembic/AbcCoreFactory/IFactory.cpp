@@ -130,18 +130,25 @@ Alembic::Abc::IArchive IFactory::getArchive(
     Alembic::AbcCoreLayer::ArchiveReaderPtrs archives;
 
     // first read our archives, skipping over bad ones
+    CoreType coreType;
     std::vector< std::string >::const_iterator it = iFileNames.begin();
     for ( ; it != iFileNames.end(); ++it )
     {
-        Alembic::Abc::IArchive archive = getArchive( *it );
+        Alembic::Abc::IArchive archive = getArchive( *it, coreType );
         if ( archive.getPtr() )
         {
             archives.push_back( archive.getPtr() );
         }
     }
 
-
-    if ( ! archives.empty() )
+    // if we have just one, no reason to layer
+    if ( archives.size() == 1 )
+    {
+        oType = coreType;
+        return Alembic::Abc::IArchive( archives[0],
+            Alembic::Abc::kWrapExisting, m_policy );
+    }
+    else if ( ! archives.empty() )
     {
         Alembic::AbcCoreAbstract::ArchiveReaderPtr arPtr = layer( archives );
         oType = kLayer;
