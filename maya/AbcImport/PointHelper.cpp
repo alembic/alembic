@@ -44,58 +44,60 @@
 #include <maya/MVector.h>
 #include <maya/MGlobal.h>
 #include <maya/MVectorArray.h>
+#include <maya/MSelectionList.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnParticleSystem.h>
 #include <maya/MDagModifier.h>
 #include <maya/MItDependencyNodes.h>
+#include <maya/MFnSet.h>
 #include <map>
 
-PointsSampleData getSampleInfo( size_t particleNumber, unsigned int sampleSize, int sampleExtent, std::string sampleName )
+bool getSampleInfo( size_t particleNumber, unsigned int sampleSize, int sampleExtent, std::string sampleName, PointsSampleData & out )
 {
-	PointsSampleData out;
-
 	// If sample size doesn't match our particle number, the sample is not valid
-	out.isValidSample = false;
+	bool isValidSample = false;
 	out.extent = sampleExtent;
+	out.origName = sampleName;
 	out.name = sampleName;
 
 	if (sampleSize == 1)
-		out.isValidSample = true;
+		isValidSample = true;
 
 	DISPLAY_INFO("\tsampleSize; " << sampleSize);
 
 	if ( sampleSize == particleNumber )
 	{
-		out.isValidSample = true;
+		isValidSample = true;
 	}
 	else if ( sampleExtent != 2 && sampleSize == particleNumber * 2 )
 	{
-		// We are certainly dealing with a 2d array, we will assume a ababababab ordering
+		// We are certainly dealing with a 2d array, we will assume ababababab ordering
 		DISPLAY_INFO("\tsampleSize is 2 times particle Size, extent is 2");
 		out.extent = 2;
-		out.isValidSample = true;
+		isValidSample = true;
 	}
 	else if ( sampleExtent != 3 && sampleSize == particleNumber * 3 )
 	{
-		// We are certainly dealing with a 3d array, we will assume a abcabcabc ordering
+		// We are certainly dealing with a 3d array, we will assume abcabcabc ordering
 		DISPLAY_INFO("\tsampleSize is 3 times particle Size, extent is 3");
 		out.extent = 3;
-		out.isValidSample = true;
+		isValidSample = true;
 	}
 
 	else if (sampleExtent > 3)
 	{
 		// can't deal with that
-		out.isValidSample = false;
+		isValidSample = false;
 	}
 
-	return out;
+	return isValidSample;
 }
 
 
 MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MObject & iObject,
 		PointSampleDataList & iData )
 {
+	DISPLAY_INFO("#######\n" << "getPointArbGeomParamsInfos()");
 	MStatus status( MS::kSuccess);
 	Alembic::AbcGeom::IPointsSchema schema = iNode.getSchema();
 	Alembic::AbcGeom::IPointsSchema::Sample samp;
@@ -141,125 +143,11 @@ MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MOb
 
 		Alembic::Abc::IArrayProperty arrayProp( props, propName );
 
-		DISPLAY_INFO( "##\n" << propName << ": Comparing at index: " << compareSampleSelector.getRequestedIndex() << " with particle size: " << particleSize );
-
-		Alembic::AbcCoreAbstract::ArraySamplePtr samp;
-
-		arrayProp.get(samp, compareSampleSelector);
-			unsigned int sampleSize = (unsigned int)samp->size();
-
-		PointsSampleData sampleInfo = getSampleInfo(particleSize, sampleSize, propExtent, propName);
-		DISPLAY_INFO("\tCreating new PointsSampleData:");
-		DISPLAY_INFO("\t\t abc sampleSize: " << sampleSize);
-		DISPLAY_INFO("\t\t abc extent: " << propExtent);
-		DISPLAY_INFO("\t\t sampleInfo.attributeName: " << sampleInfo.name);
-		DISPLAY_INFO("\t\t sampleInfo.extent: " << sampleInfo.extent);
-		DISPLAY_INFO("\t\t sampleInfo.isValidSample: " << sampleInfo.isValidSample);
-
-		MFnDependencyNode fnparticle(iObject);
-		if ( fnparticle.hasAttribute( sampleInfo.name.c_str() ) )
-		{
-
-			// Skip attribute Creation
-			DISPLAY_INFO( "\tAttribute " << sampleInfo.name << " already exists" );
-
-			MPlug attrPlug = fnparticle.findPlug(sampleInfo.name.c_str());
-			MFnAttribute attr( attrPlug.attribute(&status));
-
-			if ( sampleInfo.extent == 1 &&  attr.accepts(MFnData::kDoubleArray, &status))
-			{
-				// We can skip attribute creation
-				DISPLAY_INFO("\tAdd sample to iData[" << propName.c_str() << "]:");
-				iData[propName.c_str()] = sampleInfo;
-				continue;
-			}
-			else if (attr.accepts(MFnData::kVectorArray, &status))
-			{
-				// We can skip attribute creation
-				DISPLAY_INFO("\tAdd sample to iData[" << propName.c_str() << "]:");
-				iData[propName.c_str()] = sampleInfo;
-				continue;
-			}
-			else
-			{
-				// Attribute exists but is of the wrong type, we need to rename it
-				std::string abcPrefix("abc_");
-				sampleInfo.name = abcPrefix + sampleInfo.name;
-			}
-		}
-		iData[propName.c_str()] = sampleInfo;
-	}
-	return status;
-}
-
-MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index, Alembic::AbcCoreAbstract::index_t ceilIndex,
-		double alpha, size_t pSize, const Alembic::Abc::ICompoundProperty & props,
-		MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData)
-{
-	MStatus status(MS::kSuccess);
-
-	size_t numProps = props.getNumProperties();
-	DISPLAY_INFO( "Found " << numProps << " readArbGeomParams" );
-	DISPLAY_INFO( "particleCount: " << pSize );
-
-	DISPLAY_INFO("iData has: " << iData.size() << " items");
-	for (unsigned int i = 0; i < numProps; ++ i)
-	{
-		const Alembic::Abc::PropertyHeader & propHeader =
-				props.getPropertyHeader(i);
-		const std::string propName =  propHeader.getName();
-
-		if (!propHeader.isArray())
-			// we are dealing with PP attributes,they must be arrays
-			continue;
-
-		Alembic::Abc::IArrayProperty arrayProp( props, propName );
-
-		Alembic::AbcCoreAbstract::ArraySamplePtr samp;
-
-		arrayProp.get(samp, Alembic::Abc::ISampleSelector(index));
-			unsigned int sampSize = (unsigned int)samp->size();
-
 		Alembic::AbcCoreAbstract::DataType dtype = arrayProp.getDataType();
-		int extent = (int)dtype.getExtent();
-		Alembic::Util::PlainOldDataType pod = dtype.getPod();
-		std::string interp = arrayProp.getMetaData().get("interpretation");
+				int extent = (int)dtype.getExtent();
+				Alembic::Util::PlainOldDataType pod = dtype.getPod();
 
-		DISPLAY_INFO("\tgetting sample info from iData[" << propName.c_str() << "]")
-
-		DISPLAY_INFO("\tTesting for iData Validity");
-		if ( iData.empty() )
-		{
-			DISPLAY_INFO("\t\tiData is empty, skipping");
-			continue;
-		}
-		if ( iData.find(propName.c_str()) == iData.end() )
-		{
-			DISPLAY_INFO("\t\tiData[ " << propName.c_str() << "] not found, skipping");
-			continue;
-		}
-		DISPLAY_INFO("\tEverything looks fine");
-
-		PointsSampleData sampleInfo = iData[ propName.c_str() ];
-
-		DISPLAY_INFO( " Current Prop: [" << propName << "]: "  << ", has data: " << dtype );
-		DISPLAY_INFO( "\t\t interpretation: " << interp );
-		DISPLAY_INFO( "\t\t sampleSize: " << sampSize );
-		DISPLAY_INFO( "\t\t orig extent: " << extent );
-		DISPLAY_INFO( "\t\t POD: " << Alembic::Util::PODName(pod) );
-		DISPLAY_INFO( "\t sampleInfo[" << propName << "]");
-		DISPLAY_INFO( "\t\t\t attributeName: " << sampleInfo.name );
-		DISPLAY_INFO( "\t\t\t extent: " << sampleInfo.extent );
-		DISPLAY_INFO( "\t\t\t isValid: " << sampleInfo.isValidSample );
-
-
-		if ( ! sampleInfo.isValidSample )
-		{
-			DISPLAY_INFO("Sample is not valid");
-			continue;
-		}
-
-		// We will cast everything to double
+		// Ignore all but numerical
 		switch (pod)
 		{
 			case Alembic::Util::kBooleanPOD:
@@ -272,62 +160,178 @@ MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index, Alembic::AbcC
 			case Alembic::Util::kFloat32POD:
 			case Alembic::Util::kFloat64POD:
 			{
-				// Single value
-				if (sampSize == 1)
-				{
-					DISPLAY_INFO( "\t\t\tfloat with single value" );
-					MDoubleArray arr = dynDataFn.doubleArray( sampleInfo.name.c_str(), &status);
-
-					DISPLAY_INFO( "\t\t\t Setting particle attribute: " << propName << " with 1 double value" );
-
-					arr.append( ((double *) samp->getData())[0] );
-					continue;
-				}
-				// 1d array
-				else if ( sampleInfo.extent == 1 )
-				{
-					DISPLAY_INFO( "\t\t\tfloat with extent 1 and no fake extent" );
-					MDoubleArray doubleArray = dynDataFn.doubleArray( sampleInfo.name.c_str(), &status);
-
-					DISPLAY_INFO( "\t\t\t Setting particle attribute: " << propName << " with double array value" );
-					MDoubleArray arr((double *) samp->getData(),
-						static_cast<unsigned int>(samp->size()));
-
-					doubleArray = arr;
-					continue;
-				}
-				else // extent is 2 or 3
-				{
-					DISPLAY_INFO( "\t\t\tfloat with extent: " << extent );
-
-					MVectorArray arr = dynDataFn.vectorArray( sampleInfo.name.c_str(), &status);
-
-					DISPLAY_INFO( "\t\t\t Setting particle attribute: " << propName << " with vector array value" );
-
-					arr.setLength(pSize);
-
-					MVector vec;
-
-					double * vals = (double *) samp->getData();
-					for (unsigned int i = 0; i < pSize; ++i)
-					{
-						vec.x = vals[extent*i];
-						vec.y = vals[extent*i+1];
-
-						if (extent == 3)
-						{
-							vec.z = vals[extent*i+2];
-						}
-						arr[i] = vec;
-					}
-					continue;
-				}
-			} break;
-			case Alembic::Util::kStringPOD:
-			{
-				// ?
-			} break;
+				break;
+			}
+			default:
+				continue;
 		}
+
+
+		DISPLAY_INFO( "##\n" << propName << ": Comparing at index: " << compareSampleSelector.getRequestedIndex() << " with particle size: " << particleSize );
+
+		Alembic::AbcCoreAbstract::ArraySamplePtr samp;
+
+		arrayProp.get(samp, compareSampleSelector);
+			unsigned int sampleSize = (unsigned int)samp->size();
+
+
+		PointsSampleData sampleInfo;
+		if ( !getSampleInfo(particleSize, sampleSize, propExtent, propName, sampleInfo) )
+			continue;
+
+		sampleInfo.arrayProp = arrayProp;
+		sampleInfo.pod = pod;
+
+		DISPLAY_INFO("\tCreating new PointsSampleData:");
+		DISPLAY_INFO("\t\t abc sampleSize: " << sampleSize);
+		DISPLAY_INFO("\t\t abc extent: " << propExtent);
+		DISPLAY_INFO("\t\t sampleInfo.origName: " << sampleInfo.origName);
+		DISPLAY_INFO("\t\t sampleInfo.attributeName: " << sampleInfo.name);
+		DISPLAY_INFO("\t\t sampleInfo.extent: " << sampleInfo.extent);
+		DISPLAY_INFO("\t\t sampleInfo.pod: " << Alembic::Util::PODName(pod));
+
+
+		MFnDependencyNode fnparticle(iObject);
+		if ( fnparticle.hasAttribute( sampleInfo.name.c_str() ) || sampleInfo.name == "age" )
+		{
+			DISPLAY_INFO( "\tAttribute " << sampleInfo.name << " already exists" );
+
+			MPlug attrPlug = fnparticle.findPlug(sampleInfo.name.c_str());
+			MFnAttribute attr( attrPlug.attribute(&status));
+
+			if ( sampleInfo.extent == 1 &&  attr.accepts(MFnData::kDoubleArray, &status))
+			{
+				// We can skip attribute creation
+				DISPLAY_INFO("\tAttribute has the correct data: extent 1, kDoubleArray");
+				iData.push_back( sampleInfo );
+				continue;
+			}
+			else if (attr.accepts(MFnData::kVectorArray, &status))
+			{
+				// We can skip attribute creation
+				DISPLAY_INFO("\tAttribute has the correct data: extent 3, kVectorArray");
+				iData.push_back( sampleInfo );
+				continue;
+			}
+			else
+			{
+				// Attribute exists but is of the wrong type, we need to rename it
+				std::string abcPrefix("abc_");
+				sampleInfo.name = abcPrefix + sampleInfo.name;
+			}
+		}
+		iData.push_back( sampleInfo );
+	}
+	return status;
+}
+
+MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index, Alembic::AbcCoreAbstract::index_t ceilIndex,
+		double alpha, size_t pSize, const Alembic::Abc::ICompoundProperty & props,
+		MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData)
+{
+	MStatus status(MS::kSuccess);
+
+	size_t numAbcProps = props.getNumProperties();
+	DISPLAY_INFO( "Found " << numAbcProps << " readArbGeomParams" );
+	DISPLAY_INFO( "particleCount: " << pSize );
+	size_t numProps = iData.size();
+
+	if ( iData.empty() )
+	{
+		DISPLAY_INFO("\tiData is empty, skipping");
+		return status;
+	}
+
+	DISPLAY_INFO("iData has: " << iData.size() << " items");
+	for (unsigned int i = 0; i < numProps; ++ i)
+	{
+		PointsSampleData sampleInfo = iData[ i ];
+
+//		Alembic::AbcCoreAbstract::ArraySamplePtr samp;
+
+
+		Alembic::Util::Dimensions dim;
+		DISPLAY_INFO("\t" << "Get array dimension");
+		sampleInfo.arrayProp.getDimensions(dim, Alembic::Abc::ISampleSelector(index));
+
+		unsigned int sampSize( dim.numPoints() );
+		DISPLAY_INFO("\t" << "Dimensions.numPoints: " << sampSize);
+
+		DISPLAY_INFO("\t initialise vector with: " << sampSize << " x " << sampleInfo.extent << " = " <<  sampSize * sampleInfo.extent << " elements");
+		std::vector< double > samp(sampSize * sampleInfo.extent);
+
+		// Read evrything as double
+		DISPLAY_INFO("\t" << "Get propData as kFloat64 and feed the std::vector");
+		sampleInfo.arrayProp.getAs( &samp.front(), Alembic::Util::kFloat64POD, Alembic::Abc::ISampleSelector(index));
+
+		DISPLAY_INFO("\tgetting sample info from iData[" << sampleInfo.origName.c_str() << "]")
+
+		DISPLAY_INFO( "\t sampleInfo[" << sampleInfo.origName << "]");
+		DISPLAY_INFO( "\t\t\t attributeName: " << sampleInfo.name );
+		DISPLAY_INFO( "\t\t\t extent: " << sampleInfo.extent );
+
+		DISPLAY_INFO( "\t\t\t sampleSize: " << sampSize );
+		DISPLAY_INFO( "\t\t\t sampleInfo.pod: " << Alembic::Util::PODName(sampleInfo.pod));
+
+		// Single value
+		if (sampSize == 1)
+		{
+			DISPLAY_INFO( "\t\t\tfloat with single value" );
+			MDoubleArray arr = dynDataFn.doubleArray( sampleInfo.name.c_str(), &status);
+
+			DISPLAY_INFO( "\t\t\t Setting particle attribute: " << sampleInfo.origName << " with 1 double value" );
+
+			arr.append( samp[0] );
+			continue;
+		}
+		// 1d array
+		else if ( sampleInfo.extent == 1 )
+		{
+			DISPLAY_INFO( "\t\t\tfloat with extent 1 and no fake extent" );
+			MDoubleArray doubleArray = dynDataFn.doubleArray( sampleInfo.name.c_str(), &status);
+
+			doubleArray.setLength( sampSize );
+
+			uint count(0);
+			for (unsigned int i = 0; i < sampSize; ++i )
+			{
+				doubleArray[i] = samp[i];
+				count++;
+			}
+			DISPLAY_INFO("\t\t\t" << "looped over: " << count << " items");
+
+			continue;
+		}
+		else // extent is 2 or 3
+		{
+			DISPLAY_INFO( "\t\t\tfloat with extent: " << sampleInfo.extent );
+
+			MVectorArray arr = dynDataFn.vectorArray( sampleInfo.name.c_str(), &status);
+
+			DISPLAY_INFO( "\t\t\t Setting particle attribute: " << sampleInfo.origName << " with " << sampSize << " vector array value" );
+
+			arr.setLength(sampSize);
+
+			MVector vec;
+
+			uint count(0);
+			for (unsigned int i = 0; i < sampSize; ++i)
+			{
+				vec.x = samp[sampleInfo.extent*i];
+				vec.y = samp[sampleInfo.extent*i+1];
+
+				if (sampleInfo.extent == 3)
+				{
+					vec.z = samp[sampleInfo.extent*i+2];
+				}
+				arr[i] = vec;
+				count++;
+			}
+			DISPLAY_INFO("\t\t\t" << "looped over: " << count << " items");
+
+			continue;
+		}
+
 	}
 	return status;
 }
@@ -335,6 +339,9 @@ MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index, Alembic::AbcC
 MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 	MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData)
 {
+	// We feed the MFnArrayAttrsData with all the nescessary doubleArray and vectorArray
+	// it is then used to feed the outDataPlug of the alembic node
+
 	DISPLAY_INFO( "Reading Abc Data for frame: " << iFrame );
 
     MStatus status = MS::kSuccess;
@@ -352,11 +359,9 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 
 	schema.get(samp, index);
 
-
-
 	size_t pSize = samp.getPositions()->size();
 	size_t idSize = samp.getIds()->size();
-    DISPLAY_INFO( "\t\t pSize: " << samp.getPositions()->size() );
+    DISPLAY_INFO( "\t\t pSize:  " << samp.getPositions()->size() );
     DISPLAY_INFO( "\t\t idSize: " << samp.getIds()->size() );
 
 	MDoubleArray countArray = dynDataFn.doubleArray("count", &status);
@@ -383,17 +388,17 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 	MDoubleArray radiusArray;
 	if ( widthProp.valid() )
 	{
+// TODO, shouldn't width be 2*radius ?
 		DISPLAY_INFO("Width Param is valid");
 		Alembic::AbcGeom::IFloatGeomParam::Sample widthSamp;
 		widthProp.getExpanded(widthSamp, index);
 		radiusArray = dynDataFn.doubleArray("radiusPP", &status);
 		radiusArray.setLength(pSize);
 		fptr = widthSamp.getVals();
+		DISPLAY_INFO( "\t\t widthSize: " << fptr->size() );
 	}
 
 	MVector vec;
-
-	// All other items have can be done in one loop
 	for (unsigned int i = 0; i < pSize; ++i )
 	{
 		idArray[i] = (*idPtr)[i];
@@ -455,15 +460,9 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 
     status = modifier.doIt();
 
-
-	// We need to create a custom attribute for each abcGeomParam found under the PointSchema
-    // nParticle object can only deal with doubleArray or vectorArray, so the only thing we need to know is the extent
-    // But because sometimes the writer does not specify it explicitly, we need to investigate the header
-	// we compare the sample position size to any geomParam sample size, if is equal to a twice or three time the position size,
-	// we assume having an extent of 2 or 3
-
-    // Now connect the nParticle to an existing or a new nucleus node
-    DISPLAY_INFO("Add Partile to nSolver");
+    // To call the DG evaluation, the nParticle needs to be attached to a nucleus node
+    // It also makes any other simulation to colide with our alembic data
+    DISPLAY_INFO("Adding Particle to nSolver");
 
     MItDependencyNodes dgIt( MFn::kNucleus );
     MObject obj;
@@ -471,7 +470,7 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     while ( !dgIt.isDone() )
     {
         obj = dgIt.thisNode();
-        dgIt.next();
+        break;
     }
     MString nSolver("\"\"");
     if (!obj.isNull() && obj.hasFn( MFn::kNucleus))
@@ -482,22 +481,35 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 
     DISPLAY_INFO("nSolver is : " << nSolver );
 
+    // I found no way to do this from the API, so we call a dirty simple mel command that need to have an active selection
     MString cmd;
     cmd += "select ";
 	cmd += nParticleFn.fullPathName();
 	cmd += ";\n";
-
     cmd += "assignNSolver ";
 	cmd += nSolver;
 	cmd += ";\n";
 
     cmd += "select -clear;";
 
+    // If there is no nSolver in the scene, the nSolver string will be empty and it will trigger the creation
+    // of a new one
     DISPLAY_INFO("executingCommand:\n" << cmd);
     MGlobal::executeCommand( cmd, true, false );
     MCHECKERROR(status);
 
+    // Assign default particle shader initialParticleSE to correctly display them in the viewport
+    MSelectionList sel;
+    sel.add( "initialParticleSE" );
+    MObject particleSG;
+    sel.getDependNode(0, particleSG);
+    MFnSet fnSG( particleSG );
+    fnSG.addMember(iObject);
+    DISPLAY_INFO("assign SG: " << fnSG.name() << " to nParticle.");
+
+
     // Handle radius
+    // IF we have information for the radius, set the shading to blobby surface
     Alembic::AbcGeom::IFloatGeomParam widthProp = schema.getWidthsParam();
 	if ( widthProp.valid() )
 	{
@@ -509,7 +521,7 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 		status = modifier.doIt();
 		MCHECKERROR(status);
 
-		// Set particle shading to blobby surface to show radius
+		// particleRenderType is an enum, 7 is for blobby surface
 		MPlug renderTypePlug = MFnDependencyNode(iObject).findPlug("particleRenderType");
 		status = modifier.newPlugValueInt(renderTypePlug, 7);
 		status = modifier.doIt();
@@ -517,10 +529,13 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 	}
 
 
+	// We need to create a custom attribute for each abcGeomParam found under the PointSchema
+    // nParticle object can only deal with doubleArray or vectorArray, so the only thing we need to know is the extent
+    // But because sometimes the writer does not specify it explicitly, we need to investigate the header
+	// we compare the sample position size to any geomParam sample size, if it is equal to twice or three time the position size,
+	// we assume having an extent of 2 or 3
     PointSampleDataList iData;
-
 	status = getPointArbGeomParamsInfos(iNode, iObject, iData);
-
 
 	size_t numProps = iData.size();
 	DISPLAY_INFO("Found " << numProps << " valid arbGeomProperties for nParticles");
@@ -533,50 +548,44 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 
     Alembic::Abc::ICompoundProperty props = schema.getArbGeomParams();
 
+	DISPLAY_INFO( "Looping over iData:" );
     for (unsigned int i = 0; i < numProps; ++ i)
 	{
-		const Alembic::Abc::PropertyHeader & propHeader =
-				props.getPropertyHeader(i);
-		const std::string propName =  propHeader.getName();
-
-		const PointsSampleData & sampleInfo = iData[ propName.c_str() ];
+		PointsSampleData & sampleInfo = iData[ i ];
+		DISPLAY_INFO("\t" << "currentAttr: " << sampleInfo.origName << ", " << sampleInfo.name);
 
 		MFnDependencyNode fnparticle(iObject);
-		if ( fnparticle.hasAttribute( sampleInfo.name.c_str() ) )
+		// If attribute already exist on the shape, we check to see if the data matches
+		// if not, we rename it with abc_ prefix
+		if ( fnparticle.hasAttribute( sampleInfo.name.c_str()) )
 		{
-
-			// Skip attribute Creation
 			DISPLAY_INFO( "\tAttribute " << sampleInfo.name << " already exists" );
-//			continue;
-
-//			DISPLAY_INFO( "\tAttr " << propName << " already exists" );
-			MPlug attrPlug = fnparticle.findPlug(sampleInfo.name.c_str());
-			MFnAttribute attr( attrPlug.attribute(&status));
-
-			if ( sampleInfo.extent == 1 &&  attr.accepts(MFnData::kDoubleArray, &status))
-			{
-				// We can skip attribute creation
-				DISPLAY_INFO("\tAdd sample to iData[" << propName.c_str() << "]:");
-				continue;
-			}
-			else if (attr.accepts(MFnData::kVectorArray, &status))
-			{
-				// We can skip attribute creation
-				DISPLAY_INFO("\tAdd sample to iData[" << propName.c_str() << "]:");
-				continue;
-			}
-			else
-			{
+//
+//			MPlug attrPlug = fnparticle.findPlug(sampleInfo.name.c_str());
+//			MFnAttribute attr( attrPlug.attribute(&status));
+//
+//			if ( sampleInfo.extent == 1 &&  attr.accepts(MFnData::kDoubleArray, &status))
+//			{
+//				// We can skip attribute creation
+//				continue;
+//			}
+//			else if (attr.accepts(MFnData::kVectorArray, &status))
+//			{
+//				// We can skip attribute creation
+//				continue;
+//			}
+//			else
+//			{
 				// Attribute exists but is of the wrong type, we need to create a new one
-//				std::string abcPrefix("abc_");
-//				sampleInfo.name = abcPrefix + sampleInfo.name;
-				continue;
-			}
+//				std::string abcPrefix();
+//				abcPrefix += sampleInfo.name;
+				sampleInfo.name.insert(0, "abc_");
+//			}
 		}
 
 		if (sampleInfo.extent == 1)
 		{
-			DISPLAY_INFO( "\tCreating attribute: " << sampleInfo.name << " (orig: " << propName << ")" );
+			DISPLAY_INFO( "\tCreating attribute: " << sampleInfo.name << " (orig: " << sampleInfo.origName << ")" );
 			DISPLAY_INFO( "\twith type: kDoubleArray" );
 			attrObj = tAttr.create(sampleInfo.name.c_str(), sampleInfo.name.c_str(), MFnData::kDoubleArray, &status);
 			MCHECKERROR(status);
@@ -585,7 +594,7 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 		}
 		else
 		{
-			DISPLAY_INFO( "\tCreating attribute: " << sampleInfo.name << " (orig: " << propName << ")" );
+			DISPLAY_INFO( "\tCreating attribute: " << sampleInfo.name << " (orig: " << sampleInfo.origName << ")" );
 			DISPLAY_INFO( "\twith type: kVectorArray" );
 			attrObj = tAttr.create(sampleInfo.name.c_str(), sampleInfo.name.c_str(), MFnData::kVectorArray, &status);
 			MCHECKERROR(status);

@@ -69,19 +69,26 @@ struct Prop
     Alembic::Abc::IScalarProperty mScalar;
 };
 
+enum SimplePOD
+{
+	kInteger,
+	kFloat
+};
+
 struct PointsSampleData
 {
 	PointsSampleData();
 
 	PointsSampleData & operator=(const PointsSampleData & other);
 
+	Alembic::Abc::IArrayProperty arrayProp;
+	std::string origName;
 	std::string name;
+	Alembic::Util::PlainOldDataType pod;
 	int extent;
-	bool isValidSample;
-	bool isAnimated;
 };
 
-typedef std::map < const char*, PointsSampleData > PointSampleDataList;
+typedef std::vector < PointsSampleData > PointSampleDataList;
 
 void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
               bool iUnmarkedFaceVaryingColors);

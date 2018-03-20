@@ -45,7 +45,6 @@
 
 #include <Alembic/AbcGeom/IPoints.h>
 
-const char* attributeNameRemap( const char * abcName);
 
 PointsSampleData getSampleInfo(  size_t particleNumber, unsigned int sampleSize, int sampleExtent, std::string sampleName );
 
@@ -55,7 +54,6 @@ MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MOb
 MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index,
 		Alembic::AbcCoreAbstract::index_t ceilIndex, double alpha, size_t pSize,
 		const Alembic::Abc::ICompoundProperty & props, MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData);
-
 
 MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     MObject & iParent, MObject & iObject);

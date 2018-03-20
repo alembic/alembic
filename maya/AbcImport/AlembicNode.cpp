@@ -68,7 +68,6 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MFnEnumAttribute.h>
-#include <maya/MFnCompoundAttribute.h>
 #if defined(MAYA_WANT_EXTERNALCONTENTTABLE)
 #include <maya/MExternalContentInfoTable.h>
 #endif
@@ -101,11 +100,6 @@ MObject AlembicNode::mOutLocatorPosScaleArrayAttr;
 
 MObject AlembicNode::mOutPointPlayFromCache;
 MObject AlembicNode::mOutPointArrayAttr;
-MObject AlembicNode::mOutPointCacheArrayAttr;
-MObject AlembicNode::mOutPointPositionArrayAttr;
-MObject AlembicNode::mInPointCurrentStateAttr;
-MObject AlembicNode::mOutPointNextStateAttr;
-MObject AlembicNode::mInPointStartStateAttr;
 
 namespace
 {
@@ -138,7 +132,6 @@ MStatus AlembicNode::initialize()
     MFnNumericAttribute nAttr;
     MFnGenericAttribute gAttr;
     MFnEnumAttribute    eAttr;
-    MFnCompoundAttribute cAttr;
 
     // add the input attributes: time, file, sequence time
     mTimeAttr = uAttr.create("time", "tm", MFnUnitAttribute::kTime, 0.0);
@@ -288,37 +281,9 @@ MStatus AlembicNode::initialize()
     status = addAttribute(mOutPointPlayFromCache);
     MCHECKERROR(status);
 
-    mOutPointCacheArrayAttr = tAttr.create( "cacheArray", "ca", MFnData::kDynArrayAttrs );
+    mOutPointArrayAttr = tAttr.create("outPoints", "otps", MFnData::kDynArrayAttrs);
     MCHECKERROR(status);
-    status = tAttr.setWritable(false);
-    MCHECKERROR(status);
-
-    mInPointCurrentStateAttr = tAttr.create( "currentState", "cst", MFnData::kNObject, MObject::kNullObj, &status );
-    MCHECKERROR(status);
-    status = tAttr.setWritable(true);
-    status = tAttr.setStorable(true);
-
-	mOutPointNextStateAttr = tAttr.create("nextState", "nst", MFnData::kNObject, MObject::kNullObj, &status );
-    MCHECKERROR(status);
-	status = tAttr.setWritable(true);
-	status = tAttr.setStorable(true);
-
-    mInPointStartStateAttr = tAttr.create("startState", "sst", MFnData::kNObject, MObject::kNullObj, &status );
-    MCHECKERROR(status);
-    status = tAttr.setWritable(true);
-    status = tAttr.setStorable(true);
-
-    mOutPointArrayAttr = cAttr.create("outPoints", "opts", &status);
-    MCHECKERROR(status);
-    status = cAttr.setArray(true);
-    status = cAttr.addChild(mOutPointCacheArrayAttr);
-    MCHECKERROR(status);
-    status = cAttr.addChild(mInPointCurrentStateAttr);
-    MCHECKERROR(status);
-    status = cAttr.addChild(mInPointStartStateAttr);
-    MCHECKERROR(status);
-    status = cAttr.addChild(mOutPointNextStateAttr);
-    MCHECKERROR(status);
+    status = tAttr.setArray(true);
     status = addAttribute(mOutPointArrayAttr);
     MCHECKERROR(status);
 
@@ -379,6 +344,7 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mTimeAttr, mOutCameraArrayAttr);
     status = attributeAffects(mTimeAttr, mOutPropArrayAttr);
     status = attributeAffects(mTimeAttr, mOutLocatorPosScaleArrayAttr);
+    status = attributeAffects(mTimeAttr, mOutPointArrayAttr);
 
     status = attributeAffects(mSpeedAttr, mOutSubDArrayAttr);
     status = attributeAffects(mSpeedAttr, mOutPolyArrayAttr);
@@ -388,6 +354,7 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mSpeedAttr, mOutCameraArrayAttr);
     status = attributeAffects(mSpeedAttr, mOutPropArrayAttr);
     status = attributeAffects(mSpeedAttr, mOutLocatorPosScaleArrayAttr);
+    status = attributeAffects(mSpeedAttr, mOutPointArrayAttr);
 
     status = attributeAffects(mOffsetAttr, mOutSubDArrayAttr);
     status = attributeAffects(mOffsetAttr, mOutPolyArrayAttr);
@@ -397,6 +364,7 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mOffsetAttr, mOutCameraArrayAttr);
     status = attributeAffects(mOffsetAttr, mOutPropArrayAttr);
     status = attributeAffects(mOffsetAttr, mOutLocatorPosScaleArrayAttr);
+    status = attributeAffects(mOffsetAttr, mOutPointArrayAttr);
 
     status = attributeAffects(mCycleTypeAttr, mOutSubDArrayAttr);
     status = attributeAffects(mCycleTypeAttr, mOutPolyArrayAttr);
@@ -406,19 +374,7 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mCycleTypeAttr, mOutCameraArrayAttr);
     status = attributeAffects(mCycleTypeAttr, mOutPropArrayAttr);
     status = attributeAffects(mCycleTypeAttr, mOutLocatorPosScaleArrayAttr);
-
-    // Point output
-
-    status = attributeAffects(mOutPointNextStateAttr, mOutPointArrayAttr);
-    status = attributeAffects(mOutPointNextStateAttr, mOutPointCacheArrayAttr);
-    status = attributeAffects(mInPointStartStateAttr, mOutPointNextStateAttr);
-    status = attributeAffects(mInPointCurrentStateAttr, mOutPointNextStateAttr);
-    status = attributeAffects(mTimeAttr, mOutPointNextStateAttr);
-    status = attributeAffects(mTimeAttr, mOutPointArrayAttr);
-    status = attributeAffects(mTimeAttr, mOutPointCacheArrayAttr);
-
-//    status = attributeAffects(mOutPointCacheArrayAttr, mOutPointArrayAttr);
-//    status = attributeAffects(mOutPointNextStateAttr, mOutPointArrayAttr);
+    status = attributeAffects(mCycleTypeAttr, mOutPointArrayAttr);
 
     MGlobal::executeCommand( UITemplateMELScriptStr );
 
@@ -538,45 +494,8 @@ MStatus AlembicNode::setDependentsDirty(const MPlug& plug, MPlugArray& plugArray
 MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 {
     MStatus status;
-	DISPLAY_INFO( "#########\nRequesting compute for :\n\t" << plug.name() )
-    if ( plug == mOutPointNextStateAttr ) // NextState
-	{
-		// Simple routine to trigger nParticle evaluation
-		// we only query the current and start state of the particle
 
-		// Find the current index
-		MPlug parent = plug.parent();
-		unsigned int currentPointIndex = plug.parent().logicalIndex();
-
-		MArrayDataHandle inArrayHandle = dataBlock.inputArrayValue(mOutPointArrayAttr);
-		inArrayHandle.jumpToArrayElement(currentPointIndex);
-		MDataHandle inHandle = inArrayHandle.inputValue();
-
-		MObject inputData; // will store previous state, even if we do nothing with it
-
-		if(mCurTime <= 0.0) {
-			MDataHandle handle = inHandle.child(mInPointStartStateAttr);
-			inputData = handle.data();
-		}
-		else {
-			MDataHandle handle = inHandle.child(mInPointCurrentStateAttr);
-			inputData = handle.data();
-		}
-		DISPLAY_INFO("\t simple particle attribute");
-		return status;
-
-	}
-	else if ( plug == mInPointCurrentStateAttr )
-	{
-		dataBlock.setClean(plug);
-		DISPLAY_INFO("\t simple particle attribute");
-		return status;
-	}
-	else if (plug == mInPointStartStateAttr) {
-		dataBlock.setClean(plug);
-		DISPLAY_INFO("\t simple particle attribute");
-		return status;
-	}
+    DISPLAY_INFO("##### COMPUTE #####");
 
     // update the frame number to be imported
     MDataHandle speedHandle = dataBlock.inputValue(mSpeedAttr, &status);
@@ -1244,7 +1163,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             outArrayHandle.setAllClean();
         }
     }
-    else if ( plug == mOutPointCacheArrayAttr ) // nParticle Cache
+    else if ( plug == mOutPointArrayAttr ) // nParticle Cache
     {
 
 //    	if (mOutRead[9])
@@ -1276,29 +1195,24 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
             MArrayDataHandle outArrayHandle =
                 dataBlock.outputArrayValue(mOutPointArrayAttr, &status);
 
-            unsigned int currentPointIndex = plug.parent().logicalIndex();
+            unsigned int currentPointIndex = plug.logicalIndex();
             DISPLAY_INFO( "\tindex: " << currentPointIndex );
 
 			outArrayHandle.jumpToArrayElement(currentPointIndex);
-			MDataHandle compoundHandle = outArrayHandle.outputValue(&status);
-
-			MDataHandle outHandle = compoundHandle.child(mOutPointCacheArrayAttr);
+			MDataHandle outHandle = outArrayHandle.outputValue(&status);
 
 			MFnArrayAttrsData dynDataFn;
 			MObject obj = dynDataFn.create(&status);
 			MCHECKERROR(status);
 
 			status = read(mCurTime, mData.mPointsList[currentPointIndex], dynDataFn, mData.mPointsDataList[currentPointIndex] );
-
-
 			MCHECKERROR(status);
 
 			DISPLAY_INFO( "Getting back in AlembicNode.cpp" );
+			DISPLAY_INFO( "Set obj to outHandle" );
 			status = outHandle.set(obj);
 			MCHECKERROR(status);
-			DISPLAY_INFO( "Set obj to outHandle" );
 			outHandle.setClean();
-
 		}
 
     }

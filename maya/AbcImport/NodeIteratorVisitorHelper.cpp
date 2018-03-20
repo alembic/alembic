@@ -2604,16 +2604,16 @@ PointsSampleData::PointsSampleData()
 {
 	name = "default";
 	extent = 0;
-	isValidSample = false;
-	isAnimated = false;
+	pod = Alembic::Util::kBooleanPOD;
 }
 
 PointsSampleData & PointsSampleData::operator=(const PointsSampleData & other)
 {
+	arrayProp = other.arrayProp;
+	origName = other.origName;
 	name = other.name;
 	extent = other.extent;
-	isValidSample = other.isValidSample;
-	isAnimated = other.isAnimated;
+	pod = other.pod;
 
 	return *this;
 }
@@ -3288,47 +3288,23 @@ MString connectAttr(ArgData & iArgData)
     	DISPLAY_INFO("Connecting nParticles nodes" );
 
         MPlug compoundArrayPlug = alembicNodeFn.findPlug( "outPoints", true, &status);
+        MPlug arrayPlug = alembicNodeFn.findPlug( "outPoints", true, &status);
 		MCHECKERROR_NO_RET(status);
 
-        MPlug compoundPlug;
+//        MPlug compoundPlug;
         MObject srcObj;
         MObject dstObj;
         MPlugArray inPlugToDisconnect;
         for (unsigned int i = 0; i < particleSize; i++)
         {
-        	DISPLAY_INFO("Connecting particle number " << i );
-        	compoundPlug = compoundArrayPlug.elementByLogicalIndex(i);
-        	DISPLAY_INFO("Current compound element: " << compoundPlug.name() );
+//        	DISPLAY_INFO("Connecting particle number " << i );
+//        	compoundPlug = arrayPlug.elementByLogicalIndex(i);
+//        	DISPLAY_INFO("Current compound element: " << compoundPlug.name() );
 
 
             MFnDependencyNode fnParticle(iArgData.mData.mPointsObjList[i]);
         	DISPLAY_INFO("Current fnParticle element: " << fnParticle.name() );
 
-/*
-            // Next State
-            dstPlug = fnParticle.findPlug("nextState", true);
-            srcObj = alembicNodeFn.attribute("nextState");
-            srcPlug = compoundPlug.child( srcObj, &status );
-            DISPLAY_INFO("Connecting " << srcPlug.name() << "\n\tto:\t" << dstPlug.name() );
-            status = modifier.connect(srcPlug, dstPlug);
-            MCHECKERROR_NO_RET(status);
-
-            // Current state
-            srcPlug = fnParticle.findPlug("currentState", true);
-            dstObj = alembicNodeFn.attribute( "currentState" );
-            dstPlug = compoundPlug.child( dstObj, &status);
-            DISPLAY_INFO("Connecting " << srcPlug.name() << "\n\tto:\t" << dstPlug.name() );
-            status =  modifier.connect(srcPlug, dstPlug);
-            MCHECKERROR_NO_RET(status);
-
-            // Start State
-            srcPlug = fnParticle.findPlug("startState", true);
-            dstObj = alembicNodeFn.attribute( "startState" );
-            dstPlug = compoundPlug.child( dstObj, &status);
-            DISPLAY_INFO("Connecting " << srcPlug.name() << "\n\tto:\t" << dstPlug.name() );
-            status = modifier.connect(srcPlug, dstPlug);
-            MCHECKERROR_NO_RET(status);
-*/
 		// Play From Cache
             dstPlug = fnParticle.findPlug("playFromCache", true);
             srcPlug = alembicNodeFn.findPlug("playFromCache", true);
@@ -3352,8 +3328,13 @@ MString connectAttr(ArgData & iArgData)
 
 		// Cache Array
             dstPlug = fnParticle.findPlug("cacheArrayData", true);
-            srcObj = alembicNodeFn.attribute("cacheArray");
-            srcPlug = compoundPlug.child( srcObj, &status );
+//            srcObj = alembicNodeFn.attribute("cacheArray");
+//            srcPlug = compoundPlug.child( srcObj, &status );
+            srcPlug = arrayPlug.elementByLogicalIndex( i, &status);
+            MCHECKERROR_NO_RET(status);
+//            srcPlug.elementByLogicalIndex(logicalIndex, ReturnStatus)
+
+			//.elementByLogicalIndex(i);
 
 			// Disconnect input connection
             if ( dstPlug.isDestination() )

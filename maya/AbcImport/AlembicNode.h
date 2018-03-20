@@ -105,11 +105,6 @@ public:
 
     // output particles attributes
     static MObject mOutPointArrayAttr;
-    static MObject mOutPointCacheArrayAttr;
-    static MObject mOutPointPositionArrayAttr;
-    static MObject mInPointCurrentStateAttr;
-    static MObject mOutPointNextStateAttr;
-    static MObject mInPointStartStateAttr;
     static MObject mOutPointPlayFromCache;
 
     // output informational attrs
