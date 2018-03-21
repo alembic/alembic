@@ -112,7 +112,7 @@ private:
     // each child is made up of the original parent objects and the index
     // in each of them where that child lives
     std::vector< std::vector< ObjectAndIndex > > m_children;
-    std::vector< std::weak_ptr< AbcA::ObjectReader > > m_children_ptrs;
+    std::vector< Alembic::Util::weak_ptr< AbcA::ObjectReader > > m_children_ptrs;
     Alembic::Util::mutex m_lock;
 
     // all of our top properties, will be combined into m_top
