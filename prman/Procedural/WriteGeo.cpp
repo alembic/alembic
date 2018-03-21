@@ -192,7 +192,6 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 
     if ( multiSample ) { WriteMotionBegin( args, sampleTimes ); }
 
-
     for ( SampleTimeSet::iterator iter = sampleTimes.begin();
           iter != sampleTimes.end(); ++ iter )
     {

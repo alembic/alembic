@@ -62,6 +62,8 @@ struct ProcArgs
     , fps( rhs.fps )
     , shutterOpen( rhs.shutterOpen )
     , shutterClose( rhs.shutterClose )
+    , motionBegin( rhs.motionBegin )
+    , motionEnd( rhs.motionEnd )
     , excludeXform( false )
     , flipv ( false )
     
@@ -71,6 +73,8 @@ struct ProcArgs
     , fps_defined(false)
     , shutterOpen_defined(false)
     , shutterClose_defined(false)
+    , motionBegin_defined(false)
+    , motionEnd_defined(false)
     , excludeXform_defined(false)
     , flipv_defined(false)
     {}
@@ -84,15 +88,17 @@ struct ProcArgs
     double fps;
     double shutterOpen;
     double shutterClose;
+    double motionBegin;
+    double motionEnd;
     bool excludeXform;
     bool flipv;
     
     std::string getResource( const std::string & name );
+    bool userMotionBlockDefined();
     
 private:
     
     void applyArgs(ProcArgs & args);
-    
     
     bool filename_defined;
     bool objectpath_defined;
@@ -100,6 +106,8 @@ private:
     bool fps_defined;
     bool shutterOpen_defined;
     bool shutterClose_defined;
+    bool motionBegin_defined;
+    bool motionEnd_defined;
     bool excludeXform_defined;
     bool flipv_defined;
     
