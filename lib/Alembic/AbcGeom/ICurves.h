@@ -148,7 +148,7 @@ public:
     //! ...
     ICurvesSchema() {}
 
-    //! This constructor creates a new camera reader.
+    //! This constructor creates a new curves reader.
     //! The first argument is the parent ICompoundProperty, from which the
     //! error handler policy for is derived.  The second argument is the name
     //! of the ICompoundProperty that contains this schemas properties.  The 
