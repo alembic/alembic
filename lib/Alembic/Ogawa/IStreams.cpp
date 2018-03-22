@@ -42,6 +42,7 @@
 #ifdef _MSC_VER
 
 #include <io.h>
+#include <sys/stat.h>
 
 Alembic::Util::int32_t OPENFILE(const char * iFileName, Alembic::Util::int32_t iFlag)
 {
