@@ -1,4 +1,23 @@
-2017-3-7, Alembic 1.7.6
+2018-3-23, Alembic 1.7.7
+Thanks to your feedback and pull requests we have a few bug fixes and an
+enhancement.
+
+API:
+
+Fix bug where std::weak_ptr was used in AbcCoreLayer instead of 
+Alembic::Util::weak_ptr.
+
+Add OCurves::Schema::Sample::setPositionWeights to go along with the get.
+Expose it in the python bindings.
+
+prman Procedural:
+
+Add two options, -motionbegin and -motionend to explicitly control MotionBlocks.
+(PR 160)
+
+##-*****************************************************************************
+
+2018-3-7, Alembic 1.7.6
 Thanks to your feedback and pull requests we have a few bug fixes.
 
 API:
