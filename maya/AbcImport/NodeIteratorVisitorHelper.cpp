@@ -2604,7 +2604,6 @@ PointsSampleData::PointsSampleData()
 {
 	name = "default";
 	extent = 0;
-	pod = Alembic::Util::kBooleanPOD;
 }
 
 PointsSampleData & PointsSampleData::operator=(const PointsSampleData & other)
@@ -2613,7 +2612,6 @@ PointsSampleData & PointsSampleData::operator=(const PointsSampleData & other)
 	origName = other.origName;
 	name = other.name;
 	extent = other.extent;
-	pod = other.pod;
 
 	return *this;
 }
@@ -3297,11 +3295,6 @@ MString connectAttr(ArgData & iArgData)
         MPlugArray inPlugToDisconnect;
         for (unsigned int i = 0; i < particleSize; i++)
         {
-//        	DISPLAY_INFO("Connecting particle number " << i );
-//        	compoundPlug = arrayPlug.elementByLogicalIndex(i);
-//        	DISPLAY_INFO("Current compound element: " << compoundPlug.name() );
-
-
             MFnDependencyNode fnParticle(iArgData.mData.mPointsObjList[i]);
         	DISPLAY_INFO("Current fnParticle element: " << fnParticle.name() );
 
@@ -3328,13 +3321,8 @@ MString connectAttr(ArgData & iArgData)
 
 		// Cache Array
             dstPlug = fnParticle.findPlug("cacheArrayData", true);
-//            srcObj = alembicNodeFn.attribute("cacheArray");
-//            srcPlug = compoundPlug.child( srcObj, &status );
             srcPlug = arrayPlug.elementByLogicalIndex( i, &status);
             MCHECKERROR_NO_RET(status);
-//            srcPlug.elementByLogicalIndex(logicalIndex, ReturnStatus)
-
-			//.elementByLogicalIndex(i);
 
 			// Disconnect input connection
             if ( dstPlug.isDestination() )

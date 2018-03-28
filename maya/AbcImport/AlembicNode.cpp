@@ -277,7 +277,6 @@ MStatus AlembicNode::initialize()
     mOutPointPlayFromCache = nAttr.create( "playFromCache", "pfc", MFnNumericData::kBoolean, true, &status);
     MCHECKERROR(status);
     status = nAttr.setWritable(false);
-    status = nAttr.setUsesArrayDataBuilder(true);
     status = addAttribute(mOutPointPlayFromCache);
     MCHECKERROR(status);
 

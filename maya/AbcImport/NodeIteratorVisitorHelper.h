@@ -59,7 +59,6 @@
 
 #include <vector>
 #include <string>
-#include <map>
 
 // mArray or mScalar will be valid, mObj will be valid for those situations
 // where the property can't be validly read, unless the object stays in scope.
@@ -67,12 +66,6 @@ struct Prop
 {
     Alembic::Abc::IArrayProperty mArray;
     Alembic::Abc::IScalarProperty mScalar;
-};
-
-enum SimplePOD
-{
-	kInteger,
-	kFloat
 };
 
 struct PointsSampleData
@@ -84,7 +77,6 @@ struct PointsSampleData
 	Alembic::Abc::IArrayProperty arrayProp;
 	std::string origName;
 	std::string name;
-	Alembic::Util::PlainOldDataType pod;
 	int extent;
 };
 

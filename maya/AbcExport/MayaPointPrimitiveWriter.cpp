@@ -169,7 +169,6 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     mSchema.set(samp);
 }
 
-
 unsigned int MayaPointPrimitiveWriter::getNumCVs()
 {
     MFnParticleSystem particle(mDagPath);

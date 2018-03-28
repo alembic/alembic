@@ -52,8 +52,9 @@ MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MOb
 		PointSampleDataList & iData );
 
 MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index,
-		Alembic::AbcCoreAbstract::index_t ceilIndex, double alpha, size_t pSize,
-		const Alembic::Abc::ICompoundProperty & props, MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData);
+		MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData);
+
+MStatus createPerParticleAttributes( const Alembic::AbcGeom::IPoints & iNode, MObject & iObject );
 
 MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     MObject & iParent, MObject & iObject);

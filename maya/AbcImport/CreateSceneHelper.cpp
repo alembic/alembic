@@ -1039,8 +1039,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     if (!isConstant)
         mData.mPointsList.push_back(iNode);
 
+/*
     // since we don't really support animated points, don't bother
     // with the animated properties on it
+*/
 
     bool hasDag = false;
     if (mAction != NONE && mConnectDagNode.isValid())
@@ -1051,7 +1053,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
             particleObj = mConnectDagNode.node();
             if (!isConstant)
             {
-            	// TODO: create all attributes when connecting
+            	// Create all perParticle Attribute
+            	status = createPerParticleAttributes(iNode, particleObj);
+            	MCHECKERROR(status);
 				mData.mPointsObjList.push_back(particleObj);
             }
         }
@@ -1070,7 +1074,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     }
     else
     {
-    	// This is the first time the AlembicNode is walking through the archive
+    	// This might be the first time the AlembicNode is walking through the archive
+    	// (when opening a file with an existing alembic connected to a nParticle)
     	// We are reading the iPoint Schema, all previous step were skipped,
     	// we need to find the data necessary for feeding custom particle attributes (stored in arbGeomParam)
     	DISPLAY_INFO("Reading alembic node to find arbGeom");
