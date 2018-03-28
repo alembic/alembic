@@ -77,8 +77,8 @@ public:
         BasisType getBasis() const { return m_basis; }
 
         // the should not be null if the curve type is kVariableOrder
-        Abc::UcharArraySamplePtr getOrders() { return m_orders; }
-        Abc::FloatArraySamplePtr getKnots() { return m_knots; }
+        Abc::UcharArraySamplePtr getOrders() const { return m_orders; }
+        Abc::FloatArraySamplePtr getKnots() const { return m_knots; }
 
         // if this is NULL then the weight value of the position for each
         // point is 1
