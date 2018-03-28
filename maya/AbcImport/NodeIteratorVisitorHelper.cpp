@@ -3283,8 +3283,6 @@ MString connectAttr(ArgData & iArgData)
 
     if (particleSize > 0)
     {
-    	DISPLAY_INFO("Connecting nParticles nodes" );
-
         MPlug compoundArrayPlug = alembicNodeFn.findPlug( "outPoints", true, &status);
         MPlug arrayPlug = alembicNodeFn.findPlug( "outPoints", true, &status);
 		MCHECKERROR_NO_RET(status);
@@ -3296,13 +3294,12 @@ MString connectAttr(ArgData & iArgData)
         for (unsigned int i = 0; i < particleSize; i++)
         {
             MFnDependencyNode fnParticle(iArgData.mData.mPointsObjList[i]);
-        	DISPLAY_INFO("Current fnParticle element: " << fnParticle.name() );
 
 		// Play From Cache
             dstPlug = fnParticle.findPlug("playFromCache", true);
             srcPlug = alembicNodeFn.findPlug("playFromCache", true);
-			DISPLAY_INFO("\tConnecting " << srcPlug.name() << "\n\tto:\t" << dstPlug.name() );
             status = modifier.connect(srcPlug, dstPlug);
+			MCHECKERROR_NO_RET(status);
 
 		// Time
             dstPlug = fnParticle.findPlug("currentTime", true);
@@ -3311,13 +3308,11 @@ MString connectAttr(ArgData & iArgData)
 			// Disconnect input connection
             if ( dstPlug.isDestination() )
             {
-            	DISPLAY_INFO("\t\tDisctonnect all plug to: " << dstPlug.name())
             	status = disconnectAllPlugsTo(dstPlug);
             	MCHECKERROR_NO_RET(status);
             }
-
-			DISPLAY_INFO("\tConnecting " << srcPlug.name() << "\n\tto:\t" << dstPlug.name() );
             status = modifier.connect(srcPlug, dstPlug);
+            MCHECKERROR_NO_RET(status);
 
 		// Cache Array
             dstPlug = fnParticle.findPlug("cacheArrayData", true);
@@ -3327,12 +3322,9 @@ MString connectAttr(ArgData & iArgData)
 			// Disconnect input connection
             if ( dstPlug.isDestination() )
             {
-            	DISPLAY_INFO("\t\tDisctonnect all plug to: " << dstPlug.name())
             	status = disconnectAllPlugsTo(dstPlug);
             	MCHECKERROR_NO_RET(status);
             }
-
-            DISPLAY_INFO("\tConnecting:\t" << srcPlug.name() << "\n\tto:\t" << dstPlug.name() );
 
             status = modifier.connect(srcPlug, dstPlug);
             MCHECKERROR_NO_RET(status);

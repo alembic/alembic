@@ -1682,14 +1682,12 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
 
 MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MString> &outAttrNames )
 {
-	DISPLAY_INFO("getPerParticleAttributes:")
 	MStatus status(MS::kSuccess);
 
 	if ( !iNode.hasObj(MFn::kParticle))
 		return status;
 
 	MFnParticleSystem particle(iNode.object(&status));
-	uint count(0);
 
 	MDoubleArray doubleArray;
 	MVectorArray vectorArray;
@@ -1740,7 +1738,6 @@ MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MS
 		)
 		{
 			outAttrNames.push_back(attrName);
-			count++;
 		}
 		else
 		{
@@ -1748,7 +1745,6 @@ MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MS
 		}
 
 	}
-	DISPLAY_INFO("total Attributes: " << count );
 
 	return status;
 }
@@ -1779,7 +1775,6 @@ AttributesWriter::AttributesWriter(
     }
 
 
-    DISPLAY_INFO("AttributesWriter Creator, looping on attributes")
     for (i = 0; i < attrCount; i++)
     {
         MObject attr = iNode.attribute(i);
@@ -1791,8 +1786,6 @@ AttributesWriter::AttributesWriter(
             continue;
 
         MString propName = plug.partialName(0, 0, 0, 0, 0, 1);
-
-        DISPLAY_INFO( "\t" << propName << ":" )
 
         std::string propStr = propName.asChar();
 
@@ -1815,7 +1808,6 @@ AttributesWriter::AttributesWriter(
         	if ( *it == propName )
         	{
         		isPerParticle = true;
-        		DISPLAY_INFO("\t" << "found a per particle Attribute !")
         		break;
         	}
         }

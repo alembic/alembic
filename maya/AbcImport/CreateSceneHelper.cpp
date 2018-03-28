@@ -1067,9 +1067,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
         status = create(mFrame, iNode, mParent, particleObj);
         if (!isConstant)
         {
-        	DISPLAY_INFO( "Adding new created object to mPointsObjList: " << iNode.getName() );
             mData.mPointsObjList.push_back(particleObj);
-			DISPLAY_INFO( "\tNew mPointsObjList Size: " << mData.mPointsObjList.size() );
         }
     }
     else
@@ -1078,17 +1076,16 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     	// (when opening a file with an existing alembic connected to a nParticle)
     	// We are reading the iPoint Schema, all previous step were skipped,
     	// we need to find the data necessary for feeding custom particle attributes (stored in arbGeomParam)
-    	DISPLAY_INFO("Reading alembic node to find arbGeom");
+    	// We store them inside mData for reading at compute time
     	PointSampleDataList PointSampleVec;
     	status = getPointArbGeomParamsInfos(iNode, particleObj, PointSampleVec);
 
-		DISPLAY_INFO( "Adding new PointsSampleData vector with size: " << PointSampleVec.size());
 		mData.mPointsDataList.push_back(PointSampleVec);
     }
 
     if ( mAction >= CONNECT )
     {
-    	DISPLAY_INFO("We should do something here, I guess ...");
+    	// Should do something here ??
     }
 
 /* original code, should be safely removed after checking

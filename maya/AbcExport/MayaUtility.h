@@ -55,10 +55,6 @@ struct cmpDag
 };
 typedef std::set< MDagPath, cmpDag > ShapeSet;
 
-#define DISPLAY_INFO( msg )					\
-	std::cout << msg <<  "\t\t" << __FILE__ << "  "  << __LINE__ << std::endl;
-
-
 inline MStatus isFloat(MString str, const MString & usage)
 {
     MStatus status = MS::kSuccess;

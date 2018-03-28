@@ -494,8 +494,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 {
     MStatus status;
 
-    DISPLAY_INFO("##### COMPUTE #####");
-
     // update the frame number to be imported
     MDataHandle speedHandle = dataBlock.inputValue(mSpeedAttr, &status);
     double speed = speedHandle.asDouble();
@@ -1187,15 +1185,12 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     	unsigned int pointSize =
     	            static_cast<unsigned int>(mData.mPointsList.size());
 
-    	DISPLAY_INFO( "PointSize: " << pointSize );
-    	DISPLAY_INFO( "mPointsDataList Size: " << mData.mPointsDataList.size() );
     	if (pointSize > 0)
 		{
             MArrayDataHandle outArrayHandle =
                 dataBlock.outputArrayValue(mOutPointArrayAttr, &status);
 
             unsigned int currentPointIndex = plug.logicalIndex();
-            DISPLAY_INFO( "\tindex: " << currentPointIndex );
 
 			outArrayHandle.jumpToArrayElement(currentPointIndex);
 			MDataHandle outHandle = outArrayHandle.outputValue(&status);
@@ -1207,8 +1202,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 			status = read(mCurTime, mData.mPointsList[currentPointIndex], dynDataFn, mData.mPointsDataList[currentPointIndex] );
 			MCHECKERROR(status);
 
-			DISPLAY_INFO( "Getting back in AlembicNode.cpp" );
-			DISPLAY_INFO( "Set obj to outHandle" );
 			status = outHandle.set(obj);
 			MCHECKERROR(status);
 			outHandle.setClean();

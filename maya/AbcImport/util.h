@@ -52,10 +52,6 @@
 #include <maya/MString.h>
 #include <maya/MFnDependencyNode.h>
 
-//#define DISPLAY_INFO( msg ) ;
-#define DISPLAY_INFO( msg ) \
-	std::cout << msg <<  "\t\t" << __FILE__ << "  "  << __LINE__ << std::endl;
-
 #define MCHECKERROR(_status)		\
 { 														\
 	MStatus _maya_status = (_status);					\
