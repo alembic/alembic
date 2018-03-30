@@ -1682,6 +1682,9 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
 
 MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MString> &outAttrNames )
 {
+	// NParticles have a lot more attribue than what we see in the Attribute editor
+	// We only care about user created attributes, we have to do a multi step filtering to find the correct ones
+
 	MStatus status(MS::kSuccess);
 
 	if ( !iNode.hasObj(MFn::kParticle))
@@ -1707,6 +1710,7 @@ MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MS
 			continue;
 		}
 
+		// Check attribute properties
 		if ( attr.isHidden() ||
 			 !attr.isReadable() ||
 			 attr.isArray() ||
@@ -1714,6 +1718,8 @@ MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MS
 		{
 			continue;
 		}
+
+		// Check attribute data type
 		if ( attr.attrType() != MFnData::kDoubleArray && attr.attrType() != MFnData::kVectorArray )
 		{
 			continue;
@@ -1724,6 +1730,8 @@ MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MS
 		if ( !attr.isDynamic() )
 		{
 			// remove attribute starting with "internal"
+			// remove attribute ending with "cache"
+			// remove attribute ending with "0" ( these are initial states )
 			if ( 	attrName.substring(0, 7) == "internal" ||
 					attrName.toLowerCase().substring(attrName.length() - 5, attrName.length()) == "cache" ||
 					attrName.substring( attrName.length() - 1, attrName.length()) == "0" )
@@ -1733,6 +1741,7 @@ MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MS
 
 		}
 
+		// Check again with special function isPerParticle
 		if ( particle.isPerParticleDoubleAttribute(attrName, &status) ||
 		     particle.isPerParticleVectorAttribute(attrName, &status)
 		)
