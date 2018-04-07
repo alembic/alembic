@@ -42,6 +42,7 @@
 #ifdef _MSC_VER
 
 #include <io.h>
+#include <sys/stat.h>
 
 Alembic::Util::int32_t OPENFILE(const char * iFileName, Alembic::Util::int32_t iFlag)
 {
@@ -155,7 +156,13 @@ public:
         ssize_t numRead = 0;
         do
         {
-            numRead = pread(fd, buf, iSize - totalRead, offset);
+            Alembic::Util::uint64_t readCount = iSize - totalRead;
+            // if over 1 GB read it 1 GB chunk at a time to accomodate OSX
+            if ( readCount > 1073741824 )
+            {
+                readCount = 1073741824;
+            }
+            numRead = pread(fd, buf, readCount, offset);
             if (numRead > 0)
             {
                 totalRead += numRead;

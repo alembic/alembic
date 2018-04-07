@@ -100,14 +100,19 @@ private:
 
     size_t m_index;
 
-    // this compounds header
-    PropertyHeaderPtr m_header;
+    // we need to own the PropertyHeader on the top compounds
+    // (which have no parents), others we can get from
+    // m_children and m_childHeaderIndex below
+    PropertyHeaderPtr m_topHeader;
 
     // each child is made up of the original parent compound, array and scalar
     // properties will only have 1 entry, compounds could have more
     std::vector< CompoundReaderPtrs > m_children;
 
-    std::vector< PropertyHeaderPtr > m_propertyHeaders;
+    // so we don't have to copy property headers over, keep track of what
+    // index to use for the header from the appropriate parent in m_children
+    typedef std::pair< size_t, size_t > HeaderIndexPair;
+    std::vector< HeaderIndexPair > m_childHeaderIndex;
 
     ChildNameMap m_childNameMap;
 };

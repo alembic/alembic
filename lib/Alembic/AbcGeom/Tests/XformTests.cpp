@@ -541,8 +541,8 @@ void sparseTest()
 
     {
         std::vector< std::string > names;
-        names.push_back( nameA );
         names.push_back( nameB );
+        names.push_back( nameA );
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( names );
 
@@ -571,6 +571,55 @@ void sparseTest()
 }
 
 //-*****************************************************************************
+void sparseTest2()
+{
+    XformOp scaleOp( kScaleOperation, kScaleHint );
+
+    std::string nameA = "sparseXformTest2A.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), nameA );
+
+        OXform axform( OObject( archive ),  "a" );
+        OXform bxform( axform, "b" );
+        OXform cxform( bxform, "c" );
+    }
+
+    std::string nameB = "sparseXformTest2B.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), nameB );
+        OObject axform( OObject( archive ),  "a" );
+        OObject bxform( axform, "b" );
+        OXform cxform( bxform, "c" );
+        XformSample csamp;
+        csamp.addOp( scaleOp, V3d( 0.5, 0.5, 0.5 ) );
+        cxform.getSchema().set( csamp );
+    }
+
+    {
+        std::vector< std::string > names;
+        names.push_back( nameB );
+        names.push_back( nameA );
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( names );
+
+        IObject aobj( IObject( archive ), "a" );
+        TESTING_ASSERT( IXform::matches( aobj.getHeader() ) );
+        IXform axform( IObject( archive ), "a" );
+        TESTING_ASSERT( axform.getSchema().isConstantIdentity() );
+
+        IObject bobj( aobj, "b" );
+        TESTING_ASSERT( IXform::matches( bobj.getHeader() ) );
+        IXform bxform( aobj, "b" );
+        TESTING_ASSERT( bxform.getSchema().isConstantIdentity() );
+
+        IObject cobj( bobj, "c" );
+        TESTING_ASSERT( IXform::matches( cobj.getHeader() ) );
+        IXform cxform( bobj, "c" );
+        TESTING_ASSERT( !cxform.getSchema().isConstantIdentity() );
+    }
+}
+
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     xformOut();
@@ -578,5 +627,6 @@ int main( int argc, char *argv[] )
     someOpsXform();
     xformTreeCreate();
     sparseTest();
+    sparseTest2();
     return 0;
 }

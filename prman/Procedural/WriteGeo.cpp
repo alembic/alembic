@@ -192,7 +192,6 @@ void ProcessPolyMesh( IPolyMesh &polymesh, ProcArgs &args )
 
     if ( multiSample ) { WriteMotionBegin( args, sampleTimes ); }
 
-
     for ( SampleTimeSet::iterator iter = sampleTimes.begin();
           iter != sampleTimes.end(); ++ iter )
     {
@@ -682,6 +681,35 @@ void ProcessPoints( IPoints &points, ProcArgs &args )
         
         ParamListBuilder paramListBuilder;
         paramListBuilder.add( "P", (RtPointer)sample.getPositions()->get() );
+
+        IFloatGeomParam widthParam = ps.getWidthsParam();
+        if ( widthParam.valid() )
+        {
+            ICompoundProperty parent = widthParam.getParent();
+            
+            //prman requires "width" to be named "constantwidth" when
+            //constant instead of declared as "constant float width".
+            //It's even got an error message specifically for it.
+            std::string widthName;
+            if ( widthParam.getScope() == kConstantScope ||
+                    widthParam.getScope() == kUnknownScope )
+            {
+                widthName = "constantwidth";
+            }
+            else
+            {
+                widthName = "width";
+            }
+            
+            AddGeomParamToParamListBuilder<IFloatGeomParam>(
+                parent,
+                widthParam.getHeader(),
+                sampleSelector,
+                "float",
+                paramListBuilder,
+                1,
+                widthName);
+        }
         
         ICompoundProperty arbGeomParams = ps.getArbGeomParams();
         AddArbitraryGeomParams( arbGeomParams,

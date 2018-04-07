@@ -112,6 +112,9 @@ void register_ocurves()
               &AbcG::OCurvesSchema::Sample::getPositionWeights,
               return_value_policy<copy_const_reference,
                                   with_custodian_and_ward_postcall<0,1> >() )
+        .def( "setPositionWeights",
+              &AbcG::OCurvesSchema::Sample::setPositionWeights,
+              with_custodian_and_ward<1,2>() )
         .def( "getType",
               &AbcG::OCurvesSchema::Sample::getType )
         .def( "setType",

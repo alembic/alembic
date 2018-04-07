@@ -72,8 +72,8 @@ void layerTest()
 
     {
         std::vector< std::string > files;
-        files.push_back( fileName );
         files.push_back( fileName2 );
+        files.push_back( fileName );
 
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( files );
@@ -143,8 +143,8 @@ void pruneTest()
 
     {
         std::vector< std::string > files;
-        files.push_back( fileName );
         files.push_back( fileName2 );
+        files.push_back( fileName );
 
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( files );
@@ -211,8 +211,8 @@ void replaceTest()
 
     {
         std::vector< std::string > files;
-        files.push_back( fileName );
         files.push_back( fileName2 );
+        files.push_back( fileName );
 
         Alembic::AbcCoreFactory::IFactory factory;
         IArchive archive = factory.getArchive( files );
@@ -259,10 +259,78 @@ void replaceTest()
 }
 
 //-*****************************************************************************
+void valueLayerTest()
+{
+    std::string fileName = "valueLayer1.abc";
+    std::string fileName2 = "valueLayer2.abc";
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName );
+        OCompoundProperty child( archive.getTop().getProperties(), "child" );
+
+        OInt32ArrayProperty childCool( child, "cool" );
+        std::vector<Alembic::Util::int32_t> intvec( 3 );
+        intvec[0] = 5;
+        intvec[1] = 10;
+        intvec[2] = 15;
+        childCool.set(intvec);
+
+        OInt32Property childGuy( child, "guy" );
+        childGuy.set(42);
+
+        OInt32ArrayProperty childBlank( child, "blank" );
+    }
+
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), fileName2 );
+        OCompoundProperty child( archive.getTop().getProperties(), "child" );
+
+        // overwrite with different values
+        OInt32ArrayProperty childCool( child, "cool" );
+        std::vector<Alembic::Util::int32_t> intvec( 3 );
+        intvec[0] = 0;
+        intvec[1] = 2;
+        intvec[2] = 4;
+        childCool.set(intvec);
+
+        OInt32Property childBlank( child, "blank" );
+    }
+
+    {
+        std::vector< std::string > files;
+        files.push_back( fileName2 );
+        files.push_back( fileName );
+
+
+        Alembic::AbcCoreFactory::IFactory factory;
+        IArchive archive = factory.getArchive( files );
+
+        // child, childA, childB
+        ICompoundProperty root = archive.getTop().getProperties();
+        TESTING_ASSERT( root.getNumProperties() == 1 );
+
+        ICompoundProperty child( root, "child" );
+        TESTING_ASSERT( child.getNumProperties() == 3 );
+
+        IInt32ArrayProperty childCool( child, "cool" );
+        Int32ArraySamplePtr samplePtr;
+        childCool.get( samplePtr );
+        TESTING_ASSERT( samplePtr->size() == 3 && (*samplePtr)[0] == 0 &&
+                        (*samplePtr)[1] == 2 && (*samplePtr)[2] == 4 );
+
+        IInt32Property childGuy( child, "guy" );
+        TESTING_ASSERT( childGuy.getValue() == 42 );
+
+        IInt32Property childBlank( child, "blank" );
+        TESTING_ASSERT( childBlank.getNumSamples() == 0 );
+    }
+}
+
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     layerTest();
     pruneTest();
     replaceTest();
+    valueLayerTest();
     return 0;
 }

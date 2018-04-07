@@ -42,15 +42,38 @@ void WriteMotionBegin( ProcArgs &args, const SampleTimeSet &sampleTimes )
     std::vector<RtFloat> outputTimes;
     outputTimes.reserve( sampleTimes.size() );
 
+    // We are going to refit sample times from the alembic from the desired
+    // sample shutter range to the requested motion block.
+    chrono_t shutterOpenTime = ( args.frame + args.shutterOpen ) / args.fps;
+    chrono_t shutterCloseTime = ( args.frame + args.shutterClose ) / args.fps;
+    chrono_t shutterLen = shutterCloseTime - shutterOpenTime;
+    chrono_t motionBlockLen = args.motionEnd - args.motionBegin;
+    
+    // why is this static?
+    static const chrono_t epsilon = 1.0 / 10000.0;
+
+    bool remap = args.userMotionBlockDefined();
+    if ( remap && fabs(motionBlockLen) < epsilon ) {
+        std::cerr << "Warning: motionstart and motionend are the same value, not remapping" << std::endl;
+        remap = false;
+    }
+    if ( remap && motionBlockLen < 0 ) {
+        std::cerr << "Warning: motionend starts before motionstart, not remapping" << std::endl;
+        remap = false;
+    }
+
     chrono_t frameTime = args.frame / args.fps;
 
     for ( SampleTimeSet::const_iterator iter = sampleTimes.begin();
           iter != sampleTimes.end() ; ++iter )
     {
-        // why is this static?
-        static const chrono_t epsilon = 1.0 / 10000.0;
-
-        RtFloat value = ( (*iter) - frameTime ) * args.fps;
+        RtFloat value;
+        
+        if ( remap )
+            // standard (open) fit(x,a0,a1,b0,b1) return (x-a0)*(b1-b0)/(a1-a0) + b0
+            value = ((*iter)-shutterOpenTime)*motionBlockLen/shutterLen + args.motionBegin;
+        else
+            value = ( (*iter) - frameTime ) * args.fps;
 
         if ( fabs( value ) < epsilon )
         {
@@ -123,7 +146,7 @@ void GetRelevantSampleTimes( ProcArgs &args, TimeSamplingPtr timeSampling,
             }
         }
     }
-
+    
 
     for ( index_t i = shutterOpenFloor.first; i < shutterCloseCeil.first; ++i )
     {

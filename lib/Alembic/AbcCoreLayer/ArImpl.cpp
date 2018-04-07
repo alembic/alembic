@@ -50,9 +50,10 @@ ArImpl::ArImpl( ArchiveReaderPtrs & iArchives )
     m_archiveVersion = -1;
     m_header.reset( new AbcA::ObjectHeader() );
     m_archives.reserve( iArchives.size() );
-    ArchiveReaderPtrs::iterator it = iArchives.begin();
+    ArchiveReaderPtrs::reverse_iterator it = iArchives.rbegin();
 
-    for ( ; it != iArchives.end(); ++it )
+    // reverse them here so OrImpl goes fwds
+    for ( ; it != iArchives.rend(); ++it )
     {
         // bad archive ptr?  skip to the next one
         if ( !( *it ) )
@@ -136,16 +137,26 @@ const AbcA::MetaData & ArImpl::getMetaData() const
 //-*****************************************************************************
 AbcA::ObjectReaderPtr ArImpl::getTop()
 {
+    Alembic::Util::scoped_lock l( m_lock );
 
-    std::vector< AbcA::ObjectReaderPtr > tops;
-    tops.reserve( m_archives.size() );
-    ArchiveReaderPtrs::iterator arItr = m_archives.begin();
-    for ( ; arItr != m_archives.end(); ++arItr )
+    AbcA::ObjectReaderPtr ret = m_top.lock();
+    if ( ! ret )
     {
-        tops.push_back( (*arItr)->getTop() );
+        // time to make a new one
+        std::vector< AbcA::ObjectReaderPtr > tops;
+        tops.reserve( m_archives.size() );
+        ArchiveReaderPtrs::iterator arItr = m_archives.begin();
+        for ( ; arItr != m_archives.end(); ++arItr )
+        {
+            tops.push_back( (*arItr)->getTop() );
+        }
+
+        ret = Alembic::Util::shared_ptr<OrImpl>(
+        new OrImpl( shared_from_this(), tops, m_header ) );
+        m_top = ret;
     }
 
-    return OrImplPtr( new OrImpl( shared_from_this(), tops, m_header ) );
+    return ret;
 }
 
 //-*****************************************************************************
