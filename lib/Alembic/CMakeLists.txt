@@ -117,7 +117,9 @@ EXPORT(TARGETS
     Alembic::
     )
 
-SET(ConfigPackageLocation lib/cmake/Alembic)
+SET(ConfigPackageLocation lib/cmake/Alembic CACHE PATH
+    "Where to install the Alembic's cmake files")
+
 INSTALL(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"
