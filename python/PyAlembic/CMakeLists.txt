@@ -127,8 +127,14 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
         PROPERTIES PREFIX "" SUFFIX ".so"
     )
 
+    SET( ALEMBIC_PYTHON_INSTALL_DIR
+        lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
+        CACHE PATH
+        "Alembic's python bindings install directory"
+    )
+
     INSTALL (TARGETS alembic
-        DESTINATION lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
+        DESTINATION ${ALEMBIC_PYTHON_INSTALL_DIR}
     )
 
     IF (USE_TESTS)
