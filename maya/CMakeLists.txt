@@ -36,6 +36,11 @@
 
 IF( ${MAYA_FOUND} )
 
+SET( ALEMBIC_MAYA_PLUGINS_INSTALL_DIR maya/plug-ins
+    CACHE PATH 
+    "Alembic's maya plug-ins install dir"
+)
+
 ADD_SUBDIRECTORY( AbcExport )
 ADD_SUBDIRECTORY( AbcImport )
 
