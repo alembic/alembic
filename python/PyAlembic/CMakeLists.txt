@@ -113,7 +113,7 @@ IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
         main.cpp
     )
 
-    LINK_LIBRARIES(Alembic
+    LINK_LIBRARIES(Alembic::Alembic
                    ${PLIBS}
                    ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
     )

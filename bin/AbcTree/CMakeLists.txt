@@ -34,7 +34,7 @@
 ##-*****************************************************************************
 
 ADD_EXECUTABLE(abctree AbcTree.cpp)
-TARGET_LINK_LIBRARIES(abctree Alembic)
+TARGET_LINK_LIBRARIES(abctree Alembic::Alembic)
 
 set_target_properties(abctree PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE

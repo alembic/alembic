@@ -70,6 +70,7 @@ OPTION(USE_PYALEMBIC "Include PyAlembic stuff" OFF)
 OPTION(USE_STATIC_BOOST "Build with static Boost libs" OFF)
 OPTION(USE_STATIC_HDF5 "Build with static HDF5 libs" OFF)
 OPTION(USE_TESTS "Include Alembic tests" ON)
+OPTION(ALEMBIC_BUILD_LIBS "Build library, if off use external alembic libs" ON)
 OPTION(ALEMBIC_ILMBASE_LINK_STATIC "IlmBase is a static library" OFF)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
 OPTION(ALEMBIC_LIB_USES_BOOST
@@ -236,8 +237,14 @@ ENDIF()
 #-******************************************************************************
 
 # Alembic
-ADD_SUBDIRECTORY(lib)
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")
+IF (ALEMBIC_BUILD_LIBS)
+    ADD_SUBDIRECTORY(lib)
+    INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")
+    ADD_LIBRARY( Alembic::Alembic ALIAS Alembic )
+ELSE()
+    FIND_PACKAGE(Alembic REQUIRED CONFIG HINTS ${ALEMBIC_ROOT})
+    MESSAGE(STATUS "Using external Alembic")
+ENDIF()
 
 # PyAlembic
 IF (USE_PYALEMBIC)
