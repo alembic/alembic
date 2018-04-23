@@ -84,11 +84,12 @@ IF ( ${ALEMBIC_LIB_USES_TR1} AND CMAKE_COMPILER_IS_GNUCXX AND
     TARGET_LINK_LIBRARIES( Alembic atomic )
 ENDIF()
 
+SET( ALEMBIC_LIB_INSTALL_DIR lib CACHE PATH "Where to install the Alembic libs")
 INSTALL(TARGETS Alembic
         EXPORT AlembicTargets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION lib)
+        LIBRARY DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+        RUNTIME DESTINATION ${ALEMBIC_LIB_INSTALL_DIR})
 
 #-******************************************************************************
 # PACKAGE EXPORTS
