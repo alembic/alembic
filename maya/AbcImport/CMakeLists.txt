@@ -84,4 +84,4 @@ set_target_properties(AbcImport PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 INSTALL(TARGETS AbcImport
-        DESTINATION maya/plug-ins)
+        DESTINATION ${ALEMBIC_MAYA_PLUGINS_INSTALL_DIR})
