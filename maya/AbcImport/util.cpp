@@ -48,6 +48,7 @@
 #include <maya/MObjectArray.h>
 #include <maya/MTime.h>
 #include <maya/MItDependencyGraph.h>
+#include <maya/MDistance.h>
 
 #include <algorithm>
 
@@ -476,4 +477,61 @@ bool isColorSet(const Alembic::AbcCoreAbstract::PropertyHeader & iHeader,
     return (isColor && isScoped &&
             (iUnmarkedFaceVaryingColors ||
             iHeader.getMetaData().get("mayaColorSet") != ""));
+}
+
+float getScaleUnitImport()
+{
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    MDistance::Unit uiUnit;
+    std::string alembicImportUnit;
+    char const* env = std::getenv("ALEMBIC_IMPORT_UNIT");
+    if(env != NULL)
+        alembicImportUnit = env;
+
+    std::transform(alembicImportUnit.begin(), alembicImportUnit.end(), alembicImportUnit.begin(), ::tolower);
+
+    if(alembicImportUnit.length() > 0)
+    {
+        if(alembicImportUnit == "millimeters")
+            uiUnit = MDistance::kMillimeters;
+        else if(alembicImportUnit == "meters")
+            uiUnit = MDistance::kMeters;
+        else if(alembicImportUnit == "inches")
+            uiUnit = MDistance::kInches;
+        else if(alembicImportUnit == "feet")
+            uiUnit = MDistance::kFeet;
+        else if(alembicImportUnit == "yards")
+            uiUnit = MDistance::kYards;
+        else
+            uiUnit = MDistance::uiUnit();
+    }
+    else
+        uiUnit = MDistance::uiUnit();
+
+    float scaleUnit = 1.0;
+
+    switch(uiUnit)
+    {
+        case MDistance::kMillimeters:
+            scaleUnit = 0.1;
+            break;
+
+        case MDistance::kMeters:
+            scaleUnit = 100.0;
+            break;
+
+        case MDistance::kInches:
+            scaleUnit = 2.54;
+            break;
+
+        case MDistance::kFeet:
+            scaleUnit = 30.48;
+            break;
+
+        case MDistance::kYards:
+            scaleUnit = 91.44;
+            break;
+    }
+
+    return scaleUnit;
 }

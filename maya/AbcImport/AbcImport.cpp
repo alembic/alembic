@@ -113,6 +113,7 @@ AbcImport \"/tmp/sparseAnimPts.abc\" \"/tmp/justUVs.abc\" \"/tmp/base.abc\" \n"
 
 AbcImport::AbcImport()
 {
+    std::cout << "Using custom alembic importer" << std::endl;
 }
 
 AbcImport::~AbcImport()

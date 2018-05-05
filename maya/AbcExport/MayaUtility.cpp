@@ -675,3 +675,60 @@ MString util::getHelpText()
 
     return ret;
 }
+
+float util::getScaleUnitExport()
+{
+    // counter scale to match unit system selected in maya since maya will output centimeters anyway
+    MDistance::Unit uiUnit;
+    std::string alembicExportUnit;
+    char const* env = std::getenv("ALEMBIC_EXPORT_UNIT");
+    if(env != NULL)
+        alembicExportUnit = env;
+
+    std::transform(alembicExportUnit.begin(), alembicExportUnit.end(), alembicExportUnit.begin(), ::tolower);
+
+    if(alembicExportUnit.length() > 0)
+    {
+        if(alembicExportUnit == "millimeters")
+            uiUnit = MDistance::kMillimeters;
+        else if(alembicExportUnit == "meters")
+            uiUnit = MDistance::kMeters;
+        else if(alembicExportUnit == "inches")
+            uiUnit = MDistance::kInches;
+        else if(alembicExportUnit == "feet")
+            uiUnit = MDistance::kFeet;
+        else if(alembicExportUnit == "yards")
+            uiUnit = MDistance::kYards;
+        else
+            uiUnit = MDistance::uiUnit();
+    }
+    else
+        uiUnit = MDistance::uiUnit();
+
+    float scaleUnit = 1.0;
+
+    switch(uiUnit)
+    {
+        case MDistance::kMillimeters:
+            scaleUnit = 10;
+            break;
+
+        case MDistance::kMeters:
+            scaleUnit = 0.01;
+            break;
+
+        case MDistance::kInches:
+            scaleUnit = 0.393701;
+            break;
+
+        case MDistance::kFeet:
+            scaleUnit = 0.0328084;
+            break;
+
+        case MDistance::kYards:
+            scaleUnit = 0.0109361;
+            break;
+    }
+
+    return scaleUnit;
+}

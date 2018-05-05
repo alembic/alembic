@@ -92,10 +92,13 @@ MayaLocatorWriter::MayaLocatorWriter(MDagPath & iDag,
             "locator", dType);
     }
 
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    float scaleUnit = util::getScaleUnitExport();
+
     double val[6];
-    val[0] = posX.asDouble();
-    val[1] = posY.asDouble();
-    val[2] = posZ.asDouble();
+    val[0] = posX.asDouble() * scaleUnit;
+    val[1] = posY.asDouble() * scaleUnit;
+    val[2] = posZ.asDouble() * scaleUnit;
     val[3] = scaleX.asDouble();
     val[4] = scaleY.asDouble();
     val[5] = scaleZ.asDouble();
@@ -134,10 +137,13 @@ void MayaLocatorWriter::write()
             "Failed to initialize MFnDagNode object for locator" );
     }
 
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    float scaleUnit = util::getScaleUnitExport();
+
     double val[6];
-    val[0] = fnLocator.findPlug("localPositionX").asDouble();
-    val[1] = fnLocator.findPlug("localPositionY").asDouble();
-    val[2] = fnLocator.findPlug("localPositionZ").asDouble();
+    val[0] = fnLocator.findPlug("localPositionX").asDouble() * scaleUnit;
+    val[1] = fnLocator.findPlug("localPositionY").asDouble() * scaleUnit;
+    val[2] = fnLocator.findPlug("localPositionZ").asDouble() * scaleUnit;
     val[3] = fnLocator.findPlug("localScaleX").asDouble();
     val[4] = fnLocator.findPlug("localScaleY").asDouble();
     val[5] = fnLocator.findPlug("localScaleZ").asDouble();

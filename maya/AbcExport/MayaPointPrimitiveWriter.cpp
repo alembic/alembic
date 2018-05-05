@@ -108,12 +108,15 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     particleIds.reserve(size);
     width.reserve(size);
 
+    // counter scale to match unit system selected in maya since maya will output centimeters anyway
+    float scaleUnit = util::getScaleUnitExport();
+
     // get particle position
     MVectorArray posArray;
     particle.position(posArray);
     for (unsigned int i = 0; i < size; i++)
     {
-        MVector vec = posArray[i];
+        MVector vec = posArray[i] * scaleUnit;
         position.push_back(static_cast<float>(vec.x));
         position.push_back(static_cast<float>(vec.y));
         position.push_back(static_cast<float>(vec.z));
@@ -127,7 +130,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     particle.velocity(vecArray);
     for (unsigned int i = 0; i < size; i++)
     {
-        MVector vec = vecArray[i];
+        MVector vec = vecArray[i] * scaleUnit;
         velocity.push_back(static_cast<float>(vec.x));
         velocity.push_back(static_cast<float>(vec.y));
         velocity.push_back(static_cast<float>(vec.z));

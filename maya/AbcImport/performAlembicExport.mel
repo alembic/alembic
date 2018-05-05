@@ -1,0 +1,1306 @@
+// ****************************************************************************
+//
+// Copyright 2013 Autodesk, Inc. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ****************************************************************************
+
+//
+//  Description:
+//      This script performs the AlembicExportAll and
+//      AlembicExportSelection commands.
+//
+
+//
+//  Procedure Name:
+//      setOptionVars
+//
+//  Description:
+//      Initialize the option values.
+//
+//  Input Arguments:
+//      Whether to set the options to default values.
+//
+//  Return Value:
+//      None.
+proc setOptionVars(int $forceFactorySettings)
+{
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportCacheTimeRange`) {
+        optionVar -intValue Alembic_exportCacheTimeRange 2;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportStart`) {
+        optionVar -floatValue Alembic_exportStart 1;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportEnd`) {
+        optionVar -floatValue Alembic_exportEnd 10;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportEvaluateEvery`) {
+        optionVar -floatValue Alembic_exportEvaluateEvery 1;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportEnableFrameRelativeSample`) {
+        optionVar -intValue Alembic_exportEnableFrameRelativeSample 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportLowFrameRelativeSample`) {
+        optionVar -floatValue Alembic_exportLowFrameRelativeSample -0.2;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportHighFrameRelativeSample`) {
+        optionVar -floatValue Alembic_exportHighFrameRelativeSample 0.2;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportEnablePreRoll`) {
+        optionVar -intValue Alembic_exportEnablePreRoll 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportPreRollStartFrame`) {
+        optionVar -floatValue Alembic_exportPreRollStartFrame 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportAttr`) {
+        optionVar -stringValue Alembic_exportAttr "";
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportAttrPrefix`) {
+        optionVar -stringValue Alembic_exportAttrPrefix "";
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportVerbose`) {
+        optionVar -intValue Alembic_exportVerbose 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportNoNormals`) {
+        optionVar -intValue Alembic_exportNoNormals 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportRenderableOnly`) {
+        optionVar -intValue Alembic_exportRenderableOnly 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportStripNamespaces`) {
+        optionVar -intValue Alembic_exportStripNamespaces 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportUVWrite`) {
+        optionVar -intValue Alembic_exportUVWrite 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportWholeFrameGeo`) {
+        optionVar -intValue Alembic_exportWholeFrameGeo 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportWorldSpace`) {
+        optionVar -intValue Alembic_exportWorldSpace 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportWriteVisibility`) {
+        optionVar -intValue Alembic_exportWriteVisibility 0;
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportPerFrameCallbackMel`) {
+        optionVar -stringValue Alembic_exportPerFrameCallbackMel "";
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportPostJobCallbackMel`) {
+        optionVar -stringValue Alembic_exportPostJobCallbackMel "";
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportPerFrameCallbackPython`) {
+        optionVar -stringValue Alembic_exportPerFrameCallbackPython "";
+    }
+
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportPostJobCallbackPython`) {
+        optionVar -stringValue Alembic_exportPostJobCallbackPython "";
+    }
+
+    // version 2
+    //
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportFilterEulerRotations`) {
+        optionVar -intValue Alembic_exportFilterEulerRotations 0;
+    }
+
+    // version 4
+    //
+    if ($forceFactorySettings || !`optionVar -exists Alembic_exportDataFormat`) {
+        optionVar -intValue Alembic_exportDataFormat 1;
+    }
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportSetup
+//
+//  Description:
+//      Update the state of the option box UI to reflect the option values.
+//
+//  Input Arguments:
+//      parent               - Top level parent layout of the option box UI.
+//                             Required so that UI object names can be
+//                             successfully resolved.
+//
+//      forceFactorySettings - Whether the option values should be set to
+//                             default values.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportSetup(string $parent, int $forceFactorySettings)
+{
+    //  Retrieve the option settings
+    //
+    setOptionVars($forceFactorySettings);
+
+    setParent $parent;
+
+    //  Query the optionVar's and set the values into the controls.
+    //
+    int $cacheTimeRange = `optionVar -q Alembic_exportCacheTimeRange`;
+    if ($cacheTimeRange == 1) {
+        radioButtonGrp -e -select 1 rangeRenderSettings;
+    } else if ($cacheTimeRange == 2) {
+        radioButtonGrp -e -select 1 rangeTimeSlider;
+    } else if ($cacheTimeRange == 3) {
+        radioButtonGrp -e -select 1 rangeStartEnd;
+    }
+    Alembic_exportCacheTimeRangeChanged($parent);
+
+    floatFieldGrp -e -value1 `optionVar -q Alembic_exportStart` -value2 `optionVar -q Alembic_exportEnd` startEnd;
+    floatFieldGrp -e -value1 `optionVar -q Alembic_exportEvaluateEvery`                 evaluateEvery;
+    checkBoxGrp   -e -value1 `optionVar -q Alembic_exportEnableFrameRelativeSample`     enableFrameRelativeSample;
+    floatFieldGrp -e -value1 `optionVar -q Alembic_exportLowFrameRelativeSample` -value2 `optionVar -q Alembic_exportHighFrameRelativeSample` lowHighFrameRelativeSample;
+    Alembic_exportEnableFrameRelativeSampleChanged($parent);
+    checkBoxGrp   -e -value1 `optionVar -q Alembic_exportEnablePreRoll`                 enablePreRoll;
+    floatFieldGrp -e -value1 `optionVar -q Alembic_exportPreRollStartFrame`             preRollStartFrame;
+    Alembic_exportEnablePreRollChanged($parent);
+
+    string $attrArray[], $attrPrefixArray[];
+    string $attr       = `optionVar -q Alembic_exportAttr`;
+    string $attrPrefix = `optionVar -q Alembic_exportAttrPrefix`;
+    tokenize $attr       "," $attrArray;
+    tokenize $attrPrefix "," $attrPrefixArray;
+    textScrollList -e -removeAll attrList;
+    textScrollList -e -removeAll attrPrefixList;
+    int $i;
+    for ($i = 0; $i < size($attrArray); $i++) {
+        if (size($attrArray[$i]) > 0) {
+            textScrollList -e -append $attrArray[$i] attrList;
+        }
+    }
+    for ($i = 0; $i < size($attrPrefixArray); $i++) {
+        if (size($attrPrefixArray[$i]) > 0) {
+            textScrollList -e -append $attrPrefixArray[$i] attrPrefixList;
+        }
+    }
+
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportVerbose`                 verbose;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportNoNormals`               noNormals;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportRenderableOnly`          renderableOnly;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportStripNamespaces`         stripNamespaces;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportUVWrite`                 uvWrite;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportWholeFrameGeo`           wholeFrameGeo;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportWorldSpace`              worldSpace;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportWriteVisibility`         writeVisibility;
+    checkBoxGrp -e -value1 `optionVar -q Alembic_exportFilterEulerRotations`    filterEulerRotations;
+
+    int $dataFormat = `optionVar -q Alembic_exportDataFormat`;
+    if ($dataFormat == 1) {
+        radioButtonGrp -e -select 1 dataFormatHDF5;
+    } else if ($dataFormat == 2) {
+        radioButtonGrp -e -select 1 dataFormatOgawa;
+    }
+
+    textFieldGrp -e -text `optionVar -q Alembic_exportPerFrameCallbackMel`      perFrameCallbackMel;
+    textFieldGrp -e -text `optionVar -q Alembic_exportPostJobCallbackMel`       postJobCallbackMel;
+    textFieldGrp -e -text `optionVar -q Alembic_exportPerFrameCallbackPython`   perFrameCallbackPython;
+    textFieldGrp -e -text `optionVar -q Alembic_exportPostJobCallbackPython`    postJobCallbackPython;
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportCallback
+//
+//  Description:
+//      Update the option values with the current state of the option box UI.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the option box UI. Required so
+//                  that UI object names can be successfully resolved.
+//
+//      exportAll - Whether to export the entire scene or only selected objects.
+//
+//      doIt      - Whether the command should execute.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportCallback(string $parent, int $exportAll, int $doIt)
+{
+    setParent $parent;
+
+    //  Set the optionVar's from the control values, and then
+    //  perform the command.
+    int $cacheTimeRange = 2;
+    if (`radioButtonGrp -q -select rangeRenderSettings`) {
+        $cacheTimeRange = 1;
+    } else if (`radioButtonGrp -q -select rangeTimeSlider`) {
+        $cacheTimeRange = 2;
+    } else if (`radioButtonGrp -q -select rangeStartEnd`) {
+        $cacheTimeRange = 3;
+    }
+    optionVar -intValue Alembic_exportCacheTimeRange $cacheTimeRange;
+
+    optionVar -floatValue Alembic_exportStart                     `floatFieldGrp -q -value1 startEnd`;
+    optionVar -floatValue Alembic_exportEnd                       `floatFieldGrp -q -value2 startEnd`;
+    optionVar -floatValue Alembic_exportEvaluateEvery             `floatFieldGrp -q -value1 evaluateEvery`;
+    optionVar -intValue   Alembic_exportEnableFrameRelativeSample `checkBoxGrp   -q -value1 enableFrameRelativeSample`;
+    optionVar -floatValue Alembic_exportLowFrameRelativeSample    `floatFieldGrp -q -value1 lowHighFrameRelativeSample`;
+    optionVar -floatValue Alembic_exportHighFrameRelativeSample   `floatFieldGrp -q -value2 lowHighFrameRelativeSample`;
+    optionVar -intValue   Alembic_exportEnablePreRoll    `checkBoxGrp   -q -value1 enablePreRoll`;
+    optionVar -floatValue Alembic_exportPreRollStartFrame`floatFieldGrp -q -value1 preRollStartFrame`;
+
+    string $attrArray[]       = `textScrollList -q -allItems attrList`;
+    string $attrPrefixArray[] = `textScrollList -q -allItems attrPrefixList`;
+    string $attr, $attrPrefix;
+    int $i;
+    for ($i = 0; $i < size($attrArray); $i++) {
+        if ($i > 0) $attr += ",";
+        $attr += $attrArray[$i];
+    }
+    for ($i = 0; $i < size($attrPrefixArray); $i++) {
+        if ($i > 0) $attrPrefix += ",";
+        $attrPrefix += $attrPrefixArray[$i];
+    }
+    optionVar -stringValue Alembic_exportAttr       $attr;
+    optionVar -stringValue Alembic_exportAttrPrefix $attrPrefix;
+
+    optionVar -intValue Alembic_exportVerbose                 `checkBoxGrp -q -value1 verbose`;
+    optionVar -intValue Alembic_exportNoNormals               `checkBoxGrp -q -value1 noNormals`;
+    optionVar -intValue Alembic_exportRenderableOnly          `checkBoxGrp -q -value1 renderableOnly`;
+    optionVar -intValue Alembic_exportStripNamespaces         `checkBoxGrp -q -value1 stripNamespaces`;
+    optionVar -intValue Alembic_exportUVWrite                 `checkBoxGrp -q -value1 uvWrite`;
+    optionVar -intValue Alembic_exportWholeFrameGeo           `checkBoxGrp -q -value1 wholeFrameGeo`;
+    optionVar -intValue Alembic_exportWorldSpace              `checkBoxGrp -q -value1 worldSpace`;
+    optionVar -intValue Alembic_exportWriteVisibility         `checkBoxGrp -q -value1 writeVisibility`;
+    optionVar -intValue Alembic_exportFilterEulerRotations    `checkBoxGrp -q -value1 filterEulerRotations`;
+
+    int $dataFormat = 1;
+    if (`radioButtonGrp -q -select dataFormatHDF5`) {
+        $dataFormat = 1;
+    } else if (`radioButtonGrp -q -select dataFormatOgawa`) {
+        $dataFormat = 2;
+    }
+    optionVar -intValue Alembic_exportDataFormat $dataFormat;
+
+    optionVar -stringValue Alembic_exportPerFrameCallbackMel    `textFieldGrp -q -text perFrameCallbackMel`;
+    optionVar -stringValue Alembic_exportPostJobCallbackMel     `textFieldGrp -q -text postJobCallbackMel`;
+    optionVar -stringValue Alembic_exportPerFrameCallbackPython `textFieldGrp -q -text perFrameCallbackPython`;
+    optionVar -stringValue Alembic_exportPostJobCallbackPython  `textFieldGrp -q -text postJobCallbackPython`;
+
+    if ($doIt) {
+        performAlembicExport 0 $exportAll;
+    }
+}
+
+//
+//  Procedure Name:
+//      exportOptionsUI
+//
+//  Description:
+//      Construct the UI for option box or file options.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      Top level layout of the options UI.
+//
+proc string exportOptionsUI(string $parent)
+{
+    //  The argument is used as the parent for the options UI
+    //
+    setParent $parent;
+
+    //  Activate the default UI template so that the layout of this
+    //  option box is consistent with the layout of the rest of the
+    //  application.
+    //
+    setUITemplate -pushTemplate DefaultTemplate;
+
+    //  Turn on the wait cursor.
+    //
+    waitCursor -state 1;
+
+    // Create option box or file options contents.
+    //
+    string $optionLayout = `scrollLayout -childResizable 1`;
+    columnLayout -adjustableColumn true;
+
+        frameLayout -label (uiRes("m_performAlembicExport.kGeneralOptions")) -collapse 0;
+            columnLayout;
+                radioButtonGrp
+                        -numberOfRadioButtons 1
+                        -label (uiRes("m_performAlembicExport.kCacheTimeRange")) 
+                        -label1 (uiRes("m_performAlembicExport.kRenderSettings"))
+                        rangeRenderSettings;
+                radioButtonGrp
+                        -numberOfRadioButtons 1
+                        -label1 (uiRes("m_performAlembicExport.kTimeSlider")) 
+                        -shareCollection rangeRenderSettings
+                        rangeTimeSlider;
+                radioButtonGrp
+                        -numberOfRadioButtons 1
+                        -label1 (uiRes("m_performAlembicExport.kStartEnd")) 
+                        -shareCollection rangeRenderSettings
+                        -changeCommand1 ("Alembic_exportCacheTimeRangeChanged " + $optionLayout)
+                        rangeStartEnd;
+                floatFieldGrp
+                        -numberOfFields 2
+                        -label (uiRes("m_performAlembicExport.kStartEnd2")) 
+                        startEnd;
+                floatFieldGrp
+                        -numberOfFields 1
+                        -label (uiRes("m_performAlembicExport.kEvaluateEvery")) 
+                        evaluateEvery;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label (uiRes("m_performAlembicExport.kFrameRelativeSample"))
+                        -changeCommand1 ("Alembic_exportEnableFrameRelativeSampleChanged " + $optionLayout)
+                        enableFrameRelativeSample;
+                floatFieldGrp
+                        -numberOfFields 2
+                        -label (uiRes("m_performAlembicExport.kLowHighFrameRelativeSample"))
+                        lowHighFrameRelativeSample;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label (uiRes("m_performAlembicExport.kPreRollStartFrame")) 
+                        -changeCommand1 ("Alembic_exportEnablePreRollChanged " + $optionLayout)
+                        enablePreRoll;
+                floatFieldGrp
+                        -numberOfFields 1
+                        preRollStartFrame;
+            setParent ..;
+        setParent ..;
+
+        frameLayout -label (uiRes("m_performAlembicExport.kAttributeFrame")) -collapse 0 -marginHeight 3 -marginWidth 3;
+            columnLayout -adjustableColumn 1 -rowSpacing 3;
+                rowLayout
+                        -numberOfColumns 4
+                        -columnWidth4 90 120 95 95
+                        -columnAttach4 "left" "left" "right" "right"
+                        -columnAlign 1 "left";
+                    text
+                        -label (uiRes("m_performAlembicExport.kAttribute"));
+                    textField
+                        -changeCommand ("Alembic_exportAttrAddRemove 0 " + $optionLayout)
+                        attrField;
+                    button
+                        -label (uiRes("m_performAlembicExport.kAddAttr"))
+                        -width 90
+                        -command ("Alembic_exportAttrAddRemove 0 " + $optionLayout);
+                    button
+                        -label (uiRes("m_performAlembicExport.kRemoveAttr"))
+                        -width 90
+                        -command ("Alembic_exportAttrAddRemove 1 " + $optionLayout);
+                setParent ..;
+
+                textScrollList
+                        -numberOfRows 8
+                        -allowMultiSelection 1
+                        -height 200
+                        attrList;
+
+                rowLayout
+                        -numberOfColumns 3
+                        -columnWidth3 115 115 115
+                        -columnAttach3 "left" "right" "right";
+                    button
+                        -label (uiRes("m_performAlembicExport.kFromChannelBox"))
+                        -width 130
+                        -command ("Alembic_exportAttrGetChannels " + $optionLayout);
+                    button
+                        -label (uiRes("m_performAlembicExport.kRemoveSelectedAttr"))
+                        -width 130
+                        -command ("Alembic_exportAttrRemove 0 " + $optionLayout);
+                    button
+                        -label (uiRes("m_performAlembicExport.kRemoveAllAttr"))
+                        -width 130
+                        -command ("Alembic_exportAttrRemove 1 " + $optionLayout);
+                setParent ..;
+            setParent ..;
+        setParent ..;
+
+        frameLayout -label (uiRes("m_performAlembicExport.kAttributePrefixFrame")) -collapse 0 -marginHeight 3 -marginWidth 3;
+            columnLayout -adjustableColumn 1 -rowSpacing 3;
+                rowLayout
+                        -numberOfColumns 4
+                        -columnWidth4 90 120 95 95
+                        -columnAttach4 "left" "left" "right" "right"
+                        -columnAlign 1 "left";
+                    text
+                        -label (uiRes("m_performAlembicExport.kAttributePrefix"));
+                    textField
+                        -changeCommand ("Alembic_exportAttrPrefixAddRemove 0 " + $optionLayout)
+                        attrPrefixField;
+                    button
+                        -label (uiRes("m_performAlembicExport.kAddAttrPrefix"))
+                        -width 90
+                        -command ("Alembic_exportAttrPrefixAddRemove 0 " + $optionLayout);
+                    button
+                        -label (uiRes("m_performAlembicExport.kRemoveAttrPrefix"))
+                        -width 90
+                        -command ("Alembic_exportAttrPrefixAddRemove 1 " + $optionLayout);
+                setParent ..;
+
+                textScrollList
+                        -numberOfRows 8
+                        -allowMultiSelection 1
+                        -height 200
+                        attrPrefixList;
+
+                rowLayout
+                        -numberOfColumns 2
+                        -columnWidth2 115 115
+                        -columnAttach2 "left" "left";
+                    button
+                        -label (uiRes("m_performAlembicExport.kRemoveSelectedAttrPrefix"))
+                        -width 110
+                        -command ("Alembic_exportAttrPrefixRemove 0 " + $optionLayout);
+                    button
+                        -label (uiRes("m_performAlembicExport.kRemoveAllAttrPrefix"))
+                        -width 110
+                        -command ("Alembic_exportAttrPrefixRemove 1 " + $optionLayout);
+                setParent ..;
+            setParent ..;
+        setParent ..;
+
+        frameLayout -label (uiRes("m_performAlembicExport.kAdvancedOptions")) -collapse 0;
+            columnLayout;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kVerbose")) 
+                        verbose;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kNoNormals")) 
+                        noNormals;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kRenerableOnly"))
+                        renderableOnly;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kStripNamespaces")) 
+                        stripNamespaces;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kUVWrite")) 
+                        uvWrite;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kWholeFrameGeo")) 
+                        wholeFrameGeo;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kWorldSpace")) 
+                        worldSpace;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kWriteVisibility")) 
+                        writeVisibility;
+                checkBoxGrp
+                        -numberOfCheckBoxes 1
+                        -label1 (uiRes("m_performAlembicExport.kFilterEulerRotations")) 
+                        filterEulerRotations;
+                radioButtonGrp
+                        -numberOfRadioButtons 1
+                        -label (uiRes("m_performAlembicExport.kFileFormat"))
+                        -label1 (uiRes("m_performAlembicExport.kDataFormatHDF5Label"))
+                        -annotation (uiRes("m_performAlembicExport.kDataFormatHDF5Annot"))
+                        dataFormatHDF5;
+                radioButtonGrp
+                        -numberOfRadioButtons 1
+                        -label1 (uiRes("m_performAlembicExport.kDataFormatOgawaLabel"))
+                        -annotation (uiRes("m_performAlembicExport.kDataFormatOgawaAnnot"))
+                        -shareCollection dataFormatHDF5
+                        dataFormatOgawa;
+            setParent ..;
+        setParent ..;
+
+        frameLayout -label (uiRes("m_performAlembicExport.kCallbacks")) -collapse 0;
+            columnLayout;
+                textFieldGrp
+                        -label (uiRes("m_performAlembicExport.kPerFrameCallbackMel")) 
+                        perFrameCallbackMel;
+                textFieldGrp
+                        -label (uiRes("m_performAlembicExport.kPostJobCallbackMel")) 
+                        postJobCallbackMel;
+                textFieldGrp
+                        -label (uiRes("m_performAlembicExport.kPerFrameCallbackPython")) 
+                        perFrameCallbackPython;
+                textFieldGrp
+                        -label (uiRes("m_performAlembicExport.kPostJobCallbackPython")) 
+                        postJobCallbackPython;
+            setParent ..;
+        setParent ..;
+
+    //  Turn off the wait cursor.
+    //
+    waitCursor -state 0;
+
+    // Deactivate the default UI template
+    //
+    setUITemplate -popTemplate;
+
+    return $optionLayout;
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportCacheTimeRangeChanged
+//
+//  Description:
+//      Callback procedure when the state of Cache Time Range radio
+//      button group has been changed.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportCacheTimeRangeChanged(string $parent)
+{
+    setParent $parent;
+
+    // enable/disable start/end float fields
+    //
+    if (`radioButtonGrp -q -select rangeStartEnd`) {
+        floatFieldGrp -e -enable 1 startEnd;
+    } else {
+        floatFieldGrp -e -enable 0 startEnd;
+    }
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportEnableFrameRelativeSampleChanged
+//
+//  Description:
+//      Callback procedure when the state of Enable frame relative sample checkbox has been changed.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportEnableFrameRelativeSampleChanged(string $parent)
+{
+    setParent $parent;
+
+    // enable/disable lowHighFrameRelativeSample
+    //
+    if (`checkBoxGrp -q -value1 enableFrameRelativeSample`) {
+        floatFieldGrp -e -enable 1 lowHighFrameRelativeSample;
+    }
+    else {
+        floatFieldGrp -e -enable 0 lowHighFrameRelativeSample;
+    }
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportEnablePreRollChanged
+//
+//  Description:
+//      Callback procedure when the state of Enable Pre Roll checkbox has been changed.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportEnablePreRollChanged(string $parent)
+{
+    setParent $parent;
+
+    // enable/disable preRollStartFrame
+    //
+    if (`checkBoxGrp -q -value1 enablePreRoll`) {
+        floatFieldGrp -e -enable 1 preRollStartFrame;
+    }
+    else {
+        floatFieldGrp -e -enable 0 preRollStartFrame;
+    }
+}
+
+//
+//  Procedure Name:
+//      isUnique
+//
+//  Description:
+//      Determines whether the string array contains the specified string or not.
+//
+//  Input Arguments:
+//      item          - The string item to check in the array.
+//
+//      stringArray   - The array which may contains the string item.
+//
+//  Return Value
+//      True if the stringArray contains the specified item.
+//
+proc int isUnique(string $item, string $stringArray[])
+{
+    int $i, $result = 1;
+    for ($i = 0; $i < size($stringArray); $i++) {
+        if ($item == $stringArray[$i]) {
+            $result = 0;
+            break;
+        }
+    }
+
+    return $result;
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportAttrAddRemove
+//
+//  Description:
+//      Callback procedure when Add/Remove button in Attributes tab is pushed.
+//
+//  Input Arguments:
+//      remove    - 0: Add
+//                  1: Remove
+//
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportAttrAddRemove(int $remove, string $parent)
+{
+    setParent $parent;
+
+    // split the attribute names in the text field
+    string $attr = `textField -q -text attrField`;
+    string $attrList[];
+    tokenize $attr " " $attrList;
+
+    string $attrArray[] = `textScrollList -q -allItems attrList`;
+    int $i;
+    if ($remove) {
+        // remove the attribute
+        for ($i = 0; $i < size($attrList); $i++) {
+            if (!isUnique($attrList[$i], $attrArray)) {
+                textScrollList -e -removeItem $attrList[$i] attrList;
+            }
+        }
+    }
+    else {
+        // add the attribute
+        for ($i = 0; $i < size($attrList); $i++) {
+            if (size($attrList[$i]) > 0 && isUnique($attrList[$i], $attrArray)) {
+                textScrollList -e -append $attrList[$i] attrList;
+            }
+        }
+    }
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportAttrGetChannels
+//
+//  Description:
+//      Callback procedure when From Channel Box button in Attributes tab is pushed.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportAttrGetChannels(string $parent)
+{
+    setParent $parent;
+
+    if (`channelBox -q -exists mainChannelBox`) {
+        // current list of attributes
+        string $attrArray[] = `textScrollList -q -allItems attrList`;
+
+        // the list of new attributes to append
+        string $newAttrArray[];
+
+        // selected main attributes
+        string $mainAttrList[]  = `channelBox -q -selectedMainAttributes mainChannelBox`;
+
+        // current selected nodes
+        string $selection[] = `ls -sl`;
+
+        // add selected attributes from channel box to the attribute list
+        string $attr, $node;
+        for ($attr in $mainAttrList) {
+            for ($node in $selection) {
+                if (`attributeExists $attr $node`) {
+                    string $longName = `attributeName -long ($node + "." + $attr)`;
+                    if (isUnique($longName, $attrArray) && isUnique($longName, $newAttrArray)) {
+                        $newAttrArray[size($newAttrArray)] = $longName;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // selected shape attributes
+        string $shapeAttrList[] = `channelBox -q -selectedShapeAttributes mainChannelBox`;
+
+        // shapes
+        string $shapes[] = `listRelatives -shapes $selection`;
+
+        // add selected shape attributes from channel box to the attribute list
+        for ($attr in $shapeAttrList) {
+            for ($node in $shapes) {
+                if (`attributeExists $attr $node`) {
+                    string $longName = `attributeName -long ($node + "." + $attr)`;
+                    if (isUnique($longName, $attrArray) && isUnique($longName, $newAttrArray)) {
+                        $newAttrArray[size($newAttrArray)] = $longName;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // append the attribute list to scroll list
+        for ($attr in $newAttrArray) {
+            textScrollList -e -append $attr attrList;
+        }
+    }
+}
+
+
+//
+//  Procedure Name:
+//      Alembic_exportAttrRemove
+//
+//  Description:
+//      Callback procedure when Remove Selected/All button in Attributes tab is pushed.
+//
+//  Input Arguments:
+//      removeAll - 0: Remove Selected
+//                  1: Remove All
+//
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportAttrRemove(int $removeAll, string $parent)
+{
+    setParent $parent;
+
+    if ($removeAll) {
+        textScrollList -e -removeAll attrList;
+    }
+    else {
+        // remove the selected items
+        string $attrList[] = `textScrollList -q -selectItem attrList`;
+        string $attrItem;
+        for ($attrItem in $attrList) {
+            textScrollList -e -removeItem $attrItem attrList;
+        }
+    }
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportAttrPrefixAddRemove
+//
+//  Description:
+//      Callback procedure when Add/Remove button in Attribute Prefix tab is pushed.
+//
+//  Input Arguments:
+//      remove    - 0: Add
+//                  1: Remove
+//
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportAttrPrefixAddRemove(int $remove, string $parent)
+{
+    setParent $parent;
+
+    // split the attribute prefixes in the text field
+    string $attrPrefix = `textField -q -text attrPrefixField`;
+    string $attrPrefixList[];
+    tokenize $attrPrefix " " $attrPrefixList;
+
+    string $attrPrefixArray[] = `textScrollList -q -allItems attrPrefixList`;
+    int $i;
+    if ($remove) {
+        // remove the attribute
+        for ($i = 0; $i < size($attrPrefixList); $i++) {
+            if (!isUnique($attrPrefixList[$i], $attrPrefixArray)) {
+                textScrollList -e -removeItem $attrPrefixList[$i] attrPrefixList;
+            }
+        }
+    }
+    else {
+        // add the attribute
+        for ($i = 0; $i < size($attrPrefixList); $i++) {
+            if (size($attrPrefixList[$i]) > 0 && isUnique($attrPrefixList[$i], $attrPrefixArray)) {
+                textScrollList -e -append $attrPrefixList[$i] attrPrefixList;
+            }
+        }
+    }
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportAttrPrefixRemove
+//
+//  Description:
+//      Callback procedure when Remove Selected/All button in Attribute Prefix tab is pushed.
+//
+//  Input Arguments:
+//      removeAll - 0: Remove Selected
+//                  1: Remove All
+//
+//      parent    - Top level parent layout of the option box or file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportAttrPrefixRemove(int $removeAll, string $parent)
+{
+    setParent $parent;
+
+    if ($removeAll) {
+        // remove all items
+        textScrollList -e -removeAll attrPrefixList;
+    }
+    else {
+        // remove the selected items
+        string $attrPrefixList[] = `textScrollList -q -selectItem attrPrefixList`;
+        string $attrPrefixItem;
+        for ($attrPrefixItem in $attrPrefixList) {
+            textScrollList -e -removeItem $attrPrefixItem attrPrefixList;
+        }
+    }
+}
+
+//
+//  Procedure Name:
+//      exportOptions
+//
+//  Description:
+//      Construct the option box UI. Involves accessing the standard option
+//      box and customizing the UI accordingly.
+//
+//  Input Arguments:
+//      exportAll - Whether to export the entire scene or only selected objects.
+//
+//  Return Value:
+//      None.
+//
+proc exportOptions(int $exportAll)
+{
+    //  Name of the command for this option box.
+    //
+    string $commandName;
+    string $label;
+    if ($exportAll) {
+        $commandName = "AlembicExportAll";
+        $label       = (uiRes("m_performAlembicExport.kExportAll"));
+    }
+    else {
+        $commandName = "AlembicExportSelection";
+        $label       = (uiRes("m_performAlembicExport.kExportSelection"));
+    }
+
+    //  Build the option box actions.
+    //
+    string $callback = "Alembic_exportCallback";
+    string $setup    = "Alembic_exportSetup";
+
+    //  STEP 1:  Get the option box.
+    //  ============================
+    //
+    //  The value returned is the name of the layout to be used as
+    //  the parent for the option box UI.
+    //
+    string $layout = getOptionBox();
+
+    //  STEP 2:  Pass the command name to the option box.
+    //  =================================================
+    //
+    //  Any default option box behaviour based on the command name is set
+    //  up with this call. For example, updating the 'Help' menu item with
+    //  the name of the command.
+    //
+    setOptionBoxCommandName($commandName);
+
+    //  STEP 3:  Create option box contents.
+    //  ====================================
+    //
+    string $parent = exportOptionsUI($layout);
+
+    //  STEP 4:  Customize the buttons.
+    //  ===============================
+    //
+    //  Provide more descriptive labels for the buttons.
+    //  Disable those buttons that are not applicable to the option box.
+    //  Attach actions to those buttons that are applicable to the option box.
+
+    // 'Export' button
+    //
+    string $exportBtn = getOptionBoxApplyBtn();
+    button -e -label $label
+           -command ($callback + " " + $parent + " " + $exportAll + " 1")
+           $exportBtn;
+
+    // 'Save' button
+    //
+    string $saveBtn = getOptionBoxSaveBtn();
+    button -e
+           -command ($callback + " " + $parent + " " + $exportAll + " 0; hideOptionBox")
+           $saveBtn;
+
+    // 'Reset' button
+    //
+    string $resetBtn = getOptionBoxResetBtn();
+    button -e
+           -command ($setup + " " + $parent + " 1")
+           $resetBtn;
+
+    //  STEP 5:  Set the option box title.
+    //  ==================================
+    //
+    setOptionBoxTitle((uiRes("m_performAlembicExport.kAlembicExport")));
+
+    //  STEP 6:  Customize the 'Help' menu item text.
+    //  =============================================
+    //
+    setOptionBoxHelpTag($commandName);
+
+    //  Set the current values of the option box.
+    //  =========================================
+    //
+    eval ($setup + " " + $parent + " 0");
+
+    //  Show the option box.
+    //  ====================
+    //
+    showOptionBox();
+}
+
+//
+//  Procedure Name:
+//      captureAlembicExportOptionVars
+//
+//  Description:
+//      Capture the current state of option values to an argument list.
+//
+//  Input Arguments:
+//      exportAll - Whether to export the entire scene or only selected objects.
+//
+//  Return Value:
+//      A list of arguments to invoke AbcExport.
+//
+global proc string[] captureAlembicExportOptionVars(int $version, int $exportAll)
+{
+    setOptionVars(0);
+    int    $cacheTimeRange            = `optionVar -q Alembic_exportCacheTimeRange`;
+    float  $start                     = `optionVar -q Alembic_exportStart`;
+    float  $end                       = `optionVar -q Alembic_exportEnd`;
+    float  $evaluateEvery             = `optionVar -q Alembic_exportEvaluateEvery`;
+    int    $enableFrameRelativeSample = `optionVar -q Alembic_exportEnableFrameRelativeSample`;
+    float  $lowFrameRelativeSample    = `optionVar -q Alembic_exportLowFrameRelativeSample`;
+    float  $highFrameRelativeSample   = `optionVar -q Alembic_exportHighFrameRelativeSample`;
+    int    $enablePreRoll             = `optionVar -q Alembic_exportEnablePreRoll`;
+    float  $preRollStartFrame         = `optionVar -q Alembic_exportPreRollStartFrame`;
+    string $attr                      = `optionVar -q Alembic_exportAttr`;
+    string $attrPrefix                = `optionVar -q Alembic_exportAttrPrefix`;
+    int    $verbose                   = `optionVar -q Alembic_exportVerbose`;
+    int    $noNormals                 = `optionVar -q Alembic_exportNoNormals`;
+    int    $renderableOnly            = `optionVar -q Alembic_exportRenderableOnly`;
+    int    $stripNamespaces           = `optionVar -q Alembic_exportStripNamespaces`;
+    int    $uvWrite                   = `optionVar -q Alembic_exportUVWrite`;
+    int    $wholeFrameGeo             = `optionVar -q Alembic_exportWholeFrameGeo`;
+    int    $worldSpace                = `optionVar -q Alembic_exportWorldSpace`;
+    int    $writeVisibility           = `optionVar -q Alembic_exportWriteVisibility`;
+    string $perFrameCallbackMel       = `optionVar -q Alembic_exportPerFrameCallbackMel`;
+    string $postJobCallbackMel        = `optionVar -q Alembic_exportPostJobCallbackMel`;
+    string $perFrameCallbackPython    = `optionVar -q Alembic_exportPerFrameCallbackPython`;
+    string $postJobCallbackPython     = `optionVar -q Alembic_exportPostJobCallbackPython`;
+
+    string $args[] = {
+        "" + $exportAll,
+        $cacheTimeRange,
+        $start,
+        $end,
+        $evaluateEvery,
+        $enableFrameRelativeSample,
+        $lowFrameRelativeSample,
+        $highFrameRelativeSample,
+        $enablePreRoll,
+        $preRollStartFrame,
+        $attr,
+        $attrPrefix,
+        $verbose,
+        $noNormals,
+        $renderableOnly,
+        $stripNamespaces,
+        $uvWrite,
+        $wholeFrameGeo,
+        $worldSpace,
+        $writeVisibility,
+        $perFrameCallbackMel,
+        $postJobCallbackMel,
+        $perFrameCallbackPython,
+        $postJobCallbackPython
+    };
+
+    if ($version >= 2) {
+        int    $filterEulerRotations    = `optionVar -q Alembic_exportFilterEulerRotations`;
+
+        string $argsVer2[] = {
+            "" + $filterEulerRotations
+        };
+
+        appendStringArray($args, $argsVer2, 1);
+    }
+
+    if ($version >= 3) {
+        string $argsVer3[] = {
+            "0", "0"
+        };
+
+        appendStringArray($args, $argsVer3, 2);
+    }
+
+    if ($version >= 4) {
+        int $dataFormat = `optionVar -q Alembic_exportDataFormat`;
+
+        string $argsVer4[] = {
+            "" + $dataFormat
+        };
+
+        appendStringArray($args, $argsVer4, 1);
+    }
+
+    return $args;
+}
+
+//
+//  Procedure Name:
+//      assembleCmd
+//
+//  Description:
+//      Construct the command that will apply the option box values.
+//
+//  Input Arguments:
+//      exportAll - Whether to export the entire scene or only selected objects.
+//
+proc string assembleCmd(int $exportAll)
+{
+    int $version = 4;
+    string $args[] = captureAlembicExportOptionVars($version, $exportAll);
+    string $cmd = "doAlembicExportArgList " + $version + " {";
+    int $i;
+    for ($i = 0; $i < size($args); $i++) {
+        if ($i > 0) $cmd += ",";
+        $cmd += ("\"" + encodeString($args[$i]) + "\"");
+    }
+    $cmd += "};";
+    return $cmd;
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportFileOptionsUICreate
+//
+//  Description:
+//      Construct the file options UI.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//      
+global proc Alembic_exportFileOptionsUICreate(string $parent)
+{
+    exportOptionsUI($parent);
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportFileOptionsUIInit
+//
+//  Description:
+//      Update the state of the file options UI to reflect the option values.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//      filter    - The file type filter.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportFileOptionsUIInit(string $parent, string $filter)
+{
+    Alembic_exportSetup $parent 0;
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportAllFileOptionsUICommit
+//
+//  Description:
+//      Update the option values with the current state of the file options UI.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportAllFileOptionsUICommit(string $parent)
+{
+    Alembic_exportCallback $parent 1 0;
+}
+
+//
+//  Procedure Name:
+//      Alembic_exportSelectionFileOptionsUICommit
+//
+//  Description:
+//      Update the option values with the current state of the file options UI.
+//
+//  Input Arguments:
+//      parent    - Top level parent layout of the file options UI.
+//                  Required so that UI object names can be successfully resolved.
+//
+//  Return Value:
+//      None.
+//
+global proc Alembic_exportSelectionFileOptionsUICommit(string $parent)
+{
+    Alembic_exportCallback $parent 0 0;
+}
+
+proc int containsWhiteSpace(string $str)
+{
+    if (size(`match " " $str`) > 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+//
+//  Procedure Name:
+//      performAlembicExport
+//
+//  Description:
+//      Perform the AlembicExportAll or AlembicExportSelection command using the
+//      corresponding option values. This procedure will also show the option box
+//      window if necessary as well as construct the command string
+//      that will invoke the sphere command with the current
+//      option box values.   
+//
+//  Input Arguments:
+//      0 - Execute the command.
+//      1 - Show the option box dialog.
+//      2 - Return the command.
+//
+//      exportAll - Whether to export the entire scene or only selected objects.
+//
+//  Return Value:
+//      None.
+//
+global proc string performAlembicExport(int $action, int $exportAll)
+{
+    string $cmd;
+
+    switch ($action)
+    {
+    //  Execute the command.
+    //
+    case 0:
+        //  Get the command.
+        //
+        $cmd = assembleCmd($exportAll);
+
+        //  Execute the command with the option settings.
+        //
+        eval($cmd);
+
+        break;
+
+    //  Show the option box.
+    //
+    case 1:
+        //  Show the option box.
+        //
+        exportOptions($exportAll);
+        break;
+
+    //  Return the command string.
+    //
+    case 2:
+        //  Get the command.
+        //
+        $cmd = assembleCmd($exportAll);
+        break;
+    }
+
+    return $cmd;
+}
+

@@ -50,6 +50,9 @@ MObject create(Alembic::AbcGeom::IXform & iLocator,
                MObject & iParent,
                Alembic::Abc::IScalarProperty & iLocProp)
 {
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    float scaleUnit = getScaleUnitImport();
+
     MStatus status = MS::kSuccess;
     MObject locatorObj = MObject::kNullObj;
 
@@ -75,6 +78,10 @@ MObject create(Alembic::AbcGeom::IXform & iLocator,
         double oSample[6];
         iLocProp.get(oSample, 0);
 
+        oSample[0] *= scaleUnit;
+        oSample[1] *= scaleUnit;
+        oSample[2] *= scaleUnit;
+
         // set the plugs and be done
         MPlug dstPlug;
         dstPlug = fnLocator.findPlug("localPositionX");
@@ -98,6 +105,9 @@ void read(double iFrame,
           Alembic::AbcGeom::IXform & iLocator,
           std::vector< double > & oArray)
 {
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    float scaleUnit = getScaleUnitImport();
+
     oArray.resize(6);
 
     Alembic::Abc::ICompoundProperty props = iLocator.getProperties();
@@ -111,6 +121,10 @@ void read(double iFrame,
                                      ceilIndex);
     double samp[6];
     locProp.get(samp, index);
+
+    samp[0] *= scaleUnit;
+    samp[1] *= scaleUnit;
+    samp[2] *= scaleUnit;
 
     if (fabs(alpha) > 1e-6)  // interpolation
     {

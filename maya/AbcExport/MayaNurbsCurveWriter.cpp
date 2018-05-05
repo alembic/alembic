@@ -204,6 +204,9 @@ void MayaNurbsCurveWriter::write()
         width.push_back(constWidthPlug.asFloat());
     }
 
+    // counter scale to match unit system selected in maya since maya will output centimeters anyway
+    float scaleUnit = util::getScaleUnitExport();
+
     for (unsigned int i = 0; i < numCurves; i++)
     {
         MFnNurbsCurve curve;
@@ -271,6 +274,9 @@ void MayaNurbsCurveWriter::write()
         for (Alembic::Util::int32_t j = 0; j < numCVs; j++)
         {
             MPoint transformdPt;
+
+            cvArray[j] = cvArray[j] * scaleUnit;
+
             if (mIsCurveGrp)
             {
                 transformdPt = cvArray[j]*transformMatrix;

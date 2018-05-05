@@ -111,6 +111,9 @@ void MayaCameraWriter::write()
 {
     MFnCamera mfnCamera(mDagPath);
 
+    // counter scale to match unit system selected in maya since maya will output centimeters anyway
+    float scaleUnit = util::getScaleUnitExport();
+
     mSamp.setFocalLength(mfnCamera.focalLength());
     mSamp.setLensSqueezeRatio(mfnCamera.lensSqueezeRatio());
     mSamp.setHorizontalAperture(mfnCamera.horizontalFilmAperture() * 2.54);
@@ -122,10 +125,10 @@ void MayaCameraWriter::write()
     mSamp.setOverScanRight(overscan);
     mSamp.setOverScanTop(overscan);
     mSamp.setOverScanBottom(overscan);
-    mSamp.setNearClippingPlane(mfnCamera.nearClippingPlane());
-    mSamp.setFarClippingPlane(mfnCamera.farClippingPlane());
+    mSamp.setNearClippingPlane(mfnCamera.nearClippingPlane() * scaleUnit);
+    mSamp.setFarClippingPlane(mfnCamera.farClippingPlane() * scaleUnit);
     mSamp.setFStop(mfnCamera.fStop());
-    mSamp.setFocusDistance(mfnCamera.focusDistance());
+    mSamp.setFocusDistance(mfnCamera.focusDistance() * scaleUnit);
 
     // should this be based on the shutterAngle?  or the settings passed in?
 

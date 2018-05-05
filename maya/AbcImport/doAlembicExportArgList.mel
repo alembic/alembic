@@ -1,0 +1,402 @@
+// ****************************************************************************
+//
+// Copyright 2013 Autodesk, Inc. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ****************************************************************************
+
+//
+//  Description:
+//      This script exports selected objects or the current scene
+//      to an Alembic file by AbcExport command.
+//
+
+// Global Variables
+string $gAlembicExportLastDirectory;
+string $gAlembicExportLastWorkspace;
+
+//
+//  Procedure Name:
+//      syncOptionVars
+//
+//  Description:
+//      Synchronize option values with the argument list.
+//
+//  Input Arguments:
+//      version - The version of the argument list.
+//
+//      args    - A list of arguments to invoke AbcExport.
+//
+//  Return Value:
+//      None.
+//
+proc syncOptionVars(string $version, string $args[])
+{
+    int    $versionNum                = $version;
+    int    $cacheTimeRange            = $args[1];
+    float  $start                     = $args[2];
+    float  $end                       = $args[3];
+    float  $evaluateEvery             = $args[4];
+    int    $enableFrameRelativeSample = $args[5];
+    float  $lowFrameRelativeSample    = $args[6];
+    float  $highFrameRelativeSample   = $args[7];
+    int    $enablePreRoll             = $args[8];
+    float  $preRollStartFrame         = $args[9];
+    string $attr                      = $args[10];
+    string $attrPrefix                = $args[11];
+    int    $verbose                   = $args[12];
+    int    $noNormals                 = $args[13];
+    int    $renderableOnly            = $args[14];
+    int    $stripNamespaces           = $args[15];
+    int    $uvWrite                   = $args[16];
+    int    $wholeFrameGeo             = $args[17];
+    int    $worldSpace                = $args[18];
+    int    $writeVisibility           = $args[19];
+    string $perFrameCallbackMel       = $args[20];
+    string $postJobCallbackMel        = $args[21];
+    string $perFrameCallbackPython    = $args[22];
+    string $postJobCallbackPython     = $args[23];
+
+    optionVar -intValue    Alembic_exportCacheTimeRange            $cacheTimeRange;
+    optionVar -floatValue  Alembic_exportStart                     $start;
+    optionVar -floatValue  Alembic_exportEnd                       $end;
+    optionVar -floatValue  Alembic_exportEvaluateEvery             $evaluateEvery;
+    optionVar -intValue    Alembic_exportEnableFrameRelativeSample $enableFrameRelativeSample;
+    optionVar -floatValue  Alembic_exportLowFrameRelativeSample    $lowFrameRelativeSample;
+    optionVar -floatValue  Alembic_exportHighFrameRelativeSample   $highFrameRelativeSample;
+    optionVar -intValue    Alembic_exportEnablePreRoll             $enablePreRoll;
+    optionVar -floatValue  Alembic_exportPreRollStartFrame         $preRollStartFrame;
+    optionVar -stringValue Alembic_exportAttr                      $attr;
+    optionVar -stringValue Alembic_exportAttrPrefix                $attrPrefix;
+    optionVar -intValue    Alembic_exportVerbose                   $verbose;
+    optionVar -intValue    Alembic_exportNoNormals                 $noNormals;
+    optionVar -intValue    Alembic_exportRenderableOnly            $renderableOnly;
+    optionVar -intValue    Alembic_exportStripNamespaces           $stripNamespaces;
+    optionVar -intValue    Alembic_exportUVWrite                   $uvWrite;
+    optionVar -intValue    Alembic_exportWholeFrameGeo             $wholeFrameGeo;
+    optionVar -intValue    Alembic_exportWorldSpace                $worldSpace;
+    optionVar -intValue    Alembic_exportWriteVisibility           $writeVisibility;
+    optionVar -stringValue Alembic_exportPerFrameCallbackMel       $perFrameCallbackMel;
+    optionVar -stringValue Alembic_exportPostJobCallbackMel        $postJobCallbackMel;
+    optionVar -stringValue Alembic_exportPerFrameCallbackPython    $perFrameCallbackPython;
+    optionVar -stringValue Alembic_exportPostJobCallbackPython     $postJobCallbackPython;
+
+    if ($versionNum >= 2) {
+        int    $filterEulerRotations    = $args[24];
+
+        optionVar -intValue    Alembic_exportFilterEulerRotations    $filterEulerRotations;
+    }
+
+    if ($versionNum >= 4) {
+        int    $dataFormat = $args[27];
+        
+        optionVar -intValue Alembic_exportDataFormat $dataFormat;
+    }
+}
+
+proc int containsWhiteSpace(string $str)
+{
+    if (size(`match " " $str`) > 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+//
+//  Procedure Name:
+//      doAlembicExportArgList
+//
+//  Description:
+//      Execute AbcExport command based on the argument list.
+//
+//  Input Arguments:
+//      version - The version of the argument list.
+//
+//      args    - A list of arguments to invoke AbcExport.
+//
+//  Return Value:
+//      None.
+//
+global proc doAlembicExportArgList(string $version, string $args[])
+{
+    if (!`exists captureAlembicExportOptionVars`) {
+        eval("source \"performAlembicExport.mel\"");
+    }
+
+    // back up the current option values so that we can restore
+    // them later if the dialog is cancelled
+    int $exportAll = $args[0];
+    string $optionVarsBackup[] = captureAlembicExportOptionVars($version, $exportAll);
+
+    // synchronize the option values with the argument list
+    syncOptionVars($version, $args);
+
+    // prepare filter and starting dir for file dialog
+    string $filter = (uiRes("m_doAlembicExportArgList.kAlembic")) + " (*.abc);;"
+                        + (uiRes("m_doAlembicExportArgList.kAllFiles")) + " (*.*)";
+    if (size(`workspace -fileRuleEntry alembicCache`) == 0) {
+        workspace -fileRule "alembicCache" "cache/alembic";
+        workspace -saveWorkspace;
+    }
+    string $workspace = `workspace -fileRuleEntry alembicCache`;
+    $workspace = `workspace -expandName $workspace`;
+    sysFile -makeDir $workspace;
+
+    global string $gAlembicExportLastDirectory;
+    global string $gAlembicExportLastWorkspace;
+    string $startingDir = $gAlembicExportLastDirectory;
+    if (size($startingDir) == 0 || $gAlembicExportLastWorkspace != `workspace -q -rootDirectory`) {
+        $startingDir = $workspace;
+    }
+
+    // choose a file to export
+    string $result[];
+    if ($exportAll) {
+        $result = `fileDialog2
+                    -returnFilter 1
+                    -fileFilter $filter
+                    -caption (uiRes("m_doAlembicExportArgList.kExportAll2"))
+                    -startingDirectory $startingDir
+                    -fileMode 0
+                    -okCaption (uiRes("m_doAlembicExportArgList.kExportAll3"))
+                    -optionsUICreate "Alembic_exportFileOptionsUICreate"
+                    -optionsUIInit "Alembic_exportFileOptionsUIInit"
+                    -optionsUICommit "Alembic_exportAllFileOptionsUICommit"
+                    `;
+    } else {
+        $result = `fileDialog2
+                    -returnFilter 1
+                    -fileFilter $filter
+                    -caption (uiRes("m_doAlembicExportArgList.kExportSelection2"))
+                    -startingDirectory $startingDir
+                    -fileMode 0
+                    -okCaption (uiRes("m_doAlembicExportArgList.kExportSelection3"))
+                    -optionsUICreate "Alembic_exportFileOptionsUICreate"
+                    -optionsUIInit "Alembic_exportFileOptionsUIInit"
+                    -optionsUICommit "Alembic_exportSelectionFileOptionsUICommit"
+                    `;
+    }
+    if (size($result) == 0 || size($result[0]) == 0) {
+        // cancelled
+        // Restore optionVars to the state before this procedure is called
+        //
+        syncOptionVars($version, $optionVarsBackup);
+        return;
+    }
+
+    // Save the last directory
+    $gAlembicExportLastDirectory = dirname($result[0]);
+    $gAlembicExportLastWorkspace = `workspace -q -rootDirectory`;
+
+    // parameters
+    int    $cacheTimeRange            = `optionVar -q Alembic_exportCacheTimeRange`;
+    float  $start                     = `optionVar -q Alembic_exportStart`;
+    float  $end                       = `optionVar -q Alembic_exportEnd`;
+    float  $evaluateEvery             = `optionVar -q Alembic_exportEvaluateEvery`;
+    int    $enableFrameRelativeSample = `optionVar -q Alembic_exportEnableFrameRelativeSample`;
+    float  $lowFrameRelativeSample    = `optionVar -q Alembic_exportLowFrameRelativeSample`;
+    float  $highFrameRelativeSample   = `optionVar -q Alembic_exportHighFrameRelativeSample`;
+    int    $enablePreRoll             = `optionVar -q Alembic_exportEnablePreRoll`;
+    float  $preRollStartFrame         = `optionVar -q Alembic_exportPreRollStartFrame`;
+    string $attr                      = `optionVar -q Alembic_exportAttr`;
+    string $attrPrefix                = `optionVar -q Alembic_exportAttrPrefix`;
+    int    $verbose                   = `optionVar -q Alembic_exportVerbose`;
+    int    $noNormals                 = `optionVar -q Alembic_exportNoNormals`;
+    int    $renderableOnly            = `optionVar -q Alembic_exportRenderableOnly`;
+    int    $stripNamespaces           = `optionVar -q Alembic_exportStripNamespaces`;
+    int    $uvWrite                   = `optionVar -q Alembic_exportUVWrite`;
+    int    $wholeFrameGeo             = `optionVar -q Alembic_exportWholeFrameGeo`;
+    int    $worldSpace                = `optionVar -q Alembic_exportWorldSpace`;
+    int    $writeVisibility           = `optionVar -q Alembic_exportWriteVisibility`;
+    int    $filterEulerRotations      = `optionVar -q Alembic_exportFilterEulerRotations`;
+    int    $dataFormat                = `optionVar -q Alembic_exportDataFormat`;
+    string $perFrameCallbackMel       = `optionVar -q Alembic_exportPerFrameCallbackMel`;
+    string $postJobCallbackMel        = `optionVar -q Alembic_exportPostJobCallbackMel`;
+    string $perFrameCallbackPython    = `optionVar -q Alembic_exportPerFrameCallbackPython`;
+    string $postJobCallbackPython     = `optionVar -q Alembic_exportPostJobCallbackPython`;
+
+    // build AbcExport command
+    string $command = "AbcExport ";
+    string $job;
+
+    float $startFrame = 1;
+    float $endFrame   = 1;
+    if ($cacheTimeRange == 1) {
+        $startFrame = `getAttr defaultRenderGlobals.startFrame`;
+        $endFrame   = `getAttr defaultRenderGlobals.endFrame`;
+    }
+    else if ($cacheTimeRange == 2) {
+        $startFrame = `playbackOptions -q -min`;
+        $endFrame   = `playbackOptions -q -max`;
+    }
+    else if ($cacheTimeRange == 3) {
+        $startFrame = $start;
+        $endFrame   = $end;
+    }
+    $job += ("-frameRange " + $startFrame + " " + $endFrame + " ");
+
+    if ($evaluateEvery != 1) {
+        if ($evaluateEvery <= 0) {
+            error (uiRes("m_doAlembicExportArgList.kInvalidEvaluateEvery"));
+            return;
+        }
+        $job += ("-step " + $evaluateEvery + " ");
+    }
+
+    if ($enableFrameRelativeSample) {
+        if ($lowFrameRelativeSample > 0 || $lowFrameRelativeSample < -$evaluateEvery) {
+            error (uiRes("m_doAlembicExportArgList.kInvalidLowFrameRelativeSample"));
+            return;
+        }
+        if ($highFrameRelativeSample < 0 || $highFrameRelativeSample > $evaluateEvery) {
+            error (uiRes("m_doAlembicExportArgList.kInvalidHighFrameRelativeSample"));
+            return;
+        }
+        $job += "-frameRelativeSample ";
+        $job += $lowFrameRelativeSample;
+        $job += " -frameRelativeSample 0 -frameRelativeSample ";
+        $job += $highFrameRelativeSample;
+        $job += " ";
+    }
+
+    if ($enablePreRoll) {
+        $command += ("-preRollStartFrame " + $preRollStartFrame + " ");
+    }
+
+    int $i;
+    string $attrArray[], $attrPrefixArray[];
+    tokenize $attr "," $attrArray;
+    tokenize $attrPrefix "," $attrPrefixArray;
+    for ($i = 0; $i < size($attrArray); $i++) {
+        if (size($attrArray[$i]) > 0) {
+            $job += "-attr ";
+            $job += formValidObjectName($attrArray[$i]);
+            $job += " ";
+        }
+    }
+    for ($i = 0; $i < size($attrPrefixArray); $i++) {
+        if (size($attrPrefixArray[$i]) > 0) {
+            $job += "-attrPrefix ";
+            $job += formValidObjectName($attrPrefixArray[$i]);
+            $job += " ";
+        }
+    }
+
+    if ($verbose) {
+        $command += "-verbose ";
+    }
+
+    if ($noNormals) {
+        $job += "-noNormals ";
+    }
+
+    if ($renderableOnly) {
+        $job += "-ro ";
+    }
+
+    if ($stripNamespaces) {
+        $job += "-stripNamespaces ";
+    }
+
+    if ($uvWrite) {
+        $job += "-uvWrite ";
+    }
+
+    if ($wholeFrameGeo) {
+        $job += "-wholeFrameGeo ";
+    }
+
+    if ($worldSpace) {
+        $job += "-worldSpace ";
+    }
+
+    if ($writeVisibility) {
+        $job += "-writeVisibility ";
+    }
+
+    if ($filterEulerRotations) {
+        $job += "-eulerFilter ";
+    }
+
+    if ($dataFormat == 2) {
+        $job += "-dataFormat ogawa ";
+    }
+
+    if (size($perFrameCallbackMel) > 0) {
+        if (containsWhiteSpace($perFrameCallbackMel)) {
+            $perFrameCallbackMel = "\"" + encodeString($perFrameCallbackMel) + "\""; 
+        }
+        $job += ("-melPerFrameCallback " + encodeString($perFrameCallbackMel) + " ");
+    }
+
+    if (size($postJobCallbackMel) > 0) {
+        if (containsWhiteSpace($postJobCallbackMel)) {
+            $postJobCallbackMel = "\"" + encodeString($postJobCallbackMel) + "\""; 
+        }
+        $job += ("-melPostJobCallback " + encodeString($postJobCallbackMel) + " ");
+    }
+
+    if (size($perFrameCallbackPython) > 0) {
+        if (containsWhiteSpace($perFrameCallbackPython)) {
+            $perFrameCallbackPython = "\"" + encodeString($perFrameCallbackPython) + "\""; 
+        }
+        $job += ("-pythonPerFrameCallback " + encodeString($perFrameCallbackPython) + " ");
+    }
+
+    if (size($postJobCallbackPython) > 0) {
+        if (containsWhiteSpace($postJobCallbackPython)) {
+            $postJobCallbackPython = "\"" + encodeString($postJobCallbackPython) + "\""; 
+        }
+        $job += ("-pythonPostJobCallback " + encodeString($postJobCallbackPython) + " ");
+    }
+
+    if (!$exportAll) {
+        string $selections[] = `ls -selection -long`;
+        string $selection;
+        for ($selection in $selections) {
+            $job += "-root " + $selection + " ";
+        }
+    }
+
+    string $file = $result[0];
+    if (containsWhiteSpace($file)) {
+        $file = "\"" + $file + "\"";
+    }
+
+    $command += ("-j \"" + $job + "-file " + encodeString($file) + "\"");
+
+    // execute command
+    if (!`pluginInfo -q -loaded AbcExport`) {
+        error (uiRes("m_doAlembicExportArgList.kAbcExportNotLoaded"));
+        return;
+    }
+    evalEcho($command);
+}
+

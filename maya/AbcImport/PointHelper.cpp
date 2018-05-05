@@ -94,11 +94,14 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     Alembic::Abc::P3fArraySamplePtr v3ptr = samp.getPositions();
     MVectorArray vArray;
 
+    // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+    float scaleUnit = getScaleUnitImport();
+
     for (unsigned int pId = 0; pId < pSize; pId++)
     {
-        pArray.append((*v3ptr)[pId].x,
-                      (*v3ptr)[pId].y,
-                      (*v3ptr)[pId].z);
+        pArray.append((*v3ptr)[pId].x * scaleUnit,
+                      (*v3ptr)[pId].y * scaleUnit,
+                      (*v3ptr)[pId].z * scaleUnit);
     }
 
     status = fnParticle.emit(pArray);

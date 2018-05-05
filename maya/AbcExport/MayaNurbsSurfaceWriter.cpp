@@ -183,6 +183,9 @@ void MayaNurbsSurfaceWriter::write()
     sampPosWeights.reserve(numCVs);
     bool weightsOne = true;
 
+    // counter scale to match unit system selected in maya since maya will output centimeters anyway
+    float scaleUnit = util::getScaleUnitExport();
+
     // Maya stores the data where v varies the fastest (v,u order)
     // so we need to pack the data differently u,v order
     // (v reversed to make clockwise???)
@@ -191,10 +194,11 @@ void MayaNurbsSurfaceWriter::write()
         for (int u = 0; u < numCVsInU; u++)
         {
             int index = u * numCVsInV + v;
-            sampPos.push_back(Alembic::Abc::V3f(
-                static_cast<float>(cvArray[index].x),
-                static_cast<float>(cvArray[index].y),
-                static_cast<float>(cvArray[index].z) ));
+            Alembic::Abc::V3f p(static_cast<float>(cvArray[index].x),
+                                static_cast<float>(cvArray[index].y),
+                                static_cast<float>(cvArray[index].z));
+
+            sampPos.push_back(p * scaleUnit);
 
             if (fabs(cvArray[index].w - 1.0) > 1e-12)
             {
@@ -275,6 +279,7 @@ void MayaNurbsSurfaceWriter::write()
                     double offsetV = startV+endV;
                     for (Alembic::Util::int32_t l = 0; l < numCVs; l++)
                     {
+                        /// need scale ? cvArray[l]
                         trimU.push_back(static_cast<float>(cvArray[l].x));
 
                         // v' = maxV + minV - v

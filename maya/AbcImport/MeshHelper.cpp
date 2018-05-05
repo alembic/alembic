@@ -226,12 +226,15 @@ namespace
 
         oPointArray.setLength(numPoints);
 
+        // counter scale to match unit system selected in maya since maya will take it as centimeters anyway
+        float scaleUnit = getScaleUnitImport();
+
         if (alpha == 0 || iCeilPoints == NULL)
         {
             for (unsigned int i = 0; i < numPoints; ++i)
             {
                 oPointArray.set(i,
-                    (*iPoints)[i].x, (*iPoints)[i].y, (*iPoints)[i].z);
+                    (*iPoints)[i].x * scaleUnit, (*iPoints)[i].y * scaleUnit, (*iPoints)[i].z * scaleUnit);
             }
         }
         else
@@ -240,11 +243,11 @@ namespace
             {
                 oPointArray.set(i,
                     simpleLerp<float>(alpha,
-                        (*iPoints)[i].x, (*iCeilPoints)[i].x),
+                        (*iPoints)[i].x, (*iCeilPoints)[i].x) * scaleUnit,
                     simpleLerp<float>(alpha,
-                        (*iPoints)[i].y, (*iCeilPoints)[i].y),
+                        (*iPoints)[i].y, (*iCeilPoints)[i].y) * scaleUnit,
                     simpleLerp<float>(alpha,
-                        (*iPoints)[i].z, (*iCeilPoints)[i].z));
+                        (*iPoints)[i].z, (*iCeilPoints)[i].z) * scaleUnit);
             }
         }
 
