@@ -207,8 +207,7 @@ namespace
                     MFnTypedAttribute attr;
                     MObject attrObj = attr.create(attrName, attrName,
                                               MFnData::kString, strAttrObject);
-                    fnDepNode.addAttribute(attrObj,
-                                         MFnDependencyNode::kLocalDynamicAttr);
+                    fnDepNode.addAttribute(attrObj);
                     abcFacesetNamePlug = fnDepNode.findPlug(attrObj, true);
                 }
                 abcFacesetNamePlug.setValue(faceSetName);
@@ -278,7 +277,7 @@ namespace
             Alembic::Util::int8_t visVal;
             iVisProp.get(&visVal);
             MFnDependencyNode dep(iParent);
-            MPlug plug = dep.findPlug("visibility");
+            MPlug plug = dep.findPlug("visibility", true);
             if (!plug.isNull())
             {
                 plug.setBool(visVal != 0);
@@ -332,9 +331,9 @@ namespace
         // Set the intermediate mesh as Maya intermediate object and
         // connect it to the inMesh plug
         modifier.renameNode(ioFn.object(), fn.name() + "Orig");
-        modifier.newPlugValueBool(ioFn.findPlug("intermediateObject"), true);
-        modifier.newPlugValueBool(ioFn.findPlug(aioAttr), true);
-        modifier.connect(ioFn.findPlug("outMesh"), fn.findPlug("inMesh"));
+        modifier.newPlugValueBool(ioFn.findPlug("intermediateObject", true), true);
+        modifier.newPlugValueBool(ioFn.findPlug(aioAttr, true), true);
+        modifier.connect(ioFn.findPlug("outMesh", true), fn.findPlug("inMesh", true));
         modifier.doIt();
     }
 
@@ -343,7 +342,7 @@ namespace
         // When merge with a referenced node with history, delete the
         // previous intermediate mesh that is created by Alembic plug-in.
         MPlugArray sources;
-        fn.findPlug("inMesh").connectedTo(sources, true, false);
+        fn.findPlug("inMesh", true).connectedTo(sources, true, false);
         if (sources.length() > 0)
         {
             MObject io = sources[0].node();
@@ -1013,7 +1012,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::ICurves & iNode)
 
         if (!fncurve.object().isNull())
         {
-            MPlug dstPlug = fncurve.findPlug("create");
+            MPlug dstPlug = fncurve.findPlug("create", true);
             disconnectAllPlugsTo(dstPlug);
             disconnectProps(fncurve, mData.mPropList, firstProp);
             addToPropList(firstProp, curvesObj);
@@ -1390,7 +1389,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::INuPatch& iNode)
             return status;
         }
 
-        MPlug dstPlug = fn.findPlug("create");
+        MPlug dstPlug = fn.findPlug("create", true);
         disconnectAllPlugsTo(dstPlug);
         disconnectProps(fn, mData.mPropList, firstProp);
         addToPropList(firstProp, nurbsObj);

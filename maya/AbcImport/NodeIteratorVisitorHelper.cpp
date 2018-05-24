@@ -97,11 +97,11 @@ void addString(MObject & iParent, const std::string & iAttrName,
     MObject attrObj = attr.create(attrName, attrName, MFnData::kString,
         strAttrObject);
     MFnDependencyNode parentFn(iParent);
-    parentFn.addAttribute(attrObj, MFnDependencyNode::kLocalDynamicAttr);
+    parentFn.addAttribute(attrObj);
 
     // work around bug where this string wasn't getting saved to a file when
     // it is the default value
-    MPlug plug = parentFn.findPlug(attrName);
+    MPlug plug = parentFn.findPlug(attrName, true);
     if (!plug.isNull())
     {
         plug.setString(attrValue);
@@ -161,7 +161,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 {
     MFnDependencyNode parentFn(iParent);
     MString attrName(iProp.getName().c_str());
-    MPlug plug = parentFn.findPlug(attrName);
+    MPlug plug = parentFn.findPlug(attrName, true);
 
     MFnTypedAttribute typedAttr;
     MFnNumericAttribute numAttr;
@@ -866,10 +866,9 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 attrObj = typedAttr.create(attrName, attrName, MFnData::kString,
                         MObject::kNullObj);
 
-                parentFn.addAttribute(attrObj,
-                    MFnDependencyNode::kLocalDynamicAttr);
+                parentFn.addAttribute(attrObj);
 
-                plug = parentFn.findPlug(attrName);
+                plug = parentFn.findPlug(attrName, true);
                 if (!plug.isNull())
                 {
                     plug.setValue(strAttrObject);
@@ -952,9 +951,9 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 attrObj = typedAttr.create(attrName, attrName, MFnData::kString,
                         MObject::kNullObj);
 
-                parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+                parentFn.addAttribute(attrObj);
 
-                plug = parentFn.findPlug(attrName);
+                plug = parentFn.findPlug(attrName, true);
                 if (!plug.isNull())
                 {
                     plug.setValue(strAttrObject);
@@ -983,7 +982,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
 
     if ( ! parentFn.hasAttribute( attrName ) )
     {
-        parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+        parentFn.addAttribute(attrObj);
     }
 
     addArbAttrAndScope(iParent, iProp.getName(),
@@ -1159,7 +1158,7 @@ bool addScalarProp(Alembic::Abc::IScalarProperty & iProp, MObject & iParent)
 {
     MFnDependencyNode parentFn(iParent);
     MString attrName(iProp.getName().c_str());
-    MPlug plug = parentFn.findPlug(attrName);
+    MPlug plug = parentFn.findPlug(attrName, true);
 
     MFnTypedAttribute typedAttr;
     MFnNumericAttribute numAttr;
@@ -1294,9 +1293,9 @@ bool addScalarProp(Alembic::Abc::IScalarProperty & iProp, MObject & iParent)
           attrObj = typedAttr.create(attrName, attrName, MFnData::kString,
                         MObject::kNullObj);
 
-          parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+          parentFn.addAttribute(attrObj);
 
-          plug = parentFn.findPlug(attrName);
+          plug = parentFn.findPlug(attrName, true);
           if (!plug.isNull())
           {
              plug.setValue(strAttrObject);
@@ -1321,7 +1320,7 @@ bool addScalarProp(Alembic::Abc::IScalarProperty & iProp, MObject & iParent)
 
     if ( ! parentFn.hasAttribute( attrName ) )
     {
-        parentFn.addAttribute(attrObj,  MFnDependencyNode::kLocalDynamicAttr);
+        parentFn.addAttribute(attrObj);
     }
 
     addArbAttrAndScope(iParent, iProp.getName(),
@@ -2942,15 +2941,14 @@ MString connectAttr(ArgData & iArgData)
         MFnNumericAttribute numAttr;
         MObject attrObj = numAttr.create("allColorSets", "allColorSets",
             MFnNumericData::kBoolean);
-        alembicNodeFn.addAttribute(attrObj,
-            MFnDependencyNode::kLocalDynamicAttr);
+        alembicNodeFn.addAttribute(attrObj);
     }
 
     // set AlembicNode name
     MString fileName;
     stripFileName((*iArgData.mFileNames.begin()).c_str(), fileName);
     MString alembicNodeName = fileName +"_AlembicNode";
-    alembicNodeFn.setName(alembicNodeName, &status);
+    alembicNodeFn.setName(alembicNodeName, false, &status);
 
     // set input file name (Deprecated but leaving here for legacy support)
     MPlug plug = alembicNodeFn.findPlug("abc_File", true, &status);

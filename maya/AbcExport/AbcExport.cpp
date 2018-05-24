@@ -682,7 +682,7 @@ try
                     continue;
                 }
 
-                MPlug abcFilePlug = alembicNode.findPlug("abc_File");
+                MPlug abcFilePlug = alembicNode.findPlug("abc_File", true);
                 if (!abcFilePlug.isNull())
                 {
                     MFileObject alembicFile;
@@ -699,7 +699,7 @@ try
                     }
                 }
 
-                MPlug abcLayerFilePlug = alembicNode.findPlug("abc_layerFiles");
+                MPlug abcLayerFilePlug = alembicNode.findPlug("abc_layerFiles", true);
                 if (!abcLayerFilePlug.isNull())
                 {
                     MFnStringArrayData fnSAD( abcLayerFilePlug.asMObject() );

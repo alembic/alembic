@@ -196,7 +196,7 @@ void MayaNurbsCurveWriter::write()
     bool useConstWidth = false;
 
     MFnDependencyNode dep(mRootDagPath.transform());
-    MPlug constWidthPlug = dep.findPlug("width");
+    MPlug constWidthPlug = dep.findPlug("width", true);
 
     if (!constWidthPlug.isNull())
     {
@@ -321,7 +321,7 @@ void MayaNurbsCurveWriter::write()
         }
 
         // width
-        MPlug widthPlug = curve.findPlug("width");
+        MPlug widthPlug = curve.findPlug("width", true);
 
         if (!useConstWidth && !widthPlug.isNull())
         {
