@@ -71,7 +71,7 @@ public:
         mOutRead = std::vector<bool>(9, false);
     }
 
-    virtual ~AlembicNode() {}
+    ~AlembicNode() override {}
 
     // avoid calling createSceneVisitor twice by getting the
     // list of hdf reader pointers
@@ -107,17 +107,17 @@ public:
     static MObject mEndFrameAttr;
 
     // override virtual methods from MPxNode
-    virtual MStatus compute(const MPlug & plug, MDataBlock & dataBlock);
+    virtual MStatus compute(const MPlug & plug, MDataBlock & dataBlock) override;
 
     // return a pointer to a new instance of the class
     // (derived from MPxNode) that implements the new node type
     static void* creator() { return (new AlembicNode()); }
 
     // override virtual methods from MPxNode
-    virtual MStatus setDependentsDirty(const MPlug& plug, MPlugArray& plugArray);
-    virtual bool isPassiveOutput(const MPlug & plug) const;
+    virtual MStatus setDependentsDirty(const MPlug& plug, MPlugArray& plugArray) override;
+    virtual bool isPassiveOutput(const MPlug & plug) const override;
 #if MAYA_API_VERSION >= 201600
-    virtual SchedulingType schedulingType()const;
+    virtual SchedulingType schedulingType()const override;
 #endif
 
     // initialize all the attributes to default values
@@ -127,12 +127,11 @@ public:
     // files to archive.
     virtual MStringArray getFilesToArchive(bool shortName,
                                            bool unresolvedName,
-                                           bool markCouldBeImageSequence) const;
+                                           bool markCouldBeImageSequence) const override;
 #if defined(MAYA_WANT_EXTERNALCONTENTTABLE)
-    virtual void getExternalContent(MExternalContentInfoTable& table) const;
-    virtual void setExternalContent(const MExternalContentLocationTable& table);
+    virtual void getExternalContent(MExternalContentInfoTable& table) const override;
+    virtual void setExternalContent(const MExternalContentLocationTable& table) override;
 #endif
-
     void   setDebugMode(bool iDebugOn){ mDebugOn = iDebugOn; }
     void   setIncludeFilterString(const MString & iIncludeFilterString)
     {

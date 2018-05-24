@@ -45,7 +45,6 @@
 
 #include <Alembic/AbcGeom/IXform.h>
 
-class MDagPath;
 
 MObject create(Alembic::AbcGeom::IXform & iLocator,
                MObject & iParent,

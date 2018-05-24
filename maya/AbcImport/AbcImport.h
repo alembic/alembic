@@ -44,9 +44,9 @@ class AbcImport: public MPxCommand
 public:
 
     AbcImport();
-    ~AbcImport();
+    ~AbcImport() override;
 
-    MStatus doIt(const MArgList& args);
+    MStatus doIt(const MArgList& args) override;
 
     static MSyntax createSyntax();
     static void*   creator();
