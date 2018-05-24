@@ -97,7 +97,7 @@ MObjectArray getOutConnectedSG( const MDagPath &shapeDPath )
 
     // iterate through the output connected shading engines
     for( ; itDG.isDone()!= true; itDG.next() )
-        connSG.append( itDG.thisNode() );
+        connSG.append( itDG.currentItem() );
 
     return connSG;
 }

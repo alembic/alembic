@@ -666,7 +666,7 @@ try
 
             // check the path must exist before writing
             MFileObject absoluteFilePath;
-            absoluteFilePath.setRawFullName(absoluteFile.path());
+            absoluteFilePath.setRawFullName(absoluteFile.resolvedPath());
             if (!absoluteFilePath.exists()) {
                 MString error;
                 error.format("Path ^1s does not exist!", absoluteFilePath.resolvedFullName());

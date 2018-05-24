@@ -284,7 +284,7 @@ bool util::isAnimated(MObject & object, bool checkParent)
     NodesToCheckStruct nodeStruct;
     for (; !iter.isDone(); iter.next())
     {
-        MObject node = iter.thisNode();
+        MObject node = iter.currentItem();
 
         if (node.hasFn(MFn::kPluginDependNode) ||
                 node.hasFn( MFn::kConstraint ) ||
