@@ -84,7 +84,20 @@ namespace
 
         MDagPath dpShape;
         status = mFnNode.getPath(dpShape);
-
+        
+	// The mesh may be an intermediate object if it's deformed. We should
+        // assign shading groups to the faces of the deformed mesh instead.
+        // Because the deformed mesh is the mesh for shading.
+        if (mFnNode.isIntermediateObject())
+        {
+            // Only non-intermediate shapes are used for shading. We call
+            // extendToShape() to find the non-intermediate shape.
+            MDagPath shadedShape = dpShape;
+            shadedShape.pop();
+            if (shadedShape.extendToShape())
+                dpShape = shadedShape;
+        }
+        
         // Empty the set
         MFnSet         fnSet( iSet );
         MSelectionList selList;
