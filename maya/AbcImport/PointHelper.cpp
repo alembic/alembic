@@ -51,6 +51,22 @@
 #include <maya/MItDependencyNodes.h>
 #include <maya/MFnSet.h>
 
+// verbose
+std::string scopeToString( Alembic::AbcGeom::GeometryScope input )
+{
+	switch(input)
+	{
+		case Alembic::AbcGeom::kConstantScope: return "kConstantScope";
+		case Alembic::AbcGeom::kFacevaryingScope:return "kFacevaryingScope";
+		case Alembic::AbcGeom::kUniformScope: return "kUniformScope";
+		case Alembic::AbcGeom::kUnknownScope: return "kUnknownScope";
+		case Alembic::AbcGeom::kVaryingScope: return "kVaryingScope";
+		case Alembic::AbcGeom::kVertexScope: return "kVertexScope";
+	}
+	return "kUnknownScope";
+}
+
+
 bool getSampleInfo( size_t particleNumber, unsigned int sampleSize, int sampleExtent, std::string sampleName, PointsSampleData & out )
 {
 	// PerParticle attribute can only be as big as the number of particle
@@ -61,8 +77,7 @@ bool getSampleInfo( size_t particleNumber, unsigned int sampleSize, int sampleEx
 	out.extent = sampleExtent;
 	out.origName = sampleName;
 	out.name = sampleName;
-
-	DISPLAY_INFO("\tsampleSize; " << sampleSize);
+	out.origExtent = sampleExtent;
 
 	if ( sampleSize == particleNumber )
 	{
@@ -140,7 +155,11 @@ MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MOb
 		const std::string propName =  propHeader.getName();
 		int propExtent = propHeader.getDataType().getExtent();
 
+
 		Alembic::Abc::IArrayProperty arrayProp( props, propName );
+
+		// Get geometry scope
+		Alembic::AbcGeom::GeometryScope propScope = Alembic::AbcGeom::GetGeometryScope(arrayProp.getMetaData());
 
 		Alembic::AbcCoreAbstract::DataType dtype = arrayProp.getDataType();
 			Alembic::Util::PlainOldDataType pod = dtype.getPod();
@@ -163,26 +182,32 @@ MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MOb
 			}
 			default:
 			{
-				DISPLAY_INFO("\t attribute is not numerica, skipping");
+				DISPLAY_INFO("\t attribute is not numerical, skipping");
 				continue;
 			}
 		}
-
-
-		DISPLAY_INFO( "##\n" << propName << ": Comparing at index: " << compareSampleSelector.getRequestedIndex() << " with particle size: " << particleSize );
 
 		Alembic::AbcCoreAbstract::ArraySamplePtr samp;
 
 		arrayProp.get(samp, compareSampleSelector);
 			unsigned int sampleSize = (unsigned int)samp->size();
 
+		DISPLAY_INFO("\t sampleSize  : " << sampleSize);
+		DISPLAY_INFO("\t sampleExtent: " << propExtent);
+		DISPLAY_INFO("\t sampleName  : " << propName);
+		DISPLAY_INFO("\t sampleSize  : " << sampleSize);
+		DISPLAY_INFO("\t sampleScope : " << scopeToString(propScope));
+
+
 		PointsSampleData sampleInfo;
 		if ( !getSampleInfo(particleSize, sampleSize, propExtent, propName, sampleInfo) )
 			continue;
 
 		sampleInfo.arrayProp = arrayProp;
+		sampleInfo.scope = scopeToString(propScope);
 
 		DISPLAY_INFO("\tCreating new PointsSampleData:");
+		DISPLAY_INFO("\t\t scope: " << sampleInfo.scope);
 		DISPLAY_INFO("\t\t abc sampleSize: " << sampleSize);
 		DISPLAY_INFO("\t\t abc extent: " << propExtent);
 		DISPLAY_INFO("\t\t sampleInfo.origName: " << sampleInfo.origName);
@@ -233,7 +258,9 @@ MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index,
 
 	if ( iData.empty() )
 	{
-		DISPLAY_INFO("\tiData is empty, skipping");
+		DISPLAY_INFO("\tiData is empty, feeding empty array");
+
+
 		return status;
 	}
 
@@ -243,6 +270,7 @@ MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index,
 		PointsSampleData sampleInfo = iData[ i ];
 
 		Alembic::Util::Dimensions dim;
+		DISPLAY_INFO( sampleInfo.name << ":");
 		DISPLAY_INFO("\t" << "Get array dimension");
 		sampleInfo.arrayProp.getDimensions(dim, Alembic::Abc::ISampleSelector(index));
 
@@ -260,23 +288,15 @@ MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index,
 		DISPLAY_INFO("\tgetting sample info from iData[" << sampleInfo.origName.c_str() << "]")
 
 		DISPLAY_INFO( "\t sampleInfo[" << sampleInfo.origName << "]");
+		DISPLAY_INFO( "\t\t\t scope: " << sampleInfo.scope );
 		DISPLAY_INFO( "\t\t\t attributeName: " << sampleInfo.name );
-		DISPLAY_INFO( "\t\t\t extent: " << sampleInfo.extent );
+		DISPLAY_INFO( "\t\t\t orig extent: " << sampleInfo.origExtent );
+		DISPLAY_INFO( "\t\t\t extent     : " << sampleInfo.extent );
 		DISPLAY_INFO( "\t\t\t sampleSize: " << sampSize );
 
-		// Single value
-		if (sampSize == 1)
-		{
-			DISPLAY_INFO( "\t\t\tfloat with single value" );
-			MDoubleArray arr = dynDataFn.doubleArray( sampleInfo.name.c_str(), &status);
 
-			DISPLAY_INFO( "\t\t\t Setting particle attribute: " << sampleInfo.origName << " with 1 double value" );
-
-			arr.append( samp[0] );
-			continue;
-		}
 		// 1d array
-		else if ( sampleInfo.extent == 1 )
+		if ( sampleInfo.extent == 1 )
 		{
 			DISPLAY_INFO( "\t\t\tfloat with extent 1 and no fake extent" );
 			MDoubleArray doubleArray = dynDataFn.doubleArray( sampleInfo.name.c_str(), &status);
@@ -293,7 +313,7 @@ MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index,
 
 			continue;
 		}
-		else // extent is 2 or 3
+		else // 2d or 3d array
 		{
 			DISPLAY_INFO( "\t\t\tfloat with extent: " << sampleInfo.extent );
 
@@ -322,6 +342,8 @@ MStatus readArbGeomParams(Alembic::AbcCoreAbstract::index_t index,
 
 			continue;
 		}
+
+		DISPLAY_INFO("\t\t\t" << "we reached here, should we feed an empty array ?");
 
 	}
 	return status;
@@ -437,6 +459,13 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     DISPLAY_INFO( "\t\t pSize:  " << samp.getPositions()->size() );
     DISPLAY_INFO( "\t\t idSize: " << samp.getIds()->size() );
 
+// WRONG, we need to populate empty arrays or maya will keep the previous plug value
+//	if ( !pSize )
+//	{
+//		DISPLAY_INFO("Data is empty, don't populate arrays")
+//		return status;
+//	}
+
 	MDoubleArray countArray = dynDataFn.doubleArray("count", &status);
 	countArray.append( (double)pSize );
 
@@ -459,16 +488,20 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 	Alembic::AbcGeom::IFloatGeomParam widthProp = schema.getWidthsParam();
 	Alembic::Abc::FloatArraySamplePtr fptr;
 	MDoubleArray radiusArray;
+	Alembic::AbcGeom::GeometryScope widthScope( Alembic::AbcGeom::kUnknownScope );
 	if ( widthProp.valid() )
 	{
 // TODO, shouldn't width be 2*radius ?
 		DISPLAY_INFO("Width Param is valid");
+
 		Alembic::AbcGeom::IFloatGeomParam::Sample widthSamp;
 		widthProp.getExpanded(widthSamp, index);
 		radiusArray = dynDataFn.doubleArray("radiusPP", &status);
 		radiusArray.setLength(pSize);
 		fptr = widthSamp.getVals();
-		DISPLAY_INFO( "\t\t widthSize: " << fptr->size() );
+		Alembic::AbcGeom::GeometryScope widthScope = widthSamp.getScope();
+		DISPLAY_INFO( "\t\t widthSize : " << fptr->size() );
+		DISPLAY_INFO( "\t\t widthScope: " << scopeToString(widthScope) );
 	}
 
 	MVector vec;
@@ -481,13 +514,20 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
 		vec.z = (*p3ptr)[i].z;
 		positionArray[i] = vec;
 
-		vec.x = (*v3fptr)[i].x;
-		vec.y = (*v3fptr)[i].y;
-		vec.z = (*v3fptr)[i].z;
-		velocityArray[i] = vec;
+		if ( v3fptr )
+		{
+			vec.x = (*v3fptr)[i].x;
+			vec.y = (*v3fptr)[i].y;
+			vec.z = (*v3fptr)[i].z;
+			velocityArray[i] = vec;
+		}
 
 		if ( widthProp.valid() )
-			radiusArray[i] = (*fptr)[i];
+			if ( widthScope < Alembic::AbcGeom::kVaryingScope )
+				// Special Case, we got only one value, populate all particles with this value
+				radiusArray[i] = (*fptr)[0];
+			else
+				radiusArray[i] = (*fptr)[i];
 	}
 
 	Alembic::Abc::ICompoundProperty props = schema.getArbGeomParams();
@@ -576,77 +616,7 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     fnSG.addMember(iObject);
     DISPLAY_INFO("assign SG: " << fnSG.name() << " to nParticle.");
 
-
-/*    // Handle radius
-    // IF we have information for the radius, set the shading to blobby surface
-    Alembic::AbcGeom::IFloatGeomParam widthProp = schema.getWidthsParam();
-	if ( widthProp.valid() )
-	{
-		DISPLAY_INFO( "\tCreating attribute: radiusPP" );
-		DISPLAY_INFO( "\twith type: kDoubleArray" );
-		attrObj = tAttr.create("radiusPP", "radiusPP", MFnData::kDoubleArray, &status);
-		MCHECKERROR(status);
-		status = modifier.addAttribute(iObject, attrObj);
-		status = modifier.doIt();
-		MCHECKERROR(status);
-
-		// particleRenderType is an enum, 7 is for blobby surface
-		MPlug renderTypePlug = MFnDependencyNode(iObject).findPlug("particleRenderType");
-		status = modifier.newPlugValueInt(renderTypePlug, 7);
-		status = modifier.doIt();
-		MCHECKERROR(status);
-	}*/
-
 	status = createPerParticleAttributes(iNode, iObject);
 
 	return status;
-/*
-
-	// We need to create a custom attribute for each abcGeomParam found under the PointSchema
-    // nParticle object can only deal with doubleArray or vectorArray, so the only thing we need to know is the extent
-    // But because sometimes the writer does not specify it explicitly, we need to investigate the header
-	// we compare the sample position size to any geomParam sample size, if it is equal to twice or three time the position size,
-	// we assume having an extent of 2 or 3
-    PointSampleDataList iData;
-	status = getPointArbGeomParamsInfos(iNode, iObject, iData);
-
-	size_t numValidProps = iData.size();
-	DISPLAY_INFO("Found " << numValidProps << " valid arbGeomProperties for nParticles");
-
-	if ( numValidProps == 0 )
-	{
-		DISPLAY_INFO("No param found, skipping");
-		return status;
-	}
-
-	DISPLAY_INFO( "Looping over iData:" );
-    for (unsigned int i = 0; i < numValidProps; ++ i)
-	{
-		PointsSampleData & sampleInfo = iData[ i ];
-		DISPLAY_INFO("\t" << "currentAttr: " << sampleInfo.origName << ", " << sampleInfo.name);
-
-		if (sampleInfo.extent == 1)
-		{
-			DISPLAY_INFO( "\tCreating attribute: " << sampleInfo.name << " (orig: " << sampleInfo.origName << ")" );
-			DISPLAY_INFO( "\twith type: kDoubleArray" );
-			attrObj = tAttr.create(sampleInfo.name.c_str(), sampleInfo.name.c_str(), MFnData::kDoubleArray, &status);
-			MCHECKERROR(status);
-			status = modifier.addAttribute(iObject, attrObj);
-			MCHECKERROR(status);
-		}
-		else
-		{
-			DISPLAY_INFO( "\tCreating attribute: " << sampleInfo.name << " (orig: " << sampleInfo.origName << ")" );
-			DISPLAY_INFO( "\twith type: kVectorArray" );
-			attrObj = tAttr.create(sampleInfo.name.c_str(), sampleInfo.name.c_str(), MFnData::kVectorArray, &status);
-			MCHECKERROR(status);
-			status = modifier.addAttribute(iObject, attrObj);
-			MCHECKERROR(status);
-		}
-	}
-
-    status = modifier.doIt();
-
-    return status;
-    */
 }

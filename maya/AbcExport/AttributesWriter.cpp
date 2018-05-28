@@ -46,6 +46,20 @@ namespace {
 static const char * cAttrScope = "_AbcGeomScope";
 static const char * cAttrType  = "_AbcType";
 
+std::string scopeToString( AbcGeom::GeometryScope input )
+{
+	switch(input)
+	{
+		case AbcGeom::kConstantScope: return "kConstantScope";
+		case AbcGeom::kFacevaryingScope:return "kFacevaryingScope";
+		case AbcGeom::kUniformScope: return "kUniformScope";
+		case AbcGeom::kUnknownScope: return "kUnknownScope";
+		case AbcGeom::kVaryingScope: return "kVaryingScope";
+		case AbcGeom::kVertexScope: return "kVertexScope";
+	}
+	return "kUnknownScope";
+}
+
 // returns true if a plug is of a simple numeric data type
 bool isDataAttr(const MPlug & iParent)
 {
@@ -1725,7 +1739,7 @@ MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MS
 		// we only filter non user created attribute
 		if ( !attr.isDynamic() )
 		{
-			// remove attribute starting with "internal"
+			// manualy filter a few attributes
 			if ( 	attrName.substring(0, 7) == "internal" ||
 					attrName.toLowerCase().substring(attrName.length() - 5, attrName.length()) == "cache" ||
 					attrName.substring( attrName.length() - 1, attrName.length()) == "0" )
@@ -1792,7 +1806,6 @@ AttributesWriter::AttributesWriter(
 
         MString propName = plug.partialName(0, 0, 0, 0, 0, 1);
 
-        DISPLAY_INFO( "\t" << propName << ":" )
 
         std::string propStr = propName.asChar();
 
@@ -1815,6 +1828,7 @@ AttributesWriter::AttributesWriter(
         	if ( *it == propName )
         	{
         		isPerParticle = true;
+				DISPLAY_INFO(propName << ":" )
         		DISPLAY_INFO("\t" << "found a per particle Attribute !")
         		break;
         	}
@@ -1828,15 +1842,26 @@ AttributesWriter::AttributesWriter(
         if (!userAttr && !iArbGeom.valid())
             continue;
 
-        int sampType = util::getSampledType(plug);
+        int sampType = util::getSampledType(plug) || isPerParticle; // Per particle is always animated
+
+        DISPLAY_INFO( "findPlug: " << propName <<  cAttrScope );
 
         MPlug scopePlug = iNode.findPlug(propName + cAttrScope);
         AbcGeom::GeometryScope scope = AbcGeom::kUnknownScope;
 
-        if (!scopePlug.isNull())
+
+        if (isPerParticle) // Per particle is always kVaryingScope
+        {
+        	scope = AbcGeom::kVaryingScope;
+        }
+        else if (!scopePlug.isNull())
         {
             scope = strToScope(scopePlug.asString());
         }
+
+        DISPLAY_INFO("\t\t" << "Attribute Type: " << sampType)
+        DISPLAY_INFO("\t\t" << "userAttr: " << userAttr)
+        DISPLAY_INFO("\t\t" << "scope: " << scopeToString(scope))
 
         MString typeStr;
         MPlug typePlug = iNode.findPlug(propName + cAttrType);
