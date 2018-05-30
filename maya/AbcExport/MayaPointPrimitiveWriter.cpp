@@ -36,6 +36,9 @@
 
 #include "MayaPointPrimitiveWriter.h"
 #include "MayaUtility.h"
+#include <Alembic/AbcGeom/GeometryScope.h>
+
+namespace AbcGeom = Alembic::AbcGeom;
 
 MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
     double iFrame, MDagPath & iDag, Alembic::AbcGeom::OObject & iParent,
@@ -119,7 +122,7 @@ void MayaPointPrimitiveWriter::write(double iFrame)
         position.push_back(static_cast<float>(vec.z));
     }
     samp.setPositions(
-        Alembic::Abc::V3fArraySample((const Imath::V3f *) &position.front(),
+        Alembic::Abc::P3fArraySample((const Imath::V3f *) &position.front(),
             position.size() / 3) );
 
     // get particle velocity
@@ -163,7 +166,16 @@ void MayaPointPrimitiveWriter::write(double iFrame)
     {
 		Alembic::AbcGeom::OFloatGeomParam::Sample widthSamp;
 		widthSamp.setVals(width);
+		widthSamp.setScope( AbcGeom::kVaryingScope );
 		samp.setWidths( widthSamp );
+    }
+
+    mSchema.getProperty("");
+    DISPLAY_INFO("Schema properties:")
+    for (unsigned int i = 0; i < mSchema.getNumProperties(); ++i)
+    {
+    	Alembic::Abc::OBaseProperty prop = mSchema.getProperty(i);
+    	DISPLAY_INFO("\t" << i << ": "<< prop.getName());
     }
 
     mSchema.set(samp);
