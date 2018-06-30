@@ -267,7 +267,7 @@ MBoundingBox AbcWriteJob::getBoundingBox(double iFrame, const MMatrix & eMInvMat
             {
                 // check for riCurves flag for flattening all curve object to
                 // one curve group
-                MPlug riCurvesPlug = dagNode.findPlug("riCurves", &status);
+                MPlug riCurvesPlug = dagNode.findPlug("riCurves", true, &status);
                 if ( status == MS::kSuccess && riCurvesPlug.asBool() == true)
                 {
                     MBoundingBox box = dagNode.boundingBox();
@@ -389,7 +389,7 @@ void AbcWriteJob::setup(double iFrame, MayaTransformWriterPtr iParent, GetMember
 
     // look for riCurves flag for flattening all curve objects to a curve group
     MFnDependencyNode fnDepNode(ob, &status);
-    MPlug riCurvesPlug = fnDepNode.findPlug("riCurves", &status);
+    MPlug riCurvesPlug = fnDepNode.findPlug("riCurves", true, &status);
     bool riCurvesVal = riCurvesPlug.asBool();
     bool writeOutAsGroup = false;
     if (riCurvesVal)

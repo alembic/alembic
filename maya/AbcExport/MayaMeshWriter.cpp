@@ -158,7 +158,7 @@ getOutConnectedSG( const MDagPath &shapeDPath )
 
     // iterate through the output connected shading engines
     for( ; itDG.isDone()!= true; itDG.next() )
-        connSG.append( itDG.thisNode() );
+        connSG.append( itDG.currentItem() );
 
     return connSG;
 }
@@ -337,7 +337,7 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     name = util::stripNamespaces(name, iArgs.stripNamespace);
 
     // check to see if this poly has been tagged as a SubD
-    MPlug plug = lMesh.findPlug("SubDivisionMesh");
+    MPlug plug = lMesh.findPlug("SubDivisionMesh", true);
 
     // if there is flag "autoSubd", and NO "SubDivisionMesh" was defined,
     // let's check whether the mesh has crease edge, crease vertex or holes
@@ -1029,15 +1029,15 @@ void MayaMeshWriter::writeSubD(
     samp.setFaceIndices(Alembic::Abc::Int32ArraySample(facePoints));
     samp.setFaceCounts(Alembic::Abc::Int32ArraySample(pointCounts));
 
-    MPlug plug = lMesh.findPlug("faceVaryingInterpolateBoundary");
+    MPlug plug = lMesh.findPlug("faceVaryingInterpolateBoundary", true);
     if (!plug.isNull())
         samp.setFaceVaryingInterpolateBoundary(plug.asInt());
 
-    plug = lMesh.findPlug("interpolateBoundary");
+    plug = lMesh.findPlug("interpolateBoundary", true);
     if (!plug.isNull())
         samp.setInterpolateBoundary(plug.asInt());
 
-    plug = lMesh.findPlug("faceVaryingPropagateCorners");
+    plug = lMesh.findPlug("faceVaryingPropagateCorners", true);
     if (!plug.isNull())
         samp.setFaceVaryingPropagateCorners(plug.asInt());
 

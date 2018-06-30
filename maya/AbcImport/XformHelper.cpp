@@ -431,52 +431,52 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
 
     MPlug dstPlug;
 
-    dstPlug = trans.findPlug("scalePivotX");
+    dstPlug = trans.findPlug("scalePivotX", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("scalePivotY");
+    dstPlug = trans.findPlug("scalePivotY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("scalePivotZ");
+    dstPlug = trans.findPlug("scalePivotZ", true);
     disconnectAllPlugsTo(dstPlug);
     trans.setScalePivot(point, gSpace, gBalance);
 
-    dstPlug = trans.findPlug("scaleX");
+    dstPlug = trans.findPlug("scaleX", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("scaleY");
+    dstPlug = trans.findPlug("scaleY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("scaleZ");
+    dstPlug = trans.findPlug("scaleZ", true);
     disconnectAllPlugsTo(dstPlug);
     const double scale[3] = {1, 1, 1};
     trans.setScale(scale);
 
-    dstPlug = trans.findPlug("shearXY");
+    dstPlug = trans.findPlug("shearXY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("shearXZ");
+    dstPlug = trans.findPlug("shearXZ", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("shearYZ");
+    dstPlug = trans.findPlug("shearYZ", true);
     disconnectAllPlugsTo(dstPlug);
     trans.setShear(zero);
 
-    dstPlug = trans.findPlug("scalePivotTranslateX");
+    dstPlug = trans.findPlug("scalePivotTranslateX", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("scalePivotTranslateY");
+    dstPlug = trans.findPlug("scalePivotTranslateY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("scalePivotTranslateZ");
+    dstPlug = trans.findPlug("scalePivotTranslateZ", true);
     disconnectAllPlugsTo(dstPlug);
     trans.setScalePivotTranslation(vec, gSpace);
 
-    dstPlug = trans.findPlug("rotatePivotX");
+    dstPlug = trans.findPlug("rotatePivotX", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotatePivotY");
+    dstPlug = trans.findPlug("rotatePivotY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotatePivotZ");
+    dstPlug = trans.findPlug("rotatePivotZ", true);
     disconnectAllPlugsTo(dstPlug);
     trans.setRotatePivot(point, gSpace, gBalance);
 
-    dstPlug = trans.findPlug("rotateAxisX");
+    dstPlug = trans.findPlug("rotateAxisX", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotateAxisY");
+    dstPlug = trans.findPlug("rotateAxisY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotateAxisZ");
+    dstPlug = trans.findPlug("rotateAxisZ", true);
     disconnectAllPlugsTo(dstPlug);
     const MQuaternion quat;
     trans.setRotateOrientation(quat, gSpace, gBalance);
@@ -484,36 +484,36 @@ MStatus connectToXform(const Alembic::AbcGeom::XformSample & iSamp,
     MTransformationMatrix::RotationOrder order =
         MTransformationMatrix::kXYZ;
 
-    dstPlug = trans.findPlug("rotateOrder");
+    dstPlug = trans.findPlug("rotateOrder", true);
     disconnectAllPlugsTo(dstPlug);
     bool reorder = true;
     trans.setRotationOrder(order, reorder);
 
-    dstPlug = trans.findPlug("rotateX");
+    dstPlug = trans.findPlug("rotateX", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotateY");
+    dstPlug = trans.findPlug("rotateY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotateZ");
+    dstPlug = trans.findPlug("rotateZ", true);
     disconnectAllPlugsTo(dstPlug);
     trans.setRotation(zero, order);
 
-    dstPlug = trans.findPlug("rotatePivotTranslateX");
+    dstPlug = trans.findPlug("rotatePivotTranslateX", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotatePivotTranslateY");
+    dstPlug = trans.findPlug("rotatePivotTranslateY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("rotatePivotTranslateZ");
+    dstPlug = trans.findPlug("rotatePivotTranslateZ", true);
     disconnectAllPlugsTo(dstPlug);
     trans.setRotatePivotTranslation(vec, gSpace);
 
-    dstPlug = trans.findPlug("translateX");
+    dstPlug = trans.findPlug("translateX", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("translateY");
+    dstPlug = trans.findPlug("translateY", true);
     disconnectAllPlugsTo(dstPlug);
-    dstPlug = trans.findPlug("translateZ");
+    dstPlug = trans.findPlug("translateZ", true);
     disconnectAllPlugsTo(dstPlug);
     trans.setTranslation(vec, gSpace);
 
-    dstPlug = trans.findPlug("inheritsTransform");
+    dstPlug = trans.findPlug("inheritsTransform", true);
     disconnectAllPlugsTo(dstPlug);
     dstPlug.setBool(iSamp.getInheritsXforms());
 

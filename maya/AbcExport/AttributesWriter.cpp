@@ -1735,7 +1735,7 @@ AttributesWriter::AttributesWriter(
 
         int sampType = util::getSampledType(plug);
 
-        MPlug scopePlug = iNode.findPlug(propName + cAttrScope);
+        MPlug scopePlug = iNode.findPlug(propName + cAttrScope, true);
         AbcGeom::GeometryScope scope = AbcGeom::kUnknownScope;
 
         if (!scopePlug.isNull())
@@ -1744,7 +1744,7 @@ AttributesWriter::AttributesWriter(
         }
 
         MString typeStr;
-        MPlug typePlug = iNode.findPlug(propName + cAttrType);
+        MPlug typePlug = iNode.findPlug(propName + cAttrType, true);
         if (!typePlug.isNull())
         {
             typeStr= typePlug.asString();
