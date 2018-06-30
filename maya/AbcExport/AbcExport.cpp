@@ -36,7 +36,6 @@
 
 #include "AbcExport.h"
 #include "AbcWriteJob.h"
-#include "Export.h"
 #include "MayaUtility.h"
 
 #include <maya/MFnPlugin.h>
@@ -1146,7 +1145,7 @@ catch (std::exception & e)
 
 
 
-ALEMBIC_MAYA_PLUGIN_EXPORT  MStatus initializePlugin(MObject obj)
+MStatus initializePlugin(MObject obj)
 {
     MStatus status;
     MFnPlugin plugin(obj, "Alembic", ABCEXPORT_VERSION, "Any");
@@ -1169,7 +1168,7 @@ ALEMBIC_MAYA_PLUGIN_EXPORT  MStatus initializePlugin(MObject obj)
     return status;
 }
 
-ALEMBIC_MAYA_PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
+MStatus uninitializePlugin(MObject obj)
 {
     MStatus status;
     MFnPlugin plugin(obj);

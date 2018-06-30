@@ -37,7 +37,6 @@
 #include "AlembicNode.h"
 #include "AbcImport.h"
 #include "AlembicImportFileTranslator.h"
-#include "Export.h"
 
 #include <maya/MGlobal.h>
 #include <maya/MFnPlugin.h>
@@ -47,7 +46,7 @@
 // Interesting trivia: 0x2697 is the unicode character for Alembic
 const MTypeId AlembicNode::mMayaNodeId(0x00082697);
 
-ALEMBIC_MAYA_PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
+MStatus initializePlugin(MObject obj)
 {
     const char * pluginVersion = "1.0";
     MFnPlugin plugin(obj, "Alembic", pluginVersion, "Any");
@@ -91,7 +90,7 @@ ALEMBIC_MAYA_PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
     return status;
 }
 
-ALEMBIC_MAYA_PLUGIN_EXPORT  MStatus uninitializePlugin(MObject obj)
+MStatus uninitializePlugin(MObject obj)
 {
     MFnPlugin plugin(obj);
 

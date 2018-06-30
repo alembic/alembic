@@ -49,6 +49,12 @@
 #include <Alembic/AbcGeom/ISubD.h>
 #include <Alembic/AbcGeom/IXform.h>
 
+// MTypes.h includes windows.h
+// Suppress min/max macros
+#if defined(_WIN32) && !defined(NOMINMAX)
+    #define NOMINMAX
+#endif
+
 #include <maya/MObject.h>
 #include <maya/MPlug.h>
 #include <maya/MDataHandle.h>
