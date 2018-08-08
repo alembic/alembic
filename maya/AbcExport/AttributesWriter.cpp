@@ -48,16 +48,16 @@ static const char * cAttrType  = "_AbcType";
 
 std::string scopeToString( AbcGeom::GeometryScope input )
 {
-	switch(input)
-	{
-		case AbcGeom::kConstantScope: return "kConstantScope";
-		case AbcGeom::kFacevaryingScope:return "kFacevaryingScope";
-		case AbcGeom::kUniformScope: return "kUniformScope";
-		case AbcGeom::kUnknownScope: return "kUnknownScope";
-		case AbcGeom::kVaryingScope: return "kVaryingScope";
-		case AbcGeom::kVertexScope: return "kVertexScope";
-	}
-	return "kUnknownScope";
+    switch(input)
+    {
+        case AbcGeom::kConstantScope: return "kConstantScope";
+        case AbcGeom::kFacevaryingScope:return "kFacevaryingScope";
+        case AbcGeom::kUniformScope: return "kUniformScope";
+        case AbcGeom::kUnknownScope: return "kUnknownScope";
+        case AbcGeom::kVaryingScope: return "kVaryingScope";
+        case AbcGeom::kVertexScope: return "kVertexScope";
+    }
+    return "kUnknownScope";
 }
 
 // returns true if a plug is of a simple numeric data type
@@ -1694,80 +1694,80 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
     }
 }
 
-MStatus getPerParticleAttributes( const MFnDependencyNode &iNode, std::vector<MString> &outAttrNames )
+
+bool isPerParticleAttributes( const MFnDependencyNode &iNode, MObject attrObj )
 {
-	DISPLAY_INFO("getPerParticleAttributes:")
-	MStatus status(MS::kSuccess);
+//    DISPLAY_INFO("  isPerParticleAttributes:")
+    MStatus status(MS::kSuccess);
 
-	if ( !iNode.hasObj(MFn::kParticle))
-		return status;
+    if ( !iNode.hasObj(MFn::kParticle))
+    {
+        DISPLAY_INFO("\t" << "object is not a particle");
+        return false;
+    }
 
-	MFnParticleSystem particle(iNode.object(&status));
-	uint count(0);
+    if ( !attrObj.hasFn(MFn::kTypedAttribute))
+    {
+        DISPLAY_INFO("\t" << "not a kTypedAttribute");
+        return false;
+    }
 
-	MDoubleArray doubleArray;
-	MVectorArray vectorArray;
-	for (unsigned int i = 0; i < particle.attributeCount(); ++i)
-	{
-		MObject attrObj = particle.attribute(i);
+    MFnTypedAttribute attr( attrObj );
+    MString attrName = attr.name();
 
-		if ( !attrObj.hasFn(MFn::kTypedAttribute))
-			continue;
+    if (attrName == "radiusPP")
+    {
+        // radiusPP was handled as IPointGeom Width
+        DISPLAY_INFO("\t" << "don't touch radiusPP");
+        DISPLAY_INFO("\t" << "don't touch radiusPP");
+        return false;
+    }
 
-		MFnTypedAttribute attr( particle.attribute(i) );
-		MString attrName = attr.name();
+    if ( attr.isHidden() ||
+         !attr.isReadable() ||
+         attr.isArray() ||
+         attr.internal() )
+    {
+        DISPLAY_INFO("\t" << "attr is hidden or not readable or array or internal");
+        return false;
+    }
+    if ( attr.attrType() != MFnData::kDoubleArray && attr.attrType() != MFnData::kVectorArray )
+    {
+        DISPLAY_INFO("\t" << "attr is not doubleArray or vectorArray");
+        return false;
+    }
 
-		if (attrName == "radiusPP")
-		{
-			// radiusPP was handled as IPointGeom Width
-			continue;
-		}
+    // Perform a few name filtering to avoid useless attribute
+    // we only filter non user created attribute
+    if ( !attr.isDynamic() )
+    {
+        // manualy filter a few attributes
+        if (     attrName.substring(0, 7) == "internal" ||
+                attrName.toLowerCase().substring(attrName.length() - 5, attrName.length()) == "cache" ||
+                attrName.substring( attrName.length() - 1, attrName.length()) == "0" )
+        {
+            DISPLAY_INFO("\t" << "attr starts with internalm ends with cache or 0");
+            return false;
+        }
 
-		if ( attr.isHidden() ||
-			 !attr.isReadable() ||
-			 attr.isArray() ||
-			 attr.internal() )
-		{
-			continue;
-		}
-		if ( attr.attrType() != MFnData::kDoubleArray && attr.attrType() != MFnData::kVectorArray )
-		{
-			continue;
-		}
+    }
 
-		// Perform a few name filtering to avoid useless attribute
-		// we only filter non user created attribute
-		if ( !attr.isDynamic() )
-		{
-			// manualy filter a few attributes
-			if ( 	attrName.substring(0, 7) == "internal" ||
-					attrName.toLowerCase().substring(attrName.length() - 5, attrName.length()) == "cache" ||
-					attrName.substring( attrName.length() - 1, attrName.length()) == "0" )
-			{
-				continue;
-			}
+    MFnParticleSystem particle( iNode.object() );
 
-		}
+    if ( particle.isPerParticleDoubleAttribute(attrName, &status) ||
+         particle.isPerParticleVectorAttribute(attrName, &status)
+    )
+    {
+        DISPLAY_INFO("\t" << "VALID PER PARTICLE");
+        return true;
+    }
 
-		if ( particle.isPerParticleDoubleAttribute(attrName, &status) ||
-		     particle.isPerParticleVectorAttribute(attrName, &status)
-		)
-		{
-			outAttrNames.push_back(attrName);
-			count++;
-		}
-		else
-		{
-			continue;
-		}
+    DISPLAY_INFO("\t" << "attr is not perParticle vector or double");
 
-	}
-	DISPLAY_INFO("total Attributes: " << count );
-
-	return status;
+    return false;
 }
 
-}
+} // namespace
 
 AttributesWriter::AttributesWriter(
     Alembic::Abc::OCompoundProperty & iArbGeom,
@@ -1783,26 +1783,28 @@ AttributesWriter::AttributesWriter(
     unsigned int attrCount = iNode.attributeCount();
     unsigned int i;
 
+    DISPLAY_INFO("##########")
+    DISPLAY_INFO( iNode.name() );
+
     std::vector< PlugAndObjArray > staticPlugObjArrayVec;
     std::vector< PlugAndObjScalar > staticPlugObjScalarVec;
-
-    std::vector< MString > perParticlesAttributes;
-    if (iNode.hasObj(MFn::kParticle))
-    {
-    	getPerParticleAttributes( iNode, perParticlesAttributes );
-    }
 
 
     DISPLAY_INFO("AttributesWriter Creator, looping on attributes")
     for (i = 0; i < attrCount; i++)
     {
         MObject attr = iNode.attribute(i);
+
         MFnAttribute mfnAttr(attr);
         MPlug plug = iNode.findPlug(attr, true);
+        DISPLAY_INFO("  AttrName: " << mfnAttr.name());
 
         // if it is not readable, then bail without any more checking
         if (!mfnAttr.isReadable() || plug.isNull())
+        {
+            DISPLAY_INFO("\t" << "attr is not readable or plug is null")
             continue;
+        }
 
         MString propName = plug.partialName(0, 0, 0, 0, 0, 1);
 
@@ -1822,20 +1824,16 @@ AttributesWriter::AttributesWriter(
 
         bool userAttr = false;
 
-        bool isPerParticle(false);
-        for ( std::vector<MString>::iterator it = perParticlesAttributes.begin(); it != perParticlesAttributes.end(); ++it)
-        {
-        	if ( *it == propName )
-        	{
-        		isPerParticle = true;
-				DISPLAY_INFO(propName << ":" )
-        		DISPLAY_INFO("\t" << "found a per particle Attribute !")
-        		break;
-        	}
-        }
+        bool isPerParticle = isPerParticleAttributes(iNode, attr);
 
         if (!matchFilterOrAttribs(plug, iArgs, userAttr) && !isPerParticle)
             continue;
+
+        // When someone set user attribute on a particleShape, we want to write it to arbGeom
+        // This enable the attribute to be correctly considered as point cloud data
+        if (userAttr && iNode.hasObj(MFn::kParticle))
+            // The code will continue with the current attribute,  but will write it to arbGeom
+            userAttr = false;
 
         if (userAttr && !iUserProps.valid())
             continue;
@@ -1844,7 +1842,6 @@ AttributesWriter::AttributesWriter(
 
         int sampType = util::getSampledType(plug) || isPerParticle; // Per particle is always animated
 
-        DISPLAY_INFO( "findPlug: " << propName <<  cAttrScope );
 
         MPlug scopePlug = iNode.findPlug(propName + cAttrScope);
         AbcGeom::GeometryScope scope = AbcGeom::kUnknownScope;
@@ -1852,7 +1849,7 @@ AttributesWriter::AttributesWriter(
 
         if (isPerParticle) // Per particle is always kVaryingScope
         {
-        	scope = AbcGeom::kVaryingScope;
+            scope = AbcGeom::kVaryingScope;
         }
         else if (!scopePlug.isNull())
         {
@@ -2191,8 +2188,8 @@ bool AttributesWriter::hasAnyAttr(const MFnDependencyNode & iNode,
 
     if (iNode.hasObj(MFn::kParticle))
     {
-    	// Particles always have extra attributes
-    	return true;
+        // Particles always have extra attributes
+        return true;
     }
 
     bool userAttr;

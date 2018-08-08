@@ -80,6 +80,7 @@ MayaPointPrimitiveWriter::MayaPointPrimitiveWriter(
 
 void MayaPointPrimitiveWriter::write(double iFrame)
 {
+    MStatus status;
     std::vector<float> position;
     std::vector<float> velocity;
     std::vector< Alembic::Util::uint64_t > particleIds;
@@ -154,28 +155,40 @@ void MayaPointPrimitiveWriter::write(double iFrame)
             particleIds.size()) );
 
     // assume radius is width
+    DISPLAY_INFO("\t\t RADIUS");
     MDoubleArray radiusArray;
-    particle.radius(radiusArray);
-
-    for (unsigned int i = 0; i < size; i++)
+    MPlug radius = particle.findPlug("radiusPP", true, &status);
+    AbcGeom::GeometryScope widthScope = AbcGeom::kUnknownScope;
+    if ( status == MS::kSuccess)
     {
-        float radius = static_cast<float>(radiusArray[i]);
-        width.push_back(radius);
+        DISPLAY_INFO("\t\t found radiusPP");
+        // RadiusPP exists, get all particles value
+        widthScope = AbcGeom::kVaryingScope;
+        particle.radius(radiusArray);
+        DISPLAY_INFO( "\t\t\t value: " )
+        for (unsigned int i = 0; i < size; i++)
+        {
+            float radius = static_cast<float>(radiusArray[i]);
+            DISPLAY_INFO( "\t\t\t    " << radius );
+            width.push_back(radius);
+        }
     }
+    else
+    {
+        DISPLAY_INFO("\t\t radiusPP not found,, using radius attribute");
+        // Get the value of the radius attribute
+        widthScope = AbcGeom::kUniformScope;
+        DISPLAY_INFO( "\t\t\t value: " <<  particle.findPlug("radius").asDouble() );
+        width.push_back( particle.findPlug("radius").asDouble() );
+    }
+
+
     if (!width.empty())
     {
-		Alembic::AbcGeom::OFloatGeomParam::Sample widthSamp;
-		widthSamp.setVals(width);
-		widthSamp.setScope( AbcGeom::kVaryingScope );
-		samp.setWidths( widthSamp );
-    }
-
-    mSchema.getProperty("");
-    DISPLAY_INFO("Schema properties:")
-    for (unsigned int i = 0; i < mSchema.getNumProperties(); ++i)
-    {
-    	Alembic::Abc::OBaseProperty prop = mSchema.getProperty(i);
-    	DISPLAY_INFO("\t" << i << ": "<< prop.getName());
+        Alembic::AbcGeom::OFloatGeomParam::Sample widthSamp;
+        widthSamp.setVals(width);
+        widthSamp.setScope(widthScope);
+        samp.setWidths( widthSamp );
     }
 
     mSchema.set(samp);
