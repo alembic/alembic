@@ -2612,6 +2612,8 @@ PointsSampleData & PointsSampleData::operator=(const PointsSampleData & other)
 	origName = other.origName;
 	name = other.name;
 	extent = other.extent;
+	scope = other.scope;
+	origExtent = other.origExtent;
 
 	return *this;
 }

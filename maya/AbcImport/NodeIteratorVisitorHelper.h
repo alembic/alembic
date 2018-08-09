@@ -77,6 +77,8 @@ struct PointsSampleData
 	Alembic::Abc::IArrayProperty arrayProp;
 	std::string origName;
 	std::string name;
+	Alembic::AbcGeom::GeometryScope scope;
+	int origExtent;
 	int extent;
 };
 
