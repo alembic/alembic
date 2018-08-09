@@ -196,7 +196,7 @@ void MayaNurbsCurveWriter::write()
     bool useConstWidth = false;
 
     MFnDependencyNode dep(mRootDagPath.transform());
-    MPlug constWidthPlug = dep.findPlug("width");
+    MPlug constWidthPlug = dep.findPlug("width", true);
 
     if (!constWidthPlug.isNull())
     {
@@ -296,32 +296,32 @@ void MayaNurbsCurveWriter::write()
             if (knotsArray[0] == knotsArray[knotsLength - 1] ||
                 knotsArray[0] == knotsArray[1])
             {
-                knots.push_back(knotsArray[0]);
+                knots.push_back(static_cast<float>(knotsArray[0]));
             }
             else
             {
-                knots.push_back(2 * knotsArray[0] - knotsArray[1]);
+                knots.push_back(static_cast<float>(2 * knotsArray[0] - knotsArray[1]));
             }
 
             for (unsigned int j = 0; j < knotsLength; ++j)
             {
-                knots.push_back(knotsArray[j]);
+                knots.push_back(static_cast<float>(knotsArray[j]));
             }
 
             if (knotsArray[0] == knotsArray[knotsLength - 1] ||
                 knotsArray[knotsLength - 1] == knotsArray[knotsLength - 2])
             {
-                knots.push_back(knotsArray[knotsLength - 1]);
+                knots.push_back(static_cast<float>((knotsArray[knotsLength - 1])));
             }
             else
             {
-                knots.push_back(2 * knotsArray[knotsLength - 1] -
-                                knotsArray[knotsLength - 2]);
+                knots.push_back(static_cast<float>(2 * knotsArray[knotsLength - 1] -
+                                knotsArray[knotsLength - 2]));
             }
         }
 
         // width
-        MPlug widthPlug = curve.findPlug("width");
+        MPlug widthPlug = curve.findPlug("width", true);
 
         if (!useConstWidth && !widthPlug.isNull())
         {

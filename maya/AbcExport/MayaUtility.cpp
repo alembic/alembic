@@ -284,7 +284,7 @@ bool util::isAnimated(MObject & object, bool checkParent)
     NodesToCheckStruct nodeStruct;
     for (; !iter.isDone(); iter.next())
     {
-        MObject node = iter.thisNode();
+        MObject node = iter.currentItem();
 
         if (node.hasFn(MFn::kPluginDependNode) ||
                 node.hasFn( MFn::kConstraint ) ||
@@ -381,7 +381,7 @@ bool util::isDrivenBySplineIK(const MFnIkJoint & iJoint)
         if (!ikHandle.object().hasFn(MFn::kIkHandle)) continue;
 
         // find the ikSolver node.
-        MPlug ikSolverPlug = ikHandle.findPlug("ikSolver");
+        MPlug ikSolverPlug = ikHandle.findPlug("ikSolver", true);
         MPlugArray ikSolverDst;
         ikSolverPlug.connectedTo(ikSolverDst, true, false);
         for (unsigned int j = 0; j < ikSolverDst.length(); j++) {

@@ -72,7 +72,7 @@ ADD_MAYA_CXX_PLUGIN(AbcExport ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(AbcExport
     ${MAYA_LIBRARIES}
-    Alembic
+    Alembic::Alembic
 )
 
 set_target_properties(AbcExport PROPERTIES
@@ -80,4 +80,4 @@ set_target_properties(AbcExport PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 INSTALL(TARGETS AbcExport
-        DESTINATION maya/plug-ins)
+        DESTINATION ${ALEMBIC_MAYA_PLUGINS_INSTALL_DIR})

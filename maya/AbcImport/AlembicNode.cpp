@@ -517,7 +517,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
         //Get list of input filenames
         MFnDependencyNode depNode(thisMObject());
-        MPlug layerFilesPlug = depNode.findPlug("abc_layerFiles");
+        MPlug layerFilesPlug = depNode.findPlug("abc_layerFiles", true);
         MFnStringArrayData fnSAD( layerFilesPlug.asMObject() );
         MStringArray storedFilenames = fnSAD.array();
 
@@ -600,7 +600,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
 
         MFnDependencyNode dep(thisMObject());
-        MPlug allSetsPlug = dep.findPlug("allColorSets");
+        MPlug allSetsPlug = dep.findPlug("allColorSets", true);
         CreateSceneVisitor visitor(inputTime, !allSetsPlug.isNull(),
             MObject::kNullObj, CreateSceneVisitor::NONE, "",
             mIncludeFilterString, mExcludeFilterString);

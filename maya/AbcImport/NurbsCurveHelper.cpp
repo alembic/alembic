@@ -260,8 +260,7 @@ MObject createCurves(const std::string & iName,
         MFnNumericAttribute attr;
         MObject attrObj = attr.create("riCurves", "riCurves",
             MFnNumericData::kBoolean, 1);
-        fnTrans.addAttribute(attrObj,
-            MFnDependencyNode::kLocalDynamicAttr);
+        fnTrans.addAttribute(attrObj);
 
         // constant width
         if (widths && widths->size() == 1)
@@ -269,9 +268,8 @@ MObject createCurves(const std::string & iName,
             MFnNumericAttribute widthAttr;
             attrObj = widthAttr.create("width", "width",
                 MFnNumericData::kFloat, (*widths)[0]);
-            fnTrans.addAttribute(attrObj,
-                MFnDependencyNode::kLocalDynamicAttr);
-            fnTrans.findPlug("width").setValue((*widths)[0]);
+            fnTrans.addAttribute(attrObj);
+            fnTrans.findPlug("width", true).setValue((*widths)[0]);
         }
     }
 
@@ -389,9 +387,8 @@ MObject createCurves(const std::string & iName,
             MFnNumericAttribute widthAttr;
             MObject attrObj = widthAttr.create("width",
                 "width", MFnNumericData::kFloat, (*widths)[0]);
-            curve.addAttribute(attrObj,
-                MFnDependencyNode::kLocalDynamicAttr);
-            curve.findPlug("width").setValue((*widths)[0]);
+            curve.addAttribute(attrObj);
+            curve.findPlug("width", true).setValue((*widths)[0]);
         }
         // per vertex width
         else if (widths && widths->size() >= curVert && numVerts > 0 &&
@@ -405,8 +402,7 @@ MObject createCurves(const std::string & iName,
             MObject attrObj = attr.create("width", "width");
             attr.addDataAccept(MFnData::kDoubleArray);
             MFnDependencyNode mParentFn(curve.object());
-            mParentFn.addAttribute(attrObj,
-                MFnDependencyNode::kLocalDynamicAttr);
+            mParentFn.addAttribute(attrObj);
 
             MPlug plug(curveObj, attrObj);
             plug.setValue(attrObject);

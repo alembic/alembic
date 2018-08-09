@@ -35,7 +35,7 @@
 
 SET(TEST_LIBS
     AbcWFObjConvert
-    Alembic
+    Alembic::Alembic
     ${HDF5_LIBRARIES}
     ${ALEMBIC_ILMBASE_LIBS}
     ${CMAKE_THREAD_LIBS_INIT}

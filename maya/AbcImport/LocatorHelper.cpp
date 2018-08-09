@@ -77,17 +77,17 @@ MObject create(Alembic::AbcGeom::IXform & iLocator,
 
         // set the plugs and be done
         MPlug dstPlug;
-        dstPlug = fnLocator.findPlug("localPositionX");
+        dstPlug = fnLocator.findPlug("localPositionX", true);
         dstPlug.setValue(oSample[0]);
-        dstPlug = fnLocator.findPlug("localPositionY");
+        dstPlug = fnLocator.findPlug("localPositionY", true);
         dstPlug.setValue(oSample[1]);
-        dstPlug = fnLocator.findPlug("localPositionZ");
+        dstPlug = fnLocator.findPlug("localPositionZ", true);
         dstPlug.setValue(oSample[2]);
-        dstPlug = fnLocator.findPlug("localScaleX");
+        dstPlug = fnLocator.findPlug("localScaleX", true);
         dstPlug.setValue(oSample[3]);
-        dstPlug = fnLocator.findPlug("localScaleY");
+        dstPlug = fnLocator.findPlug("localScaleY", true);
         dstPlug.setValue(oSample[4]);
-        dstPlug = fnLocator.findPlug("localScaleZ");
+        dstPlug = fnLocator.findPlug("localScaleZ", true);
         dstPlug.setValue(oSample[5]);
     }
 
