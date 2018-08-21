@@ -38,6 +38,7 @@
 #include "PointHelper.h"
 #include "NodeIteratorVisitorHelper.h"
 
+#include <maya/MGlobal.h>
 #include <maya/MString.h>
 #include <maya/MPoint.h>
 #include <maya/MPointArray.h>
@@ -50,74 +51,6 @@
 #include <maya/MDagModifier.h>
 #include <maya/MItDependencyNodes.h>
 #include <maya/MFnSet.h>
-
-// verbose
-std::string scopeToString( Alembic::AbcGeom::GeometryScope input )
-{
-    switch(input)
-    {
-        case Alembic::AbcGeom::kConstantScope: return "kConstantScope";
-        case Alembic::AbcGeom::kFacevaryingScope:return "kFacevaryingScope";
-        case Alembic::AbcGeom::kUniformScope: return "kUniformScope";
-        case Alembic::AbcGeom::kUnknownScope: return "kUnknownScope";
-        case Alembic::AbcGeom::kVaryingScope: return "kVaryingScope";
-        case Alembic::AbcGeom::kVertexScope: return "kVertexScope";
-    }
-    return "kUnknownScope";
-}
-
-
-bool getSampleInfo( size_t particleNumber, unsigned int sampleSize, int sampleExtent, Alembic::AbcGeom::GeometryScope propScope, std::string sampleName, PointsSampleData & out )
-{
-    // PerParticle attribute can only be as big as the number of particle
-    // If sample size doesn't match our particle number, the sample is not valid
-    // If the sample size is a perfect multiple of our particule number, we assume a mistake from the exporter
-
-    bool isValidSample = false;
-
-    out.extent = sampleExtent;
-    out.origName = sampleName;
-    out.name = sampleName;
-    out.origExtent = sampleExtent;
-    out.scope = propScope;
-
-    if ( sampleSize == particleNumber )
-    {
-        isValidSample = true;
-    }
-    else if ( sampleSize == particleNumber * 2 )
-    {
-        // We are certainly dealing with a 2d array, we will assume ababababab ordering
-        out.extent = 2;
-        isValidSample = true;
-        out.scope = Alembic::AbcGeom::kVaryingScope;
-    }
-    else if ( sampleSize == particleNumber * 3 )
-    {
-        // We are certainly dealing with a 3d array, we will assume abcabcabc ordering
-        out.extent = 3;
-        isValidSample = true;
-        out.scope = Alembic::AbcGeom::kVaryingScope;
-    }
-    else if (sampleExtent > 3)
-    {
-        // can't deal with that
-        isValidSample = false;
-    }
-
-    // Test for uniform/constant scope
-    if ( out.scope <= Alembic::AbcGeom::kUniformScope || ( particleNumber > 1 && sampleSize == 1 ) )
-    {
-        if ( out.scope > Alembic::AbcGeom::kUniformScope )
-        {
-            out.scope = Alembic::AbcGeom::kUniformScope;
-        }
-        isValidSample = true;
-    }
-
-    return isValidSample;
-}
-
 
 MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MObject & iObject,
         PointSampleDataList & iData )
@@ -132,24 +65,6 @@ MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MOb
     {
         return status;
     }
-
-    // We find the index where the particles are the most
-    // I found that sometimes, the exporter doesn't specify the correct extent
-    size_t particleSize(0);
-    size_t sampleSize = schema.getNumSamples();
-    Alembic::AbcCoreAbstract::index_t index;
-    Alembic::Abc::ISampleSelector compareSampleSelector;
-    for ( index = 0 ; index < sampleSize; ++index )
-    {
-        Alembic::Abc::ISampleSelector curSampleSelector(index);
-        schema.get( samp, curSampleSelector );
-        size_t curSize = samp.getPositions()->size();
-        if ( particleSize < curSize)
-        {
-            particleSize = curSize;
-            compareSampleSelector = curSampleSelector;
-        }
-    };
 
     size_t numProps = props.getNumProperties();
     MFnTypedAttribute tAttr;
@@ -193,13 +108,13 @@ MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MOb
 
         Alembic::AbcCoreAbstract::ArraySamplePtr samp;
 
-        arrayProp.get(samp, compareSampleSelector);
-            unsigned int sampleSize = (unsigned int)samp->size();
 
+        // Storing property information for fast lookup when reading each frame
         PointsSampleData sampleInfo;
-        if ( !getSampleInfo(particleSize, sampleSize, propExtent, propScope, propName, sampleInfo) )
-            continue;
-
+        sampleInfo.origName = propName;
+        sampleInfo.scope = propScope;
+        sampleInfo.name = propName;
+        sampleInfo.extent = propExtent;
         sampleInfo.arrayProp = arrayProp;
 
         MFnDependencyNode fnparticle(iObject);
@@ -253,12 +168,16 @@ MStatus readArbGeomParams(size_t pSize, Alembic::AbcCoreAbstract::index_t index,
         Alembic::Util::Dimensions dim;
         sampleInfo.arrayProp.getDimensions(dim, Alembic::Abc::ISampleSelector(index));
 
-        // Sample size has already been checked on first file read
-        // it can be safely considered as pSize (particle number)
-        // only for kUniformScope sample that only have 1 value
-
         unsigned int sampSize( dim.numPoints() );
 
+        if ( sampleInfo.scope == Alembic::AbcGeom::kVaryingScope && sampSize != pSize)
+        {
+            MString warn = "Ignoring malformed kVarying attribute: ";
+            warn += sampleInfo.name.c_str();
+            warn += ", the number of point in the sample doesn't match the number of particle";
+            MGlobal::displayWarning(warn);
+            continue;
+        }
 
         // We don't forget the extent when alocating the array
         std::vector< double > samp(pSize * sampleInfo.extent);
