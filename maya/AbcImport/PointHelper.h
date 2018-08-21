@@ -45,9 +45,6 @@
 
 #include <Alembic/AbcGeom/IPoints.h>
 
-
-PointsSampleData getSampleInfo(  size_t particleNumber, unsigned int sampleSize, int sampleExtent, Alembic::AbcGeom::GeometryScope propScope, std::string sampleName );
-
 MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MObject & iObject,
 		PointSampleDataList & iData );
 

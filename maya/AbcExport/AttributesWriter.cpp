@@ -1823,6 +1823,7 @@ AttributesWriter::AttributesWriter(
         }
 
         bool userAttr = false;
+        bool userPerParticleAttr = false;
 
         bool isPerParticle = isPerParticleAttributes(iNode, attr);
 
@@ -1832,8 +1833,11 @@ AttributesWriter::AttributesWriter(
         // When someone set user attribute on a particleShape, we want to write it to arbGeom
         // This enable the attribute to be correctly considered as point cloud data
         if (userAttr && iNode.hasObj(MFn::kParticle))
+        {
             // The code will continue with the current attribute,  but will write it to arbGeom
             userAttr = false;
+            userPerParticleAttr = true;
+        }
 
         if (userAttr && !iUserProps.valid())
             continue;
@@ -1847,13 +1851,22 @@ AttributesWriter::AttributesWriter(
         AbcGeom::GeometryScope scope = AbcGeom::kUnknownScope;
 
 
-        if (isPerParticle) // Per particle is always kVaryingScope
+        if (isPerParticle) // PerParticle is always kVaryingScope
         {
             scope = AbcGeom::kVaryingScope;
         }
         else if (!scopePlug.isNull())
         {
             scope = strToScope(scopePlug.asString());
+        }
+        else if (userPerParticleAttr)
+        {
+            // We need to find the scope we will write
+            // The attribute was not found to be a perParticle attribute, so it cannot be kVarying
+            if (sampType == 0)
+                scope = AbcGeom::kConstantScope;
+            else if (sampType == 1)
+                scope = AbcGeom::kUniformScope;
         }
 
         DISPLAY_INFO("\t\t" << "Attribute Type: " << sampType)
