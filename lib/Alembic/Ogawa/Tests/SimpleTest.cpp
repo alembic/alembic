@@ -38,7 +38,7 @@
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 #include <iostream>
 
-void test()
+void test(Alembic::Util::option_base* iOptions)
 {
 
 {
@@ -80,7 +80,7 @@ void test()
     bcd->rewrite(1, &nine, 4); // 0 1 2 3 9 5 6 7
 }
 
-    Alembic::Ogawa::IArchive ia("simpleTest.ogawa");
+    Alembic::Ogawa::IArchive ia("simpleTest.ogawa", 1, iOptions);
     Alembic::Ogawa::IGroupPtr top = ia.getGroup();
 
     TESTING_ASSERT(top->getNumChildren() == 3);
@@ -187,8 +187,25 @@ void test()
 
 }
 
+
+struct TestOption : public Alembic::Ogawa::IStreamOptions
+{
+    FileAccessType strategy;
+
+    explicit TestOption(FileAccessType s) : strategy(s) {}
+    FileAccessType getFileAccessStrategy() { return strategy; }
+};
+
+
+
+
 int main ( int argc, char *argv[] )
 {
-    test();
+    TestOption usemmap(Alembic::Ogawa::IStreamOptions::kMemoryMapFiles);
+    test(&usemmap);
+
+    TestOption usestreams(Alembic::Ogawa::IStreamOptions::kFileStreams);
+    test(&usestreams);
+
     return 0;
 }

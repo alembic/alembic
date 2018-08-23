@@ -48,8 +48,11 @@ namespace ALEMBIC_VERSION_NS {
 class ALEMBIC_EXPORT IStreams
 {
 public:
-    IStreams(const std::string & iFileName, std::size_t iNumStreams=1);
-    IStreams(const std::vector< std::istream * > & iStreams);
+    IStreams(const std::string & iFileName,
+             std::size_t iNumStreams = 1,
+             Alembic::Util::option_base* iStreamOptions = 0);
+    IStreams(const std::vector< std::istream * > & iStreams,
+             Alembic::Util::option_base* iStreamOptions = 0);
     ~IStreams();
 
     bool isValid();
@@ -64,8 +67,6 @@ private:
     // noncopyable
     IStreams(const IStreams &);
     const IStreams & operator=(const IStreams &);
-
-    void init();
 
     class PrivateData;
     Alembic::Util::unique_ptr< PrivateData > mData;

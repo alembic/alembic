@@ -45,9 +45,10 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 ArImpl::ArImpl( const std::string &iFileName,
-                std::size_t iNumStreams )
+                std::size_t iNumStreams,
+                Alembic::Util::option_base* iOptions )
   : m_fileName( iFileName )
-  , m_archive( iFileName, iNumStreams )
+  , m_archive( iFileName, iNumStreams, iOptions )
   , m_header( new AbcA::ObjectHeader() )
   , m_manager( iNumStreams )
 {
@@ -61,8 +62,9 @@ ArImpl::ArImpl( const std::string &iFileName,
 }
 
 //-*****************************************************************************
-ArImpl::ArImpl( const std::vector< std::istream * > & iStreams )
-  : m_archive( iStreams )
+ArImpl::ArImpl( const std::vector< std::istream * > & iStreams,
+                Alembic::Util::option_base* iOptions)
+  : m_archive( iStreams, iOptions )
   , m_header( new AbcA::ObjectHeader() )
   , m_manager( iStreams.size() )
 {

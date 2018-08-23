@@ -80,7 +80,8 @@ public:
         const std::string &iFileName,
 
         ErrorHandler::Policy iPolicy = ErrorHandler::kThrowPolicy,
-        AbcA::ReadArraySampleCachePtr iCachePtr = AbcA::ReadArraySampleCachePtr());
+        AbcA::ReadArraySampleCachePtr iCachePtr = AbcA::ReadArraySampleCachePtr(),
+        Alembic::Util::option_base* iOptions = 0);
 
     //! This attaches an IArchive wrapper around an existing
     //! ArchiveReaderPtr, with an optional error handling policy.
@@ -198,14 +199,15 @@ template <class ARCHIVE_CTOR>
 IArchive::IArchive( ARCHIVE_CTOR iCtor,
                      const std::string &iFileName,
                      ErrorHandler::Policy iPolicy,
-                     AbcA::ReadArraySampleCachePtr iCachePtr )
+                     AbcA::ReadArraySampleCachePtr iCachePtr,
+                     Alembic::Util::option_base* iOptions)
 {
     // Set the error handling policy.
     getErrorHandler().setPolicy( iPolicy );
 
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArchive::IArchive( iFileName )" );
 
-    m_archive = iCtor( iFileName, iCachePtr );
+    m_archive = iCtor( iFileName, iCachePtr, iOptions );
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 

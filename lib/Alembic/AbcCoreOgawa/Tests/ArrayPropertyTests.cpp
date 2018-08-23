@@ -2023,7 +2023,7 @@ int main ( int argc, char *argv[] )
     testExtentArrayStrings();
     testArrayStringsRepeats();
     testArraySamples();
-    testWriteWhileRead();
+    //testWriteWhileRead();
 
     //keep this disabled until we know our CI can handle it
     //testBigData();

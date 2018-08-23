@@ -34,96 +34,158 @@
 //-*****************************************************************************
 
 #include <Alembic/Ogawa/IStreams.h>
+#include <Alembic/Ogawa/IOptions.h>
 #include <fstream>
 #include <stdexcept>
 
-#include <fcntl.h>
 
-#ifdef _MSC_VER
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 
-#include <io.h>
-#include <sys/stat.h>
+    #include <sys/mman.h>
+    #include <sys/stat.h>
+    #include <fcntl.h>
+    #include <unistd.h>
 
-Alembic::Util::int32_t OPENFILE(const char * iFileName, Alembic::Util::int32_t iFlag)
-{
-    Alembic::Util::int32_t fid = -1;
+    #include <cstring>
 
-    // One way to prevent writing over a file opened for reading would be to pass in
-    // _SH_DENYWR instead of _SH_DENYNO.  If we can find a posix equivalent we may
-    // have an interesting solution for that problem.
-    _sopen_s(&fid, iFileName, iFlag | _O_RANDOM, _SH_DENYNO, _S_IREAD);
-    return fid;
-}
+    #define USE_POSIX_MMAP
 
-void CLOSEFILE(Alembic::Util::int32_t iFid)
-{
-    if (iFid > -1)
-    {
-        _close(iFid);
-    }
-}
+#elif defined(_WIN32)
 
-#else
-#include <unistd.h>
-#define OPENFILE open
-#define CLOSEFILE close
+    #include <windows.h>
+    #include <io.h>
+    #include <sys/stat.h>
+
+    #define USE_WIN32_FILEMAPPING
+
 #endif
+
+#if defined(USE_POSIX_MMAP) || defined(USE_WIN32_FILEMAPPING)
+    #define ENABLE_MEMORYMAPPED_STREAM_READER
+#endif
+
+
 
 namespace Alembic {
 namespace Ogawa {
-namespace ALEMBIC_VERSION_NS {
+namespace ALEMBIC_VERSION_NS
+{
 
-class IStream
+namespace
+{
+
+class IStreamReader
 {
 public:
-    IStream(std::istream * iStream)
+    virtual ~IStreamReader() {}
+
+    virtual std::size_t numStreams() const = 0;
+
+    virtual bool isOpen() const = 0;
+
+    virtual bool read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
+                      Alembic::Util::uint64_t iSize, void* oBuf) = 0;
+};
+
+typedef Alembic::Util::shared_ptr<IStreamReader> IStreamReaderPtr;
+
+
+class StdIStreamReader : public IStreamReader
+{
+public:
+    StdIStreamReader(const std::vector<std::istream*>& iStreams) : streams(
+        iStreams)
     {
-        stream = iStream;
-        offset = 0;
+        locks = new Alembic::Util::mutex[streams.size()];
 
-        if (stream != NULL)
+        // preserve the initial position of these streams
+        offsets.reserve(streams.size());
+        for (size_t i = 0; i < streams.size(); i++)
         {
-            offset = stream->tellg();
+            offsets.push_back(streams[i]->tellg());
         }
-
-        fd = -1;
-        isGood = true;
     }
 
-    IStream(Alembic::Util::int32_t iFileDescriptor)
+    ~StdIStreamReader()
     {
-        stream = NULL;
-        offset = 0;
-
-        fd = iFileDescriptor;
-        isGood = true;
+        delete[] locks;
     }
 
-    void seekg(Alembic::Util::uint64_t iOffset)
+    size_t numStreams() const
     {
-        if (stream)
-        {
-            stream->seekg(iOffset + offset);
-            return;
-        }
-
-        offset = iOffset;
+        return streams.size();
     }
 
-    void read(void * oBuf, Alembic::Util::uint64_t iSize)
+    bool isOpen() const
     {
-        if (stream)
+        return !streams.empty();
+    }
+
+    bool read(std::size_t iTheadId, Alembic::Util::uint64_t iPos,
+              Alembic::Util::uint64_t iSize, void* oBuf)
+    {
+        std::size_t streamIndex = 0;
+        if (iTheadId < streams.size())
         {
-            stream->read((char*)oBuf, iSize);
-            return;
+            streamIndex = iTheadId;
         }
 
-        Alembic::Util::uint64_t totalRead = 0;
+        Alembic::Util::scoped_lock l(locks[streamIndex]);
+        std::istream* stream = streams[streamIndex];
+
+        stream->seekg(iPos + offsets[streamIndex]);
+        if (!stream->good()) return false;
+
+        stream->read(static_cast<char*>(oBuf), iSize);
+        if (!stream->good()) return false;
+
+        return true;
+    }
+
+private:
+    std::vector<std::istream*> streams;
+    std::vector<Alembic::Util::uint64_t> offsets;
+    Alembic::Util::mutex* locks;
+};
+
+
+class FileIStreamReader : public IStreamReader
+{
+private:
+
+// Platform support functions for file access
+#ifdef _WIN32
+    typedef int FileDescriptor;
+
+    static FileDescriptor openFile(const char * iFileName,
+                            Alembic::Util::int32_t iFlag)
+    {
+        FileDescriptor fid = -1;
+
+        // One way to prevent writing over a file opened for reading would be to
+        // pass in _SH_DENYWR instead of _SH_DENYNO.  If we can find a posix
+        // equivalent we may have an interesting solution for that problem.
+        _sopen_s(&fid, iFileName, iFlag | _O_RANDOM, _SH_DENYNO, _S_IREAD);
+        return fid;
+    }
+
+    static void closeFile(FileDescriptor iFid)
+    {
+        if (iFid > -1)
+        {
+            _close(iFid);
+        }
+    }
+
+    static bool readFile(FileDescriptor iFid,
+                  void * oBuf,
+                  Alembic::Util::uint64_t iOffset,
+                  Alembic::Util::uint64_t iSize)
         void * buf = oBuf;
+        Alembic::Util::uint64_t offset = iOffset;
+        Alembic::Util::uint64_t totalRead = 0;
 
-#ifdef _MSC_VER
         HANDLE hFile = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
-
         DWORD numRead = 0;
         do
         {
@@ -144,212 +206,481 @@ public:
 
             if (!ReadFile(hFile, buf, numToRead, &numRead, &overlapped))
             {
-                isGood = false;
-                return;
+                return false;
             }
             totalRead += numRead;
             offset += numRead;
             buf = static_cast< char * >( buf ) + numRead;
         }
         while(numRead > 0 && totalRead < iSize);
+
+        // if we couldn't read what we needed to then something went wrong
+        if (totalRead < iSize)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
 #else
+    typedef int FileDescriptor;
+
+    static FileDescriptor
+    openFile(const char* iFileName, Alembic::Util::int32_t iFlag)
+    {
+        return open(iFileName, iFlag);
+    }
+
+    static void closeFile(FileDescriptor iFid)
+    {
+        if (iFid > -1)
+        {
+            close(iFid);
+        }
+    }
+
+    static bool
+    readFile(FileDescriptor iFid, void* oBuf, Alembic::Util::uint64_t iOffset,
+             Alembic::Util::uint64_t iSize)
+    {
+        Alembic::Util::uint64_t totalRead = 0;
+        void* buf = oBuf;
+        off_t offset = iOffset;
+
         ssize_t numRead = 0;
         do
         {
             Alembic::Util::uint64_t readCount = iSize - totalRead;
             // if over 1 GB read it 1 GB chunk at a time to accomodate OSX
-            if ( readCount > 1073741824 )
+            if (readCount > 1073741824)
             {
                 readCount = 1073741824;
             }
-            numRead = pread(fd, buf, readCount, offset);
+            numRead = pread(iFid, buf, readCount, offset);
             if (numRead > 0)
             {
                 totalRead += numRead;
                 offset += numRead;
-                buf = static_cast< char * >( buf ) + numRead;
+                buf = static_cast< char* >( buf ) + numRead;
             }
-        }
-        while(numRead > 0 && totalRead < iSize);
-#endif
+
+            if (numRead < 0 && errno != EINTR)
+            {
+                return false;
+            }
+        } while (numRead > 0 && totalRead < iSize);
 
         // if we couldn't read what we needed to then something went wrong
         if (totalRead < iSize)
         {
-            isGood = false;
+            return false;
         }
+
+        return true;
     }
 
-    bool good()
-    {
-        if (stream)
-        {
-            return stream->good();
-        }
+#endif
 
-        return isGood;
+public:
+    FileIStreamReader(const std::string& iFileName, std::size_t iNumStreams)
+        : nstreams(iNumStreams)
+    {
+        fid = openFile(iFileName.c_str(), O_RDONLY);
+
+        // don't check the return value here
+        // IStream::init() will check isOpen
     }
 
-    bool fail()
+    ~FileIStreamReader()
     {
-        if (stream)
-        {
-            return stream->fail();
-        }
+        closeFile(fid);
+    }
 
-        return !isGood;
+    size_t numStreams() const
+    {
+        return nstreams;
+    }
+
+    bool isOpen() const
+    {
+        return (fid > -1);
+    }
+
+    bool read(std::size_t /*iTheadId*/, Alembic::Util::uint64_t iPos,
+              Alembic::Util::uint64_t iSize, void* oBuf)
+    {
+        // Ignore the iThread. There's no need to lock.
+        if (!isOpen()) return false;
+
+        return readFile(fid, oBuf, iPos, iSize);
     }
 
 private:
-    std::istream * stream;
-
-    Alembic::Util::int32_t fd;
-    Alembic::Util::uint64_t offset;
-    bool isGood;
+    FileDescriptor fid;
+    size_t nstreams;
 };
+
+
+
+#ifdef ENABLE_MEMORYMAPPED_STREAM_READER
+class MemoryMappedIStreamReader : public IStreamReader
+{
+private:
+
+#if defined(USE_POSIX_MMAP)
+
+    typedef int FileHandle;
+    #define BAD_FILE_HANDLE (-1)
+
+    static FileHandle openFile(const std::string& iFileName)
+    {
+        int err = open(iFileName.c_str(), O_RDONLY);
+        return err < 0 ? BAD_FILE_HANDLE : err;
+    }
+
+    static void closeFile(FileHandle iFile)
+    {
+        if (iFile != BAD_FILE_HANDLE)
+        {
+            close(iFile);
+        }
+    }
+
+    static int getFileLength(FileHandle iFile, size_t& oLength)
+    {
+        struct stat buf;
+
+        int err = fstat(iFile, &buf);
+        if (err < 0) return -1;
+        if (buf.st_size < 0) return -1;
+
+        oLength = static_cast<size_t>(buf.st_size);
+        return 0;
+    }
+
+    struct MappedRegion
+    {
+        size_t len;
+        void* p;
+
+        MappedRegion() : len(0), p(NULL)
+        {
+        }
+
+        ~MappedRegion()
+        {
+            close();
+        }
+
+        bool isMapped() const
+        {
+            return p != NULL;
+        }
+
+        void map(FileHandle iFile, size_t iLength)
+        {
+            close();
+
+            void* m = mmap(NULL, iLength, PROT_READ, MAP_PRIVATE, iFile, 0);
+            if (m == MAP_FAILED) return;
+
+            p = m;
+            len = iLength;
+        }
+
+        void close()
+        {
+            if (p)
+            {
+                munmap(p, len);
+                p = NULL;
+            }
+        }
+
+    };
+
+#elif defined(USE_WIN32_FILEMAPPING)
+    typedef HANDLE FileHandle;
+    #define BAD_FILE_HANDLE (INVALID_HANDLE_VALUE)
+
+    static FileHandle openFile(const std::string& iFileName)
+    {
+        return CreateFile(iFileName.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    }
+
+    static void closeFile(FileHandle iFile)
+    {
+        if (iFile != INVALID_HANDLE_VALUE)
+        {
+            CloseHandle(iFile);
+        }
+    }
+
+    static int getFileLength(FileHandle iFile, size_t& oLength)
+    {
+        LARGE_INTEGER length;
+        length.QuadPart = 0;
+
+        BOOL success = GetFileSizeEx(iFile, &length);
+        if (!success) return -1;
+        if (length.QuadPart < 0) return -1;
+
+        oLength = static_cast<size_t>(length.QuadPart);
+        return 0;
+    }
+
+    struct MappedRegion
+    {
+        size_t len;
+        void* p;
+
+        MappedRegion() : len(0), p(NULL)
+        {
+        }
+
+        ~MappedRegion()
+        {
+            close();
+        }
+
+        bool isMapped() const
+        {
+            return p != NULL;
+        }
+
+        void map(FileHandle iFile, size_t iLength)
+        {
+            close();
+
+            DWORD sizeHigh = static_cast<DWORD>(iLength >> 32);
+            DWORD sizeLow = static_cast<DWORD>(iLength);
+            HANDLE mapping = CreateFileMapping(iFile, NULL, PAGE_READONLY, sizeHigh, sizeLow, NULL);
+            if (mapping == NULL) return;
+
+            LPVOID view = MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, iLength);
+
+            // regardless of whether we have a successful view, close the mapping
+            // the underlying file mapping will remain open as long as the view is open
+            CloseHandle(mapping);
+
+            if (view != NULL)
+            {
+                p = view;
+                len = iLength;
+            }
+        }
+
+        void close()
+        {
+            if (p)
+            {
+                UnmapViewOfFile(p);
+                p = NULL;
+            }
+        }
+
+    };
+#else
+    #error Memory mapping enabled but no suitable platform defined.
+#endif
+
+
+public:
+    MemoryMappedIStreamReader(const std::string& iFileName,
+                              std::size_t iNumStreams)
+        : nstreams(iNumStreams), fileName(iFileName),
+          fileHandle(BAD_FILE_HANDLE)
+    {
+        fileHandle = openFile(iFileName);
+        if (fileHandle == BAD_FILE_HANDLE) return;
+
+        size_t len = 0;
+        int err = getFileLength(fileHandle, len);
+        if (err < 0) return;
+
+        mappedRegion.map(fileHandle, len);
+    }
+
+    ~MemoryMappedIStreamReader()
+    {
+        mappedRegion.close();
+        closeFile(fileHandle);
+    }
+
+    bool isOpen() const
+    {
+        return mappedRegion.isMapped();
+    }
+
+    size_t numStreams() const
+    {
+        // memory mapped files support 'unlimited' streams, but just report
+        // the number of streams we were opened with
+        return nstreams;
+    }
+
+    bool read(std::size_t iStream, Alembic::Util::uint64_t iPos,
+              Alembic::Util::uint64_t iSize, void* oBuf)
+    {
+        if (iPos + iSize > mappedRegion.len) return false;
+
+        const char* p = static_cast<const char*>(mappedRegion.p) + iPos;
+        std::memcpy(oBuf, p, iSize);
+
+        return true;
+    }
+
+private:
+    std::size_t nstreams;
+    std::string fileName;
+    FileHandle fileHandle;
+    MappedRegion mappedRegion;
+};
+#endif
+
+
+IStreamReaderPtr constructStreamReader(
+    const std::string & iFileName,
+    std::size_t iNumStreams, Alembic::Util::option_base* iStreamOptions)
+{
+    // get the options, use the defaults if not set
+    IStreamOptions defaultOptions;
+
+    IStreamOptions* options = dynamic_cast<IStreamOptions*>(iStreamOptions);
+    if (!options) options = &defaultOptions;
+
+#ifdef ENABLE_MEMORYMAPPED_STREAM_READER
+    // if allowed by the options, use memory mapped file access
+    if (options->getFileAccessStrategy() ==
+            IStreamOptions::FileAccessType::kMemoryMapFiles)
+    {
+        return IStreamReaderPtr(
+            new MemoryMappedIStreamReader(iFileName, iNumStreams));
+    }
+#endif
+
+    // otherwise, use file streams
+    return IStreamReaderPtr(new FileIStreamReader(iFileName, iNumStreams));
+}
+
+IStreamReaderPtr constructStreamReader(
+    const std::vector< std::istream * > & iStreams,
+    Alembic::Util::option_base* iStreamOptions)
+{
+    // This construction method only supports the std::istream reader
+    return IStreamReaderPtr(new StdIStreamReader(iStreams));
+}
+
+
+}  // anonymous namespace
+
+
 
 class IStreams::PrivateData
 {
 public:
     PrivateData()
     {
-        locks = NULL;
         valid = false;
         frozen = false;
         version = 0;
-        fid = -1;
     }
 
-    ~PrivateData()
+    void init(IStreamReaderPtr iReader, size_t iNumStreams)
     {
-        if (locks)
+        // simple temporary endian check
+        union
         {
-            delete [] locks;
+            Util::uint32_t l;
+            char c[4];
+        } u;
+
+        u.l = 0x01234567;
+
+        if (u.c[0] != 0x67)
+        {
+            throw std::runtime_error(
+                "Ogawa currently only supports little-endian reading.");
         }
 
-        if (fid != -1)
+        if (iNumStreams == 0 || iReader == NULL || !iReader->isOpen()) return;
+
+        Alembic::Util::uint64_t firstGroupPos = 0;
+
+        for (std::size_t i = 0; i < iNumStreams; ++i)
         {
-            CLOSEFILE(fid);
+            char header[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+            iReader->read(i, 0, 16, static_cast<void*>(header));
+            std::string magicStr(header, 5);
+            if (magicStr != "Ogawa")
+            {
+                frozen = false;
+                valid = false;
+                version = 0;
+                return;
+            }
+            bool filefrozen = (header[5] == char(0xff));
+            Alembic::Util::uint16_t fileversion = (header[6] << 8) | header[7];
+            Alembic::Util::uint64_t groupPos = *((Alembic::Util::uint64_t*) (&(header[8])));
+
+            if (i == 0)
+            {
+                firstGroupPos = groupPos;
+                frozen = filefrozen;
+                version = fileversion;
+            }
+                // all the streams have to agree, or we are invalid
+            else if (firstGroupPos != groupPos || frozen != filefrozen ||
+                     version != fileversion)
+            {
+                frozen = false;
+                valid = false;
+                version = 0;
+                return;
+            }
+        }
+
+        // if we reach here, and we're a known version, then we're valid
+        if (version == 1)
+        {
+            reader = iReader;        // preserve the reader
+            valid = true;
         }
     }
 
-    std::vector<IStream> streams;
-    std::vector<Alembic::Util::uint64_t> offsets;
-    Alembic::Util::mutex * locks;
+
     bool valid;
     bool frozen;
     Alembic::Util::uint16_t version;
 
-    Alembic::Util::int32_t fid;
+    IStreamReaderPtr reader;
 };
 
-IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams) :
+
+namespace
+{
+}  // anonymous namespace
+
+
+
+
+IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams,
+                   Alembic::Util::option_base* iStreamOptions) :
     mData(new IStreams::PrivateData())
 {
-
-    mData->fid = OPENFILE(iFileName.c_str(), O_RDONLY);
-
-    if (mData->fid > -1)
-    {
-        mData->streams.push_back(IStream(mData->fid));
-    }
-
-    init();
-    if (!mData->valid || mData->version != 1)
-    {
-        mData->streams.clear();
-        CLOSEFILE(mData->fid);
-        mData->fid = -1;
-    }
-    else
-    {
-        // we are valid, so fill in the rest
-        mData->streams.reserve(iNumStreams);
-        for (std::size_t i = 1; i < iNumStreams; ++i)
-        {
-            mData->streams.push_back(IStream(mData->fid));
-        }
-    }
-
-    mData->locks = new Alembic::Util::mutex[mData->streams.size()];
+    IStreamReaderPtr reader = constructStreamReader(iFileName, iNumStreams,
+                                                    iStreamOptions);
+    mData->init(reader, 1);
 }
 
-IStreams::IStreams(const std::vector< std::istream * > & iStreams) :
+IStreams::IStreams(const std::vector< std::istream * > & iStreams,
+                   Alembic::Util::option_base* iStreamOptions) :
     mData(new IStreams::PrivateData())
 {
-    mData->streams.reserve(iStreams.size());
-    for (std::vector< std::istream * >::const_iterator it = iStreams.begin();
-         it != iStreams.end(); ++it)
-    {
-        mData->streams.push_back(*it);
-    }
-    init();
-    if (!mData->valid || mData->version != 1)
-    {
-        mData->streams.clear();
-        return;
-    }
-
-    mData->locks = new Alembic::Util::mutex[mData->streams.size()];
-}
-
-void IStreams::init()
-{
-    // simple temporary endian check
-    union {
-        Util::uint32_t l;
-        char c[4];
-    } u;
-
-    u.l = 0x01234567;
-
-    if (u.c[0] != 0x67)
-    {
-        throw std::runtime_error(
-            "Ogawa currently only supports little-endian reading.");
-    }
-
-    if (mData->streams.empty())
-    {
-        return;
-    }
-
-    Alembic::Util::uint64_t firstGroupPos = 0;
-
-    for (std::size_t i = 0; i < mData->streams.size(); ++i)
-    {
-        char header[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        mData->streams[i].read(header, 16);
-        std::string magicStr(header, 5);
-        if (magicStr != "Ogawa")
-        {
-            mData->frozen = false;
-            mData->valid = false;
-            mData->version = 0;
-            return;
-        }
-        bool frozen = (header[5] == char(0xff));
-        Alembic::Util::uint16_t version = (header[6] << 8) | header[7];
-        Alembic::Util::uint64_t groupPos =
-            *((Alembic::Util::uint64_t *)(&(header[8])));
-
-        if (i == 0)
-        {
-            firstGroupPos = groupPos;
-            mData->frozen = frozen;
-            mData->version = version;
-        }
-        // all the streams have to agree, or we are invalid
-        else if (firstGroupPos != groupPos || mData->frozen != frozen ||
-                 mData->version != version)
-        {
-            mData->frozen = false;
-            mData->valid = false;
-            mData->version = 0;
-            return;
-        }
-    }
-    mData->valid = true;
+    IStreamReaderPtr reader = constructStreamReader(iStreams, iStreamOptions);
+    mData->init(reader, reader->numStreams());
 }
 
 IStreams::~IStreams()
@@ -379,30 +710,11 @@ void IStreams::read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
         return;
     }
 
-    std::size_t threadId = 0;
-    if (iThreadId < mData->streams.size())
+    bool success = mData->reader->read(iThreadId, iPos, iSize, oBuf);
+    if (!success)
     {
-        threadId = iThreadId;
-    }
-
-    {
-        Alembic::Util::scoped_lock l(mData->locks[threadId]);
-        IStream & stream = mData->streams[threadId];
-        stream.seekg(iPos);
-
-        // make sure our seek was good and not at the end of the file before
-        // trying to do the read
-        if (stream.good())
-        {
-            stream.read(oBuf, iSize);
-        }
-
-        // if the seekg or read failed throw an exception
-        if (stream.fail())
-        {
-            throw std::runtime_error(
-                "Ogawa IStreams::read failed.");
-        }
+        throw std::runtime_error(
+            "Ogawa IStreams::read failed.");
     }
 }
 

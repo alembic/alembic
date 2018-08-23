@@ -88,19 +88,19 @@ ReadArchive::ReadArchive( const std::vector< std::istream * > & iStreams )
 
 //-*****************************************************************************
 AbcA::ArchiveReaderPtr
-ReadArchive::operator()( const std::string &iFileName ) const
+ReadArchive::operator()( const std::string &iFileName, Alembic::Util::option_base* iOptions ) const
 {
     AbcA::ArchiveReaderPtr archivePtr;
 
     if ( m_streams.empty() )
     {
         archivePtr = Alembic::Util::shared_ptr<ArImpl>(
-            new ArImpl( iFileName, m_numStreams ) );
+            new ArImpl( iFileName, m_numStreams, iOptions ) );
     }
     else
     {
         archivePtr = Alembic::Util::shared_ptr<ArImpl>(
-            new ArImpl( m_streams ) );
+            new ArImpl( m_streams, iOptions ) );
     }
     return archivePtr;
 }
@@ -109,19 +109,19 @@ ReadArchive::operator()( const std::string &iFileName ) const
 // The given cache is ignored.
 AbcA::ArchiveReaderPtr
 ReadArchive::operator()( const std::string &iFileName,
-            AbcA::ReadArraySampleCachePtr iCache ) const
+            AbcA::ReadArraySampleCachePtr iCache, Alembic::Util::option_base* iOptions ) const
 {
     AbcA::ArchiveReaderPtr archivePtr;
 
     if ( m_streams.empty() )
     {
         archivePtr = Alembic::Util::shared_ptr<ArImpl> (
-            new ArImpl( iFileName, m_numStreams ) );
+            new ArImpl( iFileName, m_numStreams, iOptions ) );
     }
     else
     {
         archivePtr = Alembic::Util::shared_ptr<ArImpl> (
-            new ArImpl( m_streams ) );
+            new ArImpl( m_streams, iOptions ) );
     }
     return archivePtr;
 }

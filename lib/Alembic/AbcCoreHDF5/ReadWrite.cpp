@@ -91,7 +91,7 @@ ReadArchive::ReadArchive( bool iCacheHierarchy )
 //-*****************************************************************************
 // This version creates a cache.
 AbcA::ArchiveReaderPtr
-ReadArchive::operator()( const std::string &iFileName ) const
+ReadArchive::operator()( const std::string &iFileName, Alembic::Util::option_base* /*iOptions*/ ) const
 {
     AbcA::ReadArraySampleCachePtr cachePtr = CreateCache();
     Alembic::Util::shared_ptr<ArImpl> archivePtr(
@@ -104,7 +104,8 @@ ReadArchive::operator()( const std::string &iFileName ) const
 // This version takes a cache from outside.
 AbcA::ArchiveReaderPtr
 ReadArchive::operator()( const std::string &iFileName,
-                         AbcA::ReadArraySampleCachePtr iCachePtr ) const
+                         AbcA::ReadArraySampleCachePtr iCachePtr,
+                         Alembic::Util::option_base* /*iOptions*/) const
 {
     Alembic::Util::shared_ptr<ArImpl> archivePtr(
         new ArImpl( iFileName, iCachePtr, m_cacheHierarchy ) );

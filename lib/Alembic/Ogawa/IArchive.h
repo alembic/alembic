@@ -50,8 +50,8 @@ namespace ALEMBIC_VERSION_NS {
 class ALEMBIC_EXPORT IArchive
 {
 public:
-    IArchive(const std::string & iFileName, std::size_t iNumStreams=1);
-    IArchive(const std::vector< std::istream * > & iStreams);
+    IArchive(const std::string & iFileName, std::size_t iNumStreams = 1, Alembic::Util::option_base* iOptions = 0);
+    IArchive(const std::vector< std::istream * > & iStreams, Alembic::Util::option_base* iOptions = 0);
     ~IArchive();
 
     bool isValid() const;

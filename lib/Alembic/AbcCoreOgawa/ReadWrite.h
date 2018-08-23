@@ -78,12 +78,13 @@ public:
 
     // open the file
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
-    operator()( const std::string &iFileName ) const;
+    operator()( const std::string &iFileName, ::Alembic::Util::option_base* iOptions = 0 ) const;
 
     // The given cache is ignored.
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::string &iFileName,
-                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache
+                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache,
+                ::Alembic::Util::option_base* iOptions = 0
               ) const;
 
 private:
