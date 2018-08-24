@@ -53,6 +53,7 @@
 #elif defined(_WIN32)
 
     #include <windows.h>
+    #include <fcntl.h>
     #include <io.h>
     #include <sys/stat.h>
 
@@ -181,11 +182,12 @@ private:
                   void * oBuf,
                   Alembic::Util::uint64_t iOffset,
                   Alembic::Util::uint64_t iSize)
+	{
         void * buf = oBuf;
         Alembic::Util::uint64_t offset = iOffset;
         Alembic::Util::uint64_t totalRead = 0;
 
-        HANDLE hFile = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
+        HANDLE hFile = reinterpret_cast<HANDLE>(_get_osfhandle(iFid));
         DWORD numRead = 0;
         do
         {
@@ -406,7 +408,9 @@ private:
 
     static FileHandle openFile(const std::string& iFileName)
     {
-        return CreateFile(iFileName.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        // Use both FILE_SHARE_READ and FILE_SHARE_WRITE as the share mode.
+        // Without FILE_SHARE_WRITE, this will fail when trying to open a file that is already open for writing.
+        return CreateFile(iFileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     }
 
     static void closeFile(FileHandle iFile)
