@@ -298,13 +298,6 @@ private:
     mutex & m;
 };
 
-// Base-class for options objects
-struct option_base : noncopyable
-{
-protected:
-    virtual void dummy() {};
-};
-
 } // End namespace ALEMBIC_VERSION_NS
 
 using namespace ALEMBIC_VERSION_NS;

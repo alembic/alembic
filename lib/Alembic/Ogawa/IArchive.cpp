@@ -39,14 +39,16 @@ namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
 
-IArchive::IArchive(const std::string & iFileName, std::size_t iNumStreams, Alembic::Util::option_base* iOptions) :
-    mStreams(new IStreams(iFileName, iNumStreams, iOptions))
+IArchive::IArchive(const std::string & iFileName,
+                   std::size_t iNumStreams,
+                   bool iUseMMap) :
+    mStreams(new IStreams(iFileName, iNumStreams, iUseMMap))
 {
     init();
 }
 
-IArchive::IArchive(const std::vector< std::istream * > & iStreams, Alembic::Util::option_base* iOptions) :
-    mStreams(new IStreams(iStreams, iOptions))
+IArchive::IArchive(const std::vector< std::istream * > & iStreams) :
+    mStreams(new IStreams(iStreams))
 {
     init();
 }

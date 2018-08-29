@@ -41,7 +41,6 @@
 #include <Alembic/Ogawa/IArchive.h>
 #include <Alembic/Ogawa/IData.h>
 #include <Alembic/Ogawa/IGroup.h>
-#include <Alembic/Ogawa/IOptions.h>
 #include <Alembic/Ogawa/IStreams.h>
 #include <Alembic/Ogawa/OArchive.h>
 #include <Alembic/Ogawa/OData.h>

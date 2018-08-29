@@ -80,14 +80,13 @@ public:
 
     // Make our own cache.
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
-    operator()( const std::string &iFileName,
-                ::Alembic::Util::option_base* iOptions = 0) const;
+    operator()( const std::string &iFileName ) const;
 
     // Take the given cache.
     ::Alembic::AbcCoreAbstract::ArchiveReaderPtr
     operator()( const std::string &iFileName,
-                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache,
-                ::Alembic::Util::option_base* iOptions = 0) const;
+                ::Alembic::AbcCoreAbstract::ReadArraySampleCachePtr iCache
+              ) const;
 private:
     bool m_cacheHierarchy;
 };

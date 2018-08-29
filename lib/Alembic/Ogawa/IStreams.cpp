@@ -34,7 +34,6 @@
 //-*****************************************************************************
 
 #include <Alembic/Ogawa/IStreams.h>
-#include <Alembic/Ogawa/IOptions.h>
 #include <fstream>
 #include <stdexcept>
 
@@ -49,7 +48,6 @@
     #include <cstring>
 
     #define USE_POSIX_MMAP
-
 #elif defined(_WIN32)
 
     #include <windows.h>
@@ -59,11 +57,10 @@
 
     #define USE_WIN32_FILEMAPPING
 
+#else
+    #error Platform not supported.
 #endif
 
-#if defined(USE_POSIX_MMAP) || defined(USE_WIN32_FILEMAPPING)
-    #define ENABLE_MEMORYMAPPED_STREAM_READER
-#endif
 
 
 
@@ -325,13 +322,11 @@ private:
 
 
 
-#ifdef ENABLE_MEMORYMAPPED_STREAM_READER
 class MemoryMappedIStreamReader : public IStreamReader
 {
 private:
 
 #if defined(USE_POSIX_MMAP)
-
     typedef int FileHandle;
     #define BAD_FILE_HANDLE (-1)
 
@@ -541,36 +536,26 @@ private:
     FileHandle fileHandle;
     MappedRegion mappedRegion;
 };
-#endif
 
 
 IStreamReaderPtr constructStreamReader(
     const std::string & iFileName,
-    std::size_t iNumStreams, Alembic::Util::option_base* iStreamOptions)
+    std::size_t iNumStreams,
+    bool iUseMMap)
 {
-    // get the options, use the defaults if not set
-    IStreamOptions defaultOptions;
-
-    IStreamOptions* options = dynamic_cast<IStreamOptions*>(iStreamOptions);
-    if (!options) options = &defaultOptions;
-
-#ifdef ENABLE_MEMORYMAPPED_STREAM_READER
     // if allowed by the options, use memory mapped file access
-    if (options->getFileAccessStrategy() ==
-            IStreamOptions::FileAccessType::kMemoryMapFiles)
+    if (iUseMMap)
     {
         return IStreamReaderPtr(
             new MemoryMappedIStreamReader(iFileName, iNumStreams));
     }
-#endif
 
     // otherwise, use file streams
     return IStreamReaderPtr(new FileIStreamReader(iFileName, iNumStreams));
 }
 
 IStreamReaderPtr constructStreamReader(
-    const std::vector< std::istream * > & iStreams,
-    Alembic::Util::option_base* iStreamOptions)
+    const std::vector< std::istream * > & iStreams)
 {
     // This construction method only supports the std::istream reader
     return IStreamReaderPtr(new StdIStreamReader(iStreams));
@@ -671,19 +656,18 @@ namespace
 
 
 IStreams::IStreams(const std::string & iFileName, std::size_t iNumStreams,
-                   Alembic::Util::option_base* iStreamOptions) :
+                   bool iUseMMap) :
     mData(new IStreams::PrivateData())
 {
     IStreamReaderPtr reader = constructStreamReader(iFileName, iNumStreams,
-                                                    iStreamOptions);
+                                                    iUseMMap);
     mData->init(reader, 1);
 }
 
-IStreams::IStreams(const std::vector< std::istream * > & iStreams,
-                   Alembic::Util::option_base* iStreamOptions) :
+IStreams::IStreams(const std::vector< std::istream * > & iStreams) :
     mData(new IStreams::PrivateData())
 {
-    IStreamReaderPtr reader = constructStreamReader(iStreams, iStreamOptions);
+    IStreamReaderPtr reader = constructStreamReader(iStreams);
     mData->init(reader, reader->numStreams());
 }
 

@@ -56,11 +56,10 @@ private:
     friend class ReadArchive;
 
     ArImpl( const std::string &iFileName,
-            size_t iNumStreams,
-            Alembic::Util::option_base* iOptions);
+            size_t iNumStreams=1,
+            bool iUseMMap=true);
 
-    ArImpl( const std::vector< std::istream * > & iStreams,
-            Alembic::Util::option_base* iOptions);
+    ArImpl( const std::vector< std::istream * > & iStreams );
 
 public:
 

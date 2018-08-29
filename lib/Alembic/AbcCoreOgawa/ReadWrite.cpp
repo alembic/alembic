@@ -72,35 +72,37 @@ WriteArchive::operator()( std::ostream * iStream,
 ReadArchive::ReadArchive()
 {
     m_numStreams = 1;
+    m_useMMap = true;
 }
 
 //-*****************************************************************************
-ReadArchive::ReadArchive( size_t iNumStreams )
+ReadArchive::ReadArchive( size_t iNumStreams, bool iUseMMap )
 {
     m_numStreams = iNumStreams;
+    m_useMMap = iUseMMap;
 }
 
 //-*****************************************************************************
 ReadArchive::ReadArchive( const std::vector< std::istream * > & iStreams )
-    : m_numStreams( 1 ), m_streams( iStreams )
+    : m_numStreams( 1 ), m_useMMap(true), m_streams( iStreams )
 {
 }
 
 //-*****************************************************************************
 AbcA::ArchiveReaderPtr
-ReadArchive::operator()( const std::string &iFileName, Alembic::Util::option_base* iOptions ) const
+ReadArchive::operator()( const std::string &iFileName ) const
 {
     AbcA::ArchiveReaderPtr archivePtr;
 
     if ( m_streams.empty() )
     {
         archivePtr = Alembic::Util::shared_ptr<ArImpl>(
-            new ArImpl( iFileName, m_numStreams, iOptions ) );
+            new ArImpl( iFileName, m_numStreams, m_useMMap ) );
     }
     else
     {
         archivePtr = Alembic::Util::shared_ptr<ArImpl>(
-            new ArImpl( m_streams, iOptions ) );
+            new ArImpl( m_streams ) );
     }
     return archivePtr;
 }
@@ -109,19 +111,19 @@ ReadArchive::operator()( const std::string &iFileName, Alembic::Util::option_bas
 // The given cache is ignored.
 AbcA::ArchiveReaderPtr
 ReadArchive::operator()( const std::string &iFileName,
-            AbcA::ReadArraySampleCachePtr iCache, Alembic::Util::option_base* iOptions ) const
+            AbcA::ReadArraySampleCachePtr iCache ) const
 {
     AbcA::ArchiveReaderPtr archivePtr;
 
     if ( m_streams.empty() )
     {
         archivePtr = Alembic::Util::shared_ptr<ArImpl> (
-            new ArImpl( iFileName, m_numStreams, iOptions ) );
+            new ArImpl( iFileName, m_numStreams, m_useMMap ) );
     }
     else
     {
         archivePtr = Alembic::Util::shared_ptr<ArImpl> (
-            new ArImpl( m_streams, iOptions ) );
+            new ArImpl( m_streams ) );
     }
     return archivePtr;
 }

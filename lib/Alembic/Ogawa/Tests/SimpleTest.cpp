@@ -38,7 +38,7 @@
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 #include <iostream>
 
-void test(Alembic::Util::option_base* iOptions)
+void test(bool iUseMMap)
 {
 
 {
@@ -80,7 +80,7 @@ void test(Alembic::Util::option_base* iOptions)
     bcd->rewrite(1, &nine, 4); // 0 1 2 3 9 5 6 7
 }
 
-    Alembic::Ogawa::IArchive ia("simpleTest.ogawa", 1, iOptions);
+    Alembic::Ogawa::IArchive ia("simpleTest.ogawa", 1, iUseMMap);
     Alembic::Ogawa::IGroupPtr top = ia.getGroup();
 
     TESTING_ASSERT(top->getNumChildren() == 3);
@@ -187,25 +187,10 @@ void test(Alembic::Util::option_base* iOptions)
 
 }
 
-
-struct TestOption : public Alembic::Ogawa::IStreamOptions
-{
-    FileAccessType strategy;
-
-    explicit TestOption(FileAccessType s) : strategy(s) {}
-    FileAccessType getFileAccessStrategy() { return strategy; }
-};
-
-
-
-
 int main ( int argc, char *argv[] )
 {
-    TestOption usemmap(Alembic::Ogawa::IStreamOptions::kMemoryMapFiles);
-    test(&usemmap);
-
-    TestOption usestreams(Alembic::Ogawa::IStreamOptions::kFileStreams);
-    test(&usestreams);
+    test(true);     // Use mmap
+    test(false);    // Use streams
 
     return 0;
 }

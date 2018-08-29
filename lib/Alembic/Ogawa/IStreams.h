@@ -49,10 +49,9 @@ class ALEMBIC_EXPORT IStreams
 {
 public:
     IStreams(const std::string & iFileName,
-             std::size_t iNumStreams = 1,
-             Alembic::Util::option_base* iStreamOptions = 0);
-    IStreams(const std::vector< std::istream * > & iStreams,
-             Alembic::Util::option_base* iStreamOptions = 0);
+             std::size_t iNumStreams=1,
+             bool iUseMMap=true);
+    IStreams(const std::vector< std::istream * > & iStreams);
     ~IStreams();
 
     bool isValid();

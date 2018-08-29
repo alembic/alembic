@@ -37,12 +37,12 @@
 #include <Alembic/Ogawa/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-void test(Alembic::Util::option_base* iOptions)
+void test(bool iUseMMap)
 {
     {
         Alembic::Ogawa::OArchive oa("archiveTest.ogawa");
         TESTING_ASSERT(oa.isValid());
-        Alembic::Ogawa::IArchive ia("archiveTest.ogawa", 1, iOptions);
+        Alembic::Ogawa::IArchive ia("archiveTest.ogawa", 1, iUseMMap);
         TESTING_ASSERT(ia.isValid());
         TESTING_ASSERT(!ia.isFrozen());
         TESTING_ASSERT(ia.getVersion() == 1);
@@ -78,22 +78,10 @@ void stringStreamTest()
 }
 
 
-struct TestOption : public Alembic::Ogawa::IStreamOptions
-{
-    FileAccessType strategy;
-
-    explicit TestOption(FileAccessType s) : strategy(s) {}
-    FileAccessType getFileAccessStrategy() { return strategy; }
-};
-
-
 int main ( int argc, char *argv[] )
 {
-    TestOption usemmap(Alembic::Ogawa::IStreamOptions::kMemoryMapFiles);
-    test(&usemmap);
-
-    TestOption usestreams(Alembic::Ogawa::IStreamOptions::kFileStreams);
-    test(&usestreams);
+    test(true);     // Use mmap
+    test(false);    // Use streams
 
     stringStreamTest();
     return 0;
