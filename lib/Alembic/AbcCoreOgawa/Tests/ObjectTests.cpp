@@ -47,7 +47,7 @@ namespace AO = Alembic::AbcCoreOgawa;
 namespace AbcA = Alembic::AbcCoreAbstract;
 
 //-*****************************************************************************
-void testObjects()
+void testObjects(bool iUseMMap)
 {
     std::string archiveName = "objectTest.abc";
     {
@@ -130,7 +130,7 @@ void testObjects()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         AbcA::ArchiveReaderPtr a = r( archiveName );
         AbcA::ObjectReaderPtr archive = a->getTop();
         TESTING_ASSERT(archive->getNumChildren() == 3);
@@ -176,7 +176,7 @@ void testObjects()
         TESTING_ASSERT(gchild->getFullName() == "/foo/pizza");
         TESTING_ASSERT(gchild->getName() == "pizza");
 
-        AO::ReadArchive r2;
+        AO::ReadArchive r2(1, iUseMMap);
         AbcA::ArchiveReaderPtr a2 = r2( archiveName );
         AbcA::ObjectReaderPtr archive2 = a2->getTop();
         AbcA::ObjectReaderPtr child2 = archive->getChild(0);
@@ -187,7 +187,7 @@ void testObjects()
     }
 }
 
-void testChildObjects()
+void testChildObjects(bool iUseMMap)
 {
     std::string archiveName = "objectChildrenTest.abc";
     {
@@ -247,7 +247,7 @@ void testChildObjects()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         AbcA::ArchiveReaderPtr a = r( archiveName );
         AbcA::ObjectReaderPtr archive = a->getTop();
         AbcA::ObjectReaderPtr smallChild = archive->getChild(0);
@@ -264,7 +264,7 @@ void testChildObjects()
     }
 }
 
-void testMetaData()
+void testMetaData(bool iUseMMap)
 {
     std::string archiveName = "objectMetaDataTest.abc";
     {
@@ -285,7 +285,7 @@ void testMetaData()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         AbcA::ArchiveReaderPtr a = r( archiveName );
         AbcA::ObjectReaderPtr archive = a->getTop();
         AbcA::ObjectReaderPtr child = archive->getChild(0);
@@ -301,10 +301,16 @@ void testMetaData()
     }
 }
 
+void runTests(bool iUseMMap)
+{
+    testObjects(iUseMMap);
+    testChildObjects(iUseMMap);
+    testMetaData(iUseMMap);
+}
+
 int main ( int argc, char *argv[] )
 {
-    testObjects();
-    testChildObjects();
-    testMetaData();
+    runTests(true);     // Use mmap
+    runTests(false);    // Use streams
     return 0;
 }

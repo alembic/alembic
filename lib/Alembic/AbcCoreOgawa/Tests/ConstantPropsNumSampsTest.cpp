@@ -48,7 +48,7 @@ namespace AbcA = Alembic::AbcCoreAbstract;
 using namespace AbcA;
 
 //-*****************************************************************************
-void testProps()
+void testProps(bool iUseMMap)
 {
     Alembic::Util::int32_t intVal = 15;
 
@@ -104,7 +104,7 @@ void testProps()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ArchiveReaderPtr a = r( archiveName );
         ObjectReaderPtr top = a->getTop();
         TESTING_ASSERT( top->getNumChildren() == 1 );
@@ -131,6 +131,7 @@ void testProps()
 
 int main ( int argc, char *argv[] )
 {
-    testProps();
+    testProps(true);    // Use mmap
+    testProps(false);   // Use streams
     return 0;
 }

@@ -47,7 +47,7 @@
 namespace AO = Alembic::AbcCoreOgawa;
 
 namespace ABCA = Alembic::AbcCoreAbstract;
-void testArrayPropHashes()
+void testArrayPropHashes(bool iUseMMap)
 {
     std::string archiveName = "arrayHashTest.abc";
     {
@@ -238,7 +238,7 @@ void testArrayPropHashes()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ABCA::ArchiveReaderPtr a = r( archiveName );
         ABCA::ObjectReaderPtr archive = a->getTop();
 
@@ -268,7 +268,7 @@ void testArrayPropHashes()
     }
 }
 
-void testScalarPropHashes()
+void testScalarPropHashes(bool iUseMMap)
 {
     std::string archiveName = "scalarHashTest.abc";
     {
@@ -440,7 +440,7 @@ void testScalarPropHashes()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ABCA::ArchiveReaderPtr a = r( archiveName );
         ABCA::ObjectReaderPtr archive = a->getTop();
 
@@ -470,7 +470,7 @@ void testScalarPropHashes()
     }
 }
 
-void testCompoundPropHashes()
+void testCompoundPropHashes(bool iUseMMap)
 {
     std::string archiveName = "compoundHashTest.abc";
     {
@@ -575,7 +575,7 @@ void testCompoundPropHashes()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ABCA::ArchiveReaderPtr a = r( archiveName );
         ABCA::ObjectReaderPtr archive = a->getTop();
 
@@ -605,7 +605,7 @@ void testCompoundPropHashes()
     }
 }
 
-void testObjectHashes()
+void testObjectHashes(bool iUseMMap)
 {
     std::string archiveName = "objectHashTest.abc";
     {
@@ -695,7 +695,7 @@ void testObjectHashes()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ABCA::ArchiveReaderPtr a = r( archiveName );
         ABCA::ObjectReaderPtr archive = a->getTop();
 
@@ -725,7 +725,7 @@ void testObjectHashes()
     }
 }
 
-void testStringHashes()
+void testStringHashes(bool iUseMMap)
 {
     std::string archiveName = "stringsHashTest.abc";
     {
@@ -770,7 +770,7 @@ void testStringHashes()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ABCA::ArchiveReaderPtr a = r( archiveName );
         ABCA::ObjectReaderPtr archive = a->getTop();
         ABCA::CompoundPropertyReaderPtr parent = archive->getProperties();
@@ -806,12 +806,18 @@ void testStringHashes()
     }
 }
 
+void runTests(bool iUseMMap)
+{
+    testArrayPropHashes(iUseMMap);
+    testScalarPropHashes(iUseMMap);
+    testCompoundPropHashes(iUseMMap);
+    testObjectHashes(iUseMMap);
+    testStringHashes(iUseMMap);
+}
+
 int main ( int argc, char *argv[] )
 {
-    testArrayPropHashes();
-    testScalarPropHashes();
-    testCompoundPropHashes();
-    testObjectHashes();
-    testStringHashes();
+    runTests(true);     // Use mmap
+    runTests(false);    // Use streams
     return 0;
 }
