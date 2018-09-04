@@ -61,14 +61,12 @@
 #include <UT/UT_DSOVersion.h>
 #include <UT/UT_DMatrix4.h>
 
-#if UT_MAJOR_VERSION_INT >= 12
 #include <UT/UT_CappedCache.h>
-#endif
 
 #include <HOM/HOM_Module.h>
-#include <boost/tokenizer.hpp>
+#include <hboost/tokenizer.hpp>
 #include <sstream>
-#include <boost/shared_ptr.hpp>
+#include <hboost/shared_ptr.hpp>
 
 //-*****************************************************************************
 
@@ -77,8 +75,8 @@ namespace
     void TokenizeObjectPath(const std::string & objectPath,
             SOP_AlembicIn::PathList & pathList)
     {
-        typedef boost::char_separator<char> Separator;
-        typedef boost::tokenizer<Separator> Tokenizer;
+        typedef hboost::char_separator<char> Separator;
+        typedef hboost::tokenizer<Separator> Tokenizer;
         Tokenizer tokenizer( objectPath, Separator( "/" ) );
         for ( Tokenizer::iterator iter = tokenizer.begin() ;
                 iter != tokenizer.end() ; ++iter )
@@ -88,7 +86,6 @@ namespace
         }
     }
 
-#if UT_MAJOR_VERSION_INT >= 12
     class ArchiveObjectKey : public UT_CappedKey
     {
     public:
@@ -132,15 +129,12 @@ namespace
     private:
 	IObject		 myIObject;
     };
-#endif
 
     struct ArchiveCacheEntry
     {
         ArchiveCacheEntry()
         : objectPathMenuList(NULL)
-#if UT_MAJOR_VERSION_INT >= 12
 	, myCache("abcObjects", 2)
-#endif
         {
         }
 
@@ -195,7 +189,6 @@ namespace
 	IObject	findObject(IObject parent,
 		    UT_WorkBuffer &fullpath, const char *component)
 		{
-#if UT_MAJOR_VERSION_INT >= 12
 		    fullpath.append("/");
 		    fullpath.append(component);
 		    ArchiveObjectKey	key(fullpath.buffer());
@@ -212,9 +205,6 @@ namespace
 			    myCache.addItem(key, new ArchiveObjectItem(kid));
 		    }
 		    return kid;
-#else
-		    return parent.getChild(component);
-#endif
 		}
 
 	IObject getObject(const std::string &objectPath)
@@ -236,12 +226,10 @@ namespace
         std::string error;
         PY_PyObject * objectPathMenuList;
 	std::map<std::string, M44d> myTransforms;
-#if UT_MAJOR_VERSION_INT >= 12
 	UT_CappedCache	myCache;
-#endif
     };
 
-    typedef boost::shared_ptr<ArchiveCacheEntry> ArchiveCacheEntryRcPtr;
+    typedef hboost::shared_ptr<ArchiveCacheEntry> ArchiveCacheEntryRcPtr;
     typedef std::map<std::string, ArchiveCacheEntryRcPtr> ArchiveCache;
 
     //-*************************************************************************
@@ -427,12 +415,12 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     std::map<std::string,std::string> nameMap;
     bool sop_flushed = false;
 
-    const float now = context.myTime;
+    const float now = context.getTime();
 
     args.includeXform = evalInt("includeXform", 0, now);
     if (gdp->getUniqueId() != myConstantUniqueId ||
-	    gdp->points().entries() != myConstantPointCount ||
-	    gdp->primitives().entries() != myConstantPrimitiveCount)
+	    gdp->getNumPoints() != myConstantPointCount ||
+	    gdp->getNumPrimitives() != myConstantPrimitiveCount)
     {
 	// When the SOP cache flushes my geometry, make sure to recreate
 	// primitives etc.
@@ -508,15 +496,12 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
 
     if (!myTopologyConstant)
     {
+	// std::cerr<<"clearing geo\n";
         gdp->clearAndDestroy();
     }
     else
     {
-#if UT_MAJOR_VERSION_INT >= 12
         gdp->destroyInternalNormalAttribute();
-#else
-        gdp->destroyPointAttrib("internalN", sizeof(UT_Vector3), GB_ATTRIB_MIXED);
-#endif
     }
 
 
@@ -524,12 +509,11 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     args.abcTime = evalFloat("frame", 0, now) / fps;
     args.isConstant = true;
     args.isTopologyConstant = true;
-    args.reusePrimitives = myTopologyConstant && gdp->primitives().entries()>0;
+    args.reusePrimitives = myTopologyConstant && gdp->getNumPrimitives()>0;
     args.pointCount = 0;
     args.primCount = 0;
     args.nameMap = &nameMap;
     args.boss = UTgetInterrupt();
-    args.rebuiltNurbs = false;
     args.activePatchRows = 0;
     args.activePatchCols = 0;
 
@@ -594,11 +578,6 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
             myEntireSceneIsConstant = true;
         }
         myTopologyConstant = args.isTopologyConstant;
-
-        if (args.rebuiltNurbs)
-        {
-            gdp->notifyCache(GU_CACHE_ALL);
-        }
     }
     catch ( const InterruptedException & /*e*/ )
     {
@@ -616,8 +595,8 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     }
     if (myTopologyConstant)
     {
-	myConstantPointCount = gdp->points().entries();
-	myConstantPrimitiveCount = gdp->primitives().entries();
+	myConstantPointCount = gdp->getNumPoints();
+	myConstantPrimitiveCount = gdp->getNumPrimitives();
 	myConstantUniqueId = gdp->getUniqueId();
     }
 
@@ -633,33 +612,32 @@ void SOP_AlembicIn::nodeUnlocked()
 
 //-*****************************************************************************
 
-#if UT_MAJOR_VERSION_INT >= 12
     static GA_RWAttributeRef
-    findStringTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
+    findStringTuple(GU_Detail &gdp, GA_AttributeOwner owner,
             const char *name, int min_size=1)
     {
         return gdp.findStringTuple(owner, name, min_size);
     }
     static GA_RWAttributeRef
-    addStringTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
+    addStringTuple(GU_Detail &gdp, GA_AttributeOwner owner,
             const char *name, int size)
     {
         return gdp.addStringTuple(owner, name, size);
     }
     static GA_RWAttributeRef
-    findIntTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
+    findIntTuple(GU_Detail &gdp, GA_AttributeOwner owner,
             const char *name, int min_size)
     {
         return gdp.findIntTuple(owner, name, min_size);
     }
     static GA_RWAttributeRef
-    addIntTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
+    addIntTuple(GU_Detail &gdp, GA_AttributeOwner owner,
             const char *name, int size)
     {
         return gdp.addIntTuple(owner, name, size);
     }
     static GA_RWAttributeRef
-    addInt64Tuple(GU_Detail &gdp, GEO_AttributeOwner owner,
+    addInt64Tuple(GU_Detail &gdp, GA_AttributeOwner owner,
             const char *name, int size)
     {
         return gdp.addIntTuple(owner, name, size,
@@ -669,13 +647,13 @@ void SOP_AlembicIn::nodeUnlocked()
 		GA_STORE_INT64);
     }
     static GA_RWAttributeRef
-    findFloatTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
+    findFloatTuple(GU_Detail &gdp, GA_AttributeOwner owner,
             const char *name, int min_size)
     {
         return gdp.findFloatTuple(owner, name, min_size);
     }
     static GA_RWAttributeRef
-    addFloatTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
+    addFloatTuple(GU_Detail &gdp, GA_AttributeOwner owner,
             const char *name, int size, bool normal)
     {
         GA_RWAttributeRef h = gdp.addFloatTuple(owner, name, size);
@@ -686,7 +664,7 @@ void SOP_AlembicIn::nodeUnlocked()
         return h;
     }
     static GA_RWAttributeRef
-    addVelocity(GU_Detail &gdp, GEO_AttributeOwner owner)
+    addVelocity(GU_Detail &gdp, GA_AttributeOwner owner)
     {
 	return gdp.addVelocityAttribute(owner);
     }
@@ -703,124 +681,15 @@ void SOP_AlembicIn::nodeUnlocked()
     {
         group->add(gb);
     }
-#else
-    static GA_RWAttributeRef
-    findAttribute(GU_Detail &gdp, GEO_AttributeOwner owner, const char *name,
-            GB_AttribType type, size_t bytes)
-    {
-        switch (owner)
-        {
-        case GEO_POINT_DICT:
-            return gdp.findPointAttrib(name, bytes, type);
-        case GEO_VERTEX_DICT:
-            return gdp.findVertexAttrib(name, bytes, type);
-        case GEO_PRIMITIVE_DICT:
-            return gdp.findPrimAttrib(name, bytes, type);
-        case GEO_DETAIL_DICT:
-            return gdp.findAttrib(name, bytes, type);
-        default:
-            return GA_RWAttributeRef();
-        }
-    }
-
-    static GA_RWAttributeRef
-    addAttribute(GU_Detail &gdp, GEO_AttributeOwner owner, const char *name,
-        GB_AttribType type, size_t bytes, const void *def=NULL)
-    {
-        switch (owner)
-        {
-        case GEO_POINT_DICT:
-            return gdp.addPointAttrib(name, bytes, type, def);
-        case GEO_VERTEX_DICT:
-            return gdp.addVertexAttrib(name, bytes, type, def);
-        case GEO_PRIMITIVE_DICT:
-            return gdp.addPrimAttrib(name, bytes, type, def);
-        case GEO_DETAIL_DICT:
-            return gdp.addAttrib(name, bytes, type, def);
-        default:
-            return GA_RWAttributeRef();
-        }
-    }
-    static GA_RWAttributeRef
-    findStringTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
-            const char *name, int min_size=1)
-    {
-        return findAttribute(gdp, owner, name, GB_ATTRIB_INDEX, sizeof(int));
-    }
-    static GA_RWAttributeRef
-    addStringTuple(GU_Detail &gdp, GEO_AttributeOwner owner, const char *name,
-            int)
-    {
-        return addAttribute(gdp, owner, name, GB_ATTRIB_INDEX, sizeof(int));
-    }
-    static GA_RWAttributeRef
-    findIntTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
-        const char *name, int size)
-    {
-        return findAttribute(gdp, owner, name, GB_ATTRIB_INT, sizeof(int)*size);
-    }
-    static GA_RWAttributeRef
-    addIntTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
-            const char *name, int size)
-    {
-        return addAttribute(gdp, owner, name, GB_ATTRIB_INT, sizeof(int)*size);
-    }
-    static GA_RWAttributeRef
-    addInt64Tuple(GU_Detail &gdp, GEO_AttributeOwner owner,
-            const char *name, int size)
-    {
-        return addAttribute(gdp, owner, name, GB_ATTRIB_INT, sizeof(int)*size);
-    }
-    static GA_RWAttributeRef
-    findFloatTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
-            const char *name, int size)
-    {
-        GA_RWAttributeRef h;
-        h = findAttribute(gdp, owner, name, GB_ATTRIB_FLOAT,
-                sizeof(float)*size);
-        if (!h.isValid() && size == 3)
-        {
-            h = findAttribute(gdp, owner, name, GB_ATTRIB_VECTOR,
-                    sizeof(float)*size);
-        }
-        return h;
-    }
-    static GA_RWAttributeRef
-    addFloatTuple(GU_Detail &gdp, GEO_AttributeOwner owner,
-            const char *name, int size, bool normal)
-    {
-        if (normal)
-        {
-            return addAttribute(gdp, owner, name, GB_ATTRIB_VECTOR,
-                    sizeof(float)*size);
-        }
-        return addAttribute(gdp, owner, name, GB_ATTRIB_FLOAT,
-                sizeof(float)*size);
-    }
-    static GA_RWAttributeRef
-    addVelocity(GU_Detail &gdp, GEO_AttributeOwner owner)
-    {
-	return gdp.addVelocityAttribute(owner);
-    }
-    static void
-    setTypeInfo(GA_RWAttributeRef &, GA_TypeInfo)
-    {
-    }
-    static void
-    addToGroup(GB_PrimitiveGroup *group, GEO_Primitive *gb)
-    {
-        group->add(gb, 0); // Un-ordered group
-    }
-#endif
 
 GA_ROAttributeRef  SOP_AlembicIn::attachDetailStringData(
         const std::string &attrName, const std::string &value)
 {
-    GA_RWAttributeRef attrIdx = findStringTuple(*gdp, GEO_DETAIL_DICT,
+    GA_RWAttributeRef attrIdx = findStringTuple(*gdp, GA_ATTRIB_DETAIL,
             attrName.c_str());
     if (attrIdx.isInvalid())
     {
-        attrIdx = addStringTuple(*gdp, GEO_DETAIL_DICT, attrName.c_str(), 1);
+        attrIdx = addStringTuple(*gdp, GA_ATTRIB_DETAIL, attrName.c_str(), 1);
 
         if (error() >= UT_ERROR_ABORT || attrIdx.isInvalid())
         {
@@ -830,7 +699,6 @@ GA_ROAttributeRef  SOP_AlembicIn::attachDetailStringData(
             addWarning(SOP_MESSAGE, buffer.str().c_str());
         }
     }
-#if UT_MAJOR_VERSION_INT >= 12
     const GA_AIFStringTuple *aifstring = attrIdx.getAIFStringTuple();
     if (aifstring)
     {
@@ -841,18 +709,6 @@ GA_ROAttributeRef  SOP_AlembicIn::attachDetailStringData(
     {
        return GA_ROAttributeRef();
     }
-#else
-    GB_Attribute *atr = gdp->attribs().findByOffset(attrIdx);
-    if (atr)
-    {
-        gdp->attribs().getElement().setValue<int>(
-                attrIdx, atr->addIndex(value.c_str()));
-    }
-    else
-    {
-       return GBmakeInvalidAttributeRef();
-    }
-#endif
 
     return attrIdx;
 }
@@ -1008,7 +864,6 @@ void SOP_AlembicIn::walkObject( Args & args, sop_IAlembicWalker &walker,
 
 //-*****************************************************************************
 
-#if UT_MAJOR_VERSION_INT >= 12
 static std::string
 fixAttributeName(const std::string &name)
 {
@@ -1026,14 +881,6 @@ fixAttributeName(const std::string &name)
 	return std::string((const char *)var);
     return name;
 }
-#else
-static inline std::string
-fixAttributeName(const std::string &name)
-{
-    // Houdini 11 allows arbitrary characters in group/attribute names
-    return name;
-}
-#endif
 
 std::string SOP_AlembicIn::getFullName( IObject object )
 {
@@ -1061,12 +908,12 @@ void SOP_AlembicIn::addUVs(Args & args, IV2fGeomParam param,
     case kVaryingScope:
     case kVertexScope:
     {
-        addOrFindTextureAttribute(GEO_POINT_DICT, uvAttrIndex);
+        addOrFindTextureAttribute(GA_ATTRIB_POINT, uvAttrIndex);
         break;
     }
     case kFacevaryingScope:
     {
-        addOrFindTextureAttribute(GEO_VERTEX_DICT, uvAttrIndex);
+        addOrFindTextureAttribute(GA_ATTRIB_VERTEX, uvAttrIndex);
         break;
     }
     default:
@@ -1100,12 +947,12 @@ void SOP_AlembicIn::addWidths(Args & args, IFloatGeomParam param,
     case kVaryingScope:
     case kVertexScope:
     {
-        addOrFindWidthAttribute(GEO_POINT_DICT, widthAttrIndex);
+        addOrFindWidthAttribute(GA_ATTRIB_POINT, widthAttrIndex);
         break;
     }
     case kFacevaryingScope:
     {
-        addOrFindWidthAttribute(GEO_VERTEX_DICT, widthAttrIndex);
+        addOrFindWidthAttribute(GA_ATTRIB_VERTEX, widthAttrIndex);
         break;
     }
     default:
@@ -1143,12 +990,12 @@ void SOP_AlembicIn::addNormals(Args & args, IN3fGeomParam param,
     case kVaryingScope:
     case kVertexScope:
     {
-        addOrFindNormalAttribute(GEO_POINT_DICT, nAttrIndex);
+        addOrFindNormalAttribute(GA_ATTRIB_POINT, nAttrIndex);
         break;
     }
     case kFacevaryingScope:
     {
-        addOrFindNormalAttribute(GEO_VERTEX_DICT, nAttrIndex);
+        addOrFindNormalAttribute(GA_ATTRIB_VERTEX, nAttrIndex);
         break;
     }
     default:
@@ -1173,7 +1020,7 @@ void SOP_AlembicIn::addNormals(Args & args, IN3fGeomParam param,
 
 //-*****************************************************************************
 
-bool SOP_AlembicIn::addOrFindTextureAttribute(GEO_AttributeOwner owner,
+bool SOP_AlembicIn::addOrFindTextureAttribute(GA_AttributeOwner owner,
         GA_RWAttributeRef & attrIdx)
 {
     attrIdx = gdp->findTextureAttribute(owner);
@@ -1191,17 +1038,11 @@ bool SOP_AlembicIn::addOrFindTextureAttribute(GEO_AttributeOwner owner,
     return true;
 }
 
-bool SOP_AlembicIn::addOrFindWidthAttribute(GEO_AttributeOwner owner,
+bool SOP_AlembicIn::addOrFindWidthAttribute(GA_AttributeOwner owner,
         GA_RWAttributeRef & attrIdx)
 {
-#if UT_MAJOR_VERSION_INT < 12
-    float	def_width = 0.1;
-    attrIdx = gdp->addAttribute("width", sizeof(float), GB_ATTRIB_FLOAT,
-		    &def_width, owner);
-#else
     attrIdx = gdp->addTuple(GA_STORE_REAL32, owner, GA_SCOPE_PUBLIC,
 	    "width", 1, GA_Defaults(0.1));
-#endif
     if (error() >= UT_ERROR_ABORT || !attrIdx.isValid())
     {
 	addError(SOP_MESSAGE, "could not create width attribute.");
@@ -1213,7 +1054,7 @@ bool SOP_AlembicIn::addOrFindWidthAttribute(GEO_AttributeOwner owner,
 
 //-*****************************************************************************
 
-bool SOP_AlembicIn::addOrFindNormalAttribute(GEO_AttributeOwner owner,
+bool SOP_AlembicIn::addOrFindNormalAttribute(GA_AttributeOwner owner,
         GA_RWAttributeRef & attrIdx)
 {
     attrIdx = gdp->findNormalAttribute(owner);
@@ -1258,11 +1099,44 @@ void SOP_AlembicIn::addArbitraryGeomParams(Args & args,
                     startPrimIdx, endPrimIdx,
                     false);
         }
+        else if (IHalfGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IHalfGeomParam, fpreal16>(
+                    args, parent, propHeader,
+                    GA_STORE_REAL16,
+                    GA_TYPE_VOID,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
         else if (IDoubleGeomParam::matches(propHeader))
         {
             processArbitraryGeomParam<IDoubleGeomParam, double>(
                     args, parent, propHeader,
-                    GA_STORE_REAL32, //TODO, store as double in h12?
+                    GA_STORE_REAL64,
+                    GA_TYPE_VOID,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
+        else if (ICharGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<ICharGeomParam, int8>(
+                    args, parent, propHeader,
+                    GA_STORE_INT8,
+                    GA_TYPE_VOID,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
+        else if (IInt16GeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IInt16GeomParam, int16>(
+                    args, parent, propHeader,
+                    GA_STORE_INT16,
                     GA_TYPE_VOID,
                     GA_RWAttributeRef(),
                     startPointIdx, endPointIdx,
@@ -1274,6 +1148,17 @@ void SOP_AlembicIn::addArbitraryGeomParams(Args & args,
             processArbitraryGeomParam<IInt32GeomParam, int>(
                     args, parent, propHeader,
                     GA_STORE_INT32,
+                    GA_TYPE_VOID,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
+        else if (IInt64GeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IInt64GeomParam, int64>(
+                    args, parent, propHeader,
+                    GA_STORE_INT64,
                     GA_TYPE_VOID,
                     GA_RWAttributeRef(),
                     startPointIdx, endPointIdx,
@@ -1302,11 +1187,33 @@ void SOP_AlembicIn::addArbitraryGeomParams(Args & args,
                     startPrimIdx, endPrimIdx,
                     false);
         }
+        else if (IV2dGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IV2dGeomParam, double>(
+                    args, parent, propHeader,
+                    GA_STORE_REAL64,
+                    GA_TYPE_VOID,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
         else if (IV3fGeomParam::matches(propHeader))
         {
             processArbitraryGeomParam<IV3fGeomParam, float>(
                     args, parent, propHeader,
                     GA_STORE_REAL32,
+                    GA_TYPE_VECTOR,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    parentXformIsConstant);
+        }
+        else if (IV3dGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IV3dGeomParam, double>(
+                    args, parent, propHeader,
+                    GA_STORE_REAL64,
                     GA_TYPE_VECTOR,
                     GA_RWAttributeRef(),
                     startPointIdx, endPointIdx,
@@ -1324,11 +1231,44 @@ void SOP_AlembicIn::addArbitraryGeomParams(Args & args,
                     startPrimIdx, endPrimIdx,
                     parentXformIsConstant);
         }
+        else if (IN3dGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IN3dGeomParam, double>(
+                    args, parent, propHeader,
+                    GA_STORE_REAL64,
+                    GA_TYPE_NORMAL,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    parentXformIsConstant);
+        }
+        else if (IC3hGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IC3hGeomParam, fpreal16>(
+                    args, parent, propHeader,
+                    GA_STORE_REAL16,
+                    GA_TYPE_COLOR,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
         else if (IC3fGeomParam::matches(propHeader))
         {
             processArbitraryGeomParam<IC3fGeomParam, float>(
                     args, parent, propHeader,
                     GA_STORE_REAL32,
+                    GA_TYPE_COLOR,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
+        else if (IC3cGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IC3cGeomParam, uint8>(
+                    args, parent, propHeader,
+                    GA_STORE_INT8,
                     GA_TYPE_COLOR,
                     GA_RWAttributeRef(),
                     startPointIdx, endPointIdx,
@@ -1341,6 +1281,28 @@ void SOP_AlembicIn::addArbitraryGeomParams(Args & args,
                     args, parent, propHeader,
                     GA_STORE_REAL32,
                     GA_TYPE_POINT,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
+        else if (IP3dGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IP3dGeomParam, double>(
+                    args, parent, propHeader,
+                    GA_STORE_REAL64,
+                    GA_TYPE_POINT,
+                    GA_RWAttributeRef(),
+                    startPointIdx, endPointIdx,
+                    startPrimIdx, endPrimIdx,
+                    false);
+        }
+        else if (IBoolGeomParam::matches(propHeader))
+        {
+            processArbitraryGeomParam<IBoolGeomParam, uint8>(
+                    args, parent, propHeader,
+                    GA_STORE_INT8,
+                    GA_TYPE_VOID,
                     GA_RWAttributeRef(),
                     startPointIdx, endPointIdx,
                     startPrimIdx, endPrimIdx,
@@ -1385,23 +1347,33 @@ void SOP_AlembicIn::processArbitraryGeomParam(
 
     size_t extent = geomParamT::prop_type::traits_type::dataType().getExtent();
     size_t arrayExtent = param.getArrayExtent();
+
+    // If it's a standard array property, the number of elements in
+    // the sample's data can be queried from the Dimensions object
+    size_t dimPoints = 1;
+    if (propHeader.isArray())
+	dimPoints = paramSample.getVals().get()->getDimensions().numPoints();
     size_t totalExtent = extent*arrayExtent;
 
-    GEO_AttributeOwner owner = GEO_POINT_DICT;
+    GA_AttributeOwner owner = GA_ATTRIB_PRIMITIVE;
     switch (paramSample.getScope())
     {
     case kVaryingScope:
     case kVertexScope:
-        // TODO: For NURBS, kVertexScope should use GEO_VERTEX_DICT
-        owner = GEO_POINT_DICT;
+        // TODO: For NURBS, kVertexScope should use GA_ATTRIB_VERTEX
+        owner = GA_ATTRIB_POINT;
         break;
     case kFacevaryingScope:
-        owner = GEO_VERTEX_DICT;
+        owner = GA_ATTRIB_VERTEX;
         break;
-    case kUniformScope:
     case kConstantScope:
     case kUnknownScope:
-        owner = GEO_PRIMITIVE_DICT;
+	// constant (and unknown) properties don't iterate over the
+	// array data, so the whole data needs to get stored in the
+	// primitive
+	totalExtent *= dimPoints;
+    case kUniformScope:
+        owner = GA_ATTRIB_PRIMITIVE;
     }
 
     if (!attrIdx.isValid())
@@ -1474,6 +1446,8 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample(
         size_t startPrimIdx, size_t endPrimIdx
 )
 {
+    GA_RWHandleT<podT> h(attrIdx.getAttribute());
+    int	tsize = SYSmin((int)totalExtent, attrIdx.getTupleSize());
     switch (paramSample.getScope())
     {
     case kUniformScope:
@@ -1481,12 +1455,11 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample(
         const podT * values =reinterpret_cast<const podT *>(
                 paramSample.getVals()->get());
 
-        size_t i = 0;
-        for (size_t primIdx = startPrimIdx;
+        for (size_t i = 0, primIdx = startPrimIdx;
                 primIdx < endPrimIdx; ++primIdx, ++i)
         {
-            GEO_Primitive *prim = gdp->primitives()(primIdx);
-            prim->set(attrIdx, values+i*totalExtent, totalExtent);
+            GA_Offset primofs = gdp->primitiveOffset(GA_Index(primIdx));
+            h.setV(primofs, values+i*totalExtent, tsize);
         }
 
         break;
@@ -1508,24 +1481,12 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample(
         const podT * values = reinterpret_cast<const podT *>(
                 paramSample.getVals()->get());
 
-#if UT_MAJOR_VERSION_INT < 12
-        size_t i = 0;
-        for (size_t pointIdx = startPointIdx;
-                pointIdx < endPointIdx; ++pointIdx, ++i)
-        {
-            GEO_Point *point = gdp->points()(pointIdx);
-            point->set(attrIdx, values+i*totalExtent, totalExtent);
-        }
-#else
-        GA_RWHandleT<podT>	h(attrIdx.getAttribute());
-        int	tsize = SYSmin((int)totalExtent, attrIdx.getTupleSize());
         for (size_t i = 0, pointIdx = startPointIdx;
                 pointIdx < endPointIdx; ++pointIdx, ++i)
         {
             GA_Offset pt = gdp->pointOffset(GA_Index(pointIdx));
             h.setV(pt, values+i*totalExtent, tsize);
         }
-#endif
 
         break;
     }
@@ -1538,12 +1499,12 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample(
         for (size_t primIdx = startPrimIdx;
                 primIdx < endPrimIdx; ++primIdx)
         {
-            GEO_Primitive *prim = gdp->primitives()(primIdx);
+	    GEO_Primitive *prim = gdp->getGEOPrimitiveByIndex(primIdx);
 
             int vtxCount = prim->getVertexCount();
             for(int i=0; i < vtxCount; ++i, ++vertexIdx)
             {
-                prim->getVertex(i).set(attrIdx, values+vertexIdx*totalExtent, totalExtent);
+		h.setV(prim->getVertexOffset(i), values+vertexIdx*totalExtent, tsize);
             }
         }
 
@@ -1551,6 +1512,7 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample(
     }
 
     case kConstantScope:
+    case kUnknownScope:
     default:
     {
         const podT * values = reinterpret_cast<const podT *>(
@@ -1558,8 +1520,8 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample(
         for (size_t primIdx = startPrimIdx;
                 primIdx < endPrimIdx; ++primIdx)
         {
-            GEO_Primitive *prim = gdp->primitives()(primIdx);
-            prim->set(attrIdx, values, totalExtent);
+            GA_Offset primofs = gdp->primitiveOffset(GA_Index(primIdx));
+            h.setV(primofs, values, tsize);
         }
 
         break;
@@ -1581,6 +1543,7 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample<
         size_t startPrimIdx, size_t endPrimIdx
 )
 {//TACO
+    GA_RWHandleS h(attrIdx.getAttribute());
     switch (paramSample.getScope())
     {
     case kUniformScope:
@@ -1588,23 +1551,15 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample<
         const std::string * values =reinterpret_cast<const std::string *>(
                 paramSample.getVals()->get());
 
-#if UT_MAJOR_VERSION_INT < 12
-        GB_Attribute *attr = gdp->primitiveAttribs().findByOffset(attrIdx);
-#endif
         size_t i = 0;
         for (size_t primIdx = startPrimIdx;
                 primIdx < endPrimIdx; ++primIdx, ++i)
         {
-            GEO_Primitive *prim = gdp->primitives()(primIdx);
+            GA_Offset primofs = gdp->primitiveOffset(GA_Index(primIdx));
 
             for (size_t j = 0; j < totalExtent; ++j)
             {
-#if UT_MAJOR_VERSION_INT >= 12
-                prim->setString(attrIdx, values[i*totalExtent+j].c_str(), j);
-#else
-                prim->setValue<int>(attrIdx,
-                        attr->addIndex(values[i*totalExtent+j].c_str()), j);
-#endif
+		h.set(primofs, j, values[i*totalExtent+j].c_str());
             }
         }
         break;
@@ -1616,29 +1571,14 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample<
                 paramSample.getVals()->get());
 
         size_t i = 0;
-#if UT_MAJOR_VERSION_INT < 12
-        GB_Attribute *attr = gdp->pointAttribs().findByOffset(attrIdx);
-#else
-        const GA_AIFStringTuple	*stuple = attrIdx.getAIFStringTuple();
-        GA_Attribute *attr = attrIdx.getAttribute();
-#endif
         for (size_t pointIdx = startPointIdx;
                 pointIdx < endPointIdx; ++pointIdx, ++i)
         {
-#if UT_MAJOR_VERSION_INT >= 12
             GA_Offset pt = gdp->pointOffset(GA_Index(pointIdx));
             for (size_t j = 0; j < totalExtent; ++j)
             {
-                stuple->setString(attr, pt, values[i*totalExtent+j].c_str(), j);
+		h.set(pt, j, values[i*totalExtent+j].c_str());
             }
-#else
-            GEO_Point *point = gdp->points()(pointIdx);
-            for (size_t j = 0; j < totalExtent; ++j)
-            {
-                point->setValue<int>(attrIdx,
-                        attr->addIndex(values[i*totalExtent+j].c_str()), j);
-            }
-#endif
         }
 
         break;
@@ -1649,28 +1589,17 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample<
                     paramSample.getVals()->get());
 
         size_t vertexIdx = 0;
-#if UT_MAJOR_VERSION_INT < 12
-        GB_Attribute *attr = gdp->pointAttribs().findByOffset(attrIdx);
-#endif
         for (size_t primIdx = startPrimIdx;
                 primIdx < endPrimIdx; ++primIdx)
         {
-            GEO_Primitive *prim = gdp->primitives()(primIdx);
+	    GEO_Primitive *prim = gdp->getGEOPrimitiveByIndex(primIdx);
 
             int vtxCount = prim->getVertexCount();
             for(int i=0; i < vtxCount; ++i, ++vertexIdx)
             {
                 for (size_t j = 0; j < totalExtent; ++j)
                 {
-#if UT_MAJOR_VERSION_INT >= 12
-                    GEO_Vertex vtx = prim->getVertex(i);
-                    vtx.setString(attrIdx,
-                            values[vertexIdx*totalExtent+j].c_str(), j);
-#else
-                    GEO_Vertex &vtx = prim->getVertex(i);
-                    vtx.setValue<int>(attrIdx,
-                            attr->addIndex(values[i*totalExtent+j].c_str()), j);
-#endif
+		    h.set(prim->getVertexOffset(i), j, values[vertexIdx*totalExtent+j].c_str());
                 }
             }
         }
@@ -1684,22 +1613,14 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample<
         const std::string * values = reinterpret_cast<const std::string *>(
                 paramSample.getVals()->get());
 
-#if UT_MAJOR_VERSION_INT < 12
-        GB_Attribute *attr = gdp->primitiveAttribs().findByOffset(attrIdx);
-#endif
         for (size_t primIdx = startPrimIdx;
                 primIdx < endPrimIdx; ++primIdx)
         {
-            GEO_Primitive *prim = gdp->primitives()(primIdx);
+            GA_Offset primofs = gdp->primitiveOffset(GA_Index(primIdx));
 
             for (size_t j = 0; j < totalExtent; ++j)
             {
-#if UT_MAJOR_VERSION_INT >= 12
-                prim->setString(attrIdx, values[j].c_str(), j);
-#else
-                prim->setValue<int>(attrIdx,
-                        attr->addIndex(values[j].c_str()), j);
-#endif
+		h.set(primofs, j, values[j].c_str());
             }
 
         }
@@ -2082,7 +2003,7 @@ void SOP_AlembicIn::buildNuPatch( Args & args, INuPatch & nupatch,
     if (args.reusePrimitives)
     {
         surfPrim = dynamic_cast<GEO_PrimNURBSurf *>(
-                gdp->primitives()[args.primCount]);
+	    gdp->getGEOPrimitiveByIndex(args.primCount));
 
         Abc::P3fArraySamplePtr pSample =
                 schema.getPositionsProperty().getValue(sampleSelector);
@@ -2090,19 +2011,11 @@ void SOP_AlembicIn::buildNuPatch( Args & args, INuPatch & nupatch,
         //only update point positions
         for (size_t i = 0, e = pSample->size(); i < e; ++i)
         {
-#if UT_MAJOR_VERSION_INT >= 12
 	    GA_Offset pt = gdp->pointOffset(GA_Index(startPointIdx+i));
 	    gdp->setPos3(pt,
 		    (*pSample)[i][0],
 		    (*pSample)[i][1],
 		    (*pSample)[i][2]);
-#else
-	    GEO_Point *pt = gdp->points()(startPointIdx+i);
-	    pt->setPos(UT_Vector3(
-		    (*pSample)[i][0],
-		    (*pSample)[i][1],
-		    (*pSample)[i][2]));
-#endif
         }
 
 	std::string groupName = fixAttributeName(nupatch.getFullName().c_str());
@@ -2112,8 +2025,6 @@ void SOP_AlembicIn::buildNuPatch( Args & args, INuPatch & nupatch,
 
         args.pointCount += pSample->size();     // Add # points
         args.primCount += 1;
-
-        args.rebuiltNurbs = true;
     }
     else
     {
@@ -2139,7 +2050,6 @@ void SOP_AlembicIn::buildNuPatch( Args & args, INuPatch & nupatch,
                 0,//(vClosed) ? 0:1,        // interpEndsV
                 GEO_PATCH_QUADS);
 
-#if UT_MAJOR_VERSION_INT >= 12
         //copy in the u and v knots
 	GA_KnotVector	&uknots = surf->getUBasis()->getKnotVector();
 	GA_KnotVector	&vknots = surf->getVBasis()->getKnotVector();
@@ -2147,22 +2057,16 @@ void SOP_AlembicIn::buildNuPatch( Args & args, INuPatch & nupatch,
 	    uknots.setValue(i, sample.getUKnot()->get()[i]);
 	for (int i = 0; i < sample.getVKnot()->size(); ++i)
 	    vknots.setValue(i, sample.getVKnot()->get()[i]);
-#else
-        //copy in the u and v knots directly
-        memcpy(surf->getUBasis()->getData(), sample.getUKnot()->get(),
-                sample.getUKnot()->size() * sizeof(float));
-        memcpy(surf->getVBasis()->getData(), sample.getVKnot()->get(),
-                sample.getVKnot()->size() * sizeof(float));
-#endif
 
         for (int v = 0; v < rows; ++v)
         {
             for( int u = 0; u < cols; ++u )
             {
                 const V3f & p = sample.getPositions()->get()[v * cols + u];
-                (*surf)(v,u).setPos(p[0], p[1], p[2], 1);
+		GA_Offset ptofs = surf->getPointOffset(v, u);
+		gdp->setPos3(ptofs, p[0], p[1], p[2]);
 
-                //std::cerr << "ptnum: " << (*surf)(v,u).getPt()->getNum() << std::endl;
+                //std::cerr << "ptnum: " << surf->getPointIndex(v, u) << std::endl;
             }
         }
 
@@ -2213,19 +2117,11 @@ GA_PrimitiveGroup * SOP_AlembicIn::reuseMesh(const std::string & groupName,
 {
     for (size_t i = 0, e = positions->size(); i < e; ++i)
     {
-#if UT_MAJOR_VERSION_INT >= 12
         GA_Offset pt = gdp->pointOffset(GA_Index(startPointIdx+i));
         gdp->setPos3(pt,
                 (*positions)[i][0],
                 (*positions)[i][1],
                 (*positions)[i][2]);
-#else
-        GEO_Point *pt = gdp->points()(startPointIdx+i);
-        pt->setPos(UT_Vector3(
-                (*positions)[i][0],
-                (*positions)[i][1],
-                (*positions)[i][2]));
-#endif
     }
 
     return gdp->findPrimitiveGroup( groupName.c_str() );
@@ -2240,19 +2136,11 @@ GA_PrimitiveGroup * SOP_AlembicIn::buildMesh(
 
     for ( size_t i = 0, e = positions->size(); i < e; ++i )
     {
-#if UT_MAJOR_VERSION_INT >= 12
         GA_Offset pt = gdp->appendPointOffset();
         gdp->setPos3(pt,
                 (*positions)[i][0],
                 (*positions)[i][1],
                 (*positions)[i][2]);
-#else
-        GEO_Point *pt = gdp->appendPoint();
-        pt->setPos(UT_Vector3(
-                (*positions)[i][0],
-                (*positions)[i][1],
-                (*positions)[i][2]));
-#endif
     }
 
     GA_PrimitiveGroup *primGrp = 0;
@@ -2275,15 +2163,9 @@ GA_PrimitiveGroup * SOP_AlembicIn::buildMesh(
         for ( exint ptN = 0; ptN < numPointsInFace;
                 ++ptN, ++currentVtxIndex )
         {
-#if UT_MAJOR_VERSION_INT >= 12
             GA_Index idx = GA_Index((*indicies)[currentVtxIndex]
                     + startPointIdx);
             poly->setVertexPoint(ptN, gdp->pointOffset(idx));
-#else
-            GEO_Point *point = gdp->points()(
-                    (*indicies)[currentVtxIndex] + startPointIdx);
-            poly->getVertex(ptN).setPt(point);
-#endif
         }
 
         if ( primGrp )
@@ -2305,19 +2187,11 @@ GA_PrimitiveGroup * SOP_AlembicIn::buildCurves(
     UT_ASSERT(startPointIdx == gdp->points().entries());
     for ( size_t i = 0, e = positions->size(); i < e; ++i )
     {
-#if UT_MAJOR_VERSION_INT >= 12
         GA_Offset pt = gdp->appendPointOffset();
         gdp->setPos3(pt,
                 (*positions)[i][0],
                 (*positions)[i][1],
                 (*positions)[i][2]);
-#else
-        GEO_Point *pt = gdp->appendPoint();
-        pt->setPos(UT_Vector3(
-                (*positions)[i][0],
-                (*positions)[i][1],
-                (*positions)[i][2]));
-#endif
     }
     UT_ASSERT(gdp->points().entries() == startPointIdx + positions->size());
 
@@ -2340,12 +2214,7 @@ GA_PrimitiveGroup * SOP_AlembicIn::buildCurves(
 
         for ( exint ptN = 0; ptN < numPointsInFace; ++ptN, ++currentVtxIndex )
         {
-#if UT_MAJOR_VERSION_INT >= 12
             poly->setVertexPoint(ptN, gdp->pointOffset(currentVtxIndex));
-#else
-            GEO_Point *point = gdp->points()(currentVtxIndex);
-            poly->getVertex(ptN).setPt(point);
-#endif
         }
 
         if ( primGrp )
@@ -2370,14 +2239,13 @@ GA_PrimitiveGroup * SOP_AlembicIn::buildPoints(
     GA_RWAttributeRef v_h;
 
     if (ids && ids->size() == positions->size())
-	id_h = addInt64Tuple(*gdp, GEO_POINT_DICT, "id", 1);
+	id_h = addInt64Tuple(*gdp, GA_ATTRIB_POINT, "id", 1);
     if (velocities && velocities->size() == positions->size())
-	v_h = addVelocity(*gdp, GEO_POINT_DICT);
+	v_h = addVelocity(*gdp, GA_ATTRIB_POINT);
 
     UT_ASSERT(startPointIdx == gdp->points().entries());
     for ( size_t i = 0; i < npts; ++i )
     {
-#if UT_MAJOR_VERSION_INT >= 12
         GA_Offset pt = gdp->appendPointOffset();
         gdp->setPos3(pt,
                 (*positions)[i][0],
@@ -2392,20 +2260,6 @@ GA_PrimitiveGroup * SOP_AlembicIn::buildPoints(
 	    v_h.getAIFTuple()->set(v_h.getAttribute(), pt,
 		    (*velocities)[i].getValue(), 3);
 	}
-#else
-        GEO_Point *pt = gdp->appendPoint();
-        pt->setPos(UT_Vector3(
-                (*positions)[i][0],
-                (*positions)[i][1],
-                (*positions)[i][2]));
-	if (id_h.isValid())
-	    pt->setValue<int>(id_h, (*ids)[i]);
-	if (v_h.isValid())
-	{
-	    const V3f	&v = (*velocities)[i];
-	    pt->setValue<UT_Vector3>(v_h, UT_Vector3(v.x, v.y, v.z));
-	}
-#endif
     }
     UT_ASSERT(gdp->points().entries() == startPointIdx + positions->size());
 
@@ -2423,19 +2277,11 @@ GA_PrimitiveGroup * SOP_AlembicIn::buildPoints(
 	addToGroup(primGrp, part);
     }
 
-#if UT_MAJOR_VERSION_INT >= 12
     for ( exint ptN = 0; ptN < npts; ++ptN)
     {
-	part->setVertexPoint(ptN, gdp->pointOffset(ptN+startPointIdx));
+	// part->setVertexPoint(ptN, gdp->pointOffset(ptN+startPointIdx));
+	part->appendParticle(gdp->pointOffset(ptN+startPointIdx));
     }
-#else
-    exint ptN = startPointIdx;
-    for (GEO_ParticleVertex *vtx = part->iterateInit(); vtx;
-	    vtx = part->iterateFastNext(vtx), ++ptN)
-    {
-	vtx->setPt(gdp->points()(ptN));
-    }
-#endif
 
     return primGrp;
 }
@@ -2447,8 +2293,8 @@ void
 newSopOperator(OP_OperatorTable *table)
 {
     OP_Operator *alembic_op = new OP_Operator(
-        "alembic",                      // Internal name
-        "Alembic",                      // GUI name
+        "ref_alembic",                      // Internal name
+        "Reference Alembic",                      // GUI name
         SOP_AlembicIn::myConstructor,   // Op Constructr
         SOP_AlembicIn::myTemplateList,  // GUI Definition
         0, 0,                           // Min,Max # of Inputs

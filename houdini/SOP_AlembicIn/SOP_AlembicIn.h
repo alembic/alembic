@@ -46,41 +46,7 @@
 #include <Alembic/AbcGeom/All.h>
 using namespace Alembic::AbcGeom;
 
-// The Houdini Geometry libraries changed radically between H11 and H12.
-#if UT_MAJOR_VERSION_INT >= 12
     #include <GA/GA_AttributeRef.h>
-#else
-    #include <GB/GB_AttributeRef.h>
-    // These typedefs allow us to use the GA types from within H11 code
-    typedef GB_AttributeRef GA_ROAttributeRef;
-    typedef GB_AttributeRef GA_RWAttributeRef;
-    typedef GB_PrimitiveGroup GA_PrimitiveGroup;
-    typedef int GA_Offset;
-    
-    enum GA_Storage
-    {
-        GA_STORE_REAL32,
-        GA_STORE_INT32,
-        GA_STORE_STRING
-    };
-    enum GA_TypeInfo
-    {
-        GA_TYPE_VOID,
-        GA_TYPE_POINT,
-        GA_TYPE_VECTOR,
-        GA_TYPE_NORMAL,
-        GA_TYPE_COLOR,
-    };
-    inline bool	GAisIntStorage(GA_Storage s)
-    {
-        return s == GA_STORE_INT32;
-    
-    }
-    inline bool	GAisFloatStorage(GA_Storage s)
-    {
-        return s == GA_STORE_REAL32;
-    }
-#endif
 
 /// The sop_IAlembicWalker needs to be in a public namespace for forward
 /// declarations.
@@ -124,7 +90,6 @@ private:
         bool isConstant;            // Attributes are constant
         bool isTopologyConstant;    // Flag whether topology is constant
         bool reusePrimitives;       // Reuse existing primitives
-	bool rebuiltNurbs;
 
 	// normally set to 0 but useful for interpolation of
 	// varying GeomParams across NuPatch
@@ -198,13 +163,13 @@ private:
     GA_PrimitiveGroup * reuseMesh(const std::string &groupName,
             P3fArraySamplePtr positions, size_t startPointIdx);
     
-    bool addOrFindWidthAttribute(GEO_AttributeOwner owner,
+    bool addOrFindWidthAttribute(GA_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
 
-    bool addOrFindTextureAttribute(GEO_AttributeOwner owner,
+    bool addOrFindTextureAttribute(GA_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
     
-    bool addOrFindNormalAttribute(GEO_AttributeOwner owner,
+    bool addOrFindNormalAttribute(GA_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
     
     void addWidths(Args &args, IFloatGeomParam param,
