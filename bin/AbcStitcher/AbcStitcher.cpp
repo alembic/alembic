@@ -451,7 +451,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
 
                 Abc::FloatArraySamplePtr cornerSpPtr = iSamp.getCornerSharpnesses();
                 if (cornerSpPtr)
-                    oSamp.setCreaseSharpnesses(*cornerSpPtr);
+                    oSamp.setCornerSharpnesses(*cornerSpPtr);
 
                 Abc::Int32ArraySamplePtr holePtr = iSamp.getHoles();
                 if (holePtr)
