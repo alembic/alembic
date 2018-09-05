@@ -75,6 +75,7 @@ TARGET_LINK_LIBRARIES(Alembic
     ${EXTERNAL_MATH_LIBS}
     LINK_PRIVATE
     ${HDF5_LIBRARIES}
+    ${ZLIB_LIBRARY}
   )
 
 # link in atomic if we are using tr1 and the compiler is new enough

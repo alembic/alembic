@@ -37,12 +37,12 @@
 #include <Alembic/Ogawa/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-void test()
+void test(bool iUseMMap)
 {
     {
         Alembic::Ogawa::OArchive oa("archiveTest.ogawa");
         TESTING_ASSERT(oa.isValid());
-        Alembic::Ogawa::IArchive ia("archiveTest.ogawa");
+        Alembic::Ogawa::IArchive ia("archiveTest.ogawa", 1, iUseMMap);
         TESTING_ASSERT(ia.isValid());
         TESTING_ASSERT(!ia.isFrozen());
         TESTING_ASSERT(ia.getVersion() == 1);
@@ -77,9 +77,12 @@ void stringStreamTest()
     TESTING_ASSERT(ia.getGroup()->getNumChildren() == 0);
 }
 
+
 int main ( int argc, char *argv[] )
 {
-    test();
+    test(true);     // Use mmap
+    test(false);    // Use streams
+
     stringStreamTest();
     return 0;
 }

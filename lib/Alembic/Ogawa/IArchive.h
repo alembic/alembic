@@ -50,7 +50,9 @@ namespace ALEMBIC_VERSION_NS {
 class ALEMBIC_EXPORT IArchive
 {
 public:
-    IArchive(const std::string & iFileName, std::size_t iNumStreams=1);
+    IArchive(const std::string & iFileName,
+             std::size_t iNumStreams=1,
+             bool iUseMMap=true);
     IArchive(const std::vector< std::istream * > & iStreams);
     ~IArchive();
 

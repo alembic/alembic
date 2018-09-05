@@ -56,7 +56,8 @@ private:
     friend class ReadArchive;
 
     ArImpl( const std::string &iFileName,
-            size_t iNumStreams=1 );
+            size_t iNumStreams=1,
+            bool iUseMMap=true);
 
     ArImpl( const std::vector< std::istream * > & iStreams );
 

@@ -49,7 +49,7 @@ namespace AO = Alembic::AbcCoreOgawa;
 namespace AbcA = Alembic::AbcCoreAbstract;
 
 //-*****************************************************************************
-void testTimeSamplingScalar()
+void testTimeSamplingScalar(bool iUseMMap)
 {
     std::string archiveName = "timeSamplingScalar.abc";
     {
@@ -200,7 +200,7 @@ void testTimeSamplingScalar()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         AbcA::ArchiveReaderPtr a = r( archiveName );
         AbcA::ObjectReaderPtr archive = a->getTop();
         AbcA::CompoundPropertyReaderPtr parent = archive->getProperties();
@@ -284,6 +284,7 @@ void testTimeSamplingScalar()
 
 int main ( int argc, char *argv[] )
 {
-    testTimeSamplingScalar();
+    testTimeSamplingScalar(true);   // Use mmap
+    testTimeSamplingScalar(false);  // Use streams
     return 0;
 }
