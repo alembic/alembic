@@ -33,8 +33,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Util_Foundation_h_
-#define _Alembic_Util_Foundation_h_
+#ifndef Alembic_Util_Foundation_h
+#define Alembic_Util_Foundation_h
 
 #include <Alembic/Util/Config.h>
 

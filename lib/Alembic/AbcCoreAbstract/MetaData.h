@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreAbstract_MetaData_h_
-#define _Alembic_AbcCoreAbstract_MetaData_h_
+#ifndef Alembic_AbcCoreAbstract_MetaData_h
+#define Alembic_AbcCoreAbstract_MetaData_h
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 

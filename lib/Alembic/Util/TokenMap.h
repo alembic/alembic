@@ -38,8 +38,8 @@
 //! \brief The header file containing the class definition for
 //!     the \ref Alembic::Util::TokenMap class
 //-*****************************************************************************
-#ifndef _Alembic_Util_TokenMap_h_
-#define _Alembic_Util_TokenMap_h_
+#ifndef Alembic_Util_TokenMap_h
+#define Alembic_Util_TokenMap_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/Util/Exception.h>

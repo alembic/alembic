@@ -33,8 +33,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //-*****************************************************************************
-#ifndef _Alembic_Abc_OTypedArrayProperty_h_
-#define _Alembic_Abc_OTypedArrayProperty_h_
+#ifndef Alembic_Abc_OTypedArrayProperty_h
+#define Alembic_Abc_OTypedArrayProperty_h
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/OArrayProperty.h>

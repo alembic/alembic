@@ -35,8 +35,8 @@
 //-*****************************************************************************
 
 
-#ifndef _Alembic_AbcMaterial_MaterialAssignment_h_
-#define _Alembic_AbcMaterial_MaterialAssignment_h_
+#ifndef Alembic_AbcMaterial_MaterialAssignment_h
+#define Alembic_AbcMaterial_MaterialAssignment_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcMaterial/IMaterial.h>

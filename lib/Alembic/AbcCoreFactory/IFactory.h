@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreFactory_IFactory_h_
-#define _Alembic_AbcCoreFactory_IFactory_h_
+#ifndef Alembic_AbcCoreFactory_IFactory_h
+#define Alembic_AbcCoreFactory_IFactory_h
 
 #include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
 #include <Alembic/Abc/IArchive.h>

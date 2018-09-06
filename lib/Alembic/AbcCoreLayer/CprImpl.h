@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreLayer_CprImpl_h_
-#define _Alembic_AbcCoreLayer_CprImpl_h_
+#ifndef Alembic_AbcCoreLayer_CprImpl_h
+#define Alembic_AbcCoreLayer_CprImpl_h
 
 #include <Alembic/AbcCoreLayer/Foundation.h>
 

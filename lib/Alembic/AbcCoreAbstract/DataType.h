@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreAbstract_DataType_h_
-#define _Alembic_AbcCoreAbstract_DataType_h_
+#ifndef Alembic_AbcCoreAbstract_DataType_h
+#define Alembic_AbcCoreAbstract_DataType_h
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 

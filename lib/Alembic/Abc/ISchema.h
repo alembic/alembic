@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_ISchema_h_
-#define _Alembic_Abc_ISchema_h_
+#ifndef Alembic_Abc_ISchema_h
+#define Alembic_Abc_ISchema_h
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/OSchema.h>

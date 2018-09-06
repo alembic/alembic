@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcClients_WFObjConvert_Export_h_
-#define _AbcClients_WFObjConvert_Export_h_
+#ifndef AbcClients_WFObjConvert_Export_h
+#define AbcClients_WFObjConvert_Export_h
 
 #if defined(ALEMBIC_DLL)
     #if defined(ABC_WFOBJ_CONVERT_EXPORTS)
@@ -49,5 +49,5 @@
     #define ABC_WFOBJ_CONVERT_EXPORT_CONST const
 #endif
 
-#endif /* _AbcClients_WFObjConvert_Export_h_ */
+#endif /* AbcClients_WFObjConvert_Export_h */
 

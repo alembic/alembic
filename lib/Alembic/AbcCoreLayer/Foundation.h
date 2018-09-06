@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreLayer_Foundation_h_
-#define _Alembic_AbcCoreLayer_Foundation_h_
+#ifndef Alembic_AbcCoreLayer_Foundation_h
+#define Alembic_AbcCoreLayer_Foundation_h
 
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/Util/All.h>

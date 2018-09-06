@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcExport_MayaNurbsCurveWriter_h_
-#define _AbcExport_MayaNurbsCurveWriter_h_
+#ifndef AbcExport_MayaNurbsCurveWriter_h
+#define AbcExport_MayaNurbsCurveWriter_h
 
 #include "Foundation.h"
 #include "AttributesWriter.h"
@@ -72,4 +72,4 @@ class MayaNurbsCurveWriter
     unsigned int mCVCount;
 };
 
-#endif  // _AbcExport_MayaNurbsCurveWriter_h_
+#endif  // AbcExport_MayaNurbsCurveWriter_h

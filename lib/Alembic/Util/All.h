@@ -33,8 +33,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Util_All_h_
-#define _Alembic_Util_All_h_
+#ifndef Alembic_Util_All_h
+#define Alembic_Util_All_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/Util/Foundation.h>

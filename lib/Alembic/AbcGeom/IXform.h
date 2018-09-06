@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_IXform_h_
-#define _Alembic_AbcGeom_IXform_h_
+#ifndef Alembic_AbcGeom_IXform_h
+#define Alembic_AbcGeom_IXform_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>

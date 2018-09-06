@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcExport_Foundation_h_
-#define _AbcExport_Foundation_h_
+#ifndef AbcExport_Foundation_h
+#define AbcExport_Foundation_h
 
 #include <Alembic/AbcGeom/All.h>
 
@@ -134,4 +134,4 @@
 
 #define ABCEXPORT_VERSION "1.0"
 
-#endif  // _AbcExport_Foundation_h_
+#endif  // AbcExport_Foundation_h

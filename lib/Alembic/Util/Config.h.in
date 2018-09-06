@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Util_Config_h_
-#define _Alembic_Util_Config_h_
+#ifndef Alembic_Util_Config_h
+#define Alembic_Util_Config_h
 
 // Reserve 2 digits for patch number, 2 digits for the minor number and the rest
 // for the major.

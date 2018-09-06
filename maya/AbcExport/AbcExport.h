@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcExport_AbcExport_h_
-#define _AbcExport_AbcExport_h_
+#ifndef AbcExport_AbcExport_h
+#define AbcExport_AbcExport_h
 
 #include "Foundation.h"
 
@@ -50,4 +50,4 @@ class AbcExport : public MPxCommand
     static void* creator();
 };
 
-#endif  // _AbcExport_AbcExport_h_
+#endif  // AbcExport_AbcExport_h

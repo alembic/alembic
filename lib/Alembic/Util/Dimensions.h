@@ -33,8 +33,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Util_Dimensions_h_
-#define _Alembic_Util_Dimensions_h_
+#ifndef Alembic_Util_Dimensions_h
+#define Alembic_Util_Dimensions_h
 
 #include <Alembic/Util/Foundation.h>
 #include <Alembic/Util/PlainOldDataType.h>

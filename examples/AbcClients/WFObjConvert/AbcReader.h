@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcClients_WFObjConvert_AbcReader_h_
-#define _AbcClients_WFObjConvert_AbcReader_h_
+#ifndef AbcClients_WFObjConvert_AbcReader_h
+#define AbcClients_WFObjConvert_AbcReader_h
 
 #include <AbcClients/WFObjConvert/Export.h>
 #include <AbcClients/WFObjConvert/Foundation.h>
@@ -78,7 +78,7 @@ public:
 
 protected:
     void makeCurrentObject();
-    
+
     OObject m_parentObject;
     std::string m_defaultObjectName;
 

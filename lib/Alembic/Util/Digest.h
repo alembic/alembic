@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Util_Digest_h_
-#define _Alembic_Util_Digest_h_
+#ifndef Alembic_Util_Digest_h
+#define Alembic_Util_Digest_h
 
 #include <Alembic/Util/Foundation.h>
 #include <Alembic/Util/PlainOldDataType.h>

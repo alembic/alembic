@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_Tests_MeshData_h_
-#define _Alembic_AbcGeom_Tests_MeshData_h_
+#ifndef Alembic_AbcGeom_Tests_MeshData_h
+#define Alembic_AbcGeom_Tests_MeshData_h
 
 #include <Alembic/AbcGeom/All.h>
 
