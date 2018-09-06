@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef PyAlembic_PyTypedArraySampleConverter_h_
-#define PyAlembic_PyTypedArraySampleConverter_h_
+#ifndef PyAlembic_PyTypedArraySampleConverter_h
+#define PyAlembic_PyTypedArraySampleConverter_h
 
 #include <Foundation.h>
 #include <PyTypeBindingTraits.h>
@@ -62,7 +62,7 @@ struct converterMemcopyable
         new (storage) samp_type( &iFixedArray.direct_index( 0 ),
                                  iFixedArray.len() );
     }
-    
+
     // Converion from ArraySample to FixedArray
     PyObject* operator()( const samp_type& iSamp )
     {
@@ -81,7 +81,7 @@ struct converterMemcopyable
 
         return incref(obj.ptr());
     }
-    
+
     // Converion from ArraySamplePtr to FixedArray
     PyObject* operator()( const samp_type_ptr& iSampPtr )
     {
@@ -166,7 +166,7 @@ struct converterNonMemCopyable
         object obj( handle<>( converter( fixedArray ) ) );
 
         // Memory layout is not transparent between the arraysample type
-        // and the fixedarray type, we need to do explicit conversions 
+        // and the fixedarray type, we need to do explicit conversions
         // for array elements.
         for( size_t i = 0; i < iSamp.size(); ++i )
             fixedArray->direct_index( i ) = iSamp[i];

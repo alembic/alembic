@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _PyAlembic_PyIBaseProperty_h_
-#define _PyAlembic_PyIBaseProperty_h_
+#ifndef PyAlembic_PyIBaseProperty_h
+#define PyAlembic_PyIBaseProperty_h
 
 #include <Foundation.h>
 
@@ -46,7 +46,7 @@ void register_IBaseProperty( const char* iName )
     using namespace boost::python;
 
     typedef Abc::IBasePropertyT<PROP_PTR>       IBaseProperty;
-    
+
     //IBaseProperty
     //
     class_<IBaseProperty>(
@@ -81,7 +81,7 @@ void register_IBaseProperty( const char* iName )
               return_internal_reference<>() )
         .def( "getDataType",
               &IBaseProperty::getDataType,
-              "Return the DataType of this property", 
+              "Return the DataType of this property",
               return_value_policy<copy_const_reference>() )
         .def( "getTimeSampling",
               &IBaseProperty::getTimeSampling,

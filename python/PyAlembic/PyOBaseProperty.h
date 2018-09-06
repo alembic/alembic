@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _PyAlembic_PyOBaseProperty_h_
-#define _PyAlembic_PyOBaseProperty_h_
+#ifndef PyAlembic_PyOBaseProperty_h
+#define PyAlembic_PyOBaseProperty_h
 
 #include <Foundation.h>
 
@@ -46,7 +46,7 @@ void register_OBaseProperty( const char* iName )
     using namespace boost::python;
 
     typedef Abc::OBasePropertyT<PROP_PTR>       OBaseProperty;
-    
+
     //OBaseProperty
     //
     class_<OBaseProperty>(
@@ -81,7 +81,7 @@ void register_OBaseProperty( const char* iName )
               return_internal_reference<>() )
         .def( "getDataType",
               &OBaseProperty::getDataType,
-              "Return the DataType of this property", 
+              "Return the DataType of this property",
               return_value_policy<copy_const_reference>() )
         .def( "getTimeSampling",
               &OBaseProperty::getTimeSampling,
