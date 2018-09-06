@@ -168,18 +168,12 @@ public:
 
     ~unique_ptr()
     {
-        if ( p )
-        {
-            delete p;
-        }
+        delete p;
     }
 
     void reset( T* val )
     {
-        if ( p )
-        {
-            delete p;
-        }
+        delete p;
         p = val;
     }
 

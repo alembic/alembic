@@ -77,10 +77,7 @@ CprData::CprData( Ogawa::IGroupPtr iGroup,
 //-*****************************************************************************
 CprData::~CprData()
 {
-    if ( m_propertyHeaders )
-    {
-        delete [] m_propertyHeaders;
-    }
+    delete [] m_propertyHeaders;
 }
 
 //-*****************************************************************************
