@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _PyAlembic_PyTypeBindingTraits_h_
-#define _PyAlembic_PyTypeBindingTraits_h_
+#ifndef PyAlembic_PyTypeBindingTraits_h
+#define PyAlembic_PyTypeBindingTraits_h
 
 #include <Alembic/Util/PlainOldDataType.h>
 #include <Foundation.h>

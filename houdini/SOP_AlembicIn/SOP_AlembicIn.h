@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _SOP_ALEMBICIN_H_
-#define _SOP_ALEMBICIN_H_
+#ifndef SOP_ALEMBICIN_H
+#define SOP_ALEMBICIN_H
 
 #include <UT/UT_Version.h>
 #include <UT/UT_Interrupt.h>
@@ -56,7 +56,7 @@ using namespace Alembic::AbcGeom;
     typedef GB_AttributeRef GA_RWAttributeRef;
     typedef GB_PrimitiveGroup GA_PrimitiveGroup;
     typedef int GA_Offset;
-    
+
     enum GA_Storage
     {
         GA_STORE_REAL32,
@@ -74,7 +74,7 @@ using namespace Alembic::AbcGeom;
     inline bool	GAisIntStorage(GA_Storage s)
     {
         return s == GA_STORE_INT32;
-    
+
     }
     inline bool	GAisFloatStorage(GA_Storage s)
     {
@@ -100,7 +100,7 @@ public:
     /// Clear a file out of the read-cache.  If the filename is null, the
     /// entire cache is cleared.
     static void	clearCacheFile(const char *filename=NULL);
-    
+
 protected:
     //--------------------------------------------------------------------------
     // Standard hdk declarations
@@ -109,12 +109,12 @@ protected:
     virtual bool unloadData();
     virtual OP_ERROR cookMySop(OP_Context &context);
     virtual void nodeUnlocked();
-    
+
 private:
-    
+
     GA_ROAttributeRef attachDetailStringData(const std::string &attrName,
             const std::string &value);
-    
+
     struct Args
     {
         double abcTime;
@@ -130,7 +130,7 @@ private:
 	// varying GeomParams across NuPatch
 	int activePatchRows;
 	int activePatchCols;
-        
+
         // Attribute name map
         const std::map<std::string,std::string> *nameMap;
 
@@ -152,32 +152,32 @@ private:
 	    m_args.activePatchRows = m_args.activePatchCols = 0;
 	}
     };
-    
+
     class InterruptedException : public std::runtime_error
     {
     public:
          InterruptedException( const std::string & what_arg )
                 : std::runtime_error( what_arg ){}
     };
-    
-    
+
+
     void walkObject( Args & args, sop_IAlembicWalker &pathBuf,
 	    IObject parent, const ObjectHeader &ohead,
             PathList::const_iterator I, PathList::const_iterator E,
                     M44d parentXform, bool parentXformIsConstant);
-    
-    
-    
+
+
+
     std::string getFullName( IObject object );
-    
-    
-    
+
+
+
     void buildSubD( Args & args, ISubD & subd, M44d parentXform, bool parentXformIsConstant);
     void buildPolyMesh( Args & args, IPolyMesh & polymesh, M44d parentXform, bool parentXformIsConstant);
     void buildNuPatch( Args & args, INuPatch & nupatch, M44d parentXform, bool paretnXformIsConstant);
     void buildCurves( Args & args, ICurves & curves, M44d parentXform, bool parentXformIsConstant);
     void buildPoints( Args & args, IPoints & curves, M44d parentXform, bool parentXformIsConstant);
-    
+
     GA_PrimitiveGroup * buildMesh(const std::string & groupName,
             P3fArraySamplePtr positions,
             Int32ArraySamplePtr counts,
@@ -194,19 +194,19 @@ private:
 	    UInt64ArraySamplePtr ids,
 	    V3fArraySamplePtr velocities,
 	    size_t startPointIdx);
-    
+
     GA_PrimitiveGroup * reuseMesh(const std::string &groupName,
             P3fArraySamplePtr positions, size_t startPointIdx);
-    
+
     bool addOrFindWidthAttribute(GEO_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
 
     bool addOrFindTextureAttribute(GEO_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
-    
+
     bool addOrFindNormalAttribute(GEO_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
-    
+
     void addWidths(Args &args, IFloatGeomParam param,
             size_t startPointIdx, size_t endPointIdx,
             size_t startPrimIdx, size_t endPrimIdx);
@@ -214,18 +214,18 @@ private:
     void addUVs(Args & args, IV2fGeomParam param,
             size_t startPointIdx, size_t endPointIdx,
             size_t startPrimIdx, size_t endPrimIdx);
-    
+
     void addNormals(Args & args, IN3fGeomParam param,
             size_t startPointIdx, size_t endPointIdx,
             size_t startPrimIdx, size_t endPrimIdx,
             bool parentXformIsConstant);
-    
+
     void addArbitraryGeomParams(Args & args,
             ICompoundProperty parent,
             size_t startPointIdx, size_t endPointIdx,
             size_t startPrimIdx, size_t endPrimIdx,
             bool parentXformIsConstant);
-    
+
     template <typename geomParamT, typename podT>
     void processArbitraryGeomParam(
             Args & args,
@@ -239,7 +239,7 @@ private:
             size_t startPrimIdx,
             size_t endPrimIdx,
             bool parentXformIsConstant);
-    
+
     template <typename geomParamSampleT, typename podT>
     void applyArbitraryGeomParamSample(
 	    Args & args,
@@ -250,7 +250,7 @@ private:
             size_t endPointIdx,
             size_t startPrimIdx,
             size_t endPrimIdx);
-    
+
     UT_String myFileObjectCache;
     bool myTopologyConstant;
     bool myEntireSceneIsConstant;

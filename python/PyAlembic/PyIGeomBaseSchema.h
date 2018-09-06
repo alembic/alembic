@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _PyAlembic_PyIGeomBaseSchema_h_
-#define _PyAlembic_PyIGeomBaseSchema_h_
+#ifndef PyAlembic_PyIGeomBaseSchema_h
+#define PyAlembic_PyIGeomBaseSchema_h
 
 #include <Foundation.h>
 
@@ -58,7 +58,7 @@ void register_IGeomBaseSchema( const char *iName )
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,

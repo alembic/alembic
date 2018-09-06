@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _PyAlembic_PyTypeBindingUtil_h_
-#define _PyAlembic_PyTypeBindingUtil_h_
+#ifndef PyAlembic_PyTypeBindingUtil_h
+#define PyAlembic_PyTypeBindingUtil_h
 
 #include <PyTypeBindingTraits.h>
 
@@ -47,7 +47,7 @@ using namespace boost::python;
 inline object ConvertStrings( const std::vector<std::string>& iStrings )
 {
     using PyImath::StringArray;
-            
+
     manage_new_object::apply<StringArray *>::type converter;
 
     return object( handle<>( converter(

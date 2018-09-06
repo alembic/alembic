@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _PyAlembic_PyOGeomBaseSchema_h_
-#define _PyAlembic_PyOGeomBaseSchema_h_
+#ifndef PyAlembic_PyOGeomBaseSchema_h
+#define PyAlembic_PyOGeomBaseSchema_h
 
 #include <Foundation.h>
 
