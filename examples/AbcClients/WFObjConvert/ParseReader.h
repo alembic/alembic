@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcClients_WFObjConvert_ParseReader_h_
-#define _AbcClients_WFObjConvert_ParseReader_h_
+#ifndef AbcClients_WFObjConvert_ParseReader_h
+#define AbcClients_WFObjConvert_ParseReader_h
 
 //-*****************************************************************************
 // Breaking my rules here about Foundation.h, to minimize recompiling
@@ -70,7 +70,7 @@ public:
                 size_type iLine );
     void finish( const std::string &iStringName,
                  size_type iNumLines );
-    
+
     void v( std::vector<double> const & vals );
     void vt( std::vector<double> const & vals );
     void vn( std::vector<double> const & vals );
@@ -82,12 +82,12 @@ public:
 
     void g( std::vector<std::string> const &vals );
     void o( std::string const &val );
-    
+
     void mtllib( std::string const &val );
     void maplib( std::string const &val );
     void usemtl( std::string const &val );
     void usemap( std::string const &val );
-    
+
     void trace_obj( std::string const &val );
     void shadow_obj( std::string const &val );
 
@@ -102,14 +102,14 @@ public:
 
 protected:
     Reader &m_readInto;
-    
+
     size_type m_numV;
     size_type m_numVt;
     size_type m_numVn;
     size_type m_numVp;
 
     std::set<std::string> m_groups;
-    
+
 };
 
 } // End namespace WFObjConvert

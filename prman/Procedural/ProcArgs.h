@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Prman_ProcArgs_h_
-#define _Alembic_Prman_ProcArgs_h_
+#ifndef Alembic_Prman_ProcArgs_h
+#define Alembic_Prman_ProcArgs_h
 
 #define PRMAN_USE_ABCMATERIAL
 

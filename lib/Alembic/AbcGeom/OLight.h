@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_OLight_h_
-#define _Alembic_AbcGeom_OLight_h_
+#ifndef Alembic_AbcGeom_OLight_h
+#define Alembic_AbcGeom_OLight_h
 
 
 #include <Alembic/Util/Export.h>

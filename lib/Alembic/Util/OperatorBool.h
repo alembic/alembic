@@ -33,8 +33,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Util_OperatorBool_h_
-#define _Alembic_Util_OperatorBool_h_
+#ifndef Alembic_Util_OperatorBool_h
+#define Alembic_Util_OperatorBool_h
 
 #include <Alembic/Util/Foundation.h>
 

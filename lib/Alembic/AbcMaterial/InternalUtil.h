@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcMaterial_InternalUtil_h_
-#define _Alembic_AbcMaterial_InternalUtil_h_
+#ifndef Alembic_AbcMaterial_InternalUtil_h
+#define Alembic_AbcMaterial_InternalUtil_h
 
 #include <Alembic/Abc/All.h>
 

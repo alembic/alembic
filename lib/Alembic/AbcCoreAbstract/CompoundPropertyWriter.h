@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreAbstract_CompoundPropertyWriter_h_
-#define _Alembic_AbcCoreAbstract_CompoundPropertyWriter_h_
+#ifndef Alembic_AbcCoreAbstract_CompoundPropertyWriter_h
+#define Alembic_AbcCoreAbstract_CompoundPropertyWriter_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>

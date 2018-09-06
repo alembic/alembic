@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AlembicExport_MayaUtility_h_
-#define _AlembicExport_MayaUtility_h_
+#ifndef AlembicExport_MayaUtility_h
+#define AlembicExport_MayaUtility_h
 
 #include "Foundation.h"
 #include <Alembic/Abc/OArrayProperty.h>
@@ -238,4 +238,4 @@ struct FrameRangeArgs
     bool preRoll;
 };
 
-#endif  // _AlembicExport_MayaUtility_h_
+#endif  // AlembicExport_MayaUtility_h

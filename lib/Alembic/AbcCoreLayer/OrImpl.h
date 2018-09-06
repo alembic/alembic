@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreLayer_OrImpl_h_
-#define _Alembic_AbcCoreLayer_OrImpl_h_
+#ifndef Alembic_AbcCoreLayer_OrImpl_h
+#define Alembic_AbcCoreLayer_OrImpl_h
 
 #include <Alembic/AbcCoreLayer/Foundation.h>
 #include <Alembic/AbcCoreLayer/ArImpl.h>

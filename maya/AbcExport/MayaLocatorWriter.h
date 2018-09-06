@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AlembicExport_MayaLocatorWriter_h_
-#define _AlembicExport_MayaLocatorWriter_h_
+#ifndef AlembicExport_MayaLocatorWriter_h
+#define AlembicExport_MayaLocatorWriter_h
 
 #include "Foundation.h"
 #include "AttributesWriter.h"
@@ -68,4 +68,4 @@ class MayaLocatorWriter
 
 typedef Alembic::Util::shared_ptr < MayaLocatorWriter > MayaLocatorWriterPtr;
 
-#endif  // _AlembicExport_MayaLocatorWriter_h_
+#endif  // AlembicExport_MayaLocatorWriter_h

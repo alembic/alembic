@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_OGeometrySchema_h_
-#define _Alembic_AbcGeom_OGeometrySchema_h_
+#ifndef Alembic_AbcGeom_OGeometrySchema_h
+#define Alembic_AbcGeom_OGeometrySchema_h
 
 #include <Alembic/Abc/OSchema.h>
 #include <Alembic/AbcGeom/Foundation.h>

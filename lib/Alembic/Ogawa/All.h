@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Ogawa_All_h_
-#define _Alembic_Ogawa_All_h_
+#ifndef Alembic_Ogawa_All_h
+#define Alembic_Ogawa_All_h
 
 #include <Alembic/Ogawa/Foundation.h>
 #include <Alembic/Ogawa/IArchive.h>

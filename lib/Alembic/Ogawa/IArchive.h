@@ -33,8 +33,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Ogawa_IArchive_h_
-#define _Alembic_Ogawa_IArchive_h_
+#ifndef Alembic_Ogawa_IArchive_h
+#define Alembic_Ogawa_IArchive_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/Ogawa/Foundation.h>

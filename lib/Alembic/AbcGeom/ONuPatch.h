@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_ONuPatch_h_
-#define _Alembic_AbcGeom_ONuPatch_h_
+#ifndef Alembic_AbcGeom_ONuPatch_h
+#define Alembic_AbcGeom_ONuPatch_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>

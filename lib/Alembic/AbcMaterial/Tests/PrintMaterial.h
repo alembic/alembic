@@ -1,5 +1,5 @@
-#ifndef _Alembic_AbcMaterialTest_PrintMaterial_h_
-#define _Alembic_AbcMaterialTest_PrintMaterial_h_
+#ifndef Alembic_AbcMaterialTest_PrintMaterial_h
+#define Alembic_AbcMaterialTest_PrintMaterial_h
 
 #include <Alembic/AbcMaterial/MaterialFlatten.h>
 

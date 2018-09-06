@@ -39,8 +39,8 @@
 //!     \ref Alembic::Util::Exception
 //-*****************************************************************************
 
-#ifndef _Alembic_Util_Exception_h_
-#define _Alembic_Util_Exception_h_
+#ifndef Alembic_Util_Exception_h
+#define Alembic_Util_Exception_h
 
 #include <Alembic/Util/Foundation.h>
 

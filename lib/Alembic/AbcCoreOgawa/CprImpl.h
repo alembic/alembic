@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreOgawa_CprImpl_h_
-#define _Alembic_AbcCoreOgawa_CprImpl_h_
+#ifndef Alembic_AbcCoreOgawa_CprImpl_h
+#define Alembic_AbcCoreOgawa_CprImpl_h
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
 #include <Alembic/AbcCoreOgawa/CprData.h>

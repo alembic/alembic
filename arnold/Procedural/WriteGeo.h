@@ -33,8 +33,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //-*****************************************************************************
-#ifndef _Alembic_Arnold_WriteGeo_h_
-#define _Alembic_Arnold_WriteGeo_h_
+#ifndef Alembic_Arnold_WriteGeo_h
+#define Alembic_Arnold_WriteGeo_h
 
 #include <Alembic/AbcGeom/All.h>
 

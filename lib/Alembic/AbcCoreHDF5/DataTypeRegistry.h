@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_DataTypeRegistry_h_
-#define _Alembic_AbcCoreHDF5_DataTypeRegistry_h_
+#ifndef Alembic_AbcCoreHDF5_DataTypeRegistry_h
+#define Alembic_AbcCoreHDF5_DataTypeRegistry_h
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 

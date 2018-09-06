@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_HDF5Hierarchy_h_
-#define _Alembic_AbcCoreHDF5_HDF5Hierarchy_h_
+#ifndef Alembic_AbcCoreHDF5_HDF5Hierarchy_h
+#define Alembic_AbcCoreHDF5_HDF5Hierarchy_h
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 
