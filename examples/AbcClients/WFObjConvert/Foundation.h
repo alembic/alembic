@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcClients_WFObjConvert_Foundation_h_
-#define _AbcClients_WFObjConvert_Foundation_h_
+#ifndef AbcClients_WFObjConvert_Foundation_h
+#define AbcClients_WFObjConvert_Foundation_h
 
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/Util/All.h>

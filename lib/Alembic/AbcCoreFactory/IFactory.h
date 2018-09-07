@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreFactory_IFactory_h_
-#define _Alembic_AbcCoreFactory_IFactory_h_
+#ifndef Alembic_AbcCoreFactory_IFactory_h
+#define Alembic_AbcCoreFactory_IFactory_h
 
 #include <Alembic/AbcCoreAbstract/ReadArraySampleCache.h>
 #include <Alembic/Abc/IArchive.h>
@@ -123,6 +123,23 @@ public:
         m_numStreams = iNumStreams;
     }
 
+    enum OgawaReadStrategy
+    {
+        kFileStreams,
+        kMemoryMappedFiles
+    };
+
+    //! Get the I/O strategy used for reading Ogawa files.
+    OgawaReadStrategy getOgawaReadStrategy() { return m_readStrategy; }
+
+    //! Sets the I/O strategy used for reading Ogawa files. The default is
+    //! kMemoryMappedFiles.
+    void setOgawaReadStrategy( OgawaReadStrategy iStrategy )
+    {
+        m_readStrategy = iStrategy;
+    }
+
+
     //! Gets the error handler policy
     Alembic::Abc::ErrorHandler::Policy getPolicy() { return m_policy; }
 
@@ -135,6 +152,7 @@ public:
 private:
     bool m_cacheHierarchy;
     size_t m_numStreams;
+    OgawaReadStrategy m_readStrategy;
     Alembic::AbcCoreAbstract::ReadArraySampleCachePtr m_cachePtr;
     Alembic::Abc::ErrorHandler::Policy m_policy;
 

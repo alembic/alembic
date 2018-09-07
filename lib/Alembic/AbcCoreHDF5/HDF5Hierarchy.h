@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_HDF5Hierarchy_h_
-#define _Alembic_AbcCoreHDF5_HDF5Hierarchy_h_
+#ifndef Alembic_AbcCoreHDF5_HDF5Hierarchy_h
+#define Alembic_AbcCoreHDF5_HDF5Hierarchy_h
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 
@@ -69,7 +69,7 @@ private:
 };
 
 //-*****************************************************************************
-class HDF5Hierarchy 
+class HDF5Hierarchy
 {
 public:
     HDF5Hierarchy() {}
@@ -117,7 +117,7 @@ public:
     {
         hobj_ref_t objectRef = getChildRef( iParentRef, iName );
         AttrInfoArray& attrs = m_objectMap[objectRef].m_attrs;
-        
+
         for( AttrInfoArray::iterator it = attrs.begin();
              it != attrs.end(); ++it )
         {
@@ -173,12 +173,12 @@ private:
     {
         ChildInfo( const string &iName, hobj_ref_t iRef = 0 )
             : m_name( iName ), m_ref( iRef ) {}
-            
+
         string     m_name;
         hobj_ref_t m_ref;
 
         friend inline bool operator<( const ChildInfo &x, const ChildInfo &y )
-        {     
+        {
             return x.m_name < y.m_name;
         }
     };
@@ -199,11 +199,8 @@ private:
 
         void clear()
         {
-            if ( m_mask )
-            {
-                delete m_mask;
-                m_mask = NULL;
-            }
+            delete m_mask;
+            m_mask = NULL;
         }
 
         friend inline bool operator<( const AttrInfo &x, const AttrInfo &y )

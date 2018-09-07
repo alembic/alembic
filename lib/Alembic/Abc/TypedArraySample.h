@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_TypedArraySample_h_
-#define _Alembic_Abc_TypedArraySample_h_
+#ifndef Alembic_Abc_TypedArraySample_h
+#define Alembic_Abc_TypedArraySample_h
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/TypedPropertyTraits.h>

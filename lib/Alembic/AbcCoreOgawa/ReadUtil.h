@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreOgawa_ReadUtil_h_
-#define _Alembic_AbcCoreOgawa_ReadUtil_h_
+#ifndef Alembic_AbcCoreOgawa_ReadUtil_h
+#define Alembic_AbcCoreOgawa_ReadUtil_h
 
 #include <Alembic/AbcCoreOgawa/Foundation.h>
 

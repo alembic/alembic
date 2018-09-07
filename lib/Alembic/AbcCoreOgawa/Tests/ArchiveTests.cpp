@@ -58,7 +58,7 @@ using Alembic::Util::Dimensions;
 
 //-*****************************************************************************
 
-void testReadWriteEmptyArchive()
+void testReadWriteEmptyArchive(bool iUseMMap)
 {
     std::string archiveName = "emptyArchive.abc";
 
@@ -75,7 +75,7 @@ void testReadWriteEmptyArchive()
 
         TESTING_ASSERT(archive->getFullName() == "/");
 
-        Alembic::AbcCoreOgawa::ReadArchive r;
+        Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
 
         // can't read an already open archive (for now)
         TESTING_ASSERT_THROW(r( archiveName ), Alembic::Util::Exception);
@@ -83,7 +83,7 @@ void testReadWriteEmptyArchive()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ABCA::ArchiveReaderPtr a = r( archiveName );
         ABCA::ObjectReaderPtr archive = a->getTop();
         ABCA::MetaData m = archive->getHeader().getMetaData();
@@ -106,7 +106,7 @@ void testReadWriteEmptyArchive()
         TESTING_ASSERT(parent->getNumProperties() == 0);
 
         // get it again to make sure we clean ourselves up properly
-        AO::ReadArchive r2;
+        AO::ReadArchive r2(1, iUseMMap);
         ABCA::ArchiveReaderPtr a2 = r2( archiveName );
         ABCA::ObjectReaderPtr archive2 = a2->getTop();
         ABCA::CompoundPropertyReaderPtr p2 = archive2->getProperties();
@@ -114,7 +114,7 @@ void testReadWriteEmptyArchive()
     }
 }
 
-void testReadWriteTimeSamplingArchive()
+void testReadWriteTimeSamplingArchive(bool iUseMMap)
 {
     std::string archiveName = "timeSampsArchive.abc";
 
@@ -171,7 +171,7 @@ void testReadWriteTimeSamplingArchive()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ABCA::ArchiveReaderPtr a = r( archiveName );
 
         TESTING_ASSERT(a->getNumTimeSamplings() == 4);
@@ -204,7 +204,7 @@ void testReadWriteTimeSamplingArchive()
     }
 }
 
-void testReadWriteMaxNumSamplesArchive()
+void testReadWriteMaxNumSamplesArchive(bool iUseMMap)
 {
     std::string archiveName = "timeMaxNumSampsArchive.abc";
 
@@ -251,7 +251,7 @@ void testReadWriteMaxNumSamplesArchive()
     }
 
     {
-        AO::ReadArchive r;
+        AO::ReadArchive r(1, iUseMMap);
         ABCA::ArchiveReaderPtr a = r( archiveName );
 
 
@@ -327,17 +327,10 @@ void writeArchive( const std::string & iName, std::ostream * iStream )
     }
 }
 
-void readArchive( const std::string & iName, std::istream * iStream )
+void readArchive( const ABCA::ArchiveReaderPtr& iArchiveReader)
 {
-    std::vector< std::istream * > streamVec;
-    if (iStream)
-    {
-        streamVec.push_back(iStream);
-    }
-    Alembic::AbcCoreOgawa::ReadArchive r(streamVec);
-    ABCA::ArchiveReaderPtr a = r( iName );
     std::vector< ABCA::ObjectReaderPtr > objs;
-    objs.push_back( a->getTop() );
+    objs.push_back( iArchiveReader->getTop() );
     TESTING_ASSERT( objs[0]->getNumChildren() == 2 );
     objs.push_back( objs[0]->getChild(0) );
     objs.push_back( objs[0]->getChild(1) );
@@ -367,7 +360,26 @@ void readArchive( const std::string & iName, std::istream * iStream )
             objs[i]->getProperties()->getArrayProperty("c")->getNumSamples() );
     }
 
-    TESTING_ASSERT( a->getMaxNumSamplesForTimeSamplingIndex(0) == 2 );
+    TESTING_ASSERT( iArchiveReader->getMaxNumSamplesForTimeSamplingIndex(0) == 2 );
+}
+
+void readArchive( std::istream * iStream )
+{
+    std::vector<std::istream*> streamVec;
+    streamVec.push_back(iStream);
+
+    Alembic::AbcCoreOgawa::ReadArchive r(streamVec);
+    ABCA::ArchiveReaderPtr ar = r("");
+
+    readArchive(ar);
+}
+
+void readArchive( const std::string & iName, bool iUseMMap )
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r(iName);
+
+    readArchive(ar);
 }
 
 void writeVeryEmptyArchive( const std::string & iName )
@@ -377,42 +389,50 @@ void writeVeryEmptyArchive( const std::string & iName )
     ABCA::ArchiveWriterPtr a = w(iName, m);
 }
 
-void readVeryEmptyArchive( const std::string & iName )
+void readVeryEmptyArchive( const std::string & iName, bool iUseMMap )
 {
-    Alembic::AbcCoreOgawa::ReadArchive r;
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr a = r( iName );
     TESTING_ASSERT(a->getTop()->getNumChildren() == 0);
 }
 
-void testGarbageArchive()
+void testGarbageArchive(bool iUseMMap)
 {
     std::ofstream strm("garbage", std::ios_base::trunc | std::ios_base::binary);
     strm << "garbage" << std::endl;
     strm.close();
 
-    AO::ReadArchive r;
+    AO::ReadArchive r(1, iUseMMap);
     TESTING_ASSERT_THROW(r( "garbage" ), Alembic::Util::Exception);
+}
+
+void runTests(bool iUseMMap)
+{
+    testReadWriteEmptyArchive(iUseMMap);
+    testReadWriteTimeSamplingArchive(iUseMMap);
+
+    testReadWriteMaxNumSamplesArchive(iUseMMap);
+
+    testGarbageArchive(iUseMMap);
 }
 
 int main ( int argc, char *argv[] )
 {
-    testReadWriteEmptyArchive();
-    testReadWriteTimeSamplingArchive();
+    runTests(true);     // Use mmap
+    runTests(false);    // Use streams
 
     writeArchive("test.abc", NULL);
-    readArchive("test.abc", NULL);
+    readArchive("test.abc", true);
+    readArchive("test.abc", false);
 
     std::stringstream strStream;
     writeArchive("", &strStream);
     strStream.seekg(0, strStream.beg);
-    readArchive("", &strStream);
+    readArchive(&strStream);
 
     writeVeryEmptyArchive("testEmpty.abc");
-    readVeryEmptyArchive("testEmpty.abc");
-
-    testReadWriteMaxNumSamplesArchive();
-
-    testGarbageArchive();
+    readVeryEmptyArchive("testEmpty.abc", true);
+    readVeryEmptyArchive("testEmpty.abc", false);
 
     return 0;
 }

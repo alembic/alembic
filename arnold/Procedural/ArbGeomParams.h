@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Arnold_ArbGeomParams_h_
-#define _Alembic_Arnold_ArbGeomParams_h_
+#ifndef Alembic_Arnold_ArbGeomParams_h
+#define Alembic_Arnold_ArbGeomParams_h
 
 #include <ai.h>
 #include <Alembic/AbcGeom/All.h>

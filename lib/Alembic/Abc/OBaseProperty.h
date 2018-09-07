@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_OBaseProperty_h_
-#define _Alembic_Abc_OBaseProperty_h_
+#ifndef Alembic_Abc_OBaseProperty_h
+#define Alembic_Abc_OBaseProperty_h
 
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/Base.h>

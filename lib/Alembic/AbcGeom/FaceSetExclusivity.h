@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_Exclusivity_h_
-#define _Alembic_AbcGeom_Exclusivity_h_
+#ifndef Alembic_AbcGeom_Exclusivity_h
+#define Alembic_AbcGeom_Exclusivity_h
 
 namespace Alembic {
 namespace AbcGeom {

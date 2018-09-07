@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_OFaceSet_h_
-#define _Alembic_AbcGeom_OFaceSet_h_
+#ifndef Alembic_AbcGeom_OFaceSet_h
+#define Alembic_AbcGeom_OFaceSet_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>

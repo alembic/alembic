@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _ABC_STITCHER_UTIL_H_
-#define _ABC_STITCHER_UTIL_H_
+#ifndef ABC_STITCHER_UTIL_H
+#define ABC_STITCHER_UTIL_H
 
 #include <string>
 #include <vector>
@@ -90,4 +90,4 @@ void stitchCompoundProp(ICompoundPropertyVec & iCompoundProps,
                         const TimeAndSamplesMap & iTimeMap);
 
 
-#endif // _ABC_STITCHER_UTIL_H_
+#endif // ABC_STITCHER_UTIL_H

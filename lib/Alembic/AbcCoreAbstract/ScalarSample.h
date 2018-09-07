@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreAbstract_ScalarSample_h_
-#define _Alembic_AbcCoreAbstract_ScalarSample_h_
+#ifndef Alembic_AbcCoreAbstract_ScalarSample_h
+#define Alembic_AbcCoreAbstract_ScalarSample_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcCoreAbstract/Foundation.h>

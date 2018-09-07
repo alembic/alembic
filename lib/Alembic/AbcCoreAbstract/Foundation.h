@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreAbstract_Foundation_h_
-#define _Alembic_AbcCoreAbstract_Foundation_h_
+#ifndef Alembic_AbcCoreAbstract_Foundation_h
+#define Alembic_AbcCoreAbstract_Foundation_h
 
 #include <Alembic/Util/All.h>
 #include <Alembic/Util/Export.h>

@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_IGeomParam_h_
-#define _Alembic_AbcGeom_IGeomParam_h_
+#ifndef Alembic_AbcGeom_IGeomParam_h
+#define Alembic_AbcGeom_IGeomParam_h
 
 #include <Alembic/AbcGeom/Foundation.h>
 #include <Alembic/AbcGeom/GeometryScope.h>

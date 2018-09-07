@@ -33,8 +33,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //-*****************************************************************************
-#ifndef _Alembic_Prman_SampleUtil_h_
-#define _Alembic_Prman_SampleUtil_h_
+#ifndef Alembic_Prman_SampleUtil_h
+#define Alembic_Prman_SampleUtil_h
 
 #include <Alembic/AbcGeom/All.h>
 

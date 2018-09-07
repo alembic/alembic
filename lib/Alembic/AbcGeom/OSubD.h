@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_OSubD_h_
-#define _Alembic_AbcGeom_OSubD_h_
+#ifndef Alembic_AbcGeom_OSubD_h
+#define Alembic_AbcGeom_OSubD_h
 
 #include <map>
 #include <Alembic/Util/Export.h>

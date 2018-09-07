@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_SimplePwImpl_h_
-#define _Alembic_AbcCoreHDF5_SimplePwImpl_h_
+#ifndef Alembic_AbcCoreHDF5_SimplePwImpl_h
+#define Alembic_AbcCoreHDF5_SimplePwImpl_h
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 #include <Alembic/AbcCoreHDF5/WriteUtil.h>

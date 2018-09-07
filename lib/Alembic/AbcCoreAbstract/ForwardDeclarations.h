@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreAbstract_ForwardDeclarations_h_
-#define _Alembic_AbcCoreAbstract_ForwardDeclarations_h_
+#ifndef Alembic_AbcCoreAbstract_ForwardDeclarations_h
+#define Alembic_AbcCoreAbstract_ForwardDeclarations_h
 
 #include <Alembic/AbcCoreAbstract/Foundation.h>
 #include <Alembic/AbcCoreAbstract/PropertyHeader.h>

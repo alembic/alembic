@@ -33,8 +33,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Ogawa_Foundation_h_
-#define _Alembic_Ogawa_Foundation_h_
+#ifndef Alembic_Ogawa_Foundation_h
+#define Alembic_Ogawa_Foundation_h
 
 #include <Alembic/Util/Foundation.h>
 #include <Alembic/Util/PlainOldDataType.h>

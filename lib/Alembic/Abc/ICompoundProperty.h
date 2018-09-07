@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_Abc_ICompoundProperty_h_
-#define _Alembic_Abc_ICompoundProperty_h_
+#ifndef Alembic_Abc_ICompoundProperty_h
+#define Alembic_Abc_ICompoundProperty_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/Abc/Foundation.h>

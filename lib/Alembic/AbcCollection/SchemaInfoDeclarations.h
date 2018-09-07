@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCollection_SchemaInfoDeclarations_h_
-#define _Alembic_AbcCollection_SchemaInfoDeclarations_h_
+#ifndef Alembic_AbcCollection_SchemaInfoDeclarations_h
+#define Alembic_AbcCollection_SchemaInfoDeclarations_h
 
 #include <Alembic/Abc/OSchema.h>
 

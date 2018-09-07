@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcGeom_ICurves_h_
-#define _Alembic_AbcGeom_ICurves_h_
+#ifndef Alembic_AbcGeom_ICurves_h
+#define Alembic_AbcGeom_ICurves_h
 
 #include <Alembic/Util/Export.h>
 #include <Alembic/AbcGeom/Foundation.h>
@@ -77,8 +77,8 @@ public:
         BasisType getBasis() const { return m_basis; }
 
         // the should not be null if the curve type is kVariableOrder
-        Abc::UcharArraySamplePtr getOrders() { return m_orders; }
-        Abc::FloatArraySamplePtr getKnots() { return m_knots; }
+        Abc::UcharArraySamplePtr getOrders() const { return m_orders; }
+        Abc::FloatArraySamplePtr getKnots() const { return m_knots; }
 
         // if this is NULL then the weight value of the position for each
         // point is 1
@@ -151,7 +151,7 @@ public:
     //! This constructor creates a new curves reader.
     //! The first argument is the parent ICompoundProperty, from which the
     //! error handler policy for is derived.  The second argument is the name
-    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! of the ICompoundProperty that contains this schemas properties.  The
     //! remaining optional arguments can be used to override the
     //! ErrorHandlerPolicy and to specify schema interpretation matching.
     ICurvesSchema( const ICompoundProperty & iParent,

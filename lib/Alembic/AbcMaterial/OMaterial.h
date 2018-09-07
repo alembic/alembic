@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcMaterial_OMaterial_h_
-#define _Alembic_AbcMaterial_OMaterial_h_
+#ifndef Alembic_AbcMaterial_OMaterial_h
+#define Alembic_AbcMaterial_OMaterial_h
 
 #include <Alembic/Abc/All.h>
 

@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreHDF5_CpwImpl_h_
-#define _Alembic_AbcCoreHDF5_CpwImpl_h_
+#ifndef Alembic_AbcCoreHDF5_CpwImpl_h
+#define Alembic_AbcCoreHDF5_CpwImpl_h
 
 #include <Alembic/AbcCoreHDF5/Foundation.h>
 #include <Alembic/AbcCoreHDF5/CpwData.h>

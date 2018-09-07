@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AlembicExport_MayaTransformWriter_h_
-#define _AlembicExport_MayaTransformWriter_h_
+#ifndef AlembicExport_MayaTransformWriter_h
+#define AlembicExport_MayaTransformWriter_h
 
 #include "Foundation.h"
 
@@ -63,7 +63,7 @@ class MayaTransformWriter
 {
   public:
 
-    MayaTransformWriter(Alembic::Abc::OObject & iParent, MDagPath & iDag, 
+    MayaTransformWriter(Alembic::Abc::OObject & iParent, MDagPath & iDag,
         Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs);
 
     MayaTransformWriter(MayaTransformWriter & iParent, MDagPath & iDag,
@@ -102,4 +102,4 @@ class MayaTransformWriter
 typedef Alembic::Util::shared_ptr < MayaTransformWriter >
     MayaTransformWriterPtr;
 
-#endif  // _AlembicExport_MayaTransformWriter_h_
+#endif  // AlembicExport_MayaTransformWriter_h

@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _PyAlembic_PyIPropertyUtil_h_
-#define _PyAlembic_PyIPropertyUtil_h_
+#ifndef PyAlembic_PyIPropertyUtil_h
+#define PyAlembic_PyIPropertyUtil_h
 
 #include <Foundation.h>
 

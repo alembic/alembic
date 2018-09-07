@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _AbcClients_WFObjConvert_Reader_h_
-#define _AbcClients_WFObjConvert_Reader_h_
+#ifndef AbcClients_WFObjConvert_Reader_h
+#define AbcClients_WFObjConvert_Reader_h
 
 #include <AbcClients/WFObjConvert/Export.h>
 #include <AbcClients/WFObjConvert/Foundation.h>
@@ -67,7 +67,7 @@ public:
     //! By default, we will treat 4-dimensional
     //! points as homogenous and dehomogenize them, subsequently
     //! calling the V3d version of 'v'
-    
+
     //! Default constructor does nothing
     //! ...
     Reader() {}
@@ -95,7 +95,7 @@ public:
     //! the name passed to the begin function.
     virtual void parsingEnd( const std::string &iStreamName,
                              size_t iNumLinesParsed ) {}
-    
+
 
     //-*************************************************************************
     //! POINT DECLARATION
@@ -127,7 +127,7 @@ public:
     //! Set a 2-dimensional texture vertex.
     //! ...
     virtual void vt( index_t iIndex, const V2d &iVal ) {}
-    
+
     //! Set a 3-dimensional texture vertex.
     //! ...
     virtual void vt( index_t iIndex, const V3d &iVal ) {}
@@ -135,7 +135,7 @@ public:
     //! Set a 3-dimensional normal.
     //! Using V3d instead of N3f/N3T
     virtual void vn( index_t iIndex, const V3d &iVal ) {}
-    
+
     //! Set a 1-dimensional parameter vertex.
     //! ...
     virtual void vp( index_t iIndex, double iVal ) {}
@@ -178,21 +178,21 @@ public:
     //! groups at a time, and also to declare elements as belonging to
     //! a particular named object.
     //-*************************************************************************
-    
+
     //! Called when an as-yet unseen group name is encountered.
     //! ...
     virtual void newGroup( const std::string &iGroupName ) {}
 
-    
+
     //!	Called when active groups change
     //! The set of groups may be more than 1.
     virtual void activeGroups( const StringVec &iGroupNames ) {}
 
-    
+
     //!	Called when an "o" line is encountered.
     //! ...
     virtual void activeObject( const std::string &iObjectName ) {}
-    
+
     //!	Called when smoothing group changes -- note that Id == 0 means
     //!	no smoothing -- this is equivalent to the "s off" statement.
     //! the "s on" statement will set smoothing group to 1.

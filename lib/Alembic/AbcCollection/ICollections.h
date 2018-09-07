@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCollections_ICollections_h_
-#define _Alembic_AbcCollections_ICollections_h_
+#ifndef Alembic_AbcCollections_ICollections_h
+#define Alembic_AbcCollections_ICollections_h
 
 #include <Alembic/Abc/All.h>
 #include <Alembic/Util/Export.h>

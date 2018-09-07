@@ -34,8 +34,8 @@
 //
 //-*****************************************************************************
 
-#ifndef _Alembic_AbcCoreOgawa_WrittenSampleMap_h_
-#define _Alembic_AbcCoreOgawa_WrittenSampleMap_h_
+#ifndef Alembic_AbcCoreOgawa_WrittenSampleMap_h
+#define Alembic_AbcCoreOgawa_WrittenSampleMap_h
 
 #include <Alembic/AbcCoreAbstract/ArraySampleKey.h>
 #include <Alembic/AbcCoreOgawa/Foundation.h>
