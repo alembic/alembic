@@ -193,6 +193,10 @@ void simpleTestIn( const std::string& iArchiveName )
     TESTING_ASSERT( x5.isInstanceDescendant() );
     TESTING_ASSERT( x5.isInstanceRoot() );
     TESTING_ASSERT( x5.instanceSourcePath() == x4.getFullName() );
+    TESTING_ASSERT( x5.getName() == "x5" );
+
+    IObject x5Copy = x5;
+    TESTING_ASSERT( x5Copy.getName() == "x5" );
 
     numChildren = x5.getNumChildren();
     TESTING_ASSERT( numChildren == 2 );

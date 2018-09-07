@@ -170,6 +170,38 @@ void testITypedArrayProperty( IObject &iObject )
     boolProp.get( bPtr );
 }
 
+void testInstancedSchema()
+{
+    {
+        OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(),
+                          "instancedTest.abc" );
+
+        OObject archiveTop = archive.getTop();
+        OObject a( archiveTop, "a" );
+        OTest aa( a, "a" );
+
+        OObject b( archiveTop, "b" );
+        b.addChildInstance( aa, "bb" );
+    }
+
+    {
+        IArchive archive( Alembic::AbcCoreOgawa::ReadArchive(),
+                          "instancedTest.abc" );
+        IObject archiveTop = archive.getTop();
+        IObject b( archiveTop, "b" );
+        IObject bb( b, "bb" );
+        ITest bb1( b, "bb" );
+        ITest bb2( bb );
+        ABCA_ASSERT( bb.getName() == bb1.getName(),
+            "Instanced bb and bb1 names don't match." );
+        ABCA_ASSERT( bb.getName() == bb2.getName(),
+            "Instanced bb and bb1 names don't match." );
+        ABCA_ASSERT( bb.getFullName() == "/b/bb", "Bad full name for bb" );
+        ABCA_ASSERT( bb1.getFullName() == "/b/bb", "Bad full name for bb1" );
+        ABCA_ASSERT( bb2.getFullName() == "/b/bb", "Bad full name for bb2" );
+    }
+}
+
 int main( int argc, char *argv[] )
 {
 
@@ -217,5 +249,7 @@ int main( int argc, char *argv[] )
         testITypedScalarProperty( child );
         testITypedArrayProperty( child );
     }
+
+    testInstancedSchema();
     return 0;
 }
