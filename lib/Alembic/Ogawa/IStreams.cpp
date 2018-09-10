@@ -47,15 +47,12 @@
 
     #include <cstring>
 
-    #define USE_POSIX_MMAP
 #elif defined(_WIN32)
 
     #include <windows.h>
     #include <fcntl.h>
     #include <io.h>
     #include <sys/stat.h>
-
-    #define USE_WIN32_FILEMAPPING
 
 #else
     #error Platform not supported.
@@ -326,7 +323,7 @@ class MemoryMappedIStreamReader : public IStreamReader
 {
 private:
 
-#if defined(USE_POSIX_MMAP)
+#ifndef _WIN32
     typedef int FileHandle;
     #define BAD_FILE_HANDLE (-1)
 
@@ -397,7 +394,7 @@ private:
 
     };
 
-#elif defined(USE_WIN32_FILEMAPPING)
+#else // _WIN32 defined
     typedef HANDLE FileHandle;
     #define BAD_FILE_HANDLE (INVALID_HANDLE_VALUE)
 
@@ -480,8 +477,6 @@ private:
         }
 
     };
-#else
-    #error Memory mapping enabled but no suitable platform defined.
 #endif
 
 

@@ -159,8 +159,11 @@ public:
     ISchemaObject( const IObject & iObject,
                    const Argument &iArg0 = Argument(),
                    const Argument &iArg1 = Argument() )
-    : IObject( iObject.getPtr(), GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) )
+    : IObject( iObject )
     {
+        getErrorHandler().setPolicy(
+            GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) );
+
         ALEMBIC_ABC_SAFE_CALL_BEGIN(
             "ISchemaObject::ISchemaObject( wrap )" );
 
@@ -186,8 +189,11 @@ public:
                    WrapExistingFlag iFlag,
                    const Argument &iArg0 = Argument(),
                    const Argument &iArg1 = Argument() )
-    : IObject( iObject.getPtr(), GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) )
+    : IObject( iObject )
     {
+        getErrorHandler().setPolicy(
+            GetErrorHandlerPolicy( iObject, iArg0, iArg1 ) );
+
         ALEMBIC_ABC_SAFE_CALL_BEGIN(
             "ISchemaObject::ISchemaObject( wrapflag )" );
 

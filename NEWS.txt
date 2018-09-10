@@ -1,3 +1,55 @@
+2018-9-7, Alembic 1.7.9
+Thanks to your feedback and numerous pull requests we have several enhancements
+and bug fixes.
+
+API:
+
+Add memory mapped read support for Ogawa, which is now on by default but
+can be toggled off via Alembic::AbcCoreFactory::setOgawaReadStrategy.
+Read speed is improved by about 10-25% on Linux and potentially much more on
+Windows. (PR 187)
+
+Make getOrders and getKnots const on Alembic::AbcGeom::ICurves. (PR 162)
+
+Remove prefix _ in our include guards to be ISO conformant.  (PR 192 and 194)
+
+Remove some unnecessary null pointer checks before deleting an object. (PR 193)
+
+When "wrapping" an IObject around the ISchemaObject properly copy the IObject
+so that the instancing info is copied over as well. (PR 195)
+
+Maya AbcImport/AbcExport:
+
+Update several deprecated Maya API function calls. (PR 173)
+
+Clean up some compiler warnings and add override keyword to a few methods.
+(PR 174)
+
+Prevent crash for importing certain invalid NURBS surfaces and add the error
+message when the NURBS surface can't be created. (PR 175)
+
+Alembic file translator now resolved in the same way as the AbcImport command.
+(PR 176)
+
+Fix per-face shader assignments not merging if the mesh to merge is an
+intermediate object.  (PR 177)
+
+Utils:
+
+AbcStitcher:
+
+Fix crash when trying to stitch subd corner sharpness.  ( PR 181 )
+
+CMake:
+
+Use /bigobj flag for Visual Studio 2008/MSVC15.
+Use PyAlembic as a target and property name to avoid a naming conflict.
+Python binding alembic.so should be alembic.pyd on Windows. ( PR 172 )
+
+Add the msvc14fixes.cpp for the python bindings if using MSVC 14 2015 Update 3.
+
+##-*****************************************************************************
+
 2018-4-30, Alembic 1.7.8
 Thanks to your feedback and generous pull requests we have some enhancements.
 
@@ -23,7 +75,7 @@ enhancement.
 
 API:
 
-Fix bug where std::weak_ptr was used in AbcCoreLayer instead of 
+Fix bug where std::weak_ptr was used in AbcCoreLayer instead of
 Alembic::Util::weak_ptr.
 
 Add OCurves::Schema::Sample::setPositionWeights to go along with the get.
@@ -203,7 +255,7 @@ AbcImport: Support AbcCoreLayer by specifying more than one file to the AbcImpor
 
 AbcExport:
 Support writing only UVs via -uvsonly or -uvo flag.
- 
+
 Utilities:
 AbcDiff: Given 2 Alembic files, create a sparse diff between them.
 
