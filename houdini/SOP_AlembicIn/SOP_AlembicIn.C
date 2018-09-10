@@ -230,7 +230,7 @@ namespace
     };
 
     typedef hboost::shared_ptr<ArchiveCacheEntry> ArchiveCacheEntryRcPtr;
-    typedef std::map<std::string, ArchiveCacheEntryRcPtr> ArchiveCache;
+    typedef std::map<std::vector<std::string>, ArchiveCacheEntryRcPtr> ArchiveCache;
 
     //-*************************************************************************
 
@@ -241,9 +241,9 @@ namespace
 
     //-*************************************************************************
 
-    ArchiveCacheEntryRcPtr LoadArchive(const std::string & path)
+    ArchiveCacheEntryRcPtr LoadArchive(const std::vector<std::string> & paths)
     {
-        ArchiveCache::iterator I = g_archiveCache->find(path);
+        ArchiveCache::iterator I = g_archiveCache->find(paths);
         if (I != g_archiveCache->end())
         {
             return (*I).second;
@@ -253,7 +253,7 @@ namespace
         try
         {
             ::Alembic::AbcCoreFactory::IFactory factory;
-            entry->archive = factory.getArchive( path );
+            entry->archive = factory.getArchive( paths );
         }
         catch (const std::exception & e)
         {
@@ -275,13 +275,13 @@ namespace
             }
             g_archiveCache->erase(it);
         }
-        (*g_archiveCache)[path] = entry;
+        (*g_archiveCache)[paths] = entry;
         return entry;
     }
 
-    void	ClearArchiveFile(const std::string &path)
+    void	ClearArchiveFile(const std::vector<std::string> &paths)
     {
-        ArchiveCache::iterator it = g_archiveCache->find(path);
+        ArchiveCache::iterator it = g_archiveCache->find(paths);
 	if (it != g_archiveCache->end())
 	    g_archiveCache->erase(it);
     }
@@ -292,15 +292,48 @@ namespace
     }
 
     //-**************************************************************************
+
+    std::string filenamesToString(const std::vector<std::string> &filenames)
+    {
+	UT_WorkBuffer buffer;
+	for (int i = 0; i < filenames.size(); ++i)
+	{
+	    if(i)
+		buffer.append(", ");
+	    buffer.append(filenames[i].c_str());
+	}
+	return buffer.toStdString();
+    }
 }
 
 void
-SOP_AlembicIn::clearCacheFile(const char *filename)
+SOP_AlembicIn::clearCacheFile(const std::vector<std::string> *filenames)
 {
-    if (filename)
-	ClearArchiveFile(filename);
+    if (filenames)
+	ClearArchiveFile(*filenames);
     else
 	ClearArchiveCache();
+}
+
+void
+SOP_AlembicIn::appendFileNames(std::vector<std::string> &filenames, fpreal t)
+{
+    int numlayers = evalInt("numlayers", 0, t);
+    for (int i = 1; i <= numlayers; ++i)
+    {
+	if (evalIntInst("enablelayer#", &i, 0, t))
+	{
+	    UT_String fileName;
+	    evalStringInst("layer#", &i, fileName, 0, t);
+	    if (fileName.isstring())
+		filenames.push_back(fileName.toStdString());
+	}
+    }
+
+    UT_String name;
+    evalString(name, "fileName", 0, t);
+    if(name.isstring())
+	filenames.push_back(name.toStdString());
 }
 
 // Class to help us walk the tree
@@ -344,6 +377,7 @@ static PRM_Template prm_AttributeRemapTemplate[] = {
 };
 
 static PRM_Name prm_fileNameName("fileName", "File Name");
+static PRM_Name prm_numlayersName("numlayers", "Number of Layers");
 static PRM_Name prm_frameName("frame", "Frame");
 static PRM_Name prm_fpsName("fps", "Frames Per Second");
 static PRM_Name prm_objectPathName("objectPath", "Object Path");
@@ -356,13 +390,36 @@ static PRM_Default prm_fpsDefault(24, "$FPS");
 static PRM_Default prm_includeXformDefault(true);
 
 static PRM_ChoiceList	prm_objectPathMenu(PRM_CHOICELIST_TOGGLE,
-        "__import__('_alembic_hom_extensions').alembicGetObjectPathListForMenu"
-                "(hou.pwd().evalParm('fileName'))[:16380]",
-        CH_PYTHON_SCRIPT);
+        "def getFileName(node):\n"
+	"    r = []\n"
+	"    for i in range(node.evalParm('numlayers')):\n"
+	"        if node.evalParm('enablelayer%d' % (i + 1,)):\n"
+	"            p = node.evalParm('layer%d' % (i + 1,))\n"
+	"            if p:\n"
+	"                r.append(p)\n"
+	"    p = node.evalParm('fileName')\n"
+	"    if p:\n"
+	"        r.append(p)\n"
+	"    return r\n"
+	"return __import__('_alembic_hom_extensions').alembicGetObjectPathListForMenu"
+	"(getFileName(hou.pwd()))",
+	CH_PYTHON_SCRIPT);
+
+static PRM_Name prm_enablelayerName("enablelayer#", "");
+static PRM_Name prm_layerName("layer#", "Layer #");
+
+static PRM_Template prm_layersTemplate[] = {
+    PRM_Template(PRM_TOGGLE, PRM_TYPE_TOGGLE_JOIN, 1, &prm_enablelayerName,
+	    PRMoneDefaults),
+    PRM_Template(PRM_FILE, 1, &prm_layerName),
+    PRM_Template()
+};
 
 PRM_Template SOP_AlembicIn::myTemplateList[] =
 {
     PRM_Template(PRM_FILE, 1, &prm_fileNameName),
+    PRM_Template(PRM_MULTITYPE_LIST, prm_layersTemplate, 1,
+            &prm_numlayersName, 0, 0, &PRM_SpareData::multiStartOffsetOne),
     PRM_Template(PRM_FLT_J, 1, &prm_frameName, &prm_frameDefault),
     PRM_Template(PRM_FLT_J, 1, &prm_fpsName, &prm_fpsDefault),
     PRM_Template(PRM_STRING, 1, &prm_objectPathName, &prm_objectPathDefault,
@@ -429,13 +486,8 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
 	sop_flushed = true;
     }
 
-    std::string fileName;
-    {
-        UT_String str;
-        evalString(str, "fileName", 0, now);
-
-        fileName = str.toStdString();
-    }
+    std::vector<std::string> fileNames;
+    appendFileNames(fileNames, now);
 
     PathList pathList;
 
@@ -449,7 +501,7 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
     // If the file or object parameter has changed, we need to reset our
     // primitive cache.
     UT_WorkBuffer fileobjecthash;
-    fileobjecthash.sprintf("%s:%s:%d", fileName.c_str(), objectPath.c_str(),
+    fileobjecthash.sprintf("%s:%s:%d", filenamesToString(fileNames).c_str(), objectPath.c_str(),
             args.includeXform);
 
 
@@ -524,16 +576,16 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
         return error();
     }
 
-    if (fileName.empty())
+    if (fileNames.empty())
     {
         args.boss->opEnd();
-        addWarning(SOP_MESSAGE, "No file specified.");
+        addWarning(SOP_MESSAGE, "No files specified.");
         return error();
     }
 
     try
     {
-        ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(fileName);
+        ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(fileNames);
 
         if (!cacheEntry->archive.valid() )
         {
@@ -545,7 +597,7 @@ OP_ERROR SOP_AlembicIn::cookMySop(OP_Context &context)
             return error();
         }
 
-        attachDetailStringData("abcFileName", fileName);
+        attachDetailStringData("abcFileName", filenamesToString(fileNames));
 
         IObject root = cacheEntry->archive.getTop();
 
@@ -1632,6 +1684,18 @@ void SOP_AlembicIn::applyArbitraryGeomParamSample<
 
 //-*****************************************************************************
 
+bool SOP_AlembicIn::updateParmsFlags()
+{
+    bool	changed = false;
+
+    int numlayers = evalInt("numlayers", 0, 0);
+    for (int i = 1; i <= numlayers; ++i)
+	changed |= enableParmInst("layer#", &i, evalIntInst("enablelayer#", &i, 0, 0));
+    return changed;
+}
+
+//-*****************************************************************************
+
 void SOP_AlembicIn::buildSubD( Args & args, ISubD &subd, M44d parentXform, bool parentXformIsConstant)
 {
     ISampleSelector sampleSelector( args.abcTime );
@@ -2358,21 +2422,68 @@ namespace
                           lerp(a[2], b[2], amt));
     }
 
+//-*****************************************************************************
+// Utility functions for the python bindings
 
+    static void
+    appendFile(std::vector<std::string> &filenames, const char *name)
+    {
+	UT_String realname;
+
+	// complete a path search in case it is in the geometry path
+	UT_PathSearch::getInstance(UT_HOUDINI_GEOMETRY_PATH)->
+		findFile(realname, name);
+	filenames.push_back(realname.toStdString());
+    }
+
+    static void
+    appendFileList(std::vector<std::string> &filenames, PY_PyObject *fileList)
+    {
+	if (!fileList)
+	    return;
+
+	if (PY_PyString_Check(fileList))
+	{
+	    const char *fileStr = PY_PyString_AsString(fileList);
+	    if (fileStr && strlen(fileStr))
+		appendFile(filenames, fileStr);
+	}
+	else if (PY_PySequence_Check(fileList))
+	{
+	    int numFiles = PY_PySequence_Size(fileList);
+	    for (int i = 0; i < numFiles; ++i)
+	    {
+		PY_PyObject *fileObj = PY_PySequence_GetItem(fileList, i);
+		if (PY_PyString_Check(fileObj))
+		{
+		    const char *fileStr = PY_PyString_AsString(fileObj);
+		    if (fileStr && strlen(fileStr))
+			appendFile(filenames, fileStr);
+		}
+	    }
+	}
+    }
+
+//-*****************************************************************************
+// Python bindings
 
     PY_PyObject *
     Py_AlembicGetLocalXform(PY_PyObject *self, PY_PyObject *args)
     {
-        const char * archivePath = NULL;
+ 	PY_PyObject *fileList;
         const char * objectPath = NULL;
         double sampleTime = 0.0;
         bool isConstant = true;
         M44d localXform;
-        if (!PY_PyArg_ParseTuple(args, "ssd", &archivePath, &objectPath,
+        if (!PY_PyArg_ParseTuple(args, "Osd", &fileList, &objectPath,
                 &sampleTime)) return NULL;
         try
         {
-            ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(archivePath);
+	    std::vector<std::string> filenames;
+	    appendFileList(filenames, fileList);
+	    if (!filenames.size())
+		PY_Py_RETURN_NONE;
+            ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(filenames);
             if (cacheEntry->archive.valid() )
             {
 		bool	found = false;
@@ -2558,13 +2669,17 @@ namespace
     PY_PyObject *
     Py_AlembicGetSceneHierarchy(PY_PyObject *self, PY_PyObject *args)
     {
-        const char * archivePath = NULL;
+ 	PY_PyObject *fileList;
         const char * objectPath = NULL;
-        if (!PY_PyArg_ParseTuple(args, "ss", &archivePath, &objectPath
+        if (!PY_PyArg_ParseTuple(args, "Os", &fileList, &objectPath
                 )) return NULL;
         try
         {
-            ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(archivePath);
+	    std::vector<std::string> filenames;
+	    appendFileList(filenames, fileList);
+	    if (!filenames.size())
+		PY_Py_RETURN_NONE;
+            ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(filenames);
 
             if (cacheEntry->archive.valid())
             {
@@ -2631,12 +2746,17 @@ namespace
     PY_PyObject *
     Py_AlembicGetObjectPathListForMenu(PY_PyObject *self, PY_PyObject *args)
     {
-        const char * archivePath = NULL;
-        if (!PY_PyArg_ParseTuple(args, "s", &archivePath)) return NULL;
+ 	PY_PyObject *fileList;
+
+        if (!PY_PyArg_ParseTuple(args, "O", &fileList)) return NULL;
         PY_PyObject * result = NULL;
         try
         {
-            ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(archivePath);
+	    std::vector<std::string> filenames;
+	    appendFileList(filenames, fileList);
+	    if (!filenames.size())
+		PY_Py_RETURN_NONE;
+            ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(filenames);
             if (cacheEntry->objectPathMenuList != NULL)
             {
                 result = cacheEntry->objectPathMenuList;
@@ -2671,11 +2791,11 @@ namespace
     PY_PyObject *
     Py_AlembicGetCameraDict(PY_PyObject *self, PY_PyObject *args)
     {
-        const char * archivePath = NULL;
+ 	PY_PyObject *fileList;
         const char * objectPath = NULL;
         double sampleTime = 0.0;
 
-        if (!PY_PyArg_ParseTuple(args, "ssd", &archivePath, &objectPath,
+        if (!PY_PyArg_ParseTuple(args, "Osd", &fileList, &objectPath,
                 &sampleTime)) return NULL;
 
         bool isConstant = true;
@@ -2684,7 +2804,11 @@ namespace
 
         try
         {
-            ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(archivePath);
+	    std::vector<std::string> filenames;
+	    appendFileList(filenames, fileList);
+	    if (!filenames.size())
+		PY_Py_RETURN_NONE;
+            ArchiveCacheEntryRcPtr cacheEntry = LoadArchive(filenames);
             if (cacheEntry->archive.valid() )
             {
 		IObject currentObject = cacheEntry->getObject(objectPath);
