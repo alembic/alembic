@@ -402,8 +402,10 @@ static PRM_ChoiceList	prm_objectPathMenu(PRM_CHOICELIST_TOGGLE,
 	"        r.append(p)\n"
 	"    return r\n"
 	"return __import__('_alembic_hom_extensions').alembicGetObjectPathListForMenu"
-	"(getFileName(hou.pwd()))",
+	"(getFileName(hou.pwd()))[:16380]",
 	CH_PYTHON_SCRIPT);
+// As of 16.5, Houdini has a limit of 16380 items in a UI menu, so we
+// limit the list length to be safe
 
 static PRM_Name prm_enablelayerName("enablelayer#", "");
 static PRM_Name prm_layerName("layer#", "Layer #");
