@@ -65,13 +65,15 @@ public:
 
     /// Clear a file out of the read-cache.  If the filename is null, the
     /// entire cache is cleared.
-    static void	clearCacheFile(const char *filename=NULL);
+    static void	clearCacheFile(const std::vector<std::string> *filenames=NULL);
+    void appendFileNames(std::vector<std::string> &filenames, fpreal t);
 
 protected:
     //--------------------------------------------------------------------------
     // Standard hdk declarations
     SOP_AlembicIn(OP_Network *net, const char *name, OP_Operator *op);
     virtual ~SOP_AlembicIn();
+    virtual bool updateParmsFlags();
     virtual bool unloadData();
     virtual OP_ERROR cookMySop(OP_Context &context);
     virtual void nodeUnlocked();
@@ -84,8 +86,8 @@ private:
     struct Args
     {
         double abcTime;
-        size_t pointCount;
-        size_t primCount;
+        GA_Offset pointCount;
+        GA_Offset primCount;
         bool includeXform;
         bool isConstant;            // Attributes are constant
         bool isTopologyConstant;    // Flag whether topology is constant
@@ -146,22 +148,19 @@ private:
     GA_PrimitiveGroup * buildMesh(const std::string & groupName,
             P3fArraySamplePtr positions,
             Int32ArraySamplePtr counts,
-            Int32ArraySamplePtr indicies,
-            size_t startPointIdx);
+            Int32ArraySamplePtr indices);
 
     GA_PrimitiveGroup * buildCurves(const std::string & groupName,
             P3fArraySamplePtr positions,
-            Int32ArraySamplePtr counts,
-            size_t startPointIdx);
+            Int32ArraySamplePtr counts);
 
     GA_PrimitiveGroup * buildPoints(const std::string & groupName,
 	    P3fArraySamplePtr positions,
 	    UInt64ArraySamplePtr ids,
-	    V3fArraySamplePtr velocities,
-	    size_t startPointIdx);
+	    V3fArraySamplePtr velocities);
 
     GA_PrimitiveGroup * reuseMesh(const std::string &groupName,
-            P3fArraySamplePtr positions, size_t startPointIdx);
+            P3fArraySamplePtr positions, GA_Offset startPointOfs);
 
     bool addOrFindWidthAttribute(GA_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
@@ -173,22 +172,22 @@ private:
             GA_RWAttributeRef & attrIdx);
 
     void addWidths(Args &args, IFloatGeomParam param,
-            size_t startPointIdx, size_t endPointIdx,
-            size_t startPrimIdx, size_t endPrimIdx);
+            GA_Offset startPointOfs, GA_Offset endPointOfs,
+            GA_Offset startPrimOfs, GA_Offset endPrimOfs);
 
     void addUVs(Args & args, IV2fGeomParam param,
-            size_t startPointIdx, size_t endPointIdx,
-            size_t startPrimIdx, size_t endPrimIdx);
+            GA_Offset startPointOfs, GA_Offset endPointOfs,
+            GA_Offset startPrimOfs, GA_Offset endPrimOfs);
 
     void addNormals(Args & args, IN3fGeomParam param,
-            size_t startPointIdx, size_t endPointIdx,
-            size_t startPrimIdx, size_t endPrimIdx,
+            GA_Offset startPointOfs, GA_Offset endPointOfs,
+            GA_Offset startPrimOfs, GA_Offset endPrimOfs,
             bool parentXformIsConstant);
 
     void addArbitraryGeomParams(Args & args,
             ICompoundProperty parent,
-            size_t startPointIdx, size_t endPointIdx,
-            size_t startPrimIdx, size_t endPrimIdx,
+            GA_Offset startPointOfs, GA_Offset endPointOfs,
+            GA_Offset startPrimOfs, GA_Offset endPrimOfs,
             bool parentXformIsConstant);
 
     template <typename geomParamT, typename podT>
@@ -199,10 +198,10 @@ private:
             GA_Storage attrStorage,
             GA_TypeInfo attrTypeInfo,
             const GA_RWAttributeRef & existingAttr,
-            size_t startPointIdx,
-            size_t endPointIdx,
-            size_t startPrimIdx,
-            size_t endPrimIdx,
+            GA_Offset startPointOfs,
+            GA_Offset endPointOfs,
+            GA_Offset startPrimOfs,
+            GA_Offset endPrimOfs,
             bool parentXformIsConstant);
 
     template <typename geomParamSampleT, typename podT>
@@ -211,15 +210,15 @@ private:
             geomParamSampleT & paramSample,
             const GA_RWAttributeRef & attrIdx,
             size_t totalExtent,
-            size_t startPointIdx,
-            size_t endPointIdx,
-            size_t startPrimIdx,
-            size_t endPrimIdx);
+            GA_Offset startPointOfs,
+            GA_Offset endPointOfs,
+            GA_Offset startPrimOfs,
+            GA_Offset endPrimOfs);
 
     UT_String myFileObjectCache;
     bool myTopologyConstant;
     bool myEntireSceneIsConstant;
-    std::map<std::string, size_t> myPrimitiveCountCache;
+    std::map<std::string, GA_Offset> myPrimitiveCountCache;
     int myConstantPointCount;	// Point count for constant topology
     int myConstantPrimitiveCount; // Primitive count for constant topology
     int myConstantUniqueId; // Detail unique id for constant topology
