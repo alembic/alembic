@@ -46,41 +46,7 @@
 #include <Alembic/AbcGeom/All.h>
 using namespace Alembic::AbcGeom;
 
-// The Houdini Geometry libraries changed radically between H11 and H12.
-#if UT_MAJOR_VERSION_INT >= 12
     #include <GA/GA_AttributeRef.h>
-#else
-    #include <GB/GB_AttributeRef.h>
-    // These typedefs allow us to use the GA types from within H11 code
-    typedef GB_AttributeRef GA_ROAttributeRef;
-    typedef GB_AttributeRef GA_RWAttributeRef;
-    typedef GB_PrimitiveGroup GA_PrimitiveGroup;
-    typedef int GA_Offset;
-
-    enum GA_Storage
-    {
-        GA_STORE_REAL32,
-        GA_STORE_INT32,
-        GA_STORE_STRING
-    };
-    enum GA_TypeInfo
-    {
-        GA_TYPE_VOID,
-        GA_TYPE_POINT,
-        GA_TYPE_VECTOR,
-        GA_TYPE_NORMAL,
-        GA_TYPE_COLOR,
-    };
-    inline bool	GAisIntStorage(GA_Storage s)
-    {
-        return s == GA_STORE_INT32;
-
-    }
-    inline bool	GAisFloatStorage(GA_Storage s)
-    {
-        return s == GA_STORE_REAL32;
-    }
-#endif
 
 /// The sop_IAlembicWalker needs to be in a public namespace for forward
 /// declarations.
@@ -99,13 +65,15 @@ public:
 
     /// Clear a file out of the read-cache.  If the filename is null, the
     /// entire cache is cleared.
-    static void	clearCacheFile(const char *filename=NULL);
+    static void	clearCacheFile(const std::vector<std::string> *filenames=NULL);
+    void appendFileNames(std::vector<std::string> &filenames, fpreal t);
 
 protected:
     //--------------------------------------------------------------------------
     // Standard hdk declarations
     SOP_AlembicIn(OP_Network *net, const char *name, OP_Operator *op);
     virtual ~SOP_AlembicIn();
+    virtual bool updateParmsFlags();
     virtual bool unloadData();
     virtual OP_ERROR cookMySop(OP_Context &context);
     virtual void nodeUnlocked();
@@ -118,13 +86,12 @@ private:
     struct Args
     {
         double abcTime;
-        size_t pointCount;
-        size_t primCount;
+        GA_Offset pointCount;
+        GA_Offset primCount;
         bool includeXform;
         bool isConstant;            // Attributes are constant
         bool isTopologyConstant;    // Flag whether topology is constant
         bool reusePrimitives;       // Reuse existing primitives
-	bool rebuiltNurbs;
 
 	// normally set to 0 but useful for interpolation of
 	// varying GeomParams across NuPatch
@@ -181,49 +148,46 @@ private:
     GA_PrimitiveGroup * buildMesh(const std::string & groupName,
             P3fArraySamplePtr positions,
             Int32ArraySamplePtr counts,
-            Int32ArraySamplePtr indicies,
-            size_t startPointIdx);
+            Int32ArraySamplePtr indices);
 
     GA_PrimitiveGroup * buildCurves(const std::string & groupName,
             P3fArraySamplePtr positions,
-            Int32ArraySamplePtr counts,
-            size_t startPointIdx);
+            Int32ArraySamplePtr counts);
 
     GA_PrimitiveGroup * buildPoints(const std::string & groupName,
 	    P3fArraySamplePtr positions,
 	    UInt64ArraySamplePtr ids,
-	    V3fArraySamplePtr velocities,
-	    size_t startPointIdx);
+	    V3fArraySamplePtr velocities);
 
     GA_PrimitiveGroup * reuseMesh(const std::string &groupName,
-            P3fArraySamplePtr positions, size_t startPointIdx);
+            P3fArraySamplePtr positions, GA_Offset startPointOfs);
 
-    bool addOrFindWidthAttribute(GEO_AttributeOwner owner,
+    bool addOrFindWidthAttribute(GA_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
 
-    bool addOrFindTextureAttribute(GEO_AttributeOwner owner,
+    bool addOrFindTextureAttribute(GA_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
 
-    bool addOrFindNormalAttribute(GEO_AttributeOwner owner,
+    bool addOrFindNormalAttribute(GA_AttributeOwner owner,
             GA_RWAttributeRef & attrIdx);
 
     void addWidths(Args &args, IFloatGeomParam param,
-            size_t startPointIdx, size_t endPointIdx,
-            size_t startPrimIdx, size_t endPrimIdx);
+            GA_Offset startPointOfs, GA_Offset endPointOfs,
+            GA_Offset startPrimOfs, GA_Offset endPrimOfs);
 
     void addUVs(Args & args, IV2fGeomParam param,
-            size_t startPointIdx, size_t endPointIdx,
-            size_t startPrimIdx, size_t endPrimIdx);
+            GA_Offset startPointOfs, GA_Offset endPointOfs,
+            GA_Offset startPrimOfs, GA_Offset endPrimOfs);
 
     void addNormals(Args & args, IN3fGeomParam param,
-            size_t startPointIdx, size_t endPointIdx,
-            size_t startPrimIdx, size_t endPrimIdx,
+            GA_Offset startPointOfs, GA_Offset endPointOfs,
+            GA_Offset startPrimOfs, GA_Offset endPrimOfs,
             bool parentXformIsConstant);
 
     void addArbitraryGeomParams(Args & args,
             ICompoundProperty parent,
-            size_t startPointIdx, size_t endPointIdx,
-            size_t startPrimIdx, size_t endPrimIdx,
+            GA_Offset startPointOfs, GA_Offset endPointOfs,
+            GA_Offset startPrimOfs, GA_Offset endPrimOfs,
             bool parentXformIsConstant);
 
     template <typename geomParamT, typename podT>
@@ -234,10 +198,10 @@ private:
             GA_Storage attrStorage,
             GA_TypeInfo attrTypeInfo,
             const GA_RWAttributeRef & existingAttr,
-            size_t startPointIdx,
-            size_t endPointIdx,
-            size_t startPrimIdx,
-            size_t endPrimIdx,
+            GA_Offset startPointOfs,
+            GA_Offset endPointOfs,
+            GA_Offset startPrimOfs,
+            GA_Offset endPrimOfs,
             bool parentXformIsConstant);
 
     template <typename geomParamSampleT, typename podT>
@@ -246,15 +210,15 @@ private:
             geomParamSampleT & paramSample,
             const GA_RWAttributeRef & attrIdx,
             size_t totalExtent,
-            size_t startPointIdx,
-            size_t endPointIdx,
-            size_t startPrimIdx,
-            size_t endPrimIdx);
+            GA_Offset startPointOfs,
+            GA_Offset endPointOfs,
+            GA_Offset startPrimOfs,
+            GA_Offset endPrimOfs);
 
     UT_String myFileObjectCache;
     bool myTopologyConstant;
     bool myEntireSceneIsConstant;
-    std::map<std::string, size_t> myPrimitiveCountCache;
+    std::map<std::string, GA_Offset> myPrimitiveCountCache;
     int myConstantPointCount;	// Point count for constant topology
     int myConstantPrimitiveCount; // Primitive count for constant topology
     int myConstantUniqueId; // Detail unique id for constant topology
