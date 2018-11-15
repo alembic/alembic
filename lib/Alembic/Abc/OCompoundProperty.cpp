@@ -214,7 +214,13 @@ void OCompoundProperty::init( AbcA::CompoundPropertyWriterPtr iParent,
 
     getErrorHandler().setPolicy( args.getErrorHandlerPolicy() );
 
-    m_property = iParent->createCompoundProperty( iName, args.getMetaData() );
+    m_property = Alembic::Util::dynamic_pointer_cast<
+        AbcA::CompoundPropertyWriter>( iParent->getProperty( iName ) );
+    if ( !m_property )
+    {
+        m_property = iParent->createCompoundProperty( iName,
+                                                      args.getMetaData() );
+    }
 
     ALEMBIC_ABC_SAFE_CALL_END_RESET();
 }
