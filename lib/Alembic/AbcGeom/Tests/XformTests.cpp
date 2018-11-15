@@ -620,6 +620,26 @@ void sparseTest2()
 }
 
 //-*****************************************************************************
+void issue188()
+{
+    std::string name = "issue188.abc";
+
+    OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name);
+    OXform axform( OObject( archive ),  "a" );
+
+    Alembic::AbcGeom::OXformSchema schema0, schema1;
+    schema0 = axform.getSchema();
+    schema1 = schema0;
+
+    Alembic::Abc::OCompoundProperty user0 = schema0.getUserProperties();
+    Alembic::Abc::OCompoundProperty user1 = schema1.getUserProperties();
+
+    Alembic::Abc::OBox3dProperty boxy( user0, "boxy" );
+    TESTING_ASSERT( user0.getNumProperties() == 1 );
+    TESTING_ASSERT( user1.getNumProperties() == 1 );
+}
+
+//-*****************************************************************************
 int main( int argc, char *argv[] )
 {
     xformOut();
@@ -628,5 +648,6 @@ int main( int argc, char *argv[] )
     xformTreeCreate();
     sparseTest();
     sparseTest2();
+    issue188();
     return 0;
 }
