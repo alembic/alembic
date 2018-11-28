@@ -1199,7 +1199,6 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
                     dataBlock.outputArrayValue(mOutPointArrayAttr, &status);
 
                 unsigned int currentPointIndex = plug.logicalIndex();
-                DISPLAY_INFO( "\tindex: " << currentPointIndex );
 
                 outArrayHandle.jumpToArrayElement(currentPointIndex);
                 MDataHandle outHandle = outArrayHandle.outputValue(&status);

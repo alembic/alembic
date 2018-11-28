@@ -1070,9 +1070,7 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     {
 
         status = create(mFrame, iNode, mParent, particleObj);
-        DISPLAY_INFO( "Adding new created object to mPointsObjList: " << iNode.getName() );
         mData.mPointsObjList.push_back(particleObj);
-        DISPLAY_INFO( "\tNew mPointsObjList Size: " << mData.mPointsObjList.size() );
     }
     else
     {

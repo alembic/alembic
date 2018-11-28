@@ -323,7 +323,7 @@ MStatus createPerParticleAttributes( const Alembic::AbcGeom::IPoints & iNode, MO
     return modifier.doIt();
 }
 
-MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
+MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,  int & isInitializedConstant,
     MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData)
 {
     // We feed the MFnArrayAttrsData with all the nescessary doubleArray and vectorArray
