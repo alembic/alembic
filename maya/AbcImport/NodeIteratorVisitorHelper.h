@@ -84,7 +84,6 @@ struct PointsSampleData
 	std::string origName;
 	std::string name;
 	Alembic::AbcGeom::GeometryScope scope;
-	int origExtent;
 	int extent;
 };
 
@@ -244,6 +243,7 @@ public:
     std::vector<Alembic::AbcGeom::INuPatch>   mNurbsList;
     std::vector< PolyMeshAndFriends >       mPolyMeshList;
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
+    std::vector< int >                     mPointsListInitializedConstant;
     std::vector< SubDAndFriends >           mSubDList;
     std::vector<Alembic::AbcGeom::IXform>     mXformList;
 

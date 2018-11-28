@@ -1048,13 +1048,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     MObject particleObj = MObject::kNullObj;
 
     bool isConstant = iNode.getSchema().isConstant();
-    if (!isConstant)
-        mData.mPointsList.push_back(iNode);
 
-/*
-    // since we don't really support animated points, don't bother
-    // with the animated properties on it
-*/
+    mData.mPointsList.push_back(iNode);
+    mData.mPointsListInitializedConstant.push_back(0);
 
     bool hasDag = false;
     if (mAction != NONE && mConnectDagNode.isValid())
@@ -1063,13 +1059,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
         if (hasDag)
         {
             particleObj = mConnectDagNode.node();
-            if (!isConstant)
-            {
-            	// Create all perParticle Attribute
-            	status = createPerParticleAttributes(iNode, particleObj);
-            	MCHECKERROR(status);
-				mData.mPointsObjList.push_back(particleObj);
-            }
+            // Create all perParticle Attribute
+            status = createPerParticleAttributes(iNode, particleObj);
+            MCHECKERROR(status);
+            mData.mPointsObjList.push_back(particleObj);
         }
     }
 
@@ -1077,10 +1070,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     {
 
         status = create(mFrame, iNode, mParent, particleObj);
-        if (!isConstant)
-        {
-            mData.mPointsObjList.push_back(particleObj);
-        }
+        DISPLAY_INFO( "Adding new created object to mPointsObjList: " << iNode.getName() );
+        mData.mPointsObjList.push_back(particleObj);
+        DISPLAY_INFO( "\tNew mPointsObjList Size: " << mData.mPointsObjList.size() );
     }
     else
     {
@@ -1099,28 +1091,6 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     {
     	// Should do something here ??
     }
-
-/* original code, should be safely removed after checking
-    // don't currently care about anything animated on a particleObj
-    std::vector<Prop> fakePropList;
-    std::vector<Alembic::AbcGeom::IObject> fakeObjList;
-
-    if (particleObj != MObject::kNullObj)
-    {
-        Alembic::Abc::IScalarProperty visProp =
-            getVisible(iNode, false, fakePropList, fakeObjList);
-
-        setConstantVisibility(visProp, particleObj);
-
-        Alembic::Abc::ICompoundProperty arbProp =
-            iNode.getSchema().getArbGeomParams();
-        Alembic::Abc::ICompoundProperty userProp =
-            iNode.getSchema().getUserProperties();
-
-        addProps(arbProp, particleObj, false);
-        addProps(userProp, particleObj, false);
-    }
-//*/
 
     if (hasDag)
     {

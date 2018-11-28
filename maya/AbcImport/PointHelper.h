@@ -56,7 +56,8 @@ MStatus createPerParticleAttributes( const Alembic::AbcGeom::IPoints & iNode, MO
 MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     MObject & iParent, MObject & iObject);
 
-MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
+MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode, int & isInitializedConstant,
 	MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData);
+
 
 #endif  // ABCIMPORT_POINTHELPER_H_

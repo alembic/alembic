@@ -2612,7 +2612,6 @@ PointsSampleData & PointsSampleData::operator=(const PointsSampleData & other)
 	name = other.name;
 	extent = other.extent;
 	scope = other.scope;
-	origExtent = other.origExtent;
 
 	return *this;
 }
@@ -2661,6 +2660,7 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     mNumCurves = rhs.mNumCurves;
 
 	mPointsDataList = rhs.mPointsDataList;
+	mPointsListInitializedConstant = rhs.mPointsListInitializedConstant;
 
     return *this;
 }

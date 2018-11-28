@@ -411,6 +411,11 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
         }
     }
 
+    if ( schema.isConstant() )
+   {
+        isInitializedConstant = true;
+   }
+
     Alembic::Abc::ICompoundProperty props = schema.getArbGeomParams();
     if ( !props.valid() )
     {
