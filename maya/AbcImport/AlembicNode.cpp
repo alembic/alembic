@@ -494,7 +494,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 {
     MStatus status;
 
-    DISPLAY_INFO("##### COMPUTE #####");
+    DISPLAY_INFO("##### COMPUTE call for " << plug.name() << "#####");
 
     // update the frame number to be imported
     MDataHandle speedHandle = dataBlock.inputValue(mSpeedAttr, &status);
@@ -1165,54 +1165,67 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     else if ( plug == mOutPointArrayAttr ) // nParticle Cache
     {
 
-//    	if (mOutRead[9])
-//		{
-//			// Reference the output to let EM know we are the writer
-//			// of the data. EM sets the output to holder and causes
-//			// race condition when evaluating fan-out destinations.
-//			MArrayDataHandle outArrayHandle =
-//				dataBlock.outputValue(mOutPointCacheArrayAttr, &status);
-//			const unsigned int elementCount = outArrayHandle.elementCount();
-//			for (unsigned int j = 0; j < elementCount; j++)
-//			{
-//				outArrayHandle.outputValue().data();
-//				outArrayHandle.next();
-//			}
-//			outArrayHandle.setAllClean();
-//			return MS::kSuccess;
-//		}
-//    	mOutRead[9] = true;
+//        if (mOutRead[9])
+//        {
+//            // Reference the output to let EM know we are the writer
+//            // of the data. EM sets the output to holder and causes
+//            // race condition when evaluating fan-out destinations.
+//            MArrayDataHandle outArrayHandle =
+//                dataBlock.outputValue(mOutPointCacheArrayAttr, &status);
+//            const unsigned int elementCount = outArrayHandle.elementCount();
+//            for (unsigned int j = 0; j < elementCount; j++)
+//            {
+//                outArrayHandle.outputValue().data();
+//                outArrayHandle.next();
+//            }
+//            outArrayHandle.setAllClean();
+//            return MS::kSuccess;
+//        }
+//        mOutRead[9] = true;
 // HANS: I don't know what I should do with the block of code above
 
-    	unsigned int pointSize =
-    	            static_cast<unsigned int>(mData.mPointsList.size());
+        unsigned int pointSize =
+                    static_cast<unsigned int>(mData.mPointsList.size());
 
-    	DISPLAY_INFO( "PointSize: " << pointSize );
-    	DISPLAY_INFO( "mPointsDataList Size: " << mData.mPointsDataList.size() );
-    	if (pointSize > 0)
-		{
-            MArrayDataHandle outArrayHandle =
-                dataBlock.outputArrayValue(mOutPointArrayAttr, &status);
-
+        DISPLAY_INFO( "PointSize: " << pointSize );
+        DISPLAY_INFO( "mPointsDataList Size: " << mData.mPointsDataList.size() );
+        DISPLAY_INFO( "mPointsList Size: " << mData.mPointsList.size() );
+        DISPLAY_INFO( "mPointsListInitialized Size: " << mData.mPointsListInitializedConstant.size() );
+        if (pointSize > 0)
+        {
             unsigned int currentPointIndex = plug.logicalIndex();
-            DISPLAY_INFO( "\tindex: " << currentPointIndex );
 
-			outArrayHandle.jumpToArrayElement(currentPointIndex);
-			MDataHandle outHandle = outArrayHandle.outputValue(&status);
+            if ( mData.mPointsListInitializedConstant[currentPointIndex] )
+            {
+                DISPLAY_INFO( "Point cloud is static and has been initialised" );
+            }
+            else
+            {
+                MArrayDataHandle outArrayHandle =
+                    dataBlock.outputArrayValue(mOutPointArrayAttr, &status);
 
-			MFnArrayAttrsData dynDataFn;
-			MObject obj = dynDataFn.create(&status);
-			MCHECKERROR(status);
+                unsigned int currentPointIndex = plug.logicalIndex();
+                DISPLAY_INFO( "\tindex: " << currentPointIndex );
 
-			status = read(mCurTime, mData.mPointsList[currentPointIndex], dynDataFn, mData.mPointsDataList[currentPointIndex] );
-			MCHECKERROR(status);
+                outArrayHandle.jumpToArrayElement(currentPointIndex);
+                MDataHandle outHandle = outArrayHandle.outputValue(&status);
 
-			DISPLAY_INFO( "Getting back in AlembicNode.cpp" );
-			DISPLAY_INFO( "Set obj to outHandle" );
-			status = outHandle.set(obj);
-			MCHECKERROR(status);
-			outHandle.setClean();
-		}
+                MFnArrayAttrsData dynDataFn;
+                MObject obj = dynDataFn.create(&status);
+                MCHECKERROR(status);
+                DISPLAY_INFO( "\tBEFORE READ: " );
+                status = read(mCurTime, mData.mPointsList[currentPointIndex], mData.mPointsListInitializedConstant[currentPointIndex], dynDataFn, mData.mPointsDataList[currentPointIndex] );
+
+                MCHECKERROR(status);
+                DISPLAY_INFO( "Getting back in AlembicNode.cpp" );
+                DISPLAY_INFO( "Set obj to outHandle, data is not empty" );
+                status = outHandle.set(obj);
+            }
+            MCHECKERROR(status);
+            dataBlock.setClean(plug);
+
+//            outHandle.setClean();
+        }
 
     }
     else
@@ -1221,6 +1234,7 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     }
 
     dataBlock.setClean(plug);
+    DISPLAY_INFO("### END COMPUTE for plug " << plug.name() << "###");
     return status;
 }
 

@@ -1036,13 +1036,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     MObject particleObj = MObject::kNullObj;
 
     bool isConstant = iNode.getSchema().isConstant();
-    if (!isConstant)
-        mData.mPointsList.push_back(iNode);
 
-/*
-    // since we don't really support animated points, don't bother
-    // with the animated properties on it
-*/
+    mData.mPointsList.push_back(iNode);
+    mData.mPointsListInitializedConstant.push_back(0);
 
     bool hasDag = false;
     if (mAction != NONE && mConnectDagNode.isValid())
@@ -1051,13 +1047,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
         if (hasDag)
         {
             particleObj = mConnectDagNode.node();
-            if (!isConstant)
-            {
-            	// Create all perParticle Attribute
-            	status = createPerParticleAttributes(iNode, particleObj);
-            	MCHECKERROR(status);
-				mData.mPointsObjList.push_back(particleObj);
-            }
+            // Create all perParticle Attribute
+            status = createPerParticleAttributes(iNode, particleObj);
+            MCHECKERROR(status);
+            mData.mPointsObjList.push_back(particleObj);
         }
     }
 
@@ -1065,12 +1058,9 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     {
 
         status = create(mFrame, iNode, mParent, particleObj);
-        if (!isConstant)
-        {
-        	DISPLAY_INFO( "Adding new created object to mPointsObjList: " << iNode.getName() );
-            mData.mPointsObjList.push_back(particleObj);
-			DISPLAY_INFO( "\tNew mPointsObjList Size: " << mData.mPointsObjList.size() );
-        }
+        DISPLAY_INFO( "Adding new created object to mPointsObjList: " << iNode.getName() );
+        mData.mPointsObjList.push_back(particleObj);
+        DISPLAY_INFO( "\tNew mPointsObjList Size: " << mData.mPointsObjList.size() );
     }
     else
     {

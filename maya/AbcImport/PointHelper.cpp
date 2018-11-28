@@ -229,7 +229,6 @@ MStatus readArbGeomParams(size_t pSize, Alembic::AbcCoreAbstract::index_t index,
         DISPLAY_INFO( "\t sampleInfo[" << sampleInfo.origName << "]");
         DISPLAY_INFO( "\t\t\t scope: " << scopeToString( sampleInfo.scope ) );
         DISPLAY_INFO( "\t\t\t attributeName: " << sampleInfo.name );
-        DISPLAY_INFO( "\t\t\t orig extent: " << sampleInfo.origExtent );
         DISPLAY_INFO( "\t\t\t extent     : " << sampleInfo.extent );
         DISPLAY_INFO( "\t\t\t sampleSize: " << sampSize );
         DISPLAY_INFO( "\t\t\t      pSize: " << pSize );
@@ -250,7 +249,7 @@ MStatus readArbGeomParams(size_t pSize, Alembic::AbcCoreAbstract::index_t index,
             {
                 for (unsigned int i = 0; i < pSize; ++i )
                 {
-                    DISPLAY_INFO("\t\t\t\t" << samp[0] );
+//                    DISPLAY_INFO("\t\t\t\t" << samp[0] );
                     doubleArray[i] = samp[0];
                     count++;
                 }
@@ -263,7 +262,7 @@ MStatus readArbGeomParams(size_t pSize, Alembic::AbcCoreAbstract::index_t index,
                     count++;
                 }
             }
-            DISPLAY_INFO("\t\t\t" << "looped over: " << count << " items");
+//            DISPLAY_INFO("\t\t\t" << "looped over: " << count << " items");
 
             continue;
         }
@@ -310,7 +309,7 @@ MStatus readArbGeomParams(size_t pSize, Alembic::AbcCoreAbstract::index_t index,
                     count++;
                 }
             }
-            DISPLAY_INFO("\t\t\t" << "looped over: " << count << " items");
+//            DISPLAY_INFO("\t\t\t" << "looped over: " << count << " items");
 
             continue;
         }
@@ -401,13 +400,13 @@ MStatus createPerParticleAttributes( const Alembic::AbcGeom::IPoints & iNode, MO
     return modifier.doIt();
 }
 
-MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
+MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,  int & isInitializedConstant,
     MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData)
 {
     // We feed the MFnArrayAttrsData with all the nescessary doubleArray and vectorArray
     // it is then used to feed the outDataPlug of the alembic node
 
-    DISPLAY_INFO( "Reading Abc Data for frame: " << iFrame );
+    DISPLAY_INFO( "Reading Abc Data for timeIndex: " << iFrame );
 
     MStatus status = MS::kSuccess;
 
@@ -499,6 +498,11 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
             }
         }
     }
+
+    if ( schema.isConstant() )
+   {
+        isInitializedConstant = true;
+   }
 
     Alembic::Abc::ICompoundProperty props = schema.getArbGeomParams();
     if ( !props.valid() )
