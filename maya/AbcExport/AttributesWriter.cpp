@@ -46,6 +46,20 @@ namespace {
 static const char * cAttrScope = "_AbcGeomScope";
 static const char * cAttrType  = "_AbcType";
 
+std::string scopeToString( AbcGeom::GeometryScope input )
+{
+    switch(input)
+    {
+        case AbcGeom::kConstantScope: return "kConstantScope";
+        case AbcGeom::kFacevaryingScope:return "kFacevaryingScope";
+        case AbcGeom::kUniformScope: return "kUniformScope";
+        case AbcGeom::kUnknownScope: return "kUnknownScope";
+        case AbcGeom::kVaryingScope: return "kVaryingScope";
+        case AbcGeom::kVertexScope: return "kVertexScope";
+    }
+    return "kUnknownScope";
+}
+
 // returns true if a plug is of a simple numeric data type
 bool isDataAttr(const MPlug & iParent)
 {
@@ -1680,7 +1694,70 @@ void createGeomPropertyFromMFnAttr(const MObject& iAttr,
     }
 }
 
+
+bool isPerParticleAttributes( const MFnDependencyNode &iNode, MObject attrObj )
+{
+    MStatus status(MS::kSuccess);
+
+    if ( !iNode.hasObj(MFn::kParticle))
+    {
+        return false;
+    }
+
+    if ( !attrObj.hasFn(MFn::kTypedAttribute))
+    {
+        return false;
+    }
+
+    MFnTypedAttribute attr( attrObj );
+    MString attrName = attr.name();
+
+    if (attrName == "radiusPP")
+    {
+        // radiusPP was handled as IPointGeom Width
+        return false;
+    }
+
+    if ( attr.isHidden() ||
+         !attr.isReadable() ||
+         attr.isArray() ||
+         attr.internal() )
+    {
+        return false;
+    }
+    if ( attr.attrType() != MFnData::kDoubleArray && attr.attrType() != MFnData::kVectorArray )
+    {
+        return false;
+    }
+
+    // Perform a few name filtering to avoid useless attribute
+    // we only filter non user created attribute
+    if ( !attr.isDynamic() )
+    {
+        // manualy filter a few attributes
+        if (     attrName.substring(0, 7) == "internal" ||
+                attrName.toLowerCase().substring(attrName.length() - 5, attrName.length()) == "cache" ||
+                attrName.substring( attrName.length() - 1, attrName.length()) == "0" )
+        {
+            return false;
+        }
+
+    }
+
+    MFnParticleSystem particle( iNode.object() );
+
+    if ( particle.isPerParticleDoubleAttribute(attrName, &status) ||
+         particle.isPerParticleVectorAttribute(attrName, &status)
+    )
+    {
+        return true;
+    }
+
+
+    return false;
 }
+
+} // namespace
 
 AttributesWriter::AttributesWriter(
     Alembic::Abc::OCompoundProperty & iArbGeom,
@@ -1702,12 +1779,15 @@ AttributesWriter::AttributesWriter(
     for (i = 0; i < attrCount; i++)
     {
         MObject attr = iNode.attribute(i);
+
         MFnAttribute mfnAttr(attr);
         MPlug plug = iNode.findPlug(attr, true);
 
         // if it is not readable, then bail without any more checking
         if (!mfnAttr.isReadable() || plug.isNull())
+        {
             continue;
+        }
 
         MString propName = plug.partialName(0, 0, 0, 0, 0, 1);
 
@@ -1725,22 +1805,50 @@ AttributesWriter::AttributesWriter(
         }
 
         bool userAttr = false;
-        if (!matchFilterOrAttribs(plug, iArgs, userAttr))
+        bool userPerParticleAttr = false;
+
+        bool isPerParticle = isPerParticleAttributes(iNode, attr);
+
+        if (!matchFilterOrAttribs(plug, iArgs, userAttr) && !isPerParticle)
             continue;
+
+        // When someone set user attribute on a particleShape, we want to write it to arbGeom
+        // This enable the attribute to be correctly considered as point cloud data
+        if (userAttr && iNode.hasObj(MFn::kParticle))
+        {
+            // The code will continue with the current attribute,  but will write it to arbGeom
+            userAttr = false;
+            userPerParticleAttr = true;
+        }
 
         if (userAttr && !iUserProps.valid())
             continue;
         if (!userAttr && !iArbGeom.valid())
             continue;
 
-        int sampType = util::getSampledType(plug);
+        int sampType = util::getSampledType(plug) || isPerParticle; // Per particle is always animated
+
 
         MPlug scopePlug = iNode.findPlug(propName + cAttrScope, true);
         AbcGeom::GeometryScope scope = AbcGeom::kUnknownScope;
 
-        if (!scopePlug.isNull())
+
+        if (isPerParticle) // PerParticle is always kVaryingScope
+        {
+            scope = AbcGeom::kVaryingScope;
+        }
+        else if (!scopePlug.isNull())
         {
             scope = strToScope(scopePlug.asString());
+        }
+        else if (userPerParticleAttr)
+        {
+            // We need to find the scope we will write
+            // The attribute was not found to be a perParticle attribute, so it cannot be kVarying
+            if (sampType == 0)
+                scope = AbcGeom::kConstantScope;
+            else if (sampType == 1)
+                scope = AbcGeom::kUniformScope;
         }
 
         MString typeStr;
@@ -2068,6 +2176,12 @@ bool AttributesWriter::hasAnyAttr(const MFnDependencyNode & iNode,
     unsigned int i;
 
     std::vector< PlugAndObjArray > staticPlugObjArrayVec;
+
+    if (iNode.hasObj(MFn::kParticle))
+    {
+        // Particles always have extra attributes
+        return true;
+    }
 
     bool userAttr;
     for (i = 0; i < attrCount; i++)

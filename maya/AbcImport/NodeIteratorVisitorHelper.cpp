@@ -2599,6 +2599,23 @@ void readProp(double iFrame,
         iHandle.set(attrObj);
 }
 
+PointsSampleData::PointsSampleData()
+{
+	name = "default";
+	extent = 0;
+}
+
+PointsSampleData & PointsSampleData::operator=(const PointsSampleData & other)
+{
+	arrayProp = other.arrayProp;
+	origName = other.origName;
+	name = other.name;
+	extent = other.extent;
+	scope = other.scope;
+
+	return *this;
+}
+
 WriterData::WriterData()
 {
 }
@@ -2641,6 +2658,9 @@ WriterData & WriterData::operator=(const WriterData & rhs)
     mLocObjList = rhs.mLocObjList;
 
     mNumCurves = rhs.mNumCurves;
+
+	mPointsDataList = rhs.mPointsDataList;
+	mPointsListInitializedConstant = rhs.mPointsListInitializedConstant;
 
     return *this;
 }
@@ -2789,6 +2809,18 @@ void WriterData::getFrameRange(double & oMin, double & oMax)
         }
     }
 
+    iEnd = mPointsList.size();
+    for (i = 0; i < iEnd; ++i)
+    {
+        ts = mPointsList[i].getSchema().getTimeSampling();
+        std::size_t numSamples = mPointsList[i].getSchema().getNumSamples();
+        if (numSamples > 1)
+        {
+            oMin = std::min(ts->getSampleTime(0), oMin);
+            oMax = std::max(ts->getSampleTime(numSamples-1), oMax);
+        }
+    }
+
     iEnd = mPropList.size();
     for (i = 0; i < iEnd; ++i)
     {
@@ -2924,6 +2956,7 @@ MString connectAttr(ArgData & iArgData)
     MPlug srcPlug, dstPlug;
 
     MObject alembicNodeObj = modifier.createNode("AlembicNode", &status);
+    modifier.doIt();
     MFnDependencyNode alembicNodeFn(alembicNodeObj, &status);
 
     AlembicNode *alembicNodePtr =
@@ -2969,7 +3002,7 @@ MString connectAttr(ArgData & iArgData)
 
         MObject updatedFilenameData = MFnStringArrayData().create( filenameStorage, &status );
 
-        if( status = MStatus::kSuccess )
+        if( status == MStatus::kSuccess )
         {
             layerFilesPlug.setValue( updatedFilenameData );
         }
@@ -3250,7 +3283,56 @@ MString connectAttr(ArgData & iArgData)
 
     if (particleSize > 0)
     {
-        printWarning("Currently no support for animated particle system");
+        MPlug compoundArrayPlug = alembicNodeFn.findPlug( "outPoints", true, &status);
+        MPlug arrayPlug = alembicNodeFn.findPlug( "outPoints", true, &status);
+		MCHECKERROR_NO_RET(status);
+
+//        MPlug compoundPlug;
+        MObject srcObj;
+        MObject dstObj;
+        MPlugArray inPlugToDisconnect;
+        for (unsigned int i = 0; i < particleSize; i++)
+        {
+            MFnDependencyNode fnParticle(iArgData.mData.mPointsObjList[i]);
+
+		// Play From Cache
+            dstPlug = fnParticle.findPlug("playFromCache", true);
+            srcPlug = alembicNodeFn.findPlug("playFromCache", true);
+            status = modifier.connect(srcPlug, dstPlug);
+			MCHECKERROR_NO_RET(status);
+
+		// Time
+            dstPlug = fnParticle.findPlug("currentTime", true);
+            srcPlug = alembicNodeFn.findPlug("time", true);
+
+			// Disconnect input connection
+            if ( dstPlug.isDestination() )
+            {
+            	status = disconnectAllPlugsTo(dstPlug);
+            	MCHECKERROR_NO_RET(status);
+            }
+            status = modifier.connect(srcPlug, dstPlug);
+            MCHECKERROR_NO_RET(status);
+
+		// Cache Array
+            dstPlug = fnParticle.findPlug("cacheArrayData", true);
+            srcPlug = arrayPlug.elementByLogicalIndex( i, &status);
+            MCHECKERROR_NO_RET(status);
+
+			// Disconnect input connection
+            if ( dstPlug.isDestination() )
+            {
+            	status = disconnectAllPlugsTo(dstPlug);
+            	MCHECKERROR_NO_RET(status);
+            }
+
+            status = modifier.connect(srcPlug, dstPlug);
+            MCHECKERROR_NO_RET(status);
+
+            status = modifier.doIt();
+            MCHECKERROR_NO_RET(status);
+        }
+
     }
 
     if (nSurfaceSize > 0)

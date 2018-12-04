@@ -74,6 +74,21 @@ struct Prop
     Alembic::Abc::IScalarProperty mScalar;
 };
 
+struct PointsSampleData
+{
+	PointsSampleData();
+
+	PointsSampleData & operator=(const PointsSampleData & other);
+
+	Alembic::Abc::IArrayProperty arrayProp;
+	std::string origName;
+	std::string name;
+	Alembic::AbcGeom::GeometryScope scope;
+	int extent;
+};
+
+typedef std::vector < PointsSampleData > PointSampleDataList;
+
 void addProps(Alembic::Abc::ICompoundProperty & iParent, MObject & iObject,
               bool iUnmarkedFaceVaryingColors);
 
@@ -228,8 +243,13 @@ public:
     std::vector<Alembic::AbcGeom::INuPatch>   mNurbsList;
     std::vector< PolyMeshAndFriends >       mPolyMeshList;
     std::vector<Alembic::AbcGeom::IPoints>    mPointsList;
+    std::vector< int >                     mPointsListInitializedConstant;
     std::vector< SubDAndFriends >           mSubDList;
     std::vector<Alembic::AbcGeom::IXform>     mXformList;
+
+    // Particle data needs special parsing to match maya attributes types
+    // We will store convertion data here at alembicNode initialisation
+    std::vector< PointSampleDataList > mPointsDataList;
 
     // objects that aren't animated but have animated visibility need to be
     // kept alive so the visibility can be read

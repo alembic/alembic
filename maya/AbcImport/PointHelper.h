@@ -38,16 +38,26 @@
 #define ABCIMPORT_POINTHELPER_H_
 
 #include <maya/MObject.h>
+#include <maya/MFnArrayAttrsData.h>
 
 #include <vector>
 #include <string>
 
 #include <Alembic/AbcGeom/IPoints.h>
 
+MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MObject & iObject,
+		PointSampleDataList & iData );
+
+MStatus readArbGeomParams(size_t pSize, Alembic::AbcCoreAbstract::index_t index,
+		MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData);
+
+MStatus createPerParticleAttributes( const Alembic::AbcGeom::IPoints & iNode, MObject & iObject );
+
 MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     MObject & iParent, MObject & iObject);
 
-MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
-    MObject & iObject);
+MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode, int & isInitializedConstant,
+	MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData);
+
 
 #endif  // ABCIMPORT_POINTHELPER_H_
