@@ -68,7 +68,8 @@ public:
         // 6 mOutNurbsCurveGrpArrayAttr
         // 7 mOutParticlePosArrayAttr, mOutParticleIdArrayAttr
         // 8 mOutLocatorPosScaleArrayAttr
-        mOutRead = std::vector<bool>(9, false);
+        // 9 mOutPointArrayAttr
+        mOutRead = std::vector<bool>(10, false);
     }
 
     ~AlembicNode() override {}
@@ -101,6 +102,10 @@ public:
     static MObject mOutNurbsSurfaceArrayAttr;
     static MObject mOutTransOpArrayAttr;
     static MObject mOutLocatorPosScaleArrayAttr;
+
+    // output particles attributes
+    static MObject mOutPointArrayAttr;
+    static MObject mOutPointPlayFromCache;
 
     // output informational attrs
     static MObject mStartFrameAttr;

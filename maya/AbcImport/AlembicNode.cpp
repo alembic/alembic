@@ -61,6 +61,7 @@
 #include <maya/MFnMeshData.h>
 #include <maya/MFnNurbsCurveData.h>
 #include <maya/MFnNurbsSurfaceData.h>
+#include <maya/MFnArrayAttrsData.h>
 
 #include <maya/MFnGenericAttribute.h>
 #include <maya/MFnNumericAttribute.h>
@@ -96,6 +97,9 @@ MObject AlembicNode::mOutNurbsSurfaceArrayAttr;
 MObject AlembicNode::mOutTransOpArrayAttr;
 MObject AlembicNode::mOutPropArrayAttr;
 MObject AlembicNode::mOutLocatorPosScaleArrayAttr;
+
+MObject AlembicNode::mOutPointPlayFromCache;
+MObject AlembicNode::mOutPointArrayAttr;
 
 namespace
 {
@@ -269,6 +273,19 @@ MStatus AlembicNode::initialize()
     status = nAttr.setUsesArrayDataBuilder(true);
     status = addAttribute(mOutLocatorPosScaleArrayAttr);
 
+    // sampled point
+    mOutPointPlayFromCache = nAttr.create( "playFromCache", "pfc", MFnNumericData::kBoolean, true, &status);
+    MCHECKERROR(status);
+    status = nAttr.setWritable(false);
+    status = addAttribute(mOutPointPlayFromCache);
+    MCHECKERROR(status);
+
+    mOutPointArrayAttr = tAttr.create("outPoints", "otps", MFnData::kDynArrayAttrs);
+    MCHECKERROR(status);
+    status = tAttr.setArray(true);
+    status = addAttribute(mOutPointArrayAttr);
+    MCHECKERROR(status);
+
     // sampled transform operations
     mOutTransOpArrayAttr = nAttr.create("transOp", "to",
         MFnNumericData::kDouble, 0.0, &status);
@@ -326,6 +343,7 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mTimeAttr, mOutCameraArrayAttr);
     status = attributeAffects(mTimeAttr, mOutPropArrayAttr);
     status = attributeAffects(mTimeAttr, mOutLocatorPosScaleArrayAttr);
+    status = attributeAffects(mTimeAttr, mOutPointArrayAttr);
 
     status = attributeAffects(mSpeedAttr, mOutSubDArrayAttr);
     status = attributeAffects(mSpeedAttr, mOutPolyArrayAttr);
@@ -335,6 +353,7 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mSpeedAttr, mOutCameraArrayAttr);
     status = attributeAffects(mSpeedAttr, mOutPropArrayAttr);
     status = attributeAffects(mSpeedAttr, mOutLocatorPosScaleArrayAttr);
+    status = attributeAffects(mSpeedAttr, mOutPointArrayAttr);
 
     status = attributeAffects(mOffsetAttr, mOutSubDArrayAttr);
     status = attributeAffects(mOffsetAttr, mOutPolyArrayAttr);
@@ -344,6 +363,7 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mOffsetAttr, mOutCameraArrayAttr);
     status = attributeAffects(mOffsetAttr, mOutPropArrayAttr);
     status = attributeAffects(mOffsetAttr, mOutLocatorPosScaleArrayAttr);
+    status = attributeAffects(mOffsetAttr, mOutPointArrayAttr);
 
     status = attributeAffects(mCycleTypeAttr, mOutSubDArrayAttr);
     status = attributeAffects(mCycleTypeAttr, mOutPolyArrayAttr);
@@ -353,6 +373,7 @@ MStatus AlembicNode::initialize()
     status = attributeAffects(mCycleTypeAttr, mOutCameraArrayAttr);
     status = attributeAffects(mCycleTypeAttr, mOutPropArrayAttr);
     status = attributeAffects(mCycleTypeAttr, mOutLocatorPosScaleArrayAttr);
+    status = attributeAffects(mCycleTypeAttr, mOutPointArrayAttr);
 
     MGlobal::executeCommand( UITemplateMELScriptStr );
 
@@ -1138,6 +1159,52 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
 
             outArrayHandle.setAllClean();
         }
+    }
+    else if ( plug == mOutPointArrayAttr ) // nParticle Cache
+    {
+
+        // for some reason, setting clean and bailing only causes the first
+        // one to load
+        /*if (mOutRead[9])
+        {
+            dataBlock.setClean(plug);
+            return MS::kSuccess;
+        }*/
+        mOutRead[9] = true;
+
+        unsigned int pointSize =
+                    static_cast<unsigned int>(mData.mPointsList.size());
+
+        if (pointSize > 0)
+        {
+            unsigned int currentPointIndex = plug.logicalIndex();
+
+            if ( mData.mPointsListInitializedConstant[currentPointIndex] )
+            {
+                //DISPLAY_INFO( "Point cloud is static and has been initialised" );
+            }
+            else
+            {
+                MArrayDataHandle outArrayHandle =
+                    dataBlock.outputArrayValue(mOutPointArrayAttr, &status);
+
+                unsigned int currentPointIndex = plug.logicalIndex();
+
+                outArrayHandle.jumpToArrayElement(currentPointIndex);
+                MDataHandle outHandle = outArrayHandle.outputValue(&status);
+
+                MFnArrayAttrsData dynDataFn;
+                MObject obj = dynDataFn.create(&status);
+                MCHECKERROR(status);
+                status = read(mCurTime, mData.mPointsList[currentPointIndex], mData.mPointsListInitializedConstant[currentPointIndex], dynDataFn, mData.mPointsDataList[currentPointIndex] );
+
+                MCHECKERROR(status);
+                status = outHandle.set(obj);
+            }
+            MCHECKERROR(status);
+            dataBlock.setClean(plug);
+		}
+
     }
     else
     {

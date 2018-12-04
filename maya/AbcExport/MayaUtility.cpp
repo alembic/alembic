@@ -88,7 +88,6 @@ bool util::isAncestorDescendentRelationship(const MDagPath & path1,
 }
 
 
-
 // returns 0 if static, 1 if sampled, and 2 if a curve
 int util::getSampledType(const MPlug& iPlug)
 {

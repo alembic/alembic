@@ -440,6 +440,7 @@ bool CreateSceneVisitor::hasSampledData()
 {
 
     // Currently there's no support for bringing in particle system simulation
+	// Now there is !
     return (mData.mPropList.size() > 0
         || mData.mXformList.size() > 0
         || mData.mSubDList.size() > 0
@@ -447,6 +448,7 @@ bool CreateSceneVisitor::hasSampledData()
         || mData.mCameraList.size() > 0
         || mData.mNurbsList.size() > 0
         || mData.mCurvesList.size() > 0
+        || mData.mPointsList.size() > 0
         || mData.mLocList.size() > 0);
 }
 
@@ -1045,12 +1047,8 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     MStatus status = MS::kSuccess;
     MObject particleObj = MObject::kNullObj;
 
-    bool isConstant = iNode.getSchema().isConstant();
-    if (!isConstant)
-        mData.mPointsList.push_back(iNode);
-
-    // since we don't really support animated points, don't bother
-    // with the animated properties on it
+    mData.mPointsList.push_back(iNode);
+    mData.mPointsListInitializedConstant.push_back(0);
 
     bool hasDag = false;
     if (mAction != NONE && mConnectDagNode.isValid())
@@ -1059,6 +1057,10 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
         if (hasDag)
         {
             particleObj = mConnectDagNode.node();
+            // Create all perParticle Attribute
+            status = createPerParticleAttributes(iNode, particleObj);
+            MCHECKERROR(status);
+            mData.mPointsObjList.push_back(particleObj);
         }
     }
 
@@ -1066,30 +1068,24 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     {
 
         status = create(mFrame, iNode, mParent, particleObj);
-        if (!isConstant)
-        {
-            mData.mPointsObjList.push_back(particleObj);
-        }
+        mData.mPointsObjList.push_back(particleObj);
+    }
+    else
+    {
+    	// This might be the first time the AlembicNode is walking through the archive
+    	// (when opening a file with an existing alembic connected to a nParticle)
+    	// We are reading the iPoint Schema, all previous step were skipped,
+    	// we need to find the data necessary for feeding custom particle attributes (stored in arbGeomParam)
+    	// We store them inside mData for reading at compute time
+    	PointSampleDataList PointSampleVec;
+    	status = getPointArbGeomParamsInfos(iNode, particleObj, PointSampleVec);
+
+		mData.mPointsDataList.push_back(PointSampleVec);
     }
 
-    // don't currently care about anything animated on a particleObj
-    std::vector<Prop> fakePropList;
-    std::vector<Alembic::AbcGeom::IObject> fakeObjList;
-
-    if (particleObj != MObject::kNullObj)
+    if ( mAction >= CONNECT )
     {
-        Alembic::Abc::IScalarProperty visProp =
-            getVisible(iNode, false, fakePropList, fakeObjList);
-
-        setConstantVisibility(visProp, particleObj);
-
-        Alembic::Abc::ICompoundProperty arbProp =
-            iNode.getSchema().getArbGeomParams();
-        Alembic::Abc::ICompoundProperty userProp =
-            iNode.getSchema().getUserProperties();
-
-        addProps(arbProp, particleObj, false);
-        addProps(userProp, particleObj, false);
+    	// Should do something here ??
     }
 
     if (hasDag)
