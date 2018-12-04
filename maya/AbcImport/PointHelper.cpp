@@ -335,14 +335,15 @@ MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,  int & isIn
     // Get IPoints Samples
     Alembic::AbcGeom::IPointsSchema::Sample samp, ceilsSamp;
 
-        Alembic::AbcCoreAbstract::index_t index, ceilIndex;
-            double alpha = getWeightAndIndex(iFrame, schema.getTimeSampling(),
-                    schema.getNumSamples(), index, ceilIndex);
+    Alembic::AbcCoreAbstract::index_t index, ceilIndex;
+    // TODO, might want to interpolate the points when we can
+    getWeightAndIndex(iFrame, schema.getTimeSampling(),
+        schema.getNumSamples(), index, ceilIndex);
 
     schema.get(samp, index);
 
     size_t pSize = samp.getPositions()->size();
-    size_t idSize = samp.getIds()->size();
+    //size_t idSize = samp.getIds()->size();
 
     MDoubleArray countArray = dynDataFn.doubleArray("count", &status);
     countArray.append( (double)pSize );

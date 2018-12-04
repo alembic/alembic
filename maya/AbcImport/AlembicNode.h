@@ -69,7 +69,7 @@ public:
         // 7 mOutParticlePosArrayAttr, mOutParticleIdArrayAttr
         // 8 mOutLocatorPosScaleArrayAttr
         // 9 mOutPointArrayAttr
-        mOutRead = std::vector<bool>(9, false);
+        mOutRead = std::vector<bool>(10, false);
     }
 
     ~AlembicNode() override {}

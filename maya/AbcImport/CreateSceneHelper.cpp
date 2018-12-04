@@ -1047,8 +1047,6 @@ MStatus CreateSceneVisitor::operator()(Alembic::AbcGeom::IPoints& iNode)
     MStatus status = MS::kSuccess;
     MObject particleObj = MObject::kNullObj;
 
-    bool isConstant = iNode.getSchema().isConstant();
-
     mData.mPointsList.push_back(iNode);
     mData.mPointsListInitializedConstant.push_back(0);
 

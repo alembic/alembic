@@ -1163,24 +1163,14 @@ MStatus AlembicNode::compute(const MPlug & plug, MDataBlock & dataBlock)
     else if ( plug == mOutPointArrayAttr ) // nParticle Cache
     {
 
-//        if (mOutRead[9])
-//        {
-//            // Reference the output to let EM know we are the writer
-//            // of the data. EM sets the output to holder and causes
-//            // race condition when evaluating fan-out destinations.
-//            MArrayDataHandle outArrayHandle =
-//                dataBlock.outputValue(mOutPointCacheArrayAttr, &status);
-//            const unsigned int elementCount = outArrayHandle.elementCount();
-//            for (unsigned int j = 0; j < elementCount; j++)
-//            {
-//                outArrayHandle.outputValue().data();
-//                outArrayHandle.next();
-//            }
-//            outArrayHandle.setAllClean();
-//            return MS::kSuccess;
-//        }
-//        mOutRead[9] = true;
-// HANS: I don't know what I should do with the block of code above
+        // for some reason, setting clean and bailing only causes the first
+        // one to load
+        /*if (mOutRead[9])
+        {
+            dataBlock.setClean(plug);
+            return MS::kSuccess;
+        }*/
+        mOutRead[9] = true;
 
         unsigned int pointSize =
                     static_cast<unsigned int>(mData.mPointsList.size());
