@@ -1,3 +1,24 @@
+2018-12-5, Alembic 1.7.10
+Thanks to your feedback and numerous pull requests we have several enhancements
+and bug fixes.
+
+API:
+
+Check to see if the OCompoundProperty already exists before trying to create
+a new one. (PR200, Issue 188)
+
+Explicitly include errno.h for compilers that don't bring it in as part of the
+other includes.  (Issue 199)
+
+Maya:
+
+Support reading and writing nParticles as I/OPoints.  (PR163)
+
+Houdini:
+
+Update the example SOP to work with Houdini 16.5, support layering,
+and take advantage of the Houdini API for faster geometry building. (PR196)
+
 2018-9-7, Alembic 1.7.9
 Thanks to your feedback and numerous pull requests we have several enhancements
 and bug fixes.
