@@ -54,31 +54,6 @@ def stdoutWrite( text ):
     return
     sys.__stdout__.write( "%s\n" % text )
 
-def stdoutWrite2( text ):
-    return
-    sys.__stdout__.write( "%s\n" % text )
-
-def stdoutWrite3( text ):
-    return
-    sys.__stdout__.write( "%s\n" % text )
-
-def stdoutWrite4( text ):
-    return
-    sys.__stdout__.write( "%s\n" % text )
-
-def stdoutWrite5( text ):
-    return
-    sys.__stdout__.write( "%s\n" % text )
-
-def stdoutWrite6( text ):
-    return
-    sys.__stdout__.write( "%s\n" % text )
-
-def stdoutWrite7( text ):
-    return
-    sys.__stdout__.write( "%s\n" % text )
-
-
 # Main Test Class
 class AnimPointPrimitive_nParticle_Test( TestCase):
 
@@ -132,7 +107,7 @@ class AnimPointPrimitive_nParticle_Test( TestCase):
                argStr += " -%s %s" % ( item, kargs[item] )
 
         # Export
-        stdoutWrite3("writefile: %s" % self.__abc_files[-1])
+        stdoutWrite("writefile: %s" % self.__abc_files[-1])
         cmds.AbcExport(j='-fr %d %d -root %s %s -file ' % (frameRange[0], frameRange[1], root, argStr) + self.__abc_files[-1] )
 
     def importAbc(self):
@@ -590,7 +565,7 @@ def getData( particleSystemShapes, frameRange=(1,24), abc=False, customAttribute
 
     for i, particleSystem in enumerate(particleSystemShapes):
         obj = OpenMaya.MObject()
-        stdoutWrite5( "%d: %s" % (i, particleSystem))
+        stdoutWrite( "%d: %s" % (i, particleSystem))
         sel.getDependNode( i, obj )
         particleFnList.append( OpenMayaFX.MFnParticleSystem( obj ) )
 
@@ -620,7 +595,7 @@ def getData( particleSystemShapes, frameRange=(1,24), abc=False, customAttribute
     # Now eval the frameList
     for frame in frameList:
 
-        stdoutWrite5("fame: %d" % frame)
+        stdoutWrite("fame: %d" % frame)
 
         # Jump to frame
         OpenMaya.MGlobal.viewFrame(frame)
@@ -628,7 +603,7 @@ def getData( particleSystemShapes, frameRange=(1,24), abc=False, customAttribute
 
         for particleFn in particleFnList:
 
-            stdoutWrite7("\t: %s" % particleFn.name())
+            stdoutWrite("\t: %s" % particleFn.name())
             # Force evaluate dynamics
             particleFn.evaluateDynamics( OpenMaya.MTime(frame), False)
 
