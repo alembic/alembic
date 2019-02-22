@@ -966,7 +966,7 @@ int main( int argc, char *argv[] )
         std::cerr << "USAGE: " << argv[0] << " [-v] outFile.abc inFile1.abc"
             << " inFile2.abc (inFile3.abc ...)" << std::endl;
         std::cerr << "Where -v is a verbosity flag which prints the IObject"
-            << "being processed." << std::endl;
+            << " being processed." << std::endl;
         return -1;
     }
 
