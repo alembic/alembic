@@ -45,7 +45,7 @@ IF(NOT ILMBASE_ROOT AND NOT $ENV{ILMBASE_ROOT} STREQUAL "")
 ENDIF()
 
 IF(NOT DEFINED ILMBASE_ROOT)
-    MESSAGE( "ILMBASE_ROOT is undefined" )
+    MESSAGE(STATUS "ILMBASE_ROOT is undefined" )
     IF ( ${CMAKE_HOST_UNIX} )
         IF( ${DARWIN} )
           # TODO: set to default install path when shipping out
@@ -112,15 +112,14 @@ IF(ILMBASE_INCLUDE_DIR)
 
     IF(_ilmbase_CONFIG)
       FILE(STRINGS "${_ilmbase_CONFIG}" ILMBASE_BUILD_SPECIFICATION
-           REGEX "^[ \t]*#define[ \t]+ILMBASE_VERSION_STRING[ \t]+\"[.0-9]+\".*$")
+           REGEX "^[ \t]*#define[ \t]+(ILMBASE_VERSION_STRING|VERSION)[ \t]+\"[.0-9]+\".*$")
     ELSE()
       MESSAGE(WARNING "Could not find \"OpenEXRConfig.h\" in \"${ILMBASE_INCLUDE_DIR}\"")
     ENDIF()
 
     IF(ILMBASE_BUILD_SPECIFICATION)
-      MESSAGE(STATUS "${ILMBASE_BUILD_SPECIFICATION}")
-      STRING(REGEX REPLACE ".*#define[ \t]+ILMBASE_VERSION_STRING[ \t]+\"([.0-9]+)\".*"
-             "\\1" _ilmbase_libs_ver_init ${ILMBASE_BUILD_SPECIFICATION})
+      STRING(REGEX REPLACE ".*#define[ \t]+(ILMBASE_VERSION_STRING|VERSION)[ \t]+\"([.0-9]+)\".*"
+             "\\2" _ilmbase_libs_ver_init ${ILMBASE_BUILD_SPECIFICATION})
     ELSE()
       MESSAGE(WARNING "Could not determine ILMBase library version, assuming ${_ilmbase_libs_ver_init}.")
     ENDIF()
