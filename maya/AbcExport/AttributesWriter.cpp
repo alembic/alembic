@@ -1814,7 +1814,7 @@ AttributesWriter::AttributesWriter(
 
         // When someone set user attribute on a particleShape, we want to write it to arbGeom
         // This enable the attribute to be correctly considered as point cloud data
-        if (userAttr && iNode.hasObj(MFn::kParticle))
+        if (userAttr && isPerParticle)
         {
             // The code will continue with the current attribute,  but will write it to arbGeom
             userAttr = false;
