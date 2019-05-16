@@ -415,9 +415,13 @@ void sparseTest()
 
         // only set UVs
         OSubDSchema::Sample meshSamp;
+
+        TESTING_ASSERT( !meshSamp.isPartialSample() );
+
         OV2fGeomParam::Sample uvSample( V2fArraySample( (const V2f *)g_uvs,
             g_numUVs ), kFacevaryingScope );
         meshSamp.setUVs( uvSample );
+        TESTING_ASSERT( meshSamp.isPartialSample() );
         meshUVsObj.getSchema().set( meshSamp );
 
         // only set pts

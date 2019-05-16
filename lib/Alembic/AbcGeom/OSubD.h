@@ -248,8 +248,10 @@ public:
             if( !m_positions.getData() && !m_faceIndices.getData() && !m_faceCounts.getData() )
             {
                 if( m_uvs.getVals() || m_velocities.getData() ||
-                    (m_faceVaryingInterpolateBoundary != 0) || (m_faceVaryingPropagateCorners != 0) ||
-                    (m_interpolateBoundary != 0) || m_creaseIndices.getData() ||
+                    (m_faceVaryingInterpolateBoundary != ABC_GEOM_SUBD_NULL_INT_VALUE) ||
+                    (m_faceVaryingPropagateCorners != ABC_GEOM_SUBD_NULL_INT_VALUE) ||
+                    (m_interpolateBoundary != ABC_GEOM_SUBD_NULL_INT_VALUE) ||
+                    m_creaseIndices.getData() ||
                     m_creaseLengths.getData() || m_creaseSharpnesses.getData() ||
                     m_cornerIndices.getData() || m_cornerSharpnesses.getData() ||
                     m_holes.getData() )
