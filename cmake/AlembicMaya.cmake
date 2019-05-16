@@ -149,10 +149,10 @@ IF ( NOT WINDOWS )
     #SET( MAYA_COMPILE_FLAGS
     #  "-DAW_NEW_IOSTREAMS -DCC_GNU_ -DOSMac_ -DOSMacOSX_ -DBits32_ \
     #  -DOSMac_MachO_ -DREQUIRE_IOSTREAM -fno-gnu-keywords -fpascal-strings \
-    #-arch i386 -D_LANGUAGE_C_PLUS_PLUS -include ${MAYA_INCLUDE_PATH}/maya/OpenMayaMac.h" ) \
+    #-arch i386 -D_LANGUAGE_C_PLUS_PLUS" ) \
     SET ( MAYA_EXTENSION ".bundle" )
     SET( MAYA_COMPILE_FLAGS
-      "-DAW_NEW_IOSTREAMS -DCC_GNU_ -DOSMac_ -DOSMacOSX_ -DOSMac_MachO_ -DREQUIRE_IOSTREAM -fno-gnu-keywords -D_LANGUAGE_C_PLUS_PLUS -include ${MAYA_INCLUDE_PATH}/maya/OpenMayaMac.h" )
+      "-DAW_NEW_IOSTREAMS -DCC_GNU_ -DOSMac_ -DOSMacOSX_ -DOSMac_MachO_ -DREQUIRE_IOSTREAM -fno-gnu-keywords -D_LANGUAGE_C_PLUS_PLUS" )
 
     SET( MAYA_LINK_FLAGS
       #"-dynamic -g -fPIC "
