@@ -841,7 +841,7 @@ try
                 }
 
                 // pattern mismatch, we use acyclic time sampling type
-                if (timeSamples[i] != pattern[i % pattern.size()])
+                if (fabs(timeSamples[i] - pattern[i % pattern.size()]) > 0.00001)
                 {
                     isAcyclic = true;
                     break;
