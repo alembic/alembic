@@ -1,3 +1,27 @@
+2019-5-16, Alembic 1.7.11
+Thanks to your feedback and numerous pull requests we have several enhancements
+and bug fixes.
+
+CMake:
+
+Make ILMBase detection compatible with certain older versions. (PR207)
+
+Allow Alembic to build against a custom Python installation. (PR208)
+
+OpenMayaMac.h was removed from the DevKit since Maya 2016. (Issue210)
+
+API:
+
+Fix bug in OSubD where the detection of a partial sample was incorrect.
+
+Maya:
+
+AbcExport: Fix issue where certain user properties were incorrectly being
+written as arbGeomParams.  (Issue 209) (PR211)
+
+AbcExport: Fix an issue with acyclic detection because of floating point
+inaccuracy. (PR213)
+
 2018-12-5, Alembic 1.7.10
 Thanks to your feedback and numerous pull requests we have several enhancements
 and bug fixes.
