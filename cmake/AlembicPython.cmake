@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-if (NOT EXISTS Python_ADDITIONAL_VERSIONS)
+if (NOT DEFINED Python_ADDITIONAL_VERSIONS)
   set(Python_ADDITIONAL_VERSIONS 2)
 endif()
 
