@@ -74,7 +74,7 @@ Some examples of OPTIONS you may want or need to use include:
     an arbitrary location.
 
     -DPython_ADDITIONAL_VERSIONS=3  If you want to build Alembic against Python
-    3. See !(the CMake module documentation)[https://cmake.org/cmake/help/latest/module/FindPythonInterp.html].
+    3. See [the CMake module documentation](https://cmake.org/cmake/help/latest/module/FindPythonInterp.html).
 
 For Unix like operating systems:
 
