@@ -171,8 +171,7 @@ class AbcWriteJob
     void postCallback(double iFrame);
 
     MBoundingBox getBoundingBox(double iFrame, const MMatrix & eMInvMat);
-    void setup(double iFrame, MayaTransformWriterPtr iParent,
-               GetMembersMap& gmMap);
+    void setup(double iFrame, MayaTransformWriterPtr iParent);
 
     // Currently Arnold and Renderman can not handle curve groups where the
     // degrees and closed status are different per curve.

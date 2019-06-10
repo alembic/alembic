@@ -40,6 +40,7 @@ SET(H_FILES
     AttributesWriter.h
     Foundation.h
     MayaCameraWriter.h
+    MayaFaceSetWriter.h
     MayaMeshWriter.h
     MayaLocatorWriter.h
     MayaNurbsCurveWriter.h
@@ -54,6 +55,7 @@ SET(CXX_FILES
     AbcWriteJob.cpp
     AttributesWriter.cpp
     MayaCameraWriter.cpp
+    MayaFaceSetWriter.cpp
     MayaMeshWriter.cpp
     MayaLocatorWriter.cpp
     MayaNurbsCurveWriter.cpp
