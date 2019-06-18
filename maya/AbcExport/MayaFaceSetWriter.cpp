@@ -37,12 +37,13 @@
 #include "MayaFaceSetWriter.h"
 #include "MayaUtility.h"
 
-MayaFaceSetWriter::MayaFaceSetWriter(MObject & iNameObj, MPlug & iPlug,
+MayaFaceSetWriter::MayaFaceSetWriter(MObject & iNameObj,
+    std::vector<MPlug> & iPlugVec,
     Alembic::Abc::OObject & iParent,
     Alembic::Util::uint32_t iTimeIndex,
     const JobArgs & iArgs)
 {
-    mPlug = iPlug;
+    mPlugVec = iPlugVec;
 
     MFnDependencyNode fnDepNode(iNameObj);
     MString faceSetName = fnDepNode.name();
@@ -73,31 +74,37 @@ MayaFaceSetWriter::MayaFaceSetWriter(MObject & iNameObj, MPlug & iPlug,
 
 void MayaFaceSetWriter::write()
 {
-    MObject indexedObj;
-
-    MFnComponentListData cmptList(mPlug.asMObject());
-
-    unsigned int numPolyCmpt = 0;
-    for(unsigned int i = 0; i < cmptList.length(); ++i)
+    std::vector<Alembic::Util::int32_t> faceIndices;
+    for (std::size_t i = 0; i < mPlugVec.size(); ++i)
     {
-        if (cmptList[i].apiType() == MFn::kMeshPolygonComponent)
+        MObject indexedObj;
+
+        MFnComponentListData cmptList(mPlugVec[i].asMObject());
+
+        unsigned int numPolyCmpt = 0;
+        for(unsigned int i = 0; i < cmptList.length(); ++i)
         {
-            indexedObj = cmptList[i];
-            numPolyCmpt ++;
+            if (cmptList[i].apiType() == MFn::kMeshPolygonComponent)
+            {
+                indexedObj = cmptList[i];
+                numPolyCmpt ++;
+            }
         }
-    }
 
-    // retrieve the face indices
-    MIntArray indices;
-    MFnSingleIndexedComponent compFn;
-    compFn.setObject(indexedObj);
-    compFn.getElements(indices);
-    const unsigned int numData = indices.length();
+        MIntArray indices;
 
-    std::vector<Alembic::Util::int32_t> faceIndices(numData);
-    for (unsigned int j = 0; j < numData; ++j)
-    {
-        faceIndices[j] = indices[j];
+        // retrieve the face indices
+        MFnSingleIndexedComponent compFn;
+        compFn.setObject(indexedObj);
+        compFn.getElements(indices);
+        unsigned int numData = indices.length();
+        std::size_t curIndex = faceIndices.size();
+        faceIndices.resize(curIndex + numData);
+
+        for (unsigned int j = 0; j < numData; ++j)
+        {
+            faceIndices[j + curIndex] = indices[j];
+        }
     }
 
     Alembic::AbcGeom::OFaceSetSchema::Sample samp;

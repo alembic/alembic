@@ -46,7 +46,7 @@
 class MayaFaceSetWriter
 {
   public:
-    MayaFaceSetWriter(MObject & iNameObj, MPlug & iPlug,
+    MayaFaceSetWriter(MObject & iNameObj, std::vector<MPlug> & iPlugVec,
         Alembic::Abc::OObject & iParent,
         Alembic::Util::uint32_t iTimeIndex,
         const JobArgs & iArgs);
@@ -56,7 +56,7 @@ class MayaFaceSetWriter
   private:
     AttributesWriterPtr mAttrs;
     Alembic::AbcGeom::OFaceSetSchema mSchema;
-    MPlug mPlug;
+    std::vector<MPlug> mPlugVec;
 };
 
 typedef Alembic::Util::shared_ptr < MayaFaceSetWriter >

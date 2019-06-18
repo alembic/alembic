@@ -458,6 +458,10 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         return;
     }
 
+    // we can have multiple connects to the same shading engine
+    std::map< std::string,
+        std::pair< MObject, std::vector< MPlug > > > facesetMap;
+
     // mesh.instObjGroups is an array of compounds
     for (unsigned int i = 0; i < iogPlug.numElements(); ++i)
     {
@@ -515,21 +519,23 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
                     plugName = plugName.substringW(plugName.length() - 17, plugName.length() - 1);
                     if (plugName == "objectGrpCompList")
                     {
-                        Alembic::Abc::OObject parentObj;
-                        if (mPolySchema.valid())
+                        MFnDependencyNode fnDepNode(shadingObj);
+                        std::string faceSetName = fnDepNode.name().asChar();
+                        std::map< std::string, std::pair< MObject,
+                            std::vector< MPlug > > >::iterator it =
+                            facesetMap.find(faceSetName);
+
+                        if (it == facesetMap.end())
                         {
-                            parentObj = mPolySchema.getObject();
+                            std::pair< MObject, std::vector< MPlug > > opPair;
+                            opPair.first = shadingObj;
+                            opPair.second.push_back(childPlug);
+                            facesetMap[faceSetName] = opPair;
                         }
                         else
                         {
-                            parentObj = mSubDSchema.getObject();
+                            it->second.second.push_back(childPlug);
                         }
-
-                        MayaFaceSetWriterPtr facePtr(new MayaFaceSetWriter(
-                            shadingObj, childPlug, parentObj,
-                            iTimeIndex, iArgs));
-                        mFaceSets.push_back(facePtr);
-
                         // we can move on to the next
                         // mesh.instObjGroups[i].objectGroups[k]
                         break;
@@ -539,6 +545,26 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
         } // for j
     } // for i
 
+    Alembic::Abc::OObject parentObj;
+    if (mPolySchema.valid())
+    {
+        parentObj = mPolySchema.getObject();
+    }
+    else
+    {
+        parentObj = mSubDSchema.getObject();
+    }
+
+    std::map< std::string,
+        std::pair< MObject, std::vector< MPlug > > >::iterator it;
+    for (it = facesetMap.begin(); it != facesetMap.end(); ++it)
+    {
+
+        MayaFaceSetWriterPtr facePtr(new MayaFaceSetWriter(
+            it->second.first, it->second.second, parentObj,
+            iTimeIndex, iArgs));
+        mFaceSets.push_back(facePtr);
+    }
 }
 
 bool MayaMeshWriter::isSubD()
