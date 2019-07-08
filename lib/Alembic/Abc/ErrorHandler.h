@@ -92,7 +92,7 @@ public:
     class Context
     {
     public:
-        Context( ErrorHandler &iEhnd, const std::string &iCtxMsg )
+        Context( ErrorHandler &iEhnd, const char *iCtxMsg )
           : m_handler( iEhnd ),
             m_message( iCtxMsg ) {}
 
@@ -114,7 +114,7 @@ public:
     private:
         const Context& operator= (const Context&);
         ErrorHandler &m_handler;
-        std::string m_message;
+        const char *m_message;
     };
 
 private:
