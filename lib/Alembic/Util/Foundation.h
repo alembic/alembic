@@ -221,26 +221,26 @@ class mutex : noncopyable
 public:
     mutex()
     {
-        m = CreateMutex( NULL, FALSE, NULL );
+         InitializeCriticalSection(&cs);
     }
 
     ~mutex()
     {
-        CloseHandle( m );
+        DeleteCriticalSection(&cs);
     }
 
     void lock()
     {
-        WaitForSingleObject( m, INFINITE );
+        EnterCriticalSection(&cs);
     }
 
     void unlock()
     {
-        ReleaseMutex( m );
+        LeaveCriticalSection(&cs);
     }
 
 private:
-    HANDLE m;
+    CRITICAL_SECTION cs;
 };
 
 #else
