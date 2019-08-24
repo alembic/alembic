@@ -67,6 +67,9 @@ Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
     return 0;
 }
 
+#elif defined( __HAIKU__ )
+#define COMPARE_EXCHANGE( V, COMP, EXCH ) __atomic_compare_exchange_n( &V, &COMP, EXCH, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST )
+#include <strings.h>
 
 // gcc 4.8 and above not using C++11
 #elif defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 8
@@ -106,6 +109,13 @@ StreamManager::StreamManager( std::size_t iNumStreams )
 StreamManager::~StreamManager()
 {
 }
+
+#ifdef __HAIKU__
+int ffsll(long long i)
+{
+	return (__builtin_ffsll(i));
+}
+#endif
 
 StreamIDPtr StreamManager::get()
 {
