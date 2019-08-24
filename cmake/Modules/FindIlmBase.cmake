@@ -92,6 +92,7 @@ FIND_PATH(ILMBASE_INCLUDE_DIR
     IlmBaseConfig.h
   HINTS
     ${_ilmbase_SEARCH_DIRS}
+	"$ENV{ILMBASE_INC_DIR}"
   PATH_SUFFIXES
     include
     include/OpenEXR
