@@ -33,8 +33,12 @@
 ##
 ##-*****************************************************************************
 
-FIND_PACKAGE ( PythonInterp 2 REQUIRED )
-FIND_PACKAGE ( PythonLibs 2 REQUIRED )
+if (NOT DEFINED Python_ADDITIONAL_VERSIONS)
+  set(Python_ADDITIONAL_VERSIONS 2)
+endif()
+
+FIND_PACKAGE ( PythonInterp REQUIRED )
+FIND_PACKAGE ( PythonLibs REQUIRED )
 IF(PYTHONLIBS_FOUND)
     SET(ALEMBIC_PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
     SET(ALEMBIC_PYTHON_LIBRARY ${PYTHON_LIBRARIES})

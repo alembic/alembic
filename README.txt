@@ -73,6 +73,9 @@ Some examples of OPTIONS you may want or need to use include:
     -DCMAKE_INSTALL_PREFIX=customPath  If you want to install the Alembic into
     an arbitrary location.
 
+    -DPython_ADDITIONAL_VERSIONS=3  If you want to build Alembic against Python
+    3. See the [CMake module documentation](https://cmake.org/cmake/help/latest/module/FindPythonInterp.html).
+
 For Unix like operating systems:
 
 3a) Run the make command.  Kind of a no-brainer, really.  You can safely run
