@@ -128,120 +128,6 @@ void getUVSet(const MFnMesh & iMesh, const MString & iUVSetName,
     }
 }
 
-// --------------------------------------------------------------
-// getOutConnectedSG( const MObject &shape )
-//
-// Return the output connected shading groups from a shape object
-//---------------------------------------------------------------
-
-MObjectArray
-getOutConnectedSG( const MDagPath &shapeDPath )
-{
-    MStatus status;
-
-    // Array of connected Shaging Engines
-    MObjectArray connSG;
-
-    // Iterator through the dependency graph to find if there are
-    // shading engines connected
-    MObject obj(shapeDPath.node()); // non const MObject
-    MItDependencyGraph itDG( obj, MFn::kShadingEngine,
-                             MItDependencyGraph::kDownstream,
-                             MItDependencyGraph::kBreadthFirst,
-                             MItDependencyGraph::kNodeLevel, &status );
-
-    if( status == MS::kFailure )
-        return connSG;
-
-    // we want to prune the iteration if the node is not a shading engine
-    itDG.enablePruningOnFilter();
-
-    // iterate through the output connected shading engines
-    for( ; itDG.isDone()!= true; itDG.next() )
-        connSG.append( itDG.currentItem() );
-
-    return connSG;
-}
-
-// -----------------------------------------------------------------------------------------------------------
-// getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmMap, MObject &compObj )
-//
-// Return the members of a shading engine for a specific dagpath.
-// GetMembersMap is a caching mechanism.
-// If it's face mapping, return the indices, otherwise it's the whole object, and so we
-// return kFailure.
-//------------------------------------------------------------------------------------------------------------
-
-MStatus
-getSetComponents( const MDagPath &dagPath, const MObject &SG, GetMembersMap& gmMap, MObject &compObj )
-{
-    const MString instObjGroupsAttrName( "instObjGroups" );
-
-    // Check if SG is really a shading engine
-    if( SG.hasFn(MFn::kShadingEngine) != true )
-    {
-        MFnDependencyNode fnDepNode( SG );
-        MString message;
-        message.format("Node ^1s is not a valid shading engine...", fnDepNode.name() );
-        MGlobal::displayError(message);
-
-        return MS::kFailure;
-    }
-
-    // get the instObjGroups iog plug
-    MStatus status;
-    MFnDependencyNode depNode(dagPath.node());
-    MPlug iogPlug( depNode.findPlug(instObjGroupsAttrName, false, &status) );
-    if( status == MS::kFailure )
-        return MS::kFailure;
-
-    // if there are no elements,  this shading group is not connected as a face set
-    if( iogPlug.numElements()<=0 )
-        return MS::kFailure;
-
-    // the first element should always be connected as a source
-    MPlugArray iogConnections;
-    iogPlug.elementByLogicalIndex(0, &status).connectedTo(iogConnections, false, true, &status );
-    if( status == MS::kFailure )
-        return MS::kFailure;
-
-    // Function set for the shading engine
-    MFnSet fnSet( SG );
-
-    // Retrieve members
-    MSelectionList selList;
-    GetMembersMap::iterator it = gmMap.find(SG);
-    if(it != gmMap.end())
-        selList = it->second;
-    else
-    {
-        fnSet.getMembers(selList, false);
-        gmMap[SG] = selList;
-    }
-
-    // Iteration through the list
-    MDagPath            curDagPath;
-    MItSelectionList    itSelList( selList );
-    for( ; itSelList.isDone()!=true; itSelList.next() )
-    {
-        // Test if it's a face mapping
-        if( itSelList.hasComponents() == true )
-        {
-            itSelList.getDagPath( curDagPath, compObj );
-
-            // Test if component object is valid and if it's the right object
-            if( (compObj.isNull()==false) && (curDagPath==dagPath) )
-            {
-                return MS::kSuccess;
-            }
-        }
-    }
-
-    // SG is a shading engine but has no components connected to the dagPath.
-    // This means we have a whole object mapping!
-    return MS::kFailure;
-}
-
 }
 
 void MayaMeshWriter::getUVs(std::vector<float> & uvs,
@@ -301,7 +187,7 @@ void MayaMeshWriter::getUVs(std::vector<float> & uvs,
 
 MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     Alembic::Abc::OObject & iParent, Alembic::Util::uint32_t iTimeIndex,
-    const JobArgs & iArgs, GetMembersMap& gmMap)
+    const JobArgs & iArgs)
   : mNoNormals(iArgs.noNormals),
     mWriteGeometry(iArgs.writeGeometry),
     mWriteUVs(iArgs.writeUVs),
@@ -565,101 +451,119 @@ MayaMeshWriter::MayaMeshWriter(MDagPath & iDag,
     if(!iArgs.writeFaceSets)
         return;
 
-    // get the connected shading engines
-    MObjectArray connSGObjs (getOutConnectedSG(mDagPath));
-    const unsigned int sgCount = connSGObjs.length();
-
-    for (unsigned int i = 0; i < sgCount; ++i)
+    MFnDependencyNode meshDep(mDagPath.node());
+    MPlug iogPlug( meshDep.findPlug("instObjGroups", false, &status) );
+    if( status == MS::kFailure )
     {
-        MObject connSGObj, compObj;
+        return;
+    }
 
-        connSGObj = connSGObjs[i];
+    // we can have multiple connects to the same shading engine
+    std::map< std::string,
+        std::pair< MObject, std::vector< MPlug > > > facesetMap;
 
-        MFnDependencyNode fnDepNode(connSGObj);
-        MString connSgObjName = fnDepNode.name();
-
-        // retrive the component MObject
-        status = getSetComponents(mDagPath, connSGObj, gmMap, compObj);
-
-        if (status != MS::kSuccess)
+    // mesh.instObjGroups is an array of compounds
+    for (unsigned int i = 0; i < iogPlug.numElements(); ++i)
+    {
+        MPlug compPlug = iogPlug.elementByPhysicalIndex(i);
+        for (unsigned int j = 0; j < compPlug.numChildren(); ++j)
         {
-            // for some reason the shading group doesn't represent a face set
-            continue;
-        }
-
-        // retrieve the face indices
-        MIntArray indices;
-        MFnSingleIndexedComponent compFn;
-        compFn.setObject(compObj);
-        compFn.getElements(indices);
-        const unsigned int numData = indices.length();
-
-        // encountered the whole object mapping. skip it.
-        if (numData == 0)
-            continue;
-
-        std::vector<Alembic::Util::int32_t> faceIndices(numData);
-        for (unsigned int j = 0; j < numData; ++j)
-        {
-            faceIndices[j] = indices[j];
-        }
-
-        connSgObjName = util::stripNamespaces(connSgObjName,
-                                              iArgs.stripNamespace);
-
-        Alembic::AbcGeom::OFaceSet faceSet;
-        std::string faceSetName(connSgObjName.asChar());
-
-        MPlug abcFacesetNamePlug = fnDepNode.findPlug("AbcFacesetName", true);
-        if (!abcFacesetNamePlug.isNull())
-        {
-            faceSetName = abcFacesetNamePlug.asString().asChar();
-        }
-
-        if (mPolySchema.valid())
-        {
-            if (mPolySchema.hasFaceSet(faceSetName))
+            // no elements in the child could mean the whole mesh is shaded
+            MPlug objGroupPlug = compPlug.child(j);
+            for (unsigned int k = 0; k < objGroupPlug.numElements(); ++k)
             {
-                faceSet = mPolySchema.getFaceSet(faceSetName);
-            }
-            else
-            {
-                faceSet = mPolySchema.createFaceSet(faceSetName);
-            }
-        }
-        else
-        {
-            if (mSubDSchema.hasFaceSet(faceSetName))
-            {
-                faceSet = mSubDSchema.getFaceSet(faceSetName);
-            }
-            else
-            {
-                faceSet = mSubDSchema.createFaceSet(faceSetName);
-            }
-        }
-        Alembic::AbcGeom::OFaceSetSchema::Sample samp;
-        samp.setFaces(Alembic::Abc::Int32ArraySample(faceIndices));
+                // mesh.instObjGroups[i].objectGroups[k]
+                MPlug objGrpCompPlug = objGroupPlug.elementByPhysicalIndex(k);
+                if (objGrpCompPlug.isNull())
+                {
+                    continue;
+                }
 
-        Alembic::AbcGeom::OFaceSetSchema faceSetSchema = faceSet.getSchema();
+                MPlugArray dests;
+                if (!objGrpCompPlug.destinations(dests))
+                {
+                    continue;
+                }
 
-        faceSetSchema.set(samp);
-        faceSetSchema.setFaceExclusivity(Alembic::AbcGeom::kFaceSetExclusive);
+                MObject shadingObj;
 
-        MFnDependencyNode iNode(connSGObj);
+                // look for a shading engine, can we have more than 1?
+                for (unsigned int p = 0; p < dests.length(); ++p)
+                {
+                    if (dests[p].isNull())
+                    {
+                        continue;
+                    }
 
-        Alembic::Abc::OCompoundProperty cp;
-        Alembic::Abc::OCompoundProperty up;
-        if (AttributesWriter::hasAnyAttr(iNode, iArgs))
-        {
-            cp = faceSetSchema.getArbGeomParams();
-            up = faceSetSchema.getUserProperties();
-        }
+                    MObject testObj = dests[p].node();
+                    if (!testObj.hasFn(MFn::kShadingEngine))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        shadingObj = testObj;
+                    }
+                }
 
-        // last argument false so we set the animated attrs at least once
-        // because we don't appear to support animated facesets yet
-        AttributesWriter attrWriter(cp, up, faceSet, iNode, iTimeIndex,
-                                    iArgs, false);
+                if (shadingObj.isNull())
+                {
+                    continue;
+                }
+
+                // mesh.instObjGroups[i].objectGroups[k].objectGrpCompList
+                for (unsigned int l = 0; l < objGrpCompPlug.numChildren(); ++l)
+                {
+                    MPlug childPlug = objGrpCompPlug.child(l);
+                    MString plugName = childPlug.name();
+                    plugName = plugName.substringW(plugName.length() - 17, plugName.length() - 1);
+                    if (plugName == "objectGrpCompList")
+                    {
+                        MFnDependencyNode fnDepNode(shadingObj);
+                        std::string faceSetName = fnDepNode.name().asChar();
+                        std::map< std::string, std::pair< MObject,
+                            std::vector< MPlug > > >::iterator it =
+                            facesetMap.find(faceSetName);
+
+                        if (it == facesetMap.end())
+                        {
+                            std::pair< MObject, std::vector< MPlug > > opPair;
+                            opPair.first = shadingObj;
+                            opPair.second.push_back(childPlug);
+                            facesetMap[faceSetName] = opPair;
+                        }
+                        else
+                        {
+                            it->second.second.push_back(childPlug);
+                        }
+                        // we can move on to the next
+                        // mesh.instObjGroups[i].objectGroups[k]
+                        break;
+                    }
+                } //  for l
+            } // for k
+        } // for j
+    } // for i
+
+    Alembic::Abc::OObject parentObj;
+    if (mPolySchema.valid())
+    {
+        parentObj = mPolySchema.getObject();
+    }
+    else
+    {
+        parentObj = mSubDSchema.getObject();
+    }
+
+    std::map< std::string,
+        std::pair< MObject, std::vector< MPlug > > >::iterator it;
+    for (it = facesetMap.begin(); it != facesetMap.end(); ++it)
+    {
+
+        MayaFaceSetWriterPtr facePtr(new MayaFaceSetWriter(
+            it->second.first, it->second.second, parentObj,
+            iTimeIndex, iArgs));
+        mFaceSets.push_back(facePtr);
     }
 }
 
@@ -940,6 +844,13 @@ void MayaMeshWriter::write()
     {
         writeSubD(uvSamp);
     }
+
+    std::vector< MayaFaceSetWriterPtr >::iterator it;
+    for (it = mFaceSets.begin(); it != mFaceSets.end(); ++it)
+    {
+        (*it)->write();
+    }
+
 }
 
 bool MayaMeshWriter::isAnimated() const

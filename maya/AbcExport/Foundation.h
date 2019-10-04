@@ -58,6 +58,7 @@
 #include <maya/MFnAmbientLight.h>
 #include <maya/MFnAttribute.h>
 #include <maya/MFnCamera.h>
+#include <maya/MFnComponentListData.h>
 #include <maya/MFnDagNode.h>
 #include <maya/MFnData.h>
 #include <maya/MFnDependencyNode.h>

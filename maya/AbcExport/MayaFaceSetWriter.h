@@ -1,6 +1,6 @@
 //-*****************************************************************************
 //
-// Copyright (c) 2009-2014,
+// Copyright (c) 2009-2019,
 //  Sony Pictures Imageworks Inc. and
 //  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 //
@@ -34,67 +34,32 @@
 //
 //-*****************************************************************************
 
-#ifndef AbcExport_MayaMeshWriter_h
-#define AbcExport_MayaMeshWriter_h
+#ifndef AbcExport_MayaFaceSetWriter_h
+#define AbcExport_MayaFaceSetWriter_h
 
 #include "Foundation.h"
 #include "AttributesWriter.h"
-#include "MayaFaceSetWriter.h"
+#include <Alembic/AbcGeom/OFaceSet.h>
+#include <maya/MFnSingleIndexedComponent.h>
 
 // Writes an MFnMesh as a poly mesh OR a subd mesh
-class MayaMeshWriter
+class MayaFaceSetWriter
 {
   public:
+    MayaFaceSetWriter(MObject & iNameObj, std::vector<MPlug> & iPlugVec,
+        Alembic::Abc::OObject & iParent,
+        Alembic::Util::uint32_t iTimeIndex,
+        const JobArgs & iArgs);
 
-    MayaMeshWriter(MDagPath & iDag, Alembic::Abc::OObject & iParent,
-        Alembic::Util::uint32_t iTimeIndex, const JobArgs & iArgs);
     void write();
-    bool isAnimated() const;
-    bool isSubD();
-    unsigned int getNumCVs();
-    unsigned int getNumFaces();
     AttributesWriterPtr getAttrs() {return mAttrs;};
-
-    std::vector< MayaFaceSetWriterPtr >::iterator beginFaces() {return mFaceSets.begin();};
-    std::vector< MayaFaceSetWriterPtr >::iterator endFaces() {return mFaceSets.end();};
   private:
-
-    void fillTopology(
-        std::vector<float> & oPoints,
-        std::vector<Alembic::Util::int32_t> & oFacePoints,
-        std::vector<Alembic::Util::int32_t> & oPointCounts);
-
-    void writePoly(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
-
-    void writeSubD(const Alembic::AbcGeom::OV2fGeomParam::Sample & iUVs);
-
-    void getUVs(std::vector<float> & uvs,
-        std::vector<Alembic::Util::uint32_t> & indices,
-        std::string & name);
-
-    void getPolyNormals(std::vector<float> & oNormals);
-    bool mNoNormals;
-    bool mWriteGeometry;
-    bool mWriteUVs;
-    bool mWriteColorSets;
-    bool mWriteUVSets;
-
-    bool mIsGeometryAnimated;
-    MDagPath mDagPath;
-
     AttributesWriterPtr mAttrs;
-    Alembic::AbcGeom::OPolyMeshSchema mPolySchema;
-    Alembic::AbcGeom::OSubDSchema     mSubDSchema;
-
-    void writeColor();
-    std::vector<Alembic::AbcGeom::OC3fGeomParam> mRGBParams;
-    std::vector<Alembic::AbcGeom::OC4fGeomParam> mRGBAParams;
-
-    void writeUVSets();
-    typedef std::vector<Alembic::AbcGeom::OV2fGeomParam> UVParamsVec;
-    UVParamsVec mUVparams;
-
-    std::vector< MayaFaceSetWriterPtr > mFaceSets;
+    Alembic::AbcGeom::OFaceSetSchema mSchema;
+    std::vector<MPlug> mPlugVec;
 };
 
-#endif  // AbcExport_MayaMeshWriter_h
+typedef Alembic::Util::shared_ptr < MayaFaceSetWriter >
+    MayaFaceSetWriterPtr;
+
+#endif  // AbcExport_MayaFaceSetWriter_h
