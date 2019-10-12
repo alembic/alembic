@@ -273,7 +273,7 @@ ArImpl::~ArImpl()
             }
 
             m_file = -1;
-            ABCA_THROW( strm.str() );
+            std::cerr << strm.str() << std::endl;
         }
 
         H5Fclose( m_file );
