@@ -55,12 +55,16 @@ void archiveInfoTest(bool useOgawa)
         Alembic::AbcCoreAbstract::MetaData md;
         md.set("potato", "salad");
         md.set("taco", "bar");
-        OArchive archive;
+        OArchive archive, archive2;
         if (useOgawa)
         {
             archive = CreateArchiveWithInfo(
                 Alembic::AbcCoreOgawa::WriteArchive(), "archiveInfo.abc",
                 appWriter, userStr, md );
+
+            archive2 = CreateArchiveWithInfo(
+                Alembic::AbcCoreOgawa::WriteArchive(), "archiveInfoWFPS.abc",
+                42, appWriter, userStr, md );
         }
 #ifdef ALEMBIC_WITH_HDF5
         else
@@ -68,10 +72,17 @@ void archiveInfoTest(bool useOgawa)
             archive = CreateArchiveWithInfo(
                 Alembic::AbcCoreHDF5::WriteArchive(), "archiveInfo.abc",
                 appWriter, userStr, md );
+
+            archive2 = CreateArchiveWithInfo(
+                Alembic::AbcCoreHDF5::WriteArchive(), "archiveInfoWFPS.abc",
+                42, appWriter, userStr, md );
         }
 #endif
 
         TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
+        TESTING_ASSERT( archive2.getPtr()->getMetaData().get("taco") == "bar" );
+        //TESTING_ASSERT( archive2.getPtr()->getMetaData().get( kDCCFPSKey )
+        //    == "42" );
     }
 
     {
@@ -101,6 +112,55 @@ void archiveInfoTest(bool useOgawa)
         std::cout << "Date written: " << dateWritten << std::endl;
         TESTING_ASSERT( dateWritten != "" );
         TESTING_ASSERT( abcVersionStr != "" );
+
+        // test it again but the DCC FPS variant, pass in a bogus value
+        // to show that it gets reset to 0 when it doesn't exist
+        Alembic::Util::uint32_t dcc_fps = 123;
+        GetArchiveInfo( archive, appInfo, abcVersionStr, abcVersion,
+            dateWritten, userInfo, dcc_fps);
+        TESTING_ASSERT( appWriter ==  appInfo );
+        TESTING_ASSERT( userStr ==  userInfo );
+        TESTING_ASSERT( abcVersion ==  ALEMBIC_LIBRARY_VERSION );
+        std::cout << "Alembic version: " << abcVersionStr << std::endl;
+        std::cout << "Date written: " << dateWritten << std::endl;
+        TESTING_ASSERT( dateWritten != "" );
+        TESTING_ASSERT( abcVersionStr != "" );
+        TESTING_ASSERT( dcc_fps == 0 );
+
+        double start, end;
+        GetArchiveStartAndEndTime( archive, start, end );
+        TESTING_ASSERT( start == DBL_MAX && end == -DBL_MAX );
+    }
+
+    {
+        AbcF::IFactory factory;
+        AbcF::IFactory::CoreType coreType;
+        IArchive archive = factory.getArchive("archiveInfoWFPS.abc", coreType);
+        TESTING_ASSERT( (useOgawa && coreType == AbcF::IFactory::kOgawa) ||
+                        (!useOgawa && coreType == AbcF::IFactory::kHDF5) );
+
+        TESTING_ASSERT( archive.getPtr()->getMetaData().get("taco") == "bar" );
+        TESTING_ASSERT( archive.getPtr()->getMetaData().get("potato") ==
+            "salad" );
+        TESTING_ASSERT( archive.getArchiveVersion() ==
+                        ALEMBIC_LIBRARY_VERSION );
+
+        std::string appInfo;
+        std::string abcVersionStr;
+        Alembic::Util::uint32_t abcVersion = 0;
+        Alembic::Util::uint32_t dcc_fps = 123;
+        std::string dateWritten;
+        std::string userInfo;
+        GetArchiveInfo( archive, appInfo, abcVersionStr, abcVersion,
+            dateWritten, userInfo, dcc_fps );
+        TESTING_ASSERT( appWriter ==  appInfo );
+        TESTING_ASSERT( userStr ==  userInfo );
+        TESTING_ASSERT( abcVersion ==  ALEMBIC_LIBRARY_VERSION );
+        std::cout << "Alembic version: " << abcVersionStr << std::endl;
+        std::cout << "Date written: " << dateWritten << std::endl;
+        TESTING_ASSERT( dateWritten != "" );
+        TESTING_ASSERT( abcVersionStr != "" );
+        TESTING_ASSERT( dcc_fps == 42 );
 
         double start, end;
         GetArchiveStartAndEndTime( archive, start, end );
