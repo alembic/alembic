@@ -390,6 +390,15 @@ MObject createCurves(const std::string & iName,
             curve.addAttribute(attrObj);
             curve.findPlug("width", true).setValue((*widths)[0]);
         }
+        else if (widths && widths->size() == numCurves &&
+                 iWidths.getScope() ==  Alembic::AbcGeom::kUniformScope)
+        {
+            MFnNumericAttribute widthAttr;
+            MObject attrObj = widthAttr.create("width",
+                "width", MFnNumericData::kFloat, (*widths)[i]);
+            curve.addAttribute(attrObj);
+            curve.findPlug("width", true).setValue((*widths)[i]);
+        }
         // per vertex width
         else if (widths && widths->size() >= curVert && numVerts > 0 &&
             iWidths.getScope() ==  Alembic::AbcGeom::kVertexScope)
