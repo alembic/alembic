@@ -371,7 +371,7 @@ void MayaNurbsCurveWriter::write()
     {
         scope = Alembic::AbcGeom::kUniformScope;
     }
-    else
+    else if (width.size() == 1)
     {
         scope = Alembic::AbcGeom::kConstantScope;
     }

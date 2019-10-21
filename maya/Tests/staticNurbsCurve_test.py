@@ -305,3 +305,31 @@ class StaticNurbsCurveTest(unittest.TestCase):
         # constant width check
         self.failUnless('width' in MayaCmds.listAttr('|group'))
         self.failUnlessAlmostEqual(MayaCmds.getAttr('|group.width'), 0.75, 4)
+
+    def testNurbsCurveGrpWidthRW3(self):
+
+        MayaCmds.curve(d=3, p=[(0, 0, 0), (3, 5, 0), (5, 6, 0), (9, 9, 0),
+            (12, 10, 0)], k=[0,0,0,1,2,2,2], name='curve1')
+        MayaCmds.select('curveShape1')
+        MayaCmds.addAttr('curveShape1', longName='width', attributeType='double', dv=1.5)
+
+        MayaCmds.curve(d=3, p=[(0, 0, 3), (3, 5, 3), (5, 6, 3), (9, 9, 3),
+            (12, 10, 3)], k=[0,0,0,1,2,2,2], name='curve2')
+        MayaCmds.addAttr('curveShape2', longName='width', attributeType='double', dv=3.0)
+
+        MayaCmds.curve(d=3, p=[(0, 0, 6), (3, 5, 6), (5, 6, 6), (9, 9, 6),
+            (12, 10, 6)], k=[0,0,0,1,2,2,2], name='curve3')
+        MayaCmds.select('curveShape3')
+        MayaCmds.addAttr('curveShape3', longName='width', attributeType='double', dv=4.5)
+
+        MayaCmds.group('curve1', 'curve2', 'curve3', name='group')
+        MayaCmds.addAttr('group', longName='riCurves', at='bool', dv=True)
+
+        self.__files.append(util.expandFileName('testStaticNurbsCurveGrpWidthTest3.abc'))
+        MayaCmds.AbcExport(j='-root group -file ' + self.__files[-1])
+        MayaCmds.AbcImport(self.__files[-1], mode='open')
+
+        # constant width check
+        self.failUnlessAlmostEqual(MayaCmds.getAttr('|group|group.width'),  1.5, 4)
+        self.failUnlessAlmostEqual(MayaCmds.getAttr('|group|group1.width'), 3.0, 4)
+        self.failUnlessAlmostEqual(MayaCmds.getAttr('|group|group2.width'), 4.5, 4)
