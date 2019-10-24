@@ -178,14 +178,14 @@ class EulerFilterTest(unittest.TestCase):
         self.failUnlessAlmostEqual(270, MayaCmds.getAttr('test.rotateZ'))
         self.failUnlessAlmostEqual(90, MayaCmds.getAttr('test.rotateAxisX'))
         self.failUnlessAlmostEqual(-10, MayaCmds.getAttr('test.rotateAxisY'))
-        self.failUnlessAlmostEqual(-90, MayaCmds.getAttr('test.rotateAxisZ'))
+        self.failUnlessAlmostEqual(270, MayaCmds.getAttr('test.rotateAxisZ'))
 
         MayaCmds.currentTime(2, update = True)
         self.assertEqual(1, MayaCmds.getAttr('test.rotateOrder'))
         self.failUnlessAlmostEqual(460, MayaCmds.getAttr('test.rotateX'))
         self.failUnlessAlmostEqual(-40, MayaCmds.getAttr('test.rotateY'))
         self.failUnlessAlmostEqual(0, MayaCmds.getAttr('test.rotateZ'))
-        self.failUnlessAlmostEqual(100, MayaCmds.getAttr('test.rotateAxisX'))
+        self.failUnlessAlmostEqual(460, MayaCmds.getAttr('test.rotateAxisX'))
         self.failUnlessAlmostEqual(-40, MayaCmds.getAttr('test.rotateAxisY'))
         self.failUnlessAlmostEqual(0, MayaCmds.getAttr('test.rotateAxisZ'))
 
@@ -195,8 +195,8 @@ class EulerFilterTest(unittest.TestCase):
         self.failUnlessAlmostEqual(290, MayaCmds.getAttr('test.rotateY'))
         self.failUnlessAlmostEqual(810, MayaCmds.getAttr('test.rotateZ'))
         self.failUnlessAlmostEqual(110, MayaCmds.getAttr('test.rotateAxisX'))
-        self.failUnlessAlmostEqual(-70, MayaCmds.getAttr('test.rotateAxisY'))
-        self.failUnlessAlmostEqual(90, MayaCmds.getAttr('test.rotateAxisZ'))
+        self.failUnlessAlmostEqual(290, MayaCmds.getAttr('test.rotateAxisY'))
+        self.failUnlessAlmostEqual(810, MayaCmds.getAttr('test.rotateAxisZ'))
 
         # Check file with euler filter
         MayaCmds.AbcImport(self.__files[-1], mode='open')
@@ -209,7 +209,7 @@ class EulerFilterTest(unittest.TestCase):
         self.failUnlessAlmostEqual(270, MayaCmds.getAttr('test.rotateZ'))
         self.failUnlessAlmostEqual(90, MayaCmds.getAttr('test.rotateAxisX'))
         self.failUnlessAlmostEqual(-10, MayaCmds.getAttr('test.rotateAxisY'))
-        self.failUnlessAlmostEqual(-90, MayaCmds.getAttr('test.rotateAxisZ'))
+        self.failUnlessAlmostEqual(270, MayaCmds.getAttr('test.rotateAxisZ'))
 
         MayaCmds.currentTime(2, update = True)
         self.assertEqual(1, MayaCmds.getAttr('test.rotateOrder'))
@@ -218,7 +218,7 @@ class EulerFilterTest(unittest.TestCase):
         self.failUnlessAlmostEqual(360, MayaCmds.getAttr('test.rotateZ'))
         self.failUnlessAlmostEqual(100, MayaCmds.getAttr('test.rotateAxisX'))
         self.failUnlessAlmostEqual(-40, MayaCmds.getAttr('test.rotateAxisY'))
-        self.failUnlessAlmostEqual(0, MayaCmds.getAttr('test.rotateAxisZ'))
+        self.failUnlessAlmostEqual(360, MayaCmds.getAttr('test.rotateAxisZ'))
 
         MayaCmds.currentTime(3, update = True)
         self.assertEqual(1, MayaCmds.getAttr('test.rotateOrder'))
@@ -227,5 +227,5 @@ class EulerFilterTest(unittest.TestCase):
         self.failUnlessAlmostEqual(450, MayaCmds.getAttr('test.rotateZ'))
         self.failUnlessAlmostEqual(110, MayaCmds.getAttr('test.rotateAxisX'))
         self.failUnlessAlmostEqual(-70, MayaCmds.getAttr('test.rotateAxisY'))
-        self.failUnlessAlmostEqual(90, MayaCmds.getAttr('test.rotateAxisZ'))
+        self.failUnlessAlmostEqual(450, MayaCmds.getAttr('test.rotateAxisZ'))
 

@@ -337,6 +337,7 @@ void MayaNurbsCurveWriter::write()
                     width.push_back(static_cast<float>(doubleArrayData[i]));
                 }
             }
+            // successfully got as a double array but not enough values!
             else if (status == MS::kSuccess)
             {
                 MString msg = "Curve ";
@@ -352,9 +353,10 @@ void MayaNurbsCurveWriter::write()
             else
             {
                 width.push_back(widthPlug.asFloat());
-                useConstWidth = true;
             }
         }
+        // no width plug on the curve, but not yet noticed as constant width
+        // force constant
         else if (!useConstWidth)
         {
             // pick a default value
@@ -365,8 +367,15 @@ void MayaNurbsCurveWriter::write()
     }
 
     Alembic::AbcGeom::GeometryScope scope = Alembic::AbcGeom::kVertexScope;
-    if (useConstWidth)
+    if (!useConstWidth && width.size() > 1 && width.size() == numCurves)
+    {
+        scope = Alembic::AbcGeom::kUniformScope;
+    }
+    else if (width.size() == 1)
+    {
         scope = Alembic::AbcGeom::kConstantScope;
+    }
+
 
     samp.setCurvesNumVertices(Alembic::Abc::Int32ArraySample(nVertices));
     samp.setPositions(Alembic::Abc::V3fArraySample(
