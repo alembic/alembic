@@ -115,7 +115,7 @@ void archiveInfoTest(bool useOgawa)
 
         // test it again but the DCC FPS variant, pass in a bogus value
         // to show that it gets reset to 0 when it doesn't exist
-        Alembic::Util::uint32_t dcc_fps = 123;
+        double dcc_fps = 123;
         GetArchiveInfo( archive, appInfo, abcVersionStr, abcVersion,
             dateWritten, userInfo, dcc_fps);
         TESTING_ASSERT( appWriter ==  appInfo );
@@ -148,7 +148,7 @@ void archiveInfoTest(bool useOgawa)
         std::string appInfo;
         std::string abcVersionStr;
         Alembic::Util::uint32_t abcVersion = 0;
-        Alembic::Util::uint32_t dcc_fps = 123;
+        double dcc_fps = 123.0;
         std::string dateWritten;
         std::string userInfo;
         GetArchiveInfo( archive, appInfo, abcVersionStr, abcVersion,
@@ -160,7 +160,7 @@ void archiveInfoTest(bool useOgawa)
         std::cout << "Date written: " << dateWritten << std::endl;
         TESTING_ASSERT( dateWritten != "" );
         TESTING_ASSERT( abcVersionStr != "" );
-        TESTING_ASSERT( dcc_fps == 42 );
+        TESTING_ASSERT( dcc_fps == 42.0 );
 
         double start, end;
         GetArchiveStartAndEndTime( archive, start, end );
