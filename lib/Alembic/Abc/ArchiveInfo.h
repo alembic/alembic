@@ -57,6 +57,7 @@ namespace ALEMBIC_VERSION_NS {
 static ALEMBIC_EXPORT_CONST char * kApplicationNameKey = "_ai_Application";
 static ALEMBIC_EXPORT_CONST char * kDateWrittenKey = "_ai_DateWritten";
 static ALEMBIC_EXPORT_CONST char * kUserDescriptionKey = "_ai_Description";
+static ALEMBIC_EXPORT_CONST char * kDCCFPSKey = "_ai_DCC_FPS";
 
 //-*****************************************************************************
 template <class ARCHIVE_CTOR>
@@ -68,6 +69,33 @@ OArchive CreateArchiveWithInfo(
 
     //! File name
     const std::string &iFileName,
+
+    //! Application specific information about what is writing the file
+    const std::string & iApplicationWriter,
+
+    //! Extra information, could be arguments to the tool that is
+    //! writing the file.
+    const std::string & iUserDescription,
+
+    //! Optional meta data or error handling policy
+    const Argument &iArg0 = Argument(),
+
+    //! Optional meta data or error handling policy
+    const Argument &iArg1 = Argument() );
+
+//-*****************************************************************************
+template <class ARCHIVE_CTOR>
+OArchive CreateArchiveWithInfo(
+    //! We need to pass in a constructor which provides
+    //! an explicit link to the concrete implementation of
+    //! AbcCoreAbstract that we're using.
+    ARCHIVE_CTOR iCtor,
+
+    //! File name
+    const std::string &iFileName,
+
+    //! Optional FPS hint that the DCC used at write time
+    Util::uint32_t iDCCFPS,
 
     //! Application specific information about what is writing the file
     const std::string & iApplicationWriter,
@@ -104,6 +132,31 @@ GetArchiveInfo(
     std::string & oUserDescription );
 
 //-*****************************************************************************
+ALEMBIC_EXPORT void
+GetArchiveInfo(
+    //! The Archive whose meta data will be inspected
+    IArchive & iArchive,
+
+    //! Application specific information about what wrote the file
+    std::string & oApplicationWriter,
+
+    //! What version of Alembic wrote the file (and when it was built)
+    std::string & oAlembicVersion,
+
+    //! Numeric version of the Alembic API that wrote the file
+    Util::uint32_t & oAlembicApiVersion,
+
+    //! The data that the file was originally written
+    std::string & oDateWritten,
+
+    //! Extra information, could be arguments to the tool that wrote the file.
+    std::string & oUserDescription,
+
+    //! Optional hint about what FPS was being used by the DCC when this archive
+    //! was created.
+    Util::uint32_t & oDCCFPS);
+
+//-*****************************************************************************
 //! Convenience function which gets a start and end time for the archive using
 //! only IArchive::getMaxNumSamplesForTimeSamplingIndex.  The hierarchy is
 //! NOT walked.
@@ -124,6 +177,7 @@ template <class ARCHIVE_CTOR>
 OArchive CreateArchiveWithInfo(
     ARCHIVE_CTOR iCtor,
     const std::string &iFileName,
+    Util::uint32_t iDCCFPS,
     const std::string &iApplicationWriter,
     const std::string &iUserDescription,
     const Argument &iArg0,
@@ -158,8 +212,26 @@ OArchive CreateArchiveWithInfo(
         md.set( kUserDescriptionKey, iUserDescription );
     }
 
+    if ( iDCCFPS > 0 )
+    {
+        md.set( kDCCFPSKey, std::to_string( iDCCFPS ) );
+    }
+
     return OArchive( iCtor, iFileName, md, policy );
 
+}
+
+template <class ARCHIVE_CTOR>
+OArchive CreateArchiveWithInfo(
+    ARCHIVE_CTOR iCtor,
+    const std::string &iFileName,
+    const std::string &iApplicationWriter,
+    const std::string &iUserDescription,
+    const Argument &iArg0,
+    const Argument &iArg1 )
+{
+    return CreateArchiveWithInfo( iCtor, iFileName, 0, iApplicationWriter,
+        iUserDescription, iArg0, iArg1 );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

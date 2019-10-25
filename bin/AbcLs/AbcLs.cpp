@@ -752,12 +752,14 @@ int main( int argc, char *argv[] )
             std::string whenWritten;
             std::string userDescription;
             std::string coreName;
+            Alembic::Util::uint32_t dccFps;
             GetArchiveInfo (archive,
                             appName,
                             libraryVersionString,
                             libraryVersion,
                             whenWritten,
-                            userDescription);
+                            userDescription,
+                            dccFps);
 
             if ( coreType == AbcF::IFactory::kOgawa ) {
                 coreName = "Ogawa";
@@ -772,6 +774,10 @@ int main( int argc, char *argv[] )
                 std::cout << "  using Alembic : " << libraryVersionString << std::endl;
                 std::cout << "  written on : " << whenWritten << std::endl;
                 std::cout << "  user description : " << userDescription << std::endl;
+                if (dccFps > 0)
+                {
+                    std::cout << "  DCC FPS at write: " << dccFps << std::endl;
+                }
             } else {
                 std::cout << "  (file doesn't have any ArchiveInfo)"
                           << std::endl;

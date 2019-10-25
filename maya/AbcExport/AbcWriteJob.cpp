@@ -834,23 +834,26 @@ bool AbcWriteJob::eval(double iFrame)
             userInfo = "";
         }
 
+        MTime sec(1.0, MTime::kSeconds);
+        Alembic::Util::uint32_t fps(sec.as(MTime::uiUnit()));
+
 #ifdef ALEMBIC_WITH_HDF5
         if (mAsOgawa)
         {
             mRoot = CreateArchiveWithInfo(Alembic::AbcCoreOgawa::WriteArchive(),
-                mFileName, appWriter, userInfo,
+                mFileName, fps, appWriter, userInfo,
                 Alembic::Abc::ErrorHandler::kThrowPolicy);
         }
         else
         {
             mRoot = CreateArchiveWithInfo(Alembic::AbcCoreHDF5::WriteArchive(),
-                mFileName, appWriter, userInfo,
+                mFileName, fps, appWriter, userInfo,
                 Alembic::Abc::ErrorHandler::kThrowPolicy);
         }
 #else
         // just write it out as Ogawa
         mRoot = CreateArchiveWithInfo(Alembic::AbcCoreOgawa::WriteArchive(),
-            mFileName, appWriter, userInfo,
+            mFileName, fps, appWriter, userInfo,
             Alembic::Abc::ErrorHandler::kThrowPolicy);
 #endif
 
