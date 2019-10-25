@@ -165,7 +165,7 @@ public:
     //! Valid returns whether this function set is valid.
     bool valid() const
     {
-        return ( m_opsPWPtr && super_type::valid() );
+        return ( super_type::valid() );
     }
 
     //! unspecified-bool-type operator overload.

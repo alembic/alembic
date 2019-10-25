@@ -72,12 +72,14 @@ class MayaTransformWriter
     ~MayaTransformWriter();
     void write();
     bool isAnimated() const;
-    Alembic::Abc::OObject getObject() {return mSchema.getObject();};
+    Alembic::Abc::OObject getObject();
     AttributesWriterPtr getAttrs() {return mAttrs;};
 
   private:
 
     Alembic::AbcGeom::OXformSchema mSchema;
+    Alembic::AbcGeom::OObject mObject;
+
     AttributesWriterPtr mAttrs;
 
     void pushTransformStack(const MFnTransform & iTrans, bool iForceStatic);
