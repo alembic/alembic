@@ -835,7 +835,7 @@ bool AbcWriteJob::eval(double iFrame)
         }
 
         MTime sec(1.0, MTime::kSeconds);
-        Alembic::Util::uint32_t fps(sec.as(MTime::uiUnit()));
+        double fps(sec.as(MTime::uiUnit()));
 
 #ifdef ALEMBIC_WITH_HDF5
         if (mAsOgawa)

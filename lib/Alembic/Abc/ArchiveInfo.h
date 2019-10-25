@@ -95,7 +95,7 @@ OArchive CreateArchiveWithInfo(
     const std::string &iFileName,
 
     //! Optional FPS hint that the DCC used at write time
-    Util::uint32_t iDCCFPS,
+    double iDCCFPS,
 
     //! Application specific information about what is writing the file
     const std::string & iApplicationWriter,
@@ -154,7 +154,7 @@ GetArchiveInfo(
 
     //! Optional hint about what FPS was being used by the DCC when this archive
     //! was created.
-    Util::uint32_t & oDCCFPS);
+    double & oDCCFPS);
 
 //-*****************************************************************************
 //! Convenience function which gets a start and end time for the archive using
@@ -177,7 +177,7 @@ template <class ARCHIVE_CTOR>
 OArchive CreateArchiveWithInfo(
     ARCHIVE_CTOR iCtor,
     const std::string &iFileName,
-    Util::uint32_t iDCCFPS,
+    double iDCCFPS,
     const std::string &iApplicationWriter,
     const std::string &iUserDescription,
     const Argument &iArg0,
@@ -212,7 +212,7 @@ OArchive CreateArchiveWithInfo(
         md.set( kUserDescriptionKey, iUserDescription );
     }
 
-    if ( iDCCFPS > 0 )
+    if ( iDCCFPS > 0.0 )
     {
         md.set( kDCCFPSKey, std::to_string( iDCCFPS ) );
     }

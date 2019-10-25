@@ -752,7 +752,7 @@ int main( int argc, char *argv[] )
             std::string whenWritten;
             std::string userDescription;
             std::string coreName;
-            Alembic::Util::uint32_t dccFps;
+            double dccFps;
             GetArchiveInfo (archive,
                             appName,
                             libraryVersionString,
