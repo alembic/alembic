@@ -1,3 +1,37 @@
+2019-10-25, Alembic 1.7.12
+Thanks to your feedback and numerous pull requests we have several enhancements
+and bug fixes.
+
+API:
+
+Use critical section instead of mutex on Windows. (PR220)
+
+ErrorHandler now uses const char * for message instead of std::string for
+efficiency gain. (PR221)
+
+Fix incompatibilities with C++17. (PR237)
+
+Add optional DCC FPS hint when calling CreateArchiveWithInfo and
+GetArchiveInfo. (PR241)
+
+Maya:
+
+AbcExport: Support writing animated facesets. (PR217)
+
+AbcExport: Support per curve width. (PR239)
+
+AbcExport: When writing sparse data like just the UVs, create an OObject
+instead of an OXform.  (PR241)
+
+Utils:
+
+WFOBJConvert: Fix bug where OBJ files with more than one shape would fail to
+properly convert UVs and Normals. (PR232)
+
+CMake:
+
+Make it easier to select the python version to build against.  (PR215)
+
 2019-5-16, Alembic 1.7.11
 Thanks to your feedback and numerous pull requests we have several enhancements
 and bug fixes.
