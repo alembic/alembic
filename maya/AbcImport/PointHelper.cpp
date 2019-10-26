@@ -121,7 +121,7 @@ MStatus getPointArbGeomParamsInfos( const Alembic::AbcGeom::IPoints & iNode, MOb
         if ( fnparticle.hasAttribute( sampleInfo.name.c_str() ) )
         {
 
-            MPlug attrPlug = fnparticle.findPlug(sampleInfo.name.c_str());
+            MPlug attrPlug = fnparticle.findPlug(sampleInfo.name.c_str(), true);
             MFnAttribute attr( attrPlug.attribute(&status));
 
             if ( sampleInfo.extent == 1 &&  attr.accepts(MFnData::kDoubleArray, &status))
@@ -271,14 +271,15 @@ MStatus createPerParticleAttributes( const Alembic::AbcGeom::IPoints & iNode, MO
     Alembic::AbcGeom::IFloatGeomParam widthProp = iNode.getSchema().getWidthsParam();
     if ( widthProp.valid() )
     {
-        attrObj = tAttr.create("radiusPP", "radiusPP", MFnData::kDoubleArray, &status);
+        attrObj = tAttr.create("radiusPP", "radiusPP", MFnData::kDoubleArray,
+                               MObject::kNullObj, &status);
         MCHECKERROR(status);
         status = modifier.addAttribute(iObject, attrObj);
         status = modifier.doIt();
         MCHECKERROR(status);
 
         // particleRenderType is an enum, 7 is for blobby surface
-        MPlug renderTypePlug = MFnDependencyNode(iObject).findPlug("particleRenderType");
+        MPlug renderTypePlug = MFnDependencyNode(iObject).findPlug("particleRenderType", true);
         status = modifier.newPlugValueInt(renderTypePlug, 7);
         status = modifier.doIt();
         MCHECKERROR(status);
@@ -306,14 +307,16 @@ MStatus createPerParticleAttributes( const Alembic::AbcGeom::IPoints & iNode, MO
 
         if (sampleInfo.extent == 1)
         {
-            attrObj = tAttr.create(sampleInfo.name.c_str(), sampleInfo.name.c_str(), MFnData::kDoubleArray, &status);
+            attrObj = tAttr.create(sampleInfo.name.c_str(), sampleInfo.name.c_str(),
+                                   MFnData::kDoubleArray, MObject::kNullObj, &status);
             MCHECKERROR(status);
             status = modifier.addAttribute(iObject, attrObj);
             MCHECKERROR(status);
         }
         else
         {
-            attrObj = tAttr.create(sampleInfo.name.c_str(), sampleInfo.name.c_str(), MFnData::kVectorArray, &status);
+            attrObj = tAttr.create(sampleInfo.name.c_str(), sampleInfo.name.c_str(),
+                                   MFnData::kVectorArray, MObject::kNullObj, &status);
             MCHECKERROR(status);
             status = modifier.addAttribute(iObject, attrObj);
             MCHECKERROR(status);
@@ -489,7 +492,7 @@ MStatus create(double iFrame, const Alembic::AbcGeom::IPoints & iNode,
     // against another nParticleShape
     // It is not related to alembic. It crashes also with nCached particle collision
     // In maya Attribute Editor, the attribute is called "enable"
-    MPlug enablePlug = nParticleFn.findPlug("isDynamic");
+    MPlug enablePlug = nParticleFn.findPlug("isDynamic", true);
     status = modifier.newPlugValueBool(enablePlug, false);
 
     // Assign default particle shader initialParticleSE to correctly display them in the viewport
