@@ -73,8 +73,6 @@
 #endif
 
 #include <Alembic/AbcCoreFactory/IFactory.h>
-#include <Alembic/AbcCoreHDF5/ReadWrite.h>
-#include <Alembic/AbcCoreOgawa/ReadWrite.h>
 #include <Alembic/AbcGeom/Visibility.h>
 
 MObject AlembicNode::mTimeAttr;
