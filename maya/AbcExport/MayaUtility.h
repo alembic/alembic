@@ -103,7 +103,7 @@ bool isAncestorDescendentRelationship(const MDagPath & path1,
 // returns 0 if static, 1 if sampled, and 2 if a curve
 int getSampledType(const MPlug& iPlug);
 
-// 0 dont write, 1 write static 0, 2 write anim 0, 3 write anim 1
+// 0 don't write, 1 write static 0, 2 write anim 0, 3 write anim 1
 int getVisibilityType(const MPlug & iPlug);
 
 // determines what order we do the rotation in, returns false if iOrder is

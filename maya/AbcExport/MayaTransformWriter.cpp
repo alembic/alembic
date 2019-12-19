@@ -227,7 +227,7 @@ void addRotate(const MFnDependencyNode & iTrans,
     }
 }
 
-// the test on whether or not to add it is very similiar to addTranslate
+// the test on whether or not to add it is very similar to addTranslate
 // but the operation it creates is very different
 void addShear(const MFnDependencyNode & iTrans, bool forceStatic,
     Alembic::AbcGeom::XformSample & oSample,
@@ -320,7 +320,7 @@ void addShear(const MFnDependencyNode & iTrans, bool forceStatic,
     }
 }
 
-// this test is very similiar to addTranslate, except that it doesn't add it
+// this test is very similar to addTranslate, except that it doesn't add it
 // to the stack if x,y, and z are 1.0
 void addScale(const MFnDependencyNode & iTrans,
     MString parentName, MString xName, MString yName, MString zName, bool inverse,

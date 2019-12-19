@@ -119,6 +119,6 @@ class selectionTest(unittest.TestCase):
         self.failUnless(MayaCmds.objExists("body|leftArm"))
         self.failUnless(MayaCmds.objExists("lower|bottom"))
 
-        # we didnt actually select any meshes so there shouldnt
+        # we didn't actually select any meshes so there shouldn't
         # be any in the scene
         self.failIf(MayaCmds.ls(type='mesh'))

@@ -91,7 +91,7 @@ class animPropTest(unittest.TestCase):
 
         # write to files
         if wfgAndMoblur:
-            # reset __files so we wont try to tear down files that dont exist
+            # reset __files so we wont try to tear down files that don't exist
             self.__files = [self.__files[0]]
             MayaCmds.AbcExport(j='-atp SPT_ -fr 1 24 -wfg -frs -0.25 -frs 0.0 -frs 0.25 -root %s -file %s' % (root, self.__files[0]))
         else:

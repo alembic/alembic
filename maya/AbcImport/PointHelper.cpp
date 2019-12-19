@@ -179,7 +179,7 @@ MStatus readArbGeomParams(size_t pSize, Alembic::AbcCoreAbstract::index_t index,
             continue;
         }
 
-        // We don't forget the extent when alocating the array
+        // We don't forget the extent when allocating the array
         std::vector< double > samp(pSize * sampleInfo.extent);
 
         // Read everything as double
@@ -329,7 +329,7 @@ MStatus createPerParticleAttributes( const Alembic::AbcGeom::IPoints & iNode, MO
 MStatus read(double iFrame, const Alembic::AbcGeom::IPoints & iNode,  int & isInitializedConstant,
     MFnArrayAttrsData & dynDataFn, PointSampleDataList & iData)
 {
-    // We feed the MFnArrayAttrsData with all the nescessary doubleArray and vectorArray
+    // We feed the MFnArrayAttrsData with all the necessary doubleArray and vectorArray
     // it is then used to feed the outDataPlug of the alembic node
     MStatus status = MS::kSuccess;
 

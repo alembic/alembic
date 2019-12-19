@@ -118,7 +118,7 @@ void MayaNurbsSurfaceWriter::write()
         MDoubleArray knotsInU;
         nurbs.getKnotsInU(knotsInU);
 
-        // pad the start and end with a knot on each side, since thats what
+        // pad the start and end with a knot on each side, since that's what
         // most apps, like Houdini and Renderman want these two extra knots
         sampKnotsInU.reserve(numKnotsInU+2);
 
@@ -147,7 +147,7 @@ void MayaNurbsSurfaceWriter::write()
         MDoubleArray knotsInV;
         nurbs.getKnotsInV(knotsInV);
 
-        // pad the start and end with a knot on each side, since thats what
+        // pad the start and end with a knot on each side, since that's what
         // most apps, like Houdini and Renderman want these two extra knots
         sampKnotsInV.reserve(numKnotsInV+2);
 

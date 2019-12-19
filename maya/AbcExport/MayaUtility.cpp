@@ -232,7 +232,7 @@ bool util::getRotOrder(MTransformationMatrix::RotationOrder iOrder,
     return true;
 }
 
-// 0 dont write, 1 write static 0, 2 write anim 0, 3 write anim -1
+// 0 don't write, 1 write static 0, 2 write anim 0, 3 write anim -1
 int util::getVisibilityType(const MPlug & iPlug)
 {
     int type = getSampledType(iPlug);
@@ -240,7 +240,7 @@ int util::getVisibilityType(const MPlug & iPlug)
     // static case
     if (type == 0)
     {
-        // dont write anything
+        // don't write anything
         if (iPlug.asBool())
             return 0;
 
@@ -638,7 +638,7 @@ MString util::getHelpText()
 "#FRAME# is ignored in the post callbacks.\n"
 "\n"
 "#BOUNDS# replaced with a string holding bounding box values in minX minY minZ\n"
-"maxX maxY maxZ space seperated order.\n"
+"maxX maxY maxZ space separated order.\n"
 "\n"
 "#BOUNDSARRAY# replaced with the bounding box values as above, but in\n"
 "array form.\n"

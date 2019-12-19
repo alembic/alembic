@@ -349,7 +349,7 @@ namespace
         MStatus status = ioMesh.setUVs(iUlist, iVlist, &iUVSetName);
         if (status != MStatus::kSuccess)
         {
-            MGlobal::displayWarning("Couldnt set UVs for " + iUVSetName +
+            MGlobal::displayWarning("Could not set UVs for " + iUVSetName +
                 status.errorString());
             return;
         }
@@ -360,7 +360,7 @@ namespace
 
         if (status != MStatus::kSuccess)
         {
-            MGlobal::displayWarning("Couldnt assign UVs for " + iUVSetName +
+            MGlobal::displayWarning("Could not assign UVs for " + iUVSetName +
                 status.errorString());
         }
     }
@@ -515,7 +515,7 @@ namespace
         MStatus status = ioMesh.setColors(iColorList, &iColorSet, iRepr);
         if (status != MStatus::kSuccess)
         {
-            MGlobal::displayWarning("Couldnt set colors for " + iColorSet +
+            MGlobal::displayWarning("Could not set colors for " + iColorSet +
                 status.errorString());
             return;
         }
@@ -526,7 +526,7 @@ namespace
 
         if (status != MStatus::kSuccess)
         {
-            MGlobal::displayWarning("Couldnt assign colors for " + iColorSet +
+            MGlobal::displayWarning("Could not assign colors for " + iColorSet +
                 status.errorString());
         }
     }

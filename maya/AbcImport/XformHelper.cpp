@@ -264,7 +264,7 @@ bool isComplex(const Alembic::AbcGeom::XformSample & iSamp)
                             scPivot = true;
                             state = 10;
                         }
-                        // we have encounted this pivot before,
+                        // we have encountered this pivot before,
                         // this one undoes the first one
                         else if (state < 13 && scPivot)
                         {
@@ -292,7 +292,7 @@ bool isComplex(const Alembic::AbcGeom::XformSample & iSamp)
                             roPivot = true;
                             state = 3;
                         }
-                        // we have encounted this pivot before,
+                        // we have encountered this pivot before,
                         // this one undoes the first one
                         else if (state < 8 && roPivot)
                         {

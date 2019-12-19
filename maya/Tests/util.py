@@ -217,7 +217,7 @@ def compareNurbsSurface(nodeName1, nodeName2):
     return True
 
 
-# return True if the two locators are idential
+# return True if the two locators are identical
 def compareLocator(nodeName1, nodeName2):
 
     # basic error checking

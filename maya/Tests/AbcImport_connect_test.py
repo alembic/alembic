@@ -149,7 +149,7 @@ class AbcImportSwapTest(unittest.TestCase):
         MayaCmds.AbcImport(self.__files[1], connect='/', debug=False )
 
         # check the swapped scene is the same as frame #12
-        # tranform node moon
+        # transform node moon
         self.failUnlessAlmostEqual(
             MayaCmds.getAttr('moon.translateX'), -4.1942, 4)
         self.failUnlessAlmostEqual(
@@ -182,7 +182,7 @@ class AbcImportSwapTest(unittest.TestCase):
         # check the swapped scene at every frame
         for frame in range(1, 25):
             MayaCmds.currentTime(frame, update=True)
-            # tranform node moon
+            # transform node moon
             checkEqualTranslate(self, 'group1|moon', 'group3|moon', 4)
             # transform node earth
             checkEqualTranslate(self, 'group1|earth', 'group3|earth', 4)
@@ -194,7 +194,7 @@ class AbcImportSwapTest(unittest.TestCase):
         MayaCmds.AbcImport(self.__files[1], connect='/')
 
         # check the swapped scene is the same as frame #12
-        # tranform node moon
+        # transform node moon
         self.failUnlessAlmostEqual(
             MayaCmds.getAttr('moon.translateX'), -4.1942, 4)
         self.failUnlessAlmostEqual(
@@ -231,7 +231,7 @@ class AbcImportSwapTest(unittest.TestCase):
         self.failUnlessEqual(MayaCmds.objExists('saturn'), False)
 
         # check the swapped scene is the same as frame #12
-        # tranform node moon
+        # transform node moon
         self.failUnlessAlmostEqual(
             MayaCmds.getAttr('moon.translateX'), -4.1942, 4)
         self.failUnlessAlmostEqual(
@@ -266,7 +266,7 @@ class AbcImportSwapTest(unittest.TestCase):
         self.failUnlessEqual(MayaCmds.objExists('earth'), False)
 
         # check the swapped scene is the same as frame #12
-        # tranform node moon
+        # transform node moon
         self.failUnlessAlmostEqual(
             MayaCmds.getAttr('moon.translateX'), -4.1942, 4)
         self.failUnlessAlmostEqual(
@@ -290,7 +290,7 @@ class AbcImportSwapTest(unittest.TestCase):
             createIfNotFound=True)
 
         # check the swapped scene is the same as frame #12
-        # tranform node moon
+        # transform node moon
         self.failUnlessAlmostEqual(
             MayaCmds.getAttr('moon.translateX'), -4.1942, 4)
         self.failUnlessAlmostEqual(
@@ -318,7 +318,7 @@ class AbcImportSwapTest(unittest.TestCase):
             createIfNotFound=True)
 
         # check the swapped scene is the same as frame #12
-        # tranform node moon
+        # transform node moon
         self.failUnlessAlmostEqual(
             MayaCmds.getAttr('moon.translateX'), -4.1942, 4)
         self.failUnlessAlmostEqual(
@@ -370,9 +370,9 @@ class AbcImportSwapTest(unittest.TestCase):
         # check the swapped scene at every frame
         for frame in range(1, 4):
             MayaCmds.currentTime(frame, update=True)
-            # tranform node group
+            # transform node group
             checkEqualTranslate(self, 'group', 'group1', 4)
-            # tranform node group
+            # transform node group
             checkEqualTranslate(self, 'group|polyMesh', 'group1|polyMesh', 4)
             # mesh node polyMesh
             for index in range(0, 9):
@@ -404,9 +404,9 @@ class AbcImportSwapTest(unittest.TestCase):
         # check the swapped scene at every frame
         for frame in range(1, 4):
             MayaCmds.currentTime(frame, update=True)
-            # tranform node group
+            # transform node group
             checkEqualTranslate(self, 'group', 'group1', 4)
-            # tranform node group
+            # transform node group
             checkEqualTranslate(self, 'group|polyMesh', 'group1|polyMesh', 4)
             # mesh node polyMesh
             for index in range(0, 9):

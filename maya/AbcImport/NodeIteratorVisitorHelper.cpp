@@ -215,7 +215,7 @@ bool addArrayProp(Alembic::Abc::IArrayProperty & iProp, MObject & iParent)
                 return false;
             }
 
-            // default is 1 just to accomodate visiblitity
+            // default is 1 just to accommodate visiblitity
             Alembic::Util::int8_t val = 1;
 
             if (iProp.isConstant())

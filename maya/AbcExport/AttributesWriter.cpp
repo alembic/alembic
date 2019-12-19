@@ -1734,7 +1734,7 @@ bool isPerParticleAttributes( const MFnDependencyNode &iNode, MObject attrObj )
     // we only filter non user created attribute
     if ( !attr.isDynamic() )
     {
-        // manualy filter a few attributes
+        // manually filter a few attributes
         if (     attrName.substring(0, 7) == "internal" ||
                 attrName.toLowerCase().substring(attrName.length() - 5, attrName.length()) == "cache" ||
                 attrName.substring( attrName.length() - 1, attrName.length()) == "0" )
@@ -1970,7 +1970,7 @@ AttributesWriter::AttributesWriter(
             // animated visibility 1 case
             case 3:
             {
-                // dont add if we are forcing static (no frame range specified)
+                // don't add if we are forcing static (no frame range specified)
                 if (iTimeIndex == 0)
                 {
                     break;
@@ -1992,7 +1992,7 @@ AttributesWriter::AttributesWriter(
             }
             break;
 
-            // dont write any visibility
+            // don't write any visibility
             default:
             break;
         }

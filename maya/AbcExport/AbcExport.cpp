@@ -134,7 +134,7 @@ try
 
         {
             // parse the job arguments
-            // e.g. -perFrameCallbackMel "print \"something\"" will be splitted to
+            // e.g. -perFrameCallbackMel "print \"something\"" will be split to
             //    [0] -perFrameCallbackMel
             //    [1] print "something"
             enum State {
@@ -1028,8 +1028,8 @@ try
 
        jobList.push_front(job);
 
-        // make sure we add additional whole frames, if we arent skipping
-        // the inbetween ones
+        // make sure we add additional whole frames, if we aren't skipping
+        // the in between ones
         if (!skipFrame && !allFrameRange.empty())
         {
             double localMin = *(transSamples.begin());
