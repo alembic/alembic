@@ -251,7 +251,7 @@ void register_coreabstracttypes()
               "per cycle)" )
         .def( "isAcyclic",
               &AbcA::TimeSamplingType::isAcyclic,
-              "Return True of the sampling type is acyclic (infinit samples "
+              "Return True of the sampling type is acyclic (infinite samples "
               "per cycle)" )
         .def( "getNumSamplesPerCycle",
               &AbcA::TimeSamplingType::getNumSamplesPerCycle,

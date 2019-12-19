@@ -44,7 +44,7 @@ from cubeData import *
 # The cube is animated by manipulating the xform transforms
 # over time.
 
-# This is the scatch of the file hierarchy.
+# This is the sketch of the file hierarchy.
 # Abc
 #   |- Xform
 #       |- .inherits

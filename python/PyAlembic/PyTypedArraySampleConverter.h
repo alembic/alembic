@@ -63,7 +63,7 @@ struct converterMemcopyable
                                  iFixedArray.len() );
     }
 
-    // Converion from ArraySample to FixedArray
+    // Conversion from ArraySample to FixedArray
     PyObject* operator()( const samp_type& iSamp )
     {
         BOOST_STATIC_ASSERT ( binding_traits::memCopyable );
@@ -82,7 +82,7 @@ struct converterMemcopyable
         return incref(obj.ptr());
     }
 
-    // Converion from ArraySamplePtr to FixedArray
+    // Conversion from ArraySamplePtr to FixedArray
     PyObject* operator()( const samp_type_ptr& iSampPtr )
     {
         BOOST_STATIC_ASSERT ( binding_traits::memCopyable );
@@ -155,7 +155,7 @@ struct converterNonMemCopyable
                                        AbcA::TArrayDeleter<value_type>() );
     }
 
-    // Converion from ArraySample to FixedArray
+    // Conversion from ArraySample to FixedArray
     PyObject* operator()( const samp_type& iSamp )
     {
         BOOST_STATIC_ASSERT ( !binding_traits::memCopyable );
@@ -174,7 +174,7 @@ struct converterNonMemCopyable
         return incref(obj.ptr());
     }
 
-    // Converion from ArraySamplePtr to FixedArray
+    // Conversion from ArraySamplePtr to FixedArray
     PyObject* operator()( const samp_type_ptr& iSampPtr )
     {
         BOOST_STATIC_ASSERT ( !binding_traits::memCopyable );
