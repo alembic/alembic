@@ -65,7 +65,7 @@ public:
     ICompoundProperty() : IBasePropertyT<AbcA::CompoundPropertyReaderPtr>() {}
 
     //! This constructor creates a new compound property reader.
-    //! The first argument is the parent ICompundProperty, from which the error
+    //! The first argument is the parent ICompoundProperty, from which the error
     //! handler policy for inheritance is also derived.  The remaining optional
     //! arguments can be used to override the ErrorHandlerPolicy, and that's it.
     ICompoundProperty( const ICompoundProperty & iParent,

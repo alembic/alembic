@@ -248,7 +248,7 @@ private:
         do
         {
             Alembic::Util::uint64_t readCount = iSize - totalRead;
-            // if over 1 GB read it 1 GB chunk at a time to accomodate OSX
+            // if over 1 GB read it 1 GB chunk at a time to accommodate OSX
             if (readCount > 1073741824)
             {
                 readCount = 1073741824;

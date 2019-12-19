@@ -80,7 +80,7 @@ public:
                   const Abc::Argument &iArg3 = Abc::Argument() );
 
     //! This constructor creates a new light writer.
-    //! The first argument is an OCompundProperty to use as a parent, and from
+    //! The first argument is an OCompoundProperty to use as a parent, and from
     //! which the ErrorHandlerPolicy is derived.  The next is the name to give
     //! the schema which is usually the default name given by OLight (.geom)
     //! The remaining optional arguments can be used to specify MetaData,

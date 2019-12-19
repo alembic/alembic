@@ -61,8 +61,8 @@ enum MatrixHint
 
 //! \brief The Rotate identifier hint.
 //! Some 3d packages (like Maya) have multiple rotation operations
-//! that are mathmatically of the same type.  RotateHint is meant to
-//! help disambiguate these similiar mathmatical types when reading back
+//! that are mathematically of the same type.  RotateHint is meant to
+//! help disambiguate these similar mathematical types when reading back
 //! into applications that natively support the type.
 enum RotateHint
 {
@@ -76,8 +76,8 @@ enum RotateHint
 
 //! \brief The Scale identifier hint.
 //! Some 3d packages (like Maya) have multiple transformation operations
-//! that are mathmatically of the same type.  ScaleHint is meant to
-//! help disambiguate these similiar mathmatical types when reading back
+//! that are mathematically of the same type.  ScaleHint is meant to
+//! help disambiguate these similar mathematical types when reading back
 //! into applications that natively support that type.
 enum ScaleHint
 {
@@ -88,8 +88,8 @@ enum ScaleHint
 
 //! \brief The Translation identifier hint.
 //! Some 3d packages (like Maya) have multiple transformation operations
-//! that are mathmatically of the same type.  TranslateHint is meant to
-//! help disambiguate these similiar mathmatical types when reading back
+//! that are mathematically of the same type.  TranslateHint is meant to
+//! help disambiguate these similar mathematical types when reading back
 //! into applications that natively support the type.
 enum TranslateHint
 {

@@ -50,7 +50,7 @@ HDF5HierarchyWriter::HDF5HierarchyWriter( hid_t iFile, HDF5Hierarchy& iH5H )
 
     writeHierarchy( iFile );
 
-    // Hierarchy info is succcessfully saved.
+    // Hierarchy info is successfully saved.
     // Let's set a flag.
     //
     int enabled = 1;

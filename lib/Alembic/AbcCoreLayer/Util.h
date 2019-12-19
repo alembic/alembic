@@ -45,7 +45,7 @@ namespace Alembic {
 namespace AbcCoreLayer {
 namespace ALEMBIC_VERSION_NS {
 
-// Convience functions for marking prune and replace on MetaData to be used
+// Convenience functions for marking prune and replace on MetaData to be used
 // with layering.
 
 //! Used to mark that an Alembic object or property is meant to be pruned

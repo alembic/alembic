@@ -145,7 +145,7 @@ void SpwImpl::setSample( const void *iSamp )
      // mask out the non-string POD since Ogawa can safely share the same data
      // even if it originated from a different POD
      // the non-fixed sizes of our strings (plus added null characters) makes
-     // determing the sie harder so strings are handled seperately
+     // determining the size harder so strings are handled separately
     if ( key.origPOD != Alembic::Util::kStringPOD &&
          key.origPOD != Alembic::Util::kWstringPOD )
     {

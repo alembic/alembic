@@ -77,7 +77,7 @@ void testArrayPropHashes(bool iUseMMap)
         child->getProperties()->createArrayProperty("empty",  ABCA::MetaData(),
             ABCA::DataType(Alembic::Util::kInt32POD, 1), 0);
 
-        // 2 objects with with the same property with a differnt name from above
+        // 2 objects with with the same property with a different name from above
         child = archive->createChild(ABCA::ObjectHeader(
             "1propAName", ABCA::MetaData()));
         child->getProperties()->createArrayProperty("null",  ABCA::MetaData(),
@@ -88,7 +88,7 @@ void testArrayPropHashes(bool iUseMMap)
         child->getProperties()->createArrayProperty("null",  ABCA::MetaData(),
             ABCA::DataType(Alembic::Util::kInt32POD, 1), 0);
 
-        // 2 objects with with the same property with a differnt MetaData
+        // 2 objects with with the same property with a different MetaData
         ABCA::MetaData m;
         m.set("Bleep", "bloop");
         child = archive->createChild(ABCA::ObjectHeader(
@@ -123,7 +123,7 @@ void testArrayPropHashes(bool iUseMMap)
         child->getProperties()->createArrayProperty("empty",  ABCA::MetaData(),
             ABCA::DataType(Alembic::Util::kInt32POD, 2), 0);
 
-        // 2 objects with with the same property with a differnt time sampling
+        // 2 objects with with the same property with a different time sampling
         child = archive->createChild(ABCA::ObjectHeader(
             "1propATS", ABCA::MetaData()));
         child->getProperties()->createArrayProperty("empty",  ABCA::MetaData(),
@@ -298,7 +298,7 @@ void testScalarPropHashes(bool iUseMMap)
         child->getProperties()->createScalarProperty("empty",  ABCA::MetaData(),
             ABCA::DataType(Alembic::Util::kInt32POD, 1), 0);
 
-        // 2 objects with with the same property with a differnt name from above
+        // 2 objects with with the same property with a different name from above
         child = archive->createChild(ABCA::ObjectHeader(
             "1propAName", ABCA::MetaData()));
         child->getProperties()->createScalarProperty("null",  ABCA::MetaData(),
@@ -309,7 +309,7 @@ void testScalarPropHashes(bool iUseMMap)
         child->getProperties()->createScalarProperty("null",  ABCA::MetaData(),
             ABCA::DataType(Alembic::Util::kInt32POD, 1), 0);
 
-        // 2 objects with with the same property with a differnt MetaData
+        // 2 objects with with the same property with a different MetaData
         ABCA::MetaData m;
         m.set("Bleep", "bloop");
         child = archive->createChild(ABCA::ObjectHeader(
@@ -344,7 +344,7 @@ void testScalarPropHashes(bool iUseMMap)
         child->getProperties()->createScalarProperty("empty",  ABCA::MetaData(),
             ABCA::DataType(Alembic::Util::kInt32POD, 2), 0);
 
-        // 2 objects with with the same property with a differnt time sampling
+        // 2 objects with with the same property with a different time sampling
         child = archive->createChild(ABCA::ObjectHeader(
             "1propATS", ABCA::MetaData()));
         child->getProperties()->createScalarProperty("empty",  ABCA::MetaData(),
@@ -494,7 +494,7 @@ void testCompoundPropHashes(bool iUseMMap)
         child->getProperties()->createCompoundProperty("empty",
             ABCA::MetaData());
 
-        // 2 objects with with the same property with a differnt name from above
+        // 2 objects with with the same property with a different name from above
         child = archive->createChild(ABCA::ObjectHeader(
             "1propAName", ABCA::MetaData()));
         child->getProperties()->createCompoundProperty("null",

@@ -67,7 +67,7 @@ public:
     virtual const PropertyHeader & getHeader() const = 0;
 
     //! All properties have a name, which is unique amongst its siblings
-    //! in the compund property they all live in. This is the name that
+    //! in the compound property they all live in. This is the name that
     //! was given when the property was created, and is part of the property
     //! header.
     const std::string &getName() const

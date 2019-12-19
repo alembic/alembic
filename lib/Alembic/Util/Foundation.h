@@ -113,7 +113,7 @@ namespace Alembic {
 namespace Util {
 namespace ALEMBIC_VERSION_NS {
 
-// similiar to boost::noncopyable
+// similar to boost::noncopyable
 // explicitly hides copy construction and copy assignment
 class ALEMBIC_EXPORT noncopyable
 {
@@ -191,7 +191,7 @@ private:
 
 #endif
 
-// similiar to boost::totally_ordered
+// similar to boost::totally_ordered
 // only need < and == operators and this fills in the rest
 template < class T >
 class totally_ordered

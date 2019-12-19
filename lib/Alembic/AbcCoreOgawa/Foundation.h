@@ -160,7 +160,7 @@ struct PropertyHeaderAndFriends
     // Index representing the first sample that is different from sample 0
     Util::uint32_t firstChangedIndex;
 
-    // Index representing the last sample in which a change has occured
+    // Index representing the last sample in which a change has occurred
     // There is no need to repeat samples if they are the same between this
     // index and nextSampleIndex
     Util::uint32_t lastChangedIndex;

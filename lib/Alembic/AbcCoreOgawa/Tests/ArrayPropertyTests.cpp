@@ -1486,7 +1486,7 @@ void testExtentArrayStrings(bool iUseMMap)
         ABCA::ArraySampleKey key;
         TESTING_ASSERT(ap->getKey(0, key));
 
-        // includes NULL seperator
+        // includes NULL separator
         TESTING_ASSERT(key.numBytes == 34);
         TESTING_ASSERT(key.origPOD == Alembic::Util::kStringPOD);
         TESTING_ASSERT(key.readPOD == Alembic::Util::kStringPOD);

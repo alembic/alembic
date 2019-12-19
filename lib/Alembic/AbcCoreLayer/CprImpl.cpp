@@ -277,7 +277,7 @@ void CprImpl::init( CompoundReaderPtrs & iCompounds )
 
                 m_children[ index ].push_back( *it );
 
-                // for special case sparse hiearchies we don't want empty meta data
+                // for special case sparse hierarchies we don't want empty meta data
                 // on a compound to override existing non empty metadata
                 if ( propHeader.getMetaData().size() != 0 )
                 {
