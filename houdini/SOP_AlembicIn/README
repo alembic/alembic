@@ -9,7 +9,7 @@ The reference implementation for reading Alembic data into Houdini contains thre
 
 The Alembic_In SOP can read an entire Alembic archive or a subtree of an Alembic archive with the option of baking in transformations. As such, it can serve as the leaf node for geometric primitives while recreating the transformation hierarchy as Houdini objects. It supports loading arbitrary geometry parameters (AbcGeom::GeomParams) as attributes and provides options to remap attribute names on load. The SOP recognizes when data or topology is constant in order to do as little work as necessary upon frame changes.
 
-The "Alembic Archive" node constructs and contains the hierarchy of object, SOP and camera nodes used to represent an Alembic scene. Its "Build or Update Hierachy" button reads the archive hierarchy (or specified subtree) and expressions the matching parameters of its internal nodes for convenience.
+The "Alembic Archive" node constructs and contains the hierarchy of object, SOP and camera nodes used to represent an Alembic scene. Its "Build or Update Hierarchy" button reads the archive hierarchy (or specified subtree) and expressions the matching parameters of its internal nodes for convenience.
 
 The "Alembic Xform" node queries the local transformation for a specified path within an archive during its cook. It recognizes and caches when transformations are not animated in order to do as little work as necessary on frame changes.
 

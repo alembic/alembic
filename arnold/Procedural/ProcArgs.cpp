@@ -250,7 +250,7 @@ void ProcArgs::usage()
                  "considered equivalent if the keys of their relevant point "
                  "position samples match along with any specified "
                  "subdivision values. This works across multiple archives or "
-                 "invokations of the procedural. It currently does not write "
+                 "invocations of the procedural. It currently does not write "
                  "unique user data per instance but will likely do so "
                  "automatically (when necessary) in a future release. "
                  "The ray visibility of the source primitive will be set to "

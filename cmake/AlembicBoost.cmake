@@ -37,7 +37,7 @@
 # the default system paths use:
 # cmake '-UBoost_*' -DBOOST_ROOT:STRING=<path/to/boost> .
 #
-# If you are still having trouble, use explit include paths:
+# If you are still having trouble, use explicit include paths:
 # cmake '-UBoost_*' -DBOOST_INCLUDEDIR:STRING=<path/to/boost_include_dir> .
 #
 # If the libraries are in a separate location to the include files, use:

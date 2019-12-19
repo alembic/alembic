@@ -36,7 +36,7 @@
 # Recurse into libs
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib")
 
-# No boost dependency was needed so dont include AbcClients
+# No boost dependency was needed so don't include AbcClients
 IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
     ADD_SUBDIRECTORY(AbcClients)
 ENDIF()
