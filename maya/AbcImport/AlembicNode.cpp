@@ -323,6 +323,7 @@ MStatus AlembicNode::initialize()
     status = gAttr.addDataAccept(MFnData::kString);
     status = gAttr.addDataAccept(MFnData::kIntArray);
     status = gAttr.addDataAccept(MFnData::kDoubleArray);
+    status = gAttr.addDataAccept(MFnData::kFloatArray);
     status = gAttr.addDataAccept(MFnData::kVectorArray);
     status = gAttr.addDataAccept(MFnData::kPointArray);
 
