@@ -54,6 +54,9 @@
     #include <io.h>
     #include <sys/stat.h>
 
+    #include <codecvt> // SMODE TECH
+    #include <locale>  // SMODE TECH
+
 #else
     #error Platform not supported.
 #endif
@@ -400,9 +403,10 @@ private:
 
     static FileHandle openFile(const std::string& iFileName)
     {
+        const std::wstring& wFileName = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(iFileName); // SMODE TECH
         // Use both FILE_SHARE_READ and FILE_SHARE_WRITE as the share mode.
         // Without FILE_SHARE_WRITE, this will fail when trying to open a file that is already open for writing.
-        return CreateFile(iFileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        return CreateFile(wFileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     }
 
     static void closeFile(FileHandle iFile)
