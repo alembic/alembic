@@ -71,3 +71,5 @@ ADD_TEST(AbcCoreOgawa_ScalarPropertyTESTS AbcCoreOgawa_ScalarPropertyTests)
 ADD_TEST(AbcCoreOgawa_TimeSamplingTESTS AbcCoreOgawa_TimeSamplingTests)
 ADD_TEST(AbcCoreOgawa_ObjectTESTS AbcCoreOgawa_ObjectTests)
 ADD_TEST(AbcCoreOgawa_ConstantPropsTest_TEST AbcCoreOgawa_ConstantPropsTest)
+
+file(COPY issue253.abc DESTINATION .)

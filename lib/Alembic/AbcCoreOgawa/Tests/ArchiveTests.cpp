@@ -406,6 +406,12 @@ void testGarbageArchive(bool iUseMMap)
     TESTING_ASSERT_THROW(r( "garbage" ), Alembic::Util::Exception);
 }
 
+void testIssue253(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    TESTING_ASSERT_THROW(r( "issue253.abc" ),  Alembic::Util::Exception);
+}
+
 void runTests(bool iUseMMap)
 {
     testReadWriteEmptyArchive(iUseMMap);
@@ -414,6 +420,8 @@ void runTests(bool iUseMMap)
     testReadWriteMaxNumSamplesArchive(iUseMMap);
 
     testGarbageArchive(iUseMMap);
+
+    testIssue253(iUseMMap);
 }
 
 int main ( int argc, char *argv[] )
