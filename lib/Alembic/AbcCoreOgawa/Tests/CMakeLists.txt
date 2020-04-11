@@ -64,6 +64,9 @@ TARGET_LINK_LIBRARIES(AbcCoreOgawa_ObjectTests Alembic)
 ADD_EXECUTABLE(AbcCoreOgawa_ConstantPropsTest ConstantPropsNumSampsTest.cpp)
 TARGET_LINK_LIBRARIES(AbcCoreOgawa_ConstantPropsTest Alembic)
 
+ADD_EXECUTABLE(AbcCoreOgawa_FuzzTest fuzzTest.cpp)
+TARGET_LINK_LIBRARIES(AbcCoreOgawa_FuzzTest Alembic)
+
 ADD_TEST(AbcCoreOgawa_ArchiveTESTS AbcCoreOgawa_ArchiveTests)
 ADD_TEST(AbcCoreOgawa_ArrayPropertyTESTS AbcCoreOgawa_ArrayPropertyTests)
 ADD_TEST(AbcCoreOgawa_HashesTESTS AbcCoreOgawa_HashesTests)
@@ -71,5 +74,8 @@ ADD_TEST(AbcCoreOgawa_ScalarPropertyTESTS AbcCoreOgawa_ScalarPropertyTests)
 ADD_TEST(AbcCoreOgawa_TimeSamplingTESTS AbcCoreOgawa_TimeSamplingTests)
 ADD_TEST(AbcCoreOgawa_ObjectTESTS AbcCoreOgawa_ObjectTests)
 ADD_TEST(AbcCoreOgawa_ConstantPropsTest_TEST AbcCoreOgawa_ConstantPropsTest)
+ADD_TEST(AbcCoreOgawa_FuzzTest_TEST AbcCoreOgawa_FuzzTest)
 
 file(COPY issue253.abc DESTINATION .)
+file(COPY issue254.abc DESTINATION .)
+file(COPY issue255.abc DESTINATION .)
