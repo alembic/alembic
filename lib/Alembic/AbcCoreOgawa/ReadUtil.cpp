@@ -1532,10 +1532,21 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 
     data->read( buf.size(), &( buf.front() ), 0, iThreadId );
     std::size_t pos = 0;
+    std::size_t bufSize = buf.size();
     while ( pos < buf.size() )
     {
+        if (pos + 4 > bufSize)
+        {
+            ABCA_THROW("Read invalid: Object Headers name size.");
+        }
+
         Util::uint32_t nameSize = *( (Util::uint32_t *)( &buf[pos] ) );
         pos += 4;
+
+        if (pos + nameSize + 1 > bufSize)
+        {
+            ABCA_THROW("Read invalid: Object Headers name and MetaData index.");
+        }
 
         std::string name( &buf[pos], nameSize );
         pos += nameSize;
@@ -1548,8 +1559,18 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 
         if ( metaDataIndex == 0xff )
         {
+            if (pos + 4 > bufSize)
+            {
+                ABCA_THROW("Read invalid: Object Headers MetaData size.");
+            }
+
             Util::uint32_t metaDataSize = *( (Util::uint32_t *)( &buf[pos] ) );
             pos += 4;
+
+            if (pos + metaDataSize > bufSize)
+            {
+                ABCA_THROW("Read invalid: Object Headers MetaData string.");
+            }
 
             std::string metaData( &buf[pos], metaDataSize );
             pos += metaDataSize;

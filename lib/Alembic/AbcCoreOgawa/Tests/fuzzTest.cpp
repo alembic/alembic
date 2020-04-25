@@ -119,7 +119,15 @@ void testIssue254(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue254.abc");
-    TESTING_ASSERT_THROW(walkObj(ar->getTop()), std::runtime_error);
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IStreams::read failed.";
+        TESTING_ASSERT(msg == e.what());
+    }
 
 }
 
@@ -150,7 +158,15 @@ void testIssue257(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue257.abc");
-    walkObj(ar->getTop());
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Object Headers name and MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+    }
 }
 
 void testIssue258(bool iUseMMap)
