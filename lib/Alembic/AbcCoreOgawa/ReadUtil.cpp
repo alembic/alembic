@@ -1530,10 +1530,10 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
         return;
     }
 
-    data->read( buf.size(), &( buf.front() ), 0, iThreadId );
-    std::size_t pos = 0;
     std::size_t bufSize = buf.size();
-    while ( pos < buf.size() )
+    data->read( bufSize, &( buf.front() ), 0, iThreadId );
+    std::size_t pos = 0;
+    while ( pos < bufSize )
     {
         if (pos + 4 > bufSize)
         {
@@ -1588,26 +1588,32 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 
 //-*****************************************************************************
 Util::uint32_t GetUint32WithHint(const std::vector< char > & iBuf,
+                           std::size_t iBufSize,
                            Util::uint32_t iSizeHint,
                            std::size_t & ioPos)
 {
     Util::uint32_t retVal = 0;
 
-    if ( iSizeHint == 0 )
+    if ( iSizeHint == 0 && ioPos + 1 <= iBufSize )
     {
         retVal = ( Util::uint32_t ) ( ( Util::uint8_t ) iBuf[ioPos] );
         ioPos ++;
     }
-    else if ( iSizeHint == 1 )
+    else if ( iSizeHint == 1 && ioPos + 2 <= iBufSize )
     {
         retVal = ( Util::uint32_t )( *( (Util::uint16_t *)( &iBuf[ioPos] ) ) );
         ioPos += 2;
     }
-    else if ( iSizeHint == 2 )
+    else if ( iSizeHint == 2 && ioPos + 4 <= iBufSize )
     {
         retVal = *( ( Util::uint32_t * )( &iBuf[ioPos] ) );
         ioPos += 4;
     }
+    else
+    {
+        ABCA_THROW("Read invalid: Property Header bad uint32 hint.");
+    }
+
     return retVal;
 }
 
@@ -1678,9 +1684,15 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
     std::vector< char > buf( data->getSize() );
     data->read( data->getSize(), &( buf.front() ), 0, iThreadId );
     std::size_t pos = 0;
-    while ( pos < buf.size() )
+    std::size_t bufSize = buf.size();
+    while ( pos < bufSize )
     {
         PropertyHeaderPtr header( new PropertyHeaderAndFriends() );
+
+        if (pos + 4 > bufSize)
+        {
+            ABCA_THROW("Read invalid: Property header start.");
+        }
 
         // first 4 bytes is always info
         Util::uint32_t info =  *( (Util::uint32_t *)( &buf[pos] ) );
@@ -1733,15 +1745,15 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
 
             header->isHomogenous = ( info & 0x400 ) != 0;
 
-            header->nextSampleIndex = GetUint32WithHint( buf, sizeHint, pos );
+            header->nextSampleIndex = GetUint32WithHint( buf, bufSize, sizeHint, pos );
 
             if ( ( info & 0x0200 ) != 0 )
             {
                 header->firstChangedIndex =
-                    GetUint32WithHint( buf, sizeHint, pos );
+                    GetUint32WithHint( buf, bufSize, sizeHint, pos );
 
                 header->lastChangedIndex =
-                    GetUint32WithHint( buf, sizeHint, pos );
+                    GetUint32WithHint( buf, bufSize, sizeHint, pos );
             }
             else if ( ( info & 0x800 ) != 0 )
             {
@@ -1757,7 +1769,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             if ( ( info & 0x0100 ) != 0 )
             {
                 header->timeSamplingIndex =
-                    GetUint32WithHint( buf, sizeHint, pos );
+                    GetUint32WithHint( buf, bufSize, sizeHint, pos );
 
                 header->header.setTimeSampling(
                     iArchive.getTimeSampling( header->timeSamplingIndex ) );
@@ -1768,7 +1780,12 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             }
         }
 
-        Util::uint32_t nameSize = GetUint32WithHint( buf, sizeHint, pos );
+        Util::uint32_t nameSize = GetUint32WithHint( buf, bufSize, sizeHint, pos );
+
+        if (pos + nameSize > bufSize)
+        {
+            ABCA_THROW("Read invalid: Property Headers name.");
+        }
 
         std::string name( &buf[pos], nameSize );
         header->header.setName( name );
@@ -1779,7 +1796,12 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         if ( metaDataIndex == 0xff )
         {
             Util::uint32_t metaDataSize =
-                GetUint32WithHint( buf, sizeHint, pos );
+                GetUint32WithHint( buf, bufSize, sizeHint, pos );
+
+            if (pos + metaDataSize > bufSize)
+            {
+                ABCA_THROW("Read invalid: Property Header MetaData string.");
+            }
 
             std::string metaData( &buf[pos], metaDataSize );
             pos += metaDataSize;
@@ -1815,10 +1837,22 @@ ReadIndexedMetaData( Ogawa::IDataPtr iData,
     // read as part of opening the archive so threadid 0 is ok
     iData->read( iData->getSize(), &( buf.front() ), 0, 0 );
     std::size_t pos = 0;
-    while ( pos < buf.size() )
+    std::size_t bufSize = buf.size();
+    while ( pos < bufSize )
     {
+        if (pos + 1 > bufSize)
+        {
+            ABCA_THROW("Read invalid: Indexed MetaData string size.");
+        }
+
         // these are all small (less than 256 byte) meta data strings
         Util::uint8_t metaDataSize = buf[pos++];
+
+        if (pos + metaDataSize > bufSize)
+        {
+            ABCA_THROW("Read invalid: Indexed MetaData string.");
+        }
+
         std::string metaData( &buf[pos], metaDataSize );
         pos += metaDataSize;
         AbcA::MetaData md;

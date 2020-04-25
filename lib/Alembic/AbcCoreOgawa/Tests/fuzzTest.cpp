@@ -172,8 +172,15 @@ void testIssue257(bool iUseMMap)
 void testIssue258(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
-    ABCA::ArchiveReaderPtr ar = r("issue258.abc");
-    walkObj(ar->getTop());
+    try
+    {
+        r("issue258.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Indexed MetaData string.";
+        TESTING_ASSERT(msg == e.what());
+    }
 }
 
 int main ( int argc, char *argv[] )
