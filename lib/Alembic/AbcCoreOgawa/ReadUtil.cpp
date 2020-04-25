@@ -1458,8 +1458,16 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
 
     iData->read( iData->getSize(), &( buf.front() ), 0, 0 );
     std::size_t pos = 0;
-    while ( pos < buf.size() )
+    std::size_t bufSize = buf.size();
+    while ( pos < bufSize )
     {
+        // make sure maxSample, tpc, and numSamples
+        // don't go beyond our butter
+        if ( pos + 8 + sizeof( chrono_t ) > bufSize)
+        {
+            ABCA_THROW("Read invalid: TimeSamples info.");
+        }
+
         Util::uint32_t maxSample = *( (Util::uint32_t *)( &buf[pos] ) );
         pos += 4;
 
@@ -1470,6 +1478,12 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
 
         Util::uint32_t numSamples = *( (Util::uint32_t *)( &buf[pos] ) );
         pos += 4;
+
+        // make sure our numSamples don't go beyond the buffer
+        if ( pos + sizeof( chrono_t ) * numSamples > bufSize)
+        {
+            ABCA_THROW("Read invalid: TimeSamples sample times.");
+        }
 
         std::vector< chrono_t > sampleTimes( numSamples );
         memcpy( &( sampleTimes.front() ), &buf[pos],

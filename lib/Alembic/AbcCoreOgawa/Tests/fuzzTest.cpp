@@ -131,6 +131,35 @@ void testIssue255(bool iUseMMap)
 
 }
 
+void testIssue256(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        r("issue256.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: TimeSamples sample times.";
+        TESTING_ASSERT(msg == e.what());
+    }
+
+}
+
+void testIssue257(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("issue257.abc");
+    walkObj(ar->getTop());
+}
+
+void testIssue258(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("issue258.abc");
+    walkObj(ar->getTop());
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -138,5 +167,14 @@ int main ( int argc, char *argv[] )
 
     testIssue255(true);
     testIssue255(false);
+
+    testIssue256(true);
+    testIssue256(false);
+
+    testIssue257(true);
+    testIssue257(false);
+
+    testIssue258(true);
+    testIssue258(false);
     return 0;
 }
