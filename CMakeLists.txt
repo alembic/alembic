@@ -223,19 +223,16 @@ FIND_PACKAGE(Threads REQUIRED)
 # We only need boost if including PyAlembic, or using it in the lib
 IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
     INCLUDE("./cmake/AlembicBoost.cmake")
-    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 ENDIF()
 
 # IlmBase
 INCLUDE("./cmake/AlembicIlmBase.cmake")
-INCLUDE_DIRECTORIES(${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY})
 
 # HDF5
 IF (USE_HDF5)
     FIND_PACKAGE(ZLIB REQUIRED)
     SET(ALEMBIC_WITH_HDF5 "1")
     INCLUDE("./cmake/AlembicHDF5.cmake")
-    INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5_USE_18_API")
 ENDIF()
 
