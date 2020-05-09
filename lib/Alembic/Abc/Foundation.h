@@ -40,20 +40,20 @@
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/Util/All.h>
 
-#include <ImathVec.h>
-#include <ImathBox.h>
-#include <ImathMatrix.h>
-#include <ImathQuat.h>
-#include <ImathColor.h>
+#include <OpenEXR/ImathVec.h>
+#include <OpenEXR/ImathBox.h>
+#include <OpenEXR/ImathMatrix.h>
+#include <OpenEXR/ImathQuat.h>
+#include <OpenEXR/ImathColor.h>
 
 #include <iostream>
 #include <string>
 #include <exception>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <cassert>
 
 namespace Alembic {
 namespace Abc {

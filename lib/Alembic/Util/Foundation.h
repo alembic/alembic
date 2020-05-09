@@ -63,7 +63,7 @@
 
 #include <memory>
 
-#include <half.h>
+#include <OpenEXR/half.h>
 
 #include <iomanip>
 #include <iostream>
@@ -76,10 +76,10 @@
 #include <string>
 #include <vector>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 
 #include <Alembic/Util/Export.h>
 

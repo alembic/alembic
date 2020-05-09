@@ -39,8 +39,8 @@
 
 #include <Alembic/Abc/All.h>
 
-#include <ImathMatrixAlgo.h>
-#include <ImathEuler.h>
+#include <OpenEXR/ImathMatrixAlgo.h>
+#include <OpenEXR/ImathEuler.h>
 
 
 namespace Alembic {
