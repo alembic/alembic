@@ -183,6 +183,50 @@ void testIssue258(bool iUseMMap)
     }
 }
 
+void testIssue269(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("issue269.abc");
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "ReadData invalid: Null IDataPtr.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
+void testIssue270(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("issue270.abc");
+    walkObj(ar->getTop());
+}
+
+void testIssue271(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("issue271.abc");
+    walkObj(ar->getTop());
+}
+
+void testIssue272(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("issue272.abc");
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Object Headers MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -199,5 +243,18 @@ int main ( int argc, char *argv[] )
 
     testIssue258(true);
     testIssue258(false);
+
+    testIssue269(true);
+    testIssue269(false);
+
+    testIssue270(true);
+    testIssue270(false);
+
+    testIssue271(true);
+    testIssue271(false);
+
+    testIssue272(true);
+    testIssue272(false);
+
     return 0;
 }

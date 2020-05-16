@@ -1323,6 +1323,11 @@ ReadData( void * iIntoLocation,
         curPod != Alembic::Util::kWstringPOD ),
         "Cannot convert the data to or from a string, or wstring." );
 
+    if ( !iData )
+    {
+        ABCA_THROW("ReadData invalid: Null IDataPtr.");
+        return;
+    }
     std::size_t dataSize = iData->getSize();
 
     if ( dataSize < 16 )
@@ -1577,10 +1582,15 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
 
             objPtr->getMetaData().deserialize( metaData );
         }
-        else
+        else if ( metaDataIndex < iMetaDataVec.size() )
         {
             objPtr->getMetaData() = iMetaDataVec[metaDataIndex];
         }
+        else
+        {
+            ABCA_THROW("Read invalid: Object Headers MetaData index.");
+        }
+
 
         oHeaders.push_back( objPtr );
     }
