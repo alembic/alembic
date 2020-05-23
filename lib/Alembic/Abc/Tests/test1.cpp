@@ -286,5 +286,7 @@ int main( int argc, char *argv[] )
     simpleTestOut();
     simpleTestIn();
 
+    Argument defArg;
+    ABCA_ASSERT(GetTimeSamplingIndex(defArg) == 0, "index should be 1");
     return 0;
 }
