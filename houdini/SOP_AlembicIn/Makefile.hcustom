@@ -5,8 +5,7 @@ ABCBUILDROOT = ../../../alembic_build/lib/Alembic
 
 INCLUDES = -I $(ABCROOT)
 
-LINKPATHS = -L $(ABCBUILDROOT)/MD5Hash \
-            -L $(ABCBUILDROOT)/Util \
+LINKPATHS = -L $(ABCBUILDROOT)/Util \
             -L $(ABCBUILDROOT)/AbcCoreAbstract \
             -L $(ABCBUILDROOT)/AbcCoreOgawa \
             -L $(ABCBUILDROOT)/AbcCoreHDF5 \
