@@ -77,7 +77,8 @@ IGroup::IGroup(IStreamsPtr iStreams,
     mData->streams->read(iThreadIndex, iPos, 8, &mData->numChildren);
 
     // make sure we don't have a maliciously bad number of children
-    if ( mData->numChildren > (mData->streams->getSize() / 8) )
+    if ( mData->numChildren > (mData->streams->getSize() / 8) ||
+         mData->numChildren == 0 )
     {
         mData->numChildren = 0;
         return;
