@@ -179,7 +179,7 @@ private:
     {
         struct __stat64 buf;
 
-        int err = _stat64(iFile, &buf);
+        int err = _fstat64(iFile, &buf);
         if (err < 0) return -1;
         if (buf.st_size < 0) return -1;
 
