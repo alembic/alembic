@@ -227,6 +227,27 @@ void testIssue272(bool iUseMMap)
     }
 }
 
+void testIssue282(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("issue282.abc");
+    walkObj(ar->getTop());
+}
+
+void testIssue283(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("issue283.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid Alembic file.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -255,6 +276,12 @@ int main ( int argc, char *argv[] )
 
     testIssue272(true);
     testIssue272(false);
+
+    testIssue282(true);
+    testIssue282(false);
+
+    testIssue283(true);
+    testIssue283(false);
 
     return 0;
 }
