@@ -1,3 +1,30 @@
+2020-07-11, Alembic 1.7.13
+Thanks to your feedback and many issues submitted as well as a few pull requests
+we have several bug fixes.
+
+API:
+
+Ogawa:  Google generously setup AutoFuzz and it found several issues when
+reading maliciously created files.  These issues reported issues are fixed:
+253-258, 269-272, 282, 283 (PR266)
+
+Maya:
+
+AbcImport: Add support for connecting MFnData::kFloatArray.
+
+Build:
+
+Fix issue where WFObjConvert headers were being put in the wrong place when
+installed. (Issue 264)
+
+Partly address Issue 265 by making some adjustments to the Doxyfile and remove
+a very old reference to MD5Hash in the very old Houdini SOP.
+
+Partly address issues outline in PR268, use MSVC instead of Windows variable
+as they are Visual Studio specific flags and define
+-Wno-error=implicit-fallthrough for CLANG and GCC 7 and up.
+
+
 2019-10-25, Alembic 1.7.12
 Thanks to your feedback and numerous pull requests we have several enhancements
 and bug fixes.
