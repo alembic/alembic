@@ -58,6 +58,8 @@ public:
     bool isFrozen();
     Alembic::Util::uint16_t getVersion();
 
+    Alembic::Util::uint64_t getSize();
+
     // locks on the threadId, seeks to iPos, and reads iSize bytes into oBuf
     void read(std::size_t iThreadId, Alembic::Util::uint64_t iPos,
               Alembic::Util::uint64_t iSize, void * oBuf);
