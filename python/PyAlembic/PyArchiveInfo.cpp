@@ -101,6 +101,16 @@ static dict GetArchiveInfoWrapper( Abc::IArchive& iArchive )
 }
 
 //-*****************************************************************************
+static tuple GetArchiveStartAndEndTimeWrapper( Abc::IArchive& iArchive )
+{
+    double oStart;
+    double oEnd;
+    Abc::GetArchiveStartAndEndTime( iArchive, oStart, oEnd );
+
+    return make_tuple( oStart, oEnd );
+}
+
+//-*****************************************************************************
 void register_archiveinfo()
 {
     def( "CreateArchiveWithInfo",
@@ -113,6 +123,11 @@ void register_archiveinfo()
          GetArchiveInfoWrapper,
          ( arg( "IArchive" ) ),
          "Return a dictionary that contains info of the given IArchive" );
+    def( "GetArchiveStartAndEndTime",
+         GetArchiveStartAndEndTimeWrapper,
+         ( arg( "IArchive" ) ),
+         "Return tuple of start and end time for the IArchive using only the "
+         "TimeSamplings" );
 
     def( "GetLibraryVersionShort",
          AbcA::GetLibraryVersionShort,
