@@ -77,6 +77,9 @@ OPTION(ALEMBIC_LIB_USES_BOOST
     "Main Alembic library uses boost for things like shared_ptr" OFF)
 OPTION(ALEMBIC_LIB_USES_TR1
     "Main Alembic library uses std::tr1 for things like shared_ptr" OFF)
+option(USE_DOCS
+    "Create and install the HTML based API documentation (requires Doxygen)"
+    OFF)
 
 # Set static/dynamic build options
 SET(LIB_TYPE STATIC)
@@ -214,6 +217,10 @@ ENDIF()
 
 FIND_PACKAGE(Threads REQUIRED)
 
+IF (USE_DOCS)
+    FIND_PACKAGE(Doxygen)
+ENDIF()
+
 # We only need boost if including PyAlembic, or using it in the lib
 IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
     INCLUDE("./cmake/AlembicBoost.cmake")
@@ -321,6 +328,7 @@ ENDMACRO()
 
 info_cfg_option(USE_ARNOLD)
 info_cfg_option(USE_BINARIES)
+info_cfg_option(USE_DOCS)
 info_cfg_option(USE_EXAMPLES)
 info_cfg_option(USE_HDF5)
 info_cfg_option(USE_MAYA)
