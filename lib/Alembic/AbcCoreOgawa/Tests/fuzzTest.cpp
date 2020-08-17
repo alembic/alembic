@@ -276,6 +276,21 @@ void testFuzzer24853(bool iUseMMap)
     }
 }
 
+
+void testFuzzer24598(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue24598.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IData illegal size.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -316,6 +331,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzer24853(true);
     testFuzzer24853(false);
+
+    testFuzzer24598(true);
+    testFuzzer24598(false);
 
     return 0;
 }
