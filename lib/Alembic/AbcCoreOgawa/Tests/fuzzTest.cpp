@@ -291,6 +291,35 @@ void testFuzzer24598(bool iUseMMap)
     }
 }
 
+void testFuzzer25051(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25051.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IData illegal size.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
+void testFuzzer25081(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25081.abc");
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid data in CprImpl(Object)";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -334,6 +363,12 @@ int main ( int argc, char *argv[] )
 
     testFuzzer24598(true);
     testFuzzer24598(false);
+
+    testFuzzer25051(true);
+    testFuzzer25051(false);
+
+    testFuzzer25081(true);
+    testFuzzer25081(false);
 
     return 0;
 }
