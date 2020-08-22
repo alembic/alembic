@@ -75,7 +75,7 @@ def testObjOut():
 def testObjIn():
     """read the archives as layered to test layering on objects"""
 
-    arch = IArchive(['layerObjA.abc', 'layerObjB.abc'])
+    arch = IArchive(['layerObjB.abc', 'layerObjA.abc'])
     obj = arch.getTop()
     assert obj.getNumChildren() == 2
 
@@ -129,7 +129,7 @@ def testPropOut():
 def testPropIn():
     """read the archives as layered to test property layering"""
 
-    arch = IArchive(['layerPropA.abc', 'layerPropB.abc'])
+    arch = IArchive(['layerPropB.abc', 'layerPropA.abc'])
     prop = arch.getTop().getProperties()
     assert prop.getNumProperties() == 2
 
