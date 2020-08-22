@@ -39,7 +39,7 @@
 #include <Alembic/Util/Murmur3.h>
 #include <Alembic/Util/PlainOldDataType.h>
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
 #include <machine/endian.h>
 #elif !defined(_MSC_VER)
 #include <endian.h>
