@@ -80,7 +80,14 @@ IData::IData(IStreamsPtr iStreams,
     if ( mData->pos != 0 )
     {
         mData->streams->read(iThreadId, mData->pos, 8, &size);
-        mData->size = size;
+        if (mData->streams->getSize() < size)
+        {
+            throw std::runtime_error("Ogawa IData illegal size.");
+        }
+        else
+        {
+            mData->size = size;
+        }
     }
 }
 

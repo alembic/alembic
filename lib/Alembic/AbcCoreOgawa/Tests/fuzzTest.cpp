@@ -125,7 +125,7 @@ void testIssue254(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Ogawa IStreams::read failed.";
+        std::string msg = "Ogawa IData illegal size.";
         TESTING_ASSERT(msg == e.what());
     }
 
@@ -248,6 +248,78 @@ void testIssue283(bool iUseMMap)
     }
 }
 
+void testFuzzer24846(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue24846.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IData illegal size.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
+void testFuzzer24853(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue24853.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IData illegal size.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
+
+void testFuzzer24598(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue24598.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IData illegal size.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
+void testFuzzer25051(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25051.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IData illegal size.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
+void testFuzzer25081(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25081.abc");
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid data in CprImpl(Object)";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -282,6 +354,21 @@ int main ( int argc, char *argv[] )
 
     testIssue283(true);
     testIssue283(false);
+
+    testFuzzer24846(true);
+    testFuzzer24846(false);
+
+    testFuzzer24853(true);
+    testFuzzer24853(false);
+
+    testFuzzer24598(true);
+    testFuzzer24598(false);
+
+    testFuzzer25051(true);
+    testFuzzer25051(false);
+
+    testFuzzer25081(true);
+    testFuzzer25081(false);
 
     return 0;
 }
