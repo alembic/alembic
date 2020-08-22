@@ -142,8 +142,9 @@ public:
     }
 
     OTypedGeomParam()
-    : m_scope(kUnknownScope)
-    , m_isIndexed(false)
+    : m_isIndexed(false)
+    , m_scope(kUnknownScope)
+
     {
     }
 

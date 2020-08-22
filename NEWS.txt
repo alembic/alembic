@@ -1,3 +1,38 @@
+2020-07-22, Alembic 1.7.14
+Thanks to your feedback,issues, and pull requests we have several bug fixes and
+a few enhancements.
+
+API:
+
+Ogawa:
+
+Fix another Fuzzer issue with Ogawa::IData allocating too much memory
+because of a malicious file.  Add tests for Fuzzer issues:
+24846, 24853, 24598, 25051, and 25081. (PR296)
+
+Add support for the Haiku OS. (PR298)
+
+Murmur3:
+
+Add preprocessor define to support FreeBSD. (Issue 288)
+
+Remove Murmur3 from the LICENSE.txt since it was moved into the public domain
+a while ago, and is reflected as such in the code. (Issue 292)
+
+AbcGeom:
+
+Fix uninitialized member variable in OTypedGeomParam. (PR290)
+
+HDF:
+
+Remove some unused local functions. (Issue 293)
+
+Python bindings:
+
+Add GetArchiveStartAndEndTime. (PR291)
+
+Add optional dccFPS to the GetArchiveInfo dict. (PR294)
+
 2020-07-11, Alembic 1.7.13
 Thanks to your feedback and many issues submitted as well as a few pull requests
 we have several bug fixes.
