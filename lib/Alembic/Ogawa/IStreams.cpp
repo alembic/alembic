@@ -38,7 +38,8 @@
 #include <stdexcept>
 
 
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#if defined (__unix__) || defined (__HAIKU__) || \
+    (defined (__APPLE__) && defined (__MACH__))
 
     #include <sys/mman.h>
     #include <sys/stat.h>
