@@ -128,17 +128,17 @@ std::string TokenMap::get( char pairSep,
                            bool check ) const
 {
     char buf[2] = { 0, 0 };
-    
+
     buf[0] = pairSep;
     std::string pairSepStr( ( const char * )buf );
-    
+
     buf[0] = assignSep;
     std::string assignSepStr( ( const char * )buf );
 
     std::stringstream output;
 
     bool start = true;
-    
+
     for ( const_iterator iter = m_map.begin();
           iter != m_map.end(); ++iter )
     {
@@ -151,11 +151,10 @@ std::string TokenMap::get( char pairSep,
                value.find( pairSep ) != std::string::npos ||
                value.find( assignSep ) != std::string::npos ) )
         {
-            ALEMBIC_THROW( "TokenMap::get: Token-Value pair: "
-                           << token << ", " << value
-                           << " contains separator characters: "
-                           << pairSepStr << " or "
-                           << assignSepStr );
+            ALEMBIC_THROW( "TokenMap::get: Token-Value pair " <<
+                " contains separator characters: " <<
+                pairSepStr << " or " << assignSepStr <<
+                " for " << token << " or "  << value);
         }
 
         if ( value == "" )
