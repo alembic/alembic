@@ -11,19 +11,19 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6.3
+            - g++-4.8
             - zlib1g-dev
-      env: COMPILER=g++-6.3
+      env: COMPILER=g++-4.8
     - compiler: clang
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-10.0
+            - llvm-toolchain-precise-3.7
           packages:
-            - clang-10.0
+            - clang-3.7
             - zlib1g-dev
-      env: COMPILER=clang-10.0
+      env: COMPILER=clang-3.7
 
 env:
   global:
