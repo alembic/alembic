@@ -470,6 +470,23 @@ void testFuzzer25236(bool iUseMMap)
     TESTING_ASSERT(1);
 }
 
+void testFuzzer25351(bool iUseMMap)
+{
+    // seems to be fixed by fix for 25166 (bad meta data index)
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25351.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Header MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -537,6 +554,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzer25236(true);
     testFuzzer25236(false);
+
+    testFuzzer25351(true);
+    testFuzzer25351(false);
 
     return 0;
 }
