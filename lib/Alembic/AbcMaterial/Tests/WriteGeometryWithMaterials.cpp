@@ -34,20 +34,6 @@ const Abc::int32_t g_indices[] = {
     // FRONT
     4, 5, 7, 6 };
 
-const Abc::uint32_t g_uindices[] = {
-    // LEFT
-    0, 4, 6, 2,
-    // RIGHT
-    5, 1, 3, 7,
-    // BOTTOM
-    0, 1, 5, 4,
-    // TOP,
-    6, 7, 3, 2,
-    // BACK
-    1, 0, 2, 3,
-    // FRONT
-    4, 5, 7, 6 };
-
 //-*****************************************************************************
 // "Face Counts" - number of vertices in each face.
 const size_t g_numCounts = 6;
