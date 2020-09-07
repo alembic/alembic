@@ -128,6 +128,19 @@ INSTALL(FILES
     ${ConfigPackageLocation}
     )
 
+IF (DOCS_PATH)
+    IF(NOT DOXYGEN_FOUND)
+         MESSAGE(FATAL_ERROR "Doxygen is needed to build the documentation.")
+    ENDIF()
+
+    SET(DOXYGEN_EXCLUDE_PATTERNS */Tests/*)
+    SET(DOXYGEN_OUTPUT_DIRECTORY ${DOCS_PATH})
+    SET(DOXYGEN_GENERATE_HTML YES)
+    DOXYGEN_ADD_DOCS( doxygen ${CMAKE_CURRENT_SOURCE_DIR} )
+
+ENDIF()
+
+
 INSTALL(EXPORT
     AlembicTargets
     FILE
