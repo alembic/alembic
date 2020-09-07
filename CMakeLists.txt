@@ -77,8 +77,8 @@ OPTION(ALEMBIC_LIB_USES_BOOST
     "Main Alembic library uses boost for things like shared_ptr" OFF)
 OPTION(ALEMBIC_LIB_USES_TR1
     "Main Alembic library uses std::tr1 for things like shared_ptr" OFF)
-option(USE_DOCS
-    "Create and install the HTML based API documentation (requires Doxygen)"
+option(DOCS_PATH
+    "Create and install the HTML based API documentation to this location (requires Doxygen)"
     OFF)
 
 # Set static/dynamic build options
@@ -217,7 +217,7 @@ ENDIF()
 
 FIND_PACKAGE(Threads REQUIRED)
 
-IF (USE_DOCS)
+IF (DOCS_PATH)
     FIND_PACKAGE(Doxygen)
 ENDIF()
 
@@ -328,7 +328,6 @@ ENDMACRO()
 
 info_cfg_option(USE_ARNOLD)
 info_cfg_option(USE_BINARIES)
-info_cfg_option(USE_DOCS)
 info_cfg_option(USE_EXAMPLES)
 info_cfg_option(USE_HDF5)
 info_cfg_option(USE_MAYA)
@@ -341,4 +340,5 @@ info_cfg_option(ALEMBIC_ILMBASE_LINK_STATIC)
 info_cfg_option(ALEMBIC_SHARED_LIBS)
 info_cfg_option(ALEMBIC_LIB_USES_BOOST)
 info_cfg_option(ALEMBIC_LIB_USES_TR1)
+info_cfg_option(DOCS_PATH)
 MESSAGE("${_config_msg}")
