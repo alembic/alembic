@@ -127,8 +127,10 @@ void testIssue254(bool iUseMMap)
     {
         std::string msg = "Ogawa IData illegal size.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
 
+    TESTING_ASSERT(1);
 }
 
 void testIssue255(bool iUseMMap)
@@ -150,8 +152,10 @@ void testIssue256(bool iUseMMap)
     {
         std::string msg = "Read invalid: TimeSamples sample times.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
 
+    TESTING_ASSERT(1);
 }
 
 void testIssue257(bool iUseMMap)
@@ -166,7 +170,10 @@ void testIssue257(bool iUseMMap)
     {
         std::string msg = "Read invalid: Object Headers name and MetaData index.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 void testIssue258(bool iUseMMap)
@@ -180,7 +187,10 @@ void testIssue258(bool iUseMMap)
     {
         std::string msg = "Read invalid: Indexed MetaData string.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 void testIssue269(bool iUseMMap)
@@ -195,7 +205,10 @@ void testIssue269(bool iUseMMap)
     {
         std::string msg = "ReadData invalid: Null IDataPtr.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 void testIssue270(bool iUseMMap)
@@ -224,7 +237,10 @@ void testIssue272(bool iUseMMap)
     {
         std::string msg = "Read invalid: Object Headers MetaData index.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 void testIssue282(bool iUseMMap)
@@ -245,7 +261,10 @@ void testIssue283(bool iUseMMap)
     {
         std::string msg = "Invalid Alembic file.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 void testFuzzer24846(bool iUseMMap)
@@ -259,7 +278,10 @@ void testFuzzer24846(bool iUseMMap)
     {
         std::string msg = "Ogawa IData illegal size.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 void testFuzzer24853(bool iUseMMap)
@@ -273,7 +295,10 @@ void testFuzzer24853(bool iUseMMap)
     {
         std::string msg = "Ogawa IData illegal size.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 
@@ -288,7 +313,10 @@ void testFuzzer24598(bool iUseMMap)
     {
         std::string msg = "Ogawa IData illegal size.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 void testFuzzer25051(bool iUseMMap)
@@ -302,7 +330,10 @@ void testFuzzer25051(bool iUseMMap)
     {
         std::string msg = "Ogawa IData illegal size.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(1);
 }
 
 void testFuzzer25081(bool iUseMMap)
@@ -318,6 +349,142 @@ void testFuzzer25081(bool iUseMMap)
         std::string msg = "Invalid data in CprImpl(Object)";
         TESTING_ASSERT(msg == e.what());
     }
+
+    ABCA::MetaData ph = ar->getTop()->getHeader().getMetaData();
+    try
+    {
+        ph.serialize();
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "TokenMap::get: Token-Value pair  contains separator characters: ; or = for ";
+        std::string err = e.what();
+        TESTING_ASSERT(msg == err.substr(0, msg.size()));
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
+void testFuzzer25166(bool iUseMMap)
+{
+    // found issue with illegal meta data index
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25166.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Header MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
+void testFuzzer25175(bool iUseMMap)
+{
+    // seems to be fixed by fix for 25166 (bad meta data index)
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25175.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Header MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
+void testFuzzer25185(bool iUseMMap)
+{
+    // seems to be fixed by fix for 25166 (bad meta data index)
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25185.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Header MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
+void testFuzzer25192(bool iUseMMap)
+{
+    // found leak in AbcOgawa::OrData with raw pointer
+    // to m_children
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25192.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IStreams::read failed.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+
+}
+
+void testFuzzer25204(bool iUseMMap)
+{
+    // seems to be fixed by fix for 25166 (bad meta data index)
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25204.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Header MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
+void testFuzzer25236(bool iUseMMap)
+{
+    // seems to be fixed by fix for 25166 (bad meta data index)
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25236.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Header MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
+void testFuzzer25351(bool iUseMMap)
+{
+    // seems to be fixed by fix for 25166 (bad meta data index)
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25351.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Header MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
 }
 
 int main ( int argc, char *argv[] )
@@ -369,6 +536,27 @@ int main ( int argc, char *argv[] )
 
     testFuzzer25081(true);
     testFuzzer25081(false);
+
+    testFuzzer25166(true);
+    testFuzzer25166(false);
+
+    testFuzzer25175(true);
+    testFuzzer25175(false);
+
+    testFuzzer25185(true);
+    testFuzzer25185(false);
+
+    testFuzzer25192(true);
+    testFuzzer25192(false);
+
+    testFuzzer25204(true);
+    testFuzzer25204(false);
+
+    testFuzzer25236(true);
+    testFuzzer25236(false);
+
+    testFuzzer25351(true);
+    testFuzzer25351(false);
 
     return 0;
 }

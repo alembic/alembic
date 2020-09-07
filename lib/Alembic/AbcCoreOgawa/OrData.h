@@ -94,7 +94,7 @@ private:
     typedef std::map<std::string, size_t> ChildrenMap;
 
     // The children
-    Child * m_children;
+    Alembic::Util::unique_ptr< Child[] > m_children;
     ChildrenMap m_childrenMap;
 
     // Our "top" property.

@@ -1820,9 +1820,13 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
             md.deserialize( metaData );
             header->header.setMetaData( md );
         }
-        else
+        else if (metaDataIndex < iMetaDataVec.size())
         {
             header->header.setMetaData( iMetaDataVec[metaDataIndex] );
+        }
+        else
+        {
+            ABCA_THROW("Read invalid: Property Header MetaData index.");
         }
 
         oHeaders.push_back( header );

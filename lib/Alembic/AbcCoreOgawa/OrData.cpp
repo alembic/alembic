@@ -50,7 +50,6 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
                 std::size_t iThreadId,
                 AbcA::ArchiveReader & iArchive,
                 const std::vector< AbcA::MetaData > & iIndexedMetaData )
-    : m_children( NULL )
 {
     ABCA_ASSERT( iGroup, "Invalid object data group" );
 
@@ -66,7 +65,8 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
 
         if ( !headers.empty() )
         {
-            m_children = new Child[ headers.size() ];
+            m_children = Alembic::Util::unique_ptr< Child[] > (
+                new Child[ headers.size() ] );
         }
 
         for ( std::size_t i = 0; i < headers.size(); ++i )
@@ -87,7 +87,6 @@ OrData::OrData( Ogawa::IGroupPtr iGroup,
 //-*****************************************************************************
 OrData::~OrData()
 {
-    delete [] m_children;
 }
 
 //-*****************************************************************************
