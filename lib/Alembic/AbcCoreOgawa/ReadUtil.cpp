@@ -1875,12 +1875,20 @@ ReadIndexedMetaData( Ogawa::IDataPtr iData,
         {
             ABCA_THROW("Read invalid: Indexed MetaData string.");
         }
-
-        std::string metaData( &buf[pos], metaDataSize );
-        pos += metaDataSize;
-        AbcA::MetaData md;
-        md.deserialize( metaData );
-        oMetaDataVec.push_back( md );
+        else if (pos == bufSize)
+        {
+            pos += metaDataSize;
+            AbcA::MetaData md;
+            oMetaDataVec.push_back( md );
+        }
+        else
+        {
+            std::string metaData( &buf[pos], metaDataSize );
+            pos += metaDataSize;
+            AbcA::MetaData md;
+            md.deserialize( metaData );
+            oMetaDataVec.push_back( md );
+        }
     }
 }
 
