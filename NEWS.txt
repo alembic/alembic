@@ -1,3 +1,22 @@
+2020-09-10, Alembic 1.7.15
+Thanks to your feedback and issues we have a few bug fixes and an enhancement.
+
+AbcCoreOgawa:
+Fuzzer issues 25166, 25175, 25185, 25204, and 25236 all test for illegal
+meta data index values which we more carefully test.
+
+Fuzzer issue 25192 turned up a leak from a malformed file causing OrData to
+throw.
+
+Tests:
+Clang was flagging an unused variable in AbcMaterial tests.
+
+CMake:
+
+Add DOCS_PATH variable which will add Doxygen as a target and cause the
+generated html directory to be installed to that location.  We remove the
+Doxygen file from the project and now use CMakes module to configure it.
+
 2020-07-22, Alembic 1.7.14
 Thanks to your feedback,issues, and pull requests we have several bug fixes and
 a few enhancements.
