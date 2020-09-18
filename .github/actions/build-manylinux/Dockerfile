@@ -6,6 +6,6 @@ FROM quay.io/pypa/manylinux2010_x86_64:latest
 ENV PLAT manylinux2010_x86_64
 
 # Copy build script and build
-COPY build_alembic.sh .
+COPY build_alembic.sh /entrypoint.sh
 
-ENTRYPOINT [ "build_alembic.sh" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
