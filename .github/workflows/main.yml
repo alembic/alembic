@@ -22,6 +22,15 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      # Use the alembic build action of this repo
+      - uses: ./.github/actions/build-manylinux
+
+      # Upload wheel as artifact
+      - uses: actions/upload-artifact@v2
+        with:
+          name: wheel
+          path: dist/*-manylinux*.whl
+
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
