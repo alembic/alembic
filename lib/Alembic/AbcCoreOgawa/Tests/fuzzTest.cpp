@@ -487,6 +487,23 @@ void testFuzzer25351(bool iUseMMap)
     TESTING_ASSERT(1);
 }
 
+void testFuzzer25502(bool iUseMMap)
+{
+    // seems to be fixed by fix for 25166 (bad meta data index)
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25502.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IStreams::read failed.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -557,6 +574,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzer25351(true);
     testFuzzer25351(false);
+
+    testFuzzer25502(true);
+    testFuzzer25502(false);
 
     return 0;
 }

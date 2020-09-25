@@ -122,8 +122,9 @@ void ArImpl::init()
 
     ReadIndexedMetaData( group->getData( 5, 0 ), m_indexMetaData );
 
-    m_data.reset( new OrData( group->getGroup( 2, false, 0 ), "", 0, *this,
-                              m_indexMetaData ) );
+    m_data = Alembic::Util::shared_ptr < OrData >( new OrData(
+        group->getGroup( 2, false, 0 ), "", 0, *this,
+        m_indexMetaData ) );
 
     m_header->setName( "ABC" );
     m_header->setFullName( "/" );
