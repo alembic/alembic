@@ -489,7 +489,7 @@ void testFuzzer25351(bool iUseMMap)
 
 void testFuzzer25502(bool iUseMMap)
 {
-    // seems to be fixed by fix for 25166 (bad meta data index)
+    // leak on reading archive metadata because of throw
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     try
     {
@@ -502,6 +502,13 @@ void testFuzzer25502(bool iUseMMap)
         return;
     }
     TESTING_ASSERT(1);
+}
+
+void testFuzzer25695(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25695.abc");
+    walkObj(ar->getTop());
 }
 
 int main ( int argc, char *argv[] )
@@ -577,6 +584,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzer25502(true);
     testFuzzer25502(false);
+
+    testFuzzer25695(true);
+    testFuzzer25695(false);
 
     return 0;
 }

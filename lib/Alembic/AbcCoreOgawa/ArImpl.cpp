@@ -133,11 +133,9 @@ void ArImpl::init()
     data = group->getData( 3, 0 );
     if ( data->getSize() > 0 )
     {
-        char * buf = new char[ data->getSize() ];
-        data->read( data->getSize(), buf, 0, 0 );
-        std::string metaData(buf, data->getSize() );
+        std::string metaData(data->getSize(), 0);
+        data->read( data->getSize(), &(metaData[0]), 0, 0 );
         m_header->getMetaData().deserialize( metaData );
-        delete [] buf;
     }
 
 }
