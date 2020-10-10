@@ -487,6 +487,30 @@ void testFuzzer25351(bool iUseMMap)
     TESTING_ASSERT(1);
 }
 
+void testFuzzer25502(bool iUseMMap)
+{
+    // leak on reading archive metadata because of throw
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25502.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IStreams::read failed.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
+void testFuzzer25695(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25695.abc");
+    walkObj(ar->getTop());
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -557,6 +581,12 @@ int main ( int argc, char *argv[] )
 
     testFuzzer25351(true);
     testFuzzer25351(false);
+
+    testFuzzer25502(true);
+    testFuzzer25502(false);
+
+    testFuzzer25695(true);
+    testFuzzer25695(false);
 
     return 0;
 }
