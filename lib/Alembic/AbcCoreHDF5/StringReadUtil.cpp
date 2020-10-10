@@ -47,13 +47,13 @@ template <class CharT>
 static inline hid_t GetNativeDtype();
 
 template <>
-inline hid_t GetNativeDtype<char>() { return H5T_NATIVE_CHAR; }
+inline hid_t GetNativeDtype<char>() { return H5T_NATIVE_SCHAR; }
 
 template <>
 inline hid_t GetNativeDtype<wchar_t>()
 {
     // return H5T_NATIVE_INT32;
-    if ( sizeof( wchar_t ) == 1 ) { return H5T_NATIVE_CHAR; }
+    if ( sizeof( wchar_t ) == 1 ) { return H5T_NATIVE_SCHAR; }
     else if ( sizeof( wchar_t ) == 2 ) { return H5T_NATIVE_INT16; }
     else
     {
