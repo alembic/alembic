@@ -127,6 +127,12 @@ IGroupPtr IGroup::getGroup(Alembic::Util::uint64_t iIndex, bool iLight,
         child.reset(new IGroup(mData->streams, mData->childVec[iIndex], iLight,
                                iThreadIndex));
     }
+
+    if (child && child->mData->pos == mData->pos)
+    {
+        throw std::runtime_error("Ogawa: Invalid recursive IGroup.");
+    }
+
     return child;
 }
 

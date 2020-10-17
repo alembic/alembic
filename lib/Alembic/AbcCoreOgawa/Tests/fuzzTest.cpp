@@ -112,6 +112,7 @@ void walkObj(ABCA::ObjectReaderPtr parent)
     for(std::size_t i = 0; i < parent->getNumChildren(); ++i)
     {
         ABCA::ObjectReaderPtr child = parent->getChild(i);
+        walkObj(child);
     }
 }
 
@@ -137,8 +138,17 @@ void testIssue255(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue255.abc");
-    walkObj(ar->getTop());
-
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "ReadData invalid: Null IDataPtr.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
 }
 
 void testIssue256(bool iUseMMap)
@@ -215,14 +225,35 @@ void testIssue270(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue270.abc");
-    walkObj(ar->getTop());
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Headers name.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+
 }
 
 void testIssue271(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue271.abc");
-    walkObj(ar->getTop());
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Header MetaData index.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+
+    TESTING_ASSERT(1);
 }
 
 void testIssue272(bool iUseMMap)
@@ -247,7 +278,18 @@ void testIssue282(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue282.abc");
-    walkObj(ar->getTop());
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa IStreams::read failed.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+
+    TESTING_ASSERT(1);
 }
 
 void testIssue283(bool iUseMMap)
@@ -311,7 +353,7 @@ void testFuzzer24598(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Ogawa IData illegal size.";
+        std::string msg = "Ogawa: Invalid recursive IGroup.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -339,29 +381,18 @@ void testFuzzer25051(bool iUseMMap)
 void testFuzzer25081(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
-    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25081.abc");
+    ABCA::ArchiveReaderPtr ar;
     try
     {
-        walkObj(ar->getTop());
+        ar = r("fuzzer_issue25081.abc");
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Invalid data in CprImpl(Object)";
+        std::string msg = "Ogawa: Invalid recursive IGroup.";
         TESTING_ASSERT(msg == e.what());
-    }
-
-    ABCA::MetaData ph = ar->getTop()->getHeader().getMetaData();
-    try
-    {
-        ph.serialize();
-    }
-    catch(const std::exception& e)
-    {
-        std::string msg = "TokenMap::get: Token-Value pair  contains separator characters: ; or = for ";
-        std::string err = e.what();
-        TESTING_ASSERT(msg == err.substr(0, msg.size()));
         return;
     }
+
     TESTING_ASSERT(1);
 }
 
@@ -497,7 +528,7 @@ void testFuzzer25502(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Ogawa IStreams::read failed.";
+        std::string msg = "Ogawa: Invalid recursive IGroup.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -508,7 +539,35 @@ void testFuzzer25695(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25695.abc");
-    walkObj(ar->getTop());
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Property Headers name.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+    TESTING_ASSERT(1);
+}
+
+void testFuzzer26125(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue26125.abc");
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Ogawa: Invalid recursive IGroup.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+
+    TESTING_ASSERT(1);
 }
 
 int main ( int argc, char *argv[] )
@@ -587,6 +646,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzer25695(true);
     testFuzzer25695(false);
+
+    testFuzzer26125(true);
+    testFuzzer26125(false);
 
     return 0;
 }
