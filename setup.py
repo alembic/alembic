@@ -70,7 +70,7 @@ class CMakeBuild(build_ext):
             shutil.copyfile(os.path.join(site_dir, package), os.path.join(extdir, package))
 setup(
     name='alembic',
-    version='1.7.14',
+    version='1.7.16',
     author='Alembic',
     author_email='',
     description='Alembic is an open framework for storing and sharing scene data that includes a C++ library, a file format, and client plugins and applications.',

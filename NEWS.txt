@@ -1,3 +1,24 @@
+2020-10-23, Alembic 1.7.16
+Thanks to your feedback,and pull requests a couple of bug fixes and a GitHub
+enhancement.
+
+GitHub:
+
+Add a Github Action to create a python 2.7 wheel. (PR 310)
+
+AbcCoreHDF5:
+
+Specify char signedness when setting the HDF5 data type as some architectures,
+like ARM, default to unsigned. (PR 316)
+
+AbcCoreOgawa:
+
+Fuzzer issue 25695: Fix leak that can occur when reading meta data, but the file
+is maliciously cut short.  (PR 315)
+
+Fuzzer issue 26125:  Add a check and throw an excpetion for an obviously
+recursive group. (PR 321)
+
 2020-09-10, Alembic 1.7.15
 Thanks to your feedback and issues we have a few bug fixes and an enhancement.
 
