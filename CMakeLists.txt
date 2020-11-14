@@ -73,6 +73,10 @@ OPTION(USE_TESTS "Include Alembic tests" ON)
 OPTION(ALEMBIC_BUILD_LIBS "Build library, if off use external alembic libs" ON)
 OPTION(ALEMBIC_ILMBASE_LINK_STATIC "IlmBase is a static library" OFF)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
+OPTION(ALEMBIC_BOOST_PYTHON_COMPONENT
+    "The boost python component to look for ie python37 or python27"
+    python)
+
 option(DOCS_PATH
     "Create and install the HTML based API documentation to this location (requires Doxygen)"
     OFF)
@@ -243,13 +247,18 @@ ENDIF()
 
 # PyAlembic
 IF (USE_PYALEMBIC)
-    INCLUDE("./cmake/AlembicBoost.cmake")
-    INCLUDE("./cmake/AlembicPython.cmake")
+
+    if (NOT DEFINED Python_ADDITIONAL_VERSIONS)
+        set(Python_ADDITIONAL_VERSIONS 2)
+    endif()
+
+    FIND_PACKAGE ( PythonInterp REQUIRED )
+    FIND_PACKAGE ( PythonLibs REQUIRED )
+
     INCLUDE("./cmake/AlembicPyIlmBase.cmake")
     IF (PYTHONLIBS_FOUND)
-        MESSAGE(STATUS "ALEMBIC_PYTHON_INCLUDE_DIRS: ${ALEMBIC_PYTHON_INCLUDE_DIRS}")
-        MESSAGE(STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}")
-        INCLUDE_DIRECTORIES(${ALEMBIC_PYTHON_INCLUDE_DIRS} ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
+        MESSAGE(STATUS "PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}")
+        MESSAGE(STATUS "PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}")
         ADD_SUBDIRECTORY(python)
     ELSE()
         MESSAGE(WARNING "Python not found! Skipping PyAlembic")
@@ -329,5 +338,6 @@ info_cfg_option(USE_STATIC_HDF5)
 info_cfg_option(USE_TESTS)
 info_cfg_option(ALEMBIC_ILMBASE_LINK_STATIC)
 info_cfg_option(ALEMBIC_SHARED_LIBS)
+info_cfg_option(ALEMBIC_BOOST_PYTHON_COMPONENT)
 info_cfg_option(DOCS_PATH)
 MESSAGE("${_config_msg}")
