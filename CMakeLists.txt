@@ -50,8 +50,8 @@ ENDIF()
 
 # Declare the project version
 SET(PROJECT_VERSION_MAJOR "1")
-SET(PROJECT_VERSION_MINOR "7")
-SET(PROJECT_VERSION_PATCH "15")
+SET(PROJECT_VERSION_MINOR "8")
+SET(PROJECT_VERSION_PATCH "0")
 SET(PROJECT_VERSION
      ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 SET(VERSION ${PROJECT_VERSION})
@@ -73,10 +73,6 @@ OPTION(USE_TESTS "Include Alembic tests" ON)
 OPTION(ALEMBIC_BUILD_LIBS "Build library, if off use external alembic libs" ON)
 OPTION(ALEMBIC_ILMBASE_LINK_STATIC "IlmBase is a static library" OFF)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
-OPTION(ALEMBIC_LIB_USES_BOOST
-    "Main Alembic library uses boost for things like shared_ptr" OFF)
-OPTION(ALEMBIC_LIB_USES_TR1
-    "Main Alembic library uses std::tr1 for things like shared_ptr" OFF)
 option(DOCS_PATH
     "Create and install the HTML based API documentation to this location (requires Doxygen)"
     OFF)
@@ -119,8 +115,7 @@ IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
     SET(LINUX TRUE)
 ENDIF()
 
-IF (NOT ${ALEMBIC_LIB_USES_TR1} AND NOT ${ALEMBIC_LIB_USES_BOOST})
-    # TODO figure out how to do this for Windows
+IF (NOT MSVC)
     INCLUDE(CheckCXXCompilerFlag)
     CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
     CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
@@ -221,11 +216,6 @@ IF (DOCS_PATH)
     FIND_PACKAGE(Doxygen)
 ENDIF()
 
-# We only need boost if including PyAlembic, or using it in the lib
-IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
-    INCLUDE("./cmake/AlembicBoost.cmake")
-ENDIF()
-
 # IlmBase
 INCLUDE("./cmake/AlembicIlmBase.cmake")
 
@@ -253,6 +243,7 @@ ENDIF()
 
 # PyAlembic
 IF (USE_PYALEMBIC)
+    INCLUDE("./cmake/AlembicBoost.cmake")
     INCLUDE("./cmake/AlembicPython.cmake")
     INCLUDE("./cmake/AlembicPyIlmBase.cmake")
     IF (PYTHONLIBS_FOUND)
@@ -338,7 +329,5 @@ info_cfg_option(USE_STATIC_HDF5)
 info_cfg_option(USE_TESTS)
 info_cfg_option(ALEMBIC_ILMBASE_LINK_STATIC)
 info_cfg_option(ALEMBIC_SHARED_LIBS)
-info_cfg_option(ALEMBIC_LIB_USES_BOOST)
-info_cfg_option(ALEMBIC_LIB_USES_TR1)
 info_cfg_option(DOCS_PATH)
 MESSAGE("${_config_msg}")

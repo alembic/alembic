@@ -43,8 +43,4 @@
 
 #cmakedefine ALEMBIC_WITH_HDF5
 
-#cmakedefine ALEMBIC_LIB_USES_BOOST
-
-#cmakedefine ALEMBIC_LIB_USES_TR1
-
 #endif

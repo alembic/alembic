@@ -63,10 +63,6 @@ Some examples of OPTIONS you may want or need to use include:
     -DMAYA_ROOT=MayaPath may need to be specified to point at a specific
     installation of Maya.
 
-    -DALEMBIC_LIB_USES_TR1=ON or -DALEMBIC_LIB_USES_BOOST=ON if you do not have
-    a C++11 capable compiler specify one of these to use TR1, or boost as
-    a dependency of the Alembic library.
-
     -G "Visual Studio 14 2015 Win64"  If you want to create the project file for
     the 64 bit build of Alembic with the Visual Studio 2015 Community Edition.
 

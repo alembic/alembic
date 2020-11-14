@@ -40,9 +40,8 @@
 #include <Alembic/AbcCoreOgawa/Foundation.h>
 #include <Alembic/Util/Foundation.h>
 
-#if !defined(ALEMBIC_LIB_USES_TR1) && __cplusplus >= 201103L
 #include <atomic>
-#endif
+
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -70,11 +69,7 @@ private:
     Alembic::Util::mutex m_lock;
 
     // for the CAS impl
-#if !defined(ALEMBIC_LIB_USES_TR1) && __cplusplus >= 201103L
     std::atomic< Alembic::Util::int64_t > m_streams;
-#else
-    Alembic::Util::int64_t m_streams;
-#endif
 
     StreamIDPtr m_default;
 };

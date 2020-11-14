@@ -71,7 +71,7 @@ ENDIF()
 #-******************************************************************************
 
 SET(Boost_USE_STATIC_LIBS ${USE_STATIC_BOOST})
-SET(Boost_NO_BOOST_CMAKE ON) 
+SET(Boost_NO_BOOST_CMAKE ON)
 
 # disables linking to -mt variants on osx
 IF (USE_PYALEMBIC AND APPLE)
@@ -79,7 +79,7 @@ IF (USE_PYALEMBIC AND APPLE)
 ENDIF()
 
 IF (USE_PYALEMBIC)
-    FIND_PACKAGE(Boost 1.42.0 COMPONENTS program_options python)
+    FIND_PACKAGE(Boost 1.42.0 COMPONENTS python37)
 ELSE()
     FIND_PACKAGE(Boost 1.42.0 COMPONENTS program_options)
 ENDIF()

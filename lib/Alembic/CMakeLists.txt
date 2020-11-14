@@ -78,13 +78,6 @@ TARGET_LINK_LIBRARIES(Alembic
     ${ZLIB_LIBRARY}
   )
 
-# link in atomic if we are using tr1 and the compiler is new enough
-# to want  __atomic_compare_exchange_n
-IF ( ${ALEMBIC_LIB_USES_TR1} AND CMAKE_COMPILER_IS_GNUCXX AND
-    CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8 )
-    TARGET_LINK_LIBRARIES( Alembic atomic )
-ENDIF()
-
 SET( ALEMBIC_LIB_INSTALL_DIR lib CACHE PATH "Where to install the Alembic libs")
 INSTALL(TARGETS Alembic
         EXPORT AlembicTargets

@@ -43,7 +43,7 @@ namespace ALEMBIC_VERSION_NS {
 // Lets define a compare exchange macro for use below
 
 // C++11 std::atomics version
-#if !defined( ALEMBIC_LIB_USES_TR1 ) && __cplusplus >= 201103L
+#if __cplusplus >= 201103L
 #define COMPARE_EXCHANGE( V, COMP, EXCH ) V.compare_exchange_weak( COMP, EXCH, std::memory_order_seq_cst, std::memory_order_seq_cst )
 // Windows
 #elif defined( _MSC_VER )
@@ -76,12 +76,6 @@ int ffsll(long long i)
 	return (__builtin_ffsll(i));
 }
 
-// gcc 4.8 and above not using C++11
-#elif defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 8
-#define COMPARE_EXCHANGE( V, COMP, EXCH ) __atomic_compare_exchange_n( &V, &COMP, EXCH, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST )
-// gcc 4.1 and above not using C++11
-#elif defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1
-#define COMPARE_EXCHANGE( V, COMP, EXCH ) __sync_bool_compare_and_swap( &V, COMP, EXCH )
 #else
 #error Please contact alembic-discuss@googlegroups.com for support.
 #endif
