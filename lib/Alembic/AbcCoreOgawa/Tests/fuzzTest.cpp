@@ -545,7 +545,7 @@ void testFuzzer25695(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Headers name.";
+        std::string msg = "ScalarPropertyReader::getSample size is not correct expected: 3 got: 9";
         TESTING_ASSERT(msg == e.what());
         return;
     }
