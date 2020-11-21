@@ -141,10 +141,34 @@ void read()
 
 }
 
+void testFuzzer26823()
+{
+    Abc::IArchive archive(Alembic::AbcCoreOgawa::ReadArchive(),
+        "fuzzer_issue26823.abc");
+    TESTING_ASSERT(archive.getTop().getNumChildren() == 0);
+
+    // the root for this test happens to be a material
+    TESTING_ASSERT(Mat::IMaterial::matches(archive.getTop().getMetaData()));
+
+    try
+    {
+        Mat::IMaterial matObj(archive.getTop(), "blah");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "ISchemaObject::ISchemaObject( IObject )\nERROR: EXCEPTION:\nBad child: blah";
+        TESTING_ASSERT(msg == e.what());
+    }
+
+
+
+}
+
 int main( int argc, char *argv[] )
 {
     write();
     read();
+    testFuzzer26823();
     return 0;
 }
 

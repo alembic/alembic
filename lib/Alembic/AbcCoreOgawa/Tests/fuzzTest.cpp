@@ -131,7 +131,7 @@ void testIssue254(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue255(bool iUseMMap)
@@ -148,7 +148,7 @@ void testIssue255(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue256(bool iUseMMap)
@@ -165,7 +165,7 @@ void testIssue256(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue257(bool iUseMMap)
@@ -183,7 +183,7 @@ void testIssue257(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue258(bool iUseMMap)
@@ -200,7 +200,7 @@ void testIssue258(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue269(bool iUseMMap)
@@ -218,7 +218,7 @@ void testIssue269(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue270(bool iUseMMap)
@@ -253,7 +253,7 @@ void testIssue271(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue272(bool iUseMMap)
@@ -271,7 +271,7 @@ void testIssue272(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue282(bool iUseMMap)
@@ -289,7 +289,7 @@ void testIssue282(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testIssue283(bool iUseMMap)
@@ -306,7 +306,7 @@ void testIssue283(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer24846(bool iUseMMap)
@@ -323,7 +323,7 @@ void testFuzzer24846(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer24853(bool iUseMMap)
@@ -340,7 +340,7 @@ void testFuzzer24853(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 
@@ -358,7 +358,7 @@ void testFuzzer24598(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25051(bool iUseMMap)
@@ -375,7 +375,7 @@ void testFuzzer25051(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25081(bool iUseMMap)
@@ -393,7 +393,7 @@ void testFuzzer25081(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25166(bool iUseMMap)
@@ -410,7 +410,7 @@ void testFuzzer25166(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25175(bool iUseMMap)
@@ -428,7 +428,7 @@ void testFuzzer25175(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25185(bool iUseMMap)
@@ -445,7 +445,7 @@ void testFuzzer25185(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25192(bool iUseMMap)
@@ -463,7 +463,7 @@ void testFuzzer25192(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 
 }
 
@@ -481,7 +481,7 @@ void testFuzzer25204(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25236(bool iUseMMap)
@@ -498,7 +498,7 @@ void testFuzzer25236(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25351(bool iUseMMap)
@@ -515,7 +515,7 @@ void testFuzzer25351(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25502(bool iUseMMap)
@@ -532,7 +532,7 @@ void testFuzzer25502(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer25695(bool iUseMMap)
@@ -549,7 +549,7 @@ void testFuzzer25695(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer26125(bool iUseMMap)
@@ -567,7 +567,7 @@ void testFuzzer26125(bool iUseMMap)
         return;
     }
 
-    TESTING_ASSERT(1);
+    TESTING_ASSERT(0);
 }
 
 int main ( int argc, char *argv[] )

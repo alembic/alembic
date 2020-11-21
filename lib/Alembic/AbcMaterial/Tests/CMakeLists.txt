@@ -70,3 +70,5 @@ ADD_EXECUTABLE(AbcMaterial_WriteGeometryWithMaterials
                )
 TARGET_LINK_LIBRARIES(AbcMaterial_WriteGeometryWithMaterials Alembic)
 ADD_TEST(AbcMaterial_WriteGeometryWithMaterials AbcMaterial_WriteGeometryWithMaterials)
+
+file(COPY fuzzer_issue26823.abc DESTINATION .)
