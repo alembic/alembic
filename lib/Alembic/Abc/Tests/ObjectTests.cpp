@@ -38,6 +38,7 @@
 
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/All.h>
+#include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
 #ifdef ALEMBIC_WITH_HDF5
 #include <Alembic/AbcCoreHDF5/All.h>
@@ -339,6 +340,47 @@ void errorHandlerTest(bool useOgawa)
     }
 }
 
+void fuzzer26643_test()
+{
+    AbcF::IFactory factory;
+    IArchive archive = factory.getArchive("fuzzer_issue26643.abc");
+    ABCA_ASSERT(archive.getTop().getNumChildren() == 3,
+        "Expected 3 children");
+
+    try
+    {
+        archive.getTop().getChild(0);
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "IObject::getChild()\nERROR: EXCEPTION:\nOgawa IStreams::read failed.";
+        TESTING_ASSERT(msg == e.what());
+    }
+
+    try
+    {
+        archive.getTop().getChild(1);
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "IObject::getChild()\nERROR: EXCEPTION:\nInvalid object data group";
+        TESTING_ASSERT(msg == e.what());
+    }
+
+    try
+    {
+        archive.getTop().getChild(2);
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "IObject::getChild()\nERROR: EXCEPTION:\nInvalid object data group";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+
+    TESTING_ASSERT(0);
+}
+
 int main( int argc, char *argv[] )
 {
     // Write and read a simple archive: ten children, with no
@@ -405,6 +447,8 @@ int main( int argc, char *argv[] )
 #endif
 
     errorHandlerTest(true);
+
+    fuzzer26643_test();
 
     return 0;
 }
