@@ -109,9 +109,19 @@ void SprImpl::getSample( index_t iSampleIndex, void * iIntoLocation )
 
     std::size_t id = streamId->getID();
     Ogawa::IDataPtr data = m_group->getData( index, id );
-    ReadData( iIntoLocation, data, id,
-              m_header->header.getDataType(),
-              m_header->header.getDataType().getPod() );
+    AbcA::DataType dt = m_header->header.getDataType();
+
+    // Check to make sure the Ogawa data size matches our expected scalar
+    // property size, the + 16 is to account for the data key.
+    if ( dt.getPod() < Util::kStringPOD && data &&
+        data->getSize() != dt.getNumBytes() + 16 )
+    {
+        ABCA_THROW( "ScalarPropertyReader::getSample size is not correct "
+                    "expected: " << dt.getNumBytes() << " got: " <<
+                    data->getSize() - 16 );
+    }
+
+    ReadData( iIntoLocation, data, id, dt, dt.getPod() );
 }
 
 //-*****************************************************************************
