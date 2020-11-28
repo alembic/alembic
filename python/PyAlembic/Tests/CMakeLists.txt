@@ -59,8 +59,3 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/python/PyAlembic/Tests")
 
 # ADD_TEST(PyAlembic_Python_TEST PyAlembic_Test)
 
-CONFIGURE_FILE(
-    "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/run_tests"
-    @ONLY
-)

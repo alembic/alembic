@@ -34,6 +34,7 @@
 #
 #-******************************************************************************
 
+import unittest
 from alembic.AbcCoreAbstract import *
 from alembic.Abc import *
 from alembic.AbcGeom import *
@@ -53,7 +54,7 @@ from cubeData import *
 #       |- PolyMesh
 #           |- .faceCounts
 #           |- .faceIndices
-#           |- P 
+#           |- P
 #           |- .selfBnds
 
 # TimeSampling data
@@ -66,64 +67,44 @@ numSamplesPerCycle = len(tvec)
 tst = TimeSamplingType( numSamplesPerCycle, timePerCycle )
 ts = TimeSampling( tst, tvec )
 
-# Alembic file name
-fileName = 'cube2.abc'
+class CacheCubeTest2(unittest.TestCase):
+    # Test exporting a simple cube quad mesh
+    def testExportCubeGeom(self):
 
-testList = []
+        # create the archive
+        top = OArchive( 'cube2.abc' ).getTop()
+        tsidx = top.getArchive().addTimeSampling(ts)
 
-# Test exporting a simple cube quad mesh
-def testExportCubeGeom():
+        # create the top xform
+        xform = OXform(top, 'cube1', tsidx)
+        xsamp = XformSample()
+        xform.getSchema().set(xsamp)
 
-    # create the archive
-    top = OArchive( fileName ).getTop()
-    tsidx = top.getArchive().addTimeSampling(ts)
+        # the mesh shape
+        meshObj = OPolyMesh(xform, 'cube1Shape')
+        mesh = meshObj.getSchema()
+        mesh_samp = OPolyMeshSchemaSample(points, faceIndices, faceCounts)
+        mesh_samp.setSelfBounds(selfBnds)
+        mesh.set(mesh_samp)
 
-    # create the top xform
-    xform = OXform(top, 'cube1', tsidx)
-    xsamp = XformSample()
-    xform.getSchema().set(xsamp)
+    # Test importing the exported quad mesh
+    def testImportCubeGeom(self):
 
-    # the mesh shape
-    meshObj = OPolyMesh(xform, 'cube1Shape')
-    mesh = meshObj.getSchema()
-    mesh_samp = OPolyMeshSchemaSample(points, faceIndices, faceCounts)
-    mesh_samp.setSelfBounds(selfBnds)
-    mesh.set(mesh_samp)
+        top = IArchive( 'cube2.abc' ).getTop()
+        self.assertEqual(top.getNumChildren(), 1)
 
-testList.append(('testExportCubeGeom2', testExportCubeGeom))
+        # xform
+        xform = IXform(top, 'cube1')
+        self.assertEqual(xform.getName(), 'cube1')
+        self.assertEqual(xform.getSchema().getNumSamples(), 1)
 
-# Test importing the exported quad mesh
-def testImportCubeGeom():
+        # polymesh
+        meshObj = IPolyMesh(xform, 'cube1Shape')
+        mesh = meshObj.getSchema()
+        self.assertEqual(mesh.getNumSamples(), 1)
 
-    top = IArchive(fileName).getTop()
-    assert top.getNumChildren() == 1
-
-    # xform
-    xform = IXform(top, 'cube1')
-    assert xform.getName() == 'cube1'
-    assert xform.getSchema().getNumSamples() == 1
-
-    # polymesh
-    meshObj = IPolyMesh(xform, 'cube1Shape')
-    mesh = meshObj.getSchema()
-    assert mesh.getNumSamples() == 1
-
-    mesh_samp = mesh.getValue(ISampleSelector(0))
-    assert mesh_samp.getPositions() == points
-    assert mesh_samp.getFaceCounts() == faceCounts
-    assert mesh_samp.getFaceIndices() == faceIndices
-    assert mesh_samp.getSelfBounds() == selfBnds
-
-testList.append(('testImportCubeGeom2', testImportCubeGeom))
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
+        mesh_samp = mesh.getValue(ISampleSelector(0))
+        self.assertEqual(mesh_samp.getPositions(), points)
+        self.assertEqual(mesh_samp.getFaceCounts(), faceCounts)
+        self.assertEqual(mesh_samp.getFaceIndices(), faceIndices)
+        self.assertEqual(mesh_samp.getSelfBounds(), selfBnds)
