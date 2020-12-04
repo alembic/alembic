@@ -1055,8 +1055,16 @@ int main( int argc, char *argv[] )
             iOrderedArchives.push_back(iArchives[index]);
         }
 
+        // since important meta data hints can be on the archive
+        // and will likely be part of every input in the sequence
+        // propagate the one from the first archive to our output
+        MetaData md = iOrderedArchives[0].getTop().getMetaData();
         std::string appWriter = "AbcStitcher";
-        std::string userStr;
+        std::string userStr = md.get(Abc::kUserDescriptionKey);
+        if (!userStr.empty())
+        {
+            userStr =  "AbcStitcher: " + userStr;
+        }
 
         // Create an archive with the default writer
         OArchive oArchive;
@@ -1064,14 +1072,14 @@ int main( int argc, char *argv[] )
         {
             oArchive = CreateArchiveWithInfo(
                 Alembic::AbcCoreOgawa::WriteArchive(),
-                fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
+                fileName, appWriter, userStr, md, ErrorHandler::kThrowPolicy);
         }
 #ifdef ALEMBIC_WITH_HDF5
         else if (coreType == Alembic::AbcCoreFactory::IFactory::kHDF5)
         {
             oArchive = CreateArchiveWithInfo(
                 Alembic::AbcCoreHDF5::WriteArchive(),
-                fileName, appWriter, userStr, ErrorHandler::kThrowPolicy);
+                fileName, appWriter, userStr, md, ErrorHandler::kThrowPolicy);
         }
 #endif
 
