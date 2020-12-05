@@ -37,42 +37,22 @@
 import imath
 import alembic
 import traceback
+import unittest
+class InstanceTest(unittest.TestCase):
+    def testArchiveExport(self):
+        """write out an archive with an object tree"""
 
-testList = []
+        archive = alembic.Abc.OArchive("iterator.abc")
+        childObj = alembic.Abc.OObject(archive.getTop(), "childObj")
+        grandChildObj = alembic.Abc.OObject(childObj, "grandChildObj" )
 
-def archiveOut():
-    """write out an archive with an object tree"""
+    def testArchiveImport(self):
+        """read in archive with an object tree"""
 
-    archive = alembic.Abc.OArchive("iterator.abc")
-    childObj = alembic.Abc.OObject(archive.getTop(), "childObj")
-    grandChildObj = alembic.Abc.OObject(childObj, "grandChildObj" )
+        archive = alembic.Abc.IArchive("iterator.abc")
+        top = archive.getTop()
 
-def archiveIn():
-    """read in archive with an object tree"""
+        # This nested call crashed python interpreter with segmentation fault
+        grandChildObject = top.children[0].children[0]
 
-    archive = alembic.Abc.IArchive("iterator.abc")
-    top = archive.getTop()
-
-    # This nested call crashed python interpreter with segmentation fault
-    grandChildObject = top.children[0].children[0]
-
-    assert grandChildObject.getName() == "grandChildObj"
-
-def testIteratorBinding():
-    archiveOut()
-    archiveIn()
-
-testList.append(('testIteratorBinding', testIteratorBinding))
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
-
+        self.assertEqual(grandChildObject.getName(), "grandChildObj")

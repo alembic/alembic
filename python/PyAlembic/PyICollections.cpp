@@ -53,10 +53,10 @@ void register_icollections()
 
     // Overloads for ICollections
     //
-    Abc::IStringArrayProperty 
+    Abc::IStringArrayProperty
         ( AbcC::ICollectionsSchema::*getCollectionByIndex )( size_t i )
         = &AbcC::ICollectionsSchema::getCollection;
-    Abc::IStringArrayProperty 
+    Abc::IStringArrayProperty
         ( AbcC::ICollectionsSchema::*getCollectionByName )
         ( const std::string & iName) = &AbcC::ICollectionsSchema::getCollection;
 
@@ -73,7 +73,7 @@ void register_icollections()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "Default constructor creates an empty ICollectionSchema.") )
         .def( init<Abc::ICompoundProperty,
@@ -89,10 +89,10 @@ void register_icollections()
               ( arg( "index" ) ) )
         .def( "getCollection", getCollectionByName,
               ( arg( "name" ) ) )
-        .def( "getCollectionName", 
+        .def( "getCollectionName",
               &AbcC::ICollectionsSchema::getCollectionName,
               ( arg( "index" ) ) )
         .def( "valid", &AbcC::ICollectionsSchema::valid )
-        .def( "__nonzero__", &AbcC::ICollectionsSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcC::ICollectionsSchema::valid )
         ;
 }

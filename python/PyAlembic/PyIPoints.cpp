@@ -91,7 +91,7 @@ void register_ipoints()
               &AbcG::IPointsSchema::getTimeSampling )
         .def( "valid", &AbcG::IPointsSchema::valid )
         .def( "reset", &AbcG::IPointsSchema::reset )
-        .def( "__nonzero__", &AbcG::IPointsSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::IPointsSchema::valid )
         ;
 
     // IPoints::Sample

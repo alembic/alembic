@@ -70,7 +70,7 @@ void register_onupatch()
               &AbcG::ONuPatchSchema::setFromPrevious )
         .def( "reset", &AbcG::ONuPatchSchema::reset )
         .def( "valid", &AbcG::ONuPatchSchema::valid )
-        .def( "__nonzero__", &AbcG::ONuPatchSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::ONuPatchSchema::valid )
         ;
 
     // ONuPatchSchema::Sample

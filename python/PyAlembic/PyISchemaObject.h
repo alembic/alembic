@@ -105,6 +105,6 @@ void register_ISchemaObject( const char *iName )
         .staticmethod( "matches" )
         .def( "valid", &ISCHEMAOBJECT::valid )
         .def( "reset", &ISCHEMAOBJECT::reset )
-        .def( "__nonzero__", &ISCHEMAOBJECT::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &ISCHEMAOBJECT::valid )
         ;
 }

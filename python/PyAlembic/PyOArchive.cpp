@@ -99,7 +99,7 @@ void register_oarchive()
               "TimeSampling pool" )
         .def( "valid", &Abc::OArchive::valid )
         .def( "reset", &Abc::OArchive::reset )
-        .def( "__nonzero__", &Abc::OArchive::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &Abc::OArchive::valid )
         .def( "__str__", &Abc::OArchive::getName )
         ;
 }

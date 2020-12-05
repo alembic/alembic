@@ -95,7 +95,7 @@ void register_OBaseProperty( const char* iName )
         .def( "valid", &OBaseProperty::valid )
         .def( "__str__", &OBaseProperty::getName,
               return_value_policy<copy_const_reference>() )
-        .def( "__nonzero__", &OBaseProperty::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &OBaseProperty::valid )
         ;
  }
 

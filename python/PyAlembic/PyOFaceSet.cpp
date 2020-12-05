@@ -84,7 +84,7 @@ void register_ofaceset()
               ( arg( "facesExclusive" ) ) )
         .def( "valid", &AbcG::OFaceSetSchema::valid )
         .def( "reset", &AbcG::OFaceSetSchema::reset )
-        .def( "__nonzero__", &AbcG::OFaceSetSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::OFaceSetSchema::valid )
         ;
 
     // OFaceSetSchema::Sample

@@ -34,110 +34,98 @@
 #
 #-******************************************************************************
 
+import unittest
 from imath import *
 from alembic.Abc import *
 from alembic.AbcGeom import *
 
-testList = []
-
 kTranslateOperation = XformOperationType.kTranslateOperation
 kTranslateHint = 0
 
-def writeHierarchy(filename):
-    """write an oarchive with some matching hierarchies"""
+class HashTest(unittest.TestCase):
 
-    #
-    # These hashes are only supported in ogawa caches.
-    oarch = OArchive(filename, asOgawa = True)
+    def writeHierarchy(self, filename):
+        """write an oarchive with some matching hierarchies"""
 
-    #
-    #           a
-    #         /   \
-    #        b     c
-    #       / \   / \
-    #      d   e f   g
-    #
+        #
+        # These hashes are only supported in ogawa caches.
+        oarch = OArchive(filename, asOgawa = True)
 
-    a = OXform(oarch.getTop(), 'a')
-    b = OXform(a, 'b')
-    c = OXform(a, 'c')
-    d = OXform(b, 'd')
-    e = OXform(b, 'e')
-    f = OXform(c, 'f')
-    g = OXform(c, 'g')
+        #
+        #           a
+        #         /   \
+        #        b     c
+        #       / \   / \
+        #      d   e f   g
+        #
 
-    bp = OStringProperty(b.getProperties(), "testprop")
-    dp = OStringProperty(d.getProperties(), "othertestprop")
+        a = OXform(oarch.getTop(), 'a')
+        b = OXform(a, 'b')
+        c = OXform(a, 'c')
+        d = OXform(b, 'd')
+        e = OXform(b, 'e')
+        f = OXform(c, 'f')
+        g = OXform(c, 'g')
 
-    bp.setValue("the testprop")
-    dp.setValue("the othertestprop")
+        bp = OStringProperty(b.getProperties(), "testprop")
+        dp = OStringProperty(d.getProperties(), "othertestprop")
 
-    transop = XformOp(kTranslateOperation, kTranslateHint)
+        bp.setValue("the testprop")
+        dp.setValue("the othertestprop")
 
-    asamp = XformSample()
-    asamp.addOp(transop, V3d(-1.0, -1.0, 0.0))
+        transop = XformOp(kTranslateOperation, kTranslateHint)
 
-    bsamp = XformSample()
-    bsamp.addOp(transop, V3d( 1.0, -1.0, 0.0))
+        asamp = XformSample()
+        asamp.addOp(transop, V3d(-1.0, -1.0, 0.0))
 
-    a.getSchema().set(asamp)
-    b.getSchema().set(asamp)
-    c.getSchema().set(bsamp)
-    d.getSchema().set(asamp)
-    e.getSchema().set(bsamp)
-    f.getSchema().set(asamp)
-    g.getSchema().set(bsamp)
+        bsamp = XformSample()
+        bsamp.addOp(transop, V3d( 1.0, -1.0, 0.0))
 
-def testHash():
-    filename = 'hash.abc'
-    writeHierarchy(filename)
+        a.getSchema().set(asamp)
+        b.getSchema().set(asamp)
+        c.getSchema().set(bsamp)
+        d.getSchema().set(asamp)
+        e.getSchema().set(bsamp)
+        f.getSchema().set(asamp)
+        g.getSchema().set(bsamp)
 
-    iarch = IArchive(filename)
+    def testHash(self):
+        filename = 'hash.abc'
+        self.writeHierarchy(filename)
 
-    a = IObject(iarch.getTop(), 'a')
-    b = a.getChild('b')
-    c = a.getChild('c')
-    d = b.getChild('d')
-    e = b.getChild('e')
-    f = c.getChild('f')
-    g = c.getChild('g')
+        iarch = IArchive(filename)
 
-    assert a.valid()
-    assert b.valid()
-    assert c.valid()
-    assert d.valid()
-    assert e.valid()
-    assert f.valid()
-    assert g.valid()
+        a = IObject(iarch.getTop(), 'a')
+        b = a.getChild('b')
+        c = a.getChild('c')
+        d = b.getChild('d')
+        e = b.getChild('e')
+        f = c.getChild('f')
+        g = c.getChild('g')
 
-    assert a.getPropertiesHash() != ""
-    assert a.getChildrenHash()   != ""
-    assert b.getPropertiesHash() != ""
-    assert b.getChildrenHash()   != ""
-    assert c.getPropertiesHash() != ""
-    assert c.getChildrenHash()   != ""
-    assert d.getPropertiesHash() != ""
-    assert d.getChildrenHash()   != ""
-    assert e.getPropertiesHash() != ""
-    assert e.getChildrenHash()   != ""
-    assert f.getPropertiesHash() != ""
-    assert f.getChildrenHash()   != ""
-    assert g.getPropertiesHash() != ""
-    assert g.getChildrenHash()   != ""
+        self.assertTrue(a.valid())
+        self.assertTrue(b.valid())
+        self.assertTrue(c.valid())
+        self.assertTrue(d.valid())
+        self.assertTrue(e.valid())
+        self.assertTrue(f.valid())
+        self.assertTrue(g.valid())
 
-    assert b.getPropertiesHash() != d.getPropertiesHash()
-    assert e.getPropertiesHash() == g.getPropertiesHash()
+        self.assertNotEqual(a.getPropertiesHash(), "")
+        self.assertNotEqual(a.getChildrenHash(), "")
+        self.assertNotEqual(b.getPropertiesHash(), "")
+        self.assertNotEqual(b.getChildrenHash(), "")
+        self.assertNotEqual(c.getPropertiesHash(), "")
+        self.assertNotEqual(c.getChildrenHash(), "")
+        self.assertNotEqual(d.getPropertiesHash(), "")
+        self.assertNotEqual(d.getChildrenHash(), "")
+        self.assertNotEqual(e.getPropertiesHash(), "")
+        self.assertNotEqual(e.getChildrenHash(), "")
+        self.assertNotEqual(f.getPropertiesHash(), "")
+        self.assertNotEqual(f.getChildrenHash(), "")
+        self.assertNotEqual(g.getPropertiesHash(), "")
+        self.assertNotEqual(g.getChildrenHash(), "")
 
-testList.append(('testHash', testHash))
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print "\nRunning %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
+        self.assertNotEqual(b.getPropertiesHash(), d.getPropertiesHash())
+        self.assertEqual(e.getPropertiesHash(), g.getPropertiesHash())
 

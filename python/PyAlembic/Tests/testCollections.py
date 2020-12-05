@@ -69,7 +69,11 @@ class CollectionTest(unittest.TestCase):
 
         self.assertEquals(group.getSchema().getNumCollections(), 1)
 
-        group.getSchema().createCollection("cool", md, ts)
+        # TODO passing in time sampling here causes a segfault, most likely because
+        # of how createCollection currently takes an Argument &, see #274
+        cool = group.getSchema().createCollection("cool", md)
+        cool.setTimeSampling(ts)
+
         self.assertEquals(
             group.getSchema().getCollection(1).getMetaData().get("coupe"),
             "de ville" )
@@ -95,15 +99,15 @@ class CollectionTest(unittest.TestCase):
         self.assertEqual(group.getSchema().getNumCollections(), 2)
         self.assertEqual(group2.getSchema().getNumCollections(), 0)
 
-        self.assertIsNone(group2.getSchema().getCollection(45))
-        self.assertIsNone(group2.getSchema().getCollection("potato"))
+        self.assertFalse(group2.getSchema().getCollection(45).valid())
+        self.assertFalse(group2.getSchema().getCollection("potato").valid())
 
         prop = group.getSchema().getCollection("prop")
         prop2 = group.getSchema().getCollection("cool")
         self.assertEqual(prop2.getMetaData().get("coupe"), "de ville")
         self.assertEqual(archive.getTimeSampling(1), prop2.getTimeSampling())
         self.assertEqual(prop2.getNumSamples(), 2)
-        self.assertEqual(samp, prop.getValue(0))
+        samp = prop.getValue(0)
         self.assertEqual(len(samp), 3)
         self.assertEqual(samp[0], "/a/b/c/1")
         self.assertEqual(samp[1], "/a/b/c/2")

@@ -63,14 +63,14 @@ void register_ilight()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "argument" ), 
+                   ( arg( "parent" ), arg( "argument" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( "getCameraSchema",
@@ -91,6 +91,6 @@ void register_ilight()
               with_custodian_and_ward_postcall<0,1>() )
         .def( "reset", &AbcG::ILightSchema::reset )
         .def( "valid", &AbcG::ILightSchema::valid )
-        .def( "__nonzero__", &AbcG::ILightSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::ILightSchema::valid )
         ;
 }

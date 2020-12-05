@@ -104,7 +104,7 @@ void register_opolymesh()
               &AbcG::OPolyMeshSchema::setUVSourceName )
         .def( "reset", &AbcG::OPolyMeshSchema::reset )
         .def( "valid", &AbcG::OPolyMeshSchema::valid )
-        .def( "__nonzero__", &AbcG::OPolyMeshSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::OPolyMeshSchema::valid )
         .def( "createFaceSet",
               &AbcG::OPolyMeshSchema::createFaceSet,
               ( arg( "iFaceSetName" ) ),

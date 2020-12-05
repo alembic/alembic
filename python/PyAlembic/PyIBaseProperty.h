@@ -95,7 +95,7 @@ void register_IBaseProperty( const char* iName )
         .def( "valid", &IBaseProperty::valid )
         .def( "__str__", &IBaseProperty::getName,
               return_value_policy<copy_const_reference>() )
-        .def( "__nonzero__", &IBaseProperty::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &IBaseProperty::valid )
         ;
  }
 

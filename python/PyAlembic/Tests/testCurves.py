@@ -34,110 +34,94 @@
 #
 #-******************************************************************************
 
+import unittest
 from imath import *
 from alembic.AbcCoreAbstract import *
 from alembic.Abc import *
 from alembic.AbcGeom import *
 from curvesData import *
 
-testList = []
-
 kVertexScope = GeometryScope.kVertexScope
 kCubic = CurveType.kCubic
 kNonPeriodic = CurvePeriodicity.kNonPeriodic
 
-def doSample( iCurves ):
-    
-    curves = iCurves.getSchema()
 
-    widthSamp = OFloatGeomParamSample( widths, kVertexScope )
-    uvSamp = OV2fGeomParamSample( uvs, kVertexScope )
+class CurvesTest(unittest.TestCase):
 
-    curvesSamp = OCurvesSchemaSample( verts, numVerts, kCubic, kNonPeriodic,
-                                       widthSamp, uvSamp )
+    def doSample( self, iCurves ):
 
-    knots = curvesSamp.getKnots()
-    assert len(knots) == 0
+        curves = iCurves.getSchema()
 
-    newKnots = FloatArray(4)
-    for ii in range(4):
-        newKnots[ii] = ii
-    curvesSamp.setKnots(newKnots)
+        widthSamp = OFloatGeomParamSample( widths, kVertexScope )
+        uvSamp = OV2fGeomParamSample( uvs, kVertexScope )
 
-    knots = curvesSamp.getKnots()
-    for ii in range(4):
-        assert knots[ii] == ii
+        curvesSamp = OCurvesSchemaSample( verts, numVerts, kCubic, kNonPeriodic,
+                                           widthSamp, uvSamp )
 
-    orders = curvesSamp.getOrders()
-    assert len(orders) == 0
+        knots = curvesSamp.getKnots()
+        self.assertEquals(len(knots), 0)
 
-    newOrder = UnsignedCharArray(3)
-    for ii in range(3):
-        newOrder[ii] = ii
-    curvesSamp.setOrders(newOrder)
+        newKnots = FloatArray(4)
+        for ii in range(4):
+            newKnots[ii] = ii
+        curvesSamp.setKnots(newKnots)
 
-    orders = curvesSamp.getOrders()
-    for ii in range(3):
-        assert newOrder[ii] == ii
+        knots = curvesSamp.getKnots()
+        for ii in range(4):
+            self.assertEqual(knots[ii], ii)
 
-    curves.set( curvesSamp )
+        orders = curvesSamp.getOrders()
+        self.assertEqual(len(orders), 0)
 
-def curvesOut():
-    """write an oarchive with a curve in it"""
+        newOrder = UnsignedCharArray(3)
+        for ii in range(3):
+            newOrder[ii] = ii
+        curvesSamp.setOrders(newOrder)
 
-    myCurves = OCurves( OArchive( 'curves1.abc' ).getTop(),
-                        'really_long_curves_name' )
+        orders = curvesSamp.getOrders()
+        for ii in range(3):
+            self.assertEqual(newOrder[ii], ii)
 
-    for i in range(0,5):
-        doSample( myCurves )
+        curves.set( curvesSamp )
 
-def curvesIn():
-    """read an iarchive with a curve in it"""
+    def testCurvesExport(self):
+        """write an oarchive with a curve in it"""
 
-    myCurves = ICurves( IArchive( 'curves1.abc' ).getTop(),
-                        'really_long_curves_name' )
-    curves = myCurves.getSchema()
+        myCurves = OCurves( OArchive( 'curves1.abc' ).getTop(),
+                            'really_long_curves_name' )
 
-    curvesSamp = curves.getValue()
+        for i in range(0,5):
+            self.doSample( myCurves )
 
-    assert curvesSamp.getSelfBounds().min() == V3d( -1.0, -1.0, -1.0 )
-    assert curvesSamp.getSelfBounds().max() == V3d(  1.0,  1.0,  1.0 )
+    def testCurvesImport(self):
+        """read an iarchive with a curve in it"""
 
-    knots = curvesSamp.getKnots()
-    for ii in range(4):
-        assert knots[ii] == ii
+        myCurves = ICurves( IArchive( 'curves1.abc' ).getTop(),
+                            'really_long_curves_name' )
+        curves = myCurves.getSchema()
 
-    orders = curvesSamp.getOrders()
-    for ii in range(3):
-        assert orders[ii] == ii
+        curvesSamp = curves.getValue()
 
-    positions = curvesSamp.getPositions()
+        self.assertEqual(curvesSamp.getSelfBounds().min(), V3d( -1.0, -1.0, -1.0 ))
+        self.assertEqual(curvesSamp.getSelfBounds().max(), V3d(  1.0,  1.0,  1.0 ))
 
-    assert len( positions ) == 12
+        knots = curvesSamp.getKnots()
+        for ii in range(4):
+            self.assertEqual(knots[ii], ii)
 
-    for i in range( len( positions ) ):
-        assert positions[i] == verts[i]
+        orders = curvesSamp.getOrders()
+        for ii in range(3):
+            self.assertEqual(orders[ii], ii)
 
-    widthSamp = curves.getWidthsParam().getExpandedValue()
+        positions = curvesSamp.getPositions()
 
-    assert len( widthSamp.getVals() ) == 12
-    assert IFloatGeomParam.matches( curves.getWidthsParam().getHeader() )
-    assert widthSamp.getScope() == kVertexScope
+        self.assertEqual(len( positions ), 12)
 
-def testCurvesBinding():
-    curvesOut()
-    curvesIn()
+        for i in range( len( positions ) ):
+            self.assertEqual(positions[i], verts[i])
 
-testList.append( ( 'testCurvesBinding', testCurvesBinding ) )
+        widthSamp = curves.getWidthsParam().getExpandedValue()
 
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
+        self.assertEqual(len( widthSamp.getVals() ), 12)
+        self.assertTrue(IFloatGeomParam.matches( curves.getWidthsParam().getHeader()))
+        self.assertEqual(widthSamp.getScope(), kVertexScope)

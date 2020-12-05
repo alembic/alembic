@@ -87,6 +87,6 @@ void register_ocamera()
               ( arg( "timeSampling" ) ) )
         .def( "valid", &AbcG::OCameraSchema::valid )
         .def( "reset", &AbcG::OCameraSchema::reset )
-        .def( "__nonzero__", &AbcG::OCameraSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::OCameraSchema::valid )
         ;
 }

@@ -48,7 +48,7 @@ void register_abctypes()
     class_<Abc::Argument>( "Argument", no_init )
         .def( init<AbcU::uint32_t>() )
         .def( init<const AbcA::MetaData&>() )
-        .def( init<const AbcA::TimeSamplingPtr&>() )
+        .def( init<AbcA::TimeSamplingPtr>() )
         .def( init<Abc::SchemaInterpMatching>() )
         .def( init<Abc::SparseFlag>() )
         ;
@@ -59,7 +59,7 @@ void register_abctypes()
     implicitly_convertible<Abc::SchemaInterpMatching, Abc::Argument>();
     implicitly_convertible<AbcU::uint32_t, Abc::Argument>();
     implicitly_convertible<const AbcA::MetaData&, Abc::Argument>();
-    implicitly_convertible<const AbcA::TimeSamplingPtr&, Abc::Argument>();
+    implicitly_convertible<AbcA::TimeSamplingPtr, Abc::Argument>();
 
     // SchemaInterpMatching Enum
     //

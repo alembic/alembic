@@ -101,6 +101,6 @@ void register_OSchemaObject( const char *iName )
         .staticmethod( "matches" )
         .def( "valid", &OSCHEMAOBJECT::valid )
         .def( "reset", &OSCHEMAOBJECT::reset )
-        .def( "__nonzero__", &OSCHEMAOBJECT::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &OSCHEMAOBJECT::valid )
         ;
 }

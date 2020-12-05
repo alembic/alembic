@@ -110,7 +110,7 @@ void register_inupatch()
               &AbcG::INuPatchSchema::trimCurveTopologyIsConstant )
         .def( "reset", &AbcG::INuPatchSchema::reset )
         .def( "valid", &AbcG::INuPatchSchema::valid )
-        .def( "__nonzero__", &AbcG::INuPatchSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::INuPatchSchema::valid )
         ;
 
     // INuPatchSchema::Sample
@@ -176,7 +176,7 @@ void register_inupatch()
               &AbcG::INuPatchSchema::Sample::valid )
         .def( "reset",
               &AbcG::INuPatchSchema::Sample::reset )
-        .def( "__nonzero__",
+        .def( ALEMBIC_PYTHON_BOOL_NAME,
               &AbcG::INuPatchSchema::Sample::valid )
         ;
 }

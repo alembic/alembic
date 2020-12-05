@@ -118,7 +118,7 @@ void register_osubd()
               &AbcG::OSubDSchema::setUVSourceName )
         .def( "valid", &AbcG::OSubDSchema::valid )
         .def( "reset", &AbcG::OSubDSchema::reset )
-        .def( "__nonzero__", &AbcG::OSubDSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::OSubDSchema::valid )
         ;
 
     // Overloads for OSubDSchema::Sample

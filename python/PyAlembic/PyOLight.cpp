@@ -92,6 +92,6 @@ void register_olight()
               &AbcG::OLightSchema::getChildBoundsProperty )
         .def( "reset", &AbcG::OLightSchema::reset )
         .def( "valid", &AbcG::OLightSchema::valid )
-        .def( "__nonzero__", &AbcG::OLightSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::OLightSchema::valid )
         ;
 }

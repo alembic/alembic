@@ -129,7 +129,7 @@ void register_opoints()
               ( arg( "TimeSampling" ) ) )
         .def( "valid", &AbcG::OPointsSchema::valid )
         .def( "reset", &AbcG::OPointsSchema::reset )
-        .def( "__nonzero__", &AbcG::OPointsSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::OPointsSchema::valid )
         ;
 
     // OPointsSchema::Sample

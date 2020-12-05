@@ -34,81 +34,70 @@
 #
 #-******************************************************************************
 
+import unittest
 from imath import *
 from alembic.Abc import *
 
-testList = []
+class InstanceTest(unittest.TestCase):
+    def testInstanceExport(self):
+        """Write an oarchive with an instance in it"""
 
-def instanceOut():
-    """Write an oarchive with an instance in it"""
+        oarch = OArchive('instance.abc')
 
-    oarch = OArchive('instance.abc')
+        #
+        #     a
+        #    / \
+        #   b   c   <-- c is an instance of b
+        #   |
+        #   d
+        #   |
+        #   e
+        #
 
-    #
-    #     a
-    #    / \
-    #   b   c   <-- c is an instance of b
-    #   |
-    #   d
-    #   |
-    #   e
-    #
+        a = OObject(oarch.getTop(), 'a')
+        b = OObject(a, 'b')
+        d = OObject(b, 'd')
+        e = OObject(d, 'e')
 
-    a = OObject(oarch.getTop(), 'a')
-    b = OObject(a, 'b')
-    d = OObject(b, 'd')
-    e = OObject(d, 'e')
+        a.addChildInstance(b, 'c')
 
-    a.addChildInstance(b, 'c')
+    def testInstanceImport(self):
+        """Read an archive with an instance in it, verify it's instancing correctly."""
 
-testList.append(('instanceOut', instanceOut))
+        iarch = IArchive('instance.abc')
 
-def instanceIn():
-    """Read an archive with an instance in it, verify it's instancing correctly."""
+        a = IObject(iarch.getTop(), 'a')
 
-    iarch = IArchive('instance.abc')
+        self.assertEqual(a.getNumChildren(), 2)
 
-    a = IObject(iarch.getTop(), 'a')
+        self.assertEqual(a.getChild('c').getName(), 'c')
+        self.assertEqual(a.getChild('c').getName(), a.getChild(1).getName())
+        self.assertTrue(a.isChildInstance('c'))
+        self.assertTrue(a.isChildInstance(1))
 
-    assert a.getNumChildren() == 2
+        b = a.getChild('b')
+        self.assertTrue(b.valid())
 
-    assert a.getChild('c').getName() == 'c'
-    assert a.getChild('c').getName() == a.getChild(1).getName()
-    assert a.isChildInstance('c')
-    assert a.isChildInstance(1)
+        # c is an instance root pointing at b
+        c = a.getChild('c')
+        self.assertTrue(c.valid())
+        self.assertTrue(c.isInstanceRoot())
+        self.assertTrue(c.isInstanceDescendant())
+        self.assertEqual(c.instanceSourcePath(), b.getFullName())
 
-    b = a.getChild('b')
-    assert b.valid()
+        # instanced child of c is d
+        di = c.getChild('d')
+        self.assertTrue(di.valid())
+        self.assertEqual(di.getFullName(), '/a/c/d')
+        self.assertEqual(di.getParent().getFullName(), c.getFullName())
+        self.assertFalse(di.isInstanceRoot())
+        self.assertTrue(di.isInstanceDescendant())
 
-    # c is an instance root pointing at b
-    c = a.getChild('c')
-    assert c.valid()
-    assert c.isInstanceRoot()
-    assert c.isInstanceDescendant()
-    assert c.instanceSourcePath() == b.getFullName()
+        # instanced child of d is e
+        ei = di.getChild('e')
+        self.assertTrue(ei.valid())
+        self.assertTrue(ei.getFullName(), '/a/c/d/e')
+        self.assertTrue(ei.getParent().getFullName(), di.getFullName())
+        self.assertFalse(ei.isInstanceRoot())
+        self.assertTrue(ei.isInstanceDescendant())
 
-    # instanced child of c is d
-    di = c.getChild('d')
-    assert di.valid()
-    assert di.getFullName() == '/a/c/d'
-    assert di.getParent().getFullName() == c.getFullName()
-    assert not di.isInstanceRoot()
-    assert di.isInstanceDescendant()
-
-    # instanced child of d is e
-    ei = di.getChild('e')
-    assert ei.valid()
-    assert ei.getFullName() == '/a/c/d/e'
-    assert ei.getParent().getFullName() == di.getFullName()
-    assert not ei.isInstanceRoot()
-    assert ei.isInstanceDescendant()
-
-testList.append(('instanceIn', instanceIn))
-
-for test in testList:
-    funcName = test[0]
-    print "\nRunning %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""

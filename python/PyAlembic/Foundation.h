@@ -65,6 +65,12 @@ inline T * get_pointer( Alembic::Util::shared_ptr<T> const & p )
 } // namespace boost
 #endif
 
+#if PY_MAJOR_VERSION < 3
+#define ALEMBIC_PYTHON_BOOL_NAME ALEMBIC_PYTHON_BOOL_NAME
+#else
+#define ALEMBIC_PYTHON_BOOL_NAME "__bool__"
+#endif
+
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
 
