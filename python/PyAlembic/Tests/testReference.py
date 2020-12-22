@@ -34,59 +34,45 @@
 #
 #-******************************************************************************
 
+import unittest
 from alembic.Abc import *
 from alembic.AbcCoreAbstract import *
 from alembic.AbcGeom import *
 
-testList = []
+class ReferenceTest(unittest.TestCase):
+    def testReferenceExport(self):
 
-def testReferenceOut():
+        a = OArchive('testReference.abc')
+        t = a.getTop()
+        x = OXform(t, 'root')
 
-    a = OArchive('testReference.abc')
-    t = a.getTop()
-    x = OXform(t, 'root')
+        md = MetaData()
+        md.setReference()
 
-    md = MetaData()
-    md.setReference()
+        self.assertEqual(md.get('reference'), '1')
 
-    assert md.get('reference') == '1'
+        pr = OStringProperty(x.getProperties(), 'refprop', md)
+        p0 = OStringProperty(x.getProperties(), 'norefprop')
 
-    pr = OStringProperty(x.getProperties(), 'refprop', md)
-    p0 = OStringProperty(x.getProperties(), 'norefprop')
+        self.assertTrue(pr.valid())
+        self.assertTrue(p0.valid())
 
-    assert pr.valid()
-    assert p0.valid()
 
-testList.append(('testReferenceOut', testReferenceOut))
+    def testReferenceIn(self):
 
-def testReferenceIn():
+        a = IArchive('testReference.abc')
+        t = a.getTop()
+        x = t.getChild('root')
 
-    a = IArchive('testReference.abc')
-    t = a.getTop()
-    x = t.getChild('root')
+        props = x.getProperties()
+        pr = props.getProperty('refprop')
+        p0 = props.getProperty('norefprop')
 
-    props = x.getProperties()
-    pr = props.getProperty('refprop')
-    p0 = props.getProperty('norefprop')
+        self.assertTrue(pr.valid())
+        self.assertTrue(p0.valid())
 
-    assert pr.valid()
-    assert p0.valid()
+        prh = pr.getHeader()
+        self.assertTrue(prh.isReference())
 
-    prh = pr.getHeader()
-    assert prh.isReference()
-
-    p0h = p0.getHeader()
-    assert not p0h.isReference()
-
-testList.append(('testReferenceIn', testReferenceIn))
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print "\nRunning %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
+        p0h = p0.getHeader()
+        self.assertFalse(p0h.isReference())

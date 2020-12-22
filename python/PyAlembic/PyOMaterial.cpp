@@ -74,5 +74,7 @@ void register_omaterial()
               &AbcM::OMaterialSchema::setNetworkInterfaceParameterMapping )
         .def( "getNetworkInterfaceParameters",
               &AbcM::OMaterialSchema::getNetworkInterfaceParameters )
+        .def( "valid", &AbcM::OMaterialSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcM::OMaterialSchema::valid )
         ;
 }

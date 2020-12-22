@@ -57,6 +57,8 @@ class CameraTest(unittest.TestCase):
         camSchema = camObj.getSchema()
         samp.addOp(FilmBackXformOp(kScaleFilmBackOperation, "scale"))
         samp.addOp(FilmBackXformOp(kTranslateFilmBackOperation, "offset"))
+        self.assertTrue(camObj)
+        self.assertTrue(camObj.valid())
         camSchema.set(samp)
 
         samp[0].setScale(V2d(2.0, 3.0))
@@ -80,6 +82,9 @@ class CameraTest(unittest.TestCase):
 
         simpleCam = ICamera(archive.getTop(), "simpleCam")
         cam = ICamera(archive.getTop(), "cam")
+
+        self.assertTrue(cam)
+        self.assertTrue(cam.valid())
 
         # test camera "simpleCam" default values
         samp = simpleCam.getSchema().getValue()
