@@ -66,7 +66,7 @@ inline T * get_pointer( Alembic::Util::shared_ptr<T> const & p )
 #endif
 
 #if PY_MAJOR_VERSION < 3
-#define ALEMBIC_PYTHON_BOOL_NAME ALEMBIC_PYTHON_BOOL_NAME
+#define ALEMBIC_PYTHON_BOOL_NAME "__nonzero__"
 #else
 #define ALEMBIC_PYTHON_BOOL_NAME "__bool__"
 #endif
