@@ -1,4 +1,3 @@
-# If in the test dir: katana --appver 3.1.7_localdev --script RunTests.py
 import sys, os, glob, unittest
 
 
@@ -6,7 +5,7 @@ import sys, os, glob, unittest
 main_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir( main_dir )
 
-
+print(sys.argv)
 # TODO
 # For now, hack the path we import from
 # for alembic and imath paths and make sure they come

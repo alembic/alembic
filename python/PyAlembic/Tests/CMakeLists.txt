@@ -46,16 +46,5 @@ SET(TEST_LIBS
 
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/python/PyAlembic/Tests")
 
-#TODO find out how to run the python unit tests
-
-#ADD_EXECUTABLE(PyAlembic_Test
-#               testAlembicImport.cpp
-#               main.cpp
-#)
-
-# ADD_DEPENDENCIES(PyAlembic_Test alembic)
-
-# TARGET_LINK_LIBRARIES(PyAlembic_Test Alembic::Alembic ${ALEMBIC_PYILMBASE_LIBS})
-
-# ADD_TEST(PyAlembic_Python_TEST PyAlembic_Test)
+ADD_TEST(NAME PyAlembic_Python_TEST COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/python/PyAlembic/Tests/RunTests.py ${ALEMBIC_PYILMBASE_LIBS}/.. ${ALEMBIC_PYTHON_INSTALL_DIR} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/python/PyAlembic/Tests)
 

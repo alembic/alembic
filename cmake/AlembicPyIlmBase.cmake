@@ -33,20 +33,27 @@
 ##
 ##-*****************************************************************************
 
-FIND_PACKAGE(PyIlmBase)
+FIND_PACKAGE(Imath)
 
-IF (PYILMBASE_FOUND)
-    SET(ALEMBIC_PYILMBASE_FOUND 1 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
-
-    SET(ALEMBIC_PYILMBASE_LIBS
-        ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
-    )
-
-    GET_FILENAME_COMPONENT(ALEMBIC_PYILMBASE_LIB_DIRECTORY
-        ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
-        PATH
-    )
-
+IF (Imath_FOUND)
+    MESSAGE(STATUS "Found package Imath")
+    # TODO, found the correct way to do this
+    SET(ALEMBIC_PYILMBASE_PYIMATH_LIB Imath::PyImath)
 ELSE()
-    SET(ALEMBIC_PYILMBASE_FOUND 0 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
+    FIND_PACKAGE(PyIlmBase)
+    IF (PYILMBASE_FOUND)
+        SET(ALEMBIC_PYILMBASE_FOUND 1 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
+
+        SET(ALEMBIC_PYILMBASE_LIBS
+            ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
+        )
+
+        GET_FILENAME_COMPONENT(ALEMBIC_PYILMBASE_LIB_DIRECTORY
+            ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
+            PATH
+        )
+
+    ELSE()
+        SET(ALEMBIC_PYILMBASE_FOUND 0 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
+    ENDIF()
 ENDIF()
