@@ -69,7 +69,11 @@ private:
     Alembic::Util::mutex m_lock;
 
     // for the CAS impl
+#if __cplusplus < 201103L && defined( _MSC_VER )
+    Alembic::Util::int64_t m_streams;
+#else
     std::atomic< Alembic::Util::int64_t > m_streams;
+#endif
 
     StreamIDPtr m_default;
 };
