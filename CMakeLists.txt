@@ -73,9 +73,7 @@ OPTION(USE_TESTS "Include Alembic tests" ON)
 OPTION(ALEMBIC_BUILD_LIBS "Build library, if off use external alembic libs" ON)
 OPTION(ALEMBIC_ILMBASE_LINK_STATIC "IlmBase is a static library" OFF)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
-OPTION(ALEMBIC_BOOST_PYTHON_COMPONENT
-    "The boost python component to look for ie python37 or python27"
-    python)
+SET(PYALEMBIC_PYTHON_MAJOR 3 CACHE STRING "Which major version of python to look for when building PyAlembic")
 
 option(DOCS_PATH
     "Create and install the HTML based API documentation to this location (requires Doxygen)"
@@ -248,21 +246,16 @@ ENDIF()
 # PyAlembic
 IF (USE_PYALEMBIC)
 
-    if (NOT DEFINED Python_ADDITIONAL_VERSIONS)
-        set(Python_ADDITIONAL_VERSIONS 2)
+    FIND_PACKAGE(Python${PYALEMBIC_PYTHON_MAJOR} COMPONENTS Interpreter Development)
+
+    if(Python${PYALEMBIC_PYTHON_MAJOR}_FOUND)
+        MESSAGE(STATUS "Found Python ${Python${PYALEMBIC_PYTHON_MAJOR}_VERSION}")
+        INCLUDE("./cmake/AlembicPyIlmBase.cmake")
+        ADD_SUBDIRECTORY(python)
+    else()
+        MESSAGE(WARNING "Python not found! Skipping PyAlembic")
     endif()
 
-    FIND_PACKAGE ( PythonInterp REQUIRED )
-    FIND_PACKAGE ( PythonLibs REQUIRED )
-
-    INCLUDE("./cmake/AlembicPyIlmBase.cmake")
-    IF (PYTHONLIBS_FOUND)
-        MESSAGE(STATUS "PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}")
-        MESSAGE(STATUS "PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}")
-        ADD_SUBDIRECTORY(python)
-    ELSE()
-        MESSAGE(WARNING "Python not found! Skipping PyAlembic")
-    ENDIF()
 ENDIF()
 
 #-******************************************************************************
@@ -338,6 +331,6 @@ info_cfg_option(USE_STATIC_HDF5)
 info_cfg_option(USE_TESTS)
 info_cfg_option(ALEMBIC_ILMBASE_LINK_STATIC)
 info_cfg_option(ALEMBIC_SHARED_LIBS)
-info_cfg_option(ALEMBIC_BOOST_PYTHON_COMPONENT)
+info_cfg_option(PYALEMBIC_PYTHON_MAJOR)
 info_cfg_option(DOCS_PATH)
 MESSAGE("${_config_msg}")

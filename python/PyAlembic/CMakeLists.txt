@@ -57,9 +57,6 @@ ENDIF()
 
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
 
-# set core libs
-SET(PLIBS ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
-
 # lots of warnings coming from unused local typedefs inside boost python
 IF (NOT WINDOWS)
     ADD_DEFINITIONS(-Wno-unused-local-typedefs)
@@ -141,39 +138,40 @@ IF (1900 VERSION_EQUAL MSVC_VERSION)
 ENDIF ()
 
 LINK_LIBRARIES(Alembic::Alembic
-                ${PLIBS}
+               ${PYTHON_LIBRARIES}
+               ${Boost_LIBRARIES}
                ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
 )
 
-    INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
-          "${CMAKE_SOURCE_DIR}/python/PyAlembic")
+INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
+    "${CMAKE_SOURCE_DIR}/python/PyAlembic")
 
-    ADD_LIBRARY(PyAlembic SHARED ${CPP_FILES})
+ADD_LIBRARY(PyAlembic SHARED ${CPP_FILES})
 
-    SET (EXT ".so")
-	SET (PYTHON_MODULE_NAME "alembic")
-    IF (WIN32)
-        SET (EXT ".pyd")
-    ENDIF ()
+SET (EXT ".so")
+SET (PYTHON_MODULE_NAME "alembic")
+IF (WIN32)
+    SET (EXT ".pyd")
+ENDIF ()
 
-    SET_TARGET_PROPERTIES(PyAlembic
-        PROPERTIES PREFIX "" OUTPUT_NAME ${PYTHON_MODULE_NAME} SUFFIX ${EXT}
-    )
+SET_TARGET_PROPERTIES(PyAlembic
+    PROPERTIES PREFIX "" OUTPUT_NAME ${PYTHON_MODULE_NAME} SUFFIX ${EXT}
+)
 
-    SET( ALEMBIC_PYTHON_INSTALL_DIR
-        lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
-        CACHE PATH
-        "Alembic's python bindings install directory"
-    )
+SET( ALEMBIC_PYTHON_INSTALL_DIR
+    lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
+    CACHE PATH
+    "Alembic's python bindings install directory"
+)
 
-    INSTALL (TARGETS PyAlembic
-        DESTINATION ${ALEMBIC_PYTHON_INSTALL_DIR}
-    )
+INSTALL (TARGETS PyAlembic
+    DESTINATION ${ALEMBIC_PYTHON_INSTALL_DIR}
+)
 
-    IF (USE_TESTS)
-        ADD_SUBDIRECTORY(Tests)
-    ENDIF()
+IF (USE_TESTS)
+    ADD_SUBDIRECTORY(Tests)
+ENDIF()
 
-    set_target_properties(PyAlembic PROPERTIES
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+set_target_properties(PyAlembic PROPERTIES
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
