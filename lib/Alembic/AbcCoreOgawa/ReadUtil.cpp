@@ -1473,15 +1473,18 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
             ABCA_THROW("Read invalid: TimeSamples info.");
         }
 
-        Util::uint32_t maxSample = *( (Util::uint32_t *)( &buf[pos] ) );
+        Util::uint32_t maxSample;
+        memcpy(&maxSample, &buf[pos], sizeof(maxSample));
         pos += 4;
 
         oMaxSamples.push_back( maxSample );
 
-        chrono_t tpc = *( ( chrono_t * )( &buf[pos] ) );
+        chrono_t tpc;
+        memcpy(&tpc, &buf[pos], sizeof(tpc));
         pos += sizeof( chrono_t );
 
-        Util::uint32_t numSamples = *( (Util::uint32_t *)( &buf[pos] ) );
+        Util::uint32_t numSamples;
+        memcpy(&numSamples, &buf[pos], sizeof(numSamples));
         pos += 4;
 
         // make sure our numSamples don't go beyond the buffer
@@ -1545,7 +1548,8 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
             ABCA_THROW("Read invalid: Object Headers name size.");
         }
 
-        Util::uint32_t nameSize = *( (Util::uint32_t *)( &buf[pos] ) );
+        Util::uint32_t nameSize;
+        memcpy(&nameSize, &buf[pos], sizeof(nameSize));
         pos += 4;
 
         if (pos + nameSize + 1 > bufSize)
@@ -1569,7 +1573,8 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
                 ABCA_THROW("Read invalid: Object Headers MetaData size.");
             }
 
-            Util::uint32_t metaDataSize = *( (Util::uint32_t *)( &buf[pos] ) );
+            Util::uint32_t metaDataSize;
+            memcpy(&metaDataSize, &buf[pos], sizeof(metaDataSize));
             pos += 4;
 
             if (pos + metaDataSize > bufSize)
@@ -1705,7 +1710,8 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         }
 
         // first 4 bytes is always info
-        Util::uint32_t info =  *( (Util::uint32_t *)( &buf[pos] ) );
+        Util::uint32_t info;
+        memcpy(&info, &buf[pos], sizeof(info));
         pos += 4;
 
         Util::uint32_t ptype = info & 0x0003;
