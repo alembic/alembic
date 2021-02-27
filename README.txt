@@ -76,7 +76,7 @@ Some examples of OPTIONS you may want or need to use include:
     -DUSE_PYALEMBIC=ON Whether you want to build the boost python bindings for Alembic.
 
     -DPYALEMBIC_PYTHON_MAJOR=2  If you want to look for python 2 (or python 3) via find_package.
-    See the [CMake module documentation](https://cmake.org/cmake/help/v3.13/module/FindPython3.html).
+    See the [CMake module documentation](https://cmake.org/cmake/help/latest/module/FindPython3.html).
 
     -DDOCS_PATH=customDocPath  If you have Doxygen installed this will create and install the doxygen
     generated doc (WIP) to customDocPath when you run: cmake doxygen
