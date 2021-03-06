@@ -78,7 +78,6 @@ jobs:
                 --output-on-failure \
                 -VV
         working-directory: _build
-
   macos_no_python:
     name: 'macOS 10.15
       <AppleClang 11.0
