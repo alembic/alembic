@@ -10,8 +10,8 @@ print(sys.argv)
 # For now, hack the path we import from
 # for alembic and imath paths and make sure they come
 # before any other paths
-sys.path.insert(1, sys.argv[1])
-sys.path.insert(1, sys.argv[2])
+sys.path.insert(1, os.path.abspath(sys.argv[1]))
+sys.path.insert(1, os.path.abspath(sys.argv[2]))
 
 
 testFiles = sys.argv[3:]
