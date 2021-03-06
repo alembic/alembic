@@ -22,7 +22,7 @@ jobs:
     container:
       # DockerHub: https://hub.docker.com/u/aswf
       # Source: https://github.com/AcademySoftwareFoundation/aswf-docker
-      image: aswf/ci-openexr:2020
+      image: aswf/ci-ocio:2020
     strategy:
       matrix:
         build: [1,2,3,4]
