@@ -78,3 +78,67 @@ jobs:
                 --output-on-failure \
                 -VV
         working-directory: _build
+
+  macos_no_python:
+    name: 'macOS 10.15
+      <AppleClang 11.0
+       config=${{ matrix.build-type }},
+       cxx=${{ matrix.cxx-standard }}>'
+    runs-on: macos-10.15
+    strategy:
+      matrix:
+        build: [1, 2, 3, 4]
+        include:
+          # C++11
+          - build: 1
+            build-type: Release
+            cxx-standard: 11
+          # Debug
+          - build: 2
+            build-type: Debug
+            cxx-standard: 11
+          # C++14
+          - build: 3
+            build-type: Release
+            cxx-standard: 14
+          # Debug
+          - build: 4
+            build-type: Debug
+            cxx-standard: 14
+    steps:
+      ## - name: Setup Python
+      ##   uses: actions/setup-python@v1
+      ##   with:
+      ##     python-version: ${{ matrix.python-version }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Create build directories
+        run: |
+          mkdir _install
+          mkdir _build
+      ## - name: Install Dependences
+      ##   run: |
+      ##     share/ci/scripts/macos/install_boost.sh
+      ##   shell: bash
+      - name: Configure
+        run: |
+          cmake ../. \
+                -DCMAKE_INSTALL_PREFIX=../_install \
+                -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+                -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }}
+        working-directory: _build
+      - name: Build
+        run: |
+          cmake --build . \
+                --target install \
+                --config ${{ matrix.build-type }} \
+                -- -j2
+        working-directory: _build
+      - name: Test
+        run: |
+          ctest -T Test \
+                -C ${{matrix.build-type}} \
+                --timeout 7200 \
+                --output-on-failure \
+                -VV
+        working-directory: _build
