@@ -87,7 +87,7 @@ jobs:
     runs-on: macos-10.15
     strategy:
       matrix:
-        build: [1, 2, 3, 4]
+        build: []
         include:
           # C++11
           - build: 1
