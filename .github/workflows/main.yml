@@ -25,28 +25,28 @@ jobs:
       image: aswf/ci-openexr:2020
     strategy:
       matrix:
-      build: [1,2,3,4]
-      include:
-      - build: 1
-        cxx-standard: 14
-        cxx-compiler: g++
-        cc-compiler: gcc
-        compiler-desc: GCC 6.3.1
-      - build: 2
-        cxx-standard: 11
-        cxx-compiler: g++
-        cc-compiler: gcc
-        compiler-desc: GCC 6.3.1
-      - build: 3
-        cxx-standard: 14
-        cxx-compiler: clang++
-        cc-compiler: clang
-        compiler-desc: Clang 7
-      - build: 4
-        cxx-standard: 11
-        cxx-compiler: clang++
-        cc-compiler: clang
-        compiler-desc: Clang 7
+        build: [1,2,3,4]
+        include:
+        - build: 1
+          cxx-standard: 14
+          cxx-compiler: g++
+          cc-compiler: gcc
+          compiler-desc: GCC 6.3.1
+        - build: 2
+          cxx-standard: 11
+          cxx-compiler: g++
+          cc-compiler: gcc
+          compiler-desc: GCC 6.3.1
+        - build: 3
+          cxx-standard: 14
+          cxx-compiler: clang++
+          cc-compiler: clang
+          compiler-desc: Clang 7
+        - build: 4
+          cxx-standard: 11
+          cxx-compiler: clang++
+          cc-compiler: clang
+          compiler-desc: Clang 7
     env:
       CXX: ${{ matrix.cxx-compiler }}
       CC: ${{ matrix.cc-compiler }}
