@@ -129,7 +129,7 @@ void read()
         {
             std::string inputName, connectedNodeName, connectedOutputName;
 
-            std::cout << "    CONNNECTIONS:" << std::endl;
+            std::cout << "    CONNECTIONS:" << std::endl;
 
             for (size_t i = 0; i < numConnections; ++i)
             {

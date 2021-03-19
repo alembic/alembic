@@ -1700,7 +1700,7 @@ void SOP_AlembicIn::buildSubD( Args & args, ISubD &subd, M44d parentXform, bool 
         args.isConstant = false;
     }
     // If the schema is constant and we've already cooked once, we can exit
-    // early assuming that we're either not baking in tranforms or the inherited
+    // early assuming that we're either not baking in transforms or the inherited
     // transformations are constant.
     else if (args.reusePrimitives)
     {
@@ -1785,7 +1785,7 @@ void SOP_AlembicIn::buildPolyMesh( Args & args, IPolyMesh & polymesh,
         args.isConstant = false;
     }
     // If the schema is constant and we've already cooked once, we can exit
-    // early assuming that we're either not baking in tranforms or the inherited
+    // early assuming that we're either not baking in transforms or the inherited
     // transformations are constant.else if (args.reusePrimitives)
     else if (args.reusePrimitives)
     {
@@ -1868,7 +1868,7 @@ void SOP_AlembicIn::buildCurves( Args & args, ICurves & curves,
         args.isConstant = false;
     }
     // If the schema is constant and we've already cooked once, we can exit
-    // early assuming that we're either not baking in tranforms or the inherited
+    // early assuming that we're either not baking in transforms or the inherited
     // transformations are constant.else if (args.reusePrimitives)
     else if (args.reusePrimitives)
     {
@@ -1953,7 +1953,7 @@ void SOP_AlembicIn::buildPoints( Args & args, IPoints & points,
         args.isConstant = false;
     }
     // If the schema is constant and we've already cooked once, we can exit
-    // early assuming that we're either not baking in tranforms or the inherited
+    // early assuming that we're either not baking in transforms or the inherited
     // transformations are constant.else if (args.reusePrimitives)
     else if (args.reusePrimitives)
     {

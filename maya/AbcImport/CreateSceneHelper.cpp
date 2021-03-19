@@ -225,7 +225,7 @@ namespace
                 }
                 abcFacesetNamePlug.setValue(faceSetName);
 
-                // retrive face indices.
+                // retrieve face indices.
                 Alembic::AbcGeom::IFaceSetSchema::Sample samp;
                 faceSet.getSchema().get(samp);
 
@@ -525,7 +525,7 @@ void CreateSceneVisitor::checkShaderSelection(MFnMesh & iMesh,
 
             // clear before hand so that when we add the selection to the
             // set later, it will take.  This is to get around a problem where
-            // shaders are assigned per face dont shade correctly
+            // shaders are assigned per face don't shade correctly
             curSet.clear();
         }
     }
@@ -608,7 +608,7 @@ AlembicObjectPtr CreateSceneVisitor::previsit(AlembicObjectPtr iParentObject)
         }
     }
 
-    // We traverse a tree in postorder. The invarient is that iParentObject
+    // We traverse a tree in postorder. The invariant is that iParentObject
     // will have no child unless any descendent of it has the matching name.
     if (iParentObject->getNumChildren() == 0)
     {

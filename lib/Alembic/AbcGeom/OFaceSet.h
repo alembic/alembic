@@ -53,7 +53,7 @@ class ALEMBIC_EXPORT OFaceSetSchema : public OGeomBaseSchema<FaceSetSchemaInfo>
 {
 public:
     //-*************************************************************************
-    // Parition SAMPLE
+    // Partition SAMPLE
     //-*************************************************************************
     class Sample
     {
@@ -67,7 +67,7 @@ public:
         //! Creates a sample with the list of faces that are in this
         //! faceset.
         //! The array of face numbers MUST be ordered by face number.
-        //! Code that reads and works with facesets depends on this for efficency.
+        //! Code that reads and works with facesets depends on this for efficiency.
         //! e.g. call std::sort (myVecOfFaces.begin (), myVecOfFaces.end ());
         //! if you need to.
         //! The sample must be complete like this. Subsequent samples may also
@@ -132,7 +132,7 @@ public:
                     const Abc::Argument &iArg3 = Abc::Argument() );
 
     //! This constructor creates a new faceset writer.
-    //! The first argument is an OCompundProperty to use as a parent, and from
+    //! The first argument is an OCompoundProperty to use as a parent, and from
     //! which the ErrorHandlerPolicy is derived.  The next is the name to give
     //! the schema which is usually the default name given by OFaceSet
     //! (.faceset) The remaining optional arguments can be used to specify

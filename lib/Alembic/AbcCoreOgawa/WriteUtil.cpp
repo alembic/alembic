@@ -221,7 +221,7 @@ WriteData( WrittenSampleMap &iMap,
                 v.push_back(str[k]);
             }
 
-            // append a 0 for the NULL seperator character
+            // append a 0 for the NULL separator character
             v.push_back(0);
         }
 
@@ -248,7 +248,7 @@ WriteData( WrittenSampleMap &iMap,
                 v.push_back(str[k]);
             }
 
-            // append a 0 for the NULL seperator character
+            // append a 0 for the NULL separator character
             v.push_back(0);
         }
 

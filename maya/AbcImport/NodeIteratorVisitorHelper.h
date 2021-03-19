@@ -248,7 +248,7 @@ public:
     std::vector<Alembic::AbcGeom::IXform>     mXformList;
 
     // Particle data needs special parsing to match maya attributes types
-    // We will store convertion data here at alembicNode initialisation
+    // We will store conversion data here at alembicNode initialisation
     std::vector< PointSampleDataList > mPointsDataList;
 
     // objects that aren't animated but have animated visibility need to be

@@ -67,7 +67,7 @@ class AnimPointPrimitive_nParticle_Test( TestCase):
 
 
     def tearDown(self):
-        # Make sure to disable this function if you need to manualy check the particles data
+        # Make sure to disable this function if you need to manually check the particles data
         for f in self.__abc_files:
             os.remove(f)
 
@@ -175,7 +175,7 @@ class AnimPointPrimitive_nParticle_Test( TestCase):
         particleFnList = []
 
         sel = OpenMaya.MSelectionList()
-        # Get API objet
+        # Get API object
         for particleSystem in particleSystemShapes:
             sel.add( particleSystem )
 
@@ -198,7 +198,7 @@ class AnimPointPrimitive_nParticle_Test( TestCase):
     def test_nParticle_1(self):
         # Simple particle emission with random lifespan and self collision
         # Radius si set for all particles ( kUniform scope )
-        # ParticleShape has userAttribute that represente kUniform and kConstant attributes
+        # ParticleShape has userAttribute that represents kUniform and kConstant attributes
 
         suffix = "01"
 
@@ -400,7 +400,7 @@ def createParticleSystem_1():
     cmds.setAttr('%s.particleRenderType' % particleSystemShape, 7) # Blobby, to see radius
     cmds.connectDynamic( particleSystemShape, em=emitter)
 
-    # Keyframe the radius parametter to have a single sample but varying in time ( abc kUniformScope )
+    # Keyframe the radius parameter to have a single sample but varying in time ( abc kUniformScope )
     cmds.setKeyframe( "%s.radius" % particleSystem, v=.2, t=1)
     cmds.setKeyframe( "%s.radius" % particleSystem, v=1.0, t=24)
     cmds.setKeyframe( "%s.radius" % particleSystem, v=2.0, t=50)
@@ -476,7 +476,7 @@ def createParticleSystem_2():
         cmds.addAttr( particleSystemShape, ln="radiusPP",dt="doubleArray")
     cmds.dynExpression( particleSystem, s="seed(%s.id);\n%s.radiusPP = .2 + time * .2 * rand(.2,1.5)" % (particleSystemShape,particleSystemShape), runtimeAfterDynamics=True)
 
-    # rotatePP (enabled by "compute rotation", the attribute would be created by attribut editor's first constrcution in a gui maya)
+    # rotatePP (enabled by "compute rotation", the attribute would be created by attribute editor's first construction in a gui maya)
     if not cmds.objExists( "%s.rotationPP" % particleSystemShape):
         cmds.addAttr( particleSystemShape, ln="rotationPP",dt="vectorArray")
 
@@ -542,9 +542,9 @@ def getData( particleSystemShapes, frameRange=(1,24), abc=False, customAttribute
     '''
     Create a dict containing data
 
-    exemple:
+    example:
 
-    dict = { frame : { attibute : [data] }
+    dict = { frame : { attribute : [data] }
 
      3: "nParticle_test_1Shape" : {'id': [0.0],
                                   'position':  [(-0.0025255996733903885, 4.990767002105713, -0.0024415384978055954)],
@@ -557,7 +557,7 @@ def getData( particleSystemShapes, frameRange=(1,24), abc=False, customAttribute
     if not isinstance(particleSystemShapes, (list,tuple)):
         particleSystemShapes = [particleSystemShapes]
 
-    # Get API objet
+    # Get API object
     particleFnList = []
     sel = OpenMaya.MSelectionList()
     for particleSystem in particleSystemShapes:
@@ -790,7 +790,7 @@ def getParticleAttribute( particleFn, attribute, abc=False ):
 
         elif attribute.startswith("abcTest") and not abc: # ignore when getting data for alembicObject
             # Special handling for test purpose
-            # thoses attributes are created a simple attribute in maya but are translated as AbcGeom param, either
+            # those attributes are created a simple attribute in maya but are translated as AbcGeom param, either
             # kUniform or kConstant and will be imported back in maya as PP attribute.
             # to be able to correctly compare them here, we need to write them as array, like any other PP attribute in maya
 

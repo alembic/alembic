@@ -196,7 +196,7 @@ void HDF5Hierarchy::addAttr( hid_t iParent, const char *iName )
     if ( strName.compare( len-5, 5, g_strInfo ) == 0 )
     {
         ABCA_ASSERT( !info.m_mask,
-                     "A property header mask alreasy exists." );
+                     "A property header mask already exists." );
 
         info.m_mask = new MaskInfo;
         info.m_mask->m_numFields = 0;

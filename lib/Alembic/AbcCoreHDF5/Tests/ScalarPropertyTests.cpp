@@ -605,7 +605,7 @@ void testRepeatedScalarData()
 
                     Alembic::Util::float32_t f = 0;
 
-                    // make sure we can't get a non-existant sample
+                    // make sure we can't get a non-existent sample
                     TESTING_ASSERT_THROW(sp->getSample( 100, &f ),
                         Alembic::Util::Exception);
 

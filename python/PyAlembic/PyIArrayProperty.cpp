@@ -290,7 +290,7 @@ void register_iarrayproperty()
                   ( arg( "parent" ), arg( "name" ), arg( "argument" ),
                     arg( "argument" ) ),
                     "Create a new IArrayProperty with the given parent "
-                    "ICompoundProperty, namd and optionial arguments which can "
+                    "ICompoundProperty, named and optional arguments which can "
                     "be used to override the ErrorHandlingPolicy, to specify "
                     "protocol matching policy" ) )
         .def( "getNumSamples",

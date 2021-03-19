@@ -137,7 +137,7 @@ void register_ocompoundproperty()
     class_<Abc::OCompoundProperty,
            bases<Abc::OBasePropertyT<AbcA::CompoundPropertyWriterPtr> > >(
         "OCompoundProperty",
-        "Tthe OCompoundProperty class is a compound property writer",
+        "The OCompoundProperty class is a compound property writer",
         init<>( "Create an empty OCompoundProperty" ) )
         .def (init<Abc::OCompoundProperty, const std::string&,
                    optional<

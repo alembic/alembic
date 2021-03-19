@@ -105,7 +105,7 @@ void OLightSchema::setCameraSample( const CameraSample &iSamp )
     }
 
     // clear the child bounds if they happen to be set on the camera sample
-    // since that data is meaninless because we have child bounds on the
+    // since that data is meaningless because we have child bounds on the
     // light schema
     CameraSample samp = iSamp;
     Abc::Box3d childBounds;

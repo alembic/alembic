@@ -99,7 +99,7 @@ void register_utiltypes()
     //
     enum_<AbcU::PlainOldDataType>(
          "POD",
-         "Plain Old Data Types which are suppored in a Simple Property")
+         "Plain Old Data Types which are supported in a Simple Property")
         .value( "kBooleanPOD",  AbcU::kBooleanPOD )
         .value( "kUint8POD",    AbcU::kUint8POD )
         .value( "kInt8POD",     AbcU::kInt8POD )

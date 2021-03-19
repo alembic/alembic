@@ -146,7 +146,7 @@ uint8_t XformOp::getHint() const
 //-*****************************************************************************
 void XformOp::setHint( const Alembic::Util::uint8_t iHint )
 {
-    // if a non-existant hint value is set, default it to 0
+    // if a non-existent hint value is set, default it to 0
     if ( m_type == kScaleOperation && iHint > kScaleHint )
     {
         m_hint = 0;

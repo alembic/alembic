@@ -66,7 +66,7 @@ public:
         int strLen =  H5Iget_name( iObjLocID, NULL, 0  );
         ABCA_ASSERT( strLen > 0, "WrittenSampleID() passed in bad iObjLocID" );
 
-        // add 1 to account for the NULL seperator
+        // add 1 to account for the NULL separator
         strLen ++;
 
         m_objectLocation.resize( strLen );

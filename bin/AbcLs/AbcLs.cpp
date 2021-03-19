@@ -827,7 +827,7 @@ int main( int argc, char *argv[] )
                 found = true;
 
                 // if the last value happens to be an index, and we are a
-                // property  then dont bother checking the last item in seglist
+                // property then don't bother checking the last item in seglist
                 if (lastIsIndex && i == seglist.size() - 2)
                 {
                     shouldPrintValue = true;

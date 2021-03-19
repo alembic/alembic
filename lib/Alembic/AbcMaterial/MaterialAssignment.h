@@ -103,7 +103,7 @@ ALEMBIC_EXPORT bool getMaterialAssignmentPath(
 //! Returns true and fills result with the value of previously defined
 //! material assignment path within a given compound property.
 //!
-//! The common case is at the object level but this is here as a convenince
+//! The common case is at the object level but this is here as a convenience
 //! for custom solutions
 ALEMBIC_EXPORT bool getMaterialAssignmentPath(
     Abc::ICompoundProperty iProp,

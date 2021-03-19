@@ -90,7 +90,7 @@ static void register_(const char* iName)
               ( arg( "propertyHeader" ),
                 arg( "matchingSchema" ) = Abc::kStrictMatching ),
               "Return True if the given entity (as represented by a property "
-              "header) strictly matches the interepretation of this typed "
+              "header) strictly matches the interpretation of this typed "
               "property, as well as the data type" )
         .staticmethod( "matches" )
         ;

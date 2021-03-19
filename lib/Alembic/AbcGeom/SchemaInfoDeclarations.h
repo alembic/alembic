@@ -85,7 +85,7 @@ ALEMBIC_ABC_DECLARE_SCHEMA_INFO( "AbcGeom_FaceSet_v1",
                                  false,
                                  FaceSetSchemaInfo );
 
-#define ALEMBIC_ABCGEOM_PARITION_SCHEMA (FaceSetSchemaInfo::title())
+#define ALEMBIC_ABCGEOM_PARTITION_SCHEMA (FaceSetSchemaInfo::title())
 
 
 //-*****************************************************************************

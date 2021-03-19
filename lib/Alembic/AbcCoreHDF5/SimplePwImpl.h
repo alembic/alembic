@@ -134,7 +134,7 @@ protected:
     // Index representing the first sample that is different from sample 0
     uint32_t m_firstChangedIndex;
 
-    // Index representing the last sample in which a change has occured
+    // Index representing the last sample in which a change has occurred
     // There is no need to repeat samples if they are the same between this
     // index and m_nextSampleIndex
     uint32_t m_lastChangedIndex;
@@ -192,7 +192,7 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::SimplePwImpl
     ABCA_ASSERT( m_header, "Invalid property header" );
     ABCA_ASSERT( m_parentGroup >= 0, "Invalid parent group" );
     ABCA_ASSERT( m_header->getDataType().getExtent() > 0,
-        "Invalid DatatType extent");
+        "Invalid DataType extent");
 
     // Get data types
     PlainOldDataType POD = m_header->getDataType().getPod();
@@ -392,7 +392,7 @@ SimplePwImpl<ABSTRACT,IMPL,SAMPLE,KEY>::~SimplePwImpl()
         // Close the sampleIGroup if it was open
         if ( m_sampleIGroup >= 0 )
         {
-            // this should never have been openened, if a change was never
+            // this should never have been opened, if a change was never
             // detected.
             ABCA_ASSERT( m_firstChangedIndex > 0, "Corrupt SimplePwImpl" );
             H5Gclose( m_sampleIGroup );

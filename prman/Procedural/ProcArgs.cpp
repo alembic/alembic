@@ -474,7 +474,7 @@ void ProcArgs::usage()
     std::cerr << "-resource nameOrPath resourceName" << std::endl;
     std::cerr << std::endl;
     
-    std::cerr << "For each occurance of this flag, resourceName is added to "
+    std::cerr << "For each occurrence of this flag, resourceName is added to "
                  "an internal map using nameOrPath as a key. When traversing the "
                  "scene, the full path and base name of each object (in that "
                  "order) are looked up from this map. If it contains a value, "

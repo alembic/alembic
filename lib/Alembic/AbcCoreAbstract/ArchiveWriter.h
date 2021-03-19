@@ -101,7 +101,7 @@ public:
 
     //! Set the compression applied to array properties.
     //! Implementations are free to disregard this.
-    //! -1 means off, 0 means "litte", where 9 means "alot"
+    //! -1 means off, 0 means "little", where 9 means "alot"
     void setCompressionHint( int8_t iCh )
     {
         m_compressionHint = iCh < -1 ? -1 :

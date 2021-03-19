@@ -61,7 +61,7 @@ def collectionOut():
 
     prop = OStringArrayProperty()
 
-    # this should throw an execption b/c collection name is bad
+    # this should throw an exception b/c collection name is bad
     try:
         prop = group2.getSchema().createCollection("/slashy")
     except:

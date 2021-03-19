@@ -1,4 +1,4 @@
-This is a prototype implemenation of significant portions of the previous first-pass specification document (which also incorporates ideas discussed only in previous phone conversations). It does not yet contain an implementation of the network-style material definition but it's straightforward to extrapolate from here. The property naming conventions within this implementation are derived from but not identical to those within the first-pass specification. (They've been altered be be more Alembic-friendly -- but in a way still compatible with their katana inspiration.)
+This is a prototype implementation of significant portions of the previous first-pass specification document (which also incorporates ideas discussed only in previous phone conversations). It does not yet contain an implementation of the network-style material definition but it's straightforward to extrapolate from here. The property naming conventions within this implementation are derived from but not identical to those within the first-pass specification. (They've been altered be be more Alembic-friendly -- but in a way still compatible with their katana inspiration.)
 
 AbcMaterial is a module which sits above Abc. It is not dependent upon AbcGeom -- nor is AbcGeom currently dependent upon it. It provides schema and object types for representing materials and material bindings.
 
@@ -57,7 +57,7 @@ It creates this hierarchy:
 
 /geometry/geoA is a generic object which contains a material assignment to /materials/materialA. As that material doesn't inherit from any other Material objects, the resulting material is identical to the values locally defined there.
 
-/geometry/geoB is a generic object which contains a material assignment to /materials/materialA/materialB. As that material is a child of /materials/A, it combines the data defined locally for each. In this case, the "prman" "displacement" shader will be present and the "roughness" value of the "prman" "surface" shader will be overriden to 0.1.
+/geometry/geoB is a generic object which contains a material assignment to /materials/materialA/materialB. As that material is a child of /materials/A, it combines the data defined locally for each. In this case, the "prman" "displacement" shader will be present and the "roughness" value of the "prman" "surface" shader will be overridden to 0.1.
 
 /geometry/geoC  is a generic object which contains a material assignment to /materials/materialA/materialB. It also "has a" local material definition which sets the "prman" "surface" "roughness" value. Its resulting material will combine this local definition with the flattened results from /materials/materialA/materialB. If differs from geoB in that its "roughness" will be 0.3.
 

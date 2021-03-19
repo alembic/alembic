@@ -144,7 +144,7 @@ public:
     //! Returns the header of an object that has already been added,
     //! by name.
     //! This will return NULL pointer if no header by that name is found.
-    //! Even if the object assosciated with this header is no longer
+    //! Even if the object associated with this header is no longer
     //! existing, the header will be non-null if any such object
     //! had been created. This is a mechanism for testing if something
     //! has already been made.

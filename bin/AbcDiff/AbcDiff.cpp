@@ -161,7 +161,7 @@ void copyStaticProp(Alembic::Abc::IScalarProperty & iProp,
     }
 }
 
-// copies all of the compound hierachy to iWrite
+// copies all of the compound hierarchy to iWrite
 void copyProps(Alembic::Abc::ICompoundProperty & iRead,
     Alembic::Abc::OCompoundProperty & iWrite, bool iVerbose)
 {
@@ -216,7 +216,7 @@ void copyObject(Alembic::Abc::IObject & iIn, Alembic::Abc::OObject & iOut)
     }
 }
 
-// class which walks the hierarchy, writes out hiearchy and properties
+// class which walks the hierarchy, writes out hierarchy and properties
 // that are different in iInFileB from iInFileA, and prunes hierarchy and
 // properties which are in iInFileA but not iInFileB.
 class DiffWalker
@@ -330,7 +330,7 @@ private:
                 Alembic::Abc::ICompoundProperty childB(iPropB,
                     childAHeader.getName());
 
-                // dont copy metadata here, since it was the same
+                // don't copy metadata here, since it was the same
                 Alembic::Abc::OCompoundProperty outProp(oProp,
                     childAHeader.getName());
 
