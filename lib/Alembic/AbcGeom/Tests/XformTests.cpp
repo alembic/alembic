@@ -639,6 +639,40 @@ void issue188()
     TESTING_ASSERT( user1.getNumProperties() == 1 );
 }
 
+void fuzzer_issue25695(bool iUseMMap)
+{
+        Alembic::AbcCoreFactory::IFactory factory;
+
+        if ( iUseMMap )
+        {
+            factory.setOgawaReadStrategy(
+                Alembic::AbcCoreFactory::IFactory::kMemoryMappedFiles );
+        }
+        else
+        {
+            factory.setOgawaReadStrategy(
+                Alembic::AbcCoreFactory::IFactory::kFileStreams );
+        }
+
+        IArchive archive = factory.getArchive( "fuzzer_issue25695.abc" );
+        try
+        {
+            Alembic::AbcGeom::IXform xformObj( archive.getTop(), "Suzanne" );
+        }
+        catch(const std::exception& e)
+        {
+            std::string msg = "ISchemaObject::ISchemaObject( IObject )\n";
+            msg += "ERROR: EXCEPTION:\n";
+            msg += "IXformSchema::init()\n";
+            msg += "ERROR: EXCEPTION:\n";
+            msg += "ScalarPropertyReader::getSample size is not correct expected: 3 got: 9";
+            TESTING_ASSERT(msg == e.what());
+            return;
+        }
+
+        TESTING_ASSERT( 0 );
+}
+
 //-*****************************************************************************
 int main( int argc, char *argv[] )
 {
@@ -649,5 +683,7 @@ int main( int argc, char *argv[] )
     sparseTest();
     sparseTest2();
     issue188();
+    fuzzer_issue25695(false);
+    fuzzer_issue25695(true);
     return 0;
 }

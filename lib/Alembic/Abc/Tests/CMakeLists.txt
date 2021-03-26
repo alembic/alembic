@@ -99,3 +99,5 @@ ADD_TEST(Abc_CacheControl_TEST Abc_CacheControlTest)
 ADD_EXECUTABLE(Abc_RedundantDataPathsTest RedundantDataTest.cpp)
 TARGET_LINK_LIBRARIES(Abc_RedundantDataPathsTest Alembic)
 ADD_TEST(Abc_RedundantDataPaths_TEST Abc_RedundantDataPathsTest)
+
+file(COPY fuzzer_issue26643.abc DESTINATION .)

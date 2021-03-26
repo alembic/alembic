@@ -1450,6 +1450,16 @@ ReadArraySample( Ogawa::IDataPtr iDims,
 }
 
 //-*****************************************************************************
+template < typename POD >
+static inline POD DerefUnaligned(const void* iData)
+{
+    // on some platforms, dereferencing an unaligned pointer causes a crash. so, copy byte by byte.
+    POD ret;
+    memcpy(&ret, iData, sizeof(POD));
+    return ret;
+}
+
+//-*****************************************************************************
 void
 ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
                        std::vector <  AbcA::TimeSamplingPtr > & oTimeSamples,
@@ -1473,15 +1483,15 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
             ABCA_THROW("Read invalid: TimeSamples info.");
         }
 
-        Util::uint32_t maxSample = *( (Util::uint32_t *)( &buf[pos] ) );
+        Util::uint32_t maxSample = DerefUnaligned<Util::uint32_t>(&buf[pos]);
         pos += 4;
 
         oMaxSamples.push_back( maxSample );
 
-        chrono_t tpc = *( ( chrono_t * )( &buf[pos] ) );
+        chrono_t tpc = DerefUnaligned<chrono_t>(&buf[pos]);
         pos += sizeof( chrono_t );
 
-        Util::uint32_t numSamples = *( (Util::uint32_t *)( &buf[pos] ) );
+        Util::uint32_t numSamples = DerefUnaligned<Util::uint32_t>(&buf[pos]);
         pos += 4;
 
         // make sure our numSamples don't go beyond the buffer
@@ -1545,7 +1555,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
             ABCA_THROW("Read invalid: Object Headers name size.");
         }
 
-        Util::uint32_t nameSize = *( (Util::uint32_t *)( &buf[pos] ) );
+        Util::uint32_t nameSize = DerefUnaligned<Util::uint32_t>(&buf[pos]);
         pos += 4;
 
         if (pos + nameSize + 1 > bufSize)
@@ -1569,7 +1579,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
                 ABCA_THROW("Read invalid: Object Headers MetaData size.");
             }
 
-            Util::uint32_t metaDataSize = *( (Util::uint32_t *)( &buf[pos] ) );
+            Util::uint32_t metaDataSize = DerefUnaligned<Util::uint32_t>(&buf[pos]);
             pos += 4;
 
             if (pos + metaDataSize > bufSize)
@@ -1705,7 +1715,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         }
 
         // first 4 bytes is always info
-        Util::uint32_t info =  *( (Util::uint32_t *)( &buf[pos] ) );
+        Util::uint32_t info = DerefUnaligned<Util::uint32_t>(&buf[pos]);
         pos += 4;
 
         Util::uint32_t ptype = info & 0x0003;

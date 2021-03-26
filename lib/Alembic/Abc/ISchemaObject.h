@@ -145,6 +145,7 @@ public:
             << " to expected: "
             << getSchemaTitle() );
 
+        ABCA_ASSERT(m_object, "Bad child: " << iName);
         // Make the schema.
         m_schema = SCHEMA( m_object->getProperties(),
                            SCHEMA::getDefaultSchemaName(),
