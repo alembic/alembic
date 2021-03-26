@@ -108,7 +108,7 @@ void register_icurves()
               &AbcG::ICurvesSchema::getKnotsProperty )
         .def( "reset", &AbcG::ICurvesSchema::reset )
         .def( "valid", &AbcG::ICurvesSchema::valid )
-        .def( "__nonzero__", &AbcG::ICurvesSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::ICurvesSchema::valid )
         ;
 
     // ICurvesSchema::Sample
@@ -146,7 +146,7 @@ void register_icurves()
               &AbcG::ICurvesSchema::Sample::valid )
         .def( "reset",
               &AbcG::ICurvesSchema::Sample::reset )
-        .def( "__nonzero__",
+        .def( ALEMBIC_PYTHON_BOOL_NAME,
               &AbcG::ICurvesSchema::Sample::valid )
         ;
 }

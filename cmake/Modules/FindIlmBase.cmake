@@ -114,7 +114,7 @@ IF(ILMBASE_INCLUDE_DIR)
       FILE(STRINGS "${_ilmbase_CONFIG}" ILMBASE_BUILD_SPECIFICATION
            REGEX "^[ \t]*#define[ \t]+(ILMBASE_VERSION_STRING|VERSION)[ \t]+\"[.0-9]+\".*$")
     ELSE()
-      MESSAGE(WARNING "Could not find \"OpenEXRConfig.h\" in \"${ILMBASE_INCLUDE_DIR}\"")
+      MESSAGE(WARNING "Could not find \"IlmBaseConfig.h\" in \"${ILMBASE_INCLUDE_DIR}\"")
     ENDIF()
 
     IF(ILMBASE_BUILD_SPECIFICATION)

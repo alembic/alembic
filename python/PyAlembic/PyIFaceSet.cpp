@@ -88,7 +88,7 @@ void register_ifaceset()
               &AbcG::IFaceSetSchema::getFacesProperty )
         .def( "valid", &AbcG::IFaceSetSchema::valid )
         .def( "reset", &AbcG::IFaceSetSchema::reset )
-        .def( "__nonzero__", &AbcG::IFaceSetSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::IFaceSetSchema::valid )
         ;
 
     // IFaceSetSchema::Sample
@@ -101,6 +101,6 @@ void register_ifaceset()
               &AbcG::IFaceSetSchema::Sample::getSelfBounds )
         .def( "valid", &AbcG::IFaceSetSchema::Sample::valid )
         .def( "reset", &AbcG::IFaceSetSchema::Sample::reset )
-        .def( "__nonzero__", &AbcG::IFaceSetSchema::Sample::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::IFaceSetSchema::Sample::valid )
         ;
 }

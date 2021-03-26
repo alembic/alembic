@@ -63,7 +63,7 @@ void register_ixform()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
@@ -72,7 +72,7 @@ void register_ixform()
                    const Abc::Argument&> >(
                    ( arg( "parent" ), arg( "argument" ), arg( "argument" ) ),
                    "doc") )
-        .def( "getTimeSampling", 
+        .def( "getTimeSampling",
               &AbcG::IXformSchema::getTimeSampling )
         .def( "isConstant",
               &AbcG::IXformSchema::isConstant )
@@ -97,6 +97,6 @@ void register_ixform()
               &AbcG::IXformSchema::getUserProperties )
         .def( "valid", &AbcG::IXformSchema::valid )
         .def( "reset", &AbcG::IXformSchema::reset )
-        .def( "__nonzero__", &AbcG::IXformSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::IXformSchema::valid )
         ;
 }

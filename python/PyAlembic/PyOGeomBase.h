@@ -64,6 +64,6 @@ void register_OGeomBaseSchema()
               "if needed" )
         .def( "valid", &OGeomBaseSchema::valid )
         .def( "reset", &OGeomBaseSchema::reset )
-        .def( "__nonzero__", &OGeomBaseSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &OGeomBaseSchema::valid )
         ;
 }

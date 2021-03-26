@@ -34,6 +34,7 @@
 #
 #-******************************************************************************
 
+import unittest
 from imath import *
 from alembic.Abc import *
 from alembic.AbcCoreAbstract import *
@@ -45,69 +46,43 @@ testList = []
 kFacevaryingScope = GeometryScope.kFacevaryingScope
 kWrapExisting = WrapExistingFlag.kWrapExisting
 
-def testOut():
-    """write an oarchive with some data in it"""
-    
-    meshyObj = OPolyMesh( OArchive( 'wrapTest1.abc' ).getTop() , 'meshy' )
-    mesh = meshyObj.getSchema()
-    
-    uvsamp = OV2fGeomParamSample( uvs, kFacevaryingScope ) 
-    nsamp  = ON3fGeomParamSample( normals, kFacevaryingScope )
-    mesh_samp = OPolyMeshSchemaSample( verts, indices, counts, uvsamp, nsamp )
-    
-    cbox = Box3d()
-    cbox.extendBy( V3d( 1.0, -1.0, 0.0 ) )
-    cbox.extendBy( V3d( -1.0, 1.0, 3.0 ) )
-    
-    mesh.getChildBoundsProperty().setValue( cbox )
-    mesh.set( mesh_samp )
-    mesh.set( mesh_samp )
+class Wrapest(unittest.TestCase):
+    def testExport(self):
+        """write an oarchive with some data in it"""
 
-def testIn():
-    """read in an archive and try wrapping it as various objects"""
-    
-    arch = IArchive('wrapTest1.abc')
-    obj = IObject(arch.getTop(), "meshy")
-    md = obj.getMetaData()
+        meshyObj = OPolyMesh( OArchive( 'wrapTest1.abc' ).getTop() , 'meshy' )
+        mesh = meshyObj.getSchema()
 
-    assert IPolyMesh.matches(md)
-    assert not ISubD.matches(md)
-    
-    # wrap object as PolyMesh
-    mesh = IPolyMesh(obj, kWrapExisting)
-    assert mesh.valid()
+        uvsamp = OV2fGeomParamSample( uvs, kFacevaryingScope )
+        nsamp  = ON3fGeomParamSample( normals, kFacevaryingScope )
+        mesh_samp = OPolyMeshSchemaSample( verts, indices, counts, uvsamp, nsamp )
 
-    # wrap object as SubD
-    subd = ISubD(obj, kWrapExisting)
-    assert subd.valid()
+        cbox = Box3d()
+        cbox.extendBy( V3d( 1.0, -1.0, 0.0 ) )
+        cbox.extendBy( V3d( -1.0, 1.0, 3.0 ) )
 
-    # this should throw an exception
-    try:
-        cam = ICamera(obj, kWrapExisting)
-    except RuntimeError, e:
-        pass
+        mesh.getChildBoundsProperty().setValue( cbox )
+        mesh.set( mesh_samp )
+        mesh.set( mesh_samp )
 
-    # this should also throw an exception
-    try:
-        mesh = IPolyMesh(arch.getTop(), kWrapExisting)
-    except RuntimeError, e:
-        pass
-    
-def testWrapBinding():
-    testOut()
-    testIn()
+    def testImport(self):
+        """read in an archive and try wrapping it as various objects"""
 
-testList.append( ( 'testWrapBinding', testWrapBinding ) )
+        arch = IArchive('wrapTest1.abc')
+        obj = IObject(arch.getTop(), "meshy")
+        md = obj.getMetaData()
 
-# -------------------------------------------------------------------------
-# Main loop
+        self.assertTrue(IPolyMesh.matches(md))
+        self.assertFalse(ISubD.matches(md))
 
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
+        # wrap object as PolyMesh
+        mesh = IPolyMesh(obj, kWrapExisting)
+        self.assertTrue(mesh.valid())
 
-print ""
+        # wrap object as SubD
+        subd = ISubD(obj, kWrapExisting)
+        self.assertTrue(subd.valid())
 
+        # this should throw an exception
+        self.assertRaises(RuntimeError, ICamera, obj, kWrapExisting)
+        self.assertRaises(RuntimeError, IPolyMesh, arch.getTop(), kWrapExisting)

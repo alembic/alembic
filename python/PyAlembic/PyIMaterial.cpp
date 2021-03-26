@@ -186,7 +186,7 @@ struct NetworkNodeOverloads
     {
         std::string result;
         iNode.getTarget( result );
-        
+
         return result;
     }
 
@@ -253,7 +253,7 @@ void register_imaterial()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
@@ -262,7 +262,7 @@ void register_imaterial()
                    const Abc::Argument&> >(
                    ( arg( "parent" ), arg( "argument" ), arg( "argument" ) ),
                    "doc") )
-        .def( "getTargetNames", 
+        .def( "getTargetNames",
               &SchemaOverloads::getTargetNames )
         .def( "getShaderTypesForTarget",
               &SchemaOverloads::getShaderTypesForTarget )
@@ -294,6 +294,9 @@ void register_imaterial()
               &SchemaOverloads::getNetworkInterfaceParameterMappingNames )
         .def( "getNetworkInterfaceParameters",
               &AbcM::IMaterialSchema::getNetworkInterfaceParameters )
+        .def( "valid", &AbcM::IMaterialSchema::valid )
+        .def( "reset", &AbcM::IMaterialSchema::reset )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcM::IMaterialSchema::valid )
         ;
 
     // IMaterial::NetworkNode

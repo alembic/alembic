@@ -34,77 +34,41 @@
 #
 #-******************************************************************************
 
+import unittest
 import os
 import alembic
 
-__doc__ == """
-This tests for exceptions being thrown by PyAlembic when an invalid property
-index or name is passed into getProperty on either an IObject or an OObject.
-"""
+class PropExceptTest(unittest.TestCase):
+    """This tests for exceptions being thrown by PyAlembic when an invalid property
+    index or name is passed into getProperty on either an IObject or an OObject."""
 
-testList = []
+    def testExport(self):
+        """
+        Tests exception raising for invalid property indices and names
+        on the write side.
+        """
+        a = alembic.Abc.OArchive("testPropException.abc")
+        t = a.getTop()
+        x = alembic.AbcGeom.OXform(t, "myxform")
+        p = alembic.Abc.OStringProperty(x.getProperties(), "myprop")
+        test = x.getProperties().getProperty("myprop")
+        self.assertEqual(test.getName(), "myprop")
+        test = x.getProperties().getProperty(1)
+        self.assertEqual(test.getName(), "myprop")
 
-def testWrite():
-    """
-    Tests exception raising for invalid property indices and names
-    on the write side.
-    """
-    a = alembic.Abc.OArchive("testPropException.abc")
-    t = a.getTop()
-    x = alembic.AbcGeom.OXform(t, "myxform")
-    p = alembic.Abc.OStringProperty(x.getProperties(), "myprop")
-    test = x.getProperties().getProperty("myprop")
-    assert test.getName() == "myprop"
-    test = x.getProperties().getProperty(1)
-    assert test.getName() == "myprop"
+        self.assertRaises(KeyError, x.getProperties().getProperty, "notfound")
+        self.assertRaises(IndexError, x.getProperties().getProperty, 99)
 
-    try:
-        found = x.getProperties().getProperty("notfound")
-    except KeyError, e:
-        found = False
-    assert found == False
+    def testImport(self):
+        """
+        Tests exception raising for invalid property indices and names
+        on the read side.
+        """
+        a = alembic.Abc.IArchive("testPropException.abc")
+        t = a.getTop()
+        props = t.children[0].getProperties()
+        p = props.getProperty("myprop")
+        self.assertEqual(p.getName(), "myprop")
 
-    try:
-        found = x.getProperties().getProperty(99)
-    except IndexError, e:
-        found = False
-    assert found == False
-
-testList.append(('testWrite', testWrite))
-
-def testRead():
-    """
-    Tests exception raising for invalid property indices and names
-    on the read side.
-    """
-    a = alembic.Abc.IArchive("testPropException.abc")
-    t = a.getTop()
-    props = t.children[0].getProperties()
-    p = props.getProperty("myprop")
-    assert p.getName() == "myprop"
-
-    try:
-        found = props.getProperty("notfound")
-    except KeyError, e:
-        found = False
-    assert found == False
-
-    try:
-        found = props.getProperty(99)
-    except IndexError, e:
-        found = False
-    assert found == False
-
-testList.append(('testRead', testRead))
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
+        self.failUnlessRaises(KeyError, props.getProperty, "notfound")
+        self.assertRaises(IndexError, props.getProperty, 99)

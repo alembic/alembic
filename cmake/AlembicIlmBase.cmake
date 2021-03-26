@@ -33,22 +33,32 @@
 ##
 ##-*****************************************************************************
 
-FIND_PACKAGE(IlmBase)
 
-IF (ILMBASE_FOUND)
-    SET(ALEMBIC_ILMBASE_FOUND 1 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
+FIND_PACKAGE(Imath)
 
-    SET(ALEMBIC_ILMBASE_LIBS
-        ${ALEMBIC_ILMBASE_IMATH_LIB}
-        ${ALEMBIC_ILMBASE_ILMTHREAD_LIB}
-        ${ALEMBIC_ILMBASE_IEX_LIB}
-        ${ALEMBIC_ILMBASE_HALF_LIB}
-    )
-
-    if (${ALEMBIC_ILMBASE_IEXMATH_LIB})
-        SET(ALEMBIC_ILMBASE_LIBS ${ALEMBIC_ILMBASE_LIBS} ${ALEMBIC_ILMBASE_IEXMATH_LIB})
-    endif (${ALEMBIC_ILMBASE_IEXMATH_LIB})
-
+IF (Imath_FOUND)
+    MESSAGE(STATUS "Found package Imath")
+    SET(ALEMBIC_ILMBASE_LIBS Imath::Imath)
 ELSE()
-    SET(ALEMBIC_ILMBASE_FOUND 0 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
+    MESSAGE(STATUS "Could not find Imath looking for IlmBase instead.")
+    # What we really want to do is look for libs Imath and half
+    FIND_PACKAGE(IlmBase)
+
+    IF (ILMBASE_FOUND)
+        SET(ALEMBIC_ILMBASE_FOUND 1 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
+
+        SET(ALEMBIC_ILMBASE_LIBS
+            ${ALEMBIC_ILMBASE_IMATH_LIB}
+            ${ALEMBIC_ILMBASE_ILMTHREAD_LIB}
+            ${ALEMBIC_ILMBASE_IEX_LIB}
+            ${ALEMBIC_ILMBASE_HALF_LIB}
+        )
+
+        if (${ALEMBIC_ILMBASE_IEXMATH_LIB})
+            SET(ALEMBIC_ILMBASE_LIBS ${ALEMBIC_ILMBASE_LIBS} ${ALEMBIC_ILMBASE_IEXMATH_LIB})
+        endif (${ALEMBIC_ILMBASE_IEXMATH_LIB})
+
+    ELSE()
+        SET(ALEMBIC_ILMBASE_FOUND 0 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
+    ENDIF()
 ENDIF()

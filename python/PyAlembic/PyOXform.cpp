@@ -94,6 +94,6 @@ void register_oxform()
               &AbcG::OXformSchema::getChildBoundsProperty )
         .def( "valid", &AbcG::OXformSchema::valid )
         .def( "reset", &AbcG::OXformSchema::reset )
-        .def( "__nonzero__", &AbcG::OXformSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::OXformSchema::valid )
         ;
 }

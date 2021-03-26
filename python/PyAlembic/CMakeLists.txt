@@ -35,128 +35,143 @@
 
 MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
 
-# set core libs
-IF (Boost_PYTHON_LIBRARY AND ALEMBIC_PYTHON_LIBRARY)
-    MESSAGE(STATUS "Found libboost_python: ${Boost_PYTHON_LIBRARY}")
-    SET(PLIBS ${ALEMBIC_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY})
+SET(Boost_USE_STATIC_LIBS ${USE_STATIC_BOOST})
 
-    # lots of warnings coming from unused local typedefs inside boost python
-    IF (NOT WINDOWS)
-        ADD_DEFINITIONS(-Wno-unused-local-typedefs)
-    ENDIF()
-
-    SET(CPP_FILES
-        PyAbcCoreLayer.cpp
-        PyAbcGeomTypes.cpp
-        PyAbcTypes.cpp
-        PyArchiveBounds.cpp
-        PyArchiveInfo.cpp
-        PyCameraSample.cpp
-        PyCoreAbstractTypes.cpp
-        PyFilmBackXformOp.cpp
-        PyIArchive.cpp
-        PyIArrayProperty.cpp
-        PyICamera.cpp
-        PyICollections.cpp
-        PyICompoundProperty.cpp
-        PyICurves.cpp
-        PyIFaceSet.cpp
-        PyIGeomBase.cpp
-        PyIGeomParam.cpp
-        PyIGeomParamPOD.cpp
-        PyIGeomParamVertexPoint.cpp
-        PyIGeomParamBox.cpp
-        PyIGeomParamMatrixQuadColorNormal.cpp
-        PyILight.cpp
-        PyIMaterial.cpp
-        PyINuPatch.cpp
-        PyIObject.cpp
-        PyIPoints.cpp
-        PyIPolyMesh.cpp
-        PyISampleSelector.cpp
-        PyIScalarProperty.cpp
-        PyISubD.cpp
-        PyITypedArrayProperty.cpp
-        PyITypedScalarProperty.cpp
-        PyIXform.cpp
-        PyMaterialFlatten.cpp
-        PyMaterialAssignment.cpp
-        PyOArchive.cpp
-        PyOArrayProperty.cpp
-        PyOCamera.cpp
-        PyOCollections.cpp
-        PyOCompoundProperty.cpp
-        PyOCurves.cpp
-        PyOFaceSet.cpp
-        PyOGeomParam.cpp
-        PyOGeomParamPOD.cpp
-        PyOGeomParamVertexPoint.cpp
-        PyOGeomParamBox.cpp
-        PyOGeomParamMatrixQuadColorNormal.cpp
-        PyOLight.cpp
-        PyOMaterial.cpp
-        PyONuPatch.cpp
-        PyOObject.cpp
-        PyOPoints.cpp
-        PyOPolyMesh.cpp
-        PyOScalarProperty.cpp
-        PyOSubD.cpp
-        PyOTypedArrayProperty.cpp
-        PyOTypedScalarProperty.cpp
-        PyOXform.cpp
-        PyTypedArraySampleConverter.cpp
-        PyTypedPropertyTraits.cpp
-        PyUtilTypes.cpp
-        PyVisibility.cpp
-        PyXformOp.cpp
-        PyXformSample.cpp
-        main.cpp
-    )
-
-    IF (1900 VERSION_EQUAL MSVC_VERSION)
-        IF ((19.00.24213.1 VERSION_LESS_EQUAL CMAKE_CXX_COMPILER_VERSION) AND
-            (19.00.24234.1 VERSION_GREATER_EQUAL CMAKE_CXX_COMPILER_VERSION))
-            list(APPEND CPP_FILES "msvc14fixes.cpp")
-        ENDIF ()
-    ENDIF ()
-
-    LINK_LIBRARIES(Alembic::Alembic
-                   ${PLIBS}
-                   ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
-    )
-
-    INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
-          "${CMAKE_SOURCE_DIR}/python/PyAlembic")
-
-    ADD_LIBRARY(PyAlembic SHARED ${CPP_FILES})
-
-    SET (EXT ".so")
-	SET (PYTHON_MODULE_NAME "alembic")
-    IF (WIN32)
-        SET (EXT ".pyd")
-    ENDIF ()
-
-    SET_TARGET_PROPERTIES(PyAlembic
-        PROPERTIES PREFIX "" OUTPUT_NAME ${PYTHON_MODULE_NAME} SUFFIX ${EXT}
-    )
-
-    SET( ALEMBIC_PYTHON_INSTALL_DIR
-        lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
-        CACHE PATH
-        "Alembic's python bindings install directory"
-    )
-
-    INSTALL (TARGETS PyAlembic
-        DESTINATION ${ALEMBIC_PYTHON_INSTALL_DIR}
-    )
-
-    IF (USE_TESTS)
-        ADD_SUBDIRECTORY(Tests)
-    ENDIF()
-
-    set_target_properties(PyAlembic PROPERTIES
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-ELSE()
-    MESSAGE(FATAL_ERROR "Unable to find Python libs")
+# disables linking to -mt variants on osx
+IF (APPLE)
+    SET(Boost_USE_MULTITHREADED OFF)
 ENDIF()
+
+# require 1.53+ since we need std::shared_ptr supported in the wrapper
+FIND_PACKAGE(Boost 1.53.0 COMPONENTS ${ALEMBIC_BOOST_PYTHON_COMPONENT})
+
+IF (Boost_FOUND)
+    IF (Boost_VERSION LESS 105300)
+        MESSAGE(FATAL_ERROR "Boost VERSION IS TOO OLD.")
+    ENDIF()
+    MESSAGE(STATUS "BOOST INCLUDE DIRS: ${Boost_INCLUDE_DIRS}")
+    MESSAGE(STATUS "BOOST LIBRARIES: ${Boost_LIBRARIES}")
+ELSE()
+    MESSAGE(FATAL_ERROR "Boost not found.")
+ENDIF()
+
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
+
+# lots of warnings coming from unused local typedefs inside boost python
+IF (NOT WINDOWS)
+    ADD_DEFINITIONS(-Wno-unused-local-typedefs)
+ENDIF()
+
+SET(CPP_FILES
+    PyAbcCoreLayer.cpp
+    PyAbcGeomTypes.cpp
+    PyAbcTypes.cpp
+    PyArchiveBounds.cpp
+    PyArchiveInfo.cpp
+    PyCameraSample.cpp
+    PyCoreAbstractTypes.cpp
+    PyFilmBackXformOp.cpp
+    PyIArchive.cpp
+    PyIArrayProperty.cpp
+    PyICamera.cpp
+    PyICollections.cpp
+    PyICompoundProperty.cpp
+    PyICurves.cpp
+    PyIFaceSet.cpp
+    PyIGeomBase.cpp
+    PyIGeomParam.cpp
+    PyIGeomParamPOD.cpp
+    PyIGeomParamVertexPoint.cpp
+    PyIGeomParamBox.cpp
+    PyIGeomParamMatrixQuadColorNormal.cpp
+    PyILight.cpp
+    PyIMaterial.cpp
+    PyINuPatch.cpp
+    PyIObject.cpp
+    PyIPoints.cpp
+    PyIPolyMesh.cpp
+    PyISampleSelector.cpp
+    PyIScalarProperty.cpp
+    PyISubD.cpp
+    PyITypedArrayProperty.cpp
+    PyITypedScalarProperty.cpp
+    PyIXform.cpp
+    PyMaterialFlatten.cpp
+    PyMaterialAssignment.cpp
+    PyOArchive.cpp
+    PyOArrayProperty.cpp
+    PyOCamera.cpp
+    PyOCollections.cpp
+    PyOCompoundProperty.cpp
+    PyOCurves.cpp
+    PyOFaceSet.cpp
+    PyOGeomParam.cpp
+    PyOGeomParamPOD.cpp
+    PyOGeomParamVertexPoint.cpp
+    PyOGeomParamBox.cpp
+    PyOGeomParamMatrixQuadColorNormal.cpp
+    PyOLight.cpp
+    PyOMaterial.cpp
+    PyONuPatch.cpp
+    PyOObject.cpp
+    PyOPoints.cpp
+    PyOPolyMesh.cpp
+    PyOScalarProperty.cpp
+    PyOSubD.cpp
+    PyOTypedArrayProperty.cpp
+    PyOTypedScalarProperty.cpp
+    PyOXform.cpp
+    PyTypedArraySampleConverter.cpp
+    PyTypedPropertyTraits.cpp
+    PyUtilTypes.cpp
+    PyVisibility.cpp
+    PyXformOp.cpp
+    PyXformSample.cpp
+    main.cpp
+)
+
+IF (1900 VERSION_EQUAL MSVC_VERSION)
+    IF ((19.00.24213.1 VERSION_LESS_EQUAL CMAKE_CXX_COMPILER_VERSION) AND
+        (19.00.24234.1 VERSION_GREATER_EQUAL CMAKE_CXX_COMPILER_VERSION))
+        list(APPEND CPP_FILES "msvc14fixes.cpp")
+    ENDIF ()
+ENDIF ()
+
+LINK_LIBRARIES(Alembic::Alembic
+               ${PYTHON_LIBRARIES}
+               ${Boost_LIBRARIES}
+               ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
+)
+
+INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
+    "${CMAKE_SOURCE_DIR}/python/PyAlembic")
+
+ADD_LIBRARY(PyAlembic SHARED ${CPP_FILES})
+
+SET (EXT ".so")
+SET (PYTHON_MODULE_NAME "alembic")
+IF (WIN32)
+    SET (EXT ".pyd")
+ENDIF ()
+
+SET_TARGET_PROPERTIES(PyAlembic
+    PROPERTIES PREFIX "" OUTPUT_NAME ${PYTHON_MODULE_NAME} SUFFIX ${EXT}
+)
+
+SET( ALEMBIC_PYTHON_INSTALL_DIR
+    lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
+    CACHE PATH
+    "Alembic's python bindings install directory"
+)
+
+INSTALL (TARGETS PyAlembic
+    DESTINATION ${ALEMBIC_PYTHON_INSTALL_DIR}
+)
+
+IF (USE_TESTS)
+    ADD_SUBDIRECTORY(Tests)
+ENDIF()
+
+set_target_properties(PyAlembic PROPERTIES
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)

@@ -157,7 +157,7 @@ void register_iarchive()
               ( arg("index" ) ),
               "Returns the max number of samples set for the TimeSampling at the given index." )
         .def( "valid", &Abc::IArchive::valid )
-        .def( "__nonzero__", &Abc::IArchive::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &Abc::IArchive::valid )
         .def( "__str__", &Abc::IArchive::getName )
         ;
 }

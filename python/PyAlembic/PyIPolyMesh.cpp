@@ -120,7 +120,7 @@ void register_ipolymesh()
               &AbcG::IPolyMeshSchema::getVelocitiesProperty )
         .def( "reset", &AbcG::IPolyMeshSchema::reset )
         .def( "valid", &AbcG::IPolyMeshSchema::valid )
-        .def( "__nonzero__", &AbcG::IPolyMeshSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::IPolyMeshSchema::valid )
         .def( "getFaceSetNames",
               &Overloads::getFaceSetNames,
               ( arg( "oFaceSetNames" ) ) )
@@ -154,7 +154,7 @@ void register_ipolymesh()
               &AbcG::IPolyMeshSchema::Sample::valid )
          .def( "reset",
               &AbcG::IPolyMeshSchema::Sample::reset )
-         .def( "__nonzero__",
+         .def( ALEMBIC_PYTHON_BOOL_NAME,
               &AbcG::IPolyMeshSchema::Sample::valid )
         ;
 }

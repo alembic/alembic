@@ -104,7 +104,7 @@ void register_oobject()
               "Add a child to this OObject as an instance of another already created OObject" )
         .def( "getHeader",
               &Abc::OObject::getHeader,
-              "Return the header of this object", 
+              "Return the header of this object",
               return_internal_reference<>() )
         .def( "getName",
               &Abc::OObject::getName,
@@ -165,6 +165,6 @@ void register_oobject()
         .def( "reset", &Abc::OObject::reset )
         .def( "__str__", &Abc::OObject::getFullName,
               return_value_policy<copy_const_reference>() )
-        .def( "__nonzero__", &Abc::OObject::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &Abc::OObject::valid )
         ;
 }

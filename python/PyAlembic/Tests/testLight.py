@@ -34,6 +34,7 @@
 #
 #-******************************************************************************
 
+import unittest
 from imath import *
 from alembic.Abc import *
 from alembic.AbcGeom import *
@@ -42,74 +43,53 @@ testList = []
 
 kConstantScope = GeometryScope.kConstantScope
 
-def almostEqual(a0, a1, error=0.01):
-    return abs(a0 - a1) <= error
+class LightTest(unittest.TestCase):
 
-def lightOut():
-    """write out light archive"""
+    def testLighExport(self):
+        """write out light archive"""
 
-    archive = OArchive("light1.abc")
-    emptyLightObj = OLight(archive.getTop(), "emptyLight")
-    lightObj = OLight(archive.getTop(), "myLight" )
+        archive = OArchive("light1.abc")
+        emptyLightObj = OLight(archive.getTop(), "emptyLight")
+        lightObj = OLight(archive.getTop(), "myLight" )
 
-    samp = CameraSample()
-    lightObj.getSchema().setCameraSample( samp )
+        samp = CameraSample()
+        lightObj.getSchema().setCameraSample( samp )
 
-    samp = CameraSample( -0.35, 0.75, 0.1, 0.5 )
-    lightObj.getSchema().getChildBoundsProperty().setValue(
-        Box3d( V3d( 0.0, 0.1, 0.2 ), V3d( 0.3, 0.4, 0.5 ) ) )
+        samp = CameraSample( -0.35, 0.75, 0.1, 0.5 )
+        lightObj.getSchema().getChildBoundsProperty().setValue(
+            Box3d( V3d( 0.0, 0.1, 0.2 ), V3d( 0.3, 0.4, 0.5 ) ) )
 
-    lightObj.getSchema().setCameraSample( samp )
+        lightObj.getSchema().setCameraSample( samp )
 
-    arg = lightObj.getSchema().getArbGeomParams()
-    param = OFloatGeomParam( arg, "test", False,
-                                          kConstantScope, 1 )
-    user = lightObj.getSchema().getUserProperties()
-    OFloatProperty( user, "test" )
+        arg = lightObj.getSchema().getArbGeomParams()
+        param = OFloatGeomParam( arg, "test", False, kConstantScope, 1 )
+        user = lightObj.getSchema().getUserProperties()
+        OFloatProperty( user, "test" )
 
-def lightIn():
-    """read in light archive"""
+    def testLightImport(self):
+        """read in light archive"""
 
-    archive = IArchive("light1.abc")
-    emptyLightObj = ILight(archive.getTop(), "emptyLight" )
-    lightObj = ILight(archive.getTop(), "myLight" )
+        archive = IArchive("light1.abc")
+        emptyLightObj = ILight(archive.getTop(), "emptyLight" )
+        lightObj = ILight(archive.getTop(), "myLight" )
 
-    assert not emptyLightObj.getSchema().getArbGeomParams()
-    assert not emptyLightObj.getSchema().getUserProperties()
-    assert lightObj.getSchema().getArbGeomParams().getNumProperties() == 1
-    assert lightObj.getSchema().getUserProperties().getNumProperties() == 1
+        self.assertFalse(emptyLightObj.getSchema().getArbGeomParams().valid())
+        self.assertFalse(emptyLightObj.getSchema().getUserProperties().valid())
+        self.assertEqual(lightObj.getSchema().getArbGeomParams().getNumProperties(), 1)
+        self.assertEqual(lightObj.getSchema().getUserProperties().getNumProperties(), 1)
 
-    samp = lightObj.getSchema().getCameraSchema().getValue( 0 )
-    window = samp.getScreenWindow();
-    assert almostEqual( window['top'], 0.666666666666667 )
-    assert almostEqual( window['bottom'], -0.666666666666667 )
-    assert almostEqual( window['left'], -1.0 )
-    assert almostEqual( window['right'], 1.0 )
+        samp = lightObj.getSchema().getCameraSchema().getValue( 0 )
+        window = samp.getScreenWindow();
+        self.assertAlmostEqual( window['top'], 0.666666666666667 )
+        self.assertAlmostEqual( window['bottom'], -0.666666666666667 )
+        self.assertAlmostEqual( window['left'], -1.0 )
+        self.assertAlmostEqual( window['right'], 1.0 )
 
-    samp = lightObj.getSchema().getCameraSchema().getValue( 1 )
-    window = samp.getScreenWindow();
-    assert almostEqual( window['top'], -0.35 )
-    assert almostEqual( window['bottom'], 0.75 )
-    assert almostEqual( window['left'], 0.1 )
-    assert almostEqual( window['right'], 0.5 )
+        samp = lightObj.getSchema().getCameraSchema().getValue( 1 )
+        window = samp.getScreenWindow();
+        self.assertAlmostEqual( window['top'], -0.35 )
+        self.assertAlmostEqual( window['bottom'], 0.75 )
+        self.assertAlmostEqual( window['left'], 0.1 )
+        self.assertAlmostEqual( window['right'], 0.5 )
 
-    assert not lightObj.getSchema().getCameraSchema().getChildBoundsProperty()
-
-
-def testLightBinding():
-    lightOut()
-    lightIn()
-
-testList.append(('testLightBinding', testLightBinding))
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
+        self.assertFalse(lightObj.getSchema().getCameraSchema().getChildBoundsProperty().valid())

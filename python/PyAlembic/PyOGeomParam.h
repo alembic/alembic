@@ -255,7 +255,7 @@ static void register_( const char* iName )
               &OGeomParam::valid )
         .def( "reset",
               &OGeomParam::reset )
-        .def( "__nonzero__", &OGeomParam::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &OGeomParam::valid )
        ;
 
     // OGeomParam::Sample

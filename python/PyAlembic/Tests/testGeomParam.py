@@ -33,110 +33,95 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #-******************************************************************************
-
+import unittest
 from buildTestData import *
 
-testList = []
+class GeomParamTest(unittest.TestCase):
+    def geomParamImpl(self,  iTPTraits, iTypedGeomParamSample ):
 
-def testOGeomParamImpl( iTPTraits, iTypedGeomParamSample ):
+        compare = TraitsComparison[iTPTraits.__name__]
 
-    compare = TraitsComparison[iTPTraits.__name__]
+        ovals = ArrayTraitsData[iTPTraits.__name__][1]
+        samp  = iTypedGeomParamSample( ovals, GeometryScope.kConstantScope )
+        ivals = samp.getVals()
 
-    ovals = ArrayTraitsData[iTPTraits.__name__][1]
-    samp  = iTypedGeomParamSample( ovals, GeometryScope.kConstantScope )
-    ivals = samp.getVals()
+        self.assertEqual(len( ivals ), len( ovals ))
+        for i in range( len( ivals ) ):
+            self.assertTrue( compare( ivals[i], ovals[i] ) )
 
-    assert len( ivals ) == len( ovals )
-    for i in range( len( ivals ) ):
-        assert compare( ivals[i], ovals[i] )
+        samp2 = iTypedGeomParamSample()
+        samp2.setVals( ovals )
+        ivals = samp2.getVals()
 
-    samp2 = iTypedGeomParamSample()
-    samp2.setVals( ovals )
-    ivals = samp2.getVals()
+        self.assertEqual(len( ivals ), len( ovals ))
 
-    assert len( ivals ) == len( ovals )
-    for i in range( len( ivals ) ):
-        assert compare( ivals[i], ovals[i] )
+        for i in range( len( ivals ) ):
+            self.assertTrue( compare( ivals[i], ovals[i] ) )
 
-def testOGeomParamSample():
-    testOGeomParamImpl( BooleanTPTraits, OBooleanGeomParamSample )
-    testOGeomParamImpl( Uint8TPTraits  , OUcharGeomParamSample )
-    testOGeomParamImpl( Int8TPTraits   , OCharGeomParamSample )
-    testOGeomParamImpl( Uint16TPTraits , OUInt16GeomParamSample )
-    testOGeomParamImpl( Int16TPTraits  , OInt16GeomParamSample )
-    testOGeomParamImpl( Uint32TPTraits , OUInt32GeomParamSample )
-    testOGeomParamImpl( Int32TPTraits  , OInt32GeomParamSample )
-    testOGeomParamImpl( Uint64TPTraits , OUInt64GeomParamSample )
-    testOGeomParamImpl( Int64TPTraits  , OInt64GeomParamSample )
-    testOGeomParamImpl( Float16TPTraits, OHalfGeomParamSample )
-    testOGeomParamImpl( Float32TPTraits, OFloatGeomParamSample )
-    testOGeomParamImpl( Float64TPTraits, ODoubleGeomParamSample )
-    testOGeomParamImpl( StringTPTraits , OStringGeomParamSample )
-    testOGeomParamImpl( WstringTPTraits, OWstringGeomParamSample )
+    def testOGeomParamSample(self):
+        self.geomParamImpl( BooleanTPTraits, OBooleanGeomParamSample )
+        self.geomParamImpl( Uint8TPTraits  , OUcharGeomParamSample )
+        self.geomParamImpl( Int8TPTraits   , OCharGeomParamSample )
+        self.geomParamImpl( Uint16TPTraits , OUInt16GeomParamSample )
+        self.geomParamImpl( Int16TPTraits  , OInt16GeomParamSample )
+        self.geomParamImpl( Uint32TPTraits , OUInt32GeomParamSample )
+        self.geomParamImpl( Int32TPTraits  , OInt32GeomParamSample )
+        self.geomParamImpl( Uint64TPTraits , OUInt64GeomParamSample )
+        self.geomParamImpl( Int64TPTraits  , OInt64GeomParamSample )
+        self.geomParamImpl( Float16TPTraits, OHalfGeomParamSample )
+        self.geomParamImpl( Float32TPTraits, OFloatGeomParamSample )
+        self.geomParamImpl( Float64TPTraits, ODoubleGeomParamSample )
+        self.geomParamImpl( StringTPTraits , OStringGeomParamSample )
+        self.geomParamImpl( WstringTPTraits, OWstringGeomParamSample )
 
-    testOGeomParamImpl( V2sTPTraits    , OV2sGeomParamSample )
-    testOGeomParamImpl( V2iTPTraits    , OV2iGeomParamSample )
-    testOGeomParamImpl( V2fTPTraits    , OV2fGeomParamSample )
-    testOGeomParamImpl( V2dTPTraits    , OV2dGeomParamSample )
+        self.geomParamImpl( V2sTPTraits    , OV2sGeomParamSample )
+        self.geomParamImpl( V2iTPTraits    , OV2iGeomParamSample )
+        self.geomParamImpl( V2fTPTraits    , OV2fGeomParamSample )
+        self.geomParamImpl( V2dTPTraits    , OV2dGeomParamSample )
 
-    testOGeomParamImpl( V3sTPTraits    , OV3sGeomParamSample )
-    testOGeomParamImpl( V3iTPTraits    , OV3iGeomParamSample )
-    testOGeomParamImpl( V3fTPTraits    , OV3fGeomParamSample )
-    testOGeomParamImpl( V3dTPTraits    , OV3dGeomParamSample )
+        self.geomParamImpl( V3sTPTraits    , OV3sGeomParamSample )
+        self.geomParamImpl( V3iTPTraits    , OV3iGeomParamSample )
+        self.geomParamImpl( V3fTPTraits    , OV3fGeomParamSample )
+        self.geomParamImpl( V3dTPTraits    , OV3dGeomParamSample )
 
-    testOGeomParamImpl( P2sTPTraits    , OP2sGeomParamSample )
-    testOGeomParamImpl( P2iTPTraits    , OP2iGeomParamSample )
-    testOGeomParamImpl( P2fTPTraits    , OP2fGeomParamSample )
-    testOGeomParamImpl( P2dTPTraits    , OP2dGeomParamSample )
+        self.geomParamImpl( P2sTPTraits    , OP2sGeomParamSample )
+        self.geomParamImpl( P2iTPTraits    , OP2iGeomParamSample )
+        self.geomParamImpl( P2fTPTraits    , OP2fGeomParamSample )
+        self.geomParamImpl( P2dTPTraits    , OP2dGeomParamSample )
 
-    testOGeomParamImpl( P3sTPTraits    , OP3sGeomParamSample )
-    testOGeomParamImpl( P3iTPTraits    , OP3iGeomParamSample )
-    testOGeomParamImpl( P3fTPTraits    , OP3fGeomParamSample )
-    testOGeomParamImpl( P3dTPTraits    , OP3dGeomParamSample )
+        self.geomParamImpl( P3sTPTraits    , OP3sGeomParamSample )
+        self.geomParamImpl( P3iTPTraits    , OP3iGeomParamSample )
+        self.geomParamImpl( P3fTPTraits    , OP3fGeomParamSample )
+        self.geomParamImpl( P3dTPTraits    , OP3dGeomParamSample )
 
-    testOGeomParamImpl( Box2sTPTraits  , OBox2sGeomParamSample )
-    testOGeomParamImpl( Box2iTPTraits  , OBox2iGeomParamSample )
-    testOGeomParamImpl( Box2fTPTraits  , OBox2fGeomParamSample )
-    testOGeomParamImpl( Box2dTPTraits  , OBox2dGeomParamSample )
+        self.geomParamImpl( Box2sTPTraits  , OBox2sGeomParamSample )
+        self.geomParamImpl( Box2iTPTraits  , OBox2iGeomParamSample )
+        self.geomParamImpl( Box2fTPTraits  , OBox2fGeomParamSample )
+        self.geomParamImpl( Box2dTPTraits  , OBox2dGeomParamSample )
 
-    testOGeomParamImpl( Box3sTPTraits  , OBox3sGeomParamSample )
-    testOGeomParamImpl( Box3iTPTraits  , OBox3iGeomParamSample )
-    testOGeomParamImpl( Box3fTPTraits  , OBox3fGeomParamSample )
-    testOGeomParamImpl( Box3dTPTraits  , OBox3dGeomParamSample )
+        self.geomParamImpl( Box3sTPTraits  , OBox3sGeomParamSample )
+        self.geomParamImpl( Box3iTPTraits  , OBox3iGeomParamSample )
+        self.geomParamImpl( Box3fTPTraits  , OBox3fGeomParamSample )
+        self.geomParamImpl( Box3dTPTraits  , OBox3dGeomParamSample )
 
-    testOGeomParamImpl( M33fTPTraits   , OM33fGeomParamSample )
-    testOGeomParamImpl( M33dTPTraits   , OM33dGeomParamSample )
-    testOGeomParamImpl( M44fTPTraits   , OM44fGeomParamSample )
-    testOGeomParamImpl( M44dTPTraits   , OM44dGeomParamSample )
+        self.geomParamImpl( M33fTPTraits   , OM33fGeomParamSample )
+        self.geomParamImpl( M33dTPTraits   , OM33dGeomParamSample )
+        self.geomParamImpl( M44fTPTraits   , OM44fGeomParamSample )
+        self.geomParamImpl( M44dTPTraits   , OM44dGeomParamSample )
 
-    testOGeomParamImpl( QuatfTPTraits  , OQuatfGeomParamSample )
-    testOGeomParamImpl( QuatdTPTraits  , OQuatdGeomParamSample )
+        self.geomParamImpl( QuatfTPTraits  , OQuatfGeomParamSample )
+        self.geomParamImpl( QuatdTPTraits  , OQuatdGeomParamSample )
 
-    testOGeomParamImpl( C3hTPTraits    , OC3hGeomParamSample )
-    testOGeomParamImpl( C3fTPTraits    , OC3fGeomParamSample )
-    testOGeomParamImpl( C3cTPTraits    , OC3cGeomParamSample )
+        self.geomParamImpl( C3hTPTraits    , OC3hGeomParamSample )
+        self.geomParamImpl( C3fTPTraits    , OC3fGeomParamSample )
+        self.geomParamImpl( C3cTPTraits    , OC3cGeomParamSample )
 
-    testOGeomParamImpl( C4hTPTraits    , OC4hGeomParamSample )
-    testOGeomParamImpl( C4fTPTraits    , OC4fGeomParamSample )
-    testOGeomParamImpl( C4cTPTraits    , OC4cGeomParamSample )
+        self.geomParamImpl( C4hTPTraits    , OC4hGeomParamSample )
+        self.geomParamImpl( C4fTPTraits    , OC4fGeomParamSample )
+        self.geomParamImpl( C4cTPTraits    , OC4cGeomParamSample )
 
-    testOGeomParamImpl( N2fTPTraits    , ON2fGeomParamSample )
-    testOGeomParamImpl( N2dTPTraits    , ON2dGeomParamSample )
+        self.geomParamImpl( N2fTPTraits    , ON2fGeomParamSample )
+        self.geomParamImpl( N2dTPTraits    , ON2dGeomParamSample )
 
-    testOGeomParamImpl( N3fTPTraits    , ON3fGeomParamSample )
-    testOGeomParamImpl( N3dTPTraits    , ON3dGeomParamSample )
-
-testList.append( ( 'testOGeomParamSample', testOGeomParamSample ) )
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
-
+        self.geomParamImpl( N3fTPTraits    , ON3fGeomParamSample )
+        self.geomParamImpl( N3dTPTraits    , ON3dGeomParamSample )

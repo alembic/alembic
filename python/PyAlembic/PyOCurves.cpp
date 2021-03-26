@@ -70,7 +70,7 @@ void register_ocurves()
               &AbcG::OCurvesSchema::setFromPrevious )
         .def( "reset", &AbcG::OCurvesSchema::reset )
         .def( "valid", &AbcG::OCurvesSchema::valid )
-        .def( "__nonzero__", &AbcG::OCurvesSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::OCurvesSchema::valid )
         ;
 
     // OCurvesSchema::Sample

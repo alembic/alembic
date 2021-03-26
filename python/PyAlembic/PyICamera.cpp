@@ -63,7 +63,7 @@ void register_icamera()
                    optional<
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                   ( arg( "parent" ), arg( "name" ), 
+                   ( arg( "parent" ), arg( "name" ),
                      arg( "argument" ), arg( "argument" ) ),
                    "doc") )
         .def( init<Abc::ICompoundProperty,
@@ -81,11 +81,11 @@ void register_icamera()
         .def( "getUserProperties", &AbcG::ICameraSchema::getUserProperties )
         .def( "getChildBoundsProperty",
               &AbcG::ICameraSchema::getChildBoundsProperty )
-        .def( "getValue", 
+        .def( "getValue",
               &AbcG::ICameraSchema::getValue,
               ( arg( "iSS" ) = Abc::ISampleSelector() ) )
         .def( "valid", &AbcG::ICameraSchema::valid )
         .def( "reset", &AbcG::ICameraSchema::reset )
-        .def( "__nonzero__", &AbcG::ICameraSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::ICameraSchema::valid )
         ;
 }

@@ -34,6 +34,7 @@
 #
 #-******************************************************************************
 
+import unittest
 from imath import *
 from alembic.AbcCoreAbstract import *
 from alembic.Abc import *
@@ -53,7 +54,7 @@ from cubeData import *
 #       |- PolyMesh
 #           |- .faceCounts
 #           |- .faceIndices
-#           |- P 
+#           |- P
 #           |- .selfBnds
 
 # TimeSampling data
@@ -65,40 +66,6 @@ numSamplesPerCycle = len(tvec)
 
 tst = TimeSamplingType( numSamplesPerCycle, timePerCycle )
 ts = TimeSampling( tst, tvec )
-
-# Alembic file name
-fileName = 'cube.abc'
-
-# Pseudo wrapper for Typed Properties
-def OScalarProperty( iCompoundProperty, iName, iTPTraits ):
-    traits = iTPTraits()
-    meta = MetaData()
-    inter = traits.interpretation()
-    if len(inter) > 0:
-        meta.set( 'interpretation', inter )
-
-    return OScalarProperty( iCompoundProperty, iName, \
-                                    traits.dataType(), meta )
-
-def OScalarProperty4( iCompoundProperty, iName, iTPTraits, iTimeSamplingIdx ):
-    traits = iTPTraits()
-    meta = MetaData()
-    inter = traits.interpretation()
-    if len(inter) > 0:
-        meta.set( 'interpretation', inter )
-
-    return OScalarProperty( iCompoundProperty, iName, \
-                                    traits.dataType(), meta, iTimeSamplingIdx )
-
-def OArrayProperty( iCompoundProperty, iName, iTPTraits ):
-    traits = iTPTraits()
-    meta = MetaData()
-    inter = traits.interpretation()
-    if len(inter) > 0:
-        meta.set( 'interpretation', inter )
-
-    return OArrayProperty( iCompoundProperty, iName, \
-                                   traits.dataType(), meta )
 
 # Pseudo wrapper for AbcGeom Objects and their schemas
 def OXformSchema( iObject ):
@@ -125,139 +92,125 @@ def OPolyMesh( iObject, iName ):
     meta.set( 'schemaBaseType', 'AbcGeom_GeomBase_v1' )
     return OObject( iObject, iName, meta )
 
-testList = []
 
-# Test exporting a simple cube quad mesh
-def testExportCubeGeom():
-   
-    top = OArchive( fileName ).getTop()
+class CacheCubeTest(unittest.TestCase):
+    # Test exporting a simple cube quad mesh
+    def testExportCubeGeom(self):
 
-    # Add our time sampling
-    tsidx = top.getArchive().addTimeSampling(ts)
+        top = OArchive( 'cube.abc' ).getTop()
 
-    ###########################################################################
-    # cube OXform object
-    xform = OXform( top, 'cube1', tsidx )
+        # Add our time sampling
+        tsidx = top.getArchive().addTimeSampling(ts)
 
-    ###########################################################################
-    # OXform schema property
-    xformCP = OXformSchema( xform )
+        ###########################################################################
+        # cube OXform object
+        xform = OXform( top, 'cube1', tsidx )
 
-    # Properties
-    # .inherits
-    inherits = OBoolProperty( xformCP, '.inherits' )
-    for i in range( 0, numSamplesPerCycle ):
-        inherits.setValue( True )
-   
-    # .ops
-    ops = OUcharProperty( xformCP, '.ops' )
-    for i in range( 0, numSamplesPerCycle ):
-        ops.setValue( 48 )
+        ###########################################################################
+        # OXform schema property
+        xformCP = OXformSchema( xform )
 
-    # .vals
-    vals = OM44dProperty( xformCP, '.vals', tsidx )
-    vals.setValue ( xformvec[0] )
-    vals.setValue ( xformvec[1] )
-    vals.setValue ( xformvec[2] )
+        # Properties
+        # .inherits
+        inherits = OBoolProperty( xformCP, '.inherits' )
+        for i in range( 0, numSamplesPerCycle ):
+            inherits.setValue( True )
 
-    ###########################################################################
-    # /cube/cubeShape OPolyMesh object
-    shape = OPolyMesh( xform, 'cube1Shape' )
+        # .ops
+        ops = OUcharProperty( xformCP, '.ops' )
+        for i in range( 0, numSamplesPerCycle ):
+            ops.setValue( 48 )
 
-    ###########################################################################
-    # OPolyMesh schema
-    mesh = OPolyMeshSchema( shape )
+        # .vals
+        vals = OM44dProperty( xformCP, '.vals', tsidx )
+        vals.setValue ( xformvec[0] )
+        vals.setValue ( xformvec[1] )
+        vals.setValue ( xformvec[2] )
 
-    # Properties
-    # .faceCounts
-    counts = OInt32ArrayProperty( mesh, '.faceCounts' )
-    counts.setValue( faceCounts )
+        ###########################################################################
+        # /cube/cubeShape OPolyMesh object
+        shape = OPolyMesh( xform, 'cube1Shape' )
 
-    # .faceIndices
-    indices = OInt32ArrayProperty( mesh, '.faceIndices' )
-    indices.setValue( faceIndices )
+        ###########################################################################
+        # OPolyMesh schema
+        mesh = OPolyMeshSchema( shape )
 
-    # P
-    p = OP3fArrayProperty( mesh, 'P' )
-    p.setValue( points )
+        # Properties
+        # .faceCounts
+        counts = OInt32ArrayProperty( mesh, '.faceCounts' )
+        counts.setValue( faceCounts )
 
-    # selfBnds
-    bnds = OBox3dProperty( mesh, '.selfBnds' )
-    bnds.setValue( selfBnds );
+        # .faceIndices
+        indices = OInt32ArrayProperty( mesh, '.faceIndices' )
+        indices.setValue( faceIndices )
 
-testList.append( ( 'testExportCubeGeom', testExportCubeGeom ) )
+        # P
+        p = OP3fArrayProperty( mesh, 'P' )
+        p.setValue( points )
 
-# Test importing the exported quad mesh
-def testImportCubeGeom():
-    archive = IArchive( fileName )
-    assert archive.getMaxNumSamplesForTimeSamplingIndex(0) == 1
-    assert archive.getMaxNumSamplesForTimeSamplingIndex(1) == 3
+        # selfBnds
+        bnds = OBox3dProperty( mesh, '.selfBnds' )
+        bnds.setValue( selfBnds );
 
-    top = archive.getTop()
+    # Test importing the exported quad mesh
+    def testImportCubeGeom(self):
+        archive = IArchive( 'cube.abc' )
+        self.assertEqual(archive.getMaxNumSamplesForTimeSamplingIndex(0), 1)
+        self.assertEqual(archive.getMaxNumSamplesForTimeSamplingIndex(1), 3)
 
-    assert top.getNumChildren() == 1
+        top = archive.getTop()
 
-    # IXform Object
-    xform = top.getChild( 0 )
+        self.assertEqual(top.getNumChildren(), 1)
 
-    assert xform.getName() == 'cube1'
+        # IXform Object
+        xform = top.getChild( 0 )
 
-    # IXform Properties
-    xformTopCP = xform.getProperties()
-    xformCP = xformTopCP.getProperty( 0 );
+        self.assertEqual(xform.getName(), 'cube1')
 
-    inherits = xformCP.getProperty( '.inherits' )
-    ops = xformCP.getProperty( '.ops' )
-    vals = xformCP.getProperty( '.vals' )
+        # IXform Properties
+        xformTopCP = xform.getProperties()
+        xformCP = xformTopCP.getProperty( 0 );
 
-    assert inherits.getNumSamples() == numSamplesPerCycle
-    assert ops.getNumSamples() == numSamplesPerCycle
-    assert vals.getNumSamples() == numSamplesPerCycle
+        inherits = xformCP.getProperty( '.inherits' )
+        ops = xformCP.getProperty( '.ops' )
+        vals = xformCP.getProperty( '.vals' )
 
-    # Get the time sampling associated with vals.
-    tSamp = vals.getTimeSampling()
+        self.assertEqual(inherits.getNumSamples(), numSamplesPerCycle)
+        self.assertEqual(ops.getNumSamples(), numSamplesPerCycle)
+        self.assertEqual(vals.getNumSamples(), numSamplesPerCycle)
 
-    # Access index at a given time
-    index0 = tSamp.getNearIndex( tvec[0] + 0.1, numSamplesPerCycle )
-    index1 = tSamp.getCeilIndex( tvec[0] + 0.1, numSamplesPerCycle )
-    index2 = tSamp.getFloorIndex( tvec[2] + 0.1, numSamplesPerCycle )
+        # Get the time sampling associated with vals.
+        tSamp = vals.getTimeSampling()
 
-    assert index0 == 0 and index1 == 1 and index2 == 2
+        # Access index at a given time
+        index0 = tSamp.getNearIndex( tvec[0] + 0.1, numSamplesPerCycle )
+        index1 = tSamp.getCeilIndex( tvec[0] + 0.1, numSamplesPerCycle )
+        index2 = tSamp.getFloorIndex( tvec[2] + 0.1, numSamplesPerCycle )
 
-    val0 = vals.samples[index0]
-    val1 = vals.samples[index1]
-    val2 = vals.samples[index2]
+        self.assertEqual(index0, 0)
+        self.assertEqual(index1, 1)
+        self.assertEqual(index2, 2)
 
-    assert val0 == xformvec[0]
-    assert val1 == xformvec[1]
-    assert val2 == xformvec[2]
+        val0 = vals.samples[index0]
+        val1 = vals.samples[index1]
+        val2 = vals.samples[index2]
 
-    # IPolyMesh Object
-    mesh = xform.getChild( 'cube1Shape' )
-    meshTopCP = mesh.getProperties()
-    meshCP = meshTopCP.getProperty(0)
+        self.assertEqual(val0, xformvec[0])
+        self.assertEqual(val1, xformvec[1])
+        self.assertEqual(val2, xformvec[2])
 
-    # IPolyMesh Properties
-    counts = meshCP.getProperty( '.faceCounts' )
-    indices = meshCP.getProperty( '.faceIndices' )
-    p = meshCP.getProperty( 'P' )
-    bnds = meshCP.getProperty( '.selfBnds' )
+        # IPolyMesh Object
+        mesh = xform.getChild( 'cube1Shape' )
+        meshTopCP = mesh.getProperties()
+        meshCP = meshTopCP.getProperty(0)
 
-    assert counts.samples[0] == faceCounts
-    assert indices.samples[0] == faceIndices
-    assert p.samples[0] == points
-    assert bnds.samples[0] == selfBnds
+        # IPolyMesh Properties
+        counts = meshCP.getProperty( '.faceCounts' )
+        indices = meshCP.getProperty( '.faceIndices' )
+        p = meshCP.getProperty( 'P' )
+        bnds = meshCP.getProperty( '.selfBnds' )
 
-testList.append( ( 'testImportCubeGeom', testImportCubeGeom ) )
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
+        self.assertEqual(counts.samples[0], faceCounts)
+        self.assertEqual(indices.samples[0], faceIndices)
+        self.assertEqual(p.samples[0], points)
+        self.assertEqual(bnds.samples[0], selfBnds)

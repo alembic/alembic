@@ -34,83 +34,62 @@
 #
 #-******************************************************************************
 
+import unittest
 from imath import *
 from alembic.Abc import *
 from alembic.AbcGeom import *
 
-testList = []
+class PointsTest(unittest.TestCase):
+    def testPointsExport(self):
+        """write out points archive"""
 
-def equalWithAbsError (a0, a1, error):
-    return abs (a0 - a1) <= error
+        archive = OArchive("particlesOut2.abc")
+        topObj = archive.getTop()
+        ptsObj = OPoints(topObj, "somePoints")
 
-def pointsOut():
-    """write out points archive"""
-    
-    archive = OArchive("particlesOut2.abc")
-    topObj = archive.getTop()
-    ptsObj = OPoints(topObj, "somePoints")
+        positions = V3fArray(100)
+        velocities = V3fArray(100)
+        ids = IntArray(100)
+        widths = FloatArray(100)
 
-    positions = V3fArray(100)
-    velocities = V3fArray(100)
-    ids = IntArray(100)
-    widths = FloatArray(100)
+        for i in range(100):
+            widthSamp = OFloatGeomParamSample()
+            widthSamp.setScope(GeometryScope.kVertexScope)
+            widthSamp.setVals(widths)
 
-    for i in range(100):
-        widthSamp = OFloatGeomParamSample()
-        widthSamp.setScope(GeometryScope.kVertexScope)
-        widthSamp.setVals(widths)
+            psamp = OPointsSchemaSample()
+            psamp.setPositions(positions)
+            psamp.setIds(ids)
+            psamp.setVelocities(velocities)
+            psamp.setWidths(widthSamp)
+            ptsObj.getSchema().set(psamp)
 
-        psamp = OPointsSchemaSample()
-        psamp.setPositions(positions)
-        psamp.setIds(ids)
-        psamp.setVelocities(velocities)
-        psamp.setWidths(widthSamp)
-        ptsObj.getSchema().set(psamp)
+            positions[i] = V3f(i, i, i)
+            velocities[i] = V3f(100.0-i, 0, 0)
+            ids[i] = i * 10
+            widths[i] = 0.1 + i * 0.05
 
-        positions[i] = V3f(i, i, i)
-        velocities[i] = V3f(100.0-i, 0, 0)
-        ids[i] = i * 10
-        widths[i] = 0.1 + i * 0.05
+    def testPointsImport(self):
+        """read in points archive"""
 
-def pointsIn():
-    """read in points archive"""
+        archive = IArchive("particlesOut2.abc")
+        topObj = archive.getTop()
+        points = IPoints(topObj, "somePoints")
+        pointsSchema = points.getSchema()
 
-    archive = IArchive("particlesOut2.abc")
-    topObj = archive.getTop()
-    points = IPoints(topObj, "somePoints")
-    pointsSchema = points.getSchema()
+        self.assertTrue(pointsSchema.valid())
 
-    assert pointsSchema.valid()
+        widthProp = pointsSchema.getWidthsParam()
 
-    widthProp = pointsSchema.getWidthsParam()
+        self.assertEqual(widthProp.getScope(), GeometryScope.kVertexScope)
 
-    assert widthProp.getScope() == GeometryScope.kVertexScope
+        for i in range(100):
+            pointsSamp = pointsSchema.getValue(ISampleSelector(i))
+            widthSamp = widthProp.getExpandedValue(ISampleSelector(i))
 
-    for i in range(100):
-        pointsSamp = pointsSchema.getValue(ISampleSelector(i))
-        widthSamp = widthProp.getExpandedValue(ISampleSelector(i))
-
-        for j in range(i):
-            assert pointsSamp.getPositions()[j] == V3f(j, j, j)
-            assert pointsSamp.getVelocities()[j] == V3f(100-j, 0, 0)
-            assert pointsSamp.getIds()[j] == j * 10
-            assert equalWithAbsError(widthSamp.getVals()[j], 0.1 + j * 0.05, 7)
-
-def testPointsBinding():
-    pointsOut()
-    pointsIn()
-
-testList.append(('testPointsBinding', testPointsBinding))
-
-# -------------------------------------------------------------------------
-# Main loop
-
-for test in testList:
-    funcName = test[0]
-    print ""
-    print "Running %s" % funcName
-    test[1]()
-    print "passed"
-
-print ""
+            for j in range(i):
+                self.assertEqual(pointsSamp.getPositions()[j], V3f(j, j, j))
+                self.assertEqual(pointsSamp.getVelocities()[j], V3f(100-j, 0, 0))
+                self.assertEqual(pointsSamp.getIds()[j], j * 10)
+                self.assertAlmostEqual(widthSamp.getVals()[j], 0.1 + j * 0.05, 6)
 

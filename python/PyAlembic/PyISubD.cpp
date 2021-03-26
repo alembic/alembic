@@ -145,7 +145,7 @@ void register_isubd()
               ( arg( "faceSetName" ) ) )
         .def( "valid", &AbcG::ISubDSchema::valid )
         .def( "reset", &AbcG::ISubDSchema::reset )
-        .def( "__nonzero__", &AbcG::ISubDSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::ISubDSchema::valid )
         ;
 
     // ISubD::Sample

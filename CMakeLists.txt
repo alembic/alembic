@@ -35,7 +35,7 @@
 
 PROJECT(Alembic)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.13)
 
 MESSAGE(STATUS "CMAKE SYSTEM NAME: ${CMAKE_SYSTEM_NAME}")
 
@@ -50,8 +50,9 @@ ENDIF()
 
 # Declare the project version
 SET(PROJECT_VERSION_MAJOR "1")
-SET(PROJECT_VERSION_MINOR "7")
-SET(PROJECT_VERSION_PATCH "16")
+SET(PROJECT_VERSION_MINOR "8")
+SET(PROJECT_VERSION_PATCH "0")
+
 SET(PROJECT_VERSION
      ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 SET(VERSION ${PROJECT_VERSION})
@@ -73,10 +74,8 @@ OPTION(USE_TESTS "Include Alembic tests" ON)
 OPTION(ALEMBIC_BUILD_LIBS "Build library, if off use external alembic libs" ON)
 OPTION(ALEMBIC_ILMBASE_LINK_STATIC "IlmBase is a static library" OFF)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
-OPTION(ALEMBIC_LIB_USES_BOOST
-    "Main Alembic library uses boost for things like shared_ptr" OFF)
-OPTION(ALEMBIC_LIB_USES_TR1
-    "Main Alembic library uses std::tr1 for things like shared_ptr" OFF)
+SET(PYALEMBIC_PYTHON_MAJOR 3 CACHE STRING "Which major version of python to look for when building PyAlembic")
+
 option(DOCS_PATH
     "Create and install the HTML based API documentation to this location (requires Doxygen)"
     OFF)
@@ -119,16 +118,11 @@ IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
     SET(LINUX TRUE)
 ENDIF()
 
-IF (NOT ${ALEMBIC_LIB_USES_TR1} AND NOT ${ALEMBIC_LIB_USES_BOOST})
-    # TODO figure out how to do this for Windows
-    INCLUDE(CheckCXXCompilerFlag)
-    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-    IF (COMPILER_SUPPORTS_CXX11)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    ELSEIF (COMPILER_SUPPORTS_CXX0X)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-    ENDIF()
+# if not set fall back to VFX reference platform 2018 to 2020
+IF ("${CMAKE_CXX_STANDARD}" STREQUAL "")
+    MESSAGE("Defaulting CMAKE_CXX_STANDARD to 14")
+    SET(CMAKE_CXX_STANDARD 14)
+    SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 ENDIF()
 
 # Set visibility for GNU compilers
@@ -221,11 +215,6 @@ IF (DOCS_PATH)
     FIND_PACKAGE(Doxygen)
 ENDIF()
 
-# We only need boost if including PyAlembic, or using it in the lib
-IF (ALEMBIC_LIB_USES_BOOST OR USE_PYALEMBIC)
-    INCLUDE("./cmake/AlembicBoost.cmake")
-ENDIF()
-
 # IlmBase
 INCLUDE("./cmake/AlembicIlmBase.cmake")
 
@@ -253,16 +242,17 @@ ENDIF()
 
 # PyAlembic
 IF (USE_PYALEMBIC)
-    INCLUDE("./cmake/AlembicPython.cmake")
-    INCLUDE("./cmake/AlembicPyIlmBase.cmake")
-    IF (PYTHONLIBS_FOUND)
-        MESSAGE(STATUS "ALEMBIC_PYTHON_INCLUDE_DIRS: ${ALEMBIC_PYTHON_INCLUDE_DIRS}")
-        MESSAGE(STATUS "ALEMBIC_PYTHON_LIBRARY: ${ALEMBIC_PYTHON_LIBRARY}")
-        INCLUDE_DIRECTORIES(${ALEMBIC_PYTHON_INCLUDE_DIRS} ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
+
+    FIND_PACKAGE(Python${PYALEMBIC_PYTHON_MAJOR} COMPONENTS Interpreter Development)
+
+    if(Python${PYALEMBIC_PYTHON_MAJOR}_FOUND)
+        MESSAGE(STATUS "Found Python ${Python${PYALEMBIC_PYTHON_MAJOR}_VERSION}")
+        INCLUDE("./cmake/AlembicPyIlmBase.cmake")
         ADD_SUBDIRECTORY(python)
-    ELSE()
+    else()
         MESSAGE(WARNING "Python not found! Skipping PyAlembic")
-    ENDIF()
+    endif()
+
 ENDIF()
 
 #-******************************************************************************
@@ -338,7 +328,6 @@ info_cfg_option(USE_STATIC_HDF5)
 info_cfg_option(USE_TESTS)
 info_cfg_option(ALEMBIC_ILMBASE_LINK_STATIC)
 info_cfg_option(ALEMBIC_SHARED_LIBS)
-info_cfg_option(ALEMBIC_LIB_USES_BOOST)
-info_cfg_option(ALEMBIC_LIB_USES_TR1)
+info_cfg_option(PYALEMBIC_PYTHON_MAJOR)
 info_cfg_option(DOCS_PATH)
 MESSAGE("${_config_msg}")

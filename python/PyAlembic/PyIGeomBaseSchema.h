@@ -84,7 +84,7 @@ void register_IGeomBaseSchema( const char *iName )
               "" )
         .def( "valid", &IGeomBaseSchema::valid )
         .def( "reset", &IGeomBaseSchema::reset )
-        .def( "__nonzero__", &IGeomBaseSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &IGeomBaseSchema::valid )
         ;
 }
 

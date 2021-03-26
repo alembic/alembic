@@ -79,6 +79,6 @@ void register_ocollections()
         .def( "getCollection", getCollectionByName,
               ( arg( "name" ) ) )
         .def( "valid", &AbcC::OCollectionsSchema::valid )
-        .def( "__nonzero__", &AbcC::OCollectionsSchema::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcC::OCollectionsSchema::valid )
         ;
 }

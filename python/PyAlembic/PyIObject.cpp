@@ -279,7 +279,7 @@ void register_iobject()
         .def( "reset", &Abc::IObject::reset )
         .def( "__str__", &Abc::IObject::getFullName,
               return_value_policy<copy_const_reference>() )
-        .def( "__nonzero__", &Abc::IObject::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &Abc::IObject::valid )
         .add_property( "children", &getChildList )
         ;
 

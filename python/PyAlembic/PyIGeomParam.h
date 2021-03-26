@@ -108,7 +108,7 @@ static void register_( const char* iName )
         .def( "getIndexProperty",
               &IGEOMPARAM::getIndexProperty,
               with_custodian_and_ward_postcall<0,1>() )
-        .def( "__nonzero__", &IGEOMPARAM::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &IGEOMPARAM::valid )
        ;
 
     // IGEOMPARAM::Sample

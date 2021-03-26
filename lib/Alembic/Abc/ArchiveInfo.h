@@ -41,6 +41,7 @@
 #include <Alembic/Abc/Foundation.h>
 #include <Alembic/Abc/IArchive.h>
 #include <Alembic/Abc/OArchive.h>
+#include <cfloat>
 #include <time.h>
 
 namespace Alembic {

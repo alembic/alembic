@@ -105,7 +105,7 @@ void register_igeombase()
               &AbcG::IGeomBase::getUserProperties )
         .def( "valid", &AbcG::IGeomBase::valid )
         .def( "reset", &AbcG::IGeomBase::reset )
-        .def( "__nonzero__", &AbcG::IGeomBase::valid )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcG::IGeomBase::valid )
         .def( "matches",
               Overloads::matchesMetaData,
               ( arg( "metadata" ),

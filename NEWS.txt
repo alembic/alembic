@@ -1,3 +1,35 @@
+2021-03-25, Alembic 1.8.0 rc1
+Thanks to your feedback and issues we have a few bug fixes and enhancements.
+
+API:
+
+We are dropping support for the ancient TR1 and expect the compilers to at
+least support C++std11, we currently default to C++std14. Because we now
+assume at least C++std11, we can remove ALEMBIC_LIB_USES_TR1 and
+ALEMBIC_LIB_USES_BOOST and we instead expect the std versions of things like
+shared_ptr.  (Issue 312)
+
+Python:
+
+Support building python3, and make it the default, to build the bindings
+against python2 use: -DUSE_PYALEMBIC=ON -DPYALEMBIC_PYTHON_MAJOR=2
+
+Switch from __nonzero__ to __bool__ for the python3 bindings. (Issue 273)
+
+Workaround the testCollections crash.  (Issue 274)
+
+Make the unit tests python 2 and python 3 compatible.  (Issue 276)
+
+Rework the python testing framework so they can be run from CMake. (Issue 278)
+
+CMake:
+
+Update the minimum requirement to 3.13
+
+Overhaul to support the upcoming Imath 3.
+(https://github.com/AcademySoftwareFoundation/Imath)
+
+=======
 2020-10-23, Alembic 1.7.16
 Thanks to your feedback,and pull requests a couple of bug fixes and a GitHub
 enhancement.
