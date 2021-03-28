@@ -18,6 +18,7 @@ cd Python-2.7.18
 ./configure --enable-optimizations --enable-shared --enable-unicode=ucs4
 make altinstall
 cd ..
+exec $SHELL
 curl "https://bootstrap.pypa.io/pip/2.7/get-pip.py" -o "get-pip.py"
 python2.7 get-pip.py
 python2.7 -m pip install numpy
