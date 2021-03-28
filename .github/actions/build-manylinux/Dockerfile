@@ -1,4 +1,4 @@
-FROM quay.io/pypa/manylinux2010_x86_64:latest
+FROM quay.io/pypa/manylinux2010_x86_64:2021-02-06-3d322a5
 
 # Setup dev environment
 
