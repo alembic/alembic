@@ -224,7 +224,7 @@ void register_icompoundproperty()
 
     class_<PropertyHeaderIterator>
         ( "PropertyHeaderIterator", no_init )
-        .def( "next", &PropertyHeaderIterator::next,
+        .def( ALEMBIC_PYTHON_NEXT_NAME, &PropertyHeaderIterator::next,
               return_internal_reference<1>() )
         ;
 }
