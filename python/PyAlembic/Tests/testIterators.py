@@ -38,13 +38,36 @@ import imath
 import alembic
 import traceback
 import unittest
-class InstanceTest(unittest.TestCase):
+class IteratorTest(unittest.TestCase):
     def testArchiveExport(self):
         """write out an archive with an object tree"""
 
         archive = alembic.Abc.OArchive("iterator.abc")
-        childObj = alembic.Abc.OObject(archive.getTop(), "childObj")
-        grandChildObj = alembic.Abc.OObject(childObj, "grandChildObj" )
+        for i in range(3):
+            child = alembic.Abc.OObject(archive.getTop(), "childObj" + str(i))
+            for j in range(3):
+                gchild = alembic.Abc.OObject(child, "grandChild" + str(j))
+                for k in range(3):
+                    cp = alembic.Abc.OCompoundProperty(gchild.getProperties(), "prop" + str(k))
+                    sp = alembic.Abc.OStringProperty(cp, "scalar")
+                    sp.setValue("a")
+                    sp.setValue("b")
+                    sp.setValue("c")
+                    ap = alembic.Abc.OStringArrayProperty(cp, "array")
+                    stra = imath.StringArray(3)
+                    stra[0] = 'a'
+                    stra[1] = 'b'
+                    stra[2] = 'c'
+                    ap.setValue(stra)
+                    strb = imath.StringArray(2)
+                    strb[0] = 'd'
+                    strb[1] = 'e'
+                    ap.setValue(strb)
+                    strc = imath.StringArray(1)
+                    strc[0] = 'f'
+                    ap.setValue(strc)
+
+
 
     def testArchiveImport(self):
         """read in archive with an object tree"""
@@ -52,7 +75,42 @@ class InstanceTest(unittest.TestCase):
         archive = alembic.Abc.IArchive("iterator.abc")
         top = archive.getTop()
 
-        # This nested call crashed python interpreter with segmentation fault
-        grandChildObject = top.children[0].children[0]
+        # lets check the iterators
+        self.assertEqual(len(top.children), 3)
 
-        self.assertEqual(grandChildObject.getName(), "grandChildObj")
+        curI = 0
+        for i in top.children:
+            self.assertEqual(len(i.children), 3)
+            self.assertEqual(i.getName(), 'childObj' + str(curI))
+            curI += 1
+
+            curJ = 0
+            for j in i.children:
+                self.assertEqual(j.getName(), "grandChild" + str(curJ))
+                curJ += 1
+                self.assertEqual(len(j.getProperties().propertyheaders), 3)
+                curK = 0
+                for k in j.getProperties().propertyheaders:
+                    self.assertEqual(k.getName(), 'prop' + str(curK))
+                    cp = alembic.Abc.ICompoundProperty(j.getProperties(), 'prop' + str(curK))
+                    curK += 1
+
+                    sp = alembic.Abc.IStringProperty(cp, 'scalar')
+                    samp = sp.samples
+                    self.assertEqual(len(samp), 3)
+                    self.assertEqual(samp[0], "a")
+                    self.assertEqual(samp[1], "b")
+                    self.assertEqual(samp[2], "c")
+
+                    ap = alembic.Abc.IStringArrayProperty(cp, 'array')
+                    samp = ap.samples
+                    self.assertEqual(len(samp), 3)
+                    self.assertEqual(len(samp[0]), 3)
+                    self.assertEqual(len(samp[1]), 2)
+                    self.assertEqual(len(samp[2]), 1)
+                    self.assertEqual(samp[0][0], 'a')
+                    self.assertEqual(samp[0][1], 'b')
+                    self.assertEqual(samp[0][2], 'c')
+                    self.assertEqual(samp[1][0], 'd')
+                    self.assertEqual(samp[1][1], 'e')
+                    self.assertEqual(samp[2][0], 'f')

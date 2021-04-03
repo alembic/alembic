@@ -38,4 +38,7 @@ os.chdir( cwd )
 
 # Run the tests
 runner = unittest.TextTestRunner(verbosity=2)
-runner.run(suite)
+result = runner.run(suite)
+
+if not result.wasSuccessful():
+    exit(1)

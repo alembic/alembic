@@ -43,7 +43,7 @@ using namespace boost::python;
 
 //-*****************************************************************************
 template<class TPTraits>
-static object getPODValue( Abc::IScalarProperty &p, 
+static object getPODValue( Abc::IScalarProperty &p,
                            const Abc::ISampleSelector &iSS )
 {
     typedef TypeBindingTraits<TPTraits> binding_traits;
@@ -61,7 +61,7 @@ static object getPODValue( Abc::IScalarProperty &p,
 
 //-*****************************************************************************
 template<class TPTraits>
-static object getSmallArrayValue( Abc::IScalarProperty &p, 
+static object getSmallArrayValue( Abc::IScalarProperty &p,
                                   const Abc::ISampleSelector &iSS,
                                   size_t iExtent )
 {
@@ -76,7 +76,7 @@ static object getSmallArrayValue( Abc::IScalarProperty &p,
     p.get( const_cast<void*>( sampPtr->getData() ), iSS );
 
     samp_ptr_type typedSampPtr =
-        AbcU::static_pointer_cast<samp_type>( sampPtr ); 
+        AbcU::static_pointer_cast<samp_type>( sampPtr );
 
     typename return_by_value::apply<samp_ptr_type>::type converter;
 
@@ -86,16 +86,16 @@ static object getSmallArrayValue( Abc::IScalarProperty &p,
 //-*****************************************************************************
 #define CASE_RETURN_POD_VALUE( TPTraits, PROP, SELECTOR ) \
 case TPTraits::pod_enum:                                  \
-    return getPODValue<TPTraits>( PROP, SELECTOR );     
+    return getPODValue<TPTraits>( PROP, SELECTOR );
 
 //-*****************************************************************************
 #define CASE_RETURN_ARRAY_VALUE( TPTraits, PROP, SELECTOR, EXTENT ) \
 case TPTraits::pod_enum:                                            \
-    return getSmallArrayValue<TPTraits>( PROP, SELECTOR, EXTENT );     
+    return getSmallArrayValue<TPTraits>( PROP, SELECTOR, EXTENT );
 
 //-*****************************************************************************
 template<>
-object getValue<>( Abc::IScalarProperty &p, 
+object getValue<>( Abc::IScalarProperty &p,
                    const Abc::ISampleSelector &iSS,
                    const ReturnTypeEnum iReturnType )
 {
@@ -164,7 +164,7 @@ object getValue<>( Abc::IScalarProperty &p,
             {
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::C3fTPTraits::interpretation()))
-                    return getPODValue< Abc::C3fTPTraits >( p, iSS ); 
+                    return getPODValue< Abc::C3fTPTraits >( p, iSS );
                 else
                     return getPODValue< Abc::V3fTPTraits >( p, iSS );
             }
@@ -184,19 +184,19 @@ object getValue<>( Abc::IScalarProperty &p,
             {
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::C4fTPTraits::interpretation()))
-                    return getPODValue< Abc::C4fTPTraits >( p, iSS ); 
+                    return getPODValue< Abc::C4fTPTraits >( p, iSS );
                 else if (!interp.compare (Abc::QuatfTPTraits::interpretation()))
-                    return getPODValue< Abc::QuatfTPTraits >( p, iSS ); 
+                    return getPODValue< Abc::QuatfTPTraits >( p, iSS );
                 else if (!interp.compare (Abc::Box2fTPTraits::interpretation()))
-                    return getPODValue< Abc::Box2fTPTraits >( p, iSS ); 
+                    return getPODValue< Abc::Box2fTPTraits >( p, iSS );
             }
             case AbcU::kFloat64POD:
             {
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::QuatdTPTraits::interpretation()))
-                    return getPODValue< Abc::QuatdTPTraits >( p, iSS ); 
+                    return getPODValue< Abc::QuatdTPTraits >( p, iSS );
                 else if (!interp.compare (Abc::Box2dTPTraits::interpretation()))
-                    return getPODValue< Abc::Box2dTPTraits >( p, iSS ); 
+                    return getPODValue< Abc::Box2dTPTraits >( p, iSS );
             }
             default:
             break;
@@ -307,7 +307,7 @@ void register_iscalarproperty()
         {
             return getSampleList<Abc::IScalarProperty>( iProp, kReturnScalar );
         }
- 
+
         static SampleList<Abc::IScalarProperty>
         getArraySampleList( Abc::IScalarProperty& iProp )
         {
@@ -363,12 +363,13 @@ void register_iscalarproperty()
         ( "ScalarSampleList", no_init )
         .def( "__len__", &SampleList<Abc::IScalarProperty>::len )
         .def( "__getitem__", &SampleList<Abc::IScalarProperty>::getItem )
-        .def( "__iter__", &SampleList<Abc::IScalarProperty>::getIterator,
+        .def( "__iter__",
+              &SampleList<Abc::IScalarProperty>::getIterator,
               return_value_policy<manage_new_object>() )
         ;
 
     class_<SampleIterator<Abc::IScalarProperty> >
         ( "ScalarSampleIterator", no_init )
-        .def( "next", &SampleIterator<Abc::IScalarProperty>::next )
+        .def( ALEMBIC_PYTHON_NEXT_NAME, &SampleIterator<Abc::IScalarProperty>::next )
         ;
  }

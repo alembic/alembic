@@ -295,6 +295,6 @@ void register_iobject()
 
     class_<ChildIterator>
         ( "ChildIterator", no_init )
-        .def( "next", &ChildIterator::next )
+        .def( ALEMBIC_PYTHON_NEXT_NAME, &ChildIterator::next )
         ;
 }

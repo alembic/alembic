@@ -41,7 +41,7 @@
 
 using namespace boost::python;
 
-template<class TPTraits> 
+template<class TPTraits>
 static object getPythonArray( AbcA::ArraySamplePtr& iSampPtr )
 {
     typedef Abc::TypedArraySample<TPTraits> samp_type;
@@ -64,7 +64,7 @@ case TPTraits::pod_enum:                                   \
 
 //-*****************************************************************************
 template<>
-object getValue ( Abc::IArrayProperty &p, 
+object getValue ( Abc::IArrayProperty &p,
                          const Abc::ISampleSelector &iSS,
                          const ReturnTypeEnum returnType )
 {
@@ -211,12 +211,12 @@ object getValue ( Abc::IArrayProperty &p,
     stream << "ERROR: Unhandled type " << AbcU::PODName (pod)
            << " with extent " << (int)extent;
     throwPythonException( stream.str().c_str() );
-   
+
     return object(); // Returns None object
 }
 
 //-*****************************************************************************
-static object getDimension( Abc::IArrayProperty& p, 
+static object getDimension( Abc::IArrayProperty& p,
                             const Abc::ISampleSelector& iSS )
 {
     AbcU::Dimensions oDim;
@@ -228,7 +228,7 @@ static object getDimension( Abc::IArrayProperty& p,
 }
 
 //-*****************************************************************************
-static std::string getKey( Abc::IArrayProperty &p, 
+static std::string getKey( Abc::IArrayProperty &p,
                            const Abc::ISampleSelector &iSS )
 {
     AbcA::ArraySampleKey oKey;
@@ -333,6 +333,6 @@ void register_iarrayproperty()
 
     class_<SampleIterator<Abc::IArrayProperty> >
         ( "ArraySampleIterator", no_init )
-        .def ( "next", &SampleIterator<Abc::IArrayProperty>::next )
+        .def ( ALEMBIC_PYTHON_NEXT_NAME, &SampleIterator<Abc::IArrayProperty>::next )
         ;
  }
