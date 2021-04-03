@@ -33,9 +33,9 @@
 ##
 ##-*****************************************************************************
 
-PROJECT(Alembic)
-
 CMAKE_MINIMUM_REQUIRED(VERSION 3.13)
+
+PROJECT(Alembic VERSION 1.8.0)
 
 MESSAGE(STATUS "CMAKE SYSTEM NAME: ${CMAKE_SYSTEM_NAME}")
 
@@ -47,15 +47,6 @@ ENDIF()
 IF (NOT DEFINED QUIET)
     SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 ENDIF()
-
-# Declare the project version
-SET(PROJECT_VERSION_MAJOR "1")
-SET(PROJECT_VERSION_MINOR "8")
-SET(PROJECT_VERSION_PATCH "0")
-
-SET(PROJECT_VERSION
-     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
-SET(VERSION ${PROJECT_VERSION})
 
 #-******************************************************************************
 # OPTIONS (set with -D<option>=<value>)
@@ -169,7 +160,7 @@ ENDIF()
 
 IF (DEFINED ENV{ALEMBIC_INSTALL_PREFIX})
     SET( CMAKE_INSTALL_PREFIX
-        $ENV{ALEMBIC_INSTALL_PREFIX}/alembic-${VERSION})
+        $ENV{ALEMBIC_INSTALL_PREFIX}/alembic-${PROJECT_VERSION})
 ENDIF()
 
 # Tell me what my install location would be
