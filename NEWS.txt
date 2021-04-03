@@ -1,4 +1,4 @@
-2021-03-25, Alembic 1.8.0 rc1
+2021-04-03, Alembic 1.8.0 beta
 Thanks to your feedback and issues we have a few bug fixes and enhancements.
 
 API:
@@ -22,11 +22,13 @@ Make the unit tests python 2 and python 3 compatible.  (Issue 276)
 
 Rework the python testing framework so they can be run from CMake. (Issue 278)
 
+Switch from next to __next__ for the python3 bindings. (Issue 279)
+
 CMake:
 
 Update the minimum requirement to 3.13
 
-Overhaul to support the upcoming Imath 3.
+Overhaul to support the recently released Imath 3.
 (https://github.com/AcademySoftwareFoundation/Imath)
 
 =======
