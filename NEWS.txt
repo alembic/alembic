@@ -1,4 +1,4 @@
-2021-04-03, Alembic 1.8.0 beta
+2021-04-06, Alembic 1.8.0 beta 2
 Thanks to your feedback and issues we have a few bug fixes and enhancements.
 
 API:
@@ -30,6 +30,8 @@ Update the minimum requirement to 3.13
 
 Overhaul to support the recently released Imath 3.
 (https://github.com/AcademySoftwareFoundation/Imath)
+
+Fix for using Alembic as a 3rd party with Imath 3. (Issue 337)
 
 =======
 2020-10-23, Alembic 1.7.16
