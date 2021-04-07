@@ -89,12 +89,18 @@ INSTALL(TARGETS Alembic
 # PACKAGE EXPORTS
 #-******************************************************************************
 
-CONFIGURE_FILE(AlembicConfig.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
-    @ONLY
-    )
+set(alembic_targets_file "${PROJECT_NAME}Targets.cmake")
+
+SET(ConfigPackageLocation lib/cmake/Alembic CACHE PATH
+        "Where to install the Alembic's cmake files")
 
 INCLUDE(CMakePackageConfigHelpers)
+
+configure_package_config_file(AlembicConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
+     INSTALL_DESTINATION ${ConfigPackageLocation}
+     )
+
 WRITE_BASIC_PACKAGE_VERSION_FILE(
     "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"
     VERSION
@@ -106,13 +112,10 @@ WRITE_BASIC_PACKAGE_VERSION_FILE(
 EXPORT(TARGETS
     Alembic
     FILE
-    "${CMAKE_CURRENT_BINARY_DIR}/AlembicTargets.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${alembic_targets_file}"
     NAMESPACE
     Alembic::
     )
-
-SET(ConfigPackageLocation lib/cmake/Alembic CACHE PATH
-    "Where to install the Alembic's cmake files")
 
 INSTALL(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
@@ -137,7 +140,7 @@ ENDIF()
 INSTALL(EXPORT
     AlembicTargets
     FILE
-    AlembicTargets.cmake
+    ${alembic_targets_file}
     NAMESPACE
     Alembic::
     DESTINATION
