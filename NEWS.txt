@@ -9,6 +9,11 @@ assume at least C++std11, we can remove ALEMBIC_LIB_USES_TR1 and
 ALEMBIC_LIB_USES_BOOST and we instead expect the std versions of things like
 shared_ptr.  (Issue 312)
 
+Ogawa:
+
+Better support emscripten and ARM toolchains by using memcpy to avoid
+dereferencing non-aligned pointers. (PR 332)
+
 Python:
 
 Support building python3, and make it the default, to build the bindings
@@ -24,6 +29,13 @@ Rework the python testing framework so they can be run from CMake. (Issue 278)
 
 Switch from next to __next__ for the python3 bindings. (Issue 279)
 
+Utils:
+
+AbcStitcher:
+
+Propagate MetaData from the first of our ordered input archives over to the
+stitched output. (PR 324)
+
 CMake:
 
 Update the minimum requirement to 3.13
@@ -32,6 +44,8 @@ Overhaul to support the recently released Imath 3.
 (https://github.com/AcademySoftwareFoundation/Imath)
 
 Fix for using Alembic as a 3rd party with Imath 3. (Issue 337)
+
+Use Boost_VERSION_MACRO instead of Boost_VERSION. (PR 338)
 
 =======
 2020-10-23, Alembic 1.7.16
