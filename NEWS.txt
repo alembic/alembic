@@ -1,4 +1,4 @@
-2021-04-06, Alembic 1.8.0 beta 2
+2021-04-12, Alembic 1.8.0 beta 3
 Thanks to your feedback and issues we have a few bug fixes and enhancements.
 
 API:
