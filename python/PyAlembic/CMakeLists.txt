@@ -137,25 +137,17 @@ IF (1900 VERSION_EQUAL MSVC_VERSION)
     ENDIF ()
 ENDIF ()
 
-LINK_LIBRARIES(Alembic::Alembic
-               ${PYTHON_LIBRARIES}
-               ${Boost_LIBRARIES}
-               ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
-)
-
 INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
     "${CMAKE_SOURCE_DIR}/python/PyAlembic")
 
-ADD_LIBRARY(PyAlembic SHARED ${CPP_FILES})
+ADD_LIBRARY(alembic SHARED ${CPP_FILES})
 
-SET (EXT ".so")
-SET (PYTHON_MODULE_NAME "alembic")
-IF (WIN32)
-    SET (EXT ".pyd")
-ENDIF ()
-
-SET_TARGET_PROPERTIES(PyAlembic
-    PROPERTIES PREFIX "" OUTPUT_NAME ${PYTHON_MODULE_NAME} SUFFIX ${EXT}
+TARGET_LINK_LIBRARIES(alembic
+    LINK_PUBLIC
+    Alembic::Alembic
+    ${PYTHON_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${ALEMBIC_PYILMBASE_PYIMATH_LIB}
 )
 
 SET( ALEMBIC_PYTHON_INSTALL_DIR
@@ -164,7 +156,7 @@ SET( ALEMBIC_PYTHON_INSTALL_DIR
     "Alembic's python bindings install directory"
 )
 
-INSTALL (TARGETS PyAlembic
+INSTALL (TARGETS alembic
     DESTINATION ${ALEMBIC_PYTHON_INSTALL_DIR}
 )
 
@@ -172,6 +164,9 @@ IF (USE_TESTS)
     ADD_SUBDIRECTORY(Tests)
 ENDIF()
 
-set_target_properties(PyAlembic PROPERTIES
+# dont add any wacky lib prefix, as python doesnt like this
+set_target_properties(alembic PROPERTIES PREFIX "")
+
+set_target_properties(alembic PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
