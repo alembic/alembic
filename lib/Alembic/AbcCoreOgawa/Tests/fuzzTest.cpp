@@ -116,10 +116,21 @@ void walkObj(ABCA::ObjectReaderPtr parent)
     }
 }
 
+void walkJustObj(ABCA::ObjectReaderPtr parent)
+{
+    for(std::size_t i = 0; i < parent->getNumChildren(); ++i)
+    {
+        ABCA::ObjectReaderPtr child = parent->getChild(i);
+        walkJustObj(child);
+    }
+}
+
 void testIssue254(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue254.abc");
+    walkJustObj(ar->getTop());
+
     try
     {
         walkObj(ar->getTop());
@@ -138,6 +149,8 @@ void testIssue255(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue255.abc");
+    walkJustObj(ar->getTop());
+
     try
     {
         walkObj(ar->getTop());
@@ -209,6 +222,16 @@ void testIssue269(bool iUseMMap)
     ABCA::ArchiveReaderPtr ar = r("issue269.abc");
     try
     {
+        walkJustObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Object Headers name size.";
+        TESTING_ASSERT(msg == e.what());
+    }
+
+    try
+    {
         walkObj(ar->getTop());
     }
     catch(const std::exception& e)
@@ -225,6 +248,7 @@ void testIssue270(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue270.abc");
+    walkJustObj(ar->getTop());
     try
     {
         walkObj(ar->getTop());
@@ -242,6 +266,7 @@ void testIssue271(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue271.abc");
+    walkJustObj(ar->getTop());
     try
     {
         walkObj(ar->getTop());
@@ -278,6 +303,7 @@ void testIssue282(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("issue282.abc");
+    walkJustObj(ar->getTop());
     try
     {
         walkObj(ar->getTop());
@@ -353,7 +379,7 @@ void testFuzzer24598(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Ogawa: Invalid recursive IGroup.";
+        std::string msg = "Invalid object data group";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -382,18 +408,19 @@ void testFuzzer25081(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar;
+
     try
     {
         ar = r("fuzzer_issue25081.abc");
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Ogawa: Invalid recursive IGroup.";
+        std::string msg = "Invalid object data group";
         TESTING_ASSERT(msg == e.what());
         return;
     }
-
     TESTING_ASSERT(0);
+
 }
 
 void testFuzzer25166(bool iUseMMap)
@@ -528,7 +555,7 @@ void testFuzzer25502(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Ogawa: Invalid recursive IGroup.";
+        std::string msg = "Invalid object data group";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -539,6 +566,7 @@ void testFuzzer25695(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("fuzzer_issue25695.abc");
+    walkJustObj(ar->getTop());
     try
     {
         walkObj(ar->getTop());
@@ -556,18 +584,56 @@ void testFuzzer26125(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
     ABCA::ArchiveReaderPtr ar = r("fuzzer_issue26125.abc");
+
+    try
+    {
+        walkJustObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid object data group";
+        TESTING_ASSERT(msg == e.what());
+    }
+
     try
     {
         walkObj(ar->getTop());
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Ogawa: Invalid recursive IGroup.";
+        std::string msg = "Invalid object data group";
         TESTING_ASSERT(msg == e.what());
         return;
     }
 
     TESTING_ASSERT(0);
+}
+
+void testFuzzer33685(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue33685.abc");
+
+    try
+    {
+        walkJustObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid object data group";
+        TESTING_ASSERT(msg == e.what());
+    }
+
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid data in CprImpl(Object)";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
 }
 
 int main ( int argc, char *argv[] )
@@ -649,6 +715,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzer26125(true);
     testFuzzer26125(false);
+
+    testFuzzer33685(true);
+    testFuzzer33685(false);
 
     return 0;
 }

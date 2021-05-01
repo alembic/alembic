@@ -106,31 +106,28 @@ IGroupPtr IGroup::getGroup(Alembic::Util::uint64_t iIndex, bool iLight,
                            std::size_t iThreadIndex)
 {
     IGroupPtr child;
+
+    Alembic::Util::uint64_t childPos = EMPTY_DATA;
+
     if (isLight())
     {
         if (iIndex < mData->numChildren)
         {
-            Alembic::Util::uint64_t childPos = 0;
             mData->streams->read(iThreadIndex, mData->pos + 8 * iIndex + 8, 8,
                                  &childPos);
-
-            // top bit should not be set for groups
-            if ((childPos & EMPTY_DATA) == 0)
-            {
-                child.reset(new IGroup(mData->streams, childPos, iLight,
-                                       iThreadIndex));
-            }
         }
     }
     else if (isChildGroup(iIndex))
     {
-        child.reset(new IGroup(mData->streams, mData->childVec[iIndex], iLight,
-                               iThreadIndex));
+        childPos = mData->childVec[iIndex];
     }
 
-    if (child && child->mData->pos == mData->pos)
+    // sanity check that we have a valid group, either an empty one
+    // or a non data that has a decent value
+    if (childPos == EMPTY_GROUP || ((childPos & EMPTY_DATA) == 0 &&
+        childPos > 8 && childPos != mData->pos))
     {
-        throw std::runtime_error("Ogawa: Invalid recursive IGroup.");
+        child.reset(new IGroup(mData->streams, childPos, iLight, iThreadIndex));
     }
 
     return child;
