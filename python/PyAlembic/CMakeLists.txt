@@ -33,8 +33,6 @@
 ##
 ##-*****************************************************************************
 
-MESSAGE(STATUS "Boost_PYTHON_LIBRARY: ${Boost_PYTHON_LIBRARY}")
-
 SET(Boost_USE_STATIC_LIBS ${USE_STATIC_BOOST})
 
 # disables linking to -mt variants on osx
@@ -43,7 +41,7 @@ IF (APPLE)
 ENDIF()
 
 # require 1.53+ since we need std::shared_ptr supported in the wrapper
-FIND_PACKAGE(Boost 1.53.0 COMPONENTS ${ALEMBIC_BOOST_PYTHON_COMPONENT})
+FIND_PACKAGE(Boost 1.53.0 COMPONENTS "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
 
 IF (Boost_FOUND)
     IF (Boost_VERSION_MACRO LESS 105300)
@@ -141,6 +139,10 @@ INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
     "${CMAKE_SOURCE_DIR}/python/PyAlembic")
 
 ADD_LIBRARY(alembic SHARED ${CPP_FILES})
+
+if ("${PYTHON_LIBRARIES}" STREQUAL "")
+    SET(PYTHON_LIBRARIES "${Python${PYTHON_VERSION_MAJOR}_LIBRARIES}")
+endif()
 
 TARGET_LINK_LIBRARIES(alembic
     LINK_PUBLIC
