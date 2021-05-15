@@ -1,3 +1,19 @@
+2021-05-15, Alembic 1.8.1
+Thanks to your feedback and submitted issues we have a few bug fixes.
+
+CMake:
+
+Get the python bindings building on MacOS. (Issue 340)
+
+Fix the capitalization of the Imath find_depencency in AlembicConfig.cmake
+so that Imath will be found when used by external projects.
+(Issue 341 and 343)
+
+Ogawa:
+
+Address Fuzzer issue 33685 sanity check that we have a valid group to avoid
+infinite recursion during traversal.
+
 2021-04-17, Alembic 1.8.0
 Thanks to your feedback and issues we have a few bug fixes and enhancements.
 
