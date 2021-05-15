@@ -162,12 +162,19 @@ INSTALL (TARGETS alembic
     DESTINATION ${ALEMBIC_PYTHON_INSTALL_DIR}
 )
 
-IF (USE_TESTS)
+# Not sure about the best way to find the Imath python bindings for Mac
+IF (USE_TESTS AND NOT APPLE)
     ADD_SUBDIRECTORY(Tests)
 ENDIF()
 
+# For the python libs Mac looks for .so, .dylib didnt work
+SET (EXT ".so")
+IF (WIN32)
+    SET (EXT ".pyd")
+ENDIF ()
+
 # dont add any wacky lib prefix, as python doesnt like this
-set_target_properties(alembic PROPERTIES PREFIX "")
+set_target_properties(alembic PROPERTIES PREFIX "" SUFFIX ${EXT})
 
 set_target_properties(alembic PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE
