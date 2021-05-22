@@ -486,8 +486,12 @@ void testFuzzer25192(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Ogawa IStreams::read failed.";
-        TESTING_ASSERT(msg == e.what());
+        // In Issue 346 it was reported that on 32 bit systems
+        // we got the second error message, for now guard
+        // against it as well
+        std::string msg = e.what();
+        TESTING_ASSERT(msg == "Ogawa IStreams::read failed." ||
+            msg == "Ogawa IData illegal size.");
         return;
     }
     TESTING_ASSERT(0);
