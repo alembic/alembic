@@ -471,7 +471,7 @@ private:
 
     struct MappedRegion
     {
-        size_t len;
+        Alembic::Util::uint64_t len;
         void* p;
 
         MappedRegion() : len(0), p(NULL)
@@ -488,7 +488,7 @@ private:
             return p != NULL;
         }
 
-        void map(FileHandle iFile, size_t iLength)
+        void map(FileHandle iFile, Alembic::Util::uint64_t iLength)
         {
             close();
 
