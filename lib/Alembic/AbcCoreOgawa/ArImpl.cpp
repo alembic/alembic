@@ -81,7 +81,7 @@ void ArImpl::init()
 {
     Ogawa::IGroupPtr group = m_archive.getGroup();
 
-    int version = -1;
+    Util::int32_t version = -1;
     std::size_t numChildren = group->getNumChildren();
 
     if ( numChildren > 5 && group->isChildData( 0 ) &&
@@ -104,7 +104,7 @@ void ArImpl::init()
         "Unsupported file version detected: " << version );
 
     // if it isn't there, something is wrong
-    int fileVersion = 0;
+    Util::int32_t fileVersion = 0;
 
     Ogawa::IDataPtr data = group->getData( 1, 0 );
     if ( data->getSize() == 4 )
