@@ -41,7 +41,12 @@ IF (APPLE)
 ENDIF()
 
 # require 1.53+ since we need std::shared_ptr supported in the wrapper
-FIND_PACKAGE(Boost 1.53.0 COMPONENTS "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
+FIND_PACKAGE(Boost 1.53.0 COMPONENTS "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+
+# find via . instead, i.e. python2.7
+IF (NOT Boost_FOUND)
+    FIND_PACKAGE(Boost 1.53.0 COMPONENTS "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
+ENDIF()
 
 IF (Boost_FOUND)
     IF (Boost_VERSION_MACRO LESS 105300)

@@ -1,3 +1,17 @@
+2021-06-08, Alembic 1.8.2
+Thanks to your feedback and submitted issues we have a few bug fixes.
+
+Ogawa:
+
+One of the fuzzer tests were was failing with 32 bit builds because of a
+different exception message.
+
+Fix a bug with 32 bit memory mapped Windows builds.
+
+CMake:
+
+Look for boost python a little differently, falling back on existing behavior.
+
 2021-05-15, Alembic 1.8.1
 Thanks to your feedback and submitted issues we have a few bug fixes.
 
