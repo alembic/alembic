@@ -48,6 +48,12 @@ IF (NOT Boost_FOUND)
     FIND_PACKAGE(Boost 1.53.0 COMPONENTS "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
 ENDIF()
 
+# hit a weird case where boost python released seperately from the other boost modules in 1.70 could
+# not find it unless it was optional, so fall back on this
+IF (NOT Boost_FOUND)
+    FIND_PACKAGE(Boost 1.53.0 OPTIONAL_COMPONENTS "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+ENDIF()
+
 IF (Boost_FOUND)
     IF (Boost_VERSION_MACRO LESS 105300)
         MESSAGE(FATAL_ERROR "Boost VERSION IS TOO OLD.")
