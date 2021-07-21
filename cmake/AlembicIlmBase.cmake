@@ -39,10 +39,12 @@ FIND_PACKAGE(Imath)
 IF (Imath_FOUND)
     MESSAGE(STATUS "Found package Imath")
     SET(ALEMBIC_ILMBASE_LIBS Imath::Imath)
+    SET(ALEMBIC_USING_IMATH_3 ON)
 ELSE()
     MESSAGE(STATUS "Could not find Imath looking for IlmBase instead.")
     # What we really want to do is look for libs Imath and half
     FIND_PACKAGE(IlmBase)
+    SET(ALEMBIC_USING_IMATH_3 OFF)
 
     IF (ILMBASE_FOUND)
         SET(ALEMBIC_ILMBASE_FOUND 1 CACHE STRING "Set to 1 if IlmBase is found, 0 otherwise")
