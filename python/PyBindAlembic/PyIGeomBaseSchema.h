@@ -34,73 +34,57 @@
 //
 //-*****************************************************************************
 
+#ifndef PyAlembic_PyIGeomBaseSchema_h
+#define PyAlembic_PyIGeomBaseSchema_h
+
 #include <Foundation.h>
 
 using namespace py;
 
-// overloads
-//
-template<class ISCHEMAOBJECT>
-struct ISchemaObjectOverloads
-{
-    static typename ISCHEMAOBJECT::schema_type& getSchema(
-                                            ISCHEMAOBJECT &iISchemaObject )
-    {
-        return iISchemaObject.getSchema();
-    }
-    static bool matchesMetaData( const AbcA::MetaData& iMetaData,
-                                 Abc::SchemaInterpMatching iMatching )
-    {
-        return ISCHEMAOBJECT::matches( iMetaData, iMatching );
-    }
-    static bool matchesHeader( const AbcA::ObjectHeader& iHeader,
-                               Abc::SchemaInterpMatching iMatching )
-    {
-        return ISCHEMAOBJECT::matches( iHeader, iMatching );
-    }
-};
-
 //-*****************************************************************************
-template<class ISCHEMAOBJECT>
-void register_ISchemaObject( py::module_& module_handle, const char *iName )
+template<class INFO>
+void register_IGeomBaseSchema( py::module_& module_handle, const char *iName )
 {
-    // ISCHEMAOBJECT
+    typedef AbcG::IGeomBaseSchema<INFO> IGeomBaseSchema;
+
+    // IGeomBaseSchema
     //
-    class_<ISCHEMAOBJECT, Abc::IObject>(
+    class_<IGeomBaseSchema>(
           module_handle,
           iName,
           "doc" )
         .def( init<>() )
-        .def ( init<Abc::IObject,
-                    const std::string&,
-                        const Abc::Argument&,
-                        const Abc::Argument& > () )
-        .def ( init<Abc::IObject,
-                    const Abc::WrapExistingFlag,
-                        const Abc::Argument&,
-                        const Abc::Argument&> () )
-        .def_static( "getSchemaObjTitle",
-              &ISCHEMAOBJECT::getSchemaObjTitle,
-              "doc" )
-        .def_static( "getSchemaTitle",
-              &ISCHEMAOBJECT::getSchemaTitle,
-              "doc" )
-        .def( "getSchema",
-              ISchemaObjectOverloads<ISCHEMAOBJECT>::getSchema,
-              "doc",
-              return_value_policy::reference_internal )
-        .def_static( "matches",
-              ISchemaObjectOverloads<ISCHEMAOBJECT>::matchesMetaData,
-                arg( "metaData" ),
-                arg( "matchingSchema" ) = Abc::kStrictMatching ,
+        .def( init<Abc::ICompoundProperty,
+                   const std::string&,
+                   const Abc::Argument&,
+                   const Abc::Argument& >(),
+                   arg( "parent" ), arg( "name" ),
+                   arg( "argument" ), arg( "argument" ),
+                   "doc")
+        .def( init<Abc::ICompoundProperty,
+                   const Abc::Argument&,
+                   const Abc::Argument&>(),
+                   arg( "parent" ), arg( "argument" ), arg( "argument" ),
+                   "doc")
+        .def( "init", &IGeomBaseSchema::init )
+        .def( "getArbGeomParams",
+              &IGeomBaseSchema::getArbGeomParams,
+              "Acccesing the ArbGeomParams will create its compound property "
+              "if needed" )
+        .def( "getUserProperties",
+              &IGeomBaseSchema::getUserProperties,
+              "Accessing UserProperties will create its compound property "
+              "if needed" )
+        .def( "getSelfBoundsProperty",
+              &IGeomBaseSchema::getSelfBoundsProperty,
               "" )
-        .def_static( "matches",
-              ISchemaObjectOverloads<ISCHEMAOBJECT>::matchesHeader,
-                arg( "metaData" ),
-                arg( "matchingSchema" ) = Abc::kStrictMatching ,
+        .def( "getChildBoundsProperty",
+              &IGeomBaseSchema::getChildBoundsProperty,
               "" )
-        .def( "valid", &ISCHEMAOBJECT::valid )
-        .def( "reset", &ISCHEMAOBJECT::reset )
-        .def( ALEMBIC_PYTHON_BOOL_NAME, &ISCHEMAOBJECT::valid )
+        .def( "valid", &IGeomBaseSchema::valid )
+        .def( "reset", &IGeomBaseSchema::reset )
+        .def( ALEMBIC_PYTHON_BOOL_NAME, &IGeomBaseSchema::valid )
         ;
 }
+
+#endif

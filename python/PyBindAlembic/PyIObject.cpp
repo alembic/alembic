@@ -193,10 +193,10 @@ void register_iobject(py::module_& module_handle)
          module_handle,
          "IObject",
          "The IObject class as an object reader")
+         .def( py::init<>(), "Create an empty IObject" )
          .def( py::init<Abc::IObject, const std::string&>(),
                arg( "parent" ), arg( "name" ),
              "Create an IObject with the given parent IObject and name" )
-        .def( py::init<>(), "Create an empty IObject" )
         .def( "getHeader",
               &Abc::IObject::getHeader,
               "Return the header which contains all the MetaData that was "

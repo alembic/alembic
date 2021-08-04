@@ -42,83 +42,25 @@
 using namespace py;
 
 //-*****************************************************************************
-template<class TPTraits>
-static object getPODValue( Abc::IScalarProperty &p,
-                           const Abc::ISampleSelector &iSS )
-{
-    typedef TypeBindingTraits<TPTraits> binding_traits;
-    typedef typename binding_traits::python_value_type T;
-    typedef typename binding_traits::native_value_type U;
-
-    // Return the scalar property's value of type T.
-    U val;
-    p.get( reinterpret_cast<void*>( &val ), iSS );
-
-    //typename return_by_value::apply<T>::type converter;
-    return py::object( py::cast( val, return_value_policy::automatic ) );
-}
-
-//-*****************************************************************************
-template<class TPTraits>
-static object getSmallArrayValue( Abc::IScalarProperty &p,
-                                  const Abc::ISampleSelector &iSS,
-                                  size_t iExtent )
-{
-    typedef typename TPTraits::value_type U;
-    typedef Abc::TypedArraySample<TPTraits> samp_type;
-    typedef AbcU::shared_ptr<samp_type>     samp_ptr_type;
-
-    // Get the scalar property's array value of type U as an ArraySample.
-    AbcU::Dimensions dims( iExtent );
-    AbcA::ArraySamplePtr sampPtr =
-        AbcA::AllocateArraySample( TPTraits::dataType(), dims );
-    p.get( const_cast<void*>( sampPtr->getData() ), iSS );
-
-    samp_ptr_type typedSampPtr =
-        AbcU::static_pointer_cast<samp_type>( sampPtr );
-    //typename return_by_value::apply<samp_ptr_type>::type converter;
-
-    return py::object( py::cast( typedSampPtr, return_value_policy::automatic ) );
-}
-
-//-*****************************************************************************
-#define RETURN_POD_VALUE( BaseType )                        \
+#define CASE_RETURN_POD_VALUE( TPTraits )                        \
+case TPTraits::pod_enum:                    \
 {                                                             \
-  std::vector< BaseType > val(extent);                        \
+  std::vector< TPTraits::value_type > val(extent);                        \
   p.get( &val.front(), iSS);                                  \
   size_t width = size_t(1);                                   \
   size_t height = size_t(extent) ;                            \
-  return getNumPyArray<BaseType>(height, width, val.data());  \
+  return getNumPyArray<TPTraits::value_type>(height, width, val.data());  \
 }                                                             \
 
 //-*****************************************************************************
-#define RETURN_POD_ARRAY_VALUE( BaseType ) \
+#define CASE_RETURN_POD_ARRAY_VALUE( TPTraits ) \
+case TPTraits::pod_enum:                    \
 {                                           \
-  std::vector< BaseType > val(extent);      \
+  std::vector< TPTraits::value_type > val(extent);      \
   p.get( &val.front(), iSS);                \
   return py::array(py::cast(val));          \
 }                                           \
 
-//-*****************************************************************************
-#define RETURN_POD_STRING_ARRAY_VALUE( BaseType ) \
-{                                           \
-  std::vector< BaseType > val(extent);      \
-  p.get( &val.front(), iSS);                \
-  return py::array(py::cast(val));          \
-}                                           \
-
-
-//-*****************************************************************************
-#define CASE_RETURN_POD_VALUE( TPTraits, PROP, SELECTOR ) \
-case TPTraits::pod_enum:                                  \
-    return getPODValue<TPTraits>( PROP, SELECTOR );
-
-//-*****************************************************************************
-#define CASE_RETURN_ARRAY_VALUE( TPTraits, PROP, SELECTOR, EXTENT ) \
-case TPTraits::pod_enum:                                            \
-    return getSmallArrayValue<TPTraits>( PROP, SELECTOR, EXTENT );
-
-//-*****************************************************************************
 template<>
 object getValue<>( Abc::IScalarProperty &p,
                    const Abc::ISampleSelector &iSS,
@@ -139,57 +81,27 @@ object getValue<>( Abc::IScalarProperty &p,
         return object(); // Returns None object
     }
 
-    // U val;
-    // p.get( reinterpret_cast<void*>( &val ), iSS );
-
     if ( iReturnType != kReturnArray )
-    {switch ( pod )
     {
-      // case Abc::BooleanTPTraits::pod_enum:
-      //   RETURN_ARRAY_VALUE( bool );
-
-      case Abc::Uint8TPTraits::pod_enum:
-        RETURN_POD_ARRAY_VALUE( uint8_t );
-
-      case Abc::Int8TPTraits::pod_enum:
-        RETURN_POD_VALUE( int8_t );
-
-      case Abc::Uint16TPTraits::pod_enum:
-        RETURN_POD_VALUE( uint16_t );
-
-      case Abc::Int16TPTraits::pod_enum:
-        RETURN_POD_VALUE( int16_t );
-
-      case Abc::Uint32TPTraits::pod_enum:
-        RETURN_POD_VALUE( uint32_t );
-
-      case Abc::Int32TPTraits::pod_enum:
-        RETURN_POD_VALUE( int32_t );
-
-      case Abc::Uint64TPTraits::pod_enum:
-        RETURN_POD_VALUE( uint64_t );
-
-      case Abc::Int64TPTraits::pod_enum:
-        RETURN_POD_VALUE( int64_t );
-
-      case Abc::Float16TPTraits::pod_enum:
-        RETURN_POD_VALUE( half );
-
-      case Abc::Float32TPTraits::pod_enum:
-        RETURN_POD_VALUE( float );
-
-      case Abc::Float64TPTraits::pod_enum:
-        RETURN_POD_VALUE( double );
-
-      case Abc::StringTPTraits::pod_enum:
-        RETURN_POD_ARRAY_VALUE( std::string );
-
-      case Abc::WstringTPTraits::pod_enum:
-        RETURN_POD_ARRAY_VALUE( std::wstring );
-      default:
-      break;
-    }
-
+      switch ( pod )
+        {
+              CASE_RETURN_POD_VALUE( Abc::BooleanTPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Uint8TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Int8TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Uint16TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Int16TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Uint32TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Int32TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Uint64TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Int64TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Float16TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Float32TPTraits );
+              CASE_RETURN_POD_VALUE( Abc::Float64TPTraits );
+              CASE_RETURN_POD_ARRAY_VALUE( Abc::StringTPTraits );
+              CASE_RETURN_POD_ARRAY_VALUE( Abc::WstringTPTraits );
+            default:
+            break;
+        }
     }
 
     // Ok, this is a small sized array of pod values stored as an scalar value.
@@ -198,49 +110,23 @@ object getValue<>( Abc::IScalarProperty &p,
     {
         switch ( pod )
         {
-          case Abc::BooleanTPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( byte_t );
 
-          case Abc::Uint8TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( uint8_t );
-
-          case Abc::Int8TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( int8_t );
-
-          case Abc::Uint16TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( uint16_t );
-
-          case Abc::Int16TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( int16_t );
-
-          case Abc::Uint32TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( uint32_t );
-
-          case Abc::Int32TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( int32_t );
-
-          case Abc::Uint64TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( uint64_t );
-
-          case Abc::Int64TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( int64_t );
-
-          case Abc::Float16TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( half );
-
-          case Abc::Float32TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( float );
-
-          case Abc::Float64TPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( double );
-
-          case Abc::StringTPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( std::string );
-
-          case Abc::WstringTPTraits::pod_enum:
-            RETURN_POD_ARRAY_VALUE( std::wstring );
-          default:
-          break;
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::BooleanTPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Uint8TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Int8TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Uint16TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Int16TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Uint32TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Int32TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Uint64TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Int64TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Float16TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Float32TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::Float64TPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::StringTPTraits );
+                CASE_RETURN_POD_ARRAY_VALUE( Abc::WstringTPTraits );
+              default:
+              break;
         }
     }
 

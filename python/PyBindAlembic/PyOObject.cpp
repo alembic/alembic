@@ -98,6 +98,17 @@ void register_oobject(py::module_& module_handle)
               "Create a new OObject with the given parent OObject, name and "
               "optional arguments which can be use to override the "
               "ErrorHandlerPolicy, to specify MetaData" )
+          .def( init<Abc::OObject, const std::string&,
+                const Abc::Argument&>(),
+              arg( "parent"), arg( "name" ), arg( "argument" ),
+              "Create a new OObject with the given parent OObject, name and "
+              "optional arguments which can be use to override the "
+              "ErrorHandlerPolicy, to specify MetaData" )
+          .def( init<Abc::OObject, const std::string&>(),
+              arg( "parent"), arg( "name" ),
+              "Create a new OObject with the given parent OObject, name and "
+              "optional arguments which can be use to override the "
+              "ErrorHandlerPolicy, to specify MetaData" )
         .def( init<>(), "Create an empty OObject" )
         .def( "addChildInstance",
               &Abc::OObject::addChildInstance,

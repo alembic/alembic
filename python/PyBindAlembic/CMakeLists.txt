@@ -73,21 +73,21 @@ SET(CPP_FILES
     PyIObject.cpp
     PyIArrayProperty.cpp
     PyISampleSelector.cpp
-    #PyCoreAbstractTypes.cpp
+    PyCoreAbstractTypes.cpp
 
     #uses custom converters from boost with no equivalent from pybind11
     #PyTypedArraySampleConverter.cpp
 
     #PyUtilTypes.cpp
-    #PyAbcTypes.cpp
+    PyAbcTypes.cpp
     #PyAbcCoreLayer.cpp
     #PyArchiveInfo.cpp
-    #PyOArchive.cpp
-    #PyOObject.cpp
+    PyOArchive.cpp
+    PyOObject.cpp
     PyICompoundProperty.cpp
-    #PyOArrayProperty.cpp
-    #PyOCompoundProperty.cpp
-    #PyOScalarProperty.cpp
+    PyOArrayProperty.cpp
+    PyOCompoundProperty.cpp
+    PyOScalarProperty.cpp
     PyIScalarProperty.cpp
     #PyITypedScalarProperty.cpp
     #PyITypedArrayProperty.cpp
@@ -98,6 +98,7 @@ SET(CPP_FILES
     #PyVisibility.cpp
     #PyArchiveBounds.cpp
     #PyOFaceSet.cpp
+    PyIGeomBase.cpp
 
     main.cpp
 )
@@ -112,13 +113,13 @@ ENDIF ()
 INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/lib"
     "${CMAKE_SOURCE_DIR}/python/PyBindAlembic")
 
-ADD_LIBRARY(pybind_alembic SHARED ${CPP_FILES})
+ADD_LIBRARY(alembic SHARED ${CPP_FILES})
 
 if ("${PYTHON_LIBRARIES}" STREQUAL "")
     SET(PYTHON_LIBRARIES "${Python${PYTHON_VERSION_MAJOR}_LIBRARIES}")
 endif()
 
-TARGET_LINK_LIBRARIES(pybind_alembic
+TARGET_LINK_LIBRARIES(alembic
     LINK_PUBLIC
     Alembic::Alembic
     ${PYTHON_LIBRARIES}
@@ -132,7 +133,7 @@ SET( ALEMBIC_PYTHON_INSTALL_DIR
     "Alembic's python bindings install directory"
 )
 
-INSTALL (TARGETS pybind_alembic
+INSTALL (TARGETS alembic
     DESTINATION ${ALEMBIC_PYTHON_INSTALL_DIR}
 )
 
@@ -148,8 +149,8 @@ IF (WIN32)
 ENDIF ()
 
 # dont add any wacky lib prefix, as python doesnt like this
-set_target_properties(pybind_alembic PROPERTIES PREFIX "" SUFFIX ${EXT})
+set_target_properties(alembic PROPERTIES PREFIX "" SUFFIX ${EXT})
 
-set_target_properties(pybind_alembic PROPERTIES
+set_target_properties(alembic PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)

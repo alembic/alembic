@@ -70,7 +70,7 @@ void register_oarchive(py::module_& module_handle)
         .def( "getTop",
               &Abc::OArchive::getTop,
               "Return the single top-level OObject",
-              py::keep_alive<0,1>() )
+              return_value_policy::copy )
         .def( "getCompressionHint",
               &Abc::OArchive::getCompressionHint,
               "Return the compression applied to array properties\n" )

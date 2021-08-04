@@ -41,46 +41,31 @@
 
 using namespace py;
 
-template<class TPTraits>
-static py::object getPythonArray( AbcA::ArraySamplePtr& iSampPtr )
-{
-    typedef Abc::TypedArraySample<TPTraits> samp_type;
-    typedef AbcU::shared_ptr<samp_type>     samp_type_ptr;
-
-    samp_type_ptr typedSampPtr =
-        AbcU::static_pointer_cast<samp_type>( iSampPtr );
-
-    //typename return_by_value::apply<samp_type_ptr>::type converter;
-
-
-    return py::object( py::cast( typedSampPtr, return_value_policy::automatic ) );
+//-*****************************************************************************
+#define RETURN_ARRAY_VALUE( TPTraits)                                     \
+{                                                                         \
+  std::vector< TPTraits::value_type > samp(dims.numPoints() * extent);    \
+  p.getAs( &samp.front(), iSS);                                           \
+  size_t width = size_t(dims.numPoints());                                \
+  size_t height = size_t(extent) ;                                        \
+  return getNumPyArray<TPTraits::value_type>(width, height, samp.data()); \
 }
 
 //-*****************************************************************************
-#define CASE_RETURN_ARRAY_VALUE( TPTraits, iSampPtr )      \
-case TPTraits::pod_enum:                                   \
-{                                                          \
-    return getPythonArray<TPTraits>( iSampPtr );           \
+#define CASE_RETURN_ARRAY_VALUE( TPTraits)                                \
+case TPTraits::pod_enum:                                                  \
+{                                                                         \
+  RETURN_ARRAY_VALUE(TPTraits)                                            \
 }
 
 //-*****************************************************************************
-#define RETURN_ARRAY_VALUE( BaseType )                        \
+#define CASE_RETURN_STRING_ARRAY_VALUE( TPTraits)             \
+case TPTraits::pod_enum:                                      \
 {                                                             \
-  std::vector< BaseType > samp(dims.numPoints() * extent);    \
+  std::vector< TPTraits::value_type > samp(extent);           \
   p.getAs( &samp.front(), iSS);                               \
-  size_t width = size_t(dims.numPoints());                    \
-  size_t height = size_t(extent) ;                            \
-  return getNumPyArray<BaseType>(width, height, samp.data()); \
-}                                                             \
-
-//-*****************************************************************************
-#define RETURN_STRING_ARRAY_VALUE( BaseType )      \
-{                                                  \
-  std::vector< BaseType > samp(dims.numPoints());  \
-  p.getAs( &samp.front(), iSS);                    \
-  return py::array(py::cast(samp));                \
-}                                                  \
-
+  return py::array(py::cast(samp));                           \
+}
 
 //-*****************************************************************************
 template<>
@@ -105,196 +90,25 @@ py::object getValue ( Abc::IArrayProperty &p,
         return object(); // Returns None object
     }
 
-    AbcA::ArraySamplePtr ptr;
-    p.get( ptr, iSS );
-
     switch ( pod )
     {
-      // case Abc::BooleanTPTraits::pod_enum:
-      //   RETURN_ARRAY_VALUE( bool );
-
-      case Abc::Uint8TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( uint8_t );
-
-      case Abc::Int8TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( int8_t );
-
-      case Abc::Uint16TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( uint16_t );
-
-      case Abc::Int16TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( int16_t );
-
-      case Abc::Uint32TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( uint32_t );
-
-      case Abc::Int32TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( int32_t );
-
-      case Abc::Uint64TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( uint64_t );
-
-      case Abc::Int64TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( int64_t );
-
-      case Abc::Float16TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( half );
-
-      case Abc::Float32TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( float );
-
-      case Abc::Float64TPTraits::pod_enum:
-        RETURN_ARRAY_VALUE( double );
-
-      case Abc::StringTPTraits::pod_enum:
-        RETURN_STRING_ARRAY_VALUE( std::string );
-
-      case Abc::WstringTPTraits::pod_enum:
-        RETURN_STRING_ARRAY_VALUE( std::wstring );
-      default:
-      break;
-    }
-
-    // return pylist
-    // auto pylist = py::list();
-    // for (size_t index = 0; index < samp.size(); index++)
-    //   pylist.append(samp[index]);
-    // return py::array(pylist);
-
-    // return contigous arrays
-    // return py::array_t<float>(
-    //                 { samp.size() },
-    //                 { sizeof(float) },
-    //                 samp.data());
-
-      // return 3f vectors array.
-        // return py::array(py::buffer_info(
-        //     samp.data(),                               /* Pointer to buffer */
-        //     sizeof(float),                          /* Size of one scalar */
-        //     py::format_descriptor<float>::format(), /* Python struct-style format descriptor */
-        //     size_t(2),                                      /* Number of dimensions */
-        //     { size_t(samp.size()/extent), size_t(extent) },                   /* Buffer dimensions */
-        //     { sizeof(float) * extent, sizeof(float) }  /* Strides (in bytes) for each index */
-        //   ));
-
-    if (extent == 1)
-    {
-        switch ( pod )
-        {
-            CASE_RETURN_ARRAY_VALUE( Abc::BooleanTPTraits, ptr )
-            CASE_RETURN_ARRAY_VALUE( Abc::Uint8TPTraits,   ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Int8TPTraits,    ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Uint16TPTraits,  ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Int16TPTraits,   ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Uint32TPTraits,  ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Int32TPTraits,   ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Uint64TPTraits,  ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Int64TPTraits,   ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Float16TPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Float32TPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Float64TPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::StringTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::WstringTPTraits, ptr );
-            default:
-            break;
-        };
-    }
-    else if (extent == 2)
-    {
-        switch ( pod )
-        {
-
-            CASE_RETURN_ARRAY_VALUE( Abc::V2sTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::V2iTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::V2fTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::V2dTPTraits, ptr );
-            default:
-            break;
-        };
-    }
-    else if (extent == 3)
-    {
-        switch ( pod )
-        {
-            CASE_RETURN_ARRAY_VALUE( Abc::C3cTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::V3sTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::V3iTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::C3hTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::V3dTPTraits, ptr );
-            case AbcU::kFloat32POD:
-            {
-                std::string interp (p.getMetaData().get ("interpretation"));
-                if (!interp.compare (Abc::C3fTPTraits::interpretation()))
-                    return getPythonArray<Abc::C3fTPTraits> (ptr);
-                else
-                    return getPythonArray<Abc::V3fTPTraits> (ptr);
-            }
-            default:
-            break;
-        };
-    }
-    else if (extent == 4)
-    {
-        switch ( pod )
-        {
-            CASE_RETURN_ARRAY_VALUE( Abc::C4cTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::C4hTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Box2sTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Box2iTPTraits, ptr );
-            case AbcU::kFloat32POD:
-            {
-                std::string interp (p.getMetaData().get ("interpretation"));
-                if (!interp.compare (Abc::C4fTPTraits::interpretation()))
-                    return getPythonArray<Abc::C4fTPTraits>( ptr );
-                else if (!interp.compare (Abc::QuatfTPTraits::interpretation()))
-                    return getPythonArray<Abc::QuatfTPTraits>( ptr );
-                else if (!interp.compare (Abc::Box2fTPTraits::interpretation()))
-                    return getPythonArray<Abc::Box2fTPTraits>( ptr );
-            }
-            case AbcU::kFloat64POD:
-            {
-                std::string interp (p.getMetaData().get ("interpretation"));
-                if (!interp.compare (Abc::QuatdTPTraits::interpretation()))
-                    return getPythonArray<Abc::QuatdTPTraits>( ptr );
-                else if (!interp.compare (Abc::Box2dTPTraits::interpretation()))
-                    return getPythonArray<Abc::Box2dTPTraits>( ptr );
-            }
-            default:
-            break;
-        };
-    }
-    else if (extent == 6)
-    {
-        switch ( pod )
-        {
-            CASE_RETURN_ARRAY_VALUE( Abc::Box3sTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Box3iTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Box3fTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::Box3dTPTraits, ptr );
-            default:
-            break;
-        }
-    }
-    else if (extent == 9)
-    {
-        switch ( pod )
-        {
-            CASE_RETURN_ARRAY_VALUE( Abc::M33fTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::M33dTPTraits, ptr );
-            default:
-            break;
-        }
-    }
-    else if (extent == 16)
-    {
-        switch ( pod )
-        {
-            CASE_RETURN_ARRAY_VALUE( Abc::M44fTPTraits, ptr );
-            CASE_RETURN_ARRAY_VALUE( Abc::M44dTPTraits, ptr );
-            default:
-            break;
-        }
-    }
+        CASE_RETURN_ARRAY_VALUE( Abc::BooleanTPTraits);
+        CASE_RETURN_ARRAY_VALUE( Abc::Uint8TPTraits );
+        CASE_RETURN_ARRAY_VALUE( Abc::Int8TPTraits );
+        CASE_RETURN_ARRAY_VALUE(Abc::Uint16TPTraits );
+        CASE_RETURN_ARRAY_VALUE( Abc::Int16TPTraits );
+        CASE_RETURN_ARRAY_VALUE(Abc::Uint32TPTraits );
+        CASE_RETURN_ARRAY_VALUE(Abc::Int32TPTraits );
+        CASE_RETURN_ARRAY_VALUE(Abc::Uint64TPTraits );
+        CASE_RETURN_ARRAY_VALUE(Abc::Int64TPTraits );
+        CASE_RETURN_ARRAY_VALUE(Abc::Float16TPTraits );
+        CASE_RETURN_ARRAY_VALUE(Abc::Float32TPTraits );
+        CASE_RETURN_ARRAY_VALUE(Abc::Float64TPTraits );
+        CASE_RETURN_STRING_ARRAY_VALUE(Abc::StringTPTraits );
+        CASE_RETURN_STRING_ARRAY_VALUE(Abc::WstringTPTraits );
+        default:
+        break;
+    };
 
     std::stringstream stream;
     stream << "ERROR: Unhandled type " << AbcU::PODName (pod)
@@ -379,7 +193,7 @@ void register_iarrayproperty(py::module_& module_handle)
                     arg( "parent" ), arg( "name" ), arg( "argument" ),
                     arg( "argument" ),
                     "Create a new IArrayProperty with the given parent "
-                    "ICompoundProperty, namd and optionial arguments which can "
+                    "ICompoundProperty, named and optional arguments which can "
                     "be used to override the ErrorHandlingPolicy, to specify "
                     "protocol matching policy" )
         .def( "getNumSamples",

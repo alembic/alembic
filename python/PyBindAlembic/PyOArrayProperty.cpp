@@ -41,32 +41,31 @@
 using namespace py;
 
 //-*****************************************************************************
-#define CASE_SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )    \
-case TPTraits::pod_enum:                                        \
-{                                                               \
-    typedef Abc::TypedArraySample<TPTraits> samp_type;          \
-    typedef AbcU::shared_ptr<samp_type>     samp_ptr_type;      \
-    if ( TypeBindingTraits<TPTraits>::memCopyable )             \
-    {                                                           \
-        iProp.set( py::cast<samp_type>( iFixedArray ) );         \
-    }                                                           \
-    else                                                        \
-    {                                                           \
-       samp_ptr_type sampPtr = py::cast<samp_ptr_type> ( iFixedArray ); \
-       iProp.set( *sampPtr );                                   \
-    }                                                           \
-    return;                                                     \
+#define SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )                                                         \
+{                                                                                                               \
+    AbcU::Dimensions dims(iFixedArray.shape()[0]);                                                          \
+    std::vector<TPTraits::value_type> prop_array(iFixedArray.size());                                       \
+    std::memcpy(prop_array.data(), iFixedArray.data(), iFixedArray.size() * sizeof(TPTraits::value_type));  \
+    Abc::TypedArraySample<TPTraits> array_sample(prop_array.data(), dims);                                  \
+    iProp.set( array_sample );                                                                              \
+    return;                                                                                                 \
 }
 
 //-*****************************************************************************
-static void setArrayValue( Abc::OArrayProperty &p, PyObject *val )
-{
-    assert( val != 0 );
+#define CASE_SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )                                                    \
+case TPTraits::pod_enum:                                                                                        \
+{                                                                                                               \
+    SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )                                                                                                 \
+}
 
+//-*****************************************************************************
+static void setArrayValue( Abc::OArrayProperty &p, py::array& val )
+{
+    //assert( val.request().ptr != 0 );
     const AbcA::DataType &dt = p.getDataType();
     const AbcU::PlainOldDataType pod = dt.getPod();
     const uint8_t extent = dt.getExtent();
-
+    std::cout << "\n" << extent << "\n";
     if( pod < 0 || pod >= AbcU::kNumPlainOldDataTypes )
     {
         std::stringstream stream;
@@ -77,34 +76,33 @@ static void setArrayValue( Abc::OArrayProperty &p, PyObject *val )
 
     if ( extent == 1 )
     {
-        switch ( pod )
-        {
-            CASE_SET_ARRAY_VALUE( Abc::BooleanTPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Uint8TPTraits,   p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Int8TPTraits,    p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Uint16TPTraits,  p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Int16TPTraits,   p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Uint32TPTraits,  p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Int32TPTraits,   p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Uint64TPTraits,  p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Int64TPTraits,   p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Float16TPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Float32TPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Float64TPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::StringTPTraits,  p, val );
-            CASE_SET_ARRAY_VALUE( Abc::WstringTPTraits, p, val );
-            default:
-            break;
-        }
+      switch ( pod )
+      {
+          CASE_SET_ARRAY_VALUE( Abc::Uint8TPTraits, p, val );
+          CASE_SET_ARRAY_VALUE( Abc::Int8TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE( Abc::Uint16TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE( Abc::Int16TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE( Abc::Uint32TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE( Abc::Int32TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE( Abc::Uint64TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE(Abc::Int64TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE(Abc::Float16TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE(Abc::Float32TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE(Abc::Float64TPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE(Abc::StringTPTraits, p, val  );
+          CASE_SET_ARRAY_VALUE(Abc::WstringTPTraits, p, val  );
+        default:
+        break;
+      }
     }
-    else if ( extent  == 2 )
+    else if ( extent == 2 )
     {
         switch ( pod )
         {
-            CASE_SET_ARRAY_VALUE( Abc::V2sTPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::V2iTPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::V2fTPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::V2dTPTraits, p, val );
+            CASE_SET_ARRAY_VALUE(Abc::V2sTPTraits, p, val  );
+            CASE_SET_ARRAY_VALUE(Abc::V2iTPTraits, p, val  );
+            CASE_SET_ARRAY_VALUE(Abc::V2fTPTraits, p, val  );
+            CASE_SET_ARRAY_VALUE(Abc::V2dTPTraits, p, val  );
             default:
             break;
         }
@@ -115,21 +113,19 @@ static void setArrayValue( Abc::OArrayProperty &p, PyObject *val )
         {
             CASE_SET_ARRAY_VALUE( Abc::C3cTPTraits, p, val );
             CASE_SET_ARRAY_VALUE( Abc::C3hTPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::V3sTPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::V3iTPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::V3dTPTraits, p, val );
+            CASE_SET_ARRAY_VALUE(Abc::V3sTPTraits, p, val );
+            CASE_SET_ARRAY_VALUE(Abc::V3iTPTraits, p, val );
+            CASE_SET_ARRAY_VALUE(Abc::V3dTPTraits, p, val );
             case AbcU::kFloat32POD:
             {
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::C3fTPTraits::interpretation()))
                 {
-                    p.set( py::cast<Abc::TypedArraySample<Abc::C3fTPTraits> >( val ) );
-                    return;
+                    SET_ARRAY_VALUE( Abc::C3fTPTraits, p, val )
                 }
                 else
                 {
-                    p.set( py::cast<Abc::TypedArraySample<Abc::V3fTPTraits> >( val ) );
-                    return;
+                  SET_ARRAY_VALUE( Abc::V3fTPTraits, p, val )
                 }
             }
             default:
@@ -142,25 +138,22 @@ static void setArrayValue( Abc::OArrayProperty &p, PyObject *val )
         {
             CASE_SET_ARRAY_VALUE( Abc::C4cTPTraits, p, val );
             CASE_SET_ARRAY_VALUE( Abc::C4hTPTraits, p, val );
-            CASE_SET_ARRAY_VALUE( Abc::Box2sTPTraits, p, val )
-            CASE_SET_ARRAY_VALUE( Abc::Box2iTPTraits, p, val )
+            CASE_SET_ARRAY_VALUE( Abc::Box2sTPTraits, p, val );
+            CASE_SET_ARRAY_VALUE( Abc::Box2iTPTraits, p, val );
             case AbcU::kFloat32POD:
             {
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::C4fTPTraits::interpretation()))
                 {
-                    p.set( py::cast<Abc::TypedArraySample<Abc::C4fTPTraits> >( val ) );
-                    return;
+                    SET_ARRAY_VALUE( Abc::C4fTPTraits, p, val )
                 }
                 else if (!interp.compare (Abc::QuatfTPTraits::interpretation()))
                 {
-                    p.set( py::cast<Abc::TypedArraySample<Abc::QuatfTPTraits> >( val ) );
-                    return;
+                  SET_ARRAY_VALUE( Abc::QuatfTPTraits, p, val )
                 }
                 else if (!interp.compare (Abc::Box2fTPTraits::interpretation()))
                 {
-                    p.set( py::cast<Abc::TypedArraySample<Abc::Box2fTPTraits> >( val ) );
-                    return;
+                  SET_ARRAY_VALUE( Abc::Box2fTPTraits, p, val )
                 }
             }
             case AbcU::kFloat64POD:
@@ -168,13 +161,11 @@ static void setArrayValue( Abc::OArrayProperty &p, PyObject *val )
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::QuatdTPTraits::interpretation()))
                 {
-                    p.set( py::cast<Abc::TypedArraySample<Abc::QuatdTPTraits> >( val ) );
-                    return;
+                    SET_ARRAY_VALUE( Abc::QuatdTPTraits, p, val )
                 }
                 else if (!interp.compare (Abc::Box2dTPTraits::interpretation()))
                 {
-                    p.set( py::cast<Abc::TypedArraySample<Abc::Box2dTPTraits> >( val ) );
-                    return;
+                  SET_ARRAY_VALUE( Abc::Box2dTPTraits, p, val )
                 }
             }
             default:
@@ -250,6 +241,27 @@ void register_oarrayproperty( py::module_& module_handle)
                    const Abc::Argument&>(),
                     arg( "parent" ), arg( "name" ), arg( "DataType" ),
                     arg( "argument" ), arg( "argument" ), arg( "argument" ),
+                    "Create a new OArrayProperty with the given parent "
+                    "OCompoundProperty, name, DataType and optional arguments "
+                    "which can be use to override the ErrorHandlingPolicy, to "
+                    "specify MetaData, and to specify time sampling or time "
+                    "sampling index" )
+        .def( init<Abc::OCompoundProperty,
+                   const std::string&,
+                   const AbcA::DataType&,
+                   const Abc::Argument&,
+                   const Abc::Argument&>(),
+                    arg( "parent" ), arg( "name" ), arg( "DataType" ),
+                    arg( "argument" ), arg( "argument" ),
+                    "Create a new OArrayProperty with the given parent "
+                    "OCompoundProperty, name, DataType and optional arguments "
+                    "which can be use to override the ErrorHandlingPolicy, to "
+                    "specify MetaData, and to specify time sampling or time "
+                    "sampling index" )
+        .def( init<Abc::OCompoundProperty,
+                   const std::string&,
+                   const AbcA::DataType&>(),
+                    arg( "parent" ), arg( "name" ), arg( "DataType" ),
                     "Create a new OArrayProperty with the given parent "
                     "OCompoundProperty, name, DataType and optional arguments "
                     "which can be use to override the ErrorHandlingPolicy, to "

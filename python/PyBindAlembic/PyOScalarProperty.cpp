@@ -42,98 +42,58 @@ using namespace py;
 
 //-*****************************************************************************
 template<class TPTraits>
-static bool setSmallArrayValue( Abc::OScalarProperty &p, PyObject *val )
-{
-    typedef Abc::TypedArraySample<TPTraits> samp_type;
-    typedef AbcU::shared_ptr<samp_type>     samp_ptr_type;
+static bool setPODValue( Abc::OScalarProperty &p, py::object* val )
+{  std::cout << "\ninside set POD Val\n";
 
-    if ( TypeBindingTraits<TPTraits>::memCopyable )
-    {
-        extract<samp_type> x( object( reinterpret_borrow<object>( val ) ) );
-
-        if ( !x.check() )
-        {
-            return false;
-        }
-
-        samp_type samp( x() );
-
-        if ( samp.size() > 255 )
-        {
-            std::stringstream stream;
-            stream << "ERROR: Failure in setting a POD array with type "
-                   << TPTraits::name() << ": array size is bigger than 255.";
-            throwPythonException( stream.str().c_str() );
-
-            return false;
-        }
-        else
-        {
-            p.set( samp.getData() );
-        }
-    }
-    else
-    {
-        extract<samp_ptr_type> x( object( reinterpret_borrow<object>( val ) ) );
-
-        if ( !x.check() )
-            return false;
-
-        samp_ptr_type sampPtr( x() );
-        if ( sampPtr->size() > 255 )
-        {
-            std::stringstream stream;
-            stream << "ERROR: Failure in setting a POD array with type "
-                   << TPTraits::name() << ": array size is bigger than 255.";
-            throwPythonException( stream.str().c_str() );
-
-            return false;
-        }
-        else
-        {
-            p.set( sampPtr->getData() );
-        }
-    }
-
-    return true;
+  typedef typename TPTraits::value_type pod_type;
+  pod_type pod_val = val->cast<pod_type>();
+  p.set( &pod_val );
+  return true;
 }
 
 //-*****************************************************************************
 template<class TPTraits>
-static bool setPODValue( Abc::OScalarProperty &p, PyObject* val )
+static bool setSmallArrayValue( Abc::OScalarProperty &p, py::object* val )
 {
-    typedef TypeBindingTraits<TPTraits> binding_traits;
-    typedef typename binding_traits::python_value_type T;
-    typedef typename binding_traits::native_value_type U;
-
-    extract<T> x( object( reinterpret_borrow<object>( val ) ) );
-
-    if ( !x.check() )
-        return false;
-
-    U v( x() );
-    p.set( &v );
-
-    return true;
+  std::cout << "\ninside set Small Array\n";
+  typedef typename TPTraits::value_type val_type;
+  py::array iFixedArray = val->cast<py::array>();
+  AbcU::Dimensions dims(iFixedArray.shape()[0]);
+  std::vector<val_type> prop_array(iFixedArray.size());
+  std::memcpy(prop_array.data(), iFixedArray.data(), iFixedArray.size() * sizeof(val_type));
+  Abc::TypedArraySample<TPTraits> array_sample(prop_array.data(), dims);
+  p.set( array_sample.getData() );
+  return true;
 }
 
 //-*****************************************************************************
-#define CASE_SET_POD_VALUE( TPTraits, POD, VAL ) \
-case TPTraits::pod_enum:                         \
-    if ( setPODValue<TPTraits>( POD, VAL ) )     \
-        return;
+#define SET_POD_VALUE( TPTraits, iProp, iFixedArray )                                                       \
+{                                                                                                           \
+  py::array iFixedArray1 = iFixedArray.cast<py::array>();                                                 \
+  AbcU::Dimensions dims(iFixedArray1.shape()[0]);                                                           \
+  std::vector<TPTraits::value_type> prop_array(iFixedArray1.size());                                        \
+  std::memcpy(prop_array.data(), iFixedArray1.data(), iFixedArray1.size() * sizeof(TPTraits::value_type));  \
+  Abc::TypedArraySample<TPTraits> array_sample(prop_array.data(), dims);                                    \
+  iProp.set( array_sample.getData() );                                                                      \
+  return;                                                                                                   \
+}
+
+//-*****************************************************************************
+#define CASE_SET_POD_VALUE( TPTraits, POD, VAL )  \
+case TPTraits::pod_enum:                          \
+    if ( setSmallArrayValue<TPTraits>( POD, VAL ) )      \
+    return;
 
 //-*****************************************************************************
 #define CASE_SET_ARRAY_VALUE( TPTraits, POD, VAL )  \
 case TPTraits::pod_enum:                            \
-    if ( setSmallArrayValue<TPTraits>( POD, VAL ) ) \
-        return;
+    if ( setSmallArrayValue<TPTraits>( POD, VAL ))  \
+    return;
 
 //-*****************************************************************************
-static void setScalarValue( Abc::OScalarProperty &p, PyObject *val )
+static void setScalarValue( Abc::OScalarProperty &p, py::object* val )
 {
-    assert( val != 0 );
-
+    //assert( val != 0 );
     const AbcA::DataType &dt = p.getDataType();
     const AbcU::PlainOldDataType pod = dt.getPod();
     const AbcU::uint8_t extent = dt.getExtent();
@@ -220,17 +180,17 @@ static void setScalarValue( Abc::OScalarProperty &p, PyObject *val )
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::C4fTPTraits::interpretation()))
                 {
-                    setPODValue<Abc::C4fTPTraits>( p, val );
+                  setPODValue<Abc::C4fTPTraits>( p, val );
                     return;
                 }
                 else if (!interp.compare (Abc::QuatfTPTraits::interpretation()))
                 {
-                    setPODValue<Abc::QuatfTPTraits>( p, val );
+                  setPODValue<Abc::QuatfTPTraits>( p, val );
                     return;
                 }
                 else if (!interp.compare (Abc::Box2fTPTraits::interpretation()))
                 {
-                    setPODValue<Abc::Box2fTPTraits>( p, val );
+                  setPODValue<Abc::Box2fTPTraits>( p, val );
                     return;
                 }
             }
@@ -239,12 +199,12 @@ static void setScalarValue( Abc::OScalarProperty &p, PyObject *val )
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::QuatdTPTraits::interpretation()))
                 {
-                    setPODValue<Abc::QuatdTPTraits>( p, val );
+                  setPODValue<Abc::QuatdTPTraits>( p, val );
                     return;
                 }
                 else if (!interp.compare (Abc::Box2dTPTraits::interpretation()))
                 {
-                    setPODValue<Abc::Box2dTPTraits>( p, val );
+                  setPODValue<Abc::Box2dTPTraits>( p, val );
                     return;
                 }
             }
@@ -340,6 +300,15 @@ void register_oscalarproperty( py::module_& module_handle )
                    const Abc::Argument> (),
                     arg( "parent" ), arg( "name" ), arg( "DataType" ),
                     arg( "argument" ), arg( "argument" ), arg( "argumenmt" ),
+                    "Create a new OScalarProperty with the given parent "
+                    "OCompoundProperty, name, DataType and optional arguments "
+                    "which can be use to override the ErrorHandlingPolicy, to "
+                    "specify MetaData, and to specify time sampling or time "
+                    "sampling index" )
+        .def( init<Abc::OCompoundProperty,
+                   const std::string&,
+                   const AbcA::DataType&> (),
+                    arg( "parent" ), arg( "name" ), arg( "DataType" ),
                     "Create a new OScalarProperty with the given parent "
                     "OCompoundProperty, name, DataType and optional arguments "
                     "which can be use to override the ErrorHandlingPolicy, to "

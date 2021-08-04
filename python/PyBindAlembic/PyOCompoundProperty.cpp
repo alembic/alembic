@@ -148,6 +148,11 @@ void register_ocompoundproperty(py::module_& module_handle)
                   "Create a new OCompoundProperty with the given parent "
                   "OObject, name and optional arguments which can be used to "
                   "override the ErrorHandlerPolicy, to specify MetaData" )
+        .def( init<Abc::OCompoundProperty, const std::string&>(),
+                  arg( "parent"  ), arg( "name" ),
+                  "Create a new OCompoundProperty with the given parent "
+                  "OObject, name and optional arguments which can be used to "
+                  "override the ErrorHandlerPolicy, to specify MetaData" )
         .def( "getNumProperties",
               &Abc::OCompoundProperty::getNumProperties,
               "Return the number of child properties that have been createtd"

@@ -213,6 +213,11 @@ void register_coreabstracttypes(py::module_& module_handle)
               "Return the DataType of the property. An exception will be "
               "thrown if this is called for a CompoundProperty",
               py::return_value_policy::copy )
+        .def( "getTimeSampling",
+              &AbcA::PropertyHeader::getTimeSampling,
+              "Return the TimeSampling of the property. An exception will be "
+              "thrown if this is called for a CompoundProperty",
+              py::return_value_policy::reference )
         .def( "isReference",
               &Alembic::Abc::isReference,
               "Return true if the property is tagged as being a reference" )
