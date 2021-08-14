@@ -48,25 +48,6 @@ namespace ALEMBIC_VERSION_NS {
 // Windows
 #elif defined( _MSC_VER )
 #define COMPARE_EXCHANGE( V, COMP, EXCH ) (InterlockedCompareExchange64( &V, EXCH, COMP ) == COMP)
-
-Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
-{
-    if ( !iValue )
-    {
-        return 0;
-    }
-
-    for ( Alembic::Util::int64_t bit = 0; bit < 64; ++bit )
-    {
-        if ( iValue & ( Alembic::Util::int64_t( 1 ) << bit ) )
-        {
-            return bit + 1;
-        }
-    }
-
-    return 0;
-}
-
 #elif defined( __HAIKU__ )
 
 #define COMPARE_EXCHANGE( V, COMP, EXCH ) __atomic_compare_exchange_n( &V, &COMP, EXCH, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST )
@@ -78,6 +59,15 @@ int ffsll(long long i)
 
 #else
 #error Please contact alembic-discuss@googlegroups.com for support.
+#endif
+
+#ifdef _MSC_VER
+Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
+{
+    unsigned long index = 0;
+    _BitScanForward64(&index, iValue);
+    return index;
+}
 #endif
 
 StreamManager::StreamManager( std::size_t iNumStreams )
