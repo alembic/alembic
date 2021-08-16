@@ -159,6 +159,9 @@ public:
         m_arbGeomParams.reset();
         m_userProperties.reset();
 
+        m_useArrayProp = false;
+        m_isIdentity = true;
+
         super_type::reset();
     }
 
@@ -182,7 +185,7 @@ private:
 
     // should we store are channel values in an ArrayProperty,
     // or in a ScalarProperty with some Dimension > 0 and < MAX_SCALAR_CHANS
-    bool m_useArrayProp;
+    bool m_useArrayProp{false};
 
     AbcA::DataType m_arrayValuesDataType;
     Alembic::Util::Dimensions m_arraySampleDimensions;
@@ -205,7 +208,7 @@ protected:
     // calls to set; see usage in OXformSchema::set()
     XformSample m_protoSample;
 
-    bool m_isIdentity;
+    bool m_isIdentity{true};
 
     Abc::OCompoundProperty m_arbGeomParams;
 
