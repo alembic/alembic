@@ -1,3 +1,20 @@
+2021-09-11, Alembic 1.8.3
+
+Thanks to your feedback and submitted issues we have a few bug fixes.
+
+Make sure we export the IlmBase requirement in CMake when using OpenEXR 2 to
+fulfill the Imath requirement. (Issue 355)
+
+Address report from GCC Undefined Behavior Sanitizer by initializing a couple
+of bools in OXform.  (Issue 357)
+
+Fix compile issue when using C++17 with Microsoft Visual Studio and use a
+hopefully much faster find first bit set when using that compiler. (Issue 358)
+
+
+Thanks to your feedback and submitted issues we have a few bug fixes.
+
+
 2021-06-08, Alembic 1.8.2
 Thanks to your feedback and submitted issues we have a few bug fixes.
 
