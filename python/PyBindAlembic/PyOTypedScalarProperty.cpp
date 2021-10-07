@@ -56,6 +56,11 @@ static void register_(py::module_& module_handle, const char* iName)
         {
             return T::matches( iHeader, iMatching );
         }
+        static bool get( size_t index )
+        {
+          std::cout << "\n inside get item\n";
+            return true;
+        }
     };
 
     // OTypedScalarProperty
@@ -65,6 +70,19 @@ static void register_(py::module_& module_handle, const char* iName)
          iName,
          "This class is a typed scalar property writer" )
          .def( init<>(), "Create an empty property" )
+         .def( init<Abc::OCompoundProperty,
+                   const std::string&>(),
+                    "Create a new typed scalar property with the given parent "
+                    "OCompoundProperty and name" )
+        .def( init<Abc::OCompoundProperty,
+                   const std::string&,
+                   Abc::Argument>(),
+                    arg( "parent" ), arg( "name" ), arg( "argument" ),
+                    "Create a new typed scalar property with the given parent "
+                    "OCompoundProperty, name and optional arguments which can "
+                    "be used to override the ErrorHandlingPolicy, to specify "
+                    "MetaData, and to specify time sampling or time sampling "
+                    "index")
         .def( init<Abc::OCompoundProperty,
                    const std::string&,
                    Abc::Argument,
@@ -93,6 +111,7 @@ static void register_(py::module_& module_handle, const char* iName)
               "Return True if the given entity (as represented by a property "
               "header) strictly matches the interepretation of this typed "
               "property, as well as the data type" )
+
         ;
 }
 
@@ -160,8 +179,8 @@ void register_otypedscalarproperty( py::module_& module_handle )
     register_<Abc::OC4fProperty>( module_handle, "OC4fProperty" );
     register_<Abc::OC4cProperty>( module_handle, "OC4cProperty" );
 
-    register_<Abc::ON2fProperty>( module_handle, "ON3fProperty" );
-    register_<Abc::ON2dProperty>( module_handle, "ON3dProperty" );
+    register_<Abc::ON2fProperty>( module_handle, "ON2fProperty" );
+    register_<Abc::ON2dProperty>( module_handle, "ON2dProperty" );
 
     register_<Abc::ON3fProperty>( module_handle, "ON3fProperty" );
     register_<Abc::ON3dProperty>( module_handle, "ON3dProperty" );

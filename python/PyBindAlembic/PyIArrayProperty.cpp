@@ -62,7 +62,7 @@ case TPTraits::pod_enum:                                                  \
 #define CASE_RETURN_STRING_ARRAY_VALUE( TPTraits)             \
 case TPTraits::pod_enum:                                      \
 {                                                             \
-  std::vector< TPTraits::value_type > samp(extent);           \
+  std::vector< TPTraits::value_type > samp(dims.numPoints()); \
   p.getAs( &samp.front(), iSS);                               \
   return py::array(py::cast(samp));                           \
 }
@@ -124,8 +124,6 @@ static object getDimension( Abc::IArrayProperty& p,
 {
     AbcU::Dimensions oDim;
     p.getDimensions( oDim, iSS );
-
-    //return_by_value::apply<AbcU::Dimensions>::type converter;
 
     return py::object( py::cast( oDim, return_value_policy::automatic  ) );
 }
@@ -229,7 +227,7 @@ void register_iarrayproperty(py::module_& module_handle)
     class_< SampleList<Abc::IArrayProperty> >
         ( module_handle, "ArraySampleList" )
         .def( "__len__", &SampleList<Abc::IArrayProperty>::len )
-        .def( "__getitem__", &SampleList<Abc::IArrayProperty>::getItem )
+        .def( "__getitem__", &SampleList<Abc::IArrayProperty>::getItem, arg("index"), return_value_policy::reference_internal )
         .def( "__iter__", &SampleList<Abc::IArrayProperty>::getIterator,
             py::return_value_policy::take_ownership )
         ;

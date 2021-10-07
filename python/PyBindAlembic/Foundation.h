@@ -38,6 +38,7 @@
 
 #include <Python.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl_bind.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
@@ -57,18 +58,6 @@
 
 namespace py = pybind11;
 typedef unsigned char byte_t;
-
-
-// namespace py
-// {
-// template<class T>
-// inline T * get_pointer( Alembic::Util::shared_ptr<T> const & p )
-// {
-//         return p.get();
-// }
-//
-// } // namespace pybind
-// #endif
 
 #if PY_MAJOR_VERSION < 3
 #define ALEMBIC_PYTHON_BOOL_NAME "__nonzero__"

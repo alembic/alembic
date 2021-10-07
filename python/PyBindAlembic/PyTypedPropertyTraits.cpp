@@ -40,49 +40,25 @@
 using namespace py;
 
 //-*****************************************************************************
-template<class ArrayType>
-static ArrayType* createArray( size_t iSize )
-{
-    return new ArrayType( iSize );
-}
-
-template <>
-StringArray* createArray<StringArray>( size_t iSize )
-{
-    return StringArray::createDefaultArray( iSize );
-}
-
-template <>
-WstringArray* createArray<WstringArray>( size_t iSize )
-{
-    return WstringArray::createDefaultArray( iSize );
-}
-
-//-*****************************************************************************
 template<class TPTraits>
-object getArrayType()
+py::object getArrayType()
 {
-    typedef TypeBindingTraits<TPTraits>                 binding_traits;
-    typedef typename binding_traits::python_array_type  array_type;
+    typedef typename TPTraits::value_type val_type;
+    std::vector<val_type> type_data;
 
-    //typename manage_new_object::apply<array_type*>::type converter;
-
-    array_type* array = createArray<array_type>( 1 );
-
-    return py::object( py::cast( array, return_value_policy::take_ownership ) ).attr( "__class__" );
-
+    return py::object( py::cast( type_data, return_value_policy::take_ownership ).attr( "__class__" ));
 }
 
 //-*****************************************************************************
-#define REGISTER_TPTRAITS( module_handle, TPTraits )                                  \
-{                                                                                     \
-  object scope = class_<Abc::TPTraits> ( module_handle, #TPTraits ) .def( init<>() )  \
-    .def_static( "interpretation", &Abc::TPTraits::interpretation,                    \
-    "Return the interpretation string" )                                              \
-    .def_static( "dataType", &Abc::TPTraits::dataType,                                \
-    "Return the DataType of this property type" )                                     \
-    ;                                                                                 \
-scope.attr( "arrayType" ) = getArrayType<Abc::TPTraits>();                            \
+#define REGISTER_TPTRAITS( module_handle, TPTraits )                                      \
+{                                                                                         \
+    py::object scope = class_<Abc::TPTraits> ( module_handle, #TPTraits ) .def( init<>() )  \
+      .def_static( "interpretation", &Abc::TPTraits::interpretation,                        \
+      "Return the interpretation string" )                                                  \
+      .def_static( "dataType", &Abc::TPTraits::dataType,                                    \
+      "Return the DataType of this property type" )                                         \
+      ;                                                                                     \
+    scope.attr( "arrayType" ) = getArrayType<Abc::TPTraits>();                            \
 }
 
 //-*****************************************************************************

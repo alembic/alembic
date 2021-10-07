@@ -35,267 +35,248 @@
 //-*****************************************************************************
 
 #include <Foundation.h>
+//#include <TypedPropertyTraits.h>
 #include <PyTypedArraySampleConverter.h>
 #include <PyTypeBindingTraits.h>
+#include <pybind11/stl.h>
 
 using namespace py;
 
 //-*****************************************************************************
-template<class TPTraits>
-struct FixedArrayToTypedArraySample
+#define DECLARE_TYPETRAITS_VECTOR( TPTraits, TPTraitsVector ) \
+typedef std::vector<Abc::TPTraits::value_type> TPTraitsVector;  \
+PYBIND11_MAKE_OPAQUE(TPTraitsVector);
+
+// define Pybind11 std::vector for TPTraits
+DECLARE_TYPETRAITS_VECTOR(BooleanTPTraits, BoolVector);
+DECLARE_TYPETRAITS_VECTOR(Uint8TPTraits, UcharVector);
+DECLARE_TYPETRAITS_VECTOR(Int8TPTraits, CharVector);
+DECLARE_TYPETRAITS_VECTOR(Uint16TPTraits, UInt16Vector);
+DECLARE_TYPETRAITS_VECTOR(Int16TPTraits, Int16Vector);
+DECLARE_TYPETRAITS_VECTOR(Uint32TPTraits, UInt32Vector);
+DECLARE_TYPETRAITS_VECTOR(Int32TPTraits, Int32Vector);
+DECLARE_TYPETRAITS_VECTOR(Uint64TPTraits, UInt64Vector);
+DECLARE_TYPETRAITS_VECTOR(Int64TPTraits, Int64Vector);
+DECLARE_TYPETRAITS_VECTOR(Float16TPTraits, Float16Vector);
+DECLARE_TYPETRAITS_VECTOR(Float32TPTraits, Float32Vector);
+DECLARE_TYPETRAITS_VECTOR(Float64TPTraits, Float64Vector);
+// DECLARE_TYPETRAITS_VECTOR(StringTPTraits, StringVector);
+// DECLARE_TYPETRAITS_VECTOR(WstringTPTraits, WstringVector);
+
+DECLARE_TYPETRAITS_VECTOR(V2sTPTraits, V2sVector);
+DECLARE_TYPETRAITS_VECTOR(V2iTPTraits, V2iVector);
+DECLARE_TYPETRAITS_VECTOR(V2fTPTraits, V2fVector);
+DECLARE_TYPETRAITS_VECTOR(V2dTPTraits, V2dVector);
+// DECLARE_TYPETRAITS_VECTOR(P2sTPTraits, P2sVector);
+// DECLARE_TYPETRAITS_VECTOR(P2iTPTraits, P2iVector);
+// DECLARE_TYPETRAITS_VECTOR(P2fTPTraits, P2fVector);
+// DECLARE_TYPETRAITS_VECTOR(P2fTPTraits, P2dVector);
+// DECLARE_TYPETRAITS_VECTOR(N2fTPTraits, N2fVector);
+// DECLARE_TYPETRAITS_VECTOR(N2dTPTraits, N2dVector);
+
+DECLARE_TYPETRAITS_VECTOR(C3cTPTraits, C3cVector);
+DECLARE_TYPETRAITS_VECTOR(C3hTPTraits, C3hVector);
+DECLARE_TYPETRAITS_VECTOR(C3fTPTraits, C3fVector);
+DECLARE_TYPETRAITS_VECTOR(V3sTPTraits, V3sVector);
+DECLARE_TYPETRAITS_VECTOR(V3iTPTraits, V3iVector);
+// DECLARE_TYPETRAITS_VECTOR(V3fTPTraits, V3fVector);
+DECLARE_TYPETRAITS_VECTOR(V3dTPTraits, V3dVector);
+// DECLARE_TYPETRAITS_VECTOR(P3sTPTraits, P3sVector);
+// DECLARE_TYPETRAITS_VECTOR(P3sTPTraits, P3sVector);
+DECLARE_TYPETRAITS_VECTOR(P3fTPTraits, P3fVector);
+// DECLARE_TYPETRAITS_VECTOR(P3dTPTraits, P3dVector);
+// DECLARE_TYPETRAITS_VECTOR(N3fTPTraits, N3fVector);
+// DECLARE_TYPETRAITS_VECTOR(N3dTPTraits, N3dVector);
+
+DECLARE_TYPETRAITS_VECTOR(C4cTPTraits, C4cVector);
+DECLARE_TYPETRAITS_VECTOR(C4hTPTraits, C4hVector);
+DECLARE_TYPETRAITS_VECTOR(C4fTPTraits, C4fVector);
+
+DECLARE_TYPETRAITS_VECTOR(Box2iTPTraits, Box2iVector);
+DECLARE_TYPETRAITS_VECTOR(Box2sTPTraits, Box2sVector);
+DECLARE_TYPETRAITS_VECTOR(Box2fTPTraits, Box2fVector);
+DECLARE_TYPETRAITS_VECTOR(Box2dTPTraits, Box2dVector);
+DECLARE_TYPETRAITS_VECTOR(QuatfTPTraits, QuatfVector);
+DECLARE_TYPETRAITS_VECTOR(QuatdTPTraits, QuatdVector);
+
+DECLARE_TYPETRAITS_VECTOR(Box3iTPTraits, Box3iVector);
+DECLARE_TYPETRAITS_VECTOR(Box3sTPTraits, Box3sVector);
+DECLARE_TYPETRAITS_VECTOR(Box3fTPTraits, Box3fVector);
+DECLARE_TYPETRAITS_VECTOR(Box3dTPTraits, Box3dVector);
+
+DECLARE_TYPETRAITS_VECTOR(M33fTPTraits, M33fVector);
+DECLARE_TYPETRAITS_VECTOR(M33dTPTraits, M33dVector);
+
+DECLARE_TYPETRAITS_VECTOR(M44fTPTraits, M44fVector);
+DECLARE_TYPETRAITS_VECTOR(M44dTPTraits, M44dVector);
+
+template <class TPTraits>
+Abc::TypedArraySample<TPTraits> setVals(py::array& vals)
 {
-    typedef TypeBindingTraits<TPTraits>                 binding_traits;
-    typedef typename binding_traits::python_array_type  array_type;
-    typedef typename binding_traits::native_value_type  value_type;
-    typedef Abc::TypedArraySample<TPTraits>             samp_type;
-    typedef AbcU::shared_ptr<samp_type>                 samp_type_ptr;
+  typedef typename TPTraits::value_type value_type;
+  typedef typename std::vector<value_type> value_vector;
 
-    FixedArrayToTypedArraySample()
-    {
-        converter::registry::push_back( &convertible,
-                                        &construct,
-                                        type_id<samp_type>() );
-    }
+  std::vector<value_type> array_vals(vals.size());
+  std::memcpy(array_vals.data(), vals.data(), vals.size() * sizeof(value_type));
+  Abc::TypedArraySample<TPTraits> array_sample(array_vals);
+  return array_sample;
 
-    static void * convertible( PyObject* obj_ptr )
-    {
-        extract<array_type *> x( obj_ptr );
-
-        return x.check() ? obj_ptr : 0;
-    }
-
-    static void construct( PyObject* obj_ptr,
-                           converter::rvalue_from_python_stage1_data *data )
-    {
-
-        extract<array_type *> x( obj_ptr );
-
-        assert( x.check() );
-
-        array_type* fixedArray( x() );
-
-        void *storage = ( (converter::rvalue_from_python_storage<samp_type>*)
-                           data)->storage.bytes;
-
-        converterMemcopyable<TPTraits> converter;
-        converter( storage, *fixedArray, obj_ptr );
-
-        data->convertible = storage;
-    }
-};
-
-//-*****************************************************************************
-template<class TPTraits>
-struct FixedArrayToTypedArraySamplePtr
-{
-    typedef TypeBindingTraits<TPTraits>                 binding_traits;
-    typedef typename binding_traits::python_array_type  array_type;
-    typedef typename binding_traits::native_value_type  value_type;
-    typedef Abc::TypedArraySample<TPTraits>             samp_type;
-    typedef AbcU::shared_ptr<samp_type>                 samp_type_ptr;
-
-    FixedArrayToTypedArraySamplePtr()
-    {
-        converter::registry::push_back( &convertible,
-                                        &construct,
-                                        type_id<samp_type_ptr>() );
-    }
-
-    static void * convertible( PyObject* obj_ptr )
-    {
-        extract<array_type *> x( obj_ptr );
-
-        return x.check() ? obj_ptr : 0;
-    }
-
-    static void construct( PyObject* obj_ptr,
-                           converter::rvalue_from_python_stage1_data *data )
-    {
-        extract<array_type *> x( obj_ptr );
-
-        assert( x.check() );
-
-        array_type* fixedArray( x() );
-
-        void *storage = ( (converter::rvalue_from_python_storage<samp_type>*)
-                           data)->storage.bytes;
-
-        converterNonMemCopyable<TPTraits> converter;
-        converter( storage, *fixedArray, obj_ptr );
-
-        data->convertible = storage;
-    }
-};
-
-//-*****************************************************************************
-template<class TPTraits>
-struct TypedArraySampleToFixedArray
-{
-    typedef TypeBindingTraits<TPTraits>                 binding_traits;
-    typedef typename binding_traits::python_array_type  array_type;
-    typedef typename binding_traits::native_value_type  value_type;
-    typedef Abc::TypedArraySample<TPTraits>             samp_type;
-    typedef AbcU::shared_ptr<samp_type>                 samp_type_ptr;
-
-    // Conversion from ArraySample to FixedArray
-    static PyObject* convert( const samp_type &iSamp )
-    {
-        using namespace boost::mpl;
-        typename if_<bool_<binding_traits::memCopyable>,
-                     converterMemcopyable<TPTraits>,
-                     converterNonMemCopyable<TPTraits> >::type  converter;
-
-        return converter( iSamp );
-    }
-
-    // Conversion from ArraySamplePtr to FixedArray
-    static PyObject* convert( const samp_type_ptr &iSampPtr )
-    {
-        if ( !iSampPtr )
-        {
-            Py_RETURN_NONE;
-        }
-
-        using namespace boost::mpl;
-        typename if_<bool_<binding_traits::memCopyable>,
-                     converterMemcopyable<TPTraits>,
-                     converterNonMemCopyable<TPTraits> >::type  converter;
-
-        return converter( iSampPtr );
-    }
-};
-
-//-*****************************************************************************
-template<class TPTraits>
-struct StringArraySampleToFixedArray
-{
-     typedef TypeBindingTraits<TPTraits>                 binding_traits;
-     typedef typename binding_traits::python_array_type array_type;
-     typedef Abc::TypedArraySample<TPTraits>             samp_type;
-     typedef AbcU::shared_ptr<samp_type>                 samp_type_ptr;
-
-    static PyObject* convert( const samp_type &iSamp )
-    {
-        //typename manage_new_object::apply<array_type *>::type converter;
-
-        py::object obj( py::cast( array_type::createFromRawArray(
-                                                          iSamp.get(),
-                                                          iSamp.size() ),
-                                                          return_value_policy::automatic ) );
-
-
-        return obj.inc_ref().ptr();
-    }
-    static PyObject* convert( const samp_type_ptr &iSampPtr )
-    {
-        if ( !iSampPtr )
-        {
-            Py_RETURN_NONE;
-        }
-
-       return convert( *iSampPtr );
-    }
-};
-
-//-*****************************************************************************
-template<>
-struct TypedArraySampleToFixedArray<Abc::StringTPTraits> :
-    public StringArraySampleToFixedArray<Abc::StringTPTraits> {};
-
-template<>
-struct TypedArraySampleToFixedArray<Abc::WstringTPTraits> :
-    public StringArraySampleToFixedArray<Abc::WstringTPTraits> {};
-
-//-*****************************************************************************
-template<class TPTraits>
-static void register_()
-{
-    // Import case
-    // to-python converter
-    // ArraySample to FixedArray
-    to_python_converter<
-        Abc::TypedArraySample<TPTraits>,
-        TypedArraySampleToFixedArray<TPTraits> >();
-
-    // to-python converter
-    // ArraySamplePtr to FixedArray
-    to_python_converter<
-        AbcU::shared_ptr<Abc::TypedArraySample<TPTraits> >,
-        TypedArraySampleToFixedArray<TPTraits> >();
-
-    // Export case
-    // from-python converter
-    // FixedArray to ArraySample or ArraySamplePtr
-    using namespace boost::mpl;
-    typedef TypeBindingTraits<TPTraits> binding_traits;
-
-    typename if_<bool_<binding_traits::memCopyable>,
-                       FixedArrayToTypedArraySample<TPTraits>,
-                       FixedArrayToTypedArraySamplePtr<TPTraits> >::type from_pyton_converter;
 }
 
 //-*****************************************************************************
-void register_typedarraysampleconverters()
+#define REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR( module_handle, TPTraits, TPTraitsArraySample, TPTraitsVector )                                      \
+{                                                                                         \
+    typedef Abc::TPTraitsArraySample TypedArray;      \
+    typedef Abc::TPTraits::value_type value_type;      \
+    typedef typename std::vector<value_type> value_vector;\
+    struct TPTraitsArraySampleOverloads \
+    {\
+          static const value_type &getOpByIndex(TypedArray typeArray, size_t iIndex )  \
+          { \
+            return typeArray[iIndex];  \
+          } \
+          static Abc::TypedArraySample<Abc::TPTraits> getObject(py::array vals)\
+          {\
+            AbcU::Dimensions dims(vals.shape()[0]);  \
+            if( size_t(vals.shape()[0]) != size_t(vals.size()))  \
+            { \
+              std::vector<value_type> array_vals(vals.size()); \
+              std::memcpy(array_vals.data(), vals.data(), vals.size() * sizeof(value_type));\
+              Abc::TypedArraySample<Abc::TPTraits> array_sample(array_vals.data(), dims);\
+              return array_sample;\
+            } \
+            else  \
+            { \
+              std::vector<value_type> array_vals(vals.size()); \
+              std::memcpy(array_vals.data(), vals.data(), vals.size() * sizeof(value_type));\
+              std::vector<value_type> array_vals1 = vals.cast<std::vector<value_type>>(); \
+              Abc::TypedArraySample<Abc::TPTraits> array_sample(array_vals1);\
+              return array_sample;\
+            } \
+          }\
+    };\
+    class_<TypedArray, std::shared_ptr<TypedArray>> ( module_handle, #TPTraitsArraySample ) \
+    .def( init(&TPTraitsArraySampleOverloads::getObject), "Create Array Sample using the given value array" )  \
+    .def( init< const value_vector& >(), arg("valueVector"), keep_alive<1,2>(), "Create Array Sample using the given value array" )  \
+    .def( init< const value_vector&, const AbcU::Dimensions >(), arg("valueVector"), arg("dimensions"), "Create Array Sample using the given value array and dimensions" )  \
+    .def( init< const AbcA::ArraySample& >(), arg("arraySample"), "Create Array Sample by Copying the given Array Sample")  \
+    .def( init<>() ) \
+    .def( "getObject", TPTraitsArraySampleOverloads::getObject)  \
+    .def( "size", &TypedArray::size, "Return the size of the array sample" ) \
+    .def( "__getitem__", &TypedArray::operator[], arg( "index" ), return_value_policy::reference_internal )\
+    .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcA::ArraySample::valid );\
+    py::bind_vector<TPTraitsVector>(module_handle, #TPTraitsVector, py::module_local(true));\
+}
+
+//-*****************************************************************************
+#define REGISTER_TPTRAITS_ARRAY_SAMPLE( module_handle, TPTraits, TPTraitsArraySample )                                      \
+{                                                                                         \
+    typedef Abc::TPTraitsArraySample TypedArray;      \
+    typedef Abc::TPTraits::value_type value_type;      \
+    typedef typename std::vector<value_type> value_vector;\
+    struct TPTraitsArraySampleOverloads \
+    {\
+          static const value_type &getOpByIndex(TypedArray typeArray, size_t iIndex )  \
+          { \
+            return typeArray[iIndex];  \
+          } \
+          static Abc::TypedArraySample<Abc::TPTraits> getObject(py::array vals)\
+          {\
+            AbcU::Dimensions dims(vals.shape()[0]);  \
+            if( size_t(vals.shape()[0]) != size_t(vals.size()))  \
+            { \
+              std::vector<value_type> array_vals(vals.size()); \
+              std::memcpy(array_vals.data(), vals.data(), vals.size() * sizeof(value_type));\
+              Abc::TypedArraySample<Abc::TPTraits> array_sample(array_vals.data(), dims);\
+              return array_sample;\
+            } \
+            else  \
+            { \
+              std::vector<value_type> array_vals(vals.size()); \
+              std::memcpy(array_vals.data(), vals.data(), vals.size() * sizeof(value_type));\
+              std::vector<value_type> array_vals1 = vals.cast<std::vector<value_type>>(); \
+              Abc::TypedArraySample<Abc::TPTraits> array_sample(array_vals1);\
+              return array_sample;\
+            } \
+          }\
+    };\
+    class_<TypedArray,  std::shared_ptr<TypedArray>> ( module_handle, #TPTraitsArraySample ) \
+    .def( init(&TPTraitsArraySampleOverloads::getObject), "Create Array Sample using the given value array" )  \
+    .def( init< const value_vector& >(), arg("valueVector"), keep_alive<1,2>(), "Create Array Sample using the given value array" )  \
+    .def( init< const value_vector&, const AbcU::Dimensions >(), arg("valueVector"), arg("dimensions"), "Create Array Sample using the given value array and dimensions" )  \
+    .def( init< const AbcA::ArraySample& >(), arg("arraySample"), "Create Array Sample by Copying the given Array Sample")  \
+    .def( init<>() ) \
+    .def( "getObject", TPTraitsArraySampleOverloads::getObject)  \
+    .def( "size", &TypedArray::size, "Return the size of the array sample" ) \
+    .def( "__getitem__", &TypedArray::operator[], arg( "index" ), return_value_policy::reference_internal )\
+    .def( ALEMBIC_PYTHON_BOOL_NAME, &AbcA::ArraySample::valid );\
+}
+
+//-*****************************************************************************
+void register_typedarraysampleconverters(py::module_& module_handle)
 {
-    register_<Abc::BooleanTPTraits>();
-    register_<Abc::Uint8TPTraits>();
-    register_<Abc::Int8TPTraits>();
-    register_<Abc::Uint16TPTraits>();
-    register_<Abc::Int16TPTraits>();
-    register_<Abc::Uint32TPTraits>();
-    register_<Abc::Int32TPTraits>();
-    register_<Abc::Uint64TPTraits>();
-    register_<Abc::Int64TPTraits>();
-    register_<Abc::Float16TPTraits>();
-    register_<Abc::Float32TPTraits>();
-    register_<Abc::Float64TPTraits>();
-    register_<Abc::StringTPTraits>();
-    register_<Abc::WstringTPTraits>();
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, BooleanTPTraits, BoolArraySample, BoolVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Uint8TPTraits, UcharArraySample, UcharVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Int8TPTraits, CharArraySample, CharVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Uint16TPTraits, UInt16ArraySample, UInt16Vector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Int16TPTraits, Int16ArraySample, Int16Vector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Uint32TPTraits, UInt32ArraySample, UInt32Vector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Int32TPTraits, Int32ArraySample, Int32Vector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Uint64TPTraits, UInt64ArraySample, UInt64Vector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Int64TPTraits, Int64ArraySample, Int64Vector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Float16TPTraits, HalfArraySample, Float16Vector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Float32TPTraits, FloatArraySample, Float32Vector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, Float64TPTraits, DoubleArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, StringTPTraits, StringArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, WstringTPTraits, WstringArraySample);
 
-    register_<Abc::V2sTPTraits>();
-    register_<Abc::V2iTPTraits>();
-    register_<Abc::V2fTPTraits>();
-    register_<Abc::V2dTPTraits>();
-    register_<Abc::P2sTPTraits>();
-    register_<Abc::P2iTPTraits>();
-    register_<Abc::P2fTPTraits>();
-    register_<Abc::P2dTPTraits>();
-    register_<Abc::N2fTPTraits>();
-    register_<Abc::N2dTPTraits>();
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, V2sTPTraits, V2sArraySample, V2sVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, V2iTPTraits, V2iArraySample, V2iVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, V2fTPTraits, V2fArraySample, V2fVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, V2dTPTraits, V2dArraySample, V2dVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, P2sTPTraits, P2sArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, P2iTPTraits, P2iArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, P2fTPTraits, P2fArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, P2dTPTraits, P2dArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, N2fTPTraits, N2fArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, N2dTPTraits, N2dArraySample);
+    //
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, C3cTPTraits, C3cArraySample, C3cVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, C3hTPTraits, C3hArraySample, C3hVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, C3fTPTraits, C3fArraySample, C3fVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, V3sTPTraits, V3sArraySample, V3sVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, V3iTPTraits, V3iArraySample, V3iVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, V3fTPTraits, V3fArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, V3dTPTraits, V3dArraySample, V3dVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, P3sTPTraits, P3sArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, P3iTPTraits, P3iArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, P3fTPTraits, P3fArraySample, P3fVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, P3dTPTraits, P3dArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, N3fTPTraits, N3fArraySample);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE(module_handle, N3dTPTraits, N3dArraySample);
+    //
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, C4cTPTraits, C4cArraySample, C4cVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, C4hTPTraits, C4hArraySample, C4hVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, C4fTPTraits, C4fArraySample, C4fVector);
+    //
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Box2sTPTraits, Box2sArraySample, Box2sVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Box2iTPTraits, Box2iArraySample, Box2iVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Box2fTPTraits, Box2fArraySample, Box2fVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Box2dTPTraits, Box2dArraySample, Box2dVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, QuatfTPTraits, QuatfArraySample, QuatfVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, QuatdTPTraits, QuatdArraySample, QuatdVector);
+    //
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Box3sTPTraits, Box3sArraySample, Box3sVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Box3iTPTraits, Box3iArraySample, Box3iVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Box3fTPTraits, Box3fArraySample, Box3fVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, Box3dTPTraits, Box3dArraySample, Box3dVector);
+    //
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, M33fTPTraits, M33fArraySample, M33fVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, M33dTPTraits, M33dArraySample, M33dVector);
+    //
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, M44fTPTraits, M44fArraySample, M44fVector);
+    REGISTER_TPTRAITS_ARRAY_SAMPLE_VECTOR(module_handle, M44dTPTraits, M44dArraySample, M44dVector);
 
-    register_<Abc::C3cTPTraits>();
-    register_<Abc::C3hTPTraits>();
-    register_<Abc::C3fTPTraits>();
-    register_<Abc::V3sTPTraits>();
-    register_<Abc::V3iTPTraits>();
-    register_<Abc::V3fTPTraits>();
-    register_<Abc::V3dTPTraits>();
-    register_<Abc::P3sTPTraits>();
-    register_<Abc::P3iTPTraits>();
-    register_<Abc::P3fTPTraits>();
-    register_<Abc::P3dTPTraits>();
-    register_<Abc::N3fTPTraits>();
-    register_<Abc::N3dTPTraits>();
+    //typedef Alembic::Util::shared_ptr<Abc::FloatArraySample> FloatArraySamplePtr;
 
-    register_<Abc::C4cTPTraits>();
-    register_<Abc::C4hTPTraits>();
-    register_<Abc::C4fTPTraits>();
-
-    register_<Abc::Box2sTPTraits>();
-    register_<Abc::Box2iTPTraits>();
-    register_<Abc::Box2fTPTraits>();
-    register_<Abc::Box2dTPTraits>();
-    register_<Abc::QuatfTPTraits>();
-    register_<Abc::QuatdTPTraits>();
-
-    register_<Abc::Box3sTPTraits>();
-    register_<Abc::Box3iTPTraits>();
-    register_<Abc::Box3fTPTraits>();
-    register_<Abc::Box3dTPTraits>();
-
-    register_<Abc::M33fTPTraits>();
-    register_<Abc::M33dTPTraits>();
-
-    register_<Abc::M44fTPTraits>();
-    register_<Abc::M44dTPTraits>();
 }

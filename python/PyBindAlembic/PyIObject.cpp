@@ -41,46 +41,46 @@ using namespace py;
 //-*****************************************************************************
 class ChildIterator
 {
-public:
-    ChildIterator( Abc::IObject &p )
-        : _p( p ) , _iter( 0 ), _end( p.getNumChildren() ) {}
+    public:
+        ChildIterator( Abc::IObject &p )
+            : _p( p ) , _iter( 0 ), _end( p.getNumChildren() ) {}
 
-    Abc::IObject next()
-    {
-        if ( _iter >= _end )
-            py::stop_iteration();
+        Abc::IObject next()
+        {
+            if ( _iter == _end )
+                throw py::stop_iteration();
 
-        return _p.getChild( _iter++ );
-    }
-private:
-    Abc::IObject _p;
-    size_t _iter;
-    size_t _end;
+            return _p.getChild( _iter++ );
+        }
+    private:
+        Abc::IObject _p;
+        size_t _iter;
+        size_t _end;
 };
 
 //-*****************************************************************************
 class ChildList
 {
-public:
-    ChildList( Abc::IObject &p )
-        : _p( p ) {}
+    public:
+        ChildList( Abc::IObject &p )
+            : _p( p ) {}
 
-    Py_ssize_t len()
-    {
-        return (Py_ssize_t)_p.getNumChildren();
-    }
+        Py_ssize_t len()
+        {
+            return (Py_ssize_t)_p.getNumChildren();
+        }
 
-    Abc::IObject getItem( Py_ssize_t index )
-    {
-        return _p.getChild( ( AbcA::index_t )index );
-    }
+        Abc::IObject getItem( Py_ssize_t index )
+        {
+            return _p.getChild( ( AbcA::index_t )index );
+        }
 
-    ChildIterator* getIterator()
-    {
-        return new ChildIterator( _p );
-    }
-private:
-    Abc::IObject _p;
+        ChildIterator* getIterator()
+        {
+            return new ChildIterator( _p );
+        }
+    private:
+        Abc::IObject _p;
 };
 
 //-*****************************************************************************
@@ -289,13 +289,13 @@ void register_iobject(py::module_& module_handle)
     class_<ChildList>
         ( module_handle, "ChildList" )
         .def( "__len__", &ChildList::len )
-        .def( "__getitem__", &ChildList::getItem )
-        .def( "__iter__", &ChildList::getIterator,
-              py::return_value_policy::take_ownership )
+        .def( "__getitem__", &ChildList::getItem, py::keep_alive<0,1>() )
+        .def( "__iter__", &ChildList::getIterator, py::keep_alive<0,1>() )
         ;
 
     class_<ChildIterator>
         ( module_handle, "ChildIterator" )
+        .def("__iter__", [](ChildIterator &it) -> ChildIterator& { return it; })
         .def( ALEMBIC_PYTHON_NEXT_NAME, &ChildIterator::next )
         ;
 }

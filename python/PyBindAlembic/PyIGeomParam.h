@@ -46,7 +46,7 @@ static void register_(  py::module_& module_handle, const char* iName )
 
     // ITypedGeomParam
     //
-    class_<IGEOMPARAM>(
+    class_<IGEOMPARAM, std::shared_ptr<IGEOMPARAM>>(
           module_handle,
            iName,
            "This class is a typed geom param reader." )
@@ -69,7 +69,7 @@ static void register_(  py::module_& module_handle, const char* iName )
               arg( "iSampleSelector" ) = Abc::ISampleSelector() )
         .def( "getExpandedValue",
               &IGEOMPARAM::getExpandedValue,
-              arg( "iSampleSelector" ) = Abc::ISampleSelector() )
+              arg( "iSampleSelector" ) = Abc::ISampleSelector(), return_value_policy::automatic )
         .def( "getNumSamples",
               &IGEOMPARAM::getNumSamples )
         .def( "getDataType",
@@ -92,8 +92,7 @@ static void register_(  py::module_& module_handle, const char* iName )
               &IGEOMPARAM::getHeader,
               return_value_policy::reference_internal )
         .def( "getMetaData",
-              &IGEOMPARAM::getMetaData,
-              return_value_policy::reference_internal )
+              &IGEOMPARAM::getMetaData, keep_alive<0,1>() )
         .def( "isConstant",
               &IGEOMPARAM::isConstant )
         .def( "reset",
@@ -112,14 +111,13 @@ static void register_(  py::module_& module_handle, const char* iName )
     // IGEOMPARAM::Sample
     //
     std::string sampleName = std::string( iName ) + "Sample";
-    class_<typename IGEOMPARAM::Sample>( module_handle, sampleName.c_str() )
+    class_<typename IGEOMPARAM::Sample, std::shared_ptr<typename IGEOMPARAM::Sample>>( module_handle, sampleName.c_str() )
         .def( init<>() )
         .def( "getIndices",
               &IGEOMPARAM::Sample::getIndices,
               keep_alive<0,1>() )
         .def( "getVals",
-              &IGEOMPARAM::Sample::getVals,
-              keep_alive<0,1>() )
+              &IGEOMPARAM::Sample::getVals, return_value_policy::reference_internal )
         .def( "getScope",
               &IGEOMPARAM::Sample::getScope )
         .def( "isIndexed",

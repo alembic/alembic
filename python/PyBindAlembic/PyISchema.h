@@ -39,7 +39,7 @@
 using namespace py;
 
 template<class INFO>
-void register_ISchema( const char *iName )
+void register_ISchema( py::module_& module_handle, const char *iName )
 {
     typedef Abc::ISchema<INFO> ISchema;
 
@@ -96,15 +96,15 @@ void register_ISchema( const char *iName )
               "Often something like '.geom'." )
         .def_static( "matches",
               ISchemaOverloads::matchesMetaData,
-              ( arg( "metadata" ),
-                arg( "matchingSchema" ) = Abc::kStrictMatching ),
+              arg( "metadata" ),
+              arg( "matchingSchema" ) = Abc::kStrictMatching ,
               "This will check whether or not a given entity (as represented "
               "by a metadata) strictly matches the interpretation of this "
               "schema object." )
         .def_static( "matches",
               ISchemaOverloads::matchesHeader,
-              ( arg( "header" ),
-                arg( "matchingSchema" ) = Abc::kStrictMatching ),
+              arg( "header" ),
+              arg( "matchingSchema" ) = Abc::kStrictMatching ,
               "This will check whether or not a given entity (as represented "
               "by an object header) strictly matches the interpretation of this"
               "schema object, as well as the datatype." )

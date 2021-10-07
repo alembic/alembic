@@ -97,6 +97,7 @@ void register_ofaceset( py::module_& module_handle )
               keep_alive<1,2>() )
         .def( "getFaces",
               &AbcG::OFaceSetSchema::Sample::getFaces,
+              return_value_policy::copy,
               keep_alive<0,1>() )
         .def( "setFaces",
               &AbcG::OFaceSetSchema::Sample::setFaces,

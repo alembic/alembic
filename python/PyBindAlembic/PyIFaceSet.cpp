@@ -45,11 +45,11 @@ void register_ifaceset( py::module_& module_handle )
 {
     // IFaceSet
     //
-    register_ISchemaObject<AbcG::IFaceSet>( "IFaceSet" );
+    register_ISchemaObject<AbcG::IFaceSet>(  module_handle, "IFaceSet" );
 
     // IGeomBaseSchema base class
     //
-    register_IGeomBaseSchema<AbcG::FaceSetSchemaInfo>(
+    register_IGeomBaseSchema<AbcG::FaceSetSchemaInfo>(module_handle,
                                             "IGeomBaseSchema_FaceSet" );
 
     // IFaceSetSchema
@@ -63,13 +63,13 @@ void register_ifaceset( py::module_& module_handle )
         .def( init<Abc::ICompoundProperty,
                    const std::string&,
                    const Abc::Argument&,
-                   const Abc::Argument& >()
+                   const Abc::Argument& >(),
                    arg( "parent" ), arg( "name" ),
                    arg( "argument" ), arg( "argument" ),
                    "doc")
         .def( init<Abc::ICompoundProperty,
                    const Abc::Argument&,
-                   const Abc::Argument&>()
+                   const Abc::Argument&>(),
                    arg( "parent" ), arg( "argument" ), arg( "argument" ),
                    "doc")
         .def( "isConstant",
@@ -92,10 +92,13 @@ void register_ifaceset( py::module_& module_handle )
 
     // IFaceSetSchema::Sample
     //
-    class_<AbcG::IFaceSetSchema::Sample>( "IFaceSetSchemaSample", init<>() )
+    class_<AbcG::IFaceSetSchema::Sample>(
+        module_handle,
+        "IFaceSetSchemaSample" )
+        .def( init<>() )
         .def( "getFaces",
               &AbcG::IFaceSetSchema::Sample::getFaces,
-              with_custodian_and_ward_postcall<0,1>() )
+              py::keep_alive<0,1>() )
         .def( "getSelfBounds",
               &AbcG::IFaceSetSchema::Sample::getSelfBounds )
         .def( "valid", &AbcG::IFaceSetSchema::Sample::valid )

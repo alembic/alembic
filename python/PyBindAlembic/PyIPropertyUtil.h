@@ -62,50 +62,50 @@ getValue( PROP &p, const Abc::ISampleSelector &iSS,
 template<class PROP>
 class SampleIterator
 {
-public:
-    SampleIterator( PROP &p, const ReturnTypeEnum iReturnType )
-        : _p( p ), _iter( 0 ), _end( p.getNumSamples() ),
-          _returnType( iReturnType ) {}
+    public:
+        SampleIterator( PROP &p, const ReturnTypeEnum iReturnType )
+            : _p( p ), _iter( 0 ), _end( p.getNumSamples() ),
+              _returnType( iReturnType ) {}
 
-    py::object next()
-    {
-        if ( _iter >= _end )
-            py::stop_iteration();
+        py::object next()
+        {
+            if ( _iter >= _end )
+                py::stop_iteration();
 
-        return getValue<PROP>( _p, _iter++, _returnType );
-    }
-private:
-    PROP          _p;
-    AbcA::index_t _iter;
-    AbcA::index_t _end;
-    ReturnTypeEnum _returnType;
+            return getValue<PROP>( _p, _iter++, _returnType );
+        }
+    private:
+        PROP          _p;
+        AbcA::index_t _iter;
+        AbcA::index_t _end;
+        ReturnTypeEnum _returnType;
 };
 
 //-*****************************************************************************
 template<class PROP>
 class SampleList
 {
-public:
-    SampleList( PROP &p, const ReturnTypeEnum iReturnType )
-    : _p(p), _returnType( iReturnType ) {}
+    public:
+        SampleList( PROP &p, const ReturnTypeEnum iReturnType )
+        : _p(p), _returnType( iReturnType ) {}
 
-    Py_ssize_t len()
-    {
-        return (Py_ssize_t)_p.getNumSamples();
-    }
+        Py_ssize_t len()
+        {
+            return (Py_ssize_t)_p.getNumSamples();
+        }
 
-    py::object getItem( Py_ssize_t index )
-    {
-        return getValue<PROP>( _p, index, _returnType );
-    }
+        py::object getItem( Py_ssize_t index )
+        {
+            return getValue<PROP>( _p, index, _returnType );
+        }
 
-    SampleIterator<PROP>* getIterator()
-    {
-        return new SampleIterator<PROP>( _p, _returnType );
-    }
-private:
-    PROP           _p;
-    ReturnTypeEnum _returnType;
+        SampleIterator<PROP>* getIterator()
+        {
+            return new SampleIterator<PROP>( _p, _returnType );
+        }
+    private:
+        PROP           _p;
+        ReturnTypeEnum _returnType;
 };
 
 //-*****************************************************************************

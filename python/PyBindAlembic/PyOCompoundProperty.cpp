@@ -141,6 +141,12 @@ void register_ocompoundproperty(py::module_& module_handle)
         "Tthe OCompoundProperty class is a compound property writer" )
         .def( init<>(), "Create an empty OCompoundProperty" )
         .def( init<Abc::OCompoundProperty, const std::string&,
+                   const Abc::Argument&>(),
+                  arg( "parent"  ), arg( "name" ), arg( "argument" ),
+                  "Create a new OCompoundProperty with the given parent "
+                  "OObject, name and optional arguments which can be used to "
+                  "override the ErrorHandlerPolicy, to specify MetaData" )
+        .def( init<Abc::OCompoundProperty, const std::string&,
                    const Abc::Argument&,
                    const Abc::Argument&>(),
                   arg( "parent"  ), arg( "name" ), arg( "argument" ),

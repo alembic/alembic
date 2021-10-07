@@ -54,11 +54,12 @@ void register_utiltypes(py::module_& module_handle)
         }
 
         static void setItemScalar( AbcU::Dimensions &iDim,
-                                   PyObject *index, const size_t &data)
+                                   Py_ssize_t index, const size_t &data)
         {
-            PyImath::FixedArray<AbcU::uint64_t> fixedArray( iDim.rootPtr(),
-                                                            iDim.rank() );
-            fixedArray.setitem_scalar( index, data );
+            // PyImath::FixedArray<AbcU::uint64_t> fixedArray( iDim.rootPtr(),
+            //                                                 iDim.rank() );
+            // fixedArray.setitem_scalar( index, data );
+            iDim[index] = data;
         }
     };
 

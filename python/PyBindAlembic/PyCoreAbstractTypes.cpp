@@ -35,9 +35,10 @@
 //-*****************************************************************************
 
 #include <Foundation.h>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 using namespace py;
+typedef std::vector<AbcA::chrono_t> TimeVector;
+PYBIND11_MAKE_OPAQUE(TimeVector);
 
 //-*****************************************************************************
 void register_coreabstracttypes(py::module_& module_handle)
@@ -146,7 +147,7 @@ void register_coreabstracttypes(py::module_& module_handle)
               &Alembic::Abc::SetSourceName,
               "Set a source name, for later retrieval via getSourceName()" )
         .def( "getSourceName",
-              &Alembic::Abc::GetSourceName,
+              &Alembic::Abc::GetSourceName, return_value_policy::automatic,
               "Get the stored source name from the metadata, if any." )
         .def( "__str__", &AbcA::MetaData::serialize )
         ;
@@ -321,7 +322,7 @@ void register_coreabstracttypes(py::module_& module_handle)
                   arg( "timePerCycle" ), arg( "startTime" ),
                   "Create a uniform time sampling with the give time per cycle "
                   "and the given start time")
-        .def( init<AbcA::TimeSamplingType, std::vector<AbcA::chrono_t> >(),
+        .def( init<AbcA::TimeSamplingType, TimeVector >(),
                   arg( "timeSamplingType" ), arg( "sampleTimes" ),
                   "Create a time sampling with the given TimeSamplingType and "
                   "the time samples per cycle" )
@@ -357,12 +358,7 @@ void register_coreabstracttypes(py::module_& module_handle)
 
     // TimeSampling time vector
     //
-    class_<std::vector<AbcA::chrono_t> >(
-        module_handle,
-        "TimeVector",
-        "TimeVector class holds a list of the sampled times" )
-        .def( "__getitem__", [](std::vector<AbcA::chrono_t>& vec, size_t index){return &vec[index];} )
-        ;
+    py::bind_vector<TimeVector>(module_handle, "TimeVector", py::module_local(true));
 
     // TimeSamplingType Enum
     enum_<AbcA::TimeSamplingType::AcyclicFlag>( module_handle, "AcyclicFlag" )

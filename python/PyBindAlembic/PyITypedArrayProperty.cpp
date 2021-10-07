@@ -66,6 +66,11 @@ static void register_( py::module_& module_handle, const char* iName)
         "This class is a typed array property reader" )
         .def( init<>(), "Create an empty property" )
         .def( init<Abc::ICompoundProperty,
+                   const std::string& >(),
+                    arg( "parent" ), arg( "name" ),
+                    "Create a new typed property with the given parent "
+                    "OCompoundProperty and name" )
+        .def( init<Abc::ICompoundProperty,
                    const std::string&,
                    Abc::Argument,
                    Abc::Argument>(),
@@ -158,8 +163,8 @@ void register_itypedarrayproperty( py::module_& module_handle )
     register_<Abc::IC4fArrayProperty>( module_handle, "IC4fArrayProperty" );
     register_<Abc::IC4cArrayProperty>( module_handle, "IC4cArrayProperty" );
 
-    register_<Abc::IN2fArrayProperty>( module_handle, "IN3fArrayProperty" );
-    register_<Abc::IN2dArrayProperty>( module_handle, "IN3dArrayProperty" );
+    register_<Abc::IN2fArrayProperty>( module_handle, "IN2fArrayProperty" );
+    register_<Abc::IN2dArrayProperty>( module_handle, "IN2dArrayProperty" );
 
     register_<Abc::IN3fArrayProperty>( module_handle, "IN3fArrayProperty" );
     register_<Abc::IN3dArrayProperty>( module_handle, "IN3dArrayProperty" );

@@ -42,46 +42,46 @@ using namespace py;
 //-*****************************************************************************
 class PropertyHeaderIterator
 {
-public:
-    PropertyHeaderIterator( Abc::ICompoundProperty &p )
-        : _p( p ), _iter( 0 ), _end( p.getNumProperties() ) {}
+    public:
+        PropertyHeaderIterator( Abc::ICompoundProperty &p )
+            : _p( p ), _iter( 0 ), _end( p.getNumProperties() ) {}
 
-    const AbcA::PropertyHeader& next()
-    {
-        if ( _iter >= _end )
-            py::stop_iteration();
+        const AbcA::PropertyHeader& next()
+        {
+            if ( _iter == _end )
+                throw py::stop_iteration();
 
-        return _p.getPropertyHeader( _iter++ );
-    }
-private:
-    Abc::ICompoundProperty _p;
-    size_t _iter;
-    size_t _end;
+            return _p.getPropertyHeader( _iter++ );
+        }
+    private:
+        Abc::ICompoundProperty _p;
+        size_t _iter;
+        size_t _end;
 };
 
 //-*****************************************************************************
 class PropertyHeaderList
 {
-public:
-    PropertyHeaderList( Abc::ICompoundProperty &p )
-        : _p(p) {}
+    public:
+        PropertyHeaderList( Abc::ICompoundProperty &p )
+            : _p(p) {}
 
-    Py_ssize_t len()
-    {
-        return (Py_ssize_t)_p.getNumProperties();
-    }
+        Py_ssize_t len()
+        {
+            return (Py_ssize_t)_p.getNumProperties();
+        }
 
-    const AbcA::PropertyHeader& getItem( Py_ssize_t index )
-    {
-        return _p.getPropertyHeader( ( AbcA::index_t )index );
-    }
+        const AbcA::PropertyHeader& getItem( Py_ssize_t index )
+        {
+            return _p.getPropertyHeader( ( AbcA::index_t )index );
+        }
 
-    PropertyHeaderIterator* getIterator()
-    {
-        return new PropertyHeaderIterator( _p );
-    }
-private:
-    Abc::ICompoundProperty _p;
+        PropertyHeaderIterator* getIterator()
+        {
+            return new PropertyHeaderIterator( _p );
+        }
+    private:
+        Abc::ICompoundProperty _p;
 };
 
 //-*****************************************************************************
@@ -179,6 +179,10 @@ void register_icompoundproperty(py::module_& module_handle)
         "The ICompoundProperty class is a compound property reader" )
         .def( init<>(), "Create an empty ICompoundProperty" )
         .def( init<Abc::ICompoundProperty,
+                   const std::string& >(),
+                  arg( "parent" ), arg( "name" ),
+                  "Create an ICompoundProperty with the parent IObject and name ")
+        .def( init<Abc::ICompoundProperty,
                    const std::string&,
                    const Abc::Argument& >(),
                   arg( "parent" ), arg( "name" ), arg( "argument" ),
@@ -209,7 +213,8 @@ void register_icompoundproperty(py::module_& module_handle)
         .def( "getParent",
               &Abc::ICompoundProperty::getParent,
               "Return the parent ICompoundProperty" )
-        .def( "propertyheaders", &getPropertyHeaderList )
+        .def( "propertyheaders", &getPropertyHeaderList,
+              return_value_policy::reference )
         ;
 
     // List and Iterator for child properties

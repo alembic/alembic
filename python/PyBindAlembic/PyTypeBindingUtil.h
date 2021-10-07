@@ -37,7 +37,7 @@
 #ifndef PyAlembic_PyTypeBindingUtil_h
 #define PyAlembic_PyTypeBindingUtil_h
 
-#include <PyTypeBindingTraits.h>
+//#include <PyTypeBindingTraits.h>
 
 namespace {
 
@@ -46,13 +46,7 @@ using namespace py;
 //-*****************************************************************************
 inline object ConvertStrings( const std::vector<std::string>& iStrings )
 {
-    using PyImath::StringArray;
-
-    //manage_new_object::apply<StringArray *>::type converter;
-
-    return py::object( py::cast<StringArray *>( StringArray::createFromRawArray(
-                                    &iStrings.front(),
-                                    iStrings.size()  ), return_value_policy::automatic ) );
+    return py::object( py::cast( iStrings, return_value_policy::automatic ) );
 }
 
 } // namespace

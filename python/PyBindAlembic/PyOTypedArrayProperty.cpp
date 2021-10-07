@@ -77,6 +77,11 @@ static void register_(py::module_& module_handle, const char* iName)
                     "be use to override the ErrorHandlingPolicy, to specify "
                     "MetaData, and to specify time sampling or time sampling "
                     "index" )
+        .def( init<Abc::OCompoundProperty,
+                   const std::string& >(),
+                    arg ( "parent" ), arg( "name" ),
+                    "Create a new typed property with the given parent "
+                    "OCompoundProperty and name " )
         .def( "getInterpretation",
               &T::getInterpretation,
               "Return the interpretation string expected of this property" )
@@ -160,8 +165,8 @@ void register_otypedarrayproperty( py::module_& module_handle )
     register_<Abc::OC4fArrayProperty>( module_handle, "OC4fArrayProperty" );
     register_<Abc::OC4cArrayProperty>( module_handle, "OC4cArrayProperty" );
 
-    register_<Abc::ON2fArrayProperty>( module_handle, "ON3fArrayProperty" );
-    register_<Abc::ON2dArrayProperty>( module_handle, "ON3dArrayProperty" );
+    register_<Abc::ON2fArrayProperty>( module_handle, "ON2fArrayProperty" );
+    register_<Abc::ON2dArrayProperty>( module_handle, "ON2dArrayProperty" );
 
     register_<Abc::ON3fArrayProperty>( module_handle, "ON3fArrayProperty" );
     register_<Abc::ON3dArrayProperty>( module_handle, "ON3dArrayProperty" );

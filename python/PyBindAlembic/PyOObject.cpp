@@ -91,6 +91,14 @@ void register_oobject(py::module_& module_handle)
           "The OObject class is an object writer" )
           .def( init<Abc::OObject, const std::string&,
                 const Abc::Argument&,
+                const Abc::Argument& >(),
+              arg( "parent"), arg( "name" ), arg( "argument" ),
+              arg( "argument" ),
+              "Create a new OObject with the given parent OObject, name and "
+              "optional arguments which can be use to override the "
+              "ErrorHandlerPolicy, to specify MetaData" )
+          .def( init<Abc::OObject, const std::string&,
+                const Abc::Argument&,
                 const Abc::Argument&,
                 const Abc::Argument&>(),
               arg( "parent"), arg( "name" ), arg( "argument" ),

@@ -36,15 +36,15 @@
 
 #include <Foundation.h>
 
-void register_igeomparam_pod();
-void register_igeomparam_vertex_point();
-void register_igeomparam_box();
-void register_igeomparam_matrix_quad_color_normal();
+void register_igeomparam_pod(py::module_& module_handle);
+void register_igeomparam_vertex_point(py::module_& module_handle);
+void register_igeomparam_box(py::module_& module_handle);
+void register_igeomparam_matrix_quad_color_normal(py::module_& module_handle);
 
-void register_igeomparam()
+void register_igeomparam(py::module_& module_handle)
 {
-    register_igeomparam_pod();
-    register_igeomparam_vertex_point();
-    register_igeomparam_box();
-    register_igeomparam_matrix_quad_color_normal();
+    register_igeomparam_pod(module_handle);
+    register_igeomparam_vertex_point(module_handle);
+    register_igeomparam_box(module_handle);
+    register_igeomparam_matrix_quad_color_normal(module_handle);
 }

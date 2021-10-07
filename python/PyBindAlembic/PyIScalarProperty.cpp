@@ -42,24 +42,24 @@
 using namespace py;
 
 //-*****************************************************************************
-#define CASE_RETURN_POD_VALUE( TPTraits )                        \
-case TPTraits::pod_enum:                    \
-{                                                             \
-  std::vector< TPTraits::value_type > val(extent);                        \
-  p.get( &val.front(), iSS);                                  \
-  size_t width = size_t(1);                                   \
-  size_t height = size_t(extent) ;                            \
-  return getNumPyArray<TPTraits::value_type>(height, width, val.data());  \
-}                                                             \
+#define CASE_RETURN_POD_VALUE( TPTraits )                                   \
+case TPTraits::pod_enum:                                                    \
+{                                                                           \
+    std::vector< TPTraits::value_type > val(extent);                        \
+    p.get( &val.front(), iSS);                                              \
+    size_t width = size_t(1);                                               \
+    size_t height = size_t(extent) ;                                        \
+    return getNumPyArray<TPTraits::value_type>(height, width, val.data());  \
+}                                                                           \
 
 //-*****************************************************************************
-#define CASE_RETURN_POD_ARRAY_VALUE( TPTraits ) \
-case TPTraits::pod_enum:                    \
-{                                           \
-  std::vector< TPTraits::value_type > val(extent);      \
-  p.get( &val.front(), iSS);                \
-  return py::array(py::cast(val));          \
-}                                           \
+#define CASE_RETURN_POD_ARRAY_VALUE( TPTraits )       \
+case TPTraits::pod_enum:                              \
+{                                                     \
+    std::vector< TPTraits::value_type > val(extent);  \
+    p.get( &val.front(), iSS);                        \
+    return py::array(py::cast(val));                  \
+}                                                     \
 
 template<>
 object getValue<>( Abc::IScalarProperty &p,
@@ -231,7 +231,7 @@ void register_iscalarproperty( py::module_& module_handle )
     class_<SampleList<Abc::IScalarProperty> >
         ( module_handle, "ScalarSampleList")
         .def( "__len__", &SampleList<Abc::IScalarProperty>::len )
-        .def( "__getitem__", &SampleList<Abc::IScalarProperty>::getItem )
+        .def( "__getitem__", &SampleList<Abc::IScalarProperty>::getItem, arg("index"), return_value_policy::reference_internal )
         .def( "__iter__",
               &SampleList<Abc::IScalarProperty>::getIterator,
               py::return_value_policy::take_ownership )

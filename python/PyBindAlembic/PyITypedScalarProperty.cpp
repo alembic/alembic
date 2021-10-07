@@ -65,6 +65,11 @@ static void register_(py::module_& module_handle, const char* iName)
         "This class is a typed scalar property reader" )
         .def( init<>(), "Create an empty property" )
         .def( init<Abc::ICompoundProperty,
+                   const std::string& >(),
+                    arg( "parent" ), arg( "name" ),
+                    "Create a new typed property with the given parent "
+                    "OCompoundProperty and name" )
+        .def( init<Abc::ICompoundProperty,
                    const std::string&,
                    Abc::Argument,
                    Abc::Argument>(),
@@ -157,8 +162,8 @@ void register_itypedscalarproperty( py::module_& module_handle )
     register_<Abc::IC4fProperty>( module_handle, "IC4fProperty" );
     register_<Abc::IC4cProperty>( module_handle, "IC4cProperty" );
 
-    register_<Abc::IN2fProperty>( module_handle, "IN3fProperty" );
-    register_<Abc::IN2dProperty>( module_handle, "IN3dProperty" );
+    register_<Abc::IN2fProperty>( module_handle, "IN2fProperty" );
+    register_<Abc::IN2dProperty>( module_handle, "IN2dProperty" );
 
     register_<Abc::IN3fProperty>( module_handle, "IN3fProperty" );
     register_<Abc::IN3dProperty>( module_handle, "IN3dProperty" );

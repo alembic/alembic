@@ -72,6 +72,15 @@ void register_OSchemaObject( py::module_& module_handle, const char *iName )
           "doc" )
         .def( init<>() )
         .def ( init<Abc::OObject,
+                    const std::string&>() )
+        .def ( init<Abc::OObject,
+                    const std::string&,
+                        const Abc::Argument&>() )
+        .def ( init<Abc::OObject,
+                    const std::string&,
+                        const Abc::Argument&,
+                        const Abc::Argument&>() )
+        .def ( init<Abc::OObject,
                     const std::string&,
                         const Abc::Argument&,
                         const Abc::Argument&,
@@ -84,7 +93,7 @@ void register_OSchemaObject( py::module_& module_handle, const char *iName )
               "doc" )
         .def( "getSchema",
               OSchemaObjectOverloads<OSCHEMAOBJECT>::getSchema,
-              "doc",
+              "doc",keep_alive<0,1>(),
               return_value_policy::reference_internal )
         .def_static( "matches",
               OSchemaObjectOverloads<OSCHEMAOBJECT>::matchesMetaData,

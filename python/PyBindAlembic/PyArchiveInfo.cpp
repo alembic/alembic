@@ -134,7 +134,6 @@ void register_archiveinfo(py::module_& module_handle)
          arg( "IArchive" ),
          "Return tuple of start and end time for the IArchive using only the "
          "TimeSamplings" );
-
     module_handle.def( "GetLibraryVersionShort",
          AbcA::GetLibraryVersionShort,
          "Return the version number of Alembic Library and date built in a "

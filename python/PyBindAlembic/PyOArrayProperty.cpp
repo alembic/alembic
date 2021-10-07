@@ -41,8 +41,8 @@
 using namespace py;
 
 //-*****************************************************************************
-#define SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )                                                         \
-{                                                                                                               \
+#define SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )                                                     \
+{                                                                                                           \
     AbcU::Dimensions dims(iFixedArray.shape()[0]);                                                          \
     std::vector<TPTraits::value_type> prop_array(iFixedArray.size());                                       \
     std::memcpy(prop_array.data(), iFixedArray.data(), iFixedArray.size() * sizeof(TPTraits::value_type));  \
@@ -52,10 +52,20 @@ using namespace py;
 }
 
 //-*****************************************************************************
-#define CASE_SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )                                                    \
-case TPTraits::pod_enum:                                                                                        \
-{                                                                                                               \
-    SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )                                                                                                 \
+#define SET_STRING_ARRAY_VALUE( TPTraits, iProp, iFixedArray )                                                \
+case TPTraits::pod_enum:                                                                                      \
+{                                                                                                             \
+    std::vector<TPTraits::value_type> string_array = iFixedArray.cast<std::vector<TPTraits::value_type>>() ;  \
+    Abc::TypedArraySample<TPTraits> array_sample(string_array);                                               \
+    iProp.set( array_sample );                                                                                \
+    return;                                                                                                   \
+}
+
+//-*****************************************************************************
+#define CASE_SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )  \
+case TPTraits::pod_enum:                                      \
+{                                                             \
+    SET_ARRAY_VALUE( TPTraits, iProp, iFixedArray )           \
 }
 
 //-*****************************************************************************
@@ -65,7 +75,6 @@ static void setArrayValue( Abc::OArrayProperty &p, py::array& val )
     const AbcA::DataType &dt = p.getDataType();
     const AbcU::PlainOldDataType pod = dt.getPod();
     const uint8_t extent = dt.getExtent();
-    std::cout << "\n" << extent << "\n";
     if( pod < 0 || pod >= AbcU::kNumPlainOldDataTypes )
     {
         std::stringstream stream;
@@ -89,8 +98,8 @@ static void setArrayValue( Abc::OArrayProperty &p, py::array& val )
           CASE_SET_ARRAY_VALUE(Abc::Float16TPTraits, p, val  );
           CASE_SET_ARRAY_VALUE(Abc::Float32TPTraits, p, val  );
           CASE_SET_ARRAY_VALUE(Abc::Float64TPTraits, p, val  );
-          CASE_SET_ARRAY_VALUE(Abc::StringTPTraits, p, val  );
-          CASE_SET_ARRAY_VALUE(Abc::WstringTPTraits, p, val  );
+          SET_STRING_ARRAY_VALUE(Abc::StringTPTraits, p, val  );
+          SET_STRING_ARRAY_VALUE(Abc::WstringTPTraits, p, val  );
         default:
         break;
       }
@@ -270,6 +279,10 @@ void register_oarrayproperty( py::module_& module_handle)
         .def( "getNumSamples",
               &Abc::OArrayProperty::getNumSamples,
               "Return the number of samples contained in this property" )
+        .def( "set",
+              &Abc::OArrayProperty::set,
+              arg( "iSample" ),
+              "Set a sample with the given array" )
         .def( "setValue",
               &setArrayValue,
               arg( "array" ),

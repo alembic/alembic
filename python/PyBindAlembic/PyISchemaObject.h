@@ -72,9 +72,16 @@ void register_ISchemaObject( py::module_& module_handle, const char *iName )
           "doc" )
         .def( init<>() )
         .def ( init<Abc::IObject,
+                    const std::string& > () )
+        .def ( init<Abc::IObject,
+                    const std::string&,
+                        const Abc::Argument& > () )
+        .def ( init<Abc::IObject,
                     const std::string&,
                         const Abc::Argument&,
                         const Abc::Argument& > () )
+        .def ( init<Abc::IObject,
+                    const Abc::WrapExistingFlag> () )
         .def ( init<Abc::IObject,
                     const Abc::WrapExistingFlag,
                         const Abc::Argument&,
@@ -88,7 +95,7 @@ void register_ISchemaObject( py::module_& module_handle, const char *iName )
         .def( "getSchema",
               ISchemaObjectOverloads<ISCHEMAOBJECT>::getSchema,
               "doc",
-              return_value_policy::reference_internal )
+              return_value_policy::automatic, keep_alive<0, 1>() )
         .def_static( "matches",
               ISchemaObjectOverloads<ISCHEMAOBJECT>::matchesMetaData,
                 arg( "metaData" ),

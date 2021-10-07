@@ -76,12 +76,12 @@ SET(CPP_FILES
     PyCoreAbstractTypes.cpp
 
     #uses custom converters from boost with no equivalent from pybind11
-    #PyTypedArraySampleConverter.cpp
+    PyTypedArraySampleConverter.cpp
 
-    #PyUtilTypes.cpp
+    PyUtilTypes.cpp
     PyAbcTypes.cpp
-    #PyAbcCoreLayer.cpp
-    #PyArchiveInfo.cpp
+    PyAbcCoreLayer.cpp
+    PyArchiveInfo.cpp
     PyOArchive.cpp
     PyOObject.cpp
     PyICompoundProperty.cpp
@@ -89,16 +89,53 @@ SET(CPP_FILES
     PyOCompoundProperty.cpp
     PyOScalarProperty.cpp
     PyIScalarProperty.cpp
-    #PyITypedScalarProperty.cpp
-    #PyITypedArrayProperty.cpp
-    #PyOTypedScalarProperty.cpp
-    #PyOTypedArrayProperty.cpp
-    #PyTypedPropertyTraits.cpp
-    #PyAbcGeomTypes.cpp
-    #PyVisibility.cpp
-    #PyArchiveBounds.cpp
-    #PyOFaceSet.cpp
+    PyITypedScalarProperty.cpp
+    PyITypedArrayProperty.cpp
+    PyOTypedScalarProperty.cpp
+    PyOTypedArrayProperty.cpp
+    PyTypedPropertyTraits.cpp
+    PyAbcGeomTypes.cpp
+    PyVisibility.cpp
+    PyArchiveBounds.cpp
+    PyOFaceSet.cpp
+    PyIFaceSet.cpp
     PyIGeomBase.cpp
+    PyIGeomParam.cpp
+    PyIGeomParamPOD.cpp
+    PyIGeomParamVertexPoint.cpp
+    PyIGeomParamBox.cpp
+    PyIGeomParamMatrixQuadColorNormal.cpp
+    PyOGeomParam.cpp
+    PyOGeomParamPOD.cpp
+    PyOGeomParamVertexPoint.cpp
+    PyOGeomParamBox.cpp
+    PyOGeomParamMatrixQuadColorNormal.cpp
+    PyOPolyMesh.cpp
+    PyIPolyMesh.cpp
+    PyOXform.cpp
+    PyIXform.cpp
+    PyXformOp.cpp
+    PyFilmBackXformOp.cpp
+    PyXformSample.cpp
+    PyIPoints.cpp
+    PyOPoints.cpp
+    PyICurves.cpp
+    PyOCurves.cpp
+    PyISubD.cpp
+    PyOSubD.cpp
+    PyINuPatch.cpp
+    PyONuPatch.cpp
+    PyICamera.cpp
+    PyOCamera.cpp
+    PyCameraSample.cpp
+    PyILight.cpp
+    PyOLight.cpp
+    PyICollections.cpp
+    PyOCollections.cpp
+    PyIMaterial.cpp
+    PyOMaterial.cpp
+    PyMaterialFlatten.cpp
+    PyMaterialAssignment.cpp
 
     main.cpp
 )
