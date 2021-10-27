@@ -300,12 +300,12 @@ ENDIF()
 
 #-******************************************************************************
 
-SET(_config_msg "\n   * Alembic Configuration          ===")
+SET(_config_msg "\n   * Alembic Configuration              ===")
 MACRO(info_cfg_option
     _setting)
     SET(_msg "   * ${_setting}")
     STRING(LENGTH "${_msg}" _len)
-    WHILE("36" GREATER "${_len}")
+    WHILE("40" GREATER "${_len}")
         SET(_msg "${_msg} ")
         MATH(EXPR _len "${_len} + 1")
     ENDWHILE()
