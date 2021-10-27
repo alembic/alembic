@@ -127,11 +127,11 @@ IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 ENDIF()
 
 # Set some debug vs opt flags
-    add_definitions(-Wall -Werror -Wextra -Wno-unused-parameter -Wno-deprecated)
 if (ALEMBIC_DEBUG_WARNINGS_AS_ERRORS AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT MSVC)
+    add_compile_options(-Wall -Werror -Wextra -Wno-unused-parameter -Wno-deprecated)
     if((CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0) OR
         CMAKE_CXX_COMPILER_ID MATCHES "CLANG")
-        add_definitions( -Wno-error=implicit-fallthrough)
+        add_compile_options( -Wno-error=implicit-fallthrough)
     endif()
 endif()
 
