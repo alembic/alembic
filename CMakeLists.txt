@@ -65,6 +65,7 @@ OPTION(USE_TESTS "Include Alembic tests" ON)
 OPTION(ALEMBIC_BUILD_LIBS "Build library, if off use external alembic libs" ON)
 OPTION(ALEMBIC_ILMBASE_LINK_STATIC "IlmBase is a static library" OFF)
 OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
+OPTION(ALEMBIC_DEBUG_WARNINGS_AS_ERRORS "In debug mode build with warnings as errors" ON)
 SET(PYALEMBIC_PYTHON_MAJOR 3 CACHE STRING "Which major version of python to look for when building PyAlembic")
 
 option(DOCS_PATH
@@ -126,8 +127,8 @@ IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 ENDIF()
 
 # Set some debug vs opt flags
-if ("${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT MSVC)
     add_definitions(-Wall -Werror -Wextra -Wno-unused-parameter -Wno-deprecated)
+if (ALEMBIC_DEBUG_WARNINGS_AS_ERRORS AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT MSVC)
     if((CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0) OR
         CMAKE_CXX_COMPILER_ID MATCHES "CLANG")
         add_definitions( -Wno-error=implicit-fallthrough)
