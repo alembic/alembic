@@ -62,12 +62,37 @@ int ffsll(long long i)
 #endif
 
 #ifdef _MSC_VER
+
+#ifdef _WIN64
 Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
 {
     unsigned long index = 0;
     _BitScanForward64(&index, iValue);
     return index;
 }
+#else
+Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
+{
+    unsigned long index = 0;
+
+    // check the bottom 4 bytes
+    _BitScanForward(&index, iValue & 0xffffffff);
+    if ( index > 0 )
+    {
+        return index;
+    }
+
+    // now the top 4
+    _BitScanForward(&index, iValue >> 32);
+    if ( index > 0 )
+    {
+        // + 32 because this is the top 4 bytes, bottom 4 is 0
+        return index + 32;
+    }
+
+    return index;
+}
+#endif
 #endif
 
 StreamManager::StreamManager( std::size_t iNumStreams )
