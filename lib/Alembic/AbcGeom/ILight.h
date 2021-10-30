@@ -68,7 +68,7 @@ public:
     //! This constructor creates a new light reader.
     //! The first argument is the parent ICompoundProperty, from which the
     //! error handler policy for is derived.  The second argument is the name
-    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! of the ICompoundProperty that contains this schemas properties.  The
     //! remaining optional arguments can be used to override the
     //! ErrorHandlerPolicy and to specify schema interpretation matching.
     ILightSchema( const ICompoundProperty &iParent,
@@ -90,13 +90,6 @@ public:
       : Abc::ISchema<LightSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
-    }
-
-    //! Copy constructor.
-    ILightSchema(const ILightSchema& iCopy)
-        : Abc::ISchema<LightSchemaInfo>()
-    {
-        *this = iCopy;
     }
 
     //! Access to the camera schema.

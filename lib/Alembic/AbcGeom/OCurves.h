@@ -311,13 +311,7 @@ public:
         init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2, iArg3 ) );
     }
 
-    OCurvesSchema( const OCurvesSchema& iCopy )
-        : OGeomBaseSchema<CurvesSchemaInfo>()
-    {
-        *this = iCopy;
-    }
-
-    //! Default assignment operator used.
+    //! Default assignment and copy operator used.
 
     //-*************************************************************************
     // SCHEMA STUFF

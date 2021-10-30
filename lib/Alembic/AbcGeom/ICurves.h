@@ -175,13 +175,7 @@ public:
         init( iArg0, iArg1 );
     }
 
-    //! Default assignment operator used.
-
-    ICurvesSchema( const ICurvesSchema &iCopy )
-      : IGeomBaseSchema<CurvesSchemaInfo>()
-    {
-        *this = iCopy;
-    }
+    //! Default assignment and copy operator used.
 
     size_t getNumSamples() const
     { return m_positionsProperty.getNumSamples(); }

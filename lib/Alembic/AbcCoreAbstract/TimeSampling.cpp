@@ -115,14 +115,6 @@ TimeSampling::TimeSampling()
 }
 
 //-*****************************************************************************
-TimeSampling::TimeSampling( const TimeSampling & copy)
-  : m_timeSamplingType( copy.m_timeSamplingType )
-  , m_sampleTimes( copy.m_sampleTimes )
-{
-    // nothing else
-}
-
-//-*****************************************************************************
 chrono_t TimeSampling::getSampleTime( index_t iIndex ) const
 {
     if ( m_timeSamplingType.isUniform() )

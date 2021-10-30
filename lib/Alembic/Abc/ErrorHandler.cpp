@@ -64,20 +64,20 @@ void ErrorHandler::operator()( ErrorHandler::UnknownExceptionFlag kFlag,
 //-*****************************************************************************
 void ErrorHandler::handleIt( const std::string &iMsg )
 {
-    switch ( m_policy )
+    if ( m_policy == kNoisyNoopPolicy )
     {
-    case kNoisyNoopPolicy:
         std::cerr << iMsg << std::endl;
-        // Intentionally passing through to next
-    case kQuietNoopPolicy:
         m_errorLog.append( iMsg );
         m_errorLog.append( "\n" );
-        return;
-
-    default:
-    case kThrowPolicy:
+    }
+    else if ( m_policy == kQuietNoopPolicy )
+    {
+        m_errorLog.append( iMsg );
+        m_errorLog.append( "\n" );
+    }
+    else
+    {
         ABCA_THROW( iMsg );
-        return;
     }
 }
 

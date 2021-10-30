@@ -45,7 +45,7 @@ namespace Alembic {
 namespace AbcCollection {
 namespace ALEMBIC_VERSION_NS {
 
-class ALEMBIC_EXPORT ICollectionsSchema 
+class ALEMBIC_EXPORT ICollectionsSchema
     : public Abc::ISchema<CollectionsSchemaInfo>
 {
 public:
@@ -58,7 +58,7 @@ public:
     //! This constructor creates a new collections reader.
     //! The first argument is the parent ICompoundProperty, from which the
     //! error handler policy for is derived.  The second argument is the name
-    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! of the ICompoundProperty that contains this schemas properties.  The
     //! remaining optional arguments can be used to override the
     //! ErrorHandlerPolicy and to specify schema interpretation matching.
     ICollectionsSchema( const ICompoundProperty &iParent,
@@ -69,7 +69,7 @@ public:
     {
         init( iArg0, iArg1 );
     }
-    
+
     //! This constructor wraps an existing ICompoundProperty as the collection
     //! reader, and the error handler policy is derived from it.
     //! The  remaining optional arguments can be used to override the
@@ -80,13 +80,6 @@ public:
       : Abc::ISchema<CollectionsSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
-    }
-
-    //! Copy constructor.
-    ICollectionsSchema( const ICollectionsSchema& iCopy )
-        : Abc::ISchema<CollectionsSchemaInfo>()
-    {
-        *this = iCopy;
     }
 
     //! Returns the number of collections that we have
