@@ -74,16 +74,17 @@ Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
 Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
 {
     unsigned long index = 0;
+    Alembic::Util::uint64_t value(iValue);
 
     // check the bottom 4 bytes
-    _BitScanForward(&index, iValue & 0xffffffff);
+    _BitScanForward(&index, value & 0xffffffff);
     if ( index > 0 )
     {
         return index;
     }
 
     // now the top 4
-    _BitScanForward(&index, iValue >> 32);
+    _BitScanForward(&index, value >> 32);
     if ( index > 0 )
     {
         // + 32 because this is the top 4 bytes, bottom 4 is 0
