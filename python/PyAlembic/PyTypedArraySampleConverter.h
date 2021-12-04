@@ -75,8 +75,8 @@ struct converterMemcopyable
 
         // Memory layout is transparent between the arraysample type
         // and the fixedarray type, we just do a memcopy.
-        memcpy( &( *fixedArray )[0],
-                iSamp.get(),
+        memcpy( (void *) (&( *fixedArray )[0]),
+                (void *) (iSamp.get()),
                 iSamp.size() * sizeof( value_type ) );
 
         return incref(obj.ptr());
