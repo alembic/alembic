@@ -44,7 +44,7 @@ using namespace boost::python;
 template<class TPTraits>
 static bool setSmallArrayValue( Abc::OScalarProperty &p, PyObject *val )
 {
-    typedef Abc::TypedArraySample<TPTraits> samp_type;      
+    typedef Abc::TypedArraySample<TPTraits> samp_type;
     typedef AbcU::shared_ptr<samp_type>     samp_ptr_type;
 
     if ( TypeBindingTraits<TPTraits>::memCopyable )
@@ -71,7 +71,7 @@ static bool setSmallArrayValue( Abc::OScalarProperty &p, PyObject *val )
         {
             p.set( samp.getData() );
         }
-    }                                                        
+    }
     else
     {
         extract<samp_ptr_type> x( object( handle<>( borrowed( val ) ) ) );
@@ -121,13 +121,15 @@ static bool setPODValue( Abc::OScalarProperty &p, PyObject* val )
 #define CASE_SET_POD_VALUE( TPTraits, POD, VAL ) \
 case TPTraits::pod_enum:                         \
     if ( setPODValue<TPTraits>( POD, VAL ) )     \
-        return;
+        return;                                  \
+break;
 
 //-*****************************************************************************
 #define CASE_SET_ARRAY_VALUE( TPTraits, POD, VAL )  \
 case TPTraits::pod_enum:                            \
     if ( setSmallArrayValue<TPTraits>( POD, VAL ) ) \
-        return;
+        return;                                     \
+break;
 
 //-*****************************************************************************
 static void setScalarValue( Abc::OScalarProperty &p, PyObject *val )
@@ -203,6 +205,7 @@ static void setScalarValue( Abc::OScalarProperty &p, PyObject *val )
                     return;
                 }
             }
+            break;
             default:
             break;
         }
@@ -234,12 +237,13 @@ static void setScalarValue( Abc::OScalarProperty &p, PyObject *val )
                     return;
                 }
             }
+            break;
             case AbcU::kFloat64POD:
             {
                 std::string interp (p.getMetaData().get ("interpretation"));
                 if (!interp.compare (Abc::QuatdTPTraits::interpretation()))
                 {
-                    setPODValue<Abc::QuatdTPTraits>( p, val ); 
+                    setPODValue<Abc::QuatdTPTraits>( p, val );
                     return;
                 }
                 else if (!interp.compare (Abc::Box2dTPTraits::interpretation()))
