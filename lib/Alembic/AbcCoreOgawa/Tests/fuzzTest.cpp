@@ -640,6 +640,54 @@ void testFuzzer33685(bool iUseMMap)
     }
 }
 
+void testFuzzerTaoTaoGu3513(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_Taotao_Gu_3513.abc");
+
+    ABCA::MetaData md = ar->getMetaData();
+    try
+    {
+        md.serialize();
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "TokenMap::get: Token-Value pair  contains separator characters: ; or = for";
+        std::string what = e.what();
+        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+    }
+
+    walkJustObj(ar->getTop());
+    try
+    {
+        walkObj(ar->getTop());
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid data in CprImpl(Object)";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+}
+
+void testFuzzerTaoTaoGu3699(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_Taotao_Gu_3699.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid Time Sampling Type, time per cycle:";
+        std::string what = e.what();
+        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+        return;
+    }
+
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -723,5 +771,10 @@ int main ( int argc, char *argv[] )
     testFuzzer33685(true);
     testFuzzer33685(false);
 
+    testFuzzerTaoTaoGu3513(true);
+    testFuzzerTaoTaoGu3513(false);
+
+    testFuzzerTaoTaoGu3699(true);
+    testFuzzerTaoTaoGu3699(false);
     return 0;
 }
