@@ -158,8 +158,8 @@ void register_itypedscalarproperty()
     register_<Abc::IC4fProperty>( "IC4fProperty" );
     register_<Abc::IC4cProperty>( "IC4cProperty" );
 
-    register_<Abc::IN2fProperty>( "IN3fProperty" );
-    register_<Abc::IN2dProperty>( "IN3dProperty" );
+    register_<Abc::IN2fProperty>( "IN2fProperty" );
+    register_<Abc::IN2dProperty>( "IN2dProperty" );
 
     register_<Abc::IN3fProperty>( "IN3fProperty" );
     register_<Abc::IN3dProperty>( "IN3dProperty" );
