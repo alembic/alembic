@@ -640,6 +640,38 @@ void testFuzzer33685(bool iUseMMap)
     }
 }
 
+void testFuzzer49213(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue49213.abc");
+    }
+    catch(const std::exception& e)
+    {
+
+        std::string msg = "Read invalid: Property header start.";
+        TESTING_ASSERT(msg == e.what());
+    }
+}
+
+void testFuzzer52703(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue52703.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid Time Sampling Type, time per cycle: ";
+        std::string what = e.what();
+        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+    }
+
+}
+
 void testFuzzerTaoTaoGu3513(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
@@ -770,6 +802,12 @@ int main ( int argc, char *argv[] )
 
     testFuzzer33685(true);
     testFuzzer33685(false);
+
+    testFuzzer49213(true);
+    testFuzzer49213(false);
+
+    testFuzzer52703(true);
+    testFuzzer52703(false);
 
     testFuzzerTaoTaoGu3513(true);
     testFuzzerTaoTaoGu3513(false);
