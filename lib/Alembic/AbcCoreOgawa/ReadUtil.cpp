@@ -1558,7 +1558,7 @@ ReadObjectHeaders( Ogawa::IGroupPtr iGroup,
         Util::uint32_t nameSize = DerefUnaligned<Util::uint32_t>(&buf[pos]);
         pos += 4;
 
-        if (pos + nameSize + 1 > bufSize)
+        if (nameSize == 0 || pos + nameSize + 1 > bufSize)
         {
             ABCA_THROW("Read invalid: Object Headers name and MetaData index.");
         }
@@ -1801,8 +1801,7 @@ ReadPropertyHeaders( Ogawa::IGroupPtr iGroup,
         }
 
         Util::uint32_t nameSize = GetUint32WithHint( buf, bufSize, sizeHint, pos );
-
-        if (pos + nameSize > bufSize)
+        if ( nameSize == 0 || pos + nameSize > bufSize )
         {
             ABCA_THROW("Read invalid: Property Headers name.");
         }
@@ -1859,6 +1858,13 @@ ReadIndexedMetaData( Ogawa::IDataPtr iData,
 {
     // add the default empty meta data
     oMetaDataVec.push_back( AbcA::MetaData() );
+
+    // we only index small meta data, under 256 bytes each
+    // and we only allow 256 indices
+    if ( iData->getSize() > 65536 )
+    {
+        ABCA_THROW("Read invalid: Indexed MetaData buffer unexpectedly big.");
+    }
 
     std::vector< char > buf( iData->getSize() );
 

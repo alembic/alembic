@@ -291,7 +291,7 @@ void testIssue272(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Object Headers MetaData index.";
+        std::string msg = "Read invalid: Object Headers name and MetaData index.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -433,7 +433,7 @@ void testFuzzer25166(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -451,7 +451,7 @@ void testFuzzer25175(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -468,7 +468,7 @@ void testFuzzer25185(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -490,7 +490,7 @@ void testFuzzer25192(bool iUseMMap)
         // we got the second error message, for now guard
         // against it as well
         std::string msg = e.what();
-        TESTING_ASSERT(msg == "Ogawa IStreams::read failed." ||
+        TESTING_ASSERT(msg == "Read invalid: Object Headers name and MetaData index." ||
             msg == "Ogawa IData illegal size.");
         return;
     }
@@ -525,7 +525,7 @@ void testFuzzer25236(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -542,7 +542,7 @@ void testFuzzer25351(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -587,25 +587,13 @@ void testFuzzer25695(bool iUseMMap)
 void testFuzzer26125(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
-    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue26125.abc");
-
     try
     {
-        walkJustObj(ar->getTop());
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue26125.abc");
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Invalid object data group";
-        TESTING_ASSERT(msg == e.what());
-    }
-
-    try
-    {
-        walkObj(ar->getTop());
-    }
-    catch(const std::exception& e)
-    {
-        std::string msg = "Invalid object data group";
+        std::string msg = "Read invalid: Object Headers name and MetaData index.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -616,18 +604,78 @@ void testFuzzer26125(bool iUseMMap)
 void testFuzzer33685(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
-    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue33685.abc");
 
     try
     {
-        walkJustObj(ar->getTop());
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue33685.abc");
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Invalid object data group";
+        std::string msg = "Read invalid: Object Headers name and MetaData index.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
 
+    TESTING_ASSERT(0);
+}
+
+// This one ended up getting flagged for using too much memory
+// which is where we noticed that empty property and object names
+// were getting through AND a way too large Indexed meta data buffer
+void testFuzzer49213(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue49213.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Read invalid: Indexed MetaData buffer unexpectedly big.";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+
+    TESTING_ASSERT(0);
+}
+
+void testFuzzer52703(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue52703.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid Time Sampling Type, time per cycle: ";
+        std::string what = e.what();
+        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+        return;
+    }
+
+    TESTING_ASSERT(0);
+}
+
+void testFuzzerTaoTaoGu3513(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_Taotao_Gu_3513.abc");
+
+    ABCA::MetaData md = ar->getMetaData();
+    try
+    {
+        md.serialize();
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "TokenMap::get: Token-Value pair  contains separator characters: ; or = for";
+        std::string what = e.what();
+        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+    }
+
+    walkJustObj(ar->getTop());
     try
     {
         walkObj(ar->getTop());
@@ -638,6 +686,27 @@ void testFuzzer33685(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
+
+    TESTING_ASSERT(0);
+}
+
+void testFuzzerTaoTaoGu3699(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_Taotao_Gu_3699.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Invalid Time Sampling Type, time per cycle:";
+        std::string what = e.what();
+        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+        return;
+    }
+
+    TESTING_ASSERT(0);
 }
 
 int main ( int argc, char *argv[] )
@@ -723,5 +792,16 @@ int main ( int argc, char *argv[] )
     testFuzzer33685(true);
     testFuzzer33685(false);
 
+    testFuzzer49213(true);
+    testFuzzer49213(false);
+
+    testFuzzer52703(true);
+    testFuzzer52703(false);
+
+    testFuzzerTaoTaoGu3513(true);
+    testFuzzerTaoTaoGu3513(false);
+
+    testFuzzerTaoTaoGu3699(true);
+    testFuzzerTaoTaoGu3699(false);
     return 0;
 }
