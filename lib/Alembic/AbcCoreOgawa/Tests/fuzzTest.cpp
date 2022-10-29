@@ -291,7 +291,7 @@ void testIssue272(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Object Headers MetaData index.";
+        std::string msg = "Read invalid: Object Headers name and MetaData index.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -433,7 +433,7 @@ void testFuzzer25166(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -451,7 +451,7 @@ void testFuzzer25175(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -468,7 +468,7 @@ void testFuzzer25185(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -490,7 +490,7 @@ void testFuzzer25192(bool iUseMMap)
         // we got the second error message, for now guard
         // against it as well
         std::string msg = e.what();
-        TESTING_ASSERT(msg == "Ogawa IStreams::read failed." ||
+        TESTING_ASSERT(msg == "Read invalid: Object Headers name and MetaData index." ||
             msg == "Ogawa IData illegal size.");
         return;
     }
@@ -525,7 +525,7 @@ void testFuzzer25236(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -542,7 +542,7 @@ void testFuzzer25351(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Read invalid: Property Header MetaData index.";
+        std::string msg = "Read invalid: Property Headers name.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -587,25 +587,13 @@ void testFuzzer25695(bool iUseMMap)
 void testFuzzer26125(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
-    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue26125.abc");
-
     try
     {
-        walkJustObj(ar->getTop());
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue26125.abc");
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Invalid object data group";
-        TESTING_ASSERT(msg == e.what());
-    }
-
-    try
-    {
-        walkObj(ar->getTop());
-    }
-    catch(const std::exception& e)
-    {
-        std::string msg = "Invalid object data group";
+        std::string msg = "Read invalid: Object Headers name and MetaData index.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
@@ -616,30 +604,24 @@ void testFuzzer26125(bool iUseMMap)
 void testFuzzer33685(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
-    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue33685.abc");
 
     try
     {
-        walkJustObj(ar->getTop());
+        ABCA::ArchiveReaderPtr ar = r("fuzzer_issue33685.abc");
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Invalid object data group";
-        TESTING_ASSERT(msg == e.what());
-    }
-
-    try
-    {
-        walkObj(ar->getTop());
-    }
-    catch(const std::exception& e)
-    {
-        std::string msg = "Invalid data in CprImpl(Object)";
+        std::string msg = "Read invalid: Object Headers name and MetaData index.";
         TESTING_ASSERT(msg == e.what());
         return;
     }
+
+    TESTING_ASSERT(0);
 }
 
+// This one ended up getting flagged for using too much memory
+// which is where we noticed that empty property and object names
+// were getting through AND a way too large Indexed meta data buffer
 void testFuzzer49213(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
@@ -650,10 +632,12 @@ void testFuzzer49213(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-
-        std::string msg = "Read invalid: Property header start.";
+        std::string msg = "Read invalid: Indexed MetaData buffer unexpectedly big.";
         TESTING_ASSERT(msg == e.what());
+        return;
     }
+
+    TESTING_ASSERT(0);
 }
 
 void testFuzzer52703(bool iUseMMap)
@@ -668,8 +652,10 @@ void testFuzzer52703(bool iUseMMap)
         std::string msg = "Invalid Time Sampling Type, time per cycle: ";
         std::string what = e.what();
         TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+        return;
     }
 
+    TESTING_ASSERT(0);
 }
 
 void testFuzzerTaoTaoGu3513(bool iUseMMap)
@@ -700,6 +686,8 @@ void testFuzzerTaoTaoGu3513(bool iUseMMap)
         TESTING_ASSERT(msg == e.what());
         return;
     }
+
+    TESTING_ASSERT(0);
 }
 
 void testFuzzerTaoTaoGu3699(bool iUseMMap)
@@ -718,6 +706,7 @@ void testFuzzerTaoTaoGu3699(bool iUseMMap)
         return;
     }
 
+    TESTING_ASSERT(0);
 }
 
 int main ( int argc, char *argv[] )
