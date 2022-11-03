@@ -160,8 +160,8 @@ void register_itypedarrayproperty()
     register_<Abc::IC4fArrayProperty>( "IC4fArrayProperty" );
     register_<Abc::IC4cArrayProperty>( "IC4cArrayProperty" );
 
-    register_<Abc::IN2fArrayProperty>( "IN3fArrayProperty" );
-    register_<Abc::IN2dArrayProperty>( "IN3dArrayProperty" );
+    register_<Abc::IN2fArrayProperty>( "IN2fArrayProperty" );
+    register_<Abc::IN2dArrayProperty>( "IN2dArrayProperty" );
 
     register_<Abc::IN3fArrayProperty>( "IN3fArrayProperty" );
     register_<Abc::IN3dArrayProperty>( "IN3dArrayProperty" );

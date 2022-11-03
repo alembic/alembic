@@ -161,8 +161,8 @@ void register_otypedscalarproperty()
     register_<Abc::OC4fProperty>( "OC4fProperty" );
     register_<Abc::OC4cProperty>( "OC4cProperty" );
 
-    register_<Abc::ON2fProperty>( "ON3fProperty" );
-    register_<Abc::ON2dProperty>( "ON3dProperty" );
+    register_<Abc::ON2fProperty>( "ON2fProperty" );
+    register_<Abc::ON2dProperty>( "ON2dProperty" );
 
     register_<Abc::ON3fProperty>( "ON3fProperty" );
     register_<Abc::ON3dProperty>( "ON3dProperty" );

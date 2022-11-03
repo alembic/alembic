@@ -161,8 +161,8 @@ void register_otypedarrayproperty()
     register_<Abc::OC4fArrayProperty>( "OC4fArrayProperty" );
     register_<Abc::OC4cArrayProperty>( "OC4cArrayProperty" );
 
-    register_<Abc::ON2fArrayProperty>( "ON3fArrayProperty" );
-    register_<Abc::ON2dArrayProperty>( "ON3dArrayProperty" );
+    register_<Abc::ON2fArrayProperty>( "ON2fArrayProperty" );
+    register_<Abc::ON2dArrayProperty>( "ON2dArrayProperty" );
 
     register_<Abc::ON3fArrayProperty>( "ON3fArrayProperty" );
     register_<Abc::ON3dArrayProperty>( "ON3dArrayProperty" );
