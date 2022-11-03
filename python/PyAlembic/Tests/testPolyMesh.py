@@ -65,6 +65,10 @@ class PolymeshTest(unittest.TestCase):
         mesh.set( mesh_samp )
         mesh.set( mesh_samp )
 
+        userProp = mesh.getUserProperties()
+        n2f = ON2fProperty(userProp, 'n2f')
+        n2f.setValue(V2f(1.0, 2.0))
+
     def testMeshImport(self):
         """read an iarchive with a mesh in it"""
 
@@ -109,6 +113,10 @@ class PolymeshTest(unittest.TestCase):
         positions = meshSamp.getPositions()
         for i in range( len( positions ) ):
             self.assertEqual(positions[i], verts[i])
+
+        userProp = mesh.getUserProperties()
+        n2f = IN2fProperty(userProp, 'n2f')
+        self.assertEqual(n2f.getValue(0), V2f(1.0, 2.0))
 
     def testMeshLayerExport(self):
         """write a boring oarchive with a mesh and an oarchive with just uvs"""
