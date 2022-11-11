@@ -34,7 +34,7 @@
 ##-*****************************************************************************
 
 # Recurse into libs
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/lib")
 
 # No boost dependency was needed so dont include AbcClients
 IF (USE_PYALEMBIC)

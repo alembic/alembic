@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 SET(CXX_FILES
     ObjectTests.cpp

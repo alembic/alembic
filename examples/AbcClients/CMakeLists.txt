@@ -34,6 +34,6 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/examples")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/examples")
 
 ADD_SUBDIRECTORY(WFObjConvert)

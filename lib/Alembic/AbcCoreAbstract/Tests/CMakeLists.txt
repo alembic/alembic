@@ -33,7 +33,7 @@
 ##
 ##-*****************************************************************************
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 ADD_EXECUTABLE(AbcCoreAbstractTimeSamplingTest TestTimeSampling.cpp)
 TARGET_LINK_LIBRARIES(AbcCoreAbstractTimeSamplingTest Alembic)
