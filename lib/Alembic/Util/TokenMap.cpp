@@ -89,6 +89,16 @@ void TokenMap::setUnique( const std::string &config,
         std::size_t curPair = config.find(pairSep, lastPair);
         std::size_t curAssign = config.find(assignSep, lastPair);
 
+        if (curAssign > curPair)
+        {
+            if ( !quiet )
+            {
+                ALEMBIC_THROW( "TokenMap::setUnique: malformed string found:"
+                    << assignSep << " before: " << pairSep);
+            }
+            return;
+        }
+
         if (curAssign != std::string::npos)
         {
             std::size_t endPos = std::string::npos;
