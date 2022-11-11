@@ -658,6 +658,17 @@ void testFuzzer52703(bool iUseMMap)
     TESTING_ASSERT(0);
 }
 
+void testFuzzer52939(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue52939.abc");
+    ABCA::MetaData md = ar->getMetaData();
+    ABCA::MetaData::token_map_type::const_iterator it = md.begin();
+    // bad metadata ends up getting ignored
+    TESTING_ASSERT(md.size() == 0);
+}
+
 void testFuzzerTaoTaoGu3513(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
@@ -797,6 +808,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzer52703(true);
     testFuzzer52703(false);
+
+    testFuzzer52939(true);
+    testFuzzer52939(false);
 
     testFuzzerTaoTaoGu3513(true);
     testFuzzerTaoTaoGu3513(false);
