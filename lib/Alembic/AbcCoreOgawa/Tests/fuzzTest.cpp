@@ -669,6 +669,14 @@ void testFuzzer52939(bool iUseMMap)
     TESTING_ASSERT(md.size() == 0);
 }
 
+void testFuzzere53205(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue53205.abc");
+    TESTING_ASSERT(ar->getNumTimeSamplings() == 0);
+}
+
 void testFuzzerTaoTaoGu3513(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
@@ -811,6 +819,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzer52939(true);
     testFuzzer52939(false);
+
+    testFuzzere53205(true);
+    testFuzzere53205(false);
 
     testFuzzerTaoTaoGu3513(true);
     testFuzzerTaoTaoGu3513(false);

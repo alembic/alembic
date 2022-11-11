@@ -1477,7 +1477,7 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
     while ( pos < bufSize )
     {
         // make sure maxSample, tpc, and numSamples
-        // don't go beyond our butter
+        // don't go beyond our buffer
         if ( pos + 8 + sizeof( chrono_t ) > bufSize)
         {
             ABCA_THROW("Read invalid: TimeSamples info.");
