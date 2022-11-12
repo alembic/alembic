@@ -24,7 +24,8 @@ Indexed MetaData on the write side only allows 254 (plus the default empty one)
 small (up to 256 bytes), we now throw if we encounter malformed MetaData.
 We were also allowing empty property and object names through on the read side
 even though the writer forbids this.
-Finally integrate a couple of tests flagged by Taotao Gu's local fuzzer.(PR391)
+Finally integrate a couple of tests flagged by Taotao Gu's local fuzzer.
+(PR391 and PR397)
 
 Fuzzer issue 52939 showed that with certain malformed MetaData the pair
 separator should NOT occur before the assign separator. (PR396)
