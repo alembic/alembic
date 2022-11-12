@@ -1,3 +1,38 @@
+2022-11-11, Alembic 1.8.4
+
+Thanks to your feedback pull requests and submitted issues we
+have a few bug fixes and build enhancements.
+
+CMake:
+
+Add ALEMBIC_DEBUG_WARNINGS_AS_ERRORS to control the build in debug mode.
+It is set to ON by default to preserve the current behavior.
+Use add_compile_options instead of the older add_definitions. (PR371)
+
+Fix the include dirs for AbcCoreHDF5 tests. (PR382)
+
+Fix issue hinted at in Issue 223: use PROJECT_SOURCE_DIR instead of
+CMAKE_SOURCE_DIR when embedding Alembic within another CMake project. (PR393)
+
+AbcCoreOgawa:
+
+On Windows _BitScanForward64 is only available when _WIN64 is defined.
+When it is not, fall back on using _BitScanForward. (PR 373)
+
+Fuzzer issue 49213 turned up some new malformed MetaData memory problems.
+Indexed MetaData on the write side only allows 254 (plus the default empty one)
+small (up to 256 bytes), we now throw if we encounter malformed MetaData.
+We were also allowing empty property and object names through on the read side
+even though the writer forbids this.
+Finally integrate a couple of tests flagged by Taotao Gu's local fuzzer.(PR391)
+
+Fuzzer issue 52939 showed that with certain malformed MetaData the pair
+separator should NOT occur before the assign separator. (PR396)
+
+PyAlembic:
+
+N2f and N2d properties were not being correctly bound.(PR390)
+
 2021-09-11, Alembic 1.8.3
 
 Thanks to your feedback and submitted issues we have a few bug fixes.
