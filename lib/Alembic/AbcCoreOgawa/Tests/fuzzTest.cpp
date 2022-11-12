@@ -649,9 +649,8 @@ void testFuzzer52703(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Invalid Time Sampling Type, time per cycle: ";
-        std::string what = e.what();
-        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+        std::string msg = "Read invalid: TimeSamples sample times.";
+        TESTING_ASSERT(msg == e.what());
         return;
     }
 
@@ -719,9 +718,8 @@ void testFuzzerTaoTaoGu3699(bool iUseMMap)
     }
     catch(const std::exception& e)
     {
-        std::string msg = "Invalid Time Sampling Type, time per cycle:";
-        std::string what = e.what();
-        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+        std::string msg = "Read invalid: TimeSamples sample times.";
+        TESTING_ASSERT(msg == e.what());
         return;
     }
 

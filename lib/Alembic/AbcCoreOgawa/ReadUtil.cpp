@@ -1494,8 +1494,9 @@ ReadTimeSamplesAndMax( Ogawa::IDataPtr iData,
         Util::uint32_t numSamples = DerefUnaligned<Util::uint32_t>(&buf[pos]);
         pos += 4;
 
-        // make sure our numSamples don't go beyond the buffer
-        if ( pos + sizeof( chrono_t ) * numSamples > bufSize)
+        // make sure our numSamples don't go beyond the buffer and that we
+        // have at least 1 of them
+        if ( numSamples < 1 || pos + sizeof( chrono_t ) * numSamples > bufSize)
         {
             ABCA_THROW("Read invalid: TimeSamples sample times.");
         }
