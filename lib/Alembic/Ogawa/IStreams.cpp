@@ -445,7 +445,7 @@ private:
     {
         // Use both FILE_SHARE_READ and FILE_SHARE_WRITE as the share mode.
         // Without FILE_SHARE_WRITE, this will fail when trying to open a file that is already open for writing.
-        return CreateFile(iFileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        return CreateFileA(iFileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     }
 
     static void closeFile(FileHandle iFile)
