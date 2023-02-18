@@ -148,15 +148,13 @@ Alembic::Abc::IArchive IFactory::getArchive(
     if ( archives.size() == 1 )
     {
         oType = coreType;
-        return Alembic::Abc::IArchive( archives[0],
-            Alembic::Abc::kWrapExisting, m_policy );
+        return Alembic::Abc::IArchive( archives[0], m_policy );
     }
     else if ( ! archives.empty() )
     {
         Alembic::AbcCoreAbstract::ArchiveReaderPtr arPtr = layer( archives );
         oType = kLayer;
-        return Alembic::Abc::IArchive( arPtr, Alembic::Abc::kWrapExisting,
-                                       m_policy );
+        return Alembic::Abc::IArchive( arPtr, m_policy );
     }
 
     // no valid archives pushed, so invalid
