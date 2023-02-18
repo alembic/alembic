@@ -41,7 +41,7 @@ def setArray( iTPTraits, *iList ):
     array = iTPTraits.arrayType( len( iList ) )
     for i in range( len( iList ) ):
         array[i] = iList[i]
-    return array  
+    return array
 
 verts = setArray(
     V3fTPTraits,
@@ -52,7 +52,8 @@ verts = setArray(
     V3f( 1.0,  1.0, -1.0 ),
     V3f(-1.0, -1.0,  1.0 ),
     V3f( 1.0, -1.0,  1.0 ),
-    V3f(-1.0,  1.0,  1.0 )
+    V3f(-1.0,  1.0,  1.0 ),
+    V3f( 1.0,  1.0,  1.0 ),
 )
 
 velos = setArray(
