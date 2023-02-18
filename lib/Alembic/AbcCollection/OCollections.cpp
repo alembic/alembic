@@ -122,8 +122,7 @@ OCollectionsSchema::getCollection( const std::string & iName )
     if ( header != NULL && Abc::OStringArrayProperty::matches( *header ) )
     {
         Abc::OStringArrayProperty prop(
-            this->getProperty( iName ).getPtr()->asArrayPtr(),
-                Abc::kWrapExisting );
+            this->getProperty( iName ).getPtr()->asArrayPtr() );
 
         return prop;
     }

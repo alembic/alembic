@@ -51,7 +51,7 @@ void accumXform( M44d &xf, IObject obj, chrono_t seconds )
 {
     if ( IXform::matches( obj.getHeader() ) )
     {
-        IXform x( obj, kWrapExisting );
+        IXform x( obj );
         XformSample xs;
         ISampleSelector sel( seconds );
         x.getSchema().get( xs, sel );
@@ -87,31 +87,31 @@ Box3d getBounds( IObject iObj, chrono_t seconds )
 
     if ( ICurves::matches( iObj.getMetaData() ) )
     {
-        ICurves curves( iObj, kWrapExisting );
+        ICurves curves( iObj );
         ICurvesSchema cs = curves.getSchema();
         boxProp = cs.getSelfBoundsProperty();
     }
     else if ( INuPatch::matches( iObj.getMetaData() ) )
     {
-        INuPatch patch( iObj, kWrapExisting );
+        INuPatch patch( iObj );
         INuPatchSchema ps = patch.getSchema();
         boxProp = ps.getSelfBoundsProperty();
     }
     else if ( IPolyMesh::matches( iObj.getMetaData() ) )
     {
-        IPolyMesh mesh( iObj, kWrapExisting );
+        IPolyMesh mesh( iObj );
         IPolyMeshSchema ms = mesh.getSchema();
         boxProp = ms.getSelfBoundsProperty();
     }
     else if ( IPoints::matches( iObj.getMetaData() ) )
     {
-        IPoints pts( iObj, kWrapExisting );
+        IPoints pts( iObj );
         IPointsSchema ps = pts.getSchema();
         boxProp = ps.getSelfBoundsProperty();
     }
     else if ( ISubD::matches( iObj.getMetaData() ) )
     {
-        ISubD mesh( iObj, kWrapExisting );
+        ISubD mesh( iObj );
         ISubDSchema ms = mesh.getSchema();
         boxProp = ms.getSelfBoundsProperty();
     }

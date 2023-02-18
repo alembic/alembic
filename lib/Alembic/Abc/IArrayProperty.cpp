@@ -191,7 +191,6 @@ ICompoundProperty IArrayProperty::getParent() const
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "IArrayProperty::getParent()" );
 
     return ICompoundProperty( m_property->getParent(),
-                              kWrapExisting,
                               getErrorHandlerPolicy() );
 
     ALEMBIC_ABC_SAFE_CALL_END();

@@ -195,7 +195,7 @@ protected:
 //! just wish to iterate through an archive's hierarchy to examine bounding
 //! regions this class could be helpful to you. Then when you actually
 //! need to access the real data in the geometric type you can
-//! always create the needed type of I<geom type> object> via kWrapExisting.
+//! always create the needed type of I<geom type> object>.
 class IGeomBase : public IGeomBaseSchema<GeomBaseSchemaInfo>
 {
 public:
