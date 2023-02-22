@@ -676,6 +676,24 @@ void testFuzzere53205(bool iUseMMap)
     TESTING_ASSERT(ar->getNumTimeSamplings() == 0);
 }
 
+void testFuzzere53406(bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    ABCA::ArchiveReaderPtr ar = r("fuzzer_issue53406.abc");
+    ABCA::MetaData md = ar->getMetaData();
+    try
+    {
+        md.serialize();
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "TokenMap::get: Token-Value pair  contains separator characters: ; or = for";
+        std::string what = e.what();
+        TESTING_ASSERT(what.substr(0, msg.size()) == msg);
+    }
+}
+
 void testFuzzerTaoTaoGu3513(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
@@ -820,6 +838,9 @@ int main ( int argc, char *argv[] )
 
     testFuzzere53205(true);
     testFuzzere53205(false);
+
+    testFuzzere53406(true);
+    testFuzzere53406(false);
 
     testFuzzerTaoTaoGu3513(true);
     testFuzzerTaoTaoGu3513(false);
