@@ -138,7 +138,7 @@ OObject OArchive::getTop()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OArchive::getTop()" );
 
-    return OObject( m_archive->getTop(), kWrapExisting );
+    return OObject( m_archive->getTop() );
 
     ALEMBIC_ABC_SAFE_CALL_END();
 

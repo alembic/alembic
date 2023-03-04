@@ -113,7 +113,6 @@ IArchive IObject::getArchive() const
     if ( m_object )
     {
         return IArchive( m_object->getArchive(),
-                         kWrapExisting,
                          getErrorHandlerPolicy() );
     }
 
@@ -240,7 +239,6 @@ IObject IObject::getParent() const
         }
 
         IObject obj( parentPtr,
-                     kWrapExisting,
                      getErrorHandlerPolicy() );
 
         if ( setFullName )
@@ -253,7 +251,6 @@ IObject IObject::getParent() const
     else if ( m_object )
     {
         return IObject( m_object->getParent(),
-                        kWrapExisting,
                         getErrorHandlerPolicy() );
     }
 
@@ -325,7 +322,6 @@ IObject IObject::getChild( size_t iChildIndex ) const
     if ( m_object )
     {
         IObject obj( m_object->getChild( iChildIndex ),
-                     kWrapExisting,
                      getErrorHandlerPolicy() );
 
         if ( !m_instancedFullName.empty() )
@@ -352,7 +348,6 @@ IObject IObject::getChild( const std::string &iChildName ) const
     if ( m_object )
     {
         IObject obj( m_object->getChild( iChildName ),
-                     kWrapExisting,
                      getErrorHandlerPolicy() );
 
         if ( !m_instancedFullName.empty() )
@@ -388,7 +383,7 @@ ICompoundProperty IObject::getProperties() const
 
     if ( m_object )
     {
-        return ICompoundProperty( m_object->getProperties(), kWrapExisting );
+        return ICompoundProperty( m_object->getProperties() );
     }
 
     ALEMBIC_ABC_SAFE_CALL_END();

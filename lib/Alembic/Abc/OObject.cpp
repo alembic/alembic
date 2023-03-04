@@ -98,7 +98,6 @@ OArchive OObject::getArchive()
     if ( m_object )
     {
         return OArchive( m_object->getArchive(),
-                         kWrapExisting,
                          getErrorHandlerPolicy() );
     }
 
@@ -116,7 +115,6 @@ OObject OObject::getParent()
     if ( m_object )
     {
         return OObject( m_object->getParent(),
-                        kWrapExisting,
                         getErrorHandlerPolicy() );
     }
 
@@ -183,7 +181,6 @@ OObject OObject::getChild( size_t iIdx )
     {
         AbcA::ObjectWriterPtr child = m_object->getChild( iIdx );
         return OObject( child,
-                        kWrapExisting,
                         getErrorHandlerPolicy() );
     }
 
@@ -201,7 +198,6 @@ OObject OObject::getChild( const std::string &iName )
     if ( m_object )
     {
         return OObject( m_object->getChild( iName ),
-                        kWrapExisting,
                         getErrorHandlerPolicy() );
     }
 
