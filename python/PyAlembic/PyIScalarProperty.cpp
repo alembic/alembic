@@ -86,12 +86,14 @@ static object getSmallArrayValue( Abc::IScalarProperty &p,
 //-*****************************************************************************
 #define CASE_RETURN_POD_VALUE( TPTraits, PROP, SELECTOR ) \
 case TPTraits::pod_enum:                                  \
-    return getPODValue<TPTraits>( PROP, SELECTOR );
+    return getPODValue<TPTraits>( PROP, SELECTOR );       \
+break;
 
 //-*****************************************************************************
 #define CASE_RETURN_ARRAY_VALUE( TPTraits, PROP, SELECTOR, EXTENT ) \
 case TPTraits::pod_enum:                                            \
-    return getSmallArrayValue<TPTraits>( PROP, SELECTOR, EXTENT );
+    return getSmallArrayValue<TPTraits>( PROP, SELECTOR, EXTENT );  \
+break;
 
 //-*****************************************************************************
 template<>
@@ -190,6 +192,7 @@ object getValue<>( Abc::IScalarProperty &p,
                 else if (!interp.compare (Abc::Box2fTPTraits::interpretation()))
                     return getPODValue< Abc::Box2fTPTraits >( p, iSS );
             }
+            break;
             case AbcU::kFloat64POD:
             {
                 std::string interp (p.getMetaData().get ("interpretation"));

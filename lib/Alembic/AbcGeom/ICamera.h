@@ -68,7 +68,7 @@ public:
     //! This constructor creates a new camera reader.
     //! The first argument is the parent ICompoundProperty, from which the
     //! error handler policy for is derived.  The second argument is the name
-    //! of the ICompoundProperty that contains this schemas properties.  The 
+    //! of the ICompoundProperty that contains this schemas properties.  The
     //! remaining optional arguments can be used to override the
     //! ErrorHandlerPolicy and to specify schema interpretation matching.
     ICameraSchema( const ICompoundProperty & iParent,
@@ -93,15 +93,7 @@ public:
         init( iArg0, iArg1 );
     }
 
-
-    //! Copy constructor.
-    ICameraSchema(const ICameraSchema& iCopy)
-        : Abc::ISchema<CameraSchemaInfo>()
-    {
-        *this = iCopy;
-    }
-
-    //! Default assignment operator used.
+    //! Default assignment and copy operator used.
 
     //! Return the time sampling.
     AbcA::TimeSamplingPtr getTimeSampling() const

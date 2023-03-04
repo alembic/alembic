@@ -65,7 +65,7 @@ public:
     // CONSTRUCTION, DESTRUCTION, ASSIGNMENT
     //-*************************************************************************
 
-    //! The default constructor creates an empty OPolyMeshSchema
+    //! The default constructor creates an empty IXformSchema
     //! ...
     IXformSchema()
     {
@@ -101,13 +101,6 @@ public:
       : Abc::ISchema<XformSchemaInfo>( iProp, iArg0, iArg1 )
     {
         init( iArg0, iArg1 );
-    }
-
-    //! explicit copy constructor to work around Windows compiler bug
-    IXformSchema( const IXformSchema &iCopy )
-        : Abc::ISchema<XformSchemaInfo>()
-    {
-        *this = iCopy;
     }
 
     AbcA::TimeSamplingPtr getTimeSampling() const;

@@ -56,7 +56,8 @@ case TPTraits::pod_enum:                                        \
        iProp.set( *sampPtr );                                   \
     }                                                           \
     return;                                                     \
-}
+}                                                               \
+break;
 
 //-*****************************************************************************
 static void setArrayValue( Abc::OArrayProperty &p, PyObject *val )
@@ -163,6 +164,7 @@ static void setArrayValue( Abc::OArrayProperty &p, PyObject *val )
                     return;
                 }
             }
+            break;
             case AbcU::kFloat64POD:
             {
                 std::string interp (p.getMetaData().get ("interpretation"));
@@ -248,7 +250,7 @@ void register_oarrayproperty()
                    const Abc::Argument&,
                    const Abc::Argument&,
                    const Abc::Argument&> >(
-                  ( arg( "parent" ), arg( "name" ), arg( "DataType" ), 
+                  ( arg( "parent" ), arg( "name" ), arg( "DataType" ),
                     arg( "argument" ), arg( "argument" ), arg( "argument" ) ),
                     "Create a new OArrayProperty with the given parent "
                     "OCompoundProperty, name, DataType and optional arguments "

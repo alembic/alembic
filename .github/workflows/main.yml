@@ -14,39 +14,77 @@ on:
 jobs:
 
   linux:
-    name: 'Linux CentOS 7 VFX CY2020
-      <${{ matrix.compiler-desc }}
+    name: 'Linux CentOS 7 VFX CY${{ matrix.vfx-cy }}
+      <${{ matrix.compiler-desc }},
+       config=${{ matrix.build-type }},
        cxx=${{ matrix.cxx-standard }}>'
     # GH-hosted VM. The build runs in CentOS 7 'container' defined below.
     runs-on: ubuntu-latest
     container:
       # DockerHub: https://hub.docker.com/u/aswf
       # Source: https://github.com/AcademySoftwareFoundation/aswf-docker
-      image: aswf/ci-ocio:2020
+      image: aswf/ci-ocio:${{ matrix.vfx-cy }} 
     strategy:
       matrix:
-        build: [1,2,3,4]
+        build: [1,2,3,4,5,6,7,8]
         include:
         - build: 1
+          build-type: Release
           cxx-standard: 14
           cxx-compiler: g++
           cc-compiler: gcc
           compiler-desc: GCC 6.3.1
+          vfx-cy: 2020
         - build: 2
+          build-type: Release
           cxx-standard: 11
           cxx-compiler: g++
           cc-compiler: gcc
           compiler-desc: GCC 6.3.1
+          vfx-cy: 2020
         - build: 3
+          build-type: Release
           cxx-standard: 14
           cxx-compiler: clang++
           cc-compiler: clang
           compiler-desc: Clang 7
+          vfx-cy: 2020
         - build: 4
+          build-type: Release
           cxx-standard: 11
           cxx-compiler: clang++
           cc-compiler: clang
           compiler-desc: Clang 7
+          vfx-cy: 2020
+        - build: 5
+          build-type: Release
+          cxx-standard: 17
+          cxx-compiler: g++
+          cc-compiler: gcc
+          compiler-desc: gcc9.3.1
+          vfx-cy: 2022
+        - build: 6
+          build-type: Release
+          cxx-standard: 17
+          cxx-compiler: clang++
+          cc-compiler: clang
+          compiler-desc: clang10.4
+          vfx-cy: 2022
+        - build: 7
+          build-type: Debug
+          cxx-standard: 17
+          cxx-compiler: g++
+          cc-compiler: gcc
+          compiler-desc: gcc9.3.1
+          vfx-cy: 2022
+        - build: 8
+          build-type: Debug
+          cxx-standard: 17
+          cxx-compiler: clang++
+          cc-compiler: clang
+          compiler-desc: clang10.4
+          vfx-cy: 2022
+
     env:
       CXX: ${{ matrix.cxx-compiler }}
       CC: ${{ matrix.cc-compiler }}

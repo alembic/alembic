@@ -307,7 +307,6 @@ int main( int argc, char *argv[] )
     opt_meta = optionExists( options, "m");
 
     // open each file
-    size_t count = 0;
     for ( std::size_t i = 0; i < files.size(); i++ ) {
         if ( files.size() > 1 )
             std::cout << BOLD << files[i] << ':' << RESETCOLOR << std::endl;
@@ -424,7 +423,6 @@ int main( int argc, char *argv[] )
         else
             tree( iObj, opt_all );
 
-        ++count;
     }
 
     return 0;

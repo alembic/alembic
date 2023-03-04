@@ -199,14 +199,7 @@ public:
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() );
 
-    //! Copy constructor.
-    OPolyMeshSchema( const OPolyMeshSchema& iCopy )
-        : OGeomBaseSchema<PolyMeshSchemaInfo>()
-    {
-        *this = iCopy;
-    }
-
-    //! Default assignment operator used.
+    //! Default assignment and copy operator used.
 
     //-*************************************************************************
     // SCHEMA STUFF
