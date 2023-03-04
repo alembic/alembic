@@ -45,7 +45,7 @@
 #  endif
 #endif
 
-#include <halfLimits.h>
+#include <half.h>
 
 namespace Alembic {
 namespace AbcCoreOgawa {
@@ -142,7 +142,7 @@ template <>
 void getMinAndMax<Util::float16_t>(
     Util::float16_t & iMin, Util::float16_t & iMax )
 {
-    iMax = std::numeric_limits<Util::float16_t>::max();
+    iMax = HALF_MAX;
     iMin = -iMax;
 }
 

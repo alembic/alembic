@@ -72,6 +72,8 @@ public:
 
     TimeSampling();
 
+    TimeSampling( const TimeSampling &copy );
+
     bool operator==( const TimeSampling & iRhs ) const
     {
         return (m_timeSamplingType == iRhs.m_timeSamplingType &&
