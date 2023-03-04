@@ -96,7 +96,7 @@ do                                                                      \
     {                                                                   \
         TEST ;                                                          \
     }                                                                   \
-    catch ( EXCEPT )                                                    \
+    catch ( const EXCEPT & )                                            \
     {                                                                   \
         passed = true;                                                  \
     }                                                                   \

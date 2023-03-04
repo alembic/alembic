@@ -100,13 +100,6 @@ public:
         init( tsIndex, Abc::IsSparse( iArg0, iArg1, iArg2, iArg3 ) );
     }
 
-    //! Copy constructor
-    OGeomBaseSchema( const OGeomBaseSchema& iCopy )
-      : Abc::OSchema<info_type>()
-    {
-        *this = iCopy;
-    }
-
     virtual void reset ()
     {
         m_selfBoundsProperty.reset();

@@ -80,13 +80,6 @@ public:
                         const Abc::Argument &iArg1 = Abc::Argument(),
                         const Abc::Argument &iArg2 = Abc::Argument() );
 
-    //! Copy constructor.
-    OCollectionsSchema( const OCollectionsSchema& iCopy )
-        : Abc::OSchema<CollectionsSchemaInfo>()
-    {
-        *this = iCopy;
-    }
-
     //! Create a named collection, if the collection already exists
     //! return it.
     Abc::OStringArrayProperty

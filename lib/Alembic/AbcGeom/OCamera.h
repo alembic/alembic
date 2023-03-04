@@ -99,14 +99,7 @@ public:
         init( tsIndex );
     }
 
-    //! Copy constructor.
-    OCameraSchema(const OCameraSchema& iCopy)
-        : Abc::OSchema<CameraSchemaInfo>()
-    {
-        *this = iCopy;
-    }
-
-    //! Default assignment operator used.
+    //! Default assignment and copy operator used.
 
     //-*************************************************************************
     // SCHEMA STUFF

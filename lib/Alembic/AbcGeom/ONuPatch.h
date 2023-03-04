@@ -343,13 +343,6 @@ public:
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() );
 
-    //! Copy constructor.
-    ONuPatchSchema(const ONuPatchSchema& iCopy)
-        : OGeomBaseSchema<NuPatchSchemaInfo>()
-    {
-        *this = iCopy;
-    }
-
     //-*************************************************************************
     // SCHEMA STUFF
     //-*************************************************************************

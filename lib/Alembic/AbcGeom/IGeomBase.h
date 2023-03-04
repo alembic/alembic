@@ -105,13 +105,6 @@ public:
         init( iArg0, iArg1 );
     }
 
-    //! Copy constructor
-    IGeomBaseSchema( const IGeomBaseSchema& iCopy )
-      : Abc::ISchema<info_type>()
-    {
-        *this = iCopy;
-    }
-
     void init( const Abc::Argument &iArg0, const Abc::Argument &iArg1 )
     {
         ALEMBIC_ABC_SAFE_CALL_BEGIN( "IGeomBaseSchema::init()" );
@@ -270,14 +263,7 @@ public:
         init( iArg0, iArg1 );
     }
 
-    //! Copy constructor.
-    IGeomBase(const IGeomBase & iCopy)
-        : IGeomBaseSchema<GeomBaseSchemaInfo>()
-    {
-        *this = iCopy;
-    }
-
-    //! Default assignment operator used.
+    //! Default assignment and copy operator used.
 
     //-*************************************************************************
     // SCALAR PROPERTY READER FUNCTIONALITY

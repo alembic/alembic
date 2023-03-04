@@ -60,7 +60,8 @@ static object getPythonArray( AbcA::ArraySamplePtr& iSampPtr )
 case TPTraits::pod_enum:                                   \
 {                                                          \
     return getPythonArray<TPTraits>( iSampPtr );           \
-}
+}                                                          \
+break;
 
 //-*****************************************************************************
 template<>
@@ -162,6 +163,7 @@ object getValue ( Abc::IArrayProperty &p,
                 else if (!interp.compare (Abc::Box2fTPTraits::interpretation()))
                     return getPythonArray<Abc::Box2fTPTraits>( ptr );
             }
+            break;
             case AbcU::kFloat64POD:
             {
                 std::string interp (p.getMetaData().get ("interpretation"));
@@ -170,6 +172,7 @@ object getValue ( Abc::IArrayProperty &p,
                 else if (!interp.compare (Abc::Box2dTPTraits::interpretation()))
                     return getPythonArray<Abc::Box2dTPTraits>( ptr );
             }
+            break;
             default:
             break;
         };

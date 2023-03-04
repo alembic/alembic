@@ -76,13 +76,6 @@ public:
                      const Abc::Argument &iArg1 = Abc::Argument(),
                      const Abc::Argument &iArg2 = Abc::Argument() );
 
-    //! Copy constructor.
-    OMaterialSchema( const OMaterialSchema& iCopy )
-    : Abc::OSchema<MaterialSchemaInfo>()
-    {
-        *this = iCopy;
-    }
-
     //-------------------------------------------------------------------------
     //ACTUAL STUFF
 
