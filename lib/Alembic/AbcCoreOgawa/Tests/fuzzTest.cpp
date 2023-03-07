@@ -663,8 +663,9 @@ void testFuzzer52939(bool iUseMMap)
 
     ABCA::ArchiveReaderPtr ar = r("fuzzer_issue52939.abc");
     ABCA::MetaData md = ar->getMetaData();
-    ABCA::MetaData::token_map_type::const_iterator it = md.begin();
+
     // bad metadata ends up getting ignored
+    TESTING_ASSERT(md.begin() == md.end());
     TESTING_ASSERT(md.size() == 0);
 }
 
