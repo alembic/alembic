@@ -65,7 +65,6 @@ static object getSmallArrayValue( Abc::IScalarProperty &p,
                                   const Abc::ISampleSelector &iSS,
                                   size_t iExtent )
 {
-    typedef typename TPTraits::value_type U;
     typedef Abc::TypedArraySample<TPTraits> samp_type;
     typedef AbcU::shared_ptr<samp_type>     samp_ptr_type;
 

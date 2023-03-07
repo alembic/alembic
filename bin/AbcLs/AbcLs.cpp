@@ -812,7 +812,7 @@ int main( int argc, char *argv[] )
 
         // walk property hierarchy for most recent object
         Abc::ICompoundProperty props = iObj.getProperties();
-        const Abc::PropertyHeader* header;
+        const Abc::PropertyHeader* header = NULL;
         bool found = false;
         bool shouldPrintValue = false;
         for ( std::size_t i = 0; i < seglist.size(); ++i ) {

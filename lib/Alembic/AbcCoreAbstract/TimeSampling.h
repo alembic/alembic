@@ -73,6 +73,7 @@ public:
     TimeSampling();
 
     TimeSampling( const TimeSampling &copy );
+    TimeSampling & operator=( const TimeSampling &copy );
 
     bool operator==( const TimeSampling & iRhs ) const
     {
