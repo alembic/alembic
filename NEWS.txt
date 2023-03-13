@@ -1,3 +1,30 @@
+2023-03-13, Alembic 1.8.5
+
+Thanks to your feedback pull requests and submitted issues we
+have a few bug fixes and build enhancements.
+
+Add test for fuzzer issue 53406.  (PR415)
+
+Address Issue 402 by not using deprecated kWrapExisting calls
+when possible.
+
+Add missing vertex for cube test in the python bindings per Issue 407.
+
+Fix several warnings mentioned in Issue 309, 398 and 412.
+(PR413, PR414 and PR416)
+
+CMake:
+
+Don't explicitly set MACOSX_RPATH as it is set by default in CMake 3+. (PR404)
+
+Use install rpath for Imath 3. (PR405)
+
+Use STRING instead of PATH for ALEMBIC_LIB_INSTALL_DIR. (PR406)
+
+GitHub:
+
+Add CIFuzz as a GitHub action. (PR403)
+
 2022-11-11, Alembic 1.8.4
 
 Thanks to your feedback pull requests and submitted issues we
@@ -46,9 +73,6 @@ of bools in OXform.  (Issue 357)
 
 Fix compile issue when using C++17 with Microsoft Visual Studio and use a
 hopefully much faster find first bit set when using that compiler. (Issue 358)
-
-
-Thanks to your feedback and submitted issues we have a few bug fixes.
 
 
 2021-06-08, Alembic 1.8.2
