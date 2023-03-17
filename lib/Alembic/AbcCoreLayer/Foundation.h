@@ -66,7 +66,7 @@ typedef std::vector< Alembic::AbcCoreAbstract::CompoundPropertyReaderPtr >
         CompoundReaderPtrs;
 
 } // End namespace ALEMBIC_VERSION_NS
-} // End namespace AbcCoreOgawa
+} // End namespace AbcCoreLayer
 } // End namespace Alembic
 
 #endif //_Alembic_AbcCoreLayer_Foundation_h_
