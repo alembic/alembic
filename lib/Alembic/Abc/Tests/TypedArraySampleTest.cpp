@@ -38,7 +38,7 @@
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-#include <ImathMath.h>
+#include <Imath/ImathMath.h>
 
 #include <limits>
 
