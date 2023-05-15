@@ -260,9 +260,9 @@ DECLARE_TRAITS( kUint32POD,  uint32_t,  "uint32_t",  0,     Uint32PODTraits );
 DECLARE_TRAITS( kInt32POD,   int32_t,   "int32_t",   0,     Int32PODTraits );
 DECLARE_TRAITS( kUint64POD,  uint64_t,  "uint64_t",  0,     Uint64PODTraits );
 DECLARE_TRAITS( kInt64POD,   int64_t,   "int64_t",   0,     Int64PODTraits );
-DECLARE_TRAITS( kFloat16POD, float16_t, "float16_t", 0,     Float16PODTraits );
-DECLARE_TRAITS( kFloat32POD, float32_t, "float32_t", 0,     Float32PODTraits );
-DECLARE_TRAITS( kFloat64POD, float64_t, "float64_t", 0,     Float64PODTraits );
+DECLARE_TRAITS( kFloat16POD, float16_t, "float16_t", 0.0f,  Float16PODTraits );
+DECLARE_TRAITS( kFloat32POD, float32_t, "float32_t", 0.0f,  Float32PODTraits );
+DECLARE_TRAITS( kFloat64POD, float64_t, "float64_t", 0.0,   Float64PODTraits );
 DECLARE_TRAITS( kStringPOD,  string,    "string",    "",    StringPODTraits );
 DECLARE_TRAITS( kWstringPOD, wstring,   "wstring",   L"",   WstringPODTraits );
 
