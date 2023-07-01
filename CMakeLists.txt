@@ -324,3 +324,12 @@ info_cfg_option(ALEMBIC_DEBUG_WARNINGS_AS_ERRORS)
 info_cfg_option(PYALEMBIC_PYTHON_MAJOR)
 info_cfg_option(DOCS_PATH)
 MESSAGE("${_config_msg}")
+
+#-******************************************************************************
+# PACKAGING (place at the end)
+#-******************************************************************************
+set(CPACK_PACKAGE_CONTACT "Lucas Miller")
+# The following is distribution specific but leaving it here as an example for
+# the future (the example is for Ubuntu 22.04)
+# set(CPACK_DEBIAN_PACKAGE_DEPENDS "libimath-3-1-29")
+include(CPack)
