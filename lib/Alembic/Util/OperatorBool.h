@@ -40,24 +40,19 @@
 
 //-*****************************************************************************
 #define ALEMBIC_OPERATOR_BOOL( PASS_COND )                              \
-void __unspecified_bool_type_fcn() const {}                             \
-typedef void (this_type::*unspecified_bool_type)() const;               \
-operator unspecified_bool_type() const                                  \
+operator bool() const                                                   \
 {                                                                       \
-    return ( PASS_COND ) ? &this_type::__unspecified_bool_type_fcn : 0; \
+    return PASS_COND;                                                   \
 }                                                                       \
 bool operator! () const                                                 \
 {                                                                       \
-    return !( PASS_COND );                                              \
+    return !PASS_COND;                                                  \
 }
-
-
 //-*****************************************************************************
 #define ALEMBIC_OVERRIDE_OPERATOR_BOOL( PASS_COND )                     \
-operator unspecified_bool_type() const                                  \
+operator bool() const                                                   \
 {                                                                       \
-    return ( PASS_COND ) ?                                              \
-        &operator_bool_base_type::__unspecified_bool_type_fcn : 0;      \
+    return ( PASS_COND ) ;                                              \
 }                                                                       \
 bool operator! () const                                                 \
 {                                                                       \
