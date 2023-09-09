@@ -47,7 +47,7 @@ typedef std::vector< Alembic::Abc::ICompoundProperty > ICompoundPropertyVec;
 class TimeAndSamplesMap
 {
 public:
-    TimeAndSamplesMap() {m_isVerbose = false;};
+    TimeAndSamplesMap() {m_isVerbose = false; m_hold = false;};
 
     void add(Alembic::AbcCoreAbstract::TimeSamplingPtr iTime,
              std::size_t iNumSamples);
@@ -59,10 +59,13 @@ public:
     void setVerbose(bool isVerbose){m_isVerbose = isVerbose;};
     bool isVerbose() const {return m_isVerbose;};
 
+    void setHold(bool isHold){m_hold = isHold;};
+    bool isHold() const {return m_hold;};
 private:
     std::vector< Alembic::AbcCoreAbstract::TimeSamplingPtr > mTimeSampling;
     std::vector< std::size_t > mExpectedSamples;
     bool m_isVerbose;
+    bool m_hold;
 };
 
 Alembic::AbcCoreAbstract::index_t

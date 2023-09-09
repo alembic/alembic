@@ -195,7 +195,19 @@ void stitchArrayProp(const PropertyHeader & propHeader,
 
         for (index_t j = 0; j < numEmpty; ++j)
         {
+            if (!iTimeMap.isHold())
+            {
                 writer.set(emptySample);
+            }
+            else if (writer.getNumSamples() == 0)
+            {
+                reader.get(dataPtr, 0);
+                writer.set(*dataPtr);
+            }
+            else
+            {
+                writer.setFromPrevious();
+            }
         }
 
         for (; k < numSamples; k++)
@@ -208,7 +220,14 @@ void stitchArrayProp(const PropertyHeader & propHeader,
     // fill in any other empties
     for (size_t i = writer.getNumSamples(); i < totalSamples; ++i)
     {
-        writer.set(emptySample);
+        if (!iTimeMap.isHold())
+        {
+            writer.set(emptySample);
+        }
+        else
+        {
+            writer.setFromPrevious();
+        }
     }
 }
 
@@ -335,8 +354,29 @@ bool stitchArbGeomParam(const PropertyHeader & propHeader,
 
         for (index_t j = 0; j < numEmpty; ++j)
         {
-            valsWriter.set(emptySample);
-            indicesWriter.set(emptyIndicesSample);
+            if (!iTimeMap.isHold())
+            {
+                valsWriter.set(emptySample);
+                indicesWriter.set(emptyIndicesSample);
+            }
+            else if (valsWriter.getNumSamples() == 0)
+            {
+                valsProp[index].get(dataPtr, 0);
+                valsWriter.set(*dataPtr);
+
+                //
+                if (indicesProp[index].valid())
+                {
+                    indicesProp[index].get(dataPtr, 0);
+                    indicesWriter.set(*dataPtr);
+                }
+            }
+            else
+            {
+                valsWriter.setFromPrevious();
+                indicesWriter.setFromPrevious();
+            }
+
         }
 
         for (; k < numSamples; k++)
@@ -378,8 +418,16 @@ bool stitchArbGeomParam(const PropertyHeader & propHeader,
     // fill in any other empties
     for (size_t i = valsWriter.getNumSamples(); i < totalSamples; ++i)
     {
-        valsWriter.set(emptySample);
-        indicesWriter.set(emptyIndicesSample);
+        if (!iTimeMap.isHold())
+        {
+            valsWriter.set(emptySample);
+            indicesWriter.set(emptyIndicesSample);
+        }
+        else
+        {
+            valsWriter.setFromPrevious();
+            indicesWriter.setFromPrevious();
+        }
     }
     return true;
 }
@@ -387,11 +435,12 @@ bool stitchArbGeomParam(const PropertyHeader & propHeader,
 template< typename T >
 void scalarPropIO(IScalarProperty & reader,
                   Alembic::Util::uint8_t extent,
-                  OScalarProperty & writer)
+                  OScalarProperty & writer, bool hold)
 {
     std::vector< T > data(extent);
     std::vector< T > emptyData(extent);
     void * emptyPtr = static_cast< void* >(&emptyData.front());
+    void * vPtr = static_cast< void* >(&data.front());
 
     index_t numSamples = reader.getNumSamples();
     index_t numEmpty;
@@ -401,10 +450,20 @@ void scalarPropIO(IScalarProperty & reader,
     // not really empty, but set to a default 0 or empty string value
     for (index_t i = 0; i < numEmpty; ++i)
     {
-        writer.set(emptyPtr);
+        if (!hold)
+        {
+            writer.set(emptyPtr);
+        }
+        else if (writer.getNumSamples() == 0)
+        {
+            reader.get(vPtr, 0);
+            writer.set(vPtr);
+        }
+        else
+        {
+            writer.setFromPrevious();
+        }
     }
-
-    void * vPtr = static_cast< void* >(&data.front());
 
     for (; k < numSamples; ++k)
     {
@@ -452,59 +511,63 @@ void stitchScalarProp(const PropertyHeader & propHeader,
         switch(pod)
         {
             case Alembic::Util::kBooleanPOD:
-                scalarPropIO< Alembic::Util::bool_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::bool_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kUint8POD:
-                scalarPropIO< Alembic::Util::uint8_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::uint8_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kInt8POD:
-                scalarPropIO< Alembic::Util::int8_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::int8_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kUint16POD:
-                scalarPropIO< Alembic::Util::uint16_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::uint16_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kInt16POD:
-                scalarPropIO< Alembic::Util::int16_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::int16_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kUint32POD:
-                scalarPropIO< Alembic::Util::uint32_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::uint32_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kInt32POD:
-                scalarPropIO< Alembic::Util::int32_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::int32_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kUint64POD:
-                scalarPropIO< Alembic::Util::uint64_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::uint64_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kInt64POD:
-                scalarPropIO< Alembic::Util::int64_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::int64_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kFloat16POD:
-                scalarPropIO< Alembic::Util::float16_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::float16_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kFloat32POD:
-                scalarPropIO< Alembic::Util::float32_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::float32_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kFloat64POD:
-                scalarPropIO< Alembic::Util::float64_t >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::float64_t >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kStringPOD:
-                scalarPropIO< Alembic::Util::string >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::string >(reader, extent, writer, iTimeMap.isHold());
                 break;
             case Alembic::Util::kWstringPOD:
-                scalarPropIO< Alembic::Util::wstring >(reader, extent, writer);
+                scalarPropIO< Alembic::Util::wstring >(reader, extent, writer, iTimeMap.isHold());
                 break;
             default:
                 break;
         }
     }
 
-    // set any extra empties
+    // set any extra empties, or hold
     std::vector< Alembic::Util::string > emptyStr(dataType.getExtent());
     std::vector< Alembic::Util::wstring > emptyWstr(dataType.getExtent());
     std::vector< Alembic::Util::uint8_t > emptyBuffer(dataType.getNumBytes());
     for (size_t i = writer.getNumSamples(); i < totalSamples; ++i)
     {
-        if (pod == Alembic::Util::kStringPOD)
+        if (iTimeMap.isHold())
+        {
+            writer.setFromPrevious();
+        }
+        else if (pod == Alembic::Util::kStringPOD)
         {
             writer.set(&emptyStr.front());
         }
