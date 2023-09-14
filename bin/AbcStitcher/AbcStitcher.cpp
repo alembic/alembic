@@ -282,6 +282,9 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
     const AbcA::ObjectHeader & header = inObj.getHeader();
     std::size_t totalSamples = 0;
 
+    // keep track of how many we have set so far to work around issue 430
+    std::size_t totalSet = 0;
+
     // there are a number of things that needs to be checked for each node
     // to make sure they can be properly stitched together
     //
@@ -337,7 +340,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                 IXform(iObjects[i]).getSchema();
             index_t numSamples = iSchema.getNumSamples();
             index_t numEmpty = 0;
-            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+            index_t reqIdx = getIndexSample(totalSet,
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling(), numEmpty);
 
@@ -349,8 +352,9 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                 XformSample samp = iSchema.getValue(reqIdx);
                 oSchema.set(samp);
             }
+            totalSet += numEmpty;
 
-            for (; reqIdx < numSamples; reqIdx++)
+            for (; reqIdx < numSamples; reqIdx++, totalSet++)
             {
                 XformSample samp = iSchema.getValue(reqIdx);
                 oSchema.set(samp);
@@ -358,7 +362,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
         }
 
         // make sure we've set a sample, if we are going to extend them
-        for (i = oSchema.getNumSamples(); i != 0 && i < totalSamples; ++i)
+        for (i = totalSet; i != 0 && i < totalSamples; ++i)
         {
             oSchema.setFromPrevious();
         }
@@ -394,17 +398,17 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                 ISubD(iObjects[i]).getSchema();
             index_t numSamples = iSchema.getNumSamples();
             IV2fGeomParam uvs = iSchema.getUVsParam();
-            if (oSchema.getNumSamples() == 0 && uvs)
+            if (totalSet == 0 && uvs)
             {
                 oSchema.setUVSourceName(GetSourceName(uvs.getMetaData()));
             }
             index_t numEmpty = 0;
-            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+            index_t reqIdx = getIndexSample(totalSet,
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling(), numEmpty);
 
             // not hold, then set empties, other set previous if we have previous samples
-            if (!iTimeMap.isHold() || oSchema.getNumSamples() > 0)
+            if (!iTimeMap.isHold() || totalSet > 0)
             {
                 for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                 {
@@ -417,9 +421,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                         oSchema.setFromPrevious();
                     }
                 }
+                totalSet += numEmpty;
             }
 
-            for (; reqIdx < numSamples; reqIdx++)
+            for (; reqIdx < numSamples; reqIdx++, totalSet++)
             {
                 ISubDSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OSubDSchema::Sample oSamp;
@@ -483,17 +488,18 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
 
                 oSchema.set(oSamp);
                 // our first sample was written, AND we want to hold so set our previous samples to this one!
-                if (iTimeMap.isHold() && oSchema.getNumSamples() == 1)
+                if (iTimeMap.isHold() && totalSet == 0)
                 {
                     for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                     {
                         oSchema.setFromPrevious();
                     }
+                    totalSet += numEmpty;
                 }
             }
         }
 
-        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        for (size_t i = totalSet; i < totalSamples; ++i)
         {
             if (!iTimeMap.isHold())
             {
@@ -532,18 +538,18 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
 
             IN3fGeomParam normals = iSchema.getNormalsParam();
             IV2fGeomParam uvs = iSchema.getUVsParam();
-            if (oSchema.getNumSamples() == 0 && uvs)
+            if (totalSet == 0 && uvs)
             {
                 oSchema.setUVSourceName(GetSourceName(uvs.getMetaData()));
             }
 
             index_t numEmpty = 0;
-            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+            index_t reqIdx = getIndexSample(totalSet,
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling(), numEmpty);
 
             // not hold, then set empties, other set previous if we have previous samples
-            if (!iTimeMap.isHold() || oSchema.getNumSamples() > 0)
+            if (!iTimeMap.isHold() || totalSet > 0)
             {
                 for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                 {
@@ -556,9 +562,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                         oSchema.setFromPrevious();
                     }
                 }
+                totalSet += numEmpty;
             }
 
-            for (; reqIdx < numSamples; reqIdx++)
+            for (; reqIdx < numSamples; reqIdx++, totalSet++)
             {
                 IPolyMeshSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OPolyMeshSchema::Sample oSamp;
@@ -604,17 +611,18 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                 oSchema.set(oSamp);
 
                 // our first sample was written, AND we want to hold so set our previous samples to this one!
-                if (iTimeMap.isHold() && oSchema.getNumSamples() == 1)
+                if (iTimeMap.isHold() && totalSet == 0)
                 {
                     for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                     {
                         oSchema.setFromPrevious();
                     }
+                    totalSet += numEmpty;
                 }
             }
         }
 
-        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        for (size_t i = totalSet; i < totalSamples; ++i)
         {
             if (!iTimeMap.isHold())
             {
@@ -647,7 +655,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                 ICamera(iObjects[i]).getSchema();
             index_t numSamples = iSchema.getNumSamples();
             index_t numEmpty = 0;
-            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+            index_t reqIdx = getIndexSample(totalSet,
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling(), numEmpty);
 
@@ -658,8 +666,9 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
             {
                 oSchema.set(iSchema.getValue(reqIdx));
             }
+            totalSet += numEmpty;
 
-            for (; reqIdx < numSamples; reqIdx++)
+            for (; reqIdx < numSamples; reqIdx++, totalSet++)
             {
                 oSchema.set(iSchema.getValue(reqIdx));
             }
@@ -667,7 +676,7 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
 
         // for the rest of the samples just set the last one as long as
         // a sample has been already set
-        for (size_t i = oSchema.getNumSamples(); i != 0 && i < totalSamples;++i)
+        for (size_t i = totalSet; i != 0 && i < totalSamples;++i)
         {
             oSchema.setFromPrevious();
         }
@@ -700,12 +709,12 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
             index_t numSamples = iSchema.getNumSamples();
 
             index_t numEmpty = 0;
-            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+            index_t reqIdx = getIndexSample(totalSet,
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling(), numEmpty);
 
             // not hold, then set empties, other set previous if we have previous samples
-            if (!iTimeMap.isHold() || oSchema.getNumSamples() > 0)
+            if (!iTimeMap.isHold() || totalSet > 0)
             {
                 for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                 {
@@ -718,9 +727,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                         oSchema.setFromPrevious();
                     }
                 }
+                totalSet += numEmpty;
             }
 
-            for (; reqIdx < numSamples; reqIdx++)
+            for (; reqIdx < numSamples; reqIdx++, totalSet++)
             {
                 ICurvesSchema::Sample iSamp = iSchema.getValue(reqIdx);
 
@@ -785,17 +795,18 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                 oSchema.set(oSamp);
 
                 // our first sample was written, AND we want to hold so set our previous samples to this one!
-                if (iTimeMap.isHold() && oSchema.getNumSamples() == 1)
+                if (iTimeMap.isHold() && totalSet == 0)
                 {
                     for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                     {
                         oSchema.setFromPrevious();
                     }
+                    totalSet += numEmpty;
                 }
             }
         }
 
-        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        for (size_t i = totalSet; i < totalSamples; ++i)
         {
             if (!iTimeMap.isHold())
             {
@@ -830,12 +841,12 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
             IFloatGeomParam iWidths = iSchema.getWidthsParam();
             index_t numSamples = iSchema.getNumSamples();
             index_t numEmpty = 0;
-            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+            index_t reqIdx = getIndexSample(totalSet,
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling(), numEmpty);
 
             // not hold, then set empties, other set previous if we have previous samples
-            if (!iTimeMap.isHold() || oSchema.getNumSamples() > 0)
+            if (!iTimeMap.isHold() || totalSet > 0)
             {
                 for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                 {
@@ -848,9 +859,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                         oSchema.setFromPrevious();
                     }
                 }
+                totalSet += numEmpty;
             }
 
-            for (; reqIdx < numSamples; reqIdx++)
+            for (; reqIdx < numSamples; reqIdx++, totalSet++)
             {
                 IPointsSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 OPointsSchema::Sample oSamp;
@@ -877,17 +889,18 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                 oSchema.set(oSamp);
 
                 // our first sample was written, AND we want to hold so set our previous samples to this one!
-                if (iTimeMap.isHold() && oSchema.getNumSamples() == 1)
+                if (iTimeMap.isHold() && totalSet == 0)
                 {
                     for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                     {
                         oSchema.setFromPrevious();
                     }
+                    totalSet += numEmpty;
                 }
             }
         }
 
-        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        for (size_t i = totalSet; i < totalSamples; ++i)
         {
             if (!iTimeMap.isHold())
             {
@@ -928,12 +941,12 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
             IV2fGeomParam uvs = iSchema.getUVsParam();
 
             index_t numEmpty = 0;
-            index_t reqIdx = getIndexSample(oSchema.getNumSamples(),
+            index_t reqIdx = getIndexSample(totalSet,
                 oSchema.getTimeSampling(), numSamples,
                 iSchema.getTimeSampling(), numEmpty);
 
             // not hold, then set empties, other set previous if we have previous samples
-            if (!iTimeMap.isHold() || oSchema.getNumSamples() > 0)
+            if (!iTimeMap.isHold() || totalSet > 0)
             {
                 for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                 {
@@ -946,9 +959,10 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                         oSchema.setFromPrevious();
                     }
                 }
+                totalSet += numEmpty;
             }
 
-            for (; reqIdx < numSamples; reqIdx++)
+            for (; reqIdx < numSamples; reqIdx++, totalSet++)
             {
                 INuPatchSchema::Sample iSamp = iSchema.getValue(reqIdx);
                 ONuPatchSchema::Sample oSamp;
@@ -1011,17 +1025,18 @@ void visitObjects(std::vector< IObject > & iObjects, OObject & oParentObj,
                 oSchema.set(oSamp);
 
                 // our first sample was written, AND we want to hold so set our previous samples to this one!
-                if (iTimeMap.isHold() && oSchema.getNumSamples() == 1)
+                if (iTimeMap.isHold() && totalSet == 0)
                 {
                     for (index_t emptyIdx = 0; emptyIdx < numEmpty; ++emptyIdx)
                     {
                         oSchema.setFromPrevious();
                     }
+                    totalSet += numEmpty;
                 }
             }
         }
 
-        for (size_t i = oSchema.getNumSamples(); i < totalSamples; ++i)
+        for (size_t i = totalSet; i < totalSamples; ++i)
         {
             if (!iTimeMap.isHold())
             {
