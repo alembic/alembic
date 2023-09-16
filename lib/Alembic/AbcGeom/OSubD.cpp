@@ -575,6 +575,8 @@ void OSubDSchema::setFromPrevious()
 
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
 
+    m_numSamples++;
+
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 

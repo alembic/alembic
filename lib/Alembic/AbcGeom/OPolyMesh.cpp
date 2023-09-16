@@ -327,6 +327,7 @@ void OPolyMeshSchema::setFromPrevious()
     if ( m_uvsParam ) { m_uvsParam.setFromPrevious(); }
     if ( m_normalsParam ) { m_normalsParam.setFromPrevious(); }
 
+    m_numSamples++;
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 

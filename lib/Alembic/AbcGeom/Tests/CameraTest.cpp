@@ -64,6 +64,9 @@ void cameraTest()
         samp.setHorizontalAperture( 4.8 );
         samp.setVerticalFilmOffset( 3.0 );
         camSchema.set( samp );
+        camSchema.setFromPrevious();
+        camSchema.setFromPrevious();
+        TESTING_ASSERT( camSchema.getNumSamples() == 4 );
     }
 
     {
@@ -100,7 +103,7 @@ void cameraTest()
         TESTING_ASSERT( samp.getNumOpChannels() == 0 );
         TESTING_ASSERT( samp.getFilmBackMatrix() == identity );
 
-        TESTING_ASSERT( cam.getSchema().getNumSamples() == 2 );
+        TESTING_ASSERT( cam.getSchema().getNumSamples() == 4 );
 
         cam.getSchema().get( samp );
         TESTING_ASSERT( almostEqual( samp.getFocalLength(), 35.0 ) );

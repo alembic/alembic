@@ -148,6 +148,9 @@ void xformOut()
     XformSample dsamp;
     dsamp.addOp( scaleop, V3d( 3.0, 6.0, 9.0 ) );
     d.getSchema().set( dsamp );
+    d.getSchema().setFromPrevious();
+    d.getSchema().setFromPrevious();
+    TESTING_ASSERT( d.getSchema().getNumSamples() == 3 );
 
     XformSample esamp;
     M44d identmat;
