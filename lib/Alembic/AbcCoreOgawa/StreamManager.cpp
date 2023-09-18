@@ -51,18 +51,18 @@ namespace ALEMBIC_VERSION_NS {
 #elif defined( __HAIKU__ )
 
 #define COMPARE_EXCHANGE( V, COMP, EXCH ) __atomic_compare_exchange_n( &V, &COMP, EXCH, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST )
-#include <strings.h>
-int ffsll(long long i)
-{
-	return (__builtin_ffsll(i));
-}
 
 #else
 #error Please contact alembic-discuss@googlegroups.com for support.
 #endif
 
-#ifdef _MSC_VER
-
+#if defined( __HAIKU__ ) || defined( __MINGW32__ )
+#include <strings.h>
+int ffsll(long long i)
+{
+	return (__builtin_ffsll(i));
+}
+#elif defined( _MSC_VER )
 #ifdef _WIN64
 Alembic::Util::int64_t ffsll( Alembic::Util::int64_t iValue )
 {

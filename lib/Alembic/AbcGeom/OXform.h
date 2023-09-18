@@ -49,7 +49,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //! The default value for determining whether a property is actually
 //! different from the default.
-static ALEMBIC_EXPORT_CONST double kXFORM_DELTA_TOLERANCE = 1.0e-12;
+static const double kXFORM_DELTA_TOLERANCE = 1.0e-12;
 
 //-*****************************************************************************
 class ALEMBIC_EXPORT OXformSchema : public Abc::OSchema<XformSchemaInfo>

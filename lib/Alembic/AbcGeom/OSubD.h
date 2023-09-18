@@ -51,8 +51,7 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // for default values for int scalar properties here (INT_MIN / 2)
-static ALEMBIC_EXPORT_CONST
-int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( -1073741824 );
+static const int32_t ABC_GEOM_SUBD_NULL_INT_VALUE( -1073741824 );
 
 //-*****************************************************************************
 class ALEMBIC_EXPORT OSubDSchema : public OGeomBaseSchema<SubDSchemaInfo>

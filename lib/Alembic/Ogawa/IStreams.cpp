@@ -53,6 +53,7 @@
     #include <windows.h>
     #include <fcntl.h>
     #include <io.h>
+    #include <share.h>
     #include <sys/stat.h>
 
 #else

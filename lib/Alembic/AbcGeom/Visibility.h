@@ -50,19 +50,19 @@ namespace ALEMBIC_VERSION_NS {
 
 //! \brief Values for the visibility property
 //! The top-compound object of AbcGeom Schema objects can
-//! include an optional visibility property. 
+//! include an optional visibility property.
 //! The value can express
 //! - isDeferrred - the property is present but whether the object
 //!                 should be visible is determined by parents of the
 //!                 object.
 //! - isVisible -   The object should be visible.
-//! - isHidden -    The object is explicitly hidden. 
-enum ObjectVisibility 
+//! - isHidden -    The object is explicitly hidden.
+enum ObjectVisibility
 {
     //! When evaluating whether this object is visible we will
     //! walk up the hierarchy of objects looking for an object that
-    //! has the visibility property and is either explcitly 
-    //! isHidden or is explicitly isVisible. If we reach the top of 
+    //! has the visibility property and is either explcitly
+    //! isHidden or is explicitly isVisible. If we reach the top of
     //! the archive, then the object is visible.
     kVisibilityDeferred = -1,
 
@@ -73,9 +73,9 @@ enum ObjectVisibility
     kVisibilityVisible = 1,
 };
 
-//! The name used for the CharProperty (Int8) that we use to 
+//! The name used for the CharProperty (Int8) that we use to
 //! store visibility.
-static ALEMBIC_EXPORT_CONST std::string kVisibilityPropertyName = "visible";
+static const std::string kVisibilityPropertyName = "visible";
 
 typedef Abc::ICharProperty IVisibilityProperty;
 typedef Abc::OCharProperty OVisibilityProperty;
@@ -86,30 +86,30 @@ typedef Abc::OCharProperty OVisibilityProperty;
 //! Creates the visibility property for the indicated object. As a convention,
 //! if the visibility of your object is animated, for frames that
 //! the object is visible you can write kVisibilityDeferred.
-ALEMBIC_EXPORT OVisibilityProperty 
-CreateVisibilityProperty( OObject & iObject, 
+ALEMBIC_EXPORT OVisibilityProperty
+CreateVisibilityProperty( OObject & iObject,
                           uint32_t iTimeSamplingID );
 
 //! Creates the visibility property for the indicated object. As a convention,
 //! if the visibility of your object is animated, for frames that
 //! the object is visible you can write kVisibilityDeferred.
-ALEMBIC_EXPORT OVisibilityProperty 
-CreateVisibilityProperty( OObject & iObject, 
+ALEMBIC_EXPORT OVisibilityProperty
+CreateVisibilityProperty( OObject & iObject,
                           AbcA::TimeSamplingPtr iTimeSampling );
 
 // For Reader code:
 
-//! If the object doesn't have a visibility property this will 
+//! If the object doesn't have a visibility property this will
 //! return a property that evaluates to false (aka a reset property)
-ALEMBIC_EXPORT IVisibilityProperty 
+ALEMBIC_EXPORT IVisibilityProperty
 GetVisibilityProperty( IObject & schemaObject );
 
-//! If the object doesn't have a visibility property this will 
-//! return kVisibilityDeferred. This function is provided as 
-//! a convenience. It's equally valid for you to call 
+//! If the object doesn't have a visibility property this will
+//! return kVisibilityDeferred. This function is provided as
+//! a convenience. It's equally valid for you to call
 //! GetVisibilityProperty () and access the property's values
 //! directly.
-ALEMBIC_EXPORT ObjectVisibility 
+ALEMBIC_EXPORT ObjectVisibility
 GetVisibility( IObject & schemaObject,
                const Abc::ISampleSelector &iSS =
                Abc::ISampleSelector () );
@@ -120,8 +120,8 @@ GetVisibility( IObject & schemaObject,
 //! function will traverse upward through the object hierarchy
 //! until finding a object that does. If the top is reached, true
 //! will be returned.
-ALEMBIC_EXPORT bool 
-IsAncestorInvisible( IObject schemaObject, 
+ALEMBIC_EXPORT bool
+IsAncestorInvisible( IObject schemaObject,
                      const Abc::ISampleSelector &iSS =
                      Abc::ISampleSelector () );
 
