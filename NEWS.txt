@@ -1,3 +1,36 @@
+2023-09-25, Alembic 1.8.6
+
+Thanks to your feedback pull requests and submitted issues we
+have a few bug fixes and build enhancements.
+
+CMake:
+
+Introduce CPacke to top level CMake. (PR 425)
+
+AbcCoreOgawa:
+
+Fix typo in a comment. (PR 417)
+
+AbcGeom:
+
+Fix bug with OCurves, ONuPatch, OPoints, OPolyMesh, and OSubD were not properly 
+incrementing their number of set samples when using setFromPrevious. (PR 433)
+
+Util:
+
+Fix default values for float PODTraits. (PR 422)
+
+Windows:
+
+Support compiling with mingw. (PR 434)
+Explicitly call CreateFileA and CreateFileMappingA (instead of CreateFile and
+CreateFileMapping) since we are using std::string to open the file. (PR 435)
+
+AbcStitcher:
+
+Introduce -hold argument which will use the previous set sample instead of
+setting an empty sample for missing samples. (PR 432)
+
 2023-03-13, Alembic 1.8.5
 
 Thanks to your feedback pull requests and submitted issues we
