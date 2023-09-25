@@ -55,10 +55,10 @@ namespace ALEMBIC_VERSION_NS {
 
 //-*****************************************************************************
 // Some MetaData key constants
-static ALEMBIC_EXPORT_CONST char * kApplicationNameKey = "_ai_Application";
-static ALEMBIC_EXPORT_CONST char * kDateWrittenKey = "_ai_DateWritten";
-static ALEMBIC_EXPORT_CONST char * kUserDescriptionKey = "_ai_Description";
-static ALEMBIC_EXPORT_CONST char * kDCCFPSKey = "_ai_DCC_FPS";
+static const char * kApplicationNameKey = "_ai_Application";
+static const char * kDateWrittenKey = "_ai_DateWritten";
+static const char * kUserDescriptionKey = "_ai_Description";
+static const char * kDCCFPSKey = "_ai_DCC_FPS";
 
 //-*****************************************************************************
 template <class ARCHIVE_CTOR>

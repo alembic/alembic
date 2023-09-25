@@ -41,7 +41,7 @@
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 #include <machine/endian.h>
-#elif !defined(_MSC_VER)
+#elif !defined(_MSC_VER) && !defined(__MINGW32__)
 #include <endian.h>
 #endif
 

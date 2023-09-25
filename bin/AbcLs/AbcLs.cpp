@@ -650,7 +650,7 @@ int main( int argc, char *argv[] )
     act.sa_flags = SA_SIGINFO;
     sigaction(SIGSEGV, &act, NULL);
     /* signal if available */
-#elif defined(_POSIX_VERSION) || defined(_MSC_VER)
+#elif defined(_POSIX_VERSION) || defined(_MSC_VER) || defined(__MINGW32__)
     signal(SIGSEGV, segfault_sigaction);
 #else
 #error No signal interface available
