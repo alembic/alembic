@@ -424,7 +424,7 @@ void ONuPatchSchema::createPositionProperties()
 
     // initialize any required properties
     m_positionsProperty = Abc::OP3fArrayProperty( _this, "P", mdata, m_timeSamplingIndex );
-    
+
     std::vector<V3f> emptyVec;
     const V3fArraySample empty( emptyVec );
     for ( size_t i = 0 ; i < m_numSamples ; ++i )
@@ -649,6 +649,7 @@ void ONuPatchSchema::setFromPrevious( )
         m_trimWProperty.setFromPrevious();
     }
 
+    m_numSamples++;
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 

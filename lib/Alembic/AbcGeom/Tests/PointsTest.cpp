@@ -463,6 +463,10 @@ void optPropTest()
         samp.setVelocities( V3fArraySample() );
         samp.setWidths( OFloatGeomParam::Sample() );
         pt.set( samp );
+        pt.setFromPrevious();
+        pt.setFromPrevious();
+        pt.setFromPrevious();
+        TESTING_ASSERT( 10 == pt.getNumSamples() );
     }
 
     {
@@ -470,8 +474,8 @@ void optPropTest()
 
         IPoints ptsObj( IObject( archive, kTop ), "pts" );
         IPointsSchema &pts = ptsObj.getSchema();
-        TESTING_ASSERT( 7 == pts.getNumSamples() );
-        TESTING_ASSERT( 7 == pts.getVelocitiesProperty().getNumSamples() );
+        TESTING_ASSERT( 10 == pts.getNumSamples() );
+        TESTING_ASSERT( 10 == pts.getVelocitiesProperty().getNumSamples() );
     }
 }
 

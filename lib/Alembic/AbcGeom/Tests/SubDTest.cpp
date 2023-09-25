@@ -116,6 +116,11 @@ void Example1_MeshOut()
     mesh_samp.setInterpolateBoundary( 0 );
     mesh.set( mesh_samp );
 
+    mesh.setFromPrevious();
+    mesh.setFromPrevious();
+
+    TESTING_ASSERT( mesh.getNumSamples() == 5 );
+
     C3f color_val( 1.0, 0.0, 0.0 );
 
     OCompoundProperty arbParams = mesh.getArbGeomParams();
@@ -177,7 +182,7 @@ void Example1_MeshIn()
         mesh.getInterpolateBoundaryProperty().getErrorHandlerPolicy() ==
         ErrorHandler::kNoisyNoopPolicy );
 
-    TESTING_ASSERT( 3 == mesh.getNumSamples() );
+    TESTING_ASSERT( 5 == mesh.getNumSamples() );
 
     // UVs
     IV2fGeomParam uv = mesh.getUVsParam();

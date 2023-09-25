@@ -91,8 +91,10 @@ void Example1_CurvesOut()
     for ( size_t i = 0 ; i < 5 ; ++i )
     {
         doSample( myCurves );
+        myCurves.getSchema().setFromPrevious();
     }
 
+    TESTING_ASSERT( myCurves.getSchema().getNumSamples() == 10 );
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish
     // them off!

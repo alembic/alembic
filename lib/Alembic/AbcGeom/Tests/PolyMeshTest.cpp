@@ -148,9 +148,16 @@ void Example1_MeshOut()
     mesh.set( mesh_samp );
     mesh.set( mesh_samp );
 
-    // do it twice to make sure getChildBoundsProperty works correctly
+    // set form previous twice
+    mesh.setFromPrevious();
+    mesh.setFromPrevious();
+
+    // do it 4 sets to make sure getChildBoundsProperty lines up with what
+    // we set for samples
     mesh.getChildBoundsProperty().set( cbox );
     mesh.getChildBoundsProperty().set( cbox );
+    mesh.getChildBoundsProperty().setFromPrevious();
+    mesh.getChildBoundsProperty().setFromPrevious();
 
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish

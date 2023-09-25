@@ -254,6 +254,8 @@ void OPointsSchema::setFromPrevious()
     if ( m_velocitiesProperty ) { m_velocitiesProperty.setFromPrevious(); }
     if ( m_widthsParam ) { m_widthsParam.setFromPrevious(); }
 
+    m_numSamples++;
+
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 
@@ -316,7 +318,7 @@ void OPointsSchema::createPositionProperty()
 {
     AbcA::MetaData mdata;
     SetGeometryScope( mdata, kVaryingScope );
-    
+
     m_positionsProperty = Abc::OP3fArrayProperty( this->getPtr(), "P", mdata, m_timeSamplingIndex );
 
     std::vector<V3f> emptyV3Vec;

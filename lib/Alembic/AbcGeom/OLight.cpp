@@ -161,8 +161,8 @@ size_t OLightSchema::getNumSamples()
 {
     ALEMBIC_ABC_SAFE_CALL_BEGIN( "OLightSchema::getNumSamples" );
 
-    if ( m_childBoundsProperty )
-        return m_childBoundsProperty.getNumSamples();
+    if ( m_cameraSchema )
+        return m_cameraSchema.getNumSamples();
 
     ALEMBIC_ABC_SAFE_CALL_END();
 

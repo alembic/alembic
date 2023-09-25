@@ -358,6 +358,7 @@ void OCurvesSchema::setFromPrevious()
     if ( m_ordersProperty ) { m_ordersProperty.setFromPrevious(); }
     if ( m_knotsProperty ) { m_knotsProperty.setFromPrevious(); }
 
+    m_numSamples++;
     ALEMBIC_ABC_SAFE_CALL_END();
 }
 

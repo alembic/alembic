@@ -57,6 +57,9 @@ void lightTest()
         samp.setChildBounds( Abc::Box3d(
             Abc::V3d( 0.0, 0.1, 0.2), Abc::V3d( 0.3, 0.4, 0.5 ) ) );
         lightObj.getSchema().setCameraSample( samp );
+        lightObj.getSchema().setFromPrevious();
+        lightObj.getSchema().setFromPrevious();
+        TESTING_ASSERT( lightObj.getSchema().getNumSamples() == 4 );
 
         Abc::OCompoundProperty arb = lightObj.getSchema().getArbGeomParams();
         OFloatGeomParam param(arb, "test", false,
@@ -80,6 +83,7 @@ void lightTest()
             lightObj.getSchema().getArbGeomParams().getNumProperties() == 1 );
         TESTING_ASSERT(
             lightObj.getSchema().getUserProperties().getNumProperties() == 1 );
+        TESTING_ASSERT( lightObj.getSchema().getNumSamples() == 4 );
 
         lightObj.getSchema().getCameraSchema().get( samp, 0 );
         samp.getScreenWindow( top, bottom, left, right );

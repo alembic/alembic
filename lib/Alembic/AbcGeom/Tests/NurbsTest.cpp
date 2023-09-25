@@ -119,6 +119,11 @@ void Example1_NurbsOut()
     // Set the sample.
     myNurbsSchema.set( nurbsSample );
 
+    myNurbsSchema.setFromPrevious();
+    myNurbsSchema.setFromPrevious();
+
+    TESTING_ASSERT( myNurbsSchema.getNumSamples() == 3 );
+
     // Alembic objects close themselves automatically when they go out
     // of scope. So - we don't have to do anything to finish
     // them off!
@@ -381,7 +386,7 @@ void SparseTest()
     std::string name = "sparseNurbsTest.abc";
     {
         OArchive archive( Alembic::AbcCoreOgawa::WriteArchive(), name );
-        
+
         // only set normals
         ONuPatch nurbsNormalsObj( OObject( archive, kTop ), "nurbsNormals", kSparse );
         ONuPatchSchema::Sample nurbsSamp;
