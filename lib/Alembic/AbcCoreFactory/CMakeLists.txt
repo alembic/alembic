@@ -39,4 +39,4 @@ LIST(APPEND CXX_FILES
 SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
 INSTALL(FILES All.h IFactory.h
-        DESTINATION include/Alembic/AbcCoreFactory)
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/AbcCoreFactory)
