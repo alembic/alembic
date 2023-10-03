@@ -272,112 +272,112 @@ def compareCamera( nodeName1, nodeName2 ):
     fn2 = OpenMaya.MFnCamera( obj2 )
 
     if fn1.filmFit() != fn2.filmFit():
-        print "differ in filmFit"
+        print ("differ in filmFit")
         return False
 
     if not floatDiff(fn1.filmFitOffset(), fn2.filmFitOffset(), 4):
-        print "differ in filmFitOffset"
+        print ("differ in filmFitOffset")
         return False
 
     if fn1.isOrtho() != fn2.isOrtho():
-        print "differ in isOrtho"
+        print ("differ in isOrtho")
         return False
 
     if not floatDiff(fn1.orthoWidth(), fn2.orthoWidth(), 4):
-        print "differ in orthoWidth"
+        print ("differ in orthoWidth")
         return False
 
     if not floatDiff(fn1.focalLength(), fn2.focalLength(), 4):
-        print "differ in focalLength"
+        print ("differ in focalLength")
         return False
 
     if not floatDiff(fn1.lensSqueezeRatio(), fn2.lensSqueezeRatio(), 4):
-        print "differ in lensSqueezeRatio"
+        print ("differ in lensSqueezeRatio")
         return False
 
     if not floatDiff(fn1.cameraScale(), fn2.cameraScale(), 4):
-        print "differ in cameraScale"
+        print ("differ in cameraScale")
         return False
 
     if not floatDiff(fn1.horizontalFilmAperture(),
         fn2.horizontalFilmAperture(), 4):
-        print "differ in horizontalFilmAperture"
+        print ("differ in horizontalFilmAperture")
         return False
 
     if not floatDiff(fn1.verticalFilmAperture(), fn2.verticalFilmAperture(), 4):
-        print "differ in verticalFilmAperture"
+        print ("differ in verticalFilmAperture")
         return False
 
     if not floatDiff(fn1.horizontalFilmOffset(), fn2.horizontalFilmOffset(), 4):
-        print "differ in horizontalFilmOffset"
+        print ("differ in horizontalFilmOffset")
         return False
 
     if not floatDiff(fn1.verticalFilmOffset(), fn2.verticalFilmOffset(), 4):
-        print "differ in verticalFilmOffset"
+        print ("differ in verticalFilmOffset")
         return False
 
     if not floatDiff(fn1.overscan(), fn2.overscan(), 4):
-        print "differ in overscan"
+        print ("differ in overscan")
         return False
 
     if not floatDiff(fn1.nearClippingPlane(), fn2.nearClippingPlane(), 4):
-        print "differ in nearClippingPlane"
+        print ("differ in nearClippingPlane")
         return False
 
     if not floatDiff(fn1.farClippingPlane(), fn2.farClippingPlane(), 4):
-        print "differ in farClippingPlane"
+        print ("differ in farClippingPlane")
         return False
 
     if not floatDiff(fn1.preScale(), fn2.preScale(), 4):
-        print "differ in preScale"
+        print ("differ in preScale")
         return False
 
     if not floatDiff(fn1.postScale(), fn2.postScale(), 4):
-        print "differ in postScale"
+        print ("differ in postScale")
         return False
 
     if not floatDiff(fn1.filmTranslateH(), fn2.filmTranslateH(), 4):
-        print "differ in filmTranslateH"
+        print ("differ in filmTranslateH")
         return False
 
     if not floatDiff(fn1.filmTranslateV(), fn2.filmTranslateV(), 4):
-        print "differ in filmTranslateV"
+        print ("differ in filmTranslateV")
         return False
 
     if not floatDiff(fn1.horizontalRollPivot(), fn2.horizontalRollPivot(), 4):
-        print "differ in horizontalRollPivot"
+        print ("differ in horizontalRollPivot")
         return False
 
     if not floatDiff(fn1.verticalRollPivot(), fn2.verticalRollPivot(), 4):
-        print "differ in verticalRollPivot"
+        print ("differ in verticalRollPivot")
         return False
 
     if fn1.filmRollOrder() != fn2.filmRollOrder():
-        print "differ in filmRollOrder"
+        print ("differ in filmRollOrder")
         return False
 
     if not floatDiff(fn1.filmRollValue(), fn2.filmRollValue(), 4):
-        print "differ in filmRollValue"
+        print ("differ in filmRollValue")
         return False
 
     if not floatDiff(fn1.fStop(), fn2.fStop(), 4):
-        print "differ in fStop"
+        print ("differ in fStop")
         return False
 
     if not floatDiff(fn1.focusDistance(), fn2.focusDistance(), 4,):
-        print "differ in focusDistance"
+        print ("differ in focusDistance")
         return False
 
     if not floatDiff(fn1.shutterAngle(), fn2.shutterAngle(), 4):
-        print "differ in shutterAngle"
+        print ("differ in shutterAngle")
         return False
 
     if fn1.usePivotAsLocalSpace() != fn2.usePivotAsLocalSpace():
-        print "differ in usePivotAsLocalSpace"
+        print ("differ in usePivotAsLocalSpace")
         return False
 
     if fn1.tumblePivot() != fn2.tumblePivot():
-        print "differ in tumblePivot"
+        print ("differ in tumblePivot")
         return False
 
     return True
@@ -387,35 +387,35 @@ def compareNurbsCurve(nodeName1, nodeName2):
     # basic error checking
     obj1 = getObjFromName(nodeName1)
     if not obj1.hasFn(OpenMaya.MFn.kNurbsCurve):
-        print nodeName1, "not a curve."
+        print (nodeName1, "not a curve.")
         return False
 
     obj2 = getObjFromName(nodeName2)
     if not obj2.hasFn(OpenMaya.MFn.kNurbsCurve):
-        print nodeName2, "not a curve."
+        print (nodeName2, "not a curve.")
         return False
 
     fn1 = OpenMaya.MFnNurbsCurve(obj1)
     fn2 = OpenMaya.MFnNurbsCurve(obj2)
 
     if fn1.degree() != fn2.degree():
-        print nodeName1, nodeName2, "degrees differ."
+        print (nodeName1, nodeName2, "degrees differ.")
         return False
 
     if fn1.numCVs() != fn2.numCVs():
-        print nodeName1, nodeName2, "numCVs differ."
+        print (nodeName1, nodeName2, "numCVs differ.")
         return False
 
     if fn1.numSpans() != fn2.numSpans():
-        print nodeName1, nodeName2, "spans differ."
+        print (nodeName1, nodeName2, "spans differ.")
         return False
 
     if fn1.numKnots() != fn2.numKnots():
-        print nodeName1, nodeName2, "numKnots differ."
+        print (nodeName1, nodeName2, "numKnots differ.")
         return False
 
     if fn1.form() != fn2.form():
-        print nodeName1, nodeName2, "form differ."
+        print (nodeName1, nodeName2, "form differ.")
         return False
 
     cv1 = OpenMaya.MPointArray()
@@ -424,7 +424,7 @@ def compareNurbsCurve(nodeName1, nodeName2):
     fn2.getCVs(cv2)
 
     if not comparePointArray(cv1, cv2):
-        print nodeName1, nodeName2, "points differ."
+        print (nodeName1, nodeName2, "points differ.")
         return False
 
     # we do not need to compare knots, since they aren't stored in Alembic
