@@ -146,10 +146,10 @@ class Path( object ):
         try:
             key = int( key )
         except ValueError:
-            raise ValueError, "You must use an integer to refer to a path element."
+            raise ValueError("You must use an integer to refer to a path element.")
 
         if key > abs( self._maxindex ):
-            raise IndexError, "Maximum index is +/- %s." % self._maxindex
+            raise IndexError("Maximum index is +/- %s." % self._maxindex)
 
         self._plist[key] = value
         self._path = str( self[:] )
@@ -158,27 +158,27 @@ class Path( object ):
         try:
             n = int( n )
         except ValueError:
-            raise ValueError, "You must use an integer to refer to a path element."
+            raise ValueError("You must use an integer to refer to a path element.")
 
         try:
             del( self._plist[n] )
             t = Path( self[:] )
             self.__reinit__( t )
         except IndexError:
-            raise IndexError, "Maximum index is +/- %s" & self._maxindex
+            raise IndexError("Maximum index is +/- %s" & self._maxindex)
 
     def rindex( self, val ):
         if val in self:
             return len( self._plist ) - \
                 list( reversed( self._plist ) ).index( val ) - 1
         else:
-            raise ValueError, "%s is not in path." % val
+            raise ValueError("%s is not in path." % val)
 
     def index( self, val ):
         if val in self:
             return self._plist.index( val )
         else:
-            raise ValueError, "%s is not in path." % val
+            raise ValueError("%s is not in path." % val)
 
     def common( self, other, cmn=None ):
         cmn = Path( cmn )
@@ -345,7 +345,7 @@ def mapFSTree( root, path, dirs=set(), links={} ):
             break
             #pass
         else:
-            print "QOI??? %s" % full
+            print ("QOI??? %s" % full)
 
     return dirs, links
 
@@ -354,18 +354,18 @@ def main():
     try:
         arg = Path( sys.argv[1] )
     except IndexError:
-        print "Please supply a directory to analyze."
+        print ("Please supply a directory to analyze.")
         return 1
 
     dirs, links = mapFSTree( Path( os.getcwd() ), arg )
 
     print
-    print "Directories traversed to get to %s\n" % arg
-    for d in sorted( list( dirs ) ): print d
+    print ("Directories traversed to get to %s\n" % arg)
+    for d in sorted( list( dirs ) ): print (d)
 
     print
-    print "Symlinks in traversed directories for %s\n" % arg
-    for k in links: print "%s: %s" % ( k, links[k] )
+    print ("Symlinks in traversed directories for %s\n" % arg)
+    for k in links: print ("%s: %s" % ( k, links[k] ))
     print
 
     return 0
