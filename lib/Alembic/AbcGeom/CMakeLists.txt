@@ -99,7 +99,7 @@ INSTALL(FILES
     XformSample.h
     IXform.h
     OXform.h
-    DESTINATION include/Alembic/AbcGeom
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/AbcGeom
 )
 
 IF (USE_TESTS)

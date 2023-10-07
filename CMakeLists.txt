@@ -48,6 +48,8 @@ IF (NOT DEFINED QUIET)
     SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 ENDIF()
 
+INCLUDE(GNUInstallDirs)
+
 #-******************************************************************************
 # OPTIONS (set with -D<option>=<value>)
 #-******************************************************************************
@@ -74,12 +76,8 @@ option(DOCS_PATH
 
 # Set static/dynamic build options
 SET(LIB_TYPE STATIC)
-SET(RUNTIME_INSTALL_DIR lib)
-SET(LIBRARY_INSTALL_DIR lib)
-SET(ARCHIVE_INSTALL_DIR lib)
 IF (ALEMBIC_SHARED_LIBS)
     SET(LIB_TYPE SHARED)
-    SET(ARCHIVE_INSTALL_DIR lib)
     IF (WIN32)
         ADD_DEFINITIONS(-DALEMBIC_DLL)
     ENDIF()
