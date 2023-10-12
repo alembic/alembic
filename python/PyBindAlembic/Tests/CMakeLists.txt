@@ -1,6 +1,6 @@
 ##-*****************************************************************************
 ##
-## Copyright (c) 2009-2016,
+## Copyright (c) 2009-2015,
 ##  Sony Pictures Imageworks Inc. and
 ##  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
 ##
@@ -33,5 +33,18 @@
 ##
 ##-*****************************************************************************
 
-#ADD_SUBDIRECTORY(PyAlembic)
-ADD_SUBDIRECTORY(PyBindAlembic)
+SET(TEST_LIBS
+    Alembic::Alembic
+    ${HDF5_LIBRARIES}
+    ${ALEMBIC_ILMBASE_LIBS}
+    ${ALEMBIC_PYILMBASE_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${ZLIB_LIBRARIES}
+    ${EXTERNAL_MATH_LIBS}
+)
+
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/python/PyBindAlembic/Tests")
+IF (Imath_FOUND)
+    GET_TARGET_PROPERTY(PYIMATH_LOCATION ${ALEMBIC_PYILMBASE_PYIMATH_LIB} IMPORTED_LOCATION_RELEASE)
+    ADD_TEST(NAME PyBindAlembic_Python_TEST COMMAND Python${PYBINDALEMBIC_PYTHON_MAJOR}::Interpreter ${PROJECT_SOURCE_DIR}/python/PyBindAlembic/Tests/RunTests.py ${PYIMATH_LOCATION}/../python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages ${PROJECT_BINARY_DIR}/python/PyBindAlembic)
+ENDIF()
