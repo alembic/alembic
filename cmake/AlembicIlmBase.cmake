@@ -34,7 +34,7 @@
 ##-*****************************************************************************
 
 
-FIND_PACKAGE(Imath)
+FIND_PACKAGE(Imath PATHS "C:/Portable Program Files/Imath")
 
 IF (Imath_FOUND)
     MESSAGE(STATUS "Found package Imath")
