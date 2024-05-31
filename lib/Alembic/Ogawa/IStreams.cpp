@@ -157,7 +157,7 @@ private:
 #ifdef _WIN32
     typedef int FileDescriptor;
 
-    static FileDescriptor openFile(const char * iFileName,
+    static FileDescriptor openFile(const wchar_t * wFileName,
                             Alembic::Util::int32_t iFlag)
     {
         FileDescriptor fid = -1;
@@ -165,7 +165,7 @@ private:
         // One way to prevent writing over a file opened for reading would be to
         // pass in _SH_DENYWR instead of _SH_DENYNO.  If we can find a posix
         // equivalent we may have an interesting solution for that problem.
-        _sopen_s(&fid, iFileName, iFlag | _O_RANDOM, _SH_DENYNO, _S_IREAD);
+        _wsopen_s(&fid, wFileName, iFlag | _O_RANDOM, _SH_DENYNO, _S_IREAD);
         return fid;
     }
 
@@ -311,7 +311,29 @@ public:
     FileIStreamReader(const std::string& iFileName, std::size_t iNumStreams)
         : nstreams(iNumStreams)
     {
+
+#ifdef _WIN32
+        // to wchar_t
+        // get the size of the UTF8 string
+        int wLength = MultiByteToWideChar(CP_UTF8, 0, iFileName.c_str(), -1, NULL, 0);
+
+        // allocate buffer
+        wchar_t* wFileName = (wchar_t*)malloc(wLength * sizeof(wchar_t));
+        if (!wFileName)
+          throw std::runtime_error("Unable to allocate buffer  for conversion");
+
+        // convert to UTF8
+        if (MultiByteToWideChar(CP_UTF8, 0, iFileName.c_str(), -1, wFileName, wLength) <= 0)
+          throw std::runtime_error("Unable to convert to wchar_t file name");
+
+        // open file for read using the UTF8 string
+        fid = openFile(wFileName, O_RDONLY);
+		
+        // free conversion buffer
+        free(wFileName);
+#else
         fid = openFile(iFileName.c_str(), O_RDONLY);
+#endif
         fileLen = 0;
         if (getFileLength(fid, fileLen) < 0)
         {
@@ -444,9 +466,28 @@ private:
 
     static FileHandle openFile(const std::string& iFileName)
     {
+        // to wchar_t
+        // get the size of the UTF8 string
+        int wLength = MultiByteToWideChar(CP_UTF8, 0, iFileName.c_str(), -1, NULL, 0);
+
+        // allocate buffer
+        wchar_t* wFileName = (wchar_t*)malloc(wLength * sizeof(wchar_t));
+        if (!wFileName)
+          throw std::runtime_error("Unable to allocate buffer  for conversion");
+
+        // convert to UTF8
+        if (MultiByteToWideChar(CP_UTF8, 0, iFileName.c_str(), -1, wFileName, wLength) <= 0)
+          throw std::runtime_error("Unable to convert to wchar_t file name");
+
+        // open file for read using the UTF8 string
         // Use both FILE_SHARE_READ and FILE_SHARE_WRITE as the share mode.
         // Without FILE_SHARE_WRITE, this will fail when trying to open a file that is already open for writing.
-        return CreateFileA(iFileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        FileHandle fh = CreateFileW(wFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+        // free conversion buffer
+        free(wFileName);
+
+        return fh;
     }
 
     static void closeFile(FileHandle iFile)
