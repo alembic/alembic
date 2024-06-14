@@ -49,7 +49,7 @@ INSTALL(FILES
     IMaterial.h
     MaterialFlatten.h
     MaterialAssignment.h
-    DESTINATION include/Alembic/AbcMaterial
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/AbcMaterial
 )
 
 IF (USE_TESTS)

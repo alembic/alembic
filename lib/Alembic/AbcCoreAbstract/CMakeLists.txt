@@ -82,7 +82,7 @@ INSTALL(FILES
     CompoundPropertyReader.h
     ObjectReader.h
     ArchiveReader.h
-    DESTINATION include/Alembic/AbcCoreAbstract
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/AbcCoreAbstract
 )
 
 IF (USE_TESTS)
