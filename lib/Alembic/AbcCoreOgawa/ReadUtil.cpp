@@ -1313,7 +1313,8 @@ ReadData( void * iIntoLocation,
           Ogawa::IDataPtr iData,
           size_t iThreadId,
           const AbcA::DataType &iDataType,
-          Util::PlainOldDataType iAsPod )
+          Util::PlainOldDataType iAsPod,
+          size_t iLocSize )
 {
     Alembic::Util::PlainOldDataType curPod = iDataType.getPod();
     ABCA_ASSERT( ( iAsPod == curPod ) || (
@@ -1402,12 +1403,27 @@ ReadData( void * iIntoLocation,
     else if ( iAsPod == curPod )
     {
         // don't read the key
-        iData->read( dataSize - 16, iIntoLocation, 16, iThreadId );
+        std::size_t numBytes = dataSize - 16;
+
+        // dont read more than we have allocated
+        if ( numBytes > iLocSize )
+        {
+            numBytes = iLocSize;
+        }
+
+        iData->read( numBytes, iIntoLocation, 16, iThreadId );
     }
     else if ( PODNumBytes( curPod ) <= PODNumBytes( iAsPod ) )
     {
         // - 16 to skip key
         std::size_t numBytes = dataSize - 16;
+
+        // dont read more than we have allocated
+        if ( numBytes > iLocSize )
+        {
+            numBytes = iLocSize;
+        }
+
         iData->read( numBytes, iIntoLocation, 16, iThreadId );
 
         char * buf = static_cast< char * >( iIntoLocation );
@@ -1422,6 +1438,11 @@ ReadData( void * iIntoLocation,
         // read into a temporary buffer and cast them one at a time
         char * buf = new char[ numBytes ];
         iData->read( numBytes, buf, 16, iThreadId );
+
+        if ( numBytes > iLocSize )
+        {
+            numBytes = iLocSize;
+        }
 
         ConvertData( curPod, iAsPod, buf, iIntoLocation, numBytes );
 
@@ -1445,7 +1466,8 @@ ReadArraySample( Ogawa::IDataPtr iDims,
     oSample = AbcA::AllocateArraySample( iDataType, dims );
 
     ReadData( const_cast<void*>( oSample->getData() ), iData,
-        iThreadId, iDataType, iDataType.getPod() );
+        iThreadId, iDataType, iDataType.getPod(),
+        iDataType.getNumBytes() * dims.numPoints() );
 
 }
 

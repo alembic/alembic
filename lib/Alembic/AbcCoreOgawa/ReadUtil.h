@@ -62,7 +62,8 @@ ReadData( void * iIntoLocation,
           Ogawa::IDataPtr iData,
           size_t iThreadId,
           const AbcA::DataType &iDataType,
-          Util::PlainOldDataType iAsPod );
+          Util::PlainOldDataType iAsPod,
+          size_t iLocSize );
 
 //-*****************************************************************************
 void
