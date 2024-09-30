@@ -43,36 +43,36 @@ def visitSmallArraySamples( iProp, iIndent ):
     indent = " " * iIndent
 
     for i, s in enumerate( iProp.arraySamples ):
-        print "%ssample %d:" % ( indent, i )
+        print ("%ssample %d:" % ( indent, i ))
         if s is None:
-            print indent, "********** Got nothing **********"
+            print (indent, "********** Got nothing **********")
         else:
-            print indent,
+            print (indent,)
             for j in s:
-                print j,
+                print (j,)
             print
 
 def visitScalarSamples( iProp, iIndent ):
     indent = " " * iIndent
 
     for i, s in enumerate( iProp.scalarSamples ):
-        print "%ssample %d:" % ( indent, i )
+        print ("%ssample %d:" % ( indent, i ))
         if s is None:
-            print indent, "********** Got nothing **********"
+            print (indent, "********** Got nothing **********")
         else:
-            print "%s%s" % ( indent, s )
+            print ("%s%s" % ( indent, s ))
 
 def visitArraySamples( iProp, iIndent ):
     indent = " " * iIndent
 
     for i, s in enumerate( iProp.samples ):
-        print "%ssample %d:" % ( indent, i )
+        print ("%ssample %d:" % ( indent, i ))
         if s is None:
-            print indent, "********** Got nothing **********"
+            print (indent, "********** Got nothing **********")
         else:
-            print indent,
+            print (indent,)
             for j in s:
-                print j,
+                print (j,)
             print 
 
 def visitCompoundProperty( iProp, iIndent ):
@@ -81,7 +81,7 @@ def visitCompoundProperty( iProp, iIndent ):
     name = "name=%s" % iProp.getName()
     interp = "schema=%s" % iProp.getMetaData().get( "schema" )
 
-    print "%s%s %s; %s" % ( indent, ptype, name, interp )
+    print ("%s%s %s; %s" % ( indent, ptype, name, interp ))
 
     visitProperties( iProp, iIndent+2 )
 
@@ -93,7 +93,7 @@ def visitSimpleProperty( iProp, iIndent ):
     dtype = "datatype=%s" % iProp.getDataType()
     numsamps = "numsamps=%s" %iProp.getNumSamples()
 
-    print "%s%s %s; %s; %s; %s" % ( indent, ptype, name, md, dtype, numsamps )
+    print ("%s%s %s; %s; %s; %s" % ( indent, ptype, name, md, dtype, numsamps ))
 
     if iProp.isScalar():
         if iProp.getDataType().getExtent() == 1:
@@ -124,7 +124,7 @@ def visitObject( iObj, iIndent = 0 ):
 
     if path != "/":
         iIndent += 2
-        print "%s%s %s" % ( indent, ptype, name )
+        print ("%s%s %s" % ( indent, ptype, name ))
 
     visitProperties( iObj.getProperties(), iIndent )
 
@@ -134,19 +134,19 @@ def visitObject( iObj, iIndent = 0 ):
 def visitArchive( iArg ):
     iArchive = IArchive( iArg )
 
-    print "AbcEcho for %s" % GetLibraryVersion()
+    print ("AbcEcho for %s" % GetLibraryVersion())
 
     info = GetArchiveInfo ( iArchive )
 
     if len( info['appName'] ) > 0:
-        print "  file written by : %s" % info['appName']
-        print "  using Alembic : %s" % info['libraryVersionString']
-        print "  written on : %s" % info['whenWritten']
-        print "  user description by: %s" % info['userDescription']
+        print ("  file written by : %s" % info['appName'])
+        print ("  using Alembic : %s" % info['libraryVersionString'])
+        print ("  written on : %s" % info['whenWritten'])
+        print ("  user description by: %s" % info['userDescription'])
         print
     else:
-        print iArg
-        print "  (file doesn't have any ArchiveInfo)"
+        print (iArg)
+        print ("  (file doesn't have any ArchiveInfo)")
         print
 
     visitObject( iArchive.getTop() )

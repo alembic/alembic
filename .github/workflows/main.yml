@@ -12,9 +12,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-
   linux:
-    name: 'Linux CentOS 7 VFX CY${{ matrix.vfx-cy }}
+    name: 'Linux VFX CY${{ matrix.vfx-cy }}
       <${{ matrix.compiler-desc }},
        config=${{ matrix.build-type }},
        cxx=${{ matrix.cxx-standard }}>'
@@ -23,69 +22,52 @@ jobs:
     container:
       # DockerHub: https://hub.docker.com/u/aswf
       # Source: https://github.com/AcademySoftwareFoundation/aswf-docker
-      image: aswf/ci-ocio:${{ matrix.vfx-cy }} 
+      image: aswf/ci-ocio:${{ matrix.vfx-cy }}
     strategy:
       matrix:
-        build: [1,2,3,4,5,6,7,8]
+        build: [1,2,3,4,5]
         include:
         - build: 1
           build-type: Release
-          cxx-standard: 14
+          cxx-standard: 17
           cxx-compiler: g++
           cc-compiler: gcc
-          compiler-desc: GCC 6.3.1
-          vfx-cy: 2020
+          compiler-desc: gcc11.2.1
+          vfx-cy: 2024
         - build: 2
           build-type: Release
-          cxx-standard: 11
+          cxx-standard: 17
+          cxx-compiler: clang++
+          cc-compiler: clang
+          compiler-desc: clang15.0
+          vfx-cy: 2024
+        - build: 3
+          build-type: Debug
+          cxx-standard: 17
           cxx-compiler: g++
           cc-compiler: gcc
-          compiler-desc: GCC 6.3.1
-          vfx-cy: 2020
-        - build: 3
-          build-type: Release
-          cxx-standard: 14
-          cxx-compiler: clang++
-          cc-compiler: clang
-          compiler-desc: Clang 7
-          vfx-cy: 2020
+          compiler-desc: gcc11.2.1
+          vfx-cy: 2024
         - build: 4
-          build-type: Release
-          cxx-standard: 11
+          build-type: Debug
+          cxx-standard: 17
           cxx-compiler: clang++
           cc-compiler: clang
-          compiler-desc: Clang 7
-          vfx-cy: 2020
+          compiler-desc: clang15.0
+          vfx-cy: 2024
+        # remove the ACTIONS env vars below when gcc9.3 support is done
         - build: 5
           build-type: Release
           cxx-standard: 17
           cxx-compiler: g++
           cc-compiler: gcc
-          compiler-desc: gcc9.3.1
-          vfx-cy: 2022
-        - build: 6
-          build-type: Release
-          cxx-standard: 17
-          cxx-compiler: clang++
-          cc-compiler: clang
-          compiler-desc: clang10.4
-          vfx-cy: 2022
-        - build: 7
-          build-type: Debug
-          cxx-standard: 17
-          cxx-compiler: g++
-          cc-compiler: gcc
-          compiler-desc: gcc9.3.1
-          vfx-cy: 2022
-        - build: 8
-          build-type: Debug
-          cxx-standard: 17
-          cxx-compiler: clang++
-          cc-compiler: clang
-          compiler-desc: clang10.4
+          compiler-desc: gcc9.3
           vfx-cy: 2022
 
     env:
+      # remove these ACTIONS once we drop support for gcc9.3
+      ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       CXX: ${{ matrix.cxx-compiler }}
       CC: ${{ matrix.cc-compiler }}
     steps:
@@ -99,8 +81,85 @@ jobs:
         run: |
           cmake ../. \
                 -DCMAKE_INSTALL_PREFIX=../_install \
-                -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} \
-                -DCMAKE_CXX_FLAGS=${{ matrix.cxx-flags }}
+                -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }}
+        working-directory: _build
+      - name: Build
+        run: |
+          cmake --build . \
+                --target install \
+                --config ${{ matrix.build-type }} \
+                -- -j4
+        working-directory: _build
+      - name: Test
+        run: |
+          ctest -T Test \
+                --timeout 7200 \
+                --output-on-failure \
+                -VV
+        working-directory: _build
+
+  # --------------------------------------------------------------------
+
+  macos:
+    name: 'macOS VFXP-${{matrix.vfx-cy }} macos-${{ matrix.osver }}
+      <AppleClang
+       arch=${{ matrix.arch-type }},
+       config=${{ matrix.build-type }},
+       shared=${{ matrix.build-shared }},
+       cxx=${{ matrix.cxx-standard }}'
+    runs-on: macos-${{ matrix.osver }}
+    strategy:
+      matrix:
+        build: [1, 2, 3, 4]
+        include:
+          # --------------------------------------------------------------------
+          # MacOS 14
+          # --------------------------------------------------------------------
+          # Release
+          - build: 1
+            arch-type: "x86_64"
+            build-type: Release
+            build-shared: 'ON'
+            cxx-standard: 17
+            osver: 14
+
+          # Debug
+          - build: 2
+            arch-type: "x86_64"
+            build-type: Debug
+            build-shared: 'ON'
+            cxx-standard: 17
+            osver: 14
+
+          # Release
+          - build: 3
+            arch-type: "x86_64;arm64"
+            build-type: Release
+            build-shared: 'ON'
+            cxx-standard: 17
+            osver: 14
+
+          # Debug
+          - build: 4
+            arch-type: "x86_64;arm64"
+            build-type: Debug
+            build-shared: 'ON'
+            cxx-standard: 17
+            osver: 14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Create build directories
+        run: |
+          mkdir _install
+          mkdir _build
+      - name: Configure
+        run: |
+          brew install imath
+          cmake ../. \
+                -DCMAKE_INSTALL_PREFIX=../_install \
+                -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }}
         working-directory: _build
       - name: Build
         run: |

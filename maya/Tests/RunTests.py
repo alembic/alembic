@@ -68,11 +68,11 @@ if len(sys.argv) < 4:
 
 
 MayaCmds.loadPlugin(sys.argv[1])
-print 'LOADED', sys.argv[1]
+print ('LOADED', sys.argv[1])
 
 
 MayaCmds.loadPlugin(sys.argv[2])
-print 'LOADED', sys.argv[2]
+print ('LOADED', sys.argv[2])
 
 if not os.path.exists(sys.argv[3]):
   raise RuntimeError (sys.argv[3] + ' does not exist')
