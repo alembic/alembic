@@ -199,7 +199,7 @@ void AprImpl::getAs( index_t iSampleIndex, void *iIntoLocation,
 
     std::size_t id = streamId->getID();
     Ogawa::IDataPtr data = m_group->getData( index, id );
-    ReadData( iIntoLocation, data, id, m_header->header.getDataType(), iPod, SIZE_MAX );
+    ReadData( iIntoLocation, data, id, m_header->header.getDataType(), iPod );
 }
 
 } // End namespace ALEMBIC_VERSION_NS

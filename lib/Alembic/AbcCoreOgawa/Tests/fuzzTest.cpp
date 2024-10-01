@@ -284,6 +284,25 @@ void walkJustObj(ABCA::ObjectReaderPtr parent)
     }
 }
 
+void walkArchiveNoThrow(const char * iName, bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    ABCA::ArchiveReaderPtr ar;
+    try
+    {
+        ar = r(iName);
+    }
+    catch(const std::exception& e)
+    {
+    }
+
+    if (ar)
+    {
+        walkObjThrow(ar->getTop());
+    }
+}
+
 void testIssue254(bool iUseMMap)
 {
     Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
@@ -904,14 +923,45 @@ void testFuzzerTaoTaoGu3699(bool iUseMMap)
     TESTING_ASSERT(0);
 }
 
-void test_ZDI23700(bool iUseMMap)
+void test_walkAllNoThrow(bool iUseMMap)
 {
-    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
-    ABCA::ArchiveReaderPtr ar = r("zdi-23700-poc0.abc");
-    walkObjThrow(ar->getTop());
 
-    ar = r("zdi-23700-poc1.abc");
-    walkObjThrow(ar->getTop());
+    walkArchiveNoThrow("issue254.abc", iUseMMap);
+    walkArchiveNoThrow("issue255.abc", iUseMMap);
+    walkArchiveNoThrow("issue256.abc", iUseMMap);
+    walkArchiveNoThrow("issue257.abc", iUseMMap);
+    walkArchiveNoThrow("issue258.abc", iUseMMap);
+    walkArchiveNoThrow("issue269.abc", iUseMMap);
+    walkArchiveNoThrow("issue270.abc", iUseMMap);
+    walkArchiveNoThrow("issue271.abc", iUseMMap);
+    walkArchiveNoThrow("issue272.abc", iUseMMap);
+    walkArchiveNoThrow("issue282.abc", iUseMMap);
+    walkArchiveNoThrow("issue283.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue24846.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue24853.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue24598.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25051.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25081.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25166.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25175.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25185.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25192.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25204.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25236.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25351.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25502.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25695.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue26125.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue33685.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue49213.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue52703.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue52939.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue53205.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue53406.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_Taotao_Gu_3513.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_Taotao_Gu_3699.abc", iUseMMap);
+    walkArchiveNoThrow("zdi-23700-poc0.abc", iUseMMap);
+    walkArchiveNoThrow("zdi-23700-poc1.abc", iUseMMap);
 }
 
 int main ( int argc, char *argv[] )
@@ -1018,9 +1068,7 @@ int main ( int argc, char *argv[] )
     testFuzzerTaoTaoGu3699(true);
     testFuzzerTaoTaoGu3699(false);
 
-    test_ZDI23700(true);
-    test_ZDI23700(false);
-
-
+    test_walkAllNoThrow(true);
+    test_walkAllNoThrow(false);
     return 0;
 }

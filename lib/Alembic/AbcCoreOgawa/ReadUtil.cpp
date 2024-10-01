@@ -59,18 +59,24 @@ ReadDimensions( Ogawa::IDataPtr iDims,
                 const AbcA::DataType &iDataType,
                 Util::Dimensions & oDim )
 {
-    // find it based on of the size of the data
-    if ( iDims->getSize() == 0 )
+    if ( iData->getSize() < 16 )
     {
-        if ( iData->getSize() == 0 )
+        oDim = Util::Dimensions( 0 );
+    }
+    // find it based on of the size of the data
+    else if ( iDims->getSize() == 0 )
+    {
+        std::size_t numItems =
+            ( iData->getSize() - 16 ) / iDataType.getNumBytes();
+
+        // for misshaped data bump up our dimensions by 1 so we have
+        // more allocated for the partial read
+        if (( iData->getSize() - 16 ) % iDataType.getNumBytes() != 0)
         {
-            oDim = Util::Dimensions( 0 );
+            numItems += 1;
         }
-        else
-        {
-            oDim = Util::Dimensions( ( iData->getSize() - 16 ) /
-                                     iDataType.getNumBytes() );
-        }
+
+        oDim = Util::Dimensions( numItems );
     }
     // we need to read our dimensions
     else
@@ -91,6 +97,26 @@ ReadDimensions( Ogawa::IDataPtr iDims,
         for ( std::size_t i = 0; i < numRanks; ++i )
         {
             oDim[i] = dims[i];
+        }
+
+        // we have less data than what the dimensions suggest
+        // we should, so calculate them based on what we have
+        if ( iDataType.getPod() != Alembic::Util::kStringPOD &&
+             iDataType.getPod() != Alembic::Util::kWstringPOD &&
+             (iDataType.getNumBytes() * oDim.numPoints() >
+                iData->getSize() - 16) )
+        {
+            std::size_t numItems =
+                ( iData->getSize() - 16 ) / iDataType.getNumBytes();
+
+            // for misshaped data bump up our dimensions by 1 so we have
+            // more allocated for the partial read
+            if (( iData->getSize() - 16 ) % iDataType.getNumBytes() != 0)
+            {
+                numItems += 1;
+            }
+
+            oDim = Util::Dimensions( numItems );
         }
     }
 }
@@ -1313,8 +1339,7 @@ ReadData( void * iIntoLocation,
           Ogawa::IDataPtr iData,
           size_t iThreadId,
           const AbcA::DataType &iDataType,
-          Util::PlainOldDataType iAsPod,
-          size_t iLocSize )
+          Util::PlainOldDataType iAsPod)
 {
     Alembic::Util::PlainOldDataType curPod = iDataType.getPod();
     ABCA_ASSERT( ( iAsPod == curPod ) || (
@@ -1403,26 +1428,12 @@ ReadData( void * iIntoLocation,
     else if ( iAsPod == curPod )
     {
         // don't read the key
-        std::size_t numBytes = dataSize - 16;
-
-        // dont read more than we have allocated
-        if ( numBytes > iLocSize )
-        {
-            numBytes = iLocSize;
-        }
-
-        iData->read( numBytes, iIntoLocation, 16, iThreadId );
+        iData->read( dataSize - 16, iIntoLocation, 16, iThreadId );
     }
     else if ( PODNumBytes( curPod ) <= PODNumBytes( iAsPod ) )
     {
         // - 16 to skip key
         std::size_t numBytes = dataSize - 16;
-
-        // dont read more than we have allocated
-        if ( numBytes > iLocSize )
-        {
-            numBytes = iLocSize;
-        }
 
         iData->read( numBytes, iIntoLocation, 16, iThreadId );
 
@@ -1438,11 +1449,6 @@ ReadData( void * iIntoLocation,
         // read into a temporary buffer and cast them one at a time
         char * buf = new char[ numBytes ];
         iData->read( numBytes, buf, 16, iThreadId );
-
-        if ( numBytes > iLocSize )
-        {
-            numBytes = iLocSize;
-        }
 
         ConvertData( curPod, iAsPod, buf, iIntoLocation, numBytes );
 
@@ -1466,9 +1472,7 @@ ReadArraySample( Ogawa::IDataPtr iDims,
     oSample = AbcA::AllocateArraySample( iDataType, dims );
 
     ReadData( const_cast<void*>( oSample->getData() ), iData,
-        iThreadId, iDataType, iDataType.getPod(),
-        iDataType.getNumBytes() * dims.numPoints() );
-
+        iThreadId, iDataType, iDataType.getPod() );
 }
 
 //-*****************************************************************************
