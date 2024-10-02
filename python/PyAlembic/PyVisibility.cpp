@@ -46,6 +46,8 @@ void register_visibility()
     enum_<AbcG::ObjectVisibility>( "ObjectVisibility" )
         .value( "kVisibilityDeferred", AbcG::kVisibilityDeferred )
         .value( "kVisibilityHidden", AbcG::kVisibilityHidden )
+        .value( "kVisibilityVisible", AbcG::kVisibilityVisible )
+        // typo kept for historical reasons, consider removing
         .value( "kkVisibilityVisible", AbcG::kVisibilityVisible )
         ;
 
@@ -55,7 +57,7 @@ void register_visibility()
         ( Abc::OObject&, AbcU::uint32_t ) =
             &AbcG::CreateVisibilityProperty;
     AbcG::OVisibilityProperty ( *CreateVisibilityPropertyByTimeSamplingPtr )
-        ( Abc::OObject&, AbcA::TimeSamplingPtr ) = 
+        ( Abc::OObject&, AbcA::TimeSamplingPtr ) =
             &AbcG::CreateVisibilityProperty;
 
     def( "CreateVisibilityProperty",
