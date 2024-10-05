@@ -44,7 +44,7 @@ INSTALL(FILES
     SchemaInfoDeclarations.h
     OCollections.h
     ICollections.h
-    DESTINATION include/Alembic/AbcCollection
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/AbcCollection
 )
 
 IF (USE_TESTS)

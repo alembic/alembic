@@ -56,7 +56,7 @@ INSTALL(FILES
     SpookyV2.h
     TokenMap.h
     All.h
-    DESTINATION include/Alembic/Util)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/Util)
 
 IF (USE_TESTS)
     ADD_SUBDIRECTORY(Tests)
