@@ -86,7 +86,7 @@ FIND_LIBRARY( ALEMBIC_ARNOLD_LIBARNOLD ai
 
 IF( ${WINDOWS} )
   SET( ARNOLD_COMPILE_FLAGS "/c /nologo /MT /TP /DWIN32" )
-  SET( ARNOLD_LINK_FLAGS "/nologo /dll /LIBPATH:\"%RMANTREE%\lib\" libai.lib" )
+  SET( ARNOLD_LINK_FLAGS "/nologo /dll /LIBPATH:\"%RMANTREE%\\lib\" libai.lib" )
 ELSEIF( ${DARWIN} )
   SET( ARNOLD_COMPILE_FLAGS "-c" )
   SET( ARNOLD_LINK_FLAGS "-bundle -undefined dynamic_lookup" )
