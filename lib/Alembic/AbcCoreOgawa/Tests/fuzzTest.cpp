@@ -106,6 +106,126 @@ void walkProps(ABCA::CompoundPropertyReaderPtr parent)
     }
 }
 
+// catch and ignore exceptions
+void walkPropsThrow(ABCA::CompoundPropertyReaderPtr parent)
+{
+    for (std::size_t i = 0; i < parent->getNumProperties(); ++i)
+    {
+        ABCA::CompoundPropertyReaderPtr childCompound;
+        try
+        {
+            childCompound = parent->getCompoundProperty(i);
+            if (childCompound)
+            {
+                ABCA::MetaData md = childCompound->getMetaData();
+                md.serialize();
+            }
+        }
+        catch(const std::exception& e)
+        {
+        }
+
+        if (childCompound)
+        {
+            walkPropsThrow(childCompound);
+        }
+
+        ABCA::ScalarPropertyReaderPtr childScalar;
+        try
+        {
+            childScalar = parent->getScalarProperty(i);
+            if (childScalar)
+            {
+                ABCA::MetaData md = childScalar->getMetaData();
+                md.serialize();
+            }
+        }
+        catch(const std::exception& e)
+        {
+        }
+
+        if (childScalar)
+        {
+            if (childScalar->getDataType().getPod() ==
+                Alembic::AbcCoreAbstract::kStringPOD)
+            {
+                sampStrVec.resize(childScalar->getDataType().getExtent());
+            }
+            else if (childScalar->getDataType().getPod() ==
+                     Alembic::AbcCoreAbstract::kWstringPOD)
+            {
+                sampWStrVec.resize(childScalar->getDataType().getExtent());
+            }
+
+            for (std::size_t i = 0; i <  childScalar->getNumSamples(); ++i)
+            {
+                if (childScalar->getDataType().getPod() ==
+                    Alembic::AbcCoreAbstract::kStringPOD)
+                {
+                    try
+                    {
+                        childScalar->getSample(i, &sampStrVec.front());
+                    }
+                    catch(const std::exception& e)
+                    {
+                    }
+
+                }
+                else if (childScalar->getDataType().getPod() ==
+                         Alembic::AbcCoreAbstract::kWstringPOD)
+                {
+                    try
+                    {
+                        childScalar->getSample(i, &sampWStrVec.front());
+                    }
+                    catch(const std::exception& e)
+                    {
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        childScalar->getSample(i, samp);
+                    }
+                    catch(const std::exception& e)
+                    {
+                    }
+                }
+            }
+        }
+
+        ABCA::ArrayPropertyReaderPtr childArray;
+        try
+        {
+            childArray = parent->getArrayProperty(i);
+            if (childArray)
+            {
+                ABCA::MetaData md = childArray->getMetaData();
+                md.serialize();
+            }
+        }
+        catch(const std::exception& e)
+        {
+        }
+
+        if (childArray)
+        {
+            ABCA::ArraySamplePtr samp;
+            for (std::size_t i = 0; i <  childArray->getNumSamples(); ++i)
+            {
+                try
+                {
+                    childArray->getSample(i, samp);
+                }
+                catch(const std::exception& e)
+                {
+                }
+            }
+        }
+    }
+}
+
 void walkObj(ABCA::ObjectReaderPtr parent)
 {
     walkProps(parent->getProperties());
@@ -116,12 +236,70 @@ void walkObj(ABCA::ObjectReaderPtr parent)
     }
 }
 
+// this variant we catch the throws to make sure we check other issues
+void walkObjThrow(ABCA::ObjectReaderPtr parent)
+{
+    ABCA::CompoundPropertyReaderPtr props;
+    try
+    {
+        props = parent->getProperties();
+        ABCA::MetaData md = props->getMetaData();
+        md.serialize();
+
+    }
+    catch(const std::exception& e)
+    {
+    }
+
+    if (props)
+    {
+        walkPropsThrow(props);
+    }
+
+    for(std::size_t i = 0; i < parent->getNumChildren(); ++i)
+    {
+        ABCA::ObjectReaderPtr child;
+        try
+        {
+            child = parent->getChild(i);
+        }
+        catch(const std::exception& e)
+        {
+            continue;
+        }
+
+        if (child)
+        {
+            walkObjThrow(child);
+        }
+    }
+}
+
 void walkJustObj(ABCA::ObjectReaderPtr parent)
 {
     for(std::size_t i = 0; i < parent->getNumChildren(); ++i)
     {
         ABCA::ObjectReaderPtr child = parent->getChild(i);
         walkJustObj(child);
+    }
+}
+
+void walkArchiveNoThrow(const char * iName, bool iUseMMap)
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, iUseMMap);
+
+    ABCA::ArchiveReaderPtr ar;
+    try
+    {
+        ar = r(iName);
+    }
+    catch(const std::exception& e)
+    {
+    }
+
+    if (ar)
+    {
+        walkObjThrow(ar->getTop());
     }
 }
 
@@ -745,6 +923,47 @@ void testFuzzerTaoTaoGu3699(bool iUseMMap)
     TESTING_ASSERT(0);
 }
 
+void test_walkAllNoThrow(bool iUseMMap)
+{
+
+    walkArchiveNoThrow("issue254.abc", iUseMMap);
+    walkArchiveNoThrow("issue255.abc", iUseMMap);
+    walkArchiveNoThrow("issue256.abc", iUseMMap);
+    walkArchiveNoThrow("issue257.abc", iUseMMap);
+    walkArchiveNoThrow("issue258.abc", iUseMMap);
+    walkArchiveNoThrow("issue269.abc", iUseMMap);
+    walkArchiveNoThrow("issue270.abc", iUseMMap);
+    walkArchiveNoThrow("issue271.abc", iUseMMap);
+    walkArchiveNoThrow("issue272.abc", iUseMMap);
+    walkArchiveNoThrow("issue282.abc", iUseMMap);
+    walkArchiveNoThrow("issue283.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue24846.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue24853.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue24598.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25051.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25081.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25166.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25175.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25185.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25192.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25204.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25236.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25351.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25502.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue25695.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue26125.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue33685.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue49213.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue52703.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue52939.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue53205.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_issue53406.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_Taotao_Gu_3513.abc", iUseMMap);
+    walkArchiveNoThrow("fuzzer_Taotao_Gu_3699.abc", iUseMMap);
+    walkArchiveNoThrow("zdi-23700-poc0.abc", iUseMMap);
+    walkArchiveNoThrow("zdi-23700-poc1.abc", iUseMMap);
+}
+
 int main ( int argc, char *argv[] )
 {
     testIssue254(true);
@@ -848,5 +1067,8 @@ int main ( int argc, char *argv[] )
 
     testFuzzerTaoTaoGu3699(true);
     testFuzzerTaoTaoGu3699(false);
+
+    test_walkAllNoThrow(true);
+    test_walkAllNoThrow(false);
     return 0;
 }
