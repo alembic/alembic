@@ -84,7 +84,7 @@ INSTALL(FILES
     SourceName.h
     TypedArraySample.h
     TypedPropertyTraits.h
-    DESTINATION include/Alembic/Abc
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/Abc
 )
 
 IF (USE_TESTS)

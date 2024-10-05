@@ -33,5 +33,5 @@
 ##
 ##-*****************************************************************************
 
-ADD_SUBDIRECTORY(PyAlembic)
-
+#ADD_SUBDIRECTORY(PyAlembic)
+ADD_SUBDIRECTORY(PyBindAlembic)
