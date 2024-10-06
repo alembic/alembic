@@ -1,3 +1,21 @@
+2024-10-05, Alembic 1.8.7
+
+Thanks to your feedback, pull requests, and submitted issues we have A
+few bugs and build enhancements.
+
+Combine CMake feedback from several PRs and issues.  (PR457)
+
+Protect from potential buffer overrun because of malformed dimensions.
+(Issue 453)
+
+Fix a typo in the python bindings but leave the misspelled member
+(kkVisibilityVisible) to maintain compatibility.  (Issue 440)
+
+Add unicode filename support for Windows (PR450) 
+
+Make some of the extra python scripts including the PyAlembic and Maya
+unit tests python 3 compatible. (PR438)
+
 2023-09-25, Alembic 1.8.6
 
 Thanks to your feedback pull requests and submitted issues we
@@ -5,7 +23,7 @@ have a few bug fixes and build enhancements.
 
 CMake:
 
-Introduce CPacke to top level CMake. (PR 425)
+Introduce CPack to top level CMake. (PR 425)
 
 AbcCoreOgawa:
 
