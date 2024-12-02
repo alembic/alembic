@@ -1,3 +1,11 @@
+2024-12-02, Alembic 1.8.8
+
+Thanks to your feedback and submitted issues we have a few bug fixes.
+
+Support variable order curves in the python bindings. (Issue 458)
+
+Support mingw64 by adding a missing include. (Issue 459)
+
 2024-10-05, Alembic 1.8.7
 
 Thanks to your feedback, pull requests, and submitted issues we have A
