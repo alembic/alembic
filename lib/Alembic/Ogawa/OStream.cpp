@@ -37,6 +37,11 @@
 #include <fstream>
 #include <stdexcept>
 
+// for mingw support
+#if defined _WIN32 || defined _WIN64
+    #include <Windows.h>
+#endif
+
 namespace Alembic {
 namespace Ogawa {
 namespace ALEMBIC_VERSION_NS {
