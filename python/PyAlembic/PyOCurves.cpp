@@ -85,14 +85,20 @@ void register_ocurves()
                    const AbcG::OFloatGeomParam::Sample,
                    const AbcG::OV2fGeomParam::Sample,
                    const AbcG::ON3fGeomParam::Sample,
-                   const AbcG::BasisType>(
+                   const AbcG::BasisType,
+                   const Abc::FloatArraySample,
+                   const Abc::UcharArraySample,
+                   const Abc::FloatArraySample>(
                    ( arg( "iPos" ), arg( "iNVertices" ),
                      arg( "iType" ) = AbcG::kCubic,
                      arg( "iWrap" ) = AbcG::kNonPeriodic,
                      arg( "iWidth" ) = AbcG::OFloatGeomParam::Sample(),
                      arg( "iUVs" ) = AbcG::OV2fGeomParam::Sample(),
                      arg( "iNormals" ) = AbcG::ON3fGeomParam::Sample(),
-                     arg( "iBasis" ) = AbcG::kBezierBasis ) )
+                     arg( "iBasis" ) = AbcG::kBezierBasis,
+                     arg( "iPosWeight" ) = Abc::FloatArraySample(),
+                     arg( "iOrders" ) = Abc::UcharArraySample(),
+                     arg( "iKnots" ) = Abc::FloatArraySample() ) )
               [with_custodian_and_ward<1,2,
                with_custodian_and_ward<1,3> >()] )
         .def( "getWidths",

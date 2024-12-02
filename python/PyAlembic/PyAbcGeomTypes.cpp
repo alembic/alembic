@@ -94,6 +94,7 @@ void register_abcgeomtypes()
     enum_<AbcG::CurveType>( "CurveType" )
         .value( "kCubic", AbcG::kCubic )
         .value( "kLinear", AbcG::kLinear )
+        .value( "kVariableOrder", AbcG::kVariableOrder )
         ;
 
     // BasisType

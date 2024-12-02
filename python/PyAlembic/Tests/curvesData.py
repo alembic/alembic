@@ -41,7 +41,7 @@ def setArray( iTPTraits, *iList ):
     array = iTPTraits.arrayType( len( iList ) )
     for i in range( len( iList ) ):
         array[i] = iList[i]
-    return array  
+    return array
 
 numVerts = setArray( Int32TPTraits, 8, 4 )
 
@@ -90,4 +90,23 @@ widths = setArray(
 
     # second curve
     0.25, 0.5, 0.75, 1.0
+)
+
+orders_array = setArray( Uint8TPTraits, 4, 2 )
+
+weights = setArray( Float32TPTraits,
+    # first curve
+    1.0, 0.8, 0.6, 0.4, 0.4, 0.6, 0.8, 1.0,
+
+    # second curve
+    1.0, 1.0, 1.0, 1.0
+)
+
+knots_array = setArray(
+    Float32TPTraits,
+    # first curve 8 vertices 4 order so 12 knots
+    1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0,
+
+    # second curve 4 vertices 2 order so 6 knots
+    0.1, 0.1, 0.2, 0.4, 0.6, 0.6
 )

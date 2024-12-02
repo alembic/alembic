@@ -25,7 +25,7 @@ jobs:
       image: aswf/ci-ocio:${{ matrix.vfx-cy }}
     strategy:
       matrix:
-        build: [1,2,3,4,5]
+        build: [1,2,3,4]
         include:
         - build: 1
           build-type: Release
@@ -55,19 +55,7 @@ jobs:
           cc-compiler: clang
           compiler-desc: clang15.0
           vfx-cy: 2024
-        # remove the ACTIONS env vars below when gcc9.3 support is done
-        - build: 5
-          build-type: Release
-          cxx-standard: 17
-          cxx-compiler: g++
-          cc-compiler: gcc
-          compiler-desc: gcc9.3
-          vfx-cy: 2022
-
     env:
-      # remove these ACTIONS once we drop support for gcc9.3
-      ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       CXX: ${{ matrix.cxx-compiler }}
       CC: ${{ matrix.cc-compiler }}
     steps:

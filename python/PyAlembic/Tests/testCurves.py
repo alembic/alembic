@@ -43,8 +43,9 @@ from curvesData import *
 
 kVertexScope = GeometryScope.kVertexScope
 kCubic = CurveType.kCubic
+kVariableOrder = CurveType.kVariableOrder
 kNonPeriodic = CurvePeriodicity.kNonPeriodic
-
+kBezierBasis = BasisType.kBezierBasis
 
 class CurvesTest(unittest.TestCase):
 
@@ -93,6 +94,24 @@ class CurvesTest(unittest.TestCase):
         for i in range(0,5):
             self.doSample( myCurves )
 
+    def testCurvesExport2(self):
+        'write some variable order curves'
+
+        myCurves = OCurves( OArchive( 'curves2.abc' ).getTop(),
+                            'variable' )
+
+        curves = myCurves.getSchema()
+
+        widthSamp = OFloatGeomParamSample( widths, kVertexScope )
+        uvSamp = OV2fGeomParamSample( uvs, kVertexScope )
+
+        curvesSamp = OCurvesSchemaSample( verts, numVerts, kVariableOrder,
+            kNonPeriodic, widthSamp, uvSamp, ON3fGeomParamSample(),
+            kBezierBasis, weights, orders_array, knots_array )
+        curvesSamp.setKnots(knots_array)
+
+        curves.set( curvesSamp )
+
     def testCurvesImport(self):
         """read an iarchive with a curve in it"""
 
@@ -105,13 +124,39 @@ class CurvesTest(unittest.TestCase):
         self.assertEqual(curvesSamp.getSelfBounds().min(), V3d( -1.0, -1.0, -1.0 ))
         self.assertEqual(curvesSamp.getSelfBounds().max(), V3d(  1.0,  1.0,  1.0 ))
 
+        positions = curvesSamp.getPositions()
+
+        self.assertEqual(len( positions ), 12)
+
+        for i in range( len( positions ) ):
+            self.assertEqual(positions[i], verts[i])
+
+        widthSamp = curves.getWidthsParam().getExpandedValue()
+
+        self.assertEqual(len( widthSamp.getVals() ), 12)
+        self.assertTrue(IFloatGeomParam.matches( curves.getWidthsParam().getHeader()))
+        self.assertEqual(widthSamp.getScope(), kVertexScope)
+
+    def testCurvesImport2(self):
+        'read an iarchive with variable order curves'
+
+
+        myCurves = ICurves( IArchive( 'curves2.abc' ).getTop(),
+                            'variable' )
+        curves = myCurves.getSchema()
+
+        curvesSamp = curves.getValue()
+
+        self.assertEqual(curvesSamp.getSelfBounds().min(), V3d( -1.0, -1.0, -1.0 ))
+        self.assertEqual(curvesSamp.getSelfBounds().max(), V3d(  1.0,  1.0,  1.0 ))
+
         knots = curvesSamp.getKnots()
-        for ii in range(4):
-            self.assertEqual(knots[ii], ii)
+        for ii in range(len(knots_array)):
+            self.assertEqual(knots[ii], knots_array[ii])
 
         orders = curvesSamp.getOrders()
-        for ii in range(3):
-            self.assertEqual(orders[ii], ii)
+        for ii in range(2):
+            self.assertEqual(orders[ii], orders_array[ii])
 
         positions = curvesSamp.getPositions()
 
@@ -119,6 +164,10 @@ class CurvesTest(unittest.TestCase):
 
         for i in range( len( positions ) ):
             self.assertEqual(positions[i], verts[i])
+
+        pos_weights = curvesSamp.getPositionWeights()
+        for i in range( len( pos_weights ) ):
+            self.assertEqual(pos_weights[i], weights[i])
 
         widthSamp = curves.getWidthsParam().getExpandedValue()
 
