@@ -697,6 +697,13 @@ public:
                 return;
             }
             bool filefrozen = (header[5] == char(0xff));
+	    if (header[6] < 0)
+	    {
+                frozen = false;
+                valid = false;
+                version = 0;
+                return;
+            }	    
             Alembic::Util::uint16_t fileversion = (header[6] << 8) | header[7];
             Alembic::Util::uint64_t groupPos = *((Alembic::Util::uint64_t*) (&(header[8])));
             Alembic::Util::uint64_t filesize = iReader->size();
