@@ -96,7 +96,7 @@ INSTALL(TARGETS Alembic
 
 set(alembic_targets_file "${PROJECT_NAME}Targets.cmake")
 
-SET(ConfigPackageLocation lib/cmake/Alembic CACHE PATH
+SET(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/Alembic CACHE PATH
         "Where to install the Alembic's cmake files")
 
 INCLUDE(CMakePackageConfigHelpers)
