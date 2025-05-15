@@ -33,16 +33,26 @@
 ##
 ##-*****************************************************************************
 
-FIND_PACKAGE(Imath)
-
 SET(PYTHON_VERSION_MAJOR ${PYALEMBIC_PYTHON_MAJOR})
 SET(PYTHON_VERSION_MINOR ${Python${PYALEMBIC_PYTHON_MAJOR}_VERSION_MINOR})
 SET(PYTHON_INCLUDE_DIR ${Python${PYTHON_VERSION_MAJOR}_INCLUDE_DIRS})
 
+
+FIND_PACKAGE(Imath COMPONENTS PyImath)
 IF (Imath_FOUND)
-    SET(ALEMBIC_PYILMBASE_PYIMATH_LIB Imath::PyImath_Python${PYTHON_VERSION_MAJOR}_${PYTHON_VERSION_MINOR})
-    MESSAGE(STATUS "Found package Imath using: ${ALEMBIC_PYILMBASE_PYIMATH_LIB}")
+    SET(ALEMBIC_PYILMBASE_PYIMATH_LIB Imath::PyImath)
+    MESSAGE(STATUS "Found package PyImath using: ${ALEMBIC_PYILMBASE_PYIMATH_LIB}")
 ELSE()
+    FIND_PACKAGE(Imath)
+
+    IF (Imath_FOUND)
+        SET(ALEMBIC_PYILMBASE_PYIMATH_LIB Imath::PyImath_Python${PYTHON_VERSION_MAJOR}_${PYTHON_VERSION_MINOR})
+        MESSAGE(STATUS "Found package Imath using: ${ALEMBIC_PYILMBASE_PYIMATH_LIB}")
+    ENDIF()
+ENDIF()
+
+# still not found try the very old PyIlmBase way
+IF (NOT Imath_FOUND)
     FIND_PACKAGE(PyIlmBase)
     IF (PYILMBASE_FOUND)
         SET(ALEMBIC_PYILMBASE_FOUND 1 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
