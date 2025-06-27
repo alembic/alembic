@@ -33,8 +33,11 @@
 ##
 ##-*****************************************************************************
 
-
-FIND_PACKAGE(Imath)
+IF (TARGET Imath::Imath)
+    set(Imath_FOUND ON)
+else()
+    FIND_PACKAGE(Imath)
+endif()
 
 IF (Imath_FOUND)
     MESSAGE(STATUS "Found package Imath")
