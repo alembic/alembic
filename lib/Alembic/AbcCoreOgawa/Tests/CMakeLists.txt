@@ -76,6 +76,7 @@ ADD_TEST(AbcCoreOgawa_ObjectTESTS AbcCoreOgawa_ObjectTests)
 ADD_TEST(AbcCoreOgawa_ConstantPropsTest_TEST AbcCoreOgawa_ConstantPropsTest)
 ADD_TEST(AbcCoreOgawa_FuzzTest_TEST AbcCoreOgawa_FuzzTest)
 
+file(COPY badver.abc DESTINATION .)
 file(COPY issue253.abc DESTINATION .)
 file(COPY issue254.abc DESTINATION .)
 file(COPY issue255.abc DESTINATION .)
