@@ -201,8 +201,12 @@ IF (DOCS_PATH)
     FIND_PACKAGE(Doxygen)
 ENDIF()
 
-# IlmBase
-INCLUDE("./cmake/AlembicIlmBase.cmake")
+# Imath, first look to see if we are bulding it with the source
+IF (TARGET Imath::Imath)
+    set(Imath_FOUND ON)
+else()
+    FIND_PACKAGE(Imath)
+endif()
 
 # HDF5
 IF (USE_HDF5)

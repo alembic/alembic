@@ -37,7 +37,7 @@ SET(TEST_LIBS
     AbcWFObjConvert
     Alembic::Alembic
     ${HDF5_LIBRARIES}
-    ${ALEMBIC_ILMBASE_LIBS}
+    Imath::Imath)
     ${CMAKE_THREAD_LIBS_INIT}
     ${ZLIB_LIBRARIES} 
     ${EXTERNAL_MATH_LIBS}

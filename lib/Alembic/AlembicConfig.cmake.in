@@ -1,13 +1,7 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-# TODO whenever we loose the back-compatibility with IlmBase < 3, a REQUIRED needs to be added to find_dependency()
-if (@ALEMBIC_USING_IMATH_3@)
-    find_dependency(Imath)
-else ()
-    # Compatibility with OpenEXR 2.x, prior to Imath 3.x
-    find_dependency(IlmBase)
-endif ()
+find_dependency(Imath REQUIRED)
 
 SET(Alembic_HAS_HDF5 @USE_HDF5@)
 SET(Alembic_HAS_SHARED_LIBS @ALEMBIC_SHARED_LIBS@)
