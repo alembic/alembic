@@ -33,6 +33,12 @@
 ##
 ##-*****************************************************************************
 
+FIND_PACKAGE(Imath CONFIG)
+
+IF (Imath_FOUND)
+    SET(ALEMBIC_PYILMBASE_PYIMATH_LIB Imath::PyImathConfig)
+ELSE()
+
 FIND_PACKAGE(Imath)
 
 SET(PYTHON_VERSION_MAJOR ${PYALEMBIC_PYTHON_MAJOR})
@@ -59,4 +65,5 @@ ELSE()
     ELSE()
         SET(ALEMBIC_PYILMBASE_FOUND 0 CACHE STRING "Set to 1 if PyIlmBase is found, 0 otherwise")
     ENDIF()
+ENDIF()
 ENDIF()
