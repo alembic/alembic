@@ -64,7 +64,7 @@ ELSE()
     MESSAGE(FATAL_ERROR "Boost not found.")
 ENDIF()
 
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ALEMBIC_PYILMBASE_INCLUDE_DIRECTORY})
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 # lots of warnings coming from unused local typedefs inside boost python
 IF (NOT WINDOWS)
