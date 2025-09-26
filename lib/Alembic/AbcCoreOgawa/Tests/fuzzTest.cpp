@@ -923,6 +923,23 @@ void testFuzzerTaoTaoGu3699(bool iUseMMap)
     TESTING_ASSERT(0);
 }
 
+void test_badver_pr463()
+{
+    Alembic::AbcCoreOgawa::ReadArchive r(1, false);
+    try
+    {
+        ABCA::ArchiveReaderPtr ar = r("badver.abc");
+    }
+    catch(const std::exception& e)
+    {
+        std::string msg = "Could not open as Ogawa file: badver.abc";
+        TESTING_ASSERT(msg == e.what());
+        return;
+    }
+
+    TESTING_ASSERT(0);
+}
+
 void test_walkAllNoThrow(bool iUseMMap)
 {
 
@@ -1070,5 +1087,7 @@ int main ( int argc, char *argv[] )
 
     test_walkAllNoThrow(true);
     test_walkAllNoThrow(false);
+
+    test_badver_pr463();
     return 0;
 }
