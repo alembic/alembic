@@ -41,8 +41,8 @@
 #include <float.h>
 #include <stdlib.h>
 
-#include <ImathMath.h>
-#include <ImathRandom.h>
+#include <Imath/ImathMath.h>
+#include <Imath/ImathRandom.h>
 
 #include <vector>
 #include <iostream>

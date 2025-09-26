@@ -39,7 +39,7 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreAbstract/Tests/Assert.h>
 
-#include <ImathMath.h>
+#include <Imath/ImathMath.h>
 
 #include <limits>
 

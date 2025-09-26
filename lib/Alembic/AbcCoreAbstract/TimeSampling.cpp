@@ -38,7 +38,7 @@
 
 #include <Alembic/AbcCoreAbstract/DataType.h>
 
-#include <ImathMath.h>
+#include <Imath/ImathMath.h>
 
 #include <limits>
 
