@@ -76,6 +76,46 @@ static Abc::OArchive CreateArchiveWithInfoWrapper(
 }
 
 //-*****************************************************************************
+static Abc::OArchive CreateArchiveWithInfoWrapperDCCFPS(
+    const std::string &iFileName,
+    double iDCCFPS,
+    const std::string &iApplicationWriter,
+    const std::string &iUserDescription,
+    const Abc::Argument &iArg0,
+    const Abc::Argument &iArg1,
+    bool asOgawa = true )
+{
+    if ( asOgawa == true )
+    {
+        return Abc::CreateArchiveWithInfo(
+            ::Alembic::AbcCoreOgawa::WriteArchive(),
+            iFileName,
+            iDCCFPS,
+            iApplicationWriter,
+            iUserDescription,
+            iArg0,
+            iArg1 );
+    }
+    else
+    {
+#ifdef ALEMBIC_WITH_HDF5
+        return Abc::CreateArchiveWithInfo(
+            ::Alembic::AbcCoreHDF5::WriteArchive(),
+            iFileName,
+            iDCCFPS,
+            iApplicationWriter,
+            iUserDescription,
+            iArg0,
+            iArg1 );
+#else
+        throwPythonException( "Unsupported core type: HDF5" );
+#endif
+    }
+
+    return Abc::OArchive();
+}
+
+//-*****************************************************************************
 static dict GetArchiveInfoWrapper( Abc::IArchive& iArchive )
 {
     std::string appName;
@@ -125,6 +165,12 @@ void register_archiveinfo()
            arg( "UserDescription" ), arg( "argument" ) = Abc::Argument(),
            arg( "argument" ) = Abc::Argument(), arg( "asOgawa" ) = true ),
          "Create an OArchive with the passed arguments" );
+    def( "CreateArchiveWithInfo",
+         CreateArchiveWithInfoWrapperDCCFPS,
+         ( arg( "fileName" ), arg("DCCFPS"), arg( "ApplicationWriter" ),
+           arg( "UserDescription" ), arg( "argument" ) = Abc::Argument(),
+           arg( "argument" ) = Abc::Argument(), arg( "asOgawa" ) = true ),
+         "Create an OArchive with the passed arguments, including the DCC FPS hint" );
     def( "GetArchiveInfo",
          GetArchiveInfoWrapper,
          ( arg( "IArchive" ) ),
