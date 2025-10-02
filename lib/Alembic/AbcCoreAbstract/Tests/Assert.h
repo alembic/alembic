@@ -46,7 +46,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include <ImathMath.h>
+#include <Imath/ImathMath.h>
 #include <limits>
 
 //-*****************************************************************************
