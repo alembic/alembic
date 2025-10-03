@@ -40,7 +40,7 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/Util/All.h>
 
-#include <ImathVec.h>
+#include <Imath/ImathVec.h>
 
 #include <boost/static_assert.hpp>
 #include <boost/scoped_ptr.hpp>

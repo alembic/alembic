@@ -55,7 +55,7 @@ TARGET_INCLUDE_DIRECTORIES(Alembic
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib>
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/lib>
     $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>
-    ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY}
+    ${Imath_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     PRIVATE
     ${HDF5_INCLUDE_DIRS}
@@ -65,18 +65,12 @@ IF (ALEMBIC_SHARED_LIBS)
   SET_TARGET_PROPERTIES(Alembic PROPERTIES DEFINE_SYMBOL ALEMBIC_EXPORTS
     SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     VERSION ${PROJECT_VERSION})
-
-  if (ALEMBIC_USING_IMATH_3)
-    if (APPLE OR UNIX)
-      set_target_properties(Alembic PROPERTIES INSTALL_RPATH "$<TARGET_FILE_DIR:${ALEMBIC_ILMBASE_LIBS}>")
-    endif ()
-  endif ()
 ENDIF()
 
 
 TARGET_LINK_LIBRARIES(Alembic
     LINK_PUBLIC
-    ${ALEMBIC_ILMBASE_LIBS}
+    Imath::Imath
     ${CMAKE_THREAD_LIBS_INIT}
     ${EXTERNAL_MATH_LIBS}
     LINK_PRIVATE
@@ -96,7 +90,7 @@ INSTALL(TARGETS Alembic
 
 set(alembic_targets_file "${PROJECT_NAME}Targets.cmake")
 
-SET(ConfigPackageLocation lib/cmake/Alembic CACHE PATH
+SET(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/Alembic CACHE PATH
         "Where to install the Alembic's cmake files")
 
 INCLUDE(CMakePackageConfigHelpers)

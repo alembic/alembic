@@ -16,16 +16,12 @@ Required:
     CMake (3.13+) www.cmake.org
     C++ compiler that supports C++11
     Imath 3 https://github.com/AcademySoftwareFoundation/Imath
-    OR
-    OpenEXR (2.2.0+) www.openexr.com (for Imath)
 
 Optional:
 
     HDF5 (1.8.9) www.hdfgroup.org/HDF5
     Boost (1.55+) www.boost.org (to build the python bindings)
     PyImath 3 https://github.com/AcademySoftwareFoundation/Imath (to build the python bindings)
-    OR
-    pyilmbase (1.0.0+) (to build the python bindings)
     Arnold (3.3+)
     Pixar PRMan (15.x)
     Autodesk Maya (2012+)
@@ -75,9 +71,6 @@ Some examples of OPTIONS you may want or need to use include:
 
     -DUSE_PYALEMBIC=ON Whether you want to build the boost python bindings for Alembic.
 
-    -DPYALEMBIC_PYTHON_MAJOR=2  If you want to look for python 2 (or python 3) via find_package.
-    See the [CMake module documentation](https://cmake.org/cmake/help/latest/module/FindPython3.html).
-
     -DDOCS_PATH=customDocPath  If you have Doxygen installed this will create and install the doxygen
     generated doc (WIP) to customDocPath when you run: cmake doxygen
 
@@ -85,7 +78,7 @@ Some examples of OPTIONS you may want or need to use include:
 
 4) To test: ctest
    Note:  On Windows you may need to add the path to your Alembic dlls.
-   PATH=%PATH%;location of Alembic dlls (and OpenExr if not in a standard place)
+   PATH=%PATH%;location of Alembic dlls (and Imath if not in a standard place)
 
 If you get stuck, contact us on the alembic-discussion mailing list. You can
 view the mailing list archives and join the mailing list:

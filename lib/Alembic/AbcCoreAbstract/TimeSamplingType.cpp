@@ -36,7 +36,7 @@
 
 #include <Alembic/AbcCoreAbstract/TimeSamplingType.h>
 
-#include <ImathMath.h>
+#include <Imath/ImathMath.h>
 
 namespace Alembic {
 namespace AbcCoreAbstract {

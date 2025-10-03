@@ -40,7 +40,7 @@
 //-*****************************************************************************
 // Breaking my rules here about Foundation.h, to minimize recompiling
 // of the parser, which takes FOREVER. Stupid templates.
-#include <ImathVec.h>
+#include <Imath/ImathVec.h>
 #include <vector>
 #include <string>
 #include <set>

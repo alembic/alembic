@@ -43,7 +43,7 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #endif
 
-#include <ImathMath.h>
+#include <Imath/ImathMath.h>
 
 #include <limits>
 

@@ -37,7 +37,7 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreFactory/All.h>
 
-#include <ImathBoxAlgo.h>
+#include <Imath/ImathBoxAlgo.h>
 
 #include <iostream>
 
