@@ -1,3 +1,26 @@
+2025-10-03, Alembic 1.8.9
+Thanks to your feedback pull requests and submitted issues we
+have a few bug fixes and build enhancements.
+
+CMake:
+
+We are dropping build support for Ilmbase and python 2.
+We now require Imath 3+ and python 3+.
+
+Use Imath::PyImath component to find the python Imath bindings. (PR465 and PR468)
+
+Allow building Alembic source alongside Imath source. (PR467)
+
+Put CMake config files in ${CMAKE_INSTALL_LIBDIR}/cmake/Alembic instead of
+hard codeing lib/cmake/Alembic. (PR464)
+
+Include Imath headers the Imath 3 way, i.e. #include <Imath/half.h> instead of
+#include <half.h>  (Issue 431)
+
+PyAlembic: Add DCCFPS hint support to CreateArchiveWithInfo (Issue 466)
+
+Ogawa: Better handle very large Ogawa version numbers. (PR472)
+
 2024-12-02, Alembic 1.8.8
 
 Thanks to your feedback and submitted issues we have a few bug fixes.
