@@ -259,8 +259,8 @@ int main( int argc, char *argv[] )
                           << std::endl;
                 std::cout << std::endl;
             }
+            visitObject( archive.getTop(), "" );
         }
-        visitObject( archive.getTop(), "" );
     }
 
     return 0;
