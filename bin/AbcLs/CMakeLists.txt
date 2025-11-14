@@ -36,9 +36,4 @@
 ADD_EXECUTABLE(abcls AbcLs.cpp)
 
 TARGET_LINK_LIBRARIES(abcls Alembic::Alembic)
-
-set_target_properties(abcls PROPERTIES
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-
 INSTALL(TARGETS abcls DESTINATION bin)

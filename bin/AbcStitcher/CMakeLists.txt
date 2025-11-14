@@ -35,9 +35,4 @@
 
 ADD_EXECUTABLE(abcstitcher AbcStitcher.cpp util.cpp)
 TARGET_LINK_LIBRARIES(abcstitcher Alembic::Alembic)
-
-set_target_properties(abcstitcher PROPERTIES
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-
 INSTALL(TARGETS abcstitcher DESTINATION bin)

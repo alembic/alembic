@@ -38,9 +38,4 @@ TARGET_LINK_LIBRARIES(abcecho Alembic::Alembic)
 
 ADD_EXECUTABLE(abcechobounds AbcBoundsEcho.cpp)
 TARGET_LINK_LIBRARIES(abcechobounds Alembic::Alembic)
-
-set_target_properties(abcecho abcechobounds PROPERTIES
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-
 INSTALL(TARGETS abcecho abcechobounds DESTINATION bin)

@@ -354,7 +354,7 @@ int main( int argc, char *argv[] )
     bool useOgawa = true;
     try
     {
-        std::string archiveName("flatHierarchy.abc");
+        std::string archiveName("flatHierarchyObj.abc");
         useOgawa = true;
         writeFlatHierarchy ( archiveName, useOgawa );
         readFlatHierarchy  ( archiveName );

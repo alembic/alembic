@@ -342,7 +342,7 @@ int main( int argc, char *argv[] )
         std::cout << "Write and read a simple archive: ten children, ";
         std::cout << "each with one simple property" << std::endl;
 
-        std::string archiveName("flatHierarchy.abc");
+        std::string archiveName("flatHierarchyBug16.abc");
         writeSimpleProperties ( archiveName );
         readSimpleProperties  ( archiveName );
     }
