@@ -64,6 +64,8 @@ ELSE()
     MESSAGE(FATAL_ERROR "Boost not found.")
 ENDIF()
 
+INCLUDE("../../cmake/AlembicPyIlmBase.cmake")
+
 # lots of warnings coming from unused local typedefs inside boost python
 IF (NOT WINDOWS)
     ADD_DEFINITIONS(-Wno-unused-local-typedefs)
@@ -180,7 +182,3 @@ ENDIF ()
 
 # dont add any wacky lib prefix, as python doesnt like this
 set_target_properties(alembic PROPERTIES PREFIX "" SUFFIX ${EXT})
-
-set_target_properties(alembic PROPERTIES
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)

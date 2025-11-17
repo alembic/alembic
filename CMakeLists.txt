@@ -157,6 +157,14 @@ ENDIF()
 # Tell me what my install location would be
 MESSAGE(STATUS "The install dir is ${CMAKE_INSTALL_PREFIX}")
 
+IF (NOT CMAKE_SKIP_RPATH)
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    # if CMAKE_INSTALL_RPATH is not already defined
+    IF (NOT CMAKE_INSTALL_RPATH)
+        SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+    ENDIF()
+ENDIF()
+
 # check in the source directory
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
@@ -233,7 +241,6 @@ IF (USE_PYALEMBIC)
 
     if(Python${PYALEMBIC_PYTHON_MAJOR}_FOUND)
         MESSAGE(STATUS "Found Python ${Python${PYALEMBIC_PYTHON_MAJOR}_VERSION}")
-        INCLUDE("./cmake/AlembicPyIlmBase.cmake")
         ADD_SUBDIRECTORY(python)
     else()
         MESSAGE(WARNING "Python not found! Skipping PyAlembic")
