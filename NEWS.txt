@@ -1,3 +1,21 @@
+2025-11-17, Alembic 1.8.10
+Thanks to your submitted issues we have a few bug fixes and build
+enhancements.
+
+Make sure different unit tests write out to differently named files so
+that the test suite does not fail when run in parallel. (Issue 477)
+
+Add SPDX shorthand to LICENSE.txt and move extra external stuff to
+THIRD-PARTY.txt (Issue 475)
+
+CMake:
+
+If CMAKE_SKIP_RPATH is set do not add to the RPATH. if unset then we
+make sure CMAKE_INSTALL_RPATH gets set. (Issue 476, 477)
+
+Look for the boost dependency before the PyImath one for
+the python bindings.  (Issue 478)
+
 2025-10-03, Alembic 1.8.9
 Thanks to your feedback pull requests and submitted issues we
 have a few bug fixes and build enhancements.
@@ -42,7 +60,7 @@ Protect from potential buffer overrun because of malformed dimensions.
 Fix a typo in the python bindings but leave the misspelled member
 (kkVisibilityVisible) to maintain compatibility.  (Issue 440)
 
-Add unicode filename support for Windows (PR450) 
+Add unicode filename support for Windows (PR450)
 
 Make some of the extra python scripts including the PyAlembic and Maya
 unit tests python 3 compatible. (PR438)
@@ -62,7 +80,7 @@ Fix typo in a comment. (PR 417)
 
 AbcGeom:
 
-Fix bug with OCurves, ONuPatch, OPoints, OPolyMesh, and OSubD were not properly 
+Fix bug with OCurves, ONuPatch, OPoints, OPolyMesh, and OSubD were not properly
 incrementing their number of set samples when using setFromPrevious. (PR 433)
 
 Util:
