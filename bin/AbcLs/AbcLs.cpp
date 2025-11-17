@@ -740,6 +740,11 @@ int main( int argc, char *argv[] )
         AbcF::IFactory::CoreType coreType;
         archive = factory.getArchive(std::string( fp.str() ), coreType);
 
+        if (!archive)
+        {
+            continue;
+        }
+
         // display file metadata
         if ( opt_meta && seglist.size() == 0 ) {
             std::cout  << "Using "

@@ -180,6 +180,12 @@ int main( int argc, char *argv[] )
         Alembic::AbcCoreFactory::IFactory factory;
         factory.setPolicy(ErrorHandler::kQuietNoopPolicy);
         IArchive archive = factory.getArchive( argv[1] );
+        if (!archive.valid())
+        {
+            std::cerr << "Invalid archive: " << argv[1] << std::endl;
+            exit( -1 );
+        }
+
         visitObject( archive.getTop(), seconds );
     }
 
