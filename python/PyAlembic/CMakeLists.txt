@@ -46,23 +46,9 @@ if(POLICY CMP0167)
 endif()
 
 # require 1.53+ since we need std::shared_ptr supported in the wrapper
-FIND_PACKAGE(Boost 1.53.0 COMPONENTS "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
-
-# find via . instead, i.e. python2.7
-IF (NOT Boost_FOUND)
-    FIND_PACKAGE(Boost 1.53.0 COMPONENTS "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
-ENDIF()
-
-# hit a weird case where boost python released seperately from the other boost modules in 1.70 could
-# not find it unless it was optional, so fall back on this
-IF (NOT Boost_FOUND)
-    FIND_PACKAGE(Boost 1.53.0 OPTIONAL_COMPONENTS "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
-ENDIF()
+FIND_PACKAGE(Boost 1.73.0 COMPONENTS python)
 
 IF (Boost_FOUND)
-    IF (Boost_VERSION_MACRO LESS 105300)
-        MESSAGE(FATAL_ERROR "Boost VERSION IS TOO OLD.")
-    ENDIF()
     MESSAGE(STATUS "BOOST INCLUDE DIRS: ${Boost_INCLUDE_DIRS}")
     MESSAGE(STATUS "BOOST LIBRARIES: ${Boost_LIBRARIES}")
 ELSE()
@@ -154,25 +140,19 @@ ENDIF ()
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/lib"
     "${PROJECT_SOURCE_DIR}/python/PyAlembic")
 
-FIND_PACKAGE(Python${PYALEMBIC_PYTHON_MAJOR} REQUIRED COMPONENTS Interpreter Development)
-if(PYALEMBIC_PYTHON_MAJOR EQUAL 2)
-    Python2_add_library(alembic ${CPP_FILES})
-elseif(PYALEMBIC_PYTHON_MAJOR EQUAL 3)
-    Python3_add_library(alembic ${CPP_FILES} WITH_SOABI)
-else()
-    Python_add_library(alembic ${CPP_FILES} WITH_SOABI)
-endif()
+Python_add_library(alembic ${CPP_FILES} WITH_SOABI)
+
 
 TARGET_LINK_LIBRARIES(alembic
     LINK_PUBLIC
     Alembic::Alembic
-    Python${PYTHON_VERSION_MAJOR}::Python
+    Python::Python
     ${Boost_LIBRARIES}
     ${ALEMBIC_PYIMATH_LIB}
 )
 
 SET( ALEMBIC_PYTHON_INSTALL_DIR
-    lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages
+    lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages
     CACHE PATH
     "Alembic's python bindings install directory"
 )
